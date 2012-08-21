@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.ui.leaderboard;
 
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -10,14 +9,16 @@ import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.Header;
+import com.sap.sailing.domain.common.DetailType;
+import com.sap.sailing.domain.common.InvertibleComparator;
+import com.sap.sailing.domain.common.impl.InvertibleComparatorAdapter;
+import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.LegDetailColumn.LegDetailField;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardEntryDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardRowDTO;
 import com.sap.sailing.gwt.ui.shared.LegEntryDTO;
-import com.sap.sailing.domain.common.DetailType;
-import com.sap.sailing.domain.common.impl.Util.Triple;
 
 public class ManeuverCountRaceColumn extends ExpandableSortableColumn<String> implements HasStringAndDoubleValue {
 
@@ -182,14 +183,13 @@ public class ManeuverCountRaceColumn extends ExpandableSortableColumn<String> im
     }
 
     @Override
-    public Comparator<LeaderboardRowDTO> getComparator() {
-        return new Comparator<LeaderboardRowDTO>() {
+    public InvertibleComparator<LeaderboardRowDTO> getComparator() {
+        return new InvertibleComparatorAdapter<LeaderboardRowDTO>(getPreferredSortingOrder().isAscending()) {
             @Override
             public int compare(LeaderboardRowDTO o1, LeaderboardRowDTO o2) {
-                boolean ascending = isSortedAscendingForThisColumn(getLeaderboardPanel().getLeaderboardTable());
                 Double val1 = getDoubleValue(o1);
                 Double val2 = getDoubleValue(o2);
-                return val1 == null ? val2 == null ? 0 : ascending ? 1 : -1 : val2 == null ? ascending ? -1 : 1 : val1
+                return val1 == null ? val2 == null ? 0 : isAscending() ? 1 : -1 : val2 == null ? isAscending() ? -1 : 1 : val1
                         .compareTo(val2);
             }
         };
@@ -258,11 +258,11 @@ public class ManeuverCountRaceColumn extends ExpandableSortableColumn<String> im
             String detailColumnStyle) {
         Map<DetailType, SortableColumn<LeaderboardRowDTO, ?>> result = new HashMap<DetailType, SortableColumn<LeaderboardRowDTO, ?>>();
         result.put(DetailType.TACK, new FormattedDoubleLegDetailColumn(stringConstants.tack(), "", new NumberOfTacks(),
-                0, DetailType.TACK.getDefaultSortingOrder(), getLeaderboardPanel().getLeaderboardTable(), detailHeaderStyle, detailColumnStyle));
+                0, DetailType.TACK.getDefaultSortingOrder(), detailHeaderStyle, detailColumnStyle));
         result.put(DetailType.JIBE, new FormattedDoubleLegDetailColumn(stringConstants.jibe(), "", new NumberOfJibes(),
-                0, DetailType.JIBE.getDefaultSortingOrder(), getLeaderboardPanel().getLeaderboardTable(), detailHeaderStyle, detailColumnStyle));
+                0, DetailType.JIBE.getDefaultSortingOrder(), detailHeaderStyle, detailColumnStyle));
         result.put(DetailType.PENALTY_CIRCLE, new FormattedDoubleLegDetailColumn(stringConstants.penaltyCircle(), "",
-                new NumberOfPenaltyCircles(), 0, DetailType.PENALTY_CIRCLE.getDefaultSortingOrder(), getLeaderboardPanel().getLeaderboardTable(), detailHeaderStyle,
+                new NumberOfPenaltyCircles(), 0, DetailType.PENALTY_CIRCLE.getDefaultSortingOrder(), detailHeaderStyle,
                 detailColumnStyle));
         return result;
     }

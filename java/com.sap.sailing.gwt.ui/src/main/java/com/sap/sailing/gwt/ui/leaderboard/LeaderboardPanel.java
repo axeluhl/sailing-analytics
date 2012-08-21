@@ -3,7 +3,6 @@ package com.sap.sailing.gwt.ui.leaderboard;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -24,10 +23,7 @@ import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
-import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
-import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
-import com.google.gwt.user.cellview.client.ColumnSortList.ColumnSortInfo;
 import com.google.gwt.user.cellview.client.Header;
 import com.google.gwt.user.cellview.client.TextHeader;
 import com.google.gwt.user.client.Window;
@@ -50,10 +46,12 @@ import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.google.gwt.view.client.SelectionModel;
 import com.sap.sailing.domain.common.DetailType;
+import com.sap.sailing.domain.common.InvertibleComparator;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.SortingOrder;
+import com.sap.sailing.domain.common.impl.InvertibleComparatorAdapter;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
 import com.sap.sailing.gwt.ui.actions.GetLeaderboardByNameAction;
@@ -115,13 +113,9 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
 
     private final StringMessages stringMessages;
 
-    private final CellTable<LeaderboardRowDTO> leaderboardTable;
+    private final SortedCellTable<LeaderboardRowDTO> leaderboardTable;
 
     private final SelectionModel<LeaderboardRowDTO> leaderboardSelectionModel;
-
-    private ListDataProvider<LeaderboardRowDTO> data;
-
-    private final ListHandler<LeaderboardRowDTO> listHandler;
 
     private LeaderboardDTO leaderboard;
 
@@ -347,23 +341,23 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         if (newSettings.getNameOfRaceToSort() != null) {
             final RaceColumn<?> raceColumnByRaceName = getRaceColumnByRaceName(newSettings.getNameOfRaceToSort());
             if (raceColumnByRaceName != null) {
-                sort(raceColumnByRaceName, /* ascending */ true);
+                getLeaderboardTable().sortColumn(raceColumnByRaceName, /* ascending */ true);
             }
         }
     }
 
     protected class CompetitorColumn extends SortableColumn<LeaderboardRowDTO, String> {
         protected CompetitorColumn() {
-            super(new TextCell());
+            super(new TextCell(), SortingOrder.ASCENDING);
         }
 
         protected CompetitorColumn(EditTextCell editTextCell) {
-            super(editTextCell);
+            super(editTextCell, SortingOrder.ASCENDING);
         }
 
         @Override
-        public Comparator<LeaderboardRowDTO> getComparator() {
-            return new Comparator<LeaderboardRowDTO>() {
+        public InvertibleComparator<LeaderboardRowDTO> getComparator() {
+            return new InvertibleComparatorAdapter<LeaderboardRowDTO>() {
                 @Override
                 public int compare(LeaderboardRowDTO o1, LeaderboardRowDTO o2) {
                     return Collator.getInstance().compare(getLeaderboard().getDisplayName(o1.competitor),
@@ -406,12 +400,12 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     private class SailIDColumn extends SortableColumn<LeaderboardRowDTO, String> {
 
         protected SailIDColumn() {
-            super(new TextCell());
+            super(new TextCell(), SortingOrder.ASCENDING);
         }
 
         @Override
-        public Comparator<LeaderboardRowDTO> getComparator() {
-            return new Comparator<LeaderboardRowDTO>() {
+        public InvertibleComparator<LeaderboardRowDTO> getComparator() {
+            return new InvertibleComparatorAdapter<LeaderboardRowDTO>() {
                 @Override
                 public int compare(LeaderboardRowDTO o1, LeaderboardRowDTO o2) {
                     return o1.competitor.sailID == null ? o2.competitor.sailID == null ? 0 : -1
@@ -535,16 +529,15 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         }
 
         @Override
-        public Comparator<LeaderboardRowDTO> getComparator() {
-            return new Comparator<LeaderboardRowDTO>() {
+        public InvertibleComparator<LeaderboardRowDTO> getComparator() {
+            return new InvertibleComparatorAdapter<LeaderboardRowDTO>() {
                 @Override
                 public int compare(LeaderboardRowDTO o1, LeaderboardRowDTO o2) {
                     List<CompetitorDTO> competitorsFromBestToWorst = getLeaderboard().getCompetitorsFromBestToWorst(race);
-                    boolean ascending = isSortedAscendingForThisColumn(getLeaderboardPanel().getLeaderboardTable());
                     int o1Rank = competitorsFromBestToWorst.indexOf(o1.competitor) + 1;
                     int o2Rank = competitorsFromBestToWorst.indexOf(o2.competitor) + 1;
                     return o1Rank == 0 ? o2Rank == 0 ? 0
-                            : ascending ? 1 : -1 : o2Rank == 0 ? ascending ? -1 : 1
+                            : isAscending() ? 1 : -1 : o2Rank == 0 ? isAscending() ? -1 : 1
                             : o1Rank - o2Rank;
                 }
             };
@@ -562,7 +555,6 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             /* iconURL */race.isMedalRace() ? "/gwt/images/medal_small.png" : null, LeaderboardPanel.this, this, stringMessages);
             return header;
         }
-
     }
 
     public static DetailType[] getAvailableRaceDetailColumnTypes() {
@@ -624,29 +616,29 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             result.put(DetailType.RACE_DISTANCE_TRAVELED,
                     new FormattedDoubleLegDetailColumn(stringMessages.distanceInMeters(), "["+stringMessages
                             .distanceInMetersUnit()+"]", new RaceDistanceTraveledInMeters(), 0, 
-                            DetailType.RACE_DISTANCE_TRAVELED.getDefaultSortingOrder(), getLeaderboardPanel()
-                            .getLeaderboardTable(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
+                            DetailType.RACE_DISTANCE_TRAVELED.getDefaultSortingOrder(), 
+                            LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
             result.put(DetailType.RACE_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS, new FormattedDoubleLegDetailColumn(
                     stringMessages.averageSpeedInKnots(), "["+stringMessages.averageSpeedInKnotsUnit()+"]",
                     new RaceAverageSpeedInKnots(), 2, DetailType.RACE_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS.getDefaultSortingOrder(),
-                    getLeaderboardPanel().getLeaderboardTable(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
+                    LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
             result.put(DetailType.RACE_GAP_TO_LEADER_IN_SECONDS,
                     new FormattedDoubleLegDetailColumn(stringMessages.gapToLeaderInSeconds(), "["+stringMessages
                             .gapToLeaderInSecondsUnit()+"]", new RaceGapToLeaderInSeconds(), 0, DetailType.RACE_GAP_TO_LEADER_IN_SECONDS.getDefaultSortingOrder(), 
-                            getLeaderboardPanel().getLeaderboardTable(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
+                            LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
             result.put(DetailType.RACE_DISTANCE_TO_LEADER_IN_METERS,
                     new FormattedDoubleLegDetailColumn(stringMessages.windwardDistanceToLeader(), "["+stringMessages
                             .distanceInMetersUnit()+"]", new RaceDistanceToLeaderInMeters(), 0, DetailType.RACE_DISTANCE_TO_LEADER_IN_METERS.getDefaultSortingOrder(), 
-                            getLeaderboardPanel().getLeaderboardTable(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
+                            LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
             result.put(DetailType.RACE_AVERAGE_CROSS_TRACK_ERROR_IN_METERS,
                     new FormattedDoubleLegDetailColumn(stringMessages.averageCrossTrackErrorInMeters(), "["+stringMessages
                             .metersUnit()+"]", new RaceAverageCrossTrackErrorInMeters(), 0, DetailType.RACE_AVERAGE_CROSS_TRACK_ERROR_IN_METERS.getDefaultSortingOrder(),
-                            getLeaderboardPanel().getLeaderboardTable(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
+                            LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
             result.put(DetailType.NUMBER_OF_MANEUVERS, getManeuverCountRaceColumn());
             result.put(DetailType.CURRENT_LEG,
                     new FormattedDoubleLegDetailColumn(stringMessages.currentLeg(), "",
                     new CurrentLeg(), 0, DetailType.CURRENT_LEG.getDefaultSortingOrder(), 
-                    getLeaderboardPanel().getLeaderboardTable(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
+                    LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
             
             return result;
         }
@@ -850,7 +842,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         private final String columnStyle;
 
         protected TotalsColumn(String columnStyle) {
-            super(new TextCell());
+            super(new TextCell(), SortingOrder.ASCENDING);
             this.columnStyle = columnStyle;
             setHorizontalAlignment(ALIGN_CENTER);
         }
@@ -869,8 +861,8 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         }
 
         @Override
-        public Comparator<LeaderboardRowDTO> getComparator() {
-            return new Comparator<LeaderboardRowDTO>() {
+        public InvertibleComparator<LeaderboardRowDTO> getComparator() {
+            return new InvertibleComparatorAdapter<LeaderboardRowDTO>() {
                 @Override
                 public int compare(LeaderboardRowDTO o1, LeaderboardRowDTO o2) {
                     return getLeaderboard().competitors.indexOf(o1.competitor) - getLeaderboard().competitors.indexOf(o2.competitor);
@@ -891,12 +883,12 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
 
     protected class CarryColumn extends SortableColumn<LeaderboardRowDTO, String> {
         public CarryColumn() {
-            super(new TextCell());
+            super(new TextCell(), SortingOrder.ASCENDING);
             setSortable(true);
         }
 
         protected CarryColumn(EditTextCell editTextCell) {
-            super(editTextCell);
+            super(editTextCell, SortingOrder.ASCENDING);
             setSortable(true);
         }
 
@@ -906,8 +898,8 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         }
 
         @Override
-        public Comparator<LeaderboardRowDTO> getComparator() {
-            return new Comparator<LeaderboardRowDTO>() {
+        public InvertibleComparator<LeaderboardRowDTO> getComparator() {
+            return new InvertibleComparatorAdapter<LeaderboardRowDTO>() {
                 @Override
                 public int compare(LeaderboardRowDTO o1, LeaderboardRowDTO o2) {
                     Double o1CarriedPoints = o1.carriedPoints;
@@ -931,7 +923,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
 
     private class RankColumn extends SortableColumn<LeaderboardRowDTO, String> {
         public RankColumn() {
-            super(new TextCell());
+            super(new TextCell(), SortingOrder.ASCENDING);
             setHorizontalAlignment(ALIGN_CENTER);
             setSortable(true);
         }
@@ -943,8 +935,8 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         }
 
         @Override
-        public Comparator<LeaderboardRowDTO> getComparator() {
-            return new Comparator<LeaderboardRowDTO>() {
+        public InvertibleComparator<LeaderboardRowDTO> getComparator() {
+            return new InvertibleComparatorAdapter<LeaderboardRowDTO>() {
                 @Override
                 public int compare(LeaderboardRowDTO o1, LeaderboardRowDTO o2) {
                     final int rank1 = getLeaderboard().getRank(o1.competitor);
@@ -1012,7 +1004,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         LEG_COLUMN_STYLE = tableResources.cellTableStyle().cellTableLegColumn();
         LEG_DETAIL_COLUMN_STYLE = tableResources.cellTableStyle().cellTableLegDetailColumn();
         TOTAL_COLUMN_STYLE = tableResources.cellTableStyle().cellTableTotalColumn();
-        leaderboardTable = new CellTableWithStylableHeaders<LeaderboardRowDTO>(
+        leaderboardTable = new SortedCellTableWithStylableHeaders<LeaderboardRowDTO>(
         /* pageSize */10000, tableResources);
         getLeaderboardTable().setWidth("100%");
         if (userAgent.isMobile() == UserAgentDetails.PlatformTypes.MOBILE) {
@@ -1031,11 +1023,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                 /* listenersNotToNotify */LeaderboardPanel.this);
             }
         });
-        getLeaderboardTable().setSelectionModel(leaderboardSelectionModel);
-        setData(new ListDataProvider<LeaderboardRowDTO>());
-        getData().addDataDisplay(getLeaderboardTable());
-        listHandler = new ListHandler<LeaderboardRowDTO>(getData().getList());
-        getLeaderboardTable().addColumnSortHandler(listHandler);
+        leaderboardTable.setSelectionModel(leaderboardSelectionModel);
         loadCompleteLeaderboard(getLeaderboardDisplayDate());
 
         if (this.preSelectedRace == null) {
@@ -1208,8 +1196,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
      * the column style according to the {@link SortableColumn#getColumnStyle() column's style definition}.
      */
     protected void addColumn(SortableColumn<LeaderboardRowDTO, ?> column) {
-        getLeaderboardTable().addColumn(column, column.getHeader());
-        listHandler.setComparator(column, column.getComparator());
+        leaderboardTable.addColumn(column, column.getHeader(), column.getComparator(), column.getPreferredSortingOrder().isAscending());
         String columnStyle = column.getColumnStyle();
         if (columnStyle != null) {
             getLeaderboardTable().addColumnStyleName(getLeaderboardTable().getColumnCount() - 1, columnStyle);
@@ -1220,9 +1207,8 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         // remove column styles of those columns whose index will shift right by
         // one:
         removeColumnStyles(beforeIndex);
-        getLeaderboardTable().insertColumn(beforeIndex, column, column.getHeader());
+        getLeaderboardTable().insertColumn(beforeIndex, column, column.getHeader(), column.getComparator(), column.getPreferredSortingOrder().isAscending());
         addColumnStyles(beforeIndex);
-        listHandler.setComparator(column, column.getComparator());
     }
 
     private void addColumnStyles(int startColumn) {
@@ -1352,21 +1338,15 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                     }
                 }
             }
-            Comparator<LeaderboardRowDTO> comparator = getComparatorForSelectedSorting();
-            if (comparator != null) {
-                Collections.sort(getData().getList(), comparator);
+            if (leaderboardTable.getCurrentlySortedColumn() != null) {
+                leaderboardTable.sort();
             } else {
                 SortableColumn<LeaderboardRowDTO, ?> columnToSortFor = getDefaultSortColumn();
-                // if no sorting was selected, sort by the preferred sorting order of the sort column
-                boolean ascending = true;
-                if(columnToSortFor.getPreferredSortingOrder() == SortingOrder.DESCENDING) {
-                    ascending = false;
-                }
-                sort(columnToSortFor, ascending);
+                leaderboardTable.sortColumn(columnToSortFor, columnToSortFor.getPreferredSortingOrder().isAscending());
             }
             // Reselect the selected rows
             clearSelection();
-            for (LeaderboardRowDTO row : data.getList()) {
+            for (LeaderboardRowDTO row : getLeaderboardTable().getDataProvider().getList()) {
                 if (competitorSelectionProvider.isSelected(row.competitor)) {
                     leaderboardSelectionModel.setSelected(row, true);
                 }
@@ -1488,19 +1468,6 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         return defaultSortColumn;
     }
 
-    /**
-     * Sorts the leaderboard contents in ascending order according to <code>columnToSortFor</code>'s comparator and
-     * marks the table's column sort list so.
-     */
-    private void sort(SortableColumn<LeaderboardRowDTO, ?> columnToSortFor, boolean ascending) {
-        Collections.sort(getData().getList(), getComparator(columnToSortFor, ascending));
-        ColumnSortInfo columnSortInfo = getLeaderboardTable().getColumnSortList().push(columnToSortFor);
-        if (ascending != columnSortInfo.isAscending()) {
-            // flip ascending bit by repeating the push:
-            getLeaderboardTable().getColumnSortList().push(columnToSortFor);
-        }
-    }
-
     private void clearSelection() {
         for (LeaderboardRowDTO row : getData().getList()) {
             leaderboardSelectionModel.setSelected(row, false);
@@ -1523,30 +1490,6 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             }
         }
         return columnsToAddImplicitly;
-    }
-
-    private Comparator<LeaderboardRowDTO> getComparatorForSelectedSorting() {
-        Comparator<LeaderboardRowDTO> result = null;
-        if (getLeaderboardTable().getColumnSortList().size() > 0) {
-            ColumnSortInfo columnSortInfo = getLeaderboardTable().getColumnSortList().get(0);
-            @SuppressWarnings("unchecked")
-            SortableColumn<LeaderboardRowDTO, ?> castResult = (SortableColumn<LeaderboardRowDTO, ?>) columnSortInfo
-                    .getColumn();
-            final boolean ascending = columnSortInfo.isAscending();
-            result = getComparator(castResult, ascending);
-        }
-        return result;
-    }
-
-    private Comparator<LeaderboardRowDTO> getComparator(SortableColumn<LeaderboardRowDTO, ?> column,
-            final boolean ascending) {
-        Comparator<LeaderboardRowDTO> result;
-        if (ascending) {
-            result = column.getComparator();
-        } else {
-            result = Collections.reverseOrder(column.getComparator());
-        }
-        return result;
     }
 
     private RankColumn getRankColumn() {
@@ -1857,7 +1800,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         return new CarryColumn();
     }
 
-    protected CellTable<LeaderboardRowDTO> getLeaderboardTable() {
+    protected SortedCellTable<LeaderboardRowDTO> getLeaderboardTable() {
         return leaderboardTable;
     }
 
@@ -1878,11 +1821,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     }
 
     protected ListDataProvider<LeaderboardRowDTO> getData() {
-        return data;
-    }
-
-    private void setData(ListDataProvider<LeaderboardRowDTO> data) {
-        this.data = data;
+        return getLeaderboardTable().getDataProvider();
     }
 
     @Override
