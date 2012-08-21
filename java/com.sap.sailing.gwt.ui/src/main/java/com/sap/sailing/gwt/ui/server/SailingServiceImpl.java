@@ -392,38 +392,46 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         TimePoint timePoint;
         LiveLeaderboardUpdater liveLeaderboardUpdater;
         final Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
-        if (date == null) {
-            // date==null means live mode; however, if we're after the end of all races and after all score corrections,
-            // don't use the live leaderboard updater which would keep re-calculating over and over again, but map this
-            // to a usual non-live call which uses the regular LeaderboardDTOCache which is invalidated properly when
-            // the tracked race associations or score corrections or tracked race contents changes:
-            // TODO see bug 929: use lock instead of synchronized to increase concurrency
-            synchronized (leaderboardByNameLiveUpdaters) {
-                liveLeaderboardUpdater = leaderboardByNameLiveUpdaters.get(leaderboardName);
-                if (liveLeaderboardUpdater == null) {
-                    liveLeaderboardUpdater = new LiveLeaderboardUpdater(leaderboard, this);
-                    leaderboardByNameLiveUpdaters.put(leaderboardName, liveLeaderboardUpdater);
+        if (leaderboard != null) {
+            if (date == null) {
+                // date==null means live mode; however, if we're after the end of all races and after all score
+                // corrections,
+                // don't use the live leaderboard updater which would keep re-calculating over and over again, but map
+                // this
+                // to a usual non-live call which uses the regular LeaderboardDTOCache which is invalidated properly
+                // when
+                // the tracked race associations or score corrections or tracked race contents changes:
+                // TODO see bug 929: use lock instead of synchronized to increase concurrency
+                synchronized (leaderboardByNameLiveUpdaters) {
+                    liveLeaderboardUpdater = leaderboardByNameLiveUpdaters.get(leaderboardName);
+                    if (liveLeaderboardUpdater == null) {
+                        liveLeaderboardUpdater = new LiveLeaderboardUpdater(leaderboard, this);
+                        leaderboardByNameLiveUpdaters.put(leaderboardName, liveLeaderboardUpdater);
+                    }
                 }
-            }
-            final TimePoint nowMinusDelay = liveLeaderboardUpdater.getNowMinusDelay();
-            final TimePoint timePointOfLatestModification = leaderboard.getTimePointOfLatestModification();
-            if (!nowMinusDelay.before(timePointOfLatestModification)) {
-                timePoint = timePointOfLatestModification;
+                final TimePoint nowMinusDelay = liveLeaderboardUpdater.getNowMinusDelay();
+                final TimePoint timePointOfLatestModification = leaderboard.getTimePointOfLatestModification();
+                if (!nowMinusDelay.before(timePointOfLatestModification)) {
+                    timePoint = timePointOfLatestModification;
+                } else {
+                    timePoint = null;
+                    result = liveLeaderboardUpdater.getLiveLeaderboard(namesOfRaceColumnsForWhichToLoadLegDetails,
+                            nowMinusDelay);
+                }
             } else {
-                timePoint = null;
-                result = liveLeaderboardUpdater.getLiveLeaderboard(namesOfRaceColumnsForWhichToLoadLegDetails, nowMinusDelay);
+                timePoint = new MillisecondsTimePoint(date);
             }
-        } else {
-            timePoint = new MillisecondsTimePoint(date);
+            if (timePoint != null) {
+                // in replay we'd like up-to-date results; they are still cached
+                // which is OK because the cache is invalidated whenever any of the tracked races attached to the
+                // leaderboard changes.
+                result = leaderboardDTOCacheWaitingForLatestAnalysis.getLeaderboardByName(leaderboard, timePoint,
+                        namesOfRaceColumnsForWhichToLoadLegDetails);
+            }
+            logger.fine("getLeaderboardByName(" + leaderboardName + ", " + date + ", "
+                    + namesOfRaceColumnsForWhichToLoadLegDetails + ") took "
+                    + (System.currentTimeMillis() - startOfRequestHandling) + "ms");
         }
-        if (timePoint != null) {
-            // in replay we'd like up-to-date results; they are still cached
-            // which is OK because the cache is invalidated whenever any of the tracked races attached to the leaderboard changes.
-            result = leaderboardDTOCacheWaitingForLatestAnalysis.getLeaderboardByName(leaderboard,
-                    timePoint, namesOfRaceColumnsForWhichToLoadLegDetails); 
-        }
-        logger.fine("getLeaderboardByName("+leaderboardName+", "+date+", "+namesOfRaceColumnsForWhichToLoadLegDetails+") took "+
-                (System.currentTimeMillis()-startOfRequestHandling)+"ms");
         return result;
     }
 
