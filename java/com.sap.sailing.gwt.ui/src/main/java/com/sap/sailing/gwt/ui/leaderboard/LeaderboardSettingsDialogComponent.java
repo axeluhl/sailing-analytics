@@ -13,6 +13,7 @@ import com.google.gwt.user.client.ui.LongBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.DetailType;
+import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog.Validator;
 import com.sap.sailing.gwt.ui.client.DetailTypeFormatter;
@@ -21,7 +22,7 @@ import com.sap.sailing.gwt.ui.shared.RaceColumnDTO;
 import com.sap.sailing.gwt.ui.shared.components.SettingsDialogComponent;
 
 public class LeaderboardSettingsDialogComponent implements SettingsDialogComponent<LeaderboardSettings> {
-    private final List<RaceColumnDTO> raceColumnSelection;
+    private final Iterable<RaceColumnDTO> raceColumnSelection;
     private final List<RaceColumnDTO> raceAllRaceColumns;
     private final List<DetailType> maneuverDetailSelection;
     private final List<DetailType> legDetailSelection;
@@ -39,11 +40,12 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
 
     public LeaderboardSettingsDialogComponent(List<DetailType> maneuverDetailSelection,
             List<DetailType> legDetailSelection, List<DetailType> raceDetailSelection, List<RaceColumnDTO> raceAllRaceColumns,
-            List<RaceColumnDTO> raceColumnSelection, boolean autoExpandPreSelectedRace, long delayBetweenAutoAdvancesInMilliseconds, long delayInMilliseconds,
+ Iterable<RaceColumnDTO> raceColumnSelection,
+            boolean autoExpandPreSelectedRace, long delayBetweenAutoAdvancesInMilliseconds, long delayInMilliseconds,
             StringMessages stringConstants) {
         this.maneuverDetailSelection = maneuverDetailSelection;
-        this.raceColumnSelection = raceColumnSelection;
         this.raceAllRaceColumns = raceAllRaceColumns;
+        this.raceColumnSelection = raceColumnSelection;
         this.legDetailSelection = legDetailSelection;
         this.raceDetailSelection = raceDetailSelection;
         this.stringConstants = stringConstants;
@@ -105,7 +107,7 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
         List<RaceColumnDTO> allColumns = raceAllRaceColumns;
         for (RaceColumnDTO expandableSortableColumn : allColumns) {
             CheckBox checkbox = dialog.createCheckbox(expandableSortableColumn.getRaceColumnName());
-            checkbox.setValue(raceColumnSelection.contains(expandableSortableColumn));
+            checkbox.setValue(Util.contains(raceColumnSelection, expandableSortableColumn));
             raceColumnCheckboxes.put(expandableSortableColumn, checkbox);
             vpRight.add(checkbox);
         }

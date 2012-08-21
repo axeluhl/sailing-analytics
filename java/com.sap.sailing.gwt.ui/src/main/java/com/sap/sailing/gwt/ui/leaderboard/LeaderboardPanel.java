@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -139,7 +140,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
      */
     private final List<DetailType> selectedRaceDetails;
 
-    private List<RaceColumnDTO> selectedRaceColumns;
+    private Map<String, RaceColumnDTO> selectedRaceColumnsByName;
 
     protected final String RACE_COLUMN_HEADER_STYLE;
 
@@ -308,19 +309,19 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             selectedRaceDetails.addAll(newSettings.getRaceDetailsToShow());
         }
         if (newSettings.getNamesOfRaceColumnsToShow() != null) {
-            selectedRaceColumns.clear();
+            selectedRaceColumnsByName.clear();
             for (String nameOfRaceColumnToShow : newSettings.getNamesOfRaceColumnsToShow()) {
                 RaceColumnDTO raceColumnToShow = getRaceByColumnName(nameOfRaceColumnToShow);
                 if (raceColumnToShow != null) {
-                    selectedRaceColumns.add(raceColumnToShow);
+                    selectedRaceColumnsByName.put(raceColumnToShow.name, raceColumnToShow);
                 }
             }
         } else if (newSettings.getNamesOfRacesToShow() != null) {
-            selectedRaceColumns.clear();
+            selectedRaceColumnsByName.clear();
             for (String nameOfRaceToShow : newSettings.getNamesOfRacesToShow()) {
                 RaceColumnDTO raceColumnToShow = getRaceByName(nameOfRaceToShow);
                 if (raceColumnToShow != null) {
-                    selectedRaceColumns.add(raceColumnToShow);
+                    selectedRaceColumnsByName.put(raceColumnToShow.name, raceColumnToShow);
                 }
             }
         }
@@ -981,7 +982,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         this.stringMessages = stringMessages;
         this.selectedLegDetails = new ArrayList<DetailType>();
         this.selectedRaceDetails = new ArrayList<DetailType>();
-        this.selectedRaceColumns = new ArrayList<RaceColumnDTO>();
+        this.selectedRaceColumnsByName = new HashMap<String, RaceColumnDTO>();
         this.selectedManeuverDetails = new ArrayList<DetailType>();
 
         settingsUpdatedExplicitly = !settings.updateUponPlayStateChange();
@@ -1316,7 +1317,9 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                 columnToCollapseAndExpandAgain.toggleExpansion();
             }
             competitorSelectionProvider.setCompetitors(leaderboard.competitors, /* listenersNotToNotify */ this);
-            selectedRaceColumns.addAll(getRaceColumnsToAddImplicitly(leaderboard));
+            for (RaceColumnDTO selectedRaceColumn : getRaceColumnsToAddImplicitly(leaderboard)) {
+                selectedRaceColumnsByName.put(selectedRaceColumn.name, selectedRaceColumn);
+            }
             setLeaderboard(leaderboard);
             adjustColumnLayout(leaderboard);
             for (RaceColumn<?> columnToCollapseAndExpandAgain : columnsToCollapseAndExpandAgain) {
@@ -1397,7 +1400,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     }
 
     /**
-     * Based on the {@link #selectedRaceColumns}' {@link RaceColumnDTO#getDelayToLiveInMillis()} for the race that has
+     * Based on the {@link LeaderboardDTO#getDelayToLiveInMillisForLatestRace()} for the race that has
      * the latest {@link RaceColumnDTO#getStartDate(FleetDTO) start time}, if no {@link #settingsUpdatedExplicitly
      * explicit setting changes} were performed, automatically adjusts the delay accordingly.
      */
@@ -1637,9 +1640,10 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     }
 
     /**
-     * Removes all Columns of type racecolumns of leaderboardTable
+     * Removes all columns of type {@link RaceColumn} from the leaderboard table if their name is not in the list of
+     * names of the <code>selectedRaceColumns</code>.
      */
-    private void removeRaceColumnsNotSelected(List<RaceColumnDTO> selectedRaceColumns) {
+    private void removeRaceColumnsNotSelected(Iterable<RaceColumnDTO> selectedRaceColumns) {
         Set<String> selectedRaceColumnNames = new HashSet<String>();
         for (RaceColumnDTO selectedRaceColumn : selectedRaceColumns) {
             selectedRaceColumnNames.add(selectedRaceColumn.getRaceColumnName());
@@ -1663,17 +1667,17 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
      */
     private void createMissingAndAdjustExistingRaceColumns(LeaderboardDTO leaderboard) {
         // Correct order of races in selectedRaceColum
-        List<RaceColumnDTO> correctedOrderSelectedRaces = new ArrayList<RaceColumnDTO>();
+        LinkedHashMap<String, RaceColumnDTO> correctedOrderSelectedRaces = new LinkedHashMap<String, RaceColumnDTO>();
         for (RaceColumnDTO raceInLeaderboard : leaderboard.getRaceList()) {
-            if (selectedRaceColumns.contains(raceInLeaderboard)) {
-                correctedOrderSelectedRaces.add(raceInLeaderboard);
+            if (selectedRaceColumnsByName.containsKey(raceInLeaderboard.name)) {
+                correctedOrderSelectedRaces.put(raceInLeaderboard.name, raceInLeaderboard);
             }
         }
-        selectedRaceColumns = correctedOrderSelectedRaces;
-        removeRaceColumnsNotSelected(selectedRaceColumns);
-        for (int selectedRaceCount = 0; selectedRaceCount < selectedRaceColumns.size(); selectedRaceCount++) {
-            RaceColumnDTO selectedRaceColumn = selectedRaceColumns.get(selectedRaceCount);
-            final RaceColumn<?> raceColumn = getRaceColumnByRaceColumnName(selectedRaceColumn.name);
+        selectedRaceColumnsByName = correctedOrderSelectedRaces;
+        removeRaceColumnsNotSelected(selectedRaceColumnsByName.values());
+        for (int selectedRaceCount = 0; selectedRaceCount < selectedRaceColumnsByName.size(); selectedRaceCount++) {
+            RaceColumnDTO selectedRaceColumn = Util.get(selectedRaceColumnsByName.values(), selectedRaceCount);
+            final RaceColumn<?> raceColumn = selectedRaceColumn==null?null:getRaceColumnByRaceColumnName(selectedRaceColumn.name);
             if (raceColumn != null) {
                 // remove all raceColumns, starting at a specific selectedRaceCount, up to but excluding the selected
                 // raceName with the result that selectedRace is at position selectedRaceCount afterwards
@@ -1886,7 +1890,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         return new LeaderboardSettingsDialogComponent(Collections.unmodifiableList(selectedManeuverDetails),
                 Collections.unmodifiableList(selectedLegDetails),
                 Collections.unmodifiableList(selectedRaceDetails), /*  All races to select */
-                leaderboard.getRaceList(), selectedRaceColumns,
+                leaderboard.getRaceList(), selectedRaceColumnsByName.values(),
                 autoExpandPreSelectedRace, timer.getRefreshInterval(), timer.getLivePlayDelayInMillis(), stringMessages);
     }
 
