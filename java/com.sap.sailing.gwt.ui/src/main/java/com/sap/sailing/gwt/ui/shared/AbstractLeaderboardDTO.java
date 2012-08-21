@@ -10,6 +10,7 @@ import java.util.Set;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.domain.common.ScoringSchemeType;
 
 public abstract class AbstractLeaderboardDTO implements IsSerializable {
     public String name;
@@ -20,6 +21,7 @@ public abstract class AbstractLeaderboardDTO implements IsSerializable {
     public boolean hasCarriedPoints;
     public int[] discardThresholds;
     public RegattaDTO regatta;
+    public ScoringSchemeType scoringScheme;
 
     private Long delayToLiveInMillisForLatestRace;
     
@@ -71,24 +73,30 @@ public abstract class AbstractLeaderboardDTO implements IsSerializable {
         return false;
     }
 
-    public double getTotalPoints(LeaderboardRowDTO object) {
-        double totalPoints = object.carriedPoints == null ? 0 : object.carriedPoints;
+    public Double getTotalPoints(LeaderboardRowDTO object) {
+        Double totalPoints = object.carriedPoints == null ? null : object.carriedPoints;
         for (LeaderboardEntryDTO e : object.fieldsByRaceColumnName.values()) {
-            totalPoints += e.totalPoints;
+            if(e.totalPoints != null) {
+                if(totalPoints == null) {
+                    totalPoints = e.totalPoints;
+                } else {
+                    totalPoints += e.totalPoints;
+                }
+            }
         }
         return totalPoints;
     }
 
-    public double getNetPoints(CompetitorDTO competitor, String nameOfLastRaceSoFar) {
-        double result = 0;
+    public Double getNetPoints(CompetitorDTO competitor, String nameOfLastRaceSoFar) {
+        Double netPoints = null;
         LeaderboardRowDTO row = rows.get(competitor);
         if (row != null) {
             LeaderboardEntryDTO field = row.fieldsByRaceColumnName.get(nameOfLastRaceSoFar);
-            if (field != null) {
-                result = field.netPoints;
+            if (field != null &&  field.netPoints != null) {
+                netPoints = field.netPoints;
             }
         }
-        return result;
+        return netPoints;
     }
 
     public boolean raceIsTracked(String raceColumnName) {
@@ -281,6 +289,7 @@ public abstract class AbstractLeaderboardDTO implements IsSerializable {
         result = prime * result + Arrays.hashCode(discardThresholds);
         result = prime * result + (hasCarriedPoints ? 1231 : 1237);
         result = prime * result + ((name == null) ? 0 : name.hashCode());
+        result = prime * result + ((scoringScheme == null) ? 0 : scoringScheme.hashCode());
         result = prime * result + ((races == null) ? 0 : races.hashCode());
         result = prime * result + ((rows == null) ? 0 : rows.hashCode());
         return result;
@@ -304,6 +313,8 @@ public abstract class AbstractLeaderboardDTO implements IsSerializable {
             return false;
         if (hasCarriedPoints != other.hasCarriedPoints)
             return false;
+        if (scoringScheme != other.scoringScheme)
+            return false;
         if (name == null) {
             if (other.name != null)
                 return false;
@@ -325,7 +336,6 @@ public abstract class AbstractLeaderboardDTO implements IsSerializable {
     public boolean isDisplayNameSet(CompetitorDTO competitor) {
         return competitorDisplayNames.get(competitor) != null;
     }
-
 
     public Long getDelayToLiveInMillisForLatestRace() {
         return delayToLiveInMillisForLatestRace;

@@ -33,11 +33,13 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
     protected static final Fleet defaultFleet = new FleetImpl("Default");
     private static final long serialVersionUID = -5708971849158747846L;
     private final List<FlexibleRaceColumn> races;
+    private final ScoringScheme scoringScheme;
     private String name;
 
     public FlexibleLeaderboardImpl(String name, SettableScoreCorrection scoreCorrection,
             ThresholdBasedResultDiscardingRule resultDiscardingRule, ScoringScheme scoringScheme) {
-        super(scoreCorrection, resultDiscardingRule, scoringScheme);
+        super(scoreCorrection, resultDiscardingRule);
+        this.scoringScheme = scoringScheme;
         if (name == null) {
             throw new IllegalArgumentException("A leaderboard's name must not be null");
         }
@@ -106,7 +108,7 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
     public RaceColumn addRace(TrackedRace race, String columnName, boolean medalRace, Fleet fleet) {
         FlexibleRaceColumn column = getRaceColumnByName(columnName);
         if (column == null) {
-            column = createRaceColumn(columnName, medalRace);
+            column = createRaceColumn(columnName, medalRace, fleet);
             column.addRaceColumnListener(this);
             races.add(column);
         }
@@ -181,6 +183,11 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
         if (race != null) {
             race.setIsMedalRace(isMedalRace);
         }
+    }
+
+    @Override
+    public ScoringScheme getScoringScheme() {
+        return scoringScheme;
     }
 
 }

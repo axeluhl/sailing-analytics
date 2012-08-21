@@ -33,6 +33,7 @@ import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
+import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.tracking.Positioned;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -143,7 +144,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         } else if (leaderboard instanceof RegattaLeaderboard) {
             storeRegattaLeaderboard((RegattaLeaderboard) leaderboard, dbLeaderboard);
         }
-        storeLeaderboardCorrections(leaderboard, dbLeaderboard);
+        storeLeaderboardCorrectionsAndDiscards(leaderboard, dbLeaderboard);
         leaderboardCollection.update(query, dbLeaderboard, /* upsrt */ true, /* multi */ false);
     }
 
@@ -153,6 +154,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
 
     private void storeFlexibleLeaderboard(FlexibleLeaderboard leaderboard, BasicDBObject dbLeaderboard) {
         BasicDBList dbRaceColumns = new BasicDBList();
+        dbLeaderboard.put(FieldNames.SCORING_SCHEME_TYPE.name(), leaderboard.getScoringScheme().getType().name());
         dbLeaderboard.put(FieldNames.LEADERBOARD_COLUMNS.name(), dbRaceColumns);
         for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
             BasicDBObject dbRaceColumn = storeRaceColumn(raceColumn);
@@ -160,7 +162,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         }
     }
 
-    private void storeLeaderboardCorrections(Leaderboard leaderboard, BasicDBObject dbLeaderboard) {
+    private void storeLeaderboardCorrectionsAndDiscards(Leaderboard leaderboard, BasicDBObject dbLeaderboard) {
         if (leaderboard.hasCarriedPoints()) {
             BasicDBObject dbCarriedPoints = new BasicDBObject();
             dbLeaderboard.put(FieldNames.LEADERBOARD_CARRIED_POINTS.name(), dbCarriedPoints);
@@ -171,11 +173,8 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         BasicDBObject dbScoreCorrections = new BasicDBObject();
         storeScoreCorrections(leaderboard, dbScoreCorrections);
         dbLeaderboard.put(FieldNames.LEADERBOARD_SCORE_CORRECTIONS.name(), dbScoreCorrections);
-        BasicDBList dbResultDiscardingThresholds = new BasicDBList();
-        for (int threshold : leaderboard.getResultDiscardingRule().getDiscardIndexResultsStartingWithHowManyRaces()) {
-            dbResultDiscardingThresholds.add(threshold);
-        }
-        dbLeaderboard.put(FieldNames.LEADERBOARD_DISCARDING_THRESHOLDS.name(), dbResultDiscardingThresholds);
+        final ThresholdBasedResultDiscardingRule resultDiscardingRule = leaderboard.getResultDiscardingRule();
+        storeResultDiscardingRule(dbLeaderboard, resultDiscardingRule);
         BasicDBObject competitorDisplayNames = new BasicDBObject();
         for (Competitor competitor : leaderboard.getCompetitors()) {
             String displayNameForCompetitor = leaderboard.getDisplayName(competitor);
@@ -184,6 +183,15 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
             }
         }
         dbLeaderboard.put(FieldNames.LEADERBOARD_COMPETITOR_DISPLAY_NAMES.name(), competitorDisplayNames);
+    }
+
+    private void storeResultDiscardingRule(BasicDBObject dbLeaderboard,
+            final ThresholdBasedResultDiscardingRule resultDiscardingRule) {
+        BasicDBList dbResultDiscardingThresholds = new BasicDBList();
+        for (int threshold : resultDiscardingRule.getDiscardIndexResultsStartingWithHowManyRaces()) {
+            dbResultDiscardingThresholds.add(threshold);
+        }
+        dbLeaderboard.put(FieldNames.LEADERBOARD_DISCARDING_THRESHOLDS.name(), dbResultDiscardingThresholds);
     }
 
     private BasicDBObject storeRaceColumn(RaceColumn raceColumn) {
@@ -254,12 +262,18 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
             // sometimes, for reasons yet to be clarified, ensuring an index on the name field causes an NPE
             logger.throwing(MongoObjectFactoryImpl.class.getName(), "storeLeaderboardGroup", npe);
         }
-        
         BasicDBObject query = new BasicDBObject(FieldNames.LEADERBOARD_GROUP_NAME.name(), leaderboardGroup.getName());
-        
-        BasicDBObject result = new BasicDBObject();
-        result.put(FieldNames.LEADERBOARD_GROUP_NAME.name(), leaderboardGroup.getName());
-        result.put(FieldNames.LEADERBOARD_GROUP_DESCRIPTION.name(), leaderboardGroup.getDescription());
+        BasicDBObject dbLeaderboardGroup = new BasicDBObject();
+        dbLeaderboardGroup.put(FieldNames.LEADERBOARD_GROUP_NAME.name(), leaderboardGroup.getName());
+        dbLeaderboardGroup.put(FieldNames.LEADERBOARD_GROUP_DESCRIPTION.name(), leaderboardGroup.getDescription());
+        final Leaderboard overallLeaderboard = leaderboardGroup.getOverallLeaderboard();
+        if (overallLeaderboard != null) {
+            BasicDBObject dbOverallLeaderboard = new BasicDBObject();
+            dbLeaderboardGroup.put(FieldNames.LEADERBOARD_GROUP_OVERALL_LEADERBOARD.name(), dbOverallLeaderboard);
+            dbOverallLeaderboard.put(FieldNames.LEADERBOARD_NAME.name(), overallLeaderboard.getName());
+            storeLeaderboardCorrectionsAndDiscards(overallLeaderboard, dbOverallLeaderboard);
+            dbOverallLeaderboard.put(FieldNames.SCORING_SCHEME_TYPE.name(), overallLeaderboard.getScoringScheme().getType().name());
+        }
         BasicDBList dbLeaderboardIds = new BasicDBList();
         for (Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
             BasicDBObject leaderboardQuery = new BasicDBObject(FieldNames.LEADERBOARD_NAME.name(), leaderboard.getName());
@@ -271,9 +285,8 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
             ObjectId dbLeaderboardId = (ObjectId) dbLeaderboard.get("_id");
             dbLeaderboardIds.add(dbLeaderboardId);
         }
-        result.put(FieldNames.LEADERBOARD_GROUP_LEADERBOARDS.name(), dbLeaderboardIds);
-        
-        leaderboardGroupCollection.update(query, result, true, false);
+        dbLeaderboardGroup.put(FieldNames.LEADERBOARD_GROUP_LEADERBOARDS.name(), dbLeaderboardIds);
+        leaderboardGroupCollection.update(query, dbLeaderboardGroup, true, false);
     }
 
     @Override
@@ -325,6 +338,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         DBObject query = new BasicDBObject(FieldNames.REGATTA_NAME.name(), regatta.getName());
         dbRegatta.put(FieldNames.REGATTA_NAME.name(), regatta.getName());
         dbRegatta.put(FieldNames.REGATTA_BASE_NAME.name(), regatta.getBaseName());
+        dbRegatta.put(FieldNames.SCORING_SCHEME_TYPE.name(), regatta.getScoringScheme().getType().name());
         if (regatta.getBoatClass() != null) {
             dbRegatta.put(FieldNames.BOAT_CLASS_NAME.name(), regatta.getBoatClass().getName());
             dbRegatta.put(FieldNames.BOAT_CLASS_TYPICALLY_STARTS_UPWIND.name(), regatta.getBoatClass().typicallyStartsUpwind());

@@ -9,10 +9,9 @@ import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 public class LeaderboardGroupCreateDialog extends LeaderboardGroupDialog {
 
     public LeaderboardGroupCreateDialog(Collection<LeaderboardGroupDTO> existingGroups,
-            StringMessages stringConstants, AsyncCallback<LeaderboardGroupDTO> callback) {
-        super(new LeaderboardGroupDTO(), new LeaderboardGroupParameterValidator(stringConstants, existingGroups),
-                stringConstants, callback);
-
+            StringMessages stringMessages, AsyncCallback<LeaderboardGroupDTO> callback) {
+        super(new LeaderboardGroupDTO(), stringMessages,
+                callback, existingGroups);
         nameEntryField = createTextBox(null);
         descriptionEntryField = createTextArea(null);
     }

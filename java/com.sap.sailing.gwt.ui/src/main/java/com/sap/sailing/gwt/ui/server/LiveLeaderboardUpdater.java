@@ -76,7 +76,7 @@ public class LiveLeaderboardUpdater implements Runnable {
     
     /**
      * For each String from <code>namesOfRaceColumnsForWhichToLoadLegDetails</code> passed to
-     * {@link #getLiveLeaderboard(Collection)}, records the validity time point of the last request here when the
+     * {@link #getLiveLeaderboard(Collection, TimePoint)}, records the validity time point of the last request here when the
      * {@link #currentLiveLeaderboard} has been updated with results containing this column details. This updater will
      * stop computing the details for that column if the validity time for the update calculation is more than
      * {@link #UPDATE_TIMEOUT_IN_MILLIS} milliseconds after the time point recorded here.
@@ -85,7 +85,7 @@ public class LiveLeaderboardUpdater implements Runnable {
     private final Map<String, TimePoint> timePointOfLastRequestForColumnDetails;
     
     /**
-     * As soon as the first {@link #getLiveLeaderboard(Collection)} request has been received, this field tells the
+     * As soon as the first {@link #getLiveLeaderboard(Collection, TimePoint)} request has been received, this field tells the
      * "validity time point" (as opposed to the request time point; so not when the request was received but for which
      * time point the request was asking the data) for which the last general request asked the leaderboard contents,
      * regardless the combination of column details requested. This is used to decide when to stop a thread running this
@@ -113,16 +113,16 @@ public class LiveLeaderboardUpdater implements Runnable {
         return leaderboard;
     }
     
-    public LeaderboardDTO getLiveLeaderboard(Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails) throws NoWindException {
-        final MillisecondsTimePoint now = MillisecondsTimePoint.now();
-        final Long delayToLiveInMillis = getLeaderboard().getDelayToLiveInMillis();
-        TimePoint timePoint = delayToLiveInMillis == null ? now : now.minus(delayToLiveInMillis);
-        updateRequestTimes(namesOfRaceColumnsForWhichToLoadLegDetails, timePoint);
+    public LeaderboardDTO getLiveLeaderboard(Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails,
+            TimePoint nowMinusDelay) throws NoWindException {
         LeaderboardDTO result = null;
+        updateRequestTimes(namesOfRaceColumnsForWhichToLoadLegDetails, nowMinusDelay);
         synchronized (this) {
-            if (running && columnNamesForWhichCurrentLiveLeaderboardHasTheDetails.containsAll(namesOfRaceColumnsForWhichToLoadLegDetails)) {
+            if (running
+                    && columnNamesForWhichCurrentLiveLeaderboardHasTheDetails
+                            .containsAll(namesOfRaceColumnsForWhichToLoadLegDetails)) {
                 result = currentLiveLeaderboard;
-                lastRequest = timePoint;
+                lastRequest = nowMinusDelay;
                 if (result != null) {
                     cacheHitCount++;
                 }
@@ -130,13 +130,20 @@ public class LiveLeaderboardUpdater implements Runnable {
         }
         if (result == null) { // current cache doesn't have the column details requested; re-calculate
             cacheMissCount++;
-            result = sailingService.computeLeaderboardByName(leaderboard, timePoint, namesOfRaceColumnsForWhichToLoadLegDetails,
+            result = sailingService.computeLeaderboardByName(leaderboard, nowMinusDelay, namesOfRaceColumnsForWhichToLoadLegDetails,
                     /* waitForLatestAnalyses */ false);
             updateCacheContents(namesOfRaceColumnsForWhichToLoadLegDetails, result);
         }
         ensureRunning();
         logger.info(""+LiveLeaderboardUpdater.class.getSimpleName()+" cache hits/misses: "+cacheHitCount+"/"+cacheMissCount);
         return result;
+    }
+
+    TimePoint getNowMinusDelay() {
+        final MillisecondsTimePoint now = MillisecondsTimePoint.now();
+        final Long delayToLiveInMillis = getLeaderboard().getDelayToLiveInMillis();
+        TimePoint timePoint = delayToLiveInMillis == null ? now : now.minus(delayToLiveInMillis);
+        return timePoint;
     }
     
     private synchronized void ensureRunning() {
@@ -284,5 +291,4 @@ public class LiveLeaderboardUpdater implements Runnable {
         }
         return result;
     }
-
 }

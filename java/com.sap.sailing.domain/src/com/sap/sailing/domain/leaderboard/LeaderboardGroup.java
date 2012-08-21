@@ -5,6 +5,8 @@ import java.util.Collection;
 import com.sap.sailing.domain.common.Named;
 
 public interface LeaderboardGroup extends Named {
+    void addLeaderboardGroupListener(LeaderboardGroupListener listener);
+    void removeLeaderboardGroupListener(LeaderboardGroupListener listener);
     
     String getDescription();
     void setDescriptiom(String description);
@@ -18,5 +20,6 @@ public interface LeaderboardGroup extends Named {
     void removeLeaderboard(Leaderboard leaderboard);
     void removeAllLeaderboards(Collection<Leaderboard> leaderboards);
     void clearLeaderboards();
-    
+    Leaderboard getOverallLeaderboard();
+    void setOverallLeaderboard(Leaderboard leaderboard);
 }

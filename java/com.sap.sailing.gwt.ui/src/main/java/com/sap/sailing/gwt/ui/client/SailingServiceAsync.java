@@ -14,6 +14,7 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.RaceIdentifier;
+import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
@@ -193,7 +194,7 @@ public interface SailingServiceAsync {
     void updateLeaderboard(String leaderboardName, String newLeaderboardName, int[] newDiscardingThreasholds,
             AsyncCallback<Void> callback);
 
-    void createFlexibleLeaderboard(String leaderboardName, int[] discardThresholds,
+    void createFlexibleLeaderboard(String leaderboardName, int[] discardThresholds, ScoringSchemeType scoringSchemeType,
             AsyncCallback<StrippedLeaderboardDTO> asyncCallback);
 
     void createRegattaLeaderboard(RegattaIdentifier regattaIdentifier, int[] discardThresholds,
@@ -301,7 +302,9 @@ public interface SailingServiceAsync {
     /**
      * Creates a new group with the name <code>groupname</code>, the description <code>description</code> and an empty list of leaderboards.<br/>
      */
-    void createLeaderboardGroup(String groupName, String description, AsyncCallback<LeaderboardGroupDTO> callback);
+    void createLeaderboardGroup(String groupName, String description,
+            int[] overallLeaderboardDiscardThresholds, ScoringSchemeType overallLeaderboardScoringSchemeType,
+            AsyncCallback<LeaderboardGroupDTO> callback);
     
     /**
      * Updates the data of the group with the name <code>oldName</code>.
@@ -311,7 +314,8 @@ public interface SailingServiceAsync {
      * @param description The new description of the group
      * @param leaderboardNames The list of names of the new leaderboards of the group
      */
-    void updateLeaderboardGroup(String oldName, String newName, String description, List<String> leaderboardNames, AsyncCallback<Void> callback);
+    void updateLeaderboardGroup(String oldName, String newName, String description,
+            List<String> leaderboardNames, int[] overallLeaderboardDiscardThresholds, ScoringSchemeType overallLeaderboardScoringSchemeType, AsyncCallback<Void> callback);
 
     /**
      * Returns the mark passings and the data for the given {@link DetailType} of all competitors in
@@ -390,9 +394,11 @@ public interface SailingServiceAsync {
     void moveColumnInSeriesDown(RegattaIdentifier regattaIdentifier, String seriesName, String columnName,
             AsyncCallback<Void> callback);
 
-    void createRegatta(String regattaName, String boatClassName,
+    void createRegatta(
+            String regattaName,
+            String boatClassName,
             LinkedHashMap<String, Pair<List<Triple<String, Integer, Color>>, Boolean>> seriesNamesWithFleetNamesAndFleetOrderingAndMedal,
-            boolean persistent, AsyncCallback<RegattaDTO> callback);
+            boolean persistent, ScoringSchemeType scoringSchemeType, AsyncCallback<RegattaDTO> callback);
 
     void addColumnsToSeries(RegattaIdentifier regattaIdentifier, String seriesName, List<String> columnNames,
             AsyncCallback<Void> callback);

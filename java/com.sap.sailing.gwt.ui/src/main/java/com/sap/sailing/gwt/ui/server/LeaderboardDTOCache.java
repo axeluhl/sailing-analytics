@@ -239,6 +239,11 @@ public class LeaderboardDTOCache {
                     }
                 }
             }
+
+            @Override
+            public void isMedalRaceChanged(RaceColumn raceColumn, boolean newIsMedalRace) {
+                removeFromCache(leaderboard);
+            }
         };
         leaderboard.addRaceColumnListener(raceColumnListener);
         synchronized (raceColumnListeners) {
@@ -267,26 +272,6 @@ public class LeaderboardDTOCache {
     }
     
     /**
-     * Finds out the time point when any of the {@link Leaderboard#getTrackedRaces() tracked races currently attached to
-     * the <code>leaderboard</code>} and the {@link Leaderboard#getScoreCorrection() score corrections} have last been
-     * modified. If no tracked race is attached and no time-stamped score corrections have been applied to the leaderboard,
-     * <code>null</code> is returned.
-     */
-    private TimePoint getTimePointOfLatestModification(Leaderboard leaderboard) {
-        TimePoint result = null;
-        for (TrackedRace trackedRace : leaderboard.getTrackedRaces()) {
-            if (result == null || (trackedRace.getTimePointOfNewestEvent() != null && trackedRace.getTimePointOfNewestEvent().after(result))) {
-                result = trackedRace.getTimePointOfNewestEvent();
-            }
-        }
-        TimePoint timePointOfLastScoreCorrection = leaderboard.getScoreCorrection().getTimePointOfLastCorrectionsValidity();
-        if (timePointOfLastScoreCorrection != null && (result == null || timePointOfLastScoreCorrection.after(result))) {
-            result = timePointOfLastScoreCorrection;
-        }
-        return result;
-    }
-
-    /**
      * If the cache holds entries for the <code>leaderboard</code> requested, compare <code>timePoint</code> to the
      * {@link #getLatestModification latest modification} affecting the <code>leaderboard</code>. If
      * <code>timePoint</code> is after that time, adjust it to the {@link #getLatestModification latest modification
@@ -303,7 +288,7 @@ public class LeaderboardDTOCache {
             throws NoWindException, InterruptedException, ExecutionException {
         long startOfRequestHandling = System.currentTimeMillis();
         final TimePoint adjustedTimePoint;
-        TimePoint timePointOfLastModification = getTimePointOfLatestModification(leaderboard);
+        TimePoint timePointOfLastModification = leaderboard.getTimePointOfLatestModification();
         if (timePointOfLastModification != null && timePoint.after(timePointOfLastModification)) {
             adjustedTimePoint = timePointOfLastModification; 
             logger.fine("Adjusted time point in getLeaderboardByName from "+timePoint+" to "+adjustedTimePoint);

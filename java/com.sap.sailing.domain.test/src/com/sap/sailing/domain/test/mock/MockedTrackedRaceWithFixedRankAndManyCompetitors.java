@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.test;
+package com.sap.sailing.domain.test.mock;
 
 import java.io.Serializable;
 import java.util.HashSet;

@@ -33,6 +33,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.datepicker.client.DateBox;
 import com.sap.sailing.domain.common.MaxPointsReason;
+import com.sap.sailing.domain.common.SortingOrder;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
@@ -174,7 +175,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
         public EditableRaceColumn(RaceColumnDTO race, List<RowUpdateWhiteboardProducerThatAlsoHasCell<LeaderboardRowDTO, ?>> cellList) {
             super(race,
                     /* expandable */ false, // we don't want leg expansion when editing scores
-                    new CompositeCellRememberingRenderingContextAndObject(cellList),
+                    new CompositeCellRememberingRenderingContextAndObject(cellList), SortingOrder.NONE,
                     RACE_COLUMN_HEADER_STYLE, RACE_COLUMN_STYLE);
             for (RowUpdateWhiteboardProducer<LeaderboardRowDTO> rowUpdateWhiteboardProducer : cellList) {
                 rowUpdateWhiteboardProducer.setWhiteboardOwner(this);
@@ -361,7 +362,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
         public String getValue(LeaderboardRowDTO object) {
             LeaderboardEntryDTO leaderboardEntryDTO = object.fieldsByRaceColumnName.get(raceName);
             String result = "";
-            if (leaderboardEntryDTO != null) {
+            if (leaderboardEntryDTO != null && leaderboardEntryDTO.netPoints != null) {
                 result = scoreFormat.format(leaderboardEntryDTO.netPoints);
             }
             return result;

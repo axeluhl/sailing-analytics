@@ -45,7 +45,6 @@ public interface StringMessages extends Messages {
     String trackedRaceConnectedToSelectedRaceName();
     String linkToColumn();
     String unlink();
-    String createNewLeaderboard();
     String leaderboardName();
     String cancel();
     String pleaseEnterNonEmptyName();
@@ -323,7 +322,7 @@ public interface StringMessages extends Messages {
     String color();
     String medalSeries();
     String noColor();
-    String noRegatta();
+    String pleaseSelectARegatta();
     String addFleet();
     String doYouReallyWantToRemoveRegatta(String name);
     String errorLoadingScoreCorrectionProviders(String message);
@@ -373,4 +372,15 @@ public interface StringMessages extends Messages {
     String errorTryingToObtainRaceCourse(String message);
     String insertWaypointBeforeSelected();
     String insertWaypointAfterSelected();
+    String scoringSchemeLowPointSystem();
+    String scoringSchemeHighPointSystem();
+    String scoringSystem();
+    String createFlexibleLeaderboard();
+    String createRegattaLeaderboard();
+    String editFlexibleLeaderboard();
+    String editRegattaLeaderboard();
+    String noRegatta();
+    String useOverallLeaderboard();
+    String overallStandings();
+    String scoringSchemeHighPointEssOverall();
 }

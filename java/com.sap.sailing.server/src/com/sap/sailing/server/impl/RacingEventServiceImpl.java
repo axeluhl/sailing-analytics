@@ -42,7 +42,7 @@ import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.EventImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.common.Color;
-import com.sap.sailing.domain.common.DefaultLeaderboardName;
+import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaIdentifier;
@@ -58,12 +58,13 @@ import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.LeaderboardRegistry;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
+import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.leaderboard.impl.FlexibleLeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.LeaderboardGroupImpl;
-import com.sap.sailing.domain.leaderboard.impl.LowerScoreIsBetter;
 import com.sap.sailing.domain.leaderboard.impl.RegattaLeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.ResultDiscardingRuleImpl;
 import com.sap.sailing.domain.leaderboard.impl.ScoreCorrectionImpl;
+import com.sap.sailing.domain.leaderboard.meta.LeaderboardGroupMetaLeaderboard;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
@@ -221,7 +222,8 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         delayToLiveInMillis = TrackedRace.DEFAULT_LIVE_DELAY_IN_MILLISECONDS;
         // Add one default leaderboard that aggregates all races currently tracked by this service.
         // This is more for debugging purposes than for anything else.
-        addFlexibleLeaderboard(DefaultLeaderboardName.DEFAULT_LEADERBOARD_NAME, new int[] { 5, 8 });
+        addFlexibleLeaderboard(LeaderboardNameConstants.DEFAULT_LEADERBOARD_NAME, new int[] { 5, 8 },
+                tractracDomainFactory.getBaseDomainFactory().createScoringScheme(ScoringSchemeType.LOW_POINT));
         loadStoredRegattas();
         loadRaceIDToRegattaAssociations();
         loadStoredLeaderboardsAndGroups();
@@ -284,10 +286,10 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     }
     
     @Override
-    public FlexibleLeaderboard addFlexibleLeaderboard(String name, int[] discardThresholds) {
+    public FlexibleLeaderboard addFlexibleLeaderboard(String name, int[] discardThresholds, ScoringScheme scoringScheme) {
         logger.info("adding flexible leaderboard "+name);
         FlexibleLeaderboard result = new FlexibleLeaderboardImpl(name, new ScoreCorrectionImpl(), new ResultDiscardingRuleImpl(
-                discardThresholds), new LowerScoreIsBetter());
+                discardThresholds), scoringScheme);
         synchronized (leaderboardsByName) {
             if (getLeaderboardByName(name) != null) {
                 throw new IllegalArgumentException("Leaderboard with name "+name+" already exists");
@@ -455,11 +457,15 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     
     @Override
     public void removeLeaderboard(String leaderboardName) {
+        removeLeaderboardFromLeaderboardsByName(leaderboardName);
+        mongoObjectFactory.removeLeaderboard(leaderboardName);
+        syncGroupsAfterLeaderboardRemove(leaderboardName, true);
+    }
+
+    protected void removeLeaderboardFromLeaderboardsByName(String leaderboardName) {
         synchronized (leaderboardsByName) {
             leaderboardsByName.remove(leaderboardName);
         }
-        mongoObjectFactory.removeLeaderboard(leaderboardName);
-        syncGroupsAfterLeaderboardRemove(leaderboardName, true);
     }
     
     /**
@@ -565,10 +571,9 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
 
     @Override
     public Regatta createRegatta(String baseEventName, String boatClassName,
-            Iterable<? extends Series> series, boolean persistent) {
+            Iterable<? extends Series> series, boolean persistent, ScoringScheme scoringScheme) {
         Regatta regatta = new RegattaImpl(baseEventName,
-                getBaseDomainFactory().getOrCreateBoatClass(boatClassName), series, persistent, 
-                com.sap.sailing.domain.base.DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT));
+                getBaseDomainFactory().getOrCreateBoatClass(boatClassName), series, persistent, scoringScheme);
         logger.info("Created regatta " + regatta.getName() + " (" + hashCode() + ") on "+this);
         cacheAndReplicateSpecificRegattaWithoutRaceColumns(regatta);
         if (persistent) {
@@ -710,7 +715,8 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
             regattasByName.put(regatta.getName(), regatta);
             regatta.addRegattaListener(this);
             replicate(new AddSpecificRegatta(regatta.getBaseName(), regatta.getBoatClass() == null ? null : regatta
-                    .getBoatClass().getName(), getSeriesWithoutRaceColumnsConstructionParametersAsMap(regatta), regatta.isPersistent()));
+                    .getBoatClass().getName(), getSeriesWithoutRaceColumnsConstructionParametersAsMap(regatta), regatta.isPersistent(),
+                    regatta.getScoringScheme()));
             RegattaIdentifier regattaIdentifier = regatta.getRegattaIdentifier();
             for (RaceDefinition race : regatta.getAllRaces()) {
                 replicate(new AddRaceDefinition(regattaIdentifier, race));
@@ -811,7 +817,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
                     trackedRace.getMillisecondsOverWhichToAverageWind(), trackedRace.getMillisecondsOverWhichToAverageSpeed());
             replicate(op);
             linkRaceToConfiguredLeaderboardColumns(trackedRace);
-            final FlexibleLeaderboard defaultLeaderboard = (FlexibleLeaderboard) leaderboardsByName.get(DefaultLeaderboardName.DEFAULT_LEADERBOARD_NAME);
+            final FlexibleLeaderboard defaultLeaderboard = (FlexibleLeaderboard) leaderboardsByName.get(LeaderboardNameConstants.DEFAULT_LEADERBOARD_NAME);
             if (defaultLeaderboard != null) {
                 defaultLeaderboard.addRace(trackedRace, trackedRace.getRace().getName(), /* medalRace */false,
                         defaultLeaderboard.getFleet(null));
@@ -940,7 +946,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
             for (RaceDefinition race : regatta.getAllRaces()) {
                 stopTrackingWind(regatta, race);
                 // remove from default leaderboard
-                FlexibleLeaderboard defaultLeaderboard = (FlexibleLeaderboard) getLeaderboardByName(DefaultLeaderboardName.DEFAULT_LEADERBOARD_NAME);
+                FlexibleLeaderboard defaultLeaderboard = (FlexibleLeaderboard) getLeaderboardByName(LeaderboardNameConstants.DEFAULT_LEADERBOARD_NAME);
                 defaultLeaderboard.removeRaceColumn(race.getName());
             }
         }
@@ -1263,7 +1269,8 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     }
 
     @Override
-    public LeaderboardGroup addLeaderboardGroup(String groupName, String description, List<String> leaderboardNames) {
+    public LeaderboardGroup addLeaderboardGroup(String groupName, String description, List<String> leaderboardNames,
+            int[] overallLeaderboardDiscardThresholds, ScoringSchemeType overallLeaderboardScoringSchemeType) {
         ArrayList<Leaderboard> leaderboards = new ArrayList<>();
         synchronized (leaderboardsByName) {
             for (String leaderboardName : leaderboardNames) {
@@ -1276,6 +1283,12 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
             }
         }
         LeaderboardGroup result = new LeaderboardGroupImpl(groupName, description, leaderboards);
+        if (overallLeaderboardScoringSchemeType != null) {
+            // create overall leaderboard and its discards settings
+            addOverallLeaderboardToLeaderboardGroup(result,
+                    getBaseDomainFactory().createScoringScheme(overallLeaderboardScoringSchemeType),
+                    overallLeaderboardDiscardThresholds);
+        }
         synchronized (leaderboardGroupsByName) {
             if (leaderboardGroupsByName.containsKey(groupName)) {
                 throw new IllegalArgumentException("Leaderboard group with name " + groupName + " already exists");
@@ -1311,7 +1324,9 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     }
 
     @Override
-    public void updateLeaderboardGroup(String oldName, String newName, String description, List<String> leaderboardNames) {
+    public void updateLeaderboardGroup(String oldName, String newName, String description,
+            List<String> leaderboardNames, int[] overallLeaderboardDiscardThresholds,
+            ScoringSchemeType overallLeaderboardScoringSchemeType) {
         if (!oldName.equals(newName)) {
             renameLeaderboardGroup(oldName, newName);
         }
@@ -1326,7 +1341,29 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
                 group.addLeaderboard(leaderboard);
             }
         }
-        mongoObjectFactory.storeLeaderboardGroup(group);
+        Leaderboard overallLeaderboard = group.getOverallLeaderboard();
+        if (overallLeaderboard != null) {
+            if (overallLeaderboardScoringSchemeType == null) {
+                group.setOverallLeaderboard(null);
+                removeLeaderboardFromLeaderboardsByName(overallLeaderboard.getName());
+            } else {
+                // update existing overall leaderboard's discards settings; scoring scheme cannot be updated in-place
+                overallLeaderboard.setResultDiscardingRule(new ResultDiscardingRuleImpl(overallLeaderboardDiscardThresholds));
+            }
+        } else if (overallLeaderboard == null && overallLeaderboardScoringSchemeType != null) {
+            addOverallLeaderboardToLeaderboardGroup(group,
+                    getBaseDomainFactory().createScoringScheme(overallLeaderboardScoringSchemeType),
+                    overallLeaderboardDiscardThresholds);
+        } 
+        updateStoredLeaderboardGroup(group);
+    }
+
+    private void addOverallLeaderboardToLeaderboardGroup(LeaderboardGroup leaderboardGroup,
+            ScoringScheme scoringScheme, int[] discardThresholds) {
+        Leaderboard overallLeaderboard = new LeaderboardGroupMetaLeaderboard(leaderboardGroup, scoringScheme,
+                new ResultDiscardingRuleImpl(discardThresholds));
+        leaderboardGroup.setOverallLeaderboard(overallLeaderboard);
+        addLeaderboard(overallLeaderboard);
     }
 
     @Override
