@@ -162,4 +162,8 @@ public class DelayedLeaderboardCorrectionsImpl implements DelayedLeaderboardCorr
     @Override
     public void trackedRaceUnlinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
     }
+
+    @Override
+    public void isMedalRaceChanged(RaceColumn raceColumn, boolean newIsMedalRace) {
+    }
 }

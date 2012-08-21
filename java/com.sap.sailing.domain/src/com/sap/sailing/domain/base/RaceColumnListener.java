@@ -8,4 +8,6 @@ public interface RaceColumnListener extends Serializable {
     void trackedRaceLinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace);
     
     void trackedRaceUnlinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace);
+    
+    void isMedalRaceChanged(RaceColumn raceColumn, boolean newIsMedalRace);
 }
