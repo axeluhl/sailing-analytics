@@ -298,6 +298,8 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
                     if (fixSpeed.compareTo(max) > 0) {
                         max = fixSpeed;
                     }
+                    lastPos = fix.getPosition();
+                    from = fix.getTimePoint();
                 }
             }
             return max;
