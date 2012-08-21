@@ -1,15 +1,16 @@
 package com.sap.sailing.gwt.ui.leaderboard;
 
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.safehtml.shared.SafeHtml;
-import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Header;
 import com.sap.sailing.domain.common.DetailType;
+import com.sap.sailing.domain.common.InvertibleComparator;
+import com.sap.sailing.domain.common.SortingOrder;
+import com.sap.sailing.domain.common.impl.InvertibleComparatorAdapter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.LegDetailColumn.LegDetailField;
 import com.sap.sailing.gwt.ui.shared.LeaderboardEntryDTO;
@@ -121,9 +122,9 @@ public class LegColumn extends ExpandableSortableColumn<String> {
     }
     
     private class ManeuverCountLegDetailsColumn extends FormattedDoubleLegDetailColumn {
-        public ManeuverCountLegDetailsColumn(String title, CellTable<LeaderboardRowDTO> leaderboardTable,
-                String headerStyle, String columnStyle) {
-            super(title, /*unit*/null, /* field */ null, /* decimals */ 0, leaderboardTable, headerStyle, columnStyle);
+        public ManeuverCountLegDetailsColumn(String title, String headerStyle, String columnStyle) {
+            super(title, /*unit*/null, /* field */ null, /* decimals */ 0, DetailType.NUMBER_OF_MANEUVERS.getDefaultSortingOrder(),
+                    headerStyle, columnStyle);
         }
         
         @Override
@@ -202,11 +203,11 @@ public class LegColumn extends ExpandableSortableColumn<String> {
         }
 
     }
-    public LegColumn(LeaderboardPanel leaderboardPanel, String raceName, int legIndex, StringMessages stringConstants,
+    public LegColumn(LeaderboardPanel leaderboardPanel, String raceName, int legIndex, SortingOrder preferredSortingOrder, StringMessages stringConstants,
             List<DetailType> legDetailSelection, String headerStyle, String columnStyle,
             String detailHeaderStyle, String detailColumnStyle) {
-        super(leaderboardPanel, /* expandable */true /* all legs have details */, new TextCell(), stringConstants,
-                detailHeaderStyle, detailColumnStyle, legDetailSelection);
+        super(leaderboardPanel, /* expandable */true /* all legs have details */, new TextCell(), preferredSortingOrder,
+                stringConstants, detailHeaderStyle, detailColumnStyle, legDetailSelection);
         setHorizontalAlignment(ALIGN_CENTER);
         this.raceName = raceName;
         this.legIndex = legIndex;
@@ -233,40 +234,40 @@ public class LegColumn extends ExpandableSortableColumn<String> {
         Map<DetailType, SortableColumn<LeaderboardRowDTO, ?>> result = new HashMap<DetailType, SortableColumn<LeaderboardRowDTO, ?>>();
         result.put(DetailType.DISTANCE_TRAVELED,
                 new FormattedDoubleLegDetailColumn(stringConstants.distanceInMeters(), "["+stringConstants.distanceInMetersUnit()+"]",
-                        new DistanceTraveledInMeters(), 0, getLeaderboardPanel().getLeaderboardTable(), detailHeaderStyle, detailColumnStyle));
+                        new DistanceTraveledInMeters(), 0, DetailType.DISTANCE_TRAVELED.getDefaultSortingOrder(), detailHeaderStyle, detailColumnStyle));
         result.put(DetailType.AVERAGE_SPEED_OVER_GROUND_IN_KNOTS, new FormattedDoubleLegDetailColumn(
-                stringConstants.averageSpeedInKnots(), "["+stringConstants.averageSpeedInKnotsUnit()+"]", new AverageSpeedOverGroundInKnots(), 2, leaderboardPanel
-                                .getLeaderboardTable(), detailHeaderStyle, detailColumnStyle));
+                stringConstants.averageSpeedInKnots(), "["+stringConstants.averageSpeedInKnotsUnit()+"]", new AverageSpeedOverGroundInKnots(), 2,
+                DetailType.AVERAGE_SPEED_OVER_GROUND_IN_KNOTS.getDefaultSortingOrder(), detailHeaderStyle, detailColumnStyle));
         result.put(DetailType.CURRENT_SPEED_OVER_GROUND_IN_KNOTS, new FormattedDoubleLegDetailColumn(
                 stringConstants.currentSpeedOverGroundInKnots(), "["+stringConstants.currentSpeedOverGroundInKnotsUnit()+"]", new CurrentSpeedOverGroundInKnots(),
-                2, getLeaderboardPanel().getLeaderboardTable(), detailHeaderStyle, detailColumnStyle));
+                2, DetailType.CURRENT_SPEED_OVER_GROUND_IN_KNOTS.getDefaultSortingOrder(), detailHeaderStyle, detailColumnStyle));
         result.put(DetailType.ESTIMATED_TIME_TO_NEXT_WAYPOINT_IN_SECONDS,
                 new FormattedDoubleLegDetailColumn(stringConstants.estimatedTimeToNextWaypointInSeconds(),
                         "["+stringConstants.estimatedTimeToNextWaypointInSecondsUnit()+"]",
-                        new EstimatedTimeToNextWaypointInSeconds(), 1, getLeaderboardPanel().getLeaderboardTable(),
+                        new EstimatedTimeToNextWaypointInSeconds(), 1, DetailType.ESTIMATED_TIME_TO_NEXT_WAYPOINT_IN_SECONDS.getDefaultSortingOrder(), 
                         detailHeaderStyle, detailColumnStyle));
-        result.put(
-                DetailType.GAP_TO_LEADER_IN_SECONDS,
+        result.put(DetailType.GAP_TO_LEADER_IN_SECONDS,
                 new FormattedDoubleLegDetailColumn(stringConstants.gapToLeaderInSeconds(), "["+stringConstants.gapToLeaderInSecondsUnit()+"]",
-                        new GapToLeaderInSeconds(), 0, getLeaderboardPanel().getLeaderboardTable(), detailHeaderStyle, detailColumnStyle));
+                        new GapToLeaderInSeconds(), 0, DetailType.GAP_TO_LEADER_IN_SECONDS.getDefaultSortingOrder(), 
+                        detailHeaderStyle, detailColumnStyle));
         result.put(DetailType.VELOCITY_MADE_GOOD_IN_KNOTS,
                 new FormattedDoubleLegDetailColumn(stringConstants.velocityMadeGoodInKnots(),
                         "["+stringConstants.velocityMadeGoodInKnotsUnit()+"]", new VelocityMadeGoodInKnots(), 2,
-                        getLeaderboardPanel().getLeaderboardTable(), detailHeaderStyle, detailColumnStyle));
+                        DetailType.VELOCITY_MADE_GOOD_IN_KNOTS.getDefaultSortingOrder(), detailHeaderStyle, detailColumnStyle));
         result.put(DetailType.WINDWARD_DISTANCE_TO_GO_IN_METERS, new FormattedDoubleLegDetailColumn(
                 stringConstants.windwardDistanceToGoInMeters(), "["+stringConstants.windwardDistanceToGoInMetersUnit()+"]", new WindwardDistanceToGoInMeters(),
-                0, getLeaderboardPanel().getLeaderboardTable(), detailHeaderStyle, detailColumnStyle));
+                0, DetailType.WINDWARD_DISTANCE_TO_GO_IN_METERS.getDefaultSortingOrder(), detailHeaderStyle, detailColumnStyle));
         result.put(DetailType.RANK_GAIN, new RankGainColumn(stringConstants.rankGain(), new RankGain(),
-                getLeaderboardPanel().getLeaderboardTable(), detailHeaderStyle, detailColumnStyle));
+                detailHeaderStyle, detailColumnStyle));
         result.put(DetailType.NUMBER_OF_MANEUVERS, new ManeuverCountLegDetailsColumn(
-                stringConstants.numberOfManeuvers(), getLeaderboardPanel()
-                                .getLeaderboardTable(), detailHeaderStyle, detailColumnStyle));
+                stringConstants.numberOfManeuvers(), detailHeaderStyle, detailColumnStyle));
         result.put(DetailType.TIME_TRAVELED, new FormattedDoubleLegDetailColumn(stringConstants.time(),
                 "[" + stringConstants.secondsUnit() + "]", new TimeTraveledInSeconds(), 0,
-                getLeaderboardPanel().getLeaderboardTable(), detailHeaderStyle, detailColumnStyle));
+                DetailType.TIME_TRAVELED.getDefaultSortingOrder(), detailHeaderStyle, detailColumnStyle));
         result.put(DetailType.AVERAGE_CROSS_TRACK_ERROR_IN_METERS, new FormattedDoubleLegDetailColumn(stringConstants.averageCrossTrackErrorInMeters(),
                 "[" + stringConstants.metersUnit() + "]", new AverageCrossTrackErrorInMeters(), 0,
-                getLeaderboardPanel().getLeaderboardTable(), detailHeaderStyle, detailColumnStyle));
+                DetailType.AVERAGE_CROSS_TRACK_ERROR_IN_METERS.getDefaultSortingOrder(),
+                detailHeaderStyle, detailColumnStyle));
         return result;
     }
 
@@ -303,15 +304,14 @@ public class LegColumn extends ExpandableSortableColumn<String> {
     }
     
     @Override
-    public Comparator<LeaderboardRowDTO> getComparator() {
-        return new Comparator<LeaderboardRowDTO>() {
+    public InvertibleComparator<LeaderboardRowDTO> getComparator() {
+        return new InvertibleComparatorAdapter<LeaderboardRowDTO>(getPreferredSortingOrder().isAscending()) {
             @Override
             public int compare(LeaderboardRowDTO o1, LeaderboardRowDTO o2) {
-                boolean ascending = isSortedAscendingForThisColumn(getLeaderboardPanel().getLeaderboardTable());
                 LegEntryDTO o1Entry = getLegEntry(o1);
                 LegEntryDTO o2Entry = getLegEntry(o2);
-                return o1Entry == null ? o2Entry == null ? 0 : ascending?1:-1
-                                       : o2Entry == null ? ascending?-1:1 : o1Entry.rank - o2Entry.rank;
+                return o1Entry == null ? o2Entry == null ? 0 : isAscending()?1:-1
+                                       : o2Entry == null ? isAscending()?-1:1 : o1Entry.rank - o2Entry.rank;
             }
         };
     }

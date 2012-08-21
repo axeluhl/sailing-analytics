@@ -30,7 +30,7 @@ public class Util {
         }
     }
     
-    public static <T> int indexO(Iterable<? extends T> i, T t) {
+    public static <T> int indexOf(Iterable<? extends T> i, T t) {
         int result;
         if (i instanceof List<?>) {
             List<?> list = (List<?>) i;
@@ -207,7 +207,6 @@ public class Util {
 
         @Override
         public boolean equals( Object obj ) {
-
             boolean result;
             if ( this == obj ) {
                 result = true;
@@ -222,7 +221,6 @@ public class Util {
 
         @Override
         public String toString( ) {
-
             return "[" + a + ", " + b + ", " + c + "]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
         }
     }

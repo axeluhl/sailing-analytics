@@ -382,4 +382,5 @@ public interface StringMessages extends Messages {
     String noRegatta();
     String useOverallLeaderboard();
     String overallStandings();
+    String scoringSchemeHighPointEssOverall();
 }

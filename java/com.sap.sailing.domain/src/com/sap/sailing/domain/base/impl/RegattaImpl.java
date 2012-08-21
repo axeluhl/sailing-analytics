@@ -200,26 +200,47 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     public void trackedRaceUnlinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
         notifyListenersAboutTrackedRaceUnlinked(raceColumn, fleet, trackedRace);
     }
+    
+    @Override
+    public void isMedalRaceChanged(RaceColumn raceColumn, boolean newIsMedalRace) {
+        notifyListenersAboutIsMedalRaceChanged(raceColumn, newIsMedalRace);
+    }
 
     @Override
     public void addRaceColumnListener(RaceColumnListener listener) {
-        raceColumnListeners.add(listener);
+        synchronized (raceColumnListeners) {
+            raceColumnListeners.add(listener);
+        }
     }
 
     @Override
     public void removeRaceColumnListener(RaceColumnListener listener) {
-        raceColumnListeners.remove(listener);
+        synchronized (raceColumnListeners) {
+            raceColumnListeners.remove(listener);
+        }
+    }
+    
+    private Set<RaceColumnListener> getRaceColumnListeners() {
+        synchronized (raceColumnListeners) {
+            return new HashSet<RaceColumnListener>(raceColumnListeners);
+        }
     }
     
     private void notifyListenersAboutTrackedRaceLinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
-        for (RaceColumnListener listener : raceColumnListeners) {
+        for (RaceColumnListener listener : getRaceColumnListeners()) {
             listener.trackedRaceLinked(raceColumn, fleet, trackedRace);
         }
     }
 
     private void notifyListenersAboutTrackedRaceUnlinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
-        for (RaceColumnListener listener : raceColumnListeners) {
+        for (RaceColumnListener listener : getRaceColumnListeners()) {
             listener.trackedRaceUnlinked(raceColumn, fleet, trackedRace);
+        }
+    }
+
+    private void notifyListenersAboutIsMedalRaceChanged(RaceColumn raceColumn, boolean newIsMedalRace) {
+        for (RaceColumnListener listener : getRaceColumnListeners()) {
+            listener.isMedalRaceChanged(raceColumn, newIsMedalRace);
         }
     }
 

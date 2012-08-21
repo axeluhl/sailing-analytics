@@ -31,23 +31,39 @@ public abstract class AbstractRaceColumn implements RaceColumn {
     
     @Override
     public void addRaceColumnListener(RaceColumnListener listener) {
-        raceColumnListeners.add(listener);
+        synchronized (raceColumnListeners) {
+            raceColumnListeners.add(listener);
+        }
     }
 
     @Override
     public void removeRaceColumnListener(RaceColumnListener listener) {
-        raceColumnListeners.remove(listener);
+        synchronized (raceColumnListeners) {
+            raceColumnListeners.remove(listener);
+        }
+    }
+    
+    private Set<RaceColumnListener> getRaceColumnListeners() {
+        synchronized (raceColumnListeners) {
+            return new HashSet<RaceColumnListener>(raceColumnListeners);
+        }
     }
     
     private void notifyListenersAboutTrackedRaceLinked(Fleet fleet, TrackedRace trackedRace) {
-        for (RaceColumnListener listener : raceColumnListeners) {
+        for (RaceColumnListener listener : getRaceColumnListeners()) {
             listener.trackedRaceLinked(this, fleet, trackedRace);
         }
     }
 
     private void notifyListenersAboutTrackedRaceUnlinked(Fleet fleet, TrackedRace trackedRace) {
-        for (RaceColumnListener listener : raceColumnListeners) {
+        for (RaceColumnListener listener : getRaceColumnListeners()) {
             listener.trackedRaceUnlinked(this, fleet, trackedRace);
+        }
+    }
+
+    protected void notifyListenersAboutIsMedalRaceChanged() {
+        for (RaceColumnListener listener : getRaceColumnListeners()) {
+            listener.isMedalRaceChanged(this, isMedalRace());
         }
     }
 

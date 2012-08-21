@@ -10,6 +10,8 @@ public class ScoringSchemeTypeFormatter {
             return stringConstants.scoringSchemeLowPointSystem();
         case HIGH_POINT:
             return stringConstants.scoringSchemeHighPointSystem();
+        case HIGH_POINT_ESS_OVERALL:
+            return stringConstants.scoringSchemeHighPointEssOverall();
         }
         return null;
     }

@@ -364,6 +364,12 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
         }
     }
 
+    protected void notifyListenersAboutIsMedalRaceChanged(RaceColumn raceColumn, boolean newIsMedalRace) {
+        for (RaceColumnListener listener : getRaceColumnListeners()) {
+            listener.isMedalRaceChanged(raceColumn, newIsMedalRace);
+        }
+    }
+
     @Override
     public Entry getEntry(final Competitor competitor, final RaceColumn race, final TimePoint timePoint) throws NoWindException {
         Callable<Integer> trackedRankProvider = new Callable<Integer>() {
@@ -428,6 +434,11 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     @Override
     public void trackedRaceUnlinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
         notifyListenersAboutTrackedRaceUnlinked(raceColumn, fleet, trackedRace);
+    }
+    
+    @Override
+    public void isMedalRaceChanged(RaceColumn raceColumn, boolean newIsMedalRace) {
+        notifyListenersAboutIsMedalRaceChanged(raceColumn, newIsMedalRace);
     }
 
     /**
