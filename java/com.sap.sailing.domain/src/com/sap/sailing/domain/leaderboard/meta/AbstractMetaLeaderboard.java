@@ -26,8 +26,15 @@ import com.sap.sailing.domain.tracking.TrackedRace;
  * shall feed into a single overall scoring board.
  * <p>
  * 
- * For now, the implementation provided by this class is as trivial as possible. No discards, no carried points,
- * no "tracked races," but the possibility to apply score corrections and competitor renamings.
+ * For now, the implementation provided by this class is as trivial as possible. No discards, no carried points, no
+ * "tracked races," but the possibility to apply score corrections and competitor renamings.
+ * <p>
+ * 
+ * Instances of subclasses need to register a {@link ScoreCorrectionChangeForwarder} as listener on each leaderboard
+ * referenced by this meta leaderboard to ensure that score corrections applied to the "inner" leaderboard are signaled
+ * to {@link ScoreCorrectionListeners} on this meta leaderboard's score correction. See
+ * {@link #registerScoreCorrectionChangeForwarder(Leaderboard)} and
+ * {@link #unregisterScoreCorrectionChangeForwarder(Leaderboard)}.
  * 
  * @author Axel Uhl (d043530)
  * 
@@ -38,6 +45,7 @@ public abstract class AbstractMetaLeaderboard extends AbstractSimpleLeaderboardI
     private final ScoringScheme scoringScheme;
     private final String name;
     private final WeakHashMap<Leaderboard, RaceColumn> columnsForLeaderboards;
+    private final WeakHashMap<Leaderboard, ScoreCorrectionListener> scoreCorrectionChangeForwardersByLeaderboard;
     
     private class ScoreCorrectionChangeForwarder implements ScoreCorrectionListener {
         @Override
@@ -59,6 +67,7 @@ public abstract class AbstractMetaLeaderboard extends AbstractSimpleLeaderboardI
         this.scoringScheme = scoringScheme;
         this.name = name;
         columnsForLeaderboards = new WeakHashMap<>();
+        scoreCorrectionChangeForwardersByLeaderboard = new WeakHashMap<>();
     }
 
     protected abstract Iterable<Leaderboard> getLeaderboards();
@@ -100,13 +109,19 @@ public abstract class AbstractMetaLeaderboard extends AbstractSimpleLeaderboardI
         RaceColumn result = columnsForLeaderboards.get(leaderboard);
         if (result == null) {
             result = new MetaLeaderboardColumn(leaderboard, metaFleet);
-            result.addRaceColumnListener(this); // forwards RaceColumnListener events from the sub-leaderboards to this leaderboard's listeners
-            // also forward score correction changes applied to a sub-leaderboard to the score correction listeners on
-            // this leaderboard's score correction object
-            leaderboard.getScoreCorrection().addScoreCorrectionListener(new ScoreCorrectionChangeForwarder());
             columnsForLeaderboards.put(leaderboard, result);
         }
         return result;
+    }
+
+    protected void registerScoreCorrectionChangeForwarder(Leaderboard leaderboard) {
+        final ScoreCorrectionChangeForwarder listener = new ScoreCorrectionChangeForwarder();
+        scoreCorrectionChangeForwardersByLeaderboard.put(leaderboard, listener);
+        leaderboard.getScoreCorrection().addScoreCorrectionListener(listener);
+    }
+    
+    protected void unregisterScoreCorrectionChangeForwarder(Leaderboard leaderboard) {
+        leaderboard.getScoreCorrection().removeScoreCorrectionListener(scoreCorrectionChangeForwardersByLeaderboard.get(leaderboard));
     }
 
     @Override

@@ -46,8 +46,8 @@ import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
-import com.sap.sailing.domain.leaderboard.impl.HigherScoreIsBetter;
-import com.sap.sailing.domain.leaderboard.impl.LowerScoreIsBetter;
+import com.sap.sailing.domain.leaderboard.impl.HighPoint;
+import com.sap.sailing.domain.leaderboard.impl.LowPoint;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
@@ -233,7 +233,7 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
         
         DomainObjectFactory dof = MongoFactory.INSTANCE.getDomainObjectFactory(getMongoService());
         Regatta loadedRegatta = dof.loadRegatta(regatta.getName(), /* trackedRegattaRegistry */ null);
-        assertSame(LowerScoreIsBetter.class, loadedRegatta.getScoringScheme().getClass());
+        assertSame(LowPoint.class, loadedRegatta.getScoringScheme().getClass());
         assertEquals(regattaBaseName, loadedRegatta.getBaseName());
         Iterator<? extends Series> seriesIter = loadedRegatta.getSeries().iterator();
         Series loadedQualifyingSeries = seriesIter.next();
@@ -259,7 +259,7 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
         
         DomainObjectFactory dof = MongoFactory.INSTANCE.getDomainObjectFactory(getMongoService());
         Regatta loadedRegatta = dof.loadRegatta(regatta.getName(), /* trackedRegattaRegistry */ null);
-        assertSame(HigherScoreIsBetter.class, loadedRegatta.getScoringScheme().getClass());
+        assertSame(HighPoint.class, loadedRegatta.getScoringScheme().getClass());
     }
 
     @Test

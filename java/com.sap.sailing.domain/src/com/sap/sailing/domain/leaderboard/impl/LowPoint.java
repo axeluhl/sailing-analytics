@@ -14,10 +14,10 @@ import com.sap.sailing.domain.common.ScoringSchemeType;
  * @author Axel Uhl (D043530)
  * 
  */
-public class LowerScoreIsBetter extends AbstractScoringSchemeImpl {
+public class LowPoint extends AbstractScoringSchemeImpl {
     private static final long serialVersionUID = -2767385186133743330L;
 
-    public LowerScoreIsBetter() {
+    public LowPoint() {
         super(/* higherIsBetter */ false);
     }
 

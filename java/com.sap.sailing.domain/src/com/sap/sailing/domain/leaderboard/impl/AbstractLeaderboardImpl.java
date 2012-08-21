@@ -150,6 +150,8 @@ public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardI
         competitorsCache = null;
         super.trackedRaceUnlinked(raceColumn, fleet, trackedRace);
     }
+    
+    // Note: no need to redefine isMedalRaceChanged because that doesn't affect the competitorsCache
 
     @Override
     public Long getDelayToLiveInMillis() {

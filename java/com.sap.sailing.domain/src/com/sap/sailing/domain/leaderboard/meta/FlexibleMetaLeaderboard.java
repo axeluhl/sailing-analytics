@@ -38,6 +38,7 @@ public class FlexibleMetaLeaderboard extends AbstractMetaLeaderboard {
         LockUtil.lockForWrite(leaderboardsLock);
         try {
             leaderboards.add(leaderboard);
+            registerScoreCorrectionChangeForwarder(leaderboard);
         } finally {
             LockUtil.unlockAfterWrite(leaderboardsLock);
         }
@@ -47,6 +48,7 @@ public class FlexibleMetaLeaderboard extends AbstractMetaLeaderboard {
         LockUtil.lockForWrite(leaderboardsLock);
         try {
             leaderboards.remove(leaderboard);
+            unregisterScoreCorrectionChangeForwarder(leaderboard);
         } finally {
             LockUtil.unlockAfterWrite(leaderboardsLock);
         }

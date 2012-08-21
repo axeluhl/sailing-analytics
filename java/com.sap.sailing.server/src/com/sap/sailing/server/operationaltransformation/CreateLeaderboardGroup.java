@@ -2,6 +2,7 @@ package com.sap.sailing.server.operationaltransformation;
 
 import java.util.List;
 
+import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
@@ -10,11 +11,16 @@ public class CreateLeaderboardGroup extends AbstractLeaderboardGroupOperation<Le
     private static final long serialVersionUID = -5028997286564650805L;
     private final String description;
     private final List<String> leaderboardNames;
+    private final int[] overallLeaderboardDiscardThresholds;
+    private final ScoringSchemeType overallLeaderboardScoringSchemeType;
 
-    public CreateLeaderboardGroup(String leaderboardGroupName, String description, List<String> leaderboardNames) {
+    public CreateLeaderboardGroup(String leaderboardGroupName, String description, List<String> leaderboardNames,
+            int[] overallLeaderboardDiscardThresholds, ScoringSchemeType overallLeaderboardScoringSchemeType) {
         super(leaderboardGroupName);
         this.description = description;
         this.leaderboardNames = leaderboardNames;
+        this.overallLeaderboardDiscardThresholds = overallLeaderboardDiscardThresholds;
+        this.overallLeaderboardScoringSchemeType = overallLeaderboardScoringSchemeType;
     }
 
     @Override
@@ -32,7 +38,8 @@ public class CreateLeaderboardGroup extends AbstractLeaderboardGroupOperation<Le
     @Override
     public LeaderboardGroup internalApplyTo(RacingEventService toState) {
         // TODO see bug 729: try to move addLeaderboardGroup implementation here and synthesize and apply this operation there
-        return toState.addLeaderboardGroup(getLeaderboardGroupName(), description, leaderboardNames);
+        return toState.addLeaderboardGroup(getLeaderboardGroupName(), description, leaderboardNames,
+                overallLeaderboardDiscardThresholds, overallLeaderboardScoringSchemeType);
     }
 
 }

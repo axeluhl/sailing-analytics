@@ -25,6 +25,15 @@ import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
+/**
+ * Base implementation for various types of leaderboards. The {@link RaceColumnListener} implementation forwards events
+ * received to all {@link RaceColumnListener} subscribed with this leaderboard. To which objects this leaderboard subscribes
+ * as {@link RaceColumnListener} is left to the concrete subclasses to implement, but the race columns seem like useful
+ * candidates.
+ * 
+ * @author Axel Uhl (d043530)
+ *
+ */
 public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, RaceColumnListener {
     private static final long serialVersionUID = 330156778603279333L;
 
@@ -283,7 +292,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     }
 
     protected Comparator<? super Competitor> getTotalRankComparator(TimePoint timePoint) throws NoWindException {
-        return new LeaderboardTotalRankComparator(this, timePoint, getScoringScheme().getScoreComparator(/* nullScoresAreBetter */ false));
+        return new LeaderboardTotalRankComparator(this, timePoint, getScoringScheme(), /* nullScoresAreBetter */ false);
     }
 
     @Override
@@ -355,6 +364,12 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
         }
     }
 
+    protected void notifyListenersAboutIsMedalRaceChanged(RaceColumn raceColumn, boolean newIsMedalRace) {
+        for (RaceColumnListener listener : getRaceColumnListeners()) {
+            listener.isMedalRaceChanged(raceColumn, newIsMedalRace);
+        }
+    }
+
     @Override
     public Entry getEntry(final Competitor competitor, final RaceColumn race, final TimePoint timePoint) throws NoWindException {
         Callable<Integer> trackedRankProvider = new Callable<Integer>() {
@@ -419,6 +434,11 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     @Override
     public void trackedRaceUnlinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
         notifyListenersAboutTrackedRaceUnlinked(raceColumn, fleet, trackedRace);
+    }
+    
+    @Override
+    public void isMedalRaceChanged(RaceColumn raceColumn, boolean newIsMedalRace) {
+        notifyListenersAboutIsMedalRaceChanged(raceColumn, newIsMedalRace);
     }
 
     /**

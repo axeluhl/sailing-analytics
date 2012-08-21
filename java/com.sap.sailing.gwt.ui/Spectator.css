@@ -163,6 +163,8 @@ input.magnifier {
 
 .leaderboardGroupPanel-GroupName {
 	margin: 0 0 10px 0;
+	font-size: 21px;
+	font-weight: 400;
 }
 
 .leaderboardGroupPanel-GroupDescription {
@@ -238,11 +240,23 @@ input.magnifier {
   	font-family: 'UbuntuBold', Arial, Verdana, sans-serif;
 }
 
-.leaderboardGroupPanel-ActiveRace:visited, .leaderboardGroupPanel-ActiveLeaderboard:visited{
+.leaderboardGroupPanel-ActiveButton {
+	padding: 5px 8px;
+	margin: 5px 5px 5px 10px;
+	border-radius: 4px;
+	-moz-border-radius: 4px;
+	-webkit-border-radius: 4px;
+	background: url("images/btn-cta-orangeleft.png") repeat-x 0px 0 #e7e7e7;
+	text-decoration: none;
+	color: #fff;
+  	font-family: 'UbuntuBold', Arial, Verdana, sans-serif;
+}
+
+.leaderboardGroupPanel-ActiveRace:visited, .leaderboardGroupPanel-ActiveLeaderboard:visited, .leaderboardGroupPanel-ActiveButton:visited {
 	color: #fff;
 }
 
-.leaderboardGroupPanel-ActiveRace:hover, .leaderboardGroupPanel-ActiveLeaderboard:hover {
+.leaderboardGroupPanel-ActiveRace:hover, .leaderboardGroupPanel-ActiveLeaderboard:hover, .leaderboardGroupPanel-ActiveButton:hover {
 	text-decoration: none;
 	color: #fff;
   background: url("images/btn-cta-orangeleft.png") repeat-x -10px -30px #e7e7e7;
@@ -288,7 +302,7 @@ input.magnifier {
 
 .leaderboardGroupPanel-GroupDetailsPanel {
 	margin: 0 13px 20px;
-		font-size: 21px;
+	font-size: 21px;
 	font-weight: 400;
 }
 

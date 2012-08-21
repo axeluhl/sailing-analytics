@@ -239,6 +239,11 @@ public class LeaderboardDTOCache {
                     }
                 }
             }
+
+            @Override
+            public void isMedalRaceChanged(RaceColumn raceColumn, boolean newIsMedalRace) {
+                removeFromCache(leaderboard);
+            }
         };
         leaderboard.addRaceColumnListener(raceColumnListener);
         synchronized (raceColumnListeners) {

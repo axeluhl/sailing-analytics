@@ -10,7 +10,7 @@ import org.junit.Test;
 
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
-import com.sap.sailing.domain.leaderboard.impl.LowerScoreIsBetter;
+import com.sap.sailing.domain.leaderboard.impl.LowPoint;
 import com.sap.sailing.server.operationaltransformation.CreateFlexibleLeaderboard;
 import com.sap.sailing.server.replication.ReplicationMasterDescriptor;
 import com.sap.sailing.server.replication.impl.Replicator;
@@ -43,7 +43,7 @@ public class PrematureOperationReceiptTest extends AbstractServerReplicationTest
     public void testRaceColumnInLeaderboardReplicationAfterInitialLoad() throws InterruptedException, ClassNotFoundException, IOException {
         final String leaderboardName = "My new leaderboard";
         final int[] discardThresholds = new int[] { 17, 23 };
-        CreateFlexibleLeaderboard createTestLeaderboard = new CreateFlexibleLeaderboard(leaderboardName, discardThresholds, new LowerScoreIsBetter());
+        CreateFlexibleLeaderboard createTestLeaderboard = new CreateFlexibleLeaderboard(leaderboardName, discardThresholds, new LowPoint());
         assertNull(master.getLeaderboardByName(leaderboardName));
         master.apply(createTestLeaderboard);
         final Leaderboard masterLeaderboard = master.getLeaderboardByName(leaderboardName);
