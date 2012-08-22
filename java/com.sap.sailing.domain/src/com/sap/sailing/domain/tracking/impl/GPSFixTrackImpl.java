@@ -105,6 +105,8 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
      */
     private transient DistanceCache distanceCache;
     
+    private transient MaxSpeedCache<ItemType, FixType> maxSpeedCache;
+    
     public GPSFixTrackImpl(ItemType trackedItem, long millisecondsOverWhichToAverage) {
         this(trackedItem, millisecondsOverWhichToAverage, DEFAULT_MAX_SPEED_FOR_SMOOTHING);
     }
@@ -116,11 +118,13 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
         this.maxSpeedForSmoothing = maxSpeedForSmoothening;
         this.listeners = new HashSet<GPSTrackListener<ItemType, FixType>>();
         this.distanceCache = new DistanceCache(trackedItem==null?"null":trackedItem.toString());
+        this.maxSpeedCache = new MaxSpeedCache<>(this);
     }
     
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
         ois.defaultReadObject();
         distanceCache = new DistanceCache(trackedItem.toString());
+        maxSpeedCache = new MaxSpeedCache<ItemType, FixType>(this);
     }
 
     @Override
@@ -285,27 +289,7 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
 
     @Override
     public Speed getMaximumSpeedOverGround(TimePoint from, TimePoint to) {
-        lockForRead();
-        try {
-            // fetch all fixes on this leg so far and determine their maximum speed
-            Iterator<FixType> iter = getFixesIterator(from, /* inclusive */ true);
-            Speed max = Speed.NULL;
-            if (iter.hasNext()) {
-                Position lastPos = getEstimatedPosition(from, false);
-                while (iter.hasNext()) {
-                    FixType fix = iter.next();
-                    Speed fixSpeed = getSpeed(fix, lastPos, from);
-                    if (fixSpeed.compareTo(max) > 0) {
-                        max = fixSpeed;
-                    }
-                    lastPos = fix.getPosition();
-                    from = fix.getTimePoint();
-                }
-            }
-            return max;
-        } finally {
-            unlockAfterRead();
-        }
+        return maxSpeedCache.getMaxSpeed(from, to);
     }
 
     protected Speed getSpeed(FixType fix, Position lastPos, TimePoint timePointOfLastPos) {
