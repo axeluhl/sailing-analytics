@@ -515,17 +515,15 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
             NavigableSet<FixType> fixesToUseForSpeedEstimation, Weigher<TimePoint> weigher) {
         lockForRead();
         try {
-            @SuppressWarnings("unchecked")
-            NavigableSet<GPSFix> gpsFixesToUseForSpeedEstimation = (NavigableSet<GPSFix>) fixesToUseForSpeedEstimation;
-            List<GPSFix> relevantFixes = getFixesRelevantForSpeedEstimation(at, gpsFixesToUseForSpeedEstimation);
+            GPSFix[] relevantFixes = getFixesRelevantForSpeedEstimation(at, fixesToUseForSpeedEstimation);
             List<SpeedWithConfidence<TimePoint>> speeds = new ArrayList<SpeedWithConfidence<TimePoint>>();
             BearingWithConfidenceCluster<TimePoint> bearingCluster = new BearingWithConfidenceCluster<TimePoint>(weigher);
-            if (!relevantFixes.isEmpty()) {
-                Iterator<GPSFix> fixIter = relevantFixes.iterator();
-                GPSFix last = fixIter.next();
-                while (fixIter.hasNext()) {
+            if (relevantFixes.length != 0) {
+                int i=0;
+                GPSFix last = relevantFixes[i];
+                while (i<relevantFixes.length-1) {
                     // TODO bug #346: consider time difference between next.getTimepoint() and at to compute a confidence
-                    GPSFix next = fixIter.next();
+                    GPSFix next = relevantFixes[++i];
                     aggregateSpeedAndBearingFromLastToNext(speeds, bearingCluster, last, next);
                     last = next;
                 }
@@ -563,14 +561,15 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
      * {@link #getMillisecondsOverWhichToAverage() averaging interval}, the closest existing fix later or earlier than
      * <code>at</code> is used.
      */
-    private List<GPSFix> getFixesRelevantForSpeedEstimation(TimePoint at,
-            NavigableSet<GPSFix> fixesToUseForSpeedEstimation) {
+    protected GPSFix[] getFixesRelevantForSpeedEstimation(TimePoint at, NavigableSet<FixType> fixesToUseForSpeedEstimation) {
         lockForRead();
         try {
             DummyGPSFix atTimed = new DummyGPSFix(at);
             List<GPSFix> relevantFixes = new LinkedList<GPSFix>();
-            NavigableSet<GPSFix> beforeSet = fixesToUseForSpeedEstimation.headSet(atTimed, /* inclusive */false);
-            NavigableSet<GPSFix> afterSet = fixesToUseForSpeedEstimation.tailSet(atTimed, /* inclusive */true);
+            @SuppressWarnings("unchecked")
+            NavigableSet<GPSFix> castFixesToUseForSpeedEstimation = (NavigableSet<GPSFix>) fixesToUseForSpeedEstimation;
+            NavigableSet<GPSFix> beforeSet = castFixesToUseForSpeedEstimation.headSet(atTimed, /* inclusive */false);
+            NavigableSet<GPSFix> afterSet = castFixesToUseForSpeedEstimation.tailSet(atTimed, /* inclusive */true);
             GPSFix beforeFix = null;
             Iterator<GPSFix> beforeFixIter = beforeSet.descendingIterator();
             while (beforeFixIter.hasNext() &&
@@ -621,7 +620,7 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
                     }
                 }
             }
-            return relevantFixes;
+            return relevantFixes.toArray(new GPSFix[0]);
         } finally {
             unlockAfterRead();
         }

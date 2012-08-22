@@ -19,10 +19,23 @@ import com.sap.sailing.util.impl.ArrayListNavigableSet;
  * usually grows (extending at the end), caching can help to reduce the computational effort. The API for computing the
  * maximum speed (
  * {@link GPSFixTrack#getMaximumSpeedOverGround(com.sap.sailing.domain.common.TimePoint, com.sap.sailing.domain.common.TimePoint)}
- * ) allows clients to specify an interval for which the top speed is to be computed. Therefore, this cache offers a similar
- * API which supports interval-based queries.<p>
+ * ) allows clients to specify an interval for which the top speed is to be computed. Therefore, this cache offers a
+ * similar API which supports interval-based queries.
+ * <p>
  * 
- * The cache listens for GPS fixes being added to the track to which it belongs and takes care of its invalidation.
+ * The cache assumes that queries are usually posed with one of a small set of "from" time points, such as a leg's start
+ * or the race starting time. The "to" time points are expected to vary, particularly to grow in case a "live" query is
+ * made, or to represent one of a few more or less fixed time points such as a competitor's leg finishing times. With
+ * this assumption it seems reasonable to structure the cache such that the "from" time point is a key into a map that
+ * stores results for this "from" value. The various results for the same "from" entry are stored in the navigable set
+ * with ascending "to" times. When a query comes in, the best fit is determined by looking up the latest "to" that is
+ * earlier than or equal to the requested "to." If such an entry is found, the search for a maximum speed can be
+ * restricted to the interval between the cache entry's "to" and the "to" time point requested.
+ * <p>
+ * 
+ * When a new GPS fix is recorded for the track for which this is a max-speed cache, invalidation takes place. For this,
+ * the cache {@link GPSTrackListener listens} for GPS fixes being added to the track. For the fix added, we'd like to find
+ * the time interval within which a {@link 
  * 
  * @author Axel Uhl (d043530)
  * 
@@ -47,6 +60,9 @@ public class MaxSpeedCache<ItemType, FixType extends GPSFix> implements GPSTrack
         cache = new HashMap<TimePoint, NavigableSet<Pair<TimePoint,Speed>>>();
     }
 
+    /**
+     * 
+     */
     @Override
     public void gpsFixReceived(FixType fix, ItemType item) {
         // TODO Auto-generated method stub

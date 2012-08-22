@@ -1,7 +1,6 @@
 package com.sap.sailing.domain.tracking.impl;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.NavigableSet;
@@ -55,13 +54,13 @@ public class DynamicGPSFixMovingTrackImpl<ItemType> extends DynamicTrackImpl<Ite
             NavigableSet<GPSFixMoving> fixesToUseForSpeedEstimation, Weigher<TimePoint> weigher) {
         lockForRead();
         try {
-            List<GPSFixMoving> relevantFixes = getFixesRelevantForSpeedEstimation(at, fixesToUseForSpeedEstimation);
+            GPSFixMoving[] relevantFixes = getFixesRelevantForSpeedEstimation(at, fixesToUseForSpeedEstimation);
             List<SpeedWithConfidence<TimePoint>> speeds = new ArrayList<SpeedWithConfidence<TimePoint>>();
             BearingWithConfidenceCluster<TimePoint> bearingCluster = new BearingWithConfidenceCluster<TimePoint>(
                     weigher);
-            if (!relevantFixes.isEmpty()) {
-                Iterator<GPSFixMoving> fixIter = relevantFixes.iterator();
-                GPSFixMoving last = fixIter.next();
+            if (relevantFixes.length != 0) {
+                int i=0;
+                GPSFixMoving last = relevantFixes[i];
                 // add fix's own speed/bearing; this also works if only one "relevant" fix is found
                 SpeedWithConfidenceImpl<TimePoint> speedWithConfidence = new SpeedWithConfidenceImpl<TimePoint>(
                         last.getSpeed(),
@@ -69,9 +68,9 @@ public class DynamicGPSFixMovingTrackImpl<ItemType> extends DynamicTrackImpl<Ite
                 speeds.add(speedWithConfidence);
                 bearingCluster.add(new BearingWithConfidenceImpl<TimePoint>(last.getSpeed().getBearing(), /* confidence */
                         0.9, last.getTimePoint()));
-                while (fixIter.hasNext()) {
+                while (i<relevantFixes.length-1) {
                     // add to average the position and time difference
-                    GPSFixMoving next = fixIter.next();
+                    GPSFixMoving next = relevantFixes[++i];
                     aggregateSpeedAndBearingFromLastToNext(speeds, bearingCluster, last, next);
                     // add to average the speed and bearing provided by the GPSFixMoving
                     SpeedWithConfidenceImpl<TimePoint> computedSpeedWithConfidence = new SpeedWithConfidenceImpl<TimePoint>(
@@ -100,7 +99,7 @@ public class DynamicGPSFixMovingTrackImpl<ItemType> extends DynamicTrackImpl<Ite
         }
     }
     
-    private List<GPSFixMoving> getFixesRelevantForSpeedEstimation(TimePoint at,
+    protected GPSFixMoving[] getFixesRelevantForSpeedEstimation(TimePoint at,
             NavigableSet<GPSFixMoving> fixesToUseForSpeedEstimation) {
         assertReadLock();
         // TODO factor out the obtaining of relevant fixes which should be the same in super.getEstimatedSpeed(at)
@@ -159,7 +158,7 @@ public class DynamicGPSFixMovingTrackImpl<ItemType> extends DynamicTrackImpl<Ite
                 }
             }
         }
-        return relevantFixes;
+        return relevantFixes.toArray(new GPSFixMoving[0]);
     }
 
     private class DummyGPSFixMoving extends DummyTimed implements GPSFixMoving {
