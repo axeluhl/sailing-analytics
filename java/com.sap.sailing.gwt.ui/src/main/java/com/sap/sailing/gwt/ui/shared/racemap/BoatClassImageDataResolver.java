@@ -14,7 +14,7 @@ public class BoatClassImageDataResolver {
 
     static {
     	boatImagesMap = new HashMap<String, BoatClassImageData>();
-    	BoatClassImageData _470er = new BoatClassImageData("470", 4.70, 44, 72, 42, "470er");
+    	BoatClassImageData _470er = new BoatClassImageData("470er", 4.70, 44, 72, 42, "470");
     	_470er.setDownWindPortIcons(boatImageResources.class470er_DownWindPortIcon(), boatImageResources.class470er_DownWindPortIconSelected());
     	_470er.setDownWindStarboardIcons(boatImageResources.class470er_DownWindStarboardIcon(), boatImageResources.class470er_DownWindStarboardIconSelected());
     	_470er.setUpWindPortIcons(boatImageResources.class470er_UpWindPortIcon(), boatImageResources.class470er_UpWindPortIconSelected());
@@ -22,7 +22,7 @@ public class BoatClassImageDataResolver {
     	_470er.setReachingPortIcons(boatImageResources.class470er_ReachingPortIcon(), boatImageResources.class470er_ReachingPortIconSelected());
     	_470er.setReachingStarboardIcons(boatImageResources.class470er_ReachingStarboardIcon(), boatImageResources.class470er_ReachingStarboardIconSelected());
 
-    	BoatClassImageData _49er = new BoatClassImageData("49", 4.90, 42, 67, 31, "49er");
+    	BoatClassImageData _49er = new BoatClassImageData("49er", 4.90, 42, 67, 31, "49");
     	_49er.setDownWindPortIcons(boatImageResources.class49er_DownWindPortIcon(), boatImageResources.class49er_DownWindPortIconSelected());
     	_49er.setDownWindStarboardIcons(boatImageResources.class49er_DownWindStarboardIcon(), boatImageResources.class49er_DownWindStarboardIconSelected());
     	_49er.setUpWindPortIcons(boatImageResources.class49er_UpWindPortIcon(), boatImageResources.class49er_UpWindPortIconSelected());
