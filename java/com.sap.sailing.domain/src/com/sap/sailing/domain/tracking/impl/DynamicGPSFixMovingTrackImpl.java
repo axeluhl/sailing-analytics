@@ -17,7 +17,6 @@ import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.impl.KilometersPerHourSpeedImpl;
 import com.sap.sailing.domain.confidence.ConfidenceBasedAverager;
 import com.sap.sailing.domain.confidence.ConfidenceFactory;
 import com.sap.sailing.domain.confidence.HasConfidence;
@@ -99,10 +98,13 @@ public class DynamicGPSFixMovingTrackImpl<ItemType> extends DynamicTrackImpl<Ite
         }
     }
     
+    /**
+     * Note that no corresponding re-definition of {@link #getTimeIntervalWhoseEstimatedSpeedMayHaveChangedAfterAddingFix(GPSFix)} is
+     * necessary because the fixes affected are just the same. 
+     */
     protected GPSFixMoving[] getFixesRelevantForSpeedEstimation(TimePoint at,
             NavigableSet<GPSFixMoving> fixesToUseForSpeedEstimation) {
         assertReadLock();
-        // TODO factor out the obtaining of relevant fixes which should be the same in super.getEstimatedSpeed(at)
         DummyGPSFixMoving atTimed = new DummyGPSFixMoving(at);
         List<GPSFixMoving> relevantFixes = new LinkedList<GPSFixMoving>();
         boolean beforeSetEmpty;
@@ -195,31 +197,6 @@ public class DynamicGPSFixMovingTrackImpl<ItemType> extends DynamicTrackImpl<Ite
         }
     }
     
-    
-    @Override
-    protected Speed getSpeed(GPSFixMoving fix, Position lastPos, TimePoint timePointOfLastPos) {
-        lockForRead();
-        try {
-            Speed fixSpeed = fix.getSpeed();
-            Speed calculatedSpeed = super.getSpeed(fix, lastPos, timePointOfLastPos);
-            Speed averaged = averageSpeed(fixSpeed, calculatedSpeed);
-            return averaged;
-        } finally {
-            unlockAfterRead();
-        }
-    }
-
-    private Speed averageSpeed(Speed... speeds) {
-        assertReadLock();
-        double sumInKMH = 0;
-        int count = 0;
-        for (Speed speed : speeds) {
-            sumInKMH += speed.getKilometersPerHour();
-            count++;
-        }
-        return new KilometersPerHourSpeedImpl(sumInKMH/count);
-    }
-
     /**
      * In addition to the base class implementation, we additionally have the speed and bearing as
      * measured by the device. We use the device-measured speed and compare it with the speed computed

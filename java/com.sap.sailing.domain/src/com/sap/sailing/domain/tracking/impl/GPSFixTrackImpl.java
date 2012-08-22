@@ -292,18 +292,6 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
         return maxSpeedCache.getMaxSpeed(from, to);
     }
 
-    /**
-     * TODO Should some averaging take place, maybe based on {@link #millisecondsOverWhichToAverage}?
-     */
-    protected Speed getSpeed(FixType fix, Position lastPos, TimePoint timePointOfLastPos) {
-        lockForRead();
-        try {
-            return lastPos.getDistance(fix.getPosition()).inTime(fix.getTimePoint().asMillis()-timePointOfLastPos.asMillis());
-        } finally {
-            unlockAfterRead();
-        }
-    }
-
     private SpeedWithBearing estimateSpeed(FixType fix1, FixType fix2) {
         if (fix1 == null) {
             if (fix2 instanceof GPSFixMoving) {
@@ -555,6 +543,81 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
                 relativeTo));
     }
 
+    /**
+     * Computes the time interval such that {@link #getFixesRelevantForSpeedEstimation(TimePoint, NavigableSet)}, when
+     * passed any time point from that interval, produces "fix" as part of its result array. The algorithm for
+     * determining this interval co-varies with the implementation of
+     * {@link #getFixesRelevantForSpeedEstimation(TimePoint, NavigableSet)}.<p>
+     * 
+     * This implementation looks for fixes {@link #getMillisecondsOverWhichToAverage()}/2 before and after <code>fix</code>.
+     * If no fix is found in a direction within half the averaging interval but there is a fix in that direction which is further
+     * apart, the yet next fix is checked. If there is none, or that next-next fix is further apart from the next fix than <code>fix</code>,
+     * then the next fix is added to the result interval. This is because for that next fix, <code>fix</code> in that case will be relevant
+     * for speed estimation because it's the closest fix.
+     */
+    protected Pair<TimePoint, TimePoint> getTimeIntervalWhoseEstimatedSpeedMayHaveChangedAfterAddingFix(FixType fix) {
+        TimePoint intervalStart = null;
+        TimePoint intervalEnd = null;
+        lockForRead();
+        try {
+            NavigableSet<FixType> beforeSet = getInternalRawFixes().headSet(fix, /* inclusive */false);
+            NavigableSet<FixType> afterSet = getInternalRawFixes().tailSet(fix, /* inclusive */true);
+            FixType beforeFix = null;
+            Iterator<FixType> beforeFixIter = beforeSet.descendingIterator();
+            while (beforeFixIter.hasNext()
+                    && fix.getTimePoint().asMillis() - (beforeFix = beforeFixIter.next()).getTimePoint().asMillis() < getMillisecondsOverWhichToAverage() / 2) {
+                intervalStart = beforeFix.getTimePoint();
+            }
+            if (intervalStart == null) {
+                if (beforeFixIter.hasNext()) {
+                    // No before fix within half averaging interval, but there is one further away; is its next neighbour even further away?
+                    // If so, or no more neighbours are found, it's affected and marks the invalidation interval start; otherwise, fix'
+                    // time point is the invalidation interval start
+                    TimePoint intervalStartCandidate = beforeFixIter.next().getTimePoint();
+                    if (beforeFixIter.hasNext()) {
+                        TimePoint nextNeighboursTimePoint = beforeFixIter.next().getTimePoint();
+                        if (intervalStartCandidate.asMillis()-nextNeighboursTimePoint.asMillis() > fix.getTimePoint().asMillis()-intervalStartCandidate.asMillis()) {
+                            intervalStart = intervalStartCandidate;
+                        }
+                    } else {
+                        intervalStart = intervalStartCandidate;
+                    }
+                }
+            }
+            if (intervalStart == null) {
+                intervalStart = fix.getTimePoint();
+            }
+            FixType afterFix = null;
+            Iterator<FixType> afterFixIter = afterSet.iterator();
+            while (afterFixIter.hasNext()
+                    && (afterFix = afterFixIter.next()).getTimePoint().asMillis() - fix.getTimePoint().asMillis() < getMillisecondsOverWhichToAverage() / 2) {
+                intervalEnd = afterFix.getTimePoint();
+            }
+            if (intervalEnd == null) {
+                if (afterFixIter.hasNext()) {
+                    // No after fix within half averaging interval, but there is one further away; is its next neighbour even further away?
+                    // If so, or no more neighbours are found, it's affected and marks the invalidation interval start; otherwise, fix's
+                    // time point is the invalidation interval end
+                    TimePoint intervalEndCandidate = afterFixIter.next().getTimePoint();
+                    if (afterFixIter.hasNext()) {
+                        TimePoint nextNeighboursTimePoint = afterFixIter.next().getTimePoint();
+                        if (nextNeighboursTimePoint.asMillis()-intervalEndCandidate.asMillis() > intervalEndCandidate.asMillis()-fix.getTimePoint().asMillis()) {
+                            intervalEnd = intervalEndCandidate;
+                        }
+                    } else {
+                        intervalEnd = intervalEndCandidate;
+                    }
+                }
+            }
+            if (intervalEnd == null) {
+                intervalEnd = fix.getTimePoint();
+            }
+        } finally {
+            unlockAfterRead();
+        }
+        return new Pair<TimePoint, TimePoint>(intervalStart, intervalEnd);
+    }
+    
     /**
      * A track that doesn't have {@link GPSFixMoving} fixes and therefore needs to compute the speed using the fix time
      * and position differences needs at least two fixes to compute a result. If only one fix is found within the

@@ -4,6 +4,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.NavigableSet;
 
 import com.sap.sailing.domain.common.Speed;
@@ -13,6 +14,8 @@ import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.GPSTrackListener;
 import com.sap.sailing.util.impl.ArrayListNavigableSet;
+import com.sap.sailing.util.impl.LockUtil;
+import com.sap.sailing.util.impl.NamedReentrantReadWriteLock;
 
 /**
  * Re-calculating the maximum speed over a {@link GPSFixTrack} is time consuming. When the track grows the way it
@@ -59,43 +62,163 @@ public class MaxSpeedCache<ItemType, FixType extends GPSFix> implements GPSTrack
      */
     private final Map<TimePoint, NavigableSet<Pair<TimePoint, Pair<FixType, Speed>>>> cache;
     
+    private final NamedReentrantReadWriteLock lock;
+    
     public MaxSpeedCache(GPSFixTrackImpl<ItemType, FixType> track) {
         this.track = track;
         track.addListener(this);
         cache = new HashMap<TimePoint, NavigableSet<Pair<TimePoint, Pair<FixType, Speed>>>>();
+        lock = new NamedReentrantReadWriteLock(MaxSpeedCache.class.getSimpleName()+" for track of "+track.getTrackedItem(), /* fair */ false);
     }
 
     /**
-     * 
+     * Find the invalidation interval such that getFixesRelevantForSpeedEstimation, when passed any time point from that
+     * interval, produces "fix", then find all cache entries that overlap with this interval and if the max fix is
+     * outside of the invalidation interval, crop cache entry's interval such that it's overlap-free, otherwise remove.
      */
     @Override
     public void gpsFixReceived(FixType fix, ItemType item) {
-        // TODO find the invalidation interval such that getFixesRelevantForSpeedEstimation, when passed any time point from that interval, produces "fix"
-        // TODO find all cache entries that overlap with this interval
-        // TODO if the max fix is outside of the invalidation interval, crop cache entry's interval such that it's overlap-free, otherwise remove
+        // find the invalidation interval such that getFixesRelevantForSpeedEstimation, when passed any time point from that interval, produces "fix"
+        Pair<TimePoint, TimePoint> invalidationInterval = track.getTimeIntervalWhoseEstimatedSpeedMayHaveChangedAfterAddingFix(fix);
+        LockUtil.lockForWrite(lock);
+        HashMap<TimePoint, NavigableSet<Pair<TimePoint, Pair<FixType, Speed>>>> additionalCacheEntries =
+                new HashMap<TimePoint, NavigableSet<Pair<TimePoint, Pair<FixType, Speed>>>>();
+        try {
+            // find all cache entries that overlap with this interval
+            for (Iterator<Map.Entry<TimePoint, NavigableSet<Pair<TimePoint, Pair<FixType, Speed>>>>> i = cache.entrySet().iterator(); i.hasNext(); ) {
+                Entry<TimePoint, NavigableSet<Pair<TimePoint, Pair<FixType, Speed>>>> next = i.next();
+                additionalCacheEntries.putAll(invalidateEntriesAndReturnAdditionalCacheEntries(next, invalidationInterval));
+                if (next.getValue().isEmpty()) {
+                    i.remove();
+                }
+            }
+            mergeAdditionalCacheEntries(additionalCacheEntries);
+        } finally {
+            LockUtil.unlockAfterWrite(lock);
+        }
+    }
+
+    private void mergeAdditionalCacheEntries(
+            Map<TimePoint, NavigableSet<Pair<TimePoint, Pair<FixType, Speed>>>> additionalCacheEntries) {
+        assert lock.writeLock().isHeldByCurrentThread();
+        for (Map.Entry<TimePoint, NavigableSet<Pair<TimePoint, Pair<FixType, Speed>>>> additionalCacheEntry : additionalCacheEntries.entrySet()) {
+            NavigableSet<Pair<TimePoint, Pair<FixType, Speed>>> existingEntry = cache.get(additionalCacheEntry.getKey());
+            if (existingEntry == null) {
+                cache.put(additionalCacheEntry.getKey(), additionalCacheEntry.getValue()); 
+            } else {
+                existingEntry.addAll(additionalCacheEntry.getValue());
+            }
+        }
+    }
+
+    private Map<TimePoint, NavigableSet<Pair<TimePoint, Pair<FixType, Speed>>>> invalidateEntriesAndReturnAdditionalCacheEntries(
+            Entry<TimePoint, NavigableSet<Pair<TimePoint, Pair<FixType, Speed>>>> cacheEntry,
+            Pair<TimePoint, TimePoint> invalidationInterval) {
+        assert lock.writeLock().isHeldByCurrentThread();
+        // cannot modify cache here because caller is in an iteration over cache's entry set; request additions by returning them
+        Map<TimePoint, NavigableSet<Pair<TimePoint, Pair<FixType, Speed>>>> result = new HashMap<>();
+        if (!cacheEntry.getKey().after(invalidationInterval.getB())) {
+            // invalidation can only become necessary if the cache entry doesn't start after the end of the invalidation interval
+            TimePoint croppedFrom; // start of the remaining valid part of the cache entries
+            if (cacheEntry.getKey().before(invalidationInterval.getA())) {
+                croppedFrom = cacheEntry.getKey();
+            } else {
+                croppedFrom = invalidationInterval.getB(); // cache entry starts in the invalidationInterval; earliest valid point is end of invalidation interval
+            }
+            // now scan all entries whose "to" is at or after the invalidationInterval's start:
+            for (Iterator<Pair<TimePoint, Pair<FixType, Speed>>> toAndResultIter = cacheEntry.getValue().tailSet(
+                    new Pair<TimePoint, Pair<FixType, Speed>>(invalidationInterval.getA(), null), /* inclusive */ true).iterator();
+                    toAndResultIter.hasNext(); ) {
+                Pair<TimePoint, Pair<FixType, Speed>> toAndResult = toAndResultIter.next();
+                // cacheEntry's from is before or in the invalidation interval; the current "to" in this loop iteration is in or after the interval
+                // and at or after "from"; in any case the record needs to be deleted:
+                toAndResultIter.remove();
+                // if the current "to" is at or after croppedFrom, check if the olf max fix is in the cropped interval; if so, request
+                // creation of a new cache entry:
+                final TimePoint maxFixTimePoint = toAndResult.getB().getA().getTimePoint();
+                if (!toAndResult.getA().before(croppedFrom) && !maxFixTimePoint.before(croppedFrom) && !maxFixTimePoint.after(toAndResult.getA())) {
+                    addEntryToMap(croppedFrom, toAndResult.getA(), toAndResult.getB(), result);
+                }
+            }
+        }
+        return result;
     }
 
     @Override
     public void speedAveragingChanged(long oldMillisecondsOverWhichToAverage, long newMillisecondsOverWhichToAverage) {
-        cache.clear();
+        LockUtil.lockForWrite(lock);
+        try {
+            cache.clear();
+        } finally {
+            LockUtil.unlockAfterWrite(lock);
+        }
     }
 
     public Pair<FixType, Speed> getMaxSpeed(TimePoint from, TimePoint to) {
-        Pair<FixType, Speed> result = computeMaxSpeed(from, to);
-        cache(from, to, result);
+        assert !from.after(to);
+        Pair<FixType, Speed> result;
+        result = cacheLookup(from, to);
+        if (result == null) {
+            result = computeMaxSpeed(from, to);
+            cache(from, to, result);
+        }
+        return result;
+    }
+
+    /**
+     * If a cache entry exists for "from" whose interval ends at or before <code>to</code>, use it and if necessary compute the
+     * maximum in the missing tail, producing another cache entry for both, the tail and the extended interval. Otherwise, <code>null</code>
+     * is returned.
+     */
+    private Pair<FixType, Speed> cacheLookup(TimePoint from, TimePoint to) {
+        Pair<FixType, Speed> result = null;
+        LockUtil.lockForRead(lock);
+        try {
+            NavigableSet<Pair<TimePoint, Pair<FixType, Speed>>> entry = cache.get(from);
+            if (entry != null) {
+                Pair<TimePoint, Pair<FixType, Speed>> entryForLongestSubseries = entry.floor(new Pair<TimePoint, Pair<FixType, Speed>>(to, null));
+                if (entryForLongestSubseries != null) {
+                    TimePoint entryTo = entryForLongestSubseries.getA();
+                    if (entryTo.before(to)) {
+                        Pair<FixType, Speed> maxInMissingTail = getMaxSpeed(entryTo, to);
+                        if (maxInMissingTail.getB().compareTo(entryForLongestSubseries.getB().getB()) > 0) {
+                            // the maximum speed is in the tail that was not part of the interval retrieved from the cache
+                            result = maxInMissingTail;
+                        } else {
+                            result = entryForLongestSubseries.getB(); // the interval from the cache also holds the maximum for the extended interval
+                        }
+                        cache(from, to, result); // produce new
+                    }
+                }
+            }
+        } finally {
+            LockUtil.unlockAfterRead(lock);
+        }
         return result;
     }
 
     private void cache(TimePoint from, TimePoint to, Pair<FixType, Speed> fixAtMaxSpeed) {
-        NavigableSet<Pair<TimePoint, Pair<FixType, Speed>>> setForFrom = cache.get(from);
+        LockUtil.lockForWrite(lock);
+        try {
+            addEntryToMap(from, to, fixAtMaxSpeed, cache);
+        } finally {
+            LockUtil.unlockAfterWrite(lock);
+        }
+    }
+
+    private void addEntryToMap(TimePoint from, TimePoint to, Pair<FixType, Speed> fixAtMaxSpeed,
+            Map<TimePoint, NavigableSet<Pair<TimePoint, Pair<FixType, Speed>>>> map) {
+        NavigableSet<Pair<TimePoint, Pair<FixType, Speed>>> setForFrom = map.get(from);
         if (setForFrom == null) {
-            setForFrom = new ArrayListNavigableSet<Pair<TimePoint, Pair<FixType, Speed>>>(new Comparator<Pair<TimePoint, Pair<FixType, Speed>>>() {
-                @Override
-                public int compare(Pair<TimePoint, Pair<FixType, Speed>> o1, Pair<TimePoint, Pair<FixType, Speed>> o2) {
-                    return o1.getA().compareTo(o2.getA());
-                }
-            });
-            cache.put(from, setForFrom);
+            setForFrom = new ArrayListNavigableSet<Pair<TimePoint, Pair<FixType, Speed>>>(
+                    new Comparator<Pair<TimePoint, Pair<FixType, Speed>>>() {
+                        @Override
+                        public int compare(Pair<TimePoint, Pair<FixType, Speed>> o1,
+                                Pair<TimePoint, Pair<FixType, Speed>> o2) {
+                            return o1.getA().compareTo(o2.getA());
+                        }
+                    });
+            map.put(from, setForFrom);
         }
         setForFrom.add(new Pair<TimePoint, Pair<FixType, Speed>>(to, fixAtMaxSpeed));
     }
