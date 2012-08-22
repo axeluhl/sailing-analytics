@@ -37,8 +37,9 @@ import com.sap.sailing.util.impl.ArrayListNavigableSet;
  * the cache {@link GPSTrackListener listens} for GPS fixes being added to the track. For the fix added, we'd like to
  * find the time interval within which a
  * {@link GPSFixTrackImpl#getFixesRelevantForSpeedEstimation(TimePoint, NavigableSet)} with a {@link TimePoint} from
- * that interval delivers the fix added in its result. All cached intervals will then be cropped to the remaining valid
- * interval if their maximum speed time point was in the remaining interval, or removed from the cache otherwise.
+ * that interval delivers the fix added in its result. All overlapping cached intervals will then be cropped to the
+ * remaining valid interval if their maximum speed time point was in the remaining interval, or removed from the cache
+ * otherwise.
  * 
  * @author Axel Uhl (d043530)
  * 
@@ -69,8 +70,9 @@ public class MaxSpeedCache<ItemType, FixType extends GPSFix> implements GPSTrack
      */
     @Override
     public void gpsFixReceived(FixType fix, ItemType item) {
-        // TODO Auto-generated method stub
-        
+        // TODO find the invalidation interval such that getFixesRelevantForSpeedEstimation, when passed any time point from that interval, produces "fix"
+        // TODO find all cache entries that overlap with this interval
+        // TODO if the max fix is outside of the invalidation interval, crop cache entry's interval such that it's overlap-free, otherwise remove
     }
 
     @Override
