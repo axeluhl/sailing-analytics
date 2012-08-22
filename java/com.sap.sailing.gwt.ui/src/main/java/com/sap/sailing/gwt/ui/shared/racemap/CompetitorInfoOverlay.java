@@ -53,7 +53,7 @@ public class CompetitorInfoOverlay extends CanvasOverlay {
 
     @Override
     protected Overlay copy() {
-        return new BoatCanvasOverlay(competitorDTO, raceMapImageManager);
+        return new CompetitorInfoOverlay(competitorDTO, raceMapImageManager);
     }
 
     @Override
@@ -97,7 +97,7 @@ public class CompetitorInfoOverlay extends CanvasOverlay {
             context2d.stroke(); 
 
             Point boatPositionInPx = getMap().convertLatLngToDivPixel(latLngPosition);
-            getPane().setWidgetPosition(getCanvas(), boatPositionInPx.getX() - 10, boatPositionInPx.getY() - canvasHeight);
+            getPane().setWidgetPosition(getCanvas(), boatPositionInPx.getX(), boatPositionInPx.getY() - canvasHeight);
         }
     }
     
