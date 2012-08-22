@@ -55,6 +55,9 @@ public class MaxSpeedCache<ItemType, FixType extends GPSFix> implements GPSTrack
                 Position lastPos = track.getEstimatedPosition(from, false);
                 while (iter.hasNext()) {
                     FixType fix = iter.next();
+                    if (fix.getTimePoint().after(to)) {
+                        break;
+                    }
                     Speed fixSpeed = track.getSpeed(fix, lastPos, from);
                     if (fixSpeed.compareTo(max) > 0) {
                         max = fixSpeed;

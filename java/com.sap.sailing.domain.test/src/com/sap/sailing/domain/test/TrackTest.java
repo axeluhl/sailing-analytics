@@ -92,7 +92,21 @@ public class TrackTest {
         track.addGPSFix(gpsFix4);
         track.addGPSFix(gpsFix5);
     }
-    
+
+    @Test
+    public void testMaxSpeedForNonMovingTrackWithUpperTimeLimit() {
+        DynamicGPSFixTrack<Object, GPSFix> track = new DynamicGPSFixTrackImpl<Object>(new Object(), /* millisecondsOverWhichToAverage */ 30000l);
+        GPSFix fix1 = new GPSFixImpl(new DegreePosition(0, 0), new MillisecondsTimePoint(0));
+        track.addGPSFix(fix1);
+        GPSFix fix2 = new GPSFixImpl(new DegreePosition(1./60., 0), new MillisecondsTimePoint(3600000)); // 1nm in one hour = 1kt
+        track.addGPSFix(fix2);
+        GPSFix fix3 = new GPSFixImpl(new DegreePosition(3./60., 0), new MillisecondsTimePoint(7200000)); // 2nm in one hour = 2kts
+        track.addGPSFix(fix3);
+        GPSFix fix4 = new GPSFixImpl(new DegreePosition(4./60., 0), new MillisecondsTimePoint(10800000)); // 1nm in one hour = 1kt
+        track.addGPSFix(fix4);
+        assertEquals(1., track.getMaximumSpeedOverGround(new MillisecondsTimePoint(0), new MillisecondsTimePoint(3600000)).getKnots(), 0.001);
+    }
+
     @Test
     public void testMaxSpeedForNonMovingTrack() {
         DynamicGPSFixTrack<Object, GPSFix> track = new DynamicGPSFixTrackImpl<Object>(new Object(), /* millisecondsOverWhichToAverage */ 30000l);
@@ -104,7 +118,7 @@ public class TrackTest {
         track.addGPSFix(fix3);
         GPSFix fix4 = new GPSFixImpl(new DegreePosition(4./60., 0), new MillisecondsTimePoint(10800000)); // 1nm in one hour = 1kt
         track.addGPSFix(fix4);
-        assertEquals(2., track.getMaximumSpeedOverGround(new MillisecondsTimePoint(0), new MillisecondsTimePoint(10800)).getKnots(), 0.001);
+        assertEquals(2., track.getMaximumSpeedOverGround(new MillisecondsTimePoint(0), new MillisecondsTimePoint(10800000)).getKnots(), 0.001);
     }
     
     /**
