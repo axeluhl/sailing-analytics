@@ -6,7 +6,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.NavigableSet;
 
-import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util.Pair;
@@ -86,18 +85,15 @@ public class MaxSpeedCache<ItemType, FixType extends GPSFix> implements GPSTrack
             Iterator<FixType> iter = track.getFixesIterator(from, /* inclusive */ true);
             Speed max = Speed.NULL;
             if (iter.hasNext()) {
-                Position lastPos = track.getEstimatedPosition(from, false);
                 while (iter.hasNext()) {
                     FixType fix = iter.next();
                     if (fix.getTimePoint().after(to)) {
                         break;
                     }
-                    Speed fixSpeed = track.getSpeed(fix, lastPos, from);
-                    if (fixSpeed.compareTo(max) > 0) {
-                        max = fixSpeed;
+                    Speed averagedSpeedAtFixTime = track.getEstimatedSpeed(fix.getTimePoint());
+                    if (averagedSpeedAtFixTime.compareTo(max) > 0) {
+                        max = averagedSpeedAtFixTime;
                     }
-                    lastPos = fix.getPosition();
-                    from = fix.getTimePoint();
                 }
             }
             return max;

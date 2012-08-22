@@ -62,6 +62,7 @@ public class DynamicGPSFixMovingTrackImpl<ItemType> extends DynamicTrackImpl<Ite
             if (!relevantFixes.isEmpty()) {
                 Iterator<GPSFixMoving> fixIter = relevantFixes.iterator();
                 GPSFixMoving last = fixIter.next();
+                // add fix's own speed/bearing; this also works if only one "relevant" fix is found
                 SpeedWithConfidenceImpl<TimePoint> speedWithConfidence = new SpeedWithConfidenceImpl<TimePoint>(
                         last.getSpeed(),
                         /* original confidence */0.9, last.getTimePoint());

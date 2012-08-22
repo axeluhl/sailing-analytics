@@ -231,7 +231,7 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
     public Pair<TimePoint, TimePoint> getEstimatedPositionTimePeriodAffectedBy(GPSFix fix) {
         lockForRead();
         try {
-            Pair<FixType, FixType> fixesForPositionEstimation = getFixesForPositionEstimation(fix.getTimePoint(), /* inclusive */ false);
+            Pair<FixType, FixType> fixesForPositionEstimation = getFixesForPositionEstimation(fix.getTimePoint(), /* inclusive */ true);
             return new Pair<TimePoint, TimePoint>(fixesForPositionEstimation.getA() == null ? fix.getTimePoint()
                     : fixesForPositionEstimation.getA().getTimePoint(),
                     fixesForPositionEstimation.getB() == null ? fix.getTimePoint() : fixesForPositionEstimation.getB().getTimePoint());
@@ -557,6 +557,12 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
                 relativeTo));
     }
 
+    /**
+     * A track that doesn't have {@link GPSFixMoving} fixes and therefore needs to compute the speed using the fix time
+     * and position differences needs at least two fixes to compute a result. If only one fix is found within the
+     * {@link #getMillisecondsOverWhichToAverage() averaging interval}, the closest existing fix later or earlier than
+     * <code>at</code> is used.
+     */
     private List<GPSFix> getFixesRelevantForSpeedEstimation(TimePoint at,
             NavigableSet<GPSFix> fixesToUseForSpeedEstimation) {
         lockForRead();
@@ -565,17 +571,55 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
             List<GPSFix> relevantFixes = new LinkedList<GPSFix>();
             NavigableSet<GPSFix> beforeSet = fixesToUseForSpeedEstimation.headSet(atTimed, /* inclusive */false);
             NavigableSet<GPSFix> afterSet = fixesToUseForSpeedEstimation.tailSet(atTimed, /* inclusive */true);
-            for (GPSFix beforeFix : beforeSet.descendingSet()) {
-                if (at.asMillis() - beforeFix.getTimePoint().asMillis() > getMillisecondsOverWhichToAverage() / 2) {
-                    break;
-                }
+            GPSFix beforeFix = null;
+            Iterator<GPSFix> beforeFixIter = beforeSet.descendingIterator();
+            while (beforeFixIter.hasNext() &&
+                    at.asMillis() - (beforeFix=beforeFixIter.next()).getTimePoint().asMillis() < getMillisecondsOverWhichToAverage() / 2) {
                 relevantFixes.add(0, beforeFix);
             }
-            for (GPSFix afterFix : afterSet) {
-                if (afterFix.getTimePoint().asMillis() - at.asMillis() > getMillisecondsOverWhichToAverage() / 2) {
-                    break;
-                }
+            GPSFix afterFix = null;
+            Iterator<GPSFix> afterFixIter = afterSet.iterator();
+            while (afterFixIter.hasNext() &&
+                    (afterFix=afterFixIter.next()).getTimePoint().asMillis() - at.asMillis() < getMillisecondsOverWhichToAverage() / 2) {
                 relevantFixes.add(afterFix);
+            }
+            // now fill up relevantFixes until we have at least two fixes or we run out of fixes entirely (can't estimate speed
+            // with this type of fix on a track with less than two fixes)
+            while (relevantFixes.size() < 2 && (beforeFix != null || afterFix != null)) {
+                if (afterFix == null) {
+                    if (beforeFix != null) {
+                        relevantFixes.add(0, beforeFix); // add the last beforeFix to have at least two fixes, although outside of averaging interval
+                        if (beforeFixIter.hasNext()) {
+                            beforeFix = beforeFixIter.next();
+                        } else {
+                            beforeFix = null;
+                        }
+                    }
+                } else if (beforeFix == null) {
+                    relevantFixes.add(afterFix);
+                    if (afterFixIter.hasNext()) {
+                        afterFix = afterFixIter.next();
+                    } else {
+                        afterFix = null;
+                    }
+                } else {
+                    // both, beforeFix and afterFix are available; choose the one closest to "at"
+                    if (afterFix.getTimePoint().asMillis()-at.asMillis() < beforeFix.getTimePoint().asMillis()-at.asMillis()) {
+                        relevantFixes.add(afterFix);
+                        if (afterFixIter.hasNext()) {
+                            afterFix = afterFixIter.next();
+                        } else {
+                            afterFix = null;
+                        }
+                    } else {
+                        relevantFixes.add(0, beforeFix);
+                        if (beforeFixIter.hasNext()) {
+                            beforeFix = beforeFixIter.next();
+                        } else {
+                            beforeFix = null;
+                        }
+                    }
+                }
             }
             return relevantFixes;
         } finally {
