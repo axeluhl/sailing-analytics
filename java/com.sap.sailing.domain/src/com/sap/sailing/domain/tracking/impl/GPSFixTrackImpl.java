@@ -292,6 +292,9 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
         return maxSpeedCache.getMaxSpeed(from, to);
     }
 
+    /**
+     * TODO Should some averaging take place, maybe based on {@link #millisecondsOverWhichToAverage}?
+     */
     protected Speed getSpeed(FixType fix, Position lastPos, TimePoint timePointOfLastPos) {
         lockForRead();
         try {
@@ -523,16 +526,7 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
                 while (fixIter.hasNext()) {
                     // TODO bug #346: consider time difference between next.getTimepoint() and at to compute a confidence
                     GPSFix next = fixIter.next();
-                    // TODO bug #345: use SpeedWithConfidence to aggregate confidence-tagged speed values
-                    MillisecondsTimePoint relativeTo = new MillisecondsTimePoint((last.getTimePoint().asMillis() + next.getTimePoint().asMillis())/2);
-                    Speed speed = last.getPosition().getDistance(next.getPosition())
-                            .inTime(next.getTimePoint().asMillis() - last.getTimePoint().asMillis());
-                    SpeedWithConfidenceImpl<TimePoint> speedWithConfidence = new SpeedWithConfidenceImpl<TimePoint>(speed, /* original confidence */
-                            0.9, relativeTo);
-                    speeds.add(speedWithConfidence);
-                    bearingCluster.add(new BearingWithConfidenceImpl<TimePoint>(last.getPosition().getBearingGreatCircle(next.getPosition()),
-                            /* confidence */ 0.9, // TODO use number of tracked satellites to determine confidence of single fix
-                            relativeTo));
+                    aggregateSpeedAndBearingFromLastToNext(speeds, bearingCluster, last, next);
                     last = next;
                 }
             }
@@ -548,6 +542,19 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
         } finally {
             unlockAfterRead();
         }
+    }
+
+    protected void aggregateSpeedAndBearingFromLastToNext(List<SpeedWithConfidence<TimePoint>> speeds,
+            BearingWithConfidenceCluster<TimePoint> bearingCluster, GPSFix last, GPSFix next) {
+        MillisecondsTimePoint relativeTo = new MillisecondsTimePoint((last.getTimePoint().asMillis() + next.getTimePoint().asMillis())/2);
+        Speed speed = last.getPosition().getDistance(next.getPosition())
+                .inTime(next.getTimePoint().asMillis() - last.getTimePoint().asMillis());
+        SpeedWithConfidenceImpl<TimePoint> speedWithConfidence = new SpeedWithConfidenceImpl<TimePoint>(speed, /* original confidence */
+                0.9, relativeTo);
+        speeds.add(speedWithConfidence);
+        bearingCluster.add(new BearingWithConfidenceImpl<TimePoint>(last.getPosition().getBearingGreatCircle(next.getPosition()),
+                /* confidence */ 0.9, // TODO use number of tracked satellites to determine confidence of single fix
+                relativeTo));
     }
 
     private List<GPSFix> getFixesRelevantForSpeedEstimation(TimePoint at,

@@ -12,7 +12,6 @@ import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
 import com.sap.sailing.domain.base.SpeedWithConfidence;
 import com.sap.sailing.domain.base.impl.BearingWithConfidenceImpl;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
-import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.base.impl.SpeedWithBearingWithConfidenceImpl;
 import com.sap.sailing.domain.base.impl.SpeedWithConfidenceImpl;
 import com.sap.sailing.domain.common.Bearing;
@@ -72,18 +71,7 @@ public class DynamicGPSFixMovingTrackImpl<ItemType> extends DynamicTrackImpl<Ite
                 while (fixIter.hasNext()) {
                     // add to average the position and time difference
                     GPSFixMoving next = fixIter.next();
-                    SpeedWithConfidenceImpl<TimePoint> measuredSpeedWithConfidence = new SpeedWithConfidenceImpl<TimePoint>(
-                            last.getPosition().getDistance(next.getPosition())
-                                    .inTime(next.getTimePoint().asMillis() - last.getTimePoint().asMillis()),
-                            /* original confidence */0.9, new MillisecondsTimePoint(
-                                    (last.getTimePoint().asMillis() + next.getTimePoint().asMillis()) / 2));
-                    speeds.add(measuredSpeedWithConfidence);
-                    bearingCluster.add(new BearingWithConfidenceImpl<TimePoint>(last.getPosition()
-                            .getBearingGreatCircle(next.getPosition()),
-                    /* confidence */weigher.getConfidence(last.getTimePoint(), next.getTimePoint()),
-                            new MillisecondsTimePoint(
-                                    (last.getTimePoint().asMillis() + next.getTimePoint().asMillis()) / 2)));
-
+                    aggregateSpeedAndBearingFromLastToNext(speeds, bearingCluster, last, next);
                     // add to average the speed and bearing provided by the GPSFixMoving
                     SpeedWithConfidenceImpl<TimePoint> computedSpeedWithConfidence = new SpeedWithConfidenceImpl<TimePoint>(
                             next.getSpeed(), /* original confidence */0.9, next.getTimePoint());

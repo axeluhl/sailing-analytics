@@ -1,13 +1,19 @@
 package com.sap.sailing.domain.tracking.impl;
 
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.NavigableSet;
 
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.GPSTrackListener;
+import com.sap.sailing.util.impl.ArrayListNavigableSet;
 
 /**
  * Re-calculating the maximum speed over a {@link GPSFixTrack} is time consuming. When the track grows the way it
@@ -27,9 +33,19 @@ public class MaxSpeedCache<ItemType, FixType extends GPSFix> implements GPSTrack
     
     private final GPSFixTrackImpl<ItemType, FixType> track;
     
+    /**
+     * Keys are the "from" time points as passed to {@link #getMaxSpeed(TimePoint, TimePoint)}. Values are navigable
+     * sets of pairs whose {@link Pair#getA() a} component is the "to" parameter as passed to
+     * {@link #getMaxSpeed(TimePoint, TimePoint)}, and whose {@link Pair#getB() b} component is the maximum speed for
+     * that interval. The navigable set is ordered according to ascending <code>to</code> time points, yielding
+     * shorter cache intervals before longer intervals.
+     */
+    private final Map<TimePoint, NavigableSet<Pair<TimePoint, Speed>>> cache;
+    
     public MaxSpeedCache(GPSFixTrackImpl<ItemType, FixType> track) {
         this.track = track;
         track.addListener(this);
+        cache = new HashMap<TimePoint, NavigableSet<Pair<TimePoint,Speed>>>();
     }
 
     @Override
@@ -40,14 +56,32 @@ public class MaxSpeedCache<ItemType, FixType extends GPSFix> implements GPSTrack
 
     @Override
     public void speedAveragingChanged(long oldMillisecondsOverWhichToAverage, long newMillisecondsOverWhichToAverage) {
-        // TODO Auto-generated method stub
-        
+        cache.clear();
     }
 
     public Speed getMaxSpeed(TimePoint from, TimePoint to) {
+        Speed result = computeMaxSpeed(from, to);
+        cache(from, to, result);
+        return result;
+    }
+
+    private void cache(TimePoint from, TimePoint to, Speed maxSpeed) {
+        NavigableSet<Pair<TimePoint, Speed>> setForFrom = cache.get(from);
+        if (setForFrom == null) {
+            setForFrom = new ArrayListNavigableSet<Pair<TimePoint, Speed>>(new Comparator<Pair<TimePoint, Speed>>() {
+                @Override
+                public int compare(Pair<TimePoint, Speed> o1, Pair<TimePoint, Speed> o2) {
+                    return o1.getA().compareTo(o2.getA());
+                }
+            });
+            cache.put(from, setForFrom);
+        }
+        setForFrom.add(new Pair<TimePoint, Speed>(to, maxSpeed));
+    }
+    
+    protected Speed computeMaxSpeed(TimePoint from, TimePoint to) {
         track.lockForRead();
         try {
-            // TODO implement a smart cache for max SOG
             // fetch all fixes on this leg so far and determine their maximum speed
             Iterator<FixType> iter = track.getFixesIterator(from, /* inclusive */ true);
             Speed max = Speed.NULL;
