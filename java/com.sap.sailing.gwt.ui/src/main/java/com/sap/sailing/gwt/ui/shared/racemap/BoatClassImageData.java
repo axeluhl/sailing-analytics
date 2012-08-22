@@ -58,6 +58,7 @@ public class BoatClassImageData {
 	}
 
 	public BoatClassImageData(String mainBoatClassName, double boatClassLengthInMeter, int boatClassImageLengthInPx, int imageWidthInPx, int imageHeightInPx, String... aliasBoatClassNames ) {
+		this(mainBoatClassName, boatClassLengthInMeter, boatClassImageLengthInPx, imageWidthInPx, imageHeightInPx);
 		this.aliasBoatClassNames = aliasBoatClassNames;
 	}
 	
