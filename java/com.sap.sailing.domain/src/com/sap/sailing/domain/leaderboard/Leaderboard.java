@@ -15,6 +15,7 @@ import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
 /**
@@ -274,9 +275,9 @@ public interface Leaderboard extends Named {
     /**
      * @return <code>null</code> if no tracked race is available for <code>competitor</code> in this leaderboard
      * or the competitor hasn't started sailing a single race at <code>timePoint</code> for any of the tracked
-     * races attached to this leaderboard
+     * races attached to this leaderboard; the fix where the maximum speed was achieved, and the speed value
      */
-    Speed getMaximumSpeedOverGround(Competitor competitor, TimePoint timePoint);
+    Pair<GPSFixMoving, Speed> getMaximumSpeedOverGround(Competitor competitor, TimePoint timePoint);
 
     /**
      * @param legType TODO

@@ -34,8 +34,11 @@ import com.sap.sailing.util.impl.ArrayListNavigableSet;
  * <p>
  * 
  * When a new GPS fix is recorded for the track for which this is a max-speed cache, invalidation takes place. For this,
- * the cache {@link GPSTrackListener listens} for GPS fixes being added to the track. For the fix added, we'd like to find
- * the time interval within which a {@link 
+ * the cache {@link GPSTrackListener listens} for GPS fixes being added to the track. For the fix added, we'd like to
+ * find the time interval within which a
+ * {@link GPSFixTrackImpl#getFixesRelevantForSpeedEstimation(TimePoint, NavigableSet)} with a {@link TimePoint} from
+ * that interval delivers the fix added in its result. All cached intervals will then be cropped to the remaining valid
+ * interval if their maximum speed time point was in the remaining interval, or removed from the cache otherwise.
  * 
  * @author Axel Uhl (d043530)
  * 
@@ -48,16 +51,17 @@ public class MaxSpeedCache<ItemType, FixType extends GPSFix> implements GPSTrack
     /**
      * Keys are the "from" time points as passed to {@link #getMaxSpeed(TimePoint, TimePoint)}. Values are navigable
      * sets of pairs whose {@link Pair#getA() a} component is the "to" parameter as passed to
-     * {@link #getMaxSpeed(TimePoint, TimePoint)}, and whose {@link Pair#getB() b} component is the maximum speed for
-     * that interval. The navigable set is ordered according to ascending <code>to</code> time points, yielding
-     * shorter cache intervals before longer intervals.
+     * {@link #getMaxSpeed(TimePoint, TimePoint)}, and whose {@link Pair#getB() b} component is the track's fix where
+     * the averaged maximum speed for that interval was achieved together with the averaged speed at that point. The
+     * navigable set is ordered according to ascending <code>to</code> time points, yielding shorter cache intervals
+     * before longer intervals.
      */
-    private final Map<TimePoint, NavigableSet<Pair<TimePoint, Speed>>> cache;
+    private final Map<TimePoint, NavigableSet<Pair<TimePoint, Pair<FixType, Speed>>>> cache;
     
     public MaxSpeedCache(GPSFixTrackImpl<ItemType, FixType> track) {
         this.track = track;
         track.addListener(this);
-        cache = new HashMap<TimePoint, NavigableSet<Pair<TimePoint,Speed>>>();
+        cache = new HashMap<TimePoint, NavigableSet<Pair<TimePoint, Pair<FixType, Speed>>>>();
     }
 
     /**
@@ -74,32 +78,33 @@ public class MaxSpeedCache<ItemType, FixType extends GPSFix> implements GPSTrack
         cache.clear();
     }
 
-    public Speed getMaxSpeed(TimePoint from, TimePoint to) {
-        Speed result = computeMaxSpeed(from, to);
+    public Pair<FixType, Speed> getMaxSpeed(TimePoint from, TimePoint to) {
+        Pair<FixType, Speed> result = computeMaxSpeed(from, to);
         cache(from, to, result);
         return result;
     }
 
-    private void cache(TimePoint from, TimePoint to, Speed maxSpeed) {
-        NavigableSet<Pair<TimePoint, Speed>> setForFrom = cache.get(from);
+    private void cache(TimePoint from, TimePoint to, Pair<FixType, Speed> fixAtMaxSpeed) {
+        NavigableSet<Pair<TimePoint, Pair<FixType, Speed>>> setForFrom = cache.get(from);
         if (setForFrom == null) {
-            setForFrom = new ArrayListNavigableSet<Pair<TimePoint, Speed>>(new Comparator<Pair<TimePoint, Speed>>() {
+            setForFrom = new ArrayListNavigableSet<Pair<TimePoint, Pair<FixType, Speed>>>(new Comparator<Pair<TimePoint, Pair<FixType, Speed>>>() {
                 @Override
-                public int compare(Pair<TimePoint, Speed> o1, Pair<TimePoint, Speed> o2) {
+                public int compare(Pair<TimePoint, Pair<FixType, Speed>> o1, Pair<TimePoint, Pair<FixType, Speed>> o2) {
                     return o1.getA().compareTo(o2.getA());
                 }
             });
             cache.put(from, setForFrom);
         }
-        setForFrom.add(new Pair<TimePoint, Speed>(to, maxSpeed));
+        setForFrom.add(new Pair<TimePoint, Pair<FixType, Speed>>(to, fixAtMaxSpeed));
     }
     
-    protected Speed computeMaxSpeed(TimePoint from, TimePoint to) {
+    protected Pair<FixType, Speed> computeMaxSpeed(TimePoint from, TimePoint to) {
         track.lockForRead();
         try {
             // fetch all fixes on this leg so far and determine their maximum speed
             Iterator<FixType> iter = track.getFixesIterator(from, /* inclusive */ true);
             Speed max = Speed.NULL;
+            FixType maxSpeedFix = null;
             if (iter.hasNext()) {
                 while (iter.hasNext()) {
                     FixType fix = iter.next();
@@ -109,10 +114,11 @@ public class MaxSpeedCache<ItemType, FixType extends GPSFix> implements GPSTrack
                     Speed averagedSpeedAtFixTime = track.getEstimatedSpeed(fix.getTimePoint());
                     if (averagedSpeedAtFixTime.compareTo(max) > 0) {
                         max = averagedSpeedAtFixTime;
+                        maxSpeedFix = fix;
                     }
                 }
             }
-            return max;
+            return new Pair<FixType, Speed>(maxSpeedFix, max);
         } finally {
             track.unlockAfterRead();
         }

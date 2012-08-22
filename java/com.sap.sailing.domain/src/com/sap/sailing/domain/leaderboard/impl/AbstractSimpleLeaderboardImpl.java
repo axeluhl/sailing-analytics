@@ -27,6 +27,7 @@ import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.ScoreCorrection.Result;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
+import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -481,8 +482,8 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     }
 
     @Override
-    public Speed getMaximumSpeedOverGround(Competitor competitor, TimePoint timePoint) {
-        Speed result = null;
+    public Pair<GPSFixMoving, Speed> getMaximumSpeedOverGround(Competitor competitor, TimePoint timePoint) {
+        Pair<GPSFixMoving, Speed> result = null;
         for (TrackedRace trackedRace : getTrackedRaces()) {
             if (Util.contains(trackedRace.getRace().getCompetitors(), competitor)) {
                 NavigableSet<MarkPassing> markPassings = trackedRace.getMarkPassings(competitor);
@@ -497,8 +498,8 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                         to = timePoint;
                     }
                     // TODO find out in which leg the maximum speed was achieved
-                    Speed maxSpeed = trackedRace.getTrack(competitor).getMaximumSpeedOverGround(from, to);
-                    if (result == null || maxSpeed.compareTo(result) > 0) {
+                    Pair<GPSFixMoving, Speed> maxSpeed = trackedRace.getTrack(competitor).getMaximumSpeedOverGround(from, to);
+                    if (result == null || result.getB() == null || (maxSpeed.getB() != null && maxSpeed.getB().compareTo(result.getB()) > 0)) {
                         result = maxSpeed;
                     }
                 }

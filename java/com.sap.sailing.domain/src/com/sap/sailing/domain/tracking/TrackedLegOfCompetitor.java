@@ -12,6 +12,7 @@ import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.Util.Pair;
 
 public interface TrackedLegOfCompetitor extends Serializable {
     Leg getLeg();
@@ -68,9 +69,10 @@ public interface TrackedLegOfCompetitor extends Serializable {
     Speed getAverageSpeedOverGround(TimePoint timePoint);
 
     /**
-     * @return <code>null</code> if the competitor hasn't started this leg yet
+     * @return <code>null</code> if the competitor hasn't started this leg yet, otherwise the fix where the maximum speed was
+     * achieved and the speed value
      */
-    Speed getMaximumSpeedOverGround(TimePoint timePoint);
+    Pair<GPSFixMoving, Speed> getMaximumSpeedOverGround(TimePoint timePoint);
 
     /**
      * Infers the maneuvers of the competitor up to <code>timePoint</code> on this leg. If the competitor hasn't started

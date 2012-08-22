@@ -288,7 +288,7 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
     }
 
     @Override
-    public Speed getMaximumSpeedOverGround(TimePoint from, TimePoint to) {
+    public Pair<FixType, Speed> getMaximumSpeedOverGround(TimePoint from, TimePoint to) {
         return maxSpeedCache.getMaxSpeed(from, to);
     }
 

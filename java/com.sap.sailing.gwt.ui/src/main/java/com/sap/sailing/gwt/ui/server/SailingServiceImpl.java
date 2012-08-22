@@ -492,7 +492,11 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 row.competitor = competitorDTO;
                 row.fieldsByRaceColumnName = new HashMap<String, LeaderboardEntryDTO>();
                 row.carriedPoints = leaderboard.hasCarriedPoints(competitor) ? leaderboard.getCarriedPoints(competitor) : null;
-                row.maximumSpeedOverGroundInKnots = leaderboard.getMaximumSpeedOverGround(competitor, timePoint).getKnots();
+                Pair<GPSFixMoving, Speed> maxSpeed = leaderboard.getMaximumSpeedOverGround(competitor, timePoint);
+                // TODO consider pushing the GPSFix where max speed was achieved to the client
+                if (maxSpeed != null && maxSpeed.getB() != null) {
+                    row.maximumSpeedOverGroundInKnots = leaderboard.getMaximumSpeedOverGround(competitor, timePoint).getB().getKnots();
+                }
                 final Long totalTimeSailedDownwindInMilliseconds = leaderboard.getTotalTimeSailedInLegTypeInMilliseconds(competitor, LegType.DOWNWIND, timePoint);
                 row.totalTimeSailedDownwindInSeconds = totalTimeSailedDownwindInMilliseconds==null?null:1./1000.*totalTimeSailedDownwindInMilliseconds;
                 final Long totalTimeSailedInMilliseconds = leaderboard.getTotalTimeSailedInMilliseconds(competitor, timePoint);
