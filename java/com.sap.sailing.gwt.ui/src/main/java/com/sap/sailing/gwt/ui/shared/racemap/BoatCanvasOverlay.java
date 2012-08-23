@@ -5,6 +5,7 @@ import com.google.gwt.maps.client.geom.LatLngBounds;
 import com.google.gwt.maps.client.geom.Point;
 import com.google.gwt.maps.client.geom.Size;
 import com.google.gwt.maps.client.overlay.Overlay;
+import com.sap.sailing.gwt.ui.shared.BoatClassDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 
@@ -19,37 +20,57 @@ public class BoatCanvasOverlay extends CanvasOverlay {
      */
     private final CompetitorDTO competitorDTO;
 
+    /** 
+     * The boat class
+     */
+    private final BoatClassDTO boatClass;
+    
     /**
      * The current GPS fix used to draw the boat.
      */
     private GPSFixDTO boatFix;
 
-    private final RaceMapImageManager raceMapImageManager;
+    /** 
+     * The rotation angle of the original boat image in degrees
+     */
+    private static double ORIGINAL_BOAT_IMAGE_ROTATIION_ANGLE = 90.0;
 
-    public BoatCanvasOverlay(CompetitorDTO competitorDTO, RaceMapImageManager raceMapImageManager) {
+    private final BoatClassImageData boatClassImageData;    
+
+    public BoatCanvasOverlay(CompetitorDTO competitorDTO) {
         super();
         this.competitorDTO = competitorDTO;
-        this.raceMapImageManager = raceMapImageManager;
+        this.boatClass = competitorDTO.boatClass;
+        this.boatClassImageData = BoatClassImageDataResolver.getBoatClassImages(boatClass.name);
     }
 
     @Override
     protected Overlay copy() {
-        return new BoatCanvasOverlay(competitorDTO, raceMapImageManager);
+        return new BoatCanvasOverlay(competitorDTO);
     }
 
     @Override
     protected void redraw(boolean force) {
         if (boatFix != null) {
-            ImageTransformer boatImageTransformer = raceMapImageManager.getBoatImageTransformer(boatFix, isSelected());
+        	ImageTransformer boatImageTransformer; 
+        	if(boatFix.legType != null) {
+                boatImageTransformer = boatClassImageData.getBoatImageTransformerByLegTypeAndTack(boatFix.legType, boatFix.tack, isSelected());
+        	} else {
+        		boatImageTransformer = boatClassImageData.getBoatImageTransformerByTack(boatFix.tack, isSelected());
+        	}
             double realBoatSizeScaleFactor = getRealBoatSizeScaleFactor(boatImageTransformer.getImageSize());
-            boatImageTransformer.drawToCanvas(getCanvas(), boatFix.speedWithBearing.bearingInDegrees, realBoatSizeScaleFactor);
+        	double boatDrawingAngle = boatFix.speedWithBearing.bearingInDegrees - ORIGINAL_BOAT_IMAGE_ROTATIION_ANGLE;
+        	if(boatDrawingAngle < 0) {
+        		boatDrawingAngle += 360;
+        	}
+            boatImageTransformer.drawToCanvas(getCanvas(), boatDrawingAngle, realBoatSizeScaleFactor);
             LatLng latLngPosition = LatLng.newInstance(boatFix.position.latDeg, boatFix.position.lngDeg);
             Point boatPositionInPx = getMap().convertLatLngToDivPixel(latLngPosition);
             getPane().setWidgetPosition(getCanvas(), boatPositionInPx.getX() - getCanvas().getCoordinateSpaceWidth() / 2, boatPositionInPx.getY()
                     - getCanvas().getCoordinateSpaceHeight() / 2);
         }
     }
-
+    
     public GPSFixDTO getBoatFix() {
         return boatFix;
     }
@@ -64,7 +85,7 @@ public class BoatCanvasOverlay extends CanvasOverlay {
         double minScaleFactor = 0.45;
         double maxScaleFactor = 2.0;
         double realBoatSizeScaleFactor = minScaleFactor;
-        double hullLengthInMeters = competitorDTO.boatClass.getHullLengthInMeters();
+        double hullLengthInMeters = boatClass.getHullLengthInMeters();
         // to scale the boats to a realistic size we need the length of the boat in pixel, 
         // but it does not work to just take the image size, because the images for the different boat states can be different
         int boatLengthInPixel = 50;
