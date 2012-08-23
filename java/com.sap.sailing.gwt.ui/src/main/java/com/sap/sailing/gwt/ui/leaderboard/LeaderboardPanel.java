@@ -141,6 +141,8 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     private final List<DetailType> selectedRaceDetails;
 
     private final List<DetailType> selectedOverallDetails;
+    
+    private final Map<DetailType, SortableColumn<LeaderboardRowDTO, ?>> overallDetailColumnMap;
 
     private Map<String, RaceColumnDTO> selectedRaceColumnsByName;
 
@@ -1019,7 +1021,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         this.selectedOverallDetails = new ArrayList<DetailType>();
         this.selectedRaceColumnsByName = new HashMap<String, RaceColumnDTO>();
         this.selectedManeuverDetails = new ArrayList<DetailType>();
-
+        overallDetailColumnMap = createOverallDetailColumnMap();
         settingsUpdatedExplicitly = !settings.updateUponPlayStateChange();
         selectedLegDetails.addAll(settings.getLegDetailsToShow());
         selectedManeuverDetails.addAll(settings.getManeuverDetailsToShow());
@@ -1134,6 +1136,17 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         contentPanel.add(getLeaderboardTable());
         setWidget(contentPanel);
         raceNameForDefaultSorting = settings.getNameOfRaceToSort();
+    }
+
+    private Map<DetailType, SortableColumn<LeaderboardRowDTO, ?>> createOverallDetailColumnMap() {
+        Map<DetailType, SortableColumn<LeaderboardRowDTO, ?>> result = new HashMap<DetailType, SortableColumn<LeaderboardRowDTO, ?>>();
+        result.put(DetailType.MAXIMUM_SPEED_OVER_GROUND_IN_KNOTS, new MaxSpeedOverallColumn(stringMessages,
+                RACE_COLUMN_HEADER_STYLE, RACE_COLUMN_STYLE));
+        result.put(DetailType.TOTAL_TIME_SAILED_DOWNWIND_IN_SECONDS, new KingOfTheDownwindColumn(stringMessages,
+                RACE_COLUMN_HEADER_STYLE, RACE_COLUMN_STYLE));
+        result.put(DetailType.TOTAL_TIME_SAILED_IN_SECONDS, new TotalTimeSailedColumn(stringMessages,
+                RACE_COLUMN_HEADER_STYLE, RACE_COLUMN_STYLE));
+        return result;
     }
 
     /**
@@ -1554,12 +1567,45 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     private void adjustColumnLayout(LeaderboardDTO leaderboard) {
         ensureRankColumn();
         ensureSailIDAndCompetitorColumn();
-        updateCarryColumn(leaderboard);
+        boolean hasCarryColumn = updateCarryColumn(leaderboard);
+        adjustOverallDetailColumns(leaderboard, hasCarryColumn?CARRY_COLUMN_INDEX+1:CARRY_COLUMN_INDEX);
         // first remove race columns no longer needed:
         removeUnusedRaceColumns(leaderboard);
         if (leaderboard != null) {
             createMissingAndAdjustExistingRaceColumns(leaderboard);
             ensureTotalsColumn();
+        }
+    }
+
+    /**
+     * Ensures that the columns requested by {@link #selectedOverallDetails} are in the table. Assumes that if there are
+     * any existing overall details columns, they start at <code>indexOfFirstOverallDetailsColumn</code> and are in the order
+     * defined by {@link #getAvailableOverallDetailColumnTypes()}.
+     * 
+     * @param indexOfFirstOverallDetailsColumn
+     *            tells the column index for the first overall details column
+     */
+    private void adjustOverallDetailColumns(LeaderboardDTO leaderboard, int indexOfFirstOverallDetailsColumn) {
+        List<SortableColumn<LeaderboardRowDTO, ?>> overallDetailColumnsToShow = new ArrayList<SortableColumn<LeaderboardRowDTO,?>>();
+        for (DetailType overallDetailType : selectedOverallDetails) {
+            overallDetailColumnsToShow.add(overallDetailColumnMap.get(overallDetailType));
+        }
+        int currentColumnIndex = indexOfFirstOverallDetailsColumn;
+        int i = 0; // index into overallDetailColumnToShow
+        while (i<overallDetailColumnsToShow.size()) {
+            Column<LeaderboardRowDTO, ?> column = getLeaderboardTable().getColumn(currentColumnIndex);
+            if (overallDetailColumnMap.values().contains(column) && !overallDetailColumnsToShow.contains(column)) {
+                // it's an overall details column that is not currently selected; remove it from the table:
+                removeColumn(currentColumnIndex);
+            } else {
+                if (overallDetailColumnsToShow.get(i) != column) {
+                    // the selected column we're current looking for is not the current column; insert the selected column:
+                    insertColumn(currentColumnIndex, overallDetailColumnsToShow.get(i));
+                }
+                // else, we found the selected column at the currentColumnIndex; all is good, also advance both indices
+                i++;
+                currentColumnIndex++;
+            }
         }
     }
 
@@ -1818,13 +1864,18 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
      * (second column, right of the competitor column) does not exist or is not of type {@link CarryColumn}, all columns
      * starting from #1 will be removed and a {@link CarryColumn} will be added. If the leaderboard has no carried
      * points but the display still shows a carry column, the column is removed.
+     * 
+     * @return <code>true</code> if a carry column is now part of the table (regardless of whether it existed before),
+     *         <code>false</code> otherwise
      */
-    protected void updateCarryColumn(LeaderboardDTO leaderboard) {
-        if (leaderboard != null && leaderboard.hasCarriedPoints) {
+    protected boolean updateCarryColumn(LeaderboardDTO leaderboard) {
+        final boolean needsCarryColumn = leaderboard != null && leaderboard.hasCarriedPoints;
+        if (needsCarryColumn) {
             ensureCarryColumn();
         } else {
             ensureNoCarryColumn();
         }
+        return needsCarryColumn;
     }
 
     private void ensureNoCarryColumn() {
