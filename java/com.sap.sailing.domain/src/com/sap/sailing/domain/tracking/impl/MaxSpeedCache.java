@@ -188,6 +188,8 @@ public class MaxSpeedCache<ItemType, FixType extends GPSFix> implements GPSTrack
                             result = entryForLongestSubseries.getB(); // the interval from the cache also holds the maximum for the extended interval
                         }
                         cache(from, to, result); // produce new
+                    } else {
+                        result = entryForLongestSubseries.getB();
                     }
                 }
             }

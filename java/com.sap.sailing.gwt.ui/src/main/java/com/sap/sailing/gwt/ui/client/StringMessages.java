@@ -383,4 +383,7 @@ public interface StringMessages extends Messages {
     String useOverallLeaderboard();
     String overallStandings();
     String scoringSchemeHighPointEssOverall();
+    String maximumSpeedOverGroundInKnots();
+    String totalTimeSailedDownwindInSeconds();
+    String totalTimeSailedInSeconds();
 }

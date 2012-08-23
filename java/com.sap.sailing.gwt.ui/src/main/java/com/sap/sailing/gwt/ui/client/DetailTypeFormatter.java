@@ -57,6 +57,12 @@ public class DetailTypeFormatter {
             return stringMessages.time();
         case AVERAGE_CROSS_TRACK_ERROR_IN_METERS:
             return stringMessages.averageCrossTrackErrorInMeters();
+        case MAXIMUM_SPEED_OVER_GROUND_IN_KNOTS:
+            return stringMessages.maximumSpeedOverGroundInKnots();
+        case TOTAL_TIME_SAILED_DOWNWIND_IN_SECONDS:
+            return stringMessages.totalTimeSailedDownwindInSeconds();
+        case TOTAL_TIME_SAILED_IN_SECONDS:
+            return stringMessages.totalTimeSailedInSeconds();
         }
         return null;
 

@@ -616,29 +616,38 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             Map<DetailType, SortableColumn<LeaderboardRowDTO, ?>> result = new HashMap<DetailType, SortableColumn<LeaderboardRowDTO, ?>>();
             result.put(DetailType.RACE_DISTANCE_TRAVELED,
                     new FormattedDoubleLegDetailColumn(stringMessages.distanceInMeters(), "["+stringMessages
-                            .distanceInMetersUnit()+"]", new RaceDistanceTraveledInMeters(), 0, 
+                            .distanceInMetersUnit()+"]", new RaceDistanceTraveledInMeters(),
+                            DetailType.RACE_DISTANCE_TRAVELED.getPrecision(), 
                             DetailType.RACE_DISTANCE_TRAVELED.getDefaultSortingOrder(), 
                             LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
             result.put(DetailType.RACE_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS, new FormattedDoubleLegDetailColumn(
                     stringMessages.averageSpeedInKnots(), "["+stringMessages.averageSpeedInKnotsUnit()+"]",
-                    new RaceAverageSpeedInKnots(), 2, DetailType.RACE_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS.getDefaultSortingOrder(),
+                    new RaceAverageSpeedInKnots(), DetailType.RACE_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS.getPrecision(),
+                    DetailType.RACE_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS.getDefaultSortingOrder(),
                     LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
             result.put(DetailType.RACE_GAP_TO_LEADER_IN_SECONDS,
                     new FormattedDoubleLegDetailColumn(stringMessages.gapToLeaderInSeconds(), "["+stringMessages
-                            .gapToLeaderInSecondsUnit()+"]", new RaceGapToLeaderInSeconds(), 0, DetailType.RACE_GAP_TO_LEADER_IN_SECONDS.getDefaultSortingOrder(), 
+                            .gapToLeaderInSecondsUnit()+"]", new RaceGapToLeaderInSeconds(),
+                            DetailType.RACE_GAP_TO_LEADER_IN_SECONDS.getPrecision(),
+                            DetailType.RACE_GAP_TO_LEADER_IN_SECONDS.getDefaultSortingOrder(), 
                             LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
             result.put(DetailType.RACE_DISTANCE_TO_LEADER_IN_METERS,
                     new FormattedDoubleLegDetailColumn(stringMessages.windwardDistanceToLeader(), "["+stringMessages
-                            .distanceInMetersUnit()+"]", new RaceDistanceToLeaderInMeters(), 0, DetailType.RACE_DISTANCE_TO_LEADER_IN_METERS.getDefaultSortingOrder(), 
+                            .distanceInMetersUnit()+"]", new RaceDistanceToLeaderInMeters(),
+                            DetailType.RACE_DISTANCE_TO_LEADER_IN_METERS.getPrecision(),
+                            DetailType.RACE_DISTANCE_TO_LEADER_IN_METERS.getDefaultSortingOrder(), 
                             LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
             result.put(DetailType.RACE_AVERAGE_CROSS_TRACK_ERROR_IN_METERS,
                     new FormattedDoubleLegDetailColumn(stringMessages.averageCrossTrackErrorInMeters(), "["+stringMessages
-                            .metersUnit()+"]", new RaceAverageCrossTrackErrorInMeters(), 0, DetailType.RACE_AVERAGE_CROSS_TRACK_ERROR_IN_METERS.getDefaultSortingOrder(),
+                            .metersUnit()+"]", new RaceAverageCrossTrackErrorInMeters(),
+                            DetailType.RACE_AVERAGE_CROSS_TRACK_ERROR_IN_METERS.getPrecision(),
+                            DetailType.RACE_AVERAGE_CROSS_TRACK_ERROR_IN_METERS.getDefaultSortingOrder(),
                             LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
             result.put(DetailType.NUMBER_OF_MANEUVERS, getManeuverCountRaceColumn());
             result.put(DetailType.CURRENT_LEG,
                     new FormattedDoubleLegDetailColumn(stringMessages.currentLeg(), "",
-                    new CurrentLeg(), 0, DetailType.CURRENT_LEG.getDefaultSortingOrder(), 
+                    new CurrentLeg(), DetailType.CURRENT_LEG.getPrecision(),
+                    DetailType.CURRENT_LEG.getDefaultSortingOrder(), 
                     LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
             
             return result;
