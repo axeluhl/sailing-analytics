@@ -171,6 +171,7 @@ public class MaxSpeedCache<ItemType, FixType extends GPSFix> implements GPSTrack
      * is returned.
      */
     private Pair<FixType, Speed> cacheLookup(TimePoint from, TimePoint to) {
+        assert !from.after(to);
         Pair<FixType, Speed> result = null;
         NavigableSet<Pair<TimePoint, Pair<FixType, Speed>>> entry;
         Pair<TimePoint, Pair<FixType, Speed>> entryForLongestSubseries = null;
@@ -185,18 +186,21 @@ public class MaxSpeedCache<ItemType, FixType extends GPSFix> implements GPSTrack
         }
         if (entryForLongestSubseries != null) {
             TimePoint entryTo = entryForLongestSubseries.getA();
-            if (entryTo.before(to)) {
-                Pair<FixType, Speed> maxInMissingTail = getMaxSpeed(entryTo, to);
-                if (maxInMissingTail.getB().compareTo(entryForLongestSubseries.getB().getB()) > 0) {
-                    // the maximum speed is in the tail that was not part of the interval retrieved from the cache
-                    result = maxInMissingTail;
+            // avoid endless recursion in case entryTo is not after from:
+            if (entryTo.equals(to) || entryTo.after(from)) {
+                if (entryTo.before(to)) {
+                    Pair<FixType, Speed> maxInMissingTail = getMaxSpeed(entryTo, to);
+                    if (maxInMissingTail.getB().compareTo(entryForLongestSubseries.getB().getB()) > 0) {
+                        // the maximum speed is in the tail that was not part of the interval retrieved from the cache
+                        result = maxInMissingTail;
+                    } else {
+                        result = entryForLongestSubseries.getB(); // the interval from the cache also holds the maximum
+                                                                  // for the extended interval
+                    }
+                    cache(from, to, result); // produce new
                 } else {
-                    result = entryForLongestSubseries.getB(); // the interval from the cache also holds the maximum
-                                                              // for the extended interval
+                    result = entryForLongestSubseries.getB();
                 }
-                cache(from, to, result); // produce new
-            } else {
-                result = entryForLongestSubseries.getB();
             }
         }
         return result;

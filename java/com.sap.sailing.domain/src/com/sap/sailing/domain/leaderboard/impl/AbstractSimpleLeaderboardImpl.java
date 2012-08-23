@@ -512,6 +512,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     public Long getTotalTimeSailedInLegTypeInMilliseconds(Competitor competitor, LegType legType, TimePoint timePoint) throws NoWindException {
         Long result = null;
         // FIXME have to ensure that competitor participated in all race columns
+        outerLoop:
         for (TrackedRace trackedRace : getTrackedRaces()) {
             if (Util.contains(trackedRace.getRace().getCompetitors(), competitor)) {
                 trackedRace.getRace().getCourse().lockForRead();
@@ -534,7 +535,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                                     // the competitor didn't finish the leg before tracking ended. No useful value can
                                     // be obtained for this competitor anymore.
                                     result = null;
-                                    break;
+                                    break outerLoop;
                                 }
                             }
                         }
