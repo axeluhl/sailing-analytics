@@ -173,6 +173,7 @@ input.magnifier {
     line-height: 1.6;
     font-size: 14px;
     max-width: 1000px;
+    margin: 0 0 25px 0;
 }
 
 .leaderboardGroupPanel-LeaderboardsTableLabel {
@@ -251,6 +252,7 @@ input.magnifier {
 	text-decoration: none;
 	color: #fff;
   	font-family: 'UbuntuBold', Arial, Verdana, sans-serif;
+  	display: inline-block;
 }
 
 .leaderboardGroupPanel-ActiveRace:visited, .leaderboardGroupPanel-ActiveLeaderboard:visited, .leaderboardGroupPanel-ActiveButton:visited {
@@ -341,4 +343,8 @@ input.magnifier {
 
 .groupOverviewPanel-searchInputField {
 	margin: 0 5px 0 0;
+}
+
+.overallStandings {
+	margin-left: 0;
 }

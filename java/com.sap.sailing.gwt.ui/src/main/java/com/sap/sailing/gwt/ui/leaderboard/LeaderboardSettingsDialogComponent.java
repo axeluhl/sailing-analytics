@@ -24,14 +24,16 @@ import com.sap.sailing.gwt.ui.shared.components.SettingsDialogComponent;
 
 public class LeaderboardSettingsDialogComponent implements SettingsDialogComponent<LeaderboardSettings> {
     private final Iterable<RaceColumnDTO> raceColumnSelection;
+    private final Map<RaceColumnDTO, CheckBox> raceColumnCheckboxes;
     private final List<RaceColumnDTO> raceAllRaceColumns;
     private final List<DetailType> maneuverDetailSelection;
-    private final List<DetailType> legDetailSelection;
-    private final List<DetailType> raceDetailSelection;
-    private final Map<RaceColumnDTO, CheckBox> raceColumnCheckboxes;
     private final Map<DetailType, CheckBox> maneuverDetailCheckboxes;
+    private final List<DetailType> legDetailSelection;
     private final Map<DetailType, CheckBox> legDetailCheckboxes;
+    private final List<DetailType> raceDetailSelection;
     private final Map<DetailType, CheckBox> raceDetailCheckboxes;
+    private final List<DetailType> overallDetailSelection;
+    private final Map<DetailType, CheckBox> overallDetailCheckboxes;
     private final StringMessages stringConstants;
     private LongBox refreshIntervalInSecondsBox;
     private LongBox delayInSecondsBox;
@@ -40,20 +42,22 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
     private final long delayInMilliseconds;
 
     public LeaderboardSettingsDialogComponent(List<DetailType> maneuverDetailSelection,
-            List<DetailType> legDetailSelection, List<DetailType> raceDetailSelection, List<RaceColumnDTO> raceAllRaceColumns,
- Iterable<RaceColumnDTO> raceColumnSelection,
-            boolean autoExpandPreSelectedRace, long delayBetweenAutoAdvancesInMilliseconds, long delayInMilliseconds,
-            StringMessages stringConstants) {
-        this.maneuverDetailSelection = maneuverDetailSelection;
+            List<DetailType> legDetailSelection, List<DetailType> raceDetailSelection, List<DetailType> overallDetailSelection,
+            List<RaceColumnDTO> raceAllRaceColumns,
+            Iterable<RaceColumnDTO> raceColumnSelection, boolean autoExpandPreSelectedRace, long delayBetweenAutoAdvancesInMilliseconds,
+            long delayInMilliseconds, StringMessages stringConstants) {
         this.raceAllRaceColumns = raceAllRaceColumns;
-        this.raceColumnSelection = raceColumnSelection;
-        this.legDetailSelection = legDetailSelection;
-        this.raceDetailSelection = raceDetailSelection;
-        this.stringConstants = stringConstants;
-        raceColumnCheckboxes = new LinkedHashMap<RaceColumnDTO, CheckBox>();
+        this.maneuverDetailSelection = maneuverDetailSelection;
         maneuverDetailCheckboxes = new LinkedHashMap<DetailType, CheckBox>();
+        this.raceColumnSelection = raceColumnSelection;
+        raceColumnCheckboxes = new LinkedHashMap<RaceColumnDTO, CheckBox>();
+        this.legDetailSelection = legDetailSelection;
         legDetailCheckboxes = new LinkedHashMap<DetailType, CheckBox>();
+        this.raceDetailSelection = raceDetailSelection;
         raceDetailCheckboxes = new LinkedHashMap<DetailType, CheckBox>();
+        this.overallDetailSelection = overallDetailSelection;
+        overallDetailCheckboxes = new LinkedHashMap<DetailType, CheckBox>();
+        this.stringConstants = stringConstants;
         this.autoExpandPreSelectedRace = autoExpandPreSelectedRace;
         this.delayBetweenAutoAdvancesInMilliseconds = delayBetweenAutoAdvancesInMilliseconds;
         this.delayInMilliseconds = delayInMilliseconds;
@@ -63,6 +67,7 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
     public Widget getAdditionalWidget(DataEntryDialog<?> dialog) {
         FlowPanel dialogPanel = new FlowPanel();
         dialogPanel.add(createSelectedRacesPanel(dialog));
+        dialogPanel.add(createOverallDetailPanel(dialog));
         dialogPanel.add(createRaceDetailPanel(dialog));
         dialogPanel.add(createLegDetailsPanel(dialog));
         dialogPanel.add(createMeneuverDetailsPanel(dialog));
@@ -70,15 +75,12 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
         return dialogPanel;
     }
 
-	private FlowPanel createMeneuverDetailsPanel(DataEntryDialog<?> dialog) {
-		FlowPanel meneuverPanel = new FlowPanel();
-		
-		meneuverPanel.add(dialog.createHeadline(stringConstants.maneuverTypes(), true));
-		meneuverPanel.addStyleName("SettingsDialogComponent meneuverSettings");
-		
-		FlowPanel meneuverContent = new FlowPanel();
-		meneuverContent.addStyleName("dialogInnerContent");
-		
+    private FlowPanel createMeneuverDetailsPanel(DataEntryDialog<?> dialog) {
+        FlowPanel meneuverPanel = new FlowPanel();
+        meneuverPanel.add(dialog.createHeadline(stringConstants.maneuverTypes(), true));
+        meneuverPanel.addStyleName("SettingsDialogComponent");
+        FlowPanel meneuverContent = new FlowPanel();
+        meneuverContent.addStyleName("dialogInnerContent");
         List<DetailType> currentMeneuverDetailSelection = maneuverDetailSelection;
         for (DetailType detailType : ManeuverCountRaceColumn.getAvailableManeuverDetailColumnTypes()) {
             CheckBox checkbox = dialog.createCheckbox(DetailTypeFormatter.format(detailType, stringConstants));
@@ -86,50 +88,40 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
             maneuverDetailCheckboxes.put(detailType, checkbox);
             meneuverContent.add(checkbox);
         }
-        
         meneuverPanel.add(meneuverContent);
-		return meneuverPanel;
-	}
-    
+        return meneuverPanel;
+    }
+
     private FlowPanel createTimingDetailsPanel(DataEntryDialog<?> dialog) {
-    	FlowPanel timingPanel = new FlowPanel();
-        refreshIntervalInSecondsBox = dialog.createLongBox(delayBetweenAutoAdvancesInMilliseconds/1000l, 4);
-        delayInSecondsBox = dialog.createLongBox(delayInMilliseconds/1000l, 4);
-
-	    timingPanel.add(dialog.createHeadline(stringConstants.timing(), true));
-	    timingPanel.addStyleName("SettingsDialogComponent timingSettings");
-	    
-	    FlowPanel timingContent = new FlowPanel();
-	    timingContent.addStyleName("dialogInnerContent");
-	    
-	    FlowPanel delayInSecondsWrapper = new FlowPanel();
-	    delayInSecondsWrapper.getElement().getStyle().setFloat(Float.LEFT);
-	    delayInSecondsWrapper.getElement().getStyle().setPaddingRight(20, Unit.PX);
-
-	    Label delayLabel = new Label(stringConstants.delayInSeconds() + ":");
-	    delayInSecondsWrapper.add(delayLabel);
-	    delayInSecondsWrapper.add(delayInSecondsBox);
-	    timingContent.add(delayInSecondsWrapper);
-	    
-	    FlowPanel refreshIntervalWrapper = new FlowPanel();
+        FlowPanel timingPanel = new FlowPanel();
+        refreshIntervalInSecondsBox = dialog.createLongBox(delayBetweenAutoAdvancesInMilliseconds / 1000l, 4);
+        delayInSecondsBox = dialog.createLongBox(delayInMilliseconds / 1000l, 4);
+        timingPanel.add(dialog.createHeadline(stringConstants.timing(), true));
+        timingPanel.addStyleName("SettingsDialogComponent");
+        FlowPanel timingContent = new FlowPanel();
+        timingContent.addStyleName("dialogInnerContent");
+        FlowPanel delayInSecondsWrapper = new FlowPanel();
+        delayInSecondsWrapper.getElement().getStyle().setFloat(Float.LEFT);
+        delayInSecondsWrapper.getElement().getStyle().setPaddingRight(20, Unit.PX);
+        Label delayLabel = new Label(stringConstants.delayInSeconds() + ":");
+        delayInSecondsWrapper.add(delayLabel);
+        delayInSecondsWrapper.add(delayInSecondsBox);
+        timingContent.add(delayInSecondsWrapper);
+        FlowPanel refreshIntervalWrapper = new FlowPanel();
         Label refreshIntervalLabel = new Label(stringConstants.refreshInterval() + ":");
         refreshIntervalWrapper.add(refreshIntervalLabel);
         refreshIntervalWrapper.add(refreshIntervalInSecondsBox);
         timingContent.add(refreshIntervalWrapper);
-        
         timingPanel.add(timingContent);
-    	return timingPanel;
+        return timingPanel;
     }
 
-	private FlowPanel createRaceDetailPanel(DataEntryDialog<?> dialog) {
-		FlowPanel raceDetailDialog = new FlowPanel();
-
+    private FlowPanel createRaceDetailPanel(DataEntryDialog<?> dialog) {
+        FlowPanel raceDetailDialog = new FlowPanel();
         raceDetailDialog.add(dialog.createHeadline(stringConstants.raceDetailsToShow(), true));
-        raceDetailDialog.addStyleName("SettingsDialogComponent raceDetailSettings");
-
+        raceDetailDialog.addStyleName("SettingsDialogComponent");
         FlowPanel raceDetailDialogContent = new FlowPanel();
         raceDetailDialogContent.addStyleName("dialogInnerContent");
-        
         List<DetailType> currentRaceDetailSelection = raceDetailSelection;
         for (DetailType type : LeaderboardPanel.getAvailableRaceDetailColumnTypes()) {
             CheckBox checkbox = dialog.createCheckbox(DetailTypeFormatter.format(type, stringConstants));
@@ -137,20 +129,33 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
             raceDetailCheckboxes.put(type, checkbox);
             raceDetailDialogContent.add(checkbox);
         }
-        
         raceDetailDialog.add(raceDetailDialogContent);
         return raceDetailDialog;
-	}
-	
-	private FlowPanel createLegDetailsPanel(DataEntryDialog<?> dialog) {
-		FlowPanel legDetailsToShow = new FlowPanel();
-		
-		legDetailsToShow.add(dialog.createHeadline(stringConstants.legDetailsToShow(), true));
-		legDetailsToShow.addStyleName("SettingsDialogComponent legDetailsSettings");
-		
-		FlowPanel legDetailsContent = new FlowPanel();
-		legDetailsContent.addStyleName("dialogInnerContent");
-		
+    }
+
+    private FlowPanel createOverallDetailPanel(DataEntryDialog<?> dialog) {
+        FlowPanel overallDetailDialog = new FlowPanel();
+        overallDetailDialog.add(dialog.createHeadline(stringConstants.overallDetailsToShow(), true));
+        overallDetailDialog.addStyleName("SettingsDialogComponent overallDetailSettings");
+        FlowPanel overallDetailDialogContent = new FlowPanel();
+        overallDetailDialogContent.addStyleName("dialogInnerContent");
+        List<DetailType> currentOverallDetailSelection = overallDetailSelection;
+        for (DetailType type : LeaderboardPanel.getAvailableOverallDetailColumnTypes()) {
+            CheckBox checkbox = dialog.createCheckbox(DetailTypeFormatter.format(type, stringConstants));
+            checkbox.setValue(currentOverallDetailSelection.contains(type));
+            overallDetailCheckboxes.put(type, checkbox);
+            overallDetailDialogContent.add(checkbox);
+        }
+        overallDetailDialog.add(overallDetailDialogContent);
+        return overallDetailDialog;
+    }
+
+    private FlowPanel createLegDetailsPanel(DataEntryDialog<?> dialog) {
+        FlowPanel legDetailsToShow = new FlowPanel();
+        legDetailsToShow.add(dialog.createHeadline(stringConstants.legDetailsToShow(), true));
+        legDetailsToShow.addStyleName("SettingsDialogComponent");
+        FlowPanel legDetailsContent = new FlowPanel();
+        legDetailsContent.addStyleName("dialogInnerContent");
         List<DetailType> currentLegDetailSelection = legDetailSelection;
         for (DetailType type : LegColumn.getAvailableLegDetailColumnTypes()) {
             CheckBox checkbox = dialog.createCheckbox(DetailTypeFormatter.format(type, stringConstants));
@@ -158,20 +163,16 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
             legDetailCheckboxes.put(type, checkbox);
             legDetailsContent.add(checkbox);
         }
-        
         legDetailsToShow.add(legDetailsContent);
         return legDetailsToShow;
-	}
+    }
 
-	private FlowPanel createSelectedRacesPanel(DataEntryDialog<?> dialog) {
+    private FlowPanel createSelectedRacesPanel(DataEntryDialog<?> dialog) {
         FlowPanel selectedRacesPanel = new FlowPanel();
         selectedRacesPanel.addStyleName("SettingsDialogComponent selectedRacesSettings");
-        
         FlowPanel selectedRacesContent = new FlowPanel();
         selectedRacesContent.addStyleName("dialogInnerContent");
-        
         selectedRacesPanel.add(dialog.createHeadline(stringConstants.selectedRaces(), true));
-		
         List<RaceColumnDTO> allColumns = raceAllRaceColumns;
         for (RaceColumnDTO expandableSortableColumn : allColumns) {
             CheckBox checkbox = dialog.createCheckbox(expandableSortableColumn.getRaceColumnName());
@@ -179,10 +180,9 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
             raceColumnCheckboxes.put(expandableSortableColumn, checkbox);
             selectedRacesContent.add(checkbox);
         }
-        
         selectedRacesPanel.add(selectedRacesContent);
         return selectedRacesPanel;
-	}
+    }
 
     @Override
     public LeaderboardSettings getResult() {
@@ -190,6 +190,12 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
         for (Map.Entry<DetailType, CheckBox> entry : maneuverDetailCheckboxes.entrySet()) {
             if (entry.getValue().getValue()) {
                 maneuverDetailsToShow.add(entry.getKey());
+            }
+        }
+        List<DetailType> overallDetailsToShow = new ArrayList<DetailType>();
+        for (Map.Entry<DetailType, CheckBox> entry : overallDetailCheckboxes.entrySet()) {
+            if (entry.getValue().getValue()) {
+                overallDetailsToShow.add(entry.getKey());
             }
         }
         List<DetailType> raceDetailsToShow = new ArrayList<DetailType>();
@@ -213,10 +219,10 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
         Long delayBetweenAutoAdvancesValue = refreshIntervalInSecondsBox.getValue();
         Long delayInSecondsValue = delayInSecondsBox.getValue();
         return new LeaderboardSettings(maneuverDetailsToShow, legDetailsToShow, raceDetailsToShow,
-                namesOfRaceColumnsToShow, /* nameOfRacesToShow */null, autoExpandPreSelectedRace,
-                1000l * (delayBetweenAutoAdvancesValue == null ? 0l : delayBetweenAutoAdvancesValue.longValue()),
-                1000 * (delayInSecondsValue == null ? 0 : delayInSecondsValue.longValue()), null, true,
-                /* updateUponPlayStateChange */ true);
+                overallDetailsToShow, namesOfRaceColumnsToShow, /* nameOfRacesToShow */null,
+                autoExpandPreSelectedRace,
+                1000l * (delayBetweenAutoAdvancesValue == null ? 0l : delayBetweenAutoAdvancesValue.longValue()), 1000 * (delayInSecondsValue == null ? 0 : delayInSecondsValue.longValue()), null,
+                true, /* updateUponPlayStateChange */ true);
     }
 
     @Override
