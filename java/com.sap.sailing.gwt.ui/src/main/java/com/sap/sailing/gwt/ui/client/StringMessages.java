@@ -386,4 +386,5 @@ public interface StringMessages extends Messages {
     String maximumSpeedOverGroundInKnots();
     String totalTimeSailedDownwindInSeconds();
     String totalTimeSailedInSeconds();
+    String overallDetailsToShow();
 }
