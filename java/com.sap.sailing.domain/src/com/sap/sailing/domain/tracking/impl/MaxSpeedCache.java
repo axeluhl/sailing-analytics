@@ -133,11 +133,14 @@ public class MaxSpeedCache<ItemType, FixType extends GPSFix> implements GPSTrack
                 // cacheEntry's from is before or in the invalidation interval; the current "to" in this loop iteration is in or after the interval
                 // and at or after "from"; in any case the record needs to be deleted:
                 toAndResultIter.remove();
-                // if the current "to" is at or after croppedFrom, check if the olf max fix is in the cropped interval; if so, request
+                // if the current "to" is at or after croppedFrom, check if the old max fix is in the cropped interval; if so, request
                 // creation of a new cache entry:
-                final TimePoint maxFixTimePoint = toAndResult.getB().getA().getTimePoint();
-                if (!toAndResult.getA().before(croppedFrom) && !maxFixTimePoint.before(croppedFrom) && !maxFixTimePoint.after(toAndResult.getA())) {
-                    addEntryToMap(croppedFrom, toAndResult.getA(), toAndResult.getB(), result);
+                if (toAndResult.getB() != null) {
+                    final TimePoint maxFixTimePoint = toAndResult.getB().getA().getTimePoint();
+                    if (!toAndResult.getA().before(croppedFrom) && !maxFixTimePoint.before(croppedFrom)
+                            && !maxFixTimePoint.after(toAndResult.getA())) {
+                        addEntryToMap(croppedFrom, toAndResult.getA(), toAndResult.getB(), result);
+                    }
                 }
             }
         }
@@ -190,7 +193,7 @@ public class MaxSpeedCache<ItemType, FixType extends GPSFix> implements GPSTrack
             if (entryTo.equals(to) || entryTo.after(from)) {
                 if (entryTo.before(to)) {
                     Pair<FixType, Speed> maxInMissingTail = getMaxSpeed(entryTo, to);
-                    if (maxInMissingTail.getB().compareTo(entryForLongestSubseries.getB().getB()) > 0) {
+                    if (maxInMissingTail != null && maxInMissingTail.getB().compareTo(entryForLongestSubseries.getB().getB()) > 0) {
                         // the maximum speed is in the tail that was not part of the interval retrieved from the cache
                         result = maxInMissingTail;
                     } else {
@@ -232,7 +235,10 @@ public class MaxSpeedCache<ItemType, FixType extends GPSFix> implements GPSTrack
         setForFrom.add(new Pair<TimePoint, Pair<FixType, Speed>>(to, fixAtMaxSpeed));
     }
     
-    protected Pair<FixType, Speed> computeMaxSpeed(TimePoint from, TimePoint to) {
+    /**
+     * @return <code>null</code>, if no fix exists in the interval specified
+     */
+    private Pair<FixType, Speed> computeMaxSpeed(TimePoint from, TimePoint to) {
         track.lockForRead();
         try {
             // fetch all fixes on this leg so far and determine their maximum speed
@@ -252,7 +258,7 @@ public class MaxSpeedCache<ItemType, FixType extends GPSFix> implements GPSTrack
                     }
                 }
             }
-            return new Pair<FixType, Speed>(maxSpeedFix, max);
+            return maxSpeedFix == null ? null : new Pair<FixType, Speed>(maxSpeedFix, max);
         } finally {
             track.unlockAfterRead();
         }

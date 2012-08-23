@@ -484,7 +484,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     @Override
     public Pair<GPSFixMoving, Speed> getMaximumSpeedOverGround(Competitor competitor, TimePoint timePoint) {
         Pair<GPSFixMoving, Speed> result = null;
-        // FIXME have to ensure that competitor participated in all race columns
+        // TODO should we ensure that competitor participated in all race columns?
         for (TrackedRace trackedRace : getTrackedRaces()) {
             if (Util.contains(trackedRace.getRace().getCompetitors(), competitor)) {
                 NavigableSet<MarkPassing> markPassings = trackedRace.getMarkPassings(competitor);
@@ -499,7 +499,8 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                         to = timePoint;
                     }
                     Pair<GPSFixMoving, Speed> maxSpeed = trackedRace.getTrack(competitor).getMaximumSpeedOverGround(from, to);
-                    if (result == null || result.getB() == null || (maxSpeed.getB() != null && maxSpeed.getB().compareTo(result.getB()) > 0)) {
+                    if (result == null || result.getB() == null ||
+                            (maxSpeed != null && maxSpeed.getB() != null && maxSpeed.getB().compareTo(result.getB()) > 0)) {
                         result = maxSpeed;
                     }
                 }
@@ -511,7 +512,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     @Override
     public Long getTotalTimeSailedInLegTypeInMilliseconds(Competitor competitor, LegType legType, TimePoint timePoint) throws NoWindException {
         Long result = null;
-        // FIXME have to ensure that competitor participated in all race columns
+        // TODO should we ensure that competitor participated in all race columns?
         outerLoop:
         for (TrackedRace trackedRace : getTrackedRaces()) {
             if (Util.contains(trackedRace.getRace().getCompetitors(), competitor)) {
@@ -562,7 +563,12 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                         // stop counting when competitor finished the race
                         to = markPassings.last().getTimePoint();
                     } else {
-                        to = timePoint;
+                        if (trackedRace.getEndOfTracking() != null && timePoint.after(trackedRace.getEndOfTracking())) {
+                            result = null; // race not finished until end of tracking; no reasonable value can be computed for competitor
+                            break;
+                        } else {
+                            to = timePoint;
+                        }
                     }
                     long timeSpent = to.asMillis() - from.asMillis();
                     if (result == null) {
