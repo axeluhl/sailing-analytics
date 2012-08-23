@@ -187,7 +187,7 @@ public class MaxSpeedCache<ItemType, FixType extends GPSFix> implements GPSTrack
         } finally {
             LockUtil.unlockAfterRead(lock);
         }
-        if (entryForLongestSubseries != null) {
+        if (entryForLongestSubseries != null && entryForLongestSubseries.getB() != null) {
             TimePoint entryTo = entryForLongestSubseries.getA();
             // avoid endless recursion in case entryTo is not after from:
             if (entryTo.equals(to) || entryTo.after(from)) {
