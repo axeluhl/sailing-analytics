@@ -1,6 +1,8 @@
 package com.sap.sailing.gwt.ui.leaderboard;
 
+import com.google.gwt.i18n.client.NumberFormat;
 import com.sap.sailing.domain.common.DetailType;
+import com.sap.sailing.gwt.ui.client.NumberFormatterFactory;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.LeaderboardRowDTO;
 
@@ -20,11 +22,20 @@ public class TotalTimeSailedColumn extends FormattedDoubleLegDetailColumn {
     }
 
     public TotalTimeSailedColumn(StringMessages stringMessages, String headerStyle, String columnStyle) {
-        super(stringMessages.totalTimeSailedInSeconds(), stringMessages.secondsUnit(),
+        super(stringMessages.totalTimeSailedInSeconds(), stringMessages.hhmmssUnit(),
                 new TotalTimeSailedField(),
                 DetailType.TOTAL_TIME_SAILED_IN_SECONDS.getPrecision(),
                 DetailType.TOTAL_TIME_SAILED_IN_SECONDS.getDefaultSortingOrder(),
                 headerStyle, columnStyle);
     }
 
+    @Override
+    public String getStringValueToRender(LeaderboardRowDTO object) {
+        Double timeInSeconds = getDoubleValue(object);
+        int hh = (int) (timeInSeconds/3600);
+        int mm = (int) ((timeInSeconds - 3600*hh)/60);
+        int ss = (int) (timeInSeconds - 3600*hh - 60*mm);
+        NumberFormat numberFormat = NumberFormatterFactory.getDecimalFormat(2, 0);
+        return ""+numberFormat.format(hh)+":"+numberFormat.format(mm)+":"+numberFormat.format(ss);
+    }
 }

@@ -387,4 +387,5 @@ public interface StringMessages extends Messages {
     String totalTimeSailedDownwindInSeconds();
     String totalTimeSailedInSeconds();
     String overallDetailsToShow();
+    String hhmmssUnit();
 }

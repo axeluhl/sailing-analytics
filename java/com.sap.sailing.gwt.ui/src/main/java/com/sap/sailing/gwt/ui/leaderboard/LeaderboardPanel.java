@@ -576,7 +576,8 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         return new DetailType[] { DetailType.RACE_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS,
                 DetailType.RACE_DISTANCE_TRAVELED, DetailType.RACE_GAP_TO_LEADER_IN_SECONDS,
                 DetailType.RACE_DISTANCE_TO_LEADER_IN_METERS, DetailType.NUMBER_OF_MANEUVERS, DetailType.DISPLAY_LEGS,
-                DetailType.CURRENT_LEG, DetailType.RACE_AVERAGE_CROSS_TRACK_ERROR_IN_METERS };
+                DetailType.CURRENT_LEG, DetailType.RACE_AVERAGE_CROSS_TRACK_ERROR_IN_METERS,
+                DetailType.RACE_CURRENT_SPEED_OVER_GROUND_IN_KNOTS };
     }
 
     public static DetailType[] getAvailableOverallDetailColumnTypes() {
@@ -652,6 +653,13 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                             DetailType.RACE_GAP_TO_LEADER_IN_SECONDS.getPrecision(),
                             DetailType.RACE_GAP_TO_LEADER_IN_SECONDS.getDefaultSortingOrder(), LEG_COLUMN_HEADER_STYLE,
                             LEG_COLUMN_STYLE));
+            result.put(
+                    DetailType.RACE_CURRENT_SPEED_OVER_GROUND_IN_KNOTS,
+                    new FormattedDoubleLegDetailColumn(stringMessages.currentSpeedOverGroundInKnots(), "["
+                            + stringMessages.currentSpeedOverGroundInKnotsUnit() + "]", new CurrentSpeedOverGroundInKnots(),
+                            DetailType.RACE_CURRENT_SPEED_OVER_GROUND_IN_KNOTS.getPrecision(),
+                            DetailType.RACE_CURRENT_SPEED_OVER_GROUND_IN_KNOTS.getDefaultSortingOrder(),
+                            LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
             result.put(
                     DetailType.RACE_DISTANCE_TO_LEADER_IN_METERS,
                     new FormattedDoubleLegDetailColumn(stringMessages.windwardDistanceToLeader(), "["
@@ -821,7 +829,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         }
 
         /**
-         * Accumulates the average speed over all legs of a race
+         * Computes the gap to leader exploiting the ordering of the leg detail columns
          * 
          * @author Axel Uhl (D043530)
          */
@@ -857,6 +865,26 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                 LeaderboardEntryDTO fieldsForRace = row.fieldsByRaceColumnName.get(getRaceColumnName());
                 if (fieldsForRace != null && fieldsForRace.windwardDistanceToOverallLeaderInMeters != null) {
                     result = fieldsForRace.windwardDistanceToOverallLeaderInMeters;
+                }
+                return result;
+            }
+        }
+        
+        private class CurrentSpeedOverGroundInKnots implements LegDetailField<Double> {
+            @Override
+            public Double get(LeaderboardRowDTO row) {
+                Double result = null;
+                LeaderboardEntryDTO fieldsForRace = row.fieldsByRaceColumnName.get(getRaceColumnName());
+                if (fieldsForRace != null && fieldsForRace.legDetails != null) {
+                    int lastLegIndex = fieldsForRace.legDetails.size() - 1;
+                    LegEntryDTO lastLegDetail = fieldsForRace.legDetails.get(lastLegIndex);
+                    // competitor may be in leg prior to the one the leader is in; find competitors current leg
+                    while (lastLegDetail == null && lastLegIndex > 0) {
+                        lastLegDetail = fieldsForRace.legDetails.get(--lastLegIndex);
+                    }
+                    if (lastLegDetail != null) {
+                        result = lastLegDetail.currentSpeedOverGroundInKnots;
+                    }
                 }
                 return result;
             }

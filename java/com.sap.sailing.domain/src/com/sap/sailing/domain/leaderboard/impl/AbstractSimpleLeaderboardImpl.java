@@ -498,7 +498,6 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                     } else {
                         to = timePoint;
                     }
-                    // TODO find out in which leg the maximum speed was achieved
                     Pair<GPSFixMoving, Speed> maxSpeed = trackedRace.getTrack(competitor).getMaximumSpeedOverGround(from, to);
                     if (result == null || result.getB() == null || (maxSpeed.getB() != null && maxSpeed.getB().compareTo(result.getB()) > 0)) {
                         result = maxSpeed;
@@ -530,6 +529,12 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                                     } else {
                                         result += millisecondsSpendOnDownwind;
                                     }
+                                } else {
+                                    // Although the competitor has started the leg, no value was produced. This means that
+                                    // the competitor didn't finish the leg before tracking ended. No useful value can
+                                    // be obtained for this competitor anymore.
+                                    result = null;
+                                    break;
                                 }
                             }
                         }

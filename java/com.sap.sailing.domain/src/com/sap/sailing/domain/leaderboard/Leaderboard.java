@@ -280,7 +280,7 @@ public interface Leaderboard extends Named {
     Pair<GPSFixMoving, Speed> getMaximumSpeedOverGround(Competitor competitor, TimePoint timePoint);
 
     /**
-     * @param legType TODO
+     * @param legType the leg type for which to add up the times sailed
      * @return <code>null</code> if no tracked race is available for <code>competitor</code> in this leaderboard
      * or the competitor hasn't started sailing a single downwind leg at <code>timePoint</code> for any of the tracked
      * races attached to this leaderboard

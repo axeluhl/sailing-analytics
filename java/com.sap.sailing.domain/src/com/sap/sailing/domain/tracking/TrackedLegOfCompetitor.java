@@ -23,7 +23,8 @@ public interface TrackedLegOfCompetitor extends Serializable {
      * How much time did the {@link #getCompetitor competitor} spend in this {@link #getLeg() leg} at
      * <code>timePoint</code>? If the competitor hasn't started the leg yet at <code>timePoint</code>, <code>null</code>
      * is returned. If the competitor has finished the leg already at <code>timePoint</code>, the time it took the
-     * competitor to complete the leg is returned.
+     * competitor to complete the leg is returned. If the competitor didn't finish the leg before the end of tracking,
+     * <code>null</code> is returned because this indicates that the tracker stopped sending valid data.
      */
     Long getTimeInMilliSeconds(TimePoint timePoint);
 
