@@ -22,7 +22,7 @@ public class TotalTimeSailedColumn extends FormattedDoubleLegDetailColumn {
     }
 
     public TotalTimeSailedColumn(StringMessages stringMessages, String headerStyle, String columnStyle) {
-        super(stringMessages.totalTimeSailedInSeconds(), stringMessages.hhmmssUnit(),
+        super(stringMessages.totalTimeSailedInSeconds(), "[" + stringMessages.hhmmssUnit() + "]",
                 new TotalTimeSailedField(),
                 DetailType.TOTAL_TIME_SAILED_IN_SECONDS.getPrecision(),
                 DetailType.TOTAL_TIME_SAILED_IN_SECONDS.getDefaultSortingOrder(),
