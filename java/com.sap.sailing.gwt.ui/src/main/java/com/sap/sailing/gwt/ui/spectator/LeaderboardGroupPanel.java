@@ -93,6 +93,7 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
         this.root = (root == null || root.length() == 0) ? "leaderboardGroupPanel" : root;
         this.viewMode = viewMode;
         mainPanel = new VerticalPanel();
+        mainPanel.addStyleName("mainPanel");
         add(mainPanel);
         loadGroup(groupName);
     }
