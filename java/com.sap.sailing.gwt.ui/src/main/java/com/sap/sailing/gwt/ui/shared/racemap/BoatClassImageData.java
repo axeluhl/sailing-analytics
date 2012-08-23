@@ -65,7 +65,7 @@ public class BoatClassImageData {
 	public ImageTransformer getBoatImageTransformerByLegTypeAndTack(LegType legType, Tack tack, boolean isSelected) {
 		ImageTransformer result = null;
 		switch(tack) {
-			case PORT:
+			case STARBOARD:
 				switch (legType) {
 					case DOWNWIND:
 						if(isSelected) {
@@ -90,7 +90,7 @@ public class BoatClassImageData {
 						break;
 				}
 				break;
-			case STARBOARD:
+			case PORT:
 				switch (legType) {
 				case DOWNWIND:
 					if(isSelected) {
@@ -122,14 +122,14 @@ public class BoatClassImageData {
 	public ImageTransformer getBoatImageTransformerByTack(Tack tack, boolean isSelected) {
 		ImageTransformer result = null;
 		switch(tack) {
-			case PORT:
+			case STARBOARD:
 					if(isSelected) {
 						result = reachingPortImageTransformerSelected;
 					} else {
 						result = reachingPortImageTransformer;
 					}
 					break;
-			case STARBOARD:
+			case PORT:
 				if(isSelected) {
 					result = reachingStarboardImageTransformerSelected;
 				} else {
