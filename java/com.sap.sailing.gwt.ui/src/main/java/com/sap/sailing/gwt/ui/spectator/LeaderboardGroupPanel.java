@@ -93,6 +93,7 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
         this.root = (root == null || root.length() == 0) ? "leaderboardGroupPanel" : root;
         this.viewMode = viewMode;
         mainPanel = new VerticalPanel();
+        mainPanel.addStyleName("mainPanel");
         add(mainPanel);
         loadGroup(groupName);
     }
@@ -141,6 +142,12 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
                     .toSafeHtml());
             groupDescriptionLabel.setStyleName(STYLE_NAME_PREFIX + "GroupDescription");
             mainPanel.add(groupDescriptionLabel);
+
+            // Create group leaderboards GUI
+            Label leaderboardsTableLabel = new Label(stringMessages.leaderboards());
+            leaderboardsTableLabel.setStyleName(STYLE_NAME_PREFIX + "LeaderboardsTableLabel");
+            mainPanel.add(leaderboardsTableLabel);
+            
             if (group.hasOverallLeaderboard()) {
                 String debugParam = Window.Location.getParameter("gwt.codesvr");
                 String link = URLFactory.INSTANCE.encode("/gwt/Leaderboard.html?name=" + group.name+" "+LeaderboardNameConstants.OVERALL
@@ -148,14 +155,9 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
                         + (embedded ? "&embedded=true" : "")
                         + "&leaderboardGroupName=" + group.name + "&root=" + root
                         + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""));
-                HTML overallLeaderboardAnchor = new HTML(getAnchor(link, stringMessages.overallStandings(), "ActiveButton"));
-                overallLeaderboardAnchor.setStyleName(STYLE_NAME_PREFIX + "LeaderboardsTableLabel");
+                HTML overallLeaderboardAnchor = new HTML(getAnchor(link, stringMessages.overallStandings(), "ActiveButton overallStandings"));
                 mainPanel.add(overallLeaderboardAnchor);
             }
-            // Create group leaderboards GUI
-            Label leaderboardsTableLabel = new Label(stringMessages.leaderboards());
-            leaderboardsTableLabel.setStyleName(STYLE_NAME_PREFIX + "LeaderboardsTableLabel");
-            mainPanel.add(leaderboardsTableLabel);
         }
         SafeHtmlCell leaderboardNameCell = new SafeHtmlCell();
         Column<StrippedLeaderboardDTO, SafeHtml> leaderboardNameColumn = new Column<StrippedLeaderboardDTO, SafeHtml>(

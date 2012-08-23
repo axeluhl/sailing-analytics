@@ -42,6 +42,7 @@ import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.URLFactory;
+import com.sap.sailing.gwt.ui.leaderboard.ScoringSchemeTypeFormatter;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RaceColumnDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
@@ -429,7 +430,17 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel {
                 return group.description.length() <= 100 ? group.description : group.description.substring(0, 98) + "...";
             }
         };
-
+        TextColumn<LeaderboardGroupDTO> hasOverallLeaderboardColumn = new TextColumn<LeaderboardGroupDTO>() {
+            @Override
+            public String getValue(LeaderboardGroupDTO group) {
+            	String result = stringMessages.no();
+            	if(group.hasOverallLeaderboard()) {
+            	    result =  stringMessages.yes() + " (" + ScoringSchemeTypeFormatter.format(group.getOverallLeaderboardScoringSchemeType(), stringMessages) +")";
+            	}
+            	return  result;
+            }
+        };
+        
         ImagesBarColumn<LeaderboardGroupDTO, LeaderboardGroupConfigImagesBarCell> groupActionsColumn = new ImagesBarColumn<LeaderboardGroupDTO, LeaderboardGroupConfigImagesBarCell>(
                 new LeaderboardGroupConfigImagesBarCell(stringMessages));
         groupActionsColumn.setFieldUpdater(new FieldUpdater<LeaderboardGroupDTO, String>() {
@@ -460,6 +471,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel {
         groupsTable.setWidth("100%");
         groupsTable.addColumn(groupNameColumn, stringMessages.name());
         groupsTable.addColumn(groupDescriptionColumn, stringMessages.description());
+        groupsTable.addColumn(hasOverallLeaderboardColumn, stringMessages.useOverallLeaderboard());
         groupsTable.addColumn(groupActionsColumn, stringMessages.actions());
         groupsTable.addColumnSortHandler(leaderboardGroupsListHandler);
         

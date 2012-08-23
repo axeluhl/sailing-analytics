@@ -159,6 +159,7 @@ input.magnifier {
 
 .mainPanel {
 	width: 100%;
+	margin-left: 13px;
 }
 
 .leaderboardGroupPanel-GroupName {
@@ -172,10 +173,11 @@ input.magnifier {
     line-height: 1.6;
     font-size: 14px;
     max-width: 1000px;
+    margin: 0 0 25px 0;
 }
 
 .leaderboardGroupPanel-LeaderboardsTableLabel {
-	margin: 0 13px 10px;
+	margin: 0 0 10px;
 	font-size: 17px;
 	font-weight: 500;
 }
@@ -250,6 +252,7 @@ input.magnifier {
 	text-decoration: none;
 	color: #fff;
   	font-family: 'UbuntuBold', Arial, Verdana, sans-serif;
+  	display: inline-block;
 }
 
 .leaderboardGroupPanel-ActiveRace:visited, .leaderboardGroupPanel-ActiveLeaderboard:visited, .leaderboardGroupPanel-ActiveButton:visited {
@@ -269,7 +272,7 @@ input.magnifier {
 	color: #3e3e3e;
 }
 .welcomeWidget-WelcomePanelWrapper {
-	margin: 14px 13px 25px 13px;
+	margin: 14px 0 25px 0;
 	max-width: 1000px;
 }
 
@@ -340,4 +343,8 @@ input.magnifier {
 
 .groupOverviewPanel-searchInputField {
 	margin: 0 5px 0 0;
+}
+
+.overallStandings {
+	margin-left: 0;
 }
