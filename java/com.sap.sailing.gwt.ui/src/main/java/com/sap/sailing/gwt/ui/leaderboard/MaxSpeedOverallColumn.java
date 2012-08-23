@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.ui.leaderboard;
 
+import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.LeaderboardRowDTO;
@@ -27,4 +29,15 @@ public class MaxSpeedOverallColumn extends FormattedDoubleLegDetailColumn {
                 headerStyle, columnStyle);
     }
 
+    /**
+     * Adds the time point when the maximum speed was achieved as tool tip / title
+     */
+    @Override
+    protected String getTitle(LeaderboardRowDTO row) {
+        String result = null;
+        if (row.whenMaximumSpeedOverGroundWasAchieved != null) {
+            result = DateTimeFormat.getFormat(PredefinedFormat.DATE_TIME_MEDIUM).format(row.whenMaximumSpeedOverGroundWasAchieved);
+        }
+        return result;
+    }
 }
