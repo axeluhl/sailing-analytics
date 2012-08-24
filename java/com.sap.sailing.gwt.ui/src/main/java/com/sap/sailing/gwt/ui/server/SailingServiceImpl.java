@@ -1970,10 +1970,24 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     }
 
     @Override
+    public void addColumnsToLeaderboard(String leaderboardName, List<Pair<String, Boolean>> columnsToAdd) {
+        for(Pair<String, Boolean> columnToAdd: columnsToAdd) {
+            getService().apply(new AddColumnToLeaderboard(columnToAdd.getA(), leaderboardName, columnToAdd.getB()));
+        }
+    }
+    
+    @Override
+    public void removeLeaderboardColumns(String leaderboardName, List<String> columnsToRemove) {
+        for (String columnToRemove : columnsToRemove) {
+            getService().apply(new RemoveLeaderboardColumn(columnToRemove, leaderboardName));
+        }
+    }
+
+    @Override
     public void removeLeaderboardColumn(String leaderboardName, String columnName) {
         getService().apply(new RemoveLeaderboardColumn(columnName, leaderboardName));
     }
-
+    
     @Override
     public void renameLeaderboardColumn(String leaderboardName, String oldColumnName, String newColumnName) {
         getService().apply(new RenameLeaderboardColumn(leaderboardName, oldColumnName, newColumnName));

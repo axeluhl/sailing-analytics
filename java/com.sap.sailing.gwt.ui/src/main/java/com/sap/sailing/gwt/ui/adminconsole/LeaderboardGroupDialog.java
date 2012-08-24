@@ -64,7 +64,7 @@ public class LeaderboardGroupDialog extends DataEntryDialog<LeaderboardGroupDTO>
             }
             
             if (!nameNotEmpty) {
-                errorMessage = stringMessages.pleaseEnterNonEmptyName();
+                errorMessage = stringMessages.pleaseEnterAName();
             } else if (!descrNotEmpty) {
                 errorMessage = stringMessages.pleaseEnterNonEmptyDescription();
             } else if (!unique) {

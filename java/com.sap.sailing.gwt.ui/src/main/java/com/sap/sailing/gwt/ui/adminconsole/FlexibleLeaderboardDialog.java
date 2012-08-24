@@ -50,7 +50,7 @@ public abstract class FlexibleLeaderboardDialog extends AbstractLeaderboardDialo
             }
             
             if (!nonEmpty) {
-                errorMessage = stringConstants.pleaseEnterNonEmptyName();
+                errorMessage = stringConstants.pleaseEnterAName();
             } else if(!unique){
                 errorMessage = stringConstants.leaderboardWithThisNameAlreadyExists();
             } else if (!discardThresholdsAscending) {

@@ -421,7 +421,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
 		});
  
         final Button setScoreCorrectionDefaultTimeBtn = new Button("Set time to 'now'");
-        setScoreCorrectionDefaultTimeBtn.addStyleName("formButton");
+        setScoreCorrectionDefaultTimeBtn.addStyleName("inlineButton");
         scoreCorrectionInfoGrid.setWidget(0,  2, setScoreCorrectionDefaultTimeBtn);
 
         setScoreCorrectionDefaultTimeBtn.addClickHandler(new ClickHandler() {

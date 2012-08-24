@@ -1,60 +1,57 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
-import java.util.Collection;
+import java.util.List;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.CheckBox;
+import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.FleetDTO;
 import com.sap.sailing.gwt.ui.shared.RaceColumnDTO;
 
 /**
  * Fills a {@link RaceColumnDTO} object by setting its {@link RaceColumnDTO#setMedalRace(boolean) medal race} property and its name.
- * As {@link RaceColumnDTO#getFleets()} fleet, a single default fleet is added.
- * 
  * @author Axel Uhl (D043530)
  *
  */
-public class RaceColumnInLeaderboardDialog extends DataEntryDialog<Pair<RaceColumnDTO, FleetDTO>> {
-    private final static String DEFAULT_FLEET_NAME = "Default";
-    
+public class RaceColumnInLeaderboardDialog extends DataEntryDialog<RaceColumnDTO> {
     private final TextBox raceNameBox;
     private final CheckBox isMedalRace;
+    private final StringMessages stringConstants;
 
-    private RaceColumnDTO raceInLeaderboard;
+    private RaceColumnDTO raceColumnToEdit;
 
-    private static class RaceDialogValidator implements Validator<Pair<RaceColumnDTO, FleetDTO>> {
+    private static class RaceDialogValidator implements Validator<RaceColumnDTO> {
 
         private StringMessages stringConstants;
-        private Collection<Pair<RaceColumnDTO, FleetDTO>> existingRaces;
+        private List<RaceColumnDTO> existingRaces;
 
-        public RaceDialogValidator(StringMessages stringConstants, Collection<Pair<RaceColumnDTO, FleetDTO>> existingRaceColumnsAndFleetNames) {
+        public RaceDialogValidator(StringMessages stringConstants, List<RaceColumnDTO> existingRaceColumnsAndFleetNames) {
             this.stringConstants = stringConstants;
             this.existingRaces = existingRaceColumnsAndFleetNames;
         }
 
         @Override
-        public String getErrorMessage(Pair<RaceColumnDTO, FleetDTO> valueToValidate) {
+        public String getErrorMessage(RaceColumnDTO valueToValidate) {
             String errorMessage;
-            String racename = valueToValidate.getA().getRaceColumnName();
-            Boolean isMedalRace = valueToValidate.getA().isMedalRace();
+            String racename = valueToValidate.getRaceColumnName();
+            Boolean isMedalRace = valueToValidate.isMedalRace();
             boolean isNameNotEmpty = racename != null & racename != "";
             boolean medalRaceNotNull = isMedalRace != null;
 
             boolean unique = true;
-            for (Pair<RaceColumnDTO, FleetDTO> raceColumnAndFleetName : existingRaces) {
-                if (raceColumnAndFleetName.getA().getRaceColumnName().equals(valueToValidate.getA().getRaceColumnName())) {
+            for (RaceColumnDTO raceColumn : existingRaces) {
+                if (raceColumn.getRaceColumnName().equals(valueToValidate.getRaceColumnName())) {
                     unique = false;
                 }
             }
 
             if (!isNameNotEmpty) {
-                errorMessage = stringConstants.raceNameEmpty();
+                errorMessage = stringConstants.pleaseEnterAName();
             } else if (!medalRaceNotNull) {
                 errorMessage = stringConstants.medalRaceIsNull();
             } else if (!unique) {
@@ -64,38 +61,37 @@ public class RaceColumnInLeaderboardDialog extends DataEntryDialog<Pair<RaceColu
             }
             return errorMessage;
         }
-
     }
 
-    public RaceColumnInLeaderboardDialog(Collection<Pair<RaceColumnDTO, FleetDTO>> existingRaces,
-            RaceColumnDTO raceInLeaderboard, StringMessages stringConstants,
-            AsyncCallback<Pair<RaceColumnDTO, FleetDTO>> callback) {
+    public RaceColumnInLeaderboardDialog(List<RaceColumnDTO> existingRaces, RaceColumnDTO raceColumnToEdit, 
+            StringMessages stringConstants, AsyncCallback<RaceColumnDTO> callback) {
         super(stringConstants.name(), null, stringConstants.ok(), stringConstants.cancel(),
                 new RaceDialogValidator(stringConstants, existingRaces), callback);
-        this.raceInLeaderboard = raceInLeaderboard;
-        raceNameBox = createTextBox(raceInLeaderboard.getRaceColumnName());
+        this.raceColumnToEdit = raceColumnToEdit;
+        this.stringConstants = stringConstants;
+        raceNameBox = createTextBox(raceColumnToEdit.getRaceColumnName());
         isMedalRace = createCheckbox(stringConstants.medalRace());
-        isMedalRace.setValue(raceInLeaderboard.isMedalRace());
+        isMedalRace.setValue(raceColumnToEdit.isMedalRace());
     }
 
     @Override
-    protected Pair<RaceColumnDTO, FleetDTO> getResult() {
-        raceInLeaderboard.name = raceNameBox.getValue();
-        raceInLeaderboard.setMedalRace(isMedalRace.getValue());
-        raceInLeaderboard.addFleet(new FleetDTO(DEFAULT_FLEET_NAME, /* ordering */ 0, /* color */ null));
-        return new Pair<RaceColumnDTO, FleetDTO>(raceInLeaderboard, raceInLeaderboard.getFleets().iterator().next());
+    protected RaceColumnDTO getResult() {
+        raceColumnToEdit.name = raceNameBox.getValue();
+        raceColumnToEdit.setMedalRace(isMedalRace.getValue());
+        return raceColumnToEdit;
     }
 
     @Override
     protected Widget getAdditionalWidget() {
-        VerticalPanel panel = new VerticalPanel();
-        Widget additionalWidget = super.getAdditionalWidget();
-        if (additionalWidget != null) {
-            panel.add(additionalWidget);
-        }
-        panel.add(raceNameBox);
-        panel.add(isMedalRace);
-        return panel;
+        VerticalPanel mainPanel = new VerticalPanel();
+        
+        HorizontalPanel raceNamePanel = new HorizontalPanel();
+        mainPanel.add(raceNamePanel);
+        raceNamePanel.add(new Label(stringConstants.name() + ":"));
+        raceNamePanel.add(raceNameBox);
+        
+        mainPanel.add(isMedalRace);
+        return mainPanel;
     }
 
     @Override
@@ -103,5 +99,4 @@ public class RaceColumnInLeaderboardDialog extends DataEntryDialog<Pair<RaceColu
         super.show();
         raceNameBox.setFocus(true);
     }
-
 }

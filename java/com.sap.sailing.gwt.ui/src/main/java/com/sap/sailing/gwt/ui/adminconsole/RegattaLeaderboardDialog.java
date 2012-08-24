@@ -55,7 +55,7 @@ public abstract class RegattaLeaderboardDialog extends AbstractLeaderboardDialog
             boolean regattaSelected = leaderboardToValidate.regatta != null ? true : false;
             
             if (!nonEmpty) {
-                errorMessage = stringConstants.pleaseEnterNonEmptyName();
+                errorMessage = stringConstants.pleaseEnterAName();
             } else if(!regattaSelected){
                 errorMessage = stringConstants.pleaseSelectARegatta();
             } else if(!unique){

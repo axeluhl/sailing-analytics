@@ -257,4 +257,8 @@ public interface SailingService extends RemoteService {
 	RaceBuoysDTO getRaceBuoys(RaceIdentifier raceIdentifier, Date date);
 
     void updateRaceCourse(RaceIdentifier raceIdentifier, List<ControlPointDTO> controlPoints);
+
+    void addColumnsToLeaderboard(String leaderboardName, List<Pair<String, Boolean>> columnsToAdd);
+
+    void removeLeaderboardColumns(String leaderboardName, List<String> columnsToRemove);
 }

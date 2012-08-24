@@ -61,7 +61,7 @@ public class SeriesWithFleetsCreateDialog extends DataEntryDialog<SeriesDTO> {
                 }
             }
             if (!nameNotEmpty) {
-                errorMessage = stringConstants.pleaseEnterNonEmptyName();
+                errorMessage = stringConstants.pleaseEnterAName();
             } else if (!unique) {
                 errorMessage = stringConstants.seriesWithThisNameAlreadyExists();
             }
@@ -87,7 +87,7 @@ public class SeriesWithFleetsCreateDialog extends DataEntryDialog<SeriesDTO> {
                     index2++;
                 }
                 if (!fleetNameNotEmpty) {
-                    errorMessage = stringConstants.fleet() + " " + (index + 1) + ": " + stringConstants.pleaseEnterNonEmptyName();
+                    errorMessage = stringConstants.fleet() + " " + (index + 1) + ": " + stringConstants.pleaseEnterAName();
                 } else if (!fleetUnique) {
                     errorMessage = stringConstants.fleet() + " " + (index2 + 1) + ": " + stringConstants.fleetWithThisNameAlreadyExists();
                 }

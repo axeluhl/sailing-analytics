@@ -81,7 +81,7 @@ public class RaceColumnInRegattaSeriesDialog extends DataEntryDialog<Pair<Series
 
                 if (!raceColumnNameNotEmpty) {
                     errorMessage = stringConstants.race() + " " + (index + 1) + ": "
-                            + stringConstants.pleaseEnterNonEmptyName();
+                            + stringConstants.pleaseEnterAName();
                 } else if (!raceColumnUnique) {
                     errorMessage = stringConstants.race() + " " + (index2 + 1) + ": "
                             + stringConstants.raceWithThisNameAlreadyExists();
@@ -118,6 +118,7 @@ public class RaceColumnInRegattaSeriesDialog extends DataEntryDialog<Pair<Series
 
     private Widget createRaceNameDeleteButtonWidget() {
         final Button raceNameDeleteBtn = new Button(stringConstants.delete()); 
+        raceNameDeleteBtn.addStyleName("inlineButton");
         raceNameDeleteButtons.add(raceNameDeleteBtn);
         raceNameDeleteBtn.addClickHandler(new ClickHandler() {
             @Override
@@ -222,6 +223,7 @@ public class RaceColumnInRegattaSeriesDialog extends DataEntryDialog<Pair<Series
         raceNamePrefixTextBox.setWidth("20px");
         addRacesPanel.add(raceNamePrefixTextBox);
         addRacesBtn = new Button(stringConstants.add());
+        addRacesBtn.addStyleName("inlineButton");
         addRacesBtn.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {

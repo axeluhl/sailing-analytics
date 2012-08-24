@@ -47,7 +47,7 @@ public interface StringMessages extends Messages {
     String unlink();
     String leaderboardName();
     String cancel();
-    String pleaseEnterNonEmptyName();
+    String pleaseEnterAName();
     String discardRacesFromHowManyStartedRacesOn();
     String leaderboardWithThisNameAlreadyExists();
     String discardThresholdsMustBeNumeric();
@@ -150,7 +150,6 @@ public interface StringMessages extends Messages {
     String penaltyCircles();
     String medalRaceIsNull();
     String maneuverTypes();
-    String raceNameEmpty();
     String configuration();
     String chooseChart();
     String distanceTraveled();
@@ -383,4 +382,5 @@ public interface StringMessages extends Messages {
     String useOverallLeaderboard();
     String overallStandings();
     String scoringSchemeHighPointEssOverall();
+    String type();
 }
