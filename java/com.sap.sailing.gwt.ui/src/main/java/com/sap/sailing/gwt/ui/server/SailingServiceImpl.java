@@ -94,6 +94,8 @@ import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard.Entry;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
+import com.sap.sailing.domain.leaderboard.MetaLeaderboard;
+import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
@@ -1796,7 +1798,18 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         }
         return results;
     }
-    
+
+    @Override
+    public StrippedLeaderboardDTO getLeaderboard(String leaderboardName) {
+        Map<String, Leaderboard> leaderboards = getService().getLeaderboards();
+        StrippedLeaderboardDTO result = null;
+        Leaderboard leaderboard = leaderboards.get(leaderboardName);
+        if(leaderboard != null) {
+            result = createStrippedLeaderboardDTO(leaderboard, false);
+        }
+        return result;
+    }
+
     @Override
     public List<StrippedLeaderboardDTO> getLeaderboardsByEvent(RegattaDTO regatta) {
         List<StrippedLeaderboardDTO> results = new ArrayList<StrippedLeaderboardDTO>();
@@ -1849,6 +1862,20 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         Long delayToLiveInMillisForLatestRace = null;
         leaderboardDTO.name = leaderboard.getName();
         leaderboardDTO.competitorDisplayNames = new HashMap<CompetitorDTO, String>();
+        leaderboardDTO.isMetaLeaderboard = leaderboard instanceof MetaLeaderboard ? true : false;
+        if(leaderboard instanceof RegattaLeaderboard) {
+            RegattaLeaderboard regattaLeaderboard = (RegattaLeaderboard) leaderboard;
+            Regatta regatta = regattaLeaderboard.getRegatta();
+            leaderboardDTO.regattaName = regatta.getName(); 
+            leaderboardDTO.isRegattaLeaderboard = true;
+            leaderboardDTO.scoringScheme = regatta.getScoringScheme().getType();
+        } else {
+            leaderboardDTO.isRegattaLeaderboard = false;
+            leaderboardDTO.scoringScheme = leaderboard.getScoringScheme().getType();
+        }
+        leaderboardDTO.setDelayToLiveInMillisForLatestRace(delayToLiveInMillisForLatestRace);
+        leaderboardDTO.hasCarriedPoints = leaderboard.hasCarriedPoints();
+        leaderboardDTO.discardThresholds = leaderboard.getResultDiscardingRule().getDiscardIndexResultsStartingWithHowManyRaces();
         for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
             StrippedRaceDTO race = null;
             for (Fleet fleet : raceColumn.getFleets()) {
@@ -1871,10 +1898,6 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 leaderboardDTO.addRace(raceColumn.getName(), fleetDTO, raceColumn.isMedalRace(), raceIdentifier, race);
             }
         }
-        leaderboardDTO.hasCarriedPoints = leaderboard.hasCarriedPoints();
-        leaderboardDTO.discardThresholds = leaderboard.getResultDiscardingRule().getDiscardIndexResultsStartingWithHowManyRaces();
-        leaderboardDTO.scoringScheme = leaderboard.getScoringScheme().getType();
-        leaderboardDTO.setDelayToLiveInMillisForLatestRace(delayToLiveInMillisForLatestRace);
         return leaderboardDTO;
     }
 

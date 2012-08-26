@@ -261,4 +261,6 @@ public interface SailingService extends RemoteService {
     void addColumnsToLeaderboard(String leaderboardName, List<Pair<String, Boolean>> columnsToAdd);
 
     void removeLeaderboardColumns(String leaderboardName, List<String> columnsToRemove);
+
+    StrippedLeaderboardDTO getLeaderboard(String leaderboardName);
 }

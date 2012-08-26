@@ -15,6 +15,7 @@ import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.leaderboard.MetaLeaderboard;
 import com.sap.sailing.domain.leaderboard.ScoreCorrectionListener;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
@@ -39,7 +40,7 @@ import com.sap.sailing.domain.tracking.TrackedRace;
  * @author Axel Uhl (d043530)
  * 
  */
-public abstract class AbstractMetaLeaderboard extends AbstractSimpleLeaderboardImpl implements Leaderboard {
+public abstract class AbstractMetaLeaderboard extends AbstractSimpleLeaderboardImpl implements MetaLeaderboard {
     private static final long serialVersionUID = 2368754404068836260L;
     private final Fleet metaFleet;
     private final ScoringScheme scoringScheme;
@@ -70,7 +71,7 @@ public abstract class AbstractMetaLeaderboard extends AbstractSimpleLeaderboardI
         scoreCorrectionChangeForwardersByLeaderboard = new WeakHashMap<>();
     }
 
-    protected abstract Iterable<Leaderboard> getLeaderboards();
+    public abstract Iterable<Leaderboard> getLeaderboards();
     
     @Override
     public MetaLeaderboardScoreCorrection getScoreCorrection() {

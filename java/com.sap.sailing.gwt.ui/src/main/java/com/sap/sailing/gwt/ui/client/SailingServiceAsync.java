@@ -429,4 +429,6 @@ public interface SailingServiceAsync {
             AsyncCallback<Void> callback);
 
     void removeLeaderboardColumns(String leaderboardName, List<String> columnsToRemove, AsyncCallback<Void> callback);
+
+    void getLeaderboard(String leaderboardName, AsyncCallback<StrippedLeaderboardDTO> callback);
 }

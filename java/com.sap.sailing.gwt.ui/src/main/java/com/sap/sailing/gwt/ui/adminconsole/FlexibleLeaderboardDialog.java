@@ -29,22 +29,22 @@ public abstract class FlexibleLeaderboardDialog extends AbstractLeaderboardDialo
         @Override
         public String getErrorMessage(LeaderboardDescriptor leaderboardToValidate) {
             String errorMessage;
-            boolean nonEmpty = leaderboardToValidate.name != null && leaderboardToValidate.name.length() > 0;
+            boolean nonEmpty = leaderboardToValidate.getName() != null && leaderboardToValidate.getName().length() > 0;
 
             boolean discardThresholdsAscending = true;
-            for (int i = 1; i < leaderboardToValidate.discardThresholds.length; i++) {
+            for (int i = 1; i < leaderboardToValidate.getDiscardThresholds().length; i++) {
                 // TODO what are correct values for discarding Thresholds?
-                if (0 < leaderboardToValidate.discardThresholds.length){ 
+                if (0 < leaderboardToValidate.getDiscardThresholds().length){ 
                     discardThresholdsAscending = discardThresholdsAscending
-                            && leaderboardToValidate.discardThresholds[i - 1] < leaderboardToValidate.discardThresholds[i]
+                            && leaderboardToValidate.getDiscardThresholds()[i - 1] < leaderboardToValidate.getDiscardThresholds()[i]
                     // and if one box is empty, all subsequent boxes need to be empty too
-                    && (leaderboardToValidate.discardThresholds[i] == 0 || leaderboardToValidate.discardThresholds[i-1] > 0);
+                    && (leaderboardToValidate.getDiscardThresholds()[i] == 0 || leaderboardToValidate.getDiscardThresholds()[i-1] > 0);
                 }
             }
             
             boolean unique = true;
             for (StrippedLeaderboardDTO dao : existingLeaderboards) {
-                if(dao.name.equals(leaderboardToValidate.name)){
+                if(dao.name.equals(leaderboardToValidate.getName())){
                     unique = false;
                 }
             }
@@ -70,8 +70,8 @@ public abstract class FlexibleLeaderboardDialog extends AbstractLeaderboardDialo
     @Override
     protected LeaderboardDescriptor getResult() {
         LeaderboardDescriptor leaderboard = super.getResult();
-        leaderboard.regatta = null;
-        leaderboard.scoringScheme = getSelectedScoringSchemeType(scoringSchemeListBox, stringMessages);
+        leaderboard.setRegattaName(null);
+        leaderboard.setScoringScheme(getSelectedScoringSchemeType(scoringSchemeListBox, stringMessages));
         return leaderboard;
     }
 

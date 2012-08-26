@@ -383,4 +383,5 @@ public interface StringMessages extends Messages {
     String overallStandings();
     String scoringSchemeHighPointEssOverall();
     String type();
+    String actionAddRaces();
 }

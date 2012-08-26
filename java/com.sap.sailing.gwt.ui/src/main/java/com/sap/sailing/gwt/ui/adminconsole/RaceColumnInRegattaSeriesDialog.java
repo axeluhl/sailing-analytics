@@ -214,7 +214,7 @@ public class RaceColumnInRegattaSeriesDialog extends DataEntryDialog<Pair<Series
         // add races controls
         HorizontalPanel addRacesPanel = new HorizontalPanel();
         addRacesPanel.setSpacing(3);
-        addRacesPanel.add(new Label("Add a number of races:"));
+        addRacesPanel.add(new Label("Add"));
         addRacesPanel.add(addRacesListBox);
         for(int i = 1; i <= 10; i++) {
             addRacesListBox.addItem("" + i);

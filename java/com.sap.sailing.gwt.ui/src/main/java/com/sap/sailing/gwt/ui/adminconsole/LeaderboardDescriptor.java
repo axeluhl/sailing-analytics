@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import com.sap.sailing.domain.common.ScoringSchemeType;
-import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 
 /**
  * A descriptor class for creating and editing basic data of a leaderboard
@@ -9,20 +8,19 @@ import com.sap.sailing.gwt.ui.shared.RegattaDTO;
  *
  */
 public class LeaderboardDescriptor {
-    public String name;
-    public ScoringSchemeType scoringScheme; 
-    public int[] discardThresholds;
-    public RegattaDTO regatta;
+    private String name;
+    private ScoringSchemeType scoringScheme; 
+    private int[] discardThresholds;
+    private String regattaName;
 
     public LeaderboardDescriptor() {
     }
 
-    public LeaderboardDescriptor(String name, ScoringSchemeType scoringScheme, int[] discardThresholds,
-            RegattaDTO regatta) {
+    public LeaderboardDescriptor(String name, ScoringSchemeType scoringScheme, int[] discardThresholds, String regattaName) {
         this.name = name;
         this.scoringScheme = scoringScheme;
         this.discardThresholds = discardThresholds;
-        this.regatta = regatta;
+        this.regattaName = regattaName;
     }
 
     public LeaderboardDescriptor(String name, ScoringSchemeType scoringScheme, int[] discardThresholds) {
@@ -55,12 +53,11 @@ public class LeaderboardDescriptor {
         this.discardThresholds = discardThresholds;
     }
 
-    public RegattaDTO getRegatta() {
-        return regatta;
+    public String getRegattaName() {
+        return regattaName;
     }
 
-    public void setRegatta(RegattaDTO regatta) {
-        this.regatta = regatta;
+    public void setRegattaName(String regattaName) {
+        this.regattaName = regattaName;
     }
-
 }

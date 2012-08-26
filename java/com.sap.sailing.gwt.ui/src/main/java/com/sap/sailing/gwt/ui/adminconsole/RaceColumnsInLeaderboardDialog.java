@@ -10,6 +10,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Grid;
+import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
@@ -28,7 +29,7 @@ public class RaceColumnsInLeaderboardDialog extends DataEntryDialog<List<RaceCol
     private final StringMessages stringConstants;
     private final TextBox raceNamePrefixTextBox;
     private Grid raceColumnsGrid;
-    private VerticalPanel additionalWidgetPanel;
+    private VerticalPanel additionalWidget;
     private List<RaceColumnDTO> existingRaces;
     
     private static class RaceDialogValidator implements Validator<List<RaceColumnDTO>> {
@@ -87,7 +88,7 @@ public class RaceColumnsInLeaderboardDialog extends DataEntryDialog<List<RaceCol
 
     public RaceColumnsInLeaderboardDialog(List<RaceColumnDTO> existingRaces, StringMessages stringConstants,
             AsyncCallback<List<RaceColumnDTO>> callback) {
-        super(stringConstants.actionEditRaces(), null, stringConstants.ok(), stringConstants.cancel(),
+        super(stringConstants.actionAddRaces(), null, stringConstants.ok(), stringConstants.cancel(),
                 new RaceDialogValidator(stringConstants), callback);
         this.existingRaces = existingRaces;
         this.stringConstants = stringConstants;
@@ -106,6 +107,13 @@ public class RaceColumnsInLeaderboardDialog extends DataEntryDialog<List<RaceCol
         return textBox; 
     }
 
+    private Widget createMedalRaceWidget(boolean isMedalRace, boolean enabled) {
+        CheckBox checkBox = createCheckbox(stringConstants.medalRace()); 
+        checkBox.setEnabled(enabled);
+        isMedalRaceCheckboxes.add(checkBox);
+        return checkBox; 
+    }
+
     @Override
     protected List<RaceColumnDTO> getResult() {
         List<RaceColumnDTO> racesWithFleet = new ArrayList<RaceColumnDTO>();
@@ -122,19 +130,20 @@ public class RaceColumnsInLeaderboardDialog extends DataEntryDialog<List<RaceCol
     
     @Override
     protected Widget getAdditionalWidget() {
-        additionalWidgetPanel = new VerticalPanel();
+        additionalWidget = new VerticalPanel();
 
         raceNamePrefixTextBox.setText("R");
        
         // add races controls
         HorizontalPanel addRacesPanel = new HorizontalPanel();
-        addRacesPanel.setSpacing(3);
-        addRacesPanel.add(new Label("Add a number of races:"));
+        addRacesPanel.setSpacing(5);
+        addRacesPanel.add(new Label("Add"));
         addRacesPanel.add(addRacesListBox);
-        for(int i = 1; i <= 10; i++) {
+        for(int i = 1; i <= 20; i++) {
             addRacesListBox.addItem("" + i);
         }
         addRacesListBox.setSelectedIndex(0);
+        addRacesPanel.add(new Label("races with name prefix "));
         raceNamePrefixTextBox.setWidth("20px");
         addRacesPanel.add(raceNamePrefixTextBox);
         addRacesBtn = new Button(stringConstants.add());
@@ -142,7 +151,6 @@ public class RaceColumnsInLeaderboardDialog extends DataEntryDialog<List<RaceCol
         addRacesBtn.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-
                     String racePrefix = raceNamePrefixTextBox.getText();
                     int racesCountToCreate = addRacesListBox.getSelectedIndex()+1;
                     int currentSize = raceNameEntryFields.size();
@@ -152,23 +160,26 @@ public class RaceColumnsInLeaderboardDialog extends DataEntryDialog<List<RaceCol
                             raceName += (currentSize + i);
                         }
                         createRaceNameWidget(raceName, true);
+                        createMedalRaceWidget(false, true);
                     }
-                    updateRaceColumnsGrid(additionalWidgetPanel);
+                    updateRaceColumnsGrid(additionalWidget);
 
             }
         });
         addRacesPanel.add(addRacesBtn);
-        additionalWidgetPanel.add(addRacesPanel);
+        additionalWidget.add(addRacesPanel);
+        alignAllPanelWidgetsVertically(addRacesPanel, HasVerticalAlignment.ALIGN_MIDDLE);
         
-        additionalWidgetPanel.add(createHeadlineLabel(stringConstants.races()));
-        additionalWidgetPanel.add(raceColumnsGrid);
+        additionalWidget.add(createHeadlineLabel(stringConstants.races()));
+        additionalWidget.add(raceColumnsGrid);
 
         for(RaceColumnDTO raceColumn: existingRaces) {
             createRaceNameWidget(raceColumn.getRaceColumnName(), false);
+            createMedalRaceWidget(raceColumn.isMedalRace(), false);
         }
-        updateRaceColumnsGrid(additionalWidgetPanel);
+        updateRaceColumnsGrid(additionalWidget);
 
-        return additionalWidgetPanel;
+        return additionalWidget;
     }
    
     private void updateRaceColumnsGrid(VerticalPanel parentPanel) {
@@ -176,12 +187,11 @@ public class RaceColumnsInLeaderboardDialog extends DataEntryDialog<List<RaceCol
         parentPanel.remove(raceColumnsGrid);
         int raceNamesCount = raceNameEntryFields.size();
         if(raceNamesCount > 0) {
-            raceColumnsGrid = new Grid(raceNamesCount + 1, 3);
+            raceColumnsGrid = new Grid(raceNamesCount, 3);
             raceColumnsGrid.setCellSpacing(4);
-            raceColumnsGrid.setHTML(0, 0, stringConstants.name());
             for(int i = 0; i < raceNamesCount; i++) {
-                raceColumnsGrid.setWidget(i+1, 0, raceNameEntryFields.get(i));
-                raceColumnsGrid.setWidget(i+1, 1, isMedalRaceCheckboxes.get(i));
+                raceColumnsGrid.setWidget(i, 0, raceNameEntryFields.get(i));
+                raceColumnsGrid.setWidget(i, 1, isMedalRaceCheckboxes.get(i));
             }
         } else {
             raceColumnsGrid = new Grid(0, 0);

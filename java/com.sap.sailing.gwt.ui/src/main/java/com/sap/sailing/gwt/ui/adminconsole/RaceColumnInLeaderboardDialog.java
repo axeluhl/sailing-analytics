@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.CheckBox;
+import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
@@ -65,7 +66,7 @@ public class RaceColumnInLeaderboardDialog extends DataEntryDialog<RaceColumnDTO
 
     public RaceColumnInLeaderboardDialog(List<RaceColumnDTO> existingRaces, RaceColumnDTO raceColumnToEdit, 
             StringMessages stringConstants, AsyncCallback<RaceColumnDTO> callback) {
-        super(stringConstants.name(), null, stringConstants.ok(), stringConstants.cancel(),
+        super(stringConstants.actionRaceEdit(), null, stringConstants.ok(), stringConstants.cancel(),
                 new RaceDialogValidator(stringConstants, existingRaces), callback);
         this.raceColumnToEdit = raceColumnToEdit;
         this.stringConstants = stringConstants;
@@ -86,9 +87,11 @@ public class RaceColumnInLeaderboardDialog extends DataEntryDialog<RaceColumnDTO
         VerticalPanel mainPanel = new VerticalPanel();
         
         HorizontalPanel raceNamePanel = new HorizontalPanel();
+        raceNamePanel.setSpacing(3);
         mainPanel.add(raceNamePanel);
         raceNamePanel.add(new Label(stringConstants.name() + ":"));
         raceNamePanel.add(raceNameBox);
+        alignAllPanelWidgetsVertically(raceNamePanel, HasVerticalAlignment.ALIGN_MIDDLE);
         
         mainPanel.add(isMedalRace);
         return mainPanel;
