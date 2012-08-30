@@ -101,7 +101,7 @@ public class RaceColumnsInLeaderboardDialog extends DataEntryDialog<List<RaceCol
 
     private Widget createRaceNameWidget(String defaultName, boolean enabled) {
         TextBox textBox = createTextBox(defaultName); 
-        textBox.setVisibleLength(40);
+        textBox.setVisibleLength(25);
         textBox.setEnabled(enabled);
         raceNameEntryFields.add(textBox);
         return textBox; 
