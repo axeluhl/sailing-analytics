@@ -4,12 +4,15 @@ import java.util.Collections;
 
 public class BuoyDTO extends ControlPointDTO {
     public PositionDTO position;
-    
+
+    public String displayColor;
+
     public BuoyDTO() {}
     
-    public BuoyDTO(String name, double latDeg, double lngDeg) {
+    public BuoyDTO(String name, double latDeg, double lngDeg, String displayColor) {
         super(name);
-        position = new PositionDTO(latDeg, lngDeg);
+        this.position = new PositionDTO(latDeg, lngDeg);
+        this.displayColor = displayColor;
     }
 
     @Override

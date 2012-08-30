@@ -29,6 +29,10 @@ public class RaceMapImageManager {
      */
     protected Icon buoyIcon;
 
+    protected Icon buoyRedIcon;
+    protected Icon buoyYellowIcon;
+    protected Icon buoyGreenIcon;
+
     protected Map<Pair<ManeuverType, Tack>, Icon> maneuverIconsForTypeAndTargetTack;
 
     private static RaceMapResources resources = GWT.create(RaceMapResources.class);
@@ -49,6 +53,18 @@ public class RaceMapImageManager {
             buoyIcon = Icon.newInstance(resources.buoyIcon().getSafeUri().asString());
             buoyIcon.setIconSize(Size.newInstance(19, 28));
             buoyIcon.setIconAnchor(Point.newInstance(6, 15));
+
+            buoyRedIcon = Icon.newInstance(resources.buoyRedIcon().getSafeUri().asString());
+            buoyRedIcon.setIconSize(Size.newInstance(19, 28));
+            buoyRedIcon.setIconAnchor(Point.newInstance(6, 15));
+
+            buoyYellowIcon = Icon.newInstance(resources.buoyYellowIcon().getSafeUri().asString());
+            buoyYellowIcon.setIconSize(Size.newInstance(19, 28));
+            buoyYellowIcon.setIconAnchor(Point.newInstance(6, 15));
+
+            buoyGreenIcon = Icon.newInstance(resources.buoyGreenIcon().getSafeUri().asString());
+            buoyGreenIcon.setIconSize(Size.newInstance(19, 28));
+            buoyGreenIcon.setIconAnchor(Point.newInstance(6, 15));
 
             Icon tackToStarboardIcon = Icon
                     .newInstance("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=T|00FF00|000000");

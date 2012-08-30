@@ -1519,7 +1519,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                     Position positionAtDate = track.getEstimatedPosition(dateAsTimePoint, /* extrapolate */false);
                     if (positionAtDate != null) {
                         BuoyDTO buoyDTO = new BuoyDTO(buoy.getName(), positionAtDate.getLatDeg(),
-                                positionAtDate.getLngDeg());
+                                positionAtDate.getLngDeg(), buoy.getDisplayColor());
                         result.buoys.add(buoyDTO);
                     }
                 }
@@ -1550,7 +1550,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 GPSFixTrack<Buoy, GPSFix> track = trackedRace.getOrCreateTrack(buoy);
                 Position positionAtDate = track.getEstimatedPosition(dateAsTimePoint, /* extrapolate */false);
                 if (positionAtDate != null) {
-                    BuoyDTO markDTO = new BuoyDTO(buoy.getName(), positionAtDate.getLatDeg(), positionAtDate.getLngDeg());
+                    BuoyDTO markDTO = new BuoyDTO(buoy.getName(), positionAtDate.getLatDeg(), positionAtDate.getLngDeg(), buoy.getDisplayColor());
                     raceBuoysDTO.buoys.add(markDTO);
                 }
             }
@@ -1582,12 +1582,12 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             final Buoy right = ((Gate) controlPoint).getRight();
             final Position rightPos = trackedRace.getOrCreateTrack(right).getEstimatedPosition(timePoint, /* extrapolate */ false);
             result = new GateDTO(controlPoint.getName(),
-                    new BuoyDTO(left.getName(), leftPos.getLatDeg(), leftPos.getLngDeg()),
-                    new BuoyDTO(right.getName(), rightPos.getLatDeg(), rightPos.getLngDeg()));
+                    new BuoyDTO(left.getName(), leftPos.getLatDeg(), leftPos.getLngDeg(), left.getDisplayColor()),
+                    new BuoyDTO(right.getName(), rightPos.getLatDeg(), rightPos.getLngDeg(), right.getDisplayColor()));
         } else {
             final Position posOfFirst = trackedRace.getOrCreateTrack(controlPoint.getBuoys().iterator().next()).
                     getEstimatedPosition(timePoint, /* extrapolate */ false);
-            result = new BuoyDTO(controlPoint.getName(), posOfFirst.getLatDeg(), posOfFirst.getLngDeg());
+            result = new BuoyDTO(controlPoint.getName(), posOfFirst.getLatDeg(), posOfFirst.getLngDeg(), null);
         }
         return result;
     }
