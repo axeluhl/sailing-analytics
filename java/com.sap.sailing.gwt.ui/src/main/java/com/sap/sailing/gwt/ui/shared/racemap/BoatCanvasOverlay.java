@@ -82,13 +82,19 @@ public class BoatCanvasOverlay extends CanvasOverlay {
     public double getRealBoatSizeScaleFactor(Size imageSize) {
         // the possible zoom level range is 0 to 21 (zoom level 0 would show the whole world)
         int zoomLevel = map == null ? 1 : map.getZoomLevel();
+        int boatLengthInPixel = boatClassImageData.getBoatClassImageLengthInPx();
         double minScaleFactor = 0.45;
         double maxScaleFactor = 2.0;
+        if(boatLengthInPixel > 50 && boatLengthInPixel <= 100) {
+            minScaleFactor = 0.40;
+        } else if(boatLengthInPixel > 100) {
+            minScaleFactor = 0.33;
+        } 
+        
         double realBoatSizeScaleFactor = minScaleFactor;
         double hullLengthInMeters = boatClass.getHullLengthInMeters();
         // to scale the boats to a realistic size we need the length of the boat in pixel, 
         // but it does not work to just take the image size, because the images for the different boat states can be different
-        int boatLengthInPixel = 50;
         if (zoomLevel > 5) {
             LatLngBounds bounds = map.getBounds();
             if (bounds != null) {
