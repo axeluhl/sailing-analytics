@@ -22,7 +22,9 @@ import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
+import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.Util;
+import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
@@ -55,6 +57,13 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
         super(trackedRegatta, race, windStore, delayToLiveInMillis, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed,
                 delayForCacheInvalidationOfWindEstimation);
         this.raceIsKnownToStartUpwind = race.getBoatClass().typicallyStartsUpwind();
+        if(!raceIsKnownToStartUpwind) {
+            Set<WindSource> windSourcesToExclude = new HashSet<WindSource>();
+            windSourcesToExclude.add(new WindSourceImpl(WindSourceType.COURSE_BASED));
+            windSourcesToExclude.add(new WindSourceImpl(WindSourceType.TRACK_BASED_ESTIMATION));
+            setWindSourcesToExclude(windSourcesToExclude);
+        }
+        
         for (Competitor competitor : getRace().getCompetitors()) {
             DynamicGPSFixTrack<Competitor, GPSFixMoving> track = getTrack(competitor);
             track.addListener(this);
