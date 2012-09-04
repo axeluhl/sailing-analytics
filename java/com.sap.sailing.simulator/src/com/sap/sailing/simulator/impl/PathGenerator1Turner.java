@@ -34,6 +34,11 @@ public class PathGenerator1Turner implements PathGenerator {
     private SimulationParameters simulationParameters;
     private boolean leftSide;
     private result1Turn result;
+    private Position evalStartPoint;
+    private TimePoint evalStartTime;
+    private long evalTimeStep;
+    private int evalStepMax;
+    private double evalTolerance;
     
     public PathGenerator1Turner(SimulationParameters params) {
         simulationParameters = params;
@@ -49,8 +54,13 @@ public class PathGenerator1Turner implements PathGenerator {
         return simulationParameters;
     }
 
-    public void setEvaluationParameters(boolean leftSideVal) {
+    public void setEvaluationParameters(boolean leftSideVal, Position startPoint, TimePoint startTime, long timeStep, int stepMax, double tolerance) {
         this.leftSide = leftSideVal;
+        this.evalStartPoint = startPoint;
+        this.evalStartTime = startTime;
+        this.evalTimeStep = timeStep;
+        this.evalStepMax = stepMax;
+        this.evalTolerance = tolerance;
     }
 
     public int getMiddle() {
@@ -62,9 +72,20 @@ public class PathGenerator1Turner implements PathGenerator {
 
         WindFieldGenerator windField = simulationParameters.getWindField();
         PolarDiagram polarDiagram = simulationParameters.getBoatPolarDiagram();
-        Position start = simulationParameters.getCourse().get(0);
+        
+        Position start;
+        if (this.evalStartPoint == null) {
+            start = simulationParameters.getCourse().get(0);
+        } else {
+            start = this.evalStartPoint;            
+        }
         Position end = simulationParameters.getCourse().get(1);
-        TimePoint startTime = windField.getStartTime();// new MillisecondsTimePoint(0);
+        TimePoint startTime;
+        if (this.evalStartTime == null) {
+            startTime = windField.getStartTime();// new MillisecondsTimePoint(0);
+        } else {
+            startTime = this.evalStartTime;
+        }
 
         long turnloss = polarDiagram.getTurnLoss(); // 4000;
 
@@ -74,11 +95,26 @@ public class PathGenerator1Turner implements PathGenerator {
         TimePoint currentTime = startTime;
         TimePoint nextTime;
 
-        double reachingTolerance = 0.03;
-        int stepMax = 800;
+        double reachingTolerance;
+        if (this.evalTolerance == 0) {
+            reachingTolerance = 0.03;
+        } else {
+            reachingTolerance = this.evalTolerance;
+        }
+        int stepMax;
+        if (this.evalStepMax == 0) {
+            stepMax = 800;
+        } else {
+            stepMax = this.evalStepMax;
+        }
         double[] reachTime = new double[stepMax];
         boolean targetFound;
-        long timeStep = windField.getTimeStep().asMillis() / 5;
+        long timeStep;
+        if (this.evalTimeStep == 0) {
+            timeStep = windField.getTimeStep().asMillis() / 5;
+        } else {
+            timeStep = this.evalTimeStep;
+        }
         Bearing direction;
 
         double newDistance;
@@ -151,13 +187,18 @@ public class PathGenerator1Turner implements PathGenerator {
                 nextTime = new MillisecondsTimePoint(currentTime.asMillis() + timeStep);
                 Position nextPosition = currSpeed.travelTo(currentPosition, currentTime, nextTime);
                 newDistance = nextPosition.getDistance(end).getMeters();
+                /*if (this.evalStartPoint != null) {
+                    System.out.println("newDistance: "+newDistance);
+                }*/
                 if (newDistance < minimumDistance) {
                     minimumDistance = newDistance;
                 }
                 currentPosition = nextPosition;
                 currentTime = nextTime;
                 path.addLast(new TimedPositionWithSpeedImpl(currentTime, currentPosition, null)); // currSpeed));
-
+                /*if (this.evalStartPoint != null) {
+                    System.out.println("s: "+step+" dist: "+currentPosition.getDistance(end).getMeters()+" ?<? "+reachingTolerance * courseLength.getMeters());
+                }*/
                 if (currentPosition.getDistance(end).getMeters() < reachingTolerance * courseLength.getMeters()) {
                     // System.out.println(""+s+":"+path.size()+" dist:"+mindist);
                     Bearing bearPath2End = currentPosition.getBearingGreatCircle(end);

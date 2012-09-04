@@ -37,21 +37,24 @@ public class SailingSimulatorImpl implements SailingSimulator {
 
         // get 1-turners
         PathGenerator1Turner gen1Turner = new PathGenerator1Turner(simulationParameters);
-        gen1Turner.setEvaluationParameters(true);
+        gen1Turner.setEvaluationParameters(true, null, null, 0, 0, 0);
         Path leftPath = gen1Turner.getPath();
         int left1TurnMiddle = gen1Turner.getMiddle();
-        gen1Turner.setEvaluationParameters(false);
+        gen1Turner.setEvaluationParameters(false, null, null, 0, 0, 0);
         Path rightPath = gen1Turner.getPath();
         int right1TurnMiddle = gen1Turner.getMiddle();
 
         // get left- and right-going heuristic based on 1-turner
         PathGeneratorOpportunistEuclidian genOpportunistic = new PathGeneratorOpportunistEuclidian(simulationParameters);
+        //PathGeneratorOpportunistVMG genOpportunistic = new PathGeneratorOpportunistVMG(simulationParameters);
         genOpportunistic.setEvaluationParameters(left1TurnMiddle, right1TurnMiddle, true);
         Path oppPathL = genOpportunistic.getPath();
         genOpportunistic.setEvaluationParameters(left1TurnMiddle, right1TurnMiddle, false);
         Path oppPathR = genOpportunistic.getPath();
 
         Path oppPath = null;
+        //System.out.println("left -going: "+oppPathL.getPathPoints().get(oppPathL.getPathPoints().size() - 1).getTimePoint().asMillis());
+        //System.out.println("right-going: "+oppPathR.getPathPoints().get(oppPathR.getPathPoints().size() - 1).getTimePoint().asMillis());
         if (oppPathL.getPathPoints().get(oppPathL.getPathPoints().size() - 1).getTimePoint().asMillis() <= oppPathR
                 .getPathPoints().get(oppPathR.getPathPoints().size() - 1).getTimePoint().asMillis()) {
             oppPath = oppPathL;
@@ -87,6 +90,8 @@ public class SailingSimulatorImpl implements SailingSimulator {
                 optPath = oppPath;
             }
             allPaths.put("Opportunistic", oppPath);
+            //allPaths.put("OppVMG Left", oppPathL);
+            //allPaths.put("OppVMG Right", oppPathR);
         }
 
         allPaths.put("Omniscient", optPath);
@@ -101,7 +106,8 @@ public class SailingSimulatorImpl implements SailingSimulator {
         Map<String, Path> allPaths = this.getAllPaths();
         String[] allKeys = allPaths.keySet().toArray(new String[0]);
         for (String currentKey : allKeys) {
-            allTimedPaths.put(currentKey, allPaths.get(currentKey).getEvenTimedPoints(millisecondsStep));
+            //allTimedPaths.put(currentKey, allPaths.get(currentKey).getEvenTimedPoints(millisecondsStep));
+            allTimedPaths.put(currentKey, allPaths.get(currentKey).getPathPoints());
         }
 
         return allTimedPaths;

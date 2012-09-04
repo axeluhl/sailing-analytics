@@ -21,7 +21,8 @@ public interface PolarDiagram {
 	void setTargetDirection(Bearing newTargetDirection);
 	
 	SpeedWithBearing getSpeedAtBearing(Bearing bearing);
-	
+	SpeedWithBearing[] optimalVMGUpwind();
+
 	Bearing[] optimalDirectionsUpwind();
 	Bearing[] optimalDirectionsDownwind();
 	
