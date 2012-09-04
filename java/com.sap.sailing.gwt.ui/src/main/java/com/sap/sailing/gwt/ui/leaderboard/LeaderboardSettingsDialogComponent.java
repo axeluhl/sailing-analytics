@@ -177,8 +177,7 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
         // Attention: We need to consider that there are regattas with more than 30 races
         int racesCount = allColumns.size();
         int maxRacesPerRow = 10;
-        
-        if(racesCount > 0) {
+        if (racesCount > 0) {
             int rowIndex = 0;
             int columnIndex = 0;
             int rowCount = racesCount / maxRacesPerRow;
@@ -186,7 +185,6 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
                 rowCount++;
             }
             Grid grid = new Grid(rowCount, maxRacesPerRow);
-
             for (RaceColumnDTO expandableSortableColumn : allColumns) {
                 CheckBox checkbox = dialog.createCheckbox(expandableSortableColumn.getRaceColumnName());
                 checkbox.setValue(Util.contains(raceColumnSelection, expandableSortableColumn));
@@ -196,7 +194,6 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
                     rowIndex++;
                     columnIndex = 0;
                 }
-                
             }
             selectedRacesContent.add(grid);
         } else {

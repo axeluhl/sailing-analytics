@@ -57,8 +57,11 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
         super(trackedRegatta, race, windStore, delayToLiveInMillis, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed,
                 delayForCacheInvalidationOfWindEstimation);
         this.raceIsKnownToStartUpwind = race.getBoatClass().typicallyStartsUpwind();
-        if(!raceIsKnownToStartUpwind) {
+        if (!raceIsKnownToStartUpwind) {
             Set<WindSource> windSourcesToExclude = new HashSet<WindSource>();
+            for (WindSource windSourceToExclude : getWindSourcesToExclude()) {
+                windSourcesToExclude.add(windSourceToExclude);
+            }
             windSourcesToExclude.add(new WindSourceImpl(WindSourceType.COURSE_BASED));
             windSourcesToExclude.add(new WindSourceImpl(WindSourceType.TRACK_BASED_ESTIMATION));
             setWindSourcesToExclude(windSourcesToExclude);

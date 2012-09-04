@@ -23,6 +23,7 @@ public class RaceMapHelpLinesSettings {
         visibleHelpLines = new HashSet<HelpLineTypes>();
         visibleHelpLines.add(HelpLineTypes.STARTLINE);
         visibleHelpLines.add(HelpLineTypes.FINISHLINE);
+        visibleHelpLines.add(HelpLineTypes.ADVANTAGELINE);
     }
     
     public RaceMapHelpLinesSettings(Collection<HelpLineTypes> visibleHelpLines) {
