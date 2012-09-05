@@ -223,7 +223,7 @@ public class PathGeneratorOpportunistVMG implements PathGenerator {
         } else if (leftPath.getPathPoints() != null) {
             lst.addAll(leftPath.getPathPoints());
         } else if (rightPath.getPathPoints() != null) {
-            lst.addAll(leftPath.getPathPoints());
+            lst.addAll(rightPath.getPathPoints());
         }
 
         return new PathImpl(lst, wf);
