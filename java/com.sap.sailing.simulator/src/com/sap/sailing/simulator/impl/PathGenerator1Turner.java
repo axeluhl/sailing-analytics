@@ -111,7 +111,7 @@ public class PathGenerator1Turner implements PathGenerator {
         boolean targetFound;
         long timeStep;
         if (this.evalTimeStep == 0) {
-            timeStep = windField.getTimeStep().asMillis() / 5;
+            timeStep = windField.getTimeStep().asMillis() / 3;
         } else {
             timeStep = this.evalTimeStep;
         }

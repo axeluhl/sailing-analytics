@@ -315,14 +315,11 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
 
         Map<String, List<TimedPositionWithSpeed>> paths = solver.getAllPathsEvenTimed(wf.getTimeStep().asMillis());
         PathDTO[] pathDTO = new PathDTO[paths.size()];
-        //String[] pathKeys = {"1-Turner Right", "1-Turner Left", "OppVMG Right", "OppVMG Left", "Omniscient"};
-        String[] pathKeys = {"1-Turner Right", "1-Turner Left", "Opportunistic", "Omniscient"};
-        int pathIndex = 0;
-        //for(String pathName : paths.keySet()) {
-        for(String pathName : pathKeys) {
+        int pathIndex = paths.keySet().size()-1;
+        for(String pathName : paths.keySet()) {
             logger.info("Path " + pathName);
             List<TimedPositionWithSpeed> path = paths.get(pathName);
-            pathDTO[pathIndex] = new PathDTO(pathName);
+            pathDTO[pathIndex] = new PathDTO(pathName.split("#")[1]); // pathName convention is: sort-digit + "#" + path-name
             List<WindDTO> wList = new ArrayList<WindDTO>();
             for (TimedPositionWithSpeed p : path) {
 
@@ -334,7 +331,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
                 wList.add(w);
             }
             pathDTO[pathIndex].setMatrix(wList);
-            ++pathIndex;
+            --pathIndex;
         }
         return pathDTO;
     }

@@ -3,6 +3,7 @@ package com.sap.sailing.simulator.impl;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 import com.sap.sailing.simulator.Path;
 import com.sap.sailing.simulator.PathGenerator;
@@ -66,6 +67,11 @@ public class SailingSimulatorImpl implements SailingSimulator {
         PathGenerator genDynProgForward = new PathGeneratorDynProgForward(simulationParameters);
         Path optPath = genDynProgForward.getPath();
 
+        //
+        // NOTE: pathName convention is: sort-digit + "#" + path-name
+        //       The sort-digit defines the sorting of paths in webbrowser
+        //
+        
         // compare paths to avoid misleading display due to artifactual results from optimization (caused by finite
         // resolution of optimization grid)
         if (leftPath.getPathPoints() != null) {
@@ -73,7 +79,7 @@ public class SailingSimulatorImpl implements SailingSimulator {
                     .getPathPoints().get(optPath.getPathPoints().size() - 1).getTimePoint().asMillis()) {
                 optPath = leftPath;
             }
-            allPaths.put("1-Turner Left", leftPath);
+            allPaths.put("3#1-Turner Left", leftPath);
         }
 
         if (rightPath.getPathPoints() != null) {
@@ -81,7 +87,7 @@ public class SailingSimulatorImpl implements SailingSimulator {
                     .getPathPoints().get(optPath.getPathPoints().size() - 1).getTimePoint().asMillis()) {
                 optPath = rightPath;
             }
-            allPaths.put("1-Turner Right", rightPath);
+            allPaths.put("4#1-Turner Right", rightPath);
         }
 
         if (oppPath != null) {
@@ -89,25 +95,25 @@ public class SailingSimulatorImpl implements SailingSimulator {
                     .getPathPoints().get(optPath.getPathPoints().size() - 1).getTimePoint().asMillis()) {
                 optPath = oppPath;
             }
-            allPaths.put("Opportunistic", oppPath);
-            //allPaths.put("OppVMG Left", oppPathL);
-            //allPaths.put("OppVMG Right", oppPathR);
+            allPaths.put("2#Opportunistic", oppPath);
+            //allPaths.put("5#Opportunist Left", oppPathL);
+            //allPaths.put("6#Opportunist Right", oppPathR);
         }
 
-        allPaths.put("Omniscient", optPath);
+        allPaths.put("1#Omniscient", optPath);
 
         return allPaths;
     }
 
     public Map<String, List<TimedPositionWithSpeed>> getAllPathsEvenTimed(long millisecondsStep) {
 
-        Map<String, List<TimedPositionWithSpeed>> allTimedPaths = new HashMap<String, List<TimedPositionWithSpeed>>();
+        Map<String, List<TimedPositionWithSpeed>> allTimedPaths = new TreeMap<String, List<TimedPositionWithSpeed>>();
 
         Map<String, Path> allPaths = this.getAllPaths();
         String[] allKeys = allPaths.keySet().toArray(new String[0]);
         for (String currentKey : allKeys) {
-            //allTimedPaths.put(currentKey, allPaths.get(currentKey).getEvenTimedPoints(millisecondsStep));
-            allTimedPaths.put(currentKey, allPaths.get(currentKey).getPathPoints());
+            allTimedPaths.put(currentKey, allPaths.get(currentKey).getEvenTimedPoints(millisecondsStep));
+            //allTimedPaths.put(currentKey, allPaths.get(currentKey).getPathPoints());
         }
 
         return allTimedPaths;

@@ -83,7 +83,7 @@ public class WindFieldGenParamsDTO implements IsSerializable {
         startTime.setMinutes(0);
         startTime.setSeconds(0);
 
-        timeStep = new Date(30 * 1000);
+        timeStep = new Date(15 * 1000);
         endTime = new Date(startTime.getTime() + 10 * 60 * 1000);
     }
 }

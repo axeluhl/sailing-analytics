@@ -108,7 +108,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
 
                     PathCanvasOverlay pathCanvasOverlay = new PathCanvasOverlay(paths[i].name);
                     pathCanvasOverlays.add(pathCanvasOverlay);
-                    pathCanvasOverlay.pathColor = colorPalette.getNextColor();
+                    pathCanvasOverlay.pathColor = colorPalette.getColor(paths.length-1-i);
                     mapw.addOverlay(pathCanvasOverlay);
                     pathCanvasOverlay.setWindField(pathWindDTO);
                     pathCanvasOverlay.redraw(true);
@@ -117,7 +117,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
                 } else {
                     ReplayPathCanvasOverlay replayPathCanvasOverlay = new ReplayPathCanvasOverlay(paths[i].name, timer);
                     replayPathCanvasOverlays.add(replayPathCanvasOverlay);
-                    replayPathCanvasOverlay.pathColor = colorPalette.getNextColor();
+                    replayPathCanvasOverlay.pathColor = colorPalette.getColor(paths.length-1-i);
                     mapw.addOverlay(replayPathCanvasOverlay);
                     replayPathCanvasOverlay.setWindField(pathWindDTO);
                     legendCanvasOverlay.setPathOverlays(replayPathCanvasOverlays);

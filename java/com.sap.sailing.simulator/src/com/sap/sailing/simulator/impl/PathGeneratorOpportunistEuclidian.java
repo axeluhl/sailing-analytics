@@ -251,11 +251,17 @@ public class PathGeneratorOpportunistEuclidian implements PathGenerator {
         gen1Turner.setEvaluationParameters(false, currentPosition, rightGoingTime, wf.getTimeStep().asMillis() / (5 * 3), 100, 0.1);
         Path rightPath = gen1Turner.getPath();
 
-        if (leftPath.getPathPoints().get(leftPath.getPathPoints().size() - 1).getTimePoint().asMillis() <= rightPath.getPathPoints()
-                .get(rightPath.getPathPoints().size() - 1).getTimePoint().asMillis()) {
+        if ((leftPath.getPathPoints() != null) && (rightPath.getPathPoints() != null)) {
+            if (leftPath.getPathPoints().get(leftPath.getPathPoints().size() - 1).getTimePoint().asMillis() <= rightPath.getPathPoints()
+                    .get(rightPath.getPathPoints().size() - 1).getTimePoint().asMillis()) {
+                lst.addAll(leftPath.getPathPoints());
+            } else {
+                lst.addAll(rightPath.getPathPoints());
+            }
+        } else if (leftPath.getPathPoints() != null) {
             lst.addAll(leftPath.getPathPoints());
-        } else {
-            lst.addAll(rightPath.getPathPoints());
+        } else if (rightPath.getPathPoints() != null) {
+            lst.addAll(leftPath.getPathPoints());
         }
 
         return new PathImpl(lst, wf);
