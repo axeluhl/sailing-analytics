@@ -25,7 +25,7 @@ public class PathGeneratorOpportunistEuclidian implements PathGenerator {
     int maxLeft;
     int maxRight;
     boolean startLeft;
-    
+
     public PathGeneratorOpportunistEuclidian(SimulationParameters params) {
         simulationParameters = params;
     }
@@ -41,7 +41,7 @@ public class PathGeneratorOpportunistEuclidian implements PathGenerator {
     }
 
     public void setEvaluationParameters(int maxLeftVal, int maxRightVal, boolean startLeftVal) {
-        this.maxLeft = maxLeftVal;        
+        this.maxLeft = maxLeftVal;
         this.maxRight = maxRightVal;
         this.startLeft = startLeftVal;
     }
@@ -67,6 +67,7 @@ public class PathGeneratorOpportunistEuclidian implements PathGenerator {
         int prevDirection = -1;
         long turnloss = pd.getTurnLoss(); // 4000; // time lost when doing a turn
         long windpred = 1000; // time used to predict wind, i.e. hypothetical sailors prediction
+        double fracFinishPhase = 0.05;
 
         TimePoint leftTime;
         TimePoint rightTime;
@@ -81,9 +82,12 @@ public class PathGeneratorOpportunistEuclidian implements PathGenerator {
         logger.info("Time step :" + timeStep);
         // while there is more than 5% of the total distance to the finish
 
+        //
+        // StrategicPhase: start & intermediate course until close to target
+        //
         SpeedWithBearing slft = null;
         SpeedWithBearing srght = null;
-        while (currentPosition.getDistance(end).compareTo(start.getDistance(end).scale(0.1)) > 0) {
+        while (currentPosition.getDistance(end).compareTo(start.getDistance(end).scale(fracFinishPhase)) > 0) {
 
             // TimePoint nextTime = new MillisecondsTimePoint(currentTime.asMillis() + 30000);
 
@@ -103,8 +107,8 @@ public class PathGeneratorOpportunistEuclidian implements PathGenerator {
             // SpeedWithBearing sWDirect = pd.getSpeedAtBearing(wDirect);
             SpeedWithBearing sWLft = pd.getSpeedAtBearing(wLft);
             SpeedWithBearing sWRght = pd.getSpeedAtBearing(wRght);
-            logger.fine("left boat speed:" + sWLft.getKnots() + " angle:" + sWLft.getBearing().getDegrees()
-                    + "  right boat speed:" + sWRght.getKnots() + " angle:" + sWRght.getBearing().getDegrees());
+            logger.fine("left boat speed:" + sWLft.getKnots() + " angle:" + sWLft.getBearing().getDegrees() + "  right boat speed:"
+                    + sWRght.getKnots() + " angle:" + sWRght.getBearing().getDegrees());
 
             TimePoint wTime = new MillisecondsTimePoint(currentTime.asMillis() + windpred);
             // Position pWDirect = sWDirect.travelTo(currentPosition, currentTime, wTime);
@@ -139,8 +143,8 @@ public class PathGeneratorOpportunistEuclidian implements PathGenerator {
             // System.out.println("Bearings : " + (lft.getDegrees() - bearStart.getDegrees()) + " "
             // + (rght.getDegrees() - bearStart.getDegrees()));
 
-            logger.fine("left boat speed:" + slft.getKnots() + " angle:" + slft.getBearing().getDegrees()
-                    + "  right boat speed:" + srght.getKnots() + " angle:" + srght.getBearing().getDegrees());
+            logger.fine("left boat speed:" + slft.getKnots() + " angle:" + slft.getBearing().getDegrees() + "  right boat speed:"
+                    + srght.getKnots() + " angle:" + srght.getBearing().getDegrees());
 
             /*
              * if (prevDirection == 0) { directTime = new MillisecondsTimePoint(nextTimeVal); leftTime = new
@@ -201,8 +205,7 @@ public class PathGeneratorOpportunistEuclidian implements PathGenerator {
 
             } else {
                 // System.out.println("Distance Left - Right: "+lDistCM+" - "+ rDistCM);
-                if (((lDistCM <= rDistCM) && (!allLeft || (stepsLeft < maxLeft)))
-                        || (allRight && (stepsRight >= maxRight))) {
+                if (((lDistCM <= rDistCM) && (!allLeft || (stepsLeft < maxLeft))) || (allRight && (stepsRight >= maxRight))) {
                     lst.add(new TimedPositionWithSpeedImpl(nextTime, plft, slft));
                     currentPosition = plft;
                     if (prevDirection == 2) {
@@ -228,109 +231,35 @@ public class PathGeneratorOpportunistEuclidian implements PathGenerator {
 
         }
 
-        // approach end
-        double bearingToEnd;
-        SpeedWithBearing bearingBoat;
+        //
+        // FinishPhase: get 1-turners to finalize course
+        //
+        PathGenerator1Turner gen1Turner = new PathGenerator1Turner(simulationParameters);
+        TimePoint leftGoingTime;
+        TimePoint rightGoingTime;
         if (prevDirection == 1) {
-            bearingToEnd = currentPosition.getBearingGreatCircle(end).getDegrees()
-                    - pd.optimalDirectionsUpwind()[1].getDegrees();
-            bearingBoat = slft;
+            leftGoingTime = currentTime;
+            rightGoingTime = new MillisecondsTimePoint(currentTime.asMillis() + turnloss);
         } else {
-            bearingToEnd = pd.optimalDirectionsUpwind()[0].getDegrees()
-                    - currentPosition.getBearingGreatCircle(end).getDegrees();
-            bearingBoat = srght;
-        }
-        bearingToEnd = (bearingToEnd + 360 + 180) % 360 - 180;
-        // System.out.println("b2End:" + bearingToEnd);
-        double bearingToEndSign = Math.signum(bearingToEnd);
-        Position tackPosition = currentPosition;
-        Position tackPositionNew = currentPosition;
-        TimePoint tackTime = currentTime;
-        TimePoint tackTimeNext = currentTime;
-        long searchTime = 500;
-        while (Math.signum(bearingToEnd) == bearingToEndSign) {
-            tackTime = tackTimeNext;
-            tackPosition = tackPositionNew;
-            if (bearingToEnd < 0) {
-                tackTimeNext = new MillisecondsTimePoint(tackTime.asMillis() + searchTime);
-                tackPositionNew = bearingBoat.travelTo(tackPosition, tackTime, tackTimeNext);
-            } else {
-                tackTimeNext = new MillisecondsTimePoint(tackTime.asMillis() - searchTime);
-                tackPositionNew = bearingBoat.travelTo(tackPosition, tackTime, tackTimeNext);
-            }
-            if (prevDirection == 1) {
-                bearingToEnd = tackPositionNew.getBearingGreatCircle(end).getDegrees()
-                        - pd.optimalDirectionsUpwind()[1].getDegrees();
-                // System.out.println("bEnd :" + tackPosition.getBearingGreatCircle(end).getDegrees());
-                // System.out.println("bBoat:" + pd.optimalDirectionsUpwind()[1].getDegrees());
-            } else {
-                bearingToEnd = pd.optimalDirectionsUpwind()[0].getDegrees()
-                        - tackPositionNew.getBearingGreatCircle(end).getDegrees();
-                // System.out.println("bEnd :" + tackPosition.getBearingGreatCircle(end).getDegrees());
-                // System.out.println("bBoat:" + pd.optimalDirectionsUpwind()[0].getDegrees());
-            }
-            bearingToEnd = (bearingToEnd + 360 + 180) % 360 - 180;
-            // System.out.println("b2End:" + bearingToEnd);
+            leftGoingTime = new MillisecondsTimePoint(currentTime.asMillis() + turnloss);
+            rightGoingTime = currentTime;
         }
 
-        // scan more detailed between tackPosition and tackPositionNew
-        boolean endIteration = false;
-        while ((Math.abs(bearingToEnd) > 0.1) && (!endIteration)) {
-            TimePoint tackTimeMid = new MillisecondsTimePoint((tackTime.asMillis() + tackTimeNext.asMillis()) / 2);
-            if (tackTimeMid.asMillis() == tackTime.asMillis()) {
-                endIteration = true;
-            }
-            Position tackPositionMid = bearingBoat.travelTo(tackPosition, tackTime, tackTimeMid);
-            if (prevDirection == 1) {
-                bearingToEnd = tackPositionMid.getBearingGreatCircle(end).getDegrees()
-                        - pd.optimalDirectionsUpwind()[1].getDegrees();
-                // System.out.println("bEnd :" + tackPositionMid.getBearingGreatCircle(end).getDegrees());
-                // System.out.println("bBoat:" + pd.optimalDirectionsUpwind()[1].getDegrees());
-            } else {
-                bearingToEnd = pd.optimalDirectionsUpwind()[0].getDegrees()
-                        - tackPositionMid.getBearingGreatCircle(end).getDegrees();
-                // System.out.println("bEnd :" + tackPositionMid.getBearingGreatCircle(end).getDegrees());
-                // System.out.println("bBoat:" + pd.optimalDirectionsUpwind()[0].getDegrees());
-            }
-            bearingToEnd = (bearingToEnd + 360 + 180) % 360 - 180;
-            // System.out.println("fine b2End:" + bearingToEnd);
-            if (Math.signum(bearingToEnd) == bearingToEndSign) {
-                tackPosition = tackPositionMid;
-                tackTime = tackTimeMid;
-            } else {
-                tackPositionNew = tackPositionMid;
-                tackTimeNext = tackTimeMid;
-            }
+        gen1Turner.setEvaluationParameters(true, currentPosition, leftGoingTime, wf.getTimeStep().asMillis() / (5 * 3), 100, 0.1);
+        Path leftPath = gen1Turner.getPath();
+
+        gen1Turner.setEvaluationParameters(false, currentPosition, rightGoingTime, wf.getTimeStep().asMillis() / (5 * 3), 100, 0.1);
+        Path rightPath = gen1Turner.getPath();
+
+        if (leftPath.getPathPoints().get(leftPath.getPathPoints().size() - 1).getTimePoint().asMillis() <= rightPath.getPathPoints()
+                .get(rightPath.getPathPoints().size() - 1).getTimePoint().asMillis()) {
+            lst.addAll(leftPath.getPathPoints());
+        } else {
+            lst.addAll(rightPath.getPathPoints());
         }
-
-        TimePoint tackTimeOpt = new MillisecondsTimePoint((tackTime.asMillis() + tackTimeNext.asMillis()) / 2);
-        Position tackPositionOpt = bearingBoat.travelTo(tackPosition, tackTime, tackTimeOpt);
-
-        // System.out.println("tack time:"+tackPosition.)
-        lst.remove(lst.size() - 1);
-        lst.add(new TimedPositionWithSpeedImpl(tackTimeOpt, tackPositionOpt, null));
-
-        currentPosition = tackPosition;
-        currentTime = tackTime;
-
-        Wind wndEnd = wf.getWind(new TimedPositionWithSpeedImpl(currentTime, currentPosition, null));
-        // System.out.println("wndEnd speed:" + wndEnd.getKnots() + " angle:" + wndEnd.getBearing().getDegrees());
-        pd.setWind(wndEnd);
-        Bearing bearEnd = currentPosition.getBearingGreatCircle(end);
-        // System.out.println("bearEnd angle:" + bearEnd.getDegrees());
-        SpeedWithBearing spdEnd = pd.getSpeedAtBearing(bearEnd);
-
-        long nextTimeVal = currentTime.asMillis()
-                + Math.round(currentPosition.getDistance(end).getMeters() / spdEnd.getMetersPerSecond()) * 1000;// 30000;
-        // System.out.println("time:" + currentTime.asMillis() + " " + currentPosition.getDistance(end).getMeters()
-        // + " speed:" + spdEnd.getMetersPerSecond());
-        // System.out.println("next:" + nextTimeVal);
-        TimePoint nextTime = new MillisecondsTimePoint(nextTimeVal + turnloss);
-
-        lst.add(new TimedPositionWithSpeedImpl(nextTime, end, null));
 
         return new PathImpl(lst, wf);
-        
+
     }
 
     @Override
@@ -338,7 +267,7 @@ public class PathGeneratorOpportunistEuclidian implements PathGenerator {
 
         Path path = this.getPath();
         return path.getEvenTimedPoints(millisecondsStep);
-        
+
     }
- 
+
 }

@@ -62,6 +62,7 @@ public class PathGeneratorOpportunistVMG implements PathGenerator {
         int prevDirection = -1;
         long turnloss = pd.getTurnLoss(); // time lost when doing a turn
         long windpred = 1000; // time used to predict wind, i.e. hypothetical sailors prediction
+        double fracFinishPhase = 0.05;
 
         TimePoint leftTime;
         TimePoint rightTime;
@@ -79,9 +80,12 @@ public class PathGeneratorOpportunistVMG implements PathGenerator {
         logger.info("Time step :" + timeStep);
         // while there is more than 5% of the total distance to the finish
 
+        //
+        // StrategicPhase: start & intermediate course until close to target
+        //
         SpeedWithBearing slft = null;
         SpeedWithBearing srght = null;
-        while (currentPosition.getDistance(end).compareTo(start.getDistance(end).scale(0.05)) > 0) {
+        while (currentPosition.getDistance(end).compareTo(start.getDistance(end).scale(fracFinishPhase)) > 0) {
 
             long nextTimeVal = currentTime.asMillis() + timeStep;// + 30000;
             TimePoint nextTime = new MillisecondsTimePoint(nextTimeVal);
@@ -189,7 +193,9 @@ public class PathGeneratorOpportunistVMG implements PathGenerator {
             currentTime = nextTime;
         }
 
-        // get 1-turners to finalize course
+        //
+        // FinishPhase: get 1-turners to finalize course
+        //
         PathGenerator1Turner gen1Turner = new PathGenerator1Turner(simulationParameters);
         TimePoint leftGoingTime;
         TimePoint rightGoingTime;
