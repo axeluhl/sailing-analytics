@@ -59,11 +59,12 @@ public class LeaderboardGroupJsonExportServlet extends SailingServerHttpServlet 
 
                     SettableScoreCorrection scoreCorrection = leaderboard.getScoreCorrection();
                     if(scoreCorrection != null) {
-                        JSONObject jsonScoreCorrection = new JSONObject();
-                        jsonLeaderboard.put("scoreCorrection", jsonScoreCorrection);
-                        jsonScoreCorrection.put("comment", scoreCorrection.getComment());
+                        jsonLeaderboard.put("scoringComment", scoreCorrection.getComment());
                         TimePoint lastUpdateTimepoint = scoreCorrection.getTimePointOfLastCorrectionsValidity();
-                        jsonScoreCorrection.put("lastUpdateTimepoint", lastUpdateTimepoint != null ? lastUpdateTimepoint.asDate().toString(): null);
+                        jsonLeaderboard.put("lastScoringUpdate", lastUpdateTimepoint != null ? lastUpdateTimepoint.asDate().toString(): null);
+                    } else {
+                        jsonLeaderboard.put("scoringComment", null);
+                        jsonLeaderboard.put("lastScoringUpdate", null);
                     }
 
                     if(leaderboard instanceof RegattaLeaderboard) {
