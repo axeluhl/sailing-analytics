@@ -72,6 +72,7 @@ public class LeaderboardGroupJsonExportServlet extends SailingServerHttpServlet 
 
                         ScoringSchemeType type = regatta.getScoringScheme().getType();
                         jsonLeaderboard.put("scoringScheme", type != null ? type.toString() : null);
+                        jsonLeaderboard.put("regattaName", regatta.getName());
 
                         Iterable<? extends Series> regattaSeries = regatta.getSeries();
                         // there should only be one series
@@ -105,6 +106,7 @@ public class LeaderboardGroupJsonExportServlet extends SailingServerHttpServlet 
                     } else {
                         ScoringSchemeType type = leaderboard.getScoringScheme().getType();
                         jsonLeaderboard.put("scoringScheme", type != null ? type.toString() : null);
+                        jsonLeaderboard.put("regattaName", null);
 
                         jsonLeaderboard.put("seriesName", "Default");
 
