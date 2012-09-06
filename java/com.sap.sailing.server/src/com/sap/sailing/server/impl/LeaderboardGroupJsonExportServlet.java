@@ -21,6 +21,8 @@ import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
+import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
+import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.SailingServerHttpServlet;
 
 public class LeaderboardGroupJsonExportServlet extends SailingServerHttpServlet {
@@ -53,13 +55,24 @@ public class LeaderboardGroupJsonExportServlet extends SailingServerHttpServlet 
                 for (Leaderboard leaderboard: leaderboardGroup.getLeaderboards()) {
                     JSONObject jsonLeaderboard = new JSONObject();
                     jsonLeaderboard.put("name", leaderboard.getName());
-                    ScoringSchemeType type = leaderboard.getScoringScheme().getType();
-                    jsonLeaderboard.put("scoringScheme", type != null ? type.toString() : null);
                     jsonLeaderboardEntries.add(jsonLeaderboard);
+
+                    SettableScoreCorrection scoreCorrection = leaderboard.getScoreCorrection();
+                    if(scoreCorrection != null) {
+                        JSONObject jsonScoreCorrection = new JSONObject();
+                        jsonLeaderboard.put("scoreCorrection", jsonScoreCorrection);
+                        jsonScoreCorrection.put("comment", scoreCorrection.getComment());
+                        TimePoint lastUpdateTimepoint = scoreCorrection.getTimePointOfLastCorrectionsValidity();
+                        jsonScoreCorrection.put("lastUpdateTimepoint", lastUpdateTimepoint != null ? lastUpdateTimepoint.asDate().toString(): null);
+                    }
 
                     if(leaderboard instanceof RegattaLeaderboard) {
                         RegattaLeaderboard regattaLeaderboard = (RegattaLeaderboard) leaderboard;
                         Regatta regatta = regattaLeaderboard.getRegatta();
+
+                        ScoringSchemeType type = regatta.getScoringScheme().getType();
+                        jsonLeaderboard.put("scoringScheme", type != null ? type.toString() : null);
+
                         Iterable<? extends Series> regattaSeries = regatta.getSeries();
                         // there should only be one series
                         if(regattaSeries != null && Util.size(regattaSeries) == 1) {
@@ -69,6 +82,7 @@ public class LeaderboardGroupJsonExportServlet extends SailingServerHttpServlet 
                             JSONArray jsonFleetsEntries = new JSONArray();
                             jsonLeaderboard.put("fleets", jsonFleetsEntries);
                             for(Fleet fleet: series.getFleets()) {
+                                
                                 JSONObject jsonFleet = new JSONObject();
                                 jsonFleet.put("name", fleet.getName());
                                 jsonFleet.put("color", fleet.getColor() != null ? fleet.getColor().getAsHtml() : null);
@@ -81,12 +95,17 @@ public class LeaderboardGroupJsonExportServlet extends SailingServerHttpServlet 
                                     JSONObject jsonRaceColumn = new JSONObject();
                                     jsonRaceColumn.put("name", raceColumn.getName());
                                     jsonRaceColumn.put("isMedalRace" , raceColumn.isMedalRace());
-                                    jsonRaceColumn.put("isTracked", true);
+                                    
+                                    TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
+                                    jsonRaceColumn.put("isTracked", trackedRace != null ? true : false);
                                     jsonRacesEntries.add(jsonRaceColumn);
                                 }
                             }
                         }
                     } else {
+                        ScoringSchemeType type = leaderboard.getScoringScheme().getType();
+                        jsonLeaderboard.put("scoringScheme", type != null ? type.toString() : null);
+
                         jsonLeaderboard.put("seriesName", "Default");
 
                         JSONArray jsonFleetsEntries = new JSONArray();
@@ -106,7 +125,9 @@ public class LeaderboardGroupJsonExportServlet extends SailingServerHttpServlet 
                                 JSONObject jsonRaceColumn = new JSONObject();
                                 jsonRaceColumn.put("name", raceColumn.getName());
                                 jsonRaceColumn.put("isMedalRace" , raceColumn.isMedalRace());
-                                jsonRaceColumn.put("isTracked", true);
+
+                                TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
+                                jsonRaceColumn.put("isTracked", trackedRace != null ? true : false);
                                 jsonRacesEntries.add(jsonRaceColumn);
                             }
                         }

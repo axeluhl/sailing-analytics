@@ -14,12 +14,14 @@ import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
+import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.SailingServerHttpServlet;
 
@@ -51,6 +53,16 @@ public class LeaderboardJsonExportServlet extends SailingServerHttpServlet {
                     JSONObject jsonLeaderboard = new JSONObject();
                     jsonLeaderboard.put("name", leaderboard.getName());
                     jsonLeaderboard.put("timepoint", timePoint.toString());
+                    
+                    SettableScoreCorrection scoreCorrection = leaderboard.getScoreCorrection();
+                    if(scoreCorrection != null) {
+                        JSONObject jsonScoreCorrection = new JSONObject();
+                        jsonLeaderboard.put("scoreCorrection", jsonScoreCorrection);
+                        jsonScoreCorrection.put("comment", scoreCorrection.getComment());
+                        TimePoint lastUpdateTimepoint = scoreCorrection.getTimePointOfLastCorrectionsValidity();
+                        jsonScoreCorrection.put("lastUpdateTimepoint", lastUpdateTimepoint != null ? lastUpdateTimepoint.asDate().toString(): null);
+                    }
+                    
                     JSONArray jsonColumnNames = new JSONArray();
                     jsonLeaderboard.put("columnNames", jsonColumnNames);
                     for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
@@ -65,8 +77,9 @@ public class LeaderboardJsonExportServlet extends SailingServerHttpServlet {
                         jsonCompetitor.put("displayName", displayName==null?competitor.getName():displayName);
                         jsonCompetitor.put("id", competitor.getId().toString());
                         jsonCompetitor.put("sailID", competitor.getBoat().getSailID());
-                        jsonCompetitor.put("nationality", competitor.getTeam().getNationality().getThreeLetterIOCAcronym());
-                        jsonCompetitor.put("countryCode", competitor.getTeam().getNationality().getCountryCode().getTwoLetterISOCode());
+                        Nationality nationality = competitor.getTeam().getNationality();
+                        jsonCompetitor.put("nationality", nationality != null ? nationality.getThreeLetterIOCAcronym(): null);
+                        jsonCompetitor.put("countryCode", nationality != null ? nationality.getCountryCode().getTwoLetterISOCode(): null);
                         jsonCompetitor.put("rank",
                                 competitorsFromBestToWorstAccordingToTotalRank.indexOf(competitor) + 1);
                         jsonCompetitor.put("totalPoints", leaderboard.getTotalPoints(competitor, timePoint));
