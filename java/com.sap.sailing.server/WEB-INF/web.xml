@@ -33,20 +33,29 @@
 	</servlet-mapping>
 	
 	<servlet>
-		<servlet-name>ListLeaderboards</servlet-name>
-		<servlet-class>com.sap.sailing.server.impl.ListLeaderboards</servlet-class>
+		<servlet-name>LeaderboardsJsonExportServlet</servlet-name>
+		<servlet-class>com.sap.sailing.server.impl.LeaderboardsJsonExportServlet</servlet-class>
 	</servlet>
 	<servlet-mapping>
-		<servlet-name>ListLeaderboards</servlet-name>
-		<url-pattern>/listleaderboards</url-pattern>
+		<servlet-name>LeaderboardsJsonExportServlet</servlet-name>
+		<url-pattern>/leaderboards</url-pattern>
 	</servlet-mapping>
 
 	<servlet>
-		<servlet-name>LeaderboardJsonExport</servlet-name>
-		<servlet-class>com.sap.sailing.server.impl.LeaderboardJsonExport</servlet-class>
+		<servlet-name>LeaderboardJsonExportServlet</servlet-name>
+		<servlet-class>com.sap.sailing.server.impl.LeaderboardJsonExportServlet</servlet-class>
 	</servlet>
 	<servlet-mapping>
-		<servlet-name>LeaderboardJsonExport</servlet-name>
+		<servlet-name>LeaderboardJsonExportServlet</servlet-name>
 		<url-pattern>/leaderboard</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>LeaderboardGroupJsonExportServlet</servlet-name>
+		<servlet-class>com.sap.sailing.server.impl.LeaderboardGroupJsonExportServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>LeaderboardGroupJsonExportServlet</servlet-name>
+		<url-pattern>/leaderboardgroup</url-pattern>
 	</servlet-mapping>
 </web-app>
