@@ -40,7 +40,7 @@ import com.sap.sailing.simulator.TimedPositionWithSpeed;
 import com.sap.sailing.simulator.WindControlParameters;
 import com.sap.sailing.simulator.WindFieldGenerator;
 import com.sap.sailing.simulator.WindFieldGeneratorFactory;
-import com.sap.sailing.simulator.impl.PolarDiagram49;
+import com.sap.sailing.simulator.impl.PolarDiagram49STG;
 import com.sap.sailing.simulator.impl.RectangularBoundary;
 import com.sap.sailing.simulator.impl.SailingSimulatorImpl;
 import com.sap.sailing.simulator.impl.SimulationParametersImpl;
@@ -279,7 +279,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
     private PathDTO[] getSimulatedPaths(List<Position> course, WindFieldGenerator wf) {
         logger.info("Retrieving simulated paths");
        
-        PolarDiagram pd = new PolarDiagram49();
+        PolarDiagram pd = new PolarDiagram49STG();
         SimulationParameters sp = new SimulationParametersImpl(course, pd, wf);
         SailingSimulator solver = new SailingSimulatorImpl(sp);
 
@@ -309,7 +309,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
     private PathDTO[] getSimulatedPathsEvenTimed(List<Position> course, WindFieldGenerator wf) {
         logger.info("Retrieving simulated paths");
        
-        PolarDiagram pd = new PolarDiagram49(); 
+        PolarDiagram pd = new PolarDiagram49STG(); 
         SimulationParameters sp = new SimulationParametersImpl(course, pd, wf);
         SailingSimulator solver = new SailingSimulatorImpl(sp);
 

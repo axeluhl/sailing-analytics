@@ -13,14 +13,14 @@ import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.simulator.PolarDiagram;
-import com.sap.sailing.simulator.impl.PolarDiagram49;
+import com.sap.sailing.simulator.impl.PolarDiagram49STG;
 
 public class PolarDiagram49Test {
 
     @Test
     public void testPolarDiagram49_1() throws IOException {
     	
-        PolarDiagram polarDiagram = new PolarDiagram49();
+        PolarDiagram polarDiagram = new PolarDiagram49STG();
     	
     	NavigableMap<Speed, NavigableMap<Bearing, Speed>> table = polarDiagram.polarDiagramPlot(10.0);
         

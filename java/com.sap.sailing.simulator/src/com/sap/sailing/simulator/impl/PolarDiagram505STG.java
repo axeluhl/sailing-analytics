@@ -8,10 +8,10 @@ import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 
-public class PolarDiagram505 extends PolarDiagramBase {
+public class PolarDiagram505STG extends PolarDiagramBase {
 
     // this constructor creates an instance with a hard-coded set of values
-    public PolarDiagram505() {
+    public PolarDiagram505STG() {
         speedTable = new TreeMap<Speed, NavigableMap<Bearing, Speed>>();
         NavigableMap<Bearing, Speed> tableRow;
 
@@ -121,7 +121,7 @@ public class PolarDiagram505 extends PolarDiagramBase {
         tableRow.put(new DegreeBearingImpl(180), new KnotSpeedImpl(7.5));
         speedTable.put(new KnotSpeedImpl(20), tableRow);
 
-        NavigableMap<Speed, Bearing> beatAngles = new TreeMap<Speed, Bearing>();
+        beatAngles = new TreeMap<Speed, Bearing>();
         beatAngles.put(new KnotSpeedImpl(0), new DegreeBearingImpl(44.0));
         beatAngles.put(new KnotSpeedImpl(6), new DegreeBearingImpl(44.0));
         beatAngles.put(new KnotSpeedImpl(8), new DegreeBearingImpl(46.5));
@@ -132,7 +132,7 @@ public class PolarDiagram505 extends PolarDiagramBase {
         beatAngles.put(new KnotSpeedImpl(20), new DegreeBearingImpl(56.0));
 
         double beatScale = 1.0;
-        NavigableMap<Speed, Speed> beatSOG = new TreeMap<Speed, Speed>();
+        beatSOG = new TreeMap<Speed, Speed>();
         beatSOG.put(new KnotSpeedImpl(0), new KnotSpeedImpl(0));
         beatSOG.put(new KnotSpeedImpl(6), new KnotSpeedImpl(5.00 * beatScale));
         beatSOG.put(new KnotSpeedImpl(8), new KnotSpeedImpl(5.30 * beatScale));
@@ -142,7 +142,7 @@ public class PolarDiagram505 extends PolarDiagramBase {
         beatSOG.put(new KnotSpeedImpl(16), new KnotSpeedImpl(7.00 * beatScale));
         beatSOG.put(new KnotSpeedImpl(20), new KnotSpeedImpl(7.00 * beatScale));
 
-        NavigableMap<Speed, Bearing> gybeAngles = new TreeMap<Speed, Bearing>();
+        gybeAngles = new TreeMap<Speed, Bearing>();
         gybeAngles.put(new KnotSpeedImpl(0), new DegreeBearingImpl(141.0));
         gybeAngles.put(new KnotSpeedImpl(6), new DegreeBearingImpl(141.0));
         gybeAngles.put(new KnotSpeedImpl(8), new DegreeBearingImpl(141.0));
@@ -152,7 +152,7 @@ public class PolarDiagram505 extends PolarDiagramBase {
         gybeAngles.put(new KnotSpeedImpl(16), new DegreeBearingImpl(142.5));
         gybeAngles.put(new KnotSpeedImpl(20), new DegreeBearingImpl(150.0));
 
-        NavigableMap<Speed, Speed> gybeSOG = new TreeMap<Speed, Speed>();
+        gybeSOG = new TreeMap<Speed, Speed>();
         gybeSOG.put(new KnotSpeedImpl(0), new KnotSpeedImpl(0));
         gybeSOG.put(new KnotSpeedImpl(6), new KnotSpeedImpl(5.00));
         gybeSOG.put(new KnotSpeedImpl(8), new KnotSpeedImpl(6.70));

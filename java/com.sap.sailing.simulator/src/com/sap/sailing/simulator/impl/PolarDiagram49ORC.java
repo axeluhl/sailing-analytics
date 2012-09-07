@@ -8,10 +8,10 @@ import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 
-public class PolarDiagram49 extends PolarDiagramBase {
+public class PolarDiagram49ORC extends PolarDiagramBase {
 
     // this constructor creates an instance with a hard-coded set of values
-    public PolarDiagram49() {
+    public PolarDiagram49ORC() {
 
         speedTable = new TreeMap<Speed, NavigableMap<Bearing, Speed>>();
         NavigableMap<Bearing, Speed> tableRow;

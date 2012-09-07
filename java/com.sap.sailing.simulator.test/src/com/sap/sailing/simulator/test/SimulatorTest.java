@@ -16,7 +16,7 @@ import com.sap.sailing.simulator.PolarDiagram;
 import com.sap.sailing.simulator.SimulationParameters;
 import com.sap.sailing.simulator.WindControlParameters;
 import com.sap.sailing.simulator.WindFieldGenerator;
-import com.sap.sailing.simulator.impl.PolarDiagram49;
+import com.sap.sailing.simulator.impl.PolarDiagram49STG;
 import com.sap.sailing.simulator.impl.RectangularBoundary;
 import com.sap.sailing.simulator.impl.SailingSimulatorImpl;
 import com.sap.sailing.simulator.impl.SimulationParametersImpl;
@@ -33,7 +33,7 @@ public class SimulatorTest {
         List<Position> course = new LinkedList<Position>();
         course.add(start);
         course.add(end);
-        PolarDiagram pd = new PolarDiagram49();//PolarDiagram49.CreateStandard49();
+        PolarDiagram pd = new PolarDiagram49STG();//PolarDiagram49.CreateStandard49();
         RectangularBoundary bd = new RectangularBoundary(start, end, 0.1);
         Position[][] positions = bd.extractGrid(10, 10);
         //RectangularBoundary new_bd = new RectangularBoundary(start, end, 0.1);
