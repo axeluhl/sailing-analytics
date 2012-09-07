@@ -99,7 +99,13 @@ public class LeaderboardGroupJsonExportServlet extends SailingServerHttpServlet 
                                     jsonRaceColumn.put("isMedalRace" , raceColumn.isMedalRace());
                                     
                                     TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
-                                    jsonRaceColumn.put("isTracked", trackedRace != null ? true : false);
+                                    if(trackedRace != null) {
+                                        jsonRaceColumn.put("isTracked", true);
+                                        jsonRaceColumn.put("trackedRaceName", trackedRace.getRace().getName());
+                                    } else {
+                                        jsonRaceColumn.put("isTracked", false);
+                                        jsonRaceColumn.put("trackedRaceName", null);
+                                    }
                                     jsonRacesEntries.add(jsonRaceColumn);
                                 }
                             }
@@ -130,7 +136,13 @@ public class LeaderboardGroupJsonExportServlet extends SailingServerHttpServlet 
                                 jsonRaceColumn.put("isMedalRace" , raceColumn.isMedalRace());
 
                                 TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
-                                jsonRaceColumn.put("isTracked", trackedRace != null ? true : false);
+                                if(trackedRace != null) {
+                                    jsonRaceColumn.put("isTracked", true);
+                                    jsonRaceColumn.put("trackedRaceName", trackedRace.getRace().getName());
+                                } else {
+                                    jsonRaceColumn.put("isTracked", false);
+                                    jsonRaceColumn.put("trackedRaceName", null);
+                                }
                                 jsonRacesEntries.add(jsonRaceColumn);
                             }
                         }
