@@ -138,7 +138,7 @@ public class LeaderboardGroupJsonExportServlet extends SailingServerHttpServlet 
                                 if(trackedRace != null) {
                                     jsonRaceColumn.put("isTracked", true);
                                     jsonRaceColumn.put("trackedRaceName", trackedRace.getRace().getName());
-                                    jsonRaceColumn.put("regattaName", trackedRace.getRace().getName());
+                                    jsonRaceColumn.put("regattaName", trackedRace.getRaceIdentifier().getRegattaName());
                                 } else {
                                     jsonRaceColumn.put("isTracked", false);
                                     jsonRaceColumn.put("trackedRaceName", null);
