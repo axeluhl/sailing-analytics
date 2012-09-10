@@ -332,7 +332,7 @@ public class CourseImpl extends NamedImpl implements Course {
     public Waypoint getFirstWaypoint() {
         lockForRead();
         try {
-            return waypoints.get(0);
+            return waypoints.isEmpty() ? null : waypoints.get(0);
         } finally {
             unlockAfterRead();
         }
