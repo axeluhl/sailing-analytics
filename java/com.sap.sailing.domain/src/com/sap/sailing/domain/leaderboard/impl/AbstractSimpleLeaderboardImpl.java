@@ -7,15 +7,19 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.NavigableSet;
 import java.util.Set;
 import java.util.concurrent.Callable;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
+import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnListener;
+import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindException;
+import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
@@ -23,6 +27,9 @@ import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.ScoreCorrection.Result;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
+import com.sap.sailing.domain.tracking.GPSFixMoving;
+import com.sap.sailing.domain.tracking.MarkPassing;
+import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
 /**
@@ -473,4 +480,106 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
         }
         return result;
     }
+
+    @Override
+    public Pair<GPSFixMoving, Speed> getMaximumSpeedOverGround(Competitor competitor, TimePoint timePoint) {
+        Pair<GPSFixMoving, Speed> result = null;
+        // TODO should we ensure that competitor participated in all race columns?
+        for (TrackedRace trackedRace : getTrackedRaces()) {
+            if (Util.contains(trackedRace.getRace().getCompetitors(), competitor)) {
+                NavigableSet<MarkPassing> markPassings = trackedRace.getMarkPassings(competitor);
+                if (!markPassings.isEmpty()) {
+                    TimePoint from = markPassings.first().getTimePoint();
+                    TimePoint to;
+                    if (timePoint.after(markPassings.last().getTimePoint()) &&
+                            markPassings.last().getWaypoint() == trackedRace.getRace().getCourse().getLastWaypoint()) {
+                        // stop counting when competitor finished the race
+                        to = markPassings.last().getTimePoint();
+                    } else {
+                        to = timePoint;
+                    }
+                    Pair<GPSFixMoving, Speed> maxSpeed = trackedRace.getTrack(competitor).getMaximumSpeedOverGround(from, to);
+                    if (result == null || result.getB() == null ||
+                            (maxSpeed != null && maxSpeed.getB() != null && maxSpeed.getB().compareTo(result.getB()) > 0)) {
+                        result = maxSpeed;
+                    }
+                }
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public Long getTotalTimeSailedInLegTypeInMilliseconds(Competitor competitor, LegType legType, TimePoint timePoint) throws NoWindException {
+        Long result = null;
+        // TODO should we ensure that competitor participated in all race columns?
+        outerLoop:
+        for (TrackedRace trackedRace : getTrackedRaces()) {
+            if (Util.contains(trackedRace.getRace().getCompetitors(), competitor)) {
+                trackedRace.getRace().getCourse().lockForRead();
+                try {
+                    for (Leg leg : trackedRace.getRace().getCourse().getLegs()) {
+                        TrackedLegOfCompetitor trackedLeg = trackedRace.getTrackedLeg(competitor, leg);
+                        if (trackedLeg.hasStartedLeg(timePoint)) {
+                            // find out leg type at the time the competitor started the leg
+                            LegType trackedLegType = trackedRace.getTrackedLeg(leg).getLegType(trackedLeg.getStartTime());
+                            if (legType == trackedLegType) {
+                                Long millisecondsSpendOnDownwind = trackedLeg.getTimeInMilliSeconds(timePoint);
+                                if (millisecondsSpendOnDownwind != null) {
+                                    if (result == null) {
+                                        result = millisecondsSpendOnDownwind;
+                                    } else {
+                                        result += millisecondsSpendOnDownwind;
+                                    }
+                                } else {
+                                    // Although the competitor has started the leg, no value was produced. This means that
+                                    // the competitor didn't finish the leg before tracking ended. No useful value can
+                                    // be obtained for this competitor anymore.
+                                    result = null;
+                                    break outerLoop;
+                                }
+                            }
+                        }
+                    }
+                } finally {
+                    trackedRace.getRace().getCourse().unlockAfterRead();
+                }
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public Long getTotalTimeSailedInMilliseconds(Competitor competitor, TimePoint timePoint) {
+        Long result = null;
+        for (TrackedRace trackedRace : getTrackedRaces()) {
+            if (Util.contains(trackedRace.getRace().getCompetitors(), competitor)) {
+                NavigableSet<MarkPassing> markPassings = trackedRace.getMarkPassings(competitor);
+                if (!markPassings.isEmpty()) {
+                    TimePoint from = trackedRace.getStartOfRace(); // start counting at race start, not when the competitor passed the line
+                    TimePoint to;
+                    if (timePoint.after(markPassings.last().getTimePoint()) &&
+                            markPassings.last().getWaypoint() == trackedRace.getRace().getCourse().getLastWaypoint()) {
+                        // stop counting when competitor finished the race
+                        to = markPassings.last().getTimePoint();
+                    } else {
+                        if (trackedRace.getEndOfTracking() != null && timePoint.after(trackedRace.getEndOfTracking())) {
+                            result = null; // race not finished until end of tracking; no reasonable value can be computed for competitor
+                            break;
+                        } else {
+                            to = timePoint;
+                        }
+                    }
+                    long timeSpent = to.asMillis() - from.asMillis();
+                    if (result == null) {
+                        result = timeSpent;
+                    } else {
+                        result += timeSpent;
+                    }
+                }
+            }
+        }
+        return result;
+    }
+    
 }

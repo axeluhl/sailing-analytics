@@ -16,6 +16,7 @@ import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.Maneuver;
@@ -60,7 +61,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
 
     @Override
     public Long getTimeInMilliSeconds(TimePoint timePoint) {
-        long result = 0;
+        Long result;
         MarkPassing passedStartWaypoint = getTrackedRace().getMarkPassing(getCompetitor(),
                 getTrackedLeg().getLeg().getFrom());
         if (passedStartWaypoint != null) {
@@ -69,8 +70,14 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
             if (passedEndWaypoint != null) {
                 result = passedEndWaypoint.getTimePoint().asMillis() - passedStartWaypoint.getTimePoint().asMillis();
             } else {
-                result = timePoint.asMillis() - passedStartWaypoint.getTimePoint().asMillis();
+                if (getTrackedRace().getEndOfTracking() != null && timePoint.after(getTrackedRace().getEndOfTracking())) {
+                    result = null;
+                } else {
+                    result = timePoint.asMillis() - passedStartWaypoint.getTimePoint().asMillis();
+                }
             }
+        } else {
+            result = null;
         }
         return result;
     }
@@ -135,7 +142,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     }
 
     @Override
-    public Speed getMaximumSpeedOverGround(TimePoint timePoint) {
+    public Pair<GPSFixMoving, Speed> getMaximumSpeedOverGround(TimePoint timePoint) {
         // fetch all fixes on this leg so far and determine their maximum speed
         MarkPassing legStart = getMarkPassingForLegStart();
         if (legStart == null) {
@@ -507,6 +514,18 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     public boolean hasFinishedLeg(TimePoint timePoint) {
         MarkPassing markPassingForLegEnd = getMarkPassingForLegEnd();
         return markPassingForLegEnd != null && markPassingForLegEnd.getTimePoint().compareTo(timePoint) <= 0;
+    }
+    
+    @Override
+    public TimePoint getStartTime() {
+        MarkPassing markPassingForLegStart = getMarkPassingForLegStart();
+        return markPassingForLegStart == null ? null : markPassingForLegStart.getTimePoint();
+    }
+
+    @Override
+    public TimePoint getFinishTime() {
+        MarkPassing markPassingForLegEnd = getMarkPassingForLegEnd();
+        return markPassingForLegEnd == null ? null : markPassingForLegEnd.getTimePoint();
     }
 
     @Override

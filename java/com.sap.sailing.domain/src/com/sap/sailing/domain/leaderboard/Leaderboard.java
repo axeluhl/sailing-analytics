@@ -8,11 +8,14 @@ import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnListener;
 import com.sap.sailing.domain.base.Series;
+import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.Named;
 import com.sap.sailing.domain.common.NoWindException;
+import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
 /**
@@ -268,4 +271,28 @@ public interface Leaderboard extends Named {
      * <code>null</code> is returned.
      */
     TimePoint getTimePointOfLatestModification();
+
+    /**
+     * @return <code>null</code> if no tracked race is available for <code>competitor</code> in this leaderboard
+     * or the competitor hasn't started sailing a single race at <code>timePoint</code> for any of the tracked
+     * races attached to this leaderboard; the fix where the maximum speed was achieved, and the speed value
+     */
+    Pair<GPSFixMoving, Speed> getMaximumSpeedOverGround(Competitor competitor, TimePoint timePoint);
+
+    /**
+     * @param legType the leg type for which to add up the times sailed
+     * @return <code>null</code> if no tracked race is available for <code>competitor</code> in this leaderboard
+     * or the competitor hasn't started sailing a single downwind leg at <code>timePoint</code> for any of the tracked
+     * races attached to this leaderboard
+     */
+    Long getTotalTimeSailedInLegTypeInMilliseconds(Competitor competitor, LegType legType, TimePoint timePoint) throws NoWindException;
+
+    /**
+     * Starts counting when the gun goes off, not when the competitor passed the line.
+     * 
+     * @return <code>null</code> if no tracked race is available for <code>competitor</code> in this leaderboard
+     * or the competitor hasn't started sailing a single race at <code>timePoint</code> for any of the tracked
+     * races attached to this leaderboard
+     */
+    Long getTotalTimeSailedInMilliseconds(Competitor competitor, TimePoint timePoint);
 }

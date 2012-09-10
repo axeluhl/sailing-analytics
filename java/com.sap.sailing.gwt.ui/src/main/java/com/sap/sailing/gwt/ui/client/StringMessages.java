@@ -385,4 +385,9 @@ public interface StringMessages extends Messages {
     String type();
     String actionAddRaces();
     String racesWithNamePrefix();
+    String maximumSpeedOverGroundInKnots();
+    String totalTimeSailedDownwindInSeconds();
+    String totalTimeSailedInSeconds();
+    String overallDetailsToShow();
+    String hhmmssUnit();
 }

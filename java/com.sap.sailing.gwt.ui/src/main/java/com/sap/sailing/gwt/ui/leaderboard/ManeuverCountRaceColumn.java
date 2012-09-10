@@ -258,12 +258,13 @@ public class ManeuverCountRaceColumn extends ExpandableSortableColumn<String> im
             String detailColumnStyle) {
         Map<DetailType, SortableColumn<LeaderboardRowDTO, ?>> result = new HashMap<DetailType, SortableColumn<LeaderboardRowDTO, ?>>();
         result.put(DetailType.TACK, new FormattedDoubleLegDetailColumn(stringConstants.tack(), "", new NumberOfTacks(),
-                0, DetailType.TACK.getDefaultSortingOrder(), detailHeaderStyle, detailColumnStyle));
+                DetailType.TACK.getPrecision(), DetailType.TACK.getDefaultSortingOrder(), detailHeaderStyle, detailColumnStyle));
         result.put(DetailType.JIBE, new FormattedDoubleLegDetailColumn(stringConstants.jibe(), "", new NumberOfJibes(),
-                0, DetailType.JIBE.getDefaultSortingOrder(), detailHeaderStyle, detailColumnStyle));
-        result.put(DetailType.PENALTY_CIRCLE, new FormattedDoubleLegDetailColumn(stringConstants.penaltyCircle(), "",
-                new NumberOfPenaltyCircles(), 0, DetailType.PENALTY_CIRCLE.getDefaultSortingOrder(), detailHeaderStyle,
-                detailColumnStyle));
+                DetailType.JIBE.getPrecision(), DetailType.JIBE.getDefaultSortingOrder(), detailHeaderStyle, detailColumnStyle));
+        result.put(DetailType.PENALTY_CIRCLE,
+                new FormattedDoubleLegDetailColumn(stringConstants.penaltyCircle(), "", new NumberOfPenaltyCircles(),
+                        DetailType.PENALTY_CIRCLE.getPrecision(), DetailType.PENALTY_CIRCLE.getDefaultSortingOrder(),
+                        detailHeaderStyle, detailColumnStyle));
         return result;
     }
 

@@ -510,8 +510,9 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
      * the column must always be shown.
      */
     @Override
-    protected void updateCarryColumn(LeaderboardDTO leaderboard) {
+    protected boolean updateCarryColumn(LeaderboardDTO leaderboard) {
         ensureCarryColumn();
+        return true;
     }
 
     @Override
