@@ -72,7 +72,7 @@ public class FormattedDoubleLegDetailColumn extends LegDetailColumn<Double, Stri
     @Override
     public String getStringValueToRender(LeaderboardRowDTO object) {
         String value = getValue(object);
-        if (!value.isEmpty() & value != null) {
+        if (!value.isEmpty() && value != null) {
             return getValue(object);
         }
         return null;
