@@ -263,7 +263,8 @@ public class AdminApp extends SailingServerHttpServlet {
                 for (WindSource windSource : trackedRace.getWindSources()) {
                     JSONArray jsonWindArray = new JSONArray();
                     WindTrack windTrack = trackedRace.getOrCreateWindTrack(windSource);
-                    synchronized (windTrack) {
+                    windTrack.lockForRead();
+                    try {
                         Iterator<Wind> windIter = windTrack.getFixesIterator(from, /* inclusive */true);
                         while (windIter.hasNext()) {
                             Wind wind = windIter.next();
@@ -291,6 +292,8 @@ public class AdminApp extends SailingServerHttpServlet {
                             }
                             jsonWindArray.add(jsonWind);
                         }
+                    } finally {
+                        windTrack.unlockAfterRead();
                     }
                     jsonWindTracks.put(windSource.toString(), jsonWindArray);
                 }
