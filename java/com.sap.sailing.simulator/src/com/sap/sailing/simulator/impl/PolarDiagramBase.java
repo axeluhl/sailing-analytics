@@ -2,7 +2,6 @@ package com.sap.sailing.simulator.impl;
 
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.NavigableMap;
 import java.util.Set;
 import java.util.TreeMap;
@@ -37,9 +36,8 @@ public class PolarDiagramBase implements PolarDiagram {
     }
 
     // a constructor that allows a generic set of parameters
-    public PolarDiagramBase(NavigableMap<Speed, NavigableMap<Bearing, Speed>> speeds,
-            NavigableMap<Speed, Bearing> beats, NavigableMap<Speed, Bearing> gybes,
-            NavigableMap<Speed, Speed> beatSOGs, NavigableMap<Speed, Speed> gybeSOGs) {
+    public PolarDiagramBase(NavigableMap<Speed, NavigableMap<Bearing, Speed>> speeds, NavigableMap<Speed, Bearing> beats,
+            NavigableMap<Speed, Bearing> gybes, NavigableMap<Speed, Speed> beatSOGs, NavigableMap<Speed, Speed> gybeSOGs) {
 
         wind = new KnotSpeedWithBearingImpl(0, new DegreeBearingImpl(180));
 
@@ -101,8 +99,7 @@ public class PolarDiagramBase implements PolarDiagram {
             floorSpeed = floorSpeed1.getKnots();
         } else {
             floorSpeed = floorSpeed1.getKnots() + (relativeBearing.getRadians() - floorBearing1.getRadians())
-                    * (floorSpeed2.getKnots() - floorSpeed1.getKnots())
-                    / (floorBearing2.getRadians() - floorBearing1.getRadians());
+                    * (floorSpeed2.getKnots() - floorSpeed1.getKnots()) / (floorBearing2.getRadians() - floorBearing1.getRadians());
         }
 
         Speed ceilingSpeed1 = ceilingSpeeds.floorEntry(relativeBearing).getValue();
@@ -114,8 +111,7 @@ public class PolarDiagramBase implements PolarDiagram {
             ceilingSpeed = ceilingSpeed1.getKnots();
         } else {
             ceilingSpeed = ceilingSpeed1.getKnots() + (relativeBearing.getRadians() - ceilingBearing1.getRadians())
-                    * (ceilingSpeed2.getKnots() - ceilingSpeed1.getKnots())
-                    / (ceilingBearing2.getRadians() - ceilingBearing1.getRadians());
+                    * (ceilingSpeed2.getKnots() - ceilingSpeed1.getKnots()) / (ceilingBearing2.getRadians() - ceilingBearing1.getRadians());
         }
 
         double speed;
@@ -169,8 +165,7 @@ public class PolarDiagramBase implements PolarDiagram {
                 beatAngle = floorBeatAngle.getRadians();
             } else {
                 beatAngle = floorBeatAngle.getRadians() + (wind.getKnots() - floorSpeed.getKnots())
-                        * (ceilingBeatAngle.getRadians() - floorBeatAngle.getRadians())
-                        / (ceilingSpeed.getKnots() - floorSpeed.getKnots());
+                        * (ceilingBeatAngle.getRadians() - floorBeatAngle.getRadians()) / (ceilingSpeed.getKnots() - floorSpeed.getKnots());
             }
             estBeatAngleRight = new RadianBearingImpl(+beatAngle);
             estBeatAngleLeft = new RadianBearingImpl(-beatAngle);
@@ -191,14 +186,16 @@ public class PolarDiagramBase implements PolarDiagram {
             Double maxSpeedLeft = 0.0;
             for (Bearing b : allKeys) {
                 if (b.getDifferenceTo(getWind().getBearing()).getDegrees() > 0) {
-                    double currentSpeedRight = getSpeedAtBearing(b).getKnots() * Math.cos(b.getDifferenceTo(getTargetDirection()).getRadians()); 
-                    if ( currentSpeedRight > maxSpeedRight) {
+                    double currentSpeedRight = getSpeedAtBearing(b).getKnots()
+                            * Math.cos(b.getDifferenceTo(getTargetDirection()).getRadians());
+                    if (currentSpeedRight > maxSpeedRight) {
                         maxSpeedRight = currentSpeedRight;
                         estBeatAngleRight = b;
                     }
                 } else {
-                    double currentSpeedLeft = getSpeedAtBearing(b).getKnots() * Math.cos(b.getDifferenceTo(getTargetDirection()).getRadians()); 
-                    if ( currentSpeedLeft > maxSpeedLeft) {
+                    double currentSpeedLeft = getSpeedAtBearing(b).getKnots()
+                            * Math.cos(b.getDifferenceTo(getTargetDirection()).getRadians());
+                    if (currentSpeedLeft > maxSpeedLeft) {
                         maxSpeedLeft = currentSpeedLeft;
                         estBeatAngleLeft = b;
                     }
@@ -214,12 +211,12 @@ public class PolarDiagramBase implements PolarDiagram {
 
     @Override
     public SpeedWithBearing[] optimalVMGUpwind() {
-        
+
         Bearing windBearing = wind.getBearing().reverse();
         Bearing estBeatAngleRight = null;
         Bearing estBeatAngleLeft = null;
-        
-        Bearing diffWindTarget = windBearing.getDifferenceTo(targetDirection); 
+
+        Bearing diffWindTarget = windBearing.getDifferenceTo(targetDirection);
         if (diffWindTarget.equals(new DegreeBearingImpl(0))) {
             //
             // target is aligned with wind, i.e. target bearing = 0°
@@ -254,12 +251,11 @@ public class PolarDiagramBase implements PolarDiagram {
                 beatAngle = floorBeatAngle.getRadians();
             } else {
                 beatAngle = floorBeatAngle.getRadians() + (wind.getKnots() - floorSpeed.getKnots())
-                        * (ceilingBeatAngle.getRadians() - floorBeatAngle.getRadians())
-                        / (ceilingSpeed.getKnots() - floorSpeed.getKnots());
+                        * (ceilingBeatAngle.getRadians() - floorBeatAngle.getRadians()) / (ceilingSpeed.getKnots() - floorSpeed.getKnots());
             }
             estBeatAngleRight = new RadianBearingImpl(+beatAngle);
             estBeatAngleLeft = new RadianBearingImpl(-beatAngle);
-            
+
             double speedLeft = this.getSpeedAtBearing(estBeatAngleLeft).getKnots() * Math.cos(estBeatAngleLeft.getRadians());
             double speedRight = this.getSpeedAtBearing(estBeatAngleRight).getKnots() * Math.cos(estBeatAngleRight.getRadians());
             SpeedWithBearing optVMGLeft = new KnotSpeedWithBearingImpl(speedLeft, windBearing.add(estBeatAngleLeft));
@@ -271,14 +267,15 @@ public class PolarDiagramBase implements PolarDiagram {
             // target is not aligned with wind, i.e. target bearing != 0°
             //
             Set<Bearing> allKeys = new TreeSet<Bearing>(bearingComparator);
-            /*for (Double b = 0.0; b < 360.0; b += 5.0)
-                allKeys.add(new DegreeBearingImpl(b));*/
+            /*
+             * for (Double b = 0.0; b < 360.0; b += 5.0) allKeys.add(new DegreeBearingImpl(b));
+             */
             Bearing _targetDirection = targetDirection;
             setTargetDirection(new DegreeBearingImpl(0.0));
             Bearing[] optDirectionsUpwind = optimalDirectionsUpwind();
-            
+
             allKeys.addAll(Arrays.asList(optDirectionsUpwind));
-            for (int idx=0; idx<optDirectionsUpwind.length; idx++) {
+            for (int idx = 0; idx < optDirectionsUpwind.length; idx++) {
                 for (int offset = 1; offset <= 5; offset++) {
                     allKeys.add(new DegreeBearingImpl(optDirectionsUpwind[idx].getDegrees() + offset));
                     allKeys.add(new DegreeBearingImpl(optDirectionsUpwind[idx].getDegrees() - offset));
@@ -291,14 +288,16 @@ public class PolarDiagramBase implements PolarDiagram {
             Double maxSpeedLeft = 0.0;
             for (Bearing b : allKeys) {
                 if (b.getDifferenceTo(getWind().getBearing()).getDegrees() > 0) {
-                    double currentSpeedRight = getSpeedAtBearing(b).getKnots() * Math.cos(b.getDifferenceTo(getTargetDirection()).getRadians()); 
-                    if ( currentSpeedRight > maxSpeedRight) {
+                    double currentSpeedRight = getSpeedAtBearing(b).getKnots()
+                            * Math.cos(b.getDifferenceTo(getTargetDirection()).getRadians());
+                    if (currentSpeedRight > maxSpeedRight) {
                         maxSpeedRight = currentSpeedRight;
                         estBeatAngleRight = b;
                     }
                 } else {
-                    double currentSpeedLeft = getSpeedAtBearing(b).getKnots() * Math.cos(b.getDifferenceTo(getTargetDirection()).getRadians()); 
-                    if ( currentSpeedLeft > maxSpeedLeft) {
+                    double currentSpeedLeft = getSpeedAtBearing(b).getKnots()
+                            * Math.cos(b.getDifferenceTo(getTargetDirection()).getRadians());
+                    if (currentSpeedLeft > maxSpeedLeft) {
                         maxSpeedLeft = currentSpeedLeft;
                         estBeatAngleLeft = b;
                     }
@@ -333,8 +332,7 @@ public class PolarDiagramBase implements PolarDiagram {
                 gybeAngle = floorGybeAngle.getRadians();
             } else {
                 gybeAngle = floorGybeAngle.getRadians() + (wind.getKnots() - floorSpeed.getKnots())
-                        * (ceilingGybeAngle.getRadians() - floorGybeAngle.getRadians())
-                        / (ceilingSpeed.getKnots() - floorSpeed.getKnots());
+                        * (ceilingGybeAngle.getRadians() - floorGybeAngle.getRadians()) / (ceilingSpeed.getKnots() - floorSpeed.getKnots());
             }
             // Bearing estGybeAngle = new RadianBearingImpl(gybeAngle);
             estGybeAngleRight = new RadianBearingImpl(+gybeAngle);
@@ -354,14 +352,12 @@ public class PolarDiagramBase implements PolarDiagram {
             Double maxSpeedLeft = 0.0;
             for (Bearing b : allKeys) {
                 if (b.getDifferenceTo(getWind().getBearing()).getDegrees() > 0) {
-                    if (getSpeedAtBearing(b).getKnots()
-                            * Math.cos(b.getDifferenceTo(getTargetDirection().reverse()).getRadians()) > maxSpeedRight) {
+                    if (getSpeedAtBearing(b).getKnots() * Math.cos(b.getDifferenceTo(getTargetDirection().reverse()).getRadians()) > maxSpeedRight) {
                         maxSpeedRight = getSpeedAtBearing(b).getKnots()
                                 * Math.cos(b.getDifferenceTo(getTargetDirection().reverse()).getRadians());
                         estGybeAngleRight = b;
                     }
-                } else if (getSpeedAtBearing(b).getKnots()
-                        * Math.cos(b.getDifferenceTo(getTargetDirection().reverse()).getRadians()) > maxSpeedLeft) {
+                } else if (getSpeedAtBearing(b).getKnots() * Math.cos(b.getDifferenceTo(getTargetDirection().reverse()).getRadians()) > maxSpeedLeft) {
                     maxSpeedLeft = getSpeedAtBearing(b).getKnots()
                             * Math.cos(b.getDifferenceTo(getTargetDirection().reverse()).getRadians());
                     estGybeAngleLeft = b;
@@ -416,19 +412,17 @@ public class PolarDiagramBase implements PolarDiagram {
     // returns a table of Bearing-Speed pairs with a bearingStep granularity
     // for all Speeds in speedTable
     @Override
-    public NavigableMap<Speed, NavigableMap<Bearing, Speed>> polarDiagramPlot(Double bearingStep) {
+    public NavigableMap<Speed, NavigableMap<Bearing, Speed>> polarDiagramPlot(Double bearingStep, Set<Speed> extraSpeeds) {
 
         NavigableMap<Speed, NavigableMap<Bearing, Speed>> table = new TreeMap<Speed, NavigableMap<Bearing, Speed>>();
-        Set<Bearing> extraBearings = new HashSet<Bearing>();
 
-        for (Speed s : speedTable.keySet()) {
-            setWind(new KnotSpeedWithBearingImpl(s.getKnots(), new DegreeBearingImpl(135)));
-            extraBearings.addAll(Arrays.asList(optimalDirectionsUpwind()));
-            extraBearings.addAll(Arrays.asList(optimalDirectionsDownwind()));
+        Set<Speed> speedSet = new TreeSet<Speed>(); 
+        speedSet.addAll(speedTable.keySet());
+        if (extraSpeeds != null) {
+            speedSet.addAll(extraSpeeds);
         }
-
-        for (Speed s : speedTable.keySet()) {
-            setWind(new KnotSpeedWithBearingImpl(s.getKnots(), new DegreeBearingImpl(135)));
+        for (Speed s : speedSet) {
+            setWind(new KnotSpeedWithBearingImpl(s.getKnots(), new DegreeBearingImpl(180)));
             NavigableMap<Bearing, Speed> currentTable = new TreeMap<Bearing, Speed>(bearingComparator);
             table.put(s, currentTable);
 
@@ -436,8 +430,6 @@ public class PolarDiagramBase implements PolarDiagram {
                 Bearing bearing = new DegreeBearingImpl(b);
                 currentTable.put(bearing, getSpeedAtBearing(bearing));
             }
-            for (Bearing extraBearing : extraBearings)
-                currentTable.put(extraBearing, getSpeedAtBearing(extraBearing));
         }
 
         return table;
@@ -448,8 +440,6 @@ public class PolarDiagramBase implements PolarDiagram {
         return targetDirection;
     }
 
-    
-    
     @Override
     public void setTargetDirection(Bearing newTargetDirection) {
         targetDirection = newTargetDirection;

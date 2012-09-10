@@ -1,0 +1,51 @@
+package com.sap.sailing.simulator.test;
+
+import static org.junit.Assert.assertEquals;
+
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.NavigableMap;
+import java.util.Set;
+
+import org.junit.Test;
+
+import com.sap.sailing.domain.common.Bearing;
+import com.sap.sailing.domain.common.Speed;
+import com.sap.sailing.simulator.PolarDiagram;
+import com.sap.sailing.simulator.impl.PolarDiagram49STG;
+
+public class PolarDiagramPlotDataXY {
+
+    @Test
+    public void testPolarDiagram_PlotDataXY() throws IOException {
+
+        PolarDiagram polarDiagram = new PolarDiagram49STG();
+
+        NavigableMap<Speed, NavigableMap<Bearing, Speed>> table = polarDiagram.polarDiagramPlot(1.0, null);
+
+        String outputFile = "C:\\temp\\pd-test-XY.csv";
+        FileWriter fw = new FileWriter(outputFile);
+
+        Set<Speed> validSpeeds = table.keySet();
+        validSpeeds.remove(Speed.NULL);
+        String xLine = "wspeed;bangle;bspeed;polarX;polarY";
+        fw.write(xLine + "\n");
+
+        for (Speed s : validSpeeds) {    
+            xLine = "";
+            for (Bearing b : table.get(validSpeeds.iterator().next()).keySet()) {
+                xLine += "" + s.getKnots();
+                xLine += ";" + b.getDegrees();
+                xLine += ";" + table.get(s).get(b).getKnots();
+                xLine += ";" + table.get(s).get(b).getKnots() * Math.sin(b.getRadians());
+                xLine += ";" + table.get(s).get(b).getKnots() * Math.cos(b.getRadians()) + "\n";
+            }
+            fw.write(xLine + "\n");
+        }
+
+        fw.close();
+        assertEquals("no test", 1, 1);
+
+    }
+
+}

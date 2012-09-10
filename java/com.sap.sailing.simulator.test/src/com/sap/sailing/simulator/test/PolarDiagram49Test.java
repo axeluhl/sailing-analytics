@@ -22,7 +22,7 @@ public class PolarDiagram49Test {
     	
         PolarDiagram polarDiagram = new PolarDiagram49STG();
     	
-    	NavigableMap<Speed, NavigableMap<Bearing, Speed>> table = polarDiagram.polarDiagramPlot(10.0);
+    	NavigableMap<Speed, NavigableMap<Bearing, Speed>> table = polarDiagram.polarDiagramPlot(10.0,null);
         
     	String outputFile = "C:\\Users\\i059829\\Desktop\\new.csv";
 		FileWriter fw = new FileWriter(outputFile);
