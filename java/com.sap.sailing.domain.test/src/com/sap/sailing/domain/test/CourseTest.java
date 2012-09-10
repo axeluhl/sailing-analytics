@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
@@ -24,6 +25,8 @@ public class CourseTest {
         Course course = new CourseImpl("Test Course", waypoints);
         assertEquals(0, Util.size(course.getWaypoints()));
         assertEquals(0, Util.size(course.getLegs()));
+        assertNull(course.getFirstWaypoint());
+        assertNull(course.getLastWaypoint());
     }
 
     @Test

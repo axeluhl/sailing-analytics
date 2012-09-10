@@ -453,23 +453,26 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
             // if so, return an adjusted, later start time.
             // If no official start time was received, try to estimate the start time using the mark passings for the
             // start line.
-            if (startTimeReceived != null) {
-                TimePoint timeOfFirstMarkPassing = getFirstPassingTime(getRace().getCourse().getFirstWaypoint());
-                if (timeOfFirstMarkPassing != null) {
-                    long startTimeReceived2timeOfFirstMarkPassingFirstMark = timeOfFirstMarkPassing.asMillis()
-                            - startTimeReceived.asMillis();
-                    if (startTimeReceived2timeOfFirstMarkPassingFirstMark > MAX_TIME_BETWEEN_START_AND_FIRST_MARK_PASSING_IN_MILLISECONDS) {
-                        startTime = new MillisecondsTimePoint(timeOfFirstMarkPassing.asMillis()
-                                - MAX_TIME_BETWEEN_START_AND_FIRST_MARK_PASSING_IN_MILLISECONDS);
-                    } else {
-                        startTime = startTimeReceived;
+            final Waypoint firstWaypoint = getRace().getCourse().getFirstWaypoint();
+            if (firstWaypoint != null) {
+                if (startTimeReceived != null) {
+                    TimePoint timeOfFirstMarkPassing = getFirstPassingTime(firstWaypoint);
+                    if (timeOfFirstMarkPassing != null) {
+                        long startTimeReceived2timeOfFirstMarkPassingFirstMark = timeOfFirstMarkPassing.asMillis()
+                                - startTimeReceived.asMillis();
+                        if (startTimeReceived2timeOfFirstMarkPassingFirstMark > MAX_TIME_BETWEEN_START_AND_FIRST_MARK_PASSING_IN_MILLISECONDS) {
+                            startTime = new MillisecondsTimePoint(timeOfFirstMarkPassing.asMillis()
+                                    - MAX_TIME_BETWEEN_START_AND_FIRST_MARK_PASSING_IN_MILLISECONDS);
+                        } else {
+                            startTime = startTimeReceived;
+                        }
                     }
-                }
-            } else {
-                final NavigableSet<MarkPassing> markPassingsForFirstWaypointInOrder = getMarkPassingsInOrderAsNavigableSet(getRace()
-                        .getCourse().getFirstWaypoint());
-                if (markPassingsForFirstWaypointInOrder != null) {
-                    startTime = calculateStartOfRaceFromMarkPassings(markPassingsForFirstWaypointInOrder, getRace().getCompetitors());
+                } else {
+                    final NavigableSet<MarkPassing> markPassingsForFirstWaypointInOrder = getMarkPassingsInOrderAsNavigableSet(firstWaypoint);
+                    if (markPassingsForFirstWaypointInOrder != null) {
+                        startTime = calculateStartOfRaceFromMarkPassings(markPassingsForFirstWaypointInOrder, getRace()
+                                .getCompetitors());
+                    }
                 }
             }
         }
@@ -489,11 +492,14 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
 
     private TimePoint getLastPassingOfFinishLine() {
         TimePoint passingTime = null;
-        Iterable<MarkPassing> markPassingsInOrder = getMarkPassingsInOrder(getRace().getCourse().getLastWaypoint());
-        if (markPassingsInOrder != null) {
-            synchronized (markPassingsInOrder) {
-                for (MarkPassing passingFinishLine : markPassingsInOrder) {
-                    passingTime = passingFinishLine.getTimePoint();
+        final Waypoint lastWaypoint = getRace().getCourse().getLastWaypoint();
+        if (lastWaypoint != null) {
+            Iterable<MarkPassing> markPassingsInOrder = getMarkPassingsInOrder(lastWaypoint);
+            if (markPassingsInOrder != null) {
+                synchronized (markPassingsInOrder) {
+                    for (MarkPassing passingFinishLine : markPassingsInOrder) {
+                        passingTime = passingFinishLine.getTimePoint();
+                    }
                 }
             }
         }
