@@ -667,8 +667,6 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel {
                 public void onSuccess(LeaderboardGroupDTO result) {
                     //Updating the data lists
                     availableLeaderboardGroups.set(availableLeaderboardGroups.indexOf(selectedGroup), result);
-                    groupsProvider.getList().clear();
-                    groupsProvider.getList().addAll(availableLeaderboardGroups);
                     groupsSelectionModel.setSelected(result, true);
 
                     //Display details of the group
