@@ -940,8 +940,20 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
 
     protected Marker createBuoyMarker(final BuoyDTO markDTO) {
         MarkerOptions options = MarkerOptions.newInstance();
-        if (raceMapImageManager.buoyIcon != null) {
-            options.setIcon(raceMapImageManager.buoyIcon);
+        if(markDTO.displayColor != null) {
+            if("Red".equals(markDTO.displayColor) && raceMapImageManager.buoyRedIcon != null) {
+                options.setIcon(raceMapImageManager.buoyRedIcon);
+            } else if("Green".equals(markDTO.displayColor) && raceMapImageManager.buoyGreenIcon != null) {
+                options.setIcon(raceMapImageManager.buoyGreenIcon);
+            } else if("Yellow".equals(markDTO.displayColor) && raceMapImageManager.buoyYellowIcon != null) {
+                options.setIcon(raceMapImageManager.buoyYellowIcon);
+            } else if (raceMapImageManager.buoyIcon != null) {
+                options.setIcon(raceMapImageManager.buoyIcon);
+            }
+        } else {
+            if (raceMapImageManager.buoyIcon != null) {
+                options.setIcon(raceMapImageManager.buoyIcon);
+            }
         }
         options.setTitle(markDTO.name);
         final Marker buoyMarker = new Marker(LatLng.newInstance(markDTO.position.latDeg, markDTO.position.lngDeg),

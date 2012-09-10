@@ -424,4 +424,11 @@ public interface SailingServiceAsync {
     void addFragUrl(String result, AsyncCallback<Void> asyncCallback);
 
     void getRaceBuoys(RaceIdentifier raceIdentifier, Date date,	AsyncCallback<RaceBuoysDTO> callback);
+
+    void addColumnsToLeaderboard(String leaderboardName, List<Pair<String, Boolean>> columnsToAdd,
+            AsyncCallback<Void> callback);
+
+    void removeLeaderboardColumns(String leaderboardName, List<String> columnsToRemove, AsyncCallback<Void> callback);
+
+    void getLeaderboard(String leaderboardName, AsyncCallback<StrippedLeaderboardDTO> callback);
 }

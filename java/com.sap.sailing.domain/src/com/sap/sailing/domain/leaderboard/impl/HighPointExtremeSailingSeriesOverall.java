@@ -47,7 +47,7 @@ public class HighPointExtremeSailingSeriesOverall extends HighPoint {
         int o1Wins = getWins(o1Scores);
         int o2Wins = getWins(o2Scores);
         int result = o1Wins - o2Wins;
-        if (result == 0) {
+        if (result == 0 && o1Scores.size() >= 1 && o2Scores.size() >= 1) {
             result = o1Scores.get(o1Scores.size()-1).compareTo(o2Scores.get(o2Scores.size()-1));
         }
         return result;

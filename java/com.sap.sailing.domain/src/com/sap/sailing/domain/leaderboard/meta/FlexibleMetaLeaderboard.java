@@ -25,7 +25,7 @@ public class FlexibleMetaLeaderboard extends AbstractMetaLeaderboard {
     }
 
     @Override
-    protected Iterable<Leaderboard> getLeaderboards() {
+    public Iterable<Leaderboard> getLeaderboards() {
         LockUtil.lockForRead(leaderboardsLock);
         try {
             return new ArrayList<Leaderboard>(leaderboards);

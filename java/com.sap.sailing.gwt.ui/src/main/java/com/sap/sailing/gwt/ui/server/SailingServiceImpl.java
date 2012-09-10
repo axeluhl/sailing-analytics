@@ -94,6 +94,8 @@ import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard.Entry;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
+import com.sap.sailing.domain.leaderboard.MetaLeaderboard;
+import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
@@ -1526,7 +1528,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                     Position positionAtDate = track.getEstimatedPosition(dateAsTimePoint, /* extrapolate */false);
                     if (positionAtDate != null) {
                         BuoyDTO buoyDTO = new BuoyDTO(buoy.getName(), positionAtDate.getLatDeg(),
-                                positionAtDate.getLngDeg());
+                                positionAtDate.getLngDeg(), buoy.getDisplayColor());
                         result.buoys.add(buoyDTO);
                     }
                 }
@@ -1557,7 +1559,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 GPSFixTrack<Buoy, GPSFix> track = trackedRace.getOrCreateTrack(buoy);
                 Position positionAtDate = track.getEstimatedPosition(dateAsTimePoint, /* extrapolate */false);
                 if (positionAtDate != null) {
-                    BuoyDTO markDTO = new BuoyDTO(buoy.getName(), positionAtDate.getLatDeg(), positionAtDate.getLngDeg());
+                    BuoyDTO markDTO = new BuoyDTO(buoy.getName(), positionAtDate.getLatDeg(), positionAtDate.getLngDeg(), buoy.getDisplayColor());
                     raceBuoysDTO.buoys.add(markDTO);
                 }
             }
@@ -1589,12 +1591,12 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             final Buoy right = ((Gate) controlPoint).getRight();
             final Position rightPos = trackedRace.getOrCreateTrack(right).getEstimatedPosition(timePoint, /* extrapolate */ false);
             result = new GateDTO(controlPoint.getName(),
-                    new BuoyDTO(left.getName(), leftPos.getLatDeg(), leftPos.getLngDeg()),
-                    new BuoyDTO(right.getName(), rightPos.getLatDeg(), rightPos.getLngDeg()));
+                    new BuoyDTO(left.getName(), leftPos.getLatDeg(), leftPos.getLngDeg(), left.getDisplayColor()),
+                    new BuoyDTO(right.getName(), rightPos.getLatDeg(), rightPos.getLngDeg(), right.getDisplayColor()));
         } else {
             final Position posOfFirst = trackedRace.getOrCreateTrack(controlPoint.getBuoys().iterator().next()).
                     getEstimatedPosition(timePoint, /* extrapolate */ false);
-            result = new BuoyDTO(controlPoint.getName(), posOfFirst.getLatDeg(), posOfFirst.getLngDeg());
+            result = new BuoyDTO(controlPoint.getName(), posOfFirst.getLatDeg(), posOfFirst.getLngDeg(), null);
         }
         return result;
     }
@@ -1805,7 +1807,18 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         }
         return results;
     }
-    
+
+    @Override
+    public StrippedLeaderboardDTO getLeaderboard(String leaderboardName) {
+        Map<String, Leaderboard> leaderboards = getService().getLeaderboards();
+        StrippedLeaderboardDTO result = null;
+        Leaderboard leaderboard = leaderboards.get(leaderboardName);
+        if(leaderboard != null) {
+            result = createStrippedLeaderboardDTO(leaderboard, false);
+        }
+        return result;
+    }
+
     @Override
     public List<StrippedLeaderboardDTO> getLeaderboardsByEvent(RegattaDTO regatta) {
         List<StrippedLeaderboardDTO> results = new ArrayList<StrippedLeaderboardDTO>();
@@ -1858,6 +1871,20 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         Long delayToLiveInMillisForLatestRace = null;
         leaderboardDTO.name = leaderboard.getName();
         leaderboardDTO.competitorDisplayNames = new HashMap<CompetitorDTO, String>();
+        leaderboardDTO.isMetaLeaderboard = leaderboard instanceof MetaLeaderboard ? true : false;
+        if(leaderboard instanceof RegattaLeaderboard) {
+            RegattaLeaderboard regattaLeaderboard = (RegattaLeaderboard) leaderboard;
+            Regatta regatta = regattaLeaderboard.getRegatta();
+            leaderboardDTO.regattaName = regatta.getName(); 
+            leaderboardDTO.isRegattaLeaderboard = true;
+            leaderboardDTO.scoringScheme = regatta.getScoringScheme().getType();
+        } else {
+            leaderboardDTO.isRegattaLeaderboard = false;
+            leaderboardDTO.scoringScheme = leaderboard.getScoringScheme().getType();
+        }
+        leaderboardDTO.setDelayToLiveInMillisForLatestRace(delayToLiveInMillisForLatestRace);
+        leaderboardDTO.hasCarriedPoints = leaderboard.hasCarriedPoints();
+        leaderboardDTO.discardThresholds = leaderboard.getResultDiscardingRule().getDiscardIndexResultsStartingWithHowManyRaces();
         for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
             StrippedRaceDTO race = null;
             for (Fleet fleet : raceColumn.getFleets()) {
@@ -1880,10 +1907,6 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 leaderboardDTO.addRace(raceColumn.getName(), fleetDTO, raceColumn.isMedalRace(), raceIdentifier, race);
             }
         }
-        leaderboardDTO.hasCarriedPoints = leaderboard.hasCarriedPoints();
-        leaderboardDTO.discardThresholds = leaderboard.getResultDiscardingRule().getDiscardIndexResultsStartingWithHowManyRaces();
-        leaderboardDTO.scoringScheme = leaderboard.getScoringScheme().getType();
-        leaderboardDTO.setDelayToLiveInMillisForLatestRace(delayToLiveInMillisForLatestRace);
         return leaderboardDTO;
     }
 
@@ -1979,10 +2002,24 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     }
 
     @Override
+    public void addColumnsToLeaderboard(String leaderboardName, List<Pair<String, Boolean>> columnsToAdd) {
+        for(Pair<String, Boolean> columnToAdd: columnsToAdd) {
+            getService().apply(new AddColumnToLeaderboard(columnToAdd.getA(), leaderboardName, columnToAdd.getB()));
+        }
+    }
+    
+    @Override
+    public void removeLeaderboardColumns(String leaderboardName, List<String> columnsToRemove) {
+        for (String columnToRemove : columnsToRemove) {
+            getService().apply(new RemoveLeaderboardColumn(columnToRemove, leaderboardName));
+        }
+    }
+
+    @Override
     public void removeLeaderboardColumn(String leaderboardName, String columnName) {
         getService().apply(new RemoveLeaderboardColumn(columnName, leaderboardName));
     }
-
+    
     @Override
     public void renameLeaderboardColumn(String leaderboardName, String oldColumnName, String newColumnName) {
         getService().apply(new RenameLeaderboardColumn(leaderboardName, oldColumnName, newColumnName));

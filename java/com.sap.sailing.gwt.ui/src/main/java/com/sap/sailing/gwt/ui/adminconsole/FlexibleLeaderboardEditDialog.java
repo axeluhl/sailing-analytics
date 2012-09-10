@@ -17,18 +17,18 @@ public class FlexibleLeaderboardEditDialog extends FlexibleLeaderboardDialog {
         super(stringConstants.editFlexibleLeaderboard(), leaderboard, stringConstants, errorReporter, new FlexibleLeaderboardDialog.LeaderboardParameterValidator(
                 stringConstants, otherExistingLeaderboards), callback);
         
-        nameTextBox = createTextBox(leaderboard.name);
+        nameTextBox = createTextBox(leaderboard.getName());
 
         scoringSchemeListBox = createListBox(false);
         int j = 0;
         for (ScoringSchemeType scoringSchemeType: ScoringSchemeType.values()) {
             scoringSchemeListBox.addItem(ScoringSchemeTypeFormatter.format(scoringSchemeType, stringConstants));
-            if(leaderboard.scoringScheme == scoringSchemeType) {
+            if(leaderboard.getScoringScheme() == scoringSchemeType) {
                 scoringSchemeListBox.setSelectedIndex(j);
             }
             j++;
         }
         scoringSchemeListBox.setEnabled(false);
-        discardThresholdBoxes = initPrefilledDiscardThresholdBoxes(leaderboard.discardThresholds, this);
+        discardThresholdBoxes = initPrefilledDiscardThresholdBoxes(leaderboard.getDiscardThresholds(), this);
     }
 }

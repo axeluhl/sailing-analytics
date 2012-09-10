@@ -38,7 +38,7 @@ public class LeaderboardGroupMetaLeaderboard extends AbstractMetaLeaderboard imp
     }
 
     @Override
-    protected Iterable<Leaderboard> getLeaderboards() {
+    public Iterable<Leaderboard> getLeaderboards() {
         return leaderboardGroup.getLeaderboards();
     }
 

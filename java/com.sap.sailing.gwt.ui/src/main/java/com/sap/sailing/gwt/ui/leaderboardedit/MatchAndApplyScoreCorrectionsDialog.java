@@ -315,8 +315,8 @@ public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<BulkSco
                         raceColumn.isMedalRace() ? officialCorrectionEntry.getScore() / MEDAL_RACE_FACTOR : officialCorrectionEntry.getScore();
                     SafeHtmlBuilder sb = new SafeHtmlBuilder();
                     boolean entriesDiffer =
-                            ((officialNetPoints == null && entry.netPoints != 0) || (officialNetPoints != null && !new Double(entry.netPoints).equals(officialNetPoints))) ||
-                            ((officialTotalPoints == null && entry.totalPoints != 0) || (officialTotalPoints != null && !new Double(entry.totalPoints).equals(officialTotalPoints))) ||
+                            ((officialNetPoints == null && entry.netPoints != null) || (officialNetPoints != null && entry.netPoints != null && !new Double(entry.netPoints).equals(officialNetPoints))) ||
+                            ((officialTotalPoints == null && entry.totalPoints != null) || (officialTotalPoints != null &&  entry.totalPoints != null && !new Double(entry.totalPoints).equals(officialTotalPoints))) ||
                             ((officialCorrectionEntry.getMaxPointsReason() == null && entry.reasonForMaxPoints != MaxPointsReason.NONE) ||
                                     officialCorrectionEntry.getMaxPointsReason() != null && officialCorrectionEntry.getMaxPointsReason() != entry.reasonForMaxPoints);
                     if (entriesDiffer) {

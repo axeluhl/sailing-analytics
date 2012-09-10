@@ -14,20 +14,28 @@ import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
+import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.SailingServerHttpServlet;
 
-public class LeaderboardJsonExport extends SailingServerHttpServlet {
+public class LeaderboardJsonExportServlet extends SailingServerHttpServlet {
     private static final long serialVersionUID = -2460691283231361152L;
     private static final String PARAM_NAME_LEADERBOARDNAME = "leaderboardName";
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        // to allow access to the json document directly from a client side javascript
+        resp.setHeader("Access-Control-Allow-Origin", "*");
+        resp.setContentType("application/json");
+        resp.setCharacterEncoding("UTF-8");
+
         TimePoint timePoint = MillisecondsTimePoint.now();
         String leaderboardName = req.getParameter(PARAM_NAME_LEADERBOARDNAME);
         if (leaderboardName == null) {
@@ -44,6 +52,18 @@ public class LeaderboardJsonExport extends SailingServerHttpServlet {
                     Map<RaceColumn, List<Competitor>> rankedCompetitorsPerColumn = new HashMap<RaceColumn, List<Competitor>>();
                     JSONObject jsonLeaderboard = new JSONObject();
                     jsonLeaderboard.put("name", leaderboard.getName());
+                    jsonLeaderboard.put("timepoint", timePoint.toString());
+                    
+                    SettableScoreCorrection scoreCorrection = leaderboard.getScoreCorrection();
+                    if(scoreCorrection != null) {
+                        jsonLeaderboard.put("scoringComment", scoreCorrection.getComment());
+                        TimePoint lastUpdateTimepoint = scoreCorrection.getTimePointOfLastCorrectionsValidity();
+                        jsonLeaderboard.put("lastScoringUpdate", lastUpdateTimepoint != null ? lastUpdateTimepoint.asDate().toString(): null);
+                    } else {
+                        jsonLeaderboard.put("scoringComment", null);
+                        jsonLeaderboard.put("lastScoringUpdate", null);
+                    }
+                    
                     JSONArray jsonColumnNames = new JSONArray();
                     jsonLeaderboard.put("columnNames", jsonColumnNames);
                     for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
@@ -58,8 +78,9 @@ public class LeaderboardJsonExport extends SailingServerHttpServlet {
                         jsonCompetitor.put("displayName", displayName==null?competitor.getName():displayName);
                         jsonCompetitor.put("id", competitor.getId().toString());
                         jsonCompetitor.put("sailID", competitor.getBoat().getSailID());
-                        jsonCompetitor.put("nationality", competitor.getTeam().getNationality()
-                                .getThreeLetterIOCAcronym());
+                        Nationality nationality = competitor.getTeam().getNationality();
+                        jsonCompetitor.put("nationality", nationality != null ? nationality.getThreeLetterIOCAcronym(): null);
+                        jsonCompetitor.put("countryCode", nationality != null ? nationality.getCountryCode().getTwoLetterISOCode(): null);
                         jsonCompetitor.put("rank",
                                 competitorsFromBestToWorstAccordingToTotalRank.indexOf(competitor) + 1);
                         jsonCompetitor.put("totalPoints", leaderboard.getTotalPoints(competitor, timePoint));
@@ -78,7 +99,8 @@ public class LeaderboardJsonExport extends SailingServerHttpServlet {
                             jsonEntry.put("fleet", fleetOfCompetitor==null?"":fleetOfCompetitor.getName());
                             jsonEntry.put("netPoints", leaderboard.getNetPoints(competitor, raceColumn, timePoint));
                             jsonEntry.put("totalPoints", leaderboard.getTotalPoints(competitor, raceColumn, timePoint));
-                            jsonEntry.put("maxPointsReason", leaderboard.getMaxPointsReason(competitor, raceColumn, timePoint));
+                            MaxPointsReason maxPointsReason = leaderboard.getMaxPointsReason(competitor, raceColumn, timePoint);
+                            jsonEntry.put("maxPointsReason", maxPointsReason != null ? maxPointsReason.toString(): null);
                             jsonEntry.put("rank", rankedCompetitorsForColumn.indexOf(competitor)+1);
                             final TrackedRace trackedRace = raceColumn.getTrackedRace(competitor);
                             if (trackedRace != null) {

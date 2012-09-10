@@ -64,9 +64,9 @@ public class RegattaWithSeriesAndFleetsCreateDialog extends DataEntryDialog<Rega
             }
 
             if (!nameNotEmpty) {
-                errorMessage = stringConstants.pleaseEnterNonEmptyName();
+                errorMessage = stringConstants.pleaseEnterAName();
             } else if (!boatClassNotEmpty) {
-                errorMessage = stringConstants.pleaseEnterNonEmptyName();
+                errorMessage = stringConstants.pleaseEnterAName();
             } else if (!unique) {
                 errorMessage = stringConstants.regattaWithThisNameAlreadyExists();
             }
@@ -98,7 +98,7 @@ public class RegattaWithSeriesAndFleetsCreateDialog extends DataEntryDialog<Rega
 
                 if (!seriesNameNotEmpty) {
                     errorMessage = stringConstants.series() + " " + (index + 1) + ": "
-                            + stringConstants.pleaseEnterNonEmptyName();
+                            + stringConstants.pleaseEnterAName();
                 } else if (!seriesUnique) {
                     errorMessage = stringConstants.series() + " " + (index2 + 1) + ": "
                             + stringConstants.seriesWithThisNameAlreadyExists();

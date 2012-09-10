@@ -14,6 +14,8 @@ import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.DoubleBox;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.HasVerticalAlignment;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.IntegerBox;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
@@ -75,6 +77,7 @@ public abstract class DataEntryDialog<T> {
         dateEntryDialog.setAnimationEnabled(animationEnabled);
         this.validator = validator;
         okButton = new Button(okButtonName);
+        okButton.getElement().getStyle().setMargin(3, Unit.PX);
         FlowPanel dialogFPanel = new FlowPanel();
         statusLabel = new Label();
         dialogFPanel.add(statusLabel);
@@ -91,6 +94,7 @@ public abstract class DataEntryDialog<T> {
         buttonPanel.setStyleName("additionalWidgets");
         buttonPanel.add(okButton);
         cancelButton = new Button(cancelButtonName);
+        cancelButton.getElement().getStyle().setMargin(3, Unit.PX);
         buttonPanel.add(cancelButton);
         cancelButton.addClickHandler(new ClickHandler() {
             @Override
@@ -267,6 +271,7 @@ public abstract class DataEntryDialog<T> {
 
     public CheckBox createCheckbox(String checkboxLabel) {
         CheckBox result = new CheckBox(checkboxLabel);
+        result.setWordWrap(false);
         result.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
             @Override
             public void onValueChange(ValueChangeEvent<Boolean> event) {
@@ -291,6 +296,13 @@ public abstract class DataEntryDialog<T> {
         return result;
     }
 
+    protected void alignAllPanelWidgetsVertically(HorizontalPanel panel, HasVerticalAlignment.VerticalAlignmentConstant alignment) {
+        for(int i = 0; i < panel.getWidgetCount(); i++) {
+            panel.setCellVerticalAlignment(panel.getWidget(i), alignment);
+        }
+    }
+
+    
     /**
      * Can contribute an additional widget to be displayed underneath the text entry field. If <code>null</code> is
      * returned, no additional widget will be displayed. This is the default behavior of this default implementation.

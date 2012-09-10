@@ -10,10 +10,18 @@ import com.sap.sailing.domain.common.impl.NamedImpl;
 public class BuoyImpl extends NamedImpl implements Buoy {
     private static final long serialVersionUID = 1900673146064411979L;
 
+    private String displayColor;
+    
     public BuoyImpl(String name) {
         super(name);
+        displayColor = null;
     }
-    
+
+    public BuoyImpl(String name, String color) {
+        super(name);
+        this.displayColor = color;
+    }
+
     @Override
     public Serializable getId() {
         return getName();
@@ -30,5 +38,9 @@ public class BuoyImpl extends NamedImpl implements Buoy {
     public Buoy resolve(DomainFactory domainFactory) {
         Buoy result = domainFactory.getOrCreateBuoy(getName());
         return result;
+    }
+
+    public String getDisplayColor() {
+        return displayColor;
     }
 }

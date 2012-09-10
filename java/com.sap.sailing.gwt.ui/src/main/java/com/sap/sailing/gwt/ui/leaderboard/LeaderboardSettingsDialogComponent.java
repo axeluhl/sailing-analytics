@@ -10,6 +10,7 @@ import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FocusWidget;
+import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.LongBox;
 import com.google.gwt.user.client.ui.Widget;
@@ -62,7 +63,7 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
         this.delayBetweenAutoAdvancesInMilliseconds = delayBetweenAutoAdvancesInMilliseconds;
         this.delayInMilliseconds = delayInMilliseconds;
     }
-    
+
     @Override
     public Widget getAdditionalWidget(DataEntryDialog<?> dialog) {
         FlowPanel dialogPanel = new FlowPanel();
@@ -70,12 +71,12 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
         dialogPanel.add(createOverallDetailPanel(dialog));
         dialogPanel.add(createRaceDetailPanel(dialog));
         dialogPanel.add(createLegDetailsPanel(dialog));
-        dialogPanel.add(createMeneuverDetailsPanel(dialog));
+        dialogPanel.add(createManeuverDetailsPanel(dialog));
         dialogPanel.add(createTimingDetailsPanel(dialog));
         return dialogPanel;
     }
 
-    private FlowPanel createMeneuverDetailsPanel(DataEntryDialog<?> dialog) {
+    private FlowPanel createManeuverDetailsPanel(DataEntryDialog<?> dialog) {
         FlowPanel meneuverPanel = new FlowPanel();
         meneuverPanel.add(dialog.createHeadline(stringConstants.maneuverTypes(), true));
         meneuverPanel.addStyleName("SettingsDialogComponent");
@@ -169,16 +170,35 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
 
     private FlowPanel createSelectedRacesPanel(DataEntryDialog<?> dialog) {
         FlowPanel selectedRacesPanel = new FlowPanel();
-        selectedRacesPanel.addStyleName("SettingsDialogComponent selectedRacesSettings");
+        selectedRacesPanel.addStyleName("SettingsDialogComponent");
         FlowPanel selectedRacesContent = new FlowPanel();
         selectedRacesContent.addStyleName("dialogInnerContent");
         selectedRacesPanel.add(dialog.createHeadline(stringConstants.selectedRaces(), true));
         List<RaceColumnDTO> allColumns = raceAllRaceColumns;
-        for (RaceColumnDTO expandableSortableColumn : allColumns) {
-            CheckBox checkbox = dialog.createCheckbox(expandableSortableColumn.getRaceColumnName());
-            checkbox.setValue(Util.contains(raceColumnSelection, expandableSortableColumn));
-            raceColumnCheckboxes.put(expandableSortableColumn, checkbox);
-            selectedRacesContent.add(checkbox);
+        // Attention: We need to consider that there are regattas with more than 30 races
+        int racesCount = allColumns.size();
+        int maxRacesPerRow = 10;
+        if (racesCount > 0) {
+            int rowIndex = 0;
+            int columnIndex = 0;
+            int rowCount = racesCount / maxRacesPerRow;
+            if(racesCount % maxRacesPerRow != 0) {
+                rowCount++;
+            }
+            Grid grid = new Grid(rowCount, maxRacesPerRow);
+            for (RaceColumnDTO expandableSortableColumn : allColumns) {
+                CheckBox checkbox = dialog.createCheckbox(expandableSortableColumn.getRaceColumnName());
+                checkbox.setValue(Util.contains(raceColumnSelection, expandableSortableColumn));
+                raceColumnCheckboxes.put(expandableSortableColumn, checkbox);
+                grid.setWidget(rowIndex, columnIndex++, checkbox);
+                if(columnIndex == maxRacesPerRow) {
+                    rowIndex++;
+                    columnIndex = 0;
+                }
+            }
+            selectedRacesContent.add(grid);
+        } else {
+            selectedRacesContent.add(new Label(stringConstants.noRacesYet()));
         }
         selectedRacesPanel.add(selectedRacesContent);
         return selectedRacesPanel;
@@ -212,7 +232,7 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
         }
         List<String> namesOfRaceColumnsToShow = new ArrayList<String>();
         for (Map.Entry<RaceColumnDTO, CheckBox> entry : raceColumnCheckboxes.entrySet()) {
-            if(entry.getValue().getValue()){
+            if (entry.getValue().getValue()) {
                 namesOfRaceColumnsToShow.add(entry.getKey().getRaceColumnName());
             }
         }

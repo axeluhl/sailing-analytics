@@ -570,7 +570,7 @@ body ::-webkit-scrollbar-track {
 	background-repeat: no-repeat;
 }
 
-.formButton {
+.inlineButton {
 	height: 20px;
     padding: 0px 10px 3px;
     float: left;

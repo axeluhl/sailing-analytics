@@ -20,8 +20,10 @@ public abstract class AbstractLeaderboardDTO implements IsSerializable {
     public Map<CompetitorDTO, LeaderboardRowDTO> rows;
     public boolean hasCarriedPoints;
     public int[] discardThresholds;
-    public RegattaDTO regatta;
+    public String regattaName;
     public ScoringSchemeType scoringScheme;
+    public boolean isMetaLeaderboard;
+    public boolean isRegattaLeaderboard;
 
     private Long delayToLiveInMillisForLatestRace;
     
@@ -312,6 +314,8 @@ public abstract class AbstractLeaderboardDTO implements IsSerializable {
         if (!Arrays.equals(discardThresholds, other.discardThresholds))
             return false;
         if (hasCarriedPoints != other.hasCarriedPoints)
+            return false;
+        if (isMetaLeaderboard != other.isMetaLeaderboard)
             return false;
         if (scoringScheme != other.scoringScheme)
             return false;

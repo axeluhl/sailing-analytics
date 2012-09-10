@@ -47,7 +47,7 @@ public class EventDialog extends DataEntryDialog<EventDTO> {
             }
 
             if (!nameNotEmpty) {
-                errorMessage = stringConstants.pleaseEnterNonEmptyName();
+                errorMessage = stringConstants.pleaseEnterAName();
             } else if (!venueNotEmpty) {
                 errorMessage = stringConstants.pleaseEnterNonEmptyVenue();
             } else if (!unique) {

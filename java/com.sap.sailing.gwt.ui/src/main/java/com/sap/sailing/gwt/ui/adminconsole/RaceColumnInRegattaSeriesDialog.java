@@ -32,7 +32,7 @@ public class RaceColumnInRegattaSeriesDialog extends DataEntryDialog<Pair<Series
     private Button addRacesBtn;
     private final List<TextBox> raceNameEntryFields;
     private final List<Button> raceNameDeleteButtons;
-    private final StringMessages stringConstants;
+    private final StringMessages stringMessages;
     private final TextBox raceNamePrefixTextBox;
     private final boolean hasOneSeries;
     private Grid raceColumnsGrid;
@@ -81,7 +81,7 @@ public class RaceColumnInRegattaSeriesDialog extends DataEntryDialog<Pair<Series
 
                 if (!raceColumnNameNotEmpty) {
                     errorMessage = stringConstants.race() + " " + (index + 1) + ": "
-                            + stringConstants.pleaseEnterNonEmptyName();
+                            + stringConstants.pleaseEnterAName();
                 } else if (!raceColumnUnique) {
                     errorMessage = stringConstants.race() + " " + (index2 + 1) + ": "
                             + stringConstants.raceWithThisNameAlreadyExists();
@@ -98,7 +98,7 @@ public class RaceColumnInRegattaSeriesDialog extends DataEntryDialog<Pair<Series
         super(stringConstants.actionEditRaces(), null, stringConstants.ok(), stringConstants.cancel(),
                 new RaceDialogValidator(regatta, stringConstants), callback);
         this.regatta = regatta;
-        this.stringConstants = stringConstants;
+        this.stringMessages = stringConstants;
         this.hasOneSeries = regatta.series.size() == 1;
         seriesListBox = createListBox(false);
         addRacesListBox = createListBox(false);
@@ -117,7 +117,8 @@ public class RaceColumnInRegattaSeriesDialog extends DataEntryDialog<Pair<Series
     }
 
     private Widget createRaceNameDeleteButtonWidget() {
-        final Button raceNameDeleteBtn = new Button(stringConstants.delete()); 
+        final Button raceNameDeleteBtn = new Button(stringMessages.delete()); 
+        raceNameDeleteBtn.addStyleName("inlineButton");
         raceNameDeleteButtons.add(raceNameDeleteBtn);
         raceNameDeleteBtn.addClickHandler(new ClickHandler() {
             @Override
@@ -177,7 +178,7 @@ public class RaceColumnInRegattaSeriesDialog extends DataEntryDialog<Pair<Series
 
         HorizontalPanel seriesPanel = new HorizontalPanel();
         seriesPanel.setSpacing(3);
-        seriesPanel.add(new Label(stringConstants.series() + ":"));
+        seriesPanel.add(new Label(stringMessages.series() + ":"));
         if(hasOneSeries) {
             String seriesName = regatta.series.get(0).name;
             seriesListBox.addItem(seriesName);
@@ -213,7 +214,7 @@ public class RaceColumnInRegattaSeriesDialog extends DataEntryDialog<Pair<Series
         // add races controls
         HorizontalPanel addRacesPanel = new HorizontalPanel();
         addRacesPanel.setSpacing(3);
-        addRacesPanel.add(new Label("Add a number of races:"));
+        addRacesPanel.add(new Label(stringMessages.add()));
         addRacesPanel.add(addRacesListBox);
         for(int i = 1; i <= 10; i++) {
             addRacesListBox.addItem("" + i);
@@ -221,7 +222,8 @@ public class RaceColumnInRegattaSeriesDialog extends DataEntryDialog<Pair<Series
         addRacesListBox.setSelectedIndex(0);
         raceNamePrefixTextBox.setWidth("20px");
         addRacesPanel.add(raceNamePrefixTextBox);
-        addRacesBtn = new Button(stringConstants.add());
+        addRacesBtn = new Button(stringMessages.add());
+        addRacesBtn.addStyleName("inlineButton");
         addRacesBtn.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -247,7 +249,7 @@ public class RaceColumnInRegattaSeriesDialog extends DataEntryDialog<Pair<Series
         addRacesPanel.add(addRacesBtn);
         additionalWidgetPanel.add(addRacesPanel);
         
-        additionalWidgetPanel.add(createHeadlineLabel(stringConstants.races()));
+        additionalWidgetPanel.add(createHeadlineLabel(stringMessages.races()));
         additionalWidgetPanel.add(raceColumnsGrid);
 
         if(hasOneSeries) {
@@ -277,7 +279,7 @@ public class RaceColumnInRegattaSeriesDialog extends DataEntryDialog<Pair<Series
         if(raceNamesCount > 0) {
             raceColumnsGrid = new Grid(raceNamesCount + 1, 3);
             raceColumnsGrid.setCellSpacing(4);
-            raceColumnsGrid.setHTML(0, 0, stringConstants.name());
+            raceColumnsGrid.setHTML(0, 0, stringMessages.name());
             for(int i = 0; i < raceNamesCount; i++) {
                 raceColumnsGrid.setWidget(i+1, 0, raceNameEntryFields.get(i));
                 raceColumnsGrid.setWidget(i+1, 1, raceNameDeleteButtons.get(i));

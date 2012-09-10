@@ -16,7 +16,7 @@ public class RegattaLeaderboardEditDialog extends RegattaLeaderboardDialog {
         super(stringConstants.editRegattaLeaderboard(), leaderboard, existingRegattas, stringConstants, errorReporter, new RegattaLeaderboardDialog.LeaderboardParameterValidator(
                 stringConstants, otherExistingLeaderboards), callback);
         
-        nameTextBox = createTextBox(leaderboard.name);
+        nameTextBox = createTextBox(leaderboard.getName());
 
         regattaListBox = createListBox(false);
         regattaListBox.addItem(stringConstants.pleaseSelectARegatta());
@@ -24,6 +24,6 @@ public class RegattaLeaderboardEditDialog extends RegattaLeaderboardDialog {
             regattaListBox.addItem(regatta.name);
         }
         regattaListBox.setEnabled(false);
-        discardThresholdBoxes = initPrefilledDiscardThresholdBoxes(leaderboard.discardThresholds, this);
+        discardThresholdBoxes = initPrefilledDiscardThresholdBoxes(leaderboard.getDiscardThresholds(), this);
     }
 }

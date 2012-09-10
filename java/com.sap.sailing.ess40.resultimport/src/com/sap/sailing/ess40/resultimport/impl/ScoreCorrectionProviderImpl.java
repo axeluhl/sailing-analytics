@@ -26,7 +26,7 @@ import com.sap.sailing.domain.common.impl.Util.Pair;
 public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider {
     private static final long serialVersionUID = -4870646572106575667L;
     
-    private static final String EXTREME_40_CLASS_NAME = "extreme 40";
+    private static final String EXTREME_40_CLASS_NAME = "Extreme40";
 
     @Override
     public String getName() {
