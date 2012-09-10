@@ -15,7 +15,6 @@ import com.sap.sailing.domain.base.RaceColumnInSeries;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
@@ -71,8 +70,7 @@ public class LeaderboardGroupJsonExportServlet extends SailingServerHttpServlet 
                         RegattaLeaderboard regattaLeaderboard = (RegattaLeaderboard) leaderboard;
                         Regatta regatta = regattaLeaderboard.getRegatta();
 
-                        ScoringSchemeType type = regatta.getScoringScheme().getType();
-                        jsonLeaderboard.put("scoringScheme", type != null ? type.toString() : null);
+                        jsonLeaderboard.put("scoringScheme", leaderboard.getScoringScheme().getType());
 
                         Iterable<? extends Series> regattaSeries = regatta.getSeries();
                         // there should only be one series
@@ -111,8 +109,7 @@ public class LeaderboardGroupJsonExportServlet extends SailingServerHttpServlet 
                             }
                         }
                     } else {
-                        ScoringSchemeType type = leaderboard.getScoringScheme().getType();
-                        jsonLeaderboard.put("scoringScheme", type != null ? type.toString() : null);
+                        jsonLeaderboard.put("scoringScheme", leaderboard.getScoringScheme().getType());
                         jsonLeaderboard.put("seriesName", "Default");
 
                         JSONArray jsonFleetsEntries = new JSONArray();
