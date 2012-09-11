@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.leaderboard.meta;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -45,8 +47,8 @@ public abstract class AbstractMetaLeaderboard extends AbstractSimpleLeaderboardI
     private final Fleet metaFleet;
     private final ScoringScheme scoringScheme;
     private final String name;
-    private final WeakHashMap<Leaderboard, RaceColumn> columnsForLeaderboards;
-    private final WeakHashMap<Leaderboard, ScoreCorrectionListener> scoreCorrectionChangeForwardersByLeaderboard;
+    private transient WeakHashMap<Leaderboard, RaceColumn> columnsForLeaderboards;
+    private transient WeakHashMap<Leaderboard, ScoreCorrectionListener> scoreCorrectionChangeForwardersByLeaderboard;
     
     private class ScoreCorrectionChangeForwarder implements ScoreCorrectionListener {
         @Override
@@ -67,6 +69,12 @@ public abstract class AbstractMetaLeaderboard extends AbstractSimpleLeaderboardI
         metaFleet = new FleetImpl("MetaFleet");
         this.scoringScheme = scoringScheme;
         this.name = name;
+        columnsForLeaderboards = new WeakHashMap<>();
+        scoreCorrectionChangeForwardersByLeaderboard = new WeakHashMap<>();
+    }
+    
+    private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
+        ois.defaultReadObject();
         columnsForLeaderboards = new WeakHashMap<>();
         scoreCorrectionChangeForwardersByLeaderboard = new WeakHashMap<>();
     }
