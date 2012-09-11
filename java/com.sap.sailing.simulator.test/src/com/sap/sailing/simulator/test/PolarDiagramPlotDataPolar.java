@@ -26,10 +26,11 @@ public class PolarDiagramPlotDataPolar {
         Set<Speed> extraSpeeds = new TreeSet<Speed>();
         extraSpeeds.add(new KnotSpeedImpl(2.0));
         extraSpeeds.add(new KnotSpeedImpl(4.0));
+        extraSpeeds.add(new KnotSpeedImpl(18.0));
 
         NavigableMap<Speed, NavigableMap<Bearing, Speed>> table = polarDiagram.polarDiagramPlot(1.0, extraSpeeds);
 
-        String outputFile = "C:\\temp\\pd-test-49orc.csv";
+        String outputFile = "C:\\temp\\pd-test-49stg.csv";
         FileWriter fw = new FileWriter(outputFile);
 
         Set<Speed> validSpeeds = table.keySet();
@@ -37,7 +38,7 @@ public class PolarDiagramPlotDataPolar {
 
         String xLine = "X";
         for (Speed s : validSpeeds) {
-            xLine += ";" + s.getKnots();
+            xLine += ";" + (int)s.getKnots();
         }
         fw.write(xLine + "\n");
 
