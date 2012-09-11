@@ -4,7 +4,7 @@ library("plotrix")
 mode.png <- TRUE
 
 ##p.data <- read.table("p49-generated.csv", sep=";", dec=".", header=TRUE)
-p.data <- read.table("c:/temp/pd-test-49stg.csv", sep=";", dec=".", header=TRUE)
+p.data <- read.table("pd-test-49stg.csv", sep=";", dec=".", header=TRUE)
 
 my.colors <- function (n, alpha = 1) {
   if ((n <- as.integer(n[1L])) > 0) {
@@ -25,8 +25,10 @@ my.colors <- function (n, alpha = 1) {
 allcols <- my.colors(ncol(p.data)-1,alpha=1)
 
 if (mode.png) {
-  png(paste("polar-49er-stg-simulator-",gsub("X","",paste(colnames(p.data)[2:ncol(p.data)],collapse="-")),"-kn.png",sep=""),res=300,height=1500,width=1500)
+  png(paste("polar-49er-stg-simple-simulator-",gsub("X","",paste(colnames(p.data)[2:ncol(p.data)],collapse="-")),"-kn.png",sep=""),res=300,height=1500,width=1500)
 }
+
+radialMax <- round(max(p.data[,2:ncol(p.data)])/5,digits=0)*5
 
 ##for(wcol in 2:ncol(p.data)) {
 for(wcol in ncol(p.data):2) {
@@ -45,9 +47,9 @@ for(wcol in ncol(p.data):2) {
   }
   
   if (!add) {
-    polar.plot(p.tmp[,2],p.tmp[,1],radial.lim=c(0,15),start=90,clockwise=TRUE,rp.type="p",lwd=2,cex=1,point.symbols=16,line.col=allcols[wcol-1], point.col=allcols[wcol-1],add=add)
+    polar.plot(p.tmp[,2],p.tmp[,1],radial.lim=c(0,radialMax),start=90,clockwise=TRUE,rp.type="p",lwd=2,cex=1,point.symbols=16,line.col=allcols[wcol-1], point.col=allcols[wcol-1],add=add)
   }
-  polar.plot(p.tmp[,2],p.tmp[,1],radial.lim=c(0,15),start=90,clockwise=TRUE,rp.type="p",lwd=2,cex=1,point.symbols=16,line.col=allcols[wcol-1], point.col=allcols[wcol-1],show.grid=FALSE,show.grid.labels=FALSE,show.radial.grid=FALSE,add=TRUE)
+  polar.plot(p.tmp[,2],p.tmp[,1],radial.lim=c(0,radialMax),start=90,clockwise=TRUE,rp.type="p",lwd=2,cex=1,point.symbols=16,line.col=allcols[wcol-1], point.col=allcols[wcol-1],show.grid=FALSE,show.grid.labels=FALSE,show.radial.grid=FALSE,add=TRUE)
 
 }
 
