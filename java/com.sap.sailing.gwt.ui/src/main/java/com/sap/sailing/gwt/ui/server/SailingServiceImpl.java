@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.server;
 
 import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -301,6 +302,10 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         raceDetailsExecutor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
         leaderboardByNameLiveUpdaters = new HashMap<String, LiveLeaderboardUpdater>();
         leaderboardDTOCacheWaitingForLatestAnalysis = new LeaderboardDTOCache(this, /* waitForLatestAnalyses */ true);
+    }
+    
+    private void writeObject(ObjectOutputStream oos) throws IOException {
+        oos.defaultWriteObject();
     }
     
     public void destroy() {
