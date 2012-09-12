@@ -23,6 +23,7 @@ import com.sap.sailing.domain.common.impl.NamedImpl;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
+import com.sap.sailing.util.impl.RaceColumnListeners;
 
 public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListener {
     private static final Logger logger = Logger.getLogger(RegattaImpl.class.getName());
@@ -31,7 +32,7 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     private final BoatClass boatClass;
     private transient Set<RegattaListener> regattaListeners;
     private final Iterable<? extends Series> series;
-    private Set<RaceColumnListener> raceColumnListeners;
+    private RaceColumnListeners raceColumnListeners;
     private final ScoringScheme scoringScheme;
 
     /**
@@ -63,7 +64,7 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
         super(baseName+(boatClass==null?"":" ("+boatClass.getName()+")"));
         races = new HashSet<RaceDefinition>();
         regattaListeners = new HashSet<RegattaListener>();
-        raceColumnListeners = new HashSet<RaceColumnListener>();
+        raceColumnListeners = new RaceColumnListeners();
         this.boatClass = boatClass;
         this.series = series;
         for (Series s : series) {
@@ -193,57 +194,44 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
 
     @Override
     public void trackedRaceLinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
-        notifyListenersAboutTrackedRaceLinked(raceColumn, fleet, trackedRace);
+        raceColumnListeners.notifyListenersAboutTrackedRaceLinked(raceColumn, fleet, trackedRace);
     }
 
     @Override
     public void trackedRaceUnlinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
-        notifyListenersAboutTrackedRaceUnlinked(raceColumn, fleet, trackedRace);
+        raceColumnListeners.notifyListenersAboutTrackedRaceUnlinked(raceColumn, fleet, trackedRace);
     }
     
     @Override
     public void isMedalRaceChanged(RaceColumn raceColumn, boolean newIsMedalRace) {
-        notifyListenersAboutIsMedalRaceChanged(raceColumn, newIsMedalRace);
+        raceColumnListeners.notifyListenersAboutIsMedalRaceChanged(raceColumn, newIsMedalRace);
+    }
+    
+    @Override
+    public void raceColumnAddedToContainer(RaceColumn raceColumn) {
+        raceColumnListeners.notifyListenersAboutRaceColumnAddedToContainer(raceColumn);
+    }
+
+    @Override
+    public void raceColumnRemovedFromContainer(RaceColumn raceColumn) {
+        raceColumnListeners.notifyListenersAboutRaceColumnRemovedFromContainer(raceColumn);
+    }
+
+    @Override
+    public boolean isTransient() {
+        return false;
     }
 
     @Override
     public void addRaceColumnListener(RaceColumnListener listener) {
-        synchronized (raceColumnListeners) {
-            raceColumnListeners.add(listener);
-        }
+        raceColumnListeners.addRaceColumnListener(listener);
     }
 
     @Override
     public void removeRaceColumnListener(RaceColumnListener listener) {
-        synchronized (raceColumnListeners) {
-            raceColumnListeners.remove(listener);
-        }
+        raceColumnListeners.removeRaceColumnListener(listener);
     }
     
-    private Set<RaceColumnListener> getRaceColumnListeners() {
-        synchronized (raceColumnListeners) {
-            return new HashSet<RaceColumnListener>(raceColumnListeners);
-        }
-    }
-    
-    private void notifyListenersAboutTrackedRaceLinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
-        for (RaceColumnListener listener : getRaceColumnListeners()) {
-            listener.trackedRaceLinked(raceColumn, fleet, trackedRace);
-        }
-    }
-
-    private void notifyListenersAboutTrackedRaceUnlinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
-        for (RaceColumnListener listener : getRaceColumnListeners()) {
-            listener.trackedRaceUnlinked(raceColumn, fleet, trackedRace);
-        }
-    }
-
-    private void notifyListenersAboutIsMedalRaceChanged(RaceColumn raceColumn, boolean newIsMedalRace) {
-        for (RaceColumnListener listener : getRaceColumnListeners()) {
-            listener.isMedalRaceChanged(raceColumn, newIsMedalRace);
-        }
-    }
-
     @Override
     public ScoringScheme getScoringScheme() {
         return scoringScheme;

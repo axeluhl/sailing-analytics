@@ -220,12 +220,21 @@ public class LeaderboardDTOCache {
         }
         final RaceColumnListener raceColumnListener = new RaceColumnListener() {
             private static final long serialVersionUID = 8165124797028386317L;
+
             @Override
             public void trackedRaceLinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
                 removeFromCache(leaderboard);
                 registerListener(leaderboard, trackedRace);
             }
 
+            /**
+             * This listener must not be serialized. See also bug 952. 
+             */
+            @Override
+            public boolean isTransient() {
+                return true;
+            }
+            
             @Override
             public void trackedRaceUnlinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
                 removeFromCache(leaderboard);
@@ -242,6 +251,16 @@ public class LeaderboardDTOCache {
 
             @Override
             public void isMedalRaceChanged(RaceColumn raceColumn, boolean newIsMedalRace) {
+                removeFromCache(leaderboard);
+            }
+
+            @Override
+            public void raceColumnAddedToContainer(RaceColumn raceColumn) {
+                removeFromCache(leaderboard);
+            }
+
+            @Override
+            public void raceColumnRemovedFromContainer(RaceColumn raceColumn) {
                 removeFromCache(leaderboard);
             }
         };

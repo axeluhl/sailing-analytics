@@ -1460,6 +1460,12 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
             regattaTrackingCache.putAll((Map<Regatta, DynamicTrackedRegatta>) ois.readObject());
             leaderboardGroupsByName.putAll((Map<String, LeaderboardGroup>) ois.readObject());
             leaderboardsByName.putAll((Map<String, Leaderboard>) ois.readObject());
+            // now fix ScoreCorrectionListener setup for LeaderboardGroupMetaLeaderboard instances:
+            for (Leaderboard leaderboard : leaderboardsByName.values()) {
+                if (leaderboard instanceof LeaderboardGroupMetaLeaderboard) {
+                    ((LeaderboardGroupMetaLeaderboard) leaderboard).registerAsScoreCorrectionChangeForwarderOnAllLeaderboards();
+                }
+            }
             logger.info("Done with initial replication on "+this);
         } finally {
             Thread.currentThread().setContextClassLoader(oldContextClassloader);

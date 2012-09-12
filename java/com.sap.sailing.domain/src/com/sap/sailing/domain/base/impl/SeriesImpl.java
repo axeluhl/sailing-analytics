@@ -3,10 +3,8 @@ package com.sap.sailing.domain.base.impl;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
@@ -18,6 +16,7 @@ import com.sap.sailing.domain.common.impl.NamedImpl;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
+import com.sap.sailing.util.impl.RaceColumnListeners;
 
 public class SeriesImpl extends NamedImpl implements Series, RaceColumnListener {
     private static final long serialVersionUID = -1640404303144907381L;
@@ -26,7 +25,7 @@ public class SeriesImpl extends NamedImpl implements Series, RaceColumnListener 
     private final List<RaceColumnInSeries> raceColumns;
     private boolean isMedal;
     private Regatta regatta;
-    private Set<RaceColumnListener> raceColumnListeners;
+    private RaceColumnListeners raceColumnListeners;
     
     /**
      * @param fleets must be non-empty
@@ -46,7 +45,7 @@ public class SeriesImpl extends NamedImpl implements Series, RaceColumnListener 
         List<RaceColumnInSeries> myRaceColumns = new ArrayList<RaceColumnInSeries>();
         this.raceColumns = myRaceColumns;
         this.isMedal = isMedal;
-        this.raceColumnListeners = new HashSet<RaceColumnListener>();
+        this.raceColumnListeners = new RaceColumnListeners();
         for (String raceColumnName : raceColumnNames) {
             addRaceColumn(raceColumnName, trackedRegattaRegistry);
         }
@@ -54,42 +53,14 @@ public class SeriesImpl extends NamedImpl implements Series, RaceColumnListener 
 
     @Override
     public void addRaceColumnListener(RaceColumnListener listener) {
-        synchronized (raceColumnListeners) {
-            raceColumnListeners.add(listener);
-        }
+        raceColumnListeners.addRaceColumnListener(listener);
     }
 
     @Override
     public void removeRaceColumnListener(RaceColumnListener listener) {
-        synchronized (raceColumnListeners) {
-            raceColumnListeners.remove(listener);
-        }
+        raceColumnListeners.removeRaceColumnListener(listener);
     }
     
-    private Set<RaceColumnListener> getRaceColumnListeners() {
-        synchronized (raceColumnListeners) {
-            return new HashSet<RaceColumnListener>(raceColumnListeners);
-        }
-    }
-    
-    private void notifyListenersAboutTrackedRaceLinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
-        for (RaceColumnListener listener : getRaceColumnListeners()) {
-            listener.trackedRaceLinked(raceColumn, fleet, trackedRace);
-        }
-    }
-
-    private void notifyListenersAboutTrackedRaceUnlinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
-        for (RaceColumnListener listener : getRaceColumnListeners()) {
-            listener.trackedRaceUnlinked(raceColumn, fleet, trackedRace);
-        }
-    }
-
-    private void notifyListenersAboutIsMedalRaceChanged(RaceColumn raceColumn, boolean newIsMedalRace) {
-        for (RaceColumnListener listener : getRaceColumnListeners()) {
-            listener.isMedalRaceChanged(raceColumn, newIsMedalRace);
-        }
-    }
-
     @Override
     public Regatta getRegatta() {
         return regatta;
@@ -119,6 +90,7 @@ public class SeriesImpl extends NamedImpl implements Series, RaceColumnListener 
         final RaceColumnInSeriesImpl result = createRaceColumn(raceColumnName, trackedRegattaRegistry);
         result.addRaceColumnListener(this);
         raceColumns.add(result);
+        raceColumnListeners.notifyListenersAboutRaceColumnAddedToContainer(result);
         return result;
     }
 
@@ -134,7 +106,9 @@ public class SeriesImpl extends NamedImpl implements Series, RaceColumnListener 
             RaceColumnInSeries rc = raceColumns.get(i);
             if (rc.getName().equals(raceColumnName)) {
                 raceColumns.remove(i);
+                raceColumnListeners.notifyListenersAboutRaceColumnRemovedFromContainer(rc);
                 raceColumns.add(i-1, rc);
+                raceColumnListeners.notifyListenersAboutRaceColumnAddedToContainer(rc);
                 break;
             }
         }
@@ -147,7 +121,9 @@ public class SeriesImpl extends NamedImpl implements Series, RaceColumnListener 
             RaceColumnInSeries rc = raceColumns.get(i);
             if (rc.getName().equals(raceColumnName)) {
                 raceColumns.remove(i);
+                raceColumnListeners.notifyListenersAboutRaceColumnRemovedFromContainer(rc);
                 raceColumns.add(i+1, rc);
+                raceColumnListeners.notifyListenersAboutRaceColumnAddedToContainer(rc);
                 break;
             }
         }
@@ -158,6 +134,7 @@ public class SeriesImpl extends NamedImpl implements Series, RaceColumnListener 
         RaceColumnInSeries rc = getRaceColumnByName(raceColumnName);
         if (rc != null) {
             raceColumns.remove(rc);
+            raceColumnListeners.notifyListenersAboutRaceColumnRemovedFromContainer(rc);
             rc.removeRaceColumnListener(this);
         }
     }
@@ -184,17 +161,31 @@ public class SeriesImpl extends NamedImpl implements Series, RaceColumnListener 
 
     @Override
     public void trackedRaceLinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
-        notifyListenersAboutTrackedRaceLinked(raceColumn, fleet, trackedRace);
+        raceColumnListeners.notifyListenersAboutTrackedRaceLinked(raceColumn, fleet, trackedRace);
     }
 
     @Override
     public void trackedRaceUnlinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
-        notifyListenersAboutTrackedRaceUnlinked(raceColumn, fleet, trackedRace);
+        raceColumnListeners.notifyListenersAboutTrackedRaceUnlinked(raceColumn, fleet, trackedRace);
     }
 
     @Override
     public void isMedalRaceChanged(RaceColumn raceColumn, boolean newIsMedalRace) {
-        notifyListenersAboutIsMedalRaceChanged(raceColumn, newIsMedalRace);
+        raceColumnListeners.notifyListenersAboutIsMedalRaceChanged(raceColumn, newIsMedalRace);
     }
 
+    @Override
+    public void raceColumnAddedToContainer(RaceColumn raceColumn) {
+        raceColumnListeners.notifyListenersAboutRaceColumnAddedToContainer(raceColumn);
+    }
+
+    @Override
+    public void raceColumnRemovedFromContainer(RaceColumn raceColumn) {
+        raceColumnListeners.notifyListenersAboutRaceColumnRemovedFromContainer(raceColumn);
+    }
+
+    @Override
+    public boolean isTransient() {
+        return false;
+    }
 }
