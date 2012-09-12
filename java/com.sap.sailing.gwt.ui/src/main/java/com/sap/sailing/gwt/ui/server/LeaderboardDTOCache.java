@@ -218,8 +218,10 @@ public class LeaderboardDTOCache {
         synchronized (scoreCorrectionListeners) {
             scoreCorrectionListeners.put(leaderboard, scoreCorrectionListener);
         }
+        // FIXME bug 952: during replication, the following RaceColumnListener instance is to be serialized which doesn't work because the enclosing instance is not serializable (and shouldn't be)
         final RaceColumnListener raceColumnListener = new RaceColumnListener() {
             private static final long serialVersionUID = 8165124797028386317L;
+
             @Override
             public void trackedRaceLinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
                 removeFromCache(leaderboard);

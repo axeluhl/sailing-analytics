@@ -295,4 +295,5 @@ public interface Leaderboard extends Named {
      * races attached to this leaderboard
      */
     Long getTotalTimeSailedInMilliseconds(Competitor competitor, TimePoint timePoint);
+    
 }
