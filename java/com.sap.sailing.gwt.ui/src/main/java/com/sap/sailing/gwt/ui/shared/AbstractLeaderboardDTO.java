@@ -48,17 +48,19 @@ public abstract class AbstractLeaderboardDTO implements IsSerializable {
     }
 
     /**
-     * If the race whose name is specified in <code>raceName</code> has any competitor who has valid
-     * {@link LeaderboardEntryDTO#legDetails} for that race, the number of entries in the leg details is returned,
-     * telling the number of legs that the race has. Otherwise, -1 is returned.
+     * If the race whose name is specified in <code>raceName</code> has at least one competitor who has valid
+     * {@link LeaderboardEntryDTO#legDetails} for that race, the maximum number of entries of all such competitors in
+     * the leg details is returned, telling the number of legs that the race column shall display. Otherwise, -1 is
+     * returned.
      */
     public int getLegCount(String raceColumnName) {
+        int result = -1;
         for (LeaderboardRowDTO row : rows.values()) {
             if (row.fieldsByRaceColumnName.get(raceColumnName) != null && row.fieldsByRaceColumnName.get(raceColumnName).legDetails != null) {
-                return row.fieldsByRaceColumnName.get(raceColumnName).legDetails.size();
+                result = Math.max(result, row.fieldsByRaceColumnName.get(raceColumnName).legDetails.size());
             }
         }
-        return -1;
+        return result;
     }
 
     /**

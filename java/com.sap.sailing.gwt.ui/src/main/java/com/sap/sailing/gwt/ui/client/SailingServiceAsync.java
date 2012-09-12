@@ -96,8 +96,7 @@ public interface SailingServiceAsync {
      */
     void removeAndUntrackRace(RegattaAndRaceIdentifier regattaAndRaceidentifier, AsyncCallback<Void> callback);
 
-    void getWindInfo(RaceIdentifier raceIdentifier, Date from, Date to, WindSource[] windSources,
-            AsyncCallback<WindInfoForRaceDTO> callback);
+    void getRawWindFixes(RaceIdentifier raceIdentifier, Collection<WindSource> windSources, AsyncCallback<WindInfoForRaceDTO> callback);
 
     /**
      * @param from if <code>null</code>, the tracked race's start of tracking is used
@@ -431,4 +430,5 @@ public interface SailingServiceAsync {
     void removeLeaderboardColumns(String leaderboardName, List<String> columnsToRemove, AsyncCallback<Void> callback);
 
     void getLeaderboard(String leaderboardName, AsyncCallback<StrippedLeaderboardDTO> callback);
+
 }

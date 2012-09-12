@@ -306,7 +306,7 @@ public class LegColumn extends ExpandableSortableColumn<String> {
     private LegEntryDTO getLegEntry(LeaderboardRowDTO row, int theLegIndex) {
         LegEntryDTO legEntry = null;
         LeaderboardEntryDTO entry = row.fieldsByRaceColumnName.get(getRaceName());
-        if (entry != null && entry.legDetails != null) {
+        if (entry != null && entry.legDetails != null && entry.legDetails.size() > theLegIndex) {
             legEntry = entry.legDetails.get(theLegIndex);
         }
         return legEntry;
