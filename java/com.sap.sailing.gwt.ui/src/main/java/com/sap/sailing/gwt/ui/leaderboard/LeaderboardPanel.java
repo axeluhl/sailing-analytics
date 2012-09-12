@@ -140,7 +140,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
      */
     private final List<DetailType> selectedRaceDetails;
 
-    private final List<DetailType> selectedOverallDetails;
+    private final List<DetailType> selectedOverallDetailColumns;
     
     private final Map<DetailType, SortableColumn<LeaderboardRowDTO, ?>> overallDetailColumnMap;
 
@@ -313,8 +313,8 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             selectedRaceDetails.addAll(newSettings.getRaceDetailsToShow());
         }
         if (newSettings.getOverallDetailsToShow() != null) {
-            selectedOverallDetails.clear();
-            selectedOverallDetails.addAll(newSettings.getOverallDetailsToShow());
+            selectedOverallDetailColumns.clear();
+            selectedOverallDetailColumns.addAll(newSettings.getOverallDetailsToShow());
         }
         if (newSettings.getNamesOfRaceColumnsToShow() != null) {
             selectedRaceColumnsByName.clear();
@@ -1046,7 +1046,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         this.stringMessages = stringMessages;
         this.selectedLegDetails = new ArrayList<DetailType>();
         this.selectedRaceDetails = new ArrayList<DetailType>();
-        this.selectedOverallDetails = new ArrayList<DetailType>();
+        this.selectedOverallDetailColumns = new ArrayList<DetailType>();
         this.selectedRaceColumnsByName = new HashMap<String, RaceColumnDTO>();
         this.selectedManeuverDetails = new ArrayList<DetailType>();
         overallDetailColumnMap = createOverallDetailColumnMap();
@@ -1054,7 +1054,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         selectedLegDetails.addAll(settings.getLegDetailsToShow());
         selectedManeuverDetails.addAll(settings.getManeuverDetailsToShow());
         selectedRaceDetails.addAll(settings.getRaceDetailsToShow());
-        selectedOverallDetails.addAll(settings.getOverallDetailsToShow());
+        selectedOverallDetailColumns.addAll(settings.getOverallDetailsToShow());
         setAutoExpandPreSelectedRace(settings.isAutoExpandPreSelectedRace());
         if (settings.getDelayBetweenAutoAdvancesInMilliseconds() != null) {
             timer.setRefreshInterval(settings.getDelayBetweenAutoAdvancesInMilliseconds());
@@ -1606,7 +1606,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     }
 
     /**
-     * Ensures that the columns requested by {@link #selectedOverallDetails} are in the table. Assumes that if there are
+     * Ensures that the columns requested by {@link #selectedOverallDetailColumns} are in the table. Assumes that if there are
      * any existing overall details columns, they start at <code>indexOfFirstOverallDetailsColumn</code> and are in the order
      * defined by {@link #getAvailableOverallDetailColumnTypes()}.
      * 
@@ -1615,24 +1615,31 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
      */
     private void adjustOverallDetailColumns(LeaderboardDTO leaderboard, int indexOfFirstOverallDetailsColumn) {
         List<SortableColumn<LeaderboardRowDTO, ?>> overallDetailColumnsToShow = new ArrayList<SortableColumn<LeaderboardRowDTO,?>>();
-        for (DetailType overallDetailType : selectedOverallDetails) {
-            overallDetailColumnsToShow.add(overallDetailColumnMap.get(overallDetailType));
+        // ensure the ordering in overallDetailColumnsToShow conforms to the ordering of getAvailableOverallDetailColumnTypes()
+        for (DetailType overallDetailType : getAvailableOverallDetailColumnTypes()) {
+            if (selectedOverallDetailColumns.contains(overallDetailType)) {
+                overallDetailColumnsToShow.add(overallDetailColumnMap.get(overallDetailType));
+            }
         }
         int currentColumnIndex = indexOfFirstOverallDetailsColumn;
         int i = 0; // index into overallDetailColumnToShow
-        while (i<overallDetailColumnsToShow.size()) {
-            Column<LeaderboardRowDTO, ?> column = getLeaderboardTable().getColumn(currentColumnIndex);
-            if (overallDetailColumnMap.values().contains(column) && !overallDetailColumnsToShow.contains(column)) {
-                // it's an overall details column that is not currently selected; remove it from the table:
-                removeColumn(currentColumnIndex);
-            } else {
-                if (overallDetailColumnsToShow.get(i) != column) {
-                    // the selected column we're current looking for is not the current column; insert the selected column:
-                    insertColumn(currentColumnIndex, overallDetailColumnsToShow.get(i));
-                }
-                // else, we found the selected column at the currentColumnIndex; all is good, also advance both indices
+        Column<LeaderboardRowDTO, ?> currentColumn = currentColumnIndex < getLeaderboardTable().getColumnCount() ?
+                getLeaderboardTable().getColumn(currentColumnIndex) : null;
+        // repeat until no more column to check for removal and no more column left to check for need to insert
+        while (i<overallDetailColumnsToShow.size() || overallDetailColumnMap.values().contains(currentColumn)) {
+            if (i<overallDetailColumnsToShow.size() && currentColumn == overallDetailColumnsToShow.get(i)) {
+                // found selected column in table; all good, advance both "pointers"
                 i++;
                 currentColumnIndex++;
+                currentColumn = getLeaderboardTable().getColumn(currentColumnIndex);
+            } else if (i<overallDetailColumnsToShow.size()) {
+                // selected column is missing; insert
+                insertColumn(currentColumnIndex++, overallDetailColumnsToShow.get(i++));
+            } else {
+                // based on the while's condition, currentColumn is an overallDetailsColumnMap value;
+                // based on the previous if's failed condition, it is not selected. Remove:
+                removeColumn(currentColumnIndex);
+                currentColumn = getLeaderboardTable().getColumn(currentColumnIndex);
             }
         }
     }
@@ -2014,13 +2021,9 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     @Override
     public SettingsDialogComponent<LeaderboardSettings> getSettingsDialogComponent() {
         return new LeaderboardSettingsDialogComponent(Collections.unmodifiableList(selectedManeuverDetails),
-                Collections.unmodifiableList(selectedLegDetails), Collections.unmodifiableList(selectedRaceDetails), /*
-                                                                                                                      * All
-                                                                                                                      * races
-                                                                                                                      * to
-                                                                                                                      * select
-                                                                                                                      */
-                Collections.unmodifiableList(selectedOverallDetails), leaderboard.getRaceList(),
+                Collections.unmodifiableList(selectedLegDetails), Collections.unmodifiableList(selectedRaceDetails),
+                /* All races to select */
+                Collections.unmodifiableList(selectedOverallDetailColumns), leaderboard.getRaceList(),
                 selectedRaceColumnsByName.values(), autoExpandPreSelectedRace, timer.getRefreshInterval(),
                 timer.getLivePlayDelayInMillis(), stringMessages);
     }
