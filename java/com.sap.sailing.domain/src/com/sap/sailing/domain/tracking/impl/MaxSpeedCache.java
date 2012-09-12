@@ -98,6 +98,15 @@ public class MaxSpeedCache<ItemType, FixType extends GPSFix> implements GPSTrack
         }
     }
 
+    /**
+     * Returns <code>true</code> in order to skip serialization of the cache as a listener. The cache itself shall not be serialized.
+     * It is re-established during the deserialization of the owning track.
+     */
+    @Override
+    public boolean isTransient() {
+        return true;
+    }
+
     private void mergeAdditionalCacheEntries(
             Map<TimePoint, NavigableSet<Pair<TimePoint, Pair<FixType, Speed>>>> additionalCacheEntries) {
         assert lock.writeLock().isHeldByCurrentThread();

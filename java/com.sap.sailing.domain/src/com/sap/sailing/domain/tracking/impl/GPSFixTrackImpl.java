@@ -2,6 +2,8 @@ package com.sap.sailing.domain.tracking.impl;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.ConcurrentModificationException;
@@ -47,8 +49,58 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
     
     private final ItemType trackedItem;
     private long millisecondsOverWhichToAverage;
+    private final GPSTrackListeners<ItemType, FixType> listeners;
+    
 
-    private final Set<GPSTrackListener<ItemType, FixType>> listeners;
+    private static class GPSTrackListeners<I, F extends GPSFix> implements Serializable {
+        private static final long serialVersionUID = -7117842092078781722L;
+        private Set<GPSTrackListener<I, F>> listeners;
+        
+        public GPSTrackListeners() {
+            listeners = new HashSet<>();
+        }
+        
+        @SuppressWarnings("unchecked") // need typed generic cast
+        private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
+            listeners = (Set<GPSTrackListener<I, F>>) ois.readObject();
+        }
+        
+        private void writeObject(ObjectOutputStream oos) throws IOException {
+            final Set<GPSTrackListener<I, F>> listenersToSerialize;
+            synchronized (listeners) {
+                listenersToSerialize = new HashSet<>();
+                for (GPSTrackListener<I, F> listener : listeners) {
+                    if (!listener.isTransient()) {
+                        listenersToSerialize.add(listener);
+                    }
+                }
+            }
+            oos.writeObject(listenersToSerialize);
+        }
+
+        public void addListener(GPSTrackListener<I, F> listener) {
+            synchronized (listeners) {
+                listeners.add(listener);
+            }
+        }
+        
+        public void removeListener(GPSTrackListener<I, F> listener) {
+            synchronized (listeners) {
+                listeners.remove(listener);
+            }
+        }
+        
+        /**
+         * To iterate over the resulting listener list, synchronize on the iterable returned. Only this will avoid
+         * {@link ConcurrentModificationException}s because listeners may be added on the fly, and this object will
+         * synchronize on the listeners collection before adding on.
+         */
+        public Iterable<GPSTrackListener<I, F>> getListeners() {
+            synchronized (listeners) {
+                return new HashSet<GPSTrackListener<I, F>>(listeners);
+            }
+        }
+    }
     
     /**
      * Computing {@link #getDistanceTraveled(TimePoint, TimePoint)} is more expensive the longer the track is and the
@@ -116,7 +168,7 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
         this.trackedItem = trackedItem;
         this.millisecondsOverWhichToAverage = millisecondsOverWhichToAverage;
         this.maxSpeedForSmoothing = maxSpeedForSmoothening;
-        this.listeners = new HashSet<GPSTrackListener<ItemType, FixType>>();
+        this.listeners = new GPSTrackListeners<>();
         this.distanceCache = new DistanceCache(trackedItem==null?"null":trackedItem.toString());
         this.maxSpeedCache = new MaxSpeedCache<>(this);
     }
@@ -129,27 +181,18 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
 
     @Override
     public void addListener(GPSTrackListener<ItemType, FixType> listener) {
-        synchronized (listeners) {
-            listeners.add(listener);
-        }
+        listeners.addListener(listener);
     }
     
     @Override
     public void removeListener(GPSTrackListener<ItemType, FixType> listener) {
-        synchronized (listeners) {
-            listeners.remove(listener);
-        }
+        listeners.removeListener(listener);
     }
     
-    /**
-     * To iterate over the resulting listener list, synchronize on the iterable returned. Only this will avoid
-     * {@link ConcurrentModificationException}s because listeners may be added on the fly, and this object will
-     * synchronize on the listeners collection before adding on.
-     */
     protected Iterable<GPSTrackListener<ItemType, FixType>> getListeners() {
-        return listeners;
+        return listeners.getListeners();
     }
-
+    
     private class DummyGPSFix extends DummyTimed implements GPSFix {
         private static final long serialVersionUID = -6258506654181816698L;
 
