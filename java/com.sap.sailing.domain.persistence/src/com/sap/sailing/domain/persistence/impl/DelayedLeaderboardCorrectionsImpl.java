@@ -166,4 +166,9 @@ public class DelayedLeaderboardCorrectionsImpl implements DelayedLeaderboardCorr
     @Override
     public void isMedalRaceChanged(RaceColumn raceColumn, boolean newIsMedalRace) {
     }
+
+    @Override
+    public boolean isTransient() {
+        return false;
+    }
 }

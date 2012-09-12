@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
@@ -31,6 +30,7 @@ import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.util.impl.RaceColumnListeners;
 
 /**
  * Base implementation for various types of leaderboards. The {@link RaceColumnListener} implementation forwards events
@@ -68,7 +68,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
      */
     private final Map<Competitor, Double> carriedPoints;
 
-    private Set<RaceColumnListener> raceColumnListeners;
+    private RaceColumnListeners raceColumnListeners;
 
     /**
      * A leaderboard entry representing a snapshot of a cell at a given time point for a single race/competitor.
@@ -136,7 +136,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
         this.scoreCorrection = scoreCorrection;
         this.displayNames = new HashMap<Competitor, String>();
         this.resultDiscardingRule = resultDiscardingRule;
-        this.raceColumnListeners = new HashSet<RaceColumnListener>();
+        raceColumnListeners = new RaceColumnListeners();
     }
 
     @Override
@@ -339,42 +339,14 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
         return result;
     }
     
-    private Set<RaceColumnListener> getRaceColumnListeners() {
-        synchronized (raceColumnListeners) {
-            return new HashSet<RaceColumnListener>(raceColumnListeners);
-        }
-    }
-
     @Override
     public void addRaceColumnListener(RaceColumnListener listener) {
-        synchronized (raceColumnListeners) {
-            raceColumnListeners.add(listener);
-        }
+        getRaceColumnListeners().addRaceColumnListener(listener);
     }
 
     @Override
     public void removeRaceColumnListener(RaceColumnListener listener) {
-        synchronized (raceColumnListeners) {
-            raceColumnListeners.remove(listener);
-        }
-    }
-
-    protected void notifyListenersAboutTrackedRaceLinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
-        for (RaceColumnListener listener : getRaceColumnListeners()) {
-            listener.trackedRaceLinked(raceColumn, fleet, trackedRace);
-        }
-    }
-
-    protected void notifyListenersAboutTrackedRaceUnlinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
-        for (RaceColumnListener listener : getRaceColumnListeners()) {
-            listener.trackedRaceUnlinked(raceColumn, fleet, trackedRace);
-        }
-    }
-
-    protected void notifyListenersAboutIsMedalRaceChanged(RaceColumn raceColumn, boolean newIsMedalRace) {
-        for (RaceColumnListener listener : getRaceColumnListeners()) {
-            listener.isMedalRaceChanged(raceColumn, newIsMedalRace);
-        }
+        getRaceColumnListeners().removeRaceColumnListener(listener);
     }
 
     @Override
@@ -435,17 +407,22 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
 
     @Override
     public void trackedRaceLinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
-        notifyListenersAboutTrackedRaceLinked(raceColumn, fleet, trackedRace);
+        getRaceColumnListeners().notifyListenersAboutTrackedRaceLinked(raceColumn, fleet, trackedRace);
     }
 
     @Override
     public void trackedRaceUnlinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
-        notifyListenersAboutTrackedRaceUnlinked(raceColumn, fleet, trackedRace);
+        getRaceColumnListeners().notifyListenersAboutTrackedRaceUnlinked(raceColumn, fleet, trackedRace);
     }
     
     @Override
     public void isMedalRaceChanged(RaceColumn raceColumn, boolean newIsMedalRace) {
-        notifyListenersAboutIsMedalRaceChanged(raceColumn, newIsMedalRace);
+        getRaceColumnListeners().notifyListenersAboutIsMedalRaceChanged(raceColumn, newIsMedalRace);
+    }
+
+    @Override
+    public boolean isTransient() {
+        return false;
     }
 
     /**
@@ -581,5 +558,8 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
         }
         return result;
     }
-    
+
+    protected RaceColumnListeners getRaceColumnListeners() {
+        return raceColumnListeners;
+    }
 }

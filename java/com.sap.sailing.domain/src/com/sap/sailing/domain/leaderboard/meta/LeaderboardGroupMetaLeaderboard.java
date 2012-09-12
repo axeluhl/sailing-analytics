@@ -63,7 +63,7 @@ public class LeaderboardGroupMetaLeaderboard extends AbstractMetaLeaderboard imp
             for (Fleet fleet : raceColumn.getFleets()) {
                 TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
                 if (trackedRace != null) {
-                    notifyListenersAboutTrackedRaceLinked(raceColumn, fleet, trackedRace);
+                    getRaceColumnListeners().notifyListenersAboutTrackedRaceLinked(raceColumn, fleet, trackedRace);
                 }
             }
         }
@@ -77,7 +77,7 @@ public class LeaderboardGroupMetaLeaderboard extends AbstractMetaLeaderboard imp
             for (Fleet fleet : raceColumn.getFleets()) {
                 TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
                 if (trackedRace != null) {
-                    notifyListenersAboutTrackedRaceUnlinked(raceColumn, fleet, trackedRace);
+                    getRaceColumnListeners().notifyListenersAboutTrackedRaceUnlinked(raceColumn, fleet, trackedRace);
                 }
             }
         }
