@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.ui.server;
 
+import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -228,6 +230,10 @@ public class LeaderboardDTOCache {
                 registerListener(leaderboard, trackedRace);
             }
 
+            private void writeObject(ObjectOutputStream oos) throws IOException {
+                oos.defaultWriteObject();
+            }
+            
             @Override
             public void trackedRaceUnlinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
                 removeFromCache(leaderboard);

@@ -119,6 +119,7 @@ public class SeriesImpl extends NamedImpl implements Series, RaceColumnListener 
         final RaceColumnInSeriesImpl result = createRaceColumn(raceColumnName, trackedRegattaRegistry);
         result.addRaceColumnListener(this);
         raceColumns.add(result);
+        // FIXME bug 953: need to serve an observer pattern which is used to invalidate 
         return result;
     }
 
@@ -158,6 +159,7 @@ public class SeriesImpl extends NamedImpl implements Series, RaceColumnListener 
         RaceColumnInSeries rc = getRaceColumnByName(raceColumnName);
         if (rc != null) {
             raceColumns.remove(rc);
+            // FIXME bug 953: need to serve an observer pattern which is used to invalidate 
             rc.removeRaceColumnListener(this);
         }
     }
