@@ -75,7 +75,7 @@ public interface SailingService extends RemoteService {
     
     void removeAndUntrackRace(RegattaAndRaceIdentifier regattaAndRaceidentifier) throws Exception;
 
-    WindInfoForRaceDTO getWindInfo(RaceIdentifier raceIdentifier, Date from, Date to, WindSource[] windSources);
+    WindInfoForRaceDTO getRawWindFixes(RaceIdentifier raceIdentifier, Collection<WindSource> windSources);
 
     void setWind(RaceIdentifier raceIdentifier, WindDTO wind);
 

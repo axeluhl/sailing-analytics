@@ -9,7 +9,6 @@ import java.net.URL;
 import java.net.UnknownHostException;
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -1035,44 +1034,42 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     }
 
     @Override
-    public WindInfoForRaceDTO getWindInfo(RaceIdentifier raceIdentifier, Date fromDate, Date toDate, WindSource[] windSources) {
+    public WindInfoForRaceDTO getRawWindFixes(RaceIdentifier raceIdentifier, Collection<WindSource> windSources) {
         WindInfoForRaceDTO result = null;
         TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
         if (trackedRace != null) {
             result = new WindInfoForRaceDTO();
             result.raceIsKnownToStartUpwind = trackedRace.raceIsKnownToStartUpwind();
-            List<WindSource> windSourcesToExclude = new ArrayList<WindSource>();
-            for (WindSource windSourceToExclude : trackedRace.getWindSourcesToExclude()) {
-                windSourcesToExclude.add(windSourceToExclude);
-            }
-            result.windSourcesToExclude = windSourcesToExclude;
-            TimePoint from = fromDate == null ? trackedRace.getStartOfRace() : new MillisecondsTimePoint(fromDate);
-            TimePoint newestEvent = trackedRace.getTimePointOfNewestEvent();
-            TimePoint to = (toDate == null || toDate.after(newestEvent.asDate())) ? newestEvent : new MillisecondsTimePoint(toDate);
             Map<WindSource, WindTrackInfoDTO> windTrackInfoDTOs = new HashMap<WindSource, WindTrackInfoDTO>();
             result.windTrackInfoByWindSource = windTrackInfoDTOs;
-            if (from != null && to != null) {
-                List<WindSource> windSourcesToDeliver = new ArrayList<WindSource>();
-                if (windSources != null) {
-                    windSourcesToDeliver.addAll(Arrays.asList(windSources));
-                } else {
-                    Util.addAll(trackedRace.getWindSources(), windSourcesToDeliver);
-                    windSourcesToDeliver.add(new WindSourceImpl(WindSourceType.COMBINED));
-                }
-                for (WindSource windSource : windSourcesToDeliver) {
+
+            List<WindSource> windSourcesToDeliver = new ArrayList<WindSource>();
+            if (windSources != null) {
+                windSourcesToDeliver.addAll(windSources);
+            } else {
+                windSourcesToDeliver.add(new WindSourceImpl(WindSourceType.EXPEDITION));
+                windSourcesToDeliver.add(new WindSourceImpl(WindSourceType.WEB));
+            }
+            for (WindSource windSource : windSourcesToDeliver) {
+                if(windSource.getType() == WindSourceType.WEB) {
                     WindTrackInfoDTO windTrackInfoDTO = new WindTrackInfoDTO();
                     windTrackInfoDTO.windFixes = new ArrayList<WindDTO>();
                     WindTrack windTrack = trackedRace.getOrCreateWindTrack(windSource);
-                    windTrackInfoDTO.dampeningIntervalInMilliseconds = windTrack.getMillisecondsOverWhichToAverageWind();
-                    Iterator<Wind> windIter = windTrack.getFixesIterator(from, /* inclusive */true);
-                    while (windIter.hasNext()) {
-                        Wind wind = windIter.next();
-                        if (wind.getTimePoint().compareTo(to) > 0) {
-                            break;
+                    
+                    windTrack.lockForRead();
+                    try {
+                        Iterator<Wind> windIter = windTrack.getRawFixes().iterator();
+                        while (windIter.hasNext()) {
+                            Wind wind = windIter.next();
+                            if(wind != null) {
+                                WindDTO windDTO = createWindDTO(wind, windTrack);
+                                windTrackInfoDTO.windFixes.add(windDTO);
+                            }
                         }
-                        WindDTO windDTO = createWindDTO(wind, windTrack);
-                        windTrackInfoDTO.windFixes.add(windDTO);
+                    } finally {
+                        windTrack.unlockAfterRead();
                     }
+                    
                     windTrackInfoDTOs.put(windSource, windTrackInfoDTO);
                 }
             }
@@ -1314,7 +1311,13 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 }
             }
             Wind wind = new WindImpl(p, at, speedWithBearing);
-            trackedRace.recordWind(wind, trackedRace.getWindSources(WindSourceType.WEB).iterator().next());
+            Iterable<WindSource> webWindSources = trackedRace.getWindSources(WindSourceType.WEB);
+            if(Util.size(webWindSources) == 0) {
+                // create a new WEB wind source if not available
+                trackedRace.recordWind(wind, new WindSourceImpl(WindSourceType.WEB));
+            } else {
+                trackedRace.recordWind(wind, webWindSources.iterator().next());
+            }
         }
     }
 

@@ -400,6 +400,19 @@ public class TrackedRacesListComposite extends SimplePanel implements Component<
         settingsDialog.show();
     }
 
+    public RaceDTO getRaceByIdentifier(RaceIdentifier raceIdentifier) {
+        RaceDTO result = null;
+        if (raceList != null) {
+            for (RaceDTO race : raceList.getList()) {
+                if(race.getRaceIdentifier().equals(raceIdentifier)) {
+                    result = race;
+                    break;
+                }
+            }
+        }
+        return result;
+    }
+
     private List<RaceDTO> getSelectedRaces() {
         List<RaceDTO> result = new ArrayList<RaceDTO>();
         if (raceList != null) {
