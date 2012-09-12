@@ -6,4 +6,9 @@ public interface GPSTrackListener<ItemType, FixType extends GPSFix> extends Seri
     void gpsFixReceived(FixType fix, ItemType item);
 
     void speedAveragingChanged(long oldMillisecondsOverWhichToAverage, long newMillisecondsOverWhichToAverage);
+    
+    /**
+     * Listeners can use this to skip their serialization.
+     */
+    boolean isTransient();
 }

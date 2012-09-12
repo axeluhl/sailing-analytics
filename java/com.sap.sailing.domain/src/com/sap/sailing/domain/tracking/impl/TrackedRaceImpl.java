@@ -1971,6 +1971,11 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         @Override
         public void speedAveragingChanged(long oldMillisecondsOverWhichToAverage, long newMillisecondsOverWhichToAverage) {
         }
+
+        @Override
+        public boolean isTransient() {
+            return false;
+        }
     }
 
     @Override

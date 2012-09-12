@@ -114,7 +114,7 @@ public abstract class AbstractMetaLeaderboard extends AbstractSimpleLeaderboardI
         return result;
     }
 
-    private RaceColumn getColumnForLeaderboard(Leaderboard leaderboard) {
+    protected RaceColumn getColumnForLeaderboard(Leaderboard leaderboard) {
         RaceColumn result = columnsForLeaderboards.get(leaderboard);
         if (result == null) {
             result = new MetaLeaderboardColumn(leaderboard, metaFleet);

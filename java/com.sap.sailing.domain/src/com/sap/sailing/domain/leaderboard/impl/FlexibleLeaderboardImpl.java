@@ -72,6 +72,7 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
             column = createRaceColumn(name, medalRace, fleets);
             column.addRaceColumnListener(this);
             races.add(column);
+            getRaceColumnListeners().notifyListenersAboutRaceColumnAddedToContainer(column);
         }
         return column;
     }
@@ -96,6 +97,7 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
     public void removeRaceColumn(String columnName) {
         final FlexibleRaceColumn raceColumn = getRaceColumnByName(columnName);
         races.remove(raceColumn);
+        getRaceColumnListeners().notifyListenersAboutRaceColumnRemovedFromContainer(raceColumn);
         raceColumn.removeRaceColumnListener(this);
     }
     

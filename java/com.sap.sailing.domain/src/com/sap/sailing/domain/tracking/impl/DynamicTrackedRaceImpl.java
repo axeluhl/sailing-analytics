@@ -176,6 +176,11 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
                     long newMillisecondsOverWhichToAverage) {
                 // nobody can currently listen for the change of the buoy speed averaging because buoy speed is not a value used
             }
+
+            @Override
+            public boolean isTransient() {
+                return false;
+            }
         });
         return result;
     }
@@ -531,6 +536,11 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
     @Override
     public void speedAveragingChanged(long oldMillisecondsOverWhichToAverage, long newMillisecondsOverWhichToAverage) {
         notifyListenersSpeedAveragingChanged(oldMillisecondsOverWhichToAverage, newMillisecondsOverWhichToAverage);
+    }
+
+    @Override
+    public boolean isTransient() {
+        return false;
     }
 
     @Override
