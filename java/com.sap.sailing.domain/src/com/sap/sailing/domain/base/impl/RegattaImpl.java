@@ -208,6 +208,16 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     }
     
     @Override
+    public void raceColumnAddedToContainer(RaceColumn raceColumn) {
+        raceColumnListeners.notifyListenersAboutRaceColumnAddedToContainer(raceColumn);
+    }
+
+    @Override
+    public void raceColumnRemovedFromContainer(RaceColumn raceColumn) {
+        raceColumnListeners.notifyListenersAboutRaceColumnRemovedFromContainer(raceColumn);
+    }
+
+    @Override
     public boolean isTransient() {
         return false;
     }

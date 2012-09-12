@@ -90,7 +90,7 @@ public class SeriesImpl extends NamedImpl implements Series, RaceColumnListener 
         final RaceColumnInSeriesImpl result = createRaceColumn(raceColumnName, trackedRegattaRegistry);
         result.addRaceColumnListener(this);
         raceColumns.add(result);
-        // FIXME bug 953: need to serve an observer pattern which is used to invalidate 
+        raceColumnListeners.notifyListenersAboutRaceColumnAddedToContainer(result);
         return result;
     }
 
@@ -106,7 +106,9 @@ public class SeriesImpl extends NamedImpl implements Series, RaceColumnListener 
             RaceColumnInSeries rc = raceColumns.get(i);
             if (rc.getName().equals(raceColumnName)) {
                 raceColumns.remove(i);
+                raceColumnListeners.notifyListenersAboutRaceColumnRemovedFromContainer(rc);
                 raceColumns.add(i-1, rc);
+                raceColumnListeners.notifyListenersAboutRaceColumnAddedToContainer(rc);
                 break;
             }
         }
@@ -119,7 +121,9 @@ public class SeriesImpl extends NamedImpl implements Series, RaceColumnListener 
             RaceColumnInSeries rc = raceColumns.get(i);
             if (rc.getName().equals(raceColumnName)) {
                 raceColumns.remove(i);
+                raceColumnListeners.notifyListenersAboutRaceColumnRemovedFromContainer(rc);
                 raceColumns.add(i+1, rc);
+                raceColumnListeners.notifyListenersAboutRaceColumnAddedToContainer(rc);
                 break;
             }
         }
@@ -130,7 +134,7 @@ public class SeriesImpl extends NamedImpl implements Series, RaceColumnListener 
         RaceColumnInSeries rc = getRaceColumnByName(raceColumnName);
         if (rc != null) {
             raceColumns.remove(rc);
-            // FIXME bug 953: need to serve an observer pattern which is used to invalidate 
+            raceColumnListeners.notifyListenersAboutRaceColumnRemovedFromContainer(rc);
             rc.removeRaceColumnListener(this);
         }
     }
@@ -168,6 +172,16 @@ public class SeriesImpl extends NamedImpl implements Series, RaceColumnListener 
     @Override
     public void isMedalRaceChanged(RaceColumn raceColumn, boolean newIsMedalRace) {
         raceColumnListeners.notifyListenersAboutIsMedalRaceChanged(raceColumn, newIsMedalRace);
+    }
+
+    @Override
+    public void raceColumnAddedToContainer(RaceColumn raceColumn) {
+        raceColumnListeners.notifyListenersAboutRaceColumnAddedToContainer(raceColumn);
+    }
+
+    @Override
+    public void raceColumnRemovedFromContainer(RaceColumn raceColumn) {
+        raceColumnListeners.notifyListenersAboutRaceColumnRemovedFromContainer(raceColumn);
     }
 
     @Override

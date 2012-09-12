@@ -75,6 +75,18 @@ public class RaceColumnListeners implements Serializable {
         }
     }
 
+    public void notifyListenersAboutRaceColumnAddedToContainer(RaceColumn raceColumn) {
+        for (RaceColumnListener listener : getRaceColumnListeners()) {
+            listener.raceColumnAddedToContainer(raceColumn);
+        }
+    }
+
+    public void notifyListenersAboutRaceColumnRemovedFromContainer(RaceColumn raceColumn) {
+        for (RaceColumnListener listener : getRaceColumnListeners()) {
+            listener.raceColumnRemovedFromContainer(raceColumn);
+        }
+    }
+
     private Set<RaceColumnListener> getRaceColumnListeners() {
         synchronized (raceColumnListeners) {
             return new HashSet<RaceColumnListener>(raceColumnListeners);

@@ -39,6 +39,7 @@ public class FlexibleMetaLeaderboard extends AbstractMetaLeaderboard {
         try {
             leaderboards.add(leaderboard);
             registerScoreCorrectionChangeForwarder(leaderboard);
+            getRaceColumnListeners().notifyListenersAboutRaceColumnAddedToContainer(getColumnForLeaderboard(leaderboard));
         } finally {
             LockUtil.unlockAfterWrite(leaderboardsLock);
         }
@@ -48,6 +49,7 @@ public class FlexibleMetaLeaderboard extends AbstractMetaLeaderboard {
         LockUtil.lockForWrite(leaderboardsLock);
         try {
             leaderboards.remove(leaderboard);
+            getRaceColumnListeners().notifyListenersAboutRaceColumnRemovedFromContainer(getColumnForLeaderboard(leaderboard));
             unregisterScoreCorrectionChangeForwarder(leaderboard);
         } finally {
             LockUtil.unlockAfterWrite(leaderboardsLock);

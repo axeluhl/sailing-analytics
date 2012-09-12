@@ -421,6 +421,16 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     }
 
     @Override
+    public void raceColumnAddedToContainer(RaceColumn raceColumn) {
+        getRaceColumnListeners().notifyListenersAboutRaceColumnAddedToContainer(raceColumn);
+    }
+
+    @Override
+    public void raceColumnRemovedFromContainer(RaceColumn raceColumn) {
+        getRaceColumnListeners().notifyListenersAboutRaceColumnRemovedFromContainer(raceColumn);
+    }
+
+    @Override
     public boolean isTransient() {
         return false;
     }

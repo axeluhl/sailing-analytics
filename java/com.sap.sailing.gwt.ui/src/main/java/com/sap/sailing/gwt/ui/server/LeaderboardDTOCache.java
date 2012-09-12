@@ -218,7 +218,6 @@ public class LeaderboardDTOCache {
         synchronized (scoreCorrectionListeners) {
             scoreCorrectionListeners.put(leaderboard, scoreCorrectionListener);
         }
-        // FIXME bug 952: during replication, the following RaceColumnListener instance is to be serialized which doesn't work because the enclosing instance is not serializable (and shouldn't be)
         final RaceColumnListener raceColumnListener = new RaceColumnListener() {
             private static final long serialVersionUID = 8165124797028386317L;
 
@@ -228,6 +227,9 @@ public class LeaderboardDTOCache {
                 registerListener(leaderboard, trackedRace);
             }
 
+            /**
+             * This listener must not be serialized. See also bug 952. 
+             */
             @Override
             public boolean isTransient() {
                 return true;
@@ -249,6 +251,16 @@ public class LeaderboardDTOCache {
 
             @Override
             public void isMedalRaceChanged(RaceColumn raceColumn, boolean newIsMedalRace) {
+                removeFromCache(leaderboard);
+            }
+
+            @Override
+            public void raceColumnAddedToContainer(RaceColumn raceColumn) {
+                removeFromCache(leaderboard);
+            }
+
+            @Override
+            public void raceColumnRemovedFromContainer(RaceColumn raceColumn) {
                 removeFromCache(leaderboard);
             }
         };

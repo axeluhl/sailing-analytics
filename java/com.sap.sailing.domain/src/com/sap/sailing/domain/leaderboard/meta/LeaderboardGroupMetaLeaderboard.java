@@ -67,6 +67,7 @@ public class LeaderboardGroupMetaLeaderboard extends AbstractMetaLeaderboard imp
                 }
             }
         }
+        getRaceColumnListeners().notifyListenersAboutRaceColumnAddedToContainer(getColumnForLeaderboard(leaderboard));
     }
 
     @Override
@@ -81,6 +82,7 @@ public class LeaderboardGroupMetaLeaderboard extends AbstractMetaLeaderboard imp
                 }
             }
         }
+        getRaceColumnListeners().notifyListenersAboutRaceColumnRemovedFromContainer(getColumnForLeaderboard(leaderboard));
     }
     
 }

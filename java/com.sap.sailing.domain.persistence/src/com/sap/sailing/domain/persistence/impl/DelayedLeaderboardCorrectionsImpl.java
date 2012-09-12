@@ -168,6 +168,14 @@ public class DelayedLeaderboardCorrectionsImpl implements DelayedLeaderboardCorr
     }
 
     @Override
+    public void raceColumnAddedToContainer(RaceColumn raceColumn) {
+    }
+
+    @Override
+    public void raceColumnRemovedFromContainer(RaceColumn raceColumn) {
+    }
+
+    @Override
     public boolean isTransient() {
         return false;
     }
