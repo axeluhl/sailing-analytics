@@ -2,8 +2,9 @@ package com.sap.sailing.domain.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -133,6 +134,36 @@ public class LeaderboardOfflineTest extends AbstractLeaderboardTest {
                 leaderboard.getEntry(competitor, bestScoringRaceColumn, MillisecondsTimePoint.now()).getNetPoints(), 0.000000001);
         // now assert that it gets discarded because due to disqualification it scores worse than all others:
         assertEquals(0, leaderboard.getEntry(competitor, bestScoringRaceColumn, MillisecondsTimePoint.now()).getTotalPoints(), 0.000000001);
+    }
+    
+    @Test
+    public void testCarriedPointsCountInSorting() throws NoWindException {
+        raceColumnsInLeaderboard = new HashMap<TrackedRace, RaceColumn>();
+        Competitor c2 = createCompetitor("Marcus Baur");
+        Competitor c3 = createCompetitor("Robert Stanjek");
+        TimePoint now = MillisecondsTimePoint.now();
+        MockedTrackedRaceWithFixedRankAndManyCompetitors testRace = new MockedTrackedRaceWithFixedRankAndManyCompetitors(
+                competitor, /* rank */ 1, /* started */true);
+        testRace.addCompetitor(c2);
+        testRace.addCompetitor(c3); // this makes maxPoints==4
+        ScoreCorrectionImpl scoreCorrection = new ScoreCorrectionImpl();
+        FlexibleLeaderboard leaderboard = new FlexibleLeaderboardImpl("Test Leaderboard", scoreCorrection, new ResultDiscardingRuleImpl(
+                new int[] { 2 }), new LowPoint());
+        Fleet defaultFleet = leaderboard.getFleet(null);
+        leaderboard.addRace(testRace, "R1", /* medalRace */ false, defaultFleet);
+        assertEquals(1., leaderboard.getTotalPoints(competitor, now), 0.00000001);
+        assertEquals(1., leaderboard.getTotalPoints(c2, now), 0.00000001);
+        assertEquals(1., leaderboard.getTotalPoints(c3, now), 0.00000001);
+        leaderboard.setCarriedPoints(competitor, 100);
+        leaderboard.setCarriedPoints(c2, 50);
+        leaderboard.setCarriedPoints(c3, 25);
+        assertEquals(101., leaderboard.getTotalPoints(competitor, now), 0.00000001);
+        assertEquals(51., leaderboard.getTotalPoints(c2, now), 0.00000001);
+        assertEquals(26., leaderboard.getTotalPoints(c3, now), 0.00000001);
+        List<Competitor> sortedCompetitors = leaderboard.getCompetitorsFromBestToWorst(now);
+        assertSame(c3, sortedCompetitors.get(0));
+        assertSame(c2, sortedCompetitors.get(1));
+        assertSame(competitor, sortedCompetitors.get(2));
     }
     
     @Test
