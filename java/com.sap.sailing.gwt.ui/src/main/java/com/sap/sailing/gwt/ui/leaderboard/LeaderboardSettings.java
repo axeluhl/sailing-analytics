@@ -31,7 +31,6 @@ public class LeaderboardSettings {
     private final boolean sortAscending;
     
     /**
-     * @param overallDetailsToShow TODO
      * @param raceColumnsToShow <code>null</code> means don't modify the list of races shown
      */
     public LeaderboardSettings(List<DetailType> meneuverDetailsToShow, List<DetailType> legDetailsToShow,
