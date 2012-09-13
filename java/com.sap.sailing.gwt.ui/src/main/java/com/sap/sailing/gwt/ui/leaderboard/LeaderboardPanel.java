@@ -1051,10 +1051,18 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         this.selectedManeuverDetails = new ArrayList<DetailType>();
         overallDetailColumnMap = createOverallDetailColumnMap();
         settingsUpdatedExplicitly = !settings.updateUponPlayStateChange();
-        selectedLegDetails.addAll(settings.getLegDetailsToShow());
-        selectedManeuverDetails.addAll(settings.getManeuverDetailsToShow());
-        selectedRaceDetails.addAll(settings.getRaceDetailsToShow());
-        selectedOverallDetailColumns.addAll(settings.getOverallDetailsToShow());
+        if (settings.getLegDetailsToShow() != null) {
+            selectedLegDetails.addAll(settings.getLegDetailsToShow());
+        }
+        if (settings.getManeuverDetailsToShow() != null) {
+            selectedManeuverDetails.addAll(settings.getManeuverDetailsToShow());
+        }
+        if (settings.getRaceDetailsToShow() != null) {
+            selectedRaceDetails.addAll(settings.getRaceDetailsToShow());
+        }
+        if (settings.getOverallDetailsToShow() != null) {
+            selectedOverallDetailColumns.addAll(settings.getOverallDetailsToShow());
+        }
         setAutoExpandPreSelectedRace(settings.isAutoExpandPreSelectedRace());
         if (settings.getDelayBetweenAutoAdvancesInMilliseconds() != null) {
             timer.setRefreshInterval(settings.getDelayBetweenAutoAdvancesInMilliseconds());

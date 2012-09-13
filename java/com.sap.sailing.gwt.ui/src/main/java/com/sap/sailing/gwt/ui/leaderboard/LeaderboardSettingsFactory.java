@@ -59,7 +59,7 @@ public class LeaderboardSettingsFactory {
                 raceDetails.add(DetailType.RACE_DISTANCE_TO_LEADER_IN_METERS);
                 raceDetails.add(DetailType.NUMBER_OF_MANEUVERS);
                 raceDetails.add(DetailType.DISPLAY_LEGS);
-                List<DetailType> overallDetails = Collections.emptyList();
+                List<DetailType> overallDetails = null; // lead overall details unchanged
                 settings = new LeaderboardSettings(maneuverDetails, legDetails, raceDetails, overallDetails,
                         namesOfRaceColumnsToShow,
                         namesOfRacesToShow, /* set autoExpandPreSelectedRace to true if we look at a single race */ nameOfRaceColumnToShow != null || nameOfRaceToShow != null,
@@ -86,8 +86,8 @@ public class LeaderboardSettingsFactory {
      */
     public LeaderboardSettings createNewDefaultSettings(List<String> namesOfRaceColumnsToShow,
             List<String> namesOfRacesToShow, String nameOfRaceToSort, boolean autoExpandPreSelectedRace) {
-        return createNewDefaultSettings(namesOfRaceColumnsToShow, namesOfRacesToShow, nameOfRaceToSort, autoExpandPreSelectedRace,
-                /* refreshIntervalMillis */ null);
+        return createNewDefaultSettings(namesOfRaceColumnsToShow, namesOfRacesToShow, /* leave overallDetailsToShow unchanged */ null,
+                nameOfRaceToSort, autoExpandPreSelectedRace, /* refreshIntervalMillis */ null);
     }
     
     /**
@@ -95,7 +95,8 @@ public class LeaderboardSettingsFactory {
      * may be specified; if <code>null</code>, no auto-refresh shall be performed
      */
     public LeaderboardSettings createNewDefaultSettings(List<String> namesOfRaceColumnsToShow,
-            List<String> namesOfRacesToShow, String nameOfRaceToSort, boolean autoExpandPreSelectedRace, Long refreshIntervalMillis) {
+            List<String> namesOfRacesToShow, List<DetailType> overallDetailsToShow, String nameOfRaceToSort,
+            boolean autoExpandPreSelectedRace, Long refreshIntervalMillis) {
         if (namesOfRaceColumnsToShow != null && namesOfRacesToShow != null) {
             throw new IllegalArgumentException("Can specify race columns either by column or by race name, not both");
         }
@@ -109,8 +110,7 @@ public class LeaderboardSettingsFactory {
         legDetails.add(DetailType.RANK_GAIN);
         List<DetailType> raceDetails = new ArrayList<DetailType>();
         raceDetails.add(DetailType.DISPLAY_LEGS);
-        List<DetailType> overallDetails = Collections.emptyList();
-        return new LeaderboardSettings(maneuverDetails, legDetails, raceDetails, overallDetails,
+        return new LeaderboardSettings(maneuverDetails, legDetails, raceDetails, overallDetailsToShow,
                 namesOfRaceColumnsToShow,
                 namesOfRacesToShow, autoExpandPreSelectedRace,
                 refreshIntervalMillis, /* delay to live */ null, /* sort by column */ nameOfRaceToSort,
