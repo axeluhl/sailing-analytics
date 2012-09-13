@@ -73,8 +73,8 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
     public int compare(Competitor o1, Competitor o2) {
         List<Double> o1Scores = new ArrayList<Double>();
         List<Double> o2Scores = new ArrayList<Double>();
-        int o1ScoreSum = 0;
-        int o2ScoreSum = 0;
+        double o1ScoreSum = getLeaderboard().getCarriedPoints(o1);
+        double o2ScoreSum = getLeaderboard().getCarriedPoints(o2);
         Double o1MedalRaceScore = 0.0;
         Double o2MedalRaceScore = 0.0;
         for (RaceColumn raceColumn : getLeaderboard().getRaceColumns()) {
