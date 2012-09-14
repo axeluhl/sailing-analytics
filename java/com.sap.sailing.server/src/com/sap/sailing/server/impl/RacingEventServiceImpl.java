@@ -47,6 +47,7 @@ import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
+import com.sap.sailing.domain.common.Renamable;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
@@ -394,14 +395,15 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
                 throw new IllegalArgumentException("Leaderboard with name "+newName+" already exists");
             }
             Leaderboard toRename = leaderboardsByName.get(oldName);
-            if (toRename instanceof FlexibleLeaderboard) {
-                ((FlexibleLeaderboard) toRename).setName(newName);
+            if (toRename instanceof Renamable) {
+                ((Renamable) toRename).setName(newName);
                 leaderboardsByName.remove(oldName);
                 leaderboardsByName.put(newName, toRename);
                 mongoObjectFactory.renameLeaderboard(oldName, newName);
                 syncGroupsAfterLeaderboardChange(toRename, true);
             } else {
-                throw new IllegalArgumentException("Leaderboard with name "+newName+" is not a FlexibleLeaderboard and therefore cannot be renamed");
+                throw new IllegalArgumentException("Leaderboard with name "+newName+" is of type "+toRename.getClass().getSimpleName()+
+                        " and therefore cannot be renamed");
             }
         }
     }

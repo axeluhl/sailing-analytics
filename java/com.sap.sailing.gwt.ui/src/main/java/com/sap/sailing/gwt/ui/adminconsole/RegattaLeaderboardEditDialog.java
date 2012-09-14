@@ -20,8 +20,13 @@ public class RegattaLeaderboardEditDialog extends RegattaLeaderboardDialog {
 
         regattaListBox = createListBox(false);
         regattaListBox.addItem(stringConstants.pleaseSelectARegatta());
+        int i=1;
         for (RegattaDTO regatta : existingRegattas) {
             regattaListBox.addItem(regatta.name);
+            if (regatta.name.equals(leaderboard.getRegattaName())) {
+                regattaListBox.setSelectedIndex(i);
+            }
+            i++;
         }
         regattaListBox.setEnabled(false);
         discardThresholdBoxes = initPrefilledDiscardThresholdBoxes(leaderboard.getDiscardThresholds(), this);

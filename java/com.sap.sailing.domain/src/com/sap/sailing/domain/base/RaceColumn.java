@@ -1,7 +1,7 @@
 package com.sap.sailing.domain.base;
 
-import com.sap.sailing.domain.common.Named;
 import com.sap.sailing.domain.common.RaceIdentifier;
+import com.sap.sailing.domain.common.Renamable;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
@@ -24,7 +24,7 @@ import com.sap.sailing.domain.tracking.TrackedRace;
  * @author Axel Uhl (D043530)
  * 
  */
-public interface RaceColumn extends Named {
+public interface RaceColumn extends Renamable {
     void addRaceColumnListener(RaceColumnListener listener);
     
     void removeRaceColumnListener(RaceColumnListener listener);
@@ -99,8 +99,6 @@ public interface RaceColumn extends Named {
      * A "medal race" cannot be discarded. It's score is doubled during score aggregation.
      */
     boolean isMedalRace();
-    
-    void setName(String newName);
     
     /**
      * Constructs a key for maps storing corrections such as score corrections and max points reasons.
