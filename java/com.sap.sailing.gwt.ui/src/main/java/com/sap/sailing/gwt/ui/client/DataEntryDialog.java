@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.ui.client;
 
+import java.util.Date;
+
 import com.google.gwt.dom.client.Style.FontWeight;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ChangeEvent;
@@ -23,6 +25,7 @@ import com.google.gwt.user.client.ui.LongBox;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.datepicker.client.DateBox;
 
 /**
  * An abstract data entry dialog class, capturing data of type <code>T</code>, with generic OK/Cancel buttons, title and
@@ -194,6 +197,14 @@ public abstract class DataEntryDialog<T> {
     }
 
     public DoubleBox createDoubleBox(double initialValue, int visibleLength) {
+        return createDoubleBoxInternal(initialValue, visibleLength);
+    }
+
+    public DoubleBox createDoubleBox(int visibleLength) {
+        return createDoubleBoxInternal(null, visibleLength);
+    }
+    
+    private DoubleBox createDoubleBoxInternal(Double initialValue, int visibleLength) {
         DoubleBox doubleBox = new DoubleBox();
         doubleBox.setVisibleLength(visibleLength);
         doubleBox.setValue(initialValue);
@@ -207,6 +218,30 @@ public abstract class DataEntryDialog<T> {
         AbstractEntryPoint.linkEnterToButton(getOkButton(), doubleBox);
         AbstractEntryPoint.linkEscapeToButton(getCancelButton(), doubleBox);
         return doubleBox;
+    }
+
+    public DateBox createDateBox(long initialTimeInMs, int visibleLength) {
+        return createDateBoxInternal(new Date(initialTimeInMs), visibleLength);
+    }
+
+    public DateBox createDateBox(int visibleLength) {
+        return createDateBoxInternal(null, visibleLength);
+    }
+    
+    private DateBox createDateBoxInternal(Date initialDate, int visibleLength) {
+        DateBox textBox = new DateBox();
+        textBox.getTextBox().setVisibleLength(visibleLength);
+        textBox.setValue(initialDate);
+        AbstractEntryPoint.addFocusUponKeyUpToggler(textBox.getTextBox());
+        textBox.getTextBox().addChangeHandler(new ChangeHandler() {
+            @Override
+            public void onChange(ChangeEvent event) {
+                validate();
+            }
+        });
+        AbstractEntryPoint.linkEnterToButton(getOkButton(), textBox.getTextBox());
+        AbstractEntryPoint.linkEscapeToButton(getCancelButton(), textBox.getTextBox());
+        return textBox;
     }
 
     /**

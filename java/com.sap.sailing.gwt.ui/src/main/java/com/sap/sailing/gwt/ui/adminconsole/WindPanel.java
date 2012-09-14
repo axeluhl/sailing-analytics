@@ -10,6 +10,8 @@ import java.util.Set;
 import com.google.gwt.cell.client.ActionCell;
 import com.google.gwt.cell.client.ActionCell.Delegate;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.cellview.client.CellTable;
@@ -18,6 +20,7 @@ import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.IdentityColumn;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FormPanel;
@@ -55,7 +58,6 @@ public class WindPanel extends FormPanel implements RegattaDisplayer, WindShower
     private final SailingServiceAsync sailingService;
     private final ErrorReporter errorReporter;
     private final StringMessages stringMessages;
-    private final WindSettingPanel windSettingPanel;
     private final IdentityColumn<WindDTO> removeColumn;
     private final TextColumn<WindDTO> timeColumn;
     private final TextColumn<WindDTO> speedInKnotsColumn;
@@ -98,13 +100,34 @@ public class WindPanel extends FormPanel implements RegattaDisplayer, WindShower
         tabPanel.setSize("95%", "95%");
 
         windFixesDisplayPanel = new VerticalPanel();
+        Button addWindFixButton = new Button(stringMessages.actionAddWindData()+ "...");
+        addWindFixButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                RegattaAndRaceIdentifier selectedRace = getSelectedRace(); 
+                if(selectedRace != null) {
+                    RaceDTO race = trackedRacesListComposite.getRaceByIdentifier(selectedRace);
+                    WindSettingDialog windSettingDialog = new WindSettingDialog(race, stringMessages, 
+                            new AsyncCallback<WindDTO>() {
+                                @Override
+                                public void onFailure(Throwable caught) {
+                                }
 
-        windSettingPanel = new WindSettingPanel(sailingService, raceSelectionProvider, this, errorReporter, stringMessages);
+                                @Override
+                                public void onSuccess(final WindDTO result) {
+                                    addWindFix(result);
+                                }
+                            });
+                    windSettingDialog.show();
+                }
+            }
+        });
+        windFixesDisplayPanel.add(addWindFixButton);
+
         VerticalPanel windSourcesPanel = new VerticalPanel();
         windSourcesPanel.setSpacing(10);
         tabPanel.add(windSourcesPanel, stringMessages.windSourcesUsed());
         tabPanel.add(windFixesDisplayPanel, "Wind fixes");
-        tabPanel.add(windSettingPanel, "Manual wind");
         tabPanel.selectTab(0);
         
         raceIsKnownToStartUpwindBox = new CheckBox(stringMessages.raceIsKnownToStartUpwind());
@@ -190,6 +213,21 @@ public class WindPanel extends FormPanel implements RegattaDisplayer, WindShower
         windFixesDisplayPanel.add(rawWindFixesTable);
     }
 
+    private void addWindFix(final WindDTO wind) {
+        final RegattaAndRaceIdentifier raceIdentifier = getSelectedRace();
+        sailingService.setWind(raceIdentifier, wind, new AsyncCallback<Void>() {
+            @Override
+            public void onSuccess(Void result) {
+                showWind(raceIdentifier);
+            }
+
+            @Override
+            public void onFailure(Throwable caught) {
+                errorReporter.reportError("Error adding a wind fix for race " + raceIdentifier + ": " + caught.getMessage());
+            }
+        });
+    }
+    
     @Override
     public void fillRegattas(List<RegattaDTO> result) {
         trackedRacesListComposite.fillRegattas(result);
