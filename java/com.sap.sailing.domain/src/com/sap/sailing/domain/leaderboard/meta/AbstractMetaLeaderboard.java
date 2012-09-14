@@ -52,14 +52,19 @@ public abstract class AbstractMetaLeaderboard extends AbstractSimpleLeaderboardI
     
     private class ScoreCorrectionChangeForwarder implements ScoreCorrectionListener {
         @Override
-        public void correctedScoreChanced(Competitor competitor, Double oldCorrectedScore, Double newCorrectedScore) {
-            getScoreCorrection().notifyListeners(competitor, oldCorrectedScore, newCorrectedScore);
+        public void correctedScoreChanced(Competitor competitor, RaceColumn raceColumn, Double oldCorrectedScore, Double newCorrectedScore) {
+            getScoreCorrection().notifyListeners(competitor, raceColumn, oldCorrectedScore, newCorrectedScore);
         }
 
         @Override
         public void maxPointsReasonChanced(Competitor competitor, MaxPointsReason oldMaxPointsReason,
                 MaxPointsReason newMaxPointsReason) {
             getScoreCorrection().notifyListeners(competitor, oldMaxPointsReason, newMaxPointsReason);
+        }
+
+        @Override
+        public void carriedPointsChanged(Competitor competitor, Double oldCarriedPoints, Double newCarriedPoints) {
+            getScoreCorrection().notifyListenersAboutCarriedPointsChange(competitor, oldCarriedPoints, newCarriedPoints);
         }
     }
     

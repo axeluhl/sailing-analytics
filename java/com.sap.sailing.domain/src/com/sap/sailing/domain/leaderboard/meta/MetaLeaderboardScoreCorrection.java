@@ -26,11 +26,17 @@ public class MetaLeaderboardScoreCorrection extends ScoreCorrectionImpl {
         return Util.size(metaLeaderboardColumn.getLeaderboard().getCompetitors());
     }
 
+    /**
+     * These redefinitions are required for scoping reasons, to make the method visible also to other classes in this package.
+     */
     @Override
-    protected void notifyListeners(Competitor competitor, Double oldCorrectedScore, Double newCorrectedScore) {
-        super.notifyListeners(competitor, oldCorrectedScore, newCorrectedScore);
+    protected void notifyListeners(Competitor competitor, RaceColumn raceColumn, Double oldCorrectedScore, Double newCorrectedScore) {
+        super.notifyListeners(competitor, raceColumn, oldCorrectedScore, newCorrectedScore);
     }
 
+    /**
+     * These redefinitions are required for scoping reasons, to make the method visible also to other classes in this package.
+     */
     @Override
     protected void notifyListeners(Competitor competitor, MaxPointsReason oldMaxPointsReason,
             MaxPointsReason newMaxPointsReason) {

@@ -156,7 +156,8 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
 
     @Override
     public void setCarriedPoints(Competitor competitor, double carriedPoints) {
-        this.carriedPoints.put(competitor, carriedPoints);
+        Double oldCarriedPoints = this.carriedPoints.put(competitor, carriedPoints);
+        getScoreCorrection().notifyListenersAboutCarriedPointsChange(competitor, oldCarriedPoints, carriedPoints);
     }
 
     @Override
@@ -167,7 +168,8 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
 
     @Override
     public void unsetCarriedPoints(Competitor competitor) {
-        carriedPoints.remove(competitor);
+        Double oldCarriedPoints = carriedPoints.remove(competitor);
+        getScoreCorrection().notifyListenersAboutCarriedPointsChange(competitor, oldCarriedPoints, null);
     }
 
     @Override
