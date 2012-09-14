@@ -28,6 +28,12 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 public class RegattaLeaderboardImpl extends AbstractLeaderboardImpl implements RegattaLeaderboard {
     private static final long serialVersionUID = 2370461218294770084L;
     private final Regatta regatta;
+    
+    /**
+     * If this member is <code>null</code>, {@link #getName()} will use the regatta name as the default name for this
+     * leaderboard. Otherwise, the {@link #displayName} is used.
+     */
+    private String displayName;
 
     public RegattaLeaderboardImpl(Regatta regatta, SettableScoreCorrection scoreCorrection,
             ThresholdBasedResultDiscardingRule resultDiscardingRule) {
@@ -35,7 +41,15 @@ public class RegattaLeaderboardImpl extends AbstractLeaderboardImpl implements R
         this.regatta = regatta;
         regatta.addRaceColumnListener(this);
     }
-    
+
+    /**
+     * Updates the display name of this regatta leaderboard so that the regatta's name is no longer used as the default name.
+     */
+    @Override
+    public void setName(String newName) {
+        displayName = newName;
+    }
+
     @Override
     public Regatta getRegatta() {
         return regatta;
@@ -43,7 +57,13 @@ public class RegattaLeaderboardImpl extends AbstractLeaderboardImpl implements R
 
     @Override
     public String getName() {
-        return getRegatta().getName();
+        String result;
+        if (displayName != null) {
+            result = displayName;
+        } else {
+            result = getRegatta().getName();
+        }
+        return result;
     }
 
     @Override

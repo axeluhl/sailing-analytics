@@ -2,15 +2,14 @@ package com.sap.sailing.domain.leaderboard;
 
 import java.util.Collection;
 
-import com.sap.sailing.domain.common.Named;
+import com.sap.sailing.domain.common.Renamable;
 
-public interface LeaderboardGroup extends Named {
+public interface LeaderboardGroup extends Renamable {
     void addLeaderboardGroupListener(LeaderboardGroupListener listener);
     void removeLeaderboardGroupListener(LeaderboardGroupListener listener);
     
     String getDescription();
     void setDescriptiom(String description);
-    void setName(String newName);
 
     Iterable<Leaderboard> getLeaderboards();
     int getIndexOf(Leaderboard leaderboard);
