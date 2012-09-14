@@ -390,4 +390,10 @@ public interface StringMessages extends Messages {
     String totalTimeSailedInSeconds();
     String overallDetailsToShow();
     String hhmmssUnit();
+    String actionAddWindData();
+    String valueMustBeBetweenMinMax(String name, String minValue, String maxValue);
+    String optional();
+    String pleaseEnterAValue();
+    String latitude();
+    String longitude();
 }
