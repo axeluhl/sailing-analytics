@@ -7,5 +7,7 @@ public interface WindField {
 	public Wind getWind(TimedPosition coordinates);
 
 	public Boundary getBoundaries();
+	
+	public Path getLine(TimedPosition seed);
 
 }
