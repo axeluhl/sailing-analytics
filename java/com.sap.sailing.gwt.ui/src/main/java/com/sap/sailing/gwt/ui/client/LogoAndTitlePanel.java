@@ -23,7 +23,13 @@ public class LogoAndTitlePanel extends FlowPanel {
         sapLogo.setHref("http://www.sap.com");
         sapLogo.addStyleName("sapLogo");
         this.add(sapLogo);
-        
+
+        Anchor pioLogo = new Anchor(new SafeHtmlBuilder().appendHtmlConstant(
+                "<img class=\"linkNoBorder\" src=\"/gwt/images/pio_logo_42.png\"/>").toSafeHtml());
+        pioLogo.setHref("http://www.sap.com/services/portfolio/predictive-analytics");
+        pioLogo.addStyleName("pioLogo");
+        this.add(pioLogo);
+
         FlowPanel sailingAnalyticsLabelPanel = new FlowPanel();
         Label sailingAnalyticsLabel = new Label(stringConstants.sapSailingAnalytics());
         sailingAnalyticsLabelPanel.add(sailingAnalyticsLabel);
