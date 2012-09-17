@@ -13,6 +13,8 @@ public interface Path {
 	
 	TimedPositionWithSpeed getPositionAtTime(TimePoint t);
 	
+	List<TimedPositionWithSpeed> getEvenTimedPath(long timeStep);
+	
 	List<TimedPositionWithSpeed> getEvenTimedPoints(long milliseconds);
 	
 	List<TimedPositionWithSpeed> getEvenDistancedPoints(Distance dist);

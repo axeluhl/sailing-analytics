@@ -112,7 +112,8 @@ public class SailingSimulatorImpl implements SailingSimulator {
         Map<String, Path> allPaths = this.getAllPaths();
         String[] allKeys = allPaths.keySet().toArray(new String[0]);
         for (String currentKey : allKeys) {
-            allTimedPaths.put(currentKey, allPaths.get(currentKey).getEvenTimedPoints(millisecondsStep));
+            allTimedPaths.put(currentKey, allPaths.get(currentKey).getEvenTimedPath(millisecondsStep));
+            //allTimedPaths.put(currentKey, allPaths.get(currentKey).getEvenTimedPoints(millisecondsStep));
             //allTimedPaths.put(currentKey, allPaths.get(currentKey).getPathPoints());
         }
 
