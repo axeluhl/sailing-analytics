@@ -106,16 +106,15 @@ public class PathCanvasOverlay extends WindFieldCanvasOverlay implements Named {
             while (windDTOIter.hasNext()) {
                 WindDTO windDTO = windDTOIter.next();
 
+                if ((displayWindAlongPath) && ((index % arrowInterleave) == 0)) {
+                    DegreeBearingImpl dbi = new DegreeBearingImpl(windDTO.trueWindBearingDeg);
+                    // System.out.print("index: "+index+"\n");
+                    drawScaledArrow(windDTO, dbi.getRadians(), index);
+                }
+                index++;
+
                 long timeStep = windParams.getTimeStep().getTime();
                 if ((windDTO.timepoint - startTime) % (timeStep) == 0) {
-
-                    if ((displayWindAlongPath) && ((index % arrowInterleave) == 0)) {
-                        DegreeBearingImpl dbi = new DegreeBearingImpl(windDTO.trueWindBearingDeg);
-                        // System.out.print("index: "+index+"\n");
-                        drawScaledArrow(windDTO, dbi.getRadians(), index);
-                    }
-                    index++;
-
                     drawPoint(windDTO);
                 }
 
