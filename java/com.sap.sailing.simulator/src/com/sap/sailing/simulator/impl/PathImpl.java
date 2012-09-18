@@ -74,32 +74,37 @@ public class PathImpl implements Path {
         List<TimedPositionWithSpeed> path = new ArrayList<TimedPositionWithSpeed>();
 
         path.add(pathPoints.get(0));
-        TimePoint nextTimePoint = new MillisecondsTimePoint(startTime.asMillis() + timeStep); 
+        TimePoint nextTimePoint = new MillisecondsTimePoint(startTime.asMillis() + timeStep);
         List<TimedPositionWithSpeed> points = new ArrayList<TimedPositionWithSpeed>();
-        
-        for(int idx=1; idx<pathPoints.size(); idx++) {
-                        
+
+        int idx = 1;
+        while (idx < pathPoints.size()) {
+
             if (pathPoints.get(idx).getTimePoint().asMillis() >= nextTimePoint.asMillis()) {
-                
+
                 // reached point after next timestep
-                TimedPositionWithSpeed p1 = pathPoints.get(idx-1);
+                TimedPositionWithSpeed p1 = pathPoints.get(idx - 1);
                 TimedPositionWithSpeed p2 = pathPoints.get(idx);
                 Distance dist = p1.getPosition().getDistance(p2.getPosition());
-                double nextTime = nextTimePoint.asMillis();
+                // long nextTime = (double)nextTimePoint.asMillis();
+                // System.out.println(""+(nextTimePoint.asMillis() -
+                // p1.getTimePoint().asMillis())+" - "+(p2.getTimePoint().asMillis() - p1.getTimePoint().asMillis()));
+                double scale1 = (double) (nextTimePoint.asMillis() - p1.getTimePoint().asMillis());
+                double scale2 = (double) (p2.getTimePoint().asMillis() - p1.getTimePoint().asMillis());
                 Position nextPosition = p1.getPosition().translateGreatCircle(p1.getPosition().getBearingGreatCircle(p2.getPosition()),
-                        dist.scale((nextTime - p1.getTimePoint().asMillis()) / (p2.getTimePoint().asMillis() - p1.getTimePoint().asMillis()))); 
+                        dist.scale(scale1 / scale2));
                 SpeedWithBearing nextWind = windField.getWind(new TimedPositionImpl(nextTimePoint, nextPosition));
-                TimedPositionWithSpeed nextPoint = new TimedPositionWithSpeedImpl(nextTimePoint, nextPosition, nextWind); 
-                
+                TimedPositionWithSpeed nextPoint = new TimedPositionWithSpeedImpl(nextTimePoint, nextPosition, nextWind);
+
                 // distance scale: percentage of distance between previous point and next point
-                TimedPositionWithSpeed prevPoint = path.get(path.size()-1);
-                double scaleDist = 0.01*nextPoint.getPosition().getDistance(prevPoint.getPosition()).getMeters();
-                
+                TimedPositionWithSpeed prevPoint = path.get(path.size() - 1);
+                double scaleDist = 0.01 * nextPoint.getPosition().getDistance(prevPoint.getPosition()).getMeters();
+
                 // evaluate collected points to potentially find turn/corner
                 double maxDist = 0;
                 TimedPositionWithSpeed maxPoint = null;
                 Bearing nextBear = prevPoint.getPosition().getBearingGreatCircle(nextPoint.getPosition());
-                for(int jdx=0; jdx<points.size(); jdx++) {
+                for (int jdx = 0; jdx < points.size(); jdx++) {
 
                     Position pcur = points.get(jdx).getPosition();
                     Position ptmp = pcur.projectToLineThrough(prevPoint.getPosition(), nextBear);
@@ -110,30 +115,35 @@ public class PathImpl implements Path {
                     }
 
                 }
-                
+
                 if (maxDist > scaleDist) {
                     // add intermediate corner point
                     path.add(maxPoint);
                 }
-                
+
                 // add next even timed point
                 path.add(nextPoint);
-                
+
                 // clear list of intermediate points
                 points = new ArrayList<TimedPositionWithSpeed>();
-                
+
+                // increase nextTimePoint by timeStep
                 nextTimePoint = nextTimePoint.plus(timeStep);
             }
-        
+
             // collect points between previous timestep and next timestep
             points.add(pathPoints.get(idx));
 
+            if (pathPoints.get(idx).getTimePoint().asMillis() < nextTimePoint.asMillis()) {
+                idx++;
+            }
+
         }
-        
-        if (path.get(path.size()-1).getTimePoint().asMillis() < endTime.asMillis()) {
-            path.add(pathPoints.get(pathPoints.size()-1));
+
+        if (path.get(path.size() - 1).getTimePoint().asMillis() < endTime.asMillis()) {
+            path.add(pathPoints.get(pathPoints.size() - 1));
         }
-        
+
         return path;
     }
 
