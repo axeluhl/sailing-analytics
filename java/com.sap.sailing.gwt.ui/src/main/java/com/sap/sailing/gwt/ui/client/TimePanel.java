@@ -40,14 +40,14 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
      * 
      * @see #setMinMax(Date, Date, boolean)
      */
-    private Date min;
+    protected Date min;
     
     /**
      * The end time point of the time interval visualized by this time panel. May be <code>null</code> if not yet initialized.
      * 
      * @see #setMinMax(Date, Date, boolean)
      */
-    private Date max;
+    protected Date max;
     
     protected final IntegerBox playSpeedBox;
     private final Label timeDelayLabel;

@@ -339,7 +339,7 @@ public class SimulatorMainPanel2 extends SplitLayoutPanel {
 
         sliderBar.getElement().getStyle().setProperty("width", "216px");
 
-        sliderBar.setStepSize(Math.round(maxValue / 10.), false);
+        sliderBar.setStepSize(Math.round((maxValue - minValue) / 10.), false);
         sliderBar.setNumTicks(10);
         sliderBar.setNumTickLabels(1);
 
