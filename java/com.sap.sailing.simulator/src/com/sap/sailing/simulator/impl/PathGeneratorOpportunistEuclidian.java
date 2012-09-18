@@ -12,13 +12,12 @@ import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.simulator.Path;
-import com.sap.sailing.simulator.PathGenerator;
 import com.sap.sailing.simulator.PolarDiagram;
 import com.sap.sailing.simulator.SimulationParameters;
 import com.sap.sailing.simulator.TimedPositionWithSpeed;
 import com.sap.sailing.simulator.WindFieldGenerator;
 
-public class PathGeneratorOpportunistEuclidian implements PathGenerator {
+public class PathGeneratorOpportunistEuclidian extends PathGeneratorBase {
 
     private static Logger logger = Logger.getLogger("com.sap.sailing");
     SimulationParameters simulationParameters;
@@ -28,16 +27,6 @@ public class PathGeneratorOpportunistEuclidian implements PathGenerator {
 
     public PathGeneratorOpportunistEuclidian(SimulationParameters params) {
         simulationParameters = params;
-    }
-
-    @Override
-    public void setSimulationParameters(SimulationParameters params) {
-        simulationParameters = params;
-    }
-
-    @Override
-    public SimulationParameters getSimulationParameters() {
-        return simulationParameters;
     }
 
     public void setEvaluationParameters(int maxLeftVal, int maxRightVal, boolean startLeftVal) {
@@ -265,14 +254,6 @@ public class PathGeneratorOpportunistEuclidian implements PathGenerator {
         }
 
         return new PathImpl(lst, wf);
-
-    }
-
-    @Override
-    public List<TimedPositionWithSpeed> getPathEvenTimed(long millisecondsStep) {
-
-        Path path = this.getPath();
-        return path.getEvenTimedPoints(millisecondsStep);
 
     }
 

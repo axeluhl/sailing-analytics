@@ -1,7 +1,6 @@
 package com.sap.sailing.simulator.impl;
 
 import java.util.LinkedList;
-import java.util.List;
 
 import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
@@ -12,29 +11,18 @@ import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.simulator.Boundary;
 import com.sap.sailing.simulator.Path;
-import com.sap.sailing.simulator.PathGenerator;
 import com.sap.sailing.simulator.PolarDiagram;
 import com.sap.sailing.simulator.SimulationParameters;
 import com.sap.sailing.simulator.TimedPositionWithSpeed;
 import com.sap.sailing.simulator.WindFieldGenerator;
 
-public class PathGenerator1TurnerLeftDirect implements PathGenerator {
+public class PathGenerator1TurnerLeftDirect extends PathGeneratorBase {
 
     // private static Logger logger = Logger.getLogger("com.sap.sailing");
     SimulationParameters simulationParameters;
 
     public PathGenerator1TurnerLeftDirect(SimulationParameters params) {
         simulationParameters = params;
-    }
-
-    @Override
-    public void setSimulationParameters(SimulationParameters params) {
-        simulationParameters = params;
-    }
-
-    @Override
-    public SimulationParameters getSimulationParameters() {
-        return simulationParameters;
     }
 
     @Override
@@ -147,14 +135,6 @@ public class PathGenerator1TurnerLeftDirect implements PathGenerator {
             return new PathImpl(lst, windField);
         } else
             return null;
-
-    }
-
-    @Override
-    public List<TimedPositionWithSpeed> getPathEvenTimed(long millisecondsStep) {
-
-        Path path = this.getPath();
-        return path.getEvenTimedPoints(millisecondsStep);
 
     }
 

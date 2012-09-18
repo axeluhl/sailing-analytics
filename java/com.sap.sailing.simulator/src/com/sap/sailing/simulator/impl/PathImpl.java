@@ -36,36 +36,6 @@ public class PathImpl implements Path {
     }
 
     @Override
-    public TimedPositionWithSpeed getPositionAtTime(TimePoint t) {
-
-        if (t.compareTo(pathPoints.get(0).getTimePoint()) == 0)
-            return pathPoints.get(0);
-        if (t.compareTo(pathPoints.get(pathPoints.size() - 1).getTimePoint()) >= 0)
-            return pathPoints.get(pathPoints.size() - 1);
-
-        TimedPositionWithSpeed p1 = null;
-        TimedPositionWithSpeed p2 = null;
-        for (TimedPositionWithSpeed p : pathPoints) {
-            if (p.getTimePoint().compareTo(t) >= 0) {
-                p2 = p;
-                p1 = pathPoints.get(pathPoints.indexOf(p) - 1);
-                break;
-            }
-        }
-
-        double t1 = 1000.0 * p1.getTimePoint().asMillis();
-        double t2 = 1000.0 * p2.getTimePoint().asMillis();
-        double t0 = 1000.0 * t.asMillis();
-
-        Distance dist = p1.getPosition().getDistance(p2.getPosition());
-        Position p0 = p1.getPosition().translateGreatCircle(p1.getPosition().getBearingGreatCircle(p2.getPosition()),
-                dist.scale((t0 - t1) / (t2 - t1)));
-        SpeedWithBearing windAtPoint = windField.getWind(new TimedPositionImpl(t, p0));
-
-        return new TimedPositionWithSpeedImpl(t, p0, windAtPoint);
-    }
-
-    @Override
     public List<TimedPositionWithSpeed> getEvenTimedPath(long timeStep) {
 
         TimePoint startTime = pathPoints.get(0).getTimePoint();
@@ -148,6 +118,43 @@ public class PathImpl implements Path {
     }
 
     @Override
+    public void setWindField(WindField wf) {
+
+        windField = wf;
+
+    }
+
+    //@Override
+    public TimedPositionWithSpeed getPositionAtTime(TimePoint t) {
+
+        if (t.compareTo(pathPoints.get(0).getTimePoint()) == 0)
+            return pathPoints.get(0);
+        if (t.compareTo(pathPoints.get(pathPoints.size() - 1).getTimePoint()) >= 0)
+            return pathPoints.get(pathPoints.size() - 1);
+
+        TimedPositionWithSpeed p1 = null;
+        TimedPositionWithSpeed p2 = null;
+        for (TimedPositionWithSpeed p : pathPoints) {
+            if (p.getTimePoint().compareTo(t) >= 0) {
+                p2 = p;
+                p1 = pathPoints.get(pathPoints.indexOf(p) - 1);
+                break;
+            }
+        }
+
+        double t1 = 1000.0 * p1.getTimePoint().asMillis();
+        double t2 = 1000.0 * p2.getTimePoint().asMillis();
+        double t0 = 1000.0 * t.asMillis();
+
+        Distance dist = p1.getPosition().getDistance(p2.getPosition());
+        Position p0 = p1.getPosition().translateGreatCircle(p1.getPosition().getBearingGreatCircle(p2.getPosition()),
+                dist.scale((t0 - t1) / (t2 - t1)));
+        SpeedWithBearing windAtPoint = windField.getWind(new TimedPositionImpl(t, p0));
+
+        return new TimedPositionWithSpeedImpl(t, p0, windAtPoint);
+    }
+
+    //@Override
     public List<TimedPositionWithSpeed> getEvenTimedPoints(long milliseconds) {
 
         if (milliseconds == 0)
@@ -172,16 +179,9 @@ public class PathImpl implements Path {
     }
 
     // not implemented yet!
-    @Override
+    //@Override
     public List<TimedPositionWithSpeed> getEvenDistancedPoints(Distance dist) {
         return null;
-    }
-
-    @Override
-    public void setWindField(WindField wf) {
-
-        windField = wf;
-
     }
 
 }
