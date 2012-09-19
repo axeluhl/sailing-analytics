@@ -511,22 +511,31 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                         TrackedLegOfCompetitor trackedLeg = trackedRace.getTrackedLeg(competitor, leg);
                         if (trackedLeg.hasStartedLeg(timePoint)) {
                             // find out leg type at the time the competitor started the leg
-                            LegType trackedLegType = trackedRace.getTrackedLeg(leg).getLegType(trackedLeg.getStartTime());
-                            if (legType == trackedLegType) {
-                                Long millisecondsSpendOnDownwind = trackedLeg.getTimeInMilliSeconds(timePoint);
-                                if (millisecondsSpendOnDownwind != null) {
-                                    if (result == null) {
-                                        result = millisecondsSpendOnDownwind;
+                            try {
+                                LegType trackedLegType = trackedRace.getTrackedLeg(leg).getLegType(
+                                        trackedLeg.getStartTime());
+                                if (legType == trackedLegType) {
+                                    Long millisecondsSpendOnDownwind = trackedLeg.getTimeInMilliSeconds(timePoint);
+                                    if (millisecondsSpendOnDownwind != null) {
+                                        if (result == null) {
+                                            result = millisecondsSpendOnDownwind;
+                                        } else {
+                                            result += millisecondsSpendOnDownwind;
+                                        }
                                     } else {
-                                        result += millisecondsSpendOnDownwind;
+                                        // Although the competitor has started the leg, no value was produced. This
+                                        // means that
+                                        // the competitor didn't finish the leg before tracking ended. No useful value
+                                        // can
+                                        // be obtained for this competitor anymore.
+                                        result = null;
+                                        break outerLoop;
                                     }
-                                } else {
-                                    // Although the competitor has started the leg, no value was produced. This means that
-                                    // the competitor didn't finish the leg before tracking ended. No useful value can
-                                    // be obtained for this competitor anymore.
-                                    result = null;
-                                    break outerLoop;
                                 }
+                            } catch (NoWindException nwe) {
+                                // without wind there is no leg type and hence there is no reasonable value for this:
+                                result = null;
+                                break outerLoop;
                             }
                         }
                     }
