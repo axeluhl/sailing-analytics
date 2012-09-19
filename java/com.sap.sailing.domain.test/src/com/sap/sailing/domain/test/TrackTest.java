@@ -92,6 +92,42 @@ public class TrackTest {
         track.addGPSFix(gpsFix4);
         track.addGPSFix(gpsFix5);
     }
+    
+    /**
+     * A test regarding bug 968. Three subsequent fixes at the same position with increasing time stamps each, then jumping
+     * to the next position for three seconds. Let's see what distance and SOG do...
+     */
+    @Test
+    public void testJumpyFixes() {
+        DynamicGPSFixTrack<Object, GPSFixMoving> track = new DynamicGPSFixMovingTrackImpl<Object>(new Object(),
+                /* millisecondsOverWhichToAverage */ 30000l);
+        TimePoint start = MillisecondsTimePoint.now();
+        TimePoint now = start;
+        final DegreePosition startPos = new DegreePosition(0, 0);
+        Position pos = startPos;
+        SpeedWithBearing speed = new KnotSpeedWithBearingImpl(40, new DegreeBearingImpl(90));
+        int NUMBER_OF_FIXES_AT_SAME_POSITION = 3;
+        int NUMBER_OF_REAL_FIXES = 10;
+        for (int i = 0; i < NUMBER_OF_REAL_FIXES; i++) {
+            addFixesWithSamePositionButProgressingTime(track, now, pos, speed, NUMBER_OF_FIXES_AT_SAME_POSITION);
+            track.getDistanceTraveled(start, now); // cause DistanceCache to cache a result
+            TimePoint nextNow = now.plus(NUMBER_OF_FIXES_AT_SAME_POSITION * 1000);
+            pos = pos.translateGreatCircle(speed.getBearing(), speed.travel(now, nextNow));
+            now = nextNow;
+        }
+        assertEquals(speed.travel(start, now.minus(NUMBER_OF_FIXES_AT_SAME_POSITION * 1000)).getMeters(),
+                track.getDistanceTraveled(start, now).getMeters(), 0.00000001);
+    }
+
+    private void addFixesWithSamePositionButProgressingTime(DynamicGPSFixTrack<Object, GPSFixMoving> track,
+            TimePoint start, Position pos, SpeedWithBearing speed, int numberOfFixes) {
+        TimePoint now = start;
+        for (int i = 0; i < numberOfFixes; i++) {
+            GPSFixMoving fix1 = new GPSFixMovingImpl(pos, now, speed);
+            track.addGPSFix(fix1);
+            now = now.plus(1000);
+        }
+    }
 
     @Test
     public void testMaxSpeedForNonMovingTrackWithUpperTimeLimit() {
