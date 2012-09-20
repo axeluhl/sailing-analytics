@@ -71,7 +71,8 @@ public interface TrackedRace extends Serializable {
     TimePoint getEndOfRace();
 
     /**
-     * Returns a list of the first and last mark passing times of all course waypoints
+     * Returns a list of the first and last mark passing times of all course waypoints. Callers wanting to iterate over the
+     * result must <code>synchronize</code> on the result.
      */
     Iterable<Pair<Waypoint, Pair<TimePoint, TimePoint>>> getMarkPassingsTimes();
 
@@ -83,7 +84,9 @@ public interface TrackedRace extends Serializable {
     /**
      * Clients can safely iterate over the iterable returned because it's a non-live copy of the tracked legs of this
      * tracked race. This implies that should an update to the underlying list of waypoints in this race's {@link Course}
-     * take place after this method has returned, then this won't be reflected in the result returned.
+     * take place after this method has returned, then this won't be reflected in the result returned. Callers should
+     * obtain the {@link Course#lockForRead() course's read lock} while using the result of this call if they want to
+     * ensure that no course update is applied concurrently.
      */
     Iterable<TrackedLeg> getTrackedLegs();
     
