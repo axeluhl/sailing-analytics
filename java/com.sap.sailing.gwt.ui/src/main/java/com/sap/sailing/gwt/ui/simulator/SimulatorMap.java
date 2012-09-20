@@ -98,7 +98,6 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
             removeOverlays();
             pathCanvasOverlays.clear();
             replayPathCanvasOverlays.clear();
-            mapw.addOverlay(legendCanvasOverlay);
             colorPalette.reset();
             for (int i = 0; i < paths.length; ++i) {
                 /* TODO Revisit for now creating a WindFieldDTO from the path */
@@ -129,13 +128,12 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
                     maxDurationTime = tmpDurationTime;
                 }
             }
-            
+
             if (timePanel != null) {
                 timePanel.setMinMax(new Date(startTime), new Date(startTime+maxDurationTime), true);
                 timePanel.resetTimeSlider();
             }
             
-            legendCanvasOverlay.redraw(true);
             if (!summaryView) {
                 WindFieldDTO windFieldDTO = result.windField;
                 logger.info("Number of windDTO : " + windFieldDTO.getMatrix().size());
@@ -148,6 +146,9 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
                     timeListeners.add(replayPathCanvasOverlays.get(i));
                 }
             }
+            
+            mapw.addOverlay(legendCanvasOverlay);
+            //legendCanvasOverlay.redraw(true);
             
             busyIndicator.setBusy(false);
         }
