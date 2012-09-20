@@ -159,13 +159,18 @@ public class LeaderboardDTOCache {
         }
 
         @Override
-        public void correctedScoreChanced(Competitor competitor, Double oldCorrectedScore, Double newCorrectedScore) {
+        public void correctedScoreChanced(Competitor competitor, RaceColumn raceColumn, Double oldCorrectedScore, Double newCorrectedScore) {
             removeFromCache(leaderboard);
         }
 
         @Override
         public void maxPointsReasonChanced(Competitor competitor, MaxPointsReason oldMaxPointsReason,
                 MaxPointsReason newMaxPointsReason) {
+            removeFromCache(leaderboard);
+        }
+
+        @Override
+        public void carriedPointsChanged(Competitor competitor, Double oldCarriedPoints, Double newCarriedPoints) {
             removeFromCache(leaderboard);
         }
     }

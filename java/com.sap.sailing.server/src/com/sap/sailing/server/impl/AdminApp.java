@@ -8,6 +8,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -260,7 +261,15 @@ public class AdminApp extends SailingServerHttpServlet {
                             /* 24h before race start */ new MillisecondsTimePoint(trackedRace.getStartOfRace().asMillis()-24*3600*1000));
                 TimePoint to = getTimePoint(req, PARAM_NAME_TO_TIME, PARAM_NAME_TO_TIME_MILLIS, MillisecondsTimePoint.now());
                 JSONObject jsonWindTracks = new JSONObject();
+                List<WindSource> windSources = new ArrayList<WindSource>();
                 for (WindSource windSource : trackedRace.getWindSources()) {
+                    windSources.add(windSource);
+                }
+                for (WindSource windSourceToExclude : trackedRace.getWindSourcesToExclude()) {
+                    windSources.remove(windSourceToExclude);
+                }
+                windSources.add(new WindSourceImpl(WindSourceType.COMBINED));
+                for (WindSource windSource : windSources) {
                     JSONArray jsonWindArray = new JSONArray();
                     WindTrack windTrack = trackedRace.getOrCreateWindTrack(windSource);
                     windTrack.lockForRead();

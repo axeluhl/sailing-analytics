@@ -9,11 +9,10 @@ import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnListener;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.impl.Util;
-import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.util.impl.RaceColumnListeners;
 
-public abstract class AbstractRaceColumn implements RaceColumn {
+public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implements RaceColumn {
     private static final long serialVersionUID = -7801617988982540470L;
     
     private final Map<Fleet, TrackedRace> trackedRaces;
@@ -73,11 +72,6 @@ public abstract class AbstractRaceColumn implements RaceColumn {
     @Override
     public void setName(String newName) {
         this.name = newName;
-    }
-
-    @Override
-    public Pair<Competitor, RaceColumn> getKey(Competitor competitor) {
-        return new Pair<Competitor, RaceColumn>(competitor, this);
     }
 
     @Override

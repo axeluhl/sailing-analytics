@@ -254,6 +254,10 @@ body ::-webkit-scrollbar-track {
     background: none repeat scroll 0 0 #efaa00;
 }
 
+.dateBoxPopup {
+	z-Index: 2000;
+}
+
 .timeLinePanel {
 	color: #fff;
 	width: 100%;

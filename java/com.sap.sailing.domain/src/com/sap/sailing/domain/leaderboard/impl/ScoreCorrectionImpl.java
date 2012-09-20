@@ -88,9 +88,9 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
         }
     }
 
-    protected void notifyListeners(Competitor competitor, Double oldCorrectedScore, Double newCorrectedScore) {
+    protected void notifyListeners(Competitor competitor, RaceColumn raceColumn, Double oldCorrectedScore, Double newCorrectedScore) {
         for (ScoreCorrectionListener listener : getScoreCorrectionListeners()) {
-            listener.correctedScoreChanced(competitor, oldCorrectedScore, newCorrectedScore);
+            listener.correctedScoreChanced(competitor, raceColumn, oldCorrectedScore, newCorrectedScore);
         }
     }
 
@@ -98,6 +98,13 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
             MaxPointsReason newMaxPointsReason) {
         for (ScoreCorrectionListener listener : getScoreCorrectionListeners()) {
             listener.maxPointsReasonChanced(competitor, oldMaxPointsReason, newMaxPointsReason);
+        }
+    }
+
+    @Override
+    public void notifyListenersAboutCarriedPointsChange(Competitor competitor, Double oldCarriedPoints, Double newCarriedPoints) {
+        for (ScoreCorrectionListener listener : getScoreCorrectionListeners()) {
+            listener.carriedPointsChanged(competitor, oldCarriedPoints, newCarriedPoints);
         }
     }
 
@@ -116,7 +123,7 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
     @Override
     public void correctScore(Competitor competitor, RaceColumn raceColumn, double points) {
         Double oldScore = correctedScores.put(raceColumn.getKey(competitor), points);
-        notifyListeners(competitor, oldScore, points);
+        notifyListeners(competitor, raceColumn, oldScore, points);
     }
 
     @Override
@@ -128,7 +135,7 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
     @Override
     public void uncorrectScore(Competitor competitor, RaceColumn raceColumn) {
         Double oldScore = correctedScores.remove(raceColumn.getKey(competitor));
-        notifyListeners(competitor, oldScore, null);
+        notifyListeners(competitor, raceColumn, oldScore, null);
     }
 
     @Override
