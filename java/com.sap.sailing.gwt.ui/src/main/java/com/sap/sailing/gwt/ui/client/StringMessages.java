@@ -375,6 +375,9 @@ public interface StringMessages extends Messages {
     String addRegatta();
     String exchangeName();
     String course();
+    String simulatorPolarHeader();
+    String show();
+    String hide();
     String courseLayout();
     String buoy();
     String gate();
@@ -403,4 +406,9 @@ public interface StringMessages extends Messages {
     String errorTryingToObtainRaceCourse(String message);
     String insertWaypointBeforeSelected();
     String insertWaypointAfterSelected();
+    String leftWind();
+    String rightWind();
+    String strategyOption1();
+    String strategyOption2();
+    String strategyOption3();
 }

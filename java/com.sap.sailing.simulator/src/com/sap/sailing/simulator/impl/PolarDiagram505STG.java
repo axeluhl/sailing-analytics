@@ -72,7 +72,7 @@ public class PolarDiagram505STG extends PolarDiagramBase {
         tableRow.put(new DegreeBearingImpl(90), new KnotSpeedImpl(7.35));
         tableRow.put(new DegreeBearingImpl(180), new KnotSpeedImpl(7.5));
         speedTable.put(new KnotSpeedImpl(20), tableRow);
-
+        //System.out.println("50 --- ");
         beatAngles = new TreeMap<Speed, Bearing>();
         beatAngles.put(new KnotSpeedImpl(0), new DegreeBearingImpl(44.0));
         beatAngles.put(new KnotSpeedImpl(6), new DegreeBearingImpl(44.0));

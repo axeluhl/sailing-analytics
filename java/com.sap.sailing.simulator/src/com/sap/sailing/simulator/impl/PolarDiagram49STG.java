@@ -2,6 +2,7 @@ package com.sap.sailing.simulator.impl;
 
 import java.util.NavigableMap;
 import java.util.TreeMap;
+import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.Bearing;
@@ -9,7 +10,7 @@ import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 
 public class PolarDiagram49STG extends PolarDiagramBase {
-
+	private static Logger logger = Logger.getLogger("com.sap.sailing");
     // this constructor creates an instance with a hard-coded set of values
     public PolarDiagram49STG() {
 
@@ -124,6 +125,8 @@ public class PolarDiagram49STG extends PolarDiagramBase {
                 speedTable.get(s).put(gybeAngles.get(s), gybeSOG.get(s));
 
         }
+        //DEBUG
+        //logger.info("INTRAT AICI");
 
     }
 

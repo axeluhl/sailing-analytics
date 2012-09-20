@@ -31,6 +31,7 @@ public interface PolarDiagram {
 	WindSide getWindSide(Bearing bearing);
 	
 	NavigableMap<Speed, NavigableMap<Bearing, Speed>> polarDiagramPlot(Double bearingStep, Set<Speed> extraSpeeds);
+	NavigableMap<Speed, NavigableMap<Bearing, Speed>> polarDiagramPlot(Double bearingStep);
 	
 	
 }
