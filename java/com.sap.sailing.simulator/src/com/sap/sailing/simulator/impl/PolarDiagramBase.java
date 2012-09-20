@@ -2,10 +2,12 @@ package com.sap.sailing.simulator.impl;
 
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.NavigableMap;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
@@ -19,7 +21,7 @@ public class PolarDiagramBase implements PolarDiagram {
 
     // the current speed and direction of the wind
     protected SpeedWithBearing wind = new KnotSpeedWithBearingImpl(6, new DegreeBearingImpl(180));
-
+    private static Logger logger = Logger.getLogger("com.sap.sailing");
     // the preferred direction of movement
     // is used by optimalDirectionsUpwind() and optimialDirectionsDownwind()
     protected Bearing targetDirection = new DegreeBearingImpl(0);
@@ -434,7 +436,34 @@ public class PolarDiagramBase implements PolarDiagram {
 
         return table;
     }
+    @Override
+    public NavigableMap<Speed, NavigableMap<Bearing, Speed>> polarDiagramPlot(Double bearingStep) {
 
+        NavigableMap<Speed, NavigableMap<Bearing, Speed>> table = new TreeMap<Speed, NavigableMap<Bearing, Speed>>();
+        Set<Bearing> extraBearings = new HashSet<Bearing>();
+
+        for (Speed s : speedTable.keySet()) {
+            setWind(new KnotSpeedWithBearingImpl(s.getKnots(), new DegreeBearingImpl(180)));
+            extraBearings.addAll(Arrays.asList(optimalDirectionsUpwind()));
+            extraBearings.addAll(Arrays.asList(optimalDirectionsDownwind()));
+        }
+
+        for (Speed s : speedTable.keySet()) {
+            setWind(new KnotSpeedWithBearingImpl(s.getKnots(), new DegreeBearingImpl(180)));
+            NavigableMap<Bearing, Speed> currentTable = new TreeMap<Bearing, Speed>(bearingComparator);
+            table.put(s, currentTable);
+
+            for (Double b = 0.0; b < 360.0; b += bearingStep) {
+                Bearing bearing = new DegreeBearingImpl(b);
+                currentTable.put(bearing, getSpeedAtBearing(bearing));
+                //DEBUG
+                //logger.info("bearing="+bearing.getDegrees());
+            }
+            //for (Bearing extraBearing : extraBearings)
+            	//currentTable.put(extraBearing, getSpeedAtBearing(extraBearing));
+        }
+        return table;
+    }
     @Override
     public Bearing getTargetDirection() {
         return targetDirection;

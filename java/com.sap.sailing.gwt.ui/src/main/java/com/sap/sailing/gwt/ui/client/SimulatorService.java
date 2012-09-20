@@ -6,6 +6,7 @@ import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import com.sap.sailing.gwt.ui.shared.BoatClassDTO;
 import com.sap.sailing.gwt.ui.shared.PathDTO;
+import com.sap.sailing.gwt.ui.shared.PolarDiagram49DTO;
 import com.sap.sailing.gwt.ui.shared.PositionDTO;
 import com.sap.sailing.gwt.ui.shared.SimulatorResultsDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldDTO;
@@ -37,4 +38,6 @@ public interface SimulatorService extends RemoteService {
 
     public BoatClassDTO[] getBoatClasses();
 
+    public PolarDiagram49DTO getPolarDiagram49DTO(Double bearingStep, int boatClass);
+    
 }
