@@ -7,7 +7,6 @@ import java.util.NavigableMap;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
@@ -21,7 +20,7 @@ public class PolarDiagramBase implements PolarDiagram {
 
     // the current speed and direction of the wind
     protected SpeedWithBearing wind = new KnotSpeedWithBearingImpl(6, new DegreeBearingImpl(180));
-    private static Logger logger = Logger.getLogger("com.sap.sailing");
+    //private static Logger logger = Logger.getLogger("com.sap.sailing");
     // the preferred direction of movement
     // is used by optimalDirectionsUpwind() and optimialDirectionsDownwind()
     protected Bearing targetDirection = new DegreeBearingImpl(0);

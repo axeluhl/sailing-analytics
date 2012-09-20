@@ -188,10 +188,10 @@ public class SimulatorMainPanel2 extends SplitLayoutPanel {
         this.yRes = yRes;
         this.autoUpdate = autoUpdate;
         this.isOmniscient = new CheckBox(this.stringMessages.omniscient(), true);
-        this.isOmniscient.setValue(false);
+        this.isOmniscient.setValue(true);
 
         this.isOpportunistic = new CheckBox(this.stringMessages.opportunistic(), true);
-        this.isOpportunistic.setValue(false);
+        this.isOpportunistic.setValue(true);
 
         this.isStrategyOption1 = new CheckBox(this.stringMessages.strategyOption1(), true);
         this.isStrategyOption1.setValue(true);
@@ -437,11 +437,11 @@ public class SimulatorMainPanel2 extends SplitLayoutPanel {
             public void onChange(ChangeEvent evnet) {
                 int selectedIndex = boatSelector.getSelectedIndex();
 
-                isOmniscient.setVisible(selectedIndex == 1);
+                /*isOmniscient.setVisible(selectedIndex == 1);
                 isOpportunistic.setVisible(selectedIndex == 1);
                 isStrategyOption1.setVisible(selectedIndex != 1);
                 isStrategyOption2.setVisible(selectedIndex != 1);
-                isStrategyOption3.setVisible(selectedIndex != 1);
+                isStrategyOption3.setVisible(selectedIndex != 1);*/
                 LoadPolarDiagramData(selectedIndex);
             }
         });
@@ -696,9 +696,9 @@ public class SimulatorMainPanel2 extends SplitLayoutPanel {
 
         vp.add(this.isOmniscient);
         vp.add(this.isOpportunistic);
-        vp.add(this.isStrategyOption1);
-        vp.add(this.isStrategyOption2);
-        vp.add(this.isStrategyOption3);
+        //vp.add(this.isStrategyOption1);
+        //vp.add(this.isStrategyOption2);
+        //vp.add(this.isStrategyOption3);
 
         /*
          * CheckBox cb = new CheckBox(stringMessages.omniscient()); cb.setValue(true); //

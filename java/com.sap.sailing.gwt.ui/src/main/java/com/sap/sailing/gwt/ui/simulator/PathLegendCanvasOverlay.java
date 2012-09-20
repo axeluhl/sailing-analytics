@@ -132,7 +132,7 @@ public class PathLegendCanvasOverlay extends CanvasOverlay {
         Context2d context2d = canvas.getContext2d();
         context2d.setFont(textFont);
         drawRectangle(x, y, color);
-        context2d.setGlobalAlpha(0.65);
+        context2d.setGlobalAlpha(0.80);
         context2d.setFillStyle("white");
         context2d.fillRect(x + rectWidth, y, 15.0 + textmaxwidth + timewidth, rectHeight);
         context2d.setGlobalAlpha(1.0);
