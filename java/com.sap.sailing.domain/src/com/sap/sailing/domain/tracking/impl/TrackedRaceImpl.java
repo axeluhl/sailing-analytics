@@ -711,29 +711,31 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
 
     @Override
     public TrackedLegOfCompetitor getTrackedLeg(Competitor competitor, TimePoint at) {
-        NavigableSet<MarkPassing> roundings = markPassingsForCompetitor.get(competitor);
+        NavigableSet<MarkPassing> roundings = getMarkPassings(competitor);
         TrackedLegOfCompetitor result = null;
         if (roundings != null) {
-            MarkPassing lastBeforeOrAt = roundings.floor(new DummyMarkPassingWithTimePointOnly(at));
             TrackedLeg trackedLeg;
-            // already finished the race?
-            if (lastBeforeOrAt != null) {
-                // and not at or after last mark passing
-                if (getRace().getCourse().getLastWaypoint() != lastBeforeOrAt.getWaypoint()) {
-                    trackedLeg = getTrackedLegStartingAt(lastBeforeOrAt.getWaypoint());
-                } else {
-                    // exactly *at* last mark passing?
-                    if (at.equals(roundings.last().getTimePoint())) {
-                        // exactly at finish line; return last leg
-                        trackedLeg = getTrackedLegFinishingAt(lastBeforeOrAt.getWaypoint());
+            synchronized (roundings) {
+                MarkPassing lastBeforeOrAt = roundings.floor(new DummyMarkPassingWithTimePointOnly(at));
+                // already finished the race?
+                if (lastBeforeOrAt != null) {
+                    // and not at or after last mark passing
+                    if (getRace().getCourse().getLastWaypoint() != lastBeforeOrAt.getWaypoint()) {
+                        trackedLeg = getTrackedLegStartingAt(lastBeforeOrAt.getWaypoint());
                     } else {
-                        // no, then we're after the last mark passing
-                        trackedLeg = null;
+                        // exactly *at* last mark passing?
+                        if (!roundings.isEmpty() && at.equals(roundings.last().getTimePoint())) {
+                            // exactly at finish line; return last leg
+                            trackedLeg = getTrackedLegFinishingAt(lastBeforeOrAt.getWaypoint());
+                        } else {
+                            // no, then we're after the last mark passing
+                            trackedLeg = null;
+                        }
                     }
+                } else {
+                    // before beginning of race
+                    trackedLeg = null;
                 }
-            } else {
-                // before beginning of race
-                trackedLeg = null;
             }
             if (trackedLeg != null) {
                 result = trackedLeg.getTrackedLeg(competitor);
