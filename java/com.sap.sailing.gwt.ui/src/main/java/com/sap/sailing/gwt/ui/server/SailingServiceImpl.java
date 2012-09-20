@@ -1452,15 +1452,15 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             raceTimesInfo.delayToLiveInMs = trackedRace.getDelayToLiveInMillis();
 
             Iterable<Pair<Waypoint, Pair<TimePoint, TimePoint>>> markPassingsTimes = trackedRace.getMarkPassingsTimes();
-            synchronized(markPassingsTimes) {
+            synchronized (markPassingsTimes) {
                 int numberOfWaypoints = Util.size(markPassingsTimes);
                 int wayPointNumber = 1;
-                for(Pair<Waypoint, Pair<TimePoint, TimePoint>> markPassingTimes: markPassingsTimes) {
+                for (Pair<Waypoint, Pair<TimePoint, TimePoint>> markPassingTimes : markPassingsTimes) {
                     MarkPassingTimesDTO markPassingTimesDTO = new MarkPassingTimesDTO();
                     String name = "M" + (wayPointNumber - 1);
-                    if(wayPointNumber == 1) {
+                    if (wayPointNumber == 1) {
                         name = "S";
-                    } else if(wayPointNumber == numberOfWaypoints) {
+                    } else if (wayPointNumber == numberOfWaypoints) {
                         name = "F";
                     }
                     markPassingTimesDTO.name = name;
@@ -1473,16 +1473,16 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                     wayPointNumber++;
                 }
             }
-
-            Iterable<TrackedLeg> trackedLegs = trackedRace.getTrackedLegs();
-            synchronized(trackedLegs) {
+            trackedRace.getRace().getCourse().lockForRead();
+            try {
+                Iterable<TrackedLeg> trackedLegs = trackedRace.getTrackedLegs();
                 int legNumber = 1;
-                for (TrackedLeg trackedLeg: trackedLegs) {
+                for (TrackedLeg trackedLeg : trackedLegs) {
                     LegInfoDTO legInfoDTO = new LegInfoDTO(legNumber);
                     legInfoDTO.name = "L" + legNumber;
                     try {
-                        MarkPassingTimesDTO markPassingTimesDTO = markPassingTimesDTOs.get(legNumber-1);
-                        if(markPassingTimesDTO.firstPassingDate != null) {
+                        MarkPassingTimesDTO markPassingTimesDTO = markPassingTimesDTOs.get(legNumber - 1);
+                        if (markPassingTimesDTO.firstPassingDate != null) {
                             TimePoint p = new MillisecondsTimePoint(markPassingTimesDTO.firstPassingDate);
                             legInfoDTO.legType = trackedLeg.getLegType(p);
                             legInfoDTO.legBearingInDegrees = trackedLeg.getLegBearing(p).getDegrees();
@@ -1493,9 +1493,10 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                     legInfos.add(legInfoDTO);
                     legNumber++;
                 }
+            } finally {
+                trackedRace.getRace().getCourse().unlockAfterRead();
             }
         }   
-        
         return raceTimesInfo;
     }
     
