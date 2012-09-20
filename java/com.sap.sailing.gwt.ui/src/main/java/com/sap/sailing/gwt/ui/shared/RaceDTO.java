@@ -5,43 +5,45 @@ import java.util.Date;
 import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
+import com.sap.sailing.domain.tracking.RaceTracker;
+import com.sap.sailing.domain.tracking.TrackedRace;
 
 public class RaceDTO extends NamedDTO implements IsSerializable {
-    public Iterable<CompetitorDTO> competitors;
-    
     /**
-     * Tells if this race is currently being tracked live, meaning that a {@link TracTracRaceTracker} is
+     * Tells if this race is currently being tracked, meaning that a {@link RaceTracker} is
      * listening for incoming GPS fixes, mark passings etc., to update a {@link TrackedRace} object
      * accordingly.
      */
-    public boolean currentlyTracked;
+    public boolean isTracked;
 
     public Date startOfRace;
-    public Date startOfTracking;
-    public Date endOfTracking;
-    public Date timePointOfNewestEvent;
     public Date endOfRace;
-    public long delayToLiveInMs;
-    
-    private RegattaDTO regatta;
+
+    public PlacemarkOrderDTO places;
+
+    public TrackedRaceDTO trackedRace;
+
+    private String regattaName;
+    public String boatClass;
     
     public RaceDTO() {}
 
-    public RaceDTO(String name, Iterable<CompetitorDTO> competitors, boolean currentlyTracked) {
-        super(name);
-        this.competitors = competitors;
-        this.currentlyTracked = currentlyTracked;
+    public RaceDTO(RegattaAndRaceIdentifier raceIdentifier) {
+        this(raceIdentifier, null);
     }
 
-    public void setRegatta(RegattaDTO regatta) {
-        this.regatta = regatta;
+    public RaceDTO(RegattaAndRaceIdentifier raceIdentifier, TrackedRaceDTO trackedRace) {
+        super(raceIdentifier.getRaceName());
+        this.regattaName = raceIdentifier.getRegattaName();
+        this.trackedRace = trackedRace;
+        this.isTracked = trackedRace != null;
     }
-    
+
     public RegattaAndRaceIdentifier getRaceIdentifier() {
-        return new RegattaNameAndRaceName(regatta.name, name);
+        return new RegattaNameAndRaceName(regattaName, name);
     }
-    
-    public RegattaDTO getRegatta() {
-        return regatta;
+
+    public String getRegattaName() {
+        return regattaName;
     }
 }

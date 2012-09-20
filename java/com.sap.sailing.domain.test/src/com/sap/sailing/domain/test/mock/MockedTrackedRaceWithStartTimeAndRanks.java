@@ -440,4 +440,16 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+    @Override
+    public boolean hasWindData() {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public boolean hasGPSData() {
+        // TODO Auto-generated method stub
+        return false;
+    }
 }

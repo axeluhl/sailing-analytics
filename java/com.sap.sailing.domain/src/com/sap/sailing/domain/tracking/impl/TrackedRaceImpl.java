@@ -31,6 +31,7 @@ import com.sap.sailing.domain.base.BearingWithConfidence;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Buoy;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.CourseChange;
 import com.sap.sailing.domain.base.CourseListener;
 import com.sap.sailing.domain.base.Leg;
@@ -1051,6 +1052,38 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         return result;
     }
 
+    @Override
+    public boolean hasWindData() {
+        boolean result = false;
+        Course course = getRace().getCourse();
+        Waypoint firstWaypoint = course.getFirstWaypoint();
+        TimePoint timepoint = startTime != null ? startTime : startOfTrackingReceived;
+        if(firstWaypoint != null && timepoint != null) {
+            Position position = getApproximatePosition(firstWaypoint, timepoint);
+            if(position != null) {
+                Wind wind = getWind(position, timepoint);
+                if(wind != null) {
+                    result = true;
+                }
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public boolean hasGPSData() {
+        boolean result = false;
+        if(!tracks.values().isEmpty()) {
+            for(GPSFixTrack<Competitor, GPSFixMoving> gpsTrack: tracks.values()) {
+                if(gpsTrack.getFirstRawFix() != null) {
+                    result = true;
+                    break;
+                }
+            }
+        }
+        return result;
+    }
+    
     @Override
     public Wind getWind(Position p, TimePoint at) {
         return getWind(p, at, getWindSourcesToExclude());

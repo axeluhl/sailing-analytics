@@ -9,6 +9,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.datepicker.client.DateBox;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.shared.CourseDTO;
 import com.sap.sailing.gwt.ui.shared.PositionDTO;
 import com.sap.sailing.gwt.ui.shared.RaceDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
@@ -54,13 +55,19 @@ public class WindSettingDialog extends DataEntryDialog<WindDTO> {
         }
     }
 
-    public WindSettingDialog(RaceDTO race, StringMessages stringMessages, AsyncCallback<WindDTO> callback) {
+    public WindSettingDialog(RaceDTO race, CourseDTO courseDTO, StringMessages stringMessages, AsyncCallback<WindDTO> callback) {
         super(stringMessages.actionAddWindData(), null, stringMessages.ok(), stringMessages.cancel(), new WindDataValidator(stringMessages), callback);
         this.stringMessages = stringMessages;        
         speedInKnotsBox = createDoubleBox(5);
         fromInDegBox = createDoubleBox(5);
-        latDegBox = createDoubleBox(10);
-        lngDegBox = createDoubleBox(10);
+        if(courseDTO != null && courseDTO.waypointPositions.get(0) != null) {
+            PositionDTO positionDTO = courseDTO.waypointPositions.get(0);
+            latDegBox = createDoubleBox(positionDTO.latDeg, 10);
+            lngDegBox = createDoubleBox(positionDTO.lngDeg, 10);
+        } else {
+            latDegBox = createDoubleBox(10);
+            lngDegBox = createDoubleBox(10);
+        }
         if(race.startOfRace != null) {
             timeBox = createDateBox(race.startOfRace.getTime(), 20);
         } else {

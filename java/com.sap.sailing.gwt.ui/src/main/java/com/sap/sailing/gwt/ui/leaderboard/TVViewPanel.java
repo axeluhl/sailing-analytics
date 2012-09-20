@@ -11,7 +11,6 @@ import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
-import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
@@ -105,7 +104,7 @@ public class TVViewPanel extends SimplePanel implements RaceTimesInfoProviderLis
         boolean providerChanged = false;
         for (RaceColumnDTO race : leaderboard.getRaceList()) {
             for (FleetDTO fleet : race.getFleets()) {
-                RaceIdentifier raceIdentifier = race.getRaceIdentifier(fleet);
+                RegattaAndRaceIdentifier raceIdentifier = race.getRaceIdentifier(fleet);
                 if (raceIdentifier != null && !raceTimesInfoProvider.containsRaceIdentifier(raceIdentifier)) {
                     raceTimesInfoProvider.addRaceIdentifier(raceIdentifier, false);
                     providerChanged = true;
@@ -208,7 +207,7 @@ public class TVViewPanel extends SimplePanel implements RaceTimesInfoProviderLis
     }
     
     @Override
-    public void raceTimesInfosReceived(Map<RaceIdentifier, RaceTimesInfoDTO> raceTimesInfo) {
+    public void raceTimesInfosReceived(Map<RegattaAndRaceIdentifier, RaceTimesInfoDTO> raceTimesInfo) {
         if (currentRace == null) {
             currentRace = getFirstStartedAndUnfinishedRace();
             if (currentRace != null) {
@@ -229,7 +228,7 @@ public class TVViewPanel extends SimplePanel implements RaceTimesInfoProviderLis
     
     private RegattaAndRaceIdentifier getFirstStartedAndUnfinishedRace() {
         RegattaAndRaceIdentifier firstStartedAndUnfinishedRace = null;
-        Map<RaceIdentifier, RaceTimesInfoDTO> raceTimesInfos = raceTimesInfoProvider.getRaceTimesInfos();
+        Map<RegattaAndRaceIdentifier, RaceTimesInfoDTO> raceTimesInfos = raceTimesInfoProvider.getRaceTimesInfos();
         for (RaceColumnDTO race : leaderboard.getRaceList()) {
             for (FleetDTO fleet : race.getFleets()) {
                 RegattaAndRaceIdentifier raceIdentifier = race.getRaceIdentifier(fleet);

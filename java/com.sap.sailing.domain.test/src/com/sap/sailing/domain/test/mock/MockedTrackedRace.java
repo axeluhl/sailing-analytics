@@ -676,4 +676,16 @@ public class MockedTrackedRace implements DynamicTrackedRace {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+    @Override
+    public boolean hasWindData() {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public boolean hasGPSData() {
+        // TODO Auto-generated method stub
+        return false;
+    }
 }
