@@ -49,7 +49,7 @@ public class SimulatorTimePanel extends RaceTimePanel {
             @Override
             public void onClick(ClickEvent event) {
                 boolean playable = false;
-                if (SimulatorTimePanel.this.getMax().after(SimulatorTimePanel.this.timer.getTime())) {
+                if ((SimulatorTimePanel.this.timer.getTime().before(SimulatorTimePanel.this.getMax()))&&(SimulatorTimePanel.this.getActive())) {
                     playable = true;
                 }
                 SimulatorTimePanel.this.timer.setAutoAdvance(playable);
@@ -73,6 +73,28 @@ public class SimulatorTimePanel extends RaceTimePanel {
 
     }
 
+    public void setMinMax(Date min, Date max, boolean fireEvent) {
+        assert min != null && max != null;
+
+        boolean changed = false;
+        if (!max.equals(this.max)) {
+            changed = true;
+            this.max = max;
+            timeSlider.setMaxValue(new Double(max.getTime()), fireEvent);
+        }
+        if (!min.equals(this.min)) {
+            changed = true;
+            this.min = min;
+            timeSlider.setMinValue(new Double(min.getTime()), fireEvent);
+            if (timeSlider.getCurrentValue() == null) {
+                timeSlider.setCurrentValue(new Double(min.getTime()), fireEvent);
+            }
+        }
+        if (changed) {
+            timeSlider.setStepSize(1000, fireEvent);
+        }
+    }
+
     @Override
     public void timeChanged(Date time) {
 
@@ -86,7 +108,8 @@ public class SimulatorTimePanel extends RaceTimePanel {
             }
 
             if (setMax) {
-                timer.setTime(getMax().getTime()); // setTime triggers another timeChanged event, so omit label-update on setMax
+                timer.setTime(getMax().getTime()); // setTime triggers another timeChanged event, so omit label-update
+                                                   // on setMax
             } else {
                 // update time slider, date & time label
                 long t = time.getTime();
@@ -95,10 +118,9 @@ public class SimulatorTimePanel extends RaceTimePanel {
                 if (lastReceivedDataTimepoint == null) {
                     timeLabel.setText(timeFormatter.format(time));
                 } else {
-                    timeLabel.setText(timeFormatter.format(time) + " ("
-                            + timeFormatter.format(lastReceivedDataTimepoint) + ")");
+                    timeLabel.setText(timeFormatter.format(time) + " (" + timeFormatter.format(lastReceivedDataTimepoint) + ")");
                 }
-                //System.out.println("" + timeLabel.getText());
+
             }
         }
     }

@@ -1,6 +1,7 @@
 package com.sap.sailing.simulator.impl;
 
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
 
 import com.sap.sailing.domain.base.SpeedWithBearing;
@@ -13,7 +14,9 @@ import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.simulator.Boundary;
+import com.sap.sailing.simulator.Path;
 import com.sap.sailing.simulator.TimedPosition;
+import com.sap.sailing.simulator.TimedPositionWithSpeed;
 import com.sap.sailing.simulator.WindControlParameters;
 import com.sap.sailing.simulator.WindFieldGenerator;
 
@@ -76,6 +79,37 @@ public abstract class WindFieldGeneratorImpl implements WindFieldGenerator {
         return positions;
     }
 
+    @Override
+    public Path getLine(TimedPosition seed) {
+        
+        int maxSteps = 100;
+        long timeStep = 10000; // in milliseconds
+        
+        TimePoint currentTime = seed.getTimePoint();
+        Position currentPosition = seed.getPosition();
+        LinkedList<TimedPositionWithSpeed> path = new LinkedList<TimedPositionWithSpeed>();
+        path.add(new TimedPositionWithSpeedImpl(currentTime, currentPosition, null));
+        
+        for(int s=0; s<maxSteps; s++) {
+         
+            Wind currentWind = this.getWind(new TimedPositionImpl(currentTime, currentPosition));
+            TimePoint middleTime = currentTime.plus(timeStep/2);
+            Position middlePosition = currentWind.travelTo(currentPosition, middleTime, currentTime);
+            Wind middleWind = this.getWind(new TimedPositionImpl(middleTime, middlePosition));
+            
+            TimePoint nextTime = currentTime.plus(timeStep);
+            Position nextPosition = middleWind.travelTo(currentPosition, nextTime, currentTime);
+            
+            path.add(new TimedPositionWithSpeedImpl(nextTime, nextPosition, null));
+            
+            currentTime = nextTime;
+            currentPosition = nextPosition;
+        }
+        
+        return new PathImpl(path, this);
+    }
+
+    
     @Override
     public void setPositionGrid(Position[][] positions) {
         this.positions = positions;

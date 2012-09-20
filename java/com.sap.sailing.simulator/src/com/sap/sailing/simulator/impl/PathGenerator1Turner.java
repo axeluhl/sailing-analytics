@@ -1,7 +1,6 @@
 package com.sap.sailing.simulator.impl;
 
 import java.util.LinkedList;
-import java.util.List;
 
 import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
@@ -10,13 +9,12 @@ import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.simulator.Path;
-import com.sap.sailing.simulator.PathGenerator;
 import com.sap.sailing.simulator.PolarDiagram;
 import com.sap.sailing.simulator.SimulationParameters;
 import com.sap.sailing.simulator.TimedPositionWithSpeed;
 import com.sap.sailing.simulator.WindFieldGenerator;
 
-public class PathGenerator1Turner implements PathGenerator {
+public class PathGenerator1Turner extends PathGeneratorBase {
 
     class result1Turn {
         public result1Turn(Path[] p, char s, int n) {
@@ -42,16 +40,6 @@ public class PathGenerator1Turner implements PathGenerator {
     
     public PathGenerator1Turner(SimulationParameters params) {
         simulationParameters = params;
-    }
-
-    @Override
-    public void setSimulationParameters(SimulationParameters params) {
-        simulationParameters = params;
-    }
-
-    @Override
-    public SimulationParameters getSimulationParameters() {
-        return simulationParameters;
     }
 
     public void setEvaluationParameters(boolean leftSideVal, Position startPoint, TimePoint startTime, long timeStep, int stepMax, double tolerance) {
@@ -142,6 +130,7 @@ public class PathGenerator1Turner implements PathGenerator {
             while ((stepLeft < step) && (!targetFound)) {
 
                 SpeedWithBearing currentWind = windField.getWind(new TimedPositionImpl(currentTime, currentPosition));
+                //System.out.println("Wind: " + currentWind.getKnots() + "kn, " + currentWind.getBearing().getDegrees() + "deg");
                 polarDiagram.setWind(currentWind);
                 if (leftSide) {
                     direction = polarDiagram.optimalDirectionsUpwind()[0];
@@ -149,8 +138,10 @@ public class PathGenerator1Turner implements PathGenerator {
                     direction = polarDiagram.optimalDirectionsUpwind()[1];
                 }
                 SpeedWithBearing currSpeed = polarDiagram.getSpeedAtBearing(direction);
+                //System.out.println("Boat: " + currSpeed.getKnots() + "kn, " + currSpeed.getBearing().getDegrees() + "deg");
                 nextTime = new MillisecondsTimePoint(currentTime.asMillis() + timeStep);
                 Position nextPosition = currSpeed.travelTo(currentPosition, currentTime, nextTime);
+                //System.out.println("Dist: " + currentPosition.getDistance(nextPosition).getMeters() + "m");
                 newDistance = nextPosition.getDistance(end).getMeters();
                 if (newDistance < minimumDistance) {
                     minimumDistance = newDistance;
@@ -241,14 +232,6 @@ public class PathGenerator1Turner implements PathGenerator {
         this.result = new result1Turn(paths, side, stepOfOverallMinimumDistance);
 
         return result.paths[0];
-
-    }
-
-    @Override
-    public List<TimedPositionWithSpeed> getPathEvenTimed(long millisecondsStep) {
-
-        Path path = this.getPath();
-        return path.getEvenTimedPoints(millisecondsStep);
 
     }
 

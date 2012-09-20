@@ -17,30 +17,19 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.simulator.Boundary;
 import com.sap.sailing.simulator.Path;
-import com.sap.sailing.simulator.PathGenerator;
 import com.sap.sailing.simulator.PolarDiagram;
 import com.sap.sailing.simulator.SimulationParameters;
 import com.sap.sailing.simulator.TimedPosition;
 import com.sap.sailing.simulator.TimedPositionWithSpeed;
 import com.sap.sailing.simulator.WindFieldGenerator;
 
-public class PathGeneratorDijkstra implements PathGenerator {
+public class PathGeneratorDijkstra extends PathGeneratorBase {
 
     // private static Logger logger = Logger.getLogger("com.sap.sailing");
     SimulationParameters simulationParameters;
 
     public PathGeneratorDijkstra(SimulationParameters params) {
         simulationParameters = params;
-    }
-
-    @Override
-    public void setSimulationParameters(SimulationParameters params) {
-        simulationParameters = params;
-    }
-
-    @Override
-    public SimulationParameters getSimulationParameters() {
-        return simulationParameters;
     }
 
     @Override
@@ -176,14 +165,6 @@ public class PathGeneratorDijkstra implements PathGenerator {
         }
 
         return new PathImpl(lst, windField);
-
-    }
-
-    @Override
-    public List<TimedPositionWithSpeed> getPathEvenTimed(long millisecondsStep) {
-
-        Path path = this.getPath();
-        return path.getEvenTimedPoints(millisecondsStep);
 
     }
 

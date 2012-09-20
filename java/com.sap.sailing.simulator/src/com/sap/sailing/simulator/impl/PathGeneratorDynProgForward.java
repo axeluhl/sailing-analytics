@@ -2,7 +2,6 @@ package com.sap.sailing.simulator.impl;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Vector;
 
 import com.sap.sailing.domain.base.SpeedWithBearing;
@@ -14,7 +13,6 @@ import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.simulator.Boundary;
 import com.sap.sailing.simulator.Path;
-import com.sap.sailing.simulator.PathGenerator;
 import com.sap.sailing.simulator.PolarDiagram;
 import com.sap.sailing.simulator.SimulationParameters;
 import com.sap.sailing.simulator.TimedPosition;
@@ -22,23 +20,13 @@ import com.sap.sailing.simulator.TimedPositionWithSpeed;
 import com.sap.sailing.simulator.WindField;
 import com.sap.sailing.simulator.WindFieldGenerator;
 
-public class PathGeneratorDynProgForward implements PathGenerator {
+public class PathGeneratorDynProgForward extends PathGeneratorBase {
 
     // private static Logger logger = Logger.getLogger("com.sap.sailing");
     SimulationParameters simulationParameters;
 
     public PathGeneratorDynProgForward(SimulationParameters params) {
         simulationParameters = params;
-    }
-
-    @Override
-    public void setSimulationParameters(SimulationParameters params) {
-        simulationParameters = params;
-    }
-
-    @Override
-    public SimulationParameters getSimulationParameters() {
-        return simulationParameters;
     }
 
     //
@@ -156,14 +144,14 @@ public class PathGeneratorDynProgForward implements PathGenerator {
         LinkedList<TimedPositionWithSpeed> optPath = new LinkedList<TimedPositionWithSpeed>();
 
         // initiate grid: since performance is good, make it somewhat larger than what we do with dijkstra
-        int spatialGridsizeVertical = 15; // 21; //(int) Math.round(1.5 *
+        int spatialGridsizeVertical = 31; //(int) Math.round(1.5 *
         // simulationParameters.getProperty("Djikstra.gridv[int]").intValue()); // number
         // of
         // vertical
         // grid
         // steps
         // Formula: sgridh ~ xscale*sgridv/tan(beatangle*pi/180)
-        int spatialGridsizeHorizontal = 121; // (25-1)*5; //(41-1)*5; //(int) Math.round(2 *
+        int spatialGridsizeHorizontal = 31*5; //(41-1)*5; //(int) Math.round(2 *
         // simulationParameters.getProperty("Djikstra.gridh[int]").intValue()); // number
         // of
         // horizontal
@@ -359,14 +347,6 @@ public class PathGeneratorDynProgForward implements PathGenerator {
         }
 
         return new PathImpl(optPath, windField);
-    }
-
-    @Override
-    public List<TimedPositionWithSpeed> getPathEvenTimed(long millisecondsStep) {
-
-        Path path = this.getPath();
-        return path.getEvenTimedPoints(millisecondsStep);
-
     }
 
 }

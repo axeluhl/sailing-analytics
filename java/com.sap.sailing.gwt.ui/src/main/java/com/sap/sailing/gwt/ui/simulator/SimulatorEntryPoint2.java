@@ -16,7 +16,7 @@ import com.sap.sailing.gwt.ui.client.SimulatorServiceAsync;
 public class SimulatorEntryPoint2 extends AbstractEntryPoint {
 
     private String titleName;
-    private String rightLabelName;
+    //private String rightLabelName;
     private SimulatorViewModes viewMode;
 
     private final SimulatorServiceAsync simulatorSvc = GWT.create(SimulatorService.class);
@@ -30,7 +30,7 @@ public class SimulatorEntryPoint2 extends AbstractEntryPoint {
     public void onModuleLoad() {
         super.onModuleLoad();
         titleName = "Strategy Simulator";
-        rightLabelName = "My Race";
+        //rightLabelName = "My Race";
         viewMode = SimulatorViewModes.ONESCREEN;
         
         checkUrlParameters();
@@ -88,7 +88,8 @@ public class SimulatorEntryPoint2 extends AbstractEntryPoint {
 
     private FlowPanel createLogoAndTitlePanel(SimulatorMainPanel2 simulatorPanel) {
 
-        LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(titleName, rightLabelName, stringMessages);
+        //LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(titleName, rightLabelName, stringMessages);
+        LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(titleName, null, stringMessages);
         logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
 
         return logoAndTitlePanel;

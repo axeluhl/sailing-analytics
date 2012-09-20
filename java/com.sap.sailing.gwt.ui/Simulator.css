@@ -70,6 +70,11 @@ table {
 	margin: 13px 0 0 12px;
 }
 
+.pioLogo {
+	float: right;
+	margin: 11px 20px 0 12px;
+}
+
 .sailingAnalyticsLabelPanel {
 	margin: 10px 0 0 0;
 }
