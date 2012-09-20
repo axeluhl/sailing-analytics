@@ -37,7 +37,6 @@ public class PathLegendCanvasOverlay extends CanvasOverlay {
     private final double rectHeight = 20;
 
     public String textColor = "Black";
-
     public String textFont = "normal 10pt UbuntuRegular";
     
     public PathLegendCanvasOverlay() {
@@ -60,14 +59,16 @@ public class PathLegendCanvasOverlay extends CanvasOverlay {
         Context2d context2d = canvas.getContext2d();
         context2d.setFont(textFont);
         TextMetrics txtmet;
+        txtmet = context2d.measureText("00:00:00");
+        double timewidth = txtmet.getWidth();
         double txtmaxwidth = 0.0;
         for (PathCanvasOverlay path : pathOverlays) {            
-             txtmet = context2d.measureText(path.name+" 00:00:00");
+             txtmet = context2d.measureText(path.name);
              txtmaxwidth = Math.max(txtmaxwidth, txtmet.getWidth());
         }
         for (PathCanvasOverlay path : pathOverlays) {
             drawRectangleWithText(xOffset, yOffset + (pathOverlays.size()-1-index) * rectHeight, path.pathColor, 
-                    path.name + " " + getFormattedTime(path.getPathTime()),txtmaxwidth);
+                    path.name, getFormattedTime(path.getPathTime()),txtmaxwidth,timewidth);
             index++;
         }
     }
@@ -124,16 +125,20 @@ public class PathLegendCanvasOverlay extends CanvasOverlay {
 
     }
 
-    protected void drawRectangleWithText(double x, double y, String color, String text, double textmaxwidth) {
+    protected void drawRectangleWithText(double x, double y, String color, String text, String time, double textmaxwidth, double timewidth) {
+
+        double offset = 3.0;
+        
         Context2d context2d = canvas.getContext2d();
         context2d.setFont(textFont);
         drawRectangle(x, y, color);
         context2d.setGlobalAlpha(0.65);
         context2d.setFillStyle("white");
-        context2d.fillRect(x + rectWidth, y, 10.0 + textmaxwidth, rectHeight);
+        context2d.fillRect(x + rectWidth, y, 15.0 + textmaxwidth + timewidth, rectHeight);
         context2d.setGlobalAlpha(1.0);
         context2d.setFillStyle(textColor);
-        context2d.fillText(text, x + rectWidth + 5.0, y + 12.0 + 3.0);
+        context2d.fillText(text, x + rectWidth + 5.0, y + 12.0 + offset);
+        context2d.fillText(time, x + rectWidth + textmaxwidth + 10.0, y + 12.0 + offset);
     }
 
     protected String getFormattedTime(long pathTime) {
