@@ -11,5 +11,5 @@ public interface RaceFetcher {
      */
     Object getTrackedRace(RegattaAndRaceIdentifier regattaNameAndRaceName);
 
-    Object getExistingTrackedRace(RaceIdentifier regattaNameAndRaceName);
+    Object getExistingTrackedRace(RegattaAndRaceIdentifier regattaNameAndRaceName);
 }

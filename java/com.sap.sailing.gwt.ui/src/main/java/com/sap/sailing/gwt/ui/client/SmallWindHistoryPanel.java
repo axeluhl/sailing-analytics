@@ -11,7 +11,6 @@ import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.gwt.ui.shared.PositionDTO;
@@ -30,7 +29,7 @@ public class SmallWindHistoryPanel extends FormPanel implements TimeListener, Ra
     private final WindIndicator[] windIndicators;
     private final Label selectedWindSourceLabel;
     private Date date;
-    private RaceIdentifier race;
+    private RegattaAndRaceIdentifier race;
     private final SailingServiceAsync sailingService;
     private final long millisecondStepsPerLabel;
     private final ErrorReporter errorReporter;

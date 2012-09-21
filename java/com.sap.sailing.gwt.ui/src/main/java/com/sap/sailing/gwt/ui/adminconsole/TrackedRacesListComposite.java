@@ -54,7 +54,6 @@ import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.URLFactory;
-import com.sap.sailing.gwt.ui.shared.BoatClassDTO;
 import com.sap.sailing.gwt.ui.shared.RaceDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.components.Component;
@@ -123,7 +122,7 @@ public class TrackedRacesListComposite extends SimplePanel implements Component<
 
     public TrackedRacesListComposite(final SailingServiceAsync sailingService, final ErrorReporter errorReporter,
             final RegattaRefresher regattaRefresher, RaceSelectionProvider raceSelectionProvider,
-            StringMessages stringMessages, boolean hasMultiSelection) {
+            final StringMessages stringMessages, boolean hasMultiSelection) {
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
         this.regattaRefresher = regattaRefresher;
@@ -166,7 +165,7 @@ public class TrackedRacesListComposite extends SimplePanel implements Component<
         TextColumn<RaceDTO> regattaNameColumn = new TextColumn<RaceDTO>() {
             @Override
             public String getValue(RaceDTO raceDTO) {
-                return raceDTO.getRegatta().name;
+                return raceDTO.getRegattaName();
             }
         };
         regattaNameColumn.setSortable(true);
@@ -174,15 +173,13 @@ public class TrackedRacesListComposite extends SimplePanel implements Component<
         columnSortHandler.setComparator(regattaNameColumn, new Comparator<RaceDTO>() {
             @Override
             public int compare(RaceDTO t1, RaceDTO t2) {
-                RegattaDTO eventOne = t1.getRegatta();
-                RegattaDTO eventTwo = t2.getRegatta();
+                String regatta1Name = t1.getRegattaName();
+                String regatta2Name = t2.getRegattaName();
                 boolean ascending = isSortedAscending();
-                if (eventOne.name.equals(eventTwo.name)) {
+                if (regatta1Name.equals(regatta2Name)) {
                     return 0;
                 }
-                int val = -1;
-                val = (eventOne != null && eventTwo != null && ascending) ? (eventOne.name.compareTo(eventTwo.name))
-                        : -(eventTwo.name.compareTo(eventOne.name));
+                int val = ascending ? regatta1Name.compareTo(regatta2Name) : -(regatta2Name.compareTo(regatta1Name));
                 return val;
             }
 
@@ -195,8 +192,7 @@ public class TrackedRacesListComposite extends SimplePanel implements Component<
         TextColumn<RaceDTO> boatClassNameColumn = new TextColumn<RaceDTO>() {
             @Override
             public String getValue(RaceDTO raceDTO) {
-                final BoatClassDTO boatClass = raceDTO.getRegatta().boatClass;
-                return boatClass == null ? "" : boatClass.name;
+                return raceDTO.boatClass == null ? "" : raceDTO.boatClass;
             }
         };
         boatClassNameColumn.setSortable(true);
@@ -204,16 +200,13 @@ public class TrackedRacesListComposite extends SimplePanel implements Component<
         columnSortHandler.setComparator(boatClassNameColumn, new Comparator<RaceDTO>() {
             @Override
             public int compare(RaceDTO t1, RaceDTO t2) {
-                RegattaDTO regattaOne = t1.getRegatta();
-                RegattaDTO regattaTwo = t2.getRegatta();
+                String boatClass1 = t1.boatClass;
+                String boatClass2 = t2.boatClass;
                 boolean ascending = isSortedAscending();
-                if (regattaOne.boatClass.name.equals(regattaTwo.boatClass.name)) {
+                if (boatClass1.equals(boatClass2)) {
                     return 0;
                 }
-                int val = -1;
-                val = (regattaOne != null && regattaTwo != null && ascending) ? (regattaOne.boatClass.name
-                        .compareTo(regattaTwo.boatClass.name)) : -(regattaTwo.boatClass.name
-                        .compareTo(regattaOne.boatClass.name));
+                int val = ascending ? boatClass1.compareTo(boatClass2) : -(boatClass2.compareTo(boatClass1));
                 return val;
             }
 
@@ -227,7 +220,7 @@ public class TrackedRacesListComposite extends SimplePanel implements Component<
         Column<RaceDTO, SafeHtml> raceNameColumn = new Column<RaceDTO, SafeHtml>(anchorCell) {
             @Override
             public SafeHtml getValue(RaceDTO raceDTO) {
-                if (raceDTO.currentlyTracked == true) {
+                if (raceDTO.isTracked == true) {
                     RegattaNameAndRaceName raceIdentifier = (RegattaNameAndRaceName) raceDTO.getRaceIdentifier();
                     String debugParam = Window.Location.getParameter("gwt.codesvr");
                     String link = URLFactory.INSTANCE.encode("/gwt/RaceBoard.html?raceName="
@@ -294,18 +287,38 @@ public class TrackedRacesListComposite extends SimplePanel implements Component<
         TextColumn<RaceDTO> raceTrackedColumn = new TextColumn<RaceDTO>() {
             @Override
             public String getValue(RaceDTO raceDTO) {
-                if (raceDTO.currentlyTracked == true)
+                if (raceDTO.isTracked == true)
                     return "tracked";
 
                 return "";
             }
         };
 
+        TextColumn<RaceDTO> hasWindDataColumn = new TextColumn<RaceDTO>() {
+            @Override
+            public String getValue(RaceDTO raceDTO) {
+                if (raceDTO.isTracked && raceDTO.trackedRace.hasWindData == true)
+                    return stringMessages.yes();
+                else
+                    return stringMessages.no();
+            }
+        };
+
+        TextColumn<RaceDTO> hasGPSDataColumn = new TextColumn<RaceDTO>() {
+            @Override
+            public String getValue(RaceDTO raceDTO) {
+                if (raceDTO.isTracked && raceDTO.trackedRace.hasGPSData == true)
+                    return stringMessages.yes();
+                else
+                    return stringMessages.no();
+            }
+        };
+
         TextColumn<RaceDTO> raceLiveDelayColumn = new TextColumn<RaceDTO>() {
             @Override
             public String getValue(RaceDTO raceDTO) {
-                if (raceDTO.delayToLiveInMs > 0)
-                    return "" + raceDTO.delayToLiveInMs / 1000;
+                if (raceDTO.trackedRace.delayToLiveInMs > 0)
+                    return "" + raceDTO.trackedRace.delayToLiveInMs / 1000;
 
                 return "";
             }
@@ -316,6 +329,9 @@ public class TrackedRacesListComposite extends SimplePanel implements Component<
         raceTable.addColumn(raceNameColumn, stringMessages.race());
         raceTable.addColumn(raceStartColumn, stringMessages.startTime());
         raceTable.addColumn(raceTrackedColumn, stringMessages.tracked());
+        raceTable.addColumn(hasWindDataColumn, "Wind data");
+        raceTable.addColumn(hasGPSDataColumn, "GPS data");
+        
         raceTable.addColumn(raceLiveDelayColumn, stringMessages.delayInSeconds());
         raceTable.setWidth("300px");
         raceTable.setSelectionModel(selectionModel);
@@ -364,7 +380,7 @@ public class TrackedRacesListComposite extends SimplePanel implements Component<
             @Override
             public void onClick(ClickEvent click) {
                 for (RaceDTO selectedRace : getSelectedRaces()) {
-                    if (selectedRace.currentlyTracked) {
+                    if (selectedRace.isTracked) {
                         stopTrackingRace(selectedRace);
                     }
                 }
@@ -381,7 +397,7 @@ public class TrackedRacesListComposite extends SimplePanel implements Component<
             }
         });
         trackedRacesButtonPanel.add(btnRefresh);
-
+        
         btnSetDelayToLive = new Button(stringMessages.setDelayToLive() + "...");
         btnSetDelayToLive.addClickHandler(new ClickHandler() {
             @Override
@@ -425,11 +441,11 @@ public class TrackedRacesListComposite extends SimplePanel implements Component<
         return result;
     }
 
-    public void selectRaceByIdentifier(RaceIdentifier raceIdentifier) {
+    public void selectRaceByIdentifier(RegattaAndRaceIdentifier raceIdentifier) {
         if (raceList != null) {
             for (RaceDTO race : raceList.getList()) {
-                RegattaDTO event = race.getRegatta();
-                if (event.name.equals(raceIdentifier.getRegattaName()) && race.name.equals(raceIdentifier.getRaceName())) {
+                String regattaName = race.getRegattaName();
+                if (regattaName.equals(raceIdentifier.getRegattaName()) && race.name.equals(raceIdentifier.getRaceName())) {
                     dontFireNextSelectionChangeEvent = true;
                     selectionModel.setSelected(race, true);
                     break;
@@ -491,19 +507,19 @@ public class TrackedRacesListComposite extends SimplePanel implements Component<
     }
 
     private void stopTrackingRace(final RaceDTO race) {
-        final RegattaNameAndRaceName regattaNameAndRaceName = (RegattaNameAndRaceName) race.getRaceIdentifier();
-        sailingService.stopTrackingRace(regattaNameAndRaceName, new AsyncCallback<Void>() {
+        final RegattaAndRaceIdentifier regattaAndRaceIdentifier = race.getRaceIdentifier();
+        sailingService.stopTrackingRace(regattaAndRaceIdentifier, new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError("Exception trying to stop tracking race " + race.name + "in event "
-                        + race.getRegatta().name + ": " + caught.getMessage());
+                        + race.getRegattaName() + ": " + caught.getMessage());
             }
 
             @Override
             public void onSuccess(Void result) {
                 regattaRefresher.fillRegattas();
                 for (TrackedRaceChangedListener listener : raceIsTrackedRaceChangeListener) {
-                    listener.changeTrackingRace(regattaNameAndRaceName, false);
+                    listener.changeTrackingRace(regattaAndRaceIdentifier, false);
                 }
             }
         });
@@ -515,8 +531,8 @@ public class TrackedRacesListComposite extends SimplePanel implements Component<
                 new AsyncCallback<Void>() {
                     @Override
                     public void onFailure(Throwable caught) {
-                        errorReporter.reportError("Exception trying to stop tracking race " + race.name + "in event "
-                                + race.getRegatta().name + ": " + caught.getMessage());
+                        errorReporter.reportError("Exception trying to stop tracking race " + race.name + "in regatta "
+                                + race.getRegattaName() + ": " + caught.getMessage());
                     }
 
                     @Override
@@ -538,8 +554,8 @@ public class TrackedRacesListComposite extends SimplePanel implements Component<
                 boolean failed = false;
                 for (String word : wordsToFilter) {
                     String textAsUppercase = word.toUpperCase().trim();
-                    if (!raceDTO.getRegatta().name.toUpperCase().contains(textAsUppercase)
-                            && !raceDTO.getRegatta().boatClass.name.toUpperCase().contains(textAsUppercase)
+                    if (!raceDTO.getRegattaName().toUpperCase().contains(textAsUppercase)
+                            && !raceDTO.boatClass.toUpperCase().contains(textAsUppercase)
                             && !raceDTO.name.toUpperCase().contains(textAsUppercase)) {
                         failed = true;
                         break;

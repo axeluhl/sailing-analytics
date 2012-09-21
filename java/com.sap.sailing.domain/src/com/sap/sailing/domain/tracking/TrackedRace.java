@@ -358,7 +358,20 @@ public interface TrackedRace extends Serializable {
      * time as the direction the wind comes from.
      */
     boolean raceIsKnownToStartUpwind();
-    
+
+    /**
+     * Many calculations require valid wind data. In order to prevent NoWindException's to be handled by those calculation 
+     * this method can be used to check whether the tracked race has sufficient wind information available.
+     * @return <code>true</code> if {@link #getWind(Position, TimePoint)} delivers a (not null) wind fix.
+     */
+    boolean hasWindData();
+
+    /**
+     * 
+     * @return <code>true</code> if at least one GPS fix for one of the competitors is available for this race.
+     */
+    boolean hasGPSData();
+
     /**
      * Adds a race change listener to the set of listeners that will be notified about changes to this race.
      * The listener won't be serialized together with this object.

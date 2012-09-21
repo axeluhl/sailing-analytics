@@ -3,16 +3,16 @@ package com.sap.sailing.gwt.ui.actions;
 import java.util.Date;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.sap.sailing.domain.common.RaceIdentifier;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.shared.CourseDTO;
 
 public class GetCoursePositionsAction extends DefaultAsyncAction<CourseDTO> {
     private final SailingServiceAsync sailingService;
-    private final RaceIdentifier raceIdentifier;
+    private final RegattaAndRaceIdentifier raceIdentifier;
     private final Date date;
 
-    public GetCoursePositionsAction(SailingServiceAsync sailingService, RaceIdentifier raceIdentifier, Date date,
+    public GetCoursePositionsAction(SailingServiceAsync sailingService, RegattaAndRaceIdentifier raceIdentifier, Date date,
             AsyncCallback<CourseDTO> callback) {
         super(callback);
         this.sailingService = sailingService;

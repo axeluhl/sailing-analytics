@@ -827,10 +827,10 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
     }
 
     @Override
-    public void changeTrackingRace(RegattaNameAndRaceName regattaNameAndRaceName, boolean isTracked) {
+    public void changeTrackingRace(RegattaAndRaceIdentifier regattaAndRaceIdentifier, boolean isTracked) {
         for (Pair<RaceColumnDTO, FleetDTO> raceColumnAndFleetName : raceColumnAndFleetList.getList()) {
-            if (raceColumnAndFleetName.getA().getRaceColumnName().equals(regattaNameAndRaceName.getRaceName())) {
-                raceColumnAndFleetName.getA().setRaceIdentifier(raceColumnAndFleetName.getB(), regattaNameAndRaceName);
+            if (raceColumnAndFleetName.getA().getRaceColumnName().equals(regattaAndRaceIdentifier.getRaceName())) {
+                raceColumnAndFleetName.getA().setRaceIdentifier(raceColumnAndFleetName.getB(), regattaAndRaceIdentifier);
             }
         }
         raceColumnAndFleetList.refresh();

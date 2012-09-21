@@ -339,7 +339,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     }
 
     @Override
-    public void raceTimesInfosReceived(Map<RaceIdentifier, RaceTimesInfoDTO> raceTimesInfos) {
+    public void raceTimesInfosReceived(Map<RegattaAndRaceIdentifier, RaceTimesInfoDTO> raceTimesInfos) {
         this.lastRaceTimesInfo = raceTimesInfos.get(selectedRaces.get(0));        
     }
 
@@ -347,7 +347,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     public void timeChanged(final Date date) {
         if (date != null) {
             if (selectedRaces != null && !selectedRaces.isEmpty()) {
-                RaceIdentifier race = selectedRaces.get(selectedRaces.size() - 1);
+                RegattaAndRaceIdentifier race = selectedRaces.get(selectedRaces.size() - 1);
                 final Iterable<CompetitorDTO> competitorsToShow = getCompetitorsToShow();
                 
                 if (race != null) {
@@ -1089,7 +1089,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                     new DegreeBearingImpl(lastFix.wind.dampenedTrueWindFromDeg)).getDegrees()) + " "+stringMessages.degreesShort()));
         }
         if (!selectedRaces.isEmpty()) {
-            RaceIdentifier race = selectedRaces.get(selectedRaces.size() - 1);
+            RegattaAndRaceIdentifier race = selectedRaces.get(selectedRaces.size() - 1);
             if (race != null) {
                 Map<CompetitorDTO, Date> from = new HashMap<CompetitorDTO, Date>();
                 from.put(competitorDTO, fixes.get(competitorDTO).get(firstShownFix.get(competitorDTO)).timepoint);

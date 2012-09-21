@@ -17,7 +17,7 @@ import org.moxieapps.gwt.highcharts.client.plotOptions.SeriesPlotOptions;
 
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.ui.SimplePanel;
-import com.sap.sailing.domain.common.RaceIdentifier;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
@@ -43,7 +43,7 @@ public abstract class RaceChart extends SimplePanel implements RaceTimesInfoProv
     protected Date minTimepoint;
     protected Date maxTimepoint;
     
-    protected RaceIdentifier selectedRaceIdentifier;
+    protected RegattaAndRaceIdentifier selectedRaceIdentifier;
     protected RaceTimesInfoDTO lastRaceTimesInfo;
 
     protected final DateTimeFormat dateFormat = DateTimeFormat.getFormat("HH:mm:ss");
@@ -73,7 +73,7 @@ public abstract class RaceChart extends SimplePanel implements RaceTimesInfoProv
     }
     
     @Override
-    public void raceTimesInfosReceived(Map<RaceIdentifier, RaceTimesInfoDTO> raceTimesInfos) {
+    public void raceTimesInfosReceived(Map<RegattaAndRaceIdentifier, RaceTimesInfoDTO> raceTimesInfos) {
         this.lastRaceTimesInfo = raceTimesInfos.get(selectedRaceIdentifier);
         
         Pair<Date, Date> raceMinMax = RaceTimesCalculationUtil.caluclateRaceMinMax(timer, this.lastRaceTimesInfo);
