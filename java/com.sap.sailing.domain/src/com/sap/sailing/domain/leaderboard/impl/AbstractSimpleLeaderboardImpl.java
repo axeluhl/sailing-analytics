@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
@@ -69,6 +70,11 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     private final Map<Competitor, Double> carriedPoints;
 
     private RaceColumnListeners raceColumnListeners;
+    
+    /**
+     * A synchronized set that manages the difference between {@link #getCompetitors()} and {@link #getAllCompetitors()}.
+     */
+    private final Set<Competitor> suppressedCompetitors;
 
     /**
      * A leaderboard entry representing a snapshot of a cell at a given time point for a single race/competitor.
@@ -136,6 +142,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
         this.scoreCorrection = scoreCorrection;
         this.displayNames = new HashMap<Competitor, String>();
         this.resultDiscardingRule = resultDiscardingRule;
+        this.suppressedCompetitors = Collections.synchronizedSet(new HashSet<Competitor>());
         raceColumnListeners = new RaceColumnListeners();
     }
 
@@ -582,5 +589,36 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
 
     protected RaceColumnListeners getRaceColumnListeners() {
         return raceColumnListeners;
+    }
+    
+    @Override
+    public Iterable<Competitor> getCompetitors() {
+        Set<Competitor> result = new HashSet<>();
+        for (Competitor competitor : getAllCompetitors()) {
+            if (!isSuppressed(competitor)) {
+                result.add(competitor);
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Defines the difference between {@link #getCompetitors} and {@link #getAllCompetitors}. If a competitor is suppressed,
+     * it won't participate in the scoring process, particularly because it isn't considered by {@link #getCompetitorsFromBestToWorst(TimePoint)}
+     * nor {@link #getCompetitorsFromBestToWorst(RaceColumn, TimePoint)}.
+     */
+    private boolean isSuppressed(Competitor competitor) {
+        // no synchronization required because we use a synchronized set as implementation
+        return suppressedCompetitors.contains(competitor);
+    }
+    
+    @Override
+    public void setSuppressed(Competitor competitor, boolean suppressed) {
+        // no synchronization required because we use a synchronized set as implementation
+        if (suppressed) {
+            suppressedCompetitors.add(competitor);
+        } else {
+            suppressedCompetitors.remove(competitor);
+        }
     }
 }

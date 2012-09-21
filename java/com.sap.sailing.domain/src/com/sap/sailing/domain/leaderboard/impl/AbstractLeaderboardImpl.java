@@ -75,7 +75,7 @@ public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardI
     }
 
     @Override
-    public synchronized Iterable<Competitor> getCompetitors() {
+    public synchronized Iterable<Competitor> getAllCompetitors() {
         if (competitorsCache == null) {
             Set<Competitor> result = new HashSet<Competitor>();
             for (TrackedRace r : getTrackedRaces()) {

@@ -92,7 +92,7 @@ public abstract class AbstractMetaLeaderboard extends AbstractSimpleLeaderboardI
     }
 
     @Override
-    public Iterable<Competitor> getCompetitors() {
+    public Iterable<Competitor> getAllCompetitors() {
         Set<Competitor> result = new HashSet<Competitor>();
         for (Leaderboard leaderboard : getLeaderboards()) {
             Util.addAll(leaderboard.getCompetitors(), result);

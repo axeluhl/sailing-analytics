@@ -61,9 +61,27 @@ public interface Leaderboard extends Named {
     
     /**
      * Obtains the unique set of {@link Competitor} objects from all {@link TrackedRace}s currently linked to this
-     * leaderboard.
+     * leaderboard, with suppressed competitors removed. See also {@link #getAllCompetitors()} which also returns
+     * the suppressed competitors.
      */
     Iterable<Competitor> getCompetitors();
+    
+    /**
+     * A leaderboard may suppress particular competitors which are then not assigned a score and shall not be displayed
+     * in a regular view of the leaderboard. Editors for leaderboards shall, though, also display the suppressed competitors
+     * together with a visual indication showing which competitors are currently suppressed. The "suppressed-state" of a
+     * competitor can change over the life cycle of a leaderboard. A typical use case for suppressing a competitor is
+     * removing one-time entries from a series (meta-)leaderboard or suppressing a camera boat in scoring.
+     */
+    Iterable<Competitor> getAllCompetitors();
+    
+    /**
+     * Can be used to exclude competitor from regular views of this leaderboard as well as from the scoring process.
+     * As a result of suppressing a competitor, it will no longer result from calls to {@link #getCompetitors} nor to
+     * {@link #getCompetitorsFromBestToWorst(TimePoint)} nor {@link #getCompetitorsFromBestToWorst(RaceColumn, TimePoint)}.
+     * It will, however, continue to be returned from {@link #getAllCompetitors()}.
+     */
+    void setSuppressed(Competitor competitor, boolean suppressed);
     
     /**
      * Returns the first fleet found in the sequence of this leaderboard's {@link #getRaceColumns() race columns}'
