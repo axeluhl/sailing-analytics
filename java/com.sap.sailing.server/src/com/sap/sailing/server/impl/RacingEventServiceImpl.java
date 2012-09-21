@@ -331,7 +331,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
                 // uses the default fleet as the single fleet for the new column
                 RaceColumn result = ((FlexibleLeaderboard) leaderboard).addRaceColumn(columnName, medalRace,
                         leaderboard.getFleet(null));
-                updateStoredFlexibleLeaderboard((FlexibleLeaderboard) leaderboard);
+                updateStoredLeaderboard((FlexibleLeaderboard) leaderboard);
                 return result;
             } else {
                 throw new IllegalArgumentException("Leaderboard named " + leaderboardName + " is not a FlexibleLeaderboard");
@@ -346,7 +346,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
         if (leaderboard != null && leaderboard instanceof FlexibleLeaderboard) {
             ((FlexibleLeaderboard) leaderboard).moveRaceColumnUp(columnName);
-            updateStoredFlexibleLeaderboard((FlexibleLeaderboard) leaderboard);
+            updateStoredLeaderboard((FlexibleLeaderboard) leaderboard);
         } else {
             throw new IllegalArgumentException("Leaderboard named " + leaderboardName + " not found");
         }
@@ -357,7 +357,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
         if (leaderboard != null && leaderboard instanceof FlexibleLeaderboard) {
             ((FlexibleLeaderboard) leaderboard).moveRaceColumnDown(columnName);
-            updateStoredFlexibleLeaderboard((FlexibleLeaderboard) leaderboard);
+            updateStoredLeaderboard((FlexibleLeaderboard) leaderboard);
         } else {
             throw new IllegalArgumentException("Leaderboard named " + leaderboardName + " not found");
         }
@@ -368,7 +368,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
         if (leaderboard != null && leaderboard instanceof FlexibleLeaderboard) {
             ((FlexibleLeaderboard) leaderboard).removeRaceColumn(columnName);
-            updateStoredFlexibleLeaderboard((FlexibleLeaderboard) leaderboard);
+            updateStoredLeaderboard((FlexibleLeaderboard) leaderboard);
         } else {
             throw new IllegalArgumentException("Leaderboard named "+leaderboardName+" not found");
         }
@@ -379,7 +379,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
         if (leaderboard != null) {
             leaderboard.getRaceColumnByName(oldColumnName).setName(newColumnName);
-            updateStoredFlexibleLeaderboard((FlexibleLeaderboard) leaderboard);
+            updateStoredLeaderboard((FlexibleLeaderboard) leaderboard);
         } else {
             throw new IllegalArgumentException("Leaderboard named "+leaderboardName+" not found");
         }
@@ -409,7 +409,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     }
     
     @Override
-    public void updateStoredFlexibleLeaderboard(FlexibleLeaderboard leaderboard) {
+    public void updateStoredLeaderboard(Leaderboard leaderboard) {
         mongoObjectFactory.storeLeaderboard(leaderboard);
         syncGroupsAfterLeaderboardChange(leaderboard, true);
     }
@@ -1076,7 +1076,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
                         }
                     }
                     if (changed) {
-                        updateStoredFlexibleLeaderboard((FlexibleLeaderboard) leaderboard);
+                        updateStoredLeaderboard((FlexibleLeaderboard) leaderboard);
                     }
                 }
             }

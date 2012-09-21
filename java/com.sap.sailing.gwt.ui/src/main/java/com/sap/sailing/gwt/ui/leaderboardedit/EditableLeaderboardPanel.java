@@ -529,8 +529,22 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
             public FieldUpdater<LeaderboardRowDTO, String> getFieldUpdater() {
                 return new FieldUpdater<LeaderboardRowDTO, String>() {
                     @Override
-                    public void update(int index, LeaderboardRowDTO object, String value) {
-                        // TODO called when the user clicked the button; suppress the competitor in the current leaderboard
+                    public void update(int index, final LeaderboardRowDTO row, String value) {
+                        getSailingService().suppressCompetitorInLeaderboard(getLeaderboardName(), row.competitor.id,
+                                /* suppressed */ true,
+                                new AsyncCallback<Void>() {
+                                    @Override
+                                    public void onFailure(Throwable caught) {
+                                        getErrorReporter().reportError("Error trying to suppress competitor "+row.competitor.name+
+                                                " in leaderboard "+getLeaderboardName());
+                                    }
+
+                                    @Override
+                                    public void onSuccess(Void result) {
+                                        // force a reload of the entire editable leaderboard to hide the now suppressed competitor
+                                        timeChanged(getLeaderboardDisplayDate());
+                                    }
+                        });
                     }
                 };
             }

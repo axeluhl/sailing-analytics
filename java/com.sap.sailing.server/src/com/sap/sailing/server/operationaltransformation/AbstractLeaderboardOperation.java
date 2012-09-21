@@ -27,7 +27,7 @@ public abstract class AbstractLeaderboardOperation<ResultType> extends AbstractR
 
     protected void updateStoredLeaderboard(RacingEventService toState, Leaderboard leaderboard) {
         if (leaderboard instanceof FlexibleLeaderboard) {
-            toState.updateStoredFlexibleLeaderboard((FlexibleLeaderboard) leaderboard);
+            toState.updateStoredLeaderboard((FlexibleLeaderboard) leaderboard);
         } else if (leaderboard instanceof RegattaLeaderboardImpl) {
             toState.updateStoredRegattaLeaderboard((RegattaLeaderboard) leaderboard);
         }

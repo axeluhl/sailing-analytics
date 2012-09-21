@@ -90,7 +90,7 @@ public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardI
     
     @Override
     public Competitor getCompetitorByIdAsString(String idAsString) {
-        for (Competitor competitor : getCompetitors()) {
+        for (Competitor competitor : getAllCompetitors()) {
             if (competitor.getId().toString().equals(idAsString)) {
                 return competitor;
             }

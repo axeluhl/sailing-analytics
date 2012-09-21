@@ -66,6 +66,11 @@ public abstract class AbstractMetaLeaderboard extends AbstractSimpleLeaderboardI
         public void carriedPointsChanged(Competitor competitor, Double oldCarriedPoints, Double newCarriedPoints) {
             getScoreCorrection().notifyListenersAboutCarriedPointsChange(competitor, oldCarriedPoints, newCarriedPoints);
         }
+
+        @Override
+        public void isSuppressedChanged(Competitor competitor, boolean newIsSuppressed) {
+            getScoreCorrection().notifyListenersAboutIsSuppressedChange(competitor, newIsSuppressed);
+        }
     }
     
     public AbstractMetaLeaderboard(String name, ScoringScheme scoringScheme, ThresholdBasedResultDiscardingRule resultDiscardingRule) {

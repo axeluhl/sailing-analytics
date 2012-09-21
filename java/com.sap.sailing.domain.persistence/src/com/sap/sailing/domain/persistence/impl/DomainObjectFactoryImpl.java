@@ -199,6 +199,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
      */
     private Leaderboard loadLeaderboard(DBObject dbLeaderboard, RegattaRegistry regattaRegistry, LeaderboardRegistry leaderboardRegistry,
             LeaderboardGroup groupForMetaLeaderboard) {
+        // TODO load suppressed competitors
         Leaderboard result = null;
         String leaderboardName = (String) dbLeaderboard.get(FieldNames.LEADERBOARD_NAME.name());
         if (leaderboardRegistry != null) {

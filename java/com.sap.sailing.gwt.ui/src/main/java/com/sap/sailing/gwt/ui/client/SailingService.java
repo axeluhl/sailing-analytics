@@ -263,4 +263,6 @@ public interface SailingService extends RemoteService {
     void removeLeaderboardColumns(String leaderboardName, List<String> columnsToRemove);
 
     StrippedLeaderboardDTO getLeaderboard(String leaderboardName);
+
+    void suppressCompetitorInLeaderboard(String leaderboardName, String competitorIdAsString, boolean suppressed);
 }

@@ -431,4 +431,6 @@ public interface SailingServiceAsync {
 
     void getLeaderboard(String leaderboardName, AsyncCallback<StrippedLeaderboardDTO> callback);
 
+    void suppressCompetitorInLeaderboard(String leaderboardName, String competitorIdAsString, boolean suppressed, AsyncCallback<Void> asyncCallback);
+
 }

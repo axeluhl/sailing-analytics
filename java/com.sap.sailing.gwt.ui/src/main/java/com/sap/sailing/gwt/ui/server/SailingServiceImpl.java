@@ -201,6 +201,7 @@ import com.sap.sailing.server.operationaltransformation.RenameLeaderboard;
 import com.sap.sailing.server.operationaltransformation.RenameLeaderboardColumn;
 import com.sap.sailing.server.operationaltransformation.RenameLeaderboardGroup;
 import com.sap.sailing.server.operationaltransformation.SetRaceIsKnownToStartUpwind;
+import com.sap.sailing.server.operationaltransformation.SetSuppressedFlagForCompetitorInLeaderboard;
 import com.sap.sailing.server.operationaltransformation.SetWindSourcesToExclude;
 import com.sap.sailing.server.operationaltransformation.StopTrackingRace;
 import com.sap.sailing.server.operationaltransformation.StopTrackingRegatta;
@@ -2035,6 +2036,11 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     }
 
     @Override
+    public void suppressCompetitorInLeaderboard(String leaderboardName, String competitorIdAsString, boolean suppressed) {
+        getService().apply(new SetSuppressedFlagForCompetitorInLeaderboard(leaderboardName, competitorIdAsString, suppressed));
+    }
+
+    @Override
     public boolean connectTrackedRaceToLeaderboardColumn(String leaderboardName, String raceColumnName, String fleetName, RaceIdentifier raceIdentifier) {
         return getService().apply(new ConnectTrackedRaceToLeaderboardColumn(leaderboardName, raceColumnName, fleetName, raceIdentifier));
     }
@@ -2726,4 +2732,5 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             fregService.registerResultUrl(new URL(result));
         }
     }
+
 }
