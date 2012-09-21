@@ -277,6 +277,7 @@ implements CompetitorSelectionChangeListener, RequiresResize {
                                 chart.getXAxis().setMax(maxTimepoint.getTime());
 
                                 drawChartData();
+                                chart.redraw();
                                 hideLoading();
                             }
                         });
@@ -596,6 +597,9 @@ implements CompetitorSelectionChangeListener, RequiresResize {
     public void onResize() {
         if(getChartData() != null) {
             chart.setSizeToMatchContainer();
+            // it's important here to recall the redraw method, otherwise the bug fix for wrong checkbox positions (nativeAdjustCheckboxPosition)
+            // in the BaseChart class would not be called 
+            chart.redraw();
         }
     }
 
