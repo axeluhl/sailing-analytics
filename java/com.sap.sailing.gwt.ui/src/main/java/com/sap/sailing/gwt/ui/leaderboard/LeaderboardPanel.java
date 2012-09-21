@@ -398,6 +398,10 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             return object;
         }
 
+        protected void defaultRender(Context context, LeaderboardRowDTO object, SafeHtmlBuilder sb) {
+            super.render(context, object, sb);
+        }
+        
         @Override
         public void render(Context context, LeaderboardRowDTO object, SafeHtmlBuilder sb) {
             String competitorColor = LeaderboardPanel.this.competitorSelectionProvider.getColor(object.competitor);

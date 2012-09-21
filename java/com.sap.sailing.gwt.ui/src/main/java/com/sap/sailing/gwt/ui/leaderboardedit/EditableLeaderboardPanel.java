@@ -95,22 +95,14 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
     }
     
     private class EditableCompetitorColumn extends CompetitorColumn {
-        @Override
-        public void render(Context context, LeaderboardRowDTO row, SafeHtmlBuilder sb) {
-            final boolean isDisplayNameSet = getLeaderboard().isDisplayNameSet(row.competitor);
-            if (isDisplayNameSet) {
-                sb.appendHtmlConstant("<b>");
-            }
-            super.render(context, row, sb);
-            if (isDisplayNameSet) {
-                sb.appendHtmlConstant("</b>");
-            }
-        }
-        
         public EditableCompetitorColumn(List<HasCell<LeaderboardRowDTO, ?>> cells) {
             super(new CompositeCell<LeaderboardRowDTO>(cells));
         }
 
+        @Override
+        public void render(Context context, LeaderboardRowDTO object, SafeHtmlBuilder sb) {
+            super.defaultRender(context, object, sb);
+        }
     }
     
     private FieldUpdater<LeaderboardRowDTO, String> createCompetitorColumnFieldUpdater(final EditTextCell cell) {
@@ -528,6 +520,27 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
     private List<HasCell<LeaderboardRowDTO, ?>> getCellListForEditableCompetitorColumn() {
         List<HasCell<LeaderboardRowDTO, ?>> result = new ArrayList<HasCell<LeaderboardRowDTO, ?>>();
         result.add(new HasCell<LeaderboardRowDTO, String>() {
+            @Override
+            public Cell<String> getCell() {
+                return new ButtonCell();
+            }
+
+            @Override
+            public FieldUpdater<LeaderboardRowDTO, String> getFieldUpdater() {
+                return new FieldUpdater<LeaderboardRowDTO, String>() {
+                    @Override
+                    public void update(int index, LeaderboardRowDTO object, String value) {
+                        // TODO called when the user clicked the button; suppress the competitor in the current leaderboard
+                    }
+                };
+            }
+
+            @Override
+            public String getValue(LeaderboardRowDTO object) {
+                return getStringMessages().suppress();
+            }
+        });
+        result.add(new HasCell<LeaderboardRowDTO, String>() {
                     @Override
                     public EditTextCell getCell() {
                         return new EditTextCell();
@@ -539,29 +552,17 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                     }
 
                     @Override
-                    public String getValue(LeaderboardRowDTO object) {
-                        return getLeaderboard().getDisplayName(object.competitor);
-                    }
-                });
-        result.add(new HasCell<LeaderboardRowDTO, String>() {
-                    @Override
-                    public Cell<String> getCell() {
-                        return new ButtonCell();
-                    }
-
-                    @Override
-                    public FieldUpdater<LeaderboardRowDTO, String> getFieldUpdater() {
-                        return new FieldUpdater<LeaderboardRowDTO, String>() {
-                            @Override
-                            public void update(int index, LeaderboardRowDTO object, String value) {
-                                // TODO Auto-generated method stub
-                            }
-                        };
-                    }
-
-                    @Override
-                    public String getValue(LeaderboardRowDTO object) {
-                        return getStringMessages().suppress();
+                    public String getValue(LeaderboardRowDTO row) {
+                        SafeHtmlBuilder sb = new SafeHtmlBuilder();
+                        final boolean isDisplayNameSet = getLeaderboard().isDisplayNameSet(row.competitor);
+                        if (isDisplayNameSet) {
+                            sb.appendHtmlConstant("<b>");
+                        }
+                        sb.appendEscaped(getLeaderboard().getDisplayName(row.competitor));
+                        if (isDisplayNameSet) {
+                            sb.appendHtmlConstant("</b>");
+                        }
+                        return sb.toSafeHtml().asString();
                     }
                 });
         return result;
@@ -569,10 +570,10 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
 
     @Override
     protected RaceColumn<?> createRaceColumn(RaceColumnDTO race) {
-        return new EditableRaceColumn(race, getCellList(race));
+        return new EditableRaceColumn(race, getRaceColumnCellList(race));
     }
 
-    private List<RowUpdateWhiteboardProducerThatAlsoHasCell<LeaderboardRowDTO, ?>> getCellList(RaceColumnDTO race) {
+    private List<RowUpdateWhiteboardProducerThatAlsoHasCell<LeaderboardRowDTO, ?>> getRaceColumnCellList(RaceColumnDTO race) {
         List<RowUpdateWhiteboardProducerThatAlsoHasCell<LeaderboardRowDTO, ?>> list =
                 new ArrayList<RowUpdateWhiteboardProducerThatAlsoHasCell<LeaderboardRowDTO, ?>>();
         list.add(new MaxPointsDropDownCellProvider(race.getRaceColumnName()));
