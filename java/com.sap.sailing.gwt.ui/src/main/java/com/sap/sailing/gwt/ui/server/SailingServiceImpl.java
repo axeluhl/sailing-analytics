@@ -2552,9 +2552,10 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     public List<EventDTO> getEvents() {
         List<EventDTO> result = new ArrayList<EventDTO>();
         for (Event event : getService().getAllEvents()) {
-            List<RegattaDTO> regattasList = getRegattas();
-            EventDTO eventDTO = new EventDTO(event.getName(), regattasList);
+            EventDTO eventDTO = new EventDTO(event.getName());
+            eventDTO.regattas =  getRegattas();
             eventDTO.venue = new VenueDTO(event.getVenue().getName());
+            eventDTO.publicationUrl = event.getPublicationUrl();
             result.add(eventDTO);
         }
         return result;
@@ -2590,8 +2591,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     }
     
     private EventDTO convertToEventDTO(Event event) {
-        EventDTO eventDTO = new EventDTO();
-        eventDTO.name = event.getName();
+        EventDTO eventDTO = new EventDTO(event.getName());
         eventDTO.venue = new VenueDTO();
         eventDTO.venue.name = event.getVenue() != null ? event.getVenue().getName() : null;
         eventDTO.regattas = new ArrayList<RegattaDTO>();

@@ -15,6 +15,8 @@ public class EventImpl extends NamedImpl implements Event {
     private final Set<Regatta> regattas;
     
     private final Venue venue;
+    
+    private String publicationUrl;
 
     public EventImpl(String name, String venueName) {
         this(name, new VenueImpl(venueName));
@@ -48,6 +50,14 @@ public class EventImpl extends NamedImpl implements Event {
     @Override
     public Venue getVenue() {
         return venue;
+    }
+
+    public String getPublicationUrl() {
+        return publicationUrl;
+    }
+
+    public void setPublicationUrl(String publicationUrl) {
+        this.publicationUrl = publicationUrl;
     }
     
 }

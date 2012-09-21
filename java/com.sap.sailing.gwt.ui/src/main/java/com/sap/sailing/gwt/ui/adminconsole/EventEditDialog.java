@@ -10,12 +10,13 @@ public class EventEditDialog extends EventDialog {
 
     public EventEditDialog(EventDTO event, Collection<EventDTO> otherExistingEvents,
             StringMessages stringConstants, AsyncCallback<EventDTO> callback) {
-        super(event, new EventParameterValidator(stringConstants, otherExistingEvents), stringConstants, callback);
+        super(new EventParameterValidator(stringConstants, otherExistingEvents), stringConstants, callback);
 
         nameEntryField = createTextBox(event.name);
         nameEntryField.setWidth("200px");
         venueEntryField = createTextBox(event.venue.name);
         venueEntryField.setWidth("200px");
+        publicationUrlEntryField = createTextBox(event.publicationUrl);
+        publicationUrlEntryField.setWidth("200px");
     }
-
 }

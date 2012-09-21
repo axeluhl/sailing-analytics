@@ -7,13 +7,11 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 public class EventDTO extends NamedDTO implements IsSerializable {
     public List<RegattaDTO> regattas;
     public VenueDTO venue;
+    public String publicationUrl;
     
-    public EventDTO() {
-    }
+    EventDTO() {}
 
-    public EventDTO(String name, List<RegattaDTO> regattas) {
+    public EventDTO(String name) {
         super(name);
-        this.regattas = regattas;
     }
-
 }

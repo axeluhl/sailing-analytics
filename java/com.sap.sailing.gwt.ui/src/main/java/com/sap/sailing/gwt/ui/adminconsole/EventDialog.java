@@ -15,12 +15,10 @@ import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.VenueDTO;
 
 public class EventDialog extends DataEntryDialog<EventDTO> {
-
     protected StringMessages stringConstants;
-    protected EventDTO event;
-
     protected TextBox nameEntryField;
     protected TextBox venueEntryField;
+    protected TextBox publicationUrlEntryField;
 
     protected static class EventParameterValidator implements Validator<EventDTO> {
 
@@ -59,20 +57,19 @@ public class EventDialog extends DataEntryDialog<EventDTO> {
 
     }
 
-    public EventDialog(EventDTO event, EventParameterValidator validator, StringMessages stringConstants,
+    public EventDialog(EventParameterValidator validator, StringMessages stringConstants,
             AsyncCallback<EventDTO> callback) {
         super(stringConstants.event(), null, stringConstants.ok(), stringConstants.cancel(), validator,
                 callback);
         this.stringConstants = stringConstants;
-        this.event = event;
     }
 
     @Override
     protected EventDTO getResult() {
-        event.name = nameEntryField.getText();
-        event.venue = new VenueDTO();
-        event.venue.name = venueEntryField.getText();
-        return event;
+        EventDTO eventDTO = new EventDTO(nameEntryField.getText());
+        eventDTO.venue = new VenueDTO(venueEntryField.getText());
+        eventDTO.publicationUrl = publicationUrlEntryField.getText();
+        return eventDTO;
     }
 
     @Override
@@ -83,13 +80,15 @@ public class EventDialog extends DataEntryDialog<EventDTO> {
             panel.add(additionalWidget);
         }
         
-        Grid formGrid = new Grid(2, 2);
+        Grid formGrid = new Grid(3, 2);
         panel.add(formGrid);
         
         formGrid.setWidget(0,  0, new Label(stringConstants.name() + ":"));
         formGrid.setWidget(0, 1, nameEntryField);
         formGrid.setWidget(1, 0, new Label(stringConstants.venue() + ":"));
         formGrid.setWidget(1, 1, venueEntryField);
+        formGrid.setWidget(2, 0, new Label(stringConstants.publicationUrl() + ":"));
+        formGrid.setWidget(2, 1, publicationUrlEntryField);
         return panel;
     }
 

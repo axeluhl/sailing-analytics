@@ -396,4 +396,6 @@ public interface StringMessages extends Messages {
     String pleaseEnterAValue();
     String latitude();
     String longitude();
+    String actionAddEvent();
+    String publicationUrl();
 }

@@ -15,6 +15,10 @@ public interface Event extends Named {
      * @return a non-<code>null</code> venue for this event
      */
     Venue getVenue();
+    
+    String getPublicationUrl();
+
+    void setPublicationUrl(String publicationUrl);
 
     Iterable<Regatta> getRegattas();
     
