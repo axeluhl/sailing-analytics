@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.google.gwt.cell.client.AbstractSafeHtmlCell;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.Cell.Context;
 import com.google.gwt.cell.client.EditTextCell;
@@ -24,6 +25,7 @@ import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.text.shared.AbstractSafeHtmlRenderer;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.Header;
 import com.google.gwt.user.cellview.client.TextHeader;
@@ -356,13 +358,23 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         }
     }
 
-    protected class CompetitorColumn extends SortableColumn<LeaderboardRowDTO, String> {
+    protected class CompetitorColumn extends SortableColumn<LeaderboardRowDTO, LeaderboardRowDTO> {
         protected CompetitorColumn() {
-            super(new TextCell(), SortingOrder.ASCENDING);
+            super(new AbstractSafeHtmlCell<LeaderboardRowDTO>(new AbstractSafeHtmlRenderer<LeaderboardRowDTO>() {
+                @Override
+                public SafeHtml render(LeaderboardRowDTO row) {
+                    return new SafeHtmlBuilder().appendEscaped(getLeaderboard().getDisplayName(row.competitor)).toSafeHtml();
+                }
+            }) {
+                @Override
+                protected void render(com.google.gwt.cell.client.Cell.Context context, SafeHtml data, SafeHtmlBuilder sb) {
+                    sb.append(data);
+                }
+            }, SortingOrder.ASCENDING);
         }
 
-        protected CompetitorColumn(EditTextCell editTextCell) {
-            super(editTextCell, SortingOrder.ASCENDING);
+        protected CompetitorColumn(Cell<LeaderboardRowDTO> competitorEditingCell) {
+            super(competitorEditingCell, SortingOrder.ASCENDING);
         }
 
         @Override
@@ -382,8 +394,8 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         }
 
         @Override
-        public String getValue(LeaderboardRowDTO object) {
-            return getLeaderboard().getDisplayName(object.competitor);
+        public LeaderboardRowDTO getValue(LeaderboardRowDTO object) {
+            return object;
         }
 
         @Override

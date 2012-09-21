@@ -76,6 +76,11 @@ public interface Leaderboard extends Named {
     Iterable<Competitor> getAllCompetitors();
     
     /**
+     * Convenience method which returns the difference between {@link #getAllCompetitors()} and {@link #getCompetitors()}.
+     */
+    Iterable<Competitor> getSuppressedCompetitors();
+    
+    /**
      * Can be used to exclude competitor from regular views of this leaderboard as well as from the scoring process.
      * As a result of suppressing a competitor, it will no longer result from calls to {@link #getCompetitors} nor to
      * {@link #getCompetitorsFromBestToWorst(TimePoint)} nor {@link #getCompetitorsFromBestToWorst(RaceColumn, TimePoint)}.

@@ -2,8 +2,10 @@ package com.sap.sailing.gwt.ui.shared;
 
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 
@@ -20,6 +22,8 @@ public class LeaderboardDTO extends AbstractLeaderboardDTO implements IsSerializ
      * The competitor list, ordered ascending by total rank
      */
     public List<CompetitorDTO> competitors;
+
+    private Set<CompetitorDTO> suppressedCompetitors;
     
     private Map<RaceColumnDTO, List<CompetitorDTO>> competitorOrderingPerRace;
     
@@ -38,7 +42,20 @@ public class LeaderboardDTO extends AbstractLeaderboardDTO implements IsSerializ
         this.timePointOfLastCorrectionsValidity = timePointOfLastCorrectionsValidity;
         this.comment = comment;
         competitorOrderingPerRace = new HashMap<RaceColumnDTO, List<CompetitorDTO>>();
+        this.suppressedCompetitors = new HashSet<CompetitorDTO>();
         this.higherScoresIsBetter = higherScoreIsBetter;
+    }
+    
+    public Iterable<CompetitorDTO> getSuppressedCompetitors() {
+        return suppressedCompetitors;
+    }
+    
+    public void setSuppressed(CompetitorDTO competitor, boolean suppressed) {
+        if (suppressed) {
+            suppressedCompetitors.add(competitor);
+        } else {
+            suppressedCompetitors.remove(competitor);
+        }
     }
     
     public boolean isHigherScoreBetter() {

@@ -613,6 +613,11 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     }
     
     @Override
+    public Iterable<Competitor> getSuppressedCompetitors() {
+        return new HashSet<Competitor>(suppressedCompetitors);
+    }
+    
+    @Override
     public void setSuppressed(Competitor competitor, boolean suppressed) {
         // no synchronization required because we use a synchronized set as implementation
         if (suppressed) {

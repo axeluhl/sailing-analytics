@@ -401,12 +401,9 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         if (leaderboard != null) {
             if (date == null) {
                 // date==null means live mode; however, if we're after the end of all races and after all score
-                // corrections,
-                // don't use the live leaderboard updater which would keep re-calculating over and over again, but map
-                // this
-                // to a usual non-live call which uses the regular LeaderboardDTOCache which is invalidated properly
-                // when
-                // the tracked race associations or score corrections or tracked race contents changes:
+                // corrections, don't use the live leaderboard updater which would keep re-calculating over and over again, but map
+                // this to a usual non-live call which uses the regular LeaderboardDTOCache which is invalidated properly
+                // when the tracked race associations or score corrections or tracked race contents changes:
                 // TODO see bug 929: use lock instead of synchronized to increase concurrency
                 synchronized (leaderboardByNameLiveUpdaters) {
                     liveLeaderboardUpdater = leaderboardByNameLiveUpdaters.get(leaderboardName);
@@ -454,6 +451,9 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             result.competitors = new ArrayList<CompetitorDTO>();
             result.name = leaderboard.getName();
             result.competitorDisplayNames = new HashMap<CompetitorDTO, String>();
+            for (Competitor suppressedCompetitor : leaderboard.getSuppressedCompetitors()) {
+                result.setSuppressed(convertToCompetitorDTO(suppressedCompetitor), true);
+            }
             for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
                 RaceColumnDTO raceColumnDTO = result.createEmptyRaceColumn(raceColumn.getName(), raceColumn.isMedalRace());
                 for (Fleet fleet : raceColumn.getFleets()) {
