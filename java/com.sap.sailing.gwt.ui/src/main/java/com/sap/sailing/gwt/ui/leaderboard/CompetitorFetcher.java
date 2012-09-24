@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.leaderboardedit;
+package com.sap.sailing.gwt.ui.leaderboard;
 
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 
