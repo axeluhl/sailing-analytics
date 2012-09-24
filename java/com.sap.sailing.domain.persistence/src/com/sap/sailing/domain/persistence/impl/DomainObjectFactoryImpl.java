@@ -199,7 +199,6 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
      */
     private Leaderboard loadLeaderboard(DBObject dbLeaderboard, RegattaRegistry regattaRegistry, LeaderboardRegistry leaderboardRegistry,
             LeaderboardGroup groupForMetaLeaderboard) {
-        // TODO load suppressed competitors
         Leaderboard result = null;
         String leaderboardName = (String) dbLeaderboard.get(FieldNames.LEADERBOARD_NAME.name());
         if (leaderboardRegistry != null) {
@@ -220,15 +219,25 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             if (result != null) {
                 DelayedLeaderboardCorrections loadedLeaderboardCorrections = new DelayedLeaderboardCorrectionsImpl(result);
                 loadLeaderboardCorrections(dbLeaderboard, loadedLeaderboardCorrections, scoreCorrection);
+                loadSuppressedCompetitors(dbLeaderboard, loadedLeaderboardCorrections);
                 // add the leaderboard to the registry
                 if (leaderboardRegistry != null) {
                     leaderboardRegistry.addLeaderboard(result);
                     logger.info("loaded leaderboard "+result.getName()+" into "+leaderboardRegistry);
                 }
-
             }
         }
         return result;
+    }
+
+    private void loadSuppressedCompetitors(DBObject dbLeaderboard,
+            DelayedLeaderboardCorrections loadedLeaderboardCorrections) {
+        BasicDBList dbSuppressedCompetitorNames = (BasicDBList) dbLeaderboard.get(FieldNames.LEADERBOARD_SUPPRESSED_COMPETITORS.name());
+        if (dbSuppressedCompetitorNames != null) {
+            for (Object escapedCompetitorName : dbSuppressedCompetitorNames) {
+                loadedLeaderboardCorrections.suppressCompetitor(MongoUtils.unescapeDollarAndDot((String) escapedCompetitorName));
+            }
+        }
     }
 
     /**
@@ -248,7 +257,6 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
 
     /**
-     * @param leaderboardName TODO
      * @return <code>null</code> if the regatta cannot be resolved; otherwise the leaderboard for the regatta specified
      */
     private RegattaLeaderboard loadRegattaLeaderboard(String leaderboardName, String regattaName, DBObject dbLeaderboard,

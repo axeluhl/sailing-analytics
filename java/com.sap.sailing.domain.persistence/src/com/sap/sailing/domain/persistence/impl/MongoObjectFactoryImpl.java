@@ -140,6 +140,11 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         BasicDBObject query = new BasicDBObject(FieldNames.LEADERBOARD_NAME.name(), leaderboard.getName());
         BasicDBObject dbLeaderboard = new BasicDBObject();
         dbLeaderboard.put(FieldNames.LEADERBOARD_NAME.name(), leaderboard.getName());
+        BasicDBList dbSuppressedCompetitorNames = new BasicDBList();
+        for (Competitor suppressedCompetitor : leaderboard.getSuppressedCompetitors()) {
+            dbSuppressedCompetitorNames.add(MongoUtils.escapeDollarAndDot(suppressedCompetitor.getName()));
+        }
+        dbLeaderboard.put(FieldNames.LEADERBOARD_SUPPRESSED_COMPETITORS.name(), dbSuppressedCompetitorNames);
         if (leaderboard instanceof FlexibleLeaderboard) {
             storeFlexibleLeaderboard((FlexibleLeaderboard) leaderboard, dbLeaderboard);
         } else if (leaderboard instanceof RegattaLeaderboard) {

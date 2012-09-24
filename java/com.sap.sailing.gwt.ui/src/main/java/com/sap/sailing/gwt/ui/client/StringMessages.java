@@ -400,4 +400,6 @@ public interface StringMessages extends Messages {
     String publicationUrl();
     String suppress();
     String isPublic();
+    String unsuppress();
+    String suppressedCompetitors();
 }

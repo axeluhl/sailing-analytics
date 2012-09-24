@@ -18,6 +18,7 @@ import com.google.gwt.cell.client.EditTextCell;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.cell.client.HasCell;
 import com.google.gwt.cell.client.SelectionCell;
+import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -26,26 +27,41 @@ import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.text.shared.SafeHtmlRenderer;
+import com.google.gwt.user.cellview.client.CellTable;
+import com.google.gwt.user.cellview.client.Column;
+import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
+import com.google.gwt.user.cellview.client.Header;
+import com.google.gwt.user.cellview.client.TextHeader;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Grid;
+import com.google.gwt.user.client.ui.ImageResourceRenderer;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.datepicker.client.DateBox;
+import com.google.gwt.view.client.ListDataProvider;
+import com.sap.sailing.domain.common.InvertibleComparator;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.SortingOrder;
+import com.sap.sailing.domain.common.impl.InvertibleComparatorAdapter;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
+import com.sap.sailing.gwt.ui.client.Collator;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
+import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.UserAgentDetails;
+import com.sap.sailing.gwt.ui.leaderboard.CompetitorColumnBase;
+import com.sap.sailing.gwt.ui.leaderboard.CompetitorFetcher;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettingsFactory;
+import com.sap.sailing.gwt.ui.leaderboard.SortableColumn;
 import com.sap.sailing.gwt.ui.shared.BoatClassDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
@@ -66,6 +82,9 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
     
     final DateBox lastScoreCorrectionTimeBox;
     final TextBox lastScoreCorrectionCommentBox;
+    
+    final private CellTable<CompetitorDTO> suppressedCompetitorsTable;
+    final private ListDataProvider<CompetitorDTO> suppressedCompetitorsShown;
     
     private class EditableCarryColumn extends CarryColumn {
         public EditableCarryColumn() {
@@ -95,8 +114,8 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
     }
     
     private class EditableCompetitorColumn extends CompetitorColumn {
-        public EditableCompetitorColumn(List<HasCell<LeaderboardRowDTO, ?>> cells) {
-            super(new CompositeCell<LeaderboardRowDTO>(cells));
+        public EditableCompetitorColumn(List<HasCell<LeaderboardRowDTO, ?>> cells, CompetitorColumnBase<LeaderboardRowDTO> base) {
+            super(new CompositeCell<LeaderboardRowDTO>(cells), base);
         }
 
         @Override
@@ -105,6 +124,80 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
         }
     }
     
+    /**
+     * Shows the country flag and sail ID, if present
+     * 
+     * @author Axel Uhl (d043530)
+     * 
+     */
+    private class SuppressedSailIDColumn extends SortableColumn<CompetitorDTO, String> {
+        protected SuppressedSailIDColumn() {
+            super(new TextCell(), SortingOrder.ASCENDING);
+        }
+
+        @Override
+        public InvertibleComparator<CompetitorDTO> getComparator() {
+            return new InvertibleComparatorAdapter<CompetitorDTO>() {
+                @Override
+                public int compare(CompetitorDTO o1, CompetitorDTO o2) {
+                    return Collator.getInstance().compare(o1.sailID, o2.sailID);
+                }
+            };
+        }
+
+        @Override
+        public Header<String> getHeader() {
+            return new TextHeader(getStringMessages().competitor());
+        }
+
+        @Override
+        public void render(Context context, CompetitorDTO object, SafeHtmlBuilder sb) {
+            ImageResourceRenderer renderer = new ImageResourceRenderer();
+            ImageResource flagImageResource = FlagImageResolver
+                    .getFlagImageResource(object.twoLetterIsoCountryCode);
+            if (flagImageResource != null) {
+                sb.append(renderer.render(flagImageResource));
+                sb.appendHtmlConstant("&nbsp;");
+            }
+            sb.appendEscaped(object.sailID);
+        }
+
+        @Override
+        public String getValue(CompetitorDTO object) {
+            return object.sailID;
+        }
+    }
+
+    protected class SuppressedCompetitorColumn extends SortableColumn<CompetitorDTO, CompetitorDTO> {
+        private final CompetitorColumnBase<CompetitorDTO> base;
+        
+        protected SuppressedCompetitorColumn(CompetitorColumnBase<CompetitorDTO> base) {
+            super(base.getCell(getLeaderboard()), SortingOrder.ASCENDING);
+            this.base = base;
+        }
+
+        @Override
+        public InvertibleComparator<CompetitorDTO> getComparator() {
+            return base.getComparator();
+        }
+
+        @Override
+        public Header<String> getHeader() {
+            return base.getHeader();
+        }
+
+        @Override
+        public CompetitorDTO getValue(CompetitorDTO competitor) {
+            return competitor;
+        }
+
+        @Override
+        public void render(Context context, CompetitorDTO competitor, SafeHtmlBuilder sb) {
+            String competitorColorBarStyle = "style=\"border: none;\"";
+            base.render(competitor, competitorColorBarStyle, sb);
+        }
+    }
+
     private FieldUpdater<LeaderboardRowDTO, String> createCompetitorColumnFieldUpdater(final EditTextCell cell) {
         return new FieldUpdater<LeaderboardRowDTO, String>() {
             @Override
@@ -368,6 +461,8 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                 /* racesToShow */ null, /* namesOfRacesToShow */ null, null, /* autoExpandFirstRace */false),
                 new CompetitorSelectionModel(/* hasMultiSelection */true),
                 leaderboardName, leaderboardGroupName, errorReporter, stringMessages, userAgent, /* showRaceDetails */ true);
+        suppressedCompetitorsShown = new ListDataProvider<CompetitorDTO>(new ArrayList<CompetitorDTO>());
+        suppressedCompetitorsTable = createSuppressedCompetitorsTable();
         ImageResource importIcon = resources.importIcon();
         Anchor importAnchor = new Anchor(AbstractImagePrototype.create(importIcon).getSafeHtml());
         getRefreshAndSettingsPanel().insert(importAnchor, 0);
@@ -422,8 +517,56 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
 				lastScoreCorrectionTimeBox.setValue(new Date());
 			}
 		});
-        
         getContentPanel().insert(scoreCorrectionInfoGrid, 0);
+        getContentPanel().add(new Label(getStringMessages().suppressedCompetitors()+":"));
+        getContentPanel().add(suppressedCompetitorsTable);
+    }
+
+    private CellTable<CompetitorDTO> createSuppressedCompetitorsTable() {
+        CellTable<CompetitorDTO> result = new CellTable<CompetitorDTO>();
+        suppressedCompetitorsShown.addDataDisplay(result);
+        final SuppressedSailIDColumn suppressedSailIDColumn = new SuppressedSailIDColumn();
+        suppressedSailIDColumn.setSortable(true);
+        result.addColumn(suppressedSailIDColumn, suppressedSailIDColumn.getHeader());
+        final SuppressedCompetitorColumn suppressedCompetitorColumn = new SuppressedCompetitorColumn(
+                new CompetitorColumnBase<CompetitorDTO>(this, getStringMessages(), new CompetitorFetcher<CompetitorDTO>() {
+            @Override
+            public CompetitorDTO getCompetitor(CompetitorDTO t) {
+                return t;
+            }
+        }));
+        result.addColumn(suppressedCompetitorColumn, suppressedCompetitorColumn.getHeader());
+        suppressedCompetitorColumn.setSortable(true);
+        final Column<CompetitorDTO, String> unsuppressButtonColumn = new Column<CompetitorDTO, String>(new ButtonCell()) {
+            @Override
+            public String getValue(CompetitorDTO object) {
+                return getStringMessages().unsuppress();
+            }
+        };
+        unsuppressButtonColumn.setFieldUpdater(new FieldUpdater<CompetitorDTO, String>() {
+                    @Override
+                    public void update(int index, final CompetitorDTO object, String value) {
+                        getSailingService().suppressCompetitorInLeaderboard(getLeaderboardName(), object.id,
+                                /* suppressed */ false, new AsyncCallback<Void>() {
+                                    @Override
+                                    public void onFailure(Throwable caught) {
+                                        getErrorReporter().reportError("Error trying to unsuppress competitor "+object.name);
+                                    }
+                                    @Override
+                                    public void onSuccess(Void result) {
+                                        Window.setStatus("Successfully unsuppressed competitor "+object.name);
+                                        // force a reload of the entire editable leaderboard to hide the now suppressed competitor
+                                        timeChanged(getLeaderboardDisplayDate());
+                                    }
+                                });
+                    }
+                });
+        result.addColumn(unsuppressButtonColumn);
+        final ListHandler<CompetitorDTO> sortHandler = new ListHandler<CompetitorDTO>(suppressedCompetitorsShown.getList());
+        sortHandler.setComparator(suppressedSailIDColumn, suppressedSailIDColumn.getComparator());
+        sortHandler.setComparator(suppressedCompetitorColumn, suppressedCompetitorColumn.getComparator());
+        result.addColumnSortHandler(sortHandler);
+        return result;
     }
 
     private void updateScoreCorrectionInformation(String lastScoreCorrectionComment, Date lastScoreCorrectionTime) {
@@ -514,7 +657,13 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
     
     @Override
     protected CompetitorColumn createCompetitorColumn() {
-        return new EditableCompetitorColumn(getCellListForEditableCompetitorColumn());
+        return new EditableCompetitorColumn(getCellListForEditableCompetitorColumn(),
+                new CompetitorColumnBase<LeaderboardRowDTO>(this, getStringMessages(), new CompetitorFetcher<LeaderboardRowDTO>() {
+                    @Override
+                    public CompetitorDTO getCompetitor(LeaderboardRowDTO t) {
+                        return t.competitor;
+                    }
+                }));
     }
     
     private List<HasCell<LeaderboardRowDTO, ?>> getCellListForEditableCompetitorColumn() {
@@ -597,12 +746,16 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
 
     @Override
     protected void updateLeaderboard(LeaderboardDTO leaderboard) {
-    	super.updateLeaderboard(leaderboard);
+        super.updateLeaderboard(leaderboard);
         if (leaderboard != null) {
-        	String lastScoreCorrectionComment = leaderboard.getComment();
-        	Date lastScoreCorrectionTime = leaderboard.getTimePointOfLastCorrectionsValidity();
-        	lastScoreCorrectionCommentBox.setText(lastScoreCorrectionComment != null ? lastScoreCorrectionComment : "");
-        	lastScoreCorrectionTimeBox.setValue(lastScoreCorrectionTime != null ? lastScoreCorrectionTime : new Date());
+            String lastScoreCorrectionComment = leaderboard.getComment();
+            Date lastScoreCorrectionTime = leaderboard.getTimePointOfLastCorrectionsValidity();
+            lastScoreCorrectionCommentBox.setText(lastScoreCorrectionComment != null ? lastScoreCorrectionComment : "");
+            lastScoreCorrectionTimeBox.setValue(lastScoreCorrectionTime != null ? lastScoreCorrectionTime : new Date());
+            suppressedCompetitorsShown.getList().clear();
+            for (CompetitorDTO suppressedCompetitor : leaderboard.getSuppressedCompetitors()) {
+                suppressedCompetitorsShown.getList().add(suppressedCompetitor);
+            }
         }
     }   
 }
