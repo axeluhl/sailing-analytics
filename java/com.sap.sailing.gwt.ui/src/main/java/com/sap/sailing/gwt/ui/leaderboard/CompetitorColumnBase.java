@@ -10,7 +10,6 @@ import com.sap.sailing.domain.common.InvertibleComparator;
 import com.sap.sailing.domain.common.impl.InvertibleComparatorAdapter;
 import com.sap.sailing.gwt.ui.client.Collator;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.leaderboardedit.CompetitorFetcher;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
 
 public class CompetitorColumnBase<T> {
