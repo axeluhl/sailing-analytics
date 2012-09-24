@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import com.google.gwt.cell.client.AbstractSafeHtmlCell;
 import com.google.gwt.cell.client.ButtonCell;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.Cell.Context;
@@ -27,10 +26,10 @@ import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
-import com.google.gwt.text.shared.AbstractSafeHtmlRenderer;
 import com.google.gwt.text.shared.SafeHtmlRenderer;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
+import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.Header;
 import com.google.gwt.user.cellview.client.TextHeader;
 import com.google.gwt.user.client.Window;
@@ -113,8 +112,8 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
     }
     
     private class EditableCompetitorColumn extends CompetitorColumn {
-        public EditableCompetitorColumn(List<HasCell<LeaderboardRowDTO, ?>> cells) {
-            super(new CompositeCell<LeaderboardRowDTO>(cells));
+        public EditableCompetitorColumn(List<HasCell<LeaderboardRowDTO, ?>> cells, CompetitorColumnBase<LeaderboardRowDTO> base) {
+            super(new CompositeCell<LeaderboardRowDTO>(cells), base);
         }
 
         @Override
@@ -168,55 +167,32 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
     }
 
     protected class SuppressedCompetitorColumn extends SortableColumn<CompetitorDTO, CompetitorDTO> {
-        protected SuppressedCompetitorColumn() {
-            super(new AbstractSafeHtmlCell<CompetitorDTO>(new AbstractSafeHtmlRenderer<CompetitorDTO>() {
-                @Override
-                public SafeHtml render(CompetitorDTO row) {
-                    return new SafeHtmlBuilder().appendEscaped(getLeaderboard().getDisplayName(row)).toSafeHtml();
-                }
-            }) {
-                @Override
-                protected void render(com.google.gwt.cell.client.Cell.Context context, SafeHtml data, SafeHtmlBuilder sb) {
-                    sb.append(data);
-                }
-            }, SortingOrder.ASCENDING);
-        }
-
-        protected SuppressedCompetitorColumn(Cell<CompetitorDTO> competitorEditingCell) {
-            super(competitorEditingCell, SortingOrder.ASCENDING);
+        private final CompetitorColumnBase<CompetitorDTO> base;
+        
+        protected SuppressedCompetitorColumn(CompetitorColumnBase<CompetitorDTO> base) {
+            super(base.getCell(getLeaderboard()), SortingOrder.ASCENDING);
+            this.base = base;
         }
 
         @Override
         public InvertibleComparator<CompetitorDTO> getComparator() {
-            return new InvertibleComparatorAdapter<CompetitorDTO>() {
-                @Override
-                public int compare(CompetitorDTO o1, CompetitorDTO o2) {
-                    return Collator.getInstance().compare(getLeaderboard().getDisplayName(o1),
-                            getLeaderboard().getDisplayName(o2));
-                }
-            };
+            return base.getComparator();
         }
 
         @Override
         public Header<String> getHeader() {
-            return new TextHeader(getStringMessages().name());
+            return base.getHeader();
         }
 
         @Override
-        public CompetitorDTO getValue(CompetitorDTO object) {
-            return object;
+        public CompetitorDTO getValue(CompetitorDTO competitor) {
+            return competitor;
         }
 
-        protected void defaultRender(Context context, CompetitorDTO object, SafeHtmlBuilder sb) {
-            super.render(context, object, sb);
-        }
-        
         @Override
-        public void render(Context context, CompetitorDTO object, SafeHtmlBuilder sb) {
+        public void render(Context context, CompetitorDTO competitor, SafeHtmlBuilder sb) {
             String competitorColorBarStyle = "style=\"border: none;\"";
-            sb.appendHtmlConstant("<div " + competitorColorBarStyle + ">");
-            sb.appendEscaped(getLeaderboard().getDisplayName(object));
-            sb.appendHtmlConstant("</div>");
+            base.render(competitor, competitorColorBarStyle, sb);
         }
     }
 
@@ -548,9 +524,17 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
         CellTable<CompetitorDTO> result = new CellTable<CompetitorDTO>();
         suppressedCompetitorsShown.addDataDisplay(result);
         final SuppressedSailIDColumn suppressedSailIDColumn = new SuppressedSailIDColumn();
+        suppressedSailIDColumn.setSortable(true);
         result.addColumn(suppressedSailIDColumn, suppressedSailIDColumn.getHeader());
-        final SuppressedCompetitorColumn suppressedCompetitorColumn = new SuppressedCompetitorColumn();
+        final SuppressedCompetitorColumn suppressedCompetitorColumn = new SuppressedCompetitorColumn(
+                new CompetitorColumnBase<CompetitorDTO>(this, getStringMessages(), new CompetitorFetcher<CompetitorDTO>() {
+            @Override
+            public CompetitorDTO getCompetitor(CompetitorDTO t) {
+                return t;
+            }
+        }));
         result.addColumn(suppressedCompetitorColumn, suppressedCompetitorColumn.getHeader());
+        suppressedCompetitorColumn.setSortable(true);
         final Column<CompetitorDTO, String> unsuppressButtonColumn = new Column<CompetitorDTO, String>(new ButtonCell()) {
             @Override
             public String getValue(CompetitorDTO object) {
@@ -576,6 +560,10 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                     }
                 });
         result.addColumn(unsuppressButtonColumn);
+        final ListHandler<CompetitorDTO> sortHandler = new ListHandler<CompetitorDTO>(suppressedCompetitorsShown.getList());
+        sortHandler.setComparator(suppressedSailIDColumn, suppressedSailIDColumn.getComparator());
+        sortHandler.setComparator(suppressedCompetitorColumn, suppressedCompetitorColumn.getComparator());
+        result.addColumnSortHandler(sortHandler);
         return result;
     }
 
@@ -667,7 +655,13 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
     
     @Override
     protected CompetitorColumn createCompetitorColumn() {
-        return new EditableCompetitorColumn(getCellListForEditableCompetitorColumn());
+        return new EditableCompetitorColumn(getCellListForEditableCompetitorColumn(),
+                new CompetitorColumnBase<LeaderboardRowDTO>(this, getStringMessages(), new CompetitorFetcher<LeaderboardRowDTO>() {
+                    @Override
+                    public CompetitorDTO getCompetitor(LeaderboardRowDTO t) {
+                        return t.competitor;
+                    }
+                }));
     }
     
     private List<HasCell<LeaderboardRowDTO, ?>> getCellListForEditableCompetitorColumn() {
