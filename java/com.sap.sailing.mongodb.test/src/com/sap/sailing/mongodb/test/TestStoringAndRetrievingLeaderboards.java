@@ -35,6 +35,7 @@ import com.sap.sailing.domain.leaderboard.impl.ScoreCorrectionImpl;
 import com.sap.sailing.domain.persistence.impl.DomainObjectFactoryImpl;
 import com.sap.sailing.domain.persistence.impl.MongoObjectFactoryImpl;
 import com.sap.sailing.domain.test.mock.MockedTrackedRaceWithFixedRank;
+import com.sap.sailing.domain.test.mock.MockedTrackedRaceWithFixedRankAndManyCompetitors;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
 public class TestStoringAndRetrievingLeaderboards extends AbstractMongoDBTest {
@@ -42,6 +43,34 @@ public class TestStoringAndRetrievingLeaderboards extends AbstractMongoDBTest {
         super();
     }
 
+    @Test
+    public void testStoreAndRetrieveLeaderboardWithSuppressedCompetitors() {
+        final String leaderboardName = "TestLeaderboard";
+        final int[] discardIndexResultsStartingWithHowManyRaces = new int[] { 5, 8 };
+        FlexibleLeaderboardImpl leaderboard = new FlexibleLeaderboardImpl(leaderboardName, new ScoreCorrectionImpl(),
+                new ResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces), new LowPoint());
+        Competitor wolfgang = createCompetitor();
+        Competitor hasso = new CompetitorImpl(123, "Hasso Plattner", new TeamImpl("STG", Collections.singleton(
+                new PersonImpl("Hasso Plattner", new NationalityImpl("GER"),
+                /* dateOfBirth */ null, "This is famous Dr. Hasso Plattner")), new PersonImpl("Lutz Patrunky", new NationalityImpl("GER"),
+                        /* dateOfBirth */ null, "This is Patty, the coach")),
+                        new BoatImpl("Dr. Hasso Plattner's boat", new BoatClassImpl("505", /* typicallyStartsUpwind */ true), null));
+        final String raceColumnName1 = "My First Race 1";
+        MockedTrackedRaceWithFixedRankAndManyCompetitors raceWithTwoCompetitors = new MockedTrackedRaceWithFixedRankAndManyCompetitors(wolfgang, /* rank */ 1, /* started */ true);
+        raceWithTwoCompetitors.addCompetitor(hasso);
+        leaderboard.addRace(raceWithTwoCompetitors, raceColumnName1, /* medalRace */ false, leaderboard.getFleet(null));
+        leaderboard.setSuppressed(wolfgang, true);
+        assertTrue(Util.contains(leaderboard.getSuppressedCompetitors(), wolfgang));
+        assertFalse(Util.contains(leaderboard.getSuppressedCompetitors(), hasso));
+        new MongoObjectFactoryImpl(db).storeLeaderboard(leaderboard);
+        Leaderboard loadedLeaderboard = new DomainObjectFactoryImpl(db).loadLeaderboard(leaderboardName, /* regattaRegistry */ null);
+        MockedTrackedRaceWithFixedRankAndManyCompetitors raceWithTwoCompetitors2 = new MockedTrackedRaceWithFixedRankAndManyCompetitors(wolfgang, /* rank */ 1, /* started */ true);
+        raceWithTwoCompetitors2.addCompetitor(hasso);
+        loadedLeaderboard.getRaceColumnByName(raceColumnName1).setTrackedRace(loadedLeaderboard.getFleet(null), raceWithTwoCompetitors2);
+        assertTrue(Util.contains(loadedLeaderboard.getSuppressedCompetitors(), wolfgang));
+        assertFalse(Util.contains(loadedLeaderboard.getSuppressedCompetitors(), hasso));
+    }
+    
     @Test
     public void testStoreAndRetrieveLeaderboardWithCommentedScoreCorrection() {
         final String leaderboardName = "TestLeaderboard";
