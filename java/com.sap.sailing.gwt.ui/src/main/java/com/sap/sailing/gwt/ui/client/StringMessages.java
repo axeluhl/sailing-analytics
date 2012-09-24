@@ -397,4 +397,6 @@ public interface StringMessages extends Messages {
     String latitude();
     String longitude();
     String suppress();
+    String unsuppress();
+    String suppressedCompetitors();
 }

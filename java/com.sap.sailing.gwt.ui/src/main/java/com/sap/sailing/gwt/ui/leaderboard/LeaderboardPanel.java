@@ -424,7 +424,6 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
      * 
      */
     private class SailIDColumn extends SortableColumn<LeaderboardRowDTO, String> {
-
         protected SailIDColumn() {
             super(new TextCell(), SortingOrder.ASCENDING);
         }
