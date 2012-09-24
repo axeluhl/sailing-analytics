@@ -444,11 +444,17 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         }
         logger.info("loaded leaderboard group "+name);
         LeaderboardGroupImpl result = new LeaderboardGroupImpl(name, description, leaderboards);
-        DBObject dbOverallLeaderboard = (DBObject) o.get(FieldNames.LEADERBOARD_GROUP_OVERALL_LEADERBOARD.name());
-        if (dbOverallLeaderboard != null) {
+        Object overallLeaderboardIdOrName = o.get(FieldNames.LEADERBOARD_GROUP_OVERALL_LEADERBOARD.name());
+        if (overallLeaderboardIdOrName != null) {
+            final DBObject dbOverallLeaderboard;
+            if (overallLeaderboardIdOrName instanceof ObjectId) {
+                dbOverallLeaderboard = leaderboardCollection.findOne(overallLeaderboardIdOrName);
+            } else {
+                dbOverallLeaderboard = (DBObject) overallLeaderboardIdOrName;
+            }
             // the loadLeaderboard call adds the overall leaderboard to the leaderboard registry and sets it as the
             // overall leaderboard of the leaderboard group
-            loadLeaderboard(dbOverallLeaderboard, regattaRegistry, leaderboardRegistry, result);
+            loadLeaderboard(dbOverallLeaderboard, regattaRegistry, leaderboardRegistry, /* groupForMetaLeaderboard */ result);
         }
         return result;
     }

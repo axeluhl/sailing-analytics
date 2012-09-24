@@ -11,7 +11,14 @@ import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
-public class MetaLeaderboardColumn extends SimpleAbstractRaceColumn implements RaceColumn {
+/**
+ * All {@link RaceColumnListener} events received from the underlying leaderboard's race columns
+ * are forwarded to this object's {@link RaceColumnListener}s.
+ * 
+ * @author Axel Uhl
+ *
+ */
+public class MetaLeaderboardColumn extends SimpleAbstractRaceColumn implements RaceColumn, RaceColumnListener {
     private static final long serialVersionUID = 3092096133388262955L;
     private final Leaderboard leaderboard;
     private final Fleet metaFleet;
@@ -20,6 +27,7 @@ public class MetaLeaderboardColumn extends SimpleAbstractRaceColumn implements R
         super();
         this.leaderboard = leaderboard;
         this.metaFleet = metaFleet;
+        leaderboard.addRaceColumnListener(this);
     }
 
     Leaderboard getLeaderboard() {
@@ -95,4 +103,33 @@ public class MetaLeaderboardColumn extends SimpleAbstractRaceColumn implements R
     public void releaseTrackedRace(Fleet fleet) {
     }
 
+    @Override
+    public void trackedRaceLinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
+        getRaceColumnListeners().notifyListenersAboutTrackedRaceLinked(raceColumn, fleet, trackedRace);
+    }
+
+    @Override
+    public void trackedRaceUnlinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
+        getRaceColumnListeners().notifyListenersAboutTrackedRaceUnlinked(raceColumn, fleet, trackedRace);
+    }
+
+    @Override
+    public void isMedalRaceChanged(RaceColumn raceColumn, boolean newIsMedalRace) {
+        getRaceColumnListeners().notifyListenersAboutIsMedalRaceChanged(raceColumn, newIsMedalRace);
+    }
+
+    @Override
+    public void raceColumnAddedToContainer(RaceColumn raceColumn) {
+        getRaceColumnListeners().notifyListenersAboutRaceColumnAddedToContainer(raceColumn);
+    }
+
+    @Override
+    public void raceColumnRemovedFromContainer(RaceColumn raceColumn) {
+        getRaceColumnListeners().notifyListenersAboutRaceColumnRemovedFromContainer(raceColumn);
+    }
+
+    @Override
+    public boolean isTransient() {
+        return false;
+    }
 }
