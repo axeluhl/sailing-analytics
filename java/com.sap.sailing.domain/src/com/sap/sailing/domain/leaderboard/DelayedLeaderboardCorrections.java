@@ -28,4 +28,6 @@ public interface DelayedLeaderboardCorrections extends RaceColumnListener, Seria
     void setDisplayName(String competitorName, String displayName);
 
     Leaderboard getLeaderboard();
+
+    void suppressCompetitor(String competitorName);
 }

@@ -325,7 +325,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
 
     @Override
     public Competitor getCompetitorByName(String competitorName) {
-        for (Competitor competitor : getCompetitors()) {
+        for (Competitor competitor : getAllCompetitors()) {
             if (competitor.getName().equals(competitorName)) {
                 return competitor;
             }

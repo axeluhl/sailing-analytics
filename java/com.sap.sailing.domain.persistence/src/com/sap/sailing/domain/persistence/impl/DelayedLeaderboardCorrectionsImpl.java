@@ -1,8 +1,10 @@
 package com.sap.sailing.domain.persistence.impl;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
@@ -36,6 +38,7 @@ public class DelayedLeaderboardCorrectionsImpl implements DelayedLeaderboardCorr
     private final Map<String, Map<RaceColumn, MaxPointsReason>> maxPointsReasonsByCompetitorName;
     private final Map<String, Map<RaceColumn, Double>> correctedScoresByCompetitorName;
     private final Map<String, String> displayNamesByCompetitorName;
+    private final Set<String> suppressedCompetitorNames;
     private final Leaderboard leaderboard;
 
     public DelayedLeaderboardCorrectionsImpl(Leaderboard leaderboard) {
@@ -43,6 +46,7 @@ public class DelayedLeaderboardCorrectionsImpl implements DelayedLeaderboardCorr
         maxPointsReasonsByCompetitorName = new HashMap<String, Map<RaceColumn,MaxPointsReason>>();
         correctedScoresByCompetitorName = new HashMap<String, Map<RaceColumn, Double>>();
         displayNamesByCompetitorName = new HashMap<String, String>();
+        suppressedCompetitorNames = new HashSet<String>();
         this.leaderboard = leaderboard;
         leaderboard.addRaceColumnListener(this);
     }
@@ -138,6 +142,13 @@ public class DelayedLeaderboardCorrectionsImpl implements DelayedLeaderboardCorr
                 displayNamesEntryIter.remove();
             }
         }
+        for (Iterator<String> suppressedCompetitorNameIter=suppressedCompetitorNames.iterator(); suppressedCompetitorNameIter.hasNext(); ) {
+            String next = suppressedCompetitorNameIter.next();
+            if (competitorsByName.containsKey(next)) {
+                leaderboard.setSuppressed(competitorsByName.get(next), true);
+                suppressedCompetitorNameIter.remove();
+            }
+        }
         removeAsListenerIfNoLeftOvers();
     }
 
@@ -152,6 +163,12 @@ public class DelayedLeaderboardCorrectionsImpl implements DelayedLeaderboardCorr
     public void setDisplayName(String competitorName, String displayName) {
         assertNoTrackedRaceAssociatedYet();
         displayNamesByCompetitorName.put(competitorName, displayName);
+    }
+
+    @Override
+    public void suppressCompetitor(String competitorName) {
+        assertNoTrackedRaceAssociatedYet();
+        suppressedCompetitorNames.add(competitorName);
     }
 
     @Override
@@ -179,4 +196,5 @@ public class DelayedLeaderboardCorrectionsImpl implements DelayedLeaderboardCorr
     public boolean isTransient() {
         return false;
     }
+
 }
