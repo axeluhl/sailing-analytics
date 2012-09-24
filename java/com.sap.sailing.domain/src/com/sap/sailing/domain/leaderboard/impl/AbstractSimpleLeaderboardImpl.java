@@ -384,14 +384,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                 Callable<Integer> trackedRankProvider = new Callable<Integer>() {
                     @Override
                     public Integer call() throws Exception {
-                        int trackedPoints;
-                        final TrackedRace trackedRace = raceColumn.getTrackedRace(competitor);
-                        if (trackedRace != null && trackedRace.hasStarted(timePoint)) {
-                            trackedPoints = trackedRace.getRank(competitor, timePoint);
-                        } else {
-                            trackedPoints = 0;
-                        }
-                        return trackedPoints;
+                        return getTrackedRank(competitor, raceColumn, timePoint);
                     }
                 };
                 Result correctedResults = getScoreCorrection().getCorrectedScore(trackedRankProvider, competitor, raceColumn,

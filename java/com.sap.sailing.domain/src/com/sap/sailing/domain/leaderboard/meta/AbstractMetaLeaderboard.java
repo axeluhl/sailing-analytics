@@ -112,7 +112,9 @@ public abstract class AbstractMetaLeaderboard extends AbstractSimpleLeaderboardI
 
     @Override
     public int getTrackedRank(Competitor competitor, RaceColumn race, TimePoint timePoint) throws NoWindException {
-        return ((MetaLeaderboardColumn) race).getLeaderboard().getCompetitorsFromBestToWorst(timePoint).indexOf(competitor)+1;
+        final List<Competitor> competitorsFromBestToWorst = ((MetaLeaderboardColumn) race).getLeaderboard().getCompetitorsFromBestToWorst(timePoint);
+        Util.removeAll(getSuppressedCompetitors(), competitorsFromBestToWorst);
+        return competitorsFromBestToWorst.indexOf(competitor)+1;
     }
 
     @Override
