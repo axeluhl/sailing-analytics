@@ -12,9 +12,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.google.gwt.cell.client.AbstractSafeHtmlCell;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.Cell.Context;
+import com.google.gwt.cell.client.CompositeCell;
 import com.google.gwt.cell.client.EditTextCell;
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.core.client.GWT;
@@ -25,7 +25,6 @@ import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
-import com.google.gwt.text.shared.AbstractSafeHtmlRenderer;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.Header;
 import com.google.gwt.user.cellview.client.TextHeader;
@@ -72,6 +71,8 @@ import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.client.Timer.PlayStates;
 import com.sap.sailing.gwt.ui.client.UserAgentDetails;
 import com.sap.sailing.gwt.ui.leaderboard.LegDetailColumn.LegDetailField;
+import com.sap.sailing.gwt.ui.leaderboardedit.CompetitorColumnBase;
+import com.sap.sailing.gwt.ui.leaderboardedit.CompetitorFetcher;
 import com.sap.sailing.gwt.ui.shared.AbstractLeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 import com.sap.sailing.gwt.ui.shared.FleetDTO;
@@ -94,7 +95,7 @@ import com.sap.sailing.gwt.ui.shared.panels.SimpleBusyIndicator;
  * 
  */
 public class LeaderboardPanel extends FormPanel implements TimeListener, PlayStateListener,
-        Component<LeaderboardSettings>, IsEmbeddableComponent, CompetitorSelectionChangeListener {
+        Component<LeaderboardSettings>, IsEmbeddableComponent, CompetitorSelectionChangeListener, LeaderboardFetcher {
     private static final int RANK_COLUMN_INDEX = 0;
 
     private static final int SAIL_ID_COLUMN_INDEX = 1;
@@ -359,22 +360,16 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     }
 
     protected class CompetitorColumn extends SortableColumn<LeaderboardRowDTO, LeaderboardRowDTO> {
-        protected CompetitorColumn() {
-            super(new AbstractSafeHtmlCell<LeaderboardRowDTO>(new AbstractSafeHtmlRenderer<LeaderboardRowDTO>() {
-                @Override
-                public SafeHtml render(LeaderboardRowDTO row) {
-                    return new SafeHtmlBuilder().appendEscaped(getLeaderboard().getDisplayName(row.competitor)).toSafeHtml();
-                }
-            }) {
-                @Override
-                protected void render(com.google.gwt.cell.client.Cell.Context context, SafeHtml data, SafeHtmlBuilder sb) {
-                    sb.append(data);
-                }
-            }, SortingOrder.ASCENDING);
+        private final CompetitorColumnBase<LeaderboardRowDTO> base;
+        
+        protected CompetitorColumn(CompetitorColumnBase<LeaderboardRowDTO> base) {
+            super(base.getCell(getLeaderboard()), SortingOrder.ASCENDING);
+            this.base = base;
         }
 
-        protected CompetitorColumn(Cell<LeaderboardRowDTO> competitorEditingCell) {
-            super(competitorEditingCell, SortingOrder.ASCENDING);
+        public CompetitorColumn(CompositeCell<LeaderboardRowDTO> compositeCell, CompetitorColumnBase<LeaderboardRowDTO> base) {
+            super(compositeCell, SortingOrder.ASCENDING);
+            this.base = base;
         }
 
         @Override
@@ -390,7 +385,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
 
         @Override
         public Header<String> getHeader() {
-            return new TextHeader(stringMessages.name());
+            return base.getHeader();
         }
 
         @Override
@@ -411,9 +406,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             } else {
                 competitorColorBarStyle = "style=\"border: none;\"";
             }
-            sb.appendHtmlConstant("<div " + competitorColorBarStyle + ">");
-            sb.appendEscaped(getLeaderboard().getDisplayName(object.competitor));
-            sb.appendHtmlConstant("</div>");
+            base.render(object, competitorColorBarStyle, sb);
         }
     }
 
@@ -423,19 +416,22 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
      * @author Axel Uhl (d043530)
      * 
      */
-    private class SailIDColumn extends SortableColumn<LeaderboardRowDTO, String> {
-        protected SailIDColumn() {
+    private class SailIDColumn<T> extends SortableColumn<T, String> {
+        private final CompetitorFetcher<T> competitorFetcher;
+        
+        protected SailIDColumn(CompetitorFetcher<T> competitorFetcher) {
             super(new TextCell(), SortingOrder.ASCENDING);
+            this.competitorFetcher = competitorFetcher;
         }
 
         @Override
-        public InvertibleComparator<LeaderboardRowDTO> getComparator() {
-            return new InvertibleComparatorAdapter<LeaderboardRowDTO>() {
+        public InvertibleComparator<T> getComparator() {
+            return new InvertibleComparatorAdapter<T>() {
                 @Override
-                public int compare(LeaderboardRowDTO o1, LeaderboardRowDTO o2) {
-                    return o1.competitor.sailID == null ? o2.competitor.sailID == null ? 0 : -1
-                            : o2.competitor.sailID == null ? 1 : Collator.getInstance().compare(o1.competitor.sailID,
-                                    o2.competitor.sailID);
+                public int compare(T o1, T o2) {
+                    return competitorFetcher.getCompetitor(o1).sailID == null ? competitorFetcher.getCompetitor(o2).sailID == null ? 0 : -1
+                            : competitorFetcher.getCompetitor(o2).sailID == null ? 1 : Collator.getInstance().compare(
+                                    competitorFetcher.getCompetitor(o1).sailID, competitorFetcher.getCompetitor(o2).sailID);
                 }
             };
         }
@@ -446,20 +442,20 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         }
 
         @Override
-        public void render(Context context, LeaderboardRowDTO object, SafeHtmlBuilder sb) {
+        public void render(Context context, T object, SafeHtmlBuilder sb) {
             ImageResourceRenderer renderer = new ImageResourceRenderer();
             ImageResource flagImageResource = FlagImageResolver
-                    .getFlagImageResource(object.competitor.twoLetterIsoCountryCode);
+                    .getFlagImageResource(competitorFetcher.getCompetitor(object).twoLetterIsoCountryCode);
             if (flagImageResource != null) {
                 sb.append(renderer.render(flagImageResource));
                 sb.appendHtmlConstant("&nbsp;");
             }
-            sb.appendEscaped(object.competitor.sailID);
+            sb.appendEscaped(competitorFetcher.getCompetitor(object).sailID);
         }
 
         @Override
-        public String getValue(LeaderboardRowDTO object) {
-            return object.competitor.sailID;
+        public String getValue(T object) {
+            return competitorFetcher.getCompetitor(object).sailID;
         }
     }
 
@@ -1611,6 +1607,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         this.leaderboard = leaderboard;
     }
 
+    @Override
     public LeaderboardDTO getLeaderboard() {
         return leaderboard;
     }
@@ -1895,7 +1892,12 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
 
     private void ensureSailIDAndCompetitorColumn() {
         if (getLeaderboardTable().getColumnCount() <= SAIL_ID_COLUMN_INDEX) {
-            addColumn(new SailIDColumn());
+            addColumn(new SailIDColumn<LeaderboardRowDTO>(new CompetitorFetcher<LeaderboardRowDTO>() {
+                @Override
+                public CompetitorDTO getCompetitor(LeaderboardRowDTO t) {
+                    return t.competitor;
+                }
+            }));
             addColumn(createCompetitorColumn());
         } else {
             if (!(getLeaderboardTable().getColumn(SAIL_ID_COLUMN_INDEX) instanceof SailIDColumn)) {
@@ -1906,7 +1908,13 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     }
 
     protected CompetitorColumn createCompetitorColumn() {
-        return new CompetitorColumn();
+        return new CompetitorColumn(new CompetitorColumnBase<LeaderboardRowDTO>(this, getStringMessages(),
+                new CompetitorFetcher<LeaderboardRowDTO>() {
+            @Override
+            public CompetitorDTO getCompetitor(LeaderboardRowDTO t) {
+                return t.competitor;
+            }
+        }));
     }
 
     private void ensureTotalsColumn() {
