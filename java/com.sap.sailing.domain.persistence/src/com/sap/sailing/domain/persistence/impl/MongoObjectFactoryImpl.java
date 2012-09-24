@@ -129,6 +129,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
 
     @Override
     public void storeLeaderboard(Leaderboard leaderboard) {
+        // TODO store suppressed competitors
         DBCollection leaderboardCollection = database.getCollection(CollectionNames.LEADERBOARDS.name());
         try {
             leaderboardCollection.ensureIndex(FieldNames.LEADERBOARD_NAME.name());

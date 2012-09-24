@@ -66,6 +66,11 @@ public abstract class AbstractMetaLeaderboard extends AbstractSimpleLeaderboardI
         public void carriedPointsChanged(Competitor competitor, Double oldCarriedPoints, Double newCarriedPoints) {
             getScoreCorrection().notifyListenersAboutCarriedPointsChange(competitor, oldCarriedPoints, newCarriedPoints);
         }
+
+        @Override
+        public void isSuppressedChanged(Competitor competitor, boolean newIsSuppressed) {
+            getScoreCorrection().notifyListenersAboutIsSuppressedChange(competitor, newIsSuppressed);
+        }
     }
     
     public AbstractMetaLeaderboard(String name, ScoringScheme scoringScheme, ThresholdBasedResultDiscardingRule resultDiscardingRule) {
@@ -92,7 +97,7 @@ public abstract class AbstractMetaLeaderboard extends AbstractSimpleLeaderboardI
     }
 
     @Override
-    public Iterable<Competitor> getCompetitors() {
+    public Iterable<Competitor> getAllCompetitors() {
         Set<Competitor> result = new HashSet<Competitor>();
         for (Leaderboard leaderboard : getLeaderboards()) {
             Util.addAll(leaderboard.getCompetitors(), result);

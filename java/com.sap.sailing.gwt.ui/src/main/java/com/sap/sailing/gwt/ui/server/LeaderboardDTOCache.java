@@ -173,6 +173,11 @@ public class LeaderboardDTOCache {
         public void carriedPointsChanged(Competitor competitor, Double oldCarriedPoints, Double newCarriedPoints) {
             removeFromCache(leaderboard);
         }
+
+        @Override
+        public void isSuppressedChanged(Competitor competitor, boolean newIsSuppressed) {
+            removeFromCache(leaderboard);
+        }
     }
     
     public LeaderboardDTOCache(SailingServiceImpl sailingService, boolean waitForLatestAnalyses) {

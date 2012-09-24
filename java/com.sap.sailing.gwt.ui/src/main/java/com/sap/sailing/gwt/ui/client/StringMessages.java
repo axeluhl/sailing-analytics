@@ -398,4 +398,5 @@ public interface StringMessages extends Messages {
     String longitude();
     String actionAddEvent();
     String publicationUrl();
+    String suppress();
 }

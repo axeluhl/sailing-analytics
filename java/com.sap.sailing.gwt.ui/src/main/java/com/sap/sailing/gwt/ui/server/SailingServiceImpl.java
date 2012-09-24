@@ -201,6 +201,7 @@ import com.sap.sailing.server.operationaltransformation.RenameLeaderboard;
 import com.sap.sailing.server.operationaltransformation.RenameLeaderboardColumn;
 import com.sap.sailing.server.operationaltransformation.RenameLeaderboardGroup;
 import com.sap.sailing.server.operationaltransformation.SetRaceIsKnownToStartUpwind;
+import com.sap.sailing.server.operationaltransformation.SetSuppressedFlagForCompetitorInLeaderboard;
 import com.sap.sailing.server.operationaltransformation.SetWindSourcesToExclude;
 import com.sap.sailing.server.operationaltransformation.StopTrackingRace;
 import com.sap.sailing.server.operationaltransformation.StopTrackingRegatta;
@@ -401,12 +402,9 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         if (leaderboard != null) {
             if (date == null) {
                 // date==null means live mode; however, if we're after the end of all races and after all score
-                // corrections,
-                // don't use the live leaderboard updater which would keep re-calculating over and over again, but map
-                // this
-                // to a usual non-live call which uses the regular LeaderboardDTOCache which is invalidated properly
-                // when
-                // the tracked race associations or score corrections or tracked race contents changes:
+                // corrections, don't use the live leaderboard updater which would keep re-calculating over and over again, but map
+                // this to a usual non-live call which uses the regular LeaderboardDTOCache which is invalidated properly
+                // when the tracked race associations or score corrections or tracked race contents changes:
                 // TODO see bug 929: use lock instead of synchronized to increase concurrency
                 synchronized (leaderboardByNameLiveUpdaters) {
                     liveLeaderboardUpdater = leaderboardByNameLiveUpdaters.get(leaderboardName);
@@ -454,6 +452,9 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             result.competitors = new ArrayList<CompetitorDTO>();
             result.name = leaderboard.getName();
             result.competitorDisplayNames = new HashMap<CompetitorDTO, String>();
+            for (Competitor suppressedCompetitor : leaderboard.getSuppressedCompetitors()) {
+                result.setSuppressed(convertToCompetitorDTO(suppressedCompetitor), true);
+            }
             for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
                 RaceColumnDTO raceColumnDTO = result.createEmptyRaceColumn(raceColumn.getName(), raceColumn.isMedalRace());
                 for (Fleet fleet : raceColumn.getFleets()) {
@@ -2039,7 +2040,11 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     }
 
     @Override
-    public boolean connectTrackedRaceToLeaderboardColumn(String leaderboardName, String raceColumnName, String fleetName, RegattaAndRaceIdentifier raceIdentifier) {
+    public void suppressCompetitorInLeaderboard(String leaderboardName, String competitorIdAsString, boolean suppressed) {
+        getService().apply(new SetSuppressedFlagForCompetitorInLeaderboard(leaderboardName, competitorIdAsString, suppressed));
+    }
+
+    @Override
         return getService().apply(new ConnectTrackedRaceToLeaderboardColumn(leaderboardName, raceColumnName, fleetName, raceIdentifier));
     }
 
@@ -2730,4 +2735,5 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             fregService.registerResultUrl(new URL(result));
         }
     }
+
 }

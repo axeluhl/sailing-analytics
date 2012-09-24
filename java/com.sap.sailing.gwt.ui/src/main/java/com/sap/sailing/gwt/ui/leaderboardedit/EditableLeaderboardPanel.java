@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import com.google.gwt.cell.client.ButtonCell;
+import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.Cell.Context;
 import com.google.gwt.cell.client.CompositeCell;
 import com.google.gwt.cell.client.EditTextCell;
@@ -93,54 +95,44 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
     }
     
     private class EditableCompetitorColumn extends CompetitorColumn {
-        
-        @Override
-        public EditTextCell getCell() {
-            return (EditTextCell) super.getCell();
-        }
-        
-        @Override
-        public void render(Context context, LeaderboardRowDTO row, SafeHtmlBuilder sb) {
-            final boolean isDisplayNameSet = getLeaderboard().isDisplayNameSet(row.competitor);
-            if (isDisplayNameSet) {
-                sb.appendHtmlConstant("<b>");
-            }
-            super.render(context, row, sb);
-            if (isDisplayNameSet) {
-                sb.appendHtmlConstant("</b>");
-            }
+        public EditableCompetitorColumn(List<HasCell<LeaderboardRowDTO, ?>> cells) {
+            super(new CompositeCell<LeaderboardRowDTO>(cells));
         }
 
-        public EditableCompetitorColumn() {
-            super(new EditTextCell());
-            setFieldUpdater(new FieldUpdater<LeaderboardRowDTO, String>() {
-                @Override
-                public void update(final int rowIndex, final LeaderboardRowDTO row, final String value) {
-                    getSailingService().updateCompetitorDisplayNameInLeaderboard(getLeaderboardName(), row.competitor.id,
-                            value == null || value.length() == 0 ? null : value.trim(),
-                            new AsyncCallback<Void>() {
-                                @Override
-                                public void onFailure(Throwable t) {
-                                    EditableLeaderboardPanel.this.getErrorReporter().reportError("Error trying to update display name for competitor "+
-                                            row.competitor.name+" in leaderboard "+getLeaderboardName()+": "+t.getMessage()+
-                                            "\nYou may have to refresh your view.");
-                                }
-
-                                @Override
-                                public void onSuccess(Void v) {
-                                    if (getLeaderboard().competitorDisplayNames == null) {
-                                        getLeaderboard().competitorDisplayNames = new HashMap<CompetitorDTO, String>();
-                                    }
-                                    getLeaderboard().competitorDisplayNames.put(row.competitor, value == null || value.trim().length() == 0 ? null : value.trim());
-                                    getCell().setViewData(row, null); // ensure that getValue() is called again
-                                    EditableLeaderboardPanel.this.getData().getList().set(rowIndex, row);
-                                }
-                            });
-                }
-            });
+        @Override
+        public void render(Context context, LeaderboardRowDTO object, SafeHtmlBuilder sb) {
+            super.defaultRender(context, object, sb);
         }
     }
     
+    private FieldUpdater<LeaderboardRowDTO, String> createCompetitorColumnFieldUpdater(final EditTextCell cell) {
+        return new FieldUpdater<LeaderboardRowDTO, String>() {
+            @Override
+            public void update(final int rowIndex, final LeaderboardRowDTO row, final String value) {
+                getSailingService().updateCompetitorDisplayNameInLeaderboard(getLeaderboardName(), row.competitor.id,
+                        value == null || value.length() == 0 ? null : value.trim(),
+                        new AsyncCallback<Void>() {
+                            @Override
+                            public void onFailure(Throwable t) {
+                                EditableLeaderboardPanel.this.getErrorReporter().reportError("Error trying to update display name for competitor "+
+                                        row.competitor.name+" in leaderboard "+getLeaderboardName()+": "+t.getMessage()+
+                                        "\nYou may have to refresh your view.");
+                            }
+
+                            @Override
+                            public void onSuccess(Void v) {
+                                if (getLeaderboard().competitorDisplayNames == null) {
+                                    getLeaderboard().competitorDisplayNames = new HashMap<CompetitorDTO, String>();
+                                }
+                                getLeaderboard().competitorDisplayNames.put(row.competitor, value == null || value.trim().length() == 0 ? null : value.trim());
+                                cell.setViewData(row, null); // ensure that getValue() is called again
+                                EditableLeaderboardPanel.this.getData().getList().set(rowIndex, row);
+                            }
+                        });
+            }
+        };
+    }
+
     private class CompositeCellRememberingRenderingContextAndObject extends CompositeCell<LeaderboardRowDTO> {
         private final List<RowUpdateWhiteboardProducerThatAlsoHasCell<LeaderboardRowDTO, ?>> cells;
         
@@ -522,15 +514,80 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
     
     @Override
     protected CompetitorColumn createCompetitorColumn() {
-        return new EditableCompetitorColumn();
+        return new EditableCompetitorColumn(getCellListForEditableCompetitorColumn());
+    }
+    
+    private List<HasCell<LeaderboardRowDTO, ?>> getCellListForEditableCompetitorColumn() {
+        List<HasCell<LeaderboardRowDTO, ?>> result = new ArrayList<HasCell<LeaderboardRowDTO, ?>>();
+        result.add(new HasCell<LeaderboardRowDTO, String>() {
+            @Override
+            public Cell<String> getCell() {
+                return new ButtonCell();
+            }
+
+            @Override
+            public FieldUpdater<LeaderboardRowDTO, String> getFieldUpdater() {
+                return new FieldUpdater<LeaderboardRowDTO, String>() {
+                    @Override
+                    public void update(int index, final LeaderboardRowDTO row, String value) {
+                        getSailingService().suppressCompetitorInLeaderboard(getLeaderboardName(), row.competitor.id,
+                                /* suppressed */ true,
+                                new AsyncCallback<Void>() {
+                                    @Override
+                                    public void onFailure(Throwable caught) {
+                                        getErrorReporter().reportError("Error trying to suppress competitor "+row.competitor.name+
+                                                " in leaderboard "+getLeaderboardName());
+                                    }
+
+                                    @Override
+                                    public void onSuccess(Void result) {
+                                        // force a reload of the entire editable leaderboard to hide the now suppressed competitor
+                                        timeChanged(getLeaderboardDisplayDate());
+                                    }
+                        });
+                    }
+                };
+            }
+
+            @Override
+            public String getValue(LeaderboardRowDTO object) {
+                return getStringMessages().suppress();
+            }
+        });
+        result.add(new HasCell<LeaderboardRowDTO, String>() {
+                    @Override
+                    public EditTextCell getCell() {
+                        return new EditTextCell();
+                    }
+
+                    @Override
+                    public FieldUpdater<LeaderboardRowDTO, String> getFieldUpdater() {
+                        return createCompetitorColumnFieldUpdater(getCell());
+                    }
+
+                    @Override
+                    public String getValue(LeaderboardRowDTO row) {
+                        SafeHtmlBuilder sb = new SafeHtmlBuilder();
+                        final boolean isDisplayNameSet = getLeaderboard().isDisplayNameSet(row.competitor);
+                        if (isDisplayNameSet) {
+                            sb.appendHtmlConstant("<b>");
+                        }
+                        sb.appendEscaped(getLeaderboard().getDisplayName(row.competitor));
+                        if (isDisplayNameSet) {
+                            sb.appendHtmlConstant("</b>");
+                        }
+                        return sb.toSafeHtml().asString();
+                    }
+                });
+        return result;
     }
 
     @Override
     protected RaceColumn<?> createRaceColumn(RaceColumnDTO race) {
-        return new EditableRaceColumn(race, getCellList(race));
+        return new EditableRaceColumn(race, getRaceColumnCellList(race));
     }
 
-    private List<RowUpdateWhiteboardProducerThatAlsoHasCell<LeaderboardRowDTO, ?>> getCellList(RaceColumnDTO race) {
+    private List<RowUpdateWhiteboardProducerThatAlsoHasCell<LeaderboardRowDTO, ?>> getRaceColumnCellList(RaceColumnDTO race) {
         List<RowUpdateWhiteboardProducerThatAlsoHasCell<LeaderboardRowDTO, ?>> list =
                 new ArrayList<RowUpdateWhiteboardProducerThatAlsoHasCell<LeaderboardRowDTO, ?>>();
         list.add(new MaxPointsDropDownCellProvider(race.getRaceColumnName()));

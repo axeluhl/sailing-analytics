@@ -32,7 +32,7 @@ public abstract class AbstractLeaderboardColumnOperation<ResultType> extends Abs
      */
     protected void updateDB(RacingEventService toState, Leaderboard leaderboard, RaceColumn raceColumn) {
         if (leaderboard instanceof FlexibleLeaderboard) {
-            toState.updateStoredFlexibleLeaderboard((FlexibleLeaderboard) leaderboard);
+            toState.updateStoredLeaderboard((FlexibleLeaderboard) leaderboard);
         } else {
             assert raceColumn instanceof RaceColumnInSeries;
             toState.updateStoredRegatta(((RaceColumnInSeries) raceColumn).getSeries().getRegatta());

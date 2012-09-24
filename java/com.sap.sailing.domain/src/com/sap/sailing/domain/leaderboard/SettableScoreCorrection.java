@@ -42,4 +42,6 @@ public interface SettableScoreCorrection extends ScoreCorrection {
     void setComment(String scoreCorrectionComment);
     
     void notifyListenersAboutCarriedPointsChange(Competitor competitor, Double oldCarriedPoints, Double newCarriedPoints);
+
+    void notifyListenersAboutIsSuppressedChange(Competitor competitor, boolean suppressed);
 }
