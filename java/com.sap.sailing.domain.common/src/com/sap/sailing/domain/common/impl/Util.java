@@ -16,6 +16,12 @@ public class Util {
         return addTo;
     }
     
+    public static <T> void removeAll(Iterable<T> what, Collection<T> removeFrom) {
+        for (T t : what) {
+            removeFrom.remove(t);
+        }
+    }
+
     public static <T> int size(Iterable<T> i) {
         if (i instanceof Collection<?>) {
             return ((Collection<?>) i).size();
@@ -224,4 +230,5 @@ public class Util {
             return "[" + a + ", " + b + ", " + c + "]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
         }
     }
+
 }
