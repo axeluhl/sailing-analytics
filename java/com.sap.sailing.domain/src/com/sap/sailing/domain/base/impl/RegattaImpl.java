@@ -32,7 +32,7 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     private final BoatClass boatClass;
     private transient Set<RegattaListener> regattaListeners;
     private final Iterable<? extends Series> series;
-    private RaceColumnListeners raceColumnListeners;
+    private final RaceColumnListeners raceColumnListeners;
     private final ScoringScheme scoringScheme;
 
     /**

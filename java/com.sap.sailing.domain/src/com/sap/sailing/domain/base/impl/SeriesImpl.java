@@ -25,7 +25,7 @@ public class SeriesImpl extends NamedImpl implements Series, RaceColumnListener 
     private final List<RaceColumnInSeries> raceColumns;
     private boolean isMedal;
     private Regatta regatta;
-    private RaceColumnListeners raceColumnListeners;
+    private final RaceColumnListeners raceColumnListeners;
     
     /**
      * @param fleets must be non-empty

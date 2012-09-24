@@ -18,7 +18,7 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
     private final Map<Fleet, TrackedRace> trackedRaces;
     private String name;
     private final Map<Fleet, RaceIdentifier> raceIdentifiers;
-    private RaceColumnListeners raceColumnListeners;
+    private final RaceColumnListeners raceColumnListeners;
     
     public AbstractRaceColumn(String name) {
         this.name = name;
