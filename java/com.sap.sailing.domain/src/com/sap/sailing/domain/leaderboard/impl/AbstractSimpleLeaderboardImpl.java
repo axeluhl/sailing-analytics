@@ -69,7 +69,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
      */
     private final Map<Competitor, Double> carriedPoints;
 
-    private RaceColumnListeners raceColumnListeners;
+    private final RaceColumnListeners raceColumnListeners;
     
     /**
      * A synchronized set that manages the difference between {@link #getCompetitors()} and {@link #getAllCompetitors()}.
