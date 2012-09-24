@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -22,6 +23,7 @@ import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
+import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 
 /**
  * Allows administrators to manage data of a sailing event. This is a temporary panel because the managed event
@@ -86,6 +88,13 @@ public class SailingEventManagementPanel extends SimplePanel {
             }
         };
 
+        TextColumn<EventDTO> isPublicColumn = new TextColumn<EventDTO>() {
+            @Override
+            public String getValue(EventDTO event) {
+                return event.isPublic ? stringMessages.yes() : stringMessages.no();
+            }
+        };
+
         ImagesBarColumn<EventDTO, RegattaConfigImagesBarCell> eventActionColumn = new ImagesBarColumn<EventDTO, RegattaConfigImagesBarCell>(
                 new RegattaConfigImagesBarCell(stringMessages));
         eventActionColumn.setFieldUpdater(new FieldUpdater<EventDTO, String>() {
@@ -104,7 +113,8 @@ public class SailingEventManagementPanel extends SimplePanel {
         eventTable = new CellTable<EventDTO>(10000, tableRes);
         eventTable.addColumn(eventNameColumn, stringMessages.event());
         eventTable.addColumn(venueNameColumn, stringMessages.venue());
-        eventTable.addColumn(publicationUrlColumn, "Publication URL");
+        eventTable.addColumn(publicationUrlColumn, stringMessages.publicationUrl());
+        eventTable.addColumn(isPublicColumn, stringMessages.isPublic());
         eventTable.addColumn(eventActionColumn, stringMessages.actions());
         
         eventSelectionModel = new SingleSelectionModel<EventDTO>();
@@ -131,12 +141,13 @@ public class SailingEventManagementPanel extends SimplePanel {
 
             @Override
             public void onSuccess(Void result) {
+                fillEvents();
             }
         });
     }
 
     private void openCreateEventDialog() {
-        List<EventDTO> existingEvents = eventProvider.getList();
+        List<EventDTO> existingEvents = new ArrayList<EventDTO>(eventProvider.getList());
         EventCreateDialog dialog = new EventCreateDialog(Collections.unmodifiableCollection(existingEvents), stringMessages,
                 new AsyncCallback<EventDTO>() {
                     @Override
@@ -151,8 +162,9 @@ public class SailingEventManagementPanel extends SimplePanel {
         dialog.show();
     }
 
-    private void openEditEventDialog(EventDTO selectedEvent) {
-        List<EventDTO> existingEvents = eventProvider.getList();
+    private void openEditEventDialog(final EventDTO selectedEvent) {
+        List<EventDTO> existingEvents = new ArrayList<EventDTO>(eventProvider.getList());
+        existingEvents.remove(selectedEvent);
         EventEditDialog dialog = new EventEditDialog(selectedEvent, Collections.unmodifiableCollection(existingEvents), stringMessages,
                 new AsyncCallback<EventDTO>() {
                     @Override
@@ -160,14 +172,47 @@ public class SailingEventManagementPanel extends SimplePanel {
                     }
 
                     @Override
-                    public void onSuccess(EventDTO newEvent) {
+                    public void onSuccess(EventDTO updatedEvent) {
+                        updateEvent(selectedEvent.name, updatedEvent);
                     }
                 });
         dialog.show();
     }
 
+    private void updateEvent(final String oldEventName, final EventDTO updatedEvent) {
+        List<String> regattaNames = new ArrayList<String>();
+        for(RegattaDTO regatta: updatedEvent.regattas) {
+            regattaNames.add(regatta.name);
+        }
+        
+        sailingService.updateEvent(oldEventName, updatedEvent.venue, updatedEvent.publicationUrl, updatedEvent.isPublic, 
+                regattaNames, new AsyncCallback<Void>() {
+            @Override
+            public void onFailure(Throwable t) {
+                errorReporter.reportError("Error trying to update sailing event" + oldEventName + ": " + t.getMessage());
+            }
+
+            @Override
+            public void onSuccess(Void result) {
+                fillEvents();
+                if(!oldEventName.equals(updatedEvent.name)) {
+                    sailingService.renameEvent(oldEventName, updatedEvent.name, new AsyncCallback<Void>() {
+                        @Override
+                        public void onSuccess(Void result) {
+                            fillEvents();
+                        }
+                        @Override
+                        public void onFailure(Throwable t) {
+                            errorReporter.reportError("Error trying to rename sailing event" + oldEventName + ": " + t.getMessage());
+                        }
+                    });
+                }
+            }
+        });
+    }
+    
     private void createNewEvent(final EventDTO newEvent) {
-        sailingService.createEvent(newEvent.name, newEvent.venue.name, new AsyncCallback<EventDTO>() {
+        sailingService.createEvent(newEvent.name, newEvent.venue.name, newEvent.publicationUrl, newEvent.isPublic, new AsyncCallback<EventDTO>() {
             @Override
             public void onFailure(Throwable t) {
                 errorReporter.reportError("Error trying to create new event" + newEvent.name + ": " + t.getMessage());
@@ -175,6 +220,7 @@ public class SailingEventManagementPanel extends SimplePanel {
 
             @Override
             public void onSuccess(EventDTO newEvent) {
+                fillEvents();
             }
         });
     }

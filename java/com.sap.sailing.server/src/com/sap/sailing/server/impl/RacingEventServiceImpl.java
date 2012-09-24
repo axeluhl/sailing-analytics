@@ -1484,8 +1484,14 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     }
 
     @Override
-    public Event addEvent(String eventName, String venue, List<String> regattaNames) {
-        Event result = new EventImpl(eventName, venue);
+    public Event getEventByName(String name) {
+        synchronized (eventsByName) {
+            return eventsByName.get(name);
+        }
+    }
+    @Override
+    public Event addEvent(String eventName, String venue, String publicationUrl, boolean isPublic, List<String> regattaNames) {
+        Event result = new EventImpl(eventName, venue, publicationUrl, isPublic);
         synchronized (eventsByName) {
             if (eventsByName.containsKey(eventName)) {
                 throw new IllegalArgumentException("Event with name " + eventName + " already exists");
@@ -1496,6 +1502,60 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         return result;
     }
 
+    @Override
+    public void updateEvent(String eventName, String venueName, String publicationUrl, boolean isPublic, List<String> regattaNames) {
+        synchronized (eventsByName) {
+            if (!eventsByName.containsKey(eventName)) {
+                throw new IllegalArgumentException("Sailing event with name " + eventName + " does not exist.");
+            }
+            Event event = eventsByName.get(eventName);
+            event.setPublicationUrl(publicationUrl);
+            event.setPublic(isPublic);
+            event.getVenue().setName(venueName);
+            
+            // update regattas
+//            Iterable<Regatta> regattas = event.getRegattas();
+//            for (Regatta regatta : regattas) {
+//            }
+            
+            mongoObjectFactory.storeEvent(event);
+        }
+    }
+
+    @Override
+    public void renameEvent(String oldName, String newName) {
+        synchronized (eventsByName) {
+            if (!eventsByName.containsKey(oldName)) {
+                throw new IllegalArgumentException("No sailing event with name "+oldName+" found.");
+            }
+            if (eventsByName.containsKey(newName)) {
+                throw new IllegalArgumentException("Sailing event with name "+newName+" already exists.");
+            }
+            Event toRename = eventsByName.get(oldName);
+            if (toRename instanceof Renamable) {
+                ((Renamable) toRename).setName(newName);
+                eventsByName.remove(oldName);
+                eventsByName.put(newName, toRename);
+                mongoObjectFactory.renameEvent(oldName, newName);
+            } else {
+                throw new IllegalArgumentException("Sailing event with name "+newName+" is of type "+toRename.getClass().getSimpleName()+
+                        " and therefore cannot be renamed");
+            }
+        }
+    }
+
+    @Override
+    public void removeEvent(String eventName) {
+        removeEventFromEventsByName(eventName);
+        mongoObjectFactory.removeEvent(eventName);
+    }
+
+    protected void removeEventFromEventsByName(String eventName) {
+        synchronized (eventsByName) {
+            eventsByName.remove(eventName);
+        }
+    }
+    
     @Override
     public Regatta getRememberedRegattaForRace(Serializable raceID) {
         return persistentRegattasForRaceIDs.get(raceID.toString());

@@ -399,4 +399,5 @@ public interface StringMessages extends Messages {
     String actionAddEvent();
     String publicationUrl();
     String suppress();
+    String isPublic();
 }

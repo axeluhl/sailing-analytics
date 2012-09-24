@@ -43,6 +43,7 @@ import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingRaceRecordDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracRaceRecordDTO;
+import com.sap.sailing.gwt.ui.shared.VenueDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 
@@ -362,20 +363,10 @@ public interface SailingServiceAsync {
      */
     void removeEvent(String eventName, AsyncCallback<Void> callback);
     
-    /**
-     * Creates a new event with the name <code>eventName</code>, the venue <code>venue</code> and an empty list of regattas.<br/>
-     */
-    void createEvent(String eventName, String venue, AsyncCallback<EventDTO> callback);
+    void createEvent(String eventName, String description, String publicationUrl, boolean isPublic, AsyncCallback<EventDTO> callback);
     
-    /**
-     * Updates the data of the event with the name <code>oldName</code>.
-     * 
-     * @param oldName The old name of the event
-     * @param newName The new name of the event
-     * @param description The new description of the event
-     * @param leaderboardNames The list of names of the new regattas of the event
-     */
-    void updateEvent(String oldName, String newName, String venue, List<String> regattaNames, AsyncCallback<Void> callback);
+    void updateEvent(String eventName, VenueDTO venue, String publicationUrl, boolean isPublic, List<String> regattaNames,
+            AsyncCallback<Void> callback);
 
     void removeRegatta(RegattaIdentifier regattaIdentifier, AsyncCallback<Void> callback);
 

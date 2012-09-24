@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
@@ -19,6 +20,7 @@ public class EventDialog extends DataEntryDialog<EventDTO> {
     protected TextBox nameEntryField;
     protected TextBox venueEntryField;
     protected TextBox publicationUrlEntryField;
+    protected CheckBox isPublicCheckBox;
 
     protected static class EventParameterValidator implements Validator<EventDTO> {
 
@@ -69,6 +71,7 @@ public class EventDialog extends DataEntryDialog<EventDTO> {
         EventDTO eventDTO = new EventDTO(nameEntryField.getText());
         eventDTO.venue = new VenueDTO(venueEntryField.getText());
         eventDTO.publicationUrl = publicationUrlEntryField.getText();
+        eventDTO.isPublic = isPublicCheckBox.getValue();
         return eventDTO;
     }
 
@@ -80,7 +83,7 @@ public class EventDialog extends DataEntryDialog<EventDTO> {
             panel.add(additionalWidget);
         }
         
-        Grid formGrid = new Grid(3, 2);
+        Grid formGrid = new Grid(4, 2);
         panel.add(formGrid);
         
         formGrid.setWidget(0,  0, new Label(stringConstants.name() + ":"));
@@ -89,6 +92,8 @@ public class EventDialog extends DataEntryDialog<EventDTO> {
         formGrid.setWidget(1, 1, venueEntryField);
         formGrid.setWidget(2, 0, new Label(stringConstants.publicationUrl() + ":"));
         formGrid.setWidget(2, 1, publicationUrlEntryField);
+        formGrid.setWidget(3, 0, new Label(stringConstants.isPublic() + ":"));
+        formGrid.setWidget(3, 1, isPublicCheckBox);
         return panel;
     }
 
