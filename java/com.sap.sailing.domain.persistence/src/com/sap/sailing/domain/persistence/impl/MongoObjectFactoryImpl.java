@@ -148,6 +148,9 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
             storeFlexibleLeaderboard((FlexibleLeaderboard) leaderboard, dbLeaderboard);
         } else if (leaderboard instanceof RegattaLeaderboard) {
             storeRegattaLeaderboard((RegattaLeaderboard) leaderboard, dbLeaderboard);
+        } else {
+            // at least store the scoring scheme
+            dbLeaderboard.put(FieldNames.SCORING_SCHEME_TYPE.name(), leaderboard.getScoringScheme().getType().name());
         }
         storeLeaderboardCorrectionsAndDiscards(leaderboard, dbLeaderboard);
         leaderboardCollection.update(query, dbLeaderboard, /* upsrt */ true, /* multi */ false);

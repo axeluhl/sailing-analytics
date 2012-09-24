@@ -450,7 +450,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             if (overallLeaderboardIdOrName instanceof ObjectId) {
                 dbOverallLeaderboard = leaderboardCollection.findOne(overallLeaderboardIdOrName);
             } else {
-                dbOverallLeaderboard = leaderboardCollection.findOne(new BasicDBObject(FieldNames.LEADERBOARD_NAME.name(), overallLeaderboardIdOrName));
+                dbOverallLeaderboard = (DBObject) overallLeaderboardIdOrName;
             }
             // the loadLeaderboard call adds the overall leaderboard to the leaderboard registry and sets it as the
             // overall leaderboard of the leaderboard group

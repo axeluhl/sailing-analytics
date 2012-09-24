@@ -6,6 +6,7 @@ import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.util.impl.RaceColumnListeners;
 
 /**
  * One or more races that would be noted together in a single column in a {@link Leaderboard}. If the number of
@@ -25,10 +26,6 @@ import com.sap.sailing.domain.tracking.TrackedRace;
  * 
  */
 public interface RaceColumn extends Renamable {
-    void addRaceColumnListener(RaceColumnListener listener);
-    
-    void removeRaceColumnListener(RaceColumnListener listener);
-    
     /**
      * @return the fleets for each of which this column has a single race and therefore optionally a {@link TrackedRace}, in
      * ascending order; best fleets first
@@ -105,6 +102,12 @@ public interface RaceColumn extends Renamable {
      */
     Pair<Competitor, RaceColumn> getKey(Competitor competitor);
 
+    public abstract RaceColumnListeners getRaceColumnListeners();
+
+    public abstract void removeRaceColumnListener(RaceColumnListener listener);
+
+    public abstract void addRaceColumnListener(RaceColumnListener listener);
+
     /**
      * Releases the {@link TrackedRace} previously set by {@link #setTrackedRace(Fleet, TrackedRace)} but leaves the
      * {@link #getRaceIdentifier(Fleet) race identifier} untouched. Therefore, the {@link TrackedRace} may be garbage
@@ -114,6 +117,4 @@ public interface RaceColumn extends Renamable {
      *            the fleet for which to release its tracked race
      */
     void releaseTrackedRace(Fleet fleet);
-    
-    
 }

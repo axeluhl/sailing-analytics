@@ -154,7 +154,8 @@ public class DelayedLeaderboardCorrectionsImpl implements DelayedLeaderboardCorr
 
     private void removeAsListenerIfNoLeftOvers() {
         if (carriedPointsByCompetitorName.isEmpty() && maxPointsReasonsByCompetitorName.isEmpty() &&
-                correctedScoresByCompetitorName.isEmpty() && displayNamesByCompetitorName.isEmpty()) {
+                correctedScoresByCompetitorName.isEmpty() && displayNamesByCompetitorName.isEmpty() &&
+                suppressedCompetitorNames.isEmpty()) {
             getLeaderboard().removeRaceColumnListener(this);
         }
     }
