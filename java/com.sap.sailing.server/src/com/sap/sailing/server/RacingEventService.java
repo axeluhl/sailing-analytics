@@ -232,7 +232,6 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      *            Tells the thresholds from which on a next higher number of worst races will be discarded per
      *            competitor. Example: <code>[3, 6]</code> means that starting from three races the single worst race
      *            will be discarded; starting from six races, the two worst races per competitor are discarded.
-     * @param scoringScheme TODO
      * 
      * @return the leaderboard created
      */
