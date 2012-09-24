@@ -2045,6 +2045,8 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     }
 
     @Override
+    public boolean connectTrackedRaceToLeaderboardColumn(String leaderboardName, String raceColumnName,
+            String fleetName, RegattaAndRaceIdentifier raceIdentifier) {
         return getService().apply(new ConnectTrackedRaceToLeaderboardColumn(leaderboardName, raceColumnName, fleetName, raceIdentifier));
     }
 
