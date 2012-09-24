@@ -141,7 +141,7 @@ public abstract class AbstractLeaderboardDTO implements IsSerializable {
      *            must not be null
      */
     public RaceColumnDTO addRace(String raceColumnName, FleetDTO fleetDTO, boolean medalRace,
-            RegattaAndRaceIdentifier trackedRaceIdentifier, StrippedRaceDTO race) {
+            RegattaAndRaceIdentifier trackedRaceIdentifier, RaceDTO race) {
         assert fleetDTO != null;
         RaceColumnDTO raceColumnDTO = getOrCreateRaceColumn(raceColumnName);
         boolean contains = false;

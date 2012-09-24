@@ -109,6 +109,13 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
     }
 
     @Override
+    public void notifyListenersAboutIsSuppressedChange(Competitor competitor, boolean suppressed) {
+        for (ScoreCorrectionListener listener : getScoreCorrectionListeners()) {
+            listener.isSuppressedChanged(competitor, suppressed);
+        }
+    }
+
+    @Override
     public void setMaxPointsReason(Competitor competitor, RaceColumn raceColumn, MaxPointsReason reason) {
         Pair<Competitor, RaceColumn> key = raceColumn.getKey(competitor);
         MaxPointsReason oldMaxPointsReason;

@@ -228,6 +228,21 @@ input.magnifier {
   	font-family: 'UbuntuBold', Arial, Verdana, sans-serif;
 }
 
+.leaderboardGroupPanel-LiveRace {
+	padding: 5px 8px;
+	display: block;
+	float: left;
+	margin: 5px 5px 5px 0;
+	border-radius: 4px;
+	-moz-border-radius: 4px;
+	-webkit-border-radius: 4px;
+	background: url("images/btn-cta-blue.png") repeat-x -10px 0 #e7e7e7;
+	text-decoration: none;
+	color: #fff;
+  	/*border: 1px solid #a6a6a6;*/
+  	font-family: 'UbuntuBold', Arial, Verdana, sans-serif;
+}
+
 .leaderboardGroupPanel-ActiveLeaderboard {
 	padding: 5px 8px;
 	display: block;
@@ -255,14 +270,21 @@ input.magnifier {
   	display: inline-block;
 }
 
-.leaderboardGroupPanel-ActiveRace:visited, .leaderboardGroupPanel-ActiveLeaderboard:visited, .leaderboardGroupPanel-ActiveButton:visited {
+.leaderboardGroupPanel-ActiveRace:visited, .leaderboardGroupPanel-LiveRace:visited, .leaderboardGroupPanel-ActiveLeaderboard:visited, .leaderboardGroupPanel-ActiveButton:visited {
 	color: #fff;
 }
 
 .leaderboardGroupPanel-ActiveRace:hover, .leaderboardGroupPanel-ActiveLeaderboard:hover, .leaderboardGroupPanel-ActiveButton:hover {
 	text-decoration: none;
 	color: #fff;
-  background: url("images/btn-cta-orangeleft.png") repeat-x -10px -30px #e7e7e7;
+	background: url("images/btn-cta-orangeleft.png") repeat-x -10px -30px #e7e7e7;
+  /*border: 1px solid #f1af10;*/
+}
+
+.leaderboardGroupPanel-LiveRace:hover {
+	text-decoration: none;
+	color: #fff;
+	background: url("images/btn-cta-blue.png") repeat-x -10px -30px #e7e7e7;
   /*border: 1px solid #f1af10;*/
 }
 

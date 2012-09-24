@@ -50,11 +50,6 @@ public abstract class AbstractEntryPoint implements EntryPoint, ErrorReporter {
         errorDialogBox = createErrorDialog(); /* TODO: Make this more generic (e.g. make it support all kinds of messages) */
         userAgent = new UserAgentDetails(Window.Navigator.getUserAgent());
         
-        /* throw warning using alert if browser is unsupported */
-        if (!UserAgentChecker.INSTANCE.isUserAgentSupported(userAgent)) {
-            Window.alert(stringMessages.warningBrowserUnsupported());
-        }
-        
         ServiceDefTarget sailingServiceDef = (ServiceDefTarget) sailingService;
         ServiceDefTarget userManagementServiceDef = (ServiceDefTarget) userManagementService;
         String moduleBaseURL = GWT.getModuleBaseURL();

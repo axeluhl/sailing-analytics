@@ -40,6 +40,7 @@ import com.sap.sailing.gwt.ui.client.RegattaDisplayer;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.shared.CourseDTO;
 import com.sap.sailing.gwt.ui.shared.RaceDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
@@ -106,19 +107,18 @@ public class WindPanel extends FormPanel implements RegattaDisplayer, WindShower
             public void onClick(ClickEvent event) {
                 RegattaAndRaceIdentifier selectedRace = getSelectedRace(); 
                 if(selectedRace != null) {
-                    RaceDTO race = trackedRacesListComposite.getRaceByIdentifier(selectedRace);
-                    WindSettingDialog windSettingDialog = new WindSettingDialog(race, stringMessages, 
-                            new AsyncCallback<WindDTO>() {
-                                @Override
-                                public void onFailure(Throwable caught) {
-                                }
+                    final RaceDTO race = trackedRacesListComposite.getRaceByIdentifier(selectedRace);
+                    sailingService.getCoursePositions(selectedRace, race.startOfRace, new AsyncCallback<CourseDTO>() {
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            showWindSettingDialog(race, null);
+                        }
 
-                                @Override
-                                public void onSuccess(final WindDTO result) {
-                                    addWindFix(result);
-                                }
-                            });
-                    windSettingDialog.show();
+                        @Override
+                        public void onSuccess(final CourseDTO result) {
+                            showWindSettingDialog(race, result);
+                        }
+                    });
                 }
             }
         });
@@ -211,6 +211,21 @@ public class WindPanel extends FormPanel implements RegattaDisplayer, WindShower
         rawWindFixesTable.addColumnSortHandler(columnSortHandler);
         rawWindFixesTable.getColumnSortList().push(timeColumn);
         windFixesDisplayPanel.add(rawWindFixesTable);
+    }
+
+    private void showWindSettingDialog(RaceDTO race, CourseDTO course) {
+        WindSettingDialog windSettingDialog = new WindSettingDialog(race, course, stringMessages, 
+                new AsyncCallback<WindDTO>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                    }
+
+                    @Override
+                    public void onSuccess(final WindDTO result) {
+                        addWindFix(result);
+                    }
+                });
+        windSettingDialog.show();
     }
 
     private void addWindFix(final WindDTO wind) {
@@ -356,7 +371,7 @@ public class WindPanel extends FormPanel implements RegattaDisplayer, WindShower
         RegattaAndRaceIdentifier selectedRace = getSelectedRace();
         RaceDTO raceDTO = selectedRace != null ? trackedRacesListComposite.getRaceByIdentifier(selectedRace) : null;
 
-        if (selectedRace != null && raceDTO != null && raceDTO.currentlyTracked) {
+        if (selectedRace != null && raceDTO != null && raceDTO.isTracked) {
             windCaptionPanel.setVisible(true);
             windCaptionPanel.setCaptionText(stringMessages.wind() + ": " + selectedRace.getRaceName());
 

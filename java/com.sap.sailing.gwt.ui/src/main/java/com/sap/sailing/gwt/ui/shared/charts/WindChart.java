@@ -525,6 +525,9 @@ public class WindChart extends RaceChart implements Component<WindChartSettings>
     @Override
     public void onResize() {
         chart.setSizeToMatchContainer();
+        // it's important here to recall the redraw method, otherwise the bug fix for wrong checkbox positions (nativeAdjustCheckboxPosition)
+        // in the BaseChart class would not be called 
+        chart.redraw();
     }
     
     private boolean needsDataLoading() {

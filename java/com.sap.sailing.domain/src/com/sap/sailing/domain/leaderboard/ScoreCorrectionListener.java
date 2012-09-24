@@ -10,4 +10,6 @@ public interface ScoreCorrectionListener {
     void maxPointsReasonChanced(Competitor competitor, MaxPointsReason oldMaxPointsReason, MaxPointsReason newMaxPointsReason);
     
     void carriedPointsChanged(Competitor competitor, Double oldCarriedPoints, Double newCarriedPoints);
+    
+    void isSuppressedChanged(Competitor competitor, boolean newIsSuppressed);
 }

@@ -20,10 +20,10 @@ public class RaceTimesInfoProvider {
     private SailingServiceAsync sailingService;
     private ErrorReporter errorReporter;
     
-    private Set<RaceIdentifier> raceIdentifiers;
+    private Set<RegattaAndRaceIdentifier> raceIdentifiers;
     private long requestInterval;
     
-    private HashMap<RaceIdentifier, RaceTimesInfoDTO> raceTimesInfos;
+    private HashMap<RegattaAndRaceIdentifier, RaceTimesInfoDTO> raceTimesInfos;
     
     private Set<RaceTimesInfoProviderListener> listeners;
 
@@ -33,9 +33,9 @@ public class RaceTimesInfoProvider {
     public RaceTimesInfoProvider(SailingServiceAsync sailingService, ErrorReporter errorReporter, Collection<RegattaAndRaceIdentifier> raceIdentifiers, long requestInterval) {
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
-        this.raceIdentifiers = new HashSet<RaceIdentifier>(raceIdentifiers);
+        this.raceIdentifiers = new HashSet<RegattaAndRaceIdentifier>(raceIdentifiers);
         this.requestInterval = requestInterval;
-        raceTimesInfos = new HashMap<RaceIdentifier, RaceTimesInfoDTO>();
+        raceTimesInfos = new HashMap<RegattaAndRaceIdentifier, RaceTimesInfoDTO>();
         listeners = new HashSet<RaceTimesInfoProviderListener>();
         
         RepeatingCommand command = new RepeatingCommand() {
@@ -52,9 +52,9 @@ public class RaceTimesInfoProvider {
     }
     
     /**
-     * @return An unmodifiable list of the RaceIdentifiers contained 
+     * @return An unmodifiable list of the RegattaAndRaceIdentifiers contained 
      */
-    public Set<RaceIdentifier> getRaceIdentifiers() {
+    public Set<RegattaAndRaceIdentifier> getRaceIdentifiers() {
         return Collections.unmodifiableSet(raceIdentifiers);
     }
     
@@ -68,7 +68,7 @@ public class RaceTimesInfoProvider {
      * @param forceTimesInfoRequest
      *            If <code>true</code> the race time info for the given race is fetched from the server
      */
-    public void addRaceIdentifier(final RaceIdentifier raceIdentifier, boolean forceTimesInfoRequest) {
+    public void addRaceIdentifier(final RegattaAndRaceIdentifier raceIdentifier, boolean forceTimesInfoRequest) {
         raceIdentifiers.add(raceIdentifier);
         if (forceTimesInfoRequest) {
             sailingService.getRaceTimesInfo(raceIdentifier, new AsyncCallback<RaceTimesInfoDTO>() {
@@ -128,11 +128,11 @@ public class RaceTimesInfoProvider {
      * @return An unmodifiable map of the {@link RaceTimesInfoDTO times infos} for the current {@link #raceIdentifiers},
      *         or an empty map if no time infos are available
      */
-    public Map<RaceIdentifier, RaceTimesInfoDTO> getRaceTimesInfos(){
+    public Map<RegattaAndRaceIdentifier, RaceTimesInfoDTO> getRaceTimesInfos(){
         return Collections.unmodifiableMap(raceTimesInfos);
     }
     
-    public RaceTimesInfoDTO getRaceTimesInfo(RaceIdentifier raceIdentifier) {
+    public RaceTimesInfoDTO getRaceTimesInfo(RegattaAndRaceIdentifier raceIdentifier) {
         return raceTimesInfos.get(raceIdentifier);
     }
     

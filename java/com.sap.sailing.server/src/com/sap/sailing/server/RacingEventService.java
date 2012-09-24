@@ -23,7 +23,6 @@ import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RegattaRegistry;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.common.RaceFetcher;
-import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaFetcher;
 import com.sap.sailing.domain.common.RegattaIdentifier;
@@ -265,7 +264,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     /**
      * Updates the leaderboard data in the persistent store
      */
-    void updateStoredFlexibleLeaderboard(FlexibleLeaderboard leaderboard);
+    void updateStoredLeaderboard(Leaderboard leaderboard);
     
     void updateStoredRegattaLeaderboard(RegattaLeaderboard leaderboard);
 
@@ -295,7 +294,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
 
     void removeRegatta(Regatta regatta) throws MalformedURLException, IOException, InterruptedException;
 
-    TrackedRace getExistingTrackedRace(RaceIdentifier raceIdentifier);
+    TrackedRace getExistingTrackedRace(RegattaAndRaceIdentifier raceIdentifier);
     
     /**
      * Obtains an unmodifiable map of the leaderboard groups configured in this service keyed by their names.

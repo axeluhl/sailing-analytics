@@ -47,7 +47,7 @@ public class LeaderboardDiscardingRulesTest {
         assertNotNull(leaderboard);
         int[] discardingRulesNew = new int[] { 1, 5 };
         leaderboard.setResultDiscardingRule(new ResultDiscardingRuleImpl(discardingRulesNew));
-        racingEventService.updateStoredFlexibleLeaderboard(leaderboard);
+        racingEventService.updateStoredLeaderboard(leaderboard);
         Leaderboard leaderboardNew = racingEventService.getLeaderboardByName(LEADERBOARDNAME);
         assertNotNull(leaderboardNew);
         int[] result = leaderboardNew.getResultDiscardingRule().getDiscardIndexResultsStartingWithHowManyRaces();

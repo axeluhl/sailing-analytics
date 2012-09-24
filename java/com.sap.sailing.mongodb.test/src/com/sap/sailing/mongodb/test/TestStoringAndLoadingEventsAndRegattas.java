@@ -214,7 +214,7 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
     private RacingEventServiceImpl createRacingEventServiceWithOneMockedTrackedRace(final TrackedRace q2YellowTrackedRace) {
         return new RacingEventServiceImpl(getMongoService()) {
             @Override
-            public TrackedRace getExistingTrackedRace(RaceIdentifier raceIdentifier) {
+            public TrackedRace getExistingTrackedRace(RegattaAndRaceIdentifier raceIdentifier) {
                 return q2YellowTrackedRace;
             }
         };
