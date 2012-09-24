@@ -71,7 +71,6 @@ import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.client.Timer.PlayStates;
 import com.sap.sailing.gwt.ui.client.UserAgentDetails;
 import com.sap.sailing.gwt.ui.leaderboard.LegDetailColumn.LegDetailField;
-import com.sap.sailing.gwt.ui.leaderboardedit.CompetitorColumnBase;
 import com.sap.sailing.gwt.ui.leaderboardedit.CompetitorFetcher;
 import com.sap.sailing.gwt.ui.shared.AbstractLeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
