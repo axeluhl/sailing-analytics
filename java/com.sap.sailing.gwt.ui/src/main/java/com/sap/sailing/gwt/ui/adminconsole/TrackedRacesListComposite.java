@@ -317,7 +317,7 @@ public class TrackedRacesListComposite extends SimplePanel implements Component<
         TextColumn<RaceDTO> raceLiveDelayColumn = new TextColumn<RaceDTO>() {
             @Override
             public String getValue(RaceDTO raceDTO) {
-                if (raceDTO.trackedRace.delayToLiveInMs > 0)
+                if (raceDTO.isTracked && raceDTO.trackedRace.delayToLiveInMs > 0)
                     return "" + raceDTO.trackedRace.delayToLiveInMs / 1000;
 
                 return "";
