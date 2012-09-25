@@ -129,7 +129,6 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
 
     @Override
     public void storeLeaderboard(Leaderboard leaderboard) {
-        // TODO store suppressed competitors
         DBCollection leaderboardCollection = database.getCollection(CollectionNames.LEADERBOARDS.name());
         try {
             leaderboardCollection.ensureIndex(FieldNames.LEADERBOARD_NAME.name());
@@ -149,6 +148,9 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
             storeFlexibleLeaderboard((FlexibleLeaderboard) leaderboard, dbLeaderboard);
         } else if (leaderboard instanceof RegattaLeaderboard) {
             storeRegattaLeaderboard((RegattaLeaderboard) leaderboard, dbLeaderboard);
+        } else {
+            // at least store the scoring scheme
+            dbLeaderboard.put(FieldNames.SCORING_SCHEME_TYPE.name(), leaderboard.getScoringScheme().getType().name());
         }
         storeLeaderboardCorrectionsAndDiscards(leaderboard, dbLeaderboard);
         leaderboardCollection.update(query, dbLeaderboard, /* upsrt */ true, /* multi */ false);
@@ -276,11 +278,14 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         dbLeaderboardGroup.put(FieldNames.LEADERBOARD_GROUP_DESCRIPTION.name(), leaderboardGroup.getDescription());
         final Leaderboard overallLeaderboard = leaderboardGroup.getOverallLeaderboard();
         if (overallLeaderboard != null) {
-            BasicDBObject dbOverallLeaderboard = new BasicDBObject();
-            dbLeaderboardGroup.put(FieldNames.LEADERBOARD_GROUP_OVERALL_LEADERBOARD.name(), dbOverallLeaderboard);
-            dbOverallLeaderboard.put(FieldNames.LEADERBOARD_NAME.name(), overallLeaderboard.getName());
-            storeLeaderboardCorrectionsAndDiscards(overallLeaderboard, dbOverallLeaderboard);
-            dbOverallLeaderboard.put(FieldNames.SCORING_SCHEME_TYPE.name(), overallLeaderboard.getScoringScheme().getType().name());
+            BasicDBObject overallLeaderboardQuery = new BasicDBObject(FieldNames.LEADERBOARD_NAME.name(), overallLeaderboard.getName());
+            DBObject dbOverallLeaderboard = leaderboardCollection.findOne(overallLeaderboardQuery);
+            if (dbOverallLeaderboard == null) {
+                storeLeaderboard(overallLeaderboard);
+                dbOverallLeaderboard = leaderboardCollection.findOne(overallLeaderboardQuery);
+            }
+            ObjectId dbOverallLeaderboardId = (ObjectId) dbOverallLeaderboard.get("_id");
+            dbLeaderboardGroup.put(FieldNames.LEADERBOARD_GROUP_OVERALL_LEADERBOARD.name(), dbOverallLeaderboardId);
         }
         BasicDBList dbLeaderboardIds = new BasicDBList();
         for (Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {

@@ -6,11 +6,9 @@ import java.util.Map;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
-import com.sap.sailing.domain.base.RaceColumnListener;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.util.impl.RaceColumnListeners;
 
 public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implements RaceColumn {
     private static final long serialVersionUID = -7801617988982540470L;
@@ -18,23 +16,10 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
     private final Map<Fleet, TrackedRace> trackedRaces;
     private String name;
     private final Map<Fleet, RaceIdentifier> raceIdentifiers;
-    private final RaceColumnListeners raceColumnListeners;
-    
     public AbstractRaceColumn(String name) {
         this.name = name;
         this.trackedRaces = new HashMap<Fleet, TrackedRace>();
         this.raceIdentifiers = new HashMap<Fleet, RaceIdentifier>();
-        raceColumnListeners = new RaceColumnListeners();
-    }
-    
-    @Override
-    public void addRaceColumnListener(RaceColumnListener listener) {
-        getRaceColumnListeners().addRaceColumnListener(listener);
-    }
-
-    @Override
-    public void removeRaceColumnListener(RaceColumnListener listener) {
-        getRaceColumnListeners().removeRaceColumnListener(listener);
     }
     
     @Override
@@ -131,9 +116,5 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
     @Override
     public String toString() {
         return getName();
-    }
-
-    protected RaceColumnListeners getRaceColumnListeners() {
-        return raceColumnListeners;
     }
 }

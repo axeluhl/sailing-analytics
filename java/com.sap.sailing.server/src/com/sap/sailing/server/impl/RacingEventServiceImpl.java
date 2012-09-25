@@ -1346,10 +1346,11 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         if (overallLeaderboard != null) {
             if (overallLeaderboardScoringSchemeType == null) {
                 group.setOverallLeaderboard(null);
-                removeLeaderboardFromLeaderboardsByName(overallLeaderboard.getName());
+                removeLeaderboard(overallLeaderboard.getName());
             } else {
                 // update existing overall leaderboard's discards settings; scoring scheme cannot be updated in-place
                 overallLeaderboard.setResultDiscardingRule(new ResultDiscardingRuleImpl(overallLeaderboardDiscardThresholds));
+                updateStoredLeaderboard(overallLeaderboard);
             }
         } else if (overallLeaderboard == null && overallLeaderboardScoringSchemeType != null) {
             addOverallLeaderboardToLeaderboardGroup(group,
@@ -1365,6 +1366,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
                 new ResultDiscardingRuleImpl(discardThresholds));
         leaderboardGroup.setOverallLeaderboard(overallLeaderboard);
         addLeaderboard(overallLeaderboard);
+        updateStoredLeaderboard(overallLeaderboard);
     }
 
     @Override
