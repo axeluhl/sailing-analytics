@@ -288,7 +288,7 @@ public class TrackedRacesListComposite extends SimplePanel implements Component<
             @Override
             public String getValue(RaceDTO raceDTO) {
                 if (raceDTO.isTracked == true)
-                    return "tracked";
+                    return stringMessages.tracked();
 
                 return "";
             }
