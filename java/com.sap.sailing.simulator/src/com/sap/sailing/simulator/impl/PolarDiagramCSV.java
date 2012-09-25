@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -12,9 +11,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.NavigableMap;
 import java.util.TreeMap;
-
-import org.osgi.framework.Bundle;
-import org.osgi.framework.FrameworkUtil;
 
 import com.sap.sailing.domain.base.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
@@ -26,9 +22,9 @@ public class PolarDiagramCSV extends PolarDiagramBase {
 
     public PolarDiagramCSV(String inputFile) throws IOException {
 
-        Bundle bundle = FrameworkUtil.getBundle(this.getClass());
-        URL fileURL = bundle.getEntry(inputFile);
-        InputStream csvFile = fileURL.openStream();
+        InputStream csvFile = null;
+        ClassLoader cl = this.getClass().getClassLoader();
+        csvFile = cl.getResourceAsStream(inputFile);
         InputStreamReader isr = new InputStreamReader(csvFile);
         BufferedReader bfr = new BufferedReader(isr);
 
