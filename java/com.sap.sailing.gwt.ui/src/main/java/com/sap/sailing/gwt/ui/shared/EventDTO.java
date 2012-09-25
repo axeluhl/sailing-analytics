@@ -10,6 +10,9 @@ public class EventDTO extends NamedDTO implements IsSerializable {
     public VenueDTO venue;
     public String publicationUrl;
     public boolean isPublic;
+
+    // maybe temporary: as long it's not clear how a leaderboard group relates to a sailing event
+    public LeaderboardGroupDTO leaderboardGroup;
     
     EventDTO() {}
 

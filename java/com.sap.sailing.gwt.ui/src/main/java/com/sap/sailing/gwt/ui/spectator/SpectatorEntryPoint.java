@@ -65,7 +65,11 @@ public class SpectatorEntryPoint extends AbstractEntryPoint implements RegattaRe
         if (groupName == null) {
             FlowPanel groupOverviewPanel = new FlowPanel();
             groupOverviewPanel.addStyleName("contentOuterPanel");
-            groupOverviewPanel.add(new LeaderboardGroupOverviewPanel(sailingService, this, stringMessages, showRaceDetails));
+            // DON'T DELETE -> the EventOverviewPanel will replace the LeaderboardGroupOverviewPanel later on
+//            EventOverviewPanel eventOverviewPanel = new EventOverviewPanel(sailingService, this, stringMessages, showRaceDetails);
+//            groupOverviewPanel.add( eventOverviewPanel);
+            LeaderboardGroupOverviewPanel leaderboardGroupOverviewPanel = new LeaderboardGroupOverviewPanel(sailingService, this, stringMessages, showRaceDetails);
+            groupOverviewPanel.add(leaderboardGroupOverviewPanel);
             rootPanel.add(groupOverviewPanel);
         } else {
             LeaderboardGroupPanel groupPanel = new LeaderboardGroupPanel(sailingService, stringMessages, this,
