@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
@@ -26,11 +27,18 @@ import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
+import com.sap.sailing.domain.leaderboard.impl.FlexibleLeaderboardImpl;
+import com.sap.sailing.domain.leaderboard.impl.HighPoint;
+import com.sap.sailing.domain.leaderboard.impl.HighPointExtremeSailingSeriesOverall;
+import com.sap.sailing.domain.leaderboard.impl.LeaderboardGroupImpl;
 import com.sap.sailing.domain.leaderboard.impl.RegattaLeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.ResultDiscardingRuleImpl;
 import com.sap.sailing.domain.leaderboard.impl.ScoreCorrectionImpl;
+import com.sap.sailing.domain.leaderboard.meta.LeaderboardGroupMetaLeaderboard;
 import com.sap.sailing.domain.test.mock.MockedTrackedRaceWithStartTimeAndRanks;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
@@ -364,6 +372,58 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
         List<Competitor> rankedCompetitors = leaderboard.getCompetitorsFromBestToWorst(later);
         assertEquals(leaderboard.getTotalPoints(c[0], later), leaderboard.getTotalPoints(c[1], later), 0.000000001);
         assertEquals(rankedCompetitors.indexOf(c[0]), rankedCompetitors.indexOf(c[1])-1);
+    }
+
+    @Test
+    public void testOverallLeaderboardWithESSHighPointScoring() throws NoWindException {
+        // Let c0 lead the series, c3 trail it, c1 and c2 are one-time competitors which are then suppressed in the
+        // overall leaderboard, expecting c3 to rank second overall, after c0 ranking first, with c1 and c2 not appearing
+        // in the overall leaderboard's sorted competitor list
+        Competitor[] c = createCompetitors(4).toArray(new Competitor[0]);
+        Competitor[] f1 = new Competitor[] { c[2], c[0], c[1], c[3] };
+        Competitor[] f2 = new Competitor[] { c[2], c[0], c[1], c[3] };
+        Competitor[] f3 = new Competitor[] { c[1], c[3], c[0] };
+        Competitor[] f4 = new Competitor[] { c[3], c[0], c[1] };
+        Competitor[] f5 = new Competitor[] { c[0], c[3] };
+        Competitor[] f6 = new Competitor[] { c[3], c[0] };
+        TimePoint now = MillisecondsTimePoint.now();
+        TimePoint later = new MillisecondsTimePoint(now.asMillis()+1000);
+        FlexibleLeaderboard leaderboard1 = new FlexibleLeaderboardImpl("Leaderboard 1", new ScoreCorrectionImpl(),
+                new ResultDiscardingRuleImpl(/* discarding thresholds */ new int[0]), new HighPoint());
+        leaderboard1.addRace(new MockedTrackedRaceWithStartTimeAndRanks(now, Arrays.asList(f1)), "R1", /* medalRace */ false,
+                leaderboard1.getFleet(null));
+        leaderboard1.addRace(new MockedTrackedRaceWithStartTimeAndRanks(now, Arrays.asList(f2)), "R2", /* medalRace */ false,
+                leaderboard1.getFleet(null));
+        assertTrue(leaderboard1.getScoringScheme().getScoreComparator(/* nullScoresAreBetter */ false).compare(
+                leaderboard1.getTotalPoints(c[0], later), leaderboard1.getTotalPoints(c[3], later)) < 0); // c0 better than c3
+        FlexibleLeaderboard leaderboard2 = new FlexibleLeaderboardImpl("Leaderboard 3", new ScoreCorrectionImpl(),
+                new ResultDiscardingRuleImpl(/* discarding thresholds */ new int[0]), new HighPoint());
+        leaderboard2.addRace(new MockedTrackedRaceWithStartTimeAndRanks(now, Arrays.asList(f3)), "R1", /* medalRace */ false,
+                leaderboard1.getFleet(null));
+        leaderboard2.addRace(new MockedTrackedRaceWithStartTimeAndRanks(now, Arrays.asList(f4)), "R2", /* medalRace */ false,
+                leaderboard1.getFleet(null));
+        assertTrue(leaderboard2.getScoringScheme().getScoreComparator(/* nullScoresAreBetter */ false).compare(
+                leaderboard2.getTotalPoints(c[3], later), leaderboard2.getTotalPoints(c[0], later)) < 0); // c3 better than c0
+        FlexibleLeaderboard leaderboard3 = new FlexibleLeaderboardImpl("Leaderboard 3", new ScoreCorrectionImpl(),
+                new ResultDiscardingRuleImpl(/* discarding thresholds */ new int[0]), new HighPoint());
+        leaderboard3.addRace(new MockedTrackedRaceWithStartTimeAndRanks(now, Arrays.asList(f5)), "R1", /* medalRace */ false,
+                leaderboard1.getFleet(null));
+        leaderboard3.addRace(new MockedTrackedRaceWithStartTimeAndRanks(now, Arrays.asList(f6)), "R2", /* medalRace */ false,
+                leaderboard1.getFleet(null));
+        assertTrue(leaderboard3.getCompetitorsFromBestToWorst(later).indexOf(c[3]) <
+                leaderboard3.getCompetitorsFromBestToWorst(later).indexOf(c[0])); // c3 better than c0; won last race
+        LeaderboardGroup leaderboardGroup = new LeaderboardGroupImpl("Leaderboard Group", "Leaderboard Group", Arrays.asList(leaderboard1,
+                leaderboard2, leaderboard3));
+        leaderboardGroup.setOverallLeaderboard(new LeaderboardGroupMetaLeaderboard(leaderboardGroup, new HighPointExtremeSailingSeriesOverall(),
+                new ResultDiscardingRuleImpl(new int[0])));
+        leaderboardGroup.getOverallLeaderboard().setSuppressed(c[1], true);
+        leaderboardGroup.getOverallLeaderboard().setSuppressed(c[2], true);
+        List<Competitor> rankedCompetitors = leaderboardGroup.getOverallLeaderboard().getCompetitorsFromBestToWorst(later);
+        assertFalse(rankedCompetitors.contains(c[1]));
+        assertFalse(rankedCompetitors.contains(c[2]));
+        assertEquals(2, rankedCompetitors.size());
+        assertEquals(28 /* one win, two second */, leaderboardGroup.getOverallLeaderboard().getTotalPoints(c[0], later), 0.000000001);
+        assertEquals(29 /* two wins, one second */, leaderboardGroup.getOverallLeaderboard().getTotalPoints(c[3], later), 0.000000001);
     }
 
     private TimePoint createAndAttachTrackedRaces(Series theSeries, String fleetName, Competitor[]... competitorLists) {
