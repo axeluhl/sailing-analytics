@@ -4,6 +4,10 @@ import java.util.Collection;
 
 import com.sap.sailing.domain.common.Renamable;
 
+/**
+ * A leaderboard group is used to group one or more {@link Leaderboard}s.
+ * @author Frank Mittag (c5163874)
+ */
 public interface LeaderboardGroup extends Renamable {
     void addLeaderboardGroupListener(LeaderboardGroupListener listener);
     void removeLeaderboardGroupListener(LeaderboardGroupListener listener);

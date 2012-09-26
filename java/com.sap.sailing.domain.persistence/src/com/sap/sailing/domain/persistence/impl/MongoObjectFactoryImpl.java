@@ -325,11 +325,28 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         query.put(FieldNames.EVENT_NAME.name(), event.getName());
         DBObject eventDBObject = new BasicDBObject();
         eventDBObject.put(FieldNames.EVENT_NAME.name(), event.getName());
+        eventDBObject.put(FieldNames.EVENT_PUBLICATION_URL.name(), event.getPublicationUrl());
+        eventDBObject.put(FieldNames.EVENT_IS_PUBLIC.name(), event.isPublic());
         DBObject venueDBObject = getVenueAsDBObject(event.getVenue());
         eventDBObject.put(FieldNames.VENUE.name(), venueDBObject);
         eventCollection.update(query, eventDBObject, /* upsrt */ true, /* multi */ false);
     }
 
+    @Override
+    public void renameEvent(String oldName, String newName) {
+        DBCollection eventCollection = database.getCollection(CollectionNames.EVENTS.name());
+        BasicDBObject query = new BasicDBObject(FieldNames.EVENT_NAME.name(), oldName);
+        BasicDBObject renameUpdate = new BasicDBObject("$set", new BasicDBObject(FieldNames.EVENT_NAME.name(), newName));
+        eventCollection.update(query, renameUpdate);
+    }
+    
+    @Override
+    public void removeEvent(String eventName) {
+        DBCollection eventsCollection = database.getCollection(CollectionNames.EVENTS.name());
+        BasicDBObject query = new BasicDBObject(FieldNames.EVENT_NAME.name(), eventName);
+        eventsCollection.remove(query);
+    }
+    
     private DBObject getVenueAsDBObject(Venue venue) {
         DBObject result = new BasicDBObject();
         result.put(FieldNames.VENUE_NAME.name(), venue.getName());

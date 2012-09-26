@@ -415,6 +415,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      */
     void initiallyFillFrom(ObjectInputStream ois) throws IOException, ClassNotFoundException;
 
+    Event getEventByName(String name);
 
     /**
      * @return a thread-safe copy of the events currently known by the service; it's safe for callers to iterate over
@@ -423,18 +424,51 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     Iterable<Event> getAllEvents();
 
     /**
-     * Creates a new event with the name <code>eventName</code>, the description <code>desciption</code> and the
+     * Creates a new event with the name <code>eventName</code>, the venue<code>venue</code> and the
      * regattas with the names in <code>regattaNames</code> and saves it in the database.
      * 
      * @param eventName
      *            The name of the new event
      * @param venue
-     *            The venue of the new event
+     *            The name of the venue of the new event
+     * @param publicationUrl
+     *            The publication URL of the new event
+     * @param isPublic
+     *            Indicates whether the event is public accessible via the publication URL or not
      * @param regattaNames
      *            The names of the regattas contained in the new event.<br />
      * @return The new event
      */
-    Event addEvent(String eventName, String venue, List<String> regattaNames);
+    Event addEvent(String eventName, String venueName, String publicationUrl, boolean isPublic, List<String> regattaNames);
+
+    /**
+     * Updates a sailing event with the name <code>eventName</code>, the venue<code>venue</code> and the
+     * regattas with the names in <code>regattaNames</code> and updates it in the database.
+     * 
+     * @param eventName
+     *            The name of the event to update
+     * @param venueName
+     *            The name of the venue of the event
+     * @param publicationUrl
+     *            The publication URL of the event
+     * @param isPublic
+     *            Indicates whether the event is public accessible via the publication URL or not
+     * @param regattaNames
+     *            The names of the regattas contained in the event.<br />
+     * @return The new event
+     */
+    void updateEvent(String eventName, String venueName, String publicationUrl, boolean isPublic, List<String> regattaNames);
+    
+    /**
+     * Renames a sailing event. If a sailing event by the name <code>oldName</code> does not exist in {@link #getEvents()},
+     * or if a event with the name <code>newName</code> already exists, an {@link IllegalArgumentException} is thrown.
+     * If the method completes normally, the rename has been successful, and the event previously obtained by calling
+     * {@link #getEventByName(String) getEventByName(oldName)} can now be obtained by calling
+     * {@link #getEventByName(String) getEventByName(newName)}.
+     */
+    void renameEvent(String oldEventName, String newEventName);
+    
+    void removeEvent(String eventName);
 
     com.sap.sailing.domain.base.DomainFactory getBaseDomainFactory();
 
