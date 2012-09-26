@@ -794,6 +794,14 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
     protected void invalidateValidityAndDistanceCaches(FixType gpsFix) {
         assertWriteLock();
         TimePoint distanceCacheInvalidationStart = gpsFix.getTimePoint();
+        // see also bug 968: cache entries for intervals ending after the last fix need to be removed because they are
+        // based on the last fix's position and don't extrapolate; now, with the new gpsFix, the positions between the last
+        // and the new fix are defined by interpolation and hence differ from the previous assumption the competitor would have
+        // stopped moving at the last fix.
+        FixType last = getInternalFixes().lower(gpsFix);
+        if (last != null) {
+            distanceCacheInvalidationStart = last.getTimePoint().plus(1); // add one millisecond to invalidate *after* the last fix only
+        }
         gpsFix.invalidateCache();
         Iterable<FixType> lowers = getEarlierFixesWhoseValidityMayBeAffected(gpsFix);
         for (FixType lower : lowers) {
