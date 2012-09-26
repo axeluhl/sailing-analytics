@@ -32,12 +32,18 @@ public class DynamicTrackImpl<ItemType, FixType extends GPSFix> extends
         }
         if (logger.isLoggable(Level.FINEST)) {
             FixType last;
-            logger.finest("GPS fix "+gpsFix+" for "+getTrackedItem()+", isValid="+gpsFix.isValid()+", time/distance/speed from last: "+
+            lockForRead();
+            try {
+                logger.finest("GPS fix "+gpsFix+" for "+getTrackedItem()+", isValid="+isValid(getInternalRawFixes(), gpsFix)+
+                    ", time/distance/speed from last: "+
                     ((last=getInternalRawFixes().lower(gpsFix))==null
                     ? "null"
-                    : (gpsFix.getTimePoint().asMillis()-last.getTimePoint().asMillis())+"ms/"+
+                    : (gpsFix.getTimePoint().asMillis()-last.getTimePoint().asMillis()+"ms/"+
                       gpsFix.getPosition().getDistance(last.getPosition())) + "/"+
-                      gpsFix.getPosition().getDistance(last.getPosition()).inTime(gpsFix.getTimePoint().asMillis()-last.getTimePoint().asMillis()));
+                      gpsFix.getPosition().getDistance(last.getPosition()).inTime(gpsFix.getTimePoint().asMillis()-last.getTimePoint().asMillis())));
+            } finally {
+                unlockAfterRead();
+            }
         }
         for (GPSTrackListener<ItemType, FixType> listener : getListeners()) {
             listener.gpsFixReceived(gpsFix, getTrackedItem());
