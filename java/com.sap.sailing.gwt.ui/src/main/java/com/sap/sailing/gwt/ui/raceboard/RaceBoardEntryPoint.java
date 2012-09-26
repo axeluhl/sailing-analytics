@@ -190,7 +190,7 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         toolbarPanel.add(raceBoardPanel.getNavigationWidget());
         
         if (!UserAgentChecker.INSTANCE.isUserAgentSupported(userAgent)) {
-            HTML lbl = new HTML("This website optimized to work with Google Chrome. <a target='_blank' href='https://www.google.com/intl/de/chrome/browser/'>Click here to download</a>");
+            HTML lbl = new HTML("This website is optimized to work with Google Chrome. <a target='_blank' href='https://www.google.com/intl/de/chrome/browser/'>Click here to download</a>");
             lbl.setStyleName("browserOptimizedMessage");
             toolbarPanel.add(lbl);
         }
