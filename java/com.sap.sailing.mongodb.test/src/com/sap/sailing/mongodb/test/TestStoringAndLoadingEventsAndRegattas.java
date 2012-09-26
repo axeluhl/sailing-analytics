@@ -73,6 +73,7 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
     public void testLoadStoreSimpleEvent() {
         final String eventName = "Event Name";
         final String venueName = "Venue Name";
+        final String publicationUrl = "http://myevent.sapsailing.com";
         final String[] courseAreaNames = new String[] { "Alpha", "Bravo", "Charlie", "Delta", "Echo", "Foxtrott" };
         final Venue venue = new VenueImpl(venueName);
         for (String courseAreaName : courseAreaNames) {
@@ -80,7 +81,7 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
             venue.addCourseArea(courseArea);
         }
         MongoObjectFactory mof = MongoFactory.INSTANCE.getMongoObjectFactory(getMongoService());
-        Event event = new EventImpl(eventName, venue);
+        Event event = new EventImpl(eventName, venue, publicationUrl, /*isPublic*/ true);
         mof.storeEvent(event);
         
         DomainObjectFactory dof = MongoFactory.INSTANCE.getDomainObjectFactory(getMongoService());

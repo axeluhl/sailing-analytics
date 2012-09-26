@@ -448,7 +448,7 @@ public class RegattaStructureManagementPanel extends SimplePanel implements Rega
     }
 
     private void createNewEvent(final EventDTO newEvent) {
-        sailingService.createEvent(newEvent.name, newEvent.venue.name, new AsyncCallback<EventDTO>() {
+        sailingService.createEvent(newEvent.name, newEvent.venue.name, newEvent.publicationUrl, newEvent.isPublic, new AsyncCallback<EventDTO>() {
             @Override
             public void onFailure(Throwable t) {
                 errorReporter.reportError("Error trying to create new event" + newEvent.name + ": " + t.getMessage());

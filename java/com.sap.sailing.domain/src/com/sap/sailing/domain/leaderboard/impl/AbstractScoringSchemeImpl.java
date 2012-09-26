@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.leaderboard.impl;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -65,11 +66,13 @@ public abstract class AbstractScoringSchemeImpl implements ScoringScheme {
     public int compareByBetterScore(List<Double> o1Scores, List<Double> o2Scores, boolean nullScoresAreBetter) {
         assert o1Scores.size() == o2Scores.size();
         Comparator<Double> scoreComparator = getScoreComparator(nullScoresAreBetter);
-        Collections.sort(o1Scores, scoreComparator);
-        Collections.sort(o2Scores, scoreComparator);
+        List<Double> o1ScoresCopy = new ArrayList<Double>(o1Scores);
+        List<Double> o2ScoresCopy = new ArrayList<Double>(o2Scores);
+        Collections.sort(o1ScoresCopy, scoreComparator);
+        Collections.sort(o2ScoresCopy, scoreComparator);
         // now both lists are sorted from best to worst score
-        Iterator<Double> o1Iter = o1Scores.iterator();
-        Iterator<Double> o2Iter = o2Scores.iterator();
+        Iterator<Double> o1Iter = o1ScoresCopy.iterator();
+        Iterator<Double> o2Iter = o2ScoresCopy.iterator();
         int result = 0;
         while (result == 0 && o1Iter.hasNext() && o2Iter.hasNext()) {
             result = scoreComparator.compare(o1Iter.next(), o2Iter.next());
@@ -86,4 +89,8 @@ public abstract class AbstractScoringSchemeImpl implements ScoringScheme {
         return competitor2NumberOfRacesScored - competitor1NumberOfRacesScored;
     }
 
+    @Override
+    public int compareByLastRace(List<Double> o1Scores, List<Double> o2Scores, boolean nullScoresAreBetter) {
+        return getScoreComparator(nullScoresAreBetter).compare(o1Scores.get(o1Scores.size()-1), o2Scores.get(o2Scores.size()-1));
+    }
 }

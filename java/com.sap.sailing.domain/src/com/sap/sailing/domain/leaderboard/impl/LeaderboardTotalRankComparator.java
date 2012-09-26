@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.leaderboard.impl;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -114,7 +115,11 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
             if (result == 0) {
                 result = compareByMedalRaceScore(o1MedalRaceScore, o2MedalRaceScore);
                 if (result == 0) {
-                    result = compareByBetterScore(o1Scores, o2Scores);
+                    result = compareByBetterScore(Collections.unmodifiableList(o1Scores), Collections.unmodifiableList(o2Scores));
+                    if (result == 0) {
+                        // compare by last race:
+                        result = scoringScheme.compareByLastRace(o1Scores, o2Scores, nullScoresAreBetter);
+                    }
                 }
             }
         }

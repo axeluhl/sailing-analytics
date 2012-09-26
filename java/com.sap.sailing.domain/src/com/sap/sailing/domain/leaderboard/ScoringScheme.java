@@ -76,4 +76,10 @@ public interface ScoringScheme extends Serializable {
     int compareByNumberOfRacesScored(int competitor1NumberOfRacesScored, int competitor2NumberOfRacesScored);
     
     ScoringSchemeType getType();
+
+    /**
+     * Usually, when all other sorting criteria end up in a tie, the last race sailed is used to decide.
+     * @param nullScoresAreBetter TODO
+     */
+    int compareByLastRace(List<Double> o1Scores, List<Double> o2Scores, boolean nullScoresAreBetter);
 }
