@@ -27,24 +27,24 @@
          unpack="false"/>
 
    <plugin
-         id="org.apache.commons.el"
+         id="javax.servlet.jsp.jstl"
          download-size="0"
          install-size="0"
-         version="1.0.0.v201004212143"
+         version="1.2.0.v201105211821"
          unpack="false"/>
 
    <plugin
-         id="org.apache.jasper"
+         id="org.apache.jasper.glassfish"
          download-size="0"
          install-size="0"
-         version="5.5.17.v201004212143"
+         version="2.1.0.v201105210816"
          unpack="false"/>
 
    <plugin
-         id="org.eclipse.equinox.jsp.jasper"
+         id="org.apache.taglibs.standard.glassfish"
          download-size="0"
          install-size="0"
-         version="1.0.300.v20110502"
+         version="1.2.0.v201105210653"
          unpack="false"/>
-
+         
 </feature>
