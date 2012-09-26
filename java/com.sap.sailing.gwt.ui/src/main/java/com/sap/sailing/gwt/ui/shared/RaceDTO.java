@@ -5,8 +5,6 @@ import java.util.Date;
 import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
-import com.sap.sailing.domain.tracking.RaceTracker;
-import com.sap.sailing.domain.tracking.TrackedRace;
 
 public class RaceDTO extends NamedDTO implements IsSerializable {
     /**
