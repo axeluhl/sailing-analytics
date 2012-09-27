@@ -7,6 +7,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -278,6 +279,34 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
                 assertSame(competitors.get(i), rankedCompetitors.get(i));
             }
         }
+    }
+
+    @Test
+    public void testLastRaceTakesPrecedenceWithHighPointLastBreaksTieScheme() throws NoWindException {
+        List<Competitor> competitors = createCompetitors(20);
+        Regatta regatta = createRegatta(/* qualifying */ 0, new String[] { "Default" }, /* final */ 2, new String[] { "Default" },
+                /* medal */ false, "testLastRaceTakesPrecedenceWithHighPointLastBreaksTieScheme",
+                DomainFactory.INSTANCE.getOrCreateBoatClass("49er", /* typicallyStartsUpwind */ true),
+                DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.HIGH_POINT_LAST_BREAKS_TIE));
+        Leaderboard leaderboard = createLeaderboard(regatta, /* discarding thresholds */ new int[0]);
+        TimePoint now = MillisecondsTimePoint.now();
+        TimePoint later = new MillisecondsTimePoint(now.asMillis()+1000);
+        RaceColumn f1Column = series.get(1).getRaceColumnByName("F1");
+        TrackedRace f1Default = new MockedTrackedRaceWithStartTimeAndRanks(now, competitors);
+        f1Column.setTrackedRace(f1Column.getFleetByName("Default"), f1Default);
+        List<Competitor> reversedCompetitors = new ArrayList<Competitor>(competitors);
+        Collections.reverse(reversedCompetitors);
+        RaceColumn f2Column = series.get(1).getRaceColumnByName("F2");
+        TrackedRace f2Default = new MockedTrackedRaceWithStartTimeAndRanks(now, reversedCompetitors);
+        f2Column.setTrackedRace(f2Column.getFleetByName("Default"), f2Default);
+
+        // assert that all competitors have equal points now
+        Competitor firstCompetitor = competitors.iterator().next();
+        for (Competitor competitor : competitors) {
+            assertEquals(leaderboard.getTotalPoints(firstCompetitor, later), leaderboard.getTotalPoints(competitor, later));
+        }
+        // assert that the ordering of competitors equals that of the last race
+        assertEquals(reversedCompetitors, leaderboard.getCompetitorsFromBestToWorst(later));
     }
 
     @Test
