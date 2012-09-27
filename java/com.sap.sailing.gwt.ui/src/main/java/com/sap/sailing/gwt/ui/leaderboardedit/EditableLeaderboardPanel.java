@@ -28,6 +28,7 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.text.shared.SafeHtmlRenderer;
 import com.google.gwt.user.cellview.client.CellTable;
+import com.google.gwt.user.cellview.client.CellTable.Resources;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.Header;
@@ -50,6 +51,7 @@ import com.sap.sailing.domain.common.impl.InvertibleComparatorAdapter;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
+import com.sap.sailing.gwt.ui.adminconsole.AdminConsoleTableResources;
 import com.sap.sailing.gwt.ui.client.Collator;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
@@ -523,7 +525,8 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
     }
 
     private CellTable<CompetitorDTO> createSuppressedCompetitorsTable() {
-        CellTable<CompetitorDTO> result = new CellTable<CompetitorDTO>();
+        final Resources tableResources = GWT.create(AdminConsoleTableResources.class);
+        CellTable<CompetitorDTO> result = new CellTable<CompetitorDTO>(10000, tableResources);
         suppressedCompetitorsShown.addDataDisplay(result);
         final SuppressedSailIDColumn suppressedSailIDColumn = new SuppressedSailIDColumn();
         suppressedSailIDColumn.setSortable(true);
