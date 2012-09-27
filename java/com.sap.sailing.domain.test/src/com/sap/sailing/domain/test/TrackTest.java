@@ -483,7 +483,8 @@ public class TrackTest {
         GPSFix outlier = new GPSFixImpl(outlierPosition, timePointForOutlier);
         track.addGPSFix(outlier);
         assertEquals(1, invalidationCalls.size());
-        assertEquals(timePointForOutlier, invalidationCalls.iterator().next()); // outlier doesn't turn its preceding element into an outlier
+        TimePoint timePointOfLastFixBeforeOutlier = track.getLastFixBefore(timePointForOutlier).getTimePoint();
+        assertTrue(invalidationCalls.iterator().next().after(timePointOfLastFixBeforeOutlier)); // outlier doesn't turn its preceding element into an outlier
         assertNull(distanceCache.getEarliestFromAndDistanceAtOrAfterFrom(now,  start)); // no more entry for "to"-value start in cache
         invalidationCalls.clear();
         final TimePoint timePointOfLastOriginalFix = track.getLastRawFix().getTimePoint();
@@ -499,7 +500,8 @@ public class TrackTest {
         GPSFix lateOutlier = new GPSFixImpl(lateOutlierPosition, timePointForLateOutlier);
         track.addGPSFix(lateOutlier);
         assertEquals(1, invalidationCalls.size());
-        assertEquals(timePointForLateOutlier, invalidationCalls.iterator().next());
+        TimePoint timePointOfLastFixBeforeLateOutlier = track.getLastFixBefore(timePointForLateOutlier).getTimePoint();
+        assertTrue(invalidationCalls.iterator().next().after(timePointOfLastFixBeforeLateOutlier));
         invalidationCalls.clear();
         // expect the invalidation to have started after the single cache entry, so the cache entry still has to be there:
         final Pair<TimePoint, Pair<TimePoint, Distance>> stillPresentFullIntervalCacheEntry = distanceCache
