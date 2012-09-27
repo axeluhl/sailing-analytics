@@ -398,7 +398,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
 
         private boolean isNetPointsCorrected() {
             LeaderboardEntryDTO leaderboardEntryDTO = getCurrentlyRendering().fieldsByRaceColumnName.get(raceName);
-            return leaderboardEntryDTO.netPointsCorrected;
+            return leaderboardEntryDTO != null && leaderboardEntryDTO.netPointsCorrected;
         }
 
         @Override
