@@ -110,21 +110,10 @@ public class DomainFactoryImpl implements DomainFactory {
      */
     @Override
     public Buoy getOrCreateBuoy(String id) {
-        String parsedId = id;
-        String color = null;
-
-        // This is a special hack for the extreme sailing series event where we encoded the buoy color directly into the buoy name
-        String colorTag = "_COLOR:";
-        if(id.contains(colorTag)) {
-            int index = id.indexOf(colorTag);
-            color = id.substring(index + colorTag.length(), id.length());
-            parsedId = id.substring(0, index);
-        }
-        
-        Buoy result = buoyCache.get(parsedId);
+        Buoy result = buoyCache.get(id);
         if (result == null) {
-            result = new BuoyImpl(parsedId, color);
-            buoyCache.put(parsedId, result);
+            result = new BuoyImpl(id);
+            buoyCache.put(id, result);
         }
         return result;
     }
