@@ -904,7 +904,8 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 trackedRaceDTO.timePointOfNewestEvent = trackedRace.getTimePointOfNewestEvent() == null ? null : trackedRace.getTimePointOfNewestEvent().asDate();
                 trackedRaceDTO.delayToLiveInMs = trackedRace.getDelayToLiveInMillis(); 
             }
-            RaceWithCompetitorsDTO raceDTO = new RaceWithCompetitorsDTO(raceIdentifier, convertToCompetitorDTOs(r.getCompetitors()), trackedRaceDTO);
+            RaceWithCompetitorsDTO raceDTO = new RaceWithCompetitorsDTO(raceIdentifier, convertToCompetitorDTOs(r.getCompetitors()),
+                    trackedRaceDTO, getService().isRaceBeingTracked(r));
             if (trackedRace != null) {
                 raceDTO.startOfRace = trackedRace.getStartOfRace() == null ? null : trackedRace.getStartOfRace().asDate();
                 raceDTO.endOfRace = trackedRace.getEndOfRace() == null ? null : trackedRace.getEndOfRace().asDate();
@@ -1917,7 +1918,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                     trackedRaceDTO.startOfTracking = trackedRace.getStartOfTracking() == null ? null : trackedRace.getStartOfTracking().asDate();
                     trackedRaceDTO.hasWindData = trackedRace.hasWindData();
                     trackedRaceDTO.hasGPSData = trackedRace.hasGPSData();
-                    raceDTO = new RaceDTO(raceIdentifier, trackedRaceDTO);
+                    raceDTO = new RaceDTO(raceIdentifier, trackedRaceDTO, getService().isRaceBeingTracked(trackedRace.getRace()));
                     raceDTO.places = racePlaces;
                     raceDTO.startOfRace = trackedRace.getStartOfRace() == null ? null : trackedRace.getStartOfRace().asDate();
                     raceDTO.endOfRace = trackedRace.getEndOfRace() == null ? null : trackedRace.getEndOfRace().asDate();

@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.spectator;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,6 +36,7 @@ import com.sap.sailing.gwt.ui.shared.FleetDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RaceColumnDTO;
 import com.sap.sailing.gwt.ui.shared.RaceDTO;
+import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.panels.BreadcrumbPanel;
 import com.sap.sailing.gwt.ui.shared.panels.WelcomeWidget;
@@ -73,20 +75,20 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
     private final SailingServiceAsync sailingService;
     private final StringMessages stringMessages;
     private final ErrorReporter errorReporter;
-    private LeaderboardGroupDTO group;
+    private LeaderboardGroupDTO leaderboardGroup;
     private final String root;
     private final String viewMode;
     
     private VerticalPanel mainPanel;
     private Widget welcomeWidget = null;
     private boolean allLeaderboardNamesStartWithGroupName = false;
-    private final boolean embedded;
+    private final boolean isEmbedded;
     private final boolean showRaceDetails;
     
     public LeaderboardGroupPanel(SailingServiceAsync sailingService, StringMessages stringConstants,
             ErrorReporter errorReporter, final String groupName, String root, String viewMode, boolean embedded, boolean showRaceDetails) {
         super();
-        this.embedded = embedded;
+        this.isEmbedded = embedded;
         this.showRaceDetails = showRaceDetails;
         this.sailingService = sailingService;
         this.stringMessages = stringConstants;
@@ -96,65 +98,91 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
         mainPanel = new VerticalPanel();
         mainPanel.addStyleName("mainPanel");
         add(mainPanel);
-        loadGroup(groupName);
+        loadLeaderboardGroup(groupName);
     }
 
-    private void loadGroup(final String groupName) {
-        sailingService.getLeaderboardGroupByName(groupName, false /*withGeoLocationData*/, new AsyncCallback<LeaderboardGroupDTO>() {
+    private void loadLeaderboardGroup(final String leaderboardGroupName) {
+        sailingService.getLeaderboardGroupByName(leaderboardGroupName, false /*withGeoLocationData*/, new AsyncCallback<LeaderboardGroupDTO>() {
             @Override
-            public void onSuccess(LeaderboardGroupDTO group) {
-                if (group != null) {
-                    LeaderboardGroupPanel.this.group = group;
-                    if(group.leaderboards.size() > 1) {
+            public void onSuccess(final LeaderboardGroupDTO leaderboardGroupDTO) {
+                if (leaderboardGroupDTO != null) {
+                    LeaderboardGroupPanel.this.leaderboardGroup = leaderboardGroupDTO;
+                    if(leaderboardGroupDTO.leaderboards.size() > 1) {
                         allLeaderboardNamesStartWithGroupName = true;
-                        String groupName = group.name; 
-                        for(StrippedLeaderboardDTO leaderboard: group.leaderboards) {
+                        String groupName = leaderboardGroupDTO.name; 
+                        for(StrippedLeaderboardDTO leaderboard: leaderboardGroupDTO.leaderboards) {
                             if(!leaderboard.name.startsWith(groupName)) {
                                 allLeaderboardNamesStartWithGroupName = false;
                                 break;
                             }
                         }
                     }
-                    buildGUI();
+                    if(leaderboardGroup.containsRegattaLeaderboard()) {
+                        sailingService.getRegattas(new AsyncCallback<List<RegattaDTO>>() {
+                            @Override
+                            public void onSuccess(List<RegattaDTO> regattaDTOs) {
+                                Map<String, RegattaDTO> regattasByName = new HashMap<String, RegattaDTO>();
+                                for(RegattaDTO regattaDTO: regattaDTOs) {
+                                    regattasByName.put(regattaDTO.name, regattaDTO);
+                                }
+                                
+                              for(StrippedLeaderboardDTO leaderboard: leaderboardGroupDTO.leaderboards) {
+                                  if(leaderboard.isRegattaLeaderboard && leaderboard.regattaName != null) {
+                                      RegattaDTO regatta = regattasByName.get(leaderboard.regattaName);
+                                      System.out.println("Found regatta for leaderboardgroup: " +regatta.name);
+                                  }
+                              }
+                                
+                              buildGUI();
+                            }
+                            
+                            @Override
+                            public void onFailure(Throwable t) {
+                                errorReporter.reportError("Error trying to load corresponding regattas for leaderboard group " + leaderboardGroupName + ": " + t.getMessage());
+                            }
+                        });
+                    } else {
+                        buildGUI();
+                    }
                 } else {
-                    errorReporter.reportError(stringMessages.noLeaderboardGroupWithNameFound(groupName));
+                    errorReporter.reportError(stringMessages.noLeaderboardGroupWithNameFound(leaderboardGroupName));
                 }
             }
             @Override
             public void onFailure(Throwable t) {
-                errorReporter.reportError("Error trying to load the leaderboard group " + groupName + ": " + t.getMessage());
+                errorReporter.reportError("Error trying to load the leaderboard group " + leaderboardGroupName + ": " + t.getMessage());
             }
         });
     }
 
     private void buildGUI() {
-        if (!embedded) {
+        if (!isEmbedded) {
             // Create breadcrumb panel
             BreadcrumbPanel breadcrumbPanel = createBreadcrumbPanel();
             if (breadcrumbPanel != null) {
                 mainPanel.add(breadcrumbPanel);
             }
-            // Create group details GUI
-            Label groupNameLabel = new Label(group.name + ":");
+            // leaderboard group details GUI
+            Label groupNameLabel = new Label(leaderboardGroup.name + ":");
             groupNameLabel.setStyleName(STYLE_NAME_PREFIX + "GroupName");
             mainPanel.add(groupNameLabel);
             // Using HTML to display the line breaks in the description
-            HTML groupDescriptionLabel = new HTML(new SafeHtmlBuilder().appendEscapedLines(group.description)
+            HTML leaderboardGroupDescriptionLabel = new HTML(new SafeHtmlBuilder().appendEscapedLines(leaderboardGroup.description)
                     .toSafeHtml());
-            groupDescriptionLabel.setStyleName(STYLE_NAME_PREFIX + "GroupDescription");
-            mainPanel.add(groupDescriptionLabel);
+            leaderboardGroupDescriptionLabel.setStyleName(STYLE_NAME_PREFIX + "GroupDescription");
+            mainPanel.add(leaderboardGroupDescriptionLabel);
 
-            // leaderboard group UI
+            // leaderboards UI
             Label leaderboardsTableLabel = new Label(stringMessages.leaderboards());
             leaderboardsTableLabel.setStyleName(STYLE_NAME_PREFIX + "LeaderboardsTableLabel");
             mainPanel.add(leaderboardsTableLabel);
             
-            if (group.hasOverallLeaderboard()) {
+            if (leaderboardGroup.hasOverallLeaderboard()) {
                 String debugParam = Window.Location.getParameter("gwt.codesvr");
-                String link = URLFactory.INSTANCE.encode("/gwt/Leaderboard.html?name=" + group.name+" "+LeaderboardNameConstants.OVERALL
+                String link = URLFactory.INSTANCE.encode("/gwt/Leaderboard.html?name=" + leaderboardGroup.name+" "+LeaderboardNameConstants.OVERALL
                         + (showRaceDetails ? "&showRaceDetails=true" : "")
-                        + (embedded ? "&embedded=true" : "")
-                        + "&leaderboardGroupName=" + group.name + "&root=" + root
+                        + (isEmbedded ? "&embedded=true" : "")
+                        + "&leaderboardGroupName=" + leaderboardGroup.name + "&root=" + root
                         + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""));
                 HTML overallLeaderboardAnchor = new HTML(getAnchor(link, stringMessages.overallStandings(), "ActiveButton overallStandings"));
                 mainPanel.add(overallLeaderboardAnchor);
@@ -167,7 +195,7 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
             public SafeHtml getValue(StrippedLeaderboardDTO strippedLeaderboardDTO) {
                 String text = "";
                 if (allLeaderboardNamesStartWithGroupName) {
-                    text = shortenLeaderboardName(group.name, strippedLeaderboardDTO.name);
+                    text = shortenLeaderboardName(leaderboardGroup.name, strippedLeaderboardDTO.name);
                 } else {
                     text = strippedLeaderboardDTO.name;
                 }
@@ -185,8 +213,8 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
                 String debugParam = Window.Location.getParameter("gwt.codesvr");
                 String link = URLFactory.INSTANCE.encode("/gwt/Leaderboard.html?name=" + leaderboard.name
                         + (showRaceDetails ? "&showRaceDetails=true" : "")
-                        + (embedded ? "&embedded=true" : "")
-                        + "&leaderboardGroupName=" + group.name + "&root=" + root
+                        + (isEmbedded ? "&embedded=true" : "")
+                        + "&leaderboardGroupName=" + leaderboardGroup.name + "&root=" + root
                         + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""));
                 return getAnchor(link, stringMessages.overview(), /* style */ "ActiveLeaderboard");
             }
@@ -208,7 +236,7 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
             };
             leaderboardsTable.addColumn(racesColumn, stringMessages.races());
         }
-        leaderboardsTable.setRowData(group.leaderboards);
+        leaderboardsTable.setRowData(leaderboardGroup.leaderboards);
         mainPanel.add(leaderboardsTable);
     }
 
@@ -281,7 +309,7 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
                         RegattaAndRaceIdentifier raceIdentifier = race.getRaceIdentifier();
                         String link = URLFactory.INSTANCE.encode("/gwt/RaceBoard.html?leaderboardName=" + leaderboard.name
                                 + "&raceName=" + raceIdentifier.getRaceName() + "&root=" + root + raceIdentifier.getRaceName()
-                                + "&regattaName=" + raceIdentifier.getRegattaName() + "&leaderboardGroupName=" + group.name);
+                                + "&regattaName=" + raceIdentifier.getRegattaName() + "&leaderboardGroupName=" + leaderboardGroup.name);
                         if (debugParam != null && !debugParam.isEmpty()) {
                             link += "&gwt.codesvr=" + debugParam;
                         }
@@ -306,7 +334,7 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
     }
     
     private SafeHtml getAnchor(String link, String linkText, String style) {
-        if (embedded) {
+        if (isEmbedded) {
             return ANCHORTEMPLATE.anchorWithTarget(link, linkText, STYLE_NAME_PREFIX + style, "_blank");
         } else {
             return ANCHORTEMPLATE.anchor(link, linkText, STYLE_NAME_PREFIX + style);
@@ -340,7 +368,7 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
                     + (debugParam != null && !debugParam.isEmpty() ? (showRaceDetails?"":"?")+"gwt.codesvr=" + debugParam : "");
             ArrayList<Pair<String, String>> breadcrumbLinksData = new ArrayList<Pair<String, String>>();
             breadcrumbLinksData.add(new Pair<String, String>(link, stringMessages.home()));
-            breadcrumbPanel = new BreadcrumbPanel(breadcrumbLinksData, group.name);
+            breadcrumbPanel = new BreadcrumbPanel(breadcrumbLinksData, leaderboardGroup.name);
         }
         return breadcrumbPanel;
     }
