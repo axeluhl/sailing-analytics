@@ -76,6 +76,14 @@ public class CourseImpl extends NamedImpl implements Course {
     public void unlockAfterRead() {
         LockUtil.unlockAfterRead(lock);
     }
+    
+    public void lockForWrite() {
+        LockUtil.lockForWrite(lock);
+    }
+    
+    public void unlockAfterWrite() {
+        LockUtil.unlockAfterWrite(lock);
+    }
 
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
         ois.defaultReadObject();

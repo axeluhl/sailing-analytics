@@ -22,11 +22,12 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.CourseListener;
-import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.BuoyImpl;
+import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Triple;
@@ -235,9 +236,14 @@ public class CourseUpdateTest extends AbstractTracTracLiveTest {
                 System.out.println("waypointRemoved " + zeroBasedIndex + " / " + waypointThatGotRemoved);
             }
         });
-        domainFactory.updateCourseWaypoints(course, controlPoints);
-        assertTrue(result[0]);
-        testLegStructure(3);
+        ((CourseImpl) course).lockForWrite(); // without the lock it's possible that another race course update removes the additional waypoint again
+        try {
+            domainFactory.updateCourseWaypoints(course, controlPoints);
+            assertTrue(result[0]);
+            testLegStructure(3);
+        } finally {
+            ((CourseImpl) course).unlockAfterWrite();
+        }
     }
     
     @Test
