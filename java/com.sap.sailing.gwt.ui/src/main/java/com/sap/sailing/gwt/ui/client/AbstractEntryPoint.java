@@ -26,11 +26,16 @@ public abstract class AbstractEntryPoint implements EntryPoint, ErrorReporter {
     private Button dialogCloseButton;
     protected StringMessages stringMessages;
     protected UserAgentDetails userAgent;
-    
+
     /**
      * Create a remote service proxy to talk to the server-side sailing service.
      */
     protected final SailingServiceAsync sailingService = GWT.create(SailingService.class);
+
+    /**
+     * Create a remote service proxy to talk to the server-side media service.
+     */
+    protected final MediaServiceAsync mediaService = GWT.create(MediaService.class);
 
     /**
      * Create a remote service proxy to talk to the server-side user management service.
@@ -38,8 +43,7 @@ public abstract class AbstractEntryPoint implements EntryPoint, ErrorReporter {
     protected final UserManagementServiceAsync userManagementService = GWT.create(UserManagementService.class);
 
     /**
-     * The message displayed to the user when the server cannot be reached or
-     * returns an error.
+     * The message displayed to the user when the server cannot be reached or returns an error.
      */
     private static final String SERVER_ERROR = "An error occurred while " //$NON-NLS-1$
             + "attempting to contact the server. Please check your network " + "connection and try again."; //$NON-NLS-1$ //$NON-NLS-2$
@@ -47,17 +51,21 @@ public abstract class AbstractEntryPoint implements EntryPoint, ErrorReporter {
     @Override
     public void onModuleLoad() {
         stringMessages = GWT.create(StringMessages.class);
-        errorDialogBox = createErrorDialog(); /* TODO: Make this more generic (e.g. make it support all kinds of messages) */
+        errorDialogBox = createErrorDialog(); /*
+                                               * TODO: Make this more generic (e.g. make it support all kinds of
+                                               * messages)
+                                               */
         userAgent = new UserAgentDetails(Window.Navigator.getUserAgent());
-        
         ServiceDefTarget sailingServiceDef = (ServiceDefTarget) sailingService;
+        ServiceDefTarget mediaServiceDef = (ServiceDefTarget) mediaService;
         ServiceDefTarget userManagementServiceDef = (ServiceDefTarget) userManagementService;
         String moduleBaseURL = GWT.getModuleBaseURL();
         String baseURL = moduleBaseURL.substring(0, moduleBaseURL.lastIndexOf('/', moduleBaseURL.length()-2)+1);
         sailingServiceDef.setServiceEntryPoint(baseURL + "sailing");
+        mediaServiceDef.setServiceEntryPoint(baseURL + "media");
         userManagementServiceDef.setServiceEntryPoint(baseURL + "usermanagement");
     }
-    
+
     @Override
     public void reportError(String message) {
         errorDialogBox.setText(message);

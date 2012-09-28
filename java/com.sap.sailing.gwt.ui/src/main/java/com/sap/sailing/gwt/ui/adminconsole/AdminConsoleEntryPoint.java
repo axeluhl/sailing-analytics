@@ -72,6 +72,7 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
         regattaDisplayers.add(leaderboardConfigPanel);
         tabPanel.add(new FregResultImportUrlPanel(sailingService, this, stringMessages), stringMessages.fregResultImportUrls(), /* asHTML */ false);
         tabPanel.add(new ReplicationPanel(sailingService, this, stringMessages), stringMessages.replication(), /* asHTML */ false);
+        tabPanel.add(new MediaPanel(mediaService, this, stringMessages), stringMessages.mediaPanel(), /* asHTML */ false);
         
         tabPanel.selectTab(0);
         tabPanel.addSelectionHandler(new SelectionHandler<Integer>() {

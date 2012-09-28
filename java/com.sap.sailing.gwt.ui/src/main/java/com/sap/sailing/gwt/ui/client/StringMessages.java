@@ -399,4 +399,9 @@ public interface StringMessages extends Messages {
     String suppress();
     String unsuppress();
     String suppressedCompetitors();
+    String mediaPanel();
+    String url();
+    String mimeType();
+    String title();
+    String reallyRemoveMediaTrack(String mediaTrackTitle);
 }

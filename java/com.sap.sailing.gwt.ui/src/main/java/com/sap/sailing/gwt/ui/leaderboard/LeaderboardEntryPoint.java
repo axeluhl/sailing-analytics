@@ -24,7 +24,6 @@ import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
 import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 
-
 public class LeaderboardEntryPoint extends AbstractEntryPoint {
     private static final Logger logger = Logger.getLogger(LeaderboardEntryPoint.class.getName());
     private static final String PARAM_LEADERBOARD_GROUP_NAME = "leaderboardGroupName";
@@ -41,16 +40,16 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
     private static final String PARAM_DELAY_TO_LIVE_MILLIS = "delayToLiveMillis";
     private String leaderboardName;
     private String leaderboardGroupName;
-    
+
     @Override
-    public void onModuleLoad() {     
+    public void onModuleLoad() {
         super.onModuleLoad();
         final boolean showRaceDetails = Window.Location.getParameter(PARAM_SHOW_RACE_DETAILS) != null
                 && Window.Location.getParameter(PARAM_SHOW_RACE_DETAILS).equalsIgnoreCase("true");
         final boolean embedded = Window.Location.getParameter(PARAM_EMBEDDED) != null
                 && Window.Location.getParameter(PARAM_EMBEDDED).equalsIgnoreCase("true");
-        final long delayToLiveMillis = Window.Location.getParameter(PARAM_DELAY_TO_LIVE_MILLIS) != null ?
-                Long.valueOf(Window.Location.getParameter(PARAM_DELAY_TO_LIVE_MILLIS)) : 5000l; // default 5s
+        final long delayToLiveMillis = Window.Location.getParameter(PARAM_DELAY_TO_LIVE_MILLIS) != null ? Long
+                .valueOf(Window.Location.getParameter(PARAM_DELAY_TO_LIVE_MILLIS)) : 5000l; // default 5s
         sailingService.getLeaderboardNames(new AsyncCallback<List<String>>() {
             @Override
             public void onSuccess(List<String> leaderboardNames) {
@@ -69,49 +68,51 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
             }
         });
     }
-    
+
     private void createUI(boolean showRaceDetails, boolean embedded, long delayToLiveMillis) {
         DockLayoutPanel mainPanel = new DockLayoutPanel(Unit.PX);
         RootLayoutPanel.get().add(mainPanel);
         LogoAndTitlePanel logoAndTitlePanel = null;
         if (!embedded) {
-            logoAndTitlePanel = new LogoAndTitlePanel(leaderboardGroupName,
-                    stringMessages.leaderboard() + " " + leaderboardName, stringMessages);
+            logoAndTitlePanel = new LogoAndTitlePanel(leaderboardGroupName, stringMessages.leaderboard() + " "
+                    + leaderboardName, stringMessages);
             logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
             mainPanel.addNorth(logoAndTitlePanel, 68);
         }
         ScrollPanel contentScrollPanel = new ScrollPanel();
-        
+
         String tvModeParam = Window.Location.getParameter("tvMode");
         if (tvModeParam != null) {
             Timer timer = new Timer(PlayModes.Live, 1000l);
             timer.setLivePlayDelayInMillis(delayToLiveMillis);
-            TVViewPanel tvViewPanel = new TVViewPanel(sailingService, stringMessages, this, leaderboardName,
-                    userAgent, null, timer, logoAndTitlePanel, mainPanel, showRaceDetails);
+            TVViewPanel tvViewPanel = new TVViewPanel(sailingService, mediaService, stringMessages, this,
+                    leaderboardName, userAgent, null, timer, logoAndTitlePanel, mainPanel, showRaceDetails);
             contentScrollPanel.setWidget(tvViewPanel);
         } else {
             Timer timer = new Timer(PlayModes.Replay, /* delayBetweenAutoAdvancesInMilliseconds */3000l);
             timer.setLivePlayDelayInMillis(delayToLiveMillis);
-            final LeaderboardSettings leaderboardSettings = createLeaderboardSettingsFromURLParameters(Window.Location.getParameterMap());
+            final LeaderboardSettings leaderboardSettings = createLeaderboardSettingsFromURLParameters(Window.Location
+                    .getParameterMap());
             if (leaderboardSettings.getDelayBetweenAutoAdvancesInMilliseconds() != null) {
                 timer.setPlayMode(PlayModes.Live); // the leaderboard, viewed via the entry point, always goes "live"
             }
             LeaderboardPanel leaderboardPanel = new LeaderboardPanel(sailingService, new AsyncActionsExecutor(),
-                    leaderboardSettings,
-                    getPreselectedRace(Window.Location.getParameterMap()), new CompetitorSelectionModel(
-                            /* hasMultiSelection */true), timer, leaderboardName, leaderboardGroupName,
+                    leaderboardSettings, getPreselectedRace(Window.Location.getParameterMap()),
+                    new CompetitorSelectionModel(
+                    /* hasMultiSelection */true), timer, leaderboardName, leaderboardGroupName,
                     LeaderboardEntryPoint.this, stringMessages, userAgent, showRaceDetails);
             contentScrollPanel.setWidget(leaderboardPanel);
         }
 
         mainPanel.add(contentScrollPanel);
     }
-    
+
     private RaceIdentifier getPreselectedRace(Map<String, List<String>> parameterMap) {
         RaceIdentifier result;
-        if (parameterMap.containsKey(PARAM_RACE_NAME) && parameterMap.get(PARAM_RACE_NAME).size() == 1 &&
-                parameterMap.containsKey(PARAM_REGATTA_NAME) && parameterMap.get(PARAM_REGATTA_NAME).size() == 1) {
-            result = new RegattaNameAndRaceName(parameterMap.get(PARAM_REGATTA_NAME).get(0), parameterMap.get(PARAM_RACE_NAME).get(0));
+        if (parameterMap.containsKey(PARAM_RACE_NAME) && parameterMap.get(PARAM_RACE_NAME).size() == 1
+                && parameterMap.containsKey(PARAM_REGATTA_NAME) && parameterMap.get(PARAM_REGATTA_NAME).size() == 1) {
+            result = new RegattaNameAndRaceName(parameterMap.get(PARAM_REGATTA_NAME).get(0), parameterMap.get(
+                    PARAM_RACE_NAME).get(0));
         } else {
             result = null;
         }
@@ -158,7 +159,7 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
                 try {
                     result.add(DetailType.valueOf(entry));
                 } catch (IllegalArgumentException e) {
-                    logger.info("Can't find detail type "+entry+". Ignoring.");
+                    logger.info("Can't find detail type " + entry + ". Ignoring.");
                 }
             }
         }

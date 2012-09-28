@@ -1,4 +1,3 @@
-
 package com.sap.sailing.gwt.ui.raceboard;
 
 import java.util.Collections;
@@ -35,14 +34,14 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
     private RaceBoardViewModes viewMode;
 
     @Override
-    public void onModuleLoad() {     
+    public void onModuleLoad() {
         super.onModuleLoad();
         regattaName = Window.Location.getParameter("regattaName");
         raceName = Window.Location.getParameter("raceName");
         String leaderboardNameParamValue = Window.Location.getParameter("leaderboardName");
         String leaderboardGroupNameParamValue = Window.Location.getParameter("leaderboardGroupName");
         String viewModeParamValue = Window.Location.getParameter("viewMode");
-        // set the view mode for the race board 
+        // set the view mode for the race board
         if (viewModeParamValue != null && !viewModeParamValue.isEmpty()) {
             try {
                 viewMode = RaceBoardViewModes.valueOf(viewModeParamValue);
@@ -58,23 +57,26 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
             leaderboardName = leaderboardNameParamValue;
         }
         if (leaderboardGroupNameParamValue != null && !leaderboardGroupNameParamValue.isEmpty()) {
-            leaderboardGroupName = leaderboardGroupNameParamValue; 
+            leaderboardGroupName = leaderboardGroupNameParamValue;
         }
         if (regattaName == null || regattaName.isEmpty() || raceName == null || raceName.isEmpty()) {
             createErrorPage("This page requires a valid regatta name and race name.");
             return;
         }
-        final ParallelExecutionCallback<List<String>> getLeaderboardNamesCallback = new ParallelExecutionCallback<List<String>>();  
-        final ParallelExecutionCallback<List<RegattaDTO>> getRegattasCallback = new ParallelExecutionCallback<List<RegattaDTO>>();  
-        final ParallelExecutionCallback<LeaderboardGroupDTO> getLeaderboardGroupByNameCallback = new ParallelExecutionCallback<LeaderboardGroupDTO>();  
-        final ParallelExecutionCallback<UserDTO> getUserCallback = new ParallelExecutionCallback<UserDTO>();  
+        final ParallelExecutionCallback<List<String>> getLeaderboardNamesCallback = new ParallelExecutionCallback<List<String>>();
+        final ParallelExecutionCallback<List<RegattaDTO>> getRegattasCallback = new ParallelExecutionCallback<List<RegattaDTO>>();
+        final ParallelExecutionCallback<LeaderboardGroupDTO> getLeaderboardGroupByNameCallback = new ParallelExecutionCallback<LeaderboardGroupDTO>();
+        final ParallelExecutionCallback<UserDTO> getUserCallback = new ParallelExecutionCallback<UserDTO>();
         if (leaderboardGroupName != null) {
-            new ParallelExecutionHolder(getLeaderboardNamesCallback, getLeaderboardGroupByNameCallback, getRegattasCallback, getUserCallback) {
+            new ParallelExecutionHolder(getLeaderboardNamesCallback, getLeaderboardGroupByNameCallback,
+                    getRegattasCallback, getUserCallback) {
                 @Override
                 public void handleSuccess() {
                     checkUrlParameters(getLeaderboardNamesCallback.getData(),
-                            getLeaderboardGroupByNameCallback.getData(), getRegattasCallback.getData(), getUserCallback.getData());
+                            getLeaderboardGroupByNameCallback.getData(), getRegattasCallback.getData(),
+                            getUserCallback.getData());
                 }
+
                 @Override
                 public void handleFailure(Throwable t) {
                     reportError("Error trying to create the raceboard: " + t.getMessage());
@@ -84,8 +86,10 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
             new ParallelExecutionHolder(getLeaderboardNamesCallback, getRegattasCallback, getUserCallback) {
                 @Override
                 public void handleSuccess() {
-                    checkUrlParameters(getLeaderboardNamesCallback.getData(), null, getRegattasCallback.getData(), getUserCallback.getData());
+                    checkUrlParameters(getLeaderboardNamesCallback.getData(), null, getRegattasCallback.getData(),
+                            getUserCallback.getData());
                 }
+
                 @Override
                 public void handleFailure(Throwable t) {
                     reportError("Error trying to create the raceboard: " + t.getMessage());
@@ -95,25 +99,27 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         sailingService.getRegattas(getRegattasCallback);
         sailingService.getLeaderboardNames(getLeaderboardNamesCallback);
         if (leaderboardGroupName != null) {
-            sailingService.getLeaderboardGroupByName(leaderboardGroupNameParamValue, false /*withGeoLocationData*/, getLeaderboardGroupByNameCallback);
+            sailingService.getLeaderboardGroupByName(leaderboardGroupNameParamValue, false /* withGeoLocationData */,
+                    getLeaderboardGroupByNameCallback);
         }
         userManagementService.getUser(getUserCallback);
     }
 
-    private void checkUrlParameters(List<String> leaderboardNames, LeaderboardGroupDTO leaderboardGroup, List<RegattaDTO> regattas, UserDTO user) {
+    private void checkUrlParameters(List<String> leaderboardNames, LeaderboardGroupDTO leaderboardGroup,
+            List<RegattaDTO> regattas, UserDTO user) {
         if (!leaderboardNames.contains(leaderboardName)) {
-          createErrorPage(stringMessages.noSuchLeaderboard());
-          return;
+            createErrorPage(stringMessages.noSuchLeaderboard());
+            return;
         }
         if (leaderboardGroupName != null && leaderboardGroup != null) {
-            boolean foundLeaderboard = false; 
-            for(StrippedLeaderboardDTO leaderBoard:  leaderboardGroup.leaderboards) {
-                if(leaderBoard.name.equals(leaderboardName)) {
+            boolean foundLeaderboard = false;
+            for (StrippedLeaderboardDTO leaderBoard : leaderboardGroup.leaderboards) {
+                if (leaderBoard.name.equals(leaderboardName)) {
                     foundLeaderboard = true;
                     break;
                 }
             }
-            if(!foundLeaderboard) {
+            if (!foundLeaderboard) {
                 createErrorPage("the leaderboard is not contained in this leaderboard group.");
                 return;
             }
@@ -128,17 +134,19 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         List<RegattaAndRaceIdentifier> singletonList = Collections.singletonList(selectedRace.getRaceIdentifier());
         raceSelectionModel.setSelection(singletonList);
         Timer timer = new Timer(PlayModes.Replay, 1000l);
-        RaceTimesInfoProvider raceTimesInfoProvider = new RaceTimesInfoProvider(sailingService, this, singletonList, 5000l /* requestInterval*/);
-        RaceBoardPanel raceBoardPanel = new RaceBoardPanel(sailingService, user, timer, raceSelectionModel, leaderboardName, leaderboardGroupName,
-                RaceBoardEntryPoint.this, stringMessages, userAgent, viewMode, raceTimesInfoProvider);
+        RaceTimesInfoProvider raceTimesInfoProvider = new RaceTimesInfoProvider(sailingService, this, singletonList,
+                5000l /* requestInterval */);
+        RaceBoardPanel raceBoardPanel = new RaceBoardPanel(sailingService, mediaService, user, timer,
+                raceSelectionModel, leaderboardName, leaderboardGroupName, RaceBoardEntryPoint.this, stringMessages,
+                userAgent, viewMode, raceTimesInfoProvider);
         raceBoardPanel.fillRegattas(regattas);
 
         switch (viewMode) {
-            case ONESCREEN:
-                createRaceBoardInOneScreenMode(raceBoardPanel);
-                break;
+        case ONESCREEN:
+            createRaceBoardInOneScreenMode(raceBoardPanel);
+            break;
         }
-    }  
+    }
 
     private RaceDTO findRace(String regattaName, String raceName, List<RegattaDTO> regattas) {
         for (RegattaDTO regattaDTO : regattas) {
@@ -157,15 +165,15 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         FlowPanel timeLineInnerBgPanel = new FlowPanel();
         timeLineInnerBgPanel.addStyleName("timeLineInnerBgPanel");
         timeLineInnerBgPanel.add(raceBoardPanel.getTimeWidget());
-        
+
         FlowPanel timeLineInnerPanel = new FlowPanel();
         timeLineInnerPanel.add(timeLineInnerBgPanel);
         timeLineInnerPanel.addStyleName("timeLineInnerPanel");
-        
+
         FlowPanel timelinePanel = new FlowPanel();
         timelinePanel.add(timeLineInnerPanel);
         timelinePanel.addStyleName("timeLinePanel");
-        
+
         return timelinePanel;
     }
 
@@ -173,27 +181,28 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(regattaName, selectedRace.name, stringMessages);
         logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
 
-        FlowPanel globalNavigationPanel = new GlobalNavigationPanel(stringMessages, true, leaderboardName, leaderboardGroupName);
+        FlowPanel globalNavigationPanel = new GlobalNavigationPanel(stringMessages, true, leaderboardName,
+                leaderboardGroupName);
         logoAndTitlePanel.add(globalNavigationPanel);
-        
+
         return logoAndTitlePanel;
     }
-    
+
     private void createRaceBoardInOneScreenMode(RaceBoardPanel raceBoardPanel) {
         DockLayoutPanel p = new DockLayoutPanel(Unit.PX);
         RootLayoutPanel.get().add(p);
-        
+
         FlowPanel toolbarPanel = new FlowPanel();
-        
+
         toolbarPanel.add(raceBoardPanel.getNavigationWidget());
 
         FlowPanel logoAndTitlePanel = createLogoAndTitlePanel(raceBoardPanel);
         FlowPanel timePanel = createTimePanel(raceBoardPanel);
-        
-        p.addNorth(logoAndTitlePanel, 68);        
+
+        p.addNorth(logoAndTitlePanel, 68);
         p.addNorth(toolbarPanel, 40);
-        p.addSouth(timePanel, 90);                     
+        p.addSouth(timePanel, 90);
         p.add(raceBoardPanel);
         p.addStyleName("dockLayoutPanel");
-    }    
+    }
 }
