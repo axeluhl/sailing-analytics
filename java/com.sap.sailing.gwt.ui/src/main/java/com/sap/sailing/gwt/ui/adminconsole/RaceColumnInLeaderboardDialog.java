@@ -2,7 +2,6 @@ package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.List;
 
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -65,7 +64,7 @@ public class RaceColumnInLeaderboardDialog extends DataEntryDialog<RaceColumnDTO
     }
 
     public RaceColumnInLeaderboardDialog(List<RaceColumnDTO> existingRaces, RaceColumnDTO raceColumnToEdit, 
-            StringMessages stringConstants, AsyncCallback<RaceColumnDTO> callback) {
+            StringMessages stringConstants, DialogCallback<RaceColumnDTO> callback) {
         super(stringConstants.actionRaceEdit(), null, stringConstants.ok(), stringConstants.cancel(),
                 new RaceDialogValidator(stringConstants, existingRaces), callback);
         this.raceColumnToEdit = raceColumnToEdit;

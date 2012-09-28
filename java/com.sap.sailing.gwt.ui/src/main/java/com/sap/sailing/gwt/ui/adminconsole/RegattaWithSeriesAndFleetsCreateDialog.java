@@ -9,7 +9,6 @@ import java.util.List;
 import com.google.gwt.dom.client.Style.FontWeight;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
@@ -112,7 +111,7 @@ public class RegattaWithSeriesAndFleetsCreateDialog extends DataEntryDialog<Rega
     }
 
     public RegattaWithSeriesAndFleetsCreateDialog(Collection<RegattaDTO> existingRegattas,
-            StringMessages stringConstants, AsyncCallback<RegattaDTO> callback) {
+            StringMessages stringConstants, DialogCallback<RegattaDTO> callback) {
         super(stringConstants.regatta(), null, stringConstants.ok(), stringConstants.cancel(),
                 new RegattaParameterValidator(stringConstants, existingRegattas), callback);
         this.stringConstants = stringConstants;
@@ -180,13 +179,13 @@ public class RegattaWithSeriesAndFleetsCreateDialog extends DataEntryDialog<Rega
             public void onClick(ClickEvent event) {
                 RegattaDTO result = getResult();
                 SeriesWithFleetsCreateDialog dialog = new SeriesWithFleetsCreateDialog(Collections
-                        .unmodifiableCollection(result.series), stringConstants, new AsyncCallback<SeriesDTO>() {
+                        .unmodifiableCollection(result.series), stringConstants, new DialogCallback<SeriesDTO>() {
                     @Override
-                    public void onFailure(Throwable t) {
+                    public void cancel() {
                     }
 
                     @Override
-                    public void onSuccess(SeriesDTO newSeries) {
+                    public void ok(SeriesDTO newSeries) {
                         createdSeries.add(newSeries);
                         updateSeriesGrid(panel);
                     }

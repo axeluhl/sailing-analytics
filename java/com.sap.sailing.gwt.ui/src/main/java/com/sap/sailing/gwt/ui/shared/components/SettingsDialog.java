@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.ui.shared.components;
 
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog;
@@ -12,13 +11,13 @@ public class SettingsDialog<SettingsType> extends DataEntryDialog<SettingsType> 
     public SettingsDialog(final Component<SettingsType> component, StringMessages stringConstants) {
         super(stringConstants.settingsForComponent(component.getLocalizedShortName()), null, stringConstants.ok(),
                 stringConstants.cancel(), component.getSettingsDialogComponent().getValidator(),
-                new AsyncCallback<SettingsType>() {
+                new DialogCallback<SettingsType>() {
                     @Override
-                    public void onFailure(Throwable t) {
+                    public void cancel() {
                     }
 
                     @Override
-                    public void onSuccess(SettingsType newSettings) {
+                    public void ok(SettingsType newSettings) {
                         component.updateSettings(newSettings);
                     }
                 });

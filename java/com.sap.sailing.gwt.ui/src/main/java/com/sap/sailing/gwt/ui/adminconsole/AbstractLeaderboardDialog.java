@@ -3,7 +3,6 @@ package com.sap.sailing.gwt.ui.adminconsole;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.LongBox;
 import com.google.gwt.user.client.ui.TextBox;
@@ -21,7 +20,7 @@ public abstract class AbstractLeaderboardDialog extends DataEntryDialog<Leaderbo
     protected static final int MAX_NUMBER_OF_DISCARDED_RESULTS = 4;
 
     public AbstractLeaderboardDialog(String title, LeaderboardDescriptor leaderboardDTO, StringMessages stringConstants,
-            Validator<LeaderboardDescriptor> validator,  AsyncCallback<LeaderboardDescriptor> callback) {
+            Validator<LeaderboardDescriptor> validator,  DialogCallback<LeaderboardDescriptor> callback) {
         super(title, null, stringConstants.ok(), stringConstants.cancel(), validator, callback);
         this.stringMessages = stringConstants;
         this.leaderboard = leaderboardDTO;

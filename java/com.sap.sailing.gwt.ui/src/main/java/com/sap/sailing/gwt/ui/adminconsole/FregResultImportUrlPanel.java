@@ -14,6 +14,7 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog;
+import com.sap.sailing.gwt.ui.client.DataEntryDialog.DialogCallback;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -114,14 +115,14 @@ public class FregResultImportUrlPanel extends FlowPanel {
                         }
                         return result;
                     }
-        }, new AsyncCallback<String>() {
+        }, new DialogCallback<String>() {
             @Override
-            public void onFailure(Throwable caught) {
+            public void cancel() {
                 // user cancelled; just don't add
             }
 
             @Override
-            public void onSuccess(String result) {
+            public void ok(String result) {
                 urlListBox.addItem(result);
                 sailingService.addFragUrl(result, new AsyncCallback<Void>() {
                     @Override
