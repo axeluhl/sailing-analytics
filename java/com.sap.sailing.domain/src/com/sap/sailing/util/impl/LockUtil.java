@@ -1,7 +1,5 @@
 package com.sap.sailing.util.impl;
 
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
 import java.util.Map;
 import java.util.WeakHashMap;
 import java.util.concurrent.TimeUnit;
@@ -16,25 +14,38 @@ public class LockUtil {
     private static final int NUMBER_OF_SECONDS_TO_WAIT_FOR_LOCK = 5;
     private static final Logger logger = Logger.getLogger(Util.class.getName());
     private static final Map<NamedReentrantReadWriteLock, TimePoint> lastTimeWriteLockWasObtained = new WeakHashMap<>();
+    
     /**
      * Bug <a href="http://bugs.sun.com/view_bug.do?bug_id=6822370">http://bugs.sun.com/view_bug.do?bug_id=6822370</a> seems
      * dangerous, particularly if it happens in a <code>LiveLeaderboardUpdater</code> thread. Even though the bug is reported to
      * have been fixed in JDK 7(b79) we should be careful. This method tries to acquire a lock, allowing for five seconds to pass.
      * After five seconds and not having retrieved the lock, tries again until the lock has been acquired.
+     * @param lockParent TODO
      * @throws InterruptedException 
      */
-    public static void lock(Lock lock, String lockDescriptionForTimeoutLogMessage) {
+    private static void lock(Lock lock, String lockDescriptionForTimeoutLogMessage, NamedReentrantReadWriteLock lockParent) {
         boolean locked = false;
         boolean interrupted = false;
         while (!locked) {
             try {
                 locked = lock.tryLock(NUMBER_OF_SECONDS_TO_WAIT_FOR_LOCK, TimeUnit.SECONDS);
                 if (!locked) {
-                    final ByteArrayOutputStream bos = new ByteArrayOutputStream();
-                    new Throwable("This is where the lock couldn't be acquired").printStackTrace(new PrintStream(
-                            bos));
-                    logger.info("Couldn't acquire lock "+lockDescriptionForTimeoutLogMessage+" in "+NUMBER_OF_SECONDS_TO_WAIT_FOR_LOCK+"s at "+
-                            getCurrentStackTrace()+"Trying again...");
+                    StringBuilder message = new StringBuilder();
+                    message.append("Couldn't acquire lock ");
+                    message.append(lockDescriptionForTimeoutLogMessage);
+                    message.append(" in ");
+                    message.append(NUMBER_OF_SECONDS_TO_WAIT_FOR_LOCK);
+                    message.append("s at ");
+                    message.append(getCurrentStackTrace());
+                    message.append("\nThe current readers are:\n");
+                    for (Thread reader : lockParent.getReaders()) {
+                        message.append(reader);
+                        message.append('\n');
+                        message.append(getStackTrace(reader));
+                        message.append('\n');
+                    }
+                    message.append("Trying again...");
+                    logger.info(message.toString());
                 }
             }
             catch (InterruptedException ex) {
@@ -49,7 +60,7 @@ public class LockUtil {
     }
     
     public static void lockForRead(NamedReentrantReadWriteLock lock) {
-        lock(lock.readLock(), "readLock "+lock.getName());
+        lock(lock.readLock(), "readLock "+lock.getName(), lock);
     }
     
     public static void unlockAfterRead(NamedReentrantReadWriteLock lock) {
@@ -57,7 +68,7 @@ public class LockUtil {
     }
     
     public static void lockForWrite(NamedReentrantReadWriteLock lock) {
-        lock(lock.writeLock(), "writeLock "+lock.getName());
+        lock(lock.writeLock(), "writeLock "+lock.getName(), lock);
         synchronized (lastTimeWriteLockWasObtained) {
             lastTimeWriteLockWasObtained.put(lock, MillisecondsTimePoint.now());
         }
@@ -71,7 +82,7 @@ public class LockUtil {
         }
         if (timePointWriteLockWasObtained == null) {
             logger.info("Internal error: write lock "+lock.getName()+" to be unlocked but no time recorded for when it was last obtained.\n"+
-                    getCurrentStackTrace());
+                    "This is where the lock interaction happened:\n"+getCurrentStackTrace());
         } else {
             TimePoint now = MillisecondsTimePoint.now();
             if (now.asMillis()-timePointWriteLockWasObtained.asMillis() > 10000l) {
@@ -81,12 +92,17 @@ public class LockUtil {
             }
         }
     }
+    
+    private static String getStackTrace(Thread thread) {
+        StringBuilder sb = new StringBuilder();
+        for (StackTraceElement sf : thread.getStackTrace()) {
+            sb.append(sf.toString());
+            sb.append('\n');
+        }
+        return sb.toString();
+    }
 
     private static String getCurrentStackTrace() {
-        final ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        new Throwable("This is where the lock interaction happened").printStackTrace(new PrintStream(
-                bos));
-        String stackTrace = new String(bos.toByteArray());
-        return stackTrace;
+        return getStackTrace(Thread.currentThread());
     }
 }
