@@ -37,12 +37,14 @@ public class LockUtil {
                     message.append(NUMBER_OF_SECONDS_TO_WAIT_FOR_LOCK);
                     message.append("s at ");
                     message.append(getCurrentStackTrace());
+                    Thread writer = lockParent.getWriter();
+                    if (writer != null) {
+                        message.append("\nThe current writer is:\n");
+                        appendThreadData(message, writer);
+                    }
                     message.append("\nThe current readers are:\n");
                     for (Thread reader : lockParent.getReaders()) {
-                        message.append(reader);
-                        message.append('\n');
-                        message.append(getStackTrace(reader));
-                        message.append('\n');
+                        appendThreadData(message, reader);
                     }
                     message.append("Trying again...");
                     logger.info(message.toString());
@@ -57,6 +59,13 @@ public class LockUtil {
             // were acquiring the lock
             Thread.currentThread().interrupt();
         }
+    }
+
+    private static void appendThreadData(StringBuilder message, Thread writer) {
+        message.append(writer);
+        message.append('\n');
+        message.append(getStackTrace(writer));
+        message.append('\n');
     }
     
     public static void lockForRead(NamedReentrantReadWriteLock lock) {

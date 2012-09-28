@@ -165,6 +165,10 @@ public class NamedReentrantReadWriteLock extends ReentrantReadWriteLock implemen
         return new ArrayList<Thread>(readers);
     }
     
+    public Thread getWriter() {
+        return getOwner();
+    }
+    
     @Override
     public String toString() {
         return "ReentrantReadWriteLock "+getName()+" ("+(isFair()?"fair":"unfair")+")";
