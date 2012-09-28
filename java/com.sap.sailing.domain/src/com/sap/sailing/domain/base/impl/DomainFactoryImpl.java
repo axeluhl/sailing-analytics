@@ -30,6 +30,7 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.leaderboard.impl.HighPoint;
 import com.sap.sailing.domain.leaderboard.impl.HighPointExtremeSailingSeriesOverall;
+import com.sap.sailing.domain.leaderboard.impl.HighPointLastBreaksTie;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
@@ -110,21 +111,10 @@ public class DomainFactoryImpl implements DomainFactory {
      */
     @Override
     public Buoy getOrCreateBuoy(String id) {
-        String parsedId = id;
-        String color = null;
-
-        // This is a special hack for the extreme sailing series event where we encoded the buoy color directly into the buoy name
-        String colorTag = "_COLOR:";
-        if(id.contains(colorTag)) {
-            int index = id.indexOf(colorTag);
-            color = id.substring(index + colorTag.length(), id.length());
-            parsedId = id.substring(0, index);
-        }
-        
-        Buoy result = buoyCache.get(parsedId);
+        Buoy result = buoyCache.get(id);
         if (result == null) {
-            result = new BuoyImpl(parsedId, color);
-            buoyCache.put(parsedId, result);
+            result = new BuoyImpl(id);
+            buoyCache.put(id, result);
         }
         return result;
     }
@@ -248,6 +238,8 @@ public class DomainFactoryImpl implements DomainFactory {
             return new HighPoint();
         case HIGH_POINT_ESS_OVERALL:
             return new HighPointExtremeSailingSeriesOverall();
+        case HIGH_POINT_LAST_BREAKS_TIE:
+            return new HighPointLastBreaksTie();
         default:
             throw new RuntimeException("Unknown scoring scheme type "+scoringSchemeType.name());
         }

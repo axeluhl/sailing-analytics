@@ -63,7 +63,6 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
                 windSourcesToExclude.add(windSourceToExclude);
             }
             windSourcesToExclude.add(new WindSourceImpl(WindSourceType.COURSE_BASED));
-            windSourcesToExclude.add(new WindSourceImpl(WindSourceType.TRACK_BASED_ESTIMATION));
             setWindSourcesToExclude(windSourcesToExclude);
         }
         

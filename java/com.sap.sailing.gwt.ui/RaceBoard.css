@@ -288,3 +288,7 @@ img.openColumn {
 	box-shadow: 0 0 8px #424242;
 	z-index: 10;
 }
+
+.browserOptimizedMessage {
+	padding: 15px 0px;
+}

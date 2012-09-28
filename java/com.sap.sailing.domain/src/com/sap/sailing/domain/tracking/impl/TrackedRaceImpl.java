@@ -1543,8 +1543,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                                 if (estimatedSpeedWithConfidence != null
                                         && estimatedSpeedWithConfidence.getObject() != null &&
                                         // Mark passings may be missing or far off. This can lead to boats apparently
-                                        // going
-                                        // "backwards" regarding the leg's direction; ignore those
+                                        // going "backwards" regarding the leg's direction; ignore those
                                         isNavigatingForward(estimatedSpeedWithConfidence.getObject().getBearing(),
                                                 trackedLeg, timePoint)) {
                                     // additionally to generally excluding maneuvers, reduce confidence around mark

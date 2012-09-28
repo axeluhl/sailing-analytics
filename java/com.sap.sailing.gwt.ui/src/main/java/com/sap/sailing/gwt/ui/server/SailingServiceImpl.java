@@ -192,11 +192,13 @@ import com.sap.sailing.server.operationaltransformation.MoveLeaderboardColumnDow
 import com.sap.sailing.server.operationaltransformation.MoveLeaderboardColumnUp;
 import com.sap.sailing.server.operationaltransformation.RemoveAndUntrackRace;
 import com.sap.sailing.server.operationaltransformation.RemoveColumnFromSeries;
+import com.sap.sailing.server.operationaltransformation.RemoveEvent;
 import com.sap.sailing.server.operationaltransformation.RemoveLeaderboard;
 import com.sap.sailing.server.operationaltransformation.RemoveLeaderboardColumn;
 import com.sap.sailing.server.operationaltransformation.RemoveLeaderboardGroup;
 import com.sap.sailing.server.operationaltransformation.RemoveRegatta;
 import com.sap.sailing.server.operationaltransformation.RenameColumnInSeries;
+import com.sap.sailing.server.operationaltransformation.RenameEvent;
 import com.sap.sailing.server.operationaltransformation.RenameLeaderboard;
 import com.sap.sailing.server.operationaltransformation.RenameLeaderboardColumn;
 import com.sap.sailing.server.operationaltransformation.RenameLeaderboardGroup;
@@ -206,6 +208,7 @@ import com.sap.sailing.server.operationaltransformation.SetWindSourcesToExclude;
 import com.sap.sailing.server.operationaltransformation.StopTrackingRace;
 import com.sap.sailing.server.operationaltransformation.StopTrackingRegatta;
 import com.sap.sailing.server.operationaltransformation.UpdateCompetitorDisplayNameInLeaderboard;
+import com.sap.sailing.server.operationaltransformation.UpdateEvent;
 import com.sap.sailing.server.operationaltransformation.UpdateIsMedalRace;
 import com.sap.sailing.server.operationaltransformation.UpdateLeaderboard;
 import com.sap.sailing.server.operationaltransformation.UpdateLeaderboardCarryValue;
@@ -901,7 +904,8 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 trackedRaceDTO.timePointOfNewestEvent = trackedRace.getTimePointOfNewestEvent() == null ? null : trackedRace.getTimePointOfNewestEvent().asDate();
                 trackedRaceDTO.delayToLiveInMs = trackedRace.getDelayToLiveInMillis(); 
             }
-            RaceWithCompetitorsDTO raceDTO = new RaceWithCompetitorsDTO(raceIdentifier, convertToCompetitorDTOs(r.getCompetitors()), trackedRaceDTO);
+            RaceWithCompetitorsDTO raceDTO = new RaceWithCompetitorsDTO(raceIdentifier, convertToCompetitorDTOs(r.getCompetitors()),
+                    trackedRaceDTO, getService().isRaceBeingTracked(r));
             if (trackedRace != null) {
                 raceDTO.startOfRace = trackedRace.getStartOfRace() == null ? null : trackedRace.getStartOfRace().asDate();
                 raceDTO.endOfRace = trackedRace.getEndOfRace() == null ? null : trackedRace.getEndOfRace().asDate();
@@ -1914,7 +1918,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                     trackedRaceDTO.startOfTracking = trackedRace.getStartOfTracking() == null ? null : trackedRace.getStartOfTracking().asDate();
                     trackedRaceDTO.hasWindData = trackedRace.hasWindData();
                     trackedRaceDTO.hasGPSData = trackedRace.hasGPSData();
-                    raceDTO = new RaceDTO(raceIdentifier, trackedRaceDTO);
+                    raceDTO = new RaceDTO(raceIdentifier, trackedRaceDTO, getService().isRaceBeingTracked(trackedRace.getRace()));
                     raceDTO.places = racePlaces;
                     raceDTO.startOfRace = trackedRace.getStartOfRace() == null ? null : trackedRace.getStartOfRace().asDate();
                     raceDTO.endOfRace = trackedRace.getEndOfRace() == null ? null : trackedRace.getEndOfRace().asDate();
@@ -2561,48 +2565,50 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     public List<EventDTO> getEvents() {
         List<EventDTO> result = new ArrayList<EventDTO>();
         for (Event event : getService().getAllEvents()) {
-            List<RegattaDTO> regattasList = getRegattas();
-            EventDTO eventDTO = new EventDTO(event.getName(), regattasList);
-            eventDTO.venue = new VenueDTO(event.getVenue().getName());
+            EventDTO eventDTO = convertToEventDTO(event);
             result.add(eventDTO);
         }
         return result;
     }
 
     @Override
-    public void updateEvent(String oldName, String newName, String venue, List<String> regattaNames) {
-        // TODO Auto-generated method stub
-        
+    public void updateEvent(String eventName, VenueDTO venue, String publicationUrl, boolean isPublic, List<String> regattaNames) {
+        getService().apply(new UpdateEvent(eventName, venue.name, publicationUrl, isPublic, regattaNames));
     }
 
     @Override
-    public EventDTO createEvent(String eventName, String venue) {
-        return convertToEventDTO(getService().apply(new CreateEvent(eventName, venue, new ArrayList<String>())));
+    public EventDTO createEvent(String eventName, String venue, String publicationUrl, boolean isPublic) {
+        return convertToEventDTO(getService().apply(new CreateEvent(eventName, venue, publicationUrl, isPublic, new ArrayList<String>())));
     }
 
     @Override
     public void removeEvent(String eventName) {
-        // TODO Auto-generated method stub
-        
+        getService().apply(new RemoveEvent(eventName));
     }
 
     @Override
     public void renameEvent(String oldName, String newName) {
-        // TODO Auto-generated method stub
-        
+        getService().apply(new RenameEvent(oldName, newName));
     }
 
     @Override
     public EventDTO getEventByName(String eventName) {
-        // TODO Auto-generated method stub
-        return null;
+        EventDTO result = null;
+        for (Event event : getService().getAllEvents()) {
+            if(event.getName().equals(eventName)) {
+                result = convertToEventDTO(event);
+                break;
+            }
+        }
+        return result;
     }
     
     private EventDTO convertToEventDTO(Event event) {
-        EventDTO eventDTO = new EventDTO();
-        eventDTO.name = event.getName();
+        EventDTO eventDTO = new EventDTO(event.getName());
         eventDTO.venue = new VenueDTO();
         eventDTO.venue.name = event.getVenue() != null ? event.getVenue().getName() : null;
+        eventDTO.publicationUrl = event.getPublicationUrl();
+        eventDTO.isPublic = event.isPublic();
         eventDTO.regattas = new ArrayList<RegattaDTO>();
         for (Regatta regatta: event.getRegattas()) {
             RegattaDTO regattaDTO = new RegattaDTO();

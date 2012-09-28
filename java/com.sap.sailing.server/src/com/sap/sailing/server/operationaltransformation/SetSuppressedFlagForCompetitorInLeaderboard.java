@@ -21,7 +21,6 @@ public class SetSuppressedFlagForCompetitorInLeaderboard extends AbstractLeaderb
         Leaderboard leaderboard = toState.getLeaderboardByName(getLeaderboardName());
         Competitor competitor = leaderboard.getCompetitorByIdAsString(competitorIdAsString);
         leaderboard.setSuppressed(competitor, suppressed);
-        // FIXME bug 979: if this is a LeaderboardGroupMetaLeaderboard, update the stored leaderboard group, otherwise only the leaderboard...
         toState.updateStoredLeaderboard(leaderboard);
         return null;
     }

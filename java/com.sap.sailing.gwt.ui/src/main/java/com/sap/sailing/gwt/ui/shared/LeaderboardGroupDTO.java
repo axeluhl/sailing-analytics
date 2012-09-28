@@ -56,6 +56,17 @@ public class LeaderboardGroupDTO extends NamedDTO implements IsSerializable {
         this.overallLeaderboardScoringSchemeType = overallLeaderboardScoringSchemeType;
     }
 
+    public boolean containsRegattaLeaderboard() {
+        boolean result = false;
+        for (StrippedLeaderboardDTO leaderboard : leaderboards) {
+            if(leaderboard.isRegattaLeaderboard) {
+                result = true;
+                break;
+            }
+        }
+        return result;
+    }
+
     public boolean containsRace(RaceIdentifier race) {
         boolean containsRace = false;
         leaderboardsLoop:

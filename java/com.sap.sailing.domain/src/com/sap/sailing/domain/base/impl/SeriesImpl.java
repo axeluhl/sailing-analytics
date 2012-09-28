@@ -10,11 +10,13 @@ import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnInSeries;
 import com.sap.sailing.domain.base.RaceColumnListener;
+import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.common.impl.NamedImpl;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.util.impl.RaceColumnListeners;
 
@@ -28,7 +30,14 @@ public class SeriesImpl extends NamedImpl implements Series, RaceColumnListener 
     private final RaceColumnListeners raceColumnListeners;
     
     /**
-     * @param fleets must be non-empty
+     * @param fleets
+     *            must be non-empty
+     * @param trackedRegattaRegistry
+     *            used to find the {@link TrackedRegatta} for this column's series' {@link Series#getRegatta() regatta}
+     *            in order to re-associate a {@link TrackedRace} passed to {@link #setTrackedRace(Fleet, TrackedRace)}
+     *            with this column's series' {@link TrackedRegatta}, and the tracked race's {@link RaceDefinition} with
+     *            this column's series {@link Regatta}, respectively. If <code>null</code>, the re-association won't be
+     *            carried out.
      */
     public SeriesImpl(String name, boolean isMedal, Iterable<? extends Fleet> fleets, Iterable<String> raceColumnNames,
             TrackedRegattaRegistry trackedRegattaRegistry) {
@@ -84,7 +93,15 @@ public class SeriesImpl extends NamedImpl implements Series, RaceColumnListener 
     public Iterable<? extends RaceColumnInSeries> getRaceColumns() {
         return raceColumns;
     }
-    
+
+    /**
+     * @param trackedRegattaRegistry
+     *            used to find the {@link TrackedRegatta} for this column's series' {@link Series#getRegatta() regatta}
+     *            in order to re-associate a {@link TrackedRace} passed to {@link #setTrackedRace(Fleet, TrackedRace)}
+     *            with this column's series' {@link TrackedRegatta}, and the tracked race's {@link RaceDefinition} with
+     *            this column's series {@link Regatta}, respectively. If <code>null</code>, the re-association won't be
+     *            carried out.
+     */
     @Override
     public RaceColumnInSeries addRaceColumn(String raceColumnName, TrackedRegattaRegistry trackedRegattaRegistry) {
         final RaceColumnInSeriesImpl result = createRaceColumn(raceColumnName, trackedRegattaRegistry);
@@ -94,6 +111,14 @@ public class SeriesImpl extends NamedImpl implements Series, RaceColumnListener 
         return result;
     }
 
+    /**
+     * @param trackedRegattaRegistry
+     *            used to find the {@link TrackedRegatta} for this column's series' {@link Series#getRegatta() regatta}
+     *            in order to re-associate a {@link TrackedRace} passed to {@link #setTrackedRace(Fleet, TrackedRace)}
+     *            with this column's series' {@link TrackedRegatta}, and the tracked race's {@link RaceDefinition} with
+     *            this column's series {@link Regatta}, respectively. If <code>null</code>, the re-association won't be
+     *            carried out.
+     */
     private RaceColumnInSeriesImpl createRaceColumn(String raceColumnName, TrackedRegattaRegistry trackedRegattaRegistry) {
         RaceColumnInSeriesImpl result = new RaceColumnInSeriesImpl(raceColumnName, this, trackedRegattaRegistry);
         return result;

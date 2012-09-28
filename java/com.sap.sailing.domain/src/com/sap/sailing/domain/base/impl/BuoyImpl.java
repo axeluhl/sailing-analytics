@@ -43,4 +43,8 @@ public class BuoyImpl extends NamedImpl implements Buoy {
     public String getDisplayColor() {
         return displayColor;
     }
+
+    public void setDisplayColor(String displayColor) {
+        this.displayColor = displayColor;
+    }
 }

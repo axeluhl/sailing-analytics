@@ -2,23 +2,22 @@ package com.sap.sailing.server.operationaltransformation;
 
 import java.util.List;
 
-import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
 
-public class CreateEvent extends AbstractEventOperation<Event> {
-    private static final long serialVersionUID = 308389324918359960L;
-    private final String venue;
+public class UpdateEvent extends AbstractEventOperation<Void> {
+    private static final long serialVersionUID = -8271559266421161532L;
+    private final String venueName;
     private final String publicationUrl;
     private final boolean isPublic;
     private final List<String> regattaNames;
 
-    public CreateEvent(String eventName, String venue, String publicationUrl, boolean isPublic, List<String> regattaNames) {
+    public UpdateEvent(String eventName, String venueName, String publicationUrl, boolean isPublic, List<String> regattaNames) {
         super(eventName);
-        this.venue = venue;
-        this.regattaNames = regattaNames;
+        this.venueName = venueName;
         this.publicationUrl = publicationUrl;
         this.isPublic = isPublic;
+        this.regattaNames = regattaNames;
     }
 
     @Override
@@ -34,8 +33,8 @@ public class CreateEvent extends AbstractEventOperation<Event> {
     }
 
     @Override
-    public Event internalApplyTo(RacingEventService toState) {
-        return toState.addEvent(getEventName(), venue, publicationUrl, isPublic, regattaNames);
+    public Void internalApplyTo(RacingEventService toState) {
+        toState.updateEvent(getEventName(), venueName, publicationUrl, isPublic, regattaNames);
+        return null;
     }
-
 }

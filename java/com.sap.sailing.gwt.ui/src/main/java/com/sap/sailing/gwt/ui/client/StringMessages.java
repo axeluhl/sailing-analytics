@@ -382,6 +382,7 @@ public interface StringMessages extends Messages {
     String useOverallLeaderboard();
     String overallStandings();
     String scoringSchemeHighPointEssOverall();
+    String scoringSchemeHighPointLastBreaksTie();
     String type();
     String actionAddRaces();
     String racesWithNamePrefix();
@@ -396,7 +397,10 @@ public interface StringMessages extends Messages {
     String pleaseEnterAValue();
     String latitude();
     String longitude();
+    String actionAddEvent();
+    String publicationUrl();
     String suppress();
+    String isPublic();
     String unsuppress();
     String suppressedCompetitors();
 }
