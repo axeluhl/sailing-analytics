@@ -152,6 +152,7 @@ import com.sap.sailing.gwt.ui.shared.PositionDTO;
 import com.sap.sailing.gwt.ui.shared.QuickRankDTO;
 import com.sap.sailing.gwt.ui.shared.RaceBuoysDTO;
 import com.sap.sailing.gwt.ui.shared.RaceColumnDTO;
+import com.sap.sailing.gwt.ui.shared.RaceColumnInSeriesDTO;
 import com.sap.sailing.gwt.ui.shared.RaceDTO;
 import com.sap.sailing.gwt.ui.shared.RaceMapDataDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
@@ -2625,37 +2626,55 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         getService().apply(new RemoveRegatta(regattaIdentifier));
     }
 
+    private RaceColumnInSeriesDTO convertToRaceColumnInSeriesDTO(RaceColumnInSeries raceColumnInSeries) {
+        RaceColumnInSeriesDTO raceColumnInSeriesDTO = new RaceColumnInSeriesDTO(raceColumnInSeries.getSeries().getName(),
+                raceColumnInSeries.getRegatta().getName());
+        raceColumnInSeriesDTO.name = raceColumnInSeries.getName();
+        raceColumnInSeriesDTO.setMedalRace(raceColumnInSeries.isMedalRace());
+        return raceColumnInSeriesDTO;
+    }
+    
     @Override
-    public void addColumnsToSeries(RegattaIdentifier regattaIdentifier, String seriesName, List<String> columnNames) {
+    public List<RaceColumnInSeriesDTO> addRaceColumnsToSeries(RegattaIdentifier regattaIdentifier, String seriesName, List<String> columnNames) {
+        List<RaceColumnInSeriesDTO> result = new ArrayList<RaceColumnInSeriesDTO>();
         for(String columnName: columnNames) {
-            getService().apply(new AddColumnToSeries(regattaIdentifier, seriesName, columnName));
+            RaceColumnInSeries raceColumnInSeries = getService().apply(new AddColumnToSeries(regattaIdentifier, seriesName, columnName));
+            if(raceColumnInSeries != null) {
+                result.add(convertToRaceColumnInSeriesDTO(raceColumnInSeries));
+            }
         }
+        return result;
     }
 
     @Override
-    public void addColumnToSeries(RegattaIdentifier regattaIdentifier, String seriesName, String columnName) {
-        getService().apply(new AddColumnToSeries(regattaIdentifier, seriesName, columnName));
+    public RaceColumnInSeriesDTO addRaceColumnToSeries(RegattaIdentifier regattaIdentifier, String seriesName, String columnName) {
+        RaceColumnInSeriesDTO result = null;
+        RaceColumnInSeries raceColumnInSeries = getService().apply(new AddColumnToSeries(regattaIdentifier, seriesName, columnName));
+        if(raceColumnInSeries != null) {
+            result = convertToRaceColumnInSeriesDTO(raceColumnInSeries);
+        }
+        return result;
     }
 
     @Override
-    public void removeColumnsFromSeries(RegattaIdentifier regattaIdentifier, String seriesName, List<String> columnNames) {
+    public void removeRaceColumnsFromSeries(RegattaIdentifier regattaIdentifier, String seriesName, List<String> columnNames) {
         for(String columnName: columnNames) {
             getService().apply(new RemoveColumnFromSeries(regattaIdentifier, seriesName, columnName));
         }
     }
 
     @Override
-    public void removeColumnFromSeries(RegattaIdentifier regattaIdentifier, String seriesName, String columnName) {
+    public void removeRaceColumnFromSeries(RegattaIdentifier regattaIdentifier, String seriesName, String columnName) {
         getService().apply(new RemoveColumnFromSeries(regattaIdentifier, seriesName, columnName));
     }
 
     @Override
-    public void moveColumnInSeriesUp(RegattaIdentifier regattaIdentifier, String seriesName, String columnName) {
+    public void moveRaceColumnInSeriesUp(RegattaIdentifier regattaIdentifier, String seriesName, String columnName) {
         getService().apply(new MoveColumnInSeriesUp(regattaIdentifier, seriesName, columnName));
     }
 
     @Override
-    public void moveColumnInSeriesDown(RegattaIdentifier regattaIdentifier, String seriesName, String columnName) {
+    public void moveRaceColumnInSeriesDown(RegattaIdentifier regattaIdentifier, String seriesName, String columnName) {
         getService().apply(new MoveColumnInSeriesDown(regattaIdentifier, seriesName, columnName));
     }
 

@@ -48,6 +48,7 @@ import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.FleetDTO;
 import com.sap.sailing.gwt.ui.shared.NamedDTO;
 import com.sap.sailing.gwt.ui.shared.RaceColumnDTO;
+import com.sap.sailing.gwt.ui.shared.RaceColumnInSeriesDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
 
@@ -330,7 +331,7 @@ public class RegattaStructureManagementPanel extends SimplePanel implements Rega
             }
         }
 
-        sailingService.addColumnsToSeries(regattaIdentifier, series.name, raceColumnsToAdd, new AsyncCallback<Void>() {
+        sailingService.addRaceColumnsToSeries(regattaIdentifier, series.name, raceColumnsToAdd, new AsyncCallback<List<RaceColumnInSeriesDTO>>() {
                 @Override
                 public void onFailure(Throwable caught) {
                     errorReporter.reportError("Error trying to add race columns "
@@ -340,12 +341,12 @@ public class RegattaStructureManagementPanel extends SimplePanel implements Rega
                 }
 
                 @Override
-                public void onSuccess(Void v) {
+                public void onSuccess(List<RaceColumnInSeriesDTO> raceColumns) {
                     regattaRefresher.fillRegattas();
                 }
             });
         
-        sailingService.removeColumnsFromSeries(regattaIdentifier, series.name, raceColumnsToRemove, new AsyncCallback<Void>() {
+        sailingService.removeRaceColumnsFromSeries(regattaIdentifier, series.name, raceColumnsToRemove, new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError("Error trying to remove race columns "
