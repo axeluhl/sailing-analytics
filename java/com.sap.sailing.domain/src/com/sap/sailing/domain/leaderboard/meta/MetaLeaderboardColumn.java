@@ -119,6 +119,11 @@ public class MetaLeaderboardColumn extends SimpleAbstractRaceColumn implements R
     }
 
     @Override
+    public boolean canAddRaceColumnToContainer(RaceColumn raceColumn) {
+        return getRaceColumnListeners().canAddRaceColumnToContainer(raceColumn);
+    }
+
+    @Override
     public void raceColumnAddedToContainer(RaceColumn raceColumn) {
         getRaceColumnListeners().notifyListenersAboutRaceColumnAddedToContainer(raceColumn);
     }
