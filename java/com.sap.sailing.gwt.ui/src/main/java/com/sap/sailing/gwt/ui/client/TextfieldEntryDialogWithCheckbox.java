@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.ui.client;
 
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -12,7 +11,7 @@ public class TextfieldEntryDialogWithCheckbox extends DataEntryDialog<Pair<Strin
     private final TextBox entryField;
 
     public TextfieldEntryDialogWithCheckbox(String title, String message, String okButtonName, String cancelButtonName,
-            String checkboxLabel, String initialValue, Validator<Pair<String, Boolean>> validator, AsyncCallback<Pair<String, Boolean>> callback) {
+            String checkboxLabel, String initialValue, Validator<Pair<String, Boolean>> validator, DialogCallback<Pair<String, Boolean>> callback) {
         super(title, message, okButtonName, cancelButtonName, validator, callback);
         checkbox = createCheckbox(checkboxLabel);
         entryField = createTextBox(initialValue);

@@ -8,7 +8,6 @@ import java.util.List;
 
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -94,7 +93,7 @@ public class LeaderboardGroupDialog extends DataEntryDialog<LeaderboardGroupDTO>
     }
 
     public LeaderboardGroupDialog(LeaderboardGroupDTO group, StringMessages stringMessages,
-            AsyncCallback<LeaderboardGroupDTO> callback, Collection<LeaderboardGroupDTO> existingLeaderboardGroups) {
+            DialogCallback<LeaderboardGroupDTO> callback, Collection<LeaderboardGroupDTO> existingLeaderboardGroups) {
         super(stringMessages.leaderboardGroup(), null, stringMessages.ok(), stringMessages.cancel(),
                 new LeaderboardGroupParameterValidator(stringMessages, existingLeaderboardGroups), callback);
         this.stringMessages = stringMessages;

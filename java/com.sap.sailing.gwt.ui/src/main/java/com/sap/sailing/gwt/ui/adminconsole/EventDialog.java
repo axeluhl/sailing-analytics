@@ -3,7 +3,6 @@ package com.sap.sailing.gwt.ui.adminconsole;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
@@ -60,7 +59,7 @@ public class EventDialog extends DataEntryDialog<EventDTO> {
     }
 
     public EventDialog(EventParameterValidator validator, StringMessages stringConstants,
-            AsyncCallback<EventDTO> callback) {
+            DialogCallback<EventDTO> callback) {
         super(stringConstants.event(), null, stringConstants.ok(), stringConstants.cancel(), validator,
                 callback);
         this.stringConstants = stringConstants;

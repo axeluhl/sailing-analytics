@@ -9,7 +9,6 @@ import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -94,7 +93,7 @@ public class RaceColumnInRegattaSeriesDialog extends DataEntryDialog<Pair<Series
     }
 
     public RaceColumnInRegattaSeriesDialog(RegattaDTO regatta, StringMessages stringConstants,
-            AsyncCallback<Pair<SeriesDTO, List<RaceColumnDTO>>> callback) {
+            DialogCallback<Pair<SeriesDTO, List<RaceColumnDTO>>> callback) {
         super(stringConstants.actionEditRaces(), null, stringConstants.ok(), stringConstants.cancel(),
                 new RaceDialogValidator(regatta, stringConstants), callback);
         this.regatta = regatta;

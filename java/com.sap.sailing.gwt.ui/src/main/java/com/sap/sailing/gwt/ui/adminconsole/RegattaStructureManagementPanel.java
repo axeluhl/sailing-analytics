@@ -37,6 +37,7 @@ import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
+import com.sap.sailing.gwt.ui.client.DataEntryDialog.DialogCallback;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.RegattaDisplayer;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
@@ -297,13 +298,13 @@ public class RegattaStructureManagementPanel extends SimplePanel implements Rega
     
     private void editRacesOfRegattaSeries(final RegattaDTO regatta) {
         RaceColumnInRegattaSeriesDialog raceDialog = new RaceColumnInRegattaSeriesDialog(regatta, stringMessages, 
-                new AsyncCallback<Pair<SeriesDTO, List<RaceColumnDTO>>>() {
+                new DialogCallback<Pair<SeriesDTO, List<RaceColumnDTO>>>() {
                     @Override
-                    public void onFailure(Throwable caught) {
+                    public void cancel() {
                     }
 
                     @Override
-                    public void onSuccess(final Pair<SeriesDTO, List<RaceColumnDTO>> result) {
+                    public void ok(final Pair<SeriesDTO, List<RaceColumnDTO>> result) {
                         updateRacesOfRegattaSeries(regatta, result.getA(), result.getB());
                     }
                 });
@@ -391,13 +392,13 @@ public class RegattaStructureManagementPanel extends SimplePanel implements Rega
 
     private void openCreateEventDialog() {
         EventCreateDialog dialog = new EventCreateDialog(Collections.unmodifiableCollection(events), stringMessages,
-                new AsyncCallback<EventDTO>() {
+                new DialogCallback<EventDTO>() {
                     @Override
-                    public void onFailure(Throwable t) {
+                    public void cancel() {
                     }
 
                     @Override
-                    public void onSuccess(EventDTO newEvent) {
+                    public void ok(EventDTO newEvent) {
                         createNewEvent(newEvent);
                     }
                 });
@@ -413,13 +414,13 @@ public class RegattaStructureManagementPanel extends SimplePanel implements Rega
         }
         
         RegattaWithSeriesAndFleetsCreateDialog dialog = new RegattaWithSeriesAndFleetsCreateDialog(existingRegattas, stringMessages,
-                new AsyncCallback<RegattaDTO>() {
+                new DialogCallback<RegattaDTO>() {
                     @Override
-                    public void onFailure(Throwable t) {
+                    public void cancel() {
                     }
 
                     @Override
-                    public void onSuccess(RegattaDTO newRegatta) {
+                    public void ok(RegattaDTO newRegatta) {
                         createNewRegatta(newRegatta);
                     }
                 });

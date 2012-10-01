@@ -19,6 +19,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
+import com.sap.sailing.gwt.ui.client.DataEntryDialog.DialogCallback;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -149,13 +150,13 @@ public class SailingEventManagementPanel extends SimplePanel {
     private void openCreateEventDialog() {
         List<EventDTO> existingEvents = new ArrayList<EventDTO>(eventProvider.getList());
         EventCreateDialog dialog = new EventCreateDialog(Collections.unmodifiableCollection(existingEvents), stringMessages,
-                new AsyncCallback<EventDTO>() {
+                new DialogCallback<EventDTO>() {
                     @Override
-                    public void onFailure(Throwable t) {
+                    public void cancel() {
                     }
 
                     @Override
-                    public void onSuccess(EventDTO newEvent) {
+                    public void ok(EventDTO newEvent) {
                         createNewEvent(newEvent);
                     }
                 });
@@ -166,13 +167,13 @@ public class SailingEventManagementPanel extends SimplePanel {
         List<EventDTO> existingEvents = new ArrayList<EventDTO>(eventProvider.getList());
         existingEvents.remove(selectedEvent);
         EventEditDialog dialog = new EventEditDialog(selectedEvent, Collections.unmodifiableCollection(existingEvents), stringMessages,
-                new AsyncCallback<EventDTO>() {
+                new DialogCallback<EventDTO>() {
                     @Override
-                    public void onFailure(Throwable t) {
+                    public void cancel() {
                     }
 
                     @Override
-                    public void onSuccess(EventDTO updatedEvent) {
+                    public void ok(EventDTO updatedEvent) {
                         updateEvent(selectedEvent.name, updatedEvent);
                     }
                 });

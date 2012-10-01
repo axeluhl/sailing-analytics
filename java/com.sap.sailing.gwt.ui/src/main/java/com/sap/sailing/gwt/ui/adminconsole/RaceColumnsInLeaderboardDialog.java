@@ -6,7 +6,6 @@ import java.util.List;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Grid;
@@ -87,7 +86,7 @@ public class RaceColumnsInLeaderboardDialog extends DataEntryDialog<List<RaceCol
     }
 
     public RaceColumnsInLeaderboardDialog(List<RaceColumnDTO> existingRaces, StringMessages stringConstants,
-            AsyncCallback<List<RaceColumnDTO>> callback) {
+            DialogCallback<List<RaceColumnDTO>> callback) {
         super(stringConstants.actionAddRaces(), null, stringConstants.ok(), stringConstants.cancel(),
                 new RaceDialogValidator(stringConstants), callback);
         this.existingRaces = existingRaces;

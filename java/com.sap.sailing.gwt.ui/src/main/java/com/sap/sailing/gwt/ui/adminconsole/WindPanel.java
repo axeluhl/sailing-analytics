@@ -32,6 +32,7 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
+import com.sap.sailing.gwt.ui.client.DataEntryDialog.DialogCallback;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.RaceSelectionModel;
@@ -215,13 +216,13 @@ public class WindPanel extends FormPanel implements RegattaDisplayer, WindShower
 
     private void showWindSettingDialog(RaceDTO race, CourseDTO course) {
         WindSettingDialog windSettingDialog = new WindSettingDialog(race, course, stringMessages, 
-                new AsyncCallback<WindDTO>() {
+                new DialogCallback<WindDTO>() {
                     @Override
-                    public void onFailure(Throwable caught) {
+                    public void cancel() {
                     }
 
                     @Override
-                    public void onSuccess(final WindDTO result) {
+                    public void ok(final WindDTO result) {
                         addWindFix(result);
                     }
                 });
