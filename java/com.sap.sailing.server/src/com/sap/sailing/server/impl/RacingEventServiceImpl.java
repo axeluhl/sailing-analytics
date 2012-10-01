@@ -54,6 +54,7 @@ import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
+import com.sap.sailing.domain.leaderboard.FlexibleRaceColumn;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.LeaderboardRegistry;
@@ -377,8 +378,13 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     public void renameLeaderboardColumn(String leaderboardName, String oldColumnName, String newColumnName) {
         Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
         if (leaderboard != null) {
-            leaderboard.getRaceColumnByName(oldColumnName).setName(newColumnName);
-            updateStoredLeaderboard((FlexibleLeaderboard) leaderboard);
+            final RaceColumn raceColumn = leaderboard.getRaceColumnByName(oldColumnName);
+            if (raceColumn instanceof FlexibleRaceColumn) {
+                ((FlexibleRaceColumn) raceColumn).setName(newColumnName);
+                updateStoredLeaderboard((FlexibleLeaderboard) leaderboard);
+            } else {
+                throw new IllegalArgumentException("Race column "+oldColumnName+" cannot be renamed");
+            }
         } else {
             throw new IllegalArgumentException("Leaderboard named "+leaderboardName+" not found");
         }

@@ -96,10 +96,6 @@ public class MetaLeaderboardColumn extends SimpleAbstractRaceColumn implements R
     }
 
     @Override
-    public void setName(String newName) {
-    }
-
-    @Override
     public void releaseTrackedRace(Fleet fleet) {
     }
 
