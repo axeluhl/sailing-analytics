@@ -197,7 +197,6 @@ import com.sap.sailing.server.operationaltransformation.RemoveLeaderboard;
 import com.sap.sailing.server.operationaltransformation.RemoveLeaderboardColumn;
 import com.sap.sailing.server.operationaltransformation.RemoveLeaderboardGroup;
 import com.sap.sailing.server.operationaltransformation.RemoveRegatta;
-import com.sap.sailing.server.operationaltransformation.RenameColumnInSeries;
 import com.sap.sailing.server.operationaltransformation.RenameEvent;
 import com.sap.sailing.server.operationaltransformation.RenameLeaderboard;
 import com.sap.sailing.server.operationaltransformation.RenameLeaderboardColumn;
@@ -2645,12 +2644,6 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     @Override
     public void removeColumnFromSeries(RegattaIdentifier regattaIdentifier, String seriesName, String columnName) {
         getService().apply(new RemoveColumnFromSeries(regattaIdentifier, seriesName, columnName));
-    }
-
-    @Override
-    public void renameColumnInSeries(RegattaIdentifier regattaIdentifier, String seriesName, String oldColumnName,
-            String newColumnName) {
-        getService().apply(new RenameColumnInSeries(regattaIdentifier, seriesName, oldColumnName, newColumnName));
     }
 
     @Override

@@ -375,9 +375,6 @@ public interface SailingServiceAsync {
     void removeColumnFromSeries(RegattaIdentifier regattaIdentifier, String seriesName, String columnName,
             AsyncCallback<Void> callback);
 
-    void renameColumnInSeries(RegattaIdentifier regattaIdentifier, String seriesName, String oldColumnName,
-            String newColumnName, AsyncCallback<Void> callback);
-
     void moveColumnInSeriesUp(RegattaIdentifier regattaIdentifier, String seriesName, String columnName,
             AsyncCallback<Void> callback);
 
