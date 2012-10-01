@@ -104,10 +104,14 @@ public class SeriesImpl extends NamedImpl implements Series, RaceColumnListener 
      */
     @Override
     public RaceColumnInSeries addRaceColumn(String raceColumnName, TrackedRegattaRegistry trackedRegattaRegistry) {
-        final RaceColumnInSeriesImpl result = createRaceColumn(raceColumnName, trackedRegattaRegistry);
-        result.addRaceColumnListener(this);
-        raceColumns.add(result);
-        raceColumnListeners.notifyListenersAboutRaceColumnAddedToContainer(result);
+        RaceColumnInSeriesImpl result = createRaceColumn(raceColumnName, trackedRegattaRegistry);
+        if (raceColumnListeners.canAddRaceColumnToContainer(result)) {
+            result.addRaceColumnListener(this);
+            raceColumns.add(result);
+            raceColumnListeners.notifyListenersAboutRaceColumnAddedToContainer(result);
+        } else {
+            result = null;
+        }
         return result;
     }
 
@@ -197,6 +201,16 @@ public class SeriesImpl extends NamedImpl implements Series, RaceColumnListener 
     @Override
     public void isMedalRaceChanged(RaceColumn raceColumn, boolean newIsMedalRace) {
         raceColumnListeners.notifyListenersAboutIsMedalRaceChanged(raceColumn, newIsMedalRace);
+    }
+
+    /**
+     * A series listens on its columns; individual columns, however, don't ask whether they can be added; the series itself does.
+     * 
+     * @see #addRaceColumn(String, TrackedRegattaRegistry)
+     */
+    @Override
+    public boolean canAddRaceColumnToContainer(RaceColumn raceColumn) {
+        return true;
     }
 
     @Override

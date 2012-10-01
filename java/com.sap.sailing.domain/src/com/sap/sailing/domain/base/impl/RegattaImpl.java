@@ -216,6 +216,11 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     }
     
     @Override
+    public boolean canAddRaceColumnToContainer(RaceColumn raceColumn) {
+        return raceColumnListeners.canAddRaceColumnToContainer(raceColumn);
+    }
+
+    @Override
     public void raceColumnAddedToContainer(RaceColumn raceColumn) {
         raceColumnListeners.notifyListenersAboutRaceColumnAddedToContainer(raceColumn);
     }

@@ -14,10 +14,8 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
     private static final long serialVersionUID = -7801617988982540470L;
     
     private final Map<Fleet, TrackedRace> trackedRaces;
-    private String name;
     private final Map<Fleet, RaceIdentifier> raceIdentifiers;
-    public AbstractRaceColumn(String name) {
-        this.name = name;
+    public AbstractRaceColumn() {
         this.trackedRaces = new HashMap<Fleet, TrackedRace>();
         this.raceIdentifiers = new HashMap<Fleet, RaceIdentifier>();
     }
@@ -47,16 +45,6 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
                 getRaceColumnListeners().notifyListenersAboutTrackedRaceLinked(this, fleet, trackedRace);
             }
         }
-    }
-
-    @Override
-    public String getName() {
-        return name;
-    }
-
-    @Override
-    public void setName(String newName) {
-        this.name = newName;
     }
 
     @Override

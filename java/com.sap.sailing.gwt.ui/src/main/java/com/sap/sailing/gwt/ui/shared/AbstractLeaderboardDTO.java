@@ -79,12 +79,12 @@ public abstract class AbstractLeaderboardDTO implements IsSerializable {
 
     public Double getTotalPoints(LeaderboardRowDTO object) {
         Double totalPoints = object.carriedPoints == null ? null : object.carriedPoints;
-        for (LeaderboardEntryDTO e : object.fieldsByRaceColumnName.values()) {
-            if(e.totalPoints != null) {
-                if(totalPoints == null) {
-                    totalPoints = e.totalPoints;
+        for (Map.Entry<String, LeaderboardEntryDTO> e : object.fieldsByRaceColumnName.entrySet()) {
+            if (e.getValue().totalPoints != null && getOrCreateRaceColumn(e.getKey()).isValidInTotalScore()) {
+                if (totalPoints == null) {
+                    totalPoints = e.getValue().totalPoints;
                 } else {
-                    totalPoints += e.totalPoints;
+                    totalPoints += e.getValue().totalPoints;
                 }
             }
         }
@@ -124,7 +124,7 @@ public abstract class AbstractLeaderboardDTO implements IsSerializable {
     private RaceColumnDTO getOrCreateRaceColumn(String raceColumnName) {
         RaceColumnDTO result = getRaceInLeaderboardByName(raceColumnName);
         if (result == null) {
-            result = new RaceColumnDTO();
+            result = new RaceColumnDTO(/* isValidInTotalScore */ true);
             result.name = raceColumnName;
             races.add(result);
         }
@@ -133,9 +133,10 @@ public abstract class AbstractLeaderboardDTO implements IsSerializable {
     
     /**
      * If the {@link RaceColumnDTO} by the name <code>raceColumnName</code> doesn't exist yet within this leaderboard
-     * DTO, it is created. This method ensures that a fleet named <code>fleetName</code> is present. If it's not present
-     * yet, it's added to the race column's fleet name list. The <code>trackedRaceIdentifier</code> and
-     * <code>race</code> are associated with the column for the fleet identified by <code>fleetName</code>.
+     * DTO, it is created, setting is {@link RaceColumnDTO#isValidInTotalScore()} to <code>true</code>. This method
+     * ensures that a fleet named <code>fleetName</code> is present. If it's not present yet, it's added to the race
+     * column's fleet name list. The <code>trackedRaceIdentifier</code> and <code>race</code> are associated with the
+     * column for the fleet identified by <code>fleetName</code>.
      * 
      * @param fleetDTO
      *            must not be null
@@ -160,28 +161,8 @@ public abstract class AbstractLeaderboardDTO implements IsSerializable {
         return raceColumnDTO;
     }
 
-    /**
-     * A new {@link RaceColumnDTO} by the name <code>raceColumnName</code> is created and added to this leaderboard at
-     * position <code>index</code>. The single fleet <code>fleet</code> is added to the column. The
-     * <code>trackedRaceIdentifier</code> and <code>race</code> are associated with the column for the fleet identified
-     * by <code>fleetName</code>.
-     * 
-     * @param fleet
-     *            must not be null
-     */
-    public void createRaceColumnAt(String raceColumnName, FleetDTO fleet, boolean medalRace,
-            RegattaAndRaceIdentifier trackedRaceIdentifier, int index) {
-        assert fleet != null;
-        RaceColumnDTO raceInLeaderboardDTO = new RaceColumnDTO();
-        raceInLeaderboardDTO.name = raceColumnName;
-        raceInLeaderboardDTO.setMedalRace(medalRace);
-        raceInLeaderboardDTO.addFleet(fleet);
-        raceInLeaderboardDTO.setRaceIdentifier(fleet, trackedRaceIdentifier);
-        races.add(index, raceInLeaderboardDTO);
-    }
-    
-    public RaceColumnDTO createEmptyRaceColumn(String raceColumnName, boolean medalRace) {
-        RaceColumnDTO raceColumn = new RaceColumnDTO();
+    public RaceColumnDTO createEmptyRaceColumn(String raceColumnName, boolean medalRace, boolean isValidInTotalScore) {
+        RaceColumnDTO raceColumn = new RaceColumnDTO(isValidInTotalScore);
         raceColumn.name = raceColumnName;
         raceColumn.setMedalRace(medalRace);
         races.add(raceColumn);

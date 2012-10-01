@@ -242,9 +242,11 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     public Double getTotalPoints(Competitor competitor, TimePoint timePoint) throws NoWindException {
         double result = getCarriedPoints(competitor);
         for (RaceColumn r : getRaceColumns()) {
-            final Double totalPoints = getTotalPoints(competitor, r, timePoint);
-            if (totalPoints != null) {
-                result += totalPoints;
+            if (getScoringScheme().isValidInTotalScore(this, r, timePoint)) {
+                final Double totalPoints = getTotalPoints(competitor, r, timePoint);
+                if (totalPoints != null) {
+                    result += totalPoints;
+                }
             }
         }
         return result;
@@ -420,6 +422,21 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     @Override
     public void isMedalRaceChanged(RaceColumn raceColumn, boolean newIsMedalRace) {
         getRaceColumnListeners().notifyListenersAboutIsMedalRaceChanged(raceColumn, newIsMedalRace);
+    }
+
+    /**
+     * A leaderboard will only accept the addition of a race column if the column's name is unique across the leaderboard.
+     */
+    @Override
+    public boolean canAddRaceColumnToContainer(RaceColumn newRaceColumn) {
+        boolean result = true;
+        for (RaceColumn raceColumn : getRaceColumns()) {
+            if (raceColumn.getName().equals(newRaceColumn.getName())) {
+                result = false;
+                break;
+            }
+        }
+        return result;
     }
 
     @Override

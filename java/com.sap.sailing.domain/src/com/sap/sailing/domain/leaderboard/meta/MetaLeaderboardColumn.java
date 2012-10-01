@@ -96,10 +96,6 @@ public class MetaLeaderboardColumn extends SimpleAbstractRaceColumn implements R
     }
 
     @Override
-    public void setName(String newName) {
-    }
-
-    @Override
     public void releaseTrackedRace(Fleet fleet) {
     }
 
@@ -116,6 +112,11 @@ public class MetaLeaderboardColumn extends SimpleAbstractRaceColumn implements R
     @Override
     public void isMedalRaceChanged(RaceColumn raceColumn, boolean newIsMedalRace) {
         getRaceColumnListeners().notifyListenersAboutIsMedalRaceChanged(raceColumn, newIsMedalRace);
+    }
+
+    @Override
+    public boolean canAddRaceColumnToContainer(RaceColumn raceColumn) {
+        return getRaceColumnListeners().canAddRaceColumnToContainer(raceColumn);
     }
 
     @Override
