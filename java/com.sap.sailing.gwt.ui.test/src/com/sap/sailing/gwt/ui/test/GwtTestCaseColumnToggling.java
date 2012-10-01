@@ -119,12 +119,9 @@ public class GwtTestCaseColumnToggling extends GWTTestCase {
     }
     
     private void addColumnToLeaderboard() {
-        leaderboardPanel = new LeaderboardPanelMock(service, LEADERBOARD_NAME,
-                null, sc);
-
+        leaderboardPanel = new LeaderboardPanelMock(service, LEADERBOARD_NAME, null, sc);
         service.addColumnToLeaderboard(COLUMN1_NAME, LEADERBOARD_NAME, false,
                 new AsyncCallback<Void>() {
-
                     @Override
                     public void onFailure(Throwable caught) {
                         fail("Failed to add column to leaderboard.");
@@ -134,7 +131,7 @@ public class GwtTestCaseColumnToggling extends GWTTestCase {
                     @Override
                     public void onSuccess(Void result) {
                         System.out.println("Added column to leaderboard.");
-                        RaceColumnDTO race = new RaceColumnDTO();
+                        RaceColumnDTO race = new RaceColumnDTO(/* isValidInTotalScore */ null);
                         race.name = COLUMN1_NAME;
                         race.setMedalRace(false);
                         leaderboardPanel.addColumn(leaderboardPanel.createRaceColumn(race));

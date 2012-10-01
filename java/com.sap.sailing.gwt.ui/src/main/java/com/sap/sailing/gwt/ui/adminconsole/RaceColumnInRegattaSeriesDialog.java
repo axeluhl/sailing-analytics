@@ -146,7 +146,7 @@ public class RaceColumnInRegattaSeriesDialog extends DataEntryDialog<Pair<Series
             String raceColumnName = raceNameEntryFields.get(i).getValue();
             RaceColumnDTO raceColumnDTO = findRaceColumnInSeriesByName(selectedSeries, raceColumnName);
             if(raceColumnDTO == null) {
-                raceColumnDTO = new RaceColumnDTO();
+                raceColumnDTO = new RaceColumnDTO(/* isValidInTotalScore not relevant here; not in scope of a leaderboard */ null);
                 raceColumnDTO.name = raceColumnName;
             }
             races.add(raceColumnDTO);

@@ -9,6 +9,7 @@ import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.ScoringSchemeType;
+import com.sap.sailing.domain.common.TimePoint;
 
 /**
  * A leaderboard has a scoring scheme that decides how race ranks map to scores, how penalties are to be scored,
@@ -79,7 +80,15 @@ public interface ScoringScheme extends Serializable {
 
     /**
      * Usually, when all other sorting criteria end up in a tie, the last race sailed is used to decide.
-     * @param nullScoresAreBetter TODO
      */
     int compareByLastRace(List<Double> o1Scores, List<Double> o2Scores, boolean nullScoresAreBetter);
+
+    /**
+     * Under certain circumstances, a scoring scheme may decide that the scores of a column are not (yet) to be used
+     * for the leaderboard's total scores. This may, e.g., be the case if a column is split into more than one fleet and
+     * those fleets are unordered. In that case, scores need to be available for all fleets before the column counts
+     * for the total scores.
+     * @param at TODO
+     */
+    boolean isValidInTotalScore(Leaderboard leaderboard, RaceColumn raceColumn, TimePoint at);
 }

@@ -458,7 +458,8 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 result.setSuppressed(convertToCompetitorDTO(suppressedCompetitor), true);
             }
             for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
-                RaceColumnDTO raceColumnDTO = result.createEmptyRaceColumn(raceColumn.getName(), raceColumn.isMedalRace());
+                RaceColumnDTO raceColumnDTO = result.createEmptyRaceColumn(raceColumn.getName(), raceColumn.isMedalRace(),
+                        leaderboard.getScoringScheme().isValidInTotalScore(leaderboard, raceColumn, timePoint));
                 for (Fleet fleet : raceColumn.getFleets()) {
                     RegattaAndRaceIdentifier raceIdentifier = null;
                     TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
@@ -467,6 +468,8 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                         raceIdentifier = new RegattaNameAndRaceName(trackedRace.getTrackedRegatta().getRegatta()
                                 .getName(), trackedRace.getRace().getName());
                     }
+                    // Note: the RaceColumnDTO won't be created by the following addRace call because it has been created
+                    // above by the result.createEmptyRaceColumn call
                     result.addRace(raceColumn.getName(), fleetDTO, raceColumn.isMedalRace(),
                             raceIdentifier, /* StrippedRaceDTO */ null);
                 }
@@ -875,7 +878,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         }
         List<RaceColumnDTO> raceColumns = new ArrayList<RaceColumnDTO>();
         for (RaceColumnInSeries raceColumn : series.getRaceColumns()) {
-            RaceColumnDTO raceColumnDTO = new RaceColumnDTO();
+            RaceColumnDTO raceColumnDTO = new RaceColumnDTO(/* isValidInTotalScore not relevant here because no scores conveyed */ null);
             raceColumnDTO.name = raceColumn.getName();
             raceColumnDTO.setMedalRace(raceColumn.isMedalRace());
             raceColumns.add(raceColumnDTO);
