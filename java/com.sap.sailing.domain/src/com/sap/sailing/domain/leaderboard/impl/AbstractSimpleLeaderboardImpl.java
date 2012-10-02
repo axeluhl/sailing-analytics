@@ -336,18 +336,12 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     }
 
     @Override
-    public boolean considerForDiscarding(RaceColumn raceColumn, TimePoint timePoint) {
-        boolean result = getScoreCorrection().hasCorrectionFor(raceColumn);
-        if (!result && !raceColumn.isMedalRace()) {
-            for (Fleet fleet : raceColumn.getFleets()) {
-                TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
-                if (trackedRace != null && trackedRace.hasStarted(timePoint)) {
-                    result = true;
-                    break;
-                }
-            }
-        }
-        return result;
+    public boolean considerForDiscarding(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint) {
+        TrackedRace trackedRaceForCompetitorInColumn;
+        return getScoreCorrection().isScoreCorrected(competitor, raceColumn) || 
+               (getScoringScheme().isValidInTotalScore(this, raceColumn, timePoint) &&
+                       (trackedRaceForCompetitorInColumn=raceColumn.getTrackedRace(competitor)) != null &&
+                       trackedRaceForCompetitorInColumn.hasStarted(timePoint));
     }
     
     @Override
