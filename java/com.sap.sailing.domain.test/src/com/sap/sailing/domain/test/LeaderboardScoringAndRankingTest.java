@@ -108,6 +108,125 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
         }
     }
 
+    /**
+     * Regarding bug 961, test scoring in a leaderboard that has a qualification series with two unordered groups where for one
+     * column only one group has raced (expressed by a mocked TrackedRace attached to the column). Ensure that the column doesn't
+     * count for neither the total points sum nor the competitor ordering.
+     */
+    @Test
+    public void testUnorderedGroupsWithOneGroupNotHavingRacedInAColumn() throws NoWindException {
+        List<Competitor> competitors = createCompetitors(10);
+        Regatta regatta = createRegatta(/* qualifying */ 2, new String[] { "Yellow", "Blue" }, /* final */0,
+                new String[] { "Default" },
+                /* medal */false, "testUnorderedGroupsWithOneGroupNotHavingRacedInAcolumn",
+                DomainFactory.INSTANCE.getOrCreateBoatClass("49er", /* typicallyStartsUpwind */true),
+                DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT));
+        Leaderboard leaderboard = createLeaderboard(regatta, /* discarding thresholds */ new int[0]);
+        Series qualificationSeries;
+        Iterator<? extends Series> seriesIter = regatta.getSeries().iterator();
+        qualificationSeries = seriesIter.next();
+        TimePoint now = MillisecondsTimePoint.now();
+        TimePoint later = new MillisecondsTimePoint(now.asMillis()+1000);
+        TrackedRace q1Yellow = new MockedTrackedRaceWithStartTimeAndRanks(now, competitors.subList(0, 5));
+        TrackedRace q1Blue = new MockedTrackedRaceWithStartTimeAndRanks(now, competitors.subList(5, 10));
+        RaceColumn q1Column = qualificationSeries.getRaceColumnByName("Q1");
+        q1Column.setTrackedRace(q1Column.getFleetByName("Yellow"), q1Yellow);
+        q1Column.setTrackedRace(q1Column.getFleetByName("Blue"), q1Blue);
+        List<Competitor> rankedCompetitors = leaderboard.getCompetitorsFromBestToWorst(later);
+        for (int i=0; i<5; i++) {
+            assertTrue(competitors.get(i) == rankedCompetitors.get(2*i) || competitors.get(i) == rankedCompetitors.get(2*i+1));
+            assertTrue(competitors.get(i+5) == rankedCompetitors.get(2*i) || competitors.get(i+5) == rankedCompetitors.get(2*i+1));
+            assertEquals((double) (i+1), leaderboard.getTotalPoints(competitors.get(i), later), 0.000000001);
+            assertEquals((double) (i+1), leaderboard.getTotalPoints(competitors.get(i+5), later), 0.0000000001);
+        }
+        // now add one race for yellow fleet and test that it doesn't count because blue fleet is still missing its race for Q2
+        TrackedRace q2Yellow = new MockedTrackedRaceWithStartTimeAndRanks(now, competitors.subList(3, 8));
+        RaceColumn q2Column = qualificationSeries.getRaceColumnByName("Q2");
+        q2Column.setTrackedRace(q2Column.getFleetByName("Yellow"), q2Yellow);
+        List<Competitor> rankedCompetitorsWithOneRaceMissingInQ2 = leaderboard.getCompetitorsFromBestToWorst(later);
+        for (int i=0; i<5; i++) {
+            assertTrue(competitors.get(i) == rankedCompetitorsWithOneRaceMissingInQ2.get(2*i) ||
+                    competitors.get(i) == rankedCompetitorsWithOneRaceMissingInQ2.get(2*i+1));
+            assertTrue(competitors.get(i+5) == rankedCompetitorsWithOneRaceMissingInQ2.get(2*i) ||
+                    competitors.get(i+5) == rankedCompetitorsWithOneRaceMissingInQ2.get(2*i+1));
+            assertEquals((double) (i+1), leaderboard.getTotalPoints(competitors.get(i), later), 0.000000001);
+            assertEquals((double) (i+1), leaderboard.getTotalPoints(competitors.get(i+5), later), 0.0000000001);
+        }
+        // now add a tracked race for the blue fleet for Q2 and assert that the Q2 scores count for the total points sum
+        TrackedRace q2Blue = new MockedTrackedRaceWithStartTimeAndRanks(now,
+                Arrays.asList(new Competitor[] { competitors.get(0), competitors.get(1), competitors.get(2),
+                        competitors.get(8), competitors.get(9) }));
+        q2Column.setTrackedRace(q2Column.getFleetByName("Blue"), q2Blue);
+        // the new order in Q2 expected to be { (0, 3), (1, 4), (2, 5), (8, 6), (9, 7) }
+        // therefore the new total points, in ascending order, are expected to be:
+        // { 0: 1+1=2; 5: 1+3=4; 1: 2+2=4; 3: 4+1=5; 2: 3+3=6; 6: 2+4=6; 4: 5+2=7; 7: 3+5=8; 8: 4+4=8; 9: 5+5=10 }
+        double[] expectedTotalPoints = new double[] { 2, 4, 6, 5, 7, 4, 6, 8, 8, 10 };
+        int[] expectedOrderAfterTwoFullRacesPlusMinusOne = new int[] { 0, 5, 1, 3, 2, 6, 4, 7, 8, 9 };
+        List<Competitor> rankedCompetitorsWithAllRacesInQ2 = leaderboard.getCompetitorsFromBestToWorst(later);
+        for (int i=0; i<5; i++) {
+            assertTrue(competitors.get(expectedOrderAfterTwoFullRacesPlusMinusOne[2*i]) == rankedCompetitorsWithAllRacesInQ2.get(2*i) ||
+                    competitors.get(expectedOrderAfterTwoFullRacesPlusMinusOne[2*i]) == rankedCompetitorsWithAllRacesInQ2.get(2*i+1));
+            assertTrue(competitors.get(expectedOrderAfterTwoFullRacesPlusMinusOne[2*i+1]) == rankedCompetitorsWithAllRacesInQ2.get(2*i) ||
+                    competitors.get(expectedOrderAfterTwoFullRacesPlusMinusOne[2*i+1]) == rankedCompetitorsWithAllRacesInQ2.get(2*i+1));
+            assertEquals(expectedTotalPoints[2*i], leaderboard.getTotalPoints(competitors.get(2*i), later), 0.000000001);
+            assertEquals(expectedTotalPoints[2*i+1], leaderboard.getTotalPoints(competitors.get(2*i+1), later), 0.000000001);
+        }
+        
+    }
+
+    /**
+     * Regarding bug 961, test scoring in a leaderboard that has a qualification series with two unordered groups where for one
+     * column only one group has raced (expressed by a mocked TrackedRace attached to the column). Then add the second tracked
+     * race for the second column but such that it hasn't started yet at the time point of the query. Then add a score correction,
+     * simulating the use of a proxy race (that doesn't ever start) and a manual score entry.
+     */
+    @Test
+    public void testUnorderedGroupsWithOneGroupNotHavingStartedRacedInAcolumnAndThenCorrectingScore() throws NoWindException {
+        List<Competitor> competitors = createCompetitors(10);
+        Regatta regatta = createRegatta(/* qualifying */ 2, new String[] { "Yellow", "Blue" }, /* final */0,
+                new String[] { "Default" },
+                /* medal */false, "testUnorderedGroupsWithOneGroupNotHavingRacedInAcolumn",
+                DomainFactory.INSTANCE.getOrCreateBoatClass("49er", /* typicallyStartsUpwind */true),
+                DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT));
+        Leaderboard leaderboard = createLeaderboard(regatta, /* discarding thresholds */ new int[0]);
+        Series qualificationSeries;
+        Iterator<? extends Series> seriesIter = regatta.getSeries().iterator();
+        qualificationSeries = seriesIter.next();
+        TimePoint now = MillisecondsTimePoint.now();
+        TimePoint later = new MillisecondsTimePoint(now.asMillis()+1000);
+        TrackedRace q1Yellow = new MockedTrackedRaceWithStartTimeAndRanks(now, competitors.subList(0, 5));
+        TrackedRace q1Blue = new MockedTrackedRaceWithStartTimeAndRanks(now, competitors.subList(5, 10));
+        RaceColumn q1Column = qualificationSeries.getRaceColumnByName("Q1");
+        q1Column.setTrackedRace(q1Column.getFleetByName("Yellow"), q1Yellow);
+        q1Column.setTrackedRace(q1Column.getFleetByName("Blue"), q1Blue);
+        // now add one race for yellow fleet and test that it doesn't count because blue fleet is still missing its race for Q2
+        TrackedRace q2Yellow = new MockedTrackedRaceWithStartTimeAndRanks(now, competitors.subList(3, 8));
+        RaceColumn q2Column = qualificationSeries.getRaceColumnByName("Q2");
+        q2Column.setTrackedRace(q2Column.getFleetByName("Yellow"), q2Yellow);
+        // now add a tracked race for the blue fleet for Q2 that hasn't started yet and assert that the Q2 scores still don't count for the total points sum
+        TimePoint muchLater = later.plus(10000000000l);
+        TrackedRace q2Blue = new MockedTrackedRaceWithStartTimeAndRanks(muchLater,
+                Arrays.asList(new Competitor[] { competitors.get(0), competitors.get(1), competitors.get(2),
+                        competitors.get(8), competitors.get(9) }));
+        q2Column.setTrackedRace(q2Column.getFleetByName("Blue"), q2Blue);
+        List<Competitor> rankedCompetitorsWithOneRaceMissingInQ2 = leaderboard.getCompetitorsFromBestToWorst(later);
+        for (int i=0; i<5; i++) {
+            assertTrue(competitors.get(i) == rankedCompetitorsWithOneRaceMissingInQ2.get(2*i) ||
+                    competitors.get(i) == rankedCompetitorsWithOneRaceMissingInQ2.get(2*i+1));
+            assertTrue(competitors.get(i+5) == rankedCompetitorsWithOneRaceMissingInQ2.get(2*i) ||
+                    competitors.get(i+5) == rankedCompetitorsWithOneRaceMissingInQ2.get(2*i+1));
+            assertEquals((double) (i+1), leaderboard.getTotalPoints(competitors.get(i), later), 0.000000001);
+            assertEquals((double) (i+1), leaderboard.getTotalPoints(competitors.get(i+5), later), 0.0000000001);
+        }
+        assertFalse(leaderboard.getScoringScheme().isValidInTotalScore(leaderboard, q2Column, later));
+        // now add a score correction for Q2/Blue to make it count:
+        leaderboard.getScoreCorrection().correctScore(competitors.get(9), q2Column, 42.);
+        assertTrue(leaderboard.getScoringScheme().isValidInTotalScore(leaderboard, q2Column, later));
+        // the new order in Q2 expected to be { (9, 3), ... } (we don't know about any competitor in q2Blue but #9
+        // therefore the new total points for #9 are
+        // { 9: 5+42=47 }
+        assertEquals(47.0, leaderboard.getTotalPoints(competitors.get(9), later), 0.00000001);
+    }
 
     /**
      * Asserts that the competitors ranking worse than the disqualified competitor advance by one in the

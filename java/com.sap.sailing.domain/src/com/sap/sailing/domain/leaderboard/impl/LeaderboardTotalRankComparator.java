@@ -50,11 +50,13 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
     private final ScoringScheme scoringScheme;
     private final Map<Pair<Competitor, RaceColumn>, Double> totalPointsCache;
     private final boolean nullScoresAreBetter;
+    private final TimePoint timePoint;
     
     public LeaderboardTotalRankComparator(Leaderboard leaderboard, TimePoint timePoint,
             ScoringScheme scoringScheme, boolean nullScoresAreBetter) throws NoWindException {
         super();
         this.leaderboard = leaderboard;
+        this.timePoint = timePoint;
         this.scoringScheme = scoringScheme;
         this.nullScoresAreBetter = nullScoresAreBetter;
         totalPointsCache = new HashMap<Pair<Competitor, RaceColumn>, Double>();
@@ -79,29 +81,31 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
         Double o1MedalRaceScore = 0.0;
         Double o2MedalRaceScore = 0.0;
         for (RaceColumn raceColumn : getLeaderboard().getRaceColumns()) {
-            int preemptiveColumnResult = 0;
-            final Double o1Score = totalPointsCache.get(new Pair<Competitor, RaceColumn>(o1, raceColumn));
-            if (o1Score != null) {
-                o1Scores.add(o1Score);
-                o1ScoreSum += o1Score;
-            }
-            final Double o2Score = totalPointsCache.get(new Pair<Competitor, RaceColumn>(o2, raceColumn));
-            if (o2Score != null) {
-                o2Scores.add(o2Score);
-                o2ScoreSum += o2Score;
-            }
-            if (raceColumn.isMedalRace()) {
-                o1MedalRaceScore = o1Score;
-                o2MedalRaceScore = o2Score;
-                // similar to compareByFleet, however, tracking is not required; having medal race column points
-                // (tracked or manual) is sufficient
-                preemptiveColumnResult = compareByMedalRaceParticipation(o1Score, o2Score);
-            }
-            if (preemptiveColumnResult == 0) {
-                preemptiveColumnResult = compareByFleet(raceColumn, o1, o2);
-            }
-            if (preemptiveColumnResult != 0) {
-                return preemptiveColumnResult;
+            if (getLeaderboard().getScoringScheme().isValidInTotalScore(getLeaderboard(), raceColumn, timePoint)) {
+                int preemptiveColumnResult = 0;
+                final Double o1Score = totalPointsCache.get(new Pair<Competitor, RaceColumn>(o1, raceColumn));
+                if (o1Score != null) {
+                    o1Scores.add(o1Score);
+                    o1ScoreSum += o1Score;
+                }
+                final Double o2Score = totalPointsCache.get(new Pair<Competitor, RaceColumn>(o2, raceColumn));
+                if (o2Score != null) {
+                    o2Scores.add(o2Score);
+                    o2ScoreSum += o2Score;
+                }
+                if (raceColumn.isMedalRace()) {
+                    o1MedalRaceScore = o1Score;
+                    o2MedalRaceScore = o2Score;
+                    // similar to compareByFleet, however, tracking is not required; having medal race column points
+                    // (tracked or manual) is sufficient
+                    preemptiveColumnResult = compareByMedalRaceParticipation(o1Score, o2Score);
+                }
+                if (preemptiveColumnResult == 0) {
+                    preemptiveColumnResult = compareByFleet(raceColumn, o1, o2);
+                }
+                if (preemptiveColumnResult != 0) {
+                    return preemptiveColumnResult;
+                }
             }
         }
         // now count the races in which they scored; if they scored in a different number of races, prefer the
