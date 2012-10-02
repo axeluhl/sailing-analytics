@@ -4,7 +4,7 @@ import java.util.Date;
 
 public interface TimeZoomChangeListener {
 
-    void onTimeZoom(Date zoomStartTimepoint, Date zoomEndTimepoint);
+    void onTimeZoomChanged(Date zoomStartTimepoint, Date zoomEndTimepoint);
 
     void onTimeZoomReset();
 }

@@ -4,7 +4,7 @@ import java.util.Date;
 
 import com.sap.sailing.domain.common.impl.Util.Pair;
 
-public interface TimeZoomProvider {
+public interface TimeRangeWithZoomProvider extends TimeRangeProvider {
 
     public void addTimeZoomChangeListener(TimeZoomChangeListener listener);
 

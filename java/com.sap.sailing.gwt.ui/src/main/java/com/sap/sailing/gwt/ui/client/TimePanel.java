@@ -31,23 +31,24 @@ import com.sap.sailing.gwt.ui.shared.controls.slider.SliderBar;
 import com.sap.sailing.gwt.ui.shared.controls.slider.TimeSlider;
 
 public class TimePanel<T extends TimePanelSettings> extends FormPanel implements Component<T>, TimeListener, TimeZoomChangeListener,
-    PlayStateListener, RequiresResize {
+    TimeRangeChangeListener, PlayStateListener, RequiresResize {
     protected final Timer timer;
     protected boolean isTimeZoomed;
     
+    protected final TimeRangeProvider timeRangeProvider;
     /**
      * The start time point of the time interval visualized by this time panel. May be <code>null</code> if not yet initialized.
      * 
      * @see #setMinMax(Date, Date, boolean)
      */
-    private Date min;
+//    private Date min;
     
     /**
      * The end time point of the time interval visualized by this time panel. May be <code>null</code> if not yet initialized.
      * 
      * @see #setMinMax(Date, Date, boolean)
      */
-    private Date max;
+//    private Date max;
     
     private final IntegerBox playSpeedBox;
     private final Label timeDelayLabel;
@@ -67,7 +68,7 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
     private final Image playModeImage;
     protected Date lastReceivedDataTimepoint;
     private final Button slowDownButton;
-	private final Button speedUpButton;
+    private final Button speedUpButton;
 
     /**
      * The live delay may be adjusted automatically if the server decides so. However, if the user explicitly sets a live delay,
@@ -96,12 +97,14 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
         }
     }
 
-    public TimePanel(Timer timer, StringMessages stringMessages) {
+    public TimePanel(Timer timer, TimeRangeProvider timeRangeProvider, StringMessages stringMessages) {
         this.timer = timer;
+        this.timeRangeProvider = timeRangeProvider;
         this.stringMessages = stringMessages;
         isTimeZoomed = false;
         timer.addTimeListener(this);
         timer.addPlayStateListener(this);
+        timeRangeProvider.addTimeRangeChangeListener(this);
         userExplicitlyChangedLivePlayDelay = false;
         FlowPanel timePanelInnerWrapper = new FlowPanel();
         timePanelInnerWrapper.setStyleName("timePanelInnerWrapper");
@@ -296,16 +299,16 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
 
     @Override
     public void timeChanged(Date time) {
-        if (getMin() != null && getMax() != null) {
+        if (getFromTime() != null && getToTime() != null) {
             // Handle also the case where time advances beyond slider's end.
             // Handle it equally for replay and live mode for robustness reasons. This at least allows a user
             // to watch on even if the time panel was off in its assumptions about race end and end of tracking.
-            if (time.after(getMax())) {
+            if (time.after(getToTime())) {
                 Date newMaxTime = new Date(time.getTime());
-                if (newMaxTime.getTime() - getMax().getTime() < MINIMUM_AUTO_ADVANCE_TIME_IN_MS) {
-                    newMaxTime.setTime(getMax().getTime() + MINIMUM_AUTO_ADVANCE_TIME_IN_MS); 
+                if (newMaxTime.getTime() - getToTime().getTime() < MINIMUM_AUTO_ADVANCE_TIME_IN_MS) {
+                    newMaxTime.setTime(getToTime().getTime() + MINIMUM_AUTO_ADVANCE_TIME_IN_MS); 
                 }
-                setMinMax(getMin(), newMaxTime, /* fireEvent */ false); // no event because we guarantee that time is between min/max
+                setMinMax(getFromTime(), newMaxTime, /* fireEvent */ false); // no event because we guarantee that time is between min/max
             }
             long t = time.getTime();
             timeSlider.setCurrentValue(new Double(t), false);
@@ -318,12 +321,12 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
         }
     }
 
-    protected Date getMin() {
-        return min;
+    protected Date getFromTime() {
+        return timeRangeProvider.getFromTime();
     }
     
-    protected Date getMax() {
-        return max;
+    protected Date getToTime() {
+        return timeRangeProvider.getToTime();
     }
     
     /**
@@ -334,20 +337,22 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
         assert min != null && max != null;
                 
         boolean changed = false;
-        if (!max.equals(this.max)) {
+        if (!max.equals(timeRangeProvider.getToTime())) {
             changed = true;
-            this.max = max;
+//            this.max = max;
             timeSlider.setMaxValue(new Double(max.getTime()), fireEvent);
         }
-        if (!min.equals(this.min)) {
+        if (!min.equals(timeRangeProvider.getFromTime())) {
             changed = true;
-            this.min = min;
+//            this.min = min;
             timeSlider.setMinValue(new Double(min.getTime()), fireEvent);
             if (timeSlider.getCurrentValue() == null) {
                 timeSlider.setCurrentValue(new Double(min.getTime()), fireEvent);
             }
         }
         if (changed) {
+            timeRangeProvider.setTimeRange(min, max, this);
+            
             int numSteps = timeSlider.getElement().getClientWidth();
             if (numSteps > 0) {
                 timeSlider.setStepSize(numSteps, fireEvent);
@@ -406,13 +411,17 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
     }
     
     @Override
-    public void onTimeZoom(Date zoomStartTimepoint, Date zoomEndTimepoint) {
+    public void onTimeZoomChanged(Date zoomStartTimepoint, Date zoomEndTimepoint) {
     }
 
     @Override
     public void onTimeZoomReset() {
     }
-    
+
+    @Override
+    public void onTimeRangeChanged(Date fromTime, Date toTime) {
+    }
+
     protected boolean isLiveModeToBeMadePossible() {
         return false;
     }

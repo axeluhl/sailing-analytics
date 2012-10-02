@@ -18,10 +18,9 @@ import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.RaceSelectionModel;
 import com.sap.sailing.gwt.ui.client.RaceSelectionProvider;
-import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.TimeZoomModel;
+import com.sap.sailing.gwt.ui.client.TimeRangeWithZoomModel;
 import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.shared.charts.MultiChartPanel;
 import com.sap.sailing.gwt.ui.shared.charts.MultiChartSettings;
@@ -37,8 +36,6 @@ public class CompareCompetitorsChartDialog extends DialogBoxExt {
     private final RaceSelectionProvider raceSelectionProvider;
     
     private final MultiChartPanel multiChartPanel;
-    
-    private final RaceTimesInfoProvider raceTimesInfoProvider;
 
     final ListBox racesListBox;
     
@@ -54,12 +51,9 @@ public class CompareCompetitorsChartDialog extends DialogBoxExt {
         raceSelectionProvider = new RaceSelectionModel();
         raceSelectionProvider.setAllRaces(races);
         
-        raceTimesInfoProvider = new RaceTimesInfoProvider(sailingService, errorReporter, races, 1000l);
-        
         multiChartPanel = new MultiChartPanel(sailingService, new AsyncActionsExecutor(), competitorSelectionProvider, raceSelectionProvider,
-                timer, new TimeZoomModel(), stringConstants, errorReporter, false, false);
+                timer, new TimeRangeWithZoomModel(), stringConstants, errorReporter, false, false);
         multiChartPanel.setSize("100%", "100%");
-        raceTimesInfoProvider.addRaceTimesInfoProviderListener(multiChartPanel);
         
         VerticalPanel contentPanel = new VerticalPanel();
         contentPanel.setSize("100%", "100%");
