@@ -148,6 +148,10 @@ public abstract class AbstractScoringSchemeImpl implements ScoringScheme {
 
     @Override
     public int compareByLastRace(List<Double> o1Scores, List<Double> o2Scores, boolean nullScoresAreBetter) {
-        return getScoreComparator(nullScoresAreBetter).compare(o1Scores.get(o1Scores.size()-1), o2Scores.get(o2Scores.size()-1));
+        int result = 0;
+        if (!o1Scores.isEmpty() && !o2Scores.isEmpty()) {
+            result = getScoreComparator(nullScoresAreBetter).compare(o1Scores.get(o1Scores.size()-1), o2Scores.get(o2Scores.size()-1));
+        }
+        return result;
     }
 }
