@@ -711,6 +711,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             Pair<Integer, CompetitorDTO> visibleLeaderInfo = getLeadingVisibleCompetitorInfo(competitorsToShow);
             // the boat fix may be null; may mean that no positions were loaded yet for the leading visible boat; don't show anything
             GPSFixDTO lastBoatFix;
+            if (visibleLeaderInfo != null && getSettings().getHelpLinesSettings().containsHelpLine(HelpLineTypes.ADVANTAGELINE) && 
                     lastShownFix.containsKey(visibleLeaderInfo.getB()) && lastShownFix.get(visibleLeaderInfo.getB()) != -1
                     && visibleLeaderInfo.getA() > 0 && visibleLeaderInfo.getA() <= lastRaceTimesInfo.getLegInfos().size() &&
                     (lastBoatFix = getBoatFix(visibleLeaderInfo.getB(), date)) != null) {
