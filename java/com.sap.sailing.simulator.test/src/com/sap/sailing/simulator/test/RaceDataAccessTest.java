@@ -14,6 +14,8 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
+import com.sap.sailing.domain.tracking.GPSFixMoving;
+import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.RacesHandle;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
@@ -29,6 +31,7 @@ public class RaceDataAccessTest {
     private final URI storedUri;
     private RacingEventServiceImpl service;
     private RacesHandle raceHandle;
+    public boolean storedend = false;
 
     public RaceDataAccessTest() throws MalformedURLException, URISyntaxException {
 
@@ -39,25 +42,31 @@ public class RaceDataAccessTest {
         // URL("http://germanmaster.traclive.dk/events/event_20110929_Internatio/clientparams.php?event=event_20110929_Internatio&race=5b7a34f6-ec44-11e0-a523-406186cbf87c");
 
         // 49er Race3
-        //paramUrl = new URL("http://germanmaster.traclive.dk/events/event_20110929_Internatio/clientparams.php?event=event_20110929_Internatio&race=be8a79a8-ec52-11e0-a523-406186cbf87c");
+        // paramUrl = new
+        // URL("http://germanmaster.traclive.dk/events/event_20110929_Internatio/clientparams.php?event=event_20110929_Internatio&race=be8a79a8-ec52-11e0-a523-406186cbf87c");
 
         // 49er Race4
         paramUrl = new URL("http://germanmaster.traclive.dk/events/event_20110929_Internatio/clientparams.php?event=event_20110929_Internatio&race=d1f521fa-ec52-11e0-a523-406186cbf87c");
 
         // 49er Race5
-        //paramUrl = new URL("http://germanmaster.traclive.dk/events/event_20110929_Internatio/clientparams.php?event=event_20110929_Internatio&race=eb06795a-ec52-11e0-a523-406186cbf87c");
+        // paramUrl = new
+        // URL("http://germanmaster.traclive.dk/events/event_20110929_Internatio/clientparams.php?event=event_20110929_Internatio&race=eb06795a-ec52-11e0-a523-406186cbf87c");
 
         // Star Race4
-        //paramUrl = new URL("http://germanmaster.traclive.dk/events/event_20110929_Internatio/clientparams.php?event=event_20110929_Internatio&race=6bb0829e-ec44-11e0-a523-406186cbf87c");
+        // paramUrl = new
+        // URL("http://germanmaster.traclive.dk/events/event_20110929_Internatio/clientparams.php?event=event_20110929_Internatio&race=6bb0829e-ec44-11e0-a523-406186cbf87c");
 
         // 49er Race6
-        //paramUrl = new URL("http://germanmaster.traclive.dk/events/event_20110929_Internatio/clientparams.php?event=event_20110929_Internatio&race=fceb3390-ec52-11e0-a523-406186cbf87c");
+        // paramUrl = new
+        // URL("http://germanmaster.traclive.dk/events/event_20110929_Internatio/clientparams.php?event=event_20110929_Internatio&race=fceb3390-ec52-11e0-a523-406186cbf87c");
 
         // Star Race5
-        //paramUrl = new URL("http://germanmaster.traclive.dk/events/event_20110929_Internatio/clientparams.php?event=event_20110929_Internatio&race=16fd961a-ec53-11e0-a523-406186cbf87c");
+        // paramUrl = new
+        // URL("http://germanmaster.traclive.dk/events/event_20110929_Internatio/clientparams.php?event=event_20110929_Internatio&race=16fd961a-ec53-11e0-a523-406186cbf87c");
 
         // Laser Medal
-        //paramUrl = new URL("http://germanmaster.traclive.dk/events/event_20110929_Internatio/clientparams.php?event=event_20110929_Internatio&race=93ef1a40-ed25-11e0-a523-406186cbf87c");
+        // paramUrl = new
+        // URL("http://germanmaster.traclive.dk/events/event_20110929_Internatio/clientparams.php?event=event_20110929_Internatio&race=93ef1a40-ed25-11e0-a523-406186cbf87c");
 
         liveUri = new URI("tcp://10.18.206.73:1520");
         storedUri = new URI("tcp://10.18.206.73:1521");
@@ -72,8 +81,13 @@ public class RaceDataAccessTest {
 
         service = new RacingEventServiceImpl();
         logger.info("Calling service.addTracTracRace");
-        raceHandle = service.addTracTracRace(paramUrl, liveUri, storedUri, EmptyWindStore.INSTANCE, /* timeoutInMilliseconds */60000);
+        raceHandle = service.addTracTracRace(paramUrl, liveUri, storedUri, EmptyWindStore.INSTANCE, /* timeoutInMilliseconds */60000, this);
         logger.info("Calling raceHandle.getRaces(): " + raceHandle);
+
+        synchronized (this) {
+            this.wait();
+        }
+
         Set<RaceDefinition> races = raceHandle.getRaces(); // wait for RaceDefinition to be completely wired in Regatta
         logger.info("Obtained races: " + races.size());
 
@@ -89,10 +103,20 @@ public class RaceDataAccessTest {
 
             System.out.println("Competitors:");
             Iterable<Competitor> competitors = tr.getRace().getCompetitors();
+            System.out.println("" + competitors);
             Iterator<Competitor> comIter = competitors.iterator();
             while (comIter.hasNext()) {
                 Competitor com = comIter.next();
-                System.out.println("" + com.getName());
+                GPSFixTrack<Competitor, GPSFixMoving> track = null;
+                Iterable<GPSFixMoving> fixes = null;
+                track = tr.getTrack(com);
+
+                track.lockForRead();
+                fixes = track.getFixes();
+                GPSFixMoving fix = fixes.iterator().next();
+                System.out.println("" + com.getName() + ", First GPS-Fix: " + fix.getPosition().getLatDeg() + ", " + fix.getPosition().getLngDeg());
+                track.unlockAfterRead();
+
             }
 
         }
