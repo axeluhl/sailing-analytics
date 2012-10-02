@@ -44,7 +44,6 @@ public class SailingSimulatorImpl implements SailingSimulator {
         gen1Turner.setEvaluationParameters(false, null, null, 0, 0, 0);
         Path rightPath = gen1Turner.getPath();
         int right1TurnMiddle = gen1Turner.getMiddle();
-        System.out.println("1-Turners finished.");
         
         // get left- and right-going heuristic based on 1-turner
         PathGeneratorOpportunistEuclidian genOpportunistic = new PathGeneratorOpportunistEuclidian(simulationParameters);
@@ -53,7 +52,6 @@ public class SailingSimulatorImpl implements SailingSimulator {
         Path oppPathL = genOpportunistic.getPath();
         genOpportunistic.setEvaluationParameters(left1TurnMiddle, right1TurnMiddle, false);
         Path oppPathR = genOpportunistic.getPath();
-        System.out.println("Opportunistic finished.");
         
         Path oppPath = null;
         //System.out.println("left -going: "+oppPathL.getPathPoints().get(oppPathL.getPathPoints().size() - 1).getTimePoint().asMillis());
@@ -68,7 +66,6 @@ public class SailingSimulatorImpl implements SailingSimulator {
         // get optimal path from dynamic programming with forward iteration
         PathGenerator genDynProgForward = new PathGeneratorDynProgForward(simulationParameters);
         Path optPath = genDynProgForward.getPath();
-        //System.out.println("Omniscient finished.");
 
         //
         // NOTE: pathName convention is: sort-digit + "#" + path-name
