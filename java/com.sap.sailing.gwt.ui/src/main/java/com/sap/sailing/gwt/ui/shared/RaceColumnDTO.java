@@ -19,6 +19,8 @@ public class RaceColumnDTO extends NamedDTO implements IsSerializable {
     private Map<FleetDTO, RaceDTO> racesPerFleet;
     private Boolean isValidInTotalScore;
 
+    RaceColumnDTO() {} // for GWT serialization
+    
     public RaceColumnDTO(Boolean isValidInTotalScore) {
         this.isValidInTotalScore = isValidInTotalScore;
         trackedRaceIdentifiersPerFleet = new HashMap<FleetDTO, RegattaAndRaceIdentifier>();
