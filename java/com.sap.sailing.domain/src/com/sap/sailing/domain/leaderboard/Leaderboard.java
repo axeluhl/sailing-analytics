@@ -267,7 +267,7 @@ public interface Leaderboard extends Named {
      * not all fleets have started their race yet (see
      * {@link ScoringScheme#isValidInTotalScore(Leaderboard, RaceColumn, TimePoint)}).
      */
-    boolean considerForDiscarding(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint);
+    boolean countRaceForComparisonWithDiscardingThresholds(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint);
     
     public void setResultDiscardingRule(ThresholdBasedResultDiscardingRule discardingRule);
 
