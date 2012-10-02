@@ -261,11 +261,13 @@ public interface Leaderboard extends Named {
      * Tells if the column represented by <code>raceColumn</code> shall be considered when counting the number of "races
      * so far" for discarding. Although medal races are never discarded themselves, they still count in determining the
      * number of "races so far" which is then the basis for deciding how many races may be discarded. If a leaderboard
-     * has corrections for a column then that column shall be considered for discarding and counts for determining the
-     * number of races so far. Also, if a tracked race is connected to the column and has started already, the column is
-     * to be considered for discarding.
+     * has corrections for a column for the <code>competitor</code> then that column shall be considered for discarding
+     * and counts for determining the number of races so far. Also, if a tracked race is connected to the column and has
+     * started already, the column is to be considered for discarding unless the column has several unordered fleets and
+     * not all fleets have started their race yet (see
+     * {@link ScoringScheme#isValidInTotalScore(Leaderboard, RaceColumn, TimePoint)}).
      */
-    boolean considerForDiscarding(RaceColumn raceColumn, TimePoint timePoint);
+    boolean considerForDiscarding(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint);
     
     public void setResultDiscardingRule(ThresholdBasedResultDiscardingRule discardingRule);
 
