@@ -120,6 +120,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
                     replayPathCanvasOverlay.pathColor = colorPalette.getColor(paths.length-1-i);
                     mapw.addOverlay(replayPathCanvasOverlay);
                     replayPathCanvasOverlay.setWindField(pathWindDTO);
+                    replayPathCanvasOverlay.setRaceCourse(raceCourseCanvasOverlay.startPoint, raceCourseCanvasOverlay.endPoint);
                     legendCanvasOverlay.setPathOverlays(replayPathCanvasOverlays);
 
                 }
