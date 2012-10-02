@@ -51,7 +51,7 @@ public class ResultDiscardingRuleImpl implements ThresholdBasedResultDiscardingR
 
     @Override
     public Set<RaceColumn> getDiscardedRaceColumns(final Competitor competitor, final Leaderboard leaderboard, final TimePoint timePoint) {
-        int resultsToDiscard = getNumberOfResultsToDiscard(leaderboard.getRaceColumns(), leaderboard, timePoint);
+        int resultsToDiscard = getNumberOfResultsToDiscard(competitor, leaderboard.getRaceColumns(), leaderboard, timePoint);
         Set<RaceColumn> result;
         if (resultsToDiscard > 0) {
             result = new HashSet<RaceColumn>();
@@ -94,11 +94,11 @@ public class ResultDiscardingRuleImpl implements ThresholdBasedResultDiscardingR
         return result;
     }
 
-    private int getNumberOfResultsToDiscard(Iterable<RaceColumn> raceColumns, Leaderboard leaderboard, TimePoint timePoint) {
+    private int getNumberOfResultsToDiscard(Competitor competitor, Iterable<RaceColumn> raceColumns, Leaderboard leaderboard, TimePoint timePoint) {
         int numberOfResultsToDiscard;
         int numberOfStartedRaces = 0;
         for (RaceColumn raceInLeaderboard : raceColumns) {
-            if (leaderboard.considerForDiscarding(raceInLeaderboard, timePoint)) {
+            if (leaderboard.countRaceForComparisonWithDiscardingThresholds(competitor, raceInLeaderboard, timePoint)) {
                 numberOfStartedRaces++;
             }
         }

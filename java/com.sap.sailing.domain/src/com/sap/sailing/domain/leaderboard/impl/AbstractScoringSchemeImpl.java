@@ -94,7 +94,7 @@ public abstract class AbstractScoringSchemeImpl implements ScoringScheme {
             Fleet fleet = raceColumn.getFleetOfCompetitor(competitor);
             if (fleetsForWhichNoScoreWasFound.contains(fleet)) {
                 try {
-                    if (leaderboard.getTotalPoints(competitor, raceColumn, at) != null) {
+                    if (leaderboard.getNetPoints(competitor, raceColumn, at) != null) {
                         fleetsForWhichNoScoreWasFound.remove(fleet);
                     }
                 } catch (NoWindException nwe) {
