@@ -250,16 +250,19 @@ public class LeaderboardOfflineTest extends AbstractLeaderboardTest {
         }
         List<Integer> ranksOfNonMedalStartedRaces = new ArrayList<Integer>();
         TimePoint now = MillisecondsTimePoint.now();
+        int numberOfRacesToCompareToDiscardThresholds = 0;
         for (RaceColumn column : raceColumnsInLeaderboard.values()) {
-            if (!column.isMedalRace() && column.getTrackedRace(defaultFleet) != null && column.getTrackedRace(defaultFleet).hasStarted(now)) {
-                ranksOfNonMedalStartedRaces.add(column.getTrackedRace(defaultFleet).getRank(competitor, now));
+            if (column.getTrackedRace(defaultFleet) != null && column.getTrackedRace(defaultFleet).hasStarted(now)) {
+                numberOfRacesToCompareToDiscardThresholds++;
+                if (!column.isMedalRace()) {
+                    ranksOfNonMedalStartedRaces.add(column.getTrackedRace(defaultFleet).getRank(competitor, now));
+                }
             }
         }
         Collections.sort(ranksOfNonMedalStartedRaces);
         int carryInt = (carry == null ? 0 : carry);
         int totalPoints = carryInt;
         int medalRacePoints = getMedalRacePoints(competitor, now, defaultFleet);
-        int numberOfRacesFromWhichToDiscard = ranksOfNonMedalStartedRaces.size();
         for (TrackedRace race : testRaces) {
             RaceColumn raceColumn = raceColumnsInLeaderboard.get(race);
             Pair<Competitor, RaceColumn> key = new Pair<Competitor, RaceColumn>(competitor, raceColumn);
@@ -274,8 +277,8 @@ public class LeaderboardOfflineTest extends AbstractLeaderboardTest {
                 // One race is discarded because four races were started, and for [3-6) one race can be discarded.
                 // The discarded race is the worst of those started, so the one with rank 4.
                 int expectedNumberOfDiscardedRaces =
-                        numberOfRacesFromWhichToDiscard < firstDiscardingThreshold ? 0 :
-                            numberOfRacesFromWhichToDiscard < secondDiscardingThreshold ? 1 : 2;
+                        numberOfRacesToCompareToDiscardThresholds < firstDiscardingThreshold ? 0 :
+                            numberOfRacesToCompareToDiscardThresholds < secondDiscardingThreshold ? 1 : 2;
                 boolean discarded = ranksOfNonMedalStartedRaces.indexOf(rank) >= ranksOfNonMedalStartedRaces.size()-expectedNumberOfDiscardedRaces;
                 int expected = discarded ? 0 : rank==medalRacePoints?2*rank:rank;
                 assertEquals(expected, leaderboard.getTotalPoints(competitor, raceColumn, now), 0.000000001);
