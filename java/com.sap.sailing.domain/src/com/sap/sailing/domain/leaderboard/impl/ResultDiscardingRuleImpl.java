@@ -98,7 +98,7 @@ public class ResultDiscardingRuleImpl implements ThresholdBasedResultDiscardingR
         int numberOfResultsToDiscard;
         int numberOfStartedRaces = 0;
         for (RaceColumn raceInLeaderboard : raceColumns) {
-            if (leaderboard.considerForDiscarding(competitor, raceInLeaderboard, timePoint)) {
+            if (leaderboard.countRaceForComparisonWithDiscardingThresholds(competitor, raceInLeaderboard, timePoint)) {
                 numberOfStartedRaces++;
             }
         }
