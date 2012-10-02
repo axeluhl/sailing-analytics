@@ -36,7 +36,7 @@ public class SailingSimulatorImpl implements SailingSimulator {
 
         Map<String, Path> allPaths = new HashMap<String, Path>();
 
-        // get 1-turners
+        // get 1-turners 
         PathGenerator1Turner gen1Turner = new PathGenerator1Turner(simulationParameters);
         gen1Turner.setEvaluationParameters(true, null, null, 0, 0, 0);
         Path leftPath = gen1Turner.getPath();
@@ -44,7 +44,8 @@ public class SailingSimulatorImpl implements SailingSimulator {
         gen1Turner.setEvaluationParameters(false, null, null, 0, 0, 0);
         Path rightPath = gen1Turner.getPath();
         int right1TurnMiddle = gen1Turner.getMiddle();
-
+        System.out.println("1-Turners finished.");
+        
         // get left- and right-going heuristic based on 1-turner
         PathGeneratorOpportunistEuclidian genOpportunistic = new PathGeneratorOpportunistEuclidian(simulationParameters);
         //PathGeneratorOpportunistVMG genOpportunistic = new PathGeneratorOpportunistVMG(simulationParameters);
@@ -52,7 +53,8 @@ public class SailingSimulatorImpl implements SailingSimulator {
         Path oppPathL = genOpportunistic.getPath();
         genOpportunistic.setEvaluationParameters(left1TurnMiddle, right1TurnMiddle, false);
         Path oppPathR = genOpportunistic.getPath();
-
+        System.out.println("Opportunistic finished.");
+        
         Path oppPath = null;
         //System.out.println("left -going: "+oppPathL.getPathPoints().get(oppPathL.getPathPoints().size() - 1).getTimePoint().asMillis());
         //System.out.println("right-going: "+oppPathR.getPathPoints().get(oppPathR.getPathPoints().size() - 1).getTimePoint().asMillis());
@@ -66,6 +68,7 @@ public class SailingSimulatorImpl implements SailingSimulator {
         // get optimal path from dynamic programming with forward iteration
         PathGenerator genDynProgForward = new PathGeneratorDynProgForward(simulationParameters);
         Path optPath = genDynProgForward.getPath();
+        //System.out.println("Omniscient finished.");
 
         //
         // NOTE: pathName convention is: sort-digit + "#" + path-name
@@ -96,12 +99,27 @@ public class SailingSimulatorImpl implements SailingSimulator {
                 optPath = oppPath;
             }
             allPaths.put("2#Opportunistic", oppPath);
-            //allPaths.put("5#Opportunist Left", oppPathL);
-            //allPaths.put("6#Opportunist Right", oppPathR);
         }
 
         allPaths.put("1#Omniscient", optPath);
 
+/*        
+        //
+        // load examplary GPS-path
+        //
+        String raceURL = "http://germanmaster.traclive.dk/events/event_20110929_Internatio/clientparams.php?event=event_20110929_Internatio&race=d1f521fa-ec52-11e0-a523-406186cbf87c";
+        //String raceURL = "http://germanmaster.traclive.dk/events/event_20110929_Internatio/clientparams.php?event=event_20110929_Internatio&race=eb06795a-ec52-11e0-a523-406186cbf87c";
+        //String raceURL = "http://germanmaster.traclive.dk/events/event_20110929_Internatio/clientparams.php?event=event_20110929_Internatio&race=6bb0829e-ec44-11e0-a523-406186cbf87c";
+        PathGeneratorTracTrac genTrac = new PathGeneratorTracTrac(simulationParameters);
+        genTrac.setEvaluationParameters(raceURL, "tcp://10.18.206.73:1520", "tcp://10.18.206.73:1521");
+        
+        Path gpsPath = genTrac.getPath();        
+        allPaths.put("6#GPS Track", gpsPath);
+
+        Path gpsPathPoly = genTrac.getPathPolyline(new MeterDistance(4.88));        
+        allPaths.put("7#GPS Poly", gpsPathPoly);
+*/
+        
         return allPaths;
     }
 
@@ -113,8 +131,6 @@ public class SailingSimulatorImpl implements SailingSimulator {
         String[] allKeys = allPaths.keySet().toArray(new String[0]);
         for (String currentKey : allKeys) {
             allTimedPaths.put(currentKey, allPaths.get(currentKey).getEvenTimedPath(millisecondsStep));
-            //allTimedPaths.put(currentKey, allPaths.get(currentKey).getEvenTimedPoints(millisecondsStep));
-            //allTimedPaths.put(currentKey, allPaths.get(currentKey).getPathPoints());
         }
 
         return allTimedPaths;
