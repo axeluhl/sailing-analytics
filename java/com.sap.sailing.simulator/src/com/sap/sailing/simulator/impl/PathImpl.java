@@ -4,11 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.sap.sailing.domain.base.SpeedWithBearing;
+import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
+import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.simulator.Path;
 import com.sap.sailing.simulator.TimedPositionWithSpeed;
 import com.sap.sailing.simulator.WindField;
@@ -43,7 +46,13 @@ public class PathImpl implements Path {
 
         List<TimedPositionWithSpeed> path = new ArrayList<TimedPositionWithSpeed>();
 
-        path.add(pathPoints.get(0));
+        TimedPositionWithSpeed startPoint = pathPoints.get(0);
+        SpeedWithBearing startWind = null;
+        if (windField != null) {
+            startWind = windField.getWind(new TimedPositionImpl(startPoint.getTimePoint(), startPoint.getPosition()));
+            startPoint = new TimedPositionWithSpeedImpl(startPoint.getTimePoint(), startPoint.getPosition(), startWind);
+        }
+        path.add(startPoint);
         TimePoint nextTimePoint = new MillisecondsTimePoint(startTime.asMillis() + timeStep);
         List<TimedPositionWithSpeed> points = new ArrayList<TimedPositionWithSpeed>();
 
@@ -61,9 +70,16 @@ public class PathImpl implements Path {
                 // p1.getTimePoint().asMillis())+" - "+(p2.getTimePoint().asMillis() - p1.getTimePoint().asMillis()));
                 double scale1 = (double) (nextTimePoint.asMillis() - p1.getTimePoint().asMillis());
                 double scale2 = (double) (p2.getTimePoint().asMillis() - p1.getTimePoint().asMillis());
-                Position nextPosition = p1.getPosition().translateGreatCircle(p1.getPosition().getBearingGreatCircle(p2.getPosition()),
-                        dist.scale(scale1 / scale2));
-                SpeedWithBearing nextWind = windField.getWind(new TimedPositionImpl(nextTimePoint, nextPosition));
+                Position nextPosition = p1.getPosition().translateGreatCircle(p1.getPosition().getBearingGreatCircle(p2.getPosition()), dist.scale(scale1 / scale2));
+                SpeedWithBearing nextWind = null;
+                if (windField != null) {
+                    nextWind = windField.getWind(new TimedPositionImpl(nextTimePoint, nextPosition));
+                } else {
+                    double nextWindSpeed = p1.getSpeed().getKnots() + (p2.getSpeed().getKnots() - p1.getSpeed().getKnots()) * scale1 / scale2;
+                    double nextWindAngle = p1.getSpeed().getBearing().getDegrees() + (p2.getSpeed().getBearing().getDegrees() - p1.getSpeed().getBearing().getDegrees()) * scale1 / scale2;
+                    SpeedWithBearing nextWindSpeedWithBearing = new KnotSpeedWithBearingImpl(nextWindSpeed, new DegreeBearingImpl(nextWindAngle));
+                    nextWind = new WindImpl(nextPosition, nextTimePoint, nextWindSpeedWithBearing);
+                }
                 TimedPositionWithSpeed nextPoint = new TimedPositionWithSpeedImpl(nextTimePoint, nextPosition, nextWind);
 
                 // distance scale: percentage of distance between previous point and next point
@@ -88,6 +104,11 @@ public class PathImpl implements Path {
 
                 if (maxDist > scaleDist) {
                     // add intermediate corner point
+                    SpeedWithBearing maxWind = null;
+                    if (windField != null) {
+                        maxWind = windField.getWind(new TimedPositionImpl(maxPoint.getTimePoint(), maxPoint.getPosition()));
+                        maxPoint = new TimedPositionWithSpeedImpl(maxPoint.getTimePoint(), maxPoint.getPosition(), maxWind);
+                    }
                     path.add(maxPoint);
                 }
 
@@ -111,7 +132,13 @@ public class PathImpl implements Path {
         }
 
         if (path.get(path.size() - 1).getTimePoint().asMillis() < endTime.asMillis()) {
-            path.add(pathPoints.get(pathPoints.size() - 1));
+            TimedPositionWithSpeed endPoint = pathPoints.get(pathPoints.size() - 1);
+            SpeedWithBearing endWind = null;
+            if (windField != null) {
+                endWind = windField.getWind(new TimedPositionImpl(endPoint.getTimePoint(), endPoint.getPosition()));
+                endPoint = new TimedPositionWithSpeedImpl(endPoint.getTimePoint(), endPoint.getPosition(), endWind);
+            }
+            path.add(endPoint);
         }
 
         return path;
@@ -124,7 +151,7 @@ public class PathImpl implements Path {
 
     }
 
-    //@Override
+    // @Override
     public TimedPositionWithSpeed getPositionAtTime(TimePoint t) {
 
         if (t.compareTo(pathPoints.get(0).getTimePoint()) == 0)
@@ -147,14 +174,13 @@ public class PathImpl implements Path {
         double t0 = 1000.0 * t.asMillis();
 
         Distance dist = p1.getPosition().getDistance(p2.getPosition());
-        Position p0 = p1.getPosition().translateGreatCircle(p1.getPosition().getBearingGreatCircle(p2.getPosition()),
-                dist.scale((t0 - t1) / (t2 - t1)));
+        Position p0 = p1.getPosition().translateGreatCircle(p1.getPosition().getBearingGreatCircle(p2.getPosition()), dist.scale((t0 - t1) / (t2 - t1)));
         SpeedWithBearing windAtPoint = windField.getWind(new TimedPositionImpl(t, p0));
 
         return new TimedPositionWithSpeedImpl(t, p0, windAtPoint);
     }
 
-    //@Override
+    // @Override
     public List<TimedPositionWithSpeed> getEvenTimedPoints(long milliseconds) {
 
         if (milliseconds == 0)
@@ -179,7 +205,7 @@ public class PathImpl implements Path {
     }
 
     // not implemented yet!
-    //@Override
+    // @Override
     public List<TimedPositionWithSpeed> getEvenDistancedPoints(Distance dist) {
         return null;
     }
