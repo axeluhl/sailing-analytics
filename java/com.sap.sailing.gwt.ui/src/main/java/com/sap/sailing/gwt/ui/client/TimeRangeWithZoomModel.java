@@ -7,14 +7,14 @@ import java.util.Set;
 
 import com.sap.sailing.domain.common.impl.Util.Pair;
 
-public class TimeZoomModel implements TimeZoomProvider {
+public class TimeRangeWithZoomModel extends TimeRangeModel implements TimeRangeWithZoomProvider {
     private Date zoomStartTimepoint;
     private Date zoomEndTimepoint;
     private boolean isTimeZoomed;
     
     private final Set<TimeZoomChangeListener> listeners;
     
-    public TimeZoomModel() {
+    public TimeRangeWithZoomModel() {
         isTimeZoomed = false;
         listeners = new HashSet<TimeZoomChangeListener>();
     }
@@ -35,7 +35,7 @@ public class TimeZoomModel implements TimeZoomProvider {
         this.isTimeZoomed = true;
         for (TimeZoomChangeListener listener : listeners) {
             if (listenersNotToNotify == null || !Arrays.asList(listenersNotToNotify).contains(listener)) {
-                listener.onTimeZoom(zoomStartTimepoint, zoomEndTimepoint);
+                listener.onTimeZoomChanged(zoomStartTimepoint, zoomEndTimepoint);
             }
         }
     }

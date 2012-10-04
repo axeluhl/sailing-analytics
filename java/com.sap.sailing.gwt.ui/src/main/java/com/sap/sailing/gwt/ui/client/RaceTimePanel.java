@@ -18,8 +18,8 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
     private boolean autoAdjustPlayMode;
     private RaceTimesInfoDTO lastRaceTimesInfo;
     
-    public RaceTimePanel(Timer timer, StringMessages stringMessages, RaceTimesInfoProvider raceTimesInfoProvider) {
-        super(timer, stringMessages);
+    public RaceTimePanel(Timer timer, TimeRangeProvider timeRangeProvider, StringMessages stringMessages, RaceTimesInfoProvider raceTimesInfoProvider) {
+        super(timer, timeRangeProvider, stringMessages);
         this.raceTimesInfoProvider = raceTimesInfoProvider;
         selectedRace = null;
         autoAdjustPlayMode = true;
@@ -66,7 +66,7 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
                     timer.setPlayMode(PlayModes.Live);
                 }
                 
-                boolean timerAlreadyInitialized = getMin() != null && getMax() != null && timeSlider.getCurrentValue() != null;
+                boolean timerAlreadyInitialized = getFromTime() != null && getToTime() != null && timeSlider.getCurrentValue() != null;
                 if (!isTimeZoomed) {
                     updateMinMax(raceTimesInfo);
                     if (!timerAlreadyInitialized) {
@@ -83,7 +83,7 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
     } 
     
     @Override
-    public void onTimeZoom(Date zoomStartTimepoint, Date zoomEndTimepoint) {
+    public void onTimeZoomChanged(Date zoomStartTimepoint, Date zoomEndTimepoint) {
         isTimeZoomed = true;
         timeSlider.setZoomed(true);
         timer.setAutoAdvance(false);
@@ -151,7 +151,7 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
         Date max = raceMinMax.getB();
         
         // never reduce max if it was already set
-        if (min != null && max != null && (getMax() == null || getMax().before(max))) {
+        if (min != null && max != null && (getToTime() == null || getToTime().before(max))) {
             setMinMax(min, max, /* fireEvent */ false); // no event because we guarantee time to be between min and max
         }
     }

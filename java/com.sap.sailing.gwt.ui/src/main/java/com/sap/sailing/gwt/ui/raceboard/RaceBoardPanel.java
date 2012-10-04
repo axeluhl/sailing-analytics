@@ -33,7 +33,7 @@ import com.sap.sailing.gwt.ui.client.RegattaDisplayer;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.TimeListener;
-import com.sap.sailing.gwt.ui.client.TimeZoomModel;
+import com.sap.sailing.gwt.ui.client.TimeRangeWithZoomModel;
 import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.client.UserAgentDetails;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
@@ -84,7 +84,7 @@ public class RaceBoardPanel extends FormPanel implements RegattaDisplayer, RaceS
     private final RaceSelectionProvider raceSelectionProvider;
     private final UserAgentDetails userAgent;
     private final CompetitorSelectionModel competitorSelectionModel;
-    private final TimeZoomModel timeZoomModel; 
+    private final TimeRangeWithZoomModel timeRangeWithZoomModel; 
     private final RegattaAndRaceIdentifier selectedRaceIdentifier;
 
     private LeaderboardPanel leaderboardPanel;
@@ -123,7 +123,7 @@ public class RaceBoardPanel extends FormPanel implements RegattaDisplayer, RaceS
         setWidget(mainPanel);
 
         this.timer = timer;
-        timeZoomModel = new TimeZoomModel();
+        timeRangeWithZoomModel = new TimeRangeWithZoomModel();
         componentViewers = new ArrayList<ComponentViewer>();
         competitorSelectionModel = new CompetitorSelectionModel(/* hasMultiSelection */ true);
 
@@ -138,8 +138,8 @@ public class RaceBoardPanel extends FormPanel implements RegattaDisplayer, RaceS
                 break;
         }
 
-        timePanel = new RaceTimePanel(timer, stringMessages, raceTimesInfoProvider);
-        timeZoomModel.addTimeZoomChangeListener(timePanel);
+        timePanel = new RaceTimePanel(timer, timeRangeWithZoomModel, stringMessages, raceTimesInfoProvider);
+        timeRangeWithZoomModel.addTimeZoomChangeListener(timePanel);
         raceTimesInfoProvider.addRaceTimesInfoProviderListener(timePanel);
         raceSelectionProvider.addRaceSelectionChangeListener(timePanel);
         timePanel.onRaceSelectionChange(raceSelectionProvider.getSelectedRaces());
@@ -155,16 +155,14 @@ public class RaceBoardPanel extends FormPanel implements RegattaDisplayer, RaceS
         List<Component<?>> components = new ArrayList<Component<?>>();
 
         competitorChart = new MultiChartPanel(sailingService, asyncActionsExecutor, competitorSelectionModel, raceSelectionProvider,
-                    timer, timeZoomModel, stringMessages, errorReporter, true, true);
+                    timer, timeRangeWithZoomModel, stringMessages, errorReporter, true, true);
         competitorChart.setVisible(false);
-        raceTimesInfoProvider.addRaceTimesInfoProviderListener(competitorChart);
         competitorChart.onRaceSelectionChange(raceSelectionProvider.getSelectedRaces());
         components.add(competitorChart);
 
-        windChart = new WindChart(sailingService, raceSelectionProvider, timer, timeZoomModel, new WindChartSettings(),
+        windChart = new WindChart(sailingService, raceSelectionProvider, timer, timeRangeWithZoomModel, new WindChartSettings(),
                 stringMessages, asyncActionsExecutor, errorReporter, /* compactChart */ true);
         windChart.setVisible(false);
-        raceTimesInfoProvider.addRaceTimesInfoProviderListener(windChart);
         windChart.onRaceSelectionChange(raceSelectionProvider.getSelectedRaces());
         components.add(windChart);
         

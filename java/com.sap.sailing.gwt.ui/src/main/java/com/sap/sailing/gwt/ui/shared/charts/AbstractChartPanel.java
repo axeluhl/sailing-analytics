@@ -47,7 +47,7 @@ import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.RaceSelectionProvider;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.TimeZoomProvider;
+import com.sap.sailing.gwt.ui.client.TimeRangeWithZoomProvider;
 import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
@@ -88,9 +88,9 @@ implements CompetitorSelectionChangeListener, RequiresResize {
 
     public AbstractChartPanel(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
             CompetitorSelectionProvider competitorSelectionProvider, RaceSelectionProvider raceSelectionProvider,
-            Timer timer, TimeZoomProvider timeZoomProvider, final StringMessages stringMessages, ErrorReporter errorReporter, DetailType dataToShow,
+            Timer timer, TimeRangeWithZoomProvider timeRangeWithZoomProvider, final StringMessages stringMessages, ErrorReporter errorReporter, DetailType dataToShow,
             boolean compactChart, boolean allowTimeAdjust) {
-        super(sailingService, timer, timeZoomProvider, stringMessages, asyncActionsExecutor, errorReporter);
+        super(sailingService, timer, timeRangeWithZoomProvider, stringMessages, asyncActionsExecutor, errorReporter);
     	this.competitorSelectionProvider = competitorSelectionProvider;
         this.dataToShow = dataToShow;
         this.compactChart = compactChart;
@@ -107,8 +107,6 @@ implements CompetitorSelectionChangeListener, RequiresResize {
      
         competitorSelectionProvider.addCompetitorSelectionChangeListener(this);
         raceSelectionProvider.addRaceSelectionChangeListener(this);
-        timer.addTimeListener(this);
-        timeZoomProvider.addTimeZoomChangeListener(this);
     }
     
     @Override
@@ -243,14 +241,14 @@ implements CompetitorSelectionChangeListener, RequiresResize {
                     if (!chartData.contains(competitor)) {
                         dataQuery.add(new Pair<Date, CompetitorDTO>(new Date(0), competitor));
                     } else if (competitorDateOfNewestData.before(chartDataDateOfNewestData)
-                            || competitorDateOfNewestData.before(maxTimepoint)) {
+                            || competitorDateOfNewestData.before(timeRangeWithZoomProvider.getToTime())) {
                         dataQuery.add(new Pair<Date, CompetitorDTO>(new Date(competitorDateOfNewestData.getTime()
                                 + getStepSize()), competitor));
                     }
                 }
 
                 GetCompetitorsRaceDataAction getCompetitorsRaceDataAction = new GetCompetitorsRaceDataAction(
-                        sailingService, selectedRaceIdentifier, dataQuery, maxTimepoint, getStepSize(),
+                        sailingService, selectedRaceIdentifier, dataQuery, timeRangeWithZoomProvider.getToTime(), getStepSize(),
                         getDataToShow(), new AsyncCallback<MultiCompetitorRaceDataDTO>() {
 
                             @Override
@@ -273,8 +271,8 @@ implements CompetitorSelectionChangeListener, RequiresResize {
                                         }
                                     }
                                 }
-                                chart.getXAxis().setMin(minTimepoint.getTime());
-                                chart.getXAxis().setMax(maxTimepoint.getTime());
+                                chart.getXAxis().setMin(timeRangeWithZoomProvider.getFromTime().getTime());
+                                chart.getXAxis().setMax(timeRangeWithZoomProvider.getToTime().getTime());
 
                                 drawChartData();
                                 chart.redraw();
