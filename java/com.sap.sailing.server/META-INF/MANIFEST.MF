@@ -26,11 +26,6 @@ Require-Bundle: com.sap.sailing.domain,
  com.sap.sailing.operationaltransformation
 Bundle-ClassPath: .
 Export-Package: com.sap.sailing.server,
- com.sap.sailing.server.impl;
-  x-friends:="com.sap.sailing.mongodb.test,
-   com.sap.sailing.server.test,
-   com.sap.sailing.domain.swisstimingadapter.test,
-   com.sap.sailing.gwt.ui.test,
-   com.sap.sailing.server.replication.test",
+ com.sap.sailing.server.impl,
  com.sap.sailing.server.operationaltransformation
 Web-ContextPath: /sailingserver

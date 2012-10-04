@@ -87,4 +87,7 @@ public class RaceTrackerMock implements RaceTracker{
         return null;
     }
 
+    public void setWakeup(Object pointer) {
+        //wakeupPointer = pointer;
+    }
 }

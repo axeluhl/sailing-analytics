@@ -319,4 +319,8 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
     public void receivedAvailableRaces(Iterable<Race> races) {
         // don't care
     }
+    
+    public void setWakeup(Object pointer) {
+        //wakeupPointer = pointer;
+    }
 }

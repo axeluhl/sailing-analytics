@@ -76,6 +76,8 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
     private final Set<RaceDefinition> races;
     private final DynamicTrackedRegatta trackedRegatta;
     private final static SimpleDateFormat tracTracDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z");
+    
+    private Object wakeupPointer;
 
     /**
      * paramURL, liveURI and storedURI for TracTrac connection
@@ -425,6 +427,9 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
     @Override
     public void storedDataEnd() {
         logger.info("Stored data end for race(s) "+getRaces());
+        synchronized(wakeupPointer) {
+            wakeupPointer.notifyAll();
+        }
     }
 
     @Override
@@ -446,5 +451,9 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
     @Override
     public void addRaceDefinition(RaceDefinition race) {
         races.add(race);
+    }
+    
+    public void setWakeup(Object pointer) {
+        wakeupPointer = pointer;
     }
 }

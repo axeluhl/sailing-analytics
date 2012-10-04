@@ -35,6 +35,9 @@ public class PathCanvasOverlay extends WindFieldCanvasOverlay implements Named {
 
     private static Logger logger = Logger.getLogger(PathCanvasOverlay.class.getName());
 
+    private LatLng startPoint;
+    private LatLng endPoint;
+    
     protected String name;
 
     public String pathColor = "Green";
@@ -53,6 +56,11 @@ public class PathCanvasOverlay extends WindFieldCanvasOverlay implements Named {
         this.name = name;
     }
 
+    public void setRaceCourse(LatLng startPoint, LatLng endPoint) {
+        this.startPoint = startPoint; 
+        this.endPoint = endPoint; 
+    }
+    
     @Override
     protected void drawWindField() {
         logger.fine("In PathCanvasOverlay.drawWindField");
@@ -71,20 +79,21 @@ public class PathCanvasOverlay extends WindFieldCanvasOverlay implements Named {
         String title = "Path at " + numPoints + " points.";
         long totalTime = windDTOList.get(numPoints - 1).timepoint - windDTOList.get(0).timepoint;
 
-        LatLng start = LatLng.newInstance(windDTOList.get(0).position.latDeg, windDTOList.get(0).position.latDeg);
-        LatLng end = LatLng.newInstance(windDTOList.get(numPoints - 1).position.latDeg, windDTOList.get(numPoints - 1).position.latDeg);
+        //LatLng start = LatLng.newInstance(windDTOList.get(0).position.latDeg, windDTOList.get(0).position.latDeg);
+        //LatLng end = LatLng.newInstance(windDTOList.get(numPoints - 1).position.latDeg, windDTOList.get(numPoints - 1).position.latDeg);
 
-        double distance = start.distanceFrom(end) / Mile.METERS_PER_NAUTICAL_MILE;
+        double distance = startPoint.distanceFrom(endPoint) / Mile.METERS_PER_NAUTICAL_MILE;
 
-        Point startPx = getMap().convertLatLngToDivPixel(start);
-        Point endPx = getMap().convertLatLngToDivPixel(end);
+        Point startPx = getMap().convertLatLngToDivPixel(startPoint);
+        Point endPx = getMap().convertLatLngToDivPixel(endPoint);
         double rcLengthPx = Math.sqrt(Math.pow(startPx.getX() - endPx.getX(), 2) + Math.pow(startPx.getY() - endPx.getY(), 2));
-        // System.out.print("Race Course Pixel Length: "+rcLengthPx+"\n");
+        //System.out.println("Race Course Pixel Length: "+rcLengthPx);
 
         double arrowDistPx = 60;
         long arrowInterleave = Math.max(1, Math.round(arrowDistPx * numPoints / rcLengthPx));
         // System.out.print("Arrow Interleave: "+arrowInterleave+"\n");
-
+        //arrowInterleave = 3;
+        
         if (windDTOList != null && windDTOList.size() > 0) {
 
             Context2d context2d = canvas.getContext2d();

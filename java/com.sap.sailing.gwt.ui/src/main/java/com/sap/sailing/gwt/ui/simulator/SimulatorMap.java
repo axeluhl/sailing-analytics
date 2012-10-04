@@ -110,6 +110,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
                     pathCanvasOverlay.pathColor = colorPalette.getColor(paths.length-1-i);
                     mapw.addOverlay(pathCanvasOverlay);
                     pathCanvasOverlay.setWindField(pathWindDTO);
+                    pathCanvasOverlay.setRaceCourse(raceCourseCanvasOverlay.startPoint, raceCourseCanvasOverlay.endPoint);
                     pathCanvasOverlay.redraw(true);
                     legendCanvasOverlay.setPathOverlays(pathCanvasOverlays);
 
@@ -119,6 +120,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
                     replayPathCanvasOverlay.pathColor = colorPalette.getColor(paths.length-1-i);
                     mapw.addOverlay(replayPathCanvasOverlay);
                     replayPathCanvasOverlay.setWindField(pathWindDTO);
+                    replayPathCanvasOverlay.setRaceCourse(raceCourseCanvasOverlay.startPoint, raceCourseCanvasOverlay.endPoint);
                     legendCanvasOverlay.setPathOverlays(replayPathCanvasOverlays);
 
                 }
@@ -231,9 +233,9 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
                 mapw.setScrollWheelZoomEnabled(true);
                 // mapw.setContinuousZoom(true);
                 mapw.setTitle(stringMessages.simulator() + " " + stringMessages.map());
-                PositionDTO kiel = new PositionDTO(54.46195148135232, 10.1513671875);
-
-                LatLng position = LatLng.newInstance(kiel.latDeg, kiel.lngDeg);
+                //PositionDTO kiel = new PositionDTO(54.46195148135232, 10.1513671875);
+                PositionDTO trave = new PositionDTO(54.007063,10.838356); //53.978276,10.880156);//53.968015,10.891331);
+                LatLng position = LatLng.newInstance(trave.latDeg, trave.lngDeg);
                 mapw.panTo(position);
                 SimulatorMap.this.add(mapw, 0, 0);
                 mapw.setSize("100%", "100%");
