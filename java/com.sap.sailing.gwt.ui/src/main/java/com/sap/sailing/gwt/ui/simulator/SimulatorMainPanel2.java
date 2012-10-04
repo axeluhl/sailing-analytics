@@ -6,6 +6,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import org.moxieapps.gwt.highcharts.client.Chart;
+import org.moxieapps.gwt.highcharts.client.Series;
+import org.moxieapps.gwt.highcharts.client.labels.AxisLabelsData;
+import org.moxieapps.gwt.highcharts.client.labels.AxisLabelsFormatter;
+import org.moxieapps.gwt.highcharts.client.labels.XAxisLabels;
+
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
@@ -34,19 +40,13 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.shared.BoatClassDTO;
+import com.sap.sailing.gwt.ui.shared.PolarDiagram49DTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldGenParamsDTO;
 import com.sap.sailing.gwt.ui.shared.WindPatternDTO;
 import com.sap.sailing.gwt.ui.shared.controls.slider.SliderBar;
 import com.sap.sailing.gwt.ui.shared.panels.SimpleBusyIndicator;
 import com.sap.sailing.gwt.ui.shared.windpattern.WindPatternDisplay;
 import com.sap.sailing.gwt.ui.shared.windpattern.WindPatternSetting;
-import com.sap.sailing.gwt.ui.shared.PolarDiagram49DTO;
-
-import org.moxieapps.gwt.highcharts.client.Chart;
-import org.moxieapps.gwt.highcharts.client.Series;
-import org.moxieapps.gwt.highcharts.client.labels.AxisLabelsData;
-import org.moxieapps.gwt.highcharts.client.labels.AxisLabelsFormatter;
-import org.moxieapps.gwt.highcharts.client.labels.XAxisLabels;
 
 public class SimulatorMainPanel2 extends SplitLayoutPanel {
 
@@ -439,11 +439,6 @@ public class SimulatorMainPanel2 extends SplitLayoutPanel {
             public void onChange(ChangeEvent evnet) {
                 int selectedIndex = boatSelector.getSelectedIndex();
 
-                /*isOmniscient.setVisible(selectedIndex == 1);
-                isOpportunistic.setVisible(selectedIndex == 1);
-                isStrategyOption1.setVisible(selectedIndex != 1);
-                isStrategyOption2.setVisible(selectedIndex != 1);
-                isStrategyOption3.setVisible(selectedIndex != 1);*/
                 LoadPolarDiagramData(selectedIndex);
             }
         });
@@ -464,17 +459,21 @@ public class SimulatorMainPanel2 extends SplitLayoutPanel {
         final Label polarSetup = new Label(polarString);
         polarSetup.getElement().setClassName("innerHeadline");
         sailingPanel.add(polarSetup);
+
         Panel polarShow = createPolarSelector();
         sailingPanel.add(polarShow);
-        polarDiv = new HorizontalPanel();
-        polarDiv.getElement().setClassName("polarDiv");
-        polarDiv.setVisible(false);
-        LoadPolarDiagramData(0);
-        sailingPanel.add(polarDiv);
 
+         polarDiv = new HorizontalPanel();
+         polarDiv.getElement().setClassName("polarDiv");
+         polarDiv.setVisible(false);
+
+        this.LoadPolarDiagramData(0);
+
+        sailingPanel.add(polarDiv);
     }
 
     private void LoadPolarDiagramData(int selectedBoatClass) {
+
         // load the polar diagram
         try {
             if (chart != null) {
@@ -550,17 +549,10 @@ public class SimulatorMainPanel2 extends SplitLayoutPanel {
         initDisplayOptions(mapOptions);
 
         simulatorMap = new SimulatorMap(simulatorSvc, stringMessages, errorReporter, xRes, yRes, timer, timePanel,
-                windParams, busyIndicator, mode);
-
-        // FlowPanel mapPanel = new FlowPanel();
-        // mapPanel.setTitle("Map");
-        // mapPanel.setSize("100%", "92%");
-        // mapPanel.add(mapw);
-        // mapw.setSize("100%", "100%");
-
+                windParams, busyIndicator);
         simulatorMap.setSize("100%", "100%");
-        rightPanel.add(simulatorMap);
 
+        this.rightPanel.add(this.simulatorMap);
     }
 
     // initialize timer with a default time span based on windParams
@@ -698,9 +690,9 @@ public class SimulatorMainPanel2 extends SplitLayoutPanel {
 
         vp.add(this.isOmniscient);
         vp.add(this.isOpportunistic);
-        //vp.add(this.isStrategyOption1);
-        //vp.add(this.isStrategyOption2);
-        //vp.add(this.isStrategyOption3);
+        // vp.add(this.isStrategyOption1);
+        // vp.add(this.isStrategyOption2);
+        // vp.add(this.isStrategyOption3);
 
         /*
          * CheckBox cb = new CheckBox(stringMessages.omniscient()); cb.setValue(true); //
@@ -721,27 +713,29 @@ public class SimulatorMainPanel2 extends SplitLayoutPanel {
     }
 
     private Panel createPolarSelector() {
-        final Label polarShowLabel = new Label(stringMessages.showHideComponent(""));
+        HorizontalPanel polarDiagramPanel = new HorizontalPanel();
+        polarDiagramPanel.getElement().setClassName("boatClassPanel");
+        polarDiagramPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
+
+        Label polarShowLabel = new Label(stringMessages.showHideComponent(""));
         polarShowLabel.getElement().setClassName("boatClassLabel");
-        HorizontalPanel hp = new HorizontalPanel();
-        hp.getElement().setClassName("boatClassPanel");
-        hp.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
-        hp.add(polarShowLabel);
-        //
+        polarDiagramPanel.add(polarShowLabel);
+
         CheckBox cb = new CheckBox("");
         cb.setValue(false);
         cb.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
-
             @Override
             public void onValueChange(ValueChangeEvent<Boolean> event) {
                 @SuppressWarnings("deprecation")
                 boolean checked = ((CheckBox) event.getSource()).isChecked();
+
                 polarDiv.setVisible(checked);
             }
         });
-        hp.add(cb);
 
-        return hp;
+        polarDiagramPanel.add(cb);
+
+        return polarDiagramPanel;
     }
 
 }

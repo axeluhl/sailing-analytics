@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.client;
 
+import java.io.IOException;
 import java.util.List;
 
 import com.google.gwt.user.client.rpc.RemoteService;
@@ -16,27 +17,25 @@ import com.sap.sailing.gwt.ui.shared.WindPatternDTO;
 import com.sap.sailing.gwt.ui.shared.windpattern.WindPatternDisplay;
 import com.sap.sailing.gwt.ui.shared.windpattern.WindPatternNotFoundException;
 
-
 @RemoteServiceRelativePath("simulator")
 public interface SimulatorService extends RemoteService {
 
     public PositionDTO[] getRaceLocations();
 
     public WindLatticeDTO getWindLatice(WindLatticeGenParamsDTO params);
-    
-    public WindFieldDTO getWindField(WindFieldGenParamsDTO params, WindPatternDisplay pattern) throws WindPatternNotFoundException;
 
     //public PathDTO[] getPaths(WindFieldGenParamsDTO params, WindPatternDisplay pattern) throws WindPatternNotFoundException;
     
     public SimulatorResultsDTO getSimulatorResults(WindFieldGenParamsDTO params, WindPatternDisplay pattern, 
             boolean withWindField) throws WindPatternNotFoundException;
-    
+
     public List<WindPatternDTO> getWindPatterns();
-    
+
     public WindPatternDisplay getWindPatternDisplay(WindPatternDTO pattern);
 
     public BoatClassDTO[] getBoatClasses();
 
-    public PolarDiagram49DTO getPolarDiagram49DTO(Double bearingStep, int boatClass);
+    public WindFieldDTO getWindField(WindFieldGenParamsDTO params, WindPatternDisplay pattern) throws WindPatternNotFoundException;
     
+    public PolarDiagram49DTO getPolarDiagram49DTO(Double bearingStep, int boatClass) throws IOException;
 }
