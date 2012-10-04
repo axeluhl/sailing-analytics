@@ -35,12 +35,8 @@ public abstract class RaceChart extends SimplePanel implements RaceSelectionChan
 
     protected final Timer timer;
     protected final TimeRangeWithZoomProvider timeRangeWithZoomProvider; 
-//
-//    protected Date minTimepoint;
-//    protected Date maxTimepoint;
-    
+  
     protected RegattaAndRaceIdentifier selectedRaceIdentifier;
-//    protected RaceTimesInfoDTO lastRaceTimesInfo;
 
     protected final DateTimeFormat dateFormat = DateTimeFormat.getFormat("HH:mm:ss");
     protected final DateTimeFormat dateFormatHoursMinutes = DateTimeFormat.getFormat("HH:mm");
@@ -70,42 +66,6 @@ public abstract class RaceChart extends SimplePanel implements RaceSelectionChan
         timeRangeWithZoomProvider.addTimeZoomChangeListener(this);
         timeRangeWithZoomProvider.addTimeRangeChangeListener(this);
     }
-
-
-    //    @Override
-//    public void raceTimesInfosReceived(Map<RegattaAndRaceIdentifier, RaceTimesInfoDTO> raceTimesInfos) {
-//        this.lastRaceTimesInfo = raceTimesInfos.get(selectedRaceIdentifier);
-//        
-//        Pair<Date, Date> raceMinMax = RaceTimesCalculationUtil.caluclateRaceMinMax(timer, this.lastRaceTimesInfo);
-//        boolean updateMinMax = false;
-//        Date minTimepoint = timeRangeProvider.getFromTime();
-//        Date maxTimepoint = timeRangeProvider.getToTime();
-//        
-//        if(chart != null) {
-//            if (minTimepoint == null || maxTimepoint == null) {
-//                minTimepoint = raceMinMax.getA();
-//                maxTimepoint = raceMinMax.getB();
-//                updateMinMax = true;
-//            } else if(minTimepoint.getTime() != raceMinMax.getA().getTime() || maxTimepoint.getTime() != raceMinMax.getB().getTime()) {
-//                minTimepoint = raceMinMax.getA();
-//                maxTimepoint = raceMinMax.getB();
-//                updateMinMax = true;
-//            }
-//        }
-//        if (updateMinMax) {
-//            if (minTimepoint != null) {
-//                chart.getXAxis().setMin(minTimepoint.getTime());
-//            }
-//            if (maxTimepoint != null) {
-//                chart.getXAxis().setMax(maxTimepoint.getTime());
-//            }
-//            if (minTimepoint != null && maxTimepoint != null) {
-//                chart.getXAxis().setExtremes(minTimepoint.getTime(), maxTimepoint.getTime(), false, false);
-//                long tickInterval = (maxTimepoint.getTime() - minTimepoint.getTime()) / TICKCOUNT;
-//                chart.getXAxis().setTickInterval(tickInterval);
-//            }
-//        }
-//    }
 
     protected void showLoading(String message) {
         if(timer.getPlayMode() != PlayModes.Live) {

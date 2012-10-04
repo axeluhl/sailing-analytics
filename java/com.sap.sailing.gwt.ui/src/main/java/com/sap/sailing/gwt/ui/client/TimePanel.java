@@ -34,21 +34,7 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
     TimeRangeChangeListener, PlayStateListener, RequiresResize {
     protected final Timer timer;
     protected boolean isTimeZoomed;
-    
     protected final TimeRangeProvider timeRangeProvider;
-    /**
-     * The start time point of the time interval visualized by this time panel. May be <code>null</code> if not yet initialized.
-     * 
-     * @see #setMinMax(Date, Date, boolean)
-     */
-//    private Date min;
-    
-    /**
-     * The end time point of the time interval visualized by this time panel. May be <code>null</code> if not yet initialized.
-     * 
-     * @see #setMinMax(Date, Date, boolean)
-     */
-//    private Date max;
     
     private final IntegerBox playSpeedBox;
     private final Label timeDelayLabel;
@@ -339,12 +325,10 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
         boolean changed = false;
         if (!max.equals(timeRangeProvider.getToTime())) {
             changed = true;
-//            this.max = max;
             timeSlider.setMaxValue(new Double(max.getTime()), fireEvent);
         }
         if (!min.equals(timeRangeProvider.getFromTime())) {
             changed = true;
-//            this.min = min;
             timeSlider.setMinValue(new Double(min.getTime()), fireEvent);
             if (timeSlider.getCurrentValue() == null) {
                 timeSlider.setCurrentValue(new Double(min.getTime()), fireEvent);
