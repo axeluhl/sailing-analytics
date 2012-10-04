@@ -578,6 +578,6 @@ body ::-webkit-scrollbar-track {
 	height: 20px;
     padding: 0px 10px 3px;
     float: left;
-    background: #7c7b7c url(images/alert-overlay.png) repeat-x;
+    background: #de8a2e url(images/alert-overlay.png) repeat-x;
     font-family: UbuntuRegular, Arial, Verdana, sans-serif;
 }
