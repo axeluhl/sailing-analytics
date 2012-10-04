@@ -382,27 +382,14 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         return windFieldDTO;
     }
 
-    public PolarDiagram49DTO getPolarDiagram49DTO(Double bearingStep, int boatClass) {
-        PolarDiagram49DTO dto = new PolarDiagram49DTO();
-        NavigableMap<Speed, NavigableMap<Bearing, Speed>> navMap = null;
-        Number[][] series = null;
-        PolarDiagram pd;
-        // to do - boat class by ID
-        switch (boatClass) {
-        case 1: {
-            pd = new PolarDiagram49ORC();
-            break;
-        }
-        case 2: {
-            pd = new PolarDiagram505STG();
-            break;
-        }
-        default: {
-            pd = new PolarDiagram49STG();
-            break;
-        }
-        }
-        navMap = pd.polarDiagramPlot(bearingStep);
+    public PolarDiagram49DTO getPolarDiagram49DTO(Double bearingStep, int boatClassIndex) throws IOException {
+
+        String csvFilePath = ConfigurationManager.getDefault().getPolarDiagramFileLocation(boatClassIndex);
+
+        PolarDiagram pd = new PolarDiagramCSV(csvFilePath);
+
+        NavigableMap<Speed, NavigableMap<Bearing, Speed>> navMap = pd.polarDiagramPlot(bearingStep);
+
         Set<Speed> validSpeeds = navMap.keySet();
         validSpeeds.remove(Speed.NULL);
 
@@ -417,6 +404,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
             }
             i++;
         }
+        PolarDiagram49DTO dto = new PolarDiagram49DTO();
         dto.setNumberSeries(series);
 
         return dto;

@@ -35,6 +35,7 @@ public interface SimulatorService extends RemoteService {
 
     public BoatClassDTO[] getBoatClasses();
 
+    public WindFieldDTO getWindField(WindFieldGenParamsDTO params, WindPatternDisplay pattern) throws WindPatternNotFoundException;
+    
     public PolarDiagram49DTO getPolarDiagram49DTO(Double bearingStep, int boatClass) throws IOException;
-
 }
