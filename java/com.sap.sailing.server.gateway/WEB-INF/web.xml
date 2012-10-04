@@ -28,4 +28,14 @@
      <servlet-name>jspServet</servlet-name>
      <url-pattern>*.jsp</url-pattern>
    </servlet-mapping>
+   
+   	<servlet>
+		<servlet-name>SimpleJspForwardServlet</servlet-name>
+		<servlet-class>com.sap.sailing.server.gateway.SimpleJspForwardServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>SimpleJspForwardServlet</servlet-name>
+		<url-pattern>/events</url-pattern>
+	</servlet-mapping>
+   
  </web-app>
