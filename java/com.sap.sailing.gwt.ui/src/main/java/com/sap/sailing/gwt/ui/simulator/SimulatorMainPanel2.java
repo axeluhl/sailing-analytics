@@ -85,6 +85,7 @@ public class SimulatorMainPanel2 extends SplitLayoutPanel {
     private final int xRes;
     private final int yRes;
     private final boolean autoUpdate;
+    private final char mode;
 
     private SimulatorTimePanel timePanel;
 
@@ -177,7 +178,7 @@ public class SimulatorMainPanel2 extends SplitLayoutPanel {
     }
 
     public SimulatorMainPanel2(SimulatorServiceAsync svc, StringMessages stringMessages, ErrorReporter errorReporter,
-            int xRes, int yRes, boolean autoUpdate) {
+            int xRes, int yRes, boolean autoUpdate, char mode) {
 
         super();
 
@@ -187,6 +188,7 @@ public class SimulatorMainPanel2 extends SplitLayoutPanel {
         this.xRes = xRes;
         this.yRes = yRes;
         this.autoUpdate = autoUpdate;
+        this.mode = mode;
         this.isOmniscient = new CheckBox(this.stringMessages.omniscient(), true);
         this.isOmniscient.setValue(true);
 
@@ -548,7 +550,7 @@ public class SimulatorMainPanel2 extends SplitLayoutPanel {
         initDisplayOptions(mapOptions);
 
         simulatorMap = new SimulatorMap(simulatorSvc, stringMessages, errorReporter, xRes, yRes, timer, timePanel,
-                windParams, busyIndicator);
+                windParams, busyIndicator, mode);
 
         // FlowPanel mapPanel = new FlowPanel();
         // mapPanel.setTitle("Map");

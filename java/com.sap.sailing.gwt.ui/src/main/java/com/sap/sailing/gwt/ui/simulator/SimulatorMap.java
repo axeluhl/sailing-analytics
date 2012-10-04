@@ -53,6 +53,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
     private final Timer timer;
     private final SimulatorTimePanel timePanel;
     private final SimpleBusyIndicator busyIndicator;
+    private final char mode;
 
     private ColorPalette colorPalette;
 
@@ -158,7 +159,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
     }
 
     public SimulatorMap(SimulatorServiceAsync simulatorSvc, StringMessages stringMessages, ErrorReporter errorReporter,
-            int xRes, int yRes, Timer timer, WindFieldGenParamsDTO windParams, SimpleBusyIndicator busyIndicator) {
+            int xRes, int yRes, Timer timer, WindFieldGenParamsDTO windParams, SimpleBusyIndicator busyIndicator, char mode) {
         this.simulatorSvc = simulatorSvc;
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
@@ -169,6 +170,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         timer.addTimeListener(this);
         this.windParams = windParams;
         this.busyIndicator = busyIndicator;
+        this.mode = mode;
         colorPalette = new ColorPaletteGenerator();
 
         dataInitialized = false;
@@ -184,7 +186,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
     }
     
     public SimulatorMap(SimulatorServiceAsync simulatorSvc, StringMessages stringMessages, ErrorReporter errorReporter,
-            int xRes, int yRes, Timer timer, SimulatorTimePanel timePanel, WindFieldGenParamsDTO windParams, SimpleBusyIndicator busyIndicator) {
+            int xRes, int yRes, Timer timer, SimulatorTimePanel timePanel, WindFieldGenParamsDTO windParams, SimpleBusyIndicator busyIndicator, char mode) {
         this.simulatorSvc = simulatorSvc;
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
@@ -195,6 +197,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         timer.addTimeListener(this);
         this.windParams = windParams;
         this.busyIndicator = busyIndicator;
+        this.mode = mode;
         colorPalette = new ColorPaletteGenerator();
 
         dataInitialized = false;

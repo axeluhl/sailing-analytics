@@ -22,7 +22,8 @@ public class SimulatorEntryPoint2 extends AbstractEntryPoint {
     private final SimulatorServiceAsync simulatorSvc = GWT.create(SimulatorService.class);
     private int xRes = 5;
     private int yRes = 5;
-    private boolean autoUpdate = true;
+    private boolean autoUpdate = false;
+    private char mode = 'f';
 
     private static Logger logger = Logger.getLogger(SimulatorEntryPoint.class.getName());
 
@@ -57,9 +58,15 @@ public class SimulatorEntryPoint2 extends AbstractEntryPoint {
         } else {
             autoUpdate = Boolean.parseBoolean(autoUpdateStr);
         }
+        String modeStr = Window.Location.getParameter("mode");
+        if (modeStr == null || modeStr.isEmpty()) {
+            logger.config("Using default mode " + mode);
+        } else {
+            mode = modeStr.charAt(0);
+        }
         
         SimulatorMainPanel2 mainPanel = new SimulatorMainPanel2(simulatorSvc, stringMessages, this, xRes, yRes,
-                autoUpdate);
+                autoUpdate, mode);
 
         switch (viewMode) {
         case ONESCREEN:
