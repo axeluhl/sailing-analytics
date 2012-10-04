@@ -286,15 +286,20 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
     @Override
     public void timeChanged(Date time) {
         if (getFromTime() != null && getToTime() != null) {
-            // Handle also the case where time advances beyond slider's end.
-            // Handle it equally for replay and live mode for robustness reasons. This at least allows a user
-            // to watch on even if the time panel was off in its assumptions about race end and end of tracking.
+            // handle the case where time advances beyond slider's end.
             if (time.after(getToTime())) {
-                Date newMaxTime = new Date(time.getTime());
-                if (newMaxTime.getTime() - getToTime().getTime() < MINIMUM_AUTO_ADVANCE_TIME_IN_MS) {
-                    newMaxTime.setTime(getToTime().getTime() + MINIMUM_AUTO_ADVANCE_TIME_IN_MS); 
+                switch (timer.getPlayMode()) {
+                case Live:
+                    Date newMaxTime = new Date(time.getTime());
+                    if (newMaxTime.getTime() - getToTime().getTime() < MINIMUM_AUTO_ADVANCE_TIME_IN_MS) {
+                        newMaxTime.setTime(getToTime().getTime() + MINIMUM_AUTO_ADVANCE_TIME_IN_MS); 
+                    }
+                    setMinMax(getFromTime(), newMaxTime, /* fireEvent */ false); // no event because we guarantee that time is between min/max
+                    break;
+                case Replay:
+                    timer.stop();
+                    break;
                 }
-                setMinMax(getFromTime(), newMaxTime, /* fireEvent */ false); // no event because we guarantee that time is between min/max
             }
             long t = time.getTime();
             timeSlider.setCurrentValue(new Double(t), false);
@@ -368,6 +373,7 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
         case Paused:
         	playPauseButton.getElement().removeClassName("playPauseButtonPause");
         case Stopped:
+            playPauseButton.getElement().removeClassName("playPauseButtonPause");
             playModeImage.setResource(playModeInactiveImg);
             break;
         }
