@@ -9,7 +9,7 @@ import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 
 public class PolarDiagram49STG extends PolarDiagramBase {
-	//private static Logger logger = Logger.getLogger("com.sap.sailing");
+
     // this constructor creates an instance with a hard-coded set of values
     public PolarDiagram49STG() {
 
@@ -124,9 +124,5 @@ public class PolarDiagram49STG extends PolarDiagramBase {
                 speedTable.get(s).put(gybeAngles.get(s), gybeSOG.get(s));
 
         }
-        //DEBUG
-        //logger.info("INTRAT AICI");
-
     }
-
 }

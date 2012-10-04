@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.server;
 
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -45,13 +46,14 @@ import com.sap.sailing.simulator.TimedPositionWithSpeed;
 import com.sap.sailing.simulator.WindControlParameters;
 import com.sap.sailing.simulator.WindFieldGenerator;
 import com.sap.sailing.simulator.WindFieldGeneratorFactory;
-import com.sap.sailing.simulator.impl.PolarDiagram49ORC;
+import com.sap.sailing.simulator.impl.ConfigurationManager;
 import com.sap.sailing.simulator.impl.PolarDiagram49STG;
-import com.sap.sailing.simulator.impl.PolarDiagram505STG;
+import com.sap.sailing.simulator.impl.PolarDiagramCSV;
 import com.sap.sailing.simulator.impl.RectangularBoundary;
 import com.sap.sailing.simulator.impl.SailingSimulatorImpl;
 import com.sap.sailing.simulator.impl.SimulationParametersImpl;
 import com.sap.sailing.simulator.impl.TimedPositionWithSpeedImpl;
+import com.sap.sailing.simulator.impl.Tuple;
 
 public class SimulatorServiceImpl extends RemoteServiceServlet implements SimulatorService {
 
@@ -351,16 +353,13 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
     }
 
     public BoatClassDTO[] getBoatClasses() {
-        return new BoatClassDTO[] {
-                // new BoatClassDTO("470", 4.7),
-                new BoatClassDTO("49er", 4.995), new BoatClassDTO("49erORC", 4.995), new BoatClassDTO("505", 5.05),
-        // new BoatClassDTO("Elliott 6m", 6.0),
-        // new BoatClassDTO("Finn", 4.5),
-        // new BoatClassDTO("Laser", 4.2),
-        // new BoatClassDTO("Laser Radial", 4.2),
-        // new BoatClassDTO("RS:X", 2.86),
-        // new BoatClassDTO("Star", 6.922),
-        };
+        ArrayList<BoatClassDTO> result = new ArrayList<BoatClassDTO>();
+
+        for (Tuple<String, Double, String> tuple : ConfigurationManager.getDefault().getBoatClassesInfo()) {
+            result.add(new BoatClassDTO(tuple.first, tuple.second));
+        }
+
+        return result.toArray(new BoatClassDTO[result.size()]);
     }
 
     private WindDTO createWindDTO(Wind wind) {
@@ -454,29 +453,18 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         return windFieldDTO;
     }
 
-    public PolarDiagram49DTO getPolarDiagram49DTO(Double bearingStep, int boatClass) {
-        NavigableMap<Speed, NavigableMap<Bearing, Speed>> navMap = null;
-        Number[][] series = null;
-        PolarDiagram pd;
-        // to do - boat class by ID
-        switch (boatClass) {
-        case 1: {
-            pd = new PolarDiagram49ORC();
-            break;
-        }
-        case 2: {
-            pd = new PolarDiagram505STG();
-            break;
-        }
-        default: {
-            pd = new PolarDiagram49STG();
-            break;
-        }
-        }
-        navMap = pd.polarDiagramPlot(bearingStep);
+    public PolarDiagram49DTO getPolarDiagram49DTO(Double bearingStep, int boatClassIndex) throws IOException {
+
+        String csvFilePath = ConfigurationManager.getDefault().getPolarDiagramFileLocation(boatClassIndex);
+
+        PolarDiagram pd = new PolarDiagramCSV(csvFilePath);
+
+        NavigableMap<Speed, NavigableMap<Bearing, Speed>> navMap = pd.polarDiagramPlot(bearingStep);
+
         Set<Speed> validSpeeds = navMap.keySet();
         validSpeeds.remove(Speed.NULL);
-        series = new Number[validSpeeds.size()][];
+
+        Number[][] series = new Number[validSpeeds.size()][];
         int i = 0;
         for (Speed s : validSpeeds) {
             Collection<Speed> boatSpeeds = navMap.get(s).values();
