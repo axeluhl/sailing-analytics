@@ -45,6 +45,15 @@ public abstract class SailingServerHttpServlet extends HttpServlet {
        racingEventServiceTracker.open();
    }
 
+    @Override
+    public void destroy() {
+        super.destroy();
+        
+        if(racingEventServiceTracker != null) {
+            racingEventServiceTracker.close();
+        }
+    }
+    
     protected RacingEventService getService() {
         return racingEventServiceTracker.getService();
     }
@@ -103,4 +112,5 @@ public abstract class SailingServerHttpServlet extends HttpServlet {
         }
         return trackedRace;
     }
+
 }
