@@ -1526,7 +1526,8 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         try {
             for (Competitor competitor : getRace().getCompetitors()) {
                 TrackedLegOfCompetitor leg = getTrackedLeg(competitor, timePoint);
-                if (leg != null) {
+                // if bearings was set to null this indicates there was an exception; no need for further calculations, return null
+                if (bearings != null && leg != null) {
                     TrackedLeg trackedLeg = getTrackedLeg(leg.getLeg());
                     LegType legType;
                     try {
