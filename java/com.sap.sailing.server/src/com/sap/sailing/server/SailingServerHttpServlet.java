@@ -1,17 +1,18 @@
 package com.sap.sailing.server;
 
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
-import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.server.impl.Activator;
 import com.sap.sailing.util.DateParser;
 import com.sap.sailing.util.InvalidDateException;
 
@@ -28,13 +29,21 @@ public abstract class SailingServerHttpServlet extends HttpServlet {
 
     protected static final String PARAM_NAME_TIME_MILLIS = "timeasmillis";
 
+    private static final String OSGI_RFC66_WEBBUNDLE_BUNDLECONTEXT_NAME = "osgi-bundlecontext"; 
+
     private ServiceTracker<RacingEventService, RacingEventService> racingEventServiceTracker;
     
     protected SailingServerHttpServlet() {
-        BundleContext context = Activator.getDefault();
-        racingEventServiceTracker = new ServiceTracker<RacingEventService, RacingEventService>(context, RacingEventService.class.getName(), null);
-        racingEventServiceTracker.open();
     }
+
+    @Override
+    public void init(ServletConfig config) throws ServletException {  
+       super.init(config);  
+       
+       BundleContext context = (BundleContext) config.getServletContext().getAttribute(OSGI_RFC66_WEBBUNDLE_BUNDLECONTEXT_NAME);  
+       racingEventServiceTracker = new ServiceTracker<RacingEventService, RacingEventService>(context, RacingEventService.class.getName(), null);
+       racingEventServiceTracker.open();
+   }
 
     protected RacingEventService getService() {
         return racingEventServiceTracker.getService();
@@ -85,13 +94,13 @@ public abstract class SailingServerHttpServlet extends HttpServlet {
         return timePoint;
     }
 
-	protected TrackedRace getTrackedRace(HttpServletRequest req) {
-	    Regatta regatta = getRegatta(req);
-	    RaceDefinition race = getRaceDefinition(req);
-	    TrackedRace trackedRace = null;
-	    if (regatta != null && race != null) {
-	        trackedRace = getService().getOrCreateTrackedRegatta(regatta).getTrackedRace(race);
-	    }
-	    return trackedRace;
-	}
+    protected TrackedRace getTrackedRace(HttpServletRequest req) {
+        Regatta regatta = getRegatta(req);
+        RaceDefinition race = getRaceDefinition(req);
+        TrackedRace trackedRace = null;
+        if (regatta != null && race != null) {
+            trackedRace = getService().getOrCreateTrackedRegatta(regatta).getTrackedRace(race);
+        }
+        return trackedRace;
+    }
 }
