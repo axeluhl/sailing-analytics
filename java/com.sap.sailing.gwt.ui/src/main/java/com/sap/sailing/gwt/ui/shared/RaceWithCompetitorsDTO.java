@@ -10,8 +10,9 @@ public class RaceWithCompetitorsDTO extends RaceDTO {
      */
     RaceWithCompetitorsDTO() {}
 
-    public RaceWithCompetitorsDTO(RegattaAndRaceIdentifier raceIdentifier, Iterable<CompetitorDTO> competitors, TrackedRaceDTO trackedRace) {
-        super(raceIdentifier, trackedRace);
+    public RaceWithCompetitorsDTO(RegattaAndRaceIdentifier raceIdentifier, Iterable<CompetitorDTO> competitors,
+            TrackedRaceDTO trackedRace, boolean isCurrentlyTracked) {
+        super(raceIdentifier, trackedRace, isCurrentlyTracked);
         this.competitors = competitors;
     }
 

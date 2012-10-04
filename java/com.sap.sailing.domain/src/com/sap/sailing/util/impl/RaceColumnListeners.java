@@ -92,4 +92,15 @@ public class RaceColumnListeners implements Serializable {
             return new HashSet<RaceColumnListener>(raceColumnListeners);
         }
     }
+
+    public boolean canAddRaceColumnToContainer(RaceColumn columnToAdd) {
+        boolean result = true;
+        for (RaceColumnListener listener : getRaceColumnListeners()) {
+            result = listener.canAddRaceColumnToContainer(columnToAdd);
+            if (!result) {
+                break;
+            }
+        }
+        return result;
+    }
 }

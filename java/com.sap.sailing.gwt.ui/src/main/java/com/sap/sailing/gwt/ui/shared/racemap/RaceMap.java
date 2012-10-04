@@ -685,7 +685,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                         Math.cos(lat1) * Math.sin(distianceRad) * Math.cos(bearingRad));
         double lon2 = lon1 + Math.atan2(Math.sin(bearingRad)*Math.sin(distianceRad)*Math.cos(lat1), 
                        Math.cos(distianceRad)-Math.sin(lat1)*Math.sin(lat2));
-        lon2 = (lon2+3*Math.PI) % (2*Math.PI) - Math.PI;  // normalize to -180..+180º
+        lon2 = (lon2+3*Math.PI) % (2*Math.PI) - Math.PI;  // normalize to -180..+180ï¿½
         
         return LatLng.newInstance(lat2 / Math.PI * 180., lon2  / Math.PI * 180.);
     }
@@ -709,11 +709,13 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 && lastCombinedWindTrackInfoDTO.windFixes.size() > 0) {
             // find competitor with highest rank
             Pair<Integer, CompetitorDTO> visibleLeaderInfo = getLeadingVisibleCompetitorInfo(competitorsToShow);
-            if (visibleLeaderInfo != null && settings.getHelpLinesSettings().containsHelpLine(HelpLineTypes.ADVANTAGELINE) && 
+            // the boat fix may be null; may mean that no positions were loaded yet for the leading visible boat; don't show anything
+            GPSFixDTO lastBoatFix;
+            if (visibleLeaderInfo != null && getSettings().getHelpLinesSettings().containsHelpLine(HelpLineTypes.ADVANTAGELINE) && 
                     lastShownFix.containsKey(visibleLeaderInfo.getB()) && lastShownFix.get(visibleLeaderInfo.getB()) != -1
-                    && visibleLeaderInfo.getA() > 0 && visibleLeaderInfo.getA() <= lastRaceTimesInfo.getLegInfos().size()) {
+                    && visibleLeaderInfo.getA() > 0 && visibleLeaderInfo.getA() <= lastRaceTimesInfo.getLegInfos().size() &&
+                    (lastBoatFix = getBoatFix(visibleLeaderInfo.getB(), date)) != null) {
                 LegInfoDTO legInfoDTO = lastRaceTimesInfo.getLegInfos().get(visibleLeaderInfo.getA()-1);
-                GPSFixDTO lastBoatFix = getBoatFix(visibleLeaderInfo.getB(), date);
                 double advantageLineLengthInKm = 1.0; // TODO this should probably rather scale with the visible area of the map; bug 616
                 double distanceFromBoatPositionInKm = visibleLeaderInfo.getB().boatClass.getHullLengthInMeters()/1000.; // one hull length
                 // implement and use Position.translateRhumb()
@@ -777,8 +779,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                     advantageLine.insertVertex(0, advantageLinePoints[0]);
                     advantageLine.insertVertex(1, advantageLinePoints[1]);
                 }
-            }
-            else {
+            } else {
                 if (advantageLine != null) {
                     map.removeOverlay(advantageLine);
                     advantageLine = null;

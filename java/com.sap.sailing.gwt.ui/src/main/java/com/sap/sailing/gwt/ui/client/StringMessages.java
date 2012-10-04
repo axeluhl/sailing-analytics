@@ -173,6 +173,7 @@ public interface StringMessages extends Messages {
     String delete();
     String showCharts();
     String raceWithThisNameAlreadyExists();
+    String raceWithThisNameAlreadyExistsInRegatta();
     String headUp();
     String bearAway();
     String tack();
@@ -382,6 +383,7 @@ public interface StringMessages extends Messages {
     String useOverallLeaderboard();
     String overallStandings();
     String scoringSchemeHighPointEssOverall();
+    String scoringSchemeHighPointLastBreaksTie();
     String type();
     String actionAddRaces();
     String racesWithNamePrefix();
@@ -402,4 +404,5 @@ public interface StringMessages extends Messages {
     String isPublic();
     String unsuppress();
     String suppressedCompetitors();
+    String pleaseSelectASeries();
 }

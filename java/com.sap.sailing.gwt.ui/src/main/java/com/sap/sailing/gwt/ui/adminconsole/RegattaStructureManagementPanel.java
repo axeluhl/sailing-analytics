@@ -37,6 +37,7 @@ import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
+import com.sap.sailing.gwt.ui.client.DataEntryDialog.DialogCallback;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.RegattaDisplayer;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
@@ -47,6 +48,7 @@ import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.FleetDTO;
 import com.sap.sailing.gwt.ui.shared.NamedDTO;
 import com.sap.sailing.gwt.ui.shared.RaceColumnDTO;
+import com.sap.sailing.gwt.ui.shared.RaceColumnInSeriesDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
 
@@ -297,13 +299,13 @@ public class RegattaStructureManagementPanel extends SimplePanel implements Rega
     
     private void editRacesOfRegattaSeries(final RegattaDTO regatta) {
         RaceColumnInRegattaSeriesDialog raceDialog = new RaceColumnInRegattaSeriesDialog(regatta, stringMessages, 
-                new AsyncCallback<Pair<SeriesDTO, List<RaceColumnDTO>>>() {
+                new DialogCallback<Pair<SeriesDTO, List<RaceColumnDTO>>>() {
                     @Override
-                    public void onFailure(Throwable caught) {
+                    public void cancel() {
                     }
 
                     @Override
-                    public void onSuccess(final Pair<SeriesDTO, List<RaceColumnDTO>> result) {
+                    public void ok(final Pair<SeriesDTO, List<RaceColumnDTO>> result) {
                         updateRacesOfRegattaSeries(regatta, result.getA(), result.getB());
                     }
                 });
@@ -329,7 +331,7 @@ public class RegattaStructureManagementPanel extends SimplePanel implements Rega
             }
         }
 
-        sailingService.addColumnsToSeries(regattaIdentifier, series.name, raceColumnsToAdd, new AsyncCallback<Void>() {
+        sailingService.addRaceColumnsToSeries(regattaIdentifier, series.name, raceColumnsToAdd, new AsyncCallback<List<RaceColumnInSeriesDTO>>() {
                 @Override
                 public void onFailure(Throwable caught) {
                     errorReporter.reportError("Error trying to add race columns "
@@ -339,12 +341,12 @@ public class RegattaStructureManagementPanel extends SimplePanel implements Rega
                 }
 
                 @Override
-                public void onSuccess(Void v) {
+                public void onSuccess(List<RaceColumnInSeriesDTO> raceColumns) {
                     regattaRefresher.fillRegattas();
                 }
             });
         
-        sailingService.removeColumnsFromSeries(regattaIdentifier, series.name, raceColumnsToRemove, new AsyncCallback<Void>() {
+        sailingService.removeRaceColumnsFromSeries(regattaIdentifier, series.name, raceColumnsToRemove, new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError("Error trying to remove race columns "
@@ -391,13 +393,13 @@ public class RegattaStructureManagementPanel extends SimplePanel implements Rega
 
     private void openCreateEventDialog() {
         EventCreateDialog dialog = new EventCreateDialog(Collections.unmodifiableCollection(events), stringMessages,
-                new AsyncCallback<EventDTO>() {
+                new DialogCallback<EventDTO>() {
                     @Override
-                    public void onFailure(Throwable t) {
+                    public void cancel() {
                     }
 
                     @Override
-                    public void onSuccess(EventDTO newEvent) {
+                    public void ok(EventDTO newEvent) {
                         createNewEvent(newEvent);
                     }
                 });
@@ -413,13 +415,13 @@ public class RegattaStructureManagementPanel extends SimplePanel implements Rega
         }
         
         RegattaWithSeriesAndFleetsCreateDialog dialog = new RegattaWithSeriesAndFleetsCreateDialog(existingRegattas, stringMessages,
-                new AsyncCallback<RegattaDTO>() {
+                new DialogCallback<RegattaDTO>() {
                     @Override
-                    public void onFailure(Throwable t) {
+                    public void cancel() {
                     }
 
                     @Override
-                    public void onSuccess(RegattaDTO newRegatta) {
+                    public void ok(RegattaDTO newRegatta) {
                         createNewRegatta(newRegatta);
                     }
                 });

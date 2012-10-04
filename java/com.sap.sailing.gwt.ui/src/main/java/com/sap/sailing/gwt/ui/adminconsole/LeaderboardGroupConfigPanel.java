@@ -37,6 +37,7 @@ import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sailing.gwt.ui.adminconsole.LeaderboardConfigPanel.AnchorCell;
 import com.sap.sailing.gwt.ui.client.AbstractRegattaPanel;
+import com.sap.sailing.gwt.ui.client.DataEntryDialog.DialogCallback;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -450,11 +451,11 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel {
                     final String oldGroupName = group.name;
                     ArrayList<LeaderboardGroupDTO> otherExistingGroups = new ArrayList<LeaderboardGroupDTO>(availableLeaderboardGroups);
                     otherExistingGroups.remove(group);
-                    LeaderboardGroupEditDialog dialog = new LeaderboardGroupEditDialog(group, otherExistingGroups, stringMessages, new AsyncCallback<LeaderboardGroupDTO>() {
+                    LeaderboardGroupEditDialog dialog = new LeaderboardGroupEditDialog(group, otherExistingGroups, stringMessages, new DialogCallback<LeaderboardGroupDTO>() {
                         @Override
-                        public void onFailure(Throwable t) {}
+                        public void cancel() {}
                         @Override
-                        public void onSuccess(LeaderboardGroupDTO group) {
+                        public void ok(LeaderboardGroupDTO group) {
                             updateGroup(oldGroupName, group);
                         }
                     });
@@ -557,11 +558,11 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel {
     private void addNewGroup() {
         LeaderboardGroupCreateDialog dialog = new LeaderboardGroupCreateDialog(
                 Collections.unmodifiableCollection(availableLeaderboardGroups), stringMessages,
-                new AsyncCallback<LeaderboardGroupDTO>() {
+                new DialogCallback<LeaderboardGroupDTO>() {
             @Override
-            public void onFailure(Throwable t) {}
+            public void cancel() {}
             @Override
-            public void onSuccess(LeaderboardGroupDTO newGroup) {
+            public void ok(LeaderboardGroupDTO newGroup) {
                 createNewGroup(newGroup);
             }
         });

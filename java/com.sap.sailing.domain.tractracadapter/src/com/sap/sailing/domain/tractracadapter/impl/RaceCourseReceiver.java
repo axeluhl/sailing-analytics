@@ -83,7 +83,8 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<Route, RouteDa
         Course course = getDomainFactory().createCourse(event.getA().getName(), event.getB().getPoints());
         RaceDefinition existingRaceDefinitionForRace = getDomainFactory().getExistingRaceDefinitionForRace(event.getC());
         if (existingRaceDefinitionForRace != null) {
-            logger.log(Level.INFO, "Received course update for existing race "+event.getC().getName());
+            logger.log(Level.INFO, "Received course update for existing race "+event.getC().getName()+": "+
+                    event.getB().getPoints());
             // race already exists; this means that we obviously found a course re-definition (yuck...)
             // Therefore, don't create TrackedRace again because it already exists.
             try {

@@ -242,9 +242,11 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     public Double getTotalPoints(Competitor competitor, TimePoint timePoint) throws NoWindException {
         double result = getCarriedPoints(competitor);
         for (RaceColumn r : getRaceColumns()) {
-            final Double totalPoints = getTotalPoints(competitor, r, timePoint);
-            if (totalPoints != null) {
-                result += totalPoints;
+            if (getScoringScheme().isValidInTotalScore(this, r, timePoint)) {
+                final Double totalPoints = getTotalPoints(competitor, r, timePoint);
+                if (totalPoints != null) {
+                    result += totalPoints;
+                }
             }
         }
         return result;
@@ -334,18 +336,12 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     }
 
     @Override
-    public boolean considerForDiscarding(RaceColumn raceColumn, TimePoint timePoint) {
-        boolean result = getScoreCorrection().hasCorrectionFor(raceColumn);
-        if (!result && !raceColumn.isMedalRace()) {
-            for (Fleet fleet : raceColumn.getFleets()) {
-                TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
-                if (trackedRace != null && trackedRace.hasStarted(timePoint)) {
-                    result = true;
-                    break;
-                }
-            }
-        }
-        return result;
+    public boolean countRaceForComparisonWithDiscardingThresholds(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint) {
+        TrackedRace trackedRaceForCompetitorInColumn;
+        return getScoringScheme().isValidInTotalScore(this, raceColumn, timePoint) && 
+               (getScoreCorrection().isScoreCorrected(competitor, raceColumn) ||
+                       ((trackedRaceForCompetitorInColumn=raceColumn.getTrackedRace(competitor)) != null &&
+                        trackedRaceForCompetitorInColumn.hasStarted(timePoint)));
     }
     
     @Override
@@ -420,6 +416,21 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     @Override
     public void isMedalRaceChanged(RaceColumn raceColumn, boolean newIsMedalRace) {
         getRaceColumnListeners().notifyListenersAboutIsMedalRaceChanged(raceColumn, newIsMedalRace);
+    }
+
+    /**
+     * A leaderboard will only accept the addition of a race column if the column's name is unique across the leaderboard.
+     */
+    @Override
+    public boolean canAddRaceColumnToContainer(RaceColumn newRaceColumn) {
+        boolean result = true;
+        for (RaceColumn raceColumn : getRaceColumns()) {
+            if (raceColumn.getName().equals(newRaceColumn.getName())) {
+                result = false;
+                break;
+            }
+        }
+        return result;
     }
 
     @Override

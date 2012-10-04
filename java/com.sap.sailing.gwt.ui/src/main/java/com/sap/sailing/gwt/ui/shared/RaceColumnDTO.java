@@ -17,11 +17,19 @@ public class RaceColumnDTO extends NamedDTO implements IsSerializable {
     private List<FleetDTO> fleets;
     private Map<FleetDTO, RegattaAndRaceIdentifier> trackedRaceIdentifiersPerFleet;
     private Map<FleetDTO, RaceDTO> racesPerFleet;
+    private Boolean isValidInTotalScore;
 
-    public RaceColumnDTO() {
+    RaceColumnDTO() {} // for GWT serialization
+    
+    public RaceColumnDTO(Boolean isValidInTotalScore) {
+        this.isValidInTotalScore = isValidInTotalScore;
         trackedRaceIdentifiersPerFleet = new HashMap<FleetDTO, RegattaAndRaceIdentifier>();
         racesPerFleet = new HashMap<FleetDTO, RaceDTO>();
         fleets = new ArrayList<FleetDTO>();
+    }
+    
+    public boolean isValidInTotalScore() {
+        return isValidInTotalScore;
     }
     
     public String getRaceColumnName() {

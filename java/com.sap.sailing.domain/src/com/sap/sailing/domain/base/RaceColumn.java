@@ -1,7 +1,7 @@
 package com.sap.sailing.domain.base;
 
+import com.sap.sailing.domain.common.Named;
 import com.sap.sailing.domain.common.RaceIdentifier;
-import com.sap.sailing.domain.common.Renamable;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
@@ -25,7 +25,7 @@ import com.sap.sailing.util.impl.RaceColumnListeners;
  * @author Axel Uhl (D043530)
  * 
  */
-public interface RaceColumn extends Renamable {
+public interface RaceColumn extends Named {
     /**
      * @return the fleets for each of which this column has a single race and therefore optionally a {@link TrackedRace}, in
      * ascending order; best fleets first

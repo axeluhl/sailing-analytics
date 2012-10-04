@@ -47,6 +47,7 @@ import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.gwt.ui.client.DataEntryDialog.DialogCallback;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.ParallelExecutionCallback;
 import com.sap.sailing.gwt.ui.client.ParallelExecutionHolder;
@@ -248,13 +249,13 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
                             AbstractLeaderboardDialog dialog = new RegattaLeaderboardEditDialog(Collections
                                     .unmodifiableCollection(otherExistingLeaderboard), Collections.unmodifiableCollection(allRegattas),
                                     descriptor, stringMessages, errorReporter,
-                                    new AsyncCallback<LeaderboardDescriptor>() {
+                                    new DialogCallback<LeaderboardDescriptor>() {
                                         @Override
-                                        public void onFailure(Throwable arg0) {
+                                        public void cancel() {
                                         }
 
                                         @Override
-                                        public void onSuccess(LeaderboardDescriptor result) {
+                                        public void ok(LeaderboardDescriptor result) {
                                             updateLeaderboard(oldLeaderboardName, result);
                                         }
                                     });
@@ -264,13 +265,13 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
                             FlexibleLeaderboardEditDialog dialog = new FlexibleLeaderboardEditDialog(Collections
                                     .unmodifiableCollection(otherExistingLeaderboard),
                                     descriptor, stringMessages, errorReporter,
-                                    new AsyncCallback<LeaderboardDescriptor>() {
+                                    new DialogCallback<LeaderboardDescriptor>() {
                                         @Override
-                                        public void onFailure(Throwable arg0) {
+                                        public void cancel() {
                                         }
 
                                         @Override
-                                        public void onSuccess(LeaderboardDescriptor result) {
+                                        public void ok(LeaderboardDescriptor result) {
                                             updateLeaderboard(oldLeaderboardName, result);
                                         }
                                     });
@@ -693,13 +694,13 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
         }
         existingRacesWithoutThisRace.remove(raceColumnWithFleet.getA());
         final RaceColumnInLeaderboardDialog raceDialog = new RaceColumnInLeaderboardDialog(existingRacesWithoutThisRace,
-                raceColumnWithFleet.getA(), stringMessages, new AsyncCallback<RaceColumnDTO>() {
+                raceColumnWithFleet.getA(), stringMessages, new DialogCallback<RaceColumnDTO>() {
                     @Override
-                    public void onFailure(Throwable caught) {
+                    public void cancel() {
                     }
 
                     @Override
-                    public void onSuccess(final RaceColumnDTO result) {
+                    public void ok(final RaceColumnDTO result) {
                         final ParallelExecutionCallback<Void> renameLeaderboardColumnCallback = new ParallelExecutionCallback<Void>();  
                         final ParallelExecutionCallback<Void> updateIsMedalRaceCallback = new ParallelExecutionCallback<Void>();  
                         new ParallelExecutionHolder(renameLeaderboardColumnCallback, updateIsMedalRaceCallback) {
@@ -748,13 +749,13 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
         }
 
         final RaceColumnsInLeaderboardDialog raceDialog = new RaceColumnsInLeaderboardDialog(existingRaceColumns,
-                stringMessages, new AsyncCallback<List<RaceColumnDTO>>() {
+                stringMessages, new DialogCallback<List<RaceColumnDTO>>() {
                     @Override
-                    public void onFailure(Throwable caught) {
+                    public void cancel() {
                     }
 
                     @Override 
-                    public void onSuccess(final List<RaceColumnDTO> result) {
+                    public void ok(final List<RaceColumnDTO> result) {
                         updateRaceColumnsOfLeaderboard(leaderboardName, existingRaceColumns, result);
                     }                        
                 });
@@ -838,13 +839,13 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
 
     private void createFlexibleLeaderboard() {
         AbstractLeaderboardDialog dialog = new FlexibleLeaderboardCreateDialog(Collections.unmodifiableCollection(availableLeaderboardList),
-                stringMessages, errorReporter, new AsyncCallback<LeaderboardDescriptor>() {
+                stringMessages, errorReporter, new DialogCallback<LeaderboardDescriptor>() {
             @Override
-            public void onFailure(Throwable arg0) {
+            public void cancel() {
             }
 
             @Override
-            public void onSuccess(final LeaderboardDescriptor newLeaderboard) {
+            public void ok(final LeaderboardDescriptor newLeaderboard) {
                 sailingService.createFlexibleLeaderboard(newLeaderboard.getName(), newLeaderboard.getDiscardThresholds(),
                         newLeaderboard.getScoringScheme(),
                         new AsyncCallback<StrippedLeaderboardDTO>() {
@@ -866,13 +867,13 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
 
     private void createRegattaLeaderboard() {
         RegattaLeaderboardCreateDialog dialog = new RegattaLeaderboardCreateDialog(Collections.unmodifiableCollection(availableLeaderboardList),
-                Collections.unmodifiableCollection(allRegattas), stringMessages, errorReporter, new AsyncCallback<LeaderboardDescriptor>() {
+                Collections.unmodifiableCollection(allRegattas), stringMessages, errorReporter, new DialogCallback<LeaderboardDescriptor>() {
             @Override
-            public void onFailure(Throwable arg0) {
+            public void cancel() {
             }
 
             @Override
-            public void onSuccess(final LeaderboardDescriptor newLeaderboard) {
+            public void ok(final LeaderboardDescriptor newLeaderboard) {
                 RegattaIdentifier regattaIdentifier = new RegattaName(newLeaderboard.getRegattaName()); 
                 sailingService.createRegattaLeaderboard(regattaIdentifier, newLeaderboard.getDiscardThresholds(),
                         new AsyncCallback<StrippedLeaderboardDTO>() {

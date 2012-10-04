@@ -4,10 +4,20 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
+import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.Fleet;
+import com.sap.sailing.domain.base.RaceColumn;
+import com.sap.sailing.domain.common.NoWindException;
+import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.Util;
+import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
+import com.sap.sailing.domain.tracking.TrackedRace;
 
 public abstract class AbstractScoringSchemeImpl implements ScoringScheme {
     private static final long serialVersionUID = 6830414905539642446L;
@@ -58,6 +68,53 @@ public abstract class AbstractScoringSchemeImpl implements ScoringScheme {
     public Comparator<Double> getScoreComparator(boolean nullScoresAreBetter) {
         return new ScoreComparator(nullScoresAreBetter);
     }
+    
+    @Override
+    public boolean isValidInTotalScore(Leaderboard leaderboard, RaceColumn raceColumn, TimePoint at) {
+        boolean result;
+        Iterable<? extends Fleet> fleets = raceColumn.getFleets();
+        if (Util.size(fleets) <= 1 || allFleetsOrdered(fleets)) {
+            result = true;
+        } else {
+            // multiple unordered fleets; ensure that the leaderboard has results for all of them
+            result = leaderboardHasResultsForAllFleets(leaderboard, raceColumn, at);
+        }
+        return result;
+    }
+
+    private boolean leaderboardHasResultsForAllFleets(Leaderboard leaderboard, RaceColumn raceColumn, TimePoint at) {
+        Set<Fleet> fleetsForWhichNoScoreWasFound = new HashSet<Fleet>();
+        for (Fleet fleet : raceColumn.getFleets()) {
+            final TrackedRace trackedRaceForFleet = raceColumn.getTrackedRace(fleet);
+            if (trackedRaceForFleet == null || !trackedRaceForFleet.hasStarted(at)) {
+                fleetsForWhichNoScoreWasFound.add(fleet);
+            }
+        }
+        for (Competitor competitor : leaderboard.getCompetitors()) {
+            Fleet fleet = raceColumn.getFleetOfCompetitor(competitor);
+            if (fleetsForWhichNoScoreWasFound.contains(fleet)) {
+                try {
+                    if (leaderboard.getNetPoints(competitor, raceColumn, at) != null) {
+                        fleetsForWhichNoScoreWasFound.remove(fleet);
+                    }
+                } catch (NoWindException nwe) {
+                    // can't occur here because no started tracked race exists yet for the competitor
+                }
+            }
+        }
+        return fleetsForWhichNoScoreWasFound.isEmpty();
+    }
+
+    private boolean allFleetsOrdered(Iterable<? extends Fleet> fleets) {
+        boolean allOrdered = true;
+        for (Fleet fleet : fleets) {
+            if (fleet.getOrdering() == 0) {
+                allOrdered = false;
+                break;
+            }
+        }
+        return allOrdered;
+    }
 
     /**
      * Assuming both competitors scored in the same number of races, compares the sorted scores.
@@ -91,6 +148,10 @@ public abstract class AbstractScoringSchemeImpl implements ScoringScheme {
 
     @Override
     public int compareByLastRace(List<Double> o1Scores, List<Double> o2Scores, boolean nullScoresAreBetter) {
-        return getScoreComparator(nullScoresAreBetter).compare(o1Scores.get(o1Scores.size()-1), o2Scores.get(o2Scores.size()-1));
+        int result = 0;
+        if (!o1Scores.isEmpty() && !o2Scores.isEmpty()) {
+            result = getScoreComparator(nullScoresAreBetter).compare(o1Scores.get(o1Scores.size()-1), o2Scores.get(o2Scores.size()-1));
+        }
+        return result;
     }
 }

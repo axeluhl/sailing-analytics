@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.DoubleBox;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
@@ -55,7 +54,7 @@ public class WindSettingDialog extends DataEntryDialog<WindDTO> {
         }
     }
 
-    public WindSettingDialog(RaceDTO race, CourseDTO courseDTO, StringMessages stringMessages, AsyncCallback<WindDTO> callback) {
+    public WindSettingDialog(RaceDTO race, CourseDTO courseDTO, StringMessages stringMessages, DialogCallback<WindDTO> callback) {
         super(stringMessages.actionAddWindData(), null, stringMessages.ok(), stringMessages.cancel(), new WindDataValidator(stringMessages), callback);
         this.stringMessages = stringMessages;        
         speedInKnotsBox = createDoubleBox(5);

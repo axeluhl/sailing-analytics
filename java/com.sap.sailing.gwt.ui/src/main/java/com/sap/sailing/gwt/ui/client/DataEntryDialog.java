@@ -49,6 +49,11 @@ public abstract class DataEntryDialog<T> {
          */
         String getErrorMessage(T valueToValidate);
     }
+    
+    public static interface DialogCallback<T> {
+        void ok(T editedObject);
+        void cancel();
+    }
 
     /**
      * @param validator
@@ -60,7 +65,7 @@ public abstract class DataEntryDialog<T> {
      *            {@link AsyncCallback#onSuccess(Object) confirmed}
      */
     public DataEntryDialog(String title, String message, String okButtonName, String cancelButtonName,
-            Validator<T> validator, final AsyncCallback<T> callback) {
+            Validator<T> validator, final DialogCallback<T> callback) {
         this(title, message, okButtonName, cancelButtonName, validator, /* animationEnabled */ true, callback);
     }
     
@@ -74,7 +79,7 @@ public abstract class DataEntryDialog<T> {
      *            {@link AsyncCallback#onSuccess(Object) confirmed}
      */
     public DataEntryDialog(String title, String message, String okButtonName, String cancelButtonName,
-            Validator<T> validator, boolean animationEnabled, final AsyncCallback<T> callback) {
+            Validator<T> validator, boolean animationEnabled, final DialogCallback<T> callback) {
         dateEntryDialog = new DialogBox();
         dateEntryDialog.setText(title);
         dateEntryDialog.setAnimationEnabled(animationEnabled);
@@ -103,14 +108,14 @@ public abstract class DataEntryDialog<T> {
             @Override
             public void onClick(ClickEvent event) {
                 dateEntryDialog.hide();
-                callback.onFailure(null);
+                callback.cancel();
             }
         });
         dateEntryDialog.setWidget(dialogFPanel);
         okButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
                 dateEntryDialog.hide();
-                callback.onSuccess(getResult());
+                callback.ok(getResult());
             }
         });
     }
