@@ -1,7 +1,7 @@
 @CHARSET "ISO-8859-1";
 
 .cellTableWidget {
-	margin: 0 13px;
+	margin: 0;
 	table-layout: auto;
 	border-collapse: collapse;
 	/*border-spacing: 1em 0.5em;*/

@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.ui.client;
 
+import java.util.Date;
+
 import com.google.gwt.dom.client.Style.FontWeight;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ChangeEvent;
@@ -14,6 +16,8 @@ import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.DoubleBox;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.HasVerticalAlignment;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.IntegerBox;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
@@ -21,6 +25,7 @@ import com.google.gwt.user.client.ui.LongBox;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.datepicker.client.DateBox;
 
 /**
  * An abstract data entry dialog class, capturing data of type <code>T</code>, with generic OK/Cancel buttons, title and
@@ -44,6 +49,11 @@ public abstract class DataEntryDialog<T> {
          */
         String getErrorMessage(T valueToValidate);
     }
+    
+    public static interface DialogCallback<T> {
+        void ok(T editedObject);
+        void cancel();
+    }
 
     /**
      * @param validator
@@ -55,7 +65,7 @@ public abstract class DataEntryDialog<T> {
      *            {@link AsyncCallback#onSuccess(Object) confirmed}
      */
     public DataEntryDialog(String title, String message, String okButtonName, String cancelButtonName,
-            Validator<T> validator, final AsyncCallback<T> callback) {
+            Validator<T> validator, final DialogCallback<T> callback) {
         this(title, message, okButtonName, cancelButtonName, validator, /* animationEnabled */ true, callback);
     }
     
@@ -69,12 +79,13 @@ public abstract class DataEntryDialog<T> {
      *            {@link AsyncCallback#onSuccess(Object) confirmed}
      */
     public DataEntryDialog(String title, String message, String okButtonName, String cancelButtonName,
-            Validator<T> validator, boolean animationEnabled, final AsyncCallback<T> callback) {
+            Validator<T> validator, boolean animationEnabled, final DialogCallback<T> callback) {
         dateEntryDialog = new DialogBox();
         dateEntryDialog.setText(title);
         dateEntryDialog.setAnimationEnabled(animationEnabled);
         this.validator = validator;
         okButton = new Button(okButtonName);
+        okButton.getElement().getStyle().setMargin(3, Unit.PX);
         FlowPanel dialogFPanel = new FlowPanel();
         statusLabel = new Label();
         dialogFPanel.add(statusLabel);
@@ -91,19 +102,20 @@ public abstract class DataEntryDialog<T> {
         buttonPanel.setStyleName("additionalWidgets");
         buttonPanel.add(okButton);
         cancelButton = new Button(cancelButtonName);
+        cancelButton.getElement().getStyle().setMargin(3, Unit.PX);
         buttonPanel.add(cancelButton);
         cancelButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 dateEntryDialog.hide();
-                callback.onFailure(null);
+                callback.cancel();
             }
         });
         dateEntryDialog.setWidget(dialogFPanel);
         okButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
                 dateEntryDialog.hide();
-                callback.onSuccess(getResult());
+                callback.ok(getResult());
             }
         });
     }
@@ -190,6 +202,14 @@ public abstract class DataEntryDialog<T> {
     }
 
     public DoubleBox createDoubleBox(double initialValue, int visibleLength) {
+        return createDoubleBoxInternal(initialValue, visibleLength);
+    }
+
+    public DoubleBox createDoubleBox(int visibleLength) {
+        return createDoubleBoxInternal(null, visibleLength);
+    }
+    
+    private DoubleBox createDoubleBoxInternal(Double initialValue, int visibleLength) {
         DoubleBox doubleBox = new DoubleBox();
         doubleBox.setVisibleLength(visibleLength);
         doubleBox.setValue(initialValue);
@@ -203,6 +223,30 @@ public abstract class DataEntryDialog<T> {
         AbstractEntryPoint.linkEnterToButton(getOkButton(), doubleBox);
         AbstractEntryPoint.linkEscapeToButton(getCancelButton(), doubleBox);
         return doubleBox;
+    }
+
+    public DateBox createDateBox(long initialTimeInMs, int visibleLength) {
+        return createDateBoxInternal(new Date(initialTimeInMs), visibleLength);
+    }
+
+    public DateBox createDateBox(int visibleLength) {
+        return createDateBoxInternal(null, visibleLength);
+    }
+    
+    private DateBox createDateBoxInternal(Date initialDate, int visibleLength) {
+        DateBox textBox = new DateBox();
+        textBox.getTextBox().setVisibleLength(visibleLength);
+        textBox.setValue(initialDate);
+        AbstractEntryPoint.addFocusUponKeyUpToggler(textBox.getTextBox());
+        textBox.getTextBox().addChangeHandler(new ChangeHandler() {
+            @Override
+            public void onChange(ChangeEvent event) {
+                validate();
+            }
+        });
+        AbstractEntryPoint.linkEnterToButton(getOkButton(), textBox.getTextBox());
+        AbstractEntryPoint.linkEscapeToButton(getCancelButton(), textBox.getTextBox());
+        return textBox;
     }
 
     /**
@@ -249,9 +293,25 @@ public abstract class DataEntryDialog<T> {
         headlineLabel.getElement().getStyle().setPaddingTop(1, Unit.EM);
         return headlineLabel;
     }
+    
+    public FlowPanel createHeadline(String headlineText, boolean regularHeadline) {
+    	FlowPanel headlinePanel = new FlowPanel();
+    	
+        Label headlineLabel = new Label(headlineText);
+        
+        if (regularHeadline) {
+        	headlinePanel.addStyleName("dialogInnerHeadline");
+		} else {
+			headlinePanel.addStyleName("dialogInnerHeadlineOther");
+		}
+        
+        headlinePanel.add(headlineLabel);
+        return headlinePanel;
+    }
 
     public CheckBox createCheckbox(String checkboxLabel) {
         CheckBox result = new CheckBox(checkboxLabel);
+        result.setWordWrap(false);
         result.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
             @Override
             public void onValueChange(ValueChangeEvent<Boolean> event) {
@@ -276,6 +336,13 @@ public abstract class DataEntryDialog<T> {
         return result;
     }
 
+    protected void alignAllPanelWidgetsVertically(HorizontalPanel panel, HasVerticalAlignment.VerticalAlignmentConstant alignment) {
+        for(int i = 0; i < panel.getWidgetCount(); i++) {
+            panel.setCellVerticalAlignment(panel.getWidget(i), alignment);
+        }
+    }
+
+    
     /**
      * Can contribute an additional widget to be displayed underneath the text entry field. If <code>null</code> is
      * returned, no additional widget will be displayed. This is the default behavior of this default implementation.

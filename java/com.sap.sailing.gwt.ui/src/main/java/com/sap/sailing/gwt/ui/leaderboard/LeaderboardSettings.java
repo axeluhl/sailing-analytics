@@ -17,6 +17,7 @@ public class LeaderboardSettings {
     private final List<DetailType> maneuverDetailsToShow;
     private final List<DetailType> legDetailsToShow;
     private final List<DetailType> raceDetailsToShow;
+    private final List<DetailType> overallDetailsToShow;
     private final boolean autoExpandPreSelectedRace;
     private final Long delayBetweenAutoAdvancesInMilliseconds;
     private final Long delayInMilliseconds;
@@ -33,14 +34,16 @@ public class LeaderboardSettings {
      * @param raceColumnsToShow <code>null</code> means don't modify the list of races shown
      */
     public LeaderboardSettings(List<DetailType> meneuverDetailsToShow, List<DetailType> legDetailsToShow,
-            List<DetailType> raceDetailsToShow, List<String> namesOfRaceColumnsToShow,
-            List<String> namesOfRacesToShow, boolean autoExpandPreSelectedRace, Long delayBetweenAutoAdvancesInMilliseconds,
-            Long delayInMilliseconds, String nameOfRaceToSort, boolean sortAscending, boolean updateUponPlayStateChange) {
+            List<DetailType> raceDetailsToShow, List<DetailType> overallDetailsToShow,
+            List<String> namesOfRaceColumnsToShow, List<String> namesOfRacesToShow, boolean autoExpandPreSelectedRace,
+            Long delayBetweenAutoAdvancesInMilliseconds, Long delayInMilliseconds, String nameOfRaceToSort,
+            boolean sortAscending, boolean updateUponPlayStateChange) {
         if (namesOfRacesToShow != null && namesOfRaceColumnsToShow != null) {
             throw new IllegalArgumentException("You can identify races either only by their race or by their column names, not both");
         }
         this.legDetailsToShow = legDetailsToShow;
         this.raceDetailsToShow = raceDetailsToShow;
+        this.overallDetailsToShow = overallDetailsToShow;
         this.namesOfRacesToShow = namesOfRacesToShow;
         this.namesOfRaceColumnsToShow = namesOfRaceColumnsToShow;
         this.autoExpandPreSelectedRace = autoExpandPreSelectedRace;
@@ -62,6 +65,10 @@ public class LeaderboardSettings {
 
     public List<DetailType> getRaceDetailsToShow() {
         return raceDetailsToShow;
+    }
+    
+    public List<DetailType> getOverallDetailsToShow() {
+        return overallDetailsToShow;
     }
     
     /**

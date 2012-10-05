@@ -160,6 +160,14 @@ public class JSONValue {
 			return;
 		}
 		
+                if (value instanceof Enum) {
+                    out.write('\"');
+                    out.write(value.toString());
+                    out.write('\"');
+                    return;
+                }
+                
+
 		out.write(value.toString());
 	}
 

@@ -20,8 +20,11 @@ import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.impl.NamedImpl;
+import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
+import com.sap.sailing.util.impl.RaceColumnListeners;
 
 public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListener {
     private static final Logger logger = Logger.getLogger(RegattaImpl.class.getName());
@@ -30,7 +33,8 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     private final BoatClass boatClass;
     private transient Set<RegattaListener> regattaListeners;
     private final Iterable<? extends Series> series;
-    private Set<RaceColumnListener> raceColumnListeners;
+    private final RaceColumnListeners raceColumnListeners;
+    private final ScoringScheme scoringScheme;
 
     /**
      * Regattas may be constructed as implicit default regattas in which case they won't need to be stored
@@ -45,11 +49,18 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     /**
      * Constructs a regatta with a single default series with empty race column list, and a single default fleet which
      * is not {@link #isPersistent() marked for persistence}.
+     * 
+     * @param trackedRegattaRegistry
+     *            used to find the {@link TrackedRegatta} for this column's series' {@link Series#getRegatta() regatta}
+     *            in order to re-associate a {@link TrackedRace} passed to {@link #setTrackedRace(Fleet, TrackedRace)}
+     *            with this column's series' {@link TrackedRegatta}, and the tracked race's {@link RaceDefinition} with
+     *            this column's series {@link Regatta}, respectively. If <code>null</code>, the re-association won't be
+     *            carried out.
      */
-    public RegattaImpl(String baseName, BoatClass boatClass, TrackedRegattaRegistry trackedRegattaRegistry) {
+    public RegattaImpl(String baseName, BoatClass boatClass, TrackedRegattaRegistry trackedRegattaRegistry, ScoringScheme scoringScheme) {
         this(baseName, boatClass, Collections.singletonList(new SeriesImpl("Default", /* isMedal */false, Collections
                 .singletonList(new FleetImpl("Default")), /* race column names */new ArrayList<String>(),
-                trackedRegattaRegistry)), /* persistent */false);
+                trackedRegattaRegistry)), /* persistent */false, scoringScheme);
     }
 
     /**
@@ -57,11 +68,11 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
      *            all {@link Series} in this iterable will have their {@link Series#setRegatta(Regatta) regatta set} to
      *            this new regatta.
      */
-    public RegattaImpl(String baseName, BoatClass boatClass, Iterable<? extends Series> series, boolean persistent) {
+    public RegattaImpl(String baseName, BoatClass boatClass, Iterable<? extends Series> series, boolean persistent, ScoringScheme scoringScheme) {
         super(baseName+(boatClass==null?"":" ("+boatClass.getName()+")"));
         races = new HashSet<RaceDefinition>();
         regattaListeners = new HashSet<RegattaListener>();
-        raceColumnListeners = new HashSet<RaceColumnListener>();
+        raceColumnListeners = new RaceColumnListeners();
         this.boatClass = boatClass;
         this.series = series;
         for (Series s : series) {
@@ -69,6 +80,7 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
             s.addRaceColumnListener(this);
         }
         this.persistent = persistent;
+        this.scoringScheme = scoringScheme;
     }
     
     @Override
@@ -190,34 +202,52 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
 
     @Override
     public void trackedRaceLinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
-        notifyListenersAboutTrackedRaceLinked(raceColumn, fleet, trackedRace);
+        raceColumnListeners.notifyListenersAboutTrackedRaceLinked(raceColumn, fleet, trackedRace);
     }
 
     @Override
     public void trackedRaceUnlinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
-        notifyListenersAboutTrackedRaceUnlinked(raceColumn, fleet, trackedRace);
+        raceColumnListeners.notifyListenersAboutTrackedRaceUnlinked(raceColumn, fleet, trackedRace);
+    }
+    
+    @Override
+    public void isMedalRaceChanged(RaceColumn raceColumn, boolean newIsMedalRace) {
+        raceColumnListeners.notifyListenersAboutIsMedalRaceChanged(raceColumn, newIsMedalRace);
+    }
+    
+    @Override
+    public boolean canAddRaceColumnToContainer(RaceColumn raceColumn) {
+        return raceColumnListeners.canAddRaceColumnToContainer(raceColumn);
+    }
+
+    @Override
+    public void raceColumnAddedToContainer(RaceColumn raceColumn) {
+        raceColumnListeners.notifyListenersAboutRaceColumnAddedToContainer(raceColumn);
+    }
+
+    @Override
+    public void raceColumnRemovedFromContainer(RaceColumn raceColumn) {
+        raceColumnListeners.notifyListenersAboutRaceColumnRemovedFromContainer(raceColumn);
+    }
+
+    @Override
+    public boolean isTransient() {
+        return false;
     }
 
     @Override
     public void addRaceColumnListener(RaceColumnListener listener) {
-        raceColumnListeners.add(listener);
+        raceColumnListeners.addRaceColumnListener(listener);
     }
 
     @Override
     public void removeRaceColumnListener(RaceColumnListener listener) {
-        raceColumnListeners.remove(listener);
+        raceColumnListeners.removeRaceColumnListener(listener);
     }
     
-    private void notifyListenersAboutTrackedRaceLinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
-        for (RaceColumnListener listener : raceColumnListeners) {
-            listener.trackedRaceLinked(raceColumn, fleet, trackedRace);
-        }
-    }
-
-    private void notifyListenersAboutTrackedRaceUnlinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
-        for (RaceColumnListener listener : raceColumnListeners) {
-            listener.trackedRaceUnlinked(raceColumn, fleet, trackedRace);
-        }
+    @Override
+    public ScoringScheme getScoringScheme() {
+        return scoringScheme;
     }
 
 }

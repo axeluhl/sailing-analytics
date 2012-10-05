@@ -1,8 +1,10 @@
 package com.sap.sailing.domain.persistence.impl;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
@@ -36,6 +38,7 @@ public class DelayedLeaderboardCorrectionsImpl implements DelayedLeaderboardCorr
     private final Map<String, Map<RaceColumn, MaxPointsReason>> maxPointsReasonsByCompetitorName;
     private final Map<String, Map<RaceColumn, Double>> correctedScoresByCompetitorName;
     private final Map<String, String> displayNamesByCompetitorName;
+    private final Set<String> suppressedCompetitorNames;
     private final Leaderboard leaderboard;
 
     public DelayedLeaderboardCorrectionsImpl(Leaderboard leaderboard) {
@@ -43,6 +46,7 @@ public class DelayedLeaderboardCorrectionsImpl implements DelayedLeaderboardCorr
         maxPointsReasonsByCompetitorName = new HashMap<String, Map<RaceColumn,MaxPointsReason>>();
         correctedScoresByCompetitorName = new HashMap<String, Map<RaceColumn, Double>>();
         displayNamesByCompetitorName = new HashMap<String, String>();
+        suppressedCompetitorNames = new HashSet<String>();
         this.leaderboard = leaderboard;
         leaderboard.addRaceColumnListener(this);
     }
@@ -138,12 +142,20 @@ public class DelayedLeaderboardCorrectionsImpl implements DelayedLeaderboardCorr
                 displayNamesEntryIter.remove();
             }
         }
+        for (Iterator<String> suppressedCompetitorNameIter=suppressedCompetitorNames.iterator(); suppressedCompetitorNameIter.hasNext(); ) {
+            String next = suppressedCompetitorNameIter.next();
+            if (competitorsByName.containsKey(next)) {
+                leaderboard.setSuppressed(competitorsByName.get(next), true);
+                suppressedCompetitorNameIter.remove();
+            }
+        }
         removeAsListenerIfNoLeftOvers();
     }
 
     private void removeAsListenerIfNoLeftOvers() {
         if (carriedPointsByCompetitorName.isEmpty() && maxPointsReasonsByCompetitorName.isEmpty() &&
-                correctedScoresByCompetitorName.isEmpty() && displayNamesByCompetitorName.isEmpty()) {
+                correctedScoresByCompetitorName.isEmpty() && displayNamesByCompetitorName.isEmpty() &&
+                suppressedCompetitorNames.isEmpty()) {
             getLeaderboard().removeRaceColumnListener(this);
         }
     }
@@ -155,6 +167,12 @@ public class DelayedLeaderboardCorrectionsImpl implements DelayedLeaderboardCorr
     }
 
     @Override
+    public void suppressCompetitor(String competitorName) {
+        assertNoTrackedRaceAssociatedYet();
+        suppressedCompetitorNames.add(competitorName);
+    }
+
+    @Override
     public void trackedRaceLinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
         assignLeftOvers(trackedRace);
     }
@@ -162,4 +180,27 @@ public class DelayedLeaderboardCorrectionsImpl implements DelayedLeaderboardCorr
     @Override
     public void trackedRaceUnlinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
     }
+
+    @Override
+    public void isMedalRaceChanged(RaceColumn raceColumn, boolean newIsMedalRace) {
+    }
+
+    @Override
+    public boolean canAddRaceColumnToContainer(RaceColumn raceColumn) {
+        return true;
+    }
+
+    @Override
+    public void raceColumnAddedToContainer(RaceColumn raceColumn) {
+    }
+
+    @Override
+    public void raceColumnRemovedFromContainer(RaceColumn raceColumn) {
+    }
+
+    @Override
+    public boolean isTransient() {
+        return false;
+    }
+
 }

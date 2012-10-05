@@ -40,4 +40,8 @@ public interface SettableScoreCorrection extends ScoreCorrection {
     void setTimePointOfLastCorrectionsValidity(TimePoint timePointOfLastCorrectionsValidity);
     
     void setComment(String scoreCorrectionComment);
+    
+    void notifyListenersAboutCarriedPointsChange(Competitor competitor, Double oldCarriedPoints, Double newCarriedPoints);
+
+    void notifyListenersAboutIsSuppressedChange(Competitor competitor, boolean suppressed);
 }

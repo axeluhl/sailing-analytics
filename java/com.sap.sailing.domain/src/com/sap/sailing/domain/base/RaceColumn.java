@@ -6,6 +6,7 @@ import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.util.impl.RaceColumnListeners;
 
 /**
  * One or more races that would be noted together in a single column in a {@link Leaderboard}. If the number of
@@ -25,10 +26,6 @@ import com.sap.sailing.domain.tracking.TrackedRace;
  * 
  */
 public interface RaceColumn extends Named {
-    void addRaceColumnListener(RaceColumnListener listener);
-    
-    void removeRaceColumnListener(RaceColumnListener listener);
-    
     /**
      * @return the fleets for each of which this column has a single race and therefore optionally a {@link TrackedRace}, in
      * ascending order; best fleets first
@@ -100,12 +97,16 @@ public interface RaceColumn extends Named {
      */
     boolean isMedalRace();
     
-    void setName(String newName);
-    
     /**
      * Constructs a key for maps storing corrections such as score corrections and max points reasons.
      */
     Pair<Competitor, RaceColumn> getKey(Competitor competitor);
+
+    public abstract RaceColumnListeners getRaceColumnListeners();
+
+    public abstract void removeRaceColumnListener(RaceColumnListener listener);
+
+    public abstract void addRaceColumnListener(RaceColumnListener listener);
 
     /**
      * Releases the {@link TrackedRace} previously set by {@link #setTrackedRace(Fleet, TrackedRace)} but leaves the
@@ -116,6 +117,4 @@ public interface RaceColumn extends Named {
      *            the fleet for which to release its tracked race
      */
     void releaseTrackedRace(Fleet fleet);
-    
-    
 }

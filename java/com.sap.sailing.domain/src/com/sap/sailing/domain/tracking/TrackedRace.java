@@ -71,7 +71,8 @@ public interface TrackedRace extends Serializable {
     TimePoint getEndOfRace();
 
     /**
-     * Returns a list of the first and last mark passing times of all course waypoints
+     * Returns a list of the first and last mark passing times of all course waypoints. Callers wanting to iterate over the
+     * result must <code>synchronize</code> on the result.
      */
     Iterable<Pair<Waypoint, Pair<TimePoint, TimePoint>>> getMarkPassingsTimes();
 
@@ -83,7 +84,9 @@ public interface TrackedRace extends Serializable {
     /**
      * Clients can safely iterate over the iterable returned because it's a non-live copy of the tracked legs of this
      * tracked race. This implies that should an update to the underlying list of waypoints in this race's {@link Course}
-     * take place after this method has returned, then this won't be reflected in the result returned.
+     * take place after this method has returned, then this won't be reflected in the result returned. Callers should
+     * obtain the {@link Course#lockForRead() course's read lock} while using the result of this call if they want to
+     * ensure that no course update is applied concurrently.
      */
     Iterable<TrackedLeg> getTrackedLegs();
     
@@ -355,7 +358,20 @@ public interface TrackedRace extends Serializable {
      * time as the direction the wind comes from.
      */
     boolean raceIsKnownToStartUpwind();
-    
+
+    /**
+     * Many calculations require valid wind data. In order to prevent NoWindException's to be handled by those calculation 
+     * this method can be used to check whether the tracked race has sufficient wind information available.
+     * @return <code>true</code> if {@link #getWind(Position, TimePoint)} delivers a (not null) wind fix.
+     */
+    boolean hasWindData();
+
+    /**
+     * 
+     * @return <code>true</code> if at least one GPS fix for one of the competitors is available for this race.
+     */
+    boolean hasGPSData();
+
     /**
      * Adds a race change listener to the set of listeners that will be notified about changes to this race.
      * The listener won't be serialized together with this object.

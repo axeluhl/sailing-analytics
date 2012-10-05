@@ -4,16 +4,23 @@ import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
+import com.sap.sailing.domain.common.Renamable;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
 /**
- * A leaderboard that allows its clients to flexibly modify the race columns arranged in this leaderboard without the need to adhere
- * to the constraints of a {@link Regatta} with its {@link Series} and {@link Fleet}s.
+ * A leaderboard that allows its clients to flexibly modify the race columns arranged in this leaderboard without the
+ * need to adhere to the constraints of a {@link Regatta} with its {@link Series} and {@link Fleet}s.
+ * <p>
+ * 
+ * A leaderboard can be renamed. If a leaderboard is managed in a structure that keys leaderboards by name, that
+ * structure's rules have to be obeyed to ensure the structure's consistency. For example,
+ * <code>RacingEventService</code> has a <code>renameLeaderboard</code> method that ensures the internal structure's
+ * consistency and invokes this method.
  * 
  * @author Axel Uhl (D043530)
- *
+ * 
  */
-public interface FlexibleLeaderboard extends Leaderboard {
+public interface FlexibleLeaderboard extends Leaderboard, Renamable {
     /**
      * Moves the column with the name <code>name</code> up. 
      * @param name The name of the column to move.
@@ -64,13 +71,4 @@ public interface FlexibleLeaderboard extends Leaderboard {
     void removeRaceColumn(String columnName);
 
     void updateIsMedalRace(String raceName, boolean isMedalRace);
-    
-    /**
-     * A leaderboard can be renamed. If a leaderboard is managed in a structure that keys leaderboards by name,
-     * that structure's rules have to be obeyed to ensure the structure's consistency. For example,
-     * <code>RacingEventService</code> has a <code>renameLeaderboard</code> method that ensures the internal
-     * structure's consistency and invokes this method.
-     */
-    void setName(String newName);
-
 }

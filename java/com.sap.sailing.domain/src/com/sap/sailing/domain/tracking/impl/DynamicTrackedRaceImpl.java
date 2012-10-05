@@ -22,7 +22,9 @@ import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
+import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.Util;
+import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
@@ -55,6 +57,15 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
         super(trackedRegatta, race, windStore, delayToLiveInMillis, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed,
                 delayForCacheInvalidationOfWindEstimation);
         this.raceIsKnownToStartUpwind = race.getBoatClass().typicallyStartsUpwind();
+        if (!raceIsKnownToStartUpwind) {
+            Set<WindSource> windSourcesToExclude = new HashSet<WindSource>();
+            for (WindSource windSourceToExclude : getWindSourcesToExclude()) {
+                windSourcesToExclude.add(windSourceToExclude);
+            }
+            windSourcesToExclude.add(new WindSourceImpl(WindSourceType.COURSE_BASED));
+            setWindSourcesToExclude(windSourcesToExclude);
+        }
+        
         for (Competitor competitor : getRace().getCompetitors()) {
             DynamicGPSFixTrack<Competitor, GPSFixMoving> track = getTrack(competitor);
             track.addListener(this);
@@ -163,6 +174,11 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
             public void speedAveragingChanged(long oldMillisecondsOverWhichToAverage,
                     long newMillisecondsOverWhichToAverage) {
                 // nobody can currently listen for the change of the buoy speed averaging because buoy speed is not a value used
+            }
+
+            @Override
+            public boolean isTransient() {
+                return false;
             }
         });
         return result;
@@ -519,6 +535,11 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
     @Override
     public void speedAveragingChanged(long oldMillisecondsOverWhichToAverage, long newMillisecondsOverWhichToAverage) {
         notifyListenersSpeedAveragingChanged(oldMillisecondsOverWhichToAverage, newMillisecondsOverWhichToAverage);
+    }
+
+    @Override
+    public boolean isTransient() {
+        return false;
     }
 
     @Override

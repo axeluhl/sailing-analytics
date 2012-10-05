@@ -9,7 +9,6 @@ import com.google.gwt.dom.client.Node;
 import com.google.gwt.dom.client.NodeList;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.CellTable;
-import com.google.gwt.user.cellview.client.DefaultCellTableBuilder;
 import com.google.gwt.view.client.SelectionModel;
 
 /**
@@ -26,17 +25,16 @@ import com.google.gwt.view.client.SelectionModel;
 public class CellTableWithStylableHeaders<T> extends CellTable<T> {
     public CellTableWithStylableHeaders(int pageSize, LeaderboardTableResources resources) {
         super(pageSize, resources);
-        setTableBuilder(new DefaultCellTableBuilder<T>(this) {
-
+    }
+    
+    @Override
+    protected void renderRowValues(SafeHtmlBuilder sb, List<T> values, int start,
+            SelectionModel<? super T> selectionModel) {
+        super.renderRowValues(sb, values, start, selectionModel);
+        Scheduler.get().scheduleFinally(new ScheduledCommand() {
             @Override
-            public void buildRowImpl(T arg0, int arg1) {
-                super.buildRowImpl(arg0, arg1);
-                Scheduler.get().scheduleFinally(new ScheduledCommand() {
-                    @Override
-                    public void execute() {
-                        updateColumnHeaderStyles();
-                    }
-                });
+            public void execute() {
+                updateColumnHeaderStyles();
             }
         });
     }

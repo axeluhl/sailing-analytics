@@ -25,7 +25,13 @@ import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.ObjectInputStreamResolvingAgainstDomainFactory;
 import com.sap.sailing.domain.base.Team;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.leaderboard.ScoringScheme;
+import com.sap.sailing.domain.leaderboard.impl.HighPoint;
+import com.sap.sailing.domain.leaderboard.impl.HighPointExtremeSailingSeriesOverall;
+import com.sap.sailing.domain.leaderboard.impl.HighPointLastBreaksTie;
+import com.sap.sailing.domain.leaderboard.impl.LowPoint;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
 
@@ -223,4 +229,19 @@ public class DomainFactoryImpl implements DomainFactory {
         return new ObjectInputStreamResolvingAgainstDomainFactoryImpl(inputStream, this);
     }
 
+    @Override
+    public ScoringScheme createScoringScheme(ScoringSchemeType scoringSchemeType) {
+        switch (scoringSchemeType) {
+        case LOW_POINT:
+            return new LowPoint();
+        case HIGH_POINT:
+            return new HighPoint();
+        case HIGH_POINT_ESS_OVERALL:
+            return new HighPointExtremeSailingSeriesOverall();
+        case HIGH_POINT_LAST_BREAKS_TIE:
+            return new HighPointLastBreaksTie();
+        default:
+            throw new RuntimeException("Unknown scoring scheme type "+scoringSchemeType.name());
+        }
+    }
 }

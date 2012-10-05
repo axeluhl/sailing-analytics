@@ -4,16 +4,16 @@ import java.util.Date;
 import java.util.List;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.sap.sailing.domain.common.RaceIdentifier;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.shared.QuickRankDTO;
 
 public class GetQuickRankAction extends DefaultAsyncAction<List<QuickRankDTO>> {
     private final SailingServiceAsync sailingService;
-    private final RaceIdentifier raceIdentifier;
+    private final RegattaAndRaceIdentifier raceIdentifier;
     private final Date date;
 
-    public GetQuickRankAction(SailingServiceAsync sailingService, RaceIdentifier raceIdentifier, Date date,
+    public GetQuickRankAction(SailingServiceAsync sailingService, RegattaAndRaceIdentifier raceIdentifier, Date date,
             AsyncCallback<List<QuickRankDTO>> callback) {
         super(callback);
         this.sailingService = sailingService;

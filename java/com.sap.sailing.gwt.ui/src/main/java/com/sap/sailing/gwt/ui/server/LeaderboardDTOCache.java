@@ -159,13 +159,23 @@ public class LeaderboardDTOCache {
         }
 
         @Override
-        public void correctedScoreChanced(Competitor competitor, Double oldCorrectedScore, Double newCorrectedScore) {
+        public void correctedScoreChanced(Competitor competitor, RaceColumn raceColumn, Double oldCorrectedScore, Double newCorrectedScore) {
             removeFromCache(leaderboard);
         }
 
         @Override
         public void maxPointsReasonChanced(Competitor competitor, MaxPointsReason oldMaxPointsReason,
                 MaxPointsReason newMaxPointsReason) {
+            removeFromCache(leaderboard);
+        }
+
+        @Override
+        public void carriedPointsChanged(Competitor competitor, Double oldCarriedPoints, Double newCarriedPoints) {
+            removeFromCache(leaderboard);
+        }
+
+        @Override
+        public void isSuppressedChanged(Competitor competitor, boolean newIsSuppressed) {
             removeFromCache(leaderboard);
         }
     }
@@ -220,12 +230,21 @@ public class LeaderboardDTOCache {
         }
         final RaceColumnListener raceColumnListener = new RaceColumnListener() {
             private static final long serialVersionUID = 8165124797028386317L;
+
             @Override
             public void trackedRaceLinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
                 removeFromCache(leaderboard);
                 registerListener(leaderboard, trackedRace);
             }
 
+            /**
+             * This listener must not be serialized. See also bug 952. 
+             */
+            @Override
+            public boolean isTransient() {
+                return true;
+            }
+            
             @Override
             public void trackedRaceUnlinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
                 removeFromCache(leaderboard);
@@ -238,6 +257,26 @@ public class LeaderboardDTOCache {
                         }
                     }
                 }
+            }
+
+            @Override
+            public void isMedalRaceChanged(RaceColumn raceColumn, boolean newIsMedalRace) {
+                removeFromCache(leaderboard);
+            }
+
+            @Override
+            public boolean canAddRaceColumnToContainer(RaceColumn raceColumn) {
+                return true;
+            }
+
+            @Override
+            public void raceColumnAddedToContainer(RaceColumn raceColumn) {
+                removeFromCache(leaderboard);
+            }
+
+            @Override
+            public void raceColumnRemovedFromContainer(RaceColumn raceColumn) {
+                removeFromCache(leaderboard);
             }
         };
         leaderboard.addRaceColumnListener(raceColumnListener);
@@ -267,26 +306,6 @@ public class LeaderboardDTOCache {
     }
     
     /**
-     * Finds out the time point when any of the {@link Leaderboard#getTrackedRaces() tracked races currently attached to
-     * the <code>leaderboard</code>} and the {@link Leaderboard#getScoreCorrection() score corrections} have last been
-     * modified. If no tracked race is attached and no time-stamped score corrections have been applied to the leaderboard,
-     * <code>null</code> is returned.
-     */
-    private TimePoint getTimePointOfLatestModification(Leaderboard leaderboard) {
-        TimePoint result = null;
-        for (TrackedRace trackedRace : leaderboard.getTrackedRaces()) {
-            if (result == null || (trackedRace.getTimePointOfNewestEvent() != null && trackedRace.getTimePointOfNewestEvent().after(result))) {
-                result = trackedRace.getTimePointOfNewestEvent();
-            }
-        }
-        TimePoint timePointOfLastScoreCorrection = leaderboard.getScoreCorrection().getTimePointOfLastCorrectionsValidity();
-        if (timePointOfLastScoreCorrection != null && (result == null || timePointOfLastScoreCorrection.after(result))) {
-            result = timePointOfLastScoreCorrection;
-        }
-        return result;
-    }
-
-    /**
      * If the cache holds entries for the <code>leaderboard</code> requested, compare <code>timePoint</code> to the
      * {@link #getLatestModification latest modification} affecting the <code>leaderboard</code>. If
      * <code>timePoint</code> is after that time, adjust it to the {@link #getLatestModification latest modification
@@ -303,7 +322,7 @@ public class LeaderboardDTOCache {
             throws NoWindException, InterruptedException, ExecutionException {
         long startOfRequestHandling = System.currentTimeMillis();
         final TimePoint adjustedTimePoint;
-        TimePoint timePointOfLastModification = getTimePointOfLatestModification(leaderboard);
+        TimePoint timePointOfLastModification = leaderboard.getTimePointOfLatestModification();
         if (timePointOfLastModification != null && timePoint.after(timePointOfLastModification)) {
             adjustedTimePoint = timePointOfLastModification; 
             logger.fine("Adjusted time point in getLeaderboardByName from "+timePoint+" to "+adjustedTimePoint);

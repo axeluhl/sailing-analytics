@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -91,6 +92,72 @@ public class TrackTest {
         track.addGPSFix(gpsFix3);
         track.addGPSFix(gpsFix4);
         track.addGPSFix(gpsFix5);
+    }
+    
+    /**
+     * A test regarding bug 968. Three subsequent fixes at the same position with increasing time stamps each, then jumping
+     * to the next position for three seconds. Let's see what distance and SOG do...
+     */
+    @Test
+    public void testJumpyFixes() {
+        DynamicGPSFixTrack<Object, GPSFixMoving> track = new DynamicGPSFixMovingTrackImpl<Object>(new Object(),
+                /* millisecondsOverWhichToAverage */ 30000l);
+        TimePoint start = MillisecondsTimePoint.now();
+        TimePoint now = start;
+        final DegreePosition startPos = new DegreePosition(0, 0);
+        Position pos = startPos;
+        SpeedWithBearing speed = new KnotSpeedWithBearingImpl(40, new DegreeBearingImpl(90));
+        int NUMBER_OF_FIXES_AT_SAME_POSITION = 3;
+        int NUMBER_OF_REAL_FIXES = 10;
+        for (int i = 0; i < NUMBER_OF_REAL_FIXES; i++) {
+            addFixesWithSamePositionButProgressingTime(track, now, pos, speed, NUMBER_OF_FIXES_AT_SAME_POSITION);
+            track.getDistanceTraveled(start, now); // cause DistanceCache to cache a result
+            TimePoint nextNow = now.plus(NUMBER_OF_FIXES_AT_SAME_POSITION * 1000);
+            pos = pos.translateGreatCircle(speed.getBearing(), speed.travel(now, nextNow));
+            now = nextNow;
+        }
+        assertEquals(speed.travel(start, now.minus(NUMBER_OF_FIXES_AT_SAME_POSITION * 1000)).getMeters(),
+                track.getDistanceTraveled(start, now).getMeters(), 0.00000001);
+    }
+
+    private void addFixesWithSamePositionButProgressingTime(DynamicGPSFixTrack<Object, GPSFixMoving> track,
+            TimePoint start, Position pos, SpeedWithBearing speed, int numberOfFixes) {
+        TimePoint now = start;
+        for (int i = 0; i < numberOfFixes; i++) {
+            GPSFixMoving fix1 = new GPSFixMovingImpl(pos, now, speed);
+            track.addGPSFix(fix1);
+            now = now.plus(1000);
+        }
+    }
+
+    @Test
+    public void testMaxSpeedForNonMovingTrackWithUpperTimeLimit() {
+        DynamicGPSFixTrack<Object, GPSFix> track = new DynamicGPSFixTrackImpl<Object>(new Object(), /* millisecondsOverWhichToAverage */ 30000l);
+        GPSFix fix1 = new GPSFixImpl(new DegreePosition(0, 0), new MillisecondsTimePoint(0));
+        track.addGPSFix(fix1);
+        GPSFix fix2 = new GPSFixImpl(new DegreePosition(1./60., 0), new MillisecondsTimePoint(3600000)); // 1nm in one hour = 1kt
+        track.addGPSFix(fix2);
+        GPSFix fix3 = new GPSFixImpl(new DegreePosition(3./60., 0), new MillisecondsTimePoint(7200000)); // 2nm in one hour = 2kts
+        track.addGPSFix(fix3);
+        GPSFix fix4 = new GPSFixImpl(new DegreePosition(4./60., 0), new MillisecondsTimePoint(10800000)); // 1nm in one hour = 1kt
+        track.addGPSFix(fix4);
+        assertEquals(1., track.getMaximumSpeedOverGround(new MillisecondsTimePoint(0), new MillisecondsTimePoint(3600000)).
+                getB().getKnots(), 0.001);
+    }
+
+    @Test
+    public void testMaxSpeedForNonMovingTrack() {
+        DynamicGPSFixTrack<Object, GPSFix> track = new DynamicGPSFixTrackImpl<Object>(new Object(), /* millisecondsOverWhichToAverage */ 30000l);
+        GPSFix fix1 = new GPSFixImpl(new DegreePosition(0, 0), new MillisecondsTimePoint(0));
+        track.addGPSFix(fix1);
+        GPSFix fix2 = new GPSFixImpl(new DegreePosition(1./60., 0), new MillisecondsTimePoint(3600000)); // 1nm in one hour = 1kt
+        track.addGPSFix(fix2);
+        GPSFix fix3 = new GPSFixImpl(new DegreePosition(3./60., 0), new MillisecondsTimePoint(7200000)); // 2nm in one hour = 2kts
+        track.addGPSFix(fix3);
+        GPSFix fix4 = new GPSFixImpl(new DegreePosition(4./60., 0), new MillisecondsTimePoint(10800000)); // 1nm in one hour = 1kt
+        track.addGPSFix(fix4);
+        assertEquals(2., track.getMaximumSpeedOverGround(new MillisecondsTimePoint(0), new MillisecondsTimePoint(10800000)).
+                getB().getKnots(), 0.001);
     }
     
     /**
@@ -416,7 +483,8 @@ public class TrackTest {
         GPSFix outlier = new GPSFixImpl(outlierPosition, timePointForOutlier);
         track.addGPSFix(outlier);
         assertEquals(1, invalidationCalls.size());
-        assertEquals(timePointForOutlier, invalidationCalls.iterator().next()); // outlier doesn't turn its preceding element into an outlier
+        TimePoint timePointOfLastFixBeforeOutlier = track.getLastFixBefore(timePointForOutlier).getTimePoint();
+        assertTrue(invalidationCalls.iterator().next().after(timePointOfLastFixBeforeOutlier)); // outlier doesn't turn its preceding element into an outlier
         assertNull(distanceCache.getEarliestFromAndDistanceAtOrAfterFrom(now,  start)); // no more entry for "to"-value start in cache
         invalidationCalls.clear();
         final TimePoint timePointOfLastOriginalFix = track.getLastRawFix().getTimePoint();
@@ -432,7 +500,8 @@ public class TrackTest {
         GPSFix lateOutlier = new GPSFixImpl(lateOutlierPosition, timePointForLateOutlier);
         track.addGPSFix(lateOutlier);
         assertEquals(1, invalidationCalls.size());
-        assertEquals(timePointForLateOutlier, invalidationCalls.iterator().next());
+        TimePoint timePointOfLastFixBeforeLateOutlier = track.getLastFixBefore(timePointForLateOutlier).getTimePoint();
+        assertTrue(invalidationCalls.iterator().next().after(timePointOfLastFixBeforeLateOutlier));
         invalidationCalls.clear();
         // expect the invalidation to have started after the single cache entry, so the cache entry still has to be there:
         final Pair<TimePoint, Pair<TimePoint, Distance>> stillPresentFullIntervalCacheEntry = distanceCache
@@ -471,6 +540,57 @@ public class TrackTest {
         GPSFix polishedLastFix2 = track.getLastFixBefore(new MillisecondsTimePoint(Long.MAX_VALUE)); // get the last smoothened fix...
         assertEquals(fix, polishedLastFix2);
         assertEquals(speed.getMetersPerSecond()*steps, track.getDistanceTraveled(now, start).getMeters(), 0.01);
+    }
+    
+    /**
+     * A test case for bug 968. If distances are requested for time intervals ending after the last GPS fix, the position
+     * is estimated to be at the last fix known. When another fix arrives, the positions for these time points can now be
+     * interpolated, leading to different results and hence to a cache inconsistency in case the cache isn't flushed for the
+     * interval between the last and the newest fix. This test case adds a few fixes, then asks a distance traveled for an
+     * interval ending after the last fix, then adds another fix at a later time point and asks the distance again.
+     */
+    @Test
+    public void testMoreFrequentDistanceComputationThanGPSFixReception() {
+        DynamicGPSFixTrack<Object, GPSFix> track = new DynamicGPSFixTrackImpl<Object>(new Object(), /* millisecondsOverWhichToAverage */ 30000l);
+        final int timeBetweenFixesInMillis = 1000;
+        Bearing bearing = new DegreeBearingImpl(123);
+        Speed speed = new KnotSpeedImpl(7);
+        Position p = new DegreePosition(0, 0);
+        final MillisecondsTimePoint now = MillisecondsTimePoint.now();
+        TimePoint start = now;
+        final int steps = 10;
+        TimePoint next = null;
+        GPSFix fix = null;
+        for (int i=0; i<steps; i++) {
+            fix = new GPSFixImpl(p, start);
+            track.addGPSFix(fix);
+            next = start.plus(timeBetweenFixesInMillis);
+            p = p.translateGreatCircle(bearing, speed.travel(start, next));
+            start = next;
+            bearing = new DegreeBearingImpl(bearing.getDegrees() + 1);
+        }
+        Distance distance1 = track.getDistanceTraveled(now, next.minus(timeBetweenFixesInMillis));
+        Distance distance2 = track.getDistanceTraveled(now, next.minus(2*timeBetweenFixesInMillis/3));
+        Distance distance3 = track.getDistanceTraveled(now, next.minus(timeBetweenFixesInMillis/3));
+        Distance distance4 = track.getDistanceTraveled(now, next);
+        assertEquals(distance1, distance2); // no progress after time point "next" because no further fixes are known
+        assertEquals(distance1, distance3); // no progress after time point "next" because no further fixes are known
+        assertEquals(distance1, distance4); // no progress after time point "next" because no further fixes are known
+        // now add one more fix
+        fix = new GPSFixImpl(p, start);
+        track.addGPSFix(fix);
+        Distance distance1_new = track.getDistanceTraveled(now, next.minus(timeBetweenFixesInMillis));
+        Distance distance2_new = track.getDistanceTraveled(now, next.minus(2*timeBetweenFixesInMillis/3));
+        Distance distance3_new = track.getDistanceTraveled(now, next.minus(timeBetweenFixesInMillis/3));
+        Distance distance4_new = track.getDistanceTraveled(now, next);
+        assertEquals(distance1, distance1_new);
+        assertFalse(distance2.equals(distance2_new));
+        assertFalse(distance3.equals(distance3_new));
+        assertFalse(distance4.equals(distance4_new));
+        Distance toReachInOneThirdOfTimeBetweenFixesInMillis = speed.travel(next, next.plus(timeBetweenFixesInMillis/3));
+        assertEquals(toReachInOneThirdOfTimeBetweenFixesInMillis.getMeters(), distance2_new.getMeters()-distance1_new.getMeters(), 0.01);
+        assertEquals(toReachInOneThirdOfTimeBetweenFixesInMillis.getMeters(), distance3_new.getMeters()-distance2_new.getMeters(), 0.01);
+        assertEquals(toReachInOneThirdOfTimeBetweenFixesInMillis.getMeters(), distance4_new.getMeters()-distance3_new.getMeters(), 0.01);
     }
     
     @Test

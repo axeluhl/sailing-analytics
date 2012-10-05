@@ -23,6 +23,7 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
@@ -375,6 +376,12 @@ public class MockedTrackedRace implements DynamicTrackedRace {
                         // TODO Auto-generated method stub
                         
                     }
+
+                    @Override
+                    public ScoringScheme getScoringScheme() {
+                        // TODO Auto-generated method stub
+                        return null;
+                    }
                 };
             }
 
@@ -669,4 +676,16 @@ public class MockedTrackedRace implements DynamicTrackedRace {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+    @Override
+    public boolean hasWindData() {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public boolean hasGPSData() {
+        // TODO Auto-generated method stub
+        return false;
+    }
 }

@@ -36,7 +36,10 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
         rootPanel.add(tabPanel); //, 10, 10);
 
         regattaDisplayers = new HashSet<RegattaDisplayer>();
-        
+
+//        SailingEventManagementPanel sailingEventManagementPanel = new SailingEventManagementPanel(sailingService, this, stringMessages);
+//        tabPanel.add(sailingEventManagementPanel, stringMessages.events());
+
         RegattaStructureManagementPanel eventStructureManagementPanel = new RegattaStructureManagementPanel(sailingService, this, stringMessages, this);
         //eventStructureManagementPanel.ensureDebugId("RegattaStructureManagement");
         tabPanel.add(eventStructureManagementPanel, stringMessages.regattas());
@@ -105,7 +108,7 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
             @Override
             public void onSelection(SelectionEvent<Integer> event) {
                 if (leaderboardConfigPanel.isVisible()) {
-                    leaderboardConfigPanel.loadAndRefreshAllData();
+                    leaderboardConfigPanel.loadAndRefreshLeaderboards();
                 }
             }
         });

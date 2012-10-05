@@ -76,6 +76,14 @@ public class CourseImpl extends NamedImpl implements Course {
     public void unlockAfterRead() {
         LockUtil.unlockAfterRead(lock);
     }
+    
+    public void lockForWrite() {
+        LockUtil.lockForWrite(lock);
+    }
+    
+    public void unlockAfterWrite() {
+        LockUtil.unlockAfterWrite(lock);
+    }
 
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
         ois.defaultReadObject();
@@ -332,7 +340,7 @@ public class CourseImpl extends NamedImpl implements Course {
     public Waypoint getFirstWaypoint() {
         lockForRead();
         try {
-            return waypoints.get(0);
+            return waypoints.isEmpty() ? null : waypoints.get(0);
         } finally {
             unlockAfterRead();
         }
@@ -342,7 +350,7 @@ public class CourseImpl extends NamedImpl implements Course {
     public Waypoint getLastWaypoint() {
         lockForRead();
         try {
-            return waypoints.get(waypoints.size() - 1);
+            return waypoints.isEmpty() ? null : waypoints.get(waypoints.size() - 1);
         } finally {
             unlockAfterRead();
         }

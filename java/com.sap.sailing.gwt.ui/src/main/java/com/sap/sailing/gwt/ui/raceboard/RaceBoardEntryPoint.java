@@ -8,8 +8,9 @@ import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
-import com.sap.sailing.domain.common.DefaultLeaderboardName;
+import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
 import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
@@ -19,6 +20,7 @@ import com.sap.sailing.gwt.ui.client.RaceSelectionModel;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
+import com.sap.sailing.gwt.ui.client.UserAgentChecker;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RaceDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
@@ -53,7 +55,7 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
             viewMode = RaceBoardViewModes.ONESCREEN;
         }
         if (leaderboardNameParamValue == null || leaderboardNameParamValue.isEmpty()) {
-            leaderboardName = DefaultLeaderboardName.DEFAULT_LEADERBOARD_NAME;
+            leaderboardName = LeaderboardNameConstants.DEFAULT_LEADERBOARD_NAME;
         } else {
             leaderboardName = leaderboardNameParamValue;
         }
@@ -186,6 +188,12 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         FlowPanel toolbarPanel = new FlowPanel();
         
         toolbarPanel.add(raceBoardPanel.getNavigationWidget());
+        
+        if (!UserAgentChecker.INSTANCE.isUserAgentSupported(userAgent)) {
+            HTML lbl = new HTML("This website is optimized to work with Google Chrome. <a target='_blank' href='https://www.google.com/intl/de/chrome/browser/'>Click here to download</a>");
+            lbl.setStyleName("browserOptimizedMessage");
+            toolbarPanel.add(lbl);
+        }
 
         FlowPanel logoAndTitlePanel = createLogoAndTitlePanel(raceBoardPanel);
         FlowPanel timePanel = createTimePanel(raceBoardPanel);

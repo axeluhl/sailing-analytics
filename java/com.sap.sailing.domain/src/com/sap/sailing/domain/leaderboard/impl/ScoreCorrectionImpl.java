@@ -15,6 +15,7 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.ScoreCorrectionListener;
+import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
@@ -39,53 +40,78 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
      * If no score correction is provided here, the uncorrected points are the default.
      */
     private final Map<Pair<Competitor, RaceColumn>, Double> correctedScores;
-    
+
     /**
-     * If <code>null</code>, despite a non-<code>null</code> {@link #timePointOfLastCorrectionsValidity} value the result have to be assumed
-     * to be preliminary and need to be displayed with a corresponding hint.
+     * If <code>null</code>, despite a non-<code>null</code> {@link #timePointOfLastCorrectionsValidity} value the
+     * result have to be assumed to be preliminary and need to be displayed with a corresponding hint.
      */
     private String comment;
-    
+
     /**
      * Tells when the score correction was last updated. This should usually be the "validity time" and not the
      * "transaction time." In other words, if scores provided by the race committee are updated to this score correction
-     * at time X, and the race committee's scores are tagged with time Y, then this method should return Y, not X. If
-     * Y is not available for some reason, X may be used as a default.
+     * at time X, and the race committee's scores are tagged with time Y, then this method should return Y, not X. If Y
+     * is not available for some reason, X may be used as a default.
      */
     private TimePoint timePointOfLastCorrectionsValidity;
-    
+
     private transient Set<ScoreCorrectionListener> scoreCorrectionListeners;
-    
+
     public ScoreCorrectionImpl() {
-        this.maxPointsReasons = new HashMap<Util.Pair<Competitor,RaceColumn>, MaxPointsReason>();
-        this.correctedScores = new HashMap<Util.Pair<Competitor,RaceColumn>, Double>();
+        this.maxPointsReasons = new HashMap<Util.Pair<Competitor, RaceColumn>, MaxPointsReason>();
+        this.correctedScores = new HashMap<Util.Pair<Competitor, RaceColumn>, Double>();
         this.scoreCorrectionListeners = new HashSet<ScoreCorrectionListener>();
     }
-    
+
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
         ois.defaultReadObject();
         this.scoreCorrectionListeners = new HashSet<ScoreCorrectionListener>();
     }
+    
+    private Set<ScoreCorrectionListener> getScoreCorrectionListeners() {
+        synchronized (scoreCorrectionListeners) {
+            return new HashSet<ScoreCorrectionListener>(scoreCorrectionListeners);
+        }
+    }
 
     @Override
     public void addScoreCorrectionListener(ScoreCorrectionListener listener) {
-        scoreCorrectionListeners.add(listener);
+        synchronized (scoreCorrectionListeners) {
+            scoreCorrectionListeners.add(listener);
+        }
     }
 
     @Override
     public void removeScoreCorrectionListener(ScoreCorrectionListener listener) {
-        scoreCorrectionListeners.remove(listener);
-    }
-    
-    private void notifyListeners(Competitor competitor, Double oldCorrectedScore, Double newCorrectedScore) {
-        for (ScoreCorrectionListener listener : scoreCorrectionListeners) {
-            listener.correctedScoreChanced(competitor, oldCorrectedScore, newCorrectedScore);
+        synchronized (scoreCorrectionListeners) {
+            scoreCorrectionListeners.remove(listener);
         }
     }
 
-    private void notifyListeners(Competitor competitor, MaxPointsReason oldMaxPointsReason, MaxPointsReason newMaxPointsReason) {
-        for (ScoreCorrectionListener listener : scoreCorrectionListeners) {
+    protected void notifyListeners(Competitor competitor, RaceColumn raceColumn, Double oldCorrectedScore, Double newCorrectedScore) {
+        for (ScoreCorrectionListener listener : getScoreCorrectionListeners()) {
+            listener.correctedScoreChanced(competitor, raceColumn, oldCorrectedScore, newCorrectedScore);
+        }
+    }
+
+    protected void notifyListeners(Competitor competitor, MaxPointsReason oldMaxPointsReason,
+            MaxPointsReason newMaxPointsReason) {
+        for (ScoreCorrectionListener listener : getScoreCorrectionListeners()) {
             listener.maxPointsReasonChanced(competitor, oldMaxPointsReason, newMaxPointsReason);
+        }
+    }
+
+    @Override
+    public void notifyListenersAboutCarriedPointsChange(Competitor competitor, Double oldCarriedPoints, Double newCarriedPoints) {
+        for (ScoreCorrectionListener listener : getScoreCorrectionListeners()) {
+            listener.carriedPointsChanged(competitor, oldCarriedPoints, newCarriedPoints);
+        }
+    }
+
+    @Override
+    public void notifyListenersAboutIsSuppressedChange(Competitor competitor, boolean suppressed) {
+        for (ScoreCorrectionListener listener : getScoreCorrectionListeners()) {
+            listener.isSuppressedChanged(competitor, suppressed);
         }
     }
 
@@ -104,19 +130,19 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
     @Override
     public void correctScore(Competitor competitor, RaceColumn raceColumn, double points) {
         Double oldScore = correctedScores.put(raceColumn.getKey(competitor), points);
-        notifyListeners(competitor, oldScore, points);
+        notifyListeners(competitor, raceColumn, oldScore, points);
     }
-    
+
     @Override
     public boolean isScoreCorrected(Competitor competitor, RaceColumn raceColumn) {
         Pair<Competitor, RaceColumn> key = raceColumn.getKey(competitor);
         return correctedScores.containsKey(key) || maxPointsReasons.containsKey(key);
     }
-    
+
     @Override
     public void uncorrectScore(Competitor competitor, RaceColumn raceColumn) {
         Double oldScore = correctedScores.remove(raceColumn.getKey(competitor));
-        notifyListeners(competitor, oldScore, null);
+        notifyListeners(competitor, raceColumn, oldScore, null);
     }
 
     @Override
@@ -127,7 +153,7 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
         }
         return result;
     }
-    
+
     /**
      * If the {@link #getMaxPointsReason(Competitor, TrackedRace)} for the <code>competitor</code> for the
      * <code>raceColumn</code>'s tracked race is not {@link MaxPointsReason#NONE}, the
@@ -136,31 +162,34 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
      * <p>
      */
     @Override
-    public Result getCorrectedScore(Callable<Integer> uncorrectedScore, final Competitor competitor, final RaceColumn raceColumn,
-            TimePoint timePoint, int numberOfCompetitorsInLeaderboard) {
-        double result;
+    public Result getCorrectedScore(Callable<Integer> trackedRankProvider, final Competitor competitor,
+            final RaceColumn raceColumn, TimePoint timePoint, int numberOfCompetitorsInLeaderboard,
+            ScoringScheme scoringScheme) {
+        Double result;
         final MaxPointsReason maxPointsReason = getMaxPointsReason(competitor, raceColumn);
         if (maxPointsReason == MaxPointsReason.NONE) {
-            result = getCorrectedNonMaxedScore(competitor, raceColumn, uncorrectedScore);
+            result = getCorrectedNonMaxedScore(competitor, raceColumn, trackedRankProvider, scoringScheme, numberOfCompetitorsInLeaderboard);
         } else {
             // allow explicit override even when max points reason is specified; calculation may be wrong,
             // e.g., in case we have an untracked race and the number of competitors is estimated incorrectly
             Double correctedNonMaxedScore = correctedScores.get(raceColumn.getKey(competitor));
             if (correctedNonMaxedScore == null) {
-                result = getMaxPoints(raceColumn.getTrackedRace(competitor), numberOfCompetitorsInLeaderboard);
+                result = scoringScheme.getPenaltyScore(raceColumn, competitor, maxPointsReason,
+                        getNumberOfCompetitorsInRace(raceColumn, competitor, numberOfCompetitorsInLeaderboard),
+                        numberOfCompetitorsInLeaderboard);
             } else {
                 result = correctedNonMaxedScore;
             }
         }
-        final double correctedScore = result;
+        final Double correctedScore = result;
         return new Result() {
             @Override
             public MaxPointsReason getMaxPointsReason() {
                 return maxPointsReason;
             }
-            
+
             @Override
-            public double getCorrectedScore() {
+            public Double getCorrectedScore() {
                 return correctedScore;
             }
 
@@ -171,26 +200,47 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
         };
     }
 
+    protected Integer getNumberOfCompetitorsInRace(RaceColumn raceColumn, Competitor competitor, int numberOfCompetitorsInLeaderboard) {
+        Integer result;
+        final TrackedRace trackedRace = raceColumn.getTrackedRace(competitor);
+        if (trackedRace == null) {
+            result = numberOfCompetitorsInLeaderboard;
+        } else {
+            result = Util.size(trackedRace.getRace().getCompetitors());
+        }
+        return result;
+    }
+
     /**
      * Under the assumption that the competitor is not assigned the maximum score due to disqualification or other
-     * reasons, computes the corrected score. If {@link #correctedScores} contains an entry for the <code>competitor</code>'s key,
-     * it is used. Otherwise, the <code>uncorrectedScore</code> is returned.
+     * reasons, computes the corrected score. If {@link #correctedScores} contains an entry for the
+     * <code>competitor</code>'s key, it is used. Otherwise, the <code>uncorrectedScore</code> is returned.
+     * @param scoringScheme
+     *            used to transform the tracked rank into a score if there is no score correction applied
+     * @param numberOfCompetitorsInLeaderboard TODO
+     * 
+     * @return <code>null</code> in case the <code>competitor</code> has no score assigned in that race which is the
+     * case if the score is not corrected by these score corrections, and the <code>trackedRankProvider</code> delivers 0
+     * as the rank, or if the score is not corrected and the scoring scheme cannot find the competitor in any tracked race
+     * of the <code>raceColumn</code>, meaning there cannot be a tracked rank for the competitor regardless what
+     * <code>trackedRankProvider</code> delivers.
      */
-    protected double getCorrectedNonMaxedScore(Competitor competitor, RaceColumn raceColumn, Callable<Integer> uncorrectedScore) {
+    protected Double getCorrectedNonMaxedScore(Competitor competitor, RaceColumn raceColumn,
+            Callable<Integer> trackedRankProvider, ScoringScheme scoringScheme, int numberOfCompetitorsInLeaderboard) {
         Double correctedNonMaxedScore = correctedScores.get(raceColumn.getKey(competitor));
+        Double result;
         if (correctedNonMaxedScore == null) {
             try {
-                return uncorrectedScore.call();
+                int trackedRank = trackedRankProvider.call();
+                result = scoringScheme.getScoreForRank(raceColumn, competitor, trackedRank,
+                        getNumberOfCompetitorsInRace(raceColumn, competitor, numberOfCompetitorsInLeaderboard));
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
         } else {
-            return correctedNonMaxedScore;
+            result = correctedNonMaxedScore;
         }
-    }
-
-    private int getMaxPoints(TrackedRace trackedRace, int numberOfCompetitorsInLeaderboard) {
-        return trackedRace == null ? numberOfCompetitorsInLeaderboard+1 : Util.size(trackedRace.getRace().getCompetitors())+1;
+        return result;
     }
 
     @Override

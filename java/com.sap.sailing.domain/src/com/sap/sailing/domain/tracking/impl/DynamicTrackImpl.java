@@ -1,5 +1,8 @@
 package com.sap.sailing.domain.tracking.impl;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.GPSFix;
@@ -8,6 +11,7 @@ import com.sap.sailing.domain.tracking.GPSTrackListener;
 public class DynamicTrackImpl<ItemType, FixType extends GPSFix> extends
         GPSFixTrackImpl<ItemType, FixType> implements DynamicGPSFixTrack<ItemType, FixType> {
     private static final long serialVersionUID = 917778209274148097L;
+    private static final Logger logger = Logger.getLogger(DynamicTrackImpl.class.getName());
 
     public DynamicTrackImpl(ItemType trackedItem, long millisecondsOverWhichToAverage) {
         super(trackedItem, millisecondsOverWhichToAverage);
@@ -26,11 +30,23 @@ public class DynamicTrackImpl<ItemType, FixType extends GPSFix> extends
         } finally {
             unlockAfterWrite();
         }
-        Iterable<GPSTrackListener<ItemType, FixType>> listeners = getListeners();
-        synchronized (listeners) {
-            for (GPSTrackListener<ItemType, FixType> listener : listeners) {
-                listener.gpsFixReceived(gpsFix, getTrackedItem());
+        if (logger.isLoggable(Level.FINEST)) {
+            FixType last;
+            lockForRead();
+            try {
+                logger.finest("GPS fix "+gpsFix+" for "+getTrackedItem()+", isValid="+isValid(getInternalRawFixes(), gpsFix)+
+                    ", time/distance/speed from last: "+
+                    ((last=getInternalRawFixes().lower(gpsFix))==null
+                    ? "null"
+                    : (gpsFix.getTimePoint().asMillis()-last.getTimePoint().asMillis()+"ms/"+
+                      gpsFix.getPosition().getDistance(last.getPosition())) + "/"+
+                      gpsFix.getPosition().getDistance(last.getPosition()).inTime(gpsFix.getTimePoint().asMillis()-last.getTimePoint().asMillis())));
+            } finally {
+                unlockAfterRead();
             }
+        }
+        for (GPSTrackListener<ItemType, FixType> listener : getListeners()) {
+            listener.gpsFixReceived(gpsFix, getTrackedItem());
         }
     }
 
@@ -38,11 +54,8 @@ public class DynamicTrackImpl<ItemType, FixType extends GPSFix> extends
     public void setMillisecondsOverWhichToAverage(long millisecondsOverWhichToAverage) {
         long oldMillis = getMillisecondsOverWhichToAverage();
         super.setMillisecondsOverWhichToAverage(millisecondsOverWhichToAverage);
-        Iterable<GPSTrackListener<ItemType, FixType>> listeners = getListeners();
-        synchronized (listeners) {
-            for (GPSTrackListener<ItemType, FixType> listener : listeners) {
-                listener.speedAveragingChanged(oldMillis, millisecondsOverWhichToAverage);
-            }
+        for (GPSTrackListener<ItemType, FixType> listener : getListeners()) {
+            listener.speedAveragingChanged(oldMillis, millisecondsOverWhichToAverage);
         }
     }
     

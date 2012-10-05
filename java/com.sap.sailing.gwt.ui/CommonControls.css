@@ -254,6 +254,10 @@ body ::-webkit-scrollbar-track {
     background: none repeat scroll 0 0 #efaa00;
 }
 
+.dateBoxPopup {
+	z-Index: 2000;
+}
+
 .timeLinePanel {
 	color: #fff;
 	width: 100%;
@@ -401,7 +405,7 @@ body ::-webkit-scrollbar-track {
 
 .gwt-DialogBox .Caption { 
     font-size: 14px;
-    padding: 11px 10px;
+    padding: 14px 10px;
     background: url(images/dialogBox-bg.png) 0 0 repeat-x;
     -webkit-border-top-left-radius: 5px;
 	-webkit-border-top-right-radius: 5px;
@@ -519,6 +523,50 @@ body ::-webkit-scrollbar-track {
 	line-height: 1.4;
 }
 
+/* Dialogs */
+.SettingsDialogComponent {
+    padding: 0 0 15px 0;	
+}
+
+.SettingsDialogComponent .dialogInnerHeadline {
+    background: url(images/settingsDialog_bg.png) repeat-x 0 0 #E5E5E5;
+    border: 1px solid #CCCCCC;
+    font-family: UbuntuMedium,Arial,Verdana,sans-serif;
+    height: 21px;
+    padding: 2px 0 0 7px;
+    border-radius: 3px; 
+    -moz-border-radius: 3px; 
+    -webkit-border-radius: 3px;
+    margin: 0 0 10px 0;
+}
+
+.SettingsDialogComponent .dialogInnerContent {
+	padding: 0 9px 0 5px;
+}
+
+.timingSettings .dialogInnerContent {
+    padding: 0 9px 0 9px;
+}
+
+.SettingsDialogComponent .gwt-CheckBox {
+	padding: 0 10px 0 0;
+}
+
+.timingSettings .gwt-Label {
+	float: left;
+	padding: 0 10px 0 0;
+}
+
+.dialogInnerHeadlineOther {
+	font-family: UbuntuMedium, Arial, Verdana, sans-serif;
+	color: #e84a1a;
+	padding-left: 9px;
+}
+
+.helpPanel {
+	margin-top: 15px;
+}
+
 .minMaxBackgroundBar {
 	left: 0px;
 	background-image: url(images/greyBar.png);
@@ -526,10 +574,10 @@ body ::-webkit-scrollbar-track {
 	background-repeat: no-repeat;
 }
 
-.formButton {
+.inlineButton {
 	height: 20px;
     padding: 0px 10px 3px;
     float: left;
-    background: #7c7b7c url(images/alert-overlay.png) repeat-x;
+    background: #de8a2e url(images/alert-overlay.png) repeat-x;
     font-family: UbuntuRegular, Arial, Verdana, sans-serif;
 }
