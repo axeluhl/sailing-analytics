@@ -7,6 +7,8 @@ import com.sap.sailing.domain.common.Position;
 
 public interface SimulationParameters {
 	
+        char getMode();
+    
 	List<Position> getCourse();
 	
 	PolarDiagram getBoatPolarDiagram();

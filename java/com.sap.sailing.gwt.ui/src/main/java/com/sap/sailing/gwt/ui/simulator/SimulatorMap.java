@@ -32,6 +32,7 @@ import com.sap.sailing.gwt.ui.shared.panels.SimpleBusyIndicator;
 import com.sap.sailing.gwt.ui.shared.windpattern.WindPatternDisplay;
 import com.sap.sailing.gwt.ui.simulator.util.ColorPalette;
 import com.sap.sailing.gwt.ui.simulator.util.ColorPaletteGenerator;
+import com.sap.sailing.simulator.util.SailingSimulatorUtil;
 
 public class SimulatorMap extends AbsolutePanel implements RequiresDataInitialization, TimeListenerWithStoppingCriteria {
 
@@ -95,6 +96,14 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
             // Arrays.sort(paths, sorter);
             long startTime = paths[0].getMatrix().get(0).timepoint;
             long maxDurationTime = 0;
+            
+            if (mode == SailingSimulatorUtil.measured) {
+                PositionDTO pos = result.raceCourse.coursePositions.waypointPositions.get(0);
+                raceCourseCanvasOverlay.startPoint = LatLng.newInstance(pos.latDeg, pos.lngDeg);
+                pos = result.raceCourse.coursePositions.waypointPositions.get(1);
+                raceCourseCanvasOverlay.endPoint = LatLng.newInstance(pos.latDeg, pos.lngDeg);
+            }
+            raceCourseCanvasOverlay.redraw(true);
             
             removeOverlays();
             pathCanvasOverlays.clear();
@@ -328,7 +337,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         windParams.setyRes(yRes);
         busyIndicator.setBusy(true);
         // simulatorSvc.getPaths(windParams, windPatternDisplay, new PathManager(windPatternDisplay, summaryView));
-        simulatorSvc.getSimulatorResults(windParams, windPatternDisplay, !summaryView, new ResultManager(summaryView));
+        simulatorSvc.getSimulatorResults(mode, windParams, windPatternDisplay, !summaryView, new ResultManager(summaryView));
 
     }
 

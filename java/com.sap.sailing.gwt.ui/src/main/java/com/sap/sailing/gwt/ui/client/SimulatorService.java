@@ -26,7 +26,7 @@ public interface SimulatorService extends RemoteService {
 
     //public PathDTO[] getPaths(WindFieldGenParamsDTO params, WindPatternDisplay pattern) throws WindPatternNotFoundException;
     
-    public SimulatorResultsDTO getSimulatorResults(WindFieldGenParamsDTO params, WindPatternDisplay pattern, 
+    public SimulatorResultsDTO getSimulatorResults(char mode, WindFieldGenParamsDTO params, WindPatternDisplay pattern, 
             boolean withWindField) throws WindPatternNotFoundException;
 
     public List<WindPatternDTO> getWindPatterns();

@@ -39,6 +39,7 @@ Export-Package: com.sap.sailing.gwt.ui.adminconsole;x-friends:="com.sap.sailing.
    com.sap.sailing.gwt.ui.shared,
    com.google.gwt.maps.client.geom,
    com.sap.sailing.domain.common,
+   com.sap.sailing.simulator.util,
    com.sap.sailing.gwt.ui.simulator.util,
    com.google.gwt.maps.client.overlay,
    com.google.gwt.user.client.ui"

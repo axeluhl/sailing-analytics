@@ -42,6 +42,7 @@ import com.sap.sailing.gwt.ui.shared.controls.slider.SliderBar;
 import com.sap.sailing.gwt.ui.shared.panels.SimpleBusyIndicator;
 import com.sap.sailing.gwt.ui.shared.windpattern.WindPatternDisplay;
 import com.sap.sailing.gwt.ui.shared.windpattern.WindPatternSetting;
+import com.sap.sailing.simulator.util.SailingSimulatorUtil;
 
 public class SimulatorMainPanel extends SplitLayoutPanel {
 
@@ -430,7 +431,7 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
         initDisplayOptions(mapOptions);
 
         simulatorMap = new SimulatorMap(simulatorSvc, stringMessages, errorReporter, xRes, yRes, timer, windParams,
-                busyIndicator);
+                busyIndicator,SailingSimulatorUtil.freestyle);
 
         // FlowPanel mapPanel = new FlowPanel();
         // mapPanel.setTitle("Map");

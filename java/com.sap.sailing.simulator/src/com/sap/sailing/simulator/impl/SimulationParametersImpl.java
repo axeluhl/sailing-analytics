@@ -16,11 +16,13 @@ public class SimulationParametersImpl implements SimulationParameters {
 	PolarDiagram polarDiagram;
 	WindFieldGenerator windField;
 	Map<String, Double> settings;
+	char mode;
 	
-	public SimulationParametersImpl(List<Position> crs, PolarDiagram pd, WindFieldGenerator wf) {
+	public SimulationParametersImpl(List<Position> crs, PolarDiagram pd, WindFieldGenerator wf, char mode) {
 		course = crs;
 		polarDiagram = pd;
 		windField = wf;
+		this.mode = mode;
 		
 		settings = new HashMap<String, Double>();
 		
@@ -28,6 +30,11 @@ public class SimulationParametersImpl implements SimulationParameters {
 		settings.put("Heuristic.timeResolution[long]", 30000.0);
 		settings.put("Djikstra.gridv[int]", 10.0);
 		settings.put("Djikstra.gridh[int]", 100.0);
+	}
+	
+	@Override
+	public char getMode() {
+	    return mode;
 	}
 	
 	@Override

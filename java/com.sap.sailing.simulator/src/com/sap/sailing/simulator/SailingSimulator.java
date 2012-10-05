@@ -4,11 +4,14 @@ import java.util.List;
 import java.util.Map;
 
 public interface SailingSimulator {
-	
-	void setSimulationParameters(SimulationParameters params);
-	SimulationParameters getSimulationParameters();
-	
-	Map<String, Path> getAllPaths();
-	Map<String, List<TimedPositionWithSpeed>> getAllPathsEvenTimed(long millisecondsStep);
 
+    void setSimulationParameters(SimulationParameters params);
+
+    SimulationParameters getSimulationParameters();
+
+    Map<String, Path> getAllPaths();
+
+    Map<String, List<TimedPositionWithSpeed>> getAllPathsEvenTimed(long millisecondsStep);
+
+    Path getRaceCourse();
 }

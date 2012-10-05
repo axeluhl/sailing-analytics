@@ -549,7 +549,7 @@ public class SimulatorMainPanel2 extends SplitLayoutPanel {
         initDisplayOptions(mapOptions);
 
         simulatorMap = new SimulatorMap(simulatorSvc, stringMessages, errorReporter, xRes, yRes, timer, timePanel,
-                windParams, busyIndicator);
+                windParams, busyIndicator, mode);
         simulatorMap.setSize("100%", "100%");
 
         this.rightPanel.add(this.simulatorMap);

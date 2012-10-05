@@ -21,11 +21,12 @@ import com.sap.sailing.simulator.impl.RectangularBoundary;
 import com.sap.sailing.simulator.impl.SailingSimulatorImpl;
 import com.sap.sailing.simulator.impl.SimulationParametersImpl;
 import com.sap.sailing.simulator.impl.WindFieldGeneratorBlastImpl;
+import com.sap.sailing.simulator.util.SailingSimulatorUtil;
 
 public class SimulatorTest {
     
     @Test
-    public void testSailingSImulatorALL() {
+    public void testSailingSimulatorALL() {
     	Position start = new DegreePosition(48.401856, -140.001526);
         Position end = new DegreePosition(49.143987, -139.987783);
         //System.out.println(start.getDistance(end).getKilometers());
@@ -45,7 +46,7 @@ public class SimulatorTest {
         TimePoint startTime = new MillisecondsTimePoint(startDate.getTime());
         TimePoint timeStep = new MillisecondsTimePoint(30000);
         wf.generate(startTime, null, timeStep);
-        SimulationParameters param = new SimulationParametersImpl(course, pd, wf);
+        SimulationParameters param = new SimulationParametersImpl(course, pd, wf, SailingSimulatorUtil.freestyle);
         param.setProperty("Heuristic.targetTolerance[double]", 0.05);
         param.setProperty("Heuristic.timeResolution[long]", 30000.0);
         param.setProperty("Djikstra.gridv[int]", 10.0);
