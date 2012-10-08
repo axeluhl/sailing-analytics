@@ -6,9 +6,9 @@ import java.util.Set;
 import com.sap.sailing.domain.common.ManeuverType;
 
 public class RaceMapSettings {
-    
+
     private boolean showDouglasPeuckerPoints = false;
-    
+
     private final Set<ManeuverType> maneuverTypesToShow;
 
     private boolean showOnlySelectedCompetitors = false;
@@ -17,6 +17,8 @@ public class RaceMapSettings {
 
     private boolean showAllCompetitors = false;
 
+    private boolean showBuoyZones = true;
+
     private RaceMapZoomSettings zoomSettings;
 
     private RaceMapHelpLinesSettings helpLinesSettings;
@@ -24,16 +26,16 @@ public class RaceMapSettings {
     private long tailLengthInMilliseconds = 100000l;
 
     private int maxVisibleCompetitorsCount = 50;
-    
+
     private boolean showSelectedCompetitorsInfo = true;
-    
+
     public RaceMapSettings() {
         // empty default settings; don't show maneuvers by default
         maneuverTypesToShow = new HashSet<ManeuverType>();
         this.zoomSettings = new RaceMapZoomSettings();
         this.helpLinesSettings = new RaceMapHelpLinesSettings();
     }
-    
+
     /**
      * @return 0 if {@link #isShowTails()} returns <code>false</code>; {@link #getTailLengthInMilliseconds()} otherwise
      */
@@ -68,7 +70,7 @@ public class RaceMapSettings {
             maneuverTypesToShow.remove(maneuverType);
         }
     }
-    
+
     public boolean isShowManeuverType(ManeuverType maneuverType) {
         return maneuverTypesToShow.contains(maneuverType);
     }
@@ -84,7 +86,7 @@ public class RaceMapSettings {
     public RaceMapZoomSettings getZoomSettings() {
         return zoomSettings;
     }
-    
+
     public void setZoomSettings(RaceMapZoomSettings zoomSettings) {
         this.zoomSettings = zoomSettings;
     }
@@ -121,12 +123,19 @@ public class RaceMapSettings {
         this.showAllCompetitors = showAllCompetitors;
     }
 
-	public boolean isShowSelectedCompetitorsInfo() {
-		return showSelectedCompetitorsInfo;
-	}
+    public boolean isShowSelectedCompetitorsInfo() {
+        return showSelectedCompetitorsInfo;
+    }
 
-	public void setShowSelectedCompetitorsInfo(boolean showSelectedCompetitorsInfo) {
-		this.showSelectedCompetitorsInfo = showSelectedCompetitorsInfo;
-	}
+    public void setShowSelectedCompetitorsInfo(boolean showSelectedCompetitorsInfo) {
+        this.showSelectedCompetitorsInfo = showSelectedCompetitorsInfo;
+    }
 
+    public boolean isShowBuoyZones() {
+        return showBuoyZones;
+    }
+
+    public void setShowBuoyZones(boolean showBuoyZones) {
+        this.showBuoyZones = showBuoyZones;
+    }
 }

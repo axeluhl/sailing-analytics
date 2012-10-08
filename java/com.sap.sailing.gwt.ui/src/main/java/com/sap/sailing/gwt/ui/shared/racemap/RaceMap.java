@@ -157,6 +157,11 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     private final Map<CompetitorDTO, CompetitorInfoOverlay> competitorInfoOverlays;
 
     /**
+     * html5 canvases used for buoy zones display on the map
+     */
+    private final Map<BuoyDTO, BuoyOverlay> buoyOverlays;
+
+    /**
      * Map overlays with html5 canvas used to display wind sensors
      */
     private final Map<WindSource, WindSensorOverlay> windSensorOverlays;
@@ -252,6 +257,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         buoyDTOs = new HashMap<String, BuoyDTO>();
         boatCanvasOverlays = new HashMap<CompetitorDTO, BoatCanvasOverlay>();
         competitorInfoOverlays = new HashMap<CompetitorDTO, CompetitorInfoOverlay>();
+        buoyOverlays = new HashMap<BuoyDTO, BuoyOverlay>();
         windSensorOverlays = new HashMap<WindSource, WindSensorOverlay>();
         fixes = new HashMap<CompetitorDTO, List<GPSFixDTO>>();
         this.competitorSelection = competitorSelection;
@@ -324,8 +330,6 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             }
         });
     }
-
-    
     
     public void redraw() {
         timeChanged(timer.getTime());
@@ -383,6 +387,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                                     
                                     // Do mark specific actions
                                     showMarksOnMap(raceMapDataDTO.coursePositions);
+                                    showBuoysOnMap(raceMapDataDTO.coursePositions);
                                     showStartAndFinishLines(raceMapDataDTO.coursePositions);
                                     showAdvantageLine(competitorsToShow, date);
                                         
@@ -600,41 +605,76 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         }
     }
 
+    protected void showBuoysOnMap(CourseDTO courseDTO) {
+        if (map != null) {
+            if (settings.isShowBuoyZones()) {
+                Set<BuoyDTO> toRemoveBuoyOverlays = new HashSet<BuoyDTO>(buoyOverlays.keySet());
+                for (BuoyDTO buoyDTO : courseDTO.buoys) {
+                    if(buoyDTO.position != null) {
+                        BuoyOverlay buoyOverlay = buoyOverlays.get(buoyDTO);
+                        if (buoyOverlay == null) {
+                            buoyOverlay = createBuoyOverlay(buoyDTO);
+                            buoyOverlays.put(buoyDTO, buoyOverlay);
+                            map.addOverlay(buoyOverlay);
+                            buoyOverlay.redraw(true);
+                        } else {
+                            buoyOverlay.setBuoy(buoyDTO);
+                            buoyOverlay.redraw(true);
+                        }
+                        toRemoveBuoyOverlays.remove(buoyDTO);
+                    }
+                }
+                for (BuoyDTO toRemoveBuoyDTO : toRemoveBuoyOverlays) {
+                    BuoyOverlay buoyOverlay = buoyOverlays.get(toRemoveBuoyDTO);
+                    map.removeOverlay(buoyOverlay);
+                    buoyOverlays.remove(toRemoveBuoyDTO);
+                }
+            } else {
+                // remove all overlays
+                for (BuoyOverlay buoyOverlay : buoyOverlays.values()) {
+                    map.removeOverlay(buoyOverlay);
+                }
+                buoyOverlays.clear();
+            }
+        }        
+    }
+
     protected void showCompetitorInfoOnMap(final Date date, final Iterable<CompetitorDTO> competitorsToShow) {
         if (map != null) {
-        	if(settings.isShowSelectedCompetitorsInfo()) {
-                Set<CompetitorDTO> toRemoveCompetorInfoOverlays = new HashSet<CompetitorDTO>(competitorInfoOverlays.keySet());
+            if (settings.isShowSelectedCompetitorsInfo()) {
+                Set<CompetitorDTO> toRemoveCompetitorInfoOverlays = new HashSet<CompetitorDTO>(
+                        competitorInfoOverlays.keySet());
                 for (CompetitorDTO competitorDTO : competitorsToShow) {
                     if (fixes.containsKey(competitorDTO)) {
                         GPSFixDTO lastBoatFix = getBoatFix(competitorDTO, date);
                         if (lastBoatFix != null) {
-                        	CompetitorInfoOverlay competitorInfoOverlay = competitorInfoOverlays.get(competitorDTO);
+                            CompetitorInfoOverlay competitorInfoOverlay = competitorInfoOverlays.get(competitorDTO);
                             if (competitorInfoOverlay == null) {
-                            	competitorInfoOverlay = createCompetitorInfoOverlay(competitorDTO);
-                            	competitorInfoOverlays.put(competitorDTO, competitorInfoOverlay);
+                                competitorInfoOverlay = createCompetitorInfoOverlay(competitorDTO);
+                                competitorInfoOverlays.put(competitorDTO, competitorInfoOverlay);
                                 map.addOverlay(competitorInfoOverlay);
                                 competitorInfoOverlay.setBoatFix(lastBoatFix);
-                            	competitorInfoOverlay.redraw(true);
+                                competitorInfoOverlay.redraw(true);
                             } else {
                                 competitorInfoOverlay.setBoatFix(lastBoatFix);
-                            	competitorInfoOverlay.redraw(true);
+                                competitorInfoOverlay.redraw(true);
                             }
-                        	toRemoveCompetorInfoOverlays.remove(competitorDTO);
+                            toRemoveCompetitorInfoOverlays.remove(competitorDTO);
                         }
                     }
                 }
-                for (CompetitorDTO toRemoveCompetorDTO : toRemoveCompetorInfoOverlays) {
-                	CompetitorInfoOverlay competitorInfoOverlay = competitorInfoOverlays.get(toRemoveCompetorDTO);
+                for (CompetitorDTO toRemoveCompetitorDTO : toRemoveCompetitorInfoOverlays) {
+                    CompetitorInfoOverlay competitorInfoOverlay = competitorInfoOverlays.get(toRemoveCompetitorDTO);
                     map.removeOverlay(competitorInfoOverlay);
-                    competitorInfoOverlays.remove(toRemoveCompetorDTO);
+                    competitorInfoOverlays.remove(toRemoveCompetitorDTO);
                 }
-        	} else {
-        		// remove all overlays
-        		for(CompetitorInfoOverlay competitorInfoOverlay: competitorInfoOverlays.values()) {
+            } else {
+                // remove all overlays
+                for (CompetitorInfoOverlay competitorInfoOverlay : competitorInfoOverlays.values()) {
                     map.removeOverlay(competitorInfoOverlay);
-        		}
-        		competitorInfoOverlays.clear();
-        	}
+                }
+                competitorInfoOverlays.clear();
+            }
         }
     }
     
@@ -971,6 +1011,10 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
 
     protected CompetitorInfoOverlay createCompetitorInfoOverlay(final CompetitorDTO competitorDTO) {
         return new CompetitorInfoOverlay(competitorDTO, raceMapImageManager);
+    }
+
+    protected BuoyOverlay createBuoyOverlay(final BuoyDTO buoyDTO) {
+        return new BuoyOverlay(buoyDTO);
     }
     
     protected BoatCanvasOverlay createBoatCanvas(final CompetitorDTO competitorDTO, boolean highlighted) {
