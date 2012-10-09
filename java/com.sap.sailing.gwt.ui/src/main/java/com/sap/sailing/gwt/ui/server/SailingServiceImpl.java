@@ -154,6 +154,8 @@ import com.sap.sailing.gwt.ui.shared.RaceBuoysDTO;
 import com.sap.sailing.gwt.ui.shared.RaceColumnDTO;
 import com.sap.sailing.gwt.ui.shared.RaceColumnInSeriesDTO;
 import com.sap.sailing.gwt.ui.shared.RaceDTO;
+import com.sap.sailing.gwt.ui.shared.RaceEventDTO;
+import com.sap.sailing.gwt.ui.shared.RaceEventLogDTO;
 import com.sap.sailing.gwt.ui.shared.RaceMapDataDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.RaceWithCompetitorsDTO;
@@ -226,7 +228,8 @@ import com.sap.sailing.server.replication.ReplicationService;
  * The server side implementation of the RPC service.
  */
 public class SailingServiceImpl extends RemoteServiceServlet implements SailingService, RaceFetcher, RegattaFetcher {
-    private static final Logger logger = Logger.getLogger(SailingServiceImpl.class.getName());
+
+	private static final Logger logger = Logger.getLogger(SailingServiceImpl.class.getName());
     
     private static final long serialVersionUID = 9031688830194537489L;
 
@@ -2761,4 +2764,12 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         }
     }
 
+    @Override
+	public RaceEventLogDTO getRaceEventLog() {
+    	RaceEventLogDTO result = new RaceEventLogDTO("My race");
+    	for(int i = 0; i < 10; i++) {
+    		result.raceEvents.add(new RaceEventDTO("Event " + i));
+    	}
+		return result;
+	}
 }
