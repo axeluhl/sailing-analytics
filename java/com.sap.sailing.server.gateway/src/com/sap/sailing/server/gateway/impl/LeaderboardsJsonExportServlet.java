@@ -1,4 +1,4 @@
-package com.sap.sailing.server.impl;
+package com.sap.sailing.server.gateway.impl;
 
 import java.io.IOException;
 import java.util.Map;
@@ -10,7 +10,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.json.simple.JSONArray;
 
 import com.sap.sailing.domain.leaderboard.Leaderboard;
-import com.sap.sailing.server.SailingServerHttpServlet;
+import com.sap.sailing.server.gateway.SailingServerHttpServlet;
 
 public class LeaderboardsJsonExportServlet extends SailingServerHttpServlet {
     private static final long serialVersionUID = -2193421590275280102L;

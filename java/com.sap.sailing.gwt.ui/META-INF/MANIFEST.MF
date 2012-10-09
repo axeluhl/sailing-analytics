@@ -7,6 +7,7 @@ Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Require-Bundle: com.sap.sailing.domain,
  com.sap.sailing.server,
+ com.sap.sailing.server.gateway,
  com.sap.sailing.domain.tractracadapter,
  com.sap.sailing.mongodb,
  com.mongodb.driver;bundle-version="2.6.2",

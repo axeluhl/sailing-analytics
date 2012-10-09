@@ -1,4 +1,4 @@
-package com.sap.sailing.server;
+package com.sap.sailing.server.gateway;
 
 import java.io.IOException;
 import java.util.Date;
