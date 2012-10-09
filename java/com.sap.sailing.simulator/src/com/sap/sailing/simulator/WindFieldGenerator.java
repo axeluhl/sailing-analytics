@@ -7,6 +7,10 @@ import com.sap.sailing.domain.common.TimePoint;
 
 public interface WindFieldGenerator extends WindField {
     
+    public WindControlParameters getWindParameters();
+
+    public void setBoundary(Boundary boundary);
+
     public void setPositionGrid(Position[][] positions);
     
     public void generate(TimePoint start, TimePoint end, TimePoint step);
@@ -32,4 +36,10 @@ public interface WindFieldGenerator extends WindField {
      * @return
      */
     public TimePoint getEndTime();
+    
+    public int[] getGridResolution();
+    public void setGridResolution(int[] gridRes);
+    public Position[] getGridAreaGps();
+    public void setGridAreaGps(Position[] gridAreaGps);
+
 }

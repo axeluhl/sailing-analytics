@@ -238,7 +238,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
 
     }
 
-    private Pair<PathDTO[],RaceMapDataDTO> getSimulatedPathsEvenTimed(List<Position> course, WindFieldGenerator wf, char mode) {
+    private Pair<Pair<PathDTO[],RaceMapDataDTO>,WindFieldDTO> getSimulatedPathsEvenTimed(List<Position> course, WindFieldGenerator wf, char mode) {
         logger.info("Retrieving simulated paths");
 
         PolarDiagram pd = new PolarDiagram49STG();
@@ -284,7 +284,9 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
             rcDTO = null;
         }
         
-        return Pair.create(pathDTO,rcDTO);
+        WindFieldDTO wfDTO = null;
+        
+        return Pair.create(Pair.create(pathDTO,rcDTO),wfDTO);
     }
 
     public List<WindPatternDTO> getWindPatterns() {
@@ -348,33 +350,42 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
 
     @Override
     public SimulatorResultsDTO getSimulatorResults(char mode, WindFieldGenParamsDTO params, WindPatternDisplay pattern, boolean withWindField) throws WindPatternNotFoundException {
-        Position nw = new DegreePosition(params.getNorthWest().latDeg, params.getNorthWest().lngDeg);
-        Position se = new DegreePosition(params.getSouthEast().latDeg, params.getSouthEast().lngDeg);
-        List<Position> course = new ArrayList<Position>();
-        course.add(nw);
-        course.add(se);
-
-        RectangularBoundary bd = new RectangularBoundary(nw, se, 0.1);
-
+        
+        WindFieldGenerator wf = null;
+        List<Position> course = null;
+        TimePoint startTime = new MillisecondsTimePoint(params.getStartTime().getTime());
+        TimePoint timeStep = new MillisecondsTimePoint(params.getTimeStep().getTime());
         retreiveWindControlParameters(pattern);
-        controlParameters.baseWindBearing += bd.getSouth().getDegrees();
-
-        WindFieldGenerator wf = wfGenFactory.createWindFieldGenerator(pattern.getWindPattern().name(), bd, controlParameters);
+                
+        wf = wfGenFactory.createWindFieldGenerator(pattern.getWindPattern().name(), null, controlParameters);
 
         if (wf == null) {
             throw new WindPatternNotFoundException("Please select a valid wind pattern.");
         }
-        Position[][] positionGrid = bd.extractGrid(params.getxRes(), params.getyRes());
-        wf.setPositionGrid(positionGrid);
 
-        TimePoint startTime = new MillisecondsTimePoint(params.getStartTime().getTime());
-        TimePoint timeStep = new MillisecondsTimePoint(params.getTimeStep().getTime());
+        if (mode != SailingSimulatorUtil.measured) {
+            Position nw = new DegreePosition(params.getNorthWest().latDeg, params.getNorthWest().lngDeg);
+            Position se = new DegreePosition(params.getSouthEast().latDeg, params.getSouthEast().lngDeg);
+            course = new ArrayList<Position>();
+            course.add(nw);
+            course.add(se);
+            Position[] gridAreaGps = new Position[2];
+            gridAreaGps = course.toArray(gridAreaGps);
+            wf.setGridAreaGps(gridAreaGps);
+        }
+
+        int[] gridRes = new int[2];
+        gridRes[0] = params.getxRes();
+        gridRes[1] = params.getyRes();
+        wf.setGridResolution(gridRes);
+        
         wf.generate(startTime, null, timeStep);
-
         Long longestPathTime = 0L;
-        Pair<PathDTO[],RaceMapDataDTO> pairDTO = getSimulatedPathsEvenTimed(course, wf, mode);
-        PathDTO[] pathDTO = pairDTO.left;
-        RaceMapDataDTO rcDTO = pairDTO.right;
+        
+        Pair<Pair<PathDTO[],RaceMapDataDTO>,WindFieldDTO> pairDTO = getSimulatedPathsEvenTimed(course, wf, mode);
+        
+        PathDTO[] pathDTO = pairDTO.left.left;
+        RaceMapDataDTO rcDTO = pairDTO.left.right;
         for (int i = 0; i < pathDTO.length; ++i) {
             List<WindDTO> path = pathDTO[i].getMatrix();
             int pathLength = path.size();
@@ -383,11 +394,14 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         }
 
         TimePoint endTime = new MillisecondsTimePoint(startTime.asMillis() + longestPathTime);
-        WindFieldDTO windFieldDTO = createWindFieldDTO(wf, startTime, endTime, timeStep);
+        
+        WindFieldDTO windFieldDTO = null;
+        if (pattern != null) {
+            windFieldDTO = createWindFieldDTO(wf, startTime, endTime, timeStep);
+        }
         SimulatorResultsDTO simulatorResults = new SimulatorResultsDTO(rcDTO, pathDTO, windFieldDTO);
 
         return simulatorResults;
-
     }
 
     private WindFieldDTO createWindFieldDTO(WindFieldGenerator wf, TimePoint startTime, TimePoint endTime, TimePoint timeStep) {

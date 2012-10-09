@@ -326,15 +326,17 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
             errorReporter.reportError("Please select a valid wind pattern.");
             return;
         }
-        PositionDTO startPointDTO = new PositionDTO(raceCourseCanvasOverlay.startPoint.getLatitude(),
-                raceCourseCanvasOverlay.startPoint.getLongitude());
-        PositionDTO endPointDTO = new PositionDTO(raceCourseCanvasOverlay.endPoint.getLatitude(),
-                raceCourseCanvasOverlay.endPoint.getLongitude());
-
-        windParams.setNorthWest(startPointDTO);
-        windParams.setSouthEast(endPointDTO);
+        if (mode != SailingSimulatorUtil.measured) {
+            PositionDTO startPointDTO = new PositionDTO(raceCourseCanvasOverlay.startPoint.getLatitude(),
+                    raceCourseCanvasOverlay.startPoint.getLongitude());
+            PositionDTO endPointDTO = new PositionDTO(raceCourseCanvasOverlay.endPoint.getLatitude(),
+                    raceCourseCanvasOverlay.endPoint.getLongitude());
+            windParams.setNorthWest(startPointDTO);
+            windParams.setSouthEast(endPointDTO);
+        }
         windParams.setxRes(xRes);
         windParams.setyRes(yRes);
+
         busyIndicator.setBusy(true);
         // simulatorSvc.getPaths(windParams, windPatternDisplay, new PathManager(windPatternDisplay, summaryView));
         simulatorSvc.getSimulatorResults(mode, windParams, windPatternDisplay, !summaryView, new ResultManager(summaryView));
@@ -398,7 +400,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         if (!overlaysInitialized) {
             initializeOverlays();
         }
-        if (isCourseSet()) {
+        if ((isCourseSet())||(mode == SailingSimulatorUtil.measured)) {
             mapw.setDoubleClickZoom(true);
             raceCourseCanvasOverlay.setSelected(false);
             switch (name) {

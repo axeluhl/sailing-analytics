@@ -31,6 +31,10 @@ public abstract class WindFieldGeneratorImpl implements WindFieldGenerator {
 
     protected TimePoint startTime;
     protected TimePoint endTime;
+    
+    protected int[] gridRes;
+    protected Position[] gridAreaGps;
+    
     /**
      * TimePoint which constitutes one unit of time
      */
@@ -55,6 +59,16 @@ public abstract class WindFieldGeneratorImpl implements WindFieldGenerator {
         this.indexPositionMap = new HashMap<Pair<Integer, Integer>, Position>();
     }
 
+    @Override
+    public WindControlParameters getWindParameters() {
+        return windParameters;
+    }
+    
+    @Override
+    public void setBoundary(Boundary boundary) {
+        this.boundary = boundary;
+    }
+    
     @Override
     public Wind getWind(TimedPosition coordinates) {
         KnotSpeedImpl knotSpeedImpl = new KnotSpeedImpl(windParameters.baseWindSpeed);
@@ -171,5 +185,26 @@ public abstract class WindFieldGeneratorImpl implements WindFieldGenerator {
     public TimePoint getEndTime() {
         return this.endTime;
     }
+    
+    // params.getxRes(), params.getyRes()
+    @Override
+    public int[] getGridResolution() {
+        return this.gridRes;
+    }
+
+    @Override
+    public void setGridResolution(int[] gridRes) {
+        this.gridRes = gridRes;
+    } 
+
+    @Override
+    public Position[] getGridAreaGps() {
+        return this.gridAreaGps;
+    }
+
+    @Override
+    public void setGridAreaGps(Position[] gridAreaGps) {
+        this.gridAreaGps = gridAreaGps;
+    } 
 
 }

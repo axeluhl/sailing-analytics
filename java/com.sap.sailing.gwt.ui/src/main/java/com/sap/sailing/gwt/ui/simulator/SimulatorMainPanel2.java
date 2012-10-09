@@ -47,6 +47,7 @@ import com.sap.sailing.gwt.ui.shared.controls.slider.SliderBar;
 import com.sap.sailing.gwt.ui.shared.panels.SimpleBusyIndicator;
 import com.sap.sailing.gwt.ui.shared.windpattern.WindPatternDisplay;
 import com.sap.sailing.gwt.ui.shared.windpattern.WindPatternSetting;
+import com.sap.sailing.simulator.util.SailingSimulatorUtil;
 
 public class SimulatorMainPanel2 extends SplitLayoutPanel {
 
@@ -69,6 +70,7 @@ public class SimulatorMainPanel2 extends SplitLayoutPanel {
     private Panel currentWPPanel;
 
     private ListBox patternSelector;
+    private PatternSelectorHandler patternSelectorHandler;
     private Map<String, WindPatternDTO> patternNameDTOMap;
     private ListBox boatSelector;
     private ListBox directionSelector;
@@ -206,7 +208,8 @@ public class SimulatorMainPanel2 extends SplitLayoutPanel {
         leftPanel = new FlowPanel();
         rightPanel = new FlowPanel();
         patternSelector = new ListBox();
-        patternSelector.addChangeHandler(new PatternSelectorHandler());
+        patternSelectorHandler = new PatternSelectorHandler();
+        patternSelector.addChangeHandler(patternSelectorHandler);
         patternSelector.getElement().getStyle().setProperty("width", "215px");
         patternNameDTOMap = new HashMap<String, WindPatternDTO>();
         patternDisplayMap = new HashMap<String, WindPatternDisplay>();
@@ -314,13 +317,18 @@ public class SimulatorMainPanel2 extends SplitLayoutPanel {
             @Override
             public void onSuccess(List<WindPatternDTO> patterns) {
                 for (WindPatternDTO p : patterns) {
-                    patternSelector.addItem(p.getDisplayName());
-                    patternNameDTOMap.put(p.getDisplayName(), p);
+                    if ((mode != SailingSimulatorUtil.freestyle)||(!p.name.equals("MEASURED"))) {
+                        patternSelector.addItem(p.getDisplayName());
+                        patternNameDTOMap.put(p.getDisplayName(), p);
+                    }
+                }
+                if (mode == SailingSimulatorUtil.measured) {
+                    patternSelector.setItemSelected(patternSelector.getItemCount()-1, true);
+                    patternSelectorHandler.onChange(null);
                 }
             }
 
         });
-        // patternSelector.setItemSelected(0, true);
         hp.add(patternSelector);
         windPanel.add(hp);
         hp.getElement().setClassName("choosePattern");
@@ -542,7 +550,9 @@ public class SimulatorMainPanel2 extends SplitLayoutPanel {
 
         initCourseInputButton();
 
-        mapOptions.add(courseInputButton);
+        if (mode != SailingSimulatorUtil.measured) {
+            mapOptions.add(courseInputButton);
+        }
         mapOptions.add(busyIndicator);
         rightPanel.add(mapOptions);
 
@@ -586,8 +596,12 @@ public class SimulatorMainPanel2 extends SplitLayoutPanel {
         } else if (replayButton.getValue()) {
             timePanel.setActive(true);
             simulatorMap.refreshView(SimulatorMap.ViewName.REPLAY, currentWPDisplay);
+        } else {
+            if (mode == SailingSimulatorUtil.measured) {
+                timePanel.setActive(false);
+                simulatorMap.refreshView(SimulatorMap.ViewName.SUMMARY, currentWPDisplay);
+            }
         }
-
     }
 
     private void initCourseInputButton() {

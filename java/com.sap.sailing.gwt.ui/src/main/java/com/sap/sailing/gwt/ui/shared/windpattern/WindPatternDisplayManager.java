@@ -11,7 +11,8 @@ public interface WindPatternDisplayManager {
         NONE ("Choose a wind pattern"),
         OSCILLATIONS ("Oscillations"),
         OSCILLATION_WITH_BLASTS ("Oscillation with Gusts"),
-        BLASTS ("Gusts");
+        BLASTS ("Gusts"),
+        MEASURED ("Measured");
         
         private String displayName;
         WindPattern(String displayName) {

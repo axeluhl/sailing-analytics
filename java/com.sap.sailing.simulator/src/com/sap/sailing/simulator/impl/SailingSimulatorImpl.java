@@ -6,11 +6,14 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import com.sap.sailing.domain.base.impl.MeterDistance;
+import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.simulator.Boundary;
 import com.sap.sailing.simulator.Path;
 import com.sap.sailing.simulator.PathGenerator;
 import com.sap.sailing.simulator.SailingSimulator;
 import com.sap.sailing.simulator.SimulationParameters;
 import com.sap.sailing.simulator.TimedPositionWithSpeed;
+import com.sap.sailing.simulator.WindFieldGenerator;
 import com.sap.sailing.simulator.util.SailingSimulatorUtil;
 
 public class SailingSimulatorImpl implements SailingSimulator {
@@ -37,6 +40,25 @@ public class SailingSimulatorImpl implements SailingSimulator {
     @Override
     public Map<String, Path> getAllPaths() {
 
+        //
+        // Initialize WindFields boundary
+        //
+        WindFieldGenerator wf = simulationParameters.getWindField();
+        int[] gridRes = wf.getGridResolution();
+        Position[] gridArea = wf.getGridAreaGps();
+        
+        if (gridArea != null) {
+            Boundary bd = new RectangularBoundary(gridArea[0],gridArea[1], 0.1);
+            wf.getWindParameters().baseWindBearing += bd.getSouth().getDegrees();
+            wf.setBoundary(bd);
+            Position[][] positionGrid = bd.extractGrid(gridRes[0],gridRes[1]);
+            wf.setPositionGrid(positionGrid);
+            wf.generate(wf.getStartTime(), wf.getEndTime(), wf.getTimeStep());
+        }
+        
+        //
+        // Start Simulation
+        //
         Map<String, Path> allPaths = new HashMap<String, Path>();
 
         if (simulationParameters.getMode() != SailingSimulatorUtil.measured) {
