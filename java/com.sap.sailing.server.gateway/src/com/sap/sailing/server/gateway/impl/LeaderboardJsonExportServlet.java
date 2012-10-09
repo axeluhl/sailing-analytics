@@ -1,4 +1,4 @@
-package com.sap.sailing.server.impl;
+package com.sap.sailing.server.gateway.impl;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -23,7 +23,7 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.server.SailingServerHttpServlet;
+import com.sap.sailing.server.gateway.SailingServerHttpServlet;
 
 public class LeaderboardJsonExportServlet extends SailingServerHttpServlet {
     private static final long serialVersionUID = -2460691283231361152L;

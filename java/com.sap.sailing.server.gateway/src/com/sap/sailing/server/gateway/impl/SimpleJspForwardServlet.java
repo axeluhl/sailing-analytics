@@ -1,4 +1,4 @@
-package com.sap.sailing.server.gateway;
+package com.sap.sailing.server.gateway.impl;
 
 import java.io.IOException;
 
@@ -9,7 +9,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.sap.sailing.server.RacingEventService;
-import com.sap.sailing.server.SailingServerHttpServlet;
+import com.sap.sailing.server.gateway.SailingServerHttpServlet;
 
 public class SimpleJspForwardServlet extends SailingServerHttpServlet {
     private static final long serialVersionUID = -1017961881555515288L;

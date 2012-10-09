@@ -1,4 +1,4 @@
-package com.sap.sailing.server.impl;
+package com.sap.sailing.server.gateway.impl;
 
 import java.io.IOException;
 import java.util.Iterator;
@@ -34,7 +34,7 @@ import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
-import com.sap.sailing.server.SailingServerHttpServlet;
+import com.sap.sailing.server.gateway.SailingServerHttpServlet;
 import com.sap.sailing.util.InvalidDateException;
 
 public class ModeratorApp extends SailingServerHttpServlet {

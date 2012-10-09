@@ -1,4 +1,4 @@
-package com.sap.sailing.server.impl;
+package com.sap.sailing.server.gateway.impl;
 
 import java.io.IOException;
 
@@ -6,6 +6,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.sap.sailing.expeditionconnector.ExpeditionListener;
 import com.sap.sailing.expeditionconnector.ExpeditionMessage;
+import com.sap.sailing.server.gateway.AbstractHttpPostServlet;
+import com.sap.sailing.server.gateway.HttpMessageSenderServletRequestHandler;
 
 /**
  * Clients can use this servlet to retrieve Expedition messages through an HTTP connection. The connection remains

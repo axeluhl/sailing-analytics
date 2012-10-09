@@ -5,6 +5,60 @@
 	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee
 	http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" version="2.5">
 
+	<servlet>
+		<servlet-name>AdminApp</servlet-name>
+		<servlet-class> com.sap.sailing.server.gateway.impl.AdminApp</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>AdminApp</servlet-name>
+		<url-pattern>/admin</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>ModeratorApp</servlet-name>
+		<servlet-class> com.sap.sailing.server.gateway.impl.ModeratorApp</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>ModeratorApp</servlet-name>
+		<url-pattern>/moderator</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>ExpeditionThroughHttpPostServlet</servlet-name>
+		<servlet-class> com.sap.sailing.server.gateway.impl.ExpeditionThroughHttpPostServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>ExpeditionThroughHttpPostServlet</servlet-name>
+		<url-pattern>/expedition</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>LeaderboardsJsonExportServlet</servlet-name>
+		<servlet-class> com.sap.sailing.server.gateway.impl.LeaderboardsJsonExportServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>LeaderboardsJsonExportServlet</servlet-name>
+		<url-pattern>/leaderboards</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>LeaderboardJsonExportServlet</servlet-name>
+		<servlet-class> com.sap.sailing.server.gateway.impl.LeaderboardJsonExportServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>LeaderboardJsonExportServlet</servlet-name>
+		<url-pattern>/leaderboard</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>LeaderboardGroupJsonExportServlet</servlet-name>
+		<servlet-class> com.sap.sailing.server.gateway.impl.LeaderboardGroupJsonExportServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>LeaderboardGroupJsonExportServlet</servlet-name>
+		<url-pattern>/leaderboardgroup</url-pattern>
+	</servlet-mapping>
+
 	<servlet id="jsp">
      <servlet-name>jspServet</servlet-name>
      <servlet-class>org.apache.jasper.servlet.JspServlet</servlet-class>
@@ -31,7 +85,7 @@
    
    	<servlet>
 		<servlet-name>SimpleJspForwardServlet</servlet-name>
-		<servlet-class>com.sap.sailing.server.gateway.SimpleJspForwardServlet</servlet-class>
+		<servlet-class>com.sap.sailing.server.gateway.impl.SimpleJspForwardServlet</servlet-class>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>SimpleJspForwardServlet</servlet-name>
