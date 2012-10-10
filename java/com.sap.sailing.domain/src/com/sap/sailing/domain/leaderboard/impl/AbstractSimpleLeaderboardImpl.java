@@ -597,7 +597,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     
     @Override
     public Iterable<Competitor> getCompetitors() {
-        Set<Competitor> result = new HashSet<>();
+        Set<Competitor> result = new HashSet<Competitor>();
         for (Competitor competitor : getAllCompetitors()) {
             if (!isSuppressed(competitor)) {
                 result.add(competitor);

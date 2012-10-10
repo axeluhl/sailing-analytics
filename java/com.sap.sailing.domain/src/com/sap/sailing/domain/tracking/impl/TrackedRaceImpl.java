@@ -1186,8 +1186,10 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         }
         try {
             return future.get();
-        } catch (InterruptedException | ExecutionException e) {
+        } catch (InterruptedException e) {
             throw new RuntimeException(e);
+        } catch (ExecutionException e) {
+        	throw new RuntimeException(e);
         }
     }
 

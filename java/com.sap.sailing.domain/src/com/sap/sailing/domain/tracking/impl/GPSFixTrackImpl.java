@@ -57,7 +57,7 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
         private Set<GPSTrackListener<I, F>> listeners;
         
         public GPSTrackListeners() {
-            listeners = new HashSet<>();
+            listeners = new HashSet<GPSTrackListener<I, F>>();
         }
         
         @SuppressWarnings("unchecked") // need typed generic cast
@@ -68,7 +68,7 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
         private void writeObject(ObjectOutputStream oos) throws IOException {
             final Set<GPSTrackListener<I, F>> listenersToSerialize;
             synchronized (listeners) {
-                listenersToSerialize = new HashSet<>();
+                listenersToSerialize = new HashSet<GPSTrackListener<I, F>>();
                 for (GPSTrackListener<I, F> listener : listeners) {
                     if (!listener.isTransient()) {
                         listenersToSerialize.add(listener);
@@ -168,9 +168,9 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
         this.trackedItem = trackedItem;
         this.millisecondsOverWhichToAverage = millisecondsOverWhichToAverage;
         this.maxSpeedForSmoothing = maxSpeedForSmoothening;
-        this.listeners = new GPSTrackListeners<>();
+        this.listeners = new GPSTrackListeners<ItemType, FixType>();
         this.distanceCache = new DistanceCache(trackedItem==null?"null":trackedItem.toString());
-        this.maxSpeedCache = new MaxSpeedCache<>(this);
+        this.maxSpeedCache = new MaxSpeedCache<ItemType, FixType>(this);
     }
     
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {

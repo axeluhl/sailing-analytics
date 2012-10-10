@@ -79,14 +79,14 @@ public abstract class AbstractMetaLeaderboard extends AbstractSimpleLeaderboardI
         metaFleet = new FleetImpl("MetaFleet");
         this.scoringScheme = scoringScheme;
         this.name = name;
-        columnsForLeaderboards = new WeakHashMap<>();
-        scoreCorrectionChangeForwardersByLeaderboard = new WeakHashMap<>();
+        columnsForLeaderboards = new WeakHashMap<Leaderboard, RaceColumn>();
+        scoreCorrectionChangeForwardersByLeaderboard = new WeakHashMap<Leaderboard, ScoreCorrectionListener>();
     }
     
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
         ois.defaultReadObject();
-        columnsForLeaderboards = new WeakHashMap<>();
-        scoreCorrectionChangeForwardersByLeaderboard = new WeakHashMap<>();
+        columnsForLeaderboards = new WeakHashMap<Leaderboard, RaceColumn>();
+        scoreCorrectionChangeForwardersByLeaderboard = new WeakHashMap<Leaderboard, ScoreCorrectionListener>();
     }
 
     public abstract Iterable<Leaderboard> getLeaderboards();

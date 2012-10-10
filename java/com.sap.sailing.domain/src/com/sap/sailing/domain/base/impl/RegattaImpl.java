@@ -101,7 +101,7 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
         ois.defaultReadObject();
-        regattaListeners = new HashSet<>();
+        regattaListeners = new HashSet<RegattaListener>();
     }
 
     @Override

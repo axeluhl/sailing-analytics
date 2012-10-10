@@ -24,7 +24,7 @@ public class RaceColumnListeners implements Serializable {
     private transient Set<RaceColumnListener> raceColumnListeners;
 
     public RaceColumnListeners() {
-        raceColumnListeners = new HashSet<>();
+        raceColumnListeners = new HashSet<RaceColumnListener>();
     }
     
     @SuppressWarnings("unchecked") // need to cast to a typed generic
@@ -35,7 +35,7 @@ public class RaceColumnListeners implements Serializable {
     private void writeObject(ObjectOutputStream oos) throws IOException {
         final Set<RaceColumnListener> setToWrite;
         synchronized (raceColumnListeners) {
-            setToWrite = new HashSet<>();
+            setToWrite = new HashSet<RaceColumnListener>();
             for (RaceColumnListener listener : raceColumnListeners) {
                 if (!listener.isTransient()) {
                     setToWrite.add(listener);

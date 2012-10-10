@@ -236,8 +236,10 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
             if (future != null) {
                 try {
                     value = future.get();
-                } catch (InterruptedException | ExecutionException e) {
+                } catch (InterruptedException e) {
                     throw new RuntimeException(e);
+                } catch (ExecutionException e) {
+                	throw new RuntimeException(e);
                 }
             } // else no calculation currently going on; value has been fetched from latest cache entry
         } else {
