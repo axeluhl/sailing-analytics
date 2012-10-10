@@ -25,6 +25,7 @@ import com.sap.sailing.gwt.ui.shared.CourseDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RaceBuoysDTO;
 import com.sap.sailing.gwt.ui.shared.RaceColumnInSeriesDTO;
+import com.sap.sailing.gwt.ui.shared.RaceEventLogDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
@@ -420,5 +421,7 @@ public interface SailingServiceAsync {
     void getLeaderboard(String leaderboardName, AsyncCallback<StrippedLeaderboardDTO> callback);
 
     void suppressCompetitorInLeaderboard(String leaderboardName, String competitorIdAsString, boolean suppressed, AsyncCallback<Void> asyncCallback);
+
+	void getRaceEventLog(AsyncCallback<RaceEventLogDTO> callback);
 
 }

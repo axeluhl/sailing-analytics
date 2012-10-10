@@ -33,6 +33,7 @@ import com.sap.sailing.gwt.ui.shared.QuickRankDTO;
 import com.sap.sailing.gwt.ui.shared.RaceBuoysDTO;
 import com.sap.sailing.gwt.ui.shared.RaceColumnInSeriesDTO;
 import com.sap.sailing.gwt.ui.shared.RaceDTO;
+import com.sap.sailing.gwt.ui.shared.RaceEventLogDTO;
 import com.sap.sailing.gwt.ui.shared.RaceMapDataDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
@@ -264,4 +265,7 @@ public interface SailingService extends RemoteService {
     StrippedLeaderboardDTO getLeaderboard(String leaderboardName);
 
     void suppressCompetitorInLeaderboard(String leaderboardName, String competitorIdAsString, boolean suppressed);
+    
+    RaceEventLogDTO getRaceEventLog();
+    
 }
