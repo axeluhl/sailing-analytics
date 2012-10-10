@@ -1,0 +1,31 @@
+package com.sap.sailing.gwt.ui.regattaoverview;
+
+import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.RootPanel;
+import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
+import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
+
+public class RegattaOverviewEntryPoint extends AbstractEntryPoint  {
+    
+    @Override
+    public void onModuleLoad() {
+        super.onModuleLoad();
+
+        RootPanel rootPanel = RootPanel.get();
+        boolean embedded = Window.Location.getParameter("embedded") != null
+                && Window.Location.getParameter("embedded").equalsIgnoreCase("true");
+        if (!embedded) {
+            LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel("Regatta Overview", stringMessages);
+            logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
+            rootPanel.add(logoAndTitlePanel);
+        } else {
+            RootPanel.getBodyElement().getStyle().setPadding(0, Unit.PX);
+            RootPanel.getBodyElement().getStyle().setPaddingTop(20, Unit.PX);
+        }
+        
+        RegattaOverviewPanel regattaOverviewPanel = new RegattaOverviewPanel(sailingService, this, stringMessages);
+        rootPanel.add(regattaOverviewPanel);
+    }
+    
+}
