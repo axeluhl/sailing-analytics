@@ -125,6 +125,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
                     legendCanvasOverlay.setPathOverlays(pathCanvasOverlays);
 
                 } else {
+                    
                     ReplayPathCanvasOverlay replayPathCanvasOverlay = new ReplayPathCanvasOverlay(paths[i].name, timer);
                     replayPathCanvasOverlays.add(replayPathCanvasOverlay);
                     replayPathCanvasOverlay.pathColor = colorPalette.getColor(paths.length-1-i);

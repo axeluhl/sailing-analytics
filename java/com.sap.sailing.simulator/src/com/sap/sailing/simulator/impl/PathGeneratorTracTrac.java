@@ -9,6 +9,7 @@ import java.util.Set;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RaceIdentifier;
@@ -21,6 +22,7 @@ import com.sap.sailing.domain.tracking.RacesHandle;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
+import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
 import com.sap.sailing.simulator.Path;
 import com.sap.sailing.simulator.SimulationParameters;
@@ -37,12 +39,13 @@ public class PathGeneratorTracTrac extends PathGeneratorBase {
     private RacingEventServiceImpl service;
     private RacesHandle raceHandle;
     private LinkedList<TimedPositionWithSpeed> racecourse;
+    private double windScale;
     
     public PathGeneratorTracTrac(SimulationParameters params) {
         simulationParameters = params;
     }
 
-    public void setEvaluationParameters(String paramURLStr, String liveURIStr, String storedURIStr) {
+    public void setEvaluationParameters(String paramURLStr, String liveURIStr, String storedURIStr, double windScale) {
         try {
             this.paramUrl = new URL(paramURLStr);
             this.liveUri = new URI(liveURIStr);
@@ -51,6 +54,7 @@ public class PathGeneratorTracTrac extends PathGeneratorBase {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
+        this.windScale = windScale;
     }
 
     @Override
@@ -103,7 +107,14 @@ public class PathGeneratorTracTrac extends PathGeneratorBase {
 
                     GPSFixMoving gpsFix = gpsIter.next();
                     Wind gpsWind = tr.getWind(gpsFix.getPosition(), gpsFix.getTimePoint());
-                    path.addLast(new TimedPositionWithSpeedImpl(gpsFix.getTimePoint(), gpsFix.getPosition(), gpsWind));
+
+                    if (gpsWind.getKnots() == 1.0) {
+                        Wind scaledWind = new WindImpl(gpsFix.getPosition(), gpsFix.getTimePoint(), new KnotSpeedWithBearingImpl(windScale*gpsWind.getKnots(), gpsWind.getBearing()));
+                        //System.out.println("wind: "+scaledWind.getKnots());
+                        path.addLast(new TimedPositionWithSpeedImpl(gpsFix.getTimePoint(), gpsFix.getPosition(), scaledWind));
+                    } else {
+                        path.addLast(new TimedPositionWithSpeedImpl(gpsFix.getTimePoint(), gpsFix.getPosition(), gpsWind));                        
+                    }
 
                     idx++;
                 }
@@ -182,7 +193,14 @@ public class PathGeneratorTracTrac extends PathGeneratorBase {
 
                     GPSFixMoving gpsFix = gpsIter.next();
                     gpsWind = tr.getWind(gpsFix.getPosition(), gpsFix.getTimePoint());
-                    path.addLast(new TimedPositionWithSpeedImpl(gpsFix.getTimePoint(), gpsFix.getPosition(), gpsWind));
+                    
+                    if (gpsWind.getKnots() == 1.0) {
+                        Wind scaledWind = new WindImpl(gpsFix.getPosition(), gpsFix.getTimePoint(), new KnotSpeedWithBearingImpl(windScale*gpsWind.getKnots(), gpsWind.getBearing()));
+                        //System.out.println("wind: "+scaledWind.getKnots());
+                        path.addLast(new TimedPositionWithSpeedImpl(gpsFix.getTimePoint(), gpsFix.getPosition(), scaledWind));
+                    } else {
+                        path.addLast(new TimedPositionWithSpeedImpl(gpsFix.getTimePoint(), gpsFix.getPosition(), gpsWind));                        
+                    }
 
                     idx++;
                 }

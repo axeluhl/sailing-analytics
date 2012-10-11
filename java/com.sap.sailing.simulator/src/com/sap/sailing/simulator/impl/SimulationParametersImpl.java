@@ -32,6 +32,11 @@ public class SimulationParametersImpl implements SimulationParameters {
 		settings.put("Djikstra.gridh[int]", 100.0);
 	}
 	
+        @Override
+        public void setCourse(List<Position> course) {
+            this.course = course;
+        }
+        
 	@Override
 	public char getMode() {
 	    return mode;

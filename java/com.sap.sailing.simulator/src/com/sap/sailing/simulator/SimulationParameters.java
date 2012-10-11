@@ -9,6 +9,8 @@ public interface SimulationParameters {
 	
         char getMode();
     
+        public void setCourse(List<Position> course);
+
 	List<Position> getCourse();
 	
 	PolarDiagram getBoatPolarDiagram();

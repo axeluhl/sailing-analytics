@@ -58,7 +58,7 @@ public abstract class WindFieldGeneratorImpl implements WindFieldGenerator {
         this.positions = null;
         this.indexPositionMap = new HashMap<Pair<Integer, Integer>, Position>();
     }
-
+    
     @Override
     public WindControlParameters getWindParameters() {
         return windParameters;
