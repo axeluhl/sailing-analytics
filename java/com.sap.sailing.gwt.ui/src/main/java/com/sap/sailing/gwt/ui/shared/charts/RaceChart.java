@@ -4,6 +4,7 @@ import java.util.Date;
 
 import org.moxieapps.gwt.highcharts.client.Chart;
 import org.moxieapps.gwt.highcharts.client.Legend;
+import org.moxieapps.gwt.highcharts.client.Series;
 import org.moxieapps.gwt.highcharts.client.XAxis;
 import org.moxieapps.gwt.highcharts.client.events.ChartClickEvent;
 import org.moxieapps.gwt.highcharts.client.events.ChartSelectionEvent;
@@ -162,10 +163,11 @@ public abstract class RaceChart extends SimplePanel implements RaceSelectionChan
         chart.setSeriesPlotOptions(new SeriesPlotOptions().setSeriesCheckboxClickEventHandler(new SeriesCheckboxClickEventHandler() {
                     @Override
                     public boolean onClick(SeriesCheckboxClickEvent seriesCheckboxClickEvent) {
+                        Series series = chart.getSeries(seriesCheckboxClickEvent.getSeriesId());
                         if (seriesCheckboxClickEvent.isChecked()) {
-                            chart.getSeries(seriesCheckboxClickEvent.getSeriesId()).show();
+                            onSeriesSelectionChanged(series, true);
                         } else {
-                            chart.getSeries(seriesCheckboxClickEvent.getSeriesId()).hide();
+                            onSeriesSelectionChanged(series, false);
                         }
                         return false; // don't toggle the select state of the series
                     }
@@ -177,5 +179,13 @@ public abstract class RaceChart extends SimplePanel implements RaceSelectionChan
                         return false;
                     }
                 }));
+    }
+    
+    protected void onSeriesSelectionChanged(Series series, boolean selected) {
+        if(selected) {
+            series.show();
+        } else {
+            series.hide();
+        }
     }
 }
