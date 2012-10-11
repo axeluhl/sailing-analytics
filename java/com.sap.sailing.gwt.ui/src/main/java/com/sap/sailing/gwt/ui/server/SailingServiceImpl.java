@@ -35,7 +35,6 @@ import javax.servlet.ServletContext;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
-import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Buoy;
 import com.sap.sailing.domain.base.Competitor;
@@ -225,7 +224,7 @@ import com.sap.sailing.server.replication.ReplicationService;
 /**
  * The server side implementation of the RPC service.
  */
-public class SailingServiceImpl extends RemoteServiceServlet implements SailingService, RaceFetcher, RegattaFetcher {
+public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements SailingService, RaceFetcher, RegattaFetcher {
     private static final Logger logger = Logger.getLogger(SailingServiceImpl.class.getName());
     
     private static final long serialVersionUID = 9031688830194537489L;
