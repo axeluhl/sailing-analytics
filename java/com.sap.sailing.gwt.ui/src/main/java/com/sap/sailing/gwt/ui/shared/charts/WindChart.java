@@ -30,12 +30,15 @@ import org.moxieapps.gwt.highcharts.client.labels.YAxisLabels;
 import org.moxieapps.gwt.highcharts.client.plotOptions.LinePlotOptions;
 import org.moxieapps.gwt.highcharts.client.plotOptions.Marker;
 
+import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.NumberFormat;
+import com.google.gwt.text.client.DateTimeFormatRenderer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.WindSource;
+import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
 import com.sap.sailing.gwt.ui.actions.GetWindInfoAction;
 import com.sap.sailing.gwt.ui.client.ColorMap;
@@ -65,7 +68,7 @@ public class WindChart extends RaceChart implements Component<WindChartSettings>
     
     private Long timeOfEarliestRequestInMillis;
     private Long timeOfLatestRequestInMillis;
-        
+
     private final ColorMap<WindSource> colorMap;
 
     /**
@@ -297,6 +300,9 @@ public class WindChart extends RaceChart implements Component<WindChartSettings>
      */
     public void updateStripChartSeries(WindInfoForRaceDTO result, boolean append) {
         final NumberFormat numberFormat = NumberFormat.getFormat("0");
+        Long newMinTimepoint = timeOfEarliestRequestInMillis;
+        Long newMaxTimepoint = timeOfLatestRequestInMillis;
+        
         for (Map.Entry<WindSource, WindTrackInfoDTO> e : result.windTrackInfoByWindSource.entrySet()) {
             WindSource windSource = e.getKey();
             Series directionSeries = getOrCreateDirectionSeries(windSource);
@@ -309,59 +315,64 @@ public class WindChart extends RaceChart implements Component<WindChartSettings>
             Double directionMax = null;
             Point[] directionPoints = new Point[windTrackInfo.windFixes.size()];
             Point[] speedPoints = new Point[windTrackInfo.windFixes.size()];
-            int i=0;
-            
-            
+            int currentPointIndex = 0;
+
             for (WindDTO wind : windTrackInfo.windFixes) {
-                if (timeOfEarliestRequestInMillis == null || wind.timepoint<timeOfEarliestRequestInMillis) {
-                    timeOfEarliestRequestInMillis = wind.originTimepoint;
+                if (newMinTimepoint == null || wind.requestTimepoint < newMinTimepoint) {
+                    newMinTimepoint = wind.requestTimepoint;
                 }
-                if (timeOfLatestRequestInMillis == null || wind.timepoint>timeOfLatestRequestInMillis) {
-                    timeOfLatestRequestInMillis = wind.originTimepoint;
+                if (newMaxTimepoint == null || wind.requestTimepoint > newMaxTimepoint) {
+                    newMaxTimepoint = wind.requestTimepoint;
                 }
-                
-                Point newDirectionPoint = new Point(wind.originTimepoint, wind.dampenedTrueWindFromDeg);
-                if (wind.dampenedTrueWindSpeedInKnots != null) {
-                    String name = numberFormat.format(wind.dampenedTrueWindSpeedInKnots)+ stringMessages.averageSpeedInKnotsUnit();
-                    // name += " Confidence:" + wind.confidence;
-                    newDirectionPoint.setName(name);
-                }
-                newDirectionPoint = recalculateDirectionPoint(directionMax, directionMin, newDirectionPoint);
-                directionPoints[i] = newDirectionPoint;
+     
+                if((timeOfEarliestRequestInMillis == null || wind.requestTimepoint < timeOfEarliestRequestInMillis) || 
+                    timeOfLatestRequestInMillis == null || wind.requestTimepoint > timeOfLatestRequestInMillis) {
+                    Point newDirectionPoint = new Point(wind.requestTimepoint, wind.dampenedTrueWindFromDeg);
+                    if (wind.dampenedTrueWindSpeedInKnots != null) {
+                        String name = numberFormat.format(wind.dampenedTrueWindSpeedInKnots)+ stringMessages.averageSpeedInKnotsUnit();
+                        // name += " Confidence:" + wind.confidence;
+                        newDirectionPoint.setName(name);
+                    }
+                    newDirectionPoint = recalculateDirectionPoint(directionMax, directionMin, newDirectionPoint);
+                    directionPoints[currentPointIndex] = newDirectionPoint;
 
-                double direction = newDirectionPoint.getY().doubleValue();
-                if (directionMax == null || direction > directionMax) {
-                    directionMax = direction;
+                    double direction = newDirectionPoint.getY().doubleValue();
+                    if (directionMax == null || direction > directionMax) {
+                        directionMax = direction;
+                    }
+                    if (directionMin == null || direction < directionMin) {
+                        directionMin = direction;
+                    }
+                    
+                    Point newSpeedPoint = new Point(wind.requestTimepoint, wind.dampenedTrueWindSpeedInKnots);
+                    speedPoints[currentPointIndex++] = newSpeedPoint;
                 }
-                if (directionMin == null || direction < directionMin) {
-                    directionMin = direction;
-                }
-
-                Point newSpeedPoint = new Point(wind.originTimepoint, wind.dampenedTrueWindSpeedInKnots);
-                speedPoints[i++] = newSpeedPoint;
             }
             Point[] newDirectionPoints;
             Point[] newSpeedPoints = null;
             if (append) {
                 Point[] oldDirectionPoints = directionSeries.getPoints();
-                newDirectionPoints = new Point[oldDirectionPoints.length + directionPoints.length];
+                newDirectionPoints = new Point[oldDirectionPoints.length + currentPointIndex];
                 System.arraycopy(oldDirectionPoints, 0, newDirectionPoints, 0, oldDirectionPoints.length);
-                System.arraycopy(directionPoints, 0, newDirectionPoints, oldDirectionPoints.length, directionPoints.length);
+                System.arraycopy(directionPoints, 0, newDirectionPoints, oldDirectionPoints.length, currentPointIndex);
                 if (windSource.getType().useSpeed()) {
                     Point[] oldSpeedPoints = speedSeries.getPoints();
-                    newSpeedPoints = new Point[oldSpeedPoints.length + speedPoints.length];
+                    newSpeedPoints = new Point[oldSpeedPoints.length + currentPointIndex];
                     System.arraycopy(oldSpeedPoints, 0, newSpeedPoints, 0, oldSpeedPoints.length);
-                    System.arraycopy(speedPoints, 0, newSpeedPoints, oldSpeedPoints.length, speedPoints.length);
+                    System.arraycopy(speedPoints, 0, newSpeedPoints, oldSpeedPoints.length, currentPointIndex);
                 }
             } else {
                 newDirectionPoints = directionPoints;
                 newSpeedPoints = speedPoints;
             }
+ 
             directionSeries.setPoints(newDirectionPoints);
             if (windSource.getType().useSpeed()) {
                 speedSeries.setPoints(newSpeedPoints);
             }
         }
+        timeOfEarliestRequestInMillis = newMinTimepoint;
+        timeOfLatestRequestInMillis = newMaxTimepoint;
     }
     
     private Point recalculateDirectionPoint(Double yMax, Double yMin, Point directionPoint) {
@@ -501,9 +512,9 @@ public class WindChart extends RaceChart implements Component<WindChartSettings>
             case Live:
             {
                 // is date before first cache entry or is cache empty?
-                if (timeOfEarliestRequestInMillis == null || timeOfEarliestRequestInMillis > date.getTime()) {
+                if (timeOfEarliestRequestInMillis == null || date.getTime() < timeOfEarliestRequestInMillis) {
                     loadData(timeRangeWithZoomProvider.getFromTime(), date, /* append */ true);
-                } else if (timeOfLatestRequestInMillis < date.getTime()) {
+                } else if (date.getTime() > timeOfLatestRequestInMillis) {
                     loadData(new Date(timeOfLatestRequestInMillis), timeRangeWithZoomProvider.getToTime(), /* append */true);
                 }
                 // otherwise the cache spans across date and so we don't need to load anything
@@ -528,7 +539,78 @@ public class WindChart extends RaceChart implements Component<WindChartSettings>
         chart.redraw();
     }
     
+    @Override
+    protected void onSeriesSelectionChanged(Series series, boolean selected) {
+        super.onSeriesSelectionChanged(series, selected);
+        if(selected) {
+            clearCacheAndReload();
+        }
+    }
+
     private boolean needsDataLoading() {
         return isVisible();
     }
+   
+    /**
+     * Prints basic data and points of a WindInfoForRaceDTO object to a formatted string.
+     * Can be used for debugging
+     */
+    @SuppressWarnings("unused")
+    private String printWindInfoForRace(final Date from, final Date to, WindInfoForRaceDTO result, boolean printFixDetails) {
+        DateTimeFormatRenderer timeFormatter = new DateTimeFormatRenderer(DateTimeFormat.getFormat("HH:mm:ss:SSS"));
+        StringBuffer buffer = new StringBuffer();
+        buffer.append("\n");
+        buffer.append("Loaded wind data..." + "\n");
+        buffer.append("From: " + timeFormatter.render(from) + "\n");
+        buffer.append("To: " + timeFormatter.render(to) + "\n");
+        buffer.append("With resolution: " + settings.getResolutionInMilliseconds() + "\n");
+        
+        for(WindSource windSource: result.windTrackInfoByWindSource.keySet()) {
+            WindTrackInfoDTO windTrackInfoDTO = result.windTrackInfoByWindSource.get(windSource);
+            int i = 1;
+            buffer.append("Data of windsource: " + windSource.name() + "\n");
+            if(printFixDetails) {
+                for(WindDTO windDTO: windTrackInfoDTO.windFixes) {
+                    String windFix = "P" + i++ + ": " + timeFormatter.render(new Date(windDTO.requestTimepoint));
+                    if(windDTO.measureTimepoint != null) {
+                        windFix += " ," + timeFormatter.render(new Date(windDTO.measureTimepoint));
+                    }
+                    buffer.append(windFix + "\n");
+                }
+            } else {
+                buffer.append(Util.size(windTrackInfoDTO.windFixes) + " Fixes" + "\n");
+            }
+        }
+        buffer.append("\n");
+        return buffer.toString();
+    }    
+
+    /**
+     * Prints basic data and all points of a windSource to a formatted string.
+     * Can be used for debugging
+     */
+    @SuppressWarnings("unused")
+    private String printPoints(WindSource windSource, String whatIsIt, Point[] points) {
+        StringBuffer buffer = new StringBuffer();
+        DateTimeFormatRenderer timeFormatter = new DateTimeFormatRenderer(DateTimeFormat.getFormat("HH:mm:ss:SSS"));
+        buffer.append("\n");
+        buffer.append("WindSource: " + windSource.name() + ": " + whatIsIt + "\n");
+        buffer.append("Resolution in ms: " + settings.getResolutionInMilliseconds() + "\n");
+        buffer.append("timeOfEarliestRequest: " + (timeOfEarliestRequestInMillis != null ? timeFormatter.render(new Date(timeOfEarliestRequestInMillis)) : "") + "\n");
+        buffer.append("timeOfLatestRequest: " + (timeOfLatestRequestInMillis != null ? timeFormatter.render(new Date(timeOfLatestRequestInMillis)) : "") + "\n");
+        if (points == null) {
+            buffer.append("Points is null" + "\n");
+        } else {
+            buffer.append("Point count: " + points.length + "\n");
+            Date xAsDate = new Date();
+            for (int i = 0; i < points.length; i++) {
+                Point point = points[i];
+                xAsDate.setTime(point.getX().longValue());
+                buffer.append("P" + (i + 1) + ": " + timeFormatter.render(xAsDate) + ", V: " + point.getY() + "\n");
+            }
+            buffer.append(buffer.toString());
+        }
+        buffer.append("\n");
+        return buffer.toString();
+    }    
 }

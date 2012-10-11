@@ -16,7 +16,7 @@ public interface RaceChangeListener {
     
     /**
      * Invoked after the mark passings have been updated in the {@link TrackedRace}.
-     * @param competitor TODO
+     * 
      * @param oldMarkPassings
      *            the mark passings replaced by <code>markPassings</code>, keyed by the waypoints
      */
