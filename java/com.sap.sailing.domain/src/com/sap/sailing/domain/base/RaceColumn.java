@@ -66,6 +66,12 @@ public interface RaceColumn extends Named {
     TrackedRace getTrackedRace(Fleet fleet);
     
     /**
+     * If a race is associated with this column for the <code>fleet</code>, the respective {@link RaceDefinition} is returned.
+     * Otherwise, <code>null</code> is returned.
+     */
+    RaceDefinition getRaceDefinition(Fleet fleet);
+    
+    /**
      * Tries to find a tracked race whose {@link RaceDefinition#getCompetitors() competitors} contain <code>competitor</code>. If
      * no such {@link TrackedRace} is currently associated with this race column, <code>null</code> is returned. No two
      * {@link TrackedRace}s may result because a single competitor can be part of only one fleet and therefore not occur
