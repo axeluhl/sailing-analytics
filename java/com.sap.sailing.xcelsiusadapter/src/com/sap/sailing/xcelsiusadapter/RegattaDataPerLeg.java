@@ -99,13 +99,9 @@ public class RegattaDataPerLeg extends Action {
             addNamedElementWithValue(race_node, "start_time_hour", cal.get(Calendar.HOUR_OF_DAY));
             addNamedElementWithValue(race_node, "start_time_minute", cal.get(Calendar.MINUTE));
             addNamedElementWithValue(race_node, "start_time_second", cal.get(Calendar.SECOND));
-            addNamedElementWithValue(
-            															(month < 10 ? ("0" + month) : month) + "." +
-                    "start_time_formatted",
-                    (cal.get(Calendar.DAY_OF_MONTH) < 10 ? ("0" + cal.get(Calendar.DAY_OF_MONTH)) : cal
-                            .get(Calendar.DAY_OF_MONTH))
+            addNamedElementWithValue(race_node, "start_time_formatted", (cal.get(Calendar.DAY_OF_MONTH) < 10 ? ("0" + cal.get(Calendar.DAY_OF_MONTH)) : cal.get(Calendar.DAY_OF_MONTH))
                             + "."
-                            + (cal.get(Calendar.MONTH) < 10 ? ("0" + cal.get(Calendar.MONTH)) : cal.get(Calendar.MONTH))
+                            + (month < 10 ? ("0" + month) : month)
                             + "."
                             + cal.get(Calendar.YEAR)
                             + " - "
@@ -244,8 +240,6 @@ public class RegattaDataPerLeg extends Action {
 		                    	addNamedElementWithValue(competitor_node, "sail_id_formatted", competitor.getTeam().getNationality().getThreeLetterIOCAcronym() + sail_id);
                             } else {
 		                    	addNamedElementWithValue(competitor_node, "sail_id_formatted", sail_id);
-                                        .getNationality().getThreeLetterIOCAcronym()
-                                        + " " + competitor.getBoat().getSailID());
                             }
                             addNamedElementWithValue(competitor_node, "leg_finished_time_ms",
                                     compFinishedLeg.asMillis());
@@ -354,7 +348,6 @@ public class RegattaDataPerLeg extends Action {
 	        TimePoint timePoint = fromTimePoint;
 	        for (int i = 0; i < numberOfFixes && toTimePoint != null && timePoint.compareTo(toTimePoint) < 0; i++) {
 	            WindWithConfidence<Pair<Position, TimePoint>> averagedWindWithConfidence = windTrack.getAveragedWindWithConfidence(null, timePoint);
-                    .getAveragedWindWithConfidence(null, timePoint);
 	            if (averagedWindWithConfidence != null) {
 	            	double windSpeedinKnots = averagedWindWithConfidence.getObject().getKnots();
 	                double confidence = averagedWindWithConfidence.getConfidence();
