@@ -11,6 +11,7 @@ import com.google.gwt.maps.client.overlay.Icon;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.gwt.ui.shared.BuoyDTO;
 
 public class RaceMapImageManager {
 
@@ -27,21 +28,36 @@ public class RaceMapImageManager {
     /**
      * An icon for a buoy
      */
-    protected Icon buoyIcon;
+    private Icon defaultBuoyIcon;
 
-    protected Icon buoyRedIcon;
-    protected Icon buoyYellowIcon;
-    protected Icon buoyGreenIcon;
-
+    /**
+     * Contains buoy icons for display color names as obtained from {@link BuoyDTO#displayColor}, then converted to all lower case
+     */
+    private final Map<String, Icon> buoyIcons;
+    
     protected Map<Pair<ManeuverType, Tack>, Icon> maneuverIconsForTypeAndTargetTack;
 
     private static RaceMapResources resources = GWT.create(RaceMapResources.class);
 
     public RaceMapImageManager() {
+        buoyIcons = new HashMap<String, Icon>();
         maneuverIconsForTypeAndTargetTack = new HashMap<Pair<ManeuverType, Tack>, Icon>();
         
         combinedWindIconTransformer = new ImageTransformer(resources.combinedWindIcon());
         expeditionWindIconTransformer = new ImageTransformer(resources.expeditionWindIcon());
+    }
+    
+    public Icon getIconForDisplayColor(String displayColor) {
+        Icon result;
+        if (displayColor != null) {
+            result = buoyIcons.get(displayColor.toLowerCase());
+            if (result == null) {
+                result = defaultBuoyIcon;
+            }
+        } else {
+            result = defaultBuoyIcon;
+        }
+        return result;
     }
     
     /*
@@ -50,22 +66,24 @@ public class RaceMapImageManager {
      */
     public void loadMapIcons(MapWidget map) {
         if(map != null) {
-            buoyIcon = Icon.newInstance(resources.buoyIcon().getSafeUri().asString());
-            buoyIcon.setIconSize(Size.newInstance(19, 28));
-            buoyIcon.setIconAnchor(Point.newInstance(6, 15));
+            defaultBuoyIcon = Icon.newInstance(resources.buoyIcon().getSafeUri().asString());
+            defaultBuoyIcon.setIconSize(Size.newInstance(19, 28));
+            defaultBuoyIcon.setIconAnchor(Point.newInstance(6, 15));
 
-            buoyRedIcon = Icon.newInstance(resources.buoyRedIcon().getSafeUri().asString());
-            buoyRedIcon.setIconSize(Size.newInstance(19, 28));
-            buoyRedIcon.setIconAnchor(Point.newInstance(6, 15));
-
-            buoyYellowIcon = Icon.newInstance(resources.buoyYellowIcon().getSafeUri().asString());
-            buoyYellowIcon.setIconSize(Size.newInstance(19, 28));
-            buoyYellowIcon.setIconAnchor(Point.newInstance(6, 15));
-
-            buoyGreenIcon = Icon.newInstance(resources.buoyGreenIcon().getSafeUri().asString());
-            buoyGreenIcon.setIconSize(Size.newInstance(19, 28));
-            buoyGreenIcon.setIconAnchor(Point.newInstance(6, 15));
-
+            buoyIcons.put("red", Icon.newInstance(resources.buoyRedIcon().getSafeUri().asString()));
+            buoyIcons.put("green", Icon.newInstance(resources.buoyGreenIcon().getSafeUri().asString()));
+            buoyIcons.put("yellow", Icon.newInstance(resources.buoyYellowIcon().getSafeUri().asString()));
+            buoyIcons.put("white", Icon.newInstance(resources.buoyWhiteIcon().getSafeUri().asString()));
+            buoyIcons.put("black", Icon.newInstance(resources.buoyBlackIcon().getSafeUri().asString()));
+            buoyIcons.put("black conical checkered", Icon.newInstance(resources.buoyBlackConeIcon().getSafeUri().asString()));
+            buoyIcons.put("orange", Icon.newInstance(resources.buoyDarkOrangeIcon().getSafeUri().asString()));
+            buoyIcons.put("white conical", Icon.newInstance(resources.buoyWhiteConeIcon().getSafeUri().asString()));
+            buoyIcons.put("black cylinder checkered", Icon.newInstance(resources.buoyBlackFinishIcon().getSafeUri().asString()));
+            buoyIcons.put("committee vessel", Icon.newInstance(resources.juryBoatIcon().getSafeUri().asString()));
+            for (Icon buoyIcon : buoyIcons.values()) {
+                buoyIcon.setIconSize(Size.newInstance(19, 28));
+                buoyIcon.setIconAnchor(Point.newInstance(6, 15));
+            }
             Icon tackToStarboardIcon = Icon
                     .newInstance("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=T|00FF00|000000");
             tackToStarboardIcon.setIconAnchor(Point.newInstance(10, 33));
