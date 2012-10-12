@@ -5,6 +5,8 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -35,11 +37,11 @@ public class RegattaDataPerLeg extends Action {
     public RegattaDataPerLeg(HttpServletRequest req, HttpServletResponse res, RacingEventService service, int maxRows) {
         super(req, res, service, maxRows);
     }
+	
 
     public void perform() throws Exception {
 
-        final Regatta regatta = getRegatta(); // Get regatta data from request (get value for regatta name from URL
-                                              // parameter regatta)
+        final Regatta regatta = getRegatta(); // Get regatta data from request (get value for regatta name from URL parameter regatta)
         // if the regatta does not exist a tag <message> will be returned with a text message from function
         // getRegatta().
         if (regatta == null) {
@@ -74,26 +76,24 @@ public class RegattaDataPerLeg extends Action {
             TimePoint legStarted = new MillisecondsTimePoint(minNextLegStart); // get TimePoint for when the leg started
 
             addNamedElementWithValue(race_node, "start_time_ms", raceStarted.asMillis()); // add the starttime to the
-                                                                                          // race
-            addNamedElementWithValue(race_node, "assumed_end_ms", trackedRace.getEndOfRace().asMillis()); // add the
-                                                                                                          // assumed
-                                                                                                          // enddtime
+            if (trackedRace.getEndOfRace() != null) {
+            	addNamedElementWithValue(race_node, "assumed_end_ms", trackedRace.getEndOfRace().asMillis()); // add the assumed enddtime
+            } else {
+            	addNamedElementWithValue(race_node, "assumed_end_ms", 0); // add the assumed enddtime
+            }
 
             Calendar cal = Calendar.getInstance();
             cal.setTime(raceStarted.asDate());
             addNamedElementWithValue(race_node, "start_time_year", cal.get(Calendar.YEAR));
-            addNamedElementWithValue(race_node, "start_time_month", cal.get(Calendar.MONTH));
+            int month = cal.get(Calendar.MONTH) + 1;
+            addNamedElementWithValue(race_node, "start_time_month", month);
             addNamedElementWithValue(race_node, "start_time_day", cal.get(Calendar.DAY_OF_MONTH));
             addNamedElementWithValue(race_node, "start_time_hour", cal.get(Calendar.HOUR_OF_DAY));
             addNamedElementWithValue(race_node, "start_time_minute", cal.get(Calendar.MINUTE));
             addNamedElementWithValue(race_node, "start_time_second", cal.get(Calendar.SECOND));
-            addNamedElementWithValue(
-                    race_node,
-                    "start_time_formatted",
-                    (cal.get(Calendar.DAY_OF_MONTH) < 10 ? ("0" + cal.get(Calendar.DAY_OF_MONTH)) : cal
-                            .get(Calendar.DAY_OF_MONTH))
+            addNamedElementWithValue(race_node, "start_time_formatted", (cal.get(Calendar.DAY_OF_MONTH) < 10 ? ("0" + cal.get(Calendar.DAY_OF_MONTH)) : cal.get(Calendar.DAY_OF_MONTH))
                             + "."
-                            + (cal.get(Calendar.MONTH) < 10 ? ("0" + cal.get(Calendar.MONTH)) : cal.get(Calendar.MONTH))
+                            + (month < 10 ? ("0" + month) : month)
                             + "."
                             + cal.get(Calendar.YEAR)
                             + " - "
@@ -108,19 +108,30 @@ public class RegattaDataPerLeg extends Action {
 
             Pair<Double, Double> averageWindSpeedofRace = calculateAverageWindSpeedofRace(trackedRace);
             String wind_strength = "";
-            if (averageWindSpeedofRace.getA() < 4) {
-                wind_strength = "Very light";
-            } else if (averageWindSpeedofRace.getA() >= 4 && averageWindSpeedofRace.getA() < 8) {
-                wind_strength = "Light";
-            } else if (averageWindSpeedofRace.getA() >= 8 && averageWindSpeedofRace.getA() < 14) {
-                wind_strength = "Medium";
-            } else if (averageWindSpeedofRace.getA() >= 14 && averageWindSpeedofRace.getA() < 20) {
-                wind_strength = "Strong";
-            } else if (averageWindSpeedofRace.getA() >= 20) {
-                wind_strength = "Very strong";
+            if (averageWindSpeedofRace != null) {
+	            if (averageWindSpeedofRace.getA() < 4) {
+	            	wind_strength = "Very light";
+	            } else if (averageWindSpeedofRace.getA() >= 4 && averageWindSpeedofRace.getA() < 8) {
+	            	wind_strength = "Light";
+	            } else if (averageWindSpeedofRace.getA() >= 8 && averageWindSpeedofRace.getA() < 14) {
+	            	wind_strength = "Medium";
+	            } else if (averageWindSpeedofRace.getA() >= 14 && averageWindSpeedofRace.getA() < 20) {
+	            	wind_strength = "Strong";
+	            } else if (averageWindSpeedofRace.getA() >= 20) {
+	            	wind_strength = "Very strong";
+	            }
             }
-            addNamedElementWithValue(race_node, "average_wind_speed", averageWindSpeedofRace.getA());
-            addNamedElementWithValue(race_node, "average_wind_speed_confidence", averageWindSpeedofRace.getB());
+            
+            Double wind_speed = 0.0;
+            Double wind_confi = 0.0;
+            
+            if (averageWindSpeedofRace != null) {
+            	wind_speed = averageWindSpeedofRace.getA();
+            	wind_confi = averageWindSpeedofRace.getB();
+            }
+            
+            addNamedElementWithValue(race_node, "average_wind_speed", wind_speed);
+            addNamedElementWithValue(race_node, "average_wind_speed_confidence", wind_confi);
             addNamedElementWithValue(race_node, "wind_strength", wind_strength);
 
             /*
@@ -202,49 +213,85 @@ public class RegattaDataPerLeg extends Action {
                             addNamedElementWithValue(competitor_node, "nationality", competitor.getTeam()
                                     .getNationality().getThreeLetterIOCAcronym());
                             addNamedElementWithValue(competitor_node, "sail_id", competitor.getBoat().getSailID());
-                            if (competitor.getBoat().getSailID().matches("^[a-zA-Z]* [0-9]*")) {
-                                addNamedElementWithValue(competitor_node, "sail_id_formatted", competitor.getBoat()
-                                        .getSailID());
+		                    String sail_id = competitor.getBoat().getSailID();
+		                    if (sail_id.matches("^[A-Z]{3}\\s[0-9]*")) {		                    	
+		                    	
+		                    	Pattern regex = Pattern.compile("(^[A-Z]{3})\\s([0-9]*)");
+		                    	Matcher regexMatcher = regex.matcher(sail_id);
+		                    	try {
+		                    	    String resultString = regexMatcher.replaceAll("$1$2");
+		                    	    addNamedElementWithValue(competitor_node, "sail_id_formatted", resultString);
+		                    	} catch (Exception e) {
+		                    	    e.printStackTrace();
+		                    	}
+
+		                    	
+		                    } else if (sail_id.matches("^[A-Z]{3}\\S[0-9]*")) {
+		                    	addNamedElementWithValue(competitor_node, "sail_id_formatted", sail_id);
+		                    } else if (sail_id.matches("[0-9]*")){
+		                    	addNamedElementWithValue(competitor_node, "sail_id_formatted", competitor.getTeam().getNationality().getThreeLetterIOCAcronym() + sail_id);
                             } else {
-                                addNamedElementWithValue(competitor_node, "sail_id_formatted", competitor.getTeam()
-                                        .getNationality().getThreeLetterIOCAcronym()
-                                        + " " + competitor.getBoat().getSailID());
+		                    	addNamedElementWithValue(competitor_node, "sail_id_formatted", sail_id);
                             }
                             addNamedElementWithValue(competitor_node, "leg_finished_time_ms",
                                     compFinishedLeg.asMillis());
                             addNamedElementWithValue(competitor_node, "time_elapsed_ms", compFinishedLeg.asMillis()
                                     - raceStarted.asMillis());
                             addNamedElementWithValue(competitor_node, "leg_time_ms", compLegTimeAlt.asMillis());
-                            addNamedElementWithValue(competitor_node, "leg_rank",
-                                    trackedLegOfCompetitor.getRank(compFinishedLeg));
+		                    addNamedElementWithValue(competitor_node, "leg_rank", trackedLegOfCompetitor.getRank(compFinishedLeg));	
+		                    addNamedElementWithValue(competitor_node, "race_final_rank", trackedRace.getRank(competitor));
                             addNamedElementWithValue(competitor_node, "rank_gain", posGL * -1); // Ranks Gained/Lost
                             addNamedElementWithValue(competitor_node, "gap_to_leader_s",
                                     trackedLegOfCompetitor.getGapToLeaderInSeconds(compFinishedLeg));
-                            addNamedElementWithValue(competitor_node, "ww_distance_to_leader_m", trackedLegOfCompetitor
-                                    .getWindwardDistanceToOverallLeader(compFinishedLeg).getMeters());
+//		                    addNamedElementWithValue(competitor_node, "avg_xte", trackedLegOfCompetitor.getAverageCrossTrackError(compFinishedLeg).getMeters());
+//		                    addNamedElementWithValue(competitor_node, "avg_vmg_kn", trackedLegOfCompetitor.getAverageVelocityMadeGood(compFinishedLeg).getKnots());//windwardSpeed over ground on leg finished time
                             addNamedElementWithValue(competitor_node, "avg_speed_og_kn", trackedLegOfCompetitor
                                     .getAverageSpeedOverGround(compFinishedLeg).getKnots());
                             addNamedElementWithValue(competitor_node, "avg_speed_ww_kn", trackedLegOfCompetitor
                                     .getAverageVelocityMadeGood(compFinishedLeg).getKnots());// windwardSpeed over
                                                                                              // ground on leg finished
                                                                                              // time
-                            addNamedElementWithValue(competitor_node, "distance_traveled_m", trackedLegOfCompetitor
-                                    .getDistanceTraveled(compFinishedLeg).getMeters());
-                            addNamedElementWithValue(competitor_node, "number_of_jibes",
-                                    trackedLegOfCompetitor.getNumberOfJibes(compFinishedLeg));
-                            addNamedElementWithValue(competitor_node, "number_of_tacks",
-                                    trackedLegOfCompetitor.getNumberOfTacks(compFinishedLeg));
-                            addNamedElementWithValue(competitor_node, "number_of_penalty_circles",
-                                    trackedLegOfCompetitor.getNumberOfPenaltyCircles(compFinishedLeg));
-                            addNamedElementWithValue(competitor_node, "average_wind_speed",
-                                    averageWindSpeedofRace.getA());
-                            addNamedElementWithValue(competitor_node, "average_wind_speed_confidence",
-                                    averageWindSpeedofRace.getB());
+		                    addNamedElementWithValue(competitor_node, "average_wind_speed", wind_speed);
+		                    addNamedElementWithValue(competitor_node, "average_wind_speed_confidence", wind_confi);
+		                    
+//		                    Waypoint finish = trackedRace.getRace().getCourse().getLastWaypoint();
+//		                    
+//		                    Iterable<MarkPassing> markpassings = trackedRace.getMarkPassingsInOrder(finish);
+//		                    Iterator<MarkPassing> iter = markpassings.iterator();
+//		                    MarkPassing firstMarkPassing = null;
+//		                    if (iter.hasNext()) {
+//		                    	firstMarkPassing = iter.next();
+//		                    }
+//		                    
+//		                    
+////		                    Map<Waypoint, NavigableSet<MarkPassing>> markPassingsForWaypoint = new HashMap<Waypoint, NavigableSet<MarkPassing>>();
+////		                    for (Waypoint waypoint : trackedRace.getRace().getCourse().getWaypoints()) {
+////		                        markPassingsForWaypoint.put(waypoint, new ConcurrentSkipListSet<MarkPassing>(
+////		                                MarkPassingByTimeComparator.INSTANCE));
+////		                    }
+////		                    
+////		                    NavigableSet<MarkPassing> markPassingsInOrder = markPassingsForWaypoint.get(finish);
+////		                    MarkPassing firstMarkPassing = null;
+////		                    synchronized (markPassingsInOrder) {
+////		                        if (!markPassingsInOrder.isEmpty()) {
+////		                            firstMarkPassing = markPassingsInOrder.first();
+////		                        }
+////		                    }
+//		                    TimePoint timeOfFirstMarkPassing = null;
+//		                    if (firstMarkPassing != null) {
+//		                        timeOfFirstMarkPassing = firstMarkPassing.getTimePoint();
+//		                    }
+//		                    
+//		                    trackedRace.getWindwardDistanceToOverallLeader(competitor, timeOfFirstMarkPassing);
+		                    
+		                    
+		                    
+
                             // assign the smallest start time for the next leg
                             minNextLegStart = (minNextLegStart > compFinishedLeg.asMillis() ? compFinishedLeg
                                     .asMillis() : minNextLegStart);
                         } catch (Exception ex) {
-                            competitor_data_node.removeContent(competitor_node); // if the competitor dataset is not
+	                    	//competitor_data_node.removeContent(competitor_node); // if the competitor dataset is not complete, remove it from the list
                                                                                  // complete, remove it from the list
                         }
                     } else {
@@ -272,43 +319,45 @@ public class RegattaDataPerLeg extends Action {
     } // function end
 
     private Pair<Double, Double> calculateAverageWindSpeedofRace(TrackedRace trackedRace) {
-
-        TimePoint fromTimePoint = trackedRace.getStartOfRace();
-        TimePoint toTimePoint = trackedRace.getEndOfRace();
-        long resolutionInMilliseconds = 60 * 1000 * 5; // 5 min
-
-        List<WindSource> windSourcesToDeliver = new ArrayList<WindSource>();
-        WindSourceImpl windSource = new WindSourceImpl(WindSourceType.COMBINED);
-        windSourcesToDeliver.add(windSource);
-
-        double sumWindSpeed = 0.0;
-        double sumWindSpeedConfidence = 0.0;
-        int speedCounter = 0;
-
-        int numberOfFixes = (int) ((toTimePoint.asMillis() - fromTimePoint.asMillis()) / resolutionInMilliseconds);
-        WindTrack windTrack = trackedRace.getOrCreateWindTrack(windSource);
-        TimePoint timePoint = fromTimePoint;
-        for (int i = 0; i < numberOfFixes && toTimePoint != null && timePoint.compareTo(toTimePoint) < 0; i++) {
-            WindWithConfidence<Pair<Position, TimePoint>> averagedWindWithConfidence = windTrack
-                    .getAveragedWindWithConfidence(null, timePoint);
-            if (averagedWindWithConfidence != null) {
-                double windSpeedinKnots = averagedWindWithConfidence.getObject().getKnots();
-                double confidence = averagedWindWithConfidence.getConfidence();
-
-                sumWindSpeed += windSpeedinKnots;
-                sumWindSpeedConfidence += confidence;
-
-                speedCounter++;
-            }
-            timePoint = new MillisecondsTimePoint(timePoint.asMillis() + resolutionInMilliseconds);
-        }
-
         Pair<Double, Double> result = null;
-        if (speedCounter > 0) {
-            double averageWindSpeed = sumWindSpeed / speedCounter;
-            double averageWindSpeedConfidence = sumWindSpeedConfidence / speedCounter;
+        if (trackedRace.getEndOfRace() != null) {
+            TimePoint fromTimePoint = trackedRace.getStartOfRace();
+            TimePoint toTimePoint = trackedRace.getEndOfRace();
+            long resolutionInMilliseconds = 60 * 1000 * 5; // 5 min
 
-            result = new Pair<Double, Double>(averageWindSpeed, averageWindSpeedConfidence);
+            List<WindSource> windSourcesToDeliver = new ArrayList<WindSource>();
+            WindSourceImpl windSource = new WindSourceImpl(WindSourceType.COMBINED);
+            windSourcesToDeliver.add(windSource);
+
+            double sumWindSpeed = 0.0;
+            double sumWindSpeedConfidence = 0.0;
+            int speedCounter = 0;
+
+            int numberOfFixes = (int) ((toTimePoint.asMillis() - fromTimePoint.asMillis()) / resolutionInMilliseconds);
+            WindTrack windTrack = trackedRace.getOrCreateWindTrack(windSource);
+            TimePoint timePoint = fromTimePoint;
+            for (int i = 0; i < numberOfFixes && toTimePoint != null && timePoint.compareTo(toTimePoint) < 0; i++) {
+                WindWithConfidence<Pair<Position, TimePoint>> averagedWindWithConfidence = windTrack
+                        .getAveragedWindWithConfidence(null, timePoint);
+                if (averagedWindWithConfidence != null) {
+                    double windSpeedinKnots = averagedWindWithConfidence.getObject().getKnots();
+                    double confidence = averagedWindWithConfidence.getConfidence();
+
+                    sumWindSpeed += windSpeedinKnots;
+                    sumWindSpeedConfidence += confidence;
+
+                    speedCounter++;
+                }
+                timePoint = new MillisecondsTimePoint(timePoint.asMillis() + resolutionInMilliseconds);
+            }
+            if (speedCounter > 0) {
+                double averageWindSpeed = sumWindSpeed / speedCounter;
+                double averageWindSpeedConfidence = sumWindSpeedConfidence / speedCounter;
+
+                result = new Pair<Double, Double>(averageWindSpeed, averageWindSpeedConfidence);
+            }
+        } else {
+            result = new Pair<Double, Double>(0.0, 0.0);
         }
         return result;
     }
