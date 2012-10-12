@@ -10,6 +10,4 @@ package com.sap.sailing.domain.base;
  */
 public interface Buoy extends WithID, ControlPoint, IsManagedByDomainFactory {
     public String getDisplayColor();
-    
-    public void setDisplayColor(String displayColor);
 }
