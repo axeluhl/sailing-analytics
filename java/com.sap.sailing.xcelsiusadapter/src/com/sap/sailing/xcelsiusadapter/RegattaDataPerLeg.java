@@ -3,12 +3,8 @@ package com.sap.sailing.xcelsiusadapter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.NavigableSet;
-import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -22,10 +18,8 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
-import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
@@ -38,8 +32,6 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.server.RacingEventService;
-import com.sap.sailing.domain.tracking.impl.MarkPassingByTimeComparator;
-import com.sap.sailing.domain.tracking.impl.TrackedRaceImpl;
 
 public class RegattaDataPerLeg extends Action {
     public RegattaDataPerLeg(HttpServletRequest req, HttpServletResponse res, RacingEventService service, int maxRows) {
@@ -327,48 +319,46 @@ public class RegattaDataPerLeg extends Action {
     } // function end
 
     private Pair<Double, Double> calculateAverageWindSpeedofRace(TrackedRace trackedRace) {
-		Pair<Double, Double> result = null;
-		if (trackedRace.getEndOfRace() != null) {
-	        TimePoint fromTimePoint = trackedRace.getStartOfRace();
-	        TimePoint toTimePoint = trackedRace.getEndOfRace(); 
-	        long resolutionInMilliseconds = 60 * 1000 * 5; // 5 min
-	
-	        List<WindSource> windSourcesToDeliver = new ArrayList<WindSource>();
-	        WindSourceImpl windSource = new WindSourceImpl(WindSourceType.COMBINED);
-	        windSourcesToDeliver.add(windSource);
-	
-	        double sumWindSpeed = 0.0; 
-	        double sumWindSpeedConfidence = 0.0; 
-	        int speedCounter = 0;
-	        
-	        int numberOfFixes = (int) ((toTimePoint.asMillis() - fromTimePoint.asMillis())/resolutionInMilliseconds);
-	        TimePoint newestEvent = trackedRace.getTimePointOfNewestEvent();
-	
-	        WindTrack windTrack = trackedRace.getOrCreateWindTrack(windSource);
-	        TimePoint timePoint = fromTimePoint;
-	        for (int i = 0; i < numberOfFixes && toTimePoint != null && timePoint.compareTo(toTimePoint) < 0; i++) {
-	            WindWithConfidence<Pair<Position, TimePoint>> averagedWindWithConfidence = windTrack.getAveragedWindWithConfidence(null, timePoint);
-	            if (averagedWindWithConfidence != null) {
-	            	double windSpeedinKnots = averagedWindWithConfidence.getObject().getKnots();
-	                double confidence = averagedWindWithConfidence.getConfidence();
-	
-	                sumWindSpeed += windSpeedinKnots;
-	            	sumWindSpeedConfidence += confidence;
-	            	
-	            	speedCounter++;
-	            }
-	            timePoint = new MillisecondsTimePoint(timePoint.asMillis() + resolutionInMilliseconds);
-	        }
-	
-	        if(speedCounter > 0) {
-	            double averageWindSpeed = sumWindSpeed / speedCounter;
-	        	double averageWindSpeedConfidence = sumWindSpeedConfidence / speedCounter;
-	        	
-	        	result = new Pair<Double, Double>(averageWindSpeed, averageWindSpeedConfidence);
-	        } 	
-		} else {
-			result = new Pair<Double, Double>(0.0, 0.0);
-		}
+        Pair<Double, Double> result = null;
+        if (trackedRace.getEndOfRace() != null) {
+            TimePoint fromTimePoint = trackedRace.getStartOfRace();
+            TimePoint toTimePoint = trackedRace.getEndOfRace();
+            long resolutionInMilliseconds = 60 * 1000 * 5; // 5 min
+
+            List<WindSource> windSourcesToDeliver = new ArrayList<WindSource>();
+            WindSourceImpl windSource = new WindSourceImpl(WindSourceType.COMBINED);
+            windSourcesToDeliver.add(windSource);
+
+            double sumWindSpeed = 0.0;
+            double sumWindSpeedConfidence = 0.0;
+            int speedCounter = 0;
+
+            int numberOfFixes = (int) ((toTimePoint.asMillis() - fromTimePoint.asMillis()) / resolutionInMilliseconds);
+            WindTrack windTrack = trackedRace.getOrCreateWindTrack(windSource);
+            TimePoint timePoint = fromTimePoint;
+            for (int i = 0; i < numberOfFixes && toTimePoint != null && timePoint.compareTo(toTimePoint) < 0; i++) {
+                WindWithConfidence<Pair<Position, TimePoint>> averagedWindWithConfidence = windTrack
+                        .getAveragedWindWithConfidence(null, timePoint);
+                if (averagedWindWithConfidence != null) {
+                    double windSpeedinKnots = averagedWindWithConfidence.getObject().getKnots();
+                    double confidence = averagedWindWithConfidence.getConfidence();
+
+                    sumWindSpeed += windSpeedinKnots;
+                    sumWindSpeedConfidence += confidence;
+
+                    speedCounter++;
+                }
+                timePoint = new MillisecondsTimePoint(timePoint.asMillis() + resolutionInMilliseconds);
+            }
+            if (speedCounter > 0) {
+                double averageWindSpeed = sumWindSpeed / speedCounter;
+                double averageWindSpeedConfidence = sumWindSpeedConfidence / speedCounter;
+
+                result = new Pair<Double, Double>(averageWindSpeed, averageWindSpeedConfidence);
+            }
+        } else {
+            result = new Pair<Double, Double>(0.0, 0.0);
+        }
         return result;
     }
 
