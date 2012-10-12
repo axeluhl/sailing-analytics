@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.shared;
 
+import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.client.rpc.IsSerializable;
 
 public class PositionDTO implements IsSerializable {
@@ -16,6 +17,11 @@ public class PositionDTO implements IsSerializable {
     @Override
     public String toString() {
         return "("+latDeg+", "+lngDeg+")";
+    }
+
+    public String toFormattedString() {
+        NumberFormat fmt = NumberFormat.getFormat("#.###");
+        return fmt.format(latDeg)+", "+fmt.format(lngDeg);
     }
 
     @Override

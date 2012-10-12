@@ -8,12 +8,14 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.EventTarget;
 import com.google.gwt.dom.client.NativeEvent;
+import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.user.client.ui.ImageResourceRenderer;
 
 public class ExpandCollapseButtonCell extends AbstractCell<SafeHtml> {
 
-    private static final LeaderboardResources RESOURCES = GWT.create(LeaderboardResources.class);
+    private static final LeaderboardResources leaderboardResources = GWT.create(LeaderboardResources.class);
 
     private final SafeHtml html;
     private final Delegate<SafeHtml> delegate;
@@ -32,10 +34,13 @@ public class ExpandCollapseButtonCell extends AbstractCell<SafeHtml> {
         this.column = column;
         this.delegate = delegate;
 
-        String src = column.isExpanded() ? RESOURCES.minusIcon().getSafeUri().asString() : RESOURCES
-                .plusIcon().getSafeUri().asString();
-        this.html = new SafeHtmlBuilder().appendHtmlConstant(
-                "<input class=\"valignMiddle opencoloumn\" type=\"image\" src=\"" + src + "\" />").toSafeHtml();
+        ImageResourceRenderer imgRenderer = new ImageResourceRenderer(); 
+        ImageResource imgResource = column.isExpanded() ? leaderboardResources.minusIcon() : leaderboardResources.plusIcon();
+        SafeHtmlBuilder sb = new SafeHtmlBuilder();
+        sb.appendHtmlConstant("<div class=\"openColumn\">");
+        sb.append(imgRenderer.render(imgResource));
+        sb.appendHtmlConstant("</div>");
+        this.html = sb.toSafeHtml();
     }
 
     @Override

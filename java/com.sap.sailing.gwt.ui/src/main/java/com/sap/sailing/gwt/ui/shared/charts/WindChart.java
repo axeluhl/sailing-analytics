@@ -43,7 +43,7 @@ import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.RaceSelectionProvider;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.TimeZoomProvider;
+import com.sap.sailing.gwt.ui.client.TimeRangeWithZoomProvider;
 import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.client.WindSourceTypeFormatter;
@@ -75,9 +75,9 @@ public class WindChart extends RaceChart implements Component<WindChartSettings>
      *            server and displayed in this chart. If no race is selected, the chart is cleared.
      */
     public WindChart(SailingServiceAsync sailingService, RaceSelectionProvider raceSelectionProvider, Timer timer,
-            TimeZoomProvider timeZoomProvider, WindChartSettings settings, final StringMessages stringMessages, 
+            TimeRangeWithZoomProvider timeRangeWithZoomProvider, WindChartSettings settings, final StringMessages stringMessages, 
             AsyncActionsExecutor asyncActionsExecutor, ErrorReporter errorReporter, boolean compactChart) {
-        super(sailingService, timer, timeZoomProvider, stringMessages, asyncActionsExecutor, errorReporter);
+        super(sailingService, timer, timeRangeWithZoomProvider, stringMessages, asyncActionsExecutor, errorReporter);
         this.windSourceDirectionSeries = new HashMap<WindSource, Series>();
         this.windSourceSpeedSeries = new HashMap<WindSource, Series>();
         this.colorMap = new ColorMap<WindSource>();
@@ -170,8 +170,6 @@ public class WindChart extends RaceChart implements Component<WindChartSettings>
         setSize("100%", "100%");
         
         raceSelectionProvider.addRaceSelectionChangeListener(this);
-        timer.addTimeListener(this);
-        timeZoomProvider.addTimeZoomChangeListener(this);
     }
 
     @Override
@@ -197,7 +195,7 @@ public class WindChart extends RaceChart implements Component<WindChartSettings>
                         series.select(true); // ensures that the checkbox will be ticked
                     }
                 } else {
-                    if(visibleSeries.contains(series)) {
+                    if (visibleSeries.contains(series)) {
                         chart.removeSeries(series, false);
                     }
                 }
@@ -205,7 +203,7 @@ public class WindChart extends RaceChart implements Component<WindChartSettings>
         } else {
             for (Map.Entry<WindSource, Series> e : windSourceDirectionSeries.entrySet()) {
                 Series series = e.getValue();
-                if(visibleSeries.contains(series)) {
+                if (visibleSeries.contains(series)) {
                     chart.removeSeries(series, false);
                 }
             }
@@ -220,7 +218,7 @@ public class WindChart extends RaceChart implements Component<WindChartSettings>
                         series.select(true); // ensures that the checkbox will be ticked
                     }
                 } else {
-                    if(visibleSeries.contains(series)) {
+                    if (visibleSeries.contains(series)) {
                         chart.removeSeries(series, false);
                     }
                 }
@@ -228,7 +226,7 @@ public class WindChart extends RaceChart implements Component<WindChartSettings>
         } else {
             for (Map.Entry<WindSource, Series> e : windSourceSpeedSeries.entrySet()) {
                 Series series = e.getValue();
-                if(visibleSeries.contains(series)) {
+                if (visibleSeries.contains(series)) {
                     chart.removeSeries(series, false);
                 }
             }
@@ -424,7 +422,7 @@ public class WindChart extends RaceChart implements Component<WindChartSettings>
         timeOfEarliestRequestInMillis = null;
         timeOfLatestRequestInMillis = null;
         
-        loadData(minTimepoint, maxTimepoint, /* append */false);
+        loadData(timeRangeWithZoomProvider.getFromTime(), timeRangeWithZoomProvider.getToTime(), /* append */false);
     }
 
     /**
@@ -504,9 +502,9 @@ public class WindChart extends RaceChart implements Component<WindChartSettings>
             {
                 // is date before first cache entry or is cache empty?
                 if (timeOfEarliestRequestInMillis == null || timeOfEarliestRequestInMillis > date.getTime()) {
-                    loadData(minTimepoint, date, /* append */ true);
+                    loadData(timeRangeWithZoomProvider.getFromTime(), date, /* append */ true);
                 } else if (timeOfLatestRequestInMillis < date.getTime()) {
-                    loadData(new Date(timeOfLatestRequestInMillis), maxTimepoint, /* append */true);
+                    loadData(new Date(timeOfLatestRequestInMillis), timeRangeWithZoomProvider.getToTime(), /* append */true);
                 }
                 // otherwise the cache spans across date and so we don't need to load anything
                 break;
@@ -515,7 +513,7 @@ public class WindChart extends RaceChart implements Component<WindChartSettings>
             {
                 // assuming play mode is replay / non-live
                 if (timeOfLatestRequestInMillis == null) {
-                    loadData(minTimepoint, maxTimepoint, /* append */false); // replace old series
+                    loadData(timeRangeWithZoomProvider.getFromTime(), timeRangeWithZoomProvider.getToTime(), /* append */false); // replace old series
                 }
                 break;
             }
@@ -525,6 +523,9 @@ public class WindChart extends RaceChart implements Component<WindChartSettings>
     @Override
     public void onResize() {
         chart.setSizeToMatchContainer();
+        // it's important here to recall the redraw method, otherwise the bug fix for wrong checkbox positions (nativeAdjustCheckboxPosition)
+        // in the BaseChart class would not be called 
+        chart.redraw();
     }
     
     private boolean needsDataLoading() {

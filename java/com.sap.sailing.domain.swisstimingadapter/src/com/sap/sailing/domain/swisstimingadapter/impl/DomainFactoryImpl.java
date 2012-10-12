@@ -27,6 +27,7 @@ import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
+import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.swisstimingadapter.Course;
@@ -92,13 +93,19 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
+    public com.sap.sailing.domain.base.DomainFactory getBaseDomainFactory() {
+        return baseDomainFactory;
+    }
+    
+    @Override
     public Regatta getOrCreateRegatta(String raceID, TrackedRegattaRegistry trackedRegattaRegistry) {
         Regatta result = trackedRegattaRegistry.getRememberedRegattaForRace(raceID);
         if (result == null) {
             result = raceIDToRegattaCache.get(raceID);
         }
         if (result == null) {
-            result = new RegattaImpl(raceID, null, trackedRegattaRegistry);
+            result = new RegattaImpl(raceID, null, trackedRegattaRegistry,
+                    com.sap.sailing.domain.base.DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT));
             logger.info("Created regatta "+result.getName()+" ("+result.hashCode()+")");
             raceIDToRegattaCache.put(raceID, result);
         }

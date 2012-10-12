@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns="http://java.sun.com/xml/ns/javaee"
+	xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee
+	http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" version="2.5">
+
+	<servlet>
+		<servlet-name>AdminApp</servlet-name>
+		<servlet-class> com.sap.sailing.server.gateway.impl.AdminApp</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>AdminApp</servlet-name>
+		<url-pattern>/admin</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>ModeratorApp</servlet-name>
+		<servlet-class> com.sap.sailing.server.gateway.impl.ModeratorApp</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>ModeratorApp</servlet-name>
+		<url-pattern>/moderator</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>ExpeditionThroughHttpPostServlet</servlet-name>
+		<servlet-class> com.sap.sailing.server.gateway.impl.ExpeditionThroughHttpPostServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>ExpeditionThroughHttpPostServlet</servlet-name>
+		<url-pattern>/expedition</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>LeaderboardsJsonExportServlet</servlet-name>
+		<servlet-class> com.sap.sailing.server.gateway.impl.LeaderboardsJsonExportServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>LeaderboardsJsonExportServlet</servlet-name>
+		<url-pattern>/leaderboards</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>LeaderboardJsonExportServlet</servlet-name>
+		<servlet-class> com.sap.sailing.server.gateway.impl.LeaderboardJsonExportServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>LeaderboardJsonExportServlet</servlet-name>
+		<url-pattern>/leaderboard</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>LeaderboardGroupJsonExportServlet</servlet-name>
+		<servlet-class> com.sap.sailing.server.gateway.impl.LeaderboardGroupJsonExportServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>LeaderboardGroupJsonExportServlet</servlet-name>
+		<url-pattern>/leaderboardgroup</url-pattern>
+	</servlet-mapping>
+
+	<servlet id="jsp">
+     <servlet-name>jspServet</servlet-name>
+     <servlet-class>org.apache.jasper.servlet.JspServlet</servlet-class>
+     <init-param>
+         <param-name>logVerbosityLevel</param-name>
+         <param-value>DEBUG</param-value>
+     </init-param>
+     <init-param>
+         <param-name>fork</param-name>
+         <param-value>false</param-value>
+     </init-param>
+     <init-param>
+         <param-name>keepgenerated</param-name>
+         <param-value>true</param-value>
+     </init-param>
+ 
+     <load-on-startup>0</load-on-startup>
+   </servlet>
+ 
+   <servlet-mapping>
+     <servlet-name>jspServet</servlet-name>
+     <url-pattern>*.jsp</url-pattern>
+   </servlet-mapping>
+   
+   	<servlet>
+		<servlet-name>SimpleJspForwardServlet</servlet-name>
+		<servlet-class>com.sap.sailing.server.gateway.impl.SimpleJspForwardServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>SimpleJspForwardServlet</servlet-name>
+		<url-pattern>/events</url-pattern>
+	</servlet-mapping>
+   
+ </web-app>

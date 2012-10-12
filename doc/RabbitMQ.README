@@ -1,0 +1,137 @@
+See http://www.rabbitmq.com/download.html
+
+On Windows, setting up RabbitMQ requires downloading Erlang and and RabbitMQ installer.
+Although on 64bit, the 64bit Erlang wouldn't work for me, and I installed the 32bit Erlang
+and RabbitMQ versions. Those worked ok.
+
+I had to set the following global environment variables:
+
+  ERLANG_HOME=c:/Program Files/erl5.9.1/erts-5.9.1/
+  RABBITMQ_NODENAME=rabbit@localhost
+
+The RABBITMQ_NODENAME setting avoids a strange issue that otherwise happened in my case
+when Erlang is trying to lookup my hostname and can't resolve it although it's resolvable
+using, e.g., ping.
+
+
+Starting the RabbitMQ server as a service didn't work. a "rabbitmqctl status" couldn't connect.
+Instead, launching the server from the command line did the job:
+
+d043530@WDFN00263037A /cygdrive/c/Program Files (x86)/RabbitMQ Server/rabbitmq_server-2.8.4/sbin
+$ ./rabbitmq-server.bat
+Activating RabbitMQ plugins ...
+0 plugins activated:
+
+
++---+   +---+
+|   |   |   |
+|   |   |   |
+|   |   |   |
+|   +---+   +-------+
+|                   |
+| RabbitMQ  +---+   |
+|           |   |   |
+|   v2.8.4  +---+   |
+|                   |
++-------------------+
+AMQP 0-9-1 / 0-9 / 0-8
+Copyright (C) 2007-2012 VMware, Inc.
+Licensed under the MPL.  See http://www.rabbitmq.com/
+
+node           : rabbit@localhost
+app descriptor : c:/Program Files (x86)/RabbitMQ Server/rabbitmq_server-2.8.4/sbin/../ebin/rabbit.app
+home dir       : C:\Users\d043530
+config file(s) : (none)
+cookie hash    : g87gcNH9xrRolSDAnRxCPg==
+log            : C:/Users/d043530/AppData/Roaming/RabbitMQ/log/rabbit@localhost.log
+sasl log       : C:/Users/d043530/AppData/Roaming/RabbitMQ/log/rabbit@localhost-sasl.log
+database dir   : c:/Users/d043530/AppData/Roaming/RabbitMQ/db/rabbit@localhost-mnesia
+erlang version : 5.9.1
+
+-- rabbit boot start
+starting file handle cache server                                     ...done
+starting worker pool                                                  ...done
+starting database                                                     ...done
+starting database sync                                                ...done
+starting codec correctness check                                      ...done
+-- external infrastructure ready
+starting plugin registry                                              ...done
+starting auth mechanism cr-demo                                       ...done
+starting auth mechanism amqplain                                      ...done
+starting auth mechanism plain                                         ...done
+starting statistics event manager                                     ...done
+starting logging server                                               ...done
+starting exchange type direct                                         ...done
+starting exchange type fanout                                         ...done
+starting exchange type headers                                        ...done
+starting exchange type topic                                          ...done
+-- kernel ready
+starting alarm handler                                                ...done
+starting node monitor                                                 ...done
+starting cluster delegate                                             ...done
+starting guid generator                                               ...done
+starting memory monitor                                               ...done
+-- core initialized
+starting empty DB check                                               ...done
+starting exchange, queue and binding recovery                         ...done
+starting mirror queue slave sup                                       ...done
+starting adding mirrors to queues                                     ...done
+-- message delivery logic ready
+starting error log relay                                              ...done
+starting networking                                                   ...done
+starting direct client                                                ...done
+starting notify cluster nodes                                         ...done
+
+broker running
+
+To get a list of the current exchanges declared, try this:
+
+d043530@WDFN00263037A /cygdrive/c/Program Files (x86)/RabbitMQ Server/rabbitmq_server-2.8.4/sbin
+$ ./rabbitmqctl.bat  list_exchanges
+Listing exchanges ...
+amq.direct      direct
+amq.topic       topic
+updates fanout
+amq.rabbitmq.trace      topic
+amq.rabbitmq.log        topic
+amq.fanout      fanout
+amq.headers     headers
+        direct
+amq.match       headers
+...done.
+
+Querying the server state should work with something like this:
+
+d043530@WDFN00263037A /cygdrive/c/Program Files (x86)/RabbitMQ Server/rabbitmq_server-2.8.4/sbin
+$ ./rabbitmqctl.bat status
+Status of node rabbit@localhost ...
+[{pid,7600},
+ {running_applications,[{rabbit,"RabbitMQ","2.8.4"},
+                        {mnesia,"MNESIA  CXC 138 12","4.7"},
+                        {os_mon,"CPO  CXC 138 46","2.2.9"},
+                        {sasl,"SASL  CXC 138 11","2.2.1"},
+                        {stdlib,"ERTS  CXC 138 10","1.18.1"},
+                        {kernel,"ERTS  CXC 138 10","2.15.1"}]},
+ {os,{win32,nt}},
+ {erlang_version,"Erlang R15B01 (erts-5.9.1) [smp:4:4] [async-threads:30]\n"},
+ {memory,[{total,14832576},
+          {processes,5354833},
+          {processes_used,5354818},
+          {system,9477743},
+          {atom,383301},
+          {atom_used,352292},
+          {binary,233728},
+          {code,6334821},
+          {ets,442068}]},
+ {vm_memory_high_watermark,0.10174284453305112},
+ {vm_memory_limit,858993459},
+ {disk_free_limit,1000000000},
+ {disk_free,38736687104},
+ {file_descriptors,[{total_limit,924},
+                    {total_used,4},
+                    {sockets_limit,829},
+                    {sockets_used,2}]},
+ {processes,[{limit,1048576},{used,126}]},
+ {run_queue,0},
+ {uptime,4479}]
+...done.

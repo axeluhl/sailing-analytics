@@ -9,13 +9,19 @@ public class Util {
     /**
      * Adds all elements from <code>what</code> to <code>addTo</code> and returns <code>addTo</code> for chained use.
      */
-    public static <T> Collection<T> addAll(Iterable<T> what, Collection<T> addTo) {
+    public static <T> Collection<T> addAll(Iterable<? extends T> what, Collection<T> addTo) {
         for (T t : what) {
             addTo.add(t);
         }
         return addTo;
     }
     
+    public static <T> void removeAll(Iterable<T> what, Collection<T> removeFrom) {
+        for (T t : what) {
+            removeFrom.remove(t);
+        }
+    }
+
     public static <T> int size(Iterable<T> i) {
         if (i instanceof Collection<?>) {
             return ((Collection<?>) i).size();
@@ -111,43 +117,27 @@ public class Util {
 
         private B b;
 
-        private int hashCode;
+        private transient int hashCode;
 
         @SuppressWarnings("unused") // required for some serialization frameworks such as GWT RPC
         private Pair() {}
         
         public Pair( A a, B b ) {
-
             this.a = a;
             this.b = b;
-            hashCode = 0;
-        }
-
-        public void setA( A a ) {
-
-            this.a = a;
             hashCode = 0;
         }
 
         public A getA( ) {
-
             return a;
         }
 
-        public void setB( B b ) {
-
-            this.b = b;
-            hashCode = 0;
-        }
-
         public B getB( ) {
-
             return b;
         }
 
         @Override
         public int hashCode( ) {
-
             if ( hashCode == 0 ) {
                 hashCode = 17;
                 hashCode = 37 * hashCode + ( a != null ? a.hashCode( ) : 0 );
@@ -158,7 +148,6 @@ public class Util {
 
         @Override
         public boolean equals( Object obj ) {
-
             boolean result;
             if ( this == obj ) {
                 result = true;
@@ -173,7 +162,6 @@ public class Util {
 
         @Override
         public String toString( ) {
-
             return "[" + (a==null?"null":a.toString( )) + ", " +
                 (b==null?"null":b.toString( )) + "]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
         }
@@ -188,55 +176,32 @@ public class Util {
 
         private C c;
 
-        private int hashCode;
+        private transient int hashCode;
 
         @SuppressWarnings("unused") // required for some serialization frameworks such as GWT RPC
         private Triple() {}
 
         public Triple( A a, B b, C c ) {
-
             this.a = a;
             this.b = b;
             this.c = c;
-            hashCode = 0;
-        }
-
-        public void setA( A a ) {
-
-            this.a = a;
             hashCode = 0;
         }
 
         public A getA( ) {
-
             return a;
         }
 
-        public void setB( B b ) {
-
-            this.b = b;
-            hashCode = 0;
-        }
-
         public B getB( ) {
-
             return b;
         }
 
-        public void setC( C c ) {
-
-            this.c = c;
-            hashCode = 0;
-        }
-
         public C getC( ) {
-
             return c;
         }
 
         @Override
         public int hashCode( ) {
-
             if ( hashCode == 0 ) {
                 hashCode = 17;
                 hashCode = 37 * hashCode + ( a != null ? a.hashCode( ) : 0 );
@@ -248,7 +213,6 @@ public class Util {
 
         @Override
         public boolean equals( Object obj ) {
-
             boolean result;
             if ( this == obj ) {
                 result = true;
@@ -263,8 +227,8 @@ public class Util {
 
         @Override
         public String toString( ) {
-
             return "[" + a + ", " + b + ", " + c + "]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
         }
     }
+
 }

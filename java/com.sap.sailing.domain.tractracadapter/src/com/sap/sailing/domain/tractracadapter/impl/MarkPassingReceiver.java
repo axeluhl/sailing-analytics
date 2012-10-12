@@ -30,8 +30,8 @@ public class MarkPassingReceiver extends AbstractReceiverWithQueue<RaceCompetito
     private static final Logger logger = Logger.getLogger(MarkPassingReceiver.class.getName());
     
     public MarkPassingReceiver(DynamicTrackedRegatta trackedRegatta, com.tractrac.clientmodule.Event tractracEvent,
-            DomainFactory domainFactory) {
-        super(domainFactory, tractracEvent, trackedRegatta);
+            Simulator simulator, DomainFactory domainFactory) {
+        super(domainFactory, tractracEvent, trackedRegatta, simulator);
     }
 
     /**
@@ -90,8 +90,12 @@ public class MarkPassingReceiver extends AbstractReceiverWithQueue<RaceCompetito
                     markPassings.add(passing);
                 }
             }
-            trackedRace.updateMarkPassings(getDomainFactory().getOrCreateCompetitor(event.getA().getCompetitor()),
-                    markPassings);
+            if (getSimulator() != null) {
+                getSimulator().delayMarkPassings(getDomainFactory().getOrCreateCompetitor(event.getA().getCompetitor()), markPassings);
+            } else {
+                trackedRace.updateMarkPassings(getDomainFactory().getOrCreateCompetitor(event.getA().getCompetitor()),
+                        markPassings);
+            }
         } else {
             logger.warning("Couldn't find tracked race for race " + event.getA().getRace().getName()
                     + ". Dropping mark passing event " + event);

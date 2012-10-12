@@ -4,13 +4,13 @@ import java.util.Collection;
 import java.util.Date;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.sap.sailing.domain.common.RaceIdentifier;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 
 public class GetWindInfoAction extends DefaultAsyncAction<WindInfoForRaceDTO> {
     private final SailingServiceAsync sailingService;
-    private final RaceIdentifier raceIdentifier;
+    private final RegattaAndRaceIdentifier raceIdentifier;
     private Date from;
     private long millisecondsStepWidth;
     private int numberOfFixes;
@@ -23,7 +23,7 @@ public class GetWindInfoAction extends DefaultAsyncAction<WindInfoForRaceDTO> {
     private enum CallVariants { Variant1, Variant2 };
     private final CallVariants callVariant;
 
-    public GetWindInfoAction(SailingServiceAsync sailingService, RaceIdentifier raceIdentifier, Date from, long millisecondsStepWidth,
+    public GetWindInfoAction(SailingServiceAsync sailingService, RegattaAndRaceIdentifier raceIdentifier, Date from, long millisecondsStepWidth,
             int numberOfFixes, Collection<String> windSourceTypeNames, AsyncCallback<WindInfoForRaceDTO> callback) {
         super(callback);
         this.sailingService = sailingService;
@@ -35,7 +35,7 @@ public class GetWindInfoAction extends DefaultAsyncAction<WindInfoForRaceDTO> {
         callVariant = CallVariants.Variant1;
     }
 
-    public GetWindInfoAction(SailingServiceAsync sailingService, RaceIdentifier raceIdentifier, Date fromDate,
+    public GetWindInfoAction(SailingServiceAsync sailingService, RegattaAndRaceIdentifier raceIdentifier, Date fromDate,
             Date toDate, long resolutionInMilliseconds, Collection<String> windSourceTypeNames,
             AsyncCallback<WindInfoForRaceDTO> callback) {
         super(callback);

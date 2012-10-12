@@ -1,6 +1,7 @@
 package com.sap.sailing.kiworesultimport.impl;
 
 import java.io.File;
+import java.util.logging.Logger;
 
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -8,6 +9,8 @@ import org.osgi.framework.BundleContext;
 import com.sap.sailing.domain.common.ScoreCorrectionProvider;
 
 public class Activator implements BundleActivator {
+    private static final Logger logger = Logger.getLogger(Activator.class.getName());
+    
     private static final String SCAN_DIR_PATH_PROPERTY_NAME = "kiwo.results";
     private static final String DEFAULT_SCAN_DIR = "kiworesults";
     
@@ -17,8 +20,10 @@ public class Activator implements BundleActivator {
         if (scanDirPath == null) {
             scanDirPath = System.getProperty(SCAN_DIR_PATH_PROPERTY_NAME, DEFAULT_SCAN_DIR);
         }
+        final ScoreCorrectionProviderImpl service = new ScoreCorrectionProviderImpl(new File(scanDirPath));
         context.registerService(ScoreCorrectionProvider.class,
-                new ScoreCorrectionProviderImpl(new File(scanDirPath)), /* properties */ null);
+                service, /* properties */ null);
+        logger.info("Scanning "+scanDirPath+" for official result lists of "+service.getName());
     }
 
     @Override

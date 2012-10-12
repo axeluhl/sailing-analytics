@@ -9,15 +9,10 @@ import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.TabPanel;
-import com.sap.sailing.domain.common.DefaultLeaderboardName;
 import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
 import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
-import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.RegattaDisplayer;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
-import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
-import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
-import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettingsFactory;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.panels.UserStatusPanel;
 
@@ -37,7 +32,10 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
         tabPanel.setSize("95%", "95%");
 
         regattaDisplayers = new HashSet<RegattaDisplayer>();
-        
+
+//        SailingEventManagementPanel sailingEventManagementPanel = new SailingEventManagementPanel(sailingService, this, stringMessages);
+//        tabPanel.add(sailingEventManagementPanel, stringMessages.events());
+
         RegattaStructureManagementPanel eventStructureManagementPanel = new RegattaStructureManagementPanel(sailingService, this, stringMessages, this);
         tabPanel.add(eventStructureManagementPanel, stringMessages.regattas());
         regattaDisplayers.add(eventStructureManagementPanel);
@@ -56,39 +54,37 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
         regattaDisplayers.add(trackedRacesManagementPanel);
         trackedRacesManagementPanel.setSize("90%", "90%");
         tabPanel.add(trackedRacesManagementPanel, stringMessages.trackedRaces(),false);
+        RaceCourseManagementPanel raceCourseManagementPanel = new RaceCourseManagementPanel(sailingService, this, this, stringMessages);
+        regattaDisplayers.add(raceCourseManagementPanel);
+        raceCourseManagementPanel.setSize("90%", "90%");
+        tabPanel.add(raceCourseManagementPanel, stringMessages.courseLayout(),false);
+
         final AsyncActionsExecutor asyncActionsExecutor = new AsyncActionsExecutor();
         WindPanel windPanel = new WindPanel(sailingService, asyncActionsExecutor, this, this, stringMessages);
         regattaDisplayers.add(windPanel);
         windPanel.setSize("90%", "90%");
         tabPanel.add(windPanel, stringMessages.wind(), /* asHTML */ false);
-        LeaderboardSettings defaultLeaderboardSettings = LeaderboardSettingsFactory.getInstance()
-                .createNewDefaultSettings(/* racesToShow */ null, /* namesOfRacesToShow */ null, null, /* autoExpandFirstRace */false);
-        final LeaderboardPanel defaultLeaderboardPanel = new LeaderboardPanel(sailingService, asyncActionsExecutor,
-                defaultLeaderboardSettings,
-                /* preSelectedRace */null, new CompetitorSelectionModel(/* hasMultiSelection */true),
-                DefaultLeaderboardName.DEFAULT_LEADERBOARD_NAME, /* leaderboard group name */null, this,
-                stringMessages, userAgentType);
-        defaultLeaderboardPanel.setSize("90%", "90%");
-        tabPanel.add(defaultLeaderboardPanel, stringMessages.defaultLeaderboard(), /* asHTML */ false);
         final LeaderboardGroupConfigPanel leaderboardGroupConfigPanel = new LeaderboardGroupConfigPanel(sailingService, this, this, stringMessages);
         leaderboardGroupConfigPanel.setSize("90%", "90%");
         tabPanel.add(leaderboardGroupConfigPanel, stringMessages.leaderboardGroupConfiguration(), /*asHTML*/ false);
         regattaDisplayers.add(leaderboardGroupConfigPanel);
-        final LeaderboardConfigPanel leaderboardConfigPanel = new LeaderboardConfigPanel(sailingService, this, this, stringMessages);
+        final LeaderboardConfigPanel leaderboardConfigPanel = new LeaderboardConfigPanel(sailingService, this, this, stringMessages,
+                /* showRaceDetails */ true);
         leaderboardConfigPanel.setSize("90%", "90%");
         tabPanel.add(leaderboardConfigPanel, stringMessages.leaderboardConfiguration(), /* asHTML */ false);
         regattaDisplayers.add(leaderboardConfigPanel);
+        tabPanel.add(new FregResultImportUrlPanel(sailingService, this, stringMessages), stringMessages.fregResultImportUrls(), /* asHTML */ false);
         tabPanel.add(new ReplicationPanel(sailingService, this, stringMessages), stringMessages.replication(), /* asHTML */ false);
         
         tabPanel.selectTab(0);
         tabPanel.addSelectionHandler(new SelectionHandler<Integer>() {
-			@Override
-			public void onSelection(SelectionEvent<Integer> event) {
-				if (leaderboardConfigPanel.isVisible()) {
-				    leaderboardConfigPanel.loadAndRefreshAllData();
-				}
-			}
-		});
+            @Override
+            public void onSelection(SelectionEvent<Integer> event) {
+                if (leaderboardConfigPanel.isVisible()) {
+                    leaderboardConfigPanel.loadAndRefreshLeaderboards();
+                }
+            }
+        });
         fillRegattas();
     }
 

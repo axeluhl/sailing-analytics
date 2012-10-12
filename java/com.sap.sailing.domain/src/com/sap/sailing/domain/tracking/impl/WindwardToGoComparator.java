@@ -2,12 +2,15 @@ package com.sap.sailing.domain.tracking.impl;
 
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.SortedSet;
 
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.NoWindError;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 
@@ -21,10 +24,12 @@ import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 public class WindwardToGoComparator implements Comparator<TrackedLegOfCompetitor> {
     private final TrackedLeg trackedLeg;
     private final TimePoint timePoint;
+    private final Map<TrackedLegOfCompetitor, Distance> wwdtgCache;
 
     public WindwardToGoComparator(TrackedLeg trackedLeg, TimePoint timePoint) {
         this.trackedLeg = trackedLeg;
         this.timePoint = timePoint;
+        wwdtgCache = new HashMap<TrackedLegOfCompetitor, Distance>();
     }
     
     @Override
@@ -32,21 +37,28 @@ public class WindwardToGoComparator implements Comparator<TrackedLegOfCompetitor
         assert o1.getLeg() == o2.getLeg();
         try {
             int result;
-            if (o1.hasFinishedLeg(timePoint)) {
-                if (o2.hasFinishedLeg(timePoint)) {
-                    result = trackedLeg.getTrackedRace().getMarkPassing(o1.getCompetitor(), trackedLeg.getLeg().getTo()).getTimePoint().compareTo(
-                            trackedLeg.getTrackedRace().getMarkPassing(o2.getCompetitor(), trackedLeg.getLeg().getTo()).getTimePoint());
+            // To avoid having to synchronize on the competitors' mark passings, grab the decisive mark passings up front and
+            // derive hasStarted / hasFinished from them; this is redundant to TrackedLegOfCompetitor.hasStarted/hasFinished but
+            // avoids the heavy-weight synchronization-based "locking". It shall help avoid NPEs in case the mark passings
+            // for a competitor change after deciding hasFinished and grabbing the mark passing (see bug 875).
+            final MarkPassing o1MarkPassingForLegEnd = trackedLeg.getTrackedRace().getMarkPassing(o1.getCompetitor(), trackedLeg.getLeg().getTo());
+            final MarkPassing o2MarkPassingForLegEnd = trackedLeg.getTrackedRace().getMarkPassing(o2.getCompetitor(), trackedLeg.getLeg().getTo());
+            final boolean o1HasFinishedLeg = o1MarkPassingForLegEnd != null && o1MarkPassingForLegEnd.getTimePoint().compareTo(timePoint) <= 0;
+            final boolean o2HasFinishedLeg = o2MarkPassingForLegEnd != null && o2MarkPassingForLegEnd.getTimePoint().compareTo(timePoint) <= 0;
+            if (o1HasFinishedLeg) {
+                if (o2HasFinishedLeg) {
+                    result = o1MarkPassingForLegEnd.getTimePoint().compareTo(o2MarkPassingForLegEnd.getTimePoint());
                 } else {
                     result = -1; // o1 < o2 because o1 already finished the leg but o2 didn't
                 }
-            } else if (o2.hasFinishedLeg(timePoint)) {
+            } else if (o2HasFinishedLeg) {
                 result = 1; // o1 > o2 because o2 already finished the leg but o1 didn't
             } else {
                 // both didn't finish the leg yet; check which one has started:
                 if (o1.hasStartedLeg(timePoint)) {
                     if (o2.hasStartedLeg(timePoint)) {
-                        Distance o1d = o1.getWindwardDistanceToGo(timePoint);
-                        Distance o2d = o2.getWindwardDistanceToGo(timePoint);
+                        Distance o1d = getWindwardDistanceToGo(o1);
+                        Distance o2d = getWindwardDistanceToGo(o2);
                         result = o1d==null?(o2d==null?0:1):o2d==null?1:o1d.compareTo(o2d); // smaller distance to go means smaller rank
                     } else {
                         result = -1;
@@ -62,5 +74,14 @@ public class WindwardToGoComparator implements Comparator<TrackedLegOfCompetitor
         } catch (NoWindException e) {
             throw new NoWindError(e);
         }
+    }
+
+    private Distance getWindwardDistanceToGo(TrackedLegOfCompetitor o1) throws NoWindException {
+        Distance result = wwdtgCache.get(o1);
+        if (result == null) {
+            result = o1.getWindwardDistanceToGo(timePoint);
+            wwdtgCache.put(o1, result);
+        }
+        return result;
     }
 }

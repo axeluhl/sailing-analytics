@@ -48,7 +48,7 @@ public class DouglasPeucker<ItemType, FixType extends GPSFix> {
     }
 
     private Pair<GPSFix, Distance> getFixWithGreatestCrossTrackErrorInInterval(TimePoint from, TimePoint to) {
-    Distance maxDistance = Distance.NULL;
+        Distance maxDistance = Distance.NULL;
         FixType firstFixAtOrAfter = track.getFirstFixAtOrAfter(from);
         Pair<GPSFix, Distance> result = null;
         if (firstFixAtOrAfter != null) {
@@ -56,7 +56,8 @@ public class DouglasPeucker<ItemType, FixType extends GPSFix> {
             FixType toFix = track.getLastFixAtOrBefore(to);
             if (toFix != null) {
                 final Bearing bearing = fromPosition.getBearingGreatCircle(toFix.getPosition());
-                synchronized (track) {
+                track.lockForRead();
+                try {
                     Iterator<FixType> fixIter = track.getFixesIterator(from, /* inclusive */false);
                     if (executor != null) {
                         result = getFixWithGreatestCrossTrackErrorUsingExecutor(to, maxDistance, fromPosition, bearing,
@@ -77,6 +78,8 @@ public class DouglasPeucker<ItemType, FixType extends GPSFix> {
                         }
                         result = new Pair<GPSFix, Distance>(fixFurthestAway, maxDistance);
                     }
+                } finally {
+                    track.unlockAfterRead();
                 }
             }
         }

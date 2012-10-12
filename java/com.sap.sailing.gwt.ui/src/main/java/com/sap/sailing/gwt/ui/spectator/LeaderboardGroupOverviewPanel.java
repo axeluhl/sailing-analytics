@@ -63,9 +63,9 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
     public static final String STYLE_NAME_PREFIX = "groupOverviewPanel-";
     private static final AnchorTemplates ANCHORTEMPLATE = GWT.create(AnchorTemplates.class);
     
-    private SailingServiceAsync sailingService;
-    private ErrorReporter errorReporter;
-    private StringMessages stringMessages;
+    private final SailingServiceAsync sailingService;
+    private final ErrorReporter errorReporter;
+    private final StringMessages stringMessages;
 
     private TextBox locationTextBox;
     private TextBox nameTextBox;
@@ -92,8 +92,11 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
     private ListDataProvider<RaceColumnDTO> racesDataProvider;
     
     private List<LeaderboardGroupDTO> availableGroups;
+    private final boolean showRaceDetails;
 
-    public LeaderboardGroupOverviewPanel(SailingServiceAsync sailingService, ErrorReporter errorReporter, StringMessages stringMessages) {
+    public LeaderboardGroupOverviewPanel(SailingServiceAsync sailingService, ErrorReporter errorReporter,
+            StringMessages stringMessages, boolean showRaceDetails) {
+        this.showRaceDetails = showRaceDetails;
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
@@ -220,7 +223,9 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
             @Override
             public SafeHtml getValue(LeaderboardGroupDTO group) {
                 String debugParam = Window.Location.getParameter("gwt.codesvr");
-                String link = URLFactory.INSTANCE.encode("/gwt/Spectator.html?leaderboardGroupName=" + group.name + "&root=overview"
+                String link = URLFactory.INSTANCE.encode("/gwt/Spectator.html?"+
+                        (showRaceDetails ? "showRaceDetails=true&" : "") +
+                        "leaderboardGroupName=" + group.name + "&root=overview"
                         + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""));
                 return ANCHORTEMPLATE.anchor(link, group.name);
             }
@@ -254,7 +259,7 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
         };
         groupsStartDateColumn.setSortable(true);
         
-        groupsTable = new CellTable<LeaderboardGroupDTO>(200, tableResources);
+        groupsTable = new CellTable<LeaderboardGroupDTO>(10000, tableResources);
         groupsTable.setWidth("100%");
         groupsSelectionModel = new SingleSelectionModel<LeaderboardGroupDTO>();
         groupsSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
@@ -348,6 +353,7 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
                 LeaderboardGroupDTO selectedGroup = groupsSelectionModel.getSelectedObject();
                 String debugParam = Window.Location.getParameter("gwt.codesvr");
                 String link = URLFactory.INSTANCE.encode("/gwt/Leaderboard.html?name=" + leaderboard.name
+                        + (showRaceDetails ? "&showRaceDetails=true" : "")
                         + "&leaderboardGroupName=" + selectedGroup.name + "&root=overview"
                         + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""));
                 return ANCHORTEMPLATE.anchor(link, leaderboard.name);
@@ -379,7 +385,7 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
             }
         };
         
-        leaderboardsTable = new CellTable<StrippedLeaderboardDTO>(200, tableResources);
+        leaderboardsTable = new CellTable<StrippedLeaderboardDTO>(10000, tableResources);
         leaderboardsTable.setWidth("100%");
         leaderboardsSelectionModel = new SingleSelectionModel<StrippedLeaderboardDTO>();
         leaderboardsSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
@@ -489,7 +495,7 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
     }
 
     private void loadGroups() {
-        sailingService.getLeaderboardGroups(new AsyncCallback<List<LeaderboardGroupDTO>>() {
+        sailingService.getLeaderboardGroups(true /*withGeoLocationData*/, new AsyncCallback<List<LeaderboardGroupDTO>>() {
             @Override
             public void onSuccess(List<LeaderboardGroupDTO> result) {
                 availableGroups = result == null ? new ArrayList<LeaderboardGroupDTO>() : result;

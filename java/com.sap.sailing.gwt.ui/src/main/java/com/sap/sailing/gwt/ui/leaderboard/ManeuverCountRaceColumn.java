@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.ui.leaderboard;
 
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -10,14 +9,16 @@ import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.Header;
+import com.sap.sailing.domain.common.DetailType;
+import com.sap.sailing.domain.common.InvertibleComparator;
+import com.sap.sailing.domain.common.impl.InvertibleComparatorAdapter;
+import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.LegDetailColumn.LegDetailField;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardEntryDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardRowDTO;
 import com.sap.sailing.gwt.ui.shared.LegEntryDTO;
-import com.sap.sailing.domain.common.DetailType;
-import com.sap.sailing.domain.common.impl.Util.Triple;
 
 public class ManeuverCountRaceColumn extends ExpandableSortableColumn<String> implements HasStringAndDoubleValue {
 
@@ -70,8 +71,8 @@ public class ManeuverCountRaceColumn extends ExpandableSortableColumn<String> im
     public ManeuverCountRaceColumn(LeaderboardPanel leaderboardPanel, RaceNameProvider raceNameProvider,
             StringMessages stringConstants, List<DetailType> maneuverDetailSelection, String headerStyle,
             String columnStylee, String detailHeaderStyle, String detailColumnStyle) {
-        super(leaderboardPanel, /* expandable */true /* all legs have details */, new TextCell(), stringConstants,
-                detailHeaderStyle, detailColumnStyle, maneuverDetailSelection);
+        super(leaderboardPanel, /* expandable */true /* all legs have details */, new TextCell(), DetailType.NUMBER_OF_MANEUVERS.getDefaultSortingOrder(), 
+                stringConstants, detailHeaderStyle, detailColumnStyle, maneuverDetailSelection);
         setHorizontalAlignment(ALIGN_CENTER);
         this.stringConstants = stringConstants;
         this.raceNameProvider = raceNameProvider;
@@ -182,14 +183,13 @@ public class ManeuverCountRaceColumn extends ExpandableSortableColumn<String> im
     }
 
     @Override
-    public Comparator<LeaderboardRowDTO> getComparator() {
-        return new Comparator<LeaderboardRowDTO>() {
+    public InvertibleComparator<LeaderboardRowDTO> getComparator() {
+        return new InvertibleComparatorAdapter<LeaderboardRowDTO>(getPreferredSortingOrder().isAscending()) {
             @Override
             public int compare(LeaderboardRowDTO o1, LeaderboardRowDTO o2) {
-                boolean ascending = isSortedAscendingForThisColumn(getLeaderboardPanel().getLeaderboardTable());
                 Double val1 = getDoubleValue(o1);
                 Double val2 = getDoubleValue(o2);
-                return val1 == null ? val2 == null ? 0 : ascending ? 1 : -1 : val2 == null ? ascending ? -1 : 1 : val1
+                return val1 == null ? val2 == null ? 0 : isAscending() ? 1 : -1 : val2 == null ? isAscending() ? -1 : 1 : val1
                         .compareTo(val2);
             }
         };
@@ -258,12 +258,13 @@ public class ManeuverCountRaceColumn extends ExpandableSortableColumn<String> im
             String detailColumnStyle) {
         Map<DetailType, SortableColumn<LeaderboardRowDTO, ?>> result = new HashMap<DetailType, SortableColumn<LeaderboardRowDTO, ?>>();
         result.put(DetailType.TACK, new FormattedDoubleLegDetailColumn(stringConstants.tack(), "", new NumberOfTacks(),
-                0, getLeaderboardPanel().getLeaderboardTable(), detailHeaderStyle, detailColumnStyle));
+                DetailType.TACK.getPrecision(), DetailType.TACK.getDefaultSortingOrder(), detailHeaderStyle, detailColumnStyle));
         result.put(DetailType.JIBE, new FormattedDoubleLegDetailColumn(stringConstants.jibe(), "", new NumberOfJibes(),
-                0, getLeaderboardPanel().getLeaderboardTable(), detailHeaderStyle, detailColumnStyle));
-        result.put(DetailType.PENALTY_CIRCLE, new FormattedDoubleLegDetailColumn(stringConstants.penaltyCircle(), "",
-                new NumberOfPenaltyCircles(), 0, getLeaderboardPanel().getLeaderboardTable(), detailHeaderStyle,
-                detailColumnStyle));
+                DetailType.JIBE.getPrecision(), DetailType.JIBE.getDefaultSortingOrder(), detailHeaderStyle, detailColumnStyle));
+        result.put(DetailType.PENALTY_CIRCLE,
+                new FormattedDoubleLegDetailColumn(stringConstants.penaltyCircle(), "", new NumberOfPenaltyCircles(),
+                        DetailType.PENALTY_CIRCLE.getPrecision(), DetailType.PENALTY_CIRCLE.getDefaultSortingOrder(),
+                        detailHeaderStyle, detailColumnStyle));
         return result;
     }
 

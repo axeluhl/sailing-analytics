@@ -59,7 +59,7 @@ public class ManeuverAnalysis505Test extends AbstractManeuverDetectionTestCase {
         assertNotNull(fromDate);
         assertNotNull(toDate);
         List<Maneuver> maneuvers = getTrackedRace().getManeuvers(competitor, new MillisecondsTimePoint(fromDate),
-                new MillisecondsTimePoint(toDate));
+                new MillisecondsTimePoint(toDate), /* waitForLatest */ true);
         maneuversInvalid = new ArrayList<Maneuver>(maneuvers);
 
         assertManeuver(maneuvers, ManeuverType.TACK,
@@ -82,7 +82,7 @@ public class ManeuverAnalysis505Test extends AbstractManeuverDetectionTestCase {
         assertNotNull(fromDate);
         assertNotNull(toDate);
         List<Maneuver> maneuvers = getTrackedRace().getManeuvers(competitor, new MillisecondsTimePoint(fromDate),
-                new MillisecondsTimePoint(toDate));
+                new MillisecondsTimePoint(toDate), /* waitForLatest */ true);
         maneuversInvalid = new ArrayList<Maneuver>(maneuvers);
         
         assertManeuver(maneuvers, ManeuverType.TACK,

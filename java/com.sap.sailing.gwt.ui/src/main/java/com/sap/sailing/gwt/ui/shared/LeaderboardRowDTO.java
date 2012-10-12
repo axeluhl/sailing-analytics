@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.shared;
 
+import java.util.Date;
 import java.util.Map;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
@@ -13,7 +14,11 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 public class LeaderboardRowDTO implements IsSerializable {
     public CompetitorDTO competitor;
     public Map<String, LeaderboardEntryDTO> fieldsByRaceColumnName;
-    public Integer carriedPoints;
+    public Double carriedPoints;
+    public Double totalTimeSailedInSeconds;
+    public Double totalTimeSailedDownwindInSeconds;
+    public Double maximumSpeedOverGroundInKnots;
+    public Date whenMaximumSpeedOverGroundWasAchieved;
     
     @Override
     public int hashCode() {

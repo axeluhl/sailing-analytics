@@ -17,6 +17,8 @@ Name them, using "Ctrl-a A", according to the following scheme:
 
 0$ dev  1$ test  2$ prod1  3$ prod2  4$ wind  5$ mongo  6$ ssh tunnel  7-$ build  8$ logs  9*$ storeandforward
 
+Additional sessions may be used for the race committee app server.
+
 The first four sessions are used to run the four server instances. Session 4
 is used to run the udpmirror script that receives wind data through UDP and
 forwards to the four server instances. Session 5 hosts a test MongoDB instance.
@@ -153,17 +155,19 @@ First, check out the branch you want to re-build:
    using SSH with the -A argument, or by invoking the alias "sa" and
    entering the password for the trac user's SSH key
 
- - ensure there is an ssh tunnel with port forward from port 12347 to
-   port 22, e.g., by running the following command:
-
-   "ssh -A -L 12347:localhost:22 trac@localhost"
-
  - "cd git/java"
 
  - "git checkout -f <branchname>"  where <branchname> is either one of
    dev, test, prod1 or prod2
 
- - ensure that there is an ssh tunnel to localhost that 
+ - ensure the "ulimit -n" output is at least 4096 to enable the GWT compiler to assemble
+   the resource sets which consist of many files that all need to be opened concurrently.
+   Currently, the maximum value for "ulimit -n" is configured in /etc/security/limits.conf
+   and is set to 16384. This specified the maximum amount to which a user's shell can set
+   this value. The ~trac/.bash_profile contains a "ulimit -n 4096" command, but when
+   running "screen" the shells usually are no login shells. You need to make sure you
+   run ~trac/.bash_profile in the build shell to set the limit of open files to at least
+   4096.
 
  - rm -rf com.sap.sailing.gwt.ui/com.sap.sailing.gwt.ui.*; mvn -fae clean install 2>&1 | tee log
 

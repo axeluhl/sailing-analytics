@@ -6,53 +6,46 @@ import java.util.logging.Logger;
 
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceEvent;
-import org.osgi.framework.ServiceListener;
-import org.osgi.framework.ServiceReference;
-import org.osgi.util.tracker.ServiceTracker;
 
-import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.server.RacingEventService;
 
-public class Activator implements BundleActivator, ServiceListener {
+public class Activator implements BundleActivator {
     private static final Logger logger = Logger.getLogger(Activator.class.getName());
     
-    private static BundleContext fContext;
-    
-    public static BundleContext getDefault() {
-        return fContext;
+    private static ExtenderBundleTracker extenderBundleTracker;
+
+    private final RacingEventService racingEventService;
+
+    public Activator() {
+        // there is exactly one instance of the racingEventService in the whole server
+        racingEventService = new RacingEventServiceImpl();
     }
-
+    
     public void start(BundleContext context) throws Exception {
-        fContext = context;
-        RacingEventService service = new RacingEventServiceImpl();
+        extenderBundleTracker = new ExtenderBundleTracker(context);
+        extenderBundleTracker.open();
 
-        // register the racing service
-        context.registerService(RacingEventService.class.getName(), service, null);
+        // register the racing service in the OSGi registry
+        context.registerService(RacingEventService.class.getName(), racingEventService, null);
 
         logger.log(Level.INFO, "Started "+context.getBundle().getSymbolicName()+". Character encoding: "+
                 Charset.defaultCharset());
     }
     
     public void stop(BundleContext context) throws Exception {
-        fContext = null;
-        ServiceTracker<RacingEventService, RacingEventService> racingEventServiceTracker = new ServiceTracker<RacingEventService, RacingEventService>(context, RacingEventService.class.getName(), null);
-        
-        racingEventServiceTracker.open();
-        // grab the service
-        RacingEventService service = (RacingEventService) racingEventServiceTracker.getService();
-        for (Triple<Regatta, RaceDefinition, String> windTracker : service.getWindTrackedRaces()) {
-            service.stopTrackingWind(windTracker.getA(), windTracker.getB());
+        if(extenderBundleTracker != null) {
+            extenderBundleTracker.close();
         }
-        for (Regatta regatta : service.getAllRegattas()) {
-            service.stopTracking(regatta);
-        }
-    }
 
-    public void serviceChanged(ServiceEvent ev) {
-        ServiceReference<?> sr = ev.getServiceReference();
-        System.out.println("service changed: "+ev+" for service reference "+sr);
+        // stop the tracking of the wind and all races
+        for (Triple<Regatta, RaceDefinition, String> windTracker : racingEventService.getWindTrackedRaces()) {
+            racingEventService.stopTrackingWind(windTracker.getA(), windTracker.getB());
+        }
+        for (Regatta regatta : racingEventService.getAllRegattas()) {
+            racingEventService.stopTracking(regatta);
+        }
     }
 }

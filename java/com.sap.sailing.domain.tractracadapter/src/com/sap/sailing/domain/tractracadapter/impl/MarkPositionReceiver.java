@@ -7,15 +7,17 @@ import java.util.logging.Logger;
 import com.maptrack.client.io.TypeController;
 import com.sap.sailing.domain.base.Buoy;
 import com.sap.sailing.domain.base.Course;
-import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util.Triple;
-import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
+import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
+import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
-import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.tractrac.clientmodule.ControlPoint;
 import com.tractrac.clientmodule.Race;
@@ -67,8 +69,8 @@ public class MarkPositionReceiver extends AbstractReceiverWithQueue<ControlPoint
      *            particularly the mark position loading will be constrained to this end time.
      */
     public MarkPositionReceiver(final DynamicTrackedRegatta trackedRegatta, com.tractrac.clientmodule.Event tractracEvent,
-            TimePoint startOfTracking, TimePoint endOfTracking, final DomainFactory domainFactory) {
-        super(domainFactory, tractracEvent, trackedRegatta);
+            TimePoint startOfTracking, TimePoint endOfTracking, Simulator simulator, final DomainFactory domainFactory) {
+        super(domainFactory, tractracEvent, trackedRegatta, simulator);
         this.startOfTracking = startOfTracking;
         this.endOfTracking = endOfTracking;
         // assumption: there is currently only one race per TracTrac Event object
@@ -86,14 +88,18 @@ public class MarkPositionReceiver extends AbstractReceiverWithQueue<ControlPoint
     @Override
     public Iterable<TypeController> getTypeControllersAndStart() {
         List<TypeController> result = new ArrayList<TypeController>();
+        TimePoint now = MillisecondsTimePoint.now();
+        long fromTime = startOfTracking == null ? 0l : startOfTracking.compareTo(now) > 0 ? now.asMillis() : startOfTracking.asMillis();
+        long toTime = endOfTracking == null ? Long.MAX_VALUE : endOfTracking.asMillis();
+        logger.fine("subscribing to ControlPointPositionData for time range "+new MillisecondsTimePoint(fromTime)+"/"+
+                new MillisecondsTimePoint(toTime));
         TypeController controlPointListener = ControlPointPositionData.subscribe(getTracTracEvent(),
                 new ICallbackData<ControlPoint, ControlPointPositionData>() {
                     @Override
                     public void gotData(ControlPoint controlPoint, ControlPointPositionData record, boolean isLiveData) {
                         enqueue(new Triple<ControlPoint, ControlPointPositionData, Boolean>(controlPoint, record, isLiveData));
                     }
-                }, /* fromTime */ startOfTracking == null ? 0l : startOfTracking.asMillis(),
-                   /* toTime */ endOfTracking == null ? Long.MAX_VALUE : endOfTracking.asMillis());
+                }, fromTime, toTime);
         result.add(controlPointListener);
         setAndStartThread(new Thread(this, getClass().getName()));
         return result;
@@ -111,7 +117,12 @@ public class MarkPositionReceiver extends AbstractReceiverWithQueue<ControlPoint
         for (Race tractracRace : getTracTracEvent().getRaceList()) {
             DynamicTrackedRace trackedRace = getTrackedRace(tractracRace);
             if (trackedRace != null) {
-                trackedRace.recordFix(buoy, getDomainFactory().createGPSFixMoving(event.getB()));
+                GPSFixMoving markPosition = getDomainFactory().createGPSFixMoving(event.getB());
+                if (getSimulator() != null) {
+                    getSimulator().scheduleMarkPosition(buoy, markPosition);
+                } else {
+                    trackedRace.recordFix(buoy, markPosition);
+                }
             } else {
                 logger.warning("Couldn't find tracked race for race " + tractracRace.getName()
                         + ". Dropping mark position event " + event);

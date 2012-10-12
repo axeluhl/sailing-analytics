@@ -1,0 +1,100 @@
+package com.sap.sailing.domain.leaderboard.impl;
+
+import java.util.List;
+
+import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.RaceColumn;
+import com.sap.sailing.domain.common.ScoringSchemeType;
+
+/**
+ * A variant of the {@link HighPoint} scoring scheme which breaks ties differently and which assigns a score of 10 to
+ * the winner of a regatta, and one less for each subsequent position. This scheme is used particularly by the Extreme
+ * Sailing Series' overall leaderboard.
+ * <p>
+ * 
+ * From the Notices of Race: "13.5: If there is a tie in the Series score between two or more boats at any time, the tie
+ * shall be broken in favour of the boat that has won the most Regattas. If a tie still remains, it shall be broken in
+ * favour of the boat that had the better place at the last Regatta sailed."
+ * 
+ * @author Axel Uhl (d043530)
+ * 
+ */
+public class HighPointExtremeSailingSeriesOverall extends HighPoint {
+    private static final long serialVersionUID = -2500858156511889174L;
+
+    private static final int MAX_POINTS = 10;
+    
+    private static final int MIN_RACES_REQUIRED_TO_BE_SCORED = 5;
+
+    @Override
+    public Double getScoreForRank(RaceColumn raceColumn, Competitor competitor, int rank,
+            Integer numberOfCompetitorsInRace) {
+        Double result;
+        if (rank == 0) {
+            result = null;
+        } else {
+            result = Math.max(0.0, (double) (MAX_POINTS - rank + 1));
+        }
+        return result;
+    }
+
+    /**
+     * Implements rule 13.5 of the Extreme Sailing Series notice of race as of August 2012.
+     */
+    @Override
+    public int compareByBetterScore(List<Double> o1Scores, List<Double> o2Scores, boolean nullScoresAreBetter) {
+        assert o1Scores.size() == o2Scores.size();
+        int o1Wins = getWins(o1Scores);
+        int o2Wins = getWins(o2Scores);
+        int result = o1Wins - o2Wins;
+        if (result == 0 && o1Scores.size() >= 1 && o2Scores.size() >= 1) {
+            result = o1Scores.get(o1Scores.size()-1).compareTo(o2Scores.get(o2Scores.size()-1));
+        }
+        return result;
+    }
+
+    /**
+     * Counts a competitor's wins by comparing the scores to {@link #MAX_POINTS} which is the score attributed to a race
+     * won
+     */
+    private int getWins(List<Double> scores) {
+        int wins = 0;
+        for (Double score : scores) {
+            if (score == MAX_POINTS) {
+                wins++;
+            }
+        }
+        return wins;
+    }
+
+    /**
+     * Generally, in the Extreme Sailing Series the number of races scored doesn't matter. However, if a competitor
+     * scored fewer than five regattas, the competitor doesn't participate in the overall ranking and is therefore to be
+     * sorted worse than all competitors completing five or more regattas. Note that here, for an "overall" leaderboard,
+     * a column represents a regatta, not a single race.
+     */
+    @Override
+    public int compareByNumberOfRacesScored(int competitor1NumberOfRacesScored, int competitor2NumberOfRacesScored) {
+        int result;
+        if (competitor1NumberOfRacesScored >= MIN_RACES_REQUIRED_TO_BE_SCORED) {
+            if (competitor2NumberOfRacesScored >= MIN_RACES_REQUIRED_TO_BE_SCORED) {
+                result = 0;
+            } else {
+                result = -1; // competitor1 is better ("less") because it's the only one of the two scoring more than MIN_RACES_REQUIRED_TO_BE_SCORED
+            }
+        } else {
+            if (competitor2NumberOfRacesScored >= MIN_RACES_REQUIRED_TO_BE_SCORED) {
+                result = 1; // competitor2 is better ("less") because it's the only one of the two scoring more than MIN_RACES_REQUIRED_TO_BE_SCORED
+            } else {
+                result = 0;
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public ScoringSchemeType getType() {
+        return ScoringSchemeType.HIGH_POINT_ESS_OVERALL;
+    }
+
+}

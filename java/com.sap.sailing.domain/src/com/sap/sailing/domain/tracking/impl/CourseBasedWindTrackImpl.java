@@ -34,12 +34,14 @@ public class CourseBasedWindTrackImpl extends WindTrackImpl {
     
     public CourseBasedWindTrackImpl(TrackedRace trackedRace, long millisecondsOverWhichToAverage, double baseConfidence) {
         super(millisecondsOverWhichToAverage, baseConfidence,
-                /* useSpeed: no usable wind speed information can be extracted from course */ WindSourceType.COURSE_BASED.useSpeed());
+                /* useSpeed: no usable wind speed information can be extracted from course */ WindSourceType.COURSE_BASED.useSpeed(),
+                CourseBasedWindTrackImpl.class.getSimpleName()+" for race "+trackedRace.getRace().getName());
         this.trackedRace = trackedRace;
     }
 
     @Override
     protected NavigableSet<Wind> getInternalRawFixes() {
+        assertReadLock();
         NavigableSet<Wind> result;
         if (trackedRace.raceIsKnownToStartUpwind()) {
             TimePoint startTime = trackedRace.getStartOfRace();

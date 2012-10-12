@@ -9,14 +9,17 @@ import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
 
-public class UpdateLeaderboardScoreCorrection extends AbstractLeaderboardColumnOperation<Triple<Integer, Integer, Boolean>> {
+public class UpdateLeaderboardScoreCorrection extends AbstractLeaderboardColumnOperation<Triple<Double, Double, Boolean>> {
     private static final long serialVersionUID = -977025759476022993L;
     private final String competitorIdAsString;
-    private final Integer correctedScore;
+    private final Double correctedScore;
     private final TimePoint timePoint;
     
+    /**
+     * @param timePoint the time point for which to deliver leaderboard results as the result of this operation
+     */
     public UpdateLeaderboardScoreCorrection(String leaderboardName, String columnName, String competitorIdAsString,
-            Integer correctedScore, TimePoint timePoint) {
+            Double correctedScore, TimePoint timePoint) {
         super(leaderboardName, columnName);
         this.competitorIdAsString = competitorIdAsString;
         this.correctedScore = correctedScore;
@@ -36,10 +39,10 @@ public class UpdateLeaderboardScoreCorrection extends AbstractLeaderboardColumnO
     }
 
     @Override
-    public Triple<Integer, Integer, Boolean> internalApplyTo(RacingEventService toState) throws NoWindException {
+    public Triple<Double, Double, Boolean> internalApplyTo(RacingEventService toState) throws NoWindException {
         Leaderboard leaderboard = toState.getLeaderboardByName(getLeaderboardName());
-        int newNetPoints;
-        int newTotalPoints;
+        Double newNetPoints;
+        Double newTotalPoints;
         boolean isScoreCorrected;
         if (leaderboard != null) {
             Competitor competitor = leaderboard.getCompetitorByIdAsString(competitorIdAsString);
@@ -61,7 +64,7 @@ public class UpdateLeaderboardScoreCorrection extends AbstractLeaderboardColumnO
             throw new IllegalArgumentException("Didn't find leaderboard "+getLeaderboardName());
         }
         updateStoredLeaderboard(toState, leaderboard);
-        return new Triple<Integer, Integer, Boolean>(newNetPoints, newTotalPoints, isScoreCorrected);
+        return new Triple<Double, Double, Boolean>(newNetPoints, newTotalPoints, isScoreCorrected);
     }
 
 }

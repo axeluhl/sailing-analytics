@@ -12,6 +12,7 @@ import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.Util.Pair;
 
 public interface TrackedLegOfCompetitor extends Serializable {
     Leg getLeg();
@@ -22,7 +23,8 @@ public interface TrackedLegOfCompetitor extends Serializable {
      * How much time did the {@link #getCompetitor competitor} spend in this {@link #getLeg() leg} at
      * <code>timePoint</code>? If the competitor hasn't started the leg yet at <code>timePoint</code>, <code>null</code>
      * is returned. If the competitor has finished the leg already at <code>timePoint</code>, the time it took the
-     * competitor to complete the leg is returned.
+     * competitor to complete the leg is returned. If the competitor didn't finish the leg before the end of tracking,
+     * <code>null</code> is returned because this indicates that the tracker stopped sending valid data.
      */
     Long getTimeInMilliSeconds(TimePoint timePoint);
 
@@ -68,9 +70,10 @@ public interface TrackedLegOfCompetitor extends Serializable {
     Speed getAverageSpeedOverGround(TimePoint timePoint);
 
     /**
-     * @return <code>null</code> if the competitor hasn't started this leg yet
+     * @return <code>null</code> if the competitor hasn't started this leg yet, otherwise the fix where the maximum speed was
+     * achieved and the speed value
      */
-    Speed getMaximumSpeedOverGround(TimePoint timePoint);
+    Pair<GPSFixMoving, Speed> getMaximumSpeedOverGround(TimePoint timePoint);
 
     /**
      * Infers the maneuvers of the competitor up to <code>timePoint</code> on this leg. If the competitor hasn't started
@@ -78,8 +81,9 @@ public interface TrackedLegOfCompetitor extends Serializable {
      * time point is after the competitor has finished this leg, all of the competitor's maneuvers during this leg will
      * be reported in chronological order. The list may be empty if no maneuvers happened between the point in time when
      * the competitor started the leg and <code>timePoint</code>.
+     * @param waitForLatest TODO
      */
-    List<Maneuver> getManeuvers(TimePoint timePoint) throws NoWindException;
+    List<Maneuver> getManeuvers(TimePoint timePoint, boolean waitForLatest) throws NoWindException;
     
     /**
      * @return <code>null</code> if the competitor hasn't started this leg yet
@@ -114,10 +118,20 @@ public interface TrackedLegOfCompetitor extends Serializable {
      * competitor hasn't started the leg yet.
      */
     Double getGapToLeaderInSeconds(TimePoint timePoint) throws NoWindException;
+    
+    /**
+     * If a caller already went through the effort of computing the leg's leader at <code>timePoint</code>, it
+     * can share this knowledge to speed up computation as compared to {@link #getGapToLeaderInSeconds(TimePoint)}.
+     */
+    Double getGapToLeaderInSeconds(TimePoint timePoint, Competitor leaderInLegAtTimePoint) throws NoWindException;
 
     boolean hasStartedLeg(TimePoint timePoint);
     
     boolean hasFinishedLeg(TimePoint timePoint);
+    
+    TimePoint getStartTime();
+    
+    TimePoint getFinishTime();
 
     /**
      * Returns <code>null</code> in case this leg's competitor hasn't started the leg yet. If in the leg at
@@ -153,7 +167,7 @@ public interface TrackedLegOfCompetitor extends Serializable {
      */
     Distance getWindwardDistanceToOverallLeader(TimePoint timePoint) throws NoWindException;
 
-    Distance getAverageCrossTrackError(TimePoint timePoint) throws NoWindException;
+    Distance getAverageCrossTrackError(TimePoint timePoint, boolean waitForLatestAnalysis) throws NoWindException;
 
     Distance getWindwardDistance(Position pos1, Position pos2, TimePoint at) throws NoWindException;
 

@@ -39,7 +39,7 @@ public interface TrackedRegatta extends Serializable {
      *            if not <code>null</code>, after creating the {@link TrackedRace}, the <code>raceDefinition</code> is
      *            {@link DynamicRaceDefinitionSet#addRaceDefinition(RaceDefinition) added} to that object.
      */
-    TrackedRace createTrackedRace(RaceDefinition raceDefinition, WindStore windStore,
+    DynamicTrackedRace createTrackedRace(RaceDefinition raceDefinition, WindStore windStore,
             long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
             DynamicRaceDefinitionSet raceDefinitionSetToUpdate);
 

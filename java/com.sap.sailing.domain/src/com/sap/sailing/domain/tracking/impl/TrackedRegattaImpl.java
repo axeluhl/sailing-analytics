@@ -2,6 +2,7 @@ package com.sap.sailing.domain.tracking.impl;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -13,14 +14,15 @@ import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
+import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.RaceListener;
-import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.WindStore;
 
 public class TrackedRegattaImpl implements TrackedRegatta {
@@ -46,6 +48,11 @@ public class TrackedRegattaImpl implements TrackedRegatta {
         this.raceListeners = new HashSet<RaceListener>();
     }
 
+    private void writeObject(ObjectOutputStream oos) throws IOException {
+        synchronized (trackedRaces) {
+            oos.defaultWriteObject();
+        }
+    }
     /**
      * Resolving replaces this de-serialized object (which has a <code>null</code> {@link #raceListeners} collection) by
      * a new one into which all other collection contents are copied.
@@ -160,9 +167,10 @@ public class TrackedRegattaImpl implements TrackedRegatta {
     }
 
     @Override
-    public TrackedRace createTrackedRace(RaceDefinition raceDefinition, WindStore windStore, long delayToLiveInMillis, long millisecondsOverWhichToAverageWind,
-            long millisecondsOverWhichToAverageSpeed, DynamicRaceDefinitionSet raceDefinitionSetToUpdate) {
-        logger.log(Level.INFO, "Creating DynamicTrackedRaceImpl for RaceDefinition "+raceDefinition.getName());
+    public DynamicTrackedRace createTrackedRace(RaceDefinition raceDefinition, WindStore windStore, long delayToLiveInMillis,
+            long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
+            DynamicRaceDefinitionSet raceDefinitionSetToUpdate) {
+        logger.log(Level.INFO, "Creating DynamicTrackedRaceImpl for RaceDefinition " + raceDefinition.getName());
         DynamicTrackedRaceImpl result = new DynamicTrackedRaceImpl(this, raceDefinition,
                 windStore, delayToLiveInMillis, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed);
         if (raceDefinitionSetToUpdate != null) {

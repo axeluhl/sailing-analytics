@@ -15,11 +15,13 @@ public class TracTracRaceRecordDTO implements IsSerializable {
     public Date trackingStartTime;
     public Date trackingEndTime;
     public Date raceStartTime;
+    public Iterable<String> boatClassNames;
 
     public TracTracRaceRecordDTO() {}
     
     public TracTracRaceRecordDTO(String id, String regattaName, String name, String paramURL,
-            String replayURL, String liveURI, String storedURI, Date trackingStartTime, Date trackingEndTime, Date raceStartTime) {
+            String replayURL, String liveURI, String storedURI, Date trackingStartTime, Date trackingEndTime, Date raceStartTime,
+            Iterable<String> boatClassNames) {
         super();
         this.regattaName = regattaName;
         this.name = name;
@@ -31,6 +33,7 @@ public class TracTracRaceRecordDTO implements IsSerializable {
         this.trackingStartTime = trackingStartTime;
         this.trackingEndTime = trackingEndTime;
         this.raceStartTime = raceStartTime;
+        this.boatClassNames = boatClassNames;
     }
     
     @Override

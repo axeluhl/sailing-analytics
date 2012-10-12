@@ -1,28 +1,16 @@
 package com.sap.sailing.server.replication.test;
 
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.net.InetAddress;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.UnknownHostException;
 
-import javax.jms.Connection;
-import javax.jms.JMSException;
-import javax.jms.Session;
-import javax.jms.Topic;
-import javax.jms.TopicSubscriber;
-
-import org.apache.activemq.ActiveMQConnection;
-import org.apache.activemq.ActiveMQConnectionFactory;
 import org.junit.After;
 import org.junit.Before;
 
+import com.rabbitmq.client.QueueingConsumer;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.mongodb.MongoDBService;
@@ -31,10 +19,8 @@ import com.sap.sailing.server.impl.RacingEventServiceImpl;
 import com.sap.sailing.server.replication.ReplicaDescriptor;
 import com.sap.sailing.server.replication.ReplicationMasterDescriptor;
 import com.sap.sailing.server.replication.ReplicationService;
-import com.sap.sailing.server.replication.impl.Activator;
-import com.sap.sailing.server.replication.impl.MessageBrokerConfiguration;
-import com.sap.sailing.server.replication.impl.MessageBrokerManager;
 import com.sap.sailing.server.replication.impl.ReplicationInstancesManager;
+import com.sap.sailing.server.replication.impl.ReplicationMasterDescriptorImpl;
 import com.sap.sailing.server.replication.impl.ReplicationServiceImpl;
 import com.sap.sailing.server.replication.impl.Replicator;
 
@@ -42,8 +28,6 @@ public abstract class AbstractServerReplicationTest {
     private DomainFactory resolveAgainst;
     protected RacingEventServiceImpl replica;
     protected RacingEventServiceImpl master;
-    private MessageBrokerManager brokerMgr;
-    private File brokerPersistenceDir;
     private ReplicaDescriptor replicaDescriptor;
     private ReplicationServiceImpl masterReplicator;
     
@@ -52,9 +36,14 @@ public abstract class AbstractServerReplicationTest {
      */
     @Before
     public void setUp() throws Exception {
-        Pair<ReplicationServiceTestImpl, ReplicationMasterDescriptor> result = basicSetUp(true, /* master=null means create a new one */ null,
-                /* replica=null means create a new one */ null);
-        result.getA().startToReplicateFrom(result.getB());
+        try {
+            Pair<ReplicationServiceTestImpl, ReplicationMasterDescriptor> result = basicSetUp(
+                    true, /* master=null means create a new one */ null,
+            /* replica=null means create a new one */null);
+            result.getA().startToReplicateFrom(result.getB());
+        } catch (Throwable t) {
+            tearDown();
+        }
     }
 
     /**
@@ -68,8 +57,8 @@ public abstract class AbstractServerReplicationTest {
      *            service will be created as replica
      */
     protected Pair<ReplicationServiceTestImpl, ReplicationMasterDescriptor> basicSetUp(
-            boolean dropDB, RacingEventServiceImpl master, RacingEventServiceImpl replica) throws FileNotFoundException, Exception,
-            JMSException, UnknownHostException {
+            boolean dropDB, RacingEventServiceImpl master, RacingEventServiceImpl replica) throws IOException {
+        final String exchangeName = "test-sapsailinganalytics-exchange";
         final MongoDBService mongoDBService = MongoDBService.INSTANCE;
         if (dropDB) {
             mongoDBService.getDB().dropDatabase();
@@ -86,53 +75,11 @@ public abstract class AbstractServerReplicationTest {
             this.replica = new RacingEventServiceImpl(mongoDBService);
         }
         ReplicationInstancesManager rim = new ReplicationInstancesManager();
-        final String IN_VM_BROKER_URL = "vm://localhost-jms-connection?broker.useJmx=false";
-        final String activeMQPersistenceParentDir = System.getProperty("java.io.tmpdir");
-        final String brokerName = "local_in-VM_test_broker";
-        brokerPersistenceDir = new File(activeMQPersistenceParentDir, brokerName);
-        Activator.removeTemporaryTestBrokerPersistenceDirectory(brokerPersistenceDir);
-        brokerMgr = new MessageBrokerManager(new MessageBrokerConfiguration(brokerName,
-                IN_VM_BROKER_URL, activeMQPersistenceParentDir));
-        brokerMgr.startMessageBroker(/* useJmx */ false);
-        brokerMgr.createAndStartConnection();
-        masterReplicator = new ReplicationServiceImpl(rim, brokerMgr, this.master);
+        masterReplicator = new ReplicationServiceImpl(exchangeName, rim, this.master);
         replicaDescriptor = new ReplicaDescriptor(InetAddress.getLocalHost());
         masterReplicator.registerReplica(replicaDescriptor);
-        ReplicationMasterDescriptor masterDescriptor = new ReplicationMasterDescriptor() {
-            @Override
-            public URL getReplicationRegistrationRequestURL() throws MalformedURLException {
-                throw new UnsupportedOperationException();
-            }
-            @Override
-            public URL getInitialLoadURL() throws MalformedURLException {
-                throw new UnsupportedOperationException();
-            }
-
-            @Override
-            public TopicSubscriber getTopicSubscriber(String clientID) throws JMSException, UnknownHostException {
-                ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory(ActiveMQConnection.DEFAULT_USER,
-                        ActiveMQConnection.DEFAULT_PASSWORD, IN_VM_BROKER_URL);
-                connectionFactory.setClientID(clientID);
-                Connection connection = connectionFactory.createConnection();
-                connection.start();
-                Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-                Topic topic = session.createTopic(ReplicationService.SAILING_SERVER_REPLICATION_TOPIC);
-                return session.createDurableSubscriber(topic, InetAddress.getLocalHost().getHostAddress());
-            }
-            @Override
-            public int getJMSPort() {
-                return 0;
-            }
-            @Override
-            public int getServletPort() {
-                return 0;
-            }
-            @Override
-            public String getHostname() {
-                return null;
-            }
-        };
-        ReplicationServiceTestImpl replicaReplicator = new ReplicationServiceTestImpl(resolveAgainst, rim, brokerMgr,
+        ReplicationMasterDescriptor masterDescriptor = new ReplicationMasterDescriptorImpl("localhost", exchangeName, 0, 0);
+        ReplicationServiceTestImpl replicaReplicator = new ReplicationServiceTestImpl(exchangeName, resolveAgainst, rim,
                 replicaDescriptor, this.replica, this.master, masterReplicator);
         Pair<ReplicationServiceTestImpl, ReplicationMasterDescriptor> result = new Pair<>(replicaReplicator, masterDescriptor);
         return result;
@@ -141,10 +88,6 @@ public abstract class AbstractServerReplicationTest {
     @After
     public void tearDown() throws Exception {
         masterReplicator.unregisterReplica(replicaDescriptor);
-        brokerMgr.closeSessions();
-        brokerMgr.closeConnections();
-        brokerMgr.stopMessageBroker();
-        Activator.removeTemporaryTestBrokerPersistenceDirectory(brokerPersistenceDir);
     }
 
     static class ReplicationServiceTestImpl extends ReplicationServiceImpl {
@@ -153,10 +96,11 @@ public abstract class AbstractServerReplicationTest {
         private final ReplicaDescriptor replicaDescriptor;
         private final ReplicationService masterReplicationService;
         
-        public ReplicationServiceTestImpl(DomainFactory resolveAgainst,
-                ReplicationInstancesManager replicationInstancesManager, MessageBrokerManager messageBrokerManager,
-                ReplicaDescriptor replicaDescriptor, RacingEventService replica, RacingEventService master, ReplicationService masterReplicationService) {
-            super(replicationInstancesManager, messageBrokerManager, replica);
+        public ReplicationServiceTestImpl(String exchangeName, DomainFactory resolveAgainst,
+                ReplicationInstancesManager replicationInstancesManager, ReplicaDescriptor replicaDescriptor,
+                RacingEventService replica, RacingEventService master, ReplicationService masterReplicationService)
+                throws IOException {
+            super(exchangeName, replicationInstancesManager, replica);
             this.resolveAgainst = resolveAgainst;
             this.replicaDescriptor = replicaDescriptor;
             this.master = master;
@@ -168,19 +112,19 @@ public abstract class AbstractServerReplicationTest {
          */
         @Override
         public void startToReplicateFrom(ReplicationMasterDescriptor master) throws IOException,
-                ClassNotFoundException, JMSException {
+                ClassNotFoundException {
             Replicator replicator = startToReplicateFromButDontYetFetchInitialLoad(master, /* startReplicatorSuspended */ true);
             initialLoad();
             replicator.setSuspended(false); // resume after initial load
         }
 
         protected Replicator startToReplicateFromButDontYetFetchInitialLoad(ReplicationMasterDescriptor master, boolean startReplicatorSuspended)
-                throws JMSException, UnknownHostException {
+                throws IOException {
             masterReplicationService.registerReplica(replicaDescriptor);
             registerReplicaUuidForMaster(replicaDescriptor.getUuid().toString(), master);
-            TopicSubscriber replicationSubscription = master.getTopicSubscriber(replicaDescriptor.getUuid().toString());
-            final Replicator replicator = new Replicator(master, this, startReplicatorSuspended);
-            replicationSubscription.setMessageListener(replicator);
+            QueueingConsumer consumer = master.getConsumer();
+            final Replicator replicator = new Replicator(master, this, startReplicatorSuspended, consumer);
+            new Thread(replicator).start();
             return replicator;
         }
 

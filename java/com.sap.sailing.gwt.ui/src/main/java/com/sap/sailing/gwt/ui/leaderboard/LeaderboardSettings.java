@@ -17,9 +17,11 @@ public class LeaderboardSettings {
     private final List<DetailType> maneuverDetailsToShow;
     private final List<DetailType> legDetailsToShow;
     private final List<DetailType> raceDetailsToShow;
-    private final boolean autoExpandFirstRace;
+    private final List<DetailType> overallDetailsToShow;
+    private final boolean autoExpandPreSelectedRace;
     private final Long delayBetweenAutoAdvancesInMilliseconds;
     private final Long delayInMilliseconds;
+    private final boolean updateUponPlayStateChange;
     
     /**
      * An optional sort column; if <code>null</code>, the leaderboard sorting won't be touched when updating the settings.
@@ -29,34 +31,28 @@ public class LeaderboardSettings {
     private final boolean sortAscending;
     
     /**
-     * @param meneuverDetailsToShow
-     * @param legDetailsToShow
-     * @param raceDetailsToShow
-     * @param namesOfRacesToShow
-     * @param autoExpandFirstRace
-     * @param delayBetweenAutoAdvancesInMilliseconds
-     * @param delayInMilliseconds
-     * @param nameOfRaceToSort
-     * @param sortAscending
      * @param raceColumnsToShow <code>null</code> means don't modify the list of races shown
      */
     public LeaderboardSettings(List<DetailType> meneuverDetailsToShow, List<DetailType> legDetailsToShow,
-            List<DetailType> raceDetailsToShow, List<String> namesOfRaceColumnsToShow,
-            List<String> namesOfRacesToShow, boolean autoExpandFirstRace, Long delayBetweenAutoAdvancesInMilliseconds,
-            Long delayInMilliseconds, String nameOfRaceToSort, boolean sortAscending) {
+            List<DetailType> raceDetailsToShow, List<DetailType> overallDetailsToShow,
+            List<String> namesOfRaceColumnsToShow, List<String> namesOfRacesToShow, boolean autoExpandPreSelectedRace,
+            Long delayBetweenAutoAdvancesInMilliseconds, Long delayInMilliseconds, String nameOfRaceToSort,
+            boolean sortAscending, boolean updateUponPlayStateChange) {
         if (namesOfRacesToShow != null && namesOfRaceColumnsToShow != null) {
             throw new IllegalArgumentException("You can identify races either only by their race or by their column names, not both");
         }
         this.legDetailsToShow = legDetailsToShow;
         this.raceDetailsToShow = raceDetailsToShow;
+        this.overallDetailsToShow = overallDetailsToShow;
         this.namesOfRacesToShow = namesOfRacesToShow;
         this.namesOfRaceColumnsToShow = namesOfRaceColumnsToShow;
-        this.autoExpandFirstRace = autoExpandFirstRace;
+        this.autoExpandPreSelectedRace = autoExpandPreSelectedRace;
         this.delayBetweenAutoAdvancesInMilliseconds = delayBetweenAutoAdvancesInMilliseconds;
         this.delayInMilliseconds = delayInMilliseconds;
         this.maneuverDetailsToShow = meneuverDetailsToShow;
         this.nameOfRaceToSort = nameOfRaceToSort;
         this.sortAscending = sortAscending;
+        this.updateUponPlayStateChange = updateUponPlayStateChange;
     }
   
     public List<DetailType> getManeuverDetailsToShow() {
@@ -69,6 +65,10 @@ public class LeaderboardSettings {
 
     public List<DetailType> getRaceDetailsToShow() {
         return raceDetailsToShow;
+    }
+    
+    public List<DetailType> getOverallDetailsToShow() {
+        return overallDetailsToShow;
     }
     
     /**
@@ -87,8 +87,8 @@ public class LeaderboardSettings {
         return namesOfRacesToShow;
     }
 
-    public boolean isAutoExpandFirstRace() {
-        return autoExpandFirstRace;
+    public boolean isAutoExpandPreSelectedRace() {
+        return autoExpandPreSelectedRace;
     }
 
     /**
@@ -112,6 +112,14 @@ public class LeaderboardSettings {
 
     public boolean isSortAscending() {
         return sortAscending;
+    }
+
+    /**
+     * If <code>true</code>, an update of the settings will behave like a manual settings update, meaning that
+     * the settings won't automatically be replaced / adjusted when the play state changes.
+     */
+    public boolean updateUponPlayStateChange() {
+        return updateUponPlayStateChange;
     }
 
 }

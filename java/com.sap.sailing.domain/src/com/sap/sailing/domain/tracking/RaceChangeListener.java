@@ -20,7 +20,7 @@ public interface RaceChangeListener {
      * @param oldMarkPassings
      *            the mark passings replaced by <code>markPassings</code>, keyed by the waypoints
      */
-    void markPassingReceived(Map<Waypoint, MarkPassing> oldMarkPassings, Iterable<MarkPassing> markPassings);
+    void markPassingReceived(Competitor competitor, Map<Waypoint, MarkPassing> oldMarkPassings, Iterable<MarkPassing> markPassings);
 
     void speedAveragingChanged(long oldMillisecondsOverWhichToAverage, long newMillisecondsOverWhichToAverage);
 

@@ -13,95 +13,103 @@ import com.sap.sailing.gwt.ui.client.DataEntryDialog;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
-import com.sap.sailing.gwt.ui.shared.ScoreCorrectionDTO;
+import com.sap.sailing.gwt.ui.shared.RegattaScoreCorrectionDTO;
 
 public class ResultSelectionAndApplyDialog extends DataEntryDialog<Triple<String, String, Pair<String, Date>>> {
-    private final StringMessages stringMessages;
-    private final ErrorReporter errorReporter;
     private final LinkedHashMap<String, Triple<String, String, Pair<String, Date>>> values;
-    private ListBox listBox;
+    private final ListBox listBox;
 
     public ResultSelectionAndApplyDialog(
-            LeaderboardDTO leaderboard,
+            EditableLeaderboardPanel leaderboardPanel,
             SailingServiceAsync sailingService,
             StringMessages stringMessages,
             List<Triple<String, String, Pair<String, Date>>> values, ErrorReporter errorReporter) {
         super(stringMessages.selectResultListToImportFrom(), stringMessages.selectResultListToImportFrom(),
                 stringMessages.ok(), stringMessages.cancel(), new Validator(),
-                new Callback(sailingService, leaderboard, errorReporter, stringMessages));
-        this.stringMessages = stringMessages;
-        this.errorReporter = errorReporter;
+                new Callback(sailingService, leaderboardPanel, errorReporter, stringMessages));
         this.values = new LinkedHashMap<String, Triple<String, String, Pair<String, Date>>>();
         for (Triple<String, String, Pair<String, Date>> v : values) {
             this.values.put("" + v.getA() + ": " + v.getB() + " - " + v.getC().getA() + " "
                     + stringMessages.of() + " " + v.getC().getB(), v);
         }
+        listBox = createListBox(/* isMultipleSelect */ false);
     }
 
     private static class Validator implements DataEntryDialog.Validator<Triple<String, String, Pair<String, Date>>> {
         @Override
         public String getErrorMessage(Triple<String, String, Pair<String, Date>> valueToValidate) {
-            // TODO Auto-generated method stub
+            // nothing can go wrong here
             return null;
         }
     }
     
-    private static class Callback implements AsyncCallback<Triple<String, String, Pair<String, Date>>> {
-        private final LeaderboardDTO leaderboard;
+    private static class Callback implements DialogCallback<Triple<String, String, Pair<String, Date>>> {
+        private final EditableLeaderboardPanel leaderboardPanel;
         private final SailingServiceAsync sailingService;
         private final StringMessages stringMessages;
         private final ErrorReporter errorReporter;
         
-        public Callback(SailingServiceAsync sailingService, LeaderboardDTO leaderboard, ErrorReporter errorReporter,
+        public Callback(SailingServiceAsync sailingService, EditableLeaderboardPanel leaderboardPanel, ErrorReporter errorReporter,
                 StringMessages stringMessages) {
             this.sailingService = sailingService;
-            this.leaderboard = leaderboard;
+            this.leaderboardPanel = leaderboardPanel;
             this.stringMessages = stringMessages;
             this.errorReporter = errorReporter;
         }
 
         @Override
-        public void onFailure(Throwable caught) {
+        public void cancel() {
             // don't do anything; dialog was canceled
         }
 
         @Override
-        public void onSuccess(Triple<String, String, Pair<String, Date>> result) {
+        public void ok(Triple<String, String, Pair<String, Date>> result) {
             final String scoreCorrectionProviderName = result.getA();
             final String eventName = result.getB();
             final String boatClassName = result.getC().getA();
             final Date timePointWhenResultPublished = result.getC().getB();
+            leaderboardPanel.getBusyIndicator().setBusy(true);
             sailingService.getScoreCorrections(scoreCorrectionProviderName, eventName, boatClassName, timePointWhenResultPublished,
-                    new AsyncCallback<ScoreCorrectionDTO>() {
+                    new AsyncCallback<RegattaScoreCorrectionDTO>() {
                         @Override
                         public void onFailure(Throwable caught) {
+                            leaderboardPanel.getBusyIndicator().setBusy(false);
                             errorReporter.reportError(stringMessages.errorObtainingScoreCorrections(scoreCorrectionProviderName,
-                                    eventName, boatClassName, timePointWhenResultPublished.toString()));
+                                    eventName, boatClassName, timePointWhenResultPublished.toString(), caught.getMessage()));
                         }
 
                         @Override
-                        public void onSuccess(ScoreCorrectionDTO result) {
-                            // TODO Display what was obtained and link race number to RaceColumn and sail ID to sail IDs of competitors
+                        public void onSuccess(RegattaScoreCorrectionDTO result) {
+                            leaderboardPanel.getBusyIndicator().setBusy(false);
+                            new MatchAndApplyScoreCorrectionsDialog(leaderboardPanel, stringMessages, sailingService,
+                                    errorReporter, result).show();
                         }
             });
-            // TODO Auto-generated method stub
         }
     }
     
     @Override
     protected Widget getAdditionalWidget() {
-        listBox = createListBox(/* isMultipleSelect */ false);
         for (String value : values.keySet()) {
             listBox.addItem(value);
         }
         return listBox;
     }
 
+    @Override
+    public void show() {
+        super.show();
+        listBox.setFocus(true);
+    }
 
     @Override
     protected Triple<String, String, Pair<String, Date>> getResult() {
-        return values.get(listBox.getValue(listBox.getSelectedIndex()));
+        final int selectedIndex = listBox.getSelectedIndex();
+        if (selectedIndex != -1) {
+            return values.get(listBox.getValue(selectedIndex));
+        } else {
+            return null;
+        }
     }
 
 }

@@ -1,6 +1,10 @@
 Cloning wind data from one MongoDB instance to another
 ------------------------------------------------------
 
+10200: MongoDB "dev" instance
+10201: MongoDB "test" instance
+10202: MontoDB "prod" instance
+
 connect to the mongo shell:
 e.g. /opt/mongodb/bin/mongo --port 10202
 
@@ -17,8 +21,7 @@ First, export the WIND_TRACKS collection from one database. For example...
   or with an additional query parameter if only want to export the wind of a specific race
 
   /opt/mongodb/bin/mongoexport --port 10202 -d winddb -c WIND_TRACKS -q "{ 'EVENT_NAME': /Arenal Training Camps Regatta 2012/, 'RACE_NAME': /Laser/}" > /tmp/wind-tracks-dev.json
-   
-  
+    
 To import the resulting JSON file into the DB instance call:
   /opt/mongodb/bin/mongoimport --port 10201 -d winddb -c WIND_TRACKS /tmp/wind-tracks-dev.json
 

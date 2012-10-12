@@ -12,24 +12,39 @@ public class RaceMapSettings {
     private final Set<ManeuverType> maneuverTypesToShow;
 
     private boolean showOnlySelectedCompetitors = false;
-    
+
+    private boolean showTails = true;
+
+    private boolean showAllCompetitors = false;
+
     private RaceMapZoomSettings zoomSettings;
 
     private RaceMapHelpLinesSettings helpLinesSettings;
 
     private long tailLengthInMilliseconds = 100000l;
 
+    private int maxVisibleCompetitorsCount = 50;
+    
+    private boolean showSelectedCompetitorsInfo = true;
+    
     public RaceMapSettings() {
+        // empty default settings; don't show maneuvers by default
         maneuverTypesToShow = new HashSet<ManeuverType>();
-        maneuverTypesToShow.add(ManeuverType.TACK);
-        maneuverTypesToShow.add(ManeuverType.JIBE);
-        maneuverTypesToShow.add(ManeuverType.PENALTY_CIRCLE);
-        maneuverTypesToShow.add(ManeuverType.MARK_PASSING);
-        
         this.zoomSettings = new RaceMapZoomSettings();
         this.helpLinesSettings = new RaceMapHelpLinesSettings();
     }
+    
+    /**
+     * @return 0 if {@link #isShowTails()} returns <code>false</code>; {@link #getTailLengthInMilliseconds()} otherwise
+     */
+    public long getEffectiveTailLengthInMilliseconds() {
+        return isShowTails() ? getTailLengthInMilliseconds() : 0;
+    }
 
+    /**
+     * The tail length as set in the dialog; feeds into {@link #getEffectiveTailLengthInMilliseconds()}, but only if
+     * {@link #isShowTails()} is <code>true</code>.
+     */
     public long getTailLengthInMilliseconds() {
         return tailLengthInMilliseconds;
     }
@@ -81,5 +96,37 @@ public class RaceMapSettings {
     public void setHelpLinesSettings(RaceMapHelpLinesSettings helpLinesSettings) {
         this.helpLinesSettings = helpLinesSettings;
     }
+
+    public int getMaxVisibleCompetitorsCount() {
+        return maxVisibleCompetitorsCount;
+    }
+
+    public void setMaxVisibleCompetitorsCount(int maxVisibleCompetitorsCount) {
+        this.maxVisibleCompetitorsCount = maxVisibleCompetitorsCount;
+    }
+
+    public boolean isShowTails() {
+        return showTails;
+    }
+
+    public void setShowTails(boolean showTails) {
+        this.showTails = showTails;
+    }
+
+    public boolean isShowAllCompetitors() {
+        return showAllCompetitors;
+    }
+
+    public void setShowAllCompetitors(boolean showAllCompetitors) {
+        this.showAllCompetitors = showAllCompetitors;
+    }
+
+	public boolean isShowSelectedCompetitorsInfo() {
+		return showSelectedCompetitorsInfo;
+	}
+
+	public void setShowSelectedCompetitorsInfo(boolean showSelectedCompetitorsInfo) {
+		this.showSelectedCompetitorsInfo = showSelectedCompetitorsInfo;
+	}
 
 }

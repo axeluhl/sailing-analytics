@@ -8,6 +8,8 @@ import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.junit.Test;
 
@@ -22,9 +24,44 @@ import com.sap.sailing.domain.base.impl.CompetitorImpl;
 import com.sap.sailing.domain.base.impl.DomainFactoryImpl;
 import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
+import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.impl.ResultDiscardingRuleImpl;
 
 public class OfflineSerializationTest extends AbstractSerializationTest {
+    /**
+     * Bug 769 was based on an inconsistency of a cached hash code in Pair. The same problem existed for Triple.
+     * Serialization changes the Object IDs of the objects contained and therefore the hash code based on this
+     * identity. Serializing a cached hash code therefore leads to an inconsistency. The non-caching of this
+     * hash code is tested here.
+     */
+    @Test
+    public void testHashCodeOfSerializedPairIsConsistent() throws ClassNotFoundException, IOException {
+        DomainFactory receiverDomainFactory = new DomainFactoryImpl();
+        final Throwable s1 = new Throwable();
+        final Throwable s2 = new Throwable();
+        Pair<Throwable, Throwable> p =
+                new Pair<Throwable, Throwable>(
+                        s1, s2);
+        HashSet<Pair<Throwable, Throwable>> s =
+                new HashSet<Pair<Throwable, Throwable>>();
+        s.add(p);
+        Set<Pair<Throwable, Throwable>> ss =
+                cloneBySerialization(s, /* resolveAgainst */ receiverDomainFactory);
+        
+        Pair<Throwable, Throwable> ps = ss.iterator().next();
+        Throwable s1Des = ps.getA();
+        Throwable s2Des = ps.getB();
+        assertNotSame(s, ss);
+        assertNotSame(s.iterator().next(), ss.iterator().next());
+        assertNotSame(s1, s1Des);
+        assertNotSame(s2, s2Des);
+        assertEquals(1, ss.size());
+        Pair<Throwable, Throwable> pNew =
+                new Pair<Throwable, Throwable>(s1Des, s2Des);
+        assertEquals(ps.hashCode(), pNew.hashCode());
+        assertTrue(ss.contains(pNew));
+    }
+    
     /**
      * We had trouble de-serializing int[] through our specialized ObjectInputStream with its own resolveClass
      * implementation. This test failed initially before we changed the call for loading classes.

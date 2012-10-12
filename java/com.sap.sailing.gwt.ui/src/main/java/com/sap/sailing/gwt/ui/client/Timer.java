@@ -20,6 +20,11 @@ import com.google.gwt.core.client.Scheduler.RepeatingCommand;
  */
 public class Timer {
     /**
+     * Used by {@link #quantizeTimeStamp(long)}; currently set to 1s (1000ms)
+     */
+    private static final long LIVE_CLOCK_QUANTUM = 1000;
+    
+    /**
      * The time point represented by this timer
      */
     private Date time;
@@ -100,7 +105,6 @@ public class Timer {
      */
     public Timer(PlayModes playMode, long refreshInterval) {
         this.refreshInterval = refreshInterval;
-        this.playMode = playMode;
         time = new Date();
         timeListeners = new HashSet<TimeListener>();
         playStateListeners = new HashSet<PlayStateListener>();
@@ -108,6 +112,7 @@ public class Timer {
         playSpeedFactor = 1.0;
         livePlayDelayInMillis = 0l;
         autoAdvance = true;
+        setPlayMode(playMode);
     }
     
     public void addTimeListener(TimeListener listener) {
@@ -204,7 +209,7 @@ public class Timer {
             if (playMode == PlayModes.Live) {
                 setTime(System.currentTimeMillis()-livePlayDelayInMillis);
             }
-            if(autoAdvance) {
+            if (autoAdvance) {
                 startAutoAdvance();
             }
             for (PlayStateListener playStateListener : playStateListeners) {
@@ -222,7 +227,8 @@ public class Timer {
                     if (playMode == PlayModes.Replay) {
                         newTime += (long) playSpeedFactor * refreshInterval;
                     } else {
-                        newTime = System.currentTimeMillis() - getLivePlayDelayInMillis(); 
+                        // play mode is Live; quantize to make cache hits more likely
+                        newTime = quantizeTimeStamp(System.currentTimeMillis() - getLivePlayDelayInMillis()); 
                     }
                     setTime(newTime);
                 }
@@ -234,8 +240,17 @@ public class Timer {
                     return playState == PlayStates.Playing ? true: false;
                 }
             }
+
         };
         scheduleAdvancerCommand(command);
+    }
+
+    /**
+     * In {@link PlayModes#Live live mode}, time stamps are quantized to make it more likely for the back-end to achieve
+     * a cache hit. Quantization is controlled by the {@link #LIVE_CLOCK_QUANTUM} constant.
+     */
+    private long quantizeTimeStamp(long millis) {
+        return millis - (millis % LIVE_CLOCK_QUANTUM);
     }
 
     private void scheduleAdvancerCommand(RepeatingCommand command) {
@@ -243,9 +258,11 @@ public class Timer {
     }
     
     public void setLivePlayDelayInMillis(long delayInMilliseconds) {
-        this.livePlayDelayInMillis = delayInMilliseconds;
-        if (getPlayState() == PlayStates.Playing) {
-            setTime(new Date().getTime() - delayInMilliseconds);
+        if (this.livePlayDelayInMillis != delayInMilliseconds) {
+            this.livePlayDelayInMillis = delayInMilliseconds;
+            if (getPlayMode() == PlayModes.Live) {
+                setTime(new Date().getTime() - delayInMilliseconds);
+            }
         }
     }
     

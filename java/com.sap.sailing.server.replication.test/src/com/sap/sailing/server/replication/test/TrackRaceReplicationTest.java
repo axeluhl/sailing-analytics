@@ -20,13 +20,14 @@ import org.junit.Test;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.common.DefaultLeaderboardName;
+import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.leaderboard.impl.LowPoint;
 import com.sap.sailing.domain.test.AbstractTracTracLiveTest;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
@@ -73,7 +74,8 @@ public class TrackRaceReplicationTest extends AbstractServerReplicationTest {
             }
         });
         trackingParams = com.sap.sailing.domain.tractracadapter.DomainFactory.INSTANCE.createTrackingConnectivityParameters(paramURL,
-                liveURI, storedURI, startOfTracking, endOfTracking, /* delayToLiveInMillis */ 0l, EmptyWindStore.INSTANCE);
+                liveURI, storedURI, startOfTracking, endOfTracking, /* delayToLiveInMillis */
+                        0l, /* simulateWithStartTimeNow */false, EmptyWindStore.INSTANCE);
     }
 
     private void startTracking() throws Exception, InterruptedException {
@@ -104,7 +106,7 @@ public class TrackRaceReplicationTest extends AbstractServerReplicationTest {
         assertNotSame(masterTrackedRace, replicaTrackedRace);
         assertNotSame(masterTrackedRace.getRace(), replicaTrackedRace.getRace());
         assertEquals(Util.size(masterTrackedRace.getRace().getCompetitors()), Util.size(replicaTrackedRace.getRace().getCompetitors()));
-        Leaderboard replicaDefaultLeaderboard = replica.getLeaderboardByName(DefaultLeaderboardName.DEFAULT_LEADERBOARD_NAME);
+        Leaderboard replicaDefaultLeaderboard = replica.getLeaderboardByName(LeaderboardNameConstants.DEFAULT_LEADERBOARD_NAME);
         RaceColumn column = replicaDefaultLeaderboard.getRaceColumnByName(replicaTrackedRace.getRace().getName());
         assertNotNull(column);
         assertSame(replicaTrackedRace, column.getTrackedRace(replicaDefaultLeaderboard.getFleet(null)));
@@ -113,7 +115,7 @@ public class TrackRaceReplicationTest extends AbstractServerReplicationTest {
     @Test
     public void testReassignmentToLeaderboardReplication() throws Exception {
         final String leaderboardName = "Test Leaderboard";
-        Leaderboard masterLeaderboard = master.apply(new CreateFlexibleLeaderboard(leaderboardName, new int[0]));
+        Leaderboard masterLeaderboard = master.apply(new CreateFlexibleLeaderboard(leaderboardName, new int[0], new LowPoint()));
         final String columnName = "R1";
         RaceColumn masterColumn = master.apply(new AddColumnToLeaderboard(columnName, leaderboardName, /* medalRace */ false));
         final Fleet defaultFleet = masterLeaderboard.getFleet(null);

@@ -2,6 +2,7 @@ package com.sap.sailing.server.operationaltransformation;
 
 import java.util.List;
 
+import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
 
@@ -10,13 +11,17 @@ public class UpdateLeaderboardGroup extends AbstractLeaderboardGroupOperation<Vo
     private final String newName;
     private final String newDescription;
     private final List<String> leaderboardNames;
+    private final int[] overallLeaderboardDiscardThresholds;
+    private final ScoringSchemeType overallLeaderboardScoringSchemeType;
 
     public UpdateLeaderboardGroup(String leaderboardGroupName, String newName, String newDescription,
-            List<String> leaderboardNames) {
+            List<String> leaderboardNames, int[] overallLeaderboardDiscardThresholds, ScoringSchemeType overallLeaderboardScoringSchemeType) {
         super(leaderboardGroupName);
         this.newName = newName;
         this.newDescription = newDescription;
         this.leaderboardNames = leaderboardNames;
+        this.overallLeaderboardDiscardThresholds = overallLeaderboardDiscardThresholds;
+        this.overallLeaderboardScoringSchemeType = overallLeaderboardScoringSchemeType;
     }
 
     @Override
@@ -33,7 +38,8 @@ public class UpdateLeaderboardGroup extends AbstractLeaderboardGroupOperation<Vo
 
     @Override
     public Void internalApplyTo(RacingEventService toState) {
-        toState.updateLeaderboardGroup(getLeaderboardGroupName(), newName, newDescription, leaderboardNames);
+        toState.updateLeaderboardGroup(getLeaderboardGroupName(), newName, newDescription, leaderboardNames,
+                overallLeaderboardDiscardThresholds, overallLeaderboardScoringSchemeType);
         return null;
     }
 

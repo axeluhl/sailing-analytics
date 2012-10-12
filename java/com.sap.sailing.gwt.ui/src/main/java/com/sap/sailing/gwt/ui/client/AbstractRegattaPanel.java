@@ -14,15 +14,15 @@ public abstract class AbstractRegattaPanel extends FormPanel implements RegattaD
     protected DateTimeFormatRenderer timeFormatter = new DateTimeFormatRenderer(DateTimeFormat.getFormat(PredefinedFormat.TIME_LONG));
     protected final RegattaRefresher regattaRefresher;
     protected ErrorReporter errorReporter;
-    protected StringMessages stringConstants;
+    protected StringMessages stringMessages;
     
     public AbstractRegattaPanel(SailingServiceAsync sailingService,
-            RegattaRefresher regattaRefresher, ErrorReporter errorReporter, StringMessages stringConstants) {
+            RegattaRefresher regattaRefresher, ErrorReporter errorReporter, StringMessages stringMessages) {
         super();
         this.sailingService = sailingService;
         this.regattaRefresher = regattaRefresher;
         this.errorReporter  = errorReporter;
-        this.stringConstants = stringConstants;
+        this.stringMessages = stringMessages;
     }
 
     @Override

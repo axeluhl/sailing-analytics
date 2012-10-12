@@ -24,7 +24,7 @@ public class ResultListImpl extends AbstractNodeWrapper implements ResultList {
     
     private final String sourceName;
     
-    private static final SimpleDateFormat df = new SimpleDateFormat("dd. MMM yyyy hh:mm", Locale.GERMAN);
+    private static final SimpleDateFormat df = new SimpleDateFormat("dd. MMM yyyy HH:mm", Locale.GERMAN);
     
     public ResultListImpl(Node node, String sourceName) {
         super(node);
@@ -87,9 +87,12 @@ public class ResultListImpl extends AbstractNodeWrapper implements ResultList {
     @Override
     public Iterable<Boat> getBoats() {
         List<Boat> result = new ArrayList<Boat>();
-        final NodeList boats = ((Element) ((Element) getNode()).getElementsByTagName("Verteilung").item(0)).getElementsByTagName("Boat");
-        for (int i=0; i<boats.getLength(); i++) {
-            result.add(new BoatImpl(boats.item(i)));
+        final NodeList verteilung = ((Element) getNode()).getElementsByTagName("Verteilung");
+        for (int i = 0; i < verteilung.getLength(); i++) {
+            final NodeList boats = ((Element) verteilung.item(i)).getElementsByTagName("Boat");
+            for (int j = 0; j < boats.getLength(); j++) {
+                result.add(new BoatImpl(boats.item(j)));
+            }
         }
         return result;
     }

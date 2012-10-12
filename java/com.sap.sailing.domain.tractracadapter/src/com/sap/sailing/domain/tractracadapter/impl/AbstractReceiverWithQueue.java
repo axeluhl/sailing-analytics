@@ -8,6 +8,7 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
+import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
@@ -30,6 +31,7 @@ public abstract class AbstractReceiverWithQueue<A, B, C> implements Runnable, Re
     private final DomainFactory domainFactory;
     private final com.tractrac.clientmodule.Event tractracEvent;
     private final DynamicTrackedRegatta trackedRegatta;
+    private final Simulator simulator;
     private Thread thread;
 
     /**
@@ -39,11 +41,12 @@ public abstract class AbstractReceiverWithQueue<A, B, C> implements Runnable, Re
     private boolean receivedEventDuringTimeout;
     
     public AbstractReceiverWithQueue(DomainFactory domainFactory, Event tractracEvent,
-            DynamicTrackedRegatta trackedRegatta) {
+            DynamicTrackedRegatta trackedRegatta, Simulator simulator) {
         super();
         this.tractracEvent = tractracEvent;
         this.trackedRegatta = trackedRegatta;
         this.domainFactory = domainFactory;
+        this.simulator = simulator;
         this.queue = new LinkedBlockingQueue<Triple<A, B, C>>();
     }
     
@@ -73,6 +76,10 @@ public abstract class AbstractReceiverWithQueue<A, B, C> implements Runnable, Re
     @Override
     public void stopAfterProcessingQueuedEvents() {
         queue.add(new Triple<A, B, C>(null, null, null));
+    }
+    
+    protected Simulator getSimulator() {
+        return simulator;
     }
     
     @Override
@@ -114,6 +121,9 @@ public abstract class AbstractReceiverWithQueue<A, B, C> implements Runnable, Re
                 e.printStackTrace();
             }
         }
+        if (simulator != null) {
+            simulator.stop();
+        }
     }
 
     @Override
@@ -133,17 +143,23 @@ public abstract class AbstractReceiverWithQueue<A, B, C> implements Runnable, Re
     protected abstract void handleEvent(Triple<A, B, C> event);
 
     /**
-     * Tries to find a {@link TrackedRace} for <code>race</code> in the {@link com.sap.sailing.domain.base.Regatta} corresponding
-     * to {@link #tractracEvent}, as keyed by the {@link #domainFactory}. If the {@link RaceDefinition} for <code>race</code>
-     * is not found in the {@link com.sap.sailing.domain.base.Regatta}, <code>null</code> is returned. If the {@link TrackedRace}
-     * for <code>race</code> isn't found in the {@link TrackedRegatta}, <code>null</code> is returned, too.
+     * Tries to find a {@link TrackedRace} for <code>race</code> in the {@link com.sap.sailing.domain.base.Regatta}
+     * corresponding to {@link #tractracEvent}, as keyed by the {@link #domainFactory}. Waits for
+     * {@link RaceTracker#TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS} milliseconds for the
+     * {@link RaceDefinition} to show up. If it doesn't, <code>null</code> is returned. If the {@link RaceDefinition}
+     * for <code>race</code> is not found in the {@link com.sap.sailing.domain.base.Regatta}, <code>null</code> is
+     * returned. If the {@link TrackedRace} for <code>race</code> isn't found in the {@link TrackedRegatta},
+     * <code>null</code> is returned, too.
      */
     protected DynamicTrackedRace getTrackedRace(Race race) {
         DynamicTrackedRace result = null;
-        RaceDefinition raceDefinition = getDomainFactory().getAndWaitForRaceDefinition(race);
-        com.sap.sailing.domain.base.Regatta domainRegatta = trackedRegatta.getRegatta();
-        if (domainRegatta.getRaceByName(raceDefinition.getName()) != null) {
-            result = trackedRegatta.getTrackedRace(raceDefinition);
+        RaceDefinition raceDefinition = getDomainFactory().getAndWaitForRaceDefinition(race,
+                RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS);
+        if (raceDefinition != null) {
+            com.sap.sailing.domain.base.Regatta domainRegatta = trackedRegatta.getRegatta();
+            if (domainRegatta.getRaceByName(raceDefinition.getName()) != null) {
+                result = trackedRegatta.getTrackedRace(raceDefinition);
+            }
         }
         return result;
     }

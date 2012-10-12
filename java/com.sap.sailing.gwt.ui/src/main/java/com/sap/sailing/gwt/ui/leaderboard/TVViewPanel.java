@@ -11,7 +11,6 @@ import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
-import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
@@ -24,7 +23,7 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
-import com.sap.sailing.gwt.ui.client.UserAgentChecker.UserAgentTypes;
+import com.sap.sailing.gwt.ui.client.UserAgentDetails;
 import com.sap.sailing.gwt.ui.raceboard.RaceBoardPanel;
 import com.sap.sailing.gwt.ui.raceboard.RaceBoardViewModes;
 import com.sap.sailing.gwt.ui.shared.FleetDTO;
@@ -38,7 +37,7 @@ public class TVViewPanel extends SimplePanel implements RaceTimesInfoProviderLis
     private final SailingServiceAsync sailingService;
     private final StringMessages stringMessages;
     private final ErrorReporter errorReporter;
-    private final UserAgentTypes userAgentType;
+    private final UserAgentDetails userAgent;
     private final UserDTO userDTO;
     private final LogoAndTitlePanel logoAndTitlePanel;
     private final DockLayoutPanel dockPanel;
@@ -56,14 +55,17 @@ public class TVViewPanel extends SimplePanel implements RaceTimesInfoProviderLis
     private RegattaAndRaceIdentifier currentRace;
     private boolean raceBoardIsWidget;
     
+    /**
+     * @param logoAndTitlePanel allowed to be <code>null</code>
+     */
     public TVViewPanel(SailingServiceAsync sailingService, StringMessages stringMessages, ErrorReporter errorReporter,
-            String leaderboardName, UserAgentTypes userAgentType, UserDTO userDTO, Timer timer,
-            LogoAndTitlePanel logoAndTitlePanel, DockLayoutPanel dockPanel) {
+            String leaderboardName, UserAgentDetails userAgent, UserDTO userDTO, Timer timer,
+            LogoAndTitlePanel logoAndTitlePanel, DockLayoutPanel dockPanel, boolean showRaceDetails) {
         setSize("100%", "100%");
         this.sailingService = sailingService;
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
-        this.userAgentType = userAgentType;
+        this.userAgent = userAgent;
         this.userDTO = userDTO;
         this.logoAndTitlePanel = logoAndTitlePanel;
         this.dockPanel = dockPanel;
@@ -76,20 +78,18 @@ public class TVViewPanel extends SimplePanel implements RaceTimesInfoProviderLis
         timer.play();
         raceTimesInfoProvider = new RaceTimesInfoProvider(sailingService, errorReporter, new ArrayList<RegattaAndRaceIdentifier>(), 1000l);
         raceTimesInfoProvider.addRaceTimesInfoProviderListener(this);
-        
-        leaderboardPanel = createLeaderboardPanel(leaderboardName);
+        leaderboardPanel = createLeaderboardPanel(leaderboardName, showRaceDetails);
         leaderboard = null;
         showLeaderboard();
     }
     
-    private LeaderboardPanel createLeaderboardPanel(String leaderboardName) {
+    private LeaderboardPanel createLeaderboardPanel(String leaderboardName, boolean showRaceDetails) {
         LeaderboardSettings settings = LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(null, null, null, /* autoExpandFirstRace */ false); 
         CompetitorSelectionModel selectionModel = new CompetitorSelectionModel(/* hasMultiSelection */ true);
         Timer timer = new Timer(PlayModes.Live, /* delayBetweenAutoAdvancesInMilliseconds */3000l);
-        timer.play();
         LeaderboardPanel leaderboardPanel = new LeaderboardPanel(sailingService, new AsyncActionsExecutor(), settings,
         /* preSelectedRace */null, selectionModel, timer, leaderboardName, null, errorReporter, stringMessages,
-                userAgentType) {
+                userAgent, showRaceDetails) {
             @Override
             protected void setLeaderboard(LeaderboardDTO leaderboard) {
                 super.setLeaderboard(leaderboard);
@@ -104,7 +104,7 @@ public class TVViewPanel extends SimplePanel implements RaceTimesInfoProviderLis
         boolean providerChanged = false;
         for (RaceColumnDTO race : leaderboard.getRaceList()) {
             for (FleetDTO fleet : race.getFleets()) {
-                RaceIdentifier raceIdentifier = race.getRaceIdentifier(fleet);
+                RegattaAndRaceIdentifier raceIdentifier = race.getRaceIdentifier(fleet);
                 if (raceIdentifier != null && !raceTimesInfoProvider.containsRaceIdentifier(raceIdentifier)) {
                     raceTimesInfoProvider.addRaceIdentifier(raceIdentifier, false);
                     providerChanged = true;
@@ -121,7 +121,7 @@ public class TVViewPanel extends SimplePanel implements RaceTimesInfoProviderLis
         List<RegattaAndRaceIdentifier> singletonList = Collections.singletonList(raceToShow);
         raceSelectionModel.setSelection(singletonList);
         RaceBoardPanel raceBoardPanel = new RaceBoardPanel(sailingService, userDTO, timer, raceSelectionModel, leaderboardName, null,
-                errorReporter, stringMessages, userAgentType, RaceBoardViewModes.ONESCREEN, raceTimesInfoProvider);
+                errorReporter, stringMessages, userAgent, RaceBoardViewModes.ONESCREEN, raceTimesInfoProvider);
         return raceBoardPanel;
     }
     
@@ -140,8 +140,10 @@ public class TVViewPanel extends SimplePanel implements RaceTimesInfoProviderLis
             
             setWidget(leaderboardPanel);
             if (raceBoardPanel != null) {
-                logoAndTitlePanel.remove(raceBoardPanel.getNavigationWidget());
-                logoAndTitlePanel.remove(raceBoardHeader);
+                if (logoAndTitlePanel != null) {
+                    logoAndTitlePanel.remove(raceBoardPanel.getNavigationWidget());
+                    logoAndTitlePanel.remove(raceBoardHeader);
+                }
                 dockPanel.remove(timePanel);
                 raceBoardPanel = null;
             }
@@ -154,10 +156,14 @@ public class TVViewPanel extends SimplePanel implements RaceTimesInfoProviderLis
     
     private void showRaceBoard() {
         if (!raceBoardIsWidget) {
-            logoAndTitlePanel.add(raceBoardPanel.getNavigationWidget());
+            if (logoAndTitlePanel != null) {
+                logoAndTitlePanel.add(raceBoardPanel.getNavigationWidget());
+            }
             raceBoardHeader = new Label(currentRace.getRaceName());
             raceBoardHeader.addStyleName("RaceBoardHeader");
-            logoAndTitlePanel.add(raceBoardHeader);
+            if (logoAndTitlePanel != null) {
+                logoAndTitlePanel.add(raceBoardHeader);
+            }
             
             timePanel = createTimePanel();
             dockPanel.insertSouth(timePanel, 122, dockPanel.getWidget(0));
@@ -201,7 +207,7 @@ public class TVViewPanel extends SimplePanel implements RaceTimesInfoProviderLis
     }
     
     @Override
-    public void raceTimesInfosReceived(Map<RaceIdentifier, RaceTimesInfoDTO> raceTimesInfo) {
+    public void raceTimesInfosReceived(Map<RegattaAndRaceIdentifier, RaceTimesInfoDTO> raceTimesInfo) {
         if (currentRace == null) {
             currentRace = getFirstStartedAndUnfinishedRace();
             if (currentRace != null) {
@@ -222,7 +228,7 @@ public class TVViewPanel extends SimplePanel implements RaceTimesInfoProviderLis
     
     private RegattaAndRaceIdentifier getFirstStartedAndUnfinishedRace() {
         RegattaAndRaceIdentifier firstStartedAndUnfinishedRace = null;
-        Map<RaceIdentifier, RaceTimesInfoDTO> raceTimesInfos = raceTimesInfoProvider.getRaceTimesInfos();
+        Map<RegattaAndRaceIdentifier, RaceTimesInfoDTO> raceTimesInfos = raceTimesInfoProvider.getRaceTimesInfos();
         for (RaceColumnDTO race : leaderboard.getRaceList()) {
             for (FleetDTO fleet : race.getFleets()) {
                 RegattaAndRaceIdentifier raceIdentifier = race.getRaceIdentifier(fleet);

@@ -5,12 +5,14 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.IntegerBox;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.LongBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -30,10 +32,14 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
     private List<Pair<CheckBox, ManeuverType>> checkboxAndManeuverType = new ArrayList<Pair<CheckBox, ManeuverType>>();
     private List<Pair<CheckBox, ZoomTypes>> checkboxAndZoomType = new ArrayList<Pair<CheckBox,ZoomTypes>>();
     private List<Pair<CheckBox, HelpLineTypes>> checkboxAndHelpLineType = new ArrayList<Pair<CheckBox,HelpLineTypes>>();
-    private CheckBox zoomOnlyToSelectedCompetitors = new CheckBox();
-    private CheckBox checkBoxDouglasPeuckerPoints = new CheckBox();
-    private CheckBox showOnlySelectedCompetitors = new CheckBox();
-    private LongBox tailLengthBox = new LongBox();
+    private CheckBox zoomOnlyToSelectedCompetitorsCheckBox;
+    private CheckBox showDouglasPeuckerPointsCheckBox;
+    private CheckBox showOnlySelectedCompetitorsCheckBox;
+    private CheckBox showTailsCheckBox;
+    private CheckBox showAllCompetitorsCheckBox;
+    private CheckBox showSelectedCompetitorsInfoCheckBox;
+    private LongBox tailLengthBox;
+    private IntegerBox maxVisibleCompetitorsCountBox;
     
     private final StringMessages stringMessages;
     private final RaceMapSettings initialSettings;
@@ -48,31 +54,52 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
     @Override
     public Widget getAdditionalWidget(DataEntryDialog<?> dialog) {
         VerticalPanel vp = new VerticalPanel();
-        HorizontalPanel labelAndTailLengthBoxPanel = new HorizontalPanel();
-        labelAndTailLengthBoxPanel.setSpacing(5);
-        Label tailLengthLabel = new Label(stringMessages.tailLength() + ":");
-        labelAndTailLengthBoxPanel.add(tailLengthLabel);
-        labelAndTailLengthBoxPanel.setCellVerticalAlignment(tailLengthLabel, HasVerticalAlignment.ALIGN_MIDDLE);
-        tailLengthBox = dialog.createLongBox((int) (initialSettings.getTailLengthInMilliseconds() / 1000), 4);
-        labelAndTailLengthBoxPanel.add(tailLengthBox);
-        labelAndTailLengthBoxPanel.setCellVerticalAlignment(tailLengthBox, HasVerticalAlignment.ALIGN_MIDDLE);
-        vp.add(labelAndTailLengthBoxPanel);
-        showOnlySelectedCompetitors = dialog.createCheckbox(stringMessages.showOnlySelected());
-        showOnlySelectedCompetitors.setValue(initialSettings.isShowOnlySelectedCompetitors());
-        vp.add(showOnlySelectedCompetitors);
 
+        Label competitorsLabel = dialog.createHeadlineLabel(stringMessages.competitors());
+        vp.add(competitorsLabel);
+
+        // max competitors count settings
+        HorizontalPanel maxCompetitotorsCountPanel = new HorizontalPanel();
+        showAllCompetitorsCheckBox = dialog.createCheckbox(stringMessages.showAllCompetitors());
+        showAllCompetitorsCheckBox.setValue(initialSettings.isShowAllCompetitors());
+        maxCompetitotorsCountPanel.add(showAllCompetitorsCheckBox);
+        showAllCompetitorsCheckBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<Boolean> vce) {
+                boolean newValue = vce.getValue();
+                RaceMapSettingsDialogComponent.this.maxVisibleCompetitorsCountBox.setEnabled(!newValue);
+            }
+        });
+        Label maxCompetitorsCountLabel = new Label(stringMessages.maximalCount() + ":");
+        maxCompetitorsCountLabel.getElement().getStyle().setMarginLeft(25, Unit.PX);
+        maxCompetitotorsCountPanel.add(maxCompetitorsCountLabel);
+        maxCompetitotorsCountPanel.setCellVerticalAlignment(maxCompetitorsCountLabel, HasVerticalAlignment.ALIGN_MIDDLE);
+        maxVisibleCompetitorsCountBox = dialog.createIntegerBox(initialSettings.getMaxVisibleCompetitorsCount(), 4);
+        maxVisibleCompetitorsCountBox.setEnabled(!initialSettings.isShowAllCompetitors());
+        maxCompetitotorsCountPanel.add(maxVisibleCompetitorsCountBox);
+        maxCompetitotorsCountPanel.setCellVerticalAlignment(maxVisibleCompetitorsCountBox, HasVerticalAlignment.ALIGN_MIDDLE);
+        vp.add(maxCompetitotorsCountPanel);
+        
+        showOnlySelectedCompetitorsCheckBox = dialog.createCheckbox(stringMessages.showOnlySelectedCompetitors());
+        showOnlySelectedCompetitorsCheckBox.setValue(initialSettings.isShowOnlySelectedCompetitors());
+        vp.add(showOnlySelectedCompetitorsCheckBox);
+
+        showSelectedCompetitorsInfoCheckBox = dialog.createCheckbox(stringMessages.showSelectedCompetitorsInfo());
+        showSelectedCompetitorsInfoCheckBox.setValue(initialSettings.isShowSelectedCompetitorsInfo());
+        vp.add(showSelectedCompetitorsInfoCheckBox);
+        
         Label zoomLabel = dialog.createHeadlineLabel(stringMessages.zoom());
         vp.add(zoomLabel);
         
-        HorizontalPanel labelAndZoomSettingsPanel = new HorizontalPanel();
+        HorizontalPanel zoomSettingsPanel = new HorizontalPanel();
         Label zoomSettingsLabel = new Label(stringMessages.autoZoomTo() + ": ");
-        labelAndZoomSettingsPanel.add(zoomSettingsLabel);
+        zoomSettingsPanel.add(zoomSettingsLabel);
         VerticalPanel zoomSettingsBoxesPanel = new VerticalPanel();
         disableOnlySelectedWhenAreFalse = new ArrayList<CheckBox>();
         for (ZoomTypes zoomType : ZoomTypes.values()) {
             if (zoomType != ZoomTypes.NONE) {
                 CheckBox cb = dialog.createCheckbox(RaceMapSettingsTypeFormatter.formatZoomType(zoomType, stringMessages));
-                cb.setValue(initialSettings.getZoomSettings().getTypesToConsiderOnZoom().contains(zoomType), true);
+                cb.setValue(initialSettings.getZoomSettings().getTypesToConsiderOnZoom().contains(zoomType), false);
                 checkboxAndZoomType.add(new Pair<CheckBox, ZoomTypes>(cb, zoomType));
                 zoomSettingsBoxesPanel.add(cb);
                 
@@ -88,16 +115,16 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
                 }
             }
         }
-        labelAndZoomSettingsPanel.add(zoomSettingsBoxesPanel);
-        vp.add(labelAndZoomSettingsPanel);
+        zoomSettingsPanel.add(zoomSettingsBoxesPanel);
+        vp.add(zoomSettingsPanel);
         
-        zoomOnlyToSelectedCompetitors = dialog.createCheckbox(stringMessages.autoZoomSelectedCompetitors());
-        zoomOnlyToSelectedCompetitors.setValue(initialSettings.getZoomSettings().isZoomToSelectedCompetitors());
-        vp.add(zoomOnlyToSelectedCompetitors);
+        zoomOnlyToSelectedCompetitorsCheckBox = dialog.createCheckbox(stringMessages.autoZoomSelectedCompetitors());
+        zoomOnlyToSelectedCompetitorsCheckBox.setValue(initialSettings.getZoomSettings().isZoomToSelectedCompetitors());
+        vp.add(zoomOnlyToSelectedCompetitorsCheckBox);
         //Run zoomSettingsChanged to set the checkboxes to their correct state
         zoomSettingsChanged();
         
-        Label maneuversLabel = dialog.createHeadlineLabel(stringMessages.maneuverTypes());
+        Label maneuversLabel = dialog.createHeadlineLabel(stringMessages.maneuverTypesToShowWhenCompetitorIsClicked());
         vp.add(maneuversLabel);
         for (ManeuverType maneuverType : ManeuverType.values()) {
             CheckBox checkbox = dialog.createCheckbox(ManeuverTypeFormatter.format(maneuverType, stringMessages));
@@ -105,17 +132,39 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
             checkboxAndManeuverType.add(new Pair<CheckBox, ManeuverType>(checkbox, maneuverType));
             vp.add(checkbox);
         }
-        checkBoxDouglasPeuckerPoints = dialog.createCheckbox(stringMessages.douglasPeuckerPoints());
-        checkBoxDouglasPeuckerPoints.setValue(initialSettings.isShowDouglasPeuckerPoints());
-        vp.add(checkBoxDouglasPeuckerPoints);
+        showDouglasPeuckerPointsCheckBox = dialog.createCheckbox(stringMessages.douglasPeuckerPoints());
+        showDouglasPeuckerPointsCheckBox.setValue(initialSettings.isShowDouglasPeuckerPoints());
+        vp.add(showDouglasPeuckerPointsCheckBox);
         
         Label helpLinesLabel = dialog.createHeadlineLabel(stringMessages.helpLines());
         vp.add(helpLinesLabel);
-        
+
+        // boat tail settings
+        HorizontalPanel tailSettingsPanel = new HorizontalPanel();
+        showTailsCheckBox = dialog.createCheckbox(stringMessages.boatTails());
+        showTailsCheckBox.setValue(initialSettings.isShowTails());
+        tailSettingsPanel.add(showTailsCheckBox);
+        showTailsCheckBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<Boolean> vce) {
+                boolean newValue = vce.getValue();
+                RaceMapSettingsDialogComponent.this.tailLengthBox.setEnabled(newValue);
+            }
+        });
+        Label tailLengthLabel = new Label(stringMessages.lengthInSeconds() + ":");
+        tailLengthLabel.getElement().getStyle().setMarginLeft(25, Unit.PX);
+        tailSettingsPanel.add(tailLengthLabel);
+        tailSettingsPanel.setCellVerticalAlignment(tailLengthLabel, HasVerticalAlignment.ALIGN_MIDDLE);
+        tailLengthBox = dialog.createLongBox((int) (initialSettings.getTailLengthInMilliseconds() / 1000), 4);
+        tailLengthBox.setEnabled(initialSettings.isShowTails());
+        tailSettingsPanel.add(tailLengthBox);
+        tailSettingsPanel.setCellVerticalAlignment(tailLengthBox, HasVerticalAlignment.ALIGN_MIDDLE);
+        vp.add(tailSettingsPanel);
+
         VerticalPanel helpLineSettingsBoxesPanel = new VerticalPanel();
         for (HelpLineTypes helpLineType : HelpLineTypes.values()) {
                 CheckBox cb = dialog.createCheckbox(RaceMapSettingsTypeFormatter.formatHelpLineType(helpLineType, stringMessages));
-                cb.setValue(initialSettings.getHelpLinesSettings().containsHelpLine(helpLineType), true);
+                cb.setValue(initialSettings.getHelpLinesSettings().containsHelpLine(helpLineType));
                 checkboxAndHelpLineType.add(new Pair<CheckBox, HelpLineTypes>(cb, helpLineType));
                 helpLineSettingsBoxesPanel.add(cb);
         }
@@ -135,9 +184,9 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
             }
         }
 
-        zoomOnlyToSelectedCompetitors.setEnabled(!disableOnlySelected);
+        zoomOnlyToSelectedCompetitorsCheckBox.setEnabled(!disableOnlySelected);
         if (disableOnlySelected) {
-            zoomOnlyToSelectedCompetitors.setValue(false);
+            zoomOnlyToSelectedCompetitorsCheckBox.setValue(false);
         }
     }
 
@@ -149,9 +198,14 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
         }
         result.setZoomSettings(getZoomSettings());
         result.setHelpLinesSettings(getHelpLinesSettings());
-        result.setShowDouglasPeuckerPoints(checkBoxDouglasPeuckerPoints.getValue());
-        result.setShowOnlySelectedCompetitors(showOnlySelectedCompetitors.getValue());
+        result.setShowDouglasPeuckerPoints(showDouglasPeuckerPointsCheckBox.getValue());
+        result.setShowOnlySelectedCompetitors(showOnlySelectedCompetitorsCheckBox.getValue());
+        result.setShowSelectedCompetitorsInfo(showSelectedCompetitorsInfoCheckBox.getValue());
+        result.setShowAllCompetitors(showAllCompetitorsCheckBox.getValue());
+        result.setShowTails(showTailsCheckBox.getValue());
         result.setTailLengthInMilliseconds(tailLengthBox.getValue() == null ? -1 : tailLengthBox.getValue()*1000l);
+        result.setMaxVisibleCompetitorsCount(maxVisibleCompetitorsCountBox.getValue() == null ? -1 : maxVisibleCompetitorsCountBox.getValue());
+        
         return result;
     }
     
@@ -167,7 +221,7 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
         if (noAutoZoomSelected) {
             zoomTypes.add(ZoomTypes.NONE);
         }
-        return new RaceMapZoomSettings(zoomTypes, zoomOnlyToSelectedCompetitors.getValue());
+        return new RaceMapZoomSettings(zoomTypes, zoomOnlyToSelectedCompetitorsCheckBox.getValue());
     }
 
     private RaceMapHelpLinesSettings getHelpLinesSettings() {
@@ -186,8 +240,10 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
             @Override
             public String getErrorMessage(RaceMapSettings valueToValidate) {
                 String errorMessage = null;
-                if (valueToValidate.getTailLengthInMilliseconds() < 0) {
-                    errorMessage = stringMessages.tailLengthMustBeNonNegative();
+                if (valueToValidate.isShowTails() && valueToValidate.getTailLengthInMilliseconds() <= 0) {
+                    errorMessage = stringMessages.tailLengthMustBePositive();
+                } else if (!valueToValidate.isShowAllCompetitors() && valueToValidate.getMaxVisibleCompetitorsCount() <= 0) {
+                    errorMessage = stringMessages.maxVisibleCompetitorsCountMustBePositive();
                 }
                 return errorMessage;
             }

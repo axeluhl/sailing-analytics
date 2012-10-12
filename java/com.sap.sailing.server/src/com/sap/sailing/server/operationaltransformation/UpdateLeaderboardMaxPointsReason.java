@@ -5,13 +5,13 @@ import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard.Entry;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
 
-public class UpdateLeaderboardMaxPointsReason extends AbstractLeaderboardColumnOperation<Pair<Integer, Integer>> {
+public class UpdateLeaderboardMaxPointsReason extends AbstractLeaderboardColumnOperation<Triple<Double, Double, Boolean>> {
     private static final long serialVersionUID = -492130952256848047L;
     private final String competitorIdAsString;
     private final MaxPointsReason newMaxPointsReason;
@@ -38,7 +38,7 @@ public class UpdateLeaderboardMaxPointsReason extends AbstractLeaderboardColumnO
     }
 
     @Override
-    public Pair<Integer, Integer> internalApplyTo(RacingEventService toState) throws NoWindException {
+    public Triple<Double, Double, Boolean> internalApplyTo(RacingEventService toState) throws NoWindException {
         Leaderboard leaderboard = toState.getLeaderboardByName(getLeaderboardName());
         if (leaderboard != null) {
             Competitor competitor = leaderboard.getCompetitorByIdAsString(competitorIdAsString);
@@ -50,7 +50,8 @@ public class UpdateLeaderboardMaxPointsReason extends AbstractLeaderboardColumnO
                 leaderboard.getScoreCorrection().setMaxPointsReason(competitor, raceColumn, newMaxPointsReason);
                 updateStoredLeaderboard(toState, leaderboard);
                 Entry updatedEntry = leaderboard.getEntry(competitor, raceColumn, timePoint);
-                return new Pair<Integer, Integer>(updatedEntry.getNetPoints(), updatedEntry.getTotalPoints());
+                boolean isScoreCorrected = leaderboard.getScoreCorrection().isScoreCorrected(competitor, raceColumn);
+                return new Triple<Double, Double, Boolean>(updatedEntry.getNetPoints(), updatedEntry.getTotalPoints(), isScoreCorrected);
             } else {
                 throw new IllegalArgumentException("Didn't find competitor with ID "+competitorIdAsString+" in leaderboard "+getLeaderboardName());
             }

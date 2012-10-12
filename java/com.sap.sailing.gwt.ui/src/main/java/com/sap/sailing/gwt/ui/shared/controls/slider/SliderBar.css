@@ -21,6 +21,7 @@
   height: 21px;
   z-index: 1;
   cursor: pointer;
+  top: 7px;
 }
 
 .gwt-SliderBar-shell .gwt-SliderBar-tick {
@@ -29,6 +30,10 @@
   height: 5px;
   background: #efefef;
   overflow: hidden;
+}
+
+.gwt-SliderBar-shell:focus{
+	outline: none; 
 }
 
 .gwt-SliderBar-shell .gwt-SliderBar-mark {

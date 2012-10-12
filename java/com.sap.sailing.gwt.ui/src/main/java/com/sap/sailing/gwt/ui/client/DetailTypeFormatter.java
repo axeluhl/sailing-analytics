@@ -16,6 +16,7 @@ public class DetailTypeFormatter {
         case NUMBER_OF_MANEUVERS:
             return stringMessages.numberOfManeuvers();
         case CURRENT_SPEED_OVER_GROUND_IN_KNOTS:
+        case RACE_CURRENT_SPEED_OVER_GROUND_IN_KNOTS:
             return stringMessages.currentSpeedOverGroundInKnots();
         case ESTIMATED_TIME_TO_NEXT_WAYPOINT_IN_SECONDS:
             return stringMessages.estimatedTimeToNextWaypointInSeconds();
@@ -57,6 +58,12 @@ public class DetailTypeFormatter {
             return stringMessages.time();
         case AVERAGE_CROSS_TRACK_ERROR_IN_METERS:
             return stringMessages.averageCrossTrackErrorInMeters();
+        case MAXIMUM_SPEED_OVER_GROUND_IN_KNOTS:
+            return stringMessages.maximumSpeedOverGroundInKnots();
+        case TOTAL_TIME_SAILED_DOWNWIND_IN_SECONDS:
+            return stringMessages.totalTimeSailedDownwindInSeconds();
+        case TOTAL_TIME_SAILED_IN_SECONDS:
+            return stringMessages.totalTimeSailedInSeconds();
         }
         return null;
 

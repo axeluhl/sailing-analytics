@@ -90,6 +90,7 @@ public class TrackedRaceContentsReplicationTest extends AbstractServerReplicatio
                 MongoWindStoreFactory.INSTANCE.getMongoWindStore(MongoFactory.INSTANCE.getDefaultMongoObjectFactory(),
                         MongoFactory.INSTANCE.getDefaultDomainObjectFactory()), /* delayToLiveInMillis */ 5000,
                 /* millisecondsOverWhichToAverageWind */ 10000, /* millisecondsOverWhichToAverageSpeed */10000));
+        trackedRace.waitUntilWindLoadingComplete();
     }
     
     @Test
@@ -102,9 +103,14 @@ public class TrackedRaceContentsReplicationTest extends AbstractServerReplicatio
         Competitor replicaCompetitor = replicaTrackedRace.getRace().getCompetitors().iterator().next();
         assertNotNull(replicaCompetitor);
         GPSFixTrack<Competitor, GPSFixMoving> competitorTrack = replicaTrackedRace.getTrack(replicaCompetitor);
-        assertEquals(1, Util.size(competitorTrack.getRawFixes()));
-        assertEquals(fix, competitorTrack.getRawFixes().iterator().next());
-        assertNotSame(fix, competitorTrack.getRawFixes().iterator().next());
+        competitorTrack.lockForRead();
+        try {
+            assertEquals(1, Util.size(competitorTrack.getRawFixes()));
+            assertEquals(fix, competitorTrack.getRawFixes().iterator().next());
+            assertNotSame(fix, competitorTrack.getRawFixes().iterator().next());
+        } finally {
+            competitorTrack.unlockAfterRead();
+        }
     }
 
     @Test
@@ -118,9 +124,14 @@ public class TrackedRaceContentsReplicationTest extends AbstractServerReplicatio
         Buoy replicaBuoy = replicaTrackedRace.getRace().getCourse().getFirstWaypoint().getBuoys().iterator().next();
 //        assertNotSame(replicaBuoy, masterBuoy); // TODO this would require solving bug 592
         GPSFixTrack<Buoy, GPSFix> replicaBuoyTrack = replicaTrackedRace.getOrCreateTrack(replicaBuoy);
-        assertEquals(1, Util.size(replicaBuoyTrack.getRawFixes()));
-        assertEquals(replicaBuoyTrack.getRawFixes().iterator().next(), fix);
-        assertNotSame(fix, replicaBuoyTrack.getRawFixes().iterator().next());
+        replicaBuoyTrack.lockForRead();
+        try {
+            assertEquals(1, Util.size(replicaBuoyTrack.getRawFixes()));
+            assertEquals(replicaBuoyTrack.getRawFixes().iterator().next(), fix);
+            assertNotSame(fix, replicaBuoyTrack.getRawFixes().iterator().next());
+        } finally {
+            replicaBuoyTrack.unlockAfterRead();
+        }
     }
 
     @Test
@@ -133,10 +144,15 @@ public class TrackedRaceContentsReplicationTest extends AbstractServerReplicatio
         TrackedRace replicaTrackedRace = replica.getTrackedRace(raceIdentifier);
         WindTrack replicaWindTrack = replicaTrackedRace.getOrCreateWindTrack(replicaTrackedRace
                 .getWindSources(WindSourceType.WEB).iterator().next());
-        assertEquals(1, Util.size(replicaWindTrack.getRawFixes()));
-        Wind replicaWind = replicaWindTrack.getRawFixes().iterator().next();
-        assertEquals(wind, replicaWind);
-        assertNotSame(wind, replicaWind);
+        replicaWindTrack.lockForRead();
+        try {
+            assertEquals(1, Util.size(replicaWindTrack.getRawFixes()));
+            Wind replicaWind = replicaWindTrack.getRawFixes().iterator().next();
+            assertEquals(wind, replicaWind);
+            assertNotSame(wind, replicaWind);
+        } finally {
+            replicaWindTrack.unlockAfterRead();
+        }
     }
 
     @Test
@@ -146,12 +162,23 @@ public class TrackedRaceContentsReplicationTest extends AbstractServerReplicatio
         WindSource webWindSource = new WindSourceImpl(WindSourceType.WEB);
         trackedRace.recordWind(wind, webWindSource);
         trackedRace.removeWind(wind, webWindSource);
-        assertEquals(0, Util.size(trackedRace.getOrCreateWindTrack(webWindSource).getRawFixes()));
+        final WindTrack windTrack = trackedRace.getOrCreateWindTrack(webWindSource);
+        windTrack.lockForRead();
+        try {
+            assertEquals(0, Util.size(windTrack.getRawFixes()));
+        } finally {
+            windTrack.unlockAfterRead();
+        }
         Thread.sleep(1000);
         TrackedRace replicaTrackedRace = replica.getTrackedRace(raceIdentifier);
         WindTrack replicaWindTrack = replicaTrackedRace.getOrCreateWindTrack(replicaTrackedRace
                 .getWindSources(WindSourceType.WEB).iterator().next());
-        assertEquals(0, Util.size(replicaWindTrack.getRawFixes()));
+        replicaWindTrack.lockForRead();
+        try {
+            assertEquals(0, Util.size(replicaWindTrack.getRawFixes()));
+        } finally {
+            replicaWindTrack.unlockAfterRead();
+        }
     }
     
     @Test
@@ -166,13 +193,25 @@ public class TrackedRaceContentsReplicationTest extends AbstractServerReplicatio
         windTrack.add(wind);
         Thread.sleep(1000); // give MongoDB time to read its own writes in a separate session
         WindTrack trackedRaceWebWindTrack = trackedRace.getOrCreateWindTrack(webWindSource);
-        assertEquals(Util.size(windTrack.getRawFixes()), Util.size(trackedRaceWebWindTrack.getRawFixes()));
-        assertEquals(windTrack.getRawFixes().iterator().next(), trackedRaceWebWindTrack.getRawFixes().iterator().next());
-        Thread.sleep(1000); // wait for replication to happen
-        TrackedRace replicaTrackedRace = replica.getTrackedRace(raceIdentifier);
-        WindTrack replicaWindTrack = replicaTrackedRace.getOrCreateWindTrack(replicaTrackedRace
-                .getWindSources(WindSourceType.WEB).iterator().next());
-        assertEquals(Util.size(windTrack.getRawFixes()), Util.size(replicaWindTrack.getRawFixes()));
-        assertEquals(windTrack.getRawFixes().iterator().next(), replicaWindTrack.getRawFixes().iterator().next());
+        windTrack.lockForRead();
+        trackedRaceWebWindTrack.lockForRead();
+        try {
+            assertEquals(Util.size(windTrack.getRawFixes()), Util.size(trackedRaceWebWindTrack.getRawFixes()));
+            assertEquals(windTrack.getRawFixes().iterator().next(), trackedRaceWebWindTrack.getRawFixes().iterator().next());
+            Thread.sleep(1000); // wait for replication to happen
+            TrackedRace replicaTrackedRace = replica.getTrackedRace(raceIdentifier);
+            WindTrack replicaWindTrack = replicaTrackedRace.getOrCreateWindTrack(replicaTrackedRace
+                    .getWindSources(WindSourceType.WEB).iterator().next());
+            replicaWindTrack.lockForRead();
+            try {
+                assertEquals(Util.size(windTrack.getRawFixes()), Util.size(replicaWindTrack.getRawFixes()));
+                assertEquals(windTrack.getRawFixes().iterator().next(), replicaWindTrack.getRawFixes().iterator().next());
+            } finally {
+                replicaWindTrack.unlockAfterRead();
+            }
+        } finally {
+            trackedRaceWebWindTrack.unlockAfterRead();
+            windTrack.unlockAfterRead();
+        }
     }
 }
