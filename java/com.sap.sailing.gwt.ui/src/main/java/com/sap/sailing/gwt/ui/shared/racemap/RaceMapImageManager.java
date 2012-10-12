@@ -79,6 +79,7 @@ public class RaceMapImageManager {
             buoyIcons.put("orange", Icon.newInstance(resources.buoyDarkOrangeIcon().getSafeUri().asString()));
             buoyIcons.put("white conical", Icon.newInstance(resources.buoyWhiteConeIcon().getSafeUri().asString()));
             buoyIcons.put("black cylinder checkered", Icon.newInstance(resources.buoyBlackFinishIcon().getSafeUri().asString()));
+            buoyIcons.put("committee vessel", Icon.newInstance(resources.juryBoatIcon().getSafeUri().asString()));
             for (Icon buoyIcon : buoyIcons.values()) {
                 buoyIcon.setIconSize(Size.newInstance(19, 28));
                 buoyIcon.setIconAnchor(Point.newInstance(6, 15));
