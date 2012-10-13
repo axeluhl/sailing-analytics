@@ -37,6 +37,7 @@ import com.google.gwt.maps.client.event.PolylineMouseOutHandler;
 import com.google.gwt.maps.client.event.PolylineMouseOverHandler;
 import com.google.gwt.maps.client.geom.LatLng;
 import com.google.gwt.maps.client.geom.LatLngBounds;
+import com.google.gwt.maps.client.overlay.Icon;
 import com.google.gwt.maps.client.overlay.Marker;
 import com.google.gwt.maps.client.overlay.MarkerOptions;
 import com.google.gwt.maps.client.overlay.Polyline;
@@ -951,20 +952,9 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
 
     protected Marker createBuoyMarker(final BuoyDTO markDTO) {
         MarkerOptions options = MarkerOptions.newInstance();
-        if(markDTO.displayColor != null) {
-            if("Red".equals(markDTO.displayColor) && raceMapImageManager.buoyRedIcon != null) {
-                options.setIcon(raceMapImageManager.buoyRedIcon);
-            } else if("Green".equals(markDTO.displayColor) && raceMapImageManager.buoyGreenIcon != null) {
-                options.setIcon(raceMapImageManager.buoyGreenIcon);
-            } else if("Yellow".equals(markDTO.displayColor) && raceMapImageManager.buoyYellowIcon != null) {
-                options.setIcon(raceMapImageManager.buoyYellowIcon);
-            } else if (raceMapImageManager.buoyIcon != null) {
-                options.setIcon(raceMapImageManager.buoyIcon);
-            }
-        } else {
-            if (raceMapImageManager.buoyIcon != null) {
-                options.setIcon(raceMapImageManager.buoyIcon);
-            }
+        final Icon iconForDisplayColor = raceMapImageManager.getIconForDisplayColor(markDTO.displayColor);
+        if (iconForDisplayColor != null) {
+            options.setIcon(iconForDisplayColor);
         }
         options.setTitle(markDTO.name);
         final Marker buoyMarker = new Marker(LatLng.newInstance(markDTO.position.latDeg, markDTO.position.lngDeg),
