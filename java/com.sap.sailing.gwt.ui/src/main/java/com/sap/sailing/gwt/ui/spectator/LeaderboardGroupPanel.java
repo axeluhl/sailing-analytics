@@ -258,7 +258,6 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
             }
         } else {
             List<RaceColumnDTO> raceColumns = leaderboard.getRaceList();
-            
             renderRacesToHTml(leaderboard, raceColumns, new FleetDTO("Default", 0, null), b); 
         }
         return b.toSafeHtml();
@@ -306,7 +305,7 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
         for (RaceColumnDTO raceColumn : raceColumns) {
             String linkText = raceColumn.getRaceColumnName();
             RaceDTO race = raceColumn.getRace(fleet);
-            if (race != null && race.isTracked) {
+            if (race != null) {
                 RegattaAndRaceIdentifier raceIdentifier = race.getRaceIdentifier();
                 String link = URLFactory.INSTANCE.encode("/gwt/RaceBoard.html?leaderboardName=" + leaderboard.name
                         + "&raceName=" + raceIdentifier.getRaceName() + "&root=" + root + raceIdentifier.getRaceName()
@@ -317,7 +316,7 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
                 if (viewMode != null && !viewMode.isEmpty()) {
                     link += "&viewMode=" + viewMode;
                 }
-                if(race.trackedRace.hasGPSData && race.trackedRace.hasWindData) {
+                if (race.trackedRace.hasGPSData && race.trackedRace.hasWindData) {
                     b.append(getAnchor(link, linkText, /* style */ "ActiveRace"));
                 } else {
                     b.append(TEXTTEMPLATE.textWithClass(linkText, STYLE_NAME_PREFIX + "InactiveRace"));
