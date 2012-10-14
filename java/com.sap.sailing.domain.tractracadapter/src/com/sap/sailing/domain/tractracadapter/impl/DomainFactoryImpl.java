@@ -3,6 +3,7 @@ package com.sap.sailing.domain.tractracadapter.impl;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.Serializable;
+import java.io.StringReader;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -14,6 +15,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.Boat;
@@ -66,6 +68,7 @@ import com.tractrac.clientmodule.ControlPoint;
 import com.tractrac.clientmodule.Race;
 import com.tractrac.clientmodule.RaceCompetitor;
 import com.tractrac.clientmodule.data.ControlPointPositionData;
+import com.tractrac.clientmodule.metadata.IMetadata;
 
 import difflib.PatchFailedException;
 
@@ -140,20 +143,40 @@ public class DomainFactoryImpl implements DomainFactory {
             com.sap.sailing.domain.base.ControlPoint domainControlPoint = controlPointCache.get(controlPoint);
             if (domainControlPoint == null) {
                 String controlPointName = controlPoint.getName();
-                Pair<String, String> controlPointNameAndColor = getControlPointNameAndColor(controlPointName);
+                Map<String, String> controlPointMetadata = parseControlPointMetadata(controlPoint);
+                String buoyColor = controlPointMetadata.get("Color");
+                String buoyShape = controlPointMetadata.get("Shape");
                 if (controlPoint.getHasTwoPoints()) {
                     // it's a gate
-                    Buoy leftBuoy = baseDomainFactory.getOrCreateBuoy(controlPointNameAndColor.getA() + " (left)", controlPointNameAndColor.getB());
-                    Buoy rightBuoy = baseDomainFactory.getOrCreateBuoy(controlPointNameAndColor.getA() + " (right)", controlPointNameAndColor.getB());
-                    domainControlPoint = baseDomainFactory.createGate(leftBuoy, rightBuoy, controlPointNameAndColor.getA());
+                    Buoy leftBuoy = baseDomainFactory.getOrCreateBuoy(controlPointName + " (left)", buoyColor, buoyShape);
+                    Buoy rightBuoy = baseDomainFactory.getOrCreateBuoy(controlPointName + " (right)", buoyColor, buoyShape);
+                    domainControlPoint = baseDomainFactory.createGate(leftBuoy, rightBuoy, controlPointName);
                 } else {
-                    Buoy buoy = baseDomainFactory.getOrCreateBuoy(controlPointNameAndColor.getA(), controlPointNameAndColor.getB());
+                    Buoy buoy = baseDomainFactory.getOrCreateBuoy(controlPointName, buoyColor, buoyShape);
                     domainControlPoint = buoy;
                 }
                 controlPointCache.put(controlPoint, domainControlPoint);
             }
             return domainControlPoint;
         }
+    }
+    
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    private Map<String, String> parseControlPointMetadata(ControlPoint controlPoint) {
+        Map<String, String> metadataMap = new HashMap<String, String>();
+        IMetadata metadata = controlPoint.getMetadata();
+        if(metadata != null && !metadata.isEmpty()) {
+            // we assume the format of the metadata is like in a java .properties file
+            String text = metadata.getText();
+            try {
+                Properties p = new Properties();
+                p.load(new StringReader(text));
+                metadataMap = new HashMap<String, String>((Map) p);
+            } catch (IOException e) {
+                // do nothing
+            }
+        }
+        return metadataMap;
     }
     
     // TODO: This is a special hack for the extreme sailing series event where we encoded the buoy color directly into the buoy name

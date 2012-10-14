@@ -952,7 +952,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
 
     protected Marker createBuoyMarker(final BuoyDTO markDTO) {
         MarkerOptions options = MarkerOptions.newInstance();
-        final Icon iconForDisplayColor = raceMapImageManager.getIconForDisplayColor(markDTO.displayColor);
+        final Icon iconForDisplayColor = raceMapImageManager.getIconForDisplayColor(markDTO.color);
         if (iconForDisplayColor != null) {
             options.setIcon(iconForDisplayColor);
         }

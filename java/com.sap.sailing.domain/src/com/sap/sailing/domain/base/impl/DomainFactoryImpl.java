@@ -120,10 +120,10 @@ public class DomainFactoryImpl implements DomainFactory {
     }
     
     @Override
-    public Buoy getOrCreateBuoy(String id, String displayColor) {
+    public Buoy getOrCreateBuoy(String id, String color, String shape) {
         Buoy result = buoyCache.get(id);
         if (result == null) {
-            result = new BuoyImpl(id, displayColor);
+            result = new BuoyImpl(id, color, shape);
             buoyCache.put(id, result);
         }
         return result;

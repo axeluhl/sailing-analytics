@@ -10,19 +10,28 @@ import com.sap.sailing.domain.common.impl.NamedImpl;
 public class BuoyImpl extends NamedImpl implements Buoy {
     private static final long serialVersionUID = 1900673146064411979L;
 
-    private final String displayColor;
-    
+    private final String color;
+    private final String shape;
+
     /**
-     * Creates a buoy with <code>null</code> as {@link #getDisplayColor() color}
+     * Creates a buoy with <code>null</code> as {@link #getColor() color}
      */
     public BuoyImpl(String name) {
         super(name);
-        displayColor = null;
+        color = null;
+        shape = null;
     }
 
     public BuoyImpl(String name, String color) {
         super(name);
-        this.displayColor = color;
+        this.color = color;
+        shape = null;
+    }
+
+    public BuoyImpl(String name, String color, String shape) {
+        super(name);
+        this.color = color;
+        this.shape = shape;
     }
 
     @Override
@@ -43,7 +52,13 @@ public class BuoyImpl extends NamedImpl implements Buoy {
         return result;
     }
 
-    public String getDisplayColor() {
-        return displayColor;
+    @Override
+    public String getColor() {
+        return color;
+    }
+
+    @Override
+    public String getShape() {
+        return shape;
     }
 }

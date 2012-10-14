@@ -31,7 +31,7 @@ public class RaceMapImageManager {
     private Icon defaultBuoyIcon;
 
     /**
-     * Contains buoy icons for display color names as obtained from {@link BuoyDTO#displayColor}, then converted to all lower case
+     * Contains buoy icons for display color names as obtained from {@link BuoyDTO#color}, then converted to all lower case
      */
     private final Map<String, Icon> buoyIcons;
     

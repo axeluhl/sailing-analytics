@@ -9,5 +9,6 @@ package com.sap.sailing.domain.base;
  * 
  */
 public interface Buoy extends WithID, ControlPoint, IsManagedByDomainFactory {
-    public String getDisplayColor();
+    public String getColor();
+    public String getShape();
 }

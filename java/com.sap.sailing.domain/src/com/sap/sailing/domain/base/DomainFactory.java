@@ -22,10 +22,11 @@ public interface DomainFactory {
     Buoy getOrCreateBuoy(String id);
     
     /**
-     * If the buoy with ID <code>id</code> already exists, it is returned. Its display color may differ from <code>displayColor</code>
-     * in that case. Otherwise, a new {@link Buoy} is created with <code>displayColor</code> as its {@link Buoy#getDisplayColor()}.
+     * If the buoy with ID <code>id</code> already exists, it is returned. Its color may differ from <code>color</code>
+     * in that case. Otherwise, a new {@link Buoy} is created with <code>color</code> as its {@link Buoy#getColor()} 
+     * and <code>shape</code> as its {@link Buoy#getShape()}.
      */
-    Buoy getOrCreateBuoy(String id, String displayColor);
+    Buoy getOrCreateBuoy(String id, String color, String shape);
 
     Gate createGate(Buoy left, Buoy right, String name);
     
