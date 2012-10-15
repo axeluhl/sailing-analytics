@@ -40,7 +40,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.shared.BoatClassDTO;
-import com.sap.sailing.gwt.ui.shared.PolarDiagram49DTO;
+import com.sap.sailing.gwt.ui.shared.PolarDiagramDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldGenParamsDTO;
 import com.sap.sailing.gwt.ui.shared.WindPatternDTO;
 import com.sap.sailing.gwt.ui.shared.controls.slider.SliderBar;
@@ -492,12 +492,12 @@ public class SimulatorMainPanel2 extends SplitLayoutPanel {
                     .setOption("pane/endAngle", 360).setOption("exporting/enableImages", true)
                     .setOption("plotOptions/line/lineWidth", 1).setOption("plotOptions/line/marker/enabled", false)
                     .setMarginRight(2);
-            simulatorSvc.getPolarDiagram49DTO(5.0, selectedBoatClass, new AsyncCallback<PolarDiagram49DTO>() {
+            simulatorSvc.getPolarDiagram49DTO(5.0, selectedBoatClass, new AsyncCallback<PolarDiagramDTO>() {
                 /**
                  * @param polar
                  */
                 @Override
-                public void onSuccess(PolarDiagram49DTO polar) {
+                public void onSuccess(PolarDiagramDTO polar) {
                     Number[][] Nseries = polar.getNumberSeries();
                     int[] windSpeedCatalog = new int[] { 6, 8, 10, 12, 14, 16, 20 };
                     Series ser = chart.createSeries();

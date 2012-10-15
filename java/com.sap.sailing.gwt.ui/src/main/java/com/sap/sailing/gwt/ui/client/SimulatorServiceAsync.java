@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.gwt.ui.shared.BoatClassDTO;
-import com.sap.sailing.gwt.ui.shared.PolarDiagram49DTO;
+import com.sap.sailing.gwt.ui.shared.PolarDiagramDTO;
 import com.sap.sailing.gwt.ui.shared.PositionDTO;
 import com.sap.sailing.gwt.ui.shared.SimulatorResultsDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldDTO;
@@ -34,6 +34,6 @@ public interface SimulatorServiceAsync {
     void getBoatClasses(AsyncCallback<BoatClassDTO[]> callback);
 
 	void getPolarDiagram49DTO(Double bearingStep,int boatClass,
-			AsyncCallback<PolarDiagram49DTO> callback);
+			AsyncCallback<PolarDiagramDTO> callback);
 
 }

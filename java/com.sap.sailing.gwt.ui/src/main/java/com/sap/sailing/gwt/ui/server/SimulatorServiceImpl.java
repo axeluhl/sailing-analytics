@@ -26,7 +26,7 @@ import com.sap.sailing.gwt.ui.client.SimulatorService;
 import com.sap.sailing.gwt.ui.shared.BoatClassDTO;
 import com.sap.sailing.gwt.ui.shared.CourseDTO;
 import com.sap.sailing.gwt.ui.shared.PathDTO;
-import com.sap.sailing.gwt.ui.shared.PolarDiagram49DTO;
+import com.sap.sailing.gwt.ui.shared.PolarDiagramDTO;
 import com.sap.sailing.gwt.ui.shared.PositionDTO;
 import com.sap.sailing.gwt.ui.shared.RaceMapDataDTO;
 import com.sap.sailing.gwt.ui.shared.SimulatorResultsDTO;
@@ -429,7 +429,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         return windFieldDTO;
     }
 
-    public PolarDiagram49DTO getPolarDiagram49DTO(Double bearingStep, int boatClassIndex) throws IOException {
+    public PolarDiagramDTO getPolarDiagram49DTO(Double bearingStep, int boatClassIndex) throws IOException {
 
         String csvFilePath = ConfigurationManager.getDefault().getPolarDiagramFileLocation(boatClassIndex);
 
@@ -451,7 +451,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
             }
             i++;
         }
-        PolarDiagram49DTO dto = new PolarDiagram49DTO();
+        PolarDiagramDTO dto = new PolarDiagramDTO();
         dto.setNumberSeries(series);
 
         return dto;

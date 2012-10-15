@@ -6,7 +6,7 @@ import java.util.List;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import com.sap.sailing.gwt.ui.shared.BoatClassDTO;
-import com.sap.sailing.gwt.ui.shared.PolarDiagram49DTO;
+import com.sap.sailing.gwt.ui.shared.PolarDiagramDTO;
 import com.sap.sailing.gwt.ui.shared.PositionDTO;
 import com.sap.sailing.gwt.ui.shared.SimulatorResultsDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldDTO;
@@ -37,5 +37,5 @@ public interface SimulatorService extends RemoteService {
 
     public WindFieldDTO getWindField(WindFieldGenParamsDTO params, WindPatternDisplay pattern) throws WindPatternNotFoundException;
     
-    public PolarDiagram49DTO getPolarDiagram49DTO(Double bearingStep, int boatClass) throws IOException;
+    public PolarDiagramDTO getPolarDiagram49DTO(Double bearingStep, int boatClass) throws IOException;
 }
