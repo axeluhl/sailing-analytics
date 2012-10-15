@@ -20,6 +20,9 @@
   <profiles>
     <profile>
       <id>sailing.analytics</id>
+	  <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
       <properties>
         <!-- Leave empty, if no proxy is needed in your environment! -->
         <parameters.proxy>
@@ -31,10 +34,6 @@
 	  </properties>
     </profile>
   </profiles>
-  
-  <activeProfiles>
-    <activeProfile>sailing.analytics</activeProfile>
-  </activeProfiles>
 </settings>
 
 
