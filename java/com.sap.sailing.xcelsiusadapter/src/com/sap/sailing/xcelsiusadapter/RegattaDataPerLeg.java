@@ -65,11 +65,14 @@ public class RegattaDataPerLeg extends Action {
 
             // skip race if not tracked
             final TrackedRace trackedRace = getTrackedRace(regatta, race);
-            if (trackedRace == null) {
+            if (trackedRace == null || !trackedRace.hasGPSData()) {
                 continue;
             }
 
             final TimePoint raceStarted = getTimePoint(trackedRace); // get TimePoint for when the race started
+            if (raceStarted == null) {
+                continue;
+            }
 
             long minNextLegStart = raceStarted.asMillis(); // variable for keeping track of when the first competitor
                                                            // started the next leg
