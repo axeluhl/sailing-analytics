@@ -898,7 +898,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             TrackedRace trackedRace = getService().getExistingTrackedRace(raceIdentifier);
             TrackedRaceDTO trackedRaceDTO = null; 
             if (trackedRace != null) {
-                trackedRaceDTO = new TrackedRaceDTO();  
+                trackedRaceDTO = new TrackedRaceDTO();
                 trackedRaceDTO.hasWindData = trackedRace.hasWindData();
                 trackedRaceDTO.hasGPSData = trackedRace.hasGPSData();
                 trackedRaceDTO.startOfTracking = trackedRace.getStartOfTracking() == null ? null : trackedRace.getStartOfTracking().asDate();

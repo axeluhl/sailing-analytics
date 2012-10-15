@@ -269,8 +269,8 @@ public class EditCCG extends javax.swing.JDialog {
     
     private class MarkWithDesc extends MarkImpl {
         
-        public MarkWithDesc(String description, int index, Iterable<String> devices ){
-            super(description, index, devices);
+        public MarkWithDesc(String description, int index, Iterable<String> devices) {
+            super(description, index, devices, /* markType */ null);
         }
         
         @Override
