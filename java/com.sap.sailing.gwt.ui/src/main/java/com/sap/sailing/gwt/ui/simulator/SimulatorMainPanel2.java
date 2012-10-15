@@ -112,7 +112,7 @@ public class SimulatorMainPanel2 extends SplitLayoutPanel {
     private Button polarDiagramDialogCloseButton;
 
     //I077899 - Mihai Bogdan Eugen
-    private HorizontalPanel polarDiv;
+    private VerticalPanel polarDiv;
     
     //I077899 - Mihai Bogdan Eugen
     private BoatClassDTO[] boatClasses = new BoatClassDTO[0];
@@ -533,7 +533,9 @@ public class SimulatorMainPanel2 extends SplitLayoutPanel {
         return timePanel;
     }
 
+    //I077899 - Mihai Bogdan Eugen
     private Panel createPolarSelector() {
+    	
         HorizontalPanel polarDiagramPanel = new HorizontalPanel();
         polarDiagramPanel.getElement().setClassName("boatClassPanel");
         polarDiagramPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
@@ -542,15 +544,20 @@ public class SimulatorMainPanel2 extends SplitLayoutPanel {
         polarShowLabel.getElement().setClassName("boatClassLabel");
         polarDiagramPanel.add(polarShowLabel);
 
-        CheckBox cb = new CheckBox("");
+        final CheckBox cb = new CheckBox("");
         cb.setValue(false);
         cb.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
-            @Override
+			@Override
             public void onValueChange(ValueChangeEvent<Boolean> event) {
-                @SuppressWarnings("deprecation")
-                boolean checked = ((CheckBox) event.getSource()).isChecked();
+                boolean checked = ((CheckBox) event.getSource()).getValue();
 
                 polarDiv.setVisible(checked);
+                
+                if(checked) {
+                    polarDiagramDialogBox.center();
+                    polarDiagramDialogCloseButton.setFocus(true);
+                    cb.setValue(false);
+                }
             }
         });
 
@@ -578,7 +585,7 @@ public class SimulatorMainPanel2 extends SplitLayoutPanel {
         hp.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
         hp.add(boatClassLabel);
 
-        System.out.println("XXX: Inainte de getBoatClasses");
+        System.out.println("XXX: Inainte de createSailingSetup/getBoatClasses");
         this.simulatorSvc.getBoatClasses(new AsyncCallback<BoatClassDTOsAndNotificationMessage>() {
             @Override
             public void onFailure(Throwable error) {
@@ -588,7 +595,7 @@ public class SimulatorMainPanel2 extends SplitLayoutPanel {
             @Override
             public void onSuccess(BoatClassDTOsAndNotificationMessage response) {
             	
-            	System.out.println("XXX: In getBoatClasses/onSuccess");
+            	System.out.println("XXX: In createSailingSetup/getBoatClasses/onSuccess");
             	
             	String notificationMessage = response.getNotificationMessage();
             	if(notificationMessage != "" && notificationMessage.length() != 0 && warningAlreadyShown == false) {
@@ -602,7 +609,7 @@ public class SimulatorMainPanel2 extends SplitLayoutPanel {
                 }
             }
         });
-        System.out.println("XXX: Dupa de getBoatClasses");
+        System.out.println("XXX: Dupa de createSailingSetup/getBoatClasses");
         
         this.boatSelector.addChangeHandler(new ChangeHandler() {
             @Override
@@ -631,10 +638,13 @@ public class SimulatorMainPanel2 extends SplitLayoutPanel {
 
         Panel polarShow = createPolarSelector();
         sailingPanel.add(polarShow);
-
-         polarDiv = new HorizontalPanel();
-         polarDiv.getElement().setClassName("polarDiv");
-         polarDiv.setVisible(false);
+        
+        this.polarDiagramDialogCloseButton = new Button("Close"); 
+        this.polarDiagramDialogCloseButton.getElement().setId("closeButton");
+        
+        this.polarDiv = new VerticalPanel();
+        this.polarDiv.getElement().setClassName("polarDiv");
+        this.polarDiv.setVisible(false);
 
         this.loadPolarDiagramData(0);
 
@@ -722,6 +732,7 @@ public class SimulatorMainPanel2 extends SplitLayoutPanel {
                 }));
 
                 polarDiv.add(chart);
+                polarDiv.add(polarDiagramDialogCloseButton);
             }
         });
     }
@@ -806,16 +817,8 @@ public class SimulatorMainPanel2 extends SplitLayoutPanel {
         final DialogBox dialogBox = new DialogBox();
         dialogBox.setText("Poalr Diagram"); 
         dialogBox.setAnimationEnabled(true);
-        
-        this.polarDiagramDialogCloseButton = new Button("Close"); 
-        this.polarDiagramDialogCloseButton.getElement().setId("closeButton");
-        
-        VerticalPanel dialogVPanel = new VerticalPanel();
-        dialogVPanel.getElement().setClassName("polarDiv");
-        //dialogVPanel.add(this.chart2);
-        dialogVPanel.add(this.polarDiagramDialogCloseButton);
-        dialogBox.setWidget(dialogVPanel);
-        
+        dialogBox.setWidget(this.polarDiv);
+
         this.polarDiagramDialogCloseButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
             	dialogBox.hide();
