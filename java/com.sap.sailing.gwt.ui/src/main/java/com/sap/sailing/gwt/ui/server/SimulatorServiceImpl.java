@@ -447,7 +447,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         
         BoatClassDTOsAndNotificationMessage result = new BoatClassDTOsAndNotificationMessage();
 
-        ConfigurationManager config = ConfigurationManager.getDefault();
+        ConfigurationManager config = ConfigurationManager.INSTANCE;
         if(config.getStatus() == ReadingConfigurationFileStatus.IO_ERROR) {
         	throw new ConfigurationException(config.getErrorMessage());
         }
@@ -455,7 +455,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         	result.setNotificationMessage(config.getErrorMessage());
         }
         
-        for (Tuple<String, Double, String> tuple : ConfigurationManager.getDefault().getBoatClassesInfo()) {
+        for (Tuple<String, Double, String> tuple : ConfigurationManager.INSTANCE.getBoatClassesInfo()) {
         	boatClassesDTOs.add(new BoatClassDTO(tuple.first, tuple.second));
         }
 
@@ -499,7 +499,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
     //I00788 - Mihai Bogdan Eugen    
     private PolarDiagramAndNotificationMessage getPolarDiagram(int boatClassIndex) throws ConfigurationException {
     	
-        ConfigurationManager config = ConfigurationManager.getDefault();
+        ConfigurationManager config = ConfigurationManager.INSTANCE;
         PolarDiagramAndNotificationMessage result = new PolarDiagramAndNotificationMessage();
         
         if(config.getStatus() == ReadingConfigurationFileStatus.IO_ERROR) {
