@@ -62,6 +62,10 @@ public class DetailTypeFormatter {
             return stringMessages.maximumSpeedOverGroundInKnots();
         case TOTAL_TIME_SAILED_DOWNWIND_IN_SECONDS:
             return stringMessages.totalTimeSailedDownwindInSeconds();
+        case TOTAL_TIME_SAILED_UPWIND_IN_SECONDS:
+            return stringMessages.totalTimeSailedUpwindInSeconds();
+        case TOTAL_TIME_SAILED_REACHING_IN_SECONDS:
+            return stringMessages.totalTimeSailedReachingInSeconds();
         case TOTAL_TIME_SAILED_IN_SECONDS:
             return stringMessages.totalTimeSailedInSeconds();
         }

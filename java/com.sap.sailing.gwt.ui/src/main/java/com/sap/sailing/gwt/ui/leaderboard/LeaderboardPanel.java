@@ -591,6 +591,8 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
 
     public static DetailType[] getAvailableOverallDetailColumnTypes() {
         return new DetailType[] { DetailType.TOTAL_TIME_SAILED_DOWNWIND_IN_SECONDS,
+                DetailType.TOTAL_TIME_SAILED_UPWIND_IN_SECONDS,
+                DetailType.TOTAL_TIME_SAILED_REACHING_IN_SECONDS,
                 DetailType.TOTAL_TIME_SAILED_IN_SECONDS, DetailType.MAXIMUM_SPEED_OVER_GROUND_IN_KNOTS };
     }
 
@@ -1187,7 +1189,11 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         Map<DetailType, SortableColumn<LeaderboardRowDTO, ?>> result = new HashMap<DetailType, SortableColumn<LeaderboardRowDTO, ?>>();
         result.put(DetailType.MAXIMUM_SPEED_OVER_GROUND_IN_KNOTS, new MaxSpeedOverallColumn(stringMessages,
                 RACE_COLUMN_HEADER_STYLE, RACE_COLUMN_STYLE));
+        result.put(DetailType.TOTAL_TIME_SAILED_UPWIND_IN_SECONDS, new KingOfTheUpwindColumn(stringMessages,
+                RACE_COLUMN_HEADER_STYLE, RACE_COLUMN_STYLE));
         result.put(DetailType.TOTAL_TIME_SAILED_DOWNWIND_IN_SECONDS, new KingOfTheDownwindColumn(stringMessages,
+                RACE_COLUMN_HEADER_STYLE, RACE_COLUMN_STYLE));
+        result.put(DetailType.TOTAL_TIME_SAILED_REACHING_IN_SECONDS, new KingOfTheReachingColumn(stringMessages,
                 RACE_COLUMN_HEADER_STYLE, RACE_COLUMN_STYLE));
         result.put(DetailType.TOTAL_TIME_SAILED_IN_SECONDS, new TotalTimeSailedColumn(stringMessages,
                 RACE_COLUMN_HEADER_STYLE, RACE_COLUMN_STYLE));
