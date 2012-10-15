@@ -1,4 +1,4 @@
-package com.sap.sailing.server.impl;
+package com.sap.sailing.server.gateway.impl;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -47,7 +47,7 @@ import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.domain.tractracadapter.RaceRecord;
-import com.sap.sailing.server.SailingServerHttpServlet;
+import com.sap.sailing.server.gateway.SailingServerHttpServlet;
 import com.sap.sailing.util.InvalidDateException;
 
 public class AdminApp extends SailingServerHttpServlet {

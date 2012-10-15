@@ -1,9 +1,12 @@
 package com.sap.sailing.domain.base.impl;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnListener;
+import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.util.impl.RaceColumnListeners;
 
 public abstract class SimpleAbstractRaceColumn implements RaceColumn {
@@ -31,5 +34,15 @@ public abstract class SimpleAbstractRaceColumn implements RaceColumn {
     @Override
     public void removeRaceColumnListener(RaceColumnListener listener) {
         getRaceColumnListeners().removeRaceColumnListener(listener);
+    }
+
+    @Override
+    public RaceDefinition getRaceDefinition(Fleet fleet) {
+        TrackedRace trackedRace = getTrackedRace(fleet);
+        RaceDefinition result = null;
+        if (trackedRace != null) {
+            result = trackedRace.getRace();
+        }
+        return result;
     }
 }

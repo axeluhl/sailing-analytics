@@ -1,4 +1,4 @@
-package com.sap.sailing.server.impl;
+package com.sap.sailing.server.gateway;
 
 import java.io.IOException;
 import java.io.PrintWriter;

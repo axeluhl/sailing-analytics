@@ -11,6 +11,7 @@ Import-Package: com.sap.sailing.gwt.ui.shared,
  org.osgi.framework;version="1.6.0"
 Bundle-ActivationPolicy: lazy
 Require-Bundle: com.sap.sailing.server,
+ com.sap.sailing.server.gateway,
  com.sap.sailing.domain,
  com.sap.sailing.domain.tractracadapter,
  com.sap.sailing.domain.common
