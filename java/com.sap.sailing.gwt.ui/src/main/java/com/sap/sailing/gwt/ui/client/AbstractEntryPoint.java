@@ -21,7 +21,11 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 
 public abstract class AbstractEntryPoint implements EntryPoint, ErrorReporter {
 
-    private DialogBox errorDialogBox;
+    //I00788 - Mihai Bogdan Eugen  
+	private DialogBox dialogBox;
+    //I00788 - Mihai Bogdan Eugen  
+	private HTML headerTextLabel;
+	
     private HTML serverResponseLabel;
     private Button dialogCloseButton;
     protected StringMessages stringMessages;
@@ -44,10 +48,22 @@ public abstract class AbstractEntryPoint implements EntryPoint, ErrorReporter {
     private static final String SERVER_ERROR = "An error occurred while " //$NON-NLS-1$
             + "attempting to contact the server. Please check your network " + "connection and try again."; //$NON-NLS-1$ //$NON-NLS-2$
 
+    //I00788 - Mihai Bogdan Eugen  
+    private static final String ERROR_HEDER_TEXT = "Error communicating with server!";
+    //I00788 - Mihai Bogdan Eugen  
+    private static final String WARNING_HEDER_TEXT = "A non critical problem occured!";
+    //I00788 - Mihai Bogdan Eugen  
+    private static final String SERVER_NOTIFICATION = "Warning!";
+
+    //I00788 - Mihai Bogdan Eugen  
     @Override
     public void onModuleLoad() {
-        stringMessages = GWT.create(StringMessages.class);
-        errorDialogBox = createErrorDialog(); /* TODO: Make this more generic (e.g. make it support all kinds of messages) */
+        this.stringMessages = GWT.create(StringMessages.class);
+        
+        /* TODO: Make this more generic (e.g. make it support all kinds of messages) */
+        // is it generic enough?
+        this.dialogBox = this.createDialog(ERROR_HEDER_TEXT); 
+        
         userAgent = new UserAgentDetails(Window.Navigator.getUserAgent());
         
         /* throw warning using alert if browser is unsupported */
@@ -63,13 +79,10 @@ public abstract class AbstractEntryPoint implements EntryPoint, ErrorReporter {
         userManagementServiceDef.setServiceEntryPoint(baseURL + "usermanagement");
     }
     
+    //I00788 - Mihai Bogdan Eugen    
     @Override
     public void reportError(String message) {
-        errorDialogBox.setText(message);
-        serverResponseLabel.addStyleName("serverResponseLabelError"); //$NON-NLS-1$
-        serverResponseLabel.setHTML(SERVER_ERROR);
-        errorDialogBox.center();
-        dialogCloseButton.setFocus(true);
+        this.setDialogBox(SERVER_ERROR, ERROR_HEDER_TEXT, message);
     }
 
     @Override
@@ -88,23 +101,30 @@ public abstract class AbstractEntryPoint implements EntryPoint, ErrorReporter {
         RootPanel.get().add(new Label(message));
     }
 
-    private DialogBox createErrorDialog() {
+    //I00788 - Mihai Bogdan Eugen   
+    private DialogBox createDialog(String headerText) {
         // Create the popup dialog box
         final DialogBox myErrorDialogBox = new DialogBox();
         myErrorDialogBox.setText("Remote Procedure Call"); //$NON-NLS-1$
         myErrorDialogBox.setAnimationEnabled(true);
-        dialogCloseButton = new Button("Close"); //$NON-NLS-1$
+        
+        this.dialogCloseButton = new Button("Close"); //$NON-NLS-1$
         // We can set the id of a widget by accessing its Element
-        dialogCloseButton.getElement().setId("closeButton"); //$NON-NLS-1$
+        this.dialogCloseButton.getElement().setId("closeButton"); //$NON-NLS-1$
+        
         final Label textToServerLabel = new Label();
-        serverResponseLabel = new HTML();
+        
+        this.serverResponseLabel = new HTML();
+        this.headerTextLabel = new HTML();
+        
         VerticalPanel dialogVPanel = new VerticalPanel();
-        dialogVPanel.add(new HTML("<b>Error communicating with server</b>")); //$NON-NLS-1$
+        dialogVPanel.add(this.headerTextLabel);
         dialogVPanel.add(textToServerLabel);
-        dialogVPanel.add(new HTML("<br><b>Server replies:</b>")); //$NON-NLS-1$
-        dialogVPanel.add(serverResponseLabel);
+        dialogVPanel.add(new HTML("<br><b>Server replies:</b>")); 
+        dialogVPanel.add(this.serverResponseLabel);
         dialogVPanel.setHorizontalAlignment(VerticalPanel.ALIGN_RIGHT);
-        dialogVPanel.add(dialogCloseButton);
+        dialogVPanel.add(this.dialogCloseButton);
+        
         myErrorDialogBox.setWidget(dialogVPanel);
         // Add a handler to close the DialogBox
         dialogCloseButton.addClickHandler(new ClickHandler() {
@@ -151,5 +171,20 @@ public abstract class AbstractEntryPoint implements EntryPoint, ErrorReporter {
             }
         });
     }
+    
+    //I00788 - Mihai Bogdan Eugen
+    @Override
+    public void reportNotification(String message) {
+    	this.setDialogBox(message, WARNING_HEDER_TEXT, SERVER_NOTIFICATION);
+    }
 
+    //I00788 - Mihai Bogdan Eugen
+    private void setDialogBox(String responseLabelText, String headerLabelText, String message) {
+        this.serverResponseLabel.addStyleName("serverResponseLabelError"); 
+        this.serverResponseLabel.setHTML(responseLabelText);
+        this.headerTextLabel.setHTML("<b>" + headerLabelText + "</b>");
+        this.dialogBox.setText(message);
+        this.dialogBox.center();
+        this.dialogCloseButton.setFocus(true);    	
+    }
 }
