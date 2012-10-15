@@ -89,9 +89,10 @@ public class EndToEndListeningStoreAndFowardTest {
                 new BasicDBObject().append(FieldNames.LAST_MESSAGE_COUNT.name(), 0l),
                 /* upsert */true, /* multi */false);
         // important: construct a new domain factory each time to make sure the competitor cache starts out empty
+        final com.sap.sailing.domain.base.impl.DomainFactoryImpl baseDomainFactory = new com.sap.sailing.domain.base.impl.DomainFactoryImpl();
         racingEventService = new RacingEventServiceImpl(mongoDBService, SwissTimingFactory.INSTANCE,
-                new DomainFactoryImpl(new com.sap.sailing.domain.base.impl.DomainFactoryImpl()),
-                com.sap.sailing.domain.tractracadapter.DomainFactory.INSTANCE);
+                new DomainFactoryImpl(baseDomainFactory),
+                new com.sap.sailing.domain.tractracadapter.impl.DomainFactoryImpl(baseDomainFactory));
         raceHandles = new ArrayList<RacesHandle>();
     }
 
