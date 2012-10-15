@@ -10,7 +10,7 @@ import com.sap.sailing.gwt.ui.shared.LeaderboardRowDTO;
  * @author Axel Uhl (d043530)
  *
  */
-public class KingOfTheDownwindColumn extends AbstractTimeInHoursMinutesSecondsColumn {
+public class KingOfTheUpwindColumn extends AbstractTimeInHoursMinutesSecondsColumn {
     
     private static class KingOfTheDownwindField implements LegDetailField<Double> {
         @Override
@@ -19,11 +19,11 @@ public class KingOfTheDownwindColumn extends AbstractTimeInHoursMinutesSecondsCo
         }
     }
 
-    public KingOfTheDownwindColumn(StringMessages stringMessages, String headerStyle, String columnStyle) {
-        super(stringMessages.totalTimeSailedDownwindInSeconds(), "[" + stringMessages.hhmmssUnit() + "]",
+    public KingOfTheUpwindColumn(StringMessages stringMessages, String headerStyle, String columnStyle) {
+        super(stringMessages.totalTimeSailedUpwindInSeconds(), "[" + stringMessages.hhmmssUnit() + "]",
                 new KingOfTheDownwindField(),
-                DetailType.TOTAL_TIME_SAILED_DOWNWIND_IN_SECONDS.getPrecision(),
-                DetailType.TOTAL_TIME_SAILED_DOWNWIND_IN_SECONDS.getDefaultSortingOrder(),
+                DetailType.TOTAL_TIME_SAILED_UPWIND_IN_SECONDS.getPrecision(),
+                DetailType.TOTAL_TIME_SAILED_UPWIND_IN_SECONDS.getDefaultSortingOrder(),
                 headerStyle, columnStyle);
     }
 
