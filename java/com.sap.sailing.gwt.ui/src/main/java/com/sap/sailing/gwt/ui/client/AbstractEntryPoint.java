@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.ui.client;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.debug.client.DebugInfo;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
@@ -20,7 +21,8 @@ import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
 public abstract class AbstractEntryPoint implements EntryPoint, ErrorReporter {
-
+    public static final String SELENIUM_DEBUG_ID = "selenium-id";
+    
     private DialogBox errorDialogBox;
     private HTML serverResponseLabel;
     private Button dialogCloseButton;
@@ -56,6 +58,9 @@ public abstract class AbstractEntryPoint implements EntryPoint, ErrorReporter {
         String baseURL = moduleBaseURL.substring(0, moduleBaseURL.lastIndexOf('/', moduleBaseURL.length()-2)+1);
         sailingServiceDef.setServiceEntryPoint(baseURL + "sailing");
         userManagementServiceDef.setServiceEntryPoint(baseURL + "usermanagement");
+        
+        DebugInfo.setDebugIdAttribute(SELENIUM_DEBUG_ID, false);
+        DebugInfo.setDebugIdPrefix("");
     }
     
     @Override

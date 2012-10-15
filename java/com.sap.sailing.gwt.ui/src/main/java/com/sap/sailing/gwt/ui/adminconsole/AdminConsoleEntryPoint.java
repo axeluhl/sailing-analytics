@@ -46,7 +46,7 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
         regattaDisplayers.add(eventStructureManagementPanel);
         
         TracTracEventManagementPanel tractracEventManagementPanel = new TracTracEventManagementPanel(sailingService, this, this, stringMessages);
-        //tractracEventManagementPanel.ensureDebugId("TracTracEventManagement");
+        tractracEventManagementPanel.ensureDebugId("TracTracEventManagement");
         tractracEventManagementPanel.setSize("90%", "90%");
         tabPanel.add(tractracEventManagementPanel, stringMessages.tracTracEvents(), false);
         regattaDisplayers.add(tractracEventManagementPanel);

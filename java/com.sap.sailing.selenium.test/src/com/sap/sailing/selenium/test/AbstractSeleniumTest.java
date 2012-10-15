@@ -8,12 +8,15 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+import java.util.List;
 
 import org.junit.runner.RunWith;
 
+import org.openqa.selenium.By;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 
 import org.openqa.selenium.remote.Augmenter;
 import org.openqa.selenium.remote.RemoteWebDriver;
@@ -24,7 +27,6 @@ import com.sap.sailing.selenium.test.core.TestEnvironment;
 
 @RunWith(Selenium.class)
 public abstract class AbstractSeleniumTest {
-    protected static final String GWT_DEBUG_PREFIX = "gwt-debug-";
     
     @Managed
     protected TestEnvironment environment;
@@ -35,6 +37,26 @@ public abstract class AbstractSeleniumTest {
     
     protected WebDriver getWebDriver() {
         return this.environment.getWebDriver();
+    }
+    
+    protected WebElement findElementBySeleniumId(String id) {
+        return findElementBySeleniumId(getWebDriver(), id);
+    }
+    
+    protected WebElement findElementBySeleniumId(WebDriver driver, String id) {
+        return driver.findElement(By.xpath("//*[@selenium-id='" + id + "']"));
+    }
+    
+    protected WebElement findElementBySeleniumId(WebElement element, String id) {
+        return element.findElement(By.xpath("//*[@selenium-id='" + id + "']"));
+    }
+    
+    protected List<WebElement> findElementsBySeleniumId(WebDriver driver, String id) {
+        return driver.findElements(By.xpath("//*[@selenium-id='" + id + "']"));
+    }
+    
+    protected List<WebElement> findElementsBySeleniumId(WebElement element, String id) {
+        return element.findElements(By.xpath("//*[@selenium-id='" + id + "']"));
     }
     
     protected void captureScreenshot() throws IOException {
