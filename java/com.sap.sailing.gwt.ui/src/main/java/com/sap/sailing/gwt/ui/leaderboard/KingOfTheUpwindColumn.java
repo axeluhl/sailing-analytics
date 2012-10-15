@@ -12,16 +12,16 @@ import com.sap.sailing.gwt.ui.shared.LeaderboardRowDTO;
  */
 public class KingOfTheUpwindColumn extends AbstractTimeInHoursMinutesSecondsColumn {
     
-    private static class KingOfTheDownwindField implements LegDetailField<Double> {
+    private static class KingOfTheUpwindField implements LegDetailField<Double> {
         @Override
         public Double get(LeaderboardRowDTO row) {
-            return row.totalTimeSailedDownwindInSeconds;
+            return row.totalTimeSailedUpwindInSeconds;
         }
     }
 
     public KingOfTheUpwindColumn(StringMessages stringMessages, String headerStyle, String columnStyle) {
         super(stringMessages.totalTimeSailedUpwindInSeconds(), "[" + stringMessages.hhmmssUnit() + "]",
-                new KingOfTheDownwindField(),
+                new KingOfTheUpwindField(),
                 DetailType.TOTAL_TIME_SAILED_UPWIND_IN_SECONDS.getPrecision(),
                 DetailType.TOTAL_TIME_SAILED_UPWIND_IN_SECONDS.getDefaultSortingOrder(),
                 headerStyle, columnStyle);
