@@ -1,14 +1,14 @@
 package com.sap.sailing.gwt.ui.client;
 
-import java.io.IOException;
 import java.util.List;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
-import com.sap.sailing.gwt.ui.shared.BoatClassDTO;
-import com.sap.sailing.gwt.ui.shared.PolarDiagramDTO;
+import com.sap.sailing.gwt.ui.shared.BoatClassDTOsAndNotificationMessage;
+import com.sap.sailing.gwt.ui.shared.ConfigurationException;
+import com.sap.sailing.gwt.ui.shared.PolarDiagramDTOAndNotificationMessage;
 import com.sap.sailing.gwt.ui.shared.PositionDTO;
-import com.sap.sailing.gwt.ui.shared.SimulatorResultsDTO;
+import com.sap.sailing.gwt.ui.shared.SimulatorResultsDTOAndNotificationMessage;
 import com.sap.sailing.gwt.ui.shared.WindFieldDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldGenParamsDTO;
 import com.sap.sailing.gwt.ui.shared.WindLatticeDTO;
@@ -20,22 +20,24 @@ import com.sap.sailing.gwt.ui.shared.windpattern.WindPatternNotFoundException;
 @RemoteServiceRelativePath("simulator")
 public interface SimulatorService extends RemoteService {
 
-    public PositionDTO[] getRaceLocations();
+    PositionDTO[] getRaceLocations();
 
-    public WindLatticeDTO getWindLatice(WindLatticeGenParamsDTO params);
+    WindLatticeDTO getWindLatice(WindLatticeGenParamsDTO params);
 
-    //public PathDTO[] getPaths(WindFieldGenParamsDTO params, WindPatternDisplay pattern) throws WindPatternNotFoundException;
+    //PathDTO[] getPaths(WindFieldGenParamsDTO params, WindPatternDisplay pattern) throws WindPatternNotFoundException;
+
+    List<WindPatternDTO> getWindPatterns();
+
+    WindPatternDisplay getWindPatternDisplay(WindPatternDTO pattern);
+
+    WindFieldDTO getWindField(WindFieldGenParamsDTO params, WindPatternDisplay pattern) throws WindPatternNotFoundException;
     
-    public SimulatorResultsDTO getSimulatorResults(char mode, WindFieldGenParamsDTO params, WindPatternDisplay pattern, 
-            boolean withWindField) throws WindPatternNotFoundException;
+    //I00788 - Mihai Bogdan Eugen
+    SimulatorResultsDTOAndNotificationMessage getSimulatorResults(char mode, WindFieldGenParamsDTO params, WindPatternDisplay pattern, boolean withWindField, int boatClassIndex) throws WindPatternNotFoundException, ConfigurationException;
 
-    public List<WindPatternDTO> getWindPatterns();
+    //I00788 - Mihai Bogdan Eugen
+    BoatClassDTOsAndNotificationMessage getBoatClasses() throws ConfigurationException;
 
-    public WindPatternDisplay getWindPatternDisplay(WindPatternDTO pattern);
-
-    public BoatClassDTO[] getBoatClasses();
-
-    public WindFieldDTO getWindField(WindFieldGenParamsDTO params, WindPatternDisplay pattern) throws WindPatternNotFoundException;
-    
-    public PolarDiagramDTO getPolarDiagram49DTO(Double bearingStep, int boatClass) throws IOException;
+    //I00788 - Mihai Bogdan Eugen
+    PolarDiagramDTOAndNotificationMessage getPolarDiagramDTO(Double bearingStep, int boatClassIndex) throws ConfigurationException;
 }
