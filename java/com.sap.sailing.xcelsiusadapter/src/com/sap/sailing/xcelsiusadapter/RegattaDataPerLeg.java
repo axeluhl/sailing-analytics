@@ -3,12 +3,8 @@ package com.sap.sailing.xcelsiusadapter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.NavigableSet;
-import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -22,10 +18,8 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
-import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
@@ -38,8 +32,6 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.server.RacingEventService;
-import com.sap.sailing.domain.tracking.impl.MarkPassingByTimeComparator;
-import com.sap.sailing.domain.tracking.impl.TrackedRaceImpl;
 
 public class RegattaDataPerLeg extends Action {
     public RegattaDataPerLeg(HttpServletRequest req, HttpServletResponse res, RacingEventService service, int maxRows) {
@@ -73,11 +65,14 @@ public class RegattaDataPerLeg extends Action {
 
             // skip race if not tracked
             final TrackedRace trackedRace = getTrackedRace(regatta, race);
-            if (trackedRace == null) {
+            if (trackedRace == null || !trackedRace.hasGPSData()) {
                 continue;
             }
 
             final TimePoint raceStarted = getTimePoint(trackedRace); // get TimePoint for when the race started
+            if (raceStarted == null) {
+                continue;
+            }
 
             long minNextLegStart = raceStarted.asMillis(); // variable for keeping track of when the first competitor
                                                            // started the next leg
@@ -342,7 +337,6 @@ public class RegattaDataPerLeg extends Action {
 	        int speedCounter = 0;
 	        
 	        int numberOfFixes = (int) ((toTimePoint.asMillis() - fromTimePoint.asMillis())/resolutionInMilliseconds);
-	        TimePoint newestEvent = trackedRace.getTimePointOfNewestEvent();
 	
 	        WindTrack windTrack = trackedRace.getOrCreateWindTrack(windSource);
 	        TimePoint timePoint = fromTimePoint;
