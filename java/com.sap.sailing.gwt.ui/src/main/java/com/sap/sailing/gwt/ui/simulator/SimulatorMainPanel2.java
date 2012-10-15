@@ -96,9 +96,6 @@ public class SimulatorMainPanel2 extends SplitLayoutPanel {
 
     private CheckBox isOmniscient;
     private CheckBox isOpportunistic;
-    private CheckBox isStrategyOption1;
-    private CheckBox isStrategyOption2;
-    private CheckBox isStrategyOption3;
     private Chart chart;
     // private final Timer timer;
     
@@ -213,14 +210,6 @@ public class SimulatorMainPanel2 extends SplitLayoutPanel {
         this.isOpportunistic = new CheckBox(this.stringMessages.opportunistic(), true);
         this.isOpportunistic.setValue(true);
 
-        this.isStrategyOption1 = new CheckBox(this.stringMessages.strategyOption1(), true);
-        this.isStrategyOption1.setValue(true);
-
-        this.isStrategyOption2 = new CheckBox(this.stringMessages.strategyOption2(), true);
-        this.isStrategyOption2.setValue(true);
-
-        this.isStrategyOption3 = new CheckBox(this.stringMessages.strategyOption3(), true);
-        this.isStrategyOption3.setValue(true);
         leftPanel = new FlowPanel();
         rightPanel = new FlowPanel();
         patternSelector = new ListBox();
@@ -305,7 +294,7 @@ public class SimulatorMainPanel2 extends SplitLayoutPanel {
         controlPanel.getElement().setId("masterPanelLeft");
         controlPanel.add(controlPanelInnerWrapper);
         createWindSetup(controlPanelInnerWrapper);
-        createSailingSetup(controlPanelInnerWrapper);
+        this.createSailingSetup(controlPanelInnerWrapper);
         leftPanel.add(controlPanel);
 
     }
@@ -511,17 +500,6 @@ public class SimulatorMainPanel2 extends SplitLayoutPanel {
 
         vp.add(this.isOmniscient);
         vp.add(this.isOpportunistic);
-        // vp.add(this.isStrategyOption1);
-        // vp.add(this.isStrategyOption2);
-        // vp.add(this.isStrategyOption3);
-
-        /*
-         * CheckBox cb = new CheckBox(stringMessages.omniscient()); cb.setValue(true); //
-         * cb.getElement().getStyle().setFloat(Style.Float.RIGHT); vp.add(cb);
-         * 
-         * cb = new CheckBox(stringMessages.opportunistic()); cb.setValue(true); vp.add(cb);
-         */
-
         vp.getElement().getStyle().setFloat(Style.Float.RIGHT);
         fp.add(vp);
 

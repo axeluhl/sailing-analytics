@@ -20,33 +20,22 @@ public enum ConfigurationManager {
     private String errorMessage = ""; 
 
     private ConfigurationManager() {
-    	
-    	System.out.println("XXX: Inside constructor!");
         String configFileLocation = System.getenv(this._environmentVariableName);
-        System.out.println("XXX: configFileLocation=" + configFileLocation);
-        
         InputStream inputStream = null;
         try {
 	        if (configFileLocation == null || configFileLocation == "") {
-	        	System.out.println("XXX: Inside case 1: (configFileLocation == null || configFileLocation == \"\")!");
-	        	
 	        	configFileLocation = this._defaultConfigFileLocation;
 	            inputStream = this.getClass().getClassLoader().getResourceAsStream(configFileLocation);
 	            this.status = ReadingConfigurationFileStatus.ERROR_READING_ENV_VAR_VALUE;
 	            this.errorMessage = "Cannot find STG_CONFIG environment variable! Using default configuration values!";
-	            
 	        } 
 	        else if (new File(configFileLocation).exists()) {
-	        	System.out.println("XXX: Inside case 2: (new File(configFileLocation).exists())!");
-	        	
                 URL csvFileURL = new URL("file:///" + configFileLocation);
                 inputStream = csvFileURL.openStream();
 	            this.status = ReadingConfigurationFileStatus.SUCCESS;
 	            this.errorMessage = "";
-	            
             }
             else {
-            	System.out.println("XXX: Inside case 3!");
                 configFileLocation = this._defaultConfigFileLocation;
                 inputStream = this.getClass().getClassLoader().getResourceAsStream(configFileLocation);
 	            this.status = ReadingConfigurationFileStatus.ERROR_FINDING_CONFIG_FILE;
@@ -73,23 +62,12 @@ public enum ConfigurationManager {
             buffer.close();
             reader.close();
             inputStream.close();
-            System.out.println("XXX: errorMessage=" + this.errorMessage);
         } 
         catch (IOException exception) {
         	this.status = ReadingConfigurationFileStatus.IO_ERROR;
         	this.errorMessage = "An IO error occured when parsing the configuration file ( " + this._defaultConfigFileLocation + ")! The original error message is " + exception.getMessage();
         }
     }
-    
-//    public static ConfigurationManager getDefault() {
-//        if (INSTANCE == null) {
-//        	System.out.println("XXX: First time");
-//            INSTANCE = new ConfigurationManager();
-//        }
-//
-//        System.out.println("XXX: Anyother time");
-//        return INSTANCE;
-//    }
 
     public ArrayList<Tuple<String, Double, String>> getBoatClassesInfo() {
         return this._boatClassesInfo;
@@ -111,4 +89,3 @@ public enum ConfigurationManager {
 		return this.errorMessage;
 	}
 }
-

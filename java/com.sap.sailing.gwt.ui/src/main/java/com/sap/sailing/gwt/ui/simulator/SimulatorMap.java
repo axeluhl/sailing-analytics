@@ -336,10 +336,11 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         windFieldCanvasOverlay.redraw(true);
     }
 
-    //I00788 - Mihai Bogdan Eugen
+    //I077899 - Mihai Bogdan Eugen
     private void generatePath(WindPatternDisplay windPatternDisplay, final boolean summaryView, int boatClassIndex) {
         logger.info("In generatePath");
         
+        System.out.println("YYYY: Inside generatePath!");
         if (windPatternDisplay == null) {
         	this.errorReporter.reportError("Please select a valid wind pattern.");
             return;
@@ -358,7 +359,11 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
 
         this.busyIndicator.setBusy(true);
 
+        System.out.println("YYYY: before simulatorSvc.getSimulatorResults!");
+        
         this.simulatorSvc.getSimulatorResults(this.mode, this.windParams, windPatternDisplay, !summaryView, boatClassIndex, new ResultManager(summaryView));
+        
+        System.out.println("YYYY: After generatePath!");
     }
 
     private boolean isCourseSet() {
@@ -396,13 +401,13 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         }
     }
 
-    //I00788 - Mihai Bogdan Eugen
+    //I077899 - Mihai Bogdan Eugen
     private void refreshSummaryView(WindPatternDisplay windPatternDisplay, int boatClassIndex) {
         // removeOverlays();
         this.generatePath(windPatternDisplay, true, boatClassIndex);
     }
 
-    //I00788 - Mihai Bogdan Eugen
+    //I077899 - Mihai Bogdan Eugen
     private void refreshReplayView(WindPatternDisplay windPatternDisplay, int boatClassIndex) {
         // removeOverlays();
         this.generatePath(windPatternDisplay, false, boatClassIndex);
