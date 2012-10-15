@@ -459,39 +459,48 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
         Collection<Fix> fixes = new ArrayList<Fix>();
         for (int i=0; i<count; i++) {
             int fixDetailIndex = 0;
-            String[] fixSections = sections[9+i].split(";");
+            final String[] fixSections = sections[9+i].split(";");
+            final boolean postVersion1_0 = sections[9+i].split(";", -1).length >= 14;
             if (fixSections.length > 2) {
-                String boatID = fixSections[fixDetailIndex++];
-                TrackerType trackerType = TrackerType.values()[Integer.valueOf(fixSections[fixDetailIndex++])];
-                Long ageOfDataInMilliseconds = 1000l * Long.valueOf(fixSections[fixDetailIndex++]);
-                Position position = new DegreePosition(Double.valueOf(fixSections[fixDetailIndex++]),
+                final String boatID = fixSections[fixDetailIndex++];
+                final TrackerType trackerType = TrackerType.values()[Integer.valueOf(fixSections[fixDetailIndex++])];
+                final Long ageOfDataInMilliseconds = 1000l * Long.valueOf(fixSections[fixDetailIndex++]);
+                final Position position = new DegreePosition(Double.valueOf(fixSections[fixDetailIndex++]),
                         Double.valueOf(fixSections[fixDetailIndex++]));
-                Double speedOverGroundInKnots = Double.valueOf(fixSections[fixDetailIndex++]);
-                Speed averageSpeedOverGround = fixSections[fixDetailIndex].trim().length() == 0 ? null
-                            : new KnotSpeedImpl(Double.valueOf(fixSections[fixDetailIndex]));
-                fixDetailIndex++;
-                Speed velocityMadeGood = fixSections[fixDetailIndex].trim().length() == 0 ? null : new KnotSpeedImpl(
-                        Double.valueOf(fixSections[fixDetailIndex]));
-                fixDetailIndex++;
-                SpeedWithBearing speed = new KnotSpeedWithBearingImpl(speedOverGroundInKnots, new DegreeBearingImpl(
-                        Double.valueOf(fixSections[fixDetailIndex++])));
-                Integer nextMarkIndex = fixSections.length <= fixDetailIndex
+                final Double speedOverGroundInKnots = Double.valueOf(fixSections[fixDetailIndex++]);
+                final int alsIndex = postVersion1_0 ? fixDetailIndex+1 : fixDetailIndex;
+                final int vmgIndex = postVersion1_0 ? fixDetailIndex : fixDetailIndex+1;
+                final Speed averageSpeedOverGround = fixSections[alsIndex].trim().length() == 0 ? null
+                            : new KnotSpeedImpl(Double.valueOf(fixSections[alsIndex]));
+                final Speed velocityMadeGood = fixSections[vmgIndex].trim().length() == 0 ? null : new KnotSpeedImpl(
+                        Double.valueOf(fixSections[vmgIndex]));
+                fixDetailIndex += 2;
+                final DegreeBearingImpl cog = new DegreeBearingImpl(
+                        Double.valueOf(fixSections[fixDetailIndex++]));
+                final SpeedWithBearing speed = new KnotSpeedWithBearingImpl(speedOverGroundInKnots, cog);
+                final Integer nextMarkIndex = fixSections.length <= fixDetailIndex
                         || fixSections[fixDetailIndex].trim().length() == 0 ? null : Integer
                         .valueOf(fixSections[fixDetailIndex]);
                 fixDetailIndex++;
-                Integer rank = fixSections.length <= fixDetailIndex || fixSections[fixDetailIndex].trim().length() == 0 ? null
+                final Integer rank = fixSections.length <= fixDetailIndex || fixSections[fixDetailIndex].trim().length() == 0 ? null
                         : Integer.valueOf(fixSections[fixDetailIndex]);
                 fixDetailIndex++;
-                Distance distanceToLeader = fixSections.length <= fixDetailIndex
+                final Distance distanceToLeader = fixSections.length <= fixDetailIndex
                         || fixSections[fixDetailIndex].trim().length() == 0 ? null : new MeterDistance(
                         Double.valueOf(fixSections[fixDetailIndex]));
                 fixDetailIndex++;
-                Distance distanceToNextMark = fixSections.length <= fixDetailIndex
+                final Distance distanceToNextMark = fixSections.length <= fixDetailIndex
                         || fixSections[fixDetailIndex].trim().length() == 0 ? null : new MeterDistance(
                         Double.valueOf(fixSections[fixDetailIndex]));
                 fixDetailIndex++;
+                final String boatIRM; // the "disqualification" or "MaxPointReason"
+                if (postVersion1_0 && fixSections.length > fixDetailIndex) {
+                    boatIRM = fixSections[fixDetailIndex++];
+                } else {
+                    boatIRM = null;
+                }
                 fixes.add(new FixImpl(boatID, trackerType, ageOfDataInMilliseconds, position, speed, nextMarkIndex,
-                        rank, averageSpeedOverGround, velocityMadeGood, distanceToLeader, distanceToNextMark));
+                        rank, averageSpeedOverGround, velocityMadeGood, distanceToLeader, distanceToNextMark, boatIRM));
             }
         }
         for (SailMasterListener listener : listeners) {

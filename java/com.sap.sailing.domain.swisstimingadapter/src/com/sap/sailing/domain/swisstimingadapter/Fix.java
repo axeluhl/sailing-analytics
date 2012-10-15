@@ -34,4 +34,9 @@ public interface Fix {
     Distance getDistanceToLeader();
     
     Distance getDistanceToNextMark();
+
+    /**
+     * Obtains a disqualification reason, such as "DNC" or "DNS". May be <code>null</code>.
+     */
+    String getBoatIRM();
 }
