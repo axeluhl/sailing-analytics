@@ -35,7 +35,6 @@ import javax.servlet.ServletContext;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
-import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Buoy;
 import com.sap.sailing.domain.base.Competitor;
@@ -225,7 +224,7 @@ import com.sap.sailing.server.replication.ReplicationService;
 /**
  * The server side implementation of the RPC service.
  */
-public class SailingServiceImpl extends RemoteServiceServlet implements SailingService, RaceFetcher, RegattaFetcher {
+public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements SailingService, RaceFetcher, RegattaFetcher {
     private static final Logger logger = Logger.getLogger(SailingServiceImpl.class.getName());
     
     private static final long serialVersionUID = 9031688830194537489L;
@@ -899,7 +898,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             TrackedRace trackedRace = getService().getExistingTrackedRace(raceIdentifier);
             TrackedRaceDTO trackedRaceDTO = null; 
             if (trackedRace != null) {
-                trackedRaceDTO = new TrackedRaceDTO();  
+                trackedRaceDTO = new TrackedRaceDTO();
                 trackedRaceDTO.hasWindData = trackedRace.hasWindData();
                 trackedRaceDTO.hasGPSData = trackedRace.hasGPSData();
                 trackedRaceDTO.startOfTracking = trackedRace.getStartOfTracking() == null ? null : trackedRace.getStartOfTracking().asDate();
@@ -1098,7 +1097,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                     .getLngDeg());
         }
         if (wind.getTimePoint() != null) {
-            windDTO.timepoint = wind.getTimePoint().asMillis();
+            windDTO.measureTimepoint = wind.getTimePoint().asMillis();
             Wind estimatedWind = windTrack
                     .getAveragedWind(wind.getPosition(), wind.getTimePoint());
             if (estimatedWind != null) {
@@ -1114,9 +1113,9 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     /**
      * Uses <code>wind</code> for both, the non-dampened and dampened fields of the {@link WindDTO} object returned
      */
-    protected WindDTO createWindDTOFromAlreadyAveraged(Wind wind, WindTrack windTrack, TimePoint originTimepoint) {
+    protected WindDTO createWindDTOFromAlreadyAveraged(Wind wind, WindTrack windTrack, TimePoint requestTimepoint) {
         WindDTO windDTO = new WindDTO();
-        windDTO.originTimepoint = originTimepoint.asMillis();
+        windDTO.requestTimepoint = requestTimepoint.asMillis();
         windDTO.trueWindBearingDeg = wind.getBearing().getDegrees();
         windDTO.trueWindFromDeg = wind.getBearing().reverse().getDegrees();
         windDTO.trueWindSpeedInKnots = wind.getKnots();
@@ -1130,7 +1129,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                     .getLngDeg());
         }
         if (wind.getTimePoint() != null) {
-            windDTO.timepoint = wind.getTimePoint().asMillis();
+            windDTO.measureTimepoint = wind.getTimePoint().asMillis();
         }
         return windDTO;
     }
@@ -1297,8 +1296,8 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 p = new DegreePosition(windDTO.position.latDeg, windDTO.position.lngDeg);
             }
             TimePoint at = null;
-            if (windDTO.timepoint != null) {
-                at = new MillisecondsTimePoint(windDTO.timepoint);
+            if (windDTO.measureTimepoint != null) {
+                at = new MillisecondsTimePoint(windDTO.measureTimepoint);
             }
             SpeedWithBearing speedWithBearing = null;
             Speed speed = null;
@@ -1764,8 +1763,8 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 p = new DegreePosition(windDTO.position.latDeg, windDTO.position.lngDeg);
             }
             TimePoint at = null;
-            if (windDTO.timepoint != null) {
-                at = new MillisecondsTimePoint(windDTO.timepoint);
+            if (windDTO.measureTimepoint != null) {
+                at = new MillisecondsTimePoint(windDTO.measureTimepoint);
             }
             SpeedWithBearing speedWithBearing = null;
             Speed speed = null;

@@ -37,6 +37,7 @@ import com.google.gwt.maps.client.event.PolylineMouseOutHandler;
 import com.google.gwt.maps.client.event.PolylineMouseOverHandler;
 import com.google.gwt.maps.client.geom.LatLng;
 import com.google.gwt.maps.client.geom.LatLngBounds;
+import com.google.gwt.maps.client.overlay.Icon;
 import com.google.gwt.maps.client.overlay.Marker;
 import com.google.gwt.maps.client.overlay.MarkerOptions;
 import com.google.gwt.maps.client.overlay.Polyline;
@@ -710,11 +711,21 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             // find competitor with highest rank
             Pair<Integer, CompetitorDTO> visibleLeaderInfo = getLeadingVisibleCompetitorInfo(competitorsToShow);
             // the boat fix may be null; may mean that no positions were loaded yet for the leading visible boat; don't show anything
-            GPSFixDTO lastBoatFix;
-            if (visibleLeaderInfo != null && getSettings().getHelpLinesSettings().containsHelpLine(HelpLineTypes.ADVANTAGELINE) && 
-                    lastShownFix.containsKey(visibleLeaderInfo.getB()) && lastShownFix.get(visibleLeaderInfo.getB()) != -1
-                    && visibleLeaderInfo.getA() > 0 && visibleLeaderInfo.getA() <= lastRaceTimesInfo.getLegInfos().size() &&
-                    (lastBoatFix = getBoatFix(visibleLeaderInfo.getB(), date)) != null) {
+            GPSFixDTO lastBoatFix = null;
+            boolean isVisibleLeaderInfoComplete = false;
+            boolean isLegTypeKnown = false;
+            if (visibleLeaderInfo != null && lastShownFix.containsKey(visibleLeaderInfo.getB())
+                    && lastShownFix.get(visibleLeaderInfo.getB()) != -1 && visibleLeaderInfo.getA() > 0
+                    && visibleLeaderInfo.getA() <= lastRaceTimesInfo.getLegInfos().size()) {
+                isVisibleLeaderInfoComplete = true;
+                LegInfoDTO legInfoDTO = lastRaceTimesInfo.getLegInfos().get(visibleLeaderInfo.getA() - 1);
+                if (legInfoDTO.legType != null) {
+                    isLegTypeKnown = true;
+                }
+                lastBoatFix = getBoatFix(visibleLeaderInfo.getB(), date);
+            }
+            if (settings.getHelpLinesSettings().containsHelpLine(HelpLineTypes.ADVANTAGELINE)
+                    && isVisibleLeaderInfoComplete && isLegTypeKnown && lastBoatFix != null) {
                 LegInfoDTO legInfoDTO = lastRaceTimesInfo.getLegInfos().get(visibleLeaderInfo.getA()-1);
                 double advantageLineLengthInKm = 1.0; // TODO this should probably rather scale with the visible area of the map; bug 616
                 double distanceFromBoatPositionInKm = visibleLeaderInfo.getB().boatClass.getHullLengthInMeters()/1000.; // one hull length
@@ -941,20 +952,9 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
 
     protected Marker createBuoyMarker(final BuoyDTO markDTO) {
         MarkerOptions options = MarkerOptions.newInstance();
-        if(markDTO.displayColor != null) {
-            if("Red".equals(markDTO.displayColor) && raceMapImageManager.buoyRedIcon != null) {
-                options.setIcon(raceMapImageManager.buoyRedIcon);
-            } else if("Green".equals(markDTO.displayColor) && raceMapImageManager.buoyGreenIcon != null) {
-                options.setIcon(raceMapImageManager.buoyGreenIcon);
-            } else if("Yellow".equals(markDTO.displayColor) && raceMapImageManager.buoyYellowIcon != null) {
-                options.setIcon(raceMapImageManager.buoyYellowIcon);
-            } else if (raceMapImageManager.buoyIcon != null) {
-                options.setIcon(raceMapImageManager.buoyIcon);
-            }
-        } else {
-            if (raceMapImageManager.buoyIcon != null) {
-                options.setIcon(raceMapImageManager.buoyIcon);
-            }
+        final Icon iconForDisplayColor = raceMapImageManager.getIconForDisplayColor(markDTO.displayColor);
+        if (iconForDisplayColor != null) {
+            options.setIcon(iconForDisplayColor);
         }
         options.setTitle(markDTO.name);
         final Marker buoyMarker = new Marker(LatLng.newInstance(markDTO.position.latDeg, markDTO.position.lngDeg),

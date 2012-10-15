@@ -322,47 +322,46 @@ public class RegattaDataPerLeg extends Action {
     } // function end
 
     private Pair<Double, Double> calculateAverageWindSpeedofRace(TrackedRace trackedRace) {
-		Pair<Double, Double> result = null;
-		if (trackedRace.getEndOfRace() != null) {
-	        TimePoint fromTimePoint = trackedRace.getStartOfRace();
-	        TimePoint toTimePoint = trackedRace.getEndOfRace(); 
-	        long resolutionInMilliseconds = 60 * 1000 * 5; // 5 min
-	
-	        List<WindSource> windSourcesToDeliver = new ArrayList<WindSource>();
-	        WindSourceImpl windSource = new WindSourceImpl(WindSourceType.COMBINED);
-	        windSourcesToDeliver.add(windSource);
-	
-	        double sumWindSpeed = 0.0; 
-	        double sumWindSpeedConfidence = 0.0; 
-	        int speedCounter = 0;
-	        
-	        int numberOfFixes = (int) ((toTimePoint.asMillis() - fromTimePoint.asMillis())/resolutionInMilliseconds);
-	
-	        WindTrack windTrack = trackedRace.getOrCreateWindTrack(windSource);
-	        TimePoint timePoint = fromTimePoint;
-	        for (int i = 0; i < numberOfFixes && toTimePoint != null && timePoint.compareTo(toTimePoint) < 0; i++) {
-	            WindWithConfidence<Pair<Position, TimePoint>> averagedWindWithConfidence = windTrack.getAveragedWindWithConfidence(null, timePoint);
-	            if (averagedWindWithConfidence != null) {
-	            	double windSpeedinKnots = averagedWindWithConfidence.getObject().getKnots();
-	                double confidence = averagedWindWithConfidence.getConfidence();
-	
-	                sumWindSpeed += windSpeedinKnots;
-	            	sumWindSpeedConfidence += confidence;
-	            	
-	            	speedCounter++;
-	            }
-	            timePoint = new MillisecondsTimePoint(timePoint.asMillis() + resolutionInMilliseconds);
-	        }
-	
-	        if(speedCounter > 0) {
-	            double averageWindSpeed = sumWindSpeed / speedCounter;
-	        	double averageWindSpeedConfidence = sumWindSpeedConfidence / speedCounter;
-	        	
-	        	result = new Pair<Double, Double>(averageWindSpeed, averageWindSpeedConfidence);
-	        } 	
-		} else {
-			result = new Pair<Double, Double>(0.0, 0.0);
-		}
+        Pair<Double, Double> result = null;
+        if (trackedRace.getEndOfRace() != null) {
+            TimePoint fromTimePoint = trackedRace.getStartOfRace();
+            TimePoint toTimePoint = trackedRace.getEndOfRace();
+            long resolutionInMilliseconds = 60 * 1000 * 5; // 5 min
+
+            List<WindSource> windSourcesToDeliver = new ArrayList<WindSource>();
+            WindSourceImpl windSource = new WindSourceImpl(WindSourceType.COMBINED);
+            windSourcesToDeliver.add(windSource);
+
+            double sumWindSpeed = 0.0;
+            double sumWindSpeedConfidence = 0.0;
+            int speedCounter = 0;
+
+            int numberOfFixes = (int) ((toTimePoint.asMillis() - fromTimePoint.asMillis()) / resolutionInMilliseconds);
+            WindTrack windTrack = trackedRace.getOrCreateWindTrack(windSource);
+            TimePoint timePoint = fromTimePoint;
+            for (int i = 0; i < numberOfFixes && toTimePoint != null && timePoint.compareTo(toTimePoint) < 0; i++) {
+                WindWithConfidence<Pair<Position, TimePoint>> averagedWindWithConfidence = windTrack
+                        .getAveragedWindWithConfidence(null, timePoint);
+                if (averagedWindWithConfidence != null) {
+                    double windSpeedinKnots = averagedWindWithConfidence.getObject().getKnots();
+                    double confidence = averagedWindWithConfidence.getConfidence();
+
+                    sumWindSpeed += windSpeedinKnots;
+                    sumWindSpeedConfidence += confidence;
+
+                    speedCounter++;
+                }
+                timePoint = new MillisecondsTimePoint(timePoint.asMillis() + resolutionInMilliseconds);
+            }
+            if (speedCounter > 0) {
+                double averageWindSpeed = sumWindSpeed / speedCounter;
+                double averageWindSpeedConfidence = sumWindSpeedConfidence / speedCounter;
+
+                result = new Pair<Double, Double>(averageWindSpeed, averageWindSpeedConfidence);
+            }
+        } else {
+            result = new Pair<Double, Double>(0.0, 0.0);
+        }
         return result;
     }
 

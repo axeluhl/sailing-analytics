@@ -38,8 +38,8 @@ public class SimpleDomainFactoryTest {
         Race race = new RaceImpl("1234", "Race 1234");
         Iterable<Competitor> competitors = Collections.emptyList();
         StartList startList = new StartListImpl("1234", competitors);
-        Mark mark1 = new MarkImpl("M1", 0, Arrays.asList("D1", "D2"));
-        Mark mark2 = new MarkImpl("M1", 0, Arrays.asList("D3", "D4"));
+        Mark mark1 = new MarkImpl("M1", 0, Arrays.asList("D1", "D2"), /* markType */ null);
+        Mark mark2 = new MarkImpl("M1", 0, Arrays.asList("D3", "D4"), /* markType */ null);
         List<Mark> marks = Arrays.asList(mark1, mark2);
         Course course = new CourseImpl("1234", marks);
         RaceDefinition raceDefinition = domainFactory.createRaceDefinition(regatta, race, startList, course);
@@ -63,8 +63,8 @@ public class SimpleDomainFactoryTest {
         Race race = new RaceImpl("1234", "Race 1234");
         Iterable<Competitor> competitors = Collections.emptyList();
         StartList startList = new StartListImpl("1234", competitors);
-        Mark mark1 = new MarkImpl("M1", 0, Arrays.asList("D1", "D2"));
-        Mark mark2 = new MarkImpl("M1", 0, Arrays.asList("D3", "D4"));
+        Mark mark1 = new MarkImpl("M1", 0, Arrays.asList("D1", "D2"), /* markType */ null);
+        Mark mark2 = new MarkImpl("M1", 0, Arrays.asList("D3", "D4"), /* markType */ null);
         List<Mark> marks = Arrays.asList(mark1, mark2);
         Course course = new CourseImpl("1234", marks);
         RaceDefinition raceDefinition = domainFactory.createRaceDefinition(regatta, race, startList, course);

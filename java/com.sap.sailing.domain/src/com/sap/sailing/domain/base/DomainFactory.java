@@ -20,6 +20,12 @@ public interface DomainFactory {
     Nationality getOrCreateNationality(String threeLetterIOCCode);
 
     Buoy getOrCreateBuoy(String id);
+    
+    /**
+     * If the buoy with ID <code>id</code> already exists, it is returned. Its display color may differ from <code>displayColor</code>
+     * in that case. Otherwise, a new {@link Buoy} is created with <code>displayColor</code> as its {@link Buoy#getDisplayColor()}.
+     */
+    Buoy getOrCreateBuoy(String id, String displayColor);
 
     Gate createGate(Buoy left, Buoy right, String name);
     

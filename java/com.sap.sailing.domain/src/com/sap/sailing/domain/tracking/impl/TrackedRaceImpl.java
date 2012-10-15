@@ -1075,9 +1075,9 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     @Override
     public boolean hasGPSData() {
         boolean result = false;
-        if(!tracks.values().isEmpty()) {
-            for(GPSFixTrack<Competitor, GPSFixMoving> gpsTrack: tracks.values()) {
-                if(gpsTrack.getFirstRawFix() != null) {
+        if (!tracks.values().isEmpty()) {
+            for (GPSFixTrack<Competitor, GPSFixMoving> gpsTrack : tracks.values()) {
+                if (gpsTrack.getFirstRawFix() != null) {
                     result = true;
                     break;
                 }

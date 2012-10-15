@@ -42,6 +42,7 @@ import com.sap.sailing.domain.swisstimingadapter.Competitor;
 import com.sap.sailing.domain.swisstimingadapter.Course;
 import com.sap.sailing.domain.swisstimingadapter.Fix;
 import com.sap.sailing.domain.swisstimingadapter.Mark;
+import com.sap.sailing.domain.swisstimingadapter.Mark.MarkType;
 import com.sap.sailing.domain.swisstimingadapter.MessageType;
 import com.sap.sailing.domain.swisstimingadapter.Race;
 import com.sap.sailing.domain.swisstimingadapter.RaceSpecificMessageLoader;
@@ -630,7 +631,20 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
         List<Mark> marks = new ArrayList<Mark>();
         for (int i=0; i<count; i++) {
             String[] markDetails = courseConfigurationMessage.getSections()[3+i].split(";");
-            marks.add(new MarkImpl(markDetails[1], Integer.valueOf(markDetails[0]), Arrays.asList(markDetails).subList(2, markDetails.length)));
+            MarkType markType = null;
+            final int devicesNamesStartIndex;
+            if (courseConfigurationMessage.getSections()[3+i].split(";", -1).length == 5) {
+                // this is the SailMaster protocol version 1.0 (May 2012) or later (see bug 1000), containing
+                // a MarkType specification before the two tracker IDs:
+                int markTypeIndex = Integer.valueOf(markDetails[2]);
+                markType = MarkType.values()[markTypeIndex];
+                devicesNamesStartIndex = 3;
+            } else {
+                devicesNamesStartIndex = 2;
+            }
+            marks.add(new MarkImpl(markDetails[1], Integer.valueOf(markDetails[0]),
+                    Arrays.asList(markDetails).subList(devicesNamesStartIndex, markDetails.length),
+                    markType));
         }
         return new CourseImpl(courseConfigurationMessage.getSections()[1], marks);
     }
