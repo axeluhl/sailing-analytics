@@ -2,7 +2,6 @@ package com.sap.sailing.selenium.test.adminconsole;
 
 import static org.junit.Assert.*;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 

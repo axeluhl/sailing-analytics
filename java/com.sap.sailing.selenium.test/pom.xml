@@ -13,7 +13,7 @@
 
     <properties>
         <parameters.jetty>
-          -Djetty.home=${basedir}\..\target\configuration\jetty -Djetty.port=8889
+          -Djetty.home=${basedir}/../target/configuration/jetty -Djetty.port=8889
         </parameters.jetty>
         <!--
           NOTE: The actual value for "parameters.integration-tests" and "parameters.proxy" should be defined in the
@@ -80,6 +80,11 @@
                                     <autoStart>true</autoStart>
                                 </bundle>
                                 <bundle>
+                                    <id>com.sap.sailing.freg.resultimport</id>
+                                    <level>3</level>
+                                    <autoStart>true</autoStart>
+                                </bundle>
+                                <bundle>
                                     <id>com.sap.sailing.gwt.ui</id>
                                     <level>4</level>
                                     <autoStart>true</autoStart>
@@ -91,6 +96,16 @@
                                 </bundle>
                                 <bundle>
                                     <id>com.sap.sailing.server</id>
+                                    <level>4</level>
+                                    <autoStart>true</autoStart>
+                                </bundle>
+                                <bundle>
+                                    <id>com.sap.sailing.server.gateway</id>
+                                    <level>4</level>
+                                    <autoStart>true</autoStart>
+                                </bundle>
+                                <bundle>
+                                    <id>com.sap.sailing.server.replication</id>
                                     <level>4</level>
                                     <autoStart>true</autoStart>
                                 </bundle>
@@ -115,9 +130,74 @@
                                     <autoStart>true</autoStart>
                                 </bundle>
                                 <bundle>
-                                    <id>org.eclipse.jetty.osgi.boot</id>
-                                    <level>1</level>
-                                    <autoStart>true</autoStart>
+                                   <id>org.eclipse.jetty.continuation</id>
+                                   <level>4</level>
+                                   <autoStart>true</autoStart>
+                                </bundle>
+                                <bundle>
+                                   <id>org.eclipse.jetty.deploy</id>
+                                   <level>4</level>
+                                   <autoStart>true</autoStart>
+                                </bundle>
+                                <bundle>
+                                   <id>org.eclipse.jetty.http</id>
+                                   <level>4</level>
+                                   <autoStart>true</autoStart>
+                                </bundle>
+                                <bundle>
+                                   <id>org.eclipse.jetty.io</id>
+                                   <level>4</level>
+                                   <autoStart>true</autoStart>
+                                </bundle>
+                                <bundle>
+                                   <id>org.eclipse.jetty.jmx</id>
+                                   <level>4</level>
+                                   <autoStart>true</autoStart>
+                                </bundle>
+                                <bundle>
+                                   <id>org.eclipse.jetty.nested</id>
+                                   <level>4</level>
+                                   <autoStart>true</autoStart>
+                                </bundle>
+                                <bundle>
+                                   <id>org.eclipse.jetty.osgi.boot</id>
+                                   <level>4</level>
+                                   <autoStart>true</autoStart>
+                                </bundle>
+                                <bundle>
+                                   <id>org.eclipse.jetty.security</id>
+                                   <level>4</level>
+                                   <autoStart>true</autoStart>
+                                </bundle>
+                                <bundle>
+                                   <id>org.eclipse.jetty.server</id>
+                                   <level>4</level>
+                                   <autoStart>true</autoStart>
+                                </bundle>
+                                <bundle>
+                                   <id>org.eclipse.jetty.servlet</id>
+                                   <level>4</level>
+                                   <autoStart>true</autoStart>
+                                </bundle>
+                                <bundle>
+                                   <id>org.eclipse.jetty.util</id>
+                                   <level>4</level>
+                                   <autoStart>true</autoStart>
+                                </bundle>
+                                <bundle>
+                                   <id>org.eclipse.jetty.webapp</id>
+                                   <level>4</level>
+                                   <autoStart>true</autoStart>
+                                </bundle>
+                                <bundle>
+                                   <id>org.eclipse.jetty.xml</id>
+                                   <level>4</level>
+                                   <autoStart>true</autoStart>
+                                </bundle>
+                                <bundle>
+                                   <id>org.mortbay.jetty.util</id>
+                                   <level>4</level>
+                                   <autoStart>true</autoStart>
                                 </bundle>
                             </bundleStartLevel>
                         </configuration>
