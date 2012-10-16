@@ -63,6 +63,7 @@ import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sailing.gwt.ui.client.PlayStateListener;
+import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.TimeListener;
@@ -2025,7 +2026,8 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             Window.alert(stringMessages.selectAtLeastOneCompetitor());
         } else {
             List<RegattaAndRaceIdentifier> races = getTrackedRacesIdentifiers();
-            CompareCompetitorsChartDialog chartDialog = new CompareCompetitorsChartDialog(sailingService, races,
+            RaceTimesInfoProvider raceTimesInfoProvider = new RaceTimesInfoProvider(sailingService, errorReporter, races, 5000l /* requestInterval*/);
+            CompareCompetitorsChartDialog chartDialog = new CompareCompetitorsChartDialog(sailingService, races, raceTimesInfoProvider,
                     competitorSelectionProvider, timer, stringMessages, errorReporter);
             chartDialog.show();
         }

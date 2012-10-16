@@ -407,4 +407,5 @@ public interface StringMessages extends Messages {
     String unsuppress();
     String suppressedCompetitors();
     String pleaseSelectASeries();
+    String pleaseSelectARace();
 }
