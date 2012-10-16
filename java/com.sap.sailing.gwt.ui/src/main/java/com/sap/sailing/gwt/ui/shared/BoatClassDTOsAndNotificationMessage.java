@@ -5,7 +5,7 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 public class BoatClassDTOsAndNotificationMessage implements IsSerializable {
 	
 	private BoatClassDTO[] boatClassDTOs;
-	private String notificationMessage;
+	private String notificationMessage = "";
 	
 	public BoatClassDTO[] getBoatClassDTOs() {
 		return this.boatClassDTOs;

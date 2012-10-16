@@ -26,6 +26,7 @@ import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.shared.PathDTO;
 import com.sap.sailing.gwt.ui.shared.PositionDTO;
 import com.sap.sailing.gwt.ui.shared.SimulatorResultsDTO;
+import com.sap.sailing.gwt.ui.shared.SimulatorResultsDTOAndNotificationMessage;
 import com.sap.sailing.gwt.ui.shared.WindFieldDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldGenParamsDTO;
 import com.sap.sailing.gwt.ui.shared.panels.SimpleBusyIndicator;
@@ -63,11 +64,15 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
     private final int xRes;
     private final int yRes;
 
+    //I0077899 Mihai Bogdan Eugen
+    private boolean warningAlreadyShown = false;
+    
     public enum ViewName {
         SUMMARY, REPLAY, WINDDISPLAY
     }
 
-    private class ResultManager implements AsyncCallback<SimulatorResultsDTO> {
+    //I0077899 Mihai Bogdan Eugen
+    private class ResultManager implements AsyncCallback<SimulatorResultsDTOAndNotificationMessage> {
 
         /*
          * private class SortByTimeAsc implements Comparator<PathDTO> {
@@ -88,9 +93,19 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
             errorReporter.reportError("Failed servlet call to SimulatorService\n" + message.getMessage());
         }
 
+        //I0077899 Mihai Bogdan Eugen
         @Override
-        public void onSuccess(SimulatorResultsDTO result) {
-            PathDTO[] paths = result.paths;
+        public void onSuccess(SimulatorResultsDTOAndNotificationMessage result) {
+        	
+        	if(result.getNotificationMessage() != "") {
+        		if (warningAlreadyShown == false) {
+        			errorReporter.reportNotification(result.getNotificationMessage());
+        			warningAlreadyShown = true;
+        		}
+        	}
+        	
+        	SimulatorResultsDTO simulatorResult = result.getSimulatorResultsDTO();
+        	PathDTO[] paths = simulatorResult.paths;
             logger.info("Number of Paths : " + paths.length);
             // SortByTimeAsc sorter = new SortByTimeAsc();
             // Arrays.sort(paths, sorter);
@@ -98,9 +113,9 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
             long maxDurationTime = 0;
             
             if (mode == SailingSimulatorUtil.measured) {
-                PositionDTO pos = result.raceCourse.coursePositions.waypointPositions.get(0);
+                PositionDTO pos = simulatorResult.raceCourse.coursePositions.waypointPositions.get(0);
                 raceCourseCanvasOverlay.startPoint = LatLng.newInstance(pos.latDeg, pos.lngDeg);
-                pos = result.raceCourse.coursePositions.waypointPositions.get(1);
+                pos = simulatorResult.raceCourse.coursePositions.waypointPositions.get(1);
                 raceCourseCanvasOverlay.endPoint = LatLng.newInstance(pos.latDeg, pos.lngDeg);
             }
             raceCourseCanvasOverlay.redraw(true);
@@ -148,7 +163,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
             }
             
             if (!summaryView) {
-                WindFieldDTO windFieldDTO = result.windField;
+                WindFieldDTO windFieldDTO = simulatorResult.windField;
                 logger.info("Number of windDTO : " + windFieldDTO.getMatrix().size());
                 mapw.addOverlay(windFieldCanvasOverlay);
                 refreshWindFieldOverlay(windFieldDTO);
@@ -321,27 +336,34 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         windFieldCanvasOverlay.redraw(true);
     }
 
-    private void generatePath(WindPatternDisplay windPatternDisplay, final boolean summaryView) {
+    //I077899 - Mihai Bogdan Eugen
+    private void generatePath(WindPatternDisplay windPatternDisplay, final boolean summaryView, int boatClassIndex) {
         logger.info("In generatePath");
+        
+        System.out.println("YYYY: Inside generatePath!");
         if (windPatternDisplay == null) {
-            errorReporter.reportError("Please select a valid wind pattern.");
+        	this.errorReporter.reportError("Please select a valid wind pattern.");
             return;
         }
-        if (mode != SailingSimulatorUtil.measured) {
-            PositionDTO startPointDTO = new PositionDTO(raceCourseCanvasOverlay.startPoint.getLatitude(),
-                    raceCourseCanvasOverlay.startPoint.getLongitude());
-            PositionDTO endPointDTO = new PositionDTO(raceCourseCanvasOverlay.endPoint.getLatitude(),
-                    raceCourseCanvasOverlay.endPoint.getLongitude());
-            windParams.setNorthWest(startPointDTO);
-            windParams.setSouthEast(endPointDTO);
+        
+        if (this.mode != SailingSimulatorUtil.measured) {
+            PositionDTO startPointDTO = new PositionDTO(raceCourseCanvasOverlay.startPoint.getLatitude(), raceCourseCanvasOverlay.startPoint.getLongitude());
+            this.windParams.setNorthWest(startPointDTO);
+            
+            PositionDTO endPointDTO = new PositionDTO(raceCourseCanvasOverlay.endPoint.getLatitude(), raceCourseCanvasOverlay.endPoint.getLongitude());
+            this.windParams.setSouthEast(endPointDTO);
         }
-        windParams.setxRes(xRes);
-        windParams.setyRes(yRes);
+        
+        this.windParams.setxRes(xRes);
+        this.windParams.setyRes(yRes);
 
-        busyIndicator.setBusy(true);
-        // simulatorSvc.getPaths(windParams, windPatternDisplay, new PathManager(windPatternDisplay, summaryView));
-        simulatorSvc.getSimulatorResults(mode, windParams, windPatternDisplay, !summaryView, new ResultManager(summaryView));
+        this.busyIndicator.setBusy(true);
 
+        System.out.println("YYYY: before simulatorSvc.getSimulatorResults!");
+        
+        this.simulatorSvc.getSimulatorResults(this.mode, this.windParams, windPatternDisplay, !summaryView, boatClassIndex, new ResultManager(summaryView));
+        
+        System.out.println("YYYY: After generatePath!");
     }
 
     private boolean isCourseSet() {
@@ -379,14 +401,16 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         }
     }
 
-    private void refreshSummaryView(WindPatternDisplay windPatternDisplay) {
+    //I077899 - Mihai Bogdan Eugen
+    private void refreshSummaryView(WindPatternDisplay windPatternDisplay, int boatClassIndex) {
         // removeOverlays();
-        generatePath(windPatternDisplay, true);
+        this.generatePath(windPatternDisplay, true, boatClassIndex);
     }
 
-    private void refreshReplayView(WindPatternDisplay windPatternDisplay) {
+    //I077899 - Mihai Bogdan Eugen
+    private void refreshReplayView(WindPatternDisplay windPatternDisplay, int boatClassIndex) {
         // removeOverlays();
-        generatePath(windPatternDisplay, false);
+        this.generatePath(windPatternDisplay, false, boatClassIndex);
     }
 
     private void refreshWindDisplayView(WindPatternDisplay windPatternDisplay) {
@@ -397,7 +421,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         // timeListeners.add(windFieldCanvasOverlay);
     }
 
-    public void refreshView(ViewName name, WindPatternDisplay windPatternDisplay) {
+    public void refreshView(ViewName name, WindPatternDisplay windPatternDisplay, int boatClassIndex) {
         if (!overlaysInitialized) {
             initializeOverlays();
         }
@@ -406,10 +430,10 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
             raceCourseCanvasOverlay.setSelected(false);
             switch (name) {
             case SUMMARY:
-                refreshSummaryView(windPatternDisplay);
+                refreshSummaryView(windPatternDisplay, boatClassIndex);
                 break;
             case REPLAY:
-                refreshReplayView(windPatternDisplay);
+                refreshReplayView(windPatternDisplay, boatClassIndex);
                 break;
             case WINDDISPLAY:
                 refreshWindDisplayView(windPatternDisplay);

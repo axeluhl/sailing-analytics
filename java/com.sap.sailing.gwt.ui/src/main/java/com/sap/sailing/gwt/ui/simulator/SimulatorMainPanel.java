@@ -35,7 +35,7 @@ import com.sap.sailing.gwt.ui.client.TimePanel;
 import com.sap.sailing.gwt.ui.client.TimePanelSettings;
 import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
-import com.sap.sailing.gwt.ui.shared.BoatClassDTO;
+import com.sap.sailing.gwt.ui.shared.BoatClassDTOsAndNotificationMessage;
 import com.sap.sailing.gwt.ui.shared.WindFieldGenParamsDTO;
 import com.sap.sailing.gwt.ui.shared.WindPatternDTO;
 import com.sap.sailing.gwt.ui.shared.controls.slider.SliderBar;
@@ -81,7 +81,11 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
     private final int xRes;
     private final int yRes;
     private final boolean autoUpdate;
+    
+    //I077899 - Mihai Bogdan Eugen
+    private boolean warningAlreadyShown = false;
 
+    //I077899 - Mihai Bogdan Eugen
     private class WindControlCapture implements ValueChangeHandler<Double> {
 
         private SliderBar sliderBar;
@@ -98,7 +102,7 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
             logger.info("Slider value : " + arg0.getValue());
             setting.setValue(arg0.getValue());
             if (autoUpdate) {
-                update();
+                update(boatSelector.getSelectedIndex());
             }
         }
 
@@ -362,53 +366,6 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
         return vp;
     }
 
-    private void createSailingSetup(Panel controlPanel) {
-
-        VerticalPanel sailingPanel = new VerticalPanel();
-        controlPanel.add(sailingPanel);
-        sailingPanel.getElement().setClassName("sailingPanel");
-        String sailingSetup = stringMessages.sailing() + " " + stringMessages.setup();
-        Label sailingSetupLabel = new Label(sailingSetup);
-        sailingSetupLabel.getElement().setClassName("innerHeadline");
-
-        sailingPanel.add(sailingSetupLabel);
-
-        Label boatClassLabel = new Label(stringMessages.boatClass());
-        boatClassLabel.getElement().setClassName("boatClassLabel");
-        HorizontalPanel hp = new HorizontalPanel();
-        hp.getElement().setClassName("boatClassPanel");
-        hp.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
-        hp.add(boatClassLabel);
-
-        simulatorSvc.getBoatClasses(new AsyncCallback<BoatClassDTO[]>() {
-
-            @Override
-            public void onFailure(Throwable message) {
-                errorReporter.reportError("Failed to initialize boat classes\n" + message.getMessage());
-            }
-
-            @Override
-            public void onSuccess(BoatClassDTO[] boatClasses) {
-                for (int i = 0; i < boatClasses.length; ++i) {
-                    boatSelector.addItem(boatClasses[i].toString());
-                }
-            }
-
-        });
-        hp.add(boatSelector);
-
-        sailingPanel.add(hp);
-        // hp.setSize("80%", "10%");
-        // hp.setWidth("80%");
-        Panel raceDirection = createRaceDirectionSelector();
-        sailingPanel.add(raceDirection);
-        // raceDirection.setWidth("80%");
-
-        Panel strategySelector = createStrategySelector();
-        sailingPanel.add(strategySelector);
-        // strategySelector.setWidth("80%");
-    }
-
     private void createMapOptionsPanel() {
         HorizontalPanel mapOptions = new HorizontalPanel();
         mapOptions.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
@@ -457,34 +414,6 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
 
     }
 
-    private void initUpdateButton() {
-        updateButton = new Button(stringMessages.update());
-        updateButton.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent arg0) {
-                update();
-            }
-        });
-
-    }
-
-    private void update() {
-
-        if (windDisplayButton.getValue()) {
-            timePanel.setVisible(true);
-            simulatorMap.refreshView(SimulatorMap.ViewName.WINDDISPLAY, currentWPDisplay);
-        } else if (summaryButton.getValue()) {
-            timePanel.setVisible(false);
-            simulatorMap.refreshView(SimulatorMap.ViewName.SUMMARY, currentWPDisplay);
-        } else if (replayButton.getValue()) {
-            timePanel.setVisible(true);
-            simulatorMap.refreshView(SimulatorMap.ViewName.REPLAY, currentWPDisplay);
-        }
-        resetTimer();
-
-    }
-
     private void initCourseInputButton() {
         courseInputButton = new Button(stringMessages.startEnd());
 
@@ -499,60 +428,6 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
                 windDisplayButton.setValue(false);
             }
         });
-
-    }
-
-    private void initDisplayOptions(Panel mapOptions) {
-        summaryButton = new RadioButton("Map Display Options", stringMessages.summary());
-        summaryButton.getElement().setClassName("MapDisplayOptions");
-
-        summaryButton.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent arg0) {
-                timePanel.setVisible(false);
-                simulatorMap.refreshView(SimulatorMap.ViewName.SUMMARY, currentWPDisplay);
-            }
-
-        });
-
-        replayButton = new RadioButton("Map Display Options", stringMessages.replay());
-        replayButton.getElement().setClassName("MapDisplayOptions");
-
-        replayButton.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent arg0) {
-                simulatorMap.refreshView(SimulatorMap.ViewName.REPLAY, currentWPDisplay);
-                resetTimer();
-                timePanel.setVisible(true);
-            }
-
-        });
-
-        windDisplayButton = new RadioButton("Map Display Options", stringMessages.wind() + " "
-                + stringMessages.display());
-
-        windDisplayButton.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent arg0) {
-                simulatorMap.refreshView(SimulatorMap.ViewName.WINDDISPLAY, currentWPDisplay);
-                resetTimer();
-                timePanel.setVisible(true);
-            }
-
-        });
-
-        HorizontalPanel p = new HorizontalPanel();
-        // p.add(busyIndicator);
-        DecoratorPanel d = new DecoratorPanel();
-        p.add(summaryButton);
-        p.add(replayButton);
-        p.add(windDisplayButton);
-        // windDisplayButton.setValue(true);
-        d.add(p);
-        mapOptions.add(d);
 
     }
 
@@ -590,5 +465,134 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
         fp.add(vp);
         return fp;
 
+    }
+    
+    //I077899 - Mihai Bogdan Eugen
+    private void createSailingSetup(Panel controlPanel) {
+
+        VerticalPanel sailingPanel = new VerticalPanel();
+        controlPanel.add(sailingPanel);
+        sailingPanel.getElement().setClassName("sailingPanel");
+        String sailingSetup = stringMessages.sailing() + " " + stringMessages.setup();
+        Label sailingSetupLabel = new Label(sailingSetup);
+        sailingSetupLabel.getElement().setClassName("innerHeadline");
+
+        sailingPanel.add(sailingSetupLabel);
+
+        Label boatClassLabel = new Label(stringMessages.boatClass());
+        boatClassLabel.getElement().setClassName("boatClassLabel");
+        HorizontalPanel hp = new HorizontalPanel();
+        hp.getElement().setClassName("boatClassPanel");
+        hp.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
+        hp.add(boatClassLabel);
+
+        this.simulatorSvc.getBoatClasses(new AsyncCallback<BoatClassDTOsAndNotificationMessage>() {
+
+            @Override
+            public void onFailure(Throwable message) {
+                errorReporter.reportError("Failed to initialize boat classes\n" + message.getMessage());
+            }
+
+            @Override
+            public void onSuccess(BoatClassDTOsAndNotificationMessage boatClasses) {
+            	
+            	if(boatClasses.getNotificationMessage() != "") {
+            		if (warningAlreadyShown == false) {
+            			errorReporter.reportNotification(boatClasses.getNotificationMessage());
+            			warningAlreadyShown = true;
+            		}
+            	}
+            	
+                for (int i = 0; i < boatClasses.getBoatClassDTOs().length; ++i) {
+                    boatSelector.addItem(boatClasses.getBoatClassDTOs()[i].toString());
+                }
+            }
+
+        });
+        
+        hp.add(boatSelector);
+
+        sailingPanel.add(hp);
+        // hp.setSize("80%", "10%");
+        // hp.setWidth("80%");
+        Panel raceDirection = createRaceDirectionSelector();
+        sailingPanel.add(raceDirection);
+        // raceDirection.setWidth("80%");
+
+        Panel strategySelector = createStrategySelector();
+        sailingPanel.add(strategySelector);
+        // strategySelector.setWidth("80%");
+    }    
+    
+    //I077899 - Mihai Bogdan Eugen
+    private void initDisplayOptions(Panel mapOptions) {
+        this.summaryButton = new RadioButton("Map Display Options", this.stringMessages.summary());
+        this.summaryButton.getElement().setClassName("MapDisplayOptions");
+        this.summaryButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent arg0) {
+                timePanel.setVisible(false);
+                simulatorMap.refreshView(SimulatorMap.ViewName.SUMMARY, currentWPDisplay, 0);
+            }
+
+        });
+
+        this.replayButton = new RadioButton("Map Display Options", this.stringMessages.replay());
+        this.replayButton.getElement().setClassName("MapDisplayOptions");
+        this.replayButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent arg0) {
+                simulatorMap.refreshView(SimulatorMap.ViewName.REPLAY, currentWPDisplay, 0);
+                resetTimer();
+                timePanel.setVisible(true);
+            }
+        });
+
+        this.windDisplayButton = new RadioButton("Map Display Options", this.stringMessages.wind() + " " + this.stringMessages.display());
+        this.windDisplayButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent arg0) {
+                simulatorMap.refreshView(SimulatorMap.ViewName.WINDDISPLAY, currentWPDisplay, 0);
+                resetTimer();
+                timePanel.setVisible(true);
+            }
+
+        });
+
+        HorizontalPanel p = new HorizontalPanel();
+        // p.add(busyIndicator);
+        DecoratorPanel d = new DecoratorPanel();
+        p.add(summaryButton);
+        p.add(replayButton);
+        p.add(windDisplayButton);
+        // windDisplayButton.setValue(true);
+        d.add(p);
+        mapOptions.add(d);
+    }
+    
+    //I077899 - Mihai Bogdan Eugen
+    private void initUpdateButton() {
+        this.updateButton = new Button(this.stringMessages.update());
+        this.updateButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent arg0) {
+                update(0);
+            }
+        });
+    }
+    
+    //I077899 - Mihai Bogdan Eugen
+    private void update(int boatClassIndex) {
+        if (this.windDisplayButton.getValue()) {
+        	this.timePanel.setVisible(true);
+            this.simulatorMap.refreshView(SimulatorMap.ViewName.WINDDISPLAY, this.currentWPDisplay, boatClassIndex);
+        } else if (this.summaryButton.getValue()) {
+        	this.timePanel.setVisible(false);
+            this.simulatorMap.refreshView(SimulatorMap.ViewName.SUMMARY, this.currentWPDisplay, boatClassIndex);
+        } else if (this.replayButton.getValue()) {
+        	this.timePanel.setVisible(true);
+            this.simulatorMap.refreshView(SimulatorMap.ViewName.REPLAY, this.currentWPDisplay, boatClassIndex);
+        }
+        this.resetTimer();
     }
 }

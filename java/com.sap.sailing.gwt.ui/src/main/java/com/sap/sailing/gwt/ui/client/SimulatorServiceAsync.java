@@ -3,10 +3,10 @@ package com.sap.sailing.gwt.ui.client;
 import java.util.List;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.sap.sailing.gwt.ui.shared.BoatClassDTO;
-import com.sap.sailing.gwt.ui.shared.PolarDiagramDTO;
+import com.sap.sailing.gwt.ui.shared.BoatClassDTOsAndNotificationMessage;
+import com.sap.sailing.gwt.ui.shared.PolarDiagramDTOAndNotificationMessage;
 import com.sap.sailing.gwt.ui.shared.PositionDTO;
-import com.sap.sailing.gwt.ui.shared.SimulatorResultsDTO;
+import com.sap.sailing.gwt.ui.shared.SimulatorResultsDTOAndNotificationMessage;
 import com.sap.sailing.gwt.ui.shared.WindFieldDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldGenParamsDTO;
 import com.sap.sailing.gwt.ui.shared.WindLatticeDTO;
@@ -24,16 +24,16 @@ public interface SimulatorServiceAsync {
     
     //void getPaths(WindFieldGenParamsDTO params, WindPatternDisplay display, AsyncCallback<PathDTO[]> callback);
 
-    void getSimulatorResults(char mode, WindFieldGenParamsDTO params, WindPatternDisplay display, boolean withWindField,
-            AsyncCallback<SimulatorResultsDTO> callback);
-
     void getWindPatterns(AsyncCallback<List<WindPatternDTO>> callback);
 
     void getWindPatternDisplay(WindPatternDTO pattern, AsyncCallback<WindPatternDisplay> callback);
+
+    //I00788 - Mihai Bogdan Eugen
+    void getSimulatorResults(char mode, WindFieldGenParamsDTO params, WindPatternDisplay display, boolean withWindField, int boatClassIndex, AsyncCallback<SimulatorResultsDTOAndNotificationMessage> callback);
     
-    void getBoatClasses(AsyncCallback<BoatClassDTO[]> callback);
+    //I00788 - Mihai Bogdan Eugen    
+    void getBoatClasses(AsyncCallback<BoatClassDTOsAndNotificationMessage> callback);
 
-	void getPolarDiagram49DTO(Double bearingStep,int boatClass,
-			AsyncCallback<PolarDiagramDTO> callback);
-
+    //I00788 - Mihai Bogdan Eugen
+	void getPolarDiagramDTO(Double bearingStep, int boatClassIndex, AsyncCallback<PolarDiagramDTOAndNotificationMessage> callback);
 }
