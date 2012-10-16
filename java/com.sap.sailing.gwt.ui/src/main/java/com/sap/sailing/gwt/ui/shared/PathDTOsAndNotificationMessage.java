@@ -1,10 +1,9 @@
 package com.sap.sailing.gwt.ui.shared;
 
-import java.io.Serializable;
+import com.google.gwt.user.client.rpc.IsSerializable;
 
-public class PathDTOsAndNotificationMessage implements Serializable
-{
-	private static final long	serialVersionUID	= 3181973716884838685L;
+public class PathDTOsAndNotificationMessage implements IsSerializable {
+	
 	private PathDTO[] pathDTOs;
 	private String notificationMessage;
 	

@@ -1,11 +1,9 @@
 package com.sap.sailing.gwt.ui.shared;
 
-import java.io.Serializable;
+import com.google.gwt.user.client.rpc.IsSerializable;
 
-public class PolarDiagramDTOAndNotificationMessage implements Serializable {
-	
-	private static final long	serialVersionUID	= 7385409147081730741L;
-	
+public class PolarDiagramDTOAndNotificationMessage implements IsSerializable {
+
 	private PolarDiagramDTO polarDiagramDTO;
 	private String notificationMessage;
 	

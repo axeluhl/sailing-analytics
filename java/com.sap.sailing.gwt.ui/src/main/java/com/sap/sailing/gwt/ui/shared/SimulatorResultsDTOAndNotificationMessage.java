@@ -1,11 +1,9 @@
 package com.sap.sailing.gwt.ui.shared;
 
-import java.io.Serializable;
+import com.google.gwt.user.client.rpc.IsSerializable;
 
-public class SimulatorResultsDTOAndNotificationMessage implements Serializable {
-	
-	private static final long	serialVersionUID	= 6890477769867789622L;
-	
+public class SimulatorResultsDTOAndNotificationMessage implements IsSerializable {
+
 	private SimulatorResultsDTO simulatorResultsDTO;
 	private String notificationMessage;
 	
