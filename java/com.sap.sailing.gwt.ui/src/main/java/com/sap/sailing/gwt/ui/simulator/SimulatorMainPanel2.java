@@ -563,7 +563,6 @@ public class SimulatorMainPanel2 extends SplitLayoutPanel {
         hp.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
         hp.add(boatClassLabel);
 
-        System.out.println("XXX: Inainte de createSailingSetup/getBoatClasses");
         this.simulatorSvc.getBoatClasses(new AsyncCallback<BoatClassDTOsAndNotificationMessage>() {
             @Override
             public void onFailure(Throwable error) {
@@ -572,9 +571,6 @@ public class SimulatorMainPanel2 extends SplitLayoutPanel {
 
             @Override
             public void onSuccess(BoatClassDTOsAndNotificationMessage response) {
-            	
-            	System.out.println("XXX: In createSailingSetup/getBoatClasses/onSuccess");
-            	
             	String notificationMessage = response.getNotificationMessage();
             	if(notificationMessage != "" && notificationMessage.length() != 0 && warningAlreadyShown == false) {
         			errorReporter.reportNotification(response.getNotificationMessage());
@@ -587,8 +583,7 @@ public class SimulatorMainPanel2 extends SplitLayoutPanel {
                 }
             }
         });
-        System.out.println("XXX: Dupa de createSailingSetup/getBoatClasses");
-        
+
         this.boatSelector.addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent evnet) {

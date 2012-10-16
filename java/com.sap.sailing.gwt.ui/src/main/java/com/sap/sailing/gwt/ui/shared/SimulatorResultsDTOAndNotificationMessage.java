@@ -7,7 +7,7 @@ public class SimulatorResultsDTOAndNotificationMessage implements Serializable {
 	private static final long	serialVersionUID	= 6890477769867789622L;
 	
 	private SimulatorResultsDTO simulatorResultsDTO;
-	private String notificationMessage;
+	private String notificationMessage = "";
 	
 	public SimulatorResultsDTO getSimulatorResultsDTO() {
 		return this.simulatorResultsDTO;

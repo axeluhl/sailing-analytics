@@ -7,7 +7,7 @@ public class PolarDiagramDTOAndNotificationMessage implements Serializable {
 	private static final long	serialVersionUID	= 7385409147081730741L;
 	
 	private PolarDiagramDTO polarDiagramDTO;
-	private String notificationMessage;
+	private String notificationMessage = "";
 	
 	public PolarDiagramDTO getPolarDiagramDTO() {
 		return this.polarDiagramDTO;

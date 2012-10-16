@@ -6,7 +6,7 @@ public class PathDTOsAndNotificationMessage implements Serializable
 {
 	private static final long	serialVersionUID	= 3181973716884838685L;
 	private PathDTO[] pathDTOs;
-	private String notificationMessage;
+	private String notificationMessage = "";
 	
 	public PathDTO[] getPathDTOs() {
 		return this.pathDTOs;
