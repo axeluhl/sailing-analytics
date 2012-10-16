@@ -13,7 +13,7 @@ import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.components.SettingsDialogComponent;
 
 public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements RaceSelectionChangeListener, RaceTimesInfoProviderListener {
-    private RaceTimesInfoProvider raceTimesInfoProvider;
+    private final RaceTimesInfoProvider raceTimesInfoProvider;
     private RegattaAndRaceIdentifier selectedRace;
     private boolean autoAdjustPlayMode;
     private RaceTimesInfoDTO lastRaceTimesInfo;
