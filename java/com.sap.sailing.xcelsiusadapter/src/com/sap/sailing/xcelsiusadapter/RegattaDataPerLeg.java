@@ -236,26 +236,27 @@ public class RegattaDataPerLeg extends Action {
                             } else {
 		                    	addNamedElementWithValue(competitor_node, "sail_id_formatted", sail_id);
                             }
-                            addNamedElementWithValue(competitor_node, "leg_finished_time_ms",
-                                    compFinishedLeg.asMillis());
-                            addNamedElementWithValue(competitor_node, "time_elapsed_ms", compFinishedLeg.asMillis()
-                                    - raceStarted.asMillis());
+                            addNamedElementWithValue(competitor_node, "leg_finished_time_ms", compFinishedLeg.asMillis());
+                            addNamedElementWithValue(competitor_node, "time_elapsed_ms", compFinishedLeg.asMillis() - raceStarted.asMillis());
                             addNamedElementWithValue(competitor_node, "leg_time_ms", compLegTimeAlt.asMillis());
-		                    addNamedElementWithValue(competitor_node, "leg_rank", trackedLegOfCompetitor.getRank(compFinishedLeg));	
-		                    addNamedElementWithValue(competitor_node, "race_final_rank", trackedRace.getRank(competitor));
+		            addNamedElementWithValue(competitor_node, "leg_rank", trackedLegOfCompetitor.getRank(compFinishedLeg));	
+		            addNamedElementWithValue(competitor_node, "race_final_rank", trackedRace.getRank(competitor));
                             addNamedElementWithValue(competitor_node, "rank_gain", posGL * -1); // Ranks Gained/Lost
-                            addNamedElementWithValue(competitor_node, "gap_to_leader_s",
-                                    trackedLegOfCompetitor.getGapToLeaderInSeconds(compFinishedLeg));
-//		                    addNamedElementWithValue(competitor_node, "avg_xte", trackedLegOfCompetitor.getAverageCrossTrackError(compFinishedLeg).getMeters());
-//		                    addNamedElementWithValue(competitor_node, "avg_vmg_kn", trackedLegOfCompetitor.getAverageVelocityMadeGood(compFinishedLeg).getKnots());//windwardSpeed over ground on leg finished time
-                            addNamedElementWithValue(competitor_node, "avg_speed_og_kn", trackedLegOfCompetitor
-                                    .getAverageSpeedOverGround(compFinishedLeg).getKnots());
-                            addNamedElementWithValue(competitor_node, "avg_speed_ww_kn", trackedLegOfCompetitor
-                                    .getAverageVelocityMadeGood(compFinishedLeg).getKnots());// windwardSpeed over
+                            addNamedElementWithValue(competitor_node, "gap_to_leader_s", trackedLegOfCompetitor.getGapToLeaderInSeconds(compFinishedLeg));
+                            addNamedElementWithValue(competitor_node, "ww_distance_to_leader_m", 0);
+//		            addNamedElementWithValue(competitor_node, "avg_xte", trackedLegOfCompetitor.getAverageCrossTrackError(compFinishedLeg).getMeters());
+//		            addNamedElementWithValue(competitor_node, "avg_vmg_kn", trackedLegOfCompetitor.getAverageVelocityMadeGood(compFinishedLeg).getKnots());//windwardSpeed over ground on leg finished time
+                            addNamedElementWithValue(competitor_node, "avg_speed_og_kn", trackedLegOfCompetitor.getAverageSpeedOverGround(compFinishedLeg).getKnots());
+                            addNamedElementWithValue(competitor_node, "avg_speed_ww_kn", trackedLegOfCompetitor.getAverageVelocityMadeGood(compFinishedLeg).getKnots());// windwardSpeed over
                                                                                              // ground on leg finished
                                                                                              // time
-		                    addNamedElementWithValue(competitor_node, "average_wind_speed", wind_speed);
-		                    addNamedElementWithValue(competitor_node, "average_wind_speed_confidence", wind_confi);
+                            addNamedElementWithValue(competitor_node, "distance_traveled_m", trackedLegOfCompetitor.getDistanceTraveled(compFinishedLeg).getMeters());
+                            addNamedElementWithValue(competitor_node, "number_of_jibes", trackedLegOfCompetitor.getNumberOfJibes(compFinishedLeg));
+                            addNamedElementWithValue(competitor_node, "number_of_tacks", trackedLegOfCompetitor.getNumberOfTacks(compFinishedLeg));
+                            addNamedElementWithValue(competitor_node, "number_of_penalty_circles", trackedLegOfCompetitor.getNumberOfPenaltyCircles(compFinishedLeg));
+                            
+		            addNamedElementWithValue(competitor_node, "average_wind_speed", wind_speed);
+		            addNamedElementWithValue(competitor_node, "average_wind_speed_confidence", wind_confi);
 		                    
 //		                    Waypoint finish = trackedRace.getRace().getCourse().getLastWaypoint();
 //		                    
