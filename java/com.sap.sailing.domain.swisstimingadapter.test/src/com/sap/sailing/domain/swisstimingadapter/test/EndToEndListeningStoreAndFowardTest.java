@@ -141,7 +141,19 @@ public class EndToEndListeningStoreAndFowardTest {
         String scriptName1 = "/SailMasterDataInterfaceRACandSTL.txt";
         String scriptName2 = "/SailMasterDataInterface-ExampleAsText.txt";
         setUpUsingScript(racesToTrack, scriptName1, scriptName2);
+        coreOfTestLongRaceLog();
+    }
 
+    @Test
+    public void testLongRaceLogNewVersion() throws Exception {
+        String[] racesToTrack = new String[] { "W4702" };
+        String scriptName1 = "/W4702RACandSTLandCCG.txt";
+        String scriptName2 = "/W4702AsText.txt";
+        setUpUsingScript(racesToTrack, scriptName1, scriptName2);
+        coreOfTestLongRaceLog();
+    }
+
+    private void coreOfTestLongRaceLog() {
         Set<TrackedRace> allTrackedRaces = new HashSet<TrackedRace>();
         Iterable<Regatta> allRegattas = racingEventService.getAllRegattas();
         for (Regatta regatta : allRegattas) {
@@ -164,7 +176,8 @@ public class EndToEndListeningStoreAndFowardTest {
             assertEquals(7, Util.size(race.getCourse().getWaypoints()));
             assertEquals(6, Util.size(race.getCourse().getLegs()));
             for (Competitor competitor : race.getCompetitors()) {
-                if (!competitor.getName().equals("Competitor 35") && !competitor.getName().equals("Competitor 20")) {
+                if (!competitor.getName().equals("Competitor 35") && !competitor.getName().equals("Competitor 20")
+                        && !competitor.getName().equals("GBR 831") && !competitor.getName().equals("NED 24")) {
                     final GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(competitor);
                     track.lockForRead();
                     try {
@@ -228,7 +241,7 @@ public class EndToEndListeningStoreAndFowardTest {
             assertEquals(2, Util.size(race.getCourse().getLegs()));
             for (Competitor competitor : race.getCompetitors()) {
                 if (!competitor.getName().equals("NED 24") && !competitor.getName().equals("Competitor 35")
-                        && !competitor.getName().equals("Competitor 20")) {
+                        && !competitor.getName().equals("Competitor 20") && !competitor.getName().equals("GBR 831")) {
                     final GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(competitor);
                     track.lockForRead();
                     try {
