@@ -28,27 +28,27 @@ public class ConfigurationManagerTest {
 
     @Test
     public void test_getPolarDiagramFileLocation() {
-        Assert.assertEquals("resources/PolarDiagram49.csv", ConfigurationManager.getDefault()
+        Assert.assertEquals("resources/PolarDiagram49.csv", ConfigurationManager.INSTANCE
                 .getPolarDiagramFileLocation(0));
-        Assert.assertEquals("resources/PolarDiagram49Bethwaite.csv", ConfigurationManager.getDefault()
+        Assert.assertEquals("resources/PolarDiagram49Bethwaite.csv", ConfigurationManager.INSTANCE
                 .getPolarDiagramFileLocation(1));
-        Assert.assertEquals("resources/PolarDiagram49ORC.csv", ConfigurationManager.getDefault()
+        Assert.assertEquals("resources/PolarDiagram49ORC.csv", ConfigurationManager.INSTANCE
                 .getPolarDiagramFileLocation(2));
-        Assert.assertEquals("resources/PolarDiagram49STG.csv", ConfigurationManager.getDefault()
+        Assert.assertEquals("resources/PolarDiagram49STG.csv", ConfigurationManager.INSTANCE
                 .getPolarDiagramFileLocation(3));
-        Assert.assertEquals("resources/PolarDiagram505STG.csv", ConfigurationManager.getDefault()
+        Assert.assertEquals("resources/PolarDiagram505STG.csv", ConfigurationManager.INSTANCE
                 .getPolarDiagramFileLocation(4));
     }
 
     @Test
     public void test_getBoatClassesInfoCount() {
-        Assert.assertEquals(5, ConfigurationManager.getDefault().getBoatClassesInfoCount());
+        Assert.assertEquals(5, ConfigurationManager.INSTANCE.getBoatClassesInfoCount());
     }
 
     @Test
     public void test_getBoatClassesInfo() {
         int index = 0;
-        for (Tuple<String, Double, String> tuple : ConfigurationManager.getDefault().getBoatClassesInfo()) {
+        for (Tuple<String, Double, String> tuple : ConfigurationManager.INSTANCE.getBoatClassesInfo()) {
             Assert.assertEquals(this._boatClassesInfo.get(index).first, tuple.first);
             Assert.assertEquals(this._boatClassesInfo.get(index).second, tuple.second);
             Assert.assertEquals(this._boatClassesInfo.get(index).third, tuple.third);
