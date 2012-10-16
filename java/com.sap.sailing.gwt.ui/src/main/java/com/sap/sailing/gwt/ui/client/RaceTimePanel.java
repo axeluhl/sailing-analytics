@@ -84,9 +84,10 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
     
     @Override
     public void onTimeZoomChanged(Date zoomStartTimepoint, Date zoomEndTimepoint) {
+        super.onTimeZoomChanged(zoomStartTimepoint, zoomEndTimepoint);
         isTimeZoomed = true;
         timeSlider.setZoomed(true);
-        timer.setAutoAdvance(false);
+//        timer.setAutoAdvance(false);
         setMinMax(zoomStartTimepoint, zoomEndTimepoint, false);
         timeSlider.clearMarkersAndLabelsAndTicks();
         redrawAllMarkers(lastRaceTimesInfo);
@@ -94,9 +95,10 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
 
     @Override
     public void onTimeZoomReset() {
+        super.onTimeZoomReset();
         isTimeZoomed = false;
         timeSlider.setZoomed(false);
-        timer.setAutoAdvance(true);
+//        timer.setAutoAdvance(true);
         updateMinMax(this.lastRaceTimesInfo);
         timeSlider.clearMarkersAndLabelsAndTicks();
         redrawAllMarkers(lastRaceTimesInfo);
