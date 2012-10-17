@@ -5,7 +5,11 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 public class SimulatorResultsDTOAndNotificationMessage implements IsSerializable {
 
 	private SimulatorResultsDTO simulatorResultsDTO;
-	private String notificationMessage = "";
+	private String notificationMessage;
+	
+	public SimulatorResultsDTOAndNotificationMessage() {
+		this.notificationMessage = "";
+	}
 	
 	public SimulatorResultsDTO getSimulatorResultsDTO() {
 		return this.simulatorResultsDTO;

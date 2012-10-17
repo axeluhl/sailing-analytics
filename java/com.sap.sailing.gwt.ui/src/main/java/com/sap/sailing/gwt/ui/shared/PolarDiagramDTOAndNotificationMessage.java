@@ -5,7 +5,11 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 public class PolarDiagramDTOAndNotificationMessage implements IsSerializable {
 
 	private PolarDiagramDTO polarDiagramDTO;
-	private String notificationMessage = "";
+	private String notificationMessage;
+	
+	public PolarDiagramDTOAndNotificationMessage() {
+		this.notificationMessage = "";
+	}
 	
 	public PolarDiagramDTO getPolarDiagramDTO() {
 		return this.polarDiagramDTO;

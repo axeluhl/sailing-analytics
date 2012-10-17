@@ -1,11 +1,14 @@
 package com.sap.sailing.gwt.ui.shared;
 
-import java.io.Serializable;
+import com.google.gwt.user.client.rpc.IsSerializable;
 
-public class PolarDiagramDTO implements Serializable {
-	/** generated ID for serialization */
-	private static final long serialVersionUID = -7172465531558621138L;
-	private Number[][] series = null;
+public class PolarDiagramDTO implements IsSerializable {
+
+	private Number[][] series;
+	
+	public PolarDiagramDTO() {
+		this.series = null;
+	}
 
 	public void setNumberSeries(Number[][] series) {
 		this.series = series;

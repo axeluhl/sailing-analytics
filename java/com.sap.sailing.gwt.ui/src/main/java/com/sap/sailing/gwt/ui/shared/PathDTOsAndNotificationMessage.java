@@ -5,7 +5,11 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 public class PathDTOsAndNotificationMessage implements IsSerializable {
 	
 	private PathDTO[] pathDTOs;
-	private String notificationMessage = "";
+	private String notificationMessage;
+	
+	public PathDTOsAndNotificationMessage() {
+		this.notificationMessage = "";
+	}
 	
 	public PathDTO[] getPathDTOs() {
 		return this.pathDTOs;
