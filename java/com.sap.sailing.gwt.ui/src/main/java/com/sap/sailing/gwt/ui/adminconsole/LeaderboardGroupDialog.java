@@ -32,8 +32,9 @@ public class LeaderboardGroupDialog extends DataEntryDialog<LeaderboardGroupDTO>
     
     protected TextBox nameEntryField;
     protected TextArea descriptionEntryField;
-    
-    private CheckBox useOverallLeaderboardCheckBox;
+    protected CheckBox displayGroupsInReverseOrderCheckBox;
+    protected CheckBox useOverallLeaderboardCheckBox;
+
     private Panel overallLeaderboardConfigPanel;
     private LongBox[] overallLeaderboardDiscardThresholdFields;
     private ListBox overallLeaderboardScoringSchemeListBox;
@@ -87,10 +88,6 @@ public class LeaderboardGroupDialog extends DataEntryDialog<LeaderboardGroupDTO>
     protected LongBox[] getOverallLeaderboardDiscardThresholdFields() {
         return overallLeaderboardDiscardThresholdFields;
     }
-    
-    protected CheckBox getUseOverallLeaderboardCheckBox() {
-        return useOverallLeaderboardCheckBox;
-    }
 
     public LeaderboardGroupDialog(LeaderboardGroupDTO group, StringMessages stringMessages,
             DialogCallback<LeaderboardGroupDTO> callback, Collection<LeaderboardGroupDTO> existingLeaderboardGroups) {
@@ -98,6 +95,7 @@ public class LeaderboardGroupDialog extends DataEntryDialog<LeaderboardGroupDTO>
                 new LeaderboardGroupParameterValidator(stringMessages, existingLeaderboardGroups), callback);
         this.stringMessages = stringMessages;
         this.group = group;
+        displayGroupsInReverseOrderCheckBox = createCheckbox(stringMessages.displayGroupsInReverseOrder());
         useOverallLeaderboardCheckBox = createCheckbox(stringMessages.useOverallLeaderboard());
         Grid formGrid = new Grid(3,2);
         formGrid.setCellSpacing(3);
@@ -129,6 +127,7 @@ public class LeaderboardGroupDialog extends DataEntryDialog<LeaderboardGroupDTO>
     protected LeaderboardGroupDTO getResult() {
         group.name = nameEntryField.getText();
         group.description = descriptionEntryField.getText();
+        group.displayGroupsInReverseOrder = displayGroupsInReverseOrderCheckBox.getValue();
         if (useOverallLeaderboardCheckBox.getValue()) {
             group.setOverallLeaderboardDiscardThresholds(AbstractLeaderboardDialog
                     .getDiscardThresholds(getOverallLeaderboardDiscardThresholdFields()));
@@ -155,6 +154,7 @@ public class LeaderboardGroupDialog extends DataEntryDialog<LeaderboardGroupDTO>
         descriptionEntryField.setVisibleLines(6);
         descriptionEntryField.getElement().getStyle().setProperty("resize", "none");
         panel.add(descriptionEntryField);
+        panel.add(displayGroupsInReverseOrderCheckBox);
         panel.add(useOverallLeaderboardCheckBox);
         useOverallLeaderboardCheckBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
             @Override

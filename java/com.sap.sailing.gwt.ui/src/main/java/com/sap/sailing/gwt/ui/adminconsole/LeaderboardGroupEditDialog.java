@@ -2,7 +2,6 @@ package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.Collection;
 
-import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 
@@ -14,12 +13,8 @@ public class LeaderboardGroupEditDialog extends LeaderboardGroupDialog {
         getOverallLeaderboardScoringSchemeListBox().setEnabled(!group.hasOverallLeaderboard());
         nameEntryField = createTextBox(group.name);
         descriptionEntryField = createTextArea(group.description);
-    }
-
-    @Override
-    protected Widget getAdditionalWidget() {
-        Widget result = super.getAdditionalWidget();
-        getUseOverallLeaderboardCheckBox().setValue(group.hasOverallLeaderboard(), /* fire event */ true);
-        return result;
+        displayGroupsInReverseOrderCheckBox.setValue(group.displayGroupsInReverseOrder);
+        displayGroupsInReverseOrderCheckBox.setEnabled(false);
+        useOverallLeaderboardCheckBox.setValue(group.hasOverallLeaderboard());     
     }
 }

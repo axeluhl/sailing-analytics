@@ -408,4 +408,5 @@ public interface StringMessages extends Messages {
     String suppressedCompetitors();
     String pleaseSelectASeries();
     String pleaseSelectARace();
+    String displayGroupsInReverseOrder();
 }
