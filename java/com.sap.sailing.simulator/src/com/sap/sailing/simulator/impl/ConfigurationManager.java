@@ -21,15 +21,9 @@ public enum ConfigurationManager {
 
     private ConfigurationManager() {
         String configFileLocation = System.getenv(this._environmentVariableName);
-        
-        System.out.println("XXXXX: configFileLocation = " + configFileLocation);
-        
         InputStream inputStream = null;
         try {
 	        if (configFileLocation == null || configFileLocation == "") {
-	        	
-	        	System.out.println("XXXXX: case 1");
-	        	
 //	        	configFileLocation = this._defaultConfigFileLocation;
 //	            inputStream = this.getClass().getClassLoader().getResourceAsStream(configFileLocation);
 //	            this.status = ReadingConfigurationFileStatus.ERROR_READING_ENV_VAR_VALUE;
@@ -48,18 +42,12 @@ public enum ConfigurationManager {
 	            this.errorMessage = "";	            
 	        } 
 	        else if (new File(configFileLocation).exists()) {
-	        	
-	        	System.out.println("XXXXX: case 2");
-	        	
                 URL csvFileURL = new URL("file:///" + configFileLocation);
                 inputStream = csvFileURL.openStream();
 	            this.status = ReadingConfigurationFileStatus.SUCCESS;
 	            this.errorMessage = "";
             }
             else {
-            	
-            	System.out.println("XXXXX: case 3");
-            	
                 configFileLocation = this._defaultConfigFileLocation;
                 inputStream = this.getClass().getClassLoader().getResourceAsStream(configFileLocation);
 	            this.status = ReadingConfigurationFileStatus.ERROR_FINDING_CONFIG_FILE;

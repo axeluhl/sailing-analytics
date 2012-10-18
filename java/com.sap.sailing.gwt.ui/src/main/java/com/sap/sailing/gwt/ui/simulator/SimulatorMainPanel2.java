@@ -20,6 +20,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
@@ -32,6 +33,7 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.PopupPanel.PositionCallback;
 import com.google.gwt.user.client.ui.RadioButton;
 import com.google.gwt.user.client.ui.SplitLayoutPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -532,7 +534,19 @@ public class SimulatorMainPanel2 extends SplitLayoutPanel {
                 polarDiv.setVisible(checked);
                 
                 if(checked) {
-                    polarDiagramDialogBox.center();
+                	
+                	//TODO: change the hardcoded values bellow...
+                	
+                	polarDiagramDialogBox.setPopupPositionAndShow(new PositionCallback() {
+                		public void setPosition(int offsetWidth, int offsetHeight) {
+                	        
+                			int width = Window.getClientWidth() - 550;
+                			int height = Window.getClientHeight() - 525;
+
+                	        polarDiagramDialogBox.setPopupPosition(width, height);
+                	      }
+                	});
+                	
                     polarDiagramDialogCloseButton.setFocus(true);
                     cb.setValue(false);
                 }
@@ -789,8 +803,13 @@ public class SimulatorMainPanel2 extends SplitLayoutPanel {
     	
         final DialogBox dialogBox = new DialogBox();
         dialogBox.setText("Poalr Diagram"); 
+        
         dialogBox.setAnimationEnabled(true);
+        dialogBox.setAutoHideEnabled(false);
+        dialogBox.setModal(false);        
+        
         dialogBox.setWidget(this.polarDiv);
+
 
         this.polarDiagramDialogCloseButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
