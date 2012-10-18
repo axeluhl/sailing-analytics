@@ -21,21 +21,45 @@ public enum ConfigurationManager {
 
     private ConfigurationManager() {
         String configFileLocation = System.getenv(this._environmentVariableName);
+        
+        System.out.println("XXXXX: configFileLocation = " + configFileLocation);
+        
         InputStream inputStream = null;
         try {
 	        if (configFileLocation == null || configFileLocation == "") {
-	        	configFileLocation = this._defaultConfigFileLocation;
-	            inputStream = this.getClass().getClassLoader().getResourceAsStream(configFileLocation);
-	            this.status = ReadingConfigurationFileStatus.ERROR_READING_ENV_VAR_VALUE;
-	            this.errorMessage = "Cannot find STG_CONFIG environment variable! Using default configuration values!";
+	        	
+	        	System.out.println("XXXXX: case 1");
+	        	
+//	        	configFileLocation = this._defaultConfigFileLocation;
+//	            inputStream = this.getClass().getClassLoader().getResourceAsStream(configFileLocation);
+//	            this.status = ReadingConfigurationFileStatus.ERROR_READING_ENV_VAR_VALUE;
+//	            this.errorMessage = "Cannot find STG_CONFIG environment variable! Using default configuration values!";
+	            
+	        	/*
+	        	 * On 2012/10/17 12:50 Christopher Ronnewinkel:
+	        	 * Could you bring up the warning only in the case that the environment variable has been set to a non-empty value, 
+	        	 * and then using this no csv-files can be found? If the environment variable is not set or set to an empty string 
+	        	 * the simulator should start as always with the defaults.
+	        	 */
+	        	
+                configFileLocation = this._defaultConfigFileLocation;
+                inputStream = this.getClass().getClassLoader().getResourceAsStream(configFileLocation);
+	            this.status = ReadingConfigurationFileStatus.SUCCESS;
+	            this.errorMessage = "";	            
 	        } 
 	        else if (new File(configFileLocation).exists()) {
+	        	
+	        	System.out.println("XXXXX: case 2");
+	        	
                 URL csvFileURL = new URL("file:///" + configFileLocation);
                 inputStream = csvFileURL.openStream();
 	            this.status = ReadingConfigurationFileStatus.SUCCESS;
 	            this.errorMessage = "";
             }
             else {
+            	
+            	System.out.println("XXXXX: case 3");
+            	
                 configFileLocation = this._defaultConfigFileLocation;
                 inputStream = this.getClass().getClassLoader().getResourceAsStream(configFileLocation);
 	            this.status = ReadingConfigurationFileStatus.ERROR_FINDING_CONFIG_FILE;
