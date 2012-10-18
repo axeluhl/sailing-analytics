@@ -177,7 +177,7 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
                 String link = URLFactory.INSTANCE.encode("/gwt/Leaderboard.html?name=" + leaderboardGroup.name+" "+LeaderboardNameConstants.OVERALL
                         + (showRaceDetails ? "&showRaceDetails=true" : "")
                         + (isEmbedded ? "&embedded=true" : "")
-                        + "&leaderboardDisplayName=" + stringMessages.overallStandings() 
+                        + "&displayName=" + stringMessages.overallStandings() 
                         + "&leaderboardGroupName=" + leaderboardGroup.name + "&root=" + root
                         + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""));
                 HTML overallLeaderboardAnchor = new HTML(getAnchor(link, stringMessages.overallStandings(), "ActiveButton overallStandings"));

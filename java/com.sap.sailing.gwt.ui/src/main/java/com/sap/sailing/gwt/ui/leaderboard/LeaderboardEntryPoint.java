@@ -76,7 +76,7 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
         LogoAndTitlePanel logoAndTitlePanel = null;
         if (!embedded) {
             // Hack to shorten the leaderboardName in case of overall leaderboards
-            String leaderboardDisplayName = Window.Location.getParameter("leaderboardDisplayName");
+            String leaderboardDisplayName = Window.Location.getParameter("displayName");
             if(leaderboardDisplayName == null || leaderboardDisplayName.isEmpty()) {
                 leaderboardDisplayName = leaderboardName;
             }
