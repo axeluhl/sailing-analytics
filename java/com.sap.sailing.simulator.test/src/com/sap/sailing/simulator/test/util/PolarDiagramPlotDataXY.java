@@ -1,4 +1,4 @@
-package com.sap.sailing.simulator.test;
+package com.sap.sailing.simulator.test.util;
 
 import static org.junit.Assert.assertEquals;
 
@@ -7,8 +7,6 @@ import java.io.IOException;
 import java.util.NavigableMap;
 import java.util.Set;
 
-import org.junit.Test;
-
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.simulator.PolarDiagram;
@@ -16,8 +14,7 @@ import com.sap.sailing.simulator.impl.PolarDiagram49STG;
 
 public class PolarDiagramPlotDataXY {
 
-    @Test
-    public void testPolarDiagram_PlotDataXY() throws IOException {
+    public static void main(String[] args)  throws IOException {
 
         PolarDiagram polarDiagram = new PolarDiagram49STG();
 
