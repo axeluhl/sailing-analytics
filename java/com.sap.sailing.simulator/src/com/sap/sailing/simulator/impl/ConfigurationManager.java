@@ -24,10 +24,22 @@ public enum ConfigurationManager {
         InputStream inputStream = null;
         try {
 	        if (configFileLocation == null || configFileLocation == "") {
-	        	configFileLocation = this._defaultConfigFileLocation;
-	            inputStream = this.getClass().getClassLoader().getResourceAsStream(configFileLocation);
-	            this.status = ReadingConfigurationFileStatus.ERROR_READING_ENV_VAR_VALUE;
-	            this.errorMessage = "Cannot find STG_CONFIG environment variable! Using default configuration values!";
+//	        	configFileLocation = this._defaultConfigFileLocation;
+//	            inputStream = this.getClass().getClassLoader().getResourceAsStream(configFileLocation);
+//	            this.status = ReadingConfigurationFileStatus.ERROR_READING_ENV_VAR_VALUE;
+//	            this.errorMessage = "Cannot find STG_CONFIG environment variable! Using default configuration values!";
+	            
+	        	/*
+	        	 * On 2012/10/17 12:50 Christopher Ronnewinkel:
+	        	 * Could you bring up the warning only in the case that the environment variable has been set to a non-empty value, 
+	        	 * and then using this no csv-files can be found? If the environment variable is not set or set to an empty string 
+	        	 * the simulator should start as always with the defaults.
+	        	 */
+	        	
+                configFileLocation = this._defaultConfigFileLocation;
+                inputStream = this.getClass().getClassLoader().getResourceAsStream(configFileLocation);
+	            this.status = ReadingConfigurationFileStatus.SUCCESS;
+	            this.errorMessage = "";	            
 	        } 
 	        else if (new File(configFileLocation).exists()) {
                 URL csvFileURL = new URL("file:///" + configFileLocation);
