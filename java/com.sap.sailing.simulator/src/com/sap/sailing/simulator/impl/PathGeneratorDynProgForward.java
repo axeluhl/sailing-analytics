@@ -144,14 +144,14 @@ public class PathGeneratorDynProgForward extends PathGeneratorBase {
         LinkedList<TimedPositionWithSpeed> optPath = new LinkedList<TimedPositionWithSpeed>();
 
         // initiate grid: since performance is good, make it somewhat larger than what we do with dijkstra
-        int spatialGridsizeVertical = 31; //(int) Math.round(1.5 *
+        int spatialGridsizeVertical = 21; //(int) Math.round(1.5 *
         // simulationParameters.getProperty("Djikstra.gridv[int]").intValue()); // number
         // of
         // vertical
         // grid
         // steps
         // Formula: sgridh ~ xscale*sgridv/tan(beatangle*pi/180)
-        int spatialGridsizeHorizontal = 31*5; //(41-1)*5; //(int) Math.round(2 *
+        int spatialGridsizeHorizontal = 21*5; //(41-1)*5; //(int) Math.round(2 *
         // simulationParameters.getProperty("Djikstra.gridh[int]").intValue()); // number
         // of
         // horizontal
