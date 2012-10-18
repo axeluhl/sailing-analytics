@@ -111,11 +111,61 @@ a {
       #yield_content #keyVisual #infoBox p {
         color: white;
         font-size: 12px; }
-  /* line 73, site.css.sass */
+  /* line 72, site.css.sass */
   #yield_content #mainContent {
     padding: 0 10px 10px 10px;
     background: white; }
-    /* line 80, site.css.sass */
+    /* line 79, site.css.sass */
+    #yield_content #mainContent .innerContent .timeBar {
+      background: url(../images/timeBar-bg.png) 0 0 repeat-y; }
+      /* line 82, site.css.sass */
+      #yield_content #mainContent .innerContent .timeBar .raceSection {
+        margin: 0 0 40px 0;
+        *display: inline-block; }
+        /* line 3, _helpers.sass */
+        #yield_content #mainContent .innerContent .timeBar .raceSection:after {
+          content: " ";
+          display: block;
+          height: 0;
+          clear: both;
+          visibility: hidden; }
+        /* line 85, site.css.sass */
+        #yield_content #mainContent .innerContent .timeBar .raceSection .date {
+          font-family: OpenSansRegular, Arial, Verdana, sans-serif;
+          font-size: 12px;
+          margin-left: 35px; }
+        /* line 91, site.css.sass */
+        #yield_content #mainContent .innerContent .timeBar .raceSection .raceTimepoint {
+          background: url(../images/raceTimepoint-bg.png) left top no-repeat;
+          width: 29px;
+          height: 54px;
+          float: left;
+          margin: 0 0 0 -6px; }
+        /* line 97, site.css.sass */
+        #yield_content #mainContent .innerContent .timeBar .raceSection .racePanel {
+          background: url(../images/racePanel-bg.png) left bottom repeat-x #fcb913;
+          width: 169px;
+          min-height: 36px;
+          margin: 9px 10px 0 0;
+          float: left;
+          padding: 6px 0 6px 13px; }
+          /* line 104, site.css.sass */
+          #yield_content #mainContent .innerContent .timeBar .raceSection .racePanel .raceName {
+            font-size: 12px;
+            font-family: OpenSansBold, Arial, Verdana, sans-serif;
+            color: white; }
+          /* line 109, site.css.sass */
+          #yield_content #mainContent .innerContent .timeBar .raceSection .racePanel .raceLocation {
+            font-size: 12px;
+            font-family: OpenSansRegular, Arial, Verdana, sans-serif;
+            color: white; }
+      /* line 114, site.css.sass */
+      #yield_content #mainContent .innerContent .timeBar .raceDescription {
+        padding: 4px;
+        font-family: OpenSansRegular, Arial, Verdana, sans-serif;
+        font-size: 12px;
+        font-color: #222222; }
+    /* line 121, site.css.sass */
     #yield_content #mainContent .articleHeadline {
       font-size: 18px;
       font-family: OpenSansBold, Arial, Verdana, sans-serif;
@@ -124,20 +174,21 @@ a {
       clear: both;
       padding: 0 0 5px;
       margin: 0 0 15px; }
-    /* line 90, site.css.sass */
+    /* line 131, site.css.sass */
     #yield_content #mainContent .articleSubheadline {
       font-size: 14px;
       font-family: OpenSansBold, Arial, Verdana, sans-serif;
       color: #222222; }
-    /* line 96, site.css.sass */
+    /* line 137, site.css.sass */
     #yield_content #mainContent h4 {
+      margin: 0 0 10px;
       font-size: 12px;
-      font-family: OpenSansRegular, Arial, Verdana, sans-serif; }
-  /* line 101, site.css.sass */
+      font-family: OpenSansBold, Arial, Verdana, sans-serif; }
+  /* line 143, site.css.sass */
   #yield_content #spaceBar {
     height: 80px; }
 
-/* line 105, site.css.sass */
+/* line 147, site.css.sass */
 #footer {
   color: white;
   width: 940px;
@@ -146,13 +197,13 @@ a {
   background: url(../images/bkg-footer1.png);
   padding: 10px;
   font-size: 11px; }
-  /* line 114, site.css.sass */
+  /* line 156, site.css.sass */
   #footer a {
     color: white;
     font-size: 11px; }
-  /* line 119, site.css.sass */
+  /* line 161, site.css.sass */
   #footer .regularNav {
     margin: 0; }
-    /* line 121, site.css.sass */
+    /* line 163, site.css.sass */
     #footer .regularNav li {
       display: inline; }

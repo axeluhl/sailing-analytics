@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <link href='fontface.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
-    <link href='main.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+    <link href='stylesheets/fontface.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+    <link href='stylesheets/site.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
     <title>Welcome to the Sailing Analytics Homepage</title>
   </head>
   <body>
@@ -25,83 +25,348 @@
         </div>
         <div id='mainContent'>
           <h2 class='articleHeadline'>Sailing Events</h2>
-          <div id='innerContent'>
+          <div class='innerContent'>
             <h3 class='articleSubheadline'>2012</h3>
             <h4>Championships</h4>
-            <ul>
-              <li>
-                <a href='http://49er-euros2012.sapsailing.com' target='_blank'>49er Europeans 2012,</a>
-                <span>Lake Garda,</span>
-                <a href='http://2012euros.49er.org/' target='_blank'>Website</a>
-              </li>
-              <li>
-                <a href='http://drachenidm2012.sapsailing.com' target='_blank'>Internationale Deutsche Meisterschaft Drachen 2012,</a>
-                <span>Berlin Wannsee,</span>
-                <a href='http://www.vsaw.de/index.php?id=79&amp;tx_ttnews[tt_news]=2024&amp;cHash=dde51ae4707f18e0cdbbc13979ad6667' target='_blank'>Website</a>
-              </li>
-              <li>
-                <a href='http://505Worlds2012.sapsailing.com' target='_blank'>505 World Championships 2012,</a>
-                <span>La Rochelle,</span>
-                <a href='http://www.sap505worlds.com/2012/' target='_blank'>Website</a>
-              </li>
-              <li>
-                <a href='http://kielerwoche2012.sapsailing.com' target='_blank'>Kieler Woche 2012,</a>
-                <span>Kiel,</span>
-                <a href='http://www.kieler-woche.de/segeln/index.php' target='_blank'>Website</a>
-              </li>
-              <li>
-                <a href='http://yes2012.sapsailing.com' target='_blank'>Young Europeans Sailing 2012,</a>
-                <span>Kiel,</span>
-                <a href='http://www.kyc.de/regatten/yes.html' target='_blank'>Website</a>
-              </li>
-            </ul>
+            <div class='timeBar'>
+              <div class='raceSection'>
+                <h5 class='date'>
+                  September 9 - 15
+                </h5>
+                <div class='raceTimepoint'></div>
+                <a href='http://49er-euros2012.sapsailing.com' target='_blank'>
+                  <ul class='racePanel'>
+                    <li class='raceName'>
+                      49er Europeans
+                    </li>
+                    <li class='raceLocation'>
+                      Lake Garda
+                    </li>
+                  </ul>
+                </a>
+                <div class='raceDescription'>
+                  <p>
+                    49er Europeans 2012
+                  </p>
+                  <a href='http://2012euros.49er.org/' target='_blank'>Website</a>
+                </div>
+              </div>
+              <div class='raceSection'>
+                <h5 class='date'>
+                  July 31 - August 4
+                </h5>
+                <div class='raceTimepoint'></div>
+                <a href='http://drachenidm2012.sapsailing.com' target='_blank'>
+                  <ul class='racePanel'>
+                    <li class='raceName'>
+                      IDM
+                    </li>
+                    <li class='raceLocation'>
+                      Berlin Wannsee, Germany
+                    </li>
+                  </ul>
+                </a>
+                <div class='raceDescription'>
+                  <p>
+                    Internationale Deutsche Meisterschaft Drachen 2012
+                  </p>
+                  <a href='http://www.vsaw.de/index.php?id=79&amp;tx_ttnews[tt_news]=2024&amp;cHash=dde51ae4707f18e0cdbbc13979ad6667' target='_blank'>Website</a>
+                </div>
+              </div>
+              <div class='raceSection'>
+                <h5 class='date'>
+                  July 15 - 27
+                </h5>
+                <div class='raceTimepoint'></div>
+                <a href='http://505Worlds2012.sapsailing.com' target='_blank'>
+                  <ul class='racePanel'>
+                    <li class='raceName'>
+                      505 World Championships
+                    </li>
+                    <li class='raceLocation'>
+                      La Rochelle
+                    </li>
+                  </ul>
+                </a>
+                <div class='raceDescription'>
+                  <p>
+                    505 World Championships 2012
+                  </p>
+                  <a href='http://www.sap505worlds.com/2012/' target='_blank'>Website</a>
+                </div>
+              </div>
+              <div class='raceSection'>
+                <h5 class='date'>
+                  June 16 - 24
+                </h5>
+                <div class='raceTimepoint'></div>
+                <a href='http://kielerwoche2012.sapsailing.com' target='_blank'>
+                  <ul class='racePanel'>
+                    <li class='raceName'>
+                      Kieler Woche
+                    </li>
+                    <li class='raceLocation'>
+                      Kiel, Germany
+                    </li>
+                  </ul>
+                </a>
+                <div class='raceDescription'>
+                  <p>
+                    Kieler Woche 2012
+                  </p>
+                  <a href='http://www.kieler-woche.de/segeln/index.php' target='_blank'>Website</a>
+                </div>
+              </div>
+              <div class='raceSection'>
+                <h5 class='date'>
+                  2012
+                </h5>
+                <div class='raceTimepoint'></div>
+                <a href='http://yes2012.sapsailing.com' target='_blank'>
+                  <ul class='racePanel'>
+                    <li class='raceName'>
+                      Young Europeans Sailing
+                    </li>
+                    <li class='raceLocation'>
+                      Kiel, Germany
+                    </li>
+                  </ul>
+                </a>
+                <div class='raceDescription'>
+                  <p>
+                    Young Europeans Sailing 2012
+                  </p>
+                  <a href='http://www.kyc.de/regatten/yes.html' target='_blank'>Website</a>
+                </div>
+              </div>
+            </div>
             <h4>Other Events</h4>
-            <ul>
-              <li>
-                <a href='http://bmwsailingcup2012.sapsailing.com' target='_blank'>BMW Sailing Cup 2012,</a>
-                <span>Berlin Wannsee</span>
-              </li>
-              <li>
-                <a href='http://ess40-cardiff-test.sapsailing.com' target='_blank'>Extreme Sailing Series Test 2012,</a>
-                <span>Cardiff</span>
-              </li>
-              <li>
-                <a href='http://505Worlds2012-guests.sapsailing.com' target='_blank'>Guest program 505 World Championships 2012,</a>
-                <span>La Rochelle</span>
-              </li>
-              <li>
-                <a href='http://optitraining2012.sapsailing.com' target='_blank'>Opti Training,</a>
-                <span>Kiel</span>
-              </li>
-              <li>
-                <a href='http://stgacademy2012.sapsailing.com' target='_blank'>STG Academy 2012,</a>
-                <span>Trainings, Kiel</span>
-              </li>
-              <li>
-                <a href='http://winners.sapsailing.com' target='_blank'>SAP Winners Circle,</a>
-                <span>Maui</span>
-              </li>
-              <li>
-                <a href='http://arenal2012.sapsailing.com' target='_blank'>Training Regattas 2012,</a>
-                <span>Arenal, Mallorca</span>
-              </li>
-            </ul>
+            <div class='timeBar'>
+              <div class='raceSection'>
+                <h5 class='date'>
+                  2012
+                </h5>
+                <div class='raceTimepoint'></div>
+                <a href='http://bmwsailingcup2012.sapsailing.com' target='_blank'>
+                  <ul class='racePanel'>
+                    <li class='raceName'>
+                      BMW Sailing Cup
+                    </li>
+                    <li class='raceLocation'>
+                      Berlin Wannsee, Germany
+                    </li>
+                  </ul>
+                </a>
+                <div class='raceDescription'>
+                  <p>
+                    BMW Sailing Cup 2012
+                  </p>
+                  &nbsp;
+                </div>
+              </div>
+              <div class='raceSection'>
+                <h5 class='date'>
+                  2012
+                </h5>
+                <div class='raceTimepoint'></div>
+                <a href='http://ess40-cardiff-test.sapsailing.com' target='_blank'>
+                  <ul class='racePanel'>
+                    <li class='raceName'>
+                      Extreme Sailing Series
+                    </li>
+                    <li class='raceLocation'>
+                      Cardiff, GB
+                    </li>
+                  </ul>
+                </a>
+                <div class='raceDescription'>
+                  <p>
+                    Extreme Sailing Series Test 2012
+                  </p>
+                  &nbsp;
+                </div>
+              </div>
+              <div class='raceSection'>
+                <h5 class='date'>
+                  2012
+                </h5>
+                <div class='raceTimepoint'></div>
+                <a href='http://505Worlds2012-guests.sapsailing.com' target='_blank'>
+                  <ul class='racePanel'>
+                    <li class='raceName'>
+                      Guest program 505 World Championships
+                    </li>
+                    <li class='raceLocation'>
+                      La Rochelle, France
+                    </li>
+                  </ul>
+                </a>
+                <div class='raceDescription'>
+                  <p>
+                    Guest program 505 World Championships 2012
+                  </p>
+                  &nbsp;
+                </div>
+              </div>
+              <div class='raceSection'>
+                <h5 class='date'>
+                  2012
+                </h5>
+                <div class='raceTimepoint'></div>
+                <a href='http://optitraining2012.sapsailing.com' target='_blank'>
+                  <ul class='racePanel'>
+                    <li class='raceName'>
+                      Opti Training
+                    </li>
+                    <li class='raceLocation'>
+                      Kiel, Germany
+                    </li>
+                  </ul>
+                </a>
+                <div class='raceDescription'>
+                  <p>
+                    Opti Training
+                  </p>
+                  &nbsp;
+                </div>
+              </div>
+              <div class='raceSection'>
+                <h5 class='date'>
+                  2012
+                </h5>
+                <div class='raceTimepoint'></div>
+                <a href='http://stgacademy2012.sapsailing.com' target='_blank'>
+                  <ul class='racePanel'>
+                    <li class='raceName'>
+                      STG Academy
+                    </li>
+                    <li class='raceLocation'>
+                      Kiel, Germany
+                    </li>
+                  </ul>
+                </a>
+                <div class='raceDescription'>
+                  <p>
+                    STG Academy 2012
+                  </p>
+                  &nbsp;
+                </div>
+              </div>
+              <div class='raceSection'>
+                <h5 class='date'>
+                  2012
+                </h5>
+                <div class='raceTimepoint'></div>
+                <a href='http://winners.sapsailing.com' target='_blank'>
+                  <ul class='racePanel'>
+                    <li class='raceName'>
+                      SAP Winners Circle
+                    </li>
+                    <li class='raceLocation'>
+                      Maui, Hawaii
+                    </li>
+                  </ul>
+                </a>
+                <div class='raceDescription'>
+                  <p>
+                    SAP Winners Circle
+                  </p>
+                  &nbsp;
+                </div>
+              </div>
+              <div class='raceSection'>
+                <h5 class='date'>
+                  2012
+                </h5>
+                <div class='raceTimepoint'></div>
+                <a href='http://arenal2012.sapsailing.com' target='_blank'>
+                  <ul class='racePanel'>
+                    <li class='raceName'>
+                      Training Regattas
+                    </li>
+                    <li class='raceLocation'>
+                      Arenal, Mallorca
+                    </li>
+                  </ul>
+                </a>
+                <div class='raceDescription'>
+                  <p>
+                    Training Regattas 2012
+                  </p>
+                  &nbsp;
+                </div>
+              </div>
+            </div>
             <h3 class='articleSubheadline'>2011</h3>
             <h4>Championships</h4>
-            <ul>
-              <li>
-                <a href='http://505.sapsailing.com' target='_blank'>505 World Championships 2011,</a>
-                <span>Hamilton Island</span>
-              </li>
-              <li>
-                <a href='http://idm2011.sapsailing.com' target='_blank'>International German Championships 2011,</a>
-                <span>Travemünde</span>
-              </li>
-              <li>
-                <a href='http://mdm2011.sapsailing.com' target='_blank'>Meisterschaft der Meister 2011,</a>
-                <span>Hamburg</span>
-              </li>
-            </ul>
+            <div class='timeBar'>
+              <div class='raceSection'>
+                <h5 class='date'>
+                  2011
+                </h5>
+                <div class='raceTimepoint'></div>
+                <a href='http://505.sapsailing.com' target='_blank'>
+                  <ul class='racePanel'>
+                    <li class='raceName'>
+                      505 World Championships
+                    </li>
+                    <li class='raceLocation'>
+                      Hamilton Island
+                    </li>
+                  </ul>
+                </a>
+                <div class='raceDescription'>
+                  <p>
+                    505 World Championships 2011
+                  </p>
+                  &nbsp;
+                </div>
+              </div>
+              <div class='raceSection'>
+                <h5 class='date'>
+                  2011
+                </h5>
+                <div class='raceTimepoint'></div>
+                <a href='http://idm2011.sapsailing.com' target='_blank'>
+                  <ul class='racePanel'>
+                    <li class='raceName'>
+                      International German Championships
+                    </li>
+                    <li class='raceLocation'>
+                      Travemünde, Germany
+                    </li>
+                  </ul>
+                </a>
+                <div class='raceDescription'>
+                  <p>
+                    International German Championships 2011
+                  </p>
+                  &nbsp;
+                </div>
+              </div>
+              <div class='raceSection'>
+                <h5 class='date'>
+                  2011
+                </h5>
+                <div class='raceTimepoint'></div>
+                <a href='http://mdm2011.sapsailing.com' target='_blank'>
+                  <ul class='racePanel'>
+                    <li class='raceName'>
+                      Meisterschaft der Meister
+                    </li>
+                    <li class='raceLocation'>
+                      Hamburg, Germany
+                    </li>
+                  </ul>
+                </a>
+                <div class='raceDescription'>
+                  <p>
+                    Meisterschaft der Meister 2011
+                  </p>
+                  &nbsp;
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
