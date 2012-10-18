@@ -42,6 +42,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
     private boolean overlaysInitialized;
     private WindFieldGenParamsDTO windParams;
     private WindFieldCanvasOverlay windFieldCanvasOverlay;
+    private WindGridCanvasOverlay windGridCanvasOverlay;
     private List<PathCanvasOverlay> pathCanvasOverlays;
     private List<PathCanvasOverlay> replayPathCanvasOverlays;
     private RaceCourseCanvasOverlay raceCourseCanvasOverlay;
@@ -166,10 +167,12 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
                 WindFieldDTO windFieldDTO = simulatorResult.windField;
                 logger.info("Number of windDTO : " + windFieldDTO.getMatrix().size());
                 mapw.addOverlay(windFieldCanvasOverlay);
+                mapw.addOverlay(windGridCanvasOverlay);
                 refreshWindFieldOverlay(windFieldDTO);
 
                 timeListeners.clear();
                 timeListeners.add(windFieldCanvasOverlay);
+                timeListeners.add(windGridCanvasOverlay);
                 for (int i = 0; i < replayPathCanvasOverlays.size(); ++i) {
                     timeListeners.add(replayPathCanvasOverlays.get(i));
                 }
@@ -202,6 +205,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         overlaysInitialized = false;
 
         windFieldCanvasOverlay = null;
+        windGridCanvasOverlay = null;
         pathCanvasOverlays = null;
         replayPathCanvasOverlays = null;
         raceCourseCanvasOverlay = null;
@@ -229,6 +233,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         overlaysInitialized = false;
 
         windFieldCanvasOverlay = null;
+        windGridCanvasOverlay = null;
         pathCanvasOverlays = null;
         replayPathCanvasOverlays = null;
         raceCourseCanvasOverlay = null;
@@ -278,6 +283,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         mapw.addOverlay(raceCourseCanvasOverlay);
 
         windFieldCanvasOverlay = new WindFieldCanvasOverlay(timer);
+        windGridCanvasOverlay = new WindGridCanvasOverlay(timer, xRes, yRes);
         // mapw.addOverlay(windFieldCanvasOverlay);
         pathCanvasOverlays = new ArrayList<PathCanvasOverlay>();
         replayPathCanvasOverlays = new ArrayList<PathCanvasOverlay>();
@@ -317,9 +323,11 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
                 logger.info("Number of windDTO : " + wl.getMatrix().size());
                 // Window.alert("Number of windDTO : " + wl.getMatrix().size());
                 mapw.addOverlay(windFieldCanvasOverlay);
+                mapw.addOverlay(windGridCanvasOverlay);
                 refreshWindFieldOverlay(wl);
                 timeListeners.clear();
                 timeListeners.add(windFieldCanvasOverlay);
+                timeListeners.add(windGridCanvasOverlay);
                 
                 timePanel.setMinMax(windParams.getStartTime(), windParams.getEndTime(), true);
                 timePanel.resetTimeSlider();
@@ -332,8 +340,10 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
 
     private void refreshWindFieldOverlay(final WindFieldDTO wl) {
         windFieldCanvasOverlay.setWindField(wl);
+        windGridCanvasOverlay.setWindField(wl);
         timer.setTime(windParams.getStartTime().getTime());
         windFieldCanvasOverlay.redraw(true);
+        windGridCanvasOverlay.redraw(true);
     }
 
     //I077899 - Mihai Bogdan Eugen
@@ -387,6 +397,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         if (overlaysInitialized) {
             int num = 0;
             mapw.removeOverlay(windFieldCanvasOverlay);
+            mapw.removeOverlay(windGridCanvasOverlay);
             num++;
             for (int i = 0; i < pathCanvasOverlays.size(); ++i) {
                 mapw.removeOverlay(pathCanvasOverlays.get(i));

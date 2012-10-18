@@ -1,0 +1,374 @@
+package com.sap.sailing.gwt.ui.simulator;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.SortedMap;
+import java.util.TreeMap;
+import java.util.logging.Logger;
+
+import com.google.gwt.canvas.dom.client.Context2d;
+import com.google.gwt.maps.client.MapWidget;
+import com.google.gwt.maps.client.geom.LatLng;
+import com.google.gwt.maps.client.geom.Point;
+import com.google.gwt.maps.client.overlay.Overlay;
+import com.sap.sailing.gwt.ui.client.TimeListenerWithStoppingCriteria;
+import com.sap.sailing.gwt.ui.client.Timer;
+import com.sap.sailing.gwt.ui.shared.PositionDTO;
+import com.sap.sailing.gwt.ui.shared.WindDTO;
+import com.sap.sailing.gwt.ui.shared.WindFieldDTO;
+import com.sap.sailing.gwt.ui.shared.racemap.FullCanvasOverlay;
+
+public class WindGridCanvasOverlay extends FullCanvasOverlay implements TimeListenerWithStoppingCriteria {
+    /* The wind field that is to be displayed in the overlay */
+    protected WindFieldDTO wl;
+    /*
+     * Map containing the windfield for easy retrieval with key as time point.
+     */
+    protected SortedMap<Long, List<WindDTO>> timePointWindDTOMap;
+    
+    protected final Timer timer;
+
+    private int xRes;
+    private int yRes;
+    private WindDTO[][] windMatrix;
+    
+    private static Logger logger = Logger.getLogger(WindFieldCanvasOverlay.class.getName());
+    
+    private class GridCell {
+        public PositionDTO bottomLeft;
+        public PositionDTO bottomRight;
+        public PositionDTO topLeft;
+        public PositionDTO topRight;
+      
+        double windSpeedInKnots;
+        
+        public GridCell(PositionDTO bl, PositionDTO br, PositionDTO tl, PositionDTO tr, Double windSpeedInKnots) {
+            this.bottomLeft = bl;
+            this.bottomRight = br;
+            this.topLeft = tl;
+            this.topRight = tr;
+            this.windSpeedInKnots = windSpeedInKnots;
+        }
+    }
+
+    private class SortByLatitude implements Comparator<WindDTO> {
+
+        @Override
+        public int compare(WindDTO w1, WindDTO w2) {
+            return Double.compare(w1.position.latDeg , w2.position.latDeg);
+        }
+  
+    }
+    
+    private class SortByLongitude implements Comparator<WindDTO> {
+
+        @Override
+        public int compare(WindDTO w1, WindDTO w2) {
+            return Double.compare(w1.position.lngDeg , w2.position.lngDeg);
+        }
+  
+    }
+    
+    public WindGridCanvasOverlay(Timer timer, int xRes, int yRes) {
+        super();
+        this.timer = timer;
+        this.xRes = xRes;
+        this.yRes = yRes;
+        init();
+    }
+
+    public WindGridCanvasOverlay() {
+        super();
+        this.timer = null;
+        init();
+    }
+
+    private void init() {
+        wl = null;    
+        timePointWindDTOMap = new TreeMap<Long, List<WindDTO>>();
+        
+    }
+
+    public void setWindField(WindFieldDTO wl) {
+        this.wl = wl;
+        
+        timePointWindDTOMap.clear();
+        if (wl != null) {
+            for(WindDTO w : wl.getMatrix()) {
+                if (!timePointWindDTOMap.containsKey(w.timepoint)) {
+                    timePointWindDTOMap.put(w.timepoint, new LinkedList<WindDTO>());
+                }
+                timePointWindDTOMap.get(w.timepoint).add(w);
+            }
+        }
+        
+    }
+    
+    @Override
+    protected void initialize(MapWidget map) {
+        super.initialize(map);
+      
+        if (timer != null) {
+            this.timer.addTimeListener(this);
+        }
+        setVisible(true);
+    }
+
+    @Override
+    protected void remove() {
+        setVisible(false);
+        if (timer != null) {
+            this.timer.removeTimeListener(this);
+        }
+        super.remove();
+    }
+    
+    @Override
+    public void timeChanged(Date date) {
+        List<WindDTO> windDTOToDraw = new ArrayList<WindDTO>();
+        
+        SortedMap<Long, List<WindDTO>> headMap = (timePointWindDTOMap.headMap(date.getTime()+1));
+    
+        if (!headMap.isEmpty()) {
+          windDTOToDraw = headMap.get(headMap.lastKey());
+        }
+        logger.info("In WindGridCanvasOverlay.timeChanged drawing " + windDTOToDraw.size() + " points" + " @ "
+                + date);
+        
+        drawWindGrid(windDTOToDraw);
+    }
+
+    @Override
+    public int stop() {
+       if (!this.isVisible() || timePointWindDTOMap == null || timer == null   || timePointWindDTOMap.isEmpty()) {
+           return 0;
+       }
+        if (timePointWindDTOMap.lastKey() < timer.getTime().getTime()) {
+            return 0;
+        } else {
+            return 1;
+        }
+    }
+
+
+    @Override
+    protected Overlay copy() {
+        return new WindFieldCanvasOverlay(this.timer);
+    }
+
+    @Override
+    protected void redraw(boolean force) {
+        super.redraw(force);
+        if (wl != null) {
+            clear();
+           
+            drawWindGrid();
+        }
+
+    }
+
+    private void clear() {
+        canvas.getContext2d().clearRect(0.0 /*canvas.getAbsoluteLeft()*/, 0.0/*canvas.getAbsoluteTop()*/,
+                canvas.getCoordinateSpaceWidth(), canvas.getCoordinateSpaceHeight());
+    }
+    
+    protected void drawWindGrid() {
+
+        if (timer != null) {
+            timeChanged(timer.getTime());
+
+        } else {
+            drawWindGrid(wl.getMatrix());
+        }
+
+    }
+    
+    protected void drawWindGrid(final List<WindDTO> windDTOList) {
+        clear();
+        if (windDTOList != null && windDTOList.size() > 1) {
+            if (windDTOList.size() != xRes*yRes) {
+                logger.warning("Error in WindGridCanvasOverlay wind field is not rectangular.");
+                return;
+            }
+            createPositionGrid(windDTOList);
+            createGridCell();
+            /*
+            double width = getGridWidth(windDTOList);
+            double height = getGridHeight(windDTOList);
+            logger.info("In drawWindGrid width = "  + width + " height = " + height);
+            Iterator<WindDTO> windDTOIter = windDTOList.iterator();
+          
+            while (windDTOIter.hasNext()) {
+                WindDTO windDTO = windDTOIter.next();
+                PositionDTO position = windDTO.position;
+                LatLng positionLatLng = LatLng.newInstance(position.latDeg, position.lngDeg);
+                Point canvasPositionInPx = getMap().convertLatLngToDivPixel(positionLatLng);
+
+                int x = canvasPositionInPx.getX() - this.getWidgetPosLeft();
+                int y = canvasPositionInPx.getY() - this.getWidgetPosTop();
+                drawRectangle(x-width/2,y-height/2,width,height,"Grey");
+            }
+            */
+            String title = "Wind Grid at " + windDTOList.size() + " points.";
+            getCanvas().setTitle(title);
+        }
+    }
+
+    /**
+     * 
+     * @param windDTOList
+     * @return the horizontal pixel distance between the first two points in the list
+     */
+    private double getGridWidth(List<WindDTO> windDTOList) {
+        if (windDTOList.size() > 1) {
+           SortByLatitude sortLatitude = new SortByLatitude();
+           
+           
+           Collections.sort(windDTOList,sortLatitude);
+           WindDTO windDTO1 = windDTOList.get(0);
+           WindDTO windDTO2 = windDTOList.get(1);
+           
+           
+           LatLng positionLatLng1 = LatLng.newInstance( windDTO1.position.latDeg,  windDTO1.position.lngDeg);
+           Point canvasPositionInPx1 = getMap().convertLatLngToDivPixel(positionLatLng1);
+           
+           LatLng positionLatLng2 = LatLng.newInstance( windDTO2.position.latDeg,  windDTO2.position.lngDeg);
+           Point canvasPositionInPx2 = getMap().convertLatLngToDivPixel(positionLatLng2);
+           
+           return canvasPositionInPx2.getX() - canvasPositionInPx1.getX();
+        }
+        return 0;
+    }
+    
+    /**
+     * 
+     * @param windDTOList
+     * @return the horizontal pixel distance between the first two points in the list
+     */
+    private double getGridHeight(List<WindDTO> windDTOList) {
+        if (windDTOList.size() > 1) {
+           SortByLongitude sortLongitude = new SortByLongitude();
+           
+           
+           Collections.sort(windDTOList,sortLongitude);
+           WindDTO windDTO1 = windDTOList.get(0);
+           WindDTO windDTO2 = windDTOList.get(1);
+           
+           
+           LatLng positionLatLng1 = LatLng.newInstance(windDTO1.position.latDeg,  windDTO1.position.lngDeg);
+           Point canvasPositionInPx1 = getMap().convertLatLngToDivPixel(positionLatLng1);
+           
+           LatLng positionLatLng2 = LatLng.newInstance( windDTO2.position.latDeg,  windDTO2.position.lngDeg);
+           Point canvasPositionInPx2 = getMap().convertLatLngToDivPixel(positionLatLng2);
+           
+           return canvasPositionInPx2.getY() - canvasPositionInPx1.getY();
+        }
+        return 0;
+    }
+    
+    private void createPositionGrid(List<WindDTO> windDTOList) {
+        if (windDTOList.size() != xRes*yRes) {
+            logger.warning("Error in WindGridCanvasOverlay wind field is not rectangular.");
+            this.windMatrix = null;
+            return;
+        }
+        this.windMatrix = new WindDTO[yRes][xRes];
+        Iterator<WindDTO> windDTOIter = windDTOList.iterator();
+    /*
+        SortByLatitude sortLatitude = new SortByLatitude();
+        Collections.sort(windDTOList,sortLatitude);
+        SortByLongitude sortLongitude = new SortByLongitude();
+        Collections.sort(windDTOList,sortLongitude);
+      */  
+       for(int i = 0; i < yRes; ++i) {
+           for (int j = 0; j < xRes; ++j) {
+               windMatrix[i][j] = windDTOIter.next();    
+           }
+       }
+    }
+    
+    private void createGridCell() {
+        if (windMatrix != null) {
+            int numRow = windMatrix.length;
+            if (numRow >= 1) {
+                int numCol = windMatrix[0].length;
+                for (int i = 1; i < numRow-1; ++i) {
+                    for (int j = 1; j < numCol-1; ++j) {
+                      PositionDTO bl = getCenter(windMatrix[i-1][j-1].position, windMatrix[i-1][j].position,windMatrix[i][j].position,windMatrix[i][j-1].position);
+                      PositionDTO tl = getCenter(windMatrix[i][j-1].position, windMatrix[i][j].position,windMatrix[i+1][j-1].position,windMatrix[i+1][j].position); 
+                      PositionDTO br = getCenter(windMatrix[i-1][j].position, windMatrix[i-1][j+1].position,windMatrix[i][j].position,windMatrix[i][j+1].position);
+                      PositionDTO tr = getCenter(windMatrix[i][j].position, windMatrix[i][j+1].position,windMatrix[i+1][j].position,windMatrix[i+1][j+1].position);
+                      GridCell cell = new GridCell(bl,br,tl,tr,windMatrix[i][j].trueWindSpeedInKnots);
+                      drawGridCell(cell);
+                    }
+                }
+            }
+           
+        }
+    }
+    
+    private void drawGridCell(GridCell cell) {
+        
+        LatLng positionLatLng = LatLng.newInstance(cell.bottomLeft.latDeg,  cell.bottomLeft.lngDeg);
+        Point blPoint = getMap().convertLatLngToDivPixel(positionLatLng);
+        
+        positionLatLng = LatLng.newInstance(cell.bottomRight.latDeg,  cell.bottomRight.lngDeg);
+        Point brPoint = getMap().convertLatLngToDivPixel(positionLatLng);
+        
+        positionLatLng = LatLng.newInstance(cell.topLeft.latDeg,  cell.topLeft.lngDeg);
+        Point tlPoint = getMap().convertLatLngToDivPixel(positionLatLng);
+        
+        positionLatLng = LatLng.newInstance(cell.topRight.latDeg,  cell.topRight.lngDeg);
+        Point trPoint = getMap().convertLatLngToDivPixel(positionLatLng);
+       
+        drawCircle(blPoint.getX()-this.getWidgetPosLeft(), blPoint.getY()-this.getWidgetPosTop(),2,"red");
+        drawCircle(brPoint.getX()-this.getWidgetPosLeft(), brPoint.getY()-this.getWidgetPosTop(),2,"red");
+        drawCircle(tlPoint.getX()-this.getWidgetPosLeft(), tlPoint.getY()-this.getWidgetPosTop(),2,"red");
+        drawCircle(trPoint.getX()-this.getWidgetPosLeft(), trPoint.getY()-this.getWidgetPosTop(),2,"red");
+        
+        Context2d context2d  = canvas.getContext2d();
+        context2d.setLineWidth(1);
+        context2d.setStrokeStyle("Black");
+        
+       
+        context2d.beginPath();
+        context2d.moveTo(blPoint.getX()-this.getWidgetPosLeft(), blPoint.getY()-this.getWidgetPosTop());
+        context2d.lineTo(brPoint.getX()-this.getWidgetPosLeft(), brPoint.getY()-this.getWidgetPosTop());
+        context2d.closePath();
+        context2d.stroke();
+        
+        context2d.beginPath();
+        context2d.moveTo(blPoint.getX()-this.getWidgetPosLeft(), blPoint.getY()-this.getWidgetPosTop());
+        context2d.lineTo(tlPoint.getX()-this.getWidgetPosLeft(), tlPoint.getY()-this.getWidgetPosTop());
+        context2d.closePath();
+        context2d.stroke();
+        
+        context2d.beginPath();
+        context2d.moveTo(trPoint.getX()-this.getWidgetPosLeft(), trPoint.getY()-this.getWidgetPosTop());
+        context2d.lineTo(tlPoint.getX()-this.getWidgetPosLeft(), tlPoint.getY()-this.getWidgetPosTop());
+        context2d.closePath();
+        context2d.stroke();
+        
+        context2d.beginPath();
+        context2d.moveTo(trPoint.getX()-this.getWidgetPosLeft(), trPoint.getY()-this.getWidgetPosTop());
+        context2d.lineTo(brPoint.getX()-this.getWidgetPosLeft(), brPoint.getY()-this.getWidgetPosTop());
+        context2d.closePath();
+        context2d.stroke();
+        
+        
+    }
+    
+    private PositionDTO getCenter(PositionDTO a, PositionDTO b, PositionDTO c, PositionDTO d) {
+        PositionDTO center = new PositionDTO();
+        center.latDeg = (a.latDeg+b.latDeg+c.latDeg+d.latDeg)/4.0;
+        center.lngDeg = (a.lngDeg+b.lngDeg+c.lngDeg+d.lngDeg)/4.0;
+        return center;
+    }
+}
