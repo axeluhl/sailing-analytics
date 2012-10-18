@@ -15,6 +15,7 @@ import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.sap.sailing.domain.common.DetailType;
+import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
@@ -75,8 +76,12 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
         RootLayoutPanel.get().add(mainPanel);
         LogoAndTitlePanel logoAndTitlePanel = null;
         if (!embedded) {
-            logoAndTitlePanel = new LogoAndTitlePanel(leaderboardGroupName,
-                    stringMessages.leaderboard() + " " + leaderboardName, stringMessages);
+            // Hack to shorten the leaderboardName in case of overall leaderboards
+            String leaderboardDisplayName = leaderboardName;
+            if(leaderboardName.startsWith(leaderboardGroupName) && leaderboardName.contains(LeaderboardNameConstants.OVERALL)) {
+                leaderboardDisplayName = stringMessages.overallStandings(); 
+            }
+            logoAndTitlePanel = new LogoAndTitlePanel(leaderboardGroupName, leaderboardDisplayName, stringMessages);
             logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
             mainPanel.addNorth(logoAndTitlePanel, 68);
         }
