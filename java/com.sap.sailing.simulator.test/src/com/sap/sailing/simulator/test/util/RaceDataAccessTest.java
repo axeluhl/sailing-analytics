@@ -1,4 +1,4 @@
-package com.sap.sailing.simulator.test;
+package com.sap.sailing.simulator.test.util;
 
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -26,14 +26,14 @@ public class RaceDataAccessTest {
     private static final Logger logger = Logger.getLogger(RaceDataAccessTest.class.getName());
     protected static final boolean tractracTunnel = Boolean.valueOf(System.getProperty("tractrac.tunnel", "false"));
     protected static final String tractracTunnelHost = System.getProperty("tractrac.tunnel.host", "localhost");
-    private final URL paramUrl;
-    private final URI liveUri;
-    private final URI storedUri;
+    private static URL paramUrl;
+    private static URI liveUri;
+    private static URI storedUri;
     private RacingEventServiceImpl service;
     private RacesHandle raceHandle;
     public boolean storedend = false;
 
-    public RaceDataAccessTest() throws MalformedURLException, URISyntaxException {
+    public static void main(String[] args) throws MalformedURLException, URISyntaxException {
 
         // JSON URL: http://germanmaster.traclive.dk/events/event_20110929_Internatio/jsonservice.php
 
