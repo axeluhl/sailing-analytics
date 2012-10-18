@@ -75,8 +75,12 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
         RootLayoutPanel.get().add(mainPanel);
         LogoAndTitlePanel logoAndTitlePanel = null;
         if (!embedded) {
-            logoAndTitlePanel = new LogoAndTitlePanel(leaderboardGroupName,
-                    stringMessages.leaderboard() + " " + leaderboardName, stringMessages);
+            // Hack to shorten the leaderboardName in case of overall leaderboards
+            String leaderboardDisplayName = Window.Location.getParameter("displayName");
+            if(leaderboardDisplayName == null || leaderboardDisplayName.isEmpty()) {
+                leaderboardDisplayName = leaderboardName;
+            }
+            logoAndTitlePanel = new LogoAndTitlePanel(leaderboardGroupName, leaderboardDisplayName, stringMessages);
             logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
             mainPanel.addNorth(logoAndTitlePanel, 68);
         }

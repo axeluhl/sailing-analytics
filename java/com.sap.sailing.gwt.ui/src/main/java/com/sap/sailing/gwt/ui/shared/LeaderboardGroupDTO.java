@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.shared;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -13,6 +14,7 @@ public class LeaderboardGroupDTO extends NamedDTO implements IsSerializable {
 
     public String description;
     public List<StrippedLeaderboardDTO> leaderboards;
+    public boolean displayGroupsInReverseOrder;
     
     private int[] overallLeaderboardDiscardThresholds;
     private ScoringSchemeType overallLeaderboardScoringSchemeType;
@@ -55,7 +57,13 @@ public class LeaderboardGroupDTO extends NamedDTO implements IsSerializable {
     public void setOverallLeaderboardScoringSchemeType(ScoringSchemeType overallLeaderboardScoringSchemeType) {
         this.overallLeaderboardScoringSchemeType = overallLeaderboardScoringSchemeType;
     }
-
+    
+    public List<StrippedLeaderboardDTO> getLeaderboardsInReverseOrder() {
+        List<StrippedLeaderboardDTO> leaderboardsInReverseOrder = new ArrayList<StrippedLeaderboardDTO>(leaderboards);
+        Collections.reverse(leaderboardsInReverseOrder);
+        return Collections.unmodifiableList(leaderboardsInReverseOrder);
+    }
+    
     public boolean containsRegattaLeaderboard() {
         boolean result = false;
         for (StrippedLeaderboardDTO leaderboard : leaderboards) {
@@ -160,6 +168,10 @@ public class LeaderboardGroupDTO extends NamedDTO implements IsSerializable {
         } else if (!leaderboards.equals(other.leaderboards))
             return false;
         return true;
+    }
+
+    public List<StrippedLeaderboardDTO> getLeaderboards() {
+        return leaderboards;
     }
     
 }

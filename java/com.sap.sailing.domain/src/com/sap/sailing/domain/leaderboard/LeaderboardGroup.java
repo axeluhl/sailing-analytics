@@ -15,6 +15,8 @@ public interface LeaderboardGroup extends Renamable {
     String getDescription();
     void setDescriptiom(String description);
 
+    boolean isDisplayGroupsInReverseOrder();
+    
     Iterable<Leaderboard> getLeaderboards();
     int getIndexOf(Leaderboard leaderboard);
     void addLeaderboard(Leaderboard leaderboard);

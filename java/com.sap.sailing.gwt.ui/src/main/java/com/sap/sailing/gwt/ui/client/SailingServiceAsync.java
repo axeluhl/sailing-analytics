@@ -302,10 +302,11 @@ public interface SailingServiceAsync {
     
     /**
      * Creates a new group with the name <code>groupname</code>, the description <code>description</code> and an empty list of leaderboards.<br/>
+     * @param displayGroupsInReverseOrder TODO
      */
     void createLeaderboardGroup(String groupName, String description,
-            int[] overallLeaderboardDiscardThresholds, ScoringSchemeType overallLeaderboardScoringSchemeType,
-            AsyncCallback<LeaderboardGroupDTO> callback);
+            boolean displayGroupsInReverseOrder, int[] overallLeaderboardDiscardThresholds,
+            ScoringSchemeType overallLeaderboardScoringSchemeType, AsyncCallback<LeaderboardGroupDTO> callback);
     
     /**
      * Updates the data of the group with the name <code>oldName</code>.
