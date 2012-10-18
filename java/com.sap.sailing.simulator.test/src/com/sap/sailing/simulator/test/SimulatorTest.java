@@ -56,8 +56,8 @@ public class SimulatorTest {
         SailingSimulatorImpl sailingSim = new SailingSimulatorImpl(param);
         
         Map <String, Path> paths = sailingSim.getAllPaths();
-        System.out.println(paths.get("Opportunistic").getPathPoints().size());
-        System.out.println(paths.get("Omniscient").getPathPoints().size());
+        System.out.println(paths.get("2#Opportunistic").getPathPoints().size());
+        System.out.println(paths.get("1#Omniscient").getPathPoints().size());
         
         	
     }
