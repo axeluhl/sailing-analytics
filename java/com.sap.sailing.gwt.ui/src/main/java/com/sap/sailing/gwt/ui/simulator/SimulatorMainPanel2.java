@@ -802,7 +802,7 @@ public class SimulatorMainPanel2 extends SplitLayoutPanel {
     private DialogBox createPolarDiagramDialogBox() {
     	
         final DialogBox dialogBox = new DialogBox();
-        dialogBox.setText("Poalr Diagram"); 
+        dialogBox.setText("Polar Diagram"); 
         
         dialogBox.setAnimationEnabled(true);
         dialogBox.setAutoHideEnabled(false);
