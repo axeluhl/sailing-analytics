@@ -166,8 +166,10 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
             if (!summaryView) {
                 WindFieldDTO windFieldDTO = simulatorResult.windField;
                 logger.info("Number of windDTO : " + windFieldDTO.getMatrix().size());
-                mapw.addOverlay(windFieldCanvasOverlay);
+                
                 mapw.addOverlay(windGridCanvasOverlay);
+                mapw.addOverlay(windFieldCanvasOverlay);
+               
                 refreshWindFieldOverlay(windFieldDTO);
 
                 timeListeners.clear();
@@ -322,8 +324,9 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
                 }
                 logger.info("Number of windDTO : " + wl.getMatrix().size());
                 // Window.alert("Number of windDTO : " + wl.getMatrix().size());
-                mapw.addOverlay(windFieldCanvasOverlay);
                 mapw.addOverlay(windGridCanvasOverlay);
+                mapw.addOverlay(windFieldCanvasOverlay);
+         
                 refreshWindFieldOverlay(wl);
                 timeListeners.clear();
                 timeListeners.add(windFieldCanvasOverlay);

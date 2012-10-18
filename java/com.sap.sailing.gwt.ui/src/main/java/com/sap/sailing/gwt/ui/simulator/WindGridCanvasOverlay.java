@@ -336,33 +336,18 @@ public class WindGridCanvasOverlay extends FullCanvasOverlay implements TimeList
         Context2d context2d  = canvas.getContext2d();
         context2d.setLineWidth(1);
         context2d.setStrokeStyle("Black");
-        
+        context2d.setFillStyle("Grey");
        
         context2d.beginPath();
         context2d.moveTo(blPoint.getX()-this.getWidgetPosLeft(), blPoint.getY()-this.getWidgetPosTop());
         context2d.lineTo(brPoint.getX()-this.getWidgetPosLeft(), brPoint.getY()-this.getWidgetPosTop());
-        context2d.closePath();
-        context2d.stroke();
-        
-        context2d.beginPath();
-        context2d.moveTo(blPoint.getX()-this.getWidgetPosLeft(), blPoint.getY()-this.getWidgetPosTop());
+        context2d.lineTo(trPoint.getX()-this.getWidgetPosLeft(), trPoint.getY()-this.getWidgetPosTop());
         context2d.lineTo(tlPoint.getX()-this.getWidgetPosLeft(), tlPoint.getY()-this.getWidgetPosTop());
+        context2d.lineTo(blPoint.getX()-this.getWidgetPosLeft(), blPoint.getY()-this.getWidgetPosTop());
         context2d.closePath();
+        
+        context2d.fill();
         context2d.stroke();
-        
-        context2d.beginPath();
-        context2d.moveTo(trPoint.getX()-this.getWidgetPosLeft(), trPoint.getY()-this.getWidgetPosTop());
-        context2d.lineTo(tlPoint.getX()-this.getWidgetPosLeft(), tlPoint.getY()-this.getWidgetPosTop());
-        context2d.closePath();
-        context2d.stroke();
-        
-        context2d.beginPath();
-        context2d.moveTo(trPoint.getX()-this.getWidgetPosLeft(), trPoint.getY()-this.getWidgetPosTop());
-        context2d.lineTo(brPoint.getX()-this.getWidgetPosLeft(), brPoint.getY()-this.getWidgetPosTop());
-        context2d.closePath();
-        context2d.stroke();
-        
-        
     }
     
     private PositionDTO getCenter(PositionDTO a, PositionDTO b, PositionDTO c, PositionDTO d) {
