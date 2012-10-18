@@ -10,8 +10,8 @@ public class EventLeaderboardImpl extends LeaderboardGroupImpl implements EventL
     private static final long serialVersionUID = -8933204023833087837L;
     private Event event;
     
-    public EventLeaderboardImpl(Event event, String name, String description, List<Leaderboard> leaderboards) {
-        super(name, description, leaderboards);
+    public EventLeaderboardImpl(Event event, String name, String description, boolean displayGroupsInReverseOrder, List<Leaderboard> leaderboards) {
+        super(name, description, displayGroupsInReverseOrder, leaderboards);
         this.event = event;
     }
 

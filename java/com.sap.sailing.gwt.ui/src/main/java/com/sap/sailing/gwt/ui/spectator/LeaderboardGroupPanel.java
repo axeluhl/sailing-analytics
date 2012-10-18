@@ -231,7 +231,11 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
             };
             leaderboardsTable.addColumn(racesColumn, stringMessages.races());
         }
-        leaderboardsTable.setRowData(leaderboardGroup.leaderboards);
+        if(leaderboardGroup.displayGroupsInReverseOrder) {
+            leaderboardsTable.setRowData(leaderboardGroup.getLeaderboardsInReverseOrder());
+        } else {
+            leaderboardsTable.setRowData(leaderboardGroup.getLeaderboards());
+        }
         mainPanel.add(leaderboardsTable);
     }
 

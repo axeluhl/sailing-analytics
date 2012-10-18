@@ -85,7 +85,7 @@ public class TestStoringAndRetrievingLeaderboardGroups extends AbstractMongoDBTe
                 new ResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces), new LowPoint());
         leaderboards.add(leaderboard);
         
-        final LeaderboardGroup leaderboardGroup = new LeaderboardGroupImpl(groupName, groupDescription, leaderboards);
+        final LeaderboardGroup leaderboardGroup = new LeaderboardGroupImpl(groupName, groupDescription, false, leaderboards);
         final Leaderboard overallLeaderboard = new LeaderboardGroupMetaLeaderboard(leaderboardGroup,
                 new HighPointExtremeSailingSeriesOverall(), new ResultDiscardingRuleImpl(new int[0]));
         leaderboardGroup.setOverallLeaderboard(overallLeaderboard);
@@ -134,7 +134,7 @@ public class TestStoringAndRetrievingLeaderboardGroups extends AbstractMongoDBTe
                 new ResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces), new LowPoint());
         leaderboards.add(leaderboard);
         
-        final LeaderboardGroup leaderboardGroup = new LeaderboardGroupImpl(groupName, groupDescription, leaderboards);
+        final LeaderboardGroup leaderboardGroup = new LeaderboardGroupImpl(groupName, groupDescription, false, leaderboards);
         final Leaderboard overallLeaderboard = new LeaderboardGroupMetaLeaderboard(leaderboardGroup,
                 new HighPointExtremeSailingSeriesOverall(), new ResultDiscardingRuleImpl(new int[0]));
         leaderboardGroup.setOverallLeaderboard(overallLeaderboard);
@@ -190,7 +190,7 @@ public class TestStoringAndRetrievingLeaderboardGroups extends AbstractMongoDBTe
                 new ResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces), new LowPoint());
         leaderboards.add(leaderboard);
         
-        final LeaderboardGroup leaderboardGroup = new LeaderboardGroupImpl(groupName, groupDescription, leaderboards);
+        final LeaderboardGroup leaderboardGroup = new LeaderboardGroupImpl(groupName, groupDescription, false, leaderboards);
         final Leaderboard overallLeaderboard = new LeaderboardGroupMetaLeaderboard(leaderboardGroup,
                 new HighPointExtremeSailingSeriesOverall(), new ResultDiscardingRuleImpl(new int[0]));
         leaderboardGroup.setOverallLeaderboard(overallLeaderboard);
@@ -232,7 +232,7 @@ public class TestStoringAndRetrievingLeaderboardGroups extends AbstractMongoDBTe
         leaderboard = new FlexibleLeaderboardImpl(leaderboardNames[2], new ScoreCorrectionImpl(),
                 new ResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces), new LowPoint());
         leaderboards1.add(leaderboard);
-        final LeaderboardGroup leaderboardGroup1 = new LeaderboardGroupImpl(groupName1, groupDescription1, leaderboards1);
+        final LeaderboardGroup leaderboardGroup1 = new LeaderboardGroupImpl(groupName1, groupDescription1, false, leaderboards1);
         mongoObjectFactory.storeLeaderboardGroup(leaderboardGroup1);
         
         final String groupName2 = "Leaderboard Group 2";
@@ -244,7 +244,7 @@ public class TestStoringAndRetrievingLeaderboardGroups extends AbstractMongoDBTe
         leaderboard = new FlexibleLeaderboardImpl(leaderboardNames[3], new ScoreCorrectionImpl(),
                 new ResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces), new LowPoint());
         leaderboards2.add(leaderboard);
-        final LeaderboardGroup leaderboardGroup2 = new LeaderboardGroupImpl(groupName2, groupDescription2, leaderboards2);
+        final LeaderboardGroup leaderboardGroup2 = new LeaderboardGroupImpl(groupName2, groupDescription2, false, leaderboards2);
         mongoObjectFactory.storeLeaderboardGroup(leaderboardGroup2);
         
         // the leaderboard named leaderboardNames[2] occurs in both groups
@@ -281,7 +281,7 @@ public class TestStoringAndRetrievingLeaderboardGroups extends AbstractMongoDBTe
                 new ResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces), new LowPoint());
         leaderboards.add(leaderboard);
         
-        final LeaderboardGroup leaderboardGroup = new LeaderboardGroupImpl(groupName, groupDescription, leaderboards);
+        final LeaderboardGroup leaderboardGroup = new LeaderboardGroupImpl(groupName, groupDescription, false, leaderboards);
         mongoObjectFactory.storeLeaderboardGroup(leaderboardGroup);
         
         final LeaderboardGroup loadedLeaderboardGroup = domainObjectFactory.loadLeaderboardGroup(groupName, /* regattaRegistry */ null,
@@ -313,7 +313,7 @@ public class TestStoringAndRetrievingLeaderboardGroups extends AbstractMongoDBTe
                 new ResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces), new LowPoint());
         leaderboards.add(leaderboard);
         
-        final LeaderboardGroup leaderboardGroup = new LeaderboardGroupImpl(groupName, groupDescription, leaderboards);
+        final LeaderboardGroup leaderboardGroup = new LeaderboardGroupImpl(groupName, groupDescription, false, leaderboards);
         mongoObjectFactory.storeLeaderboardGroup(leaderboardGroup);
 
         final String[] ungroupedLeaderboardNames = {"Ungrouped Leaderboard 0", "Ungrouped Leaderboard 1", "Ungrouped Leaderboard 2"};
@@ -366,7 +366,7 @@ public class TestStoringAndRetrievingLeaderboardGroups extends AbstractMongoDBTe
         final RaceColumn race = leaderboard.addRaceColumn(columnName, false, fleet);
         leaderboards.add(leaderboard);
         
-        final LeaderboardGroup group = new LeaderboardGroupImpl(groupName, groupDescription, leaderboards);
+        final LeaderboardGroup group = new LeaderboardGroupImpl(groupName, groupDescription, false, leaderboards);
         mongoObjectFactory.storeLeaderboardGroup(group);
         
         //Name change test
