@@ -417,7 +417,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 }
                 final TimePoint nowMinusDelay = liveLeaderboardUpdater.getNowMinusDelay();
                 final TimePoint timePointOfLatestModification = leaderboard.getTimePointOfLatestModification();
-                if (!nowMinusDelay.before(timePointOfLatestModification)) {
+                if (timePointOfLatestModification != null && !nowMinusDelay.before(timePointOfLatestModification)) {
                     timePoint = timePointOfLatestModification;
                 } else {
                     timePoint = null;
@@ -491,8 +491,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     for (Fleet fleet : raceColumn.getFleets()) {
                         TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
                         if (trackedRace != null) {
-                            for (TrackedLeg trackedLeg : trackedRace.getTrackedLegs()) {
-                                legRanksCache.put(trackedLeg.getLeg(), trackedLeg.getRanks(timePoint));
+                            trackedRace.getRace().getCourse().lockForRead();
+                            try {
+                                for (TrackedLeg trackedLeg : trackedRace.getTrackedLegs()) {
+                                    legRanksCache.put(trackedLeg.getLeg(), trackedLeg.getRanks(timePoint));
+                                }
+                            } finally {
+                                trackedRace.getRace().getCourse().unlockAfterRead();
                             }
                         }
                     }
