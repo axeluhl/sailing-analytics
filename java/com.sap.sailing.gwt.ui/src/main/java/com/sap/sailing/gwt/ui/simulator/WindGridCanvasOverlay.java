@@ -1,11 +1,9 @@
 package com.sap.sailing.gwt.ui.simulator;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -24,7 +22,15 @@ import com.sap.sailing.gwt.ui.shared.PositionDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldDTO;
 import com.sap.sailing.gwt.ui.shared.racemap.FullCanvasOverlay;
+import com.sap.sailing.gwt.ui.simulator.util.WindGridColorPalette;
 
+/**
+ * A google map overlay based on a HTML5 canvas for representing a wind field as a heat map. 
+ * The overlay covers the whole map and colors the cells of the field based on the trueWindSpeedInKnots
+ * 
+ * @author Nidhi Sawhney(D054070)
+ *
+ */
 public class WindGridCanvasOverlay extends FullCanvasOverlay implements TimeListenerWithStoppingCriteria {
     /* The wind field that is to be displayed in the overlay */
     protected WindFieldDTO wl;
@@ -38,6 +44,7 @@ public class WindGridCanvasOverlay extends FullCanvasOverlay implements TimeList
     private int xRes;
     private int yRes;
     private WindDTO[][] windMatrix;
+    private WindGridColorPalette colorPalette;
     
     private static Logger logger = Logger.getLogger(WindFieldCanvasOverlay.class.getName());
     
@@ -47,7 +54,7 @@ public class WindGridCanvasOverlay extends FullCanvasOverlay implements TimeList
         public PositionDTO topLeft;
         public PositionDTO topRight;
       
-        double windSpeedInKnots;
+        public double windSpeedInKnots;
         
         public GridCell(PositionDTO bl, PositionDTO br, PositionDTO tl, PositionDTO tr, Double windSpeedInKnots) {
             this.bottomLeft = bl;
@@ -58,6 +65,15 @@ public class WindGridCanvasOverlay extends FullCanvasOverlay implements TimeList
         }
     }
 
+    private class SortByWindSpeed implements Comparator<WindDTO> {
+
+        @Override
+        public int compare(WindDTO w1, WindDTO w2) {
+            return Double.compare(w1.trueWindSpeedInKnots , w2.trueWindSpeedInKnots);
+        }
+  
+    }
+    
     private class SortByLatitude implements Comparator<WindDTO> {
 
         @Override
@@ -93,7 +109,7 @@ public class WindGridCanvasOverlay extends FullCanvasOverlay implements TimeList
     private void init() {
         wl = null;    
         timePointWindDTOMap = new TreeMap<Long, List<WindDTO>>();
-        
+        colorPalette = null;
     }
 
     public void setWindField(WindFieldDTO wl) {
@@ -109,6 +125,14 @@ public class WindGridCanvasOverlay extends FullCanvasOverlay implements TimeList
             }
         }
         
+        SortByWindSpeed windSpeedSorter = new SortByWindSpeed();
+        double maxSpeed = Collections.max(wl.getMatrix(), windSpeedSorter).trueWindSpeedInKnots;
+        double minSpeed = Collections.min(wl.getMatrix(), windSpeedSorter).trueWindSpeedInKnots;
+        System.out.println("minSpeed: " + minSpeed + " maxSpeed: " + maxSpeed);
+        
+        colorPalette = new WindGridColorPalette(minSpeed,maxSpeed);
+        logger.fine("Color minSpeed: " + colorPalette.getColor(minSpeed));
+        logger.fine("Color maxSpeed: " + colorPalette.getColor(maxSpeed));
     }
     
     @Override
@@ -199,23 +223,7 @@ public class WindGridCanvasOverlay extends FullCanvasOverlay implements TimeList
             }
             createPositionGrid(windDTOList);
             createGridCell();
-            /*
-            double width = getGridWidth(windDTOList);
-            double height = getGridHeight(windDTOList);
-            logger.info("In drawWindGrid width = "  + width + " height = " + height);
-            Iterator<WindDTO> windDTOIter = windDTOList.iterator();
-          
-            while (windDTOIter.hasNext()) {
-                WindDTO windDTO = windDTOIter.next();
-                PositionDTO position = windDTO.position;
-                LatLng positionLatLng = LatLng.newInstance(position.latDeg, position.lngDeg);
-                Point canvasPositionInPx = getMap().convertLatLngToDivPixel(positionLatLng);
-
-                int x = canvasPositionInPx.getX() - this.getWidgetPosLeft();
-                int y = canvasPositionInPx.getY() - this.getWidgetPosTop();
-                drawRectangle(x-width/2,y-height/2,width,height,"Grey");
-            }
-            */
+           
             String title = "Wind Grid at " + windDTOList.size() + " points.";
             getCanvas().setTitle(title);
         }
@@ -281,12 +289,7 @@ public class WindGridCanvasOverlay extends FullCanvasOverlay implements TimeList
         }
         this.windMatrix = new WindDTO[yRes][xRes];
         Iterator<WindDTO> windDTOIter = windDTOList.iterator();
-    /*
-        SortByLatitude sortLatitude = new SortByLatitude();
-        Collections.sort(windDTOList,sortLatitude);
-        SortByLongitude sortLongitude = new SortByLongitude();
-        Collections.sort(windDTOList,sortLongitude);
-      */  
+       
        for(int i = 0; i < yRes; ++i) {
            for (int j = 0; j < xRes; ++j) {
                windMatrix[i][j] = windDTOIter.next();    
@@ -328,15 +331,16 @@ public class WindGridCanvasOverlay extends FullCanvasOverlay implements TimeList
         positionLatLng = LatLng.newInstance(cell.topRight.latDeg,  cell.topRight.lngDeg);
         Point trPoint = getMap().convertLatLngToDivPixel(positionLatLng);
        
+        /* Uncomment to see the center of the grid for debug
         drawCircle(blPoint.getX()-this.getWidgetPosLeft(), blPoint.getY()-this.getWidgetPosTop(),2,"red");
         drawCircle(brPoint.getX()-this.getWidgetPosLeft(), brPoint.getY()-this.getWidgetPosTop(),2,"red");
         drawCircle(tlPoint.getX()-this.getWidgetPosLeft(), tlPoint.getY()-this.getWidgetPosTop(),2,"red");
         drawCircle(trPoint.getX()-this.getWidgetPosLeft(), trPoint.getY()-this.getWidgetPosTop(),2,"red");
-        
+        */
         Context2d context2d  = canvas.getContext2d();
         context2d.setLineWidth(1);
         context2d.setStrokeStyle("Black");
-        context2d.setFillStyle("Grey");
+        context2d.setFillStyle(colorPalette.getColor(cell.windSpeedInKnots));
        
         context2d.beginPath();
         context2d.moveTo(blPoint.getX()-this.getWidgetPosLeft(), blPoint.getY()-this.getWidgetPosTop());
@@ -347,7 +351,7 @@ public class WindGridCanvasOverlay extends FullCanvasOverlay implements TimeList
         context2d.closePath();
         
         context2d.fill();
-        context2d.stroke();
+        //context2d.stroke(); // Dont show the lines
     }
     
     private PositionDTO getCenter(PositionDTO a, PositionDTO b, PositionDTO c, PositionDTO d) {
