@@ -120,7 +120,7 @@ a {
       background: url(../images/timeBar-bg.png) 0 0 repeat-y; }
       /* line 82, site.css.sass */
       #yield_content #mainContent .innerContent .timeBar .raceSection {
-        margin: 0 0 25px 0;
+        margin: 0 0 20px 0;
         *display: inline-block; }
         /* line 3, _helpers.sass */
         #yield_content #mainContent .innerContent .timeBar .raceSection:after {
