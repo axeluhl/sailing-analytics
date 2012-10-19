@@ -598,6 +598,7 @@ public class SimulatorMainPanel2 extends SplitLayoutPanel {
                     boatSelector.addItem(boatClasses[i].name);
                 }
                 boatSelector.setItemSelected(3, true); // polar diagram 49er STG
+                loadPolarDiagramData(3);
             }
         });
 
@@ -636,7 +637,7 @@ public class SimulatorMainPanel2 extends SplitLayoutPanel {
         this.polarDiv.getElement().setClassName("polarDiv");
         this.polarDiv.setVisible(false);
 
-        this.loadPolarDiagramData(0);
+        //this.loadPolarDiagramData(0);
 
         sailingPanel.add(polarDiv);
     }
