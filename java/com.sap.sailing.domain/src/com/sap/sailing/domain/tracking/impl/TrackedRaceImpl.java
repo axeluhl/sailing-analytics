@@ -1379,7 +1379,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     }
 
     @Override
-    public  void waypointRemoved(int zeroBasedIndex, Waypoint waypointThatGotRemoved) {
+    public void waypointRemoved(int zeroBasedIndex, Waypoint waypointThatGotRemoved) {
         invalidateMarkPassingTimes();
         LockUtil.lockForRead(serializationLock);
         try {
