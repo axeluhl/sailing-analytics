@@ -24,7 +24,8 @@ public class SimulatorEntryPoint2 extends AbstractEntryPoint {
     private int yRes = 5;
     private boolean autoUpdate = false;
     private char mode = 'f';
-
+    private boolean showGrid = false;
+   
     private static Logger logger = Logger.getLogger(SimulatorEntryPoint.class.getName());
 
     @Override
@@ -64,9 +65,14 @@ public class SimulatorEntryPoint2 extends AbstractEntryPoint {
         } else {
             mode = modeStr.charAt(0);
         }
-        
+        String showGridStr = Window.Location.getParameter("showGrid");
+        if (showGridStr == null || showGridStr.isEmpty()) {
+            logger.config("Using default showGrid " + showGrid);
+        } else {
+            showGrid = Boolean.parseBoolean(showGridStr);
+        }
         SimulatorMainPanel2 mainPanel = new SimulatorMainPanel2(simulatorSvc, stringMessages, this, xRes, yRes,
-                autoUpdate, mode);
+                autoUpdate, mode, showGrid);
 
         switch (viewMode) {
         case ONESCREEN:

@@ -388,7 +388,7 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
         initDisplayOptions(mapOptions);
 
         simulatorMap = new SimulatorMap(simulatorSvc, stringMessages, errorReporter, xRes, yRes, timer, windParams,
-                busyIndicator,SailingSimulatorUtil.freestyle);
+                busyIndicator,SailingSimulatorUtil.freestyle,false);
 
         // FlowPanel mapPanel = new FlowPanel();
         // mapPanel.setTitle("Map");

@@ -93,6 +93,7 @@ public class SimulatorMainPanel2 extends SplitLayoutPanel {
     private final int yRes;
     private final boolean autoUpdate;
     private final char mode;
+    private final boolean showGrid;
 
     private SimulatorTimePanel timePanel;
 
@@ -195,7 +196,7 @@ public class SimulatorMainPanel2 extends SplitLayoutPanel {
     }
 
     public SimulatorMainPanel2(SimulatorServiceAsync svc, StringMessages stringMessages, ErrorReporter errorReporter,
-            int xRes, int yRes, boolean autoUpdate, char mode) {
+            int xRes, int yRes, boolean autoUpdate, char mode, boolean showGrid) {
 
         super();
 
@@ -206,6 +207,7 @@ public class SimulatorMainPanel2 extends SplitLayoutPanel {
         this.yRes = yRes;
         this.autoUpdate = autoUpdate;
         this.mode = mode;
+        this.showGrid = showGrid;
         this.isOmniscient = new CheckBox(this.stringMessages.omniscient(), true);
         this.isOmniscient.setValue(true);
 
@@ -442,7 +444,7 @@ public class SimulatorMainPanel2 extends SplitLayoutPanel {
         initDisplayOptions(mapOptions);
 
         simulatorMap = new SimulatorMap(simulatorSvc, stringMessages, errorReporter, xRes, yRes, timer, timePanel,
-                windParams, busyIndicator, mode);
+                windParams, busyIndicator, mode, showGrid);
         simulatorMap.setSize("100%", "100%");
 
         this.rightPanel.add(this.simulatorMap);
