@@ -597,6 +597,7 @@ public class SimulatorMainPanel2 extends SplitLayoutPanel {
                 for (int i = 0; i < boatClasses.length; ++i) {
                     boatSelector.addItem(boatClasses[i].name);
                 }
+                boatSelector.setItemSelected(3, true); // polar diagram 49er STG
             }
         });
 
@@ -766,7 +767,7 @@ public class SimulatorMainPanel2 extends SplitLayoutPanel {
             public void onClick(ClickEvent arg0) {
                 // timePanel.setVisible(false);
                 timePanel.setActive(false);
-                simulatorMap.refreshView(SimulatorMap.ViewName.SUMMARY, currentWPDisplay, 0);
+                simulatorMap.refreshView(SimulatorMap.ViewName.SUMMARY, currentWPDisplay, boatSelector.getSelectedIndex());
             }
         });
 
@@ -775,7 +776,7 @@ public class SimulatorMainPanel2 extends SplitLayoutPanel {
         this.replayButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent arg0) {
-                simulatorMap.refreshView(SimulatorMap.ViewName.REPLAY, currentWPDisplay, 0);
+                simulatorMap.refreshView(SimulatorMap.ViewName.REPLAY, currentWPDisplay, boatSelector.getSelectedIndex());
                 timePanel.setActive(true);
             }
         });
@@ -784,7 +785,7 @@ public class SimulatorMainPanel2 extends SplitLayoutPanel {
         this.windDisplayButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent arg0) {
-                simulatorMap.refreshView(SimulatorMap.ViewName.WINDDISPLAY, currentWPDisplay, 0);
+                simulatorMap.refreshView(SimulatorMap.ViewName.WINDDISPLAY, currentWPDisplay, boatSelector.getSelectedIndex());
                 timePanel.setActive(true);
             }
         });
