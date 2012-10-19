@@ -120,7 +120,7 @@ a {
       background: url(../images/timeBar-bg.png) 0 0 repeat-y; }
       /* line 82, site.css.sass */
       #yield_content #mainContent .innerContent .timeBar .raceSection {
-        margin: 0 0 40px 0;
+        margin: 0 0 25px 0;
         *display: inline-block; }
         /* line 3, _helpers.sass */
         #yield_content #mainContent .innerContent .timeBar .raceSection:after {
@@ -140,13 +140,13 @@ a {
           width: 29px;
           height: 54px;
           float: left;
-          margin: 0 0 0 -6px; }
+          margin: -16px 0 0 -5px; }
         /* line 97, site.css.sass */
         #yield_content #mainContent .innerContent .timeBar .raceSection .racePanel {
           background: url(../images/racePanel-bg.png) left bottom repeat-x #fcb913;
           width: 169px;
           min-height: 36px;
-          margin: 9px 10px 0 0;
+          margin: 2px 10px 0 -5px;
           float: left;
           padding: 6px 0 6px 13px; }
           /* line 104, site.css.sass */
@@ -178,17 +178,18 @@ a {
     #yield_content #mainContent .articleSubheadline {
       font-size: 14px;
       font-family: OpenSansBold, Arial, Verdana, sans-serif;
-      color: #222222; }
-    /* line 137, site.css.sass */
+      color: #222222;
+      margin: 0 0 6px 0; }
+    /* line 138, site.css.sass */
     #yield_content #mainContent h4 {
       margin: 0 0 10px;
       font-size: 12px;
       font-family: OpenSansBold, Arial, Verdana, sans-serif; }
-  /* line 143, site.css.sass */
+  /* line 144, site.css.sass */
   #yield_content #spaceBar {
     height: 80px; }
 
-/* line 147, site.css.sass */
+/* line 148, site.css.sass */
 #footer {
   color: white;
   width: 940px;
@@ -197,13 +198,13 @@ a {
   background: url(../images/bkg-footer1.png);
   padding: 10px;
   font-size: 11px; }
-  /* line 156, site.css.sass */
+  /* line 157, site.css.sass */
   #footer a {
     color: white;
     font-size: 11px; }
-  /* line 161, site.css.sass */
+  /* line 162, site.css.sass */
   #footer .regularNav {
     margin: 0; }
-    /* line 163, site.css.sass */
+    /* line 164, site.css.sass */
     #footer .regularNav li {
       display: inline; }
