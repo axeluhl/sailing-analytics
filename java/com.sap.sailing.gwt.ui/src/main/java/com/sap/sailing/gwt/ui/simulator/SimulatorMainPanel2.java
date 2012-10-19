@@ -732,7 +732,7 @@ public class SimulatorMainPanel2 extends SplitLayoutPanel {
         this.updateButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent arg0) {
-                update(0);
+                update(boatSelector.getSelectedIndex());
             }
         });
     }
