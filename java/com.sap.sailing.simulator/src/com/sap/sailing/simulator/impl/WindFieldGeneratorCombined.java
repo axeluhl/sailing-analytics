@@ -22,6 +22,15 @@ public class WindFieldGeneratorCombined extends WindFieldGeneratorImpl implement
     }
 
     @Override
+    public void setBoundary(Boundary boundary) {
+        
+        super.setBoundary(boundary);
+        blastGen.setBoundary(boundary);
+        oscillationGen.setBoundary(boundary);
+        
+    }
+ 
+    @Override
     public void generate(TimePoint start, TimePoint end, TimePoint step) {
         super.generate(start, end, step);
    
