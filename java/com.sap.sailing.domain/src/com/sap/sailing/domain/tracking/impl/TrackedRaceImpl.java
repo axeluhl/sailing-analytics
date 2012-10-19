@@ -1402,6 +1402,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                 toRemove = last;
             }
             if (toRemove != null) {
+                logger.info("Removing tracked leg "+toRemove.getFrom()+"/"+toRemove.getTo()+" from tracked race "+getRace().getName());
                 trackedLegs.remove(toRemove);
                 updated(/* time point */null);
             }
