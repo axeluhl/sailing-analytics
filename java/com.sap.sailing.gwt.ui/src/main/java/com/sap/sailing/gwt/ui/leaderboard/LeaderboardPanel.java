@@ -1178,7 +1178,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         refreshAndSettingsPanel.add(refreshPanel);
         refreshAndSettingsPanel.add(settingsAnchor);
         toolbarPanel.add(refreshAndSettingsPanel, DockPanel.EAST);
-        if (!isEmbedded && showRaceDetails) {
+        if (!isEmbedded) {
             contentPanel.add(toolbarPanel);
         }
         contentPanel.add(getLeaderboardTable());
