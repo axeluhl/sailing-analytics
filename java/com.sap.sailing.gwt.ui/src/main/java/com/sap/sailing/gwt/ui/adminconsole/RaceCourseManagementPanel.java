@@ -378,6 +378,7 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
             }
         };
         result.addColumn(buoyNameColumn, stringMessages.buoy());
+
         final SafeHtmlCell buoyPositionCell = new SafeHtmlCell();
         Column<BuoyDTO, SafeHtml> buoyPositionColumn = new Column<BuoyDTO, SafeHtml>(buoyPositionCell) {
             @Override
@@ -388,6 +389,15 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
             }
         };
         result.addColumn(buoyPositionColumn, stringMessages.position());
+        
+        TextColumn<BuoyDTO> buoyColorColumn = new TextColumn<BuoyDTO>() {
+            @Override
+            public String getValue(BuoyDTO buoyDTO) {
+                return buoyDTO.displayColor != null ? buoyDTO.displayColor : "";
+            }
+        };
+        result.addColumn(buoyColorColumn, stringMessages.color());
+
         return result;
     }
 
