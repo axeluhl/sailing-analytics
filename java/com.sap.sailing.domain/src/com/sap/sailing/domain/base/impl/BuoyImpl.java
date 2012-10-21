@@ -39,7 +39,7 @@ public class BuoyImpl extends NamedImpl implements Buoy {
 
     @Override
     public Buoy resolve(DomainFactory domainFactory) {
-        Buoy result = domainFactory.getOrCreateBuoy(getName());
+        Buoy result = domainFactory.getOrCreateBuoy(getName(), getDisplayColor());
         return result;
     }
 
