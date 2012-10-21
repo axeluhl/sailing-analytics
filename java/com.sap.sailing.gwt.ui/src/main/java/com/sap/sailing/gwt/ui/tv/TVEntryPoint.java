@@ -9,12 +9,8 @@ import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.RootPanel;
-import com.google.gwt.user.client.ui.ScrollPanel;
 import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
 import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
-import com.sap.sailing.gwt.ui.client.Timer;
-import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
-import com.sap.sailing.gwt.ui.leaderboard.TVViewPanel;
 
 public class TVEntryPoint extends AbstractEntryPoint {
     private static final String PARAM_LEADERBOARD_GROUP_NAME = "leaderboardGroupName";
@@ -23,6 +19,7 @@ public class TVEntryPoint extends AbstractEntryPoint {
     private static final String PARAM_DELAY_TO_LIVE_MILLIS = "delayToLiveMillis";
     private String leaderboardName;
     private String leaderboardGroupName;
+    private TVViewController tvViewController;
     
     @Override
     public void onModuleLoad() {     
@@ -65,14 +62,9 @@ public class TVEntryPoint extends AbstractEntryPoint {
             logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
             mainPanel.addNorth(logoAndTitlePanel, 68);
         }
-        ScrollPanel contentScrollPanel = new ScrollPanel();
         
-        Timer timer = new Timer(PlayModes.Live, 1000l);
-        timer.setLivePlayDelayInMillis(delayToLiveMillis);
-        TVViewPanel tvViewPanel = new TVViewPanel(sailingService, stringMessages, this, leaderboardName,
-                userAgent, timer, logoAndTitlePanel, mainPanel, showRaceDetails);
-        contentScrollPanel.setWidget(tvViewPanel);
-
-        mainPanel.add(contentScrollPanel);
+        tvViewController = new TVViewController(sailingService, stringMessages, this, leaderboardName,
+                userAgent, logoAndTitlePanel, mainPanel, delayToLiveMillis, showRaceDetails);
+        tvViewController.updateTvView(TVViews.Leaderboard);
     }
 }
