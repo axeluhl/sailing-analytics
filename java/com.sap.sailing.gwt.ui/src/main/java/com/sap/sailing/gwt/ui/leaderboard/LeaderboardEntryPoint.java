@@ -94,14 +94,6 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
         }
         ScrollPanel contentScrollPanel = new ScrollPanel();
         
-        String tvModeParam = Window.Location.getParameter("tvMode");
-        if (tvModeParam != null) {
-            Timer timer = new Timer(PlayModes.Live, 1000l);
-            timer.setLivePlayDelayInMillis(delayToLiveMillis);
-            TVViewPanel tvViewPanel = new TVViewPanel(sailingService, stringMessages, this, leaderboardName,
-                    userAgent, null, timer, logoAndTitlePanel, mainPanel, showRaceDetails);
-            contentScrollPanel.setWidget(tvViewPanel);
-        } else {
             long delayBetweenAutoAdvancesInMilliseconds = 3000l;
             final RaceColumnSelection raceColumnSelection;
             String lastN = Window.Location.getParameter(PARAM_NAME_LAST_N);
@@ -118,18 +110,17 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
                 }
             }
             Timer timer = new Timer(PlayModes.Replay, delayBetweenAutoAdvancesInMilliseconds);
-            timer.setLivePlayDelayInMillis(delayToLiveMillis);
-            final LeaderboardSettings leaderboardSettings = createLeaderboardSettingsFromURLParameters(Window.Location.getParameterMap());
-            if (leaderboardSettings.getDelayBetweenAutoAdvancesInMilliseconds() != null) {
-                timer.setPlayMode(PlayModes.Live); // the leaderboard, viewed via the entry point, always goes "live"
-            }
-            LeaderboardPanel leaderboardPanel = new LeaderboardPanel(sailingService, new AsyncActionsExecutor(),
-                    leaderboardSettings,
-                    preselectedRace, new CompetitorSelectionModel(
-                            /* hasMultiSelection */true), timer, leaderboardName, leaderboardGroupName,
-                    LeaderboardEntryPoint.this, stringMessages, userAgent, showRaceDetails, raceColumnSelection);
-            contentScrollPanel.setWidget(leaderboardPanel);
+        timer.setLivePlayDelayInMillis(delayToLiveMillis);
+        final LeaderboardSettings leaderboardSettings = createLeaderboardSettingsFromURLParameters(Window.Location.getParameterMap());
+        if (leaderboardSettings.getDelayBetweenAutoAdvancesInMilliseconds() != null) {
+            timer.setPlayMode(PlayModes.Live); // the leaderboard, viewed via the entry point, always goes "live"
         }
+        LeaderboardPanel leaderboardPanel = new LeaderboardPanel(sailingService, new AsyncActionsExecutor(),
+                leaderboardSettings,
+                    preselectedRace, new CompetitorSelectionModel(
+                        /* hasMultiSelection */true), timer, leaderboardName, leaderboardGroupName,
+                    LeaderboardEntryPoint.this, stringMessages, userAgent, showRaceDetails, raceColumnSelection);
+        contentScrollPanel.setWidget(leaderboardPanel);
 
         mainPanel.add(contentScrollPanel);
     }
