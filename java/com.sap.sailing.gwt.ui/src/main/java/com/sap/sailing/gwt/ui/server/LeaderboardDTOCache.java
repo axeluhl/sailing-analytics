@@ -278,6 +278,11 @@ public class LeaderboardDTOCache {
             public void raceColumnRemovedFromContainer(RaceColumn raceColumn) {
                 removeFromCache(leaderboard);
             }
+
+            @Override
+            public void raceColumnMoved(RaceColumn raceColumn, int newIndex) {
+                removeFromCache(leaderboard);
+            }
         };
         leaderboard.addRaceColumnListener(raceColumnListener);
         synchronized (raceColumnListeners) {

@@ -130,6 +130,11 @@ public class MetaLeaderboardColumn extends SimpleAbstractRaceColumn implements R
     }
 
     @Override
+    public void raceColumnMoved(RaceColumn raceColumn, int newIndex) {
+        getRaceColumnListeners().notifyListenersAboutRaceColumnMoved(raceColumn, newIndex);
+    }
+
+    @Override
     public boolean isTransient() {
         return false;
     }
