@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.ui.tv;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -33,7 +34,6 @@ import com.sap.sailing.gwt.ui.shared.RaceColumnDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 
 public class TVViewController implements RaceTimesInfoProviderListener {
-    
     private final SailingServiceAsync sailingService;
     private final StringMessages stringMessages;
     private final ErrorReporter errorReporter;
@@ -42,7 +42,7 @@ public class TVViewController implements RaceTimesInfoProviderListener {
     private final DockLayoutPanel dockPanel;
     
     private final Timer timer;
-    private RaceTimesInfoProvider raceTimesInfoProvider;  
+    private final RaceTimesInfoProvider raceTimesInfoProvider;  
     private LeaderboardDTO leaderboard;
     private RegattaAndRaceIdentifier currentLiveRace;
     
@@ -173,10 +173,10 @@ public class TVViewController implements RaceTimesInfoProviderListener {
 
 //            FlowPanel toolbarPanel = new FlowPanel();
 //            toolbarPanel.add(raceBoardPanel.getNavigationWidget());
+//            dockPanel.addNorth(toolbarPanel, 40);
             
             FlowPanel timePanel = createTimePanel(raceBoardPanel);
             
-//            dockPanel.addNorth(toolbarPanel, 40);
             dockPanel.addSouth(timePanel, 90);                     
             dockPanel.add(raceBoardPanel);
             
@@ -219,9 +219,11 @@ public class TVViewController implements RaceTimesInfoProviderListener {
     public void raceTimesInfosReceived(Map<RegattaAndRaceIdentifier, RaceTimesInfoDTO> raceTimesInfo) {
         if (currentLiveRace != null) {
             RaceTimesInfoDTO currentRaceTimes = raceTimesInfo.get(currentLiveRace);
-            //TODO add check for live mode
-            if (currentRaceTimes.endOfRace != null && timer.getTime().after(currentRaceTimes.endOfRace)
-                    && timer.getPlayMode() == PlayModes.Live) {
+
+            Date endOfRace = currentRaceTimes.endOfRace;
+            long timeAfterEndOfRace = 3 * 60 * 1000; // 3 min  
+            if (endOfRace != null && timer.getTime().getTime() > endOfRace.getTime() + timeAfterEndOfRace
+                && timer.getPlayMode() == PlayModes.Live) {
                 updateTvView(TVViews.Leaderboard);
             }
         } else {
