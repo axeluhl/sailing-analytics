@@ -1726,8 +1726,10 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             Column<LeaderboardRowDTO, ?> c = getLeaderboardTable().getColumn(leaderboardposition);
             if (c instanceof RaceColumn) {
                 RaceColumn<?> raceColumn = (RaceColumn<?>) c;
-                if (!raceColumn.getRaceColumnName().equals(race.getRaceColumnName()) && raceColumnStartIndex == counter) {
-                    removeColumn(raceColumn);
+                if (!raceColumn.getRaceColumnName().equals(race.getRaceColumnName())) {
+                    if (raceColumnStartIndex == counter) {
+                        removeColumn(raceColumn);
+                    }
                 } else {
                     return;
                 }
