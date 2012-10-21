@@ -13,6 +13,9 @@ import com.google.gwt.core.client.Scheduler.RepeatingCommand;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RaceIdentifier;
+import com.sap.sailing.gwt.ui.shared.FleetDTO;
+import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
+import com.sap.sailing.gwt.ui.shared.RaceColumnDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 
 public class RaceTimesInfoProvider {
@@ -28,7 +31,7 @@ public class RaceTimesInfoProvider {
     private Set<RaceTimesInfoProviderListener> listeners;
 
     /**
-     * The <code>raceIdentifiers</code> has to be <code>not-null</code>, but can be empty.
+     * The <code>raceIdentifiers</code> has to be non-<code>null</code>, but can be empty.
      */
     public RaceTimesInfoProvider(SailingServiceAsync sailingService, ErrorReporter errorReporter, Collection<RegattaAndRaceIdentifier> raceIdentifiers, long requestInterval) {
         this.sailingService = sailingService;
@@ -175,6 +178,24 @@ public class RaceTimesInfoProvider {
                 }
             });
         }
+    }
+
+    public RegattaAndRaceIdentifier getFirstStartedAndUnfinishedRace(LeaderboardDTO leaderboard) {
+        RegattaAndRaceIdentifier firstStartedAndUnfinishedRace = null;
+        Map<RegattaAndRaceIdentifier, RaceTimesInfoDTO> raceTimesInfos = getRaceTimesInfos();
+        for (RaceColumnDTO race : leaderboard.getRaceList()) {
+            for (FleetDTO fleet : race.getFleets()) {
+                RegattaAndRaceIdentifier raceIdentifier = race.getRaceIdentifier(fleet);
+                if (raceIdentifier != null) {
+                    RaceTimesInfoDTO raceTimes = raceTimesInfos.get(raceIdentifier);
+                    if (raceTimes != null && raceTimes.startOfTracking != null && raceTimes.endOfRace == null) {
+                        firstStartedAndUnfinishedRace = raceIdentifier;
+                        break;
+                    }
+                }
+            }
+        }
+        return firstStartedAndUnfinishedRace;
     }
     
 }

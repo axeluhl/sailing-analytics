@@ -46,7 +46,7 @@ public class TVViewPanel extends SimplePanel implements RaceTimesInfoProviderLis
     private RaceTimesInfoProvider raceTimesInfoProvider;
     
     private LeaderboardPanel leaderboardPanel;
-    private LeaderboardDTO leaderboard;
+    public LeaderboardDTO leaderboard;
     private boolean leaderboardIsWiget;
     
     private Label raceBoardHeader;
@@ -209,7 +209,7 @@ public class TVViewPanel extends SimplePanel implements RaceTimesInfoProviderLis
     @Override
     public void raceTimesInfosReceived(Map<RegattaAndRaceIdentifier, RaceTimesInfoDTO> raceTimesInfo) {
         if (currentRace == null) {
-            currentRace = getFirstStartedAndUnfinishedRace();
+            currentRace = raceTimesInfoProvider.getFirstStartedAndUnfinishedRace(leaderboard);
             if (currentRace != null) {
                 raceBoardPanel = createRaceBoardPanel(leaderboard.name, currentRace);
                 showRaceBoard();
@@ -224,24 +224,6 @@ public class TVViewPanel extends SimplePanel implements RaceTimesInfoProviderLis
                 showLeaderboard();
             }
         }
-    }
-    
-    private RegattaAndRaceIdentifier getFirstStartedAndUnfinishedRace() {
-        RegattaAndRaceIdentifier firstStartedAndUnfinishedRace = null;
-        Map<RegattaAndRaceIdentifier, RaceTimesInfoDTO> raceTimesInfos = raceTimesInfoProvider.getRaceTimesInfos();
-        for (RaceColumnDTO race : leaderboard.getRaceList()) {
-            for (FleetDTO fleet : race.getFleets()) {
-                RegattaAndRaceIdentifier raceIdentifier = race.getRaceIdentifier(fleet);
-                if (raceIdentifier != null) {
-                    RaceTimesInfoDTO raceTimes = raceTimesInfos.get(raceIdentifier);
-                    if (raceTimes != null && raceTimes.startOfTracking != null && raceTimes.endOfRace == null) {
-                        firstStartedAndUnfinishedRace = raceIdentifier;
-                        break;
-                    }
-                }
-            }
-        }
-        return firstStartedAndUnfinishedRace;
     }
 
 }
