@@ -23,6 +23,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.client.UserAgentDetails;
+import com.sap.sailing.gwt.ui.leaderboard.ExplicitRaceColumnSelection;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettingsFactory;
@@ -238,6 +239,18 @@ public class TVViewController implements RaceTimesInfoProviderListener {
 
     private RegattaAndRaceIdentifier checkForLiveRace() {
         RegattaAndRaceIdentifier result = null;
+        Map<RegattaAndRaceIdentifier, RaceTimesInfoDTO> raceTimesInfos = raceTimesInfoProvider.getRaceTimesInfos();
+        for (RaceColumnDTO race : leaderboard.getRaceList()) {
+            for (FleetDTO fleet : race.getFleets()) {
+                RegattaAndRaceIdentifier raceIdentifier = race.getRaceIdentifier(fleet);
+                if (raceIdentifier != null) {
+                    RaceTimesInfoDTO raceTimes = raceTimesInfos.get(raceIdentifier);
+                    if (raceTimes != null && raceTimes.startOfTracking != null && raceTimes.endOfRace == null) {
                         return raceIdentifier;
+                    }
+                }
+            }
+        }
         return result;
+    }
 }
