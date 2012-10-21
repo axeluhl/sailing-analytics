@@ -1822,7 +1822,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     private void createMissingAndAdjustExistingRaceColumns(LeaderboardDTO leaderboard) {
         // Correct order of races in selectedRaceColum
         Iterable<RaceColumnDTO> correctedOrderSelectedRaces = raceColumnSelection.getSelectedRaceColumnsOrderedAsInLeaderboard(leaderboard);
-        removeRaceColumnsNotSelected(raceColumnSelection.getSelectedRaceColumns());
+        removeRaceColumnsNotSelected(correctedOrderSelectedRaces);
         for (int selectedRaceCount = 0; selectedRaceCount < Util.size(correctedOrderSelectedRaces); selectedRaceCount++) {
             RaceColumnDTO selectedRaceColumn = Util.get(correctedOrderSelectedRaces, selectedRaceCount);
             final RaceColumn<?> raceColumn = selectedRaceColumn == null ? null
