@@ -16,11 +16,13 @@ import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.RaceIdentifier;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
 import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
+import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 
@@ -39,6 +41,12 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
     private static final String PARAM_REGATTA_NAME = "regattaName";
     private static final String PARAM_REFRESH_INTERVAL_MILLIS = "refreshIntervalMillis";
     private static final String PARAM_DELAY_TO_LIVE_MILLIS = "delayToLiveMillis";
+    
+    /**
+     * Lets the client choose a different race column selection which displays only up to the last N races with N being the integer
+     * number specified by the parameter.
+     */
+    private static final String PARAM_NAME_LAST_N = "lastN";
     private String leaderboardName;
     private String leaderboardGroupName;
     
@@ -94,7 +102,22 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
                     userAgent, null, timer, logoAndTitlePanel, mainPanel, showRaceDetails);
             contentScrollPanel.setWidget(tvViewPanel);
         } else {
-            Timer timer = new Timer(PlayModes.Replay, /* delayBetweenAutoAdvancesInMilliseconds */3000l);
+            long delayBetweenAutoAdvancesInMilliseconds = 3000l;
+            final RaceColumnSelection raceColumnSelection;
+            String lastN = Window.Location.getParameter(PARAM_NAME_LAST_N);
+            final RaceIdentifier preselectedRace = getPreselectedRace(Window.Location.getParameterMap());
+            if (lastN != null) {
+                raceColumnSelection = new LastNRacesColumnSelection(Integer.valueOf(lastN),
+                        new RaceTimesInfoProvider(sailingService, this, new ArrayList<RegattaAndRaceIdentifier>(),
+                                delayBetweenAutoAdvancesInMilliseconds));
+            } else {
+                if (preselectedRace == null) {
+                    raceColumnSelection = new ExplicitRaceColumnSelection();
+                } else {
+                    raceColumnSelection = new ExplicitRaceColumnSelectionWithPreselectedRace(preselectedRace);
+                }
+            }
+            Timer timer = new Timer(PlayModes.Replay, delayBetweenAutoAdvancesInMilliseconds);
             timer.setLivePlayDelayInMillis(delayToLiveMillis);
             final LeaderboardSettings leaderboardSettings = createLeaderboardSettingsFromURLParameters(Window.Location.getParameterMap());
             if (leaderboardSettings.getDelayBetweenAutoAdvancesInMilliseconds() != null) {
@@ -102,9 +125,9 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
             }
             LeaderboardPanel leaderboardPanel = new LeaderboardPanel(sailingService, new AsyncActionsExecutor(),
                     leaderboardSettings,
-                    getPreselectedRace(Window.Location.getParameterMap()), new CompetitorSelectionModel(
+                    preselectedRace, new CompetitorSelectionModel(
                             /* hasMultiSelection */true), timer, leaderboardName, leaderboardGroupName,
-                    LeaderboardEntryPoint.this, stringMessages, userAgent, showRaceDetails);
+                    LeaderboardEntryPoint.this, stringMessages, userAgent, showRaceDetails, raceColumnSelection);
             contentScrollPanel.setWidget(leaderboardPanel);
         }
 

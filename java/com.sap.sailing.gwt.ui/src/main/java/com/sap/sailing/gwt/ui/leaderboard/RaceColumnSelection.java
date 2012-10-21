@@ -40,4 +40,10 @@ public interface RaceColumnSelection {
      * are ordered in {@link LeaderboardDTO#getRaceList()}
      */
     Iterable<RaceColumnDTO> getSelectedRaceColumnsOrderedAsInLeaderboard(LeaderboardDTO leaderboard);
+
+    /**
+     * Tells the column selection that a new, probably updated version of the leaderboard is available. The race column
+     * selection shall take this as an opportunity to make adjustments to the selection that are to happen automatically. 
+     */
+    void autoUpdateRaceColumnSelectionForUpdatedLeaderboard(LeaderboardDTO oldLeaderboard, LeaderboardDTO newLeaderboard);
 }

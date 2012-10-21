@@ -89,7 +89,7 @@ public class TVViewPanel extends SimplePanel implements RaceTimesInfoProviderLis
         Timer timer = new Timer(PlayModes.Live, /* delayBetweenAutoAdvancesInMilliseconds */3000l);
         LeaderboardPanel leaderboardPanel = new LeaderboardPanel(sailingService, new AsyncActionsExecutor(), settings,
         /* preSelectedRace */null, selectionModel, timer, leaderboardName, null, errorReporter, stringMessages,
-                userAgent, showRaceDetails) {
+                userAgent, showRaceDetails, new ExplicitRaceColumnSelection()) {
             @Override
             protected void setLeaderboard(LeaderboardDTO leaderboard) {
                 super.setLeaderboard(leaderboard);
