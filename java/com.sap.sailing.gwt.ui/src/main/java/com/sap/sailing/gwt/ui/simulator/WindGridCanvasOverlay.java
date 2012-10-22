@@ -4,9 +4,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.logging.Logger;
@@ -16,6 +19,7 @@ import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.geom.LatLng;
 import com.google.gwt.maps.client.geom.Point;
 import com.google.gwt.maps.client.overlay.Overlay;
+import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.client.TimeListenerWithStoppingCriteria;
 import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.shared.PositionDTO;
@@ -44,6 +48,7 @@ public class WindGridCanvasOverlay extends FullCanvasOverlay implements TimeList
     private int xRes;
     private int yRes;
     private WindDTO[][] windMatrix;
+    private Map<Pair<Integer,Integer>, GridCell> gridCellMap;
     private WindGridColorPalette colorPalette;
     
     private static Logger logger = Logger.getLogger(WindFieldCanvasOverlay.class.getName());
@@ -123,16 +128,29 @@ public class WindGridCanvasOverlay extends FullCanvasOverlay implements TimeList
                 }
                 timePointWindDTOMap.get(w.timepoint).add(w);
             }
+        
+        
+            SortByWindSpeed windSpeedSorter = new SortByWindSpeed();
+            double maxSpeed = Collections.max(wl.getMatrix(), windSpeedSorter).trueWindSpeedInKnots;
+            double minSpeed = Collections.min(wl.getMatrix(), windSpeedSorter).trueWindSpeedInKnots;
+            System.out.println("minSpeed: " + minSpeed + " maxSpeed: " + maxSpeed);
+        
+            colorPalette = new WindGridColorPalette(minSpeed,maxSpeed);
+            logger.fine("Color minSpeed: " + colorPalette.getColor(minSpeed));
+            logger.fine("Color maxSpeed: " + colorPalette.getColor(maxSpeed));
+        
+            /**
+             * Get the wind at first time point to capture the positions on the grid.
+             */
+            Long firstTimePoint = timePointWindDTOMap.firstKey();
+            SortedMap<Long, List<WindDTO>> headMap = (timePointWindDTOMap.headMap(firstTimePoint+1));
+            List<WindDTO> windDTOToDraw;
+            if (!headMap.isEmpty()) {
+              windDTOToDraw = headMap.get(headMap.lastKey());
+              createPositionGrid(windDTOToDraw);
+            }
+           
         }
-        
-        SortByWindSpeed windSpeedSorter = new SortByWindSpeed();
-        double maxSpeed = Collections.max(wl.getMatrix(), windSpeedSorter).trueWindSpeedInKnots;
-        double minSpeed = Collections.min(wl.getMatrix(), windSpeedSorter).trueWindSpeedInKnots;
-        System.out.println("minSpeed: " + minSpeed + " maxSpeed: " + maxSpeed);
-        
-        colorPalette = new WindGridColorPalette(minSpeed,maxSpeed);
-        logger.fine("Color minSpeed: " + colorPalette.getColor(minSpeed));
-        logger.fine("Color maxSpeed: " + colorPalette.getColor(maxSpeed));
     }
     
     @Override
@@ -221,8 +239,10 @@ public class WindGridCanvasOverlay extends FullCanvasOverlay implements TimeList
                 logger.warning("Error in WindGridCanvasOverlay wind field is not rectangular.");
                 return;
             }
-            createPositionGrid(windDTOList);
-            createGridCell();
+            //createPositionGrid(windDTOList);
+            //createGridCell();
+            updatePositionGrid(windDTOList);
+            drawGridCell();
            
             String title = "Wind Grid at " + windDTOList.size() + " points.";
             getCanvas().setTitle(title);
@@ -287,7 +307,24 @@ public class WindGridCanvasOverlay extends FullCanvasOverlay implements TimeList
             this.windMatrix = null;
             return;
         }
-        this.windMatrix = new WindDTO[yRes][xRes];
+        this.windMatrix = new WindDTO[yRes+2][xRes];
+        Iterator<WindDTO> windDTOIter = windDTOList.iterator();
+       
+       for(int i = 1; i < yRes+1; ++i) {
+           for (int j = 0; j < xRes; ++j) {
+               windMatrix[i][j] = windDTOIter.next();    
+           }
+       }
+       extendPositionGrid();
+       
+       createGridCell();
+    }
+    
+    private void updatePositionGrid(List<WindDTO> windDTOList) {
+        if (windDTOList.size() != xRes*yRes) {
+            logger.warning("Error in WindGridCanvasOverlay wind field is not rectangular.");
+            return;
+        }
         Iterator<WindDTO> windDTOIter = windDTOList.iterator();
        
        for(int i = 0; i < yRes; ++i) {
@@ -295,6 +332,51 @@ public class WindGridCanvasOverlay extends FullCanvasOverlay implements TimeList
                windMatrix[i][j] = windDTOIter.next();    
            }
        }
+       updateGridCell();
+    }
+    
+    /**
+     * Create extra row before the first and after the last row to ensure the start and end points are covered
+     * by the grid cells.
+     */
+    private void extendPositionGrid() {
+        
+        int numRow = windMatrix.length;
+        
+        if (numRow < 4) {
+            return;
+        }
+        /*
+         * Row before the first row
+         */
+        for (int j = 0; j < xRes; ++j) {
+            PositionDTO position = new PositionDTO();
+            PositionDTO p1 = windMatrix[1][j].position;
+            PositionDTO p2 = windMatrix[2][j].position;
+            position.latDeg = 2*p1.latDeg - p2.latDeg;
+            position.lngDeg = 2*p1.lngDeg - p2.lngDeg;
+            WindDTO windDTO = new WindDTO();
+            //Only the position of this windDTO is used
+            windDTO.position = position;
+            //windDTO.trueWindSpeedInKnots = 0.0;
+            windMatrix[0][j]  = windDTO;
+        }
+        
+        /*
+         * Row after the last row
+         */
+        for (int j = 0; j < xRes; ++j) {
+            PositionDTO position = new PositionDTO();
+            PositionDTO p1 = windMatrix[numRow-2][j].position;
+            PositionDTO p2 = windMatrix[numRow-3][j].position;
+            position.latDeg = 2*p1.latDeg - p2.latDeg;
+            position.lngDeg = 2*p1.lngDeg - p2.lngDeg;
+            WindDTO windDTO = new WindDTO();
+            //Only the position of this windDTO is used
+            windDTO.position = position;
+            //windDTO.trueWindSpeedInKnots = 0.0;
+            windMatrix[numRow-1][j]  = windDTO;
+        }
     }
     
     private void createGridCell() {
@@ -302,6 +384,7 @@ public class WindGridCanvasOverlay extends FullCanvasOverlay implements TimeList
             int numRow = windMatrix.length;
             if (numRow >= 1) {
                 int numCol = windMatrix[0].length;
+                gridCellMap = new HashMap<Pair<Integer,Integer>, GridCell>();
                 for (int i = 1; i < numRow-1; ++i) {
                     for (int j = 1; j < numCol-1; ++j) {
                       PositionDTO bl = getCenter(windMatrix[i-1][j-1].position, windMatrix[i-1][j].position,windMatrix[i][j].position,windMatrix[i][j-1].position);
@@ -309,11 +392,38 @@ public class WindGridCanvasOverlay extends FullCanvasOverlay implements TimeList
                       PositionDTO br = getCenter(windMatrix[i-1][j].position, windMatrix[i-1][j+1].position,windMatrix[i][j].position,windMatrix[i][j+1].position);
                       PositionDTO tr = getCenter(windMatrix[i][j].position, windMatrix[i][j+1].position,windMatrix[i+1][j].position,windMatrix[i+1][j+1].position);
                       GridCell cell = new GridCell(bl,br,tl,tr,windMatrix[i][j].trueWindSpeedInKnots);
-                      drawGridCell(cell);
+                      Pair<Integer,Integer> cellPair = new Pair<Integer,Integer>(i, j);
+                      gridCellMap.put(cellPair, cell);
+                      //drawGridCell(cell);
                     }
                 }
             }
            
+        }
+    }
+    
+    private void updateGridCell() {
+        if (windMatrix != null) {
+            int numRow = windMatrix.length;
+            if (numRow >= 1) {
+                int numCol = windMatrix[0].length;     
+                for (int i = 1; i < numRow-1; ++i) {
+                    for (int j = 1; j < numCol-1; ++j) {
+                      Pair<Integer,Integer> cellPair = new Pair<Integer,Integer>(i, j);
+                      GridCell cell = gridCellMap.get(cellPair);
+                      cell.windSpeedInKnots = windMatrix[i][j].trueWindSpeedInKnots;
+                    }
+                }
+            }
+           
+        }
+        
+    }
+    
+    private void drawGridCell() {
+        
+        for (Entry<Pair<Integer, Integer>, GridCell> cell:gridCellMap.entrySet()) {
+            drawGridCell(cell.getValue());
         }
     }
     
