@@ -75,6 +75,7 @@ import com.sap.sailing.gwt.ui.client.TimeListener;
 import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.client.Timer.PlayStates;
 import com.sap.sailing.gwt.ui.client.WindSourceTypeFormatter;
+import com.sap.sailing.gwt.ui.shared.BoatClassDTO;
 import com.sap.sailing.gwt.ui.shared.BuoyDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 import com.sap.sailing.gwt.ui.shared.CourseDTO;
@@ -388,7 +389,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                                     
                                     // Do mark specific actions
                                     showMarksOnMap(raceMapDataDTO.coursePositions);
-                                    showBuoysOnMap(raceMapDataDTO.coursePositions);
+                                    showBuoysOnMap(raceMapDataDTO.coursePositions, raceMapDataDTO.boatClass);
                                     showStartAndFinishLines(raceMapDataDTO.coursePositions);
                                     showAdvantageLine(competitorsToShow, date);
                                         
@@ -606,15 +607,15 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         }
     }
 
-    protected void showBuoysOnMap(CourseDTO courseDTO) {
+    protected void showBuoysOnMap(CourseDTO courseDTO, BoatClassDTO boatClassDTO) {
         if (map != null) {
-            if (settings.isShowBuoyZones()) {
+            if (settings.isShowBuoyZones() && boatClassDTO != null) {
                 Set<BuoyDTO> toRemoveBuoyOverlays = new HashSet<BuoyDTO>(buoyOverlays.keySet());
                 for (BuoyDTO buoyDTO : courseDTO.buoys) {
                     if(buoyDTO.position != null) {
                         BuoyOverlay buoyOverlay = buoyOverlays.get(buoyDTO);
                         if (buoyOverlay == null) {
-                            buoyOverlay = createBuoyOverlay(buoyDTO);
+                            buoyOverlay = createBuoyOverlay(buoyDTO, boatClassDTO);
                             buoyOverlays.put(buoyDTO, buoyOverlay);
                             map.addOverlay(buoyOverlay);
                             buoyOverlay.redraw(true);
@@ -1013,8 +1014,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         return new CompetitorInfoOverlay(competitorDTO, raceMapImageManager);
     }
 
-    protected BuoyOverlay createBuoyOverlay(final BuoyDTO buoyDTO) {
-        return new BuoyOverlay(buoyDTO);
+    protected BuoyOverlay createBuoyOverlay(final BuoyDTO buoyDTO, BoatClassDTO boatClassDTO) {
+        return new BuoyOverlay(buoyDTO, boatClassDTO);
     }
     
     private BoatCanvasOverlay createBoatCanvas(final CompetitorDTO competitorDTO, boolean highlighted) {

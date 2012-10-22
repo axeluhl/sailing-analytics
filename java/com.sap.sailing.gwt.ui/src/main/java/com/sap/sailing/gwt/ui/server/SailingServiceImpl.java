@@ -53,7 +53,6 @@ import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
-import com.sap.sailing.domain.base.impl.MeterDistance;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Color;
@@ -85,6 +84,7 @@ import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KilometersPerHourSpeedImpl;
+import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
@@ -1348,6 +1348,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         raceMapDataDTO.boatPositions = getBoatPositions(raceIdentifier, from, to, extrapolate);
         raceMapDataDTO.coursePositions = getCoursePositions(raceIdentifier, date); 
         raceMapDataDTO.quickRanks = getQuickRanks(raceIdentifier, date);
+        raceMapDataDTO.boatClass = getBoatClass(raceIdentifier);
         
         return raceMapDataDTO;
     }    
@@ -1702,6 +1703,16 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return startBuoyPositions;
     }
 
+    private BoatClassDTO getBoatClass(RegattaAndRaceIdentifier regattaAndRaceIdentifier) {
+        BoatClassDTO result = null;
+        Regatta regatta = getService().getRegatta(regattaAndRaceIdentifier);
+        BoatClass regattaBoatClass = regatta.getBoatClass();
+        if(regattaBoatClass != null) {
+            result = new BoatClassDTO(regattaBoatClass.getName(), regattaBoatClass.getHullLength().getMeters());
+        }
+        return result;
+    }
+    
     @Override
     public List<QuickRankDTO> getQuickRanks(RegattaAndRaceIdentifier raceIdentifier, Date date) throws NoWindException {
         List<QuickRankDTO> result = new ArrayList<QuickRankDTO>();
