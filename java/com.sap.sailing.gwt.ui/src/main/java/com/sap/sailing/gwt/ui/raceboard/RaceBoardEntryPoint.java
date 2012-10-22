@@ -115,7 +115,7 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
                     break;
                 }
             }
-            if(!foundLeaderboard) {
+            if (!foundLeaderboard) {
                 createErrorPage("the leaderboard is not contained in this leaderboard group.");
                 return;
             }

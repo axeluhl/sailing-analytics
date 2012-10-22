@@ -1075,9 +1075,9 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     @Override
     public boolean hasGPSData() {
         boolean result = false;
-        if(!tracks.values().isEmpty()) {
-            for(GPSFixTrack<Competitor, GPSFixMoving> gpsTrack: tracks.values()) {
-                if(gpsTrack.getFirstRawFix() != null) {
+        if (!tracks.values().isEmpty()) {
+            for (GPSFixTrack<Competitor, GPSFixMoving> gpsTrack : tracks.values()) {
+                if (gpsTrack.getFirstRawFix() != null) {
                     result = true;
                     break;
                 }
@@ -1379,7 +1379,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     }
 
     @Override
-    public  void waypointRemoved(int zeroBasedIndex, Waypoint waypointThatGotRemoved) {
+    public void waypointRemoved(int zeroBasedIndex, Waypoint waypointThatGotRemoved) {
         invalidateMarkPassingTimes();
         LockUtil.lockForRead(serializationLock);
         try {
@@ -1402,6 +1402,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                 toRemove = last;
             }
             if (toRemove != null) {
+                logger.info("Removing tracked leg starting at "+toRemove.getFrom()+" from tracked race "+getRace().getName());
                 trackedLegs.remove(toRemove);
                 updated(/* time point */null);
             }

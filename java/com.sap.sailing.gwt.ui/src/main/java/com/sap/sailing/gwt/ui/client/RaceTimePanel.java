@@ -13,7 +13,7 @@ import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.components.SettingsDialogComponent;
 
 public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements RaceSelectionChangeListener, RaceTimesInfoProviderListener {
-    private RaceTimesInfoProvider raceTimesInfoProvider;
+    private final RaceTimesInfoProvider raceTimesInfoProvider;
     private RegattaAndRaceIdentifier selectedRace;
     private boolean autoAdjustPlayMode;
     private RaceTimesInfoDTO lastRaceTimesInfo;
@@ -84,9 +84,10 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
     
     @Override
     public void onTimeZoomChanged(Date zoomStartTimepoint, Date zoomEndTimepoint) {
+        super.onTimeZoomChanged(zoomStartTimepoint, zoomEndTimepoint);
         isTimeZoomed = true;
         timeSlider.setZoomed(true);
-        timer.setAutoAdvance(false);
+//        timer.setAutoAdvance(false);
         setMinMax(zoomStartTimepoint, zoomEndTimepoint, false);
         timeSlider.clearMarkersAndLabelsAndTicks();
         redrawAllMarkers(lastRaceTimesInfo);
@@ -94,9 +95,10 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
 
     @Override
     public void onTimeZoomReset() {
+        super.onTimeZoomReset();
         isTimeZoomed = false;
         timeSlider.setZoomed(false);
-        timer.setAutoAdvance(true);
+//        timer.setAutoAdvance(true);
         updateMinMax(this.lastRaceTimesInfo);
         timeSlider.clearMarkersAndLabelsAndTicks();
         redrawAllMarkers(lastRaceTimesInfo);

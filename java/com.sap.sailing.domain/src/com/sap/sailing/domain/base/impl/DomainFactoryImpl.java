@@ -118,6 +118,16 @@ public class DomainFactoryImpl implements DomainFactory {
         }
         return result;
     }
+    
+    @Override
+    public Buoy getOrCreateBuoy(String id, String displayColor) {
+        Buoy result = buoyCache.get(id);
+        if (result == null) {
+            result = new BuoyImpl(id, displayColor);
+            buoyCache.put(id, result);
+        }
+        return result;
+    }
 
     @Override
     public Gate createGate(Buoy left, Buoy right, String name) {

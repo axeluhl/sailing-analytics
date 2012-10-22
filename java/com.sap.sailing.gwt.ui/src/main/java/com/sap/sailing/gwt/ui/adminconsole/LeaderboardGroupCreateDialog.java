@@ -12,7 +12,8 @@ public class LeaderboardGroupCreateDialog extends LeaderboardGroupDialog {
         super(new LeaderboardGroupDTO(), stringMessages,
                 callback, existingGroups);
         nameEntryField = createTextBox(null);
-        descriptionEntryField = createTextArea(null);
+        descriptionEntryField = createTextArea(null);      
+        displayGroupsInReverseOrderCheckBox.setValue(false);
+        useOverallLeaderboardCheckBox.setValue(false);     
     }
-
 }

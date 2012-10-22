@@ -100,7 +100,7 @@ public class WindSettingDialog extends DataEntryDialog<WindDTO> {
 
         result.trueWindSpeedInKnots = speedInKnotsBox.getValue();
         result.trueWindFromDeg = fromInDegBox.getValue();
-        result.timepoint = timeBox.getValue() != null ? timeBox.getValue().getTime() : System.currentTimeMillis();
+        result.measureTimepoint = timeBox.getValue() != null ? timeBox.getValue().getTime() : System.currentTimeMillis();
         if (latDegBox.getValue() != null && lngDegBox.getValue() != null) {
             result.position = new PositionDTO(latDegBox.getValue(), lngDegBox.getValue());
         }

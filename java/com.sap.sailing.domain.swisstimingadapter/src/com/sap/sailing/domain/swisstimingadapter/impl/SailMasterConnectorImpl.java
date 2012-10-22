@@ -42,6 +42,7 @@ import com.sap.sailing.domain.swisstimingadapter.Competitor;
 import com.sap.sailing.domain.swisstimingadapter.Course;
 import com.sap.sailing.domain.swisstimingadapter.Fix;
 import com.sap.sailing.domain.swisstimingadapter.Mark;
+import com.sap.sailing.domain.swisstimingadapter.Mark.MarkType;
 import com.sap.sailing.domain.swisstimingadapter.MessageType;
 import com.sap.sailing.domain.swisstimingadapter.Race;
 import com.sap.sailing.domain.swisstimingadapter.RaceSpecificMessageLoader;
@@ -336,7 +337,7 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
                 parseHHMMSSToMilliseconds(details[2]);
             markIndicesRanksAndTimesSinceStartInMilliseconds.add(new Triple<Integer, Integer, Long>(markIndex, rank, timeSinceStartInMilliseconds));
         }
-        for (SailMasterListener listener : listeners) {
+        for (SailMasterListener listener : getGeneralAndRaceSpecificListeners(message.getRaceID())) {
             try {
                 listener.receivedTimingData(raceID, boatID, markIndicesRanksAndTimesSinceStartInMilliseconds);
             } catch (Throwable t) {
@@ -344,22 +345,11 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
                 logger.throwing(SailMasterConnectorImpl.class.getName(), "notifyListenersTMD", t);
             }
         }
-        Set<SailMasterListener> raceSpecificListenerSet = raceSpecificListeners.get(message.getRaceID());
-        if (raceSpecificListenerSet != null) {
-            for (SailMasterListener listener : raceSpecificListenerSet) {
-                try {
-                    listener.receivedTimingData(raceID, boatID, markIndicesRanksAndTimesSinceStartInMilliseconds);
-                } catch (Throwable t) {
-                    logger.info("Exception occurred trying to notify listener "+listener+" about "+message+": "+t.getMessage());
-                    logger.throwing(SailMasterConnectorImpl.class.getName(), "notifyListenersTMD", t);
-                }
-            }
-        }
     }
 
     private void notifyListenersCAM(SailMasterMessage message) throws ParseException {
         List<Triple<Integer, TimePoint, String>> clockAtMarkResults = parseClockAtMarkMessage(message);
-        for (SailMasterListener listener : listeners) {
+        for (SailMasterListener listener : getGeneralAndRaceSpecificListeners(message.getRaceID())) {
             try {
                 listener.receivedClockAtMark(message.getSections()[1], clockAtMarkResults);
             } catch (Throwable t) {
@@ -367,22 +357,11 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
                 logger.throwing(SailMasterConnectorImpl.class.getName(), "notifyListenersCAM", t);
             }
         }
-        Set<SailMasterListener> raceSpecificListenerSet = raceSpecificListeners.get(message.getRaceID());
-        if (raceSpecificListenerSet != null) {
-            for (SailMasterListener listener : raceSpecificListenerSet) {
-                try {
-                    listener.receivedClockAtMark(message.getSections()[1], clockAtMarkResults);
-                } catch (Throwable t) {
-                    logger.info("Exception occurred trying to notify listener "+listener+" about "+message+": "+t.getMessage());
-                    logger.throwing(SailMasterConnectorImpl.class.getName(), "notifyListenersCAM", t);
-                }
-            }
-        }
     }
 
     private void notifyListenersSTL(SailMasterMessage message) {
         StartList startListMessage = parseStartListMessage(message);
-        for (SailMasterListener listener : listeners) {
+        for (SailMasterListener listener : getGeneralAndRaceSpecificListeners(message.getRaceID())) {
             try {
                 listener.receivedStartList(message.getSections()[1], startListMessage);
             } catch (Throwable t) {
@@ -390,37 +369,16 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
                 logger.throwing(SailMasterConnectorImpl.class.getName(), "notifyListenersSTL", t);
             }
         }
-        Set<SailMasterListener> raceSpecificListenerSet = raceSpecificListeners.get(message.getRaceID());
-        if (raceSpecificListenerSet != null) {
-            for (SailMasterListener listener : raceSpecificListenerSet) {
-                try {
-                    listener.receivedStartList(message.getSections()[1], startListMessage);
-                } catch (Throwable t) {
-                    logger.info("Exception occurred trying to notify listener "+listener+" about "+message+": "+t.getMessage());
-                    logger.throwing(SailMasterConnectorImpl.class.getName(), "notifyListenersSTL", t);
-                }
-            }
-        }
     }
 
     private void notifyListenersCCG(SailMasterMessage message) {
         Course course = parseCourseConfigurationMessage(message);
-        for (SailMasterListener listener : listeners) {
+        for (SailMasterListener listener : getGeneralAndRaceSpecificListeners(message.getRaceID())) {
             try {
                 listener.receivedCourseConfiguration(message.getSections()[1], course);
             } catch (Throwable t) {
                 logger.info("Exception occurred trying to notify listener "+listener+" about "+message+": "+t.getMessage());
                 logger.throwing(SailMasterConnectorImpl.class.getName(), "notifyListenersCCG", t);
-            }
-        }
-        Set<SailMasterListener> raceSpecificListenerSet = raceSpecificListeners.get(message.getRaceID());
-        if (raceSpecificListenerSet != null) {
-            for (SailMasterListener listener : raceSpecificListenerSet) {
-                try {
-                    listener.receivedCourseConfiguration(message.getSections()[1], course);
-                } catch (Throwable t) {
-                    logger.throwing(SailMasterConnectorImpl.class.getName(), "notifyListenersCCG", t);
-                }
             }
         }
     }
@@ -458,42 +416,52 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
         Collection<Fix> fixes = new ArrayList<Fix>();
         for (int i=0; i<count; i++) {
             int fixDetailIndex = 0;
-            String[] fixSections = sections[9+i].split(";");
+            final String[] fixSections = sections[9+i].split(";");
+            final boolean postVersion1_0 = sections[9+i].split(";", -1).length >= 14;
             if (fixSections.length > 2) {
-                String boatID = fixSections[fixDetailIndex++];
-                TrackerType trackerType = TrackerType.values()[Integer.valueOf(fixSections[fixDetailIndex++])];
-                Long ageOfDataInMilliseconds = 1000l * Long.valueOf(fixSections[fixDetailIndex++]);
-                Position position = new DegreePosition(Double.valueOf(fixSections[fixDetailIndex++]),
+                final String boatID = fixSections[fixDetailIndex++];
+                final TrackerType trackerType = TrackerType.values()[Integer.valueOf(fixSections[fixDetailIndex++])];
+                final Long ageOfDataInMilliseconds = 1000l * Long.valueOf(fixSections[fixDetailIndex++]);
+                final Position position = new DegreePosition(Double.valueOf(fixSections[fixDetailIndex++]),
                         Double.valueOf(fixSections[fixDetailIndex++]));
-                Double speedOverGroundInKnots = Double.valueOf(fixSections[fixDetailIndex++]);
-                Speed averageSpeedOverGround = fixSections[fixDetailIndex].trim().length() == 0 ? null
-                            : new KnotSpeedImpl(Double.valueOf(fixSections[fixDetailIndex]));
-                fixDetailIndex++;
-                Speed velocityMadeGood = fixSections[fixDetailIndex].trim().length() == 0 ? null : new KnotSpeedImpl(
-                        Double.valueOf(fixSections[fixDetailIndex]));
-                fixDetailIndex++;
-                SpeedWithBearing speed = new KnotSpeedWithBearingImpl(speedOverGroundInKnots, new DegreeBearingImpl(
-                        Double.valueOf(fixSections[fixDetailIndex++])));
-                Integer nextMarkIndex = fixSections.length <= fixDetailIndex
+                final Double speedOverGroundInKnots = Double.valueOf(fixSections[fixDetailIndex++]);
+                final int alsIndex = postVersion1_0 ? fixDetailIndex+1 : fixDetailIndex;
+                final int vmgIndex = postVersion1_0 ? fixDetailIndex : fixDetailIndex+1;
+                final Speed averageSpeedOverGround = fixSections[alsIndex].trim().length() == 0 ? null
+                            : new KnotSpeedImpl(Double.valueOf(fixSections[alsIndex]));
+                final Speed velocityMadeGood = fixSections[vmgIndex].trim().length() == 0 ? null : new KnotSpeedImpl(
+                        Double.valueOf(fixSections[vmgIndex]));
+                fixDetailIndex += 2;
+                final DegreeBearingImpl cog = new DegreeBearingImpl(
+                        Double.valueOf(fixSections[fixDetailIndex++]));
+                final SpeedWithBearing speed = new KnotSpeedWithBearingImpl(speedOverGroundInKnots, cog);
+                final Integer nextMarkIndex = fixSections.length <= fixDetailIndex
                         || fixSections[fixDetailIndex].trim().length() == 0 ? null : Integer
                         .valueOf(fixSections[fixDetailIndex]);
                 fixDetailIndex++;
-                Integer rank = fixSections.length <= fixDetailIndex || fixSections[fixDetailIndex].trim().length() == 0 ? null
+                final Integer rank = fixSections.length <= fixDetailIndex || fixSections[fixDetailIndex].trim().length() == 0 ? null
                         : Integer.valueOf(fixSections[fixDetailIndex]);
                 fixDetailIndex++;
-                Distance distanceToLeader = fixSections.length <= fixDetailIndex
+                final Distance distanceToLeader = fixSections.length <= fixDetailIndex
                         || fixSections[fixDetailIndex].trim().length() == 0 ? null : new MeterDistance(
                         Double.valueOf(fixSections[fixDetailIndex]));
                 fixDetailIndex++;
-                Distance distanceToNextMark = fixSections.length <= fixDetailIndex
+                final Distance distanceToNextMark = fixSections.length <= fixDetailIndex
                         || fixSections[fixDetailIndex].trim().length() == 0 ? null : new MeterDistance(
                         Double.valueOf(fixSections[fixDetailIndex]));
                 fixDetailIndex++;
+                final String boatIRM; // the "disqualification" or "MaxPointReason"
+                if (postVersion1_0 && fixSections.length > fixDetailIndex) {
+                    boatIRM = fixSections[fixDetailIndex++];
+                } else {
+                    boatIRM = null;
+                }
                 fixes.add(new FixImpl(boatID, trackerType, ageOfDataInMilliseconds, position, speed, nextMarkIndex,
-                        rank, averageSpeedOverGround, velocityMadeGood, distanceToLeader, distanceToNextMark));
+                        rank, averageSpeedOverGround, velocityMadeGood, distanceToLeader, distanceToNextMark, boatIRM));
             }
         }
-        for (SailMasterListener listener : listeners) {
+        Set<SailMasterListener> allListeners = getGeneralAndRaceSpecificListeners(message.getRaceID());
+        for (SailMasterListener listener : allListeners) {
             try {
                 listener.receivedRacePositionData(raceID, status, timePoint, startTimeEstimatedStartTime, millisecondsSinceRaceStart,
                         nextMarkIndexForLeader, distanceToNextMarkForLeader, fixes);
@@ -502,18 +470,15 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
                 logger.throwing(SailMasterConnectorImpl.class.getName(), "notifyListenersRPD", t);
             }
         }
-        Set<SailMasterListener> raceSpecificListenerSet = raceSpecificListeners.get(message.getRaceID());
-        if (raceSpecificListenerSet != null) {
-            for (SailMasterListener listener : raceSpecificListenerSet) {
-                try {
-                    listener.receivedRacePositionData(raceID, status, timePoint, startTimeEstimatedStartTime, millisecondsSinceRaceStart,
-                            nextMarkIndexForLeader, distanceToNextMarkForLeader, fixes);
-                } catch (Throwable t) {
-                    logger.info("Exception occurred trying to notify listener "+listener+" about "+message+": "+t.getMessage());
-                    logger.throwing(SailMasterConnectorImpl.class.getName(), "notifyListenersRPD", t);
-                }
-            }
+    }
+
+    private Set<SailMasterListener> getGeneralAndRaceSpecificListeners(String raceID) {
+        Set<SailMasterListener> allListeners = new HashSet<SailMasterListener>(listeners);
+        Set<SailMasterListener> listenersForThisRace = raceSpecificListeners.get(raceID);
+        if (listenersForThisRace != null) {
+            allListeners.addAll(listenersForThisRace);
         }
+        return allListeners;
     }
 
     @Override
@@ -630,7 +595,20 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
         List<Mark> marks = new ArrayList<Mark>();
         for (int i=0; i<count; i++) {
             String[] markDetails = courseConfigurationMessage.getSections()[3+i].split(";");
-            marks.add(new MarkImpl(markDetails[1], Integer.valueOf(markDetails[0]), Arrays.asList(markDetails).subList(2, markDetails.length)));
+            MarkType markType = null;
+            final int devicesNamesStartIndex;
+            if (courseConfigurationMessage.getSections()[3+i].split(";", -1).length == 5) {
+                // this is the SailMaster protocol version 1.0 (May 2012) or later (see bug 1000), containing
+                // a MarkType specification before the two tracker IDs:
+                int markTypeIndex = Integer.valueOf(markDetails[2]);
+                markType = MarkType.values()[markTypeIndex];
+                devicesNamesStartIndex = 3;
+            } else {
+                devicesNamesStartIndex = 2;
+            }
+            marks.add(new MarkImpl(markDetails[1], Integer.valueOf(markDetails[0]),
+                    Arrays.asList(markDetails).subList(devicesNamesStartIndex, markDetails.length),
+                    markType));
         }
         return new CourseImpl(courseConfigurationMessage.getSections()[1], marks);
     }

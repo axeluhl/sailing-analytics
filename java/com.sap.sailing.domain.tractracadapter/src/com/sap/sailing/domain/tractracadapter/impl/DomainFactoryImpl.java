@@ -140,24 +140,14 @@ public class DomainFactoryImpl implements DomainFactory {
             com.sap.sailing.domain.base.ControlPoint domainControlPoint = controlPointCache.get(controlPoint);
             if (domainControlPoint == null) {
                 String controlPointName = controlPoint.getName();
-                Pair<String, String> parsedControlPoint = parseControlPointForColor(controlPointName);
-                if(parsedControlPoint != null) {
-                    controlPointName = parsedControlPoint.getA(); 
-                }
+                Pair<String, String> controlPointNameAndColor = getControlPointNameAndColor(controlPointName);
                 if (controlPoint.getHasTwoPoints()) {
                     // it's a gate
-                    Buoy leftBuoy = baseDomainFactory.getOrCreateBuoy(controlPointName + " (left)");
-                    Buoy rightBuoy = baseDomainFactory.getOrCreateBuoy(controlPointName + " (right)");
-                    domainControlPoint = baseDomainFactory.createGate(leftBuoy, rightBuoy, controlPointName);
-                    if(parsedControlPoint != null)  {
-                        leftBuoy.setDisplayColor(parsedControlPoint.getB());
-                        rightBuoy.setDisplayColor(parsedControlPoint.getB());
-                    }
+                    Buoy leftBuoy = baseDomainFactory.getOrCreateBuoy(controlPointNameAndColor.getA() + " (left)", controlPointNameAndColor.getB());
+                    Buoy rightBuoy = baseDomainFactory.getOrCreateBuoy(controlPointNameAndColor.getA() + " (right)", controlPointNameAndColor.getB());
+                    domainControlPoint = baseDomainFactory.createGate(leftBuoy, rightBuoy, controlPointNameAndColor.getA());
                 } else {
-                    Buoy buoy = baseDomainFactory.getOrCreateBuoy(controlPointName);
-                    if(parsedControlPoint != null)  {
-                        buoy.setDisplayColor(parsedControlPoint.getB());
-                    }  
+                    Buoy buoy = baseDomainFactory.getOrCreateBuoy(controlPointNameAndColor.getA(), controlPointNameAndColor.getB());
                     domainControlPoint = buoy;
                 }
                 controlPointCache.put(controlPoint, domainControlPoint);
@@ -168,17 +158,17 @@ public class DomainFactoryImpl implements DomainFactory {
     
     // TODO: This is a special hack for the extreme sailing series event where we encoded the buoy color directly into the buoy name
     // this will be replaced later with the new 'metadata' facility of the TTCM
-    private Pair<String, String> parseControlPointForColor(final String controlPointNameWithColor) {
-        Pair<String, String> result = null;
-        String parsedControlPointName = controlPointNameWithColor;
-
+    private Pair<String, String> getControlPointNameAndColor(final String controlPointNameWithOptionalColor) {
+        Pair<String, String> result;
         String colorTag = "_COLOR:";
-        if(controlPointNameWithColor.contains(colorTag)) {
-            int index = controlPointNameWithColor.indexOf(colorTag);
-            String color = controlPointNameWithColor.substring(index + colorTag.length(), controlPointNameWithColor.length());
-            parsedControlPointName = controlPointNameWithColor.substring(0, index);
-            result = new Pair<String, String>(parsedControlPointName, color);
+        String color = null;
+        String name = controlPointNameWithOptionalColor;
+        int index = controlPointNameWithOptionalColor.indexOf(colorTag);
+        if (index >= 0) {
+            color = controlPointNameWithOptionalColor.substring(index + colorTag.length(), controlPointNameWithOptionalColor.length());
+            name = controlPointNameWithOptionalColor.substring(0, index);
         }
+        result = new Pair<String, String>(name, color);
         return result;
     }
     

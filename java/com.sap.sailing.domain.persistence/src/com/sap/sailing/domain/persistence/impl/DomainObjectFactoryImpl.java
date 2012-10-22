@@ -432,6 +432,11 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         DBCollection leaderboardCollection = database.getCollection(CollectionNames.LEADERBOARDS.name());
         String name = (String) o.get(FieldNames.LEADERBOARD_GROUP_NAME.name());
         String description = (String) o.get(FieldNames.LEADERBOARD_GROUP_DESCRIPTION.name());
+        boolean displayGroupsInReverseOrder = false; // default value 
+        Object displayGroupsInReverseOrderObj = o.get(FieldNames.LEADERBOARD_GROUP_DISPLAY_IN_REVERSE_ORDER.name());
+        if(displayGroupsInReverseOrderObj != null) {
+            displayGroupsInReverseOrder = (Boolean) displayGroupsInReverseOrderObj; 
+        }
         ArrayList<Leaderboard> leaderboards = new ArrayList<Leaderboard>();
         BasicDBList dbLeaderboardIds = (BasicDBList) o.get(FieldNames.LEADERBOARD_GROUP_LEADERBOARDS.name());
         for (Object object : dbLeaderboardIds) {
@@ -443,7 +448,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             }
         }
         logger.info("loaded leaderboard group "+name);
-        LeaderboardGroupImpl result = new LeaderboardGroupImpl(name, description, leaderboards);
+        LeaderboardGroupImpl result = new LeaderboardGroupImpl(name, description, displayGroupsInReverseOrder, leaderboards);
         Object overallLeaderboardIdOrName = o.get(FieldNames.LEADERBOARD_GROUP_OVERALL_LEADERBOARD.name());
         if (overallLeaderboardIdOrName != null) {
             final DBObject dbOverallLeaderboard;
