@@ -199,6 +199,10 @@ public class DelayedLeaderboardCorrectionsImpl implements DelayedLeaderboardCorr
     }
 
     @Override
+    public void raceColumnMoved(RaceColumn raceColumn, int newIndex) {
+    }
+
+    @Override
     public boolean isTransient() {
         return false;
     }

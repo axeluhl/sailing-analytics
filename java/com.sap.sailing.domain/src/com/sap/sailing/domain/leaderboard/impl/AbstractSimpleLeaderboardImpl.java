@@ -417,6 +417,11 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     public void isMedalRaceChanged(RaceColumn raceColumn, boolean newIsMedalRace) {
         getRaceColumnListeners().notifyListenersAboutIsMedalRaceChanged(raceColumn, newIsMedalRace);
     }
+    
+    @Override
+    public void raceColumnMoved(RaceColumn raceColumn, int newIndex) {
+        getRaceColumnListeners().notifyListenersAboutRaceColumnMoved(raceColumn, newIndex);
+    }
 
     /**
      * A leaderboard will only accept the addition of a race column if the column's name is unique across the leaderboard.

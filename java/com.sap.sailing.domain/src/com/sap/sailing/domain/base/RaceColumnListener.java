@@ -17,6 +17,8 @@ public interface RaceColumnListener extends Serializable {
     
     void raceColumnRemovedFromContainer(RaceColumn raceColumn);
     
+    void raceColumnMoved(RaceColumn raceColumn, int newIndex);
+    
     /**
      * A listener can use this to specify that it must not be serialized together with other listeners.
      * Background: the collections holding race column listeners are usually non-transient. This will cause

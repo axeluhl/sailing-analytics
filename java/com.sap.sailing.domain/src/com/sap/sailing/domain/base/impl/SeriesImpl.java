@@ -224,6 +224,11 @@ public class SeriesImpl extends NamedImpl implements Series, RaceColumnListener 
     }
 
     @Override
+    public void raceColumnMoved(RaceColumn raceColumn, int newIndex) {
+        raceColumnListeners.notifyListenersAboutRaceColumnMoved(raceColumn, newIndex);
+    }
+
+    @Override
     public boolean isTransient() {
         return false;
     }

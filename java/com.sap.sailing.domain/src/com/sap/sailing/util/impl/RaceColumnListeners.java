@@ -87,6 +87,12 @@ public class RaceColumnListeners implements Serializable {
         }
     }
 
+    public void notifyListenersAboutRaceColumnMoved(RaceColumn raceColumn, int newIndex) {
+        for (RaceColumnListener listener : getRaceColumnListeners()) {
+            listener.raceColumnMoved(raceColumn, newIndex);
+        }
+    }
+
     private Set<RaceColumnListener> getRaceColumnListeners() {
         synchronized (raceColumnListeners) {
             return new HashSet<RaceColumnListener>(raceColumnListeners);
@@ -103,4 +109,5 @@ public class RaceColumnListeners implements Serializable {
         }
         return result;
     }
+
 }
