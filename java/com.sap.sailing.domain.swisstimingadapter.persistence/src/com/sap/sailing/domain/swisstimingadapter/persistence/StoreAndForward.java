@@ -241,13 +241,23 @@ public class StoreAndForward implements Runnable {
     }
 
     public static void main(String[] args) throws InterruptedException, IOException {
-        int listenPort = Integer.valueOf(args[0]);
-        int clientPort = Integer.valueOf(args[1]);
+        String hostname = null;
+        int i=0;
+        if (args[i].equals("-h")) {
+            hostname = args[++i];
+            i++;
+        }
+        int sailMasterPort = Integer.valueOf(args[i++]);
+        int clientPort = Integer.valueOf(args[i++]);
         
         MongoDBService mongoDBService = MongoDBService.INSTANCE;
         mongoDBService.setConfiguration(MongoDBConfiguration.getDefaultConfiguration());
         SwissTimingAdapterPersistence swissTimingAdapterPersistence = SwissTimingAdapterPersistence.INSTANCE;
-        new StoreAndForward(listenPort, clientPort, SwissTimingFactory.INSTANCE, swissTimingAdapterPersistence, mongoDBService);
+        if (hostname == null) {
+            new StoreAndForward(sailMasterPort, clientPort, SwissTimingFactory.INSTANCE, swissTimingAdapterPersistence, mongoDBService);
+        } else {
+            new StoreAndForward(hostname, sailMasterPort, clientPort, SwissTimingFactory.INSTANCE, swissTimingAdapterPersistence, mongoDBService);
+        }
     }
 
     public void run() {
