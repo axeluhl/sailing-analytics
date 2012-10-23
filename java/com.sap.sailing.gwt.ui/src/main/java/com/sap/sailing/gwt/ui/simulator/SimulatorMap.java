@@ -43,6 +43,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
     private WindFieldGenParamsDTO windParams;
     private WindFieldCanvasOverlay windFieldCanvasOverlay;
     private WindGridCanvasOverlay windGridCanvasOverlay;
+    private WindLineCanvasOverlay windLineCanvasOverlay;
     private List<PathCanvasOverlay> pathCanvasOverlays;
     private List<PathCanvasOverlay> replayPathCanvasOverlays;
     private RaceCourseCanvasOverlay raceCourseCanvasOverlay;
@@ -170,6 +171,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
                 
                 if (showGrid) {
                     mapw.addOverlay(windGridCanvasOverlay);
+                    mapw.addOverlay(windLineCanvasOverlay);
                 }
                 mapw.addOverlay(windFieldCanvasOverlay);
                
@@ -179,6 +181,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
                 timeListeners.add(windFieldCanvasOverlay);
                 if (showGrid) {
                     timeListeners.add(windGridCanvasOverlay);
+                    timeListeners.add(windLineCanvasOverlay);
                 }
                 for (int i = 0; i < replayPathCanvasOverlays.size(); ++i) {
                     timeListeners.add(replayPathCanvasOverlays.get(i));
@@ -215,6 +218,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
 
         windFieldCanvasOverlay = null;
         windGridCanvasOverlay = null;
+        windLineCanvasOverlay = null;
         pathCanvasOverlays = null;
         replayPathCanvasOverlays = null;
         raceCourseCanvasOverlay = null;
@@ -246,6 +250,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
 
         windFieldCanvasOverlay = null;
         windGridCanvasOverlay = null;
+        windLineCanvasOverlay = null;
         pathCanvasOverlays = null;
         replayPathCanvasOverlays = null;
         raceCourseCanvasOverlay = null;
@@ -292,11 +297,14 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
 
     private void initializeOverlays() {
         raceCourseCanvasOverlay = new RaceCourseCanvasOverlay();
+        raceCourseCanvasOverlay.getCanvas().getElement().setClassName("raceCourse");
+        System.out.println("RaceCourseCanvasOverlay z-index: " + raceCourseCanvasOverlay.getCanvas().getElement().getStyle().getZIndex());
         mapw.addOverlay(raceCourseCanvasOverlay);
 
         windFieldCanvasOverlay = new WindFieldCanvasOverlay(timer);
         if (showGrid) {
             windGridCanvasOverlay = new WindGridCanvasOverlay(timer, xRes, yRes);
+            windLineCanvasOverlay = new WindLineCanvasOverlay(timer);
         }
         // mapw.addOverlay(windFieldCanvasOverlay);
         pathCanvasOverlays = new ArrayList<PathCanvasOverlay>();
@@ -338,6 +346,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
                 // Window.alert("Number of windDTO : " + wl.getMatrix().size());
                 if (showGrid) {
                     mapw.addOverlay(windGridCanvasOverlay);
+                    mapw.addOverlay(windLineCanvasOverlay);
                 }
                 mapw.addOverlay(windFieldCanvasOverlay);
          
@@ -346,6 +355,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
                 timeListeners.add(windFieldCanvasOverlay);
                 if (showGrid) {
                     timeListeners.add(windGridCanvasOverlay);
+                    timeListeners.add(windLineCanvasOverlay);
                 }
                 timePanel.setMinMax(windParams.getStartTime(), windParams.getEndTime(), true);
                 timePanel.resetTimeSlider();
@@ -361,10 +371,14 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         if (windGridCanvasOverlay != null) {
             windGridCanvasOverlay.setWindField(wl);
         }
+        if (windLineCanvasOverlay != null) {
+            windLineCanvasOverlay.setWindLinesDTO(wl.getWindLinesDTO());
+        }
         timer.setTime(windParams.getStartTime().getTime());
         windFieldCanvasOverlay.redraw(true);
         if (showGrid) {
             windGridCanvasOverlay.redraw(true);
+            windLineCanvasOverlay.redraw(true);
         }
     }
 
@@ -419,10 +433,15 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         if (overlaysInitialized) {
             int num = 0;
             mapw.removeOverlay(windFieldCanvasOverlay);
+            num++;
             if (windGridCanvasOverlay != null) {
                 mapw.removeOverlay(windGridCanvasOverlay);
+                num++;
             }
-            num++;
+            if (windLineCanvasOverlay != null) {
+                mapw.removeOverlay(windLineCanvasOverlay);
+                num++;
+            }
             for (int i = 0; i < pathCanvasOverlays.size(); ++i) {
                 mapw.removeOverlay(pathCanvasOverlays.get(i));
                 num++;

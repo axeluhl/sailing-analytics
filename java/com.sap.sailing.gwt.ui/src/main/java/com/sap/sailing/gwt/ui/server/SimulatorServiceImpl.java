@@ -39,6 +39,7 @@ import com.sap.sailing.gwt.ui.shared.WindFieldDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldGenParamsDTO;
 import com.sap.sailing.gwt.ui.shared.WindLatticeDTO;
 import com.sap.sailing.gwt.ui.shared.WindLatticeGenParamsDTO;
+import com.sap.sailing.gwt.ui.shared.WindLinesDTO;
 import com.sap.sailing.gwt.ui.shared.WindPatternDTO;
 import com.sap.sailing.gwt.ui.shared.windpattern.WindPatternDisplay;
 import com.sap.sailing.gwt.ui.shared.windpattern.WindPatternDisplayManager;
@@ -49,6 +50,7 @@ import com.sap.sailing.simulator.Path;
 import com.sap.sailing.simulator.PolarDiagram;
 import com.sap.sailing.simulator.SailingSimulator;
 import com.sap.sailing.simulator.SimulationParameters;
+import com.sap.sailing.simulator.TimedPosition;
 import com.sap.sailing.simulator.TimedPositionWithSpeed;
 import com.sap.sailing.simulator.WindControlParameters;
 import com.sap.sailing.simulator.WindFieldGenerator;
@@ -59,6 +61,7 @@ import com.sap.sailing.simulator.impl.ReadingConfigurationFileStatus;
 import com.sap.sailing.simulator.impl.RectangularBoundary;
 import com.sap.sailing.simulator.impl.SailingSimulatorImpl;
 import com.sap.sailing.simulator.impl.SimulationParametersImpl;
+import com.sap.sailing.simulator.impl.TimedPositionImpl;
 import com.sap.sailing.simulator.impl.TimedPositionWithSpeedImpl;
 import com.sap.sailing.simulator.impl.Tuple;
 import com.sap.sailing.simulator.util.SailingSimulatorUtil;
@@ -217,6 +220,12 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
                                                                                      // 60 * 1000);
 
         wf.generate(startTime, null, timeStep);
+       
+        if (params.getMode() != SailingSimulatorUtil.measured) {
+            Position[] gridAreaGps = new Position[2];
+            gridAreaGps = course.toArray(gridAreaGps);
+            wf.setGridAreaGps(gridAreaGps); 
+        }
         /*
         List<WindDTO> wList = new ArrayList<WindDTO>();
 
@@ -318,9 +327,37 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         }
 
         windFieldDTO.setMatrix(wList);
+        getWindLines(wf, windFieldDTO);
+      
         return windFieldDTO;
     }
 
+    private void getWindLines(WindFieldGenerator wf, WindFieldDTO windFieldDTO) {
+        Position[] course = wf.getGridAreaGps();
+        /**
+         * TODO Check this works for the measured case
+         */
+        if (course != null && course.length > 1) {
+            /**
+             * Currently create only a single line from the start position at the start time.
+             */
+            TimedPosition tp = new TimedPositionImpl(wf.getStartTime(),course[0]);
+            Path p = wf.getLine(tp);
+            if (p != null) {
+                List<PositionDTO> positions = new ArrayList<PositionDTO>();
+                for (TimedPositionWithSpeed pathPoint : p.getPathPoints()) {
+                    Position position = pathPoint.getPosition();
+                    PositionDTO positionDTO = new PositionDTO(position.getLatDeg(), position.getLngDeg());
+                    positions.add(positionDTO);
+                }
+                WindLinesDTO windLinesDTO = new WindLinesDTO();
+                windLinesDTO.addWindLine(tp.getTimePoint().asMillis(), positions);
+                windFieldDTO.setWindLinesDTO(windLinesDTO);
+                logger.info("Added : " + windFieldDTO.getWindLinesDTO().getWindLinesMap().size() + " wind lines");
+            }
+        }
+    }
+    
     //I0077899 - Mihai Bogdan Eugen
     private SimulatedPathsEvenTimedResultDTO getSimulatedPathsEvenTimed(List<Position> course, WindFieldGenerator wf, char mode, int boatClassIndex) throws ConfigurationException {
 

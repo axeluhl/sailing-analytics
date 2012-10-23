@@ -16,6 +16,11 @@ public class WindFieldGenParamsDTO implements IsSerializable {
     private Date endTime;
     private Date timeStep;
 
+    /**
+     * Currently m is for measured
+     */
+    private char mode;
+    
     public WindFieldGenParamsDTO() {
         setDefaultTimeSettings();
     }
@@ -85,5 +90,13 @@ public class WindFieldGenParamsDTO implements IsSerializable {
 
         timeStep = new Date(15 * 1000);
         endTime = new Date(startTime.getTime() + 10 * 60 * 1000);
+    }
+
+    public char getMode() {
+        return mode;
+    }
+
+    public void setMode(char mode) {
+        this.mode = mode;
     }
 }

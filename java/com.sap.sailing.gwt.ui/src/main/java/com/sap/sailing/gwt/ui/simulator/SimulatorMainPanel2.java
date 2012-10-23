@@ -231,6 +231,7 @@ public class SimulatorMainPanel2 extends SplitLayoutPanel {
         directionSelector = new ListBox();
         directionSelector.getElement().getStyle().setProperty("width", "215px");
         windParams = new WindFieldGenParamsDTO();
+        windParams.setMode(mode);
         timer = new Timer(PlayModes.Replay, 1000l);
         timer.setAutoAdvance(false);
         // timer.setTime(windParams.getStartTime().getTime());
