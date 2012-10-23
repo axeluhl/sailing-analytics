@@ -217,6 +217,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
                                                                                      // 60 * 1000);
 
         wf.generate(startTime, null, timeStep);
+        /*
         List<WindDTO> wList = new ArrayList<WindDTO>();
 
         if (grid != null) {
@@ -225,6 +226,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
                 for (int i = 0; i < grid.length; i++) {
                     for (int j = 0; j < grid[0].length; j++) {
                         Wind localWind = wf.getWind(new TimedPositionWithSpeedImpl(t, grid[i][j], null));
+                  
                         logger.finer(localWind.toString());
                         WindDTO w = createWindDTO(localWind);
                         wList.add(w);
@@ -237,6 +239,9 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         WindFieldDTO wfDTO = new WindFieldDTO();
 
         wfDTO.setMatrix(wList);
+        */
+        
+        WindFieldDTO wfDTO = createWindFieldDTO(wf, startTime, endTime, timeStep);
         logger.info("Exiting getWindField");
         return wfDTO;
 
