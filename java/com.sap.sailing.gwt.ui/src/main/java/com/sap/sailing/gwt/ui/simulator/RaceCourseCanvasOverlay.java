@@ -71,7 +71,7 @@ public class RaceCourseCanvasOverlay extends FullCanvasOverlay {
         endPoint = null;
         startMarker = null;
         endMarker = null;
-        canvas.getElement().getStyle().setZIndex(10);
+        //canvas.getElement().getStyle().setZIndex(10);
     }
 
     public void reset() {
