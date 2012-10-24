@@ -252,14 +252,12 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
 
     private SafeHtml leaderboardRacesToHtml(StrippedLeaderboardDTO leaderboard) {
         SafeHtmlBuilder b = new SafeHtmlBuilder();
-        
         if (leaderboard.isRegattaLeaderboard && leaderboard.regattaName != null) {
             RegattaDTO regatta = regattasByName.get(leaderboard.regattaName);
             boolean renderSeriesName = Util.size(regatta.series) > 1;
-         
-            for(SeriesDTO series: regatta.series) {
+            for (SeriesDTO series : regatta.series) {
                 b.appendHtmlConstant("<div>");
-                renderSeriesToHtml(leaderboard, series,renderSeriesName, b);
+                renderSeriesToHtml(leaderboard, series, renderSeriesName, b);
                 b.appendHtmlConstant("<div style=\"clear:both;\"></div>");
                 b.appendHtmlConstant("</div>");
             }
