@@ -411,4 +411,6 @@ public interface StringMessages extends Messages {
     String displayGroupsInReverseOrder();
     String actionConfigureUrl();
     String configureLeaderboardUrlDescription();
+    String embedded();
+    String additionalUrlSettings();
 }
