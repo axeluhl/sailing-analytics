@@ -9,6 +9,7 @@ import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.ui.CheckBox;
+import com.google.gwt.user.client.ui.DoubleBox;
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -39,6 +40,7 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
     private CheckBox showAllCompetitorsCheckBox;
     private CheckBox showSelectedCompetitorsInfoCheckBox;
     private LongBox tailLengthBox;
+//    private DoubleBox buoyZoneRadiusBox;
     private IntegerBox maxVisibleCompetitorsCountBox;
     
     private final StringMessages stringMessages;

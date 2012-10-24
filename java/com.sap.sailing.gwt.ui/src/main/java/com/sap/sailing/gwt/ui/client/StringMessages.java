@@ -410,4 +410,5 @@ public interface StringMessages extends Messages {
     String pleaseSelectARace();
     String displayGroupsInReverseOrder();
     String actionConfigureUrl();
+    String buoyZone();
 }

@@ -17,8 +17,6 @@ public class RaceMapSettings {
 
     private boolean showAllCompetitors = false;
 
-    private boolean showBuoyZones = true;
-
     private RaceMapZoomSettings zoomSettings;
 
     private RaceMapHelpLinesSettings helpLinesSettings;
@@ -129,13 +127,5 @@ public class RaceMapSettings {
 
     public void setShowSelectedCompetitorsInfo(boolean showSelectedCompetitorsInfo) {
         this.showSelectedCompetitorsInfo = showSelectedCompetitorsInfo;
-    }
-
-    public boolean isShowBuoyZones() {
-        return showBuoyZones;
-    }
-
-    public void setShowBuoyZones(boolean showBuoyZones) {
-        this.showBuoyZones = showBuoyZones;
     }
 }

@@ -609,7 +609,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
 
     protected void showBuoysOnMap(CourseDTO courseDTO, BoatClassDTO boatClassDTO) {
         if (map != null) {
-            if (settings.isShowBuoyZones() && boatClassDTO != null) {
+            if (settings.getHelpLinesSettings().containsHelpLine(HelpLineTypes.BUOYZONE) && boatClassDTO != null) {
                 Set<BuoyDTO> toRemoveBuoyOverlays = new HashSet<BuoyDTO>(buoyOverlays.keySet());
                 for (BuoyDTO buoyDTO : courseDTO.buoys) {
                     if(buoyDTO.position != null) {
