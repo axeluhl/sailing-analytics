@@ -8,6 +8,9 @@ interface AdminConsoleResources extends ClientBundle {
     @Source("com/sap/sailing/gwt/ui/client/images/settings.png")
     ImageResource settingsIcon();
 
+    @Source("com/sap/sailing/gwt/ui/client/images/settingsActionIcon.png")
+    ImageResource settingsActionIcon();
+
     @Source("com/sap/sailing/gwt/ui/client/images/remove.png")
     ImageResource removeIcon();
 

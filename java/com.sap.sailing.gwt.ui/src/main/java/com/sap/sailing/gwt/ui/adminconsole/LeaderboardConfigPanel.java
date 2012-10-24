@@ -58,6 +58,7 @@ import com.sap.sailing.gwt.ui.client.RegattaDisplayer;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.URLFactory;
+import com.sap.sailing.gwt.ui.leaderboard.LeaderboardEntryPoint;
 import com.sap.sailing.gwt.ui.leaderboard.ScoringSchemeTypeFormatter;
 import com.sap.sailing.gwt.ui.shared.FleetDTO;
 import com.sap.sailing.gwt.ui.shared.RaceColumnDTO;
@@ -282,6 +283,8 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
                     String debugParam = Window.Location.getParameter("gwt.codesvr");
                     Window.open("/gwt/LeaderboardEditing.html?name=" + leaderboardDTO.name
                             + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""), "_blank", null);
+                } else if (LeaderboardConfigImagesBarCell.ACTION_CONFIGURE_URL.equals(value)) {
+                    openLeaderboardUrlConfigDialog();
                 }
             }
         });
@@ -481,6 +484,15 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
         });
 
         loadAndRefreshLeaderboards();
+    }
+
+    /**
+     * Allow the user to combine the various URL parameters that exist for the {@link LeaderboardEntryPoint} and obtain the
+     * resulting URL in a link.
+     */
+    private void openLeaderboardUrlConfigDialog() {
+        // TODO Auto-generated method stub
+        
     }
 
     public void loadAndRefreshLeaderboards() {

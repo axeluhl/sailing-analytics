@@ -10,6 +10,7 @@ public class LeaderboardConfigImagesBarCell extends ImagesBarCell {
     public static final String ACTION_REMOVE = "ACTION_REMOVE";
     public static final String ACTION_EDIT_SCORES = "ACTION_EDIT_SCORES";
     public static final String ACTION_EDIT = "ACTION_EDIT";
+    public static final String ACTION_CONFIGURE_URL = "ACTION_CONFIGURE_URL";
     private static AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
     private final StringMessages stringMessages;
     
@@ -27,6 +28,7 @@ public class LeaderboardConfigImagesBarCell extends ImagesBarCell {
     protected Iterable<ImageSpec> getImageSpecs() {
         return Arrays.asList(new ImageSpec(ACTION_EDIT, stringMessages.actionEdit(), makeImagePrototype(resources.editIcon())),
                 new ImageSpec(ACTION_EDIT_SCORES, stringMessages.actionEditScores(), makeImagePrototype(resources.scoresIcon())),
+                new ImageSpec(ACTION_CONFIGURE_URL, stringMessages.actionConfigureUrl(), makeImagePrototype(resources.settingsActionIcon())),
                 new ImageSpec(ACTION_REMOVE, stringMessages.actionRemove(), makeImagePrototype(resources.removeIcon())));
     }
 }

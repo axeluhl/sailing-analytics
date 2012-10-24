@@ -409,4 +409,5 @@ public interface StringMessages extends Messages {
     String pleaseSelectASeries();
     String pleaseSelectARace();
     String displayGroupsInReverseOrder();
+    String actionConfigureUrl();
 }
