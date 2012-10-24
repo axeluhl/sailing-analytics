@@ -44,20 +44,24 @@ public class TVViewController implements RaceTimesInfoProviderListener {
     
     private final Timer timer;
     private final RaceTimesInfoProvider raceTimesInfoProvider;  
-    public LeaderboardDTO leaderboard;
-    private RegattaAndRaceIdentifier currentLiveRace;
-    
+    private TVViews activeTvView;
+
+    // leaderboard related attributes
+    private LeaderboardDTO leaderboard;
     private final String leaderboardName;
+    private LeaderboardSettings leaderboardSettings; 
+   
+    // raceboard related attributes
+    private RegattaAndRaceIdentifier currentLiveRace;
     private boolean showRaceDetails;
     private boolean showWindChart;
-    private TVViews activeTvView;
     
     /**
      * @param logoAndTitlePanel allowed to be <code>null</code>
      */
     public TVViewController(SailingServiceAsync sailingService, StringMessages stringMessages, ErrorReporter errorReporter,
             String leaderboardName, UserAgentDetails userAgent, LogoAndTitlePanel logoAndTitlePanel,
-            DockLayoutPanel dockPanel, long delayToLiveMillis, boolean showRaceDetails) {
+            DockLayoutPanel dockPanel, long delayToLiveInMillis, boolean showRaceDetails) {
         this.sailingService = sailingService;
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
@@ -69,9 +73,10 @@ public class TVViewController implements RaceTimesInfoProviderListener {
         
         showWindChart = false;
         leaderboard = null;
+        leaderboardSettings = LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(null, null, null, /* autoExpandFirstRace */ false); 
         
-        timer = new Timer(PlayModes.Live, 1000l);
-        timer.setLivePlayDelayInMillis(delayToLiveMillis);
+        timer = new Timer(PlayModes.Live, /* delayBetweenAutoAdvancesInMilliseconds */1000l);
+        timer.setLivePlayDelayInMillis(delayToLiveInMillis);
         timer.play();
 
         raceTimesInfoProvider = new RaceTimesInfoProvider(sailingService, errorReporter, new ArrayList<RegattaAndRaceIdentifier>(), 3000l);
@@ -79,16 +84,14 @@ public class TVViewController implements RaceTimesInfoProviderListener {
     }
     
     private LeaderboardPanel createLeaderboardPanel(String leaderboardName, boolean showRaceDetails) {
-        LeaderboardSettings settings = LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(null, null, null, /* autoExpandFirstRace */ false); 
         CompetitorSelectionModel selectionModel = new CompetitorSelectionModel(/* hasMultiSelection */ true);
-        Timer timer = new Timer(PlayModes.Live, /* delayBetweenAutoAdvancesInMilliseconds */3000l);
-        LeaderboardPanel leaderboardPanel = new LeaderboardPanel(sailingService, new AsyncActionsExecutor(), settings,
+        LeaderboardPanel leaderboardPanel = new LeaderboardPanel(sailingService, new AsyncActionsExecutor(), leaderboardSettings,
         /* preSelectedRace */null, selectionModel, timer, leaderboardName, null, errorReporter, stringMessages,
                 userAgent, showRaceDetails, new ExplicitRaceColumnSelection()) {
             @Override
             protected void setLeaderboard(LeaderboardDTO leaderboard) {
                 super.setLeaderboard(leaderboard);
-                TVViewController.this.leaderboard = leaderboard;
+                TVViewController.this.leaderboard = leaderboard;                
                 updateRaceTimesInfoProvider();
             }
         };
@@ -96,17 +99,17 @@ public class TVViewController implements RaceTimesInfoProviderListener {
     }
     
     private void updateRaceTimesInfoProvider() {
-        boolean providerChanged = false;
+        boolean addedRaces = false;
         for (RaceColumnDTO race : leaderboard.getRaceList()) {
             for (FleetDTO fleet : race.getFleets()) {
                 RegattaAndRaceIdentifier raceIdentifier = race.getRaceIdentifier(fleet);
                 if (raceIdentifier != null && !raceTimesInfoProvider.containsRaceIdentifier(raceIdentifier)) {
                     raceTimesInfoProvider.addRaceIdentifier(raceIdentifier, false);
-                    providerChanged = true;
+                    addedRaces = true;
                 }
             }
         }
-        if (providerChanged) {
+        if (addedRaces) {
             raceTimesInfoProvider.forceTimesInfosUpdate();
         }
     }
@@ -140,21 +143,21 @@ public class TVViewController implements RaceTimesInfoProviderListener {
             ScrollPanel leaderboardContentPanel = new ScrollPanel();
             leaderboardContentPanel.add(leaderboardPanel);
 
-            if(leaderboard != null) {
-                //Resetting the settings of the leaderboard panel to prevent, that some race columns get lost
-                List<String> namesOfRaceColumnsToShow = new ArrayList<String>();
-                for (RaceColumnDTO race : leaderboard.getRaceList()) {
-                    namesOfRaceColumnsToShow.add(race.getRaceColumnName());
-                }
-                LeaderboardSettings settings = LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(
-                        namesOfRaceColumnsToShow, null, null, false);
-                leaderboardPanel.updateSettings(settings);
-            }
+//            if(leaderboard != null) {
+//                //Resetting the settings of the leaderboard panel to prevent, that some race columns get lost
+//                List<String> namesOfRaceColumnsToShow = new ArrayList<String>();
+//                for (RaceColumnDTO race : leaderboard.getRaceList()) {
+//                    namesOfRaceColumnsToShow.add(race.getRaceColumnName());
+//                }
+//                LeaderboardSettings settings = LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(
+//                        namesOfRaceColumnsToShow, null, null, false);
+//                leaderboardPanel.updateSettings(settings);
+//            }
 
             dockPanel.add(leaderboardContentPanel);
 
             if(logoAndTitlePanel != null) {
-                logoAndTitlePanel.setTitle(leaderboardName);
+                logoAndTitlePanel.setSubTitle(leaderboardName);
             }
             
             currentLiveRace = null;
@@ -182,7 +185,7 @@ public class TVViewController implements RaceTimesInfoProviderListener {
             dockPanel.add(raceBoardPanel);
             
             if(logoAndTitlePanel != null) {
-                logoAndTitlePanel.setTitle(currentLiveRace.getRaceName());
+                logoAndTitlePanel.setSubTitle(currentLiveRace.getRaceName());
             }
 
             activeTvView = TVViews.Raceboard;
@@ -222,8 +225,8 @@ public class TVViewController implements RaceTimesInfoProviderListener {
             RaceTimesInfoDTO currentRaceTimes = raceTimesInfo.get(currentLiveRace);
 
             Date endOfRace = currentRaceTimes.endOfRace;
-            long timeAfterEndOfRace = 3 * 60 * 1000; // 3 min  
-            if (endOfRace != null && timer.getTime().getTime() > endOfRace.getTime() + timeAfterEndOfRace
+            long waitTimeAfterEndOfRace = 60 * 1000; // 1 min  
+            if (endOfRace != null && timer.getTime().getTime() > endOfRace.getTime() + waitTimeAfterEndOfRace
                 && timer.getPlayMode() == PlayModes.Live) {
                 updateTvView(TVViews.Leaderboard);
             }

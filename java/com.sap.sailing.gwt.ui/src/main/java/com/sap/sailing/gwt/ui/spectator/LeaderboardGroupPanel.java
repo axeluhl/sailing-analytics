@@ -24,6 +24,7 @@ import com.google.gwt.view.client.NoSelectionModel;
 import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.adminconsole.LeaderboardConfigPanel.AnchorCell;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
@@ -251,13 +252,12 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
 
     private SafeHtml leaderboardRacesToHtml(StrippedLeaderboardDTO leaderboard) {
         SafeHtmlBuilder b = new SafeHtmlBuilder();
-        
         if (leaderboard.isRegattaLeaderboard && leaderboard.regattaName != null) {
             RegattaDTO regatta = regattasByName.get(leaderboard.regattaName);
-         
-            for(SeriesDTO series: regatta.series) {
+            boolean renderSeriesName = Util.size(regatta.series) > 1;
+            for (SeriesDTO series : regatta.series) {
                 b.appendHtmlConstant("<div>");
-                renderSeriesToHtml(leaderboard, series, b);
+                renderSeriesToHtml(leaderboard, series, renderSeriesName, b);
                 b.appendHtmlConstant("<div style=\"clear:both;\"></div>");
                 b.appendHtmlConstant("</div>");
             }
@@ -268,12 +268,14 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
         return b.toSafeHtml();
     }
 
-    private void renderSeriesToHtml(StrippedLeaderboardDTO leaderboard, SeriesDTO series, SafeHtmlBuilder b) {
+    private void renderSeriesToHtml(StrippedLeaderboardDTO leaderboard, SeriesDTO series, boolean renderSeriesName, SafeHtmlBuilder b) {
         boolean hasMultipleFleets = series.getFleets().size() > 1;
         Map<String, List<RaceColumnDTO>> racesOrderedByFleets = getRacesOrderedByFleets(leaderboard);
 
         b.appendHtmlConstant("<div style=\"float:left;\">");
-        b.append(TEXTTEMPLATE.textWithClass(series.name, 50, STYLE_NAME_PREFIX + "Fleet"));
+        if(renderSeriesName) {
+            b.append(TEXTTEMPLATE.textWithClass(series.name, 50, STYLE_NAME_PREFIX + "Fleet"));
+        }
         b.appendHtmlConstant("</div>");
 
         b.appendHtmlConstant("<div style=\"float:left;\">");

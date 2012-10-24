@@ -49,5 +49,24 @@ public class LogoAndTitlePanel extends FlowPanel {
             this.add(subTitleLabelWrapper);
         }
     }
-    
+
+    public String getTitle() {
+        return titleLabel != null ? titleLabel.getText() : null;
+    }
+
+    public void setTitle(String title) {
+        if(titleLabel != null) {
+            titleLabel.setText(title);
+        }
+    }
+
+    public String getSubTitle() {
+        return subTitleLabel != null ? subTitleLabel.getText() : null;
+    }
+
+    public void setSubTitle(String subTitle) {
+        if(subTitleLabel != null) {
+            subTitleLabel.setText(subTitle);
+        }
+    }   
 }
