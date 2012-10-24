@@ -21,12 +21,13 @@ public class ReplayPathCanvasOverlay extends PathCanvasOverlay {
         // this.timer.addTimeListener(this);
         canvas.setStyleName("replayPanel");
     }
-
+    
+    /*
     @Override
     protected void drawWindField() {
         timeChanged(timer.getTime());
     }
-
+    */
     @Override
     public void timeChanged(Date date) {
 
