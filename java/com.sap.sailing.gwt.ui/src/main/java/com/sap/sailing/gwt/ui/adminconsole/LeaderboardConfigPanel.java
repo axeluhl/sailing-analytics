@@ -231,11 +231,11 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
         leaderboardActionColumn.setFieldUpdater(new FieldUpdater<StrippedLeaderboardDTO, String>() {
             @Override
             public void update(int index, StrippedLeaderboardDTO leaderboardDTO, String value) {
-                if ("ACTION_REMOVE".equals(value)) {
+                if (LeaderboardConfigImagesBarCell.ACTION_REMOVE.equals(value)) {
                     if (Window.confirm("Do you really want to remove the leaderboard: '" + leaderboardDTO.name + "' ?")) {
                         removeLeaderboard(leaderboardDTO);
                     }
-                } else if ("ACTION_EDIT".equals(value)) {
+                } else if (LeaderboardConfigImagesBarCell.ACTION_EDIT.equals(value)) {
                     final String oldLeaderboardName = leaderboardDTO.name;
                     List<StrippedLeaderboardDTO> otherExistingLeaderboard = new ArrayList<StrippedLeaderboardDTO>();
                     otherExistingLeaderboard.addAll(availableLeaderboardList);
@@ -243,7 +243,7 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
                     if(leaderboardDTO.isMetaLeaderboard) {
                         Window.alert("This is a meta leaderboard. It can't be changed here.");
                     } else {
-                        if(leaderboardDTO.isRegattaLeaderboard) {
+                        if (leaderboardDTO.isRegattaLeaderboard) {
                             LeaderboardDescriptor descriptor = new LeaderboardDescriptor(leaderboardDTO.name, 
                                     null, leaderboardDTO.discardThresholds, leaderboardDTO.regattaName);
                             AbstractLeaderboardDialog dialog = new RegattaLeaderboardEditDialog(Collections
@@ -278,7 +278,7 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
                             dialog.show();
                         }
                     }
-                } else if ("ACTION_EDIT_SCORES".equals(value)) {
+                } else if (LeaderboardConfigImagesBarCell.ACTION_EDIT_SCORES.equals(value)) {
                     String debugParam = Window.Location.getParameter("gwt.codesvr");
                     Window.open("/gwt/LeaderboardEditing.html?name=" + leaderboardDTO.name
                             + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""), "_blank", null);
@@ -411,13 +411,13 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
         raceActionColumn.setFieldUpdater(new FieldUpdater<Pair<RaceColumnDTO, FleetDTO>, String>() {
             @Override
             public void update(int index, Pair<RaceColumnDTO, FleetDTO> object, String value) {
-                if ("ACTION_REMOVE".equals(value)) {
+                if (LeaderboardRaceConfigImagesBarCell.ACTION_REMOVE.equals(value)) {
                     if (Window.confirm(stringMessages.reallyRemoveRace(object.getA().getRaceColumnName()))) {
                         removeRaceColumn(object.getA());
                     }
-                } else if ("ACTION_EDIT".equals(value)) {
+                } else if (LeaderboardRaceConfigImagesBarCell.ACTION_EDIT.equals(value)) {
                     editRaceColumnOfLeaderboard(object);
-                } else if ("ACTION_UNLINK".equals(value)) {
+                } else if (LeaderboardRaceConfigImagesBarCell.ACTION_UNLINK.equals(value)) {
                     unlinkRaceColumnFromTrackedRace(object.getA().getRaceColumnName(), object.getB());
                 }
             }

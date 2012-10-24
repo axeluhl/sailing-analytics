@@ -7,8 +7,11 @@ import com.google.gwt.text.shared.SafeHtmlRenderer;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
 public class LeaderboardRaceConfigImagesBarCell extends ImagesBarCell {
-
-    private StringMessages stringMessages;
+    public static final String ACTION_REMOVE = "ACTION_REMOVE";
+    public static final String ACTION_UNLINK = "ACTION_UNLINK";
+    public static final String ACTION_EDIT = "ACTION_EDIT";
+    private final StringMessages stringMessages;
+    private static AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
 
     public LeaderboardRaceConfigImagesBarCell(StringMessages stringConstants) {
         super();
@@ -20,12 +23,10 @@ public class LeaderboardRaceConfigImagesBarCell extends ImagesBarCell {
         this.stringMessages = stringMessages;
     }
 
-    private static AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
-
     @Override
     protected Iterable<ImageSpec> getImageSpecs() {
-        return Arrays.asList(new ImageSpec("ACTION_EDIT", stringMessages.actionEdit(), makeImagePrototype(resources.editIcon())),
-                new ImageSpec("ACTION_UNLINK", stringMessages.actionRaceUnlink(), makeImagePrototype(resources.unlinkIcon())),
-                new ImageSpec("ACTION_REMOVE", stringMessages.actionRaceRemove(), makeImagePrototype(resources.removeIcon())));
+        return Arrays.asList(new ImageSpec(ACTION_EDIT, stringMessages.actionEdit(), makeImagePrototype(resources.editIcon())),
+                new ImageSpec(ACTION_UNLINK, stringMessages.actionRaceUnlink(), makeImagePrototype(resources.unlinkIcon())),
+                new ImageSpec(ACTION_REMOVE, stringMessages.actionRaceRemove(), makeImagePrototype(resources.removeIcon())));
     }
 }
