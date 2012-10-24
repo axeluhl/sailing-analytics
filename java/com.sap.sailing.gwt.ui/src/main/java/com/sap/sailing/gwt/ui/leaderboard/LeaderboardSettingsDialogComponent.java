@@ -46,7 +46,7 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
             List<DetailType> legDetailSelection, List<DetailType> raceDetailSelection, List<DetailType> overallDetailSelection,
             List<RaceColumnDTO> raceAllRaceColumns,
             Iterable<RaceColumnDTO> raceColumnSelection, boolean autoExpandPreSelectedRace, long delayBetweenAutoAdvancesInMilliseconds,
-            long delayInMilliseconds, StringMessages stringConstants) {
+            long delayInMilliseconds, StringMessages stringMessages) {
         this.raceAllRaceColumns = raceAllRaceColumns;
         this.maneuverDetailSelection = maneuverDetailSelection;
         maneuverDetailCheckboxes = new LinkedHashMap<DetailType, CheckBox>();
@@ -58,7 +58,7 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
         raceDetailCheckboxes = new LinkedHashMap<DetailType, CheckBox>();
         this.overallDetailSelection = overallDetailSelection;
         overallDetailCheckboxes = new LinkedHashMap<DetailType, CheckBox>();
-        this.stringConstants = stringConstants;
+        this.stringConstants = stringMessages;
         this.autoExpandPreSelectedRace = autoExpandPreSelectedRace;
         this.delayBetweenAutoAdvancesInMilliseconds = delayBetweenAutoAdvancesInMilliseconds;
         this.delayInMilliseconds = delayInMilliseconds;

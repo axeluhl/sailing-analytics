@@ -14,6 +14,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
+import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -21,10 +22,17 @@ import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
 import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
+import com.sap.sailing.gwt.ui.client.DataEntryDialog;
 import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
+import com.sap.sailing.gwt.ui.shared.AbstractLeaderboardDTO;
+import com.sap.sailing.gwt.ui.shared.RaceColumnDTO;
+import com.sap.sailing.gwt.ui.shared.components.Component;
+import com.sap.sailing.gwt.ui.shared.components.SettingsDialog;
+import com.sap.sailing.gwt.ui.shared.components.SettingsDialogComponent;
 
 
 public class LeaderboardEntryPoint extends AbstractEntryPoint {
@@ -189,5 +197,91 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
             result.addAll(list);
         }
         return result;
+    }
+    
+    /**
+     * Assembles a dialog that other parts of the application can use to let the user parameterize a leaderboard and
+     * obtain the according URL for it. This keeps the "secrets" of which URL parameters have which meaning encapsulated
+     * within this class.<p>
+     * 
+     * The implementation by and large uses the {@link LeaderboardSettingsDialogComponent}'s widget and adds to it a checkbox
+     * for driving the {@link #PARAM_EMBEDDED} field.
+     */
+    public static DataEntryDialog<LeaderboardSettings> getUrlConfigurationDialog(final AbstractLeaderboardDTO leaderboard,
+            final StringMessages stringMessages) {
+        return new SettingsDialog<LeaderboardSettings>(new Component<LeaderboardSettings>() {
+            @Override
+            public boolean hasSettings() {
+                return true;
+            }
+
+            @Override
+            public SettingsDialogComponent<LeaderboardSettings> getSettingsDialogComponent() {
+                List<RaceColumnDTO> raceList = leaderboard.getRaceList();
+                List<String> namesOfRaceColumnsToShow = new ArrayList<String>();
+                for (RaceColumnDTO raceColumn : raceList) {
+                    namesOfRaceColumnsToShow.add(raceColumn.name);
+                }
+                LeaderboardSettings settings = LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(
+                        namesOfRaceColumnsToShow, /* namesOfRacesToShow */ null, /* nameOfRaceToSort */ null, /* autoExpandPreSelectedRace */ false);
+                List<DetailType> overallDetailsToShow = Collections.emptyList();
+                return new LeaderboardSettingsDialogComponent(
+                        settings.getManeuverDetailsToShow(), settings.getLegDetailsToShow(),
+                        settings.getRaceDetailsToShow(), overallDetailsToShow,
+                        raceList, /* select all races by default */ raceList, /* autoExpandPreSelectedRace */ false,
+                        /* delayBetweenAutoAdvancesInMilliseconds */ 3000l,
+                        /* delayInMilliseconds */ 3000l, stringMessages);
+            }
+
+            @Override
+            public void updateSettings(LeaderboardSettings newSettings) {
+                // does nothing because there is no component
+            }
+
+            @Override
+            public String getLocalizedShortName() {
+                return stringMessages.leaderboardConfiguration();
+            }
+
+            @Override
+            public Widget getEntryWidget() {
+                throw new UnsupportedOperationException("Internal error. This settings dialog does not actually belong to a LeaderboardPanel");
+            }
+
+            @Override
+            public boolean isVisible() {
+                return false;
+            }
+
+            @Override
+            public void setVisible(boolean visibility) {
+                // no-op
+            }
+            
+        }, stringMessages, /* animationEnabled */ false);
+        /*
+        stringMessages.actionConfigureUrl(), stringMessages.configureLeaderboardUrlDescription(),
+                stringMessages.ok(), stringMessages.cancel(), new Validator<Void>() {
+                    @Override
+                    public String getErrorMessage(Void valueToValidate) {
+                        // TODO Auto-generated method stub
+                        return null;
+                    }
+                }, new DialogCallback<Void>() {
+                    @Override
+                    public void ok(Void editedObject) {
+                        // TODO Auto-generated method stub
+                    }
+                    @Override
+                    public void cancel() {
+                        // TODO Auto-generated method stub
+                    }}) {
+            @Override
+            protected Void getResult() {
+                // TODO Auto-generated method stub
+                return null;
+            }
+        };
+        */
     }
 }

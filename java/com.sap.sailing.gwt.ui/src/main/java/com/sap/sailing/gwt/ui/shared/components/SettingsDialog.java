@@ -8,9 +8,13 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 public class SettingsDialog<SettingsType> extends DataEntryDialog<SettingsType> {
     private final SettingsDialogComponent<SettingsType> settingsDialogComponent;
     
-    public SettingsDialog(final Component<SettingsType> component, StringMessages stringConstants) {
-        super(stringConstants.settingsForComponent(component.getLocalizedShortName()), null, stringConstants.ok(),
-                stringConstants.cancel(), component.getSettingsDialogComponent().getValidator(),
+    public SettingsDialog(final Component<SettingsType> component, StringMessages stringMessages) {
+        this(component, stringMessages, /* animationEnabled */ true);
+    }
+    
+    public SettingsDialog(final Component<SettingsType> component, StringMessages stringMessages, boolean animationEnabled) {
+        super(stringMessages.settingsForComponent(component.getLocalizedShortName()), null, stringMessages.ok(),
+                stringMessages.cancel(), component.getSettingsDialogComponent().getValidator(), animationEnabled,
                 new DialogCallback<SettingsType>() {
                     @Override
                     public void cancel() {
