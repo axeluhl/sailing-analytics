@@ -97,19 +97,20 @@ public abstract class WindFieldGeneratorImpl implements WindFieldGenerator {
     public Path getLine(TimedPosition seed) {
         
         int maxSteps = 100;
-        long timeStep = 10000; // in milliseconds
+        long timeStep = 100000; // in milliseconds
         
         TimePoint currentTime = seed.getTimePoint();
+        TimePoint startTime = seed.getTimePoint();
         Position currentPosition = seed.getPosition();
         LinkedList<TimedPositionWithSpeed> path = new LinkedList<TimedPositionWithSpeed>();
         path.add(new TimedPositionWithSpeedImpl(currentTime, currentPosition, null));
         
         for(int s=0; s<maxSteps; s++) {
          
-            Wind currentWind = this.getWind(new TimedPositionImpl(currentTime, currentPosition));
+            Wind currentWind = this.getWind(new TimedPositionImpl(startTime, currentPosition));
             TimePoint middleTime = currentTime.plus(timeStep/2);
             Position middlePosition = currentWind.travelTo(currentPosition, middleTime, currentTime);
-            Wind middleWind = this.getWind(new TimedPositionImpl(middleTime, middlePosition));
+            Wind middleWind = this.getWind(new TimedPositionImpl(startTime, middlePosition));
             
             TimePoint nextTime = currentTime.plus(timeStep);
             Position nextPosition = middleWind.travelTo(currentPosition, nextTime, currentTime);
