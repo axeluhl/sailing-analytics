@@ -532,7 +532,7 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
             @Override
             public void onClick(ClickEvent arg0) {
                 timePanel.setVisible(false);
-                simulatorMap.refreshView(SimulatorMap.ViewName.SUMMARY, currentWPDisplay, 0);
+                simulatorMap.refreshView(SimulatorMap.ViewName.SUMMARY, currentWPDisplay, 0, false);
             }
 
         });
@@ -542,7 +542,7 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
         this.replayButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent arg0) {
-                simulatorMap.refreshView(SimulatorMap.ViewName.REPLAY, currentWPDisplay, 0);
+                simulatorMap.refreshView(SimulatorMap.ViewName.REPLAY, currentWPDisplay, 0, false);
                 resetTimer();
                 timePanel.setVisible(true);
             }
@@ -552,7 +552,7 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
         this.windDisplayButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent arg0) {
-                simulatorMap.refreshView(SimulatorMap.ViewName.WINDDISPLAY, currentWPDisplay, 0);
+                simulatorMap.refreshView(SimulatorMap.ViewName.WINDDISPLAY, currentWPDisplay, 0, true);
                 resetTimer();
                 timePanel.setVisible(true);
             }
@@ -585,13 +585,13 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
     private void update(int boatClassIndex) {
         if (this.windDisplayButton.getValue()) {
         	this.timePanel.setVisible(true);
-            this.simulatorMap.refreshView(SimulatorMap.ViewName.WINDDISPLAY, this.currentWPDisplay, boatClassIndex);
+            this.simulatorMap.refreshView(SimulatorMap.ViewName.WINDDISPLAY, this.currentWPDisplay, boatClassIndex, true);
         } else if (this.summaryButton.getValue()) {
         	this.timePanel.setVisible(false);
-            this.simulatorMap.refreshView(SimulatorMap.ViewName.SUMMARY, this.currentWPDisplay, boatClassIndex);
+            this.simulatorMap.refreshView(SimulatorMap.ViewName.SUMMARY, this.currentWPDisplay, boatClassIndex, true);
         } else if (this.replayButton.getValue()) {
         	this.timePanel.setVisible(true);
-            this.simulatorMap.refreshView(SimulatorMap.ViewName.REPLAY, this.currentWPDisplay, boatClassIndex);
+            this.simulatorMap.refreshView(SimulatorMap.ViewName.REPLAY, this.currentWPDisplay, boatClassIndex, true);
         }
         this.resetTimer();
     }

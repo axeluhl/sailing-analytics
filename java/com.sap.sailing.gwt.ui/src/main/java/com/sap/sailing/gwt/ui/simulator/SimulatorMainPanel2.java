@@ -744,17 +744,17 @@ public class SimulatorMainPanel2 extends SplitLayoutPanel {
     private void update(int boatClassIndex) {
         if (this.windDisplayButton.getValue()) {
             this.timePanel.setActive(true);
-            this.simulatorMap.refreshView(SimulatorMap.ViewName.WINDDISPLAY, this.currentWPDisplay, boatClassIndex);
+            this.simulatorMap.refreshView(SimulatorMap.ViewName.WINDDISPLAY, this.currentWPDisplay, boatClassIndex, true);
         } else if (this.summaryButton.getValue()) {
         	this.timePanel.setActive(false);
-        	this.simulatorMap.refreshView(SimulatorMap.ViewName.SUMMARY, this.currentWPDisplay, boatClassIndex);
+        	this.simulatorMap.refreshView(SimulatorMap.ViewName.SUMMARY, this.currentWPDisplay, boatClassIndex, true);
         } else if (this.replayButton.getValue()) {
         	this.timePanel.setActive(true);
-        	this.simulatorMap.refreshView(SimulatorMap.ViewName.REPLAY, this.currentWPDisplay, boatClassIndex);
+        	this.simulatorMap.refreshView(SimulatorMap.ViewName.REPLAY, this.currentWPDisplay, boatClassIndex, true);
         } else {
             if (this.mode == SailingSimulatorUtil.measured) {
             	this.timePanel.setActive(false);
-            	this.simulatorMap.refreshView(SimulatorMap.ViewName.SUMMARY, this.currentWPDisplay, boatClassIndex);
+            	this.simulatorMap.refreshView(SimulatorMap.ViewName.SUMMARY, this.currentWPDisplay, boatClassIndex, true);
             }
         }
     }    
@@ -767,9 +767,9 @@ public class SimulatorMainPanel2 extends SplitLayoutPanel {
         this.summaryButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent arg0) {
-                // timePanel.setVisible(false);
+                // timePanel.setVisible(false);    
                 timePanel.setActive(false);
-                simulatorMap.refreshView(SimulatorMap.ViewName.SUMMARY, currentWPDisplay, boatSelector.getSelectedIndex());
+                simulatorMap.refreshView(SimulatorMap.ViewName.SUMMARY, currentWPDisplay, boatSelector.getSelectedIndex(),false);
             }
         });
 
@@ -778,7 +778,7 @@ public class SimulatorMainPanel2 extends SplitLayoutPanel {
         this.replayButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent arg0) {
-                simulatorMap.refreshView(SimulatorMap.ViewName.REPLAY, currentWPDisplay, boatSelector.getSelectedIndex());
+                simulatorMap.refreshView(SimulatorMap.ViewName.REPLAY, currentWPDisplay, boatSelector.getSelectedIndex(),false);
                 timePanel.setActive(true);
             }
         });
@@ -787,7 +787,7 @@ public class SimulatorMainPanel2 extends SplitLayoutPanel {
         this.windDisplayButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent arg0) {
-                simulatorMap.refreshView(SimulatorMap.ViewName.WINDDISPLAY, currentWPDisplay, boatSelector.getSelectedIndex());
+                simulatorMap.refreshView(SimulatorMap.ViewName.WINDDISPLAY, currentWPDisplay, boatSelector.getSelectedIndex(),false);
                 timePanel.setActive(true);
             }
         });

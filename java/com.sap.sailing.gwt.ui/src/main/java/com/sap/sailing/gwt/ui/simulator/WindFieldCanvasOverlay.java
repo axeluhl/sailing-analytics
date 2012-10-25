@@ -47,10 +47,8 @@ public class WindFieldCanvasOverlay extends FullCanvasOverlay implements TimeLis
     protected String arrowHeadColor = "Blue";
     protected WindFieldMapMouseMoveHandler mmHandler;
     protected double arrowLength = 15;
-    
    
-    
-    protected final Timer timer;
+    private Timer timer;
 
     private static Logger logger = Logger.getLogger(WindFieldCanvasOverlay.class.getName());
 
@@ -261,4 +259,11 @@ public class WindFieldCanvasOverlay extends FullCanvasOverlay implements TimeLis
         }
     }
 
+    public void setTimer(Timer timer) {
+        this.timer = timer;
+    }
+    
+    public Timer getTimer() {
+        return timer;
+    }
 }

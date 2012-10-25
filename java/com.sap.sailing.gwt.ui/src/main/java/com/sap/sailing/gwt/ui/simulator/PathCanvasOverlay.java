@@ -50,12 +50,12 @@ public class PathCanvasOverlay extends WindFieldCanvasOverlay implements Named {
         super();
         this.name = name;
     }
-
+    /*
     public PathCanvasOverlay(String name, Timer timer) {
         super(timer);
         this.name = name;
     }
-
+    */
     public void setRaceCourse(LatLng startPoint, LatLng endPoint) {
         this.startPoint = startPoint; 
         this.endPoint = endPoint; 

@@ -189,7 +189,8 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
             }
             
             mapw.addOverlay(legendCanvasOverlay);
-            //legendCanvasOverlay.redraw(true);
+            legendCanvasOverlay.setVisible(true);
+            legendCanvasOverlay.redraw(true);
             
             busyIndicator.setBusy(false);
         }
@@ -456,26 +457,106 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
     }
 
     //I077899 - Mihai Bogdan Eugen
-    private void refreshSummaryView(WindPatternDisplay windPatternDisplay, int boatClassIndex) {
+    private void refreshSummaryView(WindPatternDisplay windPatternDisplay, int boatClassIndex, boolean force) {
         // removeOverlays();
-        this.generatePath(windPatternDisplay, true, boatClassIndex);
+        if (force) {
+            this.generatePath(windPatternDisplay, true, boatClassIndex);
+        } else {
+            if (replayPathCanvasOverlays != null && !replayPathCanvasOverlays.isEmpty()) {
+                System.out.println("Soft refresh");
+                for (PathCanvasOverlay r : replayPathCanvasOverlays) {
+                    r.displayWindAlongPath = true;
+                    timer.removeTimeListener(r);
+                    r.setTimer(null);
+                    r.setVisible(true);
+                    r.redraw(true);
+                } 
+                this.legendCanvasOverlay.setVisible(true);
+                this.legendCanvasOverlay.redraw(true);
+                if (windFieldCanvasOverlay != null) {
+                    windFieldCanvasOverlay.setVisible(false);
+                }
+                if (windGridCanvasOverlay != null) {
+                    windGridCanvasOverlay.setVisible(false);
+                }
+                if (windLineCanvasOverlay != null) {
+                    windLineCanvasOverlay.setVisible(false);
+                }
+            } else {
+                this.generatePath(windPatternDisplay, true, boatClassIndex);
+            }
+        }
     }
 
     //I077899 - Mihai Bogdan Eugen
-    private void refreshReplayView(WindPatternDisplay windPatternDisplay, int boatClassIndex) {
+    private void refreshReplayView(WindPatternDisplay windPatternDisplay, int boatClassIndex, boolean force) {
         // removeOverlays();
-        this.generatePath(windPatternDisplay, false, boatClassIndex);
+        if (force) {
+            this.generatePath(windPatternDisplay, false, boatClassIndex);
+        } else {
+          
+            if (replayPathCanvasOverlays != null && !replayPathCanvasOverlays.isEmpty()) {
+                System.out.println("Soft refresh");
+                for (PathCanvasOverlay r : replayPathCanvasOverlays) {
+                    r.displayWindAlongPath = false;
+                    r.setTimer(this.timer);
+                    timer.addTimeListener(r);
+                    r.setVisible(true);
+                    r.redraw(true);
+                }
+                this.legendCanvasOverlay.setVisible(true);
+                this.legendCanvasOverlay.redraw(true);
+                if (windFieldCanvasOverlay != null) {
+                    windFieldCanvasOverlay.setVisible(true);
+                }
+                if (windGridCanvasOverlay != null) {
+                    windGridCanvasOverlay.setVisible(true);
+                }
+                if (windLineCanvasOverlay != null) {
+                    windLineCanvasOverlay.setVisible(true);
+                }
+            } else {
+                this.generatePath(windPatternDisplay, false, boatClassIndex);
+            }
+        }
     }
 
-    private void refreshWindDisplayView(WindPatternDisplay windPatternDisplay) {
-        // removeOverlays();
-        windParams.setDefaultTimeSettings();
-        generateWindField(windPatternDisplay, true);
-        // timeListeners.clear();
-        // timeListeners.add(windFieldCanvasOverlay);
+    private void refreshWindDisplayView(WindPatternDisplay windPatternDisplay, boolean force) {
+        
+        if (force) {
+            // removeOverlays();
+            windParams.setDefaultTimeSettings();
+            generateWindField(windPatternDisplay, true);
+            // timeListeners.clear();
+            // timeListeners.add(windFieldCanvasOverlay);
+        } else {
+
+            if (replayPathCanvasOverlays != null && !replayPathCanvasOverlays.isEmpty()) {
+                System.out.println("Soft refresh");
+                for (PathCanvasOverlay r : replayPathCanvasOverlays) {
+                    r.setVisible(false);
+                }
+                this.legendCanvasOverlay.setVisible(false);
+                if (windFieldCanvasOverlay != null) {
+                    windFieldCanvasOverlay.setVisible(true);
+                    windFieldCanvasOverlay.redraw(true);
+                }
+                if (windGridCanvasOverlay != null) {
+                    windGridCanvasOverlay.setVisible(true);
+                    windFieldCanvasOverlay.redraw(true);
+                }
+                if (windLineCanvasOverlay != null) {
+                    windLineCanvasOverlay.setVisible(true);
+                    windFieldCanvasOverlay.redraw(true);
+                }
+            } else {
+                windParams.setDefaultTimeSettings();
+                generateWindField(windPatternDisplay, true);
+            }
+        }
     }
 
-    public void refreshView(ViewName name, WindPatternDisplay windPatternDisplay, int boatClassIndex) {
+    public void refreshView(ViewName name, WindPatternDisplay windPatternDisplay, int boatClassIndex, boolean force) {
         if (!overlaysInitialized) {
             initializeOverlays();
         }
@@ -484,13 +565,13 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
             raceCourseCanvasOverlay.setSelected(false);
             switch (name) {
             case SUMMARY:
-                refreshSummaryView(windPatternDisplay, boatClassIndex);
+                refreshSummaryView(windPatternDisplay, boatClassIndex, force);
                 break;
             case REPLAY:
-                refreshReplayView(windPatternDisplay, boatClassIndex);
+                refreshReplayView(windPatternDisplay, boatClassIndex, force);
                 break;
             case WINDDISPLAY:
-                refreshWindDisplayView(windPatternDisplay);
+                refreshWindDisplayView(windPatternDisplay, force);
                 break;
             default:
                 break;
