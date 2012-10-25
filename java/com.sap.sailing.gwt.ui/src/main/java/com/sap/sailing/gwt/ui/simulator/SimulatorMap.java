@@ -44,7 +44,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
     private WindFieldCanvasOverlay windFieldCanvasOverlay;
     private WindGridCanvasOverlay windGridCanvasOverlay;
     private WindLineCanvasOverlay windLineCanvasOverlay;
-    private List<PathCanvasOverlay> pathCanvasOverlays;
+    //private List<PathCanvasOverlay> pathCanvasOverlays;
     private List<PathCanvasOverlay> replayPathCanvasOverlays;
     private RaceCourseCanvasOverlay raceCourseCanvasOverlay;
     private PathLegendCanvasOverlay legendCanvasOverlay;
@@ -77,6 +77,8 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
     //I0077899 Mihai Bogdan Eugen
     private class ResultManager implements AsyncCallback<SimulatorResultsDTOAndNotificationMessage> {
 
+        private boolean summaryView;
+
         /*
          * private class SortByTimeAsc implements Comparator<PathDTO> {
          * 
@@ -85,8 +87,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
          * }
          */
 
-        private boolean summaryView;
-
+       
         public ResultManager(boolean summaryView) {
             this.summaryView = summaryView;
         }
@@ -124,35 +125,31 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
             raceCourseCanvasOverlay.redraw(true);
             
             removeOverlays();
-            pathCanvasOverlays.clear();
+            //pathCanvasOverlays.clear();
             replayPathCanvasOverlays.clear();
             colorPalette.reset();
             for (int i = 0; i < paths.length; ++i) {
                 /* TODO Revisit for now creating a WindFieldDTO from the path */
                 WindFieldDTO pathWindDTO = new WindFieldDTO();
                 pathWindDTO.setMatrix(paths[i].getMatrix());
-                if (summaryView) {
-
-                    PathCanvasOverlay pathCanvasOverlay = new PathCanvasOverlay(paths[i].name);
-                    pathCanvasOverlays.add(pathCanvasOverlay);
-                    pathCanvasOverlay.pathColor = colorPalette.getColor(paths.length-1-i);
-                    mapw.addOverlay(pathCanvasOverlay);
-                    pathCanvasOverlay.setWindField(pathWindDTO);
-                    pathCanvasOverlay.setRaceCourse(raceCourseCanvasOverlay.startPoint, raceCourseCanvasOverlay.endPoint);
-                    pathCanvasOverlay.redraw(true);
-                    legendCanvasOverlay.setPathOverlays(pathCanvasOverlays);
-
-                } else {
+               
                     
-                    ReplayPathCanvasOverlay replayPathCanvasOverlay = new ReplayPathCanvasOverlay(paths[i].name, timer);
-                    replayPathCanvasOverlays.add(replayPathCanvasOverlay);
-                    replayPathCanvasOverlay.pathColor = colorPalette.getColor(paths.length-1-i);
-                    mapw.addOverlay(replayPathCanvasOverlay);
-                    replayPathCanvasOverlay.setWindField(pathWindDTO);
-                    replayPathCanvasOverlay.setRaceCourse(raceCourseCanvasOverlay.startPoint, raceCourseCanvasOverlay.endPoint);
-                    legendCanvasOverlay.setPathOverlays(replayPathCanvasOverlays);
-
+                ReplayPathCanvasOverlay replayPathCanvasOverlay = new ReplayPathCanvasOverlay(paths[i].name, timer);
+                replayPathCanvasOverlays.add(replayPathCanvasOverlay);
+                replayPathCanvasOverlay.pathColor = colorPalette.getColor(paths.length-1-i);
+                if (summaryView) {
+                   
+                    replayPathCanvasOverlay.displayWindAlongPath = true;
+                    timer.removeTimeListener(replayPathCanvasOverlay);
+                    replayPathCanvasOverlay.setTimer(null);
                 }
+                mapw.addOverlay(replayPathCanvasOverlay);
+                replayPathCanvasOverlay.setWindField(pathWindDTO);
+                replayPathCanvasOverlay.setRaceCourse(raceCourseCanvasOverlay.startPoint, raceCourseCanvasOverlay.endPoint);
+                replayPathCanvasOverlay.redraw(true);
+                legendCanvasOverlay.setPathOverlays(replayPathCanvasOverlays);
+
+                
                 
                 long tmpDurationTime = paths[i].getPathTime();
                 if (tmpDurationTime > maxDurationTime) {
@@ -165,7 +162,10 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
                 timePanel.resetTimeSlider();
             }
             
-            if (!summaryView) {
+            /**
+             * Now we always get the wind field
+             */
+            //if (!summaryView) {
                 WindFieldDTO windFieldDTO = simulatorResult.windField;
                 logger.info("Number of windDTO : " + windFieldDTO.getMatrix().size());
                 
@@ -185,6 +185,17 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
                 }
                 for (int i = 0; i < replayPathCanvasOverlays.size(); ++i) {
                     timeListeners.add(replayPathCanvasOverlays.get(i));
+                }
+            //}
+            if (summaryView) {
+                if (windFieldCanvasOverlay != null) {
+                    windFieldCanvasOverlay.setVisible(false);
+                }
+                if (windGridCanvasOverlay != null) {
+                    windGridCanvasOverlay.setVisible(false);
+                }
+                if (windLineCanvasOverlay != null) {
+                    windLineCanvasOverlay.setVisible(false);
                 }
             }
             
@@ -220,7 +231,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         windFieldCanvasOverlay = null;
         windGridCanvasOverlay = null;
         windLineCanvasOverlay = null;
-        pathCanvasOverlays = null;
+        //pathCanvasOverlays = null;
         replayPathCanvasOverlays = null;
         raceCourseCanvasOverlay = null;
         timeListeners = new LinkedList<TimeListenerWithStoppingCriteria>();
@@ -252,7 +263,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         windFieldCanvasOverlay = null;
         windGridCanvasOverlay = null;
         windLineCanvasOverlay = null;
-        pathCanvasOverlays = null;
+        //pathCanvasOverlays = null;
         replayPathCanvasOverlays = null;
         raceCourseCanvasOverlay = null;
         timeListeners = new LinkedList<TimeListenerWithStoppingCriteria>();
@@ -308,7 +319,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
             windLineCanvasOverlay = new WindLineCanvasOverlay(timer);
         }
         // mapw.addOverlay(windFieldCanvasOverlay);
-        pathCanvasOverlays = new ArrayList<PathCanvasOverlay>();
+        //pathCanvasOverlays = new ArrayList<PathCanvasOverlay>();
         replayPathCanvasOverlays = new ArrayList<PathCanvasOverlay>();
         // timeListeners.add(replayPathCanvasOverlay);
         legendCanvasOverlay = new PathLegendCanvasOverlay();
@@ -408,7 +419,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
 
         System.out.println("YYYY: before simulatorSvc.getSimulatorResults!");
         
-        this.simulatorSvc.getSimulatorResults(this.mode, this.windParams, windPatternDisplay, !summaryView, boatClassIndex, new ResultManager(summaryView));
+        this.simulatorSvc.getSimulatorResults(this.mode, this.windParams, windPatternDisplay, true, boatClassIndex, new ResultManager(summaryView));
         
         System.out.println("YYYY: After generatePath!");
     }
@@ -443,10 +454,10 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
                 mapw.removeOverlay(windLineCanvasOverlay);
                 num++;
             }
-            for (int i = 0; i < pathCanvasOverlays.size(); ++i) {
+            /*for (int i = 0; i < pathCanvasOverlays.size(); ++i) {
                 mapw.removeOverlay(pathCanvasOverlays.get(i));
                 num++;
-            }
+            }*/
             for (int i = 0; i < replayPathCanvasOverlays.size(); ++i) {
                 mapw.removeOverlay(replayPathCanvasOverlays.get(i));
                 num++;

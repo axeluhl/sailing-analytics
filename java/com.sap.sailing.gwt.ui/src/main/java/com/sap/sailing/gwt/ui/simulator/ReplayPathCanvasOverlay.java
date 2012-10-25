@@ -15,11 +15,10 @@ public class ReplayPathCanvasOverlay extends PathCanvasOverlay {
     private List<WindDTO> windDTOToDraw;
 
     public ReplayPathCanvasOverlay(String name, Timer timer) {
-        super(name);
-        setTimer(timer);
+        super(name, timer);
         this.displayWindAlongPath = false;
         windDTOToDraw = null;
-        // this.timer.addTimeListener(this);
+        //this.timer.addTimeListener(this);
         canvas.setStyleName("replayPanel");
     }
     
