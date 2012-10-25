@@ -4,10 +4,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FocusWidget;
-import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog;
@@ -75,6 +75,7 @@ public class LeaderboardUrlConfigurationDialog extends SettingsDialog<Leaderboar
         private final LeaderboardSettingsDialogComponent leaderboardSettingsDialogComponent;
         private final StringMessages stringMessages;
         private CheckBox embeddedCheckbox;
+        private Anchor resultingUrl;
         
         public LeaderboardUrlConfigurationDialogComponent(AbstractLeaderboardDTO leaderboard, StringMessages stringMessages) {
             this.stringMessages = stringMessages;
@@ -95,7 +96,7 @@ public class LeaderboardUrlConfigurationDialog extends SettingsDialog<Leaderboar
         }
 
         private void updateURL() {
-            embeddedCheckbox.setText("Trala");
+            resultingUrl.setHref("http://"+embeddedCheckbox.getValue().toString());
         }
 
         /**
@@ -130,7 +131,8 @@ public class LeaderboardUrlConfigurationDialog extends SettingsDialog<Leaderboar
             content.add(dialog.createHeadline(stringMessages.additionalUrlSettings(), true));
             embeddedCheckbox = dialog.createCheckbox(stringMessages.embedded());
             content.add(embeddedCheckbox);
-            content.add(new Label("Test Test Humba Humba"));
+            resultingUrl = new Anchor(stringMessages.leaderboard());
+            content.add(resultingUrl);
             return additionalPanel;
         }
 

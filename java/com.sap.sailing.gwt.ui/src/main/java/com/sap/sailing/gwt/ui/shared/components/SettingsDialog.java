@@ -11,10 +11,18 @@ public class SettingsDialog<SettingsType> extends DataEntryDialog<SettingsType> 
     public SettingsDialog(final Component<SettingsType> component, StringMessages stringMessages) {
         this(component, stringMessages, /* animationEnabled */ true);
     }
-    
-    public SettingsDialog(final Component<SettingsType> component, StringMessages stringMessages, boolean animationEnabled) {
+
+    /**
+     * This auxiliary constructor is required to avoid duplicate calls to {@link Component#getSettingsDialogComponent()}
+     * which may choose to create a new instance each call. Such duplicate instances would cause the validator to
+     * operate on a different instance as the one used for displaying, hence not allowing the validator to use the UI
+     * elements, neither for update nor read.
+     */
+    private SettingsDialog(final Component<SettingsType> component,
+            SettingsDialogComponent<SettingsType> dialogComponent, StringMessages stringMessages,
+            boolean animationEnabled) {
         super(stringMessages.settingsForComponent(component.getLocalizedShortName()), null, stringMessages.ok(),
-                stringMessages.cancel(), component.getSettingsDialogComponent().getValidator(), animationEnabled,
+                stringMessages.cancel(), dialogComponent.getValidator(), animationEnabled,
                 new DialogCallback<SettingsType>() {
                     @Override
                     public void cancel() {
@@ -25,7 +33,11 @@ public class SettingsDialog<SettingsType> extends DataEntryDialog<SettingsType> 
                         component.updateSettings(newSettings);
                     }
                 });
-        this.settingsDialogComponent = component.getSettingsDialogComponent();
+        this.settingsDialogComponent = dialogComponent;
+    }
+
+    public SettingsDialog(final Component<SettingsType> component, StringMessages stringMessages, boolean animationEnabled) {
+        this(component, component.getSettingsDialogComponent(), stringMessages, animationEnabled);
     }
 
     @Override
