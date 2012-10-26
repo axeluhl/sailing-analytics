@@ -413,4 +413,7 @@ public interface StringMessages extends Messages {
     String configureLeaderboardUrlDescription();
     String embedded();
     String additionalUrlSettings();
+    String restrictToSingleSelectedRace();
+    String expandSelectedRace();
+    String showRaceDetails();
 }

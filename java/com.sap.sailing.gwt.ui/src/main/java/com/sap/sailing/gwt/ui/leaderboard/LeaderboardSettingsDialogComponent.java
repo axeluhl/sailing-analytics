@@ -253,6 +253,7 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
                 if (valueToValidate.getLegDetailsToShow().isEmpty()) {
                     return stringMessages.selectAtLeastOneLegDetail();
                 } else if (valueToValidate.getDelayBetweenAutoAdvancesInMilliseconds() < 1000) {
+                    // TODO how to express that PAUSED mode is desired? Separate setting? Or should 0 express that...?
                     return stringMessages.chooseUpdateIntervalOfAtLeastOneSecond();
                 } else {
                     return null;
