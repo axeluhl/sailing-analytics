@@ -62,6 +62,7 @@ import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sailing.gwt.ui.client.PlayStateListener;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
+import com.sap.sailing.gwt.ui.client.RaceTimesInfoProviderListener;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.TimeListener;
@@ -78,6 +79,7 @@ import com.sap.sailing.gwt.ui.shared.LeaderboardEntryDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardRowDTO;
 import com.sap.sailing.gwt.ui.shared.LegEntryDTO;
 import com.sap.sailing.gwt.ui.shared.RaceColumnDTO;
+import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.components.Component;
 import com.sap.sailing.gwt.ui.shared.components.IsEmbeddableComponent;
 import com.sap.sailing.gwt.ui.shared.components.SettingsDialog;
@@ -364,7 +366,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             }
             break;
         case LAST_N:
-            raceColumnSelection = new LastNRacesColumnSelection(newSettings.getNumberOfLastRacesToShow(), getRaceTimesInfoProvider());
+            setRaceColumnSelectionToLastNStrategy(newSettings.getNumberOfLastRacesToShow());
             break;
         }
         setAutoExpandPreSelectedRace(false); // avoid expansion during updateLeaderboard(...); will expand later if it
@@ -387,6 +389,21 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             if (raceColumnByRaceName != null) {
                 getLeaderboardTable().sortColumn(raceColumnByRaceName, /* ascending */true);
             }
+        }
+    }
+
+    private void setRaceColumnSelectionToLastNStrategy(final Integer numberOfLastRacesToShow) {
+        raceColumnSelection = new LastNRacesColumnSelection(numberOfLastRacesToShow, getRaceTimesInfoProvider());
+        if (timer.getPlayState() != Timer.PlayStates.Playing) {
+            // wait for the first update and adjust leaderboard once the race times have been received
+            final RaceTimesInfoProviderListener raceTimesInfoProviderListener = new RaceTimesInfoProviderListener() {
+                @Override
+                public void raceTimesInfosReceived(Map<RegattaAndRaceIdentifier, RaceTimesInfoDTO> raceTimesInfo) {
+                    updateLeaderboard(getLeaderboard());
+                    getRaceTimesInfoProvider().removeRaceTimesInfoProviderListener(this);
+                }
+            };
+            getRaceTimesInfoProvider().addRaceTimesInfoProviderListener(raceTimesInfoProviderListener);
         }
     }
 
@@ -1147,7 +1164,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             }
             break;
         case LAST_N:
-            raceColumnSelection = new LastNRacesColumnSelection(settings.getNumberOfLastRacesToShow(), getRaceTimesInfoProvider());
+            setRaceColumnSelectionToLastNStrategy(settings.getNumberOfLastRacesToShow());
             break;
         }
         rankColumn = new RankColumn();

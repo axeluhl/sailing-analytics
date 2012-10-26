@@ -38,6 +38,7 @@ public class LastNRacesColumnSelection extends AbstractRaceColumnSelection imple
         this.numberOfLastRacesToShow = numberOfLastRacesToShow;
         this.raceTimesInfoProvider = raceTimesInfoProvider;
         raceTimesInfoProvider.addRaceTimesInfoProviderListener(this);
+        raceTimesInfosReceived(raceTimesInfoProvider.getRaceTimesInfos());
     }
 
     @Override
