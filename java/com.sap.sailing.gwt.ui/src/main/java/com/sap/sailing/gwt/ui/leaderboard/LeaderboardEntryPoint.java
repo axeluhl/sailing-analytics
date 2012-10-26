@@ -199,13 +199,15 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
         private final LeaderboardSettings leaderboardSettings;
         private final boolean embedded;
         private final boolean showRaceDetails;
+        private final boolean autoRefresh;
         
         public LeaderboardUrlSettings(LeaderboardSettings leaderboardSettings, boolean embedded,
-                boolean showRaceDetails) {
+                boolean showRaceDetails, boolean autoRefresh) {
             super();
             this.leaderboardSettings = leaderboardSettings;
             this.embedded = embedded;
             this.showRaceDetails = showRaceDetails;
+            this.autoRefresh = autoRefresh;
         }
 
         public LeaderboardSettings getLeaderboardSettings() {
@@ -218,6 +220,10 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
 
         public boolean isShowRaceDetails() {
             return showRaceDetails;
+        }
+
+        public boolean isAutoRefresh() {
+            return autoRefresh;
         }
     }
     

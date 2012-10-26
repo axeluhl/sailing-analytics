@@ -76,6 +76,7 @@ public class LeaderboardUrlConfigurationDialog extends SettingsDialog<Leaderboar
         private final StringMessages stringMessages;
         private CheckBox embeddedCheckbox;
         private CheckBox showRaceDetailsCheckbox;
+        private CheckBox autoRefreshCheckbox;
         private Anchor resultingUrl;
         private final String leaderboardName;
         
@@ -136,6 +137,8 @@ public class LeaderboardUrlConfigurationDialog extends SettingsDialog<Leaderboar
             content.add(embeddedCheckbox);
             showRaceDetailsCheckbox = dialog.createCheckbox(stringMessages.showRaceDetails());
             content.add(showRaceDetailsCheckbox);
+            autoRefreshCheckbox = dialog.createCheckbox(stringMessages.autoRefresh());
+            content.add(autoRefreshCheckbox);
             resultingUrl = new Anchor(stringMessages.leaderboard());
             content.add(resultingUrl);
             return additionalPanel;
@@ -145,7 +148,7 @@ public class LeaderboardUrlConfigurationDialog extends SettingsDialog<Leaderboar
         public LeaderboardUrlSettings getResult() {
             return new LeaderboardUrlSettings(leaderboardSettingsDialogComponent.getResult(),
                     embeddedCheckbox.getValue(),
-                    showRaceDetailsCheckbox.getValue());
+                    showRaceDetailsCheckbox.getValue(), autoRefreshCheckbox.getValue());
         }
 
         @Override
