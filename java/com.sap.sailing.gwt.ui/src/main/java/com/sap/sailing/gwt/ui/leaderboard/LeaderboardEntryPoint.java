@@ -267,6 +267,7 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
             maneuverDetails.append('=');
             maneuverDetails.append(maneuverDetail.name());
         }
+        // TODO generate PARAM_RACE_NAME parameter from LeaderboardSettings.getNamesOfRacesToShow()
         String debugParam = Window.Location.getParameter("gwt.codesvr");
         String link = URLFactory.INSTANCE.encode("/gwt/Leaderboard.html?name=" + leaderboardName
                 + (settings.isShowRaceDetails() ? "&"+PARAM_SHOW_RACE_DETAILS+"=true" : "")
