@@ -8,7 +8,7 @@ import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.simulator.Boundary;
 import com.sap.sailing.simulator.PolarDiagram;
 import com.sap.sailing.simulator.SimulationParameters;
-import com.sap.sailing.simulator.WindFieldGenerator;
+import com.sap.sailing.simulator.windfield.WindFieldGenerator;
 
 public class SimulationParametersImpl implements SimulationParameters {
 

@@ -14,14 +14,14 @@ import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.simulator.Path;
 import com.sap.sailing.simulator.PolarDiagram;
 import com.sap.sailing.simulator.SimulationParameters;
-import com.sap.sailing.simulator.WindControlParameters;
-import com.sap.sailing.simulator.WindFieldGenerator;
 import com.sap.sailing.simulator.impl.PolarDiagram49STG;
 import com.sap.sailing.simulator.impl.RectangularBoundary;
 import com.sap.sailing.simulator.impl.SailingSimulatorImpl;
 import com.sap.sailing.simulator.impl.SimulationParametersImpl;
-import com.sap.sailing.simulator.impl.WindFieldGeneratorBlastImpl;
 import com.sap.sailing.simulator.util.SailingSimulatorUtil;
+import com.sap.sailing.simulator.windfield.WindControlParameters;
+import com.sap.sailing.simulator.windfield.WindFieldGenerator;
+import com.sap.sailing.simulator.windfield.impl.WindFieldGeneratorBlastImpl;
 
 public class SimulatorTest {
     

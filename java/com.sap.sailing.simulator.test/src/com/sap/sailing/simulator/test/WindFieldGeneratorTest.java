@@ -13,6 +13,7 @@ import java.util.logging.Logger;
 
 import org.junit.Test;
 
+
 import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.impl.KilometersPerHourSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
@@ -22,13 +23,13 @@ import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.tracking.Wind;
-import com.sap.sailing.simulator.WindControlParameters;
 import com.sap.sailing.simulator.impl.RectangularBoundary;
 import com.sap.sailing.simulator.impl.TimedPositionWithSpeedImpl;
-import com.sap.sailing.simulator.impl.WindFieldGeneratorBlastImpl;
-import com.sap.sailing.simulator.impl.WindFieldGeneratorCombined;
-import com.sap.sailing.simulator.impl.WindFieldGeneratorImpl;
-import com.sap.sailing.simulator.impl.WindFieldGeneratorOscillationImpl;
+import com.sap.sailing.simulator.windfield.WindControlParameters;
+import com.sap.sailing.simulator.windfield.impl.WindFieldGeneratorBlastImpl;
+import com.sap.sailing.simulator.windfield.impl.WindFieldGeneratorCombined;
+import com.sap.sailing.simulator.windfield.impl.WindFieldGeneratorImpl;
+import com.sap.sailing.simulator.windfield.impl.WindFieldGeneratorOscillationImpl;
 
 /**
  * Test for @WindFieldGenerator

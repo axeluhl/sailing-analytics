@@ -52,9 +52,6 @@ import com.sap.sailing.simulator.SailingSimulator;
 import com.sap.sailing.simulator.SimulationParameters;
 import com.sap.sailing.simulator.TimedPosition;
 import com.sap.sailing.simulator.TimedPositionWithSpeed;
-import com.sap.sailing.simulator.WindControlParameters;
-import com.sap.sailing.simulator.WindFieldGenerator;
-import com.sap.sailing.simulator.WindFieldGeneratorFactory;
 import com.sap.sailing.simulator.impl.ConfigurationManager;
 import com.sap.sailing.simulator.impl.PolarDiagramCSV;
 import com.sap.sailing.simulator.impl.ReadingConfigurationFileStatus;
@@ -65,6 +62,9 @@ import com.sap.sailing.simulator.impl.TimedPositionImpl;
 import com.sap.sailing.simulator.impl.TimedPositionWithSpeedImpl;
 import com.sap.sailing.simulator.impl.Tuple;
 import com.sap.sailing.simulator.util.SailingSimulatorUtil;
+import com.sap.sailing.simulator.windfield.WindControlParameters;
+import com.sap.sailing.simulator.windfield.WindFieldGenerator;
+import com.sap.sailing.simulator.windfield.WindFieldGeneratorFactory;
 
 public class SimulatorServiceImpl extends RemoteServiceServlet implements SimulatorService {
 

@@ -14,8 +14,9 @@ import com.sap.sailing.simulator.PathGenerator;
 import com.sap.sailing.simulator.SailingSimulator;
 import com.sap.sailing.simulator.SimulationParameters;
 import com.sap.sailing.simulator.TimedPositionWithSpeed;
-import com.sap.sailing.simulator.WindFieldGenerator;
 import com.sap.sailing.simulator.util.SailingSimulatorUtil;
+import com.sap.sailing.simulator.windfield.WindFieldGenerator;
+import com.sap.sailing.simulator.windfield.impl.WindFieldGeneratorMeasured;
 
 public class SailingSimulatorImpl implements SailingSimulator {
 

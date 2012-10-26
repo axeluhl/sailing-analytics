@@ -16,5 +16,8 @@ Bundle-ClassPath: .,
  lib/ssj.jar
 Export-Package: com.sap.sailing.simulator,
  com.sap.sailing.simulator.impl,
- com.sap.sailing.simulator.util
+ com.sap.sailing.simulator.util,
+ com.sap.sailing.simulator.windfield,
+ com.sap.sailing.simulator.windfield.impl,
+ resources
 Web-ContextPath: /simulator

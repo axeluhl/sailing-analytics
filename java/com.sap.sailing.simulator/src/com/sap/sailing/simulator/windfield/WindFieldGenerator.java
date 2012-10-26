@@ -1,9 +1,10 @@
-package com.sap.sailing.simulator;
+package com.sap.sailing.simulator.windfield;
 
 
 
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.simulator.Boundary;
 
 public interface WindFieldGenerator extends WindField {
     

@@ -1,4 +1,4 @@
-package com.sap.sailing.simulator;
+package com.sap.sailing.simulator.windfield;
 
 
 public class WindControlParameters {

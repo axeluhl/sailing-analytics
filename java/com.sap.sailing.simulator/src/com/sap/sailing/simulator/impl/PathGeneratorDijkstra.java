@@ -21,7 +21,7 @@ import com.sap.sailing.simulator.PolarDiagram;
 import com.sap.sailing.simulator.SimulationParameters;
 import com.sap.sailing.simulator.TimedPosition;
 import com.sap.sailing.simulator.TimedPositionWithSpeed;
-import com.sap.sailing.simulator.WindFieldGenerator;
+import com.sap.sailing.simulator.windfield.WindFieldGenerator;
 
 public class PathGeneratorDijkstra extends PathGeneratorBase {
 

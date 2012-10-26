@@ -1,6 +1,7 @@
-package com.sap.sailing.simulator;
+package com.sap.sailing.simulator.windfield;
 
-import com.sap.sailing.simulator.impl.WindFieldGeneratorFactoryImpl;
+import com.sap.sailing.simulator.Boundary;
+import com.sap.sailing.simulator.windfield.impl.WindFieldGeneratorFactoryImpl;
 
 public interface WindFieldGeneratorFactory {
 

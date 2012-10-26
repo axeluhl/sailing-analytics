@@ -2,6 +2,8 @@ package com.sap.sailing.simulator;
 
 import java.util.List;
 
+import com.sap.sailing.simulator.windfield.WindField;
+
 public interface Path {
 
     List<TimedPositionWithSpeed> getPathPoints();

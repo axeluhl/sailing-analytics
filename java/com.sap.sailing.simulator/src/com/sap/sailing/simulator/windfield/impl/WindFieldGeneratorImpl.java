@@ -1,4 +1,4 @@
-package com.sap.sailing.simulator.impl;
+package com.sap.sailing.simulator.windfield.impl;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -17,8 +17,11 @@ import com.sap.sailing.simulator.Boundary;
 import com.sap.sailing.simulator.Path;
 import com.sap.sailing.simulator.TimedPosition;
 import com.sap.sailing.simulator.TimedPositionWithSpeed;
-import com.sap.sailing.simulator.WindControlParameters;
-import com.sap.sailing.simulator.WindFieldGenerator;
+import com.sap.sailing.simulator.impl.PathImpl;
+import com.sap.sailing.simulator.impl.TimedPositionImpl;
+import com.sap.sailing.simulator.impl.TimedPositionWithSpeedImpl;
+import com.sap.sailing.simulator.windfield.WindControlParameters;
+import com.sap.sailing.simulator.windfield.WindFieldGenerator;
 
 public abstract class WindFieldGeneratorImpl implements WindFieldGenerator {
 

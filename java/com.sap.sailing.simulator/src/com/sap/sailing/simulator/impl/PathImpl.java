@@ -14,7 +14,7 @@ import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.simulator.Path;
 import com.sap.sailing.simulator.TimedPositionWithSpeed;
-import com.sap.sailing.simulator.WindField;
+import com.sap.sailing.simulator.windfield.WindField;
 
 public class PathImpl implements Path {
 
