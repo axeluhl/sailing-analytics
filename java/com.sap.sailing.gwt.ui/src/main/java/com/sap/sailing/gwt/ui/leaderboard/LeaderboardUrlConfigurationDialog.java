@@ -46,7 +46,7 @@ public class LeaderboardUrlConfigurationDialog extends SettingsDialog<Leaderboar
 
         @Override
         public void updateSettings(LeaderboardUrlSettings newSettings) {
-            // TODO display the resulting URL for copy/paste or navigation
+            // no-op; the resulting URL has already been updated to the anchor in the dialog
         }
 
         @Override
@@ -75,10 +75,14 @@ public class LeaderboardUrlConfigurationDialog extends SettingsDialog<Leaderboar
         private final LeaderboardSettingsDialogComponent leaderboardSettingsDialogComponent;
         private final StringMessages stringMessages;
         private CheckBox embeddedCheckbox;
+        private CheckBox showRaceDetailsCheckbox;
+        private CheckBox autoRefreshCheckbox;
         private Anchor resultingUrl;
+        private final String leaderboardName;
         
         public LeaderboardUrlConfigurationDialogComponent(AbstractLeaderboardDTO leaderboard, StringMessages stringMessages) {
             this.stringMessages = stringMessages;
+            this.leaderboardName = leaderboard.name;
             List<RaceColumnDTO> raceList = leaderboard.getRaceList();
             List<String> namesOfRaceColumnsToShow = new ArrayList<String>();
             for (RaceColumnDTO raceColumn : raceList) {
@@ -95,8 +99,8 @@ public class LeaderboardUrlConfigurationDialog extends SettingsDialog<Leaderboar
                 /* delayBetweenAutoAdvancesInMilliseconds */ 3000l, /* delayInMilliseconds */ 3000l, stringMessages);
         }
 
-        private void updateURL() {
-            resultingUrl.setHref("http://"+embeddedCheckbox.getValue().toString());
+        private void updateURL(LeaderboardUrlSettings settings, String leaderboardName) {
+            resultingUrl.setHref(LeaderboardEntryPoint.getUrl(leaderboardName, settings));
         }
 
         /**
@@ -114,9 +118,9 @@ public class LeaderboardUrlConfigurationDialog extends SettingsDialog<Leaderboar
             final Validator<LeaderboardSettings> superValidator = leaderboardSettingsDialogComponent.getValidator();
             Validator<LeaderboardUrlSettings> result = new Validator<LeaderboardUrlSettings>() {
                 @Override
-                public String getErrorMessage(LeaderboardUrlSettings valueToValidate) {
-                    updateURL();
-                    return superValidator.getErrorMessage(valueToValidate.getLeaderboardSettings());
+                public String getErrorMessage(LeaderboardUrlSettings settings) {
+                    updateURL(settings, leaderboardName);
+                    return superValidator.getErrorMessage(settings.getLeaderboardSettings());
                 }
             };
             return result;
@@ -131,6 +135,10 @@ public class LeaderboardUrlConfigurationDialog extends SettingsDialog<Leaderboar
             content.add(dialog.createHeadline(stringMessages.additionalUrlSettings(), true));
             embeddedCheckbox = dialog.createCheckbox(stringMessages.embedded());
             content.add(embeddedCheckbox);
+            showRaceDetailsCheckbox = dialog.createCheckbox(stringMessages.showRaceDetails());
+            content.add(showRaceDetailsCheckbox);
+            autoRefreshCheckbox = dialog.createCheckbox(stringMessages.autoRefresh());
+            content.add(autoRefreshCheckbox);
             resultingUrl = new Anchor(stringMessages.leaderboard());
             content.add(resultingUrl);
             return additionalPanel;
@@ -138,7 +146,9 @@ public class LeaderboardUrlConfigurationDialog extends SettingsDialog<Leaderboar
 
         @Override
         public LeaderboardUrlSettings getResult() {
-            return new LeaderboardUrlSettings(leaderboardSettingsDialogComponent.getResult(), embeddedCheckbox.getValue());
+            return new LeaderboardUrlSettings(leaderboardSettingsDialogComponent.getResult(),
+                    embeddedCheckbox.getValue(),
+                    showRaceDetailsCheckbox.getValue(), autoRefreshCheckbox.getValue());
         }
 
         @Override

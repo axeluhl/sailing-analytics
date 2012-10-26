@@ -571,24 +571,29 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                 NavigableSet<MarkPassing> markPassings = trackedRace.getMarkPassings(competitor);
                 if (!markPassings.isEmpty()) {
                     TimePoint from = trackedRace.getStartOfRace(); // start counting at race start, not when the competitor passed the line
-                    TimePoint to;
-                    if (timePoint.after(markPassings.last().getTimePoint()) &&
-                            markPassings.last().getWaypoint() == trackedRace.getRace().getCourse().getLastWaypoint()) {
-                        // stop counting when competitor finished the race
-                        to = markPassings.last().getTimePoint();
-                    } else {
-                        if (trackedRace.getEndOfTracking() != null && timePoint.after(trackedRace.getEndOfTracking())) {
-                            result = null; // race not finished until end of tracking; no reasonable value can be computed for competitor
-                            break;
+                    if (!timePoint.before(from)) { // but only if the race started after timePoint
+                        TimePoint to;
+                        if (timePoint.after(markPassings.last().getTimePoint())
+                                && markPassings.last().getWaypoint() == trackedRace.getRace().getCourse()
+                                        .getLastWaypoint()) {
+                            // stop counting when competitor finished the race
+                            to = markPassings.last().getTimePoint();
                         } else {
-                            to = timePoint;
+                            if (trackedRace.getEndOfTracking() != null
+                                    && timePoint.after(trackedRace.getEndOfTracking())) {
+                                result = null; // race not finished until end of tracking; no reasonable value can be
+                                               // computed for competitor
+                                break;
+                            } else {
+                                to = timePoint;
+                            }
                         }
-                    }
-                    long timeSpent = to.asMillis() - from.asMillis();
-                    if (result == null) {
-                        result = timeSpent;
-                    } else {
-                        result += timeSpent;
+                        long timeSpent = to.asMillis() - from.asMillis();
+                        if (result == null) {
+                            result = timeSpent;
+                        } else {
+                            result += timeSpent;
+                        }
                     }
                 }
             }
