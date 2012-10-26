@@ -36,14 +36,14 @@ public class LeaderboardSettings {
      * Either you select races from the list of all races or you select the last N races.
      */
     public static enum RaceColumnSelectionStrategies { EXPLICIT, LAST_N; }
-    private RaceColumnSelectionStrategies activeRaceColumnSelectionStrategy;
+    private final RaceColumnSelectionStrategies activeRaceColumnSelectionStrategy;
     
     /**
      * An optional sort column; if <code>null</code>, the leaderboard sorting won't be touched when updating the settings.
      * Otherwise, the leaderboard will be sorted by the race column (ascending if {@link #sortAscending}, descending otherwise.
      */
     private final String nameOfRaceToSort;
-    private final boolean sortAscending;   
+    private final boolean sortAscending;
     
     /**
      * @param raceColumnsToShow <code>null</code> means don't modify the list of races shown
@@ -62,9 +62,10 @@ public class LeaderboardSettings {
         this.namesOfRacesToShow = namesOfRacesToShow;
         this.namesOfRaceColumnsToShow = namesOfRaceColumnsToShow;
         this.numberOfLastRacesToShow = numberOfLastRacesToShow;
-        this.activeRaceColumnSelectionStrategy = RaceColumnSelectionStrategies.EXPLICIT;
-        if(numberOfLastRacesToShow != null) {
+        if (numberOfLastRacesToShow != null) {
             activeRaceColumnSelectionStrategy = RaceColumnSelectionStrategies.LAST_N;
+        } else {
+            this.activeRaceColumnSelectionStrategy = RaceColumnSelectionStrategies.EXPLICIT;
         }
         this.autoExpandPreSelectedRace = autoExpandPreSelectedRace;
         this.delayBetweenAutoAdvancesInMilliseconds = delayBetweenAutoAdvancesInMilliseconds;
