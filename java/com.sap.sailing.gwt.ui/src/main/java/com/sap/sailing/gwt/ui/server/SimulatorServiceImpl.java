@@ -198,11 +198,12 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         RectangularBoundary bd = new RectangularBoundary(nw, se, 0.1);
         // List<Position> lattice = bd.extractLattice(params.getxRes(),
         // params.getyRes());
-
+        
+        controlParameters.resetBlastRandomStream = params.isKeepState();
         retreiveWindControlParameters(pattern);
         logger.info("Boundary south direction " + bd.getSouth());
         controlParameters.baseWindBearing += bd.getSouth().getDegrees();
-
+        
         WindFieldGenerator wf = wfGenFactory.createWindFieldGenerator(pattern.getWindPattern().name(), bd, controlParameters);
 
         if (wf == null) {
@@ -427,6 +428,8 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         List<Position> course = null;
         TimePoint startTime = new MillisecondsTimePoint(params.getStartTime().getTime());
         TimePoint timeStep = new MillisecondsTimePoint(params.getTimeStep().getTime());
+       
+        controlParameters.resetBlastRandomStream = params.isKeepState();
         retreiveWindControlParameters(pattern);
                 
         wf = wfGenFactory.createWindFieldGenerator(pattern.getWindPattern().name(), null, controlParameters);

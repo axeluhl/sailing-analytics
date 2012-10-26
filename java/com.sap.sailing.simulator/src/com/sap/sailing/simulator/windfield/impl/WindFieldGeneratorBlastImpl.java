@@ -7,6 +7,7 @@ import umontreal.iro.lecuyer.randvar.NormalGen;
 import umontreal.iro.lecuyer.randvar.UniformGen;
 import umontreal.iro.lecuyer.rng.LFSR113;
 import umontreal.iro.lecuyer.rng.MRG32k3a;
+import umontreal.iro.lecuyer.rng.RandomStream;
 
 import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
@@ -144,11 +145,13 @@ public class WindFieldGeneratorBlastImpl extends WindFieldGeneratorImpl implemen
     }
 
     private boolean isBlastSeed() {
-        return UniformGen.nextDouble(new LFSR113("BlastSeedStream"), 0, 1) < windParameters.blastProbability / 100.0;
+        //return UniformGen.nextDouble(new LFSR113("BlastSeedStream"), 0, 1) < windParameters.blastProbability / 100.0;
+        return windParameters.getBlastRandomStreamManager().getRandomStream(BlastRandomSeedManagerImpl.BlastStream.SEED.name()).nextDouble() < windParameters.blastProbability / 100.0;
     }
 
     private boolean isBlastCell() {
-        return UniformGen.nextDouble(new LFSR113("BlastCellStream"), 0, 1) > this.blastEdgeProbability / 100.0;
+        //return UniformGen.nextDouble(new LFSR113("BlastCellStream"), 0, 1) > this.blastEdgeProbability / 100.0;
+        return windParameters.getBlastRandomStreamManager().getRandomStream(BlastRandomSeedManagerImpl.BlastStream.CELL.name()).nextDouble() > this.blastEdgeProbability / 100.0;
     }
 
     private double getBlastSpeed() {
@@ -156,16 +159,22 @@ public class WindFieldGeneratorBlastImpl extends WindFieldGeneratorImpl implemen
         double bSpeedVar = windParameters.baseWindSpeed * windParameters.blastWindSpeed / 100.0 * windParameters.blastWindSpeedVar / 100.0;
         //System.out.println("blast par speed: "+windParameters.blastWindSpeed+" var: "+windParameters.blastWindSpeedVar);
         //System.out.println("blast speed mean: "+bSpeedMean+" var: "+bSpeedVar);
-        return NormalGen.nextDouble(new LFSR113("BlastSpeedStream"), bSpeedMean, bSpeedVar);
+        //return NormalGen.nextDouble(new LFSR113("BlastSpeedStream"), bSpeedMean, bSpeedVar);
+        RandomStream speedStream = windParameters.getBlastRandomStreamManager().getRandomStream(BlastRandomSeedManagerImpl.BlastStream.SPEED.name());
+        return NormalGen.nextDouble(speedStream, bSpeedMean, bSpeedVar);
 
     }
 
     private int getBlastSize() {
-        return GeometricGen.nextInt(new MRG32k3a("BlastSizeStream"), blastSizeProbability / 100.0);
+        //return GeometricGen.nextInt(new MRG32k3a("BlastSizeStream"), blastSizeProbability / 100.0);
+        RandomStream sizeStream = windParameters.getBlastRandomStreamManager().getRandomStream(BlastRandomSeedManagerImpl.BlastStream.SIZE.name());
+        return GeometricGen.nextInt(sizeStream, blastSizeProbability / 100.0);
     }
 
     private double getBlastAngle() {
-        return NormalGen.nextDouble(new LFSR113("BlastAngleStream"), blastBearingMean, blastBearingVar);
+        //return NormalGen.nextDouble(new LFSR113("BlastAngleStream"), blastBearingMean, blastBearingVar);
+        RandomStream bearingStream = windParameters.getBlastRandomStreamManager().getRandomStream(BlastRandomSeedManagerImpl.BlastStream.BEARING.name());
+        return NormalGen.nextDouble(bearingStream, blastBearingMean, blastBearingVar);
 
     }
 

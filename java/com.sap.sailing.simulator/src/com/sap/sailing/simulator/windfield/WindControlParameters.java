@@ -1,5 +1,9 @@
 package com.sap.sailing.simulator.windfield;
 
+import java.util.logging.Logger;
+
+import com.sap.sailing.simulator.windfield.impl.BlastRandomSeedManagerImpl;
+
 
 public class WindControlParameters {
     /**
@@ -74,11 +78,22 @@ public class WindControlParameters {
      */
     public Double blastWindSpeedVar;
     
+    /**
+     * Flag to control if the random stream should be reset  
+     */
+    public boolean resetBlastRandomStream;
+    
+    private RandomStreamManager blastRandomStreamManager;
+    
+    private static Logger logger = Logger.getLogger(WindControlParameters.class.getName());
+    
     public WindControlParameters() {
+        resetBlastRandomStream = false;
         setDefaults();
     }
     
     public WindControlParameters(double speedInKnots, double bearing) {
+        resetBlastRandomStream = false;
         setDefaults();
         baseWindSpeed = speedInKnots;
         baseWindBearing = bearing;
@@ -99,5 +114,20 @@ public class WindControlParameters {
         maxBlastSize = 1.0;
         blastWindSpeed = 120.0;
         blastWindSpeedVar = 10.0;
+        
+        if (blastRandomStreamManager == null || !resetBlastRandomStream) {
+            setBlastRandomStreamManager(new BlastRandomSeedManagerImpl());
+        } else {
+            logger.info("Resetting random seeds for wind field.");
+            blastRandomStreamManager.reset();
+        }
+    }
+
+    public RandomStreamManager getBlastRandomStreamManager() {
+        return blastRandomStreamManager;
+    }
+
+    public void setBlastRandomStreamManager(RandomStreamManager blastRandomStreamManager) {
+        this.blastRandomStreamManager = blastRandomStreamManager;
     }
 }

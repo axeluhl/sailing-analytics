@@ -574,6 +574,14 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         if ((isCourseSet())||(mode == SailingSimulatorUtil.measured)) {
             mapw.setDoubleClickZoom(true);
             raceCourseCanvasOverlay.setSelected(false);
+            windParams.setKeepState(!force);
+            if (force) {
+                if (replayPathCanvasOverlays != null) {
+                    removeOverlays();
+                    timeListeners.clear();
+                    replayPathCanvasOverlays.clear();
+                }
+            }
             switch (name) {
             case SUMMARY:
                 refreshSummaryView(windPatternDisplay, boatClassIndex, force);

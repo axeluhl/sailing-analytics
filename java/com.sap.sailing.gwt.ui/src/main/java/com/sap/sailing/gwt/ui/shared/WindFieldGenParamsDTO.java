@@ -16,6 +16,8 @@ public class WindFieldGenParamsDTO implements IsSerializable {
     private Date endTime;
     private Date timeStep;
 
+    private boolean keepState;
+    
     /**
      * Currently m is for measured
      */
@@ -98,5 +100,13 @@ public class WindFieldGenParamsDTO implements IsSerializable {
 
     public void setMode(char mode) {
         this.mode = mode;
+    }
+
+    public boolean isKeepState() {
+        return keepState;
+    }
+
+    public void setKeepState(boolean keepState) {
+        this.keepState = keepState;
     }
 }
