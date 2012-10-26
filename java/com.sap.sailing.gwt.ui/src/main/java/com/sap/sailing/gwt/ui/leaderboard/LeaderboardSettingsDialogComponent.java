@@ -48,18 +48,18 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
     private final boolean autoExpandPreSelectedRace;
     private final long delayBetweenAutoAdvancesInMilliseconds;
     private final long delayInMilliseconds;
-    private final Integer numerOfLastRacesToShow;
+    private final Integer numberOfLastRacesToShow;
     private RaceColumnSelectionStrategies activeRaceColumnSelectionStrategy;
     private RadioButton explicitRaceColumnSelectionRadioBtn;
     private RadioButton lastNRacesColumnSelectionRadioBtn;
-    private IntegerBox numerOfLastRacesToShowBox;
+    private IntegerBox numberOfLastRacesToShowBox;
 
     public LeaderboardSettingsDialogComponent(List<DetailType> maneuverDetailSelection,
             List<DetailType> legDetailSelection, List<DetailType> raceDetailSelection, List<DetailType> overallDetailSelection,
-            List<RaceColumnDTO> raceAllRaceColumns,Iterable<RaceColumnDTO> raceColumnSelection, Integer numerOfLastRacesToShow,
+            List<RaceColumnDTO> raceAllRaceColumns,Iterable<RaceColumnDTO> raceColumnSelection, Integer numberOfLastRacesToShow,
             boolean autoExpandPreSelectedRace, long delayBetweenAutoAdvancesInMilliseconds, long delayInMilliseconds, StringMessages stringMessages) {
         this.raceAllRaceColumns = raceAllRaceColumns;
-        this.numerOfLastRacesToShow = numerOfLastRacesToShow;
+        this.numberOfLastRacesToShow = numberOfLastRacesToShow;
         this.activeRaceColumnSelectionStrategy = raceColumnSelection != null ? RaceColumnSelectionStrategies.EXPLICIT : RaceColumnSelectionStrategies.LAST_N;
         this.maneuverDetailSelection = maneuverDetailSelection;
         maneuverDetailCheckboxes = new LinkedHashMap<DetailType, CheckBox>();
@@ -202,8 +202,8 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
             final FlowPanel lastNRacesSelectionContent = new FlowPanel();
             String radioButtonGroupName = "raceSelectionStrategyGroup";
 
-            racesSelectionStrategyPanel.add(new Label("Choose the way you select races:"));
-            explicitRaceColumnSelectionRadioBtn = dialog.createRadioButton(radioButtonGroupName, "Select from all races");
+            racesSelectionStrategyPanel.add(new Label(stringMessages.chooseTheWayYouSelectRaces()));
+            explicitRaceColumnSelectionRadioBtn = dialog.createRadioButton(radioButtonGroupName, stringMessages.selectFromAllRaces());
             racesSelectionStrategyPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
             explicitRaceColumnSelectionRadioBtn.setValue(activeRaceColumnSelectionStrategy == RaceColumnSelectionStrategies.EXPLICIT);
             explicitRaceColumnSelectionRadioBtn.addClickHandler(new ClickHandler() {
@@ -239,7 +239,7 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
             explicitRaceSelectionContent.setVisible(activeRaceColumnSelectionStrategy == RaceColumnSelectionStrategies.EXPLICIT);
             selectedRacesContent.add(explicitRaceSelectionContent);
             
-            lastNRacesColumnSelectionRadioBtn = dialog.createRadioButton(radioButtonGroupName, "Select a number of races");
+            lastNRacesColumnSelectionRadioBtn = dialog.createRadioButton(radioButtonGroupName, stringMessages.selectANumberOfRaces());
             lastNRacesColumnSelectionRadioBtn.setValue(activeRaceColumnSelectionStrategy == RaceColumnSelectionStrategies.LAST_N);
             lastNRacesColumnSelectionRadioBtn.addClickHandler(new ClickHandler() {
                 @Override
@@ -255,9 +255,9 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
             // content of 'number of races' selection
             HorizontalPanel hPanel = new HorizontalPanel();
             lastNRacesSelectionContent.add(hPanel);
-            hPanel.add(new Label("Number of last 'n' races:"));
-            numerOfLastRacesToShowBox = dialog.createIntegerBox(numerOfLastRacesToShow != null ? numerOfLastRacesToShow : racesCount, 3);
-            hPanel.add(numerOfLastRacesToShowBox);
+            hPanel.add(new Label(stringMessages.numberOfLastNRaces()));
+            numberOfLastRacesToShowBox = dialog.createIntegerBox(numberOfLastRacesToShow != null ? numberOfLastRacesToShow : racesCount, 3);
+            hPanel.add(numberOfLastRacesToShowBox);
             dialog.alignAllPanelWidgetsVertically(hPanel, HasVerticalAlignment.ALIGN_MIDDLE);
             lastNRacesSelectionContent.setVisible(activeRaceColumnSelectionStrategy == RaceColumnSelectionStrategies.LAST_N);
             selectedRacesContent.add(lastNRacesSelectionContent);
@@ -294,7 +294,7 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
             }
         }
         List<String> namesOfRaceColumnsToShow = null;
-        if(activeRaceColumnSelectionStrategy == RaceColumnSelectionStrategies.EXPLICIT) {
+        if (activeRaceColumnSelectionStrategy == RaceColumnSelectionStrategies.EXPLICIT) {
             namesOfRaceColumnsToShow = new ArrayList<String>();
             for (Map.Entry<RaceColumnDTO, CheckBox> entry : raceColumnCheckboxes.entrySet()) {
                 if (entry.getValue().getValue()) {
@@ -304,12 +304,14 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
         }
         Long delayBetweenAutoAdvancesValue = refreshIntervalInSecondsBox.getValue();
         Long delayInSecondsValue = delayInSecondsBox.getValue();
-        Integer lastNRacesToShowValue = activeRaceColumnSelectionStrategy == RaceColumnSelectionStrategies.LAST_N ? numerOfLastRacesToShowBox.getValue() : null;
+        Integer lastNRacesToShowValue = activeRaceColumnSelectionStrategy == RaceColumnSelectionStrategies.LAST_N ?
+                numberOfLastRacesToShowBox.getValue() : null;
         return new LeaderboardSettings(maneuverDetailsToShow, legDetailsToShow, raceDetailsToShow,
                 overallDetailsToShow, namesOfRaceColumnsToShow, /* nameOfRacesToShow */null,
                 lastNRacesToShowValue,
-                autoExpandPreSelectedRace, 1000l * (delayBetweenAutoAdvancesValue == null ? 0l : delayBetweenAutoAdvancesValue.longValue()), 1000 * (delayInSecondsValue == null ? 0 : delayInSecondsValue.longValue()),
-                null, true, /* updateUponPlayStateChange */ true);
+                autoExpandPreSelectedRace, 1000l * (delayBetweenAutoAdvancesValue == null ? 0l : delayBetweenAutoAdvancesValue.longValue()),
+                1000 * (delayInSecondsValue == null ? 0 : delayInSecondsValue.longValue()),
+                null, true, /* updateUponPlayStateChange */ true, activeRaceColumnSelectionStrategy);
     }
 
     @Override
@@ -320,10 +322,10 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
                 if (valueToValidate.getLegDetailsToShow().isEmpty()) {
                     return stringMessages.selectAtLeastOneLegDetail();
                 } else if (valueToValidate.getDelayBetweenAutoAdvancesInMilliseconds() < 1000) {
-                    // TODO how to express that PAUSED mode is desired? Separate setting? Or should 0 express that...?
                     return stringMessages.chooseUpdateIntervalOfAtLeastOneSecond();
-                } else if (valueToValidate.getActiveRaceColumnSelectionStrategy() == RaceColumnSelectionStrategies.LAST_N) {
-                    return stringMessages.valueMustBeBetweenMinMax("Number of races", String.valueOf(1), String.valueOf(10));
+                } else if (valueToValidate.getActiveRaceColumnSelectionStrategy() == RaceColumnSelectionStrategies.LAST_N
+                        && (numberOfLastRacesToShowBox.getValue() == null || numberOfLastRacesToShowBox.getValue() < 0)) {
+                    return stringMessages.numberOfRacesMustBeNonNegativeNumber();
                 } else {
                     return null;
                 }

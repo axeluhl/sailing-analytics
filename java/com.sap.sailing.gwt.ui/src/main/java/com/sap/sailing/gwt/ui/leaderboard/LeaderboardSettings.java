@@ -46,13 +46,14 @@ public class LeaderboardSettings {
     private final boolean sortAscending;
     
     /**
+     * @param activeRaceColumnSelectionStrategy TODO
      * @param raceColumnsToShow <code>null</code> means don't modify the list of races shown
      */
     public LeaderboardSettings(List<DetailType> meneuverDetailsToShow, List<DetailType> legDetailsToShow,
             List<DetailType> raceDetailsToShow, List<DetailType> overallDetailsToShow,
             List<String> namesOfRaceColumnsToShow, List<String> namesOfRacesToShow, Integer numberOfLastRacesToShow,
             boolean autoExpandPreSelectedRace, Long delayBetweenAutoAdvancesInMilliseconds, Long delayInMilliseconds,
-            String nameOfRaceToSort, boolean sortAscending, boolean updateUponPlayStateChange) {
+            String nameOfRaceToSort, boolean sortAscending, boolean updateUponPlayStateChange, RaceColumnSelectionStrategies activeRaceColumnSelectionStrategy) {
         if (namesOfRacesToShow != null && namesOfRaceColumnsToShow != null) {
             throw new IllegalArgumentException("You can identify races either only by their race or by their column names, not both");
         }
@@ -62,11 +63,7 @@ public class LeaderboardSettings {
         this.namesOfRacesToShow = namesOfRacesToShow;
         this.namesOfRaceColumnsToShow = namesOfRaceColumnsToShow;
         this.numberOfLastRacesToShow = numberOfLastRacesToShow;
-        if (numberOfLastRacesToShow != null) {
-            activeRaceColumnSelectionStrategy = RaceColumnSelectionStrategies.LAST_N;
-        } else {
-            this.activeRaceColumnSelectionStrategy = RaceColumnSelectionStrategies.EXPLICIT;
-        }
+        this.activeRaceColumnSelectionStrategy = activeRaceColumnSelectionStrategy;
         this.autoExpandPreSelectedRace = autoExpandPreSelectedRace;
         this.delayBetweenAutoAdvancesInMilliseconds = delayBetweenAutoAdvancesInMilliseconds;
         this.delayInMilliseconds = delayInMilliseconds;

@@ -119,8 +119,11 @@ public class LeaderboardUrlConfigurationDialog extends SettingsDialog<Leaderboar
             Validator<LeaderboardUrlSettings> result = new Validator<LeaderboardUrlSettings>() {
                 @Override
                 public String getErrorMessage(LeaderboardUrlSettings settings) {
-                    updateURL(settings, leaderboardName);
-                    return superValidator.getErrorMessage(settings.getLeaderboardSettings());
+                    String errorMessage = superValidator.getErrorMessage(settings.getLeaderboardSettings());
+                    if (errorMessage == null) {
+                        updateURL(settings, leaderboardName);
+                    }
+                    return errorMessage;
                 }
             };
             return result;

@@ -416,4 +416,10 @@ public interface StringMessages extends Messages {
     String restrictToSingleSelectedRace();
     String expandSelectedRace();
     String showRaceDetails();
+    String numberOfRaces();
+    String numberOfRacesMustBeNonNegativeNumber();
+    String chooseTheWayYouSelectRaces();
+    String selectFromAllRaces();
+    String selectANumberOfRaces();
+    String numberOfLastNRaces();
 }

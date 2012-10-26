@@ -28,6 +28,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.client.URLFactory;
+import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings.RaceColumnSelectionStrategies;
 import com.sap.sailing.gwt.ui.shared.AbstractLeaderboardDTO;
 
 
@@ -163,7 +164,8 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
                     autoExpandPreSelectedRace, refreshIntervalMillis, /* delay to live */ null,
                             /* sort by column */ (namesOfRacesToShow != null && !namesOfRacesToShow.isEmpty()) ?
                                     namesOfRacesToShow.get(0) : null, /* ascending */ true,
-                                    /* updateUponPlayStateChange */ raceDetails.isEmpty() && legDetails.isEmpty());
+                                    /* updateUponPlayStateChange */ raceDetails.isEmpty() && legDetails.isEmpty(),
+                                    RaceColumnSelectionStrategies.EXPLICIT);
         } else {
             final List<DetailType> overallDetails = Collections.emptyList();
             result = LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(null, null, /* overallDetails */
@@ -283,7 +285,6 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
                 + (settings.getLeaderboardSettings().getNumberOfLastRacesToShow() == null ? "" :
                     "&"+PARAM_NAME_LAST_N+"="+settings.getLeaderboardSettings().getNumberOfLastRacesToShow())
                 + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""));
-        // TODO drive lastN assignment
         return link;
     }
 }

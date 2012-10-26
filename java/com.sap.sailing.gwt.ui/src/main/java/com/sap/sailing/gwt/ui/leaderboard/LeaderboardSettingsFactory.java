@@ -6,6 +6,7 @@ import java.util.List;
 
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
+import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings.RaceColumnSelectionStrategies;
 
 /*
  * A factory class creating leaderboard settings for different contexts (user role, live or replay mode, etc.
@@ -64,7 +65,8 @@ public class LeaderboardSettingsFactory {
                         namesOfRaceColumnsToShow,
                         namesOfRacesToShow, null,
                         /* set autoExpandPreSelectedRace to true if we look at a single race */ nameOfRaceColumnToShow != null || nameOfRaceToShow != null, /* refresh interval */ null, /* delay to live */ null,
-                        /* name of race to sort */ nameOfRaceToSort, /* ascending */ true, /* updateUponPlayStateChange */ true);
+                        /* name of race to sort */ nameOfRaceToSort, /* ascending */ true, /* updateUponPlayStateChange */ true,
+                        RaceColumnSelectionStrategies.EXPLICIT);
                 break;
             case Replay:
             settings = createNewDefaultSettings(namesOfRaceColumnsToShow, namesOfRacesToShow, nameOfRaceToSort, /* autoExpandFirstRace */
@@ -114,6 +116,7 @@ public class LeaderboardSettingsFactory {
                 namesOfRaceColumnsToShow,
                 namesOfRacesToShow, null,
                 autoExpandPreSelectedRace, refreshIntervalMillis, /* delay to live */ null,
-                /* sort by column */ nameOfRaceToSort, /* ascending */ true, /* updateUponPlayStateChange */ true);
+                /* sort by column */ nameOfRaceToSort, /* ascending */ true, /* updateUponPlayStateChange */ true,
+                RaceColumnSelectionStrategies.EXPLICIT);
     }
 }
