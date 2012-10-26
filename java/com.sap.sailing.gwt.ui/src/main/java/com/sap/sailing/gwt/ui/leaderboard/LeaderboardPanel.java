@@ -2015,8 +2015,8 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         return new LeaderboardSettingsDialogComponent(Collections.unmodifiableList(selectedManeuverDetails),
                 Collections.unmodifiableList(selectedLegDetails), Collections.unmodifiableList(selectedRaceDetails),
                 Collections.unmodifiableList(selectedOverallDetailColumns), /* All races to select */ leaderboard.getRaceList(),
-                raceColumnSelection.getSelectedRaceColumnsOrderedAsInLeaderboard(leaderboard), autoExpandPreSelectedRace, timer.getRefreshInterval(),
-                timer.getLivePlayDelayInMillis(), stringMessages);
+                raceColumnSelection.getSelectedRaceColumnsOrderedAsInLeaderboard(leaderboard), null, autoExpandPreSelectedRace,
+                timer.getRefreshInterval(), timer.getLivePlayDelayInMillis(), stringMessages);
     }
 
     @Override

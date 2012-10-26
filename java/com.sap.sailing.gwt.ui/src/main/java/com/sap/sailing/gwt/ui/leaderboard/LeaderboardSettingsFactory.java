@@ -62,9 +62,9 @@ public class LeaderboardSettingsFactory {
                 List<DetailType> overallDetails = null; // lead overall details unchanged
                 settings = new LeaderboardSettings(maneuverDetails, legDetails, raceDetails, overallDetails,
                         namesOfRaceColumnsToShow,
-                        namesOfRacesToShow, /* set autoExpandPreSelectedRace to true if we look at a single race */ nameOfRaceColumnToShow != null || nameOfRaceToShow != null,
-                        /* refresh interval */ null, /* delay to live */ null, /* name of race to sort */ nameOfRaceToSort,
-                        /* ascending */ true, /* updateUponPlayStateChange */ true);
+                        namesOfRacesToShow, null,
+                        /* set autoExpandPreSelectedRace to true if we look at a single race */ nameOfRaceColumnToShow != null || nameOfRaceToShow != null, /* refresh interval */ null, /* delay to live */ null,
+                        /* name of race to sort */ nameOfRaceToSort, /* ascending */ true, /* updateUponPlayStateChange */ true);
                 break;
             case Replay:
             settings = createNewDefaultSettings(namesOfRaceColumnsToShow, namesOfRacesToShow, nameOfRaceToSort, /* autoExpandFirstRace */
@@ -112,8 +112,8 @@ public class LeaderboardSettingsFactory {
         raceDetails.add(DetailType.DISPLAY_LEGS);
         return new LeaderboardSettings(maneuverDetails, legDetails, raceDetails, overallDetailsToShow,
                 namesOfRaceColumnsToShow,
-                namesOfRacesToShow, autoExpandPreSelectedRace,
-                refreshIntervalMillis, /* delay to live */ null, /* sort by column */ nameOfRaceToSort,
-                /* ascending */ true, /* updateUponPlayStateChange */ true);
+                namesOfRacesToShow, null,
+                autoExpandPreSelectedRace, refreshIntervalMillis, /* delay to live */ null,
+                /* sort by column */ nameOfRaceToSort, /* ascending */ true, /* updateUponPlayStateChange */ true);
     }
 }

@@ -159,10 +159,10 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
                         (namesOfRacesToShow != null && namesOfRacesToShow.size() == 1);
             result = new LeaderboardSettings(maneuverDetails, legDetails, raceDetails, overallDetails,
                     /* namesOfRaceColumnsToShow */ null,
-                    namesOfRacesToShow, autoExpandPreSelectedRace,
-                    refreshIntervalMillis, /* delay to live */ null, /* sort by column */ (namesOfRacesToShow != null && !namesOfRacesToShow.isEmpty()) ?
-                                    namesOfRacesToShow.get(0) : null,
-                            /* ascending */ true, /* updateUponPlayStateChange */ raceDetails.isEmpty() && legDetails.isEmpty());
+                    namesOfRacesToShow, null,
+                    autoExpandPreSelectedRace, refreshIntervalMillis, /* delay to live */ null,
+                            /* sort by column */ (namesOfRacesToShow != null && !namesOfRacesToShow.isEmpty()) ?
+                                                            namesOfRacesToShow.get(0) : null, /* ascending */ true, /* updateUponPlayStateChange */ raceDetails.isEmpty() && legDetails.isEmpty());
         } else {
             final List<DetailType> overallDetails = Collections.emptyList();
             result = LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(null, null, /* overallDetails */

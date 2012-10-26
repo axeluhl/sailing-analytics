@@ -89,10 +89,10 @@ public class LeaderboardUrlConfigurationDialog extends SettingsDialog<Leaderboar
                     false);
             List<DetailType> overallDetailsToShow = Collections.emptyList();
             leaderboardSettingsDialogComponent = new LeaderboardSettingsDialogComponent(settings.getManeuverDetailsToShow(),
-                settings.getLegDetailsToShow(), settings.getRaceDetailsToShow(), overallDetailsToShow, raceList,
-                /* select all races by default */ raceList, /* autoExpandPreSelectedRace */ false,
-                /* delayBetweenAutoAdvancesInMilliseconds */ 3000l,
-                /* delayInMilliseconds */ 3000l, stringMessages);
+                settings.getLegDetailsToShow(), settings.getRaceDetailsToShow(), overallDetailsToShow, raceList, 
+                /* select all races by default */ raceList, null,
+                /* autoExpandPreSelectedRace */ false,
+                /* delayBetweenAutoAdvancesInMilliseconds */ 3000l, /* delayInMilliseconds */ 3000l, stringMessages);
         }
 
         private void updateURL() {
