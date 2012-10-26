@@ -235,6 +235,13 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
      * Can be used to disallow users to drill into the race details.
      */
     private final boolean showRaceDetails;
+    
+    /**
+     * The {@link LastNRacesColumnSelection} column selection strategy requires a {@link RaceTimesInfoProvider}. This can either be injected
+     * by passing a non-<code>null</code> object of that type to the constructor, or such an object is created and remembered in this
+     * attribute when required the first time.
+     */
+    private RaceTimesInfoProvider raceTimesInfoProvider;
 
     private class SettingsClickHandler implements ClickHandler {
         private final StringMessages stringMessages;
@@ -316,22 +323,35 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             selectedOverallDetailColumns.clear();
             selectedOverallDetailColumns.addAll(newSettings.getOverallDetailsToShow());
         }
-        if (newSettings.getNamesOfRaceColumnsToShow() != null) {
-            raceColumnSelection.requestClear();
-            for (String nameOfRaceColumnToShow : newSettings.getNamesOfRaceColumnsToShow()) {
-                RaceColumnDTO raceColumnToShow = getRaceByColumnName(nameOfRaceColumnToShow);
-                if (raceColumnToShow != null) {
-                    raceColumnSelection.requestRaceColumnSelection(raceColumnToShow.name, raceColumnToShow);
+        // update strategy for determining the race columns to show
+        switch (newSettings.getActiveRaceColumnSelectionStrategy()) {
+        case EXPLICIT:
+            if (preSelectedRace == null) {
+                raceColumnSelection = new ExplicitRaceColumnSelection();
+            } else {
+                raceColumnSelection = new ExplicitRaceColumnSelectionWithPreselectedRace(preSelectedRace);
+            }
+            if (newSettings.getNamesOfRaceColumnsToShow() != null) {
+                raceColumnSelection.requestClear();
+                for (String nameOfRaceColumnToShow : newSettings.getNamesOfRaceColumnsToShow()) {
+                    RaceColumnDTO raceColumnToShow = getRaceByColumnName(nameOfRaceColumnToShow);
+                    if (raceColumnToShow != null) {
+                        raceColumnSelection.requestRaceColumnSelection(raceColumnToShow.name, raceColumnToShow);
+                    }
+                }
+            } else if (newSettings.getNamesOfRacesToShow() != null) {
+                raceColumnSelection.requestClear();
+                for (String nameOfRaceToShow : newSettings.getNamesOfRacesToShow()) {
+                    RaceColumnDTO raceColumnToShow = getRaceByName(nameOfRaceToShow);
+                    if (raceColumnToShow != null) {
+                        raceColumnSelection.requestRaceColumnSelection(raceColumnToShow.name, raceColumnToShow);
+                    }
                 }
             }
-        } else if (newSettings.getNamesOfRacesToShow() != null) {
-            raceColumnSelection.requestClear();
-            for (String nameOfRaceToShow : newSettings.getNamesOfRacesToShow()) {
-                RaceColumnDTO raceColumnToShow = getRaceByName(nameOfRaceToShow);
-                if (raceColumnToShow != null) {
-                    raceColumnSelection.requestRaceColumnSelection(raceColumnToShow.name, raceColumnToShow);
-                }
-            }
+            break;
+        case LAST_N:
+            raceColumnSelection = new LastNRacesColumnSelection(newSettings.getNumberOfLastRacesToShow(), getRaceTimesInfoProvider());
+            break;
         }
         setAutoExpandPreSelectedRace(false); // avoid expansion during updateLeaderboard(...); will expand later if it
                                              // was expanded before
@@ -354,6 +374,18 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                 getLeaderboardTable().sortColumn(raceColumnByRaceName, /* ascending */true);
             }
         }
+    }
+
+    /**
+     * A leaderboard panel may have been provided with a valid {@link RaceTimesInfoProvider} upon creation; in this case, that object
+     * will be returned. If none was provided to the constructor, one is created and remembered if no previously created/remembered
+     * object exists.
+     */
+    private RaceTimesInfoProvider getRaceTimesInfoProvider() {
+        if (raceTimesInfoProvider == null) {
+            raceTimesInfoProvider = new RaceTimesInfoProvider(getSailingService(), errorReporter, getTrackedRacesIdentifiers(), timer.getRefreshInterval());
+        }
+        return raceTimesInfoProvider;
     }
 
     protected class CompetitorColumn extends SortableColumn<LeaderboardRowDTO, LeaderboardRowDTO> {
@@ -1038,14 +1070,14 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         this(sailingService, asyncActionsExecutor, settings, preSelectedRace, competitorSelectionProvider, new Timer(
                 PlayModes.Replay, /* delayBetweenAutoAdvancesInMilliseconds */3000l), leaderboardName,
                 leaderboardGroupName, errorReporter, stringMessages, userAgent, showRaceDetails,
-                preSelectedRace == null ? new ExplicitRaceColumnSelection() : new ExplicitRaceColumnSelectionWithPreselectedRace(preSelectedRace));
+                /* optionalRaceTimesInfoProvider */ null);
     }
 
     public LeaderboardPanel(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
             LeaderboardSettings settings, RaceIdentifier preSelectedRace,
             CompetitorSelectionProvider competitorSelectionProvider, Timer timer, String leaderboardName,
             String leaderboardGroupName, ErrorReporter errorReporter, final StringMessages stringMessages,
-            final UserAgentDetails userAgent, boolean showRaceDetails, RaceColumnSelection raceColumnSelection) {
+            final UserAgentDetails userAgent, boolean showRaceDetails, RaceTimesInfoProvider optionalRaceTimesInfoProvider) {
         this.showRaceDetails = showRaceDetails;
         this.sailingService = sailingService;
         this.asyncActionsExecutor = asyncActionsExecutor;
@@ -1058,7 +1090,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         this.selectedLegDetails = new ArrayList<DetailType>();
         this.selectedRaceDetails = new ArrayList<DetailType>();
         this.selectedOverallDetailColumns = new ArrayList<DetailType>();
-        this.raceColumnSelection = raceColumnSelection;
+        this.raceTimesInfoProvider = optionalRaceTimesInfoProvider;
         this.selectedManeuverDetails = new ArrayList<DetailType>();
         overallDetailColumnMap = createOverallDetailColumnMap();
         settingsUpdatedExplicitly = !settings.updateUponPlayStateChange();
@@ -1073,6 +1105,18 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         }
         if (settings.getOverallDetailsToShow() != null) {
             selectedOverallDetailColumns.addAll(settings.getOverallDetailsToShow());
+        }
+        switch (settings.getActiveRaceColumnSelectionStrategy()) {
+        case EXPLICIT:
+            if (preSelectedRace == null) {
+                raceColumnSelection = new ExplicitRaceColumnSelection();
+            } else {
+                raceColumnSelection = new ExplicitRaceColumnSelectionWithPreselectedRace(preSelectedRace);
+            }
+            break;
+        case LAST_N:
+            raceColumnSelection = new LastNRacesColumnSelection(settings.getNumberOfLastRacesToShow(), getRaceTimesInfoProvider());
+            break;
         }
         setAutoExpandPreSelectedRace(settings.isAutoExpandPreSelectedRace());
         if (settings.getDelayBetweenAutoAdvancesInMilliseconds() != null) {

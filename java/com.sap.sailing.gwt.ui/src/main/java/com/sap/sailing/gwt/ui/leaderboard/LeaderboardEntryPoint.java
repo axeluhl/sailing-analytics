@@ -16,14 +16,12 @@ import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.RaceIdentifier;
-import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
 import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog;
 import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
-import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
@@ -99,20 +97,7 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
         }
         ScrollPanel contentScrollPanel = new ScrollPanel();
         long delayBetweenAutoAdvancesInMilliseconds = 3000l;
-        final RaceColumnSelection raceColumnSelection;
-        String lastN = Window.Location.getParameter(PARAM_NAME_LAST_N);
         final RaceIdentifier preselectedRace = getPreselectedRace(Window.Location.getParameterMap());
-        if (lastN != null) {
-            raceColumnSelection = new LastNRacesColumnSelection(Integer.valueOf(lastN), new RaceTimesInfoProvider(
-                    sailingService, this, new ArrayList<RegattaAndRaceIdentifier>(),
-                    delayBetweenAutoAdvancesInMilliseconds));
-        } else {
-            if (preselectedRace == null) {
-                raceColumnSelection = new ExplicitRaceColumnSelection();
-            } else {
-                raceColumnSelection = new ExplicitRaceColumnSelectionWithPreselectedRace(preselectedRace);
-            }
-        }
         Timer timer = new Timer(PlayModes.Replay, delayBetweenAutoAdvancesInMilliseconds);
         timer.setLivePlayDelayInMillis(delayToLiveMillis);
         final LeaderboardSettings leaderboardSettings = createLeaderboardSettingsFromURLParameters(Window.Location.getParameterMap());
@@ -123,7 +108,7 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
                 leaderboardSettings,
                     preselectedRace, new CompetitorSelectionModel(
                         /* hasMultiSelection */true), timer, leaderboardName, leaderboardGroupName,
-                    LeaderboardEntryPoint.this, stringMessages, userAgent, showRaceDetails, raceColumnSelection);
+                    LeaderboardEntryPoint.this, stringMessages, userAgent, showRaceDetails, /* raceTimesInfoProvider */ null);
         contentScrollPanel.setWidget(leaderboardPanel);
 
         mainPanel.add(contentScrollPanel);
@@ -150,6 +135,12 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
         if (parameterMap.containsKey(PARAM_RACE_NAME) || parameterMap.containsKey(PARAM_RACE_DETAIL) ||
                 parameterMap.containsKey(PARAM_LEG_DETAIL) || parameterMap.containsKey(PARAM_MANEUVER_DETAIL) ||
                 parameterMap.containsKey(PARAM_OVERALL_DETAIL)) {
+            RaceColumnSelectionStrategies raceColumnSelectionStrategy;
+            if (parameterMap.containsKey(PARAM_NAME_LAST_N)) {
+                raceColumnSelectionStrategy = RaceColumnSelectionStrategies.LAST_N;
+            } else {
+                raceColumnSelectionStrategy = RaceColumnSelectionStrategies.EXPLICIT;
+            }
             List<DetailType> maneuverDetails = getDetailTypeListFromParamValue(parameterMap.get(PARAM_MANEUVER_DETAIL));
             List<DetailType> raceDetails = getDetailTypeListFromParamValue(parameterMap.get(PARAM_RACE_DETAIL));
             List<DetailType> overallDetails = getDetailTypeListFromParamValue(parameterMap.get(PARAM_OVERALL_DETAIL));
@@ -165,7 +156,7 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
                             /* sort by column */ (namesOfRacesToShow != null && !namesOfRacesToShow.isEmpty()) ?
                                     namesOfRacesToShow.get(0) : null, /* ascending */ true,
                                     /* updateUponPlayStateChange */ raceDetails.isEmpty() && legDetails.isEmpty(),
-                                    RaceColumnSelectionStrategies.EXPLICIT);
+                                    raceColumnSelectionStrategy);
         } else {
             final List<DetailType> overallDetails = Collections.emptyList();
             result = LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(null, null, /* overallDetails */

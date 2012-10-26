@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings.RaceColumnSelectionStrategies;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.RaceColumnDTO;
 
@@ -76,6 +77,11 @@ public class ExplicitRaceColumnSelection extends AbstractRaceColumnSelection imp
         for (RaceColumnDTO selectedRaceColumn : getRaceColumnsToAddImplicitly(newLeaderboard, oldLeaderboard)) {
             requestRaceColumnSelection(selectedRaceColumn.name, selectedRaceColumn);
         }
+    }
+
+    @Override
+    public RaceColumnSelectionStrategies getType() {
+        return RaceColumnSelectionStrategies.EXPLICIT;
     }
 
 }

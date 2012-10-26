@@ -13,6 +13,7 @@ import java.util.Set;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProviderListener;
+import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings.RaceColumnSelectionStrategies;
 import com.sap.sailing.gwt.ui.shared.FleetDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.RaceColumnDTO;
@@ -142,6 +143,11 @@ public class LastNRacesColumnSelection extends AbstractRaceColumnSelection imple
             result = resultList;
         }
         return result;
+    }
+
+    @Override
+    public RaceColumnSelectionStrategies getType() {
+        return RaceColumnSelectionStrategies.LAST_N;
     }
 
 }

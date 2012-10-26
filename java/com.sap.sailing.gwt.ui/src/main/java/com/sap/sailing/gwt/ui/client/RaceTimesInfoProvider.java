@@ -47,6 +47,7 @@ public class RaceTimesInfoProvider {
             public boolean execute() {
                 readTimesInfos();
                 Scheduler.get().scheduleFixedPeriod(this, (int) RaceTimesInfoProvider.this.requestIntervalInMillis);
+                // don't execute *this* particular scheduled repeating command again; the line above re-scheduled already
                 return false;
             }
         };

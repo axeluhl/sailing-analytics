@@ -184,20 +184,15 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
     private void createRaceBoardInOneScreenMode(RaceBoardPanel raceBoardPanel) {
         DockLayoutPanel p = new DockLayoutPanel(Unit.PX);
         RootLayoutPanel.get().add(p);
-        
         FlowPanel toolbarPanel = new FlowPanel();
-        
         toolbarPanel.add(raceBoardPanel.getNavigationWidget());
-        
         if (!UserAgentChecker.INSTANCE.isUserAgentSupported(userAgent)) {
             HTML lbl = new HTML("This website is optimized to work with Google Chrome. <a target='_blank' href='https://www.google.com/intl/de/chrome/browser/'>Click here to download</a>");
             lbl.setStyleName("browserOptimizedMessage");
             toolbarPanel.add(lbl);
         }
-
         FlowPanel logoAndTitlePanel = createLogoAndTitlePanel(raceBoardPanel);
         FlowPanel timePanel = createTimePanel(raceBoardPanel);
-        
         p.addNorth(logoAndTitlePanel, 68);        
         p.addNorth(toolbarPanel, 40);
         p.addSouth(timePanel, 90);                     
