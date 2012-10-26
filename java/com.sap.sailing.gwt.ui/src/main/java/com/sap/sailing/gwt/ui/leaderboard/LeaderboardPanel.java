@@ -379,11 +379,20 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     /**
      * A leaderboard panel may have been provided with a valid {@link RaceTimesInfoProvider} upon creation; in this case, that object
      * will be returned. If none was provided to the constructor, one is created and remembered if no previously created/remembered
-     * object exists.
+     * object exists.<p>
+     * 
+     * Precondition: {@link #timer} is not <code>null</code>
      */
     private RaceTimesInfoProvider getRaceTimesInfoProvider() {
         if (raceTimesInfoProvider == null) {
-            raceTimesInfoProvider = new RaceTimesInfoProvider(getSailingService(), errorReporter, getTrackedRacesIdentifiers(), timer.getRefreshInterval());
+            final List<RegattaAndRaceIdentifier> trackedRacesIdentifiers;
+            if (leaderboard != null && getTrackedRacesIdentifiers() != null) {
+                trackedRacesIdentifiers = getTrackedRacesIdentifiers();
+            } else {
+                trackedRacesIdentifiers = Collections.emptyList();
+            }
+            raceTimesInfoProvider = new RaceTimesInfoProvider(getSailingService(), errorReporter,
+                    trackedRacesIdentifiers, timer.getRefreshInterval());
         }
         return raceTimesInfoProvider;
     }
@@ -1106,6 +1115,13 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         if (settings.getOverallDetailsToShow() != null) {
             selectedOverallDetailColumns.addAll(settings.getOverallDetailsToShow());
         }
+        setAutoExpandPreSelectedRace(settings.isAutoExpandPreSelectedRace());
+        if (settings.getDelayBetweenAutoAdvancesInMilliseconds() != null) {
+            timer.setRefreshInterval(settings.getDelayBetweenAutoAdvancesInMilliseconds());
+        }
+        this.timer = timer;
+        timer.addPlayStateListener(this);
+        timer.addTimeListener(this);
         switch (settings.getActiveRaceColumnSelectionStrategy()) {
         case EXPLICIT:
             if (preSelectedRace == null) {
@@ -1118,14 +1134,6 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             raceColumnSelection = new LastNRacesColumnSelection(settings.getNumberOfLastRacesToShow(), getRaceTimesInfoProvider());
             break;
         }
-        setAutoExpandPreSelectedRace(settings.isAutoExpandPreSelectedRace());
-        if (settings.getDelayBetweenAutoAdvancesInMilliseconds() != null) {
-            timer.setRefreshInterval(settings.getDelayBetweenAutoAdvancesInMilliseconds());
-        }
-
-        this.timer = timer;
-        timer.addPlayStateListener(this);
-        timer.addTimeListener(this);
         rankColumn = new RankColumn();
         RACE_COLUMN_HEADER_STYLE = tableResources.cellTableStyle().cellTableRaceColumnHeader();
         LEG_COLUMN_HEADER_STYLE = tableResources.cellTableStyle().cellTableLegColumnHeader();

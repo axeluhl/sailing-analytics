@@ -141,6 +141,12 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
             } else {
                 raceColumnSelectionStrategy = RaceColumnSelectionStrategies.EXPLICIT;
             }
+            final Integer numberOfLastRacesToShow;
+            if (parameterMap.containsKey(PARAM_NAME_LAST_N)) {
+                numberOfLastRacesToShow = Integer.valueOf(parameterMap.get(PARAM_NAME_LAST_N).get(0));
+            } else {
+                numberOfLastRacesToShow = null;
+            }
             List<DetailType> maneuverDetails = getDetailTypeListFromParamValue(parameterMap.get(PARAM_MANEUVER_DETAIL));
             List<DetailType> raceDetails = getDetailTypeListFromParamValue(parameterMap.get(PARAM_RACE_DETAIL));
             List<DetailType> overallDetails = getDetailTypeListFromParamValue(parameterMap.get(PARAM_OVERALL_DETAIL));
@@ -151,7 +157,7 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
                         (namesOfRacesToShow != null && namesOfRacesToShow.size() == 1);
             result = new LeaderboardSettings(maneuverDetails, legDetails, raceDetails, overallDetails,
                     /* namesOfRaceColumnsToShow */ null,
-                    namesOfRacesToShow, /* numberOfLastRacesToShow */ null,
+                    namesOfRacesToShow, numberOfLastRacesToShow,
                     autoExpandPreSelectedRace, refreshIntervalMillis, /* delay to live */ null,
                             /* sort by column */ (namesOfRacesToShow != null && !namesOfRacesToShow.isEmpty()) ?
                                     namesOfRacesToShow.get(0) : null, /* ascending */ true,
