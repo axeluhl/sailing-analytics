@@ -246,6 +246,13 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
      * as specified by the parameters.
      */
     public static String getUrl(String leaderboardName, LeaderboardUrlSettings settings) {
+        StringBuilder overallDetails = new StringBuilder();
+        for (DetailType overallDetail : settings.getLeaderboardSettings().getOverallDetailsToShow()) {
+            overallDetails.append('&');
+            overallDetails.append(PARAM_OVERALL_DETAIL);
+            overallDetails.append('=');
+            overallDetails.append(overallDetail.name());
+        }
         StringBuilder legDetails = new StringBuilder();
         for (DetailType legDetail : settings.getLeaderboardSettings().getLegDetailsToShow()) {
             legDetails.append('&');
@@ -280,6 +287,7 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
                     "&"+PARAM_REFRESH_INTERVAL_MILLIS+"="+settings.getLeaderboardSettings().getDelayBetweenAutoAdvancesInMilliseconds())
                 + legDetails.toString()
                 + raceDetails.toString()
+                + overallDetails.toString()
                 + (settings.getLeaderboardSettings().getNumberOfLastRacesToShow() == null ? "" :
                     "&"+PARAM_NAME_LAST_N+"="+settings.getLeaderboardSettings().getNumberOfLastRacesToShow())
                 + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""));

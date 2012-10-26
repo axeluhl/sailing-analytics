@@ -56,11 +56,12 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
 
     public LeaderboardSettingsDialogComponent(List<DetailType> maneuverDetailSelection,
             List<DetailType> legDetailSelection, List<DetailType> raceDetailSelection, List<DetailType> overallDetailSelection,
-            List<RaceColumnDTO> raceAllRaceColumns,Iterable<RaceColumnDTO> raceColumnSelection, Integer numberOfLastRacesToShow,
+            List<RaceColumnDTO> raceAllRaceColumns, Iterable<RaceColumnDTO> raceColumnSelection, RaceColumnSelection raceColumnSelectionStrategy,
             boolean autoExpandPreSelectedRace, long delayBetweenAutoAdvancesInMilliseconds, long delayInMilliseconds, StringMessages stringMessages) {
         this.raceAllRaceColumns = raceAllRaceColumns;
-        this.numberOfLastRacesToShow = numberOfLastRacesToShow;
-        this.activeRaceColumnSelectionStrategy = raceColumnSelection != null ? RaceColumnSelectionStrategies.EXPLICIT : RaceColumnSelectionStrategies.LAST_N;
+        this.numberOfLastRacesToShow = (raceColumnSelectionStrategy instanceof LastNRacesColumnSelection) ?
+                ((LastNRacesColumnSelection) raceColumnSelectionStrategy).getNumberOfLastRaces() : null;
+        this.activeRaceColumnSelectionStrategy = raceColumnSelectionStrategy.getType();
         this.maneuverDetailSelection = maneuverDetailSelection;
         maneuverDetailCheckboxes = new LinkedHashMap<DetailType, CheckBox>();
         this.raceColumnSelection = raceColumnSelection;
@@ -184,9 +185,7 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
     private FlowPanel createSelectedRacesPanel(DataEntryDialog<?> dialog) {
         FlowPanel selectedRacesPanel = new FlowPanel();
         selectedRacesPanel.addStyleName("SettingsDialogComponent");
-
         selectedRacesPanel.add(dialog.createHeadline(stringMessages.selectedRaces(), true));
-
         // race selection strategy elements
         HorizontalPanel racesSelectionStrategyPanel = new HorizontalPanel();
         selectedRacesPanel.add(racesSelectionStrategyPanel);
@@ -201,7 +200,6 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
             final FlowPanel explicitRaceSelectionContent = new FlowPanel();
             final FlowPanel lastNRacesSelectionContent = new FlowPanel();
             String radioButtonGroupName = "raceSelectionStrategyGroup";
-
             racesSelectionStrategyPanel.add(new Label(stringMessages.chooseTheWayYouSelectRaces()));
             explicitRaceColumnSelectionRadioBtn = dialog.createRadioButton(radioButtonGroupName, stringMessages.selectFromAllRaces());
             racesSelectionStrategyPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
