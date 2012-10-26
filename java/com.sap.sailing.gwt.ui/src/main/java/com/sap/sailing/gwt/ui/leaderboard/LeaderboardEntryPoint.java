@@ -97,23 +97,22 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
             mainPanel.addNorth(logoAndTitlePanel, 68);
         }
         ScrollPanel contentScrollPanel = new ScrollPanel();
-        
-            long delayBetweenAutoAdvancesInMilliseconds = 3000l;
-            final RaceColumnSelection raceColumnSelection;
-            String lastN = Window.Location.getParameter(PARAM_NAME_LAST_N);
-            final RaceIdentifier preselectedRace = getPreselectedRace(Window.Location.getParameterMap());
-            if (lastN != null) {
-                raceColumnSelection = new LastNRacesColumnSelection(Integer.valueOf(lastN),
-                        new RaceTimesInfoProvider(sailingService, this, new ArrayList<RegattaAndRaceIdentifier>(),
-                                delayBetweenAutoAdvancesInMilliseconds));
+        long delayBetweenAutoAdvancesInMilliseconds = 3000l;
+        final RaceColumnSelection raceColumnSelection;
+        String lastN = Window.Location.getParameter(PARAM_NAME_LAST_N);
+        final RaceIdentifier preselectedRace = getPreselectedRace(Window.Location.getParameterMap());
+        if (lastN != null) {
+            raceColumnSelection = new LastNRacesColumnSelection(Integer.valueOf(lastN), new RaceTimesInfoProvider(
+                    sailingService, this, new ArrayList<RegattaAndRaceIdentifier>(),
+                    delayBetweenAutoAdvancesInMilliseconds));
+        } else {
+            if (preselectedRace == null) {
+                raceColumnSelection = new ExplicitRaceColumnSelection();
             } else {
-                if (preselectedRace == null) {
-                    raceColumnSelection = new ExplicitRaceColumnSelection();
-                } else {
-                    raceColumnSelection = new ExplicitRaceColumnSelectionWithPreselectedRace(preselectedRace);
-                }
+                raceColumnSelection = new ExplicitRaceColumnSelectionWithPreselectedRace(preselectedRace);
             }
-            Timer timer = new Timer(PlayModes.Replay, delayBetweenAutoAdvancesInMilliseconds);
+        }
+        Timer timer = new Timer(PlayModes.Replay, delayBetweenAutoAdvancesInMilliseconds);
         timer.setLivePlayDelayInMillis(delayToLiveMillis);
         final LeaderboardSettings leaderboardSettings = createLeaderboardSettingsFromURLParameters(Window.Location.getParameterMap());
         if (leaderboardSettings.getDelayBetweenAutoAdvancesInMilliseconds() != null) {
@@ -160,10 +159,11 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
                         (namesOfRacesToShow != null && namesOfRacesToShow.size() == 1);
             result = new LeaderboardSettings(maneuverDetails, legDetails, raceDetails, overallDetails,
                     /* namesOfRaceColumnsToShow */ null,
-                    namesOfRacesToShow, null,
+                    namesOfRacesToShow, /* numberOfLastRacesToShow */ null,
                     autoExpandPreSelectedRace, refreshIntervalMillis, /* delay to live */ null,
                             /* sort by column */ (namesOfRacesToShow != null && !namesOfRacesToShow.isEmpty()) ?
-                                                            namesOfRacesToShow.get(0) : null, /* ascending */ true, /* updateUponPlayStateChange */ raceDetails.isEmpty() && legDetails.isEmpty());
+                                    namesOfRacesToShow.get(0) : null, /* ascending */ true,
+                                    /* updateUponPlayStateChange */ raceDetails.isEmpty() && legDetails.isEmpty());
         } else {
             final List<DetailType> overallDetails = Collections.emptyList();
             result = LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(null, null, /* overallDetails */
@@ -275,11 +275,13 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
                 + (settings.getLeaderboardSettings().getDelayInMilliseconds() == null &&
                    settings.getLeaderboardSettings().getDelayInMilliseconds() != 0 ? "" :
                     "&"+PARAM_DELAY_TO_LIVE_MILLIS+"="+settings.getLeaderboardSettings().getDelayInMilliseconds())
-                + (settings.getLeaderboardSettings().getDelayBetweenAutoAdvancesInMilliseconds() == null &&
-                   settings.getLeaderboardSettings().getDelayBetweenAutoAdvancesInMilliseconds() != 0 ? "" :
+                + (!settings.isAutoRefresh() || (settings.getLeaderboardSettings().getDelayBetweenAutoAdvancesInMilliseconds() == null &&
+                   settings.getLeaderboardSettings().getDelayBetweenAutoAdvancesInMilliseconds() != 0) ? "" :
                     "&"+PARAM_REFRESH_INTERVAL_MILLIS+"="+settings.getLeaderboardSettings().getDelayBetweenAutoAdvancesInMilliseconds())
                 + legDetails.toString()
                 + raceDetails.toString()
+                + (settings.getLeaderboardSettings().getNumberOfLastRacesToShow() == null ? "" :
+                    "&"+PARAM_NAME_LAST_N+"="+settings.getLeaderboardSettings().getNumberOfLastRacesToShow())
                 + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""));
         // TODO drive lastN assignment
         return link;
