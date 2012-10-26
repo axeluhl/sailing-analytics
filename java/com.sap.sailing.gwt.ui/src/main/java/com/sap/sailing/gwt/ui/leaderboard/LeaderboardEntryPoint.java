@@ -41,6 +41,7 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
     private static final String PARAM_LEG_DETAIL = "legDetail";
     private static final String PARAM_MANEUVER_DETAIL = "maneuverDetail";
     private static final String PARAM_AUTO_EXPAND_PRESELECTED_RACE = "autoExpandPreselectedRace";
+    private static final String PARAM_AUTO_EXPAND_LAST_RACE_COLUMN = "autoExpandLastRaceColumn";
     private static final String PARAM_REGATTA_NAME = "regattaName";
     private static final String PARAM_REFRESH_INTERVAL_MILLIS = "refreshIntervalMillis";
     private static final String PARAM_DELAY_TO_LIVE_MILLIS = "delayToLiveMillis";
@@ -108,7 +109,9 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
                 leaderboardSettings,
                     preselectedRace, new CompetitorSelectionModel(
                         /* hasMultiSelection */true), timer, leaderboardName, leaderboardGroupName,
-                    LeaderboardEntryPoint.this, stringMessages, userAgent, showRaceDetails, /* raceTimesInfoProvider */ null);
+                    LeaderboardEntryPoint.this, stringMessages, userAgent, showRaceDetails, /* raceTimesInfoProvider */ null,
+                    Window.Location.getParameterMap().containsKey(PARAM_AUTO_EXPAND_LAST_RACE_COLUMN) ?
+                            Boolean.valueOf(Window.Location.getParameterMap().get(PARAM_AUTO_EXPAND_LAST_RACE_COLUMN).get(0)) : false);
         contentScrollPanel.setWidget(leaderboardPanel);
 
         mainPanel.add(contentScrollPanel);
@@ -160,7 +163,7 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
                     namesOfRacesToShow, numberOfLastRacesToShow,
                     autoExpandPreSelectedRace, refreshIntervalMillis, /* delay to live */ null,
                             /* sort by column */ (namesOfRacesToShow != null && !namesOfRacesToShow.isEmpty()) ?
-                                    namesOfRacesToShow.get(0) : null, /* ascending */ true,
+                                            namesOfRacesToShow.get(0) : null, /* ascending */ true,
                                     /* updateUponPlayStateChange */ raceDetails.isEmpty() && legDetails.isEmpty(),
                                     raceColumnSelectionStrategy);
         } else {
@@ -198,15 +201,17 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
         private final LeaderboardSettings leaderboardSettings;
         private final boolean embedded;
         private final boolean showRaceDetails;
+        private final boolean autoExpandLastRaceColumn;
         private final boolean autoRefresh;
         
         public LeaderboardUrlSettings(LeaderboardSettings leaderboardSettings, boolean embedded,
-                boolean showRaceDetails, boolean autoRefresh) {
+                boolean showRaceDetails, boolean autoRefresh, boolean autoExpandLastRaceColumn) {
             super();
             this.leaderboardSettings = leaderboardSettings;
             this.embedded = embedded;
             this.showRaceDetails = showRaceDetails;
             this.autoRefresh = autoRefresh;
+            this.autoExpandLastRaceColumn = autoExpandLastRaceColumn;
         }
 
         public LeaderboardSettings getLeaderboardSettings() {
@@ -223,6 +228,10 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
 
         public boolean isAutoRefresh() {
             return autoRefresh;
+        }
+
+        public boolean isAutoExpandLastRaceColumn() {
+            return autoExpandLastRaceColumn;
         }
     }
     
@@ -274,7 +283,6 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
             maneuverDetails.append('=');
             maneuverDetails.append(maneuverDetail.name());
         }
-        // TODO generate PARAM_RACE_NAME parameter from LeaderboardSettings.getNamesOfRacesToShow()
         String debugParam = Window.Location.getParameter("gwt.codesvr");
         String link = URLFactory.INSTANCE.encode("/gwt/Leaderboard.html?name=" + leaderboardName
                 + (settings.isShowRaceDetails() ? "&"+PARAM_SHOW_RACE_DETAILS+"=true" : "")
@@ -288,6 +296,7 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
                 + legDetails.toString()
                 + raceDetails.toString()
                 + overallDetails.toString()
+                + (settings.isAutoExpandLastRaceColumn() ? "&"+PARAM_AUTO_EXPAND_LAST_RACE_COLUMN+"=true" : "")
                 + (settings.getLeaderboardSettings().getNumberOfLastRacesToShow() == null ? "" :
                     "&"+PARAM_NAME_LAST_N+"="+settings.getLeaderboardSettings().getNumberOfLastRacesToShow())
                 + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""));

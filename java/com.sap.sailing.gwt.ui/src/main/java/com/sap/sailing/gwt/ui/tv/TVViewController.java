@@ -86,7 +86,7 @@ public class TVViewController implements RaceTimesInfoProviderListener {
         CompetitorSelectionModel selectionModel = new CompetitorSelectionModel(/* hasMultiSelection */ true);
         LeaderboardPanel leaderboardPanel = new LeaderboardPanel(sailingService, new AsyncActionsExecutor(), leaderboardSettings,
         /* preSelectedRace */null, selectionModel, timer, leaderboardName, null, errorReporter, stringMessages,
-                userAgent, showRaceDetails, /* raceTimesInfoProvider */ null) {
+                userAgent, showRaceDetails, /* raceTimesInfoProvider */ null, /* autoExpandLastRaceColumn */ false) {
             @Override
             protected void setLeaderboard(LeaderboardDTO leaderboard) {
                 super.setLeaderboard(leaderboard);

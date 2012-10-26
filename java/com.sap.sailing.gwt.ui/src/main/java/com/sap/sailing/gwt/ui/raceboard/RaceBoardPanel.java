@@ -181,12 +181,13 @@ public class RaceBoardPanel extends FormPanel implements RegattaDisplayer, RaceS
     
     private LeaderboardPanel createLeaderboardPanel(String leaderboardName, String leaderboardGroupName) {
         LeaderboardSettings leaderBoardSettings = LeaderboardSettingsFactory.getInstance()
-                .createNewSettingsForPlayMode(timer.getPlayMode(), /* nameOfRaceToSort */
-                        selectedRaceIdentifier.getRaceName(),
-                        /* nameOfRaceColumnToShow */null, /* nameOfRaceToShow */selectedRaceIdentifier.getRaceName());
+                .createNewSettingsForPlayMode(timer.getPlayMode(),
+                        /* nameOfRaceToSort */ selectedRaceIdentifier.getRaceName(),
+                        /* nameOfRaceColumnToShow */ null, /* nameOfRaceToShow */ selectedRaceIdentifier.getRaceName(),
+                        leaderboardPanel.getRaceColumnSelection());
         return new LeaderboardPanel(sailingService, asyncActionsExecutor, leaderBoardSettings, selectedRaceIdentifier,
                 competitorSelectionModel, timer, leaderboardName, leaderboardGroupName, errorReporter, stringMessages,
-                userAgent, /* showRaceDetails */ true, raceTimesInfoProvider);
+                userAgent, /* showRaceDetails */ true, raceTimesInfoProvider, /* autoExpandLastRaceColumn */ false);
      }
 
     private <SettingsType> void addComponentToNavigationMenu(final ComponentViewer componentViewer,

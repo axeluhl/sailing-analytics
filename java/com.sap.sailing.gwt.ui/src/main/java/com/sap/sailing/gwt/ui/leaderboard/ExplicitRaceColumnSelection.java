@@ -84,4 +84,9 @@ public class ExplicitRaceColumnSelection extends AbstractRaceColumnSelection imp
         return RaceColumnSelectionStrategies.EXPLICIT;
     }
 
+    @Override
+    public Integer getNumberOfLastRaceColumnsToShow() {
+        return null;
+    }
+
 }

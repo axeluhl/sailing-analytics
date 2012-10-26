@@ -148,7 +148,8 @@ public class LastNRacesColumnSelection extends AbstractRaceColumnSelection imple
         return RaceColumnSelectionStrategies.LAST_N;
     }
 
-    public int getNumberOfLastRaces() {
+    @Override
+    public Integer getNumberOfLastRaceColumnsToShow() {
         return numberOfLastRacesToShow;
     }
 

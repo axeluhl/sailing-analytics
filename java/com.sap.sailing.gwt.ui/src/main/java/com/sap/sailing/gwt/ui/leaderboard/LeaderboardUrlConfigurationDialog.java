@@ -76,6 +76,7 @@ public class LeaderboardUrlConfigurationDialog extends SettingsDialog<Leaderboar
         private final StringMessages stringMessages;
         private CheckBox embeddedCheckbox;
         private CheckBox showRaceDetailsCheckbox;
+        private CheckBox autoExpandLastRaceBox;
         private CheckBox autoRefreshCheckbox;
         private Anchor resultingUrl;
         private final String leaderboardName;
@@ -96,7 +97,8 @@ public class LeaderboardUrlConfigurationDialog extends SettingsDialog<Leaderboar
                 settings.getLegDetailsToShow(), settings.getRaceDetailsToShow(), overallDetailsToShow, raceList, 
                 /* select all races by default */ raceList, new ExplicitRaceColumnSelection(),
                 /* autoExpandPreSelectedRace */ false,
-                /* delayBetweenAutoAdvancesInMilliseconds */ 3000l, /* delayInMilliseconds */ 3000l, stringMessages);
+                /* delayBetweenAutoAdvancesInMilliseconds */ 3000l,
+                /* delayInMilliseconds */ 3000l, stringMessages);
         }
 
         private void updateURL(LeaderboardUrlSettings settings, String leaderboardName) {
@@ -138,6 +140,8 @@ public class LeaderboardUrlConfigurationDialog extends SettingsDialog<Leaderboar
             content.add(dialog.createHeadline(stringMessages.additionalUrlSettings(), true));
             embeddedCheckbox = dialog.createCheckbox(stringMessages.embedded());
             content.add(embeddedCheckbox);
+            autoExpandLastRaceBox = dialog.createCheckbox(stringMessages.expandLastRace());
+            content.add(autoExpandLastRaceBox);
             showRaceDetailsCheckbox = dialog.createCheckbox(stringMessages.showRaceDetails());
             content.add(showRaceDetailsCheckbox);
             autoRefreshCheckbox = dialog.createCheckbox(stringMessages.autoRefresh());
@@ -151,7 +155,7 @@ public class LeaderboardUrlConfigurationDialog extends SettingsDialog<Leaderboar
         public LeaderboardUrlSettings getResult() {
             return new LeaderboardUrlSettings(leaderboardSettingsDialogComponent.getResult(),
                     embeddedCheckbox.getValue(),
-                    showRaceDetailsCheckbox.getValue(), autoRefreshCheckbox.getValue());
+                    showRaceDetailsCheckbox.getValue(), autoRefreshCheckbox.getValue(), autoExpandLastRaceBox.getValue());
         }
 
         @Override

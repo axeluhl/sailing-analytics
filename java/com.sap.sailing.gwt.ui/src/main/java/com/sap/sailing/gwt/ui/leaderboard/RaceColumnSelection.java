@@ -49,4 +49,6 @@ public interface RaceColumnSelection {
     void autoUpdateRaceColumnSelectionForUpdatedLeaderboard(LeaderboardDTO oldLeaderboard, LeaderboardDTO newLeaderboard);
     
     RaceColumnSelectionStrategies getType();
+    
+    Integer getNumberOfLastRaceColumnsToShow();
 }

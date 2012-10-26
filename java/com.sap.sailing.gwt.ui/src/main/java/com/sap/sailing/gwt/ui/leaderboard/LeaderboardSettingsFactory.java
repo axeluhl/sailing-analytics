@@ -34,9 +34,12 @@ public class LeaderboardSettingsFactory {
      *            no change to the selected race columns will happen while updating the leaderboard settings. It is an error
      *            to pass non-<code>null</code> values for both, <code>nameOfRaceColumnToShow</code> <em>and</em>
      *            <code>nameOfRaceToShow</code>, and an {@link IllegalArgumentException} will be thrown in this case.
+     * @param raceColumnSelection 
+     *            the settings will be constructed such that the new settings will have the same race columns selected as those selected by
+     *            this argument
      */
     public LeaderboardSettings createNewSettingsForPlayMode(PlayModes playMode, String nameOfRaceToSort, String nameOfRaceColumnToShow,
-            String nameOfRaceToShow) {
+            String nameOfRaceToShow, RaceColumnSelection raceColumnSelection) {
         if (nameOfRaceColumnToShow != null && nameOfRaceToShow != null) {
             throw new IllegalArgumentException("Can identify only one race to show, either by race name or by its column name, but not both");
         }
@@ -63,10 +66,11 @@ public class LeaderboardSettingsFactory {
                 List<DetailType> overallDetails = null; // lead overall details unchanged
                 settings = new LeaderboardSettings(maneuverDetails, legDetails, raceDetails, overallDetails,
                         namesOfRaceColumnsToShow,
-                        namesOfRacesToShow, null,
-                        /* set autoExpandPreSelectedRace to true if we look at a single race */ nameOfRaceColumnToShow != null || nameOfRaceToShow != null, /* refresh interval */ null, /* delay to live */ null,
+                        namesOfRacesToShow, raceColumnSelection.getNumberOfLastRaceColumnsToShow(),
+                        /* set autoExpandPreSelectedRace to true if we look at a single race */ nameOfRaceColumnToShow != null || nameOfRaceToShow != null,
+                        /* refresh interval */ null, /* delay to live */ null,
                         /* name of race to sort */ nameOfRaceToSort, /* ascending */ true, /* updateUponPlayStateChange */ true,
-                        RaceColumnSelectionStrategies.EXPLICIT);
+                        raceColumnSelection.getType());
                 break;
             case Replay:
             settings = createNewDefaultSettings(namesOfRaceColumnsToShow, namesOfRacesToShow, nameOfRaceToSort, /* autoExpandFirstRace */

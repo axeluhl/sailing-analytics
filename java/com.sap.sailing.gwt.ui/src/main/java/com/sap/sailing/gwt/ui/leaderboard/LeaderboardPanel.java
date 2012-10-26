@@ -163,6 +163,8 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     private final Timer timer;
 
     private boolean autoExpandPreSelectedRace;
+    
+    private boolean autoExpandLastRaceColumn;
 
     /**
      * Remembers whether the auto-expand of the pre-selected race (see {@link #autoExpandPreSelectedRace}) has been
@@ -323,7 +325,12 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             selectedOverallDetailColumns.clear();
             selectedOverallDetailColumns.addAll(newSettings.getOverallDetailsToShow());
         }
-        // update strategy for determining the race columns to show
+        // update strategy for determining the race columns to show; if settings' race columns to show is null, use the
+        // previously selected race columns / number of race columns for the new configuration
+        Iterable<String> oldNamesOfRaceColumnsToShow = null;
+        if (newSettings.getNamesOfRaceColumnsToShow() == null) {
+            oldNamesOfRaceColumnsToShow = raceColumnSelection.getSelectedRaceColumnNames();
+        }
         switch (newSettings.getActiveRaceColumnSelectionStrategy()) {
         case EXPLICIT:
             if (preSelectedRace == null) {
@@ -339,12 +346,19 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                         raceColumnSelection.requestRaceColumnSelection(raceColumnToShow.name, raceColumnToShow);
                     }
                 }
-            } else if (newSettings.getNamesOfRacesToShow() != null) {
-                raceColumnSelection.requestClear();
-                for (String nameOfRaceToShow : newSettings.getNamesOfRacesToShow()) {
-                    RaceColumnDTO raceColumnToShow = getRaceByName(nameOfRaceToShow);
-                    if (raceColumnToShow != null) {
-                        raceColumnSelection.requestRaceColumnSelection(raceColumnToShow.name, raceColumnToShow);
+            } else {
+                // apply the old column selections again
+                for (String oldNameOfRaceColumnToShow : oldNamesOfRaceColumnsToShow) {
+                    raceColumnSelection.requestRaceColumnSelection(oldNameOfRaceColumnToShow,
+                            getLeaderboard().getRaceColumnByName(oldNameOfRaceColumnToShow));
+                }
+                if (newSettings.getNamesOfRacesToShow() != null) {
+                    raceColumnSelection.requestClear();
+                    for (String nameOfRaceToShow : newSettings.getNamesOfRacesToShow()) {
+                        RaceColumnDTO raceColumnToShow = getRaceByName(nameOfRaceToShow);
+                        if (raceColumnToShow != null) {
+                            raceColumnSelection.requestRaceColumnSelection(raceColumnToShow.name, raceColumnToShow);
+                        }
                     }
                 }
             }
@@ -1079,14 +1093,15 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         this(sailingService, asyncActionsExecutor, settings, preSelectedRace, competitorSelectionProvider, new Timer(
                 PlayModes.Replay, /* delayBetweenAutoAdvancesInMilliseconds */3000l), leaderboardName,
                 leaderboardGroupName, errorReporter, stringMessages, userAgent, showRaceDetails,
-                /* optionalRaceTimesInfoProvider */ null);
+                /* optionalRaceTimesInfoProvider */ null, /* autoExpandLastRaceColumn */ false);
     }
 
     public LeaderboardPanel(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
             LeaderboardSettings settings, RaceIdentifier preSelectedRace,
             CompetitorSelectionProvider competitorSelectionProvider, Timer timer, String leaderboardName,
             String leaderboardGroupName, ErrorReporter errorReporter, final StringMessages stringMessages,
-            final UserAgentDetails userAgent, boolean showRaceDetails, RaceTimesInfoProvider optionalRaceTimesInfoProvider) {
+            final UserAgentDetails userAgent, boolean showRaceDetails, RaceTimesInfoProvider optionalRaceTimesInfoProvider,
+            boolean autoExpandLastRaceColumn) {
         this.showRaceDetails = showRaceDetails;
         this.sailingService = sailingService;
         this.asyncActionsExecutor = asyncActionsExecutor;
@@ -1116,6 +1131,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             selectedOverallDetailColumns.addAll(settings.getOverallDetailsToShow());
         }
         setAutoExpandPreSelectedRace(settings.isAutoExpandPreSelectedRace());
+        this.autoExpandLastRaceColumn = autoExpandLastRaceColumn;
         if (settings.getDelayBetweenAutoAdvancesInMilliseconds() != null) {
             timer.setRefreshInterval(settings.getDelayBetweenAutoAdvancesInMilliseconds());
         }
@@ -1324,8 +1340,12 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         timer.setLivePlayDelayInMillis(delayInMilliseconds);
     }
 
-    public boolean isAutoExpandPreSelectedRace() {
+    private boolean isAutoExpandPreSelectedRace() {
         return autoExpandPreSelectedRace;
+    }
+    
+    private boolean isAutoExpandLastRaceColumn() {
+        return autoExpandLastRaceColumn;
     }
 
     private void setAutoExpandPreSelectedRace(boolean autoExpandPreSelectedRace) {
@@ -1334,7 +1354,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             autoExpandPerformedOnce = false;
         }
     }
-
+    
     /**
      * The time point for which the leaderboard currently shows results. In {@link PlayModes#Replay replay mode} this is
      * the {@link #timer}'s time point. In {@link PlayModes#Live live mode} the {@link #timer}'s time is quantizes to
@@ -1482,12 +1502,21 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             adjustDelayToLive();
             getData().getList().clear();
             getData().getList().addAll(getRowsToDisplay(leaderboard));
+            RaceColumn<?> lastRaceColumn = null;
+            for (int i=getLeaderboardTable().getColumnCount()-1; i>=0; i--) {
+                if (getLeaderboardTable().getColumn(i) instanceof RaceColumn<?>) {
+                    lastRaceColumn = (RaceColumn<?>) getLeaderboardTable().getColumn(i);
+                    break;
+                }
+            }
             for (int i = 0; i < getLeaderboardTable().getColumnCount(); i++) {
                 SortableColumn<?, ?> c = (SortableColumn<?, ?>) getLeaderboardTable().getColumn(i);
                 c.updateMinMax(leaderboard);
-                // Toggle pre-selected race, if the setting is set and it isn't open yet
-                if (!autoExpandPerformedOnce && isAutoExpandPreSelectedRace() && c instanceof RaceColumn<?>
-                        && ((RaceColumn<?>) c).getRace().hasTrackedRace(preSelectedRace)) {
+                // Toggle pre-selected race, if the setting is set and it isn't open yet, or the last race column if that was requested
+                if (!autoExpandPerformedOnce &&
+                        ((isAutoExpandPreSelectedRace() && c instanceof RaceColumn<?>
+                        && ((RaceColumn<?>) c).getRace().hasTrackedRace(preSelectedRace)) ||
+                        (isAutoExpandLastRaceColumn() && c == lastRaceColumn))) {
                     ExpandableSortableColumn<?> expandableSortableColumn = (ExpandableSortableColumn<?>) c;
                     if (!expandableSortableColumn.isExpanded()) {
                         expandableSortableColumn.toggleExpansion();
@@ -2014,14 +2043,14 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                 .autoRefresh());
         if (!settingsUpdatedExplicitly && playMode != oldPlayMode) {
             // if settings weren't explicitly modified, auto-switch to live mode settings and sort for
-            // any pre-selected race
+            // any pre-selected race; we need to copy the previously selected race columns to the new RaceColumnSelection
             updateSettings(LeaderboardSettingsFactory.getInstance().createNewSettingsForPlayMode(
                     playMode,
-                    /* don't touch columnToSort if no race was pre-selected */preSelectedRace == null ? null
+                    /* don't touch columnToSort if no race was pre-selected */ preSelectedRace == null ? null
                             : preSelectedRace.getRaceName(),
                     /* don't change nameOfRaceColumnToShow */null,
                     /* set nameOfRaceToShow if race was pre-selected */preSelectedRace == null ? null : preSelectedRace
-                            .getRaceName()));
+                            .getRaceName(), getRaceColumnSelection()));
         }
         currentlyHandlingPlayStateChange = false;
         oldPlayMode = playMode;
@@ -2124,5 +2153,9 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     @Override
     public void competitorsListChanged(Iterable<CompetitorDTO> competitors) {
         timeChanged(timer.getTime());
+    }
+
+    public RaceColumnSelection getRaceColumnSelection() {
+        return raceColumnSelection;
     }
 }

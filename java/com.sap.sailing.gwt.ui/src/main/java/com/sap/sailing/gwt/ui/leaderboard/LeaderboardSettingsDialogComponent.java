@@ -59,8 +59,7 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
             List<RaceColumnDTO> raceAllRaceColumns, Iterable<RaceColumnDTO> raceColumnSelection, RaceColumnSelection raceColumnSelectionStrategy,
             boolean autoExpandPreSelectedRace, long delayBetweenAutoAdvancesInMilliseconds, long delayInMilliseconds, StringMessages stringMessages) {
         this.raceAllRaceColumns = raceAllRaceColumns;
-        this.numberOfLastRacesToShow = (raceColumnSelectionStrategy instanceof LastNRacesColumnSelection) ?
-                ((LastNRacesColumnSelection) raceColumnSelectionStrategy).getNumberOfLastRaces() : null;
+        this.numberOfLastRacesToShow = raceColumnSelectionStrategy.getNumberOfLastRaceColumnsToShow();
         this.activeRaceColumnSelectionStrategy = raceColumnSelectionStrategy.getType();
         this.maneuverDetailSelection = maneuverDetailSelection;
         maneuverDetailCheckboxes = new LinkedHashMap<DetailType, CheckBox>();
