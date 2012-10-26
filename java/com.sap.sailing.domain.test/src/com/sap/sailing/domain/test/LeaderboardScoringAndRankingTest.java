@@ -23,8 +23,10 @@ import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
+import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.BuoyImpl;
 import com.sap.sailing.domain.base.impl.FleetImpl;
+import com.sap.sailing.domain.base.impl.GateImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
@@ -560,7 +562,7 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
         long totalTimeSailedC0_AtEndOfRace3 = leaderboard.getTotalTimeSailedInMilliseconds(c[0], finish);
         assertEquals(finish.asMillis()-earlier.asMillis(), totalTimeSailedC0_AtEndOfRace3);
         long totalTimeSailedC0_AfterRace3 = leaderboard.getTotalTimeSailedInMilliseconds(c[0], finish.plus(1000));
-        assertEquals(finish.asMillis()-earlier.asMillis() + 1000, totalTimeSailedC0_AfterRace3);
+        assertEquals(finish.asMillis()-earlier.asMillis(), totalTimeSailedC0_AfterRace3);
     }
 
     @Test
@@ -729,16 +731,19 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
         for (Competitor[] competitorList : competitorLists) {
             RaceColumn raceColumn = columnIter.next();
             final Map<Competitor, TimePoint> lastMarkPassingTimes = lastMarkPassingTimesForCompetitors[i];
+            final Waypoint start = new WaypointImpl(new GateImpl(new BuoyImpl("Left StartBuoy"), new BuoyImpl("Right StartBuoy"), "Start"));
+            final Waypoint finish = new WaypointImpl(new BuoyImpl("FinishBuoy"));
             TrackedRace trackedRace = new MockedTrackedRaceWithStartTimeAndRanks(startTimes[i], Arrays.asList(competitorList)) {
                 private static final long serialVersionUID = 1L;
                 @Override
                 public NavigableSet<MarkPassing> getMarkPassings(Competitor competitor) {
                     ArrayListNavigableSet<MarkPassing> result = new ArrayListNavigableSet<>(new TimedComparator());
-                    result.add(new MarkPassingImpl(lastMarkPassingTimes.get(competitor), new WaypointImpl(new BuoyImpl("TestBuoy")), competitor));
+                    result.add(new MarkPassingImpl(lastMarkPassingTimes.get(competitor), finish, competitor));
                     return result;
                 }
-                
             };
+            trackedRace.getRace().getCourse().addWaypoint(0, start);
+            trackedRace.getRace().getCourse().addWaypoint(1, finish);
             raceColumn.setTrackedRace(raceColumn.getFleetByName(fleetName), trackedRace);
             i++;
         }
