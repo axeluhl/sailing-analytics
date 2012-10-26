@@ -35,7 +35,7 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
     private final Map<DetailType, CheckBox> raceDetailCheckboxes;
     private final List<DetailType> overallDetailSelection;
     private final Map<DetailType, CheckBox> overallDetailCheckboxes;
-    private final StringMessages stringConstants;
+    private final StringMessages stringMessages;
     private LongBox refreshIntervalInSecondsBox;
     private LongBox delayInSecondsBox;
     private final boolean autoExpandPreSelectedRace;
@@ -46,7 +46,7 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
             List<DetailType> legDetailSelection, List<DetailType> raceDetailSelection, List<DetailType> overallDetailSelection,
             List<RaceColumnDTO> raceAllRaceColumns,
             Iterable<RaceColumnDTO> raceColumnSelection, boolean autoExpandPreSelectedRace, long delayBetweenAutoAdvancesInMilliseconds,
-            long delayInMilliseconds, StringMessages stringConstants) {
+            long delayInMilliseconds, StringMessages stringMessages) {
         this.raceAllRaceColumns = raceAllRaceColumns;
         this.maneuverDetailSelection = maneuverDetailSelection;
         maneuverDetailCheckboxes = new LinkedHashMap<DetailType, CheckBox>();
@@ -58,7 +58,7 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
         raceDetailCheckboxes = new LinkedHashMap<DetailType, CheckBox>();
         this.overallDetailSelection = overallDetailSelection;
         overallDetailCheckboxes = new LinkedHashMap<DetailType, CheckBox>();
-        this.stringConstants = stringConstants;
+        this.stringMessages = stringMessages;
         this.autoExpandPreSelectedRace = autoExpandPreSelectedRace;
         this.delayBetweenAutoAdvancesInMilliseconds = delayBetweenAutoAdvancesInMilliseconds;
         this.delayInMilliseconds = delayInMilliseconds;
@@ -78,13 +78,13 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
 
     private FlowPanel createManeuverDetailsPanel(DataEntryDialog<?> dialog) {
         FlowPanel meneuverPanel = new FlowPanel();
-        meneuverPanel.add(dialog.createHeadline(stringConstants.maneuverTypes(), true));
+        meneuverPanel.add(dialog.createHeadline(stringMessages.maneuverTypes(), true));
         meneuverPanel.addStyleName("SettingsDialogComponent");
         FlowPanel meneuverContent = new FlowPanel();
         meneuverContent.addStyleName("dialogInnerContent");
         List<DetailType> currentMeneuverDetailSelection = maneuverDetailSelection;
         for (DetailType detailType : ManeuverCountRaceColumn.getAvailableManeuverDetailColumnTypes()) {
-            CheckBox checkbox = dialog.createCheckbox(DetailTypeFormatter.format(detailType, stringConstants));
+            CheckBox checkbox = dialog.createCheckbox(DetailTypeFormatter.format(detailType, stringMessages));
             checkbox.setValue(currentMeneuverDetailSelection.contains(detailType));
             maneuverDetailCheckboxes.put(detailType, checkbox);
             meneuverContent.add(checkbox);
@@ -97,19 +97,19 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
         FlowPanel timingPanel = new FlowPanel();
         refreshIntervalInSecondsBox = dialog.createLongBox(delayBetweenAutoAdvancesInMilliseconds / 1000l, 4);
         delayInSecondsBox = dialog.createLongBox(delayInMilliseconds / 1000l, 4);
-        timingPanel.add(dialog.createHeadline(stringConstants.timing(), true));
+        timingPanel.add(dialog.createHeadline(stringMessages.timing(), true));
         timingPanel.addStyleName("SettingsDialogComponent");
         FlowPanel timingContent = new FlowPanel();
         timingContent.addStyleName("dialogInnerContent");
         FlowPanel delayInSecondsWrapper = new FlowPanel();
         delayInSecondsWrapper.getElement().getStyle().setFloat(Float.LEFT);
         delayInSecondsWrapper.getElement().getStyle().setPaddingRight(20, Unit.PX);
-        Label delayLabel = new Label(stringConstants.delayInSeconds() + ":");
+        Label delayLabel = new Label(stringMessages.delayInSeconds() + ":");
         delayInSecondsWrapper.add(delayLabel);
         delayInSecondsWrapper.add(delayInSecondsBox);
         timingContent.add(delayInSecondsWrapper);
         FlowPanel refreshIntervalWrapper = new FlowPanel();
-        Label refreshIntervalLabel = new Label(stringConstants.refreshInterval() + ":");
+        Label refreshIntervalLabel = new Label(stringMessages.refreshInterval() + ":");
         refreshIntervalWrapper.add(refreshIntervalLabel);
         refreshIntervalWrapper.add(refreshIntervalInSecondsBox);
         timingContent.add(refreshIntervalWrapper);
@@ -119,13 +119,13 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
 
     private FlowPanel createRaceDetailPanel(DataEntryDialog<?> dialog) {
         FlowPanel raceDetailDialog = new FlowPanel();
-        raceDetailDialog.add(dialog.createHeadline(stringConstants.raceDetailsToShow(), true));
+        raceDetailDialog.add(dialog.createHeadline(stringMessages.raceDetailsToShow(), true));
         raceDetailDialog.addStyleName("SettingsDialogComponent");
         FlowPanel raceDetailDialogContent = new FlowPanel();
         raceDetailDialogContent.addStyleName("dialogInnerContent");
         List<DetailType> currentRaceDetailSelection = raceDetailSelection;
         for (DetailType type : LeaderboardPanel.getAvailableRaceDetailColumnTypes()) {
-            CheckBox checkbox = dialog.createCheckbox(DetailTypeFormatter.format(type, stringConstants));
+            CheckBox checkbox = dialog.createCheckbox(DetailTypeFormatter.format(type, stringMessages));
             checkbox.setValue(currentRaceDetailSelection.contains(type));
             raceDetailCheckboxes.put(type, checkbox);
             raceDetailDialogContent.add(checkbox);
@@ -136,13 +136,13 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
 
     private FlowPanel createOverallDetailPanel(DataEntryDialog<?> dialog) {
         FlowPanel overallDetailDialog = new FlowPanel();
-        overallDetailDialog.add(dialog.createHeadline(stringConstants.overallDetailsToShow(), true));
+        overallDetailDialog.add(dialog.createHeadline(stringMessages.overallDetailsToShow(), true));
         overallDetailDialog.addStyleName("SettingsDialogComponent overallDetailSettings");
         FlowPanel overallDetailDialogContent = new FlowPanel();
         overallDetailDialogContent.addStyleName("dialogInnerContent");
         List<DetailType> currentOverallDetailSelection = overallDetailSelection;
         for (DetailType type : LeaderboardPanel.getAvailableOverallDetailColumnTypes()) {
-            CheckBox checkbox = dialog.createCheckbox(DetailTypeFormatter.format(type, stringConstants));
+            CheckBox checkbox = dialog.createCheckbox(DetailTypeFormatter.format(type, stringMessages));
             checkbox.setValue(currentOverallDetailSelection.contains(type));
             overallDetailCheckboxes.put(type, checkbox);
             overallDetailDialogContent.add(checkbox);
@@ -153,13 +153,13 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
 
     private FlowPanel createLegDetailsPanel(DataEntryDialog<?> dialog) {
         FlowPanel legDetailsToShow = new FlowPanel();
-        legDetailsToShow.add(dialog.createHeadline(stringConstants.legDetailsToShow(), true));
+        legDetailsToShow.add(dialog.createHeadline(stringMessages.legDetailsToShow(), true));
         legDetailsToShow.addStyleName("SettingsDialogComponent");
         FlowPanel legDetailsContent = new FlowPanel();
         legDetailsContent.addStyleName("dialogInnerContent");
         List<DetailType> currentLegDetailSelection = legDetailSelection;
         for (DetailType type : LegColumn.getAvailableLegDetailColumnTypes()) {
-            CheckBox checkbox = dialog.createCheckbox(DetailTypeFormatter.format(type, stringConstants));
+            CheckBox checkbox = dialog.createCheckbox(DetailTypeFormatter.format(type, stringMessages));
             checkbox.setValue(currentLegDetailSelection.contains(type));
             legDetailCheckboxes.put(type, checkbox);
             legDetailsContent.add(checkbox);
@@ -173,7 +173,7 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
         selectedRacesPanel.addStyleName("SettingsDialogComponent");
         FlowPanel selectedRacesContent = new FlowPanel();
         selectedRacesContent.addStyleName("dialogInnerContent");
-        selectedRacesPanel.add(dialog.createHeadline(stringConstants.selectedRaces(), true));
+        selectedRacesPanel.add(dialog.createHeadline(stringMessages.selectedRaces(), true));
         List<RaceColumnDTO> allColumns = raceAllRaceColumns;
         // Attention: We need to consider that there are regattas with more than 30 races
         int racesCount = allColumns.size();
@@ -198,7 +198,7 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
             }
             selectedRacesContent.add(grid);
         } else {
-            selectedRacesContent.add(new Label(stringConstants.noRacesYet()));
+            selectedRacesContent.add(new Label(stringMessages.noRacesYet()));
         }
         selectedRacesPanel.add(selectedRacesContent);
         return selectedRacesPanel;
@@ -251,9 +251,10 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
             @Override
             public String getErrorMessage(LeaderboardSettings valueToValidate) {
                 if (valueToValidate.getLegDetailsToShow().isEmpty()) {
-                    return stringConstants.selectAtLeastOneLegDetail();
+                    return stringMessages.selectAtLeastOneLegDetail();
                 } else if (valueToValidate.getDelayBetweenAutoAdvancesInMilliseconds() < 1000) {
-                    return stringConstants.chooseUpdateIntervalOfAtLeastOneSecond();
+                    // TODO how to express that PAUSED mode is desired? Separate setting? Or should 0 express that...?
+                    return stringMessages.chooseUpdateIntervalOfAtLeastOneSecond();
                 } else {
                     return null;
                 }

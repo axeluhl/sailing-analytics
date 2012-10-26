@@ -60,6 +60,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.URLFactory;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardEntryPoint;
 import com.sap.sailing.gwt.ui.leaderboard.ScoringSchemeTypeFormatter;
+import com.sap.sailing.gwt.ui.shared.AbstractLeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.FleetDTO;
 import com.sap.sailing.gwt.ui.shared.RaceColumnDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
@@ -284,7 +285,7 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
                     Window.open("/gwt/LeaderboardEditing.html?name=" + leaderboardDTO.name
                             + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""), "_blank", null);
                 } else if (LeaderboardConfigImagesBarCell.ACTION_CONFIGURE_URL.equals(value)) {
-                    openLeaderboardUrlConfigDialog();
+                    openLeaderboardUrlConfigDialog(leaderboardDTO, stringMessages);
                 }
             }
         });
@@ -488,11 +489,12 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
 
     /**
      * Allow the user to combine the various URL parameters that exist for the {@link LeaderboardEntryPoint} and obtain the
-     * resulting URL in a link.
+     * resulting URL in a link. The link's reference target is updated dynamically as the user adjusts the settings. Therefore,
+     * the link can be clicked, bookmarked or copied to the clipboard at any time. The OK / Cancel actions for the dialog shown
+     * are no-ops.
      */
-    private void openLeaderboardUrlConfigDialog() {
-        // TODO Auto-generated method stub
-        
+    private void openLeaderboardUrlConfigDialog(AbstractLeaderboardDTO leaderboard, StringMessages stringMessages) {
+        LeaderboardEntryPoint.getUrlConfigurationDialog(leaderboard, stringMessages).show();
     }
 
     public void loadAndRefreshLeaderboards() {

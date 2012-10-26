@@ -78,8 +78,7 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
 
     @Override
     public TimePoint getStartOfRace() {
-        // TODO Auto-generated method stub
-        return null;
+        return startTime;
     }
 
     @Override

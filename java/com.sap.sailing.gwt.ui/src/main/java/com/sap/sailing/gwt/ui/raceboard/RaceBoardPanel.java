@@ -182,7 +182,7 @@ public class RaceBoardPanel extends FormPanel implements RegattaDisplayer, RaceS
 
     @SuppressWarnings("unused")
     private <SettingsType> void addSettingsMenuItem(MenuBar settingsMenu, final Component<SettingsType> component) {
-        if(component.hasSettings()) {
+        if (component.hasSettings()) {
             settingsMenu.addItem(component.getLocalizedShortName(), new Command() {
                 public void execute() {
                     new SettingsDialog<SettingsType>(component, stringMessages).show();

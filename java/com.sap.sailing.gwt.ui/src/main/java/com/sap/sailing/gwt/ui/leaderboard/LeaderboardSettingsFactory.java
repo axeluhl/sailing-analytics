@@ -82,7 +82,7 @@ public class LeaderboardSettingsFactory {
      *            columns to be shown
      * @param namesOfRacesToShow
      *            alternatively, races to show can also be specified by their race names; if not <code>null</code>,
-     *            <code>namesOfRaceColumnsToShow</code> must be <code>null
+     *            <code>namesOfRaceColumnsToShow</code> must be <code>null</code>
      */
     public LeaderboardSettings createNewDefaultSettings(List<String> namesOfRaceColumnsToShow,
             List<String> namesOfRacesToShow, String nameOfRaceToSort, boolean autoExpandPreSelectedRace) {

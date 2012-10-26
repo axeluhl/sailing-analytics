@@ -411,4 +411,10 @@ public interface StringMessages extends Messages {
     String displayGroupsInReverseOrder();
     String actionConfigureUrl();
     String buoyZone();
+    String configureLeaderboardUrlDescription();
+    String embedded();
+    String additionalUrlSettings();
+    String restrictToSingleSelectedRace();
+    String expandSelectedRace();
+    String showRaceDetails();
 }
