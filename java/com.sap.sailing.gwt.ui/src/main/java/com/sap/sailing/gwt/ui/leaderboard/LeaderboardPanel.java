@@ -169,8 +169,8 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     private boolean autoExpandLastRaceColumn;
 
     /**
-     * Remembers whether the auto-expand of the pre-selected race (see {@link #autoExpandPreSelectedRace}) has been
-     * performed once. It must not be performed another time.
+     * Remembers whether the auto-expand of the pre-selected race (see {@link #autoExpandPreSelectedRace}) or last
+     * selected race {@link #autoExpandLastRaceColumn} has been performed once. It must not be performed another time.
      */
     private boolean autoExpandPerformedOnce;
 
@@ -1530,10 +1530,9 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                 SortableColumn<?, ?> c = (SortableColumn<?, ?>) getLeaderboardTable().getColumn(i);
                 c.updateMinMax(leaderboard);
                 // Toggle pre-selected race, if the setting is set and it isn't open yet, or the last race column if that was requested
-                if (!autoExpandPerformedOnce &&
-                        ((isAutoExpandPreSelectedRace() && c instanceof RaceColumn<?>
+                if ((!autoExpandPerformedOnce && isAutoExpandPreSelectedRace() && c instanceof RaceColumn<?>
                         && ((RaceColumn<?>) c).getRace().hasTrackedRace(preSelectedRace)) ||
-                        (isAutoExpandLastRaceColumn() && c == lastRaceColumn))) {
+                        (isAutoExpandLastRaceColumn() && c == lastRaceColumn)) {
                     ExpandableSortableColumn<?> expandableSortableColumn = (ExpandableSortableColumn<?>) c;
                     if (!expandableSortableColumn.isExpanded()) {
                         expandableSortableColumn.toggleExpansion();
