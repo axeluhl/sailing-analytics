@@ -34,5 +34,17 @@ public class PositionDTO implements IsSerializable {
         temp = (int) lngDeg;
         result = prime * result + (int) (temp ^ (temp >>> 32));
         return result;
+        
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null) {
+            return false;
+        } else {
+            return o instanceof PositionDTO && this.latDeg ==  ((PositionDTO) o).latDeg
+                    && this.lngDeg == ((PositionDTO) o).lngDeg;
+        }
+    }
+  
 }

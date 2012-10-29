@@ -338,12 +338,13 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         Position[][] positionGrid = wf.getPositionGrid();
         WindLinesDTO windLinesDTO = new WindLinesDTO();
         windFieldDTO.setWindLinesDTO(windLinesDTO);
-        if (positionGrid != null && positionGrid.length > 0) {
-            for (int j = 0; j < 1; ++j) {
+        if (positionGrid != null && positionGrid.length > 0 && positionGrid[0].length > 2) {
+            for (int j = 1; j < positionGrid[0].length -1; ++j) {
          // for (int j = 0; j < positionGrid[0].length; ++j) {      
                 TimePoint t = startTime;
+                PositionDTO startPosition = new PositionDTO(positionGrid[0][j].getLatDeg(), positionGrid[0][j].getLngDeg());
                 while (t.compareTo(endTime) <= 0) {
-                    TimedPosition tp = new TimedPositionImpl(t,positionGrid[0][j]);
+                    TimedPosition tp = new TimedPositionImpl(t,positionGrid[0][j]); 
                     Path p = wf.getLine(tp); 
                     if (p != null) {
                         List<PositionDTO> positions = new ArrayList<PositionDTO>();
@@ -353,7 +354,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
                             positions.add(positionDTO);
                         }
 
-                        windLinesDTO.addWindLine(tp.getTimePoint().asMillis(), positions);              
+                        windLinesDTO.addWindLine(startPosition, tp.getTimePoint().asMillis(), positions);              
                     }
                     t = new MillisecondsTimePoint(t.asMillis() + timeStep.asMillis()); 
                 }
@@ -372,6 +373,8 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
              * Currently create only a single line from the start position at the start time.
              */
             TimedPosition tp = new TimedPositionImpl(wf.getStartTime(),course[0]);
+            PositionDTO startPosition = new PositionDTO(course[0].getLatDeg(), course[0].getLngDeg());
+            
             Path p = wf.getLine(tp);
             if (p != null) {
                 List<PositionDTO> positions = new ArrayList<PositionDTO>();
@@ -381,7 +384,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
                     positions.add(positionDTO);
                 }
                 WindLinesDTO windLinesDTO = new WindLinesDTO();
-                windLinesDTO.addWindLine(tp.getTimePoint().asMillis(), positions);
+                windLinesDTO.addWindLine(startPosition, tp.getTimePoint().asMillis(), positions);
                 windFieldDTO.setWindLinesDTO(windLinesDTO);
                 logger.info("Added : " + windFieldDTO.getWindLinesDTO().getWindLinesMap().size() + " wind lines");
             }

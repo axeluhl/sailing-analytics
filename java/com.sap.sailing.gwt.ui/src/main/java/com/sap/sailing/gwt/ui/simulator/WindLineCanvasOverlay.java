@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 import java.util.SortedMap;
 import java.util.logging.Logger;
 
@@ -35,32 +38,50 @@ public class WindLineCanvasOverlay extends FullCanvasOverlay implements TimeList
 
     @Override
     public void timeChanged(Date date) {
-        List<PositionDTO> positionDTOToDraw = new ArrayList<PositionDTO>();
-
-        SortedMap<Long, List<PositionDTO>> headMap = (windLinesDTO.getWindLinesMap().headMap(date.getTime() + 1));
-
-        if (!headMap.isEmpty()) {
-            positionDTOToDraw = headMap.get(headMap.lastKey());
+        Map<PositionDTO, SortedMap<Long, List<PositionDTO>>> windLinesMap = windLinesDTO.getWindLinesMap();
+        
+        if (windLinesMap == null) {
+            return;
         }
-        logger.info("In WindLineCanvasOverlay.drawWindField drawing " + positionDTOToDraw.size() + " points" + " @ "
+        clear();
+        for (Entry<PositionDTO, SortedMap<Long, List<PositionDTO>>> entry : windLinesMap.entrySet()) {
+            List<PositionDTO> positionDTOToDraw = new ArrayList<PositionDTO>();
+
+            SortedMap<Long, List<PositionDTO>> headMap = (entry.getValue().headMap(date.getTime() + 1));
+
+            if (!headMap.isEmpty()) {
+                positionDTOToDraw = headMap.get(headMap.lastKey());
+            }
+            logger.info("In WindLineCanvasOverlay.drawWindField drawing " + positionDTOToDraw.size() + " points" + " @ "
                 + date);
 
-        drawWindLine(positionDTOToDraw);
-
+            drawWindLine(positionDTOToDraw);
+        }
     }
 
     @Override
     public int stop() {
-        SortedMap<Long, List<PositionDTO>> timePointPositionDTOMap = windLinesDTO.getWindLinesMap();
+        Map<PositionDTO, SortedMap<Long, List<PositionDTO>>> positionTimePointPositionDTOMap = windLinesDTO.getWindLinesMap();
 
-        if (!this.isVisible() || timePointPositionDTOMap == null || timer == null || timePointPositionDTOMap.isEmpty()) {
+        if (!this.isVisible() || positionTimePointPositionDTOMap == null || timer == null 
+                || positionTimePointPositionDTOMap.isEmpty()) {
             return 0;
         }
-        if (timePointPositionDTOMap.lastKey() < timer.getTime().getTime()) {
-            return 0;
-        } else {
-            return 1;
+        Set<PositionDTO> positions = positionTimePointPositionDTOMap.keySet();
+        if (positions != null && !positions.isEmpty()) {
+            /**
+             * Just check for one position as it would be the same for all the other positions
+             */
+            SortedMap<Long, List<PositionDTO>> timePointPositionDTOMap = 
+                    positionTimePointPositionDTOMap.get(positions.iterator().next());
+            if (timePointPositionDTOMap.lastKey() < timer.getTime().getTime()) {
+                return 0;
+            } else {
+                return 1;
+            }
         }
+        
+        return 0;
     }
 
     @Override
@@ -118,7 +139,7 @@ public class WindLineCanvasOverlay extends FullCanvasOverlay implements TimeList
 
     protected void drawWindLine(final List<PositionDTO> positionDTOList) {
         
-        clear();
+        //clear();
         
         if (positionDTOList == null) {
             return;
