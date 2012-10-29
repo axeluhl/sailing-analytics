@@ -328,9 +328,38 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         }
 
         windFieldDTO.setMatrix(wList);
-        getWindLines(wf, windFieldDTO);
-      
+        //getWindLines(wf, windFieldDTO);
+        getWindLinesFromStartLine(wf, windFieldDTO, startTime, endTime, timeStep);
         return windFieldDTO;
+    }
+
+    private void getWindLinesFromStartLine(WindFieldGenerator wf, WindFieldDTO windFieldDTO, TimePoint startTime, TimePoint endTime, TimePoint timeStep) {
+        
+        Position[][] positionGrid = wf.getPositionGrid();
+        WindLinesDTO windLinesDTO = new WindLinesDTO();
+        windFieldDTO.setWindLinesDTO(windLinesDTO);
+        if (positionGrid != null && positionGrid.length > 0) {
+            for (int j = 0; j < 1; ++j) {
+         // for (int j = 0; j < positionGrid[0].length; ++j) {      
+                TimePoint t = startTime;
+                while (t.compareTo(endTime) <= 0) {
+                    TimedPosition tp = new TimedPositionImpl(t,positionGrid[0][j]);
+                    Path p = wf.getLine(tp); 
+                    if (p != null) {
+                        List<PositionDTO> positions = new ArrayList<PositionDTO>();
+                        for (TimedPositionWithSpeed pathPoint : p.getPathPoints()) {
+                            Position position = pathPoint.getPosition();
+                            PositionDTO positionDTO = new PositionDTO(position.getLatDeg(), position.getLngDeg());
+                            positions.add(positionDTO);
+                        }
+
+                        windLinesDTO.addWindLine(tp.getTimePoint().asMillis(), positions);              
+                    }
+                    t = new MillisecondsTimePoint(t.asMillis() + timeStep.asMillis()); 
+                }
+            }
+        }
+        logger.info("Added : " + windFieldDTO.getWindLinesDTO().getWindLinesMap().size() + " wind lines");
     }
 
     private void getWindLines(WindFieldGenerator wf, WindFieldDTO windFieldDTO) {

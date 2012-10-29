@@ -3,6 +3,7 @@ package com.sap.sailing.simulator.windfield.impl;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.impl.KilometersPerHourSpeedWithBearingImpl;
@@ -42,6 +43,8 @@ public abstract class WindFieldGeneratorImpl implements WindFieldGenerator {
      * TimePoint which constitutes one unit of time
      */
     protected TimePoint timeStep;
+    
+    private static Logger logger = Logger.getLogger("com.sap.sailing.windfield");
 
     /*
      * private class LatLngComparator implements Comparator<Position> {
@@ -108,8 +111,8 @@ public abstract class WindFieldGeneratorImpl implements WindFieldGenerator {
         LinkedList<TimedPositionWithSpeed> path = new LinkedList<TimedPositionWithSpeed>();
         path.add(new TimedPositionWithSpeedImpl(currentTime, currentPosition, null));
         
-        for(int s=0; s<maxSteps; s++) {
-         
+        //for(int s=0; s<maxSteps; s++) {
+        while(boundary.isWithinBoundaries(currentPosition)) {
             Wind currentWind = this.getWind(new TimedPositionImpl(startTime, currentPosition));
             TimePoint middleTime = currentTime.plus(timeStep/2);
             Position middlePosition = currentWind.travelTo(currentPosition, middleTime, currentTime);
@@ -118,11 +121,15 @@ public abstract class WindFieldGeneratorImpl implements WindFieldGenerator {
             TimePoint nextTime = currentTime.plus(timeStep);
             Position nextPosition = middleWind.travelTo(currentPosition, nextTime, currentTime);
             
-            path.add(new TimedPositionWithSpeedImpl(nextTime, nextPosition, null));
+            if (boundary.isWithinBoundaries(nextPosition)) {
+                path.add(new TimedPositionWithSpeedImpl(nextTime, nextPosition, null));
+            }
             
             currentTime = nextTime;
             currentPosition = nextPosition;
         }
+        
+        logger.info("Added wind line with " + path.size()  + "points");
         
         return new PathImpl(path, this);
     }
