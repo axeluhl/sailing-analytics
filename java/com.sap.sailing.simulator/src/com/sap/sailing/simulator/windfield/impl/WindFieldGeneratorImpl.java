@@ -58,6 +58,13 @@ public abstract class WindFieldGeneratorImpl implements WindFieldGenerator {
      * }
      */
 
+//    public WindFieldGeneratorImpl() {
+//        this.boundary = null;
+//        this.windParameters = null;
+//        this.positions = null;
+//        this.indexPositionMap = new HashMap<Pair<Integer, Integer>, Position>();        
+//    }
+    
     public WindFieldGeneratorImpl(Boundary boundary, WindControlParameters windParameters) {
         this.boundary = boundary;
         this.windParameters = windParameters;

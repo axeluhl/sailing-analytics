@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.TreeMap;
 
 import com.sap.sailing.domain.base.impl.MeterDistance;
@@ -43,6 +44,12 @@ public class SailingSimulatorImpl implements SailingSimulator {
     public Map<String, Path> getAllPaths() {
 
         Map<String, Path> allPaths = new HashMap<String, Path>();
+        
+        //remove this into release mode
+        allPaths = readPathsFromFiles();
+        if(allPaths != null && allPaths.isEmpty() == false && allPaths.size() == 6)
+                return allPaths;
+        
         Path gpsPath = null;
         Path gpsPathPoly = null;
         
@@ -162,7 +169,10 @@ public class SailingSimulatorImpl implements SailingSimulator {
         }
 
         allPaths.put("1#Omniscient", optPath);
-            
+        
+        //TODO: remove this into release mode        
+        savePathsToFiles(allPaths);
+        
         return allPaths;
     }
 
@@ -171,9 +181,10 @@ public class SailingSimulatorImpl implements SailingSimulator {
         Map<String, List<TimedPositionWithSpeed>> allTimedPaths = new TreeMap<String, List<TimedPositionWithSpeed>>();
 
         Map<String, Path> allPaths = this.getAllPaths();
-        String[] allKeys = allPaths.keySet().toArray(new String[0]);
-        for (String currentKey : allKeys) {
-            allTimedPaths.put(currentKey, allPaths.get(currentKey).getEvenTimedPath(millisecondsStep));
+        for (Entry<String, Path> entry : allPaths.entrySet()) {
+            String key = entry.getKey();
+            Path value = entry.getValue();
+            allTimedPaths.put(key, value.getEvenTimedPath(millisecondsStep));
         }
 
         return allTimedPaths;
@@ -183,4 +194,83 @@ public class SailingSimulatorImpl implements SailingSimulator {
         return racecourse;
     }
 
+    @Override
+    public Map<String, Path> getAllPathsEvenTimed2(long millisecondsStep) {
+        Map<String, Path> allTimedPaths = new TreeMap<String, Path>();
+        Map<String, Path> allPaths = this.getAllPaths();
+        
+        for(Entry<String, Path> entry : allPaths.entrySet()) {
+                String key = entry.getKey();
+                Path value = entry.getValue();
+                allTimedPaths.put(key, value.getEvenTimedPath2(millisecondsStep));
+        }
+        
+        return allTimedPaths;
+    }
+
+    //I077899 - Mihai Bogdan Eugen
+    private boolean savePathsToFiles(Map<String, Path> paths) {
+        
+        if(paths == null)
+                return false;
+        
+        if(paths.isEmpty())
+                return true;
+        
+        boolean result = true;
+        
+        result &= SimulatorUtils.saveToFile((Path)paths.get("1#Omniscient"), "C:\\1#Omniscient.dat");
+        result &= SimulatorUtils.saveToFile((Path)paths.get("2#Opportunistic"), "C:\\2#Opportunistic.dat");
+        result &= SimulatorUtils.saveToFile((Path)paths.get("3#1-Turner Left"), "C:\\3#1-Turner Left.dat");
+        
+        result &= SimulatorUtils.saveToFile((Path)this.racecourse, "C:\\racecourse.dat");
+        
+        result &= SimulatorUtils.saveToFile((Path)paths.get("4#1-Turner Right"), "C:\\4#1-Turner Right.dat");
+        result &= SimulatorUtils.saveToFile((Path)paths.get("6#GPS Poly"), "C:\\6#GPS Poly.dat");
+        result &= SimulatorUtils.saveToFile((Path)paths.get("7#GPS Track"), "C:\\7#GPS Track.dat");
+        
+        return result;
+    }
+    
+    //I077899 - Mihai Bogdan Eugen
+    private Map<String, Path> readPathsFromFiles() {
+        
+        HashMap<String, Path> paths = new HashMap<String, Path>();
+        
+        Path path = null;
+        
+        path = SimulatorUtils.readFromExternalFile("C:\\1#Omniscient.dat");
+        if(path != null) {
+                paths.put("1#Omniscient", path);
+        }
+        
+        path = SimulatorUtils.readFromExternalFile("C:\\2#Opportunistic.dat");
+        if(path != null) {
+                paths.put("2#Opportunistic", path);
+        }
+        
+        path = SimulatorUtils.readFromExternalFile("C:\\3#1-Turner Left.dat");
+        if(path != null) {
+                paths.put("3#1-Turner Left", path);
+        }
+        
+        this.racecourse = SimulatorUtils.readFromExternalFile("C:\\racecourse.dat");
+        
+        path = SimulatorUtils.readFromExternalFile("C:\\4#1-Turner Right.dat");
+        if(path != null) {
+                paths.put("4#1-Turner Right", path);
+        }
+        
+        path = SimulatorUtils.readFromExternalFile("C:\\6#GPS Poly.dat");
+        if(path != null) {
+                paths.put("6#GPS Poly", path);
+        }
+        
+        path = SimulatorUtils.readFromExternalFile("C:\\7#GPS Track.dat");
+        if(path != null) {
+                paths.put("7#GPS Track", path);
+        }
+        
+        return paths;
+    }
 }

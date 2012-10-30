@@ -27,6 +27,7 @@ import com.sap.sailing.gwt.ui.shared.PathDTO;
 import com.sap.sailing.gwt.ui.shared.PositionDTO;
 import com.sap.sailing.gwt.ui.shared.SimulatorResultsDTO;
 import com.sap.sailing.gwt.ui.shared.SimulatorResultsDTOAndNotificationMessage;
+import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldGenParamsDTO;
 import com.sap.sailing.gwt.ui.shared.panels.SimpleBusyIndicator;
@@ -101,15 +102,14 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         @Override
         public void onSuccess(SimulatorResultsDTOAndNotificationMessage result) {
         	
-        	if(result.getNotificationMessage() != "") {
-        		if (warningAlreadyShown == false) {
-        			errorReporter.reportNotification(result.getNotificationMessage());
-        			warningAlreadyShown = true;
-        		}
-        	}
+            String notificationMessage = result.getNotificationMessage();
+            if (notificationMessage != "" && notificationMessage.length() != 0 && warningAlreadyShown == false) {
+                errorReporter.reportNotification(notificationMessage);
+                warningAlreadyShown = true;
+            }
         	
-        	SimulatorResultsDTO simulatorResult = result.getSimulatorResultsDTO();
-        	PathDTO[] paths = simulatorResult.paths;
+            SimulatorResultsDTO simulatorResult = result.getSimulatorResultsDTO();
+            PathDTO[] paths = simulatorResult.paths;
             logger.info("Number of Paths : " + paths.length);
             // SortByTimeAsc sorter = new SortByTimeAsc();
             // Arrays.sort(paths, sorter);
@@ -122,21 +122,41 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
                 pos = simulatorResult.raceCourse.coursePositions.waypointPositions.get(1);
                 raceCourseCanvasOverlay.endPoint = LatLng.newInstance(pos.latDeg, pos.lngDeg);
             }
-            raceCourseCanvasOverlay.redraw(true);
             
+            raceCourseCanvasOverlay.redraw(true);
             removeOverlays();
-            //pathCanvasOverlays.clear();
+//            pathCanvasOverlays.clear();
             replayPathCanvasOverlays.clear();
             colorPalette.reset();
-            for (int i = 0; i < paths.length; ++i) {
+            
+            String pathName = null;
+            PathDTO currentPath = null;
+            String color = null;
+            
+            for (int index = 0; index < paths.length; ++index) {
+                
+                currentPath = paths[index];
+                pathName = paths[index].name;
+                color = colorPalette.getColor(paths.length - 1 - index);
+                
+                //IMPORTANT
+                if (pathName.equals("GPS Poly"))
+                {
+                    createPathPolyline(currentPath, mapw);
+                }
+                else
+                {
+                    continue;
+                }
+                
                 /* TODO Revisit for now creating a WindFieldDTO from the path */
                 WindFieldDTO pathWindDTO = new WindFieldDTO();
-                pathWindDTO.setMatrix(paths[i].getMatrix());
+                pathWindDTO.setMatrix(currentPath.getMatrix());
                
-                    
-                ReplayPathCanvasOverlay replayPathCanvasOverlay = new ReplayPathCanvasOverlay(paths[i].name, timer);
+                ReplayPathCanvasOverlay replayPathCanvasOverlay = new ReplayPathCanvasOverlay(pathName, timer);
                 replayPathCanvasOverlays.add(replayPathCanvasOverlay);
-                replayPathCanvasOverlay.pathColor = colorPalette.getColor(paths.length-1-i);
+                replayPathCanvasOverlay.pathColor = color;
+                
                 if (summaryView) {
                    
                     replayPathCanvasOverlay.displayWindAlongPath = true;
@@ -151,7 +171,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
 
                 
                 
-                long tmpDurationTime = paths[i].getPathTime();
+                long tmpDurationTime = currentPath.getPathTime();
                 if (tmpDurationTime > maxDurationTime) {
                     maxDurationTime = tmpDurationTime;
                 }
@@ -397,8 +417,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
     //I077899 - Mihai Bogdan Eugen
     private void generatePath(WindPatternDisplay windPatternDisplay, final boolean summaryView, int boatClassIndex) {
         logger.info("In generatePath");
-        
-        System.out.println("YYYY: Inside generatePath!");
+
         if (windPatternDisplay == null) {
         	this.errorReporter.reportError("Please select a valid wind pattern.");
             return;
@@ -417,11 +436,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
 
         this.busyIndicator.setBusy(true);
 
-        System.out.println("YYYY: before simulatorSvc.getSimulatorResults!");
-        
         this.simulatorSvc.getSimulatorResults(this.mode, this.windParams, windPatternDisplay, true, boatClassIndex, new ResultManager(summaryView));
-        
-        System.out.println("YYYY: After generatePath!");
     }
 
     private boolean isCourseSet() {
@@ -627,5 +642,22 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         }
         return value;
     }
-
+    
+    //I077899 - Mihai Bogdan Eugen    
+    private static void createPathPolyline(PathDTO pathDTO, MapWidget map) 
+    {
+        List<WindDTO> pathPoints = pathDTO.getMatrix();
+        int noOfPathPoints = pathPoints.size();
+        WindDTO currentPathPoint = null;
+        List<LatLng> points = new ArrayList<LatLng>();
+        
+        for (int index = 0; index < noOfPathPoints; index++) 
+        {
+                currentPathPoint = pathPoints.get(index);
+                if (index == 0 || index == noOfPathPoints - 1 || currentPathPoint.isTurn) 
+                        points.add(LatLng.newInstance(currentPathPoint.position.latDeg, currentPathPoint.position.lngDeg));
+        }
+        
+        new PathPolyline(points.toArray(new LatLng[0]), map);           
+    } 
 }

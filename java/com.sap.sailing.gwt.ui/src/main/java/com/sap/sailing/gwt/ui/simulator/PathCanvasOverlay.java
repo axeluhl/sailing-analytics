@@ -60,6 +60,14 @@ public class PathCanvasOverlay extends WindFieldCanvasOverlay implements Named {
         this.startPoint = startPoint; 
         this.endPoint = endPoint; 
     }
+    
+    @Override
+    protected void drawWindField() {
+        logger.fine("In PathCanvasOverlay.drawWindField");
+        List<WindDTO> windDTOList = wl.getMatrix();
+        drawWindField(windDTOList);
+    }
+    
     /*
     @Override
     protected void drawWindField() {

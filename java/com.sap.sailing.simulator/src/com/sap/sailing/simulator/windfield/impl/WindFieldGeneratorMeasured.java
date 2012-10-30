@@ -1,5 +1,6 @@
 package com.sap.sailing.simulator.windfield.impl;
 
+import java.io.Serializable;
 import java.util.List;
 
 import com.sap.sailing.domain.base.SpeedWithBearing;
@@ -16,10 +17,16 @@ import com.sap.sailing.simulator.TimedPositionWithSpeed;
 import com.sap.sailing.simulator.windfield.WindControlParameters;
 import com.sap.sailing.simulator.windfield.WindFieldGenerator;
 
-public class WindFieldGeneratorMeasured extends WindFieldGeneratorImpl implements WindFieldGenerator {
-
+public class WindFieldGeneratorMeasured extends WindFieldGeneratorImpl implements WindFieldGenerator, Serializable {
+    
+    private static final long serialVersionUID = -7436152672809530764L;
+    
     protected Path gpsWind;
 
+//    public WindFieldGeneratorMeasured() {
+//        super();
+//    }
+    
     public WindFieldGeneratorMeasured(Boundary boundary, WindControlParameters windParameters) {
         super(boundary, windParameters);
     }

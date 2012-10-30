@@ -8,10 +8,12 @@ public interface SailingSimulator {
     void setSimulationParameters(SimulationParameters params);
 
     SimulationParameters getSimulationParameters();
-
+    
     Map<String, Path> getAllPaths();
 
     Map<String, List<TimedPositionWithSpeed>> getAllPathsEvenTimed(long millisecondsStep);
 
+    Map<String, Path> getAllPathsEvenTimed2(long millisecondsStep);
+    
     Path getRaceCourse();
 }

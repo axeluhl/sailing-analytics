@@ -6,11 +6,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.NavigableMap;
 import java.util.Set;
 import java.util.logging.Logger;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
+import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
@@ -76,7 +78,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
     private static Logger logger = Logger.getLogger("com.sap.sailing");
     private static final WindFieldGeneratorFactory wfGenFactory = WindFieldGeneratorFactory.INSTANCE;
     private static final WindPatternDisplayManager wpDisplayManager = WindPatternDisplayManager.INSTANCE;
-    
+
     private WindControlParameters controlParameters = new WindControlParameters(0, 0);
 
     @Override
@@ -137,10 +139,14 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
                 } else {
                     crt = crt.translateGreatCircle(east, deastwest);
                     if ((i == 3) && (j == 5)) {
-                        crt = crt.translateGreatCircle(north, new NauticalMileDistance(ySize / gridsizeY * Math.random()));
-                        crt = crt.translateGreatCircle(east, new NauticalMileDistance(xSize / gridsizeX * Math.random()));
-                        crt = crt.translateGreatCircle(south, new NauticalMileDistance(ySize / gridsizeY * Math.random()));
-                        crt = crt.translateGreatCircle(west, new NauticalMileDistance(xSize / gridsizeX * Math.random()));
+                        crt = crt.translateGreatCircle(north,
+                                new NauticalMileDistance(ySize / gridsizeY * Math.random()));
+                        crt = crt.translateGreatCircle(east,
+                                new NauticalMileDistance(xSize / gridsizeX * Math.random()));
+                        crt = crt.translateGreatCircle(south,
+                                new NauticalMileDistance(ySize / gridsizeY * Math.random()));
+                        crt = crt.translateGreatCircle(west,
+                                new NauticalMileDistance(xSize / gridsizeX * Math.random()));
                     }
                 }
 
@@ -187,7 +193,8 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
     }
 
     @Override
-    public WindFieldDTO getWindField(WindFieldGenParamsDTO params, WindPatternDisplay pattern) throws WindPatternNotFoundException {
+    public WindFieldDTO getWindField(WindFieldGenParamsDTO params, WindPatternDisplay pattern)
+            throws WindPatternNotFoundException {
         logger.info("Entering getWindField");
         Position nw = new DegreePosition(params.getNorthWest().latDeg, params.getNorthWest().lngDeg);
         Position se = new DegreePosition(params.getSouthEast().latDeg, params.getSouthEast().lngDeg);
@@ -198,13 +205,14 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         RectangularBoundary bd = new RectangularBoundary(nw, se, 0.1);
         // List<Position> lattice = bd.extractLattice(params.getxRes(),
         // params.getyRes());
-        
+
         controlParameters.resetBlastRandomStream = params.isKeepState();
         retreiveWindControlParameters(pattern);
         logger.info("Boundary south direction " + bd.getSouth());
         controlParameters.baseWindBearing += bd.getSouth().getDegrees();
-        
-        WindFieldGenerator wf = wfGenFactory.createWindFieldGenerator(pattern.getWindPattern().name(), bd, controlParameters);
+
+        WindFieldGenerator wf = wfGenFactory.createWindFieldGenerator(pattern.getWindPattern().name(), bd,
+                controlParameters);
 
         if (wf == null) {
             throw new WindPatternNotFoundException("Please select a valid wind pattern.");
@@ -221,36 +229,27 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
                                                                                      // 60 * 1000);
 
         wf.generate(startTime, null, timeStep);
-       
+
         if (params.getMode() != SailingSimulatorUtil.measured) {
             Position[] gridAreaGps = new Position[2];
             gridAreaGps = course.toArray(gridAreaGps);
-            wf.setGridAreaGps(gridAreaGps); 
+            wf.setGridAreaGps(gridAreaGps);
         }
         /*
-        List<WindDTO> wList = new ArrayList<WindDTO>();
+         * List<WindDTO> wList = new ArrayList<WindDTO>();
+         * 
+         * if (grid != null) { TimePoint t = startTime; while (t.compareTo(endTime) <= 0) { for (int i = 0; i <
+         * grid.length; i++) { for (int j = 0; j < grid[0].length; j++) { Wind localWind = wf.getWind(new
+         * TimedPositionWithSpeedImpl(t, grid[i][j], null));
+         * 
+         * logger.finer(localWind.toString()); WindDTO w = createWindDTO(localWind); wList.add(w); } } t = new
+         * MillisecondsTimePoint(t.asMillis() + timeStep.asMillis()); } }
+         * 
+         * WindFieldDTO wfDTO = new WindFieldDTO();
+         * 
+         * wfDTO.setMatrix(wList);
+         */
 
-        if (grid != null) {
-            TimePoint t = startTime;
-            while (t.compareTo(endTime) <= 0) {
-                for (int i = 0; i < grid.length; i++) {
-                    for (int j = 0; j < grid[0].length; j++) {
-                        Wind localWind = wf.getWind(new TimedPositionWithSpeedImpl(t, grid[i][j], null));
-                  
-                        logger.finer(localWind.toString());
-                        WindDTO w = createWindDTO(localWind);
-                        wList.add(w);
-                    }
-                }
-                t = new MillisecondsTimePoint(t.asMillis() + timeStep.asMillis());
-            }
-        }
-
-        WindFieldDTO wfDTO = new WindFieldDTO();
-
-        wfDTO.setMatrix(wList);
-        */
-        
         WindFieldDTO wfDTO = createWindFieldDTO(wf, startTime, endTime, timeStep);
         logger.info("Exiting getWindField");
         return wfDTO;
@@ -265,10 +264,10 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         PositionDTO posDTO = new PositionDTO();
         posDTO.latDeg = pos.getLatDeg();
         posDTO.lngDeg = pos.getLngDeg();
-        
+
         return posDTO;
     }
-    
+
     private WindDTO createWindDTO(Wind wind) {
         WindDTO windDTO = new WindDTO();
         windDTO.trueWindBearingDeg = wind.getBearing().getDegrees();
@@ -285,6 +284,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         return windDTO;
     }
 
+    @SuppressWarnings("unused")
     private WindDTO createWindDTO2(TimedPositionWithSpeed tPos) {
         WindDTO windDTO = new WindDTO();
         windDTO.trueWindBearingDeg = tPos.getSpeed().getBearing().getDegrees();
@@ -306,7 +306,8 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         return wpDisplayManager.getDisplay(WindPattern.valueOf(pattern.name));
     }
 
-    private WindFieldDTO createWindFieldDTO(WindFieldGenerator wf, TimePoint startTime, TimePoint endTime, TimePoint timeStep) {
+    private WindFieldDTO createWindFieldDTO(WindFieldGenerator wf, TimePoint startTime, TimePoint endTime,
+            TimePoint timeStep) {
 
         WindFieldDTO windFieldDTO = new WindFieldDTO();
         List<WindDTO> wList = new ArrayList<WindDTO>();
@@ -328,24 +329,26 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         }
 
         windFieldDTO.setMatrix(wList);
-        //getWindLines(wf, windFieldDTO);
+        // getWindLines(wf, windFieldDTO);
         getWindLinesFromStartLine(wf, windFieldDTO, startTime, endTime, timeStep);
         return windFieldDTO;
     }
 
-    private void getWindLinesFromStartLine(WindFieldGenerator wf, WindFieldDTO windFieldDTO, TimePoint startTime, TimePoint endTime, TimePoint timeStep) {
-        
+    private void getWindLinesFromStartLine(WindFieldGenerator wf, WindFieldDTO windFieldDTO, TimePoint startTime,
+            TimePoint endTime, TimePoint timeStep) {
+
         Position[][] positionGrid = wf.getPositionGrid();
         WindLinesDTO windLinesDTO = new WindLinesDTO();
         windFieldDTO.setWindLinesDTO(windLinesDTO);
         if (positionGrid != null && positionGrid.length > 0 && positionGrid[0].length > 2) {
-            for (int j = 1; j < positionGrid[0].length -1; ++j) {
-         // for (int j = 0; j < positionGrid[0].length; ++j) {      
+            for (int j = 1; j < positionGrid[0].length - 1; ++j) {
+                // for (int j = 0; j < positionGrid[0].length; ++j) {
                 TimePoint t = startTime;
-                PositionDTO startPosition = new PositionDTO(positionGrid[0][j].getLatDeg(), positionGrid[0][j].getLngDeg());
+                PositionDTO startPosition = new PositionDTO(positionGrid[0][j].getLatDeg(),
+                        positionGrid[0][j].getLngDeg());
                 while (t.compareTo(endTime) <= 0) {
-                    TimedPosition tp = new TimedPositionImpl(t,positionGrid[0][j]); 
-                    Path p = wf.getLine(tp); 
+                    TimedPosition tp = new TimedPositionImpl(t, positionGrid[0][j]);
+                    Path p = wf.getLine(tp);
                     if (p != null) {
                         List<PositionDTO> positions = new ArrayList<PositionDTO>();
                         for (TimedPositionWithSpeed pathPoint : p.getPathPoints()) {
@@ -354,15 +357,16 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
                             positions.add(positionDTO);
                         }
 
-                        windLinesDTO.addWindLine(startPosition, tp.getTimePoint().asMillis(), positions);              
+                        windLinesDTO.addWindLine(startPosition, tp.getTimePoint().asMillis(), positions);
                     }
-                    t = new MillisecondsTimePoint(t.asMillis() + timeStep.asMillis()); 
+                    t = new MillisecondsTimePoint(t.asMillis() + timeStep.asMillis());
                 }
             }
         }
         logger.info("Added : " + windFieldDTO.getWindLinesDTO().getWindLinesMap().size() + " wind lines");
     }
 
+    @SuppressWarnings("unused")
     private void getWindLines(WindFieldGenerator wf, WindFieldDTO windFieldDTO) {
         Position[] course = wf.getGridAreaGps();
         /**
@@ -372,9 +376,9 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
             /**
              * Currently create only a single line from the start position at the start time.
              */
-            TimedPosition tp = new TimedPositionImpl(wf.getStartTime(),course[0]);
+            TimedPosition tp = new TimedPositionImpl(wf.getStartTime(), course[0]);
             PositionDTO startPosition = new PositionDTO(course[0].getLatDeg(), course[0].getLngDeg());
-            
+
             Path p = wf.getLine(tp);
             if (p != null) {
                 List<PositionDTO> positions = new ArrayList<PositionDTO>();
@@ -390,40 +394,33 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
             }
         }
     }
-    
-    //I0077899 - Mihai Bogdan Eugen
-    private SimulatedPathsEvenTimedResultDTO getSimulatedPathsEvenTimed(List<Position> course, WindFieldGenerator wf, char mode, int boatClassIndex) throws ConfigurationException {
 
-    	logger.info("Retrieving simulated paths");
+    // I0077899 - Mihai Bogdan Eugen
+    private SimulatedPathsEvenTimedResultDTO getSimulatedPathsEvenTimed(List<Position> course, WindFieldGenerator wf,
+            char mode, int boatClassIndex) throws ConfigurationException {
+
+        logger.info("Retrieving simulated paths");
 
         PolarDiagramAndNotificationMessage polarDiagramAndNotificationMessage = this.getPolarDiagram(boatClassIndex);
-        PolarDiagram pd = polarDiagramAndNotificationMessage.getPolarDiagram(); 
-        
+        PolarDiagram pd = polarDiagramAndNotificationMessage.getPolarDiagram();
+
         SimulationParameters sp = new SimulationParametersImpl(course, pd, wf, mode);
         SailingSimulator simulator = new SailingSimulatorImpl(sp);
 
-        Map<String, List<TimedPositionWithSpeed>> paths = simulator.getAllPathsEvenTimed(wf.getTimeStep().asMillis());
+        Map<String, Path> paths = simulator.getAllPaths();
         PathDTO[] pathDTO = new PathDTO[paths.size()];
         int pathIndex = paths.keySet().size() - 1;
-        for (String pathName : paths.keySet()) {
 
-            logger.info("Path " + pathName);
-            List<TimedPositionWithSpeed> path = paths.get(pathName);
-            
-            // NOTE: pathName convention is: sort-digit + "#" + path-name
-            pathDTO[pathIndex] = new PathDTO(pathName.split("#")[1]);
+        for (Entry<String, Path> entry : paths.entrySet()) {
 
-            // fill pathDTO with path points where speed is true wind speed
-            List<WindDTO> wList = new ArrayList<WindDTO>();
-            for (TimedPositionWithSpeed p : path) {
-                WindDTO w = createWindDTO2(p);
-                wList.add(w);
-            }
-            pathDTO[pathIndex].setMatrix(wList);
+            String pathName = entry.getKey();
+            Path evenPath = (entry.getValue()).getEvenTimedPath2(wf.getTimeStep().asMillis());
+
+            pathDTO[pathIndex] = this.convertToPathDTOAndMarkTurns(evenPath, pathName.split("#")[1]);
 
             pathIndex--;
         }
-        
+
         RaceMapDataDTO rcDTO;
         if (mode == SailingSimulatorUtil.measured) {
             rcDTO = new RaceMapDataDTO();
@@ -433,37 +430,39 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
             Path rc = simulator.getRaceCourse();
             PositionDTO posDTO;
             posDTO = createPositionDTO(rc.getPathPoints().get(0).getPosition());
-            
+
             rcDTO.coursePositions.waypointPositions.add(posDTO);
             posDTO = createPositionDTO(rc.getPathPoints().get(1).getPosition());
             rcDTO.coursePositions.waypointPositions.add(posDTO);
         } else {
             rcDTO = null;
         }
-        
+
         WindFieldDTO wfDTO = null;
-        
+
         SimulatedPathsEvenTimedResultDTO result = new SimulatedPathsEvenTimedResultDTO();
         result.setPathDTOs(pathDTO);
         result.setRaceMapDataDTO(rcDTO);
         result.setWindFieldDTO(wfDTO);
         result.setNotificationMessage(polarDiagramAndNotificationMessage.getNotificationMesssage());
-        
+
         return result;
     }
-    
-    //I00788 - Mihai Bogdan Eugen       
+
+    // I00788 - Mihai Bogdan Eugen
     @Override
-    public SimulatorResultsDTOAndNotificationMessage getSimulatorResults(char mode, WindFieldGenParamsDTO params, WindPatternDisplay pattern, boolean withWindField, int boatClassIndex) throws WindPatternNotFoundException, ConfigurationException {
-        
+    public SimulatorResultsDTOAndNotificationMessage getSimulatorResults(char mode, WindFieldGenParamsDTO params,
+            WindPatternDisplay pattern, boolean withWindField, int boatClassIndex) throws WindPatternNotFoundException,
+            ConfigurationException {
+
         WindFieldGenerator wf = null;
         List<Position> course = null;
         TimePoint startTime = new MillisecondsTimePoint(params.getStartTime().getTime());
         TimePoint timeStep = new MillisecondsTimePoint(params.getTimeStep().getTime());
-       
+
         controlParameters.resetBlastRandomStream = params.isKeepState();
         retreiveWindControlParameters(pattern);
-                
+
         wf = wfGenFactory.createWindFieldGenerator(pattern.getWindPattern().name(), null, controlParameters);
 
         if (wf == null) {
@@ -485,15 +484,16 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         gridRes[0] = params.getxRes();
         gridRes[1] = params.getyRes();
         wf.setGridResolution(gridRes);
-        
+
         wf.generate(startTime, null, timeStep);
         Long longestPathTime = 0L;
-        
-        SimulatedPathsEvenTimedResultDTO simulatedPathsEvenTimedResult = this.getSimulatedPathsEvenTimed(course, wf, mode, boatClassIndex);
-        
+
+        SimulatedPathsEvenTimedResultDTO simulatedPathsEvenTimedResult = this.getSimulatedPathsEvenTimed(course, wf,
+                mode, boatClassIndex);
+
         PathDTO[] pathDTO = simulatedPathsEvenTimedResult.getPathDTOs();
         RaceMapDataDTO rcDTO = simulatedPathsEvenTimedResult.getRaceMapDataDTO();
-        
+
         for (int i = 0; i < pathDTO.length; ++i) {
             List<WindDTO> path = pathDTO[i].getMatrix();
             int pathLength = path.size();
@@ -502,52 +502,54 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         }
 
         TimePoint endTime = new MillisecondsTimePoint(startTime.asMillis() + longestPathTime);
-        
+
         WindFieldDTO windFieldDTO = null;
         if (pattern != null) {
             windFieldDTO = createWindFieldDTO(wf, startTime, endTime, timeStep);
         }
         SimulatorResultsDTO simulatorResults = new SimulatorResultsDTO(rcDTO, pathDTO, windFieldDTO);
-        
+
         SimulatorResultsDTOAndNotificationMessage result = new SimulatorResultsDTOAndNotificationMessage();
         result.setSimulatorResultsDTO(simulatorResults);
         result.setNotificationMessage(simulatedPathsEvenTimedResult.getNotificationMessage());
-        
+
         return result;
     }
-    
-    //I00788 - Mihai Bogdan Eugen    
+
+    // I00788 - Mihai Bogdan Eugen
     @Override
     public BoatClassDTOsAndNotificationMessage getBoatClasses() throws ConfigurationException {
-    	
+
         ArrayList<BoatClassDTO> boatClassesDTOs = new ArrayList<BoatClassDTO>();
-        
+
         BoatClassDTOsAndNotificationMessage result = new BoatClassDTOsAndNotificationMessage();
 
         ConfigurationManager config = ConfigurationManager.INSTANCE;
-        if(config.getStatus() == ReadingConfigurationFileStatus.IO_ERROR) {
-        	throw new ConfigurationException(config.getErrorMessage());
+        if (config.getStatus() == ReadingConfigurationFileStatus.IO_ERROR) {
+            throw new ConfigurationException(config.getErrorMessage());
+        } else if (config.getStatus() == ReadingConfigurationFileStatus.ERROR_FINDING_CONFIG_FILE
+                || config.getStatus() == ReadingConfigurationFileStatus.ERROR_READING_ENV_VAR_VALUE) {
+            result.setNotificationMessage(config.getErrorMessage());
         }
-        else if(config.getStatus() == ReadingConfigurationFileStatus.ERROR_FINDING_CONFIG_FILE || config.getStatus() == ReadingConfigurationFileStatus.ERROR_READING_ENV_VAR_VALUE) {
-        	result.setNotificationMessage(config.getErrorMessage());
-        }
-        
+
         for (Tuple<String, Double, String> tuple : ConfigurationManager.INSTANCE.getBoatClassesInfo()) {
-        	boatClassesDTOs.add(new BoatClassDTO(tuple.first, tuple.second));
+            boatClassesDTOs.add(new BoatClassDTO(tuple.first, tuple.second));
         }
 
         result.setBoatClassDTOs(boatClassesDTOs.toArray(new BoatClassDTO[boatClassesDTOs.size()]));
-        
-        return result; 
+
+        return result;
     }
-    
-    //I00788 - Mihai Bogdan Eugen   
+
+    // I00788 - Mihai Bogdan Eugen
     @Override
-    public PolarDiagramDTOAndNotificationMessage getPolarDiagramDTO(Double bearingStep, int boatClassIndex) throws ConfigurationException {
+    public PolarDiagramDTOAndNotificationMessage getPolarDiagramDTO(Double bearingStep, int boatClassIndex)
+            throws ConfigurationException {
 
-    	PolarDiagramAndNotificationMessage polarDiagramAndNotificationMessage = this.getPolarDiagram(boatClassIndex);
+        PolarDiagramAndNotificationMessage polarDiagramAndNotificationMessage = this.getPolarDiagram(boatClassIndex);
 
-        NavigableMap<Speed, NavigableMap<Bearing, Speed>> navMap = polarDiagramAndNotificationMessage.getPolarDiagram().polarDiagramPlot(bearingStep);
+        NavigableMap<Speed, NavigableMap<Bearing, Speed>> navMap = polarDiagramAndNotificationMessage.getPolarDiagram()
+                .polarDiagramPlot(bearingStep);
 
         Set<Speed> validSpeeds = navMap.keySet();
         validSpeeds.remove(Speed.NULL);
@@ -564,59 +566,117 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
             i++;
         }
         PolarDiagramDTO dto = new PolarDiagramDTO();
-    	dto.setNumberSeries(series);
+        dto.setNumberSeries(series);
 
-    	PolarDiagramDTOAndNotificationMessage result = new PolarDiagramDTOAndNotificationMessage();
-    	result.setPolarDiagramDTO(dto);
-    	result.setNotificationMessage(polarDiagramAndNotificationMessage.getNotificationMesssage());
-    	
-    	return result;
-    }
-    
-    //I00788 - Mihai Bogdan Eugen    
-    private PolarDiagramAndNotificationMessage getPolarDiagram(int boatClassIndex) throws ConfigurationException {
-    	
-        ConfigurationManager config = ConfigurationManager.INSTANCE;
-        PolarDiagramAndNotificationMessage result = new PolarDiagramAndNotificationMessage();
-        
-        if(config.getStatus() == ReadingConfigurationFileStatus.IO_ERROR) {
-        	throw new ConfigurationException(config.getErrorMessage());
-        }
-        else if(config.getStatus() == ReadingConfigurationFileStatus.ERROR_FINDING_CONFIG_FILE || config.getStatus() == ReadingConfigurationFileStatus.ERROR_READING_ENV_VAR_VALUE) {
-        	result.setNotificationMessage(config.getErrorMessage());
-        }
-        	
-        String csvFilePath = config.getPolarDiagramFileLocation(boatClassIndex);
-        
-        try {
-	        result.setPolarDiagram(new PolarDiagramCSV(csvFilePath));
-        }
-        catch(IOException exception) {
-        	throw new ConfigurationException("An IO error occured when parsing the CSV file! The original error message is " + exception.getMessage());
-        }	        
-        
+        PolarDiagramDTOAndNotificationMessage result = new PolarDiagramDTOAndNotificationMessage();
+        result.setPolarDiagramDTO(dto);
+        result.setNotificationMessage(polarDiagramAndNotificationMessage.getNotificationMesssage());
+
         return result;
     }
-    
-    //I00788 - Mihai Bogdan Eugen
+
+    // I00788 - Mihai Bogdan Eugen
+    private PolarDiagramAndNotificationMessage getPolarDiagram(int boatClassIndex) throws ConfigurationException {
+
+        ConfigurationManager config = ConfigurationManager.INSTANCE;
+        PolarDiagramAndNotificationMessage result = new PolarDiagramAndNotificationMessage();
+
+        if (config.getStatus() == ReadingConfigurationFileStatus.IO_ERROR) {
+            throw new ConfigurationException(config.getErrorMessage());
+        } else if (config.getStatus() == ReadingConfigurationFileStatus.ERROR_FINDING_CONFIG_FILE
+                || config.getStatus() == ReadingConfigurationFileStatus.ERROR_READING_ENV_VAR_VALUE) {
+            result.setNotificationMessage(config.getErrorMessage());
+        }
+
+        String csvFilePath = config.getPolarDiagramFileLocation(boatClassIndex);
+
+        try {
+            result.setPolarDiagram(new PolarDiagramCSV(csvFilePath));
+        } catch (IOException exception) {
+            throw new ConfigurationException(
+                    "An IO error occured when parsing the CSV file! The original error message is "
+                            + exception.getMessage());
+        }
+
+        return result;
+    }
+
+    // I00788 - Mihai Bogdan Eugen
     private class PolarDiagramAndNotificationMessage {
-    	private PolarDiagram polarDiagram = null;
-    	private String notificationMessage = "";
-    	
-    	public void setPolarDiagram(PolarDiagram polarDiagram) {
-    		this.polarDiagram = polarDiagram;
-    	}
-    	
-    	public void setNotificationMessage(String notificationMessage) {
-    		this.notificationMessage = notificationMessage;
-    	}
-    	
-    	public PolarDiagram getPolarDiagram() {
-    		return this.polarDiagram;
-    	}
-    	
-    	public String getNotificationMesssage() {
-    		return this.notificationMessage;
-    	}
+        private PolarDiagram polarDiagram = null;
+        private String notificationMessage = "";
+
+        public void setPolarDiagram(PolarDiagram polarDiagram) {
+            this.polarDiagram = polarDiagram;
+        }
+
+        public void setNotificationMessage(String notificationMessage) {
+            this.notificationMessage = notificationMessage;
+        }
+
+        public PolarDiagram getPolarDiagram() {
+            return this.polarDiagram;
+        }
+
+        public String getNotificationMesssage() {
+            return this.notificationMessage;
+        }
+    }
+
+    // I00788 - Mihai Bogdan Eugen
+    private PathDTO convertToPathDTOAndMarkTurns(Path path, String name) {
+        if (path == null)
+            return null;
+
+        List<TimedPositionWithSpeed> pathPoints = path.getPathPoints();
+        List<WindDTO> windDTOs = new ArrayList<WindDTO>();
+
+        WindDTO windDTO = null;
+        SpeedWithBearing speedWithBearing = null;
+        Bearing bearing = null;
+        Position position = null;
+
+        List<TimedPositionWithSpeed> turnPoints = path.getTurns();
+        boolean isTurn = false;
+
+        for (TimedPositionWithSpeed point : pathPoints) {
+
+            isTurn = false;
+
+            for (TimedPositionWithSpeed turn : turnPoints) {
+                if (turn.getPosition().getLatDeg() == point.getPosition().getLatDeg()
+                        && turn.getPosition().getLngDeg() == point.getPosition().getLngDeg()) {
+                    isTurn = true;
+                    break;
+                }
+            }
+
+            windDTO = new WindDTO();
+            windDTO.isTurn = isTurn;
+
+            speedWithBearing = point.getSpeed();
+            bearing = speedWithBearing.getBearing();
+
+            windDTO.trueWindBearingDeg = bearing.getDegrees();
+            windDTO.trueWindFromDeg = bearing.reverse().getDegrees();
+            windDTO.trueWindSpeedInKnots = speedWithBearing.getKnots();
+            windDTO.trueWindSpeedInMetersPerSecond = speedWithBearing.getMetersPerSecond();
+
+            position = point.getPosition();
+            if (position != null) {
+                windDTO.position = new PositionDTO(position.getLatDeg(), position.getLngDeg());
+            }
+
+            if (point.getTimePoint() != null) {
+                windDTO.timepoint = point.getTimePoint().asMillis();
+            }
+
+            windDTOs.add(windDTO);
+        }
+
+        PathDTO result = new PathDTO(name);
+        result.setMatrix(windDTOs);
+
+        return result;
     }
 }
