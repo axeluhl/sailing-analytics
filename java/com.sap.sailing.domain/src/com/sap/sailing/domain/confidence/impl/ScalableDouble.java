@@ -4,6 +4,7 @@ import com.sap.sailing.domain.confidence.AbstractScalarValue;
 import com.sap.sailing.domain.confidence.ScalableValue;
 
 public class ScalableDouble implements AbstractScalarValue<Double> {
+    private static final long serialVersionUID = 4917119224894426738L;
     private final double value;
     
     public ScalableDouble(double value) {

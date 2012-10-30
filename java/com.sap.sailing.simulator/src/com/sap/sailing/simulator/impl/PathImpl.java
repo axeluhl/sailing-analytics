@@ -70,14 +70,19 @@ public class PathImpl implements Path {
                 // p1.getTimePoint().asMillis())+" - "+(p2.getTimePoint().asMillis() - p1.getTimePoint().asMillis()));
                 double scale1 = (double) (nextTimePoint.asMillis() - p1.getTimePoint().asMillis());
                 double scale2 = (double) (p2.getTimePoint().asMillis() - p1.getTimePoint().asMillis());
-                Position nextPosition = p1.getPosition().translateGreatCircle(p1.getPosition().getBearingGreatCircle(p2.getPosition()), dist.scale(scale1 / scale2));
+                Position nextPosition = p1.getPosition().translateGreatCircle(
+                        p1.getPosition().getBearingGreatCircle(p2.getPosition()), dist.scale(scale1 / scale2));
                 SpeedWithBearing nextWind = null;
                 if (windField != null) {
                     nextWind = windField.getWind(new TimedPositionImpl(nextTimePoint, nextPosition));
                 } else {
-                    double nextWindSpeed = p1.getSpeed().getKnots() + (p2.getSpeed().getKnots() - p1.getSpeed().getKnots()) * scale1 / scale2;
-                    double nextWindAngle = p1.getSpeed().getBearing().getDegrees() + (p2.getSpeed().getBearing().getDegrees() - p1.getSpeed().getBearing().getDegrees()) * scale1 / scale2;
-                    SpeedWithBearing nextWindSpeedWithBearing = new KnotSpeedWithBearingImpl(nextWindSpeed, new DegreeBearingImpl(nextWindAngle));
+                    double nextWindSpeed = p1.getSpeed().getKnots()
+                            + (p2.getSpeed().getKnots() - p1.getSpeed().getKnots()) * scale1 / scale2;
+                    double nextWindAngle = p1.getSpeed().getBearing().getDegrees()
+                            + (p2.getSpeed().getBearing().getDegrees() - p1.getSpeed().getBearing().getDegrees())
+                            * scale1 / scale2;
+                    SpeedWithBearing nextWindSpeedWithBearing = new KnotSpeedWithBearingImpl(nextWindSpeed,
+                            new DegreeBearingImpl(nextWindAngle));
                     nextWind = new WindImpl(nextPosition, nextTimePoint, nextWindSpeedWithBearing);
                 }
                 TimedPositionWithSpeed nextPoint = new TimedPositionWithSpeedImpl(nextTimePoint, nextPosition, nextWind);
@@ -106,8 +111,10 @@ public class PathImpl implements Path {
                     // add intermediate corner point
                     SpeedWithBearing maxWind = null;
                     if (windField != null) {
-                        maxWind = windField.getWind(new TimedPositionImpl(maxPoint.getTimePoint(), maxPoint.getPosition()));
-                        maxPoint = new TimedPositionWithSpeedImpl(maxPoint.getTimePoint(), maxPoint.getPosition(), maxWind);
+                        maxWind = windField.getWind(new TimedPositionImpl(maxPoint.getTimePoint(), maxPoint
+                                .getPosition()));
+                        maxPoint = new TimedPositionWithSpeedImpl(maxPoint.getTimePoint(), maxPoint.getPosition(),
+                                maxWind);
                     }
                     path.add(maxPoint);
                 }
@@ -174,7 +181,8 @@ public class PathImpl implements Path {
         double t0 = 1000.0 * t.asMillis();
 
         Distance dist = p1.getPosition().getDistance(p2.getPosition());
-        Position p0 = p1.getPosition().translateGreatCircle(p1.getPosition().getBearingGreatCircle(p2.getPosition()), dist.scale((t0 - t1) / (t2 - t1)));
+        Position p0 = p1.getPosition().translateGreatCircle(p1.getPosition().getBearingGreatCircle(p2.getPosition()),
+                dist.scale((t0 - t1) / (t2 - t1)));
         SpeedWithBearing windAtPoint = windField.getWind(new TimedPositionImpl(t, p0));
 
         return new TimedPositionWithSpeedImpl(t, p0, windAtPoint);
@@ -210,4 +218,54 @@ public class PathImpl implements Path {
         return null;
     }
 
+    private static final boolean endsConsideredTurns = false;
+
+    // I077899 - Mihai Bogdan Eugen
+    public List<TimedPositionWithSpeed> getTurns() {
+        if (this.pathPoints == null)
+            return null;
+
+        List<TimedPositionWithSpeed> list = new ArrayList<TimedPositionWithSpeed>();
+
+        if (this.pathPoints.isEmpty())
+            return list;
+
+        int noOfPoints = this.pathPoints.size();
+        TimedPositionWithSpeed previousPoint = null;
+        TimedPositionWithSpeed currentPoint = null;
+        TimedPositionWithSpeed nextPoint = null;
+
+        for (int index = 0; index < noOfPoints; index++) {
+
+            currentPoint = this.pathPoints.get(index);
+
+            if (index == 0 || index == (noOfPoints - 1)) {
+                if (endsConsideredTurns) {
+                    list.add(currentPoint);
+                }
+            } else {
+
+                previousPoint = this.pathPoints.get(index - 1);
+                nextPoint = this.pathPoints.get(index + 1);
+
+                if (SimulatorUtils.isPosition2Turn(previousPoint.getPosition(), currentPoint.getPosition(),
+                        nextPoint.getPosition())) {
+                    list.add(currentPoint);
+                }
+            }
+        }
+
+        return list;
+    }
+
+    // I077899 - Mihai Bogdan Eugen
+    public boolean saveToFile(String fileName) {
+        return SimulatorUtils.saveToFile(this, fileName);
+    }
+
+    //I077899
+    @Override
+        public Path getEvenTimedPath2(long timestep) {
+        return new PathImpl(getEvenTimedPath(timestep), windField);
+    }
 }

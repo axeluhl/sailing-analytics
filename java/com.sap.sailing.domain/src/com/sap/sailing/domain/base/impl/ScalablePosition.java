@@ -5,6 +5,7 @@ import com.sap.sailing.domain.common.impl.RadianPosition;
 import com.sap.sailing.domain.confidence.ScalableValue;
 
 public class ScalablePosition implements ScalableValue<ScalablePosition, Position> {
+    private static final long serialVersionUID = -7562768236832707784L;
     private final double x, y, z;
     
     public ScalablePosition(Position position) {

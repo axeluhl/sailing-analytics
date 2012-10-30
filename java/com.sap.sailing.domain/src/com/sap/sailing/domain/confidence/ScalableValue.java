@@ -1,6 +1,8 @@
 package com.sap.sailing.domain.confidence;
 
-public interface ScalableValue<ValueType, AveragesTo> {
+import java.io.Serializable;
+
+public interface ScalableValue<ValueType, AveragesTo> extends Serializable {
     ScalableValue<ValueType, AveragesTo> multiply(double factor);
 
     ScalableValue<ValueType, AveragesTo> add(ScalableValue<ValueType, AveragesTo> t);

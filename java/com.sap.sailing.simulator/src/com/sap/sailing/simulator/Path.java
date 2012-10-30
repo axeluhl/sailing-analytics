@@ -12,12 +12,19 @@ public interface Path {
 
     List<TimedPositionWithSpeed> getEvenTimedPath(long timeStep);
 
-    //TimedPositionWithSpeed getPositionAtTime(TimePoint t);
+    // TimedPositionWithSpeed getPositionAtTime(TimePoint t);
 
-    //List<TimedPositionWithSpeed> getEvenTimedPoints(long milliseconds);
+    // List<TimedPositionWithSpeed> getEvenTimedPoints(long milliseconds);
 
-    //List<TimedPositionWithSpeed> getEvenDistancedPoints(Distance dist);
+    // List<TimedPositionWithSpeed> getEvenDistancedPoints(Distance dist);
 
     void setWindField(WindField wf);
 
+    // TimedPositionWithSpeed getClosestTurn(double lngDeg, double latDeg);
+
+    List<TimedPositionWithSpeed> getTurns();
+
+    boolean saveToFile(String fileName);
+
+    Path getEvenTimedPath2(long timeStep);
 }

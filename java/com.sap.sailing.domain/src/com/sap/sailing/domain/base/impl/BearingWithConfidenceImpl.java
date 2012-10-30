@@ -21,6 +21,7 @@ implements BearingWithConfidence<RelativeTo>, IsScalable<DoublePair, Bearing> {
     }
 
     private static class ScalableBearing implements ScalableValue<DoublePair, Bearing> {
+        private static final long serialVersionUID = -3737187345268157096L;
         private final double sin;
         private final double cos;
         

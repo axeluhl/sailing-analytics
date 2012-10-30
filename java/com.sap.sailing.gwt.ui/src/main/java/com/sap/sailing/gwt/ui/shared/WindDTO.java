@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.ui.shared;
 import com.google.gwt.user.client.rpc.IsSerializable;
 
 public class WindDTO implements IsSerializable {
+    public boolean isTurn;
     public Double trueWindSpeedInMetersPerSecond;
     public Double trueWindSpeedInKnots;
     public Double trueWindBearingDeg;
@@ -15,6 +16,7 @@ public class WindDTO implements IsSerializable {
     public Long timepoint;
     public Long originTimepoint;
     public Double confidence;
-    
-    public WindDTO() {}
+
+    public WindDTO() {
+    }
 }
