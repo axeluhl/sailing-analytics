@@ -33,6 +33,8 @@ public class RaceMapSettingsTypeFormatter {
             return stringConstants.courseMiddleLine();
         case BUOYZONE:            
             return stringConstants.buoyZone();
+        case BOATTAILS:
+            return stringConstants.boatTails();
         }
         return null;
     }

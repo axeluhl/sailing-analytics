@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.sap.sailing.domain.common.ManeuverType;
+import com.sap.sailing.gwt.ui.shared.racemap.RaceMapHelpLinesSettings.HelpLineTypes;
 
 public class RaceMapSettings {
 
@@ -13,8 +14,6 @@ public class RaceMapSettings {
 
     private boolean showOnlySelectedCompetitors = false;
 
-    private boolean showTails = true;
-
     private boolean showAllCompetitors = false;
 
     private RaceMapZoomSettings zoomSettings;
@@ -22,6 +21,8 @@ public class RaceMapSettings {
     private RaceMapHelpLinesSettings helpLinesSettings;
 
     private long tailLengthInMilliseconds = 100000l;
+
+    private double buoyZoneRadiusInMeters = 0.0;
 
     private int maxVisibleCompetitorsCount = 50;
 
@@ -35,10 +36,10 @@ public class RaceMapSettings {
     }
 
     /**
-     * @return 0 if {@link #isShowTails()} returns <code>false</code>; {@link #getTailLengthInMilliseconds()} otherwise
+     * @return 0 if the tails are not visible {@link #getTailLengthInMilliseconds()} otherwise
      */
     public long getEffectiveTailLengthInMilliseconds() {
-        return isShowTails() ? getTailLengthInMilliseconds() : 0;
+        return helpLinesSettings.isVisible(HelpLineTypes.BOATTAILS) ? getTailLengthInMilliseconds() : 0;
     }
 
     /**
@@ -105,14 +106,6 @@ public class RaceMapSettings {
         this.maxVisibleCompetitorsCount = maxVisibleCompetitorsCount;
     }
 
-    public boolean isShowTails() {
-        return showTails;
-    }
-
-    public void setShowTails(boolean showTails) {
-        this.showTails = showTails;
-    }
-
     public boolean isShowAllCompetitors() {
         return showAllCompetitors;
     }
@@ -127,5 +120,13 @@ public class RaceMapSettings {
 
     public void setShowSelectedCompetitorsInfo(boolean showSelectedCompetitorsInfo) {
         this.showSelectedCompetitorsInfo = showSelectedCompetitorsInfo;
+    }
+
+    public double getBuoyZoneRadiusInMeters() {
+        return buoyZoneRadiusInMeters;
+    }
+
+    public void setBuoyZoneRadiusInMeters(double buoyZoneRadiusInMeters) {
+        this.buoyZoneRadiusInMeters = buoyZoneRadiusInMeters;
     }
 }

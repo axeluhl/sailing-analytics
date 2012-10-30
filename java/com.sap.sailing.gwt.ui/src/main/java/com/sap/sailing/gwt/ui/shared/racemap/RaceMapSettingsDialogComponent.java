@@ -11,6 +11,7 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.DoubleBox;
 import com.google.gwt.user.client.ui.FocusWidget;
+import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.IntegerBox;
@@ -36,11 +37,10 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
     private CheckBox zoomOnlyToSelectedCompetitorsCheckBox;
     private CheckBox showDouglasPeuckerPointsCheckBox;
     private CheckBox showOnlySelectedCompetitorsCheckBox;
-    private CheckBox showTailsCheckBox;
     private CheckBox showAllCompetitorsCheckBox;
     private CheckBox showSelectedCompetitorsInfoCheckBox;
     private LongBox tailLengthBox;
-//    private DoubleBox buoyZoneRadiusBox;
+    private DoubleBox buoyZoneRadiusBox;
     private IntegerBox maxVisibleCompetitorsCountBox;
     
     private final StringMessages stringMessages;
@@ -141,38 +141,57 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
         Label helpLinesLabel = dialog.createHeadlineLabel(stringMessages.helpLines());
         vp.add(helpLinesLabel);
 
-        // boat tail settings
-        HorizontalPanel tailSettingsPanel = new HorizontalPanel();
-        showTailsCheckBox = dialog.createCheckbox(stringMessages.boatTails());
-        showTailsCheckBox.setValue(initialSettings.isShowTails());
-        tailSettingsPanel.add(showTailsCheckBox);
-        showTailsCheckBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+        Grid helpLineControlsGrid = new Grid(HelpLineTypes.values().length, 3);
+
+        // additional tail length control
+        Label tailLengthLabel = new Label(stringMessages.lengthInSeconds() + ":");
+        helpLineControlsGrid.setWidget(0, 1, tailLengthLabel);
+
+        tailLengthBox = dialog.createLongBox((int) (initialSettings.getTailLengthInMilliseconds() / 1000), 4);
+        tailLengthBox.setEnabled(initialSettings.getHelpLinesSettings().isVisible(HelpLineTypes.BOATTAILS));
+        helpLineControlsGrid.setWidget(0, 2, tailLengthBox);
+             
+        // additional buoy zone control
+        Label buoyZoneRadiusLabel = new Label("Radius in (m):");
+        helpLineControlsGrid.setWidget(1, 1, buoyZoneRadiusLabel);
+
+        buoyZoneRadiusBox = dialog.createDoubleBox(initialSettings.getBuoyZoneRadiusInMeters(), 8);
+        buoyZoneRadiusBox.setEnabled(initialSettings.getHelpLinesSettings().isVisible(HelpLineTypes.BUOYZONE));
+        helpLineControlsGrid.setWidget(1, 2, buoyZoneRadiusBox);
+
+        final CheckBox boatTailsCheckBox = createHelpLineCheckBox(dialog, HelpLineTypes.BOATTAILS);
+        boatTailsCheckBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
             @Override
-            public void onValueChange(ValueChangeEvent<Boolean> vce) {
-                boolean newValue = vce.getValue();
-                RaceMapSettingsDialogComponent.this.tailLengthBox.setEnabled(newValue);
+            public void onValueChange(ValueChangeEvent<Boolean> valueChangeEvent) {
+                tailLengthBox.setEnabled(valueChangeEvent.getValue());
             }
         });
-        Label tailLengthLabel = new Label(stringMessages.lengthInSeconds() + ":");
-        tailLengthLabel.getElement().getStyle().setMarginLeft(25, Unit.PX);
-        tailSettingsPanel.add(tailLengthLabel);
-        tailSettingsPanel.setCellVerticalAlignment(tailLengthLabel, HasVerticalAlignment.ALIGN_MIDDLE);
-        tailLengthBox = dialog.createLongBox((int) (initialSettings.getTailLengthInMilliseconds() / 1000), 4);
-        tailLengthBox.setEnabled(initialSettings.isShowTails());
-        tailSettingsPanel.add(tailLengthBox);
-        tailSettingsPanel.setCellVerticalAlignment(tailLengthBox, HasVerticalAlignment.ALIGN_MIDDLE);
-        vp.add(tailSettingsPanel);
+        helpLineControlsGrid.setWidget(0, 0, boatTailsCheckBox);
+        
+        final CheckBox buoyZoneCheckBox = createHelpLineCheckBox(dialog, HelpLineTypes.BUOYZONE);
+        buoyZoneCheckBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<Boolean> valueChangeEvent) {
+                buoyZoneRadiusBox.setEnabled(valueChangeEvent.getValue());
+            }
+        }); 
+        helpLineControlsGrid.setWidget(1, 0, buoyZoneCheckBox);
 
-        VerticalPanel helpLineSettingsBoxesPanel = new VerticalPanel();
-        for (HelpLineTypes helpLineType : HelpLineTypes.values()) {
-                CheckBox cb = dialog.createCheckbox(RaceMapSettingsTypeFormatter.formatHelpLineType(helpLineType, stringMessages));
-                cb.setValue(initialSettings.getHelpLinesSettings().containsHelpLine(helpLineType));
-                checkboxAndHelpLineType.add(new Pair<CheckBox, HelpLineTypes>(cb, helpLineType));
-                helpLineSettingsBoxesPanel.add(cb);
-        }
-        vp.add(helpLineSettingsBoxesPanel);
+        helpLineControlsGrid.setWidget(2, 0, createHelpLineCheckBox(dialog, HelpLineTypes.STARTLINE));
+        helpLineControlsGrid.setWidget(3, 0, createHelpLineCheckBox(dialog, HelpLineTypes.FINISHLINE));
+        helpLineControlsGrid.setWidget(4, 0, createHelpLineCheckBox(dialog, HelpLineTypes.ADVANTAGELINE));
+        helpLineControlsGrid.setWidget(5, 0, createHelpLineCheckBox(dialog, HelpLineTypes.COURSEMIDDLELINE));
+         
+        vp.add(helpLineControlsGrid);
         
         return vp;
+    }
+    
+    private CheckBox createHelpLineCheckBox(DataEntryDialog<?> dialog, HelpLineTypes helpLineType) {
+        CheckBox cb = dialog.createCheckbox(RaceMapSettingsTypeFormatter.formatHelpLineType(helpLineType, stringMessages));
+        cb.setValue(initialSettings.getHelpLinesSettings().isVisible(helpLineType));
+        checkboxAndHelpLineType.add(new Pair<CheckBox, HelpLineTypes>(cb, helpLineType));
+        return cb;
     }
     
     private void zoomSettingsChanged() {
@@ -204,9 +223,9 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
         result.setShowOnlySelectedCompetitors(showOnlySelectedCompetitorsCheckBox.getValue());
         result.setShowSelectedCompetitorsInfo(showSelectedCompetitorsInfoCheckBox.getValue());
         result.setShowAllCompetitors(showAllCompetitorsCheckBox.getValue());
-        result.setShowTails(showTailsCheckBox.getValue());
         result.setTailLengthInMilliseconds(tailLengthBox.getValue() == null ? -1 : tailLengthBox.getValue()*1000l);
         result.setMaxVisibleCompetitorsCount(maxVisibleCompetitorsCountBox.getValue() == null ? -1 : maxVisibleCompetitorsCountBox.getValue());
+        result.setBuoyZoneRadiusInMeters(buoyZoneRadiusBox.getValue());
         
         return result;
     }
@@ -242,7 +261,7 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
             @Override
             public String getErrorMessage(RaceMapSettings valueToValidate) {
                 String errorMessage = null;
-                if (valueToValidate.isShowTails() && valueToValidate.getTailLengthInMilliseconds() <= 0) {
+                if (valueToValidate.getHelpLinesSettings().isVisible(HelpLineTypes.BOATTAILS) && valueToValidate.getTailLengthInMilliseconds() <= 0) {
                     errorMessage = stringMessages.tailLengthMustBePositive();
                 } else if (!valueToValidate.isShowAllCompetitors() && valueToValidate.getMaxVisibleCompetitorsCount() <= 0) {
                     errorMessage = stringMessages.maxVisibleCompetitorsCountMustBePositive();

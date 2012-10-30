@@ -5,8 +5,8 @@ import com.google.gwt.canvas.dom.client.CssColor;
 import com.google.gwt.maps.client.geom.LatLng;
 import com.google.gwt.maps.client.geom.Point;
 import com.google.gwt.maps.client.overlay.Overlay;
-import com.sap.sailing.gwt.ui.shared.BoatClassDTO;
 import com.sap.sailing.gwt.ui.shared.BuoyDTO;
+import com.sap.sailing.gwt.ui.shared.PositionDTO;
 
 /**
  * A google map overlay based on a HTML5 canvas for drawing buoys (images) and the buoy zone
@@ -18,17 +18,14 @@ public class BuoyOverlay extends CanvasOverlay {
      */
     private BuoyDTO buoy;
     
+    private PositionDTO position;
+    
     private double buoyZoneRadiusInMeter;
-
-    public BuoyOverlay(BuoyDTO buoy, BoatClassDTO boatClass) {
-        super();
-        this.buoy = buoy;
-        this.buoyZoneRadiusInMeter = boatClass.getHullLengthInMeters() * 3;
-    }
     
     public BuoyOverlay(BuoyDTO buoy, double buoyZoneRadiusInMeter) {
         super();
         this.buoy = buoy;
+        this.position = buoy.position;
         this.buoyZoneRadiusInMeter = buoyZoneRadiusInMeter;
     }
 
@@ -39,15 +36,15 @@ public class BuoyOverlay extends CanvasOverlay {
 
     @Override
     protected void redraw(boolean force) {
-        if (buoy != null && buoy.position != null) {
-            LatLng latLngPosition = LatLng.newInstance(buoy.position.latDeg, buoy.position.lngDeg);
+        if (buoy != null && position != null) {
+            LatLng latLngPosition = LatLng.newInstance(position.latDeg, position.lngDeg);
             int buoyZoneRadiusInPixel = calculateRadiusOfBoundingBox(latLngPosition, buoyZoneRadiusInMeter);
             if(buoyZoneRadiusInPixel > 10) {
                 setCanvasSize(buoyZoneRadiusInPixel * 2, buoyZoneRadiusInPixel * 2);
                 
                 Context2d context2d = getCanvas().getContext2d();
                 context2d.clearRect(0, 0, buoyZoneRadiusInPixel * 2, buoyZoneRadiusInPixel * 2);
-                CssColor grayTransparentColor = CssColor.make("rgba(255,255,255,0.75)");
+                CssColor grayTransparentColor = CssColor.make("rgba(50,90,135,0.75)");
 
                 // this translation is important for drawing lines with a real line width of 1 pixel
                 context2d.setStrokeStyle(grayTransparentColor);
@@ -71,8 +68,8 @@ public class BuoyOverlay extends CanvasOverlay {
         return buoy;
     }
 
-    public void setBuoy(BuoyDTO buoy) {
-        this.buoy = buoy;
+    public void setBuoyPosition(PositionDTO position) {
+        this.position = position;
     }
 
     public double getBuoyZoneRadiusInMeter() {

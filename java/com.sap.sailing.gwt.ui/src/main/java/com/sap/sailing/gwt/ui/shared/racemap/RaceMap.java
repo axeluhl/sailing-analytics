@@ -609,18 +609,18 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
 
     protected void showBuoysOnMap(CourseDTO courseDTO, BoatClassDTO boatClassDTO) {
         if (map != null) {
-            if (settings.getHelpLinesSettings().containsHelpLine(HelpLineTypes.BUOYZONE) && boatClassDTO != null) {
+            if (settings.getHelpLinesSettings().isVisible(HelpLineTypes.BUOYZONE) && boatClassDTO != null) {
                 Set<BuoyDTO> toRemoveBuoyOverlays = new HashSet<BuoyDTO>(buoyOverlays.keySet());
                 for (BuoyDTO buoyDTO : courseDTO.buoys) {
                     if(buoyDTO.position != null) {
                         BuoyOverlay buoyOverlay = buoyOverlays.get(buoyDTO);
                         if (buoyOverlay == null) {
-                            buoyOverlay = createBuoyOverlay(buoyDTO, boatClassDTO);
+                            buoyOverlay = createBuoyOverlay(buoyDTO, boatClassDTO.getHullLengthInMeters() * 3);
                             buoyOverlays.put(buoyDTO, buoyOverlay);
                             map.addOverlay(buoyOverlay);
                             buoyOverlay.redraw(true);
                         } else {
-                            buoyOverlay.setBuoy(buoyDTO);
+                            buoyOverlay.setBuoyPosition(buoyDTO.position);
                             buoyOverlay.redraw(true);
                         }
                         toRemoveBuoyOverlays.remove(buoyDTO);
@@ -765,7 +765,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 }
                 lastBoatFix = getBoatFix(visibleLeaderInfo.getB(), date);
             }
-            if (settings.getHelpLinesSettings().containsHelpLine(HelpLineTypes.ADVANTAGELINE)
+            if (settings.getHelpLinesSettings().isVisible(HelpLineTypes.ADVANTAGELINE)
                     && isVisibleLeaderInfoComplete && isLegTypeKnown && lastBoatFix != null) {
                 LegInfoDTO legInfoDTO = lastRaceTimesInfo.getLegInfos().get(visibleLeaderInfo.getA()-1);
                 double advantageLineLengthInKm = 1.0; // TODO this should probably rather scale with the visible area of the map; bug 616
@@ -847,7 +847,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             int numberOfLegs = lastRaceTimesInfo.legInfos.size();
             // draw the start line
             if (legOfLeadingCompetitor <= 1 && 
-                    settings.getHelpLinesSettings().containsHelpLine(HelpLineTypes.STARTLINE) && courseDTO.startBuoyPositions.size() == 2) {
+                    settings.getHelpLinesSettings().isVisible(HelpLineTypes.STARTLINE) && courseDTO.startBuoyPositions.size() == 2) {
                 LatLng[] startGatePoints = new LatLng[2];
                 startGatePoints[0] = LatLng.newInstance(courseDTO.startBuoyPositions.get(0).latDeg, courseDTO.startBuoyPositions.get(0).lngDeg); 
                 startGatePoints[1] = LatLng.newInstance(courseDTO.startBuoyPositions.get(1).latDeg, courseDTO.startBuoyPositions.get(1).lngDeg); 
@@ -882,7 +882,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             }
             // draw the finish line
             if (legOfLeadingCompetitor > 0 && legOfLeadingCompetitor == numberOfLegs &&
-                settings.getHelpLinesSettings().containsHelpLine(HelpLineTypes.FINISHLINE) && courseDTO.finishBuoyPositions.size() == 2) {
+                settings.getHelpLinesSettings().isVisible(HelpLineTypes.FINISHLINE) && courseDTO.finishBuoyPositions.size() == 2) {
                 LatLng[] finishGatePoints = new LatLng[2];
                 finishGatePoints[0] = LatLng.newInstance(courseDTO.finishBuoyPositions.get(0).latDeg, courseDTO.finishBuoyPositions.get(0).lngDeg); 
                 finishGatePoints[1] = LatLng.newInstance(courseDTO.finishBuoyPositions.get(1).latDeg, courseDTO.finishBuoyPositions.get(1).lngDeg); 
@@ -917,7 +917,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             }
             // draw the course middle line
             if (legOfLeadingCompetitor > 0 && courseDTO.waypointPositions.size() > legOfLeadingCompetitor &&
-                    settings.getHelpLinesSettings().containsHelpLine(HelpLineTypes.COURSEMIDDLELINE)) {
+                    settings.getHelpLinesSettings().isVisible(HelpLineTypes.COURSEMIDDLELINE)) {
                 LatLng[] courseMiddleLinePoints = new LatLng[2];
                 double p1Lat = courseDTO.waypointPositions.get(legOfLeadingCompetitor-1).latDeg;
                 double p1Lng = courseDTO.waypointPositions.get(legOfLeadingCompetitor-1).lngDeg;
@@ -1014,8 +1014,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         return new CompetitorInfoOverlay(competitorDTO, raceMapImageManager);
     }
 
-    protected BuoyOverlay createBuoyOverlay(final BuoyDTO buoyDTO, BoatClassDTO boatClassDTO) {
-        return new BuoyOverlay(buoyDTO, boatClassDTO);
+    protected BuoyOverlay createBuoyOverlay(final BuoyDTO buoyDTO, double buoyZoneRadius) {
+        return new BuoyOverlay(buoyDTO, buoyZoneRadius);
     }
     
     private BoatCanvasOverlay createBoatCanvas(final CompetitorDTO competitorDTO, boolean highlighted) {
@@ -1669,9 +1669,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 removeAllMarkDouglasPeuckerpoints();
             }
         }
-        if (newSettings.isShowTails() != settings.isShowTails() ||
-                newSettings.getTailLengthInMilliseconds() != settings.getTailLengthInMilliseconds()) {
-            settings.setShowTails(newSettings.isShowTails());
+        if (newSettings.getTailLengthInMilliseconds() != settings.getTailLengthInMilliseconds()) {
             settings.setTailLengthInMilliseconds(newSettings.getTailLengthInMilliseconds());
             requiredRedraw = true;
         }
@@ -1689,6 +1687,11 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 zoomMapToNewBounds(settings.getZoomSettings().getNewBounds(this));
             }
         }
+        if (newSettings.getBuoyZoneRadiusInMeters() != settings.getBuoyZoneRadiusInMeters()) {
+            settings.setBuoyZoneRadiusInMeters(newSettings.getBuoyZoneRadiusInMeters());
+            requiredRedraw = true;
+        }
+
         if (!newSettings.getHelpLinesSettings().equals(settings.getHelpLinesSettings())) {
             settings.setHelpLinesSettings(newSettings.getHelpLinesSettings());
             requiredRedraw = true;
