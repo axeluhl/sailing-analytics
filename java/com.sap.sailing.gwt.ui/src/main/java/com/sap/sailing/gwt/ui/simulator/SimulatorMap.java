@@ -144,10 +144,10 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
                 {
                     createPathPolyline(currentPath, mapw);
                 }
-                else
-                {
-                    continue;
-                }
+//                else
+//                {
+//                    continue;
+//                }
                 
                 /* TODO Revisit for now creating a WindFieldDTO from the path */
                 WindFieldDTO pathWindDTO = new WindFieldDTO();

@@ -46,9 +46,9 @@ public class SailingSimulatorImpl implements SailingSimulator {
         Map<String, Path> allPaths = new HashMap<String, Path>();
         
         //remove this into release mode
-        allPaths = readPathsFromFiles();
-        if(allPaths != null && allPaths.isEmpty() == false && allPaths.size() == 6)
-                return allPaths;
+//        allPaths = readPathsFromFiles();
+//        if(allPaths != null && allPaths.isEmpty() == false && allPaths.size() == 6)
+//                return allPaths;
         
         Path gpsPath = null;
         Path gpsPathPoly = null;
@@ -171,7 +171,7 @@ public class SailingSimulatorImpl implements SailingSimulator {
         allPaths.put("1#Omniscient", optPath);
         
         //TODO: remove this into release mode        
-        savePathsToFiles(allPaths);
+//        savePathsToFiles(allPaths);
         
         return allPaths;
     }
