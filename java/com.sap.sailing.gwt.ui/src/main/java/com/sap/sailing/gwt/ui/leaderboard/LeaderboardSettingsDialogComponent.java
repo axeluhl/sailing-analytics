@@ -115,6 +115,8 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
         timingPanel.addStyleName("SettingsDialogComponent");
 
         FlowPanel timingContent = new FlowPanel();
+        timingPanel.add(timingContent);
+        
         timingContent.addStyleName("dialogInnerContent");
         Label delayLabel = new Label(stringMessages.delayInSeconds() + ":");
         delayLabel.getElement().getStyle().setPaddingRight(5, Unit.PX);
@@ -131,8 +133,7 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
         for(int i = 0; i < timingContent.getWidgetCount(); i++) {
             timingContent.getWidget(i).getElement().getStyle().setFloat(Float.LEFT);
         }
-        
-        timingPanel.add(timingContent);
+
         return timingPanel;
     }
 

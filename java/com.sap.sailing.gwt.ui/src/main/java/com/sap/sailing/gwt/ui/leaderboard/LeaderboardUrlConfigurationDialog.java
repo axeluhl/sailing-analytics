@@ -132,23 +132,23 @@ public class LeaderboardUrlConfigurationDialog extends SettingsDialog<Leaderboar
         }
 
         private FlowPanel createAdditionalUrlSettingsPanel(DataEntryDialog<?> dialog) {
-            FlowPanel additionalPanel = new FlowPanel();
-            additionalPanel.addStyleName("SettingsDialogComponent");
-            FlowPanel content = new FlowPanel();
-            content.addStyleName("dialogInnerContent");
-            additionalPanel.add(content);
-            content.add(dialog.createHeadline(stringMessages.additionalUrlSettings(), true));
+            FlowPanel urlSettingsPanel = new FlowPanel();
+            urlSettingsPanel.addStyleName("SettingsDialogComponent");
+            urlSettingsPanel.add(dialog.createHeadline(stringMessages.additionalUrlSettings(), true));
+            FlowPanel urlSettingsContent = new FlowPanel();
+            urlSettingsContent.addStyleName("dialogInnerContent");
+            urlSettingsPanel.add(urlSettingsContent);
             embeddedCheckbox = dialog.createCheckbox(stringMessages.embedded());
-            content.add(embeddedCheckbox);
+            urlSettingsContent.add(embeddedCheckbox);
             autoExpandLastRaceBox = dialog.createCheckbox(stringMessages.expandLastRace());
-            content.add(autoExpandLastRaceBox);
+            urlSettingsContent.add(autoExpandLastRaceBox);
             showRaceDetailsCheckbox = dialog.createCheckbox(stringMessages.showRaceDetails());
-            content.add(showRaceDetailsCheckbox);
+            urlSettingsContent.add(showRaceDetailsCheckbox);
             autoRefreshCheckbox = dialog.createCheckbox(stringMessages.autoRefresh());
-            content.add(autoRefreshCheckbox);
+            urlSettingsContent.add(autoRefreshCheckbox);
             resultingUrl = new Anchor(stringMessages.leaderboard());
-            content.add(resultingUrl);
-            return additionalPanel;
+            urlSettingsContent.add(resultingUrl);
+            return urlSettingsPanel;
         }
 
         @Override
