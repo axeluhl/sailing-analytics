@@ -164,6 +164,7 @@ public class RaceBoardPanel extends FormPanel implements RegattaDisplayer, RaceS
             mainPanel.add(componentViewer.getViewerWidget());
         }
 
+        addComponentToNavigationMenu(leaderboardAndMapViewer, leaderboardPanel, true);
         addComponentToNavigationMenu(leaderboardAndMapViewer, windChart,  true);
         addComponentToNavigationMenu(leaderboardAndMapViewer, competitorChart, true);
         addComponentToNavigationMenu(leaderboardAndMapViewer, raceMap, false);

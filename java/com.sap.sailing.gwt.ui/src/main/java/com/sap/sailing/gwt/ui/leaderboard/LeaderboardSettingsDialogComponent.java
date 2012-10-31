@@ -110,22 +110,28 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
         FlowPanel timingPanel = new FlowPanel();
         refreshIntervalInSecondsBox = dialog.createLongBox(delayBetweenAutoAdvancesInMilliseconds / 1000l, 4);
         delayInSecondsBox = dialog.createLongBox(delayInMilliseconds / 1000l, 4);
+        
         timingPanel.add(dialog.createHeadline(stringMessages.timing(), true));
         timingPanel.addStyleName("SettingsDialogComponent");
+
         FlowPanel timingContent = new FlowPanel();
         timingContent.addStyleName("dialogInnerContent");
-        FlowPanel delayInSecondsWrapper = new FlowPanel();
-        delayInSecondsWrapper.getElement().getStyle().setFloat(Float.LEFT);
-        delayInSecondsWrapper.getElement().getStyle().setPaddingRight(20, Unit.PX);
         Label delayLabel = new Label(stringMessages.delayInSeconds() + ":");
-        delayInSecondsWrapper.add(delayLabel);
-        delayInSecondsWrapper.add(delayInSecondsBox);
-        timingContent.add(delayInSecondsWrapper);
-        FlowPanel refreshIntervalWrapper = new FlowPanel();
+        delayLabel.getElement().getStyle().setPaddingRight(5, Unit.PX);
+        
+        timingContent.add(delayLabel);
+        timingContent.add(delayInSecondsBox);
+
         Label refreshIntervalLabel = new Label(stringMessages.refreshInterval() + ":");
-        refreshIntervalWrapper.add(refreshIntervalLabel);
-        refreshIntervalWrapper.add(refreshIntervalInSecondsBox);
-        timingContent.add(refreshIntervalWrapper);
+        refreshIntervalLabel.getElement().getStyle().setPaddingRight(5, Unit.PX);
+        refreshIntervalLabel.getElement().getStyle().setPaddingLeft(25, Unit.PX);
+        timingContent.add(refreshIntervalLabel);
+        timingContent.add(refreshIntervalInSecondsBox);
+
+        for(int i = 0; i < timingContent.getWidgetCount(); i++) {
+            timingContent.getWidget(i).getElement().getStyle().setFloat(Float.LEFT);
+        }
+        
         timingPanel.add(timingContent);
         return timingPanel;
     }
@@ -199,7 +205,9 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
             final FlowPanel explicitRaceSelectionContent = new FlowPanel();
             final FlowPanel lastNRacesSelectionContent = new FlowPanel();
             String radioButtonGroupName = "raceSelectionStrategyGroup";
-            racesSelectionStrategyPanel.add(new Label(stringMessages.chooseTheWayYouSelectRaces()));
+            Label raceSelectionWayLabel = new Label(stringMessages.chooseTheWayYouSelectRaces() + ":");
+            raceSelectionWayLabel.getElement().getStyle().setPaddingRight(5, Unit.PX);
+            racesSelectionStrategyPanel.add(raceSelectionWayLabel);
             explicitRaceColumnSelectionRadioBtn = dialog.createRadioButton(radioButtonGroupName, stringMessages.selectFromAllRaces());
             racesSelectionStrategyPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
             explicitRaceColumnSelectionRadioBtn.setValue(activeRaceColumnSelectionStrategy == RaceColumnSelectionStrategies.EXPLICIT);
@@ -252,7 +260,9 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
             // content of 'number of races' selection
             HorizontalPanel hPanel = new HorizontalPanel();
             lastNRacesSelectionContent.add(hPanel);
-            hPanel.add(new Label(stringMessages.numberOfLastNRaces()));
+            Label numberOfLastRacesLabel = new Label(stringMessages.numberOfLastNRaces() + ":");
+            numberOfLastRacesLabel.getElement().getStyle().setPaddingRight(10, Unit.PX);
+            hPanel.add(numberOfLastRacesLabel);
             numberOfLastRacesToShowBox = dialog.createIntegerBox(numberOfLastRacesToShow != null ? numberOfLastRacesToShow : racesCount, 3);
             hPanel.add(numberOfLastRacesToShowBox);
             dialog.alignAllPanelWidgetsVertically(hPanel, HasVerticalAlignment.ALIGN_MIDDLE);
