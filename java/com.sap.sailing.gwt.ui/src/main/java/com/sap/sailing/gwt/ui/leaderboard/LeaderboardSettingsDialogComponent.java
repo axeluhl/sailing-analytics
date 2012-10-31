@@ -110,6 +110,7 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
         FlowPanel timingPanel = new FlowPanel();
         refreshIntervalInSecondsBox = dialog.createLongBox(delayBetweenAutoAdvancesInMilliseconds / 1000l, 4);
         delayInSecondsBox = dialog.createLongBox(delayInMilliseconds / 1000l, 4);
+        delayInSecondsBox.getElement().getStyle().setFloat(Float.LEFT);
         
         timingPanel.add(dialog.createHeadline(stringMessages.timing(), true));
         timingPanel.addStyleName("SettingsDialogComponent");
@@ -120,6 +121,7 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
         timingContent.addStyleName("dialogInnerContent");
         Label delayLabel = new Label(stringMessages.delayInSeconds() + ":");
         delayLabel.getElement().getStyle().setPaddingRight(5, Unit.PX);
+        delayLabel.getElement().getStyle().setFloat(Float.LEFT);
         
         timingContent.add(delayLabel);
         timingContent.add(delayInSecondsBox);
@@ -127,12 +129,9 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
         Label refreshIntervalLabel = new Label(stringMessages.refreshInterval() + ":");
         refreshIntervalLabel.getElement().getStyle().setPaddingRight(5, Unit.PX);
         refreshIntervalLabel.getElement().getStyle().setPaddingLeft(25, Unit.PX);
+        refreshIntervalLabel.getElement().getStyle().setFloat(Float.LEFT);
         timingContent.add(refreshIntervalLabel);
         timingContent.add(refreshIntervalInSecondsBox);
-
-        for(int i = 0; i < timingContent.getWidgetCount(); i++) {
-            timingContent.getWidget(i).getElement().getStyle().setFloat(Float.LEFT);
-        }
 
         return timingPanel;
     }
