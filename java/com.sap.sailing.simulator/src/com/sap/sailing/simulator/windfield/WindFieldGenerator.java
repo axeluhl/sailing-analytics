@@ -2,11 +2,13 @@ package com.sap.sailing.simulator.windfield;
 
 
 
+import java.io.Serializable;
+
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.simulator.Boundary;
 
-public interface WindFieldGenerator extends WindField {
+public interface WindFieldGenerator extends WindField, Serializable {
     
     public WindControlParameters getWindParameters();
 

@@ -26,6 +26,7 @@ import com.sap.sailing.simulator.windfield.WindFieldGenerator;
 
 public abstract class WindFieldGeneratorImpl implements WindFieldGenerator {
 
+    private static final long serialVersionUID = -6366698648104363491L;
     protected Boundary boundary;
     protected WindControlParameters windParameters;
     protected Position[][] positions;

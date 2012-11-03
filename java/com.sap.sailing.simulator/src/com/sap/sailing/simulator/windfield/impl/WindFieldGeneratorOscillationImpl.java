@@ -21,6 +21,8 @@ import com.sap.sailing.simulator.windfield.WindFieldGenerator;
 
 public class WindFieldGeneratorOscillationImpl extends WindFieldGeneratorImpl implements WindFieldGenerator {
 
+    private static final long serialVersionUID = -7005970781594631010L;
+
     /* Currently the speed is time and vertical step invariant, it only changes along the horizontal 
      * direction*/
     private Speed[] speed;

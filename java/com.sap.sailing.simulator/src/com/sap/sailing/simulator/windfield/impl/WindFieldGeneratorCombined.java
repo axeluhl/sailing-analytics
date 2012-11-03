@@ -13,6 +13,7 @@ import com.sap.sailing.simulator.windfield.WindFieldGenerator;
 
 public class WindFieldGeneratorCombined extends WindFieldGeneratorImpl implements WindFieldGenerator {
     
+    private static final long serialVersionUID = 2283750025355590301L;
     private WindFieldGeneratorBlastImpl blastGen;
     private WindFieldGeneratorOscillationImpl oscillationGen;
     

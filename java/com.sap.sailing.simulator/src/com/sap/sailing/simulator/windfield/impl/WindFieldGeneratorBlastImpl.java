@@ -4,9 +4,6 @@ import java.util.logging.Logger;
 
 import umontreal.iro.lecuyer.randvar.GeometricGen;
 import umontreal.iro.lecuyer.randvar.NormalGen;
-import umontreal.iro.lecuyer.randvar.UniformGen;
-import umontreal.iro.lecuyer.rng.LFSR113;
-import umontreal.iro.lecuyer.rng.MRG32k3a;
 import umontreal.iro.lecuyer.rng.RandomStream;
 
 import com.sap.sailing.domain.base.SpeedWithBearing;
@@ -23,6 +20,11 @@ import com.sap.sailing.simulator.windfield.WindControlParameters;
 import com.sap.sailing.simulator.windfield.WindFieldGenerator;
 
 public class WindFieldGeneratorBlastImpl extends WindFieldGeneratorImpl implements WindFieldGenerator {
+
+    /**
+     * 
+     */
+    private static final long serialVersionUID = -188939912966537200L;
 
     private SpeedWithBearing[][] speedWithBearing;
 
