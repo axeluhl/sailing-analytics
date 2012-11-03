@@ -226,15 +226,15 @@ public class SailingSimulatorImpl implements SailingSimulator {
         
         boolean result = true;
         
-        result &= SimulatorUtils.saveToFile((Path)paths.get("1#Omniscient"), "C:\\1#Omniscient.dat");
-        result &= SimulatorUtils.saveToFile((Path)paths.get("2#Opportunistic"), "C:\\2#Opportunistic.dat");
-        result &= SimulatorUtils.saveToFile((Path)paths.get("3#1-Turner Left"), "C:\\3#1-Turner Left.dat");
+        result &= SimulatorUtils.saveToFile((Path)paths.get("1#Omniscient"), "resources/1#Omniscient.dat");
+        result &= SimulatorUtils.saveToFile((Path)paths.get("2#Opportunistic"), "resources/2#Opportunistic.dat");
+        result &= SimulatorUtils.saveToFile((Path)paths.get("3#1-Turner Left"), "resources/3#1-Turner Left.dat");
         
-        result &= SimulatorUtils.saveToFile((Path)this.racecourse, "C:\\racecourse.dat");
+        result &= SimulatorUtils.saveToFile((Path)this.racecourse, "resources/racecourse.dat");
         
-        result &= SimulatorUtils.saveToFile((Path)paths.get("4#1-Turner Right"), "C:\\4#1-Turner Right.dat");
-        result &= SimulatorUtils.saveToFile((Path)paths.get("6#GPS Poly"), "C:\\6#GPS Poly.dat");
-        result &= SimulatorUtils.saveToFile((Path)paths.get("7#GPS Track"), "C:\\7#GPS Track.dat");
+        result &= SimulatorUtils.saveToFile((Path)paths.get("4#1-Turner Right"), "resources/4#1-Turner Right.dat");
+        result &= SimulatorUtils.saveToFile((Path)paths.get("6#GPS Poly"), "resources/6#GPS Poly.dat");
+        result &= SimulatorUtils.saveToFile((Path)paths.get("7#GPS Track"), "resources/7#GPS Track.dat");
         
         return result;
     }
@@ -246,34 +246,34 @@ public class SailingSimulatorImpl implements SailingSimulator {
         
         Path path = null;
         
-        path = SimulatorUtils.readFromExternalFile("C:\\1#Omniscient.dat");
+        path = SimulatorUtils.readFromResourcesFile("resources/1#Omniscient.dat");
         if(path != null) {
                 paths.put("1#Omniscient", path);
         }
         
-        path = SimulatorUtils.readFromExternalFile("C:\\2#Opportunistic.dat");
+        path = SimulatorUtils.readFromResourcesFile("resources/2#Opportunistic.dat");
         if(path != null) {
                 paths.put("2#Opportunistic", path);
         }
         
-        path = SimulatorUtils.readFromExternalFile("C:\\3#1-Turner Left.dat");
+        path = SimulatorUtils.readFromResourcesFile("resources/3#1-Turner Left.dat");
         if(path != null) {
                 paths.put("3#1-Turner Left", path);
         }
         
-        this.racecourse = SimulatorUtils.readFromExternalFile("C:\\racecourse.dat");
+        this.racecourse = SimulatorUtils.readFromResourcesFile("resources/racecourse.dat");
         
-        path = SimulatorUtils.readFromExternalFile("C:\\4#1-Turner Right.dat");
+        path = SimulatorUtils.readFromResourcesFile("resources/4#1-Turner Right.dat");
         if(path != null) {
                 paths.put("4#1-Turner Right", path);
         }
         
-        path = SimulatorUtils.readFromExternalFile("C:\\6#GPS Poly.dat");
+        path = SimulatorUtils.readFromResourcesFile("resources/6#GPS Poly.dat");
         if(path != null) {
                 paths.put("6#GPS Poly", path);
         }
         
-        path = SimulatorUtils.readFromExternalFile("C:\\7#GPS Track.dat");
+        path = SimulatorUtils.readFromResourcesFile("resources/7#GPS Track.dat");
         if(path != null) {
                 paths.put("7#GPS Track", path);
         }
