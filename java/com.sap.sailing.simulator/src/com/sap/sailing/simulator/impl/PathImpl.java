@@ -1,5 +1,6 @@
 package com.sap.sailing.simulator.impl;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,8 +17,9 @@ import com.sap.sailing.simulator.Path;
 import com.sap.sailing.simulator.TimedPositionWithSpeed;
 import com.sap.sailing.simulator.windfield.WindField;
 
-public class PathImpl implements Path {
-
+public class PathImpl implements Path, Serializable {
+    
+    private static final long serialVersionUID = -6354445155884413937L;
     List<TimedPositionWithSpeed> pathPoints;
     WindField windField;
 
