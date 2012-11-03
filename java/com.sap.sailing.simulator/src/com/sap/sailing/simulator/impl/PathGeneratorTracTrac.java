@@ -48,8 +48,16 @@ public class PathGeneratorTracTrac extends PathGeneratorBase {
     public void setEvaluationParameters(String paramURLStr, String liveURIStr, String storedURIStr, double windScale) {
         try {
             this.paramUrl = new URL(paramURLStr);
-            this.liveUri = new URI(liveURIStr);
-            this.storedUri = new URI(storedURIStr);
+            if (liveURIStr != null) {
+                this.liveUri = new URI(liveURIStr);
+            } else {
+                this.liveUri = null;                
+            }
+            if (storedURIStr != null) {
+                this.storedUri = new URI(storedURIStr);
+            } else {
+                this.storedUri = null;                
+            }
         } catch (Exception e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
