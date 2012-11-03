@@ -78,8 +78,10 @@ public class SimulatorUtils {
                 file.close();
             }
         } catch (ClassNotFoundException ex) {
+            System.out.println("[ERROR in readFromExternalFile]:[ClassNotFoundException]: " + ex.getMessage());
             result = null;
         } catch (IOException ex) {
+            System.out.println("[ERROR in readFromExternalFile]:[IOException]: " + ex.getMessage());
             result = null;
         }
 
