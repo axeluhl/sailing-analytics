@@ -1,8 +1,10 @@
 package com.sap.sailing.simulator.windfield;
 
+import java.io.Serializable;
+
 import umontreal.iro.lecuyer.rng.RandomStream;
 
-public interface RandomStreamManager {
+public interface RandomStreamManager extends Serializable {
 
     /**
      * Initialise the random streams managed by the class

@@ -1,5 +1,6 @@
 package com.sap.sailing.simulator;
 
+import java.io.Serializable;
 import java.util.Map;
 
 import com.sap.sailing.domain.common.Bearing;
@@ -8,7 +9,7 @@ import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 
-public interface Boundary {
+public interface Boundary extends Serializable {
 	
 	static Bearing TRUENORTH = new DegreeBearingImpl(0);
 	static Bearing TRUESOUTH = new DegreeBearingImpl(180);

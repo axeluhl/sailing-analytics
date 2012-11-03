@@ -44,17 +44,19 @@ public class SailingSimulatorImpl implements SailingSimulator {
     public Map<String, Path> getAllPaths() {
 
         Map<String, Path> allPaths = new HashMap<String, Path>();
-        
-        //remove this into release mode
-//        allPaths = readPathsFromFiles();
-//        if(allPaths != null && allPaths.isEmpty() == false && allPaths.size() == 6)
-//                return allPaths;
-        
         Path gpsPath = null;
         Path gpsPathPoly = null;
         
         if (simulationParameters.getMode() == SailingSimulatorUtil.measured) {
-
+            
+            //remove this into release mode
+            allPaths = readPathsFromFiles();
+            if(allPaths != null && allPaths.isEmpty() == false && allPaths.size() == 6)
+            {
+                System.out.println("Readding of all paths from external files succeded!");
+                return allPaths;
+            }
+            
             //
             // load examplary GPS-path
             //
@@ -66,9 +68,9 @@ public class SailingSimulatorImpl implements SailingSimulator {
             PathGeneratorTracTrac genTrac = new PathGeneratorTracTrac(simulationParameters);
 
             // proxy configuration
-            genTrac.setEvaluationParameters(raceURL, "tcp://10.18.22.156:1520", "tcp://10.18.22.156:1521", 4.5); // new tunnel-ip
+            //genTrac.setEvaluationParameters(raceURL, "tcp://10.18.22.156:1520", "tcp://10.18.22.156:1521", 4.5); // new tunnel-ip
             // no-proxy configuration
-            //genTrac.setEvaluationParameters(raceURL, "tcp://germanmaster.traclive.dk:4400", "tcp://germanmaster.traclive.dk:4401", 4.5); // new tunnel-ip
+            genTrac.setEvaluationParameters(raceURL, "tcp://germanmaster.traclive.dk:4400", "tcp://germanmaster.traclive.dk:4401", 4.5); // new tunnel-ip
             
             gpsPath = genTrac.getPath();
             gpsPathPoly = genTrac.getPathPolyline(new MeterDistance(4.88));
@@ -173,8 +175,10 @@ public class SailingSimulatorImpl implements SailingSimulator {
 
         allPaths.put("1#Omniscient", optPath);
         
-        //TODO: remove this into release mode        
-//        savePathsToFiles(allPaths);
+        if (simulationParameters.getMode() == SailingSimulatorUtil.measured) {
+            //remove this into release mode        
+            savePathsToFiles(allPaths);
+        }
         
         return allPaths;
     }

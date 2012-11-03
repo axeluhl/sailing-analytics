@@ -8,6 +8,8 @@ import umontreal.iro.lecuyer.rng.RandomStream;
 
 public class BlastRandomSeedManagerImpl extends RandomStreamManagerImpl {
 
+    private static final long serialVersionUID = -6409398526247431352L;
+
     public enum BlastStream {
         SEED,
         CELL,

@@ -363,7 +363,9 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
                 }
             }
         }
-        logger.info("Added : " + windFieldDTO.getWindLinesDTO().getWindLinesMap().size() + " wind lines");
+        //TODO: throws null pointer exception for when reading serialized paths.
+        //TODO: should windlines also be serialized?
+        //logger.info("Added : " + windFieldDTO.getWindLinesDTO().getWindLinesMap().size() + " wind lines");
     }
 
     @SuppressWarnings("unused")

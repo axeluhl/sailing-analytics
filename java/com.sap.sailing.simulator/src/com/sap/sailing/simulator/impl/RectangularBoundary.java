@@ -12,6 +12,7 @@ import com.sap.sailing.simulator.Boundary;
 
 public class RectangularBoundary implements Boundary {
 
+    private static final long serialVersionUID = 3598121983120213464L;
     private Position rcStart; // start position of race course
     private Position rcEnd; // end position of race course
     private double lngScale; // scale of distances longitude : latitude

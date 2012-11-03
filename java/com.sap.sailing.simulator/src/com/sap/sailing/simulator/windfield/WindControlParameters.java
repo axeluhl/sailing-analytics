@@ -1,11 +1,14 @@
 package com.sap.sailing.simulator.windfield;
 
+import java.io.Serializable;
 import java.util.logging.Logger;
 
 import com.sap.sailing.simulator.windfield.impl.BlastRandomSeedManagerImpl;
 
 
-public class WindControlParameters {
+public class WindControlParameters implements Serializable {
+
+    private static final long serialVersionUID = -8512613791406845298L;
     /**
      * Base wind speed in knots
      * Value range 0 to 30

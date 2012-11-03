@@ -9,6 +9,7 @@ import com.sap.sailing.simulator.windfield.RandomStreamManager;
 
 public abstract class RandomStreamManagerImpl implements RandomStreamManager {
 
+    private static final long serialVersionUID = -2066054080465695880L;
     protected Map<String, RandomStream> randomStreamMap;
     
     public RandomStreamManagerImpl() {
