@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.NavigableMap;
 import java.util.Set;
 import java.util.logging.Logger;
@@ -55,6 +54,7 @@ import com.sap.sailing.simulator.SimulationParameters;
 import com.sap.sailing.simulator.TimedPosition;
 import com.sap.sailing.simulator.TimedPositionWithSpeed;
 import com.sap.sailing.simulator.impl.ConfigurationManager;
+import com.sap.sailing.simulator.impl.PathImpl;
 import com.sap.sailing.simulator.impl.PolarDiagramCSV;
 import com.sap.sailing.simulator.impl.ReadingConfigurationFileStatus;
 import com.sap.sailing.simulator.impl.RectangularBoundary;
@@ -395,31 +395,47 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         }
     }
 
-    // I0077899 - Mihai Bogdan Eugen
-    private SimulatedPathsEvenTimedResultDTO getSimulatedPathsEvenTimed(List<Position> course, WindFieldGenerator wf,
-            char mode, int boatClassIndex) throws ConfigurationException {
+    private SimulatedPathsEvenTimedResultDTO getSimulatedPathsEvenTimed(List<Position> course, WindFieldGenerator wf, char mode, int boatClassIndex) throws ConfigurationException {
 
         logger.info("Retrieving simulated paths");
 
         PolarDiagramAndNotificationMessage polarDiagramAndNotificationMessage = this.getPolarDiagram(boatClassIndex);
-        PolarDiagram pd = polarDiagramAndNotificationMessage.getPolarDiagram();
-
+        PolarDiagram pd = polarDiagramAndNotificationMessage.getPolarDiagram(); 
+        
         SimulationParameters sp = new SimulationParametersImpl(course, pd, wf, mode);
         SailingSimulator simulator = new SailingSimulatorImpl(sp);
 
-        Map<String, Path> paths = simulator.getAllPaths();
+        Map<String, List<TimedPositionWithSpeed>> paths = simulator.getAllPathsEvenTimed(wf.getTimeStep().asMillis());
         PathDTO[] pathDTO = new PathDTO[paths.size()];
         int pathIndex = paths.keySet().size() - 1;
+        for (String pathName : paths.keySet()) {
 
-        for (Entry<String, Path> entry : paths.entrySet()) {
+            logger.info("Path " + pathName);
+            List<TimedPositionWithSpeed> path = paths.get(pathName);
 
-            String pathName = entry.getKey();
-            Path evenPath = (entry.getValue()).getEvenTimedPath2(wf.getTimeStep().asMillis());
+            // TODO: cleanup getAllPathsEvenTimed to return Paths instead of PathPoints
+            if (pathName.equals("6#GPS Poly")) {
+                // special initialization for polyline
+                pathDTO[pathIndex] = this.convertToPathDTOAndMarkTurns(new PathImpl(paths.get(pathName), null), pathName.split("#")[1]);
 
-            pathDTO[pathIndex] = this.convertToPathDTOAndMarkTurns(evenPath, pathName.split("#")[1]);
+            } else {
+
+                // NOTE: pathName convention is: sort-digit + "#" + path-name
+                pathDTO[pathIndex] = new PathDTO(pathName.split("#")[1]);
+
+                // fill pathDTO with path points where speed is true wind speed
+                List<WindDTO> wList = new ArrayList<WindDTO>();
+                for (TimedPositionWithSpeed p : path) {
+                    WindDTO w = createWindDTO2(p);
+                    wList.add(w);
+                }
+                pathDTO[pathIndex].setMatrix(wList);
+
+            }
 
             pathIndex--;
         }
+        
 
         RaceMapDataDTO rcDTO;
         if (mode == SailingSimulatorUtil.measured) {
@@ -430,22 +446,22 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
             Path rc = simulator.getRaceCourse();
             PositionDTO posDTO;
             posDTO = createPositionDTO(rc.getPathPoints().get(0).getPosition());
-
+            
             rcDTO.coursePositions.waypointPositions.add(posDTO);
             posDTO = createPositionDTO(rc.getPathPoints().get(1).getPosition());
             rcDTO.coursePositions.waypointPositions.add(posDTO);
         } else {
             rcDTO = null;
         }
-
+        
         WindFieldDTO wfDTO = null;
-
+        
         SimulatedPathsEvenTimedResultDTO result = new SimulatedPathsEvenTimedResultDTO();
         result.setPathDTOs(pathDTO);
         result.setRaceMapDataDTO(rcDTO);
         result.setWindFieldDTO(wfDTO);
         result.setNotificationMessage(polarDiagramAndNotificationMessage.getNotificationMesssage());
-
+        
         return result;
     }
 

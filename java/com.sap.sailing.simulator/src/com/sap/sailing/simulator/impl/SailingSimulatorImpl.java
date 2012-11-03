@@ -64,8 +64,11 @@ public class SailingSimulatorImpl implements SailingSimulator {
             // String raceURL =
             // "http://germanmaster.traclive.dk/events/event_20110929_Internatio/clientparams.php?event=event_20110929_Internatio&race=6bb0829e-ec44-11e0-a523-406186cbf87c";
             PathGeneratorTracTrac genTrac = new PathGeneratorTracTrac(simulationParameters);
-            //genTrac.setEvaluationParameters(raceURL, "tcp://10.18.206.73:1520", "tcp://10.18.206.73:1521"); // old tunnel-ip
+
+            // proxy configuration
             genTrac.setEvaluationParameters(raceURL, "tcp://10.18.22.156:1520", "tcp://10.18.22.156:1521", 4.5); // new tunnel-ip
+            // no-proxy configuration
+            //genTrac.setEvaluationParameters(raceURL, "tcp://germanmaster.traclive.dk:4400", "tcp://germanmaster.traclive.dk:4401", 4.5); // new tunnel-ip
             
             gpsPath = genTrac.getPath();
             gpsPathPoly = genTrac.getPathPolyline(new MeterDistance(4.88));
