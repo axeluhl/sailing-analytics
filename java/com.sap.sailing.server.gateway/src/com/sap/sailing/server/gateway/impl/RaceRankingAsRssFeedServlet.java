@@ -108,7 +108,7 @@ public class RaceRankingAsRssFeedServlet extends SailingServerHttpServlet {
                             boolean isLive = trackedRace != null && trackedRace.getEndOfRace() == null && (trackedRace.getStartOfTracking() != null ? new Date().after(trackedRace.getStartOfTracking().asDate()) : false);
                             if(isLive) {
                                 String raceRank = "" + trackedRace.getRank(competitor, timePoint);
-                                feedText += raceRank + ".&nbsp;&nbsp;" + sailID + "<br>";
+                                feedText += raceRank + ". " + sailID + "\n";
                             }
                         }
 
@@ -118,7 +118,7 @@ public class RaceRankingAsRssFeedServlet extends SailingServerHttpServlet {
                         SyndEntry entry = new SyndEntryImpl();
                         entry.setTitle("Live Race ranking of race " + raceName);
                         entry.setLink("http://obmr2012.sapsailing.com");
-                        description.setType("text/html");
+                        description.setType("text/plain");
                         description.setValue(feedText);
                         entry.setDescription(description);
                         entries.add(entry);
