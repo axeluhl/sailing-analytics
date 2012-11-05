@@ -1,0 +1,11 @@
+Exporting swisstiming 'Store and forward' messages 
+------------------------------------------------------
+
+27012: local MongoDB "winddb" instance
+
+  /opt/mongodb/bin/mongoexport --port 27017 -d winddb -c SWISSTIMING_CONFIGURATIONS > /tmp/swisstiming_configurations.json
+  /opt/mongodb/bin/mongoexport --port 27017 -d winddb -c LAST_MESSAGE_COUNT > /tmp/swisstiming_last_message_count.json
+  /opt/mongodb/bin/mongoexport --port 27017 -d winddb -c RACES_MASTERDATA > /tmp/swisstiming_races_masterdata.json
+  /opt/mongodb/bin/mongoexport --port 27017 -d winddb -c RACES_MESSAGES > /tmp/swisstiming_races_massages.json
+  /opt/mongodb/bin/mongoexport --port 27017 -d winddb -c COMMAND_MESSAGES > /tmp/swisstiming_command_messages.json
+    
