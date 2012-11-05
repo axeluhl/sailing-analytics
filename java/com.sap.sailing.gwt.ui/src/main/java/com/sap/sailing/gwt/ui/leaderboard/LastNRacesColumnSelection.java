@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -13,6 +14,7 @@ import java.util.Set;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProviderListener;
+import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings.RaceColumnSelectionStrategies;
 import com.sap.sailing.gwt.ui.shared.FleetDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.RaceColumnDTO;
@@ -36,6 +38,7 @@ public class LastNRacesColumnSelection extends AbstractRaceColumnSelection imple
         this.numberOfLastRacesToShow = numberOfLastRacesToShow;
         this.raceTimesInfoProvider = raceTimesInfoProvider;
         raceTimesInfoProvider.addRaceTimesInfoProviderListener(this);
+        raceTimesInfosReceived(raceTimesInfoProvider.getRaceTimesInfos());
     }
 
     @Override
@@ -86,30 +89,27 @@ public class LastNRacesColumnSelection extends AbstractRaceColumnSelection imple
 
     private Iterable<RaceColumnDTO> getRaceColumnsFromNewestToOldest(LeaderboardDTO leaderboard,
             Map<RegattaAndRaceIdentifier, RaceTimesInfoDTO> raceTimesInfo) {
+        final Map<RaceColumnDTO, Date> latestStarts = new HashMap<RaceColumnDTO, Date>();
+        List<RaceColumnDTO> columns = new ArrayList<RaceColumnDTO>(leaderboard.getRaceList());
+        for (Iterator<RaceColumnDTO> i=columns.iterator(); i.hasNext(); ) {
+            RaceColumnDTO column = i.next();
+            Date latestStart = getLatestStart(column);
+            if (latestStart == null) {
+                i.remove();
+            } else {
+                latestStarts.put(column, latestStart);
+            }
+        }
         Comparator<RaceColumnDTO> comparator = new Comparator<RaceColumnDTO>() {
             @Override
             public int compare(RaceColumnDTO o1, RaceColumnDTO o2) {
                 int result;
-                Date latestStartO1 = getLatestStart(o1);
-                Date latestStartO2 = getLatestStart(o2);
-                if (latestStartO1 == null) {
-                    if (latestStartO2 == null) {
-                        result = 0;
-                    } else {
-                        result = 1;
-                    }
-                } else {
-                    if (latestStartO2 == null) {
-                        result = -1;
-                    } else {
-                        result = latestStartO2.compareTo(latestStartO1);
-                    }
-                }
+                Date latestStartO1 = latestStarts.get(o1);
+                Date latestStartO2 = latestStarts.get(o2);
+                result = latestStartO2.compareTo(latestStartO1);
                 return result;
             }
-
         };
-        List<RaceColumnDTO> columns = new ArrayList<RaceColumnDTO>(leaderboard.getRaceList());
         Collections.sort(columns, comparator);
         return columns;
     }
@@ -142,6 +142,16 @@ public class LastNRacesColumnSelection extends AbstractRaceColumnSelection imple
             result = resultList;
         }
         return result;
+    }
+
+    @Override
+    public RaceColumnSelectionStrategies getType() {
+        return RaceColumnSelectionStrategies.LAST_N;
+    }
+
+    @Override
+    public Integer getNumberOfLastRaceColumnsToShow() {
+        return numberOfLastRacesToShow;
     }
 
 }

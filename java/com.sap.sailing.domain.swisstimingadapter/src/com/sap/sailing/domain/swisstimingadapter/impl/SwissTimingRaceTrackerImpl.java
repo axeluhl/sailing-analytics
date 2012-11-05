@@ -247,7 +247,7 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
     public void receivedClockAtMark(String raceID,
             List<Triple<Integer, TimePoint, String>> markIndicesTimePointsAndBoatIDs) {
         // Ignored because it's covered by TMD. Mail from Kai Hahndorf of 2011-11-15T12:42:00Z:
-        // "Die TMD werden immer gesendet. Das CAM Protokoll ist nur für unsere TV-Grafik wichtig, da damit die Rückstandsuhr gestartet wird."
+        // "Die TMD werden immer gesendet. Das CAM Protokoll ist nur fuer unsere TV-Grafik wichtig, da damit die Rueckstandsuhr gestartet wird."
     }
 
     @Override

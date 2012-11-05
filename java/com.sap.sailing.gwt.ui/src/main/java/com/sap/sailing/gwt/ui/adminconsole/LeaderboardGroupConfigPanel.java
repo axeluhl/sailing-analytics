@@ -447,7 +447,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel {
         groupActionsColumn.setFieldUpdater(new FieldUpdater<LeaderboardGroupDTO, String>() {
             @Override
             public void update(int index, LeaderboardGroupDTO group, String command) {
-                if (command.equals("ACTION_EDIT")) {
+                if (command.equals(LeaderboardGroupConfigImagesBarCell.ACTION_EDIT)) {
                     final String oldGroupName = group.name;
                     ArrayList<LeaderboardGroupDTO> otherExistingGroups = new ArrayList<LeaderboardGroupDTO>(availableLeaderboardGroups);
                     otherExistingGroups.remove(group);
@@ -460,7 +460,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel {
                         }
                     });
                     dialog.show();
-                } else if (command.equals("ACTION_REMOVE")) {
+                } else if (command.equals(LeaderboardGroupConfigImagesBarCell.ACTION_REMOVE)) {
                     if (Window.confirm("Do you really want to remove the leaderboard group: '" + group.name + "' ?")) {
                         removeLeaderboardGroup(group);
                     }

@@ -70,15 +70,15 @@ public class DomainFactoryImpl implements DomainFactory {
         controlPointCache = new HashMap<Iterable<String>, ControlPoint>();
         olympicClassesByID = new HashMap<String, BoatClass>();
         /*
-        SAM102000 Men's Windsurfer = Windsufer Männer RS:X
+        SAM102000 Men's Windsurfer = Windsufer Mï¿½nner RS:X
         SAW102000 Women's Windsurfer = Windsurfer Damen RS:X
-        SAM004000 Men's One Person Dinghy = Laser Männer
+        SAM004000 Men's One Person Dinghy = Laser Mï¿½nner
         SAW103000 Women's One Person Dinghy = Laser Damen Laser Radial
-        SAM002000 Men's One Person Dinghy Heavy = Finn Dinghy Männer
-        SAM005000 Men's Two Person Dinghy = 470er Männer
+        SAM002000 Men's One Person Dinghy Heavy = Finn Dinghy Mï¿½nner
+        SAM005000 Men's Two Person Dinghy = 470er Mï¿½nner
         SAW005000 Women's Two Person Dinghy = 470er Damen
-        SAM009000 Men's Skiff = 49er Männer
-        SAM007000 Men's Keelboat = Starboot Männer 
+        SAM009000 Men's Skiff = 49er Mï¿½nner
+        SAM007000 Men's Keelboat = Starboot Mï¿½nner 
         SAW010000 Women's Match Racing = Matchrace Damen Elliott 6M (modified)
         */
         olympicClassesByID.put("102", baseDomainFactory.getOrCreateBoatClass("RS:X", /* typicallyStartsUpwind */ true));
@@ -148,20 +148,24 @@ public class DomainFactoryImpl implements DomainFactory {
     private BoatClass getOrCreateBoatClassFromRaceID(String raceID) {
         BoatClass result;
         /*
-            SAM102000 Men's Windsurfer = Windsufer Männer RS:X
+            SAM102000 Men's Windsurfer = Windsufer Mï¿½nner RS:X
             SAW102000 Women's Windsurfer = Windsurfer Damen RS:X
-            SAM004000 Men's One Person Dinghy = Laser Männer
+            SAM004000 Men's One Person Dinghy = Laser Mï¿½nner
             SAW103000 Women's One Person Dinghy = Laser Damen Laser Radial
-            SAM002000 Men's One Person Dinghy Heavy = Finn Dinghy Männer
-            SAM005000 Men's Two Person Dinghy = 470er Männer
+            SAM002000 Men's One Person Dinghy Heavy = Finn Dinghy Mï¿½nner
+            SAM005000 Men's Two Person Dinghy = 470er Mï¿½nner
             SAW005000 Women's Two Person Dinghy = 470er Damen
-            SAM009000 Men's Skiff = 49er Männer
-            SAM007000 Men's Keelboat = Starboot Männer 
+            SAM009000 Men's Skiff = 49er Mï¿½nner
+            SAM007000 Men's Keelboat = Starboot Mï¿½nner 
             SAW010000 Women's Match Racing = Matchrace Damen Elliott 6M (modified)
          */
         if (raceID.startsWith("SA") && raceID.length() == 9) {
             String classID = raceID.substring(3, 6);
             result = olympicClassesByID.get(classID);
+            if (result == null) {
+                // unknown code
+                result = unknownBoatClass;
+            }
         } else {
             result = unknownBoatClass;
         }
