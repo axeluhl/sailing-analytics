@@ -11,8 +11,8 @@ import java.util.Set;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.RepeatingCommand;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RaceIdentifier;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.ui.shared.FleetDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.RaceColumnDTO;
@@ -20,16 +20,16 @@ import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 
 public class RaceTimesInfoProvider {
     
-    private SailingServiceAsync sailingService;
-    private ErrorReporter errorReporter;
+    private final SailingServiceAsync sailingService;
+    private final ErrorReporter errorReporter;
     
-    private Set<RegattaAndRaceIdentifier> raceIdentifiers;
+    private final Set<RegattaAndRaceIdentifier> raceIdentifiers;
     private long requestIntervalInMillis;
     
-    private HashMap<RegattaAndRaceIdentifier, RaceTimesInfoDTO> raceTimesInfos;
+    private final HashMap<RegattaAndRaceIdentifier, RaceTimesInfoDTO> raceTimesInfos;
     
-    private Set<RaceTimesInfoProviderListener> listeners;
-
+    private final Set<RaceTimesInfoProviderListener> listeners;
+    
     /**
      * The <code>raceIdentifiers</code> has to be non-<code>null</code>, but can be empty.
      */
@@ -41,18 +41,16 @@ public class RaceTimesInfoProvider {
         this.requestIntervalInMillis = requestIntervalInMillis;
         raceTimesInfos = new HashMap<RegattaAndRaceIdentifier, RaceTimesInfoDTO>();
         listeners = new HashSet<RaceTimesInfoProviderListener>();
-        
         RepeatingCommand command = new RepeatingCommand() {
             @Override
             public boolean execute() {
                 readTimesInfos();
                 Scheduler.get().scheduleFixedPeriod(this, (int) RaceTimesInfoProvider.this.requestIntervalInMillis);
+                // don't execute *this* particular scheduled repeating command again; the line above re-scheduled already
                 return false;
             }
         };
-        Scheduler.get().scheduleFixedPeriod(command, (int) this.requestIntervalInMillis);
-        
-        forceTimesInfosUpdate();
+        command.execute();
     }
     
     /**
