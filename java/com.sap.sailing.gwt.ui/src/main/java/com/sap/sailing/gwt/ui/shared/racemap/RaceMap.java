@@ -816,6 +816,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                     startLine.addPolylineMouseOverHandler(new PolylineMouseOverHandler() {
                         @Override
                         public void onMouseOver(PolylineMouseOverEvent event) {
+                            // TODO bug 1026: add start line bias to tool tip; requires wind data to be available at this point
                             map.setTitle(stringMessages.startLine());
                         }
                     });
