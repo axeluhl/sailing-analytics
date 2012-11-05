@@ -217,14 +217,11 @@ public class LegColumn extends ExpandableSortableColumn<String> {
     }
     
     public static DetailType[] getAvailableLegDetailColumnTypes() {
-        return new DetailType[] { DetailType.AVERAGE_SPEED_OVER_GROUND_IN_KNOTS,
-                DetailType.DISTANCE_TRAVELED, DetailType.RANK_GAIN,
-                DetailType.CURRENT_SPEED_OVER_GROUND_IN_KNOTS,
-                DetailType.ESTIMATED_TIME_TO_NEXT_WAYPOINT_IN_SECONDS,
-                DetailType.VELOCITY_MADE_GOOD_IN_KNOTS, DetailType.GAP_TO_LEADER_IN_SECONDS,
-                DetailType.WINDWARD_DISTANCE_TO_GO_IN_METERS,
-                DetailType.NUMBER_OF_MANEUVERS,
-                DetailType.TIME_TRAVELED, DetailType.AVERAGE_CROSS_TRACK_ERROR_IN_METERS };
+        return new DetailType[] { DetailType.AVERAGE_SPEED_OVER_GROUND_IN_KNOTS, DetailType.DISTANCE_TRAVELED,
+                DetailType.GAP_TO_LEADER_IN_SECONDS, DetailType.CURRENT_SPEED_OVER_GROUND_IN_KNOTS,
+                DetailType.WINDWARD_DISTANCE_TO_GO_IN_METERS, DetailType.NUMBER_OF_MANEUVERS,
+                DetailType.ESTIMATED_TIME_TO_NEXT_WAYPOINT_IN_SECONDS, DetailType.VELOCITY_MADE_GOOD_IN_KNOTS,
+                DetailType.TIME_TRAVELED, DetailType.AVERAGE_CROSS_TRACK_ERROR_IN_METERS, DetailType.RANK_GAIN };
     }
 
     @Override
