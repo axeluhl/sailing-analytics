@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.swisstimingadapter.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -14,6 +15,7 @@ import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.common.ScoringSchemeType;
+import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.swisstimingadapter.Competitor;
 import com.sap.sailing.domain.swisstimingadapter.Course;
@@ -30,6 +32,62 @@ import com.sap.sailing.server.impl.RacingEventServiceImpl;
 import difflib.PatchFailedException;
 
 public class SimpleDomainFactoryTest {
+    /**
+     * Tests that an unknown boat class encoded in a regular "SA" format race ID is returned as the unknown boat class
+     * instead of null.
+     */
+    @Test
+    public void testUnknownBoatClassInValidRaceID() {
+        DomainFactory domainFactory = DomainFactory.INSTANCE;
+        final String raceID = "SAX920103";
+        RaceDefinition raceDefinition = domainFactory.createRaceDefinition(domainFactory.getOrCreateRegatta(raceID,
+                new RacingEventServiceImpl()),
+                new Race() {
+                    @Override
+                    public String getDescription() {
+                        return null;
+                    }
+
+                    @Override
+                    public String getRaceID() {
+                        return raceID;
+                    }
+
+                    @Override
+                    public TimePoint getStartTime() {
+                        return null;
+                    }
+
+                    @Override
+                    public void setStartTime(TimePoint timePoint) {
+                    }
+            
+        }, new StartList() {
+            @Override
+            public String getRaceID() {
+                return raceID;
+            }
+
+            @Override
+            public Iterable<Competitor> getCompetitors() {
+                return Collections.emptyList();
+            }
+            
+        }, new Course() {
+            @Override
+            public String getRaceID() {
+                return raceID;
+            }
+
+            @Override
+            public Iterable<Mark> getMarks() {
+                return Collections.emptyList();
+            }
+        });
+        assertNotNull(raceDefinition.getBoatClass());
+        assertEquals("Unknown", raceDefinition.getBoatClass().getName());
+    }
+    
     @Test
     public void testCourseConfigForBuoy() throws PatchFailedException {
         DomainFactory domainFactory = DomainFactory.INSTANCE;
