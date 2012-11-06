@@ -233,7 +233,7 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
             };
             leaderboardsTable.addColumn(racesColumn, stringMessages.races());
         }
-        if(leaderboardGroup.displayGroupsInReverseOrder) {
+        if(leaderboardGroup.displayLeaderboardsInReverseOrder) {
             leaderboardsTable.setRowData(leaderboardGroup.getLeaderboardsInReverseOrder());
         } else {
             leaderboardsTable.setRowData(leaderboardGroup.getLeaderboards());
