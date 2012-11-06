@@ -22,9 +22,11 @@ import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
 import com.sap.sailing.domain.base.impl.BoatImpl;
 import com.sap.sailing.domain.base.impl.CompetitorImpl;
+import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.base.impl.NationalityImpl;
 import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
+import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.ScoringSchemeType;
@@ -96,6 +98,58 @@ public class TestStoringAndRetrievingLeaderboardGroups extends AbstractMongoDBTe
         assertNotNull(loadedLeaderboardGroup.getOverallLeaderboard());
         assertNotSame(leaderboardGroup.getOverallLeaderboard(), loadedLeaderboardGroup.getOverallLeaderboard());
         assertSame(ScoringSchemeType.HIGH_POINT_ESS_OVERALL, loadedLeaderboardGroup.getOverallLeaderboard().getScoringScheme().getType());
+    }
+    
+    @Test
+    public void testStoringAndRetrievingLeaderboardGroupWithOverallLeaderboardWithScoreCorrection() throws NoWindException {
+        Competitor wolfgang = new CompetitorImpl(123, "$$$Dr. Wolfgang+Hunger$$$", new TeamImpl("STG", Collections.singleton(
+                new PersonImpl("$$$Dr. Wolfgang+Hunger$$$", new NationalityImpl("GER"),
+                /* dateOfBirth */ null, "This is famous Dr. Wolfgang Hunger")), new PersonImpl("Rigo van Maas", new NationalityImpl("NED"),
+                        /* dateOfBirth */ null, "This is Rigo, the coach")), new BoatImpl("Dr. Wolfgang Hunger's boat", new BoatClassImpl("505", /* typicallyStartsUpwind */ true), null));
+        Competitor hasso = new CompetitorImpl(123, "Hasso Plattner", new TeamImpl("STG", Collections.singleton(
+                new PersonImpl("Hasso Plattner", new NationalityImpl("GER"),
+                /* dateOfBirth */ null, "This is famous Dr. Hasso Plattner")), new PersonImpl("Lutz Patrunky", new NationalityImpl("GER"),
+                        /* dateOfBirth */ null, "This is Patty, the coach")),
+                        new BoatImpl("Dr. Hasso Plattner's boat", new BoatClassImpl("505", /* typicallyStartsUpwind */ true), null));
+        final String raceColumnName1 = "My First Race 1";
+        MockedTrackedRaceWithFixedRankAndManyCompetitors raceWithTwoCompetitors = new MockedTrackedRaceWithFixedRankAndManyCompetitors(wolfgang, /* rank */ 1, /* started */ true);
+        raceWithTwoCompetitors.addCompetitor(hasso);
+
+        final String[] leaderboardNames = {"Leaderboard 0", "Leaderboard 1", "Leaderboard 2", "Leaderboard 3"};
+        final int[] discardIndexResultsStartingWithHowManyRaces = new int[] { 5, 8 };
+        
+        final String groupName = "Leaderboard Group";
+        final String groupDescription = "A leaderboard group";
+        final ArrayList<Leaderboard> leaderboards = new ArrayList<>();
+
+        FlexibleLeaderboard leaderboard = new FlexibleLeaderboardImpl(leaderboardNames[0], new ScoreCorrectionImpl(),
+                new ResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces), new LowPoint());
+        leaderboards.add(leaderboard);
+        leaderboard.addRace(raceWithTwoCompetitors, raceColumnName1, /* medalRace */ false, leaderboard.getFleet(null));
+        leaderboard = new FlexibleLeaderboardImpl(leaderboardNames[1], new ScoreCorrectionImpl(),
+                new ResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces), new LowPoint());
+        leaderboards.add(leaderboard);
+        leaderboard = new FlexibleLeaderboardImpl(leaderboardNames[2], new ScoreCorrectionImpl(),
+                new ResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces), new LowPoint());
+        leaderboards.add(leaderboard);
+        leaderboard = new FlexibleLeaderboardImpl(leaderboardNames[3], new ScoreCorrectionImpl(),
+                new ResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces), new LowPoint());
+        leaderboards.add(leaderboard);
+        
+        final LeaderboardGroup leaderboardGroup = new LeaderboardGroupImpl(groupName, groupDescription, false, leaderboards);
+        final Leaderboard overallLeaderboard = new LeaderboardGroupMetaLeaderboard(leaderboardGroup,
+                new HighPointExtremeSailingSeriesOverall(), new ResultDiscardingRuleImpl(new int[0]));
+        leaderboardGroup.setOverallLeaderboard(overallLeaderboard);
+        overallLeaderboard.getScoreCorrection().correctScore(wolfgang, overallLeaderboard.getRaceColumnByName("Leaderboard 3"), 99.9);
+        mongoObjectFactory.storeLeaderboardGroup(leaderboardGroup);
+        
+        final LeaderboardGroup loadedLeaderboardGroup = domainObjectFactory.loadLeaderboardGroup(groupName, /* regattaRegistry */ null,
+                /* leaderboardRegistry */ null);
+        loadedLeaderboardGroup.getLeaderboards().iterator().next().getRaceColumnByName(raceColumnName1).setTrackedRace(
+                loadedLeaderboardGroup.getLeaderboards().iterator().next().getFleet(null), raceWithTwoCompetitors);
+        Leaderboard loadedOverallLeaderboard = loadedLeaderboardGroup.getOverallLeaderboard();
+        assertEquals(99.9, loadedOverallLeaderboard.getTotalPoints(wolfgang, loadedOverallLeaderboard.getRaceColumnByName("Leaderboard 3"),
+                MillisecondsTimePoint.now()), 0.00000000001);
     }
     
     @Test
