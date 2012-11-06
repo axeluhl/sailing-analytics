@@ -20,6 +20,11 @@ public abstract class SimpleAbstractRaceColumn implements RaceColumn {
      */
     private static final double DEFAULT_MEDAL_RACE_FACTOR = 2.0;
 
+    /**
+     * If <code>null</code>, the {@link #getFactor() factor} defaults to 1 for non-medal and {@link #DEFAULT_MEDAL_RACE_FACTOR} for
+     * medal races. Otherwise, the explicit factor is used.
+     */
+    private Double explicitFactor;
     
     public SimpleAbstractRaceColumn() {
         raceColumnListeners = new RaceColumnListeners();
@@ -56,6 +61,16 @@ public abstract class SimpleAbstractRaceColumn implements RaceColumn {
 
     @Override
     public double getFactor() {
-        return isMedalRace() ? DEFAULT_MEDAL_RACE_FACTOR : 1.;
+        return explicitFactor == null ? (isMedalRace() ? DEFAULT_MEDAL_RACE_FACTOR : 1.) : explicitFactor;
+    }
+    
+    @Override
+    public void setFactor(Double factor) {
+        explicitFactor = factor;
+    }
+
+    @Override
+    public Double getExplicitFactor() {
+        return explicitFactor;
     }
 }

@@ -423,4 +423,5 @@ public interface StringMessages extends Messages {
     String selectANumberOfRaces();
     String numberOfLastNRaces();
     String expandLastRace();
+    String factor();
 }

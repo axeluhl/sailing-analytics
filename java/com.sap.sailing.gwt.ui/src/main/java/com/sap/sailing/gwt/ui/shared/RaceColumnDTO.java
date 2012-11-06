@@ -18,6 +18,7 @@ public class RaceColumnDTO extends NamedDTO implements IsSerializable {
     private Map<FleetDTO, RegattaAndRaceIdentifier> trackedRaceIdentifiersPerFleet;
     private Map<FleetDTO, RaceDTO> racesPerFleet;
     private Boolean isValidInTotalScore;
+    private Double explicitFactor;
 
     RaceColumnDTO() {} // for GWT serialization
     
@@ -36,6 +37,14 @@ public class RaceColumnDTO extends NamedDTO implements IsSerializable {
         return name;
     }
     
+    public Double getExplicitFactor() {
+        return explicitFactor;
+    }
+
+    public void setExplicitFactor(Double explicitFactor) {
+        this.explicitFactor = explicitFactor;
+    }
+
     public boolean hasTrackedRace(RaceIdentifier raceIdentifier) {
         return trackedRaceIdentifiersPerFleet.values().contains(raceIdentifier);
     }

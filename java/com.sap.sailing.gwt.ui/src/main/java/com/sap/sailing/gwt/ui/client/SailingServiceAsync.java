@@ -422,4 +422,7 @@ public interface SailingServiceAsync {
 
     void suppressCompetitorInLeaderboard(String leaderboardName, String competitorIdAsString, boolean suppressed, AsyncCallback<Void> asyncCallback);
 
+    void updateLeaderboardColumnFactor(String leaderboardName, String columnName, Double newFactor,
+            AsyncCallback<Void> callback);
+
 }

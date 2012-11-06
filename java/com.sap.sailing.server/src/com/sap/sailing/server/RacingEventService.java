@@ -259,6 +259,11 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     void removeLeaderboardColumn(String leaderboardName, String columnName);
 
     void renameLeaderboardColumn(String leaderboardName, String oldColumnName, String newColumnName);
+    
+    /**
+     * @see RaceColumn#setFactor(Double)
+     */
+    void updateLeaderboardColumnFactor(String leaderboardName, String columnName, Double factor);
 
     /**
      * Updates the leaderboard data in the persistent store
