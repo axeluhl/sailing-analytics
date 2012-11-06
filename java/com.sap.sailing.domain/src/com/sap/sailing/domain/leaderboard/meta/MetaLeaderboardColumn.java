@@ -40,14 +40,6 @@ public class MetaLeaderboardColumn extends SimpleAbstractRaceColumn implements R
     }
 
     @Override
-    public void addRaceColumnListener(RaceColumnListener listener) {
-    }
-
-    @Override
-    public void removeRaceColumnListener(RaceColumnListener listener) {
-    }
-
-    @Override
     public Iterable<? extends Fleet> getFleets() {
         return Collections.singleton(metaFleet);
     }
