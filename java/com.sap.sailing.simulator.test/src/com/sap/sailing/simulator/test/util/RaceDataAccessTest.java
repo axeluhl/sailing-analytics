@@ -84,7 +84,22 @@ public class RaceDataAccessTest {
         System.setProperty("mongo.port", "10200");
         System.setProperty("http.proxyHost", "proxy.wdf.sap.corp");
         System.setProperty("http.proxyPort", "8080");
-
+       // paramUrl = new URL("http://germanmaster.traclive.dk/events/event_20120615_KielerWoch/clientparams.php?event=event_20120615_KielerWoch&race=0b5969cc-b789-11e1-a845-406186cbf87c");
+        paramUrl = new URL("http://germanmaster.traclive.dk/events/event_20110929_Internatio/clientparams.php?event=event_20110929_Internatio&race=d1f521fa-ec52-11e0-a523-406186cbf87c");
+        //old
+        //liveUri = new URI("tcp://10.18.206.73:1520"); 
+        //proxy
+        liveUri = new URI("tcp://10.18.22.156:1520");
+        //non-proxy
+        //liveUri =  new URI("tcp://germanmaster.traclive.dk:4400");
+        
+        //old
+        //storedUri = new URI("tcp://10.18.206.73:1521");
+        //proxy
+        storedUri = new URI("tcp://10.18.22.156:1521");
+        //non-proxy
+        //storedUri = new URI("tcp://germanmaster.traclive.dk:4401");
+        
         service = new RacingEventServiceImpl();
         logger.info("Calling service.addTracTracRace");
         raceHandle = service.addTracTracRace(paramUrl, liveUri, storedUri, EmptyWindStore.INSTANCE, /* timeoutInMilliseconds */60000, this);
