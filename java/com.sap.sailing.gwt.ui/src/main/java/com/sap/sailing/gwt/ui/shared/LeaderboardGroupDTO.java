@@ -14,7 +14,7 @@ public class LeaderboardGroupDTO extends NamedDTO implements IsSerializable {
 
     public String description;
     public List<StrippedLeaderboardDTO> leaderboards;
-    public boolean displayGroupsInReverseOrder;
+    public boolean displayLeaderboardsInReverseOrder;
     
     private int[] overallLeaderboardDiscardThresholds;
     private ScoringSchemeType overallLeaderboardScoringSchemeType;

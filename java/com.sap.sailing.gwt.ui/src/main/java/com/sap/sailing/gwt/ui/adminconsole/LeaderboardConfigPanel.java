@@ -704,7 +704,9 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
 
     private void editRaceColumnOfLeaderboard(final Pair<RaceColumnDTO, FleetDTO> raceColumnWithFleet) {
         final String selectedLeaderboardName = getSelectedLeaderboardName();
+        final boolean oldIsMedalRace = raceColumnWithFleet.getA().isMedalRace();
         final String oldRaceColumnName = raceColumnWithFleet.getA().getRaceColumnName();
+        final Double oldExplicitFactor = raceColumnWithFleet.getA().getExplicitFactor();
         List<RaceColumnDTO> existingRacesWithoutThisRace = new ArrayList<RaceColumnDTO>();
         for(Pair<RaceColumnDTO, FleetDTO> pair: raceColumnAndFleetList.getList()) {
             existingRacesWithoutThisRace.add(pair.getA());
@@ -718,10 +720,23 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
 
                     @Override
                     public void ok(final RaceColumnDescriptor result) {
-                        final ParallelExecutionCallback<Void> renameLeaderboardColumnCallback = new ParallelExecutionCallback<Void>();  
-                        final ParallelExecutionCallback<Void> updateIsMedalRaceCallback = new ParallelExecutionCallback<Void>();  
-                        final ParallelExecutionCallback<Void> updateLeaderboardColumnFactorCallback = new ParallelExecutionCallback<Void>();  
-                        new ParallelExecutionHolder(renameLeaderboardColumnCallback, updateIsMedalRaceCallback, updateLeaderboardColumnFactorCallback) {
+                        boolean rename = !oldRaceColumnName.equals(result.getName());
+                        boolean updateIsMedalRace = oldIsMedalRace != result.isMedalRace();
+                        boolean updateFactor = oldExplicitFactor != result.getExplicitFactor();
+                        List<ParallelExecutionCallback<Void>> callbacks = new ArrayList<ParallelExecutionCallback<Void>>();
+                        final ParallelExecutionCallback<Void> renameLeaderboardColumnCallback = new ParallelExecutionCallback<Void>();
+                        if (rename) {
+                            callbacks.add(renameLeaderboardColumnCallback);
+                        }
+                        final ParallelExecutionCallback<Void> updateIsMedalRaceCallback = new ParallelExecutionCallback<Void>();
+                        if (updateIsMedalRace) {
+                            callbacks.add(updateIsMedalRaceCallback);
+                        }
+                        final ParallelExecutionCallback<Void> updateLeaderboardColumnFactorCallback = new ParallelExecutionCallback<Void>();
+                        if (updateFactor) {
+                            callbacks.add(updateLeaderboardColumnFactorCallback);
+                        }
+                        new ParallelExecutionHolder(callbacks.toArray(new ParallelExecutionCallback<?>[0])) {
                             @Override
                             public void handleSuccess() {
                                 loadAndRefreshLeaderboard(selectedLeaderboardName);
@@ -734,12 +749,18 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
                                         + t.getMessage());
                             }
                         };
-                        sailingService.renameLeaderboardColumn(selectedLeaderboardName, oldRaceColumnName,
-                                result.getName(), renameLeaderboardColumnCallback);
-                        sailingService.updateIsMedalRace(selectedLeaderboardName, result.getName(),
-                                result.isMedalRace(), updateIsMedalRaceCallback);
-                        sailingService.updateLeaderboardColumnFactor(selectedLeaderboardName, result.getName(),
-                                result.getExplicitFactor(), updateLeaderboardColumnFactorCallback);
+                        if (rename) {
+                            sailingService.renameLeaderboardColumn(selectedLeaderboardName, oldRaceColumnName,
+                                    result.getName(), renameLeaderboardColumnCallback);
+                        }
+                        if (updateIsMedalRace) {
+                            sailingService.updateIsMedalRace(selectedLeaderboardName, result.getName(),
+                                    result.isMedalRace(), updateIsMedalRaceCallback);
+                        }
+                        if (updateFactor) {
+                            sailingService.updateLeaderboardColumnFactor(selectedLeaderboardName, result.getName(),
+                                    result.getExplicitFactor(), updateLeaderboardColumnFactorCallback);
+                        }
                     }
             });
         raceDialog.show();
@@ -749,11 +770,10 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
             final boolean isMedalRace) {
         sailingService.updateIsMedalRace(leaderboardName, raceInLeaderboard.getRaceColumnName(), isMedalRace,
                 new AsyncCallback<Void>() {
-
                     @Override
                     public void onFailure(Throwable caught) {
+                        errorReporter.reportError(stringMessages.errorUpdatingIsMedalRace(caught.getMessage()));
                     }
-
                     @Override
                     public void onSuccess(Void result) {
                         selectedLeaderboard.setIsMedalRace(raceInLeaderboard.getRaceColumnName(), isMedalRace);
@@ -821,7 +841,7 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
                 raceSelectionProvider.addRaceSelectionChangeListener(LeaderboardConfigPanel.this);
             }
         });
-        if (selectedLeaderboard != null && !selectedLeaderboard.isMetaLeaderboard) {
+        if (selectedLeaderboard != null) {
             raceColumnAndFleetList.getList().clear();
             for (RaceColumnDTO raceColumn : selectedLeaderboard.getRaceList()) {
                 for (FleetDTO fleet : raceColumn.getFleets()) {
@@ -829,8 +849,10 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
                 }
             }
             selectedLeaderBoardPanel.setVisible(true);
-            trackedRacesCaptionPanel.setVisible(true);
             selectedLeaderBoardPanel.setCaptionText("Details of leaderboard '" + selectedLeaderboard.name + "'");
+            if (!selectedLeaderboard.isMetaLeaderboard) {
+                trackedRacesCaptionPanel.setVisible(true);
+            }
         } else {
             selectedLeaderBoardPanel.setVisible(false);
             trackedRacesCaptionPanel.setVisible(false);

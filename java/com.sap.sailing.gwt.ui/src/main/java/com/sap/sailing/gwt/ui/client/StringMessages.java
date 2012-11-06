@@ -424,4 +424,5 @@ public interface StringMessages extends Messages {
     String numberOfLastNRaces();
     String expandLastRace();
     String factor();
+    String errorUpdatingIsMedalRace(String message);
 }

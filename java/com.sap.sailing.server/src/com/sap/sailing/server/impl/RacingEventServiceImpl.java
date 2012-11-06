@@ -366,11 +366,13 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     @Override
     public void removeLeaderboardColumn(String leaderboardName, String columnName) {
         Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
-        if (leaderboard != null && leaderboard instanceof FlexibleLeaderboard) {
+        if (leaderboard == null) {
+            throw new IllegalArgumentException("Leaderboard named "+leaderboardName+" not found");
+        } else if (!(leaderboard instanceof FlexibleLeaderboard)) {
+            throw new IllegalArgumentException("Columns cannot be removed from Leaderboard named "+leaderboardName);
+        } else {
             ((FlexibleLeaderboard) leaderboard).removeRaceColumn(columnName);
             updateStoredLeaderboard((FlexibleLeaderboard) leaderboard);
-        } else {
-            throw new IllegalArgumentException("Leaderboard named "+leaderboardName+" not found");
         }
     }
 
@@ -1486,7 +1488,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
             // now fix ScoreCorrectionListener setup for LeaderboardGroupMetaLeaderboard instances:
             for (Leaderboard leaderboard : leaderboardsByName.values()) {
                 if (leaderboard instanceof LeaderboardGroupMetaLeaderboard) {
-                    ((LeaderboardGroupMetaLeaderboard) leaderboard).registerAsScoreCorrectionChangeForwarderOnAllLeaderboards();
+                    ((LeaderboardGroupMetaLeaderboard) leaderboard).registerAsScoreCorrectionChangeForwarderAndRaceColumnListenerOnAllLeaderboards();
                 }
             }
             logger.info("Done with initial replication on "+this);
