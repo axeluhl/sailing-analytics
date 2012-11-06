@@ -471,8 +471,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     }
                     // Note: the RaceColumnDTO won't be created by the following addRace call because it has been created
                     // above by the result.createEmptyRaceColumn call
-                    result.addRace(raceColumn.getName(), fleetDTO, raceColumn.isMedalRace(),
-                            raceIdentifier, /* StrippedRaceDTO */ null);
+                    result.addRace(raceColumn.getName(), raceColumn.getExplicitFactor(), fleetDTO,
+                            raceColumn.isMedalRace(), raceIdentifier, /* StrippedRaceDTO */ null);
                 }
                 result.setCompetitorsFromBestToWorst(raceColumnDTO, getCompetitorDTOList(leaderboard.getCompetitorsFromBestToWorst(raceColumn, timePoint)));
             }
@@ -891,6 +891,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             RaceColumnDTO raceColumnDTO = new RaceColumnDTO(/* isValidInTotalScore not relevant here because no scores conveyed */ null);
             raceColumnDTO.name = raceColumn.getName();
             raceColumnDTO.setMedalRace(raceColumn.isMedalRace());
+            raceColumnDTO.setExplicitFactor(raceColumn.getExplicitFactor());
             raceColumns.add(raceColumnDTO);
         }
         SeriesDTO result = new SeriesDTO(series.getName(), fleets, raceColumns, series.isMedal());
@@ -1841,7 +1842,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         Map<String, Leaderboard> leaderboards = getService().getLeaderboards();
         StrippedLeaderboardDTO result = null;
         Leaderboard leaderboard = leaderboards.get(leaderboardName);
-        if(leaderboard != null) {
+        if (leaderboard != null) {
             result = createStrippedLeaderboardDTO(leaderboard, false);
         }
         return result;
@@ -1900,7 +1901,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         leaderboardDTO.name = leaderboard.getName();
         leaderboardDTO.competitorDisplayNames = new HashMap<CompetitorDTO, String>();
         leaderboardDTO.isMetaLeaderboard = leaderboard instanceof MetaLeaderboard ? true : false;
-        if(leaderboard instanceof RegattaLeaderboard) {
+        if (leaderboard instanceof RegattaLeaderboard) {
             RegattaLeaderboard regattaLeaderboard = (RegattaLeaderboard) leaderboard;
             Regatta regatta = regattaLeaderboard.getRegatta();
             leaderboardDTO.regattaName = regatta.getName(); 
@@ -1936,7 +1937,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     raceDTO.endOfRace = trackedRace.getEndOfRace() == null ? null : trackedRace.getEndOfRace().asDate();
                 }    
                 final FleetDTO fleetDTO = convertToFleetDTO(fleet);
-                leaderboardDTO.addRace(raceColumn.getName(), fleetDTO, raceColumn.isMedalRace(), raceIdentifier, raceDTO);
+                leaderboardDTO.addRace(raceColumn.getName(), raceColumn.getExplicitFactor(), fleetDTO,
+                        raceColumn.isMedalRace(), raceIdentifier, raceDTO);
             }
         }
         return leaderboardDTO;

@@ -418,6 +418,11 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
         getRaceColumnListeners().notifyListenersAboutRaceColumnMoved(raceColumn, newIndex);
     }
 
+    @Override
+    public void factorChanged(RaceColumn raceColumn, Double oldFactor, Double newFactor) {
+        getRaceColumnListeners().notifyListenersAboutFactorChanged(raceColumn, oldFactor, newFactor);
+    }
+
     /**
      * A leaderboard will only accept the addition of a race column if the column's name is unique across the leaderboard.
      */

@@ -66,7 +66,9 @@ public abstract class SimpleAbstractRaceColumn implements RaceColumn {
     
     @Override
     public void setFactor(Double factor) {
+        Double oldExplicitFactor = getExplicitFactor();
         explicitFactor = factor;
+        raceColumnListeners.notifyListenersAboutFactorChanged(this, oldExplicitFactor, factor);
     }
 
     @Override

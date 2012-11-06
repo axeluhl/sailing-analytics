@@ -135,6 +135,11 @@ public class MetaLeaderboardColumn extends SimpleAbstractRaceColumn implements R
     }
 
     @Override
+    public void factorChanged(RaceColumn raceColumn, Double oldFactor, Double newFactor) {
+        getRaceColumnListeners().notifyListenersAboutFactorChanged(raceColumn, oldFactor, newFactor);
+    }
+
+    @Override
     public boolean isTransient() {
         return false;
     }

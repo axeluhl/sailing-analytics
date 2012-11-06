@@ -721,7 +721,7 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
                         final ParallelExecutionCallback<Void> renameLeaderboardColumnCallback = new ParallelExecutionCallback<Void>();  
                         final ParallelExecutionCallback<Void> updateIsMedalRaceCallback = new ParallelExecutionCallback<Void>();  
                         final ParallelExecutionCallback<Void> updateLeaderboardColumnFactorCallback = new ParallelExecutionCallback<Void>();  
-                        new ParallelExecutionHolder(renameLeaderboardColumnCallback, updateIsMedalRaceCallback) {
+                        new ParallelExecutionHolder(renameLeaderboardColumnCallback, updateIsMedalRaceCallback, updateLeaderboardColumnFactorCallback) {
                             @Override
                             public void handleSuccess() {
                                 loadAndRefreshLeaderboard(selectedLeaderboardName);

@@ -203,6 +203,10 @@ public class DelayedLeaderboardCorrectionsImpl implements DelayedLeaderboardCorr
     }
 
     @Override
+    public void factorChanged(RaceColumn raceColumn, Double oldFactor, Double newFactor) {
+    }
+
+    @Override
     public boolean isTransient() {
         return false;
     }
