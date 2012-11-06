@@ -9,6 +9,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 
 import org.junit.Assert;
@@ -49,6 +50,7 @@ import com.sap.sailing.domain.test.mock.MockedTrackedRaceWithFixedRankAndManyCom
 import com.sap.sailing.mongodb.MongoDBService;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
+import com.sap.sailing.server.operationaltransformation.UpdateLeaderboardScoreCorrection;
 
 public class TestStoringAndRetrievingLeaderboardGroups extends AbstractMongoDBTest {
     private MongoObjectFactory mongoObjectFactory = null;
@@ -102,6 +104,7 @@ public class TestStoringAndRetrievingLeaderboardGroups extends AbstractMongoDBTe
     
     @Test
     public void testStoringAndRetrievingLeaderboardGroupWithOverallLeaderboardWithScoreCorrection() throws NoWindException {
+        RacingEventService racingEventService = new RacingEventServiceImpl();
         Competitor wolfgang = new CompetitorImpl(123, "$$$Dr. Wolfgang+Hunger$$$", new TeamImpl("STG", Collections.singleton(
                 new PersonImpl("$$$Dr. Wolfgang+Hunger$$$", new NationalityImpl("GER"),
                 /* dateOfBirth */ null, "This is famous Dr. Wolfgang Hunger")), new PersonImpl("Rigo van Maas", new NationalityImpl("NED"),
@@ -120,36 +123,37 @@ public class TestStoringAndRetrievingLeaderboardGroups extends AbstractMongoDBTe
         
         final String groupName = "Leaderboard Group";
         final String groupDescription = "A leaderboard group";
-        final ArrayList<Leaderboard> leaderboards = new ArrayList<>();
 
         FlexibleLeaderboard leaderboard = new FlexibleLeaderboardImpl(leaderboardNames[0], new ScoreCorrectionImpl(),
                 new ResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces), new LowPoint());
-        leaderboards.add(leaderboard);
+        racingEventService.addLeaderboard(leaderboard);
         leaderboard.addRace(raceWithTwoCompetitors, raceColumnName1, /* medalRace */ false, leaderboard.getFleet(null));
         leaderboard = new FlexibleLeaderboardImpl(leaderboardNames[1], new ScoreCorrectionImpl(),
                 new ResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces), new LowPoint());
-        leaderboards.add(leaderboard);
+        racingEventService.addLeaderboard(leaderboard);
         leaderboard = new FlexibleLeaderboardImpl(leaderboardNames[2], new ScoreCorrectionImpl(),
                 new ResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces), new LowPoint());
-        leaderboards.add(leaderboard);
+        racingEventService.addLeaderboard(leaderboard);
         leaderboard = new FlexibleLeaderboardImpl(leaderboardNames[3], new ScoreCorrectionImpl(),
                 new ResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces), new LowPoint());
-        leaderboards.add(leaderboard);
+        racingEventService.addLeaderboard(leaderboard);
         
-        final LeaderboardGroup leaderboardGroup = new LeaderboardGroupImpl(groupName, groupDescription, false, leaderboards);
-        final Leaderboard overallLeaderboard = new LeaderboardGroupMetaLeaderboard(leaderboardGroup,
-                new HighPointExtremeSailingSeriesOverall(), new ResultDiscardingRuleImpl(new int[0]));
-        leaderboardGroup.setOverallLeaderboard(overallLeaderboard);
-        overallLeaderboard.getScoreCorrection().correctScore(wolfgang, overallLeaderboard.getRaceColumnByName("Leaderboard 3"), 99.9);
+        LeaderboardGroup leaderboardGroup = racingEventService.addLeaderboardGroup(groupName, groupDescription, false, Arrays.asList(leaderboardNames), new int[0],
+                ScoringSchemeType.HIGH_POINT_ESS_OVERALL);
+        final Leaderboard overallLeaderboard = leaderboardGroup.getOverallLeaderboard();
         mongoObjectFactory.storeLeaderboardGroup(leaderboardGroup);
+        racingEventService.apply(new UpdateLeaderboardScoreCorrection(overallLeaderboard.getName(), "Leaderboard 3",
+                wolfgang.getId().toString(), 99.9, MillisecondsTimePoint.now()));
         
         final LeaderboardGroup loadedLeaderboardGroup = domainObjectFactory.loadLeaderboardGroup(groupName, /* regattaRegistry */ null,
                 /* leaderboardRegistry */ null);
         loadedLeaderboardGroup.getLeaderboards().iterator().next().getRaceColumnByName(raceColumnName1).setTrackedRace(
                 loadedLeaderboardGroup.getLeaderboards().iterator().next().getFleet(null), raceWithTwoCompetitors);
         Leaderboard loadedOverallLeaderboard = loadedLeaderboardGroup.getOverallLeaderboard();
-        assertEquals(99.9, loadedOverallLeaderboard.getTotalPoints(wolfgang, loadedOverallLeaderboard.getRaceColumnByName("Leaderboard 3"),
-                MillisecondsTimePoint.now()), 0.00000000001);
+        final Double totalPoints = loadedOverallLeaderboard.getTotalPoints(wolfgang, loadedOverallLeaderboard.getRaceColumnByName("Leaderboard 3"),
+                MillisecondsTimePoint.now());
+        assertNotNull(totalPoints);
+        assertEquals(99.9, totalPoints, 0.00000000001);
     }
     
     @Test
