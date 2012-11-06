@@ -270,8 +270,6 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      */
     void updateStoredLeaderboard(Leaderboard leaderboard);
     
-    void updateStoredRegattaLeaderboard(RegattaLeaderboard leaderboard);
-
     void updateStoredRegatta(Regatta regatta);
 
     long getDelayToLiveInMillis();

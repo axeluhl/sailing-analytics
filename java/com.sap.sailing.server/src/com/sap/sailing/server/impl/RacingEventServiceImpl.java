@@ -438,12 +438,6 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     }
     
     @Override
-    public void updateStoredRegattaLeaderboard(RegattaLeaderboard leaderboard) {
-        mongoObjectFactory.storeLeaderboard(leaderboard);
-        syncGroupsAfterLeaderboardChange(leaderboard, true);
-    }
-
-    @Override
     public void updateStoredRegatta(Regatta regatta) {
         if (regatta.isPersistent()) {
             mongoObjectFactory.storeRegatta(regatta);
