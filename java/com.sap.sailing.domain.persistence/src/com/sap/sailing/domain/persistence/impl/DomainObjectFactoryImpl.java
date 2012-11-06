@@ -220,6 +220,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 DelayedLeaderboardCorrections loadedLeaderboardCorrections = new DelayedLeaderboardCorrectionsImpl(result);
                 loadLeaderboardCorrections(dbLeaderboard, loadedLeaderboardCorrections, scoreCorrection);
                 loadSuppressedCompetitors(dbLeaderboard, loadedLeaderboardCorrections);
+                loadColumnFactors(dbLeaderboard, result);
                 // add the leaderboard to the registry
                 if (leaderboardRegistry != null) {
                     leaderboardRegistry.addLeaderboard(result);
@@ -228,6 +229,17 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             }
         }
         return result;
+    }
+
+    private void loadColumnFactors(DBObject dbLeaderboard, Leaderboard result) {
+        DBObject dbColumnFactors = (DBObject) dbLeaderboard.get(FieldNames.LEADERBOARD_COLUMN_FACTORS.name());
+        if (dbColumnFactors != null) {
+            for (String encodedRaceColumnName : dbColumnFactors.keySet()) {
+                double factor = ((Number) dbColumnFactors.get(encodedRaceColumnName)).doubleValue();
+                String raceColumnName = MongoUtils.unescapeDollarAndDot(encodedRaceColumnName);
+                result.getRaceColumnByName(raceColumnName).setFactor(factor);
+            }
+        }
     }
 
     private void loadSuppressedCompetitors(DBObject dbLeaderboard,

@@ -131,4 +131,16 @@ public interface RaceColumn extends Named {
      * overall series leaderboard the last two columns each count 1.5 times their scores.
      */
     double getFactor();
+    
+    /**
+     * @param factor if <code>null</code>, {@link #getFactor()} will again compute a default value; otherwise, {@link #getFactor()} will
+     * then return the double value of <code>factor</code>.
+     */
+    void setFactor(Double factor);
+
+    /**
+     * If <code>null</code>, the {@link #getFactor() factor} defaults to 1 for non-medal and {@link #DEFAULT_MEDAL_RACE_FACTOR} for
+     * medal races. Otherwise, the explicit factor is used.
+     */
+    Double getExplicitFactor();
 }

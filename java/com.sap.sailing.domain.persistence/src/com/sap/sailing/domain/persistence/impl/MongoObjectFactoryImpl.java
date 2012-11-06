@@ -152,8 +152,20 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
             // at least store the scoring scheme
             dbLeaderboard.put(FieldNames.SCORING_SCHEME_TYPE.name(), leaderboard.getScoringScheme().getType().name());
         }
+        storeColumnFactors(leaderboard, dbLeaderboard);
         storeLeaderboardCorrectionsAndDiscards(leaderboard, dbLeaderboard);
         leaderboardCollection.update(query, dbLeaderboard, /* upsrt */ true, /* multi */ false);
+    }
+
+    private void storeColumnFactors(Leaderboard leaderboard, BasicDBObject dbLeaderboard) {
+        DBObject raceColumnFactors = new BasicDBObject();
+        for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
+            Double explicitFactor = raceColumn.getExplicitFactor();
+            if (explicitFactor != null) {
+                raceColumnFactors.put(MongoUtils.escapeDollarAndDot(raceColumn.getName()), explicitFactor);
+            }
+        }
+        dbLeaderboard.put(FieldNames.LEADERBOARD_COLUMN_FACTORS.name(), raceColumnFactors);
     }
 
     private void storeRegattaLeaderboard(RegattaLeaderboard leaderboard, DBObject dbLeaderboard) {
@@ -234,6 +246,8 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
                 }
             }
             if (!dbCorrectionForRace.isEmpty()) {
+                // using the column name as the key for the score corrections requires re-writing the score corrections
+                // of a meta-leaderboard if the name of one of its leaderboards changes
                 dbScoreCorrections.put(raceColumn.getName(), dbCorrectionForRace);
             }
         }

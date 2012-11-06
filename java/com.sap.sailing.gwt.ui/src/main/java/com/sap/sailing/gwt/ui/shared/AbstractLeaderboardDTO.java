@@ -137,14 +137,15 @@ public abstract class AbstractLeaderboardDTO implements IsSerializable {
      * ensures that a fleet named <code>fleetName</code> is present. If it's not present yet, it's added to the race
      * column's fleet name list. The <code>trackedRaceIdentifier</code> and <code>race</code> are associated with the
      * column for the fleet identified by <code>fleetName</code>.
-     * 
+     * @param explicitFactor TODO
      * @param fleetDTO
      *            must not be null
      */
-    public RaceColumnDTO addRace(String raceColumnName, FleetDTO fleetDTO, boolean medalRace,
-            RegattaAndRaceIdentifier trackedRaceIdentifier, RaceDTO race) {
+    public RaceColumnDTO addRace(String raceColumnName, Double explicitFactor, FleetDTO fleetDTO,
+            boolean medalRace, RegattaAndRaceIdentifier trackedRaceIdentifier, RaceDTO race) {
         assert fleetDTO != null;
         RaceColumnDTO raceColumnDTO = getOrCreateRaceColumn(raceColumnName);
+        raceColumnDTO.setExplicitFactor(explicitFactor);
         boolean contains = false;
         for (FleetDTO fleet : raceColumnDTO.getFleets()) {
             if (fleet.name.equals(fleetDTO.name)) {

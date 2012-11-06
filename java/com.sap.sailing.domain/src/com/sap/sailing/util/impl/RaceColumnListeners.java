@@ -69,6 +69,12 @@ public class RaceColumnListeners implements Serializable {
         }
     }
 
+    public void notifyListenersAboutFactorChanged(RaceColumn raceColumn, Double oldFactor, Double newFactor) {
+        for (RaceColumnListener listener : getRaceColumnListeners()) {
+            listener.factorChanged(raceColumn, oldFactor, newFactor);
+        }
+    }
+
     public void notifyListenersAboutIsMedalRaceChanged(RaceColumn raceColumn, boolean newIsMedalRace) {
         for (RaceColumnListener listener : getRaceColumnListeners()) {
             listener.isMedalRaceChanged(raceColumn, newIsMedalRace);

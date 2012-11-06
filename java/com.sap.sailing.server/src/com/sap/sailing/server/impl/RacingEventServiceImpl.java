@@ -381,9 +381,25 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
             final RaceColumn raceColumn = leaderboard.getRaceColumnByName(oldColumnName);
             if (raceColumn instanceof FlexibleRaceColumn) {
                 ((FlexibleRaceColumn) raceColumn).setName(newColumnName);
-                updateStoredLeaderboard((FlexibleLeaderboard) leaderboard);
+                updateStoredLeaderboard(leaderboard);
             } else {
                 throw new IllegalArgumentException("Race column "+oldColumnName+" cannot be renamed");
+            }
+        } else {
+            throw new IllegalArgumentException("Leaderboard named "+leaderboardName+" not found");
+        }
+    }
+
+    @Override
+    public void updateLeaderboardColumnFactor(String leaderboardName, String columnName, Double factor) {
+        Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
+        if (leaderboard != null) {
+            final RaceColumn raceColumn = leaderboard.getRaceColumnByName(columnName);
+            if (raceColumn != null) {
+                raceColumn.setFactor(factor);
+                updateStoredLeaderboard(leaderboard);
+            } else {
+                throw new IllegalArgumentException("Race column "+columnName+" not found in leaderboard "+leaderboardName);
             }
         } else {
             throw new IllegalArgumentException("Leaderboard named "+leaderboardName+" not found");
@@ -436,8 +452,6 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
      * Checks all groups, if they contain a leaderboard with the name of the <code>updatedLeaderboard</code> and
      * replaces the one in the group with the updated one.<br />
      * This synchronizes things like the RaceIdentifier in the leaderboard columns.
-     * 
-     * @param updatedLeaderboard
      */
     private void syncGroupsAfterLeaderboardChange(Leaderboard updatedLeaderboard, boolean doDatabaseUpdate) {
         boolean groupNeedsUpdate = false;
