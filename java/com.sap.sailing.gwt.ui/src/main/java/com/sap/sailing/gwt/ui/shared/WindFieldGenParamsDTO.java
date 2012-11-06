@@ -23,6 +23,16 @@ public class WindFieldGenParamsDTO implements IsSerializable {
      */
     private char mode;
     
+    /**
+     * Show the wind arrows in wind display and replay modes.
+     */
+    private boolean showArrows;
+    
+    /**
+     * Show the "heat map" and the wind lines in the wind display and replay modes.
+     */
+    private boolean showGrid;
+    
     public WindFieldGenParamsDTO() {
         setDefaultTimeSettings();
     }
@@ -108,5 +118,21 @@ public class WindFieldGenParamsDTO implements IsSerializable {
 
     public void setKeepState(boolean keepState) {
         this.keepState = keepState;
+    }
+
+    public boolean isShowArrows() {
+        return showArrows;
+    }
+
+    public void setShowArrows(boolean showArrows) {
+        this.showArrows = showArrows;
+    }
+
+    public boolean isShowGrid() {
+        return showGrid;
+    }
+
+    public void setShowGrid(boolean showGrid) {
+        this.showGrid = showGrid;
     }
 }
