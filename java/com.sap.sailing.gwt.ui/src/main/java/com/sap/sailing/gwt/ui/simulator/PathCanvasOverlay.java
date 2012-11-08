@@ -34,7 +34,9 @@ public class PathCanvasOverlay extends WindFieldCanvasOverlay implements Named {
     private static final long serialVersionUID = -6284996043723173190L;
 
     private static Logger logger = Logger.getLogger(PathCanvasOverlay.class.getName());
-
+    
+    private static final int MinimumPxDistanceBetweenArrows = 60;
+    
     private LatLng startPoint;
     private LatLng endPoint;
     
@@ -113,13 +115,19 @@ public class PathCanvasOverlay extends WindFieldCanvasOverlay implements Named {
             windDTOIter = windDTOList.iterator();
             int index = 0;
             long startTime = windDTOList.get(0).timepoint;
+            prevWindDTO = null; //For the last time arrow was displayed
             while (windDTOIter.hasNext()) {
                 WindDTO windDTO = windDTOIter.next();
 
-                if ((displayWindAlongPath) && ((index % arrowInterleave) == 0)) {
-                    DegreeBearingImpl dbi = new DegreeBearingImpl(windDTO.trueWindBearingDeg);
+                //if ((displayWindAlongPath) && ((index % arrowInterleave) == 0)) {
+                if (displayWindAlongPath) {
+                    if (checkPointsAreFarEnough(windDTO,prevWindDTO)) {
+                        DegreeBearingImpl dbi = new DegreeBearingImpl(windDTO.trueWindBearingDeg);
                     // System.out.print("index: "+index+"\n");
-                    drawScaledArrow(windDTO, dbi.getRadians(), index);
+                    
+                        drawScaledArrow(windDTO, dbi.getRadians(), index);
+                        prevWindDTO = windDTO;
+                    }
                 }
                 index++;
 
@@ -183,6 +191,37 @@ public class PathCanvasOverlay extends WindFieldCanvasOverlay implements Named {
         drawCircle(x1, y1, weight / 2., pathColor);
     }
 
+    /**
+     * 
+     * @return true if the pixel distance between the two points is greater than
+     * a threshold. returns true if either of the points is null
+     */
+    private boolean checkPointsAreFarEnough(WindDTO p1, WindDTO p2) {
+        if (p1 == null || p2 == null) {
+            return true;
+        }
+        PositionDTO position = p1.position;
+
+        LatLng positionLatLng = LatLng.newInstance(position.latDeg, position.lngDeg);
+        Point canvasPositionInPx = getMap().convertLatLngToDivPixel(positionLatLng);
+
+        int x1 = canvasPositionInPx.getX();
+        int y1 = canvasPositionInPx.getY();
+
+        position = p2.position;
+        positionLatLng = LatLng.newInstance(position.latDeg, position.lngDeg);
+        canvasPositionInPx = getMap().convertLatLngToDivPixel(positionLatLng);
+        int x2 = canvasPositionInPx.getX();
+        int y2 = canvasPositionInPx.getY();
+
+        double pxDistance = Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
+        if (pxDistance >= MinimumPxDistanceBetweenArrows) {
+            return true;
+        } else {
+           return false;
+        }
+    }
+    
     @Override
     public String getName() {
         return name;
