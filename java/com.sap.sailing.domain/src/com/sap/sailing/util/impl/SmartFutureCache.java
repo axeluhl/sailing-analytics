@@ -237,6 +237,12 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
         recalculator.execute(future);
     }
     
+    /**
+     * Fetches a value for <code>key</code> from the cache. If no {@link #triggerUpdate(Object, UpdateInterval)} for the <code>key</code>
+     * has ever happened, <code>null</code> will be returned. Otherwise, depending on <code>waitForLatest</code> the result is taken
+     * from the cache straight away (<code>waitForLatest==false</code>) or, if a re-calculation for the <code>key</code> is still
+     * ongoing, the result of that ongoing re-calculation is returned.
+     */
     public V get(K key, boolean waitForLatest) {
         V value = null;
         if (waitForLatest) {
