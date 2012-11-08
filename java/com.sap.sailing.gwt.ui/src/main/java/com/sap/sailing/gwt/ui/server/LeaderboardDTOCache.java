@@ -359,7 +359,7 @@ public class LeaderboardDTOCache {
                 registerAsListener(leaderboard);
             } else {
                 /*
-                 * Waiting for latest analyses results largely regards wind estimation and maneuver cache; see
+                 * Waiting for latest analyzes results largely regards wind estimation and maneuver cache; see
                  * SmartFutureCache. Even if waitForLatestAnalysis is requested, it is OK to cache. The cache would be
                  * invalidated when the race changes, forcing a new re-calculation based on the latest analysis results.
                  * Once the race stabilizes, the latest analysis results for maneuvers and wind estimation will no
