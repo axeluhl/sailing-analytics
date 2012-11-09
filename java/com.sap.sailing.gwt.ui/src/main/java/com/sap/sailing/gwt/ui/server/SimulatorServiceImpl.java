@@ -235,22 +235,8 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
             gridAreaGps = course.toArray(gridAreaGps);
             wf.setGridAreaGps(gridAreaGps);
         }
-        /*
-         * List<WindDTO> wList = new ArrayList<WindDTO>();
-         * 
-         * if (grid != null) { TimePoint t = startTime; while (t.compareTo(endTime) <= 0) { for (int i = 0; i <
-         * grid.length; i++) { for (int j = 0; j < grid[0].length; j++) { Wind localWind = wf.getWind(new
-         * TimedPositionWithSpeedImpl(t, grid[i][j], null));
-         * 
-         * logger.finer(localWind.toString()); WindDTO w = createWindDTO(localWind); wList.add(w); } } t = new
-         * MillisecondsTimePoint(t.asMillis() + timeStep.asMillis()); } }
-         * 
-         * WindFieldDTO wfDTO = new WindFieldDTO();
-         * 
-         * wfDTO.setMatrix(wList);
-         */
 
-        WindFieldDTO wfDTO = createWindFieldDTO(wf, startTime, endTime, timeStep);
+        WindFieldDTO wfDTO = createWindFieldDTO(wf, startTime, endTime, timeStep, params.isShowGrid());
         logger.info("Exiting getWindField");
         return wfDTO;
 
@@ -307,7 +293,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
     }
 
     private WindFieldDTO createWindFieldDTO(WindFieldGenerator wf, TimePoint startTime, TimePoint endTime,
-            TimePoint timeStep) {
+            TimePoint timeStep, boolean isShowGrid) {
 
         WindFieldDTO windFieldDTO = new WindFieldDTO();
         List<WindDTO> wList = new ArrayList<WindDTO>();
@@ -329,8 +315,10 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         }
 
         windFieldDTO.setMatrix(wList);
-        // getWindLines(wf, windFieldDTO);
-        getWindLinesFromStartLine(wf, windFieldDTO, startTime, endTime, timeStep);
+        if (isShowGrid) {
+            getWindLinesFromStartLine(wf, windFieldDTO, startTime, endTime, timeStep);
+            getWindLinesFromEndLine(wf, windFieldDTO, startTime, endTime, timeStep);
+        }
         return windFieldDTO;
     }
 
@@ -338,8 +326,11 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
             TimePoint endTime, TimePoint timeStep) {
 
         Position[][] positionGrid = wf.getPositionGrid();
-        WindLinesDTO windLinesDTO = new WindLinesDTO();
-        windFieldDTO.setWindLinesDTO(windLinesDTO);
+        WindLinesDTO windLinesDTO = windFieldDTO.getWindLinesDTO();
+        if (windLinesDTO == null) {
+            windLinesDTO = new WindLinesDTO();
+            windFieldDTO.setWindLinesDTO(windLinesDTO);
+        }
         if (positionGrid != null && positionGrid.length > 0 && positionGrid[0].length > 2) {
             for (int j = 1; j < positionGrid[0].length - 1; ++j) {
                 // for (int j = 0; j < positionGrid[0].length; ++j) {
@@ -348,7 +339,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
                         positionGrid[0][j].getLngDeg());
                 while (t.compareTo(endTime) <= 0) {
                     TimedPosition tp = new TimedPositionImpl(t, positionGrid[0][j]);
-                    Path p = wf.getLine(tp);
+                    Path p = wf.getLine(tp, false /*forward*/);
                     if (p != null) {
                         List<PositionDTO> positions = new ArrayList<PositionDTO>();
                         for (TimedPositionWithSpeed pathPoint : p.getPathPoints()) {
@@ -368,6 +359,42 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         //logger.info("Added : " + windFieldDTO.getWindLinesDTO().getWindLinesMap().size() + " wind lines");
     }
 
+    private void getWindLinesFromEndLine(WindFieldGenerator wf, WindFieldDTO windFieldDTO, TimePoint startTime,
+            TimePoint endTime, TimePoint timeStep) {
+
+        Position[][] positionGrid = wf.getPositionGrid();
+        WindLinesDTO windLinesDTO = windFieldDTO.getWindLinesDTO();
+        if (windLinesDTO == null) {
+            windLinesDTO = new WindLinesDTO();
+            windFieldDTO.setWindLinesDTO(windLinesDTO);
+        }
+        if (positionGrid != null && positionGrid.length > 1 && positionGrid[0].length > 2) {
+            int lastRowIndex = positionGrid.length - 1;
+            for (int j = 1; j < positionGrid[lastRowIndex].length - 1; ++j) {
+        
+                TimePoint t = startTime;
+                PositionDTO startPosition = new PositionDTO(positionGrid[lastRowIndex][j].getLatDeg(),
+                        positionGrid[lastRowIndex][j].getLngDeg());
+                while (t.compareTo(endTime) <= 0) {
+                    TimedPosition tp = new TimedPositionImpl(t, positionGrid[lastRowIndex][j]);
+                    Path p = wf.getLine(tp, true /*forward*/);
+                    if (p != null) {
+                        List<PositionDTO> positions = new ArrayList<PositionDTO>();
+                        for (TimedPositionWithSpeed pathPoint : p.getPathPoints()) {
+                            Position position = pathPoint.getPosition();
+                            PositionDTO positionDTO = new PositionDTO(position.getLatDeg(), position.getLngDeg());
+                            positions.add(positionDTO);
+                        }
+
+                        windLinesDTO.addWindLine(startPosition, tp.getTimePoint().asMillis(), positions);
+                    }
+                    t = new MillisecondsTimePoint(t.asMillis() + timeStep.asMillis());
+                }
+            }
+        }
+       
+    }
+    
     @SuppressWarnings("unused")
     private void getWindLines(WindFieldGenerator wf, WindFieldDTO windFieldDTO) {
         Position[] course = wf.getGridAreaGps();
@@ -381,7 +408,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
             TimedPosition tp = new TimedPositionImpl(wf.getStartTime(), course[0]);
             PositionDTO startPosition = new PositionDTO(course[0].getLatDeg(), course[0].getLngDeg());
 
-            Path p = wf.getLine(tp);
+            Path p = wf.getLine(tp, false);
             if (p != null) {
                 List<PositionDTO> positions = new ArrayList<PositionDTO>();
                 for (TimedPositionWithSpeed pathPoint : p.getPathPoints()) {
@@ -523,7 +550,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
 
         WindFieldDTO windFieldDTO = null;
         if (pattern != null) {
-            windFieldDTO = createWindFieldDTO(wf, startTime, endTime, timeStep);
+            windFieldDTO = createWindFieldDTO(wf, startTime, endTime, timeStep, params.isShowGrid());
         }
         SimulatorResultsDTO simulatorResults = new SimulatorResultsDTO(rcDTO, pathDTO, windFieldDTO);
 
