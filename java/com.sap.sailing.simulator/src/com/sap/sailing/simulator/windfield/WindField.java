@@ -13,6 +13,6 @@ public interface WindField extends Serializable {
 
 	public Boundary getBoundaries();
 	
-	public Path getLine(TimedPosition seed);
+	public Path getLine(TimedPosition seed, boolean forward);
 
 }
