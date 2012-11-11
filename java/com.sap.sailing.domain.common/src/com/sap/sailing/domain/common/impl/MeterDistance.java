@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.base.impl;
+package com.sap.sailing.domain.common.impl;
 
 import com.sap.sailing.domain.common.AbstractDistance;
 import com.sap.sailing.domain.common.Distance;

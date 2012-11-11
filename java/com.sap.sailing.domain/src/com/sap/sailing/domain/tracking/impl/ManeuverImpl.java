@@ -71,6 +71,7 @@ public class ManeuverImpl extends AbstractGPSFixImpl implements Maneuver {
         return newTack;
     }
 
+    @Override
     public Distance getManeuverLoss() {
         return maneuverLoss;
     }

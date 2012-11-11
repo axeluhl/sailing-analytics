@@ -425,4 +425,5 @@ public interface SailingServiceAsync {
     void updateLeaderboardColumnFactor(String leaderboardName, String columnName, Double newFactor,
             AsyncCallback<Void> callback);
 
+
 }

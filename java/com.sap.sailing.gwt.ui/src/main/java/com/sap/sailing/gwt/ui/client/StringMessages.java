@@ -425,4 +425,5 @@ public interface StringMessages extends Messages {
     String expandLastRace();
     String factor();
     String errorUpdatingIsMedalRace(String message);
+    String maneuverLoss();
 }
