@@ -92,7 +92,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
 
     private static final Logger logger = Logger.getLogger(TrackedRaceImpl.class.getName());
 
-    private static final double PENALTY_CIRCLE_DEGREES_THRESHOLD = 320;
+    private static final double PENALTY_CIRCLE_DEGREES_THRESHOLD = 270;
 
     // TODO make this variable
     private static final long DELAY_FOR_CACHE_CLEARING_IN_MILLISECONDS = 7500;
@@ -1847,11 +1847,8 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         List<Pair<GPSFixMoving, CourseChange>> group = new ArrayList<Pair<GPSFixMoving, CourseChange>>();
         if (!courseChangeSequenceInSameDirection.isEmpty()) {
             Distance twoHullLengths = competitor.getBoat().getBoatClass().getHullLength().scale(2);
-            SpeedWithBearing beforeGroupOnApproximation = speedWithBearingOnApproximationAtBeginning; // speed/bearing
-                                                                                                      // before group
-            SpeedWithBearing beforeCurrentCourseChangeOnApproximation = beforeGroupOnApproximation; // speed/bearing
-                                                                                                    // before current
-                                                                                                    // course change
+            SpeedWithBearing beforeGroupOnApproximation = speedWithBearingOnApproximationAtBeginning; // speed/bearing before group
+            SpeedWithBearing beforeCurrentCourseChangeOnApproximation = beforeGroupOnApproximation; // speed/bearing before current course change
             Iterator<Pair<GPSFixMoving, CourseChange>> iter = courseChangeSequenceInSameDirection.iterator();
             double totalCourseChangeInDegrees = 0.0;
             long totalMilliseconds = 0l;
@@ -1910,17 +1907,21 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         Tack tackAfterManeuver = getTack(maneuverPosition, timePointAfterManeuver,
                 speedWithBearingOnApproximationAtEnd.getBearing());
         ManeuverType maneuverType;
+        Distance maneuverLoss = null;
         // the TrackedLegOfCompetitor variables may be null, e.g., in case the time points are before or after the race
         TrackedLegOfCompetitor legBeforeManeuver = getTrackedLeg(competitor, timePointBeforeManeuver);
         TrackedLegOfCompetitor legAfterManeuver = getTrackedLeg(competitor, timePointAfterManeuver);
-        if (Math.abs(totalCourseChangeInDegrees) > PENALTY_CIRCLE_DEGREES_THRESHOLD) {
-            maneuverType = ManeuverType.PENALTY_CIRCLE;
-        } else if (legBeforeManeuver != legAfterManeuver
-                &&
+        // check for mask passing first; a tacking / jibe-setting mark rounding thus takes precedence over being detected as a penalty circle
+        if (legBeforeManeuver != legAfterManeuver
                 // a maneuver at the start line is not to be considered a MARK_PASSING maneuver; show a tack as a tack
-                legAfterManeuver != null
+                && legAfterManeuver != null
                 && legAfterManeuver.getLeg().getFrom() != getRace().getCourse().getFirstWaypoint()) {
             maneuverType = ManeuverType.MARK_PASSING;
+        } else if (Math.abs(totalCourseChangeInDegrees) > PENALTY_CIRCLE_DEGREES_THRESHOLD) {
+            maneuverType = ManeuverType.PENALTY_CIRCLE;
+            if (legBeforeManeuver != null) {
+                maneuverLoss = legBeforeManeuver.getManeuverLoss(timePointBeforeManeuver, timePointAfterManeuver);
+            }
         } else {
             if (tackBeforeManeuver != tackAfterManeuver) {
                 LegType legType = legBeforeManeuver != null ? getTrackedLeg(legBeforeManeuver.getLeg()).getLegType(
@@ -1931,9 +1932,15 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                     switch (legType) {
                     case UPWIND:
                         maneuverType = ManeuverType.TACK;
+                        if (legBeforeManeuver != null) {
+                            maneuverLoss = legBeforeManeuver.getManeuverLoss(timePointBeforeManeuver, timePointAfterManeuver);
+                        }
                         break;
                     case DOWNWIND:
                         maneuverType = ManeuverType.JIBE;
+                        if (legBeforeManeuver != null) {
+                            maneuverLoss = legBeforeManeuver.getManeuverLoss(timePointBeforeManeuver, timePointAfterManeuver);
+                        }
                         break;
                     default:
                         maneuverType = ManeuverType.UNKNOWN;
@@ -1964,7 +1971,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         }
         Maneuver maneuver = new ManeuverImpl(maneuverType, tackAfterManeuver, maneuverPosition, maneuverTimePoint,
                 speedWithBearingOnApproximationAtBeginning, speedWithBearingOnApproximationAtEnd,
-                totalCourseChangeInDegrees);
+                totalCourseChangeInDegrees, maneuverLoss);
         return maneuver;
     }
 

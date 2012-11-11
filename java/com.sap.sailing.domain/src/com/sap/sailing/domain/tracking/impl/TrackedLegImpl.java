@@ -35,7 +35,7 @@ public class TrackedLegImpl implements TrackedLeg, RaceChangeListener {
 
     private final static Logger logger = Logger.getLogger(TrackedLegImpl.class.getName());
     
-    private final static double UPWIND_DOWNWIND_TOLERANCE_IN_DEG = 45; // TracTrac does 22.5, Marcus Baur suggest 40; Nils Schröder suggests 60
+    private final static double UPWIND_DOWNWIND_TOLERANCE_IN_DEG = 45; // TracTrac does 22.5, Marcus Baur suggest 40; Nils Schrï¿½der suggests 60
 
     private final Leg leg;
     private final Map<Competitor, TrackedLegOfCompetitor> trackedLegsOfCompetitors;
@@ -135,7 +135,8 @@ public class TrackedLegImpl implements TrackedLeg, RaceChangeListener {
     public LegType getLegType(TimePoint at) throws NoWindException {
         Wind wind = getWindOnLeg(at);
         if (wind == null) {
-            throw new NoWindException("Need to know wind direction to determine whether leg "+getLeg()+
+            throw new NoWindException("Need to know wind direction in race "+getTrackedRace().getRace().getName()+
+                    " to determine whether leg "+getLeg()+
                     " is an upwind or downwind leg");
         }
         Bearing legBearing = getLegBearing(at);

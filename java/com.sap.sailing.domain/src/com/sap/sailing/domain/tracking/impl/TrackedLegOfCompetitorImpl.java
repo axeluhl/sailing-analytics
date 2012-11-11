@@ -9,6 +9,7 @@ import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MeterDistance;
+import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.ManeuverType;
@@ -196,10 +197,10 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     }
 
     /**
-     * If the current {@link #getLeg() leg} is +/- {@link #UPWIND_DOWNWIND_TOLERANCE_IN_DEG} degrees collinear with the
+     * If the current {@link #getLeg() leg} is +/- {@link TrackedLegImpl#UPWIND_DOWNWIND_TOLERANCE_IN_DEG} degrees collinear with the
      * wind's bearing, the competitor's position is projected onto the line crossing <code>buoy</code> in the wind's
      * bearing, and the distance from the projection to the <code>buoy</code> is returned. Otherwise, it is assumed that
-     * the leg is neither an upwind nor a downwind leg, and hence the true distance to <code>buoy</code> is returned.
+     * the leg is neither an upwind nor a downwind leg, and hence the along-track distance to <code>buoy</code> is returned.
      * 
      * @param at the wind estimation is performed for this point in time
      */
@@ -574,6 +575,39 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
             } else {
                 result = null;
             }
+        }
+        return result;
+    }
+
+    @Override
+    public Distance getManeuverLoss(MillisecondsTimePoint timePointBeforeManeuver,
+            MillisecondsTimePoint timePointAfterManeuver) throws NoWindException {
+        assert timePointBeforeManeuver != null;
+        assert timePointAfterManeuver != null;
+        Distance result;
+        long millisecondsOverWhichToAverageSpeed = getTrackedRace().getMillisecondsOverWhichToAverageSpeed();
+        TimePoint extrapolationBase = timePointBeforeManeuver.minus(millisecondsOverWhichToAverageSpeed/2);
+        final GPSFixTrack<Competitor, GPSFixMoving> track = getTrackedRace().getTrack(getCompetitor());
+        Position estimatedPositionAtBase = track.getEstimatedPosition(extrapolationBase, /* extrapolate */ false);
+        if (estimatedPositionAtBase != null) {
+            SpeedWithBearing estimatedSpeedAtBase = track.getEstimatedSpeed(extrapolationBase);
+            if (estimatedSpeedAtBase != null) {
+                TimePoint extrapolationTarget = timePointAfterManeuver.plus(millisecondsOverWhichToAverageSpeed / 2);
+                Position extrapolatedPositionWithoutManeuver = estimatedSpeedAtBase.travelTo(estimatedPositionAtBase,
+                        extrapolationBase, extrapolationTarget);
+                Position estimatedActualPositionAfterManeuver = track.getEstimatedPosition(extrapolationTarget, /* extrapolate */
+                        false);
+                if (estimatedActualPositionAfterManeuver != null) {
+                    result = getWindwardDistance(estimatedActualPositionAfterManeuver, extrapolatedPositionWithoutManeuver,
+                            new MillisecondsTimePoint((timePointBeforeManeuver.asMillis() + timePointAfterManeuver.asMillis())/2));
+                } else {
+                    result = null;
+                }
+            } else {
+                result = null;
+            }
+        } else {
+            result = null;
         }
         return result;
     }
