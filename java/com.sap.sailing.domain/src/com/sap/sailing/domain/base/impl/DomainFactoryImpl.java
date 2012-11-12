@@ -106,8 +106,8 @@ public class DomainFactoryImpl implements DomainFactory {
     
     /**
      * @param id
-     *            the ID which is probably also used as the "device name" and the "sail number" in case of an
-     *            {@link MessageType#RPD RPD} message
+     * the ID which is probably also used as the "device name" and the "sail number" in case of an
+     * {@link MessageType#RPD RPD} message
      */
     @Override
     public Buoy getOrCreateBuoy(String id) {
@@ -120,10 +120,10 @@ public class DomainFactoryImpl implements DomainFactory {
     }
     
     @Override
-    public Buoy getOrCreateBuoy(String id, String displayColor) {
+    public Buoy getOrCreateBuoy(String id, String color, String shape, String pattern) {
         Buoy result = buoyCache.get(id);
         if (result == null) {
-            result = new BuoyImpl(id, displayColor);
+            result = new BuoyImpl(id, color, shape, pattern);
             buoyCache.put(id, result);
         }
         return result;

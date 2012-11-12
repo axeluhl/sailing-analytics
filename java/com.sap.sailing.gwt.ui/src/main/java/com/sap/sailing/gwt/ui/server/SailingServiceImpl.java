@@ -53,7 +53,6 @@ import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
-import com.sap.sailing.domain.base.impl.MeterDistance;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Color;
@@ -85,6 +84,7 @@ import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KilometersPerHourSpeedImpl;
+import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
@@ -861,6 +861,14 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return result;
     }
 
+    private BuoyDTO convertToBuoyDTO(Buoy buoy, Position position) {
+        BuoyDTO buoyDTO = new BuoyDTO(buoy.getName(), position.getLatDeg(), position.getLngDeg());
+        buoyDTO.color = buoy.getColor();
+        buoyDTO.shape = buoy.getShape();
+        buoyDTO.pattern = buoy.getPattern();
+        return buoyDTO;
+    }
+
     private RegattaDTO convertToRegattaDTO(Regatta regatta) {
         RegattaDTO regattaDTO = new RegattaDTO(regatta.getName(), regatta.getScoringScheme().getType());
         regattaDTO.races = convertToRaceDTOs(regatta);
@@ -1556,9 +1564,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     GPSFixTrack<Buoy, GPSFix> track = trackedRace.getOrCreateTrack(buoy);
                     Position positionAtDate = track.getEstimatedPosition(dateAsTimePoint, /* extrapolate */false);
                     if (positionAtDate != null) {
-                        BuoyDTO buoyDTO = new BuoyDTO(buoy.getName(), positionAtDate.getLatDeg(),
-                                positionAtDate.getLngDeg(), buoy.getDisplayColor());
-                        result.buoys.add(buoyDTO);
+                        result.buoys.add(convertToBuoyDTO(buoy, positionAtDate));
                     }
                 }
                 
@@ -1588,8 +1594,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 GPSFixTrack<Buoy, GPSFix> track = trackedRace.getOrCreateTrack(buoy);
                 Position positionAtDate = track.getEstimatedPosition(dateAsTimePoint, /* extrapolate */false);
                 if (positionAtDate != null) {
-                    BuoyDTO markDTO = new BuoyDTO(buoy.getName(), positionAtDate.getLatDeg(), positionAtDate.getLngDeg(), buoy.getDisplayColor());
-                    raceBuoysDTO.buoys.add(markDTO);
+                    raceBuoysDTO.buoys.add(convertToBuoyDTO(buoy, positionAtDate));
                 }
             }
         }
@@ -1619,13 +1624,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             final Position leftPos = trackedRace.getOrCreateTrack(left).getEstimatedPosition(timePoint, /* extrapolate */ false);
             final Buoy right = ((Gate) controlPoint).getRight();
             final Position rightPos = trackedRace.getOrCreateTrack(right).getEstimatedPosition(timePoint, /* extrapolate */ false);
-            result = new GateDTO(controlPoint.getName(),
-                    new BuoyDTO(left.getName(), leftPos.getLatDeg(), leftPos.getLngDeg(), left.getDisplayColor()),
-                    new BuoyDTO(right.getName(), rightPos.getLatDeg(), rightPos.getLngDeg(), right.getDisplayColor()));
+            result = new GateDTO(controlPoint.getName(), convertToBuoyDTO(left, leftPos), convertToBuoyDTO(right, rightPos)); 
         } else {
             final Position posOfFirst = trackedRace.getOrCreateTrack(controlPoint.getBuoys().iterator().next()).
                     getEstimatedPosition(timePoint, /* extrapolate */ false);
-            result = new BuoyDTO(controlPoint.getName(), posOfFirst.getLatDeg(), posOfFirst.getLngDeg(), null);
+            result = new BuoyDTO(controlPoint.getName(), posOfFirst.getLatDeg(), posOfFirst.getLngDeg());
         }
         return result;
     }
@@ -2435,7 +2438,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     maneuver.getTimePoint().asDate(),
                     createSpeedWithBearingDTO(maneuver.getSpeedWithBearingBefore()),
                     createSpeedWithBearingDTO(maneuver.getSpeedWithBearingAfter()),
-                    maneuver.getDirectionChangeInDegrees());
+                    maneuver.getDirectionChangeInDegrees(), maneuver.getManeuverLoss()==null?null:maneuver.getManeuverLoss().getMeters());
             result.add(maneuverDTO);
         }
         return result;
@@ -2777,5 +2780,4 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             fregService.registerResultUrl(new URL(result));
         }
     }
-
 }
