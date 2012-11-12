@@ -207,6 +207,10 @@ public class DelayedLeaderboardCorrectionsImpl implements DelayedLeaderboardCorr
     }
 
     @Override
+    public void competitorDisplayNameChanged(Competitor competitor, String oldDisplayName, String displayName) {
+    }
+
+    @Override
     public boolean isTransient() {
         return false;
     }

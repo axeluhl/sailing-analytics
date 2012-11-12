@@ -7,6 +7,7 @@ import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnListener;
@@ -114,6 +115,12 @@ public class RaceColumnListeners implements Serializable {
             }
         }
         return result;
+    }
+
+    public void notifyListenersAboutCompetitorDisplayNameChanged(Competitor competitor, String oldDisplayName, String displayName) {
+        for (RaceColumnListener listener : getRaceColumnListeners()) {
+            listener.competitorDisplayNameChanged(competitor, oldDisplayName, displayName);
+        }
     }
 
 }

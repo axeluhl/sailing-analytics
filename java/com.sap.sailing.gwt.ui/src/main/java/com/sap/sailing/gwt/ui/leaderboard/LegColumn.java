@@ -9,6 +9,7 @@ import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.user.cellview.client.Header;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.InvertibleComparator;
+import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.SortingOrder;
 import com.sap.sailing.domain.common.impl.InvertibleComparatorAdapter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -133,24 +134,24 @@ public class LegColumn extends ExpandableSortableColumn<String> {
             LegEntryDTO entry = getLegEntry(row);
             if (entry != null) {
                 StringBuilder result = new StringBuilder();
-                if (entry.numberOfTacks != null) {
-                    result.append(entry.numberOfTacks);
+                if (entry.numberOfManeuvers.get(ManeuverType.TACK) != null) {
+                    result.append(entry.numberOfManeuvers.get(ManeuverType.TACK));
                     result.append(" ");
                     result.append(stringMessages.tacks());
                 }
-                if (entry.numberOfJibes != null) {
+                if (entry.numberOfManeuvers.get(ManeuverType.JIBE) != null) {
                     if (result.length() > 0) {
                         result.append(", ");
                     }
-                    result.append(entry.numberOfJibes);
+                    result.append(entry.numberOfManeuvers.get(ManeuverType.JIBE));
                     result.append(" ");
                     result.append(stringMessages.jibes());
                 }
-                if (entry.numberOfPenaltyCircles != null) {
+                if (entry.numberOfManeuvers.get(ManeuverType.PENALTY_CIRCLE) != null) {
                     if (result.length() > 0) {
                         result.append(", ");
                     }
-                    result.append(entry.numberOfPenaltyCircles);
+                    result.append(entry.numberOfManeuvers.get(ManeuverType.PENALTY_CIRCLE));
                     result.append(" ");
                     result.append(stringMessages.penaltyCircles());
                 }
@@ -168,9 +169,9 @@ public class LegColumn extends ExpandableSortableColumn<String> {
                 result.append(getFormatter().format(fieldValue));
             }
             LegEntryDTO entry = getLegEntry(row);
-            if (entry != null && entry.numberOfPenaltyCircles != null && (int) entry.numberOfPenaltyCircles != 0) {
+            if (entry != null && entry.numberOfManeuvers.get(ManeuverType.PENALTY_CIRCLE) != null && (int) entry.numberOfManeuvers.get(ManeuverType.PENALTY_CIRCLE) != 0) {
                 result.append(" (");
-                result.append(entry.numberOfPenaltyCircles);
+                result.append(entry.numberOfManeuvers.get(ManeuverType.PENALTY_CIRCLE));
                 result.append("P)");
             }
             return result.toString();
@@ -181,28 +182,21 @@ public class LegColumn extends ExpandableSortableColumn<String> {
             LegEntryDTO entry = getLegEntry(row);
             Double result = null;
             if (entry != null) {
-                if (entry.numberOfTacks != null) {
-                    result = (double) entry.numberOfTacks;
-                }
-                if (entry.numberOfJibes != null) {
-                    if (result == null) {
-                        result = (double) entry.numberOfJibes;
-                    } else {
-                        result += (double) entry.numberOfJibes;
-                    }
-                }
-                if (entry.numberOfPenaltyCircles != null) {
-                    if (result == null) {
-                        result = (double) entry.numberOfPenaltyCircles;
-                    } else {
-                        result += (double) entry.numberOfPenaltyCircles;
+                for (ManeuverType maneuverType : new ManeuverType[] { ManeuverType.TACK, ManeuverType.JIBE,
+                        ManeuverType.PENALTY_CIRCLE }) {
+                    if (entry.numberOfManeuvers.get(maneuverType) != null) {
+                        if (result == null) {
+                            result = (double) entry.numberOfManeuvers.get(maneuverType);
+                        } else {
+                            result += (double) entry.numberOfManeuvers.get(maneuverType);
+                        }
                     }
                 }
             }
             return result;
         }
-
     }
+        
     public LegColumn(LeaderboardPanel leaderboardPanel, String raceName, int legIndex, SortingOrder preferredSortingOrder, StringMessages stringMessages,
             List<DetailType> legDetailSelection, String headerStyle, String columnStyle,
             String detailHeaderStyle, String detailColumnStyle) {

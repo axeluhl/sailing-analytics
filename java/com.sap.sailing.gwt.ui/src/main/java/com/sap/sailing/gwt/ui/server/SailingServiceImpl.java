@@ -60,6 +60,7 @@ import com.sap.sailing.domain.common.CountryCode;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LegType;
+import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindError;
 import com.sap.sailing.domain.common.NoWindException;
@@ -831,37 +832,34 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     .getMeters();
             List<Maneuver> maneuvers = trackedLeg.getManeuvers(timePoint, waitForLatestAnalyses);
             if (maneuvers != null) {
-                result.numberOfTacks = 0;
-                result.numberOfJibes = 0;
-                result.numberOfPenaltyCircles = 0;
-                int maneuverCount = 0;
-                double totalManeuverLossInMeters = 0.0;
+                result.numberOfManeuvers = new HashMap<ManeuverType, Integer>();
+                result.numberOfManeuvers.put(ManeuverType.TACK, 0);
+                result.numberOfManeuvers.put(ManeuverType.JIBE, 0);
+                result.numberOfManeuvers.put(ManeuverType.PENALTY_CIRCLE, 0);
+                Map<ManeuverType, Double> totalManeuverLossInMeters = new HashMap<ManeuverType, Double>();
+                totalManeuverLossInMeters.put(ManeuverType.TACK, 0.0);
+                totalManeuverLossInMeters.put(ManeuverType.JIBE, 0.0);
+                totalManeuverLossInMeters.put(ManeuverType.PENALTY_CIRCLE, 0.0);
                 for (Maneuver maneuver : maneuvers) {
                     switch (maneuver.getType()) {
                     case TACK:
-                        result.numberOfTacks++;
-                        if (maneuver.getManeuverLoss() != null) {
-                            maneuverCount++;
-                            totalManeuverLossInMeters += maneuver.getManeuverLoss().getMeters();
-                        }
-                        break;
                     case JIBE:
-                        result.numberOfJibes++;
-                        if (maneuver.getManeuverLoss() != null) {
-                            maneuverCount++;
-                            totalManeuverLossInMeters += maneuver.getManeuverLoss().getMeters();
-                        }
-                        break;
                     case PENALTY_CIRCLE:
-                        result.numberOfPenaltyCircles++;
                         if (maneuver.getManeuverLoss() != null) {
-                            maneuverCount++;
-                            totalManeuverLossInMeters += maneuver.getManeuverLoss().getMeters();
+                            result.numberOfManeuvers.put(maneuver.getType(), result.numberOfManeuvers.get(maneuver.getType())+1);
+                            totalManeuverLossInMeters.put(maneuver.getType(),
+                                    totalManeuverLossInMeters.get(maneuver.getType()) + maneuver.getManeuverLoss().getMeters());
                         }
                         break;
                     }
                 }
-                result.averageManeuverLossInMeters = maneuverCount == 0 ? null : (totalManeuverLossInMeters/maneuverCount);
+                result.averageManeuverLossInMeters = new HashMap<ManeuverType, Double>();
+                for (ManeuverType maneuverType : new ManeuverType[] { ManeuverType.TACK, ManeuverType.JIBE, ManeuverType.PENALTY_CIRCLE }) {
+                    if (result.numberOfManeuvers.get(maneuverType) != 0) {
+                        result.averageManeuverLossInMeters.put(maneuverType,
+                                totalManeuverLossInMeters.get(maneuverType)/result.numberOfManeuvers.get(maneuverType));
+                    }
+                }
             }
         }
         return result;

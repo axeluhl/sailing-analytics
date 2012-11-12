@@ -50,8 +50,11 @@ public class LeaderboardSettingsFactory {
             case Live:  
                 List<DetailType> maneuverDetails = new ArrayList<DetailType>();
                 maneuverDetails.add(DetailType.TACK);
+                maneuverDetails.add(DetailType.AVERAGE_TACK_LOSS_IN_METERS);
                 maneuverDetails.add(DetailType.JIBE);
+                maneuverDetails.add(DetailType.AVERAGE_JIBE_LOSS_IN_METERS);
                 maneuverDetails.add(DetailType.PENALTY_CIRCLE);
+                maneuverDetails.add(DetailType.AVERAGE_MANEUVER_LOSS_IN_METERS);
                 List<DetailType> legDetails = new ArrayList<DetailType>();
                 legDetails.add(DetailType.DISTANCE_TRAVELED);
                 legDetails.add(DetailType.AVERAGE_SPEED_OVER_GROUND_IN_KNOTS);
@@ -108,8 +111,11 @@ public class LeaderboardSettingsFactory {
         }
         List<DetailType> maneuverDetails = new ArrayList<DetailType>();
         maneuverDetails.add(DetailType.TACK);
+        maneuverDetails.add(DetailType.AVERAGE_TACK_LOSS_IN_METERS);
         maneuverDetails.add(DetailType.JIBE);
+        maneuverDetails.add(DetailType.AVERAGE_JIBE_LOSS_IN_METERS);
         maneuverDetails.add(DetailType.PENALTY_CIRCLE);
+        maneuverDetails.add(DetailType.AVERAGE_MANEUVER_LOSS_IN_METERS);
         List<DetailType> legDetails = new ArrayList<DetailType>();
         legDetails.add(DetailType.DISTANCE_TRAVELED);
         legDetails.add(DetailType.AVERAGE_SPEED_OVER_GROUND_IN_KNOTS);

@@ -11,8 +11,8 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.Header;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.InvertibleComparator;
+import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.impl.InvertibleComparatorAdapter;
-import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.LegDetailColumn.LegDetailField;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
@@ -46,28 +46,42 @@ public class ManeuverCountRaceColumn extends ExpandableSortableColumn<String> im
     private class NumberOfTacks extends AbstractManeuverDetailField<Double> {
         @Override
         protected Double getFromNonNullEntry(LeaderboardEntryDTO entry) {
-            return ManeuverCountRaceColumn.this.getTotalNumberOfTacks(entry);
+            return ManeuverCountRaceColumn.this.getTotalNumberOfManeuvers(entry, ManeuverType.TACK);
+        }
+    }
+
+    private class AverageTackLossInMeters extends AbstractManeuverDetailField<Double> {
+        @Override
+        protected Double getFromNonNullEntry(LeaderboardEntryDTO entry) {
+            return ManeuverCountRaceColumn.this.getAverageManeuverLossInMeters(entry, ManeuverType.TACK);
         }
     }
 
     private class NumberOfJibes extends AbstractManeuverDetailField<Double> {
         @Override
         protected Double getFromNonNullEntry(LeaderboardEntryDTO entry) {
-            return ManeuverCountRaceColumn.this.getTotalNumberOfJibes(entry);
+            return ManeuverCountRaceColumn.this.getTotalNumberOfManeuvers(entry, ManeuverType.JIBE);
+        }
+    }
+
+    private class AverageJibeLossInMeters extends AbstractManeuverDetailField<Double> {
+        @Override
+        protected Double getFromNonNullEntry(LeaderboardEntryDTO entry) {
+            return ManeuverCountRaceColumn.this.getAverageManeuverLossInMeters(entry, ManeuverType.JIBE);
         }
     }
 
     private class NumberOfPenaltyCircles extends AbstractManeuverDetailField<Double> {
         @Override
         protected Double getFromNonNullEntry(LeaderboardEntryDTO entry) {
-            return ManeuverCountRaceColumn.this.getTotalNumberOfPenaltyCircles(entry);
+            return ManeuverCountRaceColumn.this.getTotalNumberOfManeuvers(entry, ManeuverType.PENALTY_CIRCLE);
         }
     }
 
     private class AverageManeuverLossInMeters extends AbstractManeuverDetailField<Double> {
         @Override
         protected Double getFromNonNullEntry(LeaderboardEntryDTO entry) {
-            return ManeuverCountRaceColumn.this.getAverageManeuverLossInMeters(entry);
+            return ManeuverCountRaceColumn.this.getAverageManeuverLossInMeters(entry, ManeuverType.TACK, ManeuverType.JIBE);
         }
     }
 
@@ -84,118 +98,68 @@ public class ManeuverCountRaceColumn extends ExpandableSortableColumn<String> im
         this.minmaxRenderer = new MinMaxRenderer(this, getComparator());
     }
 
-    public Double getAverageManeuverLossInMeters(LeaderboardEntryDTO row) {
-        Double maneuverLossInMetersSum = null;
+    private Double getAverageManeuverLossInMeters(LeaderboardEntryDTO row, ManeuverType... maneuverTypes) {
         int count = 0;
+        double totalLossInMeters = 0.0;
         if (row != null && row.legDetails != null) {
             for (LegEntryDTO legDetail : row.legDetails) {
                 if (legDetail != null) {
                     if (legDetail.averageManeuverLossInMeters != null) {
-                        if (maneuverLossInMetersSum == null) {
-                            maneuverLossInMetersSum = (double) legDetail.averageManeuverLossInMeters;
-                        } else {
-                            maneuverLossInMetersSum += (double) legDetail.averageManeuverLossInMeters;
+                        for (ManeuverType maneuverType : maneuverTypes) {
+                            final Integer maneuverCount = legDetail.numberOfManeuvers.get(maneuverType);
+                            if (maneuverCount != null && maneuverCount != 0) {
+                                totalLossInMeters += legDetail.averageManeuverLossInMeters.get(maneuverType) * maneuverCount;
+                                count += maneuverCount;
+                            }
                         }
-                        Triple<Double, Double, Double> maneuverCounts = getTotalNumberOfTacksJibesAndPenaltyCircles(row);
-                        count += maneuverCounts.getA()+maneuverCounts.getB()+maneuverCounts.getC();
                     }
                 }
             }
         }
-        return maneuverLossInMetersSum == null ? null : maneuverLossInMetersSum / count;
+        return count == 0 ? null : totalLossInMeters / count;
     }
 
-    private Double getTotalNumberOfTacks(LeaderboardEntryDTO row) {
-        Double totalNumberOfTacks = null;
+    private Double getTotalNumberOfManeuvers(LeaderboardEntryDTO row, ManeuverType maneuverType) {
+        Double totalNumberOfManeuvers = null;
         if (row != null && row.legDetails != null) {
             for (LegEntryDTO legDetail : row.legDetails) {
                 if (legDetail != null) {
-                    if (legDetail.numberOfTacks != null) {
-                        if (totalNumberOfTacks == null) {
-                            totalNumberOfTacks = (double) legDetail.numberOfTacks;
+                    if (legDetail.numberOfManeuvers.get(maneuverType) != null) {
+                        if (totalNumberOfManeuvers == null) {
+                            totalNumberOfManeuvers = (double) legDetail.numberOfManeuvers.get(maneuverType);
                         } else {
-                            totalNumberOfTacks += (double) legDetail.numberOfTacks;
+                            totalNumberOfManeuvers += (double) legDetail.numberOfManeuvers.get(maneuverType);
                         }
                     }
                 }
             }
         }
-        return totalNumberOfTacks;
+        return totalNumberOfManeuvers;
     }
 
-    private Double getTotalNumberOfJibes(LeaderboardEntryDTO row) {
-        Double totalNumberOfJibes = null;
-        if (row != null && row.legDetails != null) {
-            for (LegEntryDTO legDetail : row.legDetails) {
-                if (legDetail != null) {
-                    if (legDetail.numberOfJibes != null) {
-                        if (totalNumberOfJibes == null) {
-                            totalNumberOfJibes = (double) legDetail.numberOfJibes;
-                        } else {
-                            totalNumberOfJibes += (double) legDetail.numberOfJibes;
-                        }
-                    }
-                }
-            }
-        }
-        return totalNumberOfJibes;
-    }
-
-    private Double getTotalNumberOfPenaltyCircles(LeaderboardEntryDTO row) {
-        Double totalNumberOfPnaltyCicles = null;
-        if (row != null && row.legDetails != null) {
-            for (LegEntryDTO legDetail : row.legDetails) {
-                if (legDetail != null) {
-                    if (legDetail.numberOfPenaltyCircles != null) {
-                        if (totalNumberOfPnaltyCicles == null) {
-                            totalNumberOfPnaltyCicles = (double) legDetail.numberOfPenaltyCircles;
-                        } else {
-                            totalNumberOfPnaltyCicles += (double) legDetail.numberOfPenaltyCircles;
-                        }
-                    }
-                }
-            }
-        }
-        return totalNumberOfPnaltyCicles;
-    }
-
-    private Triple<Double, Double, Double> getTotalNumberOfTacksJibesAndPenaltyCircles(LeaderboardRowDTO row) {
+    private Map<ManeuverType, Double> getTotalNumberOfTacksJibesAndPenaltyCircles(LeaderboardRowDTO row) {
         LeaderboardEntryDTO fieldsForRace = row.fieldsByRaceColumnName.get(getRaceName());
         return getTotalNumberOfTacksJibesAndPenaltyCircles(fieldsForRace);
     }
 
-    private Triple<Double, Double, Double> getTotalNumberOfTacksJibesAndPenaltyCircles(LeaderboardEntryDTO fieldsForRace) {
-        Double totalNumberOfTacks = null;
-        Double totalNumberOfJibes = null;
-        Double totalNumberOfPenaltyCircles = null;
+    private Map<ManeuverType, Double> getTotalNumberOfTacksJibesAndPenaltyCircles(LeaderboardEntryDTO fieldsForRace) {
+        Map<ManeuverType, Double> totalNumberOfManeuvers = new HashMap<ManeuverType, Double>();
+        for (ManeuverType maneuverType : new ManeuverType[] { ManeuverType.TACK, ManeuverType.JIBE, ManeuverType.PENALTY_CIRCLE }) {
+            totalNumberOfManeuvers.put(maneuverType, 0.0);
+        }
         if (fieldsForRace != null && fieldsForRace.legDetails != null) {
             for (LegEntryDTO legDetail : fieldsForRace.legDetails) {
                 if (legDetail != null) {
-                    if (legDetail.numberOfTacks != null) {
-                        if (totalNumberOfTacks == null) {
-                            totalNumberOfTacks = (double) legDetail.numberOfTacks;
-                        } else {
-                            totalNumberOfTacks += legDetail.numberOfTacks;
-                        }
-                    }
-                    if (legDetail.numberOfJibes != null) {
-                        if (totalNumberOfJibes == null) {
-                            totalNumberOfJibes = (double) legDetail.numberOfJibes;
-                        } else {
-                            totalNumberOfJibes += (double) legDetail.numberOfJibes;
-                        }
-                    }
-                    if (legDetail.numberOfPenaltyCircles != null) {
-                        if (totalNumberOfPenaltyCircles == null) {
-                            totalNumberOfPenaltyCircles = (double) legDetail.numberOfPenaltyCircles;
-                        } else {
-                            totalNumberOfPenaltyCircles += (double) legDetail.numberOfPenaltyCircles;
+                    for (ManeuverType maneuverType : new ManeuverType[] { ManeuverType.TACK, ManeuverType.JIBE, ManeuverType.PENALTY_CIRCLE }) {
+                        if (legDetail.numberOfManeuvers.get(maneuverType) != null) {
+                            totalNumberOfManeuvers.put(maneuverType,
+                                    totalNumberOfManeuvers.get(maneuverType) + (double) legDetail.numberOfManeuvers.get(maneuverType));
                         }
                     }
                 }
             }
         }
-        return new Triple<Double, Double, Double>(totalNumberOfTacks, totalNumberOfJibes, totalNumberOfPenaltyCircles);
+        return totalNumberOfManeuvers;
     }
 
     private String getRaceName() {
@@ -251,25 +215,14 @@ public class ManeuverCountRaceColumn extends ExpandableSortableColumn<String> im
 
     public Double getDoubleValue(LeaderboardRowDTO row) {
         Double result = null;
-        Triple<Double, Double, Double> tacksJibesAndPenalties = getTotalNumberOfTacksJibesAndPenaltyCircles(row);
-        Double totalNumberOfTacks = tacksJibesAndPenalties.getA();
-        Double totalNumberOfJibes = tacksJibesAndPenalties.getB();
-        Double totalNumberOfPenaltyCircles = tacksJibesAndPenalties.getC();
-        if (totalNumberOfTacks != null) {
-            result = (double) totalNumberOfTacks;
-        }
-        if (totalNumberOfJibes != null) {
-            if (result == null) {
-                result = (double) totalNumberOfJibes;
-            } else {
-                result += (double) totalNumberOfJibes;
-            }
-        }
-        if (totalNumberOfPenaltyCircles != null) {
-            if (result == null) {
-                result = (double) totalNumberOfPenaltyCircles;
-            } else {
-                result += (double) totalNumberOfPenaltyCircles;
+        Map<ManeuverType, Double> tacksJibesAndPenalties = getTotalNumberOfTacksJibesAndPenaltyCircles(row);
+        for (Double maneuverCount : tacksJibesAndPenalties.values()) {
+            if (maneuverCount != null) {
+                if (result == null) {
+                    result = maneuverCount;
+                } else {
+                    result += maneuverCount;
+                }
             }
         }
         return result;
@@ -293,6 +246,16 @@ public class ManeuverCountRaceColumn extends ExpandableSortableColumn<String> im
                 new FormattedDoubleLegDetailColumn(stringMessages.penaltyCircle(), "", new NumberOfPenaltyCircles(),
                         DetailType.PENALTY_CIRCLE.getPrecision(), DetailType.PENALTY_CIRCLE.getDefaultSortingOrder(),
                         detailHeaderStyle, detailColumnStyle));
+        result.put(DetailType.AVERAGE_TACK_LOSS_IN_METERS,
+                new FormattedDoubleLegDetailColumn(stringMessages.averageTackLossInMeters(),
+                        stringMessages.distanceInMetersUnit(), new AverageTackLossInMeters(),
+                        DetailType.AVERAGE_TACK_LOSS_IN_METERS.getPrecision(), DetailType.AVERAGE_TACK_LOSS_IN_METERS.getDefaultSortingOrder(),
+                        detailHeaderStyle, detailColumnStyle));
+        result.put(DetailType.AVERAGE_JIBE_LOSS_IN_METERS,
+                new FormattedDoubleLegDetailColumn(stringMessages.averageJibeLossInMeters(),
+                        stringMessages.distanceInMetersUnit(), new AverageJibeLossInMeters(),
+                        DetailType.AVERAGE_JIBE_LOSS_IN_METERS.getPrecision(), DetailType.AVERAGE_JIBE_LOSS_IN_METERS.getDefaultSortingOrder(),
+                        detailHeaderStyle, detailColumnStyle));
         result.put(DetailType.AVERAGE_MANEUVER_LOSS_IN_METERS,
                 new FormattedDoubleLegDetailColumn(stringMessages.averageManeuverLossInMeters(),
                         stringMessages.distanceInMetersUnit(), new AverageManeuverLossInMeters(),
@@ -302,7 +265,8 @@ public class ManeuverCountRaceColumn extends ExpandableSortableColumn<String> im
     }
 
     public static DetailType[] getAvailableManeuverDetailColumnTypes() {
-        return new DetailType[] { DetailType.TACK, DetailType.JIBE, DetailType.PENALTY_CIRCLE };
+        return new DetailType[] { DetailType.TACK, DetailType.AVERAGE_TACK_LOSS_IN_METERS,
+                DetailType.JIBE, DetailType.AVERAGE_JIBE_LOSS_IN_METERS, DetailType.PENALTY_CIRCLE, DetailType.AVERAGE_MANEUVER_LOSS_IN_METERS };
     }
 
     @Override

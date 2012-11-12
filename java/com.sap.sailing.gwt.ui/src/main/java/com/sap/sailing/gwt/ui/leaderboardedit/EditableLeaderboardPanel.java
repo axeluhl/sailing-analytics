@@ -221,7 +221,8 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                                 }
                                 getLeaderboard().competitorDisplayNames.put(row.competitor, value == null || value.trim().length() == 0 ? null : value.trim());
                                 cell.setViewData(row, null); // ensure that getValue() is called again
-                                EditableLeaderboardPanel.this.getData().getList().set(rowIndex, row);
+                                EditableLeaderboardPanel.this.getData().getList().set(
+                                        EditableLeaderboardPanel.this.getData().getList().indexOf(row), row);
                             }
                         });
             }
@@ -672,9 +673,10 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
     private List<HasCell<LeaderboardRowDTO, ?>> getCellListForEditableCompetitorColumn() {
         List<HasCell<LeaderboardRowDTO, ?>> result = new ArrayList<HasCell<LeaderboardRowDTO, ?>>();
         result.add(new HasCell<LeaderboardRowDTO, String>() {
+            private final ButtonCell cell = new ButtonCell();
             @Override
             public Cell<String> getCell() {
-                return new ButtonCell();
+                return cell;
             }
 
             @Override
@@ -707,9 +709,10 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
             }
         });
         result.add(new HasCell<LeaderboardRowDTO, String>() {
+            private final EditTextCell cell = new EditTextCell();
                     @Override
                     public EditTextCell getCell() {
-                        return new EditTextCell();
+                        return cell;
                     }
 
                     @Override

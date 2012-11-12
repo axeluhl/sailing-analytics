@@ -68,6 +68,12 @@ public class DetailTypeFormatter {
             return stringMessages.totalTimeSailedReachingInSeconds();
         case TOTAL_TIME_SAILED_IN_SECONDS:
             return stringMessages.totalTimeSailedInSeconds();
+        case AVERAGE_MANEUVER_LOSS_IN_METERS:
+            return stringMessages.averageManeuverLossInMeters();
+        case AVERAGE_TACK_LOSS_IN_METERS:
+            return stringMessages.averageTackLossInMeters();
+        case AVERAGE_JIBE_LOSS_IN_METERS:
+            return stringMessages.averageJibeLossInMeters();
         }
         return null;
 
