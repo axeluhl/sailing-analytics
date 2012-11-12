@@ -834,19 +834,34 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 result.numberOfTacks = 0;
                 result.numberOfJibes = 0;
                 result.numberOfPenaltyCircles = 0;
+                int maneuverCount = 0;
+                double totalManeuverLossInMeters = 0.0;
                 for (Maneuver maneuver : maneuvers) {
                     switch (maneuver.getType()) {
                     case TACK:
                         result.numberOfTacks++;
+                        if (maneuver.getManeuverLoss() != null) {
+                            maneuverCount++;
+                            totalManeuverLossInMeters += maneuver.getManeuverLoss().getMeters();
+                        }
                         break;
                     case JIBE:
                         result.numberOfJibes++;
+                        if (maneuver.getManeuverLoss() != null) {
+                            maneuverCount++;
+                            totalManeuverLossInMeters += maneuver.getManeuverLoss().getMeters();
+                        }
                         break;
                     case PENALTY_CIRCLE:
                         result.numberOfPenaltyCircles++;
+                        if (maneuver.getManeuverLoss() != null) {
+                            maneuverCount++;
+                            totalManeuverLossInMeters += maneuver.getManeuverLoss().getMeters();
+                        }
                         break;
                     }
                 }
+                result.averageManeuverLossInMeters = maneuverCount == 0 ? null : (totalManeuverLossInMeters/maneuverCount);
             }
         }
         return result;

@@ -37,6 +37,7 @@ public class LegEntryDTO implements IsSerializable {
     public boolean finished;
     public Integer numberOfJibes;
     public Integer numberOfTacks;
+    public Double averageManeuverLossInMeters;
     public Integer numberOfPenaltyCircles;
     public Double averageCrossTrackErrorInMeters;
     

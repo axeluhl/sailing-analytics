@@ -426,4 +426,5 @@ public interface StringMessages extends Messages {
     String factor();
     String errorUpdatingIsMedalRace(String message);
     String maneuverLoss();
+    String averageManeuverLossInMeters();
 }
