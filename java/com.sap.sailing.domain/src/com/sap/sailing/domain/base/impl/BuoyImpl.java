@@ -12,26 +12,34 @@ public class BuoyImpl extends NamedImpl implements Buoy {
 
     private final String color;
     private final String shape;
+    private final String pattern;
 
-    /**
-     * Creates a buoy with <code>null</code> as {@link #getColor() color}
-     */
     public BuoyImpl(String name) {
         super(name);
         color = null;
         shape = null;
+        pattern = null;
     }
 
     public BuoyImpl(String name, String color) {
         super(name);
         this.color = color;
         shape = null;
+        pattern = null;
     }
 
     public BuoyImpl(String name, String color, String shape) {
         super(name);
         this.color = color;
         this.shape = shape;
+        pattern = null;
+    }
+
+    public BuoyImpl(String name, String color, String shape, String pattern) {
+        super(name);
+        this.color = color;
+        this.shape = shape;
+        this.pattern = pattern;
     }
 
     @Override
@@ -48,7 +56,7 @@ public class BuoyImpl extends NamedImpl implements Buoy {
 
     @Override
     public Buoy resolve(DomainFactory domainFactory) {
-        Buoy result = domainFactory.getOrCreateBuoy(getName(), getDisplayColor());
+        Buoy result = domainFactory.getOrCreateBuoy(getName(), color, shape, pattern);
         return result;
     }
 
@@ -60,5 +68,10 @@ public class BuoyImpl extends NamedImpl implements Buoy {
     @Override
     public String getShape() {
         return shape;
+    }
+
+    @Override
+    public String getPattern() {
+        return pattern;
     }
 }

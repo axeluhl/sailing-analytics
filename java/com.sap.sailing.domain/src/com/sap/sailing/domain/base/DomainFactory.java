@@ -26,7 +26,7 @@ public interface DomainFactory {
      * in that case. Otherwise, a new {@link Buoy} is created with <code>color</code> as its {@link Buoy#getColor()} 
      * and <code>shape</code> as its {@link Buoy#getShape()}.
      */
-    Buoy getOrCreateBuoy(String id, String color, String shape);
+    Buoy getOrCreateBuoy(String id, String color, String shape, String pattern);
 
     Gate createGate(Buoy left, Buoy right, String name);
     

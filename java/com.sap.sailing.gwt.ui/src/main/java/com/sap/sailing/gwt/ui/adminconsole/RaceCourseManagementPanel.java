@@ -393,7 +393,7 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
         TextColumn<BuoyDTO> buoyColorColumn = new TextColumn<BuoyDTO>() {
             @Override
             public String getValue(BuoyDTO buoyDTO) {
-                return buoyDTO.displayColor != null ? buoyDTO.displayColor : "";
+                return buoyDTO.color != null ? buoyDTO.color : "";
             }
         };
         result.addColumn(buoyColorColumn, stringMessages.color());

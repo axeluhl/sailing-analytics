@@ -4,10 +4,9 @@ import java.util.Collections;
 
 public class BuoyDTO extends ControlPointDTO {
     public PositionDTO position;
-
     public String color;
-
     public String shape;
+    public String pattern;
 
     BuoyDTO() {}
     

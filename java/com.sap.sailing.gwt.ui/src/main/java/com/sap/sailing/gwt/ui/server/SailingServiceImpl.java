@@ -865,6 +865,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         BuoyDTO buoyDTO = new BuoyDTO(buoy.getName(), position.getLatDeg(), position.getLngDeg());
         buoyDTO.color = buoy.getColor();
         buoyDTO.shape = buoy.getShape();
+        buoyDTO.pattern = buoy.getPattern();
         return buoyDTO;
     }
 

@@ -146,13 +146,14 @@ public class DomainFactoryImpl implements DomainFactory {
                 Map<String, String> controlPointMetadata = parseControlPointMetadata(controlPoint);
                 String buoyColor = controlPointMetadata.get("Color");
                 String buoyShape = controlPointMetadata.get("Shape");
+                String buoyPattern = controlPointMetadata.get("Pattern");
                 if (controlPoint.getHasTwoPoints()) {
                     // it's a gate
-                    Buoy leftBuoy = baseDomainFactory.getOrCreateBuoy(controlPointName + " (left)", buoyColor, buoyShape);
-                    Buoy rightBuoy = baseDomainFactory.getOrCreateBuoy(controlPointName + " (right)", buoyColor, buoyShape);
+                    Buoy leftBuoy = baseDomainFactory.getOrCreateBuoy(controlPointName + " (left)", buoyColor, buoyShape, buoyPattern);
+                    Buoy rightBuoy = baseDomainFactory.getOrCreateBuoy(controlPointName + " (right)", buoyColor, buoyShape, buoyPattern);
                     domainControlPoint = baseDomainFactory.createGate(leftBuoy, rightBuoy, controlPointName);
                 } else {
-                    Buoy buoy = baseDomainFactory.getOrCreateBuoy(controlPointName, buoyColor, buoyShape);
+                    Buoy buoy = baseDomainFactory.getOrCreateBuoy(controlPointName, buoyColor, buoyShape, buoyPattern);
                     domainControlPoint = buoy;
                 }
                 controlPointCache.put(controlPoint, domainControlPoint);
@@ -178,23 +179,7 @@ public class DomainFactoryImpl implements DomainFactory {
         }
         return metadataMap;
     }
-    
-    // TODO: This is a special hack for the extreme sailing series event where we encoded the buoy color directly into the buoy name
-    // this will be replaced later with the new 'metadata' facility of the TTCM
-    private Pair<String, String> getControlPointNameAndColor(final String controlPointNameWithOptionalColor) {
-        Pair<String, String> result;
-        String colorTag = "_COLOR:";
-        String color = null;
-        String name = controlPointNameWithOptionalColor;
-        int index = controlPointNameWithOptionalColor.indexOf(colorTag);
-        if (index >= 0) {
-            color = controlPointNameWithOptionalColor.substring(index + colorTag.length(), controlPointNameWithOptionalColor.length());
-            name = controlPointNameWithOptionalColor.substring(0, index);
-        }
-        result = new Pair<String, String>(name, color);
-        return result;
-    }
-    
+        
     @Override
     public Course createCourse(String name, Iterable<ControlPoint> controlPoints) {
         List<Waypoint> waypointList = new ArrayList<Waypoint>();

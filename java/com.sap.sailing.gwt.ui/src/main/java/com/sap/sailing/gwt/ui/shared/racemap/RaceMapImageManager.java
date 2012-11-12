@@ -1,6 +1,8 @@
 package com.sap.sailing.gwt.ui.shared.racemap;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.google.gwt.core.client.GWT;
@@ -8,10 +10,10 @@ import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.geom.Point;
 import com.google.gwt.maps.client.geom.Size;
 import com.google.gwt.maps.client.overlay.Icon;
+import com.google.gwt.resources.client.ImageResource;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.impl.Util.Pair;
-import com.sap.sailing.gwt.ui.shared.BuoyDTO;
 
 public class RaceMapImageManager {
 
@@ -26,37 +28,35 @@ public class RaceMapImageManager {
     protected ImageTransformer expeditionWindIconTransformer;
 
     /**
-     * An icon for a buoy
+     * The default icon for a buoy
      */
     private Icon defaultBuoyIcon;
-
-    /**
-     * Contains buoy icons for display color names as obtained from {@link BuoyDTO#color}, then converted to all lower case
-     */
-    private final Map<String, Icon> buoyIcons;
+ 
+    private final List<BuoyIconDescriptor> buoyIconDescriptors;
     
     protected Map<Pair<ManeuverType, Tack>, Icon> maneuverIconsForTypeAndTargetTack;
 
     private static RaceMapResources resources = GWT.create(RaceMapResources.class);
 
     public RaceMapImageManager() {
-        buoyIcons = new HashMap<String, Icon>();
+        buoyIconDescriptors = new ArrayList<BuoyIconDescriptor>();
+        
         maneuverIconsForTypeAndTargetTack = new HashMap<Pair<ManeuverType, Tack>, Icon>();
         
         combinedWindIconTransformer = new ImageTransformer(resources.combinedWindIcon());
         expeditionWindIconTransformer = new ImageTransformer(resources.expeditionWindIcon());
     }
     
-    public Icon getIconForDisplayColor(String displayColor) {
-        Icon result;
-        if (displayColor != null) {
-            result = buoyIcons.get(displayColor.toLowerCase());
-            if (result == null) {
-                result = defaultBuoyIcon;
+    public Icon resolveBuoyIcon(String color, String shape, String pattern) {
+        Icon result = defaultBuoyIcon;
+        
+        for (BuoyIconDescriptor iconDescriptor: buoyIconDescriptors) {
+            if(iconDescriptor.isCompatible(color, shape, pattern)) {
+                result = iconDescriptor.getIcon();
+                break;
             }
-        } else {
-            result = defaultBuoyIcon;
         }
+        
         return result;
     }
     
@@ -70,20 +70,17 @@ public class RaceMapImageManager {
             defaultBuoyIcon.setIconSize(Size.newInstance(19, 28));
             defaultBuoyIcon.setIconAnchor(Point.newInstance(6, 15));
 
-            buoyIcons.put("red", Icon.newInstance(resources.buoyRedIcon().getSafeUri().asString()));
-            buoyIcons.put("green", Icon.newInstance(resources.buoyGreenIcon().getSafeUri().asString()));
-            buoyIcons.put("yellow", Icon.newInstance(resources.buoyYellowIcon().getSafeUri().asString()));
-            buoyIcons.put("white", Icon.newInstance(resources.buoyWhiteIcon().getSafeUri().asString()));
-            buoyIcons.put("black", Icon.newInstance(resources.buoyBlackIcon().getSafeUri().asString()));
-            buoyIcons.put("black conical checkered", Icon.newInstance(resources.buoyBlackConeIcon().getSafeUri().asString()));
-            buoyIcons.put("orange", Icon.newInstance(resources.buoyDarkOrangeIcon().getSafeUri().asString()));
-            buoyIcons.put("white conical", Icon.newInstance(resources.buoyWhiteConeIcon().getSafeUri().asString()));
-            buoyIcons.put("black cylinder checkered", Icon.newInstance(resources.buoyBlackFinishIcon().getSafeUri().asString()));
-            buoyIcons.put("committee vessel", Icon.newInstance(resources.juryBoatIcon().getSafeUri().asString()));
-            for (Icon buoyIcon : buoyIcons.values()) {
-                buoyIcon.setIconSize(Size.newInstance(19, 28));
-                buoyIcon.setIconAnchor(Point.newInstance(6, 15));
-            }
+            createBuoyIconDescriptor(resources.buoyRedIcon(), "red", null, null); 
+            createBuoyIconDescriptor(resources.buoyGreenIcon(), "green", null, null); 
+            createBuoyIconDescriptor(resources.buoyYellowIcon(), "yellow", null, null); 
+            createBuoyIconDescriptor(resources.buoyGreyIcon(), "grey", null, null); 
+            createBuoyIconDescriptor(resources.buoyWhiteIcon(), "white", null, null); 
+            createBuoyIconDescriptor(resources.buoyWhiteConeIcon(), "white", "conical", null); 
+            createBuoyIconDescriptor(resources.buoyBlackIcon(), "black", null, null); 
+            createBuoyIconDescriptor(resources.buoyBlackConeIcon(), "black", "conical", null); 
+            createBuoyIconDescriptor(resources.buoyDarkOrangeIcon(), "orange", null, null); 
+            createBuoyIconDescriptor(resources.buoyBlackFinishIcon(), "black", "cylinder", "checkered"); 
+            
             Icon tackToStarboardIcon = Icon
                     .newInstance("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=T|00FF00|000000");
             tackToStarboardIcon.setIconAnchor(Point.newInstance(10, 33));
@@ -138,6 +135,14 @@ public class RaceMapImageManager {
             penaltyCircleToPortIcon.setIconAnchor(Point.newInstance(10, 33));
             maneuverIconsForTypeAndTargetTack.put(new Pair<ManeuverType, Tack>(ManeuverType.PENALTY_CIRCLE, Tack.PORT), penaltyCircleToPortIcon);
         }
+    }
+    
+    private void createBuoyIconDescriptor(ImageResource imgResource, String color, String shape, String pattern) {
+        Icon icon = Icon.newInstance(imgResource.getSafeUri().asString());
+        icon.setIconSize(Size.newInstance(19, 28));
+        icon.setIconAnchor(Point.newInstance(6, 15));
+        BuoyIconDescriptor buoyIconDescriptor = new BuoyIconDescriptor(icon, color, shape, pattern);
+        buoyIconDescriptors.add(buoyIconDescriptor);
     }
     
     public ImageTransformer getCombinedWindIconTransformer() {
