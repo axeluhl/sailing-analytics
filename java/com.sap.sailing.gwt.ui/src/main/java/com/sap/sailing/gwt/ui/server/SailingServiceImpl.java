@@ -861,6 +861,14 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return result;
     }
 
+    private BuoyDTO convertToBuoyDTO(Buoy buoy, Position position) {
+        BuoyDTO buoyDTO = new BuoyDTO(buoy.getName(), position.getLatDeg(), position.getLngDeg());
+        buoyDTO.color = buoy.getColor();
+        buoyDTO.shape = buoy.getShape();
+        buoyDTO.pattern = buoy.getPattern();
+        return buoyDTO;
+    }
+
     private RegattaDTO convertToRegattaDTO(Regatta regatta) {
         RegattaDTO regattaDTO = new RegattaDTO(regatta.getName(), regatta.getScoringScheme().getType());
         regattaDTO.races = convertToRaceDTOs(regatta);
@@ -1556,9 +1564,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     GPSFixTrack<Buoy, GPSFix> track = trackedRace.getOrCreateTrack(buoy);
                     Position positionAtDate = track.getEstimatedPosition(dateAsTimePoint, /* extrapolate */false);
                     if (positionAtDate != null) {
-                        BuoyDTO buoyDTO = new BuoyDTO(buoy.getName(), positionAtDate.getLatDeg(),
-                                positionAtDate.getLngDeg(), buoy.getDisplayColor());
-                        result.buoys.add(buoyDTO);
+                        result.buoys.add(convertToBuoyDTO(buoy, positionAtDate));
                     }
                 }
                 
@@ -1588,8 +1594,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 GPSFixTrack<Buoy, GPSFix> track = trackedRace.getOrCreateTrack(buoy);
                 Position positionAtDate = track.getEstimatedPosition(dateAsTimePoint, /* extrapolate */false);
                 if (positionAtDate != null) {
-                    BuoyDTO markDTO = new BuoyDTO(buoy.getName(), positionAtDate.getLatDeg(), positionAtDate.getLngDeg(), buoy.getDisplayColor());
-                    raceBuoysDTO.buoys.add(markDTO);
+                    raceBuoysDTO.buoys.add(convertToBuoyDTO(buoy, positionAtDate));
                 }
             }
         }
@@ -1619,13 +1624,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             final Position leftPos = trackedRace.getOrCreateTrack(left).getEstimatedPosition(timePoint, /* extrapolate */ false);
             final Buoy right = ((Gate) controlPoint).getRight();
             final Position rightPos = trackedRace.getOrCreateTrack(right).getEstimatedPosition(timePoint, /* extrapolate */ false);
-            result = new GateDTO(controlPoint.getName(),
-                    new BuoyDTO(left.getName(), leftPos.getLatDeg(), leftPos.getLngDeg(), left.getDisplayColor()),
-                    new BuoyDTO(right.getName(), rightPos.getLatDeg(), rightPos.getLngDeg(), right.getDisplayColor()));
+            result = new GateDTO(controlPoint.getName(), convertToBuoyDTO(left, leftPos), convertToBuoyDTO(right, rightPos)); 
         } else {
             final Position posOfFirst = trackedRace.getOrCreateTrack(controlPoint.getBuoys().iterator().next()).
                     getEstimatedPosition(timePoint, /* extrapolate */ false);
-            result = new BuoyDTO(controlPoint.getName(), posOfFirst.getLatDeg(), posOfFirst.getLngDeg(), null);
+            result = new BuoyDTO(controlPoint.getName(), posOfFirst.getLatDeg(), posOfFirst.getLngDeg());
         }
         return result;
     }

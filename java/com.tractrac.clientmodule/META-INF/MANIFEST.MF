@@ -2,20 +2,17 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: TracTrac Client module
 Bundle-SymbolicName: com.tractrac.clientmodule
-Bundle-Version: 1.0.0.qualifier
+Bundle-Version: 2.0.6.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ClassPath: lib/TracTracClientModule.jar,
- .
+ .,
+ lib/TracCommon.jar,
+ lib/TracDataLib.jar
 Export-Package: com.maptrack.asio,
  com.maptrack.asio.record,
  com.maptrack.asio.session,
  com.maptrack.autolog,
- com.maptrack.client.data,
- com.maptrack.client.gui,
  com.maptrack.client.io,
- com.maptrack.client.map,
- com.maptrack.client.map.tiles,
- com.maptrack.data.grib,
  com.maptrack.dataflow.cache,
  com.maptrack.dataflow.data,
  com.maptrack.dataflow.livedata,
@@ -29,6 +26,7 @@ Export-Package: com.maptrack.asio,
  com.maptrack.dataflow.storeddata,
  com.maptrack.dataflow.storeddata.stream,
  com.maptrack.dataflow.storeddata.tcp,
+ com.maptrack.dataflow.storeddata.url,
  com.maptrack.exceptions,
  com.maptrack.map,
  com.maptrack.protocol,
@@ -41,17 +39,15 @@ Export-Package: com.maptrack.asio,
  com.maptrack.utils.seqtimedatatable.btreemem,
  com.maptrack.utils.seqtimedatatable.btreememdisk,
  com.maptrack.utils.seqtimedatatable.simple,
+ com.maptrack.utils.sortedset,
+ com.maptrack.utils.sortedset.btree,
  com.sap.tractrac.clientmodule.util,
  com.tractrac.clientmodule,
  com.tractrac.clientmodule.data,
  com.tractrac.clientmodule.data.containers,
  com.tractrac.clientmodule.details,
+ com.tractrac.clientmodule.metadata,
  com.tractrac.clientmodule.setup,
- com.tractrac.clientmodule.test,
- net.jcip.annotations,
- ucar.grib,
- ucar.grib.grib1,
- ucar.grib.grib2,
- ucar.unidata.io
+ com.tractrac.clientmodule.test
 Bundle-ActivationPolicy: lazy
 Bundle-Vendor: TracTrac
