@@ -23,10 +23,10 @@ interface RaceMapResources extends ClientBundle {
     @Source("com/sap/sailing/gwt/ui/client/images/buoy_grey.png")
     ImageResource buoyGreyIcon();
 
-    @Source("com/sap/sailing/gwt/ui/client/images/buoy_white.png")
+    @Source("com/sap/sailing/gwt/ui/client/images/buoy_white_grey.png")
     ImageResource buoyWhiteIcon();
 
-    @Source("com/sap/sailing/gwt/ui/client/images/buoy_white_cone.png")
+    @Source("com/sap/sailing/gwt/ui/client/images/buoy_white_grey_cone.png")
     ImageResource buoyWhiteConeIcon();
 
     @Source("com/sap/sailing/gwt/ui/client/images/juryBoat.png")

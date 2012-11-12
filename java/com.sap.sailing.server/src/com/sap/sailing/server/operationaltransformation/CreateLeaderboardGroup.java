@@ -10,14 +10,16 @@ import com.sap.sailing.server.RacingEventServiceOperation;
 public class CreateLeaderboardGroup extends AbstractLeaderboardGroupOperation<LeaderboardGroup> {
     private static final long serialVersionUID = -5028997286564650805L;
     private final String description;
+    private final boolean displayGroupsInReverseOrder;
     private final List<String> leaderboardNames;
     private final int[] overallLeaderboardDiscardThresholds;
     private final ScoringSchemeType overallLeaderboardScoringSchemeType;
 
-    public CreateLeaderboardGroup(String leaderboardGroupName, String description, List<String> leaderboardNames,
+    public CreateLeaderboardGroup(String leaderboardGroupName, String description, boolean displayGroupsInReverseOrder, List<String> leaderboardNames,
             int[] overallLeaderboardDiscardThresholds, ScoringSchemeType overallLeaderboardScoringSchemeType) {
         super(leaderboardGroupName);
         this.description = description;
+        this.displayGroupsInReverseOrder = displayGroupsInReverseOrder;
         this.leaderboardNames = leaderboardNames;
         this.overallLeaderboardDiscardThresholds = overallLeaderboardDiscardThresholds;
         this.overallLeaderboardScoringSchemeType = overallLeaderboardScoringSchemeType;
@@ -38,7 +40,7 @@ public class CreateLeaderboardGroup extends AbstractLeaderboardGroupOperation<Le
     @Override
     public LeaderboardGroup internalApplyTo(RacingEventService toState) {
         // TODO see bug 729: try to move addLeaderboardGroup implementation here and synthesize and apply this operation there
-        return toState.addLeaderboardGroup(getLeaderboardGroupName(), description, leaderboardNames,
+        return toState.addLeaderboardGroup(getLeaderboardGroupName(), description, displayGroupsInReverseOrder, leaderboardNames,
                 overallLeaderboardDiscardThresholds, overallLeaderboardScoringSchemeType);
     }
 

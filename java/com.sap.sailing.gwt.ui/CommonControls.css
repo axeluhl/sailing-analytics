@@ -186,7 +186,7 @@ body ::-webkit-scrollbar-track {
 
 .subTitleLabelWrapper {
 	position: absolute;
-    min-width: 400px;
+    min-width: 200px;
     text-align: right;
     height: 68px;
     right: 0;

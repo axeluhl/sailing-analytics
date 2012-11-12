@@ -18,14 +18,14 @@ public class RaceMapZoomSettings {
         NONE(null), WINDSENSORS(new RaceMap.WindSensorsBoundsCalculator()), BOATS(new RaceMap.BoatsBoundsCalculator()), 
         TAILS(new RaceMap.TailsBoundsCalculator()), BUOYS(new RaceMap.BuoysBoundsCalculator());
 
-        private LatLngBoundsCalculator calculater;
+        private LatLngBoundsCalculator calculator;
 
         private ZoomTypes(LatLngBoundsCalculator calculator) {
-            this.calculater = calculator;
+            this.calculator = calculator;
         }
 
         public LatLngBounds calculateNewBounds(RaceMap forMap) {
-            return calculater.calculateNewBounds(forMap);
+            return calculator.calculateNewBounds(forMap);
         }
     };
 

@@ -39,7 +39,8 @@ public class ColorMap<T> {
      * Returns a color that is computed once.
      * 
      * @param object
-     *            An ID unique for a competitor.
+     *            An ID unique for something this map is to provide a color for. Color assignment is based on the
+     *            object's {@link Object#equals(Object)} and {@link Object#hashCode()}.
      * @return A color in hex/html-format (e.g. #ff0000)
      */
     public String getColorByID(T object) {

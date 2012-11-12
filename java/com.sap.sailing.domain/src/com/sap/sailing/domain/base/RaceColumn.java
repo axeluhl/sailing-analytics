@@ -108,11 +108,11 @@ public interface RaceColumn extends Named {
      */
     Pair<Competitor, RaceColumn> getKey(Competitor competitor);
 
-    public abstract RaceColumnListeners getRaceColumnListeners();
+    RaceColumnListeners getRaceColumnListeners();
 
-    public abstract void removeRaceColumnListener(RaceColumnListener listener);
+    void removeRaceColumnListener(RaceColumnListener listener);
 
-    public abstract void addRaceColumnListener(RaceColumnListener listener);
+    void addRaceColumnListener(RaceColumnListener listener);
 
     /**
      * Releases the {@link TrackedRace} previously set by {@link #setTrackedRace(Fleet, TrackedRace)} but leaves the
@@ -123,4 +123,24 @@ public interface RaceColumn extends Named {
      *            the fleet for which to release its tracked race
      */
     void releaseTrackedRace(Fleet fleet);
+    
+    /**
+     * Usually, the scores in each leaderboard column count as they are for the overall score. However, if a column is
+     * a medal race column it usually counts double. Under certain circumstances, columns may also count with factors different
+     * from 1 or 2. For example, we've seen cases in the Extreme Sailing Series where the race committee defined that in the
+     * overall series leaderboard the last two columns each count 1.5 times their scores.
+     */
+    double getFactor();
+    
+    /**
+     * @param factor if <code>null</code>, {@link #getFactor()} will again compute a default value; otherwise, {@link #getFactor()} will
+     * then return the double value of <code>factor</code>.
+     */
+    void setFactor(Double factor);
+
+    /**
+     * If <code>null</code>, the {@link #getFactor() factor} defaults to 1 for non-medal and {@link #DEFAULT_MEDAL_RACE_FACTOR} for
+     * medal races. Otherwise, the explicit factor is used.
+     */
+    Double getExplicitFactor();
 }

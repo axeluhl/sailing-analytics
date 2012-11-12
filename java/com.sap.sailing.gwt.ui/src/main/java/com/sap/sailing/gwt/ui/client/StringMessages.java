@@ -389,6 +389,8 @@ public interface StringMessages extends Messages {
     String racesWithNamePrefix();
     String maximumSpeedOverGroundInKnots();
     String totalTimeSailedDownwindInSeconds();
+    String totalTimeSailedUpwindInSeconds();
+    String totalTimeSailedReachingInSeconds();
     String totalTimeSailedInSeconds();
     String overallDetailsToShow();
     String hhmmssUnit();
@@ -405,4 +407,23 @@ public interface StringMessages extends Messages {
     String unsuppress();
     String suppressedCompetitors();
     String pleaseSelectASeries();
+    String pleaseSelectARace();
+    String displayGroupsInReverseOrder();
+    String actionConfigureUrl();
+    String configureLeaderboardUrlDescription();
+    String embedded();
+    String additionalUrlSettings();
+    String restrictToSingleSelectedRace();
+    String expandSelectedRace();
+    String showRaceDetails();
+    String numberOfRaces();
+    String numberOfRacesMustBeNonNegativeNumber();
+    String chooseTheWayYouSelectRaces();
+    String selectFromAllRaces();
+    String selectANumberOfRaces();
+    String numberOfLastNRaces();
+    String expandLastRace();
+    String factor();
+    String errorUpdatingIsMedalRace(String message);
+    String maneuverLoss();
 }

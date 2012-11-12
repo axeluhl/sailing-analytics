@@ -55,7 +55,7 @@ public class LeaderboardJsonExportServlet extends SailingServerHttpServlet {
                     jsonLeaderboard.put("timepoint", timePoint.toString());
                     
                     SettableScoreCorrection scoreCorrection = leaderboard.getScoreCorrection();
-                    if(scoreCorrection != null) {
+                    if (scoreCorrection != null) {
                         jsonLeaderboard.put("scoringComment", scoreCorrection.getComment());
                         TimePoint lastUpdateTimepoint = scoreCorrection.getTimePointOfLastCorrectionsValidity();
                         jsonLeaderboard.put("lastScoringUpdate", lastUpdateTimepoint != null ? lastUpdateTimepoint.asDate().toString(): null);
@@ -83,6 +83,7 @@ public class LeaderboardJsonExportServlet extends SailingServerHttpServlet {
                         jsonCompetitor.put("countryCode", nationality != null ? nationality.getCountryCode().getTwoLetterISOCode(): null);
                         jsonCompetitor.put("rank",
                                 competitorsFromBestToWorstAccordingToTotalRank.indexOf(competitor) + 1);
+                        jsonCompetitor.put("carriedPoints", leaderboard.getCarriedPoints(competitor));
                         jsonCompetitor.put("totalPoints", leaderboard.getTotalPoints(competitor, timePoint));
                         jsonCompetitorEntries.add(jsonCompetitor);
                         JSONObject jsonRaceColumns = new JSONObject();

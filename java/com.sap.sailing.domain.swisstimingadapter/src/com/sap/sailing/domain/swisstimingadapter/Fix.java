@@ -34,4 +34,10 @@ public interface Fix {
     Distance getDistanceToLeader();
     
     Distance getDistanceToNextMark();
+
+    /**
+     * Obtains a disqualification reason which is one of { None, BFD, DNS, DNF, DNC, DSQ, OCS, RAF, SCP, ZFP }. May be
+     * <code>null</code>.
+     */
+    String getBoatIRM();
 }
