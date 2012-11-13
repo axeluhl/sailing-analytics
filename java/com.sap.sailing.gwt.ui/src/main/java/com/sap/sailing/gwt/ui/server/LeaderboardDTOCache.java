@@ -288,6 +288,11 @@ public class LeaderboardDTOCache {
             public void factorChanged(RaceColumn raceColumn, Double oldFactor, Double newFactor) {
                 removeFromCache(leaderboard);
             }
+
+            @Override
+            public void competitorDisplayNameChanged(Competitor competitor, String oldDisplayName, String displayName) {
+                removeFromCache(leaderboard);
+            }
         };
         leaderboard.addRaceColumnListener(raceColumnListener);
         synchronized (raceColumnListeners) {

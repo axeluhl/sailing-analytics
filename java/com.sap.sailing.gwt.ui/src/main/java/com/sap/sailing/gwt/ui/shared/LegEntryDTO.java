@@ -1,6 +1,9 @@
 package com.sap.sailing.gwt.ui.shared;
 
+import java.util.Map;
+
 import com.google.gwt.user.client.rpc.IsSerializable;
+import com.sap.sailing.domain.common.ManeuverType;
 
 /**
  * Holds data about one competitor's performance in one leg of one race represented in the
@@ -35,9 +38,8 @@ public class LegEntryDTO implements IsSerializable {
     public Long timeInMilliseconds;
     public boolean started;
     public boolean finished;
-    public Integer numberOfJibes;
-    public Integer numberOfTacks;
-    public Integer numberOfPenaltyCircles;
+    public Map<ManeuverType, Integer> numberOfManeuvers;
+    public Map<ManeuverType, Double> averageManeuverLossInMeters;
     public Double averageCrossTrackErrorInMeters;
     
     @Override
@@ -54,9 +56,7 @@ public class LegEntryDTO implements IsSerializable {
                 + ((estimatedTimeToNextWaypointInSeconds == null) ? 0 : estimatedTimeToNextWaypointInSeconds.hashCode());
         result = prime * result + (finished ? 1231 : 1237);
         result = prime * result + ((gapToLeaderInSeconds == null) ? 0 : gapToLeaderInSeconds.hashCode());
-        result = prime * result + ((numberOfJibes == null) ? 0 : numberOfJibes.hashCode());
-        result = prime * result + ((numberOfPenaltyCircles == null) ? 0 : numberOfPenaltyCircles.hashCode());
-        result = prime * result + ((numberOfTacks == null) ? 0 : numberOfTacks.hashCode());
+        result = prime * result + ((numberOfManeuvers == null) ? 0 : numberOfManeuvers.hashCode());
         result = prime * result + rank;
         result = prime * result + (started ? 1231 : 1237);
         result = prime * result + (int) (timeInMilliseconds ^ (timeInMilliseconds >>> 32));
@@ -101,20 +101,10 @@ public class LegEntryDTO implements IsSerializable {
                 return false;
         } else if (!gapToLeaderInSeconds.equals(other.gapToLeaderInSeconds))
             return false;
-        if (numberOfJibes == null) {
-            if (other.numberOfJibes != null)
+        if (numberOfManeuvers == null) {
+            if (other.numberOfManeuvers != null)
                 return false;
-        } else if (!numberOfJibes.equals(other.numberOfJibes))
-            return false;
-        if (numberOfPenaltyCircles == null) {
-            if (other.numberOfPenaltyCircles != null)
-                return false;
-        } else if (!numberOfPenaltyCircles.equals(other.numberOfPenaltyCircles))
-            return false;
-        if (numberOfTacks == null) {
-            if (other.numberOfTacks != null)
-                return false;
-        } else if (!numberOfTacks.equals(other.numberOfTacks))
+        } else if (!numberOfManeuvers.equals(other.numberOfManeuvers))
             return false;
         if (rank != other.rank)
             return false;

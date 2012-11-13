@@ -9,6 +9,7 @@ import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.user.cellview.client.Header;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.InvertibleComparator;
+import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.SortingOrder;
 import com.sap.sailing.domain.common.impl.InvertibleComparatorAdapter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -27,7 +28,7 @@ import com.sap.sailing.gwt.ui.shared.LegEntryDTO;
 public class LegColumn extends ExpandableSortableColumn<String> {
     private final String raceName;
     private final int legIndex;
-    private final StringMessages stringConstants;
+    private final StringMessages stringMessages;
     private final String headerStyle;
     private final String columnStyle;
     
@@ -133,26 +134,26 @@ public class LegColumn extends ExpandableSortableColumn<String> {
             LegEntryDTO entry = getLegEntry(row);
             if (entry != null) {
                 StringBuilder result = new StringBuilder();
-                if (entry.numberOfTacks != null) {
-                    result.append(entry.numberOfTacks);
+                if (entry.numberOfManeuvers.get(ManeuverType.TACK) != null) {
+                    result.append(entry.numberOfManeuvers.get(ManeuverType.TACK));
                     result.append(" ");
-                    result.append(stringConstants.tacks());
+                    result.append(stringMessages.tacks());
                 }
-                if (entry.numberOfJibes != null) {
+                if (entry.numberOfManeuvers.get(ManeuverType.JIBE) != null) {
                     if (result.length() > 0) {
                         result.append(", ");
                     }
-                    result.append(entry.numberOfJibes);
+                    result.append(entry.numberOfManeuvers.get(ManeuverType.JIBE));
                     result.append(" ");
-                    result.append(stringConstants.jibes());
+                    result.append(stringMessages.jibes());
                 }
-                if (entry.numberOfPenaltyCircles != null) {
+                if (entry.numberOfManeuvers.get(ManeuverType.PENALTY_CIRCLE) != null) {
                     if (result.length() > 0) {
                         result.append(", ");
                     }
-                    result.append(entry.numberOfPenaltyCircles);
+                    result.append(entry.numberOfManeuvers.get(ManeuverType.PENALTY_CIRCLE));
                     result.append(" ");
-                    result.append(stringConstants.penaltyCircles());
+                    result.append(stringMessages.penaltyCircles());
                 }
                 resultString = result.toString();
             }
@@ -168,9 +169,9 @@ public class LegColumn extends ExpandableSortableColumn<String> {
                 result.append(getFormatter().format(fieldValue));
             }
             LegEntryDTO entry = getLegEntry(row);
-            if (entry != null && entry.numberOfPenaltyCircles != null && (int) entry.numberOfPenaltyCircles != 0) {
+            if (entry != null && entry.numberOfManeuvers.get(ManeuverType.PENALTY_CIRCLE) != null && (int) entry.numberOfManeuvers.get(ManeuverType.PENALTY_CIRCLE) != 0) {
                 result.append(" (");
-                result.append(entry.numberOfPenaltyCircles);
+                result.append(entry.numberOfManeuvers.get(ManeuverType.PENALTY_CIRCLE));
                 result.append("P)");
             }
             return result.toString();
@@ -181,37 +182,30 @@ public class LegColumn extends ExpandableSortableColumn<String> {
             LegEntryDTO entry = getLegEntry(row);
             Double result = null;
             if (entry != null) {
-                if (entry.numberOfTacks != null) {
-                    result = (double) entry.numberOfTacks;
-                }
-                if (entry.numberOfJibes != null) {
-                    if (result == null) {
-                        result = (double) entry.numberOfJibes;
-                    } else {
-                        result += (double) entry.numberOfJibes;
-                    }
-                }
-                if (entry.numberOfPenaltyCircles != null) {
-                    if (result == null) {
-                        result = (double) entry.numberOfPenaltyCircles;
-                    } else {
-                        result += (double) entry.numberOfPenaltyCircles;
+                for (ManeuverType maneuverType : new ManeuverType[] { ManeuverType.TACK, ManeuverType.JIBE,
+                        ManeuverType.PENALTY_CIRCLE }) {
+                    if (entry.numberOfManeuvers.get(maneuverType) != null) {
+                        if (result == null) {
+                            result = (double) entry.numberOfManeuvers.get(maneuverType);
+                        } else {
+                            result += (double) entry.numberOfManeuvers.get(maneuverType);
+                        }
                     }
                 }
             }
             return result;
         }
-
     }
-    public LegColumn(LeaderboardPanel leaderboardPanel, String raceName, int legIndex, SortingOrder preferredSortingOrder, StringMessages stringConstants,
+        
+    public LegColumn(LeaderboardPanel leaderboardPanel, String raceName, int legIndex, SortingOrder preferredSortingOrder, StringMessages stringMessages,
             List<DetailType> legDetailSelection, String headerStyle, String columnStyle,
             String detailHeaderStyle, String detailColumnStyle) {
         super(leaderboardPanel, /* expandable */true /* all legs have details */, new TextCell(), preferredSortingOrder,
-                stringConstants, detailHeaderStyle, detailColumnStyle, legDetailSelection);
+                stringMessages, detailHeaderStyle, detailColumnStyle, legDetailSelection);
         setHorizontalAlignment(ALIGN_CENTER);
         this.raceName = raceName;
         this.legIndex = legIndex;
-        this.stringConstants = stringConstants;
+        this.stringMessages = stringMessages;
         this.headerStyle = headerStyle;
         this.columnStyle = columnStyle;
     }
@@ -226,51 +220,51 @@ public class LegColumn extends ExpandableSortableColumn<String> {
 
     @Override
     protected Map<DetailType, SortableColumn<LeaderboardRowDTO, ?>> getDetailColumnMap(
-            LeaderboardPanel leaderboardPanel, StringMessages stringConstants, String detailHeaderStyle,
+            LeaderboardPanel leaderboardPanel, StringMessages stringMessages, String detailHeaderStyle,
             String detailColumnStyle) {
         Map<DetailType, SortableColumn<LeaderboardRowDTO, ?>> result = new HashMap<DetailType, SortableColumn<LeaderboardRowDTO, ?>>();
         result.put(DetailType.DISTANCE_TRAVELED,
-                new FormattedDoubleLegDetailColumn(stringConstants.distanceInMeters(), "["+stringConstants.distanceInMetersUnit()+"]",
+                new FormattedDoubleLegDetailColumn(stringMessages.distanceInMeters(), "["+stringMessages.distanceInMetersUnit()+"]",
                         new DistanceTraveledInMeters(), DetailType.DISTANCE_TRAVELED.getPrecision(),
                         DetailType.DISTANCE_TRAVELED.getDefaultSortingOrder(), detailHeaderStyle, detailColumnStyle));
         result.put(DetailType.AVERAGE_SPEED_OVER_GROUND_IN_KNOTS, new FormattedDoubleLegDetailColumn(
-                stringConstants.averageSpeedInKnots(), "["+stringConstants.averageSpeedInKnotsUnit()+"]", new AverageSpeedOverGroundInKnots(),
+                stringMessages.averageSpeedInKnots(), "["+stringMessages.averageSpeedInKnotsUnit()+"]", new AverageSpeedOverGroundInKnots(),
                 DetailType.AVERAGE_SPEED_OVER_GROUND_IN_KNOTS.getPrecision(),
                 DetailType.AVERAGE_SPEED_OVER_GROUND_IN_KNOTS.getDefaultSortingOrder(), detailHeaderStyle, detailColumnStyle));
         result.put(DetailType.CURRENT_SPEED_OVER_GROUND_IN_KNOTS, new FormattedDoubleLegDetailColumn(
-                stringConstants.currentSpeedOverGroundInKnots(), "["+stringConstants.currentSpeedOverGroundInKnotsUnit()+"]", new CurrentSpeedOverGroundInKnots(),
+                stringMessages.currentSpeedOverGroundInKnots(), "["+stringMessages.currentSpeedOverGroundInKnotsUnit()+"]", new CurrentSpeedOverGroundInKnots(),
                 DetailType.CURRENT_SPEED_OVER_GROUND_IN_KNOTS.getPrecision(),
                 DetailType.CURRENT_SPEED_OVER_GROUND_IN_KNOTS.getDefaultSortingOrder(), detailHeaderStyle, detailColumnStyle));
         result.put(DetailType.ESTIMATED_TIME_TO_NEXT_WAYPOINT_IN_SECONDS,
-                new FormattedDoubleLegDetailColumn(stringConstants.estimatedTimeToNextWaypointInSeconds(),
-                        "["+stringConstants.estimatedTimeToNextWaypointInSecondsUnit()+"]",
+                new FormattedDoubleLegDetailColumn(stringMessages.estimatedTimeToNextWaypointInSeconds(),
+                        "["+stringMessages.estimatedTimeToNextWaypointInSecondsUnit()+"]",
                         new EstimatedTimeToNextWaypointInSeconds(), 
                         DetailType.ESTIMATED_TIME_TO_NEXT_WAYPOINT_IN_SECONDS.getPrecision(),
                         DetailType.ESTIMATED_TIME_TO_NEXT_WAYPOINT_IN_SECONDS.getDefaultSortingOrder(), 
                         detailHeaderStyle, detailColumnStyle));
         result.put(DetailType.GAP_TO_LEADER_IN_SECONDS,
-                new FormattedDoubleLegDetailColumn(stringConstants.gapToLeaderInSeconds(), "["+stringConstants.gapToLeaderInSecondsUnit()+"]",
+                new FormattedDoubleLegDetailColumn(stringMessages.gapToLeaderInSeconds(), "["+stringMessages.gapToLeaderInSecondsUnit()+"]",
                         new GapToLeaderInSeconds(), DetailType.GAP_TO_LEADER_IN_SECONDS.getPrecision(),
                         DetailType.GAP_TO_LEADER_IN_SECONDS.getDefaultSortingOrder(), 
                         detailHeaderStyle, detailColumnStyle));
         result.put(DetailType.VELOCITY_MADE_GOOD_IN_KNOTS,
-                new FormattedDoubleLegDetailColumn(stringConstants.velocityMadeGoodInKnots(),
-                        "["+stringConstants.velocityMadeGoodInKnotsUnit()+"]", new VelocityMadeGoodInKnots(),
+                new FormattedDoubleLegDetailColumn(stringMessages.velocityMadeGoodInKnots(),
+                        "["+stringMessages.velocityMadeGoodInKnotsUnit()+"]", new VelocityMadeGoodInKnots(),
                         DetailType.VELOCITY_MADE_GOOD_IN_KNOTS.getPrecision(),
                         DetailType.VELOCITY_MADE_GOOD_IN_KNOTS.getDefaultSortingOrder(), detailHeaderStyle, detailColumnStyle));
         result.put(DetailType.WINDWARD_DISTANCE_TO_GO_IN_METERS, new FormattedDoubleLegDetailColumn(
-                stringConstants.windwardDistanceToGoInMeters(), "["+stringConstants.windwardDistanceToGoInMetersUnit()+"]", new WindwardDistanceToGoInMeters(),
+                stringMessages.windwardDistanceToGoInMeters(), "["+stringMessages.windwardDistanceToGoInMetersUnit()+"]", new WindwardDistanceToGoInMeters(),
                 DetailType.WINDWARD_DISTANCE_TO_GO_IN_METERS.getPrecision(),
                 DetailType.WINDWARD_DISTANCE_TO_GO_IN_METERS.getDefaultSortingOrder(), detailHeaderStyle, detailColumnStyle));
-        result.put(DetailType.RANK_GAIN, new RankGainColumn(stringConstants.rankGain(), new RankGain(),
+        result.put(DetailType.RANK_GAIN, new RankGainColumn(stringMessages.rankGain(), new RankGain(),
                 detailHeaderStyle, detailColumnStyle));
         result.put(DetailType.NUMBER_OF_MANEUVERS, new ManeuverCountLegDetailsColumn(
-                stringConstants.numberOfManeuvers(), detailHeaderStyle, detailColumnStyle));
-        result.put(DetailType.TIME_TRAVELED, new FormattedDoubleLegDetailColumn(stringConstants.time(),
-                "[" + stringConstants.secondsUnit() + "]", new TimeTraveledInSeconds(), DetailType.TIME_TRAVELED.getPrecision(),
+                stringMessages.numberOfManeuvers(), detailHeaderStyle, detailColumnStyle));
+        result.put(DetailType.TIME_TRAVELED, new FormattedDoubleLegDetailColumn(stringMessages.time(),
+                "[" + stringMessages.secondsUnit() + "]", new TimeTraveledInSeconds(), DetailType.TIME_TRAVELED.getPrecision(),
                 DetailType.TIME_TRAVELED.getDefaultSortingOrder(), detailHeaderStyle, detailColumnStyle));
-        result.put(DetailType.AVERAGE_CROSS_TRACK_ERROR_IN_METERS, new FormattedDoubleLegDetailColumn(stringConstants.averageCrossTrackErrorInMeters(),
-                "[" + stringConstants.metersUnit() + "]", new AverageCrossTrackErrorInMeters(),
+        result.put(DetailType.AVERAGE_CROSS_TRACK_ERROR_IN_METERS, new FormattedDoubleLegDetailColumn(stringMessages.averageCrossTrackErrorInMeters(),
+                "[" + stringMessages.metersUnit() + "]", new AverageCrossTrackErrorInMeters(),
                 DetailType.AVERAGE_CROSS_TRACK_ERROR_IN_METERS.getPrecision(),
                 DetailType.AVERAGE_CROSS_TRACK_ERROR_IN_METERS.getDefaultSortingOrder(),
                 detailHeaderStyle, detailColumnStyle));
@@ -324,8 +318,8 @@ public class LegColumn extends ExpandableSortableColumn<String> {
 
     @Override
     public Header<SafeHtml> getHeader() {
-        SortableExpandableColumnHeader result = new SortableExpandableColumnHeader(/* title */ stringConstants.leg()+(legIndex+1),
-                /* iconURL */ null, getLeaderboardPanel(), this, stringConstants);
+        SortableExpandableColumnHeader result = new SortableExpandableColumnHeader(/* title */ stringMessages.leg()+(legIndex+1),
+                /* iconURL */ null, getLeaderboardPanel(), this, stringMessages);
         return result;
     }
     
