@@ -10,6 +10,7 @@ import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.RootPanel;
@@ -27,6 +28,7 @@ import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.client.URLFactory;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings.RaceColumnSelectionStrategies;
+import com.sap.sailing.gwt.ui.raceboard.GlobalNavigationPanel;
 import com.sap.sailing.gwt.ui.shared.AbstractLeaderboardDTO;
 
 
@@ -94,6 +96,10 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
             }
             logoAndTitlePanel = new LogoAndTitlePanel(leaderboardGroupName, leaderboardDisplayName, stringMessages);
             logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
+            
+            FlowPanel globalNavigationPanel = new GlobalNavigationPanel(stringMessages, true, null, leaderboardGroupName);
+            logoAndTitlePanel.add(globalNavigationPanel);
+
             mainPanel.addNorth(logoAndTitlePanel, 68);
         }
         ScrollPanel contentScrollPanel = new ScrollPanel();
