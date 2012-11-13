@@ -709,7 +709,45 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
             }
         });
         result.add(new HasCell<LeaderboardRowDTO, String>() {
-            private final EditTextCell cell = new EditTextCell();
+            final class OptionalBoldRenderer implements SafeHtmlRenderer<String> {
+                private LeaderboardRowDTO currentRow;
+                
+                @Override
+                public SafeHtml render(String object) {
+                    SafeHtmlBuilder builder = new SafeHtmlBuilder();
+                    render(object, builder);
+                    return builder.toSafeHtml();
+                }
+
+                private boolean isDisplayNameSet() {
+                    return currentRow != null && getLeaderboard().isDisplayNameSet(currentRow.competitor);
+                }
+
+                @Override
+                public void render(String value, SafeHtmlBuilder builder) {
+                    if (isDisplayNameSet()) {
+                        builder.appendHtmlConstant("<b>");
+                    }
+                    builder.appendEscaped(value);
+                    if (isDisplayNameSet()) {
+                        builder.appendHtmlConstant("</b>");
+                    }
+                }
+                
+                public void setCurrentRow(LeaderboardRowDTO currentRow) {
+                    this.currentRow = currentRow;
+                }
+            }
+            
+            private final OptionalBoldRenderer renderer = new OptionalBoldRenderer();
+            
+            private final EditTextCell cell = new EditTextCell(renderer) {
+                @Override
+                public void render(Context context, String value, SafeHtmlBuilder sb) {
+                    renderer.setCurrentRow((LeaderboardRowDTO) context.getKey());
+                    super.render(context, value, sb);
+                }
+            };
                     @Override
                     public EditTextCell getCell() {
                         return cell;
@@ -722,16 +760,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
 
                     @Override
                     public String getValue(LeaderboardRowDTO row) {
-                        SafeHtmlBuilder sb = new SafeHtmlBuilder();
-                        final boolean isDisplayNameSet = getLeaderboard().isDisplayNameSet(row.competitor);
-                        if (isDisplayNameSet) {
-                            sb.appendHtmlConstant("<b>");
-                        }
-                        sb.appendEscaped(getLeaderboard().getDisplayName(row.competitor));
-                        if (isDisplayNameSet) {
-                            sb.appendHtmlConstant("</b>");
-                        }
-                        return sb.toSafeHtml().asString();
+                        return getLeaderboard().getDisplayName(row.competitor);
                     }
                 });
         return result;
