@@ -109,7 +109,7 @@ public class TestStoringAndRetrievingLeaderboardGroups extends AbstractMongoDBTe
                 new PersonImpl("$$$Dr. Wolfgang+Hunger$$$", new NationalityImpl("GER"),
                 /* dateOfBirth */ null, "This is famous Dr. Wolfgang Hunger")), new PersonImpl("Rigo van Maas", new NationalityImpl("NED"),
                         /* dateOfBirth */ null, "This is Rigo, the coach")), new BoatImpl("Dr. Wolfgang Hunger's boat", new BoatClassImpl("505", /* typicallyStartsUpwind */ true), null));
-        Competitor hasso = new CompetitorImpl(123, "Hasso Plattner", new TeamImpl("STG", Collections.singleton(
+        Competitor hasso = new CompetitorImpl(234, "Hasso Plattner", new TeamImpl("STG", Collections.singleton(
                 new PersonImpl("Hasso Plattner", new NationalityImpl("GER"),
                 /* dateOfBirth */ null, "This is famous Dr. Hasso Plattner")), new PersonImpl("Lutz Patrunky", new NationalityImpl("GER"),
                         /* dateOfBirth */ null, "This is Patty, the coach")),
@@ -150,7 +150,9 @@ public class TestStoringAndRetrievingLeaderboardGroups extends AbstractMongoDBTe
         loadedLeaderboardGroup.getLeaderboards().iterator().next().getRaceColumnByName(raceColumnName1).setTrackedRace(
                 loadedLeaderboardGroup.getLeaderboards().iterator().next().getFleet(null), raceWithTwoCompetitors);
         Leaderboard loadedOverallLeaderboard = loadedLeaderboardGroup.getOverallLeaderboard();
-        final Double totalPoints = loadedOverallLeaderboard.getTotalPoints(wolfgang, loadedOverallLeaderboard.getRaceColumnByName("Leaderboard 3"),
+        final RaceColumn leaderboard3Column = loadedOverallLeaderboard.getRaceColumnByName("Leaderboard 3");
+        assertTrue(loadedOverallLeaderboard.getScoreCorrection().hasCorrectionFor(leaderboard3Column));
+        final Double totalPoints = loadedOverallLeaderboard.getTotalPoints(wolfgang, leaderboard3Column,
                 MillisecondsTimePoint.now());
         assertNotNull(totalPoints);
         assertEquals(99.9, totalPoints, 0.00000000001);
@@ -162,7 +164,7 @@ public class TestStoringAndRetrievingLeaderboardGroups extends AbstractMongoDBTe
                 new PersonImpl("$$$Dr. Wolfgang+Hunger$$$", new NationalityImpl("GER"),
                 /* dateOfBirth */ null, "This is famous Dr. Wolfgang Hunger")), new PersonImpl("Rigo van Maas", new NationalityImpl("NED"),
                         /* dateOfBirth */ null, "This is Rigo, the coach")), new BoatImpl("Dr. Wolfgang Hunger's boat", new BoatClassImpl("505", /* typicallyStartsUpwind */ true), null));
-        Competitor hasso = new CompetitorImpl(123, "Hasso Plattner", new TeamImpl("STG", Collections.singleton(
+        Competitor hasso = new CompetitorImpl(234, "Hasso Plattner", new TeamImpl("STG", Collections.singleton(
                 new PersonImpl("Hasso Plattner", new NationalityImpl("GER"),
                 /* dateOfBirth */ null, "This is famous Dr. Hasso Plattner")), new PersonImpl("Lutz Patrunky", new NationalityImpl("GER"),
                         /* dateOfBirth */ null, "This is Patty, the coach")),
@@ -218,7 +220,7 @@ public class TestStoringAndRetrievingLeaderboardGroups extends AbstractMongoDBTe
                 new PersonImpl("$$$Dr. Wolfgang+Hunger$$$", new NationalityImpl("GER"),
                 /* dateOfBirth */ null, "This is famous Dr. Wolfgang Hunger")), new PersonImpl("Rigo van Maas", new NationalityImpl("NED"),
                         /* dateOfBirth */ null, "This is Rigo, the coach")), new BoatImpl("Dr. Wolfgang Hunger's boat", new BoatClassImpl("505", /* typicallyStartsUpwind */ true), null));
-        Competitor hasso = new CompetitorImpl(123, "Hasso Plattner", new TeamImpl("STG", Collections.singleton(
+        Competitor hasso = new CompetitorImpl(234, "Hasso Plattner", new TeamImpl("STG", Collections.singleton(
                 new PersonImpl("Hasso Plattner", new NationalityImpl("GER"),
                 /* dateOfBirth */ null, "This is famous Dr. Hasso Plattner")), new PersonImpl("Lutz Patrunky", new NationalityImpl("GER"),
                         /* dateOfBirth */ null, "This is Patty, the coach")),
