@@ -30,8 +30,7 @@ public class GlobalNavigationPanel extends FlowPanel {
 
         String spectatorViewLink = "/gwt/Spectator.html";
         String leaderboardViewLink = "/gwt/Leaderboard.html";
-    
-        String homeLink = spectatorViewLink;
+        String homeLink = "/";
         
         if(showHomeNavigation) {
             if (leaderboardGroupName != null && !leaderboardGroupName.isEmpty()) {
