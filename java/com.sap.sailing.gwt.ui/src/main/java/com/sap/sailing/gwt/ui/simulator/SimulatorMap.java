@@ -570,11 +570,11 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
                 }
                 if (this.windGridCanvasOverlay != null) {
                     this.windGridCanvasOverlay.setVisible(true);
-                    this.windFieldCanvasOverlay.redraw(true);
+                    this.windGridCanvasOverlay.redraw(true);
                 }
                 if (this.windLineCanvasOverlay != null) {
                     this.windLineCanvasOverlay.setVisible(true);
-                    this.windFieldCanvasOverlay.redraw(true);
+                    this.windLineCanvasOverlay.redraw(true);
                 }
             } else {
                 this.windParams.setDefaultTimeSettings();
