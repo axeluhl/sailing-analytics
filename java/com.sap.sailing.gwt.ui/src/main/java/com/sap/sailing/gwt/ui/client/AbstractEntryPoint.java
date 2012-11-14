@@ -10,6 +10,7 @@ import com.google.gwt.event.dom.client.KeyPressEvent;
 import com.google.gwt.event.dom.client.KeyPressHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
+import com.google.gwt.resources.client.TextResource;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import com.google.gwt.user.client.ui.Button;
@@ -47,7 +48,24 @@ public abstract class AbstractEntryPoint implements EntryPoint, ErrorReporter {
             + "attempting to contact the server. Please check your network " + "connection and try again."; //$NON-NLS-1$ //$NON-NLS-2$
 
     @Override
-    public void onModuleLoad() {
+    public final void onModuleLoad() {
+        if(DebugInfo.isDebugIdEnabled()) {
+            PendingAjaxCallBundle bundle = GWT.create(PendingAjaxCallBundle.class);
+            TextResource script = bundle.ajaxSemaphoreJS();
+            JavaScriptInjector.inject(script.getText());
+            
+            DebugInfo.setDebugIdAttribute(SELENIUM_DEBUG_ID, false);
+            DebugInfo.setDebugIdPrefix("");
+        }
+        
+        doOnModuleLoad();
+        
+        if(DebugInfo.isDebugIdEnabled()) {
+            PendingAjaxCallMarker.decrementPendingAjaxCalls();
+        }
+    }
+    
+    protected void doOnModuleLoad() {
         stringMessages = GWT.create(StringMessages.class);
         errorDialogBox = createErrorDialog(); /* TODO: Make this more generic (e.g. make it support all kinds of messages) */
         userAgent = new UserAgentDetails(Window.Navigator.getUserAgent());
@@ -58,9 +76,6 @@ public abstract class AbstractEntryPoint implements EntryPoint, ErrorReporter {
         String baseURL = moduleBaseURL.substring(0, moduleBaseURL.lastIndexOf('/', moduleBaseURL.length()-2)+1);
         sailingServiceDef.setServiceEntryPoint(baseURL + "sailing");
         userManagementServiceDef.setServiceEntryPoint(baseURL + "usermanagement");
-        
-        DebugInfo.setDebugIdAttribute(SELENIUM_DEBUG_ID, false);
-        DebugInfo.setDebugIdPrefix("");
     }
     
     @Override

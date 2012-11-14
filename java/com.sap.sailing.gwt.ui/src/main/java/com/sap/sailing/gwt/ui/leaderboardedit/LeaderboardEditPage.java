@@ -12,8 +12,8 @@ import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
 
 public class LeaderboardEditPage extends AbstractEntryPoint {
     @Override
-    public void onModuleLoad() {
-        super.onModuleLoad();
+    protected void doOnModuleLoad() {    
+        super.doOnModuleLoad();
         sailingService.getLeaderboardNames(new AsyncCallback<List<String>>() {
             @Override
             public void onSuccess(List<String> leaderboardNames) {

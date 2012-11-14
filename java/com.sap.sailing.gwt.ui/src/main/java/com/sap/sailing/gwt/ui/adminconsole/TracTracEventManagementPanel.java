@@ -55,6 +55,7 @@ import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
+import com.sap.sailing.gwt.ui.client.MarkedAsyncCallback;
 import com.sap.sailing.gwt.ui.client.RaceSelectionModel;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -142,6 +143,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
     
     protected CaptionPanel createConnectionsPanel() {
         CaptionPanel connectionsPanel = new CaptionPanel(this.stringMessages.connections());
+        connectionsPanel.ensureDebugId("ConnectionsSection");
         connectionsPanel.setStyleName("bold");
 
         FlexTable layoutTable = new FlexTable();
@@ -342,6 +344,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
     
     protected CaptionPanel createTrackableRacesPanel() {
         CaptionPanel trackableRacesPanel = new CaptionPanel(this.stringMessages.trackableRaces());
+        trackableRacesPanel.ensureDebugId("TrackableRacesSection");
         trackableRacesPanel.setStyleName("bold");
         
         FlexTable layoutTable = new FlexTable();
@@ -468,6 +471,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
     
     protected CaptionPanel createTrackedRacesPanel() {
         CaptionPanel trackedRacesPanel = new CaptionPanel(this.stringMessages.trackedRaces());
+        trackedRacesPanel.ensureDebugId("TrackedRacesSection");
         trackedRacesPanel.setStyleName("bold");
         
         trackedRacesPanel.setContentWidget(this.trackedRacesListComposite);
@@ -535,14 +539,14 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
     }
     
     private void fillConfigurations() {
-        this.sailingService.getPreviousTracTracConfigurations(new AsyncCallback<List<TracTracConfigurationDTO>>() {
+        this.sailingService.getPreviousTracTracConfigurations(new MarkedAsyncCallback<List<TracTracConfigurationDTO>>() {
             @Override
-            public void onFailure(Throwable caught) {
+            public void handleFailure(Throwable caught) {
                 reportError("Remote Procedure Call getPreviousConfigurations() - Failure: " + caught.getMessage());
             }
 
             @Override
-            public void onSuccess(List<TracTracConfigurationDTO> result) {
+            public void handleSuccess(List<TracTracConfigurationDTO> result) {
                 TracTracEventManagementPanel.this.previousConfigurations.clear();
                 TracTracEventManagementPanel.this.connectionsHistoryListBox.clear();
                 
@@ -564,14 +568,14 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         final String liveDataURI = this.liveURITextBox.getValue();
         final String storedDataURI = this.storedURITextBox.getValue();
 
-        sailingService.listTracTracRacesInEvent(jsonURL, new AsyncCallback<Pair<String, List<TracTracRaceRecordDTO>>>() {
+        sailingService.listTracTracRacesInEvent(jsonURL, new MarkedAsyncCallback<Pair<String, List<TracTracRaceRecordDTO>>>() {
             @Override
-            public void onFailure(Throwable caught) {
+            public void handleFailure(Throwable caught) {
                 reportError("Error trying to list races: " + caught.getMessage());
             }
 
             @Override
-            public void onSuccess(final Pair<String, List<TracTracRaceRecordDTO>> result) {
+            public void handleSuccess(final Pair<String, List<TracTracRaceRecordDTO>> result) {
                 TracTracEventManagementPanel.this.availableTracTracRaces.clear();
                 
                 final String eventName = result.getA();
@@ -591,14 +595,14 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
                 
                 // store a successful configuration in the database for later retrieval
                 sailingService.storeTracTracConfiguration(eventName, jsonURL, liveDataURI, storedDataURI,
-                        new AsyncCallback<Void>() {
+                        new MarkedAsyncCallback<Void>() {
                             @Override
-                            public void onFailure(Throwable caught) {
+                            public void handleFailure(Throwable caught) {
                                 reportError("Exception trying to store configuration in DB: "  + caught.getMessage());
                             }
 
                             @Override
-                            public void onSuccess(Void voidResult) {
+                            public void handleSuccess(Void voidResult) {
                                 // refresh list of previous configurations
                                 TracTracConfigurationDTO config = new TracTracConfigurationDTO(eventName, jsonURL,
                                         liveDataURI, storedDataURI);
@@ -681,19 +685,19 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
                 return;
             }
         }
-                
+        
         for (final TracTracRaceRecordDTO race : this.raceList.getList()) {
             if (selectionModel.isSelected(race)) {
                 this.sailingService.trackWithTracTrac(regattaIdentifier, race, liveURI, storedURI, trackWind, 
-                        correctWind, simulateWithStartTimeNow, new AsyncCallback<Void>() {
+                        correctWind, simulateWithStartTimeNow, new MarkedAsyncCallback<Void>() {
                     @Override
-                    public void onFailure(Throwable caught) {
+                    public void handleFailure(Throwable caught) {
                         reportError("Error trying to register race " + race.name + " for tracking: "
                                 + caught.getMessage() + ". Check live/stored URI syntax.");
                     }
 
                     @Override
-                    public void onSuccess(Void result) {
+                    public void handleSuccess(Void result) {
                         System.out.println("--------------------------Tracking started");
                         TracTracEventManagementPanel.this.regattaRefresher.fillRegattas();
                     }

@@ -37,8 +37,8 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
     private RaceBoardViewModes viewMode;
 
     @Override
-    public void onModuleLoad() {     
-        super.onModuleLoad();
+    protected void doOnModuleLoad() {    
+        super.doOnModuleLoad();
         regattaName = Window.Location.getParameter("regattaName");
         raceName = Window.Location.getParameter("raceName");
         String leaderboardNameParamValue = Window.Location.getParameter("leaderboardName");

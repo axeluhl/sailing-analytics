@@ -23,8 +23,8 @@ import com.sap.sailing.gwt.ui.shared.panels.SimpleWelcomeWidget;
 public class SpectatorEntryPoint extends AbstractEntryPoint implements RegattaRefresher {
     
     @Override
-    public void onModuleLoad() {
-        super.onModuleLoad();
+    protected void doOnModuleLoad() {    
+        super.doOnModuleLoad();
         String groupParamValue = Window.Location.getParameter("leaderboardGroupName");
         String viewModeParamValue = Window.Location.getParameter("viewMode");
         boolean showRaceDetails = Window.Location.getParameter("showRaceDetails") != null

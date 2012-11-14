@@ -20,8 +20,9 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
     private Set<RegattaDisplayer> regattaDisplayers;
     
     @Override
-    public void onModuleLoad() {
-        super.onModuleLoad();
+    protected void doOnModuleLoad() {
+        super.doOnModuleLoad();
+        
         RootPanel rootPanel = RootPanel.get();
         rootPanel.setSize("100%", "100%");
         
