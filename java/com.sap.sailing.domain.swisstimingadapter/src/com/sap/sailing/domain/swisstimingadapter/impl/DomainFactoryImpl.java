@@ -234,6 +234,7 @@ public class DomainFactoryImpl implements DomainFactory {
     public void updateCourseWaypoints(com.sap.sailing.domain.base.Course courseToUpdate, Iterable<Mark> marks) throws PatchFailedException {
         List<com.sap.sailing.domain.base.ControlPoint> newDomainControlPoints = new ArrayList<ControlPoint>();
         for (Mark mark : marks) {
+            // TODO bug 1043: propagate the mark names to the waypoint names
             com.sap.sailing.domain.base.ControlPoint domainControlPoint = getOrCreateControlPoint(mark.getDevices());
             newDomainControlPoints.add(domainControlPoint);
         }
