@@ -41,16 +41,16 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
     private MapWidget mapw;
     private boolean dataInitialized;
     private boolean overlaysInitialized;
-    private WindFieldGenParamsDTO windParams;
+    private final WindFieldGenParamsDTO windParams;
     private WindFieldCanvasOverlay windFieldCanvasOverlay;
     private WindGridCanvasOverlay windGridCanvasOverlay;
     private WindLineCanvasOverlay windLineCanvasOverlay;
-    //private List<PathCanvasOverlay> pathCanvasOverlays;
+    // private List<PathCanvasOverlay> pathCanvasOverlays;
     private List<PathCanvasOverlay> replayPathCanvasOverlays;
     private RaceCourseCanvasOverlay raceCourseCanvasOverlay;
     private PathLegendCanvasOverlay legendCanvasOverlay;
 
-    private List<TimeListenerWithStoppingCriteria> timeListeners;
+    private final List<TimeListenerWithStoppingCriteria> timeListeners;
 
     private final SimulatorServiceAsync simulatorSvc;
     private final StringMessages stringMessages;
@@ -59,25 +59,24 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
     private final SimulatorTimePanel timePanel;
     private final SimpleBusyIndicator busyIndicator;
     private final char mode;
-    
-    private ColorPalette colorPalette;
+
+    private final ColorPalette colorPalette;
 
     private static Logger logger = Logger.getLogger(SimulatorMap.class.getName());
 
     private final int xRes;
     private final int yRes;
 
-    //I0077899 Mihai Bogdan Eugen
+    private PathPolyline pathPolyline;
     private boolean warningAlreadyShown = false;
-    
+
     public enum ViewName {
         SUMMARY, REPLAY, WINDDISPLAY
     }
 
-    //I0077899 Mihai Bogdan Eugen
     private class ResultManager implements AsyncCallback<SimulatorResultsDTOAndNotificationMessage> {
 
-        private boolean summaryView;
+        private final boolean summaryView;
 
         /*
          * private class SortByTimeAsc implements Comparator<PathDTO> {
@@ -87,153 +86,141 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
          * }
          */
 
-       
-        public ResultManager(boolean summaryView) {
+        public ResultManager(final boolean summaryView) {
             this.summaryView = summaryView;
         }
 
         @Override
-        public void onFailure(Throwable message) {
-            errorReporter.reportError("Failed servlet call to SimulatorService\n" + message.getMessage());
+        public void onFailure(final Throwable message) {
+            SimulatorMap.this.errorReporter.reportError("Failed servlet call to SimulatorService\n" + message.getMessage());
         }
 
-        //I0077899 Mihai Bogdan Eugen
         @Override
-        public void onSuccess(SimulatorResultsDTOAndNotificationMessage result) {
-        	
-            String notificationMessage = result.getNotificationMessage();
-            if (notificationMessage != "" && notificationMessage.length() != 0 && warningAlreadyShown == false) {
-                errorReporter.reportNotification(notificationMessage);
-                warningAlreadyShown = true;
+        public void onSuccess(final SimulatorResultsDTOAndNotificationMessage result) {
+
+            final String notificationMessage = result.getNotificationMessage();
+            if (notificationMessage != "" && notificationMessage.length() != 0 && SimulatorMap.this.warningAlreadyShown == false) {
+                SimulatorMap.this.errorReporter.reportNotification(notificationMessage);
+                SimulatorMap.this.warningAlreadyShown = true;
             }
-        	
-            SimulatorResultsDTO simulatorResult = result.getSimulatorResultsDTO();
-            PathDTO[] paths = simulatorResult.paths;
+
+            final SimulatorResultsDTO simulatorResult = result.getSimulatorResultsDTO();
+            final PathDTO[] paths = simulatorResult.paths;
             logger.info("Number of Paths : " + paths.length);
             // SortByTimeAsc sorter = new SortByTimeAsc();
             // Arrays.sort(paths, sorter);
-            long startTime = paths[0].getMatrix().get(0).timepoint;
+            final long startTime = paths[0].getMatrix().get(0).timepoint;
             long maxDurationTime = 0;
-            
-            if (mode == SailingSimulatorUtil.measured) {
+
+            if (SimulatorMap.this.mode == SailingSimulatorUtil.measured) {
                 PositionDTO pos = simulatorResult.raceCourse.coursePositions.waypointPositions.get(0);
-                raceCourseCanvasOverlay.startPoint = LatLng.newInstance(pos.latDeg, pos.lngDeg);
+                SimulatorMap.this.raceCourseCanvasOverlay.startPoint = LatLng.newInstance(pos.latDeg, pos.lngDeg);
                 pos = simulatorResult.raceCourse.coursePositions.waypointPositions.get(1);
-                raceCourseCanvasOverlay.endPoint = LatLng.newInstance(pos.latDeg, pos.lngDeg);
+                SimulatorMap.this.raceCourseCanvasOverlay.endPoint = LatLng.newInstance(pos.latDeg, pos.lngDeg);
             }
-            
-            raceCourseCanvasOverlay.redraw(true);
-            removeOverlays();
-//            pathCanvasOverlays.clear();
-            replayPathCanvasOverlays.clear();
-            colorPalette.reset();
-            
+
+            SimulatorMap.this.raceCourseCanvasOverlay.redraw(true);
+            SimulatorMap.this.removeOverlays();
+            // pathCanvasOverlays.clear();
+            SimulatorMap.this.replayPathCanvasOverlays.clear();
+            SimulatorMap.this.colorPalette.reset();
+
             String pathName = null;
             PathDTO currentPath = null;
             String color = null;
-            
+
             for (int index = 0; index < paths.length; ++index) {
-                
+
                 currentPath = paths[index];
                 pathName = paths[index].name;
-                color = colorPalette.getColor(paths.length - 1 - index);
-                
-                //IMPORTANT
-                if (pathName.equals("GPS Poly"))
-                {
-                    createPathPolyline(currentPath, mapw);
+                color = SimulatorMap.this.colorPalette.getColor(paths.length - 1 - index);
+
+                if (pathName.equals("GPS Poly")) {
+                    SimulatorMap.this.pathPolyline = createPathPolyline(currentPath, SimulatorMap.this.mapw);
                 }
-//                else
-//                {
-//                    continue;
-//                }
-                
+
                 /* TODO Revisit for now creating a WindFieldDTO from the path */
-                WindFieldDTO pathWindDTO = new WindFieldDTO();
+                final WindFieldDTO pathWindDTO = new WindFieldDTO();
                 pathWindDTO.setMatrix(currentPath.getMatrix());
-               
-                ReplayPathCanvasOverlay replayPathCanvasOverlay = new ReplayPathCanvasOverlay(pathName, timer);
-                replayPathCanvasOverlays.add(replayPathCanvasOverlay);
+
+                final ReplayPathCanvasOverlay replayPathCanvasOverlay = new ReplayPathCanvasOverlay(pathName, SimulatorMap.this.timer);
+                SimulatorMap.this.replayPathCanvasOverlays.add(replayPathCanvasOverlay);
                 replayPathCanvasOverlay.pathColor = color;
-                
-                if (summaryView) {
-                   
+
+                if (this.summaryView) {
+
                     replayPathCanvasOverlay.displayWindAlongPath = true;
-                    timer.removeTimeListener(replayPathCanvasOverlay);
+                    SimulatorMap.this.timer.removeTimeListener(replayPathCanvasOverlay);
                     replayPathCanvasOverlay.setTimer(null);
                 }
-                mapw.addOverlay(replayPathCanvasOverlay);
+                SimulatorMap.this.mapw.addOverlay(replayPathCanvasOverlay);
                 replayPathCanvasOverlay.setWindField(pathWindDTO);
-                replayPathCanvasOverlay.setRaceCourse(raceCourseCanvasOverlay.startPoint, raceCourseCanvasOverlay.endPoint);
+                replayPathCanvasOverlay.setRaceCourse(SimulatorMap.this.raceCourseCanvasOverlay.startPoint, SimulatorMap.this.raceCourseCanvasOverlay.endPoint);
                 replayPathCanvasOverlay.redraw(true);
-                legendCanvasOverlay.setPathOverlays(replayPathCanvasOverlays);
+                SimulatorMap.this.legendCanvasOverlay.setPathOverlays(SimulatorMap.this.replayPathCanvasOverlays);
 
-                
-                
-                long tmpDurationTime = currentPath.getPathTime();
+                final long tmpDurationTime = currentPath.getPathTime();
                 if (tmpDurationTime > maxDurationTime) {
                     maxDurationTime = tmpDurationTime;
                 }
             }
 
-            if (timePanel != null) {
-                timePanel.setMinMax(new Date(startTime), new Date(startTime+maxDurationTime), true);
-                timePanel.resetTimeSlider();
+            if (SimulatorMap.this.timePanel != null) {
+                SimulatorMap.this.timePanel.setMinMax(new Date(startTime), new Date(startTime + maxDurationTime), true);
+                SimulatorMap.this.timePanel.resetTimeSlider();
             }
-            
+
             /**
              * Now we always get the wind field
              */
-            //if (!summaryView) {
-                WindFieldDTO windFieldDTO = simulatorResult.windField;
-                logger.info("Number of windDTO : " + windFieldDTO.getMatrix().size());
-                
-                if (windParams.isShowGrid()) {
-                    mapw.addOverlay(windGridCanvasOverlay);
-                    mapw.addOverlay(windLineCanvasOverlay);
-                }
-                if (windParams.isShowArrows()) {
-                    mapw.addOverlay(windFieldCanvasOverlay);
-                }
-                
-                refreshWindFieldOverlay(windFieldDTO);
+            final WindFieldDTO windFieldDTO = simulatorResult.windField;
+            logger.info("Number of windDTO : " + windFieldDTO.getMatrix().size());
 
-                timeListeners.clear();
-                if (windParams.isShowArrows()) {
-                    timeListeners.add(windFieldCanvasOverlay);
+            if (SimulatorMap.this.windParams.isShowGrid()) {
+                SimulatorMap.this.mapw.addOverlay(SimulatorMap.this.windGridCanvasOverlay);
+                SimulatorMap.this.mapw.addOverlay(SimulatorMap.this.windLineCanvasOverlay);
+            }
+            if (SimulatorMap.this.windParams.isShowArrows()) {
+                SimulatorMap.this.mapw.addOverlay(SimulatorMap.this.windFieldCanvasOverlay);
+            }
+
+            SimulatorMap.this.refreshWindFieldOverlay(windFieldDTO);
+
+            SimulatorMap.this.timeListeners.clear();
+            if (SimulatorMap.this.windParams.isShowArrows()) {
+                SimulatorMap.this.timeListeners.add(SimulatorMap.this.windFieldCanvasOverlay);
+            }
+            if (SimulatorMap.this.windParams.isShowGrid()) {
+                SimulatorMap.this.timeListeners.add(SimulatorMap.this.windGridCanvasOverlay);
+                SimulatorMap.this.timeListeners.add(SimulatorMap.this.windLineCanvasOverlay);
+            }
+            for (int i = 0; i < SimulatorMap.this.replayPathCanvasOverlays.size(); ++i) {
+                SimulatorMap.this.timeListeners.add(SimulatorMap.this.replayPathCanvasOverlays.get(i));
+            }
+
+            if (this.summaryView) {
+                if (SimulatorMap.this.windFieldCanvasOverlay != null) {
+                    SimulatorMap.this.windFieldCanvasOverlay.setVisible(false);
                 }
-                if (windParams.isShowGrid()) {
-                    timeListeners.add(windGridCanvasOverlay);
-                    timeListeners.add(windLineCanvasOverlay);
+                if (SimulatorMap.this.windGridCanvasOverlay != null) {
+                    SimulatorMap.this.windGridCanvasOverlay.setVisible(false);
                 }
-                for (int i = 0; i < replayPathCanvasOverlays.size(); ++i) {
-                    timeListeners.add(replayPathCanvasOverlays.get(i));
-                }
-            //}
-            if (summaryView) {
-                if (windFieldCanvasOverlay != null) {
-                    windFieldCanvasOverlay.setVisible(false);
-                }
-                if (windGridCanvasOverlay != null) {
-                    windGridCanvasOverlay.setVisible(false);
-                }
-                if (windLineCanvasOverlay != null) {
-                    windLineCanvasOverlay.setVisible(false);
+                if (SimulatorMap.this.windLineCanvasOverlay != null) {
+                    SimulatorMap.this.windLineCanvasOverlay.setVisible(false);
                 }
             }
-            
-            mapw.addOverlay(legendCanvasOverlay);
-            legendCanvasOverlay.setVisible(true);
-            legendCanvasOverlay.redraw(true);
-            
-            busyIndicator.setBusy(false);
+
+            SimulatorMap.this.mapw.addOverlay(SimulatorMap.this.legendCanvasOverlay);
+            SimulatorMap.this.legendCanvasOverlay.setVisible(true);
+            SimulatorMap.this.legendCanvasOverlay.redraw(true);
+
+            SimulatorMap.this.busyIndicator.setBusy(false);
         }
 
     }
 
-    public SimulatorMap(SimulatorServiceAsync simulatorSvc, StringMessages stringMessages, ErrorReporter errorReporter,
-            int xRes, int yRes, Timer timer, WindFieldGenParamsDTO windParams, SimpleBusyIndicator busyIndicator, 
-            char mode) {
+    public SimulatorMap(final SimulatorServiceAsync simulatorSvc, final StringMessages stringMessages, final ErrorReporter errorReporter, final int xRes,
+            final int yRes, final Timer timer, final WindFieldGenParamsDTO windParams, final SimpleBusyIndicator busyIndicator, final char mode) {
         this.simulatorSvc = simulatorSvc;
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
@@ -245,27 +232,26 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         this.windParams = windParams;
         this.busyIndicator = busyIndicator;
         this.mode = mode;
-      
-        colorPalette = new ColorPaletteGenerator();
 
-        dataInitialized = false;
-        overlaysInitialized = false;
+        this.colorPalette = new ColorPaletteGenerator();
 
-        windFieldCanvasOverlay = null;
-        windGridCanvasOverlay = null;
-        windLineCanvasOverlay = null;
-        //pathCanvasOverlays = null;
-        replayPathCanvasOverlays = null;
-        raceCourseCanvasOverlay = null;
-        timeListeners = new LinkedList<TimeListenerWithStoppingCriteria>();
-        initializeData();
+        this.dataInitialized = false;
+        this.overlaysInitialized = false;
+
+        this.windFieldCanvasOverlay = null;
+        this.windGridCanvasOverlay = null;
+        this.windLineCanvasOverlay = null;
+        // pathCanvasOverlays = null;
+        this.replayPathCanvasOverlays = null;
+        this.raceCourseCanvasOverlay = null;
+        this.timeListeners = new LinkedList<TimeListenerWithStoppingCriteria>();
+        this.initializeData();
         // createOverlays();
     }
-    
-    public SimulatorMap(SimulatorServiceAsync simulatorSvc, StringMessages stringMessages, ErrorReporter errorReporter,
-            int xRes, int yRes, Timer timer, SimulatorTimePanel timePanel, WindFieldGenParamsDTO windParams, 
-            SimpleBusyIndicator busyIndicator, 
-            char mode) {
+
+    public SimulatorMap(final SimulatorServiceAsync simulatorSvc, final StringMessages stringMessages, final ErrorReporter errorReporter, final int xRes,
+            final int yRes, final Timer timer, final SimulatorTimePanel timePanel, final WindFieldGenParamsDTO windParams,
+            final SimpleBusyIndicator busyIndicator, final char mode) {
         this.simulatorSvc = simulatorSvc;
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
@@ -277,19 +263,19 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         this.windParams = windParams;
         this.busyIndicator = busyIndicator;
         this.mode = mode;
-        colorPalette = new ColorPaletteGenerator();
+        this.colorPalette = new ColorPaletteGenerator();
 
-        dataInitialized = false;
-        overlaysInitialized = false;
+        this.dataInitialized = false;
+        this.overlaysInitialized = false;
 
-        windFieldCanvasOverlay = null;
-        windGridCanvasOverlay = null;
-        windLineCanvasOverlay = null;
-        //pathCanvasOverlays = null;
-        replayPathCanvasOverlays = null;
-        raceCourseCanvasOverlay = null;
-        timeListeners = new LinkedList<TimeListenerWithStoppingCriteria>();
-        initializeData();
+        this.windFieldCanvasOverlay = null;
+        this.windGridCanvasOverlay = null;
+        this.windLineCanvasOverlay = null;
+        // pathCanvasOverlays = null;
+        this.replayPathCanvasOverlays = null;
+        this.raceCourseCanvasOverlay = null;
+        this.timeListeners = new LinkedList<TimeListenerWithStoppingCriteria>();
+        this.initializeData();
         // createOverlays();
     }
 
@@ -301,152 +287,156 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
          * key will work for an application served from localhost.
          */
         Maps.loadMapsApi("", "2", false, new Runnable() {
+            @Override
             public void run() {
-                mapw = new MapWidget();
+                SimulatorMap.this.mapw = new MapWidget();
                 // mapw.setUI(SimulatorMapOptions.newInstance());
-                mapw.setZoomLevel(13);
+                SimulatorMap.this.mapw.setZoomLevel(13);
                 // mapw.setSize("100%", "650px");
                 // mapw.setSize("100%", "80%");
 
-                mapw.addControl(new LargeMapControl3D(), new ControlPosition(ControlAnchor.TOP_RIGHT, /* offsetX */0, /* offsetY */
-                30));
-                mapw.addControl(new MenuMapTypeControl());
-                mapw.addControl(new ScaleControl(), new ControlPosition(ControlAnchor.BOTTOM_RIGHT, /* offsetX */10, /* offsetY */
-                20));
+                SimulatorMap.this.mapw.addControl(new LargeMapControl3D(), new ControlPosition(ControlAnchor.TOP_RIGHT, /* offsetX */0, /* offsetY */
+                        30));
+                SimulatorMap.this.mapw.addControl(new MenuMapTypeControl());
+                SimulatorMap.this.mapw.addControl(new ScaleControl(), new ControlPosition(ControlAnchor.BOTTOM_RIGHT, /* offsetX */10, /* offsetY */
+                        20));
                 // Add the map to the HTML host page
-                mapw.setScrollWheelZoomEnabled(true);
+                SimulatorMap.this.mapw.setScrollWheelZoomEnabled(true);
                 // mapw.setContinuousZoom(true);
-                mapw.setTitle(stringMessages.simulator() + " " + stringMessages.map());
-                //PositionDTO kiel = new PositionDTO(54.46195148135232, 10.1513671875);
-                PositionDTO trave = new PositionDTO(54.007063,10.838356); //53.978276,10.880156);//53.968015,10.891331);
-                LatLng position = LatLng.newInstance(trave.latDeg, trave.lngDeg);
-                mapw.panTo(position);
-                SimulatorMap.this.add(mapw, 0, 0);
-                mapw.setSize("100%", "100%");
+                SimulatorMap.this.mapw.setTitle(SimulatorMap.this.stringMessages.simulator() + " " + SimulatorMap.this.stringMessages.map());
+                // PositionDTO kiel = new PositionDTO(54.46195148135232, 10.1513671875);
+                final PositionDTO trave = new PositionDTO(54.007063, 10.838356); // 53.978276,10.880156);//53.968015,10.891331);
+                final LatLng position = LatLng.newInstance(trave.latDeg, trave.lngDeg);
+                SimulatorMap.this.mapw.panTo(position);
+                SimulatorMap.this.add(SimulatorMap.this.mapw, 0, 0);
+                SimulatorMap.this.mapw.setSize("100%", "100%");
 
-                dataInitialized = true;
+                SimulatorMap.this.dataInitialized = true;
             }
         });
     }
 
     private void initializeOverlays() {
-        raceCourseCanvasOverlay = new RaceCourseCanvasOverlay();
-        raceCourseCanvasOverlay.getCanvas().getElement().setClassName("raceCourse");
-        System.out.println("RaceCourseCanvasOverlay z-index: " + raceCourseCanvasOverlay.getCanvas().getElement().getStyle().getZIndex());
-        mapw.addOverlay(raceCourseCanvasOverlay);
-        
-        if (windParams.isShowArrows()) {
-            windFieldCanvasOverlay = new WindFieldCanvasOverlay(timer);
+        this.raceCourseCanvasOverlay = new RaceCourseCanvasOverlay();
+        this.raceCourseCanvasOverlay.getCanvas().getElement().setClassName("raceCourse");
+        System.out.println("RaceCourseCanvasOverlay z-index: " + this.raceCourseCanvasOverlay.getCanvas().getElement().getStyle().getZIndex());
+        this.mapw.addOverlay(this.raceCourseCanvasOverlay);
+
+        if (this.windParams.isShowArrows()) {
+            this.windFieldCanvasOverlay = new WindFieldCanvasOverlay(this.timer);
         }
-        if (windParams.isShowGrid()) {
-            windGridCanvasOverlay = new WindGridCanvasOverlay(timer, xRes, yRes);
-            windLineCanvasOverlay = new WindLineCanvasOverlay(timer);
+        if (this.windParams.isShowGrid()) {
+            this.windGridCanvasOverlay = new WindGridCanvasOverlay(this.timer, this.xRes, this.yRes);
+            this.windLineCanvasOverlay = new WindLineCanvasOverlay(this.timer);
         }
         // mapw.addOverlay(windFieldCanvasOverlay);
-        //pathCanvasOverlays = new ArrayList<PathCanvasOverlay>();
-        replayPathCanvasOverlays = new ArrayList<PathCanvasOverlay>();
+        // pathCanvasOverlays = new ArrayList<PathCanvasOverlay>();
+        this.replayPathCanvasOverlays = new ArrayList<PathCanvasOverlay>();
         // timeListeners.add(replayPathCanvasOverlay);
-        legendCanvasOverlay = new PathLegendCanvasOverlay();
+        this.legendCanvasOverlay = new PathLegendCanvasOverlay();
 
-        overlaysInitialized = true;
+        this.overlaysInitialized = true;
     }
 
-    private void generateWindField(WindPatternDisplay windPatternDisplay, final boolean removeOverlays) {
+    private void generateWindField(final WindPatternDisplay windPatternDisplay, final boolean removeOverlays) {
         logger.info("In generateWindField");
         if (windPatternDisplay == null) {
-            errorReporter.reportError("Please select a valid wind pattern.");
+            this.errorReporter.reportError("Please select a valid wind pattern.");
             return;
         }
-        PositionDTO startPointDTO = new PositionDTO(raceCourseCanvasOverlay.startPoint.getLatitude(),
-                raceCourseCanvasOverlay.startPoint.getLongitude());
-        PositionDTO endPointDTO = new PositionDTO(raceCourseCanvasOverlay.endPoint.getLatitude(),
-                raceCourseCanvasOverlay.endPoint.getLongitude());
+        final PositionDTO startPointDTO = new PositionDTO(this.raceCourseCanvasOverlay.startPoint.getLatitude(),
+                this.raceCourseCanvasOverlay.startPoint.getLongitude());
+        final PositionDTO endPointDTO = new PositionDTO(this.raceCourseCanvasOverlay.endPoint.getLatitude(),
+                this.raceCourseCanvasOverlay.endPoint.getLongitude());
         logger.info("StartPoint:" + startPointDTO);
-        windParams.setNorthWest(startPointDTO);
-        windParams.setSouthEast(endPointDTO);
-        windParams.setxRes(xRes);
-        windParams.setyRes(yRes);
-        busyIndicator.setBusy(true);
-        simulatorSvc.getWindField(windParams, windPatternDisplay, new AsyncCallback<WindFieldDTO>() {
+        this.windParams.setNorthWest(startPointDTO);
+        this.windParams.setSouthEast(endPointDTO);
+        this.windParams.setxRes(this.xRes);
+        this.windParams.setyRes(this.yRes);
+        this.busyIndicator.setBusy(true);
+        this.simulatorSvc.getWindField(this.windParams, windPatternDisplay, new AsyncCallback<WindFieldDTO>() {
             @Override
-            public void onFailure(Throwable message) {
-                errorReporter.reportError("Failed servlet call to SimulatorService\n" + message.getMessage());
+            public void onFailure(final Throwable message) {
+                SimulatorMap.this.errorReporter.reportError("Failed servlet call to SimulatorService\n" + message.getMessage());
             }
 
             @Override
-            public void onSuccess(WindFieldDTO wl) {
+            public void onSuccess(final WindFieldDTO wl) {
                 if (removeOverlays) {
-                    removeOverlays();
+                    SimulatorMap.this.removeOverlays();
                 }
                 logger.info("Number of windDTO : " + wl.getMatrix().size());
                 // Window.alert("Number of windDTO : " + wl.getMatrix().size());
-                if (windParams.isShowGrid()) {
-                    mapw.addOverlay(windGridCanvasOverlay);
-                    mapw.addOverlay(windLineCanvasOverlay);
+                if (SimulatorMap.this.windParams.isShowGrid()) {
+                    SimulatorMap.this.mapw.addOverlay(SimulatorMap.this.windGridCanvasOverlay);
+                    SimulatorMap.this.mapw.addOverlay(SimulatorMap.this.windLineCanvasOverlay);
                 }
-                if (windParams.isShowArrows()) {
-                    mapw.addOverlay(windFieldCanvasOverlay);
+                if (SimulatorMap.this.windParams.isShowArrows()) {
+                    SimulatorMap.this.mapw.addOverlay(SimulatorMap.this.windFieldCanvasOverlay);
                 }
-                refreshWindFieldOverlay(wl);
-                timeListeners.clear();
-                if (windParams.isShowArrows()) {
-                    timeListeners.add(windFieldCanvasOverlay);
+                SimulatorMap.this.refreshWindFieldOverlay(wl);
+                SimulatorMap.this.timeListeners.clear();
+                if (SimulatorMap.this.windParams.isShowArrows()) {
+                    SimulatorMap.this.timeListeners.add(SimulatorMap.this.windFieldCanvasOverlay);
                 }
-                if (windParams.isShowGrid()) {
-                    timeListeners.add(windGridCanvasOverlay);
-                    timeListeners.add(windLineCanvasOverlay);
+                if (SimulatorMap.this.windParams.isShowGrid()) {
+                    SimulatorMap.this.timeListeners.add(SimulatorMap.this.windGridCanvasOverlay);
+                    SimulatorMap.this.timeListeners.add(SimulatorMap.this.windLineCanvasOverlay);
                 }
-                timePanel.setMinMax(windParams.getStartTime(), windParams.getEndTime(), true);
-                timePanel.resetTimeSlider();
-                
-                busyIndicator.setBusy(false);
+                SimulatorMap.this.timePanel.setMinMax(SimulatorMap.this.windParams.getStartTime(), SimulatorMap.this.windParams.getEndTime(), true);
+                SimulatorMap.this.timePanel.resetTimeSlider();
+
+                SimulatorMap.this.busyIndicator.setBusy(false);
             }
         });
 
     }
 
     private void refreshWindFieldOverlay(final WindFieldDTO wl) {
-        if (windFieldCanvasOverlay != null) {
-            windFieldCanvasOverlay.setWindField(wl);
+        if (this.windFieldCanvasOverlay != null) {
+            this.windFieldCanvasOverlay.setWindField(wl);
         }
-        if (windGridCanvasOverlay != null) {
-            windGridCanvasOverlay.setWindField(wl);
+        if (this.windGridCanvasOverlay != null) {
+            this.windGridCanvasOverlay.setWindField(wl);
         }
+
         if (windLineCanvasOverlay != null) {
             windLineCanvasOverlay.setWindLinesDTO(wl.getWindLinesDTO());
             if (windGridCanvasOverlay != null) {
                 windLineCanvasOverlay.setGridCorners(windGridCanvasOverlay.getGridCorners());
             }
         }
-        timer.setTime(windParams.getStartTime().getTime());
-        if (windParams.isShowArrows()) {
-            windFieldCanvasOverlay.redraw(true);
+        
+        this.timer.setTime(this.windParams.getStartTime().getTime());
+        if (this.windParams.isShowArrows()) {
+            this.windFieldCanvasOverlay.redraw(true);
         }
-        if (windParams.isShowGrid()) {
-            windGridCanvasOverlay.redraw(true);
-            windLineCanvasOverlay.redraw(true);
+        if (this.windParams.isShowGrid()) {
+            this.windGridCanvasOverlay.redraw(true);
+            this.windLineCanvasOverlay.redraw(true);
         }
     }
 
-    //I077899 - Mihai Bogdan Eugen
-    private void generatePath(WindPatternDisplay windPatternDisplay, final boolean summaryView, int boatClassIndex) {
+    private void generatePath(final WindPatternDisplay windPatternDisplay, final boolean summaryView, final int boatClassIndex) {
         logger.info("In generatePath");
 
         if (windPatternDisplay == null) {
-        	this.errorReporter.reportError("Please select a valid wind pattern.");
+            this.errorReporter.reportError("Please select a valid wind pattern.");
             return;
         }
-        
+
         if (this.mode != SailingSimulatorUtil.measured) {
-            PositionDTO startPointDTO = new PositionDTO(raceCourseCanvasOverlay.startPoint.getLatitude(), raceCourseCanvasOverlay.startPoint.getLongitude());
+            final PositionDTO startPointDTO = new PositionDTO(this.raceCourseCanvasOverlay.startPoint.getLatitude(),
+                    this.raceCourseCanvasOverlay.startPoint.getLongitude());
             this.windParams.setNorthWest(startPointDTO);
-            
-            PositionDTO endPointDTO = new PositionDTO(raceCourseCanvasOverlay.endPoint.getLatitude(), raceCourseCanvasOverlay.endPoint.getLongitude());
+
+            final PositionDTO endPointDTO = new PositionDTO(this.raceCourseCanvasOverlay.endPoint.getLatitude(),
+                    this.raceCourseCanvasOverlay.endPoint.getLongitude());
             this.windParams.setSouthEast(endPointDTO);
         }
-        
-        this.windParams.setxRes(xRes);
-        this.windParams.setyRes(yRes);
+
+        this.windParams.setxRes(this.xRes);
+        this.windParams.setyRes(this.yRes);
 
         this.busyIndicator.setBusy(true);
 
@@ -454,72 +444,71 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
     }
 
     private boolean isCourseSet() {
-        return raceCourseCanvasOverlay.isCourseSet();
+        return this.raceCourseCanvasOverlay.isCourseSet();
     }
 
     public void reset() {
-        if (!overlaysInitialized) {
-            initializeOverlays();
+        if (!this.overlaysInitialized) {
+            this.initializeOverlays();
         } else {
-            removeOverlays();
+            this.removeOverlays();
         }
-        mapw.setDoubleClickZoom(false);
-        raceCourseCanvasOverlay.setSelected(true);
+        this.mapw.setDoubleClickZoom(false);
+        this.raceCourseCanvasOverlay.setSelected(true);
         // raceCourseCanvasOverlay.setVisible(true);
-        raceCourseCanvasOverlay.reset();
-        raceCourseCanvasOverlay.redraw(true);
+        this.raceCourseCanvasOverlay.reset();
+        this.raceCourseCanvasOverlay.redraw(true);
     }
 
     public void removeOverlays() {
-        if (overlaysInitialized) {
+        if (this.overlaysInitialized) {
             int num = 0; // tracking for debugging only
-            if (windFieldCanvasOverlay != null) {
-                mapw.removeOverlay(windFieldCanvasOverlay);
+            if (this.windFieldCanvasOverlay != null) {
+                this.mapw.removeOverlay(this.windFieldCanvasOverlay);
                 num++;
             }
-            if (windGridCanvasOverlay != null) {
-                mapw.removeOverlay(windGridCanvasOverlay);
+            if (this.windGridCanvasOverlay != null) {
+                this.mapw.removeOverlay(this.windGridCanvasOverlay);
                 num++;
             }
-            if (windLineCanvasOverlay != null) {
-                mapw.removeOverlay(windLineCanvasOverlay);
+            if (this.windLineCanvasOverlay != null) {
+                this.mapw.removeOverlay(this.windLineCanvasOverlay);
                 num++;
             }
-           
-            for (int i = 0; i < replayPathCanvasOverlays.size(); ++i) {
-                mapw.removeOverlay(replayPathCanvasOverlays.get(i));
+
+            for (int i = 0; i < this.replayPathCanvasOverlays.size(); ++i) {
+                this.mapw.removeOverlay(this.replayPathCanvasOverlays.get(i));
                 num++;
             }
-            mapw.removeOverlay(legendCanvasOverlay);
+            this.mapw.removeOverlay(this.legendCanvasOverlay);
             logger.info("Removed " + num + " overlays");
         }
     }
 
-    //I077899 - Mihai Bogdan Eugen
-    private void refreshSummaryView(WindPatternDisplay windPatternDisplay, int boatClassIndex, boolean force) {
+    private void refreshSummaryView(final WindPatternDisplay windPatternDisplay, final int boatClassIndex, final boolean force) {
         // removeOverlays();
         if (force) {
             this.generatePath(windPatternDisplay, true, boatClassIndex);
         } else {
-            if (replayPathCanvasOverlays != null && !replayPathCanvasOverlays.isEmpty()) {
+            if (this.replayPathCanvasOverlays != null && !this.replayPathCanvasOverlays.isEmpty()) {
                 System.out.println("Soft refresh");
-                for (PathCanvasOverlay r : replayPathCanvasOverlays) {
+                for (final PathCanvasOverlay r : this.replayPathCanvasOverlays) {
                     r.displayWindAlongPath = true;
-                    timer.removeTimeListener(r);
+                    this.timer.removeTimeListener(r);
                     r.setTimer(null);
                     r.setVisible(true);
                     r.redraw(true);
-                } 
+                }
                 this.legendCanvasOverlay.setVisible(true);
                 this.legendCanvasOverlay.redraw(true);
-                if (windFieldCanvasOverlay != null) {
-                    windFieldCanvasOverlay.setVisible(false);
+                if (this.windFieldCanvasOverlay != null) {
+                    this.windFieldCanvasOverlay.setVisible(false);
                 }
-                if (windGridCanvasOverlay != null) {
-                    windGridCanvasOverlay.setVisible(false);
+                if (this.windGridCanvasOverlay != null) {
+                    this.windGridCanvasOverlay.setVisible(false);
                 }
-                if (windLineCanvasOverlay != null) {
-                    windLineCanvasOverlay.setVisible(false);
+                if (this.windLineCanvasOverlay != null) {
+                    this.windLineCanvasOverlay.setVisible(false);
                 }
             } else {
                 this.generatePath(windPatternDisplay, true, boatClassIndex);
@@ -527,32 +516,31 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         }
     }
 
-    //I077899 - Mihai Bogdan Eugen
-    private void refreshReplayView(WindPatternDisplay windPatternDisplay, int boatClassIndex, boolean force) {
+    private void refreshReplayView(final WindPatternDisplay windPatternDisplay, final int boatClassIndex, final boolean force) {
         // removeOverlays();
         if (force) {
             this.generatePath(windPatternDisplay, false, boatClassIndex);
         } else {
-          
-            if (replayPathCanvasOverlays != null && !replayPathCanvasOverlays.isEmpty()) {
+
+            if (this.replayPathCanvasOverlays != null && !this.replayPathCanvasOverlays.isEmpty()) {
                 System.out.println("Soft refresh");
-                for (PathCanvasOverlay r : replayPathCanvasOverlays) {
+                for (final PathCanvasOverlay r : this.replayPathCanvasOverlays) {
                     r.displayWindAlongPath = false;
                     r.setTimer(this.timer);
-                    timer.addTimeListener(r);
+                    this.timer.addTimeListener(r);
                     r.setVisible(true);
                     r.redraw(true);
                 }
                 this.legendCanvasOverlay.setVisible(true);
                 this.legendCanvasOverlay.redraw(true);
-                if (windFieldCanvasOverlay != null) {
-                    windFieldCanvasOverlay.setVisible(true);
+                if (this.windFieldCanvasOverlay != null) {
+                    this.windFieldCanvasOverlay.setVisible(true);
                 }
-                if (windGridCanvasOverlay != null) {
-                    windGridCanvasOverlay.setVisible(true);
+                if (this.windGridCanvasOverlay != null) {
+                    this.windGridCanvasOverlay.setVisible(true);
                 }
-                if (windLineCanvasOverlay != null) {
-                    windLineCanvasOverlay.setVisible(true);
+                if (this.windLineCanvasOverlay != null) {
+                    this.windLineCanvasOverlay.setVisible(true);
                 }
             } else {
                 this.generatePath(windPatternDisplay, false, boatClassIndex);
@@ -560,65 +548,65 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         }
     }
 
-    private void refreshWindDisplayView(WindPatternDisplay windPatternDisplay, boolean force) {
-        
+    private void refreshWindDisplayView(final WindPatternDisplay windPatternDisplay, final boolean force) {
+
         if (force) {
             // removeOverlays();
-            windParams.setDefaultTimeSettings();
-            generateWindField(windPatternDisplay, true);
+            this.windParams.setDefaultTimeSettings();
+            this.generateWindField(windPatternDisplay, true);
             // timeListeners.clear();
             // timeListeners.add(windFieldCanvasOverlay);
         } else {
 
-            if (replayPathCanvasOverlays != null && !replayPathCanvasOverlays.isEmpty()) {
+            if (this.replayPathCanvasOverlays != null && !this.replayPathCanvasOverlays.isEmpty()) {
                 System.out.println("Soft refresh");
-                for (PathCanvasOverlay r : replayPathCanvasOverlays) {
+                for (final PathCanvasOverlay r : this.replayPathCanvasOverlays) {
                     r.setVisible(false);
                 }
                 this.legendCanvasOverlay.setVisible(false);
-                if (windFieldCanvasOverlay != null) {
-                    windFieldCanvasOverlay.setVisible(true);
-                    windFieldCanvasOverlay.redraw(true);
+                if (this.windFieldCanvasOverlay != null) {
+                    this.windFieldCanvasOverlay.setVisible(true);
+                    this.windFieldCanvasOverlay.redraw(true);
                 }
-                if (windGridCanvasOverlay != null) {
-                    windGridCanvasOverlay.setVisible(true);
-                    windFieldCanvasOverlay.redraw(true);
+                if (this.windGridCanvasOverlay != null) {
+                    this.windGridCanvasOverlay.setVisible(true);
+                    this.windFieldCanvasOverlay.redraw(true);
                 }
-                if (windLineCanvasOverlay != null) {
-                    windLineCanvasOverlay.setVisible(true);
-                    windFieldCanvasOverlay.redraw(true);
+                if (this.windLineCanvasOverlay != null) {
+                    this.windLineCanvasOverlay.setVisible(true);
+                    this.windFieldCanvasOverlay.redraw(true);
                 }
             } else {
-                windParams.setDefaultTimeSettings();
-                generateWindField(windPatternDisplay, true);
+                this.windParams.setDefaultTimeSettings();
+                this.generateWindField(windPatternDisplay, true);
             }
         }
     }
 
-    public void refreshView(ViewName name, WindPatternDisplay windPatternDisplay, int boatClassIndex, boolean force) {
-        if (!overlaysInitialized) {
-            initializeOverlays();
+    public void refreshView(final ViewName name, final WindPatternDisplay windPatternDisplay, final int boatClassIndex, final boolean force) {
+        if (!this.overlaysInitialized) {
+            this.initializeOverlays();
         }
-        if ((isCourseSet())||(mode == SailingSimulatorUtil.measured)) {
-            mapw.setDoubleClickZoom(true);
-            raceCourseCanvasOverlay.setSelected(false);
-            windParams.setKeepState(!force);
+        if ((this.isCourseSet()) || (this.mode == SailingSimulatorUtil.measured)) {
+            this.mapw.setDoubleClickZoom(true);
+            this.raceCourseCanvasOverlay.setSelected(false);
+            this.windParams.setKeepState(!force);
             if (force) {
-                if (replayPathCanvasOverlays != null) {
-                    removeOverlays();
-                    timeListeners.clear();
-                    replayPathCanvasOverlays.clear();
+                if (this.replayPathCanvasOverlays != null) {
+                    this.removeOverlays();
+                    this.timeListeners.clear();
+                    this.replayPathCanvasOverlays.clear();
                 }
             }
             switch (name) {
             case SUMMARY:
-                refreshSummaryView(windPatternDisplay, boatClassIndex, force);
+                this.refreshSummaryView(windPatternDisplay, boatClassIndex, force);
                 break;
             case REPLAY:
-                refreshReplayView(windPatternDisplay, boatClassIndex, force);
+                this.refreshReplayView(windPatternDisplay, boatClassIndex, force);
                 break;
             case WINDDISPLAY:
-                refreshWindDisplayView(windPatternDisplay, force);
+                this.refreshWindDisplayView(windPatternDisplay, force);
                 break;
             default:
                 break;
@@ -630,47 +618,63 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
 
     @Override
     public void initializeData() {
-        loadMapsAPI();
+        this.loadMapsAPI();
     }
 
     @Override
     public boolean isDataInitialized() {
-        return dataInitialized;
+        return this.dataInitialized;
     }
 
     @Override
-    public void timeChanged(Date date) {
-        if (stop() == 0) {
+    public void timeChanged(final Date date) {
+        if (this.stop() == 0) {
             logger.info("Stopping the timer");
-            timer.stop();
+            this.timer.stop();
         }
     }
 
     @Override
     public int stop() {
-
         int value = 0;
-        for (TimeListenerWithStoppingCriteria t : timeListeners) {
+        for (final TimeListenerWithStoppingCriteria t : this.timeListeners) {
             value += t.stop();
         }
         return value;
     }
-    
-    //I077899 - Mihai Bogdan Eugen    
-    private static void createPathPolyline(PathDTO pathDTO, MapWidget map) 
-    {
-        List<WindDTO> pathPoints = pathDTO.getMatrix();
-        int noOfPathPoints = pathPoints.size();
+
+    private static PathPolyline createPathPolyline(final PathDTO pathDTO, final MapWidget map) {
+        final List<WindDTO> pathPoints = pathDTO.getMatrix();
+
+        final int noOfPathPoints = pathPoints.size();
         WindDTO currentPathPoint = null;
-        List<LatLng> points = new ArrayList<LatLng>();
-        
-        for (int index = 0; index < noOfPathPoints; index++) 
-        {
-                currentPathPoint = pathPoints.get(index);
-                if (index == 0 || index == noOfPathPoints - 1 || currentPathPoint.isTurn) 
-                        points.add(LatLng.newInstance(currentPathPoint.position.latDeg, currentPathPoint.position.lngDeg));
+        final List<LatLng> points = new ArrayList<LatLng>();
+
+        for (int index = 0; index < noOfPathPoints; index++) {
+            currentPathPoint = pathPoints.get(index);
+            if (index == 0 || index == noOfPathPoints - 1 || currentPathPoint.isTurn) {
+                points.add(LatLng.newInstance(currentPathPoint.position.latDeg, currentPathPoint.position.lngDeg));
+            }
         }
-        
-        new PathPolyline(points.toArray(new LatLng[0]), map);           
-    } 
+
+        final double averageWindSpeed = computeAverageWindSpeed(pathPoints);
+
+        return new PathPolyline(points.toArray(new LatLng[0]), averageWindSpeed, map);
+    }
+
+    public static double computeAverageWindSpeed(final List<WindDTO> windDTOs) {
+        double result = 0.0;
+        for (final WindDTO windDTO : windDTOs) {
+            result += windDTO.trueWindSpeedInMetersPerSecond;
+        }
+
+        result /= windDTOs.size();
+        // new KnotSpeedWithBearingImpl(6, new DegreeBearingImpl(180));
+        return result;
+    }
+
+    public double getPathPolylineAverageSpeed() {
+        return this.pathPolyline.getAverageWindSpeed();
+    }
+
 }
