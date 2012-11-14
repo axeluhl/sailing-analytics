@@ -9,9 +9,9 @@ package com.sap.sailing.gwt.ui.simulator.util;
 public class WindGridColorPalette implements ColorPalette {
 
     /*White is 255 or FF */
-    public int minColor = 255; 
+    public int minColor = 255;//200; 
     /*Black is 0 or 00 */
-    public int maxColor = 0;
+    public int maxColor = 0;//100;
     
     private double min;
     private double max;
@@ -56,7 +56,8 @@ public class WindGridColorPalette implements ColorPalette {
             if (colorValueHex.length() < 2) {
                 colorValueHex = "0" + colorValueHex;
             }
-            String rgb = "#" + colorValueHex + colorValueHex + colorValueHex;
+            //String rgb = "#" + colorValueHex + colorValueHex + colorValueHex;
+            String rgb = "#" + colorValueHex + colorValueHex + "FF";
             return rgb;
         }
         return null;

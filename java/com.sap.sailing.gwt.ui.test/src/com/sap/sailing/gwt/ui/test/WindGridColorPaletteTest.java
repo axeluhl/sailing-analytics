@@ -14,9 +14,9 @@ public class WindGridColorPaletteTest {
         WindGridColorPalette cp = new WindGridColorPalette(min,max);
         
         assertEquals("Lightest color", "#FFFFFF", cp.getColor(min));
-        assertEquals("Darkest color", "#000000", cp.getColor(max));
+        assertEquals("Darkest color", "#0000FF", cp.getColor(max));
         
-        assertEquals("In between color", "#7F7F7F", cp.getColor((max+min)/2));
+        assertEquals("In between color", "#7F7FFF", cp.getColor((max+min)/2));
     }
 
 }
