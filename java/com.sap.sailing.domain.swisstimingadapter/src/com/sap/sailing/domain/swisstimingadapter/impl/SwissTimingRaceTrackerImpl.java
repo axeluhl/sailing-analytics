@@ -12,7 +12,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.logging.Logger;
 
-import com.sap.sailing.domain.base.Buoy;
+import com.sap.sailing.domain.base.SingleMark;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RaceDefinition;
@@ -179,8 +179,8 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
                     case TIMINGSCORING:
                     case UNIDENTIFIED:
                         String trackerID = fix.getBoatID();
-                        Buoy buoy = domainFactory.getOrCreateBuoy(trackerID);
-                        trackedRace.recordFix(buoy, gpsFix);
+                        SingleMark mark = domainFactory.getOrCreateMark(trackerID);
+                        trackedRace.recordFix(mark, gpsFix);
                         break;
                     case COMPETITOR:
                         Competitor competitor = domainFactory.getCompetitorByBoatID(fix.getBoatID());

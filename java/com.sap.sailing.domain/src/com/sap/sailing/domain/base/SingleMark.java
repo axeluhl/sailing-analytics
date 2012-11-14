@@ -1,0 +1,15 @@
+package com.sap.sailing.domain.base;
+
+
+/**
+ * A marks name is used as its ID which is only identifying the mark uniquely within a single race or course
+ * definition.
+ * 
+ * @author Axel Uhl (D043530)
+ * 
+ */
+public interface SingleMark extends WithID, ControlPoint, IsManagedByDomainFactory {
+    public String getColor();
+    public String getShape();
+    public String getPattern();
+}

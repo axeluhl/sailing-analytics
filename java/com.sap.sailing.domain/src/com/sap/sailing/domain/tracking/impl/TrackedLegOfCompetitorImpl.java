@@ -3,7 +3,7 @@ package com.sap.sailing.domain.tracking.impl;
 import java.util.Iterator;
 import java.util.List;
 
-import com.sap.sailing.domain.base.Buoy;
+import com.sap.sailing.domain.base.SingleMark;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.SpeedWithBearing;
@@ -166,8 +166,8 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
             return Distance.NULL;
         } else {
             Distance result = null;
-            for (Buoy buoy : getLeg().getTo().getBuoys()) {
-                Distance d = getWindwardDistanceTo(buoy, timePoint);
+            for (SingleMark mark : getLeg().getTo().getMarks()) {
+                Distance d = getWindwardDistanceTo(mark, timePoint);
                 if (result == null || d != null && d.compareTo(result) < 0) {
                     result = d;
                 }
@@ -178,29 +178,29 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
 
     /**
      * If the current {@link #getLeg() leg} is +/- {@link #UPWIND_DOWNWIND_TOLERANCE_IN_DEG} degrees collinear with the
-     * wind's bearing, the competitor's position is projected onto the line crossing <code>buoy</code> in the wind's
-     * bearing, and the distance from the projection to the <code>buoy</code> is returned. Otherwise, it is assumed that
-     * the leg is neither an upwind nor a downwind leg, and hence the true distance to <code>buoy</code> is returned.
+     * wind's bearing, the competitor's position is projected onto the line crossing <code>mark</code> in the wind's
+     * bearing, and the distance from the projection to the <code>mark</code> is returned. Otherwise, it is assumed that
+     * the leg is neither an upwind nor a downwind leg, and hence the true distance to <code>mark</code> is returned.
      */
-    private Distance getWindwardDistanceTo(Buoy buoy, TimePoint at) throws NoWindException {
+    private Distance getWindwardDistanceTo(SingleMark mark, TimePoint at) throws NoWindException {
         Position estimatedPosition = getTrackedRace().getTrack(getCompetitor()).getEstimatedPosition(at, false);
         if (!hasStartedLeg(at) || estimatedPosition == null) {
             // covers the case with no fixes for this leg yet, also if the mark passing has already been received
-            estimatedPosition = getTrackedRace().getOrCreateTrack(getLeg().getFrom().getBuoys().iterator().next())
+            estimatedPosition = getTrackedRace().getOrCreateTrack(getLeg().getFrom().getMarks().iterator().next())
                     .getEstimatedPosition(at, false);
         }
         if (estimatedPosition == null) { // may happen if mark positions haven't been received yet
             return null;
         }
-        return getWindwardDistance(estimatedPosition, getTrackedRace().getOrCreateTrack(buoy).getEstimatedPosition(at, false),
+        return getWindwardDistance(estimatedPosition, getTrackedRace().getOrCreateTrack(mark).getEstimatedPosition(at, false),
                 at);
     }
 
     /**
      * If the current {@link #getLeg() leg} is +/- {@link TrackedLegImpl#UPWIND_DOWNWIND_TOLERANCE_IN_DEG} degrees collinear with the
-     * wind's bearing, the competitor's position is projected onto the line crossing <code>buoy</code> in the wind's
-     * bearing, and the distance from the projection to the <code>buoy</code> is returned. Otherwise, it is assumed that
-     * the leg is neither an upwind nor a downwind leg, and hence the along-track distance to <code>buoy</code> is returned.
+     * wind's bearing, the competitor's position is projected onto the line crossing <code>mark</code> in the wind's
+     * bearing, and the distance from the projection to the <code>mark</code> is returned. Otherwise, it is assumed that
+     * the leg is neither an upwind nor a downwind leg, and hence the along-track distance to <code>mark</code> is returned.
      * 
      * @param at the wind estimation is performed for this point in time
      */

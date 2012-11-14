@@ -16,7 +16,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
-import com.sap.sailing.domain.base.Buoy;
+import com.sap.sailing.domain.base.SingleMark;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.DomainFactory;
@@ -42,7 +42,7 @@ public class DomainFactoryImpl implements DomainFactory {
      */
     private final Map<String, Nationality> nationalityCache;
     
-    private final Map<String, Buoy> buoyCache;
+    private final Map<String, SingleMark> markCache;
     
     private final Map<String, BoatClass> boatClassCache;
     
@@ -85,7 +85,7 @@ public class DomainFactoryImpl implements DomainFactory {
     public DomainFactoryImpl() {
         waypointCacheReferenceQueue = new ReferenceQueue<Waypoint>();
         nationalityCache = new HashMap<String, Nationality>();
-        buoyCache = new HashMap<String, Buoy>();
+        markCache = new HashMap<String, SingleMark>();
         boatClassCache = new HashMap<String, BoatClass>();
         competitorCache = new HashMap<Serializable, Competitor>();
         waypointCache = new ConcurrentHashMap<Serializable, WeakWaypointReference>();
@@ -110,27 +110,27 @@ public class DomainFactoryImpl implements DomainFactory {
      * {@link MessageType#RPD RPD} message
      */
     @Override
-    public Buoy getOrCreateBuoy(String id) {
-        Buoy result = buoyCache.get(id);
+    public SingleMark getOrCreateSingleMark(String id) {
+        SingleMark result = markCache.get(id);
         if (result == null) {
-            result = new BuoyImpl(id);
-            buoyCache.put(id, result);
+            result = new SingleMarkImpl(id);
+            markCache.put(id, result);
         }
         return result;
     }
     
     @Override
-    public Buoy getOrCreateBuoy(String id, String color, String shape, String pattern) {
-        Buoy result = buoyCache.get(id);
+    public SingleMark getOrCreateSingleMark(String id, String color, String shape, String pattern) {
+        SingleMark result = markCache.get(id);
         if (result == null) {
-            result = new BuoyImpl(id, color, shape, pattern);
-            buoyCache.put(id, result);
+            result = new SingleMarkImpl(id, color, shape, pattern);
+            markCache.put(id, result);
         }
         return result;
     }
 
     @Override
-    public Gate createGate(Buoy left, Buoy right, String name) {
+    public Gate createGate(SingleMark left, SingleMark right, String name) {
        return new GateImpl(left, right, name);
     }
 

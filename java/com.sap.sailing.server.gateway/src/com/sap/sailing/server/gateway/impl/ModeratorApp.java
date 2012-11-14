@@ -12,7 +12,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
-import com.sap.sailing.domain.base.Buoy;
+import com.sap.sailing.domain.base.SingleMark;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Person;
@@ -162,22 +162,22 @@ public class ModeratorApp extends SailingServerHttpServlet {
                 for (Waypoint waypoint : trackedRace.getRace().getCourse().getWaypoints()) {
                     JSONObject jsonWaypoint = new JSONObject();
                     jsonWaypoint.put("name", waypoint.getName());
-                    JSONArray jsonBuoys = new JSONArray();
-                    for (Buoy buoy : waypoint.getBuoys()) {
-                        JSONObject jsonBuoy = new JSONObject();
-                        jsonBuoy.put("name", buoy.getName());
-                        GPSFixTrack<Buoy, GPSFix> buoyTrack = trackedRace.getOrCreateTrack(buoy);
-                        GPSFix lastFixAtOrBefore = buoyTrack.getLastFixAtOrBefore(timePoint);
+                    JSONArray jsonMarks = new JSONArray();
+                    for (SingleMark mark : waypoint.getMarks()) {
+                        JSONObject jsonMark = new JSONObject();
+                        jsonMark.put("name", mark.getName());
+                        GPSFixTrack<SingleMark, GPSFix> markTrack = trackedRace.getOrCreateTrack(mark);
+                        GPSFix lastFixAtOrBefore = markTrack.getLastFixAtOrBefore(timePoint);
                         if (lastFixAtOrBefore != null) {
-                            Position buoyPosition = lastFixAtOrBefore.getPosition();
-                            if (buoyPosition != null) {
-                                jsonBuoy.put("lat", buoyPosition.getLatDeg());
-                                jsonBuoy.put("lng", buoyPosition.getLngDeg());
+                            Position markPosition = lastFixAtOrBefore.getPosition();
+                            if (markPosition != null) {
+                                jsonMark.put("lat", markPosition.getLatDeg());
+                                jsonMark.put("lng", markPosition.getLngDeg());
                             }
                         }
-                        jsonBuoys.add(jsonBuoy);
+                        jsonMarks.add(jsonMark);
                     }
-                    jsonWaypoint.put("buoys", jsonBuoys);
+                    jsonWaypoint.put("buoys", jsonMarks);
                     jsonWaypoints.add(jsonWaypoint);
                 }
                 jsonWaypoints.writeJSONString(resp.getWriter());
@@ -218,7 +218,7 @@ public class ModeratorApp extends SailingServerHttpServlet {
                 Position positionForWind = null;
                 TrackedLeg currentLeg = trackedRace.getCurrentLeg(timePoint);
                 if (currentLeg != null) {
-                    positionForWind = trackedRace.getOrCreateTrack(currentLeg.getLeg().getFrom().getBuoys().iterator().next())
+                    positionForWind = trackedRace.getOrCreateTrack(currentLeg.getLeg().getFrom().getMarks().iterator().next())
                             .getEstimatedPosition(timePoint, false);
                 }
                 Wind currentWind = trackedRace.getWind(positionForWind, timePoint);

@@ -13,7 +13,7 @@ import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import com.sap.sailing.domain.base.Buoy;
+import com.sap.sailing.domain.base.SingleMark;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.Waypoint;
@@ -534,11 +534,11 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
     }
 
     @Override
-    public void buoyPositionChanged(GPSFix fix, Buoy buoy) {
+    public void markPositionChanged(GPSFix fix, SingleMark mark) {
         assert fix != null && fix.getTimePoint() != null;
-        // A buoy position change can mean a leg type change. The interval over which the wind estimation is affected
-        // depends on how the GPS track computes the estimated buoy position. Ask it:
-        Pair<TimePoint, TimePoint> interval = getTrackedRace().getOrCreateTrack(buoy).getEstimatedPositionTimePeriodAffectedBy(fix);
+        // A mark position change can mean a leg type change. The interval over which the wind estimation is affected
+        // depends on how the GPS track computes the estimated mark position. Ask it:
+        Pair<TimePoint, TimePoint> interval = getTrackedRace().getOrCreateTrack(mark).getEstimatedPositionTimePeriodAffectedBy(fix);
         WindWithConfidence<TimePoint> startOfInvalidation = getDummyFixWithConfidence(interval.getA());
         TimePoint endOfInvalidation = interval.getB();
         scheduleCacheRefresh(startOfInvalidation, endOfInvalidation);

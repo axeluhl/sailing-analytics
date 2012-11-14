@@ -1,6 +1,6 @@
 package com.sap.sailing.domain.tracking;
 
-import com.sap.sailing.domain.base.Buoy;
+import com.sap.sailing.domain.base.SingleMark;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
@@ -8,7 +8,7 @@ import com.sap.sailing.domain.common.WindSource;
 public interface DynamicTrackedRace extends TrackedRace {
     void recordFix(Competitor competitor, GPSFixMoving fix);
     
-    void recordFix(Buoy buoy, GPSFix fix);
+    void recordFix(SingleMark mark, GPSFix fix);
     
     void recordWind(Wind wind, WindSource windSource);
 
@@ -20,10 +20,10 @@ public interface DynamicTrackedRace extends TrackedRace {
     DynamicGPSFixTrack<Competitor, GPSFixMoving> getTrack(Competitor competitor);
     
     /**
-     * Yields the track describing <code>buoy</code>'s movement over time; never <code>null</code> because a
-     * new track will be created in case no track was present for <code>buoy</code> so far.
+     * Yields the track describing <code>mark</code>'s movement over time; never <code>null</code> because a
+     * new track will be created in case no track was present for <code>mark</code> so far.
      */
-    DynamicGPSFixTrack<Buoy, GPSFix> getOrCreateTrack(Buoy buoy);
+    DynamicGPSFixTrack<SingleMark, GPSFix> getOrCreateTrack(SingleMark mark);
 
     /**
      * Updates all mark passings for <code>competitor</code> for this race. The

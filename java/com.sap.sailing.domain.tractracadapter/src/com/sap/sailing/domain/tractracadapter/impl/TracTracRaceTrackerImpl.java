@@ -23,7 +23,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 import com.maptrack.client.io.TypeController;
-import com.sap.sailing.domain.base.Buoy;
+import com.sap.sailing.domain.base.SingleMark;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceDefinition;
@@ -247,14 +247,14 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
                     for (ControlPoint controlPoint : event.getControlPointList()) {
                         com.sap.sailing.domain.base.ControlPoint domainControlPoint = domainFactory.getOrCreateControlPoint(controlPoint);
                         boolean first = true;
-                        for (Buoy buoy : domainControlPoint.getBuoys()) {
+                        for (SingleMark mark : domainControlPoint.getMarks()) {
                             for (RaceDefinition raceDefinition : raceDefinitions) {
                                 DynamicTrackedRace trackedRace = getTrackedRegatta().getExistingTrackedRace(
                                         raceDefinition);
                                 if (trackedRace != null) {
-                                    DynamicGPSFixTrack<Buoy, GPSFix> buoyTrack = trackedRace.getOrCreateTrack(buoy);
-                                    if (buoyTrack.getFirstRawFix() == null) {
-                                        buoyTrack.addGPSFix(new GPSFixImpl(new DegreePosition(first ? controlPoint
+                                    DynamicGPSFixTrack<SingleMark, GPSFix> markTrack = trackedRace.getOrCreateTrack(mark);
+                                    if (markTrack.getFirstRawFix() == null) {
+                                        markTrack.addGPSFix(new GPSFixImpl(new DegreePosition(first ? controlPoint
                                                 .getLat1() : controlPoint.getLat2(), first ? controlPoint.getLon1()
                                                 : controlPoint.getLon2()), MillisecondsTimePoint.now()));
                                     }

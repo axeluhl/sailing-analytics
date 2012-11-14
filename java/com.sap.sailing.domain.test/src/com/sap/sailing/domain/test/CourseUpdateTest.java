@@ -26,7 +26,7 @@ import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Waypoint;
-import com.sap.sailing.domain.base.impl.BuoyImpl;
+import com.sap.sailing.domain.base.impl.SingleMarkImpl;
 import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
 import com.sap.sailing.domain.common.impl.Util;
@@ -130,10 +130,10 @@ public class CourseUpdateTest extends AbstractTracTracLiveTest {
     
     @Test
     public void testWaypointListDiff() {
-        Waypoint wp1 = new WaypointImpl(new BuoyImpl("b1"));
-        Waypoint wp2 = new WaypointImpl(new BuoyImpl("b2"));
-        Waypoint wp3 = new WaypointImpl(new BuoyImpl("b3"));
-        Waypoint wp4 = new WaypointImpl(new BuoyImpl("b4"));
+        Waypoint wp1 = new WaypointImpl(new SingleMarkImpl("b1"));
+        Waypoint wp2 = new WaypointImpl(new SingleMarkImpl("b2"));
+        Waypoint wp3 = new WaypointImpl(new SingleMarkImpl("b3"));
+        Waypoint wp4 = new WaypointImpl(new SingleMarkImpl("b4"));
         List<Waypoint> waypoints = new ArrayList<Waypoint>(4);
         waypoints.add(wp1);
         waypoints.add(wp2);

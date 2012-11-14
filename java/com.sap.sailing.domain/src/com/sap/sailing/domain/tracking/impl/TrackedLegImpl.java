@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
-import com.sap.sailing.domain.base.Buoy;
+import com.sap.sailing.domain.base.SingleMark;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Waypoint;
@@ -156,9 +156,9 @@ public class TrackedLegImpl implements TrackedLeg, RaceChangeListener {
 
     @Override
     public Bearing getLegBearing(TimePoint at) {
-        Position startBuoyPos = getTrackedRace().getApproximatePosition(getLeg().getFrom(), at);
-        Position endBuoyPos = getTrackedRace().getApproximatePosition(getLeg().getTo(), at);
-        Bearing legBearing = (startBuoyPos != null && endBuoyPos != null) ? startBuoyPos.getBearingGreatCircle(endBuoyPos) : null;
+        Position startMarkPos = getTrackedRace().getApproximatePosition(getLeg().getFrom(), at);
+        Position endMarkPos = getTrackedRace().getApproximatePosition(getLeg().getTo(), at);
+        Bearing legBearing = (startMarkPos != null && endMarkPos != null) ? startMarkPos.getBearingGreatCircle(endMarkPos) : null;
         return legBearing;
     }
 
@@ -170,9 +170,9 @@ public class TrackedLegImpl implements TrackedLeg, RaceChangeListener {
     private Wind getWindOnLeg(TimePoint at) {
         Wind wind;
         Position approximateLegStartPosition = getTrackedRace().getOrCreateTrack(
-                getLeg().getFrom().getBuoys().iterator().next()).getEstimatedPosition(at, false);
+                getLeg().getFrom().getMarks().iterator().next()).getEstimatedPosition(at, false);
         Position approximateLegEndPosition = getTrackedRace().getOrCreateTrack(
-                getLeg().getTo().getBuoys().iterator().next()).getEstimatedPosition(at, false);
+                getLeg().getTo().getMarks().iterator().next()).getEstimatedPosition(at, false);
         if (approximateLegStartPosition == null || approximateLegEndPosition == null) {
             wind = null;
         } else {
@@ -217,7 +217,7 @@ public class TrackedLegImpl implements TrackedLeg, RaceChangeListener {
     }
 
     @Override
-    public void buoyPositionChanged(GPSFix fix, Buoy buoy) {
+    public void markPositionChanged(GPSFix fix, SingleMark mark) {
         clearCaches();
     }
 

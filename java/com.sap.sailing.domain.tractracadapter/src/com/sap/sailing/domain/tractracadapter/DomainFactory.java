@@ -12,7 +12,7 @@ import java.util.List;
 
 import com.maptrack.client.io.TypeController;
 import com.sap.sailing.domain.base.BoatClass;
-import com.sap.sailing.domain.base.Buoy;
+import com.sap.sailing.domain.base.SingleMark;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.Person;
@@ -189,11 +189,11 @@ public interface DomainFactory {
             DynamicRaceDefinitionSet raceDefinitionSetToUpdate);
 
     /**
-     * The record may be for a single buoy or a gate. If for a gate, the
+     * The record may be for a single mark or a gate. If for a gate, the
      * {@link ControlPointPositionData#getIndex() index} is used to determine
-     * which of its buoys is affected.
+     * which of its marks is affected.
      */
-    Buoy getBuoy(ControlPoint controlPoint, ControlPointPositionData record);
+    SingleMark getMark(ControlPoint controlPoint, ControlPointPositionData record);
 
     com.sap.sailing.domain.base.ControlPoint getOrCreateControlPoint(ControlPoint controlPoint);
 

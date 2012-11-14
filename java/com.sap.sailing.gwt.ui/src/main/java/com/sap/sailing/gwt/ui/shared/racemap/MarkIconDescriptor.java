@@ -3,15 +3,15 @@ package com.sap.sailing.gwt.ui.shared.racemap;
 import com.google.gwt.maps.client.overlay.Icon;
 
 /**
- * A descriptor class for display properties of a buoy icon.
+ * A descriptor class for display properties of a mark icon.
  */
-public class BuoyIconDescriptor {
+public class MarkIconDescriptor {
     private final Icon icon;
     private final String color;
     private final String shape;
     private final String pattern;
 
-    public BuoyIconDescriptor(Icon icon, String color, String shape, String pattern) {
+    public MarkIconDescriptor(Icon icon, String color, String shape, String pattern) {
         this.icon = icon;
         this.color = color;
         this.shape = shape;
@@ -35,7 +35,7 @@ public class BuoyIconDescriptor {
     }
     
     /**
-     * An utility method to check if the buoy icon has compatible display properties.
+     * An utility method to check if the mark icon has compatible display properties.
      * In case of null values at least one valid display property must exist and fit.  
      */
     public boolean isCompatible(String colorToCheck, String shapeToCheck, String patternToCheck) {
