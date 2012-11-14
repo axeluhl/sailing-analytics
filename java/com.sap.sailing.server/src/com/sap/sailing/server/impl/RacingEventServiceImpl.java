@@ -609,7 +609,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     public List<com.sap.sailing.domain.swisstimingadapter.RaceRecord> getSwissTimingRaceRecords(String hostname,
             int port, boolean canSendRequests) throws InterruptedException, UnknownHostException, IOException, ParseException {
         List<com.sap.sailing.domain.swisstimingadapter.RaceRecord> result = new ArrayList<com.sap.sailing.domain.swisstimingadapter.RaceRecord>();
-        SailMasterConnector swissTimingConnector = swissTimingFactory.getOrCreateSailMasterLiveSimulatorConnector(hostname, port, swissTimingAdapterPersistence,
+        SailMasterConnector swissTimingConnector = swissTimingFactory.getOrCreateSailMasterConnector(hostname, port, swissTimingAdapterPersistence,
                 canSendRequests);
         //
         for (Race race : swissTimingConnector.getRaces()) {

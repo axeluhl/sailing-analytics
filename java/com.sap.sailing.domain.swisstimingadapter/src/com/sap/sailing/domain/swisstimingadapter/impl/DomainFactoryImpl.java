@@ -104,7 +104,7 @@ public class DomainFactoryImpl implements DomainFactory {
             result = raceIDToRegattaCache.get(raceID);
         }
         if (result == null) {
-            result = new RegattaImpl(raceID, null, trackedRegattaRegistry,
+            result = new RegattaImpl(raceID, getOrCreateBoatClassFromRaceID(raceID), trackedRegattaRegistry,
                     com.sap.sailing.domain.base.DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT));
             logger.info("Created regatta "+result.getName()+" ("+result.hashCode()+")");
             raceIDToRegattaCache.put(raceID, result);
@@ -128,7 +128,7 @@ public class DomainFactoryImpl implements DomainFactory {
                         /* dateOfBirth */ null, teamMemberName.trim()));
             }
             Team team = new TeamImpl(competitor.getName(), teamMembers, /* coach */ null);
-            result = baseDomainFactory.createCompetitor(competitor.getBoatID(), competitor.getName(), team, boat);
+            result = baseDomainFactory.getOrCreateCompetitor(competitor.getBoatID(), competitor.getName(), team, boat);
         }
         return result;
     }
