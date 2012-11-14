@@ -414,6 +414,9 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         }
         if (windLineCanvasOverlay != null) {
             windLineCanvasOverlay.setWindLinesDTO(wl.getWindLinesDTO());
+            if (windGridCanvasOverlay != null) {
+                windLineCanvasOverlay.setGridCorners(windGridCanvasOverlay.getGridCorners());
+            }
         }
         timer.setTime(windParams.getStartTime().getTime());
         if (windParams.isShowArrows()) {

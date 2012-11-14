@@ -475,4 +475,26 @@ public class WindGridCanvasOverlay extends FullCanvasOverlay implements TimeList
         center.lngDeg = (a.lngDeg + b.lngDeg + c.lngDeg + d.lngDeg) / 4.0;
         return center;
     }
+    
+    public PositionDTO[] getGridCorners() {
+        if (gridCellMap != null && !gridCellMap.isEmpty()) {
+            PositionDTO[] corners = new PositionDTO[4];
+            int numRow = windMatrix.length;
+            int numCol = windMatrix[0].length;
+            Pair<Integer, Integer> cellPair1 = new Pair<Integer, Integer>(1, 1);
+            corners[0] = gridCellMap.get(cellPair1).bottomLeft;
+            
+            Pair<Integer, Integer> cellPair2 = new Pair<Integer, Integer>(1, numCol-2);
+            corners[1] = gridCellMap.get(cellPair2).bottomRight;
+            
+            Pair<Integer, Integer> cellPair3 = new Pair<Integer, Integer>(numRow-2, numCol-2);
+            corners[2] = gridCellMap.get(cellPair3).topRight;
+            
+            Pair<Integer, Integer> cellPair4 = new Pair<Integer, Integer>(numRow-2, 1);
+            corners[3] = gridCellMap.get(cellPair4).topLeft;
+          
+            return corners;
+        }
+        return null;
+    }
 }

@@ -139,9 +139,9 @@ public abstract class WindFieldGeneratorImpl implements WindFieldGenerator {
                 nextPosition = middleWind.travelTo(currentPosition, currentTime, nextTime);
             }
             
-            if (boundary.isWithinBoundaries(nextPosition)) {
+            //if (boundary.isWithinBoundaries(nextPosition)) {
                 path.add(new TimedPositionWithSpeedImpl(nextTime, nextPosition, null));
-            }
+            //}
             
             currentTime = nextTime;
             currentPosition = nextPosition;
