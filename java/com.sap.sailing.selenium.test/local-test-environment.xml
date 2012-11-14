@@ -1,0 +1,69 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  Configuration file for the test environment. This file is used for the configuration of the environment for the
+  executions of the integration tests. For the execution in a local environment you should make a copy of this file,
+  change it accordingly to your local setup (eg. browser(s) to use for the tests) and adjust the property
+  "parameters.integration-tests" in your user specific settings.xml to point to your local copy of this file.
+-->
+<test-environment xmlns="http://www.sapsailing.com/test-environment"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://www.sapsailing.com/test-environment ./test-environment-configuration.xsd ">
+  
+  <!--
+    The context root (the server) against which the tests should be executed.
+  -->
+  <context-root>http://riccardo:riccardo@localhost:8888/</context-root>
+  
+  <!--
+    In this section necessary system properties for the different web drivers can be provided if needed. For more
+    informations about available properties see the following sides:
+    
+    - http://code.google.com/p/selenium/wiki/ChromeDriver
+    - http://code.google.com/p/selenium/wiki/FirefoxDriver
+    - http://code.google.com/p/selenium/wiki/InternetExplorerDriver
+    - http://code.google.com/p/selenium/wiki/OperaDriver
+    - http://code.google.com/p/selenium/wiki/SafariDriver
+    - http://code.google.com/p/selenium/wiki/RemoteWebDriverServer
+    
+    NOTE: For the Chrome and the InternetExplorer driver an additional "server", which acts as a bridge between the
+          browser and the driver, is needed.
+  -->
+  
+  <system-properties>
+     <!--
+     <system-property>
+        <name>webdriver.chrome.driver</name>
+        <value>[path to]\chromedriver.exe</value>
+     </system-property>
+     -->
+     <system-property>
+        <name>webdriver.firefox.bin</name>
+        <value>D:\Internet\Firefox\firefox.exe</value>
+     </system-property>
+  </system-properties>
+  
+  
+  <!--
+    The driver definitions define all web drivers (browsers) which should be used for the execution of the tests. This
+    means that each test will be executed once for each driver defined here. This allows to perform the tests with
+    different browsers to validate the proper functionality of the application across different browsers.
+    
+    The capabilities section can be used for fine tuning of the driver (e.g. version). For more informations see the
+    pages mentioned above.
+  -->
+  <driver-definition class="org.openqa.selenium.firefox.FirefoxDriver">
+     <!--
+     <capabilities>
+        <capability>
+          <name>version</name>
+          <value>14.0.0</value>
+        </capability>
+     </capabilities>
+     -->
+  </driver-definition>
+  
+  <!--
+  <driver-definition class="org.openqa.selenium.chrome.ChromeDriver" />
+  -->
+</test-environment>

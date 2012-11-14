@@ -1,8 +1,8 @@
-package com.sap.sailing.selenium.test.core.impl;
+package com.sap.sailing.selenium.core.impl;
 
 import org.openqa.selenium.WebDriver;
 
-import com.sap.sailing.selenium.test.core.TestEnvironment;
+import com.sap.sailing.selenium.core.TestEnvironment;
 
 public class TestEnvironmentImpl implements TestEnvironment {
     private WebDriver driver;

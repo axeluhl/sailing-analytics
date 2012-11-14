@@ -1,4 +1,4 @@
-package com.sap.sailing.selenium.test.core;
+package com.sap.sailing.selenium.core;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -108,7 +108,6 @@ public class TestEnvironmentConfiguration {
         Schema schema = schemaFactory.newSchema(new StreamSource(TEST_ENVIRONMENT_SCHEMA));
         
         DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
-        builderFactory.setValidating(true);
         builderFactory.setNamespaceAware(true);
         builderFactory.setSchema(schema);
         

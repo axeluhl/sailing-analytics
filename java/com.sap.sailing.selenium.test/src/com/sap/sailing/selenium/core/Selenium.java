@@ -1,4 +1,4 @@
-package com.sap.sailing.selenium.test.core;
+package com.sap.sailing.selenium.core;
 
 import java.lang.reflect.Constructor;
 
@@ -11,6 +11,7 @@ import java.util.Map.Entry;
 import org.junit.runner.Description;
 import org.junit.runner.Runner;
 
+import org.junit.runner.notification.Failure;
 import org.junit.runner.notification.RunNotifier;
 
 import org.junit.runners.BlockJUnit4ClassRunner;
@@ -25,8 +26,8 @@ import org.openqa.selenium.WebDriver;
 
 import org.openqa.selenium.remote.DesiredCapabilities;
 
-import com.sap.sailing.selenium.test.core.TestEnvironmentConfiguration.DriverDefinition;
-import com.sap.sailing.selenium.test.core.impl.TestEnvironmentImpl;
+import com.sap.sailing.selenium.core.TestEnvironmentConfiguration.DriverDefinition;
+import com.sap.sailing.selenium.core.impl.TestEnvironmentImpl;
 
 public class Selenium extends ParentRunner<Runner> {
     private final List<Runner> children;
@@ -88,7 +89,8 @@ public class Selenium extends ParentRunner<Runner> {
         
         private TestEnvironmentImpl environment;
         
-        public SeleniumJUnit4ClassRunner(Class<?> klass, String root, DriverDefinition definition) throws InitializationError {
+        public SeleniumJUnit4ClassRunner(Class<?> klass, String root, DriverDefinition definition)
+                throws InitializationError {
             super(klass);
             
             this.root = root;
@@ -110,37 +112,26 @@ public class Selenium extends ParentRunner<Runner> {
             
             List<FrameworkField> fields = testClass.getAnnotatedFields(Managed.class);
             
-            this.environment = createTestEnvironment();
-            
             for (final FrameworkField field : fields) {
                 field.getField().setAccessible(true);
                 field.getField().set(test, this.environment);
-                
-                //FieldUtils.writeField(field.getField(), test, selenium, true);
             }
-            
-//            final List<TestRule> rules = this.getTestRules(test);
-//            
-//            for (final TestRule rule : rules) {
-//                final Field[] ruleFields = rule.getClass().getDeclaredFields();
-//                for (final Field ruleField : ruleFields) {
-//                    if (ruleField.getAnnotation(annotationType) != null) {
-//                        FieldUtils.writeField(ruleField, rule, selenium, true);
-//                    } else if (ruleField.getAnnotation(SeleniumBrowser.class) != null) {
-//                        FieldUtils.writeField(ruleField, rule, browser, true);
-//                    }
-//                }
-//            }
-    
+                
             return test;
         }
         
         @Override
         public void run(final RunNotifier notifier) {
             try {
-                super.run(notifier);
-            } finally {
-                this.environment.close();
+                this.environment = createTestEnvironment();
+                
+                try {
+                    super.run(notifier);
+                } finally {
+                    this.environment.close();
+                }
+            } catch (Exception exception) {
+                notifier.fireTestFailure(new Failure(getDescription(), exception));
             }
         }
         

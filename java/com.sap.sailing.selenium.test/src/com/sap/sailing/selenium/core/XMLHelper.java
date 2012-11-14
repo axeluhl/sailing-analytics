@@ -1,4 +1,4 @@
-package com.sap.sailing.selenium.test.core;
+package com.sap.sailing.selenium.core;
 
 import java.util.ArrayList;
 import java.util.Collections;
