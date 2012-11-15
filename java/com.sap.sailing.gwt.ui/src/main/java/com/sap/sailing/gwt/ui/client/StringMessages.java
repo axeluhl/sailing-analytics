@@ -429,4 +429,6 @@ public interface StringMessages extends Messages {
     String averageManeuverLossInMeters();
     String averageTackLossInMeters();
     String averageJibeLossInMeters();
+    String legend();
+    String live();
 }
