@@ -44,9 +44,11 @@ public class MediaTrack implements IsSerializable {
         public Date endTime;
     }
 
+    public String dbId;
     public String title;
     public String url;
     public Date startTime;
+    public int durationInMillis;
     public MediaType type;
     public MediaSubType subType;
 
@@ -54,13 +56,20 @@ public class MediaTrack implements IsSerializable {
         super();
     }
 
-    public MediaTrack(String title, String url, Date startTime, MediaType type, MediaSubType subType) {
+    public MediaTrack(String title, String url, Date startTime, int durationInMillis, MediaType mediaType, MediaSubType mediaSubType) {
+        this(null, title, url, startTime, durationInMillis, mediaType, mediaSubType);
+    }
+
+    public MediaTrack(String dbId, String title, String url, Date startTime, int durationInMillis, MediaType mediaType,
+            MediaSubType mediaSubType) {
         super();
+        this.dbId = dbId;
         this.title = title;
         this.url = url;
         this.startTime = startTime;
-        this.type = type;
-        this.subType = subType;
+        this.durationInMillis = durationInMillis;
+        this.type = mediaType;
+        this.subType = mediaSubType;
     }
 
 }

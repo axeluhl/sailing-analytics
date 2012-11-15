@@ -4,44 +4,59 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
 import java.util.List;
-import java.util.logging.Logger;
+
+import org.osgi.framework.BundleContext;
+import org.osgi.util.tracker.ServiceTracker;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.persistence.media.DBMediaTrack;
 import com.sap.sailing.domain.persistence.media.MediaDB;
 import com.sap.sailing.domain.persistence.media.MediaDBFactory;
+import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.gwt.ui.client.MediaService;
 import com.sap.sailing.gwt.ui.shared.media.MediaTrack;
 import com.sap.sailing.gwt.ui.shared.media.MediaTrack.MediaSubType;
 import com.sap.sailing.gwt.ui.shared.media.MediaTrack.MediaType;
+import com.sap.sailing.server.RacingEventService;
 
 public class MediaServiceImpl extends RemoteServiceServlet implements MediaService {
 
-    private static final Logger logger = Logger.getLogger(MediaServiceImpl.class.getName());
+//    private static final Logger logger = Logger.getLogger(MediaServiceImpl.class.getName());
 
     DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z");
+
+    private ServiceTracker<RacingEventService, RacingEventService> racingEventServiceTracker;
 
     private static final long serialVersionUID = -8917349579281305977L;
 
     public MediaServiceImpl() {
         super();
+        BundleContext context = Activator.getDefault();
+        racingEventServiceTracker = new ServiceTracker<RacingEventService, RacingEventService>(
+                context, RacingEventService.class.getName(), null);
+        racingEventServiceTracker.open();
     }
 
     @Override
     public Collection<MediaTrack> getMediaTracksForRace(RegattaAndRaceIdentifier regattaAndRaceIdentifier) {
-        return getAllMediaTracks();
+        TrackedRace trackedRace = racingEventServiceTracker.getService().getExistingTrackedRace(regattaAndRaceIdentifier);
+        if (trackedRace != null) {
+            Date raceStart = trackedRace.getStartOfTracking().asDate();
+            Date raceEnd = trackedRace.getStartOfTracking().asDate();
+            return createMediaTracksFromDB(mediaDB().queryOverlappingMediaTracks(raceStart , raceEnd));
+        } else {
+            return Collections.emptyList();
+        }
     }
 
     @Override
-    public List<MediaTrack> getAllMediaTracks() {
+    public Collection<MediaTrack> getAllMediaTracks() {
         List<DBMediaTrack> allDBMediaTracks = mediaDB().loadAllMediaTracks();
-        List<MediaTrack> result = new ArrayList<MediaTrack>();
-        for (DBMediaTrack dbMediaTrack : allDBMediaTracks) {
-            MediaTrack mediaTrack = createMediaTrackFromDB(dbMediaTrack);
-            result.add(mediaTrack );
-        }
+        Collection<MediaTrack> result = createMediaTracksFromDB(allDBMediaTracks);
         return result;
 //        try {
 //            Date date = dateFormat.parse("2012-09-15 14:42:10 +0100");
@@ -56,16 +71,25 @@ public class MediaServiceImpl extends RemoteServiceServlet implements MediaServi
 //        }
     }
 
+    private Collection<MediaTrack> createMediaTracksFromDB(Collection<DBMediaTrack> allDBMediaTracks) {
+        Collection<MediaTrack> result = new ArrayList<MediaTrack>();
+        for (DBMediaTrack dbMediaTrack : allDBMediaTracks) {
+            MediaTrack mediaTrack = createMediaTrackFromDB(dbMediaTrack);
+            result.add(mediaTrack );
+        }
+        return result;
+    }
+
     private MediaTrack createMediaTrackFromDB(DBMediaTrack dbMediaTrack) {
         MediaType mediaType = MediaType.valueOf(dbMediaTrack.mimeType);
         MediaSubType mediaSubType = MediaSubType.valueOf(dbMediaTrack.mimeSubType);
-        MediaTrack mediaTrack = new MediaTrack(dbMediaTrack.title, dbMediaTrack.url, dbMediaTrack.startTime, mediaType, mediaSubType);
+        MediaTrack mediaTrack = new MediaTrack(dbMediaTrack.dbId, dbMediaTrack.title, dbMediaTrack.url, dbMediaTrack.startTime, dbMediaTrack.durationInMillis, mediaType, mediaSubType);
         return mediaTrack;
     }
 
     @Override
     public void addMediaTrack(MediaTrack mediaTrack) {
-        mediaDB().insertMediaTrack(mediaTrack.title, mediaTrack.url, mediaTrack.startTime, mediaTrack.type.name(), mediaTrack.subType.name());
+        mediaDB().insertMediaTrack(mediaTrack.title, mediaTrack.url, mediaTrack.startTime, mediaTrack.durationInMillis, mediaTrack.type.name(), mediaTrack.subType.name());
     }
 
     private MediaDB mediaDB() {
@@ -74,6 +98,16 @@ public class MediaServiceImpl extends RemoteServiceServlet implements MediaServi
 
     @Override
     public void deleteMediaTrack(MediaTrack mediaTrack) {
-        mediaDB().deleteMediaTrack(mediaTrack.title);
+        mediaDB().deleteMediaTrack(mediaTrack.dbId);
+    }
+
+    @Override
+    public void updateStartTime(MediaTrack mediaTrack) {
+        mediaDB().updateStartTime(mediaTrack.dbId, mediaTrack.startTime);
+    }
+
+    @Override
+    public void updateDuration(MediaTrack mediaTrack) {
+        mediaDB().updateDuration(mediaTrack.dbId, mediaTrack.durationInMillis);
     }
 }

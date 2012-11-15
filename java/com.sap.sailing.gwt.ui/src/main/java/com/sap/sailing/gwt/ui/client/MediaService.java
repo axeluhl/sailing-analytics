@@ -13,10 +13,14 @@ public interface MediaService extends RemoteService {
 
     Collection<MediaTrack> getMediaTracksForRace(RegattaAndRaceIdentifier regattaAndRaceIdentifier);
 
-    List<MediaTrack> getAllMediaTracks();
+    Collection<MediaTrack> getAllMediaTracks();
 
     void addMediaTrack(MediaTrack mediaTrack);
 
     void deleteMediaTrack(MediaTrack mediaTrack);
+
+    void updateStartTime(MediaTrack mediaTrack);
+
+    void updateDuration(MediaTrack mediaTrack);
 
 }

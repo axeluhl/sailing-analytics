@@ -1,7 +1,7 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
+import java.util.Collection;
 import java.util.Comparator;
-import java.util.List;
 
 import com.google.gwt.cell.client.ActionCell;
 import com.google.gwt.cell.client.EditTextCell;
@@ -38,7 +38,7 @@ import com.sap.sailing.gwt.ui.shared.media.MediaTrack;
  */
 public class MediaPanel extends FlowPanel {
 
-    private static final DateTimeFormat TIME_FORMAT = DateTimeFormat.getFormat(PredefinedFormat.HOUR24_MINUTE_SECOND);
+//    private static final DateTimeFormat TIME_FORMAT = DateTimeFormat.getFormat(PredefinedFormat.HOUR24_MINUTE_SECOND);
     private static final DateTimeFormat DATETIME_FORMAT = DateTimeFormat.getFormat(PredefinedFormat.DATE_TIME_MEDIUM);
     // private Calendar calender = new GregorianCalendar();
 
@@ -80,7 +80,7 @@ public class MediaPanel extends FlowPanel {
 
     protected void loadMediaTracks() {
         mediaTrackListDataProvider.getList().clear();
-        mediaService.getAllMediaTracks(new AsyncCallback<List<MediaTrack>>() {
+        mediaService.getAllMediaTracks(new AsyncCallback<Collection<MediaTrack>>() {
 
             @Override
             public void onFailure(Throwable t) {
@@ -88,7 +88,7 @@ public class MediaPanel extends FlowPanel {
             }
 
             @Override
-            public void onSuccess(List<MediaTrack> allMediaTracks) {
+            public void onSuccess(Collection<MediaTrack> allMediaTracks) {
                 mediaTrackListDataProvider.getList().addAll(allMediaTracks);
                 mediaTrackListDataProvider.refresh();
             }
@@ -255,11 +255,56 @@ public class MediaPanel extends FlowPanel {
             public void update(int index, MediaTrack mediaTrack, String newStartTime) {
                 // Called when the user changes the value.
                 mediaTrack.startTime = DATETIME_FORMAT.parse(newStartTime);
-                mediaTrackListDataProvider.refresh();
+                mediaService.updateStartTime(mediaTrack, new AsyncCallback<Void>() {
+
+                    @Override
+                    public void onFailure(Throwable t) {
+                        errorReporter.reportError(t.toString());
+                    }
+
+                    @Override
+                    public void onSuccess(Void allMediaTracks) {
+                        mediaTrackListDataProvider.refresh();
+                    }
+                });
             }
         });
         mediaTracksTable.addColumn(startTimeColumn, stringMessages.startTime());
         mediaTracksTable.setColumnWidth(startTimeColumn, 100, Unit.PCT);
+
+        // duration
+        Column<MediaTrack, String> durationColumn = new Column<MediaTrack, String>(new EditTextCell()) {
+            @Override
+            public String getValue(MediaTrack mediaTrack) {
+                return TimeFormatUtil.milliSecondsToHrsMinSec(mediaTrack.durationInMillis);
+            }
+        };
+        durationColumn.setSortable(true);
+        sortHandler.setComparator(durationColumn, new Comparator<MediaTrack>() {
+            public int compare(MediaTrack mediaTrack1, MediaTrack mediaTrack2) {
+                return Integer.valueOf(mediaTrack1.durationInMillis).compareTo(Integer.valueOf(mediaTrack2.durationInMillis));
+            }
+        });
+        durationColumn.setFieldUpdater(new FieldUpdater<MediaTrack, String>() {
+            public void update(int index, MediaTrack mediaTrack, String newDuration) {
+                // Called when the user changes the value.
+                mediaTrack.durationInMillis = TimeFormatUtil.hrsMinSecToMilliSeconds(newDuration);
+                mediaService.updateDuration(mediaTrack, new AsyncCallback<Void>() {
+
+                    @Override
+                    public void onFailure(Throwable t) {
+                        errorReporter.reportError(t.toString());
+                    }
+
+                    @Override
+                    public void onSuccess(Void allMediaTracks) {
+                        mediaTrackListDataProvider.refresh();
+                    }
+                });
+            }
+        });
+        mediaTracksTable.addColumn(durationColumn, stringMessages.duration());
+        mediaTracksTable.setColumnWidth(durationColumn, 100, Unit.PCT);
 
         // delete action
         Column<MediaTrack, MediaTrack> deleteActionColumn = new IdentityColumn<MediaTrack>(new ActionCell<MediaTrack>("X", new ActionCell.Delegate<MediaTrack>() {
