@@ -280,11 +280,27 @@ public class StoreAndForward implements Runnable {
                         SailMasterMessage message = swissTimingFactory.createMessage(messageAndOptionalSequenceNumber.getA(), lastMessageCount);
                         swissTimingAdapterPersistence.storeSailMasterMessage(message);
                         synchronized (this) {
-                            for (OutputStream os : streamsToForwardTo) {
+                            for (OutputStream os : new ArrayList<OutputStream>(streamsToForwardTo)) {
                                 // write the sequence number of the message into the stream before actually writing the
                                 // SwissTiming message
+                                try {
                                 // TODO if forwarding to os doesn't work, e.g., because the socket was closed or the client died, remove os from streamsToForwardTo and the socket from socketsToForwardTo
-                                transceiver.sendMessage(message, os);
+                                    transceiver.sendMessage(message, os);
+                                } catch (Throwable e) {
+                                    int i=streamsToForwardTo.indexOf(os);
+                                    try {
+                                        os.close();
+                                    } catch (Throwable t) {
+                                        logger.throwing(StoreAndForward.class.getName(), "run", t);
+                                    }
+                                    streamsToForwardTo.remove(os);
+                                    Socket s = socketsToForwardTo.remove(i);
+                                    try {
+                                        s.close();
+                                    } catch (Throwable t) {
+                                        logger.throwing(StoreAndForward.class.getName(), "run", t);
+                                    }
+                                }
                             }
                         }
                         if (!stopped) {
