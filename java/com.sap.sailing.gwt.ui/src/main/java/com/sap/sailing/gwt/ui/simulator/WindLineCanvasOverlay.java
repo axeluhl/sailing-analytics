@@ -13,6 +13,7 @@ import java.util.SortedMap;
 import java.util.logging.Logger;
 
 import com.google.gwt.canvas.dom.client.Context2d;
+import com.google.gwt.canvas.dom.client.Context2d.Composite;
 import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.geom.LatLng;
 import com.google.gwt.maps.client.geom.Point;
@@ -33,6 +34,7 @@ public class WindLineCanvasOverlay extends FullCanvasOverlay implements TimeList
 
     private PositionDTO[] corners;
     private LineSegment[] boundary;
+    private PositionDTO center;
   
     private static Logger logger = Logger.getLogger(WindLineCanvasOverlay.class.getName());
 
@@ -52,7 +54,11 @@ public class WindLineCanvasOverlay extends FullCanvasOverlay implements TimeList
             return;
         }
          clear();
-         
+        
+        Context2d context2d = canvas.getContext2d();
+        context2d.setGlobalAlpha(0.2);
+        //context2d.setGlobalCompositeOperation(Composite.LIGHTER) ;
+        
         int index = 0;
         for (Entry<PositionDTO, SortedMap<Long, List<PositionDTO>>> entry : windLinesMap.entrySet()) {
             List<PositionDTO> positionDTOToDraw = new ArrayList<PositionDTO>();
@@ -67,7 +73,6 @@ public class WindLineCanvasOverlay extends FullCanvasOverlay implements TimeList
 
             drawWindLine(positionDTOToDraw, ++index);
         }
-       //setWidgetOnMap();
     }
 
     @Override
@@ -162,17 +167,14 @@ public class WindLineCanvasOverlay extends FullCanvasOverlay implements TimeList
         String title = "Wind line at " + numPoints + " points.";
         getCanvas().setTitle(title);
 
-        Context2d context2d = canvas.getContext2d();
-        context2d.setGlobalAlpha(0.2);
-
         Iterator<PositionDTO> positionDTOIter = positionDTOList.iterator();
         PositionDTO prevPositionDTO = null;
         while (positionDTOIter.hasNext()) {
             PositionDTO positionDTO = positionDTOIter.next();
             if (prevPositionDTO != null) {
-                if (positionDTOIter.hasNext()) {
+                if (checkPointInGrid(prevPositionDTO)  && checkPointInGrid(positionDTO) ) {
                     drawLine(prevPositionDTO, positionDTO);
-                } else { //Check the last point is within the boundary
+                } else { 
                     PositionDTO pointOnBoundary = getPointOnBoundary(prevPositionDTO, positionDTO);
                     if (pointOnBoundary != null) {
                         drawLine(prevPositionDTO, pointOnBoundary);
@@ -267,6 +269,8 @@ public class WindLineCanvasOverlay extends FullCanvasOverlay implements TimeList
             boundary[1] = new LineSegment(corners[1].latDeg, corners[1].lngDeg, corners[2].latDeg, corners[2].lngDeg);
             boundary[2] = new LineSegment(corners[2].latDeg, corners[2].lngDeg, corners[3].latDeg, corners[3].lngDeg);
             boundary[3] = new LineSegment(corners[3].latDeg, corners[3].lngDeg, corners[0].latDeg, corners[0].lngDeg);
+            
+            center = getCenter();
 
         }
 
@@ -329,6 +333,29 @@ public class WindLineCanvasOverlay extends FullCanvasOverlay implements TimeList
 
     }
 
+    private PositionDTO getCenter() {
+        if (corners != null && corners.length == 4) {
+            PositionDTO center = new PositionDTO();
+            center.latDeg = (corners[0].latDeg + corners[1].latDeg + corners[2].latDeg + corners[3].latDeg) / 4.0;
+            center.lngDeg = (corners[0].lngDeg + corners[1].lngDeg + corners[2].lngDeg + corners[3].lngDeg) / 4.0;
+            return center;
+        }
+        return null;
+    }
 
+    private boolean checkPointInGrid(PositionDTO point) {
+        if (center != null ) {
+            PositionDTO pointOnBoundary = getPointOnBoundary(center,point);
+            if (pointOnBoundary == null) { // Line through center and the point does not intersect
+                return true;
+            } else {
+                if (pointOnBoundary.equals(point)) {
+                    return true;
+                }
+                return false;
+            }
+        }
+        return false;
+    }
 
 }
