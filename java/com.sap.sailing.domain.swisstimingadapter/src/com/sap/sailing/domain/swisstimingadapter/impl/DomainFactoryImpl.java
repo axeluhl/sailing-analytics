@@ -193,22 +193,27 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     private ControlPoint getOrCreateControlPoint(Iterable<String> devices) {
-        ControlPoint result = controlPointCache.get(devices);
-        if (result == null) {
-            switch (Util.size(devices)) {
-            case 1:
-                result = getOrCreateBuoy(devices.iterator().next());
-                break;
-            case 2:
-                Iterator<String> buoyNameIter = devices.iterator();
-                String left = buoyNameIter.next();
-                String right = buoyNameIter.next();
-                result = baseDomainFactory.createGate(getOrCreateBuoy(left), getOrCreateBuoy(right), left+"/"+right);
-                break;
-            default:
-                throw new RuntimeException("Don't know how to handle control points with number of devices neither 1 nor 2. Was "+Util.size(devices));
+        ControlPoint result;
+        synchronized (controlPointCache) {
+            result = controlPointCache.get(devices);
+            if (result == null) {
+                switch (Util.size(devices)) {
+                case 1:
+                    result = getOrCreateBuoy(devices.iterator().next());
+                    break;
+                case 2:
+                    Iterator<String> buoyNameIter = devices.iterator();
+                    String left = buoyNameIter.next();
+                    String right = buoyNameIter.next();
+                    result = baseDomainFactory.createGate(getOrCreateBuoy(left), getOrCreateBuoy(right), left + "/" + right);
+                    break;
+                default:
+                    throw new RuntimeException(
+                            "Don't know how to handle control points with number of devices neither 1 nor 2. Was "
+                                    + Util.size(devices));
+                }
+                controlPointCache.put(devices, result);
             }
-            controlPointCache.put(devices, result);
         }
         return result;
     }
