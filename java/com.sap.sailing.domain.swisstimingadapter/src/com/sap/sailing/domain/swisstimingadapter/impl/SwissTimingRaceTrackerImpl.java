@@ -252,8 +252,9 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
 
     @Override
     public void receivedStartList(String raceID, StartList startList) {
+        StartList oldStartList = this.startList;
         this.startList = startList;
-        if (course != null) {
+        if (oldStartList == null && course != null) {
             createRaceDefinition(raceID);
         }
     }
@@ -291,9 +292,10 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
 
     @Override
     public void receivedCourseConfiguration(String raceID, Course course) {
+        Course oldCourse = this.course;
         this.course = course;
         if (trackedRace == null) {
-            if (startList != null) {
+            if (oldCourse == null && startList != null) {
                 createRaceDefinition(raceID);
             }
         } else {

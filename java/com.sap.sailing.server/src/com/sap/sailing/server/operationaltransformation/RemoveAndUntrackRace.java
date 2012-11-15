@@ -30,7 +30,7 @@ public class RemoveAndUntrackRace extends AbstractRaceOperation<Void> {
     @Override
     public Void internalApplyTo(RacingEventService toState) {
         Regatta regatta = toState.getRegatta(getRaceIdentifier());
-        if (regatta!= null) {
+        if (regatta != null) {
             RaceDefinition race = regatta.getRaceByName(getRaceIdentifier().getRaceName());
             if (race != null) {
                 try {

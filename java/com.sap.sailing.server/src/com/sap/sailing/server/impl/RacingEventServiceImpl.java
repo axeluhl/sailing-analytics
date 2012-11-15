@@ -799,6 +799,12 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         }
     }
     
+    private void stopObservingRegattaForRedaultLeaderboardAndAutoLeaderboardLinking(DynamicTrackedRegatta trackedRegatta) {
+        synchronized (regattasObservedForDefaultLeaderboard) {
+            regattasObservedForDefaultLeaderboard.remove(trackedRegatta);
+        }
+    }
+    
     /**
      * A listener class used to ensure that when a tracked race is added to any {@link TrackedRegatta} managed by this
      * service, the service adds the tracked race to the default leaderboard and links it to the leaderboard columns
@@ -1206,7 +1212,8 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     @Override
     public void removeTrackedRegatta(Regatta regatta) {
         logger.info("Removing regatta "+regatta.getName()+" from regattaTrackingCache");
-        regattaTrackingCache.remove(regatta);
+        DynamicTrackedRegatta trackedRegatta = regattaTrackingCache.remove(regatta);
+        stopObservingRegattaForRedaultLeaderboardAndAutoLeaderboardLinking(trackedRegatta);
     }
 
     @Override
