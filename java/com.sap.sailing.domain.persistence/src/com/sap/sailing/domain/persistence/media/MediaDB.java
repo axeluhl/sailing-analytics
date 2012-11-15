@@ -1,9 +1,8 @@
 package com.sap.sailing.domain.persistence.media;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
-
-import com.mongodb.DBObject;
 
 /**
  * Offers CRUD methods for mongo representation of media track objects.
@@ -13,12 +12,18 @@ import com.mongodb.DBObject;
  */
 public interface MediaDB {
 
-    void insertMediaTrack(String videoTitle, String url, Date startTime, String mediaType, String mediaSubType);
+    String insertMediaTrack(String title, String url, Date startTime, int durationInMillis, String mediaType, String mediaSubType);
 
-    DBMediaTrack loadMediaTrack(String videoTitle);
+    DBMediaTrack loadMediaTrack(String dbId);
 
     List<DBMediaTrack> loadAllMediaTracks();
 
     void deleteMediaTrack(String title);
+
+    void updateStartTime(String title, Date startTime);
+
+    void updateDuration(String dbId, int durationInMillis);
+
+    Collection<DBMediaTrack> queryOverlappingMediaTracks(Date rangeStart, Date rangeEnd);
 
 }

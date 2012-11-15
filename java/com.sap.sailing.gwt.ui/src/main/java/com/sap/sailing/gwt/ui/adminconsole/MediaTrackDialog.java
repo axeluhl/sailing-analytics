@@ -2,8 +2,10 @@ package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.Date;
 
+import com.google.gwt.dom.client.VideoElement;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
+import com.google.gwt.media.client.Video;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
@@ -64,8 +66,35 @@ public class MediaTrackDialog extends DataEntryDialog<MediaTrack> {
         String title = nameBox.getValue();
         String url = urlBox.getValue();
         Date startTime = startTimeBox.getValue();
-        MediaTrack result = new MediaTrack(title, url, startTime, mediaType, mediaSubType);
+        int durationInMillis = getMediaDuration(url, mediaType, mediaSubType);
+        MediaTrack result = new MediaTrack(title, url, startTime, durationInMillis, mediaType, mediaSubType);
         return result;
+    }
+
+    private int getMediaDuration(String url, MediaType mediaType, MediaSubType mediaSubType) {
+        if (mediaType != null) {
+            switch (mediaType) {
+            case VIDEO:
+                Video videoControl = Video.createIfSupported();
+                if (videoControl != null) {
+                    videoControl.setSrc(url);
+                    VideoElement videoElement = videoControl.getVideoElement();
+                    double result = videoElement.getDuration();
+                    videoElement.play();
+
+                    long timeout = System.currentTimeMillis() + 5 * 1000;
+                    while (System.currentTimeMillis() < timeout) {
+                        if (videoElement.getReadyState() > 0) {
+                            return (int) Math.round(videoElement.getDuration() * 1000);
+                        }
+                    }
+                }
+            default:
+                return 0;
+            }
+        } else {
+            return 0;
+        }
     }
 
     @Override

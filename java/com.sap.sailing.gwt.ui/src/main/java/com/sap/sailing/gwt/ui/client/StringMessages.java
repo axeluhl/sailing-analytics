@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.client;
 
 import com.google.gwt.i18n.client.Messages;
+import com.google.gwt.user.cellview.client.Header;
 
 public interface StringMessages extends Messages {
     String helloWorld();
@@ -404,4 +405,5 @@ public interface StringMessages extends Messages {
     String mimeType();
     String title();
     String reallyRemoveMediaTrack(String mediaTrackTitle);
+    String duration();
 }
