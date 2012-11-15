@@ -431,4 +431,6 @@ public interface StringMessages extends Messages {
     String averageJibeLossInMeters();
     String shape();
     String pattern();
+    String legend();
+    String live();
 }

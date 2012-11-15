@@ -609,7 +609,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     public List<com.sap.sailing.domain.swisstimingadapter.RaceRecord> getSwissTimingRaceRecords(String hostname,
             int port, boolean canSendRequests) throws InterruptedException, UnknownHostException, IOException, ParseException {
         List<com.sap.sailing.domain.swisstimingadapter.RaceRecord> result = new ArrayList<com.sap.sailing.domain.swisstimingadapter.RaceRecord>();
-        SailMasterConnector swissTimingConnector = swissTimingFactory.getOrCreateSailMasterLiveSimulatorConnector(hostname, port, swissTimingAdapterPersistence,
+        SailMasterConnector swissTimingConnector = swissTimingFactory.getOrCreateSailMasterConnector(hostname, port, swissTimingAdapterPersistence,
                 canSendRequests);
         //
         for (Race race : swissTimingConnector.getRaces()) {
@@ -796,6 +796,12 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
                 trackedRegatta.addRaceListener(new RaceAdditionListener());
                 regattasObservedForDefaultLeaderboard.add(trackedRegatta);
             }
+        }
+    }
+    
+    private void stopObservingRegattaForRedaultLeaderboardAndAutoLeaderboardLinking(DynamicTrackedRegatta trackedRegatta) {
+        synchronized (regattasObservedForDefaultLeaderboard) {
+            regattasObservedForDefaultLeaderboard.remove(trackedRegatta);
         }
     }
     
@@ -1206,7 +1212,8 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     @Override
     public void removeTrackedRegatta(Regatta regatta) {
         logger.info("Removing regatta "+regatta.getName()+" from regattaTrackingCache");
-        regattaTrackingCache.remove(regatta);
+        DynamicTrackedRegatta trackedRegatta = regattaTrackingCache.remove(regatta);
+        stopObservingRegattaForRedaultLeaderboardAndAutoLeaderboardLinking(trackedRegatta);
     }
 
     @Override

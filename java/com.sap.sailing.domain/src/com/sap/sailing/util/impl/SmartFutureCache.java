@@ -260,6 +260,7 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
                 try {
                     value = future.get();
                 } catch (InterruptedException | ExecutionException e) {
+                    logger.throwing(SmartFutureCache.class.getName(), "get", e);
                     throw new RuntimeException(e);
                 }
             } // else no calculation currently going on; value has been fetched from latest cache entry

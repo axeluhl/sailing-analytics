@@ -34,11 +34,10 @@ import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
-import com.sap.sailing.server.gateway.SailingServerHttpServlet;
 import com.sap.sailing.util.InvalidDateException;
 
-public class ModeratorApp extends SailingServerHttpServlet {
-    private static final Logger logger = Logger.getLogger(ModeratorApp.class.getName());
+public class RegattaAndRaceDataJsonExportServlet extends JsonExportServlet {
+    private static final Logger logger = Logger.getLogger(RegattaAndRaceDataJsonExportServlet.class.getName());
     
     private static final long serialVersionUID = 1333207389294903999L;
 
@@ -77,7 +76,7 @@ public class ModeratorApp extends SailingServerHttpServlet {
                     resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Unknown action \""+action+"\"");
                 }
             } else {
-                resp.getWriter().println("Hello moderator!");
+                resp.getWriter().println("No action specified!");
             }
         } catch (Throwable e) {
             resp.getWriter().println("Error processing request:");
@@ -140,6 +139,7 @@ public class ModeratorApp extends SailingServerHttpServlet {
                     jsonCompetitors.add(jsonCompetitor);
                 }
                 jsonRace.put("competitors", jsonCompetitors);
+                setJsonResponseHeader(resp);
                 jsonRace.writeJSONString(resp.getWriter());
             } catch (InvalidDateException e) {
                 resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Couldn't parse time specification " + e.getMessage());
@@ -180,6 +180,7 @@ public class ModeratorApp extends SailingServerHttpServlet {
                     jsonWaypoint.put("buoys", jsonMarks);
                     jsonWaypoints.add(jsonWaypoint);
                 }
+                setJsonResponseHeader(resp);
                 jsonWaypoints.writeJSONString(resp.getWriter());
             } catch (InvalidDateException e) {
                 resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Couldn't parse time specification " + e.getMessage());
@@ -350,6 +351,7 @@ public class ModeratorApp extends SailingServerHttpServlet {
                 } catch (NoWindException e) {
                     // well, we don't know the wind direction... then no windward distance will be shown...
                 }
+                setJsonResponseHeader(resp);
                 jsonRace.writeJSONString(resp.getWriter());
             } catch (InvalidDateException e) {
                 resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Couldn't parse time specification " + e.getMessage());
@@ -411,6 +413,7 @@ public class ModeratorApp extends SailingServerHttpServlet {
             jsonEvent.put("races", jsonRaces);
             regattaList.add(jsonEvent);
         }
+        setJsonResponseHeader(resp);
         regattaList.writeJSONString(resp.getWriter());
     }
 }

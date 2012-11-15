@@ -275,15 +275,32 @@ public class StoreAndForward implements Runnable {
                     while (!stopped && messageAndOptionalSequenceNumber != null) {
                         logger.fine("Received message: "+messageAndOptionalSequenceNumber.getA());
                         DBObject newCountRecord = lastMessageCountCollection.findAndModify(emptyQuery, incrementLastMessageCountQuery);
-                        lastMessageCount = (Long) ((newCountRecord == null) ? 0 : newCountRecord.get(FieldNames.LAST_MESSAGE_COUNT.name()));
+                        lastMessageCount = ((newCountRecord == null) ? 0l :
+                            ((Number) newCountRecord.get(FieldNames.LAST_MESSAGE_COUNT.name())).longValue());
                         SailMasterMessage message = swissTimingFactory.createMessage(messageAndOptionalSequenceNumber.getA(), lastMessageCount);
                         swissTimingAdapterPersistence.storeSailMasterMessage(message);
                         synchronized (this) {
-                            for (OutputStream os : streamsToForwardTo) {
+                            for (OutputStream os : new ArrayList<OutputStream>(streamsToForwardTo)) {
                                 // write the sequence number of the message into the stream before actually writing the
                                 // SwissTiming message
+                                try {
                                 // TODO if forwarding to os doesn't work, e.g., because the socket was closed or the client died, remove os from streamsToForwardTo and the socket from socketsToForwardTo
-                                transceiver.sendMessage(message, os);
+                                    transceiver.sendMessage(message, os);
+                                } catch (Throwable e) {
+                                    int i=streamsToForwardTo.indexOf(os);
+                                    try {
+                                        os.close();
+                                    } catch (Throwable t) {
+                                        logger.throwing(StoreAndForward.class.getName(), "run", t);
+                                    }
+                                    streamsToForwardTo.remove(os);
+                                    Socket s = socketsToForwardTo.remove(i);
+                                    try {
+                                        s.close();
+                                    } catch (Throwable t) {
+                                        logger.throwing(StoreAndForward.class.getName(), "run", t);
+                                    }
+                                }
                             }
                         }
                         if (!stopped) {

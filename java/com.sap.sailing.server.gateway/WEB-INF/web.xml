@@ -15,11 +15,11 @@
 	</servlet-mapping>
 
 	<servlet>
-		<servlet-name>ModeratorApp</servlet-name>
-		<servlet-class>com.sap.sailing.server.gateway.impl.ModeratorApp</servlet-class>
+		<servlet-name>RegattaAndRaceDataJsonExportServlet</servlet-name>
+		<servlet-class>com.sap.sailing.server.gateway.impl.RegattaAndRaceDataJsonExportServlet</servlet-class>
 	</servlet>
 	<servlet-mapping>
-		<servlet-name>ModeratorApp</servlet-name>
+		<servlet-name>RegattaAndRaceDataJsonExportServlet</servlet-name>
 		<url-pattern>/moderator</url-pattern>
 	</servlet-mapping>
 
