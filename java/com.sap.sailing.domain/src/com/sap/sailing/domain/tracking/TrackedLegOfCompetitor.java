@@ -174,9 +174,9 @@ public interface TrackedLegOfCompetitor extends Serializable {
     /**
      * If the current {@link #getLeg() leg} is +/- {@link TrackedLegImpl#UPWIND_DOWNWIND_TOLERANCE_IN_DEG} degrees
      * co-linear with the wind's bearing, the competitor's position is projected onto the line crossing
-     * <code>buoy</code> in the wind's bearing, and the distance from the projection to the <code>buoy</code> is
+     * <code>mark</code> in the wind's bearing, and the distance from the projection to the <code>mark</code> is
      * returned. Otherwise, it is assumed that the leg is neither an upwind nor a downwind leg, and hence the along-track
-     * distance to <code>buoy</code> is returned.
+     * distance to <code>mark</code> is returned.
      * 
      * @param at
      *            the wind estimation is performed for this point in time

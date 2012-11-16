@@ -5,10 +5,12 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.FontWeight;
+import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
@@ -81,8 +83,11 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
     private static final String STYLE_ACTIVE_BUTTON = STYLE_NAME_PREFIX + "ActiveButton";
     private static final String STYLE_ACTIVE_LEADERBOARD = STYLE_NAME_PREFIX + "ActiveLeaderboard";
     private static final String STYLE_LEGEND = STYLE_NAME_PREFIX + "Legend";
+    private static final String STYLE_TABLE_TEXT = STYLE_NAME_PREFIX + "TableText";
+    private static final String STYLE_COLORBOX = STYLE_NAME_PREFIX + "ColorBox";
+    private static final String STYLE_BOATCLASS = STYLE_NAME_PREFIX + "BoatClass";
     
-    private enum RacesRenderStrategy { DEFAULT, ESS40 };
+    private enum RaceRenderingStrategy { DEFAULT, ESS40 };
 
     private final SailingServiceAsync sailingService;
     private final StringMessages stringMessages;
@@ -98,7 +103,7 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
     private final boolean isEmbedded;
     private final boolean showRaceDetails;
     
-    private RacesRenderStrategy racesRenderStrategy = RacesRenderStrategy.DEFAULT;  
+    private RaceRenderingStrategy raceRenderingStrategy = RaceRenderingStrategy.DEFAULT;  
     
     public LeaderboardGroupPanel(SailingServiceAsync sailingService, StringMessages stringConstants,
             ErrorReporter errorReporter, final String groupName, String root, String viewMode, boolean embedded, boolean showRaceDetails) {
@@ -165,6 +170,10 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
     }
 
     private void createdPageContent() {
+        if(leaderboardGroup.name.equals("Extreme Sailing Series")) {
+            raceRenderingStrategy = RaceRenderingStrategy.ESS40;
+        }
+        
         if (!isEmbedded) {
             Label groupNameLabel = new Label(leaderboardGroup.name + ":");
             groupNameLabel.setStyleName(STYLE_NAME_PREFIX + "GroupName");
@@ -205,7 +214,7 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
                     text = strippedLeaderboardDTO.name;
                 }
                 SafeHtmlBuilder b = new SafeHtmlBuilder();
-                b.append(TEXTTEMPLATE.textWithClass(text, STYLE_NAME_PREFIX + "BoatClass"));
+                b.append(TEXTTEMPLATE.textWithClass(text, STYLE_BOATCLASS));
                 return b.toSafeHtml();
             }
         };
@@ -221,24 +230,24 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
                         + (isEmbedded ? "&embedded=true" : "")
                         + "&leaderboardGroupName=" + leaderboardGroup.name + "&root=" + root
                         + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""));
-                return getAnchor(link, stringMessages.overview(), STYLE_ACTIVE_LEADERBOARD);
+                return getAnchor(link, stringMessages.leaderboard(), STYLE_ACTIVE_LEADERBOARD);
             }
         };
         
         LeaderboardGroupFullTableResources tableResources = GWT.create(LeaderboardGroupFullTableResources.class);
         CellTable<StrippedLeaderboardDTO> leaderboardsTable = new CellTable<StrippedLeaderboardDTO>(10000, tableResources);
         leaderboardsTable.setSelectionModel(new NoSelectionModel<StrippedLeaderboardDTO>());
-        leaderboardsTable.addColumn(leaderboardNameColumn, stringMessages.name());
-        leaderboardsTable.addColumn(overviewColumn, stringMessages.leaderboard());
+        leaderboardsTable.addColumn(leaderboardNameColumn, stringMessages.regatta());
+        leaderboardsTable.addColumn(overviewColumn, "");
         if (showRaceDetails) {
             SafeHtmlCell racesCell = new SafeHtmlCell();
             Column<StrippedLeaderboardDTO, SafeHtml> racesColumn = new Column<StrippedLeaderboardDTO, SafeHtml>(
                     racesCell) {
                 @Override
                 public SafeHtml getValue(StrippedLeaderboardDTO leaderboard) {
-                    switch(racesRenderStrategy) {
+                    switch(raceRenderingStrategy) {
                     case DEFAULT: return leaderboardRacesToHtml(leaderboard);
-                    case ESS40: ess40LeaderboardRacesToHtml(leaderboard);
+                    case ESS40: return ess40LeaderboardRacesToHtml(leaderboard);
                     }
                     return null;
                     
@@ -301,25 +310,73 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
             }
         } else {
             List<RaceColumnDTO> raceColumns = leaderboard.getRaceList();
-            renderRacesToHTml(leaderboard, raceColumns, new FleetDTO("Default", 0, null), b); 
+            renderRacesToHTml(leaderboard.name, raceColumns, new FleetDTO("Default", 0, null), b); 
         }
         return b.toSafeHtml();
     }
 
     private SafeHtml ess40LeaderboardRacesToHtml(StrippedLeaderboardDTO leaderboard) {
         SafeHtmlBuilder b = new SafeHtmlBuilder();
-        if (leaderboard.isRegattaLeaderboard && leaderboard.regattaName != null) {
-            RegattaDTO regatta = regattasByName.get(leaderboard.regattaName);
-            boolean renderSeriesName = Util.size(regatta.series) > 1;
-            for (SeriesDTO series : regatta.series) {
-                b.appendHtmlConstant("<div>");
-                renderSeriesToHtml(leaderboard, series, renderSeriesName, b);
-                b.appendHtmlConstant("<div style=\"clear:both;\"></div>");
-                b.appendHtmlConstant("</div>");
+        if (!leaderboard.isRegattaLeaderboard) {
+            FleetDTO defaultFleet = new FleetDTO("Default", 0, null);
+            DateTimeFormat format = DateTimeFormat.getFormat("yyyy-MM-dd");
+            DateTimeFormat dayFormat = DateTimeFormat.getFormat("MMMM d");
+
+            List<RaceColumnDTO> racesWithUnknownDate = new ArrayList<RaceColumnDTO>();
+            Map<String, List<RaceColumnDTO>> orderedRacesByDay = new TreeMap<String, List<RaceColumnDTO>>();
+            List<RaceColumnDTO> lastRacesPerDayList = null;
+
+            for (RaceColumnDTO raceColumn : leaderboard.getRaceList()) {
+                RaceDTO race = raceColumn.getRace(defaultFleet);
+                if(race != null && race.startOfRace != null) {
+                    String day = format.format(race.startOfRace);
+                    List<RaceColumnDTO> racesPerDay = orderedRacesByDay.get(day);
+                    if(racesPerDay == null) {
+                        racesPerDay = new ArrayList<RaceColumnDTO>();
+                        orderedRacesByDay.put(day, racesPerDay);
+                        lastRacesPerDayList = racesPerDay;
+                    }
+                    if(!racesWithUnknownDate.isEmpty()) {
+                        racesPerDay.addAll(racesWithUnknownDate);
+                        racesWithUnknownDate.clear();
+                    }
+                    racesPerDay.add(raceColumn);
+                } else {
+                    racesWithUnknownDate.add(raceColumn);
+                }
             }
-        } else {
-            List<RaceColumnDTO> raceColumns = leaderboard.getRaceList();
-            renderRacesToHTml(leaderboard, raceColumns, new FleetDTO("Default", 0, null), b); 
+            
+            if(!racesWithUnknownDate.isEmpty()) {
+                if(lastRacesPerDayList == null) {
+                    // all races have an unknown date
+                    orderedRacesByDay.put("unknown", racesWithUnknownDate);
+                } else {
+                    // add the remaining list of races with unknown date to the last day
+                    lastRacesPerDayList.addAll(racesWithUnknownDate);
+                }
+            }            
+
+            for(List<RaceColumnDTO> raceColumnsPerDay: orderedRacesByDay.values()) {
+                b.appendHtmlConstant("<div style=\"float:left;\">");
+
+                for (RaceColumnDTO raceColumn : raceColumnsPerDay) {
+                    RaceDTO race = raceColumn.getRace(defaultFleet);
+                    if(race != null && race.startOfRace != null) {
+                        String dayAsText = dayFormat.format(race.startOfRace);
+                        b.append(TEXTTEMPLATE.textWithClass(dayAsText, 100, STYLE_TABLE_TEXT));
+                        break;
+                    }
+                }
+                
+                for (RaceColumnDTO raceColumn : raceColumnsPerDay) {
+                    String raceColumnName = raceColumn.getRaceColumnName();
+                    RaceDTO race = raceColumn.getRace(defaultFleet);
+                    renderRaceLink(leaderboard.name, race, raceColumnName, b);
+                }
+
+                b.appendHtmlConstant("</div>");
+                b.appendHtmlConstant("<div style=\"clear:both;\"></div>");
+            }
         }
         return b.toSafeHtml();
     }
@@ -330,7 +387,7 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
 
         b.appendHtmlConstant("<div style=\"float:left;\">");
         if(renderSeriesName) {
-            b.append(TEXTTEMPLATE.textWithClass(series.name, 50, STYLE_NAME_PREFIX + "Fleet"));
+            b.append(TEXTTEMPLATE.textWithClass(series.name, 50, STYLE_TABLE_TEXT));
         }
         b.appendHtmlConstant("</div>");
 
@@ -344,52 +401,57 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
 
             if (hasMultipleFleets) {
                 if(color != null) {
-                    b.append(COLORBOXTEMPLATE.colorBox(color.getAsHtml(), STYLE_NAME_PREFIX + "ColorBox"));
+                    b.append(COLORBOXTEMPLATE.colorBox(color.getAsHtml(), STYLE_COLORBOX));
                 }
-                b.append(TEXTTEMPLATE.textWithClass(fleet.name, 50, STYLE_NAME_PREFIX + "Fleet"));
+                b.append(TEXTTEMPLATE.textWithClass(fleet.name, 50, STYLE_TABLE_TEXT));
             } else {
                 String displayName = fleet.name;
                 if ("Default".equals(fleet.name)) {
-                    b.append(TEXTTEMPLATE.textWithClass("", 70, STYLE_NAME_PREFIX + "Fleet"));
+                    b.append(TEXTTEMPLATE.textWithClass("", 70, STYLE_TABLE_TEXT));
                 } else {
-                    b.append(TEXTTEMPLATE.textWithClass(displayName, 50, STYLE_NAME_PREFIX + "Fleet"));
+                    b.append(TEXTTEMPLATE.textWithClass(displayName, 50, STYLE_TABLE_TEXT));
                 }
             }
             
-            renderRacesToHTml(leaderboard, raceColumns, fleet, b);
+            renderRacesToHTml(leaderboard.name, raceColumns, fleet, b);
             
             b.appendHtmlConstant("</div>");
         }
         b.appendHtmlConstant("</div>");
     }
     
-    private void renderRacesToHTml(StrippedLeaderboardDTO leaderboard, List<RaceColumnDTO> raceColumns, FleetDTO fleet, SafeHtmlBuilder b) {
-        String debugParam = Window.Location.getParameter("gwt.codesvr");
+    private void renderRacesToHTml(String leaderboardName, List<RaceColumnDTO> raceColumns, FleetDTO fleet, SafeHtmlBuilder b) {
         for (RaceColumnDTO raceColumn : raceColumns) {
-            String linkText = raceColumn.getRaceColumnName();
+            String raceColumnName = raceColumn.getRaceColumnName();
             RaceDTO race = raceColumn.getRace(fleet);
-            if (race != null) {
-                RegattaAndRaceIdentifier raceIdentifier = race.getRaceIdentifier();
-                String link = URLFactory.INSTANCE.encode("/gwt/RaceBoard.html?leaderboardName=" + leaderboard.name
-                        + "&raceName=" + raceIdentifier.getRaceName() + "&root=" + root + raceIdentifier.getRaceName()
-                        + "&regattaName=" + raceIdentifier.getRegattaName() + "&leaderboardGroupName=" + leaderboardGroup.name);
-                if (debugParam != null && !debugParam.isEmpty()) {
-                    link += "&gwt.codesvr=" + debugParam;
-                }
-                if (viewMode != null && !viewMode.isEmpty()) {
-                    link += "&viewMode=" + viewMode;
-                }
-                if (race.trackedRace.hasGPSData && race.trackedRace.hasWindData) {
-                    b.append(getAnchor(link, linkText, STYLE_ACTIVE_RACE));
-                } else {
-                    b.append(TEXTTEMPLATE.textWithClass(linkText, STYLE_INACTIVE_RACE));
-                }
-                
-            } else {
-                b.append(TEXTTEMPLATE.textWithClass(linkText, STYLE_INACTIVE_RACE));
-            }
+            renderRaceLink(leaderboardName, race, raceColumnName, b);
         }
     }
+
+    private void renderRaceLink(String leaderboardName, RaceDTO race, String raceColumnName, SafeHtmlBuilder b) {
+        String debugParam = Window.Location.getParameter("gwt.codesvr");
+        if (race != null) {
+            RegattaAndRaceIdentifier raceIdentifier = race.getRaceIdentifier();
+            String link = URLFactory.INSTANCE.encode("/gwt/RaceBoard.html?leaderboardName=" + leaderboardName
+                    + "&raceName=" + raceIdentifier.getRaceName() + "&root=" + root + raceIdentifier.getRaceName()
+                    + "&regattaName=" + raceIdentifier.getRegattaName() + "&leaderboardGroupName=" + leaderboardGroup.name);
+            if (debugParam != null && !debugParam.isEmpty()) {
+                link += "&gwt.codesvr=" + debugParam;
+            }
+            if (viewMode != null && !viewMode.isEmpty()) {
+                link += "&viewMode=" + viewMode;
+            }
+            if (race.trackedRace.hasGPSData && race.trackedRace.hasWindData) {
+                b.append(getAnchor(link, raceColumnName, STYLE_ACTIVE_RACE));
+            } else {
+                b.append(TEXTTEMPLATE.textWithClass(raceColumnName, STYLE_INACTIVE_RACE));
+            }
+            
+        } else {
+            b.append(TEXTTEMPLATE.textWithClass(raceColumnName, STYLE_INACTIVE_RACE));
+        }
+    }
+    
     
     private Map<String, List<RaceColumnDTO>> getRacesOrderedByFleets(StrippedLeaderboardDTO leaderboard) {
         Map<String, List<RaceColumnDTO>> racesOrderedByFleets = new LinkedHashMap<String, List<RaceColumnDTO>>();

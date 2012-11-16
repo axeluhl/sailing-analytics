@@ -89,7 +89,7 @@ public class SimpleDomainFactoryTest {
     }
     
     @Test
-    public void testCourseConfigForBuoy() throws PatchFailedException {
+    public void testCourseConfigForMark() throws PatchFailedException {
         DomainFactory domainFactory = DomainFactory.INSTANCE;
         Regatta regatta = new RegattaImpl("TestEvent", /* boatClass */ null, new RacingEventServiceImpl(),
                 com.sap.sailing.domain.base.DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT));
