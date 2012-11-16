@@ -24,7 +24,7 @@ import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.Waypoint;
-import com.sap.sailing.domain.base.impl.BuoyImpl;
+import com.sap.sailing.domain.base.impl.MarkImpl;
 import com.sap.sailing.domain.base.impl.FleetImpl;
 import com.sap.sailing.domain.base.impl.GateImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
@@ -731,8 +731,8 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
         for (Competitor[] competitorList : competitorLists) {
             RaceColumn raceColumn = columnIter.next();
             final Map<Competitor, TimePoint> lastMarkPassingTimes = lastMarkPassingTimesForCompetitors[i];
-            final Waypoint start = new WaypointImpl(new GateImpl(new BuoyImpl("Left StartBuoy"), new BuoyImpl("Right StartBuoy"), "Start"));
-            final Waypoint finish = new WaypointImpl(new BuoyImpl("FinishBuoy"));
+            final Waypoint start = new WaypointImpl(new GateImpl(new MarkImpl("Left StartBuoy"), new MarkImpl("Right StartBuoy"), "Start"));
+            final Waypoint finish = new WaypointImpl(new MarkImpl("FinishBuoy"));
             TrackedRace trackedRace = new MockedTrackedRaceWithStartTimeAndRanks(startTimes[i], Arrays.asList(competitorList)) {
                 private static final long serialVersionUID = 1L;
                 @Override

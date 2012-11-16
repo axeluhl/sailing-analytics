@@ -11,7 +11,7 @@ import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
-import com.sap.sailing.domain.base.Buoy;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Nationality;
@@ -199,13 +199,13 @@ public class DomainFactoryImpl implements DomainFactory {
             if (result == null) {
                 switch (Util.size(devices)) {
                 case 1:
-                    result = getOrCreateBuoy(devices.iterator().next());
+                    result = getOrCreateMark(devices.iterator().next());
                     break;
                 case 2:
-                    Iterator<String> buoyNameIter = devices.iterator();
-                    String left = buoyNameIter.next();
-                    String right = buoyNameIter.next();
-                    result = baseDomainFactory.createGate(getOrCreateBuoy(left), getOrCreateBuoy(right), left + "/" + right);
+                    Iterator<String> markNameIter = devices.iterator();
+                    String left = markNameIter.next();
+                    String right = markNameIter.next();
+                    result = baseDomainFactory.createGate(getOrCreateMark(left), getOrCreateMark(right), left + "/" + right);
                     break;
                 default:
                     throw new RuntimeException(
@@ -224,8 +224,8 @@ public class DomainFactoryImpl implements DomainFactory {
      *            {@link MessageType#RPD RPD} message
      */
     @Override
-    public Buoy getOrCreateBuoy(String id) {
-        return baseDomainFactory.getOrCreateBuoy(id);
+    public Mark getOrCreateMark(String id) {
+        return baseDomainFactory.getOrCreateSingleMark(id);
     }
 
     @Override
