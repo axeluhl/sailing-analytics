@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.shared.charts;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -73,7 +74,7 @@ public class LeaderboardRankChart extends SimplePanel {
             }
         }));
         chart.getYAxis(0).setAxisTitleText(stringMessages.rank()).setStartOnTick(true).setShowFirstLabel(false)
-        /* TODO is a custom formatter required if it only returns the axis label data again?
+        /* TODO do we need a specific formatter if we don't really format anything?
                 .setLabels(new YAxisLabels().setFormatter(new AxisLabelsFormatter() {
                     @Override
                     public String format(AxisLabelsData axisLabelsData) {
@@ -88,15 +89,19 @@ public class LeaderboardRankChart extends SimplePanel {
                  .getXAxis().setAxisTitle(null);
         }
         setSize("100%", "100%");
+        setWidget(chart);
         loadChartData(leaderboardName, stringMessages, errorReporter, sailingService);
     }
 
     private void loadChartData(String leaderboardName, final StringMessages stringMessages,
             final ErrorReporter errorReporter, SailingServiceAsync sailingService) {
+        chart.showLoading(stringMessages.loadingCompetitorData());
         sailingService.getRankedCompetitorsFromBestToWorstAfterEachRaceColumn(leaderboardName,
                 /* date: null means "now" or "live" */ null, new AsyncCallback<List<Pair<String,List<CompetitorDTO>>>>() {
                     @Override
                     public void onSuccess(List<Pair<String, List<CompetitorDTO>>> result) {
+                        List<Series> chartSeries = Arrays.asList(chart.getSeries());
+                        chart.hideLoading();
                         raceColumnNames.clear();
                         int raceNumber = 0;
                         for (Pair<String, List<CompetitorDTO>> entry : result) {
@@ -104,6 +109,9 @@ public class LeaderboardRankChart extends SimplePanel {
                             int rank = 1;
                             for (CompetitorDTO competitor : entry.getB()) {
                                 Series series = getOrCreateSeries(competitor);
+                                if (!chartSeries.contains(series)) {
+                                    chart.addSeries(series);
+                                }
                                 series.addPoint(raceNumber, rank);
                                 rank++;
                             }
@@ -113,6 +121,7 @@ public class LeaderboardRankChart extends SimplePanel {
                     
                     @Override
                     public void onFailure(Throwable caught) {
+                        chart.hideLoading();
                         errorReporter.reportError(stringMessages.errorFetchingRankingChartData(caught.getMessage()));
                     }
                 });

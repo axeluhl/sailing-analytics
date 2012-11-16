@@ -344,5 +344,7 @@ public interface Leaderboard extends Named {
      */
     Double getTotalPoints(Competitor competitor, RaceColumn raceColumn, Iterable<RaceColumn> raceColumnsToConsider,
             TimePoint timePoint) throws NoWindException;
+
+    TimePoint getNowMinusDelay();
     
 }

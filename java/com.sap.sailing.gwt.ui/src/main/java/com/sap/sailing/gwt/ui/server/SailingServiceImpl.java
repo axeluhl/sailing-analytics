@@ -417,7 +417,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                         leaderboardByNameLiveUpdaters.put(leaderboardName, liveLeaderboardUpdater);
                     }
                 }
-                final TimePoint nowMinusDelay = liveLeaderboardUpdater.getNowMinusDelay();
+                final TimePoint nowMinusDelay = leaderboard.getNowMinusDelay();
                 final TimePoint timePointOfLatestModification = leaderboard.getTimePointOfLatestModification();
                 if (timePointOfLatestModification != null && !nowMinusDelay.before(timePointOfLatestModification)) {
                     timePoint = timePointOfLatestModification;
@@ -2802,7 +2802,20 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public List<Pair<String, List<CompetitorDTO>>> getRankedCompetitorsFromBestToWorstAfterEachRaceColumn(String leaderboardName, Date date) throws NoWindException {
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
-        Map<RaceColumn, List<Competitor>> preResult = leaderboard.getRankedCompetitorsFromBestToWorstAfterEachRaceColumn(new MillisecondsTimePoint(date));
+        final TimePoint timePoint;
+        if (date == null) {
+            final TimePoint nowMinusDelay = leaderboard.getNowMinusDelay();
+            final TimePoint timePointOfLatestModification = leaderboard.getTimePointOfLatestModification();
+            if (timePointOfLatestModification != null && !nowMinusDelay.before(timePointOfLatestModification)) {
+                timePoint = timePointOfLatestModification;
+            } else {
+                timePoint = nowMinusDelay;
+            }
+        } else {
+            timePoint = new MillisecondsTimePoint(date);
+        }
+        Map<RaceColumn, List<Competitor>> preResult = leaderboard
+                .getRankedCompetitorsFromBestToWorstAfterEachRaceColumn(timePoint);
         List<Pair<String, List<CompetitorDTO>>> result = new ArrayList<Util.Pair<String,List<CompetitorDTO>>>();
         for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
             List<CompetitorDTO> competitorList = getCompetitorDTOList(preResult.get(raceColumn));

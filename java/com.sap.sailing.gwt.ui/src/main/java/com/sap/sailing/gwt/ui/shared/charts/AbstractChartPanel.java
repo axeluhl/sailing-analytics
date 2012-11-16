@@ -229,7 +229,7 @@ implements CompetitorSelectionChangeListener, RequiresResize {
                 needToLoadWhenMadeVisible = false; // we're loading it now
                 if (showBusyIndicator) {
                     setWidget(chart);
-                    showLoading("Loading competitor data...");
+                    showLoading(stringMessages.loadingCompetitorData());
                 }
                 if (chartData == null || chartData.getDetailType() != getDataToShow()) {
                     chartData = new MultiCompetitorRaceDataDTO(getDataToShow());

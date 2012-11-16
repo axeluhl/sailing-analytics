@@ -16,6 +16,7 @@ import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnListener;
+import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindException;
@@ -672,5 +673,13 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
             suppressedCompetitors.remove(competitor);
         }
         getScoreCorrection().notifyListenersAboutIsSuppressedChange(competitor, suppressed);
+    }
+
+    @Override
+    public TimePoint getNowMinusDelay() {
+        final MillisecondsTimePoint now = MillisecondsTimePoint.now();
+        final Long delayToLiveInMillis = getDelayToLiveInMillis();
+        TimePoint timePoint = delayToLiveInMillis == null ? now : now.minus(delayToLiveInMillis);
+        return timePoint;
     }
 }

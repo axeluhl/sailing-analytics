@@ -435,4 +435,5 @@ public interface StringMessages extends Messages {
     String live();
     String afterRace();
     String errorFetchingRankingChartData(String message);
+    String loadingCompetitorData();
 }

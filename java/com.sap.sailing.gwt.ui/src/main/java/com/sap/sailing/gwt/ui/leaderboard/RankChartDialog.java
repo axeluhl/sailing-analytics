@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.leaderboard;
 
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Label;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
@@ -11,6 +12,10 @@ public class RankChartDialog extends DialogBoxExt {
     public RankChartDialog(SailingServiceAsync sailingService, String leaderboardName, CompetitorSelectionProvider competitorSelectionProvider,
             StringMessages stringMessages, ErrorReporter errorReporter, boolean compactChart) {
         super(new Label(stringMessages.close()));
+        this.setPopupPosition(15, 15);
+        this.setHTML(stringMessages.compareCompetitors());
+        this.setWidth(Window.getClientWidth() - 250 + "px");
+        this.setAnimationEnabled(true);
         setWidget(new LeaderboardRankChart(sailingService, leaderboardName, competitorSelectionProvider, stringMessages, errorReporter, compactChart));
     }
 }
