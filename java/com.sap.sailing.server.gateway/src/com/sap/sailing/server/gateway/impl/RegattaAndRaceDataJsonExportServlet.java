@@ -177,7 +177,7 @@ public class RegattaAndRaceDataJsonExportServlet extends JsonExportServlet {
                         }
                         jsonMarks.add(jsonMark);
                     }
-                    jsonWaypoint.put("buoys", jsonMarks);
+                    jsonWaypoint.put("marks", jsonMarks);
                     jsonWaypoints.add(jsonWaypoint);
                 }
                 setJsonResponseHeader(resp);
