@@ -138,7 +138,7 @@ implements CompetitorSelectionChangeListener, RequiresResize {
                 .setLinePlotOptions(new LinePlotOptions().setLineWidth(LINE_WIDTH).setMarker(new Marker().setEnabled(false).setHoverState(
                                                 new Marker().setEnabled(true).setRadius(4))).setShadow(false)
                                 .setHoverStateLineWidth(LINE_WIDTH));
-        useCheckboxesToShowAndHide(chart);
+        ChartUtil.useCheckboxesToShowAndHide(chart);
         chart.setChartTitle(new ChartTitle().setText(DetailTypeFormatter.format(dataToShow, stringMessages)));
         
         if (allowTimeAdjust) {
@@ -156,10 +156,11 @@ implements CompetitorSelectionChangeListener, RequiresResize {
             });
         }
         final String unit = getUnit();
-        if(!compactChart)
+        if (!compactChart) {
             chart.getYAxis().setAxisTitleText(DetailTypeFormatter.format(dataToShow, stringMessages) + " ["+unit+"]");
-        else
+        } else {
             chart.getYAxis().setAxisTitleText("["+unit+"]");
+        }
         chart.getYAxis().setStartOnTick(false).setShowFirstLabel(false);
         chart.getYAxis().setReversed((dataToShow == DetailType.WINDWARD_DISTANCE_TO_OVERALL_LEADER || 
                                       dataToShow == DetailType.GAP_TO_LEADER_IN_SECONDS) ? true : false);

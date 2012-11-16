@@ -425,5 +425,6 @@ public interface SailingServiceAsync {
     void updateLeaderboardColumnFactor(String leaderboardName, String columnName, Double newFactor,
             AsyncCallback<Void> callback);
 
-
+    void getRankedCompetitorsFromBestToWorstAfterEachRaceColumn(String leaderboardName, Date date,
+            AsyncCallback<List<Pair<String, List<CompetitorDTO>>>> callback);
 }

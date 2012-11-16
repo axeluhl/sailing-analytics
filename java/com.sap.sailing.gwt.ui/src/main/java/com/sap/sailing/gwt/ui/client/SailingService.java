@@ -267,4 +267,6 @@ public interface SailingService extends RemoteService {
     void suppressCompetitorInLeaderboard(String leaderboardName, String competitorIdAsString, boolean suppressed);
 
     void updateLeaderboardColumnFactor(String leaderboardName, String columnName, Double newFactor);
+    
+    List<Pair<String, List<CompetitorDTO>>> getRankedCompetitorsFromBestToWorstAfterEachRaceColumn(String leaderboardName, Date date) throws NoWindException;
 }

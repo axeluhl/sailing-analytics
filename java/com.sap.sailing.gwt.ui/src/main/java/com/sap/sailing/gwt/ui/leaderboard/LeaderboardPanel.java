@@ -1247,6 +1247,14 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         playPause.addClickHandler(playPauseHandler);
         playStateChanged(timer.getPlayState(), timer.getPlayMode());
         refreshPanel.add(playPause);
+        Anchor rankChartsAnchor = new Anchor(AbstractImagePrototype.create(chartIcon).getSafeHtml());
+        rankChartsAnchor.setTitle(stringMessages.showCharts());
+        rankChartsAnchor.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                showRankChartDialog();
+            }
+        });
         Anchor chartsAnchor = new Anchor(AbstractImagePrototype.create(chartIcon).getSafeHtml());
         chartsAnchor.setTitle(stringMessages.showCharts());
         chartsAnchor.addClickHandler(new ClickHandler() {
@@ -1258,6 +1266,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         Anchor settingsAnchor = new Anchor(AbstractImagePrototype.create(leaderboardSettingsIcon).getSafeHtml());
         settingsAnchor.setTitle(stringMessages.settings());
         settingsAnchor.addClickHandler(new SettingsClickHandler(stringMessages));
+        refreshAndSettingsPanel.add(rankChartsAnchor);
         refreshAndSettingsPanel.add(chartsAnchor);
         refreshAndSettingsPanel.add(refreshPanel);
         refreshAndSettingsPanel.add(settingsAnchor);
@@ -2083,6 +2092,12 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                     competitorSelectionProvider, timer, stringMessages, errorReporter);
             chartDialog.show();
         }
+    }
+
+    private void showRankChartDialog() {
+        RankChartDialog chartDialog = new RankChartDialog(sailingService, leaderboardName, competitorSelectionProvider,
+                stringMessages, errorReporter, /* compactChart */ false);
+        chartDialog.show();
     }
 
     private List<RegattaAndRaceIdentifier> getTrackedRacesIdentifiers() {

@@ -570,9 +570,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         row.totalTimeSailedInSeconds = totalTimeSailedInMilliseconds==null?null:1./1000.*totalTimeSailedInMilliseconds;
     }
     
-    private List<CompetitorDTO> getCompetitorDTOList(List<Competitor> competitorsFromBestToWorst) {
+    private List<CompetitorDTO> getCompetitorDTOList(List<Competitor> competitors) {
         List<CompetitorDTO> result = new ArrayList<CompetitorDTO>();
-        for (Competitor competitor : competitorsFromBestToWorst) {
+        for (Competitor competitor : competitors) {
             result.add(convertToCompetitorDTO(competitor));
         }
         return result;
@@ -2797,5 +2797,17 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         if (fregService != null) {
             fregService.registerResultUrl(new URL(result));
         }
+    }
+
+    @Override
+    public List<Pair<String, List<CompetitorDTO>>> getRankedCompetitorsFromBestToWorstAfterEachRaceColumn(String leaderboardName, Date date) throws NoWindException {
+        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+        Map<RaceColumn, List<Competitor>> preResult = leaderboard.getRankedCompetitorsFromBestToWorstAfterEachRaceColumn(new MillisecondsTimePoint(date));
+        List<Pair<String, List<CompetitorDTO>>> result = new ArrayList<Util.Pair<String,List<CompetitorDTO>>>();
+        for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
+            List<CompetitorDTO> competitorList = getCompetitorDTOList(preResult.get(raceColumn));
+            result.add(new Pair<String, List<CompetitorDTO>>(raceColumn.getName(), competitorList));
+        }
+        return result;
     }
 }
