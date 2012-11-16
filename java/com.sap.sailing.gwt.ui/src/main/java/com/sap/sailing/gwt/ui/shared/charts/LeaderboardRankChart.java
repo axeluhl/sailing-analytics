@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.ui.shared.charts;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,6 +12,7 @@ import org.moxieapps.gwt.highcharts.client.Chart;
 import org.moxieapps.gwt.highcharts.client.ChartTitle;
 import org.moxieapps.gwt.highcharts.client.Color;
 import org.moxieapps.gwt.highcharts.client.Credits;
+import org.moxieapps.gwt.highcharts.client.Point;
 import org.moxieapps.gwt.highcharts.client.Series;
 import org.moxieapps.gwt.highcharts.client.ToolTip;
 import org.moxieapps.gwt.highcharts.client.ToolTipData;
@@ -31,18 +33,33 @@ import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.TimeListener;
+import com.sap.sailing.gwt.ui.client.Timer;
+import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 
-public class LeaderboardRankChart extends SimplePanel implements RequiresResize {
+public class LeaderboardRankChart extends SimplePanel implements RequiresResize, TimeListener {
     private static final int LINE_WIDTH = 1;
     private final CompetitorSelectionProvider competitorSelectionProvider;
     private final Map<CompetitorDTO, Series> competitorSeries;
     private final Chart chart;
     private final List<String> raceColumnNames;
+    private final Timer timer;
+    private final String leaderboardName;
+    private final StringMessages stringMessages;
+    private final SailingServiceAsync sailingService;
+    private final ErrorReporter errorReporter;
 
     public LeaderboardRankChart(SailingServiceAsync sailingService, String leaderboardName,
-            CompetitorSelectionProvider competitorSelectionProvider, final StringMessages stringMessages, ErrorReporter errorReporter, boolean compactChart) {
+            CompetitorSelectionProvider competitorSelectionProvider, Timer timer,
+            final StringMessages stringMessages, ErrorReporter errorReporter, boolean compactChart) {
         this.competitorSelectionProvider = competitorSelectionProvider;
+        this.stringMessages = stringMessages;
+        this.sailingService = sailingService;
+        this.errorReporter = errorReporter;
+        this.timer = timer;
+        timer.addTimeListener(this);
+        this.leaderboardName = leaderboardName;
         competitorSeries = new HashMap<CompetitorDTO, Series>();
         raceColumnNames = new ArrayList<String>();
         chart = new Chart()
@@ -92,12 +109,12 @@ public class LeaderboardRankChart extends SimplePanel implements RequiresResize 
         }
         setWidget(chart);
         setSize("100%", "100%");
-        loadChartData(leaderboardName, stringMessages, errorReporter, sailingService);
+        // show the loading message only upon initial load
+        chart.showLoading(stringMessages.loadingCompetitorData());
+        timeChanged(timer.getTime());
     }
 
-    private void loadChartData(String leaderboardName, final StringMessages stringMessages,
-            final ErrorReporter errorReporter, SailingServiceAsync sailingService) {
-        chart.showLoading(stringMessages.loadingCompetitorData());
+    private void loadChartData(Date date) {
         sailingService.getRankedCompetitorsFromBestToWorstAfterEachRaceColumn(leaderboardName,
                 /* date: null means "now" or "live" */ null, new AsyncCallback<List<Pair<String,List<CompetitorDTO>>>>() {
                     @Override
@@ -105,6 +122,11 @@ public class LeaderboardRankChart extends SimplePanel implements RequiresResize 
                         List<Series> chartSeries = new ArrayList<Series>(Arrays.asList(chart.getSeries()));
                         chart.hideLoading();
                         raceColumnNames.clear();
+                        for (Series series : competitorSeries.values()) {
+                            for (Point p : new ArrayList<Point>(Arrays.asList(series.getPoints()))) {
+                                series.removePoint(p, /* redraw */ false, /* animation */ false);
+                            }
+                        }
                         int raceNumber = 0;
                         int maxCompetitorCount = 0;
                         for (Pair<String, List<CompetitorDTO>> entry : result) {
@@ -117,7 +139,7 @@ public class LeaderboardRankChart extends SimplePanel implements RequiresResize 
                                     chart.addSeries(series);
                                     chartSeries.add(series);
                                 }
-                                series.addPoint(raceNumber, -rank);
+                                series.addPoint(raceNumber, -rank, /* redraw */ false, /* shift */ false, /* animation */ false);
                                 rank++;
                             }
                             raceNumber++;
@@ -159,5 +181,10 @@ public class LeaderboardRankChart extends SimplePanel implements RequiresResize 
             // in the BaseChart class would not be called 
             chart.redraw();
         }
+    }
+
+    @Override
+    public void timeChanged(Date date) {
+        loadChartData(timer.getPlayMode() == PlayModes.Live ? null : date);
     }
 }

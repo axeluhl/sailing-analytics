@@ -1232,6 +1232,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             }
         };
         ImageResource chartIcon = resources.chartIcon();
+        ImageResource rankChartIcon = resources.rankChartIcon();
         ImageResource leaderboardSettingsIcon = resources.leaderboardSettingsIcon();
         pauseIcon = resources.pauseIcon();
         playIcon = resources.playIcon();
@@ -1247,8 +1248,8 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         playPause.addClickHandler(playPauseHandler);
         playStateChanged(timer.getPlayState(), timer.getPlayMode());
         refreshPanel.add(playPause);
-        Anchor rankChartsAnchor = new Anchor(AbstractImagePrototype.create(chartIcon).getSafeHtml());
-        rankChartsAnchor.setTitle(stringMessages.showCharts());
+        Anchor rankChartsAnchor = new Anchor(AbstractImagePrototype.create(rankChartIcon).getSafeHtml());
+        rankChartsAnchor.setTitle(stringMessages.showRankChart());
         rankChartsAnchor.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -2096,7 +2097,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
 
     private void showRankChartDialog() {
         RankChartDialog chartDialog = new RankChartDialog(sailingService, leaderboardName, competitorSelectionProvider,
-                stringMessages, errorReporter, /* compactChart */ false);
+                timer, stringMessages, errorReporter, /* compactChart */ false);
         chartDialog.show();
     }
 
