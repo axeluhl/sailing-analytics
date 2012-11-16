@@ -52,8 +52,27 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
     private final boolean nullScoresAreBetter;
     private final TimePoint timePoint;
     
+    /**
+     * Considers all of the leaderboard's columns in their state at <code>timePoint</code> for calculating the score and rank.
+     */
     public LeaderboardTotalRankComparator(Leaderboard leaderboard, TimePoint timePoint,
             ScoringScheme scoringScheme, boolean nullScoresAreBetter) throws NoWindException {
+        this(leaderboard, timePoint, scoringScheme, nullScoresAreBetter, leaderboard.getRaceColumns());
+    }
+    
+    /**
+     * Considers only the race columns specified in <code>raceColumnsToConsider</code> and behaves as if the other columns
+     * were filled with <code>null</code> values. Those columns not considered do not count for determining the discards either.
+     * For example, if the first race may be discarded when five races have been completed, and only four {@link RaceColumn}s are
+     * considered, no race's score will be discarded for this call. This allows clients to tell what the ranking would have been
+     * with only the race columns specified in <code>raceColumnsToConsider</code> having completed for all fleets.<p>
+     * 
+     * Note, that <code>timePoint</code> is considered in addition to <code>raceColumnsToConsider</code> such that the scores in
+     * those columns considered is computed for the <code>timePoint</code> specified. In particular, if a time point is chosen that
+     * is before a race in a column that is considered has started, <code>null</code> values may result in that column.
+     */
+    public LeaderboardTotalRankComparator(Leaderboard leaderboard, TimePoint timePoint,
+            ScoringScheme scoringScheme, boolean nullScoresAreBetter, Iterable<RaceColumn> raceColumnsToConsider) throws NoWindException {
         super();
         this.leaderboard = leaderboard;
         this.timePoint = timePoint;
@@ -61,7 +80,7 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
         this.nullScoresAreBetter = nullScoresAreBetter;
         totalPointsCache = new HashMap<Pair<Competitor, RaceColumn>, Double>();
         for (Competitor competitor : leaderboard.getCompetitors()) {
-            for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
+            for (RaceColumn raceColumn : raceColumnsToConsider) {
                 totalPointsCache.put(new Pair<Competitor, RaceColumn>(competitor, raceColumn),
                         leaderboard.getTotalPoints(competitor, raceColumn, timePoint));
             }

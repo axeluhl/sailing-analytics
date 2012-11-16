@@ -214,13 +214,22 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
 
     @Override
     public boolean isDiscarded(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint) {
+        return isDiscarded(competitor, raceColumn, getRaceColumns(), timePoint);
+    }
+    
+    private boolean isDiscarded(Competitor competitor, RaceColumn raceColumn, Iterable<RaceColumn> raceColumnsToConsider, TimePoint timePoint) {
         return !raceColumn.isMedalRace() && getMaxPointsReason(competitor, raceColumn, timePoint).isDiscardable()
-                && getResultDiscardingRule().getDiscardedRaceColumns(competitor, this, timePoint).contains(
+                && getResultDiscardingRule().getDiscardedRaceColumns(competitor, this, raceColumnsToConsider, timePoint).contains(
                         raceColumn);
     }
 
     @Override
     public Double getTotalPoints(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint) throws NoWindException {
+        return getTotalPoints(competitor, raceColumn, getRaceColumns(), timePoint);
+    }
+    
+    private Double getTotalPoints(Competitor competitor, RaceColumn raceColumn,
+            Iterable<RaceColumn> raceColumnsToConsider, TimePoint timePoint) throws NoWindException {
         Double result;
         if (isDiscarded(competitor, raceColumn, timePoint)) {
             result = 0.0;
@@ -298,16 +307,20 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
 
     @Override
     public List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint) throws NoWindException {
+        return getCompetitorsFromBestToWorst(getRaceColumns(), timePoint);
+    }
+    
+    private List<Competitor> getCompetitorsFromBestToWorst(Iterable<RaceColumn> raceColumnsToConsider, TimePoint timePoint) throws NoWindException {
         List<Competitor> result = new ArrayList<Competitor>();
         for (Competitor competitor : getCompetitors()) {
             result.add(competitor);
         }
-        Collections.sort(result, getTotalRankComparator(timePoint));
+        Collections.sort(result, getTotalRankComparator(raceColumnsToConsider, timePoint));
         return result;
     }
 
-    protected Comparator<? super Competitor> getTotalRankComparator(TimePoint timePoint) throws NoWindException {
-        return new LeaderboardTotalRankComparator(this, timePoint, getScoringScheme(), /* nullScoresAreBetter */ false);
+    protected Comparator<? super Competitor> getTotalRankComparator(Iterable<RaceColumn> raceColumnsToConsider, TimePoint timePoint) throws NoWindException {
+        return new LeaderboardTotalRankComparator(this, timePoint, getScoringScheme(), /* nullScoresAreBetter */ false, raceColumnsToConsider);
     }
 
     @Override
@@ -369,6 +382,17 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     }
 
     @Override
+    public Map<RaceColumn, List<Competitor>> getRankedCompetitorsFromBestToWorstAfterEachRaceColumn(TimePoint timePoint) throws NoWindException {
+        Map<RaceColumn, List<Competitor>> result = new HashMap<>();
+        List<RaceColumn> raceColumnsToConsider = new ArrayList<>();
+        for (RaceColumn raceColumn : getRaceColumns()) {
+            raceColumnsToConsider.add(raceColumn);
+            result.put(raceColumn, getCompetitorsFromBestToWorst(raceColumnsToConsider, timePoint));
+        }
+        return result;
+    }
+
+    @Override
     public Map<Pair<Competitor, RaceColumn>, Entry> getContent(final TimePoint timePoint) throws NoWindException {
         Map<Pair<Competitor, RaceColumn>, Entry> result = new HashMap<Pair<Competitor, RaceColumn>, Entry>();
         Map<Competitor, Set<RaceColumn>> discardedRaces = new HashMap<Competitor, Set<RaceColumn>>();
@@ -384,7 +408,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                         timePoint, Util.size(getCompetitors()), getScoringScheme());
                 Set<RaceColumn> discardedRacesForCompetitor = discardedRaces.get(competitor);
                 if (discardedRacesForCompetitor == null) {
-                    discardedRacesForCompetitor = getResultDiscardingRule().getDiscardedRaceColumns(competitor, this, timePoint);
+                    discardedRacesForCompetitor = getResultDiscardingRule().getDiscardedRaceColumns(competitor, this, getRaceColumns(), timePoint);
                     discardedRaces.put(competitor, discardedRacesForCompetitor);
                 }
                 boolean discarded = discardedRacesForCompetitor.contains(raceColumn);
