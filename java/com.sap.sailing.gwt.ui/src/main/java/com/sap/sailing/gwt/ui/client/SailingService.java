@@ -31,6 +31,7 @@ import com.sap.sailing.gwt.ui.shared.ManeuverDTO;
 import com.sap.sailing.gwt.ui.shared.MultiCompetitorRaceDataDTO;
 import com.sap.sailing.gwt.ui.shared.QuickRankDTO;
 import com.sap.sailing.gwt.ui.shared.RaceBuoysDTO;
+import com.sap.sailing.gwt.ui.shared.RaceColumnInSeriesDTO;
 import com.sap.sailing.gwt.ui.shared.RaceDTO;
 import com.sap.sailing.gwt.ui.shared.RaceMapDataDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
@@ -43,6 +44,7 @@ import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingRaceRecordDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracRaceRecordDTO;
+import com.sap.sailing.gwt.ui.shared.VenueDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 
@@ -140,19 +142,17 @@ public interface SailingService extends RemoteService {
     
     void removeRegatta(RegattaIdentifier regattaIdentifier);
     
-    void addColumnsToSeries(RegattaIdentifier regattaIdentifier, String seriesName, List<String> columnNames);
+    List<RaceColumnInSeriesDTO> addRaceColumnsToSeries(RegattaIdentifier regattaIdentifier, String seriesName, List<String> columnNames);
 
-    void addColumnToSeries(RegattaIdentifier regattaIdentifier, String seriesName, String columnName);
+    RaceColumnInSeriesDTO addRaceColumnToSeries(RegattaIdentifier regattaIdentifier, String seriesName, String columnName);
 
-    void removeColumnsFromSeries(RegattaIdentifier regattaIdentifier, String seriesName, List<String> columnNames);
+    void removeRaceColumnsFromSeries(RegattaIdentifier regattaIdentifier, String seriesName, List<String> columnNames);
 
-    void removeColumnFromSeries(RegattaIdentifier regattaIdentifier, String seriesName, String columnName);
+    void removeRaceColumnFromSeries(RegattaIdentifier regattaIdentifier, String seriesName, String columnName);
 
-    void renameColumnInSeries(RegattaIdentifier regattaIdentifier, String seriesName, String oldColumnName, String newColumnName);
+    void moveRaceColumnInSeriesUp(RegattaIdentifier regattaIdentifier, String seriesName, String columnName);
 
-    void moveColumnInSeriesUp(RegattaIdentifier regattaIdentifier, String seriesName, String columnName);
-
-    void moveColumnInSeriesDown(RegattaIdentifier regattaIdentifier, String seriesName, String columnName);
+    void moveRaceColumnInSeriesDown(RegattaIdentifier regattaIdentifier, String seriesName, String columnName);
 
     boolean connectTrackedRaceToLeaderboardColumn(String leaderboardName, String raceColumnName,
             String fleetName, RegattaAndRaceIdentifier raceIdentifier);
@@ -203,7 +203,8 @@ public interface SailingService extends RemoteService {
     
     void removeLeaderboardGroup(String groupName);
     
-    LeaderboardGroupDTO createLeaderboardGroup(String groupName, String description, int[] overallLeaderboardDiscardThresholds,
+    LeaderboardGroupDTO createLeaderboardGroup(String groupName, String description,
+            boolean displayGroupsInReverseOrder, int[] overallLeaderboardDiscardThresholds,
             ScoringSchemeType overallLeaderboardScoringSchemeType);
     
     void updateLeaderboardGroup(String oldName, String newName, String description, List<String> leaderboardNames,
@@ -225,9 +226,9 @@ public interface SailingService extends RemoteService {
 
     void updateRacesDelayToLive(List<RegattaAndRaceIdentifier> regattaAndRaceIdentifiers, long delayToLiveInMs);
 
-    void updateEvent(String oldName, String newName, String description, List<String> regattaNames);
+    void updateEvent(String eventName, VenueDTO venue, String publicationUrl, boolean isPublic, List<String> regattaNames);
 
-    EventDTO createEvent(String eventName, String description);
+    EventDTO createEvent(String eventName, String venueName, String publicationUrl, boolean isPublic);
 
     void removeEvent(String eventName);
 
@@ -264,4 +265,6 @@ public interface SailingService extends RemoteService {
     StrippedLeaderboardDTO getLeaderboard(String leaderboardName);
 
     void suppressCompetitorInLeaderboard(String leaderboardName, String competitorIdAsString, boolean suppressed);
+
+    void updateLeaderboardColumnFactor(String leaderboardName, String columnName, Double newFactor);
 }

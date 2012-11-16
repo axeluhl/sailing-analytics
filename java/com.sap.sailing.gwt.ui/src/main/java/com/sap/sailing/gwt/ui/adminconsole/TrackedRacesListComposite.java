@@ -288,7 +288,7 @@ public class TrackedRacesListComposite extends SimplePanel implements Component<
             @Override
             public String getValue(RaceDTO raceDTO) {
                 if (raceDTO.isTracked == true)
-                    return "tracked";
+                    return stringMessages.tracked();
 
                 return "";
             }
@@ -297,7 +297,7 @@ public class TrackedRacesListComposite extends SimplePanel implements Component<
         TextColumn<RaceDTO> hasWindDataColumn = new TextColumn<RaceDTO>() {
             @Override
             public String getValue(RaceDTO raceDTO) {
-                if (raceDTO.isTracked && raceDTO.trackedRace.hasWindData == true)
+                if (raceDTO.trackedRace != null && raceDTO.trackedRace.hasWindData == true)
                     return stringMessages.yes();
                 else
                     return stringMessages.no();
@@ -307,17 +307,18 @@ public class TrackedRacesListComposite extends SimplePanel implements Component<
         TextColumn<RaceDTO> hasGPSDataColumn = new TextColumn<RaceDTO>() {
             @Override
             public String getValue(RaceDTO raceDTO) {
-                if (raceDTO.isTracked && raceDTO.trackedRace.hasGPSData == true)
+                if (raceDTO.trackedRace != null && raceDTO.trackedRace.hasGPSData == true) {
                     return stringMessages.yes();
-                else
+                } else {
                     return stringMessages.no();
+                }
             }
         };
 
         TextColumn<RaceDTO> raceLiveDelayColumn = new TextColumn<RaceDTO>() {
             @Override
             public String getValue(RaceDTO raceDTO) {
-                if (raceDTO.trackedRace != null && raceDTO.trackedRace.delayToLiveInMs > 0) {
+                if (raceDTO.isTracked && raceDTO.trackedRace != null && raceDTO.trackedRace.delayToLiveInMs > 0) {
                     return "" + raceDTO.trackedRace.delayToLiveInMs / 1000;
                 }
                 return "";

@@ -104,6 +104,28 @@ public class MediaDBImpl implements MediaDB {
     }
 
     @Override
+    public void updateTitle(String dbId, String title) {
+        BasicDBObject updateQuery = new BasicDBObject();
+        updateQuery.append(DbNames.Fields._id.name(), new ObjectId(dbId));
+
+        BasicDBObject update = new BasicDBObject();
+        update.append("$set", new BasicDBObject(DbNames.Fields.MEDIA_TITLE.name(), title));
+
+        getVideoCollection().update(updateQuery, update);
+    }
+
+    @Override
+    public void updateUrl(String dbId, String url) {
+        BasicDBObject updateQuery = new BasicDBObject();
+        updateQuery.append(DbNames.Fields._id.name(), new ObjectId(dbId));
+
+        BasicDBObject update = new BasicDBObject();
+        update.append("$set", new BasicDBObject(DbNames.Fields.MEDIA_URL.name(), url));
+
+        getVideoCollection().update(updateQuery, update);
+    }
+
+    @Override
     public void updateStartTime(String dbId, Date startTime) {
         BasicDBObject updateQuery = new BasicDBObject();
         updateQuery.append(DbNames.Fields._id.name(), new ObjectId(dbId));

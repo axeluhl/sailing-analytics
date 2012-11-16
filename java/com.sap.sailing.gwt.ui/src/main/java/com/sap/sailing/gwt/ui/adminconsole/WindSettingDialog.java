@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.DoubleBox;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
@@ -55,7 +54,7 @@ public class WindSettingDialog extends DataEntryDialog<WindDTO> {
         }
     }
 
-    public WindSettingDialog(RaceDTO race, CourseDTO courseDTO, StringMessages stringMessages, AsyncCallback<WindDTO> callback) {
+    public WindSettingDialog(RaceDTO race, CourseDTO courseDTO, StringMessages stringMessages, DialogCallback<WindDTO> callback) {
         super(stringMessages.actionAddWindData(), null, stringMessages.ok(), stringMessages.cancel(), new WindDataValidator(stringMessages), callback);
         this.stringMessages = stringMessages;        
         speedInKnotsBox = createDoubleBox(5);
@@ -101,7 +100,7 @@ public class WindSettingDialog extends DataEntryDialog<WindDTO> {
 
         result.trueWindSpeedInKnots = speedInKnotsBox.getValue();
         result.trueWindFromDeg = fromInDegBox.getValue();
-        result.timepoint = timeBox.getValue() != null ? timeBox.getValue().getTime() : System.currentTimeMillis();
+        result.measureTimepoint = timeBox.getValue() != null ? timeBox.getValue().getTime() : System.currentTimeMillis();
         if (latDegBox.getValue() != null && lngDegBox.getValue() != null) {
             result.position = new PositionDTO(latDegBox.getValue(), lngDegBox.getValue());
         }

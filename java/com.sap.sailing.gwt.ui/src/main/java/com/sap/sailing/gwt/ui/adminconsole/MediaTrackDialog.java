@@ -43,8 +43,8 @@ public class MediaTrackDialog extends DataEntryDialog<MediaTrack> {
 
     private TextBox mimeTypeBox;
 
-    public MediaTrackDialog(StringMessages stringMessages, AsyncCallback<MediaTrack> okCancelCallback) {
-        super("Media Track", "", stringMessages.ok(), stringMessages.cancel(), MEDIA_TRACK_VALIDATOR, okCancelCallback);
+    public MediaTrackDialog(StringMessages stringMessages, DialogCallback<MediaTrack> dialogCallback) {
+        super("Media Track", "", stringMessages.ok(), stringMessages.cancel(), MEDIA_TRACK_VALIDATOR, dialogCallback);
         this.stringMessages = stringMessages;
     }
 

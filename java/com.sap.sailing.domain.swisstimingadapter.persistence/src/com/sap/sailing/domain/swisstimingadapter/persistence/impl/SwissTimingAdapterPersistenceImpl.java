@@ -125,7 +125,7 @@ public class SwissTimingAdapterPersistenceImpl implements SwissTimingAdapterPers
         List<SailMasterMessage> result = new ArrayList<SailMasterMessage>();
         for (DBObject o : results) {
             SailMasterMessage msg = swissTimingFactory.createMessage((String) o.get(FieldNames.MESSAGE_CONTENT.name()),
-                    (Long) o.get(FieldNames.MESSAGE_SEQUENCE_NUMBER.name()));
+                    ((Number) o.get(FieldNames.MESSAGE_SEQUENCE_NUMBER.name())).longValue());
             result.add(msg);
         }
         return result;

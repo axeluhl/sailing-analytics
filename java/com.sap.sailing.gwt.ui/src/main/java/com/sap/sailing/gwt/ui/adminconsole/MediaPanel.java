@@ -25,6 +25,7 @@ import com.google.gwt.view.client.DefaultSelectionEventManager;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionModel;
 import com.google.gwt.view.client.SingleSelectionModel;
+import com.sap.sailing.gwt.ui.client.DataEntryDialog.DialogCallback;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -159,7 +160,18 @@ public class MediaPanel extends FlowPanel {
             public void update(int index, MediaTrack mediaTrack, String newTitle) {
                 // Called when the user changes the value.
                 mediaTrack.title = newTitle;
-                mediaTrackListDataProvider.refresh();
+                mediaService.updateTitle(mediaTrack, new AsyncCallback<Void>() {
+
+                    @Override
+                    public void onFailure(Throwable t) {
+                        errorReporter.reportError(t.toString());
+                    }
+
+                    @Override
+                    public void onSuccess(Void allMediaTracks) {
+                        mediaTrackListDataProvider.refresh();
+                    }
+                });
             }
         });
         mediaTracksTable.setColumnWidth(titleColumn, 20, Unit.PCT);
@@ -182,7 +194,18 @@ public class MediaPanel extends FlowPanel {
             public void update(int index, MediaTrack mediaTrack, String newUrl) {
                 // Called when the user changes the value.
                 mediaTrack.url = newUrl;
-                mediaTrackListDataProvider.refresh();
+                mediaService.updateUrl(mediaTrack, new AsyncCallback<Void>() {
+
+                    @Override
+                    public void onFailure(Throwable t) {
+                        errorReporter.reportError(t.toString());
+                    }
+
+                    @Override
+                    public void onSuccess(Void allMediaTracks) {
+                        mediaTrackListDataProvider.refresh();
+                    }
+                });
             }
         });
         mediaTracksTable.setColumnWidth(urlColumn, 100, Unit.PCT);
@@ -242,7 +265,7 @@ public class MediaPanel extends FlowPanel {
         Column<MediaTrack, String> startTimeColumn = new Column<MediaTrack, String>(new EditTextCell()) {
             @Override
             public String getValue(MediaTrack mediaTrack) {
-                return DATETIME_FORMAT.format(mediaTrack.startTime);
+                return mediaTrack.startTime == null ? "" : DATETIME_FORMAT.format(mediaTrack.startTime);
             }
         };
         startTimeColumn.setSortable(true);
@@ -336,15 +359,15 @@ public class MediaPanel extends FlowPanel {
     }
 
     private void addMediaTrack() {
-        MediaTrackDialog dialog = new MediaTrackDialog(stringMessages, new AsyncCallback<MediaTrack>() {
+        MediaTrackDialog dialog = new MediaTrackDialog(stringMessages, new DialogCallback<MediaTrack>() {
 
             @Override
-            public void onFailure(Throwable arg0) {
+            public void cancel() {
                 // no op
             }
 
             @Override
-            public void onSuccess(MediaTrack mediaTrack) {
+            public void ok(MediaTrack mediaTrack) {
                 mediaService.addMediaTrack(mediaTrack, new AsyncCallback<Void>() {
 
                     @Override

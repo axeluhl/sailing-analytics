@@ -22,6 +22,7 @@ import com.google.gwt.user.client.ui.IntegerBox;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.LongBox;
+import com.google.gwt.user.client.ui.RadioButton;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
@@ -49,6 +50,11 @@ public abstract class DataEntryDialog<T> {
          */
         String getErrorMessage(T valueToValidate);
     }
+    
+    public static interface DialogCallback<T> {
+        void ok(T editedObject);
+        void cancel();
+    }
 
     /**
      * @param validator
@@ -60,7 +66,7 @@ public abstract class DataEntryDialog<T> {
      *            {@link AsyncCallback#onSuccess(Object) confirmed}
      */
     public DataEntryDialog(String title, String message, String okButtonName, String cancelButtonName,
-            Validator<T> validator, final AsyncCallback<T> callback) {
+            Validator<T> validator, final DialogCallback<T> callback) {
         this(title, message, okButtonName, cancelButtonName, validator, /* animationEnabled */ true, callback);
     }
     
@@ -74,7 +80,7 @@ public abstract class DataEntryDialog<T> {
      *            {@link AsyncCallback#onSuccess(Object) confirmed}
      */
     public DataEntryDialog(String title, String message, String okButtonName, String cancelButtonName,
-            Validator<T> validator, boolean animationEnabled, final AsyncCallback<T> callback) {
+            Validator<T> validator, boolean animationEnabled, final DialogCallback<T> callback) {
         dateEntryDialog = new DialogBox();
         dateEntryDialog.setText(title);
         dateEntryDialog.setAnimationEnabled(animationEnabled);
@@ -103,14 +109,14 @@ public abstract class DataEntryDialog<T> {
             @Override
             public void onClick(ClickEvent event) {
                 dateEntryDialog.hide();
-                callback.onFailure(null);
+                callback.cancel();
             }
         });
         dateEntryDialog.setWidget(dialogFPanel);
         okButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
                 dateEntryDialog.hide();
-                callback.onSuccess(getResult());
+                callback.ok(getResult());
             }
         });
     }
@@ -291,15 +297,12 @@ public abstract class DataEntryDialog<T> {
     
     public FlowPanel createHeadline(String headlineText, boolean regularHeadline) {
     	FlowPanel headlinePanel = new FlowPanel();
-    	
         Label headlineLabel = new Label(headlineText);
-        
         if (regularHeadline) {
-        	headlinePanel.addStyleName("dialogInnerHeadline");
-		} else {
-			headlinePanel.addStyleName("dialogInnerHeadlineOther");
-		}
-        
+            headlinePanel.addStyleName("dialogInnerHeadline");
+        } else {
+            headlinePanel.addStyleName("dialogInnerHeadlineOther");
+        }
         headlinePanel.add(headlineLabel);
         return headlinePanel;
     }
@@ -318,6 +321,20 @@ public abstract class DataEntryDialog<T> {
         return result;
     }
 
+    public RadioButton createRadioButton(String radioButtonGroupName, String radioButtonLabel) {
+        RadioButton result = new RadioButton(radioButtonGroupName, radioButtonLabel);
+        result.setWordWrap(false);
+        result.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<Boolean> event) {
+                validate();
+            }
+        });
+        AbstractEntryPoint.linkEnterToButton(getOkButton(), result);
+        AbstractEntryPoint.linkEscapeToButton(getCancelButton(), result);
+        return result;
+    }
+    
     public ListBox createListBox(boolean isMultipleSelect) {
         ListBox result = new ListBox(isMultipleSelect);
         result.addChangeHandler(new ChangeHandler() {
@@ -331,12 +348,11 @@ public abstract class DataEntryDialog<T> {
         return result;
     }
 
-    protected void alignAllPanelWidgetsVertically(HorizontalPanel panel, HasVerticalAlignment.VerticalAlignmentConstant alignment) {
+    public void alignAllPanelWidgetsVertically(HorizontalPanel panel, HasVerticalAlignment.VerticalAlignmentConstant alignment) {
         for(int i = 0; i < panel.getWidgetCount(); i++) {
             panel.setCellVerticalAlignment(panel.getWidget(i), alignment);
         }
     }
-
     
     /**
      * Can contribute an additional widget to be displayed underneath the text entry field. If <code>null</code> is

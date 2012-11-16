@@ -40,14 +40,6 @@ public class MetaLeaderboardColumn extends SimpleAbstractRaceColumn implements R
     }
 
     @Override
-    public void addRaceColumnListener(RaceColumnListener listener) {
-    }
-
-    @Override
-    public void removeRaceColumnListener(RaceColumnListener listener) {
-    }
-
-    @Override
     public Iterable<? extends Fleet> getFleets() {
         return Collections.singleton(metaFleet);
     }
@@ -96,10 +88,6 @@ public class MetaLeaderboardColumn extends SimpleAbstractRaceColumn implements R
     }
 
     @Override
-    public void setName(String newName) {
-    }
-
-    @Override
     public void releaseTrackedRace(Fleet fleet) {
     }
 
@@ -119,6 +107,11 @@ public class MetaLeaderboardColumn extends SimpleAbstractRaceColumn implements R
     }
 
     @Override
+    public boolean canAddRaceColumnToContainer(RaceColumn raceColumn) {
+        return getRaceColumnListeners().canAddRaceColumnToContainer(raceColumn);
+    }
+
+    @Override
     public void raceColumnAddedToContainer(RaceColumn raceColumn) {
         getRaceColumnListeners().notifyListenersAboutRaceColumnAddedToContainer(raceColumn);
     }
@@ -126,6 +119,21 @@ public class MetaLeaderboardColumn extends SimpleAbstractRaceColumn implements R
     @Override
     public void raceColumnRemovedFromContainer(RaceColumn raceColumn) {
         getRaceColumnListeners().notifyListenersAboutRaceColumnRemovedFromContainer(raceColumn);
+    }
+
+    @Override
+    public void raceColumnMoved(RaceColumn raceColumn, int newIndex) {
+        getRaceColumnListeners().notifyListenersAboutRaceColumnMoved(raceColumn, newIndex);
+    }
+
+    @Override
+    public void factorChanged(RaceColumn raceColumn, Double oldFactor, Double newFactor) {
+        getRaceColumnListeners().notifyListenersAboutFactorChanged(raceColumn, oldFactor, newFactor);
+    }
+
+    @Override
+    public void competitorDisplayNameChanged(Competitor competitor, String oldDisplayName, String displayName) {
+        getRaceColumnListeners().notifyListenersAboutCompetitorDisplayNameChanged(competitor, oldDisplayName, displayName);
     }
 
     @Override

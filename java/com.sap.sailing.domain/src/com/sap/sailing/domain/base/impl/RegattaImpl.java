@@ -22,6 +22,7 @@ import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.impl.NamedImpl;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.util.impl.RaceColumnListeners;
 
@@ -48,6 +49,13 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     /**
      * Constructs a regatta with a single default series with empty race column list, and a single default fleet which
      * is not {@link #isPersistent() marked for persistence}.
+     * 
+     * @param trackedRegattaRegistry
+     *            used to find the {@link TrackedRegatta} for this column's series' {@link Series#getRegatta() regatta}
+     *            in order to re-associate a {@link TrackedRace} passed to {@link #setTrackedRace(Fleet, TrackedRace)}
+     *            with this column's series' {@link TrackedRegatta}, and the tracked race's {@link RaceDefinition} with
+     *            this column's series {@link Regatta}, respectively. If <code>null</code>, the re-association won't be
+     *            carried out.
      */
     public RegattaImpl(String baseName, BoatClass boatClass, TrackedRegattaRegistry trackedRegattaRegistry, ScoringScheme scoringScheme) {
         this(baseName, boatClass, Collections.singletonList(new SeriesImpl("Default", /* isMedal */false, Collections
@@ -208,6 +216,11 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     }
     
     @Override
+    public boolean canAddRaceColumnToContainer(RaceColumn raceColumn) {
+        return raceColumnListeners.canAddRaceColumnToContainer(raceColumn);
+    }
+
+    @Override
     public void raceColumnAddedToContainer(RaceColumn raceColumn) {
         raceColumnListeners.notifyListenersAboutRaceColumnAddedToContainer(raceColumn);
     }
@@ -215,6 +228,21 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     @Override
     public void raceColumnRemovedFromContainer(RaceColumn raceColumn) {
         raceColumnListeners.notifyListenersAboutRaceColumnRemovedFromContainer(raceColumn);
+    }
+
+    @Override
+    public void raceColumnMoved(RaceColumn raceColumn, int newIndex) {
+        raceColumnListeners.notifyListenersAboutRaceColumnMoved(raceColumn, newIndex);
+    }
+
+    @Override
+    public void factorChanged(RaceColumn raceColumn, Double oldFactor, Double newFactor) {
+        raceColumnListeners.notifyListenersAboutFactorChanged(raceColumn, oldFactor, newFactor);
+    }
+
+    @Override
+    public void competitorDisplayNameChanged(Competitor competitor, String oldDisplayName, String displayName) {
+        raceColumnListeners.notifyListenersAboutCompetitorDisplayNameChanged(competitor, oldDisplayName, displayName);
     }
 
     @Override

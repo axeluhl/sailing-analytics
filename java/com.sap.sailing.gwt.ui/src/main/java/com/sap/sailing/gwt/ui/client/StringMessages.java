@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.ui.client;
 
 import com.google.gwt.i18n.client.Messages;
-import com.google.gwt.user.cellview.client.Header;
 
 public interface StringMessages extends Messages {
     String helloWorld();
@@ -174,6 +173,7 @@ public interface StringMessages extends Messages {
     String delete();
     String showCharts();
     String raceWithThisNameAlreadyExists();
+    String raceWithThisNameAlreadyExistsInRegatta();
     String headUp();
     String bearAway();
     String tack();
@@ -383,11 +383,14 @@ public interface StringMessages extends Messages {
     String useOverallLeaderboard();
     String overallStandings();
     String scoringSchemeHighPointEssOverall();
+    String scoringSchemeHighPointLastBreaksTie();
     String type();
     String actionAddRaces();
     String racesWithNamePrefix();
     String maximumSpeedOverGroundInKnots();
     String totalTimeSailedDownwindInSeconds();
+    String totalTimeSailedUpwindInSeconds();
+    String totalTimeSailedReachingInSeconds();
     String totalTimeSailedInSeconds();
     String overallDetailsToShow();
     String hhmmssUnit();
@@ -397,13 +400,41 @@ public interface StringMessages extends Messages {
     String pleaseEnterAValue();
     String latitude();
     String longitude();
+    String actionAddEvent();
+    String publicationUrl();
     String suppress();
+    String isPublic();
     String unsuppress();
     String suppressedCompetitors();
+    String pleaseSelectASeries();
+    String pleaseSelectARace();
+    String displayGroupsInReverseOrder();
+    String actionConfigureUrl();
+    String configureLeaderboardUrlDescription();
+    String embedded();
     String mediaPanel();
     String url();
     String mimeType();
     String title();
     String reallyRemoveMediaTrack(String mediaTrackTitle);
     String duration();
+    String additionalUrlSettings();
+    String restrictToSingleSelectedRace();
+    String expandSelectedRace();
+    String showRaceDetails();
+    String numberOfRaces();
+    String numberOfRacesMustBeNonNegativeNumber();
+    String chooseTheWayYouSelectRaces();
+    String selectFromAllRaces();
+    String selectANumberOfRaces();
+    String numberOfLastNRaces();
+    String expandLastRace();
+    String factor();
+    String errorUpdatingIsMedalRace(String message);
+    String maneuverLoss();
+    String averageManeuverLossInMeters();
+    String averageTackLossInMeters();
+    String averageJibeLossInMeters();
+    String legend();
+    String live();
 }

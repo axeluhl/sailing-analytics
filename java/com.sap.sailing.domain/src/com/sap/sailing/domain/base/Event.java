@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.base;
 
 import com.sap.sailing.domain.common.Named;
+import com.sap.sailing.domain.common.Renamable;
 
 /**
  * An event is a group of {@link Regatta regattas} carried out at a common venue within a common time frame. For
@@ -10,11 +11,19 @@ import com.sap.sailing.domain.common.Named;
  * @author Axel Uhl (D043530)
  * 
  */
-public interface Event extends Named {
+public interface Event extends Named, Renamable {
     /**
      * @return a non-<code>null</code> venue for this event
      */
     Venue getVenue();
+    
+    String getPublicationUrl();
+
+    void setPublicationUrl(String publicationUrl);
+
+    boolean isPublic();
+
+    void setPublic(boolean isPublic);
 
     Iterable<Regatta> getRegattas();
     

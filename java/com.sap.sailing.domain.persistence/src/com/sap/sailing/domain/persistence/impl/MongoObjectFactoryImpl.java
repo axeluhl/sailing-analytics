@@ -152,8 +152,20 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
             // at least store the scoring scheme
             dbLeaderboard.put(FieldNames.SCORING_SCHEME_TYPE.name(), leaderboard.getScoringScheme().getType().name());
         }
+        storeColumnFactors(leaderboard, dbLeaderboard);
         storeLeaderboardCorrectionsAndDiscards(leaderboard, dbLeaderboard);
         leaderboardCollection.update(query, dbLeaderboard, /* upsrt */ true, /* multi */ false);
+    }
+
+    private void storeColumnFactors(Leaderboard leaderboard, BasicDBObject dbLeaderboard) {
+        DBObject raceColumnFactors = new BasicDBObject();
+        for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
+            Double explicitFactor = raceColumn.getExplicitFactor();
+            if (explicitFactor != null) {
+                raceColumnFactors.put(MongoUtils.escapeDollarAndDot(raceColumn.getName()), explicitFactor);
+            }
+        }
+        dbLeaderboard.put(FieldNames.LEADERBOARD_COLUMN_FACTORS.name(), raceColumnFactors);
     }
 
     private void storeRegattaLeaderboard(RegattaLeaderboard leaderboard, DBObject dbLeaderboard) {
@@ -234,6 +246,8 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
                 }
             }
             if (!dbCorrectionForRace.isEmpty()) {
+                // using the column name as the key for the score corrections requires re-writing the score corrections
+                // of a meta-leaderboard if the name of one of its leaderboards changes
                 dbScoreCorrections.put(raceColumn.getName(), dbCorrectionForRace);
             }
         }
@@ -276,6 +290,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         BasicDBObject dbLeaderboardGroup = new BasicDBObject();
         dbLeaderboardGroup.put(FieldNames.LEADERBOARD_GROUP_NAME.name(), leaderboardGroup.getName());
         dbLeaderboardGroup.put(FieldNames.LEADERBOARD_GROUP_DESCRIPTION.name(), leaderboardGroup.getDescription());
+        dbLeaderboardGroup.put(FieldNames.LEADERBOARD_GROUP_DISPLAY_IN_REVERSE_ORDER.name(), leaderboardGroup.isDisplayGroupsInReverseOrder());
         final Leaderboard overallLeaderboard = leaderboardGroup.getOverallLeaderboard();
         if (overallLeaderboard != null) {
             BasicDBObject overallLeaderboardQuery = new BasicDBObject(FieldNames.LEADERBOARD_NAME.name(), overallLeaderboard.getName());
@@ -325,11 +340,28 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         query.put(FieldNames.EVENT_NAME.name(), event.getName());
         DBObject eventDBObject = new BasicDBObject();
         eventDBObject.put(FieldNames.EVENT_NAME.name(), event.getName());
+        eventDBObject.put(FieldNames.EVENT_PUBLICATION_URL.name(), event.getPublicationUrl());
+        eventDBObject.put(FieldNames.EVENT_IS_PUBLIC.name(), event.isPublic());
         DBObject venueDBObject = getVenueAsDBObject(event.getVenue());
         eventDBObject.put(FieldNames.VENUE.name(), venueDBObject);
         eventCollection.update(query, eventDBObject, /* upsrt */ true, /* multi */ false);
     }
 
+    @Override
+    public void renameEvent(String oldName, String newName) {
+        DBCollection eventCollection = database.getCollection(CollectionNames.EVENTS.name());
+        BasicDBObject query = new BasicDBObject(FieldNames.EVENT_NAME.name(), oldName);
+        BasicDBObject renameUpdate = new BasicDBObject("$set", new BasicDBObject(FieldNames.EVENT_NAME.name(), newName));
+        eventCollection.update(query, renameUpdate);
+    }
+    
+    @Override
+    public void removeEvent(String eventName) {
+        DBCollection eventsCollection = database.getCollection(CollectionNames.EVENTS.name());
+        BasicDBObject query = new BasicDBObject(FieldNames.EVENT_NAME.name(), eventName);
+        eventsCollection.remove(query);
+    }
+    
     private DBObject getVenueAsDBObject(Venue venue) {
         DBObject result = new BasicDBObject();
         result.put(FieldNames.VENUE_NAME.name(), venue.getName());

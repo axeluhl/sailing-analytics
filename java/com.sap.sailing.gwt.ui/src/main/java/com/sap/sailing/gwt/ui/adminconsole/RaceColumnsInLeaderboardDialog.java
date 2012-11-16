@@ -6,7 +6,6 @@ import java.util.List;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Grid;
@@ -87,7 +86,7 @@ public class RaceColumnsInLeaderboardDialog extends DataEntryDialog<List<RaceCol
     }
 
     public RaceColumnsInLeaderboardDialog(List<RaceColumnDTO> existingRaces, StringMessages stringConstants,
-            AsyncCallback<List<RaceColumnDTO>> callback) {
+            DialogCallback<List<RaceColumnDTO>> callback) {
         super(stringConstants.actionAddRaces(), null, stringConstants.ok(), stringConstants.cancel(),
                 new RaceDialogValidator(stringConstants), callback);
         this.existingRaces = existingRaces;
@@ -120,7 +119,7 @@ public class RaceColumnsInLeaderboardDialog extends DataEntryDialog<List<RaceCol
         int racesCount = raceNameEntryFields.size();
         for(int i = 0; i < racesCount; i++) {
             String raceColumnName = raceNameEntryFields.get(i).getValue();
-            RaceColumnDTO raceColumnDTO = new RaceColumnDTO();
+            RaceColumnDTO raceColumnDTO = new RaceColumnDTO(/* isValidInTotalScore not relevant here because no scores attached */ null);
             raceColumnDTO.name = raceColumnName;
             raceColumnDTO.setMedalRace(false);
             racesWithFleet.add(raceColumnDTO);

@@ -32,7 +32,10 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
         tabPanel.setSize("95%", "95%");
 
         regattaDisplayers = new HashSet<RegattaDisplayer>();
-        
+
+//        SailingEventManagementPanel sailingEventManagementPanel = new SailingEventManagementPanel(sailingService, this, stringMessages);
+//        tabPanel.add(sailingEventManagementPanel, stringMessages.events());
+
         RegattaStructureManagementPanel eventStructureManagementPanel = new RegattaStructureManagementPanel(sailingService, this, stringMessages, this);
         tabPanel.add(eventStructureManagementPanel, stringMessages.regattas());
         regattaDisplayers.add(eventStructureManagementPanel);

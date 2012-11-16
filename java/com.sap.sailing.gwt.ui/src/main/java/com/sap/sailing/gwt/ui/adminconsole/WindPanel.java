@@ -32,6 +32,7 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
+import com.sap.sailing.gwt.ui.client.DataEntryDialog.DialogCallback;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.RaceSelectionModel;
@@ -168,7 +169,7 @@ public class WindPanel extends FormPanel implements RegattaDisplayer, WindShower
         timeColumn = new TextColumn<WindDTO>() {
             @Override
             public String getValue(WindDTO object) {
-                return DateAndTimeFormatterUtil.formatDateAndTime(new Date(object.timepoint));
+                return DateAndTimeFormatterUtil.formatDateAndTime(new Date(object.measureTimepoint));
             }
         };
         speedInKnotsColumn = new TextColumn<WindDTO>() {
@@ -215,13 +216,13 @@ public class WindPanel extends FormPanel implements RegattaDisplayer, WindShower
 
     private void showWindSettingDialog(RaceDTO race, CourseDTO course) {
         WindSettingDialog windSettingDialog = new WindSettingDialog(race, course, stringMessages, 
-                new AsyncCallback<WindDTO>() {
+                new DialogCallback<WindDTO>() {
                     @Override
-                    public void onFailure(Throwable caught) {
+                    public void cancel() {
                     }
 
                     @Override
-                    public void onSuccess(final WindDTO result) {
+                    public void ok(final WindDTO result) {
                         addWindFix(result);
                     }
                 });
@@ -316,7 +317,7 @@ public class WindPanel extends FormPanel implements RegattaDisplayer, WindShower
         result.setComparator(timeColumn, new Comparator<WindDTO>() {
             @Override
             public int compare(WindDTO o1, WindDTO o2) {
-                return o1.timepoint < o2.timepoint ? -1 : o1.timepoint == o2.timepoint ? 0 : 1;
+                return o1.measureTimepoint < o2.measureTimepoint ? -1 : o1.measureTimepoint == o2.measureTimepoint ? 0 : 1;
             }
         });
         result.setComparator(speedInKnotsColumn, new Comparator<WindDTO>() {

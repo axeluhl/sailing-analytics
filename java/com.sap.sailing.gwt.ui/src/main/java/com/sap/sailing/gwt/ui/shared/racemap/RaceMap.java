@@ -37,6 +37,7 @@ import com.google.gwt.maps.client.event.PolylineMouseOutHandler;
 import com.google.gwt.maps.client.event.PolylineMouseOverHandler;
 import com.google.gwt.maps.client.geom.LatLng;
 import com.google.gwt.maps.client.geom.LatLngBounds;
+import com.google.gwt.maps.client.overlay.Icon;
 import com.google.gwt.maps.client.overlay.Marker;
 import com.google.gwt.maps.client.overlay.MarkerOptions;
 import com.google.gwt.maps.client.overlay.Polyline;
@@ -74,12 +75,12 @@ import com.sap.sailing.gwt.ui.client.TimeListener;
 import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.client.Timer.PlayStates;
 import com.sap.sailing.gwt.ui.client.WindSourceTypeFormatter;
+import com.sap.sailing.gwt.ui.shared.BuoyDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 import com.sap.sailing.gwt.ui.shared.CourseDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 import com.sap.sailing.gwt.ui.shared.LegInfoDTO;
 import com.sap.sailing.gwt.ui.shared.ManeuverDTO;
-import com.sap.sailing.gwt.ui.shared.BuoyDTO;
 import com.sap.sailing.gwt.ui.shared.PositionDTO;
 import com.sap.sailing.gwt.ui.shared.QuickRankDTO;
 import com.sap.sailing.gwt.ui.shared.RaceMapDataDTO;
@@ -685,7 +686,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                         Math.cos(lat1) * Math.sin(distianceRad) * Math.cos(bearingRad));
         double lon2 = lon1 + Math.atan2(Math.sin(bearingRad)*Math.sin(distianceRad)*Math.cos(lat1), 
                        Math.cos(distianceRad)-Math.sin(lat1)*Math.sin(lat2));
-        lon2 = (lon2+3*Math.PI) % (2*Math.PI) - Math.PI;  // normalize to -180..+180º
+        lon2 = (lon2+3*Math.PI) % (2*Math.PI) - Math.PI;  // normalize to -180..+180ï¿½
         
         return LatLng.newInstance(lat2 / Math.PI * 180., lon2  / Math.PI * 180.);
     }
@@ -709,11 +710,23 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 && lastCombinedWindTrackInfoDTO.windFixes.size() > 0) {
             // find competitor with highest rank
             Pair<Integer, CompetitorDTO> visibleLeaderInfo = getLeadingVisibleCompetitorInfo(competitorsToShow);
-            if (visibleLeaderInfo != null && settings.getHelpLinesSettings().containsHelpLine(HelpLineTypes.ADVANTAGELINE) && 
-                    lastShownFix.containsKey(visibleLeaderInfo.getB()) && lastShownFix.get(visibleLeaderInfo.getB()) != -1
-                    && visibleLeaderInfo.getA() > 0 && visibleLeaderInfo.getA() <= lastRaceTimesInfo.getLegInfos().size()) {
+            // the boat fix may be null; may mean that no positions were loaded yet for the leading visible boat; don't show anything
+            GPSFixDTO lastBoatFix = null;
+            boolean isVisibleLeaderInfoComplete = false;
+            boolean isLegTypeKnown = false;
+            if (visibleLeaderInfo != null && lastShownFix.containsKey(visibleLeaderInfo.getB())
+                    && lastShownFix.get(visibleLeaderInfo.getB()) != -1 && visibleLeaderInfo.getA() > 0
+                    && visibleLeaderInfo.getA() <= lastRaceTimesInfo.getLegInfos().size()) {
+                isVisibleLeaderInfoComplete = true;
+                LegInfoDTO legInfoDTO = lastRaceTimesInfo.getLegInfos().get(visibleLeaderInfo.getA() - 1);
+                if (legInfoDTO.legType != null) {
+                    isLegTypeKnown = true;
+                }
+                lastBoatFix = getBoatFix(visibleLeaderInfo.getB(), date);
+            }
+            if (settings.getHelpLinesSettings().containsHelpLine(HelpLineTypes.ADVANTAGELINE)
+                    && isVisibleLeaderInfoComplete && isLegTypeKnown && lastBoatFix != null) {
                 LegInfoDTO legInfoDTO = lastRaceTimesInfo.getLegInfos().get(visibleLeaderInfo.getA()-1);
-                GPSFixDTO lastBoatFix = getBoatFix(visibleLeaderInfo.getB(), date);
                 double advantageLineLengthInKm = 1.0; // TODO this should probably rather scale with the visible area of the map; bug 616
                 double distanceFromBoatPositionInKm = visibleLeaderInfo.getB().boatClass.getHullLengthInMeters()/1000.; // one hull length
                 // implement and use Position.translateRhumb()
@@ -777,8 +790,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                     advantageLine.insertVertex(0, advantageLinePoints[0]);
                     advantageLine.insertVertex(1, advantageLinePoints[1]);
                 }
-            }
-            else {
+            } else {
                 if (advantageLine != null) {
                     map.removeOverlay(advantageLine);
                     advantageLine = null;
@@ -804,6 +816,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                     startLine.addPolylineMouseOverHandler(new PolylineMouseOverHandler() {
                         @Override
                         public void onMouseOver(PolylineMouseOverEvent event) {
+                            // TODO bug 1026: add start line bias to tool tip; requires wind data to be available at this point
                             map.setTitle(stringMessages.startLine());
                         }
                     });
@@ -940,20 +953,9 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
 
     protected Marker createBuoyMarker(final BuoyDTO markDTO) {
         MarkerOptions options = MarkerOptions.newInstance();
-        if(markDTO.displayColor != null) {
-            if("Red".equals(markDTO.displayColor) && raceMapImageManager.buoyRedIcon != null) {
-                options.setIcon(raceMapImageManager.buoyRedIcon);
-            } else if("Green".equals(markDTO.displayColor) && raceMapImageManager.buoyGreenIcon != null) {
-                options.setIcon(raceMapImageManager.buoyGreenIcon);
-            } else if("Yellow".equals(markDTO.displayColor) && raceMapImageManager.buoyYellowIcon != null) {
-                options.setIcon(raceMapImageManager.buoyYellowIcon);
-            } else if (raceMapImageManager.buoyIcon != null) {
-                options.setIcon(raceMapImageManager.buoyIcon);
-            }
-        } else {
-            if (raceMapImageManager.buoyIcon != null) {
-                options.setIcon(raceMapImageManager.buoyIcon);
-            }
+        final Icon markIcon = raceMapImageManager.resolveBuoyIcon(markDTO.color, markDTO.shape, markDTO.pattern);
+        if (markIcon != null) {
+            options.setIcon(markIcon);
         }
         options.setTitle(markDTO.name);
         final Marker buoyMarker = new Marker(LatLng.newInstance(markDTO.position.latDeg, markDTO.position.lngDeg),
@@ -968,11 +970,11 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         return buoyMarker;
     }
 
-    protected CompetitorInfoOverlay createCompetitorInfoOverlay(final CompetitorDTO competitorDTO) {
+    private CompetitorInfoOverlay createCompetitorInfoOverlay(final CompetitorDTO competitorDTO) {
         return new CompetitorInfoOverlay(competitorDTO, raceMapImageManager);
     }
     
-    protected BoatCanvasOverlay createBoatCanvas(final CompetitorDTO competitorDTO, boolean highlighted) {
+    private BoatCanvasOverlay createBoatCanvas(final CompetitorDTO competitorDTO, boolean highlighted) {
         final BoatCanvasOverlay boatCanvas = new BoatCanvasOverlay(competitorDTO);
         boatCanvas.setSelected(highlighted);
         boatCanvas.getCanvas().setTitle(competitorDTO.sailID + ", " + competitorDTO.name);
@@ -1296,8 +1298,9 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                                 + NumberFormat.getDecimalFormat().format(after.speedInKnots - before.speedInKnots) + " "+stringMessages.averageSpeedInKnotsUnit()+" ("
                                 + NumberFormat.getDecimalFormat().format(before.speedInKnots) + " "+stringMessages.averageSpeedInKnotsUnit()+" -> "
                                 + NumberFormat.getDecimalFormat().format(after.speedInKnots) + " "+stringMessages.averageSpeedInKnotsUnit()+")";
-                        
-                        options.setTitle(timeAndManeuver + "; " + directionChange + "; " + speedChange);
+                        String maneuverLoss = maneuver.maneuverLossInMeters == null ? "" : ("; "+stringMessages.maneuverLoss()+": "+
+                                NumberFormat.getDecimalFormat().format(maneuver.maneuverLossInMeters)+"m");
+                        options.setTitle(timeAndManeuver + "; " + directionChange + "; " + speedChange + maneuverLoss);
                         options.setIcon(raceMapImageManager.maneuverIconsForTypeAndTargetTack
                                 .get(new Util.Pair<ManeuverType, Tack>(maneuver.type, maneuver.newTack)));
                         Marker marker = new Marker(latLng, options);

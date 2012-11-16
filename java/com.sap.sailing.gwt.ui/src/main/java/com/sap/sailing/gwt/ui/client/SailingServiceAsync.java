@@ -24,6 +24,7 @@ import com.sap.sailing.gwt.ui.shared.ControlPointDTO;
 import com.sap.sailing.gwt.ui.shared.CourseDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RaceBuoysDTO;
+import com.sap.sailing.gwt.ui.shared.RaceColumnInSeriesDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
@@ -43,6 +44,7 @@ import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingRaceRecordDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracRaceRecordDTO;
+import com.sap.sailing.gwt.ui.shared.VenueDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 
@@ -300,10 +302,11 @@ public interface SailingServiceAsync {
     
     /**
      * Creates a new group with the name <code>groupname</code>, the description <code>description</code> and an empty list of leaderboards.<br/>
+     * @param displayGroupsInReverseOrder TODO
      */
     void createLeaderboardGroup(String groupName, String description,
-            int[] overallLeaderboardDiscardThresholds, ScoringSchemeType overallLeaderboardScoringSchemeType,
-            AsyncCallback<LeaderboardGroupDTO> callback);
+            boolean displayGroupsInReverseOrder, int[] overallLeaderboardDiscardThresholds,
+            ScoringSchemeType overallLeaderboardScoringSchemeType, AsyncCallback<LeaderboardGroupDTO> callback);
     
     /**
      * Updates the data of the group with the name <code>oldName</code>.
@@ -362,47 +365,33 @@ public interface SailingServiceAsync {
      */
     void removeEvent(String eventName, AsyncCallback<Void> callback);
     
-    /**
-     * Creates a new event with the name <code>eventName</code>, the venue <code>venue</code> and an empty list of regattas.<br/>
-     */
-    void createEvent(String eventName, String venue, AsyncCallback<EventDTO> callback);
+    void createEvent(String eventName, String description, String publicationUrl, boolean isPublic, AsyncCallback<EventDTO> callback);
     
-    /**
-     * Updates the data of the event with the name <code>oldName</code>.
-     * 
-     * @param oldName The old name of the event
-     * @param newName The new name of the event
-     * @param description The new description of the event
-     * @param leaderboardNames The list of names of the new regattas of the event
-     */
-    void updateEvent(String oldName, String newName, String venue, List<String> regattaNames, AsyncCallback<Void> callback);
+    void updateEvent(String eventName, VenueDTO venue, String publicationUrl, boolean isPublic, List<String> regattaNames,
+            AsyncCallback<Void> callback);
 
     void removeRegatta(RegattaIdentifier regattaIdentifier, AsyncCallback<Void> callback);
 
-    void addColumnToSeries(RegattaIdentifier regattaIdentifier, String seriesName, String columnName, AsyncCallback<Void> callback);
+    void addRaceColumnToSeries(RegattaIdentifier regattaIdentifier, String seriesName, String columnName,
+            AsyncCallback<RaceColumnInSeriesDTO> callback);
 
-    void removeColumnFromSeries(RegattaIdentifier regattaIdentifier, String seriesName, String columnName,
+    void removeRaceColumnFromSeries(RegattaIdentifier regattaIdentifier, String seriesName, String columnName,
             AsyncCallback<Void> callback);
 
-    void renameColumnInSeries(RegattaIdentifier regattaIdentifier, String seriesName, String oldColumnName,
-            String newColumnName, AsyncCallback<Void> callback);
-
-    void moveColumnInSeriesUp(RegattaIdentifier regattaIdentifier, String seriesName, String columnName,
+    void moveRaceColumnInSeriesUp(RegattaIdentifier regattaIdentifier, String seriesName, String columnName, 
             AsyncCallback<Void> callback);
 
-    void moveColumnInSeriesDown(RegattaIdentifier regattaIdentifier, String seriesName, String columnName,
+    void moveRaceColumnInSeriesDown(RegattaIdentifier regattaIdentifier, String seriesName, String columnName,
             AsyncCallback<Void> callback);
 
-    void createRegatta(
-            String regattaName,
-            String boatClassName,
+    void createRegatta(String regattaName, String boatClassName,
             LinkedHashMap<String, Pair<List<Triple<String, Integer, Color>>, Boolean>> seriesNamesWithFleetNamesAndFleetOrderingAndMedal,
             boolean persistent, ScoringSchemeType scoringSchemeType, AsyncCallback<RegattaDTO> callback);
 
-    void addColumnsToSeries(RegattaIdentifier regattaIdentifier, String seriesName, List<String> columnNames,
-            AsyncCallback<Void> callback);
+    void addRaceColumnsToSeries(RegattaIdentifier regattaIdentifier, String seriesName, List<String> columnNames,
+            AsyncCallback<List<RaceColumnInSeriesDTO>> callback);
 
-    void removeColumnsFromSeries(RegattaIdentifier regattaIdentifier, String seriesName, List<String> columnNames,
+    void removeRaceColumnsFromSeries(RegattaIdentifier regattaIdentifier, String seriesName, List<String> columnNames,
             AsyncCallback<Void> callback);
 
     void getScoreCorrectionProviderDTOs(AsyncCallback<Iterable<ScoreCorrectionProviderDTO>> callback);
@@ -432,5 +421,9 @@ public interface SailingServiceAsync {
     void getLeaderboard(String leaderboardName, AsyncCallback<StrippedLeaderboardDTO> callback);
 
     void suppressCompetitorInLeaderboard(String leaderboardName, String competitorIdAsString, boolean suppressed, AsyncCallback<Void> asyncCallback);
+
+    void updateLeaderboardColumnFactor(String leaderboardName, String columnName, Double newFactor,
+            AsyncCallback<Void> callback);
+
 
 }

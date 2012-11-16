@@ -47,11 +47,6 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
 
     static final Double DOUBLE_0 = new Double(0);
 
-    /**
-     * The factor by which a medal race score is multiplied in the overall point scheme
-     */
-    static final double MEDAL_RACE_FACTOR = 2.0;
-
     private final SettableScoreCorrection scoreCorrection;
 
     private ThresholdBasedResultDiscardingRule resultDiscardingRule;
@@ -191,7 +186,9 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
 
     @Override
     public void setDisplayName(Competitor competitor, String displayName) {
+        String oldDisplayName = displayNames.get(competitor);
         displayNames.put(competitor, displayName);
+        getRaceColumnListeners().notifyListenersAboutCompetitorDisplayNameChanged(competitor, oldDisplayName, displayName);
     }
 
     @Override
@@ -232,7 +229,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
             if (netPoints == null) {
                 result = null;
             } else {
-                result = (raceColumn.isMedalRace() ? MEDAL_RACE_FACTOR : 1.0) * netPoints;
+                result = raceColumn.getFactor() * netPoints;
             }
         }
         return result;
@@ -242,9 +239,11 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     public Double getTotalPoints(Competitor competitor, TimePoint timePoint) throws NoWindException {
         double result = getCarriedPoints(competitor);
         for (RaceColumn r : getRaceColumns()) {
-            final Double totalPoints = getTotalPoints(competitor, r, timePoint);
-            if (totalPoints != null) {
-                result += totalPoints;
+            if (getScoringScheme().isValidInTotalScore(this, r, timePoint)) {
+                final Double totalPoints = getTotalPoints(competitor, r, timePoint);
+                if (totalPoints != null) {
+                    result += totalPoints;
+                }
             }
         }
         return result;
@@ -334,18 +333,12 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     }
 
     @Override
-    public boolean considerForDiscarding(RaceColumn raceColumn, TimePoint timePoint) {
-        boolean result = getScoreCorrection().hasCorrectionFor(raceColumn);
-        if (!result && !raceColumn.isMedalRace()) {
-            for (Fleet fleet : raceColumn.getFleets()) {
-                TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
-                if (trackedRace != null && trackedRace.hasStarted(timePoint)) {
-                    result = true;
-                    break;
-                }
-            }
-        }
-        return result;
+    public boolean countRaceForComparisonWithDiscardingThresholds(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint) {
+        TrackedRace trackedRaceForCompetitorInColumn;
+        return getScoringScheme().isValidInTotalScore(this, raceColumn, timePoint) && 
+               (getScoreCorrection().isScoreCorrected(competitor, raceColumn) ||
+                       ((trackedRaceForCompetitorInColumn=raceColumn.getTrackedRace(competitor)) != null &&
+                        trackedRaceForCompetitorInColumn.hasStarted(timePoint)));
     }
     
     @Override
@@ -371,7 +364,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
         final Double correctedScore = correctedResults.getCorrectedScore();
         return new EntryImpl(trackedRankProvider, correctedScore, correctedResults.isCorrected(),
                 discarded ? DOUBLE_0
-                        : correctedScore == null ? null : Double.valueOf(correctedScore * (race.isMedalRace() ? MEDAL_RACE_FACTOR : 1.0)),
+                        : correctedScore == null ? null : Double.valueOf(correctedScore * race.getFactor()),
                         correctedResults.getMaxPointsReason(), discarded, race.getFleetOfCompetitor(competitor));
     }
 
@@ -398,7 +391,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                 final Double correctedScore = correctedResults.getCorrectedScore();
                 Entry entry = new EntryImpl(trackedRankProvider, correctedScore,
                         correctedResults.isCorrected(), discarded ? DOUBLE_0 : (correctedScore==null?null:
-                                Double.valueOf((correctedScore * (raceColumn.isMedalRace() ? MEDAL_RACE_FACTOR : 1.0)))),
+                                Double.valueOf((correctedScore * raceColumn.getFactor()))),
                                 correctedResults.getMaxPointsReason(), discarded,
                                 raceColumn.getFleetOfCompetitor(competitor));
                 result.put(new Pair<Competitor, RaceColumn>(competitor, raceColumn), entry);
@@ -421,6 +414,31 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     public void isMedalRaceChanged(RaceColumn raceColumn, boolean newIsMedalRace) {
         getRaceColumnListeners().notifyListenersAboutIsMedalRaceChanged(raceColumn, newIsMedalRace);
     }
+    
+    @Override
+    public void raceColumnMoved(RaceColumn raceColumn, int newIndex) {
+        getRaceColumnListeners().notifyListenersAboutRaceColumnMoved(raceColumn, newIndex);
+    }
+
+    @Override
+    public void factorChanged(RaceColumn raceColumn, Double oldFactor, Double newFactor) {
+        getRaceColumnListeners().notifyListenersAboutFactorChanged(raceColumn, oldFactor, newFactor);
+    }
+
+    /**
+     * A leaderboard will only accept the addition of a race column if the column's name is unique across the leaderboard.
+     */
+    @Override
+    public boolean canAddRaceColumnToContainer(RaceColumn newRaceColumn) {
+        boolean result = true;
+        for (RaceColumn raceColumn : getRaceColumns()) {
+            if (raceColumn.getName().equals(newRaceColumn.getName())) {
+                result = false;
+                break;
+            }
+        }
+        return result;
+    }
 
     @Override
     public void raceColumnAddedToContainer(RaceColumn raceColumn) {
@@ -430,6 +448,11 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     @Override
     public void raceColumnRemovedFromContainer(RaceColumn raceColumn) {
         getRaceColumnListeners().notifyListenersAboutRaceColumnRemovedFromContainer(raceColumn);
+    }
+
+    @Override
+    public void competitorDisplayNameChanged(Competitor competitor, String oldDisplayName, String displayName) {
+        getRaceColumnListeners().notifyListenersAboutCompetitorDisplayNameChanged(competitor, oldDisplayName, displayName);
     }
 
     @Override
@@ -555,24 +578,29 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                 NavigableSet<MarkPassing> markPassings = trackedRace.getMarkPassings(competitor);
                 if (!markPassings.isEmpty()) {
                     TimePoint from = trackedRace.getStartOfRace(); // start counting at race start, not when the competitor passed the line
-                    TimePoint to;
-                    if (timePoint.after(markPassings.last().getTimePoint()) &&
-                            markPassings.last().getWaypoint() == trackedRace.getRace().getCourse().getLastWaypoint()) {
-                        // stop counting when competitor finished the race
-                        to = markPassings.last().getTimePoint();
-                    } else {
-                        if (trackedRace.getEndOfTracking() != null && timePoint.after(trackedRace.getEndOfTracking())) {
-                            result = null; // race not finished until end of tracking; no reasonable value can be computed for competitor
-                            break;
+                    if (!timePoint.before(from)) { // but only if the race started after timePoint
+                        TimePoint to;
+                        if (timePoint.after(markPassings.last().getTimePoint())
+                                && markPassings.last().getWaypoint() == trackedRace.getRace().getCourse()
+                                        .getLastWaypoint()) {
+                            // stop counting when competitor finished the race
+                            to = markPassings.last().getTimePoint();
                         } else {
-                            to = timePoint;
+                            if (trackedRace.getEndOfTracking() != null
+                                    && timePoint.after(trackedRace.getEndOfTracking())) {
+                                result = null; // race not finished until end of tracking; no reasonable value can be
+                                               // computed for competitor
+                                break;
+                            } else {
+                                to = timePoint;
+                            }
                         }
-                    }
-                    long timeSpent = to.asMillis() - from.asMillis();
-                    if (result == null) {
-                        result = timeSpent;
-                    } else {
-                        result += timeSpent;
+                        long timeSpent = to.asMillis() - from.asMillis();
+                        if (result == null) {
+                            result = timeSpent;
+                        } else {
+                            result += timeSpent;
+                        }
                     }
                 }
             }

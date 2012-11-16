@@ -36,7 +36,9 @@ import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sailing.gwt.ui.adminconsole.LeaderboardConfigPanel.AnchorCell;
+import com.sap.sailing.gwt.ui.adminconsole.LeaderboardGroupDialog.LeaderboardGroupDescriptor;
 import com.sap.sailing.gwt.ui.client.AbstractRegattaPanel;
+import com.sap.sailing.gwt.ui.client.DataEntryDialog.DialogCallback;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -445,21 +447,22 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel {
                 new LeaderboardGroupConfigImagesBarCell(stringMessages));
         groupActionsColumn.setFieldUpdater(new FieldUpdater<LeaderboardGroupDTO, String>() {
             @Override
-            public void update(int index, LeaderboardGroupDTO group, String command) {
-                if (command.equals("ACTION_EDIT")) {
+            public void update(int index, final LeaderboardGroupDTO group, String command) {
+                if (command.equals(LeaderboardGroupConfigImagesBarCell.ACTION_EDIT)) {
                     final String oldGroupName = group.name;
                     ArrayList<LeaderboardGroupDTO> otherExistingGroups = new ArrayList<LeaderboardGroupDTO>(availableLeaderboardGroups);
                     otherExistingGroups.remove(group);
-                    LeaderboardGroupEditDialog dialog = new LeaderboardGroupEditDialog(group, otherExistingGroups, stringMessages, new AsyncCallback<LeaderboardGroupDTO>() {
+                    LeaderboardGroupEditDialog dialog = new LeaderboardGroupEditDialog(group, otherExistingGroups, stringMessages,
+                            new DialogCallback<LeaderboardGroupDescriptor>() {
                         @Override
-                        public void onFailure(Throwable t) {}
+                        public void cancel() {}
                         @Override
-                        public void onSuccess(LeaderboardGroupDTO group) {
-                            updateGroup(oldGroupName, group);
+                        public void ok(LeaderboardGroupDescriptor groupDescriptor) {
+                            updateGroup(oldGroupName, group, groupDescriptor);
                         }
                     });
                     dialog.show();
-                } else if (command.equals("ACTION_REMOVE")) {
+                } else if (command.equals(LeaderboardGroupConfigImagesBarCell.ACTION_REMOVE)) {
                     if (Window.confirm("Do you really want to remove the leaderboard group: '" + group.name + "' ?")) {
                         removeLeaderboardGroup(group);
                     }
@@ -557,24 +560,24 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel {
     private void addNewGroup() {
         LeaderboardGroupCreateDialog dialog = new LeaderboardGroupCreateDialog(
                 Collections.unmodifiableCollection(availableLeaderboardGroups), stringMessages,
-                new AsyncCallback<LeaderboardGroupDTO>() {
+                new DialogCallback<LeaderboardGroupDescriptor>() {
             @Override
-            public void onFailure(Throwable t) {}
+            public void cancel() {}
             @Override
-            public void onSuccess(LeaderboardGroupDTO newGroup) {
+            public void ok(LeaderboardGroupDescriptor newGroup) {
                 createNewGroup(newGroup);
             }
         });
         dialog.show();
     }
     
-    private void createNewGroup(final LeaderboardGroupDTO newGroup) {
-        sailingService.createLeaderboardGroup(newGroup.name, newGroup.description,
-                newGroup.getOverallLeaderboardDiscardThresholds(), newGroup.getOverallLeaderboardScoringSchemeType(),
-                new AsyncCallback<LeaderboardGroupDTO>() {
+    private void createNewGroup(final LeaderboardGroupDescriptor newGroup) {
+        sailingService.createLeaderboardGroup(newGroup.getName(), newGroup.getDescription(), newGroup.isDisplayLeaderboardsInReverseOrder(),
+                newGroup.getOverallLeaderboardDiscardThresholds(),
+                newGroup.getOverallLeaderboardScoringSchemeType(), new AsyncCallback<LeaderboardGroupDTO>() {
             @Override
             public void onFailure(Throwable t) {
-                errorReporter.reportError("Error trying to create new leaderboard group" + newGroup.name
+                errorReporter.reportError("Error trying to create new leaderboard group" + newGroup.getName()
                         + ": " + t.getMessage());
             }
             @Override
@@ -587,14 +590,14 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel {
         });
     }
     
-    private void updateGroup(final String oldGroupName, final LeaderboardGroupDTO groupToUpdate) {
+    private void updateGroup(final String oldGroupName, final LeaderboardGroupDTO groupToUpdate, final LeaderboardGroupDescriptor updateDescriptor) {
         List<String> leaderboardNames = new ArrayList<String>();
         for (StrippedLeaderboardDTO leaderboardDTO : groupToUpdate.leaderboards) {
             leaderboardNames.add(leaderboardDTO.name);
         }
-        sailingService.updateLeaderboardGroup(oldGroupName, groupToUpdate.name, groupToUpdate.description,
-                leaderboardNames, groupToUpdate.getOverallLeaderboardDiscardThresholds(),
-                groupToUpdate.getOverallLeaderboardScoringSchemeType(), new AsyncCallback<Void>() {
+        sailingService.updateLeaderboardGroup(oldGroupName, updateDescriptor.getName(), updateDescriptor.getDescription(),
+                leaderboardNames, updateDescriptor.getOverallLeaderboardDiscardThresholds(),
+                updateDescriptor.getOverallLeaderboardScoringSchemeType(), new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable t) {
                 errorReporter.reportError("Error trying to update leaderboard group " + oldGroupName + ": "
@@ -602,10 +605,15 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel {
             }
             @Override
             public void onSuccess(Void v) {
-                //Update the availableLeaderboardGroups and the list of displayed groups
+                // Update the availableLeaderboardGroups and the list of displayed groups
                 for (int i = 0; i < availableLeaderboardGroups.size(); i++) {
                     LeaderboardGroupDTO group = availableLeaderboardGroups.get(i);
                     if (oldGroupName.equals(group.name)) {
+                        groupToUpdate.name = updateDescriptor.getName();
+                        groupToUpdate.description = updateDescriptor.getDescription();
+                        groupToUpdate.displayLeaderboardsInReverseOrder = updateDescriptor.isDisplayLeaderboardsInReverseOrder();
+                        groupToUpdate.setOverallLeaderboardDiscardThresholds(updateDescriptor.getOverallLeaderboardDiscardThresholds());
+                        groupToUpdate.setOverallLeaderboardScoringSchemeType(updateDescriptor.getOverallLeaderboardScoringSchemeType());
                         availableLeaderboardGroups.set(i, groupToUpdate);
                         int displayedIndex = groupsProvider.getList().indexOf(group);
                         if (displayedIndex != -1) {
@@ -617,8 +625,27 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel {
             }
         });
     }
+    
+    /**
+     * Updates a change in the group's leaderboard list to the server
+     */
     private void updateGroup(final LeaderboardGroupDTO group) {
-        updateGroup(group.name, group);
+        List<String> leaderboardNames = new ArrayList<String>();
+        for (StrippedLeaderboardDTO leaderboardDTO : group.leaderboards) {
+            leaderboardNames.add(leaderboardDTO.name);
+        }
+        sailingService.updateLeaderboardGroup(group.name, group.name, group.description,
+                leaderboardNames, group.getOverallLeaderboardDiscardThresholds(),
+                group.getOverallLeaderboardScoringSchemeType(), new AsyncCallback<Void>() {
+            @Override
+            public void onFailure(Throwable t) {
+                errorReporter.reportError("Error trying to update leaderboard group " + group.name + ": "
+                        + t.getMessage());
+            }
+            @Override
+            public void onSuccess(Void v) {
+            }
+        });
     }
 
     private void removeLeaderboardGroup(final LeaderboardGroupDTO group) {

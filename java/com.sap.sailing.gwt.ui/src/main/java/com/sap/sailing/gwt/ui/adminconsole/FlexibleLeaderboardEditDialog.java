@@ -2,7 +2,6 @@ package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.Collection;
 
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -13,7 +12,7 @@ public class FlexibleLeaderboardEditDialog extends FlexibleLeaderboardDialog {
     
     public FlexibleLeaderboardEditDialog(Collection<StrippedLeaderboardDTO> otherExistingLeaderboards,
             LeaderboardDescriptor leaderboard, StringMessages stringConstants, ErrorReporter errorReporter,
-            AsyncCallback<LeaderboardDescriptor> callback) {
+            DialogCallback<LeaderboardDescriptor> callback) {
         super(stringConstants.editFlexibleLeaderboard(), leaderboard, stringConstants, errorReporter, new FlexibleLeaderboardDialog.LeaderboardParameterValidator(
                 stringConstants, otherExistingLeaderboards), callback);
         

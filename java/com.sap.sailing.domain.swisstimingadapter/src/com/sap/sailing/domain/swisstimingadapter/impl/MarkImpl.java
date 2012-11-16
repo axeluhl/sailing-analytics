@@ -8,17 +8,23 @@ public class MarkImpl implements Mark {
     private final String description;
     private final int index;
     private final Iterable<String> devices;
+    private final MarkType markType;
     
-    
-    public MarkImpl(String description, int index, Iterable<String> devices) {
+    public MarkImpl(String description, int index, Iterable<String> devices, MarkType markType) {
         super();
         this.description = description;
         this.index = index;
+        this.markType = markType;
         ArrayList<String> l = new ArrayList<String>();
         for (String device : devices) {
             l.add(device);
         }
         this.devices = l;
+    }
+
+    @Override
+    public MarkType getMarkType() {
+        return markType;
     }
 
     @Override

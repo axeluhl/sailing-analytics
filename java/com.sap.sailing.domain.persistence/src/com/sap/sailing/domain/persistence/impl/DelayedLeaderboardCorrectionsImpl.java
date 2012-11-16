@@ -67,29 +67,35 @@ public class DelayedLeaderboardCorrectionsImpl implements DelayedLeaderboardCorr
     @Override
     public void setCarriedPoints(String competitorName, double carriedPoints) {
         assertNoTrackedRaceAssociatedYet();
-        carriedPointsByCompetitorName.put(competitorName, carriedPoints);
+        synchronized (carriedPointsByCompetitorName) {
+            carriedPointsByCompetitorName.put(competitorName, carriedPoints);
+        }
     }
     
     @Override
     public void setMaxPointsReason(String competitorName, RaceColumn raceColumn, MaxPointsReason maxPointsReason) {
         assertNoTrackedRaceAssociatedYet();
-        Map<RaceColumn, MaxPointsReason> map = maxPointsReasonsByCompetitorName.get(competitorName);
-        if (map == null) {
-            map = new HashMap<RaceColumn, MaxPointsReason>();
-            maxPointsReasonsByCompetitorName.put(competitorName, map);
+        synchronized (maxPointsReasonsByCompetitorName) {
+            Map<RaceColumn, MaxPointsReason> map = maxPointsReasonsByCompetitorName.get(competitorName);
+            if (map == null) {
+                map = new HashMap<RaceColumn, MaxPointsReason>();
+                maxPointsReasonsByCompetitorName.put(competitorName, map);
+            }
+            map.put(raceColumn, maxPointsReason);
         }
-        map.put(raceColumn, maxPointsReason);
     }
 
     @Override
     public void correctScore(String competitorName, RaceColumn raceColumn, double correctedScore) {
         assertNoTrackedRaceAssociatedYet();
-        Map<RaceColumn, Double> map = correctedScoresByCompetitorName.get(competitorName);
-        if (map == null) {
-            map = new HashMap<RaceColumn, Double>();
-            correctedScoresByCompetitorName.put(competitorName, map);
+        synchronized (correctedScoresByCompetitorName) {
+            Map<RaceColumn, Double> map = correctedScoresByCompetitorName.get(competitorName);
+            if (map == null) {
+                map = new HashMap<RaceColumn, Double>();
+                correctedScoresByCompetitorName.put(competitorName, map);
+            }
+            map.put(raceColumn, correctedScore);
         }
-        map.put(raceColumn, correctedScore);
     }
 
     /**
@@ -105,48 +111,67 @@ public class DelayedLeaderboardCorrectionsImpl implements DelayedLeaderboardCorr
         for (Competitor competitor : race.getRace().getCompetitors()) {
             competitorsByName.put(competitor.getName(), competitor);
         }
-        for (Iterator<Map.Entry<String, Double>> carryEntryIter = carriedPointsByCompetitorName.entrySet().iterator(); carryEntryIter.hasNext(); ) {
-            Map.Entry<String, Double> carryEntry = carryEntryIter.next();
-            if (competitorsByName.containsKey(carryEntry.getKey())) {
-                leaderboard.setCarriedPoints(competitorsByName.get(carryEntry.getKey()), carryEntry.getValue());
-                carryEntryIter.remove();
-            }
-        }
-        for (Iterator<java.util.Map.Entry<String, Map<RaceColumn, MaxPointsReason>>> maxPointsReasonsEntryIter =
-                maxPointsReasonsByCompetitorName.entrySet().iterator(); maxPointsReasonsEntryIter.hasNext();) {
-            java.util.Map.Entry<String, Map<RaceColumn, MaxPointsReason>> maxPointsReasonEntries = maxPointsReasonsEntryIter.next();
-            if (competitorsByName.containsKey(maxPointsReasonEntries.getKey())) {
-                for (Map.Entry<RaceColumn, MaxPointsReason> maxPointsReasonEntry : maxPointsReasonEntries.getValue().entrySet()) {
-                    leaderboard.getScoreCorrection().setMaxPointsReason(competitorsByName.get(maxPointsReasonEntries.getKey()),
-                            maxPointsReasonEntry.getKey(), maxPointsReasonEntry.getValue());
+        synchronized (carriedPointsByCompetitorName) {
+            for (Iterator<Map.Entry<String, Double>> carryEntryIter = carriedPointsByCompetitorName.entrySet()
+                    .iterator(); carryEntryIter.hasNext();) {
+                Map.Entry<String, Double> carryEntry = carryEntryIter.next();
+                if (competitorsByName.containsKey(carryEntry.getKey())) {
+                    leaderboard.setCarriedPoints(competitorsByName.get(carryEntry.getKey()), carryEntry.getValue());
+                    carryEntryIter.remove();
                 }
-                maxPointsReasonsEntryIter.remove();
             }
         }
-        for (Iterator<java.util.Map.Entry<String, Map<RaceColumn, Double>>> correctedScoresEntryIter =
-                correctedScoresByCompetitorName.entrySet().iterator(); correctedScoresEntryIter.hasNext();) {
-            java.util.Map.Entry<String, Map<RaceColumn, Double>> correctedScoresEntries = correctedScoresEntryIter.next();
-            if (competitorsByName.containsKey(correctedScoresEntries.getKey())) {
-                for (java.util.Map.Entry<RaceColumn, Double> correctedScoreEntry : correctedScoresEntries.getValue().entrySet()) {
-                    leaderboard.getScoreCorrection().correctScore(competitorsByName.get(correctedScoresEntries.getKey()),
-                            correctedScoreEntry.getKey(), correctedScoreEntry.getValue());
+        synchronized (maxPointsReasonsByCompetitorName) {
+            for (Iterator<java.util.Map.Entry<String, Map<RaceColumn, MaxPointsReason>>> maxPointsReasonsEntryIter = maxPointsReasonsByCompetitorName
+                    .entrySet().iterator(); maxPointsReasonsEntryIter.hasNext();) {
+                java.util.Map.Entry<String, Map<RaceColumn, MaxPointsReason>> maxPointsReasonEntries = maxPointsReasonsEntryIter
+                        .next();
+                if (competitorsByName.containsKey(maxPointsReasonEntries.getKey())) {
+                    for (Map.Entry<RaceColumn, MaxPointsReason> maxPointsReasonEntry : maxPointsReasonEntries
+                            .getValue().entrySet()) {
+                        leaderboard.getScoreCorrection().setMaxPointsReason(
+                                competitorsByName.get(maxPointsReasonEntries.getKey()), maxPointsReasonEntry.getKey(),
+                                maxPointsReasonEntry.getValue());
+                    }
+                    maxPointsReasonsEntryIter.remove();
                 }
-                correctedScoresEntryIter.remove();
             }
         }
-        for (Iterator<java.util.Map.Entry<String, String>> displayNamesEntryIter =
-                displayNamesByCompetitorName.entrySet().iterator(); displayNamesEntryIter.hasNext();) {
-            java.util.Map.Entry<String, String> displayNamesEntry = displayNamesEntryIter.next();
-            if (competitorsByName.containsKey(displayNamesEntry.getKey())) {
-                leaderboard.setDisplayName(competitorsByName.get(displayNamesEntry.getKey()), displayNamesEntry.getValue());
-                displayNamesEntryIter.remove();
+        synchronized (correctedScoresByCompetitorName) {
+            for (Iterator<java.util.Map.Entry<String, Map<RaceColumn, Double>>> correctedScoresEntryIter = correctedScoresByCompetitorName
+                    .entrySet().iterator(); correctedScoresEntryIter.hasNext();) {
+                java.util.Map.Entry<String, Map<RaceColumn, Double>> correctedScoresEntries = correctedScoresEntryIter
+                        .next();
+                if (competitorsByName.containsKey(correctedScoresEntries.getKey())) {
+                    for (java.util.Map.Entry<RaceColumn, Double> correctedScoreEntry : correctedScoresEntries
+                            .getValue().entrySet()) {
+                        leaderboard.getScoreCorrection().correctScore(
+                                competitorsByName.get(correctedScoresEntries.getKey()), correctedScoreEntry.getKey(),
+                                correctedScoreEntry.getValue());
+                    }
+                    correctedScoresEntryIter.remove();
+                }
             }
         }
-        for (Iterator<String> suppressedCompetitorNameIter=suppressedCompetitorNames.iterator(); suppressedCompetitorNameIter.hasNext(); ) {
-            String next = suppressedCompetitorNameIter.next();
-            if (competitorsByName.containsKey(next)) {
-                leaderboard.setSuppressed(competitorsByName.get(next), true);
-                suppressedCompetitorNameIter.remove();
+        synchronized (displayNamesByCompetitorName) {
+            for (Iterator<java.util.Map.Entry<String, String>> displayNamesEntryIter = displayNamesByCompetitorName
+                    .entrySet().iterator(); displayNamesEntryIter.hasNext();) {
+                java.util.Map.Entry<String, String> displayNamesEntry = displayNamesEntryIter.next();
+                if (competitorsByName.containsKey(displayNamesEntry.getKey())) {
+                    leaderboard.setDisplayName(competitorsByName.get(displayNamesEntry.getKey()),
+                            displayNamesEntry.getValue());
+                    displayNamesEntryIter.remove();
+                }
+            }
+        }
+        synchronized (suppressedCompetitorNames) {
+            for (Iterator<String> suppressedCompetitorNameIter = suppressedCompetitorNames.iterator(); suppressedCompetitorNameIter
+                    .hasNext();) {
+                String next = suppressedCompetitorNameIter.next();
+                if (competitorsByName.containsKey(next)) {
+                    leaderboard.setSuppressed(competitorsByName.get(next), true);
+                    suppressedCompetitorNameIter.remove();
+                }
             }
         }
         removeAsListenerIfNoLeftOvers();
@@ -163,13 +188,17 @@ public class DelayedLeaderboardCorrectionsImpl implements DelayedLeaderboardCorr
     @Override
     public void setDisplayName(String competitorName, String displayName) {
         assertNoTrackedRaceAssociatedYet();
-        displayNamesByCompetitorName.put(competitorName, displayName);
+        synchronized (displayNamesByCompetitorName) {
+            displayNamesByCompetitorName.put(competitorName, displayName);
+        }
     }
 
     @Override
     public void suppressCompetitor(String competitorName) {
         assertNoTrackedRaceAssociatedYet();
-        suppressedCompetitorNames.add(competitorName);
+        synchronized (suppressedCompetitorNames) {
+            suppressedCompetitorNames.add(competitorName);
+        }
     }
 
     @Override
@@ -186,11 +215,28 @@ public class DelayedLeaderboardCorrectionsImpl implements DelayedLeaderboardCorr
     }
 
     @Override
+    public boolean canAddRaceColumnToContainer(RaceColumn raceColumn) {
+        return true;
+    }
+
+    @Override
     public void raceColumnAddedToContainer(RaceColumn raceColumn) {
     }
 
     @Override
     public void raceColumnRemovedFromContainer(RaceColumn raceColumn) {
+    }
+
+    @Override
+    public void raceColumnMoved(RaceColumn raceColumn, int newIndex) {
+    }
+
+    @Override
+    public void factorChanged(RaceColumn raceColumn, Double oldFactor, Double newFactor) {
+    }
+
+    @Override
+    public void competitorDisplayNameChanged(Competitor competitor, String oldDisplayName, String displayName) {
     }
 
     @Override

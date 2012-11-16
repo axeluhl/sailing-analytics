@@ -20,7 +20,11 @@ public interface MediaDB {
 
     void deleteMediaTrack(String title);
 
-    void updateStartTime(String title, Date startTime);
+    void updateTitle(String dbId, String title);
+
+    void updateUrl(String dbId, String url);
+
+    void updateStartTime(String dbId, Date startTime);
 
     void updateDuration(String dbId, int durationInMillis);
 

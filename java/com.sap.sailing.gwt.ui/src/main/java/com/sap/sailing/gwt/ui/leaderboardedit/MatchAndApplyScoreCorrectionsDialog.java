@@ -378,7 +378,7 @@ public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<BulkSco
         }
     }
 
-    private static class Callback implements AsyncCallback<BulkScoreCorrectionDTO> {
+    private static class Callback implements DialogCallback<BulkScoreCorrectionDTO> {
         private final SailingServiceAsync sailingService;
         private final StringMessages stringMessages;
         private final ErrorReporter errorReporter;
@@ -393,12 +393,12 @@ public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<BulkSco
         }
 
         @Override
-        public void onFailure(Throwable caught) {
+        public void cancel() {
             // user has canceled the dialog
         }
 
         @Override
-        public void onSuccess(final BulkScoreCorrectionDTO result) {
+        public void ok(final BulkScoreCorrectionDTO result) {
             leaderboardPanel.getBusyIndicator().setBusy(true);
             sailingService.updateLeaderboardScoreCorrectionsAndMaxPointsReasons(result, new AsyncCallback<Void>() {
                 @Override

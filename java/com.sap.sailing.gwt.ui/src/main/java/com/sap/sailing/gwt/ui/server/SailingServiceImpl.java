@@ -35,7 +35,6 @@ import javax.servlet.ServletContext;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
-import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Buoy;
 import com.sap.sailing.domain.base.Competitor;
@@ -54,7 +53,6 @@ import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
-import com.sap.sailing.domain.base.impl.MeterDistance;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Color;
@@ -62,6 +60,7 @@ import com.sap.sailing.domain.common.CountryCode;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LegType;
+import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindError;
 import com.sap.sailing.domain.common.NoWindException;
@@ -86,6 +85,7 @@ import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KilometersPerHourSpeedImpl;
+import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
@@ -152,6 +152,7 @@ import com.sap.sailing.gwt.ui.shared.PositionDTO;
 import com.sap.sailing.gwt.ui.shared.QuickRankDTO;
 import com.sap.sailing.gwt.ui.shared.RaceBuoysDTO;
 import com.sap.sailing.gwt.ui.shared.RaceColumnDTO;
+import com.sap.sailing.gwt.ui.shared.RaceColumnInSeriesDTO;
 import com.sap.sailing.gwt.ui.shared.RaceDTO;
 import com.sap.sailing.gwt.ui.shared.RaceMapDataDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
@@ -192,11 +193,12 @@ import com.sap.sailing.server.operationaltransformation.MoveLeaderboardColumnDow
 import com.sap.sailing.server.operationaltransformation.MoveLeaderboardColumnUp;
 import com.sap.sailing.server.operationaltransformation.RemoveAndUntrackRace;
 import com.sap.sailing.server.operationaltransformation.RemoveColumnFromSeries;
+import com.sap.sailing.server.operationaltransformation.RemoveEvent;
 import com.sap.sailing.server.operationaltransformation.RemoveLeaderboard;
 import com.sap.sailing.server.operationaltransformation.RemoveLeaderboardColumn;
 import com.sap.sailing.server.operationaltransformation.RemoveLeaderboardGroup;
 import com.sap.sailing.server.operationaltransformation.RemoveRegatta;
-import com.sap.sailing.server.operationaltransformation.RenameColumnInSeries;
+import com.sap.sailing.server.operationaltransformation.RenameEvent;
 import com.sap.sailing.server.operationaltransformation.RenameLeaderboard;
 import com.sap.sailing.server.operationaltransformation.RenameLeaderboardColumn;
 import com.sap.sailing.server.operationaltransformation.RenameLeaderboardGroup;
@@ -206,9 +208,11 @@ import com.sap.sailing.server.operationaltransformation.SetWindSourcesToExclude;
 import com.sap.sailing.server.operationaltransformation.StopTrackingRace;
 import com.sap.sailing.server.operationaltransformation.StopTrackingRegatta;
 import com.sap.sailing.server.operationaltransformation.UpdateCompetitorDisplayNameInLeaderboard;
+import com.sap.sailing.server.operationaltransformation.UpdateEvent;
 import com.sap.sailing.server.operationaltransformation.UpdateIsMedalRace;
 import com.sap.sailing.server.operationaltransformation.UpdateLeaderboard;
 import com.sap.sailing.server.operationaltransformation.UpdateLeaderboardCarryValue;
+import com.sap.sailing.server.operationaltransformation.UpdateLeaderboardColumnFactor;
 import com.sap.sailing.server.operationaltransformation.UpdateLeaderboardGroup;
 import com.sap.sailing.server.operationaltransformation.UpdateLeaderboardMaxPointsReason;
 import com.sap.sailing.server.operationaltransformation.UpdateLeaderboardScoreCorrection;
@@ -222,7 +226,7 @@ import com.sap.sailing.server.replication.ReplicationService;
 /**
  * The server side implementation of the RPC service.
  */
-public class SailingServiceImpl extends RemoteServiceServlet implements SailingService, RaceFetcher, RegattaFetcher {
+public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements SailingService, RaceFetcher, RegattaFetcher {
     private static final Logger logger = Logger.getLogger(SailingServiceImpl.class.getName());
     
     private static final long serialVersionUID = 9031688830194537489L;
@@ -415,7 +419,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 }
                 final TimePoint nowMinusDelay = liveLeaderboardUpdater.getNowMinusDelay();
                 final TimePoint timePointOfLatestModification = leaderboard.getTimePointOfLatestModification();
-                if (!nowMinusDelay.before(timePointOfLatestModification)) {
+                if (timePointOfLatestModification != null && !nowMinusDelay.before(timePointOfLatestModification)) {
                     timePoint = timePointOfLatestModification;
                 } else {
                     timePoint = null;
@@ -456,7 +460,8 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 result.setSuppressed(convertToCompetitorDTO(suppressedCompetitor), true);
             }
             for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
-                RaceColumnDTO raceColumnDTO = result.createEmptyRaceColumn(raceColumn.getName(), raceColumn.isMedalRace());
+                RaceColumnDTO raceColumnDTO = result.createEmptyRaceColumn(raceColumn.getName(), raceColumn.isMedalRace(),
+                        leaderboard.getScoringScheme().isValidInTotalScore(leaderboard, raceColumn, timePoint));
                 for (Fleet fleet : raceColumn.getFleets()) {
                     RegattaAndRaceIdentifier raceIdentifier = null;
                     TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
@@ -465,8 +470,10 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                         raceIdentifier = new RegattaNameAndRaceName(trackedRace.getTrackedRegatta().getRegatta()
                                 .getName(), trackedRace.getRace().getName());
                     }
-                    result.addRace(raceColumn.getName(), fleetDTO, raceColumn.isMedalRace(),
-                            raceIdentifier, /* StrippedRaceDTO */ null);
+                    // Note: the RaceColumnDTO won't be created by the following addRace call because it has been created
+                    // above by the result.createEmptyRaceColumn call
+                    result.addRace(raceColumn.getName(), raceColumn.getExplicitFactor(), fleetDTO,
+                            raceColumn.isMedalRace(), raceIdentifier, /* StrippedRaceDTO */ null);
                 }
                 result.setCompetitorsFromBestToWorst(raceColumnDTO, getCompetitorDTOList(leaderboard.getCompetitorsFromBestToWorst(raceColumn, timePoint)));
             }
@@ -486,8 +493,13 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                     for (Fleet fleet : raceColumn.getFleets()) {
                         TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
                         if (trackedRace != null) {
-                            for (TrackedLeg trackedLeg : trackedRace.getTrackedLegs()) {
-                                legRanksCache.put(trackedLeg.getLeg(), trackedLeg.getRanks(timePoint));
+                            trackedRace.getRace().getCourse().lockForRead();
+                            try {
+                                for (TrackedLeg trackedLeg : trackedRace.getTrackedLegs()) {
+                                    legRanksCache.put(trackedLeg.getLeg(), trackedLeg.getRanks(timePoint));
+                                }
+                            } finally {
+                                trackedRace.getRace().getCourse().unlockAfterRead();
                             }
                         }
                     }
@@ -506,6 +518,10 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 }
                 final Long totalTimeSailedDownwindInMilliseconds = leaderboard.getTotalTimeSailedInLegTypeInMilliseconds(competitor, LegType.DOWNWIND, timePoint);
                 row.totalTimeSailedDownwindInSeconds = totalTimeSailedDownwindInMilliseconds==null?null:1./1000.*totalTimeSailedDownwindInMilliseconds;
+                final Long totalTimeSailedUpwindInMilliseconds = leaderboard.getTotalTimeSailedInLegTypeInMilliseconds(competitor, LegType.UPWIND, timePoint);
+                row.totalTimeSailedUpwindInSeconds = totalTimeSailedUpwindInMilliseconds==null?null:1./1000.*totalTimeSailedUpwindInMilliseconds;
+                final Long totalTimeSailedReachingInMilliseconds = leaderboard.getTotalTimeSailedInLegTypeInMilliseconds(competitor, LegType.REACHING, timePoint);
+                row.totalTimeSailedReachingInSeconds = totalTimeSailedReachingInMilliseconds==null?null:1./1000.*totalTimeSailedReachingInMilliseconds;
                 final Long totalTimeSailedInMilliseconds = leaderboard.getTotalTimeSailedInMilliseconds(competitor, timePoint);
                 row.totalTimeSailedInSeconds = totalTimeSailedInMilliseconds==null?null:1./1000.*totalTimeSailedInMilliseconds;
                 result.competitors.add(competitorDTO);
@@ -816,20 +832,32 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                     .getMeters();
             List<Maneuver> maneuvers = trackedLeg.getManeuvers(timePoint, waitForLatestAnalyses);
             if (maneuvers != null) {
-                result.numberOfTacks = 0;
-                result.numberOfJibes = 0;
-                result.numberOfPenaltyCircles = 0;
+                result.numberOfManeuvers = new HashMap<ManeuverType, Integer>();
+                result.numberOfManeuvers.put(ManeuverType.TACK, 0);
+                result.numberOfManeuvers.put(ManeuverType.JIBE, 0);
+                result.numberOfManeuvers.put(ManeuverType.PENALTY_CIRCLE, 0);
+                Map<ManeuverType, Double> totalManeuverLossInMeters = new HashMap<ManeuverType, Double>();
+                totalManeuverLossInMeters.put(ManeuverType.TACK, 0.0);
+                totalManeuverLossInMeters.put(ManeuverType.JIBE, 0.0);
+                totalManeuverLossInMeters.put(ManeuverType.PENALTY_CIRCLE, 0.0);
                 for (Maneuver maneuver : maneuvers) {
                     switch (maneuver.getType()) {
                     case TACK:
-                        result.numberOfTacks++;
-                        break;
                     case JIBE:
-                        result.numberOfJibes++;
-                        break;
                     case PENALTY_CIRCLE:
-                        result.numberOfPenaltyCircles++;
+                        if (maneuver.getManeuverLoss() != null) {
+                            result.numberOfManeuvers.put(maneuver.getType(), result.numberOfManeuvers.get(maneuver.getType())+1);
+                            totalManeuverLossInMeters.put(maneuver.getType(),
+                                    totalManeuverLossInMeters.get(maneuver.getType()) + maneuver.getManeuverLoss().getMeters());
+                        }
                         break;
+                    }
+                }
+                result.averageManeuverLossInMeters = new HashMap<ManeuverType, Double>();
+                for (ManeuverType maneuverType : new ManeuverType[] { ManeuverType.TACK, ManeuverType.JIBE, ManeuverType.PENALTY_CIRCLE }) {
+                    if (result.numberOfManeuvers.get(maneuverType) != 0) {
+                        result.averageManeuverLossInMeters.put(maneuverType,
+                                totalManeuverLossInMeters.get(maneuverType)/result.numberOfManeuvers.get(maneuverType));
                     }
                 }
             }
@@ -844,6 +872,14 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             result.add(convertToRegattaDTO(regatta));
         }
         return result;
+    }
+
+    private BuoyDTO convertToBuoyDTO(Buoy buoy, Position position) {
+        BuoyDTO buoyDTO = new BuoyDTO(buoy.getName(), position.getLatDeg(), position.getLngDeg());
+        buoyDTO.color = buoy.getColor();
+        buoyDTO.shape = buoy.getShape();
+        buoyDTO.pattern = buoy.getPattern();
+        return buoyDTO;
     }
 
     private RegattaDTO convertToRegattaDTO(Regatta regatta) {
@@ -873,9 +909,10 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         }
         List<RaceColumnDTO> raceColumns = new ArrayList<RaceColumnDTO>();
         for (RaceColumnInSeries raceColumn : series.getRaceColumns()) {
-            RaceColumnDTO raceColumnDTO = new RaceColumnDTO();
+            RaceColumnDTO raceColumnDTO = new RaceColumnDTO(/* isValidInTotalScore not relevant here because no scores conveyed */ null);
             raceColumnDTO.name = raceColumn.getName();
             raceColumnDTO.setMedalRace(raceColumn.isMedalRace());
+            raceColumnDTO.setExplicitFactor(raceColumn.getExplicitFactor());
             raceColumns.add(raceColumnDTO);
         }
         SeriesDTO result = new SeriesDTO(series.getName(), fleets, raceColumns, series.isMedal());
@@ -893,7 +930,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             TrackedRace trackedRace = getService().getExistingTrackedRace(raceIdentifier);
             TrackedRaceDTO trackedRaceDTO = null; 
             if (trackedRace != null) {
-                trackedRaceDTO = new TrackedRaceDTO();  
+                trackedRaceDTO = new TrackedRaceDTO();
                 trackedRaceDTO.hasWindData = trackedRace.hasWindData();
                 trackedRaceDTO.hasGPSData = trackedRace.hasGPSData();
                 trackedRaceDTO.startOfTracking = trackedRace.getStartOfTracking() == null ? null : trackedRace.getStartOfTracking().asDate();
@@ -901,7 +938,8 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 trackedRaceDTO.timePointOfNewestEvent = trackedRace.getTimePointOfNewestEvent() == null ? null : trackedRace.getTimePointOfNewestEvent().asDate();
                 trackedRaceDTO.delayToLiveInMs = trackedRace.getDelayToLiveInMillis(); 
             }
-            RaceWithCompetitorsDTO raceDTO = new RaceWithCompetitorsDTO(raceIdentifier, convertToCompetitorDTOs(r.getCompetitors()), trackedRaceDTO);
+            RaceWithCompetitorsDTO raceDTO = new RaceWithCompetitorsDTO(raceIdentifier, convertToCompetitorDTOs(r.getCompetitors()),
+                    trackedRaceDTO, getService().isRaceBeingTracked(r));
             if (trackedRace != null) {
                 raceDTO.startOfRace = trackedRace.getStartOfRace() == null ? null : trackedRace.getStartOfRace().asDate();
                 raceDTO.endOfRace = trackedRace.getEndOfRace() == null ? null : trackedRace.getEndOfRace().asDate();
@@ -1091,7 +1129,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                     .getLngDeg());
         }
         if (wind.getTimePoint() != null) {
-            windDTO.timepoint = wind.getTimePoint().asMillis();
+            windDTO.measureTimepoint = wind.getTimePoint().asMillis();
             Wind estimatedWind = windTrack
                     .getAveragedWind(wind.getPosition(), wind.getTimePoint());
             if (estimatedWind != null) {
@@ -1107,9 +1145,9 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     /**
      * Uses <code>wind</code> for both, the non-dampened and dampened fields of the {@link WindDTO} object returned
      */
-    protected WindDTO createWindDTOFromAlreadyAveraged(Wind wind, WindTrack windTrack, TimePoint originTimepoint) {
+    protected WindDTO createWindDTOFromAlreadyAveraged(Wind wind, WindTrack windTrack, TimePoint requestTimepoint) {
         WindDTO windDTO = new WindDTO();
-        windDTO.originTimepoint = originTimepoint.asMillis();
+        windDTO.requestTimepoint = requestTimepoint.asMillis();
         windDTO.trueWindBearingDeg = wind.getBearing().getDegrees();
         windDTO.trueWindFromDeg = wind.getBearing().reverse().getDegrees();
         windDTO.trueWindSpeedInKnots = wind.getKnots();
@@ -1123,7 +1161,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                     .getLngDeg());
         }
         if (wind.getTimePoint() != null) {
-            windDTO.timepoint = wind.getTimePoint().asMillis();
+            windDTO.measureTimepoint = wind.getTimePoint().asMillis();
         }
         return windDTO;
     }
@@ -1290,8 +1328,8 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 p = new DegreePosition(windDTO.position.latDeg, windDTO.position.lngDeg);
             }
             TimePoint at = null;
-            if (windDTO.timepoint != null) {
-                at = new MillisecondsTimePoint(windDTO.timepoint);
+            if (windDTO.measureTimepoint != null) {
+                at = new MillisecondsTimePoint(windDTO.measureTimepoint);
             }
             SpeedWithBearing speedWithBearing = null;
             Speed speed = null;
@@ -1539,9 +1577,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                     GPSFixTrack<Buoy, GPSFix> track = trackedRace.getOrCreateTrack(buoy);
                     Position positionAtDate = track.getEstimatedPosition(dateAsTimePoint, /* extrapolate */false);
                     if (positionAtDate != null) {
-                        BuoyDTO buoyDTO = new BuoyDTO(buoy.getName(), positionAtDate.getLatDeg(),
-                                positionAtDate.getLngDeg(), buoy.getDisplayColor());
-                        result.buoys.add(buoyDTO);
+                        result.buoys.add(convertToBuoyDTO(buoy, positionAtDate));
                     }
                 }
                 
@@ -1571,8 +1607,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 GPSFixTrack<Buoy, GPSFix> track = trackedRace.getOrCreateTrack(buoy);
                 Position positionAtDate = track.getEstimatedPosition(dateAsTimePoint, /* extrapolate */false);
                 if (positionAtDate != null) {
-                    BuoyDTO markDTO = new BuoyDTO(buoy.getName(), positionAtDate.getLatDeg(), positionAtDate.getLngDeg(), buoy.getDisplayColor());
-                    raceBuoysDTO.buoys.add(markDTO);
+                    raceBuoysDTO.buoys.add(convertToBuoyDTO(buoy, positionAtDate));
                 }
             }
         }
@@ -1602,13 +1637,11 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             final Position leftPos = trackedRace.getOrCreateTrack(left).getEstimatedPosition(timePoint, /* extrapolate */ false);
             final Buoy right = ((Gate) controlPoint).getRight();
             final Position rightPos = trackedRace.getOrCreateTrack(right).getEstimatedPosition(timePoint, /* extrapolate */ false);
-            result = new GateDTO(controlPoint.getName(),
-                    new BuoyDTO(left.getName(), leftPos.getLatDeg(), leftPos.getLngDeg(), left.getDisplayColor()),
-                    new BuoyDTO(right.getName(), rightPos.getLatDeg(), rightPos.getLngDeg(), right.getDisplayColor()));
+            result = new GateDTO(controlPoint.getName(), convertToBuoyDTO(left, leftPos), convertToBuoyDTO(right, rightPos)); 
         } else {
             final Position posOfFirst = trackedRace.getOrCreateTrack(controlPoint.getBuoys().iterator().next()).
                     getEstimatedPosition(timePoint, /* extrapolate */ false);
-            result = new BuoyDTO(controlPoint.getName(), posOfFirst.getLatDeg(), posOfFirst.getLngDeg(), null);
+            result = new BuoyDTO(controlPoint.getName(), posOfFirst.getLatDeg(), posOfFirst.getLngDeg());
         }
         return result;
     }
@@ -1757,8 +1790,8 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 p = new DegreePosition(windDTO.position.latDeg, windDTO.position.lngDeg);
             }
             TimePoint at = null;
-            if (windDTO.timepoint != null) {
-                at = new MillisecondsTimePoint(windDTO.timepoint);
+            if (windDTO.measureTimepoint != null) {
+                at = new MillisecondsTimePoint(windDTO.measureTimepoint);
             }
             SpeedWithBearing speedWithBearing = null;
             Speed speed = null;
@@ -1825,7 +1858,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         Map<String, Leaderboard> leaderboards = getService().getLeaderboards();
         StrippedLeaderboardDTO result = null;
         Leaderboard leaderboard = leaderboards.get(leaderboardName);
-        if(leaderboard != null) {
+        if (leaderboard != null) {
             result = createStrippedLeaderboardDTO(leaderboard, false);
         }
         return result;
@@ -1884,7 +1917,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         leaderboardDTO.name = leaderboard.getName();
         leaderboardDTO.competitorDisplayNames = new HashMap<CompetitorDTO, String>();
         leaderboardDTO.isMetaLeaderboard = leaderboard instanceof MetaLeaderboard ? true : false;
-        if(leaderboard instanceof RegattaLeaderboard) {
+        if (leaderboard instanceof RegattaLeaderboard) {
             RegattaLeaderboard regattaLeaderboard = (RegattaLeaderboard) leaderboard;
             Regatta regatta = regattaLeaderboard.getRegatta();
             leaderboardDTO.regattaName = regatta.getName(); 
@@ -1898,8 +1931,8 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         leaderboardDTO.hasCarriedPoints = leaderboard.hasCarriedPoints();
         leaderboardDTO.discardThresholds = leaderboard.getResultDiscardingRule().getDiscardIndexResultsStartingWithHowManyRaces();
         for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
-            RaceDTO raceDTO = null;
             for (Fleet fleet : raceColumn.getFleets()) {
+                RaceDTO raceDTO = null;
                 RegattaAndRaceIdentifier raceIdentifier = null;
                 TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
                 if (trackedRace != null) {
@@ -1914,13 +1947,14 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                     trackedRaceDTO.startOfTracking = trackedRace.getStartOfTracking() == null ? null : trackedRace.getStartOfTracking().asDate();
                     trackedRaceDTO.hasWindData = trackedRace.hasWindData();
                     trackedRaceDTO.hasGPSData = trackedRace.hasGPSData();
-                    raceDTO = new RaceDTO(raceIdentifier, trackedRaceDTO);
+                    raceDTO = new RaceDTO(raceIdentifier, trackedRaceDTO, getService().isRaceBeingTracked(trackedRace.getRace()));
                     raceDTO.places = racePlaces;
                     raceDTO.startOfRace = trackedRace.getStartOfRace() == null ? null : trackedRace.getStartOfRace().asDate();
                     raceDTO.endOfRace = trackedRace.getEndOfRace() == null ? null : trackedRace.getEndOfRace().asDate();
                 }    
                 final FleetDTO fleetDTO = convertToFleetDTO(fleet);
-                leaderboardDTO.addRace(raceColumn.getName(), fleetDTO, raceColumn.isMedalRace(), raceIdentifier, raceDTO);
+                leaderboardDTO.addRace(raceColumn.getName(), raceColumn.getExplicitFactor(), fleetDTO,
+                        raceColumn.isMedalRace(), raceIdentifier, raceDTO);
             }
         }
         return leaderboardDTO;
@@ -2039,6 +2073,11 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     @Override
     public void renameLeaderboardColumn(String leaderboardName, String oldColumnName, String newColumnName) {
         getService().apply(new RenameLeaderboardColumn(leaderboardName, oldColumnName, newColumnName));
+    }
+    
+    @Override
+    public void updateLeaderboardColumnFactor(String leaderboardName, String columnName, Double newFactor) {
+        getService().apply(new UpdateLeaderboardColumnFactor(leaderboardName, columnName, newFactor));
     }
 
     @Override
@@ -2412,7 +2451,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                     maneuver.getTimePoint().asDate(),
                     createSpeedWithBearingDTO(maneuver.getSpeedWithBearingBefore()),
                     createSpeedWithBearingDTO(maneuver.getSpeedWithBearingAfter()),
-                    maneuver.getDirectionChangeInDegrees());
+                    maneuver.getDirectionChangeInDegrees(), maneuver.getManeuverLoss()==null?null:maneuver.getManeuverLoss().getMeters());
             result.add(maneuverDTO);
         }
         return result;
@@ -2483,6 +2522,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         LeaderboardGroupDTO groupDTO = new LeaderboardGroupDTO();
         groupDTO.name = leaderboardGroup.getName();
         groupDTO.description = leaderboardGroup.getDescription();
+        groupDTO.displayLeaderboardsInReverseOrder = leaderboardGroup.isDisplayGroupsInReverseOrder();
         for (Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
             groupDTO.leaderboards.add(createStrippedLeaderboardDTO(leaderboard, withGeoLocationData));
         }
@@ -2512,9 +2552,9 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     }
 
     @Override
-    public LeaderboardGroupDTO createLeaderboardGroup(String groupName, String description,
+    public LeaderboardGroupDTO createLeaderboardGroup(String groupName, String description, boolean displayGroupsInReverseOrder,
             int[] overallLeaderboardDiscardThresholds, ScoringSchemeType overallLeaderboardScoringSchemeType) {
-        CreateLeaderboardGroup createLeaderboardGroupOp = new CreateLeaderboardGroup(groupName, description,
+        CreateLeaderboardGroup createLeaderboardGroupOp = new CreateLeaderboardGroup(groupName, description, displayGroupsInReverseOrder,
                 new ArrayList<String>(), overallLeaderboardDiscardThresholds, overallLeaderboardScoringSchemeType);
         return convertToLeaderboardGroupDTO(getService().apply(createLeaderboardGroupOp), false);
     }
@@ -2561,48 +2601,50 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     public List<EventDTO> getEvents() {
         List<EventDTO> result = new ArrayList<EventDTO>();
         for (Event event : getService().getAllEvents()) {
-            List<RegattaDTO> regattasList = getRegattas();
-            EventDTO eventDTO = new EventDTO(event.getName(), regattasList);
-            eventDTO.venue = new VenueDTO(event.getVenue().getName());
+            EventDTO eventDTO = convertToEventDTO(event);
             result.add(eventDTO);
         }
         return result;
     }
 
     @Override
-    public void updateEvent(String oldName, String newName, String venue, List<String> regattaNames) {
-        // TODO Auto-generated method stub
-        
+    public void updateEvent(String eventName, VenueDTO venue, String publicationUrl, boolean isPublic, List<String> regattaNames) {
+        getService().apply(new UpdateEvent(eventName, venue.name, publicationUrl, isPublic, regattaNames));
     }
 
     @Override
-    public EventDTO createEvent(String eventName, String venue) {
-        return convertToEventDTO(getService().apply(new CreateEvent(eventName, venue, new ArrayList<String>())));
+    public EventDTO createEvent(String eventName, String venue, String publicationUrl, boolean isPublic) {
+        return convertToEventDTO(getService().apply(new CreateEvent(eventName, venue, publicationUrl, isPublic, new ArrayList<String>())));
     }
 
     @Override
     public void removeEvent(String eventName) {
-        // TODO Auto-generated method stub
-        
+        getService().apply(new RemoveEvent(eventName));
     }
 
     @Override
     public void renameEvent(String oldName, String newName) {
-        // TODO Auto-generated method stub
-        
+        getService().apply(new RenameEvent(oldName, newName));
     }
 
     @Override
     public EventDTO getEventByName(String eventName) {
-        // TODO Auto-generated method stub
-        return null;
+        EventDTO result = null;
+        for (Event event : getService().getAllEvents()) {
+            if(event.getName().equals(eventName)) {
+                result = convertToEventDTO(event);
+                break;
+            }
+        }
+        return result;
     }
     
     private EventDTO convertToEventDTO(Event event) {
-        EventDTO eventDTO = new EventDTO();
-        eventDTO.name = event.getName();
+        EventDTO eventDTO = new EventDTO(event.getName());
         eventDTO.venue = new VenueDTO();
         eventDTO.venue.name = event.getVenue() != null ? event.getVenue().getName() : null;
+        eventDTO.publicationUrl = event.getPublicationUrl();
+        eventDTO.isPublic = event.isPublic();
         eventDTO.regattas = new ArrayList<RegattaDTO>();
         for (Regatta regatta: event.getRegattas()) {
             RegattaDTO regattaDTO = new RegattaDTO();
@@ -2617,43 +2659,55 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         getService().apply(new RemoveRegatta(regattaIdentifier));
     }
 
+    private RaceColumnInSeriesDTO convertToRaceColumnInSeriesDTO(RaceColumnInSeries raceColumnInSeries) {
+        RaceColumnInSeriesDTO raceColumnInSeriesDTO = new RaceColumnInSeriesDTO(raceColumnInSeries.getSeries().getName(),
+                raceColumnInSeries.getRegatta().getName());
+        raceColumnInSeriesDTO.name = raceColumnInSeries.getName();
+        raceColumnInSeriesDTO.setMedalRace(raceColumnInSeries.isMedalRace());
+        return raceColumnInSeriesDTO;
+    }
+    
     @Override
-    public void addColumnsToSeries(RegattaIdentifier regattaIdentifier, String seriesName, List<String> columnNames) {
+    public List<RaceColumnInSeriesDTO> addRaceColumnsToSeries(RegattaIdentifier regattaIdentifier, String seriesName, List<String> columnNames) {
+        List<RaceColumnInSeriesDTO> result = new ArrayList<RaceColumnInSeriesDTO>();
         for(String columnName: columnNames) {
-            getService().apply(new AddColumnToSeries(regattaIdentifier, seriesName, columnName));
+            RaceColumnInSeries raceColumnInSeries = getService().apply(new AddColumnToSeries(regattaIdentifier, seriesName, columnName));
+            if(raceColumnInSeries != null) {
+                result.add(convertToRaceColumnInSeriesDTO(raceColumnInSeries));
+            }
         }
+        return result;
     }
 
     @Override
-    public void addColumnToSeries(RegattaIdentifier regattaIdentifier, String seriesName, String columnName) {
-        getService().apply(new AddColumnToSeries(regattaIdentifier, seriesName, columnName));
+    public RaceColumnInSeriesDTO addRaceColumnToSeries(RegattaIdentifier regattaIdentifier, String seriesName, String columnName) {
+        RaceColumnInSeriesDTO result = null;
+        RaceColumnInSeries raceColumnInSeries = getService().apply(new AddColumnToSeries(regattaIdentifier, seriesName, columnName));
+        if(raceColumnInSeries != null) {
+            result = convertToRaceColumnInSeriesDTO(raceColumnInSeries);
+        }
+        return result;
     }
 
     @Override
-    public void removeColumnsFromSeries(RegattaIdentifier regattaIdentifier, String seriesName, List<String> columnNames) {
+    public void removeRaceColumnsFromSeries(RegattaIdentifier regattaIdentifier, String seriesName, List<String> columnNames) {
         for(String columnName: columnNames) {
             getService().apply(new RemoveColumnFromSeries(regattaIdentifier, seriesName, columnName));
         }
     }
 
     @Override
-    public void removeColumnFromSeries(RegattaIdentifier regattaIdentifier, String seriesName, String columnName) {
+    public void removeRaceColumnFromSeries(RegattaIdentifier regattaIdentifier, String seriesName, String columnName) {
         getService().apply(new RemoveColumnFromSeries(regattaIdentifier, seriesName, columnName));
     }
 
     @Override
-    public void renameColumnInSeries(RegattaIdentifier regattaIdentifier, String seriesName, String oldColumnName,
-            String newColumnName) {
-        getService().apply(new RenameColumnInSeries(regattaIdentifier, seriesName, oldColumnName, newColumnName));
-    }
-
-    @Override
-    public void moveColumnInSeriesUp(RegattaIdentifier regattaIdentifier, String seriesName, String columnName) {
+    public void moveRaceColumnInSeriesUp(RegattaIdentifier regattaIdentifier, String seriesName, String columnName) {
         getService().apply(new MoveColumnInSeriesUp(regattaIdentifier, seriesName, columnName));
     }
 
     @Override
-    public void moveColumnInSeriesDown(RegattaIdentifier regattaIdentifier, String seriesName, String columnName) {
+    public void moveRaceColumnInSeriesDown(RegattaIdentifier regattaIdentifier, String seriesName, String columnName) {
         getService().apply(new MoveColumnInSeriesDown(regattaIdentifier, seriesName, columnName));
     }
 
@@ -2739,5 +2793,4 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             fregService.registerResultUrl(new URL(result));
         }
     }
-
 }

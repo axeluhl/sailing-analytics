@@ -28,6 +28,7 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.text.shared.SafeHtmlRenderer;
 import com.google.gwt.user.cellview.client.CellTable;
+import com.google.gwt.user.cellview.client.CellTable.Resources;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.Header;
@@ -50,6 +51,7 @@ import com.sap.sailing.domain.common.impl.InvertibleComparatorAdapter;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
+import com.sap.sailing.gwt.ui.adminconsole.AdminConsoleTableResources;
 import com.sap.sailing.gwt.ui.client.Collator;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
@@ -219,7 +221,8 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                                 }
                                 getLeaderboard().competitorDisplayNames.put(row.competitor, value == null || value.trim().length() == 0 ? null : value.trim());
                                 cell.setViewData(row, null); // ensure that getValue() is called again
-                                EditableLeaderboardPanel.this.getData().getList().set(rowIndex, row);
+                                EditableLeaderboardPanel.this.getData().getList().set(
+                                        EditableLeaderboardPanel.this.getData().getList().indexOf(row), row);
                             }
                         });
             }
@@ -398,7 +401,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
 
         private boolean isNetPointsCorrected() {
             LeaderboardEntryDTO leaderboardEntryDTO = getCurrentlyRendering().fieldsByRaceColumnName.get(raceName);
-            return leaderboardEntryDTO.netPointsCorrected;
+            return leaderboardEntryDTO != null && leaderboardEntryDTO.netPointsCorrected;
         }
 
         @Override
@@ -523,7 +526,8 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
     }
 
     private CellTable<CompetitorDTO> createSuppressedCompetitorsTable() {
-        CellTable<CompetitorDTO> result = new CellTable<CompetitorDTO>();
+        final Resources tableResources = GWT.create(AdminConsoleTableResources.class);
+        CellTable<CompetitorDTO> result = new CellTable<CompetitorDTO>(10000, tableResources);
         suppressedCompetitorsShown.addDataDisplay(result);
         final SuppressedSailIDColumn suppressedSailIDColumn = new SuppressedSailIDColumn();
         suppressedSailIDColumn.setSortable(true);
@@ -669,9 +673,10 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
     private List<HasCell<LeaderboardRowDTO, ?>> getCellListForEditableCompetitorColumn() {
         List<HasCell<LeaderboardRowDTO, ?>> result = new ArrayList<HasCell<LeaderboardRowDTO, ?>>();
         result.add(new HasCell<LeaderboardRowDTO, String>() {
+            private final ButtonCell cell = new ButtonCell();
             @Override
             public Cell<String> getCell() {
-                return new ButtonCell();
+                return cell;
             }
 
             @Override
@@ -704,9 +709,48 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
             }
         });
         result.add(new HasCell<LeaderboardRowDTO, String>() {
+            final class OptionalBoldRenderer implements SafeHtmlRenderer<String> {
+                private LeaderboardRowDTO currentRow;
+                
+                @Override
+                public SafeHtml render(String object) {
+                    SafeHtmlBuilder builder = new SafeHtmlBuilder();
+                    render(object, builder);
+                    return builder.toSafeHtml();
+                }
+
+                private boolean isDisplayNameSet() {
+                    return currentRow != null && getLeaderboard().isDisplayNameSet(currentRow.competitor);
+                }
+
+                @Override
+                public void render(String value, SafeHtmlBuilder builder) {
+                    if (isDisplayNameSet()) {
+                        builder.appendHtmlConstant("<b>");
+                    }
+                    builder.appendEscaped(value);
+                    if (isDisplayNameSet()) {
+                        builder.appendHtmlConstant("</b>");
+                    }
+                }
+                
+                public void setCurrentRow(LeaderboardRowDTO currentRow) {
+                    this.currentRow = currentRow;
+                }
+            }
+            
+            private final OptionalBoldRenderer renderer = new OptionalBoldRenderer();
+            
+            private final EditTextCell cell = new EditTextCell(renderer) {
+                @Override
+                public void render(Context context, String value, SafeHtmlBuilder sb) {
+                    renderer.setCurrentRow((LeaderboardRowDTO) context.getKey());
+                    super.render(context, value, sb);
+                }
+            };
                     @Override
                     public EditTextCell getCell() {
-                        return new EditTextCell();
+                        return cell;
                     }
 
                     @Override
@@ -716,16 +760,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
 
                     @Override
                     public String getValue(LeaderboardRowDTO row) {
-                        SafeHtmlBuilder sb = new SafeHtmlBuilder();
-                        final boolean isDisplayNameSet = getLeaderboard().isDisplayNameSet(row.competitor);
-                        if (isDisplayNameSet) {
-                            sb.appendHtmlConstant("<b>");
-                        }
-                        sb.appendEscaped(getLeaderboard().getDisplayName(row.competitor));
-                        if (isDisplayNameSet) {
-                            sb.appendHtmlConstant("</b>");
-                        }
-                        return sb.toSafeHtml().asString();
+                        return getLeaderboard().getDisplayName(row.competitor);
                     }
                 });
         return result;

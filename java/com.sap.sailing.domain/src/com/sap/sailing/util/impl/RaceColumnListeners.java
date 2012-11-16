@@ -7,6 +7,7 @@ import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnListener;
@@ -69,6 +70,12 @@ public class RaceColumnListeners implements Serializable {
         }
     }
 
+    public void notifyListenersAboutFactorChanged(RaceColumn raceColumn, Double oldFactor, Double newFactor) {
+        for (RaceColumnListener listener : getRaceColumnListeners()) {
+            listener.factorChanged(raceColumn, oldFactor, newFactor);
+        }
+    }
+
     public void notifyListenersAboutIsMedalRaceChanged(RaceColumn raceColumn, boolean newIsMedalRace) {
         for (RaceColumnListener listener : getRaceColumnListeners()) {
             listener.isMedalRaceChanged(raceColumn, newIsMedalRace);
@@ -87,9 +94,33 @@ public class RaceColumnListeners implements Serializable {
         }
     }
 
+    public void notifyListenersAboutRaceColumnMoved(RaceColumn raceColumn, int newIndex) {
+        for (RaceColumnListener listener : getRaceColumnListeners()) {
+            listener.raceColumnMoved(raceColumn, newIndex);
+        }
+    }
+
     private Set<RaceColumnListener> getRaceColumnListeners() {
         synchronized (raceColumnListeners) {
             return new HashSet<RaceColumnListener>(raceColumnListeners);
         }
     }
+
+    public boolean canAddRaceColumnToContainer(RaceColumn columnToAdd) {
+        boolean result = true;
+        for (RaceColumnListener listener : getRaceColumnListeners()) {
+            result = listener.canAddRaceColumnToContainer(columnToAdd);
+            if (!result) {
+                break;
+            }
+        }
+        return result;
+    }
+
+    public void notifyListenersAboutCompetitorDisplayNameChanged(Competitor competitor, String oldDisplayName, String displayName) {
+        for (RaceColumnListener listener : getRaceColumnListeners()) {
+            listener.competitorDisplayNameChanged(competitor, oldDisplayName, displayName);
+        }
+    }
+
 }

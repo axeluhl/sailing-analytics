@@ -31,6 +31,7 @@ import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.google.gwt.view.client.SelectionModel;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog;
+import com.sap.sailing.gwt.ui.client.DataEntryDialog.DialogCallback;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -83,7 +84,7 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
         private final MultiSelectionModel<BuoyDTO> selectionModel;
         
         public ControlPointCreationDialog(final StringMessages stringMessages, AdminConsoleTableResources tableRes,
-                List<BuoyDTO> buoys, AsyncCallback<ControlPointDTO> callback) {
+                List<BuoyDTO> buoys, DialogCallback<ControlPointDTO> callback) {
             super(stringMessages.controlPoint(), stringMessages.selectOneBuoyOrTwoBuoysForGate(),
                     stringMessages.ok(), stringMessages.cancel(), new Validator<ControlPointDTO>() {
                         @Override
@@ -377,6 +378,7 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
             }
         };
         result.addColumn(buoyNameColumn, stringMessages.buoy());
+
         final SafeHtmlCell buoyPositionCell = new SafeHtmlCell();
         Column<BuoyDTO, SafeHtml> buoyPositionColumn = new Column<BuoyDTO, SafeHtml>(buoyPositionCell) {
             @Override
@@ -387,6 +389,15 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
             }
         };
         result.addColumn(buoyPositionColumn, stringMessages.position());
+        
+        TextColumn<BuoyDTO> buoyColorColumn = new TextColumn<BuoyDTO>() {
+            @Override
+            public String getValue(BuoyDTO buoyDTO) {
+                return buoyDTO.color != null ? buoyDTO.color : "";
+            }
+        };
+        result.addColumn(buoyColorColumn, stringMessages.color());
+
         return result;
     }
 
@@ -428,14 +439,14 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
 
     private void insertWaypoint(final SailingServiceAsync sailingService, StringMessages stringMessages,
             AdminConsoleTableResources tableRes, final boolean beforeSelection) {
-        new ControlPointCreationDialog(stringMessages, tableRes, buoyDataProvider.getList(), new AsyncCallback<ControlPointDTO>() {
+        new ControlPointCreationDialog(stringMessages, tableRes, buoyDataProvider.getList(), new DialogCallback<ControlPointDTO>() {
             @Override
-            public void onFailure(Throwable caught) {
+            public void cancel() {
                 // dialog cancelled, do nothing
             }
 
             @Override
-            public void onSuccess(ControlPointDTO result) {
+            public void ok(ControlPointDTO result) {
                 Set<ControlPointAndOldAndNewBuoy> selectedElements = controlPointsSelectionModel.getSelectedSet();
                 if (!selectedElements.isEmpty()) {
                     ControlPointAndOldAndNewBuoy selectedElement = selectedElements.iterator().next();
