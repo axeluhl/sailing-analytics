@@ -64,18 +64,18 @@ public class LeaderboardRankChart extends SimplePanel implements RequiresResize 
             @Override
             public String format(ToolTipData toolTipData) {
                 String seriesName = toolTipData.getSeriesName();
-                return "<b>" + seriesName + ":</b> " + stringMessages.rank() + toolTipData.getYAsLong()+
-                        stringMessages.afterRace() + toolTipData.getXAsString();
+                return "<b>" + seriesName + ":</b> " + stringMessages.rankNAfterRace(-toolTipData.getYAsLong(),
+                        raceColumnNames.get((int) toolTipData.getXAsLong()));
             }
         }));
         chart.getXAxis().setType(Axis.Type.LINEAR).setAxisTitleText(stringMessages.afterRace());
-        chart.getXAxis().setLabels(new XAxisLabels().setFormatter(new AxisLabelsFormatter() {
+        chart.getXAxis().setTickInterval(1).setLabels(new XAxisLabels().setFormatter(new AxisLabelsFormatter() {
             @Override
             public String format(AxisLabelsData axisLabelsData) {
                 return raceColumnNames.get((int) axisLabelsData.getValueAsLong());
             }
         }));
-        chart.getYAxis().setAxisTitleText(stringMessages.rank()).setStartOnTick(true).setShowFirstLabel(false)
+        chart.getYAxis().setAxisTitleText(stringMessages.rank()).setShowFirstLabel(false).setShowLastLabel(false)
         .setLabels(new YAxisLabels().setFormatter(new AxisLabelsFormatter() {
             @Override
             public String format(AxisLabelsData axisLabelsData) {
@@ -122,7 +122,7 @@ public class LeaderboardRankChart extends SimplePanel implements RequiresResize 
                             }
                             raceNumber++;
                         }
-                        chart.getYAxis().setMax(maxCompetitorCount);
+                        chart.getYAxis().setMax(-0.9).setMin(-maxCompetitorCount-0.1);
                         chart.setSizeToMatchContainer();
                         // it's important here to recall the redraw method, otherwise the bug fix for wrong checkbox positions (nativeAdjustCheckboxPosition)
                         // in the BaseChart class would not be called 

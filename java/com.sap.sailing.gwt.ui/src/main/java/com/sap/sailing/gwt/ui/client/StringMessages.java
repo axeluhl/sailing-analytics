@@ -433,7 +433,8 @@ public interface StringMessages extends Messages {
     String pattern();
     String legend();
     String live();
-    String afterRace();
     String errorFetchingRankingChartData(String message);
     String loadingCompetitorData();
+    String rankNAfterRace(long l, String string);
+    String afterRace();
 }
