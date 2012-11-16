@@ -23,6 +23,7 @@ import org.moxieapps.gwt.highcharts.client.plotOptions.Marker;
 import org.moxieapps.gwt.highcharts.client.plotOptions.Marker.Symbol;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
@@ -31,7 +32,7 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 
-public class LeaderboardRankChart extends SimplePanel {
+public class LeaderboardRankChart extends SimplePanel implements RequiresResize {
     private static final int LINE_WIDTH = 1;
     private final CompetitorSelectionProvider competitorSelectionProvider;
     private final Map<CompetitorDTO, Series> competitorSeries;
@@ -88,8 +89,8 @@ public class LeaderboardRankChart extends SimplePanel {
                  .setChartSubtitle(null)
                  .getXAxis().setAxisTitle(null);
         }
-        setSize("100%", "100%");
         setWidget(chart);
+        setSize("100%", "100%");
         loadChartData(leaderboardName, stringMessages, errorReporter, sailingService);
     }
 
@@ -117,6 +118,10 @@ public class LeaderboardRankChart extends SimplePanel {
                             }
                             raceNumber++;
                         }
+                        chart.setSizeToMatchContainer();
+                        // it's important here to recall the redraw method, otherwise the bug fix for wrong checkbox positions (nativeAdjustCheckboxPosition)
+                        // in the BaseChart class would not be called 
+                        chart.redraw();
                     }
                     
                     @Override
@@ -139,5 +144,15 @@ public class LeaderboardRankChart extends SimplePanel {
             competitorSeries.put(competitor, result);
         }
         return result;
+    }
+
+    @Override
+    public void onResize() {
+        if (!competitorSeries.isEmpty()) {
+            chart.setSizeToMatchContainer();
+            // it's important here to recall the redraw method, otherwise the bug fix for wrong checkbox positions (nativeAdjustCheckboxPosition)
+            // in the BaseChart class would not be called 
+            chart.redraw();
+        }
     }
 }

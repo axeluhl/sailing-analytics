@@ -596,7 +596,7 @@ implements CompetitorSelectionChangeListener, RequiresResize {
     
     @Override
     public void onResize() {
-        if(getChartData() != null) {
+        if (getChartData() != null) {
             chart.setSizeToMatchContainer();
             // it's important here to recall the redraw method, otherwise the bug fix for wrong checkbox positions (nativeAdjustCheckboxPosition)
             // in the BaseChart class would not be called 
