@@ -74,14 +74,7 @@ public class LeaderboardRankChart extends SimplePanel implements RequiresResize 
                 return raceColumnNames.get((int) axisLabelsData.getValueAsLong());
             }
         }));
-        chart.getYAxis(0).setAxisTitleText(stringMessages.rank()).setStartOnTick(true).setShowFirstLabel(false)
-        /* TODO do we need a specific formatter if we don't really format anything?
-                .setLabels(new YAxisLabels().setFormatter(new AxisLabelsFormatter() {
-                    @Override
-                    public String format(AxisLabelsData axisLabelsData) {
-                        return axisLabelsData.getValueAsString();
-                    }
-                })) */;
+        chart.getYAxis().setAxisTitleText(stringMessages.rank()).setStartOnTick(true).setShowFirstLabel(false);
         if (compactChart) {
             chart.setSpacingBottom(10).setSpacingLeft(10).setSpacingRight(10).setSpacingTop(2)
                  .setOption("legend/margin", 2)
@@ -101,23 +94,27 @@ public class LeaderboardRankChart extends SimplePanel implements RequiresResize 
                 /* date: null means "now" or "live" */ null, new AsyncCallback<List<Pair<String,List<CompetitorDTO>>>>() {
                     @Override
                     public void onSuccess(List<Pair<String, List<CompetitorDTO>>> result) {
-                        List<Series> chartSeries = Arrays.asList(chart.getSeries());
+                        List<Series> chartSeries = new ArrayList<Series>(Arrays.asList(chart.getSeries()));
                         chart.hideLoading();
                         raceColumnNames.clear();
                         int raceNumber = 0;
+                        int maxCompetitorCount = 0;
                         for (Pair<String, List<CompetitorDTO>> entry : result) {
                             raceColumnNames.add(entry.getA());
                             int rank = 1;
+                            maxCompetitorCount = Math.max(maxCompetitorCount, entry.getB().size());
                             for (CompetitorDTO competitor : entry.getB()) {
                                 Series series = getOrCreateSeries(competitor);
                                 if (!chartSeries.contains(series)) {
                                     chart.addSeries(series);
+                                    chartSeries.add(series);
                                 }
                                 series.addPoint(raceNumber, rank);
                                 rank++;
                             }
                             raceNumber++;
                         }
+                        chart.getYAxis().setMax(maxCompetitorCount);
                         chart.setSizeToMatchContainer();
                         // it's important here to recall the redraw method, otherwise the bug fix for wrong checkbox positions (nativeAdjustCheckboxPosition)
                         // in the BaseChart class would not be called 
