@@ -92,7 +92,8 @@ public class LeaderboardRankChart extends SimplePanel implements RequiresResize,
                 return raceColumnNames.get((int) axisLabelsData.getValueAsLong());
             }
         }));
-        chart.getYAxis().setAxisTitleText(stringMessages.rank()).setShowFirstLabel(false).setShowLastLabel(false)
+        chart.getYAxis().setAllowDecimals(false).setStartOnTick(true).setEndOnTick(true).setAxisTitleText(stringMessages.rank())
+        .setShowFirstLabel(false).setShowLastLabel(false)
         .setLabels(new YAxisLabels().setFormatter(new AxisLabelsFormatter() {
             @Override
             public String format(AxisLabelsData axisLabelsData) {
@@ -144,7 +145,7 @@ public class LeaderboardRankChart extends SimplePanel implements RequiresResize,
                             }
                             raceNumber++;
                         }
-                        chart.getYAxis().setMax(-0.9).setMin(-maxCompetitorCount-0.1);
+                        chart.getYAxis().setMaxPadding(0.5/maxCompetitorCount).setMinPadding(0.5/maxCompetitorCount);
                         chart.setSizeToMatchContainer();
                         // it's important here to recall the redraw method, otherwise the bug fix for wrong checkbox positions (nativeAdjustCheckboxPosition)
                         // in the BaseChart class would not be called 
