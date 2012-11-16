@@ -1,7 +1,7 @@
 package com.sap.sailing.domain.tracking;
 
-import com.sap.sailing.domain.base.SingleMark;
+import com.sap.sailing.domain.base.Mark;
 
 public interface MarkGPSFix extends GPSFixMoving {
-    SingleMark getMark();
+    Mark getMark();
 }

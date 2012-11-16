@@ -29,7 +29,7 @@ import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.BearingWithConfidence;
 import com.sap.sailing.domain.base.BoatClass;
-import com.sap.sailing.domain.base.SingleMark;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.CourseChange;
@@ -195,11 +195,11 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
 
     private transient Map<TimePoint, Future<Wind>> directionFromStartToNextMarkCache;
 
-    private final ConcurrentHashMap<SingleMark, GPSFixTrack<SingleMark, GPSFix>> markTracks;
+    private final ConcurrentHashMap<Mark, GPSFixTrack<Mark, GPSFix>> markTracks;
 
     protected long millisecondsOverWhichToAverageSpeed;
 
-    private final Map<SingleMark, StartToNextMarkCacheInvalidationListener> startToNextMarkCacheInvalidationListeners;
+    private final Map<Mark, StartToNextMarkCacheInvalidationListener> startToNextMarkCacheInvalidationListeners;
 
     protected long millisecondsOverWhichToAverageWind;
 
@@ -251,13 +251,13 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         this.millisecondsOverWhichToAverageSpeed = millisecondsOverWhichToAverageSpeed;
         this.millisecondsOverWhichToAverageWind = millisecondsOverWhichToAverageWind;
         this.delayToLiveInMillis = delayToLiveInMillis; 
-        this.startToNextMarkCacheInvalidationListeners = new ConcurrentHashMap<SingleMark, TrackedRaceImpl.StartToNextMarkCacheInvalidationListener>();
+        this.startToNextMarkCacheInvalidationListeners = new ConcurrentHashMap<Mark, TrackedRaceImpl.StartToNextMarkCacheInvalidationListener>();
         this.maneuverCache = createManeuverCache();
-        this.markTracks = new ConcurrentHashMap<SingleMark, GPSFixTrack<SingleMark, GPSFix>>();
+        this.markTracks = new ConcurrentHashMap<Mark, GPSFixTrack<Mark, GPSFix>>();
         this.crossTrackErrorCache = new CrossTrackErrorCache(this);
         int i = 0;
         for (Waypoint waypoint : race.getCourse().getWaypoints()) {
-            for (SingleMark mark : waypoint.getMarks()) {
+            for (Mark mark : waypoint.getMarks()) {
                 getOrCreateTrack(mark);
                 if (i < 2) {
                     // add cache invalidation listeners for first and second waypoint's marks for
@@ -962,8 +962,8 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
      * synchronization to avoid duplicate track creation for the same mark.
      */
     @Override
-    public GPSFixTrack<SingleMark, GPSFix> getOrCreateTrack(SingleMark mark) {
-        GPSFixTrack<SingleMark, GPSFix> result = markTracks.get(mark);
+    public GPSFixTrack<Mark, GPSFix> getOrCreateTrack(Mark mark) {
+        GPSFixTrack<Mark, GPSFix> result = markTracks.get(mark);
         if (result == null) {
             // try again, this time with more expensive synchronization
             synchronized (markTracks) {
@@ -982,14 +982,14 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         return result;
     }
 
-    protected DynamicGPSFixTrackImpl<SingleMark> createMarkTrack(SingleMark mark) {
-        return new DynamicGPSFixTrackImpl<SingleMark>(mark, millisecondsOverWhichToAverageSpeed);
+    protected DynamicGPSFixTrackImpl<Mark> createMarkTrack(Mark mark) {
+        return new DynamicGPSFixTrackImpl<Mark>(mark, millisecondsOverWhichToAverageSpeed);
     }
 
     @Override
     public Position getApproximatePosition(Waypoint waypoint, TimePoint timePoint) {
         Position result = null;
-        for (SingleMark mark : waypoint.getMarks()) {
+        for (Mark mark : waypoint.getMarks()) {
             Position nextPos = getOrCreateTrack(mark).getEstimatedPosition(timePoint, /* extrapolate */false);
             if (result == null) {
                 result = nextPos;
@@ -1289,7 +1289,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
             // assuming that getRace().getCourse()'s write lock is held by the current thread
             updateStartToNextMarkCacheInvalidationCacheListenersAfterWaypointAdded(zeroBasedIndex, waypointThatGotAdded);
             getOrCreateMarkPassingsInOrderAsNavigableSet(waypointThatGotAdded);
-            for (SingleMark mark : waypointThatGotAdded.getMarks()) {
+            for (Mark mark : waypointThatGotAdded.getMarks()) {
                 getOrCreateTrack(mark);
             }
             // a waypoint got added; this means that a leg got added as well; but we shouldn't claim we know where
@@ -1342,13 +1342,13 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     }
 
     private void addStartToNextMarkCacheInvalidationListener(Waypoint waypoint) {
-        for (SingleMark mark : waypoint.getMarks()) {
+        for (Mark mark : waypoint.getMarks()) {
             addStartToNextMarkCacheInvalidationListener(mark);
         }
     }
 
-    private void addStartToNextMarkCacheInvalidationListener(SingleMark mark) {
-        GPSFixTrack<SingleMark, GPSFix> track = getOrCreateTrack(mark);
+    private void addStartToNextMarkCacheInvalidationListener(Mark mark) {
+        GPSFixTrack<Mark, GPSFix> track = getOrCreateTrack(mark);
         StartToNextMarkCacheInvalidationListener listener = new StartToNextMarkCacheInvalidationListener(track);
         LockUtil.lockForRead(serializationLock);
         try {
@@ -1360,12 +1360,12 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     }
 
     private void stopAndRemoveStartToNextMarkCacheInvalidationListener(Waypoint waypoint) {
-        for (SingleMark mark : waypoint.getMarks()) {
+        for (Mark mark : waypoint.getMarks()) {
             stopAndRemoveStartToNextMarkCacheInvalidationListener(mark);
         }
     }
 
-    private void stopAndRemoveStartToNextMarkCacheInvalidationListener(SingleMark mark) {
+    private void stopAndRemoveStartToNextMarkCacheInvalidationListener(Mark mark) {
         StartToNextMarkCacheInvalidationListener listener = startToNextMarkCacheInvalidationListeners.get(mark);
         if (listener != null) {
             listener.stopListening();
@@ -1994,11 +1994,11 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         return getRace().getBoatClass().getApproximateManeuverDurationInMilliseconds();
     }
 
-    private class StartToNextMarkCacheInvalidationListener implements GPSTrackListener<SingleMark, GPSFix> {
+    private class StartToNextMarkCacheInvalidationListener implements GPSTrackListener<Mark, GPSFix> {
         private static final long serialVersionUID = 3540278554797445085L;
-        private final GPSFixTrack<SingleMark, GPSFix> listeningTo;
+        private final GPSFixTrack<Mark, GPSFix> listeningTo;
 
-        public StartToNextMarkCacheInvalidationListener(GPSFixTrack<SingleMark, GPSFix> listeningTo) {
+        public StartToNextMarkCacheInvalidationListener(GPSFixTrack<Mark, GPSFix> listeningTo) {
             this.listeningTo = listeningTo;
         }
 
@@ -2007,7 +2007,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         }
 
         @Override
-        public void gpsFixReceived(GPSFix fix, SingleMark mark) {
+        public void gpsFixReceived(GPSFix fix, Mark mark) {
             clearDirectionFromStartToNextMarkCache();
         }
 
@@ -2051,10 +2051,10 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     }
 
     @Override
-    public Iterable<SingleMark> getMarks() {
+    public Iterable<Mark> getMarks() {
         while (true) {
             try {
-                return new HashSet<SingleMark>(markTracks.keySet());
+                return new HashSet<Mark>(markTracks.keySet());
             } catch (ConcurrentModificationException cme) {
                 logger.info("Caught " + cme + "; trying again.");
             }

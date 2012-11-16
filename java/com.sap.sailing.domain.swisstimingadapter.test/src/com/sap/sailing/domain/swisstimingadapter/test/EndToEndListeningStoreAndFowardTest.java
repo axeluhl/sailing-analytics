@@ -22,7 +22,7 @@ import org.junit.Test;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
-import com.sap.sailing.domain.base.SingleMark;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
@@ -187,14 +187,14 @@ public class EndToEndListeningStoreAndFowardTest {
                     }
                 }
             }
-            Set<SingleMark> marks = new HashSet<SingleMark>();
+            Set<Mark> marks = new HashSet<Mark>();
             for (Waypoint waypoint : race.getCourse().getWaypoints()) {
-                for (SingleMark mark : waypoint.getMarks()) {
+                for (Mark mark : waypoint.getMarks()) {
                     marks.add(mark);
                 }
             }
-            for (SingleMark mark : marks) {
-                final GPSFixTrack<SingleMark, GPSFix> track = trackedRace.getOrCreateTrack(mark);
+            for (Mark mark : marks) {
+                final GPSFixTrack<Mark, GPSFix> track = trackedRace.getOrCreateTrack(mark);
                 track.lockForRead();
                 try {
                     assertTrue("Track of mark " + mark + " empty",
@@ -251,14 +251,14 @@ public class EndToEndListeningStoreAndFowardTest {
                     }
                 }
             }
-            Set<SingleMark> marks = new HashSet<SingleMark>();
+            Set<Mark> marks = new HashSet<Mark>();
             for (Waypoint waypoint : race.getCourse().getWaypoints()) {
-                for (SingleMark mark : waypoint.getMarks()) {
+                for (Mark mark : waypoint.getMarks()) {
                     marks.add(mark);
                 }
             }
-            for (SingleMark mark : marks) {
-                final GPSFixTrack<SingleMark, GPSFix> track = trackedRace.getOrCreateTrack(mark);
+            for (Mark mark : marks) {
+                final GPSFixTrack<Mark, GPSFix> track = trackedRace.getOrCreateTrack(mark);
                 track.lockForRead();
                 try {
                     assertTrue("Track of mark " + mark + " empty", !Util.isEmpty(track.getRawFixes()));

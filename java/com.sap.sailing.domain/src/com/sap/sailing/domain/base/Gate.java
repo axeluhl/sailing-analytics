@@ -1,7 +1,7 @@
 package com.sap.sailing.domain.base;
 
 public interface Gate extends ControlPoint {
-    SingleMark getLeft();
+    Mark getLeft();
     
-    SingleMark getRight();
+    Mark getRight();
 }

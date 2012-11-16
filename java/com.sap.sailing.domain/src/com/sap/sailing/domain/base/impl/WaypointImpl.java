@@ -1,6 +1,6 @@
 package com.sap.sailing.domain.base.impl;
 
-import com.sap.sailing.domain.base.SingleMark;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Waypoint;
@@ -39,7 +39,7 @@ public class WaypointImpl implements Waypoint {
     }
 
     @Override
-    public Iterable<SingleMark> getMarks() {
+    public Iterable<Mark> getMarks() {
         return getControlPoint().getMarks();
     }
 

@@ -14,7 +14,7 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.sap.sailing.domain.base.SingleMark;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.CourseListener;
@@ -273,11 +273,11 @@ public class CourseImpl extends NamedImpl implements Course {
         }
     }
     
-    private ControlPoint getControlPointForMark(SingleMark mark) {
+    private ControlPoint getControlPointForMark(Mark mark) {
         lockForRead();
         try {
             for (ControlPoint controlPoint : getControlPoints()) {
-                for (SingleMark controlPointMark : controlPoint.getMarks()) {
+                for (Mark controlPointMark : controlPoint.getMarks()) {
                     if (mark == controlPointMark) {
                         return controlPoint;
                     }
@@ -290,7 +290,7 @@ public class CourseImpl extends NamedImpl implements Course {
     }
     
     @Override
-    public Iterable<Leg> getLegsAdjacentTo(SingleMark mark) {
+    public Iterable<Leg> getLegsAdjacentTo(Mark mark) {
         lockForRead();
         try {
             Set<Leg> result = new HashSet<Leg>();

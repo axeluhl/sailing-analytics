@@ -14,7 +14,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.BoatClass;
-import com.sap.sailing.domain.base.SingleMark;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.RaceDefinition;
@@ -103,7 +103,7 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
     }
     
     @Override
-    public void recordFix(SingleMark mark, GPSFix fix) {
+    public void recordFix(Mark mark, GPSFix fix) {
         getOrCreateTrack(mark).addGPSFix(fix);
     }
 
@@ -114,7 +114,7 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
             getTrack(competitor).setMillisecondsOverWhichToAverage(millisecondsOverWhichToAverageSpeed);
         }
         for (Waypoint waypoint : getRace().getCourse().getWaypoints()) {
-            for (SingleMark mark : waypoint.getMarks()) {
+            for (Mark mark : waypoint.getMarks()) {
                 getOrCreateTrack(mark).setMillisecondsOverWhichToAverage(millisecondsOverWhichToAverageSpeed);
             }
         }
@@ -155,18 +155,18 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
     }
     
     @Override
-    public DynamicGPSFixTrack<SingleMark, GPSFix> getOrCreateTrack(SingleMark mark) {
-        return (DynamicGPSFixTrack<SingleMark, GPSFix>) super.getOrCreateTrack(mark);
+    public DynamicGPSFixTrack<Mark, GPSFix> getOrCreateTrack(Mark mark) {
+        return (DynamicGPSFixTrack<Mark, GPSFix>) super.getOrCreateTrack(mark);
     }
     
     @Override
-    protected DynamicGPSFixTrackImpl<SingleMark> createMarkTrack(SingleMark mark) {
-        DynamicGPSFixTrackImpl<SingleMark> result = super.createMarkTrack(mark);
-        result.addListener(new GPSTrackListener<SingleMark, GPSFix>() {
+    protected DynamicGPSFixTrackImpl<Mark> createMarkTrack(Mark mark) {
+        DynamicGPSFixTrackImpl<Mark> result = super.createMarkTrack(mark);
+        result.addListener(new GPSTrackListener<Mark, GPSFix>() {
             private static final long serialVersionUID = -2855787105725103732L;
 
             @Override
-            public void gpsFixReceived(GPSFix fix, SingleMark mark) {
+            public void gpsFixReceived(GPSFix fix, Mark mark) {
                 notifyListeners(fix, mark);
             }
 
@@ -246,7 +246,7 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
         }
     }
 
-    private void notifyListeners(GPSFix fix, SingleMark mark) {
+    private void notifyListeners(GPSFix fix, Mark mark) {
         RaceChangeListener[] listeners;
         synchronized (getListeners()) {
             listeners = getListeners().toArray(new RaceChangeListener[getListeners().size()]);

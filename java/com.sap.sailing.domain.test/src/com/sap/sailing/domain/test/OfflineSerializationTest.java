@@ -14,7 +14,7 @@ import java.util.Set;
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.BoatClass;
-import com.sap.sailing.domain.base.SingleMark;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Nationality;
@@ -91,9 +91,9 @@ public class OfflineSerializationTest extends AbstractSerializationTest {
     public void testIdentityStabilityOfMarkSerialization() throws ClassNotFoundException, IOException {
         DomainFactory senderDomainFactory = new DomainFactoryImpl();
         DomainFactory receiverDomainFactory = new DomainFactoryImpl();
-        SingleMark sendersMark1 = senderDomainFactory.getOrCreateSingleMark("TestBuoy1");
-        SingleMark receiversMark1 = cloneBySerialization(sendersMark1, receiverDomainFactory);
-        SingleMark receiversSecondCopyOfMark1 = cloneBySerialization(sendersMark1, receiverDomainFactory);
+        Mark sendersMark1 = senderDomainFactory.getOrCreateSingleMark("TestBuoy1");
+        Mark receiversMark1 = cloneBySerialization(sendersMark1, receiverDomainFactory);
+        Mark receiversSecondCopyOfMark1 = cloneBySerialization(sendersMark1, receiverDomainFactory);
         assertSame(receiversMark1, receiversSecondCopyOfMark1);
     }
 
@@ -101,7 +101,7 @@ public class OfflineSerializationTest extends AbstractSerializationTest {
     public void testIdentityStabilityOfWaypointSerialization() throws ClassNotFoundException, IOException {
         DomainFactory senderDomainFactory = new DomainFactoryImpl();
         DomainFactory receiverDomainFactory = new DomainFactoryImpl();
-        SingleMark sendersMark1 = senderDomainFactory.getOrCreateSingleMark("TestBuoy1");
+        Mark sendersMark1 = senderDomainFactory.getOrCreateSingleMark("TestBuoy1");
         Waypoint sendersWaypoint1 = senderDomainFactory.createWaypoint(sendersMark1);
         Waypoint receiversWaypoint1 = cloneBySerialization(sendersWaypoint1, receiverDomainFactory);
         Waypoint receiversSecondCopyOfWaypoint1 = cloneBySerialization(sendersWaypoint1, receiverDomainFactory);

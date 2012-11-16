@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import com.maptrack.client.io.TypeController;
-import com.sap.sailing.domain.base.SingleMark;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
@@ -113,7 +113,7 @@ public class MarkPositionReceiver extends AbstractReceiverWithQueue<ControlPoint
                 System.out.println();
             }
         }
-        SingleMark mark = getDomainFactory().getMark(event.getA(), event.getB());
+        Mark mark = getDomainFactory().getMark(event.getA(), event.getB());
         for (Race tractracRace : getTracTracEvent().getRaceList()) {
             DynamicTrackedRace trackedRace = getTrackedRace(tractracRace);
             if (trackedRace != null) {

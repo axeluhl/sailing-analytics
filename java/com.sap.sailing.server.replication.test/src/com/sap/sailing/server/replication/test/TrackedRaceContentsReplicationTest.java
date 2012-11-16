@@ -15,7 +15,7 @@ import org.junit.Test;
 
 import com.mongodb.MongoException;
 import com.sap.sailing.domain.base.BoatClass;
-import com.sap.sailing.domain.base.SingleMark;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Regatta;
@@ -117,13 +117,13 @@ public class TrackedRaceContentsReplicationTest extends AbstractServerReplicatio
     public void testMarkFixReplication() throws InterruptedException {
         final GPSFixMovingImpl fix = new GPSFixMovingImpl(new DegreePosition(2, 3), new MillisecondsTimePoint(3456),
                 new KnotSpeedWithBearingImpl(13, new DegreeBearingImpl(234)));
-        final SingleMark masterMark = trackedRace.getRace().getCourse().getFirstWaypoint().getMarks().iterator().next();
+        final Mark masterMark = trackedRace.getRace().getCourse().getFirstWaypoint().getMarks().iterator().next();
         trackedRace.recordFix(masterMark, fix);
         Thread.sleep(1000);
         TrackedRace replicaTrackedRace = replica.getTrackedRace(raceIdentifier);
-        SingleMark replicaMark = replicaTrackedRace.getRace().getCourse().getFirstWaypoint().getMarks().iterator().next();
+        Mark replicaMark = replicaTrackedRace.getRace().getCourse().getFirstWaypoint().getMarks().iterator().next();
 //        assertNotSame(replicaMark, masterMark); // TODO this would require solving bug 592
-        GPSFixTrack<SingleMark, GPSFix> replicaMarkTrack = replicaTrackedRace.getOrCreateTrack(replicaMark);
+        GPSFixTrack<Mark, GPSFix> replicaMarkTrack = replicaTrackedRace.getOrCreateTrack(replicaMark);
         replicaMarkTrack.lockForRead();
         try {
             assertEquals(1, Util.size(replicaMarkTrack.getRawFixes()));

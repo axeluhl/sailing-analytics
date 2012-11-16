@@ -16,7 +16,7 @@ import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sap.sailing.domain.base.SingleMark;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
@@ -70,7 +70,7 @@ public class ManeuverAnalysisIDMChampionsFinalTest extends AbstractManeuverDetec
         markPositions.put("G2 Mark4 (left)", new DegreePosition(53.9599880000002, 10.878665000000069));
         markPositions.put("G2 Mark1", new DegreePosition(53.96355800000006, 10.885751999999806));
         for (Waypoint w : race.getRace().getCourse().getWaypoints()) {
-            for (SingleMark mark : w.getMarks()) {
+            for (Mark mark : w.getMarks()) {
                 race.getOrCreateTrack(mark).addGPSFix(new GPSFixImpl(markPositions.get(mark.getName()), epoch));
                 race.getOrCreateTrack(mark).addGPSFix(new GPSFixImpl(markPositions.get(mark.getName()), now));
             }

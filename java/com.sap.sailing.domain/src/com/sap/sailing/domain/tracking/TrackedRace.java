@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.NavigableSet;
 import java.util.SortedSet;
 
-import com.sap.sailing.domain.base.SingleMark;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Leg;
@@ -188,12 +188,12 @@ public interface TrackedRace extends Serializable {
      * Yields the track describing <code>mark</code>'s movement over time; never <code>null</code> because a
      * new track will be created in case no track was present for <code>mark</code> so far.
      */
-    GPSFixTrack<SingleMark, GPSFix> getOrCreateTrack(SingleMark mark);
+    GPSFixTrack<Mark, GPSFix> getOrCreateTrack(Mark mark);
 
     /**
      * Retrieves all marks assigned to the race. They are not necessarily part of the race course.
      */
-    Iterable<SingleMark> getMarks();
+    Iterable<Mark> getMarks();
 
     /**
      * If the <code>waypoint</code> only has one {@link #getMarks() mark}, its position at time <code>timePoint</code>

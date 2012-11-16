@@ -36,7 +36,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
 import com.sap.sailing.domain.base.BoatClass;
-import com.sap.sailing.domain.base.SingleMark;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Course;
@@ -711,7 +711,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         }
 
         @Override
-        public void markPositionChanged(GPSFix fix, SingleMark mark) {
+        public void markPositionChanged(GPSFix fix, Mark mark) {
             invalidateCacheAndRemoveThisListenerFromTrackedRace();
         }
 
@@ -874,7 +874,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return result;
     }
 
-    private MarkDTO convertToMarkDTO(SingleMark mark, Position position) {
+    private MarkDTO convertToMarkDTO(Mark mark, Position position) {
         MarkDTO markDTO = new MarkDTO(mark.getName(), position.getLatDeg(), position.getLngDeg());
         markDTO.color = mark.getColor();
         markDTO.shape = mark.getShape();
@@ -1562,19 +1562,19 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             if (trackedRace != null) {
                 result.marks = new HashSet<MarkDTO>();
                 result.waypointPositions = new ArrayList<PositionDTO>();
-                Set<SingleMark> marks = new HashSet<SingleMark>();
+                Set<Mark> marks = new HashSet<Mark>();
                 Course course = trackedRace.getRace().getCourse();
                  for (Waypoint waypoint : course.getWaypoints()) {
                     Position waypointPosition = trackedRace.getApproximatePosition(waypoint, dateAsTimePoint);
                     if (waypointPosition != null) {
                         result.waypointPositions.add(new PositionDTO(waypointPosition.getLatDeg(), waypointPosition.getLngDeg()));
                     }
-                    for (SingleMark b : waypoint.getMarks()) {
+                    for (Mark b : waypoint.getMarks()) {
                         marks.add(b);
                     }
                 }
-                for (SingleMark mark : marks) {
-                    GPSFixTrack<SingleMark, GPSFix> track = trackedRace.getOrCreateTrack(mark);
+                for (Mark mark : marks) {
+                    GPSFixTrack<Mark, GPSFix> track = trackedRace.getOrCreateTrack(mark);
                     Position positionAtDate = track.getEstimatedPosition(dateAsTimePoint, /* extrapolate */false);
                     if (positionAtDate != null) {
                         result.marks.add(convertToMarkDTO(mark, positionAtDate));
@@ -1602,9 +1602,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
         if (trackedRace != null) {
             raceMarksDTO.marks = new HashSet<MarkDTO>();
-            Iterable<SingleMark> marks = trackedRace.getMarks();
-            for (SingleMark mark : marks) {
-                GPSFixTrack<SingleMark, GPSFix> track = trackedRace.getOrCreateTrack(mark);
+            Iterable<Mark> marks = trackedRace.getMarks();
+            for (Mark mark : marks) {
+                GPSFixTrack<Mark, GPSFix> track = trackedRace.getOrCreateTrack(mark);
                 Position positionAtDate = track.getEstimatedPosition(dateAsTimePoint, /* extrapolate */false);
                 if (positionAtDate != null) {
                     raceMarksDTO.marks.add(convertToMarkDTO(mark, positionAtDate));
@@ -1633,9 +1633,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     private ControlPointDTO createControlPointDTO(ControlPoint controlPoint, TrackedRace trackedRace, TimePoint timePoint) {
         ControlPointDTO result;
         if (controlPoint instanceof Gate) {
-            final SingleMark left = ((Gate) controlPoint).getLeft();
+            final Mark left = ((Gate) controlPoint).getLeft();
             final Position leftPos = trackedRace.getOrCreateTrack(left).getEstimatedPosition(timePoint, /* extrapolate */ false);
-            final SingleMark right = ((Gate) controlPoint).getRight();
+            final Mark right = ((Gate) controlPoint).getRight();
             final Position rightPos = trackedRace.getOrCreateTrack(right).getEstimatedPosition(timePoint, /* extrapolate */ false);
             result = new GateDTO(controlPoint.getName(), convertToMarkDTO(left, leftPos), convertToMarkDTO(right, rightPos)); 
         } else {
@@ -1678,8 +1678,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     ControlPoint newControlPoint;
                     if (controlPointDTO instanceof GateDTO) {
                         GateDTO gateDTO = (GateDTO) controlPointDTO;
-                        SingleMark left = baseDomainFactory.getOrCreateSingleMark(gateDTO.getLeft().name);
-                        SingleMark right = baseDomainFactory.getOrCreateSingleMark(gateDTO.getRight().name);
+                        Mark left = baseDomainFactory.getOrCreateSingleMark(gateDTO.getLeft().name);
+                        Mark right = baseDomainFactory.getOrCreateSingleMark(gateDTO.getRight().name);
                         newControlPoint = baseDomainFactory.createGate(left, right, gateDTO.name);
                     } else {
                         newControlPoint = baseDomainFactory.getOrCreateSingleMark(controlPointDTO.name);
@@ -1695,11 +1695,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         }
     }
 
-    private boolean markNamesMatch(Iterable<SingleMark> marks, Iterable<MarkDTO> marksDTOs) {
-        Iterator<SingleMark> marksIter = marks.iterator();
+    private boolean markNamesMatch(Iterable<Mark> marks, Iterable<MarkDTO> marksDTOs) {
+        Iterator<Mark> marksIter = marks.iterator();
         Iterator<MarkDTO> markDTOsIter = marksDTOs.iterator();
         while (marksIter.hasNext() && markDTOsIter.hasNext()) {
-            SingleMark nextMark = marksIter.next();
+            Mark nextMark = marksIter.next();
             MarkDTO nextMarkDTO = markDTOsIter.next();
             if (!nextMark.getName().equals(nextMarkDTO.name)) {
                 return false;
@@ -1710,7 +1710,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     private List<PositionDTO> getMarkPositionDTOs(TimePoint timePoint, TrackedRace trackedRace, Waypoint waypoint) {
         List<PositionDTO> startMarkPositions = new ArrayList<PositionDTO>();
-        for (SingleMark startMark : waypoint.getMarks()) {
+        for (Mark startMark : waypoint.getMarks()) {
             final Position estimatedMarkPosition = trackedRace.getOrCreateTrack(startMark)
                     .getEstimatedPosition(timePoint, /* extrapolate */false);
             if (estimatedMarkPosition != null) {
@@ -1981,7 +1981,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         Placemark finishBest = null;
 
         // Get start postition
-        Iterator<SingleMark> startMarks = race.getRace().getCourse().getFirstWaypoint().getMarks().iterator();
+        Iterator<Mark> startMarks = race.getRace().getCourse().getFirstWaypoint().getMarks().iterator();
         GPSFix startMarkFix = startMarks.hasNext() ? race.getOrCreateTrack(startMarks.next()).getLastRawFix() : null;
         Position startPosition = startMarkFix != null ? startMarkFix.getPosition() : null;
         if (startPosition != null) {
@@ -2004,7 +2004,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         }
 
         // Get finish position
-        Iterator<SingleMark> finishMarks = race.getRace().getCourse().getFirstWaypoint().getMarks().iterator();
+        Iterator<Mark> finishMarks = race.getRace().getCourse().getFirstWaypoint().getMarks().iterator();
         GPSFix finishMarkFix = finishMarks.hasNext() ? race.getOrCreateTrack(finishMarks.next()).getLastRawFix() : null;
         Position finishPosition = finishMarkFix != null ? finishMarkFix.getPosition() : null;
         if (startPosition != null && finishPosition != null) {

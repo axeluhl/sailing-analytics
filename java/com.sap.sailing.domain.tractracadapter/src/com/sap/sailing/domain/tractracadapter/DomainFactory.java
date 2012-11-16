@@ -12,7 +12,7 @@ import java.util.List;
 
 import com.maptrack.client.io.TypeController;
 import com.sap.sailing.domain.base.BoatClass;
-import com.sap.sailing.domain.base.SingleMark;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.Person;
@@ -193,7 +193,7 @@ public interface DomainFactory {
      * {@link ControlPointPositionData#getIndex() index} is used to determine
      * which of its marks is affected.
      */
-    SingleMark getMark(ControlPoint controlPoint, ControlPointPositionData record);
+    Mark getMark(ControlPoint controlPoint, ControlPointPositionData record);
 
     com.sap.sailing.domain.base.ControlPoint getOrCreateControlPoint(ControlPoint controlPoint);
 

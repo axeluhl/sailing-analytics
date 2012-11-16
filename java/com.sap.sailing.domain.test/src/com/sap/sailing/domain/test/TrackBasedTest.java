@@ -5,7 +5,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import com.sap.sailing.domain.base.SingleMark;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Course;
@@ -15,7 +15,7 @@ import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
 import com.sap.sailing.domain.base.impl.BoatImpl;
-import com.sap.sailing.domain.base.impl.SingleMarkImpl;
+import com.sap.sailing.domain.base.impl.MarkImpl;
 import com.sap.sailing.domain.base.impl.CompetitorImpl;
 import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.base.impl.GateImpl;
@@ -96,10 +96,10 @@ public abstract class TrackBasedTest {
         TrackedRegatta trackedRegatta = new TrackedRegattaImpl(regatta);
         List<Waypoint> waypoints = new ArrayList<Waypoint>();
         // create a two-lap upwind/downwind course:
-        SingleMarkImpl left = new SingleMarkImpl("Left lee gate buoy");
-        SingleMarkImpl right = new SingleMarkImpl("Right lee gate buoy");
+        MarkImpl left = new MarkImpl("Left lee gate buoy");
+        MarkImpl right = new MarkImpl("Right lee gate buoy");
         ControlPoint leeGate = new GateImpl(left, right, "Lee Gate");
-        SingleMark windwardMark = new SingleMarkImpl("Windward mark");
+        Mark windwardMark = new MarkImpl("Windward mark");
         waypoints.add(new WaypointImpl(leeGate));
         waypoints.add(new WaypointImpl(windwardMark));
         waypoints.add(new WaypointImpl(leeGate));

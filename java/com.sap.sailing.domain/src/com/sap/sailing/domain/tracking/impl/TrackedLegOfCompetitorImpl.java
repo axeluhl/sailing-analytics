@@ -3,7 +3,7 @@ package com.sap.sailing.domain.tracking.impl;
 import java.util.Iterator;
 import java.util.List;
 
-import com.sap.sailing.domain.base.SingleMark;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.SpeedWithBearing;
@@ -166,7 +166,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
             return Distance.NULL;
         } else {
             Distance result = null;
-            for (SingleMark mark : getLeg().getTo().getMarks()) {
+            for (Mark mark : getLeg().getTo().getMarks()) {
                 Distance d = getWindwardDistanceTo(mark, timePoint);
                 if (result == null || d != null && d.compareTo(result) < 0) {
                     result = d;
@@ -182,7 +182,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
      * bearing, and the distance from the projection to the <code>mark</code> is returned. Otherwise, it is assumed that
      * the leg is neither an upwind nor a downwind leg, and hence the true distance to <code>mark</code> is returned.
      */
-    private Distance getWindwardDistanceTo(SingleMark mark, TimePoint at) throws NoWindException {
+    private Distance getWindwardDistanceTo(Mark mark, TimePoint at) throws NoWindException {
         Position estimatedPosition = getTrackedRace().getTrack(getCompetitor()).getEstimatedPosition(at, false);
         if (!hasStartedLeg(at) || estimatedPosition == null) {
             // covers the case with no fixes for this leg yet, also if the mark passing has already been received

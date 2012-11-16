@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
-import com.sap.sailing.domain.base.SingleMark;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Timed;
@@ -324,7 +324,7 @@ public class CrossTrackErrorCache extends AbstractRaceChangeListener {
     }
 
     @Override
-    public void markPositionChanged(GPSFix fix, SingleMark mark) {
+    public void markPositionChanged(GPSFix fix, Mark mark) {
         TimePoint from = owner.getOrCreateTrack(mark).getEstimatedPositionTimePeriodAffectedBy(fix).getA();
         for (Competitor competitor : cachePerCompetitor.keySet()) {
             invalidate(competitor, from);

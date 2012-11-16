@@ -76,6 +76,6 @@ public interface Course extends Named {
      */
     void update(List<ControlPoint> newControlPoints, DomainFactory baseDomainFactory) throws PatchFailedException;
 
-    Iterable<Leg> getLegsAdjacentTo(SingleMark mark);
+    Iterable<Leg> getLegsAdjacentTo(Mark mark);
 
 }

@@ -8,7 +8,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.logging.Logger;
 
-import com.sap.sailing.domain.base.SingleMark;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
@@ -213,7 +213,7 @@ public class Simulator {
         
     }
 
-    public void scheduleMarkPosition(final SingleMark mark, GPSFixMoving markFix) {
+    public void scheduleMarkPosition(final Mark mark, GPSFixMoving markFix) {
         final TimePoint transformedTimepoint = advance(markFix.getTimePoint());
         final GPSFixMoving transformedMarkFix = new GPSFixMovingImpl(markFix.getPosition(), transformedTimepoint, markFix.getSpeed());
         long waitTime = getWaitTimeInMillisUntil(transformedMarkFix.getTimePoint());

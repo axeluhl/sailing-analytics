@@ -23,7 +23,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 import com.maptrack.client.io.TypeController;
-import com.sap.sailing.domain.base.SingleMark;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceDefinition;
@@ -247,12 +247,12 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
                     for (ControlPoint controlPoint : event.getControlPointList()) {
                         com.sap.sailing.domain.base.ControlPoint domainControlPoint = domainFactory.getOrCreateControlPoint(controlPoint);
                         boolean first = true;
-                        for (SingleMark mark : domainControlPoint.getMarks()) {
+                        for (Mark mark : domainControlPoint.getMarks()) {
                             for (RaceDefinition raceDefinition : raceDefinitions) {
                                 DynamicTrackedRace trackedRace = getTrackedRegatta().getExistingTrackedRace(
                                         raceDefinition);
                                 if (trackedRace != null) {
-                                    DynamicGPSFixTrack<SingleMark, GPSFix> markTrack = trackedRace.getOrCreateTrack(mark);
+                                    DynamicGPSFixTrack<Mark, GPSFix> markTrack = trackedRace.getOrCreateTrack(mark);
                                     if (markTrack.getFirstRawFix() == null) {
                                         markTrack.addGPSFix(new GPSFixImpl(new DegreePosition(first ? controlPoint
                                                 .getLat1() : controlPoint.getLat2(), first ? controlPoint.getLon1()

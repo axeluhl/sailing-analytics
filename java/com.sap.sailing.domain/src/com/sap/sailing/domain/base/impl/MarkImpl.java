@@ -3,39 +3,39 @@ package com.sap.sailing.domain.base.impl;
 import java.io.Serializable;
 import java.util.Collections;
 
-import com.sap.sailing.domain.base.SingleMark;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.common.impl.NamedImpl;
 
-public class SingleMarkImpl extends NamedImpl implements SingleMark {
+public class MarkImpl extends NamedImpl implements Mark {
     private static final long serialVersionUID = 1900673146064411979L;
 
     private final String color;
     private final String shape;
     private final String pattern;
 
-    public SingleMarkImpl(String name) {
+    public MarkImpl(String name) {
         super(name);
         color = null;
         shape = null;
         pattern = null;
     }
 
-    public SingleMarkImpl(String name, String color) {
+    public MarkImpl(String name, String color) {
         super(name);
         this.color = color;
         shape = null;
         pattern = null;
     }
 
-    public SingleMarkImpl(String name, String color, String shape) {
+    public MarkImpl(String name, String color, String shape) {
         super(name);
         this.color = color;
         this.shape = shape;
         pattern = null;
     }
 
-    public SingleMarkImpl(String name, String color, String shape, String pattern) {
+    public MarkImpl(String name, String color, String shape, String pattern) {
         super(name);
         this.color = color;
         this.shape = shape;
@@ -49,14 +49,14 @@ public class SingleMarkImpl extends NamedImpl implements SingleMark {
 
     @SuppressWarnings("unchecked")
     @Override
-    public Iterable<SingleMark> getMarks() {
-        Iterable<? extends SingleMark> result = Collections.singleton(this);
-        return (Iterable<SingleMark>) result;
+    public Iterable<Mark> getMarks() {
+        Iterable<? extends Mark> result = Collections.singleton(this);
+        return (Iterable<Mark>) result;
     }
 
     @Override
-    public SingleMark resolve(DomainFactory domainFactory) {
-        SingleMark result = domainFactory.getOrCreateSingleMark(getName(), color, shape, pattern);
+    public Mark resolve(DomainFactory domainFactory) {
+        Mark result = domainFactory.getOrCreateSingleMark(getName(), color, shape, pattern);
         return result;
     }
 

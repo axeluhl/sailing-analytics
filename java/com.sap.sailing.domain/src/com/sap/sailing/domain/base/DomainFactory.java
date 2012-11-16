@@ -19,16 +19,16 @@ public interface DomainFactory {
      */
     Nationality getOrCreateNationality(String threeLetterIOCCode);
 
-    SingleMark getOrCreateSingleMark(String id);
+    Mark getOrCreateSingleMark(String id);
     
     /**
      * If the single mark with ID <code>id</code> already exists, it is returned. Its color may differ from <code>color</code>
-     * in that case. Otherwise, a new {@link SingleMark} is created with <code>color</code> as its {@link SingleMark#getColor()} 
-     * and <code>shape</code> as its {@link SingleMark#getShape()}.
+     * in that case. Otherwise, a new {@link Mark} is created with <code>color</code> as its {@link Mark#getColor()} 
+     * and <code>shape</code> as its {@link Mark#getShape()}.
      */
-    SingleMark getOrCreateSingleMark(String id, String color, String shape, String pattern);
+    Mark getOrCreateSingleMark(String id, String color, String shape, String pattern);
 
-    Gate createGate(SingleMark left, SingleMark right, String name);
+    Gate createGate(Mark left, Mark right, String name);
     
     /**
      * The waypoint created is weakly cached so that when requested again by

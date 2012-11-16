@@ -13,7 +13,7 @@ import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import com.sap.sailing.domain.base.SingleMark;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.Waypoint;
@@ -534,7 +534,7 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
     }
 
     @Override
-    public void markPositionChanged(GPSFix fix, SingleMark mark) {
+    public void markPositionChanged(GPSFix fix, Mark mark) {
         assert fix != null && fix.getTimePoint() != null;
         // A mark position change can mean a leg type change. The interval over which the wind estimation is affected
         // depends on how the GPS track computes the estimated mark position. Ask it:

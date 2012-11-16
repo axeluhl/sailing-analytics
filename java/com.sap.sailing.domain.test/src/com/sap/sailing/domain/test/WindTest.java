@@ -15,7 +15,7 @@ import java.util.Set;
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.BoatClass;
-import com.sap.sailing.domain.base.SingleMark;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.DomainFactory;
@@ -246,8 +246,8 @@ public class WindTest {
     @Test
     public void testWindEstimationReturnsNullIfNoUpwindStartAndNoOtherWindDataAvailable() {
         DomainFactory domainFactory = DomainFactory.INSTANCE;
-        SingleMark startFinishLeft = domainFactory.getOrCreateSingleMark("Start/Finish left");
-        SingleMark startFinishRight = domainFactory.getOrCreateSingleMark("Start/Finish right");
+        Mark startFinishLeft = domainFactory.getOrCreateSingleMark("Start/Finish left");
+        Mark startFinishRight = domainFactory.getOrCreateSingleMark("Start/Finish right");
         ControlPoint startFinish = domainFactory.createGate(startFinishLeft, startFinishRight, "Start/Finish");
         ControlPoint top = domainFactory.getOrCreateSingleMark("Top");
         Waypoint w1 = domainFactory.createWaypoint(startFinish);

@@ -17,7 +17,7 @@ import java.util.regex.Pattern;
 
 import org.junit.Before;
 
-import com.sap.sailing.domain.base.SingleMark;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RaceDefinition;
@@ -165,7 +165,7 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest {
         markPositions.put("K Finish (left)", new DegreePosition(54.48918199999999, 10.17003714));
         markPositions.put("K Finish (right)", new DegreePosition(54.48891756, 10.170632146666675));
         for (Waypoint w : race.getRace().getCourse().getWaypoints()) {
-            for (SingleMark mark : w.getMarks()) {
+            for (Mark mark : w.getMarks()) {
                 race.getOrCreateTrack(mark).addGPSFix(new GPSFixImpl(markPositions.get(mark.getName()), epoch));
                 race.getOrCreateTrack(mark).addGPSFix(new GPSFixImpl(markPositions.get(mark.getName()),
                         timePointForFixes));

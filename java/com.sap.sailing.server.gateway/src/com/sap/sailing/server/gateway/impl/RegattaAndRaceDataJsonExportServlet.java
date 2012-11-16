@@ -12,7 +12,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
-import com.sap.sailing.domain.base.SingleMark;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Person;
@@ -163,10 +163,10 @@ public class RegattaAndRaceDataJsonExportServlet extends JsonExportServlet {
                     JSONObject jsonWaypoint = new JSONObject();
                     jsonWaypoint.put("name", waypoint.getName());
                     JSONArray jsonMarks = new JSONArray();
-                    for (SingleMark mark : waypoint.getMarks()) {
+                    for (Mark mark : waypoint.getMarks()) {
                         JSONObject jsonMark = new JSONObject();
                         jsonMark.put("name", mark.getName());
-                        GPSFixTrack<SingleMark, GPSFix> markTrack = trackedRace.getOrCreateTrack(mark);
+                        GPSFixTrack<Mark, GPSFix> markTrack = trackedRace.getOrCreateTrack(mark);
                         GPSFix lastFixAtOrBefore = markTrack.getLastFixAtOrBefore(timePoint);
                         if (lastFixAtOrBefore != null) {
                             Position markPosition = lastFixAtOrBefore.getPosition();

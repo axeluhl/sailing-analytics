@@ -20,7 +20,7 @@ import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
-import com.sap.sailing.domain.base.SingleMark;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Nationality;
@@ -149,11 +149,11 @@ public class DomainFactoryImpl implements DomainFactory {
                 String markPattern = controlPointMetadata.get("Pattern");
                 if (controlPoint.getHasTwoPoints()) {
                     // it's a gate
-                    SingleMark leftMark = baseDomainFactory.getOrCreateSingleMark(controlPointName + " (left)", markColor, markShape, markPattern);
-                    SingleMark rightMark = baseDomainFactory.getOrCreateSingleMark(controlPointName + " (right)", markColor, markShape, markPattern);
+                    Mark leftMark = baseDomainFactory.getOrCreateSingleMark(controlPointName + " (left)", markColor, markShape, markPattern);
+                    Mark rightMark = baseDomainFactory.getOrCreateSingleMark(controlPointName + " (right)", markColor, markShape, markPattern);
                     domainControlPoint = baseDomainFactory.createGate(leftMark, rightMark, controlPointName);
                 } else {
-                    SingleMark mark = baseDomainFactory.getOrCreateSingleMark(controlPointName, markColor, markShape, markPattern);
+                    Mark mark = baseDomainFactory.getOrCreateSingleMark(controlPointName, markColor, markShape, markPattern);
                     domainControlPoint = mark;
                 }
                 controlPointCache.put(controlPoint, domainControlPoint);
@@ -497,10 +497,10 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public SingleMark getMark(ControlPoint controlPoint, ControlPointPositionData record) {
+    public Mark getMark(ControlPoint controlPoint, ControlPointPositionData record) {
         com.sap.sailing.domain.base.ControlPoint myControlPoint = getOrCreateControlPoint(controlPoint);
-        SingleMark result;
-        Iterator<SingleMark> iter = myControlPoint.getMarks().iterator();
+        Mark result;
+        Iterator<Mark> iter = myControlPoint.getMarks().iterator();
         if (controlPoint.getHasTwoPoints()) {
             if (record.getIndex() == 0) {
                 result = iter.next();

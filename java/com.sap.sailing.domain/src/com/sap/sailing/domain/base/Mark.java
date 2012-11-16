@@ -8,7 +8,7 @@ package com.sap.sailing.domain.base;
  * @author Axel Uhl (D043530)
  * 
  */
-public interface SingleMark extends WithID, ControlPoint, IsManagedByDomainFactory {
+public interface Mark extends WithID, ControlPoint, IsManagedByDomainFactory {
     public String getColor();
     public String getShape();
     public String getPattern();
