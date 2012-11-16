@@ -149,11 +149,11 @@ public class DomainFactoryImpl implements DomainFactory {
                 String markPattern = controlPointMetadata.get("Pattern");
                 if (controlPoint.getHasTwoPoints()) {
                     // it's a gate
-                    Mark leftMark = baseDomainFactory.getOrCreateSingleMark(controlPointName + " (left)", markColor, markShape, markPattern);
-                    Mark rightMark = baseDomainFactory.getOrCreateSingleMark(controlPointName + " (right)", markColor, markShape, markPattern);
+                    Mark leftMark = baseDomainFactory.getOrCreateMark(controlPointName + " (left)", markColor, markShape, markPattern);
+                    Mark rightMark = baseDomainFactory.getOrCreateMark(controlPointName + " (right)", markColor, markShape, markPattern);
                     domainControlPoint = baseDomainFactory.createGate(leftMark, rightMark, controlPointName);
                 } else {
-                    Mark mark = baseDomainFactory.getOrCreateSingleMark(controlPointName, markColor, markShape, markPattern);
+                    Mark mark = baseDomainFactory.getOrCreateMark(controlPointName, markColor, markShape, markPattern);
                     domainControlPoint = mark;
                 }
                 controlPointCache.put(controlPoint, domainControlPoint);

@@ -1,7 +1,6 @@
 package com.sap.sailing.domain.swisstimingadapter;
 
 import com.sap.sailing.domain.base.BoatClass;
-import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Nationality;
@@ -31,7 +30,7 @@ public interface DomainFactory {
 
     RaceDefinition createRaceDefinition(Regatta regatta, Race race, StartList startList, com.sap.sailing.domain.swisstimingadapter.Course course);
 
-    Mark getOrCreateMark(String trackerID);
+    com.sap.sailing.domain.base.Mark getOrCreateMark(String trackerID);
     
     GPSFixMoving createGPSFix(TimePoint timePointOfTransmission, Fix fix);
 

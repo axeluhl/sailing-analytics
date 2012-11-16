@@ -1678,11 +1678,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     ControlPoint newControlPoint;
                     if (controlPointDTO instanceof GateDTO) {
                         GateDTO gateDTO = (GateDTO) controlPointDTO;
-                        Mark left = baseDomainFactory.getOrCreateSingleMark(gateDTO.getLeft().name);
-                        Mark right = baseDomainFactory.getOrCreateSingleMark(gateDTO.getRight().name);
+                        Mark left = baseDomainFactory.getOrCreateMark(gateDTO.getLeft().name);
+                        Mark right = baseDomainFactory.getOrCreateMark(gateDTO.getRight().name);
                         newControlPoint = baseDomainFactory.createGate(left, right, gateDTO.name);
                     } else {
-                        newControlPoint = baseDomainFactory.getOrCreateSingleMark(controlPointDTO.name);
+                        newControlPoint = baseDomainFactory.getOrCreateMark(controlPointDTO.name);
                     }
                     newControlPoints.add(newControlPoint);
                 }

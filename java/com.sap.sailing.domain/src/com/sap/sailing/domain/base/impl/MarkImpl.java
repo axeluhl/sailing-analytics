@@ -56,7 +56,7 @@ public class MarkImpl extends NamedImpl implements Mark {
 
     @Override
     public Mark resolve(DomainFactory domainFactory) {
-        Mark result = domainFactory.getOrCreateSingleMark(getName(), color, shape, pattern);
+        Mark result = domainFactory.getOrCreateMark(getName(), color, shape, pattern);
         return result;
     }
 

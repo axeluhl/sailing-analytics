@@ -11,7 +11,6 @@ import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
-import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Nationality;
@@ -224,8 +223,8 @@ public class DomainFactoryImpl implements DomainFactory {
      *            {@link MessageType#RPD RPD} message
      */
     @Override
-    public Mark getOrCreateMark(String id) {
-        return baseDomainFactory.getOrCreateSingleMark(id);
+    public com.sap.sailing.domain.base.Mark getOrCreateMark(String id) {
+        return baseDomainFactory.getOrCreateMark(id);
     }
 
     @Override

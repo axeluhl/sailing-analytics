@@ -110,7 +110,7 @@ public class DomainFactoryImpl implements DomainFactory {
      * {@link MessageType#RPD RPD} message
      */
     @Override
-    public Mark getOrCreateSingleMark(String id) {
+    public Mark getOrCreateMark(String id) {
         Mark result = markCache.get(id);
         if (result == null) {
             result = new MarkImpl(id);
@@ -120,7 +120,7 @@ public class DomainFactoryImpl implements DomainFactory {
     }
     
     @Override
-    public Mark getOrCreateSingleMark(String id, String color, String shape, String pattern) {
+    public Mark getOrCreateMark(String id, String color, String shape, String pattern) {
         Mark result = markCache.get(id);
         if (result == null) {
             result = new MarkImpl(id, color, shape, pattern);

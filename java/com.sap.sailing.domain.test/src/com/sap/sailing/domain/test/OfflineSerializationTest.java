@@ -91,7 +91,7 @@ public class OfflineSerializationTest extends AbstractSerializationTest {
     public void testIdentityStabilityOfMarkSerialization() throws ClassNotFoundException, IOException {
         DomainFactory senderDomainFactory = new DomainFactoryImpl();
         DomainFactory receiverDomainFactory = new DomainFactoryImpl();
-        Mark sendersMark1 = senderDomainFactory.getOrCreateSingleMark("TestBuoy1");
+        Mark sendersMark1 = senderDomainFactory.getOrCreateMark("TestBuoy1");
         Mark receiversMark1 = cloneBySerialization(sendersMark1, receiverDomainFactory);
         Mark receiversSecondCopyOfMark1 = cloneBySerialization(sendersMark1, receiverDomainFactory);
         assertSame(receiversMark1, receiversSecondCopyOfMark1);
@@ -101,7 +101,7 @@ public class OfflineSerializationTest extends AbstractSerializationTest {
     public void testIdentityStabilityOfWaypointSerialization() throws ClassNotFoundException, IOException {
         DomainFactory senderDomainFactory = new DomainFactoryImpl();
         DomainFactory receiverDomainFactory = new DomainFactoryImpl();
-        Mark sendersMark1 = senderDomainFactory.getOrCreateSingleMark("TestBuoy1");
+        Mark sendersMark1 = senderDomainFactory.getOrCreateMark("TestBuoy1");
         Waypoint sendersWaypoint1 = senderDomainFactory.createWaypoint(sendersMark1);
         Waypoint receiversWaypoint1 = cloneBySerialization(sendersWaypoint1, receiverDomainFactory);
         Waypoint receiversSecondCopyOfWaypoint1 = cloneBySerialization(sendersWaypoint1, receiverDomainFactory);

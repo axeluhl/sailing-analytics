@@ -19,14 +19,14 @@ public interface DomainFactory {
      */
     Nationality getOrCreateNationality(String threeLetterIOCCode);
 
-    Mark getOrCreateSingleMark(String id);
+    Mark getOrCreateMark(String id);
     
     /**
      * If the single mark with ID <code>id</code> already exists, it is returned. Its color may differ from <code>color</code>
      * in that case. Otherwise, a new {@link Mark} is created with <code>color</code> as its {@link Mark#getColor()} 
      * and <code>shape</code> as its {@link Mark#getShape()}.
      */
-    Mark getOrCreateSingleMark(String id, String color, String shape, String pattern);
+    Mark getOrCreateMark(String id, String color, String shape, String pattern);
 
     Gate createGate(Mark left, Mark right, String name);
     

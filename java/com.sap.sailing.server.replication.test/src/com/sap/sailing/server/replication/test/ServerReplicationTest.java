@@ -87,9 +87,9 @@ public class ServerReplicationTest extends AbstractServerReplicationTest {
                 new ArrayList<Competitor>());
         AddRaceDefinition addRaceOperation = new AddRaceDefinition(new RegattaName(regatta.getName()), race);
         master.apply(addRaceOperation);
-        masterCourse.addWaypoint(0, masterDomainFactory.createWaypoint(masterDomainFactory.getOrCreateSingleMark("Mark1")));
-        masterCourse.addWaypoint(1, masterDomainFactory.createWaypoint(masterDomainFactory.getOrCreateSingleMark("Mark2")));
-        masterCourse.addWaypoint(2, masterDomainFactory.createWaypoint(masterDomainFactory.getOrCreateSingleMark("Mark3")));
+        masterCourse.addWaypoint(0, masterDomainFactory.createWaypoint(masterDomainFactory.getOrCreateMark("Mark1")));
+        masterCourse.addWaypoint(1, masterDomainFactory.createWaypoint(masterDomainFactory.getOrCreateMark("Mark2")));
+        masterCourse.addWaypoint(2, masterDomainFactory.createWaypoint(masterDomainFactory.getOrCreateMark("Mark3")));
         masterCourse.removeWaypoint(1);
         Thread.sleep(1000); // wait 1s for JMS to deliver the message and the message to be applied
         Regatta replicaEvent = replica.getRegatta(new RegattaName(regatta.getName()));

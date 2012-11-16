@@ -246,10 +246,10 @@ public class WindTest {
     @Test
     public void testWindEstimationReturnsNullIfNoUpwindStartAndNoOtherWindDataAvailable() {
         DomainFactory domainFactory = DomainFactory.INSTANCE;
-        Mark startFinishLeft = domainFactory.getOrCreateSingleMark("Start/Finish left");
-        Mark startFinishRight = domainFactory.getOrCreateSingleMark("Start/Finish right");
+        Mark startFinishLeft = domainFactory.getOrCreateMark("Start/Finish left");
+        Mark startFinishRight = domainFactory.getOrCreateMark("Start/Finish right");
         ControlPoint startFinish = domainFactory.createGate(startFinishLeft, startFinishRight, "Start/Finish");
-        ControlPoint top = domainFactory.getOrCreateSingleMark("Top");
+        ControlPoint top = domainFactory.getOrCreateMark("Top");
         Waypoint w1 = domainFactory.createWaypoint(startFinish);
         Waypoint w2 = domainFactory.createWaypoint(top);
         Waypoint w3 = domainFactory.createWaypoint(startFinish);
