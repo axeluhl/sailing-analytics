@@ -18,6 +18,7 @@ import org.moxieapps.gwt.highcharts.client.ToolTipFormatter;
 import org.moxieapps.gwt.highcharts.client.labels.AxisLabelsData;
 import org.moxieapps.gwt.highcharts.client.labels.AxisLabelsFormatter;
 import org.moxieapps.gwt.highcharts.client.labels.XAxisLabels;
+import org.moxieapps.gwt.highcharts.client.labels.YAxisLabels;
 import org.moxieapps.gwt.highcharts.client.plotOptions.LinePlotOptions;
 import org.moxieapps.gwt.highcharts.client.plotOptions.Marker;
 import org.moxieapps.gwt.highcharts.client.plotOptions.Marker.Symbol;
@@ -74,7 +75,14 @@ public class LeaderboardRankChart extends SimplePanel implements RequiresResize 
                 return raceColumnNames.get((int) axisLabelsData.getValueAsLong());
             }
         }));
-        chart.getYAxis().setAxisTitleText(stringMessages.rank()).setStartOnTick(true).setShowFirstLabel(false);
+        chart.getYAxis().setAxisTitleText(stringMessages.rank()).setStartOnTick(true).setShowFirstLabel(false)
+        .setLabels(new YAxisLabels().setFormatter(new AxisLabelsFormatter() {
+            @Override
+            public String format(AxisLabelsData axisLabelsData) {
+                // invert signum to ensure best are at the top
+                return "" + (-axisLabelsData.getValueAsLong());
+            }
+        }));
         if (compactChart) {
             chart.setSpacingBottom(10).setSpacingLeft(10).setSpacingRight(10).setSpacingTop(2)
                  .setOption("legend/margin", 2)
@@ -109,7 +117,7 @@ public class LeaderboardRankChart extends SimplePanel implements RequiresResize 
                                     chart.addSeries(series);
                                     chartSeries.add(series);
                                 }
-                                series.addPoint(raceNumber, rank);
+                                series.addPoint(raceNumber, -rank);
                                 rank++;
                             }
                             raceNumber++;
