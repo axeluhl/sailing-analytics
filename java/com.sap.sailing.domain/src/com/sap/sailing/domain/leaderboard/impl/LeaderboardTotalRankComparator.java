@@ -82,7 +82,7 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
         for (Competitor competitor : leaderboard.getCompetitors()) {
             for (RaceColumn raceColumn : raceColumnsToConsider) {
                 totalPointsCache.put(new Pair<Competitor, RaceColumn>(competitor, raceColumn),
-                        leaderboard.getTotalPoints(competitor, raceColumn, timePoint));
+                        leaderboard.getTotalPoints(competitor, raceColumn, raceColumnsToConsider, timePoint));
             }
         }
     }

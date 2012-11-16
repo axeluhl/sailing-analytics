@@ -337,5 +337,12 @@ public interface Leaderboard extends Named {
      * races attached to this leaderboard
      */
     Long getTotalTimeSailedInMilliseconds(Competitor competitor, TimePoint timePoint);
+
+    /**
+     * Same as {@link #getTotalPoints(Competitor, RaceColumn, TimePoint)}, only that for determining the discarded
+     * results only <code>raceColumnsToConsider</code> are considered.
+     */
+    Double getTotalPoints(Competitor competitor, RaceColumn raceColumn, Iterable<RaceColumn> raceColumnsToConsider,
+            TimePoint timePoint) throws NoWindException;
     
 }

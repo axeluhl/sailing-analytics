@@ -228,10 +228,11 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
         return getTotalPoints(competitor, raceColumn, getRaceColumns(), timePoint);
     }
     
-    private Double getTotalPoints(Competitor competitor, RaceColumn raceColumn,
+    @Override
+    public Double getTotalPoints(Competitor competitor, RaceColumn raceColumn,
             Iterable<RaceColumn> raceColumnsToConsider, TimePoint timePoint) throws NoWindException {
         Double result;
-        if (isDiscarded(competitor, raceColumn, timePoint)) {
+        if (isDiscarded(competitor, raceColumn, raceColumnsToConsider, timePoint)) {
             result = 0.0;
         } else {
             final Double netPoints = getNetPoints(competitor, raceColumn, timePoint);
