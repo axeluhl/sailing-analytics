@@ -42,7 +42,10 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
         TracTracEventManagementPanel tractracEventManagementPanel = new TracTracEventManagementPanel(sailingService, this, this, stringMessages);
         regattaDisplayers.add(tractracEventManagementPanel);
         tractracEventManagementPanel.setSize("90%", "90%");
-        tabPanel.add(tractracEventManagementPanel, stringMessages.tracTracEvents(), false);
+        SwissTimingReplayConnectorPanel swissTimingArchiveConnectorPanel = new SwissTimingReplayConnectorPanel(sailingService, this, this, stringMessages);
+        regattaDisplayers.add(swissTimingArchiveConnectorPanel);
+        swissTimingArchiveConnectorPanel.setSize("90%", "90%");
+        tabPanel.add(swissTimingArchiveConnectorPanel, stringMessages.swissTimingArchiveConnector(), false);
         SwissTimingEventManagementPanel swisstimingEventManagementPanel = new SwissTimingEventManagementPanel(sailingService, this, this, stringMessages);
         regattaDisplayers.add(swisstimingEventManagementPanel);
         swisstimingEventManagementPanel.setSize("90%", "90%");

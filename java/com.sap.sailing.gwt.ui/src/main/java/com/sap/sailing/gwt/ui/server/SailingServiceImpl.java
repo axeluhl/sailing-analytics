@@ -102,6 +102,8 @@ import com.sap.sailing.domain.persistence.MongoWindStoreFactory;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingConfiguration;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
 import com.sap.sailing.domain.swisstimingadapter.persistence.SwissTimingAdapterPersistence;
+import com.sap.sailing.domain.swisstimingreplayadapter.SwissTimingReplayRace;
+import com.sap.sailing.domain.swisstimingreplayadapter.SwissTimingReplayService;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
@@ -167,6 +169,7 @@ import com.sap.sailing.gwt.ui.shared.ScoreCorrectionProviderDTO;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
 import com.sap.sailing.gwt.ui.shared.SpeedWithBearingDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
+import com.sap.sailing.gwt.ui.shared.SwissTimingReplayRaceDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingRaceRecordDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracConfigurationDTO;
@@ -2243,6 +2246,23 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
+    public List<SwissTimingReplayRaceDTO> listSwissTiminigReplayRaces(String swissTimingUrl) {
+        List<SwissTimingReplayRace> replayRaces = SwissTimingReplayService.listReplayRaces(swissTimingUrl);
+        List<SwissTimingReplayRaceDTO> result = new ArrayList<SwissTimingReplayRaceDTO>(replayRaces.size()); 
+        for (SwissTimingReplayRace replayRace : replayRaces) {
+            result.add(new SwissTimingReplayRaceDTO(replayRace.flight_number, replayRace.race_id, replayRace.rsc, replayRace.name, replayRace.boat_class, replayRace.startTime, replayRace.link));
+        }
+        return result;
+    }
+    
+    @Override
+    public void replaySwissTimingRace(RegattaIdentifier regattaIdentifier, SwissTimingReplayRaceDTO replayRaceDTO,
+            boolean trackWind, boolean correctWindByDeclination, boolean simulateWithStartTimeNow) {
+        SwissTimingReplayService.loadRaceData(replayRaceDTO.link);
+        
+    }
+
+    @Override
     public String[] getCountryCodes() {
         List<String> countryCodes = new ArrayList<String>();
         for (CountryCode cc : countryCodeFactory.getAll()) {
@@ -2793,4 +2813,5 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             fregService.registerResultUrl(new URL(result));
         }
     }
+
 }

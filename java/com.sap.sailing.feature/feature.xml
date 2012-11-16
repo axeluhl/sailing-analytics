@@ -128,6 +128,13 @@ Computes leaderboard information for sailing races and offers RESTful APIs to al
          unpack="false"/>
 
    <plugin
+         id="com.sap.sailing.domain.swisstimingreplayadapter"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
          id="com.sap.sailing.domain.tractracadapter.persistence"
          download-size="0"
          install-size="0"

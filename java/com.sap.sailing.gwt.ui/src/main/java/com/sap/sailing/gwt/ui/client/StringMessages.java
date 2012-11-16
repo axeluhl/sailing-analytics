@@ -431,4 +431,5 @@ public interface StringMessages extends Messages {
     String averageJibeLossInMeters();
     String legend();
     String live();
+    String swissTimingArchiveConnector();
 }
