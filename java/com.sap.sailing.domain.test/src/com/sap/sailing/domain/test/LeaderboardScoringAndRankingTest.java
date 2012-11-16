@@ -611,6 +611,26 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
         // c[1]: 3  3  2 (4) 3  3            3  6  8  8 11 14
         // c[2]: 1  1  1 (2) 2  2            1  2  3  3  5  7
         // c[3]:(4) 4  4  1  1  1            4  8 12  9 10 11
+        double[][] scoresAfter3Races = new double[][] {
+                { 2, 2, 3 },
+                { 3, 3, 2 },
+                { 1, 1, 1 },
+                { 4, 4, 4 } };
+        double[][] scoresAfter4Races = new double[][] {
+                { 2, 2, 0, 3 },
+                { 3, 3, 2, 0 },
+                { 1, 1, 1, 0 },
+                { 0, 4, 4, 1 } };
+        double[][] scoresAfter5Races = new double[][] {
+                { 2, 2, 3, 3, 0 },
+                { 3, 3, 2, 0, 3 },
+                { 1, 1, 1, 0, 2 },
+                { 0, 4, 4, 1, 1 } };
+        double[][] scoresAfter6Races = new double[][] {
+                { 2, 2, 3, 3, 0, 4 },
+                { 3, 3, 2, 0, 3, 3 },
+                { 1, 1, 1, 0, 2, 2 },
+                { 0, 4, 4, 1, 1, 1 } };
         Competitor[] f1 = new Competitor[] { c[2], c[0], c[1], c[3] };
         Competitor[] f2 = new Competitor[] { c[2], c[0], c[1], c[3] };
         Competitor[] f3 = new Competitor[] { c[2], c[1], c[0], c[3] };
@@ -637,6 +657,30 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
                 rankedCompetitorsFromBestToWorstAfterEachRaceColumn.get(Util.get(leaderboard.getRaceColumns(), 4)));
         assertEquals(Arrays.asList(c[2], c[3], c[0], c[1]), // c[0] has more second places than c[1] (2 vs. 1)
                 rankedCompetitorsFromBestToWorstAfterEachRaceColumn.get(Util.get(leaderboard.getRaceColumns(), 5)));
+        List<RaceColumn> raceColumnsToConsider = new ArrayList<>();
+        int raceColumnNumber=0;
+        while (raceColumnNumber<3) {
+            final RaceColumn raceColumn = Util.get(leaderboard.getRaceColumns(), raceColumnNumber++);
+            raceColumnsToConsider.add(raceColumn);
+        }
+        checkScoresAfterSomeRaces(leaderboard, raceColumnsToConsider, scoresAfter3Races, later, c);
+        raceColumnsToConsider.add(Util.get(leaderboard.getRaceColumns(), raceColumnNumber++));
+        checkScoresAfterSomeRaces(leaderboard, raceColumnsToConsider, scoresAfter4Races, later, c);
+        raceColumnsToConsider.add(Util.get(leaderboard.getRaceColumns(), raceColumnNumber++));
+        checkScoresAfterSomeRaces(leaderboard, raceColumnsToConsider, scoresAfter5Races, later, c);
+        raceColumnsToConsider.add(Util.get(leaderboard.getRaceColumns(), raceColumnNumber++));
+        checkScoresAfterSomeRaces(leaderboard, raceColumnsToConsider, scoresAfter6Races, later, c);
+    }
+
+    private void checkScoresAfterSomeRaces(Leaderboard leaderboard, List<RaceColumn> raceColumnsToConsider,
+            double[][] scoresAfterNRaces, TimePoint timePoint, Competitor[] competitors) throws NoWindException {
+        for (int competitorIndex=0; competitorIndex<scoresAfterNRaces.length; competitorIndex++) {
+            for (int raceColumnIndex=0; raceColumnIndex<raceColumnsToConsider.size(); raceColumnIndex++) {
+                assertEquals(scoresAfterNRaces[competitorIndex][raceColumnIndex],
+                        leaderboard.getTotalPoints(competitors[competitorIndex], raceColumnsToConsider.get(raceColumnIndex),
+                                raceColumnsToConsider, timePoint), 0.00000001);
+            }
+        }
     }
 
     @Test
