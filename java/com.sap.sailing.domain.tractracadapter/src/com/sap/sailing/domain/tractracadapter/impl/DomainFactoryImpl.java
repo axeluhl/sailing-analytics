@@ -20,7 +20,7 @@ import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
-import com.sap.sailing.domain.base.Buoy;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Nationality;
@@ -144,17 +144,17 @@ public class DomainFactoryImpl implements DomainFactory {
             if (domainControlPoint == null) {
                 String controlPointName = controlPoint.getName();
                 Map<String, String> controlPointMetadata = parseControlPointMetadata(controlPoint);
-                String buoyColor = controlPointMetadata.get("Color");
-                String buoyShape = controlPointMetadata.get("Shape");
-                String buoyPattern = controlPointMetadata.get("Pattern");
+                String markColor = controlPointMetadata.get("Color");
+                String markShape = controlPointMetadata.get("Shape");
+                String markPattern = controlPointMetadata.get("Pattern");
                 if (controlPoint.getHasTwoPoints()) {
                     // it's a gate
-                    Buoy leftBuoy = baseDomainFactory.getOrCreateBuoy(controlPointName + " (left)", buoyColor, buoyShape, buoyPattern);
-                    Buoy rightBuoy = baseDomainFactory.getOrCreateBuoy(controlPointName + " (right)", buoyColor, buoyShape, buoyPattern);
-                    domainControlPoint = baseDomainFactory.createGate(leftBuoy, rightBuoy, controlPointName);
+                    Mark leftMark = baseDomainFactory.getOrCreateMark(controlPointName + " (left)", markColor, markShape, markPattern);
+                    Mark rightMark = baseDomainFactory.getOrCreateMark(controlPointName + " (right)", markColor, markShape, markPattern);
+                    domainControlPoint = baseDomainFactory.createGate(leftMark, rightMark, controlPointName);
                 } else {
-                    Buoy buoy = baseDomainFactory.getOrCreateBuoy(controlPointName, buoyColor, buoyShape, buoyPattern);
-                    domainControlPoint = buoy;
+                    Mark mark = baseDomainFactory.getOrCreateMark(controlPointName, markColor, markShape, markPattern);
+                    domainControlPoint = mark;
                 }
                 controlPointCache.put(controlPoint, domainControlPoint);
             }
@@ -497,10 +497,10 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public Buoy getBuoy(ControlPoint controlPoint, ControlPointPositionData record) {
+    public Mark getMark(ControlPoint controlPoint, ControlPointPositionData record) {
         com.sap.sailing.domain.base.ControlPoint myControlPoint = getOrCreateControlPoint(controlPoint);
-        Buoy result;
-        Iterator<Buoy> iter = myControlPoint.getBuoys().iterator();
+        Mark result;
+        Iterator<Mark> iter = myControlPoint.getMarks().iterator();
         if (controlPoint.getHasTwoPoints()) {
             if (record.getIndex() == 0) {
                 result = iter.next();

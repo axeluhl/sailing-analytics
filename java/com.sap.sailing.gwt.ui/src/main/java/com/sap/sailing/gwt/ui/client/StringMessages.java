@@ -363,12 +363,12 @@ public interface StringMessages extends Messages {
     String errorTryingToObtainLeaderboardContents(String message);
     String lastScoreUpdate();
     String warningBrowserUnsupported();
-    String newBuoy();
+    String newMark();
     String controlPoint();
     String errorUpdatingRaceCourse(String message);
     String successfullyUpdatedCourse();
-    String selectOneBuoyOrTwoBuoysForGate();
-    String errorTryingToObtainTheBuoysOfTheRace(String message);
+    String selectOneMarkOrTwoMarksForGate();
+    String errorTryingToObtainTheMarksOfTheRace(String message);
     String errorTryingToObtainRaceCourse(String message);
     String insertWaypointBeforeSelected();
     String insertWaypointAfterSelected();
@@ -429,6 +429,8 @@ public interface StringMessages extends Messages {
     String averageManeuverLossInMeters();
     String averageTackLossInMeters();
     String averageJibeLossInMeters();
+    String shape();
+    String pattern();
     String legend();
     String live();
 }

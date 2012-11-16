@@ -93,7 +93,7 @@ public class RankPerLeg2 extends Action {
                             } else {
                                 addColumn(markName);
                             }
-                            addColumn(leg == null ? "null" : leg.getTo().getBuoys().iterator().next().getName());
+                            addColumn(leg == null ? "null" : leg.getTo().getMarks().iterator().next().getName());
 
                             addColumn(upOrDownwinLeg);
                             addColumn(competitorName);
