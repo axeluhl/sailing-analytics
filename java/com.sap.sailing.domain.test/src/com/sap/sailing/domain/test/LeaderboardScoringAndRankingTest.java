@@ -35,6 +35,7 @@ import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
@@ -598,6 +599,88 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
         List<Competitor> rankedCompetitors = leaderboard.getCompetitorsFromBestToWorst(later);
         assertEquals(leaderboard.getTotalPoints(c[0], later), leaderboard.getTotalPoints(c[1], later), 0.000000001);
         assertTrue(rankedCompetitors.indexOf(c[0]) == rankedCompetitors.indexOf(c[1])-1);
+    }
+
+    @Test
+    public void testScoringConsideringNotAllRaces() throws NoWindException {
+        // one discard at four races
+        Competitor[] c = createCompetitors(4).toArray(new Competitor[0]);
+        // Leaderboard:                     Accumulated with incremental discards
+        //       R1 R2 R3 R4 R5 R6          R1 R2 R3 R4 R5 R6
+        // c[0]: 2  2  3  3 (4) 4            2  4  7  7 10 14
+        // c[1]: 3  3  2 (4) 3  3            3  6  8  8 11 14
+        // c[2]: 1  1  1 (2) 2  2            1  2  3  3  5  7
+        // c[3]:(4) 4  4  1  1  1            4  8 12  9 10 11
+        double[][] scoresAfter3Races = new double[][] {
+                { 2, 2, 3 },
+                { 3, 3, 2 },
+                { 1, 1, 1 },
+                { 4, 4, 4 } };
+        double[][] scoresAfter4Races = new double[][] {
+                { 2, 2, 0, 3 },
+                { 3, 3, 2, 0 },
+                { 1, 1, 1, 0 },
+                { 0, 4, 4, 1 } };
+        double[][] scoresAfter5Races = new double[][] {
+                { 2, 2, 3, 3, 0 },
+                { 3, 3, 2, 0, 3 },
+                { 1, 1, 1, 0, 2 },
+                { 0, 4, 4, 1, 1 } };
+        double[][] scoresAfter6Races = new double[][] {
+                { 2, 2, 3, 3, 0, 4 },
+                { 3, 3, 2, 0, 3, 3 },
+                { 1, 1, 1, 0, 2, 2 },
+                { 0, 4, 4, 1, 1, 1 } };
+        Competitor[] f1 = new Competitor[] { c[2], c[0], c[1], c[3] };
+        Competitor[] f2 = new Competitor[] { c[2], c[0], c[1], c[3] };
+        Competitor[] f3 = new Competitor[] { c[2], c[1], c[0], c[3] };
+        Competitor[] f4 = new Competitor[] { c[3], c[2], c[0], c[1] };
+        Competitor[] f5 = new Competitor[] { c[3], c[2], c[1], c[0] };
+        Competitor[] f6 = new Competitor[] { c[3], c[2], c[1], c[0] };
+        Regatta regatta = createRegatta(/* qualifying */0, new String[] { "Default" }, /* final */6, new String[] { "Default" },
+        /* medal */ false, "testTieBreakWithTwoVersusOneSeconds",
+                DomainFactory.INSTANCE.getOrCreateBoatClass("49er", /* typicallyStartsUpwind */true),
+                DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT));
+        Leaderboard leaderboard = createLeaderboard(regatta, /* discarding thresholds */ new int[] { 4 });
+        TimePoint later = createAndAttachTrackedRaces(series.get(1), "Default", f1, f2, f3, f4, f5, f6);
+        Map<RaceColumn, List<Competitor>> rankedCompetitorsFromBestToWorstAfterEachRaceColumn =
+                leaderboard.getRankedCompetitorsFromBestToWorstAfterEachRaceColumn(later);
+        assertEquals(Arrays.asList(c[2], c[0], c[1], c[3]),
+                rankedCompetitorsFromBestToWorstAfterEachRaceColumn.get(Util.get(leaderboard.getRaceColumns(), 0)));
+        assertEquals(Arrays.asList(c[2], c[0], c[1], c[3]),
+                rankedCompetitorsFromBestToWorstAfterEachRaceColumn.get(Util.get(leaderboard.getRaceColumns(), 1)));
+        assertEquals(Arrays.asList(c[2], c[0], c[1], c[3]),
+                rankedCompetitorsFromBestToWorstAfterEachRaceColumn.get(Util.get(leaderboard.getRaceColumns(), 2)));
+        assertEquals(Arrays.asList(c[2], c[0], c[1], c[3]),
+                rankedCompetitorsFromBestToWorstAfterEachRaceColumn.get(Util.get(leaderboard.getRaceColumns(), 3)));
+        assertEquals(Arrays.asList(c[2], c[3], c[0], c[1]), // c[3] has one win, c[0] none
+                rankedCompetitorsFromBestToWorstAfterEachRaceColumn.get(Util.get(leaderboard.getRaceColumns(), 4)));
+        assertEquals(Arrays.asList(c[2], c[3], c[0], c[1]), // c[0] has more second places than c[1] (2 vs. 1)
+                rankedCompetitorsFromBestToWorstAfterEachRaceColumn.get(Util.get(leaderboard.getRaceColumns(), 5)));
+        List<RaceColumn> raceColumnsToConsider = new ArrayList<>();
+        int raceColumnNumber=0;
+        while (raceColumnNumber<3) {
+            final RaceColumn raceColumn = Util.get(leaderboard.getRaceColumns(), raceColumnNumber++);
+            raceColumnsToConsider.add(raceColumn);
+        }
+        checkScoresAfterSomeRaces(leaderboard, raceColumnsToConsider, scoresAfter3Races, later, c);
+        raceColumnsToConsider.add(Util.get(leaderboard.getRaceColumns(), raceColumnNumber++));
+        checkScoresAfterSomeRaces(leaderboard, raceColumnsToConsider, scoresAfter4Races, later, c);
+        raceColumnsToConsider.add(Util.get(leaderboard.getRaceColumns(), raceColumnNumber++));
+        checkScoresAfterSomeRaces(leaderboard, raceColumnsToConsider, scoresAfter5Races, later, c);
+        raceColumnsToConsider.add(Util.get(leaderboard.getRaceColumns(), raceColumnNumber++));
+        checkScoresAfterSomeRaces(leaderboard, raceColumnsToConsider, scoresAfter6Races, later, c);
+    }
+
+    private void checkScoresAfterSomeRaces(Leaderboard leaderboard, List<RaceColumn> raceColumnsToConsider,
+            double[][] scoresAfterNRaces, TimePoint timePoint, Competitor[] competitors) throws NoWindException {
+        for (int competitorIndex=0; competitorIndex<scoresAfterNRaces.length; competitorIndex++) {
+            for (int raceColumnIndex=0; raceColumnIndex<raceColumnsToConsider.size(); raceColumnIndex++) {
+                assertEquals(scoresAfterNRaces[competitorIndex][raceColumnIndex],
+                        leaderboard.getTotalPoints(competitors[competitorIndex], raceColumnsToConsider.get(raceColumnIndex),
+                                raceColumnsToConsider, timePoint), 0.00000001);
+            }
+        }
     }
 
     @Test

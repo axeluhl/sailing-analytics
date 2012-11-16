@@ -94,7 +94,6 @@ public class WindChart extends RaceChart implements Component<WindChartSettings>
         windSourceSpeedPoints = new HashMap<WindSource, Point[]>();
         overallDirectionMinMax = new Pair<Double, Double>(null, null);
         colorMap = new ColorMap<WindSource>();
-        
         chart = new Chart()
                 .setPersistent(true)
                 .setZoomType(Chart.ZoomType.X)
@@ -111,7 +110,7 @@ public class WindChart extends RaceChart implements Component<WindChartSettings>
                         new Marker().setEnabled(false).setHoverState(
                                 new Marker().setEnabled(true).setRadius(4))).setShadow(false)
                                     .setHoverStateLineWidth(LINE_WIDTH));
-        useCheckboxesToShowAndHide(chart);
+        ChartUtil.useCheckboxesToShowAndHide(chart);
         final NumberFormat numberFormat = NumberFormat.getFormat("0");
         chart.setToolTip(new ToolTip().setEnabled(true).setFormatter(new ToolTipFormatter() {
             @Override
@@ -178,9 +177,7 @@ public class WindChart extends RaceChart implements Component<WindChartSettings>
                  .setChartSubtitle(null)
                  .getXAxis().setAxisTitle(null);
         }
-        
         setSize("100%", "100%");
-        
         raceSelectionProvider.addRaceSelectionChangeListener(this);
     }
 
@@ -221,7 +218,7 @@ public class WindChart extends RaceChart implements Component<WindChartSettings>
             }
         }
 
-        if(settings.isShowWindSpeedSeries()) {
+        if (settings.isShowWindSpeedSeries()) {
             for (Map.Entry<WindSource, Series> e : windSourceSpeedSeries.entrySet()) {
                 Series series = e.getValue();
                 if (settings.getWindSpeedSourcesToDisplay().contains(e.getKey().getType())) {

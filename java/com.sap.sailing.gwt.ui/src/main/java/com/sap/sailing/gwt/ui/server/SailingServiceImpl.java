@@ -417,7 +417,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                         leaderboardByNameLiveUpdaters.put(leaderboardName, liveLeaderboardUpdater);
                     }
                 }
-                final TimePoint nowMinusDelay = liveLeaderboardUpdater.getNowMinusDelay();
+                final TimePoint nowMinusDelay = leaderboard.getNowMinusDelay();
                 final TimePoint timePointOfLatestModification = leaderboard.getTimePointOfLatestModification();
                 if (timePointOfLatestModification != null && !nowMinusDelay.before(timePointOfLatestModification)) {
                     timePoint = timePointOfLatestModification;
@@ -511,19 +511,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 row.competitor = competitorDTO;
                 row.fieldsByRaceColumnName = new HashMap<String, LeaderboardEntryDTO>();
                 row.carriedPoints = leaderboard.hasCarriedPoints(competitor) ? leaderboard.getCarriedPoints(competitor) : null;
-                final Pair<GPSFixMoving, Speed> maximumSpeedOverGround = leaderboard.getMaximumSpeedOverGround(competitor, timePoint);
-                if (maximumSpeedOverGround != null && maximumSpeedOverGround.getB() != null) {
-                    row.maximumSpeedOverGroundInKnots = maximumSpeedOverGround.getB().getKnots();
-                    row.whenMaximumSpeedOverGroundWasAchieved = maximumSpeedOverGround.getA().getTimePoint().asDate();
-                }
-                final Long totalTimeSailedDownwindInMilliseconds = leaderboard.getTotalTimeSailedInLegTypeInMilliseconds(competitor, LegType.DOWNWIND, timePoint);
-                row.totalTimeSailedDownwindInSeconds = totalTimeSailedDownwindInMilliseconds==null?null:1./1000.*totalTimeSailedDownwindInMilliseconds;
-                final Long totalTimeSailedUpwindInMilliseconds = leaderboard.getTotalTimeSailedInLegTypeInMilliseconds(competitor, LegType.UPWIND, timePoint);
-                row.totalTimeSailedUpwindInSeconds = totalTimeSailedUpwindInMilliseconds==null?null:1./1000.*totalTimeSailedUpwindInMilliseconds;
-                final Long totalTimeSailedReachingInMilliseconds = leaderboard.getTotalTimeSailedInLegTypeInMilliseconds(competitor, LegType.REACHING, timePoint);
-                row.totalTimeSailedReachingInSeconds = totalTimeSailedReachingInMilliseconds==null?null:1./1000.*totalTimeSailedReachingInMilliseconds;
-                final Long totalTimeSailedInMilliseconds = leaderboard.getTotalTimeSailedInMilliseconds(competitor, timePoint);
-                row.totalTimeSailedInSeconds = totalTimeSailedInMilliseconds==null?null:1./1000.*totalTimeSailedInMilliseconds;
+                addOverallDetailsToRow(leaderboard, timePoint, competitor, row);
                 result.competitors.add(competitorDTO);
                 Map<String, Future<LeaderboardEntryDTO>> futuresForColumnName = new HashMap<String, Future<LeaderboardEntryDTO>>();
                 for (final RaceColumn raceColumn : leaderboard.getRaceColumns()) {
@@ -564,10 +552,27 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 (System.currentTimeMillis()-startOfRequestHandling)+"ms");
         return result;
     }
+
+    private void addOverallDetailsToRow(final Leaderboard leaderboard, final TimePoint timePoint,
+            final Competitor competitor, LeaderboardRowDTO row) throws NoWindException {
+        final Pair<GPSFixMoving, Speed> maximumSpeedOverGround = leaderboard.getMaximumSpeedOverGround(competitor, timePoint);
+        if (maximumSpeedOverGround != null && maximumSpeedOverGround.getB() != null) {
+            row.maximumSpeedOverGroundInKnots = maximumSpeedOverGround.getB().getKnots();
+            row.whenMaximumSpeedOverGroundWasAchieved = maximumSpeedOverGround.getA().getTimePoint().asDate();
+        }
+        final Long totalTimeSailedDownwindInMilliseconds = leaderboard.getTotalTimeSailedInLegTypeInMilliseconds(competitor, LegType.DOWNWIND, timePoint);
+        row.totalTimeSailedDownwindInSeconds = totalTimeSailedDownwindInMilliseconds==null?null:1./1000.*totalTimeSailedDownwindInMilliseconds;
+        final Long totalTimeSailedUpwindInMilliseconds = leaderboard.getTotalTimeSailedInLegTypeInMilliseconds(competitor, LegType.UPWIND, timePoint);
+        row.totalTimeSailedUpwindInSeconds = totalTimeSailedUpwindInMilliseconds==null?null:1./1000.*totalTimeSailedUpwindInMilliseconds;
+        final Long totalTimeSailedReachingInMilliseconds = leaderboard.getTotalTimeSailedInLegTypeInMilliseconds(competitor, LegType.REACHING, timePoint);
+        row.totalTimeSailedReachingInSeconds = totalTimeSailedReachingInMilliseconds==null?null:1./1000.*totalTimeSailedReachingInMilliseconds;
+        final Long totalTimeSailedInMilliseconds = leaderboard.getTotalTimeSailedInMilliseconds(competitor, timePoint);
+        row.totalTimeSailedInSeconds = totalTimeSailedInMilliseconds==null?null:1./1000.*totalTimeSailedInMilliseconds;
+    }
     
-    private List<CompetitorDTO> getCompetitorDTOList(List<Competitor> competitorsFromBestToWorst) {
+    private List<CompetitorDTO> getCompetitorDTOList(List<Competitor> competitors) {
         List<CompetitorDTO> result = new ArrayList<CompetitorDTO>();
-        for (Competitor competitor : competitorsFromBestToWorst) {
+        for (Competitor competitor : competitors) {
             result.add(convertToCompetitorDTO(competitor));
         }
         return result;
@@ -2792,5 +2797,30 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         if (fregService != null) {
             fregService.registerResultUrl(new URL(result));
         }
+    }
+
+    @Override
+    public List<Pair<String, List<CompetitorDTO>>> getRankedCompetitorsFromBestToWorstAfterEachRaceColumn(String leaderboardName, Date date) throws NoWindException {
+        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+        final TimePoint timePoint;
+        if (date == null) {
+            final TimePoint nowMinusDelay = leaderboard.getNowMinusDelay();
+            final TimePoint timePointOfLatestModification = leaderboard.getTimePointOfLatestModification();
+            if (timePointOfLatestModification != null && !nowMinusDelay.before(timePointOfLatestModification)) {
+                timePoint = timePointOfLatestModification;
+            } else {
+                timePoint = nowMinusDelay;
+            }
+        } else {
+            timePoint = new MillisecondsTimePoint(date);
+        }
+        Map<RaceColumn, List<Competitor>> preResult = leaderboard
+                .getRankedCompetitorsFromBestToWorstAfterEachRaceColumn(timePoint);
+        List<Pair<String, List<CompetitorDTO>>> result = new ArrayList<Util.Pair<String,List<CompetitorDTO>>>();
+        for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
+            List<CompetitorDTO> competitorList = getCompetitorDTOList(preResult.get(raceColumn));
+            result.add(new Pair<String, List<CompetitorDTO>>(raceColumn.getName(), competitorList));
+        }
+        return result;
     }
 }
