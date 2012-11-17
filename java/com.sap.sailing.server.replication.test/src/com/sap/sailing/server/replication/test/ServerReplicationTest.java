@@ -91,7 +91,7 @@ public class ServerReplicationTest extends AbstractServerReplicationTest {
         masterCourse.addWaypoint(1, masterDomainFactory.createWaypoint(masterDomainFactory.getOrCreateMark("Mark2")));
         masterCourse.addWaypoint(2, masterDomainFactory.createWaypoint(masterDomainFactory.getOrCreateMark("Mark3")));
         masterCourse.removeWaypoint(1);
-        Thread.sleep(1000); // wait 1s for JMS to deliver the message and the message to be applied
+        Thread.sleep(3000); // wait 1s for JMS to deliver the message and the message to be applied
         Regatta replicaEvent = replica.getRegatta(new RegattaName(regatta.getName()));
         assertNotNull(replicaEvent);
         RaceDefinition replicaRace = replicaEvent.getRaceByName(raceName);
