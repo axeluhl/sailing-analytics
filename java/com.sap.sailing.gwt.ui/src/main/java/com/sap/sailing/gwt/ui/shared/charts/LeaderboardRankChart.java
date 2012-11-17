@@ -4,8 +4,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.moxieapps.gwt.highcharts.client.Axis;
 import org.moxieapps.gwt.highcharts.client.Chart;
@@ -28,6 +30,7 @@ import org.moxieapps.gwt.highcharts.client.plotOptions.Marker.Symbol;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.SimplePanel;
+import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
@@ -123,6 +126,7 @@ public class LeaderboardRankChart extends SimplePanel implements RequiresResize,
                         List<Series> chartSeries = new ArrayList<Series>(Arrays.asList(chart.getSeries()));
                         chart.hideLoading();
                         raceColumnNames.clear();
+                        Set<Series> unusedSeries = new HashSet<Series>(competitorSeries.values());
                         for (Series series : competitorSeries.values()) {
                             for (Point p : new ArrayList<Point>(Arrays.asList(series.getPoints()))) {
                                 series.removePoint(p, /* redraw */ false, /* animation */ false);
@@ -135,12 +139,16 @@ public class LeaderboardRankChart extends SimplePanel implements RequiresResize,
                             int rank = 1;
                             maxCompetitorCount = Math.max(maxCompetitorCount, entry.getB().size());
                             for (CompetitorDTO competitor : entry.getB()) {
-                                Series series = getOrCreateSeries(competitor);
-                                if (!chartSeries.contains(series)) {
-                                    chart.addSeries(series);
-                                    chartSeries.add(series);
+                                if (Util.isEmpty(competitorSelectionProvider.getSelectedCompetitors()) ||
+                                        competitorSelectionProvider.isSelected(competitor)) {
+                                    Series series = getOrCreateSeries(competitor);
+                                    unusedSeries.remove(series);
+                                    if (!chartSeries.contains(series)) {
+                                        chart.addSeries(series);
+                                        chartSeries.add(series);
+                                    }
+                                    series.addPoint(raceNumber, -rank, /* redraw */ false, /* shift */ false, /* animation */ false);
                                 }
-                                series.addPoint(raceNumber, -rank, /* redraw */ false, /* shift */ false, /* animation */ false);
                                 rank++;
                             }
                             raceNumber++;
