@@ -613,3 +613,12 @@ body ::-webkit-scrollbar-track {
     background: #de8a2e url(images/alert-overlay.png) repeat-x;
     font-family: UbuntuRegular, Arial, Verdana, sans-serif;
 }
+
+
+.chartCloseButton {
+	cursor: pointer;
+	background: url(images/closeButton.png) right center no-repeat;
+	height: 18px;
+	width: 60px;
+	text-align: left;
+}
