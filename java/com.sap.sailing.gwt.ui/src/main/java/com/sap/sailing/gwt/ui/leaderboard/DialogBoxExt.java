@@ -29,6 +29,7 @@ public class DialogBoxExt extends DialogBox {
         super();
 
         closeWidget = closeDialogBox;
+        closeWidget.getElement().addClassName("chartCloseButton");
 
         // an empty header could case a problem!
         setHTML("&nbsp;");
