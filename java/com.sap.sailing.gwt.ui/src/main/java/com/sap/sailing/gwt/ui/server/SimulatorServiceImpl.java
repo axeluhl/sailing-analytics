@@ -275,7 +275,6 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         return windDTO;
     }
 
-    @SuppressWarnings("unused")
     private WindDTO createWindDTO2(final TimedPositionWithSpeed tPos) {
         final WindDTO windDTO = new WindDTO();
         windDTO.trueWindBearingDeg = tPos.getSpeed().getBearing().getDegrees();
