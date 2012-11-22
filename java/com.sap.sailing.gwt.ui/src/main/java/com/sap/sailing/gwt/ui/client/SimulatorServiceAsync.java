@@ -6,6 +6,8 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.gwt.ui.shared.BoatClassDTOsAndNotificationMessage;
 import com.sap.sailing.gwt.ui.shared.PolarDiagramDTOAndNotificationMessage;
 import com.sap.sailing.gwt.ui.shared.PositionDTO;
+import com.sap.sailing.gwt.ui.shared.ReceivePolarDiagramDataDTO;
+import com.sap.sailing.gwt.ui.shared.RequestPolarDiagramDataDTO;
 import com.sap.sailing.gwt.ui.shared.SimulatorResultsDTOAndNotificationMessage;
 import com.sap.sailing.gwt.ui.shared.WindFieldDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldGenParamsDTO;
@@ -19,21 +21,20 @@ public interface SimulatorServiceAsync {
     void getRaceLocations(AsyncCallback<PositionDTO[]> callback);
 
     void getWindLatice(WindLatticeGenParamsDTO params, AsyncCallback<WindLatticeDTO> callback);
-    
+
     void getWindField(WindFieldGenParamsDTO params, WindPatternDisplay display, AsyncCallback<WindFieldDTO> callback);
-    
+
     //void getPaths(WindFieldGenParamsDTO params, WindPatternDisplay display, AsyncCallback<PathDTO[]> callback);
 
     void getWindPatterns(AsyncCallback<List<WindPatternDTO>> callback);
 
     void getWindPatternDisplay(WindPatternDTO pattern, AsyncCallback<WindPatternDisplay> callback);
 
-    //I00788 - Mihai Bogdan Eugen
     void getSimulatorResults(char mode, WindFieldGenParamsDTO params, WindPatternDisplay display, boolean withWindField, int boatClassIndex, AsyncCallback<SimulatorResultsDTOAndNotificationMessage> callback);
-    
-    //I00788 - Mihai Bogdan Eugen    
+
     void getBoatClasses(AsyncCallback<BoatClassDTOsAndNotificationMessage> callback);
 
-    //I00788 - Mihai Bogdan Eugen
-	void getPolarDiagramDTO(Double bearingStep, int boatClassIndex, AsyncCallback<PolarDiagramDTOAndNotificationMessage> callback);
+    void getPolarDiagramDTO(Double bearingStep, int boatClassIndex, AsyncCallback<PolarDiagramDTOAndNotificationMessage> callback);
+
+    void getSpeedsFromPolarDiagram(RequestPolarDiagramDataDTO requestData, AsyncCallback<ReceivePolarDiagramDataDTO> callback);
 }

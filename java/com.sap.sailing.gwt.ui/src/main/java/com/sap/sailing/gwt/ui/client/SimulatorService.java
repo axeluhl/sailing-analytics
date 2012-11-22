@@ -8,6 +8,8 @@ import com.sap.sailing.gwt.ui.shared.BoatClassDTOsAndNotificationMessage;
 import com.sap.sailing.gwt.ui.shared.ConfigurationException;
 import com.sap.sailing.gwt.ui.shared.PolarDiagramDTOAndNotificationMessage;
 import com.sap.sailing.gwt.ui.shared.PositionDTO;
+import com.sap.sailing.gwt.ui.shared.ReceivePolarDiagramDataDTO;
+import com.sap.sailing.gwt.ui.shared.RequestPolarDiagramDataDTO;
 import com.sap.sailing.gwt.ui.shared.SimulatorResultsDTOAndNotificationMessage;
 import com.sap.sailing.gwt.ui.shared.WindFieldDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldGenParamsDTO;
@@ -31,13 +33,12 @@ public interface SimulatorService extends RemoteService {
     WindPatternDisplay getWindPatternDisplay(WindPatternDTO pattern);
 
     WindFieldDTO getWindField(WindFieldGenParamsDTO params, WindPatternDisplay pattern) throws WindPatternNotFoundException;
-    
-    //I00788 - Mihai Bogdan Eugen
+
     SimulatorResultsDTOAndNotificationMessage getSimulatorResults(char mode, WindFieldGenParamsDTO params, WindPatternDisplay pattern, boolean withWindField, int boatClassIndex) throws WindPatternNotFoundException, ConfigurationException;
 
-    //I00788 - Mihai Bogdan Eugen
     BoatClassDTOsAndNotificationMessage getBoatClasses() throws ConfigurationException;
 
-    //I00788 - Mihai Bogdan Eugen
     PolarDiagramDTOAndNotificationMessage getPolarDiagramDTO(Double bearingStep, int boatClassIndex) throws ConfigurationException;
+
+    ReceivePolarDiagramDataDTO getSpeedsFromPolarDiagram(RequestPolarDiagramDataDTO requestData) throws ConfigurationException;
 }
