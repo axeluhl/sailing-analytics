@@ -735,6 +735,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
 
         final PolarDiagramAndNotificationMessage polarDiagramAndNotificationMessage = this.getPolarDiagram(requestData.boatClass);
         final PolarDiagram polarDiagram = polarDiagramAndNotificationMessage.getPolarDiagram();
+        final String notificationMessage = polarDiagramAndNotificationMessage.getNotificationMesssage();
         final List<SpeedWithBearingDTO> speeds = new ArrayList<SpeedWithBearingDTO>();
 
         final List<PositionDTO> positions = requestData.positions;
@@ -761,6 +762,6 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
             speeds.add(new SpeedWithBearingDTO(speedWithBearing.getKnots(), speedWithBearing.getBearing().getDegrees()));
         }
 
-        return new ReceivePolarDiagramDataDTO(speeds);
+        return new ReceivePolarDiagramDataDTO(speeds, notificationMessage);
     }
 }
