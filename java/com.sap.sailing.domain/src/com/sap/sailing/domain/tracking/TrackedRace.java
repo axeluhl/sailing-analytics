@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.NavigableSet;
 import java.util.SortedSet;
 
-import com.sap.sailing.domain.base.Buoy;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Leg;
@@ -13,10 +13,10 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.DouglasPeucker;
 import com.sap.sailing.domain.common.Distance;
-import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
@@ -71,7 +71,8 @@ public interface TrackedRace extends Serializable {
     TimePoint getEndOfRace();
 
     /**
-     * Returns a list of the first and last mark passing times of all course waypoints
+     * Returns a list of the first and last mark passing times of all course waypoints. Callers wanting to iterate over the
+     * result must <code>synchronize</code> on the result.
      */
     Iterable<Pair<Waypoint, Pair<TimePoint, TimePoint>>> getMarkPassingsTimes();
 
@@ -83,7 +84,9 @@ public interface TrackedRace extends Serializable {
     /**
      * Clients can safely iterate over the iterable returned because it's a non-live copy of the tracked legs of this
      * tracked race. This implies that should an update to the underlying list of waypoints in this race's {@link Course}
-     * take place after this method has returned, then this won't be reflected in the result returned.
+     * take place after this method has returned, then this won't be reflected in the result returned. Callers should
+     * obtain the {@link Course#lockForRead() course's read lock} while using the result of this call if they want to
+     * ensure that no course update is applied concurrently.
      */
     Iterable<TrackedLeg> getTrackedLegs();
     
@@ -182,14 +185,19 @@ public interface TrackedRace extends Serializable {
     MarkPassing getMarkPassing(Competitor competitor, Waypoint waypoint);
 
     /**
-     * Yields the track describing <code>buoy</code>'s movement over time; never <code>null</code> because a
-     * new track will be created in case no track was present for <code>buoy</code> so far.
+     * Yields the track describing <code>mark</code>'s movement over time; never <code>null</code> because a
+     * new track will be created in case no track was present for <code>mark</code> so far.
      */
-    GPSFixTrack<Buoy, GPSFix> getOrCreateTrack(Buoy buoy);
+    GPSFixTrack<Mark, GPSFix> getOrCreateTrack(Mark mark);
 
     /**
-     * If the <code>waypoint</code> only has one {@link #getBuoys() buoy}, its position at time <code>timePoint</code>
-     * is returned. Otherwise, the center of gravity between the buoys' positions is computed and returned.
+     * Retrieves all marks assigned to the race. They are not necessarily part of the race course.
+     */
+    Iterable<Mark> getMarks();
+
+    /**
+     * If the <code>waypoint</code> only has one {@link #getMarks() mark}, its position at time <code>timePoint</code>
+     * is returned. Otherwise, the center of gravity between the mark positions is computed and returned.
      */
     Position getApproximatePosition(Waypoint waypoint, TimePoint timePoint);
     
@@ -338,7 +346,6 @@ public interface TrackedRace extends Serializable {
     List<GPSFixMoving> approximate(Competitor competitor, Distance maxDistance, TimePoint from, TimePoint to);
 
     /**
-     * @param waitForLatest TODO
      * @return a non-<code>null</code> but perhaps empty list of the maneuvers that <code>competitor</code> performed in
      *         this race between <code>from</code> and <code>to</code>.
      */
@@ -350,7 +357,20 @@ public interface TrackedRace extends Serializable {
      * time as the direction the wind comes from.
      */
     boolean raceIsKnownToStartUpwind();
-    
+
+    /**
+     * Many calculations require valid wind data. In order to prevent NoWindException's to be handled by those calculation 
+     * this method can be used to check whether the tracked race has sufficient wind information available.
+     * @return <code>true</code> if {@link #getWind(Position, TimePoint)} delivers a (not null) wind fix.
+     */
+    boolean hasWindData();
+
+    /**
+     * 
+     * @return <code>true</code> if at least one GPS fix for one of the competitors is available for this race.
+     */
+    boolean hasGPSData();
+
     /**
      * Adds a race change listener to the set of listeners that will be notified about changes to this race.
      * The listener won't be serialized together with this object.
@@ -412,7 +432,15 @@ public interface TrackedRace extends Serializable {
      * Returns the competitors of this tracked race, according to their ranking. Competitors whose {@link #getRank(Competitor)} is 0 will
      * be sorted "worst".
      */
-    List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint);
+    List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint) throws NoWindException;
 
     Distance getAverageCrossTrackError(Competitor competitor, TimePoint from, TimePoint to, boolean upwindOnly, boolean waitForLatestAnalyses) throws NoWindException;
+
+    /**
+     * When provided with a {@link WindStore} during construction, the tracked race will asynchronously load the wind
+     * data for this tracked race from the wind store in a background thread and update this tracked race with the results.
+     * Clients that want to wait for the wind loading process to complete can do so by calling this method which will block
+     * until the wind loading has completed.
+     */
+    void waitUntilWindLoadingComplete() throws InterruptedException;
 }

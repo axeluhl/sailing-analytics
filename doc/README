@@ -473,7 +473,7 @@ into one in the future.
 		  positions to be returned; if not specified,
 		  known boat positions are listed until the
 		  "end of time"
-  action=showwaypoints: shows the positions of a race's marks / buoys
+  action=showwaypoints: shows the positions of a course marks
    		  at a specified point in time; if no time/timeasmillis
 		  is provided, the race start time is used; if that is
 		  not available, the start of tracking is used;
@@ -482,10 +482,10 @@ into one in the future.
 		  available, the current time is used. The output
 		  is an array of JSON objects with following format each:
 		    { "name": ...,    	      // waypoint name
-       		      "buoys": [ {	      // usually one or two buoys
-		        "name": ...,	      // buoy name
-			"lat": ...,	      // optional; if buoy pos known
-			"lng": ... } ... ] }  // optionsl; if buoy pos known
+       		      "marks": [ {	      // usually one mark or two marks in case of a gate
+		        "name": ...,	      // mark name
+			"lat": ...,	      // optional; if mark pos known
+			"lng": ... } ... ] }  // optionsl; if mark pos known
     regattaname:  name of the regatta, as returned by the "listevents"
     		  action on the /moderator servlet
     racename:     name of the race, as returned by the "listevents"

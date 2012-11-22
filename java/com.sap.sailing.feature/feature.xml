@@ -26,6 +26,14 @@ Computes leaderboard information for sailing races and offers RESTful APIs to al
       <import plugin="javax.servlet" version="2.5.0" match="greaterOrEqual"/>
       <import plugin="com.mongodb.driver" version="2.6.2" match="greaterOrEqual"/>
       <import plugin="com.google.gwt.osgi" version="2.4.0" match="greaterOrEqual"/>
+      <import plugin="com.sap.sailing.domain.common"/>
+      <import plugin="org.json.simple" version="1.1.0" match="greaterOrEqual"/>
+      <import plugin="com.sap.sailing.operationaltransformation"/>
+      <import plugin="org.moxieapps.gwt.highcharts" version="1.1.4" match="greaterOrEqual"/>
+      <import plugin="com.sap.sailing.geocoding"/>
+      <import plugin="org.apache.geronimo.specs.geronimo-jms_1.1_spec"/>
+      <import plugin="com.rabbitmq.client"/>
+      <import plugin="org.apache.geronimo.specs.geronimo-j2ee-management_1.1_spec"/>
    </requires>
 
    <plugin
@@ -51,6 +59,13 @@ Computes leaderboard information for sailing races and offers RESTful APIs to al
 
    <plugin
          id="com.sap.sailing.server"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="com.sap.sailing.server.gateway"
          download-size="0"
          install-size="0"
          version="0.0.0"
@@ -182,6 +197,13 @@ Computes leaderboard information for sailing races and offers RESTful APIs to al
 
    <plugin
          id="com.sap.sailing.ess40.resultimport"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="com.sap.sailing.freg.resultimport"
          download-size="0"
          install-size="0"
          version="0.0.0"

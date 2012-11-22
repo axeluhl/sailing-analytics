@@ -6,6 +6,7 @@ import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.util.impl.RaceColumnListeners;
 
 /**
  * One or more races that would be noted together in a single column in a {@link Leaderboard}. If the number of
@@ -25,10 +26,6 @@ import com.sap.sailing.domain.tracking.TrackedRace;
  * 
  */
 public interface RaceColumn extends Named {
-    void addRaceColumnListener(RaceColumnListener listener);
-    
-    void removeRaceColumnListener(RaceColumnListener listener);
-    
     /**
      * @return the fleets for each of which this column has a single race and therefore optionally a {@link TrackedRace}, in
      * ascending order; best fleets first
@@ -69,6 +66,12 @@ public interface RaceColumn extends Named {
     TrackedRace getTrackedRace(Fleet fleet);
     
     /**
+     * If a race is associated with this column for the <code>fleet</code>, the respective {@link RaceDefinition} is returned.
+     * Otherwise, <code>null</code> is returned.
+     */
+    RaceDefinition getRaceDefinition(Fleet fleet);
+    
+    /**
      * Tries to find a tracked race whose {@link RaceDefinition#getCompetitors() competitors} contain <code>competitor</code>. If
      * no such {@link TrackedRace} is currently associated with this race column, <code>null</code> is returned. No two
      * {@link TrackedRace}s may result because a single competitor can be part of only one fleet and therefore not occur
@@ -100,12 +103,16 @@ public interface RaceColumn extends Named {
      */
     boolean isMedalRace();
     
-    void setName(String newName);
-    
     /**
      * Constructs a key for maps storing corrections such as score corrections and max points reasons.
      */
     Pair<Competitor, RaceColumn> getKey(Competitor competitor);
+
+    RaceColumnListeners getRaceColumnListeners();
+
+    void removeRaceColumnListener(RaceColumnListener listener);
+
+    void addRaceColumnListener(RaceColumnListener listener);
 
     /**
      * Releases the {@link TrackedRace} previously set by {@link #setTrackedRace(Fleet, TrackedRace)} but leaves the
@@ -117,5 +124,23 @@ public interface RaceColumn extends Named {
      */
     void releaseTrackedRace(Fleet fleet);
     
+    /**
+     * Usually, the scores in each leaderboard column count as they are for the overall score. However, if a column is
+     * a medal race column it usually counts double. Under certain circumstances, columns may also count with factors different
+     * from 1 or 2. For example, we've seen cases in the Extreme Sailing Series where the race committee defined that in the
+     * overall series leaderboard the last two columns each count 1.5 times their scores.
+     */
+    double getFactor();
     
+    /**
+     * @param factor if <code>null</code>, {@link #getFactor()} will again compute a default value; otherwise, {@link #getFactor()} will
+     * then return the double value of <code>factor</code>.
+     */
+    void setFactor(Double factor);
+
+    /**
+     * If <code>null</code>, the {@link #getFactor() factor} defaults to 1 for non-medal and {@link #DEFAULT_MEDAL_RACE_FACTOR} for
+     * medal races. Otherwise, the explicit factor is used.
+     */
+    Double getExplicitFactor();
 }

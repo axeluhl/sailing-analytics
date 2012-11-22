@@ -6,16 +6,16 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
-import com.sap.sailing.domain.base.Buoy;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Timed;
 import com.sap.sailing.domain.base.Waypoint;
-import com.sap.sailing.domain.base.impl.MeterDistance;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
@@ -31,7 +31,7 @@ import com.sap.sailing.util.impl.SmartFutureCache.UpdateInterval;
 /**
  * (Re-)computing the cross track error for a competitor causes significant amounts of CPU cycles. The cross track error
  * is aggregated for each competitor per race and per leg. The calculation uses the same base data and can be combined.
- * The results can be cached. Cache invalidation becomes necessary as mark passings, buoy positions and boat positions
+ * The results can be cached. Cache invalidation becomes necessary as mark passings, mark positions and boat positions
  * change. For this purpose, this cache subscribes itself as a listener to the {@link TrackedRace} to which it belongs
  * and manages cache invalidations autonomously.
  *   
@@ -69,6 +69,10 @@ public class CrossTrackErrorCache extends AbstractRaceChangeListener {
     }
     
     private static class CrossTrackErrorSumAndNumberOfFixesTrack extends TrackImpl<CrossTrackErrorSumAndNumberOfFixes> {
+        private CrossTrackErrorSumAndNumberOfFixesTrack(String nameForReadWriteLock) {
+            super(nameForReadWriteLock);
+        }
+
         private static final long serialVersionUID = 4884868659665863604L;
         
         public void deleteAllLaterThan(TimePoint from) {
@@ -165,7 +169,7 @@ public class CrossTrackErrorCache extends AbstractRaceChangeListener {
                         }
                         return result;
                     }
-                });
+                }, CrossTrackErrorCache.class.getSimpleName()+" for race "+owner.getRace().getName());
         this.owner = owner;
         owner.addListener(this);
     }
@@ -240,7 +244,9 @@ public class CrossTrackErrorCache extends AbstractRaceChangeListener {
      * the competitor's finish line passing, or the last GPS fix if there is no finish line passing.
      */
     private CrossTrackErrorSumAndNumberOfFixesTrack computeFixesForCacheUpdate(Competitor competitor, TimePoint from) throws NoWindException {
-        CrossTrackErrorSumAndNumberOfFixesTrack result = new CrossTrackErrorSumAndNumberOfFixesTrack();
+        CrossTrackErrorSumAndNumberOfFixesTrack result = new CrossTrackErrorSumAndNumberOfFixesTrack(
+                        CrossTrackErrorSumAndNumberOfFixesTrack.class.getSimpleName() + " for competitor "
+                        + competitor.getName() + " in race " + owner.getRace().getName());
         final CrossTrackErrorSumAndNumberOfFixesTrack competitorCacheEntry = cachePerCompetitor.get(competitor, /* waitForLatest */ false);
         final CrossTrackErrorSumAndNumberOfFixes lastCacheEntryBeforeFrom;
         lastCacheEntryBeforeFrom = competitorCacheEntry == null ? null : competitorCacheEntry.getLastFixBefore(from);
@@ -318,8 +324,8 @@ public class CrossTrackErrorCache extends AbstractRaceChangeListener {
     }
 
     @Override
-    public void buoyPositionChanged(GPSFix fix, Buoy buoy) {
-        TimePoint from = owner.getOrCreateTrack(buoy).getEstimatedPositionTimePeriodAffectedBy(fix).getA();
+    public void markPositionChanged(GPSFix fix, Mark mark) {
+        TimePoint from = owner.getOrCreateTrack(mark).getEstimatedPositionTimePeriodAffectedBy(fix).getA();
         for (Competitor competitor : cachePerCompetitor.keySet()) {
             invalidate(competitor, from);
         }
@@ -355,7 +361,7 @@ public class CrossTrackErrorCache extends AbstractRaceChangeListener {
             for (Map.Entry<Waypoint, MarkPassing> e : oldMarkPassings.entrySet()) {
                 if (!foundOldWaypoints.contains(e.getKey())) {
                     TimePoint timePointOfRemovedMarkPassing = e.getValue().getTimePoint();
-                    if (timePointOfRemovedMarkPassing.compareTo(from) < 0) {
+                    if (from == null || timePointOfRemovedMarkPassing.compareTo(from) < 0) {
                         from = timePointOfRemovedMarkPassing;
                     }
                 }

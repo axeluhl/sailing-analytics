@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.NavigableSet;
 
 import com.sap.sailing.domain.base.BoatClass;
-import com.sap.sailing.domain.base.Buoy;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.RaceColumnListener;
 import com.sap.sailing.domain.base.Regatta;
@@ -23,6 +23,7 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
@@ -44,7 +45,7 @@ import com.sap.sailing.domain.tracking.impl.WindTrackImpl;
 
 public class MockedTrackedRace implements DynamicTrackedRace {
     private static final long serialVersionUID = 5827912985564121181L;
-    private final WindTrack windTrack = new WindTrackImpl(/* millisecondsOverWhichToAverage */ 30000, /* useSpeed */ true);
+    private final WindTrack windTrack = new WindTrackImpl(/* millisecondsOverWhichToAverage */ 30000, /* useSpeed */ true, "TestWindTrack");
     
     public WindTrack getWindTrack() {
         return windTrack;
@@ -153,7 +154,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public DynamicGPSFixTrack<Buoy, GPSFix> getOrCreateTrack(Buoy buoy) {
+    public DynamicGPSFixTrack<Mark, GPSFix> getOrCreateTrack(Mark mark) {
         // TODO Auto-generated method stub
         return null;
     }
@@ -374,6 +375,12 @@ public class MockedTrackedRace implements DynamicTrackedRace {
                     public void removeRaceColumnListener(RaceColumnListener listener) {
                         // TODO Auto-generated method stub
                         
+                    }
+
+                    @Override
+                    public ScoringScheme getScoringScheme() {
+                        // TODO Auto-generated method stub
+                        return null;
                     }
                 };
             }
@@ -600,7 +607,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public void recordFix(Buoy buoy, GPSFix fix) {
+    public void recordFix(Mark mark, GPSFix fix) {
         // TODO Auto-generated method stub
         
     }
@@ -657,5 +664,28 @@ public class MockedTrackedRace implements DynamicTrackedRace {
             throws NoWindException {
         // TODO Auto-generated method stub
         return null;
+    }
+
+    @Override
+    public void waitUntilWindLoadingComplete() throws InterruptedException {
+        // TODO Auto-generated method stub
+    }
+
+	@Override
+	public Iterable<Mark> getMarks() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+    @Override
+    public boolean hasWindData() {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public boolean hasGPSData() {
+        // TODO Auto-generated method stub
+        return false;
     }
 }

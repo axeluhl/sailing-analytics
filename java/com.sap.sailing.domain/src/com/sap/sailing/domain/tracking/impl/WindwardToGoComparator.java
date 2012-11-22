@@ -10,6 +10,7 @@ import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.NoWindError;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 
@@ -36,14 +37,21 @@ public class WindwardToGoComparator implements Comparator<TrackedLegOfCompetitor
         assert o1.getLeg() == o2.getLeg();
         try {
             int result;
-            if (o1.hasFinishedLeg(timePoint)) {
-                if (o2.hasFinishedLeg(timePoint)) {
-                    result = trackedLeg.getTrackedRace().getMarkPassing(o1.getCompetitor(), trackedLeg.getLeg().getTo()).getTimePoint().compareTo(
-                            trackedLeg.getTrackedRace().getMarkPassing(o2.getCompetitor(), trackedLeg.getLeg().getTo()).getTimePoint());
+            // To avoid having to synchronize on the competitors' mark passings, grab the decisive mark passings up front and
+            // derive hasStarted / hasFinished from them; this is redundant to TrackedLegOfCompetitor.hasStarted/hasFinished but
+            // avoids the heavy-weight synchronization-based "locking". It shall help avoid NPEs in case the mark passings
+            // for a competitor change after deciding hasFinished and grabbing the mark passing (see bug 875).
+            final MarkPassing o1MarkPassingForLegEnd = trackedLeg.getTrackedRace().getMarkPassing(o1.getCompetitor(), trackedLeg.getLeg().getTo());
+            final MarkPassing o2MarkPassingForLegEnd = trackedLeg.getTrackedRace().getMarkPassing(o2.getCompetitor(), trackedLeg.getLeg().getTo());
+            final boolean o1HasFinishedLeg = o1MarkPassingForLegEnd != null && o1MarkPassingForLegEnd.getTimePoint().compareTo(timePoint) <= 0;
+            final boolean o2HasFinishedLeg = o2MarkPassingForLegEnd != null && o2MarkPassingForLegEnd.getTimePoint().compareTo(timePoint) <= 0;
+            if (o1HasFinishedLeg) {
+                if (o2HasFinishedLeg) {
+                    result = o1MarkPassingForLegEnd.getTimePoint().compareTo(o2MarkPassingForLegEnd.getTimePoint());
                 } else {
                     result = -1; // o1 < o2 because o1 already finished the leg but o2 didn't
                 }
-            } else if (o2.hasFinishedLeg(timePoint)) {
+            } else if (o2HasFinishedLeg) {
                 result = 1; // o1 > o2 because o2 already finished the leg but o1 didn't
             } else {
                 // both didn't finish the leg yet; check which one has started:

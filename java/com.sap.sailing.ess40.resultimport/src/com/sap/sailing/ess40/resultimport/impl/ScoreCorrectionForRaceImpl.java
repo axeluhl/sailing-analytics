@@ -13,12 +13,12 @@ public class ScoreCorrectionForRaceImpl implements ScoreCorrectionsForRace {
     private final int raceNumberStartingWithOne;
     private final Map<String, ScoreCorrectionForCompetitorInRace> scoreCorrectionsByTeamName;
     
-    public ScoreCorrectionForRaceImpl(Map<String, List<Pair<String, Integer>>> actResults, int raceNumberStartingWithZero) {
+    public ScoreCorrectionForRaceImpl(Map<String, List<Pair<String, Double>>> actResults, int raceNumberStartingWithZero) {
         this.raceNumberStartingWithOne = raceNumberStartingWithZero+1;
         this.scoreCorrectionsByTeamName = new HashMap<String, ScoreCorrectionForCompetitorInRace>();
-        for (Map.Entry<String, List<Pair<String, Integer>>> e : actResults.entrySet()) {
+        for (Map.Entry<String, List<Pair<String, Double>>> e : actResults.entrySet()) {
             String teamName = e.getKey();
-            Pair<String, Integer> rankAndPoints;
+            Pair<String, Double> rankAndPoints;
             if (raceNumberStartingWithZero < e.getValue().size()) {
                 rankAndPoints = e.getValue().get(raceNumberStartingWithZero);
             } else {

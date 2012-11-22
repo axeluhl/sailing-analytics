@@ -20,10 +20,11 @@ import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
-import com.sap.sailing.domain.common.DefaultLeaderboardName;
+import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.leaderboard.impl.LowPoint;
 import com.sap.sailing.server.operationaltransformation.AddDefaultRegatta;
 import com.sap.sailing.server.operationaltransformation.AddRaceDefinition;
 import com.sap.sailing.server.operationaltransformation.CreateFlexibleLeaderboard;
@@ -45,7 +46,7 @@ public class ServerReplicationTest extends AbstractServerReplicationTest {
         final String leaderboardName = "My new leaderboard";
         assertNull(replica.getLeaderboardByName(leaderboardName));
         final int[] discardThresholds = new int[] { 17, 23 };
-        CreateFlexibleLeaderboard createTestLeaderboard = new CreateFlexibleLeaderboard(leaderboardName, discardThresholds);
+        CreateFlexibleLeaderboard createTestLeaderboard = new CreateFlexibleLeaderboard(leaderboardName, discardThresholds, new LowPoint());
         assertNull(master.getLeaderboardByName(leaderboardName));
         master.apply(createTestLeaderboard);
         final Leaderboard masterLeaderboard = master.getLeaderboardByName(leaderboardName);
@@ -59,7 +60,7 @@ public class ServerReplicationTest extends AbstractServerReplicationTest {
 
     @Test
     public void testLeaderboardRemovalReplication() throws InterruptedException {
-        final String leaderboardName = DefaultLeaderboardName.DEFAULT_LEADERBOARD_NAME;
+        final String leaderboardName = LeaderboardNameConstants.DEFAULT_LEADERBOARD_NAME;
         assertNotNull(replica.getLeaderboardByName(leaderboardName));
         assertNotNull(master.getLeaderboardByName(leaderboardName));
         RemoveLeaderboard removeDefaultLeaderboard = new RemoveLeaderboard(leaderboardName);
@@ -86,18 +87,18 @@ public class ServerReplicationTest extends AbstractServerReplicationTest {
                 new ArrayList<Competitor>());
         AddRaceDefinition addRaceOperation = new AddRaceDefinition(new RegattaName(regatta.getName()), race);
         master.apply(addRaceOperation);
-        masterCourse.addWaypoint(0, masterDomainFactory.createWaypoint(masterDomainFactory.getOrCreateBuoy("Buoy1")));
-        masterCourse.addWaypoint(1, masterDomainFactory.createWaypoint(masterDomainFactory.getOrCreateBuoy("Buoy2")));
-        masterCourse.addWaypoint(2, masterDomainFactory.createWaypoint(masterDomainFactory.getOrCreateBuoy("Buoy3")));
+        masterCourse.addWaypoint(0, masterDomainFactory.createWaypoint(masterDomainFactory.getOrCreateMark("Mark1")));
+        masterCourse.addWaypoint(1, masterDomainFactory.createWaypoint(masterDomainFactory.getOrCreateMark("Mark2")));
+        masterCourse.addWaypoint(2, masterDomainFactory.createWaypoint(masterDomainFactory.getOrCreateMark("Mark3")));
         masterCourse.removeWaypoint(1);
-        Thread.sleep(1000); // wait 1s for JMS to deliver the message and the message to be applied
+        Thread.sleep(3000); // wait 1s for JMS to deliver the message and the message to be applied
         Regatta replicaEvent = replica.getRegatta(new RegattaName(regatta.getName()));
         assertNotNull(replicaEvent);
         RaceDefinition replicaRace = replicaEvent.getRaceByName(raceName);
         assertNotNull(replicaRace);
         Course replicaCourse = replicaRace.getCourse();
         assertEquals(2, Util.size(replicaCourse.getWaypoints()));
-        assertEquals("Buoy1", replicaCourse.getFirstWaypoint().getBuoys().iterator().next().getName());
-        assertEquals("Buoy3", replicaCourse.getLastWaypoint().getBuoys().iterator().next().getName());
+        assertEquals("Mark1", replicaCourse.getFirstWaypoint().getMarks().iterator().next().getName());
+        assertEquals("Mark3", replicaCourse.getLastWaypoint().getMarks().iterator().next().getName());
     }
 }

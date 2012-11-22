@@ -2,10 +2,14 @@ package com.sap.sailing.domain.tracking.impl;
 
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.NavigableSet;
 import java.util.SortedSet;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.common.Distance;
+import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
@@ -29,12 +33,20 @@ public class RaceRankComparator implements Comparator<Competitor> {
     private final TrackedRace trackedRace;
     private final TimePoint timePoint;
     private final DummyMarkPassingWithTimePointOnly markPassingWithTimePoint;
+    private final Map<Competitor, Distance> windwardDistanceToGoInLegCache;
     
-    public RaceRankComparator(TrackedRace trackedRace, TimePoint timePoint) {
+    public RaceRankComparator(TrackedRace trackedRace, TimePoint timePoint) throws NoWindException {
         super();
         this.trackedRace = trackedRace;
         this.timePoint = timePoint;
         this.markPassingWithTimePoint = new DummyMarkPassingWithTimePointOnly(timePoint);
+        this.windwardDistanceToGoInLegCache = new HashMap<Competitor, Distance>();
+        for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
+            final TrackedLegOfCompetitor trackedLegOfCompetitor = trackedRace.getTrackedLeg(competitor, timePoint);
+            if (trackedLegOfCompetitor != null) {
+                windwardDistanceToGoInLegCache.put(competitor, trackedLegOfCompetitor.getWindwardDistanceToGo(timePoint));
+            }
+        }
     }
 
     @Override
@@ -91,7 +103,10 @@ public class RaceRankComparator implements Comparator<Competitor> {
                             result = trackedRace.getRace().getCourse().getLegs().indexOf(o1Leg.getLeg()) -
                                     trackedRace.getRace().getCourse().getLegs().indexOf(o2Leg.getLeg());
                         } else {
-                            result = new WindwardToGoComparator(trackedRace.getTrackedLeg(o1Leg.getLeg()), timePoint).compare(o1Leg, o2Leg);
+                            // competitors are in same leg; compare their windward distance to go
+                            final Distance wwdtgO1 = windwardDistanceToGoInLegCache.get(o1);
+                            final Distance wwdtgO2 = windwardDistanceToGoInLegCache.get(o2);
+                            result = wwdtgO1==null?wwdtgO2==null?0:-1:wwdtgO2==null?1:wwdtgO1.compareTo(wwdtgO2);
                         }
                     }
                 }

@@ -1,7 +1,9 @@
 package com.sap.sailing.domain.base;
 
-import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.Named;
+import com.sap.sailing.domain.common.RegattaIdentifier;
+import com.sap.sailing.domain.leaderboard.ScoringScheme;
+import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 
 /**
@@ -13,6 +15,8 @@ import com.sap.sailing.domain.tracking.TrackedRegatta;
  *
  */
 public interface Regatta extends Named {
+    ScoringScheme getScoringScheme();
+    
     /**
      * A regatta consists of one or more series.
      * 

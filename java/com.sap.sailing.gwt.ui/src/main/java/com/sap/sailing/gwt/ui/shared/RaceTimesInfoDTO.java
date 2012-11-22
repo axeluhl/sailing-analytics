@@ -5,10 +5,10 @@ import java.util.Iterator;
 import java.util.List;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
-import com.sap.sailing.domain.common.RaceIdentifier;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 
 public class RaceTimesInfoDTO implements IsSerializable {
-    private RaceIdentifier raceIdentifier;
+    private RegattaAndRaceIdentifier raceIdentifier;
 
     public List<LegInfoDTO> legInfos;
 
@@ -21,17 +21,17 @@ public class RaceTimesInfoDTO implements IsSerializable {
     public Date newestTrackingEvent;
     public long delayToLiveInMs;
 
-    public RaceTimesInfoDTO(RaceIdentifier raceIdentifier) {
+    public RaceTimesInfoDTO(RegattaAndRaceIdentifier raceIdentifier) {
         this.raceIdentifier = raceIdentifier;
     }
 
     public RaceTimesInfoDTO() {}
 
-    public RaceIdentifier getRaceIdentifier() {
+    public RegattaAndRaceIdentifier getRaceIdentifier() {
         return raceIdentifier;
     }
 
-    public void setRaceIdentifier(RaceIdentifier raceIdentifier) {
+    public void setRaceIdentifier(RegattaAndRaceIdentifier raceIdentifier) {
         this.raceIdentifier = raceIdentifier;
     }
 
@@ -103,4 +103,15 @@ public class RaceTimesInfoDTO implements IsSerializable {
     public void setMarkPassingTimes(List<MarkPassingTimesDTO> markPassingTimes) {
         this.markPassingTimes = markPassingTimes;
     }
+    
+    @Override
+	public String toString() {
+		return "RaceTimesInfoDTO [raceIdentifier=" + raceIdentifier
+				+ ", legInfos=" + legInfos + ", markPassingTimes="
+				+ markPassingTimes + ", startOfRace=" + startOfRace
+				+ ", startOfTracking=" + startOfTracking + ", endOfTracking="
+				+ endOfTracking + ", endOfRace=" + endOfRace
+				+ ", newestTrackingEvent=" + newestTrackingEvent
+				+ ", delayToLiveInMs=" + delayToLiveInMs + "]";
+	}
 }

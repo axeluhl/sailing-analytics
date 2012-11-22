@@ -4,20 +4,20 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 
 public class ReplicationMasterDTO implements IsSerializable {
     private String hostname;
-    private int jmsPort;
+    private int messagingPort;
     private int servletPort;
     ReplicationMasterDTO() {}
-    public ReplicationMasterDTO(String hostname, int jmsPort, int servletPort) {
+    public ReplicationMasterDTO(String hostname, int messagingPort, int servletPort) {
         super();
         this.hostname = hostname;
-        this.jmsPort = jmsPort;
+        this.messagingPort = messagingPort;
         this.servletPort = servletPort;
     }
     public String getHostname() {
         return hostname;
     }
-    public int getJmsPort() {
-        return jmsPort;
+    public int getMessagingPort() {
+        return messagingPort;
     }
     public int getServletPort() {
         return servletPort;

@@ -18,10 +18,12 @@ public abstract class AbstractMongoDBTest {
     private final MongoDBConfiguration dbConfiguration;
     private MongoDBService service;
     
-    public AbstractMongoDBTest() {
+    public AbstractMongoDBTest() throws UnknownHostException, MongoException {
         dbConfiguration = MongoDBConfiguration.getDefaultTestConfiguration();
         service = MongoDBService.INSTANCE;
         service.setConfiguration(getDBConfiguration());
+        mongo = newMongo();
+        db = service.getDB();
     }
     
     protected MongoDBConfiguration getDBConfiguration() {
@@ -34,9 +36,7 @@ public abstract class AbstractMongoDBTest {
     
     @Before
     public void dropTestDB() throws UnknownHostException, MongoException, InterruptedException {
-        mongo = newMongo();
         assertNotNull(mongo);
-        db = mongo.getDB(getDBConfiguration().getDatabaseName());
         dropAllCollections(db);
         assertNotNull(db);
     }

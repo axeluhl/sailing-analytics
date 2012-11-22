@@ -18,7 +18,6 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
-import com.sap.sailing.gwt.ui.client.UserAgentChecker.UserAgentTypes;
 
 public abstract class AbstractEntryPoint implements EntryPoint, ErrorReporter {
 
@@ -26,7 +25,7 @@ public abstract class AbstractEntryPoint implements EntryPoint, ErrorReporter {
     private HTML serverResponseLabel;
     private Button dialogCloseButton;
     protected StringMessages stringMessages;
-    protected UserAgentTypes userAgentType;
+    protected UserAgentDetails userAgent;
     
     /**
      * Create a remote service proxy to talk to the server-side sailing service.
@@ -48,8 +47,9 @@ public abstract class AbstractEntryPoint implements EntryPoint, ErrorReporter {
     @Override
     public void onModuleLoad() {
         stringMessages = GWT.create(StringMessages.class);
-        errorDialogBox = createErrorDialog();
-        userAgentType = UserAgentChecker.INSTANCE.checkUserAgent(Window.Navigator.getUserAgent());
+        errorDialogBox = createErrorDialog(); /* TODO: Make this more generic (e.g. make it support all kinds of messages) */
+        userAgent = new UserAgentDetails(Window.Navigator.getUserAgent());
+        
         ServiceDefTarget sailingServiceDef = (ServiceDefTarget) sailingService;
         ServiceDefTarget userManagementServiceDef = (ServiceDefTarget) userManagementService;
         String moduleBaseURL = GWT.getModuleBaseURL();
@@ -79,7 +79,6 @@ public abstract class AbstractEntryPoint implements EntryPoint, ErrorReporter {
     public void createErrorPage(String message) {
         LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(stringMessages);
         logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
-
         RootPanel.get().add(logoAndTitlePanel);
         RootPanel.get().add(new Label(message));
     }

@@ -8,8 +8,9 @@ import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
-import com.sap.sailing.domain.common.DefaultLeaderboardName;
+import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
 import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
@@ -19,6 +20,7 @@ import com.sap.sailing.gwt.ui.client.RaceSelectionModel;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
+import com.sap.sailing.gwt.ui.client.UserAgentChecker;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RaceDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
@@ -53,7 +55,7 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
             viewMode = RaceBoardViewModes.ONESCREEN;
         }
         if (leaderboardNameParamValue == null || leaderboardNameParamValue.isEmpty()) {
-            leaderboardName = DefaultLeaderboardName.DEFAULT_LEADERBOARD_NAME;
+            leaderboardName = LeaderboardNameConstants.DEFAULT_LEADERBOARD_NAME;
         } else {
             leaderboardName = leaderboardNameParamValue;
         }
@@ -113,7 +115,7 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
                     break;
                 }
             }
-            if(!foundLeaderboard) {
+            if (!foundLeaderboard) {
                 createErrorPage("the leaderboard is not contained in this leaderboard group.");
                 return;
             }
@@ -130,7 +132,7 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         Timer timer = new Timer(PlayModes.Replay, 1000l);
         RaceTimesInfoProvider raceTimesInfoProvider = new RaceTimesInfoProvider(sailingService, this, singletonList, 5000l /* requestInterval*/);
         RaceBoardPanel raceBoardPanel = new RaceBoardPanel(sailingService, user, timer, raceSelectionModel, leaderboardName, leaderboardGroupName,
-                RaceBoardEntryPoint.this, stringMessages, userAgentType, viewMode, raceTimesInfoProvider);
+                RaceBoardEntryPoint.this, stringMessages, userAgent, viewMode, raceTimesInfoProvider);
         raceBoardPanel.fillRegattas(regattas);
 
         switch (viewMode) {
@@ -182,17 +184,19 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
     private void createRaceBoardInOneScreenMode(RaceBoardPanel raceBoardPanel) {
         DockLayoutPanel p = new DockLayoutPanel(Unit.PX);
         RootLayoutPanel.get().add(p);
-        
         FlowPanel toolbarPanel = new FlowPanel();
-        
         toolbarPanel.add(raceBoardPanel.getNavigationWidget());
-
+        if (!UserAgentChecker.INSTANCE.isUserAgentSupported(userAgent)) {
+            HTML lbl = new HTML("This website is optimized to work with Google Chrome. <a target='_blank' href='https://www.google.com/intl/de/chrome/browser/'>Click here to download</a>");
+            lbl.setStyleName("browserOptimizedMessage");
+            toolbarPanel.add(lbl);
+        }
         FlowPanel logoAndTitlePanel = createLogoAndTitlePanel(raceBoardPanel);
         FlowPanel timePanel = createTimePanel(raceBoardPanel);
-        
         p.addNorth(logoAndTitlePanel, 68);        
         p.addNorth(toolbarPanel, 40);
         p.addSouth(timePanel, 90);                     
         p.add(raceBoardPanel);
+        p.addStyleName("dockLayoutPanel");
     }    
 }

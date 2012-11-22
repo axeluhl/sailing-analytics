@@ -36,7 +36,7 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.util.InvalidDateException;
 
-public class Action {
+public class Action  {
     private HttpServletRequest req;
     private HttpServletResponse res;
 

@@ -6,10 +6,10 @@ import java.util.List;
 
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Venue;
-import com.sap.sailing.domain.common.impl.NamedImpl;
 
-public class VenueImpl extends NamedImpl implements Venue {
+public class VenueImpl implements Venue {
     private static final long serialVersionUID = 6854152040737643290L;
+    private String name;
     
     /**
      * The course areas are ordered because they typically follow an ordered naming pattern borrowed from the
@@ -18,7 +18,7 @@ public class VenueImpl extends NamedImpl implements Venue {
     private final List<CourseArea> courseAreas;
 
     public VenueImpl(String name) {
-        super(name);
+        this.name = name;
         courseAreas = new ArrayList<CourseArea>();
     }
 
@@ -37,4 +37,18 @@ public class VenueImpl extends NamedImpl implements Venue {
         courseAreas.remove(courseArea);
     }
     
+    @Override
+    public String getName() {
+        return name;
+    }
+
+    /**
+     * @param newName must not be <code>null</code>
+     */
+    public void setName(String newName) {
+        if (newName == null) {
+            throw new IllegalArgumentException("An venue name must not be null");
+        }
+        this.name = newName;
+    }
 }

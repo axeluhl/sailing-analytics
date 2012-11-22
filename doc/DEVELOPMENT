@@ -124,7 +124,7 @@ a OSGI-enabled version (ask the technical lead of the project)
 c) Add the library to an appropriate target folder in the project
 com.sap.sailing.targetplatform.base (e.g. target-base)
 
-d) Add an corresponding entry to the corresponding feature.xml in the
+d) Add a corresponding entry to the corresponding feature.xml in the
 project com.sap.sailing.targetplatform.base
 
 e) Rebuild the base target platform by running the script

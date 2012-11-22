@@ -3,15 +3,17 @@ package com.sap.sailing.domain.leaderboard.impl;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
-import java.util.TreeSet;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.RaceColumn;
+import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindError;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.TimePoint;
@@ -48,31 +50,44 @@ public class ResultDiscardingRuleImpl implements ThresholdBasedResultDiscardingR
     }
 
     @Override
-    public Set<RaceColumn> getDiscardedRaceColumns(final Competitor competitor, final Leaderboard leaderboard, final TimePoint timePoint) {
-        int resultsToDiscard = getNumberOfResultsToDiscard(leaderboard.getRaceColumns(), leaderboard, timePoint);
+    public Set<RaceColumn> getDiscardedRaceColumns(final Competitor competitor, final Leaderboard leaderboard,
+            Iterable<RaceColumn> raceColumnsToConsider, final TimePoint timePoint) {
+        int resultsToDiscard = getNumberOfResultsToDiscard(competitor, raceColumnsToConsider, leaderboard, timePoint);
         Set<RaceColumn> result;
         if (resultsToDiscard > 0) {
             result = new HashSet<RaceColumn>();
-            TreeSet<RaceColumn> sortedRaces = new TreeSet<RaceColumn>(new Comparator<RaceColumn>() {
+            List<RaceColumn> sortedRaces = new ArrayList<RaceColumn>();
+            Comparator<RaceColumn> comparator = new Comparator<RaceColumn>() {
                 @Override
                 public int compare(RaceColumn o1, RaceColumn o2) {
                     try {
-                        return leaderboard.getNetPoints(competitor, o1, timePoint) - leaderboard.getNetPoints(competitor, o2, timePoint);
+                        // invert to get bad races first; have the score comparator sort null scores as "better" so they end
+                        // up at the end of the list
+                        return -leaderboard
+                                .getScoringScheme()
+                                .getScoreComparator(/* nullScoresAreBetter */true)
+                                .compare(leaderboard.getNetPoints(competitor, o1, timePoint),
+                                        leaderboard.getNetPoints(competitor, o2, timePoint));
                     } catch (NoWindException e) {
                         throw new NoWindError(e);
                     }
                 }
-            });
-            for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
+            };
+            for (RaceColumn raceColumn : raceColumnsToConsider) {
                 if (!raceColumn.isMedalRace()) {
                     sortedRaces.add(raceColumn);
                 }
             }
+            Collections.sort(sortedRaces, comparator);
             int i=0;
-            Iterator<RaceColumn> badRacesIter = sortedRaces.descendingIterator();
+            Iterator<RaceColumn> badRacesIter = sortedRaces.iterator();
             while (badRacesIter.hasNext() && i<resultsToDiscard) {
-                result.add(badRacesIter.next());
-                i++;
+                final RaceColumn badRace = badRacesIter.next();
+                final MaxPointsReason maxPointsReason = leaderboard.getMaxPointsReason(competitor, badRace, timePoint);
+                if (maxPointsReason == null || maxPointsReason.isDiscardable()) {
+                    result.add(badRace);
+                    i++;
+                }
             }
         } else {
             result = Collections.emptySet();
@@ -80,11 +95,12 @@ public class ResultDiscardingRuleImpl implements ThresholdBasedResultDiscardingR
         return result;
     }
 
-    private int getNumberOfResultsToDiscard(Iterable<RaceColumn> raceColumns, Leaderboard leaderboard, TimePoint timePoint) {
+    private int getNumberOfResultsToDiscard(Competitor competitor, Iterable<RaceColumn> raceColumnsToConsider,
+            Leaderboard leaderboard, TimePoint timePoint) {
         int numberOfResultsToDiscard;
         int numberOfStartedRaces = 0;
-        for (RaceColumn raceInLeaderboard : raceColumns) {
-            if (leaderboard.considerForDiscarding(raceInLeaderboard, timePoint)) {
+        for (RaceColumn raceInLeaderboard : raceColumnsToConsider) {
+            if (leaderboard.countRaceForComparisonWithDiscardingThresholds(competitor, raceInLeaderboard, timePoint)) {
                 numberOfStartedRaces++;
             }
         }

@@ -9,13 +9,19 @@ public class Util {
     /**
      * Adds all elements from <code>what</code> to <code>addTo</code> and returns <code>addTo</code> for chained use.
      */
-    public static <T> Collection<T> addAll(Iterable<T> what, Collection<T> addTo) {
+    public static <T> Collection<T> addAll(Iterable<? extends T> what, Collection<T> addTo) {
         for (T t : what) {
             addTo.add(t);
         }
         return addTo;
     }
     
+    public static <T> void removeAll(Iterable<T> what, Collection<T> removeFrom) {
+        for (T t : what) {
+            removeFrom.remove(t);
+        }
+    }
+
     public static <T> int size(Iterable<T> i) {
         if (i instanceof Collection<?>) {
             return ((Collection<?>) i).size();
@@ -207,7 +213,6 @@ public class Util {
 
         @Override
         public boolean equals( Object obj ) {
-
             boolean result;
             if ( this == obj ) {
                 result = true;
@@ -222,8 +227,8 @@ public class Util {
 
         @Override
         public String toString( ) {
-
             return "[" + a + ", " + b + ", " + c + "]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
         }
     }
+
 }

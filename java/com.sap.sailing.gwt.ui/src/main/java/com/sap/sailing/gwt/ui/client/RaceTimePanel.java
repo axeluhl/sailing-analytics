@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Map;
 
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.client.Timer.PlayStates;
@@ -14,13 +13,13 @@ import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.components.SettingsDialogComponent;
 
 public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements RaceSelectionChangeListener, RaceTimesInfoProviderListener {
-    private RaceTimesInfoProvider raceTimesInfoProvider;
-    private RaceIdentifier selectedRace;
+    private final RaceTimesInfoProvider raceTimesInfoProvider;
+    private RegattaAndRaceIdentifier selectedRace;
     private boolean autoAdjustPlayMode;
     private RaceTimesInfoDTO lastRaceTimesInfo;
     
-    public RaceTimePanel(Timer timer, StringMessages stringMessages, RaceTimesInfoProvider raceTimesInfoProvider) {
-        super(timer, stringMessages);
+    public RaceTimePanel(Timer timer, TimeRangeProvider timeRangeProvider, StringMessages stringMessages, RaceTimesInfoProvider raceTimesInfoProvider) {
+        super(timer, timeRangeProvider, stringMessages);
         this.raceTimesInfoProvider = raceTimesInfoProvider;
         selectedRace = null;
         autoAdjustPlayMode = true;
@@ -67,8 +66,8 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
                     timer.setPlayMode(PlayModes.Live);
                 }
                 
-                boolean timerAlreadyInitialized = getMin() != null && getMax() != null && timeSlider.getCurrentValue() != null;
-                if(!isTimeZoomed) {
+                boolean timerAlreadyInitialized = getFromTime() != null && getToTime() != null && timeSlider.getCurrentValue() != null;
+                if (!isTimeZoomed) {
                     updateMinMax(raceTimesInfo);
                     if (!timerAlreadyInitialized) {
                         initTimerPosition(raceTimesInfo);
@@ -84,10 +83,11 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
     } 
     
     @Override
-    public void onTimeZoom(Date zoomStartTimepoint, Date zoomEndTimepoint) {
+    public void onTimeZoomChanged(Date zoomStartTimepoint, Date zoomEndTimepoint) {
+        super.onTimeZoomChanged(zoomStartTimepoint, zoomEndTimepoint);
         isTimeZoomed = true;
         timeSlider.setZoomed(true);
-        timer.setAutoAdvance(false);
+//        timer.setAutoAdvance(false);
         setMinMax(zoomStartTimepoint, zoomEndTimepoint, false);
         timeSlider.clearMarkersAndLabelsAndTicks();
         redrawAllMarkers(lastRaceTimesInfo);
@@ -95,9 +95,10 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
 
     @Override
     public void onTimeZoomReset() {
+        super.onTimeZoomReset();
         isTimeZoomed = false;
         timeSlider.setZoomed(false);
-        timer.setAutoAdvance(true);
+//        timer.setAutoAdvance(true);
         updateMinMax(this.lastRaceTimesInfo);
         timeSlider.clearMarkersAndLabelsAndTicks();
         redrawAllMarkers(lastRaceTimesInfo);
@@ -152,7 +153,7 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
         Date max = raceMinMax.getB();
         
         // never reduce max if it was already set
-        if (min != null && max != null && (getMax() == null || getMax().before(max))) {
+        if (min != null && max != null && (getToTime() == null || getToTime().before(max))) {
             setMinMax(min, max, /* fireEvent */ false); // no event because we guarantee time to be between min and max
         }
     }
@@ -233,7 +234,7 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
     }
     
     @Override
-    public void raceTimesInfosReceived(Map<RaceIdentifier, RaceTimesInfoDTO> raceTimesInfos) {
+    public void raceTimesInfosReceived(Map<RegattaAndRaceIdentifier, RaceTimesInfoDTO> raceTimesInfos) {
         updateTimeInfo(raceTimesInfos.get(selectedRace));
     }
 }

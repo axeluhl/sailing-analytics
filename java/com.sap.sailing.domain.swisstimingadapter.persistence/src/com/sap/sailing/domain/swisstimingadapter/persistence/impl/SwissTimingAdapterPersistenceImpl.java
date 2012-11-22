@@ -117,6 +117,7 @@ public class SwissTimingAdapterPersistenceImpl implements SwissTimingAdapterPers
     @Override
     public List<SailMasterMessage> loadRaceMessages(String raceID) {
         DBCollection racesMessagesCollection = database.getCollection(CollectionNames.RACES_MESSAGES.name());
+        racesMessagesCollection.ensureIndex(new BasicDBObject(FieldNames.MESSAGE_SEQUENCE_NUMBER.name(), null)); // no sort without index
         BasicDBObject query = new BasicDBObject();
         query.append(FieldNames.RACE_ID.name(), raceID);
         DBCursor results = racesMessagesCollection.find(query).sort(
@@ -124,7 +125,7 @@ public class SwissTimingAdapterPersistenceImpl implements SwissTimingAdapterPers
         List<SailMasterMessage> result = new ArrayList<SailMasterMessage>();
         for (DBObject o : results) {
             SailMasterMessage msg = swissTimingFactory.createMessage((String) o.get(FieldNames.MESSAGE_CONTENT.name()),
-                    (Long) o.get(FieldNames.MESSAGE_SEQUENCE_NUMBER.name()));
+                    ((Number) o.get(FieldNames.MESSAGE_SEQUENCE_NUMBER.name())).longValue());
             result.add(msg);
         }
         return result;

@@ -6,6 +6,7 @@ import java.util.List;
 
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
+import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings.RaceColumnSelectionStrategies;
 
 /*
  * A factory class creating leaderboard settings for different contexts (user role, live or replay mode, etc.
@@ -33,9 +34,12 @@ public class LeaderboardSettingsFactory {
      *            no change to the selected race columns will happen while updating the leaderboard settings. It is an error
      *            to pass non-<code>null</code> values for both, <code>nameOfRaceColumnToShow</code> <em>and</em>
      *            <code>nameOfRaceToShow</code>, and an {@link IllegalArgumentException} will be thrown in this case.
+     * @param raceColumnSelection 
+     *            the settings will be constructed such that the new settings will have the same race columns selected as those selected by
+     *            this argument
      */
     public LeaderboardSettings createNewSettingsForPlayMode(PlayModes playMode, String nameOfRaceToSort, String nameOfRaceColumnToShow,
-            String nameOfRaceToShow) {
+            String nameOfRaceToShow, RaceColumnSelection raceColumnSelection) {
         if (nameOfRaceColumnToShow != null && nameOfRaceToShow != null) {
             throw new IllegalArgumentException("Can identify only one race to show, either by race name or by its column name, but not both");
         }
@@ -44,26 +48,32 @@ public class LeaderboardSettingsFactory {
         List<String> namesOfRacesToShow = nameOfRaceToShow == null ? null : Collections.singletonList(nameOfRaceToShow);
         switch (playMode) {
             case Live:  
-                ArrayList<DetailType> maneuverDetails = new ArrayList<DetailType>();
+                List<DetailType> maneuverDetails = new ArrayList<DetailType>();
                 maneuverDetails.add(DetailType.TACK);
+                maneuverDetails.add(DetailType.AVERAGE_TACK_LOSS_IN_METERS);
                 maneuverDetails.add(DetailType.JIBE);
+                maneuverDetails.add(DetailType.AVERAGE_JIBE_LOSS_IN_METERS);
                 maneuverDetails.add(DetailType.PENALTY_CIRCLE);
-                ArrayList<DetailType> legDetails = new ArrayList<DetailType>();
+                maneuverDetails.add(DetailType.AVERAGE_MANEUVER_LOSS_IN_METERS);
+                List<DetailType> legDetails = new ArrayList<DetailType>();
                 legDetails.add(DetailType.DISTANCE_TRAVELED);
                 legDetails.add(DetailType.AVERAGE_SPEED_OVER_GROUND_IN_KNOTS);
                 legDetails.add(DetailType.ESTIMATED_TIME_TO_NEXT_WAYPOINT_IN_SECONDS);
                 legDetails.add(DetailType.RANK_GAIN);
-                ArrayList<DetailType> raceDetails = new ArrayList<DetailType>();
+                List<DetailType> raceDetails = new ArrayList<DetailType>();
                 raceDetails.add(DetailType.RACE_DISTANCE_TRAVELED);
                 raceDetails.add(DetailType.RACE_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS);
                 raceDetails.add(DetailType.RACE_DISTANCE_TO_LEADER_IN_METERS);
                 raceDetails.add(DetailType.NUMBER_OF_MANEUVERS);
                 raceDetails.add(DetailType.DISPLAY_LEGS);
-                settings = new LeaderboardSettings(maneuverDetails, legDetails, raceDetails, namesOfRaceColumnsToShow,
-                        namesOfRacesToShow,
-                        /* set autoExpandPreSelectedRace to true if we look at a single race */ nameOfRaceColumnToShow != null || nameOfRaceToShow != null, /* refresh interval */ null,
-                        /* delay to live */ null, /* name of race to sort */ nameOfRaceToSort, /* ascending */ true,
-                        /* updateUponPlayStateChange */ true);
+                List<DetailType> overallDetails = null; // lead overall details unchanged
+                settings = new LeaderboardSettings(maneuverDetails, legDetails, raceDetails, overallDetails,
+                        namesOfRaceColumnsToShow,
+                        namesOfRacesToShow, raceColumnSelection.getNumberOfLastRaceColumnsToShow(),
+                        /* set autoExpandPreSelectedRace to true if we look at a single race */ nameOfRaceColumnToShow != null || nameOfRaceToShow != null,
+                        /* refresh interval */ null, /* delay to live */ null,
+                        /* name of race to sort */ nameOfRaceToSort, /* ascending */ true, /* updateUponPlayStateChange */ true,
+                        raceColumnSelection.getType());
                 break;
             case Replay:
             settings = createNewDefaultSettings(namesOfRaceColumnsToShow, namesOfRacesToShow, nameOfRaceToSort, /* autoExpandFirstRace */
@@ -81,27 +91,42 @@ public class LeaderboardSettingsFactory {
      *            columns to be shown
      * @param namesOfRacesToShow
      *            alternatively, races to show can also be specified by their race names; if not <code>null</code>,
-     *            <code>namesOfRaceColumnsToShow</code> must be <code>null
+     *            <code>namesOfRaceColumnsToShow</code> must be <code>null</code>
      */
     public LeaderboardSettings createNewDefaultSettings(List<String> namesOfRaceColumnsToShow,
             List<String> namesOfRacesToShow, String nameOfRaceToSort, boolean autoExpandPreSelectedRace) {
+        return createNewDefaultSettings(namesOfRaceColumnsToShow, namesOfRacesToShow, /* leave overallDetailsToShow unchanged */ null,
+                nameOfRaceToSort, autoExpandPreSelectedRace, /* refreshIntervalMillis */ null);
+    }
+    
+    /**
+     * Like {@link #createNewDefaultSettings(List, List, String, boolean)}, only that an additional refresh interval for auto-refresh
+     * may be specified; if <code>null</code>, no auto-refresh shall be performed
+     */
+    public LeaderboardSettings createNewDefaultSettings(List<String> namesOfRaceColumnsToShow,
+            List<String> namesOfRacesToShow, List<DetailType> overallDetailsToShow, String nameOfRaceToSort,
+            boolean autoExpandPreSelectedRace, Long refreshIntervalMillis) {
         if (namesOfRaceColumnsToShow != null && namesOfRacesToShow != null) {
             throw new IllegalArgumentException("Can specify race columns either by column or by race name, not both");
         }
-        ArrayList<DetailType> maneuverDetails = new ArrayList<DetailType>();
+        List<DetailType> maneuverDetails = new ArrayList<DetailType>();
         maneuverDetails.add(DetailType.TACK);
+        maneuverDetails.add(DetailType.AVERAGE_TACK_LOSS_IN_METERS);
         maneuverDetails.add(DetailType.JIBE);
+        maneuverDetails.add(DetailType.AVERAGE_JIBE_LOSS_IN_METERS);
         maneuverDetails.add(DetailType.PENALTY_CIRCLE);
-        ArrayList<DetailType> legDetails = new ArrayList<DetailType>();
+        maneuverDetails.add(DetailType.AVERAGE_MANEUVER_LOSS_IN_METERS);
+        List<DetailType> legDetails = new ArrayList<DetailType>();
         legDetails.add(DetailType.DISTANCE_TRAVELED);
         legDetails.add(DetailType.AVERAGE_SPEED_OVER_GROUND_IN_KNOTS);
         legDetails.add(DetailType.RANK_GAIN);
-        ArrayList<DetailType> raceDetails = new ArrayList<DetailType>();
+        List<DetailType> raceDetails = new ArrayList<DetailType>();
         raceDetails.add(DetailType.DISPLAY_LEGS);
-        return new LeaderboardSettings(maneuverDetails, legDetails, raceDetails, namesOfRaceColumnsToShow,
-                namesOfRacesToShow,
-                autoExpandPreSelectedRace, /* refresh interval */ null,
-                /* delay to live */ null, /* sort by column */ nameOfRaceToSort, /* ascending */ true,
-                /* updateUponPlayStateChange */ true);
+        return new LeaderboardSettings(maneuverDetails, legDetails, raceDetails, overallDetailsToShow,
+                namesOfRaceColumnsToShow,
+                namesOfRacesToShow, null,
+                autoExpandPreSelectedRace, refreshIntervalMillis, /* delay to live */ null,
+                /* sort by column */ nameOfRaceToSort, /* ascending */ true, /* updateUponPlayStateChange */ true,
+                RaceColumnSelectionStrategies.EXPLICIT);
     }
 }

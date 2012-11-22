@@ -21,8 +21,15 @@ import com.sap.sailing.domain.tracking.TrackedRace;
  */
 public interface ScoreCorrection extends Serializable {
     public interface Result {
-        int getCorrectedScore();
+        /**
+         * @return <code>null</code> in case there is no score attributed to the competitor for the race column in
+         *         question. This can, e.g., mean that the race hasn't started yet or the competitor wasn't enlisted in
+         *         the race at all.
+         */
+        Double getCorrectedScore();
+
         MaxPointsReason getMaxPointsReason();
+
         boolean isCorrected();
     }
     
@@ -33,12 +40,11 @@ public interface ScoreCorrection extends Serializable {
      * Note, though, that {@link MaxPointsReason#NONE} can also be the reason for an explicit score correction, e.g., if
      * the tracking results were overruled by the jury. Clients may use
      * {@link #isScoreCorrected(Competitor, TrackedRace)} to detect the difference.
-     * 
      * @param numberOfCompetitors
      *            the number of competitors to use as the basis for penalty score calculation ("max points")
      */
-    Result getCorrectedScore(Callable<Integer> uncorrectedScore, Competitor competitor, RaceColumn raceColumn,
-            TimePoint timePoint, int numberOfCompetitors);
+    Result getCorrectedScore(Callable<Integer> trackedRank, Competitor competitor, RaceColumn raceColumn,
+            TimePoint timePoint, int numberOfCompetitors, ScoringScheme scoringScheme);
 
     /**
      * Note the difference between what this method does and a more naive comparison of uncorrected and corrected score.
@@ -51,4 +57,18 @@ public interface ScoreCorrection extends Serializable {
      */
     boolean isScoreCorrected(Competitor competitor, RaceColumn raceColumn);
 
+    /**
+     * Tells when the score correction was last updated. This should usually be the "validity time" and not the
+     * "transaction time." In other words, if scores provided by the race committee are updated to this score correction
+     * at time X, and the race committee's scores are tagged with time Y, then this method should return Y, not X. If
+     * Y is not available for some reason, X may be used as a default.
+     */
+    TimePoint getTimePointOfLastCorrectionsValidity();
+    
+    /**
+     * A free-form comment to display to the viewers of the leaderboard that has these score corrections. It should make
+     * crystal clear if the scores are preliminary or not yet jury-finalized. If <code>null</code> is returned, this
+     * always has to be interpreted as "preliminary" because then no comment as to the correctness have been made.
+     */
+    String getComment();
 }

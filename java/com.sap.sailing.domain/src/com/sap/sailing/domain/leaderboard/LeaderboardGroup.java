@@ -2,14 +2,21 @@ package com.sap.sailing.domain.leaderboard;
 
 import java.util.Collection;
 
-import com.sap.sailing.domain.common.Named;
+import com.sap.sailing.domain.common.Renamable;
 
-public interface LeaderboardGroup extends Named {
+/**
+ * A leaderboard group is used to group one or more {@link Leaderboard}s.
+ * @author Frank Mittag (c5163874)
+ */
+public interface LeaderboardGroup extends Renamable {
+    void addLeaderboardGroupListener(LeaderboardGroupListener listener);
+    void removeLeaderboardGroupListener(LeaderboardGroupListener listener);
     
     String getDescription();
     void setDescriptiom(String description);
-    void setName(String newName);
 
+    boolean isDisplayGroupsInReverseOrder();
+    
     Iterable<Leaderboard> getLeaderboards();
     int getIndexOf(Leaderboard leaderboard);
     void addLeaderboard(Leaderboard leaderboard);
@@ -18,5 +25,6 @@ public interface LeaderboardGroup extends Named {
     void removeLeaderboard(Leaderboard leaderboard);
     void removeAllLeaderboards(Collection<Leaderboard> leaderboards);
     void clearLeaderboards();
-    
+    Leaderboard getOverallLeaderboard();
+    void setOverallLeaderboard(Leaderboard leaderboard);
 }

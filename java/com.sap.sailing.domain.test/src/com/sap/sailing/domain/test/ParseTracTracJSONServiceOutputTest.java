@@ -103,7 +103,7 @@ public class ParseTracTracJSONServiceOutputTest {
     @Test
     public void testHamiltonOnline() throws MalformedURLException, IOException, java.text.ParseException, ParseException, URISyntaxException {
         JSONService jsonService = DomainFactory.INSTANCE.parseJSONURL(new URL(
-                "http://" + TracTracConnectionConstants.HOST_NAME + "/events/event_20110308_SAPWorldCh/jsonservice.php"));
+                "http://" + TracTracConnectionConstants.HOST_NAME + "/events/event_20110308_SAPWorldCh/jsonservice.php?humba=trala"));
         assertEquals("SAP 2011 505 World Championship", jsonService.getEventName());
         List<RaceRecord> races = jsonService.getRaceRecords();
         assertEquals(14, races.size());

@@ -9,6 +9,7 @@ import com.google.gwt.junit.client.GWTTestCase;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
+import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.tractracadapter.TracTracConnectionConstants;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -101,7 +102,7 @@ public class GwtTestCaseColumnToggling extends GWTTestCase {
     }
     
     private void createLeaderboard(){
-        service.createFlexibleLeaderboard(LEADERBOARD_NAME, new int[] { 1, 2 },
+        service.createFlexibleLeaderboard(LEADERBOARD_NAME, new int[] { 1, 2 }, ScoringSchemeType.LOW_POINT,
                 new AsyncCallback<StrippedLeaderboardDTO>() {
                     @Override
                     public void onSuccess(StrippedLeaderboardDTO result) {
@@ -118,12 +119,9 @@ public class GwtTestCaseColumnToggling extends GWTTestCase {
     }
     
     private void addColumnToLeaderboard() {
-        leaderboardPanel = new LeaderboardPanelMock(service, LEADERBOARD_NAME,
-                null, sc);
-
+        leaderboardPanel = new LeaderboardPanelMock(service, LEADERBOARD_NAME, null, sc);
         service.addColumnToLeaderboard(COLUMN1_NAME, LEADERBOARD_NAME, false,
                 new AsyncCallback<Void>() {
-
                     @Override
                     public void onFailure(Throwable caught) {
                         fail("Failed to add column to leaderboard.");
@@ -133,7 +131,7 @@ public class GwtTestCaseColumnToggling extends GWTTestCase {
                     @Override
                     public void onSuccess(Void result) {
                         System.out.println("Added column to leaderboard.");
-                        RaceColumnDTO race = new RaceColumnDTO();
+                        RaceColumnDTO race = new RaceColumnDTO(/* isValidInTotalScore */ null);
                         race.name = COLUMN1_NAME;
                         race.setMedalRace(false);
                         leaderboardPanel.addColumn(leaderboardPanel.createRaceColumn(race));
@@ -162,34 +160,32 @@ public class GwtTestCaseColumnToggling extends GWTTestCase {
     private void getLeaderboard(){
         ArrayList<String> al = new ArrayList<String>();
         al.add(COLUMN1_NAME);
-        service.getLeaderboardByName(LEADERBOARD_NAME, new Date(), al, /* waitForLatestManeuverAnalysis */ true,
-                new AsyncCallback<LeaderboardDTO>() {
+        service.getLeaderboardByName(LEADERBOARD_NAME, new Date(), al, new AsyncCallback<LeaderboardDTO>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                fail("Failed to get leaderboard.");
+                finishTest();
+            }
 
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        fail("Failed to get leaderboard.");
-                        finishTest();
+            @Override
+            public void onSuccess(LeaderboardDTO result) {
+                System.out.println("Got leaderboard.");
+                
+                leaderboard = result;
+                leaderboardPanel.updateLeaderboard(leaderboard);
+                for (int i = 0; i < leaderboardPanel.getLeaderboardTable()
+                        .getColumnCount(); i++) {
+                    Column<LeaderboardRowDTO, ?> c = leaderboardPanel.getLeaderboardTable().getColumn(i);
+                    if (c instanceof ExpandableSortableColumn<?>) {
+                        @SuppressWarnings("unchecked")
+                        ExpandableSortableColumn<LeaderboardRowDTO> myRc = (ExpandableSortableColumn<LeaderboardRowDTO>) c;
+                        rc = myRc;
+                        rc.setEnableExpansion(true);
                     }
-
-                    @Override
-                    public void onSuccess(LeaderboardDTO result) {
-                        System.out.println("Got leaderboard.");
-                        
-                        leaderboard = result;
-                        leaderboardPanel.updateLeaderboard(leaderboard);
-                        for (int i = 0; i < leaderboardPanel.getLeaderboardTable()
-                                .getColumnCount(); i++) {
-                            Column<LeaderboardRowDTO, ?> c = leaderboardPanel.getLeaderboardTable().getColumn(i);
-                            if (c instanceof ExpandableSortableColumn<?>) {
-                                @SuppressWarnings("unchecked")
-                                ExpandableSortableColumn<LeaderboardRowDTO> myRc = (ExpandableSortableColumn<LeaderboardRowDTO>) c;
-                                rc = myRc;
-                                rc.setEnableLegDrillDown(true);
-                            }
-                        }
-                        removeColumnAndAssert();
-                    }
-                });
+                }
+                removeColumnAndAssert();
+            }
+        });
     }
     
     private void removeColumnAndAssert(){

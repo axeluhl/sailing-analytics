@@ -12,6 +12,7 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
 import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
+import com.sap.sailing.gwt.ui.raceboard.GlobalNavigationPanel;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.panels.SimpleWelcomeWidget;
 
@@ -54,9 +55,14 @@ public class SpectatorEntryPoint extends AbstractEntryPoint implements RegattaRe
         boolean embedded = Window.Location.getParameter("embedded") != null
                 && Window.Location.getParameter("embedded").equalsIgnoreCase("true");
         if (!embedded) {
-            LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(groupName != null ? groupName
-                    : stringMessages.overview(), stringMessages);
+            String title = groupName != null ? groupName : stringMessages.overview();
+            
+            LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(title, stringMessages);
             logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
+            
+            FlowPanel globalNavigationPanel = new GlobalNavigationPanel(stringMessages, true, null, null);
+            logoAndTitlePanel.add(globalNavigationPanel);
+
             rootPanel.add(logoAndTitlePanel);
         } else {
             RootPanel.getBodyElement().getStyle().setPadding(0, Unit.PX);
@@ -65,7 +71,11 @@ public class SpectatorEntryPoint extends AbstractEntryPoint implements RegattaRe
         if (groupName == null) {
             FlowPanel groupOverviewPanel = new FlowPanel();
             groupOverviewPanel.addStyleName("contentOuterPanel");
-            groupOverviewPanel.add(new LeaderboardGroupOverviewPanel(sailingService, this, stringMessages, showRaceDetails));
+            // DON'T DELETE -> the EventOverviewPanel will replace the LeaderboardGroupOverviewPanel later on
+//            EventOverviewPanel eventOverviewPanel = new EventOverviewPanel(sailingService, this, stringMessages, showRaceDetails);
+//            groupOverviewPanel.add( eventOverviewPanel);
+            LeaderboardGroupOverviewPanel leaderboardGroupOverviewPanel = new LeaderboardGroupOverviewPanel(sailingService, this, stringMessages, showRaceDetails);
+            groupOverviewPanel.add(leaderboardGroupOverviewPanel);
             rootPanel.add(groupOverviewPanel);
         } else {
             LeaderboardGroupPanel groupPanel = new LeaderboardGroupPanel(sailingService, stringMessages, this,

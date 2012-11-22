@@ -3,6 +3,7 @@ package com.sap.sailing.domain.tractracadapter.impl;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.Serializable;
+import java.io.StringReader;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -14,11 +15,12 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
-import com.sap.sailing.domain.base.Buoy;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Nationality;
@@ -36,6 +38,7 @@ import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
 import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
@@ -65,6 +68,7 @@ import com.tractrac.clientmodule.ControlPoint;
 import com.tractrac.clientmodule.Race;
 import com.tractrac.clientmodule.RaceCompetitor;
 import com.tractrac.clientmodule.data.ControlPointPositionData;
+import com.tractrac.clientmodule.metadata.IMetadata;
 
 import difflib.PatchFailedException;
 
@@ -102,6 +106,11 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
+    public com.sap.sailing.domain.base.DomainFactory getBaseDomainFactory() {
+        return baseDomainFactory;
+    }
+    
+    @Override
     public Position createPosition(
             com.tractrac.clientmodule.data.Position position) {
         return new DegreePosition(position.getLatitude(), position.getLongitude());
@@ -133,12 +142,19 @@ public class DomainFactoryImpl implements DomainFactory {
         synchronized (controlPointCache) {
             com.sap.sailing.domain.base.ControlPoint domainControlPoint = controlPointCache.get(controlPoint);
             if (domainControlPoint == null) {
+                String controlPointName = controlPoint.getName();
+                Map<String, String> controlPointMetadata = parseControlPointMetadata(controlPoint);
+                String markColor = controlPointMetadata.get("Color");
+                String markShape = controlPointMetadata.get("Shape");
+                String markPattern = controlPointMetadata.get("Pattern");
                 if (controlPoint.getHasTwoPoints()) {
                     // it's a gate
-                    domainControlPoint = baseDomainFactory.createGate(baseDomainFactory.getOrCreateBuoy(controlPoint.getName() + " (left)"),
-                            baseDomainFactory.getOrCreateBuoy(controlPoint.getName() + " (right)"), controlPoint.getName());
+                    Mark leftMark = baseDomainFactory.getOrCreateMark(controlPointName + " (left)", markColor, markShape, markPattern);
+                    Mark rightMark = baseDomainFactory.getOrCreateMark(controlPointName + " (right)", markColor, markShape, markPattern);
+                    domainControlPoint = baseDomainFactory.createGate(leftMark, rightMark, controlPointName);
                 } else {
-                    domainControlPoint = baseDomainFactory.getOrCreateBuoy(controlPoint.getName());
+                    Mark mark = baseDomainFactory.getOrCreateMark(controlPointName, markColor, markShape, markPattern);
+                    domainControlPoint = mark;
                 }
                 controlPointCache.put(controlPoint, domainControlPoint);
             }
@@ -146,6 +162,24 @@ public class DomainFactoryImpl implements DomainFactory {
         }
     }
     
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    private Map<String, String> parseControlPointMetadata(ControlPoint controlPoint) {
+        Map<String, String> metadataMap = new HashMap<String, String>();
+        IMetadata metadata = controlPoint.getMetadata();
+        if(metadata != null && !metadata.isEmpty()) {
+            // we assume the format of the metadata is like in a java .properties file
+            String text = metadata.getText();
+            try {
+                Properties p = new Properties();
+                p.load(new StringReader(text));
+                metadataMap = new HashMap<String, String>((Map) p);
+            } catch (IOException e) {
+                // do nothing
+            }
+        }
+        return metadataMap;
+    }
+        
     @Override
     public Course createCourse(String name, Iterable<ControlPoint> controlPoints) {
         List<Waypoint> waypointList = new ArrayList<Waypoint>();
@@ -274,7 +308,9 @@ public class DomainFactoryImpl implements DomainFactory {
                 // This is particularly bad if a persistent regatta was loaded but a default regatta was accidentally created.
                 // Then, there is no way but restart the server to get rid of this stale cache entry here.
                 if (result == null) {
-                    result = new RegattaImpl(event.getName(), boatClass, trackedRegattaRegistry);
+                    result = new RegattaImpl(event.getName(), boatClass, trackedRegattaRegistry,
+                            // use the low-point system as the default scoring scheme
+                            com.sap.sailing.domain.base.DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT));
                     regattaCache.put(key, result);
                     weakRegattaCache.put(event, result);
                     logger.info("Created regatta "+result.getName()+" ("+result.hashCode()+") because none found for key "+key);
@@ -461,10 +497,10 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public Buoy getBuoy(ControlPoint controlPoint, ControlPointPositionData record) {
+    public Mark getMark(ControlPoint controlPoint, ControlPointPositionData record) {
         com.sap.sailing.domain.base.ControlPoint myControlPoint = getOrCreateControlPoint(controlPoint);
-        Buoy result;
-        Iterator<Buoy> iter = myControlPoint.getBuoys().iterator();
+        Mark result;
+        Iterator<Mark> iter = myControlPoint.getMarks().iterator();
         if (controlPoint.getHasTwoPoints()) {
             if (record.getIndex() == 0) {
                 result = iter.next();

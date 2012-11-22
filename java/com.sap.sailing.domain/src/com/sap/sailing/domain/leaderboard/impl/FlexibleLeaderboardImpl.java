@@ -3,7 +3,6 @@ package com.sap.sailing.domain.leaderboard.impl;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -13,6 +12,7 @@ import com.sap.sailing.domain.base.RaceColumnListener;
 import com.sap.sailing.domain.base.impl.FleetImpl;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.FlexibleRaceColumn;
+import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -33,11 +33,13 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
     protected static final Fleet defaultFleet = new FleetImpl("Default");
     private static final long serialVersionUID = -5708971849158747846L;
     private final List<FlexibleRaceColumn> races;
+    private final ScoringScheme scoringScheme;
     private String name;
 
     public FlexibleLeaderboardImpl(String name, SettableScoreCorrection scoreCorrection,
-            ThresholdBasedResultDiscardingRule resultDiscardingRule, Comparator<Integer> scoreComparator) {
-        super(scoreCorrection, resultDiscardingRule, scoreComparator);
+            ThresholdBasedResultDiscardingRule resultDiscardingRule, ScoringScheme scoringScheme) {
+        super(scoreCorrection, resultDiscardingRule);
+        this.scoringScheme = scoringScheme;
         if (name == null) {
             throw new IllegalArgumentException("A leaderboard's name must not be null");
         }
@@ -70,6 +72,7 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
             column = createRaceColumn(name, medalRace, fleets);
             column.addRaceColumnListener(this);
             races.add(column);
+            getRaceColumnListeners().notifyListenersAboutRaceColumnAddedToContainer(column);
         }
         return column;
     }
@@ -94,6 +97,7 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
     public void removeRaceColumn(String columnName) {
         final FlexibleRaceColumn raceColumn = getRaceColumnByName(columnName);
         races.remove(raceColumn);
+        getRaceColumnListeners().notifyListenersAboutRaceColumnRemovedFromContainer(raceColumn);
         raceColumn.removeRaceColumnListener(this);
     }
     
@@ -106,7 +110,7 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
     public RaceColumn addRace(TrackedRace race, String columnName, boolean medalRace, Fleet fleet) {
         FlexibleRaceColumn column = getRaceColumnByName(columnName);
         if (column == null) {
-            column = createRaceColumn(columnName, medalRace);
+            column = createRaceColumn(columnName, medalRace, fleet);
             column.addRaceColumnListener(this);
             races.add(column);
         }
@@ -136,15 +140,15 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
                 race = r;
             }
         }
-        if (race == null) {
-            return;
-        }
-        int index = 0;
-        index = races.lastIndexOf(race);
-        index--;
-        if (index >= 0) {
-            races.remove(race);
-            races.add(index, race);
+        if (race != null) {
+            int index = 0;
+            index = races.lastIndexOf(race);
+            index--;
+            if (index >= 0) {
+                races.remove(race);
+                races.add(index, race);
+                getRaceColumnListeners().notifyListenersAboutRaceColumnMoved(race, index);
+            }
         }
     }
 
@@ -156,18 +160,17 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
                 race = r;
             }
         }
-        if (race == null) {
-            return;
-        }
-        int index = 0;
-        index = races.lastIndexOf(race);
-        if (index == -1) {
-            return;
-        }
-        index++;
-        if (index < races.size()) {
-            races.remove(race);
-            races.add(index, race);
+        if (race != null) {
+            int index = 0;
+            index = races.lastIndexOf(race);
+            if (index != -1) {
+                index++;
+                if (index < races.size()) {
+                    races.remove(race);
+                    races.add(index, race);
+                    getRaceColumnListeners().notifyListenersAboutRaceColumnMoved(race, index);
+                }
+            }
         }
     }
 
@@ -181,6 +184,11 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
         if (race != null) {
             race.setIsMedalRace(isMedalRace);
         }
+    }
+
+    @Override
+    public ScoringScheme getScoringScheme() {
+        return scoringScheme;
     }
 
 }

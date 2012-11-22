@@ -16,5 +16,10 @@ import com.sap.sailing.domain.common.TimePoint;
  *
  */
 public interface ResultDiscardingRule extends Serializable {
-    Set<RaceColumn> getDiscardedRaceColumns(Competitor competitor, Leaderboard leaderboard, TimePoint timePoint);
+    /**
+     * @param raceColumnsToConsider if a column is <code>not</code> contained, its existence will be ignored for determining the
+     * columns to discard. It affects the count of races. Only columns contained can be part of the result.
+     */
+    Set<RaceColumn> getDiscardedRaceColumns(Competitor competitor, Leaderboard leaderboard,
+            Iterable<RaceColumn> raceColumnsToConsider, TimePoint timePoint);
 }

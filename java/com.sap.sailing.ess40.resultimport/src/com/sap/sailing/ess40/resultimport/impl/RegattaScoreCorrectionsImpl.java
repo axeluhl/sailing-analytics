@@ -13,7 +13,7 @@ public class RegattaScoreCorrectionsImpl implements RegattaScoreCorrections {
     private final Iterable<ScoreCorrectionsForRace> scoreCorrectionsForRaces;
     
     public RegattaScoreCorrectionsImpl(ScoreCorrectionProviderImpl scoreCorrectionProviderImpl,
-            Map<String, List<Pair<String, Integer>>> actResults) {
+            Map<String, List<Pair<String, Double>>> actResults) {
         this.provider = scoreCorrectionProviderImpl;
         List<ScoreCorrectionsForRace> scfr = new ArrayList<ScoreCorrectionsForRace>();
         int maxSize = getMaxListSize(actResults);
@@ -23,9 +23,9 @@ public class RegattaScoreCorrectionsImpl implements RegattaScoreCorrections {
         this.scoreCorrectionsForRaces = scfr;
     }
 
-    private int getMaxListSize(Map<String, List<Pair<String, Integer>>> actResults) {
+    private int getMaxListSize(Map<String, List<Pair<String, Double>>> actResults) {
         int result = 0;
-        for (Map.Entry<String, List<Pair<String, Integer>>> e : actResults.entrySet()) {
+        for (Map.Entry<String, List<Pair<String, Double>>> e : actResults.entrySet()) {
             result = Math.max(result, e.getValue().size());
         }
         return result;

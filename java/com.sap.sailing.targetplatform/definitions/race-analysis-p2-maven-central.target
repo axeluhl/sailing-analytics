@@ -5,11 +5,12 @@
 <locations>
 <location includeAllPlatforms="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="org.eclipse.jetty.bundles.f.feature.group" version="7.5.4"/>
-<repository location="http://download.eclipse.org/jetty/updates/jetty-bundles-7.x/7.5.4.v20111024/"/>
+<repository location="http://archive.eclipse.org/jetty/updates/jetty-bundles-7.x/7.5.4.v20111024/"/>
 </location>
 <location includeAllPlatforms="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="com.sap.sailing.target.base.feature.group" version="1.0.0"/>
 <unit id="com.sap.sailing.target.test.feature.group" version="1.0.0"/>
+<unit id="com.sap.sailing.target.jsp.feature.group" version="1.0.0"/>
 <unit id="com.sap.sailing.target.jms.feature.group" version="1.0.0"/>
 <unit id="com.sap.sailing.target.restlet.feature.group" version="1.0.0"/>
 <repository location="http://sapcoe-app01.pironet-ndh.com/p2/sailing/"/>

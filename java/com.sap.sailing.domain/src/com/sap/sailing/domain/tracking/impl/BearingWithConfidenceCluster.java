@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 
 import com.sap.sailing.domain.base.BearingWithConfidence;
+import com.sap.sailing.domain.base.BearingWithConfidence.DoublePair;
 import com.sap.sailing.domain.base.impl.BearingWithConfidenceImpl;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.impl.Util.Pair;
@@ -145,8 +146,8 @@ public class BearingWithConfidenceCluster<RelativeTo> {
      * {@link BearingWithConfidence#getObject() object}.
      */
     public BearingWithConfidence<RelativeTo> getAverage(RelativeTo relativeTo) {
-        ConfidenceBasedAverager<Pair<Double, Double>, Bearing, RelativeTo> averager = ConfidenceFactory.INSTANCE.createAverager(weigher);
-        HasConfidence<Pair<Double, Double>, Bearing, RelativeTo> average = averager.getAverage(getBearings(), relativeTo);
+        ConfidenceBasedAverager<DoublePair, Bearing, RelativeTo> averager = ConfidenceFactory.INSTANCE.createAverager(weigher);
+        HasConfidence<DoublePair, Bearing, RelativeTo> average = averager.getAverage(getBearings(), relativeTo);
         return average == null ? null : new BearingWithConfidenceImpl<RelativeTo>(average.getObject(), average.getConfidence(), average.getRelativeTo());
     }
     

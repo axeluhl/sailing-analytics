@@ -36,6 +36,9 @@ public interface Course extends Named {
      */
     List<Leg> getLegs();
 
+    /**
+     * @return a non-live copy of the waypoints of this course; the creation of the copy is thread safe
+     */
     Iterable<Waypoint> getWaypoints();
     
     /**
@@ -73,6 +76,6 @@ public interface Course extends Named {
      */
     void update(List<ControlPoint> newControlPoints, DomainFactory baseDomainFactory) throws PatchFailedException;
 
-    Iterable<Leg> getLegsAdjacentTo(Buoy buoy);
+    Iterable<Leg> getLegsAdjacentTo(Mark mark);
 
 }

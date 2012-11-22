@@ -26,8 +26,14 @@
       <import plugin="org.eclipse.jetty.xml" version="7.5.4" match="greaterOrEqual"/>
       <import plugin="org.eclipse.osgi"/>
       <import plugin="org.eclipse.osgi.services"/>
-      <import plugin="org.eclipse.jetty.nested" version="7.5.4" match="greaterOrEqual"/>
       <import plugin="slf4j.api"/>
+      <import plugin="org.eclipse.jetty.nested" version="7.5.4" match="greaterOrEqual"/>
+      <import plugin="javax.el"/>
+      <import plugin="javax.servlet.jsp"/>
+      <import plugin="javax.servlet.jsp.jstl"/>
+      <import plugin="org.apache.jasper.glassfish"/>
+      <import plugin="org.apache.taglibs.standard.glassfish"/>
+      <import plugin="org.eclipse.jetty.osgi.boot"/>
    </requires>
 
    <plugin
@@ -35,6 +41,14 @@
          download-size="0"
          install-size="0"
          version="7.5.4.v20111024"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.jetty.osgi.boot.jsp"
+         download-size="0"
+         install-size="0"
+         version="7.5.4.v20111024"
+         fragment="true"
          unpack="false"/>
 
    <plugin
@@ -75,6 +89,13 @@
 
    <plugin
          id="org.eclipse.equinox.launcher"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.apache.commons.fileupload"
          download-size="0"
          install-size="0"
          version="0.0.0"

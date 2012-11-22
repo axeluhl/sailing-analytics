@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import com.maptrack.client.io.TypeController;
-import com.sap.sailing.domain.base.Buoy;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
@@ -81,7 +81,7 @@ public class MarkPositionReceiver extends AbstractReceiverWithQueue<ControlPoint
     
     /**
      * The listeners returned will, when added to a controller, receive events about the
-     * position changes of marks during a race. Receiving such an event updates the Buoy's
+     * position changes of marks during a race. Receiving such an event updates the mark's
      * {@link GPSFixTrack} in the {@link TrackedRegatta}. Starts a thread for this receiver,
      * blocking for events received.
      */
@@ -89,14 +89,17 @@ public class MarkPositionReceiver extends AbstractReceiverWithQueue<ControlPoint
     public Iterable<TypeController> getTypeControllersAndStart() {
         List<TypeController> result = new ArrayList<TypeController>();
         TimePoint now = MillisecondsTimePoint.now();
+        long fromTime = startOfTracking == null ? 0l : startOfTracking.compareTo(now) > 0 ? now.asMillis() : startOfTracking.asMillis();
+        long toTime = endOfTracking == null ? Long.MAX_VALUE : endOfTracking.asMillis();
+        logger.fine("subscribing to ControlPointPositionData for time range "+new MillisecondsTimePoint(fromTime)+"/"+
+                new MillisecondsTimePoint(toTime));
         TypeController controlPointListener = ControlPointPositionData.subscribe(getTracTracEvent(),
                 new ICallbackData<ControlPoint, ControlPointPositionData>() {
                     @Override
                     public void gotData(ControlPoint controlPoint, ControlPointPositionData record, boolean isLiveData) {
                         enqueue(new Triple<ControlPoint, ControlPointPositionData, Boolean>(controlPoint, record, isLiveData));
                     }
-                }, /* fromTime */ startOfTracking == null ? 0l : startOfTracking.compareTo(now) > 0 ? now.asMillis() : startOfTracking.asMillis(),
-                   /* toTime */ endOfTracking == null ? Long.MAX_VALUE : endOfTracking.asMillis());
+                }, fromTime, toTime);
         result.add(controlPointListener);
         setAndStartThread(new Thread(this, getClass().getName()));
         return result;
@@ -110,15 +113,15 @@ public class MarkPositionReceiver extends AbstractReceiverWithQueue<ControlPoint
                 System.out.println();
             }
         }
-        Buoy buoy = getDomainFactory().getBuoy(event.getA(), event.getB());
+        Mark mark = getDomainFactory().getMark(event.getA(), event.getB());
         for (Race tractracRace : getTracTracEvent().getRaceList()) {
             DynamicTrackedRace trackedRace = getTrackedRace(tractracRace);
             if (trackedRace != null) {
                 GPSFixMoving markPosition = getDomainFactory().createGPSFixMoving(event.getB());
                 if (getSimulator() != null) {
-                    getSimulator().scheduleMarkPosition(buoy, markPosition);
+                    getSimulator().scheduleMarkPosition(mark, markPosition);
                 } else {
-                    trackedRace.recordFix(buoy, markPosition);
+                    trackedRace.recordFix(mark, markPosition);
                 }
             } else {
                 logger.warning("Couldn't find tracked race for race " + tractracRace.getName()

@@ -39,8 +39,9 @@ public interface MongoObjectFactory {
     void renameLeaderboard(String oldName, String newName);
 
     /**
-     * Stores the group, if it doesn't exist or updates it.<br />
-     * Leaderboards in the group, which aren't stored in the database, will be stored.
+     * Stores the group, if it doesn't exist or updates it. Leaderboards in the group, which aren't stored in the
+     * database, will be stored. If the leaderboard group has an {@link LeaderboardGroup#getOverallLeaderboard() overall
+     * leaderboard}, it will be stored / updated as well.
      */
     void storeLeaderboardGroup(LeaderboardGroup leaderboardGroup);
     
@@ -60,7 +61,17 @@ public interface MongoObjectFactory {
      * by calls to {@link #storeRegatta} where a reference to their owning event is stored. 
      */
     void storeEvent(Event event);
-    
+
+    /**
+     * Renames the event with the name <code>oldName</code>.
+     */
+    void renameEvent(String oldName, String newName);
+
+    /**
+     * Removes the event named <code>eventName</code> from the database.
+     */
+    void removeEvent(String eventName);
+
     /**
      * Stores the regatta together with its name, {@link Series} definitions and an optional link to the
      * {@link Event} to which the regatta belongs.

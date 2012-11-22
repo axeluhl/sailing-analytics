@@ -19,4 +19,11 @@ public class MarkPassingTimesDTO extends NamedDTO implements IsSerializable {
     public MarkPassingTimesDTO(String name) {
         this.name = name;
     }
+
+	@Override
+	public String toString() {
+		return "MarkPassingTimesDTO [firstPassingDate=" + firstPassingDate
+				+ ", lastPassingDate=" + lastPassingDate + ", name=" + name
+				+ "]";
+	}
 }

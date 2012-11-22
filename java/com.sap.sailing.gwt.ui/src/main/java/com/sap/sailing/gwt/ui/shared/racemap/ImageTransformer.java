@@ -11,12 +11,7 @@ import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.ui.Image;
 
 /**
- * Loads an image from a URL, draws it to a {@link Canvas}, rotates (specified angle) and scales it and allows clients
- * to obtain a URL for the rotated image contents to be used in other contexts requiring an image URL. Clients can also
- * {@link #getCanvas() obtain the canvas} and add it to a document so the transformed image is displayed immediately
- * without the intermediate representation as an image resource through a URL. The transformed image can then be
- * updated in rotation and scale using {@link #drawTransformedImage(double, double)}.
- * 
+ * An image transformer which takes in ImageResource, rotates (specified angle) and scales it and draws it to a {@link Canvas}.
  * @author Axel Uhl (d043530)
  *
  */

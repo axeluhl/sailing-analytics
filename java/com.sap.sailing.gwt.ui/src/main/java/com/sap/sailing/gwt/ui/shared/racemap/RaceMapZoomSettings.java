@@ -16,16 +16,16 @@ public class RaceMapZoomSettings {
      */
     public enum ZoomTypes {
         NONE(null), WINDSENSORS(new RaceMap.WindSensorsBoundsCalculator()), BOATS(new RaceMap.BoatsBoundsCalculator()), 
-        TAILS(new RaceMap.TailsBoundsCalculator()), BUOYS(new RaceMap.BuoysBoundsCalculator());
+        TAILS(new RaceMap.TailsBoundsCalculator()), BUOYS(new RaceMap.CourseMarksBoundsCalculator());
 
-        private LatLngBoundsCalculator calculater;
+        private LatLngBoundsCalculator calculator;
 
         private ZoomTypes(LatLngBoundsCalculator calculator) {
-            this.calculater = calculator;
+            this.calculator = calculator;
         }
 
         public LatLngBounds calculateNewBounds(RaceMap forMap) {
-            return calculater.calculateNewBounds(forMap);
+            return calculator.calculateNewBounds(forMap);
         }
     };
 
@@ -38,10 +38,9 @@ public class RaceMapZoomSettings {
      */
     public RaceMapZoomSettings() {
         typesToConsiderOnZoom = new ArrayList<ZoomTypes>();
-        typesToConsiderOnZoom.add(ZoomTypes.BOATS);
-        typesToConsiderOnZoom.add(ZoomTypes.TAILS);
+//        typesToConsiderOnZoom.add(ZoomTypes.BOATS);
+//        typesToConsiderOnZoom.add(ZoomTypes.TAILS);
         typesToConsiderOnZoom.add(ZoomTypes.BUOYS);
-        //TODO reenable after disconnecting wind data from races
 //        typesToConsiderOnZoom.add(ZoomTypes.WINDSENSORS);
         zoomToSelectedCompetitors = false;
     }

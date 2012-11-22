@@ -11,12 +11,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.sap.sailing.domain.base.Buoy;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.CourseListener;
@@ -25,6 +23,8 @@ import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.impl.NamedImpl;
 import com.sap.sailing.util.CourseAsWaypointList;
+import com.sap.sailing.util.impl.LockUtil;
+import com.sap.sailing.util.impl.NamedReentrantReadWriteLock;
 
 import difflib.DiffUtils;
 import difflib.Patch;
@@ -39,11 +39,12 @@ public class CourseImpl extends NamedImpl implements Course {
     private final Map<Waypoint, Integer> waypointIndexes;
     private final List<Leg> legs;
     private transient Set<CourseListener> listeners;
-    private transient ReadWriteLock lock;
+    private transient NamedReentrantReadWriteLock lock;
     
     public CourseImpl(String name, Iterable<Waypoint> waypoints) {
         super(name);
-        lock = new ReentrantReadWriteLock();
+        lock = new NamedReentrantReadWriteLock("lock for CourseImpl "+name,
+                /* fair */ true); // if non-fair, course update may need to wait forever for many concurrent readers
         listeners = new HashSet<CourseListener>();
         this.waypoints = new ArrayList<Waypoint>();
         waypointIndexes = new HashMap<Waypoint, Integer>();
@@ -68,18 +69,26 @@ public class CourseImpl extends NamedImpl implements Course {
     
     @Override
     public void lockForRead() {
-        lock.readLock().lock();
+        LockUtil.lockForRead(lock);
     }
 
     @Override
     public void unlockAfterRead() {
-        lock.readLock().unlock();
+        LockUtil.unlockAfterRead(lock);
+    }
+    
+    public void lockForWrite() {
+        LockUtil.lockForWrite(lock);
+    }
+    
+    public void unlockAfterWrite() {
+        LockUtil.unlockAfterWrite(lock);
     }
 
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
         ois.defaultReadObject();
         listeners = new HashSet<>();
-        lock = new ReentrantReadWriteLock();
+        lock = new NamedReentrantReadWriteLock("lock for CourseImpl "+this.getName(), /* fair */ true);
     }
     
     /**
@@ -108,8 +117,9 @@ public class CourseImpl extends NamedImpl implements Course {
     
     @Override
     public void addWaypoint(int zeroBasedPosition, Waypoint waypointToAdd) {
-        lock.writeLock().lock();
+        LockUtil.lockForWrite(lock);
         try {
+            logger.info("Adding waypoint " + waypointToAdd + " to course '" + getName() + "'");
             waypoints.add(zeroBasedPosition, waypointToAdd);
             Map<Waypoint, Integer> updatesToWaypointIndexes = new HashMap<Waypoint, Integer>();
             updatesToWaypointIndexes.put(waypointToAdd, zeroBasedPosition);
@@ -128,9 +138,11 @@ public class CourseImpl extends NamedImpl implements Course {
             if (waypoints.size() > 1) {
                 legs.add(new LegImpl(this, legStartWaypointIndex));
             }
+            logger.info("Waypoint " + waypointToAdd + " added to course '" + getName() + "', before notifying listeners");
             notifyListenersWaypointAdded(zeroBasedPosition, waypointToAdd);
+            logger.info("Waypoint " + waypointToAdd + " added to course '" + getName() + "', after notifying listeners");
         } finally {
-            lock.writeLock().unlock();
+            LockUtil.unlockAfterWrite(lock);
         }
     }
 
@@ -138,10 +150,11 @@ public class CourseImpl extends NamedImpl implements Course {
     public void removeWaypoint(int zeroBasedPosition) {
         if (zeroBasedPosition >= 0) {
             Waypoint removedWaypoint;
-            lock.writeLock().lock();
+            LockUtil.lockForWrite(lock);
             try {
                 boolean isLast = zeroBasedPosition == waypoints.size() - 1;
                 removedWaypoint = waypoints.remove(zeroBasedPosition);
+                logger.info("Removing waypoint " + removedWaypoint + " from course '" + getName() + "'");
                 waypointIndexes.remove(removedWaypoint);
                 Map<Waypoint, Integer> updatesToWaypointIndexes = new HashMap<Waypoint, Integer>();
                 for (Map.Entry<Waypoint, Integer> e : waypointIndexes.entrySet()) {
@@ -158,9 +171,11 @@ public class CourseImpl extends NamedImpl implements Course {
                 } else {
                     legs.remove(zeroBasedPosition);
                 }
+                logger.info("Waypoint " + removedWaypoint + " removed from course '" + getName() + "', before notifying listeners");
                 notifyListenersWaypointRemoved(zeroBasedPosition, removedWaypoint);
+                logger.info("Waypoint " + removedWaypoint + " removed from course '" + getName() + "', after notifying listeners");
             } finally {
-                lock.writeLock().unlock();
+                LockUtil.unlockAfterWrite(lock);
             }
         }
     }
@@ -258,12 +273,12 @@ public class CourseImpl extends NamedImpl implements Course {
         }
     }
     
-    private ControlPoint getControlPointForBuoy(Buoy buoy) {
+    private ControlPoint getControlPointForMark(Mark mark) {
         lockForRead();
         try {
             for (ControlPoint controlPoint : getControlPoints()) {
-                for (Buoy controlPointBuoy : controlPoint.getBuoys()) {
-                    if (buoy == controlPointBuoy) {
+                for (Mark controlPointMark : controlPoint.getMarks()) {
+                    if (mark == controlPointMark) {
                         return controlPoint;
                     }
                 }
@@ -275,21 +290,21 @@ public class CourseImpl extends NamedImpl implements Course {
     }
     
     @Override
-    public Iterable<Leg> getLegsAdjacentTo(Buoy buoy) {
+    public Iterable<Leg> getLegsAdjacentTo(Mark mark) {
         lockForRead();
         try {
             Set<Leg> result = new HashSet<Leg>();
-            ControlPoint controlPointForBuoy = getControlPointForBuoy(buoy);
-            if (controlPointForBuoy != null) {
+            ControlPoint controlPointForMark = getControlPointForMark(mark);
+            if (controlPointForMark != null) {
                 boolean first = true;
                 for (Leg leg : getLegs()) {
                     if (first) {
-                        if (leg.getFrom().getControlPoint() == controlPointForBuoy) {
+                        if (leg.getFrom().getControlPoint() == controlPointForMark) {
                             result.add(leg);
                         }
                         first = false;
                     }
-                    if (leg.getTo().getControlPoint() == controlPointForBuoy) {
+                    if (leg.getTo().getControlPoint() == controlPointForMark) {
                         result.add(leg);
                     }
                 }
@@ -325,7 +340,7 @@ public class CourseImpl extends NamedImpl implements Course {
     public Waypoint getFirstWaypoint() {
         lockForRead();
         try {
-            return waypoints.get(0);
+            return waypoints.isEmpty() ? null : waypoints.get(0);
         } finally {
             unlockAfterRead();
         }
@@ -335,7 +350,7 @@ public class CourseImpl extends NamedImpl implements Course {
     public Waypoint getLastWaypoint() {
         lockForRead();
         try {
-            return waypoints.get(waypoints.size() - 1);
+            return waypoints.isEmpty() ? null : waypoints.get(waypoints.size() - 1);
         } finally {
             unlockAfterRead();
         }
@@ -353,7 +368,7 @@ public class CourseImpl extends NamedImpl implements Course {
 
     @Override
     public void update(List<ControlPoint> newControlPoints, DomainFactory baseDomainFactory) throws PatchFailedException {
-        lock.writeLock().lock();
+        LockUtil.lockForWrite(lock);
         try {
             Iterable<Waypoint> courseWaypoints = getWaypoints();
             List<Waypoint> newWaypointList = new LinkedList<Waypoint>();
@@ -361,7 +376,8 @@ public class CourseImpl extends NamedImpl implements Course {
             // new waypoint list; since several waypoints can have the same control point, the map goes from
             // control point to List<Waypoint>. The waypoints in the lists are held in the order of their
             // occurrence in courseToUpdate.getWaypoints().
-            Map<com.sap.sailing.domain.base.ControlPoint, List<Waypoint>> existingWaypointsByControlPoint = new HashMap<com.sap.sailing.domain.base.ControlPoint, List<Waypoint>>();
+            Map<com.sap.sailing.domain.base.ControlPoint, List<Waypoint>> existingWaypointsByControlPoint =
+                    new HashMap<com.sap.sailing.domain.base.ControlPoint, List<Waypoint>>();
             for (Waypoint waypoint : courseWaypoints) {
                 List<Waypoint> wpl = existingWaypointsByControlPoint.get(waypoint.getControlPoint());
                 if (wpl == null) {
@@ -385,7 +401,7 @@ public class CourseImpl extends NamedImpl implements Course {
             CourseAsWaypointList courseAsWaypointList = new CourseAsWaypointList(this);
             patch.applyToInPlace(courseAsWaypointList);
         } finally {
-            lock.writeLock().unlock();
+            LockUtil.unlockAfterWrite(lock);
         }
     }
     
