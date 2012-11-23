@@ -8,14 +8,16 @@ public class RequestPolarDiagramDataDTO implements IsSerializable {
 
     private int boatClass;
     private List<PositionDTO> positions;
+    private SpeedWithBearingDTO windSpeed;
 
     public RequestPolarDiagramDataDTO() {
 
     }
 
-    public RequestPolarDiagramDataDTO(final int boatClass, final List<PositionDTO> positions) {
+    public RequestPolarDiagramDataDTO(final int boatClass, final List<PositionDTO> positions, final SpeedWithBearingDTO windSpeed) {
         this.boatClass = boatClass;
         this.positions = positions;
+        this.windSpeed = windSpeed;
     }
 
     public int getBoatClass() {
@@ -32,5 +34,13 @@ public class RequestPolarDiagramDataDTO implements IsSerializable {
 
     public void setPositions(final List<PositionDTO> positions) {
         this.positions = positions;
+    }
+
+    public SpeedWithBearingDTO getWindSpeed() {
+        return this.windSpeed;
+    }
+
+    public void setWindSpeed(final SpeedWithBearingDTO windSpeed) {
+        this.windSpeed = windSpeed;
     }
 }

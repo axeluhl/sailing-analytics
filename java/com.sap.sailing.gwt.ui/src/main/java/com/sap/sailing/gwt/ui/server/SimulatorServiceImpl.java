@@ -12,6 +12,7 @@ import java.util.logging.Logger;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.sap.sailing.domain.base.SpeedWithBearing;
+import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
@@ -498,7 +499,6 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         return result;
     }
 
-    // I00788 - Mihai Bogdan Eugen
     @Override
     public SimulatorResultsDTOAndNotificationMessage getSimulatorResults(final char mode, final WindFieldGenParamsDTO params,
             final WindPatternDisplay pattern, final boolean withWindField, final int boatClassIndex) throws WindPatternNotFoundException,
@@ -565,7 +565,6 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         return result;
     }
 
-    // I00788 - Mihai Bogdan Eugen
     @Override
     public BoatClassDTOsAndNotificationMessage getBoatClasses() throws ConfigurationException {
 
@@ -590,7 +589,6 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         return result;
     }
 
-    // I00788 - Mihai Bogdan Eugen
     @Override
     public PolarDiagramDTOAndNotificationMessage getPolarDiagramDTO(final Double bearingStep, final int boatClassIndex)
             throws ConfigurationException {
@@ -624,7 +622,6 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         return result;
     }
 
-    // I00788 - Mihai Bogdan Eugen
     private PolarDiagramAndNotificationMessage getPolarDiagram(final int boatClassIndex) throws ConfigurationException {
 
         final ConfigurationManager config = ConfigurationManager.INSTANCE;
@@ -650,7 +647,6 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         return result;
     }
 
-    // I00788 - Mihai Bogdan Eugen
     private class PolarDiagramAndNotificationMessage {
         private PolarDiagram polarDiagram = null;
         private String notificationMessage = "";
@@ -672,7 +668,6 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         }
     }
 
-    // I00788 - Mihai Bogdan Eugen
     private PathDTO convertToPathDTOAndMarkTurns(final Path path, final String name) {
         if (path == null) {
             return null;
@@ -733,12 +728,17 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
     @Override
     public ReceivePolarDiagramDataDTO getSpeedsFromPolarDiagram(final RequestPolarDiagramDataDTO requestData) throws ConfigurationException {
 
-        final PolarDiagramAndNotificationMessage polarDiagramAndNotificationMessage = this.getPolarDiagram(requestData.boatClass);
+        final PolarDiagramAndNotificationMessage polarDiagramAndNotificationMessage = this.getPolarDiagram(requestData.getBoatClass());
         final PolarDiagram polarDiagram = polarDiagramAndNotificationMessage.getPolarDiagram();
+
+        final SpeedWithBearingDTO windSpeedDTO = requestData.getWindSpeed();
+        final SpeedWithBearing windSpeed = new KnotSpeedWithBearingImpl(windSpeedDTO.speedInKnots, new DegreeBearingImpl(windSpeedDTO.bearingInDegrees));
+        polarDiagram.setWind(windSpeed);
+
         final String notificationMessage = polarDiagramAndNotificationMessage.getNotificationMesssage();
         final List<SpeedWithBearingDTO> speeds = new ArrayList<SpeedWithBearingDTO>();
 
-        final List<PositionDTO> positions = requestData.positions;
+        final List<PositionDTO> positions = requestData.getPositions();
         final int noOfPositions = positions.size();
 
         DegreePosition degreePositionStart = null;
