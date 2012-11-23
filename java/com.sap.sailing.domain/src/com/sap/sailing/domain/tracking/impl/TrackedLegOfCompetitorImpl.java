@@ -7,6 +7,7 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.SpeedWithBearing;
+import com.sap.sailing.domain.base.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
@@ -585,30 +586,37 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
         assert timePointAfterManeuver != null;
         Distance result;
         long millisecondsOverWhichToAverageSpeed = getTrackedRace().getMillisecondsOverWhichToAverageSpeed();
-        TimePoint extrapolationBase = timePointBeforeManeuver.minus(millisecondsOverWhichToAverageSpeed/2);
+        TimePoint extrapolationBase = timePointBeforeManeuver.minus(millisecondsOverWhichToAverageSpeed);
         final GPSFixTrack<Competitor, GPSFixMoving> track = getTrackedRace().getTrack(getCompetitor());
-        Position estimatedPositionAtBase = track.getEstimatedPosition(extrapolationBase, /* extrapolate */ false);
-        if (estimatedPositionAtBase != null) {
-            SpeedWithBearing estimatedSpeedAtBase = track.getEstimatedSpeed(extrapolationBase);
-            if (estimatedSpeedAtBase != null) {
-                TimePoint extrapolationTarget = timePointAfterManeuver.plus(millisecondsOverWhichToAverageSpeed / 2);
-                Position extrapolatedPositionWithoutManeuver = estimatedSpeedAtBase.travelTo(estimatedPositionAtBase,
-                        extrapolationBase, extrapolationTarget);
-                Position estimatedActualPositionAfterManeuver = track.getEstimatedPosition(extrapolationTarget, /* extrapolate */ false);
-                Bearing bearingAfterManeuver = track.getEstimatedSpeed(extrapolationTarget).getBearing();
-                if (estimatedActualPositionAfterManeuver != null) {
-                    // find the mean course between inbound and outbound course and project actual and extrapolated positions onto it:
-                    Bearing middle = estimatedSpeedAtBase.getBearing().middle(bearingAfterManeuver);
-                    result = extrapolatedPositionWithoutManeuver.alongTrackDistance(estimatedActualPositionAfterManeuver, middle);
-                    /* TODO remove if fix for bug 1055 works well
-                    result = getWindwardDistance(estimatedActualPositionAfterManeuver, extrapolatedPositionWithoutManeuver,
-                            new MillisecondsTimePoint((timePointBeforeManeuver.asMillis() + timePointAfterManeuver.asMillis())/2));
-                     */
-                } else {
-                    result = null;
+        SpeedWithBearing speedBeforeManeuver = track.getEstimatedSpeed(extrapolationBase);
+        if (speedBeforeManeuver != null) {
+            TimePoint extrapolationTarget = timePointAfterManeuver.plus(millisecondsOverWhichToAverageSpeed);
+            SpeedWithBearing speedAfterManeuver = track.getEstimatedSpeed(extrapolationTarget);
+            // find the mean course between inbound and outbound course and project actual and extrapolated
+            // positions onto it:
+            Bearing middle = speedBeforeManeuver.getBearing().middle(speedAfterManeuver.getBearing());
+            Position positionAtBase = track.getEstimatedPosition(extrapolationBase, /* extrapolate */false);
+            Speed projectedSpeedBeforeManeuver = speedBeforeManeuver.projectTo(positionAtBase, middle);
+            double projectedSpeedBeforeManeuverInKnots = projectedSpeedBeforeManeuver.getKnots();
+            Speed projectedSpeedAfterManeuver = speedAfterManeuver.projectTo(positionAtBase, middle);
+            double projectedSpeedAfterManeuverInKnots = projectedSpeedAfterManeuver.getKnots();
+            track.lockForRead();
+            try {
+                Iterator<GPSFixMoving> fixIter = track.getFixesIterator(timePointBeforeManeuver, /* inclusive */true);
+                GPSFixMoving fix;
+                TimePoint previousTimePoint = timePointBeforeManeuver;
+                result = Distance.NULL;
+                while (fixIter.hasNext() && !(fix = fixIter.next()).getTimePoint().after(timePointAfterManeuver)) {
+                    Speed projectedSpeedAtFix = fix.getSpeed().projectTo(fix.getPosition(), middle);
+                    final double estimatedSpeedWithoutManeuver = projectedSpeedBeforeManeuverInKnots +
+                            (fix.getTimePoint().asMillis()-timePointBeforeManeuver.asMillis()) /
+                            (timePointAfterManeuver.asMillis()-timePointBeforeManeuver.asMillis()) *
+                            (projectedSpeedAfterManeuverInKnots - projectedSpeedBeforeManeuverInKnots);
+                    Speed speedDifference = new KnotSpeedImpl(estimatedSpeedWithoutManeuver - projectedSpeedAtFix.getKnots());
+                    result = result.add(speedDifference.travel(previousTimePoint, fix.getTimePoint()));
                 }
-            } else {
-                result = null;
+            } finally {
+                track.unlockAfterRead();
             }
         } else {
             result = null;
