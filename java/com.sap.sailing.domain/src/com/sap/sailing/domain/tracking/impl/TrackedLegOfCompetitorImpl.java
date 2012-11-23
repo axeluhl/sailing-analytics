@@ -3,12 +3,11 @@ package com.sap.sailing.domain.tracking.impl;
 import java.util.Iterator;
 import java.util.List;
 
-import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
-import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.ManeuverType;
@@ -580,8 +579,8 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     }
 
     @Override
-    public Distance getManeuverLoss(MillisecondsTimePoint timePointBeforeManeuver,
-            MillisecondsTimePoint timePointAfterManeuver) throws NoWindException {
+    public Distance getManeuverLoss(TimePoint timePointBeforeManeuver,
+            TimePoint timePointAfterManeuver) throws NoWindException {
         assert timePointBeforeManeuver != null;
         assert timePointAfterManeuver != null;
         Distance result;
@@ -595,11 +594,16 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
                 TimePoint extrapolationTarget = timePointAfterManeuver.plus(millisecondsOverWhichToAverageSpeed / 2);
                 Position extrapolatedPositionWithoutManeuver = estimatedSpeedAtBase.travelTo(estimatedPositionAtBase,
                         extrapolationBase, extrapolationTarget);
-                Position estimatedActualPositionAfterManeuver = track.getEstimatedPosition(extrapolationTarget, /* extrapolate */
-                        false);
+                Position estimatedActualPositionAfterManeuver = track.getEstimatedPosition(extrapolationTarget, /* extrapolate */ false);
+                Bearing bearingAfterManeuver = track.getEstimatedSpeed(extrapolationTarget).getBearing();
                 if (estimatedActualPositionAfterManeuver != null) {
+                    // find the mean course between inbound and outbound course and project actual and extrapolated positions onto it:
+                    Bearing middle = estimatedSpeedAtBase.getBearing().middle(bearingAfterManeuver);
+                    result = extrapolatedPositionWithoutManeuver.alongTrackDistance(estimatedActualPositionAfterManeuver, middle);
+                    /* TODO remove if fix for bug 1055 works well
                     result = getWindwardDistance(estimatedActualPositionAfterManeuver, extrapolatedPositionWithoutManeuver,
                             new MillisecondsTimePoint((timePointBeforeManeuver.asMillis() + timePointAfterManeuver.asMillis())/2));
+                     */
                 } else {
                     result = null;
                 }
