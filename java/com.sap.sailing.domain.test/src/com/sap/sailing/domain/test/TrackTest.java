@@ -685,4 +685,29 @@ public class TrackTest {
         assertEquals(estimatedSpeed.getKnots(), estimatedSpeedNew.getKnots(), 0.001);
         assertEquals(estimatedSpeed.getBearing().getDegrees(), estimatedSpeedNew.getBearing().getDegrees(), 0.001);
     }
+    
+    @Test
+    public void testInvalidationIntervalForPositionEstimationForEmptyTrack() {
+        track.lockForRead();
+        final GPSFixMoving firstFixSoFar;
+        try {
+            firstFixSoFar = track.getFixes().iterator().next();
+        } finally {
+            track.unlockAfterRead();
+        }
+        assertNotNull(firstFixSoFar);
+        TimePoint beginningOfTime = new MillisecondsTimePoint(0);
+        Position positionAtBeginningOfTime = track.getEstimatedPosition(beginningOfTime, /* extrapolate */false);
+        long timespan = 2 /* hours */ * 3600 /* seconds/hour */ * 1000 /* millis/s */;
+        SpeedWithBearing speed = new KnotSpeedWithBearingImpl(45, new DegreeBearingImpl(123));
+        TimePoint slightlyBeforeFirstFix = firstFixSoFar.getTimePoint().minus(timespan);
+        Position newPosition = firstFixSoFar.getPosition().translateGreatCircle(speed.getBearing().reverse(),
+                speed.travel(firstFixSoFar.getTimePoint(), firstFixSoFar.getTimePoint().plus(timespan)));
+        GPSFixMoving newFirstFix = new GPSFixMovingImpl(newPosition, slightlyBeforeFirstFix, speed);
+        track.addGPSFix(newFirstFix);
+        Pair<TimePoint, TimePoint> intervalAffected = track.getEstimatedPositionTimePeriodAffectedBy(newFirstFix);
+        Position newPositionAtBeginningOfTime = track.getEstimatedPosition(beginningOfTime, /* extrapolate */false);
+        assertFalse(newPositionAtBeginningOfTime.equals(positionAtBeginningOfTime));
+        assertTrue(!intervalAffected.getA().after(beginningOfTime));
+    }
 }

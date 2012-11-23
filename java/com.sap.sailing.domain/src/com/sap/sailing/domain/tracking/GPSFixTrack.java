@@ -102,6 +102,8 @@ public interface GPSFixTrack<ItemType, FixType extends GPSFix> extends Track<Fix
     SpeedWithBearing getRawEstimatedSpeed(TimePoint at);
 
     /**
+     * FIXME see bug 1054: if the fix is added to one end of the track, this will affect all queries beyond this end!
+     * 
      * Finds out which position estimation time interval has been affected by inserting <code>fix</code>.
      * 
      * @param fix
