@@ -167,6 +167,7 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
 
             @Override
             public void gpsFixReceived(GPSFix fix, Mark mark) {
+                triggerManeuverCacheRecalculationForAllCompetitors();
                 notifyListeners(fix, mark);
             }
 
