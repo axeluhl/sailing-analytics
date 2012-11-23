@@ -4,6 +4,7 @@ import com.sap.sailing.domain.base.CourseChange;
 import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.KilometersPerHourSpeedImpl;
 
@@ -38,7 +39,7 @@ public class KilometersPerHourSpeedWithBearingImpl extends KilometersPerHourSpee
 
     @Override
     public String toString() {
-        return super.toString()+" to "+getBearing().getDegrees()+"°";
+        return super.toString()+" to "+getBearing().getDegrees()+"ï¿½";
     }
 
     @Override
@@ -50,5 +51,10 @@ public class KilometersPerHourSpeedWithBearingImpl extends KilometersPerHourSpee
     public boolean equals(Object object) {
         return super.equals(object) && object instanceof SpeedWithBearing
                 && getBearing().equals(((SpeedWithBearing) object).getBearing());
+    }
+
+    @Override
+    public Speed projectTo(Position position, Bearing projectTo) {
+        return AbstractSpeedWithAbstractBearingImpl.projectTo(this, position, projectTo);
     }
 }

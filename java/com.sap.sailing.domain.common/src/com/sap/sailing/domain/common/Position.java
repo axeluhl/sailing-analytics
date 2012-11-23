@@ -12,7 +12,7 @@ public interface Position extends Serializable {
     double getLngDeg();
 
     /**
-     * Central angle between this position and the other position
+     * Central angle between this position and the other position, in radians
      */
     double getCentralAngleRad(Position p);
 
