@@ -277,14 +277,22 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
     }
 
     private WindDTO createWindDTO2(final TimedPositionWithSpeed tPos) {
+
         final WindDTO windDTO = new WindDTO();
         windDTO.trueWindBearingDeg = tPos.getSpeed().getBearing().getDegrees();
         windDTO.trueWindFromDeg = tPos.getSpeed().getBearing().reverse().getDegrees();
         windDTO.trueWindSpeedInKnots = tPos.getSpeed().getKnots();
         windDTO.trueWindSpeedInMetersPerSecond = tPos.getSpeed().getMetersPerSecond();
+
+        windDTO.dampenedTrueWindBearingDeg = tPos.getSpeed().getBearing().getDegrees();
+        windDTO.dampenedTrueWindFromDeg = tPos.getSpeed().getBearing().reverse().getDegrees();
+        windDTO.dampenedTrueWindSpeedInKnots = tPos.getSpeed().getKnots();
+        windDTO.dampenedTrueWindSpeedInMetersPerSecond = tPos.getSpeed().getMetersPerSecond();
+
         if (tPos.getPosition() != null) {
             windDTO.position = new PositionDTO(tPos.getPosition().getLatDeg(), tPos.getPosition().getLngDeg());
         }
+
         if (tPos.getTimePoint() != null) {
             windDTO.timepoint = tPos.getTimePoint().asMillis();
         }
@@ -438,6 +446,8 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
 
         final SimulationParameters sp = new SimulationParametersImpl(course, pd, wf, mode);
         final SailingSimulator simulator = new SailingSimulatorImpl(sp);
+
+        // final Map<String, Path> paths2 = simulator.getAllPathsEvenTimed2(wf.getTimeStep().asMillis());
 
         final Map<String, List<TimedPositionWithSpeed>> paths = simulator.getAllPathsEvenTimed(wf.getTimeStep().asMillis());
         final PathDTO[] pathDTO = new PathDTO[paths.size()];
