@@ -1846,7 +1846,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         List<Maneuver> result = new ArrayList<Maneuver>();
         List<Pair<GPSFixMoving, CourseChange>> group = new ArrayList<Pair<GPSFixMoving, CourseChange>>();
         if (!courseChangeSequenceInSameDirection.isEmpty()) {
-            Distance twoHullLengths = competitor.getBoat().getBoatClass().getHullLength().scale(2);
+            Distance threeHullLengths = competitor.getBoat().getBoatClass().getHullLength().scale(3);
             SpeedWithBearing beforeGroupOnApproximation = speedWithBearingOnApproximationAtBeginning; // speed/bearing before group
             SpeedWithBearing beforeCurrentCourseChangeOnApproximation = beforeGroupOnApproximation; // speed/bearing before current course change
             Iterator<Pair<GPSFixMoving, CourseChange>> iter = courseChangeSequenceInSameDirection.iterator();
@@ -1858,11 +1858,13 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                 Pair<GPSFixMoving, CourseChange> currentFixAndCourseChange = iter.next();
                 if (!group.isEmpty()
                         // TODO use different maneuver times for upwind / reaching / downwind / cross-leg (mark passing)
+                        // group contains complete maneuver if the next fix is too late or too far away to belong to the same maneuver
+                        // FIXME penalty circles slow down the boat so much that time limit may get exceeded although distance limit is matched
                         && currentFixAndCourseChange.getA().getTimePoint().asMillis()
                                 - group.get(group.size() - 1).getA().getTimePoint().asMillis() > getApproximateManeuverDurationInMilliseconds()
                         && currentFixAndCourseChange.getA().getPosition()
                                 .getDistance(group.get(group.size() - 1).getA().getPosition())
-                                .compareTo(twoHullLengths) > 0) {
+                                .compareTo(threeHullLengths) > 0) {
                     // if next is more then approximate maneuver duration later or further apart than two hull lengths,
                     // turn the current group into a maneuver and add to result
                     Maneuver maneuver = createManeuverFromGroupOfCourseChanges(competitor, beforeGroupOnApproximation,
