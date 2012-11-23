@@ -287,7 +287,11 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
                     start = fix.getTimePoint();
                 }
             } else {
-                start = fixesForPositionEstimation.getA().getTimePoint();
+                if (fixesForPositionEstimation.getA() == null) {
+                    start = new MillisecondsTimePoint(0);
+                } else {
+                    start = fixesForPositionEstimation.getA().getTimePoint();
+                }
             }
             final TimePoint end;
             if (fix.equals(fixesForPositionEstimation.getB())) {
@@ -298,7 +302,11 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
                     end = fix.getTimePoint();
                 }
             } else {
-                end = fixesForPositionEstimation.getB().getTimePoint();
+                if (fixesForPositionEstimation.getB() == null) {
+                    end = new MillisecondsTimePoint(Long.MAX_VALUE);
+                } else {
+                    end = fixesForPositionEstimation.getB().getTimePoint();
+                }
             }
             return new Pair<TimePoint, TimePoint>(start, end);
         } finally {

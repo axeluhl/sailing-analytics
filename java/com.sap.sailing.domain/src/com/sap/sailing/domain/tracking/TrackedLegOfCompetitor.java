@@ -6,7 +6,6 @@ import java.util.List;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.SpeedWithBearing;
-import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NoWindException;
@@ -192,5 +191,5 @@ public interface TrackedLegOfCompetitor extends Serializable {
      * and the resulting extrapolated position's "windward distance" is computed to the competitor's actual position
      * at that time. This distance is returned as the result of this method. 
      */
-    Distance getManeuverLoss(MillisecondsTimePoint timePointBeforeManeuver, MillisecondsTimePoint timePointAfterManeuver) throws NoWindException;
+    Distance getManeuverLoss(TimePoint timePointBeforeManeuver, TimePoint timePointAfterManeuver) throws NoWindException;
 }
