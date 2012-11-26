@@ -11,6 +11,7 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.logging.Logger;
 
+import com.google.gwt.canvas.dom.client.Context2d;
 import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.geom.LatLng;
 import com.google.gwt.maps.client.geom.Point;
@@ -161,6 +162,9 @@ public class WindFieldCanvasOverlay extends FullCanvasOverlay implements TimeLis
     
     protected void drawWindField(final List<WindDTO> windDTOList) {
         clear();
+        Context2d context2d = canvas.getContext2d();
+        context2d.setGlobalAlpha(0.4);
+
         if (windDTOList != null && windDTOList.size() > 0) {
             Iterator<WindDTO> windDTOIter = windDTOList.iterator();
             int index = 0;
