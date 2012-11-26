@@ -83,7 +83,7 @@ public class RankPerLeg extends Action {
                         addRow();
                         addColumn(legId);
                         addColumn(markName);
-                        addColumn(leg.getTo().getBuoys().iterator().next().getName());
+                        addColumn(leg.getTo().getMarks().iterator().next().getName());
                         addColumn(upOrDownwindLeg);
                         addColumn(competitorName);
                         addColumn(sailID == null ? "null" : sailID);

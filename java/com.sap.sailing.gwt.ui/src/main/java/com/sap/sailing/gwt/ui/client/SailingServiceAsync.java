@@ -23,7 +23,7 @@ import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 import com.sap.sailing.gwt.ui.shared.ControlPointDTO;
 import com.sap.sailing.gwt.ui.shared.CourseDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
-import com.sap.sailing.gwt.ui.shared.RaceBuoysDTO;
+import com.sap.sailing.gwt.ui.shared.RaceCourseMarksDTO;
 import com.sap.sailing.gwt.ui.shared.RaceColumnInSeriesDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
@@ -412,7 +412,7 @@ public interface SailingServiceAsync {
 
     void addFragUrl(String result, AsyncCallback<Void> asyncCallback);
 
-    void getRaceBuoys(RegattaAndRaceIdentifier raceIdentifier, Date date,	AsyncCallback<RaceBuoysDTO> callback);
+    void getRaceCourseMarks(RegattaAndRaceIdentifier raceIdentifier, Date date,	AsyncCallback<RaceCourseMarksDTO> callback);
 
     void addColumnsToLeaderboard(String leaderboardName, List<Pair<String, Boolean>> columnsToAdd,
             AsyncCallback<Void> callback);
@@ -432,5 +432,6 @@ public interface SailingServiceAsync {
             boolean trackWind, boolean correctWindByDeclination, boolean simulateWithStartTimeNow,
             AsyncCallback<Void> asyncCallback);
 
-
+    void getRankedCompetitorsFromBestToWorstAfterEachRaceColumn(String leaderboardName, Date date,
+            AsyncCallback<List<Pair<String, List<CompetitorDTO>>>> callback);
 }

@@ -272,12 +272,43 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
 
     @Override
     public Pair<TimePoint, TimePoint> getEstimatedPositionTimePeriodAffectedBy(GPSFix fix) {
+        if (fix == null) {
+            throw new IllegalArgumentException("fix must not be null");
+        }
         lockForRead();
         try {
             Pair<FixType, FixType> fixesForPositionEstimation = getFixesForPositionEstimation(fix.getTimePoint(), /* inclusive */ true);
-            return new Pair<TimePoint, TimePoint>(fixesForPositionEstimation.getA() == null ? fix.getTimePoint()
-                    : fixesForPositionEstimation.getA().getTimePoint(),
-                    fixesForPositionEstimation.getB() == null ? fix.getTimePoint() : fixesForPositionEstimation.getB().getTimePoint());
+            final TimePoint start;
+            if (fix.equals(fixesForPositionEstimation.getA())) {
+                if (getLastFixBefore(fix.getTimePoint()) == null) {
+                    // fix is the first fix in the track; all position estimation before this point may be affected
+                    start = new MillisecondsTimePoint(0);
+                } else {
+                    start = fix.getTimePoint();
+                }
+            } else {
+                if (fixesForPositionEstimation.getA() == null) {
+                    start = new MillisecondsTimePoint(0);
+                } else {
+                    start = fixesForPositionEstimation.getA().getTimePoint();
+                }
+            }
+            final TimePoint end;
+            if (fix.equals(fixesForPositionEstimation.getB())) {
+                if (getFirstFixAfter(fix.getTimePoint()) == null) {
+                    // fix is the first fix in the track; all position estimation before this point may be affected
+                    end = new MillisecondsTimePoint(Long.MAX_VALUE);
+                } else {
+                    end = fix.getTimePoint();
+                }
+            } else {
+                if (fixesForPositionEstimation.getB() == null) {
+                    end = new MillisecondsTimePoint(Long.MAX_VALUE);
+                } else {
+                    end = fixesForPositionEstimation.getB().getTimePoint();
+                }
+            }
+            return new Pair<TimePoint, TimePoint>(start, end);
         } finally {
             unlockAfterRead();
         }
