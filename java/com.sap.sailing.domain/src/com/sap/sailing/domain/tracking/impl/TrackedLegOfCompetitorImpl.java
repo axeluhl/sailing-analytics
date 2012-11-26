@@ -584,8 +584,9 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
             TimePoint timePointAfterManeuver) throws NoWindException {
         // FIXME bug 156: the timePointAfterManeuver is not a good one to select the outbound speed from:
         // instead, the outbound speed should be chosen as the maximum speed reached after the acceleration phase
-        // after the maneuver, at least withing some reasonable threshold like five times the approximate
-        // "maneuver duration", whatever this means
+        // after the maneuver, at least within some reasonable threshold like five times the approximate
+        // "maneuver duration", whatever this means. Inbound, the timePointBeforeManeuver seems reasonable because
+        // it is when the direction change starts.
         assert timePointBeforeManeuver != null;
         assert timePointAfterManeuver != null;
         Distance result;
