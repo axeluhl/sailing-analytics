@@ -2,9 +2,11 @@ package com.sap.sailing.monitoring;
 
 import java.io.IOException;
 import java.net.ConnectException;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
+import java.util.Properties;
 import java.util.logging.Logger;
 
 /**
@@ -18,9 +20,9 @@ public abstract class AbstractPortMonitor extends Thread {
 
     Logger log = Logger.getLogger(AbstractPortMonitor.class.getName());
     
-    private final int TIMEOUT = 1000;
-    private final int GRACEFUL = 5000;
-    private final int PAUSE = 1000;
+    private int TIMEOUT = 1000;
+    private int GRACEFUL = 5000;
+    private int PAUSE = 1000;
     
     protected InetSocketAddress[] endpoints = null;
     protected int interval;
@@ -30,6 +32,8 @@ public abstract class AbstractPortMonitor extends Thread {
     
     private long lastmillis;
     private InetSocketAddress currentendpoint;
+    
+    protected Properties properties;
 
     public AbstractPortMonitor(InetSocketAddress[] endpoints, int interval) {
         this.endpoints = endpoints;
@@ -40,6 +44,31 @@ public abstract class AbstractPortMonitor extends Thread {
         
         this.interval = interval;
         this.started = true;
+        
+        log.info("Initialized monitoring!");
+    }
+    
+    public AbstractPortMonitor(Properties properties) {
+        String[] prop_endpoints = properties.getProperty("monitor.endpoints").split(",");
+        this.endpoints = new InetSocketAddress[prop_endpoints.length];
+        
+        try {
+            for (int i=0;i<prop_endpoints.length;i++) {
+                String[] data = prop_endpoints[i].split(":");
+                this.endpoints[i] = new InetSocketAddress(InetAddress.getByName(data[0].trim()), Integer.parseInt(data[1].trim()));
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        
+        this.interval = Integer.parseInt(properties.getProperty("monitor.interval").trim());
+        
+        this.TIMEOUT = Integer.parseInt(properties.getProperty("monitor.timeout").trim());
+        this.GRACEFUL = Integer.parseInt(properties.getProperty("monitor.gracetime").trim());
+        this.PAUSE = Integer.parseInt(properties.getProperty("monitor.pause").trim());
+        
+        this.started = true;
+        this.properties = properties;
         
         log.info("Initialized monitoring!");
     }

@@ -42,6 +42,20 @@ public class OSGiRestartingPortMonitor extends AbstractPortMonitor {
             endpointservices.put(endpoints[i], services[i]);
         }
     }
+    
+    public OSGiRestartingPortMonitor(Properties properties) {
+        super(properties);
+
+        /* store bundles so that we can reference them later */
+        for (Bundle bundle : Activator.getContext().getBundles()) {
+            bundles.put(bundle.getSymbolicName(), bundle);
+        }
+
+        String[] prop_services = properties.getProperty("monitor.services").split(",");
+        for (int i=0; i<endpoints.length;i++) {
+            endpointservices.put(endpoints[i], prop_services[i].trim());
+        }
+    }
 
     @Override
     public void handleFailure(InetSocketAddress endpoint) {
@@ -64,21 +78,13 @@ public class OSGiRestartingPortMonitor extends AbstractPortMonitor {
         
         log.info("Bundle " + servicename + " restarted");
         
-        /* Send out mail */
-        Properties props = new Properties();
-        props.setProperty("mail.from", "s.pamies@banality.de");
-        props.setProperty("mail.transport.protocol", "smtp");
-        props.setProperty("mail.smtp.host", "mail.banality.de");
-        props.setProperty("mail.smtp.port", "25");
-        props.setProperty("mail.smtp.auth", "true");
-        
         try {
-            Session session = Session.getDefaultInstance(props, new SMTPAuthenticator());
+            Session session = Session.getDefaultInstance(this.properties, new SMTPAuthenticator());
             MimeMessage msg = new MimeMessage(session);
             
             msg.setSubject("Bundle " + servicename + " restarted");
             msg.setContent("The Bundle " + servicename + " has been restarted - port check on " + endpoint.getPort() + " didn't respond!", "text/plain");
-            msg.addRecipient(RecipientType.TO, new InternetAddress("spamsch@gmail.com"));
+            msg.addRecipient(RecipientType.TO, new InternetAddress(this.properties.getProperty("mail.to")));
             
             Transport ts = session.getTransport();
             ts.connect();
@@ -92,8 +98,8 @@ public class OSGiRestartingPortMonitor extends AbstractPortMonitor {
     
     private class SMTPAuthenticator extends javax.mail.Authenticator {
         public PasswordAuthentication getPasswordAuthentication() {
-           String username = "pamiesmail@banality.de";
-           String password = "***";
+           String username = properties.getProperty("mail.smtp.user");
+           String password = properties.getProperty("mail.smtp.password");
            return new PasswordAuthentication(username, password);
         }
     }

@@ -1,7 +1,8 @@
 package com.sap.sailing.monitoring;
 
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
+import java.io.File;
+import java.io.FileReader;
+import java.util.Properties;
 
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -28,17 +29,13 @@ public class Activator implements BundleActivator {
 	public void start(BundleContext bundleContext) throws Exception {
 		Activator.context = bundleContext;
 
-		/* Configuration */
-		InetSocketAddress[] endpoints = new InetSocketAddress[]{
-		        new InetSocketAddress(InetAddress.getByName("localhost"), 8080)
-		};
-		
-		String[] services = new String[] {
-		        "com.sap.sailing.server"
-		};
+		/* Load properties */
+		File propertiesfile = new File(new File(System.getProperty("jetty.home")).getParent() + "/monitoring.properties");
+		Properties props = new Properties();
+		props.load(new FileReader(propertiesfile));
 		
 		/* Starts a new port monitoring app */
-		monitor = new OSGiRestartingPortMonitor(endpoints, services, 10000);
+		monitor = new OSGiRestartingPortMonitor(props);
 		monitor.startMonitoring();
 	}
 
