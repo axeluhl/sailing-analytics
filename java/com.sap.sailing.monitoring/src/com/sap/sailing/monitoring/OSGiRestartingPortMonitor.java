@@ -93,7 +93,7 @@ public class OSGiRestartingPortMonitor extends AbstractPortMonitor {
     private class SMTPAuthenticator extends javax.mail.Authenticator {
         public PasswordAuthentication getPasswordAuthentication() {
            String username = "pamiesmail@banality.de";
-           String password = "qay?234wsx";
+           String password = "***";
            return new PasswordAuthentication(username, password);
         }
     }
