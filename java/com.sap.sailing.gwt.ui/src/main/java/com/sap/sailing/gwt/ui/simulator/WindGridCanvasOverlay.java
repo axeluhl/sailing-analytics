@@ -351,7 +351,7 @@ public class WindGridCanvasOverlay extends FullCanvasOverlay implements TimeList
             WindDTO windDTO = new WindDTO();
             // Only the position of this windDTO is used
             windDTO.position = position;
-            // windDTO.trueWindSpeedInKnots = 0.0;
+            windDTO.trueWindSpeedInKnots = 0.0;
             windMatrix[0][j] = windDTO;
         }
 
@@ -391,7 +391,7 @@ public class WindGridCanvasOverlay extends FullCanvasOverlay implements TimeList
                                     windMatrix[i][j + 1].position);
                             PositionDTO tr = getCenter(windMatrix[i][j].position, windMatrix[i][j + 1].position,
                                     windMatrix[i + 1][j].position, windMatrix[i + 1][j + 1].position);
-                            GridCell cell = new GridCell(bl, br, tl, tr, windMatrix[i][j].trueWindSpeedInKnots);
+                            GridCell cell = new GridCell(bl, br, tl, tr, windMatrix[i-1][j].trueWindSpeedInKnots);
                             Pair<Integer, Integer> cellPair = new Pair<Integer, Integer>(i, j);
                             gridCellMap.put(cellPair, cell);
                             // drawGridCell(cell);
@@ -413,7 +413,7 @@ public class WindGridCanvasOverlay extends FullCanvasOverlay implements TimeList
                         for (int j = 1; j < numCol - 1; ++j) {
                             Pair<Integer, Integer> cellPair = new Pair<Integer, Integer>(i, j);
                             GridCell cell = gridCellMap.get(cellPair);
-                            cell.windSpeedInKnots = windMatrix[i][j].trueWindSpeedInKnots;
+                            cell.windSpeedInKnots = windMatrix[i-1][j].trueWindSpeedInKnots;
                         }
                     }
                 }
