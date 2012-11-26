@@ -12,8 +12,21 @@ public class WindDTO implements IsSerializable {
     public Double dampenedTrueWindBearingDeg;
     public Double dampenedTrueWindFromDeg;
     public PositionDTO position;
-    public Long timepoint;
-    public Long originTimepoint;
+    
+    /**
+     * The point in time when these wind values have been measured
+     * The value can be null in case the values are derived or calculated from other values
+     */
+    public Long measureTimepoint;
+    
+    /**
+     * The point in time for which the calculation of these values has been requested.  
+     */
+    public Long requestTimepoint;
+    
+    /**
+     * The confidence of the wind values
+     */
     public Double confidence;
     
     public WindDTO() {}

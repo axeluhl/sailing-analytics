@@ -110,38 +110,6 @@ img.openColumn {
 	width: 100%;
 }
 
-.globalNavigation {
-    position:absolute;
-    top:0;
-    right:0;
-}
-
-.globalNavigation-leaderBoardGroup a, .globalNavigation-home a {
-    background: url(images/globalNavigation-home_bg.png) 11px 8px no-repeat;
-}
-
-.globalNavigation-leaderBoard a {
-	background: url(images/globalNavigation-leaderBoard_bg.png) 11px 8px no-repeat;
-}
-
-.globalNavigation-leaderBoardGroup, .globalNavigation-leaderBoard, .globalNavigation-home {
-    margin: -4px 10px 0 0;
-    padding: 0px 0px 4px;
-    float: left;
-    background: #7c7b7c url(images/alert-overlay.png) repeat-x;
-}
-
-.globalNavigation-leaderBoard {
-	margin-right: 5px;
-}
-
-.globalNavigation-leaderBoardGroup a, .globalNavigation-leaderBoard a, .globalNavigation-home a {
-	color: #fff;
-	text-decoration: none;
-    display: block;
-    padding: 8px 13px 6px 36px;
-}
-
 .raceBoardNavigation {
 	float: left;
 	margin: 9px 0 0 12px;

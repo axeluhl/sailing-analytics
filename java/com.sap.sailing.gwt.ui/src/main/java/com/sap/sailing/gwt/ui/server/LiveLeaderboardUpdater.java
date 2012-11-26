@@ -139,13 +139,6 @@ public class LiveLeaderboardUpdater implements Runnable {
         return result;
     }
 
-    TimePoint getNowMinusDelay() {
-        final MillisecondsTimePoint now = MillisecondsTimePoint.now();
-        final Long delayToLiveInMillis = getLeaderboard().getDelayToLiveInMillis();
-        TimePoint timePoint = delayToLiveInMillis == null ? now : now.minus(delayToLiveInMillis);
-        return timePoint;
-    }
-    
     private synchronized void ensureRunning() {
         if (!running) {
             start();

@@ -698,7 +698,6 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
 
                     @Override
                     public void handleSuccess(Void result) {
-                        System.out.println("--------------------------Tracking started");
                         TracTracEventManagementPanel.this.regattaRefresher.fillRegattas();
                     }
                 });
@@ -738,7 +737,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
             this.availableRegattas.add(regatta);
             this.availableRegattasListBox.addItem(regatta.name);
             
-            if(regatta.name.equals(selectedRegatta.name)) {
+            if(selectedRegatta != null && selectedRegatta.name.equals(regatta.name)) {
                 this.availableRegattasListBox.setSelectedIndex(this.availableRegattasListBox.getItemCount() - 1);
             }
         }

@@ -206,7 +206,7 @@ public class RaceColumnInRegattaSeriesDialog extends DataEntryDialog<Pair<Series
                 raceNamePrefixTextBox.setText(seriesName.substring(0, 1).toUpperCase());
             }
         } else {
-            seriesListBox.addItem("Please select a series");
+            seriesListBox.addItem(stringMessages.pleaseSelectASeries());
             for (SeriesDTO series : regatta.series) {
                 seriesListBox.addItem(series.name);
             }

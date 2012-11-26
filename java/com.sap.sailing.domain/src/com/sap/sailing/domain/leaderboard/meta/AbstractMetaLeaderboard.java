@@ -36,7 +36,7 @@ import com.sap.sailing.domain.tracking.TrackedRace;
  * Instances of subclasses need to register a {@link ScoreCorrectionChangeForwarder} as listener on each leaderboard
  * referenced by this meta leaderboard to ensure that score corrections applied to the "inner" leaderboard are signaled
  * to {@link ScoreCorrectionListeners} on this meta leaderboard's score correction. See
- * {@link #registerScoreCorrectionChangeForwarder(Leaderboard)} and
+ * {@link #registerScoreCorrectionAndRaceColumnChangeForwarder(Leaderboard)} and
  * {@link #unregisterScoreCorrectionChangeForwarder(Leaderboard)}.
  * 
  * @author Axel Uhl (d043530)
@@ -130,12 +130,14 @@ public abstract class AbstractMetaLeaderboard extends AbstractSimpleLeaderboardI
         RaceColumn result = columnsForLeaderboards.get(leaderboard);
         if (result == null) {
             result = new MetaLeaderboardColumn(leaderboard, metaFleet);
+            result.addRaceColumnListener(this);
             columnsForLeaderboards.put(leaderboard, result);
         }
         return result;
     }
 
-    protected void registerScoreCorrectionChangeForwarder(Leaderboard leaderboard) {
+    protected void registerScoreCorrectionAndRaceColumnChangeForwarder(Leaderboard leaderboard) {
+        leaderboard.addRaceColumnListener(this);
         final ScoreCorrectionChangeForwarder listener = new ScoreCorrectionChangeForwarder();
         scoreCorrectionChangeForwardersByLeaderboard.put(leaderboard, listener);
         leaderboard.getScoreCorrection().addScoreCorrectionListener(listener);

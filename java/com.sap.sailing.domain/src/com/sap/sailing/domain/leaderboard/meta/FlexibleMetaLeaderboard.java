@@ -38,7 +38,7 @@ public class FlexibleMetaLeaderboard extends AbstractMetaLeaderboard {
         LockUtil.lockForWrite(leaderboardsLock);
         try {
             leaderboards.add(leaderboard);
-            registerScoreCorrectionChangeForwarder(leaderboard);
+            registerScoreCorrectionAndRaceColumnChangeForwarder(leaderboard);
             getRaceColumnListeners().notifyListenersAboutRaceColumnAddedToContainer(getColumnForLeaderboard(leaderboard));
         } finally {
             LockUtil.unlockAfterWrite(leaderboardsLock);

@@ -3,6 +3,7 @@ package com.sap.sailing.domain.tractracadapter.impl;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.Serializable;
+import java.io.StringReader;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -14,11 +15,12 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
-import com.sap.sailing.domain.base.Buoy;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Nationality;
@@ -66,6 +68,7 @@ import com.tractrac.clientmodule.ControlPoint;
 import com.tractrac.clientmodule.Race;
 import com.tractrac.clientmodule.RaceCompetitor;
 import com.tractrac.clientmodule.data.ControlPointPositionData;
+import com.tractrac.clientmodule.metadata.IMetadata;
 
 import difflib.PatchFailedException;
 
@@ -140,25 +143,18 @@ public class DomainFactoryImpl implements DomainFactory {
             com.sap.sailing.domain.base.ControlPoint domainControlPoint = controlPointCache.get(controlPoint);
             if (domainControlPoint == null) {
                 String controlPointName = controlPoint.getName();
-                Pair<String, String> parsedControlPoint = parseControlPointForColor(controlPointName);
-                if(parsedControlPoint != null) {
-                    controlPointName = parsedControlPoint.getA(); 
-                }
+                Map<String, String> controlPointMetadata = parseControlPointMetadata(controlPoint);
+                String markColor = controlPointMetadata.get("Color");
+                String markShape = controlPointMetadata.get("Shape");
+                String markPattern = controlPointMetadata.get("Pattern");
                 if (controlPoint.getHasTwoPoints()) {
                     // it's a gate
-                    Buoy leftBuoy = baseDomainFactory.getOrCreateBuoy(controlPointName + " (left)");
-                    Buoy rightBuoy = baseDomainFactory.getOrCreateBuoy(controlPointName + " (right)");
-                    domainControlPoint = baseDomainFactory.createGate(leftBuoy, rightBuoy, controlPointName);
-                    if(parsedControlPoint != null)  {
-                        leftBuoy.setDisplayColor(parsedControlPoint.getB());
-                        rightBuoy.setDisplayColor(parsedControlPoint.getB());
-                    }
+                    Mark leftMark = baseDomainFactory.getOrCreateMark(controlPointName + " (left)", markColor, markShape, markPattern);
+                    Mark rightMark = baseDomainFactory.getOrCreateMark(controlPointName + " (right)", markColor, markShape, markPattern);
+                    domainControlPoint = baseDomainFactory.createGate(leftMark, rightMark, controlPointName);
                 } else {
-                    Buoy buoy = baseDomainFactory.getOrCreateBuoy(controlPointName);
-                    if(parsedControlPoint != null)  {
-                        buoy.setDisplayColor(parsedControlPoint.getB());
-                    }  
-                    domainControlPoint = buoy;
+                    Mark mark = baseDomainFactory.getOrCreateMark(controlPointName, markColor, markShape, markPattern);
+                    domainControlPoint = mark;
                 }
                 controlPointCache.put(controlPoint, domainControlPoint);
             }
@@ -166,22 +162,24 @@ public class DomainFactoryImpl implements DomainFactory {
         }
     }
     
-    // TODO: This is a special hack for the extreme sailing series event where we encoded the buoy color directly into the buoy name
-    // this will be replaced later with the new 'metadata' facility of the TTCM
-    private Pair<String, String> parseControlPointForColor(final String controlPointNameWithColor) {
-        Pair<String, String> result = null;
-        String parsedControlPointName = controlPointNameWithColor;
-
-        String colorTag = "_COLOR:";
-        if(controlPointNameWithColor.contains(colorTag)) {
-            int index = controlPointNameWithColor.indexOf(colorTag);
-            String color = controlPointNameWithColor.substring(index + colorTag.length(), controlPointNameWithColor.length());
-            parsedControlPointName = controlPointNameWithColor.substring(0, index);
-            result = new Pair<String, String>(parsedControlPointName, color);
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    private Map<String, String> parseControlPointMetadata(ControlPoint controlPoint) {
+        Map<String, String> metadataMap = new HashMap<String, String>();
+        IMetadata metadata = controlPoint.getMetadata();
+        if(metadata != null && !metadata.isEmpty()) {
+            // we assume the format of the metadata is like in a java .properties file
+            String text = metadata.getText();
+            try {
+                Properties p = new Properties();
+                p.load(new StringReader(text));
+                metadataMap = new HashMap<String, String>((Map) p);
+            } catch (IOException e) {
+                // do nothing
+            }
         }
-        return result;
+        return metadataMap;
     }
-    
+        
     @Override
     public Course createCourse(String name, Iterable<ControlPoint> controlPoints) {
         List<Waypoint> waypointList = new ArrayList<Waypoint>();
@@ -499,10 +497,10 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public Buoy getBuoy(ControlPoint controlPoint, ControlPointPositionData record) {
+    public Mark getMark(ControlPoint controlPoint, ControlPointPositionData record) {
         com.sap.sailing.domain.base.ControlPoint myControlPoint = getOrCreateControlPoint(controlPoint);
-        Buoy result;
-        Iterator<Buoy> iter = myControlPoint.getBuoys().iterator();
+        Mark result;
+        Iterator<Mark> iter = myControlPoint.getMarks().iterator();
         if (controlPoint.getHasTwoPoints()) {
             if (record.getIndex() == 0) {
                 result = iter.next();

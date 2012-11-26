@@ -100,7 +100,7 @@ public class TrackedRegattaImpl implements TrackedRegatta {
             if (trbbc != null) {
                 trbbc.remove(trackedRace);
                 if (trbbc.isEmpty()) {
-                    trbbc.remove(trackedRace.getRace().getBoatClass());
+                    trackedRacesByBoatClass.remove(trackedRace.getRace().getBoatClass());
                 }
             }
             for (RaceListener listener : raceListeners) {

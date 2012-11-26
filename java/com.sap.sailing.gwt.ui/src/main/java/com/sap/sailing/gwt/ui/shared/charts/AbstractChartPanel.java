@@ -12,6 +12,7 @@ import org.moxieapps.gwt.highcharts.client.Chart;
 import org.moxieapps.gwt.highcharts.client.ChartSubtitle;
 import org.moxieapps.gwt.highcharts.client.ChartTitle;
 import org.moxieapps.gwt.highcharts.client.Color;
+import org.moxieapps.gwt.highcharts.client.Credits;
 import org.moxieapps.gwt.highcharts.client.Point;
 import org.moxieapps.gwt.highcharts.client.Series;
 import org.moxieapps.gwt.highcharts.client.ToolTip;
@@ -132,11 +133,12 @@ implements CompetitorSelectionChangeListener, RequiresResize {
                 .setMarginRight(65)
                 .setBorderColor(new Color("#A6A6A6"))
                 .setBorderWidth(1)
+                .setCredits(new Credits().setEnabled(false))
                 .setChartSubtitle(new ChartSubtitle().setText(stringMessages.clickAndDragToZoomIn()))
                 .setLinePlotOptions(new LinePlotOptions().setLineWidth(LINE_WIDTH).setMarker(new Marker().setEnabled(false).setHoverState(
                                                 new Marker().setEnabled(true).setRadius(4))).setShadow(false)
                                 .setHoverStateLineWidth(LINE_WIDTH));
-        useCheckboxesToShowAndHide(chart);
+        ChartUtil.useCheckboxesToShowAndHide(chart);
         chart.setChartTitle(new ChartTitle().setText(DetailTypeFormatter.format(dataToShow, stringMessages)));
         
         if (allowTimeAdjust) {
@@ -154,10 +156,11 @@ implements CompetitorSelectionChangeListener, RequiresResize {
             });
         }
         final String unit = getUnit();
-        if(!compactChart)
+        if (!compactChart) {
             chart.getYAxis().setAxisTitleText(DetailTypeFormatter.format(dataToShow, stringMessages) + " ["+unit+"]");
-        else
+        } else {
             chart.getYAxis().setAxisTitleText("["+unit+"]");
+        }
         chart.getYAxis().setStartOnTick(false).setShowFirstLabel(false);
         chart.getYAxis().setReversed((dataToShow == DetailType.WINDWARD_DISTANCE_TO_OVERALL_LEADER || 
                                       dataToShow == DetailType.GAP_TO_LEADER_IN_SECONDS) ? true : false);
@@ -226,7 +229,7 @@ implements CompetitorSelectionChangeListener, RequiresResize {
                 needToLoadWhenMadeVisible = false; // we're loading it now
                 if (showBusyIndicator) {
                     setWidget(chart);
-                    showLoading("Loading competitor data...");
+                    showLoading(stringMessages.loadingCompetitorData());
                 }
                 if (chartData == null || chartData.getDetailType() != getDataToShow()) {
                     chartData = new MultiCompetitorRaceDataDTO(getDataToShow());
@@ -593,7 +596,7 @@ implements CompetitorSelectionChangeListener, RequiresResize {
     
     @Override
     public void onResize() {
-        if(getChartData() != null) {
+        if (getChartData() != null) {
             chart.setSizeToMatchContainer();
             // it's important here to recall the redraw method, otherwise the bug fix for wrong checkbox positions (nativeAdjustCheckboxPosition)
             // in the BaseChart class would not be called 

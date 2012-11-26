@@ -140,15 +140,15 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
                 race = r;
             }
         }
-        if (race == null) {
-            return;
-        }
-        int index = 0;
-        index = races.lastIndexOf(race);
-        index--;
-        if (index >= 0) {
-            races.remove(race);
-            races.add(index, race);
+        if (race != null) {
+            int index = 0;
+            index = races.lastIndexOf(race);
+            index--;
+            if (index >= 0) {
+                races.remove(race);
+                races.add(index, race);
+                getRaceColumnListeners().notifyListenersAboutRaceColumnMoved(race, index);
+            }
         }
     }
 
@@ -160,18 +160,17 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
                 race = r;
             }
         }
-        if (race == null) {
-            return;
-        }
-        int index = 0;
-        index = races.lastIndexOf(race);
-        if (index == -1) {
-            return;
-        }
-        index++;
-        if (index < races.size()) {
-            races.remove(race);
-            races.add(index, race);
+        if (race != null) {
+            int index = 0;
+            index = races.lastIndexOf(race);
+            if (index != -1) {
+                index++;
+                if (index < races.size()) {
+                    races.remove(race);
+                    races.add(index, race);
+                    getRaceColumnListeners().notifyListenersAboutRaceColumnMoved(race, index);
+                }
+            }
         }
     }
 

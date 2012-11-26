@@ -7,13 +7,21 @@ import com.sap.sailing.domain.common.DetailType;
 public class LeaderboardSettings {
     /**
      * Only one of {@link #namesOfRaceColumnsToShow} and {@link #namesOfRacesToShow} must be non-<code>null</code>.
+     * Only valid when the {@link #activeRaceColumnSelectionStrategy} is set to EXPLIZIT
      */
     private final List<String> namesOfRaceColumnsToShow;
 
     /**
      * Only one of {@link #namesOfRaceColumnsToShow} and {@link #namesOfRacesToShow} must be non-<code>null</code>.
+     * Only valid when the {@link #activeRaceColumnSelectionStrategy} is set to EXPLIZIT
      */
     private final List<String> namesOfRacesToShow;
+
+    /**
+     * Only valid when the {@link #activeRaceColumnSelectionStrategy} is set to LAST_N
+     */
+    private final Integer numberOfLastRacesToShow;
+
     private final List<DetailType> maneuverDetailsToShow;
     private final List<DetailType> legDetailsToShow;
     private final List<DetailType> raceDetailsToShow;
@@ -22,6 +30,13 @@ public class LeaderboardSettings {
     private final Long delayBetweenAutoAdvancesInMilliseconds;
     private final Long delayInMilliseconds;
     private final boolean updateUponPlayStateChange;
+    
+    /**
+     * There are two ways to select race columns.
+     * Either you select races from the list of all races or you select the last N races.
+     */
+    public static enum RaceColumnSelectionStrategies { EXPLICIT, LAST_N; }
+    private final RaceColumnSelectionStrategies activeRaceColumnSelectionStrategy;
     
     /**
      * An optional sort column; if <code>null</code>, the leaderboard sorting won't be touched when updating the settings.
@@ -35,9 +50,9 @@ public class LeaderboardSettings {
      */
     public LeaderboardSettings(List<DetailType> meneuverDetailsToShow, List<DetailType> legDetailsToShow,
             List<DetailType> raceDetailsToShow, List<DetailType> overallDetailsToShow,
-            List<String> namesOfRaceColumnsToShow, List<String> namesOfRacesToShow, boolean autoExpandPreSelectedRace,
-            Long delayBetweenAutoAdvancesInMilliseconds, Long delayInMilliseconds, String nameOfRaceToSort,
-            boolean sortAscending, boolean updateUponPlayStateChange) {
+            List<String> namesOfRaceColumnsToShow, List<String> namesOfRacesToShow, Integer numberOfLastRacesToShow,
+            boolean autoExpandPreSelectedRace, Long delayBetweenAutoAdvancesInMilliseconds, Long delayInMilliseconds,
+            String nameOfRaceToSort, boolean sortAscending, boolean updateUponPlayStateChange, RaceColumnSelectionStrategies activeRaceColumnSelectionStrategy) {
         if (namesOfRacesToShow != null && namesOfRaceColumnsToShow != null) {
             throw new IllegalArgumentException("You can identify races either only by their race or by their column names, not both");
         }
@@ -46,6 +61,8 @@ public class LeaderboardSettings {
         this.overallDetailsToShow = overallDetailsToShow;
         this.namesOfRacesToShow = namesOfRacesToShow;
         this.namesOfRaceColumnsToShow = namesOfRaceColumnsToShow;
+        this.numberOfLastRacesToShow = numberOfLastRacesToShow;
+        this.activeRaceColumnSelectionStrategy = activeRaceColumnSelectionStrategy;
         this.autoExpandPreSelectedRace = autoExpandPreSelectedRace;
         this.delayBetweenAutoAdvancesInMilliseconds = delayBetweenAutoAdvancesInMilliseconds;
         this.delayInMilliseconds = delayInMilliseconds;
@@ -76,7 +93,7 @@ public class LeaderboardSettings {
      * {@link LeaderboardPanel#updateSettings(LeaderboardSettings)}.
      */
     public List<String> getNamesOfRaceColumnsToShow() {
-        return namesOfRaceColumnsToShow;
+        return activeRaceColumnSelectionStrategy == RaceColumnSelectionStrategies.EXPLICIT ? namesOfRaceColumnsToShow : null;
     }
 
     /**
@@ -84,7 +101,15 @@ public class LeaderboardSettings {
      * {@link LeaderboardPanel#updateSettings(LeaderboardSettings)}.
      */
     public List<String> getNamesOfRacesToShow() {
-        return namesOfRacesToShow;
+        return activeRaceColumnSelectionStrategy == RaceColumnSelectionStrategies.EXPLICIT ? namesOfRacesToShow : null;
+    }
+    
+    /**
+     * If <code>null</code>, this is to mean that the race columns should not be modified by
+     * {@link LeaderboardPanel#updateSettings(LeaderboardSettings)}.
+     */
+    public Integer getNumberOfLastRacesToShow() {
+        return activeRaceColumnSelectionStrategy == RaceColumnSelectionStrategies.LAST_N ? numberOfLastRacesToShow : null;
     }
 
     public boolean isAutoExpandPreSelectedRace() {
@@ -120,6 +145,10 @@ public class LeaderboardSettings {
      */
     public boolean updateUponPlayStateChange() {
         return updateUponPlayStateChange;
+    }
+
+    public RaceColumnSelectionStrategies getActiveRaceColumnSelectionStrategy() {
+        return activeRaceColumnSelectionStrategy;
     }
 
 }

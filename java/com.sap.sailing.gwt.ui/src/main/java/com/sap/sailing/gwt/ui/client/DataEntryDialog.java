@@ -22,6 +22,7 @@ import com.google.gwt.user.client.ui.IntegerBox;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.LongBox;
+import com.google.gwt.user.client.ui.RadioButton;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
@@ -296,15 +297,12 @@ public abstract class DataEntryDialog<T> {
     
     public FlowPanel createHeadline(String headlineText, boolean regularHeadline) {
     	FlowPanel headlinePanel = new FlowPanel();
-    	
         Label headlineLabel = new Label(headlineText);
-        
         if (regularHeadline) {
-        	headlinePanel.addStyleName("dialogInnerHeadline");
-		} else {
-			headlinePanel.addStyleName("dialogInnerHeadlineOther");
-		}
-        
+            headlinePanel.addStyleName("dialogInnerHeadline");
+        } else {
+            headlinePanel.addStyleName("dialogInnerHeadlineOther");
+        }
         headlinePanel.add(headlineLabel);
         return headlinePanel;
     }
@@ -323,6 +321,20 @@ public abstract class DataEntryDialog<T> {
         return result;
     }
 
+    public RadioButton createRadioButton(String radioButtonGroupName, String radioButtonLabel) {
+        RadioButton result = new RadioButton(radioButtonGroupName, radioButtonLabel);
+        result.setWordWrap(false);
+        result.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<Boolean> event) {
+                validate();
+            }
+        });
+        AbstractEntryPoint.linkEnterToButton(getOkButton(), result);
+        AbstractEntryPoint.linkEscapeToButton(getCancelButton(), result);
+        return result;
+    }
+    
     public ListBox createListBox(boolean isMultipleSelect) {
         ListBox result = new ListBox(isMultipleSelect);
         result.addChangeHandler(new ChangeHandler() {
@@ -336,12 +348,11 @@ public abstract class DataEntryDialog<T> {
         return result;
     }
 
-    protected void alignAllPanelWidgetsVertically(HorizontalPanel panel, HasVerticalAlignment.VerticalAlignmentConstant alignment) {
+    public void alignAllPanelWidgetsVertically(HorizontalPanel panel, HasVerticalAlignment.VerticalAlignmentConstant alignment) {
         for(int i = 0; i < panel.getWidgetCount(); i++) {
             panel.setCellVerticalAlignment(panel.getWidget(i), alignment);
         }
     }
-
     
     /**
      * Can contribute an additional widget to be displayed underneath the text entry field. If <code>null</code> is

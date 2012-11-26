@@ -26,7 +26,7 @@ import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Waypoint;
-import com.sap.sailing.domain.base.impl.BuoyImpl;
+import com.sap.sailing.domain.base.impl.MarkImpl;
 import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
 import com.sap.sailing.domain.common.impl.Util;
@@ -130,10 +130,10 @@ public class CourseUpdateTest extends AbstractTracTracLiveTest {
     
     @Test
     public void testWaypointListDiff() {
-        Waypoint wp1 = new WaypointImpl(new BuoyImpl("b1"));
-        Waypoint wp2 = new WaypointImpl(new BuoyImpl("b2"));
-        Waypoint wp3 = new WaypointImpl(new BuoyImpl("b3"));
-        Waypoint wp4 = new WaypointImpl(new BuoyImpl("b4"));
+        Waypoint wp1 = new WaypointImpl(new MarkImpl("b1"));
+        Waypoint wp2 = new WaypointImpl(new MarkImpl("b2"));
+        Waypoint wp3 = new WaypointImpl(new MarkImpl("b3"));
+        Waypoint wp4 = new WaypointImpl(new MarkImpl("b4"));
         List<Waypoint> waypoints = new ArrayList<Waypoint>(4);
         waypoints.add(wp1);
         waypoints.add(wp2);
@@ -216,9 +216,8 @@ public class CourseUpdateTest extends AbstractTracTracLiveTest {
     @Test
     public void testWaypointAddedAtEnd() throws PatchFailedException, InterruptedException {
         final boolean[] result = new boolean[1];
-        final com.tractrac.clientmodule.ControlPoint cp1 = new com.tractrac.clientmodule.ControlPoint(
-                UUID.randomUUID(), "CP1", /* hasTwo */false) {
-        };
+        final com.tractrac.clientmodule.Event event = new com.tractrac.clientmodule.Event(UUID.randomUUID(), "Event1");
+        final com.tractrac.clientmodule.ControlPoint cp1 = event.addControlPoint(UUID.randomUUID(), "CP1", /* hasTwo */false);
         waitForRouteData();
         final List<com.tractrac.clientmodule.ControlPoint> controlPoints = new ArrayList<com.tractrac.clientmodule.ControlPoint>(
                 routeData[0].getPoints());
@@ -249,9 +248,8 @@ public class CourseUpdateTest extends AbstractTracTracLiveTest {
     @Test
     public void testTrackedRacesTrackedLegsUpdatedProperly() throws InterruptedException, PatchFailedException {
         final boolean[] result = new boolean[1];
-        final com.tractrac.clientmodule.ControlPoint cp1 = new com.tractrac.clientmodule.ControlPoint(
-                UUID.randomUUID(), "CP1", /* hasTwo */false) {
-        };
+        final com.tractrac.clientmodule.Event event = new com.tractrac.clientmodule.Event(UUID.randomUUID(), "Event1");
+        final com.tractrac.clientmodule.ControlPoint cp1 = event.addControlPoint(UUID.randomUUID(), "CP1", /* hasTwo */false);
         waitForRouteData();
         final List<com.tractrac.clientmodule.ControlPoint> controlPoints = new ArrayList<com.tractrac.clientmodule.ControlPoint>(
                 routeData[0].getPoints());

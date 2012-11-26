@@ -3,27 +3,27 @@ package com.sap.sailing.gwt.ui.shared;
 import java.util.Arrays;
 
 public class GateDTO extends ControlPointDTO {
-    private BuoyDTO left;
-    private BuoyDTO right;
+    private MarkDTO left;
+    private MarkDTO right;
     
     public GateDTO() {}
     
-    public GateDTO(String name, BuoyDTO left, BuoyDTO right) {
+    public GateDTO(String name, MarkDTO left, MarkDTO right) {
         super(name);
         this.left = left;
         this.right = right;
     }
     
-    public BuoyDTO getLeft() {
+    public MarkDTO getLeft() {
         return left;
     }
 
-    public BuoyDTO getRight() {
+    public MarkDTO getRight() {
         return right;
     }
 
     @Override
-    public Iterable<BuoyDTO> getBuoys() {
+    public Iterable<MarkDTO> getMarks() {
         return Arrays.asList(left, right);
     }
 }

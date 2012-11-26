@@ -16,7 +16,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import java.util.logging.Logger;
 
-import com.sap.sailing.domain.base.Buoy;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
@@ -101,7 +101,7 @@ public class LeaderboardDTOCache {
         }
 
         @Override
-        public void buoyPositionChanged(GPSFix fix, Buoy buoy) {
+        public void markPositionChanged(GPSFix fix, Mark mark) {
             removeFromCache(leaderboard);
         }
 
@@ -278,6 +278,21 @@ public class LeaderboardDTOCache {
             public void raceColumnRemovedFromContainer(RaceColumn raceColumn) {
                 removeFromCache(leaderboard);
             }
+
+            @Override
+            public void raceColumnMoved(RaceColumn raceColumn, int newIndex) {
+                removeFromCache(leaderboard);
+            }
+
+            @Override
+            public void factorChanged(RaceColumn raceColumn, Double oldFactor, Double newFactor) {
+                removeFromCache(leaderboard);
+            }
+
+            @Override
+            public void competitorDisplayNameChanged(Competitor competitor, String oldDisplayName, String displayName) {
+                removeFromCache(leaderboard);
+            }
         };
         leaderboard.addRaceColumnListener(raceColumnListener);
         synchronized (raceColumnListeners) {
@@ -349,7 +364,7 @@ public class LeaderboardDTOCache {
                 registerAsListener(leaderboard);
             } else {
                 /*
-                 * Waiting for latest analyses results largely regards wind estimation and maneuver cache; see
+                 * Waiting for latest analyzes results largely regards wind estimation and maneuver cache; see
                  * SmartFutureCache. Even if waitForLatestAnalysis is requested, it is OK to cache. The cache would be
                  * invalidated when the race changes, forcing a new re-calculation based on the latest analysis results.
                  * Once the race stabilizes, the latest analysis results for maneuvers and wind estimation will no

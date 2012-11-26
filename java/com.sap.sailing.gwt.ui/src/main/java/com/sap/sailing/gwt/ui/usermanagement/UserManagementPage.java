@@ -16,7 +16,7 @@ import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
 
 public class UserManagementPage extends AbstractEntryPoint {
     @Override
-    protected void doOnModuleLoad() {    
+    protected void doOnModuleLoad() {
         super.doOnModuleLoad();
         VerticalPanel vp = new VerticalPanel();
         RootPanel.get().add(vp);

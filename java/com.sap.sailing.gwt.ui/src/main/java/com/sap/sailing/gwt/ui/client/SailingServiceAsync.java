@@ -23,7 +23,7 @@ import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 import com.sap.sailing.gwt.ui.shared.ControlPointDTO;
 import com.sap.sailing.gwt.ui.shared.CourseDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
-import com.sap.sailing.gwt.ui.shared.RaceBuoysDTO;
+import com.sap.sailing.gwt.ui.shared.RaceCourseMarksDTO;
 import com.sap.sailing.gwt.ui.shared.RaceColumnInSeriesDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
@@ -302,10 +302,11 @@ public interface SailingServiceAsync {
     
     /**
      * Creates a new group with the name <code>groupname</code>, the description <code>description</code> and an empty list of leaderboards.<br/>
+     * @param displayGroupsInReverseOrder TODO
      */
     void createLeaderboardGroup(String groupName, String description,
-            int[] overallLeaderboardDiscardThresholds, ScoringSchemeType overallLeaderboardScoringSchemeType,
-            AsyncCallback<LeaderboardGroupDTO> callback);
+            boolean displayGroupsInReverseOrder, int[] overallLeaderboardDiscardThresholds,
+            ScoringSchemeType overallLeaderboardScoringSchemeType, AsyncCallback<LeaderboardGroupDTO> callback);
     
     /**
      * Updates the data of the group with the name <code>oldName</code>.
@@ -410,7 +411,7 @@ public interface SailingServiceAsync {
 
     void addFragUrl(String result, AsyncCallback<Void> asyncCallback);
 
-    void getRaceBuoys(RegattaAndRaceIdentifier raceIdentifier, Date date,	AsyncCallback<RaceBuoysDTO> callback);
+    void getRaceCourseMarks(RegattaAndRaceIdentifier raceIdentifier, Date date,	AsyncCallback<RaceCourseMarksDTO> callback);
 
     void addColumnsToLeaderboard(String leaderboardName, List<Pair<String, Boolean>> columnsToAdd,
             AsyncCallback<Void> callback);
@@ -421,4 +422,9 @@ public interface SailingServiceAsync {
 
     void suppressCompetitorInLeaderboard(String leaderboardName, String competitorIdAsString, boolean suppressed, AsyncCallback<Void> asyncCallback);
 
+    void updateLeaderboardColumnFactor(String leaderboardName, String columnName, Double newFactor,
+            AsyncCallback<Void> callback);
+
+    void getRankedCompetitorsFromBestToWorstAfterEachRaceColumn(String leaderboardName, Date date,
+            AsyncCallback<List<Pair<String, List<CompetitorDTO>>>> callback);
 }

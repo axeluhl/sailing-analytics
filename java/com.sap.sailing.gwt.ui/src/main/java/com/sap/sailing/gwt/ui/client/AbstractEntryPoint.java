@@ -22,7 +22,8 @@ import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
 public abstract class AbstractEntryPoint implements EntryPoint, ErrorReporter {
-    public static final String SELENIUM_DEBUG_ID = "selenium-id";
+    public static final String DEBUG_ID_ATTRIBUTE = "selenium-id";
+    public static final String DEBUG_ID_PREFIX = "";
     
     private DialogBox errorDialogBox;
     private HTML serverResponseLabel;
@@ -54,8 +55,8 @@ public abstract class AbstractEntryPoint implements EntryPoint, ErrorReporter {
             TextResource script = bundle.ajaxSemaphoreJS();
             JavaScriptInjector.inject(script.getText());
             
-            DebugInfo.setDebugIdAttribute(SELENIUM_DEBUG_ID, false);
-            DebugInfo.setDebugIdPrefix("");
+            DebugInfo.setDebugIdAttribute(DEBUG_ID_ATTRIBUTE, false);
+            DebugInfo.setDebugIdPrefix(DEBUG_ID_PREFIX);
         }
         
         doOnModuleLoad();
@@ -166,5 +167,4 @@ public abstract class AbstractEntryPoint implements EntryPoint, ErrorReporter {
             }
         });
     }
-
 }

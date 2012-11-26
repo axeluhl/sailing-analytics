@@ -39,8 +39,9 @@ public interface MongoObjectFactory {
     void renameLeaderboard(String oldName, String newName);
 
     /**
-     * Stores the group, if it doesn't exist or updates it.<br />
-     * Leaderboards in the group, which aren't stored in the database, will be stored.
+     * Stores the group, if it doesn't exist or updates it. Leaderboards in the group, which aren't stored in the
+     * database, will be stored. If the leaderboard group has an {@link LeaderboardGroup#getOverallLeaderboard() overall
+     * leaderboard}, it will be stored / updated as well.
      */
     void storeLeaderboardGroup(LeaderboardGroup leaderboardGroup);
     
