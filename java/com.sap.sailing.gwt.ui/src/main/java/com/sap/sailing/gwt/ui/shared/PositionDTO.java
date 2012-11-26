@@ -42,8 +42,11 @@ public class PositionDTO implements IsSerializable {
         if (o == null) {
             return false;
         } else {
-            return o instanceof PositionDTO && this.latDeg ==  ((PositionDTO) o).latDeg
-                    && this.lngDeg == ((PositionDTO) o).lngDeg;
+            if (o instanceof PositionDTO) {
+                PositionDTO other = (PositionDTO) o;
+                return Math.abs(this.latDeg-other.latDeg) <= 1e-5 && Math.abs(this.lngDeg-other.lngDeg) <= 1e-5;
+            }
+            return false;
         }
     }
   
