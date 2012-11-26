@@ -320,7 +320,8 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
     private void initializeOverlays() {
         this.raceCourseCanvasOverlay = new RaceCourseCanvasOverlay();
         this.raceCourseCanvasOverlay.getCanvas().getElement().setClassName("raceCourse");
-        System.out.println("RaceCourseCanvasOverlay z-index: " + this.raceCourseCanvasOverlay.getCanvas().getElement().getStyle().getZIndex());
+        // System.out.println("RaceCourseCanvasOverlay z-index: " +
+        // this.raceCourseCanvasOverlay.getCanvas().getElement().getStyle().getZIndex());
         this.mapw.addOverlay(this.raceCourseCanvasOverlay);
 
         if (this.windParams.isShowArrows()) {

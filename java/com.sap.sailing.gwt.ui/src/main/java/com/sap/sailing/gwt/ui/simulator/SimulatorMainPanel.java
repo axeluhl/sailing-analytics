@@ -56,8 +56,8 @@ import com.sap.sailing.simulator.util.SailingSimulatorUtil;
 
 public class SimulatorMainPanel extends SplitLayoutPanel {
 
-    private FlowPanel leftPanel;
-    private FlowPanel rightPanel;
+    private final FlowPanel leftPanel;
+    private final FlowPanel rightPanel;
     private VerticalPanel windPanel;
 
     private Button updateButton;
@@ -68,21 +68,21 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
     private RadioButton windDisplayButton;
     // private TimePanel<TimePanelSettings> timePanel;
 
-    private Map<String, WindPatternDisplay> patternDisplayMap;
-    private Map<String, Panel> patternPanelMap;
+    private final Map<String, WindPatternDisplay> patternDisplayMap;
+    private final Map<String, Panel> patternPanelMap;
 
     private WindPatternDisplay currentWPDisplay;
     private Panel currentWPPanel;
 
-    private ListBox patternSelector;
-    private PatternSelectorHandler patternSelectorHandler;
-    private Map<String, WindPatternDTO> patternNameDTOMap;
-    private ListBox boatSelector;
-    private ListBox directionSelector;
+    private final ListBox patternSelector;
+    private final PatternSelectorHandler patternSelectorHandler;
+    private final Map<String, WindPatternDTO> patternNameDTOMap;
+    private final ListBox boatSelector;
+    private final ListBox directionSelector;
 
-    private WindFieldGenParamsDTO windParams;
+    private final WindFieldGenParamsDTO windParams;
     private final Timer timer;
-    private SimpleBusyIndicator busyIndicator;
+    private final SimpleBusyIndicator busyIndicator;
     private static Logger logger = Logger.getLogger(SimulatorMainPanel.class.getName());
 
     private SimulatorMap simulatorMap;
@@ -93,43 +93,32 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
     private final int yRes;
     private final boolean autoUpdate;
     private final char mode;
-    
-    private SimulatorTimePanel timePanel;
 
-    private CheckBox isOmniscient;
-    private CheckBox isOpportunistic;
+    private final SimulatorTimePanel timePanel;
+
+    private final CheckBox isOmniscient;
+    private final CheckBox isOpportunistic;
     private Chart chart;
     // private final Timer timer;
-    
-    //I077899 - Mihai Bogdan Eugen    
+
     private boolean warningAlreadyShown = false;
-    
-    //I077899 - Mihai Bogdan Eugen
-    private DialogBox polarDiagramDialogBox;
-    
-    //I077899 - Mihai Bogdan Eugen
+    private final DialogBox polarDiagramDialogBox;
     private Button polarDiagramDialogCloseButton;
-
-    //I077899 - Mihai Bogdan Eugen
     private VerticalPanel polarDiv;
-    
-    //I077899 - Mihai Bogdan Eugen
     private BoatClassDTO[] boatClasses = new BoatClassDTO[0];
-   
 
-    //I077899 - Mihai Bogdan Eugen
     private class WindControlCapture implements ValueChangeHandler<Double> {
 
-        private SliderBar sliderBar;
-        private WindPatternSetting<?> setting;
+        private final SliderBar sliderBar;
+        private final WindPatternSetting<?> setting;
 
-        public WindControlCapture(SliderBar sliderBar, WindPatternSetting<?> setting) {
+        public WindControlCapture(final SliderBar sliderBar, final WindPatternSetting<?> setting) {
             this.sliderBar = sliderBar;
             this.setting = setting;
         }
 
         @Override
-        public void onValueChange(ValueChangeEvent<Double> arg0) {
+        public void onValueChange(final ValueChangeEvent<Double> arg0) {
             sliderBar.setTitle(String.valueOf(Math.round(sliderBar.getCurrentValue())));
             logger.info("Slider value : " + arg0.getValue());
             setting.setValue(arg0.getValue());
@@ -143,23 +132,23 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
 
         private class PatternRetriever implements AsyncCallback<WindPatternDisplay> {
 
-            private String windPattern;
+            private final String windPattern;
 
-            public PatternRetriever(String windPattern) {
+            public PatternRetriever(final String windPattern) {
                 this.windPattern = windPattern;
             }
 
             @Override
-            public void onFailure(Throwable message) {
+            public void onFailure(final Throwable message) {
                 errorReporter.reportError("Error retreiving wind patterns" + message.getMessage());
             }
 
             @Override
-            public void onSuccess(WindPatternDisplay display) {
+            public void onSuccess(final WindPatternDisplay display) {
                 logger.info(display.getSettings().toString());
                 patternDisplayMap.put(windPattern, display);
                 currentWPDisplay = display;
-                Panel wPanel = getWindControlPanel();
+                final Panel wPanel = getWindControlPanel();
                 if (currentWPPanel != null) {
                     currentWPPanel.removeFromParent();
                 }
@@ -173,9 +162,9 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
         }
 
         @Override
-        public void onChange(ChangeEvent arg0) {
+        public void onChange(final ChangeEvent arg0) {
 
-            String windPattern = patternSelector.getItemText(patternSelector.getSelectedIndex());
+            final String windPattern = patternSelector.getItemText(patternSelector.getSelectedIndex());
             logger.info(windPattern);
 
             if (patternDisplayMap.containsKey(windPattern)) {
@@ -187,7 +176,7 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
                 windPanel.add(currentWPPanel);
 
             } else {
-                WindPatternDTO pattern = patternNameDTOMap.get(windPattern);
+                final WindPatternDTO pattern = patternNameDTOMap.get(windPattern);
                 simulatorSvc.getWindPatternDisplay(pattern, new PatternRetriever(windPattern));
             }
             simulatorMap.removeOverlays();
@@ -195,8 +184,8 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
 
     }
 
-    public SimulatorMainPanel(SimulatorServiceAsync svc, StringMessages stringMessages, ErrorReporter errorReporter,
-            int xRes, int yRes, boolean autoUpdate, char mode, boolean showGrid, boolean showArrows) {
+    public SimulatorMainPanel(final SimulatorServiceAsync svc, final StringMessages stringMessages, final ErrorReporter errorReporter,
+            final int xRes, final int yRes, final boolean autoUpdate, final char mode, final boolean showGrid, final boolean showArrows) {
 
         super();
 
@@ -233,12 +222,12 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
         windParams.setMode(mode);
         windParams.setShowArrows(showArrows);
         windParams.setShowGrid(showGrid);
-        
+
         timer = new Timer(PlayModes.Replay, 1000l);
         timer.setAutoAdvance(false);
         // timer.setTime(windParams.getStartTime().getTime());
         // TO DO make it work for no time panel display
-        FlowPanel timeSliderWrapperPanel = new FlowPanel();
+        final FlowPanel timeSliderWrapperPanel = new FlowPanel();
 
         /*
          * timePanel = new TimePanel<TimePanelSettings>(timer, stringMessages);
@@ -269,18 +258,18 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
 
         this.add(rightPanel);
         // rightPanel.getElement().getStyle().setFloat(Style.Float.RIGHT);
-        
+
         this.polarDiagramDialogBox = this.createPolarDiagramDialogBox();
 
     }
 
     private void createOptionsPanelTop() {
-        HorizontalPanel optionsPanel = new HorizontalPanel();
+        final HorizontalPanel optionsPanel = new HorizontalPanel();
         optionsPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
 
         optionsPanel.setTitle("Optionsbar");
         optionsPanel.getElement().setClassName("optionsPanel");
-        Label options = new Label(stringMessages.optionsBar());
+        final Label options = new Label(stringMessages.optionsBar());
         options.getElement().setClassName("sectorHeadline");
         optionsPanel.setSize("100%", "45px");
         optionsPanel.add(options);
@@ -293,8 +282,8 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
     }
 
     private void createOptionsPanel() {
-        FlowPanel controlPanel = new FlowPanel();
-        FlowPanel controlPanelInnerWrapper = new FlowPanel();
+        final FlowPanel controlPanel = new FlowPanel();
+        final FlowPanel controlPanelInnerWrapper = new FlowPanel();
         controlPanelInnerWrapper.getElement().setClassName("controlPanelInnerWrapper");
         controlPanel.setTitle("Control Settings");
         controlPanel.getElement().setClassName("controlPanel");
@@ -306,31 +295,31 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
 
     }
 
-    private void createWindSetup(Panel controlPanel) {
+    private void createWindSetup(final Panel controlPanel) {
         windPanel = new VerticalPanel();
 
         controlPanel.add(windPanel);
         windPanel.getElement().setClassName("windPanel");
-        String windSetup = stringMessages.wind() + " " + stringMessages.setup();
-        Label windSetupLabel = new Label(windSetup);
+        final String windSetup = stringMessages.wind() + " " + stringMessages.setup();
+        final Label windSetupLabel = new Label(windSetup);
         windSetupLabel.getElement().setClassName("innerHeadline");
         windPanel.add(windSetupLabel);
 
-        HorizontalPanel hp = new HorizontalPanel();
+        final HorizontalPanel hp = new HorizontalPanel();
 
-        Label pattern = new Label(stringMessages.pattern());
+        final Label pattern = new Label(stringMessages.pattern());
         hp.add(pattern);
 
         simulatorSvc.getWindPatterns(new AsyncCallback<List<WindPatternDTO>>() {
 
             @Override
-            public void onFailure(Throwable message) {
+            public void onFailure(final Throwable message) {
                 errorReporter.reportError("Failed to initialize wind patterns\n" + message.getMessage());
             }
 
             @Override
-            public void onSuccess(List<WindPatternDTO> patterns) {
-                for (WindPatternDTO p : patterns) {
+            public void onSuccess(final List<WindPatternDTO> patterns) {
+                for (final WindPatternDTO p : patterns) {
                     if ((mode != SailingSimulatorUtil.freestyle)||(!p.name.equals("MEASURED"))) {
                         patternSelector.addItem(p.getDisplayName());
                         patternNameDTOMap.put(p.getDisplayName(), p);
@@ -354,14 +343,15 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
 
     private Panel getWindControlPanel() {
         assert (currentWPDisplay != null);
-        VerticalPanel windControlPanel = new VerticalPanel();
+        final VerticalPanel windControlPanel = new VerticalPanel();
         windControlPanel.getElement().setClassName("windControLPanel");
         // windControlPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
 
-        for (WindPatternSetting<?> s : currentWPDisplay.getSettings()) {
+        for (final WindPatternSetting<?> s : currentWPDisplay.getSettings()) {
             switch (s.getDisplayWidgetType()) {
             case SLIDERBAR:
                 @SuppressWarnings("unused")
+                final
                 Panel sliderPanel = getSliderPanel(windControlPanel, s);
                 // windControlPanel.add(sliderPanel);
                 // sliderPanel.getElement().getStyle().setFloat(Style.Float.NONE);
@@ -376,16 +366,16 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
         return windControlPanel;
     }
 
-    private Panel getSliderPanel(Panel parentPanel, WindPatternSetting<?> s) {
+    private Panel getSliderPanel(final Panel parentPanel, final WindPatternSetting<?> s) {
 
-        String labelName = s.getDisplayName();
-        double minValue = (Double) s.getMin();
-        double maxValue = (Double) s.getMax();
-        double defaultValue = (Double) s.getDefault();
+        final String labelName = s.getDisplayName();
+        final double minValue = (Double) s.getMin();
+        final double maxValue = (Double) s.getMax();
+        final double defaultValue = (Double) s.getDefault();
 
-        FlowPanel vp = new FlowPanel();
+        final FlowPanel vp = new FlowPanel();
         vp.getElement().setClassName("sliderWrapper");
-        Label label = new Label(labelName);
+        final Label label = new Label(labelName);
         label.setWordWrap(true);
 
         vp.add(label);
@@ -400,13 +390,13 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
         sliderBar.setNumTickLabels(1);
 
         sliderBar.setEnabled(true);
-        WindControlCapture handler = new WindControlCapture(sliderBar, s);
+        final WindControlCapture handler = new WindControlCapture(sliderBar, s);
         sliderBar.addValueChangeHandler(handler);
 
         sliderBar.setLabelFormatter(new SliderBar.LabelFormatter() {
 
             @Override
-            public String formatLabel(SliderBar slider, Double value, Double previousValue) {
+            public String formatLabel(final SliderBar slider, final Double value, final Double previousValue) {
                 return String.valueOf(Math.round(value));
             }
         });
@@ -424,13 +414,13 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
     }
 
     private void createMapOptionsPanel() {
-        HorizontalPanel mapOptions = new HorizontalPanel();
+        final HorizontalPanel mapOptions = new HorizontalPanel();
         mapOptions.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
         mapOptions.setSize("100%", "45px");
         mapOptions.setTitle("Maps");
         mapOptions.getElement().setClassName("mapOptions");
 
-        Label mapsLabel = new Label(stringMessages.maps());
+        final Label mapsLabel = new Label(stringMessages.maps());
         mapsLabel.getElement().setClassName("sectorHeadline");
         mapOptions.add(mapsLabel);
 
@@ -455,18 +445,18 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
 
     // initialize timer with a default time span based on windParams
     private void initTimer() {
-        Date startDate = windParams.getStartTime();
+        final Date startDate = windParams.getStartTime();
         if (timePanel != null) {
             timePanel.setMinMax(startDate, windParams.getEndTime(), false);
         }
     }
-    
+
     private void initCourseInputButton() {
         courseInputButton = new Button(stringMessages.startEnd());
 
         courseInputButton.addClickHandler(new ClickHandler() {
             @Override
-            public void onClick(ClickEvent arg0) {
+            public void onClick(final ClickEvent arg0) {
                 simulatorMap.reset();
                 // TODO fix so that resetting the course displays the current
                 // selection
@@ -480,9 +470,9 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
     }
 
     private Panel createRaceDirectionSelector() {
-        Label raceDirectionLabel = new Label(stringMessages.raceDirection());
+        final Label raceDirectionLabel = new Label(stringMessages.raceDirection());
         raceDirectionLabel.getElement().setClassName("boatClassLabel");
-        HorizontalPanel hp = new HorizontalPanel();
+        final HorizontalPanel hp = new HorizontalPanel();
         hp.getElement().setClassName("boatClassPanel");
         hp.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
         hp.add(raceDirectionLabel);
@@ -496,13 +486,13 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
     }
 
     private Panel createStrategySelector() {
-        Label label = new Label(stringMessages.strategies());
+        final Label label = new Label(stringMessages.strategies());
         label.getElement().getStyle().setFloat(Style.Float.LEFT);
 
-        FlowPanel fp = new FlowPanel();
+        final FlowPanel fp = new FlowPanel();
         fp.add(label);
 
-        VerticalPanel vp = new VerticalPanel();
+        final VerticalPanel vp = new VerticalPanel();
         vp.getElement().getStyle().setProperty("width", "215px");
 
         vp.add(this.isOmniscient);
@@ -518,40 +508,40 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
         return timePanel;
     }
 
-    //I077899 - Mihai Bogdan Eugen
     private Panel createPolarSelector() {
-    	
-        HorizontalPanel polarDiagramPanel = new HorizontalPanel();
+
+        final HorizontalPanel polarDiagramPanel = new HorizontalPanel();
         polarDiagramPanel.getElement().setClassName("boatClassPanel");
         polarDiagramPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
 
-        Label polarShowLabel = new Label(stringMessages.showHideComponent(""));
+        final Label polarShowLabel = new Label(stringMessages.showHideComponent(""));
         polarShowLabel.getElement().setClassName("boatClassLabel");
         polarDiagramPanel.add(polarShowLabel);
 
         final CheckBox cb = new CheckBox("");
         cb.setValue(false);
         cb.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
-			@Override
-            public void onValueChange(ValueChangeEvent<Boolean> event) {
-                boolean checked = ((CheckBox) event.getSource()).getValue();
+            @Override
+            public void onValueChange(final ValueChangeEvent<Boolean> event) {
+                final boolean checked = ((CheckBox) event.getSource()).getValue();
 
                 polarDiv.setVisible(checked);
-                
-                if(checked) {
-                	
-                	//TODO: change the hardcoded values bellow...
-                	
-                	polarDiagramDialogBox.setPopupPositionAndShow(new PositionCallback() {
-                		public void setPosition(int offsetWidth, int offsetHeight) {
-                	        
-                			int width = Window.getClientWidth() - 550;
-                			int height = Window.getClientHeight() - 525;
 
-                	        polarDiagramDialogBox.setPopupPosition(width, height);
-                	      }
-                	});
-                	
+                if(checked) {
+
+                    //TODO: change the hardcoded values bellow...
+
+                    polarDiagramDialogBox.setPopupPositionAndShow(new PositionCallback() {
+                        @Override
+                        public void setPosition(final int offsetWidth, final int offsetHeight) {
+
+                            final int width = Window.getClientWidth() - 550;
+                            final int height = Window.getClientHeight() - 525;
+
+                            polarDiagramDialogBox.setPopupPosition(width, height);
+                        }
+                    });
+
                     polarDiagramDialogCloseButton.setFocus(true);
                     cb.setValue(false);
                 }
@@ -562,41 +552,40 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
 
         return polarDiagramPanel;
     }
-    
-    //I077899 - Mihai Bogdan Eugen
-    private void createSailingSetup(Panel controlPanel) {
 
-        VerticalPanel sailingPanel = new VerticalPanel();
+    private void createSailingSetup(final Panel controlPanel) {
+
+        final VerticalPanel sailingPanel = new VerticalPanel();
         controlPanel.add(sailingPanel);
         sailingPanel.getElement().setClassName("sailingPanel");
-        String sailingSetup = stringMessages.sailing() + " " + stringMessages.setup();
-        Label sailingSetupLabel = new Label(sailingSetup);
+        final String sailingSetup = stringMessages.sailing() + " " + stringMessages.setup();
+        final Label sailingSetupLabel = new Label(sailingSetup);
         sailingSetupLabel.getElement().setClassName("innerHeadline");
 
         sailingPanel.add(sailingSetupLabel);
 
-        Label boatClassLabel = new Label(stringMessages.boatClass());
+        final Label boatClassLabel = new Label(stringMessages.boatClass());
         boatClassLabel.getElement().setClassName("boatClassLabel");
-        HorizontalPanel hp = new HorizontalPanel();
+        final HorizontalPanel hp = new HorizontalPanel();
         hp.getElement().setClassName("boatClassPanel");
         hp.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
         hp.add(boatClassLabel);
 
         this.simulatorSvc.getBoatClasses(new AsyncCallback<BoatClassDTOsAndNotificationMessage>() {
             @Override
-            public void onFailure(Throwable error) {
+            public void onFailure(final Throwable error) {
                 errorReporter.reportError("Failed to initialize boat classes!\r\n" + error.getMessage());
             }
 
             @Override
-            public void onSuccess(BoatClassDTOsAndNotificationMessage response) {
-            	String notificationMessage = response.getNotificationMessage();
-            	if(notificationMessage != "" && notificationMessage.length() != 0 && warningAlreadyShown == false) {
-        			errorReporter.reportNotification(response.getNotificationMessage());
-        			warningAlreadyShown = true;
-            	}
-            	
-            	boatClasses = response.getBoatClassDTOs();
+            public void onSuccess(final BoatClassDTOsAndNotificationMessage response) {
+                final String notificationMessage = response.getNotificationMessage();
+                if(notificationMessage != "" && notificationMessage.length() != 0 && warningAlreadyShown == false) {
+                    errorReporter.reportNotification(response.getNotificationMessage());
+                    warningAlreadyShown = true;
+                }
+
+                boatClasses = response.getBoatClassDTOs();
                 for (int i = 0; i < boatClasses.length; ++i) {
                     boatSelector.addItem(boatClasses[i].name);
                 }
@@ -607,8 +596,8 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
 
         this.boatSelector.addChangeHandler(new ChangeHandler() {
             @Override
-            public void onChange(ChangeEvent evnet) {
-                int selectedIndex = boatSelector.getSelectedIndex();
+            public void onChange(final ChangeEvent evnet) {
+                final int selectedIndex = boatSelector.getSelectedIndex();
                 loadPolarDiagramData(selectedIndex);
             }
         });
@@ -617,25 +606,25 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
         sailingPanel.add(hp);
         // hp.setSize("80%", "10%");
         // hp.setWidth("80%");
-        Panel raceDirection = createRaceDirectionSelector();
+        final Panel raceDirection = createRaceDirectionSelector();
         sailingPanel.add(raceDirection);
         // raceDirection.setWidth("80%");
 
-        Panel strategySelector = createStrategySelector();
+        final Panel strategySelector = createStrategySelector();
         sailingPanel.add(strategySelector);
         // strategySelector.setWidth("80%");
         // I077721
-        String polarString = stringMessages.simulatorPolarHeader();
+        final String polarString = stringMessages.simulatorPolarHeader();
         final Label polarSetup = new Label(polarString);
         polarSetup.getElement().setClassName("innerHeadline");
         sailingPanel.add(polarSetup);
 
-        Panel polarShow = createPolarSelector();
+        final Panel polarShow = createPolarSelector();
         sailingPanel.add(polarShow);
-        
-        this.polarDiagramDialogCloseButton = new Button("Close"); 
+
+        this.polarDiagramDialogCloseButton = new Button("Close");
         this.polarDiagramDialogCloseButton.getElement().setId("closeButton");
-        
+
         this.polarDiv = new VerticalPanel();
         this.polarDiv.getElement().setClassName("polarDiv");
         this.polarDiv.setVisible(false);
@@ -645,62 +634,61 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
         sailingPanel.add(polarDiv);
     }
 
-    //I077899 - Mihai Bogdan Eugen
     private void loadPolarDiagramData(final int selectedBoatClass) {
 
         this.simulatorSvc.getBoatClasses(new AsyncCallback<BoatClassDTOsAndNotificationMessage>() {
             @Override
-            public void onFailure(Throwable error) {
+            public void onFailure(final Throwable error) {
                 errorReporter.reportError("Failed to initialize boat classes!\r\n" + error.getMessage());
             }
             @Override
-            public void onSuccess(BoatClassDTOsAndNotificationMessage boatClassesAndMsg) {
-            	String notificationMessage = boatClassesAndMsg.getNotificationMessage();
-            	if(notificationMessage != "" && notificationMessage.length() != 0 && warningAlreadyShown == false) {
-        			errorReporter.reportNotification(boatClassesAndMsg.getNotificationMessage());
-        			warningAlreadyShown = true;
-            	}
-            	
-            	boatClasses = boatClassesAndMsg.getBoatClassDTOs();
-            	chart.setChartTitleText(boatClasses[selectedBoatClass].name);
+            public void onSuccess(final BoatClassDTOsAndNotificationMessage boatClassesAndMsg) {
+                final String notificationMessage = boatClassesAndMsg.getNotificationMessage();
+                if(notificationMessage != "" && notificationMessage.length() != 0 && warningAlreadyShown == false) {
+                    errorReporter.reportNotification(boatClassesAndMsg.getNotificationMessage());
+                    warningAlreadyShown = true;
+                }
+
+                boatClasses = boatClassesAndMsg.getBoatClassDTOs();
+                chart.setChartTitleText(boatClasses[selectedBoatClass].name);
             }
         });
-        
-    	
+
+
         if (this.chart != null) {
-        	this.polarDiv.remove(this.chart);
+            this.polarDiv.remove(this.chart);
         }
         this.chart = new Chart()
-        		.setType(Series.Type.LINE)
-        		.setChartTitleText("Polar diagram test")
-        		.setWidth(450)
-                .setHeight(300)
-                .setOption("/chart/polar", true)
-                .setOption("pane/startAngle", 0)
-                .setOption("pane/endAngle", 360)
-                .setOption("exporting/enableImages", true)
-                .setOption("plotOptions/line/lineWidth", 1)
-                .setOption("plotOptions/line/marker/enabled", false)
-                .setMarginRight(2);
+        .setType(Series.Type.LINE)
+        .setChartTitleText("Polar diagram test")
+        .setWidth(450)
+        .setHeight(300)
+        .setOption("/chart/polar", true)
+        .setOption("pane/startAngle", 0)
+        .setOption("pane/endAngle", 360)
+        .setOption("exporting/enableImages", true)
+        .setOption("plotOptions/line/lineWidth", 1)
+        .setOption("plotOptions/line/marker/enabled", false)
+        .setMarginRight(2);
 
         this.simulatorSvc.getPolarDiagramDTO(5.0, selectedBoatClass, new AsyncCallback<PolarDiagramDTOAndNotificationMessage>() {
             @Override
-            public void onFailure(Throwable error) {
-            		
+            public void onFailure(final Throwable error) {
+
                 errorReporter.reportError("Failed to initialize boat classes!\r\n" + error.getMessage());
             }
             @Override
-            public void onSuccess(PolarDiagramDTOAndNotificationMessage polar) {
-            	String notificationMessage = polar.getNotificationMessage();
-            	if(notificationMessage != "" && notificationMessage.length() != 0 && warningAlreadyShown == false) {
-        			errorReporter.reportNotification(polar.getNotificationMessage());
-        			warningAlreadyShown = true;
-            	}
-            	
-                Number[][] Nseries = polar.getPolarDiagramDTO().getNumberSeries();
-                int[] windSpeedCatalog = new int[] { 6, 8, 10, 12, 14, 16, 20 };
-                PolarChartColorRange cc = new PolarChartColorRange(Nseries.length+1);
-                ArrayList<String> windSpeedColor = cc.GetColors();
+            public void onSuccess(final PolarDiagramDTOAndNotificationMessage polar) {
+                final String notificationMessage = polar.getNotificationMessage();
+                if(notificationMessage != "" && notificationMessage.length() != 0 && warningAlreadyShown == false) {
+                    errorReporter.reportNotification(polar.getNotificationMessage());
+                    warningAlreadyShown = true;
+                }
+
+                final Number[][] Nseries = polar.getPolarDiagramDTO().getNumberSeries();
+                final int[] windSpeedCatalog = new int[] { 6, 8, 10, 12, 14, 16, 20 };
+                final PolarChartColorRange cc = new PolarChartColorRange(Nseries.length+1);
+                final ArrayList<String> windSpeedColor = cc.GetColors();
                 Series ser = chart.createSeries();
 
                 for (int i = 0; i < Nseries.length; i++) {
@@ -710,13 +698,13 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
                     ser.setOption("color", windSpeedColor.get(i));
                     chart.addSeries(ser);
                 }
-                
+
                 chart.getXAxis().setTickInterval(10);
                 chart.getYAxis().setMin(0);
                 chart.setOption("plotOptions/series/pointInterval", 360.0 / (Nseries[0].length));
                 chart.getXAxis().setLabels(new XAxisLabels().setFormatter(new AxisLabelsFormatter() {
                     @Override
-                    public String format(AxisLabelsData axisLabelsData) {
+                    public String format(final AxisLabelsData axisLabelsData) {
                         String labelD = "";
                         if (axisLabelsData.getValueAsLong() % 30 == 0) {
                             labelD = axisLabelsData.getValueAsLong() + "\u00B0";
@@ -731,45 +719,42 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
         });
     }
 
-    //I077899 - Mihai Bogdan Eugen
     private void initUpdateButton() {
         this.updateButton = new Button(stringMessages.update());
         this.updateButton.addClickHandler(new ClickHandler() {
             @Override
-            public void onClick(ClickEvent arg0) {
+            public void onClick(final ClickEvent arg0) {
                 update(boatSelector.getSelectedIndex());
             }
         });
     }
 
-    //I077899 - Mihai Bogdan Eugen
-    private void update(int boatClassIndex) {
+    private void update(final int boatClassIndex) {
         if (this.windDisplayButton.getValue()) {
             this.timePanel.setActive(true);
             this.simulatorMap.refreshView(SimulatorMap.ViewName.WINDDISPLAY, this.currentWPDisplay, boatClassIndex, true);
         } else if (this.summaryButton.getValue()) {
-        	this.timePanel.setActive(false);
-        	this.simulatorMap.refreshView(SimulatorMap.ViewName.SUMMARY, this.currentWPDisplay, boatClassIndex, true);
+            this.timePanel.setActive(false);
+            this.simulatorMap.refreshView(SimulatorMap.ViewName.SUMMARY, this.currentWPDisplay, boatClassIndex, true);
         } else if (this.replayButton.getValue()) {
-        	this.timePanel.setActive(true);
-        	this.simulatorMap.refreshView(SimulatorMap.ViewName.REPLAY, this.currentWPDisplay, boatClassIndex, true);
+            this.timePanel.setActive(true);
+            this.simulatorMap.refreshView(SimulatorMap.ViewName.REPLAY, this.currentWPDisplay, boatClassIndex, true);
         } else {
             if (this.mode == SailingSimulatorUtil.measured) {
-            	this.timePanel.setActive(false);
-            	this.simulatorMap.refreshView(SimulatorMap.ViewName.SUMMARY, this.currentWPDisplay, boatClassIndex, true);
+                this.timePanel.setActive(false);
+                this.simulatorMap.refreshView(SimulatorMap.ViewName.SUMMARY, this.currentWPDisplay, boatClassIndex, true);
             }
         }
-    }    
-    
-    //I077899 - Mihai Bogdan Eugen
-    private void initDisplayOptions(Panel mapOptions) {
-    	
+    }
+
+    private void initDisplayOptions(final Panel mapOptions) {
+
         this.summaryButton = new RadioButton("Map Display Options", stringMessages.summary());
         this.summaryButton.getElement().setClassName("MapDisplayOptions");
         this.summaryButton.addClickHandler(new ClickHandler() {
             @Override
-            public void onClick(ClickEvent arg0) {
-                // timePanel.setVisible(false);    
+            public void onClick(final ClickEvent arg0) {
+                // timePanel.setVisible(false);
                 timePanel.setActive(false);
                 simulatorMap.refreshView(SimulatorMap.ViewName.SUMMARY, currentWPDisplay, boatSelector.getSelectedIndex(),false);
             }
@@ -779,7 +764,7 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
         this.replayButton.getElement().setClassName("MapDisplayOptions");
         this.replayButton.addClickHandler(new ClickHandler() {
             @Override
-            public void onClick(ClickEvent arg0) {
+            public void onClick(final ClickEvent arg0) {
                 simulatorMap.refreshView(SimulatorMap.ViewName.REPLAY, currentWPDisplay, boatSelector.getSelectedIndex(),false);
                 timePanel.setActive(true);
             }
@@ -788,15 +773,15 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
         this.windDisplayButton = new RadioButton("Map Display Options", stringMessages.wind() + " " + stringMessages.display());
         this.windDisplayButton.addClickHandler(new ClickHandler() {
             @Override
-            public void onClick(ClickEvent arg0) {
+            public void onClick(final ClickEvent arg0) {
                 simulatorMap.refreshView(SimulatorMap.ViewName.WINDDISPLAY, currentWPDisplay, boatSelector.getSelectedIndex(),false);
                 timePanel.setActive(true);
             }
         });
 
-        HorizontalPanel p = new HorizontalPanel();
+        final HorizontalPanel p = new HorizontalPanel();
         // p.add(busyIndicator);
-        DecoratorPanel d = new DecoratorPanel();
+        final DecoratorPanel d = new DecoratorPanel();
         p.add(windDisplayButton);
         p.add(summaryButton);
         p.add(replayButton);
@@ -805,25 +790,25 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
         mapOptions.add(d);
     }
 
-    //I077899 - Mihai Bogdan Eugen
     private DialogBox createPolarDiagramDialogBox() {
-    	
+
         final DialogBox dialogBox = new DialogBox();
-        dialogBox.setText("Polar Diagram"); 
-        
+        dialogBox.setText("Polar Diagram");
+
         dialogBox.setAnimationEnabled(true);
         dialogBox.setAutoHideEnabled(false);
-        dialogBox.setModal(false);        
-        
+        dialogBox.setModal(false);
+
         dialogBox.setWidget(this.polarDiv);
 
 
         this.polarDiagramDialogCloseButton.addClickHandler(new ClickHandler() {
-            public void onClick(ClickEvent event) {
-            	dialogBox.hide();
+            @Override
+            public void onClick(final ClickEvent event) {
+                dialogBox.hide();
             }
         });
-        
+
         return dialogBox;
     }
 }

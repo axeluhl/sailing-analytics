@@ -262,10 +262,18 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
 
     private WindDTO createWindDTO(final Wind wind) {
         final WindDTO windDTO = new WindDTO();
+
         windDTO.trueWindBearingDeg = wind.getBearing().getDegrees();
         windDTO.trueWindFromDeg = wind.getBearing().reverse().getDegrees();
         windDTO.trueWindSpeedInKnots = wind.getKnots();
         windDTO.trueWindSpeedInMetersPerSecond = wind.getMetersPerSecond();
+
+        // FIXME: workaround till i figure out how to get the "dampened" values
+        windDTO.dampenedTrueWindBearingDeg = windDTO.trueWindBearingDeg;
+        windDTO.dampenedTrueWindFromDeg = windDTO.trueWindFromDeg;
+        windDTO.dampenedTrueWindSpeedInKnots = windDTO.trueWindSpeedInKnots;
+        windDTO.dampenedTrueWindSpeedInMetersPerSecond = windDTO.trueWindSpeedInMetersPerSecond;
+
         if (wind.getPosition() != null) {
             windDTO.position = new PositionDTO(wind.getPosition().getLatDeg(), wind.getPosition().getLngDeg());
         }
@@ -284,10 +292,11 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         windDTO.trueWindSpeedInKnots = tPos.getSpeed().getKnots();
         windDTO.trueWindSpeedInMetersPerSecond = tPos.getSpeed().getMetersPerSecond();
 
-        windDTO.dampenedTrueWindBearingDeg = tPos.getSpeed().getBearing().getDegrees();
-        windDTO.dampenedTrueWindFromDeg = tPos.getSpeed().getBearing().reverse().getDegrees();
-        windDTO.dampenedTrueWindSpeedInKnots = tPos.getSpeed().getKnots();
-        windDTO.dampenedTrueWindSpeedInMetersPerSecond = tPos.getSpeed().getMetersPerSecond();
+        // FIXME: workaround till i figure out how to get the "dampened" values
+        windDTO.dampenedTrueWindBearingDeg = windDTO.trueWindBearingDeg;
+        windDTO.dampenedTrueWindFromDeg = windDTO.trueWindFromDeg;
+        windDTO.dampenedTrueWindSpeedInKnots = windDTO.trueWindSpeedInKnots;
+        windDTO.dampenedTrueWindSpeedInMetersPerSecond = windDTO.trueWindSpeedInMetersPerSecond;
 
         if (tPos.getPosition() != null) {
             windDTO.position = new PositionDTO(tPos.getPosition().getLatDeg(), tPos.getPosition().getLngDeg());
