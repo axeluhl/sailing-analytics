@@ -1,9 +1,11 @@
 package com.sap.sailing.monitoring;
 
 import java.io.IOException;
+import java.net.ConnectException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
+import java.util.logging.Logger;
 
 /**
  * Simple post monitoring application. Checks given ports in an regular interval. 
@@ -14,14 +16,18 @@ import java.net.SocketTimeoutException;
  */
 public abstract class AbstractPortMonitor extends Thread {
 
+    Logger log = Logger.getLogger(AbstractPortMonitor.class.getName());
+    
     private final int TIMEOUT = 1000;
     private final int GRACEFUL = 5000;
     private final int PAUSE = 1000;
     
-    private InetSocketAddress[] endpoints = null;
-    private int interval;
+    protected InetSocketAddress[] endpoints = null;
+    protected int interval;
 
     boolean started = false;
+    boolean paused = false;
+    
     private long lastmillis;
     private InetSocketAddress currentendpoint;
 
@@ -34,6 +40,8 @@ public abstract class AbstractPortMonitor extends Thread {
         
         this.interval = interval;
         this.started = true;
+        
+        log.info("Initialized monitoring!");
     }
 
     public void startMonitoring() {
@@ -48,38 +56,56 @@ public abstract class AbstractPortMonitor extends Thread {
             Thread.sleep(GRACEFUL);
             
             while (started) {
-                long currentmillis = System.currentTimeMillis();
-                try {
-                    if (currentmillis >= (lastmillis + interval + (100*endpoints.length))) {
-                        for (int i = 0; i < endpoints.length; i++) {
-                            currentendpoint = endpoints[i];
-                            
-                            Socket sn = new Socket();
-                            sn.connect(currentendpoint, TIMEOUT);
-                            
-                            handleConnection(currentendpoint);
-                            lastmillis = System.currentTimeMillis();
+                if (!paused) {
+                    long currentmillis = System.currentTimeMillis();
+                    try {
+                        if (currentmillis >= (lastmillis + interval + (100*endpoints.length))) {
+                            for (int i = 0; i < endpoints.length; i++) {
+                                currentendpoint = endpoints[i];
+                                
+                                Socket sn = new Socket();
+                                sn.connect(currentendpoint, TIMEOUT);
+                                
+                                log.info("Connection succeeded to " + currentendpoint.toString());
+                                handleConnection(currentendpoint);
+                                lastmillis = System.currentTimeMillis();
+                            }
                         }
+                        
+                    } catch (SocketTimeoutException|ConnectException ex) {
+                        log.info("Connection FAILED to " + currentendpoint.toString());
+                        handleFailure(currentendpoint);
+                        lastmillis = System.currentTimeMillis();
+                        
+                    } catch (IOException ex) {
+                        ex.printStackTrace();
                     }
-    
-                    Thread.sleep(PAUSE);
-                    
-                } catch (SocketTimeoutException ex) {
-                    handleFailure(currentendpoint);
-                    
-                } catch (IOException ex) {
-                    ex.printStackTrace();
+                } else {
+                    log.info("Pausing...");
                 }
+                
+                Thread.sleep(PAUSE);
             }
 
         } catch (InterruptedException ex) {
-            System.out.println("Interrupted");
+            System.err.println("Interrupted");
         }
             
     }
     
     public void stopMonitoring() {
         this.started = false;        
+    }
+    
+    protected void removeEndpoint(InetSocketAddress endpoint) {
+        InetSocketAddress[] new_endpoints = new InetSocketAddress[endpoints.length-1];
+        
+        for (int i=0;i<endpoints.length;i++) {
+            if (endpoints[i] != endpoint)
+                new_endpoints[i] = endpoint;
+        }
+        
+        this.endpoints = new_endpoints;
     }
     
     public abstract void handleFailure(InetSocketAddress endpoint);

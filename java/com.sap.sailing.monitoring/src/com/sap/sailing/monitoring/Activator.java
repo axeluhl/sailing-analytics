@@ -28,8 +28,17 @@ public class Activator implements BundleActivator {
 	public void start(BundleContext bundleContext) throws Exception {
 		Activator.context = bundleContext;
 
+		/* Configuration */
+		InetSocketAddress[] endpoints = new InetSocketAddress[]{
+		        new InetSocketAddress(InetAddress.getByName("localhost"), 8080)
+		};
+		
+		String[] services = new String[] {
+		        "com.sap.sailing.server"
+		};
+		
 		/* Starts a new port monitoring app */
-		monitor = new SystemPrinterPortMonitor(new InetSocketAddress[]{new InetSocketAddress(InetAddress.getByName("173.194.69.94"), 80)}, 10000);
+		monitor = new OSGiRestartingPortMonitor(endpoints, services, 10000);
 		monitor.startMonitoring();
 	}
 
