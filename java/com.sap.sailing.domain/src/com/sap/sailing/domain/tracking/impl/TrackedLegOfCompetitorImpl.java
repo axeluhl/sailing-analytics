@@ -595,29 +595,30 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
         assert timePointAfterManeuver != null;
         Distance result;
         final GPSFixTrack<Competitor, GPSFixMoving> track = getTrackedRace().getTrack(getCompetitor());
-        SpeedWithBearing speedBeforeManeuver = track.getEstimatedSpeed(timePointBeforeManeuver);
-        if (speedBeforeManeuver != null) {
-            List<GPSFixMoving> fixes = getFixesToConsiderForManeuverLossAnalysis(timePointBeforeManeuver,
-                    maneuverTimePoint, timePointAfterManeuver);
+        List<GPSFixMoving> fixes = getFixesToConsiderForManeuverLossAnalysis(timePointBeforeManeuver,
+                maneuverTimePoint, timePointAfterManeuver);
+        TimePoint timePointWhenSpeedStartedToDrop = fixes.get(0).getTimePoint();
+        SpeedWithBearing speedWhenSpeedStartedToDrop = track.getEstimatedSpeed(timePointWhenSpeedStartedToDrop);
+        if (speedWhenSpeedStartedToDrop != null) {
             TimePoint timePointWhenSpeedLevelledOffAfterManeuver = fixes.get(fixes.size()-1).getTimePoint();
             SpeedWithBearing speedAfterManeuver = track.getEstimatedSpeed(timePointWhenSpeedLevelledOffAfterManeuver);
             // For upwind/downwind legs, find the mean course between inbound and outbound course and project actual and
             // extrapolated positions onto it:
             Bearing middle = null;
-            if (getTrackedLeg().isUpOrDownwindLeg(timePointBeforeManeuver)) {
-                middle = getProjectionAngleForUpwindDownwindManeuverLossAnalysis(timePointBeforeManeuver, speedBeforeManeuver,
+            if (getTrackedLeg().isUpOrDownwindLeg(timePointWhenSpeedStartedToDrop)) {
+                middle = getProjectionAngleForUpwindDownwindManeuverLossAnalysis(timePointWhenSpeedStartedToDrop, speedWhenSpeedStartedToDrop,
                         speedAfterManeuver);
             }
-            Position positionAtBase = track.getEstimatedPosition(timePointBeforeManeuver, /* extrapolate */false);
-            Speed projectedSpeedBeforeManeuver = projectSpeedToMiddleIfUpwindDownwindElseToLegDirection(
-                    timePointBeforeManeuver, middle, speedBeforeManeuver, positionAtBase);
-            double projectedSpeedBeforeManeuverInKnots = projectedSpeedBeforeManeuver.getKnots();
+            Position positionAtBase = track.getEstimatedPosition(timePointWhenSpeedStartedToDrop, /* extrapolate */false);
+            Speed projectedSpeedWhenSpeedStartedToDrop = projectSpeedToMiddleIfUpwindDownwindElseToLegDirection(
+                    timePointWhenSpeedStartedToDrop, middle, speedWhenSpeedStartedToDrop, positionAtBase);
+            double projectedSpeedBeforeManeuverInKnots = projectedSpeedWhenSpeedStartedToDrop.getKnots();
             Speed projectedSpeedAfterManeuver = projectSpeedToMiddleIfUpwindDownwindElseToLegDirection(
                     timePointAfterManeuver, middle, speedAfterManeuver, positionAtBase);
             double projectedSpeedAfterManeuverInKnots = projectedSpeedAfterManeuver.getKnots();
             // now determine the fixes along which to accumulate the maneuver loss:
 
-            TimePoint previousTimePoint = timePointBeforeManeuver;
+            TimePoint previousTimePoint = timePointWhenSpeedStartedToDrop;
             result = Distance.NULL;
             for (GPSFixMoving fix : fixes) {
                 // project onto average maneuver course for upwind/downwind and on leg direction otherwise
@@ -626,8 +627,8 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
                 Speed projectedSpeedAtFix = projectSpeedToMiddleIfUpwindDownwindElseToLegDirection(
                         timePointBeforeManeuver, middle, fixSpeed, fixPosition);
                 final double estimatedSpeedWithoutManeuverInKnots = (double) projectedSpeedBeforeManeuverInKnots
-                        + (double) (fix.getTimePoint().asMillis() - timePointBeforeManeuver.asMillis())
-                        / (double) (timePointWhenSpeedLevelledOffAfterManeuver.asMillis() - timePointBeforeManeuver.asMillis())
+                        + (double) (fix.getTimePoint().asMillis() - timePointWhenSpeedStartedToDrop.asMillis())
+                        / (double) (timePointWhenSpeedLevelledOffAfterManeuver.asMillis() - timePointWhenSpeedStartedToDrop.asMillis())
                         * (double) (projectedSpeedAfterManeuverInKnots - projectedSpeedBeforeManeuverInKnots);
                 Speed speedDifference = new KnotSpeedImpl(estimatedSpeedWithoutManeuverInKnots
                         - projectedSpeedAtFix.getKnots());
@@ -722,8 +723,8 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
             while ((stillGreater=maxima.higher(firstMaxSpeedFixAfterLowSpeed)) != null &&
                     track.getEstimatedSpeed(stillGreater.getTimePoint()).compareTo(
                             track.getEstimatedSpeed(firstMaxSpeedFixAfterLowSpeed.getTimePoint())) > 0 &&
-                    firstMaxSpeedFixAfterLowSpeed.getTimePoint().asMillis()-
-                    stillGreater.getTimePoint().asMillis() < MAX_SMOOTHENING_INTERVAL_MILLIS) {
+                    stillGreater.getTimePoint().asMillis() - firstMaxSpeedFixAfterLowSpeed.getTimePoint().asMillis()
+                     < MAX_SMOOTHENING_INTERVAL_MILLIS) {
                 firstMaxSpeedFixAfterLowSpeed = stillGreater;
             }
             ListIterator<GPSFixMoving> i = fixes.listIterator(fixes.size());
