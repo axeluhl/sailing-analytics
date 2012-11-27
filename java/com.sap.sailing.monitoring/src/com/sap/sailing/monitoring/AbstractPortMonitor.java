@@ -20,9 +20,9 @@ public abstract class AbstractPortMonitor extends Thread {
 
     Logger log = Logger.getLogger(AbstractPortMonitor.class.getName());
     
-    private int TIMEOUT = 1000;
-    private int GRACEFUL = 5000;
-    private int PAUSE = 1000;
+    private int timeout = 1000;
+    private int graceful = 5000;
+    private int pause = 1000;
     
     protected InetSocketAddress[] endpoints = null;
     protected int interval;
@@ -37,21 +37,17 @@ public abstract class AbstractPortMonitor extends Thread {
 
     public AbstractPortMonitor(InetSocketAddress[] endpoints, int interval) {
         this.endpoints = endpoints;
-        
         if (interval < 10000) {
             throw new RuntimeException("Interval can not be lower than 10 seconds!");
         }
-        
         this.interval = interval;
         this.started = true;
-        
         log.info("Initialized monitoring!");
     }
     
     public AbstractPortMonitor(Properties properties) {
         String[] prop_endpoints = properties.getProperty("monitor.endpoints").split(",");
         this.endpoints = new InetSocketAddress[prop_endpoints.length];
-        
         try {
             for (int i=0;i<prop_endpoints.length;i++) {
                 String[] data = prop_endpoints[i].split(":");
@@ -60,16 +56,12 @@ public abstract class AbstractPortMonitor extends Thread {
         } catch (Exception ex) {
             ex.printStackTrace();
         }
-        
-        this.interval = Integer.parseInt(properties.getProperty("monitor.interval").trim());
-        
-        this.TIMEOUT = Integer.parseInt(properties.getProperty("monitor.timeout").trim());
-        this.GRACEFUL = Integer.parseInt(properties.getProperty("monitor.gracetime").trim());
-        this.PAUSE = Integer.parseInt(properties.getProperty("monitor.pause").trim());
-        
+        this.interval = Integer.parseInt(properties.getProperty("monitor.interval", ""+interval).trim());
+        this.timeout = Integer.parseInt(properties.getProperty("monitor.timeout", ""+timeout).trim());
+        this.graceful = Integer.parseInt(properties.getProperty("monitor.gracetime", ""+graceful).trim());
+        this.pause = Integer.parseInt(properties.getProperty("monitor.pause", ""+pause).trim());
         this.started = true;
         this.properties = properties;
-        
         log.info("Initialized monitoring!");
     }
 
@@ -79,11 +71,9 @@ public abstract class AbstractPortMonitor extends Thread {
     
     @Override
     public void run() {
-        
         try {
             /* graceful start - give services some time */
-            Thread.sleep(GRACEFUL);
-            
+            Thread.sleep(graceful);
             while (started) {
                 if (!paused) {
                     long currentmillis = System.currentTimeMillis();
@@ -93,33 +83,28 @@ public abstract class AbstractPortMonitor extends Thread {
                                 currentendpoint = endpoints[i];
                                 
                                 Socket sn = new Socket();
-                                sn.connect(currentendpoint, TIMEOUT);
+                                sn.connect(currentendpoint, timeout);
                                 
                                 log.info("Connection succeeded to " + currentendpoint.toString());
                                 handleConnection(currentendpoint);
                                 lastmillis = System.currentTimeMillis();
                             }
                         }
-                        
                     } catch (SocketTimeoutException|ConnectException ex) {
                         log.info("Connection FAILED to " + currentendpoint.toString());
                         handleFailure(currentendpoint);
                         lastmillis = System.currentTimeMillis();
-                        
                     } catch (IOException ex) {
                         ex.printStackTrace();
                     }
                 } else {
                     log.info("Pausing...");
                 }
-                
-                Thread.sleep(PAUSE);
+                Thread.sleep(pause);
             }
-
         } catch (InterruptedException ex) {
             System.err.println("Interrupted");
         }
-            
     }
     
     public void stopMonitoring() {
@@ -128,12 +113,10 @@ public abstract class AbstractPortMonitor extends Thread {
     
     protected void removeEndpoint(InetSocketAddress endpoint) {
         InetSocketAddress[] new_endpoints = new InetSocketAddress[endpoints.length-1];
-        
         for (int i=0;i<endpoints.length;i++) {
             if (endpoints[i] != endpoint)
                 new_endpoints[i] = endpoint;
         }
-        
         this.endpoints = new_endpoints;
     }
     

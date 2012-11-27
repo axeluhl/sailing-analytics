@@ -24,7 +24,6 @@ import org.osgi.framework.BundleException;
  * @since Nov 26, 2012
  */
 public class OSGiRestartingPortMonitor extends AbstractPortMonitor {
-
     Logger log = Logger.getLogger(OSGiRestartingPortMonitor.class.getName());
     
     HashMap<InetSocketAddress, String> endpointservices = new HashMap<InetSocketAddress, String>();
@@ -32,12 +31,10 @@ public class OSGiRestartingPortMonitor extends AbstractPortMonitor {
     
     public OSGiRestartingPortMonitor(InetSocketAddress[] endpoints, String[] services, int interval) {
         super(endpoints, interval);
-        
         /* store bundles so that we can reference them later */
         for (Bundle bundle : Activator.getContext().getBundles()) {
             bundles.put(bundle.getSymbolicName(), bundle);
         }
-        
         for (int i=0; i<endpoints.length;i++) {
             endpointservices.put(endpoints[i], services[i]);
         }
@@ -45,12 +42,10 @@ public class OSGiRestartingPortMonitor extends AbstractPortMonitor {
     
     public OSGiRestartingPortMonitor(Properties properties) {
         super(properties);
-
         /* store bundles so that we can reference them later */
         for (Bundle bundle : Activator.getContext().getBundles()) {
             bundles.put(bundle.getSymbolicName(), bundle);
         }
-
         String[] prop_services = properties.getProperty("monitor.services").split(",");
         for (int i=0; i<endpoints.length;i++) {
             endpointservices.put(endpoints[i], prop_services[i].trim());
@@ -75,9 +70,7 @@ public class OSGiRestartingPortMonitor extends AbstractPortMonitor {
                 log.severe("Could not start " + servicename + "! Handler will try again next time");
             }
         }
-        
         log.info("Bundle " + servicename + " restarted");
-        
         try {
             Session session = Session.getDefaultInstance(this.properties, new SMTPAuthenticator());
             MimeMessage msg = new MimeMessage(session);
@@ -90,7 +83,6 @@ public class OSGiRestartingPortMonitor extends AbstractPortMonitor {
             ts.connect();
             ts.sendMessage(msg, msg.getRecipients(RecipientType.TO));
             ts.close();
-            
         } catch(Exception ex) {
             ex.printStackTrace();
         }
