@@ -145,32 +145,47 @@ public class DomainFactoryImpl implements DomainFactory {
             if (domainControlPoint == null) {
                 String controlPointName = controlPoint.getName();
                 Map<String, String> controlPointMetadata = parseControlPointMetadata(controlPoint);
-                MarkType type = MarkType.BUOY;
-                String markType = controlPointMetadata.get("Type");
-                if(markType != null && !markType.isEmpty()) {
-                    for(MarkType m: MarkType.values()) {
-                        if(m.name().equalsIgnoreCase(markType)) {
-                            type = m;
-                            break;
-                        }
-                    }
-                }
-                String markColor = controlPointMetadata.get("Color");
-                String markShape = controlPointMetadata.get("Shape");
-                String markPattern = controlPointMetadata.get("Pattern");
                 if (controlPoint.getHasTwoPoints()) {
                     // it's a gate
-                    Mark leftMark = baseDomainFactory.getOrCreateMark(controlPointName + " (left)", type, markColor, markShape, markPattern);
-                    Mark rightMark = baseDomainFactory.getOrCreateMark(controlPointName + " (right)", type, markColor, markShape, markPattern);
-                    domainControlPoint = baseDomainFactory.createGate(leftMark, rightMark, controlPointName);
+                    MarkType type1 = resolveMarkTypeFromMetadata(controlPointMetadata, "P1.Type");
+                    MarkType type2 = resolveMarkTypeFromMetadata(controlPointMetadata, "P2.Type");
+                    String color1 = controlPointMetadata.get("P1.Color");
+                    String color2 = controlPointMetadata.get("P2.Color");
+                    String shape1 = controlPointMetadata.get("P1.Shape");
+                    String shape2 = controlPointMetadata.get("P2.Shape");
+                    String pattern1 = controlPointMetadata.get("P1.Pattern");
+                    String pattern2 = controlPointMetadata.get("P2.Pattern");
+                    
+                    Mark mark1 = baseDomainFactory.getOrCreateMark(controlPointName + " (1)", type1, color1, shape1, pattern1);
+                    Mark mark2 = baseDomainFactory.getOrCreateMark(controlPointName + " (2)", type2, color2, shape2, pattern2);
+                    domainControlPoint = baseDomainFactory.createGate(mark1, mark2, controlPointName);
                 } else {
-                    Mark mark = baseDomainFactory.getOrCreateMark(controlPointName, type, markColor, markShape, markPattern);
+                    MarkType type = resolveMarkTypeFromMetadata(controlPointMetadata, "Type");
+                    String color = controlPointMetadata.get("Color");
+                    String shape = controlPointMetadata.get("Shape");
+                    String pattern = controlPointMetadata.get("Pattern");
+                    
+                    Mark mark = baseDomainFactory.getOrCreateMark(controlPointName, type, color, shape, pattern);
                     domainControlPoint = mark;
                 }
                 controlPointCache.put(controlPoint, domainControlPoint);
             }
             return domainControlPoint;
         }
+    }
+
+    private MarkType resolveMarkTypeFromMetadata(Map<String, String> controlPointMetadata, String typePropertyName) {
+        MarkType result = MarkType.BUOY;
+        String markType = controlPointMetadata.get(typePropertyName);
+        if(markType != null && !markType.isEmpty()) {
+            for(MarkType m: MarkType.values()) {
+                if(m.name().equalsIgnoreCase(markType)) {
+                    result = m;
+                    break;
+                }
+            }
+        }
+        return result;
     }
     
     @SuppressWarnings({ "rawtypes", "unchecked" })
