@@ -74,7 +74,7 @@ body {
   #navigation .navButton {
     border: 1px solid #666666;
     font-family: OpenSansBold, Arial, Verdana, sans-serif;
-    background: #cccccc;
+    background: url(images/icon-arrowright.png) no-repeat right center #cccccc;
     display: block;
     padding: 14px 0 14px 13px;
     margin: 0 0 10px 0;
