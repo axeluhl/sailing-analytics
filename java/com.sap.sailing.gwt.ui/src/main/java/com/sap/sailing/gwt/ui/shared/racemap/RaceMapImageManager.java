@@ -82,9 +82,9 @@ public class RaceMapImageManager {
             createMarkIconDescriptor(resources.buoyDarkOrangeIcon(), MarkType.BUOY, "orange", null, null, 6, 20);
             createMarkIconDescriptor(resources.buoyBlackFinishIcon(), MarkType.BUOY, "black", "cylinder", "checkered", 6, 20); 
             
-            createMarkIconDescriptor(resources.cameraBoatIcon(), MarkType.CAMERABOAT, null, null, null, 6, 15);
-            createMarkIconDescriptor(resources.umpireBoatIcon(), MarkType.UMPIREBOAT, null, null, null, 6, 15);
-            createMarkIconDescriptor(resources.startBoatIcon(), MarkType.STARTBOAT, null, null, null, 6, 15);
+            createMarkIconDescriptor(resources.cameraBoatIcon(), MarkType.CAMERABOAT, null, null, null, 35, 20);
+            createMarkIconDescriptor(resources.umpireBoatIcon(), MarkType.UMPIREBOAT, null, null, null, 35, 20);
+            createMarkIconDescriptor(resources.startBoatIcon(), MarkType.STARTBOAT, null, null, null, 35, 20);
 
             createMarkIconDescriptor(resources.landmarkIcon(), MarkType.LANDMARK, null, null, null, 6, 15);
             
