@@ -1,6 +1,6 @@
 package com.sap.sailing.monitoring;
 
-import java.net.InetSocketAddress;
+import java.util.Properties;
 
 /**
  * Implementation of port monitor that prints out messages if
@@ -11,17 +11,17 @@ import java.net.InetSocketAddress;
  */
 public class SystemPrinterPortMonitor extends AbstractPortMonitor {
 
-    public SystemPrinterPortMonitor(InetSocketAddress[] endpoints, int interval) {
-        super(endpoints, interval);
+    public SystemPrinterPortMonitor(Properties prop) {
+        super(prop);
     }
 
     @Override
-    public void handleFailure(InetSocketAddress endpoint) {
+    public void handleFailure(IEndpoint endpoint) {
         System.out.println("ERROR: Could not connect to endpoint " + endpoint.toString());
     }
 
     @Override
-    public void handleConnection(InetSocketAddress endpoint) {
+    public void handleConnection(IEndpoint endpoint) {
         System.out.println("INFO: Connection to " + endpoint.toString() + " succeeded.");
     }
 
