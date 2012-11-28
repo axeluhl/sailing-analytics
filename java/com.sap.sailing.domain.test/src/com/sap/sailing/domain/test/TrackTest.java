@@ -782,8 +782,8 @@ public class TrackTest {
         myTrack.addGPSFix(fix6);
         final SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
         SpeedWithBearing estimatedSpeedWithBearing = myTrack.getEstimatedSpeed(new MillisecondsTimePoint(dateFormatter.parse("2011-06-23T16:08:37.000+0200")));
-        assertEquals(215., estimatedSpeedWithBearing.getBearing().getDegrees(), 5);
-        assertEquals(3.9, estimatedSpeedWithBearing.getKnots(), 0.2);
+        assertEquals(230., estimatedSpeedWithBearing.getBearing().getDegrees(), 5);
+        assertEquals(5.0, estimatedSpeedWithBearing.getKnots(), 0.2);
     }
 
     @Test
@@ -814,8 +814,8 @@ public class TrackTest {
         myTrack.addGPSFix(fix7);
         final SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
         SpeedWithBearing estimatedSpeedWithBearing = myTrack.getEstimatedSpeed(new MillisecondsTimePoint(dateFormatter.parse("2012-10-21T15:00:45.000+0200")));
-        assertEquals(286., estimatedSpeedWithBearing.getBearing().getDegrees(), 5);
-        assertEquals(16.8, estimatedSpeedWithBearing.getKnots(), 0.2);
+        assertEquals(275., estimatedSpeedWithBearing.getBearing().getDegrees(), 5);
+        assertEquals(15.5, estimatedSpeedWithBearing.getKnots(), 0.2);
     }
 
     private GPSFixMoving createFix(String isoDateTime, double lat, double lng, double knotSpeed, double bearingDeg) throws ParseException {
