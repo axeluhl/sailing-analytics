@@ -67,7 +67,7 @@ body {
   font-size: 12px;
   font-family: OpenSansRegular, Arial, Verdana, sans-serif;
   font-weight: normal;
-  background-image: url(../images/bg-image.jpg);
+  background-image: url(images/bg-image.jpg);
   background-attachment: fixed;
   background-color: #222222;
   background-position: 50% 0%;
@@ -167,7 +167,7 @@ a:hover {
 #yield_content #breadcrumb .breadcrumbList li {
   height: 23px;
   float: left;
-  background: url(../images/breadcrumb-seperator.png) right center no-repeat;
+  background: url(images/breadcrumb-seperator.png) right center no-repeat;
   margin: 0 10px 0 0;
 }
 /* line 17, _breadcrumb.sass */
@@ -238,7 +238,7 @@ a:hover {
 }
 /* line 33, _main_content.sass */
 #yield_content #mainContent a.btn-cta {
-  background: url("../images/btn-cta-orangeright.png") 100% 0% no-repeat;
+  background: url("images/btn-cta-orangeright.png") 100% 0% no-repeat;
   display: block;
   float: left;
   line-height: 30px;
@@ -258,7 +258,7 @@ a:hover {
 }
 /* line 48, _main_content.sass */
 #yield_content #mainContent a.btn-cta span {
-  background: url("../images/btn-cta-orangeleft.png") no-repeat transparent;
+  background: url("images/btn-cta-orangeleft.png") no-repeat transparent;
   color: white;
   cursor: pointer;
   display: block;
@@ -279,7 +279,7 @@ a:hover {
   width: 940px;
   height: 20px;
   margin: -40px auto 0 auto;
-  background: url(../images/bkg-footer1.png);
+  background: url(images/bkg-footer1.png);
   padding: 10px;
   font-size: 11px;
 }
