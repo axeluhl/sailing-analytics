@@ -722,24 +722,26 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
             Iterator<FixType> afterFixIter = afterSet.iterator();
             boolean noAfterFixUsedYet = true;
             while (afterFixIter.hasNext() &&
-                    ((afterFix=afterFixIter.next()).getTimePoint().asMillis() - at.asMillis() < getMillisecondsOverWhichToAverage() / 2) || noAfterFixUsedYet) {
+                    ((afterFix=afterFixIter.next()).getTimePoint().asMillis() - at.asMillis() < getMillisecondsOverWhichToAverage() / 2 || noAfterFixUsedYet)) {
                 relevantFixes.add(afterFix);
                 noAfterFixUsedYet = false;
             }
             // now fill up relevantFixes until we have at least two fixes or we run out of fixes entirely (can't estimate speed
             // with this type of fix on a track with less than two fixes)
-            while (relevantFixes.size() < 2 && (beforeFix != null || afterFix != null)) {
+            while (relevantFixes.size() < 2 && ((noBeforeFixUsedYet && beforeFix != null) || (noAfterFixUsedYet && afterFix != null))) {
                 if (afterFix == null) {
-                    if (beforeFix != null) {
+                    if (beforeFix != null && noBeforeFixUsedYet) {
                         relevantFixes.add(0, beforeFix); // add the last beforeFix to have at least two fixes, although outside of averaging interval
+                        noBeforeFixUsedYet = false;
                         if (beforeFixIter.hasNext()) {
                             beforeFix = beforeFixIter.next();
                         } else {
                             beforeFix = null;
                         }
                     }
-                } else if (beforeFix == null) {
+                } else if (beforeFix == null && noAfterFixUsedYet) {
                     relevantFixes.add(afterFix);
+                    noAfterFixUsedYet = false;
                     if (afterFixIter.hasNext()) {
                         afterFix = afterFixIter.next();
                     } else {
@@ -747,15 +749,17 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
                     }
                 } else {
                     // both, beforeFix and afterFix are available; choose the one closest to "at"
-                    if (afterFix.getTimePoint().asMillis()-at.asMillis() < beforeFix.getTimePoint().asMillis()-at.asMillis()) {
+                    if (noAfterFixUsedYet && afterFix.getTimePoint().asMillis()-at.asMillis() < beforeFix.getTimePoint().asMillis()-at.asMillis()) {
                         relevantFixes.add(afterFix);
+                        noAfterFixUsedYet = false;
                         if (afterFixIter.hasNext()) {
                             afterFix = afterFixIter.next();
                         } else {
                             afterFix = null;
                         }
-                    } else {
+                    } else if (noBeforeFixUsedYet) {
                         relevantFixes.add(0, beforeFix);
+                        noBeforeFixUsedYet = false;
                         if (beforeFixIter.hasNext()) {
                             beforeFix = beforeFixIter.next();
                         } else {
