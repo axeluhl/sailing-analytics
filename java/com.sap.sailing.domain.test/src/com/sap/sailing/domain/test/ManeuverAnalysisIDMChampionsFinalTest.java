@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -91,12 +92,12 @@ public class ManeuverAnalysisIDMChampionsFinalTest extends AbstractManeuverDetec
         assertNotNull(competitor);
         Date toDate = new Date(1317650038784l); // that's shortly after their penalty circle
         Date fromDate = new Date(toDate.getTime()-450000l);
-        Date maneuverTime = new Date(1317649967712l);
+        final SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+        TimePoint maneuverTime = new MillisecondsTimePoint(dateFormatter.parse("2011-10-03T15:52:30.000+0200"));
         List<Maneuver> maneuvers = getTrackedRace().getManeuvers(competitor, new MillisecondsTimePoint(fromDate),
                 new MillisecondsTimePoint(toDate), /* waitForLatest */ true);
         maneuversInvalid = new ArrayList<Maneuver>(maneuvers);
-        assertManeuver(maneuvers, ManeuverType.PENALTY_CIRCLE,
-                new MillisecondsTimePoint(maneuverTime), PENALTYCIRCLE_TOLERANCE);
+        assertManeuver(maneuvers, ManeuverType.PENALTY_CIRCLE, maneuverTime, PENALTYCIRCLE_TOLERANCE);
         List<ManeuverType> maneuverTypesFound = new ArrayList<ManeuverType>();
         maneuverTypesFound.add(ManeuverType.PENALTY_CIRCLE);
         assertAllManeuversOfTypesDetected(maneuverTypesFound, maneuversInvalid);
