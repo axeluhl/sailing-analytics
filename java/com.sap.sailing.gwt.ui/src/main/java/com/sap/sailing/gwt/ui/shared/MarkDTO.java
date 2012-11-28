@@ -2,11 +2,14 @@ package com.sap.sailing.gwt.ui.shared;
 
 import java.util.Collections;
 
+import com.sap.sailing.domain.common.MarkType;
+
 public class MarkDTO extends ControlPointDTO {
     public PositionDTO position;
     public String color;
     public String shape;
     public String pattern;
+    public MarkType type;
 
     MarkDTO() {}
     
