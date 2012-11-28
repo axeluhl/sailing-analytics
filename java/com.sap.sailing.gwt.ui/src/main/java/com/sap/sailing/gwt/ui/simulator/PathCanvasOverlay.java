@@ -125,7 +125,7 @@ public class PathCanvasOverlay extends WindFieldCanvasOverlay implements Named {
                         DegreeBearingImpl dbi = new DegreeBearingImpl(windDTO.trueWindBearingDeg);
                     // System.out.print("index: "+index+"\n");
                     
-                        drawScaledArrow(windDTO, dbi.getRadians(), index);
+                        drawScaledArrow(windDTO, dbi.getRadians(), index, true);
                         prevWindDTO = windDTO;
                     }
                 }

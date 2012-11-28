@@ -42,6 +42,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
     private boolean dataInitialized;
     private boolean overlaysInitialized;
     private final WindFieldGenParamsDTO windParams;
+    private WindStreamletsCanvasOverlay windStreamletsCanvasOverlay;
     private WindFieldCanvasOverlay windFieldCanvasOverlay;
     private WindGridCanvasOverlay windGridCanvasOverlay;
     private WindLineCanvasOverlay windLineCanvasOverlay;
@@ -179,10 +180,15 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
 
             if (windParams.isShowGrid()) {
                 mapw.addOverlay(windGridCanvasOverlay);
+            }
+            if (windParams.isShowLines()) {
                 mapw.addOverlay(windLineCanvasOverlay);
             }
             if (windParams.isShowArrows()) {
                 mapw.addOverlay(windFieldCanvasOverlay);
+            }
+            if (windParams.isShowStreamlets()) {
+                mapw.addOverlay(windStreamletsCanvasOverlay);
             }
 
             refreshWindFieldOverlay(windFieldDTO);
@@ -191,8 +197,13 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
             if (windParams.isShowArrows()) {
                 timeListeners.add(windFieldCanvasOverlay);
             }
+            if (windParams.isShowStreamlets()) {
+                timeListeners.add(windStreamletsCanvasOverlay);
+            }
             if (windParams.isShowGrid()) {
                 timeListeners.add(windGridCanvasOverlay);
+            }
+            if (windParams.isShowLines()) {                
                 timeListeners.add(windLineCanvasOverlay);
             }
             for (int i = 0; i < replayPathCanvasOverlays.size(); ++i) {
@@ -327,8 +338,13 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         if (this.windParams.isShowArrows()) {
             this.windFieldCanvasOverlay = new WindFieldCanvasOverlay(this.timer);
         }
+        if (this.windParams.isShowStreamlets()) {
+            this.windStreamletsCanvasOverlay = new WindStreamletsCanvasOverlay(this.timer);
+        }
         if (this.windParams.isShowGrid()) {
             this.windGridCanvasOverlay = new WindGridCanvasOverlay(this.timer, this.xRes, this.yRes);
+        }
+        if (windParams.isShowLines()) {
             this.windLineCanvasOverlay = new WindLineCanvasOverlay(this.timer);
         }
         // mapw.addOverlay(windFieldCanvasOverlay);
@@ -371,18 +387,28 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
                 // Window.alert("Number of windDTO : " + wl.getMatrix().size());
                 if (windParams.isShowGrid()) {
                     mapw.addOverlay(windGridCanvasOverlay);
+                }
+                if (windParams.isShowLines()) {
                     mapw.addOverlay(windLineCanvasOverlay);
                 }
                 if (windParams.isShowArrows()) {
                     mapw.addOverlay(windFieldCanvasOverlay);
+                }
+                if (windParams.isShowStreamlets()) {
+                    mapw.addOverlay(windStreamletsCanvasOverlay);
                 }
                 refreshWindFieldOverlay(wl);
                 timeListeners.clear();
                 if (windParams.isShowArrows()) {
                     timeListeners.add(windFieldCanvasOverlay);
                 }
+                if (windParams.isShowStreamlets()) {
+                    timeListeners.add(windStreamletsCanvasOverlay);
+                }
                 if (windParams.isShowGrid()) {
                     timeListeners.add(windGridCanvasOverlay);
+                }
+                if (windParams.isShowLines()) {
                     timeListeners.add(windLineCanvasOverlay);
                 }
                 timePanel.setMinMax(windParams.getStartTime(), windParams.getEndTime(), true);
@@ -397,6 +423,9 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
     private void refreshWindFieldOverlay(final WindFieldDTO wl) {
         if (this.windFieldCanvasOverlay != null) {
             this.windFieldCanvasOverlay.setWindField(wl);
+        }
+        if (this.windStreamletsCanvasOverlay != null) {
+            this.windStreamletsCanvasOverlay.setWindField(wl);
         }
         if (this.windGridCanvasOverlay != null) {
             this.windGridCanvasOverlay.setWindField(wl);
@@ -413,8 +442,13 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         if (this.windParams.isShowArrows()) {
             this.windFieldCanvasOverlay.redraw(true);
         }
+        if (this.windParams.isShowStreamlets()) {
+            this.windStreamletsCanvasOverlay.redraw(true);
+        }
         if (this.windParams.isShowGrid()) {
             this.windGridCanvasOverlay.redraw(true);
+        }
+        if (this.windParams.isShowLines()) {
             this.windLineCanvasOverlay.redraw(true);
         }
     }
@@ -467,6 +501,10 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
             int num = 0; // tracking for debugging only
             if (this.windFieldCanvasOverlay != null) {
                 this.mapw.removeOverlay(this.windFieldCanvasOverlay);
+                num++;
+            }
+            if (this.windStreamletsCanvasOverlay != null) {
+                this.mapw.removeOverlay(this.windStreamletsCanvasOverlay);
                 num++;
             }
             if (this.windGridCanvasOverlay != null) {

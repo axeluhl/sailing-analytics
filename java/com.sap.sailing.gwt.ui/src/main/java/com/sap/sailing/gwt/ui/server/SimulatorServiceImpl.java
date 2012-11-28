@@ -241,7 +241,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
             wf.setGridAreaGps(gridAreaGps);
         }
 
-        final WindFieldDTO wfDTO = createWindFieldDTO(wf, startTime, endTime, timeStep, params.isShowGrid());
+        final WindFieldDTO wfDTO = createWindFieldDTO(wf, startTime, endTime, timeStep, params.isShowLines());
         logger.info("Exiting getWindField");
         return wfDTO;
 
@@ -268,11 +268,13 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         windDTO.trueWindSpeedInKnots = wind.getKnots();
         windDTO.trueWindSpeedInMetersPerSecond = wind.getMetersPerSecond();
 
+        /*
         // FIXME: workaround till i figure out how to get the "dampened" values
         windDTO.dampenedTrueWindBearingDeg = windDTO.trueWindBearingDeg;
         windDTO.dampenedTrueWindFromDeg = windDTO.trueWindFromDeg;
         windDTO.dampenedTrueWindSpeedInKnots = windDTO.trueWindSpeedInKnots;
         windDTO.dampenedTrueWindSpeedInMetersPerSecond = windDTO.trueWindSpeedInMetersPerSecond;
+*/
 
         if (wind.getPosition() != null) {
             windDTO.position = new PositionDTO(wind.getPosition().getLatDeg(), wind.getPosition().getLngDeg());
@@ -315,7 +317,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
     }
 
     private WindFieldDTO createWindFieldDTO(final WindFieldGenerator wf, final TimePoint startTime, final TimePoint endTime,
-            final TimePoint timeStep, final boolean isShowGrid) {
+            final TimePoint timeStep, final boolean isShowLines) {
 
         final WindFieldDTO windFieldDTO = new WindFieldDTO();
         final List<WindDTO> wList = new ArrayList<WindDTO>();
@@ -337,7 +339,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         }
 
         windFieldDTO.setMatrix(wList);
-        if (isShowGrid) {
+        if (isShowLines) {
             getWindLinesFromStartLine(wf, windFieldDTO, startTime, endTime, timeStep);
             getWindLinesFromEndLine(wf, windFieldDTO, startTime, endTime, timeStep);
         }
@@ -674,7 +676,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
 
         WindFieldDTO windFieldDTO = null;
         if (pattern != null) {
-            windFieldDTO = createWindFieldDTO(wf, startTime, endTime, timeStep, params.isShowGrid());
+            windFieldDTO = createWindFieldDTO(wf, startTime, endTime, timeStep, params.isShowLines());
         }
         final SimulatorResultsDTO simulatorResults = new SimulatorResultsDTO(rcDTO, pathDTO, windFieldDTO);
 
