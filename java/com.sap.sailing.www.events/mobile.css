@@ -58,10 +58,16 @@ body {
   /* line 15, mobile.css.sass */
   body h1 {
     font-size: 16px;
-    line-height: 26px; }
+    line-height: 26px;
+    font-family: OpenSansBold, Arial, Verdana, sans-serif;}
+
   /* line 20, mobile.css.sass */
   body #logo {
     height: 80px; }
+
+  body h2 {
+    font-size: 13px;
+    font-family: OpenSansBold, Arial, Verdana, sans-serif;}
 
 /* line 23, mobile.css.sass */
 #yield_content {
