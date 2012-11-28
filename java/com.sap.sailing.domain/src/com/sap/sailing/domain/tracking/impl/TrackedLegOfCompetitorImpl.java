@@ -697,6 +697,9 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
             track.unlockAfterRead();
         }
         GPSFixMoving fixWithLowestSpeedOverGround = getBestFittingSpeedMinimumInManeuver(minima, minimumSpeed, maneuverTimePoint);
+        if (fixWithLowestSpeedOverGround == null) {
+            fixWithLowestSpeedOverGround = fixes.get(0);
+        }
         // now remove all fixes before the last maximum before the fix with the lowest speed over ground during the maneuver if
         // there was such a maximum; otherwise, leave all fixes from the maneuver start on in place.
         final long MAX_SMOOTHENING_INTERVAL_MILLIS = getCompetitor().getBoat().getBoatClass().getApproximateManeuverDurationInMilliseconds();
