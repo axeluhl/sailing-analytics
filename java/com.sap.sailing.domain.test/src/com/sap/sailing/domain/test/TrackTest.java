@@ -754,7 +754,7 @@ public class TrackTest {
     }
 
     @Test
-    public void testSpeedEstimationForCourseChangeBetweenFixes() throws ParseException {
+    public void testSpeedEstimationForCourseChangeAtFix() throws ParseException {
         /*
          * See bug 1065, first test data set: [2011-06-23T16:08:27.000+0200: (54.49155,10.184947) with
          * 5.399568034557236kn to 291.0ï¿½, 2011-06-23T16:08:31.000+0200: (54.491597,10.184808) with 5.939524838012959kn
@@ -784,6 +784,38 @@ public class TrackTest {
         SpeedWithBearing estimatedSpeedWithBearing = myTrack.getEstimatedSpeed(new MillisecondsTimePoint(dateFormatter.parse("2011-06-23T16:08:37.000+0200")));
         assertEquals(215., estimatedSpeedWithBearing.getBearing().getDegrees(), 5);
         assertEquals(3.9, estimatedSpeedWithBearing.getKnots(), 0.2);
+    }
+
+    @Test
+    public void testSpeedEstimationForCourseChangeBetweenFixes() throws ParseException {
+        /*
+         * See bug 1065, first test data set: [2012-10-21T15:00:32.000+0200: (43.692862999999996,7.267875) with
+         * 16.73866090712743kn to 294.0Â°, 2012-10-21T15:00:34.000+0200: (43.692937,7.267683) with 16.73866090712743kn
+         * to 299.0Â°, 2012-10-21T15:00:36.000+0200: (43.693017,7.267487999999999) with 16.73866090712743kn to 300.0Â°,
+         * 2012-10-21T15:00:38.000+0200: (43.693103,7.267297999999999) with 16.73866090712743kn to 300.0Â°,
+         * 2012-10-21T15:00:40.000+0200: (43.693191999999996,7.267112) with 16.73866090712743kn to 303.0Â°,
+         * 2012-10-21T15:00:43.000+0200: (43.693283,7.2669179999999995) with 18.898488120950326kn to 302.0Â°]
+         * 2012-10-21T15:00:51.000+0200: (43.693245,7.266183) with 11.339092872570195kn to 237.0Â°
+         */
+        DynamicGPSFixMovingTrackImpl<Object> myTrack = new DynamicGPSFixMovingTrackImpl<Object>(new Object(), /* millisecondsOverWhichToAverage */5000);
+        GPSFixMoving fix1 = createFix("2012-10-21T15:00:32.000+0200", 43.692862999999996,7.267875, 16.73866090712743, 294.0);
+        myTrack.addGPSFix(fix1);
+        GPSFixMoving fix2 = createFix("2012-10-21T15:00:34.000+0200", 43.692937, 7.267683, 16.73866090712743, 299.0);
+        myTrack.addGPSFix(fix2);
+        GPSFixMoving fix3 = createFix("2012-10-21T15:00:36.000+0200", 43.693017, 7.267487999999999, 16.73866090712743, 300.0);
+        myTrack.addGPSFix(fix3);
+        GPSFixMoving fix4 = createFix("2012-10-21T15:00:38.000+0200", 43.693103, 7.267297999999999, 16.73866090712743, 300.0);
+        myTrack.addGPSFix(fix4);
+        GPSFixMoving fix5 = createFix("2012-10-21T15:00:40.000+0200", 43.693191999999996, 7.267112, 16.73866090712743, 303.0);
+        myTrack.addGPSFix(fix5);
+        GPSFixMoving fix6 = createFix("2012-10-21T15:00:43.000+0200", 43.693283, 7.2669179999999995, 18.898488120950326, 302.0);
+        myTrack.addGPSFix(fix6);
+        GPSFixMoving fix7 = createFix("2012-10-21T15:00:51.000+0200", 43.693245, 7.266183, 11.339092872570195, 237.0);
+        myTrack.addGPSFix(fix7);
+        final SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+        SpeedWithBearing estimatedSpeedWithBearing = myTrack.getEstimatedSpeed(new MillisecondsTimePoint(dateFormatter.parse("2012-10-21T15:00:45.000+0200")));
+        assertEquals(286., estimatedSpeedWithBearing.getBearing().getDegrees(), 5);
+        assertEquals(16.8, estimatedSpeedWithBearing.getKnots(), 0.2);
     }
 
     private GPSFixMoving createFix(String isoDateTime, double lat, double lng, double knotSpeed, double bearingDeg) throws ParseException {

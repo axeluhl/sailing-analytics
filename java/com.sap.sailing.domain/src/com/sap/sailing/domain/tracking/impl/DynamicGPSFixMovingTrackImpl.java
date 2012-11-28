@@ -109,39 +109,29 @@ public class DynamicGPSFixMovingTrackImpl<ItemType> extends DynamicTrackImpl<Ite
         List<GPSFixMoving> relevantFixes = new LinkedList<GPSFixMoving>();
         boolean beforeSetEmpty;
         GPSFixMoving beforeSetLast = null;
-        lockForRead();
-        try {
-            NavigableSet<GPSFixMoving> beforeSet = fixesToUseForSpeedEstimation.headSet(atTimed, /* inclusive */ false);
-            beforeSetEmpty = beforeSet.isEmpty(); // ask this while holding the lock
-            if (!beforeSetEmpty) {
-                beforeSetLast = beforeSet.last();
+        NavigableSet<GPSFixMoving> beforeSet = fixesToUseForSpeedEstimation.headSet(atTimed, /* inclusive */false);
+        beforeSetEmpty = beforeSet.isEmpty(); // ask this while holding the lock
+        if (!beforeSetEmpty) {
+            beforeSetLast = beforeSet.last();
+        }
+        for (GPSFixMoving beforeFix : beforeSet.descendingSet()) {
+            if (at.asMillis() - beforeFix.getTimePoint().asMillis() > getMillisecondsOverWhichToAverage() / 2) {
+                break;
             }
-            for (GPSFixMoving beforeFix : beforeSet.descendingSet()) {
-                if (at.asMillis() - beforeFix.getTimePoint().asMillis() > getMillisecondsOverWhichToAverage() / 2) {
-                    break;
-                }
-                relevantFixes.add(0, beforeFix);
-            }
-        } finally {
-            unlockAfterRead();
+            relevantFixes.add(0, beforeFix);
         }
         boolean afterSetEmpty;
         GPSFixMoving afterSetFirst = null;
-        lockForRead();
-        try {
-            NavigableSet<GPSFixMoving> afterSet = fixesToUseForSpeedEstimation.tailSet(atTimed, /* inclusive */ true);
-            afterSetEmpty = afterSet.isEmpty(); // ask this while holding the lock
-            if (!afterSetEmpty) {
-                afterSetFirst = afterSet.first();
+        NavigableSet<GPSFixMoving> afterSet = fixesToUseForSpeedEstimation.tailSet(atTimed, /* inclusive */true);
+        afterSetEmpty = afterSet.isEmpty(); // ask this while holding the lock
+        if (!afterSetEmpty) {
+            afterSetFirst = afterSet.first();
+        }
+        for (GPSFixMoving afterFix : afterSet) {
+            if (afterFix.getTimePoint().asMillis() - at.asMillis() > getMillisecondsOverWhichToAverage() / 2) {
+                break;
             }
-            for (GPSFixMoving afterFix : afterSet) {
-                if (afterFix.getTimePoint().asMillis() - at.asMillis() > getMillisecondsOverWhichToAverage() / 2) {
-                    break;
-                }
-                relevantFixes.add(afterFix);
-            }
-        } finally {
-            unlockAfterRead();
+            relevantFixes.add(afterFix);
         }
         if (relevantFixes.isEmpty()) {
             // find the fix closest to "at":
