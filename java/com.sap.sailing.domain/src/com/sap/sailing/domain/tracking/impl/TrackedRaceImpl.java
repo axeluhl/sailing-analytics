@@ -1995,8 +1995,8 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                     break;
                 }
                 if (lastFix != null) {
-                    Bearing courseAtLastFix = lastFix.getSpeed().getBearing();
-                    Bearing courseAtFix = fix.getSpeed().getBearing();
+                    Bearing courseAtLastFix = track.getEstimatedSpeed(lastFix.getTimePoint()).getBearing();
+                    Bearing courseAtFix = track.getEstimatedSpeed(fix.getTimePoint()).getBearing();
                     double angleSpeedInDegreesPerSecond = Math.abs((courseAtFix.getDifferenceTo(courseAtLastFix).getDegrees()) /
                             (double) (fix.getTimePoint().asMillis()-lastFix.getTimePoint().asMillis()));
                     if (angleSpeedInDegreesPerSecond > maxAngleSpeedInDegreesPerSecond) {
