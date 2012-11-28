@@ -4,16 +4,16 @@ import com.google.gwt.user.client.ui.DoubleBox;
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog.Validator;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.components.SettingsDialogComponent;
 
 public abstract class AbstractChartSettingsComponent<SettingsType extends ChartSettings> implements SettingsDialogComponent<SettingsType> {
-
-    private DoubleBox stepSizeBox;
     private final ChartSettings settings;
-    private final StringMessages stringMessages;
+    protected DoubleBox stepSizeBox;
+    protected final StringMessages stringMessages;
 
     public AbstractChartSettingsComponent(ChartSettings settings, StringMessages stringMessages) {
         this.settings = settings;
@@ -21,18 +21,14 @@ public abstract class AbstractChartSettingsComponent<SettingsType extends ChartS
     }
 
     @Override
-    public VerticalPanel getAdditionalWidget(DataEntryDialog<?> dialog) {
-        VerticalPanel panel = new VerticalPanel();
-        panel.add(new Label(getStringMessages().stepSizeInSeconds()));
+    public Widget getAdditionalWidget(DataEntryDialog<?> dialog) {
+        VerticalPanel mainPanel = new VerticalPanel();
+        mainPanel.add(new Label(stringMessages.stepSizeInSeconds()));
         stepSizeBox = dialog.createDoubleBox(((double) settings.getStepSize()) / 1000, 5);
-        panel.add(stepSizeBox);
-        return panel;
+        mainPanel.add(stepSizeBox);
+        return mainPanel;
     }
 
-    protected DoubleBox getStepSizeBox() {
-        return stepSizeBox;
-    }
-    
     @Override
     public Validator<SettingsType> getValidator() {
         return new Validator<SettingsType>() {
@@ -40,7 +36,7 @@ public abstract class AbstractChartSettingsComponent<SettingsType extends ChartS
             public String getErrorMessage(SettingsType valueToValidate) {
                 String errorMessage = null;
                 if (valueToValidate.getStepSize() < 1) {
-                    errorMessage = getStringMessages().stepSizeMustBeGreaterThanNull();
+                    errorMessage = stringMessages.stepSizeMustBeGreaterThanNull();
                 }
                 return errorMessage;
             }
@@ -52,14 +48,14 @@ public abstract class AbstractChartSettingsComponent<SettingsType extends ChartS
         return stepSizeBox;
     }
 
-    protected StringMessages getStringMessages() {
-        return stringMessages;
+    public ChartSettings getAbstractResult() {
+        Double valueInSeconds = stepSizeBox.getValue();
+        Long value = valueInSeconds == null ? 0 : (long) (stepSizeBox.getValue() * 1000);
+        return new ChartSettings(value);
     }
 
-    public ChartSettings getAbstractResult() {
-        Double valueInSeconds = getStepSizeBox().getValue();
-        Long value = valueInSeconds == null ? 0 : (long) (getStepSizeBox().getValue() * 1000);
-        return new ChartSettings(value);
+    public ChartSettings getSettings() {
+        return settings;
     }
 
 }

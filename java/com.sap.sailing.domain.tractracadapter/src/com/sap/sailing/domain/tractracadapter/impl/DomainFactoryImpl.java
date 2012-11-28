@@ -37,6 +37,7 @@ import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
+import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.TimePoint;
@@ -144,16 +145,26 @@ public class DomainFactoryImpl implements DomainFactory {
             if (domainControlPoint == null) {
                 String controlPointName = controlPoint.getName();
                 Map<String, String> controlPointMetadata = parseControlPointMetadata(controlPoint);
+                MarkType type = MarkType.BUOY;
+                String markType = controlPointMetadata.get("Type");
+                if(markType != null && !markType.isEmpty()) {
+                    for(MarkType m: MarkType.values()) {
+                        if(m.name().equalsIgnoreCase(markType)) {
+                            type = m;
+                            break;
+                        }
+                    }
+                }
                 String markColor = controlPointMetadata.get("Color");
                 String markShape = controlPointMetadata.get("Shape");
                 String markPattern = controlPointMetadata.get("Pattern");
                 if (controlPoint.getHasTwoPoints()) {
                     // it's a gate
-                    Mark leftMark = baseDomainFactory.getOrCreateMark(controlPointName + " (left)", markColor, markShape, markPattern);
-                    Mark rightMark = baseDomainFactory.getOrCreateMark(controlPointName + " (right)", markColor, markShape, markPattern);
+                    Mark leftMark = baseDomainFactory.getOrCreateMark(controlPointName + " (left)", type, markColor, markShape, markPattern);
+                    Mark rightMark = baseDomainFactory.getOrCreateMark(controlPointName + " (right)", type, markColor, markShape, markPattern);
                     domainControlPoint = baseDomainFactory.createGate(leftMark, rightMark, controlPointName);
                 } else {
-                    Mark mark = baseDomainFactory.getOrCreateMark(controlPointName, markColor, markShape, markPattern);
+                    Mark mark = baseDomainFactory.getOrCreateMark(controlPointName, type, markColor, markShape, markPattern);
                     domainControlPoint = mark;
                 }
                 controlPointCache.put(controlPoint, domainControlPoint);

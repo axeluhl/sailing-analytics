@@ -953,7 +953,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
 
     protected Marker createCourseMarkMarker(final MarkDTO markDTO) {
         MarkerOptions options = MarkerOptions.newInstance();
-        final Icon markIcon = raceMapImageManager.resolveMarkIcon(markDTO.color, markDTO.shape, markDTO.pattern);
+        final Icon markIcon = raceMapImageManager.resolveMarkIcon(markDTO.type, markDTO.color, markDTO.shape, markDTO.pattern);
         if (markIcon != null) {
             options.setIcon(markIcon);
         }

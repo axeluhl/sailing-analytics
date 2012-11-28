@@ -47,7 +47,7 @@ public class ChartPanel extends AbstractChartPanel<ChartSettings> implements Com
     public void updateSettings(ChartSettings newSettings) {
         updateSettingsOnly(newSettings);
         clearChart();
-        loadData(true);
+        timeChanged(timer.getTime());
     }
 
     @Override
