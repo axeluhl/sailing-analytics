@@ -884,6 +884,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         markDTO.color = mark.getColor();
         markDTO.shape = mark.getShape();
         markDTO.pattern = mark.getPattern();
+        markDTO.type = mark.getType();
         return markDTO;
     }
 

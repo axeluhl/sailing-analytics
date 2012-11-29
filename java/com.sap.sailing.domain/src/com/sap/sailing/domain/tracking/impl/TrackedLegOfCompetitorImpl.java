@@ -1,7 +1,10 @@
 package com.sap.sailing.domain.tracking.impl;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
+import java.util.NavigableSet;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
@@ -25,6 +28,7 @@ import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
+import com.sap.sailing.util.impl.ArrayListNavigableSet;
 
 /**
  * Provides a convenient view on the tracked leg, projecting to a single competitor's performance.
@@ -581,7 +585,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
 
     @Override
     public Distance getManeuverLoss(TimePoint timePointBeforeManeuver,
-            TimePoint timePointAfterManeuver) throws NoWindException {
+            TimePoint maneuverTimePoint, TimePoint timePointAfterManeuver) throws NoWindException {
         // FIXME bug 156: the timePointAfterManeuver is not a good one to select the outbound speed from:
         // instead, the outbound speed should be chosen as the maximum speed reached after the acceleration phase
         // after the maneuver, at least within some reasonable threshold like five times the approximate
@@ -590,43 +594,192 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
         assert timePointBeforeManeuver != null;
         assert timePointAfterManeuver != null;
         Distance result;
-        long millisecondsOverWhichToAverageSpeed = getTrackedRace().getMillisecondsOverWhichToAverageSpeed();
-        TimePoint extrapolationBase = timePointBeforeManeuver.minus(millisecondsOverWhichToAverageSpeed);
         final GPSFixTrack<Competitor, GPSFixMoving> track = getTrackedRace().getTrack(getCompetitor());
-        SpeedWithBearing speedBeforeManeuver = track.getEstimatedSpeed(extrapolationBase);
-        if (speedBeforeManeuver != null) {
-            TimePoint extrapolationTarget = timePointAfterManeuver.plus(millisecondsOverWhichToAverageSpeed);
-            SpeedWithBearing speedAfterManeuver = track.getEstimatedSpeed(extrapolationTarget);
-            // find the mean course between inbound and outbound course and project actual and extrapolated
-            // positions onto it:
-            Bearing middle = speedBeforeManeuver.getBearing().middle(speedAfterManeuver.getBearing());
-            Position positionAtBase = track.getEstimatedPosition(extrapolationBase, /* extrapolate */false);
-            Speed projectedSpeedBeforeManeuver = speedBeforeManeuver.projectTo(positionAtBase, middle);
-            double projectedSpeedBeforeManeuverInKnots = projectedSpeedBeforeManeuver.getKnots();
-            Speed projectedSpeedAfterManeuver = speedAfterManeuver.projectTo(positionAtBase, middle);
+        List<GPSFixMoving> fixes = getFixesToConsiderForManeuverLossAnalysis(timePointBeforeManeuver,
+                maneuverTimePoint, timePointAfterManeuver);
+        TimePoint timePointWhenSpeedStartedToDrop = fixes.get(0).getTimePoint();
+        SpeedWithBearing speedWhenSpeedStartedToDrop = track.getEstimatedSpeed(timePointWhenSpeedStartedToDrop);
+        if (speedWhenSpeedStartedToDrop != null) {
+            TimePoint timePointWhenSpeedLevelledOffAfterManeuver = fixes.get(fixes.size()-1).getTimePoint();
+            SpeedWithBearing speedAfterManeuver = track.getEstimatedSpeed(timePointWhenSpeedLevelledOffAfterManeuver);
+            // For upwind/downwind legs, find the mean course between inbound and outbound course and project actual and
+            // extrapolated positions onto it:
+            Bearing middle = null;
+            if (getTrackedLeg().isUpOrDownwindLeg(timePointWhenSpeedStartedToDrop)) {
+                middle = getProjectionAngleForUpwindDownwindManeuverLossAnalysis(timePointWhenSpeedStartedToDrop, speedWhenSpeedStartedToDrop,
+                        speedAfterManeuver);
+            }
+            Position positionAtBase = track.getEstimatedPosition(timePointWhenSpeedStartedToDrop, /* extrapolate */false);
+            Speed projectedSpeedWhenSpeedStartedToDrop = projectSpeedToMiddleIfUpwindDownwindElseToLegDirection(
+                    timePointWhenSpeedStartedToDrop, middle, speedWhenSpeedStartedToDrop, positionAtBase);
+            double projectedSpeedBeforeManeuverInKnots = projectedSpeedWhenSpeedStartedToDrop.getKnots();
+            Speed projectedSpeedAfterManeuver = projectSpeedToMiddleIfUpwindDownwindElseToLegDirection(
+                    timePointAfterManeuver, middle, speedAfterManeuver, positionAtBase);
             double projectedSpeedAfterManeuverInKnots = projectedSpeedAfterManeuver.getKnots();
-            track.lockForRead();
-            try {
-                Iterator<GPSFixMoving> fixIter = track.getFixesIterator(timePointBeforeManeuver, /* inclusive */true);
-                GPSFixMoving fix;
-                TimePoint previousTimePoint = timePointBeforeManeuver;
-                result = Distance.NULL;
-                while (fixIter.hasNext() && !(fix = fixIter.next()).getTimePoint().after(timePointAfterManeuver)) {
-                    Speed projectedSpeedAtFix = fix.getSpeed().projectTo(fix.getPosition(), middle);
-                    final double estimatedSpeedWithoutManeuver = projectedSpeedBeforeManeuverInKnots +
-                            (fix.getTimePoint().asMillis()-timePointBeforeManeuver.asMillis()) /
-                            (timePointAfterManeuver.asMillis()-timePointBeforeManeuver.asMillis()) *
-                            (projectedSpeedAfterManeuverInKnots - projectedSpeedBeforeManeuverInKnots);
-                    Speed speedDifference = new KnotSpeedImpl(estimatedSpeedWithoutManeuver - projectedSpeedAtFix.getKnots());
-                    result = result.add(speedDifference.travel(previousTimePoint, fix.getTimePoint()));
-                }
-            } finally {
-                track.unlockAfterRead();
+            // now determine the fixes along which to accumulate the maneuver loss:
+
+            TimePoint previousTimePoint = timePointWhenSpeedStartedToDrop;
+            result = Distance.NULL;
+            for (GPSFixMoving fix : fixes) {
+                // project onto average maneuver course for upwind/downwind and on leg direction otherwise
+                final SpeedWithBearing fixSpeed = track.getEstimatedSpeed(fix.getTimePoint());
+                final Position fixPosition = fix.getPosition();
+                Speed projectedSpeedAtFix = projectSpeedToMiddleIfUpwindDownwindElseToLegDirection(
+                        timePointBeforeManeuver, middle, fixSpeed, fixPosition);
+                final double estimatedSpeedWithoutManeuverInKnots = (double) projectedSpeedBeforeManeuverInKnots
+                        + (double) (fix.getTimePoint().asMillis() - timePointWhenSpeedStartedToDrop.asMillis())
+                        / (double) (timePointWhenSpeedLevelledOffAfterManeuver.asMillis() - timePointWhenSpeedStartedToDrop.asMillis())
+                        * (double) (projectedSpeedAfterManeuverInKnots - projectedSpeedBeforeManeuverInKnots);
+                Speed speedDifference = new KnotSpeedImpl(estimatedSpeedWithoutManeuverInKnots
+                        - projectedSpeedAtFix.getKnots());
+                result = result.add(speedDifference.travel(previousTimePoint, fix.getTimePoint()));
+                previousTimePoint = fix.getTimePoint();
             }
         } else {
             result = null;
         }
         return result;
+    }
+
+    /**
+     * Fetches the set of fixes that encompass the maneuver. Usually, during a maneuver a boat loses speed over ground
+     * before it has reached the new tack and starts accelerating again, until the speed levels off. We assume that the
+     * <code>timePointBeforeManeuver</code> minus some excess time based on the approximate maneuver duration is the
+     * earliest time point to analyze. Starting there, we look for speed over ground minima between then and
+     * <code>timePointAfterManeuver</code> plus three times the approximate maneuver time as excess time. There may be
+     * multiple minima. We choose the one that has the best "fit" in terms of being close to the
+     * <code>maneuverTimePoint</code> and being low in terms of speed over ground. From that time point, the nearest
+     * maximum speeds over ground before and after are determined, and the fixes between them are returned.
+     */
+    private List<GPSFixMoving> getFixesToConsiderForManeuverLossAnalysis(TimePoint timePointBeforeManeuver,
+            TimePoint maneuverTimePoint, TimePoint timePointAfterManeuver) {
+        final long EXCESS_TIME_BEFORE_MANEUVER_END_TO_SCAN_IN_MILLIS = getCompetitor().getBoat().getBoatClass().getApproximateManeuverDurationInMilliseconds();
+        final long EXCESS_TIME_AFTER_MANEUVER_END_TO_SCAN_IN_MILLIS = 3*EXCESS_TIME_BEFORE_MANEUVER_END_TO_SCAN_IN_MILLIS;
+        List<GPSFixMoving> fixes = new ArrayList<>();
+        NavigableSet<GPSFixMoving> maxima = new ArrayListNavigableSet<GPSFixMoving>(new TimedComparator());
+        NavigableSet<GPSFixMoving> minima = new ArrayListNavigableSet<GPSFixMoving>(new TimedComparator());
+        GPSFixTrack<Competitor, GPSFixMoving> track = getTrackedRace().getTrack(getCompetitor());
+        Speed lastSpeed = Speed.NULL;
+        Speed lastLastSpeed = Speed.NULL;
+        GPSFixMoving lastFix = null;
+        Speed minimumSpeed = new KnotSpeedImpl(Double.MAX_VALUE);
+        track.lockForRead();
+        try {
+            Iterator<GPSFixMoving> fixIter = track.getFixesIterator(
+                    timePointBeforeManeuver.minus(EXCESS_TIME_BEFORE_MANEUVER_END_TO_SCAN_IN_MILLIS), /* inclusive */true);
+            GPSFixMoving fix;
+            // The timePointAfterManeuver is determined based on the geometric shape of the boat's trajectory, not on
+            // the speed development. To understand the full maneuver loss, we need to follow the boat speed until it levels off,
+            // but no further than some reasonable threshold because the wind may continue to pick up, letting the boat accelerate
+            // over a time much longer than accounted for by the maneuver.
+            while (fixIter.hasNext()) {
+                fix = fixIter.next();
+                final SpeedWithBearing estimatedSpeedAtFix = track.getEstimatedSpeed(fix.getTimePoint());
+                if (lastFix != null) {
+                    if (lastSpeed.compareTo(lastLastSpeed) > 0 && lastSpeed.compareTo(estimatedSpeedAtFix) > 0) {
+                        maxima.add(lastFix);
+                    } else if (lastSpeed.compareTo(lastLastSpeed) < 0 && lastSpeed.compareTo(estimatedSpeedAtFix) < 0) {
+                        minima.add(lastFix);
+                        if (estimatedSpeedAtFix.compareTo(minimumSpeed) < 0) {
+                            minimumSpeed = estimatedSpeedAtFix;
+                        }
+                    }
+                }
+                if (fix.getTimePoint().after(timePointAfterManeuver.plus(EXCESS_TIME_AFTER_MANEUVER_END_TO_SCAN_IN_MILLIS))) {
+                    break;
+                }
+                fixes.add(fix);
+                lastLastSpeed = lastSpeed;
+                lastSpeed = estimatedSpeedAtFix;
+                lastFix = fix;
+            }
+        } finally {
+            track.unlockAfterRead();
+        }
+        GPSFixMoving fixWithLowestSpeedOverGround = getBestFittingSpeedMinimumInManeuver(minima, minimumSpeed, maneuverTimePoint);
+        if (fixWithLowestSpeedOverGround == null) {
+            fixWithLowestSpeedOverGround = fixes.get(0);
+        }
+        // now remove all fixes before the last maximum before the fix with the lowest speed over ground during the maneuver if
+        // there was such a maximum; otherwise, leave all fixes from the maneuver start on in place.
+        final long MAX_SMOOTHENING_INTERVAL_MILLIS = getCompetitor().getBoat().getBoatClass().getApproximateManeuverDurationInMilliseconds();
+        GPSFixMoving lastMaxSpeedFixBeforeLowSpeed = maxima.lower(fixWithLowestSpeedOverGround);
+        // now check if there's a greater one that's only a little bit earlier
+        if (lastMaxSpeedFixBeforeLowSpeed != null) {
+            GPSFixMoving stillGreater;
+            while ((stillGreater=maxima.lower(lastMaxSpeedFixBeforeLowSpeed)) != null &&
+                    track.getEstimatedSpeed(stillGreater.getTimePoint()).compareTo(
+                            track.getEstimatedSpeed(lastMaxSpeedFixBeforeLowSpeed.getTimePoint())) > 0 &&
+                    lastMaxSpeedFixBeforeLowSpeed.getTimePoint().asMillis()-
+                    stillGreater.getTimePoint().asMillis() < MAX_SMOOTHENING_INTERVAL_MILLIS) {
+                lastMaxSpeedFixBeforeLowSpeed = stillGreater;
+            }
+            Iterator<GPSFixMoving> i = fixes.iterator();
+            while (i.hasNext() && i.next().getTimePoint().before(lastMaxSpeedFixBeforeLowSpeed.getTimePoint())) {
+                i.remove();
+            }
+        }
+        // now remove all fixes after the first maximum after the global minimum:
+        GPSFixMoving firstMaxSpeedFixAfterLowSpeed = maxima.higher(fixWithLowestSpeedOverGround);
+        if (firstMaxSpeedFixAfterLowSpeed != null) {
+            GPSFixMoving stillGreater;
+            while ((stillGreater=maxima.higher(firstMaxSpeedFixAfterLowSpeed)) != null &&
+                    track.getEstimatedSpeed(stillGreater.getTimePoint()).compareTo(
+                            track.getEstimatedSpeed(firstMaxSpeedFixAfterLowSpeed.getTimePoint())) > 0 &&
+                    stillGreater.getTimePoint().asMillis() - firstMaxSpeedFixAfterLowSpeed.getTimePoint().asMillis()
+                     < MAX_SMOOTHENING_INTERVAL_MILLIS) {
+                firstMaxSpeedFixAfterLowSpeed = stillGreater;
+            }
+            ListIterator<GPSFixMoving> i = fixes.listIterator(fixes.size());
+            while (i.hasPrevious() && i.previous().getTimePoint().after(firstMaxSpeedFixAfterLowSpeed.getTimePoint())) {
+                i.remove();
+            }
+        }
+        return fixes;
+    }
+
+    private GPSFixMoving getBestFittingSpeedMinimumInManeuver(NavigableSet<GPSFixMoving> minima, Speed minimumSpeed, TimePoint maneuverTimePoint) {
+        // Idea: being the approximate maneuver duration away from maneuverTimePoint is as bad as having twice the speed.
+        GPSFixMoving bestSpeedMinimum = null;
+        double lowestBadness = Double.MAX_VALUE;
+        final long approximateManeuverTimeInMillis = getCompetitor().getBoat().getBoatClass().getApproximateManeuverDurationInMilliseconds();
+        final GPSFixTrack<Competitor, GPSFixMoving> track = getTrackedRace().getTrack(getCompetitor());
+        for (GPSFixMoving minimum : minima) {
+            // best speedBadness can be 1 which represents the absolute speed minimum in the interval considered
+            double speedBadness = track.getEstimatedSpeed(minimum.getTimePoint()).getKnots() / minimumSpeed.getKnots();
+            // best timePointBadness can be 1 which is a minimum exactly at the maneuver time point
+            double timePointBadness = 1. + (double) Math.abs(minimum.getTimePoint().asMillis()-maneuverTimePoint.asMillis()) / 
+                    (double) approximateManeuverTimeInMillis;
+            final double totalBadness = speedBadness * timePointBadness;
+            if (totalBadness < lowestBadness) {
+                bestSpeedMinimum = minimum;
+                lowestBadness = totalBadness;
+            }
+        }
+        return bestSpeedMinimum;
+    }
+
+    protected Speed projectSpeedToMiddleIfUpwindDownwindElseToLegDirection(TimePoint at,
+            Bearing projectToForUpwindDownwind, final SpeedWithBearing speed, final Position position) throws NoWindException {
+        Speed projectedSpeedAtFix = getTrackedLeg().isUpOrDownwindLeg(at) ?
+                speed.projectTo(position, projectToForUpwindDownwind) :
+                    getWindwardSpeed(speed, at);
+        return projectedSpeedAtFix;
+    }
+
+    protected Bearing getProjectionAngleForUpwindDownwindManeuverLossAnalysis(TimePoint timePointBeforeManeuver,
+            SpeedWithBearing speedBeforeManeuver, SpeedWithBearing speedAfterManeuver) {
+        Bearing middle;
+        middle = speedBeforeManeuver.getBearing().middle(speedAfterManeuver.getBearing());
+        Wind wind = getTrackedRace().getWind(getTrackedRace().getTrack(getCompetitor()).
+                getEstimatedPosition(timePointBeforeManeuver, /* extrapolate */ false), timePointBeforeManeuver);
+        // If the average course in the maneuver deviates from the wind's  
+        final int MAX_DIFF_AVERAGE_COURSE_VERSUS_WIND_IN_DEGREES = 20;
+        if (Math.abs(wind.getBearing().getDifferenceTo(middle).getDegrees()) > MAX_DIFF_AVERAGE_COURSE_VERSUS_WIND_IN_DEGREES &&
+                Math.abs(wind.getFrom().getDifferenceTo(middle).getDegrees()) > MAX_DIFF_AVERAGE_COURSE_VERSUS_WIND_IN_DEGREES) {
+            middle = wind.getBearing();
+        }
+        return middle;
     }
 
 }

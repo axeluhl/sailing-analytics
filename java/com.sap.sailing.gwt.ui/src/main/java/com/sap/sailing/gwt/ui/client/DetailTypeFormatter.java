@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.client;
 
+import com.google.gwt.i18n.client.NumberFormat;
 import com.sap.sailing.domain.common.DetailType;
 
 public class DetailTypeFormatter {
@@ -76,6 +77,16 @@ public class DetailTypeFormatter {
             return stringMessages.averageJibeLossInMeters();
         }
         return null;
+    }
 
+    public static NumberFormat getNumberFormat(DetailType detailType) {
+        String decimalPlaces = "";
+        for (int i = 0; i < detailType.getPrecision(); i++) {
+            if (i == 0) {
+                decimalPlaces += ".";
+            }
+            decimalPlaces += "0";
+        }
+        return NumberFormat.getFormat("0" + decimalPlaces);
     }
 }

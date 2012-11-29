@@ -38,9 +38,17 @@ interface RaceMapResources extends ClientBundle {
     @Source("com/sap/sailing/gwt/ui/client/images/buoys/buoy_green.png")
     ImageResource buoyGreenIcon();
 
+    @Source("com/sap/sailing/gwt/ui/client/images/buoys/landmark.png")
+    ImageResource landmarkIcon();
+    
+    @Source("com/sap/sailing/gwt/ui/client/images/cameraBoat.png")
+    ImageResource cameraBoatIcon();
 
-    @Source("com/sap/sailing/gwt/ui/client/images/juryBoat.png")
-    ImageResource juryBoatIcon();
+    @Source("com/sap/sailing/gwt/ui/client/images/umpireBoat.png")
+    ImageResource umpireBoatIcon();
+
+    @Source("com/sap/sailing/gwt/ui/client/images/startBoat.png")
+    ImageResource startBoatIcon();
 
     @Source("com/sap/sailing/gwt/ui/client/images/wind_combined.png")
     ImageResource combinedWindIcon();
