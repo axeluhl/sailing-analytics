@@ -54,7 +54,7 @@ import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorRaceDataDTO;
-import com.sap.sailing.gwt.ui.shared.MultiCompetitorRaceDataDTO;
+import com.sap.sailing.gwt.ui.shared.CompetitorsRaceDataDTO;
 import com.sap.sailing.gwt.ui.shared.components.Component;
 
 /**
@@ -72,7 +72,7 @@ import com.sap.sailing.gwt.ui.shared.components.Component;
 public abstract class AbstractChartPanel<SettingsType extends ChartSettings> extends RaceChart implements
         CompetitorSelectionChangeListener, RequiresResize {
     private static final int LINE_WIDTH = 1;
-    private MultiCompetitorRaceDataDTO chartData;
+    private CompetitorsRaceDataDTO chartData;
     private boolean compactChart;
     private final Label noCompetitorsSelectedLabel;
     private final Map<CompetitorDTO, Series> dataSeriesByCompetitor;
@@ -180,56 +180,63 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
      * {@link SailingServiceAsync#getCompetitorsRaceData(RaceIdentifier, List, long, DetailType, AsyncCallback)}. After
      * loading is the method {@link #drawChartData()} called.<br />
      * If no data needs to be {@link #needsDataLoading() loaded}, the no competitors selected label is displayed.
-     * 
-     * @param showBusyIndicator
-     *            If <code>true</code> is the busy indicator shown while loading the data from the server.
      */
-    private void updateChart(Date from, Date to, boolean append, boolean showBusyIndicator) {
+    private void updateChart(Date from, Date to, boolean append) {
         if (hasSelectedCompetitors()) {
             setWidget(chart);
-            if (showBusyIndicator) {
-                showLoading(stringMessages.loadingCompetitorData());
+            
+            ArrayList<CompetitorDTO> competitorsToLoad = new ArrayList<CompetitorDTO>();
+            for (CompetitorDTO competitorDTO : getSelectedCompetitors()) {
+                competitorsToLoad.add(competitorDTO);
             }
-            loadData(from, to, append);
+
+            loadData(from, to, competitorsToLoad, append);
         } else {
             setWidget(noCompetitorsSelectedLabel);
         }
     }
 
-    private void loadData(Date from, Date to, boolean append) {
-        boolean hasDetailTypeChanged = chartData == null || chartData.getDetailType() != selectedDetailType;
-
-        if (hasDetailTypeChanged) {
-            chartData = new MultiCompetitorRaceDataDTO(selectedDetailType);
+    private void loadData(final Date from, final Date to, List<CompetitorDTO> competitors, boolean append) {
+        if(chartData != null && chartData.getDetailType() != selectedDetailType) {
+            chartData = null;
         }
 
-        // Date toDate = new Date(System.currentTimeMillis() - timer.getLivePlayDelayInMillis());
-        final ArrayList<Pair<Date, CompetitorDTO>> dataQuery = new ArrayList<Pair<Date, CompetitorDTO>>();
-        for (CompetitorDTO competitor : getSelectedCompetitors()) {
-            Date chartDataDateOfNewestData = chartData.getDateOfNewestData();
-            Date competitorDateOfNewestData = chartData.contains(competitor) ? chartData.getCompetitorData(competitor)
-                    .getDateOfNewestData() : null;
-            if (!chartData.contains(competitor)) {
-                dataQuery.add(new Pair<Date, CompetitorDTO>(new Date(0), competitor));
-            } else if (competitorDateOfNewestData.before(chartDataDateOfNewestData)
-                    || competitorDateOfNewestData.before(timeRangeWithZoomProvider.getToTime())) {
-                dataQuery.add(new Pair<Date, CompetitorDTO>(new Date(competitorDateOfNewestData.getTime()
-                        + getStepSize()), competitor));
-            }
+        ArrayList<CompetitorDTO> competitorsToLoad = new ArrayList<CompetitorDTO>();
+        for (CompetitorDTO competitorDTO : competitors) {
+            competitorsToLoad.add(competitorDTO);
         }
+            
+//            Date chartDataDateOfNewestData = chartData.getDateOfNewestData();
+//            Date competitorDateOfNewestData = chartData.contains(competitor) ? chartData.getCompetitorData(competitor)
+//                    .getDateOfNewestData() : null;
+//            if (!chartData.contains(competitor)) {
+//                competitorsToLoad.add(new Pair<Date, CompetitorDTO>(new Date(0), competitor));
+//            } else if (competitorDateOfNewestData.before(chartDataDateOfNewestData)
+//                    || competitorDateOfNewestData.before(timeRangeWithZoomProvider.getToTime())) {
+//                competitorsToLoad.add(new Pair<Date, CompetitorDTO>(new Date(competitorDateOfNewestData.getTime()
+//                        + getStepSize()), competitor));
+//            }
 
+        showLoading(stringMessages.loadingCompetitorData());
         GetCompetitorsRaceDataAction getCompetitorsRaceDataAction = new GetCompetitorsRaceDataAction(sailingService,
-                selectedRaceIdentifier, dataQuery, timeRangeWithZoomProvider.getToTime(), getStepSize(),
-                getSelectedDetailType(), new AsyncCallback<MultiCompetitorRaceDataDTO>() {
+                selectedRaceIdentifier, competitorsToLoad, from, to, getStepSize(),
+                getSelectedDetailType(), new AsyncCallback<CompetitorsRaceDataDTO>() {
                     @Override
-                    public void onSuccess(MultiCompetitorRaceDataDTO result) {
+                    public void onSuccess(CompetitorsRaceDataDTO result) {
                         if (result != null) {
-                            for (CompetitorRaceDataDTO competitorData : result.getAllRaceData()) {
-                                if (chartData.contains(competitorData.getCompetitor())) {
-                                    chartData.addCompetitorRaceData(competitorData);
-                                    chartData.setCompetitorMarkPassingsData(competitorData);
-                                } else {
-                                    chartData.setCompetitorData(competitorData.getCompetitor(), competitorData);
+                            timeOfEarliestRequestInMillis = result.getRequestedFromTime().getTime();
+                            timeOfLatestRequestInMillis = result.getRequestedToTime().getTime();
+                            
+                            if(chartData == null) {
+                                chartData = result;
+                            } else {
+                                for (CompetitorRaceDataDTO competitorData : result.getAllRaceData()) {
+                                    if (chartData.contains(competitorData.getCompetitor())) {
+                                        chartData.addCompetitorRaceData(competitorData);
+                                        chartData.setCompetitorMarkPassingsData(competitorData);
+                                    } else {
+                                        chartData.setCompetitorData(competitorData.getCompetitor(), competitorData);
+                                    }
                                 }
                             }
                         }
@@ -253,7 +260,11 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
     @Override
     public void addedToSelection(CompetitorDTO competitor) {
         if (isVisible()) {
-            timeChanged(timer.getTime());
+            ArrayList<CompetitorDTO> competitorsToLoad = new ArrayList<CompetitorDTO>();
+            competitorsToLoad.add(competitor);
+            Date fromDate = timeOfEarliestRequestInMillis == null ? null : new Date(timeOfEarliestRequestInMillis);
+            Date toDate = timeOfLatestRequestInMillis == null ? null : new Date(timeOfLatestRequestInMillis);
+            loadData(fromDate, toDate, competitorsToLoad, false);
         }
     }
 
@@ -261,15 +272,19 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
     public void removedFromSelection(CompetitorDTO competitor) {
         Series competitorSeries = dataSeriesByCompetitor.get(competitor);
         if (competitorSeries != null) {
-            chart.removeSeries(competitorSeries, isVisible());
+            chart.removeSeries(competitorSeries, false);
         }
         Series competitorMarkPassingSeries = markPassingSeriesByCompetitor.get(competitor);
         if (competitorMarkPassingSeries != null) {
-            chart.removeSeries(competitorMarkPassingSeries, isVisible());
+            chart.removeSeries(competitorMarkPassingSeries, false);
         }
-
-        if (isVisible() && !hasSelectedCompetitors()) {
-            setWidget(noCompetitorsSelectedLabel);
+        
+        if (isVisible()) {
+             if(hasSelectedCompetitors()) {
+                 chart.redraw();
+             } else {
+                 setWidget(noCompetitorsSelectedLabel);
+             }
         }
     }
 
@@ -290,13 +305,13 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
 
         if (chartData != null) {
             List<Series> chartSeries = Arrays.asList(chart.getSeries());
-            for (CompetitorDTO competitor : competitorSelectionProvider.getSelectedCompetitors()) {
+            for (CompetitorDTO competitor : getSelectedCompetitors()) {
                 Series competitorDataSeries = getOrCreateCompetitorDataSeries(competitor);
                 Series markPassingSeries = getOrCreateCompetitorMarkPassingSeries(competitor);
                 CompetitorRaceDataDTO competitorData = chartData.getCompetitorData(competitor);
                 if (competitorData != null) {
                     Date toDate = new Date(System.currentTimeMillis() - timer.getLivePlayDelayInMillis());
-
+                    
                     List<Triple<String, Date, Double>> markPassingsData = competitorData.getMarkPassingsData();
                     List<Point> markPassingPoints = new ArrayList<Point>();
                     for (Triple<String, Date, Double> markPassingData : markPassingsData) {
@@ -333,10 +348,10 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
                 }
             }
         }
-        if (!isZoomed) {
-            chart.getXAxis().setMin(timeRangeWithZoomProvider.getFromTime().getTime());
-            chart.getXAxis().setMax(timeRangeWithZoomProvider.getToTime().getTime());
-        }
+//        if (!isZoomed) {
+//            chart.getXAxis().setMin(timeRangeWithZoomProvider.getFromTime().getTime());
+//            chart.getXAxis().setMax(timeRangeWithZoomProvider.getToTime().getTime());
+//        }
         chart.redraw();
     }
 
@@ -421,6 +436,8 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
      */
     protected void clearChart() {
         setChartData(null);
+        timeOfEarliestRequestInMillis = null;
+        timeOfLatestRequestInMillis = null;
         dataSeriesByCompetitor.clear();
         markPassingSeriesByCompetitor.clear();
         chart.removeAllSeries();
@@ -523,11 +540,11 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
         return hasDetailTypeChanged;
     }
 
-    protected MultiCompetitorRaceDataDTO getChartData() {
+    protected CompetitorsRaceDataDTO getChartData() {
         return chartData;
     }
 
-    protected void setChartData(MultiCompetitorRaceDataDTO chartData) {
+    protected void setChartData(CompetitorsRaceDataDTO chartData) {
         this.chartData = chartData;
     }
 
@@ -593,30 +610,25 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
 
         switch (timer.getPlayMode()) {
         case Live: {
-            boolean showBusyIndicator = false;
             // is date before first cache entry or is cache empty?
             if (timeOfEarliestRequestInMillis == null || date.getTime() < timeOfEarliestRequestInMillis) {
-                updateChart(timeRangeWithZoomProvider.getFromTime(), date, /* append */true, showBusyIndicator);
+                updateChart(timeRangeWithZoomProvider.getFromTime(), date, /* append */true);
             } else if (date.getTime() > timeOfLatestRequestInMillis) {
-                updateChart(new Date(timeOfLatestRequestInMillis), timeRangeWithZoomProvider.getToTime(), /* append */
-                        true, showBusyIndicator);
+                updateChart(new Date(timeOfLatestRequestInMillis), timeRangeWithZoomProvider.getToTime(), /* append */true);
             }
             // otherwise the cache spans across date and so we don't need to load anything
             break;
         }
         case Replay: {
-            boolean showBusyIndicator = true;
             if (timeOfLatestRequestInMillis == null) {
                 // pure replay mode
-                updateChart(timeRangeWithZoomProvider.getFromTime(), timeRangeWithZoomProvider.getToTime(), /* append */
-                        false, showBusyIndicator);
+                updateChart(timeRangeWithZoomProvider.getFromTime(), timeRangeWithZoomProvider.getToTime(), /* append */false);
             } else {
                 // replay mode during live play
                 if (timeOfEarliestRequestInMillis == null || date.getTime() < timeOfEarliestRequestInMillis) {
-                    updateChart(timeRangeWithZoomProvider.getFromTime(), date, /* append */true, showBusyIndicator);
+                    updateChart(timeRangeWithZoomProvider.getFromTime(), date, /* append */true);
                 } else if (date.getTime() > timeOfLatestRequestInMillis) {
-                    updateChart(new Date(timeOfLatestRequestInMillis), timeRangeWithZoomProvider.getToTime(), /* append */
-                            true, showBusyIndicator);
+                    updateChart(new Date(timeOfLatestRequestInMillis), timeRangeWithZoomProvider.getToTime(), /* append */true);
                 }
             }
             break;

@@ -145,7 +145,7 @@ import com.sap.sailing.gwt.ui.shared.LegEntryDTO;
 import com.sap.sailing.gwt.ui.shared.LegInfoDTO;
 import com.sap.sailing.gwt.ui.shared.ManeuverDTO;
 import com.sap.sailing.gwt.ui.shared.MarkPassingTimesDTO;
-import com.sap.sailing.gwt.ui.shared.MultiCompetitorRaceDataDTO;
+import com.sap.sailing.gwt.ui.shared.CompetitorsRaceDataDTO;
 import com.sap.sailing.gwt.ui.shared.PlacemarkDTO;
 import com.sap.sailing.gwt.ui.shared.PlacemarkOrderDTO;
 import com.sap.sailing.gwt.ui.shared.PositionDTO;
@@ -1305,18 +1305,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
         WindInfoForRaceDTO result = null;
         if (trackedRace != null) {
-            TimePoint fromTimePoint;
-            if (from == null) {
-                fromTimePoint = trackedRace.getStartOfTracking();
-            } else {
-                fromTimePoint = new MillisecondsTimePoint(from);
-            }
-            TimePoint toTimePoint;
-            if (to == null) {
-                toTimePoint = trackedRace.getEndOfRace();
-            } else {
-                toTimePoint = new MillisecondsTimePoint(to);
-            }
+            TimePoint fromTimePoint = from == null ? trackedRace.getStartOfTracking() : new MillisecondsTimePoint(from);
+            TimePoint toTimePoint = to == null ? trackedRace.getEndOfRace() : new MillisecondsTimePoint(to);
             if(fromTimePoint != null && toTimePoint != null) {
                 int numberOfFixes = (int) ((toTimePoint.asMillis() - fromTimePoint.asMillis())/resolutionInMilliseconds);
                 result = getAveragedWindInfo(fromTimePoint, resolutionInMilliseconds, numberOfFixes, windSourceTypeNames, trackedRace);
@@ -2312,51 +2302,42 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
     
     @Override
-    public MultiCompetitorRaceDataDTO getCompetitorsRaceData(RegattaAndRaceIdentifier race, List<Pair<Date, CompetitorDTO>> competitorsQuery,
-            Date toDate, long stepSize, DetailType detailType) throws NoWindException {
-        MultiCompetitorRaceDataDTO data = null;
+    public CompetitorsRaceDataDTO getCompetitorsRaceData(RegattaAndRaceIdentifier race, List<CompetitorDTO> competitors, Date from, Date to,
+            long stepSizeInMs, DetailType detailType) throws NoWindException {
+        CompetitorsRaceDataDTO result = null;
         TrackedRace trackedRace = getExistingTrackedRace(race);
         if (trackedRace != null) {
             TimePoint newestEvent = trackedRace.getTimePointOfNewestEvent();
-            TimePoint endTime = (toDate == null || toDate.after(newestEvent.asDate())) ? newestEvent : new MillisecondsTimePoint(toDate);
-            data = getMultiCompetitorRaceDataDTO(trackedRace, competitorsQuery, trackedRace.getStartOfRace(),
-                        endTime, stepSize, detailType);
+            TimePoint startTime = from == null ? trackedRace.getStartOfTracking() : new MillisecondsTimePoint(from);
+            TimePoint endTime = (to == null || to.after(newestEvent.asDate())) ? newestEvent : new MillisecondsTimePoint(to);
+            result = new CompetitorsRaceDataDTO(detailType, startTime.asDate(), endTime.asDate());
+
+            for (CompetitorDTO competitorDTO : competitors) {
+                Competitor competitor = getCompetitorById(trackedRace.getRace().getCompetitors(), competitorDTO.id);
+                ArrayList<Triple<String, Date, Double>> markPassingsData = new ArrayList<Triple<String, Date, Double>>();
+                ArrayList<Pair<Date, Double>> raceData = new ArrayList<Pair<Date, Double>>();
+                // Filling the mark passings
+                Set<MarkPassing> competitorMarkPassings = trackedRace.getMarkPassings(competitor);
+                if (competitorMarkPassings != null) {
+                    for (MarkPassing markPassing : competitorMarkPassings) {
+                        MillisecondsTimePoint time = new MillisecondsTimePoint(markPassing.getTimePoint().asMillis());
+                        markPassingsData.add(new Triple<String, Date, Double>(markPassing.getWaypoint().getName(), time
+                                .asDate(), getCompetitorRaceDataEntry(detailType, trackedRace, competitor, time)));
+                    }
+                }
+                if (startTime != null && endTime != null) {
+                    for (long i = startTime.asMillis(); i <= endTime.asMillis(); i += stepSizeInMs) {
+                        MillisecondsTimePoint time = new MillisecondsTimePoint(i);
+                        raceData.add(new Pair<Date, Double>(time.asDate(), getCompetitorRaceDataEntry(detailType, trackedRace,
+                                competitor, time)));
+                    }
+                }
+                result.setCompetitorData(competitorDTO, new CompetitorRaceDataDTO(competitorDTO, detailType, markPassingsData, raceData));
+            }
         }
-        return data;
+        return result;
     }
     
-    private MultiCompetitorRaceDataDTO getMultiCompetitorRaceDataDTO(TrackedRace race,
-            List<Pair<Date, CompetitorDTO>> competitorsQuery, TimePoint startTime, TimePoint endTime, long stepSize,
-            DetailType detailType) throws NoWindException {
-        MultiCompetitorRaceDataDTO data = new MultiCompetitorRaceDataDTO(detailType);
-        // Fetching the data from the TrackedRace
-        for (Pair<Date, CompetitorDTO> competitorQuery : competitorsQuery) {
-            Competitor competitor = getCompetitorById(race.getRace().getCompetitors(), competitorQuery.getB().id);
-            ArrayList<Triple<String, Date, Double>> markPassingsData = new ArrayList<Triple<String, Date, Double>>();
-            ArrayList<Pair<Date, Double>> raceData = new ArrayList<Pair<Date, Double>>();
-            // Filling the mark passings
-            Set<MarkPassing> competitorMarkPassings = race.getMarkPassings(competitor);
-            if (competitorMarkPassings != null) {
-                for (MarkPassing markPassing : competitorMarkPassings) {
-                    MillisecondsTimePoint time = new MillisecondsTimePoint(markPassing.getTimePoint().asMillis());
-                    markPassingsData.add(new Triple<String, Date, Double>(markPassing.getWaypoint().getName(), time
-                            .asDate(), getCompetitorRaceDataEntry(detailType, race, competitor, time)));
-                }
-            }
-            if (startTime != null && endTime != null) {
-                for (long i = competitorQuery.getA().before(startTime.asDate()) ? startTime.asMillis()
-                        : competitorQuery.getA().getTime(); i <= endTime.asMillis(); i += stepSize) {
-                    MillisecondsTimePoint time = new MillisecondsTimePoint(i);
-                    raceData.add(new Pair<Date, Double>(time.asDate(), getCompetitorRaceDataEntry(detailType, race,
-                            competitor, time)));
-                }
-            }
-            // Adding fetched data to the container
-            data.setCompetitorData(competitorQuery.getB(), new CompetitorRaceDataDTO(competitorQuery.getB(),
-                    detailType, markPassingsData, raceData));
-        }
-        return data;
-    }
     @Override
     public Map<CompetitorDTO, List<GPSFixDTO>> getDouglasPoints(RegattaAndRaceIdentifier raceIdentifier,
             Map<CompetitorDTO, Date> from, Map<CompetitorDTO, Date> to,
