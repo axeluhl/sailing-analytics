@@ -31,7 +31,7 @@ import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardEntryDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.ManeuverDTO;
-import com.sap.sailing.gwt.ui.shared.MultiCompetitorRaceDataDTO;
+import com.sap.sailing.gwt.ui.shared.CompetitorsRaceDataDTO;
 import com.sap.sailing.gwt.ui.shared.QuickRankDTO;
 import com.sap.sailing.gwt.ui.shared.RaceDTO;
 import com.sap.sailing.gwt.ui.shared.RaceMapDataDTO;
@@ -319,16 +319,6 @@ public interface SailingServiceAsync {
     void updateLeaderboardGroup(String oldName, String newName, String description,
             List<String> leaderboardNames, int[] overallLeaderboardDiscardThresholds, ScoringSchemeType overallLeaderboardScoringSchemeType, AsyncCallback<Void> callback);
 
-    /**
-     * Returns the mark passings and the data for the given {@link DetailType} of all competitors in
-     * <code>competitorsQuery</code> in the <code>race</code>, including the first dates in the query.<br />
-     * The Long part in the <code>competitorsQuery</code> defines the time point, from which on the data should be
-     * returned. If this time point is lesser than the start of race, all available data for this competitor is
-     * returned.<br />
-     * Returns <code>null</code>, if <code>race</code> isn't tracked. 
-     */
-    void getCompetitorsRaceData(RegattaAndRaceIdentifier race, List<Pair<Date,CompetitorDTO>> competitorsToLoad, Date toDate, long stepSize,
-            DetailType detailType, AsyncCallback<MultiCompetitorRaceDataDTO> callback);
 
     void setRaceIsKnownToStartUpwind(RegattaAndRaceIdentifier raceIdentifier, boolean raceIsKnownToStartUpwind,
             AsyncCallback<Void> callback);
@@ -427,4 +417,7 @@ public interface SailingServiceAsync {
 
     void getRankedCompetitorsFromBestToWorstAfterEachRaceColumn(String leaderboardName, Date date,
             AsyncCallback<List<Pair<String, List<CompetitorDTO>>>> callback);
+
+    void getCompetitorsRaceData(RegattaAndRaceIdentifier race, List<CompetitorDTO> competitors, Date from, Date to,
+            long stepSize, DetailType detailType, AsyncCallback<CompetitorsRaceDataDTO> callback);
 }
