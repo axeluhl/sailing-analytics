@@ -36,7 +36,9 @@ public class WindFieldGenParamsDTO implements IsSerializable {
     private boolean showStreamlets;
 
     private boolean showLines;
-    
+
+    private char seedLines;
+
     
     public WindFieldGenParamsDTO() {
         setDefaultTimeSettings();
@@ -155,6 +157,14 @@ public class WindFieldGenParamsDTO implements IsSerializable {
 
     public void setShowLines(boolean showLines) {
         this.showLines = showLines;
+    }
+
+    public char getSeedLines() {
+        return seedLines;
+    }
+
+    public void setSeedLines(char seedLines) {
+        this.seedLines = seedLines;
     }
 
 }

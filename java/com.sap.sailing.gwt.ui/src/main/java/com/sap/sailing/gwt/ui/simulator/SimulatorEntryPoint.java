@@ -20,22 +20,16 @@ public class SimulatorEntryPoint extends AbstractEntryPoint {
     private SimulatorViewModes viewMode;
 
     private final SimulatorServiceAsync simulatorSvc = GWT.create(SimulatorService.class);
-    private int xRes = 5;
-    private int yRes = 5;
+    private int xRes = 60;
+    private int yRes = 30;
     private boolean autoUpdate = false;
     private char mode = 'f';
-    /**
-     * Show the wind arrows in wind display and replay modes.
-     */
-    private boolean showArrows = true;
-    
-    /**
-     * Show the "heat map" and the wind lines in the wind display and replay modes.
-     */
-    private boolean showGrid = false;
-    private boolean showLines = false;
-    
-    private boolean showStreamlets = false;
+
+    private boolean showArrows = false; // show the wind arrows in wind display and replay modes.    
+    private boolean showGrid = true;   // show the "heat map" in the wind display and replay modes.
+    private boolean showLines = false;  // show the wind lines in the wind display and replay modes.
+    private char seedLines = 'b';  // seed lines at: 'b'ack, 'f'ront
+    private boolean showStreamlets = true; // show the wind streamlets in the wind display and replay modes.
    
     private static Logger logger = Logger.getLogger(SimulatorEntryPoint.class.getName());
 
@@ -100,9 +94,18 @@ public class SimulatorEntryPoint extends AbstractEntryPoint {
             } else {
                 showStreamlets = false;
             }
+            if (windDisplayStr.contains("b")) {
+                seedLines = 'b';
+            }
+            if (windDisplayStr.contains("f")) {
+                seedLines = 'f';
+            }
+            if (windDisplayStr.contains("c")) {
+                seedLines = 'c';
+            }
         }
         SimulatorMainPanel mainPanel = new SimulatorMainPanel(simulatorSvc, stringMessages, this, xRes, yRes,
-                autoUpdate, mode, showGrid, showLines, showArrows, showStreamlets);
+                autoUpdate, mode, showGrid, showLines, seedLines, showArrows, showStreamlets);
 
         switch (viewMode) {
         case ONESCREEN:

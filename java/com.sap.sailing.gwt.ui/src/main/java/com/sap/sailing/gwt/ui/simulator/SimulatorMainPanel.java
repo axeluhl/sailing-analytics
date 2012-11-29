@@ -185,7 +185,7 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
     }
 
     public SimulatorMainPanel(final SimulatorServiceAsync svc, final StringMessages stringMessages, final ErrorReporter errorReporter,
-            final int xRes, final int yRes, final boolean autoUpdate, final char mode, final boolean showGrid, final boolean showLines, final boolean showArrows, final boolean showStreamlets) {
+            final int xRes, final int yRes, final boolean autoUpdate, final char mode, final boolean showGrid, final boolean showLines, final char seedLines, final boolean showArrows, final boolean showStreamlets) {
 
         super();
 
@@ -223,6 +223,7 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
         windParams.setShowArrows(showArrows);
         windParams.setShowGrid(showGrid);
         windParams.setShowLines(showLines);
+        windParams.setSeedLines(seedLines);
         windParams.setShowStreamlets(showStreamlets);
 
         timer = new Timer(PlayModes.Replay, 1000l);

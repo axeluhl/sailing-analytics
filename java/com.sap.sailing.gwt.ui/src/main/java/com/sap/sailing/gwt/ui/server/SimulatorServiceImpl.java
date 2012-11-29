@@ -242,7 +242,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
             wf.setGridAreaGps(gridAreaGps);
         }
 
-        final WindFieldDTO wfDTO = createWindFieldDTO(wf, startTime, endTime, timeStep, params.isShowLines());
+        final WindFieldDTO wfDTO = createWindFieldDTO(wf, startTime, endTime, timeStep, params.isShowLines(), params.getSeedLines());
         logger.info("Exiting getWindField");
         return wfDTO;
 
@@ -304,7 +304,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
     }
 
     private WindFieldDTO createWindFieldDTO(final WindFieldGenerator wf, final TimePoint startTime, final TimePoint endTime,
-            final TimePoint timeStep, final boolean isShowLines) {
+            final TimePoint timeStep, final boolean isShowLines, final char seedLines) {
 
         final WindFieldDTO windFieldDTO = new WindFieldDTO();
         final List<SimulatorWindDTO> wList = new ArrayList<SimulatorWindDTO>();
@@ -327,8 +327,14 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
 
         windFieldDTO.setMatrix(wList);
         if (isShowLines) {
-            getWindLinesFromStartLine(wf, windFieldDTO, startTime, endTime, timeStep);
-            getWindLinesFromEndLine(wf, windFieldDTO, startTime, endTime, timeStep);
+            
+            if (seedLines == 'f') {
+                getWindLinesFromStartLine(wf, windFieldDTO, startTime, endTime, timeStep);
+            }
+            if (seedLines == 'b') {
+                getWindLinesFromEndLine(wf, windFieldDTO, startTime, endTime, timeStep);
+            }
+            
         }
         return windFieldDTO;
     }
@@ -566,7 +572,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
 
         WindFieldDTO windFieldDTO = null;
         if (pattern != null) {
-            windFieldDTO = createWindFieldDTO(wf, startTime, endTime, timeStep, params.isShowLines());
+            windFieldDTO = createWindFieldDTO(wf, startTime, endTime, timeStep, params.isShowLines(), params.getSeedLines());
         }
         final SimulatorResultsDTO simulatorResults = new SimulatorResultsDTO(rcDTO, pathDTO, windFieldDTO);
 
