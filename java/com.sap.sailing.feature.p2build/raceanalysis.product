@@ -3,6 +3,7 @@
 
 <product name="SAP  Race Analysis" uid="raceanalysis.product.id" id="raceanalysis.product" application="raceanalysis.application" version="1.0.0" useFeatures="true" includeLaunchers="false">
 
+
    <configIni use="default">
    </configIni>
 
@@ -15,6 +16,7 @@
 
    <windowImages/>
 
+
    <launcher>
       <solaris/>
       <win useIco="false">
@@ -22,8 +24,10 @@
       </win>
    </launcher>
 
+
    <vm>
    </vm>
+
 
    <plugins>
    </plugins>
@@ -38,6 +42,7 @@
       <plugin id="com.sap.sailing.freg.resultimport" autoStart="true" startLevel="3" />
       <plugin id="com.sap.sailing.gwt.ui" autoStart="true" startLevel="4" />
       <plugin id="com.sap.sailing.kiworesultimport" autoStart="true" startLevel="3" />
+      <plugin id="com.sap.sailing.monitoring" autoStart="true" startLevel="42" />
       <plugin id="com.sap.sailing.server" autoStart="true" startLevel="4" />
       <plugin id="com.sap.sailing.server.gateway" autoStart="true" startLevel="4" />
       <plugin id="com.sap.sailing.server.replication" autoStart="true" startLevel="4" />
