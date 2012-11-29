@@ -98,3 +98,13 @@ body {
     -moz-border-radius-bottomright: 5px;
     -webkit-border-bottom-right-radius: 5px;
     border-bottom-right-radius: 5px; }
+
+   #navigation .navButton:active {
+    background: url(images/icon-arrowright-white.png) no-repeat right center #d4652d;
+    color: #fff;
+    }
+
+   #navigation .navButton:hover {
+    background: url(images/icon-arrowright-white.png) no-repeat right center #d4652d;
+    color: #fff;
+    }
