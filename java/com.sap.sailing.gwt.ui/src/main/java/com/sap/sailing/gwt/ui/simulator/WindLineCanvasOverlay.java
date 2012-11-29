@@ -172,18 +172,12 @@ public class WindLineCanvasOverlay extends FullCanvasOverlay implements TimeList
         while (positionDTOIter.hasNext()) {
             PositionDTO positionDTO = positionDTOIter.next();
             if (prevPositionDTO != null) {
-                boolean previousPointInGrid = checkPointInGrid(prevPositionDTO);
-                boolean currentPointInGrid = checkPointInGrid(positionDTO);
-                if (previousPointInGrid  && currentPointInGrid) {
+                if (checkPointInGrid(prevPositionDTO)  && checkPointInGrid(positionDTO) ) {
                     drawLine(prevPositionDTO, positionDTO);
                 } else { 
                     PositionDTO pointOnBoundary = getPointOnBoundary(prevPositionDTO, positionDTO);
                     if (pointOnBoundary != null) {
-                        if (previousPointInGrid) {
-                            drawLine(prevPositionDTO, pointOnBoundary);
-                        } else if (currentPointInGrid) {
-                            drawLine(pointOnBoundary, positionDTO);
-                        }
+                        drawLine(prevPositionDTO, pointOnBoundary);
                     }
                 }
             }

@@ -33,6 +33,9 @@ public class SimulatorEntryPoint extends AbstractEntryPoint {
      * Show the "heat map" and the wind lines in the wind display and replay modes.
      */
     private boolean showGrid = false;
+    private boolean showLines = false;
+    
+    private boolean showStreamlets = false;
    
     private static Logger logger = Logger.getLogger(SimulatorEntryPoint.class.getName());
 
@@ -82,14 +85,24 @@ public class SimulatorEntryPoint extends AbstractEntryPoint {
             } else {
                 showGrid = false;
             }
+            if (windDisplayStr.contains("l")) {
+                showLines = true;
+            } else {
+                showLines = false;
+            }
             if (windDisplayStr.contains("a")) {
                 showArrows = true;
             } else {
                 showArrows = false;
             }
+            if (windDisplayStr.contains("s")) {
+                showStreamlets = true;
+            } else {
+                showStreamlets = false;
+            }
         }
         SimulatorMainPanel mainPanel = new SimulatorMainPanel(simulatorSvc, stringMessages, this, xRes, yRes,
-                autoUpdate, mode, showGrid, showArrows);
+                autoUpdate, mode, showGrid, showLines, showArrows, showStreamlets);
 
         switch (viewMode) {
         case ONESCREEN:

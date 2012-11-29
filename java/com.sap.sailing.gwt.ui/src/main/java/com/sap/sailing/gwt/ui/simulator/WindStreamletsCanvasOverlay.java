@@ -33,7 +33,7 @@ import com.sap.sailing.gwt.ui.simulator.util.WindFieldMapMouseMoveHandler;
  * @author Nidhi Sawhney(D054070)
  * 
  */
-public class WindFieldCanvasOverlay extends FullCanvasOverlay implements TimeListenerWithStoppingCriteria {
+public class WindStreamletsCanvasOverlay extends FullCanvasOverlay implements TimeListenerWithStoppingCriteria {
 
     /* The wind field that is to be displayed in the overlay */
     protected WindFieldDTO wl;
@@ -44,22 +44,22 @@ public class WindFieldCanvasOverlay extends FullCanvasOverlay implements TimeLis
     
     /* The points where ToolTip is to be displayed */
     protected Map<ToolTip, WindDTO> windFieldPoints;
-    protected String arrowColor = "Blue";
+    protected String arrowColor = "Black";
     protected String arrowHeadColor = "Blue";
     protected WindFieldMapMouseMoveHandler mmHandler;
     protected double arrowLength = 15;
    
     private Timer timer;
 
-    private static Logger logger = Logger.getLogger(WindFieldCanvasOverlay.class.getName());
+    private static Logger logger = Logger.getLogger(WindStreamletsCanvasOverlay.class.getName());
 
-    public WindFieldCanvasOverlay(Timer timer) {
+    public WindStreamletsCanvasOverlay(Timer timer) {
         super();
         this.timer = timer;
         init();
     }
 
-    public WindFieldCanvasOverlay() {
+    public WindStreamletsCanvasOverlay() {
         super();
         this.timer = null;
         init();
@@ -119,7 +119,7 @@ public class WindFieldCanvasOverlay extends FullCanvasOverlay implements TimeLis
 
     @Override
     protected Overlay copy() {
-        return new WindFieldCanvasOverlay(this.timer);
+        return new WindStreamletsCanvasOverlay(this.timer);
     }
 
     @Override
@@ -151,29 +151,41 @@ public class WindFieldCanvasOverlay extends FullCanvasOverlay implements TimeLis
 
     }
 
-    protected void drawScaledArrow(WindDTO windDTO, double angle, int index, boolean drawHead) {
+    protected void drawScaledArrow(WindDTO windDTO, double angle, int index, double pxLength, boolean drawHead) {
 
-        double aWidth = Math.max(1., (windDTO.trueWindSpeedInMetersPerSecond/2.));
-        double aLength = Math.max(10., (4.*windDTO.trueWindSpeedInMetersPerSecond));
+        double aWidth = 1.0; //Math.max(1., (windDTO.trueWindSpeedInMetersPerSecond/2.));
+        //double aLength = 10.0; //Math.max(10., (4.*windDTO.trueWindSpeedInMetersPerSecond));
         //System.out.println("arrow speed: "+windDTO.trueWindSpeedInMetersPerSecond+" angle:"+angle+" aWidth: "+aWidth+" aLength: "+aLength);
-        drawArrow(windDTO, angle, aLength, aWidth, index, drawHead);
+        drawArrow(windDTO, angle, pxLength, aWidth, index, drawHead);
 
     }
     
     protected void drawWindField(final List<WindDTO> windDTOList) {
-        boolean drawHead = true;
+        boolean drawHead = false;
         clear();
         Context2d context2d = canvas.getContext2d();
         context2d.setGlobalAlpha(0.4);
 
         if (windDTOList != null && windDTOList.size() > 0) {
             Iterator<WindDTO> windDTOIter = windDTOList.iterator();
+            WindDTO w0 = windDTOIter.next();
+            WindDTO w1 = windDTOIter.next();
+            LatLng pg0 = LatLng.newInstance(w0.position.latDeg, w0.position.lngDeg);
+            LatLng pg1 = LatLng.newInstance(w1.position.latDeg, w1.position.lngDeg);
+            Point px0 = getMap().convertLatLngToDivPixel(pg0);
+            Point px1 = getMap().convertLatLngToDivPixel(pg1);
+            double dx = px0.getX()-px1.getX();
+            double dy = px0.getY()-px1.getY();
+            double pxLength = Math.sqrt( dx*dx + dy*dy );
+            System.out.println("pxLength = "+pxLength);
+            
+            windDTOIter = windDTOList.iterator();
             int index = 0;
             while (windDTOIter.hasNext()) {
                 WindDTO windDTO = windDTOIter.next();
                 //System.out.println("wind angle: "+windDTO.trueWindBearingDeg);
                 DegreeBearingImpl dbi = new DegreeBearingImpl(windDTO.trueWindBearingDeg);
-                drawScaledArrow(windDTO, dbi.getRadians(), ++index, drawHead);
+                drawScaledArrow(windDTO, dbi.getRadians(), ++index, pxLength, drawHead);
             }
             String title = "Wind Field at " + windDTOList.size() + " points.";
             getCanvas().setTitle(title);

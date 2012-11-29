@@ -32,6 +32,11 @@ public class WindFieldGenParamsDTO implements IsSerializable {
      * Show the "heat map" and the wind lines in the wind display and replay modes.
      */
     private boolean showGrid;
+
+    private boolean showStreamlets;
+
+    private boolean showLines;
+    
     
     public WindFieldGenParamsDTO() {
         setDefaultTimeSettings();
@@ -100,7 +105,7 @@ public class WindFieldGenParamsDTO implements IsSerializable {
         startTime.setMinutes(0);
         startTime.setSeconds(0);
 
-        timeStep = new Date(15 * 1000);
+        timeStep = new Date(20 * 1000);
         endTime = new Date(startTime.getTime() + 10 * 60 * 1000);
     }
 
@@ -135,4 +140,21 @@ public class WindFieldGenParamsDTO implements IsSerializable {
     public void setShowGrid(boolean showGrid) {
         this.showGrid = showGrid;
     }
+
+    public boolean isShowStreamlets() {
+        return showStreamlets;
+    }
+
+    public void setShowStreamlets(boolean showStreamlets) {
+        this.showStreamlets = showStreamlets;
+    }
+
+    public boolean isShowLines() {
+        return showLines;
+    }
+
+    public void setShowLines(boolean showLines) {
+        this.showLines = showLines;
+    }
+
 }
