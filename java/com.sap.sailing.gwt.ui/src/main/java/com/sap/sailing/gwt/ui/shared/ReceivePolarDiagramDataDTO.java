@@ -6,24 +6,24 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 
 public class ReceivePolarDiagramDataDTO implements IsSerializable {
 
-    private List<SpeedWithBearingDTO> speeds;
+    private List<SpeedBearingPositionDTO> speedsBearingsPositions;
     private String notificationMessage;
 
     public ReceivePolarDiagramDataDTO() {
         this.notificationMessage = "";
     }
 
-    public ReceivePolarDiagramDataDTO(final List<SpeedWithBearingDTO> speeds, final String notificatonMessage) {
-        this.speeds = speeds;
+    public ReceivePolarDiagramDataDTO(final List<SpeedBearingPositionDTO> speedsBearingsPositions, final String notificatonMessage) {
+        this.speedsBearingsPositions = speedsBearingsPositions;
         this.notificationMessage = notificatonMessage;
     }
 
-    public List<SpeedWithBearingDTO> getSpeeds() {
-        return this.speeds;
+    public List<SpeedBearingPositionDTO> getSpeedsBearingsPositions() {
+        return this.speedsBearingsPositions;
     }
 
-    public void setSpeeds(final List<SpeedWithBearingDTO> speeds) {
-        this.speeds = speeds;
+    public void setSpeedsBearingsPositions(final List<SpeedBearingPositionDTO> speedsBearingsPositions) {
+        this.speedsBearingsPositions = speedsBearingsPositions;
     }
 
     public String getNotificationMessage() {
