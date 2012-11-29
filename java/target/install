@@ -20,7 +20,7 @@ echo Install p2 content
 cp -v $p2PluginRepository/configuration/config.ini configuration
 cp -v $GIT_DIR/java/target/configuration/jetty/etc/jetty.xml configuration/jetty/etc
 cp -v $GIT_DIR/java/target/configuration/jetty/etc/realm.properties configuration/jetty/etc
-cp -v $GIT_DIR/java/target/configuration/jetty/etc/monitoring.properties configuration/jetty/etc
+cp -v $GIT_DIR/java/target/configuration/monitoring.properties configuration/
 cp -r -v $p2PluginRepository/configuration/org.eclipse.equinox.simpleconfigurator configuration
 cp -v $p2PluginRepository/plugins/*.jar plugins
 echo Done.
