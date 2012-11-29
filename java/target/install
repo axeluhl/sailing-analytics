@@ -18,6 +18,7 @@ rm -rf org.eclipse.*
 rm -rf configuration/org.eclipse.*
 echo Install p2 content
 cp -v $p2PluginRepository/configuration/config.ini configuration
+cp -v $p2PluginRepository/configuration/monitoring.properties configuration
 cp -v $GIT_DIR/java/target/configuration/jetty/etc/jetty.xml configuration/jetty/etc
 cp -v $GIT_DIR/java/target/configuration/jetty/etc/realm.properties configuration/jetty/etc
 cp -r -v $p2PluginRepository/configuration/org.eclipse.equinox.simpleconfigurator configuration
