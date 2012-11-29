@@ -14,14 +14,13 @@ import com.google.gwt.maps.client.geom.Point;
 import com.google.gwt.maps.client.overlay.PolyEditingOptions;
 import com.google.gwt.maps.client.overlay.Polyline;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.sap.sailing.domain.common.Distance;
-import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SimulatorServiceAsync;
 import com.sap.sailing.gwt.ui.shared.PathDTO;
 import com.sap.sailing.gwt.ui.shared.PositionDTO;
 import com.sap.sailing.gwt.ui.shared.ReceivePolarDiagramDataDTO;
 import com.sap.sailing.gwt.ui.shared.RequestPolarDiagramDataDTO;
+import com.sap.sailing.gwt.ui.shared.SpeedBearingPositionDTO;
 import com.sap.sailing.gwt.ui.shared.SpeedWithBearingDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.racemap.TwoDPoint;
@@ -43,8 +42,10 @@ public class PathPolyline {
     private static final String DEFAULT_DASHLINE_DISTANCED_COLOR = "Red";
     private static final String DEFAULT_DASHLINE_BISECTOR_COLOR = "Green";
     private static final String DEFAULT_DASHLINE_VERTICAL_COLOR = "Blue";
+
     private static final double STEP_DURATION_MILLISECONDS = 1000;
-    private static final double EARTH_RADIUS_METERS = 6378137;
+    private static final boolean USE_DAMPENED_VALUES = false;
+    private static final boolean USE_ONLY_TURN_POINTS = false;
 
     private Polyline polyline;
     private final LatLng[] points;
@@ -67,8 +68,9 @@ public class PathPolyline {
     private boolean warningAlreadyShown = false;
 
     private boolean firstTime = true;
-
     private double stepSizeMeters = 0.0;
+
+    // private static Logger logger = Logger.getLogger(PathPolyline.class.getName());
 
     public PathPolyline(final LatLng[] points, final int boatClassID, final ErrorReporter errorReporter, final PathDTO pathDTO,
             final SimulatorServiceAsync simulatorService, final MapWidget map) {
@@ -186,10 +188,10 @@ public class PathPolyline {
         this.polyline.setEditingEnabled(PolyEditingOptions.newInstance(this.points.length - 1));
 
         if (this.firstTime) {
+
             this.averageWindSpeed = this.getAverageWindSpeed();
-            this.stepSizeMeters = convertFromKnotsToMPS(this.averageWindSpeed.speedInKnots) * (STEP_DURATION_MILLISECONDS / 1000);
+            this.stepSizeMeters = PathPolylineUtils.convertFromKnotsToMPS(this.averageWindSpeed.speedInKnots) * (STEP_DURATION_MILLISECONDS / 1000);
             this.firstTime = false;
-            System.err.println("BOGDAN: averageWindSpeed = " + this.averageWindSpeed.toString());
         }
 
         this.computeTotalTimeOfPathPolyline();
@@ -319,6 +321,10 @@ public class PathPolyline {
         return this.map.convertContainerPixelToLatLng(Point.newInstance((int) point.getX(), (int) point.getY()));
     }
 
+    private LatLng convertToLatLng(final PositionDTO position) {
+        return LatLng.newInstance(position.latDeg, position.lngDeg);
+    }
+
     private Polyline createPolyline(final TwoDPoint first, final TwoDPoint second, final String color, final int weight) {
         final LatLng[] points = new LatLng[2];
 
@@ -351,305 +357,86 @@ public class PathPolyline {
                     warningAlreadyShown = true;
                 }
 
-                final List<PositionDTO> positions = requestData.getPositions();
-                final List<SpeedWithBearingDTO> speeds = receiveData.getSpeeds();
+                // final List<PositionDTO> positions = requestData.getPositions();
+                final List<SpeedBearingPositionDTO> speeds = receiveData.getSpeedsBearingsPositions();
 
-                final int noOfPositions = positions.size();
+                // int counter = 0;
+                // for (final SpeedBearingPositionDTO speed : speeds) {
+                // counter++;
+                // System.err.println("Position " + counter + ": " + speed.getPosition().latDeg + "," +
+                // speed.getPosition().lngDeg + " and speed = "
+                // + PathPolylineUtils.convertFromKnotsToMPS(speed.getSpeedWithBearing().speedInKnots));
+                // }
+
                 final int noOfSpeeds = speeds.size();
 
-                if (noOfPositions != 1 + noOfSpeeds) {
-                    // ERROR
-                }
-
-                PositionDTO currentStartPositionDTO = null;
-                PositionDTO currentEndPositionDTO = null;
-                SpeedWithBearingDTO currentSpeedWithBearingDTO = null;
+                SpeedBearingPositionDTO startSpeedAndPosition = null;
+                SpeedBearingPositionDTO endSpeedAndPosition = null;
+                LatLng startPoint = null;
+                LatLng endPoint = null;
+                double startSpeed = 0.0;
+                double endSpeed = 0.0;
                 double totalTime = 0.0;
 
-                for (int index = 0; index < noOfPositions; index++) {
+                for (int index = 0; index < noOfSpeeds; index++) {
 
-                    if (index == noOfPositions - 1) {
+                    if (index == noOfSpeeds - 1) {
                         break;
                     }
 
-                    currentStartPositionDTO = positions.get(index);
-                    currentEndPositionDTO = positions.get(index + 1);
-                    currentSpeedWithBearingDTO = speeds.get(index);
+                    startSpeedAndPosition = speeds.get(index);
+                    endSpeedAndPosition = speeds.get(index + 1);
 
-                    totalTime += getTimeRequiredToSail(currentStartPositionDTO, currentEndPositionDTO, currentSpeedWithBearingDTO);
+                    startPoint = convertToLatLng(startSpeedAndPosition.getPosition());
+                    endPoint = convertToLatLng(endSpeedAndPosition.getPosition());
+
+                    startSpeed = PathPolylineUtils.convertFromKnotsToMPS(startSpeedAndPosition.getSpeedWithBearing().speedInKnots);
+                    endSpeed = PathPolylineUtils.convertFromKnotsToMPS(endSpeedAndPosition.getSpeedWithBearing().speedInKnots);
+
+                    //
+
+                    final double time = PathPolylineUtils.getTime(startPoint, startSpeed, endPoint, endSpeed);
+                    final double distance = PathPolylineUtils.getDistanceBetween(startPoint, endPoint);
+                    System.err.println("ZZZ: Segment no " + index + " distance=" + distance + " time=" + time);
+                    totalTime += PathPolylineUtils.getTime(startPoint, startSpeed, endPoint, endSpeed);
                 }
 
-                System.err.println("BOGDAN: Total time of the path polyline is " + totalTime + " seconds!");
+                System.err.println("==================================================");
+                System.err.println("Total time of the path polyline is " + totalTime + " seconds!");
             }
         });
     }
 
-    private static double convertFromDegToRad(final double noOfDegrees) {
-        return (noOfDegrees / 180) * Math.PI;
-    }
-
-    private static double convertFromKnotsToMPS(final double knots) {
-        return knots * 0.51444;
-    }
-
-    private SpeedWithBearingDTO computeAverageWindSpeed_TrueWind() {
-
-        final List<WindDTO> windDTOs = this.pathDTO.getMatrix();
-        final int count = windDTOs.size();
-
-        double sumOfProductOfSpeedAndCosBearing = 0;
-        double sumOfProductOfSpeedAndSinBearing = 0;
-
-        for (final WindDTO windDTO : windDTOs) {
-            sumOfProductOfSpeedAndCosBearing += (windDTO.trueWindSpeedInKnots * Math.cos(convertFromDegToRad(windDTO.trueWindBearingDeg)));
-            sumOfProductOfSpeedAndSinBearing += (windDTO.trueWindSpeedInKnots * Math.sin(convertFromDegToRad(windDTO.trueWindBearingDeg)));
-        }
-
-        final double a = sumOfProductOfSpeedAndCosBearing / count;
-        final double b = sumOfProductOfSpeedAndSinBearing / count;
-        final double c = Math.atan(b / a);
-
-        double averageBearing = 0;
-
-        if (a == 0) {
-            averageBearing = (b >= 0) ? 90 : 270;
-        } else if (a < 0) { // 2nd Q : 3rd Q
-            averageBearing = 180 + c;
-        } else if (a > 0) {
-            averageBearing = (b >= 0) ? c : 360 + c; // 1st Q : 4th Q
-        }
-
-        final double averageSpeed = Math.sqrt(a * a + b * b);
-
-        return new SpeedWithBearingDTO(averageSpeed, averageBearing);
-    }
-
-    @SuppressWarnings("unused")
-    private SpeedWithBearingDTO computeAverageWindSpeed_DampenedTrueWind() {
-
-        final List<WindDTO> windDTOs = this.pathDTO.getMatrix();
-        final int count = windDTOs.size();
-
-        double sumOfProductOfSpeedAndCosBearing = 0;
-        double sumOfProductOfSpeedAndSinBearing = 0;
-
-        for (final WindDTO windDTO : windDTOs) {
-
-            if (windDTO.dampenedTrueWindSpeedInKnots == null) {
-                System.err.println("BOGDAN: windDTO.dampenedTrueWindSpeedInKnots is null");
-            }
-
-            sumOfProductOfSpeedAndCosBearing += (windDTO.dampenedTrueWindSpeedInKnots * Math.cos(convertFromDegToRad(windDTO.dampenedTrueWindBearingDeg)));
-            sumOfProductOfSpeedAndSinBearing += (windDTO.dampenedTrueWindSpeedInKnots * Math.sin(convertFromDegToRad(windDTO.dampenedTrueWindBearingDeg)));
-        }
-
-        final double a = sumOfProductOfSpeedAndCosBearing / count;
-        final double b = sumOfProductOfSpeedAndSinBearing / count;
-        final double c = Math.atan(b / a);
-
-        double averageBearing = 0;
-
-        if (a == 0) {
-            averageBearing = (b >= 0) ? 90 : 270;
-        } else if (a < 0) { // 2nd Q : 3rd Q
-            averageBearing = 180 + c;
-        } else if (a > 0) {
-            averageBearing = (b >= 0) ? c : 360 + c; // 1st Q : 4th Q
-        }
-
-        final double averageSpeed = Math.sqrt(a * a + b * b);
-
-        return new SpeedWithBearingDTO(averageSpeed, averageBearing);
-    }
-
-    @SuppressWarnings("unused")
-    private SpeedWithBearingDTO computeAverageWindSpeed_MinMax_DampenedTrueWind() {
-
-        final List<WindDTO> windDTOs = this.pathDTO.getMatrix();
-
-        WindDTO minWindDTO = windDTOs.get(0);
-        WindDTO maxWindDTO = windDTOs.get(0);
-        WindDTO currentWindDTO = null;
-        final int count = windDTOs.size();
-
-        for (int index = 1; index < count; index++) {
-
-            currentWindDTO = windDTOs.get(index);
-
-            if (currentWindDTO.dampenedTrueWindSpeedInKnots < minWindDTO.dampenedTrueWindSpeedInKnots) {
-                minWindDTO = currentWindDTO;
-            }
-
-            if (currentWindDTO.dampenedTrueWindSpeedInKnots > maxWindDTO.dampenedTrueWindSpeedInKnots) {
-                maxWindDTO = currentWindDTO;
-            }
-        }
-
-        final double speedInKnots = (minWindDTO.dampenedTrueWindSpeedInKnots + maxWindDTO.dampenedTrueWindSpeedInKnots) / 2;
-        final double bearingInDegrees = (minWindDTO.dampenedTrueWindBearingDeg + maxWindDTO.dampenedTrueWindBearingDeg) / 2;
-
-        return new SpeedWithBearingDTO(speedInKnots, bearingInDegrees);
-    }
-
-    @SuppressWarnings("unused")
-    private SpeedWithBearingDTO computeAverageWindSpeed_MinMax_TrueWind() {
-
-        final List<WindDTO> windDTOs = this.pathDTO.getMatrix();
-
-        WindDTO minWindDTO = windDTOs.get(0);
-        WindDTO maxWindDTO = windDTOs.get(0);
-        WindDTO currentWindDTO = null;
-        final int count = windDTOs.size();
-
-        for (int index = 1; index < count; index++) {
-
-            currentWindDTO = windDTOs.get(index);
-
-            if (currentWindDTO.trueWindSpeedInKnots < minWindDTO.trueWindSpeedInKnots) {
-                minWindDTO = currentWindDTO;
-            }
-
-            if (currentWindDTO.trueWindSpeedInKnots > maxWindDTO.trueWindSpeedInKnots) {
-                maxWindDTO = currentWindDTO;
-            }
-        }
-
-        final double speedInKnots = (minWindDTO.trueWindSpeedInKnots + maxWindDTO.trueWindSpeedInKnots) / 2;
-        final double bearingInDegrees = (minWindDTO.trueWindBearingDeg + maxWindDTO.trueWindBearingDeg) / 2;
-
-        return new SpeedWithBearingDTO(speedInKnots, bearingInDegrees);
-    }
-
     private SpeedWithBearingDTO getAverageWindSpeed() {
 
-        final SpeedWithBearingDTO averageWindSpeed_TrueWind = this.computeAverageWindSpeed_TrueWind();
-
-        // final SpeedWithBearingDTO averageWindSpeed_DampenedTrueWind =
-        // this.computeAverageWindSpeed_DampenedTrueWind();
-
-        // final SpeedWithBearingDTO averageWindSpeed_MinMax_DampenedTrueWind =
-        // this.computeAverageWindSpeed_MinMax_DampenedTrueWind();
-
-        // final SpeedWithBearingDTO averageWindSpeed_MinMax_TrueWind = this.computeAverageWindSpeed_MinMax_TrueWind();
-
-        return averageWindSpeed_TrueWind;
+        final List<WindDTO> windDTOs = this.pathDTO.getMatrix();
+        // PathPolylineUtils.computeMinMaxAverageWindSpeed(windDTOs, USE_DAMPENED_VALUES)
+        return PathPolylineUtils.computeAverageWindSpeed(windDTOs, USE_DAMPENED_VALUES);
     }
 
     private RequestPolarDiagramDataDTO createRequestPolarDiagramDataDTO() {
 
         final List<PositionDTO> positions = new ArrayList<PositionDTO>();
 
-        // final int noOfPoints = this.points.length;
-        //
-        // System.err.println("BOGDAN: stepSizeMeters = " + this.stepSizeMeters);
-        // System.err.println("BOGDAN: this.points[0] = " + this.points[0].toString());
-        // System.err.println("BOGDAN: this.points[1] = " + this.points[1].toString());
-        //
-        // final List<LatLng> temp = getIntermediatePositions(this.points[0], this.points[1], this.stepSizeMeters);
-        // System.err.println("BOGDAN: temp.size() = " + temp.size());
-
-        // for (int index = 0; index < noOfPoints; index++) {
-        //
-        // if (index == noOfPoints - 1) {
-        // positions.add(new PositionDTO(this.points[index].getLatitude(), this.points[index].getLongitude()));
-        // break;
-        // }
-        //
-        // for (final LatLng point : getIntermediatePositions(this.points[index], this.points[index + 1],
-        // this.stepSizeMeters)) {
-        // positions.add(new PositionDTO(point.getLatitude(), point.getLongitude()));
-        // }
-        // }
-
-        for (final LatLng point : this.points) {
-
-            positions.add(new PositionDTO(point.getLatitude(), point.getLongitude()));
+        if (USE_ONLY_TURN_POINTS) {
+            for (final LatLng point : this.points) {
+                positions.add(new PositionDTO(point.getLatitude(), point.getLongitude()));
+            }
+        } else {
+            for (final LatLng point : PathPolylineUtils.getIntermediatePoints(this.points, this.stepSizeMeters)) {
+                positions.add(new PositionDTO(point.getLatitude(), point.getLongitude()));
+            }
         }
+
+        System.err.println("==================================================");
+        System.err.println("total distance of path = " + PathPolylineUtils.getTotalDistanceMeters(this.points) + " meters");
+        System.err.println("step size = " + stepSizeMeters + " meters");
+        System.err.println("average wind speed = " + PathPolylineUtils.convertFromKnotsToMPS(this.averageWindSpeed.speedInKnots) + " meters/second");
+        System.err.println("total points = " + positions.size());
+        System.err.println("==================================================");
+
+        this.averageWindSpeed = new SpeedWithBearingDTO(4, this.averageWindSpeed.bearingInDegrees);
 
         return new RequestPolarDiagramDataDTO(this.boatClassID, positions, this.averageWindSpeed);
-    }
-
-    @SuppressWarnings("unused")
-    private static List<LatLng> getIntermediatePositions(final LatLng startPosition, final LatLng endPosition, final double stepSizeMeters) {
-        final List<LatLng> result = new ArrayList<LatLng>();
-
-        final double distance = startPosition.distanceFrom(endPosition);
-        System.err.println("BOGDAN: distance = " + distance);
-
-        final double noOfSteps = distance / stepSizeMeters;
-        System.err.println("BOGDAN: noOfSteps = " + noOfSteps);
-
-        final double bearingDegrees = getBearingDegreesBetween(startPosition, endPosition);
-
-        LatLng first = startPosition;
-        LatLng second = null;
-
-        result.add(first);
-        for (int index = 0; index < noOfSteps; index++) {
-
-            second = getDestinationPoint(first, stepSizeMeters, bearingDegrees);
-            result.add(second);
-            first = LatLng.newInstance(second.getLatitude(), second.getLongitude());
-        }
-
-        return result;
-    }
-
-    /**
-     * As seen at http://www.movable-type.co.uk/scripts/latlong.html => Destination point given distance and bearing
-     * from start point
-     */
-    private static LatLng getDestinationPoint(final LatLng startPoint, final double distanceMeters, final double bearingDegrees) {
-
-        final double lat1 = startPoint.getLatitude();
-        final double lng1 = startPoint.getLongitude();
-
-        final double cosOfBearing = Math.cos(bearingDegrees);
-        final double sinOfBearing = Math.sin(bearingDegrees);
-
-        final double angularDistance = distanceMeters / EARTH_RADIUS_METERS;
-        final double cosOfAngularDistance = Math.cos(angularDistance);
-        final double sinOfAngularDistance = Math.sin(angularDistance);
-
-        final double lat2 = Math.asin(Math.sin(lat1) * cosOfAngularDistance + Math.cos(lat1) * sinOfAngularDistance * cosOfBearing);
-        final double lng2 = lng1 + Math.atan2(sinOfBearing * sinOfAngularDistance * Math.cos(lat1), cosOfAngularDistance - Math.sin(lat1) * Math.sin(lat2));
-
-        return LatLng.newInstance(lat2, lng2);
-    }
-
-    /**
-     * As seen in com.sap.sailing.domain.common.AbstractPosition and
-     * com.sap.sailing.domain.common.impl.RadianBearingImpl
-     */
-    private static double getBearingDegreesBetween(final LatLng startPoint, final LatLng endPoint) {
-
-        double bearingRadians = Math.atan2(
-                Math.sin(endPoint.getLongitudeRadians() - startPoint.getLongitudeRadians()) * Math.cos(endPoint.getLatitudeRadians()),
-                Math.cos(startPoint.getLatitudeRadians()) * Math.sin(endPoint.getLatitudeRadians()) - Math.sin(startPoint.getLatitudeRadians())
-                * Math.cos(endPoint.getLatitudeRadians()) * Math.cos(endPoint.getLongitudeRadians() - startPoint.getLongitudeRadians()));
-
-        if (bearingRadians < 0) {
-            bearingRadians = bearingRadians + 2 * Math.PI;
-        }
-
-        bearingRadians = bearingRadians - 2 * Math.PI * (int) (bearingRadians / 2. / Math.PI);
-
-        return (bearingRadians / Math.PI * 180.0);
-    }
-
-    private static double getTimeRequiredToSail(final PositionDTO positionDTOStart, final PositionDTO positionDTOEnd, final SpeedWithBearingDTO speed) {
-
-        final double speedMetersPerSecond = speed.speedInKnots * 0.51444;
-
-        if (speedMetersPerSecond == 0.0) {
-            return Double.MAX_VALUE;
-        }
-
-        final DegreePosition degreePositionStart = new DegreePosition(positionDTOStart.latDeg, positionDTOStart.lngDeg);
-        final DegreePosition degreePositionEnd = new DegreePosition(positionDTOEnd.latDeg, positionDTOEnd.lngDeg);
-
-        final Distance distance = degreePositionStart.getDistance(degreePositionEnd);
-
-        return (distance.getMeters() / speedMetersPerSecond);
     }
 }
