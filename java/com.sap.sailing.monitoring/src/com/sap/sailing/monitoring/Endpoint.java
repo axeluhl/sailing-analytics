@@ -3,69 +3,33 @@ package com.sap.sailing.monitoring;
 import java.net.InetSocketAddress;
 
 /**
- * @see IEndpoint
+ * Definition of an endpoint that submits to checks by 
+ * the monitoring service. It consists of an address, a port
+ * and additional status information.
  * 
  * @author Simon Pamies (info@pamies.de)
  * @since Nov 28, 2012
  */
-public class Endpoint implements IEndpoint {
-
-    private InetSocketAddress address;
-    private String name = "";
-    private long last_success = 0;
-    private long last_fail = 0;
-    private boolean already_checked = false;
+public interface Endpoint {
     
-    public Endpoint(InetSocketAddress address) {
-        this.address = address;
-    }
+    InetSocketAddress getAddress();
     
-    @Override
-    public InetSocketAddress getAddress() {
-        return address;
-    }
-
-    @Override
-    public long lastSucceeded() {
-        return last_success;
-    }
-
-    @Override
-    public long lastFailed() {
-        return last_fail;
-    }
-
-    @Override
-    public boolean alreadyChecked() {
-        return already_checked;
-    }
+    String getName();
     
-    @Override
-    public boolean hasFailed() {
-        return (last_fail > last_success);
-    }
+    long lastSucceeded();
     
-    public void setSuccess(long millis) {
-        last_success = millis;
-        already_checked = true;
-    }
+    long lastFailed();
     
-    public void setFailure(long millis) {
-        last_fail = millis;
-    }
+    boolean alreadyChecked();
     
-    public String toString() {
-        return getAddress().toString();
-    }
-
-    @Override
-    public String getName() {
-        return name;
-    }
-
-    @Override
-    public void setName(String name) {
-        this.name = name;
-    }
+    boolean hasFailed();
+    
+    void setSuccess(long millis);
+    
+    void setFailure(long millis);
+    
+    void setName(String name);
+    
+    String toString();
 
 }

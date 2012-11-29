@@ -16,12 +16,12 @@ public class SystemPrinterPortMonitor extends AbstractPortMonitor {
     }
 
     @Override
-    public void handleFailure(IEndpoint endpoint) {
+    public void handleFailure(Endpoint endpoint) {
         System.out.println("ERROR: Could not connect to endpoint " + endpoint.toString());
     }
 
     @Override
-    public void handleConnection(IEndpoint endpoint) {
+    public void handleConnection(Endpoint endpoint) {
         System.out.println("INFO: Connection to " + endpoint.toString() + " succeeded.");
     }
 

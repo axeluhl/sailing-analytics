@@ -43,7 +43,7 @@ public class OSGiRestartingPortMonitor extends AbstractPortMonitor {
     }
 
     @Override
-    public void handleFailure(IEndpoint endpoint) {
+    public void handleFailure(Endpoint endpoint) {
         Bundle bundle = bundles.get(endpoint.getName());
         
         if (bundle.getState() == BundleEvent.STARTED || bundle.getState() == BundleEvent.STOPPED) {
@@ -63,7 +63,7 @@ public class OSGiRestartingPortMonitor extends AbstractPortMonitor {
         log.info("Bundle " + endpoint.getName() + " restarted");
         
         /* only send mail if service has not failed before */
-        if (!endpoint.hasFailed())
+        if (!endpoint.hasFailed()) {
             try {
                 Session session = Session.getDefaultInstance(this.properties, new SMTPAuthenticator());
                 MimeMessage msg = new MimeMessage(session);
@@ -80,6 +80,7 @@ public class OSGiRestartingPortMonitor extends AbstractPortMonitor {
             } catch(Exception ex) {
                 ex.printStackTrace();
             }
+        }
     }
     
     private class SMTPAuthenticator extends javax.mail.Authenticator {
@@ -91,7 +92,7 @@ public class OSGiRestartingPortMonitor extends AbstractPortMonitor {
     }
 
     @Override
-    public void handleConnection(IEndpoint endpoint) {
+    public void handleConnection(Endpoint endpoint) {
     }
 
 }

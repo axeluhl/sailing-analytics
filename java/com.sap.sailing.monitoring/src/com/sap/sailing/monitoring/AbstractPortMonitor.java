@@ -9,6 +9,7 @@ import java.net.SocketTimeoutException;
 import java.util.Properties;
 import java.util.logging.Logger;
 
+
 /**
  * Simple post monitoring application. Checks given ports in an regular interval. 
  * If there is a problem it calls the registered handler.
@@ -24,26 +25,26 @@ public abstract class AbstractPortMonitor extends Thread {
     private int graceful = 5000;
     private int pause = 1000;
     
-    protected IEndpoint[] endpoints = null;
+    protected Endpoint[] endpoints = null;
     protected int interval;
 
     boolean started = false;
     boolean paused = false;
     
     private long lastmillis;
-    private IEndpoint currentendpoint;
+    private Endpoint currentendpoint;
     
     protected Properties properties;
     
     public AbstractPortMonitor(Properties properties) {
         String[] prop_endpoints = properties.getProperty("monitor.endpoints").split(",");
         
-        this.endpoints = new IEndpoint[prop_endpoints.length];
+        this.endpoints = new Endpoint[prop_endpoints.length];
         for (int i=0; i<prop_endpoints.length;i++) {
             String[] data = prop_endpoints[i].split(":");
             
             try {
-                Endpoint e = new Endpoint(new InetSocketAddress(InetAddress.getByName(data[0].trim()), Integer.parseInt(data[1].trim())));
+                EndpointImpl e = new EndpointImpl(new InetSocketAddress(InetAddress.getByName(data[0].trim()), Integer.parseInt(data[1].trim())));
                 this.endpoints[i] = e;
             } catch (Exception ex) {
                 log.severe("Could not parse endpoint definition " + prop_endpoints[i]);
@@ -121,8 +122,8 @@ public abstract class AbstractPortMonitor extends Thread {
         this.started = false;        
     }
     
-    public abstract void handleFailure(IEndpoint endpoint);
+    public abstract void handleFailure(Endpoint endpoint);
     
-    public abstract void handleConnection(IEndpoint endpoint);
+    public abstract void handleConnection(Endpoint endpoint);
 
 }
