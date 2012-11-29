@@ -8,19 +8,23 @@ import java.util.Set;
 import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sailing.domain.common.DetailType;
 
-public class MultiCompetitorRaceDataDTO implements IsSerializable {
+public class CompetitorsRaceDataDTO implements IsSerializable {
     
     private DetailType detailType;
     private HashMap<CompetitorDTO, CompetitorRaceDataDTO> competitorsData;
+    private Date requestedFromTime;
+    private Date requestedToTime;
     
-    MultiCompetitorRaceDataDTO() {}
+    CompetitorsRaceDataDTO() {}
     
-    public MultiCompetitorRaceDataDTO(DetailType detailType) {
+    public CompetitorsRaceDataDTO(DetailType detailType, Date requestedFromTime, Date requestedToTime) {
         this.detailType = detailType;
+        this.requestedFromTime = requestedFromTime;
+        this.requestedToTime = requestedToTime;
         this.competitorsData = new HashMap<CompetitorDTO, CompetitorRaceDataDTO>();
     }
     
-    public MultiCompetitorRaceDataDTO(DetailType detailType, HashMap<CompetitorDTO, CompetitorRaceDataDTO> raceData) {
+    public CompetitorsRaceDataDTO(DetailType detailType, HashMap<CompetitorDTO, CompetitorRaceDataDTO> raceData) {
         this.detailType = detailType;
         this.competitorsData = new HashMap<CompetitorDTO, CompetitorRaceDataDTO>(raceData);
     }
@@ -113,6 +117,14 @@ public class MultiCompetitorRaceDataDTO implements IsSerializable {
 
     public boolean contains(CompetitorDTO competitor) {
         return competitorsData.containsKey(competitor);
+    }
+
+    public Date getRequestedFromTime() {
+        return requestedFromTime;
+    }
+
+    public Date getRequestedToTime() {
+        return requestedToTime;
     }
     
 }

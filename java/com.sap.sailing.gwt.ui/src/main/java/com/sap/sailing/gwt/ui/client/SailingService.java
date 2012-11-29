@@ -28,7 +28,7 @@ import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.ManeuverDTO;
-import com.sap.sailing.gwt.ui.shared.MultiCompetitorRaceDataDTO;
+import com.sap.sailing.gwt.ui.shared.CompetitorsRaceDataDTO;
 import com.sap.sailing.gwt.ui.shared.QuickRankDTO;
 import com.sap.sailing.gwt.ui.shared.RaceCourseMarksDTO;
 import com.sap.sailing.gwt.ui.shared.RaceColumnInSeriesDTO;
@@ -210,9 +210,8 @@ public interface SailingService extends RemoteService {
     void updateLeaderboardGroup(String oldName, String newName, String description, List<String> leaderboardNames,
             int[] overallLeaderboardDiscardThresholds, ScoringSchemeType overallLeaderboardScoringSchemeType);
 
-    MultiCompetitorRaceDataDTO getCompetitorsRaceData(RegattaAndRaceIdentifier race, List<Pair<Date, CompetitorDTO>> competitors,
-            Date toDate, long stepSize, DetailType detailType) 
-            throws NoWindException;
+    CompetitorsRaceDataDTO getCompetitorsRaceData(RegattaAndRaceIdentifier race, List<CompetitorDTO> competitors, Date from, Date to,
+            long stepSizeInMs, DetailType detailType) throws NoWindException;
 
     void setRaceIsKnownToStartUpwind(RegattaAndRaceIdentifier raceIdentifier, boolean raceIsKnownToStartUpwind);
 

@@ -60,6 +60,7 @@
 		<module>com.sap.sailing.ess40.resultimport.test</module>
 		<module>com.sap.sailing.freg.resultimport</module>
 		<module>com.sap.sailing.freg.resultimport.test</module>
+		<module>com.sap.sailing.monitoring</module>
 	</modules>
 	
 	<properties>
