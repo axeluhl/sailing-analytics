@@ -5,11 +5,12 @@ import java.util.List;
 
 import com.google.gwt.maps.client.geom.LatLng;
 import com.sap.sailing.gwt.ui.shared.SpeedWithBearingDTO;
-import com.sap.sailing.gwt.ui.shared.WindDTO;
+import com.sap.sailing.gwt.ui.shared.SimulatorWindDTO;
 
 public class PathPolylineUtils {
 
     public static final double EARTH_RADIUS_METERS = 6378137;
+    public static final double factor_kn2mps = 0.514444;
 
     public static double convertFromDegToRad(final double noOfDegrees) {
         return (noOfDegrees * 0.0174532925);
@@ -20,10 +21,14 @@ public class PathPolylineUtils {
     }
 
     public static double convertFromKnotsToMPS(final double knots) {
-        return knots * 0.51444;
+        return knots * factor_kn2mps;
     }
 
-    public static SpeedWithBearingDTO computeAverageWindSpeed(final List<WindDTO> windDTOs, final boolean useDampenedValues) {
+    public static double convertFromMPSToKnots(final double mps) {
+        return mps / factor_kn2mps;
+    }
+
+    public static SpeedWithBearingDTO computeAverageWindSpeed(final List<SimulatorWindDTO> windDTOs, final boolean useDampenedValues) {
 
         final int count = windDTOs.size();
 
@@ -33,10 +38,10 @@ public class PathPolylineUtils {
         double windBearingDegrees = 0.0;
         double windBearingRadians = 0.0;
 
-        for (final WindDTO windDTO : windDTOs) {
+        for (final SimulatorWindDTO windDTO : windDTOs) {
 
-            windSpeedKnots = useDampenedValues ? windDTO.dampenedTrueWindSpeedInKnots : windDTO.trueWindSpeedInKnots;
-            windBearingDegrees = useDampenedValues ? windDTO.dampenedTrueWindBearingDeg : windDTO.trueWindBearingDeg;
+            windSpeedKnots = windDTO.trueWindSpeedInKnots; //useDampenedValues ? windDTO.dampenedTrueWindSpeedInKnots : windDTO.trueWindSpeedInKnots;
+            windBearingDegrees =  windDTO.trueWindBearingDeg; //useDampenedValues ? windDTO.dampenedTrueWindBearingDeg : windDTO.trueWindBearingDeg;
             windBearingRadians = PathPolylineUtils.convertFromDegToRad(windBearingDegrees);
 
             sumOfProductOfSpeedAndCosBearing += (windSpeedKnots * Math.cos(windBearingRadians));
@@ -62,18 +67,18 @@ public class PathPolylineUtils {
         return new SpeedWithBearingDTO(averageSpeed, averageBearing);
     }
 
-    public static SpeedWithBearingDTO computeMinMaxAverageWindSpeed(final List<WindDTO> windDTOs, final boolean useDampenedValues) {
+    public static SpeedWithBearingDTO computeMinMaxAverageWindSpeed(final List<SimulatorWindDTO> windDTOs, final boolean useDampenedValues) {
 
-        WindDTO minWindDTO = windDTOs.get(0);
-        WindDTO maxWindDTO = windDTOs.get(0);
-        WindDTO currentWindDTO = null;
+        SimulatorWindDTO minWindDTO = windDTOs.get(0);
+        SimulatorWindDTO maxWindDTO = windDTOs.get(0);
+        SimulatorWindDTO currentWindDTO = null;
         final int count = windDTOs.size();
 
         for (int index = 1; index < count; index++) {
 
             currentWindDTO = windDTOs.get(index);
 
-            if (useDampenedValues) {
+/*            if (useDampenedValues) {
                 if (currentWindDTO.dampenedTrueWindSpeedInKnots < minWindDTO.dampenedTrueWindSpeedInKnots) {
                     minWindDTO = currentWindDTO;
                 }
@@ -81,7 +86,7 @@ public class PathPolylineUtils {
                 if (currentWindDTO.dampenedTrueWindSpeedInKnots > maxWindDTO.dampenedTrueWindSpeedInKnots) {
                     maxWindDTO = currentWindDTO;
                 }
-            } else {
+            } else {*/
                 if (currentWindDTO.trueWindSpeedInKnots < minWindDTO.trueWindSpeedInKnots) {
                     minWindDTO = currentWindDTO;
                 }
@@ -89,13 +94,15 @@ public class PathPolylineUtils {
                 if (currentWindDTO.trueWindSpeedInKnots > maxWindDTO.trueWindSpeedInKnots) {
                     maxWindDTO = currentWindDTO;
                 }
-            }
+            //}
         }
 
-        final double speedInKnots = useDampenedValues ? ((minWindDTO.dampenedTrueWindSpeedInKnots + maxWindDTO.dampenedTrueWindSpeedInKnots) / 2)
-                : ((minWindDTO.trueWindSpeedInKnots + maxWindDTO.trueWindSpeedInKnots) / 2);
-        final double bearingInDegrees = useDampenedValues ? ((minWindDTO.dampenedTrueWindBearingDeg + maxWindDTO.dampenedTrueWindBearingDeg) / 2)
-                : ((minWindDTO.trueWindBearingDeg + maxWindDTO.trueWindBearingDeg) / 2);
+        final double speedInKnots = ((minWindDTO.trueWindSpeedInKnots + maxWindDTO.trueWindSpeedInKnots) / 2);
+        //useDampenedValues ? ((minWindDTO.dampenedTrueWindSpeedInKnots + maxWindDTO.dampenedTrueWindSpeedInKnots) / 2)
+        //        : ((minWindDTO.trueWindSpeedInKnots + maxWindDTO.trueWindSpeedInKnots) / 2);
+        final double bearingInDegrees = ((minWindDTO.trueWindBearingDeg + maxWindDTO.trueWindBearingDeg) / 2); 
+        //useDampenedValues ? ((minWindDTO.dampenedTrueWindBearingDeg + maxWindDTO.dampenedTrueWindBearingDeg) / 2)
+        //        : ((minWindDTO.trueWindBearingDeg + maxWindDTO.trueWindBearingDeg) / 2);
 
         return new SpeedWithBearingDTO(speedInKnots, bearingInDegrees);
     }

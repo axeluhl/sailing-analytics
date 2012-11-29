@@ -813,4 +813,5 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
 
         return dialogBox;
     }
+    
 }

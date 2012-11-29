@@ -6,7 +6,7 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 
 public class PathDTO extends NamedDTO implements IsSerializable {
 
-    private List<WindDTO> matrix;
+    private List<SimulatorWindDTO> matrix;
     
     public PathDTO() {
         
@@ -16,11 +16,11 @@ public class PathDTO extends NamedDTO implements IsSerializable {
         super(name);
     }
     
-    public List<WindDTO> getMatrix() {
+    public List<SimulatorWindDTO> getMatrix() {
         return matrix;
     }
 
-    public void setMatrix(List<WindDTO> matrix) {
+    public void setMatrix(List<SimulatorWindDTO> matrix) {
         this.matrix = matrix;
     }
     

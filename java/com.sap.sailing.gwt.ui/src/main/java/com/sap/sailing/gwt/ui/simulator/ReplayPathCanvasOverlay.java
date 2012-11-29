@@ -6,13 +6,13 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import com.sap.sailing.gwt.ui.client.Timer;
-import com.sap.sailing.gwt.ui.shared.WindDTO;
+import com.sap.sailing.gwt.ui.shared.SimulatorWindDTO;
 
 public class ReplayPathCanvasOverlay extends PathCanvasOverlay {
 
     private static final long serialVersionUID = -6284996043723173190L;
     private static Logger logger = Logger.getLogger(ReplayPathCanvasOverlay.class.getName());
-    private List<WindDTO> windDTOToDraw;
+    private List<SimulatorWindDTO> windDTOToDraw;
 
     public ReplayPathCanvasOverlay(String name, Timer timer) {
         super(name, timer);
@@ -34,8 +34,8 @@ public class ReplayPathCanvasOverlay extends PathCanvasOverlay {
         canvas.getContext2d().clearRect(0/* canvas.getAbsoluteLeft() */, 0/* canvas.getAbsoluteTop() */,
                 canvas.getCoordinateSpaceWidth(), canvas.getCoordinateSpaceHeight());
 
-        windDTOToDraw = new ArrayList<WindDTO>();
-        for (WindDTO windDTO : wl.getMatrix()) {
+        windDTOToDraw = new ArrayList<SimulatorWindDTO>();
+        for (SimulatorWindDTO windDTO : wl.getMatrix()) {
             if (windDTO.timepoint <= date.getTime()) {
                 windDTOToDraw.add(windDTO);
             }

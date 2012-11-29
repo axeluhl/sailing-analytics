@@ -16,7 +16,7 @@ import com.sap.sailing.domain.common.Named;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.shared.PositionDTO;
-import com.sap.sailing.gwt.ui.shared.WindDTO;
+import com.sap.sailing.gwt.ui.shared.SimulatorWindDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldGenParamsDTO;
 
 /**
@@ -67,11 +67,11 @@ public class PathCanvasOverlay extends WindFieldCanvasOverlay implements Named {
     @Override
     protected void drawWindField() {
         logger.fine("In PathCanvasOverlay.drawWindField");
-        List<WindDTO> windDTOList = wl.getMatrix();
+        List<SimulatorWindDTO> windDTOList = wl.getMatrix();
         drawWindField(windDTOList);
     }
      */
-    protected void drawWindField(final List<WindDTO> windDTOList) {
+    protected void drawWindField(final List<SimulatorWindDTO> windDTOList) {
 
         WindFieldGenParamsDTO windParams = new WindFieldGenParamsDTO();
 
@@ -102,10 +102,10 @@ public class PathCanvasOverlay extends WindFieldCanvasOverlay implements Named {
             Context2d context2d = canvas.getContext2d();
             context2d.setGlobalAlpha(0.8);
 
-            Iterator<WindDTO> windDTOIter = windDTOList.iterator();
-            WindDTO prevWindDTO = null;
+            Iterator<SimulatorWindDTO> windDTOIter = windDTOList.iterator();
+            SimulatorWindDTO prevWindDTO = null;
             while (windDTOIter.hasNext()) {
-                WindDTO windDTO = windDTOIter.next();
+                SimulatorWindDTO windDTO = windDTOIter.next();
                 if (prevWindDTO != null) {
                     drawLine(prevWindDTO, windDTO);
                 }
@@ -117,7 +117,7 @@ public class PathCanvasOverlay extends WindFieldCanvasOverlay implements Named {
             long startTime = windDTOList.get(0).timepoint;
             prevWindDTO = null; //For the last time arrow was displayed
             while (windDTOIter.hasNext()) {
-                WindDTO windDTO = windDTOIter.next();
+                SimulatorWindDTO windDTO = windDTOIter.next();
 
                 //if ((displayWindAlongPath) && ((index % arrowInterleave) == 0)) {
                 if (displayWindAlongPath) {
@@ -151,7 +151,7 @@ public class PathCanvasOverlay extends WindFieldCanvasOverlay implements Named {
         }
     }
 
-    private void drawLine(WindDTO p1, WindDTO p2) {
+    private void drawLine(SimulatorWindDTO p1, SimulatorWindDTO p2) {
 
         double weight = 3.0;
 
@@ -176,7 +176,7 @@ public class PathCanvasOverlay extends WindFieldCanvasOverlay implements Named {
         // System.out.print("x1:"+x1+" y1:"+y1+" x2:"+x2+" y2:"+y2+"\n");
     }
 
-    private void drawPoint(WindDTO p) {
+    private void drawPoint(SimulatorWindDTO p) {
 
         double weight = 3.0;
 
@@ -196,7 +196,7 @@ public class PathCanvasOverlay extends WindFieldCanvasOverlay implements Named {
      * @return true if the pixel distance between the two points is greater than
      * a threshold. returns true if either of the points is null
      */
-    private boolean checkPointsAreFarEnough(WindDTO p1, WindDTO p2) {
+    private boolean checkPointsAreFarEnough(SimulatorWindDTO p1, SimulatorWindDTO p2) {
         if (p1 == null || p2 == null) {
             return true;
         }
@@ -228,7 +228,7 @@ public class PathCanvasOverlay extends WindFieldCanvasOverlay implements Named {
     }
 
     public long getPathTime() {
-        List<WindDTO> windDTOList = wl.getMatrix();
+        List<SimulatorWindDTO> windDTOList = wl.getMatrix();
         int numPoints = windDTOList.size();
         long totalTime = windDTOList.get(numPoints - 1).timepoint - windDTOList.get(0).timepoint;
         return totalTime;

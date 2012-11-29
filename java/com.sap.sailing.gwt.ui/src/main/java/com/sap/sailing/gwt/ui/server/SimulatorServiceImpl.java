@@ -40,7 +40,7 @@ import com.sap.sailing.gwt.ui.shared.SimulatorResultsDTO;
 import com.sap.sailing.gwt.ui.shared.SimulatorResultsDTOAndNotificationMessage;
 import com.sap.sailing.gwt.ui.shared.SpeedBearingPositionDTO;
 import com.sap.sailing.gwt.ui.shared.SpeedWithBearingDTO;
-import com.sap.sailing.gwt.ui.shared.WindDTO;
+import com.sap.sailing.gwt.ui.shared.SimulatorWindDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldGenParamsDTO;
 import com.sap.sailing.gwt.ui.shared.WindLatticeDTO;
@@ -261,13 +261,13 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         return posDTO;
     }
 
-    private WindDTO createWindDTO(final Wind wind) {
-        final WindDTO windDTO = new WindDTO();
+    private SimulatorWindDTO createWindDTO(final Wind wind) {
+        final SimulatorWindDTO windDTO = new SimulatorWindDTO();
 
         windDTO.trueWindBearingDeg = wind.getBearing().getDegrees();
-        windDTO.trueWindFromDeg = wind.getBearing().reverse().getDegrees();
+        //windDTO.trueWindFromDeg = wind.getBearing().reverse().getDegrees();
         windDTO.trueWindSpeedInKnots = wind.getKnots();
-        windDTO.trueWindSpeedInMetersPerSecond = wind.getMetersPerSecond();
+        //windDTO.trueWindSpeedInMetersPerSecond = wind.getMetersPerSecond();
 
         if (wind.getPosition() != null) {
             windDTO.position = new PositionDTO(wind.getPosition().getLatDeg(), wind.getPosition().getLngDeg());
@@ -279,19 +279,13 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         return windDTO;
     }
 
-    private WindDTO createWindDTO2(final TimedPositionWithSpeed tPos) {
+    private SimulatorWindDTO createWindDTO2(final TimedPositionWithSpeed tPos) {
 
-        final WindDTO windDTO = new WindDTO();
+        final SimulatorWindDTO windDTO = new SimulatorWindDTO();
         windDTO.trueWindBearingDeg = tPos.getSpeed().getBearing().getDegrees();
-        windDTO.trueWindFromDeg = tPos.getSpeed().getBearing().reverse().getDegrees();
+        //windDTO.trueWindFromDeg = tPos.getSpeed().getBearing().reverse().getDegrees();
         windDTO.trueWindSpeedInKnots = tPos.getSpeed().getKnots();
-        windDTO.trueWindSpeedInMetersPerSecond = tPos.getSpeed().getMetersPerSecond();
-
-        // FIXME: workaround till i figure out how to get the "dampened" values
-        windDTO.dampenedTrueWindBearingDeg = windDTO.trueWindBearingDeg;
-        windDTO.dampenedTrueWindFromDeg = windDTO.trueWindFromDeg;
-        windDTO.dampenedTrueWindSpeedInKnots = windDTO.trueWindSpeedInKnots;
-        windDTO.dampenedTrueWindSpeedInMetersPerSecond = windDTO.trueWindSpeedInMetersPerSecond;
+        //windDTO.trueWindSpeedInMetersPerSecond = tPos.getSpeed().getMetersPerSecond();
 
         if (tPos.getPosition() != null) {
             windDTO.position = new PositionDTO(tPos.getPosition().getLatDeg(), tPos.getPosition().getLngDeg());
@@ -313,7 +307,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
             final TimePoint timeStep, final boolean isShowLines) {
 
         final WindFieldDTO windFieldDTO = new WindFieldDTO();
-        final List<WindDTO> wList = new ArrayList<WindDTO>();
+        final List<SimulatorWindDTO> wList = new ArrayList<SimulatorWindDTO>();
         final Position[][] positionGrid = wf.getPositionGrid();
 
         if (positionGrid != null && positionGrid.length > 0) {
@@ -323,7 +317,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
                     for (int j = 0; j < positionGrid[i].length; ++j) {
                         final Wind localWind = wf.getWind(new TimedPositionWithSpeedImpl(t, positionGrid[i][j], null));
                         logger.finer(localWind.toString());
-                        final WindDTO w = createWindDTO(localWind);
+                        final SimulatorWindDTO w = createWindDTO(localWind);
                         wList.add(w);
                     }
                 }
@@ -476,9 +470,9 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
                 pathDTO[pathIndex] = new PathDTO(pathName.split("#")[1]);
 
                 // fill pathDTO with path points where speed is true wind speed
-                final List<WindDTO> wList = new ArrayList<WindDTO>();
+                final List<SimulatorWindDTO> wList = new ArrayList<SimulatorWindDTO>();
                 for (final TimedPositionWithSpeed p : path) {
-                    final WindDTO w = createWindDTO2(p);
+                    final SimulatorWindDTO w = createWindDTO2(p);
                     wList.add(w);
                 }
                 pathDTO[pathIndex].setMatrix(wList);
@@ -562,7 +556,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         final RaceMapDataDTO rcDTO = simulatedPathsEvenTimedResult.getRaceMapDataDTO();
 
         for (int i = 0; i < pathDTO.length; ++i) {
-            final List<WindDTO> path = pathDTO[i].getMatrix();
+            final List<SimulatorWindDTO> path = pathDTO[i].getMatrix();
             final int pathLength = path.size();
             final long pathTime = pathDTO[i].getMatrix().get(pathLength - 1).timepoint - path.get(0).timepoint;
             longestPathTime = Math.max(longestPathTime, pathTime);
@@ -692,9 +686,9 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         }
 
         final List<TimedPositionWithSpeed> pathPoints = path.getPathPoints();
-        final List<WindDTO> windDTOs = new ArrayList<WindDTO>();
+        final List<SimulatorWindDTO> windDTOs = new ArrayList<SimulatorWindDTO>();
 
-        WindDTO windDTO = null;
+        SimulatorWindDTO windDTO = null;
         SpeedWithBearing speedWithBearing = null;
         Bearing bearing = null;
         Position position = null;
@@ -714,16 +708,16 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
                 }
             }
 
-            windDTO = new WindDTO();
+            windDTO = new SimulatorWindDTO();
             windDTO.isTurn = isTurn;
 
             speedWithBearing = point.getSpeed();
             bearing = speedWithBearing.getBearing();
 
             windDTO.trueWindBearingDeg = bearing.getDegrees();
-            windDTO.trueWindFromDeg = bearing.reverse().getDegrees();
+            //windDTO.trueWindFromDeg = bearing.reverse().getDegrees();
             windDTO.trueWindSpeedInKnots = speedWithBearing.getKnots();
-            windDTO.trueWindSpeedInMetersPerSecond = speedWithBearing.getMetersPerSecond();
+            //windDTO.trueWindSpeedInMetersPerSecond = speedWithBearing.getMetersPerSecond();
 
             position = point.getPosition();
             if (position != null) {

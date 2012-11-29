@@ -11,11 +11,11 @@ import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.maps.client.event.MapMouseMoveHandler;
 import com.google.gwt.maps.client.geom.LatLng;
 import com.google.gwt.maps.client.geom.Point;
-import com.sap.sailing.gwt.ui.shared.WindDTO;
+import com.sap.sailing.gwt.ui.shared.SimulatorWindDTO;
 import com.sap.sailing.gwt.ui.shared.racemap.FullCanvasOverlay;
 
 /**
- * To handle MouseMoveEvent to display tool tips around WindDTO objects in a wind field
+ * To handle MouseMoveEvent to display tool tips around SimulatorWindDTO objects in a wind field
  * 
  * @author Nidhi Sawhney(D054070)
  * 
@@ -23,7 +23,7 @@ import com.sap.sailing.gwt.ui.shared.racemap.FullCanvasOverlay;
 public class WindFieldMapMouseMoveHandler implements MapMouseMoveHandler {
 
     private FullCanvasOverlay canvasOverlay;
-    private Map<ToolTip, WindDTO> windFieldPoints = null;
+    private Map<ToolTip, SimulatorWindDTO> windFieldPoints = null;
     private ImageData lastImageData = null;
     private double lastToolx;
     private double lastTooly;
@@ -37,7 +37,7 @@ public class WindFieldMapMouseMoveHandler implements MapMouseMoveHandler {
         lastImageData = null;
     }
     
-    public void setWindFieldPoints(Map<ToolTip, WindDTO> windFieldPoints) {
+    public void setWindFieldPoints(Map<ToolTip, SimulatorWindDTO> windFieldPoints) {
         this.windFieldPoints = windFieldPoints;
     }
 
@@ -66,7 +66,7 @@ public class WindFieldMapMouseMoveHandler implements MapMouseMoveHandler {
             lastImageData = context2d.getImageData(x, y, ToolTip.toolRectW, ToolTip.toolRectH);
            
             
-            WindDTO windDTO = windFieldPoints.get(point);
+            SimulatorWindDTO windDTO = windFieldPoints.get(point);
             context2d.setFillStyle("#4f4f4f");
             context2d.fillRect(x, y, ToolTip.toolRectW, ToolTip.toolRectH);
 

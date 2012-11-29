@@ -27,7 +27,7 @@ import com.sap.sailing.gwt.ui.shared.PathDTO;
 import com.sap.sailing.gwt.ui.shared.PositionDTO;
 import com.sap.sailing.gwt.ui.shared.SimulatorResultsDTO;
 import com.sap.sailing.gwt.ui.shared.SimulatorResultsDTOAndNotificationMessage;
-import com.sap.sailing.gwt.ui.shared.WindDTO;
+import com.sap.sailing.gwt.ui.shared.SimulatorWindDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldGenParamsDTO;
 import com.sap.sailing.gwt.ui.shared.panels.SimpleBusyIndicator;
@@ -685,10 +685,10 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
 
     private static PathPolyline createPathPolyline(final PathDTO pathDTO, final ErrorReporter errorReporter, final SimulatorServiceAsync simulatorService,
             final MapWidget map) {
-        final List<WindDTO> pathPoints = pathDTO.getMatrix();
+        final List<SimulatorWindDTO> pathPoints = pathDTO.getMatrix();
 
         final int noOfPathPoints = pathPoints.size();
-        WindDTO currentPathPoint = null;
+        SimulatorWindDTO currentPathPoint = null;
         final List<LatLng> points = new ArrayList<LatLng>();
 
         for (int index = 0; index < noOfPathPoints; index++) {

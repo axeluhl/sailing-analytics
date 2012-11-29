@@ -22,7 +22,7 @@ import com.sap.sailing.gwt.ui.shared.ReceivePolarDiagramDataDTO;
 import com.sap.sailing.gwt.ui.shared.RequestPolarDiagramDataDTO;
 import com.sap.sailing.gwt.ui.shared.SpeedBearingPositionDTO;
 import com.sap.sailing.gwt.ui.shared.SpeedWithBearingDTO;
-import com.sap.sailing.gwt.ui.shared.WindDTO;
+import com.sap.sailing.gwt.ui.shared.SimulatorWindDTO;
 import com.sap.sailing.gwt.ui.shared.racemap.TwoDPoint;
 import com.sap.sailing.gwt.ui.shared.racemap.TwoDSegment;
 import com.sap.sailing.gwt.ui.shared.racemap.TwoDVector;
@@ -409,7 +409,7 @@ public class PathPolyline {
 
     private SpeedWithBearingDTO getAverageWindSpeed() {
 
-        final List<WindDTO> windDTOs = this.pathDTO.getMatrix();
+        final List<SimulatorWindDTO> windDTOs = this.pathDTO.getMatrix();
         // PathPolylineUtils.computeMinMaxAverageWindSpeed(windDTOs, USE_DAMPENED_VALUES)
         return PathPolylineUtils.computeAverageWindSpeed(windDTOs, USE_DAMPENED_VALUES);
     }

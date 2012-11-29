@@ -6,15 +6,15 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 
 public class WindFieldDTO implements IsSerializable {
 
-    private List<WindDTO> matrix;
+    private List<SimulatorWindDTO> matrix;
     
     private WindLinesDTO windLinesDTO;
 
-    public List<WindDTO> getMatrix() {
+    public List<SimulatorWindDTO> getMatrix() {
         return matrix;
     }
 
-    public void setMatrix(List<WindDTO> matrix) {
+    public void setMatrix(List<SimulatorWindDTO> matrix) {
         this.matrix = matrix;
     }
 
