@@ -69,7 +69,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
     private final TextBox storedURIBox;
     private final IntegerBox livePortIntegerbox;
     private final TextBox hostnameTextbox;
-    private final TextBox regattaNameTextbox;
+    private final TextBox eventNameTextbox;
     private final TextBox filterEventsTextbox;
     private final ListDataProvider<TracTracRaceRecordDTO> raceList;
     private final CellTable<TracTracRaceRecordDTO> raceTable;
@@ -151,18 +151,18 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         });
         grid.setWidget(3, 1, hostnameTextbox);
         
-        Label lblEventName = new Label(stringMessages.regattaName() + ":");
+        Label lblEventName = new Label(stringMessages.eventName() + ":");
         grid.setWidget(4, 0, lblEventName);
         
-        regattaNameTextbox = new TextBox();
-        regattaNameTextbox.setText("event_2011...");
-        regattaNameTextbox.addKeyUpHandler(new KeyUpHandler() {
+        eventNameTextbox = new TextBox();
+        eventNameTextbox.setText("event_2011...");
+        eventNameTextbox.addKeyUpHandler(new KeyUpHandler() {
             @Override
             public void onKeyUp(KeyUpEvent event) {
                 updateJsonUrl();
             }
         });
-        grid.setWidget(4, 1, regattaNameTextbox);
+        grid.setWidget(4, 1, eventNameTextbox);
         
         Label lblLivePort = new Label(stringMessages.ports() + ":");
         grid.setWidget(5, 0, lblLivePort);
@@ -425,7 +425,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
     }
 
     private void updateJsonUrl() {
-        jsonURLBox.setValue("http://" + hostnameTextbox.getValue() + "/events/" + regattaNameTextbox.getValue()
+        jsonURLBox.setValue("http://" + hostnameTextbox.getValue() + "/events/" + eventNameTextbox.getValue()
                 + "/jsonservice.php");
     }
 
@@ -577,7 +577,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
                 .getItemText(previousConfigurationsComboBox.getSelectedIndex()));
         if (ttConfig != null) {
             hostnameTextbox.setValue("");
-            regattaNameTextbox.setValue("");
+            eventNameTextbox.setValue("");
             livePortIntegerbox.setText("");
             storedPortIntegerbox.setText("");
             jsonURLBox.setValue(ttConfig.jsonURL);
