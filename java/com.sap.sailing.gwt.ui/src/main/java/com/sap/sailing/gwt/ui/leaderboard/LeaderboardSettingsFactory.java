@@ -103,6 +103,14 @@ public class LeaderboardSettingsFactory {
     public LeaderboardSettings createNewDefaultSettings(List<String> namesOfRaceColumnsToShow,
             List<String> namesOfRacesToShow, List<DetailType> overallDetailsToShow, String nameOfRaceToSort,
             boolean autoExpandPreSelectedRace, Long refreshIntervalMillis) {
+        return createNewDefaultSettings(namesOfRaceColumnsToShow, namesOfRacesToShow, overallDetailsToShow, nameOfRaceToSort, autoExpandPreSelectedRace, refreshIntervalMillis,
+                /* numberOfLastRacesToShow */ null, /* raceColumnSelectionStrategy */ RaceColumnSelectionStrategies.EXPLICIT);
+    }
+    
+    public LeaderboardSettings createNewDefaultSettings(List<String> namesOfRaceColumnsToShow,
+            List<String> namesOfRacesToShow, List<DetailType> overallDetailsToShow, String nameOfRaceToSort,
+            boolean autoExpandPreSelectedRace, Long refreshIntervalMillis, Integer numberOfLastRacesToShow,
+            RaceColumnSelectionStrategies raceColumnSelectionStrategy) {
         if (namesOfRaceColumnsToShow != null && namesOfRacesToShow != null) {
             throw new IllegalArgumentException("Can specify race columns either by column or by race name, not both");
         }
@@ -118,9 +126,9 @@ public class LeaderboardSettingsFactory {
         raceDetails.add(DetailType.DISPLAY_LEGS);
         return new LeaderboardSettings(maneuverDetails, legDetails, raceDetails, overallDetailsToShow,
                 namesOfRaceColumnsToShow,
-                namesOfRacesToShow, null,
+                namesOfRacesToShow, numberOfLastRacesToShow,
                 autoExpandPreSelectedRace, refreshIntervalMillis, /* delay to live */ null,
                 /* sort by column */ nameOfRaceToSort, /* ascending */ true, /* updateUponPlayStateChange */ true,
-                RaceColumnSelectionStrategies.EXPLICIT);
+                raceColumnSelectionStrategy);
     }
 }
