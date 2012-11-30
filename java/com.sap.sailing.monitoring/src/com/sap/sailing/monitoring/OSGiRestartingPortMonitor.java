@@ -64,9 +64,10 @@ public class OSGiRestartingPortMonitor extends AbstractPortMonitor {
                 msg.setFrom(new InternetAddress("root@sapsailing.com"));
                 msg.setSubject("Bundle " + endpoint.getName() + " restarted");
                 msg.setContent("The Bundle " + endpoint.getName() + " has been restarted - check on " + endpoint + " didn't respond!\n" +
-                		"This Mail won't be send again if service continues to fail.", "text/plain");
-                msg.addRecipient(RecipientType.TO, new InternetAddress(this.properties.getProperty("mail.to")));
-                
+                		"This Mail won't be sent again if service continues to fail.", "text/plain");
+                for (String mailAddress : this.properties.getProperty("mail.to").split(",")) {
+                    msg.addRecipient(RecipientType.TO, new InternetAddress(mailAddress.trim()));
+                }
                 Transport ts = session.getTransport();
                 ts.connect();
                 ts.sendMessage(msg, msg.getRecipients(RecipientType.TO));
