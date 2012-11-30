@@ -56,10 +56,12 @@ public class OSGiRestartingPortMonitor extends AbstractPortMonitor {
         
         /* only send mail if service has not failed before */
         if (!endpoint.hasFailed() /*before*/) {
+            log.info("Sending mail to "+this.properties.getProperty("mail.to")+" saying that bundle " + endpoint.getName() + " was restarted");
             try {
                 Session session = Session.getDefaultInstance(this.properties, new SMTPAuthenticator());
                 MimeMessage msg = new MimeMessage(session);
                 
+                msg.setFrom(new InternetAddress("root@sapsailing.com"));
                 msg.setSubject("Bundle " + endpoint.getName() + " restarted");
                 msg.setContent("The Bundle " + endpoint.getName() + " has been restarted - check on " + endpoint + " didn't respond!\n" +
                 		"This Mail won't be send again if service continues to fail.", "text/plain");
@@ -71,6 +73,7 @@ public class OSGiRestartingPortMonitor extends AbstractPortMonitor {
                 ts.close();
             } catch(Exception ex) {
                 ex.printStackTrace();
+                log.throwing(getClass().getName(), "handleFailure", ex);
             }
         }
     }
