@@ -90,25 +90,21 @@ public abstract class AbstractPortMonitor extends Thread {
                         if (currentmillis >= (lastmillis + interval + (100*endpoints.length))) {
                             for (int i = 0; i < endpoints.length; i++) {
                                 currentendpoint = endpoints[i];
-                                
                                 if (!currentendpoint.isURL()) {
                                     Socket sn = new Socket();
                                     sn.connect(currentendpoint.getAddress(), timeout);
                                     sn.close();
                                 } else {
-                                    
                                     /* despite its name this does NOT open a real TCP connection */
                                     HttpURLConnection conn = (HttpURLConnection)currentendpoint.getURL().openConnection();
                                     conn.setConnectTimeout(timeout);
                                     conn.setRequestMethod("GET");
                                     conn.connect();
-                                    
                                     int code = conn.getResponseCode();
-                                    if (code != 200)
+                                    if (code != 200) {
                                         throw new ConnectException("Could not successfully connect to endpoint " + currentendpoint.toString());
-                                        
+                                    }
                                 }
-                                
                                 log.info("Connection succeeded to " + currentendpoint.toString());
                                 handleConnection(currentendpoint);
                                 

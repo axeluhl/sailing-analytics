@@ -27,54 +27,58 @@ public class OSGiRestartingPortMonitor extends AbstractPortMonitor {
     public OSGiRestartingPortMonitor(Properties properties) {
         super(properties);
         
-        String[] prop_services = properties.getProperty("monitor.bundles").split(",");
+        String[] props_bundles = properties.getProperty("monitor.bundles").split(",");
         
         for (int i=0; i<endpoints.length;i++) {
-            endpoints[i].setName(prop_services[i].trim());
+            endpoints[i].setBundleName(props_bundles[i].trim());
         }
     }
 
     @Override
     public void handleFailure(Endpoint endpoint) {
-        Bundle bundle = getBundleByName(endpoint.getName());
-        
-        if (bundle.getState() == BundleEvent.STARTED || bundle.getState() == BundleEvent.STOPPED) {
-            try {
-                bundle.stop();
-            } catch (BundleException e) {
-                log.severe("Could not stop " + endpoint.getName() + " trying to start anyway.");
-            }
-            
-            try {
-                bundle.start();
-            } catch (BundleException e) {
-                log.severe("Could not start " + endpoint.getName() + "! Handler will try again next time");
-            }
-        }
-        
-        log.info("Bundle " + endpoint.getName() + " restarted");
-        
-        /* only send mail if service has not failed before */
-        if (!endpoint.hasFailed() /*before*/) {
-            log.info("Sending mail to "+this.properties.getProperty("mail.to")+" saying that bundle " + endpoint.getName() + " was restarted");
-            try {
-                Session session = Session.getDefaultInstance(this.properties, new SMTPAuthenticator());
-                MimeMessage msg = new MimeMessage(session);
-                
-                msg.setFrom(new InternetAddress("root@sapsailing.com"));
-                msg.setSubject("Bundle " + endpoint.getName() + " restarted");
-                msg.setContent("The Bundle " + endpoint.getName() + " has been restarted - check on " + endpoint + " didn't respond!\n" +
-                		"This Mail won't be sent again if service continues to fail.", "text/plain");
-                for (String mailAddress : this.properties.getProperty("mail.to").split(",")) {
-                    msg.addRecipient(RecipientType.TO, new InternetAddress(mailAddress.trim()));
+        Bundle bundle = getBundleByName(endpoint.getBundleName());
+        if (bundle == null) {
+            log.severe("Couldn't find bundle "+endpoint.getBundleName()+". Cannot restart. Please check monitoring.properties file");
+        } else {
+            if (bundle.getState() == BundleEvent.STARTED || bundle.getState() == BundleEvent.STOPPED) {
+                try {
+                    bundle.stop();
+                } catch (BundleException e) {
+                    log.severe("Could not stop " + endpoint.getBundleName() + " trying to start anyway.");
                 }
-                Transport ts = session.getTransport();
-                ts.connect();
-                ts.sendMessage(msg, msg.getRecipients(RecipientType.TO));
-                ts.close();
-            } catch(Exception ex) {
-                ex.printStackTrace();
-                log.throwing(getClass().getName(), "handleFailure", ex);
+                try {
+                    bundle.start();
+                } catch (BundleException e) {
+                    log.severe("Could not start " + endpoint.getBundleName() + "! Handler will try again next time");
+                }
+            }
+
+            log.info("Bundle " + endpoint.getBundleName() + " restarted");
+
+            /* only send mail if service has not failed before */
+            if (!endpoint.hasFailed() /* before */) {
+                log.info("Sending mail to " + this.properties.getProperty("mail.to") + " saying that bundle "
+                        + endpoint.getBundleName() + " was restarted");
+                try {
+                    Session session = Session.getDefaultInstance(this.properties, new SMTPAuthenticator());
+                    MimeMessage msg = new MimeMessage(session);
+
+                    msg.setFrom(new InternetAddress("root@sapsailing.com"));
+                    msg.setSubject("Bundle " + endpoint.getBundleName() + " restarted");
+                    msg.setContent("The Bundle " + endpoint.getBundleName() + " has been restarted - check on "
+                            + endpoint + " didn't respond!\n"
+                            + "This Mail won't be sent again if service continues to fail.", "text/plain");
+                    for (String mailAddress : this.properties.getProperty("mail.to").split(",")) {
+                        msg.addRecipient(RecipientType.TO, new InternetAddress(mailAddress.trim()));
+                    }
+                    Transport ts = session.getTransport();
+                    ts.connect();
+                    ts.sendMessage(msg, msg.getRecipients(RecipientType.TO));
+                    ts.close();
+                } catch (Throwable ex) {
+                    ex.printStackTrace();
+                    log.throwing(getClass().getName(), "handleFailure", ex);
+                }
             }
         }
     }
