@@ -4,9 +4,12 @@ import java.util.Properties;
 import java.util.logging.Logger;
 
 import javax.mail.Message.RecipientType;
+import javax.mail.MessagingException;
+import javax.mail.NoSuchProviderException;
 import javax.mail.PasswordAuthentication;
 import javax.mail.Session;
 import javax.mail.Transport;
+import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
@@ -39,6 +42,13 @@ public class OSGiRestartingPortMonitor extends AbstractPortMonitor {
         Bundle bundle = getBundleByName(endpoint.getBundleName());
         if (bundle == null) {
             log.severe("Couldn't find bundle "+endpoint.getBundleName()+". Cannot restart. Please check monitoring.properties file");
+            try {
+                sendMail(endpoint, "Couldn't find non-responsive bundle "+endpoint.getBundleName(),
+                        "Couldn't find bundle "+endpoint.getBundleName()+". Cannot restart. Please check monitoring.properties file");
+            } catch (Throwable e) {
+                e.printStackTrace();
+                log.throwing(getClass().getName(), "handleFailure", e);
+            }
         } else {
             if (bundle.getState() == BundleEvent.STARTED || bundle.getState() == BundleEvent.STOPPED) {
                 try {
@@ -52,35 +62,38 @@ public class OSGiRestartingPortMonitor extends AbstractPortMonitor {
                     log.severe("Could not start " + endpoint.getBundleName() + "! Handler will try again next time");
                 }
             }
-
-            log.info("Bundle " + endpoint.getBundleName() + " restarted");
-
+            final String subject = "Bundle " + endpoint.getBundleName() + " restarted";
+            log.info(subject);
             /* only send mail if service has not failed before */
             if (!endpoint.hasFailed() /* before */) {
                 log.info("Sending mail to " + this.properties.getProperty("mail.to") + " saying that bundle "
                         + endpoint.getBundleName() + " was restarted");
                 try {
-                    Session session = Session.getDefaultInstance(this.properties, new SMTPAuthenticator());
-                    MimeMessage msg = new MimeMessage(session);
-
-                    msg.setFrom(new InternetAddress("root@sapsailing.com"));
-                    msg.setSubject("Bundle " + endpoint.getBundleName() + " restarted");
-                    msg.setContent("The Bundle " + endpoint.getBundleName() + " has been restarted - check on "
+                    sendMail(endpoint, subject, "The Bundle " + endpoint.getBundleName() + " has been restarted - check on "
                             + endpoint + " didn't respond!\n"
-                            + "This Mail won't be sent again if service continues to fail.", "text/plain");
-                    for (String mailAddress : this.properties.getProperty("mail.to").split(",")) {
-                        msg.addRecipient(RecipientType.TO, new InternetAddress(mailAddress.trim()));
-                    }
-                    Transport ts = session.getTransport();
-                    ts.connect();
-                    ts.sendMessage(msg, msg.getRecipients(RecipientType.TO));
-                    ts.close();
+                            + "This Mail won't be sent again if service continues to fail.");
                 } catch (Throwable ex) {
                     ex.printStackTrace();
                     log.throwing(getClass().getName(), "handleFailure", ex);
                 }
             }
         }
+    }
+
+    private void sendMail(Endpoint endpoint, final String subject, String content) throws MessagingException, AddressException,
+            NoSuchProviderException {
+        Session session = Session.getDefaultInstance(this.properties, new SMTPAuthenticator());
+        MimeMessage msg = new MimeMessage(session);
+        msg.setFrom(new InternetAddress("root@sapsailing.com"));
+        msg.setSubject(subject);
+        msg.setContent(content, "text/plain");
+        for (String mailAddress : this.properties.getProperty("mail.to").split(",")) {
+            msg.addRecipient(RecipientType.TO, new InternetAddress(mailAddress.trim()));
+        }
+        Transport ts = session.getTransport();
+        ts.connect();
+        ts.sendMessage(msg, msg.getRecipients(RecipientType.TO));
+        ts.close();
     }
     
     @Override
