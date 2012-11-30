@@ -1,6 +1,7 @@
 package com.sap.sailing.monitoring;
 
 import java.net.InetSocketAddress;
+import java.net.URL;
 
 
 /**
@@ -13,12 +14,22 @@ public class EndpointImpl implements Endpoint {
 
     private InetSocketAddress address;
     private String name = "";
+    private URL url;
+    private boolean is_url = false;
     private long last_success = 0;
     private long last_fail = 0;
     private boolean already_checked = false;
     
     public EndpointImpl(InetSocketAddress address) {
         this.address = address;
+        this.is_url = false;
+        this.url = null;
+    }
+    
+    public EndpointImpl(URL input) {
+        this.address = null;
+        this.is_url = true;
+        this.url = input;
     }
     
     @Override
@@ -56,7 +67,7 @@ public class EndpointImpl implements Endpoint {
     }
     
     public String toString() {
-        return getAddress().toString();
+        return isURL() ? getURL().toString() : getAddress().toString();
     }
 
     @Override
@@ -67,6 +78,16 @@ public class EndpointImpl implements Endpoint {
     @Override
     public void setName(String name) {
         this.name = name;
+    }
+
+    @Override
+    public boolean isURL() {
+        return is_url;
+    }
+
+    @Override
+    public URL getURL() {
+        return url;
     }
 
 }

@@ -1,6 +1,7 @@
 package com.sap.sailing.monitoring;
 
 import java.net.InetSocketAddress;
+import java.net.URL;
 
 /**
  * Definition of an endpoint that submits to checks by 
@@ -12,9 +13,26 @@ import java.net.InetSocketAddress;
  */
 public interface Endpoint {
     
+    /**
+     * @return the address of this endpoint
+     */
     InetSocketAddress getAddress();
     
+    /**
+     * @return the name of this endpoint. This information can be used
+     * to reference other services.
+     */
     String getName();
+    
+    /**
+     * @return true if this endpoint represents an url
+     */
+    boolean isURL();
+    
+    /**
+     * @return the associated URL or null if there is none
+     */
+    URL getURL();
     
     long lastSucceeded();
     

@@ -43,6 +43,7 @@ public class MultiChartPanel extends AbstractChartPanel<MultiChartSettings> impl
         boolean settingsChanged = updateSettingsOnly(newSettings);
         boolean selectedDetailTypeChanged = setSelectedDetailType(newSettings.getDetailType());
         if (selectedDetailTypeChanged || settingsChanged) {
+            clearChart();
             timeChanged(timer.getTime());
         }
     }

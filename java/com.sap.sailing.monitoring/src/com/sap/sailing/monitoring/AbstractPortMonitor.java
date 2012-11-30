@@ -2,10 +2,13 @@ package com.sap.sailing.monitoring;
 
 import java.io.IOException;
 import java.net.ConnectException;
+import java.net.HttpURLConnection;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.MalformedURLException;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
+import java.net.URL;
 import java.util.Properties;
 import java.util.logging.Logger;
 
@@ -41,13 +44,24 @@ public abstract class AbstractPortMonitor extends Thread {
         
         this.endpoints = new Endpoint[prop_endpoints.length];
         for (int i=0; i<prop_endpoints.length;i++) {
-            String[] data = prop_endpoints[i].split(":");
             
-            try {
-                EndpointImpl e = new EndpointImpl(new InetSocketAddress(InetAddress.getByName(data[0].trim()), Integer.parseInt(data[1].trim())));
-                this.endpoints[i] = e;
-            } catch (Exception ex) {
-                log.severe("Could not parse endpoint definition " + prop_endpoints[i]);
+            if (prop_endpoints[i].trim().startsWith("http")) {
+                try {
+                    URL url = new URL(prop_endpoints[i].trim());
+                    EndpointImpl e = new EndpointImpl(url);
+                    this.endpoints[i] = e;
+                } catch (MalformedURLException ex) {
+                    log.severe("Could not parse endpoint definition " + prop_endpoints[i]);
+                }
+            } else {
+                String[] data = prop_endpoints[i].split(":");
+                
+                try {
+                    EndpointImpl e = new EndpointImpl(new InetSocketAddress(InetAddress.getByName(data[0].trim()), Integer.parseInt(data[1].trim())));
+                    this.endpoints[i] = e;
+                } catch (Exception ex) {
+                    log.severe("Could not parse endpoint definition " + prop_endpoints[i]);
+                }
             }
         }
         
@@ -77,9 +91,23 @@ public abstract class AbstractPortMonitor extends Thread {
                             for (int i = 0; i < endpoints.length; i++) {
                                 currentendpoint = endpoints[i];
                                 
-                                Socket sn = new Socket();
-                                sn.connect(currentendpoint.getAddress(), timeout);
-                                sn.close();
+                                if (!currentendpoint.isURL()) {
+                                    Socket sn = new Socket();
+                                    sn.connect(currentendpoint.getAddress(), timeout);
+                                    sn.close();
+                                } else {
+                                    
+                                    /* despite its name this does NOT open a real TCP connection */
+                                    HttpURLConnection conn = (HttpURLConnection)currentendpoint.getURL().openConnection();
+                                    conn.setConnectTimeout(timeout);
+                                    conn.setRequestMethod("GET");
+                                    conn.connect();
+                                    
+                                    int code = conn.getResponseCode();
+                                    if (code != 200)
+                                        throw new ConnectException("Could not successfully connect to endpoint " + currentendpoint.toString());
+                                        
+                                }
                                 
                                 log.info("Connection succeeded to " + currentendpoint.toString());
                                 handleConnection(currentendpoint);
