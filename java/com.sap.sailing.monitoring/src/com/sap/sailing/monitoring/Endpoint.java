@@ -22,7 +22,7 @@ public interface Endpoint {
      * @return the name of this endpoint. This information can be used
      * to reference other services.
      */
-    String getName();
+    String getBundleName();
     
     /**
      * @return true if this endpoint represents an url
@@ -46,7 +46,7 @@ public interface Endpoint {
     
     void setFailure(long millis);
     
-    void setName(String name);
+    void setBundleName(String name);
     
     String toString();
 

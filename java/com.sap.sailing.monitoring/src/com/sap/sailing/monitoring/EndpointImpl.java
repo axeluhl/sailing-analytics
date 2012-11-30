@@ -71,12 +71,12 @@ public class EndpointImpl implements Endpoint {
     }
 
     @Override
-    public String getName() {
+    public String getBundleName() {
         return name;
     }
 
     @Override
-    public void setName(String name) {
+    public void setBundleName(String name) {
         this.name = name;
     }
 
