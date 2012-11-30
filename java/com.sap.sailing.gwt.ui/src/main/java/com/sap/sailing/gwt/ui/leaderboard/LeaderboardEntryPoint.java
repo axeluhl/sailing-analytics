@@ -139,23 +139,23 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
      */
     private LeaderboardSettings createLeaderboardSettingsFromURLParameters(Map<String, List<String>> parameterMap) {
         LeaderboardSettings result;
-        Long refreshIntervalMillis = parameterMap.containsKey(PARAM_REFRESH_INTERVAL_MILLIS) ?
-                Long.valueOf(parameterMap.get(PARAM_REFRESH_INTERVAL_MILLIS).get(0)) : null;
+        Long refreshIntervalMillis = parameterMap.containsKey(PARAM_REFRESH_INTERVAL_MILLIS) ? Long
+                .valueOf(parameterMap.get(PARAM_REFRESH_INTERVAL_MILLIS).get(0)) : null;
+        RaceColumnSelectionStrategies raceColumnSelectionStrategy;
+        if (parameterMap.containsKey(PARAM_NAME_LAST_N)) {
+            raceColumnSelectionStrategy = RaceColumnSelectionStrategies.LAST_N;
+        } else {
+            raceColumnSelectionStrategy = RaceColumnSelectionStrategies.EXPLICIT;
+        }
+        final Integer numberOfLastRacesToShow;
+        if (parameterMap.containsKey(PARAM_NAME_LAST_N)) {
+            numberOfLastRacesToShow = Integer.valueOf(parameterMap.get(PARAM_NAME_LAST_N).get(0));
+        } else {
+            numberOfLastRacesToShow = null;
+        }
         if (parameterMap.containsKey(PARAM_RACE_NAME) || parameterMap.containsKey(PARAM_RACE_DETAIL) ||
                 parameterMap.containsKey(PARAM_LEG_DETAIL) || parameterMap.containsKey(PARAM_MANEUVER_DETAIL) ||
                 parameterMap.containsKey(PARAM_OVERALL_DETAIL)) {
-            RaceColumnSelectionStrategies raceColumnSelectionStrategy;
-            if (parameterMap.containsKey(PARAM_NAME_LAST_N)) {
-                raceColumnSelectionStrategy = RaceColumnSelectionStrategies.LAST_N;
-            } else {
-                raceColumnSelectionStrategy = RaceColumnSelectionStrategies.EXPLICIT;
-            }
-            final Integer numberOfLastRacesToShow;
-            if (parameterMap.containsKey(PARAM_NAME_LAST_N)) {
-                numberOfLastRacesToShow = Integer.valueOf(parameterMap.get(PARAM_NAME_LAST_N).get(0));
-            } else {
-                numberOfLastRacesToShow = null;
-            }
             List<DetailType> maneuverDetails = getDetailTypeListFromParamValue(parameterMap.get(PARAM_MANEUVER_DETAIL));
             List<DetailType> raceDetails = getDetailTypeListFromParamValue(parameterMap.get(PARAM_RACE_DETAIL));
             List<DetailType> overallDetails = getDetailTypeListFromParamValue(parameterMap.get(PARAM_OVERALL_DETAIL));
@@ -176,7 +176,7 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
             final List<DetailType> overallDetails = Collections.emptyList();
             result = LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(null, null, /* overallDetails */
                     overallDetails, null,
-                    /* autoExpandFirstRace */ false, refreshIntervalMillis);
+                    /* autoExpandFirstRace */ false, refreshIntervalMillis, numberOfLastRacesToShow, raceColumnSelectionStrategy);
         }
         return result;
     }
