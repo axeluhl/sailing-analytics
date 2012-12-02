@@ -327,13 +327,13 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
             }
         }
         
-        timeOfEarliestRequestInMillis = chartData.getRequestedFromTime().getTime();
-        timeOfLatestRequestInMillis = chartData.getRequestedToTime().getTime();
+        if(timeOfEarliestRequestInMillis == null || timeOfEarliestRequestInMillis > chartData.getRequestedFromTime().getTime()) {
+            timeOfEarliestRequestInMillis = chartData.getRequestedFromTime().getTime();
+        }
+        if(timeOfLatestRequestInMillis == null || timeOfLatestRequestInMillis < chartData.getRequestedToTime().getTime()) {
+            timeOfLatestRequestInMillis = chartData.getRequestedToTime().getTime();
+        }
 
-//        if (!isZoomed) {
-//            chart.getXAxis().setMin(timeRangeWithZoomProvider.getFromTime().getTime());
-//            chart.getXAxis().setMax(timeRangeWithZoomProvider.getToTime().getTime());
-//        }
         chart.redraw();
     }
 
