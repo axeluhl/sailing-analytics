@@ -13,7 +13,7 @@ import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 
 public class RaceColumnDTO extends NamedDTO implements IsSerializable {
-    private static final long IS_LIVE_GRACE_PERIOD_IN_MILLIS = 5 * 60 * 1000; // five minutes
+    private static final long IS_LIVE_GRACE_PERIOD_IN_MILLIS = 3 * 60 * 1000; // three minutes
     
     private boolean medalRace;
     private List<FleetDTO> fleets;
@@ -146,23 +146,10 @@ public class RaceColumnDTO extends NamedDTO implements IsSerializable {
      */
     public boolean isLive() {
         boolean result = false;
+        final long now = System.currentTimeMillis();
         if (getWhenLastTrackedRaceWasLive() != null
-                && getWhenLastTrackedRaceWasLive().getTime() > System.currentTimeMillis() - IS_LIVE_GRACE_PERIOD_IN_MILLIS) {
+                && getWhenLastTrackedRaceWasLive().getTime() > now - IS_LIVE_GRACE_PERIOD_IN_MILLIS) {
             result = true;
-        } else {
-            for (FleetDTO fleet : getFleets()) {
-                final RaceDTO raceDTO = racesPerFleet.get(fleet);
-                if (trackedRaceIdentifiersPerFleet.get(fleet) != null
-                        && raceDTO != null
-                        && raceDTO.trackedRace != null
-                        && raceDTO.trackedRace.hasGPSData && raceDTO.trackedRace.hasWindData
-                        && raceDTO.endOfRace == null
-                        && (raceDTO.trackedRace.startOfTracking != null ? new Date()
-                                .after(raceDTO.trackedRace.startOfTracking) : false)) {
-                    result = true;
-                    break;
-                }
-            }
         }
         return result;
     }
