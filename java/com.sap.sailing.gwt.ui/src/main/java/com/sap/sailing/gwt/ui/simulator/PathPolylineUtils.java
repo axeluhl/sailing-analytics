@@ -4,62 +4,68 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.google.gwt.maps.client.geom.LatLng;
-import com.sap.sailing.gwt.ui.shared.SpeedWithBearingDTO;
 import com.sap.sailing.gwt.ui.shared.SimulatorWindDTO;
+import com.sap.sailing.gwt.ui.shared.SpeedWithBearingDTO;
 
 public class PathPolylineUtils {
 
     public static final double EARTH_RADIUS_METERS = 6378137;
-    public static final double factor_kn2mps = 0.514444;
+    public static final double FACTOR_DEG2RAD = 0.0174532925;
+    public static final double FACTOR_RAD2DEG = 57.2957795;
+    public static final double FACTOR_KN2MPS = 0.514444;
+    public static final double FACTOR_MPS2KN = 1.94384;
 
-    public static double convertFromDegToRad(final double noOfDegrees) {
-        return (noOfDegrees * 0.0174532925);
+
+    public static double degreesToRadians(final double noOfDegrees) {
+        return (noOfDegrees * FACTOR_DEG2RAD);
     }
 
-    public static double convertFromRadToDeg(final double noOfRadians) {
-        return (noOfRadians * 57.2957795);
+    public static double radiansToDegrees(final double noOfRadians) {
+        return (noOfRadians * FACTOR_RAD2DEG);
     }
 
-    public static double convertFromKnotsToMPS(final double knots) {
-        return knots * factor_kn2mps;
+    public static double knotsToMetersPerSecond(final double knots) {
+        return knots * FACTOR_KN2MPS;
     }
 
-    public static double convertFromMPSToKnots(final double mps) {
-        return mps / factor_kn2mps;
+    public static double metersPerSecondKnots(final double mps) {
+        return mps * FACTOR_MPS2KN;
     }
 
-    public static SpeedWithBearingDTO computeAverageWindSpeed(final List<SimulatorWindDTO> windDTOs, final boolean useDampenedValues) {
+    public static SpeedWithBearingDTO computeAverageWindSpeed(final List<SimulatorWindDTO> windDTOs) {
 
         final int count = windDTOs.size();
 
         double sumOfProductOfSpeedAndCosBearing = 0.0;
         double sumOfProductOfSpeedAndSinBearing = 0.0;
-        double windSpeedKnots = 0.0;
-        double windBearingDegrees = 0.0;
         double windBearingRadians = 0.0;
 
         for (final SimulatorWindDTO windDTO : windDTOs) {
 
-            windSpeedKnots = windDTO.trueWindSpeedInKnots; //useDampenedValues ? windDTO.dampenedTrueWindSpeedInKnots : windDTO.trueWindSpeedInKnots;
-            windBearingDegrees =  windDTO.trueWindBearingDeg; //useDampenedValues ? windDTO.dampenedTrueWindBearingDeg : windDTO.trueWindBearingDeg;
-            windBearingRadians = PathPolylineUtils.convertFromDegToRad(windBearingDegrees);
+            windBearingRadians = degreesToRadians(windDTO.trueWindBearingDeg);
 
-            sumOfProductOfSpeedAndCosBearing += (windSpeedKnots * Math.cos(windBearingRadians));
-            sumOfProductOfSpeedAndSinBearing += (windSpeedKnots * Math.sin(windBearingRadians));
+            sumOfProductOfSpeedAndCosBearing += (windDTO.trueWindSpeedInKnots * Math.cos(windBearingRadians));
+            sumOfProductOfSpeedAndSinBearing += (windDTO.trueWindSpeedInKnots * Math.sin(windBearingRadians));
         }
 
-        final double a = sumOfProductOfSpeedAndCosBearing / count;
-        final double b = sumOfProductOfSpeedAndSinBearing / count;
-        final double c = Math.atan(b / a);
+        final double a = sumOfProductOfSpeedAndSinBearing / count;
+        final double b = sumOfProductOfSpeedAndCosBearing / count;
+        final double c = radiansToDegrees(Math.atan(Math.abs(b / a)));
 
         double averageBearing = 0.0;
 
-        if (a == 0) {
-            averageBearing = (b >= 0) ? 90 : 270;
-        } else if (a < 0) { // 2nd Q : 3rd Q
-            averageBearing = 180 + c;
-        } else if (a > 0) {
-            averageBearing = (b >= 0) ? c : 360 + c; // 1st Q : 4th Q
+        if (a > 0) {
+            averageBearing = c;
+        } else if (a < 0) {
+            averageBearing = c - 180;
+        } else if (a == 0) {
+            if (b > 0) {
+                averageBearing = 180;
+            } else if (b < 0) {
+                averageBearing = -180;
+            } else {
+                // undefined
+            }
         }
 
         final double averageSpeed = Math.sqrt(a * a + b * b);
@@ -67,7 +73,7 @@ public class PathPolylineUtils {
         return new SpeedWithBearingDTO(averageSpeed, averageBearing);
     }
 
-    public static SpeedWithBearingDTO computeMinMaxAverageWindSpeed(final List<SimulatorWindDTO> windDTOs, final boolean useDampenedValues) {
+    public static SpeedWithBearingDTO computeMinMaxAverageWindSpeed(final List<SimulatorWindDTO> windDTOs) {
 
         SimulatorWindDTO minWindDTO = windDTOs.get(0);
         SimulatorWindDTO maxWindDTO = windDTOs.get(0);
@@ -78,31 +84,17 @@ public class PathPolylineUtils {
 
             currentWindDTO = windDTOs.get(index);
 
-/*            if (useDampenedValues) {
-                if (currentWindDTO.dampenedTrueWindSpeedInKnots < minWindDTO.dampenedTrueWindSpeedInKnots) {
-                    minWindDTO = currentWindDTO;
-                }
+            if (currentWindDTO.trueWindSpeedInKnots < minWindDTO.trueWindSpeedInKnots) {
+                minWindDTO = currentWindDTO;
+            }
 
-                if (currentWindDTO.dampenedTrueWindSpeedInKnots > maxWindDTO.dampenedTrueWindSpeedInKnots) {
-                    maxWindDTO = currentWindDTO;
-                }
-            } else {*/
-                if (currentWindDTO.trueWindSpeedInKnots < minWindDTO.trueWindSpeedInKnots) {
-                    minWindDTO = currentWindDTO;
-                }
-
-                if (currentWindDTO.trueWindSpeedInKnots > maxWindDTO.trueWindSpeedInKnots) {
-                    maxWindDTO = currentWindDTO;
-                }
-            //}
+            if (currentWindDTO.trueWindSpeedInKnots > maxWindDTO.trueWindSpeedInKnots) {
+                maxWindDTO = currentWindDTO;
+            }
         }
 
         final double speedInKnots = ((minWindDTO.trueWindSpeedInKnots + maxWindDTO.trueWindSpeedInKnots) / 2);
-        //useDampenedValues ? ((minWindDTO.dampenedTrueWindSpeedInKnots + maxWindDTO.dampenedTrueWindSpeedInKnots) / 2)
-        //        : ((minWindDTO.trueWindSpeedInKnots + maxWindDTO.trueWindSpeedInKnots) / 2);
-        final double bearingInDegrees = ((minWindDTO.trueWindBearingDeg + maxWindDTO.trueWindBearingDeg) / 2); 
-        //useDampenedValues ? ((minWindDTO.dampenedTrueWindBearingDeg + maxWindDTO.dampenedTrueWindBearingDeg) / 2)
-        //        : ((minWindDTO.trueWindBearingDeg + maxWindDTO.trueWindBearingDeg) / 2);
+        final double bearingInDegrees = ((minWindDTO.trueWindBearingDeg + maxWindDTO.trueWindBearingDeg) / 2);
 
         return new SpeedWithBearingDTO(speedInKnots, bearingInDegrees);
     }
@@ -167,8 +159,7 @@ public class PathPolylineUtils {
 
     }
 
-    public static double getTime(final LatLng startPoint, final double startSpeedMetersPerSecond, final LatLng endPoint,
-            final double endSpeedMetersPerSecond) {
+    public static double getTime(final LatLng startPoint, final LatLng endPoint, final double endSpeedMetersPerSecond) {
 
         final double distance = getDistanceBetween(startPoint, endPoint);
 
@@ -176,9 +167,7 @@ public class PathPolylineUtils {
             return 0.0;
         }
 
-
-
-        return 2 * distance / (startSpeedMetersPerSecond + endSpeedMetersPerSecond);
+        return distance / endSpeedMetersPerSecond;
     }
 
     /**
@@ -241,7 +230,7 @@ public class PathPolylineUtils {
         final double x = Math.cos(lat1)*Math.sin(lat2) - Math.sin(lat1)*Math.cos(lat2)*Math.cos(dLon);
         final double bearing = Math.atan2(y, x);
 
-        return (convertFromRadToDeg(bearing) + 360) % 360;
+        return (radiansToDegrees(bearing) + 360) % 360;
     }
 
     /**
@@ -259,7 +248,7 @@ public class PathPolylineUtils {
         final double x = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLon);
         final double bearing = Math.atan2(y, x);
 
-        return (convertFromRadToDeg(bearing) + 180) % 360;
+        return (radiansToDegrees(bearing) + 180) % 360;
     }
 
     /**
@@ -290,7 +279,7 @@ public class PathPolylineUtils {
     public static LatLng getDestinationPoint(final LatLng startPoint, final double bearingDegrees, final double distanceMeters) {
 
         final double distance = distanceMeters / EARTH_RADIUS_METERS;
-        final double bearing = convertFromDegToRad(bearingDegrees);
+        final double bearing = degreesToRadians(bearingDegrees);
         final double lat1 = startPoint.getLatitudeRadians();
         final double lon1 = startPoint.getLongitudeRadians();
 
@@ -298,6 +287,6 @@ public class PathPolylineUtils {
         double lon2 = lon1 + Math.atan2(Math.sin(bearing) * Math.sin(distance) * Math.cos(lat1), Math.cos(distance) - Math.sin(lat1) * Math.sin(lat2));
         lon2 = (lon2 + 3 * Math.PI) % (2 * Math.PI) - Math.PI;
 
-        return LatLng.newInstance(convertFromRadToDeg(lat2), convertFromRadToDeg(lon2));
+        return LatLng.newInstance(radiansToDegrees(lat2), radiansToDegrees(lon2));
     }
 }
