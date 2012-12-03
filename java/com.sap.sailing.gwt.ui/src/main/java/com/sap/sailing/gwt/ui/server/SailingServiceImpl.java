@@ -462,6 +462,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
                 RaceColumnDTO raceColumnDTO = result.createEmptyRaceColumn(raceColumn.getName(), raceColumn.isMedalRace(),
                         leaderboard.getScoringScheme().isValidInTotalScore(leaderboard, raceColumn, timePoint));
+                TimePoint latestTimePointAfterQueryTimePointWhenATrackedRaceWasRunning = null;
                 for (Fleet fleet : raceColumn.getFleets()) {
                     RegattaAndRaceIdentifier raceIdentifier = null;
                     TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
@@ -469,11 +470,25 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     if (trackedRace != null) {
                         raceIdentifier = new RegattaNameAndRaceName(trackedRace.getTrackedRegatta().getRegatta()
                                 .getName(), trackedRace.getRace().getName());
+                        if (trackedRace.hasStarted(timePoint)) {
+                            TimePoint runningTimePointForTrackedRace = timePoint;
+                            final TimePoint endOfRace = trackedRace.getEndOfRace();
+                            if (endOfRace != null) {
+                                runningTimePointForTrackedRace = endOfRace;
+                            }
+                            if (latestTimePointAfterQueryTimePointWhenATrackedRaceWasRunning == null ||
+                                runningTimePointForTrackedRace.after(latestTimePointAfterQueryTimePointWhenATrackedRaceWasRunning)) {
+                                latestTimePointAfterQueryTimePointWhenATrackedRaceWasRunning = runningTimePointForTrackedRace;
+                            }
+                        }
                     }
                     // Note: the RaceColumnDTO won't be created by the following addRace call because it has been created
                     // above by the result.createEmptyRaceColumn call
                     result.addRace(raceColumn.getName(), raceColumn.getExplicitFactor(), fleetDTO,
                             raceColumn.isMedalRace(), raceIdentifier, /* StrippedRaceDTO */ null);
+                }
+                if (latestTimePointAfterQueryTimePointWhenATrackedRaceWasRunning != null) {
+                    raceColumnDTO.setWhenLastTrackedRaceWasRunning(latestTimePointAfterQueryTimePointWhenATrackedRaceWasRunning.asDate());
                 }
                 result.setCompetitorsFromBestToWorst(raceColumnDTO, getCompetitorDTOList(leaderboard.getCompetitorsFromBestToWorst(raceColumn, timePoint)));
             }

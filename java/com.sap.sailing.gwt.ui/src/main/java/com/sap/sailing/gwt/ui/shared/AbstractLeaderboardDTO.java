@@ -137,7 +137,10 @@ public abstract class AbstractLeaderboardDTO implements IsSerializable {
      * ensures that a fleet named <code>fleetName</code> is present. If it's not present yet, it's added to the race
      * column's fleet name list. The <code>trackedRaceIdentifier</code> and <code>race</code> are associated with the
      * column for the fleet identified by <code>fleetName</code>.
-     * @param explicitFactor TODO
+     * 
+     * @param explicitFactor
+     *            factor by which to multiply the race column's points for the overall score; if <code>null</code>, the
+     *            default will be determined by whether or not the column is marked as medal race
      * @param fleetDTO
      *            must not be null
      */
