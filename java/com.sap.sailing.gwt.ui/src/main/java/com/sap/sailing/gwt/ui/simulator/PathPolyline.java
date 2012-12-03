@@ -20,9 +20,9 @@ import com.sap.sailing.gwt.ui.shared.PathDTO;
 import com.sap.sailing.gwt.ui.shared.PositionDTO;
 import com.sap.sailing.gwt.ui.shared.ReceivePolarDiagramDataDTO;
 import com.sap.sailing.gwt.ui.shared.RequestPolarDiagramDataDTO;
+import com.sap.sailing.gwt.ui.shared.SimulatorWindDTO;
 import com.sap.sailing.gwt.ui.shared.SpeedBearingPositionDTO;
 import com.sap.sailing.gwt.ui.shared.SpeedWithBearingDTO;
-import com.sap.sailing.gwt.ui.shared.SimulatorWindDTO;
 import com.sap.sailing.gwt.ui.shared.racemap.TwoDPoint;
 import com.sap.sailing.gwt.ui.shared.racemap.TwoDSegment;
 import com.sap.sailing.gwt.ui.shared.racemap.TwoDVector;
@@ -43,8 +43,8 @@ public class PathPolyline {
     private static final String DEFAULT_DASHLINE_BISECTOR_COLOR = "Green";
     private static final String DEFAULT_DASHLINE_VERTICAL_COLOR = "Blue";
 
-    private static final double STEP_DURATION_MILLISECONDS = 1000;
-    private static final boolean USE_DAMPENED_VALUES = false;
+    // private static final double STEP_DURATION_MILLISECONDS = 1000;
+    private static final double STEP_SIZE_METERS = 5.0;
     private static final boolean USE_ONLY_TURN_POINTS = false;
 
     private Polyline polyline;
@@ -68,7 +68,8 @@ public class PathPolyline {
     private boolean warningAlreadyShown = false;
 
     private boolean firstTime = true;
-    private double stepSizeMeters = 0.0;
+
+    // private double stepSizeMeters = 5.0;
 
     // private static Logger logger = Logger.getLogger(PathPolyline.class.getName());
 
@@ -190,7 +191,8 @@ public class PathPolyline {
         if (this.firstTime) {
 
             this.averageWindSpeed = this.getAverageWindSpeed();
-            this.stepSizeMeters = PathPolylineUtils.convertFromKnotsToMPS(this.averageWindSpeed.speedInKnots) * (STEP_DURATION_MILLISECONDS / 1000);
+            // this.stepSizeMeters = PathPolylineUtils.knotsToMetersPerSecond(this.averageWindSpeed.speedInKnots) *
+            // (STEP_DURATION_MILLISECONDS / 1000);
             this.firstTime = false;
         }
 
@@ -357,24 +359,13 @@ public class PathPolyline {
                     warningAlreadyShown = true;
                 }
 
-                // final List<PositionDTO> positions = requestData.getPositions();
                 final List<SpeedBearingPositionDTO> speeds = receiveData.getSpeedsBearingsPositions();
-
-                // int counter = 0;
-                // for (final SpeedBearingPositionDTO speed : speeds) {
-                // counter++;
-                // System.err.println("Position " + counter + ": " + speed.getPosition().latDeg + "," +
-                // speed.getPosition().lngDeg + " and speed = "
-                // + PathPolylineUtils.convertFromKnotsToMPS(speed.getSpeedWithBearing().speedInKnots));
-                // }
-
                 final int noOfSpeeds = speeds.size();
 
                 SpeedBearingPositionDTO startSpeedAndPosition = null;
                 SpeedBearingPositionDTO endSpeedAndPosition = null;
                 LatLng startPoint = null;
                 LatLng endPoint = null;
-                double startSpeed = 0.0;
                 double endSpeed = 0.0;
                 double totalTime = 0.0;
 
@@ -389,20 +380,18 @@ public class PathPolyline {
 
                     startPoint = convertToLatLng(startSpeedAndPosition.getPosition());
                     endPoint = convertToLatLng(endSpeedAndPosition.getPosition());
+                    endSpeed = PathPolylineUtils.knotsToMetersPerSecond(endSpeedAndPosition.getSpeedWithBearing().speedInKnots);
 
-                    startSpeed = PathPolylineUtils.convertFromKnotsToMPS(startSpeedAndPosition.getSpeedWithBearing().speedInKnots);
-                    endSpeed = PathPolylineUtils.convertFromKnotsToMPS(endSpeedAndPosition.getSpeedWithBearing().speedInKnots);
-
-                    //
-
-                    final double time = PathPolylineUtils.getTime(startPoint, startSpeed, endPoint, endSpeed);
-                    final double distance = PathPolylineUtils.getDistanceBetween(startPoint, endPoint);
-                    System.err.println("ZZZ: Segment no " + index + " distance=" + distance + " time=" + time);
-                    totalTime += PathPolylineUtils.getTime(startPoint, startSpeed, endPoint, endSpeed);
+                    totalTime += PathPolylineUtils.getTime(startPoint, endPoint, endSpeed);
                 }
 
                 System.err.println("==================================================");
-                System.err.println("Total time of the path polyline is " + totalTime + " seconds!");
+                System.err.println("total distance = " + PathPolylineUtils.getTotalDistanceMeters(points) + " meters");
+                System.err.println("step size = " + STEP_SIZE_METERS + " meters");
+                System.err.println("average wind speed = " + PathPolylineUtils.knotsToMetersPerSecond(averageWindSpeed.speedInKnots) + " meters/second");
+                System.err.println("total time = " + totalTime + " seconds!");
+                System.err.println("==================================================");
+
             }
         });
     }
@@ -410,8 +399,8 @@ public class PathPolyline {
     private SpeedWithBearingDTO getAverageWindSpeed() {
 
         final List<SimulatorWindDTO> windDTOs = this.pathDTO.getMatrix();
-        // PathPolylineUtils.computeMinMaxAverageWindSpeed(windDTOs, USE_DAMPENED_VALUES)
-        return PathPolylineUtils.computeAverageWindSpeed(windDTOs, USE_DAMPENED_VALUES);
+        // PathPolylineUtils.computeMinMaxAverageWindSpeed(windDTOs)
+        return PathPolylineUtils.computeAverageWindSpeed(windDTOs);
     }
 
     private RequestPolarDiagramDataDTO createRequestPolarDiagramDataDTO() {
@@ -423,19 +412,10 @@ public class PathPolyline {
                 positions.add(new PositionDTO(point.getLatitude(), point.getLongitude()));
             }
         } else {
-            for (final LatLng point : PathPolylineUtils.getIntermediatePoints(this.points, this.stepSizeMeters)) {
+            for (final LatLng point : PathPolylineUtils.getIntermediatePoints(this.points, STEP_SIZE_METERS)) {
                 positions.add(new PositionDTO(point.getLatitude(), point.getLongitude()));
             }
         }
-
-        System.err.println("==================================================");
-        System.err.println("total distance of path = " + PathPolylineUtils.getTotalDistanceMeters(this.points) + " meters");
-        System.err.println("step size = " + stepSizeMeters + " meters");
-        System.err.println("average wind speed = " + PathPolylineUtils.convertFromKnotsToMPS(this.averageWindSpeed.speedInKnots) + " meters/second");
-        System.err.println("total points = " + positions.size());
-        System.err.println("==================================================");
-
-        this.averageWindSpeed = new SpeedWithBearingDTO(4, this.averageWindSpeed.bearingInDegrees);
 
         return new RequestPolarDiagramDataDTO(this.boatClassID, positions, this.averageWindSpeed);
     }

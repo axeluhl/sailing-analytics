@@ -153,8 +153,8 @@ public class WindFieldCanvasOverlay extends FullCanvasOverlay implements TimeLis
 
     protected void drawScaledArrow(SimulatorWindDTO windDTO, double angle, int index, boolean drawHead) {
 
-        double aWidth = Math.max(1., (PathPolylineUtils.convertFromKnotsToMPS(windDTO.trueWindSpeedInKnots)/2.));
-        double aLength = Math.max(10., (4.*PathPolylineUtils.convertFromKnotsToMPS(windDTO.trueWindSpeedInKnots)));
+        double aWidth = Math.max(1., (PathPolylineUtils.knotsToMetersPerSecond(windDTO.trueWindSpeedInKnots)/2.));
+        double aLength = Math.max(10., (4.*PathPolylineUtils.knotsToMetersPerSecond(windDTO.trueWindSpeedInKnots)));
         //System.out.println("arrow speed: "+windDTO.trueWindSpeedInMetersPerSecond+" angle:"+angle+" aWidth: "+aWidth+" aLength: "+aLength);
         drawArrow(windDTO, angle, aLength, aWidth, index, drawHead);
 
