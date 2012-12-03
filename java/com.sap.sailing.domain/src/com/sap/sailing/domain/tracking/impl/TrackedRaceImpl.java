@@ -1895,15 +1895,15 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
             SpeedWithBearing speedWithBearingOnApproximationAtBeginning, List<Pair<GPSFixMoving, CourseChange>> group,
             SpeedWithBearing speedWithBearingOnApproximationAtEnd, double totalCourseChangeInDegrees,
             long totalMilliseconds) throws NoWindException {
-        TimePoint maneuverTimePoint = new MillisecondsTimePoint(totalMilliseconds / group.size());
-        Position maneuverPosition = getTrack(competitor)
-                .getEstimatedPosition(maneuverTimePoint, /* extrapolate */false);
         MillisecondsTimePoint timePointBeforeManeuver = new MillisecondsTimePoint(group.get(0).getA().getTimePoint()
                 .asMillis()
                 - getApproximateManeuverDurationInMilliseconds() / 2);
         MillisecondsTimePoint timePointAfterManeuver = new MillisecondsTimePoint(group.get(group.size() - 1).getA()
                 .getTimePoint().asMillis()
                 + getApproximateManeuverDurationInMilliseconds() / 2);
+        TimePoint maneuverTimePoint = computeManeuverTimepoint(competitor, timePointBeforeManeuver, timePointAfterManeuver);
+        Position maneuverPosition = getTrack(competitor)
+                .getEstimatedPosition(maneuverTimePoint, /* extrapolate */false);
         Tack tackBeforeManeuver = getTack(maneuverPosition, timePointBeforeManeuver,
                 speedWithBearingOnApproximationAtBeginning.getBearing());
         Tack tackAfterManeuver = getTack(maneuverPosition, timePointAfterManeuver,
@@ -1922,7 +1922,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         } else if (Math.abs(totalCourseChangeInDegrees) > PENALTY_CIRCLE_DEGREES_THRESHOLD) {
             maneuverType = ManeuverType.PENALTY_CIRCLE;
             if (legBeforeManeuver != null) {
-                maneuverLoss = legBeforeManeuver.getManeuverLoss(timePointBeforeManeuver, timePointAfterManeuver);
+                maneuverLoss = legBeforeManeuver.getManeuverLoss(timePointBeforeManeuver, maneuverTimePoint, timePointAfterManeuver);
             }
         } else {
             if (tackBeforeManeuver != tackAfterManeuver) {
@@ -1935,13 +1935,13 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                     case UPWIND:
                         maneuverType = ManeuverType.TACK;
                         if (legBeforeManeuver != null) {
-                            maneuverLoss = legBeforeManeuver.getManeuverLoss(timePointBeforeManeuver, timePointAfterManeuver);
+                            maneuverLoss = legBeforeManeuver.getManeuverLoss(timePointBeforeManeuver, maneuverTimePoint, timePointAfterManeuver);
                         }
                         break;
                     case DOWNWIND:
                         maneuverType = ManeuverType.JIBE;
                         if (legBeforeManeuver != null) {
-                            maneuverLoss = legBeforeManeuver.getManeuverLoss(timePointBeforeManeuver, timePointAfterManeuver);
+                            maneuverLoss = legBeforeManeuver.getManeuverLoss(timePointBeforeManeuver, maneuverTimePoint, timePointAfterManeuver);
                         }
                         break;
                     default:
@@ -1975,6 +1975,41 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                 speedWithBearingOnApproximationAtBeginning, speedWithBearingOnApproximationAtEnd,
                 totalCourseChangeInDegrees, maneuverLoss);
         return maneuver;
+    }
+
+    /**
+     * Computes the maneuver time point as the time point along between maneuver start and end where the competitor's track has greatest change
+     * in course.
+     */
+    private TimePoint computeManeuverTimepoint(Competitor competitor, MillisecondsTimePoint timePointBeforeManeuver,
+            MillisecondsTimePoint timePointAfterManeuver) {
+        TimePoint result = timePointBeforeManeuver;
+        GPSFixTrack<Competitor, GPSFixMoving> track = getTrack(competitor);
+        GPSFixMoving lastFix = null;
+        double maxAngleSpeedInDegreesPerSecond = 0;
+        track.lockForRead();
+        try {
+            for (Iterator<GPSFixMoving> i=track.getFixesIterator(timePointBeforeManeuver, /* inclusive */ true); i.hasNext(); ) {
+                GPSFixMoving fix = i.next();
+                if (fix.getTimePoint().after(timePointAfterManeuver)) {
+                    break;
+                }
+                if (lastFix != null) {
+                    Bearing courseAtLastFix = track.getEstimatedSpeed(lastFix.getTimePoint()).getBearing();
+                    Bearing courseAtFix = track.getEstimatedSpeed(fix.getTimePoint()).getBearing();
+                    double angleSpeedInDegreesPerSecond = Math.abs((courseAtFix.getDifferenceTo(courseAtLastFix).getDegrees()) /
+                            (double) (fix.getTimePoint().asMillis()-lastFix.getTimePoint().asMillis()));
+                    if (angleSpeedInDegreesPerSecond > maxAngleSpeedInDegreesPerSecond) {
+                        maxAngleSpeedInDegreesPerSecond = angleSpeedInDegreesPerSecond;
+                        result = lastFix.getTimePoint();
+                    }
+                }
+                lastFix = fix;
+            }
+        } finally {
+            track.unlockAfterRead();
+        }
+        return result;
     }
 
     /**

@@ -71,8 +71,11 @@ public class LeaderboardRankChart extends SimplePanel implements RequiresResize,
                 .setMarginRight(65)
                 .setWidth100()
                 .setHeight100()
-                .setBorderColor(new Color("#A6A6A6"))
+                .setBorderColor(new Color("#CACACA"))
                 .setBorderWidth(1)
+                .setBorderRadius(0)
+                .setBackgroundColor(new Color("#EBEBEB"))
+                .setPlotBorderWidth(0)
                 .setCredits(new Credits().setEnabled(false))
                 .setChartTitle(new ChartTitle().setText(stringMessages.rank()))
                 .setLinePlotOptions(new LinePlotOptions().setLineWidth(LINE_WIDTH).setMarker(

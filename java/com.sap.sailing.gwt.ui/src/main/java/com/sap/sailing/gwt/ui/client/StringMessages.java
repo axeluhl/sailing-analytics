@@ -94,6 +94,7 @@ public interface StringMessages extends Messages {
     String trackableRaces();
     String trackWind();
     String regattaName();
+    String eventName();
     String event();
     String startTime();
     String regatta();

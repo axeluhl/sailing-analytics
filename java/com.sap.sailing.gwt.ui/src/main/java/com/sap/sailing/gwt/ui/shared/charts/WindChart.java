@@ -60,6 +60,8 @@ import com.sap.sailing.gwt.ui.shared.components.SettingsDialogComponent;
 
 public class WindChart extends RaceChart implements Component<WindChartSettings>, RequiresResize {
     private static final int LINE_WIDTH = 1;
+    private static final int MAX_SERIES_POINTS = 10000;
+
     private final WindChartSettings settings;
     
     /**
@@ -101,8 +103,11 @@ public class WindChart extends RaceChart implements Component<WindChartSettings>
                 .setMarginRight(65)
                 .setWidth100()
                 .setHeight100()
-                .setBorderColor(new Color("#A6A6A6"))
+                .setBorderColor(new Color("#CACACA"))
                 .setBorderWidth(1)
+                .setBorderRadius(0)
+                .setBackgroundColor(new Color("#EBEBEB"))
+                .setPlotBorderWidth(0)
                 .setCredits(new Credits().setEnabled(false))
                 .setChartTitle(new ChartTitle().setText(stringMessages.wind()))
                 .setChartSubtitle(new ChartSubtitle().setText(stringMessages.clickAndDragToZoomIn()))
@@ -280,6 +285,7 @@ public class WindChart extends RaceChart implements Component<WindChartSettings>
                 .setType(Series.Type.LINE)
                 .setName(stringMessages.fromDeg()+" "+WindSourceTypeFormatter.format(windSource, stringMessages))
                 .setYAxis(0)
+                .setOption("turboThreshold", MAX_SERIES_POINTS)
                 .setPlotOptions(new LinePlotOptions().setColor(colorMap.getColorByID(windSource)).setSelected(true));
         return newSeries;
     }
@@ -294,6 +300,7 @@ public class WindChart extends RaceChart implements Component<WindChartSettings>
                 .setType(Series.Type.LINE)
                 .setName(stringMessages.windSpeed()+" "+WindSourceTypeFormatter.format(windSource, stringMessages))
                 .setYAxis(1) // use the second Y-axis
+                .setOption("turboThreshold", MAX_SERIES_POINTS)
                 .setPlotOptions(new LinePlotOptions().setDashStyle(PlotLine.DashStyle.SHORT_DOT)
                         .setLineWidth(3).setHoverStateLineWidth(3)
                         .setColor(colorMap.getColorByID(windSource)).setSelected(true)); // show only the markers, not the connecting lines
@@ -304,7 +311,7 @@ public class WindChart extends RaceChart implements Component<WindChartSettings>
      * Updates the wind charts with the wind data from <code>result</code>. If <code>append</code> is <code>true</code>, previously
      * existing points in the chart are left unchanged. Otherwise, the existing wind series are replaced.
      */
-    public void updateStripChartSeries(WindInfoForRaceDTO result, boolean append) {
+    public void updateChartSeries(WindInfoForRaceDTO result, boolean append) {
         final NumberFormat numberFormat = NumberFormat.getFormat("0");
         Long newMinTimepoint = timeOfEarliestRequestInMillis;
         Long newMaxTimepoint = timeOfLatestRequestInMillis;
@@ -425,7 +432,7 @@ public class WindChart extends RaceChart implements Component<WindChartSettings>
 
     /**
      * Sets the visibilities of the wind source series based on the new settings. Note that this does not
-     * re-load any wind data. This has to happen by calling {@link #updateStripChartSeries(WindInfoForRaceDTO, boolean)}.
+     * re-load any wind data. This has to happen by calling {@link #updateChartSeries(WindInfoForRaceDTO, boolean)}.
      */
     @Override
     public void updateSettings(WindChartSettings newSettings) {
@@ -470,7 +477,7 @@ public class WindChart extends RaceChart implements Component<WindChartSettings>
                         @Override
                         public void onSuccess(WindInfoForRaceDTO result) {
                             if (result != null) {
-                                updateStripChartSeries(result, append);
+                                updateChartSeries(result, append);
                                 updateVisibleSeries();
                             } else {
                                 if (!append) {

@@ -62,7 +62,7 @@ public class CompareCompetitorsChartDialog extends DialogBoxExt implements RaceT
         this.errorReporter = errorReporter;
         this.timeRangeWithZoomProvider = new TimeRangeWithZoomModel(); 
         this.setPopupPosition(15, 15);
-        this.setHTML(stringMessages.compareCompetitors());
+        this.setHTML(stringMessages.competitorCharts());
         this.setWidth(Window.getClientWidth() - 250 + "px");
         this.setAnimationEnabled(true);
 

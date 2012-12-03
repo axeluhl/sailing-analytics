@@ -6,34 +6,34 @@ import java.util.List;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
-import com.sap.sailing.gwt.ui.shared.MultiCompetitorRaceDataDTO;
+import com.sap.sailing.gwt.ui.shared.CompetitorsRaceDataDTO;
 
-public class GetCompetitorsRaceDataAction extends DefaultAsyncAction<MultiCompetitorRaceDataDTO> {
+public class GetCompetitorsRaceDataAction extends DefaultAsyncAction<CompetitorsRaceDataDTO> {
     private final SailingServiceAsync sailingService;
-
-    private final RegattaAndRaceIdentifier race;
-    private final List<Pair<Date, CompetitorDTO>> competitorsQuery;
+    private final RegattaAndRaceIdentifier raceIdentifier;
+    private final List<CompetitorDTO> competitors;
+    private final Date fromDate;
     private final Date toDate;
-    private final long stepSize;
+    private final long stepSizeInMs;
     private final DetailType detailType;
     
-    public GetCompetitorsRaceDataAction(SailingServiceAsync sailingService, RegattaAndRaceIdentifier race, List<Pair<Date, CompetitorDTO>> competitorsQuery,
-            Date toDate, long stepSize, DetailType detailType, AsyncCallback<MultiCompetitorRaceDataDTO> callback) {
+    public GetCompetitorsRaceDataAction(SailingServiceAsync sailingService, RegattaAndRaceIdentifier raceIdentifier, List<CompetitorDTO> competitors,
+            Date fromDate, Date toDate, long stepSizeInMs, DetailType detailType, AsyncCallback<CompetitorsRaceDataDTO> callback) {
         super(callback);
         this.sailingService = sailingService;
-        this.race = race;
-        this.competitorsQuery = competitorsQuery;
+        this.raceIdentifier = raceIdentifier;
+        this.competitors = competitors;
+        this.fromDate = fromDate;
         this.toDate = toDate;
-        this.stepSize = stepSize;
+        this.stepSizeInMs = stepSizeInMs;
         this.detailType = detailType;
     }
 
     @Override
     public void execute(AsyncActionsExecutor asyncActionsExecutor) {
-        sailingService.getCompetitorsRaceData(race, competitorsQuery, toDate, stepSize, detailType,
-                    (AsyncCallback<MultiCompetitorRaceDataDTO>) getWrapperCallback(asyncActionsExecutor));
+        sailingService.getCompetitorsRaceData(raceIdentifier, competitors, fromDate, toDate, stepSizeInMs, detailType,
+                    (AsyncCallback<CompetitorsRaceDataDTO>) getWrapperCallback(asyncActionsExecutor));
     }
 }
