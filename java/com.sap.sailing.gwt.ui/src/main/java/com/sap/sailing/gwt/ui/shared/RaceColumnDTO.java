@@ -24,16 +24,17 @@ public class RaceColumnDTO extends NamedDTO implements IsSerializable {
     
     /**
      * If the column has tracked races attached, this field tells the latest time point when one of those races was
-     * still running. If a tracked race has started but hasn't ended yet, the query time point is used for this field if
-     * it is after the time point when that race started, assuming that at the query time the race was still running. If
-     * the race hasn't started at the query time, the race isn't considered for setting this field. If the end of the
-     * race is known, it is used for this field if later than any other value set for this field.
+     * still running. It is necessary for the race to have GPS and wind data for the time point to be recorded here. If
+     * a tracked race has started but hasn't ended yet, the query time point is used for this field if it is after the
+     * time point when that race started, assuming that at the query time the race was still running. If the race hasn't
+     * started at the query time, the race isn't considered for setting this field. If the end of the race is known, it
+     * is used for this field if later than any other value set for this field.
      * <p>
      * 
      * If no tracked race is attached to this column or none of the tracked races attached has started at the query time
      * point, this field is <code>null</code>.
      */
-    private Date whenLastTrackedRaceWasRunning;
+    private Date whenLastTrackedRaceWasLive;
 
     RaceColumnDTO() {} // for GWT serialization
     
@@ -145,8 +146,8 @@ public class RaceColumnDTO extends NamedDTO implements IsSerializable {
      */
     public boolean isLive() {
         boolean result = false;
-        if (getWhenLastTrackedRaceWasRunning() != null
-                && getWhenLastTrackedRaceWasRunning().getTime() > System.currentTimeMillis() - IS_LIVE_GRACE_PERIOD_IN_MILLIS) {
+        if (getWhenLastTrackedRaceWasLive() != null
+                && getWhenLastTrackedRaceWasLive().getTime() > System.currentTimeMillis() - IS_LIVE_GRACE_PERIOD_IN_MILLIS) {
             result = true;
         } else {
             for (FleetDTO fleet : getFleets()) {
@@ -154,6 +155,7 @@ public class RaceColumnDTO extends NamedDTO implements IsSerializable {
                 if (trackedRaceIdentifiersPerFleet.get(fleet) != null
                         && raceDTO != null
                         && raceDTO.trackedRace != null
+                        && raceDTO.trackedRace.hasGPSData && raceDTO.trackedRace.hasWindData
                         && raceDTO.endOfRace == null
                         && (raceDTO.trackedRace.startOfTracking != null ? new Date()
                                 .after(raceDTO.trackedRace.startOfTracking) : false)) {
@@ -219,11 +221,11 @@ public class RaceColumnDTO extends NamedDTO implements IsSerializable {
         fleets.add(fleet);
     }
 
-    private Date getWhenLastTrackedRaceWasRunning() {
-        return whenLastTrackedRaceWasRunning;
+    private Date getWhenLastTrackedRaceWasLive() {
+        return whenLastTrackedRaceWasLive;
     }
 
-    public void setWhenLastTrackedRaceWasRunning(Date whenLastTrackedRaceWasRunning) {
-        this.whenLastTrackedRaceWasRunning = whenLastTrackedRaceWasRunning;
+    public void setWhenLastTrackedRaceWasLive(Date whenLastTrackedRaceWasLive) {
+        this.whenLastTrackedRaceWasLive = whenLastTrackedRaceWasLive;
     }
 }

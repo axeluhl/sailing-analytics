@@ -462,7 +462,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
                 RaceColumnDTO raceColumnDTO = result.createEmptyRaceColumn(raceColumn.getName(), raceColumn.isMedalRace(),
                         leaderboard.getScoringScheme().isValidInTotalScore(leaderboard, raceColumn, timePoint));
-                TimePoint latestTimePointAfterQueryTimePointWhenATrackedRaceWasRunning = null;
+                TimePoint latestTimePointAfterQueryTimePointWhenATrackedRaceWasLive = null;
                 for (Fleet fleet : raceColumn.getFleets()) {
                     RegattaAndRaceIdentifier raceIdentifier = null;
                     TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
@@ -470,15 +470,15 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     if (trackedRace != null) {
                         raceIdentifier = new RegattaNameAndRaceName(trackedRace.getTrackedRegatta().getRegatta()
                                 .getName(), trackedRace.getRace().getName());
-                        if (trackedRace.hasStarted(timePoint)) {
-                            TimePoint runningTimePointForTrackedRace = timePoint;
+                        if (trackedRace.hasStarted(timePoint) && trackedRace.hasGPSData() && trackedRace.hasWindData()) {
+                            TimePoint liveTimePointForTrackedRace = timePoint;
                             final TimePoint endOfRace = trackedRace.getEndOfRace();
                             if (endOfRace != null) {
-                                runningTimePointForTrackedRace = endOfRace;
+                                liveTimePointForTrackedRace = endOfRace;
                             }
-                            if (latestTimePointAfterQueryTimePointWhenATrackedRaceWasRunning == null ||
-                                runningTimePointForTrackedRace.after(latestTimePointAfterQueryTimePointWhenATrackedRaceWasRunning)) {
-                                latestTimePointAfterQueryTimePointWhenATrackedRaceWasRunning = runningTimePointForTrackedRace;
+                            if (latestTimePointAfterQueryTimePointWhenATrackedRaceWasLive == null ||
+                                liveTimePointForTrackedRace.after(latestTimePointAfterQueryTimePointWhenATrackedRaceWasLive)) {
+                                latestTimePointAfterQueryTimePointWhenATrackedRaceWasLive = liveTimePointForTrackedRace;
                             }
                         }
                     }
@@ -487,8 +487,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     result.addRace(raceColumn.getName(), raceColumn.getExplicitFactor(), fleetDTO,
                             raceColumn.isMedalRace(), raceIdentifier, /* StrippedRaceDTO */ null);
                 }
-                if (latestTimePointAfterQueryTimePointWhenATrackedRaceWasRunning != null) {
-                    raceColumnDTO.setWhenLastTrackedRaceWasRunning(latestTimePointAfterQueryTimePointWhenATrackedRaceWasRunning.asDate());
+                if (latestTimePointAfterQueryTimePointWhenATrackedRaceWasLive != null) {
+                    raceColumnDTO.setWhenLastTrackedRaceWasLive(latestTimePointAfterQueryTimePointWhenATrackedRaceWasLive.asDate());
                 }
                 result.setCompetitorsFromBestToWorst(raceColumnDTO, getCompetitorDTOList(leaderboard.getCompetitorsFromBestToWorst(raceColumn, timePoint)));
             }
