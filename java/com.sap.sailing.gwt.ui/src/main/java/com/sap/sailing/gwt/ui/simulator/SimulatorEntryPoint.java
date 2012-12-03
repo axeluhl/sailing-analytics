@@ -69,6 +69,12 @@ public class SimulatorEntryPoint extends AbstractEntryPoint {
             logger.config("Using default mode " + mode);
         } else {
             mode = modeStr.charAt(0);
+            if (mode == 'm') {
+                showArrows = true; // show the wind arrows in wind display and replay modes.    
+                showGrid = false;   // show the "heat map" in the wind display and replay modes.
+                showLines = false;  // show the wind lines in the wind display and replay modes.
+                showStreamlets = false; // show the wind streamlets in the wind display and replay modes.
+            }
         }
         String windDisplayStr = Window.Location.getParameter("windDisplay");
         if (windDisplayStr == null || windDisplayStr.isEmpty()) {
@@ -99,9 +105,6 @@ public class SimulatorEntryPoint extends AbstractEntryPoint {
             }
             if (windDisplayStr.contains("f")) {
                 seedLines = 'f';
-            }
-            if (windDisplayStr.contains("c")) {
-                seedLines = 'c';
             }
         }
         SimulatorMainPanel mainPanel = new SimulatorMainPanel(simulatorSvc, stringMessages, this, xRes, yRes,
