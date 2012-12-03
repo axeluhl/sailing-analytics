@@ -106,7 +106,7 @@ public abstract class RaceChart extends SimplePanel implements RaceSelectionChan
         return true;
     }
 
-    protected void resetMinMaxInterval(Date minIntervalTimepoint, Date maxIntervalTimepoint) {
+    protected void resetMinMaxInterval() {
         XAxis xAxis = chart.getXAxis();
         Date minTimepoint = timeRangeWithZoomProvider.getFromTime();
         Date maxTimepoint = timeRangeWithZoomProvider.getToTime();
@@ -137,7 +137,7 @@ public abstract class RaceChart extends SimplePanel implements RaceSelectionChan
     }
 
     public void onTimeRangeChanged(Date fromTime, Date toTime) {
-        resetMinMaxInterval(fromTime, toTime);
+        resetMinMaxInterval();
     }
 
     public void onTimeZoomReset() {

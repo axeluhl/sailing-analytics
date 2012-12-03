@@ -316,8 +316,17 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
                     newRaceDataPoints = new Point[currentPointIndex];
                     System.arraycopy(raceDataPointsToAdd, 0, newRaceDataPoints, 0, currentPointIndex);
                 }
-                
-                competitorDataSeries.setPoints(newRaceDataPoints, false);
+
+                if(timeRangeWithZoomProvider.isZoomed()) {
+                    Pair<Date, Date> timeZoom = timeRangeWithZoomProvider.getTimeZoom();
+                    resetMinMaxInterval();
+                    
+                    competitorDataSeries.setPoints(newRaceDataPoints, false);
+                    
+                    changeMinMaxInterval(timeZoom.getA(), timeZoom.getB());
+                } else {
+                    competitorDataSeries.setPoints(newRaceDataPoints, false);
+                }
 
                 // Adding the series if chart doesn't contain it
                 if (!chartSeries.contains(competitorDataSeries)) {
