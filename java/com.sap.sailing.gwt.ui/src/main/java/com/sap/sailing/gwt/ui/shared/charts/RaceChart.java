@@ -106,10 +106,8 @@ public abstract class RaceChart extends SimplePanel implements RaceSelectionChan
         return true;
     }
 
-    protected void resetMinMaxInterval() {
+    protected void changeMinMaxAndExtremesInterval(Date minTimepoint, Date maxTimepoint, boolean redraw) {
         XAxis xAxis = chart.getXAxis();
-        Date minTimepoint = timeRangeWithZoomProvider.getFromTime();
-        Date maxTimepoint = timeRangeWithZoomProvider.getToTime();
         
         if (minTimepoint != null) {
             xAxis.setMin(minTimepoint.getTime());
@@ -122,25 +120,27 @@ public abstract class RaceChart extends SimplePanel implements RaceSelectionChan
             long tickInterval = (maxTimepoint.getTime() - minTimepoint.getTime()) / TICKCOUNT;
             xAxis.setTickInterval(tickInterval);
         }
-        chart.redraw();
+        if(redraw) {
+            chart.redraw();
+        }
     }
 
-    protected void changeMinMaxInterval(Date minIntervalTimepoint, Date maxIntervalTimepoint) {
-        XAxis xAxis = chart.getXAxis();
-        xAxis.setExtremes(minIntervalTimepoint.getTime(), maxIntervalTimepoint.getTime(), true, true);
+    protected void resetMinMaxAndExtremesInterval(boolean redraw) {
+        changeMinMaxAndExtremesInterval(timeRangeWithZoomProvider.getFromTime(), timeRangeWithZoomProvider.getToTime(), redraw);
     }
-    
+
     public void onTimeZoomChanged(Date zoomStartTimepoint, Date zoomEndTimepoint) {
-        changeMinMaxInterval(zoomStartTimepoint, zoomEndTimepoint);
+        changeMinMaxAndExtremesInterval(zoomStartTimepoint, zoomEndTimepoint, true);
         // Probably there is a function for this in a newer version of highcharts: http://jsfiddle.net/mqz3N/1071/ 
         // chart.showResetZoom();
     }
 
     public void onTimeRangeChanged(Date fromTime, Date toTime) {
-        resetMinMaxInterval();
+        if(isZoomed && timer.getPlayMode() != PlayModes.Live)
+            changeMinMaxAndExtremesInterval(timeRangeWithZoomProvider.getFromTime(), timeRangeWithZoomProvider.getToTime(), true);
     }
 
     public void onTimeZoomReset() {
-        changeMinMaxInterval(timeRangeWithZoomProvider.getFromTime(), timeRangeWithZoomProvider.getToTime());
+        resetMinMaxAndExtremesInterval(true);
     }
 }
