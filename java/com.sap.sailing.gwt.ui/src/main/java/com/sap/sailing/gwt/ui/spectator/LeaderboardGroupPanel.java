@@ -371,7 +371,7 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
                 for (RaceColumnDTO raceColumn : raceColumnsPerDay) {
                     String raceColumnName = raceColumn.getRaceColumnName();
                     RaceDTO race = raceColumn.getRace(defaultFleet);
-                    renderRaceLink(leaderboard.name, race, raceColumn.isLive(), raceColumnName, b);
+                    renderRaceLink(leaderboard.name, race, raceColumn.isLive(defaultFleet), raceColumnName, b);
                 }
 
                 b.appendHtmlConstant("</div>");
@@ -424,7 +424,7 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
         for (RaceColumnDTO raceColumn : raceColumns) {
             String raceColumnName = raceColumn.getRaceColumnName();
             RaceDTO race = raceColumn.getRace(fleet);
-            renderRaceLink(leaderboardName, race, raceColumn.isLive(), raceColumnName, b);
+            renderRaceLink(leaderboardName, race, raceColumn.isLive(fleet), raceColumnName, b);
         }
     }
 

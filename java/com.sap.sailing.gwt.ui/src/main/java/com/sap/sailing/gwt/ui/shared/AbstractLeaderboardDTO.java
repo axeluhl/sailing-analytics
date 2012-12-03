@@ -263,8 +263,10 @@ public abstract class AbstractLeaderboardDTO implements IsSerializable {
      */
     public boolean containsLiveRace() {
         for (RaceColumnDTO race : getRaceList()) {
-            if (race.isLive()) {
-                return true;
+            for (FleetDTO fleet : race.getFleets()) {
+                if (race.isLive(fleet)) {
+                    return true;
+                }
             }
         }
         return false;
