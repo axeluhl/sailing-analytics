@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.simulator;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -38,7 +39,7 @@ public class PathLegendCanvasOverlay extends CanvasOverlay {
 
     public String textColor = "Black";
     public String textFont = "normal 10pt UbuntuRegular";
-    
+
     public PathLegendCanvasOverlay() {
         this.setPathOverlays(null);
     }
@@ -49,46 +50,46 @@ public class PathLegendCanvasOverlay extends CanvasOverlay {
     }
 
     @Override
-    protected void redraw(boolean force) {
-   
+    protected void redraw(final boolean force) {
+
         if (pathOverlays == null || pathOverlays.size() < 1) {
             return;
         }
         setCanvasSettings();
         int index = 0;
-        Context2d context2d = canvas.getContext2d();
+        final Context2d context2d = canvas.getContext2d();
         context2d.setFont(textFont);
         TextMetrics txtmet;
         txtmet = context2d.measureText("00:00:00");
-        double timewidth = txtmet.getWidth();
+        final double timewidth = txtmet.getWidth();
         double txtmaxwidth = 0.0;
-        for (PathCanvasOverlay path : pathOverlays) {            
-             txtmet = context2d.measureText(path.name);
-             txtmaxwidth = Math.max(txtmaxwidth, txtmet.getWidth());
+        for (final PathCanvasOverlay path : pathOverlays) {
+            txtmet = context2d.measureText(path.name);
+            txtmaxwidth = Math.max(txtmaxwidth, txtmet.getWidth());
         }
-        for (PathCanvasOverlay path : pathOverlays) {
-            drawRectangleWithText(xOffset, yOffset + (pathOverlays.size()-1-index) * rectHeight, path.pathColor, 
+        for (final PathCanvasOverlay path : pathOverlays) {
+            drawRectangleWithText(xOffset, yOffset + (pathOverlays.size()-1-index) * rectHeight, path.pathColor,
                     path.name, getFormattedTime(path.getPathTime()),txtmaxwidth,timewidth);
             index++;
         }
     }
 
     protected void setCanvasSettings() {
-        int canvasWidth = (int) rectWidth + 200;
-        int canvasHeight = getMap().getSize().getHeight();
+        final int canvasWidth = (int) rectWidth + 200;
+        final int canvasHeight = getMap().getSize().getHeight();
 
         canvas.setWidth(String.valueOf(canvasWidth));
         canvas.setHeight(String.valueOf(canvasHeight));
         canvas.setCoordinateSpaceWidth(canvasWidth);
         canvas.setCoordinateSpaceHeight(canvasHeight);
 
-        Point sw = getMap().convertLatLngToDivPixel(getMap().getBounds().getSouthWest());
-        Point ne = getMap().convertLatLngToDivPixel(getMap().getBounds().getNorthEast());
+        final Point sw = getMap().convertLatLngToDivPixel(getMap().getBounds().getSouthWest());
+        final Point ne = getMap().convertLatLngToDivPixel(getMap().getBounds().getNorthEast());
         setWidgetPosLeft(Math.min(sw.getX(), ne.getX()));
         setWidgetPosTop(Math.min(sw.getY(), ne.getY()));
         //setWidgetPosLeft(xOffset);
         //setWidgetPosTop(yOffset);
-        
+
         getPane().setWidgetPosition(getCanvas(), getWidgetPosLeft(), getWidgetPosTop());
 
     }
@@ -97,15 +98,39 @@ public class PathLegendCanvasOverlay extends CanvasOverlay {
         return pathOverlays;
     }
 
-    public void setPathOverlays(List<PathCanvasOverlay> pathOverlays) {
+    public void setPathOverlays(final List<PathCanvasOverlay> pathOverlays) {
+
         this.pathOverlays = pathOverlays;
+    }
+
+    public void addPathOverlay(final PathCanvasOverlay pathOverlay) {
+
+        if (this.pathOverlays == null) {
+            this.pathOverlays = new ArrayList<PathCanvasOverlay>();
+        }
+
+        boolean found = false;
+
+        if (pathOverlay.name.equals("Polyline")) {
+            for (final PathCanvasOverlay overlay : this.pathOverlays) {
+                if (overlay.name.equals("Polyline")) {
+                    overlay.setTotalTimeMilliseconds(pathOverlay.getTotalTimeMilliseconds());
+                    found = true;
+                    break;
+                }
+            }
+        }
+
+        if (found == false) {
+            this.pathOverlays.add(pathOverlay);
+        }
     }
 
     public int getWidgetPosLeft() {
         return widgetPosLeft;
     }
 
-    public void setWidgetPosLeft(int widgetPosLeft) {
+    public void setWidgetPosLeft(final int widgetPosLeft) {
         this.widgetPosLeft = widgetPosLeft;
     }
 
@@ -113,23 +138,23 @@ public class PathLegendCanvasOverlay extends CanvasOverlay {
         return widgetPosTop;
     }
 
-    public void setWidgetPosTop(int widgetPosTop) {
+    public void setWidgetPosTop(final int widgetPosTop) {
         this.widgetPosTop = widgetPosTop;
     }
 
-    protected void drawRectangle(double x, double y, String color) {
-        Context2d context2d = canvas.getContext2d();
+    protected void drawRectangle(final double x, final double y, final String color) {
+        final Context2d context2d = canvas.getContext2d();
         context2d.setFillStyle(color);
         context2d.setLineWidth(3);
         context2d.fillRect(x, y, rectWidth, rectHeight);
 
     }
 
-    protected void drawRectangleWithText(double x, double y, String color, String text, String time, double textmaxwidth, double timewidth) {
+    protected void drawRectangleWithText(final double x, final double y, final String color, final String text, final String time, final double textmaxwidth, final double timewidth) {
 
-        double offset = 3.0;
-        
-        Context2d context2d = canvas.getContext2d();
+        final double offset = 3.0;
+
+        final Context2d context2d = canvas.getContext2d();
         context2d.setFont(textFont);
         drawRectangle(x, y, color);
         context2d.setGlobalAlpha(0.80);
@@ -141,10 +166,10 @@ public class PathLegendCanvasOverlay extends CanvasOverlay {
         context2d.fillText(time, x + rectWidth + textmaxwidth + 10.0, y + 12.0 + offset);
     }
 
-    protected String getFormattedTime(long pathTime) {
-        TimeZone gmt = TimeZone.createTimeZone(0);
-        Date timeDiffDate = new Date(pathTime);
-        String pathTimeStr = DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.HOUR24_MINUTE_SECOND).format(
+    protected String getFormattedTime(final long pathTime) {
+        final TimeZone gmt = TimeZone.createTimeZone(0);
+        final Date timeDiffDate = new Date(pathTime);
+        final String pathTimeStr = DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.HOUR24_MINUTE_SECOND).format(
                 timeDiffDate, gmt);
         return pathTimeStr;
     }

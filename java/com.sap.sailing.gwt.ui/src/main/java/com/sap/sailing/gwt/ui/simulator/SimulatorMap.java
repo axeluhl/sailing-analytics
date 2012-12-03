@@ -137,8 +137,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
                 color = colorPalette.getColor(paths.length - 1 - index);
 
                 if (pathName.equals("GPS Poly")) {
-                    // pathPolyline = createPathPolyline(currentPath, simulatorSvc, mapw);
-                    createPathPolyline(currentPath, errorReporter, simulatorSvc, mapw);
+                    createPathPolyline(currentPath);
                 }
 
                 /* TODO Revisit for now creating a WindFieldDTO from the path */
@@ -203,7 +202,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
             if (windParams.isShowGrid()) {
                 timeListeners.add(windGridCanvasOverlay);
             }
-            if (windParams.isShowLines()) {                
+            if (windParams.isShowLines()) {
                 timeListeners.add(windLineCanvasOverlay);
             }
             for (int i = 0; i < replayPathCanvasOverlays.size(); ++i) {
@@ -683,8 +682,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         return value;
     }
 
-    private static PathPolyline createPathPolyline(final PathDTO pathDTO, final ErrorReporter errorReporter, final SimulatorServiceAsync simulatorService,
-            final MapWidget map) {
+    private PathPolyline createPathPolyline(final PathDTO pathDTO) {
         final List<SimulatorWindDTO> pathPoints = pathDTO.getMatrix();
 
         final int noOfPathPoints = pathPoints.size();
@@ -700,6 +698,19 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
 
         final int boatClassID = 3; // 49er STG
 
-        return new PathPolyline(points.toArray(new LatLng[0]), boatClassID, errorReporter, pathDTO, simulatorService, map);
+        return new PathPolyline(points.toArray(new LatLng[0]), boatClassID, this.errorReporter, pathDTO, this.simulatorSvc, this.mapw, this);
+    }
+
+    public void addLegendOverlayForPathPolyline(final long totalTimeMilliseconds) {
+
+        final PathCanvasOverlay overlay = new PathCanvasOverlay("Polyline", totalTimeMilliseconds);
+        overlay.pathColor = PathPolyline.DEFAULT_COLOR;
+
+        this.legendCanvasOverlay.addPathOverlay(overlay);
+    }
+
+    public void redrawLegendCanvasOverlay() {
+        this.legendCanvasOverlay.setVisible(true);
+        this.legendCanvasOverlay.redraw(true);
     }
 }

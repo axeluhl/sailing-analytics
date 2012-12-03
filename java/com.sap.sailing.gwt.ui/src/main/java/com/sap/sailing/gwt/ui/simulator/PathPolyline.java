@@ -33,7 +33,7 @@ public class PathPolyline {
     private static final boolean SHOULD_DRAW_VERTICAL_DASHLINES = true;
     private static final boolean SHOULD_DRAW_SHADOW_DASHLINES = false;
 
-    private static final String DEFAULT_COLOR = "#8B0000";
+    public static final String DEFAULT_COLOR = "#8B0000";
     private static final int DEFAULT_WEIGHT = 3;
     private static final double DEFAULT_OPACITY = 1.0;
     private static final double DEFAULT_DISTANCE_PX = 25;
@@ -69,17 +69,20 @@ public class PathPolyline {
 
     private boolean firstTime = true;
 
+    private SimulatorMap simulatorMap = null;
+
     // private double stepSizeMeters = 5.0;
 
     // private static Logger logger = Logger.getLogger(PathPolyline.class.getName());
 
     public PathPolyline(final LatLng[] points, final int boatClassID, final ErrorReporter errorReporter, final PathDTO pathDTO,
-            final SimulatorServiceAsync simulatorService, final MapWidget map) {
-        this(points, DEFAULT_COLOR, DEFAULT_WEIGHT, DEFAULT_OPACITY, boatClassID, errorReporter, pathDTO, simulatorService, map);
+            final SimulatorServiceAsync simulatorService, final MapWidget map, final SimulatorMap simulatorMap) {
+        this(points, DEFAULT_COLOR, DEFAULT_WEIGHT, DEFAULT_OPACITY, boatClassID, errorReporter, pathDTO, simulatorService, map, simulatorMap);
     }
 
     public PathPolyline(final LatLng[] points, final String color, final int weight, final double opacity, final int boatClassID,
-            final ErrorReporter errorReporter, final PathDTO pathDTO, final SimulatorServiceAsync simulatorService, final MapWidget map) {
+            final ErrorReporter errorReporter, final PathDTO pathDTO, final SimulatorServiceAsync simulatorService, final MapWidget map,
+            final SimulatorMap simulatorMap) {
         this.points = points;
         this.color = color;
         this.weight = weight;
@@ -95,6 +98,8 @@ public class PathPolyline {
         this.averageWindSpeed = new SpeedWithBearingDTO();
         this.boatClassID = boatClassID;
         this.errorReporter = errorReporter;
+
+        this.simulatorMap = simulatorMap;
 
         this.drawPolylineOnMap();
         this.drawDashLinesOnMap(this.map.getZoomLevel());
@@ -389,9 +394,12 @@ public class PathPolyline {
                 System.err.println("total distance = " + PathPolylineUtils.getTotalDistanceMeters(points) + " meters");
                 System.err.println("step size = " + STEP_SIZE_METERS + " meters");
                 System.err.println("average wind speed = " + PathPolylineUtils.knotsToMetersPerSecond(averageWindSpeed.speedInKnots) + " meters/second");
-                System.err.println("total time = " + totalTime + " seconds!");
+                System.err.println("total time = " + (long) totalTime + " seconds!");
                 System.err.println("==================================================");
 
+
+                simulatorMap.addLegendOverlayForPathPolyline(((long) totalTime) * 1000);
+                simulatorMap.redrawLegendCanvasOverlay();
             }
         });
     }
