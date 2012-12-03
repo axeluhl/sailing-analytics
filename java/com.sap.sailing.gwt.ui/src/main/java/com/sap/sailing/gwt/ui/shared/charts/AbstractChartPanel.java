@@ -319,11 +319,11 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
 
                 if(timeRangeWithZoomProvider.isZoomed()) {
                     Pair<Date, Date> timeZoom = timeRangeWithZoomProvider.getTimeZoom();
-                    resetMinMaxInterval();
+                    resetMinMaxAndExtremesInterval(false);
                     
                     competitorDataSeries.setPoints(newRaceDataPoints, false);
                     
-                    changeMinMaxInterval(timeZoom.getA(), timeZoom.getB());
+                    changeMinMaxAndExtremesInterval(timeZoom.getA(), timeZoom.getB(), false);
                 } else {
                     competitorDataSeries.setPoints(newRaceDataPoints, false);
                 }
