@@ -371,7 +371,7 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
                 for (RaceColumnDTO raceColumn : raceColumnsPerDay) {
                     String raceColumnName = raceColumn.getRaceColumnName();
                     RaceDTO race = raceColumn.getRace(defaultFleet);
-                    renderRaceLink(leaderboard.name, race, raceColumnName, b);
+                    renderRaceLink(leaderboard.name, race, raceColumn.isLive(), raceColumnName, b);
                 }
 
                 b.appendHtmlConstant("</div>");
@@ -424,11 +424,11 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
         for (RaceColumnDTO raceColumn : raceColumns) {
             String raceColumnName = raceColumn.getRaceColumnName();
             RaceDTO race = raceColumn.getRace(fleet);
-            renderRaceLink(leaderboardName, race, raceColumnName, b);
+            renderRaceLink(leaderboardName, race, raceColumn.isLive(), raceColumnName, b);
         }
     }
 
-    private void renderRaceLink(String leaderboardName, RaceDTO race, String raceColumnName, SafeHtmlBuilder b) {
+    private void renderRaceLink(String leaderboardName, RaceDTO race, boolean isLive, String raceColumnName, SafeHtmlBuilder b) {
         String debugParam = Window.Location.getParameter("gwt.codesvr");
         if (race != null) {
             RegattaAndRaceIdentifier raceIdentifier = race.getRaceIdentifier();
@@ -441,7 +441,9 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
             if (viewMode != null && !viewMode.isEmpty()) {
                 link += "&viewMode=" + viewMode;
             }
-            if (race.trackedRace.hasGPSData && race.trackedRace.hasWindData) {
+            if(isLive) {
+                b.append(getAnchor(link, raceColumnName, STYLE_LIVE_RACE));
+            } else if (race.trackedRace.hasGPSData && race.trackedRace.hasWindData) {
                 b.append(getAnchor(link, raceColumnName, STYLE_ACTIVE_RACE));
             } else {
                 b.append(TEXTTEMPLATE.textWithClass(raceColumnName, STYLE_INACTIVE_RACE));
