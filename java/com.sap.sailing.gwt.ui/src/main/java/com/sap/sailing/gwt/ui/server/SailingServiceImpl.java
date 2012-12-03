@@ -462,8 +462,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
                 RaceColumnDTO raceColumnDTO = result.createEmptyRaceColumn(raceColumn.getName(), raceColumn.isMedalRace(),
                         leaderboard.getScoringScheme().isValidInTotalScore(leaderboard, raceColumn, timePoint));
-                TimePoint latestTimePointAfterQueryTimePointWhenATrackedRaceWasLive = null;
                 for (Fleet fleet : raceColumn.getFleets()) {
+                    TimePoint latestTimePointAfterQueryTimePointWhenATrackedRaceWasLive = null;
                     RegattaAndRaceIdentifier raceIdentifier = null;
                     TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
                     final FleetDTO fleetDTO = convertToFleetDTO(fleet);
@@ -476,19 +476,16 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                             if (endOfRace != null) {
                                 liveTimePointForTrackedRace = endOfRace;
                             }
-                            if (latestTimePointAfterQueryTimePointWhenATrackedRaceWasLive == null ||
-                                liveTimePointForTrackedRace.after(latestTimePointAfterQueryTimePointWhenATrackedRaceWasLive)) {
-                                latestTimePointAfterQueryTimePointWhenATrackedRaceWasLive = liveTimePointForTrackedRace;
-                            }
+                            latestTimePointAfterQueryTimePointWhenATrackedRaceWasLive = liveTimePointForTrackedRace;
                         }
                     }
                     // Note: the RaceColumnDTO won't be created by the following addRace call because it has been created
                     // above by the result.createEmptyRaceColumn call
                     result.addRace(raceColumn.getName(), raceColumn.getExplicitFactor(), fleetDTO,
                             raceColumn.isMedalRace(), raceIdentifier, /* StrippedRaceDTO */ null);
-                }
-                if (latestTimePointAfterQueryTimePointWhenATrackedRaceWasLive != null) {
-                    raceColumnDTO.setWhenLastTrackedRaceWasLive(latestTimePointAfterQueryTimePointWhenATrackedRaceWasLive.asDate());
+                    if (latestTimePointAfterQueryTimePointWhenATrackedRaceWasLive != null) {
+                        raceColumnDTO.setWhenLastTrackedRaceWasLive(fleetDTO, latestTimePointAfterQueryTimePointWhenATrackedRaceWasLive.asDate());
+                    }
                 }
                 result.setCompetitorsFromBestToWorst(raceColumnDTO, getCompetitorDTOList(leaderboard.getCompetitorsFromBestToWorst(raceColumn, timePoint)));
             }
@@ -1943,8 +1940,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         leaderboardDTO.hasCarriedPoints = leaderboard.hasCarriedPoints();
         leaderboardDTO.discardThresholds = leaderboard.getResultDiscardingRule().getDiscardIndexResultsStartingWithHowManyRaces();
         for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
-            TimePoint latestTimePointAfterQueryTimePointWhenATrackedRaceWasLive = null;
             for (Fleet fleet : raceColumn.getFleets()) {
+                TimePoint latestTimePointAfterQueryTimePointWhenATrackedRaceWasLive = null;
                 RaceDTO raceDTO = null;
                 RegattaAndRaceIdentifier raceIdentifier = null;
                 TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
@@ -1970,18 +1967,14 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                         if (endOfRace != null) {
                             liveTimePointForTrackedRace = endOfRace;
                         }
-                        if (latestTimePointAfterQueryTimePointWhenATrackedRaceWasLive == null
-                                || liveTimePointForTrackedRace
-                                        .after(latestTimePointAfterQueryTimePointWhenATrackedRaceWasLive)) {
-                            latestTimePointAfterQueryTimePointWhenATrackedRaceWasLive = liveTimePointForTrackedRace;
-                        }
+                        latestTimePointAfterQueryTimePointWhenATrackedRaceWasLive = liveTimePointForTrackedRace;
                     }
                 }    
                 final FleetDTO fleetDTO = convertToFleetDTO(fleet);
                 RaceColumnDTO raceColumnDTO = leaderboardDTO.addRace(raceColumn.getName(), raceColumn.getExplicitFactor(), fleetDTO,
                         raceColumn.isMedalRace(), raceIdentifier, raceDTO);
                 if (latestTimePointAfterQueryTimePointWhenATrackedRaceWasLive != null) {
-                    raceColumnDTO.setWhenLastTrackedRaceWasLive(latestTimePointAfterQueryTimePointWhenATrackedRaceWasLive.asDate());
+                    raceColumnDTO.setWhenLastTrackedRaceWasLive(fleetDTO, latestTimePointAfterQueryTimePointWhenATrackedRaceWasLive.asDate());
                 }
             }
         }
