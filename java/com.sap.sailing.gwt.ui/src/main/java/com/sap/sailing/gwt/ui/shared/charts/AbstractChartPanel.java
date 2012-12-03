@@ -316,8 +316,17 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
                     newRaceDataPoints = new Point[currentPointIndex];
                     System.arraycopy(raceDataPointsToAdd, 0, newRaceDataPoints, 0, currentPointIndex);
                 }
-                
-                competitorDataSeries.setPoints(newRaceDataPoints, false);
+
+                if(timeRangeWithZoomProvider.isZoomed()) {
+                    Pair<Date, Date> timeZoom = timeRangeWithZoomProvider.getTimeZoom();
+                    resetMinMaxInterval();
+                    
+                    competitorDataSeries.setPoints(newRaceDataPoints, false);
+                    
+                    changeMinMaxInterval(timeZoom.getA(), timeZoom.getB());
+                } else {
+                    competitorDataSeries.setPoints(newRaceDataPoints, false);
+                }
 
                 // Adding the series if chart doesn't contain it
                 if (!chartSeries.contains(competitorDataSeries)) {
@@ -327,13 +336,13 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
             }
         }
         
-        timeOfEarliestRequestInMillis = chartData.getRequestedFromTime().getTime();
-        timeOfLatestRequestInMillis = chartData.getRequestedToTime().getTime();
+        if(timeOfEarliestRequestInMillis == null || timeOfEarliestRequestInMillis > chartData.getRequestedFromTime().getTime()) {
+            timeOfEarliestRequestInMillis = chartData.getRequestedFromTime().getTime();
+        }
+        if(timeOfLatestRequestInMillis == null || timeOfLatestRequestInMillis < chartData.getRequestedToTime().getTime()) {
+            timeOfLatestRequestInMillis = chartData.getRequestedToTime().getTime();
+        }
 
-//        if (!isZoomed) {
-//            chart.getXAxis().setMin(timeRangeWithZoomProvider.getFromTime().getTime());
-//            chart.getXAxis().setMax(timeRangeWithZoomProvider.getToTime().getTime());
-//        }
         chart.redraw();
     }
 
