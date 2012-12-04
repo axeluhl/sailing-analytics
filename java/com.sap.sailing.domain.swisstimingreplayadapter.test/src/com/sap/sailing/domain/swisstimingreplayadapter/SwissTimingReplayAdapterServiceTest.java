@@ -1,11 +1,12 @@
 package com.sap.sailing.domain.swisstimingreplayadapter;
 
 import java.io.InputStream;
+import java.util.Date;
 import java.util.List;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
 
 public class SwissTimingReplayAdapterServiceTest {
@@ -32,8 +33,19 @@ public class SwissTimingReplayAdapterServiceTest {
     }    
     
     @Test
-    public void testReadRaceData() throws Exception {
-        SwissTimingReplayService.readData(getClass().getResourceAsStream("/SAW005906.20120805.replay"));
+    public void testReadRaceData_SAW005906_20120805() throws Exception {
+        SwissTimingReplayService.readData(getClass().getResourceAsStream("/SAW005906.20120805.replay"), new SwissTimingReplayTestListener());
+    }
+
+    @Test
+    public void testReadRaceData_SAW010955_20120802() throws Exception {
+        SwissTimingReplayService.readData(getClass().getResourceAsStream("/SAW010955.20120802.replay"), new SwissTimingReplayTestListener());
+    }
+
+    @Test
+    @Ignore
+    public void testReadRaceData_SAM002901() throws Exception {
+        SwissTimingReplayService.readData(getClass().getResourceAsStream("/SAM002901.replay"), new SwissTimingReplayTestListener());
     }
 
 }
