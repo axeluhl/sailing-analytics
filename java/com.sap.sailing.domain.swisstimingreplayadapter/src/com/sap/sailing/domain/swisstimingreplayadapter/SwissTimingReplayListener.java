@@ -16,14 +16,14 @@ public interface SwissTimingReplayListener {
 
     void competitorsCount(short competitorsCount);
 
-    void competitor(int hashValue, String nation, String sailNumber, String name, Status status, BoatType boatType,
+    void competitor(int hashValue, String nation, String sailNumber, String name, CompetitorStatus competitorStatus, BoatType boatType,
             short cRank_Bracket, short cnPoints_x10_Bracket, short ctPoints_x10_Winner);
 
-    void frame(byte cid, int raceTime, int startTime, int estimatedStartTime, Status status, short distanceToNextMark,
+    void frame(byte cid, int raceTime, int startTime, int estimatedStartTime, RaceStatus raceStatus, short distanceToNextMark,
             Weather weather, short humidity, short temperature, String messageText, byte cFlag, byte rFlag,
             byte duration, short nm);
 
-    void ranking(int hashValue, short rank, short rankIndex, short racePoints, Status stastus, short finishRank,
+    void ranking(int hashValue, short rank, short rankIndex, short racePoints, CompetitorStatus competitorStatus, short finishRank,
             short finishRankIndex, int gap, int raceTime);
 
     void rankingsCount(short entriesCount);
@@ -33,7 +33,7 @@ public interface SwissTimingReplayListener {
     void trackersCount(short trackersCount);
 
     void trackers(int hashValue, int latitude, int longitude, short cog, short sog, short average_sog, short vmg,
-            Status status, short rank, short dtl, short dtnm, short nm, short pRank, short ptPoints, short pnPoints);
+            CompetitorStatus competitorStatus, short rank, short dtl, short dtnm, short nm, short pRank, short ptPoints, short pnPoints);
 
     void illegalState(String message);
 

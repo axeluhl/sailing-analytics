@@ -1,34 +1,93 @@
 package com.sap.sailing.domain.swisstimingreplayadapter;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Arrays;
+import java.util.List;
 
-public enum MarkType {
+public class MarkType {
 
-    MANUAL((byte) 1), LINE_CROSSING((byte) 2), BUOY_ROUNDIN((byte) 3), UNKNOWN_167((byte) -89), UNKNOWN_171((byte) -85), UNKNOWN_179((byte) -77);
+    // mark type ist maskiert: bit 7 = (isBuoy/isPin), 6 = (isBoat/noBoat), 5 = (isMeasure), 4 = (isStart,IsFinishOrCourse), 3 = (isFinish/isStartOrCourse), 2 = (isTurn/isStraight), 1 = (isCouple), 0 = (isVisible) 
     
-    private static final Map<Byte, MarkType> byCode;
-
-    static {
-        byCode = new HashMap<Byte, MarkType>();
-        for (MarkType markType : MarkType.values()) {
-            byCode.put(markType.code, markType);
-        }
-    }
-
-    private final byte code;
+    static byte IS_VISIBLE = (byte) (1 << 0);
+    static byte IS_COUPLE = (byte) (1 << 1);
+    static byte IS_TURN = (byte) (1 << 2);
+    static byte IS_FINISH = (byte) (1 << 3);
+    static byte IS_START = (byte) (1 << 4);
+    static byte IS_MEASURE = (byte) (1 << 5);
+    static byte IS_BOAT = (byte) (1 << 6);
+    static byte IS_BUOY = (byte) (1 << 7);
     
-    private MarkType(byte code) {
-        this.code = code;
-    }
+    static String[] AS_STRING = new String[] {"VISIBLE", "COUPLE", "TURN", "FINISH", "START", "MEASURE", "BOAT", "BUOY"};
+    
+    private final byte bitCode;
 
-    public static MarkType byCode(byte code) {
-        MarkType result = byCode.get(code);
-        if (result != null) {
-            return result;
-        } else {
-            throw new IllegalArgumentException("Unknown mark type: " + code);
+    public MarkType(byte bitCode) {
+        this.bitCode = bitCode;
+    }
+    
+    public boolean isVisible() {
+        return testFlag(IS_VISIBLE);
+    }
+    
+    public boolean isCouple() {
+        return testFlag(IS_COUPLE);
+    }
+    
+    public boolean isTurn() {
+        return testFlag(IS_TURN);
+    }
+    
+    public boolean isStraight() {
+        return ! isTurn();
+    }
+    
+    public boolean isFinish() {
+        return testFlag(IS_FINISH);
+    }
+    
+    public boolean isStartOrCourse() {
+        return ! isFinish();
+    }
+    
+    public boolean isStart() {
+        return testFlag(IS_START);
+    }
+    
+    public boolean isFinishOrCourse() {
+        return ! isStart();
+    }
+    
+    public boolean isMeasure() {
+        return testFlag(IS_MEASURE);
+    }
+    
+    public boolean isBoat() {
+        return testFlag(IS_BOAT);
+    }
+    
+    public boolean isBuoy() {
+        return testFlag(IS_BUOY);
+    }
+    
+    public boolean isPin() {
+        return ! isBuoy();
+    }
+    
+    @Override
+    public String toString() {
+        String[] toString = new String[AS_STRING.length];
+        for (int i = 0; i < toString.length; i++) {
+            byte mask = (byte) (1 << i);
+            if (testFlag(mask)) {
+                toString[i] = AS_STRING[i];
+            } else {
+                toString[i] = AS_STRING[i].toLowerCase();
+            }
         }
+        return Arrays.toString(toString);
     }
 
+    private boolean testFlag(byte mask) {
+        return (bitCode & mask) == mask;
+    }
+    
 }

@@ -23,7 +23,7 @@ public class SwissTimingReplayService {
     private static final int ETX = 0x03;
     private static final int EOT = 0x04;
     
-    private static final Charset CHARSET = Charset.forName("cp1252");
+    private static final Charset CHARSET = Charset.forName("ISO-8859-1");
     
     public static final DateFormat SWISSTIMING_DATEFORMAT = new SimpleDateFormat("dd.MM.yyyy HH:mm");
 
@@ -140,7 +140,7 @@ public class SwissTimingReplayService {
                         short windSpeed = data.readShort();
                         short windDirection = data.readShort();
 
-                        replayListener.mark(MarkType.byCode(markType), identifier, index, id1, id2, windSpeed, windDirection);
+                        replayListener.mark(new MarkType(markType), identifier, index, id1, id2, windSpeed, windDirection);
                         payloadSize -= 1 + 8 + 1 + 8 + 8 + 2 + 2;
                     }
                     break;
@@ -161,7 +161,7 @@ public class SwissTimingReplayService {
                         short cnPoints_x10_Bracket = data.readShort();
                         short ctPoints_x10_Winner = data.readShort();
                         
-                        replayListener.competitor(hashValue, nation, sailNumber, name, Status.byCode(competitorStatus), BoatType.byCode(boatType), cRank_Bracket, cnPoints_x10_Bracket, ctPoints_x10_Winner);
+                        replayListener.competitor(hashValue, nation, sailNumber, name, CompetitorStatus.byCode(competitorStatus), BoatType.byCode(boatType), cRank_Bracket, cnPoints_x10_Bracket, ctPoints_x10_Winner);
                         payloadSize -= 4 + 3 + 1 + sailNumberLength + 1 + nameLength + 1 + 1 + 2 + 2 + 2;
                     }
                     break;
@@ -183,7 +183,7 @@ public class SwissTimingReplayService {
                         byte duration = data.readByte();
                         short nm = data.readShort();
                         
-                        replayListener.frame(cid, raceTime, startTime, estimatedStartTime, Status.byCode(raceStatus), distanceToNextMark, Weather.byCode(weather), humidity, temperature, 
+                        replayListener.frame(cid, raceTime, startTime, estimatedStartTime, RaceStatus.byCode(raceStatus), distanceToNextMark, Weather.byCode(weather), humidity, temperature, 
                                 messageText, cFlag, rFlag, duration, nm);
                         payloadSize -= 1 + 3 + 3 + 3 + 1 + 2 + 1 + 2 + 2 + 1 + messageTextLength + 1 + 1 + 1 + 2;
                     }
@@ -197,13 +197,13 @@ public class SwissTimingReplayService {
                         short rank = data.readShort();
                         short rankIndex = data.readShort();
                         short racePoints = data.readShort();
-                        byte status = data.readByte();
+                        byte competitorStatus = data.readByte();
                         short finishRank = data.readShort();
                         short finishRankIndex = data.readShort();
                         int gap = read3ByteInt(data);
                         int raceTime = read3ByteInt(data);
                         short marksCount = data.readShort();
-                        replayListener.ranking(hashValue, rank, rankIndex, racePoints, Status.byCode(status), finishRank, finishRankIndex, gap, raceTime);
+                        replayListener.ranking(hashValue, rank, rankIndex, racePoints, CompetitorStatus.byCode(competitorStatus), finishRank, finishRankIndex, gap, raceTime);
                         payloadSize -= 4 + 2 + 2 + 2 + 1 + 2 + 2 + 3 + 3 + 2;
                         for (int i = 0; i < marksCount; i++) {
                             short marksRank = data.readShort();
@@ -228,7 +228,7 @@ public class SwissTimingReplayService {
                         short sog = data.readShort();
                         short average_sog = data.readShort();
                         short vmg = data.readShort();
-                        byte status = data.readByte();
+                        byte competitorStatus = data.readByte();
                         short rank = data.readShort();
                         short dtl = data.readShort();
                         short dtnm = data.readShort();
@@ -237,7 +237,7 @@ public class SwissTimingReplayService {
                         short ptPoints = data.readShort();
                         short pnPoints = data.readShort();
                         
-                        replayListener.trackers(hashValue, latitude, longitude, cog, sog, average_sog, vmg, Status.byCode(status), rank, dtl, dtnm, nm, pRank, ptPoints, pnPoints);
+                        replayListener.trackers(hashValue, latitude, longitude, cog, sog, average_sog, vmg, CompetitorStatus.byCode(competitorStatus), rank, dtl, dtnm, nm, pRank, ptPoints, pnPoints);
 
                         payloadSize -= 4 + 4 + 4 + 2 + 2 + 2 + 2 + 1 + 2 + 2 + 2 + 2 + 2 + 2 + 2;
                     }

@@ -1,8 +1,7 @@
 package com.sap.sailing.domain.swisstimingreplayadapter;
 
-public enum Status {
+public enum CompetitorStatus {
 
-    ZERO,
     Sailing,
     Finished,
     DNS,
@@ -19,7 +18,7 @@ public enum Status {
     SCP,
     ZFP;
     
-    public static Status byCode(byte code) {
+    public static CompetitorStatus byCode(byte code) {
         return values()[code];
     }
     

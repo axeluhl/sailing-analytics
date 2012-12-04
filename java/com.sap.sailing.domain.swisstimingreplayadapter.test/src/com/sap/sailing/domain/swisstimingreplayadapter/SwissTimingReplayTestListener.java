@@ -47,9 +47,9 @@ public class SwissTimingReplayTestListener implements SwissTimingReplayListener 
     }
     
     @Override
-    public void competitor(int hashValue, String nation, String sailNumber, String name, Status status,
+    public void competitor(int hashValue, String nation, String sailNumber, String name, CompetitorStatus competitorStatus,
             BoatType boatType, short cRank_Bracket, short cnPoints_x10_Bracket, short ctPoints_x10_Winner) {
-        System.out.println("competitor - hashValue: " + hashValue + ", nation: " + nation + ", sailNumber: " + sailNumber + ", name: " + name + ", status: " + status + ", boatType: " + boatType + ", cRank_Bracket: " + cRank_Bracket + ", cnPoints_x10_Bracket: " + cnPoints_x10_Bracket + ", ctPoints_x10_Winner: " + ctPoints_x10_Winner);
+        System.out.println("competitor - hashValue: " + hashValue + ", nation: " + nation + ", sailNumber: " + sailNumber + ", name: " + name + ", competitorStatus: " + competitorStatus + ", boatType: " + boatType + ", cRank_Bracket: " + cRank_Bracket + ", cnPoints_x10_Bracket: " + cnPoints_x10_Bracket + ", ctPoints_x10_Winner: " + ctPoints_x10_Winner);
         
     }
 
@@ -61,17 +61,17 @@ public class SwissTimingReplayTestListener implements SwissTimingReplayListener 
     }
 
     @Override
-    public void frame(byte cid, int raceTime, int startTime, int estimatedStartTime, Status status,
+    public void frame(byte cid, int raceTime, int startTime, int estimatedStartTime, RaceStatus raceStatus,
             short distanceToNextMark, Weather weather, short humidity, short temperature, String messageText,
             byte cFlag, byte rFlag, byte duration, short nm) {
-        System.out.println("frame - cid: " + cid + ", raceTime: " + raceTime + ", startTime: " + startTime + ", estimatedStartTime: " + estimatedStartTime + ", status: " + status + ", distanceToNextMark: " + distanceToNextMark + ", weather: " + weather + ", humidity: " + humidity + ", temperature: " + temperature + ", messageText: " + messageText + ", cFlag: " + cFlag + ", rFlag: " + rFlag + ", duration: " + duration + ", nm: " + nm);
+        System.out.println("frame - cid: " + cid + ", raceTime: " + raceTime + ", startTime: " + startTime + ", estimatedStartTime: " + estimatedStartTime + ", raceStatus: " + raceStatus + ", distanceToNextMark: " + distanceToNextMark + ", weather: " + weather + ", humidity: " + humidity + ", temperature: " + temperature + ", messageText: " + messageText + ", cFlag: " + cFlag + ", rFlag: " + rFlag + ", duration: " + duration + ", nm: " + nm);
         
     }
 
     @Override
-    public void ranking(int hashValue, short rank, short rankIndex, short racePoints, Status status,
+    public void ranking(int hashValue, short rank, short rankIndex, short racePoints, CompetitorStatus competitorStatus,
             short finishRank, short finishRankIndex, int gap, int raceTime) {
-        System.out.println("ranking - hashValue: " + hashValue + ", rank: " + rank + ", rankIndex: " + rankIndex + ", racePoints: " + racePoints + ", status: " + status + ", finishRank: " + finishRank + ", finishRankIndex: " + finishRankIndex + ", gap: " + gap + ", raceTime: " + raceTime);
+        System.out.println("ranking - hashValue: " + hashValue + ", rank: " + rank + ", rankIndex: " + rankIndex + ", racePoints: " + racePoints + ", competitorStatus: " + competitorStatus + ", finishRank: " + finishRank + ", finishRankIndex: " + finishRankIndex + ", gap: " + gap + ", raceTime: " + raceTime);
         
     }
 
@@ -95,11 +95,11 @@ public class SwissTimingReplayTestListener implements SwissTimingReplayListener 
 
     @Override
     public void trackers(int hashValue, int latitude, int longitude, short cog, short sog, short average_sog,
-            short vmg, Status status, short rank, short dtl, short dtnm, short nm, short pRank, short ptPoints,
+            short vmg, CompetitorStatus competitorStatus, short rank, short dtl, short dtnm, short nm, short pRank, short ptPoints,
             short pnPoints) {
-        latitude = referenceLatitude + latitude;
-        longitude = referenceLongitude + longitude;
-        System.out.println("trackers - hashValue: " + hashValue + ", latitude: " + (double) latitude / 1E7 + ", longitude: " + (double) longitude / 1E7 + ", cog: " + cog + ", sog: " + sog + ", average_sog: " + average_sog + ", vmg: " + vmg + ", status: " + status + ", rank: " + rank + ", dtl: " + dtl + ", dtnm: " + dtnm + ", nm: " + nm + ", pRank: " + pRank + ", ptPoints: " + ptPoints + ", pnPoints: " + pnPoints);
+        latitude = referenceLatitude - latitude;
+        longitude = referenceLongitude - longitude;
+        System.out.println("trackers - hashValue: " + hashValue + ", latitude: " + (double) latitude / 1E7 + ", longitude: " + (double) longitude / 1E7 + ", cog: " + cog + ", sog: " + sog + ", average_sog: " + average_sog + ", vmg: " + vmg + ", competitorStatus: " + competitorStatus + ", rank: " + rank + ", dtl: " + dtl + ", dtnm: " + dtnm + ", nm: " + nm + ", pRank: " + pRank + ", ptPoints: " + ptPoints + ", pnPoints: " + pnPoints);
         
     }
 
