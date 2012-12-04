@@ -3,7 +3,8 @@
 </head>
 <body onload="updateIFramePositionAndSize();" style="margin:0px;" >
 <form id="urlForm" action="" onsubmit="return embedUrl(this);">
-  <b>URL:</b>&nbsp;<input type="text" size="150" name="embeddedUrl"><br/>
+  <b>URL 1:</b>&nbsp;<input type="text" size="150" name="embeddedUrl1"><br/>
+  <b>URL 2:</b>&nbsp;<input type="text" size="150" name="embeddedUrl2"><br/>
   <b>Position:</b>&nbsp;&nbsp;Left: <input type="number" size="10" value="0" name="leftPos"> Top: <input type="number" value="0" size="10" name="topPos"><br/>
   <b>Size:</b>&nbsp;&nbsp;Width: <input type="number" value="1280" size="10" name="sizeWidth">Height: <input type="number" value="720" size="10" name="sizeHeight"><br/>
   <input type="submit" value="Set">
@@ -18,7 +19,8 @@ var frameWidth = 1280;
 
 function embedUrl(form) {
 	$("#urlForm").hide();
-	$("#leaderboard").prop('src', form.embeddedUrl.value);
+	$("#leaderboard1").prop('src', form.embeddedUrl1.value);
+	$("#leaderboard2").prop('src', form.embeddedUrl2.value);
 	frameLeftPos = parseInt(form.leftPos.value);
 	frameTopPos = parseInt(form.topPos.value);
 	frameWidth = parseInt(form.sizeWidth.value);
@@ -33,8 +35,10 @@ function updateIFramePositionAndSize() {
 	$("body").css("margin-left", (frameLeftPos / mozDevicePixelRatio) +"px");
 	$("body").css("margin-top", (frameTopPos / mozDevicePixelRatio) +"px");
 
-	$("#leaderboard").height(frameHeight / mozDevicePixelRatio);
-	$("#leaderboard").width(frameWidth / mozDevicePixelRatio);
+	$("#leaderboard1").height(frameHeight / mozDevicePixelRatio);
+	$("#leaderboard1").width(frameWidth / mozDevicePixelRatio);
+	$("#leaderboard2").height(frameHeight / mozDevicePixelRatio);
+	$("#leaderboard2").width(frameWidth / mozDevicePixelRatio);
 }
 
 $(window).resize(function() {
@@ -65,6 +69,7 @@ var mediaQueryBinarySearch = function(
 
 <style id=binarysearch></style>
 <div style="position:fixed; bottom:0; right:0;" id="dummyElement">X</div>
-<iframe id="leaderboard" width="1000px" height="500px" frameborder="0" src="http://www.sapsailing.com"></iframe>
+<iframe id="leaderboard1" width="1000px" height="300px" frameborder="0" src="http://www.sapsailing.com"></iframe>
+<iframe id="leaderboard2" width="1000px" height="300px" frameborder="0" src="http://www.sapsailing.com"></iframe>
 </body>
 </html>
