@@ -268,10 +268,14 @@ public class SwissTimingReplayService {
     }
 
     private static int read3ByteInt(DataInputStream data) throws IOException {
-        int result = data.readByte()  << 16;
-        result = result + data.readByte()  << 8;
-        result = result + data.readByte();
-        return 0;
+        byte highByte = data.readByte(); 
+        byte midByte = data.readByte(); 
+        byte lowByte = data.readByte();
+        
+        int highInt = (highByte & 0xFF) << 16;
+        int midInt = (midByte & 0xFF) << 8;
+        int lowInt = lowByte & 0xFF;
+        return highInt | midInt | lowInt;
     }
 
     private static String readString(DataInputStream data, int length) throws IOException {
