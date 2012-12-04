@@ -3,16 +3,9 @@ package com.sap.sailing.gwt.ui.shared.charts;
 import java.util.Date;
 
 import org.moxieapps.gwt.highcharts.client.Chart;
-import org.moxieapps.gwt.highcharts.client.Legend;
 import org.moxieapps.gwt.highcharts.client.XAxis;
 import org.moxieapps.gwt.highcharts.client.events.ChartClickEvent;
 import org.moxieapps.gwt.highcharts.client.events.ChartSelectionEvent;
-import org.moxieapps.gwt.highcharts.client.events.SeriesCheckboxClickEvent;
-import org.moxieapps.gwt.highcharts.client.events.SeriesCheckboxClickEventHandler;
-import org.moxieapps.gwt.highcharts.client.events.SeriesLegendItemClickEvent;
-import org.moxieapps.gwt.highcharts.client.events.SeriesLegendItemClickEventHandler;
-import org.moxieapps.gwt.highcharts.client.plotOptions.PlotOptions;
-import org.moxieapps.gwt.highcharts.client.plotOptions.SeriesPlotOptions;
 
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.ui.SimplePanel;
@@ -68,7 +61,7 @@ public abstract class RaceChart extends SimplePanel implements RaceSelectionChan
     }
 
     protected void showLoading(String message) {
-        if(timer.getPlayMode() != PlayModes.Live) {
+        if (timer.getPlayMode() != PlayModes.Live) {
             chart.showLoading(message);
         }
         isLoading = true;
@@ -113,10 +106,8 @@ public abstract class RaceChart extends SimplePanel implements RaceSelectionChan
         return true;
     }
 
-    protected void resetMinMaxInterval(Date minIntervalTimepoint, Date maxIntervalTimepoint) {
+    protected void changeMinMaxAndExtremesInterval(Date minTimepoint, Date maxTimepoint, boolean redraw) {
         XAxis xAxis = chart.getXAxis();
-        Date minTimepoint = timeRangeWithZoomProvider.getFromTime();
-        Date maxTimepoint = timeRangeWithZoomProvider.getToTime();
         
         if (minTimepoint != null) {
             xAxis.setMin(minTimepoint.getTime());
@@ -129,53 +120,27 @@ public abstract class RaceChart extends SimplePanel implements RaceSelectionChan
             long tickInterval = (maxTimepoint.getTime() - minTimepoint.getTime()) / TICKCOUNT;
             xAxis.setTickInterval(tickInterval);
         }
-        chart.redraw();
+        if(redraw) {
+            chart.redraw();
+        }
     }
 
-    protected void changeMinMaxInterval(Date minIntervalTimepoint, Date maxIntervalTimepoint) {
-        XAxis xAxis = chart.getXAxis();
-        xAxis.setExtremes(minIntervalTimepoint.getTime(), maxIntervalTimepoint.getTime(), true, true);
+    protected void resetMinMaxAndExtremesInterval(boolean redraw) {
+        changeMinMaxAndExtremesInterval(timeRangeWithZoomProvider.getFromTime(), timeRangeWithZoomProvider.getToTime(), redraw);
     }
-    
+
     public void onTimeZoomChanged(Date zoomStartTimepoint, Date zoomEndTimepoint) {
-        changeMinMaxInterval(zoomStartTimepoint, zoomEndTimepoint);
+        changeMinMaxAndExtremesInterval(zoomStartTimepoint, zoomEndTimepoint, true);
         // Probably there is a function for this in a newer version of highcharts: http://jsfiddle.net/mqz3N/1071/ 
         // chart.showResetZoom();
     }
 
     public void onTimeRangeChanged(Date fromTime, Date toTime) {
-        resetMinMaxInterval(fromTime, toTime);
+        if(isZoomed && timer.getPlayMode() != PlayModes.Live)
+            changeMinMaxAndExtremesInterval(timeRangeWithZoomProvider.getFromTime(), timeRangeWithZoomProvider.getToTime(), true);
     }
 
     public void onTimeZoomReset() {
-        changeMinMaxInterval(timeRangeWithZoomProvider.getFromTime(), timeRangeWithZoomProvider.getToTime());
-    }
-
-    /**
-     * When using this method to enable the use of checkboxes only for hiding / showing a series, callers need to ensure
-     * that all series have {@link PlotOptions#setSelected(boolean)} set to <code>true</code> for all series that are
-     * added to the chart and hence visible. Otherwise, the checkbox won't initially be in sync with the series'
-     * visibility state.
-     */
-    protected void useCheckboxesToShowAndHide(final Chart chart) {
-        chart.setLegend(new Legend().setEnabled(true).setBorderWidth(0).setSymbolPadding(25)); // make room for checkbox
-        chart.setSeriesPlotOptions(new SeriesPlotOptions().setSeriesCheckboxClickEventHandler(new SeriesCheckboxClickEventHandler() {
-                    @Override
-                    public boolean onClick(SeriesCheckboxClickEvent seriesCheckboxClickEvent) {
-                        if (seriesCheckboxClickEvent.isChecked()) {
-                            chart.getSeries(seriesCheckboxClickEvent.getSeriesId()).show();
-                        } else {
-                            chart.getSeries(seriesCheckboxClickEvent.getSeriesId()).hide();
-                        }
-                        return false; // don't toggle the select state of the series
-                    }
-                }).setShowCheckbox(true).
-                setSeriesLegendItemClickEventHandler(new SeriesLegendItemClickEventHandler() {
-                    @Override
-                    public boolean onClick(SeriesLegendItemClickEvent seriesLegendItemClickEvent) {
-                        // disable toggling visibility by clicking the legend item; force user to use checkbox instead
-                        return false;
-                    }
-                }));
+        resetMinMaxAndExtremesInterval(true);
     }
 }

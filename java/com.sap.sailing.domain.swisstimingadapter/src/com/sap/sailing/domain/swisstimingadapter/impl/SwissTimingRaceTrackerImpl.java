@@ -12,10 +12,10 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.logging.Logger;
 
-import com.sap.sailing.domain.base.Buoy;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.Distance;
@@ -36,14 +36,14 @@ import com.sap.sailing.domain.swisstimingadapter.SwissTimingRaceTracker;
 import com.sap.sailing.domain.tracking.AbstractRaceTrackerImpl;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
-import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
+import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.RacesHandle;
-import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
 
@@ -179,8 +179,8 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
                     case TIMINGSCORING:
                     case UNIDENTIFIED:
                         String trackerID = fix.getBoatID();
-                        Buoy buoy = domainFactory.getOrCreateBuoy(trackerID);
-                        trackedRace.recordFix(buoy, gpsFix);
+                        Mark mark = domainFactory.getOrCreateMark(trackerID);
+                        trackedRace.recordFix(mark, gpsFix);
                         break;
                     case COMPETITOR:
                         Competitor competitor = domainFactory.getCompetitorByBoatID(fix.getBoatID());
@@ -247,13 +247,14 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
     public void receivedClockAtMark(String raceID,
             List<Triple<Integer, TimePoint, String>> markIndicesTimePointsAndBoatIDs) {
         // Ignored because it's covered by TMD. Mail from Kai Hahndorf of 2011-11-15T12:42:00Z:
-        // "Die TMD werden immer gesendet. Das CAM Protokoll ist nur für unsere TV-Grafik wichtig, da damit die Rückstandsuhr gestartet wird."
+        // "Die TMD werden immer gesendet. Das CAM Protokoll ist nur fuer unsere TV-Grafik wichtig, da damit die Rueckstandsuhr gestartet wird."
     }
 
     @Override
     public void receivedStartList(String raceID, StartList startList) {
+        StartList oldStartList = this.startList;
         this.startList = startList;
-        if (course != null) {
+        if (oldStartList == null && course != null) {
             createRaceDefinition(raceID);
         }
     }
@@ -291,9 +292,10 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
 
     @Override
     public void receivedCourseConfiguration(String raceID, Course course) {
+        Course oldCourse = this.course;
         this.course = course;
         if (trackedRace == null) {
-            if (startList != null) {
+            if (oldCourse == null && startList != null) {
                 createRaceDefinition(raceID);
             }
         } else {

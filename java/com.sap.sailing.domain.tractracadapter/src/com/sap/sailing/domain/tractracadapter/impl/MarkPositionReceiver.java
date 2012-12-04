@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import com.maptrack.client.io.TypeController;
-import com.sap.sailing.domain.base.Buoy;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
@@ -81,7 +81,7 @@ public class MarkPositionReceiver extends AbstractReceiverWithQueue<ControlPoint
     
     /**
      * The listeners returned will, when added to a controller, receive events about the
-     * position changes of marks during a race. Receiving such an event updates the Buoy's
+     * position changes of marks during a race. Receiving such an event updates the mark's
      * {@link GPSFixTrack} in the {@link TrackedRegatta}. Starts a thread for this receiver,
      * blocking for events received.
      */
@@ -113,15 +113,15 @@ public class MarkPositionReceiver extends AbstractReceiverWithQueue<ControlPoint
                 System.out.println();
             }
         }
-        Buoy buoy = getDomainFactory().getBuoy(event.getA(), event.getB());
+        Mark mark = getDomainFactory().getMark(event.getA(), event.getB());
         for (Race tractracRace : getTracTracEvent().getRaceList()) {
             DynamicTrackedRace trackedRace = getTrackedRace(tractracRace);
             if (trackedRace != null) {
                 GPSFixMoving markPosition = getDomainFactory().createGPSFixMoving(event.getB());
                 if (getSimulator() != null) {
-                    getSimulator().scheduleMarkPosition(buoy, markPosition);
+                    getSimulator().scheduleMarkPosition(mark, markPosition);
                 } else {
-                    trackedRace.recordFix(buoy, markPosition);
+                    trackedRace.recordFix(mark, markPosition);
                 }
             } else {
                 logger.warning("Couldn't find tracked race for race " + tractracRace.getName()

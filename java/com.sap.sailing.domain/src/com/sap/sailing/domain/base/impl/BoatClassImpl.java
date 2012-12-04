@@ -3,6 +3,7 @@ package com.sap.sailing.domain.base.impl;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.common.Distance;
+import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.impl.NamedImpl;
 
 public class BoatClassImpl extends NamedImpl implements BoatClass {
@@ -41,7 +42,10 @@ public class BoatClassImpl extends NamedImpl implements BoatClass {
         super(name);
         this.typicallyStartsUpwind = typicallyStartsUpwind;
         approximateManeuverDurationInMilliseconds = 8000; // as discussed with Dennis Gehrlein
-        hullLength = new MeterDistance(5); // a good average for the olympic classes...
+        // TODO see bug 911: these values need to come from a master data base
+        hullLength = name.toLowerCase().contains("extreme") && name.contains("40")
+                ? new MeterDistance(40*12*2.54/100)
+                : new MeterDistance(5); // a good average for the olympic classes...
     }
 
     @Override

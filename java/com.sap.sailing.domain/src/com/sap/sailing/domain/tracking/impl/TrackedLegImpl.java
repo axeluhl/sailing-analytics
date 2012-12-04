@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
-import com.sap.sailing.domain.base.Buoy;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Waypoint;
@@ -35,7 +35,7 @@ public class TrackedLegImpl implements TrackedLeg, RaceChangeListener {
 
     private final static Logger logger = Logger.getLogger(TrackedLegImpl.class.getName());
     
-    private final static double UPWIND_DOWNWIND_TOLERANCE_IN_DEG = 45; // TracTrac does 22.5, Marcus Baur suggest 40; Nils Schröder suggests 60
+    private final static double UPWIND_DOWNWIND_TOLERANCE_IN_DEG = 45; // TracTrac does 22.5, Marcus Baur suggest 40; Nils Schrï¿½der suggests 60
 
     private final Leg leg;
     private final Map<Competitor, TrackedLegOfCompetitor> trackedLegsOfCompetitors;
@@ -135,7 +135,8 @@ public class TrackedLegImpl implements TrackedLeg, RaceChangeListener {
     public LegType getLegType(TimePoint at) throws NoWindException {
         Wind wind = getWindOnLeg(at);
         if (wind == null) {
-            throw new NoWindException("Need to know wind direction to determine whether leg "+getLeg()+
+            throw new NoWindException("Need to know wind direction in race "+getTrackedRace().getRace().getName()+
+                    " to determine whether leg "+getLeg()+
                     " is an upwind or downwind leg");
         }
         Bearing legBearing = getLegBearing(at);
@@ -155,9 +156,9 @@ public class TrackedLegImpl implements TrackedLeg, RaceChangeListener {
 
     @Override
     public Bearing getLegBearing(TimePoint at) {
-        Position startBuoyPos = getTrackedRace().getApproximatePosition(getLeg().getFrom(), at);
-        Position endBuoyPos = getTrackedRace().getApproximatePosition(getLeg().getTo(), at);
-        Bearing legBearing = (startBuoyPos != null && endBuoyPos != null) ? startBuoyPos.getBearingGreatCircle(endBuoyPos) : null;
+        Position startMarkPos = getTrackedRace().getApproximatePosition(getLeg().getFrom(), at);
+        Position endMarkPos = getTrackedRace().getApproximatePosition(getLeg().getTo(), at);
+        Bearing legBearing = (startMarkPos != null && endMarkPos != null) ? startMarkPos.getBearingGreatCircle(endMarkPos) : null;
         return legBearing;
     }
 
@@ -169,9 +170,9 @@ public class TrackedLegImpl implements TrackedLeg, RaceChangeListener {
     private Wind getWindOnLeg(TimePoint at) {
         Wind wind;
         Position approximateLegStartPosition = getTrackedRace().getOrCreateTrack(
-                getLeg().getFrom().getBuoys().iterator().next()).getEstimatedPosition(at, false);
+                getLeg().getFrom().getMarks().iterator().next()).getEstimatedPosition(at, false);
         Position approximateLegEndPosition = getTrackedRace().getOrCreateTrack(
-                getLeg().getTo().getBuoys().iterator().next()).getEstimatedPosition(at, false);
+                getLeg().getTo().getMarks().iterator().next()).getEstimatedPosition(at, false);
         if (approximateLegStartPosition == null || approximateLegEndPosition == null) {
             wind = null;
         } else {
@@ -216,7 +217,7 @@ public class TrackedLegImpl implements TrackedLeg, RaceChangeListener {
     }
 
     @Override
-    public void buoyPositionChanged(GPSFix fix, Buoy buoy) {
+    public void markPositionChanged(GPSFix fix, Mark mark) {
         clearCaches();
     }
 

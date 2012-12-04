@@ -44,13 +44,31 @@ public class TestStoringAndRetrievingLeaderboards extends AbstractMongoDBTest {
     }
 
     @Test
+    public void testStoreAndRetrieveSimpleLeaderboardWithSpecificColumnFactors() {
+        final String leaderboardName = "TestLeaderboard";
+        final int[] discardIndexResultsStartingWithHowManyRaces = new int[] { 5, 8 };
+        FlexibleLeaderboardImpl leaderboard = new FlexibleLeaderboardImpl(leaderboardName, new ScoreCorrectionImpl(),
+                new ResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces), new LowPoint());
+        leaderboard.addRaceColumn("R1", /* medalRace */ false);
+        RaceColumn r2 = leaderboard.addRaceColumn("R2", /* medalRace */ false);
+        r2.setFactor(1.5);
+        RaceColumn r3 = leaderboard.addRaceColumn("R3", /* medalRace */ false);
+        r3.setFactor(2.5);
+        new MongoObjectFactoryImpl(db).storeLeaderboard(leaderboard);
+        Leaderboard loadedLeaderboard = new DomainObjectFactoryImpl(db).loadLeaderboard(leaderboardName, /* regattaRegistry */ null);
+        assertEquals(1.0, loadedLeaderboard.getRaceColumnByName("R1").getFactor(), 0.000000001);
+        assertEquals(1.5, loadedLeaderboard.getRaceColumnByName("R2").getFactor(), 0.000000001);
+        assertEquals(2.5, loadedLeaderboard.getRaceColumnByName("R3").getFactor(), 0.000000001);
+    }
+    
+    @Test
     public void testStoreAndRetrieveLeaderboardWithSuppressedCompetitors() {
         final String leaderboardName = "TestLeaderboard";
         final int[] discardIndexResultsStartingWithHowManyRaces = new int[] { 5, 8 };
         FlexibleLeaderboardImpl leaderboard = new FlexibleLeaderboardImpl(leaderboardName, new ScoreCorrectionImpl(),
                 new ResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces), new LowPoint());
         Competitor wolfgang = createCompetitor();
-        Competitor hasso = new CompetitorImpl(123, "Hasso Plattner", new TeamImpl("STG", Collections.singleton(
+        Competitor hasso = new CompetitorImpl(234, "Hasso Plattner", new TeamImpl("STG", Collections.singleton(
                 new PersonImpl("Hasso Plattner", new NationalityImpl("GER"),
                 /* dateOfBirth */ null, "This is famous Dr. Hasso Plattner")), new PersonImpl("Lutz Patrunky", new NationalityImpl("GER"),
                         /* dateOfBirth */ null, "This is Patty, the coach")),

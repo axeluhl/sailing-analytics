@@ -220,6 +220,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 DelayedLeaderboardCorrections loadedLeaderboardCorrections = new DelayedLeaderboardCorrectionsImpl(result);
                 loadLeaderboardCorrections(dbLeaderboard, loadedLeaderboardCorrections, scoreCorrection);
                 loadSuppressedCompetitors(dbLeaderboard, loadedLeaderboardCorrections);
+                loadColumnFactors(dbLeaderboard, result);
                 // add the leaderboard to the registry
                 if (leaderboardRegistry != null) {
                     leaderboardRegistry.addLeaderboard(result);
@@ -228,6 +229,17 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             }
         }
         return result;
+    }
+
+    private void loadColumnFactors(DBObject dbLeaderboard, Leaderboard result) {
+        DBObject dbColumnFactors = (DBObject) dbLeaderboard.get(FieldNames.LEADERBOARD_COLUMN_FACTORS.name());
+        if (dbColumnFactors != null) {
+            for (String encodedRaceColumnName : dbColumnFactors.keySet()) {
+                double factor = ((Number) dbColumnFactors.get(encodedRaceColumnName)).doubleValue();
+                String raceColumnName = MongoUtils.unescapeDollarAndDot(encodedRaceColumnName);
+                result.getRaceColumnByName(raceColumnName).setFactor(factor);
+            }
+        }
     }
 
     private void loadSuppressedCompetitors(DBObject dbLeaderboard,
@@ -432,18 +444,24 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         DBCollection leaderboardCollection = database.getCollection(CollectionNames.LEADERBOARDS.name());
         String name = (String) o.get(FieldNames.LEADERBOARD_GROUP_NAME.name());
         String description = (String) o.get(FieldNames.LEADERBOARD_GROUP_DESCRIPTION.name());
+        boolean displayGroupsInReverseOrder = false; // default value 
+        Object displayGroupsInReverseOrderObj = o.get(FieldNames.LEADERBOARD_GROUP_DISPLAY_IN_REVERSE_ORDER.name());
+        if (displayGroupsInReverseOrderObj != null) {
+            displayGroupsInReverseOrder = (Boolean) displayGroupsInReverseOrderObj; 
+        }
         ArrayList<Leaderboard> leaderboards = new ArrayList<Leaderboard>();
         BasicDBList dbLeaderboardIds = (BasicDBList) o.get(FieldNames.LEADERBOARD_GROUP_LEADERBOARDS.name());
         for (Object object : dbLeaderboardIds) {
             ObjectId dbLeaderboardId = (ObjectId) object;
             DBObject dbLeaderboard = leaderboardCollection.findOne(dbLeaderboardId);
-            final Leaderboard loadedLeaderboard = loadLeaderboard(dbLeaderboard, regattaRegistry, leaderboardRegistry, /* groupForMetaLeaderboard */ null);
+            final Leaderboard loadedLeaderboard = loadLeaderboard(dbLeaderboard, regattaRegistry,
+                    leaderboardRegistry, /* groupForMetaLeaderboard */ null);
             if (loadedLeaderboard != null) {
                 leaderboards.add(loadedLeaderboard);
             }
         }
         logger.info("loaded leaderboard group "+name);
-        LeaderboardGroupImpl result = new LeaderboardGroupImpl(name, description, leaderboards);
+        LeaderboardGroupImpl result = new LeaderboardGroupImpl(name, description, displayGroupsInReverseOrder, leaderboards);
         Object overallLeaderboardIdOrName = o.get(FieldNames.LEADERBOARD_GROUP_OVERALL_LEADERBOARD.name());
         if (overallLeaderboardIdOrName != null) {
             final DBObject dbOverallLeaderboard;
@@ -452,9 +470,11 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             } else {
                 dbOverallLeaderboard = (DBObject) overallLeaderboardIdOrName;
             }
-            // the loadLeaderboard call adds the overall leaderboard to the leaderboard registry and sets it as the
-            // overall leaderboard of the leaderboard group
-            loadLeaderboard(dbOverallLeaderboard, regattaRegistry, leaderboardRegistry, /* groupForMetaLeaderboard */ result);
+            if (dbOverallLeaderboard != null) {
+                // the loadLeaderboard call adds the overall leaderboard to the leaderboard registry and sets it as the
+                // overall leaderboard of the leaderboard group
+                loadLeaderboard(dbOverallLeaderboard, regattaRegistry, leaderboardRegistry, /* groupForMetaLeaderboard */ result);
+            }
         }
         return result;
     }

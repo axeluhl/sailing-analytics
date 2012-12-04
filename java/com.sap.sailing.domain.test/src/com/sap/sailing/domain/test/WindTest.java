@@ -15,7 +15,7 @@ import java.util.Set;
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.BoatClass;
-import com.sap.sailing.domain.base.Buoy;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.DomainFactory;
@@ -246,10 +246,10 @@ public class WindTest {
     @Test
     public void testWindEstimationReturnsNullIfNoUpwindStartAndNoOtherWindDataAvailable() {
         DomainFactory domainFactory = DomainFactory.INSTANCE;
-        Buoy startFinishLeft = domainFactory.getOrCreateBuoy("Start/Finish left");
-        Buoy startFinishRight = domainFactory.getOrCreateBuoy("Start/Finish right");
+        Mark startFinishLeft = domainFactory.getOrCreateMark("Start/Finish left");
+        Mark startFinishRight = domainFactory.getOrCreateMark("Start/Finish right");
         ControlPoint startFinish = domainFactory.createGate(startFinishLeft, startFinishRight, "Start/Finish");
-        ControlPoint top = domainFactory.getOrCreateBuoy("Top");
+        ControlPoint top = domainFactory.getOrCreateMark("Top");
         Waypoint w1 = domainFactory.createWaypoint(startFinish);
         Waypoint w2 = domainFactory.createWaypoint(top);
         Waypoint w3 = domainFactory.createWaypoint(startFinish);

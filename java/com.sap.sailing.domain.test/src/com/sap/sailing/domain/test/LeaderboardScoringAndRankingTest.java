@@ -8,8 +8,11 @@ import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.NavigableSet;
 
 import org.junit.Test;
 
@@ -20,14 +23,19 @@ import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
+import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.base.impl.MarkImpl;
 import com.sap.sailing.domain.base.impl.FleetImpl;
+import com.sap.sailing.domain.base.impl.GateImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
+import com.sap.sailing.domain.base.impl.WaypointImpl;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
@@ -41,7 +49,11 @@ import com.sap.sailing.domain.leaderboard.impl.ResultDiscardingRuleImpl;
 import com.sap.sailing.domain.leaderboard.impl.ScoreCorrectionImpl;
 import com.sap.sailing.domain.leaderboard.meta.LeaderboardGroupMetaLeaderboard;
 import com.sap.sailing.domain.test.mock.MockedTrackedRaceWithStartTimeAndRanks;
+import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
+import com.sap.sailing.domain.tracking.impl.TimedComparator;
+import com.sap.sailing.util.impl.ArrayListNavigableSet;
 
 public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
     private ArrayList<Series> series;
@@ -511,6 +523,48 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
         // assert that the ordering of competitors equals that of the last race
         assertEquals(reversedCompetitors, leaderboard.getCompetitorsFromBestToWorst(later));
     }
+    
+    @Test
+    public void testTotalTimeNotCountedForRacesStartedLaterThanTimePointRequested() {
+        TimePoint now = MillisecondsTimePoint.now();
+        TimePoint earlier = now.minus(1000000);
+        TimePoint later = now.plus(1000000); // first race from "earlier" to "now", second from "now" to "later", third from "later" to "finish"
+        TimePoint finish = later.plus(1000000);
+        Competitor[] c = createCompetitors(3).toArray(new Competitor[0]);
+        Competitor[] f1 = new Competitor[] { c[0], c[1], c[2] };
+        Competitor[] f2 = new Competitor[] { c[0], c[1], c[2] };
+        Competitor[] f3 = new Competitor[] { c[1], c[2], c[0] };
+        Regatta regatta = createRegatta(/* qualifying */0, new String[] { "Default" }, /* final */3, new String[] { "Default" },
+        /* medal */ false, "testTotalTimeNotCountedForRacesStartedLaterThanTimePointReqeusted",
+                DomainFactory.INSTANCE.getOrCreateBoatClass("49er", /* typicallyStartsUpwind */true), DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT));
+        Leaderboard leaderboard = createLeaderboard(regatta, /* discarding thresholds */ new int[0]);
+        @SuppressWarnings("unchecked")
+        Map<Competitor, TimePoint>[] lastMarkPassingTimesForCompetitors = (Map<Competitor, TimePoint>[]) new HashMap<?, ?>[3];
+        lastMarkPassingTimesForCompetitors[0] = new HashMap<>();
+        lastMarkPassingTimesForCompetitors[0].put(c[0], now);
+        lastMarkPassingTimesForCompetitors[0].put(c[1], now);
+        lastMarkPassingTimesForCompetitors[0].put(c[2], now);
+        lastMarkPassingTimesForCompetitors[1] = new HashMap<>();
+        lastMarkPassingTimesForCompetitors[1].put(c[0], later);
+        lastMarkPassingTimesForCompetitors[1].put(c[1], later);
+        lastMarkPassingTimesForCompetitors[1].put(c[2], later);
+        lastMarkPassingTimesForCompetitors[2] = new HashMap<>();
+        lastMarkPassingTimesForCompetitors[2].put(c[0], finish);
+        lastMarkPassingTimesForCompetitors[2].put(c[1], finish);
+        lastMarkPassingTimesForCompetitors[2].put(c[2], finish);
+        createAndAttachTrackedRacesWithStartTimeAndLastMarkPassingTimes(series.get(1), "Default",
+                new Competitor[][] { f1, f2, f3 }, new TimePoint[] { earlier, now, later }, lastMarkPassingTimesForCompetitors);
+        long totalTimeSailedC0_InRace1 = leaderboard.getTotalTimeSailedInMilliseconds(c[0], earlier.plus(1000));
+        assertEquals(1000l, totalTimeSailedC0_InRace1);
+        long totalTimeSailedC0_InRace2 = leaderboard.getTotalTimeSailedInMilliseconds(c[0], now.plus(1000));
+        assertEquals(now.asMillis()-earlier.asMillis() + 1000, totalTimeSailedC0_InRace2);
+        long totalTimeSailedC0_InRace3 = leaderboard.getTotalTimeSailedInMilliseconds(c[0], later.plus(1000));
+        assertEquals(later.asMillis()-earlier.asMillis() + 1000, totalTimeSailedC0_InRace3);
+        long totalTimeSailedC0_AtEndOfRace3 = leaderboard.getTotalTimeSailedInMilliseconds(c[0], finish);
+        assertEquals(finish.asMillis()-earlier.asMillis(), totalTimeSailedC0_AtEndOfRace3);
+        long totalTimeSailedC0_AfterRace3 = leaderboard.getTotalTimeSailedInMilliseconds(c[0], finish.plus(1000));
+        assertEquals(finish.asMillis()-earlier.asMillis(), totalTimeSailedC0_AfterRace3);
+    }
 
     @Test
     public void testTieBreakWithTwoVersusOneWins() throws NoWindException {
@@ -545,6 +599,88 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
         List<Competitor> rankedCompetitors = leaderboard.getCompetitorsFromBestToWorst(later);
         assertEquals(leaderboard.getTotalPoints(c[0], later), leaderboard.getTotalPoints(c[1], later), 0.000000001);
         assertTrue(rankedCompetitors.indexOf(c[0]) == rankedCompetitors.indexOf(c[1])-1);
+    }
+
+    @Test
+    public void testScoringConsideringNotAllRaces() throws NoWindException {
+        // one discard at four races
+        Competitor[] c = createCompetitors(4).toArray(new Competitor[0]);
+        // Leaderboard:                     Accumulated with incremental discards
+        //       R1 R2 R3 R4 R5 R6          R1 R2 R3 R4 R5 R6
+        // c[0]: 2  2  3  3 (4) 4            2  4  7  7 10 14
+        // c[1]: 3  3  2 (4) 3  3            3  6  8  8 11 14
+        // c[2]: 1  1  1 (2) 2  2            1  2  3  3  5  7
+        // c[3]:(4) 4  4  1  1  1            4  8 12  9 10 11
+        double[][] scoresAfter3Races = new double[][] {
+                { 2, 2, 3 },
+                { 3, 3, 2 },
+                { 1, 1, 1 },
+                { 4, 4, 4 } };
+        double[][] scoresAfter4Races = new double[][] {
+                { 2, 2, 0, 3 },
+                { 3, 3, 2, 0 },
+                { 1, 1, 1, 0 },
+                { 0, 4, 4, 1 } };
+        double[][] scoresAfter5Races = new double[][] {
+                { 2, 2, 3, 3, 0 },
+                { 3, 3, 2, 0, 3 },
+                { 1, 1, 1, 0, 2 },
+                { 0, 4, 4, 1, 1 } };
+        double[][] scoresAfter6Races = new double[][] {
+                { 2, 2, 3, 3, 0, 4 },
+                { 3, 3, 2, 0, 3, 3 },
+                { 1, 1, 1, 0, 2, 2 },
+                { 0, 4, 4, 1, 1, 1 } };
+        Competitor[] f1 = new Competitor[] { c[2], c[0], c[1], c[3] };
+        Competitor[] f2 = new Competitor[] { c[2], c[0], c[1], c[3] };
+        Competitor[] f3 = new Competitor[] { c[2], c[1], c[0], c[3] };
+        Competitor[] f4 = new Competitor[] { c[3], c[2], c[0], c[1] };
+        Competitor[] f5 = new Competitor[] { c[3], c[2], c[1], c[0] };
+        Competitor[] f6 = new Competitor[] { c[3], c[2], c[1], c[0] };
+        Regatta regatta = createRegatta(/* qualifying */0, new String[] { "Default" }, /* final */6, new String[] { "Default" },
+        /* medal */ false, "testTieBreakWithTwoVersusOneSeconds",
+                DomainFactory.INSTANCE.getOrCreateBoatClass("49er", /* typicallyStartsUpwind */true),
+                DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT));
+        Leaderboard leaderboard = createLeaderboard(regatta, /* discarding thresholds */ new int[] { 4 });
+        TimePoint later = createAndAttachTrackedRaces(series.get(1), "Default", f1, f2, f3, f4, f5, f6);
+        Map<RaceColumn, List<Competitor>> rankedCompetitorsFromBestToWorstAfterEachRaceColumn =
+                leaderboard.getRankedCompetitorsFromBestToWorstAfterEachRaceColumn(later);
+        assertEquals(Arrays.asList(c[2], c[0], c[1], c[3]),
+                rankedCompetitorsFromBestToWorstAfterEachRaceColumn.get(Util.get(leaderboard.getRaceColumns(), 0)));
+        assertEquals(Arrays.asList(c[2], c[0], c[1], c[3]),
+                rankedCompetitorsFromBestToWorstAfterEachRaceColumn.get(Util.get(leaderboard.getRaceColumns(), 1)));
+        assertEquals(Arrays.asList(c[2], c[0], c[1], c[3]),
+                rankedCompetitorsFromBestToWorstAfterEachRaceColumn.get(Util.get(leaderboard.getRaceColumns(), 2)));
+        assertEquals(Arrays.asList(c[2], c[0], c[1], c[3]),
+                rankedCompetitorsFromBestToWorstAfterEachRaceColumn.get(Util.get(leaderboard.getRaceColumns(), 3)));
+        assertEquals(Arrays.asList(c[2], c[3], c[0], c[1]), // c[3] has one win, c[0] none
+                rankedCompetitorsFromBestToWorstAfterEachRaceColumn.get(Util.get(leaderboard.getRaceColumns(), 4)));
+        assertEquals(Arrays.asList(c[2], c[3], c[0], c[1]), // c[0] has more second places than c[1] (2 vs. 1)
+                rankedCompetitorsFromBestToWorstAfterEachRaceColumn.get(Util.get(leaderboard.getRaceColumns(), 5)));
+        List<RaceColumn> raceColumnsToConsider = new ArrayList<>();
+        int raceColumnNumber=0;
+        while (raceColumnNumber<3) {
+            final RaceColumn raceColumn = Util.get(leaderboard.getRaceColumns(), raceColumnNumber++);
+            raceColumnsToConsider.add(raceColumn);
+        }
+        checkScoresAfterSomeRaces(leaderboard, raceColumnsToConsider, scoresAfter3Races, later, c);
+        raceColumnsToConsider.add(Util.get(leaderboard.getRaceColumns(), raceColumnNumber++));
+        checkScoresAfterSomeRaces(leaderboard, raceColumnsToConsider, scoresAfter4Races, later, c);
+        raceColumnsToConsider.add(Util.get(leaderboard.getRaceColumns(), raceColumnNumber++));
+        checkScoresAfterSomeRaces(leaderboard, raceColumnsToConsider, scoresAfter5Races, later, c);
+        raceColumnsToConsider.add(Util.get(leaderboard.getRaceColumns(), raceColumnNumber++));
+        checkScoresAfterSomeRaces(leaderboard, raceColumnsToConsider, scoresAfter6Races, later, c);
+    }
+
+    private void checkScoresAfterSomeRaces(Leaderboard leaderboard, List<RaceColumn> raceColumnsToConsider,
+            double[][] scoresAfterNRaces, TimePoint timePoint, Competitor[] competitors) throws NoWindException {
+        for (int competitorIndex=0; competitorIndex<scoresAfterNRaces.length; competitorIndex++) {
+            for (int raceColumnIndex=0; raceColumnIndex<raceColumnsToConsider.size(); raceColumnIndex++) {
+                assertEquals(scoresAfterNRaces[competitorIndex][raceColumnIndex],
+                        leaderboard.getTotalPoints(competitors[competitorIndex], raceColumnsToConsider.get(raceColumnIndex),
+                                raceColumnsToConsider, timePoint), 0.00000001);
+            }
+        }
     }
 
     @Test
@@ -644,8 +780,8 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
                 leaderboard1.getFleet(null));
         assertTrue(leaderboard3.getCompetitorsFromBestToWorst(later).indexOf(c[3]) <
                 leaderboard3.getCompetitorsFromBestToWorst(later).indexOf(c[0])); // c3 better than c0; won last race
-        LeaderboardGroup leaderboardGroup = new LeaderboardGroupImpl("Leaderboard Group", "Leaderboard Group", Arrays.asList(leaderboard1,
-                leaderboard2, leaderboard3));
+        LeaderboardGroup leaderboardGroup = new LeaderboardGroupImpl("Leaderboard Group", "Leaderboard Group", false, Arrays.asList(leaderboard1,
+                        leaderboard2, leaderboard3));
         leaderboardGroup.setOverallLeaderboard(new LeaderboardGroupMetaLeaderboard(leaderboardGroup, new HighPointExtremeSailingSeriesOverall(),
                 new ResultDiscardingRuleImpl(new int[0])));
         leaderboardGroup.getOverallLeaderboard().setSuppressed(c[1], true);
@@ -668,6 +804,32 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
             raceColumn.setTrackedRace(raceColumn.getFleetByName(fleetName), trackedRace);
         }
         return later;
+    }
+
+    private void createAndAttachTrackedRacesWithStartTimeAndLastMarkPassingTimes(
+            Series theSeries, String fleetName, Competitor[][] competitorLists, TimePoint[] startTimes,
+            Map<Competitor, TimePoint>[] lastMarkPassingTimesForCompetitors) {
+        Iterator<? extends RaceColumn> columnIter = theSeries.getRaceColumns().iterator();
+        int i=0;
+        for (Competitor[] competitorList : competitorLists) {
+            RaceColumn raceColumn = columnIter.next();
+            final Map<Competitor, TimePoint> lastMarkPassingTimes = lastMarkPassingTimesForCompetitors[i];
+            final Waypoint start = new WaypointImpl(new GateImpl(new MarkImpl("Left StartBuoy"), new MarkImpl("Right StartBuoy"), "Start"));
+            final Waypoint finish = new WaypointImpl(new MarkImpl("FinishBuoy"));
+            TrackedRace trackedRace = new MockedTrackedRaceWithStartTimeAndRanks(startTimes[i], Arrays.asList(competitorList)) {
+                private static final long serialVersionUID = 1L;
+                @Override
+                public NavigableSet<MarkPassing> getMarkPassings(Competitor competitor) {
+                    ArrayListNavigableSet<MarkPassing> result = new ArrayListNavigableSet<>(new TimedComparator());
+                    result.add(new MarkPassingImpl(lastMarkPassingTimes.get(competitor), finish, competitor));
+                    return result;
+                }
+            };
+            trackedRace.getRace().getCourse().addWaypoint(0, start);
+            trackedRace.getRace().getCourse().addWaypoint(1, finish);
+            raceColumn.setTrackedRace(raceColumn.getFleetByName(fleetName), trackedRace);
+            i++;
+        }
     }
 
     private List<Competitor> createCompetitors(int numberOfCompetitorsToCreate) {

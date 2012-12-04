@@ -14,7 +14,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.BoatClass;
-import com.sap.sailing.domain.base.Buoy;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.RaceDefinition;
@@ -103,8 +103,8 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
     }
     
     @Override
-    public void recordFix(Buoy buoy, GPSFix fix) {
-        getOrCreateTrack(buoy).addGPSFix(fix);
+    public void recordFix(Mark mark, GPSFix fix) {
+        getOrCreateTrack(mark).addGPSFix(fix);
     }
 
     @Override
@@ -114,8 +114,8 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
             getTrack(competitor).setMillisecondsOverWhichToAverage(millisecondsOverWhichToAverageSpeed);
         }
         for (Waypoint waypoint : getRace().getCourse().getWaypoints()) {
-            for (Buoy buoy : waypoint.getBuoys()) {
-                getOrCreateTrack(buoy).setMillisecondsOverWhichToAverage(millisecondsOverWhichToAverageSpeed);
+            for (Mark mark : waypoint.getMarks()) {
+                getOrCreateTrack(mark).setMillisecondsOverWhichToAverage(millisecondsOverWhichToAverageSpeed);
             }
         }
         updated(/* time point */null);
@@ -155,25 +155,26 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
     }
     
     @Override
-    public DynamicGPSFixTrack<Buoy, GPSFix> getOrCreateTrack(Buoy buoy) {
-        return (DynamicGPSFixTrack<Buoy, GPSFix>) super.getOrCreateTrack(buoy);
+    public DynamicGPSFixTrack<Mark, GPSFix> getOrCreateTrack(Mark mark) {
+        return (DynamicGPSFixTrack<Mark, GPSFix>) super.getOrCreateTrack(mark);
     }
     
     @Override
-    protected DynamicGPSFixTrackImpl<Buoy> createBuoyTrack(Buoy buoy) {
-        DynamicGPSFixTrackImpl<Buoy> result = super.createBuoyTrack(buoy);
-        result.addListener(new GPSTrackListener<Buoy, GPSFix>() {
+    protected DynamicGPSFixTrackImpl<Mark> createMarkTrack(Mark mark) {
+        DynamicGPSFixTrackImpl<Mark> result = super.createMarkTrack(mark);
+        result.addListener(new GPSTrackListener<Mark, GPSFix>() {
             private static final long serialVersionUID = -2855787105725103732L;
 
             @Override
-            public void gpsFixReceived(GPSFix fix, Buoy buoy) {
-                notifyListeners(fix, buoy);
+            public void gpsFixReceived(GPSFix fix, Mark mark) {
+                triggerManeuverCacheRecalculationForAllCompetitors();
+                notifyListeners(fix, mark);
             }
 
             @Override
             public void speedAveragingChanged(long oldMillisecondsOverWhichToAverage,
                     long newMillisecondsOverWhichToAverage) {
-                // nobody can currently listen for the change of the buoy speed averaging because buoy speed is not a value used
+                // nobody can currently listen for the change of the mark speed averaging because mark speed is not a value used
             }
 
             @Override
@@ -246,14 +247,14 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
         }
     }
 
-    private void notifyListeners(GPSFix fix, Buoy buoy) {
+    private void notifyListeners(GPSFix fix, Mark mark) {
         RaceChangeListener[] listeners;
         synchronized (getListeners()) {
             listeners = getListeners().toArray(new RaceChangeListener[getListeners().size()]);
         }
         for (RaceChangeListener listener : listeners) {
             try {
-                listener.buoyPositionChanged(fix, buoy);
+                listener.markPositionChanged(fix, mark);
             } catch (Throwable t) {
                 logger.log(Level.SEVERE, "RaceChangeListener " + listener + " threw exception " + t.getMessage());
                 logger.throwing(DynamicTrackedRaceImpl.class.getName(), "notifyListeners(GPSFix, Competitor)", t);

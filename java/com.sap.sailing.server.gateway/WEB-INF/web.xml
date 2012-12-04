@@ -7,7 +7,7 @@
 
 	<servlet>
 		<servlet-name>AdminApp</servlet-name>
-		<servlet-class> com.sap.sailing.server.gateway.impl.AdminApp</servlet-class>
+		<servlet-class>com.sap.sailing.server.gateway.impl.AdminApp</servlet-class>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>AdminApp</servlet-name>
@@ -15,17 +15,17 @@
 	</servlet-mapping>
 
 	<servlet>
-		<servlet-name>ModeratorApp</servlet-name>
-		<servlet-class> com.sap.sailing.server.gateway.impl.ModeratorApp</servlet-class>
+		<servlet-name>RegattaAndRaceDataJsonExportServlet</servlet-name>
+		<servlet-class>com.sap.sailing.server.gateway.impl.RegattaAndRaceDataJsonExportServlet</servlet-class>
 	</servlet>
 	<servlet-mapping>
-		<servlet-name>ModeratorApp</servlet-name>
+		<servlet-name>RegattaAndRaceDataJsonExportServlet</servlet-name>
 		<url-pattern>/moderator</url-pattern>
 	</servlet-mapping>
 
 	<servlet>
 		<servlet-name>ExpeditionThroughHttpPostServlet</servlet-name>
-		<servlet-class> com.sap.sailing.server.gateway.impl.ExpeditionThroughHttpPostServlet</servlet-class>
+		<servlet-class>com.sap.sailing.server.gateway.impl.ExpeditionThroughHttpPostServlet</servlet-class>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>ExpeditionThroughHttpPostServlet</servlet-name>
@@ -34,12 +34,13 @@
 	
 	<servlet>
 		<servlet-name>LeaderboardsJsonExportServlet</servlet-name>
-		<servlet-class> com.sap.sailing.server.gateway.impl.LeaderboardsJsonExportServlet</servlet-class>
+		<servlet-class>com.sap.sailing.server.gateway.impl.LeaderboardsJsonExportServlet</servlet-class>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>LeaderboardsJsonExportServlet</servlet-name>
 		<url-pattern>/leaderboards</url-pattern>
 	</servlet-mapping>
+
 
 	<servlet>
 		<servlet-name>LeaderboardJsonExportServlet</servlet-name>
@@ -52,11 +53,20 @@
 
 	<servlet>
 		<servlet-name>LeaderboardGroupJsonExportServlet</servlet-name>
-		<servlet-class> com.sap.sailing.server.gateway.impl.LeaderboardGroupJsonExportServlet</servlet-class>
+		<servlet-class>com.sap.sailing.server.gateway.impl.LeaderboardGroupJsonExportServlet</servlet-class>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>LeaderboardGroupJsonExportServlet</servlet-name>
 		<url-pattern>/leaderboardgroup</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>RaceRankingAsRssFeedServlet</servlet-name>
+		<servlet-class>com.sap.sailing.server.gateway.impl.RaceRankingAsRssFeedServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>RaceRankingAsRssFeedServlet</servlet-name>
+		<url-pattern>/rss/raceranking</url-pattern>
 	</servlet-mapping>
 
 	<servlet id="jsp">

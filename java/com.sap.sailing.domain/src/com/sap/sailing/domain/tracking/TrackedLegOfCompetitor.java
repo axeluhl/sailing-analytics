@@ -13,6 +13,7 @@ import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.domain.tracking.impl.TrackedLegImpl;
 
 public interface TrackedLegOfCompetitor extends Serializable {
     Leg getLeg();
@@ -169,6 +170,27 @@ public interface TrackedLegOfCompetitor extends Serializable {
 
     Distance getAverageCrossTrackError(TimePoint timePoint, boolean waitForLatestAnalysis) throws NoWindException;
 
+    /**
+     * If the current {@link #getLeg() leg} is +/- {@link TrackedLegImpl#UPWIND_DOWNWIND_TOLERANCE_IN_DEG} degrees
+     * co-linear with the wind's bearing, the competitor's position is projected onto the line crossing
+     * <code>mark</code> in the wind's bearing, and the distance from the projection to the <code>mark</code> is
+     * returned. Otherwise, it is assumed that the leg is neither an upwind nor a downwind leg, and hence the along-track
+     * distance to <code>mark</code> is returned.
+     * 
+     * @param at
+     *            the wind estimation is performed for this point in time
+     */
     Distance getWindwardDistance(Position pos1, Position pos2, TimePoint at) throws NoWindException;
 
+    /**
+     * Computes the maneuver loss as the "windward distance" that the boat lost compared to not having maneuvered.
+     * As defined by {@link TrackedLegOfCompetitor#getWindwardDistance(Position, Position, TimePoint)}, distances for
+     * reaching legs are computed as the along-track distance. For upwind/downwind legs it's taken to be the
+     * along-wind projection. With this distance measure, the competitors speed and bearing before the maneuver,
+     * as defined by <code>timePointBeforeManeuver</code> is extrapolated until <code>timePointAfterManeuver</code>,
+     * and the resulting extrapolated position's "windward distance" is computed to the competitor's actual position
+     * at that time. This distance is returned as the result of this method. 
+     * @param maneuverTimePoint TODO
+     */
+    Distance getManeuverLoss(TimePoint timePointBeforeManeuver, TimePoint maneuverTimePoint, TimePoint timePointAfterManeuver) throws NoWindException;
 }

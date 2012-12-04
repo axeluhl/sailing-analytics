@@ -5,7 +5,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.NavigableSet;
 
-import com.sap.sailing.domain.base.Buoy;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.RaceDefinition;
@@ -78,8 +78,7 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
 
     @Override
     public TimePoint getStartOfRace() {
-        // TODO Auto-generated method stub
-        return null;
+        return startTime;
     }
 
     @Override
@@ -194,7 +193,7 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     }
 
     @Override
-    public GPSFixTrack<Buoy, GPSFix> getOrCreateTrack(Buoy buoy) {
+    public GPSFixTrack<Mark, GPSFix> getOrCreateTrack(Mark mark) {
         // TODO Auto-generated method stub
         return null;
     }
@@ -436,7 +435,7 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     }
 
 	@Override
-	public Iterable<Buoy> getBuoys() {
+	public Iterable<Mark> getMarks() {
 		// TODO Auto-generated method stub
 		return null;
 	}

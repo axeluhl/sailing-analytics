@@ -28,9 +28,9 @@ import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.ManeuverDTO;
-import com.sap.sailing.gwt.ui.shared.MultiCompetitorRaceDataDTO;
+import com.sap.sailing.gwt.ui.shared.CompetitorsRaceDataDTO;
 import com.sap.sailing.gwt.ui.shared.QuickRankDTO;
-import com.sap.sailing.gwt.ui.shared.RaceBuoysDTO;
+import com.sap.sailing.gwt.ui.shared.RaceCourseMarksDTO;
 import com.sap.sailing.gwt.ui.shared.RaceColumnInSeriesDTO;
 import com.sap.sailing.gwt.ui.shared.RaceDTO;
 import com.sap.sailing.gwt.ui.shared.RaceEventLogDTO;
@@ -204,15 +204,15 @@ public interface SailingService extends RemoteService {
     
     void removeLeaderboardGroup(String groupName);
     
-    LeaderboardGroupDTO createLeaderboardGroup(String groupName, String description, int[] overallLeaderboardDiscardThresholds,
+    LeaderboardGroupDTO createLeaderboardGroup(String groupName, String description,
+            boolean displayGroupsInReverseOrder, int[] overallLeaderboardDiscardThresholds,
             ScoringSchemeType overallLeaderboardScoringSchemeType);
     
     void updateLeaderboardGroup(String oldName, String newName, String description, List<String> leaderboardNames,
             int[] overallLeaderboardDiscardThresholds, ScoringSchemeType overallLeaderboardScoringSchemeType);
 
-    MultiCompetitorRaceDataDTO getCompetitorsRaceData(RegattaAndRaceIdentifier race, List<Pair<Date, CompetitorDTO>> competitors,
-            Date toDate, long stepSize, DetailType detailType) 
-            throws NoWindException;
+    CompetitorsRaceDataDTO getCompetitorsRaceData(RegattaAndRaceIdentifier race, List<CompetitorDTO> competitors, Date from, Date to,
+            long stepSizeInMs, DetailType detailType) throws NoWindException;
 
     void setRaceIsKnownToStartUpwind(RegattaAndRaceIdentifier raceIdentifier, boolean raceIsKnownToStartUpwind);
 
@@ -254,7 +254,7 @@ public interface SailingService extends RemoteService {
     Void updateLeaderboardScoreCorrectionMetadata(String leaderboardName, Date timePointOfLastCorrectionValidity,
             String comment);
 
-	RaceBuoysDTO getRaceBuoys(RegattaAndRaceIdentifier raceIdentifier, Date date);
+    RaceCourseMarksDTO getRaceCourseMarks(RegattaAndRaceIdentifier raceIdentifier, Date date);
 
     void updateRaceCourse(RegattaAndRaceIdentifier raceIdentifier, List<ControlPointDTO> controlPoints);
 
@@ -265,7 +265,10 @@ public interface SailingService extends RemoteService {
     StrippedLeaderboardDTO getLeaderboard(String leaderboardName);
 
     void suppressCompetitorInLeaderboard(String leaderboardName, String competitorIdAsString, boolean suppressed);
-    
+
     RaceEventLogDTO getRaceEventLog();
+
+    void updateLeaderboardColumnFactor(String leaderboardName, String columnName, Double newFactor);
     
+    List<Pair<String, List<CompetitorDTO>>> getRankedCompetitorsFromBestToWorstAfterEachRaceColumn(String leaderboardName, Date date) throws NoWindException;
 }

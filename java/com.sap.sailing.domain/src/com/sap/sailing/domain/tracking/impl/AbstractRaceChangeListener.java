@@ -2,7 +2,7 @@ package com.sap.sailing.domain.tracking.impl;
 
 import java.util.Map;
 
-import com.sap.sailing.domain.base.Buoy;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.TimePoint;
@@ -24,7 +24,7 @@ public abstract class AbstractRaceChangeListener implements RaceChangeListener {
     }
 
     @Override
-    public void buoyPositionChanged(GPSFix fix, Buoy buoy) {
+    public void markPositionChanged(GPSFix fix, Mark mark) {
     }
 
     @Override

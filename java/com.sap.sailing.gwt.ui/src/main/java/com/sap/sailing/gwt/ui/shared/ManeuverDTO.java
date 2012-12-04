@@ -20,11 +20,13 @@ public class ManeuverDTO implements IsSerializable {
     public SpeedWithBearingDTO speedWithBearingAfter;
     
     public double directionChangeInDegrees;
+    
+    public Double maneuverLossInMeters;
 
     public ManeuverDTO() {}
     
     public ManeuverDTO(ManeuverType type, Tack newTack, PositionDTO position, Date timepoint, SpeedWithBearingDTO speedWithBearingBefore,
-            SpeedWithBearingDTO speedWithBearingAfter, double directionChangeInDegrees) {
+            SpeedWithBearingDTO speedWithBearingAfter, double directionChangeInDegrees, Double maneuverLossInMeters) {
         super();
         this.type = type;
         this.newTack = newTack;
@@ -33,6 +35,7 @@ public class ManeuverDTO implements IsSerializable {
         this.speedWithBearingBefore = speedWithBearingBefore;
         this.speedWithBearingAfter = speedWithBearingAfter;
         this.directionChangeInDegrees = directionChangeInDegrees;
+        this.maneuverLossInMeters = maneuverLossInMeters;
     }
     
 }

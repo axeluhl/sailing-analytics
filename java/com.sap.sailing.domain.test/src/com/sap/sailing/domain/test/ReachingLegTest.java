@@ -11,7 +11,7 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sap.sailing.domain.base.Buoy;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Course;
@@ -20,7 +20,7 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
-import com.sap.sailing.domain.base.impl.BuoyImpl;
+import com.sap.sailing.domain.base.impl.MarkImpl;
 import com.sap.sailing.domain.base.impl.CompetitorImpl;
 import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.base.impl.GateImpl;
@@ -86,11 +86,11 @@ public class ReachingLegTest extends TrackBasedTest {
         TrackedRegatta trackedRegatta = new TrackedRegattaImpl(regatta);
         List<Waypoint> waypoints = new ArrayList<Waypoint>();
         // create a two-lap upwind/downwind course:
-        BuoyImpl left = new BuoyImpl("Left lee gate buoy");
-        BuoyImpl right = new BuoyImpl("Right lee gate buoy");
+        MarkImpl left = new MarkImpl("Left lee gate buoy");
+        MarkImpl right = new MarkImpl("Right lee gate buoy");
         ControlPoint leeGate = new GateImpl(left, right, "Lee Gate");
-        Buoy windwardMark = new BuoyImpl("Windward mark");
-        Buoy offsetMark = new BuoyImpl("Offset mark");
+        Mark windwardMark = new MarkImpl("Windward mark");
+        Mark offsetMark = new MarkImpl("Offset mark");
         waypoints.add(new WaypointImpl(leeGate));
         waypoints.add(new WaypointImpl(windwardMark));
         waypoints.add(new WaypointImpl(offsetMark));

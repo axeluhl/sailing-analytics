@@ -19,6 +19,9 @@ public interface SettableScoreCorrection extends ScoreCorrection {
      */
     void setMaxPointsReason(Competitor competitor, RaceColumn raceColumn, MaxPointsReason reason);
     
+    /**
+     * @return a non-<code>null</code> result
+     */
     MaxPointsReason getMaxPointsReason(Competitor competitor, RaceColumn raceColumn);
 
     void correctScore(Competitor competitor, RaceColumn raceColumn, double points);

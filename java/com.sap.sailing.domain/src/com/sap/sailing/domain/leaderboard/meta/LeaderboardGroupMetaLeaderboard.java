@@ -20,9 +20,9 @@ import com.sap.sailing.domain.tracking.TrackedRace;
  * <p>
  * 
  * After an object of this type has been de-serialized, and after all objects referenced by it (leaderboard, leaderboard
- * group) have been initialized, {@link #registerAsScoreCorrectionChangeForwarderOnAllLeaderboards()} must be called to
+ * group) have been initialized, {@link #registerAsScoreCorrectionChangeForwarderAndRaceColumnListenerOnAllLeaderboards()} must be called to
  * ensure that score corrections are propagated as desired. This is because score correction listeners are "transient"
- * and are as such not serialized. Note: calling {@link #registerAsScoreCorrectionChangeForwarderOnAllLeaderboards()}
+ * and are as such not serialized. Note: calling {@link #registerAsScoreCorrectionChangeForwarderAndRaceColumnListenerOnAllLeaderboards()}
  * during <code>readObject</code> or <code>readResolve</code> is not possible because the object graph hasn't been fully
  * initialized yet when those methods are called. Hence, the structures for registering the score correction listeners
  * are not yet in place at that time.
@@ -40,13 +40,12 @@ public class LeaderboardGroupMetaLeaderboard extends AbstractMetaLeaderboard imp
         super(leaderboardGroup.getName()+" "+LeaderboardNameConstants.OVERALL, scoringScheme, resultDiscardingRule);
         this.leaderboardGroup = leaderboardGroup;
         leaderboardGroup.addLeaderboardGroupListener(this);
-        registerAsScoreCorrectionChangeForwarderOnAllLeaderboards();
+        registerAsScoreCorrectionChangeForwarderAndRaceColumnListenerOnAllLeaderboards();
     }
 
-    public void registerAsScoreCorrectionChangeForwarderOnAllLeaderboards() {
+    public void registerAsScoreCorrectionChangeForwarderAndRaceColumnListenerOnAllLeaderboards() {
         for (Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
-            leaderboard.addRaceColumnListener(this);
-            registerScoreCorrectionChangeForwarder(leaderboard);
+            registerScoreCorrectionAndRaceColumnChangeForwarder(leaderboard);
         }
     }
     
@@ -57,8 +56,7 @@ public class LeaderboardGroupMetaLeaderboard extends AbstractMetaLeaderboard imp
 
     @Override
     public void leaderboardAdded(LeaderboardGroup group, Leaderboard leaderboard) {
-        leaderboard.addRaceColumnListener(this);
-        registerScoreCorrectionChangeForwarder(leaderboard);
+        registerScoreCorrectionAndRaceColumnChangeForwarder(leaderboard);
         for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
             for (Fleet fleet : raceColumn.getFleets()) {
                 TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);

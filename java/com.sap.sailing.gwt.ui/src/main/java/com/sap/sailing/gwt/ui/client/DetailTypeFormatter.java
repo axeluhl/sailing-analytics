@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.client;
 
+import com.google.gwt.i18n.client.NumberFormat;
 import com.sap.sailing.domain.common.DetailType;
 
 public class DetailTypeFormatter {
@@ -62,10 +63,30 @@ public class DetailTypeFormatter {
             return stringMessages.maximumSpeedOverGroundInKnots();
         case TOTAL_TIME_SAILED_DOWNWIND_IN_SECONDS:
             return stringMessages.totalTimeSailedDownwindInSeconds();
+        case TOTAL_TIME_SAILED_UPWIND_IN_SECONDS:
+            return stringMessages.totalTimeSailedUpwindInSeconds();
+        case TOTAL_TIME_SAILED_REACHING_IN_SECONDS:
+            return stringMessages.totalTimeSailedReachingInSeconds();
         case TOTAL_TIME_SAILED_IN_SECONDS:
             return stringMessages.totalTimeSailedInSeconds();
+        case AVERAGE_MANEUVER_LOSS_IN_METERS:
+            return stringMessages.averageManeuverLossInMeters();
+        case AVERAGE_TACK_LOSS_IN_METERS:
+            return stringMessages.averageTackLossInMeters();
+        case AVERAGE_JIBE_LOSS_IN_METERS:
+            return stringMessages.averageJibeLossInMeters();
         }
         return null;
+    }
 
+    public static NumberFormat getNumberFormat(DetailType detailType) {
+        String decimalPlaces = "";
+        for (int i = 0; i < detailType.getPrecision(); i++) {
+            if (i == 0) {
+                decimalPlaces += ".";
+            }
+            decimalPlaces += "0";
+        }
+        return NumberFormat.getFormat("0" + decimalPlaces);
     }
 }
