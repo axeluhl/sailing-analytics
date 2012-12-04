@@ -87,8 +87,6 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
     private static final String STYLE_COLORBOX = STYLE_NAME_PREFIX + "ColorBox";
     private static final String STYLE_BOATCLASS = STYLE_NAME_PREFIX + "BoatClass";
     
-    private enum RaceRenderingStrategy { DEFAULT, ESS40 };
-
     private final SailingServiceAsync sailingService;
     private final StringMessages stringMessages;
     private final ErrorReporter errorReporter;
@@ -102,8 +100,6 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
     private boolean allLeaderboardNamesStartWithGroupName = false;
     private final boolean isEmbedded;
     private final boolean showRaceDetails;
-    
-    private RaceRenderingStrategy raceRenderingStrategy = RaceRenderingStrategy.DEFAULT;  
     
     public LeaderboardGroupPanel(SailingServiceAsync sailingService, StringMessages stringConstants,
             ErrorReporter errorReporter, final String groupName, String root, String viewMode, boolean embedded, boolean showRaceDetails) {
@@ -170,10 +166,6 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
     }
 
     private void createdPageContent() {
-        if(leaderboardGroup.name.equals("Extreme Sailing Series")) {
-            raceRenderingStrategy = RaceRenderingStrategy.ESS40;
-        }
-        
         if (!isEmbedded) {
             Label groupNameLabel = new Label(leaderboardGroup.name + ":");
             groupNameLabel.setStyleName(STYLE_NAME_PREFIX + "GroupName");
@@ -245,12 +237,7 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
                     racesCell) {
                 @Override
                 public SafeHtml getValue(StrippedLeaderboardDTO leaderboard) {
-                    switch(raceRenderingStrategy) {
-                    case DEFAULT: return leaderboardRacesToHtml(leaderboard);
-                    case ESS40: return ess40LeaderboardRacesToHtml(leaderboard);
-                    }
-                    return null;
-                    
+                    return leaderboardRacesToHtml(leaderboard);
                 }
             };
             leaderboardsTable.addColumn(racesColumn, stringMessages.races());
@@ -263,7 +250,7 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
         mainPanel.add(leaderboardsTable);
         
         // legend
-        if(!isEmbedded) {
+        if (!isEmbedded) {
             HorizontalPanel legendPanel = new HorizontalPanel();
             legendPanel.setStyleName(STYLE_LEGEND);
             legendPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
@@ -315,6 +302,7 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
         return b.toSafeHtml();
     }
 
+    // TODO Bug 1089: this method is in preparation of a solution to bug 1089
     private SafeHtml ess40LeaderboardRacesToHtml(StrippedLeaderboardDTO leaderboard) {
         SafeHtmlBuilder b = new SafeHtmlBuilder();
         if (!leaderboard.isRegattaLeaderboard) {
@@ -346,7 +334,7 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
                 }
             }
             
-            if(!racesWithUnknownDate.isEmpty()) {
+            if (!racesWithUnknownDate.isEmpty()) {
                 if(lastRacesPerDayList == null) {
                     // all races have an unknown date
                     orderedRacesByDay.put("unknown", racesWithUnknownDate);
@@ -441,7 +429,7 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
             if (viewMode != null && !viewMode.isEmpty()) {
                 link += "&viewMode=" + viewMode;
             }
-            if(isLive) {
+            if (isLive) {
                 b.append(getAnchor(link, raceColumnName, STYLE_LIVE_RACE));
             } else if (race.trackedRace.hasGPSData && race.trackedRace.hasWindData) {
                 b.append(getAnchor(link, raceColumnName, STYLE_ACTIVE_RACE));
