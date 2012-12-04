@@ -274,10 +274,17 @@ input.magnifier {
 	color: #fff;
 }
 
-.leaderboardGroupPanel-ActiveRace:hover, .leaderboardGroupPanel-ActiveLeaderboard:hover, .leaderboardGroupPanel-ActiveButton:hover {
+.leaderboardGroupPanel-ActiveLeaderboard:hover, .leaderboardGroupPanel-ActiveButton:hover {
 	text-decoration: none;
 	color: #fff;
 	background: url("images/btn-cta-orangeleft.png") repeat-x -10px -30px #e7e7e7;
+  /*border: 1px solid #f1af10;*/
+}
+
+.leaderboardGroupPanel-ActiveRace:hover {
+	text-decoration: none;
+	color: #fff;
+	background: url("images/btn-cta-blueleft.png") repeat-x -10px -30px #e7e7e7;
   /*border: 1px solid #f1af10;*/
 }
 
@@ -286,6 +293,10 @@ input.magnifier {
 	color: #fff;
 	background: url("images/btn-cta-greenleft.png") repeat-x -10px -30px #e7e7e7;
   /*border: 1px solid #f1af10;*/
+}
+
+.leaderboardGroupPanel-Legend {
+	float: right;
 }
 
 .welcomeWidget-WelcomePanel{

@@ -180,27 +180,8 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
             labelAndLegendPanel.add(leaderboardsTableLabel, DockPanel.WEST);
             // legend
             if (!isEmbedded) {
-                HorizontalPanel legendPanel = new HorizontalPanel();
-                legendPanel.setStyleName(STYLE_LEGEND);
-                legendPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
-                legendPanel.setSpacing(5);
-                labelAndLegendPanel.add(legendPanel, DockPanel.EAST);
-                
-                Label legendLabel = new Label(stringMessages.legend() + ":");
-                legendLabel.getElement().getStyle().setFontWeight(FontWeight.BOLD);
-                legendPanel.add(legendLabel);
-                
-                Label inactiveRace = new Label(stringMessages.untracked());
-                inactiveRace.setStyleName(STYLE_INACTIVE_RACE);
-                legendPanel.add(inactiveRace);
-
-                Label activeRace = new Label(stringMessages.tracked());
-                activeRace.setStyleName(STYLE_ACTIVE_RACE);
-                legendPanel.add(activeRace);
-                
-                Label liveRace = new Label(stringMessages.live());
-                liveRace.setStyleName(STYLE_LIVE_RACE);
-                legendPanel.add(liveRace);
+                HorizontalPanel legendPanel = createLegendPanel();
+                labelAndLegendPanel.add(legendPanel, DockPanel.CENTER);
             }
             mainPanel.add(labelAndLegendPanel);
             
@@ -273,6 +254,30 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
         }
         mainPanel.add(leaderboardsTable);
         
+    }
+
+    private HorizontalPanel createLegendPanel() {
+        HorizontalPanel legendPanel = new HorizontalPanel();
+        legendPanel.setStyleName(STYLE_LEGEND);
+        legendPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
+        legendPanel.setSpacing(5);
+        
+        Label legendLabel = new Label(stringMessages.legend() + ":");
+        legendLabel.getElement().getStyle().setFontWeight(FontWeight.BOLD);
+        legendPanel.add(legendLabel);
+        
+        Label inactiveRace = new Label(stringMessages.untracked());
+        inactiveRace.setStyleName(STYLE_INACTIVE_RACE);
+        legendPanel.add(inactiveRace);
+
+        Label activeRace = new Label(stringMessages.tracked());
+        activeRace.setStyleName(STYLE_ACTIVE_RACE);
+        legendPanel.add(activeRace);
+        
+        Label liveRace = new Label(stringMessages.live());
+        liveRace.setStyleName(STYLE_LIVE_RACE);
+        legendPanel.add(liveRace);
+        return legendPanel;
     }
 
     private String shortenLeaderboardName(String prefixToCut, String leaderboardName) {
