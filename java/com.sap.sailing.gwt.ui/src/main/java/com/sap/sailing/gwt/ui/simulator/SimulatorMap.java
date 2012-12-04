@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.simulator;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -68,8 +69,11 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
     private final int xRes;
     private final int yRes;
 
-    // private PathPolyline pathPolyline;
     private boolean warningAlreadyShown = false;
+    private boolean firstTime = true;
+
+    private PathDTO gpsPoly = null;
+    private PathDTO gpsTrack = null;
 
     public enum ViewName {
         SUMMARY, REPLAY, WINDDISPLAY
@@ -136,9 +140,18 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
                 pathName = paths[index].name;
                 color = colorPalette.getColor(paths.length - 1 - index);
 
-                if (pathName.equals("GPS Poly")) {
-                    createPathPolyline(currentPath);
+                if (pathName.equals("GPS Track")) {
+                    gpsTrack = currentPath;
                 }
+                else if (pathName.equals("GPS Poly")) {
+                    gpsPoly = currentPath;
+                }
+
+                if (firstTime && gpsTrack != null && gpsPoly != null) {
+                    createPathPolyline(identifyPath(gpsTrack, gpsPoly));
+                    firstTime = false;
+                }
+
 
                 /* TODO Revisit for now creating a WindFieldDTO from the path */
                 final WindFieldDTO pathWindDTO = new WindFieldDTO();
@@ -682,8 +695,85 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         return value;
     }
 
-    private PathPolyline createPathPolyline(final PathDTO pathDTO) {
-        final List<SimulatorWindDTO> pathPoints = pathDTO.getMatrix();
+    private static List<SimulatorWindDTO> identifyPath(final PathDTO gpsTrack, final PathDTO gpsPoly) {
+
+        final List<SimulatorWindDTO> windDTOs = new ArrayList<SimulatorWindDTO>();
+
+        final List<SimulatorWindDTO> gpsTrackWindDTOs = gpsTrack.getMatrix();
+        final List<SimulatorWindDTO> gpsPolyWindDTOs = gpsPoly.getMatrix();
+
+        final int countOfGpsPolyWindDTOs = gpsPolyWindDTOs.size();
+        if (countOfGpsPolyWindDTOs == 0 || countOfGpsPolyWindDTOs == 1) {
+            return null;
+        }
+
+        final SimulatorWindDTO startWindDTO = gpsPolyWindDTOs.get(0);
+        final SimulatorWindDTO endWindDTO = gpsPolyWindDTOs.get(countOfGpsPolyWindDTOs - 1);
+
+        final int startIndex = getIndexOfClosest(gpsTrackWindDTOs, startWindDTO);
+        // System.err.println("BBBB: startIndex = " + startIndex);
+        final int endIndex = getIndexOfClosest(gpsTrackWindDTOs, endWindDTO);
+        // System.err.println("BBBB: endIndex = " + endIndex);
+
+        for (int index = startIndex; index <= endIndex; index++) {
+            windDTOs.add(gpsTrackWindDTOs.get(index));
+        }
+
+        return windDTOs;
+    }
+
+    private static int getIndexOfClosest(final List<SimulatorWindDTO> items, final SimulatorWindDTO item) {
+        final int count = items.size();
+
+        final List<Double> diff_lat = new ArrayList<Double>();
+        final List<Double> diff_lng = new ArrayList<Double>();
+        final List<Long> diff_timepoint = new ArrayList<Long>();
+
+        for (int index = 0; index < count; index++) {
+            diff_lat.add(Math.abs(items.get(index).position.latDeg - item.position.latDeg));
+            diff_lng.add(Math.abs(items.get(index).position.lngDeg - item.position.lngDeg));
+            diff_timepoint.add(Math.abs(items.get(index).timepoint - item.timepoint));
+        }
+
+        final double min_diff_lat = Collections.min(diff_lat);
+        final double min_max_diff_lat = min_diff_lat + Collections.max(diff_lat);
+
+        final double min_diff_lng = Collections.min(diff_lng);
+        final double min_max_diff_lng = min_diff_lng + Collections.max(diff_lng);
+
+        final long min_diff_timepoint = Collections.min(diff_timepoint);
+        final double min_max_diff_timepoint = min_diff_timepoint + Collections.max(diff_timepoint);
+
+        final List<Double> norm_diff_lat = new ArrayList<Double>();
+        final List<Double> norm_diff_lng = new ArrayList<Double>();
+        final List<Double> norm_diff_timepoint = new ArrayList<Double>();
+
+        for (int index = 0; index < count; index++) {
+            norm_diff_lat.add((diff_lat.get(index) - min_diff_lat) / min_max_diff_lat);
+            norm_diff_lng.add((diff_lng.get(index) - min_diff_lng) / min_max_diff_lng);
+            norm_diff_timepoint.add((diff_timepoint.get(index) - min_diff_timepoint) / min_max_diff_timepoint);
+        }
+
+        final List<Double> deltas = new ArrayList<Double>();
+
+        for (int index = 0; index < count; index++) {
+            deltas.add(Math.sqrt(Math.pow(norm_diff_lat.get(index), 2) + Math.pow(norm_diff_lng.get(index), 2) + Math.pow(norm_diff_timepoint.get(index), 2)));
+        }
+
+        int result = 0;
+        double min = deltas.get(0);
+
+        for (int index = 0; index < count; index++) {
+            if (deltas.get(index) < min) {
+                result = index;
+                min = deltas.get(index);
+            }
+        }
+
+        return result;
+    }
+
+    private PathPolyline createPathPolyline(final List<SimulatorWindDTO> pathPoints) {
 
         final int noOfPathPoints = pathPoints.size();
         SimulatorWindDTO currentPathPoint = null;
@@ -698,7 +788,13 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
 
         final int boatClassID = 3; // 49er STG
 
-        return new PathPolyline(points.toArray(new LatLng[0]), boatClassID, this.errorReporter, pathDTO, this.simulatorSvc, this.mapw, this);
+        return new PathPolyline(points.toArray(new LatLng[0]), boatClassID, this.errorReporter, pathPoints, this.simulatorSvc, this.mapw, this);
+    }
+
+    @SuppressWarnings("unused")
+    private PathPolyline createPathPolyline(final PathDTO pathDTO) {
+
+        return this.createPathPolyline(pathDTO.getMatrix());
     }
 
     public void addLegendOverlayForPathPolyline(final long totalTimeMilliseconds) {
@@ -713,4 +809,5 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         this.legendCanvasOverlay.setVisible(true);
         this.legendCanvasOverlay.redraw(true);
     }
+
 }

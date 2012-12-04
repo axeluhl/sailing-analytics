@@ -16,7 +16,6 @@ import com.google.gwt.maps.client.overlay.Polyline;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SimulatorServiceAsync;
-import com.sap.sailing.gwt.ui.shared.PathDTO;
 import com.sap.sailing.gwt.ui.shared.PositionDTO;
 import com.sap.sailing.gwt.ui.shared.ReceivePolarDiagramDataDTO;
 import com.sap.sailing.gwt.ui.shared.RequestPolarDiagramDataDTO;
@@ -61,7 +60,7 @@ public class PathPolyline {
     private SpeedWithBearingDTO averageWindSpeed;
 
     private final int boatClassID;
-    private final PathDTO pathDTO;
+    private final List<SimulatorWindDTO> pathPoints;
     private final SimulatorServiceAsync simulatorService;
     private final MapWidget map;
     private final ErrorReporter errorReporter;
@@ -75,13 +74,13 @@ public class PathPolyline {
 
     // private static Logger logger = Logger.getLogger(PathPolyline.class.getName());
 
-    public PathPolyline(final LatLng[] points, final int boatClassID, final ErrorReporter errorReporter, final PathDTO pathDTO,
+    public PathPolyline(final LatLng[] points, final int boatClassID, final ErrorReporter errorReporter, final List<SimulatorWindDTO> pathPoints,
             final SimulatorServiceAsync simulatorService, final MapWidget map, final SimulatorMap simulatorMap) {
-        this(points, DEFAULT_COLOR, DEFAULT_WEIGHT, DEFAULT_OPACITY, boatClassID, errorReporter, pathDTO, simulatorService, map, simulatorMap);
+        this(points, DEFAULT_COLOR, DEFAULT_WEIGHT, DEFAULT_OPACITY, boatClassID, errorReporter, pathPoints, simulatorService, map, simulatorMap);
     }
 
     public PathPolyline(final LatLng[] points, final String color, final int weight, final double opacity, final int boatClassID,
-            final ErrorReporter errorReporter, final PathDTO pathDTO, final SimulatorServiceAsync simulatorService, final MapWidget map,
+            final ErrorReporter errorReporter, final List<SimulatorWindDTO> pathPoints, final SimulatorServiceAsync simulatorService, final MapWidget map,
             final SimulatorMap simulatorMap) {
         this.points = points;
         this.color = color;
@@ -92,7 +91,7 @@ public class PathPolyline {
         this.originAndHeads = new HashMap<TwoDPoint, List<TwoDPoint>>();
         this.shadowPoints = new ArrayList<LatLng>();
 
-        this.pathDTO = pathDTO;
+        this.pathPoints = pathPoints;
         this.simulatorService = simulatorService;
         this.map = map;
         this.averageWindSpeed = new SpeedWithBearingDTO();
@@ -393,7 +392,8 @@ public class PathPolyline {
                 System.err.println("==================================================");
                 System.err.println("total distance = " + PathPolylineUtils.getTotalDistanceMeters(points) + " meters");
                 System.err.println("step size = " + STEP_SIZE_METERS + " meters");
-                System.err.println("average wind speed = " + PathPolylineUtils.knotsToMetersPerSecond(averageWindSpeed.speedInKnots) + " meters/second");
+                System.err.println("average wind speed = " + PathPolylineUtils.knotsToMetersPerSecond(averageWindSpeed.speedInKnots)
+                        + " meters/second, with bearing of " + averageWindSpeed.bearingInDegrees + " degrees");
                 System.err.println("total time = " + (long) totalTime + " seconds!");
                 System.err.println("==================================================");
 
@@ -406,9 +406,8 @@ public class PathPolyline {
 
     private SpeedWithBearingDTO getAverageWindSpeed() {
 
-        final List<SimulatorWindDTO> windDTOs = this.pathDTO.getMatrix();
         // PathPolylineUtils.computeMinMaxAverageWindSpeed(windDTOs)
-        return PathPolylineUtils.computeAverageWindSpeed(windDTOs);
+        return PathPolylineUtils.computeAverageWindSpeed(this.pathPoints);
     }
 
     private RequestPolarDiagramDataDTO createRequestPolarDiagramDataDTO() {

@@ -38,9 +38,9 @@ import com.sap.sailing.gwt.ui.shared.RequestPolarDiagramDataDTO;
 import com.sap.sailing.gwt.ui.shared.SimulatedPathsEvenTimedResultDTO;
 import com.sap.sailing.gwt.ui.shared.SimulatorResultsDTO;
 import com.sap.sailing.gwt.ui.shared.SimulatorResultsDTOAndNotificationMessage;
+import com.sap.sailing.gwt.ui.shared.SimulatorWindDTO;
 import com.sap.sailing.gwt.ui.shared.SpeedBearingPositionDTO;
 import com.sap.sailing.gwt.ui.shared.SpeedWithBearingDTO;
-import com.sap.sailing.gwt.ui.shared.SimulatorWindDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldGenParamsDTO;
 import com.sap.sailing.gwt.ui.shared.WindLatticeDTO;
@@ -327,14 +327,14 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
 
         windFieldDTO.setMatrix(wList);
         if (isShowLines) {
-            
+
             if (seedLines == 'f') {
                 getWindLinesFromStartLine(wf, windFieldDTO, startTime, endTime, timeStep);
             }
             if (seedLines == 'b') {
                 getWindLinesFromEndLine(wf, windFieldDTO, startTime, endTime, timeStep);
             }
-            
+
         }
         return windFieldDTO;
     }
@@ -352,9 +352,9 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
             for (int j = 1; j < positionGrid[0].length - 1; ++j) {
                 // for (int j = 0; j < positionGrid[0].length; ++j) {
                 TimePoint t = startTime;
-                Position p0 =  positionGrid[0][j];
-                Position p1 =  positionGrid[1][j];
-                Position seed = new DegreePosition(p0.getLatDeg() + 0.5*(p0.getLatDeg()-p1.getLatDeg()), p0.getLngDeg() + 0.5*(p0.getLngDeg()-p1.getLngDeg()));
+                final Position p0 =  positionGrid[0][j];
+                final Position p1 =  positionGrid[1][j];
+                final Position seed = new DegreePosition(p0.getLatDeg() + 0.5*(p0.getLatDeg()-p1.getLatDeg()), p0.getLngDeg() + 0.5*(p0.getLngDeg()-p1.getLngDeg()));
                 final PositionDTO startPosition = new PositionDTO(seed.getLatDeg(), seed.getLngDeg());
                 while (t.compareTo(endTime) <= 0) {
                     final TimedPosition tp = new TimedPositionImpl(t, seed);
@@ -392,9 +392,9 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
             for (int j = 1; j < positionGrid[lastRowIndex].length - 1; ++j) {
 
                 TimePoint t = startTime;
-                Position p0 =  positionGrid[lastRowIndex][j];
-                Position p1 =  positionGrid[lastRowIndex-1][j];
-                Position seed = new DegreePosition(p0.getLatDeg() + 0.5*(p0.getLatDeg()-p1.getLatDeg()), p0.getLngDeg() + 0.5*(p0.getLngDeg()-p1.getLngDeg()));
+                final Position p0 =  positionGrid[lastRowIndex][j];
+                final Position p1 =  positionGrid[lastRowIndex-1][j];
+                final Position seed = new DegreePosition(p0.getLatDeg() + 0.5*(p0.getLatDeg()-p1.getLatDeg()), p0.getLngDeg() + 0.5*(p0.getLngDeg()-p1.getLngDeg()));
                 final PositionDTO startPosition = new PositionDTO(seed.getLatDeg(), seed.getLngDeg());
                 while (t.compareTo(endTime) <= 0) {
                     final TimedPosition tp = new TimedPositionImpl(t, seed);
@@ -466,7 +466,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
             final List<TimedPositionWithSpeed> path = paths.get(pathName);
 
             // TODO: cleanup getAllPathsEvenTimed to return Paths instead of PathPoints
-            if (pathName.equals("6#GPS Poly")) {
+            if (pathName.equals("6#GPS Poly") || pathName.equals("7#GPS Track")) {
                 // special initialization for polyline
                 pathDTO[pathIndex] = this.convertToPathDTOAndMarkTurns(new PathImpl(paths.get(pathName), null), pathName.split("#")[1]);
 
@@ -784,7 +784,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
 
             speeds.add(new SpeedBearingPositionDTO(positionDTO,
                     new SpeedWithBearingDTO(speedWithBearing.getKnots(),
-                    speedWithBearing.getBearing().getDegrees())));
+                            speedWithBearing.getBearing().getDegrees())));
         }
 
         return new ReceivePolarDiagramDataDTO(speeds, polarDiagramAndNotificationMessage.getNotificationMesssage());
