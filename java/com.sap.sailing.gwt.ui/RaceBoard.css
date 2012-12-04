@@ -247,8 +247,13 @@ img.openColumn {
   cursor: pointer;
 }
 
-
 .backToLivePlayButton {
+	background: url(images/btn-cta-greenleft.png) center top repeat-x;
+    margin: 0 0 0 5px;
+}
+
+.backToLivePlayButton:hover {
+    background: url(images/btn-cta-greenleft.png) center -30px repeat-x;
     margin: 0 0 0 5px;
 }
 
