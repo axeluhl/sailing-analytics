@@ -226,6 +226,7 @@ img.openColumn {
 
 .playPauseButton {
 	padding: 0;
+	float: left;
 	width: 28px;
 	height: 24px;
 	background: url(images/timeslider-play-active-icon.png) 0 0 no-repeat;
@@ -246,10 +247,14 @@ img.openColumn {
   cursor: pointer;
 }
 
-
 .backToLivePlayButton {
-    float: left;
-    padding: 3px 10px 4px;
+	background: url(images/btn-cta-greenleft.png) center top repeat-x;
+    margin: 0 0 0 5px;
+}
+
+.backToLivePlayButton:hover {
+    background: url(images/btn-cta-greenleft.png) center -30px repeat-x;
+    margin: 0 0 0 5px;
 }
 
 .dockLayoutPanel div[style="position: absolute; overflow: hidden; left: 0px; right: 0px; bottom: 0px; height: 90px;"] {
