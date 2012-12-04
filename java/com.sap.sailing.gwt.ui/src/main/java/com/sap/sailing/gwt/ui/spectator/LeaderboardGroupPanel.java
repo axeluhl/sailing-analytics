@@ -175,6 +175,8 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
             mainPanel.add(leaderboardGroupDescriptionLabel);
 
             DockPanel labelAndLegendPanel = new DockPanel();
+            labelAndLegendPanel.setWidth("100%");
+            labelAndLegendPanel.setVerticalAlignment(DockPanel.ALIGN_MIDDLE);
             Label leaderboardsTableLabel = new Label(stringMessages.leaderboards());
             leaderboardsTableLabel.setStyleName(STYLE_NAME_PREFIX + "LeaderboardsTableLabel");
             labelAndLegendPanel.add(leaderboardsTableLabel, DockPanel.WEST);
@@ -233,6 +235,7 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
         
         LeaderboardGroupFullTableResources tableResources = GWT.create(LeaderboardGroupFullTableResources.class);
         CellTable<StrippedLeaderboardDTO> leaderboardsTable = new CellTable<StrippedLeaderboardDTO>(10000, tableResources);
+        leaderboardsTable.setWidth("100%");
         leaderboardsTable.setSelectionModel(new NoSelectionModel<StrippedLeaderboardDTO>());
         leaderboardsTable.addColumn(leaderboardNameColumn, stringMessages.regatta());
         leaderboardsTable.addColumn(overviewColumn, "");
