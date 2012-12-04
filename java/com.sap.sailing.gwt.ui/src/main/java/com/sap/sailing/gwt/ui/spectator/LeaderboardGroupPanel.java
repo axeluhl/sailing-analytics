@@ -303,7 +303,7 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
     }
 
     // TODO Bug 1089: this method is in preparation of a solution to bug 1089
-    private SafeHtml ess40LeaderboardRacesToHtml(StrippedLeaderboardDTO leaderboard) {
+    private SafeHtml leaderboardRacesToHtmlDayByDay(StrippedLeaderboardDTO leaderboard) {
         SafeHtmlBuilder b = new SafeHtmlBuilder();
         if (!leaderboard.isRegattaLeaderboard) {
             FleetDTO defaultFleet = new FleetDTO("Default", 0, null);
