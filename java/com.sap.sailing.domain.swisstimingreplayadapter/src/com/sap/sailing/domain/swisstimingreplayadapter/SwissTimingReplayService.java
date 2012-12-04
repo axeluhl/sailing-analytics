@@ -88,7 +88,7 @@ public class SwissTimingReplayService {
             short messageLength = data.readShort();
             
             if (messageLength > 0) {
-                short payloadSize = (short) (messageLength - 5); //
+                short payloadSize = (short) (messageLength - 5); //payload is message minus STX, MIC, message length and ETX/EOT --> = 5 byte 
                 
                 switch (messageIdentificationCode) {
                 case MessageIdentificationCodes.MIC_00_Reference_Timestamp:
@@ -257,7 +257,7 @@ public class SwissTimingReplayService {
           if (endByte == EOT) {
               replayListener.eot();
           } else if (endByte == ETX) {
-              
+              //observe whether ETX is interesting for anybody. 
           } else {
               replayListener.illegalState("Premature end of data section.");
           }          
@@ -268,10 +268,16 @@ public class SwissTimingReplayService {
     }
 
     private static int read3ByteInt(DataInputStream data) throws IOException {
-        int result = data.readByte()  << 16;
-        result = result + data.readByte()  << 8;
-        result = result + data.readByte();
-        return 0;
+        byte highByte = data.readByte(); 
+        byte midByte = data.readByte(); 
+        byte lowByte = data.readByte();
+        
+        //turn signed to unsigned, then shift left
+        int highInt = (highByte & 0xFF) << 16;
+        int midInt = (midByte & 0xFF) << 8;
+        int lowInt = lowByte & 0xFF;
+        
+        return highInt | midInt | lowInt;
     }
 
     private static String readString(DataInputStream data, int length) throws IOException {
