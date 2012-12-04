@@ -196,7 +196,7 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
                         + "&leaderboardGroupName=" + leaderboardGroup.name + "&root=" + root
                         + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""));
                 Anchor overallStandingsLink = new Anchor(stringMessages.overallStandings(), true, link);
-                overallStandingsLink.setStyleName(STYLE_ACTIVE_BUTTON);
+                overallStandingsLink.setStyleName(STYLE_ACTIVE_LEADERBOARD);
                 overallStandingsLink.addStyleName("overallStandings");
                 mainPanel.add(overallStandingsLink);
             }
