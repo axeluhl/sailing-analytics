@@ -79,12 +79,14 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
     private static final String STYLE_INACTIVE_RACE = STYLE_NAME_PREFIX + "InactiveRace";
     private static final String STYLE_ACTIVE_RACE = STYLE_NAME_PREFIX + "ActiveRace";
     private static final String STYLE_LIVE_RACE = STYLE_NAME_PREFIX + "LiveRace";
-    private static final String STYLE_ACTIVE_BUTTON = STYLE_NAME_PREFIX + "ActiveButton";
+    //private static final String STYLE_ACTIVE_BUTTON = STYLE_NAME_PREFIX + "ActiveButton";
     private static final String STYLE_ACTIVE_LEADERBOARD = STYLE_NAME_PREFIX + "ActiveLeaderboard";
     private static final String STYLE_LEGEND = STYLE_NAME_PREFIX + "Legend";
     private static final String STYLE_TABLE_TEXT = STYLE_NAME_PREFIX + "TableText";
     private static final String STYLE_COLORBOX = STYLE_NAME_PREFIX + "ColorBox";
     private static final String STYLE_BOATCLASS = STYLE_NAME_PREFIX + "BoatClass";
+    private static final String STYLE_LEGEND_LIVE = STYLE_NAME_PREFIX + "LegendLive";
+    private static final String STYLE_LEGEND_TRACKED = STYLE_NAME_PREFIX + "LegendTracked";
     
     private final SailingServiceAsync sailingService;
     private final StringMessages stringMessages;
@@ -196,7 +198,7 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
                         + "&leaderboardGroupName=" + leaderboardGroup.name + "&root=" + root
                         + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""));
                 Anchor overallStandingsLink = new Anchor(stringMessages.overallStandings(), true, link);
-                overallStandingsLink.setStyleName(STYLE_ACTIVE_BUTTON);
+                overallStandingsLink.setStyleName(STYLE_ACTIVE_LEADERBOARD);
                 overallStandingsLink.addStyleName("overallStandings");
                 mainPanel.add(overallStandingsLink);
             }
@@ -274,11 +276,11 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
         legendPanel.add(inactiveRace);
 
         Label activeRace = new Label(stringMessages.tracked());
-        activeRace.setStyleName(STYLE_ACTIVE_RACE);
+        activeRace.setStyleName(STYLE_LEGEND_TRACKED);
         legendPanel.add(activeRace);
         
         Label liveRace = new Label(stringMessages.live());
-        liveRace.setStyleName(STYLE_LIVE_RACE);
+        liveRace.setStyleName(STYLE_LEGEND_LIVE);
         legendPanel.add(liveRace);
         return legendPanel;
     }

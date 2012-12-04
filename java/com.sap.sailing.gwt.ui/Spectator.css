@@ -213,7 +213,7 @@ input.magnifier {
 	-webkit-border-radius: 4px;
 }
 
-.leaderboardGroupPanel-ActiveRace, .leaderboardGroupPanel-InactiveRace {
+.leaderboardGroupPanel-ActiveRace, .leaderboardGroupPanel-InactiveRace, .leaderboardGroupPanel-LegendTracked {
 	padding: 5px 8px;
 	display: block;
 	float: left;
@@ -228,7 +228,7 @@ input.magnifier {
   	font-family: 'UbuntuBold', Arial, Verdana, sans-serif;
 }
 
-.leaderboardGroupPanel-LiveRace {
+.leaderboardGroupPanel-LiveRace, .leaderboardGroupPanel-LegendLive {
 	padding: 5px 8px;
 	display: block;
 	float: left;
