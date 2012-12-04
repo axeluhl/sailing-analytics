@@ -79,7 +79,6 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
     private static final String STYLE_INACTIVE_RACE = STYLE_NAME_PREFIX + "InactiveRace";
     private static final String STYLE_ACTIVE_RACE = STYLE_NAME_PREFIX + "ActiveRace";
     private static final String STYLE_LIVE_RACE = STYLE_NAME_PREFIX + "LiveRace";
-    //private static final String STYLE_ACTIVE_BUTTON = STYLE_NAME_PREFIX + "ActiveButton";
     private static final String STYLE_ACTIVE_LEADERBOARD = STYLE_NAME_PREFIX + "ActiveLeaderboard";
     private static final String STYLE_LEGEND = STYLE_NAME_PREFIX + "Legend";
     private static final String STYLE_TABLE_TEXT = STYLE_NAME_PREFIX + "TableText";
