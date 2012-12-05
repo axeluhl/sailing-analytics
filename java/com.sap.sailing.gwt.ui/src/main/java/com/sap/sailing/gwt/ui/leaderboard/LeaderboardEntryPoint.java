@@ -298,6 +298,7 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
         String link = URLFactory.INSTANCE.encode("/gwt/Leaderboard.html?name=" + leaderboardName
                 + (settings.isShowRaceDetails() ? "&"+PARAM_SHOW_RACE_DETAILS+"=true" : "")
                 + (settings.isEmbedded() ? "&"+PARAM_EMBEDDED+"=true" : "")
+                + (settings.getLeaderboardSettings().isShowOverallLeaderboardsOnSamePage() ? "&"+PARAM_SHOW_OVERALL_LEADERBOARDS_ON_SAME_PAGE+"=true" : "")
                 + (settings.getLeaderboardSettings().getDelayInMilliseconds() == null &&
                    settings.getLeaderboardSettings().getDelayInMilliseconds() != 0 ? "" :
                     "&"+PARAM_DELAY_TO_LIVE_MILLIS+"="+settings.getLeaderboardSettings().getDelayInMilliseconds())
