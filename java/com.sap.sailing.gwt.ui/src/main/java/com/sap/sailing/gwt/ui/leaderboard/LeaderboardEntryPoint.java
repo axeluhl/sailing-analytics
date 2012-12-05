@@ -46,6 +46,7 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
     private static final String PARAM_AUTO_EXPAND_LAST_RACE_COLUMN = "autoExpandLastRaceColumn";
     private static final String PARAM_REGATTA_NAME = "regattaName";
     private static final String PARAM_REFRESH_INTERVAL_MILLIS = "refreshIntervalMillis";
+    private static final String PARAM_SHOW_OVERALL_LEADERBOARDS_ON_SAME_PAGE = "showOverallLeaderboardsOnSamePage";
     private static final String PARAM_DELAY_TO_LIVE_MILLIS = "delayToLiveMillis";
     
     /**
@@ -153,6 +154,9 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
         } else {
             numberOfLastRacesToShow = null;
         }
+        boolean showOverallLeaderboardsOnSamePage = parameterMap.containsKey(PARAM_SHOW_OVERALL_LEADERBOARDS_ON_SAME_PAGE) ?
+                Boolean.valueOf(parameterMap.get(PARAM_SHOW_OVERALL_LEADERBOARDS_ON_SAME_PAGE).get(0)) :
+                    false;
         if (parameterMap.containsKey(PARAM_RACE_NAME) || parameterMap.containsKey(PARAM_RACE_DETAIL) ||
                 parameterMap.containsKey(PARAM_LEG_DETAIL) || parameterMap.containsKey(PARAM_MANEUVER_DETAIL) ||
                 parameterMap.containsKey(PARAM_OVERALL_DETAIL)) {
@@ -171,12 +175,13 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
                             /* sort by column */ (namesOfRacesToShow != null && !namesOfRacesToShow.isEmpty()) ?
                                             namesOfRacesToShow.get(0) : null, /* ascending */ true,
                                     /* updateUponPlayStateChange */ raceDetails.isEmpty() && legDetails.isEmpty(),
-                                    raceColumnSelectionStrategy);
+                                    raceColumnSelectionStrategy, showOverallLeaderboardsOnSamePage);
         } else {
             final List<DetailType> overallDetails = Collections.emptyList();
-            result = LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(null, null, /* overallDetails */
-                    overallDetails, null,
-                    /* autoExpandFirstRace */ false, refreshIntervalMillis, numberOfLastRacesToShow, raceColumnSelectionStrategy);
+            result = LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(null, null,
+                    /* overallDetails */ overallDetails, null,
+                    /* autoExpandFirstRace */false, refreshIntervalMillis, numberOfLastRacesToShow,
+                    raceColumnSelectionStrategy, showOverallLeaderboardsOnSamePage);
         }
         return result;
     }

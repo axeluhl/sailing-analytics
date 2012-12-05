@@ -167,6 +167,8 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     private boolean autoExpandPreSelectedRace;
     
     private boolean autoExpandLastRaceColumn;
+    
+    private boolean showOverallLeaderboardsOnSamePage;
 
     /**
      * Remembers whether the auto-expand of the pre-selected race (see {@link #autoExpandPreSelectedRace}) or last
@@ -390,6 +392,22 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                 getLeaderboardTable().sortColumn(raceColumnByRaceName, /* ascending */true);
             }
         }
+        if (newSettings.isShowOverallLeaderboardsOnSamePage() != showOverallLeaderboardsOnSamePage) {
+            showOverallLeaderboardsOnSamePage = newSettings.isShowOverallLeaderboardsOnSamePage();
+            if (showOverallLeaderboardsOnSamePage) {
+                showOverallLeaderboards();
+            } else {
+                hideOverallLeaderboards();
+            }
+        }
+    }
+
+    private void showOverallLeaderboards() {
+        // TODO Auto-generated method stub
+    }
+
+    private void hideOverallLeaderboards() {
+        // TODO Auto-generated method stub
     }
 
     private void setRaceColumnSelectionToLastNStrategy(final Integer numberOfLastRacesToShow) {
@@ -1133,6 +1151,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         this.selectedOverallDetailColumns = new ArrayList<DetailType>();
         this.raceTimesInfoProvider = optionalRaceTimesInfoProvider;
         this.selectedManeuverDetails = new ArrayList<DetailType>();
+        this.showOverallLeaderboardsOnSamePage = settings.isShowOverallLeaderboardsOnSamePage();
         overallDetailColumnMap = createOverallDetailColumnMap();
         settingsUpdatedExplicitly = !settings.updateUponPlayStateChange();
         if (settings.getLegDetailsToShow() != null) {
@@ -2076,7 +2095,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                             : preSelectedRace.getRaceName(),
                     /* don't change nameOfRaceColumnToShow */null,
                     /* set nameOfRaceToShow if race was pre-selected */preSelectedRace == null ? null : preSelectedRace
-                            .getRaceName(), getRaceColumnSelection()));
+                            .getRaceName(), getRaceColumnSelection(), showOverallLeaderboardsOnSamePage));
         }
         currentlyHandlingPlayStateChange = false;
         oldPlayMode = playMode;
@@ -2129,7 +2148,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                 Collections.unmodifiableList(selectedLegDetails), Collections.unmodifiableList(selectedRaceDetails),
                 Collections.unmodifiableList(selectedOverallDetailColumns), /* All races to select */ leaderboard.getRaceList(),
                 raceColumnSelection.getSelectedRaceColumnsOrderedAsInLeaderboard(leaderboard), raceColumnSelection, autoExpandPreSelectedRace,
-                timer.getRefreshInterval(), timer.getLivePlayDelayInMillis(), stringMessages);
+                showOverallLeaderboardsOnSamePage, timer.getRefreshInterval(), timer.getLivePlayDelayInMillis(), stringMessages);
     }
 
     @Override

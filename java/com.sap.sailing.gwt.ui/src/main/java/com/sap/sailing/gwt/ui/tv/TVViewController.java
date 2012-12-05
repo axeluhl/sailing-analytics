@@ -72,7 +72,8 @@ public class TVViewController implements RaceTimesInfoProviderListener {
         
         showWindChart = false;
         leaderboard = null;
-        leaderboardSettings = LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(null, null, null, /* autoExpandFirstRace */ false); 
+        leaderboardSettings = LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(null, null, null, /* autoExpandFirstRace */ false,
+                /* showMetaLeaderboardsOnSamePage */ false); 
         
         timer = new Timer(PlayModes.Live, /* delayBetweenAutoAdvancesInMilliseconds */1000l);
         timer.setLivePlayDelayInMillis(delayToLiveInMillis);
