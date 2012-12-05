@@ -57,6 +57,7 @@ import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
 import com.sap.sailing.gwt.ui.actions.GetLeaderboardByNameAction;
 import com.sap.sailing.gwt.ui.client.Collator;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
+import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
@@ -448,7 +449,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                             getSailingService(), asyncActionsExecutor, LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(
                                   /* namesOfRaceColumnsToShow */ null, /* namesOfRacesToShow */ null, /* nameOfRaceToSort */ null,
                                   /* autoExpandPreSelectedRace */ false, /* showOverallLeaderboardsOnSamePage */ false),
-                                  /* preSelectedRace */ null, competitorSelectionProvider,
+                                  /* preSelectedRace */ null, new CompetitorSelectionModel(/* hasMultiSelection */ true),
                             timer, overallLeaderboardName, errorReporter, stringMessages, userAgent, showRaceDetails,
                             /* optionalRaceTimesInfoProvider */ null, /* autoExpandLastRaceColumn */ false);
                     overallLeaderboardPanels.add(overallLeaderboardPanel);
@@ -1650,7 +1651,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             scoreCorrectionCommentLabel.setText(leaderboard.getComment() != null ? leaderboard.getComment() : "");
             if (leaderboard.getTimePointOfLastCorrectionsValidity() != null) {
                 Date lastCorrectionDate = leaderboard.getTimePointOfLastCorrectionsValidity();
-                String lastUpdate = dateFormatter.format(lastCorrectionDate) + " "
+                String lastUpdate = dateFormatter.format(lastCorrectionDate) + ", "
                         + timeFormatter.format(lastCorrectionDate);
                 scoreCorrectionLastUpdateTimeLabel.setText(stringMessages.lastScoreUpdate() + ": " + lastUpdate);
             } else {
