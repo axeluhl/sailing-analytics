@@ -92,15 +92,15 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
         if (!embedded) {
             // Hack to shorten the leaderboardName in case of overall leaderboards
             String leaderboardDisplayName = Window.Location.getParameter("displayName");
-            if(leaderboardDisplayName == null || leaderboardDisplayName.isEmpty()) {
+            if (leaderboardDisplayName == null || leaderboardDisplayName.isEmpty()) {
                 leaderboardDisplayName = leaderboardName;
             }
-            logoAndTitlePanel = new LogoAndTitlePanel(leaderboardGroupName, leaderboardDisplayName, stringMessages);
+            logoAndTitlePanel = new LogoAndTitlePanel(leaderboardGroupName, leaderboardDisplayName, stringMessages, isSmallWidth());
             logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
-            
-            FlowPanel globalNavigationPanel = new GlobalNavigationPanel(stringMessages, true, null, leaderboardGroupName);
-            logoAndTitlePanel.add(globalNavigationPanel);
-
+            if (!isSmallWidth()) {
+                FlowPanel globalNavigationPanel = new GlobalNavigationPanel(stringMessages, true, null, leaderboardGroupName);
+                logoAndTitlePanel.add(globalNavigationPanel);
+            }
             mainPanel.addNorth(logoAndTitlePanel, 68);
         }
         ScrollPanel contentScrollPanel = new ScrollPanel();

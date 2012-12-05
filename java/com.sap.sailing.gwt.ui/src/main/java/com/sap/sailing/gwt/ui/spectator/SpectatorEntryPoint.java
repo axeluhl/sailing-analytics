@@ -56,10 +56,8 @@ public class SpectatorEntryPoint extends AbstractEntryPoint implements RegattaRe
                 && Window.Location.getParameter("embedded").equalsIgnoreCase("true");
         if (!embedded) {
             String title = groupName != null ? groupName : stringMessages.overview();
-            
-            LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(title, stringMessages);
+            LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(title, stringMessages, isSmallWidth());
             logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
-            
             FlowPanel globalNavigationPanel = new GlobalNavigationPanel(stringMessages, true, null, null);
             logoAndTitlePanel.add(globalNavigationPanel);
 

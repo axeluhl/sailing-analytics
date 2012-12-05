@@ -75,9 +75,14 @@ public abstract class AbstractEntryPoint implements EntryPoint, ErrorReporter {
             reportError(message);
         }
     }
+    
+    protected boolean isSmallWidth() {
+        int width = Window.getClientWidth();
+        return width <= 720;
+    }
 
     public void createErrorPage(String message) {
-        LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(stringMessages);
+        LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(stringMessages, isSmallWidth());
         logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
         RootPanel.get().add(logoAndTitlePanel);
         RootPanel.get().add(new Label(message));

@@ -9,42 +9,46 @@ public class LogoAndTitlePanel extends FlowPanel {
     protected Label titleLabel; 
     protected Label subTitleLabel;
 
-    public LogoAndTitlePanel(StringMessages stringConstants) {
-        this(null, null, stringConstants);
+    public LogoAndTitlePanel(StringMessages stringConstants, boolean isSmallWidth) {
+        this(null, null, stringConstants, isSmallWidth);
     }
 
-    public LogoAndTitlePanel(String title, StringMessages stringConstants) {
-        this(title, null, stringConstants);
+    public LogoAndTitlePanel(String title, StringMessages stringConstants, boolean isSmallWidth) {
+        this(title, null, stringConstants, isSmallWidth);
     }
 
-    public LogoAndTitlePanel(String title, String subTitle, StringMessages stringConstants) {
+    public LogoAndTitlePanel(String title, String subTitle, StringMessages stringConstants, boolean isSmallWidth) {
         Anchor sapLogo = new Anchor(new SafeHtmlBuilder().appendHtmlConstant(
                 "<img class=\"linkNoBorder\" src=\"/gwt/images/sap_66_transparent.png\"/>").toSafeHtml());
         sapLogo.setHref("http://www.sap.com");
         sapLogo.addStyleName("sapLogo");
         this.add(sapLogo);
-        
-        FlowPanel sailingAnalyticsLabelPanel = new FlowPanel();
-        Label sailingAnalyticsLabel = new Label(stringConstants.sapSailingAnalytics());
-        sailingAnalyticsLabelPanel.add(sailingAnalyticsLabel);
-        sailingAnalyticsLabelPanel.addStyleName("sailingAnalyticsLabelPanel");
-        sailingAnalyticsLabel.addStyleName("sailingAnalyticsLabel boldLabel");
-        this.add(sailingAnalyticsLabelPanel);
-        
-        if (title != null) {
-            FlowPanel subTitleLabelWrapper = new FlowPanel();
-            subTitleLabelWrapper.addStyleName("titleLabelWrapper");
+        if (!isSmallWidth) {
+            FlowPanel sailingAnalyticsLabelPanel = new FlowPanel();
+            Label sailingAnalyticsLabel = new Label(stringConstants.sapSailingAnalytics());
+            sailingAnalyticsLabelPanel.add(sailingAnalyticsLabel);
+            sailingAnalyticsLabelPanel.addStyleName("sailingAnalyticsLabelPanel");
+            sailingAnalyticsLabel.addStyleName("sailingAnalyticsLabel boldLabel");
+            this.add(sailingAnalyticsLabelPanel);
+        }
+        if (!isSmallWidth && title != null) {
+            FlowPanel titleLabelWrapper = new FlowPanel();
+            titleLabelWrapper.addStyleName("titleLabelWrapper");
             titleLabel = new Label(title);
             titleLabel.addStyleName("titleLabel");
-            subTitleLabelWrapper.add(titleLabel);
-            this.add(subTitleLabelWrapper);
+            titleLabelWrapper.add(titleLabel);
+            this.add(titleLabelWrapper);
         }
-        
         if (subTitle != null) {
-            FlowPanel subTitleLabelWrapper = new FlowPanel();
-            subTitleLabelWrapper.addStyleName("subTitleLabelWrapper");
             subTitleLabel = new Label(subTitle);
-            subTitleLabel.addStyleName("subTitleLabel");
+            FlowPanel subTitleLabelWrapper = new FlowPanel();
+            if (isSmallWidth) {
+                subTitleLabelWrapper.addStyleName("titleLabelWrapper");
+                subTitleLabel.addStyleName("titleLabelRight");
+            } else {
+                subTitleLabelWrapper.addStyleName("subTitleLabelWrapper");
+                subTitleLabel.addStyleName("subTitleLabel");
+            }
             subTitleLabelWrapper.add(subTitleLabel);
             this.add(subTitleLabelWrapper);
         }

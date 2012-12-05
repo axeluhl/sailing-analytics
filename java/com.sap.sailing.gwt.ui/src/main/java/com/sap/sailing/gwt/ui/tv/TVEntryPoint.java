@@ -58,7 +58,7 @@ public class TVEntryPoint extends AbstractEntryPoint {
             if(leaderboardDisplayName == null || leaderboardDisplayName.isEmpty()) {
                 leaderboardDisplayName = leaderboardName;
             }
-            logoAndTitlePanel = new LogoAndTitlePanel(leaderboardGroupName, leaderboardDisplayName, stringMessages);
+            logoAndTitlePanel = new LogoAndTitlePanel(leaderboardGroupName, leaderboardDisplayName, stringMessages, isSmallWidth());
             logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
             mainPanel.addNorth(logoAndTitlePanel, 68);
         }

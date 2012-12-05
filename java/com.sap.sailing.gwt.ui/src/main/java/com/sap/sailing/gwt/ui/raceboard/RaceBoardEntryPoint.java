@@ -172,12 +172,12 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
     }
 
     private FlowPanel createLogoAndTitlePanel(RaceBoardPanel raceBoardPanel) {
-        LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(regattaName, selectedRace.name, stringMessages);
+        LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(regattaName, selectedRace.name, stringMessages, isSmallWidth());
         logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
-
-        FlowPanel globalNavigationPanel = new GlobalNavigationPanel(stringMessages, true, leaderboardName, leaderboardGroupName);
-        logoAndTitlePanel.add(globalNavigationPanel);
-        
+        if (!isSmallWidth()) {
+            FlowPanel globalNavigationPanel = new GlobalNavigationPanel(stringMessages, true, leaderboardName, leaderboardGroupName);
+            logoAndTitlePanel.add(globalNavigationPanel);
+        }
         return logoAndTitlePanel;
     }
     
