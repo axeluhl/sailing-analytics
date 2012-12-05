@@ -162,6 +162,8 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
 
     protected final String TOTAL_COLUMN_STYLE;
 
+    public static final String LEADERBOARD_MARGIN_STYLE = "leaderboardMargin";
+
     private final Timer timer;
 
     private boolean autoExpandPreSelectedRace;
@@ -419,7 +421,9 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
 
     private void showOverallLeaderboards() {
         overallLeaderboardsPanel.clear();
-        overallLeaderboardsPanel.add(new Label(stringMessages.overallStandings()));
+        final Label overallStandingsLabel = new Label(stringMessages.overallStandings());
+        overallStandingsLabel.setStyleName("leaderboardHeading");
+        overallLeaderboardsPanel.add(overallStandingsLabel);
         updateOverallLeaderboardsAndAddToPanel();
     }
 
@@ -1282,7 +1286,6 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         contentPanel = new VerticalPanel();
         contentPanel.setStyleName("leaderboardContent");
         overallLeaderboardsPanel = new VerticalPanel();
-        overallLeaderboardsPanel.setStyleName("leaderboardContent");
         overallLeaderboardPanels = new ArrayList<LeaderboardPanel>();
         informationPanel = new FlowPanel();
         informationPanel.setStyleName("leaderboardInfo");

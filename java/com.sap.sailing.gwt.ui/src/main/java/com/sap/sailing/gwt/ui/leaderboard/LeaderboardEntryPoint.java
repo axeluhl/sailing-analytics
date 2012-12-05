@@ -118,6 +118,7 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
                         /* hasMultiSelection */true), timer, leaderboardName, LeaderboardEntryPoint.this,
                     stringMessages, userAgent, showRaceDetails, /* raceTimesInfoProvider */ null, Window.Location.getParameterMap().containsKey(PARAM_AUTO_EXPAND_LAST_RACE_COLUMN) ?
                             Boolean.valueOf(Window.Location.getParameterMap().get(PARAM_AUTO_EXPAND_LAST_RACE_COLUMN).get(0)) : false);
+        leaderboardPanel.addStyleName(LeaderboardPanel.LEADERBOARD_MARGIN_STYLE);
         contentScrollPanel.setWidget(leaderboardPanel);
 
         mainPanel.add(contentScrollPanel);
