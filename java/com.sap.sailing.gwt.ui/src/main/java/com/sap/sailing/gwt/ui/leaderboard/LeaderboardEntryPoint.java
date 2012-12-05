@@ -10,7 +10,6 @@ import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
-import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.RootPanel;
@@ -56,6 +55,7 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
     private static final String PARAM_NAME_LAST_N = "lastN";
     private String leaderboardName;
     private String leaderboardGroupName;
+    private GlobalNavigationPanel globalNavigationPanel;
     
     @Override
     public void onModuleLoad() {     
@@ -95,10 +95,20 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
             if (leaderboardDisplayName == null || leaderboardDisplayName.isEmpty()) {
                 leaderboardDisplayName = leaderboardName;
             }
-            logoAndTitlePanel = new LogoAndTitlePanel(leaderboardGroupName, leaderboardDisplayName, stringMessages, isSmallWidth());
+            globalNavigationPanel = new GlobalNavigationPanel(stringMessages, true, null, leaderboardGroupName);
+            logoAndTitlePanel = new LogoAndTitlePanel(leaderboardGroupName, leaderboardDisplayName, stringMessages, this) {
+                @Override
+                public void onResize() {
+                    super.onResize();
+                    if (isSmallWidth()) {
+                        remove(globalNavigationPanel);
+                    } else {
+                        add(globalNavigationPanel);
+                    }
+                }
+            };
             logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
             if (!isSmallWidth()) {
-                FlowPanel globalNavigationPanel = new GlobalNavigationPanel(stringMessages, true, null, leaderboardGroupName);
                 logoAndTitlePanel.add(globalNavigationPanel);
             }
             mainPanel.addNorth(logoAndTitlePanel, 68);

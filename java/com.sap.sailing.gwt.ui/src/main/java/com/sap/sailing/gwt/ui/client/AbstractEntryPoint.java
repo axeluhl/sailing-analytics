@@ -19,8 +19,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
-public abstract class AbstractEntryPoint implements EntryPoint, ErrorReporter {
-
+public abstract class AbstractEntryPoint implements EntryPoint, ErrorReporter, WindowSizeDetector {
     private DialogBox errorDialogBox;
     private HTML serverResponseLabel;
     private Button dialogCloseButton;
@@ -76,13 +75,14 @@ public abstract class AbstractEntryPoint implements EntryPoint, ErrorReporter {
         }
     }
     
-    protected boolean isSmallWidth() {
+    @Override
+    public boolean isSmallWidth() {
         int width = Window.getClientWidth();
         return width <= 720;
     }
 
     public void createErrorPage(String message) {
-        LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(stringMessages, isSmallWidth());
+        LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(stringMessages, this);
         logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
         RootPanel.get().add(logoAndTitlePanel);
         RootPanel.get().add(new Label(message));
