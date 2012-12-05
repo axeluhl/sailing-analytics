@@ -115,9 +115,8 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
         LeaderboardPanel leaderboardPanel = new LeaderboardPanel(sailingService, new AsyncActionsExecutor(),
                 leaderboardSettings,
                     preselectedRace, new CompetitorSelectionModel(
-                        /* hasMultiSelection */true), timer, leaderboardName, leaderboardGroupName,
-                    LeaderboardEntryPoint.this, stringMessages, userAgent, showRaceDetails, /* raceTimesInfoProvider */ null,
-                    Window.Location.getParameterMap().containsKey(PARAM_AUTO_EXPAND_LAST_RACE_COLUMN) ?
+                        /* hasMultiSelection */true), timer, leaderboardName, LeaderboardEntryPoint.this,
+                    stringMessages, userAgent, showRaceDetails, /* raceTimesInfoProvider */ null, Window.Location.getParameterMap().containsKey(PARAM_AUTO_EXPAND_LAST_RACE_COLUMN) ?
                             Boolean.valueOf(Window.Location.getParameterMap().get(PARAM_AUTO_EXPAND_LAST_RACE_COLUMN).get(0)) : false);
         contentScrollPanel.setWidget(leaderboardPanel);
 

@@ -441,4 +441,5 @@ public interface StringMessages extends Messages {
     String showRankChart();
     String overallLeaderboardSelection();
     String showOverallLeaderboardOnSamePage();
+    String errorTryingToObtainOverallLeaderboards(String message);
 }

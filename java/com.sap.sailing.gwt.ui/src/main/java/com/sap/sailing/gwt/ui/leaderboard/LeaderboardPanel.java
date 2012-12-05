@@ -193,6 +193,19 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     private final RaceIdentifier preSelectedRace;
 
     private final VerticalPanel contentPanel;
+    
+    /**
+     * Used to display one or more overall leaderboards if selected. See also
+     * {@link LeaderboardSettings#isShowOverallLeaderboardsOnSamePage()}. Always contained by the {@link #contentPanel} at the
+     * right position, but may be empty.
+     */
+    private final VerticalPanel overallLeaderboardsPanel;
+
+    /**
+     * The leaderboard panels displayed in {@link #overallLeaderboardsPanel}.
+     */
+    private final List<LeaderboardPanel> overallLeaderboardPanels;
+    
     private final HorizontalPanel refreshAndSettingsPanel;
 
     private final FlowPanel informationPanel;
@@ -248,6 +261,8 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
      * attribute when required the first time.
      */
     private RaceTimesInfoProvider raceTimesInfoProvider;
+
+    private final UserAgentDetails userAgent;
 
     private class SettingsClickHandler implements ClickHandler {
         private final StringMessages stringMessages;
@@ -403,11 +418,54 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     }
 
     private void showOverallLeaderboards() {
-        // TODO Auto-generated method stub
+        overallLeaderboardsPanel.clear();
+        overallLeaderboardsPanel.add(new Label(stringMessages.overallStandings()));
+        updateOverallLeaderboardsAndAddToPanel();
     }
 
+    /**
+     * Fetches from the server the list of overall ("meta") leaderboard descriptions in which this main leaderboard occurs and
+     * creates one {@link LeaderboardPanel} for each such overall leaderboard. Those panels are then added to
+     * {@link #overallLeaderboardPanels}, registered with the {@link #timer} for common timing with the main leaderboard panel,
+     * and the panels are made visible by adding them to the {@link #overallLeaderboardsPanel} panel.
+     */
+    private void updateOverallLeaderboardsAndAddToPanel() {
+        getSailingService().getOverallLeaderboardNamesContaining(leaderboardName, new AsyncCallback<List<String>>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                getErrorReporter().reportError(
+                        stringMessages.errorTryingToObtainOverallLeaderboards(caught.getMessage()));
+            }
+
+            @Override
+            public void onSuccess(List<String> overallLeaderboardNames) {
+                for (String overallLeaderboardName : overallLeaderboardNames) {
+                    LeaderboardPanel overallLeaderboardPanel = new LeaderboardPanel(
+                            getSailingService(), asyncActionsExecutor, LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(
+                                  /* namesOfRaceColumnsToShow */ null, /* namesOfRacesToShow */ null, /* nameOfRaceToSort */ null,
+                                  /* autoExpandPreSelectedRace */ false, /* showOverallLeaderboardsOnSamePage */ false),
+                                  /* preSelectedRace */ null, competitorSelectionProvider,
+                            timer, overallLeaderboardName, errorReporter, stringMessages, userAgent, showRaceDetails,
+                            /* optionalRaceTimesInfoProvider */ null, /* autoExpandLastRaceColumn */ false);
+                    overallLeaderboardPanels.add(overallLeaderboardPanel);
+                    overallLeaderboardsPanel.add(overallLeaderboardPanel);
+                }
+            }
+        });
+        
+    }
+
+    /**
+     * Clears the panel used to display the overall leaderboards, removes all overall leaderboard panels from their listener
+     * relationship with the {@link #timer} and then clears the {@link #overallLeaderboardPanels} list.
+     */
     private void hideOverallLeaderboards() {
-        // TODO Auto-generated method stub
+        overallLeaderboardsPanel.clear();
+        for (LeaderboardPanel overallLeaderboardPanel : overallLeaderboardPanels) {
+            timer.removeTimeListener(overallLeaderboardPanel);
+            timer.removePlayStateListener(overallLeaderboardPanel);
+        }
+        overallLeaderboardPanels.clear();
     }
 
     private void setRaceColumnSelectionToLastNStrategy(final Integer numberOfLastRacesToShow) {
@@ -1114,29 +1172,28 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
 
     public LeaderboardPanel(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
             LeaderboardSettings settings, CompetitorSelectionProvider competitorSelectionProvider,
-            String leaderboardName, String leaderboardGroupName, ErrorReporter errorReporter,
-            final StringMessages stringMessages, final UserAgentDetails userAgent, boolean showRaceDetails) {
+            String leaderboardName, ErrorReporter errorReporter, final StringMessages stringMessages,
+            final UserAgentDetails userAgent, boolean showRaceDetails) {
         this(sailingService, asyncActionsExecutor, settings, /* preSelectedRace */null, competitorSelectionProvider,
-                leaderboardName, leaderboardGroupName, errorReporter, stringMessages, userAgent, showRaceDetails);
+                leaderboardName, errorReporter, stringMessages, userAgent, showRaceDetails);
     }
 
     public LeaderboardPanel(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
             LeaderboardSettings settings, RaceIdentifier preSelectedRace,
             CompetitorSelectionProvider competitorSelectionProvider, String leaderboardName,
-            String leaderboardGroupName, ErrorReporter errorReporter, final StringMessages stringMessages,
-            final UserAgentDetails userAgent, boolean showRaceDetails) {
+            ErrorReporter errorReporter, final StringMessages stringMessages, final UserAgentDetails userAgent,
+            boolean showRaceDetails) {
         this(sailingService, asyncActionsExecutor, settings, preSelectedRace, competitorSelectionProvider, new Timer(
                 PlayModes.Replay, /* delayBetweenAutoAdvancesInMilliseconds */3000l), leaderboardName,
-                leaderboardGroupName, errorReporter, stringMessages, userAgent, showRaceDetails,
-                /* optionalRaceTimesInfoProvider */ null, /* autoExpandLastRaceColumn */ false);
+                errorReporter, stringMessages, userAgent, showRaceDetails, /* optionalRaceTimesInfoProvider */ null,
+                /* autoExpandLastRaceColumn */ false);
     }
 
     public LeaderboardPanel(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
             LeaderboardSettings settings, RaceIdentifier preSelectedRace,
             CompetitorSelectionProvider competitorSelectionProvider, Timer timer, String leaderboardName,
-            String leaderboardGroupName, ErrorReporter errorReporter, final StringMessages stringMessages,
-            final UserAgentDetails userAgent, boolean showRaceDetails, RaceTimesInfoProvider optionalRaceTimesInfoProvider,
-            boolean autoExpandLastRaceColumn) {
+            ErrorReporter errorReporter, final StringMessages stringMessages, final UserAgentDetails userAgent,
+            boolean showRaceDetails, RaceTimesInfoProvider optionalRaceTimesInfoProvider, boolean autoExpandLastRaceColumn) {
         this.showRaceDetails = showRaceDetails;
         this.sailingService = sailingService;
         this.asyncActionsExecutor = asyncActionsExecutor;
@@ -1197,6 +1254,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         leaderboardTable = new SortedCellTableWithStylableHeaders<LeaderboardRowDTO>(
         /* pageSize */10000, tableResources);
         getLeaderboardTable().setWidth("100%");
+        this.userAgent = userAgent;
         if (userAgent.isMobile() == UserAgentDetails.PlatformTypes.MOBILE) {
             leaderboardSelectionModel = new ToggleSelectionModel<LeaderboardRowDTO>();
         } else {
@@ -1223,6 +1281,9 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         }
         contentPanel = new VerticalPanel();
         contentPanel.setStyleName("leaderboardContent");
+        overallLeaderboardsPanel = new VerticalPanel();
+        overallLeaderboardsPanel.setStyleName("leaderboardContent");
+        overallLeaderboardPanels = new ArrayList<LeaderboardPanel>();
         informationPanel = new FlowPanel();
         informationPanel.setStyleName("leaderboardInfo");
         scoreCorrectionLastUpdateTimeLabel = new Label("");
@@ -1295,6 +1356,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             contentPanel.add(toolbarPanel);
         }
         contentPanel.add(getLeaderboardTable());
+        contentPanel.add(overallLeaderboardsPanel);
         setWidget(contentPanel);
         raceNameForDefaultSorting = settings.getNameOfRaceToSort();
     }

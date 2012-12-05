@@ -189,8 +189,8 @@ public class RaceBoardPanel extends FormPanel implements RegattaDisplayer, RaceS
                         new ExplicitRaceColumnSelectionWithPreselectedRace(selectedRaceIdentifier),
                         /* showOverallLeaderboardsOnSamePage */ false);
         return new LeaderboardPanel(sailingService, asyncActionsExecutor, leaderBoardSettings, selectedRaceIdentifier,
-                competitorSelectionModel, timer, leaderboardName, leaderboardGroupName, errorReporter, stringMessages,
-                userAgent, /* showRaceDetails */ true, raceTimesInfoProvider, /* autoExpandLastRaceColumn */ false);
+                competitorSelectionModel, timer, leaderboardName, errorReporter, stringMessages, userAgent,
+                /* showRaceDetails */ true, raceTimesInfoProvider, /* autoExpandLastRaceColumn */ false);
      }
 
     private <SettingsType> void addComponentToNavigationMenu(final ComponentViewer componentViewer,
