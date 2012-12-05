@@ -124,7 +124,7 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
                 .setMarginRight(65)
                 .setBorderColor(new Color("#CACACA"))
                 .setBackgroundColor(new Color("#EBEBEB"))
-                .setBorderWidth(1)
+                .setBorderWidth(0)
                 .setBorderRadius(0)
                 .setPlotBorderWidth(0)
                 .setCredits(new Credits().setEnabled(false))
@@ -317,16 +317,7 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
                     System.arraycopy(raceDataPointsToAdd, 0, newRaceDataPoints, 0, currentPointIndex);
                 }
 
-                if(timeRangeWithZoomProvider.isZoomed()) {
-                    Pair<Date, Date> timeZoom = timeRangeWithZoomProvider.getTimeZoom();
-                    resetMinMaxAndExtremesInterval(false);
-                    
-                    competitorDataSeries.setPoints(newRaceDataPoints, false);
-                    
-                    changeMinMaxAndExtremesInterval(timeZoom.getA(), timeZoom.getB(), false);
-                } else {
-                    competitorDataSeries.setPoints(newRaceDataPoints, false);
-                }
+                setSeriesPoints(competitorDataSeries, newRaceDataPoints);
 
                 // Adding the series if chart doesn't contain it
                 if (!chartSeries.contains(competitorDataSeries)) {
