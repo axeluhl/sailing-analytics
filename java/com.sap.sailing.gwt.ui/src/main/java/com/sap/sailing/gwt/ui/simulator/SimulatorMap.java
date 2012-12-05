@@ -136,6 +136,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
                 pathName = paths[index].name;
                 color = colorPalette.getColor(paths.length - 1 - index);
 
+                // TODO: "GPS Poly" has wrong wind information => fix douglas-peucker "approximate", or refer to "GPS Track"
                 if (pathName.equals("GPS Poly")) {
                     // pathPolyline = createPathPolyline(currentPath, simulatorSvc, mapw);
                     createPathPolyline(currentPath, errorReporter, simulatorSvc, mapw);
@@ -219,6 +220,9 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
                 }
                 if (windLineCanvasOverlay != null) {
                     windLineCanvasOverlay.setVisible(false);
+                }
+                if (windStreamletsCanvasOverlay != null) {
+                    windStreamletsCanvasOverlay.setVisible(false);
                 }
             }
 
