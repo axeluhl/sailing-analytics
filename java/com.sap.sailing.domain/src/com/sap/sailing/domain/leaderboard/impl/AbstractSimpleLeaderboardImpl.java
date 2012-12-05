@@ -385,8 +385,8 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
 
     @Override
     public Map<RaceColumn, List<Competitor>> getRankedCompetitorsFromBestToWorstAfterEachRaceColumn(TimePoint timePoint) throws NoWindException {
-        Map<RaceColumn, List<Competitor>> result = new HashMap<>();
-        List<RaceColumn> raceColumnsToConsider = new ArrayList<>();
+        Map<RaceColumn, List<Competitor>> result = new HashMap<RaceColumn, List<Competitor>>();
+        List<RaceColumn> raceColumnsToConsider = new ArrayList<RaceColumn>();
         for (RaceColumn raceColumn : getRaceColumns()) {
             raceColumnsToConsider.add(raceColumn);
             result.put(raceColumn, getCompetitorsFromBestToWorst(raceColumnsToConsider, timePoint));

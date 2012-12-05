@@ -655,7 +655,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
             TimePoint maneuverTimePoint, TimePoint timePointAfterManeuver) {
         final long EXCESS_TIME_BEFORE_MANEUVER_END_TO_SCAN_IN_MILLIS = getCompetitor().getBoat().getBoatClass().getApproximateManeuverDurationInMilliseconds();
         final long EXCESS_TIME_AFTER_MANEUVER_END_TO_SCAN_IN_MILLIS = 3*EXCESS_TIME_BEFORE_MANEUVER_END_TO_SCAN_IN_MILLIS;
-        List<GPSFixMoving> fixes = new ArrayList<>();
+        List<GPSFixMoving> fixes = new ArrayList<GPSFixMoving>();
         NavigableSet<GPSFixMoving> maxima = new ArrayListNavigableSet<GPSFixMoving>(new TimedComparator());
         NavigableSet<GPSFixMoving> minima = new ArrayListNavigableSet<GPSFixMoving>(new TimedComparator());
         GPSFixTrack<Competitor, GPSFixMoving> track = getTrackedRace().getTrack(getCompetitor());
