@@ -381,7 +381,6 @@ public class WindChart extends RaceChart implements Component<WindChartSettings>
                 newDirectionPoints = directionPoints;
                 newSpeedPoints = speedPoints;
             }
- 
             setSeriesPoints(directionSeries, newDirectionPoints);
             windSourceDirectionPoints.put(windSource, newDirectionPoints);
             if (windSource.getType().useSpeed()) {
