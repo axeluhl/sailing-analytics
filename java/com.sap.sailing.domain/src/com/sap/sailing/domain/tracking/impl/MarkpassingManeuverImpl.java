@@ -1,0 +1,43 @@
+package com.sap.sailing.domain.tracking.impl;
+
+import com.sap.sailing.domain.base.SpeedWithBearing;
+import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.common.Distance;
+import com.sap.sailing.domain.common.ManeuverType;
+import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.Tack;
+import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.tracking.MarkPassingManeuver;
+
+public class MarkpassingManeuverImpl extends ManeuverImpl implements MarkPassingManeuver {
+    private static final long serialVersionUID = 8935348908557191614L;
+    private final Waypoint waypointPassed;
+    private final Tack side;
+    
+    public MarkpassingManeuverImpl(ManeuverType type, Tack newTack, Position position, TimePoint timePoint,
+            SpeedWithBearing speedWithBearingBefore, SpeedWithBearing speedWithBearingAfter,
+            double directionChangeInDegrees, Distance maneuverLoss, Waypoint waypointPassed, Tack side) {
+        super(type, newTack, position, timePoint, speedWithBearingBefore, speedWithBearingAfter,
+                directionChangeInDegrees, maneuverLoss);
+        this.waypointPassed = waypointPassed;
+        this.side = side;
+    }
+
+    @Override
+    public Waypoint getWaypointPassed() {
+        return waypointPassed;
+    }
+
+    @Override
+    public Tack getSide() {
+        return side;
+    }
+    
+    @Override
+    public String toString() {
+        StringBuilder result = new StringBuilder(super.toString());
+        result.append(", passed waypoint "+getWaypointPassed()+" to "+getSide().name());
+        return result.toString();
+    }
+
+}
