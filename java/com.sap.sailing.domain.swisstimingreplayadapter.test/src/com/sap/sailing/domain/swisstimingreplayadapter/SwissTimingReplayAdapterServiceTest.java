@@ -48,4 +48,9 @@ public class SwissTimingReplayAdapterServiceTest {
         SwissTimingReplayService.readData(getClass().getResourceAsStream("/SAM002901.replay"), new SwissTimingReplayTestListener());
     }
 
+    @Test
+    public void testReadRaceData_SAM009904_20120731() throws Exception {
+        SwissTimingReplayService.readData(getClass().getResourceAsStream("/SAM009904.20120731.replay"), new SwissTimingReplayTestListener());
+    }
+
 }
