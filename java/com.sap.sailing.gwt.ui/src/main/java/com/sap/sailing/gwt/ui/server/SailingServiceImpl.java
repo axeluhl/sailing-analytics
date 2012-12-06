@@ -2254,7 +2254,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public void replaySwissTimingRace(RegattaIdentifier regattaIdentifier, SwissTimingReplayRaceDTO replayRaceDTO,
             boolean trackWind, boolean correctWindByDeclination, boolean simulateWithStartTimeNow) {
-        SwissTimingReplayService.loadRaceData(replayRaceDTO.link);
+//        SwissTimingReplayRaceTracker swissTimingReplayRaceTracker = new SwissTimingReplayRaceTracker();
+//        SwissTimingReplayService.loadRaceData(replayRaceDTO.link, swissTimingReplayRaceTracker);
         
     }
 
