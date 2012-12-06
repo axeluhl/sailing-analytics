@@ -96,12 +96,10 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
         dataSeriesByCompetitor = new HashMap<CompetitorDTO, Series>();
         markPassingSeriesByCompetitor = new HashMap<CompetitorDTO, Series>();
         setSize("100%", "100%");
-
         noCompetitorsSelectedLabel = new Label(stringMessages.selectAtLeastOneCompetitor() + ".");
         noCompetitorsSelectedLabel.setStyleName("abstractChartPanel-importantMessageOfChart");
-
+        createChart();
         setSelectedDetailType(detailType);
-
         competitorSelectionProvider.addCompetitorSelectionChangeListener(this);
         raceSelectionProvider.addRaceSelectionChangeListener(this);
     }
@@ -472,6 +470,10 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
         return this.selectedDetailType;
     }
 
+    private boolean hasReversedYAxis(DetailType detailType) {
+        return detailType == DetailType.WINDWARD_DISTANCE_TO_OVERALL_LEADER || detailType == DetailType.GAP_TO_LEADER_IN_SECONDS;
+    }
+    
     /**
      * Updates the {@link #selectedDetailType} field, clears the chart for the new <code>selectedDetailType</code> and
      * clears the {@link #chartData}.<br />
@@ -482,15 +484,20 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
     protected boolean setSelectedDetailType(DetailType newSelectedDetailType) {
         boolean hasDetailTypeChanged = newSelectedDetailType != this.selectedDetailType;
         if (hasDetailTypeChanged) {
+            boolean oldReversedYAxis = hasReversedYAxis(this.selectedDetailType);
             this.selectedDetailType = newSelectedDetailType;
-            
-            // There is a bug in the highcharts library which prevents to change the reverse property of the YAxis
-            // Because we need this functionality we need to recreate the chart each time the YAxis changes 
-            chart = createChart();
-
-            chart.setTitle(new ChartTitle().setText(DetailTypeFormatter.format(selectedDetailType, stringMessages)),
-                    null);
-
+            // TODO There is a bug in the highcharts library which prevents to change the reverse property of the YAxis
+            // Because we need this functionality we need to recreate the chart each time the YAxis changes
+            if (oldReversedYAxis != hasReversedYAxis(selectedDetailType)) {
+                chart = createChart();
+                if (isZoomed) {
+                    Pair<Date, Date> zoomRange = timeRangeWithZoomProvider.getTimeZoom();
+                    onTimeZoomChanged(zoomRange.getA(), zoomRange.getB());
+                } else {
+                    resetMinMaxAndExtremesInterval(/* redraw */ true);
+                }
+            }
+            chart.setTitle(new ChartTitle().setText(DetailTypeFormatter.format(selectedDetailType, stringMessages)), null);
             final String unit = getDetailTypeUnit();
             if (!compactChart) {
                 chart.getYAxis().setAxisTitleText(
@@ -498,12 +505,8 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
             } else {
                 chart.getYAxis().setAxisTitleText("[" + unit + "]");
             }
-            
-            chart.getYAxis()
-                    .setReversed(
-                            (selectedDetailType == DetailType.WINDWARD_DISTANCE_TO_OVERALL_LEADER || selectedDetailType == DetailType.GAP_TO_LEADER_IN_SECONDS) ? true
-                                    : false);
-
+            chart.getYAxis().setReversed(
+                    selectedDetailType == DetailType.WINDWARD_DISTANCE_TO_OVERALL_LEADER || selectedDetailType == DetailType.GAP_TO_LEADER_IN_SECONDS);
             final NumberFormat numberFormat = DetailTypeFormatter.getNumberFormat(selectedDetailType);
             chart.setToolTip(new ToolTip().setEnabled(true).setFormatter(new ToolTipFormatter() {
                 @Override
