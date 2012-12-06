@@ -15,57 +15,63 @@ public class PathPolylineUtils {
     public static final double FACTOR_KN2MPS = 0.514444;
     public static final double FACTOR_MPS2KN = 1.94384;
 
-
-    public static double degreesToRadians(final double noOfDegrees) {
-        return (noOfDegrees * FACTOR_DEG2RAD);
+    /**
+     * Converts degress to radians
+     */
+    public static double degreesToRadians(final double degrees) {
+        return (degrees * FACTOR_DEG2RAD);
     }
 
-    public static double radiansToDegrees(final double noOfRadians) {
-        return (noOfRadians * FACTOR_RAD2DEG);
+    /**
+     * Converts radians to degrees
+     */
+    public static double radiansToDegrees(final double radians) {
+        return (radians * FACTOR_RAD2DEG);
     }
 
+    /**
+     * Converts knots to meters per second
+     */
     public static double knotsToMetersPerSecond(final double knots) {
         return knots * FACTOR_KN2MPS;
     }
 
-    public static double metersPerSecondKnots(final double mps) {
-        return mps * FACTOR_MPS2KN;
+    /**
+     * Converts meters per second to knots
+     */
+    public static double metersPerSecondToKnots(final double metersPerSecond) {
+        return metersPerSecond * FACTOR_MPS2KN;
     }
 
-    public static SpeedWithBearingDTO computeAverageWindSpeed(final List<SimulatorWindDTO> windDTOs) {
-
-        final int count = windDTOs.size();
+    /**
+     * Computes the average value from the given list of SpeedWithBearing objects.
+     */
+    public static SpeedWithBearingDTO getAverage(final List<SimulatorWindDTO> windDTOs) {
 
         double sumOfProductOfSpeedAndCosBearing = 0.0;
         double sumOfProductOfSpeedAndSinBearing = 0.0;
         double windBearingRadians = 0.0;
 
         for (final SimulatorWindDTO windDTO : windDTOs) {
-
             windBearingRadians = degreesToRadians(windDTO.trueWindBearingDeg);
-
-            sumOfProductOfSpeedAndCosBearing += (windDTO.trueWindSpeedInKnots * Math.cos(windBearingRadians));
             sumOfProductOfSpeedAndSinBearing += (windDTO.trueWindSpeedInKnots * Math.sin(windBearingRadians));
+            sumOfProductOfSpeedAndCosBearing += (windDTO.trueWindSpeedInKnots * Math.cos(windBearingRadians));
         }
-
+        final int count = windDTOs.size();
         final double a = sumOfProductOfSpeedAndSinBearing / count;
         final double b = sumOfProductOfSpeedAndCosBearing / count;
-        final double c = radiansToDegrees(Math.atan(Math.abs(b / a)));
+        final double c = radiansToDegrees(Math.atan(a / b));
 
         double averageBearing = 0.0;
 
-        if (a > 0) {
+        if (a > 0 && b >= 0) {
             averageBearing = c;
-        } else if (a < 0) {
-            averageBearing = c - 180;
-        } else if (a == 0) {
-            if (b > 0) {
-                averageBearing = 180;
-            } else if (b < 0) {
-                averageBearing = -180;
-            } else {
-                // undefined
-            }
+        } else if (a < 0 && b >= 0) {
+            averageBearing = 360 + c;
+        } else if (a < 0 && b < 0) {
+            averageBearing = 180 + c;
+        } else if (a > 0 && b < 0) {
+            averageBearing = 180 - c;
         }
 
         final double averageSpeed = Math.sqrt(a * a + b * b);
@@ -73,32 +79,35 @@ public class PathPolylineUtils {
         return new SpeedWithBearingDTO(averageSpeed, averageBearing);
     }
 
-    public static SpeedWithBearingDTO computeMinMaxAverageWindSpeed(final List<SimulatorWindDTO> windDTOs) {
+    // public static SpeedWithBearingDTO getAverage_MinMax(final List<SimulatorWindDTO> windDTOs) {
+    //
+    // SimulatorWindDTO minWindDTO = windDTOs.get(0);
+    // SimulatorWindDTO maxWindDTO = windDTOs.get(0);
+    // SimulatorWindDTO currentWindDTO = null;
+    // final int count = windDTOs.size();
+    //
+    // for (int index = 1; index < count; index++) {
+    //
+    // currentWindDTO = windDTOs.get(index);
+    //
+    // if (currentWindDTO.trueWindSpeedInKnots < minWindDTO.trueWindSpeedInKnots) {
+    // minWindDTO = currentWindDTO;
+    // }
+    //
+    // if (currentWindDTO.trueWindSpeedInKnots > maxWindDTO.trueWindSpeedInKnots) {
+    // maxWindDTO = currentWindDTO;
+    // }
+    // }
+    //
+    // final double speedInKnots = ((minWindDTO.trueWindSpeedInKnots + maxWindDTO.trueWindSpeedInKnots) / 2);
+    // final double bearingInDegrees = ((minWindDTO.trueWindBearingDeg + maxWindDTO.trueWindBearingDeg) / 2);
+    //
+    // return new SpeedWithBearingDTO(speedInKnots, bearingInDegrees);
+    // }
 
-        SimulatorWindDTO minWindDTO = windDTOs.get(0);
-        SimulatorWindDTO maxWindDTO = windDTOs.get(0);
-        SimulatorWindDTO currentWindDTO = null;
-        final int count = windDTOs.size();
-
-        for (int index = 1; index < count; index++) {
-
-            currentWindDTO = windDTOs.get(index);
-
-            if (currentWindDTO.trueWindSpeedInKnots < minWindDTO.trueWindSpeedInKnots) {
-                minWindDTO = currentWindDTO;
-            }
-
-            if (currentWindDTO.trueWindSpeedInKnots > maxWindDTO.trueWindSpeedInKnots) {
-                maxWindDTO = currentWindDTO;
-            }
-        }
-
-        final double speedInKnots = ((minWindDTO.trueWindSpeedInKnots + maxWindDTO.trueWindSpeedInKnots) / 2);
-        final double bearingInDegrees = ((minWindDTO.trueWindBearingDeg + maxWindDTO.trueWindBearingDeg) / 2);
-
-        return new SpeedWithBearingDTO(speedInKnots, bearingInDegrees);
-    }
-
+    /**
+     * Gets an array of points from the start to the end with a certain step.
+     */
     public static List<LatLng> getIntermediatePoints(final LatLng startPoint, final LatLng endPoint, final double stepSizeMeters) {
         final List<LatLng> result = new ArrayList<LatLng>();
 
@@ -118,6 +127,10 @@ public class PathPolylineUtils {
         return result;
     }
 
+    /**
+     * For every segment of two points in the given array, it computes the intermediate points given the certain step
+     * size.
+     */
     public static LatLng[] getIntermediatePoints(final LatLng[] points, final double stepSizeMeters) {
 
         final int noOfPoints = points.length;

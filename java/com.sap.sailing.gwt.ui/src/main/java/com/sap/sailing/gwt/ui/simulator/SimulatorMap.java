@@ -140,18 +140,22 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
                 pathName = paths[index].name;
                 color = colorPalette.getColor(paths.length - 1 - index);
 
+                /****************************************/
                 if (pathName.equals("GPS Track")) {
                     gpsTrack = currentPath;
-                }
-                else if (pathName.equals("GPS Poly")) {
-                    gpsPoly = currentPath;
-                }
+                } else
+                    /****************************************/
+                    if (pathName.equals("GPS Poly")) {
+                        gpsPoly = currentPath;
+                        // createPathPolyline(gpsPoly.getMatrix());
+                    }
 
+                /****************************************/
                 if (firstTime && gpsTrack != null && gpsPoly != null) {
                     createPathPolyline(identifyPath(gpsTrack, gpsPoly));
                     firstTime = false;
                 }
-
+                /****************************************/
 
                 /* TODO Revisit for now creating a WindFieldDTO from the path */
                 final WindFieldDTO pathWindDTO = new WindFieldDTO();

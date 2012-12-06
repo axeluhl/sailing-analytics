@@ -27,10 +27,10 @@ import com.sap.sailing.gwt.ui.shared.racemap.TwoDSegment;
 import com.sap.sailing.gwt.ui.shared.racemap.TwoDVector;
 
 public class PathPolyline {
-    private static final boolean SHOULD_DRAW_DISTANCED_DASHLINES = true;
-    private static final boolean SHOULD_DRAW_BISECTOR_DASHLINES = true;
-    private static final boolean SHOULD_DRAW_VERTICAL_DASHLINES = true;
-    private static final boolean SHOULD_DRAW_SHADOW_DASHLINES = false;
+    private static final boolean DRAW_DISTANCED_DASHLINES = false;
+    private static final boolean DRAW_BISECTOR_DASHLINES = false;
+    private static final boolean DRAW_VERTICAL_DASHLINES = false;
+    private static final boolean DRAW_SHADOW_DASHLINES = false;
 
     public static final String DEFAULT_COLOR = "#8B0000";
     private static final int DEFAULT_WEIGHT = 3;
@@ -42,8 +42,7 @@ public class PathPolyline {
     private static final String DEFAULT_DASHLINE_BISECTOR_COLOR = "Green";
     private static final String DEFAULT_DASHLINE_VERTICAL_COLOR = "Blue";
 
-    // private static final double STEP_DURATION_MILLISECONDS = 1000;
-    private static final double STEP_SIZE_METERS = 5.0;
+    private static final double STEP_DURATION_MILLISECONDS = 1000;
     private static final boolean USE_ONLY_TURN_POINTS = false;
 
     private Polyline polyline;
@@ -70,9 +69,7 @@ public class PathPolyline {
 
     private SimulatorMap simulatorMap = null;
 
-    // private double stepSizeMeters = 5.0;
-
-    // private static Logger logger = Logger.getLogger(PathPolyline.class.getName());
+    private double stepSizeMeters = 0.0;
 
     public PathPolyline(final LatLng[] points, final int boatClassID, final ErrorReporter errorReporter, final List<SimulatorWindDTO> pathPoints,
             final SimulatorServiceAsync simulatorService, final MapWidget map, final SimulatorMap simulatorMap) {
@@ -195,8 +192,7 @@ public class PathPolyline {
         if (this.firstTime) {
 
             this.averageWindSpeed = this.getAverageWindSpeed();
-            // this.stepSizeMeters = PathPolylineUtils.knotsToMetersPerSecond(this.averageWindSpeed.speedInKnots) *
-            // (STEP_DURATION_MILLISECONDS / 1000);
+            this.stepSizeMeters = PathPolylineUtils.knotsToMetersPerSecond(this.averageWindSpeed.speedInKnots) * (STEP_DURATION_MILLISECONDS / 1000);
             this.firstTime = false;
         }
 
@@ -237,7 +233,7 @@ public class PathPolyline {
             }
             this.originAndHeads.get(distancedFromPoint).add(distancedPoint);
 
-            if (SHOULD_DRAW_DISTANCED_DASHLINES) {
+            if (DRAW_DISTANCED_DASHLINES) {
                 this.dashedLines.add(this.createPolyline(distancedFromPoint, distancedPoint, DEFAULT_DASHLINE_DISTANCED_COLOR, DEFAULT_DASHLINE_WEIGHT));
             }
         }
@@ -256,7 +252,7 @@ public class PathPolyline {
             }
             this.originAndHeads.get(distancedFromPoint).add(distancedPoint);
 
-            if (SHOULD_DRAW_DISTANCED_DASHLINES) {
+            if (DRAW_DISTANCED_DASHLINES) {
                 this.dashedLines.add(this.createPolyline(distancedFromPoint, distancedPoint, DEFAULT_DASHLINE_DISTANCED_COLOR, DEFAULT_DASHLINE_WEIGHT));
             }
         }
@@ -277,11 +273,11 @@ public class PathPolyline {
             rotated270Head = TwoDPoint.getDistancedPoint(origin, distance, rotated90Head);
             // rotated270Head = TwoDPoint.get270RotatedPoint(origin, bisectorHead);
 
-            if (SHOULD_DRAW_BISECTOR_DASHLINES) {
+            if (DRAW_BISECTOR_DASHLINES) {
                 this.dashedLines.add(this.createPolyline(origin, bisectorHead, DEFAULT_DASHLINE_BISECTOR_COLOR, DEFAULT_DASHLINE_WEIGHT));
             }
 
-            if (SHOULD_DRAW_VERTICAL_DASHLINES) {
+            if (DRAW_VERTICAL_DASHLINES) {
                 this.dashedLines.add(this.createPolyline(origin, rotated90Head, DEFAULT_DASHLINE_VERTICAL_COLOR, DEFAULT_DASHLINE_WEIGHT));
                 this.dashedLines.add(this.createPolyline(origin, rotated270Head, DEFAULT_DASHLINE_VERTICAL_COLOR, DEFAULT_DASHLINE_WEIGHT));
             }
@@ -291,7 +287,7 @@ public class PathPolyline {
             this.map.addOverlay(line);
         }
 
-        if (SHOULD_DRAW_SHADOW_DASHLINES) {
+        if (DRAW_SHADOW_DASHLINES) {
             if (this.shadowPolyline != null) {
                 this.map.removeOverlay(this.shadowPolyline);
             }
@@ -391,7 +387,7 @@ public class PathPolyline {
 
                 System.err.println("==================================================");
                 System.err.println("total distance = " + PathPolylineUtils.getTotalDistanceMeters(points) + " meters");
-                System.err.println("step size = " + STEP_SIZE_METERS + " meters");
+                System.err.println("step size = " + stepSizeMeters + " meters");
                 System.err.println("average wind speed = " + PathPolylineUtils.knotsToMetersPerSecond(averageWindSpeed.speedInKnots)
                         + " meters/second, with bearing of " + averageWindSpeed.bearingInDegrees + " degrees");
                 System.err.println("total time = " + (long) totalTime + " seconds!");
@@ -405,9 +401,7 @@ public class PathPolyline {
     }
 
     private SpeedWithBearingDTO getAverageWindSpeed() {
-
-        // PathPolylineUtils.computeMinMaxAverageWindSpeed(windDTOs)
-        return PathPolylineUtils.computeAverageWindSpeed(this.pathPoints);
+        return PathPolylineUtils.getAverage(this.pathPoints);
     }
 
     private RequestPolarDiagramDataDTO createRequestPolarDiagramDataDTO() {
@@ -419,7 +413,7 @@ public class PathPolyline {
                 positions.add(new PositionDTO(point.getLatitude(), point.getLongitude()));
             }
         } else {
-            for (final LatLng point : PathPolylineUtils.getIntermediatePoints(this.points, STEP_SIZE_METERS)) {
+            for (final LatLng point : PathPolylineUtils.getIntermediatePoints(this.points, this.stepSizeMeters)) {
                 positions.add(new PositionDTO(point.getLatitude(), point.getLongitude()));
             }
         }
