@@ -2830,4 +2830,22 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         }
         return result;
     }
+
+    @Override
+    public List<String> getOverallLeaderboardNamesContaining(String leaderboardName) {
+        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+        if (leaderboard == null) {
+            throw new IllegalArgumentException("Couldn't find leaderboard named "+leaderboardName);
+        }
+        List<String> result = new ArrayList<String>();
+        for (Map.Entry<String, Leaderboard> leaderboardEntry : getService().getLeaderboards().entrySet()) {
+            if (leaderboardEntry.getValue() instanceof MetaLeaderboard) {
+                MetaLeaderboard metaLeaderboard = (MetaLeaderboard) leaderboardEntry.getValue();
+                if (Util.contains(metaLeaderboard.getLeaderboards(), leaderboard)) {
+                    result.add(leaderboardEntry.getKey());
+                }
+            }
+        }
+        return result;
+    }
 }
