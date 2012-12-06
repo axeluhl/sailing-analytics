@@ -56,4 +56,10 @@ public class TimeRangeWithZoomModel extends TimeRangeModel implements TimeRangeW
     public boolean isZoomed() {
         return isTimeZoomed;
     }
+
+    @Override
+    public String toString() {
+        return "TimeRangeWithZoomModel [fromTime=" + fromTime + ", toTime=" + toTime + ", zoomStartTimepoint=" + zoomStartTimepoint + ", zoomEndTimepoint="
+                + zoomEndTimepoint + ", isTimeZoomed=" + isTimeZoomed + "]";
+    }
 }

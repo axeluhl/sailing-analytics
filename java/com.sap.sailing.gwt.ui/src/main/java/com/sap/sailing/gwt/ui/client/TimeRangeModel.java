@@ -57,4 +57,9 @@ public class TimeRangeModel implements TimeRangeProvider {
     public Date getToTime() {
         return toTime;
     }
+
+    @Override
+    public String toString() {
+        return "TimeRangeModel [fromTime=" + fromTime + ", toTime=" + toTime + "]";
+    }
 }

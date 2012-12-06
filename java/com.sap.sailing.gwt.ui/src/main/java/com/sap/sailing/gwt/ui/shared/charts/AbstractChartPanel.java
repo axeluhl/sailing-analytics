@@ -100,7 +100,6 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
         noCompetitorsSelectedLabel = new Label(stringMessages.selectAtLeastOneCompetitor() + ".");
         noCompetitorsSelectedLabel.setStyleName("abstractChartPanel-importantMessageOfChart");
 
-        chart = createChart();
         setSelectedDetailType(detailType);
 
         competitorSelectionProvider.addCompetitorSelectionChangeListener(this);
@@ -484,7 +483,10 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
         boolean hasDetailTypeChanged = newSelectedDetailType != this.selectedDetailType;
         if (hasDetailTypeChanged) {
             this.selectedDetailType = newSelectedDetailType;
-            clearChart();
+            
+            // There is a bug in the highcharts library which prevents to change the reverse property of the YAxis
+            // Because we need this functionality we need to recreate the chart each time the YAxis changes 
+            chart = createChart();
 
             chart.setTitle(new ChartTitle().setText(DetailTypeFormatter.format(selectedDetailType, stringMessages)),
                     null);
@@ -496,6 +498,7 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
             } else {
                 chart.getYAxis().setAxisTitleText("[" + unit + "]");
             }
+            
             chart.getYAxis()
                     .setReversed(
                             (selectedDetailType == DetailType.WINDWARD_DISTANCE_TO_OVERALL_LEADER || selectedDetailType == DetailType.GAP_TO_LEADER_IN_SECONDS) ? true
