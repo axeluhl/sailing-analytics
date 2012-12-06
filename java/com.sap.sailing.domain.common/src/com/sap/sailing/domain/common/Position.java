@@ -17,7 +17,7 @@ public interface Position extends Serializable {
     double getCentralAngleRad(Position p);
 
     Distance getDistance(Position p);
-    
+
     /**
      * The bearing from this position towards <code>p</code> on a great circle
      */
@@ -57,4 +57,9 @@ public interface Position extends Serializable {
      * no solution, and a <code>NaN</code> or exception will result.
      */
     Distance alongTrackDistance(Position p, Bearing bearing);
+
+    /**
+     * Returns true is the current position can be considered a turn comparing to the previous and the next one.
+     */
+    boolean isTurn(Position previousPoint, Position nextPoint);
 }
