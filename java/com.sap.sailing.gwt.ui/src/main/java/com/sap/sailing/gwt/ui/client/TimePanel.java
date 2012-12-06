@@ -33,8 +33,7 @@ import com.sap.sailing.gwt.ui.shared.controls.slider.TimeSlider;
 public class TimePanel<T extends TimePanelSettings> extends FormPanel implements Component<T>, TimeListener, TimeZoomChangeListener,
     TimeRangeChangeListener, PlayStateListener, RequiresResize {
     protected final Timer timer;
-    protected boolean isTimeZoomed;
-    protected final TimeRangeProvider timeRangeProvider;
+    protected final TimeRangeWithZoomProvider timeRangeProvider;
     
     private final IntegerBox playSpeedBox;
     private final Label timeDelayLabel;
@@ -83,11 +82,10 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
         }
     }
 
-    public TimePanel(Timer timer, TimeRangeProvider timeRangeProvider, StringMessages stringMessages) {
+    public TimePanel(Timer timer, TimeRangeWithZoomProvider timeRangeProvider, StringMessages stringMessages) {
         this.timer = timer;
         this.timeRangeProvider = timeRangeProvider;
         this.stringMessages = stringMessages;
-        isTimeZoomed = false;
         timer.addTimeListener(this);
         timer.addPlayStateListener(this);
         timeRangeProvider.addTimeRangeChangeListener(this);
@@ -285,30 +283,32 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
 
     @Override
     public void timeChanged(Date time) {
-        if (getFromTime() != null && getToTime() != null) {
-            // handle the case where time advances beyond slider's end.
-            if (time.after(getToTime())) {
-                switch (timer.getPlayMode()) {
-                case Live:
-                    Date newMaxTime = new Date(time.getTime());
-                    if (newMaxTime.getTime() - getToTime().getTime() < MINIMUM_AUTO_ADVANCE_TIME_IN_MS) {
-                        newMaxTime.setTime(getToTime().getTime() + MINIMUM_AUTO_ADVANCE_TIME_IN_MS); 
+        if(timeRangeProvider.isZoomed()) {
+        } else {
+            if (getFromTime() != null && getToTime() != null) {
+                // handle the case where time advances beyond slider's end.
+                if (time.after(getToTime())) {
+                    switch (timer.getPlayMode()) {
+                    case Live:
+                        Date newMaxTime = new Date(time.getTime());
+                        if (newMaxTime.getTime() - getToTime().getTime() < MINIMUM_AUTO_ADVANCE_TIME_IN_MS) {
+                            newMaxTime.setTime(getToTime().getTime() + MINIMUM_AUTO_ADVANCE_TIME_IN_MS); 
+                        }
+                        setMinMax(getFromTime(), newMaxTime, /* fireEvent */ false); // no event because we guarantee that time is between min/max
+                        break;
+                    case Replay:
+                        timer.stop();
+                        break;
                     }
-                    setMinMax(getFromTime(), newMaxTime, /* fireEvent */ false); // no event because we guarantee that time is between min/max
-                    break;
-                case Replay:
-                    timer.stop();
-                    break;
                 }
+                timeSlider.setCurrentValue(new Double(time.getTime()), false);
             }
-            long t = time.getTime();
-            timeSlider.setCurrentValue(new Double(t), false);
-            dateLabel.setText(dateFormatter.format(time));
-            if (lastReceivedDataTimepoint == null) {
-                timeLabel.setText(timeFormatter.format(time));
-            } else {
-                timeLabel.setText(timeFormatter.format(time) + " (" + timeFormatter.format(lastReceivedDataTimepoint) + ")");
-            }
+        }
+        dateLabel.setText(dateFormatter.format(time));
+        if (lastReceivedDataTimepoint == null) {
+            timeLabel.setText(timeFormatter.format(time));
+        } else {
+            timeLabel.setText(timeFormatter.format(time) + " (" + timeFormatter.format(lastReceivedDataTimepoint) + ")");
         }
     }
 
@@ -340,7 +340,9 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
             }
         }
         if (changed) {
-            timeRangeProvider.setTimeRange(min, max, this);
+            if(!timeRangeProvider.isZoomed()) {
+                timeRangeProvider.setTimeRange(min, max, this);
+            }
             
             int numSteps = timeSlider.getElement().getClientWidth();
             if (numSteps > 0) {
