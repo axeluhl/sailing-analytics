@@ -442,4 +442,5 @@ public interface StringMessages extends Messages {
     String overallLeaderboardSelection();
     String showOverallLeaderboardOnSamePage();
     String errorTryingToObtainOverallLeaderboards(String message);
+    String passedTo(String name);
 }

@@ -1977,7 +1977,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         }
         final Maneuver maneuver;
         if (maneuverType == ManeuverType.MARK_PASSING) {
-            maneuver = new MarkpassingManeuverImpl(maneuverType, tackAfterManeuver, maneuverPosition, maneuverTimePoint,
+            maneuver = new MarkPassingManeuverImpl(maneuverType, tackAfterManeuver, maneuverPosition, maneuverTimePoint,
                     speedWithBearingOnApproximationAtBeginning, speedWithBearingOnApproximationAtEnd,
                     totalCourseChangeInDegrees, maneuverLoss, waypointPassed, sideToWhichWaypointWasPassed);
         } else {
