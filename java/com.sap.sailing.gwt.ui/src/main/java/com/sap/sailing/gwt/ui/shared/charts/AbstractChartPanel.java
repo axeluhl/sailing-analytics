@@ -313,9 +313,7 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
                     newRaceDataPoints = new Point[currentPointIndex];
                     System.arraycopy(raceDataPointsToAdd, 0, newRaceDataPoints, 0, currentPointIndex);
                 }
-
                 setSeriesPoints(competitorDataSeries, newRaceDataPoints);
-
                 // Adding the series if chart doesn't contain it
                 if (!chartSeries.contains(competitorDataSeries)) {
                     chart.addSeries(competitorDataSeries);
@@ -323,14 +321,12 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
                 }
             }
         }
-        
-        if(timeOfEarliestRequestInMillis == null || timeOfEarliestRequestInMillis > chartData.getRequestedFromTime().getTime()) {
+        if (timeOfEarliestRequestInMillis == null || timeOfEarliestRequestInMillis > chartData.getRequestedFromTime().getTime()) {
             timeOfEarliestRequestInMillis = chartData.getRequestedFromTime().getTime();
         }
-        if(timeOfLatestRequestInMillis == null || timeOfLatestRequestInMillis < chartData.getRequestedToTime().getTime()) {
+        if (timeOfLatestRequestInMillis == null || timeOfLatestRequestInMillis < chartData.getRequestedToTime().getTime()) {
             timeOfLatestRequestInMillis = chartData.getRequestedToTime().getTime();
         }
-
         chart.redraw();
     }
 

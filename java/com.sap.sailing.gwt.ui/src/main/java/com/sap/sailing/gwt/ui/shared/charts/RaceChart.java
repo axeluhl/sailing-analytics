@@ -130,9 +130,9 @@ public abstract class RaceChart extends SimplePanel implements RaceSelectionChan
     protected void setSeriesPoints(Series series, Point[] points) {
         if (timeRangeWithZoomProvider.isZoomed()) {
             Pair<Date, Date> timeZoom = timeRangeWithZoomProvider.getTimeZoom();
-            resetMinMaxAndExtremesInterval(false);
+            resetMinMaxAndExtremesInterval(/* redraw */ false);
             series.setPoints(points, false);
-            changeMinMaxAndExtremesInterval(timeZoom.getA(), timeZoom.getB(), false);
+            changeMinMaxAndExtremesInterval(timeZoom.getA(), timeZoom.getB(), /* redraw */ false);
         } else {
             series.setPoints(points, false);
         }
