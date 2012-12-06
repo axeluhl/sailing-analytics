@@ -3,6 +3,7 @@ package com.sap.sailing.simulator.impl;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashSet;
+import java.util.Map.Entry;
 import java.util.NavigableMap;
 import java.util.Set;
 import java.util.TreeMap;
@@ -19,7 +20,12 @@ import com.sap.sailing.simulator.PolarDiagram;
 public class PolarDiagramBase implements PolarDiagram {
 
     // the current speed and direction of the wind
+    protected SpeedWithBearing windprev = new KnotSpeedWithBearingImpl(6, new DegreeBearingImpl(180));
     protected SpeedWithBearing wind = new KnotSpeedWithBearingImpl(6, new DegreeBearingImpl(180));
+    protected SpeedWithBearing current = null; //new KnotSpeedWithBearingImpl(0, new DegreeBearingImpl(180));
+    
+    protected NavigableMap<Bearing, SpeedWithBearing> polarChart;
+    protected NavigableMap<Bearing, SpeedWithBearing> polarChartOG;
     // private static Logger logger = Logger.getLogger("com.sap.sailing");
     // the preferred direction of movement
     // is used by optimalDirectionsUpwind() and optimialDirectionsDownwind()
@@ -31,6 +37,7 @@ public class PolarDiagramBase implements PolarDiagram {
     protected NavigableMap<Speed, Speed> beatSOG;
     protected NavigableMap<Speed, Speed> gybeSOG;
 
+    
     public NavigableMap<Speed, NavigableMap<Bearing, Speed>> getSpeedTable() {
         return this.speedTable;
     }
@@ -68,7 +75,7 @@ public class PolarDiagramBase implements PolarDiagram {
         gybeAngles = gybes;
         beatSOG = beatSOGs;
         gybeSOG = gybeSOGs;
-
+        
         for (Speed s : speedTable.keySet()) {
 
             if (beatAngles.containsKey(s) && !speedTable.get(s).containsKey(beatAngles.get(s)))
@@ -88,11 +95,147 @@ public class PolarDiagramBase implements PolarDiagram {
 
     @Override
     public void setWind(SpeedWithBearing newWind) {
-        wind = newWind;
+        
+        if ((windprev.getKnots() != newWind.getKnots())||(windprev.getBearing().getDegrees() != newWind.getBearing().getDegrees())) {
+            windprev = newWind;
+            if ((current == null)||(current.getKnots() == 0.0)) {
+                wind = newWind;
+                polarChart = null;
+                polarChartOG = null;
+            } else {
+                wind = getApparentWindFromCurrent(newWind);
+                transformPD();
+            }
+        }
+    }
+
+    public void transformPD() {
+            
+        if (current != null) {
+                
+            polarChart = new TreeMap<Bearing, SpeedWithBearing>(bearingComparator);
+            polarChartOG = new TreeMap<Bearing, SpeedWithBearing>(bearingComparator);
+            for (Double bearAngle = 0.0; bearAngle < 360.0; bearAngle += 5.0) {
+                
+                SpeedWithBearing rotSpeed = new KnotSpeedWithBearingImpl(this.getSpeedAtBearingRaw(new DegreeBearingImpl(bearAngle)).getKnots(), new DegreeBearingImpl(bearAngle));
+                SpeedWithBearing transSpeed = getSOGfromSMF(rotSpeed);
+
+                polarChart.put(new DegreeBearingImpl(bearAngle), transSpeed);
+                polarChartOG.put(transSpeed.getBearing(), transSpeed);
+                //System.out.println(""+bearAngle+","+((transSpeed.getBearing().getDegrees())%360.0)+","+transSpeed.getKnots());
+                
+            }
+            
+        }
+    }
+    
+    
+    @Override
+    public void setCurrent(SpeedWithBearing newCurrent) {
+        current = newCurrent;
+    }
+    
+    
+    @Override
+    public SpeedWithBearing getCurrent() {
+        return current;
+    }
+
+    
+    public SpeedWithBearing addVectorSpeeds(SpeedWithBearing a, SpeedWithBearing b) {
+
+        if (a.getKnots() == 0.0)
+            return b;
+        if (b.getKnots() == 0.0)
+            return a;
+            
+        double xA = a.getKnots() * Math.sin( a.getBearing().getRadians() );
+        double yA = a.getKnots() * Math.cos( a.getBearing().getRadians() );
+        
+        double xB = b.getKnots() * Math.sin( b.getBearing().getRadians() );
+        double yB = b.getKnots() * Math.cos( b.getBearing().getRadians() );
+        
+        double xC = xA + xB;
+        double yC = yA + yB;
+        
+        double bearC = Math.atan2(xC, yC);
+        if (bearC < 0) {
+            bearC += 2*Math.PI;
+        }
+        //System.out.println("bearC: "+(bearC*180/Math.PI));
+        double lengthC = Math.sqrt( xC*xC + yC*yC );
+        
+        return new KnotSpeedWithBearingImpl(lengthC, new RadianBearingImpl(bearC));    
+    }
+    
+    
+    public SpeedWithBearing getApparentWindFromCurrent(SpeedWithBearing newWind) {
+        
+        if (current == null) 
+            return newWind;
+        
+        if (current.getKnots() == 0.0)
+            return newWind;
+        
+        return addVectorSpeeds(newWind, new KnotSpeedWithBearingImpl(current.getKnots(), current.getBearing().reverse()));
+    }
+
+    
+    // convert speed in moving frame (SMF) to speed over ground (SOG)
+    public SpeedWithBearing getSOGfromSMF(SpeedWithBearing smf) {
+        
+        if (current == null) {
+            return smf;
+        } else {
+            return addVectorSpeeds(smf, current);
+        }
     }
 
     @Override
+    public SpeedWithBearing getSpeedAtBearingOverGround(Bearing bearing) {
+
+        if (polarChartOG == null) {
+            
+            return getSpeedAtBearingRaw(bearing);
+            
+        } else {
+                        
+            Entry<Bearing,SpeedWithBearing> loSpeed = polarChartOG.lowerEntry(bearing);
+            Entry<Bearing,SpeedWithBearing> hiSpeed = polarChartOG.higherEntry(bearing);
+            if (hiSpeed == null) {
+                hiSpeed = loSpeed;
+            }
+            if (loSpeed == null) {
+                loSpeed = hiSpeed;
+            }
+            
+            return new KnotSpeedWithBearingImpl((loSpeed.getValue().getKnots()+hiSpeed.getValue().getKnots())/2.0, new DegreeBearingImpl((loSpeed.getValue().getBearing().getDegrees()+hiSpeed.getValue().getBearing().getDegrees())/2.0));
+        }
+    }
+    
+    @Override
     public SpeedWithBearing getSpeedAtBearing(Bearing bearing) {
+
+        if (polarChart == null) {
+            
+            return getSpeedAtBearingRaw(bearing);
+            
+        } else {
+                        
+            Entry<Bearing,SpeedWithBearing> loSpeed = polarChart.lowerEntry(bearing);
+            Entry<Bearing,SpeedWithBearing> hiSpeed = polarChart.higherEntry(bearing);
+            if (hiSpeed == null) {
+                hiSpeed = loSpeed;
+            }
+            if (loSpeed == null) {
+                loSpeed = hiSpeed;
+            }
+            
+            return new KnotSpeedWithBearingImpl((loSpeed.getValue().getKnots()+hiSpeed.getValue().getKnots())/2.0, new DegreeBearingImpl((loSpeed.getValue().getBearing().getDegrees()+hiSpeed.getValue().getBearing().getDegrees())/2.0));
+        }
+    }
+    
+    public SpeedWithBearing getSpeedAtBearingRaw(Bearing bearing) {
 
         Bearing relativeBearing = wind.getBearing().reverse().getDifferenceTo(bearing);
         if (relativeBearing.getDegrees() < 0)
@@ -154,6 +297,7 @@ public class PolarDiagramBase implements PolarDiagram {
 
     @Override
     public Bearing[] optimalDirectionsUpwind() {
+        
         Bearing windBearing = wind.getBearing().reverse();
         Bearing estBeatAngleRight = null;
         Bearing estBeatAngleLeft = null;
@@ -192,17 +336,20 @@ public class PolarDiagramBase implements PolarDiagram {
                         * (ceilingBeatAngle.getRadians() - floorBeatAngle.getRadians())
                         / (ceilingSpeed.getKnots() - floorSpeed.getKnots());
             }
-            estBeatAngleRight = new RadianBearingImpl(+beatAngle);
-            estBeatAngleLeft = new RadianBearingImpl(-beatAngle);
-            return new Bearing[] {
-                    // windBearing.add(estBeatAngle),
-                    // windBearing.add(estBeatAngle.getDifferenceTo(windBearing))
-                    windBearing.add(estBeatAngleLeft), windBearing.add(estBeatAngleRight) };
+            
+            // get bearing to north based on beatAngle and windBearing
+            estBeatAngleLeft = windBearing.add(new RadianBearingImpl(-beatAngle));
+            estBeatAngleRight = windBearing.add(new RadianBearingImpl(+beatAngle));
+            
+            return new Bearing[] { estBeatAngleLeft, estBeatAngleRight };
+            
         } else {
             Set<Bearing> allKeys = new TreeSet<Bearing>(bearingComparator);
             for (Double b = 0.0; b < 360.0; b += 5.0)
                 allKeys.add(new DegreeBearingImpl(b));
             Bearing _targetDirection = targetDirection;
+            
+            // TODO: rework, adding optimalDirectionsUpwind will be bearing over ground including water current
             setTargetDirection(new DegreeBearingImpl(0.0));
             allKeys.addAll(Arrays.asList(optimalDirectionsUpwind()));
             allKeys.addAll(Arrays.asList(optimalDirectionsDownwind()));
@@ -226,12 +373,9 @@ public class PolarDiagramBase implements PolarDiagram {
                     }
                 }
             }
-            return new Bearing[] {
-                    // windBearing.add(estBeatAngle),
-                    // windBearing.add(estBeatAngle.getDifferenceTo(windBearing))
-                    estBeatAngleLeft, estBeatAngleRight };
-        }
 
+            return new Bearing[] { estBeatAngleLeft, estBeatAngleRight };            
+        }
     }
 
     @Override
@@ -286,8 +430,10 @@ public class PolarDiagramBase implements PolarDiagram {
                     * Math.cos(estBeatAngleLeft.getRadians());
             double speedRight = this.getSpeedAtBearing(estBeatAngleRight).getKnots()
                     * Math.cos(estBeatAngleRight.getRadians());
+            
             SpeedWithBearing optVMGLeft = new KnotSpeedWithBearingImpl(speedLeft, windBearing.add(estBeatAngleLeft));
             SpeedWithBearing optVMGRight = new KnotSpeedWithBearingImpl(speedRight, windBearing.add(estBeatAngleRight));
+            
             return new SpeedWithBearing[] { optVMGLeft, optVMGRight };
 
         } else {
@@ -331,8 +477,10 @@ public class PolarDiagramBase implements PolarDiagram {
                     }
                 }
             }
+            
             SpeedWithBearing optVMGLeft = new KnotSpeedWithBearingImpl(maxSpeedLeft, estBeatAngleLeft);
             SpeedWithBearing optVMGRight = new KnotSpeedWithBearingImpl(maxSpeedRight, estBeatAngleRight);
+            
             return new SpeedWithBearing[] { optVMGLeft, optVMGRight };
         }
     }
@@ -364,9 +512,12 @@ public class PolarDiagramBase implements PolarDiagram {
                         / (ceilingSpeed.getKnots() - floorSpeed.getKnots());
             }
             // Bearing estGybeAngle = new RadianBearingImpl(gybeAngle);
-            estGybeAngleRight = new RadianBearingImpl(+gybeAngle);
-            estGybeAngleLeft = new RadianBearingImpl(-gybeAngle);
-            return new Bearing[] { windBearing.add(estGybeAngleRight), windBearing.add(estGybeAngleLeft) };
+            
+            estGybeAngleRight = windBearing.add(new RadianBearingImpl(+gybeAngle));
+            estGybeAngleLeft = windBearing.add(new RadianBearingImpl(-gybeAngle));
+            
+            return new Bearing[] { estGybeAngleRight, estGybeAngleLeft };
+            
         } else {
 
             Set<Bearing> allKeys = new TreeSet<Bearing>(bearingComparator);
@@ -394,10 +545,8 @@ public class PolarDiagramBase implements PolarDiagram {
                     estGybeAngleLeft = b;
                 }
             }
-            return new Bearing[] {
-                    // windBearing.add(estBeatAngle),
-                    // windBearing.add(estBeatAngle.getDifferenceTo(windBearing))
-                    estGybeAngleLeft, estGybeAngleRight };
+            
+            return new Bearing[] { estGybeAngleLeft, estGybeAngleRight };
         }
     }
 

@@ -69,7 +69,7 @@ public class PathGeneratorDynProgForward extends PathGeneratorBase {
         // calculate bearing, distance and speed from p1 to p2
         Bearing bearingToP = p1.getBearingGreatCircle(p2);
         Distance distanceToP = p1.getDistance(p2);
-        Speed speedToP = polarDiagram.getSpeedAtBearing(bearingToP);
+        Speed speedToP = polarDiagram.getSpeedAtBearingOverGround(bearingToP);
         // System.out.println("p1 to p2: angle: "+bearingToP.getDegrees()+"° dist: "+distanceToP.getMeters()+"m speed: "+speedToP.getMetersPerSecond()+"m/s");
 
         // add time delta for sailing from p1 to p2 to current time

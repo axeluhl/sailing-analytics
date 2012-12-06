@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
+import java.util.logging.Logger;
 
 import org.osgi.framework.FrameworkUtil;
 
@@ -36,6 +37,8 @@ public class SailingSimulatorImpl implements SailingSimulator {
 
     private SimulationParameters simulationParameters;
     private Path racecourse;
+
+    private static Logger logger = Logger.getLogger("com.sap.sailing");
 
     public SailingSimulatorImpl(final SimulationParameters params) {
         this.simulationParameters = params;
@@ -81,11 +84,9 @@ public class SailingSimulatorImpl implements SailingSimulator {
 
             // proxy configuration
             genTrac.setEvaluationParameters(raceURL, "tcp://10.18.22.156:1520", "tcp://10.18.22.156:1521", 4.5); // new
-            // tunnel-ip
 
             // no-proxy configuration
-            // genTrac.setEvaluationParameters(raceURL, "tcp://germanmaster.traclive.dk:4400",
-            // "tcp://germanmaster.traclive.dk:4401", 4.5); // new tunnel-ip
+            //genTrac.setEvaluationParameters(raceURL, "tcp://germanmaster.traclive.dk:4400", "tcp://germanmaster.traclive.dk:4401", 4.5);
 
             gpsPath = genTrac.getPath();
             gpsPathPoly = genTrac.getPathPolyline(new MeterDistance(4.88));
@@ -114,8 +115,19 @@ public class SailingSimulatorImpl implements SailingSimulator {
 
         if (gridArea != null) {
             final Boundary bd = new RectangularBoundary(gridArea[0], gridArea[1], 0.1);
+            
+            // set base wind bearing
             wf.getWindParameters().baseWindBearing += bd.getSouth().getDegrees();
-            // System.out.println("baseWindBearing: " + wf.getWindParameters().baseWindBearing);
+            //System.out.println("baseWindBearing: " + wf.getWindParameters().baseWindBearing);
+            logger.info("base wind: "+this.simulationParameters.getBoatPolarDiagram().getWind().getKnots()+" kn, "+((wf.getWindParameters().baseWindBearing)%360.0)+"°");
+            
+            // set water current
+            //this.simulationParameters.getBoatPolarDiagram().setCurrent(new KnotSpeedWithBearingImpl(2.0,new DegreeBearingImpl((wf.getWindParameters().baseWindBearing+90.0)%360.0)));
+            //this.simulationParameters.getBoatPolarDiagram().setCurrent(new KnotSpeedWithBearingImpl(2.0,new DegreeBearingImpl((270.0)%360.0)));
+            if (this.simulationParameters.getBoatPolarDiagram().getCurrent() != null) {
+                logger.info("water current: "+this.simulationParameters.getBoatPolarDiagram().getCurrent().getKnots()+" kn, "+this.simulationParameters.getBoatPolarDiagram().getCurrent().getBearing().getDegrees()+"°");
+            }
+            
             wf.setBoundary(bd);
             final Position[][] positionGrid = bd.extractGrid(gridRes[0], gridRes[1]);
             wf.setPositionGrid(positionGrid);
@@ -251,7 +263,7 @@ public class SailingSimulatorImpl implements SailingSimulator {
 
         try {
             pathPrefix = SailingSimulatorImpl.getPathPrefix();
-            System.out.println("pathPrefix=" + pathPrefix);
+            logger.info("pathPrefix=" + pathPrefix);
         } catch (final ClassNotFoundException exception) {
             return false;
         }

@@ -19,11 +19,17 @@ public interface PolarDiagram {
 
     void setWind(SpeedWithBearing newWind);
 
+    void setCurrent(SpeedWithBearing newCurrent);
+    
+    SpeedWithBearing getCurrent();
+
     Bearing getTargetDirection();
 
     void setTargetDirection(Bearing newTargetDirection);
 
     SpeedWithBearing getSpeedAtBearing(Bearing bearing);
+
+    SpeedWithBearing getSpeedAtBearingOverGround(Bearing bearing);
 
     SpeedWithBearing[] optimalVMGUpwind();
 

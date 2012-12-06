@@ -236,6 +236,9 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
                 if (windLineCanvasOverlay != null) {
                     windLineCanvasOverlay.setVisible(false);
                 }
+                if (windStreamletsCanvasOverlay != null) {
+                    windStreamletsCanvasOverlay.setVisible(false);
+                }
             }
 
             mapw.addOverlay(legendCanvasOverlay);

@@ -13,7 +13,6 @@ import java.util.NavigableMap;
 import java.util.TreeMap;
 
 import com.sap.sailing.domain.base.impl.KnotSpeedImpl;
-import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
@@ -116,7 +115,7 @@ public class PolarDiagramCSV extends PolarDiagramBase {
             mapGybeSOG.put(velocity, runVMG.get(index));
         }
 
-        setWind(new KnotSpeedWithBearingImpl(0, new DegreeBearingImpl(180)));
+        //setWind(new KnotSpeedWithBearingImpl(0, new DegreeBearingImpl(180)));
 
         super.speedTable = mapSpeedTable;
         super.beatAngles = mapBeatAngles;
