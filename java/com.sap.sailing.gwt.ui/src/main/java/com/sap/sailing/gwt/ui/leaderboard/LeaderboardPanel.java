@@ -16,6 +16,7 @@ import com.google.gwt.cell.client.CompositeCell;
 import com.google.gwt.cell.client.EditTextCell;
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Style.FontWeight;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
@@ -107,6 +108,9 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
 
     private final SailingServiceAsync sailingService;
 
+    private static String IS_LIVE_TEXT_COLOR = "#1876B3";
+    private static String DEFAULT_TEXT_COLOR = "#000000";
+    
     interface RaceColumnTemplates extends SafeHtmlTemplates {
         @SafeHtmlTemplates.Template("<div style=\"color:{0}; border-bottom: 3px solid {1}\">")
         SafeHtml cellFrameWithTextColorAndFleetBorder(String textColor, String borderStyle);
@@ -223,6 +227,8 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     
     private final HorizontalPanel refreshAndSettingsPanel;
 
+    private final HorizontalPanel legendPanel;
+    
     private final FlowPanel informationPanel;
     private final Label scoreCorrectionLastUpdateTimeLabel;
     private final Label scoreCorrectionCommentLabel;
@@ -317,10 +323,40 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     }
 
     @Override
+    public Widget getLegendWidget() {
+    	return legendPanel;
+    }
+    
+    @Override
     public boolean isEmbedded() {
         return isEmbedded;
     }
 
+    private HorizontalPanel createLegendPanel() {
+    	String STYLE_LEGEND = "legend";
+    	String STYLE_LEGEND_LIVE_RACE = "legend-live-race";
+    	String STYLE_LEGEND_FINISHED_RACE = "legend-finished-race";
+    	
+        HorizontalPanel legendPanel = new HorizontalPanel();
+        legendPanel.setStyleName(STYLE_LEGEND);
+        legendPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
+        legendPanel.setSpacing(5);
+        
+        Label legendLabel = new Label(stringMessages.legend() + ":");
+        legendLabel.getElement().getStyle().setFontWeight(FontWeight.BOLD);
+        legendPanel.add(legendLabel);
+        
+        Label liveRace = new Label(stringMessages.live());
+        liveRace.setStyleName(STYLE_LEGEND_LIVE_RACE);
+        legendPanel.add(liveRace);
+
+        Label finishedRace = new Label(stringMessages.finished());
+        finishedRace.setStyleName(STYLE_LEGEND_FINISHED_RACE);
+        legendPanel.add(finishedRace);
+
+        return legendPanel;
+    }
+    
     protected VerticalPanel getContentPanel() {
         return contentPanel;
     }
@@ -684,7 +720,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             if (entry != null) {
             	boolean isLive = isLive(entry.fleet);
             	
-                String textColor = isLive ? "#444444" : "#000000";
+                String textColor = isLive ? IS_LIVE_TEXT_COLOR : DEFAULT_TEXT_COLOR;
                 String totalPointsAsText = entry.totalPoints == null ? "" : scoreFormat.format(entry.totalPoints);
                 String netPointsAsText = entry.netPoints == null ? "" : scoreFormat.format(entry.netPoints);
 
@@ -1095,7 +1131,9 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
 
         @Override
         public void render(Context context, LeaderboardRowDTO object, SafeHtmlBuilder sb) {
-            sb.appendHtmlConstant("<span style=\"font-weight: bold;\">");
+            String textColor = getLeaderboard().containsLiveRace() ? IS_LIVE_TEXT_COLOR : DEFAULT_TEXT_COLOR;
+        	
+            sb.appendHtmlConstant("<span style=\"font-weight: bold; color:" + textColor + "\">");
             sb.appendEscaped(getValue(object));
             sb.appendHtmlConstant("</span>");
         }
@@ -1313,6 +1351,8 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         informationPanel.add(scoreCorrectionCommentLabel);
         informationPanel.add(scoreCorrectionLastUpdateTimeLabel);
 
+        legendPanel = createLegendPanel(); 
+
         DockPanel toolbarPanel = new DockPanel();
         toolbarPanel.setStyleName("leaderboardContent-toolbar");
         busyIndicator = new SimpleBusyIndicator(false, 0.8f);
@@ -1378,6 +1418,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             contentPanel.add(toolbarPanel);
         }
         contentPanel.add(getLeaderboardTable());
+        contentPanel.add(legendPanel);
         contentPanel.add(overallLeaderboardsPanel);
         setWidget(contentPanel);
         raceNameForDefaultSorting = settings.getNameOfRaceToSort();
