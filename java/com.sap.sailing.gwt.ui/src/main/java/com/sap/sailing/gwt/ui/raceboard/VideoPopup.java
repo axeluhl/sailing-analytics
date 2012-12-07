@@ -12,7 +12,7 @@ import com.sap.sailing.gwt.ui.shared.media.MediaTrack;
 
 public class VideoPopup extends DialogBox implements MediaPlayer {
 
-    private static final int TOLERATED_LAG_IN_MILLISECONDS = 4000;
+    private static final int TOLERATED_LAG_IN_MILLISECONDS = 2000;
     private Video videoControl;
     private MediaTrack videoTrack;
 

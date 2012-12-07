@@ -16,7 +16,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import java.util.logging.Logger;
 
-import com.sap.sailing.domain.base.Buoy;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
@@ -101,7 +101,7 @@ public class LeaderboardDTOCache {
         }
 
         @Override
-        public void buoyPositionChanged(GPSFix fix, Buoy buoy) {
+        public void markPositionChanged(GPSFix fix, Mark mark) {
             removeFromCache(leaderboard);
         }
 

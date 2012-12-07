@@ -147,6 +147,7 @@ public class RaceBoardPanel extends FormPanel implements RegattaDisplayer, RaceS
     private void createOneScreenView(String leaderboardName, String leaderboardGroupName, FlowPanel mainPanel) {
         // create the default leaderboard and select the right race
         leaderboardPanel = createLeaderboardPanel(leaderboardName, leaderboardGroupName);
+        leaderboardPanel.addStyleName(LeaderboardPanel.LEADERBOARD_MARGIN_STYLE);
         RaceMap raceMap = new RaceMap(sailingService, asyncActionsExecutor, errorReporter, timer, competitorSelectionModel, stringMessages);
         raceTimesInfoProvider.addRaceTimesInfoProviderListener(raceMap);
         raceMap.onRaceSelectionChange(Collections.singletonList(selectedRaceIdentifier));
@@ -172,13 +173,17 @@ public class RaceBoardPanel extends FormPanel implements RegattaDisplayer, RaceS
         addComponentToNavigationMenu(leaderboardAndMapViewer, competitorChart, true);
         addComponentToNavigationMenu(leaderboardAndMapViewer, raceMap, false);
 
+        addMediaSelectorToNavigationMenu();
+        
+    }
+
+    private void addMediaSelectorToNavigationMenu() {
         MediaSelector mediaSelector = new MediaSelector(errorReporter);
         raceTimesInfoProvider.addRaceTimesInfoProviderListener(mediaSelector);
         timer.addPlayStateListener(mediaSelector);
         timer.addTimeListener(mediaSelector);
         mediaService.getMediaTracksForRace(selectedRaceIdentifier, mediaSelector);
         componentsNavigationPanel.add(mediaSelector.widget());
-        
     }
 
     @SuppressWarnings("unused")
@@ -197,10 +202,11 @@ public class RaceBoardPanel extends FormPanel implements RegattaDisplayer, RaceS
                 .createNewSettingsForPlayMode(timer.getPlayMode(),
                         /* nameOfRaceToSort */ selectedRaceIdentifier.getRaceName(),
                         /* nameOfRaceColumnToShow */ null, /* nameOfRaceToShow */ selectedRaceIdentifier.getRaceName(),
-                        new ExplicitRaceColumnSelectionWithPreselectedRace(selectedRaceIdentifier));
+                        new ExplicitRaceColumnSelectionWithPreselectedRace(selectedRaceIdentifier),
+                        /* showOverallLeaderboardsOnSamePage */ false);
         return new LeaderboardPanel(sailingService, asyncActionsExecutor, leaderBoardSettings, selectedRaceIdentifier,
-                competitorSelectionModel, timer, leaderboardName, leaderboardGroupName, errorReporter, stringMessages,
-                userAgent, /* showRaceDetails */ true, raceTimesInfoProvider, /* autoExpandLastRaceColumn */ false);
+                competitorSelectionModel, timer, leaderboardName, errorReporter, stringMessages, userAgent,
+                /* showRaceDetails */ true, raceTimesInfoProvider, /* autoExpandLastRaceColumn */ false);
      }
 
     private <SettingsType> void addComponentToNavigationMenu(final ComponentViewer componentViewer,

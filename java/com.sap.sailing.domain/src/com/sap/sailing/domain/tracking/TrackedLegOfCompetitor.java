@@ -6,7 +6,6 @@ import java.util.List;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.SpeedWithBearing;
-import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NoWindException;
@@ -174,9 +173,9 @@ public interface TrackedLegOfCompetitor extends Serializable {
     /**
      * If the current {@link #getLeg() leg} is +/- {@link TrackedLegImpl#UPWIND_DOWNWIND_TOLERANCE_IN_DEG} degrees
      * co-linear with the wind's bearing, the competitor's position is projected onto the line crossing
-     * <code>buoy</code> in the wind's bearing, and the distance from the projection to the <code>buoy</code> is
+     * <code>mark</code> in the wind's bearing, and the distance from the projection to the <code>mark</code> is
      * returned. Otherwise, it is assumed that the leg is neither an upwind nor a downwind leg, and hence the along-track
-     * distance to <code>buoy</code> is returned.
+     * distance to <code>mark</code> is returned.
      * 
      * @param at
      *            the wind estimation is performed for this point in time
@@ -191,6 +190,7 @@ public interface TrackedLegOfCompetitor extends Serializable {
      * as defined by <code>timePointBeforeManeuver</code> is extrapolated until <code>timePointAfterManeuver</code>,
      * and the resulting extrapolated position's "windward distance" is computed to the competitor's actual position
      * at that time. This distance is returned as the result of this method. 
+     * @param maneuverTimePoint TODO
      */
-    Distance getManeuverLoss(MillisecondsTimePoint timePointBeforeManeuver, MillisecondsTimePoint timePointAfterManeuver) throws NoWindException;
+    Distance getManeuverLoss(TimePoint timePointBeforeManeuver, TimePoint maneuverTimePoint, TimePoint timePointAfterManeuver) throws NoWindException;
 }

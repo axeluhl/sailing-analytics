@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
-import com.sap.sailing.domain.base.Buoy;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Timed;
@@ -31,7 +31,7 @@ import com.sap.sailing.util.impl.SmartFutureCache.UpdateInterval;
 /**
  * (Re-)computing the cross track error for a competitor causes significant amounts of CPU cycles. The cross track error
  * is aggregated for each competitor per race and per leg. The calculation uses the same base data and can be combined.
- * The results can be cached. Cache invalidation becomes necessary as mark passings, buoy positions and boat positions
+ * The results can be cached. Cache invalidation becomes necessary as mark passings, mark positions and boat positions
  * change. For this purpose, this cache subscribes itself as a listener to the {@link TrackedRace} to which it belongs
  * and manages cache invalidations autonomously.
  *   
@@ -324,8 +324,8 @@ public class CrossTrackErrorCache extends AbstractRaceChangeListener {
     }
 
     @Override
-    public void buoyPositionChanged(GPSFix fix, Buoy buoy) {
-        TimePoint from = owner.getOrCreateTrack(buoy).getEstimatedPositionTimePeriodAffectedBy(fix).getA();
+    public void markPositionChanged(GPSFix fix, Mark mark) {
+        TimePoint from = owner.getOrCreateTrack(mark).getEstimatedPositionTimePeriodAffectedBy(fix).getA();
         for (Competitor competitor : cachePerCompetitor.keySet()) {
             invalidate(competitor, from);
         }

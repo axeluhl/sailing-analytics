@@ -3,13 +3,14 @@ package com.sap.sailing.gwt.ui.raceboard;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.CheckBox;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
@@ -19,41 +20,42 @@ import com.sap.sailing.gwt.ui.client.RaceTimesInfoProviderListener;
 import com.sap.sailing.gwt.ui.client.TimeListener;
 import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.client.Timer.PlayStates;
+import com.sap.sailing.gwt.ui.raceboard.MediaSelectionDialog.MediaSelectionListener;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.media.MediaTrack;
 
 public class MediaSelector implements RaceTimesInfoProviderListener, PlayStateListener, TimeListener,
-        AsyncCallback<Collection<MediaTrack>> {
+        AsyncCallback<Collection<MediaTrack>>, MediaSelectionListener {
 
-    private final CheckBox toggleVideoPanel;
-    private final Collection<MediaPlayer> activePlayers = new ArrayList<MediaPlayer>();
+    private final Button manageMediaButton;
+    private final MediaSelectionDialog mediaSelectionDialog;
+
+    private final AudioControl audioPlayer;
+    private final Map<MediaTrack, VideoPopup> videoPlayers = new HashMap<MediaTrack, VideoPopup>();
     private final Collection<MediaTrack> audioTracks = new ArrayList<MediaTrack>();
     private final Collection<MediaTrack> videoTracks = new ArrayList<MediaTrack>();
     private final ErrorReporter errorReporter;
 
     public MediaSelector(ErrorReporter errorReporter) {
         this.errorReporter = errorReporter;
+        
+        mediaSelectionDialog = new MediaSelectionDialog(this);         
 
-        final VideoPopup videoPopup = new VideoPopup();
-        activePlayers.add(videoPopup);
-
-        toggleVideoPanel = new CheckBox("Show Video");
-        toggleVideoPanel.setEnabled(false);
-        toggleVideoPanel.addStyleName("raceBoardNavigation-innerElement");
-        toggleVideoPanel.getElement().getStyle().setFloat(Style.Float.LEFT);
-        toggleVideoPanel.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
-
+        audioPlayer = new AudioControl();
+        
+        manageMediaButton = new Button("Audio & Video");
+        manageMediaButton.addClickHandler(new ClickHandler() {
+            
             @Override
-            public void onValueChange(ValueChangeEvent<Boolean> event) {
-
-                if (toggleVideoPanel.getValue()) {
-                    videoPopup.show();
-                } else {
-                    videoPopup.hide();
-                }
-
+            public void onClick(ClickEvent event) {
+                mediaSelectionDialog.show(videoTracks, audioTracks, manageMediaButton);
             }
         });
+        manageMediaButton.addStyleName("raceBoardNavigation-standaloneElement");
+        manageMediaButton.getElement().getStyle().setFloat(Style.Float.LEFT);
+        manageMediaButton.setTitle("Configure Media");
+
+
     }
 
     @Override
@@ -74,8 +76,13 @@ public class MediaSelector implements RaceTimesInfoProviderListener, PlayStateLi
         }
     }
 
+    private void updatePlayState() {
+        
+    }
+
     private void pausePlaying() {
-        for (MediaPlayer player : activePlayers) {
+        audioPlayer.pause();
+        for (MediaPlayer player : videoPlayers.values()) {
             if (!player.isPaused()) {
                 player.pause();
             }
@@ -83,7 +90,8 @@ public class MediaSelector implements RaceTimesInfoProviderListener, PlayStateLi
     }
 
     private void startPlaying() {
-        for (MediaPlayer player : activePlayers) {
+        audioPlayer.play();
+        for (MediaPlayer player : videoPlayers.values()) {
             if (player.isPaused()) {
                 player.play();
             }
@@ -92,13 +100,14 @@ public class MediaSelector implements RaceTimesInfoProviderListener, PlayStateLi
 
     @Override
     public void timeChanged(Date raceTime) {
-        for (MediaPlayer player : activePlayers) {
+        audioPlayer.alignTime(raceTime);
+        for (MediaPlayer player : videoPlayers.values()) {
             player.alignTime(raceTime);
         }
     }
 
     public Widget widget() {
-        return toggleVideoPanel;
+        return manageMediaButton;
     }
 
     @Override
@@ -109,7 +118,7 @@ public class MediaSelector implements RaceTimesInfoProviderListener, PlayStateLi
 
     @Override
     public void onSuccess(Collection<MediaTrack> mediaTracks) {
-        toggleVideoPanel.setEnabled(mediaTracks.size() > 0);
+        manageMediaButton.setEnabled(mediaTracks.size() > 0);
         for (MediaTrack mediaTrack : mediaTracks) {
             switch (mediaTrack.type) {
             case AUDIO:
@@ -117,7 +126,6 @@ public class MediaSelector implements RaceTimesInfoProviderListener, PlayStateLi
                 break;
             case VIDEO:
                 videoTracks.add(mediaTrack);
-                activePlayers.iterator().next().setMediaTrack(mediaTrack);
                 break;
             }
         }
@@ -126,7 +134,30 @@ public class MediaSelector implements RaceTimesInfoProviderListener, PlayStateLi
     @Override
     public void raceTimesInfosReceived(Map<RegattaAndRaceIdentifier, RaceTimesInfoDTO> raceTimesInfo) {
         // TODO Auto-generated method stub
-        
+
+    }
+
+    @Override
+    public void audioChanged(MediaTrack audioTrack) {
+        audioPlayer.setMediaTrack(audioTrack);
+        updatePlayState();
+    }
+
+    @Override
+    public void videoSelected(MediaTrack videoTrack) {
+        if (!videoPlayers.containsKey(videoTrack)) {
+            final VideoPopup videoPopup = new VideoPopup();
+            videoPlayers.put(videoTrack, videoPopup);
+        }
+        updatePlayState();
+    }
+
+    @Override
+    public void videoDeselected(MediaTrack videoTrack) {
+        VideoPopup removedVideoPlayer = videoPlayers.remove(videoTrack);
+        removedVideoPlayer.pause();
+        removedVideoPlayer.hide(false);
+        updatePlayState();
     }
 
 }

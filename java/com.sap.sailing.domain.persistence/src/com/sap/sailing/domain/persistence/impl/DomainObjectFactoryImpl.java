@@ -470,9 +470,11 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             } else {
                 dbOverallLeaderboard = (DBObject) overallLeaderboardIdOrName;
             }
-            // the loadLeaderboard call adds the overall leaderboard to the leaderboard registry and sets it as the
-            // overall leaderboard of the leaderboard group
-            loadLeaderboard(dbOverallLeaderboard, regattaRegistry, leaderboardRegistry, /* groupForMetaLeaderboard */ result);
+            if (dbOverallLeaderboard != null) {
+                // the loadLeaderboard call adds the overall leaderboard to the leaderboard registry and sets it as the
+                // overall leaderboard of the leaderboard group
+                loadLeaderboard(dbOverallLeaderboard, regattaRegistry, leaderboardRegistry, /* groupForMetaLeaderboard */ result);
+            }
         }
         return result;
     }

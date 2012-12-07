@@ -81,15 +81,17 @@ public class MediaServiceImpl extends RemoteServiceServlet implements MediaServi
     }
 
     private MediaTrack createMediaTrackFromDB(DBMediaTrack dbMediaTrack) {
-        MediaType mediaType = MediaType.valueOf(dbMediaTrack.mimeType);
-        MediaSubType mediaSubType = MediaSubType.valueOf(dbMediaTrack.mimeSubType);
+        MediaType mediaType = dbMediaTrack.mimeType != null ? MediaType.valueOf(dbMediaTrack.mimeType) : null;
+        MediaSubType mediaSubType = dbMediaTrack.mimeSubType != null ? MediaSubType.valueOf(dbMediaTrack.mimeSubType) : null;
         MediaTrack mediaTrack = new MediaTrack(dbMediaTrack.dbId, dbMediaTrack.title, dbMediaTrack.url, dbMediaTrack.startTime, dbMediaTrack.durationInMillis, mediaType, mediaSubType);
         return mediaTrack;
     }
 
     @Override
     public void addMediaTrack(MediaTrack mediaTrack) {
-        mediaDB().insertMediaTrack(mediaTrack.title, mediaTrack.url, mediaTrack.startTime, mediaTrack.durationInMillis, mediaTrack.type.name(), mediaTrack.subType.name());
+        String mediaType = mediaTrack.type != null ? mediaTrack.type.name() : null;
+        String mediaSubType = mediaTrack.subType != null ? mediaTrack.subType.name() : null;
+        mediaDB().insertMediaTrack(mediaTrack.title, mediaTrack.url, mediaTrack.startTime, mediaTrack.durationInMillis, mediaType, mediaSubType);
     }
 
     private MediaDB mediaDB() {
