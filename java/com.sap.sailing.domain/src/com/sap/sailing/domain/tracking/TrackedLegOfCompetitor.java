@@ -190,7 +190,8 @@ public interface TrackedLegOfCompetitor extends Serializable {
      * as defined by <code>timePointBeforeManeuver</code> is extrapolated until <code>timePointAfterManeuver</code>,
      * and the resulting extrapolated position's "windward distance" is computed to the competitor's actual position
      * at that time. This distance is returned as the result of this method. 
-     * @param maneuverTimePoint TODO
      */
     Distance getManeuverLoss(TimePoint timePointBeforeManeuver, TimePoint maneuverTimePoint, TimePoint timePointAfterManeuver) throws NoWindException;
+
+    TrackedLeg getTrackedLeg();
 }

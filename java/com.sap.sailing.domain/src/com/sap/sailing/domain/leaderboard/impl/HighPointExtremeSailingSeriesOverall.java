@@ -60,6 +60,7 @@ public class HighPointExtremeSailingSeriesOverall extends HighPoint {
     private int getWins(List<Double> scores) {
         int wins = 0;
         for (Double score : scores) {
+            // FIXME bug 1091: must consider the column factor; problem: we don't know what the column is here
             if (score == MAX_POINTS) {
                 wins++;
             }

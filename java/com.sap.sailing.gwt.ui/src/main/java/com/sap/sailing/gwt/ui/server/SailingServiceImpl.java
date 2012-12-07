@@ -832,11 +832,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             result.finished = trackedLeg.hasFinishedLeg(timePoint);
             result.gapToLeaderInSeconds = trackedLeg.getGapToLeaderInSeconds(timePoint,
                     legRanksCache.get(trackedLeg.getLeg()).entrySet().iterator().next().getKey());
-            if (result.gapToLeaderInSeconds != null && result.timeInMilliseconds != null) {
-                TimePoint timeAtLegStart = timePoint.minus(result.timeInMilliseconds);
-                Double gapAtLegStart = trackedLeg.getGapToLeaderInSeconds(timeAtLegStart);
-                if (gapAtLegStart != null) {
-                    result.gapChangeSinceLegStart = result.gapToLeaderInSeconds - gapAtLegStart;
+            if (result.gapToLeaderInSeconds != null) {
+                // FIXME problem: asking just after the beginning of the leg yields very different values from asking for the end of the previous leg.
+                // This is because for the previous leg it's decided based on the mark passings; for the next (current) leg it's decided based on
+                // windward distance and VMG
+                Double gapAtEndOfPreviousLegInSeconds = getGapAtEndOfPreviousLegInSeconds(trackedLeg);
+                if (gapAtEndOfPreviousLegInSeconds != null) {
+                    result.gapChangeSinceLegStartInSeconds = result.gapToLeaderInSeconds - gapAtEndOfPreviousLegInSeconds;
                 }
             }
             LinkedHashMap<Competitor, Integer> legRanks = legRanksCache.get(trackedLeg.getLeg());
@@ -895,6 +897,41 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             }
         }
         return result;
+    }
+
+    private Double getGapAtEndOfPreviousLegInSeconds(TrackedLegOfCompetitor trackedLeg) throws NoWindException {
+        final Double result;
+        final Course course = trackedLeg.getTrackedLeg().getTrackedRace().getRace().getCourse();
+        course.lockForRead();
+        try {
+            int indexOfStartWaypoint = course.getIndexOfWaypoint(trackedLeg.getLeg().getFrom());
+            if (indexOfStartWaypoint == 0) {
+                // trackedLeg was the first leg; gap is determined by gap of start line passing time points
+                Iterable<MarkPassing> markPassingsForLegStart = trackedLeg.getTrackedLeg().getTrackedRace().getMarkPassingsInOrder(trackedLeg.getLeg().getFrom());
+                // TODO null safety
+                final Iterator<MarkPassing> markPassingsIter = markPassingsForLegStart.iterator();
+                if (markPassingsIter.hasNext()) {
+                    TimePoint firstStart = markPassingsIter.next().getTimePoint();
+                    final MarkPassing markPassingForFrom = trackedLeg.getTrackedLeg().getTrackedRace().
+                            getMarkPassing(trackedLeg.getCompetitor(), trackedLeg.getLeg().getFrom());
+                    if (markPassingForFrom != null) {
+                        TimePoint competitorStart = markPassingForFrom.getTimePoint();
+                        result = (double) (competitorStart.asMillis() - firstStart.asMillis()) / 1000.;
+                    } else {
+                        result = null;
+                    }
+                } else {
+                    result = null;
+                }
+            } else {
+                TrackedLeg previousTrackedLeg = trackedLeg.getTrackedLeg().getTrackedRace().getTrackedLeg(course.getLegs().get(indexOfStartWaypoint-1));
+                TrackedLegOfCompetitor previousTrackedLegOfCompetitor = previousTrackedLeg.getTrackedLeg(trackedLeg.getCompetitor());
+                result = previousTrackedLegOfCompetitor.getGapToLeaderInSeconds(previousTrackedLegOfCompetitor.getFinishTime());
+            }
+            return result;
+        } finally {
+            course.unlockAfterRead();
+        }
     }
 
     @Override
