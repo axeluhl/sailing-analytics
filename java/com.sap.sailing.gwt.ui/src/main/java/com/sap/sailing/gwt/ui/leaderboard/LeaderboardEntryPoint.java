@@ -318,6 +318,7 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
                 + legDetails.toString()
                 + raceDetails.toString()
                 + overallDetails.toString()
+                + maneuverDetails.toString()
                 + (settings.isAutoExpandLastRaceColumn() ? "&"+PARAM_AUTO_EXPAND_LAST_RACE_COLUMN+"=true" : "")
                 + (settings.getLeaderboardSettings().getNumberOfLastRacesToShow() == null ? "" :
                     "&"+PARAM_NAME_LAST_N+"="+settings.getLeaderboardSettings().getNumberOfLastRacesToShow())
