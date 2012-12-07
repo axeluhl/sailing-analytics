@@ -908,7 +908,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             if (indexOfStartWaypoint == 0) {
                 // trackedLeg was the first leg; gap is determined by gap of start line passing time points
                 Iterable<MarkPassing> markPassingsForLegStart = trackedLeg.getTrackedLeg().getTrackedRace().getMarkPassingsInOrder(trackedLeg.getLeg().getFrom());
-                // TODO null safety
                 final Iterator<MarkPassing> markPassingsIter = markPassingsForLegStart.iterator();
                 if (markPassingsIter.hasNext()) {
                     TimePoint firstStart = markPassingsIter.next().getTimePoint();
