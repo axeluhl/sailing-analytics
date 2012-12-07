@@ -14,6 +14,14 @@ public interface MediaPlayer {
 
     void alignTime(Date raceTime);
 
+    MediaTrack getMediaTrack();
+    
     void setMediaTrack(MediaTrack mediaTrack);
 
+    void setPlaybackSpeed(double newPlaySpeedFactor);
+
+    boolean isMuted();
+
+    void setMuted(boolean isToBeMuted);
+    
 }

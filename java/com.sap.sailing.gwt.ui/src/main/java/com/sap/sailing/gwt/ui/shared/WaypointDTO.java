@@ -3,7 +3,7 @@ package com.sap.sailing.gwt.ui.shared;
 import java.util.List;
 
 public class WaypointDTO extends NamedDTO {
-    public List<BuoyDTO> buoys;
+    public List<MarkDTO> marks;
     
     public int courseIndex;
 

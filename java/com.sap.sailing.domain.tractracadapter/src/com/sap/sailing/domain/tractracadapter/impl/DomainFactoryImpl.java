@@ -20,7 +20,7 @@ import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
-import com.sap.sailing.domain.base.Buoy;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Nationality;
@@ -37,6 +37,7 @@ import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
+import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.TimePoint;
@@ -144,22 +145,47 @@ public class DomainFactoryImpl implements DomainFactory {
             if (domainControlPoint == null) {
                 String controlPointName = controlPoint.getName();
                 Map<String, String> controlPointMetadata = parseControlPointMetadata(controlPoint);
-                String buoyColor = controlPointMetadata.get("Color");
-                String buoyShape = controlPointMetadata.get("Shape");
-                String buoyPattern = controlPointMetadata.get("Pattern");
                 if (controlPoint.getHasTwoPoints()) {
                     // it's a gate
-                    Buoy leftBuoy = baseDomainFactory.getOrCreateBuoy(controlPointName + " (left)", buoyColor, buoyShape, buoyPattern);
-                    Buoy rightBuoy = baseDomainFactory.getOrCreateBuoy(controlPointName + " (right)", buoyColor, buoyShape, buoyPattern);
-                    domainControlPoint = baseDomainFactory.createGate(leftBuoy, rightBuoy, controlPointName);
+                    MarkType type1 = resolveMarkTypeFromMetadata(controlPointMetadata, "P1.Type");
+                    MarkType type2 = resolveMarkTypeFromMetadata(controlPointMetadata, "P2.Type");
+                    String color1 = controlPointMetadata.get("P1.Color");
+                    String color2 = controlPointMetadata.get("P2.Color");
+                    String shape1 = controlPointMetadata.get("P1.Shape");
+                    String shape2 = controlPointMetadata.get("P2.Shape");
+                    String pattern1 = controlPointMetadata.get("P1.Pattern");
+                    String pattern2 = controlPointMetadata.get("P2.Pattern");
+                    
+                    Mark mark1 = baseDomainFactory.getOrCreateMark(controlPointName + " (1)", type1, color1, shape1, pattern1);
+                    Mark mark2 = baseDomainFactory.getOrCreateMark(controlPointName + " (2)", type2, color2, shape2, pattern2);
+                    domainControlPoint = baseDomainFactory.createGate(mark1, mark2, controlPointName);
                 } else {
-                    Buoy buoy = baseDomainFactory.getOrCreateBuoy(controlPointName, buoyColor, buoyShape, buoyPattern);
-                    domainControlPoint = buoy;
+                    MarkType type = resolveMarkTypeFromMetadata(controlPointMetadata, "Type");
+                    String color = controlPointMetadata.get("Color");
+                    String shape = controlPointMetadata.get("Shape");
+                    String pattern = controlPointMetadata.get("Pattern");
+                    
+                    Mark mark = baseDomainFactory.getOrCreateMark(controlPointName, type, color, shape, pattern);
+                    domainControlPoint = mark;
                 }
                 controlPointCache.put(controlPoint, domainControlPoint);
             }
             return domainControlPoint;
         }
+    }
+
+    private MarkType resolveMarkTypeFromMetadata(Map<String, String> controlPointMetadata, String typePropertyName) {
+        MarkType result = MarkType.BUOY;
+        String markType = controlPointMetadata.get(typePropertyName);
+        if(markType != null && !markType.isEmpty()) {
+            for(MarkType m: MarkType.values()) {
+                if(m.name().equalsIgnoreCase(markType)) {
+                    result = m;
+                    break;
+                }
+            }
+        }
+        return result;
     }
     
     @SuppressWarnings({ "rawtypes", "unchecked" })
@@ -497,10 +523,10 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public Buoy getBuoy(ControlPoint controlPoint, ControlPointPositionData record) {
+    public Mark getMark(ControlPoint controlPoint, ControlPointPositionData record) {
         com.sap.sailing.domain.base.ControlPoint myControlPoint = getOrCreateControlPoint(controlPoint);
-        Buoy result;
-        Iterator<Buoy> iter = myControlPoint.getBuoys().iterator();
+        Mark result;
+        Iterator<Mark> iter = myControlPoint.getMarks().iterator();
         if (controlPoint.getHasTwoPoints()) {
             if (record.getIndex() == 0) {
                 result = iter.next();

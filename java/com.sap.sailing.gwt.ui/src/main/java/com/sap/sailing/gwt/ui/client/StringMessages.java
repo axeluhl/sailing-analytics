@@ -94,6 +94,7 @@ public interface StringMessages extends Messages {
     String trackableRaces();
     String trackWind();
     String regattaName();
+    String eventName();
     String event();
     String startTime();
     String regatta();
@@ -363,12 +364,12 @@ public interface StringMessages extends Messages {
     String errorTryingToObtainLeaderboardContents(String message);
     String lastScoreUpdate();
     String warningBrowserUnsupported();
-    String newBuoy();
+    String newMark();
     String controlPoint();
     String errorUpdatingRaceCourse(String message);
     String successfullyUpdatedCourse();
-    String selectOneBuoyOrTwoBuoysForGate();
-    String errorTryingToObtainTheBuoysOfTheRace(String message);
+    String selectOneMarkOrTwoMarksForGate();
+    String errorTryingToObtainTheMarksOfTheRace(String message);
     String errorTryingToObtainRaceCourse(String message);
     String insertWaypointBeforeSelected();
     String insertWaypointAfterSelected();
@@ -435,6 +436,16 @@ public interface StringMessages extends Messages {
     String averageManeuverLossInMeters();
     String averageTackLossInMeters();
     String averageJibeLossInMeters();
+    String shape();
+    String pattern();
     String legend();
     String live();
+    String errorFetchingRankingChartData(String message);
+    String loadingCompetitorData();
+    String rankNAfterRace(long l, String string);
+    String afterRace();
+    String showRankChart();
+    String overallLeaderboardSelection();
+    String showOverallLeaderboardOnSamePage();
+    String errorTryingToObtainOverallLeaderboards(String message);
 }

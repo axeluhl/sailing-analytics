@@ -28,6 +28,7 @@ Export-Package: com.sap.sailing.gwt.ui.adminconsole;x-friends:="com.sap.sailing.
  com.sap.sailing.gwt.ui.client;x-friends:="com.sap.sailing.gwt.ui.test",
  com.sap.sailing.gwt.ui.leaderboard;x-friends:="com.sap.sailing.gwt.ui.test",
  com.sap.sailing.gwt.ui.leaderboardedit;x-friends:="com.sap.sailing.gwt.ui.test",
+ com.sap.sailing.gwt.ui.raceboard,
  com.sap.sailing.gwt.ui.server;x-friends:="com.sap.sailing.gwt.ui.test",
  com.sap.sailing.gwt.ui.shared;x-friends:="com.sap.sailing.gwt.ui.test",
  com.sap.sailing.gwt.ui.shared.media

@@ -461,9 +461,10 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
             String leaderboardName, String leaderboardGroupName, final ErrorReporter errorReporter,
             final StringMessages stringMessages, UserAgentDetails userAgent) {
         super(sailingService, asyncActionsExecutor, LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(
-                /* racesToShow */ null, /* namesOfRacesToShow */ null, null, /* autoExpandFirstRace */false),
+                /* racesToShow */ null, /* namesOfRacesToShow */ null, null, /* autoExpandFirstRace */ false,
+                /* showMetaLeaderboardsOnSamePage */ false),
                 new CompetitorSelectionModel(/* hasMultiSelection */true),
-                leaderboardName, leaderboardGroupName, errorReporter, stringMessages, userAgent, /* showRaceDetails */ true);
+                leaderboardName, errorReporter, stringMessages, userAgent, /* showRaceDetails */ true);
         suppressedCompetitorsShown = new ListDataProvider<CompetitorDTO>(new ArrayList<CompetitorDTO>());
         suppressedCompetitorsTable = createSuppressedCompetitorsTable();
         ImageResource importIcon = resources.importIcon();

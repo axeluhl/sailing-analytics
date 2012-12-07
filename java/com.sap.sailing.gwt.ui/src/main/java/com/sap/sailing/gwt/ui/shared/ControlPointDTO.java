@@ -23,5 +23,5 @@ public abstract class ControlPointDTO extends NamedDTO {
         return System.identityHashCode(this);
     }
     
-    public abstract Iterable<BuoyDTO> getBuoys();
+    public abstract Iterable<MarkDTO> getMarks();
 }

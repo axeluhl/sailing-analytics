@@ -1,7 +1,7 @@
 package com.sap.sailing.domain.base;
 
 public interface Gate extends ControlPoint {
-    Buoy getLeft();
+    Mark getLeft();
     
-    Buoy getRight();
+    Mark getRight();
 }

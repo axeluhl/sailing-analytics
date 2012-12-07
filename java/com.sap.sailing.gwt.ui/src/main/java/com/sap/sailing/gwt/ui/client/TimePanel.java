@@ -401,6 +401,11 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
     }
     
     @Override
+    public void playSpeedFactorChanged(double newPlaySpeedFactor) {
+        // nothing to do
+    }
+    
+    @Override
     public void onTimeZoomChanged(Date zoomStartTimepoint, Date zoomEndTimepoint) {
     }
 

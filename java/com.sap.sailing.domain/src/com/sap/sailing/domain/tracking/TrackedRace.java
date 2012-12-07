@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.NavigableSet;
 import java.util.SortedSet;
 
-import com.sap.sailing.domain.base.Buoy;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Leg;
@@ -63,10 +63,12 @@ public interface TrackedRace extends Serializable {
      * Determine the race end time is tricky. Boats may sink, stop, not finish, although they started the race. We therefore
      * cannot wait for all boats to reach the finish line.
      * The following rules are used to calculate the endOfRace:
-     * 1. Returns <code>Null</code> if no boat passed the finish line 
-     * 2. Returns time of the last mark passing recorded for the finish line
-     * 3. TODO: Returns the time of the first passing of the finish line + the target window (defined in the competition rules)
-     *    if a target window has been defined for the race 
+     * <ol>
+     *  <li>Returns <code>null</code> if no boat passed the finish line</li>
+     *  <li>Returns time of the last mark passing recorded for the finish line</li>
+     *  <li>TODO: Returns the time of the first passing of the finish line + the target window (defined in the competition rules)
+     *    if a target window has been defined for the race</li>
+     * </ol> 
      */
     TimePoint getEndOfRace();
 
@@ -185,19 +187,19 @@ public interface TrackedRace extends Serializable {
     MarkPassing getMarkPassing(Competitor competitor, Waypoint waypoint);
 
     /**
-     * Yields the track describing <code>buoy</code>'s movement over time; never <code>null</code> because a
-     * new track will be created in case no track was present for <code>buoy</code> so far.
+     * Yields the track describing <code>mark</code>'s movement over time; never <code>null</code> because a
+     * new track will be created in case no track was present for <code>mark</code> so far.
      */
-    GPSFixTrack<Buoy, GPSFix> getOrCreateTrack(Buoy buoy);
+    GPSFixTrack<Mark, GPSFix> getOrCreateTrack(Mark mark);
 
     /**
-     * Retrieves all buoys assigned to the race. They are not necessarily part of the race course.
+     * Retrieves all marks assigned to the race. They are not necessarily part of the race course.
      */
-    Iterable<Buoy> getBuoys();
+    Iterable<Mark> getMarks();
 
     /**
-     * If the <code>waypoint</code> only has one {@link #getBuoys() buoy}, its position at time <code>timePoint</code>
-     * is returned. Otherwise, the center of gravity between the buoys' positions is computed and returned.
+     * If the <code>waypoint</code> only has one {@link #getMarks() mark}, its position at time <code>timePoint</code>
+     * is returned. Otherwise, the center of gravity between the mark positions is computed and returned.
      */
     Position getApproximatePosition(Waypoint waypoint, TimePoint timePoint);
     

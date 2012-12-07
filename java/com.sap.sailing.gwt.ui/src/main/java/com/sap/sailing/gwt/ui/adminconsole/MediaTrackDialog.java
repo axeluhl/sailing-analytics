@@ -6,7 +6,6 @@ import com.google.gwt.dom.client.VideoElement;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.media.client.Video;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
@@ -77,9 +76,11 @@ public class MediaTrackDialog extends DataEntryDialog<MediaTrack> {
             case VIDEO:
                 Video videoControl = Video.createIfSupported();
                 if (videoControl != null) {
+                    videoControl.setPreload("true");
                     videoControl.setSrc(url);
                     VideoElement videoElement = videoControl.getVideoElement();
-                    double result = videoElement.getDuration();
+                    int result = (int) Math.round(videoElement.getDuration());
+                    videoElement.load();
                     videoElement.play();
 
                     long timeout = System.currentTimeMillis() + 5 * 1000;
@@ -88,6 +89,7 @@ public class MediaTrackDialog extends DataEntryDialog<MediaTrack> {
                             return (int) Math.round(videoElement.getDuration() * 1000);
                         }
                     }
+                    return result;
                 }
             default:
                 return 0;

@@ -12,6 +12,7 @@ import com.google.gwt.maps.client.geom.Size;
 import com.google.gwt.maps.client.overlay.Icon;
 import com.google.gwt.resources.client.ImageResource;
 import com.sap.sailing.domain.common.ManeuverType;
+import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 
@@ -28,18 +29,18 @@ public class RaceMapImageManager {
     protected ImageTransformer expeditionWindIconTransformer;
 
     /**
-     * The default icon for a buoy
+     * The default icon for a course mark
      */
-    private Icon defaultBuoyIcon;
+    private Icon defaultCourseMarkIcon;
  
-    private final List<BuoyIconDescriptor> buoyIconDescriptors;
+    private final List<MarkIconDescriptor> markIconDescriptors;
     
     protected Map<Pair<ManeuverType, Tack>, Icon> maneuverIconsForTypeAndTargetTack;
 
     private static RaceMapResources resources = GWT.create(RaceMapResources.class);
 
     public RaceMapImageManager() {
-        buoyIconDescriptors = new ArrayList<BuoyIconDescriptor>();
+        markIconDescriptors = new ArrayList<MarkIconDescriptor>();
         
         maneuverIconsForTypeAndTargetTack = new HashMap<Pair<ManeuverType, Tack>, Icon>();
         
@@ -47,11 +48,11 @@ public class RaceMapImageManager {
         expeditionWindIconTransformer = new ImageTransformer(resources.expeditionWindIcon());
     }
     
-    public Icon resolveBuoyIcon(String color, String shape, String pattern) {
-        Icon result = defaultBuoyIcon;
+    public Icon resolveMarkIcon(MarkType type, String color, String shape, String pattern) {
+        Icon result = defaultCourseMarkIcon;
         
-        for (BuoyIconDescriptor iconDescriptor: buoyIconDescriptors) {
-            if(iconDescriptor.isCompatible(color, shape, pattern)) {
+        for (MarkIconDescriptor iconDescriptor: markIconDescriptors) {
+            if(iconDescriptor.isCompatible(type, color, shape, pattern)) {
                 result = iconDescriptor.getIcon();
                 break;
             }
@@ -66,20 +67,26 @@ public class RaceMapImageManager {
      */
     public void loadMapIcons(MapWidget map) {
         if(map != null) {
-            defaultBuoyIcon = Icon.newInstance(resources.buoyIcon().getSafeUri().asString());
-            defaultBuoyIcon.setIconSize(Size.newInstance(19, 28));
-            defaultBuoyIcon.setIconAnchor(Point.newInstance(6, 15));
+            defaultCourseMarkIcon = Icon.newInstance(resources.buoyIcon().getSafeUri().asString());
+            defaultCourseMarkIcon.setIconSize(Size.newInstance(19, 28));
+            defaultCourseMarkIcon.setIconAnchor(Point.newInstance(6, 15));
 
-            createBuoyIconDescriptor(resources.buoyRedIcon(), "red", null, null); 
-            createBuoyIconDescriptor(resources.buoyGreenIcon(), "green", null, null); 
-            createBuoyIconDescriptor(resources.buoyYellowIcon(), "yellow", null, null); 
-            createBuoyIconDescriptor(resources.buoyGreyIcon(), "grey", null, null); 
-            createBuoyIconDescriptor(resources.buoyWhiteIcon(), "white", null, null); 
-            createBuoyIconDescriptor(resources.buoyWhiteConeIcon(), "white", "conical", null); 
-            createBuoyIconDescriptor(resources.buoyBlackIcon(), "black", null, null); 
-            createBuoyIconDescriptor(resources.buoyBlackConeIcon(), "black", "conical", null); 
-            createBuoyIconDescriptor(resources.buoyDarkOrangeIcon(), "orange", null, null); 
-            createBuoyIconDescriptor(resources.buoyBlackFinishIcon(), "black", "cylinder", "checkered"); 
+            createMarkIconDescriptor(resources.buoyRedIcon(), MarkType.BUOY, "red", null, null, 6, 20); 
+            createMarkIconDescriptor(resources.buoyGreenIcon(), MarkType.BUOY, "green", null, null, 6, 20); 
+            createMarkIconDescriptor(resources.buoyYellowIcon(), MarkType.BUOY, "yellow", null, null, 6, 20); 
+            createMarkIconDescriptor(resources.buoyGreyIcon(), MarkType.BUOY, "grey", null, null, 6, 20);
+            createMarkIconDescriptor(resources.buoyWhiteIcon(), MarkType.BUOY, "white", null, null, 6, 20);
+            createMarkIconDescriptor(resources.buoyWhiteConeIcon(), MarkType.BUOY, "white", "conical", null, 6, 20); 
+            createMarkIconDescriptor(resources.buoyBlackIcon(), MarkType.BUOY, "black", null, null, 6, 20);
+            createMarkIconDescriptor(resources.buoyBlackConeIcon(), MarkType.BUOY, "black", "conical", null, 6, 20); 
+            createMarkIconDescriptor(resources.buoyDarkOrangeIcon(), MarkType.BUOY, "orange", null, null, 6, 20);
+            createMarkIconDescriptor(resources.buoyBlackFinishIcon(), MarkType.BUOY, "black", "cylinder", "checkered", 6, 20); 
+            
+            createMarkIconDescriptor(resources.cameraBoatIcon(), MarkType.CAMERABOAT, null, null, null, 35, 20);
+            createMarkIconDescriptor(resources.umpireBoatIcon(), MarkType.UMPIREBOAT, null, null, null, 35, 20);
+            createMarkIconDescriptor(resources.startBoatIcon(), MarkType.STARTBOAT, null, null, null, 35, 20);
+
+            createMarkIconDescriptor(resources.landmarkIcon(), MarkType.LANDMARK, null, null, null, 6, 15);
             
             Icon tackToStarboardIcon = Icon
                     .newInstance("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=T|00FF00|000000");
@@ -137,12 +144,13 @@ public class RaceMapImageManager {
         }
     }
     
-    private void createBuoyIconDescriptor(ImageResource imgResource, String color, String shape, String pattern) {
+    private void createMarkIconDescriptor(ImageResource imgResource, MarkType type, String color, String shape, String pattern,
+            int anchorPointX, int anchorPointY) {
         Icon icon = Icon.newInstance(imgResource.getSafeUri().asString());
-        icon.setIconSize(Size.newInstance(19, 28));
-        icon.setIconAnchor(Point.newInstance(6, 15));
-        BuoyIconDescriptor buoyIconDescriptor = new BuoyIconDescriptor(icon, color, shape, pattern);
-        buoyIconDescriptors.add(buoyIconDescriptor);
+        //icon.setIconSize(Size.newInstance(19, 28));
+        icon.setIconAnchor(Point.newInstance(anchorPointX, anchorPointY));
+        MarkIconDescriptor markIconDescriptor = new MarkIconDescriptor(icon, type, color, shape, pattern);
+        markIconDescriptors.add(markIconDescriptor);
     }
     
     public ImageTransformer getCombinedWindIconTransformer() {
