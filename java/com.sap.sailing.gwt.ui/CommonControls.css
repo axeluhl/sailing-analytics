@@ -557,7 +557,6 @@ body ::-webkit-scrollbar-track {
   cursor: default;
   color: #888;
   background: #F1F1F1;
-  border: 1px solid #919090;
   top: 0;
 }
 
