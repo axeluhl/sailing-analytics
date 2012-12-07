@@ -21,6 +21,7 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.resources.client.ImageResource;
+import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.Column;
@@ -105,6 +106,17 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     protected static final NumberFormat scoreFormat = NumberFormat.getFormat("0.00");
 
     private final SailingServiceAsync sailingService;
+
+    interface RaceColumnTemplates extends SafeHtmlTemplates {
+        @SafeHtmlTemplates.Template("<div style=\"color:{0}; border-bottom: 3px solid {1}\">")
+        SafeHtml cellFrameWithTextColorAndFleetBorder(String textColor, String borderStyle);
+
+        @SafeHtmlTemplates.Template("<div style=\"color:{0};\">")
+        SafeHtml cellFrameWithTextColor(String textColor);
+    }
+
+    private static RaceColumnTemplates raceColumnTemplate = GWT.create(RaceColumnTemplates.class);
+
 
     /**
      * The leaderboard name is used to
@@ -644,6 +656,10 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             return race.isMedalRace();
         }
 
+        public boolean isLive(FleetDTO fleetDTO) {
+            return race.isLive(fleetDTO);
+        }
+
         @Override
         public String getColumnStyle() {
             return columnStyle;
@@ -666,15 +682,18 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         public void render(Context context, LeaderboardRowDTO object, SafeHtmlBuilder html) {
             LeaderboardEntryDTO entry = object.fieldsByRaceColumnName.get(getRaceColumnName());
             if (entry != null) {
-                String fleetColorBarStyle = "";
+            	boolean isLive = isLive(entry.fleet);
+            	
+                String textColor = isLive ? "#444444" : "#000000";
                 String totalPointsAsText = entry.totalPoints == null ? "" : scoreFormat.format(entry.totalPoints);
                 String netPointsAsText = entry.netPoints == null ? "" : scoreFormat.format(entry.netPoints);
 
                 if (entry.fleet != null && entry.fleet.getColor() != null) {
-                    fleetColorBarStyle = " style=\"border-bottom: 3px solid " + entry.fleet.getColor().getAsHtml()
-                            + ";\"";
+                	html.append(raceColumnTemplate.cellFrameWithTextColorAndFleetBorder(textColor, entry.fleet.getColor().getAsHtml()));
+                } else {
+                	html.append(raceColumnTemplate.cellFrameWithTextColor(textColor));
                 }
-                html.appendHtmlConstant("<div" + fleetColorBarStyle + ">");
+
                 // don't show points if max points / penalty
                 if (entry.reasonForMaxPoints == null || entry.reasonForMaxPoints == MaxPointsReason.NONE) {
                     if (!entry.discarded) {
@@ -692,8 +711,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                     if (entry.discarded) {
                         html.appendHtmlConstant("<del>");
                     }
-                    html.appendEscaped(entry.reasonForMaxPoints == MaxPointsReason.NONE ? "" : entry.reasonForMaxPoints
-                            .name());
+                    html.appendEscaped(entry.reasonForMaxPoints == MaxPointsReason.NONE ? "" : entry.reasonForMaxPoints.name());
                     if (entry.discarded) {
                         html.appendHtmlConstant("</del>");
                     }
