@@ -734,8 +734,9 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     }
 
     public static DetailType[] getAvailableRaceDetailColumnTypes() {
-        return new DetailType[] { DetailType.RACE_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS,
-                DetailType.RACE_DISTANCE_TRAVELED, DetailType.RACE_GAP_TO_LEADER_IN_SECONDS,
+        return new DetailType[] { DetailType.RACE_GAP_TO_LEADER_IN_SECONDS,
+                DetailType.RACE_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS,
+                DetailType.RACE_DISTANCE_TRAVELED, 
                 DetailType.RACE_CURRENT_SPEED_OVER_GROUND_IN_KNOTS, DetailType.RACE_DISTANCE_TO_LEADER_IN_METERS,
                 DetailType.NUMBER_OF_MANEUVERS, DetailType.DISPLAY_LEGS, DetailType.CURRENT_LEG,
                 DetailType.RACE_AVERAGE_CROSS_TRACK_ERROR_IN_METERS };
