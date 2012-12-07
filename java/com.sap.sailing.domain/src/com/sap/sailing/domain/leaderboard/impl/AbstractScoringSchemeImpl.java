@@ -15,6 +15,7 @@ import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util;
+import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -120,16 +121,22 @@ public abstract class AbstractScoringSchemeImpl implements ScoringScheme {
      * Assuming both competitors scored in the same number of races, compares the sorted scores.
      */
     @Override
-    public int compareByBetterScore(List<Double> o1Scores, List<Double> o2Scores, boolean nullScoresAreBetter) {
+    public int compareByBetterScore(List<Pair<RaceColumn, Double>> o1Scores, List<Pair<RaceColumn, Double>> o2Scores, boolean nullScoresAreBetter) {
         assert o1Scores.size() == o2Scores.size();
-        Comparator<Double> scoreComparator = getScoreComparator(nullScoresAreBetter);
-        List<Double> o1ScoresCopy = new ArrayList<Double>(o1Scores);
-        List<Double> o2ScoresCopy = new ArrayList<Double>(o2Scores);
+        final Comparator<Double> pureScoreComparator = getScoreComparator(nullScoresAreBetter);
+        Comparator<Pair<RaceColumn, Double>> scoreComparator = new Comparator<Pair<RaceColumn, Double>>() {
+            @Override
+            public int compare(Pair<RaceColumn, Double> o1, Pair<RaceColumn, Double> o2) {
+                return pureScoreComparator.compare(o1.getB(), o2.getB());
+            }
+        };
+        List<Pair<RaceColumn, Double>> o1ScoresCopy = new ArrayList<Pair<RaceColumn, Double>>(o1Scores);
+        List<Pair<RaceColumn, Double>> o2ScoresCopy = new ArrayList<Pair<RaceColumn, Double>>(o2Scores);
         Collections.sort(o1ScoresCopy, scoreComparator);
         Collections.sort(o2ScoresCopy, scoreComparator);
         // now both lists are sorted from best to worst score
-        Iterator<Double> o1Iter = o1ScoresCopy.iterator();
-        Iterator<Double> o2Iter = o2ScoresCopy.iterator();
+        Iterator<Pair<RaceColumn, Double>> o1Iter = o1ScoresCopy.iterator();
+        Iterator<Pair<RaceColumn, Double>> o2Iter = o2ScoresCopy.iterator();
         int result = 0;
         while (result == 0 && o1Iter.hasNext() && o2Iter.hasNext()) {
             result = scoreComparator.compare(o1Iter.next(), o2Iter.next());
@@ -147,10 +154,11 @@ public abstract class AbstractScoringSchemeImpl implements ScoringScheme {
     }
 
     @Override
-    public int compareByLastRace(List<Double> o1Scores, List<Double> o2Scores, boolean nullScoresAreBetter) {
+    public int compareByLastRace(List<Pair<RaceColumn, Double>> o1Scores, List<Pair<RaceColumn, Double>> o2Scores, boolean nullScoresAreBetter) {
         int result = 0;
         if (!o1Scores.isEmpty() && !o2Scores.isEmpty()) {
-            result = getScoreComparator(nullScoresAreBetter).compare(o1Scores.get(o1Scores.size()-1), o2Scores.get(o2Scores.size()-1));
+            result = getScoreComparator(nullScoresAreBetter).compare(o1Scores.get(o1Scores.size()-1).getB(),
+                    o2Scores.get(o2Scores.size()-1).getB());
         }
         return result;
     }
