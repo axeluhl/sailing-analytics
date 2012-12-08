@@ -880,7 +880,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                         case TACK:
                         case JIBE:
                         case PENALTY_CIRCLE:
-                            if (!maneuver.getTimePoint().before(startOfLeg)) {
+                            if (!maneuver.getTimePoint().before(startOfLeg) && (!trackedLeg.hasFinishedLeg(timePoint) ||
+                                    maneuver.getTimePoint().before(trackedLeg.getFinishTime()))) {
                                 if (maneuver.getManeuverLoss() != null) {
                                     result.numberOfManeuvers.put(maneuver.getType(),
                                             result.numberOfManeuvers.get(maneuver.getType()) + 1);

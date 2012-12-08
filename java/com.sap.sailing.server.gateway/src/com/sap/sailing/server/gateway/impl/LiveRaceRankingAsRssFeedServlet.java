@@ -94,7 +94,9 @@ public class LiveRaceRankingAsRssFeedServlet extends SailingServerHttpServlet {
                         String entryTitle = "Live ranking of race '" + raceColumnToShow.getName() + "'";
                         entry.setTitle(entryTitle);
 
-                    	List<Competitor> competitorsFromBestToWorst = leaderboard.getCompetitorsFromBestToWorst(raceColumnToShow, MillisecondsTimePoint.now());
+                        
+                        
+                    	List<Competitor> competitorsFromBestToWorst = leaderboard.getCompetitorsFromBestToWorst(raceColumnToShow, timePoint);
                         int currentCompetitorCounter = 0; 
                         String feedText = "";
                         
@@ -102,10 +104,9 @@ public class LiveRaceRankingAsRssFeedServlet extends SailingServerHttpServlet {
                         	if(currentCompetitorCounter == maxCompetitorsToShow) {
                         		break;
                         	}                        	
-                            String sailID = competitor.getBoat().getSailID();
-                            String raceRank = "" + liveTrackedRace.getRank(competitor, timePoint);
-                            feedText += raceRank + ". " + sailID + "\n";
                         	currentCompetitorCounter++;
+                            String sailID = competitor.getBoat().getSailID();
+                            feedText += currentCompetitorCounter + ". " + sailID + "\n";
                         	
 //                            String competitorName = competitor.getName();
 //                            final String displayName = leaderboard.getDisplayName(competitor);
