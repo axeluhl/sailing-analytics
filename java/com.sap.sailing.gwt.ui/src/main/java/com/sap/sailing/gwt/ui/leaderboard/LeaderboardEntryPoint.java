@@ -300,7 +300,7 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
         StringBuilder maneuverDetails = new StringBuilder();
         for (DetailType maneuverDetail : settings.getLeaderboardSettings().getManeuverDetailsToShow()) {
             maneuverDetails.append('&');
-            maneuverDetails.append(PARAM_RACE_DETAIL);
+            maneuverDetails.append(PARAM_MANEUVER_DETAIL);
             maneuverDetails.append('=');
             maneuverDetails.append(maneuverDetail.name());
         }
@@ -318,6 +318,7 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
                 + legDetails.toString()
                 + raceDetails.toString()
                 + overallDetails.toString()
+                + maneuverDetails.toString()
                 + (settings.isAutoExpandLastRaceColumn() ? "&"+PARAM_AUTO_EXPAND_LAST_RACE_COLUMN+"=true" : "")
                 + (settings.getLeaderboardSettings().getNumberOfLastRacesToShow() == null ? "" :
                     "&"+PARAM_NAME_LAST_N+"="+settings.getLeaderboardSettings().getNumberOfLastRacesToShow())
