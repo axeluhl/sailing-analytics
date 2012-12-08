@@ -611,7 +611,7 @@ public class EventOverviewPanel extends FormPanel {
             result = textContainsStringsToCheck(event.name, name.split("\\s"));
         }
         if (result && onlyLiveCheckBox.getValue()) {
-            result = event.leaderboardGroup.containsLiveRace();
+            result = event.leaderboardGroup.hasLiveRace();
         }else if (result) {
             Date startDate = event.leaderboardGroup.getGroupStartDate();
             if (startDate != null) {

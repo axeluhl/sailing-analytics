@@ -55,6 +55,7 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.SortingOrder;
 import com.sap.sailing.domain.common.impl.InvertibleComparatorAdapter;
 import com.sap.sailing.domain.common.impl.Util;
+import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
 import com.sap.sailing.gwt.ui.actions.GetLeaderboardByNameAction;
 import com.sap.sailing.gwt.ui.client.Collator;
@@ -661,6 +662,10 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         public RaceColumnDTO getRace() {
             return race;
         }
+        
+        public void setRace(RaceColumnDTO race) {
+        	this.race = race;
+        }
 
         public String getRaceColumnName() {
             return race.getRaceColumnName();
@@ -1110,7 +1115,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
 
         @Override
         public void render(Context context, LeaderboardRowDTO object, SafeHtmlBuilder sb) {
-            String textColor = getLeaderboard().containsLiveRace() ? IS_LIVE_TEXT_COLOR : DEFAULT_TEXT_COLOR;
+            String textColor = getLeaderboard().hasLiveRace() ? IS_LIVE_TEXT_COLOR : DEFAULT_TEXT_COLOR;
         	
             sb.appendHtmlConstant("<span style=\"font-weight: bold; color:" + textColor + "\">");
             sb.appendEscaped(getValue(object));
@@ -1653,6 +1658,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             raceColumnSelection.autoUpdateRaceColumnSelectionForUpdatedLeaderboard(getLeaderboard(), leaderboard);
             setLeaderboard(leaderboard);
             adjustColumnLayout(leaderboard);
+            updateRaceColumnDTOsToRaceColumns(leaderboard);
             for (RaceColumn<?> columnToCollapseAndExpandAgain : columnsToCollapseAndExpandAgain) {
                 columnToCollapseAndExpandAgain.toggleExpansion();
             }
@@ -1703,7 +1709,13 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             } else {
                 scoreCorrectionLastUpdateTimeLabel.setText("");
             }
-            boolean hasLiveRace = leaderboard.containsLiveRace();
+            
+            List<Pair<RaceColumnDTO, FleetDTO>> liveRaces = leaderboard.getLiveRaces();
+            boolean hasLiveRace = !liveRaces.isEmpty();
+            if (hasLiveRace) {
+            	Pair<RaceColumnDTO, FleetDTO> liveRace = liveRaces.get(0);
+            	liveRaceLabel.setText("Race " + liveRace.getA().getRaceColumnName() + " is live");
+            }
             scoreCorrectionCommentLabel.setVisible(!hasLiveRace);
             scoreCorrectionLastUpdateTimeLabel.setVisible(!hasLiveRace);
             liveRaceLabel.setVisible(hasLiveRace);
@@ -1711,6 +1723,18 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     }
 
     /**
+     * The race columns hold a now outdated copy of a {@link RaceColumnDTO} which needs to be updated from the {@link LeaderboardDTO} just received
+     */
+    private void updateRaceColumnDTOsToRaceColumns(LeaderboardDTO leaderboard) {
+    	for (RaceColumnDTO newRace : leaderboard.getRaceList()) {
+    		RaceColumn<?> raceColumn = getRaceColumnByRaceColumnName(newRace.name);
+    		if (raceColumn != null) {
+    			raceColumn.setRace(newRace);
+    		}
+    	}
+	}
+
+	/**
      * Due to a course change, a race may change its number of legs. All expanded race columns that show leg columns and
      * whose leg count changed need to be collapsed before the leaderboard is replaced, and expanded afterwards again.
      * Race columns whose toggling is {@link ExpandableSortableColumn#isTogglingInProcess() currently in progress} are
