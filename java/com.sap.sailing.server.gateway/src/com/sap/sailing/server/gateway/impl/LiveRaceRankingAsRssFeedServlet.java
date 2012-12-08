@@ -26,64 +26,87 @@ import com.sun.syndication.feed.synd.SyndFeed;
 import com.sun.syndication.feed.synd.SyndFeedImpl;
 import com.sun.syndication.io.SyndFeedOutput;
 
-public class RaceRankingAsRssFeedServlet extends SailingServerHttpServlet {
+public class LiveRaceRankingAsRssFeedServlet extends SailingServerHttpServlet {
     private static final long serialVersionUID = -508373964426868319L;
     private static final String PARAM_NAME_LEADERBOARDNAME = "leaderboardName";
-    private static final String PARAM_NAME_RACENAME = "raceName";
+    private static final String PARAM_MAX_COMPETITORS = "max";
     private String charEncoding =  "UTF-8";
-    
+    private int maxCompetitorsToShow = 1000;
+
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        // to allow access to the json document directly from a client side javascript
+        // to allow access to the rss feed directly from a client side javascript
         resp.setHeader("Access-Control-Allow-Origin", "*");
         resp.setContentType("application/rss+xml");
         resp.setCharacterEncoding(charEncoding);
 
         TimePoint timePoint = MillisecondsTimePoint.now();
         String leaderboardName = req.getParameter(PARAM_NAME_LEADERBOARDNAME);
-        String raceName = req.getParameter(PARAM_NAME_RACENAME);
+        String maxCompetitorsParam  = req.getParameter(PARAM_MAX_COMPETITORS);
+        if(maxCompetitorsParam != null) {
+			try {
+				maxCompetitorsToShow = Integer.parseInt(maxCompetitorsParam);
+			} catch (NumberFormatException e) {
+			}
+        }
+        
         if (leaderboardName == null) {
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Need to specify a leaderboard name using the "+
                     PARAM_NAME_LEADERBOARDNAME+" parameter");
-        } else if (raceName == null) {
-                resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Need to specify a race column name using the "+
-                        PARAM_NAME_RACENAME+" parameter");
         } else {
             Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
             if (leaderboard == null) {
                 resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Leaderboard "+leaderboardName+" not found");
             } else {
                 try {
-                    RaceColumn raceColumnToShow = null; 
-                    
+                    RaceColumn raceColumnToShow = null;
+                    TrackedRace liveTrackedRace = null;
+
+                    // find a live race in the leaderboard
                     Iterable<RaceColumn> races = leaderboard.getRaceColumns();
                     for (RaceColumn raceInLeaderboard : races) {
                         for (Fleet fleet : raceInLeaderboard.getFleets()) {
-                            TrackedRace trackedRace = raceInLeaderboard.getTrackedRace(fleet);
-                            if (trackedRace != null && raceInLeaderboard.getName().equals(raceName)) {
-                                raceColumnToShow = raceInLeaderboard; 
-                                    break;
+                            TrackedRace trackedRaceOfFleet = raceInLeaderboard.getTrackedRace(fleet);
+                            if(trackedRaceOfFleet != null && isLive(trackedRaceOfFleet)) {
+                                raceColumnToShow = raceInLeaderboard;
+                                liveTrackedRace = trackedRaceOfFleet;
+                                break;
                             }
                         }
                     }
 
-                    if(raceColumnToShow != null) {
-                        List<Competitor> competitorsFromBestToWorst = leaderboard.getCompetitorsFromBestToWorst(raceColumnToShow, MillisecondsTimePoint.now());
-                        String eventName = "STG meets 'Berlin Match Race'";
-                        String title = eventName + ": " + leaderboardName;
-                        
-                        SyndFeed feed = new SyndFeedImpl();
-                        feed.setTitle(title);
-                        feed.setFeedType("rss_2.0");
-                        feed.setLink("http://www.sapsaling.com");
-                        feed.setDescription("SAP Sailing Analytics");
-                        feed.setPublishedDate(new Date());
-                        feed.setEncoding(charEncoding);
-                        
+                    SyndFeed feed = new SyndFeedImpl();
+                    String title = leaderboard.getName();
+                    feed.setTitle(title);
+                    feed.setFeedType("rss_2.0");
+                    feed.setLink("http://www.sapsaling.com");
+                    feed.setDescription("SAP Sailing Analytics");
+                    feed.setPublishedDate(new Date());
+                    feed.setEncoding(charEncoding);
+                    
+                    List<SyndEntry> entries = new ArrayList<SyndEntry>();
+                    SyndContent description = new SyndContentImpl();
+                    SyndEntry entry = new SyndEntryImpl();
+                    entry.setLink("http://www.sapsailing.com");
+                    description.setType("text/plain");
+
+                    if(raceColumnToShow != null && liveTrackedRace != null) {
+                        String entryTitle = "Live ranking of race '" + raceColumnToShow.getName() + "'";
+                        entry.setTitle(entryTitle);
+
+                    	List<Competitor> competitorsFromBestToWorst = leaderboard.getCompetitorsFromBestToWorst(raceColumnToShow, MillisecondsTimePoint.now());
+                        int currentCompetitorCounter = 0; 
                         String feedText = "";
                         
                         for (Competitor competitor : competitorsFromBestToWorst) {
+                        	if(currentCompetitorCounter == maxCompetitorsToShow) {
+                        		break;
+                        	}                        	
                             String sailID = competitor.getBoat().getSailID();
+                            String raceRank = "" + liveTrackedRace.getRank(competitor, timePoint);
+                            feedText += raceRank + ". " + sailID + "\n";
+                        	currentCompetitorCounter++;
+                        	
 //                            String competitorName = competitor.getName();
 //                            final String displayName = leaderboard.getDisplayName(competitor);
 //                            String id = competitor.getId().toString();
@@ -92,7 +115,6 @@ public class RaceRankingAsRssFeedServlet extends SailingServerHttpServlet {
 //                            String countryCode = nationality != null ? nationality.getCountryCode().getTwoLetterISOCode(): null;
 //                            String totalRank = "" +competitorsFromBestToWorst.indexOf(competitor) + 1;
 //                            String totalPoints = "" + leaderboard.getTotalPoints(competitor, timePoint);
-//
 //                            String raceColumnName = raceColumnToShow.getName();
 //                            final Fleet fleetOfCompetitor = raceColumnToShow.getFleetOfCompetitor(competitor);
 //                            String fleet = fleetOfCompetitor==null?"":fleetOfCompetitor.getName();
@@ -103,37 +125,33 @@ public class RaceRankingAsRssFeedServlet extends SailingServerHttpServlet {
 //                            String isDiscarded = String.valueOf(leaderboard.isDiscarded(competitor, raceColumnToShow, timePoint));
 //                            String isCorrected = String.valueOf(leaderboard.getScoreCorrection().isScoreCorrected(competitor, raceColumnToShow));
 
-                            final TrackedRace trackedRace = raceColumnToShow.getTrackedRace(competitor);
-                            
-                            boolean isLive = trackedRace != null && trackedRace.getEndOfRace() == null && (trackedRace.getStartOfTracking() != null ? new Date().after(trackedRace.getStartOfTracking().asDate()) : false);
-                            if(isLive) {
-                                String raceRank = "" + trackedRace.getRank(competitor, timePoint);
-                                feedText += raceRank + ". " + sailID + "\n";
-                            }
                         }
-
-                        List<SyndEntry> entries = new ArrayList<SyndEntry>();
-                        SyndContent description = new SyndContentImpl();
-                        
-                        SyndEntry entry = new SyndEntryImpl();
-                        entry.setTitle("Live Race ranking of race " + raceName);
-                        entry.setLink("http://obmr2012.sapsailing.com");
-                        description.setType("text/plain");
                         description.setValue(feedText);
-                        entry.setDescription(description);
-                        entries.add(entry);
-                        feed.setEntries(entries);
-                        
-                        PrintWriter writer = resp.getWriter();
-                        SyndFeedOutput feedOutput = new SyndFeedOutput();
-                        feedOutput.output(feed, writer);
                     } else {
-                        resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "No live race at the moment");
+                        String entryTitle = "No live race right now";
+                        entry.setTitle(entryTitle);
+                        description.setValue("");
                     }
+
+                    entry.setDescription(description);
+                    entries.add(entry);
+                    feed.setEntries(entries);
+
+                    PrintWriter writer = resp.getWriter();
+                    SyndFeedOutput feedOutput = new SyndFeedOutput();
+                    feedOutput.output(feed, writer);
                 } catch (Exception e) {
                     resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
                 }
             }
         }
     }
+
+    /**
+    * @return <code>true</code> if the startOfTracking is after the current date and there's no end of the race
+     */
+    private boolean isLive(TrackedRace trackedRace) {
+        return trackedRace.getEndOfRace() == null && (trackedRace.getStartOfTracking() != null ? new Date().after(trackedRace.getStartOfTracking().asDate()) : false);
+    }
+    
 }
