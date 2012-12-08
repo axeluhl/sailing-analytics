@@ -111,6 +111,12 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     private static String IS_LIVE_TEXT_COLOR = "#1876B3";
     private static String DEFAULT_TEXT_COLOR = "#000000";
     
+    private static final String STYLE_LEADERBOARD_PREFIX = "leaderboard-";
+    private static final String STYLE_LEADERBOARD_CONTENT = "leaderboardContent";
+    private static final String STYLE_LEADERBOARD_INFO = "leaderboardInfo";
+    private static final String STYLE_LEADERBOARD_TOOLBAR = "leaderboardContent-toolbar";
+
+    
     interface RaceColumnTemplates extends SafeHtmlTemplates {
         @SafeHtmlTemplates.Template("<div style=\"color:{0}; border-bottom: 3px solid {1}\">")
         SafeHtml cellFrameWithTextColorAndFleetBorder(String textColor, String borderStyle);
@@ -1341,11 +1347,11 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             isEmbedded = true;
         }
         contentPanel = new VerticalPanel();
-        contentPanel.setStyleName("leaderboardContent");
+        contentPanel.setStyleName(STYLE_LEADERBOARD_CONTENT);
         overallLeaderboardsPanel = new VerticalPanel();
         overallLeaderboardPanels = new ArrayList<LeaderboardPanel>();
         informationPanel = new FlowPanel();
-        informationPanel.setStyleName("leaderboardInfo");
+		informationPanel.setStyleName(STYLE_LEADERBOARD_INFO);
         scoreCorrectionLastUpdateTimeLabel = new Label("");
         scoreCorrectionCommentLabel = new Label("");
         informationPanel.add(scoreCorrectionCommentLabel);
@@ -1354,7 +1360,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         legendPanel = createLegendPanel(); 
 
         DockPanel toolbarPanel = new DockPanel();
-        toolbarPanel.setStyleName("leaderboardContent-toolbar");
+		toolbarPanel.setStyleName(STYLE_LEADERBOARD_TOOLBAR);
         busyIndicator = new SimpleBusyIndicator(false, 0.8f);
         if (!isEmbedded) {
             toolbarPanel.add(informationPanel, DockPanel.WEST);
