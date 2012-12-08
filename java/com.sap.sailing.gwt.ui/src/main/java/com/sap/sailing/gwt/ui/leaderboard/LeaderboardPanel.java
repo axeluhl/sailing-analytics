@@ -114,7 +114,8 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     private static final String STYLE_LEADERBOARD_CONTENT = "leaderboardContent";
     private static final String STYLE_LEADERBOARD_INFO = "leaderboardInfo";
     private static final String STYLE_LEADERBOARD_TOOLBAR = "leaderboardContent-toolbar";
-    
+    private static final String STYLE_LEADERBOARD_LIVE_RACE = "leaderboardContent-liverace";
+	
     interface RaceColumnTemplates extends SafeHtmlTemplates {
         @SafeHtmlTemplates.Template("<div style=\"color:{0}; border-bottom: 3px solid {1}\">")
         SafeHtml cellFrameWithTextColorAndFleetBorder(String textColor, String borderStyle);
@@ -124,7 +125,6 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     }
 
     private static RaceColumnTemplates raceColumnTemplate = GWT.create(RaceColumnTemplates.class);
-
 
     /**
      * The leaderboard name is used to
@@ -231,12 +231,11 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     
     private final HorizontalPanel refreshAndSettingsPanel;
 
-    private final HorizontalPanel legendPanel;
-    
     private final FlowPanel informationPanel;
     private final Label scoreCorrectionLastUpdateTimeLabel;
     private final Label scoreCorrectionCommentLabel;
-
+    private final Label liveRaceLabel; 
+    
     private final DateTimeFormat dateFormatter = DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.DATE_LONG);
     private final DateTimeFormat timeFormatter = DateTimeFormat.getFormat("HH:mm:ss");
 
@@ -328,7 +327,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
 
     @Override
     public Widget getLegendWidget() {
-    	return legendPanel;
+    	return null;
     }
     
     @Override
@@ -336,35 +335,6 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         return isEmbedded;
     }
 
-    private HorizontalPanel createLegendPanel() {
-    	String STYLE_LEGEND = "legend";
-    	String STYLE_LEGEND_LIVE_RACE = "legend-live-race";
-    	String STYLE_LEGEND_FINISHED_RACE = "legend-finished-race";
-    	
-        HorizontalPanel legendPanel = new HorizontalPanel();
-        legendPanel.setStyleName(STYLE_LEGEND);
-        legendPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
-        legendPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
-        legendPanel.setSpacing(5);
-        
-        Label legendLabel = new Label(stringMessages.legend() + ":");
-        legendPanel.add(legendLabel);
-        
-        Label finishedRace = new Label(stringMessages.finished());
-        finishedRace.setStyleName(STYLE_LEGEND_FINISHED_RACE);
-        finishedRace.getElement().getStyle().setFontWeight(FontWeight.BOLD);
-        finishedRace.getElement().getStyle().setColor(DEFAULT_TEXT_COLOR);
-        legendPanel.add(finishedRace);
-
-        Label liveRace = new Label(stringMessages.live());
-        liveRace.setStyleName(STYLE_LEGEND_LIVE_RACE);
-        liveRace.getElement().getStyle().setFontWeight(FontWeight.BOLD);
-        liveRace.getElement().getStyle().setColor(IS_LIVE_TEXT_COLOR);
-        legendPanel.add(liveRace);
-
-        return legendPanel;
-    }
-    
     protected VerticalPanel getContentPanel() {
         return contentPanel;
     }
@@ -1353,6 +1323,8 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         contentPanel.setStyleName(STYLE_LEADERBOARD_CONTENT);
         overallLeaderboardsPanel = new VerticalPanel();
         overallLeaderboardPanels = new ArrayList<LeaderboardPanel>();
+        
+        // the information panel
         informationPanel = new FlowPanel();
 		informationPanel.setStyleName(STYLE_LEADERBOARD_INFO);
         scoreCorrectionLastUpdateTimeLabel = new Label("");
@@ -1360,8 +1332,14 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         informationPanel.add(scoreCorrectionCommentLabel);
         informationPanel.add(scoreCorrectionLastUpdateTimeLabel);
 
-        legendPanel = createLegendPanel(); 
-
+        liveRaceLabel = new Label(stringMessages.live());
+        liveRaceLabel.setStyleName(STYLE_LEADERBOARD_LIVE_RACE);
+        liveRaceLabel.getElement().getStyle().setFontWeight(FontWeight.BOLD);
+        liveRaceLabel.getElement().getStyle().setColor(IS_LIVE_TEXT_COLOR);
+        liveRaceLabel.setVisible(false);
+        informationPanel.add(liveRaceLabel);
+        
+        // the toolbar panel
         DockPanel toolbarPanel = new DockPanel();
 		toolbarPanel.setStyleName(STYLE_LEADERBOARD_TOOLBAR);
         busyIndicator = new SimpleBusyIndicator(false, 0.8f);
@@ -1427,7 +1405,6 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             contentPanel.add(toolbarPanel);
         }
         contentPanel.add(getLeaderboardTable());
-        contentPanel.add(legendPanel);
         contentPanel.add(overallLeaderboardsPanel);
         setWidget(contentPanel);
         raceNameForDefaultSorting = settings.getNameOfRaceToSort();
@@ -1716,6 +1693,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                     leaderboardSelectionModel.setSelected(row, true);
                 }
             }
+            
             scoreCorrectionCommentLabel.setText(leaderboard.getComment() != null ? leaderboard.getComment() : "");
             if (leaderboard.getTimePointOfLastCorrectionsValidity() != null) {
                 Date lastCorrectionDate = leaderboard.getTimePointOfLastCorrectionsValidity();
@@ -1725,6 +1703,10 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             } else {
                 scoreCorrectionLastUpdateTimeLabel.setText("");
             }
+            boolean hasLiveRace = leaderboard.containsLiveRace();
+            scoreCorrectionCommentLabel.setVisible(!hasLiveRace);
+            scoreCorrectionLastUpdateTimeLabel.setVisible(!hasLiveRace);
+            liveRaceLabel.setVisible(hasLiveRace);
         }
     }
 
@@ -1908,7 +1890,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     }
 
     /**
-     * If header information doesn't match the race column's actual state (tracked races attached meaning expanable;
+     * If header information doesn't match the race column's actual state (tracked races attached meaning expandable;
      * medal race), the column is removed and inserted again
      * 
      * @param raceColumn
