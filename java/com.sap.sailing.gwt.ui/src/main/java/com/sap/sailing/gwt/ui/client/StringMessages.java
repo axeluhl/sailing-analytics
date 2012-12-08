@@ -443,4 +443,7 @@ public interface StringMessages extends Messages {
     String showOverallLeaderboardOnSamePage();
     String errorTryingToObtainOverallLeaderboards(String message);
     String finished();
+    String passedTo(String name);
+    String gapChangeSinceLegStartInSeconds();
+    String sideToWhichMarkAtLegStartWasRounded();
 }
