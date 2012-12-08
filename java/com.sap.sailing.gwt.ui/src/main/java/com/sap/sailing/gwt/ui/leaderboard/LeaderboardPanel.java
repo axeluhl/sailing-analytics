@@ -111,11 +111,9 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     private static String IS_LIVE_TEXT_COLOR = "#1876B3";
     private static String DEFAULT_TEXT_COLOR = "#000000";
     
-    private static final String STYLE_LEADERBOARD_PREFIX = "leaderboard-";
     private static final String STYLE_LEADERBOARD_CONTENT = "leaderboardContent";
     private static final String STYLE_LEADERBOARD_INFO = "leaderboardInfo";
     private static final String STYLE_LEADERBOARD_TOOLBAR = "leaderboardContent-toolbar";
-
     
     interface RaceColumnTemplates extends SafeHtmlTemplates {
         @SafeHtmlTemplates.Template("<div style=\"color:{0}; border-bottom: 3px solid {1}\">")
@@ -346,19 +344,23 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         HorizontalPanel legendPanel = new HorizontalPanel();
         legendPanel.setStyleName(STYLE_LEGEND);
         legendPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
+        legendPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
         legendPanel.setSpacing(5);
         
         Label legendLabel = new Label(stringMessages.legend() + ":");
-        legendLabel.getElement().getStyle().setFontWeight(FontWeight.BOLD);
         legendPanel.add(legendLabel);
         
-        Label liveRace = new Label(stringMessages.live());
-        liveRace.setStyleName(STYLE_LEGEND_LIVE_RACE);
-        legendPanel.add(liveRace);
-
         Label finishedRace = new Label(stringMessages.finished());
         finishedRace.setStyleName(STYLE_LEGEND_FINISHED_RACE);
+        finishedRace.getElement().getStyle().setFontWeight(FontWeight.BOLD);
+        finishedRace.getElement().getStyle().setColor(DEFAULT_TEXT_COLOR);
         legendPanel.add(finishedRace);
+
+        Label liveRace = new Label(stringMessages.live());
+        liveRace.setStyleName(STYLE_LEGEND_LIVE_RACE);
+        liveRace.getElement().getStyle().setFontWeight(FontWeight.BOLD);
+        liveRace.getElement().getStyle().setColor(IS_LIVE_TEXT_COLOR);
+        legendPanel.add(liveRace);
 
         return legendPanel;
     }
