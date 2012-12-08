@@ -90,7 +90,7 @@ public class MarkPassingReceiver extends AbstractReceiverWithQueue<RaceCompetito
                     markPassings.add(passing);
                 }
             }
-            logger.fine("Received mark passings: "+markPassings);
+            logger.fine("Received mark passings in race "+trackedRace.getRace().getName()+": "+markPassings);
             if (getSimulator() != null) {
                 getSimulator().delayMarkPassings(getDomainFactory().getOrCreateCompetitor(event.getA().getCompetitor()), markPassings);
             } else {
