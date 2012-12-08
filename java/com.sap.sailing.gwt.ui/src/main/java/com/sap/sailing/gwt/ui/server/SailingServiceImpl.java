@@ -858,40 +858,57 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             Distance windwardDistanceToGo = trackedLeg.getWindwardDistanceToGo(timePoint);
             result.windwardDistanceToGoInMeters = windwardDistanceToGo == null ? null : windwardDistanceToGo
                     .getMeters();
-            List<Maneuver> maneuvers = trackedLeg.getManeuvers(timePoint, waitForLatestAnalyses);
-            if (maneuvers != null) {
-                result.numberOfManeuvers = new HashMap<ManeuverType, Integer>();
-                result.numberOfManeuvers.put(ManeuverType.TACK, 0);
-                result.numberOfManeuvers.put(ManeuverType.JIBE, 0);
-                result.numberOfManeuvers.put(ManeuverType.PENALTY_CIRCLE, 0);
-                Map<ManeuverType, Double> totalManeuverLossInMeters = new HashMap<ManeuverType, Double>();
-                totalManeuverLossInMeters.put(ManeuverType.TACK, 0.0);
-                totalManeuverLossInMeters.put(ManeuverType.JIBE, 0.0);
-                totalManeuverLossInMeters.put(ManeuverType.PENALTY_CIRCLE, 0.0);
-                for (Maneuver maneuver : maneuvers) {
-                    switch (maneuver.getType()) {
-                    case TACK:
-                    case JIBE:
-                    case PENALTY_CIRCLE:
-                        if (maneuver.getManeuverLoss() != null) {
-                            result.numberOfManeuvers.put(maneuver.getType(), result.numberOfManeuvers.get(maneuver.getType())+1);
-                            totalManeuverLossInMeters.put(maneuver.getType(),
-                                    totalManeuverLossInMeters.get(maneuver.getType()) + maneuver.getManeuverLoss().getMeters());
+            final TimePoint startOfRace = trackedLeg.getTrackedLeg().getTrackedRace().getStartOfRace();
+            if (startOfRace != null && trackedLeg.hasStartedLeg(timePoint)) {
+                // not using trackedLeg.getManeuvers(...) because it may not catch the mark passing maneuver starting this leg
+                // because that may have been detected as slightly before the mark passing time, hence associated with the previous leg
+                List<Maneuver> maneuvers = trackedLeg.getTrackedLeg().getTrackedRace()
+                        .getManeuvers(trackedLeg.getCompetitor(), startOfRace, timePoint, waitForLatestAnalyses);
+                if (maneuvers != null) {
+                    result.numberOfManeuvers = new HashMap<ManeuverType, Integer>();
+                    result.numberOfManeuvers.put(ManeuverType.TACK, 0);
+                    result.numberOfManeuvers.put(ManeuverType.JIBE, 0);
+                    result.numberOfManeuvers.put(ManeuverType.PENALTY_CIRCLE, 0);
+                    Map<ManeuverType, Double> totalManeuverLossInMeters = new HashMap<ManeuverType, Double>();
+                    totalManeuverLossInMeters.put(ManeuverType.TACK, 0.0);
+                    totalManeuverLossInMeters.put(ManeuverType.JIBE, 0.0);
+                    totalManeuverLossInMeters.put(ManeuverType.PENALTY_CIRCLE, 0.0);
+                    TimePoint startOfLeg = trackedLeg.getStartTime();
+                    for (Maneuver maneuver : maneuvers) {
+                        // don't count maneuvers that were in previous legs
+                        switch (maneuver.getType()) {
+                        case TACK:
+                        case JIBE:
+                        case PENALTY_CIRCLE:
+                            if (!maneuver.getTimePoint().before(startOfLeg)) {
+                                if (maneuver.getManeuverLoss() != null) {
+                                    result.numberOfManeuvers.put(maneuver.getType(),
+                                            result.numberOfManeuvers.get(maneuver.getType()) + 1);
+                                    totalManeuverLossInMeters.put(maneuver.getType(),
+                                            totalManeuverLossInMeters.get(maneuver.getType())
+                                                    + maneuver.getManeuverLoss().getMeters());
+                                }
+                            }
+                            break;
+                        case MARK_PASSING:
+                            // analyze all mark passings, not only those after this leg's start, to catch the mark passing
+                            // maneuver starting this leg, even if its time point is slightly before the mark passing starting this leg
+                            MarkPassingManeuver mpm = (MarkPassingManeuver) maneuver;
+                            if (mpm.getWaypointPassed() == trackedLeg.getLeg().getFrom()) {
+                                result.sideToWhichMarkAtLegStartWasRounded = mpm.getSide();
+                            }
+                            break;
                         }
-                        break;
-                    case MARK_PASSING:
-                        MarkPassingManeuver mpm = (MarkPassingManeuver) maneuver;
-                        if (mpm.getWaypointPassed() == trackedLeg.getLeg().getFrom()) {
-                            result.sideToWhichMarkAtLegStartWasRounded = mpm.getSide();
-                        }
-                        break;
                     }
-                }
-                result.averageManeuverLossInMeters = new HashMap<ManeuverType, Double>();
-                for (ManeuverType maneuverType : new ManeuverType[] { ManeuverType.TACK, ManeuverType.JIBE, ManeuverType.PENALTY_CIRCLE }) {
-                    if (result.numberOfManeuvers.get(maneuverType) != 0) {
-                        result.averageManeuverLossInMeters.put(maneuverType,
-                                totalManeuverLossInMeters.get(maneuverType)/result.numberOfManeuvers.get(maneuverType));
+                    result.averageManeuverLossInMeters = new HashMap<ManeuverType, Double>();
+                    for (ManeuverType maneuverType : new ManeuverType[] { ManeuverType.TACK, ManeuverType.JIBE,
+                            ManeuverType.PENALTY_CIRCLE }) {
+                        if (result.numberOfManeuvers.get(maneuverType) != 0) {
+                            result.averageManeuverLossInMeters.put(
+                                    maneuverType,
+                                    totalManeuverLossInMeters.get(maneuverType)
+                                            / result.numberOfManeuvers.get(maneuverType));
+                        }
                     }
                 }
             }
