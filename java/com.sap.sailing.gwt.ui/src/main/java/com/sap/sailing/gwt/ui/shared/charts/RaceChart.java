@@ -3,6 +3,8 @@ package com.sap.sailing.gwt.ui.shared.charts;
 import java.util.Date;
 
 import org.moxieapps.gwt.highcharts.client.Chart;
+import org.moxieapps.gwt.highcharts.client.Point;
+import org.moxieapps.gwt.highcharts.client.Series;
 import org.moxieapps.gwt.highcharts.client.XAxis;
 import org.moxieapps.gwt.highcharts.client.events.ChartClickEvent;
 import org.moxieapps.gwt.highcharts.client.events.ChartSelectionEvent;
@@ -10,6 +12,7 @@ import org.moxieapps.gwt.highcharts.client.events.ChartSelectionEvent;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
@@ -108,7 +111,6 @@ public abstract class RaceChart extends SimplePanel implements RaceSelectionChan
 
     protected void changeMinMaxAndExtremesInterval(Date minTimepoint, Date maxTimepoint, boolean redraw) {
         XAxis xAxis = chart.getXAxis();
-        
         if (minTimepoint != null) {
             xAxis.setMin(minTimepoint.getTime());
         }
@@ -120,26 +122,41 @@ public abstract class RaceChart extends SimplePanel implements RaceSelectionChan
             long tickInterval = (maxTimepoint.getTime() - minTimepoint.getTime()) / TICKCOUNT;
             xAxis.setTickInterval(tickInterval);
         }
-        if(redraw) {
+        if (redraw) {
             chart.redraw();
         }
     }
 
+    protected void setSeriesPoints(Series series, Point[] points) {
+        if (timeRangeWithZoomProvider.isZoomed()) {
+            Pair<Date, Date> timeZoom = timeRangeWithZoomProvider.getTimeZoom();
+            resetMinMaxAndExtremesInterval(/* redraw */ false);
+            series.setPoints(points, false);
+            changeMinMaxAndExtremesInterval(timeZoom.getA(), timeZoom.getB(), /* redraw */ false);
+        } else {
+            series.setPoints(points, false);
+        }
+    }
+    
     protected void resetMinMaxAndExtremesInterval(boolean redraw) {
         changeMinMaxAndExtremesInterval(timeRangeWithZoomProvider.getFromTime(), timeRangeWithZoomProvider.getToTime(), redraw);
     }
 
+    @Override
     public void onTimeZoomChanged(Date zoomStartTimepoint, Date zoomEndTimepoint) {
         changeMinMaxAndExtremesInterval(zoomStartTimepoint, zoomEndTimepoint, true);
         // Probably there is a function for this in a newer version of highcharts: http://jsfiddle.net/mqz3N/1071/ 
         // chart.showResetZoom();
     }
 
+    @Override
     public void onTimeRangeChanged(Date fromTime, Date toTime) {
-        if(isZoomed && timer.getPlayMode() != PlayModes.Live)
-            changeMinMaxAndExtremesInterval(timeRangeWithZoomProvider.getFromTime(), timeRangeWithZoomProvider.getToTime(), true);
+        if (!(isZoomed && timer.getPlayMode() == PlayModes.Live)) {
+            resetMinMaxAndExtremesInterval(/* redraw */ true);
+        }
     }
 
+    @Override
     public void onTimeZoomReset() {
         resetMinMaxAndExtremesInterval(true);
     }

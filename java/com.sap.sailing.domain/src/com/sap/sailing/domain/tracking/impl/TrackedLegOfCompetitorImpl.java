@@ -46,7 +46,8 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
         this.competitor = competitor;
     }
 
-    protected TrackedLegImpl getTrackedLeg() {
+    @Override
+    public TrackedLegImpl getTrackedLeg() {
         return trackedLeg;
     }
 
@@ -430,7 +431,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
         return getGapToLeaderInSeconds(timePoint, new LeaderGetter() {
             @Override
             public Competitor getLeader() {
-                return getTrackedLeg().getLeader(timePoint);
+                return getTrackedLeg().getLeader(hasFinishedLeg(timePoint) ? getFinishTime() : timePoint);
             }
         });
     }

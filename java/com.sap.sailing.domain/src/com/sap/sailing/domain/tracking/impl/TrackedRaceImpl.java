@@ -1915,12 +1915,16 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         // the TrackedLegOfCompetitor variables may be null, e.g., in case the time points are before or after the race
         TrackedLegOfCompetitor legBeforeManeuver = getTrackedLeg(competitor, timePointBeforeManeuver);
         TrackedLegOfCompetitor legAfterManeuver = getTrackedLeg(competitor, timePointAfterManeuver);
+        Waypoint waypointPassed = null; // set for MARK_PASSING maneuvers only
+        Tack sideToWhichWaypointWasPassed = null; // set for MARK_PASSING maneuvers only
         // check for mask passing first; a tacking / jibe-setting mark rounding thus takes precedence over being detected as a penalty circle
         if (legBeforeManeuver != legAfterManeuver
                 // a maneuver at the start line is not to be considered a MARK_PASSING maneuver; show a tack as a tack
                 && legAfterManeuver != null
                 && legAfterManeuver.getLeg().getFrom() != getRace().getCourse().getFirstWaypoint()) {
             maneuverType = ManeuverType.MARK_PASSING;
+            waypointPassed = legAfterManeuver.getLeg().getFrom();
+            sideToWhichWaypointWasPassed = totalCourseChangeInDegrees < 0 ? Tack.PORT : Tack.STARBOARD;
         } else if (Math.abs(totalCourseChangeInDegrees) > PENALTY_CIRCLE_DEGREES_THRESHOLD) {
             maneuverType = ManeuverType.PENALTY_CIRCLE;
             if (legBeforeManeuver != null) {
@@ -1973,9 +1977,16 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                         : ManeuverType.BEAR_AWAY;
             }
         }
-        Maneuver maneuver = new ManeuverImpl(maneuverType, tackAfterManeuver, maneuverPosition, maneuverTimePoint,
-                speedWithBearingOnApproximationAtBeginning, speedWithBearingOnApproximationAtEnd,
-                totalCourseChangeInDegrees, maneuverLoss);
+        final Maneuver maneuver;
+        if (maneuverType == ManeuverType.MARK_PASSING) {
+            maneuver = new MarkPassingManeuverImpl(maneuverType, tackAfterManeuver, maneuverPosition, maneuverTimePoint,
+                    speedWithBearingOnApproximationAtBeginning, speedWithBearingOnApproximationAtEnd,
+                    totalCourseChangeInDegrees, maneuverLoss, waypointPassed, sideToWhichWaypointWasPassed);
+        } else {
+            maneuver = new ManeuverImpl(maneuverType, tackAfterManeuver, maneuverPosition, maneuverTimePoint,
+                    speedWithBearingOnApproximationAtBeginning, speedWithBearingOnApproximationAtEnd,
+                    totalCourseChangeInDegrees, maneuverLoss);
+        }
         return maneuver;
     }
 

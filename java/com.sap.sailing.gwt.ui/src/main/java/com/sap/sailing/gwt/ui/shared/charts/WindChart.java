@@ -104,7 +104,7 @@ public class WindChart extends RaceChart implements Component<WindChartSettings>
                 .setWidth100()
                 .setHeight100()
                 .setBorderColor(new Color("#CACACA"))
-                .setBorderWidth(1)
+                .setBorderWidth(0)
                 .setBorderRadius(0)
                 .setBackgroundColor(new Color("#EBEBEB"))
                 .setPlotBorderWidth(0)
@@ -381,11 +381,10 @@ public class WindChart extends RaceChart implements Component<WindChartSettings>
                 newDirectionPoints = directionPoints;
                 newSpeedPoints = speedPoints;
             }
- 
-            directionSeries.setPoints(newDirectionPoints);
+            setSeriesPoints(directionSeries, newDirectionPoints);
             windSourceDirectionPoints.put(windSource, newDirectionPoints);
             if (windSource.getType().useSpeed()) {
-                speedSeries.setPoints(newSpeedPoints);
+                setSeriesPoints(speedSeries, newSpeedPoints);
                 windSourceSpeedPoints.put(windSource, newSpeedPoints);
             }
         }

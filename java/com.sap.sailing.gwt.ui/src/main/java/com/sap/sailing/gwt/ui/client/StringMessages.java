@@ -439,4 +439,13 @@ public interface StringMessages extends Messages {
     String rankNAfterRace(long l, String string);
     String afterRace();
     String showRankChart();
+    String overallLeaderboardSelection();
+    String showOverallLeaderboardOnSamePage();
+    String errorTryingToObtainOverallLeaderboards(String message);
+    String finished();
+    String passedTo(String name);
+    String gapChangeSinceLegStartInSeconds();
+    String sideToWhichMarkAtLegStartWasRounded();
+    String raceIsLive(String raceName);
+    String racesAreLive(String raceNames);
 }

@@ -5,6 +5,7 @@ import java.util.List;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.common.ScoringSchemeType;
+import com.sap.sailing.domain.common.impl.Util.Pair;
 
 /**
  * A variant of the {@link HighPoint} scoring scheme which breaks ties differently and which assigns a score of 10 to
@@ -42,13 +43,13 @@ public class HighPointExtremeSailingSeriesOverall extends HighPoint {
      * Implements rule 13.5 of the Extreme Sailing Series notice of race as of August 2012.
      */
     @Override
-    public int compareByBetterScore(List<Double> o1Scores, List<Double> o2Scores, boolean nullScoresAreBetter) {
+    public int compareByBetterScore(List<Pair<RaceColumn, Double>> o1Scores, List<Pair<RaceColumn, Double>> o2Scores, boolean nullScoresAreBetter) {
         assert o1Scores.size() == o2Scores.size();
         int o1Wins = getWins(o1Scores);
         int o2Wins = getWins(o2Scores);
-        int result = o1Wins - o2Wins;
+        int result = o2Wins - o1Wins;
         if (result == 0 && o1Scores.size() >= 1 && o2Scores.size() >= 1) {
-            result = o1Scores.get(o1Scores.size()-1).compareTo(o2Scores.get(o2Scores.size()-1));
+            result = o1Scores.get(o1Scores.size()-1).getB().compareTo(o2Scores.get(o2Scores.size()-1).getB());
         }
         return result;
     }
@@ -57,10 +58,10 @@ public class HighPointExtremeSailingSeriesOverall extends HighPoint {
      * Counts a competitor's wins by comparing the scores to {@link #MAX_POINTS} which is the score attributed to a race
      * won
      */
-    private int getWins(List<Double> scores) {
+    private int getWins(List<Pair<RaceColumn, Double>> scores) {
         int wins = 0;
-        for (Double score : scores) {
-            if (score == MAX_POINTS) {
+        for (Pair<RaceColumn, Double> score : scores) {
+            if (score.getB() == MAX_POINTS * score.getA().getFactor()) {
                 wins++;
             }
         }
