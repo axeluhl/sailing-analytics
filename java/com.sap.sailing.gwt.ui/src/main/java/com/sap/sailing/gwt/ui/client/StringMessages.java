@@ -446,4 +446,6 @@ public interface StringMessages extends Messages {
     String passedTo(String name);
     String gapChangeSinceLegStartInSeconds();
     String sideToWhichMarkAtLegStartWasRounded();
+    String raceIsLive(String raceName);
+    String racesAreLive(String raceNames);
 }

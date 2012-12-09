@@ -1713,10 +1713,23 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             List<Pair<RaceColumnDTO, FleetDTO>> liveRaces = leaderboard.getLiveRaces();
             boolean hasLiveRace = !liveRaces.isEmpty();
             if (hasLiveRace) {
-            	Pair<RaceColumnDTO, FleetDTO> liveRace = liveRaces.get(0);
-            	liveRaceLabel.setText("Race " + liveRace.getA().getRaceColumnName() + " is live");
+            	String liveRaceText = "";
+            	if(liveRaces.size() == 1) {
+                	Pair<RaceColumnDTO, FleetDTO> liveRace = liveRaces.get(0);
+                	liveRaceText = stringMessages.raceIsLive("'" + liveRace.getA().getRaceColumnName() + "'");
+            	} else {
+            		String raceNames = "";
+            		for(Pair<RaceColumnDTO, FleetDTO> liveRace: liveRaces) {
+            			raceNames += "'" + liveRace.getA().getRaceColumnName() + "', ";
+            		}
+            		// remove last ", "
+            		raceNames = raceNames.substring(0, raceNames.length()-2);
+                	liveRaceText = stringMessages.racesAreLive(raceNames);
+            	}
+            	liveRaceLabel.setText(liveRaceText);
+            } else {
+            	liveRaceLabel.setText("");
             }
-            scoreCorrectionCommentLabel.setVisible(!hasLiveRace);
             scoreCorrectionLastUpdateTimeLabel.setVisible(!hasLiveRace);
             liveRaceLabel.setVisible(hasLiveRace);
         }
