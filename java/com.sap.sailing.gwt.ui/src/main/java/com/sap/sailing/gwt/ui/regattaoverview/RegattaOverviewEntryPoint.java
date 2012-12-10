@@ -16,7 +16,7 @@ public class RegattaOverviewEntryPoint extends AbstractEntryPoint  {
         boolean embedded = Window.Location.getParameter("embedded") != null
                 && Window.Location.getParameter("embedded").equalsIgnoreCase("true");
         if (!embedded) {
-            LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel("Regatta Overview", stringMessages);
+            LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel("Regatta Overview", stringMessages, this);
             logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
             rootPanel.add(logoAndTitlePanel);
         } else {
