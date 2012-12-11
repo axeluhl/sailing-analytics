@@ -55,13 +55,13 @@ public class InitialLoadReplicationObjectIdentityTest extends AbstractServerRepl
         final ArrayList<Competitor> competitors = new ArrayList<Competitor>();
         competitors.add(competitor);
         RaceDefinition race1 = new RaceDefinitionImpl(raceName1, masterCourse, boatClass, competitors);
-        // FIXME need to test initial load, not operation-based replication!!!
         AddRaceDefinition addRaceOperation1 = new AddRaceDefinition(new RegattaName(regatta.getName()), race1);
         master.apply(addRaceOperation1);
+        replicationDescriptorPair.getA().startToReplicateFrom(replicationDescriptorPair.getB());
         RaceDefinition race2 = new RaceDefinitionImpl(raceName2, masterCourse, boatClass, competitors);
         AddRaceDefinition addRaceOperation2 = new AddRaceDefinition(new RegattaName(regatta.getName()), race2);
         master.apply(addRaceOperation2);
-        replicationDescriptorPair.getA().startToReplicateFrom(replicationDescriptorPair.getB());
+        Thread.sleep(3000); // wait 1s for messaging to deliver the message and the message to be applied
         Regatta replicaEvent = replica.getRegatta(new RegattaName(regatta.getName()));
         RaceDefinition replicaRace1 = replicaEvent.getRaceByName(raceName1);
         RaceDefinition replicaRace2 = replicaEvent.getRaceByName(raceName2);
