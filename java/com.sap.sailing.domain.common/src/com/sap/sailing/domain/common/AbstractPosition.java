@@ -6,7 +6,7 @@ import com.sap.sailing.domain.common.impl.RadianPosition;
 
 public class AbstractPosition implements Position {
 
-    private static final double TRESHOLD_DEGREES = 16;
+    private static final double TRESHOLD_DEGREES = 20.0;
     private static final long serialVersionUID = -3057027562787541064L;
 
     @Override
