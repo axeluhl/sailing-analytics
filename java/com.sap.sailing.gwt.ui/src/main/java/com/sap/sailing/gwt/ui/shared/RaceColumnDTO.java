@@ -143,14 +143,13 @@ public class RaceColumnDTO extends NamedDTO implements IsSerializable {
     }
     
     /**
-     * @param fleet TODO
      * @return <code>true</code> if the startOfTracking is after the current date and there's no end of the race
      */
     public boolean isLive(FleetDTO fleet) {
         boolean result = false;
         final long now = System.currentTimeMillis();
-        if (getWhenLastTrackedRaceWasLive(fleet) != null
-                && getWhenLastTrackedRaceWasLive(fleet).getTime() > now - IS_LIVE_GRACE_PERIOD_IN_MILLIS) {
+        Date whenLastTrackedRaceWasLive = getWhenLastTrackedRaceWasLive(fleet);
+        if (whenLastTrackedRaceWasLive != null && whenLastTrackedRaceWasLive.getTime() > now - IS_LIVE_GRACE_PERIOD_IN_MILLIS) {
             result = true;
         }
         return result;

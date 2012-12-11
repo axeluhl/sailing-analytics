@@ -448,4 +448,10 @@ public interface StringMessages extends Messages {
     String overallLeaderboardSelection();
     String showOverallLeaderboardOnSamePage();
     String errorTryingToObtainOverallLeaderboards(String message);
+    String finished();
+    String passedTo(String name);
+    String gapChangeSinceLegStartInSeconds();
+    String sideToWhichMarkAtLegStartWasRounded();
+    String raceIsLive(String raceName);
+    String racesAreLive(String raceNames);
 }

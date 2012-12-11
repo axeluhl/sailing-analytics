@@ -36,6 +36,8 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
     private String leaderboardGroupName;
     private RaceBoardViewModes viewMode;
 
+    private GlobalNavigationPanel globalNavigationPanel;
+
     @Override
     public void onModuleLoad() {     
         super.onModuleLoad();
@@ -131,7 +133,7 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         raceSelectionModel.setSelection(singletonList);
         Timer timer = new Timer(PlayModes.Replay, 1000l);
         RaceTimesInfoProvider raceTimesInfoProvider = new RaceTimesInfoProvider(sailingService, this, singletonList, 5000l /* requestInterval*/);
-        RaceBoardPanel raceBoardPanel = new RaceBoardPanel(sailingService, mediaService, user, timer, raceSelectionModel, leaderboardName, leaderboardGroupName,
+        RaceBoardPanel raceBoardPanel = new RaceBoardPanel(sailingService, user, timer, raceSelectionModel, leaderboardName, leaderboardGroupName,
                 RaceBoardEntryPoint.this, stringMessages, userAgent, viewMode, raceTimesInfoProvider);
         raceBoardPanel.fillRegattas(regattas);
 
@@ -172,12 +174,22 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
     }
 
     private FlowPanel createLogoAndTitlePanel(RaceBoardPanel raceBoardPanel) {
-        LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(regattaName, selectedRace.name, stringMessages);
+        globalNavigationPanel = new GlobalNavigationPanel(stringMessages, true, leaderboardName, leaderboardGroupName);
+        LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(regattaName, selectedRace.name, stringMessages, this) {
+            @Override
+            public void onResize() {
+                super.onResize();
+                if (isSmallWidth()) {
+                    remove(globalNavigationPanel);
+                } else {
+                    add(globalNavigationPanel);
+                }
+            }
+        };
         logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
-
-        FlowPanel globalNavigationPanel = new GlobalNavigationPanel(stringMessages, true, leaderboardName, leaderboardGroupName);
-        logoAndTitlePanel.add(globalNavigationPanel);
-        
+        if (!isSmallWidth()) {
+            logoAndTitlePanel.add(globalNavigationPanel);
+        }
         return logoAndTitlePanel;
     }
     
