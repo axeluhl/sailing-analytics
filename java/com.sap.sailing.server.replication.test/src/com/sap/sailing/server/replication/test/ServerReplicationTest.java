@@ -4,7 +4,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
@@ -25,7 +24,6 @@ import com.sap.sailing.domain.common.DefaultLeaderboardName;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
-import com.sap.sailing.domain.test.TrackBasedTest;
 import com.sap.sailing.server.operationaltransformation.AddDefaultRegatta;
 import com.sap.sailing.server.operationaltransformation.AddRaceDefinition;
 import com.sap.sailing.server.operationaltransformation.CreateFlexibleLeaderboard;
@@ -102,33 +100,4 @@ public class ServerReplicationTest extends AbstractServerReplicationTest {
         assertEquals("Buoy1", replicaCourse.getFirstWaypoint().getBuoys().iterator().next().getName());
         assertEquals("Buoy3", replicaCourse.getLastWaypoint().getBuoys().iterator().next().getName());
     }
-
-    @Test
-    public void testSameCompetitorInTwoRacesReplication() throws InterruptedException {
-        final String boatClassName = "49er";
-        // FIXME use master DomainFactory; see bug 592
-        final DomainFactory masterDomainFactory = DomainFactory.INSTANCE;
-        BoatClass boatClass = masterDomainFactory.getOrCreateBoatClass(boatClassName);
-        final String baseEventName = "Test Event";
-        AddDefaultRegatta addEventOperation = new AddDefaultRegatta(baseEventName, boatClassName);
-        Regatta regatta = master.apply(addEventOperation);
-        final String raceName1 = "Test Race 1";
-        final String raceName2 = "Test Race 2";
-        Competitor competitor = TrackBasedTest.createCompetitor("The Same Competitor");
-        final CourseImpl masterCourse = new CourseImpl("Test Course", new ArrayList<Waypoint>());
-        final ArrayList<Competitor> competitors = new ArrayList<Competitor>();
-        competitors.add(competitor);
-        RaceDefinition race1 = new RaceDefinitionImpl(raceName1, masterCourse, boatClass, competitors);
-        AddRaceDefinition addRaceOperation1 = new AddRaceDefinition(new RegattaName(regatta.getName()), race1);
-        master.apply(addRaceOperation1);
-        RaceDefinition race2 = new RaceDefinitionImpl(raceName2, masterCourse, boatClass, competitors);
-        AddRaceDefinition addRaceOperation2 = new AddRaceDefinition(new RegattaName(regatta.getName()), race2);
-        master.apply(addRaceOperation2);
-        Thread.sleep(3000); // wait 1s for JMS to deliver the message and the message to be applied
-        Regatta replicaEvent = replica.getRegatta(new RegattaName(regatta.getName()));
-        RaceDefinition replicaRace1 = replicaEvent.getRaceByName(raceName1);
-        RaceDefinition replicaRace2 = replicaEvent.getRaceByName(raceName2);
-        assertSame(replicaRace1.getCompetitors().iterator().next(), replicaRace2.getCompetitors().iterator().next());
-    }
-
 }
