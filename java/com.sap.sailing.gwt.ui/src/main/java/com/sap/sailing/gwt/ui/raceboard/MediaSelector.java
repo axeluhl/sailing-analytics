@@ -87,7 +87,6 @@ public class MediaSelector implements RaceTimesInfoProviderListener, PlayStateLi
         }
     }
 
-
     @Override
     public void playSpeedFactorChanged(double newPlaySpeedFactor) {
         this.currentPlaybackSpeed = newPlaySpeedFactor;
@@ -102,6 +101,7 @@ public class MediaSelector implements RaceTimesInfoProviderListener, PlayStateLi
         if (audioPlayer != null) {
             audioPlayer.pause();
         }
+
         for (MediaPlayer player : videoPlayers.values()) {
             if (!player.isPaused()) {
                 player.pause();

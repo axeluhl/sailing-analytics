@@ -20,7 +20,7 @@ public class VideoPopup extends AbstractMediaPlayer {
             videoHolder.add(mediaControl);
 
             // HTML videoFrame = new
-            // HTML("<iframe class=\"youtube-player\" type=\"text/html\" width=\"640\" height=\"385\" src=\"http://www.youtube.com/embed/dP15zlyra3c?html5=1\" frameborder=\"0\"></iframe>");
+s            // HTML("<iframe class=\"youtube-player\" type=\"text/html\" width=\"640\" height=\"385\" src=\"http://www.youtube.com/embed/dP15zlyra3c?html5=1\" frameborder=\"0\"></iframe>");
             //
             // SimplePanel videoFrameHolder = new SimplePanel();
             // videoFrameHolder.add(videoFrame);
