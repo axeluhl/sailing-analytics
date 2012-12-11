@@ -150,6 +150,7 @@ public abstract class AbstractServerReplicationTest {
                             pw.close();
                             s.close();
                         }
+                        ss.close();
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     }
