@@ -228,7 +228,7 @@ img.openColumn {
 	padding: 0;
 	float: left;
 	width: 28px;
-	height: 24px;
+	height: 25px;
 	background: url(images/timeslider-play-active-icon.png) 0 0 no-repeat;
     cursor: pointer;
 }
