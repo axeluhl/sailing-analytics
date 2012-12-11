@@ -28,7 +28,6 @@ import com.sap.sailing.simulator.Path;
 import com.sap.sailing.simulator.PathGenerator;
 import com.sap.sailing.simulator.SailingSimulator;
 import com.sap.sailing.simulator.SimulationParameters;
-import com.sap.sailing.simulator.TimedPositionWithSpeed;
 import com.sap.sailing.simulator.util.SailingSimulatorUtil;
 import com.sap.sailing.simulator.windfield.WindFieldGenerator;
 import com.sap.sailing.simulator.windfield.impl.WindFieldGeneratorMeasured;
@@ -53,8 +52,6 @@ public class SailingSimulatorImpl implements SailingSimulator {
     public SimulationParameters getSimulationParameters() {
         return this.simulationParameters;
     }
-
-    // private static Logger logger = Logger.getLogger("com.sap.sailing");
 
     @Override
     public Map<String, Path> getAllPaths() {
@@ -115,19 +112,19 @@ public class SailingSimulatorImpl implements SailingSimulator {
 
         if (gridArea != null) {
             final Boundary bd = new RectangularBoundary(gridArea[0], gridArea[1], 0.1);
-            
+
             // set base wind bearing
             wf.getWindParameters().baseWindBearing += bd.getSouth().getDegrees();
             //System.out.println("baseWindBearing: " + wf.getWindParameters().baseWindBearing);
             logger.info("base wind: "+this.simulationParameters.getBoatPolarDiagram().getWind().getKnots()+" kn, "+((wf.getWindParameters().baseWindBearing)%360.0)+"°");
-            
+
             // set water current
             //this.simulationParameters.getBoatPolarDiagram().setCurrent(new KnotSpeedWithBearingImpl(2.0,new DegreeBearingImpl((wf.getWindParameters().baseWindBearing+90.0)%360.0)));
             //this.simulationParameters.getBoatPolarDiagram().setCurrent(new KnotSpeedWithBearingImpl(2.0,new DegreeBearingImpl((270.0)%360.0)));
             if (this.simulationParameters.getBoatPolarDiagram().getCurrent() != null) {
                 logger.info("water current: "+this.simulationParameters.getBoatPolarDiagram().getCurrent().getKnots()+" kn, "+this.simulationParameters.getBoatPolarDiagram().getCurrent().getBearing().getDegrees()+"°");
             }
-            
+
             wf.setBoundary(bd);
             final Position[][] positionGrid = bd.extractGrid(gridRes[0], gridRes[1]);
             wf.setPositionGrid(positionGrid);
@@ -212,20 +209,21 @@ public class SailingSimulatorImpl implements SailingSimulator {
         return allPaths;
     }
 
-    @Override
-    public Map<String, List<TimedPositionWithSpeed>> getAllPathsEvenTimed(final long millisecondsStep) {
-
-        final Map<String, List<TimedPositionWithSpeed>> allTimedPaths = new TreeMap<String, List<TimedPositionWithSpeed>>();
-
-        final Map<String, Path> allPaths = this.getAllPaths();
-        for (final Entry<String, Path> entry : allPaths.entrySet()) {
-            final String key = entry.getKey();
-            final Path value = entry.getValue();
-            allTimedPaths.put(key, value.getEvenTimedPath(millisecondsStep));
-        }
-
-        return allTimedPaths;
-    }
+    // @Override
+    // public Map<String, List<TimedPositionWithSpeed>> getAllPathsEvenTimed(final long millisecondsStep) {
+    //
+    // final Map<String, List<TimedPositionWithSpeed>> allTimedPaths = new TreeMap<String,
+    // List<TimedPositionWithSpeed>>();
+    //
+    // final Map<String, Path> allPaths = this.getAllPaths();
+    // for (final Entry<String, Path> entry : allPaths.entrySet()) {
+    // final String key = entry.getKey();
+    // final Path value = entry.getValue();
+    // allTimedPaths.put(key, value.getEvenTimedPath(millisecondsStep));
+    // }
+    //
+    // return allTimedPaths;
+    // }
 
     @Override
     public Path getRaceCourse() {
@@ -233,14 +231,17 @@ public class SailingSimulatorImpl implements SailingSimulator {
     }
 
     @Override
-    public Map<String, Path> getAllPathsEvenTimed2(final long millisecondsStep) {
+    public Map<String, Path> getAllPathsEvenTimed(final long millisecondsStep) {
+
         final Map<String, Path> allTimedPaths = new TreeMap<String, Path>();
         final Map<String, Path> allPaths = this.getAllPaths();
 
         for (final Entry<String, Path> entry : allPaths.entrySet()) {
+
             final String key = entry.getKey();
             final Path value = entry.getValue();
-            allTimedPaths.put(key, value.getEvenTimedPath2(millisecondsStep));
+
+            allTimedPaths.put(key, value.getEvenTimedPath(millisecondsStep));
         }
 
         return allTimedPaths;
