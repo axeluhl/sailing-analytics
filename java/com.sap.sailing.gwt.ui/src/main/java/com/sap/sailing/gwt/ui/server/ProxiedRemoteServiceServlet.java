@@ -23,12 +23,9 @@ public abstract class ProxiedRemoteServiceServlet extends RemoteServiceServlet {
     protected SerializationPolicy doGetSerializationPolicy(
             HttpServletRequest request, String moduleBaseURL, String strongName) {
         String moduleBaseURLHdr = request.getHeader("X-GWT-Module-Base");
-
         if(moduleBaseURLHdr != null){
             moduleBaseURL = moduleBaseURLHdr;
         }
-
         return super.doGetSerializationPolicy(request, moduleBaseURL, strongName);
-    }    
-    
+    }
 }
