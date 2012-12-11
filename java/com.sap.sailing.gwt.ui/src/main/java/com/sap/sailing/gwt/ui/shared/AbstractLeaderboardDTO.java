@@ -11,6 +11,7 @@ import java.util.Set;
 import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.ScoringSchemeType;
+import com.sap.sailing.domain.common.impl.Util.Pair;
 
 public abstract class AbstractLeaderboardDTO implements IsSerializable {
     public String name;
@@ -261,7 +262,7 @@ public abstract class AbstractLeaderboardDTO implements IsSerializable {
     /**
      * @return <code>true</code> if the leaderboard contains a race which is live
      */
-    public boolean containsLiveRace() {
+    public boolean hasLiveRace() {
         for (RaceColumnDTO race : getRaceList()) {
             for (FleetDTO fleet : race.getFleets()) {
                 if (race.isLive(fleet)) {
@@ -270,6 +271,18 @@ public abstract class AbstractLeaderboardDTO implements IsSerializable {
             }
         }
         return false;
+    }
+
+    public List<Pair<RaceColumnDTO, FleetDTO>> getLiveRaces() {
+    	List<Pair<RaceColumnDTO, FleetDTO>> result = new ArrayList<Pair<RaceColumnDTO, FleetDTO>>();
+        for (RaceColumnDTO race : getRaceList()) {
+            for (FleetDTO fleet : race.getFleets()) {
+                if (race.isLive(fleet)) {
+                	result.add(new Pair<RaceColumnDTO, FleetDTO>(race, fleet));
+                }
+            }
+        }
+        return result;
     }
 
     @Override
