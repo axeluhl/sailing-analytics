@@ -14,29 +14,29 @@ public class ReplayPathCanvasOverlay extends PathCanvasOverlay {
     private static Logger logger = Logger.getLogger(ReplayPathCanvasOverlay.class.getName());
     private List<SimulatorWindDTO> windDTOToDraw;
 
-    public ReplayPathCanvasOverlay(String name, Timer timer) {
+    public ReplayPathCanvasOverlay(final String name, final Timer timer) {
         super(name, timer);
         this.displayWindAlongPath = false;
         windDTOToDraw = null;
         //this.timer.addTimeListener(this);
         canvas.setStyleName("replayPanel");
     }
-    
+
     /*
     @Override
     protected void drawWindField() {
         timeChanged(timer.getTime());
     }
-    */
+     */
     @Override
-    public void timeChanged(Date date) {
+    public void timeChanged(final Date date) {
 
         canvas.getContext2d().clearRect(0/* canvas.getAbsoluteLeft() */, 0/* canvas.getAbsoluteTop() */,
                 canvas.getCoordinateSpaceWidth(), canvas.getCoordinateSpaceHeight());
 
         windDTOToDraw = new ArrayList<SimulatorWindDTO>();
-        for (SimulatorWindDTO windDTO : wl.getMatrix()) {
-            if (windDTO.timepoint <= date.getTime()) {
+        for (final SimulatorWindDTO windDTO : wl.getMatrix()) {
+            if (windDTO.getTimepoint() <= date.getTime()) {
                 windDTOToDraw.add(windDTO);
             }
         }
