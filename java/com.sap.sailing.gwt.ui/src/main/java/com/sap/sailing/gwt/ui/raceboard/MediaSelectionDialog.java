@@ -35,7 +35,7 @@ public class MediaSelectionDialog implements CloseHandler<PopupPanel> {
     
     MediaSelectionDialog(MediaSelectionListener mediaSelectionListener) {
         this.mediaSelectionListener = mediaSelectionListener;
-        dialogControl = new DialogBox(true, true);
+        dialogControl = new DialogBox(true, false);
         dialogControl.setText("Select Playback Media");
         dialogControl.addCloseHandler(this);
     }
