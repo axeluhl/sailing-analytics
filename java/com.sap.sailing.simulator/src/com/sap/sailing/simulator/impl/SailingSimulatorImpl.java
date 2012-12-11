@@ -209,22 +209,6 @@ public class SailingSimulatorImpl implements SailingSimulator {
         return allPaths;
     }
 
-    // @Override
-    // public Map<String, List<TimedPositionWithSpeed>> getAllPathsEvenTimed(final long millisecondsStep) {
-    //
-    // final Map<String, List<TimedPositionWithSpeed>> allTimedPaths = new TreeMap<String,
-    // List<TimedPositionWithSpeed>>();
-    //
-    // final Map<String, Path> allPaths = this.getAllPaths();
-    // for (final Entry<String, Path> entry : allPaths.entrySet()) {
-    // final String key = entry.getKey();
-    // final Path value = entry.getValue();
-    // allTimedPaths.put(key, value.getEvenTimedPath(millisecondsStep));
-    // }
-    //
-    // return allTimedPaths;
-    // }
-
     @Override
     public Path getRaceCourse() {
         return this.racecourse;
@@ -238,10 +222,14 @@ public class SailingSimulatorImpl implements SailingSimulator {
 
         for (final Entry<String, Path> entry : allPaths.entrySet()) {
 
-            final String key = entry.getKey();
+            final String pathName = entry.getKey();
             final Path value = entry.getValue();
 
-            allTimedPaths.put(key, value.getEvenTimedPath(millisecondsStep));
+            if (pathName.equals("7#GPS Track")) {
+                allTimedPaths.put(pathName, value);
+            } else {
+                allTimedPaths.put(pathName, value.getEvenTimedPath(millisecondsStep));
+            }
         }
 
         return allTimedPaths;
