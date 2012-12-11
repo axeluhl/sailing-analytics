@@ -45,24 +45,24 @@ public class PathPolyline {
     private static final double STEP_DURATION_MILLISECONDS = 1000;
     private static final boolean USE_ONLY_TURN_POINTS = false;
 
-    private Polyline polyline;
-    private final LatLng[] points;
+    private Polyline polyline = null;
+    private LatLng[] points = null;
 
-    private Polyline shadowPolyline;
-    private final List<LatLng> shadowPoints;
-    private final List<Polyline> dashedLines;
+    private Polyline shadowPolyline = null;
+    private List<LatLng> shadowPoints = null;
+    private List<Polyline> dashedLines = null;
 
-    private final String color;
-    private final int weight;
-    private final double opacity;
-    private final Map<TwoDPoint, List<TwoDPoint>> originAndHeads;
-    private SpeedWithBearingDTO averageWindSpeed;
+    private String color = "";
+    private int weight = 0;
+    private double opacity = 0.0;
+    private Map<TwoDPoint, List<TwoDPoint>> originAndHeads = null;
+    private SpeedWithBearingDTO averageWindSpeed = null;
 
-    private final int boatClassID;
-    private final List<SimulatorWindDTO> pathPoints;
-    private final SimulatorServiceAsync simulatorService;
-    private final MapWidget map;
-    private final ErrorReporter errorReporter;
+    private int boatClassID = 0;
+    private List<SimulatorWindDTO> pathPoints = null;
+    private SimulatorServiceAsync simulatorService = null;
+    private MapWidget map = null;
+    private ErrorReporter errorReporter = null;
     private boolean warningAlreadyShown = false;
 
     private boolean firstTime = true;
@@ -71,12 +71,32 @@ public class PathPolyline {
 
     private double stepSizeMeters = 0.0;
 
-    public PathPolyline(final LatLng[] points, final int boatClassID, final ErrorReporter errorReporter, final List<SimulatorWindDTO> pathPoints,
+    public static PathPolyline createPathPolyline(final List<SimulatorWindDTO> pathPoints, final ErrorReporter errorReporter,
+            final SimulatorServiceAsync simulatorService, final MapWidget map, final SimulatorMap simulatorMap, final int boatClassID) {
+
+        final int noOfPathPoints = pathPoints.size();
+        SimulatorWindDTO currentPathPoint = null;
+        final List<LatLng> points = new ArrayList<LatLng>();
+
+        for (int index = 0; index < noOfPathPoints; index++) {
+            currentPathPoint = pathPoints.get(index);
+            if (index == 0 || index == noOfPathPoints - 1 || currentPathPoint.isTurn()) {
+                points.add(LatLng.newInstance(currentPathPoint.getPosition().latDeg, currentPathPoint.getPosition().lngDeg));
+            }
+        }
+
+        return new PathPolyline(points.toArray(new LatLng[0]), boatClassID, errorReporter, pathPoints, simulatorService, map, simulatorMap);
+    }
+
+    private PathPolyline() {
+    }
+
+    private PathPolyline(final LatLng[] points, final int boatClassID, final ErrorReporter errorReporter, final List<SimulatorWindDTO> pathPoints,
             final SimulatorServiceAsync simulatorService, final MapWidget map, final SimulatorMap simulatorMap) {
         this(points, DEFAULT_COLOR, DEFAULT_WEIGHT, DEFAULT_OPACITY, boatClassID, errorReporter, pathPoints, simulatorService, map, simulatorMap);
     }
 
-    public PathPolyline(final LatLng[] points, final String color, final int weight, final double opacity, final int boatClassID,
+    private PathPolyline(final LatLng[] points, final String color, final int weight, final double opacity, final int boatClassID,
             final ErrorReporter errorReporter, final List<SimulatorWindDTO> pathPoints, final SimulatorServiceAsync simulatorService, final MapWidget map,
             final SimulatorMap simulatorMap) {
         this.points = points;
