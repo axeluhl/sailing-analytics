@@ -629,17 +629,11 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         final PathDTO[] pathDTOs = new PathDTO[noOfPaths];
         int index = noOfPaths - 1;
 
-        Path gpsPoly = null;
-        Path gpsTrack = null;
+        // Adding the polyline
+        pathDTOs[0] = this.getPolylinePathDTO(pathsAndNames.get("6#GPS Poly"), pathsAndNames.get("7#GPS Track"));
 
         for (final Entry<String, Path> entry : pathsAndNames.entrySet()) {
             logger.info("Path " + entry.getKey());
-
-            if (entry.getKey().equals("6#GPS Poly")) {
-                gpsPoly = entry.getValue();
-            } else if (entry.getKey().equals("7#GPS Track")) {
-                gpsTrack = entry.getValue();
-            }
 
             // NOTE: pathName convention is: sort-digit + "#" + path-name
             pathDTOs[index] = new PathDTO(entry.getKey().split("#")[1]);
@@ -653,10 +647,6 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
             pathDTOs[index].setPoints(wList);
 
             index--;
-        }
-
-        if (gpsPoly != null && gpsTrack != null) {
-            pathDTOs[0] = this.getPolylinePathDTO(gpsPoly, gpsTrack);
         }
 
         RaceMapDataDTO rcDTO;
