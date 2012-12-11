@@ -26,15 +26,14 @@ public interface SimulatorService extends RemoteService {
 
     WindLatticeDTO getWindLatice(WindLatticeGenParamsDTO params);
 
-    //PathDTO[] getPaths(WindFieldGenParamsDTO params, WindPatternDisplay pattern) throws WindPatternNotFoundException;
+    WindFieldDTO getWindField(WindFieldGenParamsDTO params, WindPatternDisplay pattern) throws WindPatternNotFoundException;
 
     List<WindPatternDTO> getWindPatterns();
 
     WindPatternDisplay getWindPatternDisplay(WindPatternDTO pattern);
 
-    WindFieldDTO getWindField(WindFieldGenParamsDTO params, WindPatternDisplay pattern) throws WindPatternNotFoundException;
-
-    SimulatorResultsDTOAndNotificationMessage getSimulatorResults(char mode, WindFieldGenParamsDTO params, WindPatternDisplay pattern, boolean withWindField, int boatClassIndex) throws WindPatternNotFoundException, ConfigurationException;
+    SimulatorResultsDTOAndNotificationMessage getSimulatorResults(char mode, WindFieldGenParamsDTO params, WindPatternDisplay pattern, boolean withWindField,
+            int boatClassIndex) throws WindPatternNotFoundException, ConfigurationException;
 
     BoatClassDTOsAndNotificationMessage getBoatClasses() throws ConfigurationException;
 

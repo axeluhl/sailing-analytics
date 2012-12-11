@@ -24,13 +24,12 @@ public interface SimulatorServiceAsync {
 
     void getWindField(WindFieldGenParamsDTO params, WindPatternDisplay display, AsyncCallback<WindFieldDTO> callback);
 
-    //void getPaths(WindFieldGenParamsDTO params, WindPatternDisplay display, AsyncCallback<PathDTO[]> callback);
-
     void getWindPatterns(AsyncCallback<List<WindPatternDTO>> callback);
 
     void getWindPatternDisplay(WindPatternDTO pattern, AsyncCallback<WindPatternDisplay> callback);
 
-    void getSimulatorResults(char mode, WindFieldGenParamsDTO params, WindPatternDisplay display, boolean withWindField, int boatClassIndex, AsyncCallback<SimulatorResultsDTOAndNotificationMessage> callback);
+    void getSimulatorResults(char mode, WindFieldGenParamsDTO params, WindPatternDisplay display, boolean withWindField, int boatClassIndex,
+            AsyncCallback<SimulatorResultsDTOAndNotificationMessage> callback);
 
     void getBoatClasses(AsyncCallback<BoatClassDTOsAndNotificationMessage> callback);
 

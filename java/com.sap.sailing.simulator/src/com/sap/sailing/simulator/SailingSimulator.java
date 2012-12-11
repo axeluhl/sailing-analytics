@@ -10,8 +10,6 @@ public interface SailingSimulator {
 
     Map<String, Path> getAllPaths();
 
-    // Map<String, List<TimedPositionWithSpeed>> getAllPathsEvenTimed(long millisecondsStep);
-
     Map<String, Path> getAllPathsEvenTimed(long millisecondsStep);
 
     Path getRaceCourse();
