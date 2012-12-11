@@ -240,12 +240,12 @@ img.openColumn {
     -webkit-border-radius: 5px 5px 5px 5px;
 }
 
-.raceBoardNavigation-standaloneElement {
+.raceBoardNavigation-standaloneElement:active {
 	top: 1px;
 	position: relative;
 }
 
-.raceBoardNavigation-standaloneElement {
+.raceBoardNavigation-standaloneElement:hover {
     background: url("images/btn-cta-orangeleft.png") repeat-x scroll center -30px transparent;
     cursor: pointer;
 }

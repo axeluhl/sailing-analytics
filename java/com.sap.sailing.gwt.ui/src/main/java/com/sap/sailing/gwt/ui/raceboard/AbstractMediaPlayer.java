@@ -47,15 +47,15 @@ public abstract class AbstractMediaPlayer implements MediaPlayer {
             long mediaStartTimeInMillis = mediaTrack.startTime.getTime();
             long mediaTimeInMillis = mediaStartTimeInMillis + Math.round(mediaControl.getCurrentTime() * 1000);
             long raceTimeInMillis = raceTime.getTime();
-            long videoLaggingBehindRaceInMillis = raceTimeInMillis - mediaTimeInMillis;
-            if (Math.abs(videoLaggingBehindRaceInMillis) > TOLERATED_LAG_IN_MILLISECONDS) {
-                double videoTime = (raceTimeInMillis - mediaStartTimeInMillis) / 1000;
-                if (videoTime < 0) {
+            long mediaLaggingBehindRaceInMillis = raceTimeInMillis - mediaTimeInMillis;
+            if (Math.abs(mediaLaggingBehindRaceInMillis) > TOLERATED_LAG_IN_MILLISECONDS) {
+                double mediaTime = (raceTimeInMillis - mediaStartTimeInMillis) / 1000;
+                if (mediaTime < 0) {
                     pause();
-                } else if (videoTime > mediaControl.getDuration()) {
+                } else if (mediaTime > mediaControl.getDuration()) {
                     pause();
                 } else {
-                    mediaControl.setCurrentTime(videoTime);
+                    mediaControl.setCurrentTime(mediaTime);
                 }
             }
         }

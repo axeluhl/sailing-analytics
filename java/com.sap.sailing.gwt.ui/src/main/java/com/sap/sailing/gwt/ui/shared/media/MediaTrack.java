@@ -8,7 +8,7 @@ public class MediaTrack implements IsSerializable {
 
     public enum MimeFileType {
         
-        mp4(MediaType.VIDEO, MediaSubType.mpeg), ogv(MediaType.VIDEO, MediaSubType.ogg), qt(MediaType.VIDEO, MediaSubType.quicktime), mp3(MediaType.AUDIO, MediaSubType.mpeg), ogg(MediaType.AUDIO, MediaSubType.ogg), aac(MediaType.AUDIO, MediaSubType.aac);
+        mp4(MediaType.VIDEO, MediaSubType.mpeg), ogv(MediaType.VIDEO, MediaSubType.ogg), qt(MediaType.VIDEO, MediaSubType.quicktime), mp3(MediaType.AUDIO, MediaSubType.mpeg), ogg(MediaType.AUDIO, MediaSubType.ogg), aac(MediaType.AUDIO, MediaSubType.aac), webm(MediaType.VIDEO, MediaSubType.webm);
         
         public final MediaType mediaType;
         public final MediaSubType mediaSubType;
@@ -29,7 +29,7 @@ public class MediaTrack implements IsSerializable {
     }
 
     public enum MediaSubType {
-        ogg, mpeg, x_aiff, quicktime, aac;
+        ogg, mpeg, x_aiff, quicktime, aac, webm;
         
         public String toString() {
             return name().replace('_', '-');

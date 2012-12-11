@@ -88,6 +88,15 @@ public class MediaSelectionDialog implements CloseHandler<PopupPanel> {
         RadioButton audioItem = new RadioButton("group-name", title);
         audioItem.setTitle(tooltip);
         audioItem.setValue(audioTrack == selectedAudioTrack);
+        audioItem.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+            
+            @Override
+            public void onValueChange(ValueChangeEvent<Boolean> changeEvent) {
+                if (changeEvent.getValue()) {
+                    mediaSelectionListener.audioChanged(audioTrack);
+                }
+            }
+        });
         return audioItem;
     }
 
