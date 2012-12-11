@@ -47,7 +47,11 @@ public class PathImpl implements Path, Serializable {
     }
 
     @Override
-    public List<TimedPositionWithSpeed> getEvenTimedPath(final long timeStep) {
+    public Path getEvenTimedPath(final long timestep) {
+        return new PathImpl(this.getEvenTimedPathAsList(timestep), this.windField);
+    }
+
+    private List<TimedPositionWithSpeed> getEvenTimedPathAsList(final long timeStep) {
 
         final TimePoint startTime = this.pathPoints.get(0).getTimePoint();
         final TimePoint endTime = this.pathPoints.get(this.pathPoints.size() - 1).getTimePoint();
@@ -270,11 +274,6 @@ public class PathImpl implements Path, Serializable {
         }
 
         return list;
-    }
-
-    @Override
-    public Path getEvenTimedPath2(final long timestep) {
-        return new PathImpl(this.getEvenTimedPath(timestep), this.windField);
     }
 
     public static boolean saveToGpxFile(final Path path, final String fileName) {
