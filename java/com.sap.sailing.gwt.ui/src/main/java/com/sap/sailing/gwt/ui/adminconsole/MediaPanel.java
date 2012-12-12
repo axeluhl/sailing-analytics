@@ -3,7 +3,6 @@ package com.sap.sailing.gwt.ui.adminconsole;
 import java.util.Collection;
 import java.util.Comparator;
 
-import com.google.gwt.cell.client.ActionCell;
 import com.google.gwt.cell.client.EditTextCell;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.core.client.GWT;
@@ -15,7 +14,6 @@ import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
-import com.google.gwt.user.cellview.client.IdentityColumn;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
@@ -330,16 +328,20 @@ public class MediaPanel extends FlowPanel {
         mediaTracksTable.setColumnWidth(durationColumn, 100, Unit.PCT);
 
         // delete action
-        Column<MediaTrack, MediaTrack> deleteActionColumn = new IdentityColumn<MediaTrack>(new ActionCell<MediaTrack>("X", new ActionCell.Delegate<MediaTrack>() {
+        ImagesBarColumn<MediaTrack, MediaActionBarCell> mediaActionColumn = new ImagesBarColumn<MediaTrack, MediaActionBarCell>(
+                new MediaActionBarCell(stringMessages));
+        mediaActionColumn.setFieldUpdater(new FieldUpdater<MediaTrack, String>() {
             @Override
-            public void execute(MediaTrack mediaTrack) {
-              if (Window.confirm(stringMessages.reallyRemoveMediaTrack(mediaTrack.title))) {
-                  removeMediaTrack(mediaTrack);
-              }
+            public void update(int index, MediaTrack mediaTrack, String value) {
+                if (MediaActionBarCell.ACTION_REMOVE.equals(value)) {
+                    if (Window.confirm(stringMessages.reallyRemoveMediaTrack(mediaTrack.title))) {
+                        removeMediaTrack(mediaTrack);
+                    }
+                } 
             }
-          }));
-        mediaTracksTable.addColumn(deleteActionColumn, stringMessages.delete());
-        mediaTracksTable.setColumnWidth(deleteActionColumn, 5, Unit.PCT);
+        });
+        mediaTracksTable.addColumn(mediaActionColumn, stringMessages.delete());
+        mediaTracksTable.setColumnWidth(mediaActionColumn, 5, Unit.PCT);
 
     }
 

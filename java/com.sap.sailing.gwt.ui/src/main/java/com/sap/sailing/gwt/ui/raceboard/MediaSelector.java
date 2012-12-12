@@ -10,8 +10,11 @@ import java.util.Set;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
@@ -28,7 +31,9 @@ import com.sap.sailing.gwt.ui.shared.media.MediaTrack;
 public class MediaSelector implements RaceTimesInfoProviderListener, PlayStateListener, TimeListener,
         AsyncCallback<Collection<MediaTrack>>, MediaSelectionListener {
 
+    private final CheckBox toggleMediaButton;
     private final Button manageMediaButton;
+    
     private final MediaSelectionDialog mediaSelectionDialog;
 
     private MediaPlayer audioPlayer;
@@ -46,7 +51,8 @@ public class MediaSelector implements RaceTimesInfoProviderListener, PlayStateLi
         
         mediaSelectionDialog = new MediaSelectionDialog(this);         
 
-        manageMediaButton = new Button("Audio & Video");
+        manageMediaButton = new Button();
+        manageMediaButton.setEnabled(false);
         manageMediaButton.addClickHandler(new ClickHandler() {
             
             @Override
@@ -56,17 +62,78 @@ public class MediaSelector implements RaceTimesInfoProviderListener, PlayStateLi
                 } else {
                     MediaTrack playingAudioTrack = audioPlayer != null ? audioPlayer.getMediaTrack() : null;
                     Set<MediaTrack> playingVideoTracks = videoPlayers.keySet();
-                    mediaSelectionDialog.show(videoTracks, playingVideoTracks, audioTracks, playingAudioTrack, manageMediaButton);
+                    mediaSelectionDialog.show(videoTracks, playingVideoTracks, audioTracks, playingAudioTrack, toggleMediaButton);
                 }
             }
         });
-        manageMediaButton.addStyleName("raceBoardNavigation-standaloneElement");
+        manageMediaButton.addStyleName("raceBoardNavigation-settingsButton");
         manageMediaButton.getElement().getStyle().setFloat(Style.Float.LEFT);
         manageMediaButton.setTitle("Configure Media");
 
 
+        toggleMediaButton = new CheckBox("Audio & Video");
+        toggleMediaButton.setEnabled(false);
+        toggleMediaButton.addStyleName("raceBoardNavigation-innerElement");
+        toggleMediaButton.getElement().getStyle().setFloat(Style.Float.LEFT);
+        toggleMediaButton.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+
+            @Override
+            public void onValueChange(ValueChangeEvent<Boolean> event) {
+
+                if (toggleMediaButton.getValue()) {
+                    playDefault();
+                } else {
+                    stopAll();
+                }
+
+            }
+
+        });
     }
 
+    private void playDefault() {
+            MediaTrack defaultVideo = getDefaultVideo();
+            if (defaultVideo != null) {
+                videoSelected(defaultVideo );
+            }
+            MediaTrack defaultAudio = getDefaultAudio();
+            if (defaultAudio != null) {
+                audioChanged(defaultAudio);
+            }
+    }
+
+    private MediaTrack getDefaultAudio() {
+        if (!audioTracks.isEmpty()) {
+            return audioTracks.iterator().next();
+        } else {
+            //TODO: determine best fitting audio, e.g. best overlap with race
+            return getDefaultVideo();
+        }
+    }
+
+    private MediaTrack getDefaultVideo() {
+        if (!videoTracks.isEmpty()) {
+            return videoTracks.iterator().next();
+        } else {
+            //TODO: determine best fitting video, e.g. best overlap with race
+            return null;
+        }
+        
+    }
+
+    private void stopAll() {
+        if (audioPlayer != null) {
+            audioPlayer.pause();
+            audioPlayer = null;
+        }
+        for (VideoPopup videoPlayer : videoPlayers.values()) {
+            videoPlayer.pause();
+            videoPlayer.hide();
+        }
+        videoPlayers.clear();
+    }
+
+    
     @Override
     public void playStateChanged(PlayStates playState, PlayModes playMode) {
         this.currentPlayState = playState;
@@ -131,10 +198,6 @@ public class MediaSelector implements RaceTimesInfoProviderListener, PlayStateLi
         }
     }
 
-    public Widget widget() {
-        return manageMediaButton;
-    }
-
     @Override
     public void onFailure(Throwable caught) {
         errorReporter
@@ -143,7 +206,6 @@ public class MediaSelector implements RaceTimesInfoProviderListener, PlayStateLi
 
     @Override
     public void onSuccess(Collection<MediaTrack> mediaTracks) {
-        manageMediaButton.setEnabled(mediaTracks.size() > 0);
         for (MediaTrack mediaTrack : mediaTracks) {
             switch (mediaTrack.type) {
             case VIDEO:
@@ -153,6 +215,8 @@ public class MediaSelector implements RaceTimesInfoProviderListener, PlayStateLi
                 break;
             }
         }
+        manageMediaButton.setEnabled(mediaTracks.size() > 0);
+        toggleMediaButton.setEnabled(mediaTracks.size() > 0);
     }
     
     @Override
@@ -185,6 +249,9 @@ public class MediaSelector implements RaceTimesInfoProviderListener, PlayStateLi
         } else {
             assignNewAudioPlayer(audioTrack);
         }
+        
+        updateToggleButton();
+        
     }
 
     @Override
@@ -207,6 +274,9 @@ public class MediaSelector implements RaceTimesInfoProviderListener, PlayStateLi
         } else {
             //nothing changed 
         }
+        
+        updateToggleButton();
+        
     }
 
     @Override
@@ -217,8 +287,15 @@ public class MediaSelector implements RaceTimesInfoProviderListener, PlayStateLi
             assignNewAudioPlayer(removedVideoPlayer.getMediaTrack());
         }
         removedVideoPlayer.hide();
+
+        updateToggleButton();
+        
     }
     
+    private void updateToggleButton() {
+        toggleMediaButton.setValue((audioPlayer != null) || (!videoPlayers.isEmpty()));
+    }
+
     private void assignNewAudioPlayer(MediaTrack audioTrack) {
         if (audioTrack != null) {
             audioPlayer = new AudioControl();
@@ -243,6 +320,10 @@ public class MediaSelector implements RaceTimesInfoProviderListener, PlayStateLi
         default:
             break;
         }
+    }
+
+    public Widget[] widgets() {
+        return new Widget[] {toggleMediaButton, manageMediaButton};
     }
 
 }

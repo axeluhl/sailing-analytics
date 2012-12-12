@@ -183,7 +183,9 @@ public class RaceBoardPanel extends FormPanel implements RegattaDisplayer, RaceS
         timer.addPlayStateListener(mediaSelector);
         timer.addTimeListener(mediaSelector);
         mediaService.getMediaTracksForRace(selectedRaceIdentifier, mediaSelector);
-        componentsNavigationPanel.add(mediaSelector.widget());
+        for (Widget widget : mediaSelector.widgets()) {
+            componentsNavigationPanel.add(widget);
+        }
     }
 
     @SuppressWarnings("unused")
