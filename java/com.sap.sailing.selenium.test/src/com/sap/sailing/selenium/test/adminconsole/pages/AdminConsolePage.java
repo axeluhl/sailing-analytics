@@ -3,24 +3,17 @@ package com.sap.sailing.selenium.test.adminconsole.pages;
 import java.text.MessageFormat;
 import java.util.concurrent.TimeUnit;
 
-import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebDriver.TargetLocator;
 import org.openqa.selenium.WebElement;
-
-import org.openqa.selenium.security.UserAndPassword;
-
-import org.openqa.selenium.support.FindBy;
-import org.openqa.selenium.support.How;
 
 import org.openqa.selenium.support.ui.FluentWait;
 
-import com.google.common.base.Function;
 import com.sap.sailing.selenium.core.BySeleniumId;
 import com.sap.sailing.selenium.core.ElementSearchConditions;
-import com.sap.sailing.selenium.test.PageObject;
+import com.sap.sailing.selenium.core.FindBy;
 
+import com.sap.sailing.selenium.test.PageObject;
 
 public class AdminConsolePage extends PageObject {
     private static final String PAGE_TITLE = "SAP Sailing Analytics Administration Console";
@@ -51,7 +44,8 @@ public class AdminConsolePage extends PageObject {
         return new AdminConsolePage(driver);
     }
     
-    @FindBy(how = How.XPATH, using = "//*[@selenium-id='AdministrationTabs']")
+    //@FindBy(how = How.XPATH, using = "//*[@selenium-id='AdministrationTabs']")
+    @FindBy(how = BySeleniumId.class, using = "AdministrationTabs")
     private WebElement tabPanel;
     
     private AdminConsolePage(WebDriver driver) {

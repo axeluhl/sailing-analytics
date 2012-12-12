@@ -11,11 +11,11 @@ public class SeleniumElementLocatorFactory implements ElementLocatorFactory {
     private SearchContext context;
     private final int timeOut;
     private final int intervall;
-    
+
     public SeleniumElementLocatorFactory(SearchContext context, int timeOut) {
         this(context, timeOut, 250);
     }
-    
+
     public SeleniumElementLocatorFactory(SearchContext context, int timeOut, int intervall) {
         this.context = context;
         this.timeOut = timeOut;
@@ -24,6 +24,9 @@ public class SeleniumElementLocatorFactory implements ElementLocatorFactory {
 
     @Override
     public ElementLocator createLocator(Field field) {
+        if (!Annotations.isAnnotationPresent(field))
+            return null;
+
         return new SeleniumElementLocator(this.context, field, this.timeOut, this.intervall);
     }
 }

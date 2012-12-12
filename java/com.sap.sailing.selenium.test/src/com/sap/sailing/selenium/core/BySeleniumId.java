@@ -13,7 +13,7 @@ public class BySeleniumId extends By {
      *   specified context (web driver or web element) and returns the first matching element which is one or more
      *   levels deep in the current context.</p>
      */
-    private static final MessageFormat BY_SELENIUM_ID = new MessageFormat(".//*[@selenium-id=\"{0}\"]");
+    private static final MessageFormat BY_SELENIUM_ID = new MessageFormat(".//*[@selenium-id=\"{0}\"]"); //$NON-NLS-1$
     
     private String id;
     

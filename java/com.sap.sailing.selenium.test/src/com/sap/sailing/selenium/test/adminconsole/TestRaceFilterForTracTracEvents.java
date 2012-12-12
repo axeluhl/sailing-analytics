@@ -26,8 +26,8 @@ public class TestRaceFilterForTracTracEvents extends AbstractSeleniumTest {
         
     }
     
-    @SuppressWarnings("boxing")
     @Test
+    @SuppressWarnings("boxing")
     public void testPartialFilter() {
         AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
         

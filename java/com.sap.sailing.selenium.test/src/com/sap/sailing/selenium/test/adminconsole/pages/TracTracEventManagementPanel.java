@@ -8,19 +8,25 @@ import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
-import org.openqa.selenium.support.FindBy;
-import org.openqa.selenium.support.How;
+//import org.openqa.selenium.support.FindBy;
+//import org.openqa.selenium.support.How;
+
+import com.sap.sailing.selenium.core.FindBy;
+import com.sap.sailing.selenium.core.BySeleniumId;
 
 import com.sap.sailing.selenium.test.PageObject;
 
 public class TracTracEventManagementPanel extends PageObject {
-    @FindBy(how = How.XPATH, using = ".//*[@selenium-id='JSONURL']")
+    //@FindBy(how = How.XPATH, using = ".//*[@selenium-id='JSONURL']")
+    @FindBy(how = BySeleniumId.class, using = "JSONURL")
     private WebElement jsonURLField;
     
-    @FindBy(how = How.XPATH, using = ".//*[@selenium-id='ListRaces']")
+    //@FindBy(how = How.XPATH, using = ".//*[@selenium-id='ListRaces']")
+    @FindBy(how = BySeleniumId.class, using = "ListRaces")
     private WebElement listRacesButton;
     
-    @FindBy(how = How.XPATH, using = ".//*[@selenium-id='FilterRaces']")
+    //@FindBy(how = How.XPATH, using = ".//*[@selenium-id='FilterRaces']")
+    @FindBy(how = BySeleniumId.class, using = "FilterRaces")
     private WebElement filterTrackableRacesField;
     
     private WebElement trackWindCheckBox;
