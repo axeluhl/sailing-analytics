@@ -33,6 +33,7 @@ import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceChangeListener;
+import com.sap.sailing.domain.tracking.RaceCommitteeEventTrack;
 import com.sap.sailing.domain.tracking.RaceListener;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
@@ -688,4 +689,10 @@ public class MockedTrackedRace implements DynamicTrackedRace {
         // TODO Auto-generated method stub
         return false;
     }
+
+	@Override
+	public RaceCommitteeEventTrack getOrCreateRaceCommitteeEventTrack() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

@@ -27,6 +27,7 @@ import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceChangeListener;
+import com.sap.sailing.domain.tracking.RaceCommitteeEventTrack;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -451,4 +452,10 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
         // TODO Auto-generated method stub
         return false;
     }
+
+	@Override
+	public RaceCommitteeEventTrack getOrCreateRaceCommitteeEventTrack() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

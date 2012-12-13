@@ -33,6 +33,7 @@ import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSTrackListener;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceChangeListener;
+import com.sap.sailing.domain.tracking.RaceCommitteeEventTrack;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.Wind;
@@ -583,5 +584,11 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
     public boolean raceIsKnownToStartUpwind() {
         return raceIsKnownToStartUpwind;
     }
+
+	@Override
+	public RaceCommitteeEventTrack getOrCreateRaceCommitteeEventTrack() {
+		// TODO To Be Implemented
+		return null;
+	}
 
 }
