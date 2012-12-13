@@ -3,6 +3,8 @@ package com.sap.sailing.selenium.core;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 
+import java.net.URL;
+
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -72,6 +74,7 @@ public class Selenium extends ParentRunner<SeleniumJUnit4ClassRunner> {
         try {
             TestEnvironmentConfiguration configuration = TestEnvironmentConfiguration.getInstance();
             String contextRoot = configuration.getContextRoot();
+            String screenshotsFolder = configuration.getScreenshotsFolder();
             Map<String, String> systemProperties = configuration.getSystemProperties();
 
             for (Entry<String, String> property : systemProperties.entrySet()) {
@@ -81,7 +84,10 @@ public class Selenium extends ParentRunner<SeleniumJUnit4ClassRunner> {
             TestClass test = getTestClass();
 
             for (DriverDefinition defenition : configuration.getDriverDefinitions()) {
-                this.children.add(new SeleniumJUnit4ClassRunner(test.getJavaClass(), contextRoot, defenition));
+                SeleniumJUnit4ClassRunner child = new SeleniumJUnit4ClassRunner(test.getJavaClass(), contextRoot,
+                        new URL(screenshotsFolder), defenition);
+                
+                this.children.add(child);
             }
         } catch (Exception exception) {
             throw new InitializationError(exception);
@@ -90,15 +96,17 @@ public class Selenium extends ParentRunner<SeleniumJUnit4ClassRunner> {
 
     protected class SeleniumJUnit4ClassRunner extends BlockJUnit4ClassRunner {
         private String root;
+        private URL screenshots;
         private DriverDefinition definition;
 
         private TestEnvironmentImpl environment;
 
-        public SeleniumJUnit4ClassRunner(Class<?> klass, String root, DriverDefinition definition)
+        public SeleniumJUnit4ClassRunner(Class<?> klass, String root, URL screenshots, DriverDefinition definition)
                 throws InitializationError {
             super(klass);
 
             this.root = root;
+            this.screenshots = screenshots;
             this.definition = definition;
         }
 
@@ -206,13 +214,21 @@ public class Selenium extends ParentRunner<SeleniumJUnit4ClassRunner> {
                 Capabilities capabilities = new DesiredCapabilities(capabilityDefenitions);
 
                 Constructor<WebDriver> constructor = clazz.getConstructor(Capabilities.class);
-
-                return new TestEnvironmentImpl(constructor.newInstance(capabilities), this.root);
+                WebDriver driver = constructor.newInstance(capabilities);
+                
+                URL screenshots = resolveScreenshotFolder();
+                
+                return new TestEnvironmentImpl(driver, this.root, screenshots);
             } catch (Exception exception) {
                 throw exception;
             }
         }
 
+        // TODO: Implement in a way that we construct a unique folder which is a subfolder of the defined one!
+        private URL resolveScreenshotFolder() {
+            return this.screenshots;
+        }
+        
         private void setValueForField(Object instance, Field field, Object value) throws IllegalArgumentException,
                 IllegalAccessException {
             field.setAccessible(true);

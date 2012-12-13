@@ -53,6 +53,8 @@ public class TestEnvironmentConfiguration {
     
     private static final String CONTEXT_ROOT = "context-root";
     
+    private static final String SCREENSHOTS_FOLDER = "screenshots-folder";
+    
     private static final String SYSTEM_PROPERTIES = "system-properties";
     
     private static final String SYSTEM_PROPERTY = "system-property";
@@ -94,10 +96,11 @@ public class TestEnvironmentConfiguration {
         testEnvironmentNode.normalize();
                 
         String contextRoot = XMLHelper.getContentTextNS(testEnvironmentNode, CONTEXT_ROOT, NAMESPACE_URI);
+        String screenshotsFolder = XMLHelper.getContentTextNS(testEnvironmentNode, SCREENSHOTS_FOLDER, NAMESPACE_URI);
         Map<String, String> systemProperties = createSystemProperties(testEnvironmentNode);
         List<DriverDefinition> driverDefenitions = createDriverDefenitions(testEnvironmentNode);
         
-        return new TestEnvironmentConfiguration(contextRoot, systemProperties, driverDefenitions);
+        return new TestEnvironmentConfiguration(contextRoot, screenshotsFolder, systemProperties, driverDefenitions);
     }
     
     private static synchronized Document readTestConfiguration() throws ParserConfigurationException,
@@ -121,7 +124,7 @@ public class TestEnvironmentConfiguration {
         Element systemPropertiesNode = XMLHelper.getElementNS(testEnvironmentNode, SYSTEM_PROPERTIES, NAMESPACE_URI);
         
         if(systemPropertiesNode == null)
-            return Collections.EMPTY_MAP;
+            return Collections.emptyMap();
         
         Map<String, String> properties = new HashMap<>();
         
@@ -173,18 +176,28 @@ public class TestEnvironmentConfiguration {
     
     private String root;
     
+    private String screenshotsFolder;
+    
     private Map<String, String> properties;
     
     private List<DriverDefinition> definitions;
     
-    private TestEnvironmentConfiguration(String root, Map<String, String> properties, List<DriverDefinition> defenitions) {
+    // TODO: Add a timestamp which should be used for the screenshot folder
+    
+    private TestEnvironmentConfiguration(String root, String screenshots, Map<String, String> properties,
+            List<DriverDefinition> defenitions) {
         this.root = root;
+        this.screenshotsFolder = screenshots;
         this.properties = properties;
         this.definitions = defenitions;
     }
     
     public String getContextRoot() {
         return this.root;
+    }
+    
+    public String getScreenshotsFolder() {
+        return this.screenshotsFolder;
     }
     
     public Map<String, String> getSystemProperties() {

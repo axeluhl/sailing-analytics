@@ -16,6 +16,11 @@
   <context-root>http://riccardo:riccardo@localhost:8889/</context-root>
   
   <!--
+    The folder where screenshots (attachments) are stored.
+  -->
+  <screenshots-folder></screenshots-folder>
+  
+  <!--
     In this section necessary system properties for the different web drivers can be provided if needed. For more
     informations about available properties see the following sides:
     
