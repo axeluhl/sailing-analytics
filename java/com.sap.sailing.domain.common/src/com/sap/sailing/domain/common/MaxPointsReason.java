@@ -10,43 +10,55 @@ package com.sap.sailing.domain.common;
 public enum MaxPointsReason {
     
     /** The competitor finished the race properly */
-    NONE(true),
+    NONE(/* discardable */ true, /* advanceCompetitorsTrackedWorse */ false),
     /** Did Not Start */
-    DNS(true), 
+    DNS(/* discardable */ true, /* advanceCompetitorsTrackedWorse */ true), 
     /** Did Not Finish */
-    DNF(true),
+    DNF(/* discardable */ true, /* advanceCompetitorsTrackedWorse */ true),
     /** DiSQualified */
-    DSQ(true),
+    DSQ(/* discardable */ true, /* advanceCompetitorsTrackedWorse */ true),
     /** On Course Side (jumped the gun) */
-    OCS(true),
+    OCS(/* discardable */ true, /* advanceCompetitorsTrackedWorse */ true),
     /** Disqualified, non-discardable */
-    DND(false),
+    DND(/* discardable */ false, /* advanceCompetitorsTrackedWorse */ true),
     /** 20 % penalty under rule 30.2 */
-    ZFP(true),
+    ZFP(/* discardable */ true, /* advanceCompetitorsTrackedWorse */ false),
     /** Took a Scoring penalty under rule 44.3 (a) */
-    SCP(true),
+    SCP(/* discardable */ true, /* advanceCompetitorsTrackedWorse */ false),
     /** Disqualification not excludable under rule 90.3 (b) */
-    DNE(false),
+    DNE(/* discardable */ false, /* advanceCompetitorsTrackedWorse */ true),
     /** Disqualification for gross misconduct not excludable under rule 90.3 (b) */
-    DGM(false),
+    DGM(/* discardable */ false, /* advanceCompetitorsTrackedWorse */ true),
     /** Redress given */
-    RDG(true),
+    RDG(/* discardable */ true, /* advanceCompetitorsTrackedWorse */ false),
     /** Black Flag Disqualified */
-    BFD(true),
+    BFD(/* discardable */ true, /* advanceCompetitorsTrackedWorse */ true),
     /** Did Not Compete */
-    DNC(true),
+    DNC(/* discardable */ true, /* advanceCompetitorsTrackedWorse */ true),
     /** Retired After Finishing */
-    RAF(true),
+    RAF(/* discardable */ true, /* advanceCompetitorsTrackedWorse */ true),
     /** Discretionary Penalty Imposed by the race committee */
-    DPI(true);
+    DPI(/* discardable */ true, /* advanceCompetitorsTrackedWorse */ false);
     
     private final boolean discardable;
+    
+    private final boolean advanceCompetitorsTrackedWorse;
 
-    private MaxPointsReason(boolean discardable) {
+    private MaxPointsReason(boolean discardable, boolean advanceCompetitorsTrackedWorse) {
         this.discardable = discardable;
+        this.advanceCompetitorsTrackedWorse = advanceCompetitorsTrackedWorse;
     }
 
     public boolean isDiscardable() {
         return discardable;
+    }
+    
+    /**
+     * Most "max points reasons" are a penalty. If the competitor has finished the race and by the penalty is ranked to the "bottom,"
+     * those competitors tracked worse usually will advance by one rank. However, "max points reasons" such as a redress given (RDG)
+     * are different. In this case, only the points awarded to the competitor change without any effect on other competitors.
+     */
+    public boolean isAdvanceCompetitorsTrackedWorse() {
+        return advanceCompetitorsTrackedWorse;
     }
 }

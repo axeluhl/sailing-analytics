@@ -274,4 +274,6 @@ public interface SailingService extends RemoteService {
             boolean trackWind, boolean correctWindByDeclination, boolean simulateWithStartTimeNow);
 
     List<Pair<String, List<CompetitorDTO>>> getRankedCompetitorsFromBestToWorstAfterEachRaceColumn(String leaderboardName, Date date) throws NoWindException;
+
+    List<String> getOverallLeaderboardNamesContaining(String leaderboardName);
 }

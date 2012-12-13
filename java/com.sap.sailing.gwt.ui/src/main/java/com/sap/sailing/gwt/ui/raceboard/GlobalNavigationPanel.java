@@ -23,16 +23,12 @@ public class GlobalNavigationPanel extends FlowPanel {
 
     public GlobalNavigationPanel(StringMessages stringMessages, boolean showHomeNavigation, String leaderboardName, String leaderboardGroupName) {
         super();
-        
         setStyleName("globalNavigation");
-        
         debugParam = Window.Location.getParameter("gwt.codesvr");
-
         String spectatorViewLink = "/gwt/Spectator.html";
         String leaderboardViewLink = "/gwt/Leaderboard.html";
         String homeLink = "/";
-        
-        if(showHomeNavigation) {
+        if (showHomeNavigation) {
             if (leaderboardGroupName != null && !leaderboardGroupName.isEmpty()) {
                 String leaderBoardGroupLink = spectatorViewLink + "?showRaceDetails=true&leaderboardGroupName=" + leaderboardGroupName; 
                 addNavigationLink(leaderboardGroupName, leaderBoardGroupLink, "leaderBoardGroup", "Go to the Event overview.");

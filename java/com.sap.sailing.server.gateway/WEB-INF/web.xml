@@ -61,12 +61,12 @@
 	</servlet-mapping>
 
 	<servlet>
-		<servlet-name>RaceRankingAsRssFeedServlet</servlet-name>
-		<servlet-class>com.sap.sailing.server.gateway.impl.RaceRankingAsRssFeedServlet</servlet-class>
+		<servlet-name>LiveRaceRankingAsRssFeedServlet</servlet-name>
+		<servlet-class>com.sap.sailing.server.gateway.impl.LiveRaceRankingAsRssFeedServlet</servlet-class>
 	</servlet>
 	<servlet-mapping>
-		<servlet-name>RaceRankingAsRssFeedServlet</servlet-name>
-		<url-pattern>/rss/raceranking</url-pattern>
+		<servlet-name>LiveRaceRankingAsRssFeedServlet</servlet-name>
+		<url-pattern>/rss/liveRaceRanking</url-pattern>
 	</servlet-mapping>
 
 	<servlet id="jsp">

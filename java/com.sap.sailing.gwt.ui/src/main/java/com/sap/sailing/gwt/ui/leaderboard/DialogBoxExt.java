@@ -16,10 +16,10 @@ import com.google.gwt.user.client.ui.Widget;
  */
 public class DialogBoxExt extends DialogBox {
 
-    private HorizontalPanel captionPanel = new HorizontalPanel();
+    private final HorizontalPanel captionPanel;
 
     /** widget which will be use to close the dialog box */
-    private Widget closeWidget = null;
+    private final Widget closeWidget;
 
     /**
      * You have to provide a widget here. If click on the widget the dialog box will be closed.
@@ -27,21 +27,17 @@ public class DialogBoxExt extends DialogBox {
      */
     public DialogBoxExt(Widget closeDialogBox) {
         super();
-
+        assert closeDialogBox != null;
+        captionPanel = new HorizontalPanel();
         closeWidget = closeDialogBox;
         closeWidget.getElement().addClassName("chartCloseButton");
-
-        // an empty header could case a problem!
+        // an empty header could cause a problem!
         setHTML("&nbsp;");
     }
 
     @Override
     public void setHTML(String html) {
-        if (closeWidget != null) {
-            setCaption(html, closeWidget);
-        } else {
-            super.setHTML(html);
-        }
+        setCaption(html, closeWidget);
     }
 
     @Override

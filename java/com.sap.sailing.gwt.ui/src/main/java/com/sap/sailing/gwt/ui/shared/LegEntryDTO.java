@@ -4,6 +4,7 @@ import java.util.Map;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sailing.domain.common.ManeuverType;
+import com.sap.sailing.domain.common.Tack;
 
 /**
  * Holds data about one competitor's performance in one leg of one race represented in the
@@ -18,6 +19,8 @@ public class LegEntryDTO implements IsSerializable {
     public Double averageSpeedOverGroundInKnots;
     public int rank;
     public Double gapToLeaderInSeconds;
+    public Double gapChangeSinceLegStartInSeconds;
+    public Tack sideToWhichMarkAtLegStartWasRounded;
     public Double estimatedTimeToNextWaypointInSeconds;
 
     /**
@@ -41,11 +44,13 @@ public class LegEntryDTO implements IsSerializable {
     public Map<ManeuverType, Integer> numberOfManeuvers;
     public Map<ManeuverType, Double> averageManeuverLossInMeters;
     public Double averageCrossTrackErrorInMeters;
-    
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
+        result = prime * result
+                + ((averageCrossTrackErrorInMeters == null) ? 0 : averageCrossTrackErrorInMeters.hashCode());
+        result = prime * result + ((averageManeuverLossInMeters == null) ? 0 : averageManeuverLossInMeters.hashCode());
         result = prime * result
                 + ((averageSpeedOverGroundInKnots == null) ? 0 : averageSpeedOverGroundInKnots.hashCode());
         result = prime * result
@@ -55,11 +60,14 @@ public class LegEntryDTO implements IsSerializable {
                 * result
                 + ((estimatedTimeToNextWaypointInSeconds == null) ? 0 : estimatedTimeToNextWaypointInSeconds.hashCode());
         result = prime * result + (finished ? 1231 : 1237);
+        result = prime * result + ((gapChangeSinceLegStartInSeconds == null) ? 0 : gapChangeSinceLegStartInSeconds.hashCode());
         result = prime * result + ((gapToLeaderInSeconds == null) ? 0 : gapToLeaderInSeconds.hashCode());
         result = prime * result + ((numberOfManeuvers == null) ? 0 : numberOfManeuvers.hashCode());
         result = prime * result + rank;
+        result = prime * result
+                + ((sideToWhichMarkAtLegStartWasRounded == null) ? 0 : sideToWhichMarkAtLegStartWasRounded.hashCode());
         result = prime * result + (started ? 1231 : 1237);
-        result = prime * result + (int) (timeInMilliseconds ^ (timeInMilliseconds >>> 32));
+        result = prime * result + ((timeInMilliseconds == null) ? 0 : timeInMilliseconds.hashCode());
         result = prime * result + ((velocityMadeGoodInKnots == null) ? 0 : velocityMadeGoodInKnots.hashCode());
         result = prime * result
                 + ((windwardDistanceToGoInMeters == null) ? 0 : windwardDistanceToGoInMeters.hashCode());
@@ -74,6 +82,16 @@ public class LegEntryDTO implements IsSerializable {
         if (getClass() != obj.getClass())
             return false;
         LegEntryDTO other = (LegEntryDTO) obj;
+        if (averageCrossTrackErrorInMeters == null) {
+            if (other.averageCrossTrackErrorInMeters != null)
+                return false;
+        } else if (!averageCrossTrackErrorInMeters.equals(other.averageCrossTrackErrorInMeters))
+            return false;
+        if (averageManeuverLossInMeters == null) {
+            if (other.averageManeuverLossInMeters != null)
+                return false;
+        } else if (!averageManeuverLossInMeters.equals(other.averageManeuverLossInMeters))
+            return false;
         if (averageSpeedOverGroundInKnots == null) {
             if (other.averageSpeedOverGroundInKnots != null)
                 return false;
@@ -96,6 +114,11 @@ public class LegEntryDTO implements IsSerializable {
             return false;
         if (finished != other.finished)
             return false;
+        if (gapChangeSinceLegStartInSeconds == null) {
+            if (other.gapChangeSinceLegStartInSeconds != null)
+                return false;
+        } else if (!gapChangeSinceLegStartInSeconds.equals(other.gapChangeSinceLegStartInSeconds))
+            return false;
         if (gapToLeaderInSeconds == null) {
             if (other.gapToLeaderInSeconds != null)
                 return false;
@@ -108,9 +131,14 @@ public class LegEntryDTO implements IsSerializable {
             return false;
         if (rank != other.rank)
             return false;
+        if (sideToWhichMarkAtLegStartWasRounded != other.sideToWhichMarkAtLegStartWasRounded)
+            return false;
         if (started != other.started)
             return false;
-        if (timeInMilliseconds != other.timeInMilliseconds)
+        if (timeInMilliseconds == null) {
+            if (other.timeInMilliseconds != null)
+                return false;
+        } else if (!timeInMilliseconds.equals(other.timeInMilliseconds))
             return false;
         if (velocityMadeGoodInKnots == null) {
             if (other.velocityMadeGoodInKnots != null)
@@ -124,6 +152,4 @@ public class LegEntryDTO implements IsSerializable {
             return false;
         return true;
     }
-    
-    
 }

@@ -17,8 +17,6 @@ import java.util.Set;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.i18n.client.DateTimeFormat;
-import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.maps.client.InfoWindowContent;
 import com.google.gwt.maps.client.MapWidget;
@@ -75,17 +73,16 @@ import com.sap.sailing.gwt.ui.client.TimeListener;
 import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.client.Timer.PlayStates;
 import com.sap.sailing.gwt.ui.client.WindSourceTypeFormatter;
-import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 import com.sap.sailing.gwt.ui.shared.CourseDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 import com.sap.sailing.gwt.ui.shared.LegInfoDTO;
 import com.sap.sailing.gwt.ui.shared.ManeuverDTO;
+import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.gwt.ui.shared.PositionDTO;
 import com.sap.sailing.gwt.ui.shared.QuickRankDTO;
 import com.sap.sailing.gwt.ui.shared.RaceMapDataDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
-import com.sap.sailing.gwt.ui.shared.SpeedWithBearingDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
@@ -1286,21 +1283,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                         LatLng latLng = LatLng.newInstance(maneuver.position.latDeg, maneuver.position.lngDeg);
                         MarkerOptions options = MarkerOptions.newInstance();
                         //TODO Introduce user role dependent view (Spectator, Admin)
-                        SpeedWithBearingDTO before = maneuver.speedWithBearingBefore;
-                        SpeedWithBearingDTO after = maneuver.speedWithBearingAfter;
-                        
-                        String timeAndManeuver = DateTimeFormat.getFormat(PredefinedFormat.TIME_FULL).format(maneuver.timepoint)
-                                + ": " + maneuver.type.name();
-                        String directionChange = stringMessages.directionChange() + ": "
-                                + ((int) maneuver.directionChangeInDegrees) + " "+stringMessages.degreesShort()+" ("
-                                + ((int) before.bearingInDegrees) + " deg -> " + ((int) after.bearingInDegrees) + " "+stringMessages.degreesShort()+")";
-                        String speedChange = stringMessages.speedChange() + ": " 
-                                + NumberFormat.getDecimalFormat().format(after.speedInKnots - before.speedInKnots) + " "+stringMessages.averageSpeedInKnotsUnit()+" ("
-                                + NumberFormat.getDecimalFormat().format(before.speedInKnots) + " "+stringMessages.averageSpeedInKnotsUnit()+" -> "
-                                + NumberFormat.getDecimalFormat().format(after.speedInKnots) + " "+stringMessages.averageSpeedInKnotsUnit()+")";
-                        String maneuverLoss = maneuver.maneuverLossInMeters == null ? "" : ("; "+stringMessages.maneuverLoss()+": "+
-                                NumberFormat.getDecimalFormat().format(maneuver.maneuverLossInMeters)+"m");
-                        options.setTitle(timeAndManeuver + "; " + directionChange + "; " + speedChange + maneuverLoss);
+                        options.setTitle(maneuver.toString(stringMessages));
                         options.setIcon(raceMapImageManager.maneuverIconsForTypeAndTargetTack
                                 .get(new Util.Pair<ManeuverType, Tack>(maneuver.type, maneuver.newTack)));
                         Marker marker = new Marker(latLng, options);

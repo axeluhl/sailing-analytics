@@ -427,4 +427,12 @@ public interface SailingServiceAsync {
 
     void getCompetitorsRaceData(RegattaAndRaceIdentifier race, List<CompetitorDTO> competitors, Date from, Date to,
             long stepSize, DetailType detailType, AsyncCallback<CompetitorsRaceDataDTO> callback);
+
+    /**
+     * Finds out the names of all {@link MetaLeaderboard}s managed by this server that
+     * {@link MetaLeaderboard#getLeaderboards() contain} the leaderboard identified by <code>leaderboardName</code>. The
+     * names of those meta-leaderboards are returned. The list returned is never <code>null</code> but may be empty if no such
+     * leaderboard is found.
+     */
+    void getOverallLeaderboardNamesContaining(String leaderboardName, AsyncCallback<List<String>> asyncCallback);
 }

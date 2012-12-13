@@ -96,13 +96,10 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
         dataSeriesByCompetitor = new HashMap<CompetitorDTO, Series>();
         markPassingSeriesByCompetitor = new HashMap<CompetitorDTO, Series>();
         setSize("100%", "100%");
-
         noCompetitorsSelectedLabel = new Label(stringMessages.selectAtLeastOneCompetitor() + ".");
         noCompetitorsSelectedLabel.setStyleName("abstractChartPanel-importantMessageOfChart");
-
-        chart = createChart();
+        createChart();
         setSelectedDetailType(detailType);
-
         competitorSelectionProvider.addCompetitorSelectionChangeListener(this);
         raceSelectionProvider.addRaceSelectionChangeListener(this);
     }
@@ -124,7 +121,7 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
                 .setMarginRight(65)
                 .setBorderColor(new Color("#CACACA"))
                 .setBackgroundColor(new Color("#EBEBEB"))
-                .setBorderWidth(1)
+                .setBorderWidth(0)
                 .setBorderRadius(0)
                 .setPlotBorderWidth(0)
                 .setCredits(new Credits().setEnabled(false))
@@ -316,9 +313,7 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
                     newRaceDataPoints = new Point[currentPointIndex];
                     System.arraycopy(raceDataPointsToAdd, 0, newRaceDataPoints, 0, currentPointIndex);
                 }
-                
-                competitorDataSeries.setPoints(newRaceDataPoints, false);
-
+                setSeriesPoints(competitorDataSeries, newRaceDataPoints);
                 // Adding the series if chart doesn't contain it
                 if (!chartSeries.contains(competitorDataSeries)) {
                     chart.addSeries(competitorDataSeries);
@@ -326,14 +321,12 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
                 }
             }
         }
-        
-        timeOfEarliestRequestInMillis = chartData.getRequestedFromTime().getTime();
-        timeOfLatestRequestInMillis = chartData.getRequestedToTime().getTime();
-
-//        if (!isZoomed) {
-//            chart.getXAxis().setMin(timeRangeWithZoomProvider.getFromTime().getTime());
-//            chart.getXAxis().setMax(timeRangeWithZoomProvider.getToTime().getTime());
-//        }
+        if (timeOfEarliestRequestInMillis == null || timeOfEarliestRequestInMillis > chartData.getRequestedFromTime().getTime()) {
+            timeOfEarliestRequestInMillis = chartData.getRequestedFromTime().getTime();
+        }
+        if (timeOfLatestRequestInMillis == null || timeOfLatestRequestInMillis < chartData.getRequestedToTime().getTime()) {
+            timeOfLatestRequestInMillis = chartData.getRequestedToTime().getTime();
+        }
         chart.redraw();
     }
 
@@ -473,6 +466,10 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
         return this.selectedDetailType;
     }
 
+    private boolean hasReversedYAxis(DetailType detailType) {
+        return detailType == DetailType.WINDWARD_DISTANCE_TO_OVERALL_LEADER || detailType == DetailType.GAP_TO_LEADER_IN_SECONDS;
+    }
+    
     /**
      * Updates the {@link #selectedDetailType} field, clears the chart for the new <code>selectedDetailType</code> and
      * clears the {@link #chartData}.<br />
@@ -483,12 +480,20 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
     protected boolean setSelectedDetailType(DetailType newSelectedDetailType) {
         boolean hasDetailTypeChanged = newSelectedDetailType != this.selectedDetailType;
         if (hasDetailTypeChanged) {
+            boolean oldReversedYAxis = hasReversedYAxis(this.selectedDetailType);
             this.selectedDetailType = newSelectedDetailType;
-            clearChart();
-
-            chart.setTitle(new ChartTitle().setText(DetailTypeFormatter.format(selectedDetailType, stringMessages)),
-                    null);
-
+            // TODO There is a bug in the highcharts library which prevents to change the reverse property of the YAxis
+            // Because we need this functionality we need to recreate the chart each time the YAxis changes
+            if (oldReversedYAxis != hasReversedYAxis(selectedDetailType)) {
+                chart = createChart();
+                if (isZoomed) {
+                    Pair<Date, Date> zoomRange = timeRangeWithZoomProvider.getTimeZoom();
+                    onTimeZoomChanged(zoomRange.getA(), zoomRange.getB());
+                } else {
+                    resetMinMaxAndExtremesInterval(/* redraw */ true);
+                }
+            }
+            chart.setTitle(new ChartTitle().setText(DetailTypeFormatter.format(selectedDetailType, stringMessages)), null);
             final String unit = getDetailTypeUnit();
             if (!compactChart) {
                 chart.getYAxis().setAxisTitleText(
@@ -496,11 +501,8 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
             } else {
                 chart.getYAxis().setAxisTitleText("[" + unit + "]");
             }
-            chart.getYAxis()
-                    .setReversed(
-                            (selectedDetailType == DetailType.WINDWARD_DISTANCE_TO_OVERALL_LEADER || selectedDetailType == DetailType.GAP_TO_LEADER_IN_SECONDS) ? true
-                                    : false);
-
+            chart.getYAxis().setReversed(
+                    selectedDetailType == DetailType.WINDWARD_DISTANCE_TO_OVERALL_LEADER || selectedDetailType == DetailType.GAP_TO_LEADER_IN_SECONDS);
             final NumberFormat numberFormat = DetailTypeFormatter.getNumberFormat(selectedDetailType);
             chart.setToolTip(new ToolTip().setEnabled(true).setFormatter(new ToolTipFormatter() {
                 @Override
