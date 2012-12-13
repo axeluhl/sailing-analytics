@@ -7,5 +7,6 @@ Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: com.sap.sailing.domain.swisstimingreplayadapter,
  junit.framework;version="4.8.2",
+ org.json.simple,
  org.json.simple.parser,
  org.junit;version="4.8.2"

@@ -61,7 +61,7 @@ public class SwissTimingReplayTestListener implements SwissTimingReplayListener 
     }
 
     @Override
-    public void frame(byte cid, int raceTime, int startTime, int estimatedStartTime, RaceStatus raceStatus,
+    public void frameMetaData(byte cid, int raceTime, int startTime, int estimatedStartTime, RaceStatus raceStatus,
             short distanceToNextMark, Weather weather, short humidity, short temperature, String messageText,
             byte cFlag, byte rFlag, byte duration, short nm) {
         System.out.println("frame - cid: " + cid + ", raceTime: " + raceTime + ", startTime: " + startTime + ", estimatedStartTime: " + estimatedStartTime + ", raceStatus: " + raceStatus + ", distanceToNextMark: " + distanceToNextMark + ", weather: " + weather + ", humidity: " + humidity + ", temperature: " + temperature + ", messageText: " + messageText + ", cFlag: " + cFlag + ", rFlag: " + rFlag + ", duration: " + duration + ", nm: " + nm);
@@ -104,18 +104,28 @@ public class SwissTimingReplayTestListener implements SwissTimingReplayListener 
     }
 
     @Override
-    public void illegalState(String message) {
-        throw new IllegalStateException(message);
+    public void eot() {
+        System.out.println("EOT");
     }
-
+    
     @Override
     public void unknownMessageIdentificationCode(byte messageIdentificationCode) {
         throw new IllegalArgumentException("Unknown message identification code: " +  messageIdentificationCode);
     }
 
     @Override
-    public void eot() {
-        System.out.println("EOT");
+    public void unexpectedStartByte(byte startByte) {
+        throw new IllegalStateException("Unexpected start byte: " + startByte);
+    }
+
+    @Override
+    public void payloadMismatch(short remainingPayloadSize) {
+        throw new IllegalStateException("Payload mismatch. Remaining payload: " + remainingPayloadSize);
+    }
+
+    @Override
+    public void prematureEndOfData(byte endByte) {
+        throw new IllegalStateException("Premature end of data: " + endByte);
     }
 
 }

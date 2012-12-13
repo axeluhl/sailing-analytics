@@ -36,8 +36,6 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
-import com.sap.sailing.domain.common.impl.Util;
-import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.RaceSelectionModel;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
@@ -116,7 +114,7 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
         TextColumn<SwissTimingReplayRaceDTO> regattaNameColumn = new TextColumn<SwissTimingReplayRaceDTO>() {
             @Override
             public String getValue(SwissTimingReplayRaceDTO object) {
-                return object.race_id;
+                return object.rsc;
             }
         };
         TextColumn<SwissTimingReplayRaceDTO> raceNameColumn = new TextColumn<SwissTimingReplayRaceDTO>() {
@@ -197,8 +195,8 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
         boatClassNamesColumn.setSortable(true);
         AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
         raceTable = new CellTable<SwissTimingReplayRaceDTO>(/* pageSize */ 10000, tableRes);
-        raceTable.addColumn(regattaNameColumn, stringMessages.event());
         raceTable.addColumn(raceNameColumn, stringMessages.race());
+        raceTable.addColumn(regattaNameColumn, "RSC");
         raceTable.addColumn(boatClassNamesColumn, stringMessages.boatClass());
         raceTable.addColumn(raceStartTrackingColumn, stringMessages.startTime());
         raceTable.setWidth("300px");

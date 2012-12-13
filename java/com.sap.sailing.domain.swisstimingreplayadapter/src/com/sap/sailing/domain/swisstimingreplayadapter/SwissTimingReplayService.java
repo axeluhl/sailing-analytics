@@ -7,55 +7,105 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.text.DateFormat;
+import java.text.MessageFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
 public class SwissTimingReplayService {
-    
+
+    static final String RACE_CONFIG_URL_TEMPLATE = "http://live.ota.st-sportservice.com/configuration?_race={0}&effective=1&additional=config";
+
     private static final int STX = 0x02;
     private static final int ETX = 0x03;
     private static final int EOT = 0x04;
-    
+
     private static final Charset CHARSET = Charset.forName("ISO-8859-1");
-    
-    public static final DateFormat SWISSTIMING_DATEFORMAT = new SimpleDateFormat("dd.MM.yyyy HH:mm");
+
+    public static final String SWISSTIMING_DATEFORMAT_PATTERN = "dd.MM.yyyy HH:mm";
+    public static final TimeZone DEFAULT_TIMEZONE = TimeZone.getTimeZone("GMT");
 
     public static List<SwissTimingReplayRace> listReplayRaces(String swissTimingUrlText) {
-        URL url;
+        URL raceListUrl;
         try {
-            url = new URL(swissTimingUrlText);
-            return parseJSONObject(url.openStream(), swissTimingUrlText);
-        } catch (Exception e) { //MalformedURLException | IOException | ParseException | org.json.simple.parser.ParseException)
+            raceListUrl = new URL(swissTimingUrlText);
+            List<SwissTimingReplayRace> races = parseJSONObject(raceListUrl.openStream(), swissTimingUrlText);
+            // loadRaceConfigs(races);
+            return races;
+        } catch (Exception e) { // MalformedURLException | IOException | ParseException |
+                                // org.json.simple.parser.ParseException)
             throw new RuntimeException(e);
         }
     }
 
-    static List<SwissTimingReplayRace>  parseJSONObject(InputStream inputStream, String swissTimingUrlText) throws IOException, ParseException, org.json.simple.parser.ParseException {
+    public static SwissTimingRaceConfig loadRaceConfig(String raceId) {
+        try {
+            URL configUrl = new URL(MessageFormat.format(RACE_CONFIG_URL_TEMPLATE, raceId));
+            InputStream configDataStream = configUrl.openStream();
+            return loadRaceConfig(configDataStream);
+        } catch (Exception e) { // MalformedURLException | ParseException | org.json.simple.parser.ParseException)
+            throw new RuntimeException(e);
+        }
+    }
+
+    static SwissTimingRaceConfig loadRaceConfig(InputStream configDataStream) throws IOException,
+            org.json.simple.parser.ParseException {
+        JSONObject jsonRaceConfig = (JSONObject) new JSONParser().parse(new InputStreamReader(configDataStream));
+        JSONObject jsonConfigEntry = (JSONObject) jsonRaceConfig.get("config");
+        String latitude = (String) jsonRaceConfig.get("latitude");
+        String longitude = (String) jsonRaceConfig.get("longitude");
+        String country_code = (String) jsonRaceConfig.get("country_code");
+        String gmt_offset = (String) jsonRaceConfig.get("gmt_offset");
+        String location = (String) jsonRaceConfig.get("location");
+        String event_name = (String) (jsonConfigEntry != null ? jsonConfigEntry.get("event_name") : null);
+        String race_start_ts = (String) (jsonConfigEntry != null ? jsonConfigEntry.get("race_start_ts") : null);
+        SwissTimingRaceConfig raceConfig = new SwissTimingRaceConfig(latitude, longitude, country_code, gmt_offset,
+                location, event_name, race_start_ts);
+        return raceConfig;
+    }
+
+    /**
+     * 
+     * @param inputStream
+     *            The stream to read the JSON content from
+     * @param swissTimingUrlText
+     *            The URL where the stream has been taken from. Only used as information for later reference.
+     * @return
+     * @throws IOException
+     * @throws ParseException
+     * @throws org.json.simple.parser.ParseException
+     */
+    static List<SwissTimingReplayRace> parseJSONObject(InputStream inputStream, String swissTimingUrlText)
+            throws IOException, ParseException, org.json.simple.parser.ParseException {
         JSONArray json = (JSONArray) new JSONParser().parse(new InputStreamReader(inputStream));
         List<SwissTimingReplayRace> result = new ArrayList<SwissTimingReplayRace>();
+        DateFormat startTimeFormat = getStartTimeFormat();
         for (Object raceEntry : json) {
             JSONObject jsonRaceEntry = (JSONObject) raceEntry;
             String startTimeText = (String) jsonRaceEntry.get("start");
-            Date startTime = startTimeText == null ? null : SWISSTIMING_DATEFORMAT.parse(startTimeText);
-            SwissTimingReplayRace replayRace = new SwissTimingReplayRace(
-                    swissTimingUrlText, 
-                    (String) jsonRaceEntry.get("flight_number"),
-                    (String) jsonRaceEntry.get("race_id"),
-                    (String) jsonRaceEntry.get("rsc"),
-                    (String) jsonRaceEntry.get("name"),
-                    (String) jsonRaceEntry.get("class"),
-                    startTime ,
+            Date startTime = startTimeText == null ? null : startTimeFormat.parse(startTimeText);
+            
+            SwissTimingReplayRace replayRace = new SwissTimingReplayRace(swissTimingUrlText,
+                    (String) jsonRaceEntry.get("flight_number"), (String) jsonRaceEntry.get("race_id"),
+                    (String) jsonRaceEntry.get("rsc"), (String) jsonRaceEntry.get("name"),
+                    (String) jsonRaceEntry.get("class"), startTime,
                     (String) jsonRaceEntry.get("link"));
             result.add(replayRace);
         }
         return result;
+    }
+
+    public static DateFormat getStartTimeFormat() {
+        DateFormat startTimeFormat = new SimpleDateFormat(SWISSTIMING_DATEFORMAT_PATTERN);
+        startTimeFormat.setTimeZone(DEFAULT_TIMEZONE);
+        return startTimeFormat;
     }
 
     public static void loadRaceData(String link, SwissTimingReplayListener replayListener) {
@@ -64,32 +114,33 @@ public class SwissTimingReplayService {
             raceDataUrl = new URL("http://" + link);
             InputStream urlInputStream = raceDataUrl.openStream();
             readData(urlInputStream, replayListener);
-            
+
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        
+
     }
 
     static void readData(InputStream urlInputStream, SwissTimingReplayListener replayListener) throws IOException {
         DataInputStream data = new DataInputStream(urlInputStream);
-        
-        byte[] startByteBuffer = new  byte[1];
+
+        byte[] startByteBuffer = new byte[1];
         int readSuccess = data.read(startByteBuffer);
-        
+
         while (readSuccess != -1) {
-            
+
             byte startByte = startByteBuffer[0];
             if (startByte != STX) {
-                replayListener.illegalState("Expected STX (0x02), found: " + startByte);
+                replayListener.unexpectedStartByte(startByte);
             }
-        
+
             byte messageIdentificationCode = data.readByte();
             short messageLength = data.readShort();
-            
+
             if (messageLength > 0) {
-                short payloadSize = (short) (messageLength - 5); //payload is message minus STX, MIC, message length and ETX/EOT --> = 5 byte 
-                
+                short payloadSize = (short) (messageLength - 5); // payload is message minus STX, MIC, message length
+                                                                 // and ETX/EOT --> = 5 byte
+
                 switch (messageIdentificationCode) {
                 case MessageIdentificationCodes.MIC_00_Reference_Timestamp:
                     while (payloadSize > 0) {
@@ -113,7 +164,7 @@ public class SwissTimingReplayService {
 
                     replayListener.keyFrameIndex(keyFrameIndex);
                     payloadSize -= 4;
-                    
+
                     while (payloadSize > 0) {
                         int keyFrameIndexPosition = data.readInt();
 
@@ -140,7 +191,8 @@ public class SwissTimingReplayService {
                         short windSpeed = data.readShort();
                         short windDirection = data.readShort();
 
-                        replayListener.mark(new MarkType(markType), identifier, index, id1, id2, windSpeed, windDirection);
+                        replayListener.mark(new MarkType(markType), identifier, index, id1, id2, windSpeed,
+                                windDirection);
                         payloadSize -= 1 + 8 + 1 + 8 + 8 + 2 + 2;
                     }
                     break;
@@ -160,8 +212,10 @@ public class SwissTimingReplayService {
                         short cRank_Bracket = data.readShort();
                         short cnPoints_x10_Bracket = data.readShort();
                         short ctPoints_x10_Winner = data.readShort();
-                        
-                        replayListener.competitor(hashValue, nation, sailNumber, name, CompetitorStatus.byCode(competitorStatus), BoatType.byCode(boatType), cRank_Bracket, cnPoints_x10_Bracket, ctPoints_x10_Winner);
+
+                        replayListener.competitor(hashValue, nation, sailNumber, name,
+                                CompetitorStatus.byCode(competitorStatus), BoatType.byCode(boatType), cRank_Bracket,
+                                cnPoints_x10_Bracket, ctPoints_x10_Winner);
                         payloadSize -= 4 + 3 + 1 + sailNumberLength + 1 + nameLength + 1 + 1 + 2 + 2 + 2;
                     }
                     break;
@@ -182,9 +236,10 @@ public class SwissTimingReplayService {
                         byte rFlag = data.readByte();
                         byte duration = data.readByte();
                         short nm = data.readShort();
-                        
-                        replayListener.frame(cid, raceTime, startTime, estimatedStartTime, RaceStatus.byCode(raceStatus), distanceToNextMark, Weather.byCode(weather), humidity, temperature, 
-                                messageText, cFlag, rFlag, duration, nm);
+
+                        replayListener.frameMetaData(cid, raceTime, startTime, estimatedStartTime,
+                                RaceStatus.byCode(raceStatus), distanceToNextMark, Weather.byCode(weather), humidity,
+                                temperature, messageText, cFlag, rFlag, duration, nm);
                         payloadSize -= 1 + 3 + 3 + 3 + 1 + 2 + 1 + 2 + 2 + 1 + messageTextLength + 1 + 1 + 1 + 2;
                     }
                     break;
@@ -203,7 +258,8 @@ public class SwissTimingReplayService {
                         int gap = read3ByteInt(data);
                         int raceTime = read3ByteInt(data);
                         short marksCount = data.readShort();
-                        replayListener.ranking(hashValue, rank, rankIndex, racePoints, CompetitorStatus.byCode(competitorStatus), finishRank, finishRankIndex, gap, raceTime);
+                        replayListener.ranking(hashValue, rank, rankIndex, racePoints,
+                                CompetitorStatus.byCode(competitorStatus), finishRank, finishRankIndex, gap, raceTime);
                         payloadSize -= 4 + 2 + 2 + 2 + 1 + 2 + 2 + 3 + 3 + 2;
                         for (int i = 0; i < marksCount; i++) {
                             short marksRank = data.readShort();
@@ -213,7 +269,7 @@ public class SwissTimingReplayService {
                             replayListener.rankingMark(marksRank, marksRankIndex, marksGap, marksRaceTime);
                             payloadSize -= 2 + 2 + 3 + 3;
                         }
-                        
+
                     }
                     break;
                 case MessageIdentificationCodes.MIC_124_Trackers:
@@ -236,8 +292,10 @@ public class SwissTimingReplayService {
                         short pRank = data.readShort();
                         short ptPoints = data.readShort();
                         short pnPoints = data.readShort();
-                        
-                        replayListener.trackers(hashValue, latitude, longitude, cog, sog, average_sog, vmg, CompetitorStatus.byCode(competitorStatus), rank, dtl, dtnm, nm, pRank, ptPoints, pnPoints);
+
+                        replayListener.trackers(hashValue, latitude, longitude, cog, sog, average_sog, vmg,
+                                CompetitorStatus.byCode(competitorStatus), rank, dtl, dtnm, nm, pRank, ptPoints,
+                                pnPoints);
 
                         payloadSize -= 4 + 4 + 4 + 2 + 2 + 2 + 2 + 1 + 2 + 2 + 2 + 2 + 2 + 2 + 2;
                     }
@@ -248,35 +306,34 @@ public class SwissTimingReplayService {
                 }
 
                 if (payloadSize != 0) {
-                    replayListener.illegalState("Payload mismatch.");
+                    replayListener.payloadMismatch(payloadSize);
                 }
             }
-            
-            
-          byte endByte = data.readByte();
-          if (endByte == EOT) {
-              replayListener.eot();
-          } else if (endByte == ETX) {
-              //observe whether ETX is interesting for anybody. 
-          } else {
-              replayListener.illegalState("Premature end of data section.");
-          }          
-          
-          readSuccess = data.read(startByteBuffer);
-          
+
+            byte endByte = data.readByte();
+            if (endByte == EOT) {
+                replayListener.eot();
+            } else if (endByte == ETX) {
+                // observe whether ETX is interesting for anybody.
+            } else {
+                replayListener.prematureEndOfData(endByte);
+            }
+
+            readSuccess = data.read(startByteBuffer);
+
         }
     }
 
     private static int read3ByteInt(DataInputStream data) throws IOException {
-        byte highByte = data.readByte(); 
-        byte midByte = data.readByte(); 
+        byte highByte = data.readByte();
+        byte midByte = data.readByte();
         byte lowByte = data.readByte();
-        
-        //turn signed to unsigned, then shift left
+
+        // turn signed to unsigned, then shift left
         int highInt = (highByte & 0xFF) << 16;
         int midInt = (midByte & 0xFF) << 8;
         int lowInt = lowByte & 0xFF;
-        
+
         return highInt | midInt | lowInt;
     }
 
