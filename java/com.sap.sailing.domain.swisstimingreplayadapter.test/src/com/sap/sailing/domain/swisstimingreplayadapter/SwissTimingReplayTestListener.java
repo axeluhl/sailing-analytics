@@ -20,7 +20,6 @@ public class SwissTimingReplayTestListener implements SwissTimingReplayParser.Sw
     int rankingMarkCount;
 
     public SwissTimingReplayTestListener() {
-
     }
 
     @Override

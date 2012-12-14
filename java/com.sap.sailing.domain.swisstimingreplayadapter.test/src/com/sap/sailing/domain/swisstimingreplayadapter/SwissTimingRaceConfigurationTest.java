@@ -1,9 +1,11 @@
 package com.sap.sailing.domain.swisstimingreplayadapter;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.InetSocketAddress;
-import java.net.Proxy;
 import java.net.URL;
 import java.net.URLConnection;
 import java.text.MessageFormat;
@@ -15,16 +17,12 @@ import java.util.Map;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-
 public class SwissTimingRaceConfigurationTest {
     
     private static final String JSON_URL = "/2012_OSG.json";
     
+    @Ignore("Takes a very long time; only used to see if we can parse all configurations")
     @Test
-    @Ignore
     public void testLoadConfigurations() throws IOException, ParseException, org.json.simple.parser.ParseException {
         InputStream inputStream = getClass().getResourceAsStream(JSON_URL);
         List<SwissTimingReplayRace> races = SwissTimingReplayService.parseJSONObject(inputStream , JSON_URL);
@@ -57,14 +55,9 @@ public class SwissTimingRaceConfigurationTest {
 
     @Test
     public void testRaceConfig_6260_with_detail_config() throws Exception {
-
-        InetSocketAddress proxyAddress = new InetSocketAddress("proxy", 8080);
-        Proxy proxy = new Proxy(Proxy.Type.HTTP, proxyAddress);
-
         URL configFileURL = new URL(MessageFormat.format(SwissTimingReplayService.RACE_CONFIG_URL_TEMPLATE, "6260"));
-        URLConnection connection = configFileURL.openConnection(proxy);
+        URLConnection connection = configFileURL.openConnection();
         InputStream configDataStream = connection.getInputStream();
-
         SwissTimingRaceConfig config_446483 = SwissTimingReplayService.loadRaceConfig(configDataStream);
         assertNotNull(config_446483);
         assertEquals("GB", config_446483.country_code);
