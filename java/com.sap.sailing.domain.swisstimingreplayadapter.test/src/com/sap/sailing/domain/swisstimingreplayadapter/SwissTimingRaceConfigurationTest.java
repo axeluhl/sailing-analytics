@@ -26,17 +26,12 @@ public class SwissTimingRaceConfigurationTest {
     @Test
     @Ignore
     public void testLoadConfigurations() throws IOException, ParseException, org.json.simple.parser.ParseException {
-        
-        InetSocketAddress proxyAddress = new InetSocketAddress("proxy", 8080);
-        Proxy proxy = new Proxy(Proxy.Type.HTTP, proxyAddress);
-        
         InputStream inputStream = getClass().getResourceAsStream(JSON_URL);
         List<SwissTimingReplayRace> races = SwissTimingReplayService.parseJSONObject(inputStream , JSON_URL);
-        
         Map<String, SwissTimingRaceConfig> configsById = new HashMap<String, SwissTimingRaceConfig>();
         for (SwissTimingReplayRace race : races) {
             URL configFileURL = new URL(MessageFormat.format(SwissTimingReplayService.RACE_CONFIG_URL_TEMPLATE, race.race_id));
-            URLConnection connection = configFileURL.openConnection(proxy);
+            URLConnection connection = configFileURL.openConnection();
             InputStream configDataStream = connection.getInputStream();
             SwissTimingRaceConfig raceConfig = SwissTimingReplayService.loadRaceConfig(configDataStream);
             configsById.put(race.race_id, raceConfig);
@@ -45,14 +40,9 @@ public class SwissTimingRaceConfigurationTest {
     
     @Test
     public void testRaceConfig_446483_no_detail_config() throws Exception {
-
-        InetSocketAddress proxyAddress = new InetSocketAddress("proxy", 8080);
-        Proxy proxy = new Proxy(Proxy.Type.HTTP, proxyAddress);
-
         URL configFileURL = new URL(MessageFormat.format(SwissTimingReplayService.RACE_CONFIG_URL_TEMPLATE, "446483"));
-        URLConnection connection = configFileURL.openConnection(proxy);
+        URLConnection connection = configFileURL.openConnection();
         InputStream configDataStream = connection.getInputStream();
-
         SwissTimingRaceConfig config_446483 = SwissTimingReplayService.loadRaceConfig(configDataStream);
         assertNotNull(config_446483);
         assertEquals("GB", config_446483.country_code);
