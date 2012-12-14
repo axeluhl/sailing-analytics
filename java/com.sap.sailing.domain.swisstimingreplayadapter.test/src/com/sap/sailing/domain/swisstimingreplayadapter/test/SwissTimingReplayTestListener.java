@@ -1,7 +1,14 @@
-package com.sap.sailing.domain.swisstimingreplayadapter;
+package com.sap.sailing.domain.swisstimingreplayadapter.test;
+
+import com.sap.sailing.domain.swisstimingreplayadapter.CompetitorStatus;
+import com.sap.sailing.domain.swisstimingreplayadapter.SwissTimingReplayListener;
+import com.sap.sailing.domain.swisstimingreplayadapter.impl.BoatType;
+import com.sap.sailing.domain.swisstimingreplayadapter.impl.MarkType;
+import com.sap.sailing.domain.swisstimingreplayadapter.impl.RaceStatus;
+import com.sap.sailing.domain.swisstimingreplayadapter.impl.Weather;
 
 
-public class SwissTimingReplayTestListener implements SwissTimingReplayParser.SwissTimingReplayListener {
+public class SwissTimingReplayTestListener implements SwissTimingReplayListener {
 
     int keyFrameIndexSum;
     int keyFrameIndexPositionCount;

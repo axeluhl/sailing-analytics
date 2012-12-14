@@ -1,6 +1,8 @@
-package com.sap.sailing.domain.swisstimingreplayadapter;
+package com.sap.sailing.domain.swisstimingreplayadapter.test;
 
 import org.junit.Test;
+
+import com.sap.sailing.domain.swisstimingreplayadapter.impl.MarkType;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;

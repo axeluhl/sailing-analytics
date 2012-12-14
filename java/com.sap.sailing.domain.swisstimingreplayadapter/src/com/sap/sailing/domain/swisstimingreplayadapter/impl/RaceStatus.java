@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.swisstimingreplayadapter;
+package com.sap.sailing.domain.swisstimingreplayadapter.impl;
 
 public enum RaceStatus {
 

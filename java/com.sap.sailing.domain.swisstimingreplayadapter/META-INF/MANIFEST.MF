@@ -6,5 +6,8 @@ Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
-Require-Bundle: org.json.simple;bundle-version="1.1.0"
-Export-Package: com.sap.sailing.domain.swisstimingreplayadapter
+Require-Bundle: com.sap.sailing.domain.common,
+ com.sap.sailing.domain,
+ org.json.simple;bundle-version="1.1.0"
+Export-Package: com.sap.sailing.domain.swisstimingreplayadapter,
+ com.sap.sailing.domain.swisstimingreplayadapter.impl;x-friends:="com.sap.sailing.domain.swisstimingreplayadapter.test"

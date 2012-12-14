@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.swisstimingreplayadapter;
+package com.sap.sailing.domain.swisstimingreplayadapter.impl;
 
 import java.util.Arrays;
 
@@ -6,14 +6,14 @@ public class MarkType {
 
     // mark type ist maskiert: bit 7 = (isBuoy/isPin), 6 = (isBoat/noBoat), 5 = (isMeasure), 4 = (isStart,IsFinishOrCourse), 3 = (isFinish/isStartOrCourse), 2 = (isTurn/isStraight), 1 = (isCouple), 0 = (isVisible) 
     
-    static byte IS_VISIBLE = (byte) (1 << 0);
-    static byte IS_COUPLE = (byte) (1 << 1);
-    static byte IS_TURN = (byte) (1 << 2);
-    static byte IS_FINISH = (byte) (1 << 3);
-    static byte IS_START = (byte) (1 << 4);
-    static byte IS_MEASURE = (byte) (1 << 5);
-    static byte IS_BOAT = (byte) (1 << 6);
-    static byte IS_BUOY = (byte) (1 << 7);
+    public static byte IS_VISIBLE = (byte) (1 << 0);
+    public static byte IS_COUPLE = (byte) (1 << 1);
+    public static byte IS_TURN = (byte) (1 << 2);
+    public static byte IS_FINISH = (byte) (1 << 3);
+    public static byte IS_START = (byte) (1 << 4);
+    public static byte IS_MEASURE = (byte) (1 << 5);
+    public static byte IS_BOAT = (byte) (1 << 6);
+    public static byte IS_BUOY = (byte) (1 << 7);
     
     static String[] AS_STRING = new String[] {"VISIBLE", "COUPLE", "TURN", "FINISH", "START", "MEASURE", "BOAT", "BUOY"};
     

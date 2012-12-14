@@ -1,8 +1,15 @@
-package com.sap.sailing.domain.swisstimingreplayadapter;
+package com.sap.sailing.domain.swisstimingreplayadapter.test;
 
 import java.util.Date;
 
-public class SwissTimingReplayPrintListener implements SwissTimingReplayParser.SwissTimingReplayListener {
+import com.sap.sailing.domain.swisstimingreplayadapter.CompetitorStatus;
+import com.sap.sailing.domain.swisstimingreplayadapter.SwissTimingReplayListener;
+import com.sap.sailing.domain.swisstimingreplayadapter.impl.BoatType;
+import com.sap.sailing.domain.swisstimingreplayadapter.impl.MarkType;
+import com.sap.sailing.domain.swisstimingreplayadapter.impl.RaceStatus;
+import com.sap.sailing.domain.swisstimingreplayadapter.impl.Weather;
+
+public class SwissTimingReplayPrintListener implements SwissTimingReplayListener {
     
     private long referenceTimestamp;
     private int referenceLatitude;
