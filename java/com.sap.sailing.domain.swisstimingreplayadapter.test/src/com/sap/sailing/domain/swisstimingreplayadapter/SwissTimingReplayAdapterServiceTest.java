@@ -33,24 +33,71 @@ public class SwissTimingReplayAdapterServiceTest {
     }    
     
     @Test
-    public void testReadRaceData_SAW005906_20120805() throws Exception {
-        SwissTimingReplayService.readData(getClass().getResourceAsStream("/SAW005906.20120805.replay"), new SwissTimingReplayTestListener());
+    public void testRaceData_SAW005906_20120805() throws Exception {
+        SwissTimingReplayTestListener replayCountListener = new SwissTimingReplayTestListener();
+        SwissTimingReplayParser.readData(getClass().getResourceAsStream("/SAW005906.20120805.replay"), replayCountListener);
+        
+        assertEquals(0, replayCountListener.keyFrameIndexSum);          
+        assertEquals(790, replayCountListener.keyFrameIndexPositionCount);  
+        assertEquals(2013, replayCountListener.eotCount);                    
+        assertEquals(2012, replayCountListener.frameCount);                  
+        assertEquals(2012, replayCountListener.referenceTimestampCount);     
+        assertEquals(2012, replayCountListener.referenceLocationCount);      
+        assertEquals(2012, replayCountListener.rsc_cidCount);                
+        assertEquals(72432, replayCountListener.competitorsCountSum);       
+        assertEquals(72432, replayCountListener.competitorsCount);            
+        assertEquals(20120, replayCountListener.markCount);                   
+        assertEquals(72432, replayCountListener.trackersCountSum);          
+        assertEquals(72432, replayCountListener.trackersCount);               
+        assertEquals(40240, replayCountListener.rankingsCountSum);          
+        assertEquals(40240, replayCountListener.rankingsCount);               
+        assertEquals(321920, replayCountListener.rankingMarkCount);                
     }
 
     @Test
-    public void testReadRaceData_SAW010955_20120802() throws Exception {
-        SwissTimingReplayService.readData(getClass().getResourceAsStream("/SAW010955.20120802.replay"), new SwissTimingReplayTestListener());
+    public void testRaceData_SAW010955_20120802() throws Exception {
+        SwissTimingReplayTestListener replayCountListener = new SwissTimingReplayTestListener();
+        SwissTimingReplayParser.readData(getClass().getResourceAsStream("/SAW010955.20120802.replay"), replayCountListener);
+        
+        assertEquals(0, replayCountListener.keyFrameIndexSum);          
+        assertEquals(402, replayCountListener.keyFrameIndexPositionCount);  
+        assertEquals(404, replayCountListener.eotCount);                    
+        assertEquals(403, replayCountListener.frameCount);                  
+        assertEquals(403, replayCountListener.referenceTimestampCount);     
+        assertEquals(403, replayCountListener.referenceLocationCount);      
+        assertEquals(403, replayCountListener.rsc_cidCount);                
+        assertEquals(4836, replayCountListener.competitorsCountSum);       
+        assertEquals(4836, replayCountListener.competitorsCount);            
+        assertEquals(2015, replayCountListener.markCount);                   
+        assertEquals(4836, replayCountListener.trackersCountSum);          
+        assertEquals(4836, replayCountListener.trackersCount);               
+        assertEquals(806, replayCountListener.rankingsCountSum);          
+        assertEquals(806, replayCountListener.rankingsCount);               
+        assertEquals(2418, replayCountListener.rankingMarkCount);                
     }
 
     @Test
     @Ignore
-    public void testReadRaceData_SAM002901() throws Exception {
-        SwissTimingReplayService.readData(getClass().getResourceAsStream("/SAM002901.replay"), new SwissTimingReplayTestListener());
+    public void printRaceData_SAW005906_20120805() throws Exception {
+        SwissTimingReplayParser.readData(getClass().getResourceAsStream("/SAW005906.20120805.replay"), new SwissTimingReplayPrintListener());
     }
 
     @Test
-    public void testReadRaceData_SAM009904_20120731() throws Exception {
-        SwissTimingReplayService.readData(getClass().getResourceAsStream("/SAM009904.20120731.replay"), new SwissTimingReplayTestListener());
+    @Ignore
+    public void printReadRaceData_SAW010955_20120802() throws Exception {
+        SwissTimingReplayParser.readData(getClass().getResourceAsStream("/SAW010955.20120802.replay"), new SwissTimingReplayPrintListener());
+    }
+
+    @Test
+    @Ignore
+    public void printReadRaceData_SAM002901() throws Exception {
+        SwissTimingReplayParser.readData(getClass().getResourceAsStream("/SAM002901.replay"), new SwissTimingReplayPrintListener());
+    }
+
+    @Test
+    @Ignore
+    public void printReadRaceData_SAM009904_20120731() throws Exception {
+        SwissTimingReplayParser.readData(getClass().getResourceAsStream("/SAM009904.20120731.replay"), new SwissTimingReplayPrintListener());
     }
 
 }

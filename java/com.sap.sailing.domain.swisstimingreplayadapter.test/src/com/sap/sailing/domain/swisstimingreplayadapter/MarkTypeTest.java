@@ -1,11 +1,10 @@
 package com.sap.sailing.domain.swisstimingreplayadapter;
 
-import static org.junit.Assert.*;
-import static org.junit.Assert.assertTrue;
-
 import org.junit.Test;
 
-import static junit.framework.Assert.assertEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class MarkTypeTest {
     

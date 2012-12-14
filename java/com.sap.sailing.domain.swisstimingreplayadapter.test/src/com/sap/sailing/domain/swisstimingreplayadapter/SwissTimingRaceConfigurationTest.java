@@ -12,11 +12,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertNotNull;
-
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
 public class SwissTimingRaceConfigurationTest {
@@ -24,7 +24,8 @@ public class SwissTimingRaceConfigurationTest {
     private static final String JSON_URL = "/2012_OSG.json";
     
     @Test
-    public void testLoadConfiguartions() throws IOException, ParseException, org.json.simple.parser.ParseException {
+    @Ignore
+    public void testLoadConfigurations() throws IOException, ParseException, org.json.simple.parser.ParseException {
         
         InetSocketAddress proxyAddress = new InetSocketAddress("proxy", 8080);
         Proxy proxy = new Proxy(Proxy.Type.HTTP, proxyAddress);

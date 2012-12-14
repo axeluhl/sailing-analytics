@@ -1,7 +1,6 @@
 package com.sap.sailing.domain.swisstimingreplayadapter;
 
 import java.util.Arrays;
-import java.util.List;
 
 public class MarkType {
 
