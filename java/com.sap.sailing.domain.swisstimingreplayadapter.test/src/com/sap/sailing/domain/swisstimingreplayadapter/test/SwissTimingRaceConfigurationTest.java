@@ -25,7 +25,7 @@ public class SwissTimingRaceConfigurationTest {
     
     private static final String JSON_URL = "/2012_OSG.json";
     
-    //@Ignore("Takes a very long time; only used to see if we can parse all configurations")
+    @Ignore("Takes a very long time; only used to see if we can parse all configurations")
     @Test
     public void testLoadConfigurations() throws IOException, ParseException, org.json.simple.parser.ParseException {
         InputStream inputStream = getClass().getResourceAsStream(JSON_URL);

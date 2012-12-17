@@ -158,7 +158,7 @@ public class DomainFactoryImpl implements DomainFactory {
             SAM007000 Men's Keelboat = Starboot M�nner 
             SAW010000 Women's Match Racing = Matchrace Damen Elliott 6M (modified)
          */
-        if (raceID.startsWith("SA") && raceID.length() == 9) {
+        if (raceID.toUpperCase().startsWith("SA") && raceID.length() == 9) {
             String classID = raceID.substring(3, 6);
             result = olympicClassesByID.get(classID);
             if (result == null) {

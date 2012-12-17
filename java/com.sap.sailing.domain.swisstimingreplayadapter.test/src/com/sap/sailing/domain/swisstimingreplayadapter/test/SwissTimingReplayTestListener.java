@@ -60,14 +60,14 @@ public class SwissTimingReplayTestListener implements SwissTimingReplayListener 
     }
 
     @Override
-    public void competitor(int hashValue, String nation, String sailNumber, String name,
+    public void competitor(int hashValue, String threeLetterIOCCode, String sailNumberOrID, String name,
             CompetitorStatus competitorStatus, BoatType boatType, short cRank_Bracket, short cnPoints_x10_Bracket,
             short ctPoints_x10_Winner) {
         competitorsCount++;
     }
 
     @Override
-    public void mark(MarkType markType, String identifier, byte index, String id1, String id2, short windSpeed,
+    public void mark(MarkType markType, String name, byte index, String id1, String id2, short windSpeedInKnots,
             short windDirection) {
             markCount++;
     }
