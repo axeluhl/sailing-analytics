@@ -63,6 +63,8 @@ public interface SwissTimingReplayListener {
     void raceID(String raceID);
 
     /**
+     * @param cid
+     *            competition ID
      * @param raceTime
      *            the number of seconds the race is on; 16777215 (2<<24 - 1) in case the race hasn't started yet
      * @param startTime
