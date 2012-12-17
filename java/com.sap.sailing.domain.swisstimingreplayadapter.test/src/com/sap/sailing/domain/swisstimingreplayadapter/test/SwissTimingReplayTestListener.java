@@ -30,12 +30,12 @@ public class SwissTimingReplayTestListener implements SwissTimingReplayListener 
     }
 
     @Override
-    public void rsc_cid(String text) {
+    public void raceID(String raceID) {
         rsc_cidCount++;
     }
 
     @Override
-    public void referenceTimestamp(long referenceTimestamp) {
+    public void referenceTimestamp(long referenceTimestampMillis) {
         referenceTimestampCount++;
     }
 

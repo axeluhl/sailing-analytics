@@ -52,7 +52,7 @@ public interface SwissTimingReplayListener {
 
     void keyFrameIndexPosition(int keyFrameIndexPosition);
 
-    void referenceTimestamp(long referenceTimestamp);
+    void referenceTimestamp(long referenceTimestampMillis);
 
     /**
      * @param latitude latitude in degrees * 10000000
@@ -60,8 +60,24 @@ public interface SwissTimingReplayListener {
      */
     void referenceLocation(int latitude, int longitude);
 
-    void rsc_cid(String text);
+    void raceID(String raceID);
 
+    /**
+     * @param raceTime
+     *            the number of seconds the race is on; 16777215 (2<<24 - 1) in case the race hasn't started yet
+     * @param startTime
+     *            number of seconds since the beginning of the day (00:00 in local time of the race venue) as specified
+     *            by the previous {@link #referenceTimestamp(long)} message, or 16777215 (2<<24 - 1) in case the
+     *            definitive start time isn't known yet. In this case, <code>estimatedStartTime</code> may be provided.
+     * @param estimatedStartTime
+     *            number of seconds since the beginning of the day (00:00 in local time of the race venue) as specified
+     *            by the previous {@link #referenceTimestamp(long)} message, or 16777215 (2<<24 - 1) in case the start
+     *            time is not estimated, e.g., because a definitive <code>startTime</code> is provided
+     * @param humidity
+     *            relative air humidity in percent
+     * @param temperature
+     *            temperature in degree Celsius
+     */
     void frameMetaData(byte cid, int raceTime, int startTime, int estimatedStartTime, RaceStatus raceStatus, short distanceToNextMark,
             Weather weather, short humidity, short temperature, String messageText, byte cFlag, byte rFlag,
             byte duration, short nm);

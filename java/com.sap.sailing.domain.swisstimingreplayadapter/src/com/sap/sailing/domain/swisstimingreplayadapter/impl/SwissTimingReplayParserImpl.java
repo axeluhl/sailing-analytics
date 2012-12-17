@@ -124,7 +124,7 @@ public class SwissTimingReplayParserImpl implements SwissTimingReplayParser {
                         int length = 9;
                         String text = readString(data, length);
 
-                        replayListener.rsc_cid(text);
+                        replayListener.raceID(text);
                         payloadSize -= length;
                     }
                     break;

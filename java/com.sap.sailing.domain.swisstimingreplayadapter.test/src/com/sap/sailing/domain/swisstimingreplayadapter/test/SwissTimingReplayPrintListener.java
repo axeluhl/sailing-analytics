@@ -16,7 +16,7 @@ public class SwissTimingReplayPrintListener implements SwissTimingReplayListener
     private int referenceLongitude;
     
     @Override
-    public void rsc_cid(String text) {
+    public void raceID(String text) {
         System.out.println("rsc_cid - text: " + text);
         
     }
