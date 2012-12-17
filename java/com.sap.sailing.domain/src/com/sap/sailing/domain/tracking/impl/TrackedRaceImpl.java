@@ -1691,11 +1691,13 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         boolean markPassingsNotEmpty;
         TimePoint extendedFrom = null;
         MarkPassing crossedFinishLine = null;
+        // getLastWaypoint() will wait for a read lock on the course; do this outside the synchronized block to avoid deadlocks
+        final Waypoint lastWaypoint = getRace().getCourse().getLastWaypoint();
         synchronized (markPassings) {
             markPassingsNotEmpty = markPassings != null && !markPassings.isEmpty();
             if (markPassingsNotEmpty) {
                 extendedFrom = markPassings.iterator().next().getTimePoint();
-                crossedFinishLine = getMarkPassing(competitor, getRace().getCourse().getLastWaypoint());
+                crossedFinishLine = getMarkPassing(competitor, lastWaypoint);
             }
         }
         if (markPassingsNotEmpty) {
