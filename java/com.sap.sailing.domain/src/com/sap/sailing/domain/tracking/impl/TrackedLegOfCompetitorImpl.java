@@ -607,8 +607,8 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
             // extrapolated positions onto it:
             Bearing middleManeuverAngleIfUpwindOrDownwindLeg = null;
             if (getTrackedLeg().isUpOrDownwindLeg(timePointWhenSpeedStartedToDrop)) {
-                middleManeuverAngleIfUpwindOrDownwindLeg = getProjectionAngleForUpwindDownwindManeuverLossAnalysis(timePointWhenSpeedStartedToDrop, speedWhenSpeedStartedToDrop,
-                        speedAfterManeuver);
+                Bearing middle = speedWhenSpeedStartedToDrop.getBearing().middle(speedAfterManeuver.getBearing());
+                middleManeuverAngleIfUpwindOrDownwindLeg = middle;
             }
             Position positionAtBase = track.getEstimatedPosition(timePointWhenSpeedStartedToDrop, /* extrapolate */false);
             Speed projectedSpeedWhenSpeedStartedToDrop = projectSpeedToMiddleIfUpwindDownwindElseToLegDirection(
@@ -766,21 +766,6 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
                 speed.projectTo(position, projectToForUpwindDownwind) :
                     getWindwardSpeed(speed, at);
         return projectedSpeedAtFix;
-    }
-
-    protected Bearing getProjectionAngleForUpwindDownwindManeuverLossAnalysis(TimePoint timePointBeforeManeuver,
-            SpeedWithBearing speedBeforeManeuver, SpeedWithBearing speedAfterManeuver) {
-        Bearing middle = speedBeforeManeuver.getBearing().middle(speedAfterManeuver.getBearing());
-        Wind wind = getTrackedRace().getWind(getTrackedRace().getTrack(getCompetitor()).
-                getEstimatedPosition(timePointBeforeManeuver, /* extrapolate */ false), timePointBeforeManeuver);
-        // If the average course in the maneuver deviates from the wind's  
-        final int MAX_DIFF_AVERAGE_COURSE_VERSUS_WIND_IN_DEGREES = 20;
-        if (wind != null &&
-                Math.abs(wind.getBearing().getDifferenceTo(middle).getDegrees()) > MAX_DIFF_AVERAGE_COURSE_VERSUS_WIND_IN_DEGREES &&
-                Math.abs(wind.getFrom().getDifferenceTo(middle).getDegrees()) > MAX_DIFF_AVERAGE_COURSE_VERSUS_WIND_IN_DEGREES) {
-            middle = wind.getBearing();
-        }
-        return middle;
     }
 
 }
