@@ -167,7 +167,12 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter {
             short distanceToNextMark, Weather weather, short humidity, short temperature, String messageText,
             byte cFlag, byte rFlag, byte duration, short nm) {
         if (isValid(startTime)) {
-            bestStartTimePerRaceID.put(currentRaceID, getTimePoint(startTime));
+            final TimePoint startTimeReceived = getTimePoint(startTime);
+            bestStartTimePerRaceID.put(currentRaceID, startTimeReceived);
+            DynamicTrackedRace trackedRace = trackedRacePerRaceID.get(currentRaceID);
+            if (trackedRace != null) {
+                trackedRace.setStartTimeReceived(startTimeReceived);
+            }
         } else if (isValid(estimatedStartTime)) {
             bestStartTimePerRaceID.put(currentRaceID, getTimePoint(estimatedStartTime));
         }
@@ -274,6 +279,10 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter {
                         WindTrack.DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_WIND, 
                         /* time over which to average speed: */ race.getBoatClass().getApproximateManeuverDurationInMilliseconds(),
                         /* raceDefinitionSetToUpdate */ null);
+        TimePoint bestStartTimeKnownSoFar = bestStartTimePerRaceID.get(currentRaceID);
+        if (bestStartTimeKnownSoFar != null) {
+            trackedRace.setStartTimeReceived(bestStartTimeKnownSoFar);
+        }
         trackedRacePerRaceID.put(currentRaceID, trackedRace);
     }
 
@@ -284,7 +293,7 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter {
         DynamicTrackedRace trackedRace = trackedRacePerRaceID.get(currentRaceID);
         Position position = new DegreePosition(referenceLocation.getLatDeg() + ((double) latitude) / 10000000.,
                 referenceLocation.getLngDeg() + ((double) longitude) / 10000000.);
-        TimePoint raceTimePoint = raceTimePerRaceID.get(currentRaceID);
+        TimePoint raceTimePoint = raceTimePerRaceID.containsKey(currentRaceID) ? raceTimePerRaceID.get(currentRaceID) : referenceTimePoint;
         Bearing bearing = new DegreeBearingImpl(cog);
         SpeedWithBearing speed = new KnotSpeedWithBearingImpl(((double) sog_Knots_x10) / 10., bearing);
         GPSFixMoving fix = new GPSFixMovingImpl(position, raceTimePoint, speed);
@@ -301,11 +310,12 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter {
             Competitor competitor = competitorByHashValue.get(hashValue);
             if (competitor != null) {
                 trackedRace.recordFix(competitor, fix);
-                if (lastNextMark.get(competitor) != nextMark) {
+                Course course = trackedRace.getRace().getCourse();
+                if ((!lastNextMark.containsKey(competitor) || lastNextMark.get(competitor) != nextMark) && nextMark > 0) {
+                    Waypoint waypointPassed = nextMark == 255 ? course.getLastWaypoint() : Util.get(course.getWaypoints(), nextMark - 1);
                     List<MarkPassing> newMarkPassings = new ArrayList<>();
                     Util.addAll(trackedRace.getMarkPassings(competitor), newMarkPassings);
-                    newMarkPassings.add(new MarkPassingImpl(raceTimePoint,
-                            Util.get(trackedRace.getRace().getCourse().getWaypoints(), nextMark), competitor));
+                    newMarkPassings.add(new MarkPassingImpl(raceTimePoint, waypointPassed, competitor));
                     trackedRace.updateMarkPassings(competitor, newMarkPassings);
                     lastNextMark.put(competitor, nextMark);
                 }
