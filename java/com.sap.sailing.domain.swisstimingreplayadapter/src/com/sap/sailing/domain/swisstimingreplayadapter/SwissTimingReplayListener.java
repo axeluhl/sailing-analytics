@@ -86,7 +86,7 @@ public interface SwissTimingReplayListener {
     
     void competitorsCount(short competitorsCount);
 
-    void competitor(int hashValue, String nation, String sailNumber, String name, CompetitorStatus competitorStatus, BoatType boatType,
+    void competitor(int hashValue, String nation, String sailNumberOrTrackerID, String name, CompetitorStatus competitorStatus, BoatType boatType,
             short cRank_Bracket, short cnPoints_x10_Bracket, short ctPoints_x10_Winner);
 
     /**

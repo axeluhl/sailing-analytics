@@ -8,9 +8,12 @@ import java.util.List;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import com.sap.sailing.domain.swisstimingadapter.DomainFactory;
 import com.sap.sailing.domain.swisstimingreplayadapter.SwissTimingReplayRace;
 import com.sap.sailing.domain.swisstimingreplayadapter.impl.SwissTimingReplayParserImpl;
 import com.sap.sailing.domain.swisstimingreplayadapter.impl.SwissTimingReplayServiceImpl;
+import com.sap.sailing.domain.swisstimingreplayadapter.impl.SwissTimingReplayToDomainAdapter;
+import com.sap.sailing.domain.test.DummyTrackedRegattaRegistry;
 
 public class SwissTimingReplayAdapterServiceTest {
     
@@ -77,9 +80,18 @@ public class SwissTimingReplayAdapterServiceTest {
     }
 
     @Test
+    public void testRaceData_SAW010955_20120802_WithDomainAdapter() throws Exception {
+        SwissTimingReplayToDomainAdapter replayListener = new SwissTimingReplayToDomainAdapter(null, DomainFactory.INSTANCE,
+                new DummyTrackedRegattaRegistry());
+        new SwissTimingReplayParserImpl().readData(getClass().getResourceAsStream("/SAW005906.20120805.replay"), replayListener);
+        
+    }
+
+    @Test
     @Ignore
     public void printRaceData_SAW005906_20120805() throws Exception {
-        new SwissTimingReplayParserImpl().readData(getClass().getResourceAsStream("/SAW005906.20120805.replay"), new SwissTimingReplayPrintListener());
+        new SwissTimingReplayParserImpl().readData(getClass().getResourceAsStream("/SAW005906.20120805.replay"),
+                new SwissTimingReplayPrintListener());
     }
 
     @Test

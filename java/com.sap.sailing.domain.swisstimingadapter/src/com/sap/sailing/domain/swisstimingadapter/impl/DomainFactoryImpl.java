@@ -133,6 +133,28 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
+    public Competitor getOrCreateCompetitor(String boatID, String threeLetterIOCCode, String name, 
+            BoatClass boatClass) {
+        return getOrCreateCompetitor(new CompetitorImpl(boatID, threeLetterIOCCode, name), boatClass);
+    }
+
+    @Override
+    public RaceDefinition createRaceDefinition(Regatta regatta, String raceID, Iterable<Competitor> competitors,
+            List<ControlPoint> courseDefinition) {
+        List<Waypoint> waypoints = new ArrayList<>();
+        for (ControlPoint controlPoint : courseDefinition) {
+            Waypoint waypoint = baseDomainFactory.createWaypoint(controlPoint);
+            waypoints.add(waypoint);
+        }
+        com.sap.sailing.domain.base.Course domainCourse = new CourseImpl("Course", waypoints);
+        BoatClass boatClass = getOrCreateBoatClassFromRaceID(raceID);
+        logger.info("Creating RaceDefinitionImpl for race "+raceID);
+        RaceDefinition result = new RaceDefinitionImpl(raceID, domainCourse, boatClass, competitors);
+        regatta.addRace(result);
+        return result;
+    }
+
+    @Override
     public RaceDefinition createRaceDefinition(Regatta regatta, Race race, StartList startList, Course course) {
         com.sap.sailing.domain.base.Course domainCourse = createCourse(race.getDescription(), course);
         BoatClass boatClass = getOrCreateBoatClassFromRaceID(race.getRaceID());
@@ -144,18 +166,19 @@ public class DomainFactoryImpl implements DomainFactory {
         return result;
     }
 
-    private BoatClass getOrCreateBoatClassFromRaceID(String raceID) {
+    @Override
+    public BoatClass getOrCreateBoatClassFromRaceID(String raceID) {
         BoatClass result;
         /*
-            SAM102000 Men's Windsurfer = Windsufer M�nner RS:X
+            SAM102000 Men's Windsurfer = Windsurfer Maenner RS:X
             SAW102000 Women's Windsurfer = Windsurfer Damen RS:X
-            SAM004000 Men's One Person Dinghy = Laser M�nner
+            SAM004000 Men's One Person Dinghy = Laser Maenner
             SAW103000 Women's One Person Dinghy = Laser Damen Laser Radial
-            SAM002000 Men's One Person Dinghy Heavy = Finn Dinghy M�nner
-            SAM005000 Men's Two Person Dinghy = 470er M�nner
+            SAM002000 Men's One Person Dinghy Heavy = Finn Dinghy Maenner
+            SAM005000 Men's Two Person Dinghy = 470er Maenner
             SAW005000 Women's Two Person Dinghy = 470er Damen
-            SAM009000 Men's Skiff = 49er M�nner
-            SAM007000 Men's Keelboat = Starboot M�nner 
+            SAM009000 Men's Skiff = 49er Maenner
+            SAM007000 Men's Keelboat = Starboot Maenner 
             SAW010000 Women's Match Racing = Matchrace Damen Elliott 6M (modified)
          */
         if (raceID.toUpperCase().startsWith("SA") && raceID.length() == 9) {
@@ -191,7 +214,8 @@ public class DomainFactoryImpl implements DomainFactory {
         return result;
     }
 
-    private ControlPoint getOrCreateControlPoint(Iterable<String> devices) {
+    @Override
+    public ControlPoint getOrCreateControlPoint(Iterable<String> devices) {
         ControlPoint result;
         synchronized (controlPointCache) {
             result = controlPointCache.get(devices);
@@ -270,8 +294,8 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public Nationality getOrCreateNationality(String nationalityName) {
-        return baseDomainFactory.getOrCreateNationality(nationalityName);
+    public Nationality getOrCreateNationality(String threeLetterIOCCode) {
+        return baseDomainFactory.getOrCreateNationality(threeLetterIOCCode);
     }
 
     @Override
