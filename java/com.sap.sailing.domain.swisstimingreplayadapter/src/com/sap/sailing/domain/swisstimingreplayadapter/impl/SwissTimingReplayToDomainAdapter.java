@@ -82,6 +82,7 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter {
     public void competitor(int hashValue, String nation, String sailNumber, String name,
             CompetitorStatus competitorStatus, BoatType boatType, short cRank_Bracket, short cnPoints_x10_Bracket,
             short ctPoints_x10_Winner) {
+        // TODO distinguish between competitors and non-competitors; all non-competitors are considered marks
         // TODO Auto-generated method stub
         super.competitor(hashValue, nation, sailNumber, name, competitorStatus, boatType, cRank_Bracket, cnPoints_x10_Bracket,
                 ctPoints_x10_Winner);
