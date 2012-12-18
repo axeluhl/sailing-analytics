@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 import java.util.Map.Entry;
 import java.util.NavigableSet;
 import java.util.Set;
@@ -61,6 +62,8 @@ import difflib.PatchFailedException;
  *
  */
 public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter {
+    private static final int THRESHOLD_FOR_EARLIEST_MARK_PASSING_BEFORE_START_IN_MILLIS = 30000;
+
     private static final Logger logger = Logger.getLogger(SwissTimingReplayToDomainAdapter.class.getName());
     
     private final DomainFactory domainFactory;
@@ -166,7 +169,7 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter {
     }
     
     private boolean isValid(int threeByteValue) {
-        return threeByteValue != 2<<24 - 1;
+        return threeByteValue != (1<<24) - 1;
     }
 
     @Override
@@ -183,7 +186,7 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter {
         } else if (isValid(estimatedStartTime)) {
             bestStartTimePerRaceID.put(currentRaceID, getTimePoint(estimatedStartTime));
         }
-        if (bestStartTimePerRaceID.containsKey(currentRaceID)) {
+        if (isValid(raceTime) && bestStartTimePerRaceID.containsKey(currentRaceID)) {
             raceTimePerRaceID.put(currentRaceID, bestStartTimePerRaceID.get(currentRaceID).plus(1000*raceTime));
         }
     }
@@ -194,7 +197,8 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter {
     }
 
     private TimePoint getMidnight(TimePoint referenceTimePoint) {
-        GregorianCalendar cal = new GregorianCalendar();
+        // FIXME need to identify time zone based on date and location
+        GregorianCalendar cal = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
         cal.setTimeInMillis(referenceTimePoint.asMillis());
         cal.set(Calendar.HOUR_OF_DAY, 0);
         cal.set(Calendar.MINUTE, 0);
@@ -321,7 +325,11 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter {
             if (competitor != null) {
                 trackedRace.recordFix(competitor, fix);
                 Course course = trackedRace.getRace().getCourse();
-                if ((!lastNextMark.containsKey(competitor) || lastNextMark.get(competitor) != nextMark) && nextMark > 0) {
+                // record a mark passing, but not if the mark passing has happened longer than 30s before the race start
+                if (bestStartTimePerRaceID.get(currentRaceID) != null &&
+                        !bestStartTimePerRaceID.get(currentRaceID).after(
+                                raceTimePoint.plus(THRESHOLD_FOR_EARLIEST_MARK_PASSING_BEFORE_START_IN_MILLIS)) &&
+                        (!lastNextMark.containsKey(competitor) || lastNextMark.get(competitor) != nextMark) && nextMark > 0) {
                     Waypoint waypointPassed = nextMark == 255 ? course.getLastWaypoint() : Util.get(course.getWaypoints(), nextMark - 1);
                     List<MarkPassing> newMarkPassings = new ArrayList<>();
                     final NavigableSet<MarkPassing> markPassings = trackedRace.getMarkPassings(competitor);
