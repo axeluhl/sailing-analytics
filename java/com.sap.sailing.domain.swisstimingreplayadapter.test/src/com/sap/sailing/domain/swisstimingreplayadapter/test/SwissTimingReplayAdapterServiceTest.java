@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.swisstimingreplayadapter.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
 import java.io.InputStream;
 import java.util.List;
@@ -8,12 +9,14 @@ import java.util.List;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.swisstimingadapter.DomainFactory;
 import com.sap.sailing.domain.swisstimingreplayadapter.SwissTimingReplayRace;
 import com.sap.sailing.domain.swisstimingreplayadapter.impl.SwissTimingReplayParserImpl;
 import com.sap.sailing.domain.swisstimingreplayadapter.impl.SwissTimingReplayServiceImpl;
 import com.sap.sailing.domain.swisstimingreplayadapter.impl.SwissTimingReplayToDomainAdapter;
 import com.sap.sailing.domain.test.DummyTrackedRegattaRegistry;
+import com.sap.sailing.domain.tracking.TrackedRace;
 
 public class SwissTimingReplayAdapterServiceTest {
     
@@ -84,7 +87,8 @@ public class SwissTimingReplayAdapterServiceTest {
         SwissTimingReplayToDomainAdapter replayListener = new SwissTimingReplayToDomainAdapter(null, DomainFactory.INSTANCE,
                 new DummyTrackedRegattaRegistry());
         new SwissTimingReplayParserImpl().readData(getClass().getResourceAsStream("/SAW005906.20120805.replay"), replayListener);
-        
+        Iterable<? extends TrackedRace> trackedRaces = replayListener.getTrackedRaces();
+        assertFalse(Util.isEmpty(trackedRaces));
     }
 
     @Test

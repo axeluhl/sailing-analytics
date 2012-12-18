@@ -5,8 +5,11 @@ import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.NavigableSet;
 import java.util.Set;
 import java.util.logging.Logger;
 
@@ -139,6 +142,10 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter {
         lastNextMark = new HashMap<>();
         this.domainFactory = domainFactory;
     }
+    
+    public Iterable<? extends TrackedRace> getTrackedRaces() {
+        return trackedRacePerRaceID.values();
+    }
 
     private BoatClass getCurrentBoatClass() {
         return domainFactory.getOrCreateBoatClassFromRaceID(currentRaceID);
@@ -201,7 +208,7 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter {
             CompetitorStatus competitorStatus, BoatType boatType, short cRank_Bracket, short cnPoints_x10_Bracket,
             short ctPoints_x10_Winner) {
         if (boatType == BoatType.Competitor) {
-            Competitor competitor = domainFactory.getOrCreateCompetitor(sailNumberOrTrackerID, threeLetterIOCCode, name,
+            Competitor competitor = domainFactory.getOrCreateCompetitor(sailNumberOrTrackerID, threeLetterIOCCode.trim(), name.trim(),
                     getCurrentBoatClass());
             Set<Competitor> competitorsOfCurrentRace = competitorsPerRaceID.get(currentRaceID);
             if (competitorsOfCurrentRace == null) {
@@ -212,13 +219,13 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter {
             competitorByHashValue.put(hashValue, competitor);
         } else {
             // consider it a mark
-            Mark mark = domainFactory.getOrCreateMark(sailNumberOrTrackerID);
+            Mark mark = domainFactory.getOrCreateMark(sailNumberOrTrackerID.trim());
             Map<String, Mark> marksOfCurrentRace = marksPerRaceIDPerMarkID.get(currentRaceID);
             if (marksOfCurrentRace == null) {
                 marksOfCurrentRace = new HashMap<>();
                 marksPerRaceIDPerMarkID.put(currentRaceID, marksOfCurrentRace);
             }
-            marksOfCurrentRace.put(sailNumberOrTrackerID, mark);
+            marksOfCurrentRace.put(sailNumberOrTrackerID.trim(), mark);
             markByHashValue.put(hashValue, mark);
         }
     }
@@ -228,9 +235,9 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter {
     public void mark(MarkType markType, String name, byte index, String id1, String id2, short windSpeedInKnots,
             short trueWindDirectionInDegrees) {
         final List<String> markNames = new ArrayList<>();
-        markNames.add(id1);
+        markNames.add(id1.trim());
         if (id2 != null) {
-            markNames.add(id2);
+            markNames.add(id2.trim());
         }
         final ControlPoint controlPoint = domainFactory.getOrCreateControlPoint(markNames);
         if (index == 0) {
@@ -270,8 +277,7 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter {
 
     private void createRace() {
         final Regatta myRegatta = regatta != null ? regatta : domainFactory.getOrCreateRegatta(currentRaceID, trackedRegattaRegistry);
-        RaceDefinition race = domainFactory.createRaceDefinition(
-                myRegatta,
+        RaceDefinition race = domainFactory.createRaceDefinition(myRegatta,
                 currentRaceID, competitorsPerRaceID.get(currentRaceID), currentCourseDefinition);
         racePerRaceID.put(currentRaceID, race);
         DynamicTrackedRace trackedRace = trackedRegattaRegistry.getOrCreateTrackedRegatta(myRegatta).
@@ -299,10 +305,13 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter {
         GPSFixMoving fix = new GPSFixMovingImpl(position, raceTimePoint, speed);
         Mark mark = markByHashValue.get(hashValue);
         if (mark != null) {
-            for (Map.Entry<ControlPoint, SpeedWithBearing> controlPointWithWind : windAtControlPoint.entrySet()) {
+            Iterator<Entry<ControlPoint, SpeedWithBearing>> i = windAtControlPoint.entrySet().iterator();
+            while (i.hasNext()) {
+                Entry<ControlPoint, SpeedWithBearing> controlPointWithWind = i.next();
                 if (Util.contains(controlPointWithWind.getKey().getMarks(), mark)) {
                     trackedRace.recordWind(new WindImpl(position, raceTimePoint, controlPointWithWind.getValue()),
                             new WindSourceWithAdditionalID(WindSourceType.EXPEDITION, mark.getName()));
+                    i.remove();
                 }
             }
             trackedRace.recordFix(mark, fix);
@@ -314,7 +323,13 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter {
                 if ((!lastNextMark.containsKey(competitor) || lastNextMark.get(competitor) != nextMark) && nextMark > 0) {
                     Waypoint waypointPassed = nextMark == 255 ? course.getLastWaypoint() : Util.get(course.getWaypoints(), nextMark - 1);
                     List<MarkPassing> newMarkPassings = new ArrayList<>();
-                    Util.addAll(trackedRace.getMarkPassings(competitor), newMarkPassings);
+                    final NavigableSet<MarkPassing> markPassings = trackedRace.getMarkPassings(competitor);
+                    trackedRace.lockForRead(markPassings);
+                    try {
+                        Util.addAll(markPassings, newMarkPassings);
+                    } finally {
+                        trackedRace.unlockAfterRead(markPassings);
+                    }
                     newMarkPassings.add(new MarkPassingImpl(raceTimePoint, waypointPassed, competitor));
                     trackedRace.updateMarkPassings(competitor, newMarkPassings);
                     lastNextMark.put(competitor, nextMark);

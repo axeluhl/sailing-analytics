@@ -929,19 +929,24 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             if (indexOfStartWaypoint == 0) {
                 // trackedLeg was the first leg; gap is determined by gap of start line passing time points
                 Iterable<MarkPassing> markPassingsForLegStart = trackedLeg.getTrackedLeg().getTrackedRace().getMarkPassingsInOrder(trackedLeg.getLeg().getFrom());
-                final Iterator<MarkPassing> markPassingsIter = markPassingsForLegStart.iterator();
-                if (markPassingsIter.hasNext()) {
-                    TimePoint firstStart = markPassingsIter.next().getTimePoint();
-                    final MarkPassing markPassingForFrom = trackedLeg.getTrackedLeg().getTrackedRace().
-                            getMarkPassing(trackedLeg.getCompetitor(), trackedLeg.getLeg().getFrom());
-                    if (markPassingForFrom != null) {
-                        TimePoint competitorStart = markPassingForFrom.getTimePoint();
-                        result = (double) (competitorStart.asMillis() - firstStart.asMillis()) / 1000.;
+                trackedLeg.getTrackedLeg().getTrackedRace().lockForRead(markPassingsForLegStart);
+                try {
+                    final Iterator<MarkPassing> markPassingsIter = markPassingsForLegStart.iterator();
+                    if (markPassingsIter.hasNext()) {
+                        TimePoint firstStart = markPassingsIter.next().getTimePoint();
+                        final MarkPassing markPassingForFrom = trackedLeg.getTrackedLeg().getTrackedRace()
+                                .getMarkPassing(trackedLeg.getCompetitor(), trackedLeg.getLeg().getFrom());
+                        if (markPassingForFrom != null) {
+                            TimePoint competitorStart = markPassingForFrom.getTimePoint();
+                            result = (double) (competitorStart.asMillis() - firstStart.asMillis()) / 1000.;
+                        } else {
+                            result = null;
+                        }
                     } else {
                         result = null;
                     }
-                } else {
-                    result = null;
+                } finally {
+                    trackedLeg.getTrackedLeg().getTrackedRace().unlockAfterRead(markPassingsForLegStart);
                 }
             } else {
                 TrackedLeg previousTrackedLeg = trackedLeg.getTrackedLeg().getTrackedRace().getTrackedLeg(course.getLegs().get(indexOfStartWaypoint-1));
@@ -2438,10 +2443,16 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 // Filling the mark passings
                 Set<MarkPassing> competitorMarkPassings = trackedRace.getMarkPassings(competitor);
                 if (competitorMarkPassings != null) {
-                    for (MarkPassing markPassing : competitorMarkPassings) {
-                        MillisecondsTimePoint time = new MillisecondsTimePoint(markPassing.getTimePoint().asMillis());
-                        markPassingsData.add(new Triple<String, Date, Double>(markPassing.getWaypoint().getName(), time
-                                .asDate(), getCompetitorRaceDataEntry(detailType, trackedRace, competitor, time)));
+                    trackedRace.lockForRead(competitorMarkPassings);
+                    try {
+                        for (MarkPassing markPassing : competitorMarkPassings) {
+                            MillisecondsTimePoint time = new MillisecondsTimePoint(markPassing.getTimePoint().asMillis());
+                            markPassingsData.add(new Triple<String, Date, Double>(markPassing.getWaypoint().getName(),
+                                    time.asDate(),
+                                    getCompetitorRaceDataEntry(detailType, trackedRace, competitor, time)));
+                        }
+                    } finally {
+                        trackedRace.unlockAfterRead(competitorMarkPassings);
                     }
                 }
                 if (startTime != null && endTime != null) {

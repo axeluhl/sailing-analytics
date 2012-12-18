@@ -9,6 +9,7 @@ import java.util.ConcurrentModificationException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -237,10 +238,13 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
      */
     private final NamedReentrantReadWriteLock serializationLock;
 
+    private final Map<Iterable<MarkPassing>, NamedReentrantReadWriteLock> locksForMarkPassings;
+    
     public TrackedRaceImpl(final TrackedRegatta trackedRegatta, RaceDefinition race, final WindStore windStore,
             long delayToLiveInMillis, final long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
             long delayForWindEstimationCacheInvalidation) {
         super();
+        locksForMarkPassings = new IdentityHashMap<>();
         this.serializationLock = new NamedReentrantReadWriteLock("Serialization lock for tracked race "+race.getName(), /* fair */ true);
         this.cacheInvalidationTimerLock = new Object();
         this.updateCount = 0;
@@ -497,10 +501,13 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         if (lastWaypoint != null) {
             Iterable<MarkPassing> markPassingsInOrder = getMarkPassingsInOrder(lastWaypoint);
             if (markPassingsInOrder != null) {
-                synchronized (markPassingsInOrder) {
+                lockForRead(markPassingsInOrder);
+                try {
                     for (MarkPassing passingFinishLine : markPassingsInOrder) {
                         passingTime = passingFinishLine.getTimePoint();
                     }
+                } finally {
+                    unlockAfterRead(markPassingsInOrder);
                 }
             }
         }
@@ -511,10 +518,13 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         NavigableSet<MarkPassing> markPassingsInOrder = getMarkPassingsInOrderAsNavigableSet(waypoint);
         MarkPassing firstMarkPassing = null;
         if (markPassingsInOrder != null) {
-            synchronized (markPassingsInOrder) {
+            lockForRead(markPassingsInOrder);
+            try {
                 if (!markPassingsInOrder.isEmpty()) {
                     firstMarkPassing = markPassingsInOrder.first();
                 }
+            } finally {
+                unlockAfterRead(markPassingsInOrder);
             }
         }
         TimePoint timeOfFirstMarkPassing = null;
@@ -529,7 +539,8 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         TimePoint startOfRace = null;
         // Find the first mark passing within the largest cluster crossing the line within one minute.
         final long ONE_MINUTE_IN_MILLIS = 60 * 1000;
-        synchronized (markPassings) {
+        lockForRead(markPassings);
+        try {
             if (markPassings != null) {
                 int largestStartGroupWithinOneMinuteSize = 0;
                 MarkPassing startOfLargestGroupSoFar = null;
@@ -577,6 +588,8 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                 }
                 startOfRace = startOfLargestGroupSoFar == null ? null : startOfLargestGroupSoFar.getTimePoint();
             }
+        } finally {
+            unlockAfterRead(markPassings);
         }
         return startOfRace;
     }
@@ -629,7 +642,8 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                                 // read-out;
                                 // the results of getMarkPassingsInOrder(to) has by definition an ascending time-point
                                 // ordering
-                                synchronized (markPassings) {
+                                lockForRead(markPassings);
+                                try {
                                     for (MarkPassing currentMarkPassing : markPassings) {
                                         Date currentPassingDate = currentMarkPassing.getTimePoint().asDate();
                                         if (previousLegPassingTime == null
@@ -639,6 +653,8 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                                             break;
                                         }
                                     }
+                                } finally {
+                                    unlockAfterRead(markPassings);
                                 }
                             }
                         }
@@ -716,12 +732,16 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         TrackedLegOfCompetitor result = null;
         if (roundings != null) {
             TrackedLeg trackedLeg;
-            synchronized (roundings) {
+            // obtain last waypoint before obtaining mark passings monitor because obtaining the last waypoint
+            // obtains the read lock for the course
+            final Waypoint lastWaypoint = getRace().getCourse().getLastWaypoint();
+            lockForRead(roundings);
+            try {
                 MarkPassing lastBeforeOrAt = roundings.floor(new DummyMarkPassingWithTimePointOnly(at));
                 // already finished the race?
                 if (lastBeforeOrAt != null) {
                     // and not at or after last mark passing
-                    if (getRace().getCourse().getLastWaypoint() != lastBeforeOrAt.getWaypoint()) {
+                    if (lastWaypoint != lastBeforeOrAt.getWaypoint()) {
                         trackedLeg = getTrackedLegStartingAt(lastBeforeOrAt.getWaypoint());
                     } else {
                         // exactly *at* last mark passing?
@@ -737,6 +757,8 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                     // before beginning of race
                     trackedLeg = null;
                 }
+            } finally {
+                unlockAfterRead(roundings);
             }
             if (trackedLeg != null) {
                 result = trackedLeg.getTrackedLeg(competitor);
@@ -868,10 +890,13 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     public Distance getAverageCrossTrackError(Competitor competitor, TimePoint timePoint, boolean waitForLatestAnalysis) throws NoWindException {
         NavigableSet<MarkPassing> markPassings = getMarkPassings(competitor);
         TimePoint from = null;
-        synchronized (markPassings) {
+        lockForRead(markPassings);
+        try {
             if (markPassings != null && !markPassings.isEmpty()) {
                 from = markPassings.iterator().next().getTimePoint();
             }
+        } finally {
+            unlockAfterRead(markPassings);
         }
         Distance result;
         if (from != null) {
@@ -942,12 +967,15 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     public MarkPassing getMarkPassing(Competitor competitor, Waypoint waypoint) {
         final NavigableSet<MarkPassing> markPassings = getMarkPassings(competitor);
         if (markPassings != null) {
-            synchronized (markPassings) {
+            lockForRead(markPassings);
+            try {
                 for (MarkPassing markPassing : markPassings) {
                     if (markPassing.getWaypoint() == waypoint) {
                         return markPassing;
                     }
                 }
+            } finally {
+                unlockAfterRead(markPassings);
             }
         }
         return null;
@@ -1181,6 +1209,12 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
             }
         }
         if (newFuture != null) {
+            // FIXME locking problem: this method is sometimes called by code holding the course's read lock.
+            // If a writer is waiting for the write lock, further read locks aren't granted due to the "fair" locking policy.
+            // To finish the future, a read lock on the course needs to be obtained in the getLegs() call. This isn't granted
+            // until the writer times out and tries again. Moving the future execution into a thread doesn't help because the
+            // future.get() below will again block until the future has finished which can't happen because the writer cannot
+            // obtain the write lock, and the new read lock isn't granted.
             newFuture.run();
             future = newFuture;
         }
@@ -1412,12 +1446,28 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
             for (NavigableSet<MarkPassing> markPassingsForOneCompetitor : markPassingsForCompetitor.values()) {
                 if (!markPassingsForOneCompetitor.isEmpty()) {
                     final Competitor competitor = markPassingsForOneCompetitor.iterator().next().getCompetitor();
-                    markPassingsForOneCompetitor.removeAll(markPassingsRemoved);
+                    LockUtil.lockForWrite(getMarkPassingsLock(markPassingsForOneCompetitor));
+                    try {
+                        markPassingsForOneCompetitor.removeAll(markPassingsRemoved);
+                    } finally {
+                        LockUtil.unlockAfterWrite(getMarkPassingsLock(markPassingsForOneCompetitor));
+                    }
                     triggerManeuverCacheRecalculation(competitor);
                 }
             }
         } finally {
             LockUtil.unlockAfterRead(serializationLock);
+        }
+    }
+
+    protected NamedReentrantReadWriteLock getMarkPassingsLock(Iterable<MarkPassing> markPassings) {
+        synchronized (locksForMarkPassings) {
+            NamedReentrantReadWriteLock lock = locksForMarkPassings.get(markPassings);
+            if (lock == null) {
+                lock = new NamedReentrantReadWriteLock("mark passings lock for "+markPassings, /* fair */ false);
+                locksForMarkPassings.put(markPassings, lock);
+            }
+            return lock;
         }
     }
 
@@ -1552,7 +1602,8 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                                     // passings:
                                     NavigableSet<MarkPassing> markPassings = getMarkPassings(competitor);
                                     double markPassingProximityConfidenceReduction = 1.0;
-                                    synchronized (markPassings) {
+                                    lockForRead(markPassings);
+                                    try {
                                         NavigableSet<MarkPassing> prevMarkPassing = markPassings.headSet(
                                                 dummyMarkPassingForNow, /* inclusive */true);
                                         NavigableSet<MarkPassing> nextMarkPassing = markPassings.tailSet(
@@ -1567,6 +1618,8 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                                                     1.0 - weigherForMarkPassingProximity.getConfidence(nextMarkPassing
                                                             .first().getTimePoint(), timePoint));
                                         }
+                                    } finally {
+                                        unlockAfterRead(markPassings);
                                     }
                                     BearingWithConfidence<TimePoint> bearing = new BearingWithConfidenceImpl<TimePoint>(
                                             estimatedSpeedWithConfidence.getObject() == null ? null
@@ -1693,12 +1746,15 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         MarkPassing crossedFinishLine = null;
         // getLastWaypoint() will wait for a read lock on the course; do this outside the synchronized block to avoid deadlocks
         final Waypoint lastWaypoint = getRace().getCourse().getLastWaypoint();
-        synchronized (markPassings) {
+        lockForRead(markPassings);
+        try {
             markPassingsNotEmpty = markPassings != null && !markPassings.isEmpty();
             if (markPassingsNotEmpty) {
                 extendedFrom = markPassings.iterator().next().getTimePoint();
                 crossedFinishLine = getMarkPassing(competitor, lastWaypoint);
             }
+        } finally {
+            unlockAfterRead(markPassings);
         }
         if (markPassingsNotEmpty) {
             TimePoint extendedTo;

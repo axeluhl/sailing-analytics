@@ -398,8 +398,11 @@ public class CourseImpl extends NamedImpl implements Course {
                 newWaypointList.add(waypoint);
             }
             Patch<Waypoint> patch = DiffUtils.diff(courseWaypoints, newWaypointList);
-            CourseAsWaypointList courseAsWaypointList = new CourseAsWaypointList(this);
-            patch.applyToInPlace(courseAsWaypointList);
+            if (!patch.isEmpty()) {
+                logger.info("applying course update " + patch + " to course " + this);
+                CourseAsWaypointList courseAsWaypointList = new CourseAsWaypointList(this);
+                patch.applyToInPlace(courseAsWaypointList);
+            }
         } finally {
             LockUtil.unlockAfterWrite(lock);
         }
