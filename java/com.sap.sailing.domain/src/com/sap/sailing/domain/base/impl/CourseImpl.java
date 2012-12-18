@@ -205,6 +205,11 @@ public class CourseImpl extends NamedImpl implements Course {
     }
 
     @Override
+    public Leg getFirstLeg() {
+        return legs.get(0);
+    }
+
+    @Override
     public List<Leg> getLegs() {
         lockForRead();
         try {

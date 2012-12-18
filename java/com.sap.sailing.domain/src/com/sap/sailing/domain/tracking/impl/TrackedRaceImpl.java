@@ -82,6 +82,7 @@ import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
+import com.sap.sailing.util.impl.ArrayListNavigableSet;
 import com.sap.sailing.util.impl.LockUtil;
 import com.sap.sailing.util.impl.NamedReentrantReadWriteLock;
 import com.sap.sailing.util.impl.SmartFutureCache;
@@ -729,36 +730,38 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     @Override
     public TrackedLegOfCompetitor getTrackedLeg(Competitor competitor, TimePoint at) {
         NavigableSet<MarkPassing> roundings = getMarkPassings(competitor);
+        lockForRead(roundings);
+        try {
+            NavigableSet<MarkPassing> localRoundings = new ArrayListNavigableSet<>(roundings.size(), new TimedComparator());
+            localRoundings.addAll(roundings);
+        } finally {
+            unlockAfterRead(roundings);
+        }
         TrackedLegOfCompetitor result = null;
         if (roundings != null) {
             TrackedLeg trackedLeg;
             // obtain last waypoint before obtaining mark passings monitor because obtaining the last waypoint
             // obtains the read lock for the course
             final Waypoint lastWaypoint = getRace().getCourse().getLastWaypoint();
-            lockForRead(roundings);
-            try {
-                MarkPassing lastBeforeOrAt = roundings.floor(new DummyMarkPassingWithTimePointOnly(at));
-                // already finished the race?
-                if (lastBeforeOrAt != null) {
-                    // and not at or after last mark passing
-                    if (lastWaypoint != lastBeforeOrAt.getWaypoint()) {
-                        trackedLeg = getTrackedLegStartingAt(lastBeforeOrAt.getWaypoint());
-                    } else {
-                        // exactly *at* last mark passing?
-                        if (!roundings.isEmpty() && at.equals(roundings.last().getTimePoint())) {
-                            // exactly at finish line; return last leg
-                            trackedLeg = getTrackedLegFinishingAt(lastBeforeOrAt.getWaypoint());
-                        } else {
-                            // no, then we're after the last mark passing
-                            trackedLeg = null;
-                        }
-                    }
+            MarkPassing lastBeforeOrAt = roundings.floor(new DummyMarkPassingWithTimePointOnly(at));
+            // already finished the race?
+            if (lastBeforeOrAt != null) {
+                // and not at or after last mark passing
+                if (lastWaypoint != lastBeforeOrAt.getWaypoint()) {
+                    trackedLeg = getTrackedLegStartingAt(lastBeforeOrAt.getWaypoint());
                 } else {
-                    // before beginning of race
-                    trackedLeg = null;
+                    // exactly *at* last mark passing?
+                    if (!roundings.isEmpty() && at.equals(roundings.last().getTimePoint())) {
+                        // exactly at finish line; return last leg
+                        trackedLeg = getTrackedLegFinishingAt(lastBeforeOrAt.getWaypoint());
+                    } else {
+                        // no, then we're after the last mark passing
+                        trackedLeg = null;
+                    }
                 }
-            } finally {
-                unlockAfterRead(roundings);
+            } else {
+                // before beginning of race
+                trackedLeg = null;
             }
             if (trackedLeg != null) {
                 result = trackedLeg.getTrackedLeg(competitor);
@@ -1193,12 +1196,16 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                     @Override
                     public Wind call() {
                         Wind result;
-                        Leg firstLeg = getRace().getCourse().getLegs().iterator().next();
-                        Position firstLegEnd = getApproximatePosition(firstLeg.getTo(), at);
-                        Position firstLegStart = getApproximatePosition(firstLeg.getFrom(), at);
-                        if (firstLegStart != null && firstLegEnd != null) {
-                            result = new WindImpl(firstLegStart, at, new KnotSpeedWithBearingImpl(1.0,
-                                    firstLegEnd.getBearingGreatCircle(firstLegStart)));
+                        Leg firstLeg = getRace().getCourse().getFirstLeg();
+                        if (firstLeg != null) {
+                            Position firstLegEnd = getApproximatePosition(firstLeg.getTo(), at);
+                            Position firstLegStart = getApproximatePosition(firstLeg.getFrom(), at);
+                            if (firstLegStart != null && firstLegEnd != null) {
+                                result = new WindImpl(firstLegStart, at, new KnotSpeedWithBearingImpl(1.0,
+                                        firstLegEnd.getBearingGreatCircle(firstLegStart)));
+                            } else {
+                                result = null;
+                            }
                         } else {
                             result = null;
                         }
@@ -1209,12 +1216,6 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
             }
         }
         if (newFuture != null) {
-            // FIXME locking problem: this method is sometimes called by code holding the course's read lock.
-            // If a writer is waiting for the write lock, further read locks aren't granted due to the "fair" locking policy.
-            // To finish the future, a read lock on the course needs to be obtained in the getLegs() call. This isn't granted
-            // until the writer times out and tries again. Moving the future execution into a thread doesn't help because the
-            // future.get() below will again block until the future has finished which can't happen because the writer cannot
-            // obtain the write lock, and the new read lock isn't granted.
             newFuture.run();
             future = newFuture;
         }
