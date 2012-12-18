@@ -22,7 +22,7 @@ import com.sap.sailing.domain.swisstimingreplayadapter.impl.Weather;
  *   n x [
  *          1 x referenceTimestamp
  *          1 x referenceLocation 
- *          1 x rsc_cid    
+ *          1 x raceID
  *          1 x competitorsCount
  *          competitorsCount x competitor
  *          m x mark

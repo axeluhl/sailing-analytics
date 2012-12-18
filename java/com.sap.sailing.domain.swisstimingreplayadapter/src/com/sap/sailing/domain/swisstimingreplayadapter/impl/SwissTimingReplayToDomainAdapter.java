@@ -166,7 +166,7 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter {
     }
     
     private boolean isValid(int threeByteValue) {
-        return threeByteValue == 2<<24 - 1;
+        return threeByteValue != 2<<24 - 1;
     }
 
     @Override
@@ -297,6 +297,7 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter {
             short vmg_Knots_x10, CompetitorStatus competitorStatus, short rank, short distanceToLeader_meters,
             short distanceToNextMark_meters, short nextMark, short pRank, short ptPoints, short pnPoints) {
         DynamicTrackedRace trackedRace = trackedRacePerRaceID.get(currentRaceID);
+        // TODO does this have to be "+" or "-"? Jens Rommel made a remark on 2012-12-18 that this may have to be "-"...
         Position position = new DegreePosition(referenceLocation.getLatDeg() + ((double) latitude) / 10000000.,
                 referenceLocation.getLngDeg() + ((double) longitude) / 10000000.);
         TimePoint raceTimePoint = raceTimePerRaceID.containsKey(currentRaceID) ? raceTimePerRaceID.get(currentRaceID) : referenceTimePoint;
