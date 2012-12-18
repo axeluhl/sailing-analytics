@@ -6,12 +6,20 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 public class PositionDTO implements IsSerializable {
     public double latDeg;
     public double lngDeg;
-    
+
     public PositionDTO() {}
-    
-    public PositionDTO(double latDeg, double lngDeg) {
+
+    public PositionDTO(final double latDeg, final double lngDeg) {
         this.latDeg = latDeg;
         this.lngDeg = lngDeg;
+    }
+
+    public double getLatitudeRadians() {
+        return this.latDeg * 0.0174532925;
+    }
+
+    public double getLongitudeRadians() {
+        return this.lngDeg * 0.0174532925;
     }
 
     @Override
@@ -20,7 +28,7 @@ public class PositionDTO implements IsSerializable {
     }
 
     public String toFormattedString() {
-        NumberFormat fmt = NumberFormat.getFormat("#.###");
+        final NumberFormat fmt = NumberFormat.getFormat("#.###");
         return fmt.format(latDeg)+", "+fmt.format(lngDeg);
     }
 
@@ -34,20 +42,20 @@ public class PositionDTO implements IsSerializable {
         temp = (int) lngDeg;
         result = prime * result + (int) (temp ^ (temp >>> 32));
         return result;
-        
+
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         if (o == null) {
             return false;
         } else {
             if (o instanceof PositionDTO) {
-                PositionDTO other = (PositionDTO) o;
+                final PositionDTO other = (PositionDTO) o;
                 return Math.abs(this.latDeg-other.latDeg) <= 1e-5 && Math.abs(this.lngDeg-other.lngDeg) <= 1e-5;
             }
             return false;
         }
     }
-  
+
 }
