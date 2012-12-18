@@ -24,7 +24,6 @@ import com.sap.sailing.simulator.windfield.WindField;
 
 public class PathImpl implements Path, Serializable {
 
-    private static final boolean ENDS_ARE_CONSIDERED_TURNS = false;
     private static final long serialVersionUID = -6354445155884413937L;
     List<TimedPositionWithSpeed> pathPoints;
     WindField windField;
@@ -259,9 +258,7 @@ public class PathImpl implements Path, Serializable {
             currentPoint = this.pathPoints.get(index);
 
             if (index == 0 || index == (noOfPoints - 1)) {
-                if (ENDS_ARE_CONSIDERED_TURNS) {
-                    list.add(currentPoint);
-                }
+                list.add(currentPoint);
             } else {
 
                 previousPoint = this.pathPoints.get(index - 1);
@@ -303,7 +300,7 @@ public class PathImpl implements Path, Serializable {
                     + formatter.format(timedPoint.getTimePoint().asDate()) + "</time>\r\n\t\t\t</trkpt>");
         }
 
-        buffer.append("\t\t</trkseg>\r\n\t</trk>\r\n</gpx>\r\n");
+        buffer.append("\r\n\t\t</trkseg>\r\n\t</trk>\r\n</gpx>\r\n");
 
         final String content = buffer.toString();
 
