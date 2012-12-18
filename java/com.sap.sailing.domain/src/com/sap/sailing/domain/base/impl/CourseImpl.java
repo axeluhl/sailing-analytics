@@ -107,12 +107,7 @@ public class CourseImpl extends NamedImpl implements Course {
      * For access by {@link LegImpl}
      */
     Waypoint getWaypoint(int i) {
-        lockForRead();
-        try {
-            return waypoints.get(i);
-        } finally {
-            unlockAfterRead();
-        }
+        return waypoints.get(i);
     }
     
     @Override
