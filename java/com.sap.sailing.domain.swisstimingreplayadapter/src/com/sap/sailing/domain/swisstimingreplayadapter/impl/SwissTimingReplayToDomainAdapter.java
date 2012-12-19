@@ -2,16 +2,17 @@ package com.sap.sailing.domain.swisstimingreplayadapter.impl;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.TimeZone;
 import java.util.Map.Entry;
 import java.util.NavigableSet;
 import java.util.Set;
+import java.util.TimeZone;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.BoatClass;
@@ -125,6 +126,8 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter {
      */
     private final Map<Competitor, Short> lastNextMark;
     
+    private RaceStatus lastRaceStatus;
+    
     /**
      * @param regatta
      *            the regatta to associate the race(s) received by the listener with, or <code>null</code> to force the
@@ -175,7 +178,21 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter {
     @Override
     public void frameMetaData(byte cid, int raceTime, int startTime, int estimatedStartTime, RaceStatus raceStatus,
             short distanceToNextMark, Weather weather, short humidity, short temperature, String messageText,
-            byte cFlag, byte rFlag, byte duration, short nm) {
+            byte cFlag, byte rFlag, byte duration, short nextMark) {
+        if (raceStatus != lastRaceStatus) {
+            lastRaceStatus = raceStatus;
+            if (raceStatus == RaceStatus.running) {
+                // remove all previous mark passings if the tracked race already exists; it may contain mark passings
+                // from previous, aborted runs of the same race
+                DynamicTrackedRace trackedRace = trackedRacePerRaceID.get(currentRaceID);
+                if (trackedRace != null) {
+                    Iterable<MarkPassing> noMarkPassings = Collections.emptyList();
+                    for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
+                        trackedRace.updateMarkPassings(competitor, noMarkPassings);
+                    }
+                }
+            }
+        }
         if (isValid(startTime)) {
             final TimePoint startTimeReceived = getTimePoint(startTime);
             bestStartTimePerRaceID.put(currentRaceID, startTimeReceived);

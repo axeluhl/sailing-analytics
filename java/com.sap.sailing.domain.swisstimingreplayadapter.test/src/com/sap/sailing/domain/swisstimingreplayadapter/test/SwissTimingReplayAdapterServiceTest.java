@@ -9,6 +9,7 @@ import java.util.List;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.swisstimingadapter.DomainFactory;
 import com.sap.sailing.domain.swisstimingreplayadapter.SwissTimingReplayRace;
@@ -89,6 +90,11 @@ public class SwissTimingReplayAdapterServiceTest {
         new SwissTimingReplayParserImpl().readData(getClass().getResourceAsStream("/SAW005906.20120805.replay"), replayListener);
         Iterable<? extends TrackedRace> trackedRaces = replayListener.getTrackedRaces();
         assertFalse(Util.isEmpty(trackedRaces));
+        assertEquals(1, Util.size(trackedRaces));
+        TrackedRace trackedRace = trackedRaces.iterator().next();
+        for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
+            assertEquals(Util.size(trackedRace.getRace().getCourse().getWaypoints()), Util.size(trackedRace.getMarkPassings(competitor)));
+        }
     }
 
     @Test

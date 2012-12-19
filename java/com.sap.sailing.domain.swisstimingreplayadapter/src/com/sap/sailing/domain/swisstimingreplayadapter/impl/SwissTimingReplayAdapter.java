@@ -23,7 +23,7 @@ public class SwissTimingReplayAdapter implements SwissTimingReplayListener {
     @Override
     public void frameMetaData(byte cid, int raceTime, int startTime, int estimatedStartTime, RaceStatus raceStatus,
             short distanceToNextMark, Weather weather, short humidity, short temperature, String messageText,
-            byte cFlag, byte rFlag, byte duration, short nm) {}
+            byte cFlag, byte rFlag, byte duration, short nextMark) {}
 
     @Override
     public void competitorsCount(short competitorsCount) {}

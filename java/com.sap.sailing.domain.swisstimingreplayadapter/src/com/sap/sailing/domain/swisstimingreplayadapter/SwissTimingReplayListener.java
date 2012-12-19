@@ -79,10 +79,12 @@ public interface SwissTimingReplayListener {
      *            relative air humidity in percent
      * @param temperature
      *            temperature in degree Celsius
+     * @param nextMark
+     *            zero-based number of the next mark to reach; 255 in case the race is finished
      */
     void frameMetaData(byte cid, int raceTime, int startTime, int estimatedStartTime, RaceStatus raceStatus, short distanceToNextMark,
             Weather weather, short humidity, short temperature, String messageText, byte cFlag, byte rFlag,
-            byte duration, short nm);
+            byte duration, short nextMark);
     
     void competitorsCount(short competitorsCount);
 
