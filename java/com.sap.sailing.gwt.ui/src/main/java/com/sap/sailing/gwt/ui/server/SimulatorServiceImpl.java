@@ -264,8 +264,8 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         Long longestPathTime = 0L;
 
         final SimulatedPathsEvenTimedResultDTO simulatedPaths = this.getSimulatedPathsEvenTimed(course, wf, mode, boatClassIndex);
-        final PathDTO[] pathDTOs = simulatedPaths.getPathDTOs();
-        final RaceMapDataDTO rcDTO = simulatedPaths.getRaceMapDataDTO();
+        final PathDTO[] pathDTOs = simulatedPaths.pathDTOs;
+        final RaceMapDataDTO rcDTO = simulatedPaths.raceMapDataDTO;
 
         for (final PathDTO path : pathDTOs) {
             if (path.name.equals(POLYLINE_PATH_NAME)) {
@@ -284,7 +284,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
             windFieldDTO = this.createWindFieldDTO(wf, startTime, endTime, timeStep, params.isShowLines(), params.getSeedLines());
         }
 
-        return new SimulatorResultsDTO(rcDTO, pathDTOs, windFieldDTO, simulatedPaths.getNotificationMessage());
+        return new SimulatorResultsDTO(rcDTO, pathDTOs, windFieldDTO, simulatedPaths.notificationMessage);
     }
 
     @Override
@@ -614,15 +614,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
             rcDTO = null;
         }
 
-        final WindFieldDTO wfDTO = null;
-
-        final SimulatedPathsEvenTimedResultDTO result = new SimulatedPathsEvenTimedResultDTO();
-        result.setPathDTOs(pathDTOs);
-        result.setRaceMapDataDTO(rcDTO);
-        result.setWindFieldDTO(wfDTO);
-        result.setNotificationMessage(polarDiagramAndNotificationMessage.getB());
-
-        return result;
+        return new SimulatedPathsEvenTimedResultDTO(pathDTOs, rcDTO, null, polarDiagramAndNotificationMessage.getB());
     }
 
     private Pair<PolarDiagram, String> getPolarDiagram(final int boatClassIndex) throws ConfigurationException {
