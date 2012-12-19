@@ -9,19 +9,19 @@ public class Util {
     /**
      * Adds all elements from <code>what</code> to <code>addTo</code> and returns <code>addTo</code> for chained use.
      */
-    public static <T> Collection<T> addAll(Iterable<T> what, Collection<T> addTo) {
-        for (T t : what) {
+    public static <T> Collection<T> addAll(final Iterable<T> what, final Collection<T> addTo) {
+        for (final T t : what) {
             addTo.add(t);
         }
         return addTo;
     }
-    
-    public static <T> int size(Iterable<T> i) {
+
+    public static <T> int size(final Iterable<T> i) {
         if (i instanceof Collection<?>) {
             return ((Collection<?>) i).size();
         } else {
             int result = 0;
-            Iterator<T> iter = i.iterator();
+            final Iterator<T> iter = i.iterator();
             while (iter.hasNext()) {
                 result++;
                 iter.next();
@@ -29,16 +29,16 @@ public class Util {
             return result;
         }
     }
-    
-    public static <T> int indexO(Iterable<? extends T> i, T t) {
+
+    public static <T> int indexO(final Iterable<? extends T> i, final T t) {
         int result;
         if (i instanceof List<?>) {
-            List<?> list = (List<?>) i;
+            final List<?> list = (List<?>) i;
             result = list.indexOf(t);
         } else {
             boolean found = false;
             int counter = 0;
-            for (T it : i) {
+            for (final T it : i) {
                 if (it == null && t == null
                         || it != null && it.equals(t)) {
                     result = counter;
@@ -55,26 +55,26 @@ public class Util {
         }
         return result;
     }
-    
-    public static <T> boolean equals(Iterable<? extends T> a, Iterable<? extends T> b) {
-        Iterator<? extends T> aIter = a.iterator();
-        Iterator<? extends T> bIter = b.iterator();
+
+    public static <T> boolean equals(final Iterable<? extends T> a, final Iterable<? extends T> b) {
+        final Iterator<? extends T> aIter = a.iterator();
+        final Iterator<? extends T> bIter = b.iterator();
         while (aIter.hasNext() && bIter.hasNext()) {
-            T ao = aIter.next();
-            T bo = bIter.next();
+            final T ao = aIter.next();
+            final T bo = bIter.next();
             if (!ao.equals(bo)) {
                 return false;
             }
         }
         return !aIter.hasNext() && !bIter.hasNext();
     }
-    
-    public static <T> T get(Iterable<T> iterable, int i) {
+
+    public static <T> T get(final Iterable<T> iterable, final int i) {
         if (iterable instanceof List<?>) {
-            List<T> l = (List<T>) iterable;
+            final List<T> l = (List<T>) iterable;
             return l.get(i);
         } else {
-            Iterator<T> iter = iterable.iterator();
+            final Iterator<T> iter = iterable.iterator();
             T result = iter.next();
             for (int j=0; j<i; j++) {
                 result = iter.next();
@@ -83,11 +83,11 @@ public class Util {
         }
     }
 
-    public static <T> boolean contains(Iterable<T> ts, T t) {
+    public static <T> boolean contains(final Iterable<T> ts, final T t) {
         if (ts instanceof Collection<?>) {
             return ((Collection<?>) ts).contains(t);
         } else {
-            for (T t2 : ts) {
+            for (final T t2 : ts) {
                 if (t2.equals(t)) {
                     return true;
                 }
@@ -96,7 +96,7 @@ public class Util {
         }
     }
 
-    public static <T> boolean isEmpty(Iterable<T> ts) {
+    public static <T> boolean isEmpty(final Iterable<T> ts) {
         if (ts instanceof Collection<?>) {
             return ((Collection<?>) ts).isEmpty();
         } else {
@@ -115,8 +115,8 @@ public class Util {
 
         @SuppressWarnings("unused") // required for some serialization frameworks such as GWT RPC
         private Pair() {}
-        
-        public Pair( A a, B b ) {
+
+        public Pair( final A a, final B b ) {
             this.a = a;
             this.b = b;
             hashCode = 0;
@@ -141,12 +141,12 @@ public class Util {
         }
 
         @Override
-        public boolean equals( Object obj ) {
+        public boolean equals( final Object obj ) {
             boolean result;
             if ( this == obj ) {
                 result = true;
             } else if ( obj instanceof Pair<?, ?> ) {
-                Pair<?, ?> pair = (Pair<?, ?>) obj;
+                final Pair<?, ?> pair = (Pair<?, ?>) obj;
                 result = ( this.a != null && this.a.equals( pair.a ) || this.a == null && pair.a == null ) && ( this.b != null && this.b.equals( pair.b ) || this.b == null && pair.b == null );
             } else {
                 result = false;
@@ -157,7 +157,7 @@ public class Util {
         @Override
         public String toString( ) {
             return "[" + (a==null?"null":a.toString( )) + ", " +
-                (b==null?"null":b.toString( )) + "]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+                    (b==null?"null":b.toString( )) + "]"; //$NON-NLS-1$ //$NON-NLS-2$
         }
     }
 
@@ -175,7 +175,7 @@ public class Util {
         @SuppressWarnings("unused") // required for some serialization frameworks such as GWT RPC
         private Triple() {}
 
-        public Triple( A a, B b, C c ) {
+        public Triple( final A a, final B b, final C c ) {
             this.a = a;
             this.b = b;
             this.c = c;
@@ -206,13 +206,13 @@ public class Util {
         }
 
         @Override
-        public boolean equals( Object obj ) {
+        public boolean equals( final Object obj ) {
 
             boolean result;
             if ( this == obj ) {
                 result = true;
             } else if ( obj instanceof Triple<?, ?, ?> ) {
-                Triple<?, ?, ?> thrice = (Triple<?, ?, ?>) obj;
+                final Triple<?, ?, ?> thrice = (Triple<?, ?, ?>) obj;
                 result = ( this.a != null && this.a.equals( thrice.a ) || this.a == null && thrice.a == null ) && ( this.b != null && this.b.equals( thrice.b ) || this.b == null && thrice.b == null ) && ( this.c != null && this.c.equals( thrice.c ) || this.c == null && thrice.c == null );
             } else {
                 result = false;
@@ -224,6 +224,86 @@ public class Util {
         public String toString( ) {
 
             return "[" + a + ", " + b + ", " + c + "]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+        }
+    }
+
+    public static class Quadruple<A, B, C, D> implements Serializable {
+
+        private static final long serialVersionUID = 2120209172266608653L;
+
+        private A a;
+
+        private B b;
+
+        private C c;
+
+        private D d;
+
+        private transient int hashCode;
+
+        @SuppressWarnings("unused")
+        // required for some serialization frameworks such as GWT RPC
+        private Quadruple() {
+        }
+
+        public Quadruple(final A a, final B b, final C c, final D d) {
+            this.a = a;
+            this.b = b;
+            this.c = c;
+            this.d = d;
+            this.hashCode = 0;
+        }
+
+        public A getA() {
+            return this.a;
+        }
+
+        public B getB() {
+            return this.b;
+        }
+
+        public C getC() {
+            return this.c;
+        }
+
+        public D getD() {
+            return this.d;
+        }
+
+        @Override
+        public int hashCode() {
+            if (this.hashCode == 0) {
+                this.hashCode = 17;
+                this.hashCode = 37 * this.hashCode + (this.a != null ? a.hashCode() : 0);
+                this.hashCode = 37 * this.hashCode + (this.b != null ? b.hashCode() : 0);
+                this.hashCode = 37 * this.hashCode + (this.c != null ? c.hashCode() : 0);
+                this.hashCode = 37 * this.hashCode + (this.d != null ? d.hashCode() : 0);
+            }
+            return this.hashCode;
+        }
+
+        @Override
+        public boolean equals(final Object obj) {
+
+            boolean result;
+            if (this == obj) {
+                result = true;
+            } else if (obj instanceof Triple<?, ?, ?>) {
+                final Quadruple<?, ?, ?, ?> thrice = (Quadruple<?, ?, ?, ?>) obj;
+                result = (this.a != null && this.a.equals(thrice.a) || this.a == null && thrice.a == null)
+                        && (this.b != null && this.b.equals(thrice.b) || this.b == null && thrice.b == null)
+                        && (this.c != null && this.c.equals(thrice.c) || this.c == null && thrice.c == null)
+                        && (this.d != null && this.d.equals(thrice.d) || this.d == null && thrice.d == null);
+            } else {
+                result = false;
+            }
+            return result;
+        }
+
+        @Override
+        public String toString() {
+
+            return "[" + this.a + ", " + this.b + ", " + this.c + ", " + this.d + "]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
         }
     }
 }

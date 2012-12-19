@@ -1,29 +1,26 @@
 package com.sap.sailing.simulator.test;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import junit.framework.Assert;
 
 import org.junit.Before;
 import org.junit.Test;
 
+import com.sap.sailing.domain.common.impl.Util.Quadruple;
 import com.sap.sailing.simulator.impl.ConfigurationManager;
-import com.sap.sailing.simulator.impl.Tuple;
 
 public class ConfigurationManagerTest {
-    private final ArrayList<Tuple<String, Double, String>> _boatClassesInfo = new ArrayList<Tuple<String, Double, String>>();
+    private final List<Quadruple<String, Double, String, Integer>> _boatClassesInfo = new ArrayList<Quadruple<String, Double, String, Integer>>();
 
     @Before
     public void initialize() {
-        this._boatClassesInfo.add(new Tuple<String, Double, String>("49er", 4.995, "resources/PolarDiagram49.csv"));
-        this._boatClassesInfo.add(new Tuple<String, Double, String>("49er Bethwaite", 4.876,
-                "resources/PolarDiagram49Bethwaite.csv"));
-        this._boatClassesInfo.add(new Tuple<String, Double, String>("49er ORC", 4.995,
-                "resources/PolarDiagram49ORC.csv"));
-        this._boatClassesInfo.add(new Tuple<String, Double, String>("49er STG", 4.876,
-                "resources/PolarDiagram49STG.csv"));
-        this._boatClassesInfo
-                .add(new Tuple<String, Double, String>("505 STG", 5.05, "resources/PolarDiagram505STG.csv"));
+        this._boatClassesInfo.add(new Quadruple<String, Double, String, Integer>("49er", 4.995, "resources/PolarDiagram49.csv", 0));
+        this._boatClassesInfo.add(new Quadruple<String, Double, String, Integer>("49er Bethwaite", 4.876, "resources/PolarDiagram49Bethwaite.csv", 1));
+        this._boatClassesInfo.add(new Quadruple<String, Double, String, Integer>("49er ORC", 4.995, "resources/PolarDiagram49ORC.csv", 2));
+        this._boatClassesInfo.add(new Quadruple<String, Double, String, Integer>("49er STG", 4.876, "resources/PolarDiagram49STG.csv", 3));
+        this._boatClassesInfo.add(new Quadruple<String, Double, String, Integer>("505 STG", 5.05, "resources/PolarDiagram505STG.csv", 4));
     }
 
     @Test
@@ -48,10 +45,10 @@ public class ConfigurationManagerTest {
     @Test
     public void test_getBoatClassesInfo() {
         int index = 0;
-        for (Tuple<String, Double, String> tuple : ConfigurationManager.INSTANCE.getBoatClassesInfo()) {
-            Assert.assertEquals(this._boatClassesInfo.get(index).first, tuple.first);
-            Assert.assertEquals(this._boatClassesInfo.get(index).second, tuple.second);
-            Assert.assertEquals(this._boatClassesInfo.get(index).third, tuple.third);
+        for (final Quadruple<String, Double, String, Integer> tuple : ConfigurationManager.INSTANCE.getBoatClassesInfo()) {
+            Assert.assertEquals(this._boatClassesInfo.get(index).getA(), tuple.getA());
+            Assert.assertEquals(this._boatClassesInfo.get(index).getB(), tuple.getB());
+            Assert.assertEquals(this._boatClassesInfo.get(index).getC(), tuple.getC());
             index++;
         }
     }
