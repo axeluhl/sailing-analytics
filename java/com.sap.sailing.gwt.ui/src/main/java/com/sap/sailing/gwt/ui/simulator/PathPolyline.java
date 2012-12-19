@@ -65,8 +65,8 @@ public class PathPolyline {
         final List<LatLng> points = new ArrayList<LatLng>();
 
         for (final SimulatorWindDTO pathPoint : pathPoints) {
-            if (pathPoint.isTurn()) {
-                points.add(LatLng.newInstance(pathPoint.getPosition().latDeg, pathPoint.getPosition().lngDeg));
+            if (pathPoint.isTurn) {
+                points.add(LatLng.newInstance(pathPoint.position.latDeg, pathPoint.position.lngDeg));
             }
         }
 
@@ -192,7 +192,9 @@ public class PathPolyline {
 
         this.map.addOverlay(this.polyline);
         this.polyline.setEditingEnabled(PolyEditingOptions.newInstance(this.turnPoints.length - 1));
+
         this.getTotalTime();
+        this.getTotalTime2();
     }
 
     private void drawDashLinesOnMap(final int zoomLevel) {
@@ -363,11 +365,47 @@ public class PathPolyline {
                 final long totalTime = receiveData.totalTimeSeconds;
 
                 System.err.println("==================================================");
-                System.err.println("total time (new way) = " + totalTime + " seconds!");
+                System.err.println("total time (old way) = " + totalTime + " seconds!");
                 System.err.println("==================================================");
 
                 simulatorMap.addLegendOverlayForPathPolyline(totalTime * 1000);
                 simulatorMap.redrawLegendCanvasOverlay();
+            }
+        });
+    }
+
+    private void getTotalTime2() {
+        final List<PositionDTO> turnPointsAsPositionDTO = new ArrayList<PositionDTO>();
+
+        for (final LatLng point : this.turnPoints) {
+            turnPointsAsPositionDTO.add(convertToPositionDTO(point));
+        }
+
+        final RequestTotalTimeDTO requestData = new RequestTotalTimeDTO(this.boatClassID, this.allPoints, turnPointsAsPositionDTO);
+
+        this.simulatorService.getTotalTime2(requestData, new AsyncCallback<ResponseTotalTimeDTO>() {
+
+            @Override
+            public void onFailure(final Throwable error) {
+                errorReporter.reportError("Failed to initialize boat classes!\r\n" + error.getMessage());
+            }
+
+            @Override
+            public void onSuccess(final ResponseTotalTimeDTO receiveData) {
+                final String notificationMessage = receiveData.notificationMessage;
+                if (notificationMessage != "" && notificationMessage.length() != 0 && warningAlreadyShown == false) {
+                    errorReporter.reportNotification(notificationMessage);
+                    warningAlreadyShown = true;
+                }
+
+                final long totalTime = receiveData.totalTimeSeconds;
+
+                System.err.println("==================================================");
+                System.err.println("total time (new way) = " + totalTime + " seconds!");
+                System.err.println("==================================================");
+
+                // simulatorMap.addLegendOverlayForPathPolyline(totalTime * 1000);
+                // simulatorMap.redrawLegendCanvasOverlay();
             }
         });
     }

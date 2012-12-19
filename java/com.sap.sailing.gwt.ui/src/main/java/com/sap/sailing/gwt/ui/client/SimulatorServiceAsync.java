@@ -36,4 +36,6 @@ public interface SimulatorServiceAsync {
     void getPolarDiagramDTO(Double bearingStep, int boatClassIndex, AsyncCallback<PolarDiagramDTOAndNotificationMessage> callback);
 
     void getTotalTime(RequestTotalTimeDTO requestData, AsyncCallback<ResponseTotalTimeDTO> asyncCallback);
+
+    void getTotalTime2(RequestTotalTimeDTO requestData, AsyncCallback<ResponseTotalTimeDTO> asyncCallback);
 }

@@ -68,9 +68,9 @@ public class SimulatorServiceUtils {
         double windBearingRadians = 0.0;
 
         for (final SimulatorWindDTO windDTO : windDTOs) {
-            windBearingRadians = degreesToRadians(windDTO.getTrueWindBearingDeg());
-            sumOfProductOfSpeedAndSinBearing += (windDTO.getTrueWindSpeedInKnots() * Math.sin(windBearingRadians));
-            sumOfProductOfSpeedAndCosBearing += (windDTO.getTrueWindSpeedInKnots() * Math.cos(windBearingRadians));
+            windBearingRadians = degreesToRadians(windDTO.trueWindBearingDeg);
+            sumOfProductOfSpeedAndSinBearing += (windDTO.trueWindSpeedInKnots * Math.sin(windBearingRadians));
+            sumOfProductOfSpeedAndCosBearing += (windDTO.trueWindSpeedInKnots * Math.cos(windBearingRadians));
         }
         final int count = windDTOs.size();
         final double a = sumOfProductOfSpeedAndSinBearing / count;
