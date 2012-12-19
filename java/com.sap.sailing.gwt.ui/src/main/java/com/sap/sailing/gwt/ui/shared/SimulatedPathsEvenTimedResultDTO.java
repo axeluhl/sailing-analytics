@@ -20,36 +20,4 @@ public class SimulatedPathsEvenTimedResultDTO implements IsSerializable
         this.windFieldDTO = windFieldDTO;
         this.notificationMessage = notificationMessage;
     }
-
-    // public PathDTO[] getPathDTOs() {
-    // return this.pathDTOs;
-    // }
-    //
-    // public void setPathDTOs(final PathDTO[] pathDTOs) {
-    // this.pathDTOs = pathDTOs;
-    // }
-    //
-    // public RaceMapDataDTO getRaceMapDataDTO() {
-    // return this.raceMapDataDTO;
-    // }
-    //
-    // public void setRaceMapDataDTO(final RaceMapDataDTO raceMapDataDTO) {
-    // this.raceMapDataDTO = raceMapDataDTO;
-    // }
-    //
-    // public WindFieldDTO getWindFieldDTO() {
-    // return this.windFieldDTO;
-    // }
-    //
-    // public void setWindFieldDTO(final WindFieldDTO windFieldDTO) {
-    // this.windFieldDTO = windFieldDTO;
-    // }
-    //
-    // public String getNotificationMessage() {
-    // return this.notificationMessage;
-    // }
-    //
-    // public void setNotificationMessage(final String notificationMessage) {
-    // this.notificationMessage = notificationMessage;
-    // }
 }
