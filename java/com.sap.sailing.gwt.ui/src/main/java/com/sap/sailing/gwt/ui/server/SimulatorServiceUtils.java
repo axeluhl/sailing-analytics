@@ -1,13 +1,18 @@
-package com.sap.sailing.gwt.ui.simulator;
+package com.sap.sailing.gwt.ui.server;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import com.google.gwt.maps.client.geom.LatLng;
+import com.sap.sailing.domain.base.SpeedWithBearing;
+import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
+import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
+import com.sap.sailing.domain.common.impl.DegreePosition;
+import com.sap.sailing.domain.common.impl.RadianPosition;
+import com.sap.sailing.gwt.ui.shared.PositionDTO;
 import com.sap.sailing.gwt.ui.shared.SimulatorWindDTO;
-import com.sap.sailing.gwt.ui.shared.SpeedWithBearingDTO;
 
-public class PathPolylineUtils {
+public class SimulatorServiceUtils {
 
     public static final double EARTH_RADIUS_METERS = 6378137;
     public static final double FACTOR_DEG2RAD = 0.0174532925;
@@ -46,7 +51,17 @@ public class PathPolylineUtils {
     /**
      * Computes the average value from the given list of SpeedWithBearing objects.
      */
-    public static SpeedWithBearingDTO getAverage(final List<SimulatorWindDTO> windDTOs) {
+    public static SpeedWithBearing getAverage(final SimulatorWindDTO windDTO1, final SimulatorWindDTO windDTO2) {
+        final List<SimulatorWindDTO> windDTOs = new ArrayList<SimulatorWindDTO>();
+        windDTOs.add(windDTO1);
+        windDTOs.add(windDTO2);
+        return SimulatorServiceUtils.getAverage(windDTOs);
+    }
+
+    /**
+     * Computes the average value from the given list of SpeedWithBearing objects.
+     */
+    public static SpeedWithBearing getAverage(final List<SimulatorWindDTO> windDTOs) {
 
         double sumOfProductOfSpeedAndCosBearing = 0.0;
         double sumOfProductOfSpeedAndSinBearing = 0.0;
@@ -62,60 +77,34 @@ public class PathPolylineUtils {
         final double b = sumOfProductOfSpeedAndCosBearing / count;
         final double c = radiansToDegrees(Math.atan(a / b));
 
-        double averageBearing = 0.0;
+        double averageBearingDegrees = 0.0;
 
         if (a > 0 && b >= 0) {
-            averageBearing = c;
+            averageBearingDegrees = c;
         } else if (a < 0 && b >= 0) {
-            averageBearing = 360 + c;
+            averageBearingDegrees = 360 + c;
         } else if (a < 0 && b < 0) {
-            averageBearing = 180 + c;
+            averageBearingDegrees = 180 + c;
         } else if (a > 0 && b < 0) {
-            averageBearing = 180 - c;
+            averageBearingDegrees = 180 - c;
         }
 
-        final double averageSpeed = Math.sqrt(a * a + b * b);
+        final double averageSpeedKnots = Math.sqrt(a * a + b * b);
 
-        return new SpeedWithBearingDTO(averageSpeed, averageBearing);
+        return new KnotSpeedWithBearingImpl(averageSpeedKnots, new DegreeBearingImpl(averageBearingDegrees));
     }
-
-    // public static SpeedWithBearingDTO getAverage_MinMax(final List<SimulatorWindDTO> windDTOs) {
-    //
-    // SimulatorWindDTO minWindDTO = windDTOs.get(0);
-    // SimulatorWindDTO maxWindDTO = windDTOs.get(0);
-    // SimulatorWindDTO currentWindDTO = null;
-    // final int count = windDTOs.size();
-    //
-    // for (int index = 1; index < count; index++) {
-    //
-    // currentWindDTO = windDTOs.get(index);
-    //
-    // if (currentWindDTO.trueWindSpeedInKnots < minWindDTO.trueWindSpeedInKnots) {
-    // minWindDTO = currentWindDTO;
-    // }
-    //
-    // if (currentWindDTO.trueWindSpeedInKnots > maxWindDTO.trueWindSpeedInKnots) {
-    // maxWindDTO = currentWindDTO;
-    // }
-    // }
-    //
-    // final double speedInKnots = ((minWindDTO.trueWindSpeedInKnots + maxWindDTO.trueWindSpeedInKnots) / 2);
-    // final double bearingInDegrees = ((minWindDTO.trueWindBearingDeg + maxWindDTO.trueWindBearingDeg) / 2);
-    //
-    // return new SpeedWithBearingDTO(speedInKnots, bearingInDegrees);
-    // }
 
     /**
      * Gets an array of points from the start to the end with a certain step.
      */
-    public static List<LatLng> getIntermediatePoints(final LatLng startPoint, final LatLng endPoint, final double stepSizeMeters) {
-        final List<LatLng> result = new ArrayList<LatLng>();
+    public static List<Position> getIntermediatePoints(final Position startPoint, final Position endPoint, final double stepSizeMeters) {
+        final List<Position> result = new ArrayList<Position>();
 
         final double distance = getDistanceBetween(startPoint, endPoint);
         final int noOfSteps = (int) (distance / stepSizeMeters);
         double bearing = getInitialBearing(startPoint, endPoint);
 
-        LatLng temp = null;
+        Position temp = null;
 
         result.add(startPoint);
         for (int stepIndex = 1; stepIndex < noOfSteps; stepIndex++) {
@@ -127,52 +116,62 @@ public class PathPolylineUtils {
         return result;
     }
 
+    public static List<Position> getIntermediatePoints2(final List<PositionDTO> points, final double stepSizeMeters) {
+        final List<Position> newPoints = new ArrayList<Position>();
+
+        for (final PositionDTO point : points) {
+            newPoints.add(new DegreePosition(point.latDeg, point.lngDeg));
+        }
+
+        return SimulatorServiceUtils.getIntermediatePoints(newPoints, stepSizeMeters);
+    }
+
     /**
      * For every segment of two points in the given array, it computes the intermediate points given the certain step
      * size.
      */
-    public static LatLng[] getIntermediatePoints(final LatLng[] points, final double stepSizeMeters) {
+    public static List<Position> getIntermediatePoints(final List<Position> points, final double stepSizeMeters) {
 
-        final int noOfPoints = points.length;
+        final int noOfPoints = points.size();
         if (noOfPoints == 0) {
-            return new LatLng[0];
-        }
-        else if (noOfPoints == 1) {
+            return new ArrayList<Position>();
+        } else if (noOfPoints == 1) {
             return points;
-        }
-        else if (noOfPoints == 2) {
+        } else if (noOfPoints == 2) {
 
-            final LatLng startPoint = points[0];
-            final LatLng endPoint = points[1];
+            final Position startPoint = points.get(0);
+            final Position endPoint = points.get(1);
 
             final double distance = getDistanceBetween(startPoint, endPoint);
             if (distance <= stepSizeMeters) {
                 return points;
-            }
-            else {
-                final List<LatLng> newPoints = getIntermediatePoints(startPoint, endPoint, stepSizeMeters);
+            } else {
+                final List<Position> newPoints = getIntermediatePoints(startPoint, endPoint, stepSizeMeters);
                 newPoints.add(endPoint);
-                return newPoints.toArray(new LatLng[0]);
+                return newPoints;
             }
         }
 
-        final List<LatLng> result = new ArrayList<LatLng>();
+        final List<Position> result = new ArrayList<Position>();
 
         for (int index = 0; index < noOfPoints; index++) {
             if (index == noOfPoints - 1) {
                 break;
             }
 
-            result.addAll(getIntermediatePoints(points[index], points[index + 1], stepSizeMeters));
+            result.addAll(getIntermediatePoints(points.get(index), points.get(index + 1), stepSizeMeters));
         }
 
-        result.add(points[noOfPoints - 1]);
+        result.add(points.get(noOfPoints - 1));
 
-        return result.toArray(new LatLng[0]);
+        return result;
 
     }
 
-    public static double getTime(final LatLng startPoint, final LatLng endPoint, final double endSpeedMetersPerSecond) {
+    /**
+     * Computes the time required to travel from the start point to the end point with the specified speed.
+     */
+    public static double getTimeSeconds(final Position startPoint, final Position endPoint, final double endSpeedMetersPerSecond) {
 
         final double distance = getDistanceBetween(startPoint, endPoint);
 
@@ -186,7 +185,7 @@ public class PathPolylineUtils {
     /**
      * Returns the total distance between the path composed of the given points
      */
-    public static double getTotalDistanceMeters(final LatLng[] points) {
+    public static double getTotalDistanceMeters(final Position[] points) {
 
         final int noOfPositions = points.length;
 
@@ -211,13 +210,13 @@ public class PathPolylineUtils {
     /**
      * Returns the distance from this point to the supplied point, in meters (using Haversine formula).
      */
-    public static double getDistanceBetween(final LatLng startPoint, final LatLng endPoint) {
+    public static double getDistanceBetween(final Position startPoint, final Position endPoint) {
 
-        final double lat1 = startPoint.getLatitudeRadians();
-        final double lon1 = startPoint.getLongitudeRadians();
+        final double lat1 = startPoint.getLatRad();
+        final double lon1 = startPoint.getLngRad();
 
-        final double lat2 = endPoint.getLatitudeRadians();
-        final double lon2 = endPoint.getLongitudeRadians();
+        final double lat2 = endPoint.getLatRad();
+        final double lon2 = endPoint.getLngRad();
 
         final double dLat = lat2 - lat1;
         final double dLon = lon2 - lon1;
@@ -232,15 +231,15 @@ public class PathPolylineUtils {
     /**
      * Returns the initial bearing from the start point to the end point in degrees
      */
-    public static double getInitialBearing(final LatLng startPoint, final LatLng endPoint) {
+    public static double getInitialBearing(final Position startPoint, final Position endPoint) {
 
-        final double lat1 = startPoint.getLatitudeRadians();
-        final double lat2 = endPoint.getLatitudeRadians();
+        final double lat1 = startPoint.getLatRad();
+        final double lat2 = endPoint.getLatRad();
 
-        final double dLon = endPoint.getLongitudeRadians() - startPoint.getLongitudeRadians();
+        final double dLon = endPoint.getLngRad() - startPoint.getLngRad();
 
         final double y = Math.sin(dLon) * Math.cos(lat2);
-        final double x = Math.cos(lat1)*Math.sin(lat2) - Math.sin(lat1)*Math.cos(lat2)*Math.cos(dLon);
+        final double x = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLon);
         final double bearing = Math.atan2(y, x);
 
         return (radiansToDegrees(bearing) + 360) % 360;
@@ -250,12 +249,12 @@ public class PathPolylineUtils {
      * Returns final bearing arriving at the end point from the start point; The final bearing will differ from the
      * initial bearing by varying degrees according to distance and latitude
      */
-    public static double getFinalBearing(final LatLng startPoint, final LatLng endPoint) {
+    public static double getFinalBearing(final Position startPoint, final Position endPoint) {
 
-        final double lat1 = startPoint.getLatitudeRadians();
-        final double lat2 = endPoint.getLatitudeRadians();
+        final double lat1 = startPoint.getLatRad();
+        final double lat2 = endPoint.getLatRad();
 
-        final double dLon = endPoint.getLongitudeRadians() - startPoint.getLongitudeRadians();
+        final double dLon = endPoint.getLngRad() - startPoint.getLngRad();
 
         final double y = Math.sin(dLon) * Math.cos(lat2);
         final double x = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLon);
@@ -267,13 +266,13 @@ public class PathPolylineUtils {
     /**
      * Returns the midpoint between this point and the supplied point.
      */
-    public static LatLng getMidpointBetween(final LatLng startPoint, final LatLng endPoint) {
+    public static Position getMidpointBetween(final Position startPoint, final Position endPoint) {
 
-        final double lat1 = startPoint.getLatitudeRadians();
-        final double lon1 = startPoint.getLongitudeRadians();
-        final double lat2 = endPoint.getLatitudeRadians();
+        final double lat1 = startPoint.getLatRad();
+        final double lon1 = startPoint.getLngRad();
+        final double lat2 = endPoint.getLatRad();
 
-        final double dLon = endPoint.getLongitudeRadians() - startPoint.getLongitudeRadians();
+        final double dLon = endPoint.getLngRad() - lon1;
 
         final double Bx = Math.cos(lat2) * Math.cos(dLon);
         final double By = Math.cos(lat2) * Math.sin(dLon);
@@ -282,24 +281,24 @@ public class PathPolylineUtils {
         double lon3 = lon1 + Math.atan2(By, Math.cos(lat1) + Bx);
         lon3 = (lon3 + 3 * Math.PI) % (2 * Math.PI) - Math.PI;
 
-        return LatLng.newInstance(lat3, lon3);
+        return new RadianPosition(lat3, lon3);
     }
 
     /**
      * Returns the destination point from this point having travelled the given distance, in meters on the given initial
      * bearing (bearing may vary before destination is reached)
      */
-    public static LatLng getDestinationPoint(final LatLng startPoint, final double bearingDegrees, final double distanceMeters) {
+    public static Position getDestinationPoint(final Position startPoint, final double bearingDegrees, final double distanceMeters) {
 
         final double distance = distanceMeters / EARTH_RADIUS_METERS;
         final double bearing = degreesToRadians(bearingDegrees);
-        final double lat1 = startPoint.getLatitudeRadians();
-        final double lon1 = startPoint.getLongitudeRadians();
+        final double lat1 = startPoint.getLatRad();
+        final double lon1 = startPoint.getLngRad();
 
         final double lat2 = Math.asin(Math.sin(lat1) * Math.cos(distance) + Math.cos(lat1) * Math.sin(distance) * Math.cos(bearing));
         double lon2 = lon1 + Math.atan2(Math.sin(bearing) * Math.sin(distance) * Math.cos(lat1), Math.cos(distance) - Math.sin(lat1) * Math.sin(lat2));
         lon2 = (lon2 + 3 * Math.PI) % (2 * Math.PI) - Math.PI;
 
-        return LatLng.newInstance(radiansToDegrees(lat2), radiansToDegrees(lon2));
+        return new RadianPosition(lat2, lon2);
     }
 }

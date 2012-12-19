@@ -14,7 +14,6 @@ import java.util.logging.Logger;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.sap.sailing.domain.base.SpeedWithBearing;
-import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
@@ -24,6 +23,8 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.NauticalMileDistance;
+import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.domain.common.impl.Util.Quadruple;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.gwt.ui.client.SimulatorService;
 import com.sap.sailing.gwt.ui.shared.BoatClassDTO;
@@ -35,13 +36,11 @@ import com.sap.sailing.gwt.ui.shared.PolarDiagramDTO;
 import com.sap.sailing.gwt.ui.shared.PolarDiagramDTOAndNotificationMessage;
 import com.sap.sailing.gwt.ui.shared.PositionDTO;
 import com.sap.sailing.gwt.ui.shared.RaceMapDataDTO;
-import com.sap.sailing.gwt.ui.shared.ReceivePolarDiagramDataDTO;
-import com.sap.sailing.gwt.ui.shared.RequestPolarDiagramDataDTO;
+import com.sap.sailing.gwt.ui.shared.RequestTotalTimeDTO;
+import com.sap.sailing.gwt.ui.shared.ResponseTotalTimeDTO;
 import com.sap.sailing.gwt.ui.shared.SimulatedPathsEvenTimedResultDTO;
 import com.sap.sailing.gwt.ui.shared.SimulatorResultsDTO;
 import com.sap.sailing.gwt.ui.shared.SimulatorWindDTO;
-import com.sap.sailing.gwt.ui.shared.SpeedBearingPositionDTO;
-import com.sap.sailing.gwt.ui.shared.SpeedWithBearingDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldGenParamsDTO;
 import com.sap.sailing.gwt.ui.shared.WindLatticeDTO;
@@ -68,7 +67,6 @@ import com.sap.sailing.simulator.impl.SailingSimulatorImpl;
 import com.sap.sailing.simulator.impl.SimulationParametersImpl;
 import com.sap.sailing.simulator.impl.TimedPositionImpl;
 import com.sap.sailing.simulator.impl.TimedPositionWithSpeedImpl;
-import com.sap.sailing.simulator.impl.Tuple;
 import com.sap.sailing.simulator.util.SailingSimulatorUtil;
 import com.sap.sailing.simulator.windfield.WindControlParameters;
 import com.sap.sailing.simulator.windfield.WindFieldGenerator;
@@ -304,8 +302,8 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
             result.setNotificationMessage(config.getErrorMessage());
         }
 
-        for (final Tuple<String, Double, String> tuple : ConfigurationManager.INSTANCE.getBoatClassesInfo()) {
-            boatClassesDTOs.add(new BoatClassDTO(tuple.first, tuple.second));
+        for (final Quadruple<String, Double, String, Integer> tuple : ConfigurationManager.INSTANCE.getBoatClassesInfo()) {
+            boatClassesDTOs.add(new BoatClassDTO(tuple.getA(), tuple.getB()));
         }
 
         result.setBoatClassDTOs(boatClassesDTOs.toArray(new BoatClassDTO[boatClassesDTOs.size()]));
@@ -317,9 +315,9 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
     public PolarDiagramDTOAndNotificationMessage getPolarDiagramDTO(final Double bearingStep, final int boatClassIndex)
             throws ConfigurationException {
 
-        final PolarDiagramAndNotificationMessage polarDiagramAndNotificationMessage = this.getPolarDiagram(boatClassIndex);
+        final Pair<PolarDiagram, String> polarDiagramAndNotificationMessage = this.getPolarDiagram(boatClassIndex);
 
-        final NavigableMap<Speed, NavigableMap<Bearing, Speed>> navMap = polarDiagramAndNotificationMessage.getPolarDiagram()
+        final NavigableMap<Speed, NavigableMap<Bearing, Speed>> navMap = polarDiagramAndNotificationMessage.getA()
                 .polarDiagramPlot(bearingStep);
 
         final Set<Speed> validSpeeds = navMap.keySet();
@@ -341,55 +339,9 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
 
         final PolarDiagramDTOAndNotificationMessage result = new PolarDiagramDTOAndNotificationMessage();
         result.setPolarDiagramDTO(dto);
-        result.setNotificationMessage(polarDiagramAndNotificationMessage.getNotificationMesssage());
+        result.setNotificationMessage(polarDiagramAndNotificationMessage.getB());
 
         return result;
-    }
-
-    @Override
-    public ReceivePolarDiagramDataDTO getSpeedsFromPolarDiagram(final RequestPolarDiagramDataDTO requestData) throws ConfigurationException {
-
-        final PolarDiagramAndNotificationMessage polarDiagramAndNotificationMessage = this.getPolarDiagram(requestData.getBoatClass());
-        final PolarDiagram polarDiagram = polarDiagramAndNotificationMessage.getPolarDiagram();
-
-        final SpeedWithBearingDTO windSpeedDTO = requestData.getWindSpeed();
-        final SpeedWithBearing windSpeed = new KnotSpeedWithBearingImpl(windSpeedDTO.speedInKnots, new DegreeBearingImpl(windSpeedDTO.bearingInDegrees));
-        polarDiagram.setWind(windSpeed);
-
-        final List<SpeedBearingPositionDTO> speeds = new ArrayList<SpeedBearingPositionDTO>();
-
-        final List<PositionDTO> positions = requestData.getPositions();
-        final int noOfPositions = positions.size();
-
-        DegreePosition degreePositionStart = null;
-        DegreePosition degreePositionEnd = null;
-        PositionDTO positionDTO = null;
-        Bearing bearing = null;
-        SpeedWithBearing speedWithBearing = null;
-
-        speeds.add(new SpeedBearingPositionDTO(positions.get(0), new SpeedWithBearingDTO(0.0, 0.0)));
-
-        for (int index = 0; index < noOfPositions; index++) {
-
-            if (index == noOfPositions - 1) {
-                break;
-            }
-
-            positionDTO = positions.get(index);
-            degreePositionStart = new DegreePosition(positionDTO.latDeg, positionDTO.lngDeg);
-
-            positionDTO = positions.get(index + 1);
-            degreePositionEnd = new DegreePosition(positionDTO.latDeg, positionDTO.lngDeg);
-
-            bearing = degreePositionStart.getBearingGreatCircle(degreePositionEnd);
-
-            speedWithBearing = polarDiagram.getSpeedAtBearing(bearing);
-
-            speeds.add(new SpeedBearingPositionDTO(positionDTO,
-                    new SpeedWithBearingDTO(speedWithBearing.getKnots(), speedWithBearing.getBearing().getDegrees())));
-        }
-
-        return new ReceivePolarDiagramDataDTO(speeds, polarDiagramAndNotificationMessage.getNotificationMesssage());
     }
 
     /* PRIVATE MEMBERS */
@@ -425,12 +377,8 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         }
     }
 
-    private PositionDTO createPositionDTO(final Position pos) {
-        final PositionDTO posDTO = new PositionDTO();
-        posDTO.latDeg = pos.getLatDeg();
-        posDTO.lngDeg = pos.getLngDeg();
-
-        return posDTO;
+    private static PositionDTO toPositionDTO(final Position position) {
+        return new PositionDTO(position.getLatDeg(), position.getLngDeg());
     }
 
     private SimulatorWindDTO createSimulatorWindDTO(final Wind wind) {
@@ -443,7 +391,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         result.setTrueWindSpeedInKnots(wind.getKnots());
 
         if (position != null) {
-            result.setPosition(createPositionDTO(position));
+            result.setPosition(toPositionDTO(position));
         }
         if (timePoint != null) {
             result.setTimepoint(timePoint.asMillis());
@@ -463,7 +411,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         result.setTrueWindSpeedInKnots(speedWithBearing.getKnots());
 
         if (position != null) {
-            result.setPosition(createPositionDTO(position));
+            result.setPosition(toPositionDTO(position));
         }
 
         if (timePoint != null) {
@@ -618,8 +566,8 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
 
         logger.info("Retrieving simulated paths");
 
-        final PolarDiagramAndNotificationMessage polarDiagramAndNotificationMessage = this.getPolarDiagram(boatClassIndex);
-        final PolarDiagram pd = polarDiagramAndNotificationMessage.getPolarDiagram();
+        final Pair<PolarDiagram, String> polarDiagramAndNotificationMessage = this.getPolarDiagram(boatClassIndex);
+        final PolarDiagram pd = polarDiagramAndNotificationMessage.getA();
 
         final SimulationParameters sp = new SimulationParametersImpl(course, pd, wf, mode);
         final SailingSimulator simulator = new SailingSimulatorImpl(sp);
@@ -657,10 +605,10 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
 
             final Path rc = simulator.getRaceCourse();
             PositionDTO posDTO;
-            posDTO = createPositionDTO(rc.getPathPoints().get(0).getPosition());
+            posDTO = toPositionDTO(rc.getPathPoints().get(0).getPosition());
 
             rcDTO.coursePositions.waypointPositions.add(posDTO);
-            posDTO = createPositionDTO(rc.getPathPoints().get(1).getPosition());
+            posDTO = toPositionDTO(rc.getPathPoints().get(1).getPosition());
             rcDTO.coursePositions.waypointPositions.add(posDTO);
         } else {
             rcDTO = null;
@@ -672,34 +620,35 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         result.setPathDTOs(pathDTOs);
         result.setRaceMapDataDTO(rcDTO);
         result.setWindFieldDTO(wfDTO);
-        result.setNotificationMessage(polarDiagramAndNotificationMessage.getNotificationMesssage());
+        result.setNotificationMessage(polarDiagramAndNotificationMessage.getB());
 
         return result;
     }
 
-    private PolarDiagramAndNotificationMessage getPolarDiagram(final int boatClassIndex) throws ConfigurationException {
+    private Pair<PolarDiagram, String> getPolarDiagram(final int boatClassIndex) throws ConfigurationException {
 
         final ConfigurationManager config = ConfigurationManager.INSTANCE;
-        final PolarDiagramAndNotificationMessage result = new PolarDiagramAndNotificationMessage();
+        PolarDiagram polarDiagram = null;
+        String notificationMessage = "";
 
         if (config.getStatus() == ReadingConfigurationFileStatus.IO_ERROR) {
             throw new ConfigurationException(config.getErrorMessage());
         } else if (config.getStatus() == ReadingConfigurationFileStatus.ERROR_FINDING_CONFIG_FILE
                 || config.getStatus() == ReadingConfigurationFileStatus.ERROR_READING_ENV_VAR_VALUE) {
-            result.setNotificationMessage(config.getErrorMessage());
+            notificationMessage = config.getErrorMessage();
         }
 
         final String csvFilePath = config.getPolarDiagramFileLocation(boatClassIndex);
 
         try {
-            result.setPolarDiagram(new PolarDiagramCSV(csvFilePath));
+            polarDiagram = new PolarDiagramCSV(csvFilePath);
         } catch (final IOException exception) {
             throw new ConfigurationException(
                     "An IO error occured when parsing the CSV file! The original error message is "
                             + exception.getMessage());
         }
 
-        return result;
+        return new Pair<PolarDiagram, String>(polarDiagram, notificationMessage);
     }
 
     private PathDTO getPolylinePathDTO(final Path gpsPoly, final Path gpsTrack) {
@@ -721,7 +670,10 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         final int endPointIndex = getIndexOfClosest(gpsTrackPoints, endPoint);
 
         final List<TimedPositionWithSpeed> polylinePoints = gpsTrackPoints.subList(startPointIndex, endPointIndex + 1);
+
         final List<TimedPositionWithSpeed> turns = (new PathImpl(polylinePoints, null)).getTurns();
+        // PathImpl.saveToGpxFile(new PathImpl(turns, null), "C:\\gps_path_turns_20deg_not_even_timed.gpx");
+
         final List<SimulatorWindDTO> points = new ArrayList<SimulatorWindDTO>();
 
         boolean isTurn = false;
@@ -806,24 +758,64 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         return result;
     }
 
-    private class PolarDiagramAndNotificationMessage {
-        private PolarDiagram polarDiagram = null;
-        private String notificationMessage = "";
 
-        public void setPolarDiagram(final PolarDiagram polarDiagram) {
-            this.polarDiagram = polarDiagram;
+    @Override
+    public ResponseTotalTimeDTO getTotalTime(final RequestTotalTimeDTO requestData) throws ConfigurationException {
+
+        final SpeedWithBearing averageWind = SimulatorServiceUtils.getAverage(requestData.allPoints);
+        final double stepSizeMeters = SimulatorServiceUtils.knotsToMetersPerSecond(averageWind.getKnots()) * (STEP_DURATION_MILLISECONDS / 1000);
+
+        final List<Position> intermediatePoints = SimulatorServiceUtils.getIntermediatePoints2(requestData.turnPoints, stepSizeMeters);
+        final int noOfIntermediatePoints = intermediatePoints.size();
+
+        final Pair<PolarDiagram, String> polarDiagramAndNotificationMessage = this.getPolarDiagram(requestData.boatClassID);
+        final PolarDiagram polarDiagram = polarDiagramAndNotificationMessage.getA();
+        final String notificationMessage = polarDiagramAndNotificationMessage.getB();
+
+        final List<Pair<Position, Double>> speeds = new ArrayList<Pair<Position, Double>>();
+
+        Position startPoint = null;
+        Position endPoint = null;
+        Position currentPoint = null;
+        double bearingDeg = 0.;
+        SpeedWithBearing speedWithBearing = null;
+
+        currentPoint = intermediatePoints.get(0);
+        speeds.add(new Pair<Position, Double>(currentPoint, 0.0));
+
+        polarDiagram.setWind(averageWind);
+
+        for (int index = 0; index < noOfIntermediatePoints - 1; index++) {
+            startPoint = intermediatePoints.get(index);
+            endPoint = intermediatePoints.get(index + 1);
+            bearingDeg = SimulatorServiceUtils.getInitialBearing(startPoint, endPoint);
+            speedWithBearing = polarDiagram.getSpeedAtBearing(new DegreeBearingImpl(bearingDeg));
+            speeds.add(new Pair<Position, Double>(endPoint, speedWithBearing.getKnots()));
         }
 
-        public void setNotificationMessage(final String notificationMessage) {
-            this.notificationMessage = notificationMessage;
+        double totalTimeSeconds = 0.0;
+
+        final int noOfSpeedsMinus1 = speeds.size() - 1;
+
+        Pair<Position, Double> startSpeedAndPosition = null;
+        Pair<Position, Double> endSpeedAndPosition = null;
+
+        double endSpeed = 0.0;
+
+        for (int index = 0; index < noOfSpeedsMinus1; index++) {
+
+            startSpeedAndPosition = speeds.get(index);
+            endSpeedAndPosition = speeds.get(index + 1);
+
+            startPoint = startSpeedAndPosition.getA();
+            endPoint = endSpeedAndPosition.getA();
+            endSpeed = SimulatorServiceUtils.knotsToMetersPerSecond(endSpeedAndPosition.getB());
+
+            totalTimeSeconds += SimulatorServiceUtils.getTimeSeconds(startPoint, endPoint, endSpeed);
         }
 
-        public PolarDiagram getPolarDiagram() {
-            return this.polarDiagram;
-        }
-
-        public String getNotificationMesssage() {
-            return this.notificationMessage;
-        }
+        return new ResponseTotalTimeDTO((long) totalTimeSeconds, notificationMessage);
     }
+
+    private static final int STEP_DURATION_MILLISECONDS = 1000;
 }

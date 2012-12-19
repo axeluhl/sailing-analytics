@@ -17,11 +17,9 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SimulatorServiceAsync;
 import com.sap.sailing.gwt.ui.shared.PositionDTO;
-import com.sap.sailing.gwt.ui.shared.ReceivePolarDiagramDataDTO;
-import com.sap.sailing.gwt.ui.shared.RequestPolarDiagramDataDTO;
+import com.sap.sailing.gwt.ui.shared.RequestTotalTimeDTO;
+import com.sap.sailing.gwt.ui.shared.ResponseTotalTimeDTO;
 import com.sap.sailing.gwt.ui.shared.SimulatorWindDTO;
-import com.sap.sailing.gwt.ui.shared.SpeedBearingPositionDTO;
-import com.sap.sailing.gwt.ui.shared.SpeedWithBearingDTO;
 import com.sap.sailing.gwt.ui.shared.racemap.TwoDPoint;
 import com.sap.sailing.gwt.ui.shared.racemap.TwoDSegment;
 import com.sap.sailing.gwt.ui.shared.racemap.TwoDVector;
@@ -42,11 +40,8 @@ public class PathPolyline {
     private static final String DEFAULT_DASHLINE_BISECTOR_COLOR = "Green";
     private static final String DEFAULT_DASHLINE_VERTICAL_COLOR = "Blue";
 
-    private static final double STEP_DURATION_MILLISECONDS = 1000;
-    private static final boolean USE_ONLY_TURN_POINTS = false;
-
     private Polyline polyline = null;
-    private LatLng[] points = null;
+    private LatLng[] turnPoints = null;
 
     private Polyline shadowPolyline = null;
     private List<LatLng> shadowPoints = null;
@@ -56,32 +51,22 @@ public class PathPolyline {
     private int weight = 0;
     private double opacity = 0.0;
     private Map<TwoDPoint, List<TwoDPoint>> originAndHeads = null;
-    private SpeedWithBearingDTO averageWindSpeed = null;
-
     private int boatClassID = 0;
-    private List<SimulatorWindDTO> pathPoints = null;
+    private List<SimulatorWindDTO> allPoints = null;
     private SimulatorServiceAsync simulatorService = null;
     private MapWidget map = null;
     private ErrorReporter errorReporter = null;
     private boolean warningAlreadyShown = false;
-
-    private boolean firstTime = true;
-
     private SimulatorMap simulatorMap = null;
-
-    private double stepSizeMeters = 0.0;
 
     public static PathPolyline createPathPolyline(final List<SimulatorWindDTO> pathPoints, final ErrorReporter errorReporter,
             final SimulatorServiceAsync simulatorService, final MapWidget map, final SimulatorMap simulatorMap, final int boatClassID) {
 
-        final int noOfPathPoints = pathPoints.size();
-        SimulatorWindDTO currentPathPoint = null;
         final List<LatLng> points = new ArrayList<LatLng>();
 
-        for (int index = 0; index < noOfPathPoints; index++) {
-            currentPathPoint = pathPoints.get(index);
-            if (index == 0 || index == noOfPathPoints - 1 || currentPathPoint.isTurn()) {
-                points.add(LatLng.newInstance(currentPathPoint.getPosition().latDeg, currentPathPoint.getPosition().lngDeg));
+        for (final SimulatorWindDTO pathPoint : pathPoints) {
+            if (pathPoint.isTurn()) {
+                points.add(LatLng.newInstance(pathPoint.getPosition().latDeg, pathPoint.getPosition().lngDeg));
             }
         }
 
@@ -99,7 +84,7 @@ public class PathPolyline {
     private PathPolyline(final LatLng[] points, final String color, final int weight, final double opacity, final int boatClassID,
             final ErrorReporter errorReporter, final List<SimulatorWindDTO> pathPoints, final SimulatorServiceAsync simulatorService, final MapWidget map,
             final SimulatorMap simulatorMap) {
-        this.points = points;
+        this.turnPoints = points;
         this.color = color;
         this.weight = weight;
         this.opacity = opacity;
@@ -108,10 +93,9 @@ public class PathPolyline {
         this.originAndHeads = new HashMap<TwoDPoint, List<TwoDPoint>>();
         this.shadowPoints = new ArrayList<LatLng>();
 
-        this.pathPoints = pathPoints;
+        this.allPoints = pathPoints;
         this.simulatorService = simulatorService;
         this.map = map;
-        this.averageWindSpeed = new SpeedWithBearingDTO();
         this.boatClassID = boatClassID;
         this.errorReporter = errorReporter;
 
@@ -133,13 +117,13 @@ public class PathPolyline {
             this.map.removeOverlay(this.polyline);
         }
 
-        this.polyline = new Polyline(this.points, this.color, this.weight, this.opacity);
+        this.polyline = new Polyline(this.turnPoints, this.color, this.weight, this.opacity);
 
         this.polyline.addPolylineLineUpdatedHandler(new PolylineLineUpdatedHandler() {
             @Override
             public void onUpdate(final PolylineLineUpdatedEvent event) {
                 final int indexOfMovedPoint = getIndexOfMovedPoint();
-                final int noOfPoints = points.length;
+                final int noOfPoints = turnPoints.length;
 
                 if (indexOfMovedPoint == 0 || indexOfMovedPoint == noOfPoints - 1) {
                     // start and end points cannot be moved!
@@ -154,13 +138,13 @@ public class PathPolyline {
 
                     final double distance = (map.getZoomLevel() - 11) * DEFAULT_DISTANCE_PX;
 
-                    final TwoDPoint origin = convertToTwoDPoint(points[indexOfMovedPoint]);
-                    final TwoDPoint head1 = TwoDPoint.getDistancedPoint(origin, distance, convertToTwoDPoint(points[indexOfMovedPoint - 1]));
-                    final TwoDPoint head2 = TwoDPoint.getDistancedPoint(origin, distance, convertToTwoDPoint(points[indexOfMovedPoint + 1]));
+                    final TwoDPoint origin = convertToTwoDPoint(turnPoints[indexOfMovedPoint]);
+                    final TwoDPoint head1 = TwoDPoint.getDistancedPoint(origin, distance, convertToTwoDPoint(turnPoints[indexOfMovedPoint - 1]));
+                    final TwoDPoint head2 = TwoDPoint.getDistancedPoint(origin, distance, convertToTwoDPoint(turnPoints[indexOfMovedPoint + 1]));
                     final TwoDPoint newOrigin = TwoDPoint.getCorrectProjection(origin, head1, head2, convertToTwoDPoint(polyline.getVertex(indexOfMovedPoint)));
 
                     shadowPoints.clear();
-                    for (final LatLng point : points) {
+                    for (final LatLng point : turnPoints) {
                         shadowPoints.add(point);
                     }
 
@@ -172,32 +156,32 @@ public class PathPolyline {
                     TwoDPoint beforeNewOrigin = null;
 
                     if (indexOfMovedPoint == 1) {
-                        afterLine = new TwoDSegment(convertToTwoDPoint(points[indexOfMovedPoint + 1]), convertToTwoDPoint(points[indexOfMovedPoint + 2]));
-                        afterVector = new TwoDVector(origin, convertToTwoDPoint(points[indexOfMovedPoint + 1]));
+                        afterLine = new TwoDSegment(convertToTwoDPoint(turnPoints[indexOfMovedPoint + 1]), convertToTwoDPoint(turnPoints[indexOfMovedPoint + 2]));
+                        afterVector = new TwoDVector(origin, convertToTwoDPoint(turnPoints[indexOfMovedPoint + 1]));
                         afterNewOrigin = TwoDPoint.projectToLineByVector(newOrigin, afterLine, afterVector);
 
-                        points[indexOfMovedPoint] = convertToLatLng(newOrigin);
-                        points[indexOfMovedPoint + 1] = convertToLatLng(afterNewOrigin);
+                        turnPoints[indexOfMovedPoint] = convertToLatLng(newOrigin);
+                        turnPoints[indexOfMovedPoint + 1] = convertToLatLng(afterNewOrigin);
 
                     } else if (indexOfMovedPoint == noOfPoints - 2) {
-                        beforeLine = new TwoDSegment(convertToTwoDPoint(points[indexOfMovedPoint - 2]), convertToTwoDPoint(points[indexOfMovedPoint - 1]));
-                        beforeVector = new TwoDVector(convertToTwoDPoint(points[indexOfMovedPoint - 1]), origin);
+                        beforeLine = new TwoDSegment(convertToTwoDPoint(turnPoints[indexOfMovedPoint - 2]), convertToTwoDPoint(turnPoints[indexOfMovedPoint - 1]));
+                        beforeVector = new TwoDVector(convertToTwoDPoint(turnPoints[indexOfMovedPoint - 1]), origin);
                         beforeNewOrigin = TwoDPoint.projectToLineByVector(newOrigin, beforeLine, beforeVector);
 
-                        points[indexOfMovedPoint - 1] = convertToLatLng(beforeNewOrigin);
-                        points[indexOfMovedPoint] = convertToLatLng(newOrigin);
+                        turnPoints[indexOfMovedPoint - 1] = convertToLatLng(beforeNewOrigin);
+                        turnPoints[indexOfMovedPoint] = convertToLatLng(newOrigin);
                     } else {
-                        beforeLine = new TwoDSegment(convertToTwoDPoint(points[indexOfMovedPoint - 2]), convertToTwoDPoint(points[indexOfMovedPoint - 1]));
-                        beforeVector = new TwoDVector(convertToTwoDPoint(points[indexOfMovedPoint - 1]), origin);
+                        beforeLine = new TwoDSegment(convertToTwoDPoint(turnPoints[indexOfMovedPoint - 2]), convertToTwoDPoint(turnPoints[indexOfMovedPoint - 1]));
+                        beforeVector = new TwoDVector(convertToTwoDPoint(turnPoints[indexOfMovedPoint - 1]), origin);
                         beforeNewOrigin = TwoDPoint.projectToLineByVector(newOrigin, beforeLine, beforeVector);
 
-                        afterLine = new TwoDSegment(convertToTwoDPoint(points[indexOfMovedPoint + 1]), convertToTwoDPoint(points[indexOfMovedPoint + 2]));
-                        afterVector = new TwoDVector(origin, convertToTwoDPoint(points[indexOfMovedPoint + 1]));
+                        afterLine = new TwoDSegment(convertToTwoDPoint(turnPoints[indexOfMovedPoint + 1]), convertToTwoDPoint(turnPoints[indexOfMovedPoint + 2]));
+                        afterVector = new TwoDVector(origin, convertToTwoDPoint(turnPoints[indexOfMovedPoint + 1]));
                         afterNewOrigin = TwoDPoint.projectToLineByVector(newOrigin, afterLine, afterVector);
 
-                        points[indexOfMovedPoint - 1] = convertToLatLng(beforeNewOrigin);
-                        points[indexOfMovedPoint] = convertToLatLng(newOrigin);
-                        points[indexOfMovedPoint + 1] = convertToLatLng(afterNewOrigin);
+                        turnPoints[indexOfMovedPoint - 1] = convertToLatLng(beforeNewOrigin);
+                        turnPoints[indexOfMovedPoint] = convertToLatLng(newOrigin);
+                        turnPoints[indexOfMovedPoint + 1] = convertToLatLng(afterNewOrigin);
                     }
                 }
 
@@ -207,20 +191,12 @@ public class PathPolyline {
         });
 
         this.map.addOverlay(this.polyline);
-        this.polyline.setEditingEnabled(PolyEditingOptions.newInstance(this.points.length - 1));
-
-        if (this.firstTime) {
-
-            this.averageWindSpeed = this.getAverageWindSpeed();
-            this.stepSizeMeters = PathPolylineUtils.knotsToMetersPerSecond(this.averageWindSpeed.speedInKnots) * (STEP_DURATION_MILLISECONDS / 1000);
-            this.firstTime = false;
-        }
-
-        this.computeTotalTimeOfPathPolyline();
+        this.polyline.setEditingEnabled(PolyEditingOptions.newInstance(this.turnPoints.length - 1));
+        this.getTotalTime();
     }
 
     private void drawDashLinesOnMap(final int zoomLevel) {
-        final int noOfPathPoints = this.points.length;
+        final int noOfPathPoints = this.turnPoints.length;
         if (noOfPathPoints == 0 || noOfPathPoints == 1 || noOfPathPoints == 2) {
             return;
         }
@@ -240,10 +216,10 @@ public class PathPolyline {
         final double distance = (zoomLevel - 11) * DEFAULT_DISTANCE_PX;
 
         for (int index = 0; index < noOfPathPoints - 2; index++) {
-            temp = this.map.convertLatLngToContainerPixel(this.points[index + 1]);
+            temp = this.map.convertLatLngToContainerPixel(this.turnPoints[index + 1]);
             distancedFromPoint = new TwoDPoint(temp.getX(), temp.getY());
 
-            temp = this.map.convertLatLngToContainerPixel(this.points[index]);
+            temp = this.map.convertLatLngToContainerPixel(this.turnPoints[index]);
             startPoint = new TwoDPoint(temp.getX(), temp.getY());
 
             distancedPoint = TwoDPoint.getDistancedPoint(distancedFromPoint, distance, startPoint);
@@ -259,10 +235,10 @@ public class PathPolyline {
         }
 
         for (int index = noOfPathPoints - 1; index > 1; index--) {
-            temp = this.map.convertLatLngToContainerPixel(this.points[index - 1]);
+            temp = this.map.convertLatLngToContainerPixel(this.turnPoints[index - 1]);
             distancedFromPoint = new TwoDPoint(temp.getX(), temp.getY());
 
-            temp = this.map.convertLatLngToContainerPixel(this.points[index]);
+            temp = this.map.convertLatLngToContainerPixel(this.turnPoints[index]);
             startPoint = new TwoDPoint(temp.getX(), temp.getY());
 
             distancedPoint = TwoDPoint.getDistancedPoint(distancedFromPoint, distance, startPoint);
@@ -323,10 +299,10 @@ public class PathPolyline {
         LatLng newPointPosition = null;
 
         for (; index < this.polyline.getVertexCount(); index++) {
-            oldPointPosition = this.points[index];
+            oldPointPosition = this.turnPoints[index];
             newPointPosition = this.polyline.getVertex(index);
 
-            if (equalsLatLng(oldPointPosition, newPointPosition) == false) {
+            if (equals(oldPointPosition, newPointPosition) == false) {
                 break;
             }
         }
@@ -343,8 +319,8 @@ public class PathPolyline {
         return this.map.convertContainerPixelToLatLng(Point.newInstance((int) point.getX(), (int) point.getY()));
     }
 
-    private LatLng convertToLatLng(final PositionDTO position) {
-        return LatLng.newInstance(position.latDeg, position.lngDeg);
+    private static PositionDTO convertToPositionDTO(final LatLng position) {
+        return new PositionDTO(position.getLatitude(), position.getLongitude());
     }
 
     private Polyline createPolyline(final TwoDPoint first, final TwoDPoint second, final String color, final int weight) {
@@ -356,15 +332,20 @@ public class PathPolyline {
         return new Polyline(points, color, weight);
     }
 
-    private static boolean equalsLatLng(final LatLng first, final LatLng second) {
+    private static boolean equals(final LatLng first, final LatLng second) {
         return (first.getLatitude() == second.getLatitude() && first.getLongitude() == second.getLongitude());
     }
 
-    private void computeTotalTimeOfPathPolyline() {
+    private void getTotalTime() {
+        final List<PositionDTO> turnPointsAsPositionDTO = new ArrayList<PositionDTO>();
 
-        final RequestPolarDiagramDataDTO requestData = this.createRequestPolarDiagramDataDTO();
+        for (final LatLng point : this.turnPoints) {
+            turnPointsAsPositionDTO.add(convertToPositionDTO(point));
+        }
 
-        this.simulatorService.getSpeedsFromPolarDiagram(requestData, new AsyncCallback<ReceivePolarDiagramDataDTO>() {
+        final RequestTotalTimeDTO requestData = new RequestTotalTimeDTO(this.boatClassID, this.allPoints, turnPointsAsPositionDTO);
+
+        this.simulatorService.getTotalTime(requestData, new AsyncCallback<ResponseTotalTimeDTO>() {
 
             @Override
             public void onFailure(final Throwable error) {
@@ -372,72 +353,55 @@ public class PathPolyline {
             }
 
             @Override
-            public void onSuccess(final ReceivePolarDiagramDataDTO receiveData) {
-                final String notificationMessage = receiveData.getNotificationMessage();
+            public void onSuccess(final ResponseTotalTimeDTO receiveData) {
+                final String notificationMessage = receiveData.notificationMessage;
                 if (notificationMessage != "" && notificationMessage.length() != 0 && warningAlreadyShown == false) {
                     errorReporter.reportNotification(notificationMessage);
                     warningAlreadyShown = true;
                 }
 
-                final List<SpeedBearingPositionDTO> speeds = receiveData.getSpeedsBearingsPositions();
-                final int noOfSpeeds = speeds.size();
-
-                SpeedBearingPositionDTO startSpeedAndPosition = null;
-                SpeedBearingPositionDTO endSpeedAndPosition = null;
-                LatLng startPoint = null;
-                LatLng endPoint = null;
-                double endSpeed = 0.0;
-                double totalTime = 0.0;
-
-                for (int index = 0; index < noOfSpeeds; index++) {
-
-                    if (index == noOfSpeeds - 1) {
-                        break;
-                    }
-
-                    startSpeedAndPosition = speeds.get(index);
-                    endSpeedAndPosition = speeds.get(index + 1);
-
-                    startPoint = convertToLatLng(startSpeedAndPosition.getPosition());
-                    endPoint = convertToLatLng(endSpeedAndPosition.getPosition());
-                    endSpeed = PathPolylineUtils.knotsToMetersPerSecond(endSpeedAndPosition.getSpeedWithBearing().speedInKnots);
-
-                    totalTime += PathPolylineUtils.getTime(startPoint, endPoint, endSpeed);
-                }
+                final long totalTime = receiveData.totalTimeSeconds;
 
                 System.err.println("==================================================");
-                System.err.println("total distance = " + PathPolylineUtils.getTotalDistanceMeters(points) + " meters");
-                System.err.println("step size = " + stepSizeMeters + " meters");
-                System.err.println("average wind speed = " + PathPolylineUtils.knotsToMetersPerSecond(averageWindSpeed.speedInKnots)
-                        + " meters/second, with bearing of " + averageWindSpeed.bearingInDegrees + " degrees");
-                System.err.println("total time = " + (long) totalTime + " seconds!");
+                System.err.println("total time (new way) = " + totalTime + " seconds!");
                 System.err.println("==================================================");
 
-
-                simulatorMap.addLegendOverlayForPathPolyline(((long) totalTime) * 1000);
+                simulatorMap.addLegendOverlayForPathPolyline(totalTime * 1000);
                 simulatorMap.redrawLegendCanvasOverlay();
             }
         });
     }
 
-    private SpeedWithBearingDTO getAverageWindSpeed() {
-        return PathPolylineUtils.getAverage(this.pathPoints);
+    private static final double FACTOR_DEG2RAD = 0.0174532925;
+    private static final double FACTOR_RAD2DEG = 57.2957795;
+    private static final double FACTOR_KN2MPS = 0.514444;
+    private static final double FACTOR_MPS2KN = 1.94384;
+
+    /**
+     * Converts degress to radians
+     */
+    public static double degreesToRadians(final double degrees) {
+        return (degrees * FACTOR_DEG2RAD);
     }
 
-    private RequestPolarDiagramDataDTO createRequestPolarDiagramDataDTO() {
+    /**
+     * Converts radians to degrees
+     */
+    public static double radiansToDegrees(final double radians) {
+        return (radians * FACTOR_RAD2DEG);
+    }
 
-        final List<PositionDTO> positions = new ArrayList<PositionDTO>();
+    /**
+     * Converts knots to meters per second
+     */
+    public static double knotsToMetersPerSecond(final double knots) {
+        return knots * FACTOR_KN2MPS;
+    }
 
-        if (USE_ONLY_TURN_POINTS) {
-            for (final LatLng point : this.points) {
-                positions.add(new PositionDTO(point.getLatitude(), point.getLongitude()));
-            }
-        } else {
-            for (final LatLng point : PathPolylineUtils.getIntermediatePoints(this.points, this.stepSizeMeters)) {
-                positions.add(new PositionDTO(point.getLatitude(), point.getLongitude()));
-            }
-        }
-
-        return new RequestPolarDiagramDataDTO(this.boatClassID, positions, this.averageWindSpeed);
+    /**
+     * Converts meters per second to knots
+     */
+    public static double metersPerSecondToKnots(final double metersPerSecond) {
+        return metersPerSecond * FACTOR_MPS2KN;
     }
 }
