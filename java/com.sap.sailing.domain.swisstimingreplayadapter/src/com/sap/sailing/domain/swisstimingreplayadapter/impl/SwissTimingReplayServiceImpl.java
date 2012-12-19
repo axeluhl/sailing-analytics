@@ -17,9 +17,12 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
+import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.swisstimingadapter.DomainFactory;
 import com.sap.sailing.domain.swisstimingreplayadapter.SwissTimingReplayListener;
 import com.sap.sailing.domain.swisstimingreplayadapter.SwissTimingReplayRace;
 import com.sap.sailing.domain.swisstimingreplayadapter.SwissTimingReplayService;
+import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 
 public class SwissTimingReplayServiceImpl implements SwissTimingReplayService {
 
@@ -108,17 +111,21 @@ public class SwissTimingReplayServiceImpl implements SwissTimingReplayService {
         return startTimeFormat;
     }
 
+    @Override
     public void loadRaceData(String link, SwissTimingReplayListener replayListener) {
         URL raceDataUrl;
         try {
             raceDataUrl = new URL("http://" + link);
             InputStream urlInputStream = raceDataUrl.openStream();
             new SwissTimingReplayParserImpl().readData(urlInputStream, replayListener);
-
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-
     }
 
+    @Override
+    public void loadRaceData(String link, DomainFactory domainFactory, Regatta regatta, TrackedRegattaRegistry trackedRegattaRegistry) {
+        SwissTimingReplayListener listener = new SwissTimingReplayToDomainAdapter(regatta, domainFactory, trackedRegattaRegistry);
+        loadRaceData(link, listener);
+    }
 }

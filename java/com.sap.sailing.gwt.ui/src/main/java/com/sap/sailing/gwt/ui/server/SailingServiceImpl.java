@@ -51,9 +51,11 @@ import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.base.impl.FleetImpl;
 import com.sap.sailing.domain.base.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.base.impl.SeriesImpl;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.CountryCode;
@@ -103,6 +105,7 @@ import com.sap.sailing.domain.swisstimingadapter.SwissTimingConfiguration;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
 import com.sap.sailing.domain.swisstimingadapter.persistence.SwissTimingAdapterPersistence;
 import com.sap.sailing.domain.swisstimingreplayadapter.SwissTimingReplayRace;
+import com.sap.sailing.domain.swisstimingreplayadapter.SwissTimingReplayService;
 import com.sap.sailing.domain.swisstimingreplayadapter.SwissTimingReplayServiceFactory;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFix;
@@ -2356,10 +2359,18 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public void replaySwissTimingRace(RegattaIdentifier regattaIdentifier, SwissTimingReplayRaceDTO replayRaceDTO,
             boolean trackWind, boolean correctWindByDeclination, boolean simulateWithStartTimeNow) {
-        Regatta regatta = getService().createRegatta(replayRaceDTO.rsc, replayRaceDTO.boat_class, null, false, null);
-//        SwissTimingReplayRaceTracker swissTimingReplayRaceTracker = new SwissTimingReplayRaceTracker();
-//        SwissTimingReplayService.loadRaceData(replayRaceDTO.link, swissTimingReplayRaceTracker);
-        
+        Regatta regatta;
+        if (regattaIdentifier == null) {
+            regatta = getService().createRegatta(replayRaceDTO.rsc, replayRaceDTO.boat_class,
+                    Collections.singletonList(new SeriesImpl("Default", /* isMedal */false, Collections
+                            .singletonList(new FleetImpl("Default")), /* race column names */new ArrayList<String>(),
+                            getService())), false,
+                    baseDomainFactory.createScoringScheme(ScoringSchemeType.LOW_POINT));
+        } else {
+            regatta = getService().getRegatta(regattaIdentifier);
+        }
+        SwissTimingReplayService replayService = SwissTimingReplayServiceFactory.INSTANCE.createSwissTimingReplayService();
+        replayService.loadRaceData(replayRaceDTO.link, getService().getSwissTimingDomainFactory(), regatta, getService());
     }
 
     @Override

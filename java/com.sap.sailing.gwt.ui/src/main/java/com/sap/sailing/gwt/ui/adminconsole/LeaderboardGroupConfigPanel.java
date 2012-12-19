@@ -673,7 +673,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel {
         List<String> filter = Arrays.asList(groupsFilterTextBox.getText().split("\\s"));
         groupsProvider.getList().clear();
         for (LeaderboardGroupDTO group : availableLeaderboardGroups) {
-            if (!textContainingStringsToCheck(filter, group.name)) {
+            if (textContainsStringsToCheck(filter, group.name)) {
                 groupsProvider.getList().add(group);
             }
         }
@@ -721,7 +721,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel {
         List<String> filter = Arrays.asList(leaderboardsFilterTextBox.getText().split("\\s"));
         leaderboardsProvider.getList().clear();
         for (StrippedLeaderboardDTO leaderboard : availableLeaderboards) {
-            if (!textContainingStringsToCheck(filter, leaderboard.name) && !selectedGroup.leaderboards.contains(leaderboard)) {
+            if (textContainsStringsToCheck(filter, leaderboard.name) && !selectedGroup.leaderboards.contains(leaderboard)) {
                 leaderboardsProvider.getList().add(leaderboard);
             } else {
                 leaderboardsSelectionModel.setSelected(leaderboard, false);

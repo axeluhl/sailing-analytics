@@ -104,7 +104,7 @@ public class DomainFactoryImpl implements DomainFactory {
         }
         if (result == null) {
             result = new RegattaImpl(raceID, getOrCreateBoatClassFromRaceID(raceID), trackedRegattaRegistry,
-                    com.sap.sailing.domain.base.DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT));
+                    getBaseDomainFactory().createScoringScheme(ScoringSchemeType.LOW_POINT));
             logger.info("Created regatta "+result.getName()+" ("+result.hashCode()+")");
             raceIDToRegattaCache.put(raceID, result);
         }

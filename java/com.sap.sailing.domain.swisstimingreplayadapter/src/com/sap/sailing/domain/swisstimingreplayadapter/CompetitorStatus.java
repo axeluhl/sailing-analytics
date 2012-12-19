@@ -16,10 +16,17 @@ public enum CompetitorStatus {
     RAF,
     RGD,
     SCP,
-    ZFP;
+    ZFP,
+    Unknown;
     
     public static CompetitorStatus byCode(byte code) {
-        return values()[code];
+        final CompetitorStatus result;
+        if (code >= 0 && values().length >= code+1) {
+            result = values()[code];
+        } else {
+            result = Unknown;
+        }
+        return result;
     }
     
 }
