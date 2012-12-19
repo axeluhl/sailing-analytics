@@ -37,6 +37,14 @@ public class SailingSimulatorImpl implements SailingSimulator {
     private SimulationParameters simulationParameters;
     private Path racecourse;
 
+    private static final String raceURL = "http://germanmaster.traclive.dk/events/event_20110929_Internatio/clientparams.php?event=event_20110929_Internatio&race=d1f521fa-ec52-11e0-a523-406186cbf87c";
+    // private static final String raceURL =
+    // "http://germanmaster.traclive.dk/events/event_20110929_Internatio/clientparams.php?event=event_20110929_Internatio&race=eb06795a-ec52-11e0-a523-406186cbf87c";
+    // private static final String raceURL =
+    // "http://germanmaster.traclive.dk/events/event_20120615_KielerWoch/clientparams.php?event=event_20120615_KielerWoch&race=0b5969cc-b789-11e1-a845-406186cbf87c";
+    // private static final String raceURL =
+    // "http://germanmaster.traclive.dk/events/event_20110929_Internatio/clientparams.php?event=event_20110929_Internatio&race=6bb0829e-ec44-11e0-a523-406186cbf87c";
+
     private static Logger logger = Logger.getLogger("com.sap.sailing");
 
     public SailingSimulatorImpl(final SimulationParameters params) {
@@ -70,13 +78,6 @@ public class SailingSimulatorImpl implements SailingSimulator {
             //
             // load examplary GPS-path
             //
-            final String raceURL = "http://germanmaster.traclive.dk/events/event_20110929_Internatio/clientparams.php?event=event_20110929_Internatio&race=d1f521fa-ec52-11e0-a523-406186cbf87c";
-            // String raceURL =
-            // "http://germanmaster.traclive.dk/events/event_20110929_Internatio/clientparams.php?event=event_20110929_Internatio&race=eb06795a-ec52-11e0-a523-406186cbf87c";
-            // String raceURL =
-            // "http://germanmaster.traclive.dk/events/event_20120615_KielerWoch/clientparams.php?event=event_20120615_KielerWoch&race=0b5969cc-b789-11e1-a845-406186cbf87c";
-            // String raceURL =
-            // "http://germanmaster.traclive.dk/events/event_20110929_Internatio/clientparams.php?event=event_20110929_Internatio&race=6bb0829e-ec44-11e0-a523-406186cbf87c";
             final PathGeneratorTracTrac genTrac = new PathGeneratorTracTrac(this.simulationParameters);
 
             // proxy configuration
@@ -396,5 +397,26 @@ public class SailingSimulatorImpl implements SailingSimulator {
         }
 
         return result;
+    }
+
+    @Override
+    public Path getGPSTrack() {
+
+        Path path = readFromResourcesFile("resources/7#GPS Track.dat");
+        if (path == null) {
+            System.err.println("[ERROR][SailingSimulatorImpl][readPathsFromResources] Cannot de-serialize path from resources/7#GPS Track.dat");
+
+            final PathGeneratorTracTrac genTrac = new PathGeneratorTracTrac(this.simulationParameters);
+
+            genTrac.setEvaluationParameters(raceURL, "tcp://10.18.22.156:1520", "tcp://10.18.22.156:1521", 4.5); // new
+
+            // no-proxy configuration
+            // genTrac.setEvaluationParameters(raceURL, "tcp://germanmaster.traclive.dk:4400",
+            // "tcp://germanmaster.traclive.dk:4401", 4.5);
+
+            path = genTrac.getPath();
+        }
+
+        return path;
     }
 }

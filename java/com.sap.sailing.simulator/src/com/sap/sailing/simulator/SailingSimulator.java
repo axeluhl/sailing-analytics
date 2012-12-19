@@ -8,6 +8,8 @@ public interface SailingSimulator {
 
     SimulationParameters getSimulationParameters();
 
+    Path getGPSTrack();
+
     Map<String, Path> getAllPaths();
 
     Map<String, Path> getAllPathsEvenTimed(long millisecondsStep);
