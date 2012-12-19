@@ -101,7 +101,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
 
             final PathDTO[] paths = result.getPaths();
             logger.info("Number of Paths : " + paths.length);
-            final long startTime = paths[0].getPoints().get(0).getTimepoint();
+            final long startTime = paths[0].getPoints().get(0).timepoint;
             long maxDurationTime = 0;
 
             if (mode == SailingSimulatorUtil.measured) {

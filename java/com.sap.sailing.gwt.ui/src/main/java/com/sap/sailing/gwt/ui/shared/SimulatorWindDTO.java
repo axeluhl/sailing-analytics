@@ -3,13 +3,18 @@ package com.sap.sailing.gwt.ui.shared;
 import com.google.gwt.user.client.rpc.IsSerializable;
 
 public class SimulatorWindDTO implements IsSerializable {
-    private Boolean isTurn;
-    private Double trueWindSpeedInKnots;
-    private Double trueWindBearingDeg;
-    private PositionDTO position;
-    private Long timepoint;
+    public Boolean isTurn;
+    public Double trueWindSpeedInKnots;
+    public Double trueWindBearingDeg;
+    public PositionDTO position;
+    public Long timepoint;
 
     public SimulatorWindDTO() {
+        this.isTurn = false;
+        this.trueWindBearingDeg = 0.0;
+        this.trueWindSpeedInKnots = 0.0;
+        this.position = null;
+        this.timepoint = 0L;
     }
 
     public SimulatorWindDTO(final PositionDTO position, final double windSpeedKn, final double windBearingDeg, final long timepointMsec) {
@@ -73,45 +78,5 @@ public class SimulatorWindDTO implements IsSerializable {
             }
             return false;
         }
-    }
-
-    public Boolean isTurn() {
-        return this.isTurn;
-    }
-
-    public void setTurn(final Boolean isTurn) {
-        this.isTurn = isTurn;
-    }
-
-    public Double getTrueWindSpeedInKnots() {
-        return this.trueWindSpeedInKnots;
-    }
-
-    public void setTrueWindSpeedInKnots(final Double trueWindSpeedInKnots) {
-        this.trueWindSpeedInKnots = trueWindSpeedInKnots;
-    }
-
-    public Double getTrueWindBearingDeg() {
-        return this.trueWindBearingDeg;
-    }
-
-    public void setTrueWindBearingDeg(final Double trueWindBearingDeg) {
-        this.trueWindBearingDeg = trueWindBearingDeg;
-    }
-
-    public PositionDTO getPosition() {
-        return this.position;
-    }
-
-    public void setPosition(final PositionDTO position) {
-        this.position = position;
-    }
-
-    public Long getTimepoint() {
-        return this.timepoint;
-    }
-
-    public void setTimepoint(final Long timepoint) {
-        this.timepoint = timepoint;
     }
 }

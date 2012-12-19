@@ -74,8 +74,8 @@ public class WindFieldMapMouseMoveHandler implements MapMouseMoveHandler {
             context2d.fillRect(x + 3, y + 3, ToolTip.toolRectW - 6, ToolTip.toolRectH - 6);
 
             context2d.setFillStyle("Blue");
-            final String speedStr = NumberFormat.getFormat("#.00").format(windDTO.getTrueWindSpeedInKnots());
-            final String bearingStr = NumberFormat.getFormat("#.00").format(windDTO.getTrueWindBearingDeg());
+            final String speedStr = NumberFormat.getFormat("#.00").format(windDTO.trueWindSpeedInKnots);
+            final String bearingStr = NumberFormat.getFormat("#.00").format(windDTO.trueWindBearingDeg);
             final String ttMsg = speedStr + " kn " + bearingStr + "°";
             context2d.fillText(ttMsg, x+10,y+15,60);
         }

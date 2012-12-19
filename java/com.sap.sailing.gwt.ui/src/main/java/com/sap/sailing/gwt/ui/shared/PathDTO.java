@@ -29,7 +29,7 @@ public class PathDTO extends NamedDTO implements IsSerializable {
             return 0;
         }
 
-        return points.get(points.size() - 1).getTimepoint() - points.get(0).getTimepoint();
+        return points.get(points.size() - 1).timepoint - points.get(0).timepoint;
     }
 
 }

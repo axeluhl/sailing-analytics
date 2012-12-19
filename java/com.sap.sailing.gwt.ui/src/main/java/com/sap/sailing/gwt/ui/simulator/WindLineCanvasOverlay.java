@@ -13,7 +13,6 @@ import java.util.SortedMap;
 import java.util.logging.Logger;
 
 import com.google.gwt.canvas.dom.client.Context2d;
-import com.google.gwt.canvas.dom.client.Context2d.Composite;
 import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.geom.LatLng;
 import com.google.gwt.maps.client.geom.Point;
@@ -38,7 +37,7 @@ public class WindLineCanvasOverlay extends FullCanvasOverlay implements TimeList
   
     private static Logger logger = Logger.getLogger(WindLineCanvasOverlay.class.getName());
 
-    public WindLineCanvasOverlay(Timer timer) {
+    public WindLineCanvasOverlay(final Timer timer) {
         super();
         this.timer = timer;
         windLinesDTO = null;
@@ -47,23 +46,23 @@ public class WindLineCanvasOverlay extends FullCanvasOverlay implements TimeList
     }
 
     @Override
-    public void timeChanged(Date date) {
-        Map<PositionDTO, SortedMap<Long, List<PositionDTO>>> windLinesMap = windLinesDTO.getWindLinesMap();
+    public void timeChanged(final Date date) {
+        final Map<PositionDTO, SortedMap<Long, List<PositionDTO>>> windLinesMap = windLinesDTO.getWindLinesMap();
 
         if (windLinesMap == null) {
             return;
         }
          clear();
         
-        Context2d context2d = canvas.getContext2d();
+        final Context2d context2d = canvas.getContext2d();
         context2d.setGlobalAlpha(0.2);
         //context2d.setGlobalCompositeOperation(Composite.LIGHTER) ;
         
         int index = 0;
-        for (Entry<PositionDTO, SortedMap<Long, List<PositionDTO>>> entry : windLinesMap.entrySet()) {
+        for (final Entry<PositionDTO, SortedMap<Long, List<PositionDTO>>> entry : windLinesMap.entrySet()) {
             List<PositionDTO> positionDTOToDraw = new ArrayList<PositionDTO>();
 
-            SortedMap<Long, List<PositionDTO>> headMap = (entry.getValue().headMap(date.getTime() + 1));
+            final SortedMap<Long, List<PositionDTO>> headMap = (entry.getValue().headMap(date.getTime() + 1));
 
             if (!headMap.isEmpty()) {
                 positionDTOToDraw = headMap.get(headMap.lastKey());
@@ -77,19 +76,19 @@ public class WindLineCanvasOverlay extends FullCanvasOverlay implements TimeList
 
     @Override
     public int stop() {
-        Map<PositionDTO, SortedMap<Long, List<PositionDTO>>> positionTimePointPositionDTOMap = windLinesDTO
+        final Map<PositionDTO, SortedMap<Long, List<PositionDTO>>> positionTimePointPositionDTOMap = windLinesDTO
                 .getWindLinesMap();
 
         if (!this.isVisible() || positionTimePointPositionDTOMap == null || timer == null
                 || positionTimePointPositionDTOMap.isEmpty()) {
             return 0;
         }
-        Set<PositionDTO> positions = positionTimePointPositionDTOMap.keySet();
+        final Set<PositionDTO> positions = positionTimePointPositionDTOMap.keySet();
         if (positions != null && !positions.isEmpty()) {
             /**
              * Just check for one position as it would be the same for all the other positions
              */
-            SortedMap<Long, List<PositionDTO>> timePointPositionDTOMap = positionTimePointPositionDTOMap.get(positions
+            final SortedMap<Long, List<PositionDTO>> timePointPositionDTOMap = positionTimePointPositionDTOMap.get(positions
                     .iterator().next());
             if (timePointPositionDTOMap.lastKey() < timer.getTime().getTime()) {
                 return 0;
@@ -110,12 +109,12 @@ public class WindLineCanvasOverlay extends FullCanvasOverlay implements TimeList
         return windLinesDTO;
     }
 
-    public void setWindLinesDTO(WindLinesDTO windLinesDTO) {
+    public void setWindLinesDTO(final WindLinesDTO windLinesDTO) {
         this.windLinesDTO = windLinesDTO;
     }
 
     @Override
-    protected void initialize(MapWidget map) {
+    protected void initialize(final MapWidget map) {
         super.initialize(map);
         if (timer != null) {
             this.timer.addTimeListener(this);
@@ -133,7 +132,7 @@ public class WindLineCanvasOverlay extends FullCanvasOverlay implements TimeList
     }
 
     @Override
-    protected void redraw(boolean force) {
+    protected void redraw(final boolean force) {
         super.redraw(force);
         if (this.windLinesDTO != null) {
             clear();
@@ -154,28 +153,28 @@ public class WindLineCanvasOverlay extends FullCanvasOverlay implements TimeList
         }
     }
 
-    protected void drawWindLine(final List<PositionDTO> positionDTOList, int index) {
+    protected void drawWindLine(final List<PositionDTO> positionDTOList, final int index) {
 
         if (positionDTOList == null) {
             return;
         }
-        int numPoints = positionDTOList.size();
+        final int numPoints = positionDTOList.size();
         if (numPoints < 1) {
             return;
         }
 
-        String title = "Wind line at " + numPoints + " points.";
+        final String title = "Wind line at " + numPoints + " points.";
         getCanvas().setTitle(title);
 
-        Iterator<PositionDTO> positionDTOIter = positionDTOList.iterator();
+        final Iterator<PositionDTO> positionDTOIter = positionDTOList.iterator();
         PositionDTO prevPositionDTO = null;
         while (positionDTOIter.hasNext()) {
-            PositionDTO positionDTO = positionDTOIter.next();
+            final PositionDTO positionDTO = positionDTOIter.next();
             if (prevPositionDTO != null) {
                 if (checkPointInGrid(prevPositionDTO)  && checkPointInGrid(positionDTO) ) {
                     drawLine(prevPositionDTO, positionDTO);
                 } else { 
-                    PositionDTO pointOnBoundary = getPointOnBoundary(prevPositionDTO, positionDTO);
+                    final PositionDTO pointOnBoundary = getPointOnBoundary(prevPositionDTO, positionDTO);
                     if (pointOnBoundary != null) {
                         drawLine(prevPositionDTO, pointOnBoundary);
                     }
@@ -208,30 +207,30 @@ public class WindLineCanvasOverlay extends FullCanvasOverlay implements TimeList
         */
     }
 
-    private PositionDTO getPointOnBoundary(PositionDTO p1, PositionDTO p2) {
+    private PositionDTO getPointOnBoundary(final PositionDTO p1, final PositionDTO p2) {
        
         if (boundary != null) {
 
-            LineSegment line = new LineSegment(p1.latDeg, p1.lngDeg, p2.latDeg, p2.lngDeg);
+            final LineSegment line = new LineSegment(p1.latDeg, p1.lngDeg, p2.latDeg, p2.lngDeg);
 
             com.sap.sailing.gwt.ui.simulator.util.LineSegment.Point p = line.intersect(boundary[0]);
             if (p != null) {
-                PositionDTO pDTO = new PositionDTO(p.getX(), p.getY());
+                final PositionDTO pDTO = new PositionDTO(p.getX(), p.getY());
                 return pDTO;
             }
             p = line.intersect(boundary[2]);
             if (p != null) {
-                PositionDTO pDTO = new PositionDTO(p.getX(), p.getY());
+                final PositionDTO pDTO = new PositionDTO(p.getX(), p.getY());
                 return pDTO;
             }
             p = line.intersect(boundary[1]);
             if (p != null) {
-                PositionDTO pDTO = new PositionDTO(p.getX(), p.getY());
+                final PositionDTO pDTO = new PositionDTO(p.getX(), p.getY());
                 return pDTO;
             }
             p = line.intersect(boundary[3]);
             if (p != null) {
-                PositionDTO pDTO = new PositionDTO(p.getX(), p.getY());
+                final PositionDTO pDTO = new PositionDTO(p.getX(), p.getY());
                 return pDTO;
             }
 
@@ -241,26 +240,26 @@ public class WindLineCanvasOverlay extends FullCanvasOverlay implements TimeList
 
     }
 
-    private void drawLine(PositionDTO p1, PositionDTO p2) {
+    private void drawLine(final PositionDTO p1, final PositionDTO p2) {
 
-        double weight = 1.0;
+        final double weight = 1.0;
 
         LatLng positionLatLng = LatLng.newInstance(p1.latDeg, p1.lngDeg);
         Point canvasPositionInPx = getMap().convertLatLngToDivPixel(positionLatLng);
 
-        int x1 = canvasPositionInPx.getX() - this.getWidgetPosLeft();
-        int y1 = canvasPositionInPx.getY() - this.getWidgetPosTop();
+        final int x1 = canvasPositionInPx.getX() - this.getWidgetPosLeft();
+        final int y1 = canvasPositionInPx.getY() - this.getWidgetPosTop();
 
         positionLatLng = LatLng.newInstance(p2.latDeg, p2.lngDeg);
         canvasPositionInPx = getMap().convertLatLngToDivPixel(positionLatLng);
-        int x2 = canvasPositionInPx.getX() - this.getWidgetPosLeft();
-        int y2 = canvasPositionInPx.getY() - this.getWidgetPosTop();
+        final int x2 = canvasPositionInPx.getX() - this.getWidgetPosLeft();
+        final int y2 = canvasPositionInPx.getY() - this.getWidgetPosTop();
 
         drawLine(x1, y1, x2, y2, weight, lineColor);
 
     }
 
-    public void setGridCorners(PositionDTO[] gridCorners) {
+    public void setGridCorners(final PositionDTO[] gridCorners) {
         this.corners = gridCorners;
         if (corners != null && corners.length == 4) {
             this.boundary = new LineSegment[4];
@@ -276,34 +275,35 @@ public class WindLineCanvasOverlay extends FullCanvasOverlay implements TimeList
 
     }
 
-    private Point getPointInDivPixel(PositionDTO p) {
-        LatLng pLatLng = LatLng.newInstance(p.latDeg, p.lngDeg);
-        Point canvasPositionInPx = getMap().convertLatLngToDivPixel(pLatLng);
-        int x = canvasPositionInPx.getX();
-        int y = canvasPositionInPx.getY();
+    private Point getPointInDivPixel(final PositionDTO p) {
+        final LatLng pLatLng = LatLng.newInstance(p.latDeg, p.lngDeg);
+        final Point canvasPositionInPx = getMap().convertLatLngToDivPixel(pLatLng);
+        final int x = canvasPositionInPx.getX();
+        final int y = canvasPositionInPx.getY();
         return Point.newInstance(x, y);
     }
 
  
     
+    @Override
     protected void setCanvasSettings() {
         if (corners != null && corners.length == 4) {
 
-            Point corner0 = getPointInDivPixel(corners[0]);
-            Point corner1 = getPointInDivPixel(corners[1]);
-            Point corner3 = getPointInDivPixel(corners[3]);
+            final Point corner0 = getPointInDivPixel(corners[0]);
+            final Point corner1 = getPointInDivPixel(corners[1]);
+            final Point corner3 = getPointInDivPixel(corners[3]);
 
-            int canvasWidth = (int) Math.sqrt(Math.pow(corner0.getX() - corner1.getX(), 2)
+            final int canvasWidth = (int) Math.sqrt(Math.pow(corner0.getX() - corner1.getX(), 2)
                     + Math.pow(corner0.getY() - corner1.getY(), 2));
-            int canvasHeight = (int) Math.sqrt(Math.pow(corner3.getX() - corner0.getX(), 2)
+            final int canvasHeight = (int) Math.sqrt(Math.pow(corner3.getX() - corner0.getX(), 2)
                     + Math.pow(corner3.getY() - corner0.getY(), 2));
 
             
-            int canvasRadius = (int) Math.sqrt(canvasWidth * canvasWidth / 4 + canvasHeight * canvasHeight / 4);
+            final int canvasRadius = (int) Math.sqrt(canvasWidth * canvasWidth / 4 + canvasHeight * canvasHeight / 4);
             canvas.setSize("" + 2 * canvasRadius + "px", "" + 2 * canvasRadius + "px");
             canvas.setCoordinateSpaceWidth(2 * canvasRadius); canvas.setCoordinateSpaceHeight(2 * canvasRadius);
              
-            Point anchorPoint = getAnchorPoint();
+            final Point anchorPoint = getAnchorPoint();
 
             setWidgetPosLeft(anchorPoint.getX());
             setWidgetPosTop(anchorPoint.getY());
@@ -320,10 +320,10 @@ public class WindLineCanvasOverlay extends FullCanvasOverlay implements TimeList
     private Point getAnchorPoint() {
 
         if (corners != null) {
-            List<Integer> xlist = new LinkedList<Integer>();
-            List<Integer> ylist = new LinkedList<Integer>();
+            final List<Integer> xlist = new LinkedList<Integer>();
+            final List<Integer> ylist = new LinkedList<Integer>();
             for (int i = 0; i < corners.length; ++i) {
-                Point corner = getPointInDivPixel(corners[i]);
+                final Point corner = getPointInDivPixel(corners[i]);
                 xlist.add(corner.getX());
                 ylist.add(corner.getY());
             }
@@ -335,7 +335,7 @@ public class WindLineCanvasOverlay extends FullCanvasOverlay implements TimeList
 
     private PositionDTO getCenter() {
         if (corners != null && corners.length == 4) {
-            PositionDTO center = new PositionDTO();
+            final PositionDTO center = new PositionDTO();
             center.latDeg = (corners[0].latDeg + corners[1].latDeg + corners[2].latDeg + corners[3].latDeg) / 4.0;
             center.lngDeg = (corners[0].lngDeg + corners[1].lngDeg + corners[2].lngDeg + corners[3].lngDeg) / 4.0;
             return center;
@@ -343,9 +343,9 @@ public class WindLineCanvasOverlay extends FullCanvasOverlay implements TimeList
         return null;
     }
 
-    private boolean checkPointInGrid(PositionDTO point) {
+    private boolean checkPointInGrid(final PositionDTO point) {
         if (center != null ) {
-            PositionDTO pointOnBoundary = getPointOnBoundary(center,point);
+            final PositionDTO pointOnBoundary = getPointOnBoundary(center,point);
             if (pointOnBoundary == null) { // Line through center and the point does not intersect
                 return true;
             } else {

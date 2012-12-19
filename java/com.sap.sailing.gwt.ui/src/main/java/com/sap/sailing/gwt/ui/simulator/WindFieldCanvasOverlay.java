@@ -83,10 +83,10 @@ public class WindFieldCanvasOverlay extends FullCanvasOverlay implements TimeLis
         timePointWindDTOMap.clear();
         if (wl != null) {
             for(final SimulatorWindDTO w : wl.getMatrix()) {
-                if (!timePointWindDTOMap.containsKey(w.getTimepoint())) {
-                    timePointWindDTOMap.put(w.getTimepoint(), new LinkedList<SimulatorWindDTO>());
+                if (!timePointWindDTOMap.containsKey(w.timepoint)) {
+                    timePointWindDTOMap.put(w.timepoint, new LinkedList<SimulatorWindDTO>());
                 }
-                timePointWindDTOMap.get(w.getTimepoint()).add(w);
+                timePointWindDTOMap.get(w.timepoint).add(w);
             }
         }
 
@@ -153,8 +153,8 @@ public class WindFieldCanvasOverlay extends FullCanvasOverlay implements TimeLis
 
     protected void drawScaledArrow(final SimulatorWindDTO windDTO, final double angle, final int index, final boolean drawHead) {
 
-        final double aWidth = Math.max(1., (PathPolyline.knotsToMetersPerSecond(windDTO.getTrueWindSpeedInKnots()) / 2.));
-        final double aLength = Math.max(10., (4. * PathPolyline.knotsToMetersPerSecond(windDTO.getTrueWindSpeedInKnots())));
+        final double aWidth = Math.max(1., (PathPolyline.knotsToMetersPerSecond(windDTO.trueWindSpeedInKnots) / 2.));
+        final double aLength = Math.max(10., (4. * PathPolyline.knotsToMetersPerSecond(windDTO.trueWindSpeedInKnots)));
         //System.out.println("arrow speed: "+windDTO.trueWindSpeedInMetersPerSecond+" angle:"+angle+" aWidth: "+aWidth+" aLength: "+aLength);
         drawArrow(windDTO, angle, aLength, aWidth, index, drawHead);
 
@@ -172,7 +172,7 @@ public class WindFieldCanvasOverlay extends FullCanvasOverlay implements TimeLis
             while (windDTOIter.hasNext()) {
                 final SimulatorWindDTO windDTO = windDTOIter.next();
                 //System.out.println("wind angle: "+windDTO.trueWindBearingDeg);
-                final DegreeBearingImpl dbi = new DegreeBearingImpl(windDTO.getTrueWindBearingDeg());
+                final DegreeBearingImpl dbi = new DegreeBearingImpl(windDTO.trueWindBearingDeg);
                 drawScaledArrow(windDTO, dbi.getRadians(), ++index, drawHead);
             }
             final String title = "Wind Field at " + windDTOList.size() + " points.";
@@ -181,12 +181,12 @@ public class WindFieldCanvasOverlay extends FullCanvasOverlay implements TimeLis
     }
 
     protected void drawArrow(final SimulatorWindDTO windDTO, final double angle, final double length, final double weight, final int index, final boolean drawHead) {
-        final String msg = "Wind @ P" + index + ": time : " + windDTO.getTimepoint() + " speed: " + windDTO.getTrueWindSpeedInKnots()
+        final String msg = "Wind @ P" + index + ": time : " + windDTO.timepoint + " speed: " + windDTO.trueWindSpeedInKnots
                 + "knots "
-                + windDTO.getTrueWindBearingDeg();
+                + windDTO.trueWindBearingDeg;
         logger.fine(msg);
 
-        final PositionDTO position = windDTO.getPosition();
+        final PositionDTO position = windDTO.position;
 
         final LatLng positionLatLng = LatLng.newInstance(position.latDeg, position.lngDeg);
         final Point canvasPositionInPx = getMap().convertLatLngToDivPixel(positionLatLng);

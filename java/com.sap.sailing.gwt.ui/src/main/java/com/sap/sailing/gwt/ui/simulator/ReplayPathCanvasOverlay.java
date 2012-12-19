@@ -36,7 +36,7 @@ public class ReplayPathCanvasOverlay extends PathCanvasOverlay {
 
         windDTOToDraw = new ArrayList<SimulatorWindDTO>();
         for (final SimulatorWindDTO windDTO : wl.getMatrix()) {
-            if (windDTO.getTimepoint() <= date.getTime()) {
+            if (windDTO.timepoint <= date.getTime()) {
                 windDTOToDraw.add(windDTO);
             }
         }
