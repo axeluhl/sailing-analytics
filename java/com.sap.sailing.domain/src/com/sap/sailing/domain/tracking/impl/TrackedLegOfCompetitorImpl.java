@@ -623,8 +623,6 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
             Speed projectedSpeedAfterManeuver = projectSpeedToMiddleIfUpwindDownwindElseToLegDirection(
                     timePointAfterManeuver, middleManeuverAngleIfUpwindOrDownwindLeg, speedAfterManeuver, positionAtBase);
             double projectedSpeedAfterManeuverInKnots = projectedSpeedAfterManeuver.getKnots();
-            // now determine the fixes along which to accumulate the maneuver loss:
-
             TimePoint previousTimePoint = timePointWhenSpeedStartedToDrop;
             result = Distance.NULL;
             for (GPSFixMoving fix : fixes) {
