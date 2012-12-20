@@ -270,7 +270,7 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter {
         currentCourseDefinition.set(index, controlPoint);
         if (windSpeedInKnots != -1 && trueWindDirectionInDegrees != -1) {
             SpeedWithBearing windSpeedWithBearing = new KnotSpeedWithBearingImpl(windSpeedInKnots,
-                    new DegreeBearingImpl(trueWindDirectionInDegrees));
+                    new DegreeBearingImpl(trueWindDirectionInDegrees).reverse());
             windAtControlPoint.put(controlPoint, windSpeedWithBearing);
         } else {
             windAtControlPoint.remove(controlPoint);
