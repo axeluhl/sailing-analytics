@@ -37,6 +37,20 @@ public class SailingSimulatorImpl implements SailingSimulator {
     private SimulationParameters simulationParameters;
     private Path racecourse;
 
+    private static final double windScale = 4.5;
+
+    // proxy configuration
+    private static final String liveURI = "tcp://10.18.22.156:1520";
+
+    // no-proxy configuration
+    // private static final String liveURI = "tcp://germanmaster.traclive.dk:4400";
+
+    // proxy configuration
+    private static final String storedURI = "tcp://10.18.22.156:1521";
+
+    // no-proxy configuration
+    // private static final String storedURI = "tcp://germanmaster.traclive.dk:4401";
+
     private static final String raceURL = "http://germanmaster.traclive.dk/events/event_20110929_Internatio/clientparams.php?event=event_20110929_Internatio&race=d1f521fa-ec52-11e0-a523-406186cbf87c";
     // private static final String raceURL =
     // "http://germanmaster.traclive.dk/events/event_20110929_Internatio/clientparams.php?event=event_20110929_Internatio&race=eb06795a-ec52-11e0-a523-406186cbf87c";
@@ -75,16 +89,8 @@ public class SailingSimulatorImpl implements SailingSimulator {
                 return allPaths;
             }
 
-            //
-            // load examplary GPS-path
-            //
             final PathGeneratorTracTrac genTrac = new PathGeneratorTracTrac(this.simulationParameters);
-
-            // proxy configuration
-            genTrac.setEvaluationParameters(raceURL, "tcp://10.18.22.156:1520", "tcp://10.18.22.156:1521", 4.5); // new
-
-            // no-proxy configuration
-            //genTrac.setEvaluationParameters(raceURL, "tcp://germanmaster.traclive.dk:4400", "tcp://germanmaster.traclive.dk:4401", 4.5);
+            genTrac.setEvaluationParameters(raceURL, liveURI, storedURI, windScale);
 
             gpsPath = genTrac.getPath();
             gpsPathPoly = genTrac.getPathPolyline(new MeterDistance(4.88));
@@ -407,13 +413,7 @@ public class SailingSimulatorImpl implements SailingSimulator {
             System.err.println("[ERROR][SailingSimulatorImpl][readPathsFromResources] Cannot de-serialize path from resources/7#GPS Track.dat");
 
             final PathGeneratorTracTrac genTrac = new PathGeneratorTracTrac(this.simulationParameters);
-
-            genTrac.setEvaluationParameters(raceURL, "tcp://10.18.22.156:1520", "tcp://10.18.22.156:1521", 4.5); // new
-
-            // no-proxy configuration
-            // genTrac.setEvaluationParameters(raceURL, "tcp://germanmaster.traclive.dk:4400",
-            // "tcp://germanmaster.traclive.dk:4401", 4.5);
-
+            genTrac.setEvaluationParameters(raceURL, liveURI, storedURI, windScale);
             path = genTrac.getPath();
         }
 
