@@ -611,35 +611,19 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
             SpeedWithBearing speedAfterManeuver = track.getEstimatedSpeed(timePointWhenSpeedLevelledOffAfterManeuver);
             // For upwind/downwind legs, find the mean course between inbound and outbound course and project actual and
             // extrapolated positions onto it:
-            Bearing middleManeuverAngleIfUpwindOrDownwindLeg = null;
-            if (getTrackedLeg().isUpOrDownwindLeg(timePointWhenSpeedStartedToDrop)) {
-                Bearing middle = speedWhenSpeedStartedToDrop.getBearing().middle(speedAfterManeuver.getBearing());
-                middleManeuverAngleIfUpwindOrDownwindLeg = middle;
-            }
-            Position positionAtBase = track.getEstimatedPosition(timePointWhenSpeedStartedToDrop, /* extrapolate */false);
-            Speed projectedSpeedWhenSpeedStartedToDrop = projectSpeedToMiddleIfUpwindDownwindElseToLegDirection(
-                    timePointWhenSpeedStartedToDrop, middleManeuverAngleIfUpwindOrDownwindLeg, speedWhenSpeedStartedToDrop, positionAtBase);
-            double projectedSpeedBeforeManeuverInKnots = projectedSpeedWhenSpeedStartedToDrop.getKnots();
-            Speed projectedSpeedAfterManeuver = projectSpeedToMiddleIfUpwindDownwindElseToLegDirection(
-                    timePointAfterManeuver, middleManeuverAngleIfUpwindOrDownwindLeg, speedAfterManeuver, positionAtBase);
-            double projectedSpeedAfterManeuverInKnots = projectedSpeedAfterManeuver.getKnots();
-            TimePoint previousTimePoint = timePointWhenSpeedStartedToDrop;
-            result = Distance.NULL;
-            for (GPSFixMoving fix : fixes) {
-                // project onto average maneuver course for upwind/downwind and on leg direction otherwise
-                final SpeedWithBearing fixSpeed = track.getEstimatedSpeed(fix.getTimePoint());
-                final Position fixPosition = fix.getPosition();
-                Speed projectedSpeedAtFix = projectSpeedToMiddleIfUpwindDownwindElseToLegDirection(
-                        timePointBeforeManeuver, middleManeuverAngleIfUpwindOrDownwindLeg, fixSpeed, fixPosition);
-                final double estimatedSpeedWithoutManeuverInKnots = (double) projectedSpeedBeforeManeuverInKnots
-                        + (double) (fix.getTimePoint().asMillis() - timePointWhenSpeedStartedToDrop.asMillis())
-                        / (double) (timePointWhenSpeedLevelledOffAfterManeuver.asMillis() - timePointWhenSpeedStartedToDrop.asMillis())
-                        * (double) (projectedSpeedAfterManeuverInKnots - projectedSpeedBeforeManeuverInKnots);
-                Speed speedDifference = new KnotSpeedImpl(estimatedSpeedWithoutManeuverInKnots
-                        - projectedSpeedAtFix.getKnots());
-                result = result.add(speedDifference.travel(previousTimePoint, fix.getTimePoint()));
-                previousTimePoint = fix.getTimePoint();
-            }
+            Bearing middleManeuverAngle = speedWhenSpeedStartedToDrop.getBearing().middle(speedAfterManeuver.getBearing());
+            // extrapolate maximum speed before maneuver to time point of maximum speed after maneuver and project resulting position
+            // onto the average maneuver course; compare to the projected position actually reached at the time point of maximum speed after
+            // maneuver:
+            Position positionWhenSpeedStartedToDrop = track.getEstimatedPosition(timePointWhenSpeedStartedToDrop, /* extrapolate */ false);
+            Position extrapolatedPositionAtTimePointOfMaxSpeedAfterManeuver = 
+                    speedWhenSpeedStartedToDrop.travelTo(positionWhenSpeedStartedToDrop, timePointWhenSpeedStartedToDrop, timePointWhenSpeedLevelledOffAfterManeuver);
+            Position actualPositionAtTimePointOfMaxSpeedAfterManeuver = track.getEstimatedPosition(timePointWhenSpeedLevelledOffAfterManeuver, /* extrapolate */ false);
+            Position projectedExtrapolatedPositionAtTimePointOfMaxSpeedAfterManeuver =
+                    extrapolatedPositionAtTimePointOfMaxSpeedAfterManeuver.projectToLineThrough(positionWhenSpeedStartedToDrop, middleManeuverAngle);
+            Position projectedActualPositionAtTimePointOfMaxSpeedAfterManeuver =
+                    actualPositionAtTimePointOfMaxSpeedAfterManeuver.projectToLineThrough(positionWhenSpeedStartedToDrop, middleManeuverAngle);
+            result = projectedActualPositionAtTimePointOfMaxSpeedAfterManeuver.getDistance(projectedExtrapolatedPositionAtTimePointOfMaxSpeedAfterManeuver);
         } else {
             result = null;
         }
@@ -685,8 +669,8 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
                         maxima.add(lastFix);
                     } else if (lastSpeed.compareTo(lastLastSpeed) < 0 && lastSpeed.compareTo(estimatedSpeedAtFix) < 0) {
                         minima.add(lastFix);
-                        if (estimatedSpeedAtFix.compareTo(minimumSpeed) < 0) {
-                            minimumSpeed = estimatedSpeedAtFix;
+                        if (lastSpeed.compareTo(minimumSpeed) < 0) {
+                            minimumSpeed = lastSpeed;
                         }
                     }
                 }
@@ -701,7 +685,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
         } finally {
             track.unlockAfterRead();
         }
-        GPSFixMoving fixWithLowestSpeedOverGround = getBestFittingSpeedMinimumInManeuver(minima, minimumSpeed, maneuverTimePoint);
+        GPSFixMoving fixWithLowestSpeedOverGround = getBestFittingSpeedMinimumInManeuver(minima, maxima, minimumSpeed, maneuverTimePoint);
         if (fixWithLowestSpeedOverGround == null) {
             fixWithLowestSpeedOverGround = fixes.get(0);
         }
@@ -743,33 +727,38 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
         return fixes;
     }
 
-    private GPSFixMoving getBestFittingSpeedMinimumInManeuver(NavigableSet<GPSFixMoving> minima, Speed minimumSpeed, TimePoint maneuverTimePoint) {
-        // Idea: being the approximate maneuver duration away from maneuverTimePoint is as bad as having twice the speed.
+    private GPSFixMoving getBestFittingSpeedMinimumInManeuver(NavigableSet<GPSFixMoving> minima,
+            NavigableSet<GPSFixMoving> maxima, Speed minimumSpeed, TimePoint maneuverTimePoint) {
+        // Idea: being 10x the approximate maneuver duration away from maneuverTimePoint is as bad as having twice the percentage between min
+        // and max speed (min = 0%; max=100%).
         GPSFixMoving bestSpeedMinimum = null;
-        double lowestBadness = Double.MAX_VALUE;
-        final long approximateManeuverTimeInMillis = getCompetitor().getBoat().getBoatClass().getApproximateManeuverDurationInMilliseconds();
-        final GPSFixTrack<Competitor, GPSFixMoving> track = getTrackedRace().getTrack(getCompetitor());
-        for (GPSFixMoving minimum : minima) {
-            // best speedBadness can be 1 which represents the absolute speed minimum in the interval considered
-            double speedBadness = track.getEstimatedSpeed(minimum.getTimePoint()).getKnots() / minimumSpeed.getKnots();
-            // best timePointBadness can be 1 which is a minimum exactly at the maneuver time point
-            double timePointBadness = 1. + (double) Math.abs(minimum.getTimePoint().asMillis()-maneuverTimePoint.asMillis()) / 
-                    (double) approximateManeuverTimeInMillis;
-            final double totalBadness = speedBadness * timePointBadness;
-            if (totalBadness < lowestBadness) {
-                bestSpeedMinimum = minimum;
-                lowestBadness = totalBadness;
+        Speed maxSpeed = null;
+        for (GPSFixMoving maximum : maxima) {
+            if (maxSpeed == null || maximum.getSpeed().getKnots() > maxSpeed.getKnots()) {
+                maxSpeed = maximum.getSpeed();
+            }
+        }
+        if (maxSpeed != null) {
+            double speedDifferenceBetweenMaxAndMinInKnots = maxSpeed.getKnots() - minimumSpeed.getKnots();
+            double lowestBadness = Double.MAX_VALUE;
+            final long approximateManeuverTimeInMillis = getCompetitor().getBoat().getBoatClass()
+                    .getApproximateManeuverDurationInMilliseconds();
+            final GPSFixTrack<Competitor, GPSFixMoving> track = getTrackedRace().getTrack(getCompetitor());
+            for (GPSFixMoving minimum : minima) {
+                // best speedBadness can be 1 which represents the absolute speed minimum in the interval considered
+                double speedBadness = 1 + (track.getEstimatedSpeed(minimum.getTimePoint()).getKnots() - minimumSpeed.getKnots()) /
+                        speedDifferenceBetweenMaxAndMinInKnots;
+                // best timePointBadness can be 1 which is a minimum exactly at the maneuver time point
+                double timePointBadness = 1.
+                        + (double) Math.abs(minimum.getTimePoint().asMillis() - maneuverTimePoint.asMillis())
+                        / (double) approximateManeuverTimeInMillis / 10.;
+                final double totalBadness = speedBadness * timePointBadness;
+                if (totalBadness < lowestBadness) {
+                    bestSpeedMinimum = minimum;
+                    lowestBadness = totalBadness;
+                }
             }
         }
         return bestSpeedMinimum;
     }
-
-    private Speed projectSpeedToMiddleIfUpwindDownwindElseToLegDirection(TimePoint at,
-            Bearing projectToForUpwindDownwind, final SpeedWithBearing speed, final Position position) throws NoWindException {
-        Speed projectedSpeedAtFix = projectToForUpwindDownwind != null ?
-                speed.projectTo(position, projectToForUpwindDownwind) :
-                    getWindwardSpeed(speed, at);
-        return projectedSpeedAtFix;
-    }
-
 }
