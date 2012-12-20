@@ -197,8 +197,11 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
         if (estimatedPosition == null) { // may happen if mark positions haven't been received yet
             return null;
         }
-        return getWindwardDistance(estimatedPosition, getTrackedRace().getOrCreateTrack(mark).getEstimatedPosition(at, false),
-                at);
+        final Position estimatedMarkPosition = getTrackedRace().getOrCreateTrack(mark).getEstimatedPosition(at, false);
+        if (estimatedMarkPosition == null) {
+            return null;
+        }
+        return getWindwardDistance(estimatedPosition, estimatedMarkPosition, at);
     }
 
     /**
