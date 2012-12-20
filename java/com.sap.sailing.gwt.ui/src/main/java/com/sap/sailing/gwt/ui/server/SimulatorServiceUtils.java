@@ -101,7 +101,7 @@ public class SimulatorServiceUtils {
         final List<Position> result = new ArrayList<Position>();
 
         final double distance = getDistanceBetween(startPoint, endPoint);
-        final int noOfSteps = (int) (distance / stepSizeMeters);
+        final int noOfSteps = (int) (distance / stepSizeMeters) + 1;
         double bearing = getInitialBearing(startPoint, endPoint);
 
         Position temp = null;
@@ -133,6 +133,7 @@ public class SimulatorServiceUtils {
     public static List<Position> getIntermediatePoints(final List<Position> points, final double stepSizeMeters) {
 
         final int noOfPoints = points.size();
+        final int noOfPointsMinus1 = noOfPoints - 1;
         if (noOfPoints == 0) {
             return new ArrayList<Position>();
         } else if (noOfPoints == 1) {
@@ -154,11 +155,7 @@ public class SimulatorServiceUtils {
 
         final List<Position> result = new ArrayList<Position>();
 
-        for (int index = 0; index < noOfPoints; index++) {
-            if (index == noOfPoints - 1) {
-                break;
-            }
-
+        for (int index = 0; index < noOfPointsMinus1; index++) {
             result.addAll(getIntermediatePoints(points.get(index), points.get(index + 1), stepSizeMeters));
         }
 
