@@ -1,9 +1,14 @@
 package com.sap.sailing.domain.swisstimingreplayadapter.test;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.List;
 
 import org.junit.Ignore;
@@ -61,7 +66,69 @@ public class SwissTimingReplayAdapterServiceTest {
         assertEquals(40240, replayCountListener.rankingsCount);               
         assertEquals(321920, replayCountListener.rankingMarkCount);                
     }
+
+    @Test
+    public void testRaceData_SAW005905_20120805_EqualsOnlineVersion() throws Exception {
+        byte[] localCopy = read(getClass().getResourceAsStream("/SAW005905.20120805.replay"));
+        byte[] onlineCopy = read((InputStream) new URL(
+                "http://live.ota.st-sportservice.com/Data/Log?_rsc=SAW005905&_date=05.08.2012").getContent());
+        assertArrayEquals(localCopy, onlineCopy);
+    }
     
+    private byte[] read(InputStream resourceAsStream) throws IOException {
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        byte[] buf = new byte[8192];
+        int read;
+        while ((read=resourceAsStream.read(buf)) != -1) {
+            bos.write(buf, 0, read);
+        }
+        return bos.toByteArray();
+    }
+
+    @Test
+    public void testRaceData_SAW005905_20120805() throws Exception {
+        SwissTimingReplayTestListener replayCountListener = new SwissTimingReplayTestListener();
+        new SwissTimingReplayParserImpl().readData(getClass().getResourceAsStream("/SAW005905.20120805.replay"), replayCountListener);
+        assertEquals(0, replayCountListener.keyFrameIndexSum);          
+        assertEquals(715, replayCountListener.keyFrameIndexPositionCount);  
+        assertEquals(1156, replayCountListener.eotCount);                    
+        assertEquals(1155, replayCountListener.frameCount);                  
+        assertEquals(1155, replayCountListener.referenceTimestampCount);     
+        assertEquals(1155, replayCountListener.referenceLocationCount);      
+        assertEquals(1155, replayCountListener.rsc_cidCount);                
+        assertEquals(41580, replayCountListener.competitorsCountSum);       
+        assertEquals(41580, replayCountListener.competitorsCount);            
+        assertEquals(8085, replayCountListener.markCount);                   
+        assertEquals(41580, replayCountListener.trackersCountSum);          
+        assertEquals(41580, replayCountListener.trackersCount);               
+        assertEquals(23100, replayCountListener.rankingsCountSum);          
+        assertEquals(23100, replayCountListener.rankingsCount);               
+        assertEquals(115500, replayCountListener.rankingMarkCount);                
+    }
+
+    @Test
+    public void testRaceData_SAW005905_20120805_online() throws Exception {
+        SwissTimingReplayTestListener replayCountListener = new SwissTimingReplayTestListener();
+        byte[] onlineCopy = read((InputStream) new URL(
+                "http://live.ota.st-sportservice.com/Data/Log?_rsc=SAW005905&_date=05.08.2012").getContent());
+        new SwissTimingReplayParserImpl().readData(new ByteArrayInputStream(onlineCopy), replayCountListener);
+        assertEquals(0, replayCountListener.keyFrameIndexSum);          
+        assertEquals(715, replayCountListener.keyFrameIndexPositionCount);  
+        assertEquals(1156, replayCountListener.eotCount);                    
+        assertEquals(1155, replayCountListener.frameCount);                  
+        assertEquals(1155, replayCountListener.referenceTimestampCount);     
+        assertEquals(1155, replayCountListener.referenceLocationCount);      
+        assertEquals(1155, replayCountListener.rsc_cidCount);                
+        assertEquals(41580, replayCountListener.competitorsCountSum);       
+        assertEquals(41580, replayCountListener.competitorsCount);            
+        assertEquals(8085, replayCountListener.markCount);                   
+        assertEquals(41580, replayCountListener.trackersCountSum);          
+        assertEquals(41580, replayCountListener.trackersCount);               
+        assertEquals(23100, replayCountListener.rankingsCountSum);          
+        assertEquals(23100, replayCountListener.rankingsCount);               
+        assertEquals(115500, replayCountListener.rankingMarkCount);                
+    }
+
     @Test
     public void testRaceData_SAW010115_20120811() throws Exception {
         SwissTimingReplayTestListener replayCountListener = new SwissTimingReplayTestListener();

@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.swisstimingreplayadapter.impl;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -116,8 +118,14 @@ public class SwissTimingReplayServiceImpl implements SwissTimingReplayService {
         URL raceDataUrl;
         try {
             raceDataUrl = new URL("http://" + link);
-            InputStream urlInputStream = raceDataUrl.openStream();
-            new SwissTimingReplayParserImpl().readData(urlInputStream, replayListener);
+            InputStream urlInputStream = (InputStream) raceDataUrl.getContent();
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            byte[] buf = new byte[8192];
+            int read;
+            while ((read = urlInputStream.read(buf)) != -1) {
+                bos.write(buf, 0, read);
+            }
+            new SwissTimingReplayParserImpl().readData(new ByteArrayInputStream(bos.toByteArray()), replayListener);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

@@ -11,7 +11,7 @@ public enum BoatType {
     }
     
     public static BoatType byCode(byte code) {
-        if (code == 99) {
+        if (code == 99 || code >= values().length || code < 0) {
             return Unknown;
         } else {
             return values()[code - 1];
