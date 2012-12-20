@@ -78,4 +78,6 @@ public interface Course extends Named {
 
     Iterable<Leg> getLegsAdjacentTo(Mark mark);
 
+    Leg getFirstLeg();
+
 }

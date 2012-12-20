@@ -476,4 +476,6 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
 
     com.sap.sailing.domain.base.DomainFactory getBaseDomainFactory();
 
+    com.sap.sailing.domain.swisstimingadapter.DomainFactory getSwissTimingDomainFactory();
+
 }

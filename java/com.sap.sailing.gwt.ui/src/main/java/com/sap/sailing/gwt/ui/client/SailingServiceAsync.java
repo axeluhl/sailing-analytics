@@ -40,6 +40,7 @@ import com.sap.sailing.gwt.ui.shared.ReplicationStateDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.ScoreCorrectionProviderDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
+import com.sap.sailing.gwt.ui.shared.SwissTimingReplayRaceDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingRaceRecordDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracConfigurationDTO;
@@ -414,6 +415,12 @@ public interface SailingServiceAsync {
 
     void updateLeaderboardColumnFactor(String leaderboardName, String columnName, Double newFactor,
             AsyncCallback<Void> callback);
+
+    void listSwissTiminigReplayRaces(String swissTimingUrl, AsyncCallback<List<SwissTimingReplayRaceDTO>> asyncCallback);
+
+    void replaySwissTimingRace(RegattaIdentifier regattaIdentifier, SwissTimingReplayRaceDTO replayRace,
+            boolean trackWind, boolean correctWindByDeclination, boolean simulateWithStartTimeNow,
+            AsyncCallback<Void> asyncCallback);
 
     void getRankedCompetitorsFromBestToWorstAfterEachRaceColumn(String leaderboardName, Date date,
             AsyncCallback<List<Pair<String, List<CompetitorDTO>>>> callback);

@@ -107,12 +107,7 @@ public class CourseImpl extends NamedImpl implements Course {
      * For access by {@link LegImpl}
      */
     Waypoint getWaypoint(int i) {
-        lockForRead();
-        try {
-            return waypoints.get(i);
-        } finally {
-            unlockAfterRead();
-        }
+        return waypoints.get(i);
     }
     
     @Override
@@ -202,6 +197,11 @@ public class CourseImpl extends NamedImpl implements Course {
                 logger.throwing(CourseImpl.class.getName(), "notifyListenersWaypointAdded", t);
             }
         }
+    }
+
+    @Override
+    public Leg getFirstLeg() {
+        return legs.get(0);
     }
 
     @Override
@@ -398,8 +398,11 @@ public class CourseImpl extends NamedImpl implements Course {
                 newWaypointList.add(waypoint);
             }
             Patch<Waypoint> patch = DiffUtils.diff(courseWaypoints, newWaypointList);
-            CourseAsWaypointList courseAsWaypointList = new CourseAsWaypointList(this);
-            patch.applyToInPlace(courseAsWaypointList);
+            if (!patch.isEmpty()) {
+                logger.info("applying course update " + patch + " to course " + this);
+                CourseAsWaypointList courseAsWaypointList = new CourseAsWaypointList(this);
+                patch.applyToInPlace(courseAsWaypointList);
+            }
         } finally {
             LockUtil.unlockAfterWrite(lock);
         }

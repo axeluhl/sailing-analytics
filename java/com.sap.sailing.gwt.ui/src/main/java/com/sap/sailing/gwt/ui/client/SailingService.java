@@ -40,6 +40,7 @@ import com.sap.sailing.gwt.ui.shared.RegattaScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.ReplicationStateDTO;
 import com.sap.sailing.gwt.ui.shared.ScoreCorrectionProviderDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
+import com.sap.sailing.gwt.ui.shared.SwissTimingReplayRaceDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingRaceRecordDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracConfigurationDTO;
@@ -266,7 +267,12 @@ public interface SailingService extends RemoteService {
     void suppressCompetitorInLeaderboard(String leaderboardName, String competitorIdAsString, boolean suppressed);
 
     void updateLeaderboardColumnFactor(String leaderboardName, String columnName, Double newFactor);
-    
+
+    List<SwissTimingReplayRaceDTO> listSwissTiminigReplayRaces(String swissTimingUrl);
+
+    void replaySwissTimingRace(RegattaIdentifier regattaIdentifier, SwissTimingReplayRaceDTO replayRace,
+            boolean trackWind, boolean correctWindByDeclination, boolean simulateWithStartTimeNow);
+
     List<Pair<String, List<CompetitorDTO>>> getRankedCompetitorsFromBestToWorstAfterEachRaceColumn(String leaderboardName, Date date) throws NoWindException;
 
     List<String> getOverallLeaderboardNamesContaining(String leaderboardName);

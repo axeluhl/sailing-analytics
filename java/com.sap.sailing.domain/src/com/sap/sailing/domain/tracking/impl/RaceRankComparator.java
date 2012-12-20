@@ -60,7 +60,8 @@ public class RaceRankComparator implements Comparator<Competitor> {
             MarkPassing o1LastMarkPassingBeforeTimePoint = null;
             int o1MarkPassingsBeforeTimePointSize;
             TrackedLegOfCompetitor o1Leg;
-            synchronized (o1MarkPassings) {
+            trackedRace.lockForRead(o1MarkPassings);
+            try {
                 o1MarkPassingsBeforeTimePoint = o1MarkPassings.headSet(
                         markPassingWithTimePoint, /* inclusive */true);
                 o1MarkPassingsBeforeTimePointSize = o1MarkPassingsBeforeTimePoint.size();
@@ -68,19 +69,24 @@ public class RaceRankComparator implements Comparator<Competitor> {
                     o1LastMarkPassingBeforeTimePoint = o1MarkPassingsBeforeTimePoint.last();
                 }
                 o1Leg = trackedRace.getCurrentLeg(o1, timePoint);
+            } finally {
+                trackedRace.unlockAfterRead(o1MarkPassings);
             }
             NavigableSet<MarkPassing> o2MarkPassings = trackedRace.getMarkPassings(o2);
             NavigableSet<MarkPassing> o2MarkPassingsBeforeTimePoint;
             MarkPassing o2LastMarkPassingBeforeTimePoint = null;
             int o2MarkPassingsBeforeTimePointSize;
             TrackedLegOfCompetitor o2Leg;
-            synchronized (o2MarkPassings) {
+            trackedRace.lockForRead(o2MarkPassings);
+            try {
                 o2MarkPassingsBeforeTimePoint = o2MarkPassings.headSet(markPassingWithTimePoint, /* inclusive */true);
                 o2MarkPassingsBeforeTimePointSize = o2MarkPassingsBeforeTimePoint.size();
                 if (o2MarkPassingsBeforeTimePointSize > 0) {
                     o2LastMarkPassingBeforeTimePoint = o2MarkPassingsBeforeTimePoint.last();
                 }
                 o2Leg = trackedRace.getCurrentLeg(o2, timePoint);
+            } finally {
+                trackedRace.unlockAfterRead(o2MarkPassings);
             }
             result = o2MarkPassingsBeforeTimePointSize - o1MarkPassingsBeforeTimePointSize; // inverted: more legs means
                                                                                             // smaller rank

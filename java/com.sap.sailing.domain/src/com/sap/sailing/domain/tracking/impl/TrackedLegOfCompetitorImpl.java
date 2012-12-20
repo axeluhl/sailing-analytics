@@ -197,8 +197,11 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
         if (estimatedPosition == null) { // may happen if mark positions haven't been received yet
             return null;
         }
-        return getWindwardDistance(estimatedPosition, getTrackedRace().getOrCreateTrack(mark).getEstimatedPosition(at, false),
-                at);
+        final Position estimatedMarkPosition = getTrackedRace().getOrCreateTrack(mark).getEstimatedPosition(at, false);
+        if (estimatedMarkPosition == null) {
+            return null;
+        }
+        return getWindwardDistance(estimatedPosition, estimatedMarkPosition, at);
     }
 
     /**
@@ -449,11 +452,14 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
             Iterable<MarkPassing> markPassingsInOrder = getTrackedRace().getMarkPassingsInOrder(getLeg().getTo());
             if (markPassingsInOrder != null) {
                 MarkPassing firstMarkPassing = null;
-                synchronized (markPassingsInOrder) {
+                getTrackedRace().lockForRead(markPassingsInOrder);
+                try {
                     Iterator<MarkPassing> markPassingsForLegEnd = markPassingsInOrder.iterator();
                     if (markPassingsForLegEnd.hasNext()) {
                         firstMarkPassing = markPassingsForLegEnd.next();
                     }
+                } finally {
+                    getTrackedRace().unlockAfterRead(markPassingsInOrder);
                 }
                 if (firstMarkPassing != null) {
                     // someone has already finished the leg
