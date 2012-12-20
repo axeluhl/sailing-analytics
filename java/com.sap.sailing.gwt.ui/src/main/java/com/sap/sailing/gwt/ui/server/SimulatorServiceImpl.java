@@ -811,7 +811,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         return new ResponseTotalTimeDTO((long) totalTimeSeconds, notificationMessage);
     }
 
-    private static final int STEP_DURATION_MILLISECONDS = 1000;
+    private static final int STEP_DURATION_MILLISECONDS = 2000;
 
     @Override
     public ResponseTotalTimeDTO getTotalTime2(final RequestTotalTimeDTO requestData) throws ConfigurationException {
