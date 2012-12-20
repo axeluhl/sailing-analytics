@@ -113,19 +113,25 @@ public class SwissTimingReplayServiceImpl implements SwissTimingReplayService {
         return startTimeFormat;
     }
 
+    private static class ByteArrayOutputStreamWithVisibleBuffer extends ByteArrayOutputStream {
+        public byte[] getBuffer() {
+            return buf;
+        }
+    }   
+    
     @Override
     public void loadRaceData(String link, SwissTimingReplayListener replayListener) {
         URL raceDataUrl;
         try {
             raceDataUrl = new URL("http://" + link);
             InputStream urlInputStream = (InputStream) raceDataUrl.getContent();
-            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            ByteArrayOutputStreamWithVisibleBuffer bos = new ByteArrayOutputStreamWithVisibleBuffer();
             byte[] buf = new byte[8192];
             int read;
             while ((read = urlInputStream.read(buf)) != -1) {
                 bos.write(buf, 0, read);
             }
-            new SwissTimingReplayParserImpl().readData(new ByteArrayInputStream(bos.toByteArray()), replayListener);
+            new SwissTimingReplayParserImpl().readData(new ByteArrayInputStream(bos.getBuffer(), 0, bos.size()), replayListener);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
