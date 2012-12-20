@@ -368,8 +368,8 @@ public class PathPolyline {
                 System.err.println("total time (old way) = " + totalTime + " seconds!");
                 System.err.println("==================================================");
 
-                simulatorMap.addLegendOverlayForPathPolyline(totalTime * 1000);
-                simulatorMap.redrawLegendCanvasOverlay();
+                // simulatorMap.addLegendOverlayForPathPolyline(totalTime * 1000);
+                // simulatorMap.redrawLegendCanvasOverlay();
             }
         });
     }
@@ -404,8 +404,8 @@ public class PathPolyline {
                 System.err.println("total time (new way) = " + totalTime + " seconds!");
                 System.err.println("==================================================");
 
-                // simulatorMap.addLegendOverlayForPathPolyline(totalTime * 1000);
-                // simulatorMap.redrawLegendCanvasOverlay();
+                simulatorMap.addLegendOverlayForPathPolyline(totalTime * 1000);
+                simulatorMap.redrawLegendCanvasOverlay();
             }
         });
     }
