@@ -1332,16 +1332,19 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
             // in the leg list of the course the leg was added; that's an implementation secret of CourseImpl. So try:
             LinkedHashMap<Leg, TrackedLeg> reorderedTrackedLegs = new LinkedHashMap<Leg, TrackedLeg>();
             List<Leg> newLegs = getRace().getCourse().getLegs();
-            for (int i=0; i<zeroBasedIndex; i++) {
-                reorderedTrackedLegs.put(newLegs.get(i), trackedLegs.get(newLegs.get(i)));
-            }
-            for (int i=zeroBasedIndex; i<newLegs.size(); i++) {
-                reorderedTrackedLegs.put(newLegs.get(i), createTrackedLeg(newLegs.get(i)));
+            for (Leg leg : newLegs) {
+                TrackedLeg trackedLeg = trackedLegs.get(leg);
+                if (trackedLeg != null) {
+                    reorderedTrackedLegs.put(leg, trackedLeg);
+                } else {
+                    reorderedTrackedLegs.put(leg, createTrackedLeg(leg));
+                }
             }
             // now ensure that the iteration order is in sync with the leg iteration order
             trackedLegs.clear();
             for (Map.Entry<Leg, TrackedLeg> entry : reorderedTrackedLegs.entrySet()) {
                 trackedLegs.put(entry.getKey(), entry.getValue());
+                entry.getValue().waypointsMayHaveChanges();
             }
             updated(/* time point */null); // no maneuver cache invalidation required because we don't yet have mark
                                            // passings for new waypoint

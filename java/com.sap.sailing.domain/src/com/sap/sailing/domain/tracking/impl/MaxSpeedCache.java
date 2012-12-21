@@ -167,12 +167,13 @@ public class MaxSpeedCache<ItemType, FixType extends GPSFix> implements GPSTrack
     }
 
     public Pair<FixType, Speed> getMaxSpeed(TimePoint from, TimePoint to) {
-        assert !from.after(to);
-        Pair<FixType, Speed> result;
-        result = cacheLookup(from, to);
-        if (result == null) {
-            result = computeMaxSpeed(from, to);
-            cache(from, to, result);
+        Pair<FixType, Speed> result = null;
+        if (!to.before(from)) {
+            result = cacheLookup(from, to);
+            if (result == null) {
+                result = computeMaxSpeed(from, to);
+                cache(from, to, result);
+            }
         }
         return result;
     }

@@ -69,6 +69,9 @@ public interface GPSFixTrack<ItemType, FixType extends GPSFix> extends Track<Fix
      */
     Position getEstimatedRawPosition(TimePoint timePoint, boolean extrapolate);
     
+    /**
+     * @return <code>null</code> if <code>from</code> is before <code>to</code>
+     */
     Pair<FixType, Speed> getMaximumSpeedOverGround(TimePoint from, TimePoint to);
 
     /**

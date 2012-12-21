@@ -148,7 +148,6 @@ public class CourseTest {
         assertWaypointIndexes(course);
         course.addWaypoint(0, wp0_5);
         assertWaypointIndexes(course);
-        assertNotSame(course.getLegs().get(0), oldSingleLeg);
         assertEquals(3, Util.size(course.getWaypoints()));
         assertEquals(2, Util.size(course.getLegs()));
         assertEquals(wp0_5, course.getLegs().get(0).getFrom());

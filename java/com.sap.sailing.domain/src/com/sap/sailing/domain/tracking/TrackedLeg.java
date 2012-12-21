@@ -45,4 +45,6 @@ public interface TrackedLeg extends Serializable {
     Bearing getLegBearing(TimePoint at);
 
     Distance getCrossTrackError(Position p, TimePoint timePoint);
+
+    void waypointsMayHaveChanges();
 }
