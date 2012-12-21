@@ -36,7 +36,9 @@ public interface SwissTimingReplayService {
      * @param link
      *            the URL without the implicit "http://" prefix, as obtained, e.g., from
      *            {@link SwissTimingReplayRace#getLink()}.
-     * @param regatta TODO
+     * @param regatta
+     *            the regatta to which the race shall be added; if <code>null</code>, a default regatta will be
+     *            created/used
      */
     void loadRaceData(String link, DomainFactory domainFactory, Regatta regatta, TrackedRegattaRegistry trackedRegattaRegistry);
 

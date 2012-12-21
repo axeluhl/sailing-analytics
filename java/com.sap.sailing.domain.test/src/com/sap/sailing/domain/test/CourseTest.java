@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
@@ -12,9 +13,10 @@ import java.util.List;
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.Course;
+import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Waypoint;
-import com.sap.sailing.domain.base.impl.MarkImpl;
 import com.sap.sailing.domain.base.impl.CourseImpl;
+import com.sap.sailing.domain.base.impl.MarkImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
 import com.sap.sailing.domain.common.impl.Util;
 
@@ -62,7 +64,7 @@ public class CourseTest {
     }
 
     @Test
-    public void testRemoveWaypointToCourseWithOneWaypoint() {
+    public void testRemoveWaypointFromCourseWithOneWaypoint() {
         List<Waypoint> waypoints = new ArrayList<Waypoint>();
         waypoints.add(new WaypointImpl(new MarkImpl("Test Mark")));
         waypoints.add(new WaypointImpl(new MarkImpl("Second Mark")));
@@ -73,7 +75,7 @@ public class CourseTest {
         assertEquals(1, Util.size(course.getWaypoints()));
         assertEquals(0, Util.size(course.getLegs()));
     }
-
+    
     @Test
     public void testRemoveWaypointToEmptyCourse() {
         Iterable<Waypoint> waypoints = Collections.emptyList();
@@ -107,7 +109,33 @@ public class CourseTest {
     }
 
     @Test
-    public void testRemovetWaypointFromCourseWithThreeWaypoints() {
+    public void testInsertWaypointAsFirstInCourseWithFormerlyTwoWaypoints() {
+        List<Waypoint> waypoints = new ArrayList<Waypoint>();
+        final WaypointImpl wp1 = new WaypointImpl(new MarkImpl("Test Mark 1"));
+        waypoints.add(wp1);
+        final WaypointImpl wp2 = new WaypointImpl(new MarkImpl("Test Mark 2"));
+        waypoints.add(wp2);
+        Course course = new CourseImpl("Test Course", waypoints);
+        assertEquals(2, Util.size(course.getWaypoints()));
+        assertEquals(1, Util.size(course.getLegs()));
+        final WaypointImpl wp0_5 = new WaypointImpl(new MarkImpl("Test Mark .5"));
+        Leg oldSingleLeg = course.getLegs().get(0);
+        course.addWaypoint(0, wp0_5);
+        assertNotSame(course.getLegs().get(0), oldSingleLeg);
+        assertEquals(3, Util.size(course.getWaypoints()));
+        assertEquals(2, Util.size(course.getLegs()));
+        assertEquals(wp0_5, course.getLegs().get(0).getFrom());
+        assertEquals(wp1, course.getLegs().get(0).getTo());
+        assertEquals(wp1, course.getLegs().get(1).getFrom());
+        assertEquals(wp2, course.getLegs().get(1).getTo());
+        assertTrue(Util.equals(Arrays.asList(new Waypoint[] { wp0_5, wp1, wp2 }), course.getWaypoints()));
+        assertEquals(0, course.getIndexOfWaypoint(wp0_5));
+        assertEquals(1, course.getIndexOfWaypoint(wp1));
+        assertEquals(2, course.getIndexOfWaypoint(wp2));
+    }
+
+    @Test
+    public void testRemoveWaypointFromCourseWithThreeWaypoints() {
         List<Waypoint> waypoints = new ArrayList<Waypoint>();
         final WaypointImpl wp1 = new WaypointImpl(new MarkImpl("Test Mark 1"));
         waypoints.add(wp1);
@@ -121,9 +149,34 @@ public class CourseTest {
         course.removeWaypoint(1);
         assertEquals(2, Util.size(course.getWaypoints()));
         assertEquals(1, Util.size(course.getLegs()));
+        assertEquals(wp1, course.getLegs().get(0).getFrom());
+        assertEquals(wp3, course.getLegs().get(0).getTo());
         assertTrue(Util.equals(Arrays.asList(new Waypoint[] { wp1, wp3 }), course.getWaypoints()));
         assertEquals(0, course.getIndexOfWaypoint(wp1));
         assertEquals(-1, course.getIndexOfWaypoint(wp2));
+        assertEquals(1, course.getIndexOfWaypoint(wp3));
+    }
+
+    @Test
+    public void testRemoveFirstWaypointFromCourseWithThreeWaypoints() {
+        List<Waypoint> waypoints = new ArrayList<Waypoint>();
+        final WaypointImpl wp1 = new WaypointImpl(new MarkImpl("Test Mark 1"));
+        waypoints.add(wp1);
+        final WaypointImpl wp2 = new WaypointImpl(new MarkImpl("Test Mark 2"));
+        waypoints.add(wp2);
+        final WaypointImpl wp3 = new WaypointImpl(new MarkImpl("Test Mark 3"));
+        waypoints.add(wp3);
+        Course course = new CourseImpl("Test Course", waypoints);
+        assertEquals(3, Util.size(course.getWaypoints()));
+        assertEquals(2, Util.size(course.getLegs()));
+        course.removeWaypoint(0);
+        assertEquals(2, Util.size(course.getWaypoints()));
+        assertEquals(1, Util.size(course.getLegs()));
+        assertEquals(wp2, course.getLegs().get(0).getFrom());
+        assertEquals(wp3, course.getLegs().get(0).getTo());
+        assertTrue(Util.equals(Arrays.asList(new Waypoint[] { wp2, wp3 }), course.getWaypoints()));
+        assertEquals(-1, course.getIndexOfWaypoint(wp1));
+        assertEquals(0, course.getIndexOfWaypoint(wp2));
         assertEquals(1, course.getIndexOfWaypoint(wp3));
     }
 

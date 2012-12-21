@@ -18,6 +18,7 @@ import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
+import com.sap.sailing.gwt.ui.shared.SwissTimingArchiveConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.BulkScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 import com.sap.sailing.gwt.ui.shared.ControlPointDTO;
@@ -435,4 +436,9 @@ public interface SailingServiceAsync {
      * leaderboard is found.
      */
     void getOverallLeaderboardNamesContaining(String leaderboardName, AsyncCallback<List<String>> asyncCallback);
+
+    void getPreviousSwissTimingArchiveConfigurations(
+            AsyncCallback<List<SwissTimingArchiveConfigurationDTO>> asyncCallback);
+
+    void storeSwissTimingArchiveConfiguration(String swissTimingUrl, AsyncCallback<Void> asyncCallback);
 }

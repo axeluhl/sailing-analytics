@@ -131,7 +131,11 @@ public class CourseImpl extends NamedImpl implements Course {
                 legStartWaypointIndex = zeroBasedPosition;
             }
             if (waypoints.size() > 1) {
-                legs.add(new LegImpl(this, legStartWaypointIndex));
+                legs.add(legStartWaypointIndex, new LegImpl(this, legStartWaypointIndex));
+            }
+            // update remaining legs with adjusted waypoint indexes
+            for (int i=legStartWaypointIndex+1; i<legs.size(); i++) {
+                legs.set(i, new LegImpl(this, i));
             }
             logger.info("Waypoint " + waypointToAdd + " added to course '" + getName() + "', before notifying listeners");
             notifyListenersWaypointAdded(zeroBasedPosition, waypointToAdd);
@@ -165,6 +169,10 @@ public class CourseImpl extends NamedImpl implements Course {
                     }
                 } else {
                     legs.remove(zeroBasedPosition);
+                }
+                // renumber subsequent legs
+                for (int i=zeroBasedPosition; i<waypoints.size()-1; i++) {
+                    legs.set(i, new LegImpl(this, i));
                 }
                 logger.info("Waypoint " + removedWaypoint + " removed from course '" + getName() + "', before notifying listeners");
                 notifyListenersWaypointRemoved(zeroBasedPosition, removedWaypoint);

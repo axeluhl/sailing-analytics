@@ -16,6 +16,7 @@ import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.swisstimingadapter.MessageType;
 import com.sap.sailing.domain.swisstimingadapter.Race;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterMessage;
+import com.sap.sailing.domain.swisstimingadapter.SwissTimingArchiveConfiguration;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingConfiguration;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
 import com.sap.sailing.domain.swisstimingadapter.persistence.SwissTimingAdapterPersistence;
@@ -85,8 +86,8 @@ public class SwissTimingAdapterPersistenceImpl implements SwissTimingAdapterPers
         } catch (Throwable t) {
             // something went wrong during DB access; report, then use empty new wind track
             logger.log(Level.SEVERE,
-                    "Error connecting to MongoDB, unable to load recorded TracTrac configurations. Check MongoDB settings.");
-            logger.throwing(SwissTimingAdapterPersistenceImpl.class.getName(), "getTracTracConfigurations", t);
+                    "Error connecting to MongoDB, unable to load recorded SwissTiming configurations. Check MongoDB settings.");
+            logger.throwing(SwissTimingAdapterPersistenceImpl.class.getName(), "getSwissTimingConfigurations", t);
         }
         return result;
     }
@@ -96,6 +97,29 @@ public class SwissTimingAdapterPersistenceImpl implements SwissTimingAdapterPers
         return swissTimingFactory.createSwissTimingConfiguration((String) object.get(FieldNames.ST_CONFIG_NAME.name()),
                 (String) object.get(FieldNames.ST_CONFIG_HOSTNAME.name()), (Integer) object
                         .get(FieldNames.ST_CONFIG_PORT.name()), canSendRequests == null ? false : canSendRequests);
+    }
+
+    @Override
+    public Iterable<SwissTimingArchiveConfiguration> getSwissTimingArchiveConfigurations() {
+        List<SwissTimingArchiveConfiguration> result = new ArrayList<SwissTimingArchiveConfiguration>();
+        try {
+            DBCollection stConfigs = database.getCollection(CollectionNames.SWISSTIMING_ARCHIVE_CONFIGURATIONS.name());
+            for (DBObject o : stConfigs.find()) {
+                SwissTimingArchiveConfiguration stConfig = loadSwissTimingArchiveConfiguration(o);
+                result.add(stConfig);
+            }
+            Collections.reverse(result);
+        } catch (Throwable t) {
+            // something went wrong during DB access; report, then use empty new wind track
+            logger.log(Level.SEVERE,
+                    "Error connecting to MongoDB, unable to load recorded SwissTiming archive configurations. Check MongoDB settings.");
+            logger.throwing(SwissTimingAdapterPersistenceImpl.class.getName(), "getSwissTimingArchiveConfigurations", t);
+        }
+        return result;
+    }
+
+    private SwissTimingArchiveConfiguration loadSwissTimingArchiveConfiguration(DBObject object) {
+        return swissTimingFactory.createSwissTimingArchiveConfiguration((String) object.get(FieldNames.ST_ARCHIVE_JSON_URL.name()));
     }
 
     @Override
@@ -190,6 +214,19 @@ public class SwissTimingAdapterPersistenceImpl implements SwissTimingAdapterPers
         result.put(FieldNames.ST_CONFIG_CAN_SEND_REQUESTS.name(), swissTimingConfiguration.canSendRequests());
 
         stConfigCollection.insert(result);
+    }
+
+    @Override
+    public void storeSwissTimingArchiveConfiguration(
+            SwissTimingArchiveConfiguration createSwissTimingArchiveConfiguration) {
+        DBCollection stArchiveConfigCollection = database.getCollection(CollectionNames.SWISSTIMING_ARCHIVE_CONFIGURATIONS.name());
+        stArchiveConfigCollection.ensureIndex(CollectionNames.SWISSTIMING_ARCHIVE_CONFIGURATIONS.name());
+        BasicDBObject result = new BasicDBObject();
+        result.put(FieldNames.ST_ARCHIVE_JSON_URL.name(), createSwissTimingArchiveConfiguration.getJsonUrl());
+        for (DBObject equallyNamedConfig : stArchiveConfigCollection.find(result)) {
+            stArchiveConfigCollection.remove(equallyNamedConfig);
+        }
+        stArchiveConfigCollection.insert(result);
     }
 
     @Override

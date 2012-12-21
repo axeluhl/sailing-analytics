@@ -71,23 +71,18 @@ public class SwissTimingReplayParserImpl implements SwissTimingReplayParser {
     public void readData(InputStream urlInputStream, SwissTimingReplayListener replayListener) throws IOException,
             UnknownMessageIdentificationCode, UnexpectedStartByte, PayloadMismatch, PrematureEndOfData {
         DataInputStream data = new DataInputStream(urlInputStream);
-        int positionInStream = 0;
         byte[] startByteBuffer = new byte[1];
         int readSuccess = data.read(startByteBuffer);
         while (readSuccess != -1) {
-            positionInStream += readSuccess;
             byte startByte = startByteBuffer[0];
             if (startByte != STX) {
                 throw new UnexpectedStartByte(startByte);
             }
             byte messageIdentificationCode = data.readByte();
-            positionInStream++;
             short messageLength = data.readShort();
-            positionInStream += 2;
             if (messageLength > 0) {
                 short payloadSize = (short) (messageLength - 5); // payload is message minus STX, MIC, message length
                                                                  // and ETX/EOT --> = 5 byte
-                positionInStream += payloadSize;
                 switch (messageIdentificationCode) {
                 case MessageIdentificationCodes.MIC_00_Reference_Timestamp:
                     while (payloadSize > 0) {
@@ -242,7 +237,6 @@ public class SwissTimingReplayParserImpl implements SwissTimingReplayParser {
                 }
             }
             byte endByte = data.readByte();
-            positionInStream++;
             if (endByte == EOT) {
                 replayListener.eot();
             } else if (endByte == ETX) {

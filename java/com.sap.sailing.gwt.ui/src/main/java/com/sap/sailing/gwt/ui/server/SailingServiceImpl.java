@@ -101,6 +101,7 @@ import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.MongoWindStoreFactory;
+import com.sap.sailing.domain.swisstimingadapter.SwissTimingArchiveConfiguration;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingConfiguration;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
 import com.sap.sailing.domain.swisstimingadapter.persistence.SwissTimingAdapterPersistence;
@@ -174,6 +175,7 @@ import com.sap.sailing.gwt.ui.shared.ScoreCorrectionProviderDTO;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
 import com.sap.sailing.gwt.ui.shared.SpeedWithBearingDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
+import com.sap.sailing.gwt.ui.shared.SwissTimingArchiveConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingRaceRecordDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingReplayRaceDTO;
@@ -2974,5 +2976,21 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             }
         }
         return result;
+    }
+
+    @Override
+    public List<SwissTimingArchiveConfigurationDTO> getPreviousSwissTimingArchiveConfigurations() {
+        Iterable<SwissTimingArchiveConfiguration> configs = swissTimingAdapterPersistence.getSwissTimingArchiveConfigurations();
+        List<SwissTimingArchiveConfigurationDTO> result = new ArrayList<SwissTimingArchiveConfigurationDTO>();
+        for (SwissTimingArchiveConfiguration stArchiveConfig : configs) {
+            result.add(new SwissTimingArchiveConfigurationDTO(stArchiveConfig.getJsonUrl()));
+        }
+        return result;
+   }
+
+    @Override
+    public void storeSwissTimingArchiveConfiguration(String swissTimingJsonUrl) {
+        swissTimingAdapterPersistence.storeSwissTimingArchiveConfiguration(swissTimingFactory.createSwissTimingArchiveConfiguration(
+                swissTimingJsonUrl));
     }
 }
