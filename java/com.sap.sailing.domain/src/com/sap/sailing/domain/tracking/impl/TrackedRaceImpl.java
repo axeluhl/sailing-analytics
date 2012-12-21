@@ -793,7 +793,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     @Override
     public int getRankDifference(Competitor competitor, Leg leg, TimePoint timePoint) {
         int previousRank;
-        if (leg == getRace().getCourse().getLegs().iterator().next()) {
+        if (leg == getRace().getCourse().getFirstLeg()) {
             // first leg; report rank difference from 0
             previousRank = 0;
         } else {
@@ -1318,6 +1318,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
 
     @Override
     public void waypointAdded(int zeroBasedIndex, Waypoint waypointThatGotAdded) {
+        // expecting to hold the course's write lock
         invalidateMarkPassingTimes();
         LockUtil.lockForRead(serializationLock);
         try {

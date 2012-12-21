@@ -42,6 +42,7 @@ import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
+import com.sap.sailing.gwt.ui.shared.SwissTimingArchiveConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingReplayRaceDTO;
 
 /**
@@ -56,8 +57,9 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
     private final TextBox filterEventsTextbox;
     private final ListDataProvider<SwissTimingReplayRaceDTO> raceList;
     private final CellTable<SwissTimingReplayRaceDTO> raceTable;
-    private final Map<String, SwissTimingReplayRaceDTO> connectionHistory;
-    private final TextBox connectionEdit;
+    private final Map<String, SwissTimingArchiveConfigurationDTO> previousConfigurations;
+    private final ListBox previousConfigurationsComboBox;
+    private final TextBox jsonUrlBox;
     private final Grid grid;
     private final List<SwissTimingReplayRaceDTO> availableSwissTimingRaces;
     private Iterable<RegattaDTO> allRegattas;
@@ -67,9 +69,16 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
             RegattaRefresher regattaRefresher, StringMessages stringMessages) {
         super(sailingService, regattaRefresher, errorReporter, new RaceSelectionModel(), stringMessages);
         this.errorReporter = errorReporter;
-        connectionHistory = new HashMap<String, SwissTimingReplayRaceDTO>();
         availableSwissTimingRaces = new ArrayList<SwissTimingReplayRaceDTO>();
-
+        previousConfigurationsComboBox = new ListBox();
+        previousConfigurationsComboBox.addChangeHandler(new ChangeHandler() {
+            @Override
+            public void onChange(ChangeEvent event) {
+                jsonUrlBox.setText(previousConfigurationsComboBox.getItemText(previousConfigurationsComboBox.getSelectedIndex()));
+            }
+        });
+        previousConfigurations = new HashMap<String, SwissTimingArchiveConfigurationDTO>();
+        getConnectionHistory();
         VerticalPanel mainPanel = new VerticalPanel();
         this.setWidget(mainPanel);
         mainPanel.setWidth("100%");
@@ -84,26 +93,19 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
         
         verticalPanel.setWidth("100%");
         
-        grid = new Grid(2, 2);
+        grid = new Grid(4, 2);
         verticalPanel.add(grid);
         verticalPanel.setCellWidth(grid, "100%");
-        
+
+        Label jsonUrlLabel = new Label(stringMessages.jsonUrl());
+        grid.setWidget(0, 0, jsonUrlLabel);
+        grid.setWidget(1, 0, previousConfigurationsComboBox);
         Label connection = new Label(stringMessages.historyOfConnections());
-        grid.setWidget(0, 0, connection);
-        
-        connectionEdit = new TextBox();
-        grid.setWidget(1, 0, connectionEdit);
-        connectionEdit.addChangeHandler(new ChangeHandler() {
-            
-            //TODO: add autocompletion support
-            @Override
-            public void onChange(ChangeEvent event) {
-//                updatePanelFromSelectedStoredConfiguration();
-            }
-        });
-        
+        grid.setWidget(2, 0, connection);
+        jsonUrlBox = new TextBox();
+        grid.setWidget(3, 0, jsonUrlBox);
         Button btnListRaces = new Button(stringMessages.listRaces());
-        grid.setWidget(1, 1, btnListRaces);
+        grid.setWidget(3, 1, btnListRaces);
         btnListRaces.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -276,23 +278,29 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
     }
 
     private void getConnectionHistory() {
-//        TODO: persist SwissTiming connections
-//        sailingService.getPreviousTracTracConfigurations(new AsyncCallback<List<TracTracConfigurationDTO>>() {
-//            @Override
-//            public void onFailure(Throwable caught) {
-//                errorReporter.reportError("Remote Procedure Call getPreviousConfigurations() - Failure: "
-//                        + caught.getMessage());
-//            }
-//
-//            @Override
-//            public void onSuccess(List<TracTracConfigurationDTO> result) {
-//            }
-//        });
+        sailingService.getPreviousSwissTimingArchiveConfigurations(new AsyncCallback<List<SwissTimingArchiveConfigurationDTO>>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                errorReporter.reportError("Remote Procedure Call getPreviousConfigurations() - Failure: "
+                        + caught.getMessage());
+            }
+
+            @Override
+            public void onSuccess(List<SwissTimingArchiveConfigurationDTO> result) {
+                previousConfigurationsComboBox.clear();
+                previousConfigurations.clear();
+                for (SwissTimingArchiveConfigurationDTO configEntry : result) {
+                    String name = configEntry.getJsonUrl();
+                    previousConfigurations.put(name, configEntry);
+                    previousConfigurationsComboBox.addItem(name);
+                }
+            }
+        });
     }
 
     private void fillRaces(final SailingServiceAsync sailingService) {
-        final String swissTimingUrl = connectionEdit.getValue();
-        sailingService.listSwissTiminigReplayRaces(swissTimingUrl, new AsyncCallback<List<SwissTimingReplayRaceDTO>>() {
+        final String swissTimingJsonUrl = jsonUrlBox.getValue();
+        sailingService.listSwissTiminigReplayRaces(swissTimingJsonUrl, new AsyncCallback<List<SwissTimingReplayRaceDTO>>() {
             @Override
             public void onFailure(Throwable caught) {
                 SwissTimingReplayConnectorPanel.this.errorReporter.reportError("Error trying to list SwissTiming races: "
@@ -307,26 +315,23 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
                 raceList.getList().addAll(availableSwissTimingRaces);
                 filterEventsTextbox.setText(null);
                 // store a successful configuration in the database for later retrieval
-                //TODO: adapt to SwissTiming connection persistence
-//                sailingService.storeTracTracConfiguration(races.getA(), jsonURL, liveDataURI, storedDataURI,
-//                        new AsyncCallback<Void>() {
-//                            @Override
-//                            public void onFailure(Throwable caught) {
-//                                errorReporter.reportError("Exception trying to store configuration in DB: "
-//                                        + caught.getMessage());
-//                            }
-//
-//                            @Override
-//                            public void onSuccess(Void voidResult) {
-//                                // refresh list of previous configurations
-//                                TracTracConfigurationDTO ttConfig = new TracTracConfigurationDTO(races.getA(),
-//                                        jsonURL, liveDataURI, storedDataURI);
-//                                if (connectionHistory.put(ttConfig.name, ttConfig) == null) {
-//                                    previousConfigurationsComboBox.addItem(ttConfig.name);
-//                                }
-//                            }
-//                        });
-//
+                sailingService.storeSwissTimingArchiveConfiguration(swissTimingJsonUrl,
+                        new AsyncCallback<Void>() {
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                errorReporter.reportError("Exception trying to store configuration in DB: "
+                                        + caught.getMessage());
+                            }
+
+                            @Override
+                            public void onSuccess(Void voidResult) {
+                                // refresh list of previous configurations
+                                SwissTimingArchiveConfigurationDTO stConfig = new SwissTimingArchiveConfigurationDTO(swissTimingJsonUrl);
+                                if (previousConfigurations.put(stConfig.getJsonUrl(), stConfig) == null) {
+                                    previousConfigurationsComboBox.addItem(stConfig.getJsonUrl());
+                                }
+                            }
+                        });
             }
         });
     }

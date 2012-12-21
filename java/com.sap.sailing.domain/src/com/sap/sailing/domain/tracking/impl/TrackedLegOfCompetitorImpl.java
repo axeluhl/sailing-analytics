@@ -370,27 +370,33 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
         if (leaderPosition != null && currentPosition != null) {
             result = Distance.NULL;
             boolean foundCompetitorsLeg = false;
-            for (Leg leg : getTrackedRace().getRace().getCourse().getLegs()) {
-                if (leg == getLeg()) {
-                    foundCompetitorsLeg = true;
-                }
-                if (foundCompetitorsLeg) {
-                    // if the leaderLeg is null, the leader has already arrived
-                    if (leaderLeg == null || leg != leaderLeg.getLeg()) {
-                        // add distance to next mark
-                        Position nextMarkPosition = getTrackedRace().getApproximatePosition(leg.getTo(), timePoint);
-                        Distance distanceToNextMark = getTrackedRace().getTrackedLeg(getCompetitor(), leg)
-                                .getWindwardDistance(currentPosition, nextMarkPosition, timePoint);
-                        result = new MeterDistance(result.getMeters() + distanceToNextMark.getMeters());
-                        currentPosition = nextMarkPosition;
-                    } else {
-                        // we're now in the same leg with leader; compute windward distance to leader
-                        result = new MeterDistance(result.getMeters()
-                                + getTrackedRace().getTrackedLeg(getCompetitor(), leg)
-                                        .getWindwardDistance(currentPosition, leaderPosition, timePoint).getMeters());
-                        break;
+            getTrackedRace().getRace().getCourse().lockForRead();
+            try {
+                for (Leg leg : getTrackedRace().getRace().getCourse().getLegs()) {
+                    if (leg == getLeg()) {
+                        foundCompetitorsLeg = true;
+                    }
+                    if (foundCompetitorsLeg) {
+                        // if the leaderLeg is null, the leader has already arrived
+                        if (leaderLeg == null || leg != leaderLeg.getLeg()) {
+                            // add distance to next mark
+                            Position nextMarkPosition = getTrackedRace().getApproximatePosition(leg.getTo(), timePoint);
+                            Distance distanceToNextMark = getTrackedRace().getTrackedLeg(getCompetitor(), leg)
+                                    .getWindwardDistance(currentPosition, nextMarkPosition, timePoint);
+                            result = new MeterDistance(result.getMeters() + distanceToNextMark.getMeters());
+                            currentPosition = nextMarkPosition;
+                        } else {
+                            // we're now in the same leg with leader; compute windward distance to leader
+                            result = new MeterDistance(result.getMeters()
+                                    + getTrackedRace().getTrackedLeg(getCompetitor(), leg)
+                                            .getWindwardDistance(currentPosition, leaderPosition, timePoint)
+                                            .getMeters());
+                            break;
+                        }
                     }
                 }
+            } finally {
+                getTrackedRace().getRace().getCourse().unlockAfterRead();
             }
         }
         return result;
