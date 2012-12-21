@@ -129,8 +129,8 @@ public class CourseTest {
         assertEquals(wp1, course.getLegs().get(1).getFrom());
         assertEquals(wp2, course.getLegs().get(1).getTo());
         assertTrue(Util.equals(Arrays.asList(new Waypoint[] { wp0_5, wp1, wp2 }), course.getWaypoints()));
-        assertEquals(0, course.getIndexOfWaypoint(wp1));
-        assertEquals(1, course.getIndexOfWaypoint(wp0_5));
+        assertEquals(0, course.getIndexOfWaypoint(wp0_5));
+        assertEquals(1, course.getIndexOfWaypoint(wp1));
         assertEquals(2, course.getIndexOfWaypoint(wp2));
     }
 
@@ -174,9 +174,9 @@ public class CourseTest {
         assertEquals(1, Util.size(course.getLegs()));
         assertEquals(wp2, course.getLegs().get(0).getFrom());
         assertEquals(wp3, course.getLegs().get(0).getTo());
-        assertTrue(Util.equals(Arrays.asList(new Waypoint[] { wp1, wp3 }), course.getWaypoints()));
-        assertEquals(0, course.getIndexOfWaypoint(wp1));
-        assertEquals(-1, course.getIndexOfWaypoint(wp2));
+        assertTrue(Util.equals(Arrays.asList(new Waypoint[] { wp2, wp3 }), course.getWaypoints()));
+        assertEquals(-1, course.getIndexOfWaypoint(wp1));
+        assertEquals(0, course.getIndexOfWaypoint(wp2));
         assertEquals(1, course.getIndexOfWaypoint(wp3));
     }
 
