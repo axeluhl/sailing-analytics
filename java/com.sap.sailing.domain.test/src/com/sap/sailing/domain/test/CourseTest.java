@@ -2,23 +2,33 @@ package com.sap.sailing.domain.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.base.impl.BoatClassImpl;
+import com.sap.sailing.domain.base.impl.CompetitorImpl;
 import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.base.impl.MarkImpl;
+import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
 import com.sap.sailing.domain.common.impl.Util;
+import com.sap.sailing.domain.tracking.DynamicTrackedRace;
+import com.sap.sailing.domain.tracking.TrackedLeg;
+import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
+import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 
 public class CourseTest {
     @Test
@@ -180,4 +190,58 @@ public class CourseTest {
         assertEquals(1, course.getIndexOfWaypoint(wp3));
     }
 
+    @Test
+    public void testRemoveWaypointWithTrackedRaceListening() {
+        List<Waypoint> waypoints = new ArrayList<Waypoint>();
+        final WaypointImpl wp1 = new WaypointImpl(new MarkImpl("Test Mark 1"));
+        waypoints.add(wp1);
+        final WaypointImpl wp2 = new WaypointImpl(new MarkImpl("Test Mark 2"));
+        waypoints.add(wp2);
+        final WaypointImpl wp3 = new WaypointImpl(new MarkImpl("Test Mark 3"));
+        waypoints.add(wp3);
+        Course course = new CourseImpl("Test Course", waypoints);
+        final Set<CompetitorImpl> hasso = Collections.singleton(AbstractLeaderboardTest.createCompetitor("Hasso"));
+        DynamicTrackedRace trackedRace = new DynamicTrackedRaceImpl(/* trackedRegatta */ null,
+                new RaceDefinitionImpl("Test Race", course, new BoatClassImpl("49er", /* upwind start */ true),
+                        hasso),
+                        EmptyWindStore.INSTANCE, /* delayToLiveInMillis */ 3000,
+                        /* millisecondsOverWhichToAverageWind */ 30000,
+                        /* millisecondsOverWhichToAverageSpeed */ 8000);
+        assertLegStructure(course, trackedRace);
+        course.removeWaypoint(0);
+        assertLegStructure(course, trackedRace);
+    }
+
+    @Test
+    public void testInsertWaypointWithTrackedRaceListening() {
+        List<Waypoint> waypoints = new ArrayList<Waypoint>();
+        final WaypointImpl wp1 = new WaypointImpl(new MarkImpl("Test Mark 1"));
+        waypoints.add(wp1);
+        final WaypointImpl wp2 = new WaypointImpl(new MarkImpl("Test Mark 2"));
+        waypoints.add(wp2);
+        Course course = new CourseImpl("Test Course", waypoints);
+        final Set<CompetitorImpl> hasso = Collections.singleton(AbstractLeaderboardTest.createCompetitor("Hasso"));
+        DynamicTrackedRace trackedRace = new DynamicTrackedRaceImpl(/* trackedRegatta */ null,
+                new RaceDefinitionImpl("Test Race", course, new BoatClassImpl("49er", /* upwind start */ true),
+                        hasso),
+                        EmptyWindStore.INSTANCE, /* delayToLiveInMillis */ 3000,
+                        /* millisecondsOverWhichToAverageWind */ 30000,
+                        /* millisecondsOverWhichToAverageSpeed */ 8000);
+        assertLegStructure(course, trackedRace);
+        final WaypointImpl wp1_5 = new WaypointImpl(new MarkImpl("Test Mark 1.5"));
+        course.addWaypoint(0, wp1_5);
+        assertLegStructure(course, trackedRace);
+    }
+
+    private void assertLegStructure(Course course, DynamicTrackedRace trackedRace) {
+        assertEquals(Util.size(course.getLegs()), Util.size(trackedRace.getTrackedLegs()));
+        Iterator<Leg> legIter = course.getLegs().iterator();
+        Iterator<TrackedLeg> trackedLegIter = trackedRace.getTrackedLegs().iterator();
+        while (legIter.hasNext()) {
+            assertTrue(trackedLegIter.hasNext());
+            Leg leg = legIter.next();
+            TrackedLeg trackedLeg = trackedLegIter.next();
+            assertSame(leg, trackedLeg.getLeg());
+        }
+    }
 }

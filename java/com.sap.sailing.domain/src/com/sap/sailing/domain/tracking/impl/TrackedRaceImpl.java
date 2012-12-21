@@ -1331,14 +1331,12 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
             // a waypoint got added; this means that a leg got added as well; but we shouldn't claim we know where
             // in the leg list of the course the leg was added; that's an implementation secret of CourseImpl. So try:
             LinkedHashMap<Leg, TrackedLeg> reorderedTrackedLegs = new LinkedHashMap<Leg, TrackedLeg>();
-            for (Leg leg : getRace().getCourse().getLegs()) {
-                if (!trackedLegs.containsKey(leg)) {
-                    // no tracked leg for leg yet:
-                    TrackedLeg newTrackedLeg = createTrackedLeg(leg);
-                    reorderedTrackedLegs.put(leg, newTrackedLeg);
-                } else {
-                    reorderedTrackedLegs.put(leg, trackedLegs.get(leg));
-                }
+            List<Leg> newLegs = getRace().getCourse().getLegs();
+            for (int i=0; i<zeroBasedIndex; i++) {
+                reorderedTrackedLegs.put(newLegs.get(i), trackedLegs.get(newLegs.get(i)));
+            }
+            for (int i=zeroBasedIndex; i<newLegs.size(); i++) {
+                reorderedTrackedLegs.put(newLegs.get(i), createTrackedLeg(newLegs.get(i)));
             }
             // now ensure that the iteration order is in sync with the leg iteration order
             trackedLegs.clear();
@@ -1439,7 +1437,20 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
             }
             if (toRemove != null) {
                 logger.info("Removing tracked leg at zero-based index "+zeroBasedIndex+" from tracked race "+getRace().getName());
-                trackedLegs.remove(toRemove);
+                LinkedHashMap<Leg, TrackedLeg> newTrackedLegs = new LinkedHashMap<>();
+                for (Map.Entry<Leg, TrackedLeg> trackedLegsEntry : trackedLegs.entrySet()) {
+                    if (trackedLegsEntry.getKey() == toRemove) {
+                        break;
+                    } else {
+                        newTrackedLegs.put(trackedLegsEntry.getKey(), trackedLegsEntry.getValue());
+                    }
+                }
+                trackedLegs.clear();
+                trackedLegs.putAll(newTrackedLegs);
+                List<Leg> newLegs = getRace().getCourse().getLegs();
+                for (int j=zeroBasedIndex; j<newLegs.size(); j++) {
+                    trackedLegs.put(newLegs.get(j), createTrackedLeg(newLegs.get(j)));
+                }
                 updated(/* time point */null);
             }
             // remove all corresponding markpassings if a waypoint has been removed
