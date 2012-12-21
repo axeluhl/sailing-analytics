@@ -39,6 +39,7 @@ public class CourseTest {
         assertEquals(0, Util.size(course.getLegs()));
         assertNull(course.getFirstWaypoint());
         assertNull(course.getLastWaypoint());
+        assertWaypointIndexes(course);
     }
 
     @Test
@@ -48,6 +49,7 @@ public class CourseTest {
         Course course = new CourseImpl("Test Course", waypoints);
         assertEquals(1, Util.size(course.getWaypoints()));
         assertEquals(0, Util.size(course.getLegs()));
+        assertWaypointIndexes(course);
     }
     
     @Test
@@ -57,7 +59,9 @@ public class CourseTest {
         Course course = new CourseImpl("Test Course", waypoints);
         assertEquals(1, Util.size(course.getWaypoints()));
         assertEquals(0, Util.size(course.getLegs()));
+        assertWaypointIndexes(course);
         course.addWaypoint(1, new WaypointImpl(new MarkImpl("Second Mark")));
+        assertWaypointIndexes(course);
         assertEquals(2, Util.size(course.getWaypoints()));
         assertEquals(1, Util.size(course.getLegs()));
     }
@@ -68,7 +72,9 @@ public class CourseTest {
         Course course = new CourseImpl("Test Course", waypoints);
         assertEquals(0, Util.size(course.getWaypoints()));
         assertEquals(0, Util.size(course.getLegs()));
+        assertWaypointIndexes(course);
         course.addWaypoint(0, new WaypointImpl(new MarkImpl("First Mark")));
+        assertWaypointIndexes(course);
         assertEquals(1, Util.size(course.getWaypoints()));
         assertEquals(0, Util.size(course.getLegs()));
     }
@@ -81,7 +87,9 @@ public class CourseTest {
         Course course = new CourseImpl("Test Course", waypoints);
         assertEquals(2, Util.size(course.getWaypoints()));
         assertEquals(1, Util.size(course.getLegs()));
+        assertWaypointIndexes(course);
         course.removeWaypoint(1);
+        assertWaypointIndexes(course);
         assertEquals(1, Util.size(course.getWaypoints()));
         assertEquals(0, Util.size(course.getLegs()));
     }
@@ -93,7 +101,9 @@ public class CourseTest {
         course.addWaypoint(0, new WaypointImpl(new MarkImpl("First Mark")));
         assertEquals(1, Util.size(course.getWaypoints()));
         assertEquals(0, Util.size(course.getLegs()));
+        assertWaypointIndexes(course);
         course.removeWaypoint(0);
+        assertWaypointIndexes(course);
         assertEquals(0, Util.size(course.getWaypoints()));
         assertEquals(0, Util.size(course.getLegs()));
     }
@@ -109,7 +119,9 @@ public class CourseTest {
         assertEquals(2, Util.size(course.getWaypoints()));
         assertEquals(1, Util.size(course.getLegs()));
         final WaypointImpl wp1_5 = new WaypointImpl(new MarkImpl("Test Mark 1.5"));
+        assertWaypointIndexes(course);
         course.addWaypoint(1, wp1_5);
+        assertWaypointIndexes(course);
         assertEquals(3, Util.size(course.getWaypoints()));
         assertEquals(2, Util.size(course.getLegs()));
         assertTrue(Util.equals(Arrays.asList(new Waypoint[] { wp1, wp1_5, wp2 }), course.getWaypoints()));
@@ -130,7 +142,9 @@ public class CourseTest {
         assertEquals(1, Util.size(course.getLegs()));
         final WaypointImpl wp0_5 = new WaypointImpl(new MarkImpl("Test Mark .5"));
         Leg oldSingleLeg = course.getLegs().get(0);
+        assertWaypointIndexes(course);
         course.addWaypoint(0, wp0_5);
+        assertWaypointIndexes(course);
         assertNotSame(course.getLegs().get(0), oldSingleLeg);
         assertEquals(3, Util.size(course.getWaypoints()));
         assertEquals(2, Util.size(course.getLegs()));
@@ -156,7 +170,9 @@ public class CourseTest {
         Course course = new CourseImpl("Test Course", waypoints);
         assertEquals(3, Util.size(course.getWaypoints()));
         assertEquals(2, Util.size(course.getLegs()));
+        assertWaypointIndexes(course);
         course.removeWaypoint(1);
+        assertWaypointIndexes(course);
         assertEquals(2, Util.size(course.getWaypoints()));
         assertEquals(1, Util.size(course.getLegs()));
         assertEquals(wp1, course.getLegs().get(0).getFrom());
@@ -179,7 +195,9 @@ public class CourseTest {
         Course course = new CourseImpl("Test Course", waypoints);
         assertEquals(3, Util.size(course.getWaypoints()));
         assertEquals(2, Util.size(course.getLegs()));
+        assertWaypointIndexes(course);
         course.removeWaypoint(0);
+        assertWaypointIndexes(course);
         assertEquals(2, Util.size(course.getWaypoints()));
         assertEquals(1, Util.size(course.getLegs()));
         assertEquals(wp2, course.getLegs().get(0).getFrom());
@@ -200,6 +218,7 @@ public class CourseTest {
         final WaypointImpl wp3 = new WaypointImpl(new MarkImpl("Test Mark 3"));
         waypoints.add(wp3);
         Course course = new CourseImpl("Test Course", waypoints);
+        assertWaypointIndexes(course);
         final Set<CompetitorImpl> hasso = Collections.singleton(AbstractLeaderboardTest.createCompetitor("Hasso"));
         DynamicTrackedRace trackedRace = new DynamicTrackedRaceImpl(/* trackedRegatta */ null,
                 new RaceDefinitionImpl("Test Race", course, new BoatClassImpl("49er", /* upwind start */ true),
@@ -210,6 +229,14 @@ public class CourseTest {
         assertLegStructure(course, trackedRace);
         course.removeWaypoint(0);
         assertLegStructure(course, trackedRace);
+        assertWaypointIndexes(course);
+    }
+
+    private void assertWaypointIndexes(Course course) {
+        int i=0;
+        for (Waypoint waypoint : course.getWaypoints()) {
+            assertEquals(i, course.getIndexOfWaypoint(waypoint));
+        }
     }
 
     @Test
@@ -229,7 +256,9 @@ public class CourseTest {
                         /* millisecondsOverWhichToAverageSpeed */ 8000);
         assertLegStructure(course, trackedRace);
         final WaypointImpl wp1_5 = new WaypointImpl(new MarkImpl("Test Mark 1.5"));
+        assertWaypointIndexes(course);
         course.addWaypoint(0, wp1_5);
+        assertWaypointIndexes(course);
         assertLegStructure(course, trackedRace);
     }
 
