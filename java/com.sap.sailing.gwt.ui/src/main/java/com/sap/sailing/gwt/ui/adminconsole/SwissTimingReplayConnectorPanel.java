@@ -74,7 +74,7 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
         previousConfigurationsComboBox.addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent event) {
-                jsonUrlBox.setText(previousConfigurationsComboBox.getItemText(previousConfigurationsComboBox.getSelectedIndex()));
+                updateJsonUrlFromSelectedPreviousConfiguration();
             }
         });
         previousConfigurations = new HashMap<String, SwissTimingArchiveConfigurationDTO>();
@@ -294,6 +294,7 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
                     previousConfigurations.put(name, configEntry);
                     previousConfigurationsComboBox.addItem(name);
                 }
+                updateJsonUrlFromSelectedPreviousConfiguration();
             }
         });
     }
@@ -456,6 +457,10 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
         }
         // now sort again according to selected criterion
         ColumnSortEvent.fire(raceTable, raceTable.getColumnSortList());
+    }
+
+    private void updateJsonUrlFromSelectedPreviousConfiguration() {
+        jsonUrlBox.setText(previousConfigurationsComboBox.getItemText(previousConfigurationsComboBox.getSelectedIndex()));
     }
 
 }

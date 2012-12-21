@@ -5,6 +5,8 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 public class SwissTimingArchiveConfigurationDTO implements IsSerializable {
     private String jsonUrl;
 
+    SwissTimingArchiveConfigurationDTO() {}
+    
     public SwissTimingArchiveConfigurationDTO(String jsonUrl) {
         super();
         this.jsonUrl = jsonUrl;
