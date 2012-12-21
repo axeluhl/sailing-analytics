@@ -1,9 +1,8 @@
 package com.sap.sailing.domain.test;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
@@ -144,7 +143,6 @@ public class CourseTest {
         assertEquals(2, Util.size(course.getWaypoints()));
         assertEquals(1, Util.size(course.getLegs()));
         final WaypointImpl wp0_5 = new WaypointImpl(new MarkImpl("Test Mark .5"));
-        Leg oldSingleLeg = course.getLegs().get(0);
         assertWaypointIndexes(course);
         course.addWaypoint(0, wp0_5);
         assertWaypointIndexes(course);
