@@ -16,6 +16,7 @@ import java.util.Set;
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.Course;
+import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
@@ -29,6 +30,8 @@ import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
+
+import difflib.PatchFailedException;
 
 public class CourseTest {
     @Test
@@ -156,6 +159,24 @@ public class CourseTest {
         assertEquals(0, course.getIndexOfWaypoint(wp0_5));
         assertEquals(1, course.getIndexOfWaypoint(wp1));
         assertEquals(2, course.getIndexOfWaypoint(wp2));
+    }
+
+    @Test
+    public void testMovingWaypointFoward() throws PatchFailedException {
+        List<Waypoint> waypoints = new ArrayList<Waypoint>();
+        final WaypointImpl wp1 = new WaypointImpl(new MarkImpl("Test Mark 1"));
+        waypoints.add(wp1);
+        final WaypointImpl wp2 = new WaypointImpl(new MarkImpl("Test Mark 2"));
+        waypoints.add(wp2);
+        final WaypointImpl wp3 = new WaypointImpl(new MarkImpl("Test Mark 3"));
+        waypoints.add(wp3);
+        Course course = new CourseImpl("Test Course", waypoints);
+        assertEquals(3, Util.size(course.getWaypoints()));
+        assertEquals(2, Util.size(course.getLegs()));
+        assertWaypointIndexes(course);
+        course.update(Arrays.asList(wp2.getMarks().iterator().next(), wp3.getMarks().iterator().next(), wp1.getMarks().iterator().next()),
+                DomainFactory.INSTANCE);
+        assertWaypointIndexes(course);
     }
 
     @Test

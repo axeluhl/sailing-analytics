@@ -14,12 +14,12 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.CourseListener;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Leg;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.impl.NamedImpl;
 import com.sap.sailing.util.CourseAsWaypointList;
@@ -65,6 +65,7 @@ public class CourseImpl extends NamedImpl implements Course {
                 previous = current;
             }
         }
+        assert this.waypoints.size() == waypointIndexes.size();
     }
     
     @Override
@@ -140,6 +141,7 @@ public class CourseImpl extends NamedImpl implements Course {
             logger.info("Waypoint " + waypointToAdd + " added to course '" + getName() + "', before notifying listeners");
             notifyListenersWaypointAdded(zeroBasedPosition, waypointToAdd);
             logger.info("Waypoint " + waypointToAdd + " added to course '" + getName() + "', after notifying listeners");
+            assert waypoints.size() == waypointIndexes.size();
         } finally {
             LockUtil.unlockAfterWrite(lock);
         }
@@ -177,6 +179,7 @@ public class CourseImpl extends NamedImpl implements Course {
                 logger.info("Waypoint " + removedWaypoint + " removed from course '" + getName() + "', before notifying listeners");
                 notifyListenersWaypointRemoved(zeroBasedPosition, removedWaypoint);
                 logger.info("Waypoint " + removedWaypoint + " removed from course '" + getName() + "', after notifying listeners");
+                assert waypoints.size() == waypointIndexes.size();
             } finally {
                 LockUtil.unlockAfterWrite(lock);
             }
@@ -375,7 +378,7 @@ public class CourseImpl extends NamedImpl implements Course {
     }
 
     @Override
-    public void update(List<ControlPoint> newControlPoints, DomainFactory baseDomainFactory) throws PatchFailedException {
+    public void update(List<? extends ControlPoint> newControlPoints, DomainFactory baseDomainFactory) throws PatchFailedException {
         LockUtil.lockForWrite(lock);
         try {
             Iterable<Waypoint> courseWaypoints = getWaypoints();
@@ -409,6 +412,7 @@ public class CourseImpl extends NamedImpl implements Course {
             if (!patch.isEmpty()) {
                 logger.info("applying course update " + patch + " to course " + this);
                 CourseAsWaypointList courseAsWaypointList = new CourseAsWaypointList(this);
+                // FIXME issue: if the patch contains "forward moves" it may first insert the additional duplicates at the end, then remove them at the beginning, leading to duplicate waypoints in the course which is not supported
                 patch.applyToInPlace(courseAsWaypointList);
             }
         } finally {
