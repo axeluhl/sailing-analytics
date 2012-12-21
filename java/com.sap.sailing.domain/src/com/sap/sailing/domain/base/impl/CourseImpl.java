@@ -115,6 +115,7 @@ public class CourseImpl extends NamedImpl implements Course {
     public void addWaypoint(int zeroBasedPosition, Waypoint waypointToAdd) {
         LockUtil.lockForWrite(lock);
         try {
+            assert !waypoints.contains(waypointToAdd); // no duplicate waypoints allowed
             logger.info("Adding waypoint " + waypointToAdd + " to course '" + getName() + "'");
             waypoints.add(zeroBasedPosition, waypointToAdd);
             Map<Waypoint, Integer> updatesToWaypointIndexes = new HashMap<Waypoint, Integer>();
@@ -412,7 +413,6 @@ public class CourseImpl extends NamedImpl implements Course {
             if (!patch.isEmpty()) {
                 logger.info("applying course update " + patch + " to course " + this);
                 CourseAsWaypointList courseAsWaypointList = new CourseAsWaypointList(this);
-                // FIXME issue: if the patch contains "forward moves" it may first insert the additional duplicates at the end, then remove them at the beginning, leading to duplicate waypoints in the course which is not supported
                 patch.applyToInPlace(courseAsWaypointList);
             }
         } finally {
