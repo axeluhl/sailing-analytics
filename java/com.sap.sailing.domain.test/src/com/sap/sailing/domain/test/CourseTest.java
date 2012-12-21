@@ -235,7 +235,9 @@ public class CourseTest {
     private void assertWaypointIndexes(Course course) {
         int i=0;
         for (Waypoint waypoint : course.getWaypoints()) {
-            assertEquals(i, course.getIndexOfWaypoint(waypoint));
+            assertEquals("expected index for waypoint "+waypoint.getName()+" to be "+i+" but was "+course.getIndexOfWaypoint(waypoint),
+                    i, course.getIndexOfWaypoint(waypoint));
+            i++;
         }
     }
 
