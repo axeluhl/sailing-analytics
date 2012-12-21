@@ -573,13 +573,18 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         final SailingSimulator simulator = new SailingSimulatorImpl(sp);
         final Map<String, Path> pathsAndNames = simulator.getAllPathsEvenTimed(wf.getTimeStep().asMillis());
 
-        final int noOfPaths = pathsAndNames.size() + 1; // the last path is the polyline
+        int noOfPaths = pathsAndNames.size();
+        if (mode == SailingSimulatorUtil.measured) {
+            noOfPaths++; // the last path is the polyline
+        }
         final PathDTO[] pathDTOs = new PathDTO[noOfPaths];
         int index = noOfPaths - 1;
 
+        if (mode == SailingSimulatorUtil.measured) {
         // Adding the polyline
         pathDTOs[0] = this.getPolylinePathDTO(pathsAndNames.get("6#GPS Poly"), pathsAndNames.get("7#GPS Track"));
-
+        }
+        
         for (final Entry<String, Path> entry : pathsAndNames.entrySet()) {
             logger.info("Path " + entry.getKey());
 
@@ -596,6 +601,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
 
             index--;
         }
+        
 
         RaceMapDataDTO rcDTO;
         if (mode == SailingSimulatorUtil.measured) {
