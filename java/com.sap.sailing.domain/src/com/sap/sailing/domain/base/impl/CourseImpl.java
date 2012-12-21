@@ -126,18 +126,10 @@ public class CourseImpl extends NamedImpl implements Course {
                 }
             }
             waypointIndexes.putAll(updatesToWaypointIndexes);
-            int legStartWaypointIndex;
-            if (zeroBasedPosition == waypoints.size() - 1) { // added to end
-                legStartWaypointIndex = zeroBasedPosition - 1;
-            } else {
-                legStartWaypointIndex = zeroBasedPosition;
-            }
+            // legs are "virtual" in that they only contain a waypoint index; adding happens most conveniently by
+            // appending a leg with its start waypoint index pointing to the last but one waypoint, leaving all others unchanged
             if (waypoints.size() > 1) {
-                legs.add(legStartWaypointIndex, new LegImpl(this, legStartWaypointIndex));
-            }
-            // update remaining legs with adjusted waypoint indexes
-            for (int i=legStartWaypointIndex+1; i<legs.size(); i++) {
-                legs.set(i, new LegImpl(this, i));
+                legs.add(new LegImpl(this, waypoints.size()-2));
             }
             logger.info("Waypoint " + waypointToAdd + " added to course '" + getName() + "', before notifying listeners");
             notifyListenersWaypointAdded(zeroBasedPosition, waypointToAdd);
@@ -154,7 +146,6 @@ public class CourseImpl extends NamedImpl implements Course {
             Waypoint removedWaypoint;
             LockUtil.lockForWrite(lock);
             try {
-                boolean isLast = zeroBasedPosition == waypoints.size() - 1;
                 removedWaypoint = waypoints.remove(zeroBasedPosition);
                 logger.info("Removing waypoint " + removedWaypoint + " from course '" + getName() + "'");
                 waypointIndexes.remove(removedWaypoint);
@@ -165,17 +156,11 @@ public class CourseImpl extends NamedImpl implements Course {
                     }
                 }
                 waypointIndexes.putAll(updatesToWaypointIndexes);
-                if (isLast) {
-                    if (waypoints.size() > 0) { // if we had only one waypoint, we didn't have any legs
-                        // last waypoint was removed; remove last leg
-                        legs.remove(legs.size() - 1);
-                    }
-                } else {
-                    legs.remove(zeroBasedPosition);
-                }
-                // renumber subsequent legs
-                for (int i=zeroBasedPosition; i<waypoints.size()-1; i++) {
-                    legs.set(i, new LegImpl(this, i));
+                // the legs are "virtual" only in that they contain a waypoint index; when removing, removing the last is most
+                // convenient because all other legs' indices will still be contiguous
+                if (!legs.isEmpty()) { // if we had only one waypoint, we didn't have any legs
+                    // last waypoint was removed; remove last leg
+                    legs.remove(legs.size() - 1);
                 }
                 logger.info("Waypoint " + removedWaypoint + " removed from course '" + getName() + "', before notifying listeners");
                 notifyListenersWaypointRemoved(zeroBasedPosition, removedWaypoint);
