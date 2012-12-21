@@ -122,7 +122,9 @@ public class SailingSimulatorImpl implements SailingSimulator {
             logger.info("base wind: "+this.simulationParameters.getBoatPolarDiagram().getWind().getKnots()+" kn, "+((wf.getWindParameters().baseWindBearing)%360.0)+"°");
             
             // set water current
-            //this.simulationParameters.getBoatPolarDiagram().setCurrent(new KnotSpeedWithBearingImpl(2.0,new DegreeBearingImpl((wf.getWindParameters().baseWindBearing+90.0)%360.0)));
+            // TODO: nicer initialize of polar diagram interpolate table
+            //this.simulationParameters.getBoatPolarDiagram().setCurrent(null); // initialize
+            //this.simulationParameters.getBoatPolarDiagram().setCurrent(new KnotSpeedWithBearingImpl(1.0,new DegreeBearingImpl((wf.getWindParameters().baseWindBearing+90.0)%360.0)));
             //this.simulationParameters.getBoatPolarDiagram().setCurrent(new KnotSpeedWithBearingImpl(2.0,new DegreeBearingImpl((270.0)%360.0)));
             if (this.simulationParameters.getBoatPolarDiagram().getCurrent() != null) {
                 logger.info("water current: "+this.simulationParameters.getBoatPolarDiagram().getCurrent().getKnots()+" kn, "+this.simulationParameters.getBoatPolarDiagram().getCurrent().getBearing().getDegrees()+"°");

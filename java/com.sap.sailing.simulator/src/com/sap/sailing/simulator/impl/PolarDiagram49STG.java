@@ -20,7 +20,7 @@ public class PolarDiagram49STG extends PolarDiagramBase {
 
         tableRow = new TreeMap<Bearing, Speed>(PolarDiagramBase.bearingComparator);
         tableRow.put(new DegreeBearingImpl(0), Speed.NULL);
-        tableRow.put(new DegreeBearingImpl(cutAngle), new KnotSpeedImpl(1));
+        tableRow.put(new DegreeBearingImpl(cutAngle), Speed.NULL);
         tableRow.put(new DegreeBearingImpl(90), Speed.NULL);
         tableRow.put(new DegreeBearingImpl(180), Speed.NULL);
         speedTable.put(Speed.NULL, tableRow);
