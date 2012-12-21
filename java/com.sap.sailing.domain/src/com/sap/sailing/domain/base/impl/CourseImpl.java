@@ -130,7 +130,7 @@ public class CourseImpl extends NamedImpl implements Course {
             } else {
                 legStartWaypointIndex = zeroBasedPosition;
             }
-            // FIXME Arghhhhhh... need to update index of start waypoint for all subsequent legs!!!
+            // FIXME bug 1113 Arghhhhhh... need to update index of start waypoint for all subsequent legs!!!
             if (waypoints.size() > 1) {
                 legs.add(new LegImpl(this, legStartWaypointIndex));
             }
