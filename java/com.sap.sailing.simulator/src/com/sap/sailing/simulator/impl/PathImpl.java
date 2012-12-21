@@ -46,7 +46,11 @@ public class PathImpl implements Path, Serializable {
     }
 
     @Override
-    public List<TimedPositionWithSpeed> getEvenTimedPath(final long timeStep) {
+    public Path getEvenTimedPath(final long timestep) {
+        return new PathImpl(this.getEvenTimedPathAsList(timestep), this.windField);
+    }
+
+    private List<TimedPositionWithSpeed> getEvenTimedPathAsList(final long timeStep) {
 
         final TimePoint startTime = this.pathPoints.get(0).getTimePoint();
         final TimePoint endTime = this.pathPoints.get(this.pathPoints.size() - 1).getTimePoint();
@@ -232,9 +236,6 @@ public class PathImpl implements Path, Serializable {
         return null;
     }
 
-    private static final boolean endsConsideredTurns = false;
-
-    // I077899
     @Override
     public List<TimedPositionWithSpeed> getTurns() {
         if (this.pathPoints == null) {
@@ -257,46 +258,19 @@ public class PathImpl implements Path, Serializable {
             currentPoint = this.pathPoints.get(index);
 
             if (index == 0 || index == (noOfPoints - 1)) {
-                if (endsConsideredTurns) {
-                    list.add(currentPoint);
-                }
+                list.add(currentPoint);
             } else {
 
                 previousPoint = this.pathPoints.get(index - 1);
                 nextPoint = this.pathPoints.get(index + 1);
 
-                if (PathImpl.isPosition2Turn(previousPoint.getPosition(), currentPoint.getPosition(),
-                        nextPoint.getPosition())) {
+                if (currentPoint.getPosition().isTurn(previousPoint.getPosition(), nextPoint.getPosition())) {
                     list.add(currentPoint);
                 }
             }
         }
 
         return list;
-    }
-
-    @Override
-    public Path getEvenTimedPath2(final long timestep) {
-        return new PathImpl(this.getEvenTimedPath(timestep), this.windField);
-    }
-
-    private static double TRESHOLD_DEGREES = 15;
-
-    private static boolean isPosition2Turn(final Position position1, final Position position2, final Position position3) {
-        return PathImpl.isPosition2Turn(position1, position2, position3, TRESHOLD_DEGREES);
-    }
-
-    private static boolean isPosition2Turn(final Position pos1, final Position pos2, final Position pos3,
-            final double treshold) {
-        final Bearing b1 = pos1.getBearingGreatCircle(pos2);
-        final Bearing b2 = pos2.getBearingGreatCircle(pos3);
-        double diff = b1.getDifferenceTo(b2).getDegrees();
-
-        if (diff < 0) {
-            diff = 360 + diff;
-        }
-
-        return !((diff >= 0 && diff <= treshold) || (diff >= (180 - treshold) && diff <= (180 + treshold)) || (diff >= (360 - treshold) && diff <= 360));
     }
 
     public static boolean saveToGpxFile(final Path path, final String fileName) {
@@ -326,7 +300,7 @@ public class PathImpl implements Path, Serializable {
                     + formatter.format(timedPoint.getTimePoint().asDate()) + "</time>\r\n\t\t\t</trkpt>");
         }
 
-        buffer.append("\t\t</trkseg>\r\n\t</trk>\r\n</gpx>\r\n");
+        buffer.append("\r\n\t\t</trkseg>\r\n\t</trk>\r\n</gpx>\r\n");
 
         final String content = buffer.toString();
 

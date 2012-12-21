@@ -22,13 +22,13 @@ import com.sap.sailing.gwt.ui.shared.racemap.FullCanvasOverlay;
  */
 public class WindFieldMapMouseMoveHandler implements MapMouseMoveHandler {
 
-    private FullCanvasOverlay canvasOverlay;
+    private final FullCanvasOverlay canvasOverlay;
     private Map<ToolTip, SimulatorWindDTO> windFieldPoints = null;
     private ImageData lastImageData = null;
     private double lastToolx;
     private double lastTooly;
 
-    public WindFieldMapMouseMoveHandler(FullCanvasOverlay canvasOverlay) {
+    public WindFieldMapMouseMoveHandler(final FullCanvasOverlay canvasOverlay) {
         super();
         this.canvasOverlay = canvasOverlay;
     }
@@ -36,47 +36,47 @@ public class WindFieldMapMouseMoveHandler implements MapMouseMoveHandler {
     public void clear() {
         lastImageData = null;
     }
-    
-    public void setWindFieldPoints(Map<ToolTip, SimulatorWindDTO> windFieldPoints) {
+
+    public void setWindFieldPoints(final Map<ToolTip, SimulatorWindDTO> windFieldPoints) {
         this.windFieldPoints = windFieldPoints;
     }
 
     @Override
-    public void onMouseMove(MapMouseMoveEvent event) {
+    public void onMouseMove(final MapMouseMoveEvent event) {
         //logger.info("In MouseMove");
-        
+
         if (windFieldPoints == null) {
             return;
         }
-        
-        LatLng latLng = event.getLatLng();
-        Point pointP = event.getSender().convertLatLngToDivPixel(latLng);
-        double x = pointP.getX() - canvasOverlay.getWidgetPosLeft();
-        double y = pointP.getY() - canvasOverlay.getWidgetPosTop();
-        ToolTip point = new ToolTip(x, y);
-        Context2d context2d = canvasOverlay.getCanvas().getContext2d();
+
+        final LatLng latLng = event.getLatLng();
+        final Point pointP = event.getSender().convertLatLngToDivPixel(latLng);
+        final double x = pointP.getX() - canvasOverlay.getWidgetPosLeft();
+        final double y = pointP.getY() - canvasOverlay.getWidgetPosTop();
+        final ToolTip point = new ToolTip(x, y);
+        final Context2d context2d = canvasOverlay.getCanvas().getContext2d();
         if (lastImageData != null) {
             context2d.putImageData(lastImageData, lastToolx, lastTooly);
         }
-        
+
         if (windFieldPoints.containsKey(point)) {
             //logger.info("Found Point");
             lastToolx = x;
             lastTooly = y;
             lastImageData = context2d.getImageData(x, y, ToolTip.toolRectW, ToolTip.toolRectH);
-           
-            
-            SimulatorWindDTO windDTO = windFieldPoints.get(point);
+
+
+            final SimulatorWindDTO windDTO = windFieldPoints.get(point);
             context2d.setFillStyle("#4f4f4f");
             context2d.fillRect(x, y, ToolTip.toolRectW, ToolTip.toolRectH);
 
             context2d.setFillStyle("#FFFFFF");
             context2d.fillRect(x + 3, y + 3, ToolTip.toolRectW - 6, ToolTip.toolRectH - 6);
-           
+
             context2d.setFillStyle("Blue");
-            String speedStr = NumberFormat.getFormat("#.00").format(windDTO.trueWindSpeedInKnots);
-            String bearingStr = NumberFormat.getFormat("#.00").format(windDTO.trueWindBearingDeg);
-            String ttMsg = speedStr + " kn " + bearingStr + "°";
+            final String speedStr = NumberFormat.getFormat("#.00").format(windDTO.trueWindSpeedInKnots);
+            final String bearingStr = NumberFormat.getFormat("#.00").format(windDTO.trueWindBearingDeg);
+            final String ttMsg = speedStr + " kn " + bearingStr + "°";
             context2d.fillText(ttMsg, x+10,y+15,60);
         }
 

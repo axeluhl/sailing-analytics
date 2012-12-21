@@ -6,9 +6,9 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.gwt.ui.shared.BoatClassDTOsAndNotificationMessage;
 import com.sap.sailing.gwt.ui.shared.PolarDiagramDTOAndNotificationMessage;
 import com.sap.sailing.gwt.ui.shared.PositionDTO;
-import com.sap.sailing.gwt.ui.shared.ReceivePolarDiagramDataDTO;
-import com.sap.sailing.gwt.ui.shared.RequestPolarDiagramDataDTO;
-import com.sap.sailing.gwt.ui.shared.SimulatorResultsDTOAndNotificationMessage;
+import com.sap.sailing.gwt.ui.shared.RequestTotalTimeDTO;
+import com.sap.sailing.gwt.ui.shared.ResponseTotalTimeDTO;
+import com.sap.sailing.gwt.ui.shared.SimulatorResultsDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldGenParamsDTO;
 import com.sap.sailing.gwt.ui.shared.WindLatticeDTO;
@@ -24,17 +24,18 @@ public interface SimulatorServiceAsync {
 
     void getWindField(WindFieldGenParamsDTO params, WindPatternDisplay display, AsyncCallback<WindFieldDTO> callback);
 
-    //void getPaths(WindFieldGenParamsDTO params, WindPatternDisplay display, AsyncCallback<PathDTO[]> callback);
-
     void getWindPatterns(AsyncCallback<List<WindPatternDTO>> callback);
 
     void getWindPatternDisplay(WindPatternDTO pattern, AsyncCallback<WindPatternDisplay> callback);
 
-    void getSimulatorResults(char mode, WindFieldGenParamsDTO params, WindPatternDisplay display, boolean withWindField, int boatClassIndex, AsyncCallback<SimulatorResultsDTOAndNotificationMessage> callback);
+    void getSimulatorResults(char mode, WindFieldGenParamsDTO params, WindPatternDisplay display, boolean withWindField, int boatClassIndex,
+            AsyncCallback<SimulatorResultsDTO> callback);
 
     void getBoatClasses(AsyncCallback<BoatClassDTOsAndNotificationMessage> callback);
 
     void getPolarDiagramDTO(Double bearingStep, int boatClassIndex, AsyncCallback<PolarDiagramDTOAndNotificationMessage> callback);
 
-    void getSpeedsFromPolarDiagram(RequestPolarDiagramDataDTO requestData, AsyncCallback<ReceivePolarDiagramDataDTO> callback);
+    void getTotalTime(RequestTotalTimeDTO requestData, AsyncCallback<ResponseTotalTimeDTO> asyncCallback);
+
+    void getTotalTime2(RequestTotalTimeDTO requestData, AsyncCallback<ResponseTotalTimeDTO> asyncCallback);
 }

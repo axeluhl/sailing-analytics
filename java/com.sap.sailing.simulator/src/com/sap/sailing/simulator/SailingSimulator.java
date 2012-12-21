@@ -1,6 +1,5 @@
 package com.sap.sailing.simulator;
 
-import java.util.List;
 import java.util.Map;
 
 public interface SailingSimulator {
@@ -8,12 +7,12 @@ public interface SailingSimulator {
     void setSimulationParameters(SimulationParameters params);
 
     SimulationParameters getSimulationParameters();
-    
+
+    Path getGPSTrack();
+
     Map<String, Path> getAllPaths();
 
-    Map<String, List<TimedPositionWithSpeed>> getAllPathsEvenTimed(long millisecondsStep);
+    Map<String, Path> getAllPathsEvenTimed(long millisecondsStep);
 
-    Map<String, Path> getAllPathsEvenTimed2(long millisecondsStep);
-    
     Path getRaceCourse();
 }

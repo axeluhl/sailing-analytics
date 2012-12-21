@@ -28,7 +28,6 @@ import com.sap.sailing.simulator.Path;
 import com.sap.sailing.simulator.PathGenerator;
 import com.sap.sailing.simulator.SailingSimulator;
 import com.sap.sailing.simulator.SimulationParameters;
-import com.sap.sailing.simulator.TimedPositionWithSpeed;
 import com.sap.sailing.simulator.util.SailingSimulatorUtil;
 import com.sap.sailing.simulator.windfield.WindFieldGenerator;
 import com.sap.sailing.simulator.windfield.impl.WindFieldGeneratorMeasured;
@@ -37,6 +36,28 @@ public class SailingSimulatorImpl implements SailingSimulator {
 
     private SimulationParameters simulationParameters;
     private Path racecourse;
+
+    private static final double windScale = 4.5;
+
+    // proxy configuration
+    private static final String liveURI = "tcp://10.18.22.156:1520";
+
+    // no-proxy configuration
+    // private static final String liveURI = "tcp://germanmaster.traclive.dk:4400";
+
+    // proxy configuration
+    private static final String storedURI = "tcp://10.18.22.156:1521";
+
+    // no-proxy configuration
+    // private static final String storedURI = "tcp://germanmaster.traclive.dk:4401";
+
+    private static final String raceURL = "http://germanmaster.traclive.dk/events/event_20110929_Internatio/clientparams.php?event=event_20110929_Internatio&race=d1f521fa-ec52-11e0-a523-406186cbf87c";
+    // private static final String raceURL =
+    // "http://germanmaster.traclive.dk/events/event_20110929_Internatio/clientparams.php?event=event_20110929_Internatio&race=eb06795a-ec52-11e0-a523-406186cbf87c";
+    // private static final String raceURL =
+    // "http://germanmaster.traclive.dk/events/event_20120615_KielerWoch/clientparams.php?event=event_20120615_KielerWoch&race=0b5969cc-b789-11e1-a845-406186cbf87c";
+    // private static final String raceURL =
+    // "http://germanmaster.traclive.dk/events/event_20110929_Internatio/clientparams.php?event=event_20110929_Internatio&race=6bb0829e-ec44-11e0-a523-406186cbf87c";
 
     private static Logger logger = Logger.getLogger("com.sap.sailing");
 
@@ -54,8 +75,6 @@ public class SailingSimulatorImpl implements SailingSimulator {
         return this.simulationParameters;
     }
 
-    // private static Logger logger = Logger.getLogger("com.sap.sailing");
-
     @Override
     public Map<String, Path> getAllPaths() {
 
@@ -70,23 +89,8 @@ public class SailingSimulatorImpl implements SailingSimulator {
                 return allPaths;
             }
 
-            //
-            // load examplary GPS-path
-            //
-            final String raceURL = "http://germanmaster.traclive.dk/events/event_20110929_Internatio/clientparams.php?event=event_20110929_Internatio&race=d1f521fa-ec52-11e0-a523-406186cbf87c";
-            // String raceURL =
-            // "http://germanmaster.traclive.dk/events/event_20110929_Internatio/clientparams.php?event=event_20110929_Internatio&race=eb06795a-ec52-11e0-a523-406186cbf87c";
-            // String raceURL =
-            // "http://germanmaster.traclive.dk/events/event_20120615_KielerWoch/clientparams.php?event=event_20120615_KielerWoch&race=0b5969cc-b789-11e1-a845-406186cbf87c";
-            // String raceURL =
-            // "http://germanmaster.traclive.dk/events/event_20110929_Internatio/clientparams.php?event=event_20110929_Internatio&race=6bb0829e-ec44-11e0-a523-406186cbf87c";
             final PathGeneratorTracTrac genTrac = new PathGeneratorTracTrac(this.simulationParameters);
-
-            // proxy configuration
-            genTrac.setEvaluationParameters(raceURL, "tcp://10.18.22.156:1520", "tcp://10.18.22.156:1521", 4.5); // new
-
-            // no-proxy configuration
-            //genTrac.setEvaluationParameters(raceURL, "tcp://germanmaster.traclive.dk:4400", "tcp://germanmaster.traclive.dk:4401", 4.5);
+            genTrac.setEvaluationParameters(raceURL, liveURI, storedURI, windScale);
 
             gpsPath = genTrac.getPath();
             gpsPathPoly = genTrac.getPathPolyline(new MeterDistance(4.88));
@@ -115,12 +119,12 @@ public class SailingSimulatorImpl implements SailingSimulator {
 
         if (gridArea != null) {
             final Boundary bd = new RectangularBoundary(gridArea[0], gridArea[1], 0.1);
-            
+
             // set base wind bearing
             wf.getWindParameters().baseWindBearing += bd.getSouth().getDegrees();
             //System.out.println("baseWindBearing: " + wf.getWindParameters().baseWindBearing);
             logger.info("base wind: "+this.simulationParameters.getBoatPolarDiagram().getWind().getKnots()+" kn, "+((wf.getWindParameters().baseWindBearing)%360.0)+"°");
-            
+
             // set water current
             // TODO: nicer initialize of polar diagram interpolate table
             //this.simulationParameters.getBoatPolarDiagram().setCurrent(null); // initialize
@@ -129,7 +133,7 @@ public class SailingSimulatorImpl implements SailingSimulator {
             if (this.simulationParameters.getBoatPolarDiagram().getCurrent() != null) {
                 logger.info("water current: "+this.simulationParameters.getBoatPolarDiagram().getCurrent().getKnots()+" kn, "+this.simulationParameters.getBoatPolarDiagram().getCurrent().getBearing().getDegrees()+"°");
             }
-            
+
             wf.setBoundary(bd);
             final Position[][] positionGrid = bd.extractGrid(gridRes[0], gridRes[1]);
             wf.setPositionGrid(positionGrid);
@@ -215,34 +219,26 @@ public class SailingSimulatorImpl implements SailingSimulator {
     }
 
     @Override
-    public Map<String, List<TimedPositionWithSpeed>> getAllPathsEvenTimed(final long millisecondsStep) {
-
-        final Map<String, List<TimedPositionWithSpeed>> allTimedPaths = new TreeMap<String, List<TimedPositionWithSpeed>>();
-
-        final Map<String, Path> allPaths = this.getAllPaths();
-        for (final Entry<String, Path> entry : allPaths.entrySet()) {
-            final String key = entry.getKey();
-            final Path value = entry.getValue();
-            allTimedPaths.put(key, value.getEvenTimedPath(millisecondsStep));
-        }
-
-        return allTimedPaths;
-    }
-
-    @Override
     public Path getRaceCourse() {
         return this.racecourse;
     }
 
     @Override
-    public Map<String, Path> getAllPathsEvenTimed2(final long millisecondsStep) {
+    public Map<String, Path> getAllPathsEvenTimed(final long millisecondsStep) {
+
         final Map<String, Path> allTimedPaths = new TreeMap<String, Path>();
         final Map<String, Path> allPaths = this.getAllPaths();
 
         for (final Entry<String, Path> entry : allPaths.entrySet()) {
-            final String key = entry.getKey();
+
+            final String pathName = entry.getKey();
             final Path value = entry.getValue();
-            allTimedPaths.put(key, value.getEvenTimedPath2(millisecondsStep));
+
+            if (pathName.equals("7#GPS Track")) {
+                allTimedPaths.put(pathName, value);
+            } else {
+                allTimedPaths.put(pathName, value.getEvenTimedPath(millisecondsStep));
+            }
         }
 
         return allTimedPaths;
@@ -409,5 +405,20 @@ public class SailingSimulatorImpl implements SailingSimulator {
         }
 
         return result;
+    }
+
+    @Override
+    public Path getGPSTrack() {
+
+        Path path = readFromResourcesFile("resources/7#GPS Track.dat");
+        if (path == null) {
+            System.err.println("[ERROR][SailingSimulatorImpl][readPathsFromResources] Cannot de-serialize path from resources/7#GPS Track.dat");
+
+            final PathGeneratorTracTrac genTrac = new PathGeneratorTracTrac(this.simulationParameters);
+            genTrac.setEvaluationParameters(raceURL, liveURI, storedURI, windScale);
+            path = genTrac.getPath();
+        }
+
+        return path;
     }
 }

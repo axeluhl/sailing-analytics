@@ -3,13 +3,43 @@ package com.sap.sailing.gwt.ui.shared;
 import com.google.gwt.user.client.rpc.IsSerializable;
 
 public class SimulatorWindDTO implements IsSerializable {
-    public boolean isTurn;
+    public Boolean isTurn;
     public Double trueWindSpeedInKnots;
     public Double trueWindBearingDeg;
     public PositionDTO position;
     public Long timepoint;
 
     public SimulatorWindDTO() {
+        this.isTurn = false;
+        this.trueWindBearingDeg = 0.0;
+        this.trueWindSpeedInKnots = 0.0;
+        this.position = null;
+        this.timepoint = 0L;
+    }
+
+    public SimulatorWindDTO(final PositionDTO position, final double windSpeedKn, final double windBearingDeg, final long timepointMsec) {
+        this.position = position;
+        this.trueWindBearingDeg = windBearingDeg;
+        this.trueWindSpeedInKnots = windSpeedKn;
+        this.timepoint = timepointMsec;
+        this.isTurn = false;
+    }
+
+    public SimulatorWindDTO(final double latDeg, final double lngDeg, final double windSpeedKn, final double windBearingDeg, final long timepointMsec) {
+        this.position = new PositionDTO(latDeg, lngDeg);
+        this.trueWindBearingDeg = windBearingDeg;
+        this.trueWindSpeedInKnots = windSpeedKn;
+        this.timepoint = timepointMsec;
+        this.isTurn = false;
+    }
+
+    public SimulatorWindDTO(final double latDeg, final double lngDeg, final double windSpeedKn, final double windBearingDeg, final long timepointMsec,
+            final boolean isTurn) {
+        this.position = new PositionDTO(latDeg, lngDeg);
+        this.trueWindBearingDeg = windBearingDeg;
+        this.trueWindSpeedInKnots = windSpeedKn;
+        this.timepoint = timepointMsec;
+        this.isTurn = isTurn;
     }
 
     @Override

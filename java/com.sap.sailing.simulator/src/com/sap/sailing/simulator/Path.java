@@ -10,19 +10,9 @@ public interface Path {
 
     void setPathPoints(List<TimedPositionWithSpeed> pointsList);
 
-    List<TimedPositionWithSpeed> getEvenTimedPath(long timeStep);
-
-    // TimedPositionWithSpeed getPositionAtTime(TimePoint t);
-
-    // List<TimedPositionWithSpeed> getEvenTimedPoints(long milliseconds);
-
-    // List<TimedPositionWithSpeed> getEvenDistancedPoints(Distance dist);
-
     void setWindField(WindField wf);
-
-    // TimedPositionWithSpeed getClosestTurn(double lngDeg, double latDeg);
 
     List<TimedPositionWithSpeed> getTurns();
 
-    Path getEvenTimedPath2(long timeStep);
+    Path getEvenTimedPath(long timeStep);
 }
