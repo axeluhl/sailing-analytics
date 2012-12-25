@@ -249,7 +249,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
             long delayToLiveInMillis, final long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
             long delayForWindEstimationCacheInvalidation) {
         super();
-        locksForMarkPassings = new IdentityHashMap<>();
+        locksForMarkPassings = new IdentityHashMap<Iterable<MarkPassing>, NamedReentrantReadWriteLock>();
         this.serializationLock = new NamedReentrantReadWriteLock("Serialization lock for tracked race "+race.getName(), /* fair */ true);
         this.cacheInvalidationTimerLock = new Object();
         this.updateCount = 0;
@@ -739,7 +739,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         NavigableSet<MarkPassing> roundings = getMarkPassings(competitor);
         lockForRead(roundings);
         try {
-            NavigableSet<MarkPassing> localRoundings = new ArrayListNavigableSet<>(roundings.size(), new TimedComparator());
+            NavigableSet<MarkPassing> localRoundings = new ArrayListNavigableSet<MarkPassing>(roundings.size(), new TimedComparator());
             localRoundings.addAll(roundings);
         } finally {
             unlockAfterRead(roundings);
@@ -1449,7 +1449,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
             }
             if (toRemove != null) {
                 logger.info("Removing tracked leg at zero-based index "+zeroBasedIndex+" from tracked race "+getRace().getName());
-                LinkedHashMap<Leg, TrackedLeg> newTrackedLegs = new LinkedHashMap<>();
+                LinkedHashMap<Leg, TrackedLeg> newTrackedLegs = new LinkedHashMap<Leg, TrackedLeg>();
                 for (Map.Entry<Leg, TrackedLeg> trackedLegsEntry : trackedLegs.entrySet()) {
                     if (trackedLegsEntry.getKey() == toRemove) {
                         break;
