@@ -89,130 +89,73 @@ public class RaceCommitteeTrackTest {
 		try {
 			
 			Iterator<RaceCommitteeEvent> iterator = rcEventTrack.getFixes().iterator();
-			int count = 0;
-			
-			do 
-			{
-				RaceCommitteeEvent event = iterator.next();
-				assertEquals(event, expectedOrderingList.get(count));
-				count++;
-			} 
-			while(iterator.hasNext());
-			
-			assertEquals(count, 5);
+			checkOrderingAndListLength(expectedOrderingList, iterator, 0, 5);
 			
 			iterator = rcEventTrack.getRawFixes().iterator();
-			count = 0;
-			
-			do 
-			{
-				RaceCommitteeEvent event = iterator.next();
-				assertEquals(event, expectedOrderingList.get(count));
-				count++;
-			} 
-			while(iterator.hasNext());
-			
-			assertEquals(count, 5);
+			checkOrderingAndListLength(expectedOrderingList, iterator, 0, 5);
 			
 			RaceCommitteeEvent event = rcEventTrack.getFirstRawFix();
-			if (event != null) {
-				assertEquals(event, rcEvent5);
-			} else {
-				fail("Returned event was null");
-			}
+			checkEquality(rcEvent5, event);
 			
 			event = rcEventTrack.getLastRawFix();
-			if (event != null) {
-				assertEquals(event, rcEvent1);
-			} else {
-				fail("Returned event was null");
-			}
+			checkEquality(rcEvent1, event);
 			
 			event = rcEventTrack.getFirstFixAfter(t3);
-			if (event != null) {
-				assertEquals(event, rcEvent2);
-			} else {
-				fail("Returned event was null");
-			}
+			checkEquality(rcEvent2, event);
 			
 			event = rcEventTrack.getFirstFixAtOrAfter(t3);
-			if (event != null) {
-				assertEquals(event, rcEvent3);
-			} else {
-				fail("Returned event was null");
-			}
+			checkEquality(rcEvent3, event);
 			
 			event = rcEventTrack.getFirstRawFixAfter(t2);
-			if (event != null) {
-				assertEquals(event, rcEvent1);
-			} else {
-				fail("Returned event was null");
-			}
+			checkEquality(rcEvent1, event);
 			
 			event = rcEventTrack.getFirstRawFixAtOrAfter(t2);
-			if (event != null) {
-				assertEquals(event, rcEvent2);
-			} else {
-				fail("Returned event was null");
-			}
+			checkEquality(rcEvent2, event);
 			
 			event = rcEventTrack.getLastFixBefore(t3);
-			if (event != null) {
-				assertEquals(event, rcEvent4);
-			} else {
-				fail("Returned event was null");
-			}
+			checkEquality(rcEvent4, event);
 			
 			event = rcEventTrack.getLastFixAtOrBefore(t3);
-			if (event != null) {
-				assertEquals(event, rcEvent3);
-			} else {
-				fail("Returned event was null");
-			}
+			checkEquality(rcEvent3, event);
 			
 			event = rcEventTrack.getLastRawFixBefore(t4);
-			if (event != null) {
-				assertEquals(event, rcEvent5);
-			} else {
-				fail("Returned event was null");
-			}
+			checkEquality(rcEvent5, event);
 			
 			event = rcEventTrack.getLastRawFixAtOrBefore(t4);
-			if (event != null) {
-				assertEquals(event, rcEvent4);
-			} else {
-				fail("Returned event was null");
-			}
+			checkEquality(rcEvent4, event);
 			
 			iterator = rcEventTrack.getFixesIterator(tx, true);
-			count = 0;
-			
-			do 
-			{
-				event = iterator.next();
-				assertEquals(event, expectedOrderingList.get(count + 1));
-				count++;
-			} 
-			while(iterator.hasNext());
-			
-			assertEquals(count, 4);
+			checkOrderingAndListLength(expectedOrderingList, iterator, 1, 4);
 			
 			iterator = rcEventTrack.getRawFixesIterator(tx, true);
-			count = 0;
-			
-			do 
-			{
-				event = iterator.next();
-				assertEquals(event, expectedOrderingList.get(count + 1));
-				count++;
-			} 
-			while(iterator.hasNext());
-			
-			assertEquals(count, 4);
+			checkOrderingAndListLength(expectedOrderingList, iterator, 1, 4);
 			
 			
 		} finally {
 			rcEventTrack.unlockAfterRead();
+		}
+	}
+
+	private void checkOrderingAndListLength(List<RaceCommitteeEvent> expectedOrderingList, Iterator<RaceCommitteeEvent> iterator, int countOffset, int expectedLength) {
+		int count = 0;
+		
+		do 
+		{
+			RaceCommitteeEvent event = iterator.next();
+			assertEquals(event, expectedOrderingList.get(count + countOffset));
+			count++;
+		} 
+		while(iterator.hasNext());
+		
+		assertEquals(count, expectedLength);
+	}
+	
+
+	private void checkEquality(RaceCommitteeEvent knownRcEvent, RaceCommitteeEvent trackEvent) {
+		if (trackEvent != null) {
+			assertEquals(trackEvent, knownRcEvent);
+		} else {
+			fail("Returned event was null");
 		}
 	}
 }
