@@ -448,7 +448,7 @@ public interface TrackedRace extends Serializable {
     void waitUntilWindLoadingComplete() throws InterruptedException;
     
     /**
-     * Returns the event log track of the race committee for this race
+     * Returns the race committee event track for this race or creates it if it did not exist yet
      */
     RaceCommitteeEventTrack getOrCreateRaceCommitteeEventTrack();
 }

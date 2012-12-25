@@ -67,6 +67,8 @@ import com.sap.sailing.domain.confidence.HasConfidence;
 import com.sap.sailing.domain.confidence.Weigher;
 import com.sap.sailing.domain.confidence.impl.HyperbolicTimeDifferenceWeigher;
 import com.sap.sailing.domain.confidence.impl.PositionAndTimePointWeigher;
+import com.sap.sailing.domain.racecommittee.RaceCommitteeEventTrack;
+import com.sap.sailing.domain.racecommittee.impl.RaceCommitteeEventTrackImpl;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
@@ -236,6 +238,8 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
      * synchronization or locking.
      */
     private final NamedReentrantReadWriteLock serializationLock;
+    
+    private transient RaceCommitteeEventTrack raceCommitteeEventTrack;
 
     public TrackedRaceImpl(final TrackedRegatta trackedRegatta, RaceDefinition race, final WindStore windStore,
             long delayToLiveInMillis, final long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
@@ -322,6 +326,9 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         this.trackedRegatta = trackedRegatta;
         competitorRankings = new HashMap<TimePoint, List<Competitor>>();
         competitorRankingsLocks = new HashMap<TimePoint, NamedReentrantReadWriteLock>();
+        
+        // by default, a tracked race shall offer one event track for race committee events
+        raceCommitteeEventTrack = createRaceCommitteeEventTrack();
     }
     
     /**
@@ -2119,4 +2126,24 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     protected void setDelayToLiveInMillis(long delayToLiveInMillis) {
         this.delayToLiveInMillis = delayToLiveInMillis; 
     }
+    
+    @Override
+    public RaceCommitteeEventTrack getOrCreateRaceCommitteeEventTrack() {
+    	RaceCommitteeEventTrack result = raceCommitteeEventTrack;
+    	if (result == null)
+    		synchronized (raceCommitteeEventTrack) {
+    			result = createRaceCommitteeEventTrack();
+    			LockUtil.lockForRead(serializationLock);
+    			try {
+    				raceCommitteeEventTrack = result;
+    			} finally {
+    				LockUtil.unlockAfterRead(serializationLock);
+    			}
+    		}
+    	return result;
+    }
+
+	private RaceCommitteeEventTrack createRaceCommitteeEventTrack() {
+		return new RaceCommitteeEventTrackImpl("Race Committee Event Track for " + this.toString());
+	}
 }

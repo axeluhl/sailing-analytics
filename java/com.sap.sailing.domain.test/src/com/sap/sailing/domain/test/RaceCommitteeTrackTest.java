@@ -147,6 +147,7 @@ public class RaceCommitteeTrackTest {
 		} 
 		while(iterator.hasNext());
 		
+		//for Iterables the size of the list can also be retrieved via Util.size(Iterable<T> i)
 		assertEquals(count, expectedLength);
 	}
 	
