@@ -247,6 +247,11 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         return getTracTracDomainFactory().getBaseDomainFactory();
     }
     
+    @Override
+    public com.sap.sailing.domain.swisstimingadapter.DomainFactory getSwissTimingDomainFactory() {
+        return swissTimingDomainFactory;
+    }
+    
     private void loadRaceIDToRegattaAssociations() {
         persistentRegattasForRaceIDs.putAll(domainObjectFactory.loadRaceIDToRegattaAssociations(this));
     }

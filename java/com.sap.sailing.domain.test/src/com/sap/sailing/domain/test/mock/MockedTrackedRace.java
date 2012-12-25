@@ -695,4 +695,16 @@ public class MockedTrackedRace implements DynamicTrackedRace {
 		// TODO Auto-generated method stub
 		return null;
 	}
+	
+    @Override
+    public void lockForRead(Iterable<MarkPassing> markPassings) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void unlockAfterRead(Iterable<MarkPassing> markPassings) {
+        // TODO Auto-generated method stub
+        
+    }
 }

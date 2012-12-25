@@ -51,9 +51,11 @@ import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.base.impl.FleetImpl;
 import com.sap.sailing.domain.base.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.base.impl.SeriesImpl;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.CountryCode;
@@ -99,9 +101,13 @@ import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.MongoWindStoreFactory;
+import com.sap.sailing.domain.swisstimingadapter.SwissTimingArchiveConfiguration;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingConfiguration;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
 import com.sap.sailing.domain.swisstimingadapter.persistence.SwissTimingAdapterPersistence;
+import com.sap.sailing.domain.swisstimingreplayadapter.SwissTimingReplayRace;
+import com.sap.sailing.domain.swisstimingreplayadapter.SwissTimingReplayService;
+import com.sap.sailing.domain.swisstimingreplayadapter.SwissTimingReplayServiceFactory;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
@@ -171,8 +177,10 @@ import com.sap.sailing.gwt.ui.shared.ScoreCorrectionProviderDTO;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
 import com.sap.sailing.gwt.ui.shared.SpeedWithBearingDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
+import com.sap.sailing.gwt.ui.shared.SwissTimingArchiveConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingRaceRecordDTO;
+import com.sap.sailing.gwt.ui.shared.SwissTimingReplayRaceDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracRaceRecordDTO;
 import com.sap.sailing.gwt.ui.shared.TrackedRaceDTO;
@@ -928,19 +936,24 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             if (indexOfStartWaypoint == 0) {
                 // trackedLeg was the first leg; gap is determined by gap of start line passing time points
                 Iterable<MarkPassing> markPassingsForLegStart = trackedLeg.getTrackedLeg().getTrackedRace().getMarkPassingsInOrder(trackedLeg.getLeg().getFrom());
-                final Iterator<MarkPassing> markPassingsIter = markPassingsForLegStart.iterator();
-                if (markPassingsIter.hasNext()) {
-                    TimePoint firstStart = markPassingsIter.next().getTimePoint();
-                    final MarkPassing markPassingForFrom = trackedLeg.getTrackedLeg().getTrackedRace().
-                            getMarkPassing(trackedLeg.getCompetitor(), trackedLeg.getLeg().getFrom());
-                    if (markPassingForFrom != null) {
-                        TimePoint competitorStart = markPassingForFrom.getTimePoint();
-                        result = (double) (competitorStart.asMillis() - firstStart.asMillis()) / 1000.;
+                trackedLeg.getTrackedLeg().getTrackedRace().lockForRead(markPassingsForLegStart);
+                try {
+                    final Iterator<MarkPassing> markPassingsIter = markPassingsForLegStart.iterator();
+                    if (markPassingsIter.hasNext()) {
+                        TimePoint firstStart = markPassingsIter.next().getTimePoint();
+                        final MarkPassing markPassingForFrom = trackedLeg.getTrackedLeg().getTrackedRace()
+                                .getMarkPassing(trackedLeg.getCompetitor(), trackedLeg.getLeg().getFrom());
+                        if (markPassingForFrom != null) {
+                            TimePoint competitorStart = markPassingForFrom.getTimePoint();
+                            result = (double) (competitorStart.asMillis() - firstStart.asMillis()) / 1000.;
+                        } else {
+                            result = null;
+                        }
                     } else {
                         result = null;
                     }
-                } else {
-                    result = null;
+                } finally {
+                    trackedLeg.getTrackedLeg().getTrackedRace().unlockAfterRead(markPassingsForLegStart);
                 }
             } else {
                 TrackedLeg previousTrackedLeg = trackedLeg.getTrackedLeg().getTrackedRace().getTrackedLeg(course.getLegs().get(indexOfStartWaypoint-1));
@@ -2337,6 +2350,34 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
+    public List<SwissTimingReplayRaceDTO> listSwissTiminigReplayRaces(String swissTimingUrl) {
+        List<SwissTimingReplayRace> replayRaces = SwissTimingReplayServiceFactory.INSTANCE
+                .createSwissTimingReplayService().listReplayRaces(swissTimingUrl);
+        List<SwissTimingReplayRaceDTO> result = new ArrayList<SwissTimingReplayRaceDTO>(replayRaces.size()); 
+        for (SwissTimingReplayRace replayRace : replayRaces) {
+            result.add(new SwissTimingReplayRaceDTO(replayRace.getFlightNumber(), replayRace.getRaceId(), replayRace.getRsc(), replayRace.getName(), replayRace.getBoatClass(), replayRace.getStartTime(), replayRace.getLink()));
+        }
+        return result;
+    }
+    
+    @Override
+    public void replaySwissTimingRace(RegattaIdentifier regattaIdentifier, SwissTimingReplayRaceDTO replayRaceDTO,
+            boolean trackWind, boolean correctWindByDeclination, boolean simulateWithStartTimeNow) {
+        Regatta regatta;
+        if (regattaIdentifier == null) {
+            regatta = getService().createRegatta(replayRaceDTO.rsc, replayRaceDTO.boat_class,
+                    Collections.singletonList(new SeriesImpl("Default", /* isMedal */false, Collections
+                            .singletonList(new FleetImpl("Default")), /* race column names */new ArrayList<String>(),
+                            getService())), false,
+                    baseDomainFactory.createScoringScheme(ScoringSchemeType.LOW_POINT));
+        } else {
+            regatta = getService().getRegatta(regattaIdentifier);
+        }
+        SwissTimingReplayService replayService = SwissTimingReplayServiceFactory.INSTANCE.createSwissTimingReplayService();
+        replayService.loadRaceData(replayRaceDTO.link, getService().getSwissTimingDomainFactory(), regatta, getService());
+    }
+
+    @Override
     public String[] getCountryCodes() {
         List<String> countryCodes = new ArrayList<String>();
         for (CountryCode cc : countryCodeFactory.getAll()) {
@@ -2417,10 +2458,16 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 // Filling the mark passings
                 Set<MarkPassing> competitorMarkPassings = trackedRace.getMarkPassings(competitor);
                 if (competitorMarkPassings != null) {
-                    for (MarkPassing markPassing : competitorMarkPassings) {
-                        MillisecondsTimePoint time = new MillisecondsTimePoint(markPassing.getTimePoint().asMillis());
-                        markPassingsData.add(new Triple<String, Date, Double>(markPassing.getWaypoint().getName(), time
-                                .asDate(), getCompetitorRaceDataEntry(detailType, trackedRace, competitor, time)));
+                    trackedRace.lockForRead(competitorMarkPassings);
+                    try {
+                        for (MarkPassing markPassing : competitorMarkPassings) {
+                            MillisecondsTimePoint time = new MillisecondsTimePoint(markPassing.getTimePoint().asMillis());
+                            markPassingsData.add(new Triple<String, Date, Double>(markPassing.getWaypoint().getName(),
+                                    time.asDate(),
+                                    getCompetitorRaceDataEntry(detailType, trackedRace, competitor, time)));
+                        }
+                    } finally {
+                        trackedRace.unlockAfterRead(competitorMarkPassings);
                     }
                 }
                 if (startTime != null && endTime != null) {
@@ -2940,5 +2987,21 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             }
         }
         return result;
+    }
+
+    @Override
+    public List<SwissTimingArchiveConfigurationDTO> getPreviousSwissTimingArchiveConfigurations() {
+        Iterable<SwissTimingArchiveConfiguration> configs = swissTimingAdapterPersistence.getSwissTimingArchiveConfigurations();
+        List<SwissTimingArchiveConfigurationDTO> result = new ArrayList<SwissTimingArchiveConfigurationDTO>();
+        for (SwissTimingArchiveConfiguration stArchiveConfig : configs) {
+            result.add(new SwissTimingArchiveConfigurationDTO(stArchiveConfig.getJsonUrl()));
+        }
+        return result;
+   }
+
+    @Override
+    public void storeSwissTimingArchiveConfiguration(String swissTimingJsonUrl) {
+        swissTimingAdapterPersistence.storeSwissTimingArchiveConfiguration(swissTimingFactory.createSwissTimingArchiveConfiguration(
+                swissTimingJsonUrl));
     }
 }

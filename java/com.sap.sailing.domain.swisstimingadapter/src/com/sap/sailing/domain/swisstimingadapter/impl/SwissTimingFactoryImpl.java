@@ -15,6 +15,7 @@ import com.sap.sailing.domain.swisstimingadapter.RaceSpecificMessageLoader;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterConnector;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterMessage;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterTransceiver;
+import com.sap.sailing.domain.swisstimingadapter.SwissTimingArchiveConfiguration;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingConfiguration;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingMessageParser;
@@ -109,5 +110,8 @@ public class SwissTimingFactoryImpl implements SwissTimingFactory {
     	return new RaceImpl(raceId, description, startTime);
     }
 
-    
+    @Override
+    public SwissTimingArchiveConfiguration createSwissTimingArchiveConfiguration(String jsonUrl) {
+        return new SwissTimingArchiveConfigurationImpl(jsonUrl);
+    }
 }
