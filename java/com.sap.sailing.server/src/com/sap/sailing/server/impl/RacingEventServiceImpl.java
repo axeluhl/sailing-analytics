@@ -69,6 +69,7 @@ import com.sap.sailing.domain.leaderboard.meta.LeaderboardGroupMetaLeaderboard;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
+import com.sap.sailing.domain.racecommittee.RaceCommitteeEvent;
 import com.sap.sailing.domain.swisstimingadapter.Race;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterConnector;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterMessage;
@@ -108,6 +109,7 @@ import com.sap.sailing.server.operationaltransformation.ConnectTrackedRaceToLead
 import com.sap.sailing.server.operationaltransformation.CreateTrackedRace;
 import com.sap.sailing.server.operationaltransformation.RecordMarkGPSFix;
 import com.sap.sailing.server.operationaltransformation.RecordCompetitorGPSFix;
+import com.sap.sailing.server.operationaltransformation.RecordRaceCommitteeEvent;
 import com.sap.sailing.server.operationaltransformation.RecordWindFix;
 import com.sap.sailing.server.operationaltransformation.RemoveWindFix;
 import com.sap.sailing.server.operationaltransformation.TrackRegatta;
@@ -913,9 +915,14 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
             replicate(new UpdateWindAveragingTime(getRaceIdentifier(), newMillisecondsOverWhichToAverage));
         }
 
-        private RegattaAndRaceIdentifier getRaceIdentifier() {
-            return trackedRace.getRaceIdentifier();
-        }
+		@Override
+		public void raceCommitteeEventReceived(RaceCommitteeEvent event) {
+			replicate(new RecordRaceCommitteeEvent(getRaceIdentifier(), event));
+		}
+
+		private RegattaAndRaceIdentifier getRaceIdentifier() {
+			return trackedRace.getRaceIdentifier();
+		}
     }
 
     /**

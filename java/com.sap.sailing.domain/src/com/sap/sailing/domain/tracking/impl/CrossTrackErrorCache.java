@@ -6,9 +6,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
-import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Timed;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.Distance;

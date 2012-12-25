@@ -24,6 +24,7 @@ import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
+import com.sap.sailing.domain.racecommittee.RaceCommitteeEvent;
 import com.sap.sailing.domain.racecommittee.RaceCommitteeEventTrack;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
@@ -696,6 +697,12 @@ public class MockedTrackedRace implements DynamicTrackedRace {
 		return null;
 	}
 	
+	@Override
+	public void recordRaceCommitteeEvent(RaceCommitteeEvent event) {
+		// TODO Auto-generated method stub
+		
+	}
+	
     @Override
     public void lockForRead(Iterable<MarkPassing> markPassings) {
         // TODO Auto-generated method stub
@@ -707,4 +714,5 @@ public class MockedTrackedRace implements DynamicTrackedRace {
         // TODO Auto-generated method stub
         
     }
+
 }

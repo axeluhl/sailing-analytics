@@ -25,6 +25,7 @@ import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
+import com.sap.sailing.domain.racecommittee.RaceCommitteeEvent;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
@@ -613,5 +614,28 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
     public boolean raceIsKnownToStartUpwind() {
         return raceIsKnownToStartUpwind;
     }
+
+	@Override
+	public void recordRaceCommitteeEvent(RaceCommitteeEvent event) {
+		getOrCreateRaceCommitteeEventTrack().add(event);
+        updated(/* time point */null); // TODO: updated has to be understood better, for now it shall have the same behaviour as in recordWind
+        //TODO triggerRaceStateCalculation();
+        notifyListeners(event);
+	}
+
+	private void notifyListeners(RaceCommitteeEvent event) {
+		 RaceChangeListener[] listeners;
+	        synchronized (getListeners()) {
+	            listeners = getListeners().toArray(new RaceChangeListener[getListeners().size()]);
+	        }
+	        for (RaceChangeListener listener : listeners) {
+	            try {
+	                listener.raceCommitteeEventReceived(event);
+	            } catch (Throwable t) {
+	                logger.log(Level.SEVERE, "RaceChangeListener " + listener + " threw exception " + t.getMessage());
+	                logger.throwing(DynamicTrackedRaceImpl.class.getName(), "notifyListeners(RaceCommitteeEvent)", t);
+	            }
+	        }
+	}
 
 }

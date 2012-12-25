@@ -7,6 +7,7 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
+import com.sap.sailing.domain.racecommittee.RaceCommitteeEvent;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
@@ -54,5 +55,9 @@ public abstract class AbstractRaceChangeListener implements RaceChangeListener {
     @Override
     public void delayToLiveChanged(long delayToLiveInMillis) {
     }
+    
+    @Override
+	public void raceCommitteeEventReceived(RaceCommitteeEvent event) {
+	}
 
 }

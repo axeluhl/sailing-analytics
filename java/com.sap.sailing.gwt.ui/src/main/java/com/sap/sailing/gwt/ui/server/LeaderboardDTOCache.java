@@ -31,6 +31,7 @@ import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.ScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ScoreCorrectionListener;
+import com.sap.sailing.domain.racecommittee.RaceCommitteeEvent;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
@@ -149,6 +150,11 @@ public class LeaderboardDTOCache {
         private void removeFromTrackedRace() {
             trackedRace.removeListener(this);
         }
+
+		@Override
+		public void raceCommitteeEventReceived(RaceCommitteeEvent event) {
+			removeFromCache(leaderboard);
+		}
     }
     
     private class CacheInvalidationUponScoreCorrectionListener implements ScoreCorrectionListener {
