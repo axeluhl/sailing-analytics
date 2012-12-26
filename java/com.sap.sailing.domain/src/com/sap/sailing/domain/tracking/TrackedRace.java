@@ -23,6 +23,7 @@ import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.racecommittee.RaceCommitteeEventTrack;
+import com.sap.sailing.domain.racecommittee.RaceCommitteeStore;
 
 /**
  * Live tracking data of a single race. The race follows a defined {@link Course} with a sequence of {@link Leg}s. The
@@ -456,4 +457,14 @@ public interface TrackedRace extends Serializable {
      * Returns the race committee event track for this race or creates it if it did not exist yet
      */
     RaceCommitteeEventTrack getOrCreateRaceCommitteeEventTrack();
+
+    /**
+     * When provided with a {@link RaceCommitteeStore} during construction, the tracked race will asynchronously load the race committee event
+     * data for this tracked race from the race committee store in a background thread and update this tracked race with the results.
+     * Clients that want to wait for the race committee event loading process to complete can do so by calling this method which will block
+     * until the race committee event loading has completed.
+     */
+	void waitUntilRaceCommitteeEventLoadingComplete() throws InterruptedException;
+
+	RaceCommitteeStore getRaceCommitteeStore();
 }

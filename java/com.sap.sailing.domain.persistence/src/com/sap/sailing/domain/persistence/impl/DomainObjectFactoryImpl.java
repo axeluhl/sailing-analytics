@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.persistence.impl;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -17,6 +18,7 @@ import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 import com.sap.sailing.domain.base.BoatClass;
+import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Event;
@@ -67,6 +69,12 @@ import com.sap.sailing.domain.leaderboard.impl.ResultDiscardingRuleImpl;
 import com.sap.sailing.domain.leaderboard.impl.ScoreCorrectionImpl;
 import com.sap.sailing.domain.leaderboard.meta.LeaderboardGroupMetaLeaderboard;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
+import com.sap.sailing.domain.racecommittee.Flags;
+import com.sap.sailing.domain.racecommittee.RaceCommitteeEvent;
+import com.sap.sailing.domain.racecommittee.RaceCommitteeEventTrack;
+import com.sap.sailing.domain.racecommittee.impl.RaceCommitteeEventTrackImpl;
+import com.sap.sailing.domain.racecommittee.impl.RaceCommitteeFlagEventImpl;
+import com.sap.sailing.domain.racecommittee.impl.RaceCommitteeStartTimeEventImpl;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindTrack;
@@ -740,4 +748,50 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         }
         return result;
     }
+
+	@Override
+	public RaceCommitteeEventTrack loadRaceCommitteeEventTrack(Regatta regatta, RaceDefinition race) {
+		RaceCommitteeEventTrack result = new RaceCommitteeEventTrackImpl(RaceCommitteeEventTrackImpl.class.getSimpleName());
+        try {
+            BasicDBObject query = new BasicDBObject();
+            query.put(FieldNames.REGATTA_NAME.name(), regatta.getName());
+            query.put(FieldNames.RACE_NAME.name(), race.getName());
+            DBCollection raceCommitteeTrack = database.getCollection(CollectionNames.RACECOMMITTEE_TRACKS.name());
+            for (DBObject o : raceCommitteeTrack.find(query)) {
+                RaceCommitteeEvent raceCommitteeEvent = loadRaceCommitteeEvent((DBObject) o.get(FieldNames.RC_EVENT.name()));
+
+                result.add(raceCommitteeEvent);
+            }
+        } catch (Throwable t) {
+             // something went wrong during DB access; report, then use empty new race committee track
+            logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load recorded race committee data. Check MongoDB settings.");
+            logger.throwing(DomainObjectFactoryImpl.class.getName(), "loadRaceCommitteeEventTrack", t);
+        }
+        return result;
+	}
+
+	private RaceCommitteeEvent loadRaceCommitteeEvent(DBObject dbObject) {
+		Serializable id = (Serializable) dbObject.get(FieldNames.RC_EVENT_ID.name());
+		Integer passId = (Integer) dbObject.get(FieldNames.RC_EVENT_PASS_ID.name());
+		//BasicDBList dbList = (BasicDBList) dbObject.get(FieldNames.RC_EVENT_INVOLVED_BOATS.name());
+		List<Competitor> competitors = new ArrayList<Competitor>();
+		
+		Long startTimeInMillis = (Long) dbObject.get(FieldNames.RC_EVENT_START_TIME.name());
+		TimePoint startTime = null;
+		if (startTimeInMillis != null) {
+			startTime = new MillisecondsTimePoint(startTimeInMillis);
+			if (startTime != null) {
+				return new RaceCommitteeStartTimeEventImpl(loadTimePoint(dbObject), id, competitors, passId, startTime);
+			}
+		}
+		
+		Flags upperFlag = Flags.valueOf((String) dbObject.get(FieldNames.RC_EVENT_FLAG_UPPER.name()));
+		Flags lowerFlag = Flags.valueOf((String) dbObject.get(FieldNames.RC_EVENT_FLAG_LOWER.name()));
+		Boolean displayed = Boolean.valueOf((String) dbObject.get(FieldNames.RC_EVENT_FLAG_DISPLAYED.name()));
+		
+		if (upperFlag != null && lowerFlag != null && displayed != null) {
+			return new RaceCommitteeFlagEventImpl(loadTimePoint(dbObject), id, competitors, passId, upperFlag, lowerFlag, displayed);
+		}
+		return null;
+	}
 }

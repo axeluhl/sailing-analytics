@@ -22,6 +22,7 @@ import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.racecommittee.RaceCommitteeEventTrack;
+import com.sap.sailing.domain.racecommittee.RaceCommitteeStore;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
@@ -470,4 +471,17 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
         // TODO Auto-generated method stub
         
     }
+
+	@Override
+	public void waitUntilRaceCommitteeEventLoadingComplete()
+			throws InterruptedException {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public RaceCommitteeStore getRaceCommitteeStore() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

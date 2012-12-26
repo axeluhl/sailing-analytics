@@ -26,6 +26,7 @@ import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.racecommittee.RaceCommitteeEvent;
 import com.sap.sailing.domain.racecommittee.RaceCommitteeEventTrack;
+import com.sap.sailing.domain.racecommittee.RaceCommitteeStore;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
@@ -714,5 +715,18 @@ public class MockedTrackedRace implements DynamicTrackedRace {
         // TODO Auto-generated method stub
         
     }
+
+	@Override
+	public void waitUntilRaceCommitteeEventLoadingComplete()
+			throws InterruptedException {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public RaceCommitteeStore getRaceCommitteeStore() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
 }

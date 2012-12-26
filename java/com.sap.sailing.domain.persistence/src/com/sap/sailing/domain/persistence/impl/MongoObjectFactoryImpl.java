@@ -462,8 +462,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
 
 	public DBObject storeRaceCommitteeTrackEntry(Regatta regatta, RaceDefinition race, RaceCommitteeFlagEvent flagEvent) {
 		BasicDBObject result = new BasicDBObject();
-        result.put(FieldNames.EVENT_NAME.name(), regatta.getName());
-        result.put(FieldNames.RACE_NAME.name(), race.getName());
+		storeRegattaAndRaceForRaceCommitteeEvent(regatta, race, result);
         
         result.put(FieldNames.RC_EVENT.name(), storeRaceCommitteeFlagEvent(flagEvent));
         return result;
@@ -471,11 +470,15 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
 	
 	public DBObject storeRaceCommitteeTrackEntry(Regatta regatta, RaceDefinition race, RaceCommitteeStartTimeEvent startTimeEvent) {
 		BasicDBObject result = new BasicDBObject();
-        result.put(FieldNames.EVENT_NAME.name(), regatta.getName());
-        result.put(FieldNames.RACE_NAME.name(), race.getName());
+		storeRegattaAndRaceForRaceCommitteeEvent(regatta, race, result);
         
         result.put(FieldNames.RC_EVENT.name(), storeRaceCommitteeStartTimeEvent(startTimeEvent));
         return result;
+	}
+	
+	private void storeRegattaAndRaceForRaceCommitteeEvent(Regatta regatta, RaceDefinition race, DBObject result) {
+		result.put(FieldNames.REGATTA_NAME.name(), regatta.getName());
+        result.put(FieldNames.RACE_NAME.name(), race.getName());
 	}
 
 	private Object storeRaceCommitteeStartTimeEvent(RaceCommitteeStartTimeEvent startTimeEvent) {
