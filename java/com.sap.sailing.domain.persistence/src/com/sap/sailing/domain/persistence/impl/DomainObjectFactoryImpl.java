@@ -14,8 +14,10 @@ import org.bson.types.ObjectId;
 
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
+import com.mongodb.BasicDBObjectBuilder;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
+import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.CourseArea;
@@ -50,6 +52,7 @@ import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.RGBColor;
+import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.common.impl.WindSourceWithAdditionalID;
 import com.sap.sailing.domain.leaderboard.DelayedLeaderboardCorrections;
@@ -120,27 +123,11 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return result;
     }
     
-    @Override
-    public WindTrack loadWindTrack(Regatta regatta, RaceDefinition race, WindSource windSource, long millisecondsOverWhichToAverage) {
-        WindTrack result = new WindTrackImpl(millisecondsOverWhichToAverage, windSource.getType().getBaseConfidence(),
-                windSource.getType().useSpeed(),
-                /* nameForReadWriteLock */ WindTrackImpl.class.getSimpleName()+" for source "+windSource.toString());
-        try {
-            BasicDBObject query = new BasicDBObject();
-            query.put(FieldNames.EVENT_NAME.name(), regatta.getName());
-            query.put(FieldNames.RACE_NAME.name(), race.getName());
-            query.put(FieldNames.WIND_SOURCE_NAME.name(), windSource.name());
-            DBCollection windTracks = database.getCollection(CollectionNames.WIND_TRACKS.name());
-            for (DBObject o : windTracks.find(query)) {
-                Wind wind = loadWind((DBObject) o.get(FieldNames.WIND.name()));
-                result.add(wind);
-            }
-        } catch (Throwable t) {
-             // something went wrong during DB access; report, then use empty new wind track
-            logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load recorded wind data. Check MongoDB settings.");
-            logger.throwing(DomainObjectFactoryImpl.class.getName(), "loadWindTrack", t);
-        }
-        return result;
+    private void ensureIndicesOnWindTracks(DBCollection windTracks) {
+        windTracks.ensureIndex(FieldNames.RACE_ID.name()); // for new programmatic access
+        windTracks.ensureIndex(FieldNames.REGATTA_NAME.name()); // for export or human look-up
+        // for legacy access to not yet migrated fixes
+        windTracks.ensureIndex(new BasicDBObjectBuilder().add(FieldNames.EVENT_NAME.name(), 1).add(FieldNames.RACE_NAME.name(), 1).get());
     }
 
     @Override
@@ -502,32 +489,67 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
 
     @Override
+    public WindTrack loadWindTrack(Regatta regatta, RaceDefinition race, WindSource windSource, long millisecondsOverWhichToAverage) {
+        final WindTrack result;
+        Map<WindSource, WindTrack> resultMap = loadWindTracks(regatta, race, windSource, millisecondsOverWhichToAverage);
+        if (resultMap.containsKey(windSource)) {
+            result = resultMap.get(windSource);
+        } else {
+            // create an empty wind track as result if no fixes were found in store for the wind source requested
+            result = new WindTrackImpl(millisecondsOverWhichToAverage, windSource.getType().getBaseConfidence(),
+                windSource.getType().useSpeed(),
+                /* nameForReadWriteLock */ WindTrackImpl.class.getSimpleName()+" for source "+windSource.toString());
+        }
+        return result;
+    }
+
+    @Override
     public Map<? extends WindSource, ? extends WindTrack> loadWindTracks(Regatta regatta, RaceDefinition race,
             long millisecondsOverWhichToAverageWind) {
+        Map<WindSource, WindTrack> result = loadWindTracks(regatta, race, /* constrain wind source */ null, millisecondsOverWhichToAverageWind);
+        return result;
+    }
+
+    /**
+     * @param constrainToWindSource
+     *            if <code>null</code>, wind for all sources will be loaded; otherwise, only wind data for the wind
+     *            source specified by this argument will be loaded
+     */
+    private Map<WindSource, WindTrack> loadWindTracks(Regatta regatta, RaceDefinition race,
+            WindSource constrainToWindSource, long millisecondsOverWhichToAverageWind) {
         Map<WindSource, WindTrack> result = new HashMap<WindSource, WindTrack>();
         try {
-            BasicDBObject query = new BasicDBObject();
-            // TODO EVENT_NAME has to become REGATTA_NAME, but we'd need a DB migration script for this for legacy instances
-            query.put(FieldNames.EVENT_NAME.name(), regatta.getName());
-            query.put(FieldNames.RACE_NAME.name(), race.getName());
             DBCollection windTracks = database.getCollection(CollectionNames.WIND_TRACKS.name());
-            for (DBObject o : windTracks.find(query)) {
-                Wind wind = loadWind((DBObject) o.get(FieldNames.WIND.name()));
-                WindSourceType windSourceType = WindSourceType.valueOf((String) o.get(FieldNames.WIND_SOURCE_NAME.name()));
-                WindSource windSource;
-                if (o.containsField(FieldNames.WIND_SOURCE_ID.name())) {
-                    windSource = new WindSourceWithAdditionalID(windSourceType, (String) o.get(FieldNames.WIND_SOURCE_ID.name()));
-                } else {
-                    windSource = new WindSourceImpl(windSourceType);
+            ensureIndicesOnWindTracks(windTracks);
+            BasicDBObject queryById = new BasicDBObject();
+            queryById.put(FieldNames.RACE_ID.name(), race.getId());
+            if (constrainToWindSource != null) {
+                queryById.put(FieldNames.WIND_SOURCE_NAME.name(), constrainToWindSource.name());
+            }
+            for (DBObject dbWind : windTracks.find(queryById)) {
+                loadWindFix(result, dbWind, millisecondsOverWhichToAverageWind);
+            }
+            BasicDBObject queryByName = new BasicDBObject();
+            queryByName.put(FieldNames.EVENT_NAME.name(), regatta.getName());
+            queryByName.put(FieldNames.RACE_NAME.name(), race.getName());
+            if (constrainToWindSource != null) {
+                queryByName.put(FieldNames.WIND_SOURCE_NAME.name(), constrainToWindSource.name());
+            }
+            final DBCursor windFixesFoundByName = windTracks.find(queryByName);
+            if (windFixesFoundByName.hasNext()) {
+                List<DBObject> windFixesToMigrate = new ArrayList<DBObject>();
+                for (DBObject dbWind : windFixesFoundByName) {
+                    Pair<Wind, WindSource> wind = loadWindFix(result, dbWind, millisecondsOverWhichToAverageWind);
+                    // write the wind fix with the new ID-based key and remove the legacy wind fix from the DB
+                    windFixesToMigrate.add(new MongoObjectFactoryImpl(database).storeWindTrackEntry(race, regatta.getName(),
+                            wind.getB(), wind.getA()));
                 }
-                WindTrack track = result.get(windSource);
-                if (track == null) {
-                    track = new WindTrackImpl(millisecondsOverWhichToAverageWind, windSource.getType().getBaseConfidence(),
-                            windSource.getType().useSpeed(),
-                            /* nameForReadWriteLock */ WindTrackImpl.class.getSimpleName()+" for source "+windSource.toString());
-                    result.put(windSource, track);
-                }
-                track.add(wind);
+                logger.info("Migrating "+windFixesFoundByName.size()+" wind fixes of regatta "+regatta.getName()+
+                        " and race "+race.getName()+" to ID-based keys");
+                windTracks.insert(windFixesToMigrate.toArray(new DBObject[windFixesToMigrate.size()]));
+                logger.info("Removing "+windFixesFoundByName.size()+" wind fixes that were keyed by the names of regatta "+regatta.getName()+
+                        " and race "+race.getName());
+                windTracks.remove(queryByName);
             }
         } catch (Throwable t) {
              // something went wrong during DB access; report, then use empty new wind track
@@ -535,6 +557,26 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             logger.throwing(DomainObjectFactoryImpl.class.getName(), "loadWindTrack", t);
         }
         return result;
+    }
+
+    private Pair<Wind, WindSource> loadWindFix(Map<WindSource, WindTrack> result, DBObject dbWind, long millisecondsOverWhichToAverageWind) {
+        Wind wind = loadWind((DBObject) dbWind.get(FieldNames.WIND.name()));
+        WindSourceType windSourceType = WindSourceType.valueOf((String) dbWind.get(FieldNames.WIND_SOURCE_NAME.name()));
+        WindSource windSource;
+        if (dbWind.containsField(FieldNames.WIND_SOURCE_ID.name())) {
+            windSource = new WindSourceWithAdditionalID(windSourceType, (String) dbWind.get(FieldNames.WIND_SOURCE_ID.name()));
+        } else {
+            windSource = new WindSourceImpl(windSourceType);
+        }
+        WindTrack track = result.get(windSource);
+        if (track == null) {
+            track = new WindTrackImpl(millisecondsOverWhichToAverageWind, windSource.getType().getBaseConfidence(),
+                    windSource.getType().useSpeed(),
+                    /* nameForReadWriteLock */ WindTrackImpl.class.getSimpleName()+" for source "+windSource.toString());
+            result.put(windSource, track);
+        }
+        track.add(wind);
+        return new Pair<Wind, WindSource>(wind, windSource);
     }
 
     @Override

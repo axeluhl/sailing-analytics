@@ -87,7 +87,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     @Override
     public void addWindTrackDumper(TrackedRegatta trackedRegatta, TrackedRace trackedRace, WindSource windSource) {
         WindTrack windTrack = trackedRace.getOrCreateWindTrack(windSource);
-        windTrack.addListener(new MongoWindListener(trackedRegatta, trackedRace, windSource, this, database));
+        windTrack.addListener(new MongoWindListener(trackedRace, trackedRegatta.getRegatta().getName(), windSource, this, database));
     }
 
     public DBCollection getWindTrackCollection() {
@@ -96,10 +96,15 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         return result;
     }
 
-    public DBObject storeWindTrackEntry(Regatta regatta, RaceDefinition race, WindSource windSource, Wind wind) {
+    /**
+     * @param regattaName
+     *            the regatta name is stored only for human readability purposes because a time stamp may be a bit unhandy for
+     *            identifying where the wind fix was collected
+     */
+    public DBObject storeWindTrackEntry(RaceDefinition race, String regattaName, WindSource windSource, Wind wind) {
         BasicDBObject result = new BasicDBObject();
-        result.put(FieldNames.EVENT_NAME.name(), regatta.getName());
-        result.put(FieldNames.RACE_NAME.name(), race.getName());
+        result.put(FieldNames.RACE_ID.name(), race.getId());
+        result.put(FieldNames.REGATTA_NAME.name(), regattaName);
         result.put(FieldNames.WIND_SOURCE_NAME.name(), windSource.name());
         if (windSource.getId() != null) {
             result.put(FieldNames.WIND_SOURCE_ID.name(), windSource.getId());

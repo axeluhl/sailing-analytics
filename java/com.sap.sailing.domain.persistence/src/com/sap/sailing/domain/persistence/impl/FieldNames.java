@@ -29,6 +29,7 @@ public enum FieldNames {
     SCORING_SCHEME_TYPE,
     
     RACE_NAME,
+    RACE_ID,
     
     VENUE,
     VENUE_NAME,
