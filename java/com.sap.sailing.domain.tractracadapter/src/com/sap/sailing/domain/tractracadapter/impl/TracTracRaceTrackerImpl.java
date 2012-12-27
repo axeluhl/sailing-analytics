@@ -249,8 +249,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
                         boolean first = true;
                         for (Mark mark : domainControlPoint.getMarks()) {
                             for (RaceDefinition raceDefinition : raceDefinitions) {
-                                DynamicTrackedRace trackedRace = getTrackedRegatta().getExistingTrackedRace(
-                                        raceDefinition);
+                                DynamicTrackedRace trackedRace = getTrackedRegatta().getExistingTrackedRace(raceDefinition);
                                 if (trackedRace != null) {
                                     DynamicGPSFixTrack<Mark, GPSFix> markTrack = trackedRace.getOrCreateTrack(mark);
                                     if (markTrack.getFirstRawFix() == null) {
@@ -280,6 +279,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
                 if (colonIndex >= 0) {
                     String propertyName = line.substring(0, colonIndex);
                     String propertyValue = line.substring(colonIndex+1);
+                    // TODO read RaceDefaultRouteUUID and the corresponding Route1UUID / Route2UUID / ..., then parse the route data and update if needed
                     if (propertyName.equals("RaceName")) {
                         RaceDefinition race = getRegatta().getRaceByName(propertyValue);
                         if (race != null) {
