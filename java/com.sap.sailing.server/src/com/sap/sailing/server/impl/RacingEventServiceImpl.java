@@ -19,6 +19,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -136,7 +137,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
      * Holds the {@link Event} objects for those event registered with this service. Note that there may be {@link Event}
      * objects that exist outside this service for events not (yet) registered here.
      */
-    protected final ConcurrentHashMap<String, Event> eventsByName;
+    protected final ConcurrentHashMap<Serializable, Event> eventsById;
 
     /**
      * Holds the {@link Regatta} objects for those races registered with this service. Note that there may be {@link Regatta}
@@ -211,7 +212,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         swissTimingAdapterPersistence = SwissTimingAdapterPersistence.INSTANCE;
         windTrackerFactory = ExpeditionWindTrackerFactory.getInstance();
         regattasByName = new ConcurrentHashMap<String, Regatta>();
-        eventsByName = new ConcurrentHashMap<String, Event>();
+        eventsById = new ConcurrentHashMap<Serializable, Event>();
         regattaTrackingCache = new ConcurrentHashMap<Regatta, DynamicTrackedRegatta>();
         raceTrackersByRegatta = new ConcurrentHashMap<Regatta, Set<RaceTracker>>();
         raceTrackersByID = new ConcurrentHashMap<Object, RaceTracker>();
@@ -266,8 +267,8 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
 
     private void loadStoredEvents() {
         for (Event event : domainObjectFactory.loadAllEvents()) {
-            synchronized (eventsByName) {
-                eventsByName.put(event.getName(), event);
+            synchronized (eventsById) {
+                eventsById.put(event.getId(), event);
             }
         }
     }
@@ -540,7 +541,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
 
     @Override
     public Iterable<Event> getAllEvents() {
-        return Collections.unmodifiableCollection(new ArrayList<Event>(eventsByName.values()));
+        return Collections.unmodifiableCollection(new ArrayList<Event>(eventsById.values()));
     }
 
     @Override
@@ -579,9 +580,10 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     }
 
     @Override
-    public Regatta getOrCreateRegatta(String baseEventName, String boatClassName) {
+    public Regatta getOrCreateRegatta(String baseEventName, String boatClassName, Serializable id) {
         Regatta regatta = new RegattaImpl(baseEventName, getBaseDomainFactory().getOrCreateBoatClass(
-                boatClassName), this, com.sap.sailing.domain.base.DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT));
+                boatClassName), this, com.sap.sailing.domain.base.DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT),
+                RegattaImpl.getFullName(baseEventName, boatClassName));
         Regatta result = regattasByName.get(regatta.getName());
         if (result == null) {
             result = regatta;
@@ -593,9 +595,9 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
 
     @Override
     public Regatta createRegatta(String baseEventName, String boatClassName,
-            Iterable<? extends Series> series, boolean persistent, ScoringScheme scoringScheme) {
+            Serializable id, Iterable<? extends Series> series, boolean persistent, ScoringScheme scoringScheme) {
         Regatta regatta = new RegattaImpl(baseEventName,
-                getBaseDomainFactory().getOrCreateBoatClass(boatClassName), series, persistent, scoringScheme);
+                getBaseDomainFactory().getOrCreateBoatClass(boatClassName), series, persistent, scoringScheme, id);
         logger.info("Created regatta " + regatta.getName() + " (" + hashCode() + ") on "+this);
         cacheAndReplicateSpecificRegattaWithoutRaceColumns(regatta);
         if (persistent) {
@@ -737,8 +739,8 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
             regattasByName.put(regatta.getName(), regatta);
             regatta.addRegattaListener(this);
             replicate(new AddSpecificRegatta(regatta.getBaseName(), regatta.getBoatClass() == null ? null : regatta
-                    .getBoatClass().getName(), getSeriesWithoutRaceColumnsConstructionParametersAsMap(regatta), regatta.isPersistent(),
-                    regatta.getScoringScheme()));
+                    .getBoatClass().getName(), regatta.getId(), getSeriesWithoutRaceColumnsConstructionParametersAsMap(regatta),
+                    regatta.isPersistent(), regatta.getScoringScheme()));
             RegattaIdentifier regattaIdentifier = regatta.getRegattaIdentifier();
             for (RaceDefinition race : regatta.getAllRaces()) {
                 replicate(new AddRaceDefinition(regattaIdentifier, race));
@@ -769,7 +771,8 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
             logger.info("putting regatta "+regatta.getName()+" ("+regatta.hashCode()+") into regattasByName of "+this);
             regattasByName.put(regatta.getName(), regatta);
             regatta.addRegattaListener(this);
-            replicate(new AddDefaultRegatta(regatta.getBaseName(), regatta.getBoatClass() == null ? null : regatta.getBoatClass().getName()));
+            replicate(new AddDefaultRegatta(regatta.getBaseName(), regatta.getBoatClass() == null ? null : regatta.getBoatClass().getName(),
+                    regatta.getId()));
             RegattaIdentifier regattaIdentifier = regatta.getRegattaIdentifier();
             for (RaceDefinition race : regatta.getAllRaces()) {
                 replicate(new AddRaceDefinition(regattaIdentifier, race));
@@ -1514,75 +1517,55 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     }
 
     @Override
-    public Event getEventByName(String name) {
-        synchronized (eventsByName) {
-            return eventsByName.get(name);
-        }
-    }
-    @Override
     public Event addEvent(String eventName, String venue, String publicationUrl, boolean isPublic, List<String> regattaNames) {
-        Event result = new EventImpl(eventName, venue, publicationUrl, isPublic);
-        synchronized (eventsByName) {
-            if (eventsByName.containsKey(eventName)) {
-                throw new IllegalArgumentException("Event with name " + eventName + " already exists");
+        Event result = new EventImpl(eventName, venue, publicationUrl, isPublic, UUID.randomUUID());
+        synchronized (eventsById) {
+            if (eventsById.containsKey(result.getId())) {
+                throw new IllegalArgumentException("Event with ID " + result.getId() + " already exists which is pretty surprising...");
             }
-            eventsByName.put(eventName, result);
+            eventsById.put(result.getId(), result);
         }
         mongoObjectFactory.storeEvent(result);
         return result;
     }
 
     @Override
-    public void updateEvent(String eventName, String venueName, String publicationUrl, boolean isPublic, List<String> regattaNames) {
-        synchronized (eventsByName) {
-            if (!eventsByName.containsKey(eventName)) {
-                throw new IllegalArgumentException("Sailing event with name " + eventName + " does not exist.");
+    public void updateEvent(Serializable id, String eventName, String venueName, String publicationUrl, boolean isPublic, List<String> regattaNames) {
+        synchronized (eventsById) {
+            if (!eventsById.containsKey(id)) {
+                throw new IllegalArgumentException("Sailing event with ID " + id + " does not exist.");
             }
-            Event event = eventsByName.get(eventName);
+            Event event = eventsById.get(id);
+            event.setName(eventName);
             event.setPublicationUrl(publicationUrl);
             event.setPublic(isPublic);
             event.getVenue().setName(venueName);
-            
-            // update regattas
-//            Iterable<Regatta> regattas = event.getRegattas();
-//            for (Regatta regatta : regattas) {
-//            }
-            
+            // TODO need to update regattas if they are once linked to event objects
             mongoObjectFactory.storeEvent(event);
         }
     }
 
     @Override
-    public void renameEvent(String oldName, String newName) {
-        synchronized (eventsByName) {
-            if (!eventsByName.containsKey(oldName)) {
-                throw new IllegalArgumentException("No sailing event with name "+oldName+" found.");
+    public void renameEvent(Serializable id, String newName) {
+        synchronized (eventsById) {
+            if (!eventsById.containsKey(id)) {
+                throw new IllegalArgumentException("No sailing event with ID "+id+" found.");
             }
-            if (eventsByName.containsKey(newName)) {
-                throw new IllegalArgumentException("Sailing event with name "+newName+" already exists.");
-            }
-            Event toRename = eventsByName.get(oldName);
-            if (toRename instanceof Renamable) {
-                ((Renamable) toRename).setName(newName);
-                eventsByName.remove(oldName);
-                eventsByName.put(newName, toRename);
-                mongoObjectFactory.renameEvent(oldName, newName);
-            } else {
-                throw new IllegalArgumentException("Sailing event with name "+newName+" is of type "+toRename.getClass().getSimpleName()+
-                        " and therefore cannot be renamed");
-            }
+            Event toRename = eventsById.get(id);
+            toRename.setName(newName);
+            mongoObjectFactory.renameEvent(id, newName);
         }
     }
 
     @Override
-    public void removeEvent(String eventName) {
-        removeEventFromEventsByName(eventName);
-        mongoObjectFactory.removeEvent(eventName);
+    public void removeEvent(Serializable id) {
+        removeEventFromEventsById(id);
+        mongoObjectFactory.removeEvent(id);
     }
 
-    protected void removeEventFromEventsByName(String eventName) {
-        synchronized (eventsByName) {
-            eventsByName.remove(eventName);
+    protected void removeEventFromEventsById(Serializable id) {
+        synchronized (eventsById) {
+            eventsById.remove(id);
         }
     }
     

@@ -297,7 +297,7 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter {
     }
 
     private void createRace() {
-        final Regatta myRegatta = regatta != null ? regatta : domainFactory.getOrCreateRegatta(currentRaceID, trackedRegattaRegistry);
+        final Regatta myRegatta = regatta != null ? regatta : domainFactory.getOrCreateDefaultRegatta(currentRaceID, trackedRegattaRegistry);
         RaceDefinition race = domainFactory.createRaceDefinition(myRegatta,
                 currentRaceID, competitorsPerRaceID.get(currentRaceID), currentCourseDefinition);
         racePerRaceID.put(currentRaceID, race);

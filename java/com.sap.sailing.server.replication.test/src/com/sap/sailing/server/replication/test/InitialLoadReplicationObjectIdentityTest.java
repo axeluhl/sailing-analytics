@@ -4,6 +4,7 @@ import static org.junit.Assert.assertSame;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.UUID;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -46,7 +47,7 @@ public class InitialLoadReplicationObjectIdentityTest extends AbstractServerRepl
         final DomainFactory masterDomainFactory = DomainFactory.INSTANCE;
         BoatClass boatClass = masterDomainFactory.getOrCreateBoatClass(boatClassName);
         final String baseEventName = "Test Event";
-        AddDefaultRegatta addEventOperation = new AddDefaultRegatta(baseEventName, boatClassName);
+        AddDefaultRegatta addEventOperation = new AddDefaultRegatta(baseEventName, boatClassName, UUID.randomUUID());
         Regatta regatta = master.apply(addEventOperation);
         final String raceName1 = "Test Race 1";
         final String raceName2 = "Test Race 2";

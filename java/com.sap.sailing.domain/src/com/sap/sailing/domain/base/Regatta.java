@@ -14,7 +14,7 @@ import com.sap.sailing.domain.tracking.TrackedRegatta;
  * @author Axel Uhl (d043530)
  *
  */
-public interface Regatta extends Named {
+public interface Regatta extends Named, WithID {
     ScoringScheme getScoringScheme();
     
     /**
