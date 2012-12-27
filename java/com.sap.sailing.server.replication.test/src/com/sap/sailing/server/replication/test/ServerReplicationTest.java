@@ -8,6 +8,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.UUID;
 
 import org.junit.Test;
 
@@ -79,8 +80,8 @@ public class ServerReplicationTest extends AbstractServerReplicationTest {
         final DomainFactory masterDomainFactory = DomainFactory.INSTANCE;
         BoatClass boatClass = masterDomainFactory.getOrCreateBoatClass(boatClassName);
         final String baseEventName = "Test Event";
-        AddDefaultRegatta addEventOperation = new AddDefaultRegatta(baseEventName, boatClassName);
-        Regatta regatta = master.apply(addEventOperation);
+        AddDefaultRegatta addRegattaOperation = new AddDefaultRegatta(baseEventName, boatClassName, UUID.randomUUID());
+        Regatta regatta = master.apply(addRegattaOperation);
         final String raceName = "Test Race";
         final CourseImpl masterCourse = new CourseImpl("Test Course", new ArrayList<Waypoint>());
         RaceDefinition race = new RaceDefinitionImpl(raceName, masterCourse, boatClass,

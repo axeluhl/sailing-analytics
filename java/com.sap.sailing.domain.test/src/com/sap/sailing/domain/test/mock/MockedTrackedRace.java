@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.test.mock;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.NavigableSet;
 
@@ -287,6 +288,12 @@ public class MockedTrackedRace implements DynamicTrackedRace {
                     @Override
                     public String getName() {
                         return "A Mocked Test Regatta";
+                    }
+
+                    @Override
+                    public Serializable getId() {
+                        // TODO Auto-generated method stub
+                        return null;
                     }
 
                     @Override

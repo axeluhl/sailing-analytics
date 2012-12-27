@@ -379,10 +379,12 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     public void storeRegatta(Regatta regatta) {
         DBCollection regattasCollection = database.getCollection(CollectionNames.REGATTAS.name());
         regattasCollection.ensureIndex(FieldNames.REGATTA_NAME.name());
+        regattasCollection.ensureIndex(FieldNames.REGATTA_ID.name());
         DBObject dbRegatta = new BasicDBObject();
         DBObject query = new BasicDBObject(FieldNames.REGATTA_NAME.name(), regatta.getName());
         dbRegatta.put(FieldNames.REGATTA_NAME.name(), regatta.getName());
         dbRegatta.put(FieldNames.REGATTA_BASE_NAME.name(), regatta.getBaseName());
+        dbRegatta.put(FieldNames.REGATTA_ID.name(), regatta.getId());
         dbRegatta.put(FieldNames.SCORING_SCHEME_TYPE.name(), regatta.getScoringScheme().getType().name());
         if (regatta.getBoatClass() != null) {
             dbRegatta.put(FieldNames.BOAT_CLASS_NAME.name(), regatta.getBoatClass().getName());

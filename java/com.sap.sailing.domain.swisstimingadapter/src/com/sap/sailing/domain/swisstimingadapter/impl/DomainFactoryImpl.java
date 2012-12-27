@@ -97,14 +97,14 @@ public class DomainFactoryImpl implements DomainFactory {
     }
     
     @Override
-    public Regatta getOrCreateRegatta(String raceID, TrackedRegattaRegistry trackedRegattaRegistry) {
+    public Regatta getOrCreateDefaultRegatta(String raceID, TrackedRegattaRegistry trackedRegattaRegistry) {
         Regatta result = trackedRegattaRegistry.getRememberedRegattaForRace(raceID);
         if (result == null) {
             result = raceIDToRegattaCache.get(raceID);
         }
         if (result == null) {
             result = new RegattaImpl(raceID, getOrCreateBoatClassFromRaceID(raceID), trackedRegattaRegistry,
-                    getBaseDomainFactory().createScoringScheme(ScoringSchemeType.LOW_POINT));
+                    getBaseDomainFactory().createScoringScheme(ScoringSchemeType.LOW_POINT), raceID);
             logger.info("Created regatta "+result.getName()+" ("+result.hashCode()+")");
             raceIDToRegattaCache.put(raceID, result);
         }

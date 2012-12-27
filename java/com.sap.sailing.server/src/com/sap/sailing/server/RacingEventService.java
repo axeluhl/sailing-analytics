@@ -4,6 +4,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.SocketException;
 import java.net.URI;
@@ -369,9 +370,9 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     TrackedRace createTrackedRace(RegattaAndRaceIdentifier raceIdentifier, WindStore windStore,
             long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed);
 
-    Regatta getOrCreateRegatta(String regattaName, String boatClassName);
+    Regatta getOrCreateRegatta(String regattaName, String boatClassName, Serializable id);
 
-    Regatta createRegatta(String baseName, String boatClassName, Iterable<? extends Series> series, boolean persistent, ScoringScheme scoringScheme);
+    Regatta createRegatta(String baseName, String boatClassName, Serializable id, Iterable<? extends Series> series, boolean persistent, ScoringScheme scoringScheme);
 
     /**
      * Adds <code>raceDefinition</code> to the {@link Regatta} such that it will appear in {@link Regatta#getAllRaces()}

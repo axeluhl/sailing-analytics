@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.persistence.impl;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -622,6 +623,10 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         if (dbRegatta != null) {
             String baseName = (String) dbRegatta.get(FieldNames.REGATTA_BASE_NAME.name());
             String boatClassName = (String) dbRegatta.get(FieldNames.BOAT_CLASS_NAME.name());
+            Serializable id = (Serializable) dbRegatta.get(FieldNames.REGATTA_ID.name());
+            if (id == null) {
+                id = baseName + "("+boatClassName+")";
+            }
             BoatClass boatClass = null;
             if (boatClassName != null) {
                 boolean typicallyStartsUpwind = (Boolean) dbRegatta.get(FieldNames.BOAT_CLASS_TYPICALLY_STARTS_UPWIND.name());
@@ -629,7 +634,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             }
             BasicDBList dbSeries = (BasicDBList) dbRegatta.get(FieldNames.REGATTA_SERIES.name());
             Iterable<Series> series = loadSeries(dbSeries, trackedRegattaRegistry);
-            result = new RegattaImpl(baseName, boatClass, series, /* persistent */ true, loadScoringScheme(dbRegatta));
+            result = new RegattaImpl(baseName, boatClass, series, /* persistent */ true, loadScoringScheme(dbRegatta), id);
         }
         return result;
     }
