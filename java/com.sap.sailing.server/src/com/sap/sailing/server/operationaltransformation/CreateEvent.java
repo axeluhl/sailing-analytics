@@ -12,9 +12,11 @@ public class CreateEvent extends AbstractEventOperation<Event> {
     private final String publicationUrl;
     private final boolean isPublic;
     private final List<String> regattaNames;
-
+    private final String eventName;
+    
     public CreateEvent(String eventName, String venue, String publicationUrl, boolean isPublic, List<String> regattaNames) {
-        super(eventName);
+        super(/* id */ null);
+        this.eventName = eventName;
         this.venue = venue;
         this.regattaNames = regattaNames;
         this.publicationUrl = publicationUrl;
@@ -31,6 +33,10 @@ public class CreateEvent extends AbstractEventOperation<Event> {
     public RacingEventServiceOperation<?> transformServerOp(RacingEventServiceOperation<?> clientOp) {
         // TODO Auto-generated method stub
         return null;
+    }
+
+    protected String getEventName() {
+        return eventName;
     }
 
     @Override

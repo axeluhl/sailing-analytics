@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.persistence.impl;
 
+import java.io.Serializable;
 import java.util.logging.Logger;
 
 import org.bson.types.ObjectId;
@@ -335,11 +336,12 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     @Override
     public void storeEvent(Event event) {
         DBCollection eventCollection = database.getCollection(CollectionNames.EVENTS.name());
-        eventCollection.ensureIndex(FieldNames.EVENT_NAME.name());
+        eventCollection.ensureIndex(FieldNames.EVENT_ID.name());
         DBObject query = new BasicDBObject();
-        query.put(FieldNames.EVENT_NAME.name(), event.getName());
+        query.put(FieldNames.EVENT_ID.name(), event.getId());
         DBObject eventDBObject = new BasicDBObject();
         eventDBObject.put(FieldNames.EVENT_NAME.name(), event.getName());
+        eventDBObject.put(FieldNames.EVENT_ID.name(), event.getId());
         eventDBObject.put(FieldNames.EVENT_PUBLICATION_URL.name(), event.getPublicationUrl());
         eventDBObject.put(FieldNames.EVENT_IS_PUBLIC.name(), event.isPublic());
         DBObject venueDBObject = getVenueAsDBObject(event.getVenue());
@@ -348,17 +350,17 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     }
 
     @Override
-    public void renameEvent(String oldName, String newName) {
+    public void renameEvent(Serializable id, String newName) {
         DBCollection eventCollection = database.getCollection(CollectionNames.EVENTS.name());
-        BasicDBObject query = new BasicDBObject(FieldNames.EVENT_NAME.name(), oldName);
+        BasicDBObject query = new BasicDBObject(FieldNames.EVENT_ID.name(), id);
         BasicDBObject renameUpdate = new BasicDBObject("$set", new BasicDBObject(FieldNames.EVENT_NAME.name(), newName));
         eventCollection.update(query, renameUpdate);
     }
     
     @Override
-    public void removeEvent(String eventName) {
+    public void removeEvent(Serializable id) {
         DBCollection eventsCollection = database.getCollection(CollectionNames.EVENTS.name());
-        BasicDBObject query = new BasicDBObject(FieldNames.EVENT_NAME.name(), eventName);
+        BasicDBObject query = new BasicDBObject(FieldNames.EVENT_ID.name(), id);
         eventsCollection.remove(query);
     }
     

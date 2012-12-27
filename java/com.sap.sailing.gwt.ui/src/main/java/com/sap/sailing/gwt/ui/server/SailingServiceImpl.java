@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.ui.server;
 
 import java.io.IOException;
 import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -2752,8 +2753,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public void updateEvent(String eventName, VenueDTO venue, String publicationUrl, boolean isPublic, List<String> regattaNames) {
-        getService().apply(new UpdateEvent(eventName, venue.name, publicationUrl, isPublic, regattaNames));
+    public void updateEvent(String eventName, Serializable id, VenueDTO venue, String publicationUrl, boolean isPublic, List<String> regattaNames) {
+        getService().apply(new UpdateEvent(id, eventName, venue.name, publicationUrl, isPublic, regattaNames));
     }
 
     @Override
@@ -2789,6 +2790,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         eventDTO.venue.name = event.getVenue() != null ? event.getVenue().getName() : null;
         eventDTO.publicationUrl = event.getPublicationUrl();
         eventDTO.isPublic = event.isPublic();
+        eventDTO.id = event.getId();
         eventDTO.regattas = new ArrayList<RegattaDTO>();
         for (Regatta regatta: event.getRegattas()) {
             RegattaDTO regattaDTO = new RegattaDTO();

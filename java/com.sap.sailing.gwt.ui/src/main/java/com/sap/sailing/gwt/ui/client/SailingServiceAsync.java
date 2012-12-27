@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.client;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
 import java.util.LinkedHashMap;
@@ -359,8 +360,8 @@ public interface SailingServiceAsync {
     
     void createEvent(String eventName, String description, String publicationUrl, boolean isPublic, AsyncCallback<EventDTO> callback);
     
-    void updateEvent(String eventName, VenueDTO venue, String publicationUrl, boolean isPublic, List<String> regattaNames,
-            AsyncCallback<Void> callback);
+    void updateEvent(String eventName, Serializable id, VenueDTO venue, String publicationUrl, boolean isPublic,
+            List<String> regattaNames, AsyncCallback<Void> callback);
 
     void removeRegatta(RegattaIdentifier regattaIdentifier, AsyncCallback<Void> callback);
 

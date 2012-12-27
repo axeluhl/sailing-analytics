@@ -13,6 +13,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.UUID;
 import java.util.logging.Logger;
 
 import org.junit.Test;
@@ -81,7 +82,7 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
             venue.addCourseArea(courseArea);
         }
         MongoObjectFactory mof = MongoFactory.INSTANCE.getMongoObjectFactory(getMongoService());
-        Event event = new EventImpl(eventName, venue, publicationUrl, /*isPublic*/ true);
+        Event event = new EventImpl(eventName, venue, publicationUrl, /*isPublic*/ true, UUID.randomUUID());
         mof.storeEvent(event);
         
         DomainObjectFactory dof = MongoFactory.INSTANCE.getDomainObjectFactory(getMongoService());

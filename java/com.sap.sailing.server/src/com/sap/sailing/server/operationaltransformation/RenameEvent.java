@@ -1,5 +1,7 @@
 package com.sap.sailing.server.operationaltransformation;
 
+import java.io.Serializable;
+
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
 
@@ -7,8 +9,8 @@ public class RenameEvent extends AbstractEventOperation<Void> {
     private static final long serialVersionUID = 4516794459150387632L;
     private final String newEventName;
 
-    public RenameEvent(String eventName, String newEventName) {
-        super(eventName);
+    public RenameEvent(Serializable id, String newEventName) {
+        super(id);
         this.newEventName = newEventName;
     }
 
@@ -26,9 +28,7 @@ public class RenameEvent extends AbstractEventOperation<Void> {
 
     @Override
     public Void internalApplyTo(RacingEventService toState) {
-        if (!getEventName().equals(newEventName)) {
-            toState.renameEvent(getEventName(), newEventName);
-        }
+        toState.renameEvent(getId(), newEventName);
         return null;
     }
 }

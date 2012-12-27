@@ -10,6 +10,7 @@ public enum FieldNames {
      * TODO this will have to be renamed to REGATTA_NAME, but compatibility concerns keep us from doing so at the moment
      */
     EVENT_NAME,
+    EVENT_ID,
     EVENT_PUBLICATION_URL,
     EVENT_IS_PUBLIC,
     

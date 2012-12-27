@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -174,20 +175,19 @@ public class SailingEventManagementPanel extends SimplePanel {
 
                     @Override
                     public void ok(EventDTO updatedEvent) {
-                        updateEvent(selectedEvent.name, updatedEvent);
+                        updateEvent(selectedEvent.name, selectedEvent.id, updatedEvent);
                     }
                 });
         dialog.show();
     }
 
-    private void updateEvent(final String oldEventName, final EventDTO updatedEvent) {
+    private void updateEvent(final String oldEventName, final Serializable oldEventId, final EventDTO updatedEvent) {
         List<String> regattaNames = new ArrayList<String>();
         for(RegattaDTO regatta: updatedEvent.regattas) {
             regattaNames.add(regatta.name);
         }
-        
-        sailingService.updateEvent(oldEventName, updatedEvent.venue, updatedEvent.publicationUrl, updatedEvent.isPublic, 
-                regattaNames, new AsyncCallback<Void>() {
+        sailingService.updateEvent(oldEventName, oldEventId, updatedEvent.venue, updatedEvent.publicationUrl, 
+                updatedEvent.isPublic, regattaNames, new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable t) {
                 errorReporter.reportError("Error trying to update sailing event" + oldEventName + ": " + t.getMessage());
