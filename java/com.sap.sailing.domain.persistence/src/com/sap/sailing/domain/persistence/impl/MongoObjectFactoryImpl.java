@@ -37,6 +37,7 @@ import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.racecommittee.RaceCommitteeEvent;
+import com.sap.sailing.domain.racecommittee.RaceCommitteeEventTrack;
 import com.sap.sailing.domain.racecommittee.RaceCommitteeFlagEvent;
 import com.sap.sailing.domain.racecommittee.RaceCommitteeStartTimeEvent;
 import com.sap.sailing.domain.tracking.Positioned;
@@ -492,7 +493,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         return result;
 	}
 
-	private DBObject storeRaceCommitteeFlagEvent(RaceCommitteeFlagEvent flagEvent) {
+	public DBObject storeRaceCommitteeFlagEvent(RaceCommitteeFlagEvent flagEvent) {
 		DBObject result = new BasicDBObject();
         storeTimed(flagEvent, result);
         storeRaceCommitteeEventProperties(flagEvent, result);
@@ -518,5 +519,11 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         	dbInvolvedCompetitorNames.add(MongoUtils.escapeDollarAndDot(competitor.getName()));
         }
         return dbInvolvedCompetitorNames;
+	}
+
+	@Override
+	public void addRaceCommitteeEventTrackDumper(TrackedRegatta trackedRegatta, TrackedRace trackedRace) {
+		RaceCommitteeEventTrack rcEventTrack = trackedRace.getOrCreateRaceCommitteeEventTrack();
+		rcEventTrack.addListener(new MongoRaceCommitteeListener(trackedRegatta, trackedRace, this, database));		
 	}
 }

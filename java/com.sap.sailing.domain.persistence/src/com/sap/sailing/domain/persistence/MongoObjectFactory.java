@@ -24,6 +24,13 @@ public interface MongoObjectFactory {
      * the {@link RaceDefinition#getName() race name} and the {@link Regatta#getName() regatta name}.
      */
     void addWindTrackDumper(TrackedRegatta trackedRegatta, TrackedRace trackedRace, WindSource windSource);
+    
+    /**
+     * Registers for new race committee events on the <code>trackedRace</code>. Each
+     * update received will be appended to the MongoDB and can later be retrieved. The key used to identify the race is
+     * the {@link RaceDefinition#getName() race name} and the {@link Regatta#getName() regatta name}.
+     */
+    void addRaceCommitteeEventTrackDumper(TrackedRegatta trackedRegatta, TrackedRace trackedRace);
 
     /**
      * Stores the configuration data of <code>leaderboard</code> in the Mongo DB associated with this

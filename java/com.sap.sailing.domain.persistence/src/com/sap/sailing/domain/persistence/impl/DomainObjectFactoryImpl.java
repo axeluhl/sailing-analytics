@@ -772,7 +772,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return result;
 	}
 
-	private RaceCommitteeEvent loadRaceCommitteeEvent(DBObject dbObject) {
+	public RaceCommitteeEvent loadRaceCommitteeEvent(DBObject dbObject) {
 		TimePoint timePoint = loadTimePoint(dbObject);
 		Serializable id = (Serializable) dbObject.get(FieldNames.RC_EVENT_ID.name());
 		Integer passId = (Integer) dbObject.get(FieldNames.RC_EVENT_PASS_ID.name());
