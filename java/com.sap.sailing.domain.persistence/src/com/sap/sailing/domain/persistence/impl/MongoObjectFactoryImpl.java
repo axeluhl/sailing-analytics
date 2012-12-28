@@ -486,6 +486,8 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         storeTimed(startTimeEvent, result);
         storeRaceCommitteeEventProperties(startTimeEvent, result);
         
+        result.put(FieldNames.RC_EVENT_CLASS.name(), RaceCommitteeStartTimeEvent.class.getSimpleName());
+        
         result.put(FieldNames.RC_EVENT_START_TIME.name(), startTimeEvent.getStartTime().asMillis());
         return result;
 	}
@@ -494,6 +496,8 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
 		DBObject result = new BasicDBObject();
         storeTimed(flagEvent, result);
         storeRaceCommitteeEventProperties(flagEvent, result);
+        
+        result.put(FieldNames.RC_EVENT_CLASS.name(), RaceCommitteeFlagEvent.class.getSimpleName());
         
         result.put(FieldNames.RC_EVENT_FLAG_UPPER.name(), flagEvent.getUpperFlag().name());
         result.put(FieldNames.RC_EVENT_FLAG_LOWER.name(), flagEvent.getLowerFlag().name());

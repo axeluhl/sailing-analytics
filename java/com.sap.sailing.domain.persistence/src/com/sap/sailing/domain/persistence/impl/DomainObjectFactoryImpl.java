@@ -71,10 +71,11 @@ import com.sap.sailing.domain.leaderboard.meta.LeaderboardGroupMetaLeaderboard;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.racecommittee.Flags;
 import com.sap.sailing.domain.racecommittee.RaceCommitteeEvent;
+import com.sap.sailing.domain.racecommittee.RaceCommitteeEventFactory;
 import com.sap.sailing.domain.racecommittee.RaceCommitteeEventTrack;
+import com.sap.sailing.domain.racecommittee.RaceCommitteeFlagEvent;
+import com.sap.sailing.domain.racecommittee.RaceCommitteeStartTimeEvent;
 import com.sap.sailing.domain.racecommittee.impl.RaceCommitteeEventTrackImpl;
-import com.sap.sailing.domain.racecommittee.impl.RaceCommitteeFlagEventImpl;
-import com.sap.sailing.domain.racecommittee.impl.RaceCommitteeStartTimeEventImpl;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindTrack;
@@ -759,8 +760,9 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             DBCollection raceCommitteeTrack = database.getCollection(CollectionNames.RACECOMMITTEE_TRACKS.name());
             for (DBObject o : raceCommitteeTrack.find(query)) {
                 RaceCommitteeEvent raceCommitteeEvent = loadRaceCommitteeEvent((DBObject) o.get(FieldNames.RC_EVENT.name()));
-
-                result.add(raceCommitteeEvent);
+                
+                if (raceCommitteeEvent != null)
+                	result.add(raceCommitteeEvent);
             }
         } catch (Throwable t) {
              // something went wrong during DB access; report, then use empty new race committee track
@@ -771,27 +773,40 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
 	}
 
 	private RaceCommitteeEvent loadRaceCommitteeEvent(DBObject dbObject) {
+		TimePoint timePoint = loadTimePoint(dbObject);
 		Serializable id = (Serializable) dbObject.get(FieldNames.RC_EVENT_ID.name());
 		Integer passId = (Integer) dbObject.get(FieldNames.RC_EVENT_PASS_ID.name());
 		//BasicDBList dbList = (BasicDBList) dbObject.get(FieldNames.RC_EVENT_INVOLVED_BOATS.name());
 		List<Competitor> competitors = new ArrayList<Competitor>();
 		
-		Long startTimeInMillis = (Long) dbObject.get(FieldNames.RC_EVENT_START_TIME.name());
-		TimePoint startTime = null;
-		if (startTimeInMillis != null) {
-			startTime = new MillisecondsTimePoint(startTimeInMillis);
-			if (startTime != null) {
-				return new RaceCommitteeStartTimeEventImpl(loadTimePoint(dbObject), id, competitors, passId, startTime);
-			}
+		String eventClass = (String) dbObject.get(FieldNames.RC_EVENT_CLASS.name());
+		if (eventClass.equals(RaceCommitteeStartTimeEvent.class.getSimpleName())) {
+			return loadRaceCommitteeStartTimeEvent(timePoint, id, passId, competitors, dbObject);
+		} else if (eventClass.equals(RaceCommitteeFlagEvent.class.getSimpleName())) {
+			return loadRaceCommitteeFlagEvent(timePoint, id, passId, competitors, dbObject);
 		}
 		
+		return null;
+	}
+
+	private RaceCommitteeEvent loadRaceCommitteeFlagEvent(TimePoint timePoint, Serializable id, Integer passId, List<Competitor> competitors, DBObject dbObject) {
 		Flags upperFlag = Flags.valueOf((String) dbObject.get(FieldNames.RC_EVENT_FLAG_UPPER.name()));
 		Flags lowerFlag = Flags.valueOf((String) dbObject.get(FieldNames.RC_EVENT_FLAG_LOWER.name()));
 		Boolean displayed = Boolean.valueOf((String) dbObject.get(FieldNames.RC_EVENT_FLAG_DISPLAYED.name()));
 		
-		if (upperFlag != null && lowerFlag != null && displayed != null) {
-			return new RaceCommitteeFlagEventImpl(loadTimePoint(dbObject), id, competitors, passId, upperFlag, lowerFlag, displayed);
+		if (upperFlag == null || lowerFlag == null || displayed == null) {
+			return null;
 		}
-		return null;
+		
+		return RaceCommitteeEventFactory.INSTANCE.createFlagEvent(timePoint, id, competitors, passId, upperFlag, lowerFlag, displayed);
+	}
+
+	private RaceCommitteeStartTimeEvent loadRaceCommitteeStartTimeEvent(TimePoint timePoint, Serializable id, Integer passId, List<Competitor> competitors, DBObject dbObject) {
+		Long startTimeInMillis = (Long) dbObject.get(FieldNames.RC_EVENT_START_TIME.name());
+		if (startTimeInMillis == null) {
+			return null;
+		}
+		TimePoint startTime = new MillisecondsTimePoint(startTimeInMillis);
+		return RaceCommitteeEventFactory.INSTANCE.createStartTimeEvent(timePoint, passId, competitors, passId, startTime);
 	}
 }
