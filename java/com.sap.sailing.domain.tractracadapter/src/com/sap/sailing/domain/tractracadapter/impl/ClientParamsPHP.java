@@ -10,6 +10,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -19,7 +20,9 @@ import java.util.regex.Pattern;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.WithID;
 import com.sap.sailing.domain.common.impl.DegreePosition;
+import com.sap.sailing.domain.tractracadapter.TracTracControlPoint;
 
 /**
  * Parses and then represents the contents of a clientparams.php TracTrac document describing one race with
@@ -86,7 +89,7 @@ public class ClientParamsPHP {
      * @author Axel Uhl (D043530)
      *
      */
-    private abstract class ObjectWithUUID {
+    private abstract class ObjectWithUUID implements WithID {
         private final Pattern propertyNamePattern = Pattern.compile("([^0-9]*)(([0-9][0-9]*)(.*))?");
         private final String propertyNamePrefix;
         private final Integer number;
@@ -108,18 +111,20 @@ public class ClientParamsPHP {
             }
         }
         
+        @Override
+        public UUID getId() {
+            return uuid;
+        }
         
         @Override
         public int hashCode() {
-            return uuid.hashCode();
+            return getId().hashCode();
         }
-
 
         @Override
         public boolean equals(Object obj) {
-            return uuid.equals(((ObjectWithUUID) obj).uuid);
+            return getId().equals(((WithID) obj).getId());
         }
-
 
         protected String getProperty(String propertyName) {
             String result = properties.get(propertyNamePrefix+number+propertyName);
@@ -185,7 +190,7 @@ public class ClientParamsPHP {
         }
     }
 
-    public class ControlPoint extends ObjectWithUUID {
+    public class ControlPoint extends ObjectWithUUID implements TracTracControlPoint {
         public ControlPoint(UUID uuid) {
             super(uuid);
         }
@@ -206,7 +211,7 @@ public class ClientParamsPHP {
          * @return one or two marks that form the control point
          */
         public Iterable<Mark> getMarks() {
-            List<Mark> result = new ArrayList<>();
+            final List<Mark> result = new ArrayList<>();
             for (int i=1; i<=1+Integer.valueOf(getProperty("HasTwoPoints")); i++) {
                 String latDegString = getProperty("Mark"+i+"Lat");
                 Position position = null;
@@ -217,6 +222,34 @@ public class ClientParamsPHP {
                     }
                 }
                 result.add(new Mark(position));
+            }
+            return result;
+        }
+
+        @Override
+        public UUID getId() {
+            return super.getId();
+        }
+
+        @Override
+        public boolean getHasTwoPoints() {
+            return getProperty("HasTwoPoints").equals("1");
+        }
+
+        @Override
+        public Position getMark1Position() {
+            return getMarks().iterator().next().getPosition();
+        }
+
+        @Override
+        public Position getMark2Position() {
+            final Position result;
+            if (getHasTwoPoints()) {
+                Iterator<Mark> markIter = getMarks().iterator();
+                markIter.next(); // skip first mark
+                result = markIter.next().getPosition();
+            } else {
+                result = null;
             }
             return result;
         }

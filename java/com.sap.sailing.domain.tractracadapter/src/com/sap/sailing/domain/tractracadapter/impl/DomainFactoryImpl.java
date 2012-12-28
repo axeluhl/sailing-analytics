@@ -11,6 +11,7 @@ import java.net.URL;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -144,7 +145,13 @@ public class DomainFactoryImpl implements DomainFactory {
             com.sap.sailing.domain.base.ControlPoint domainControlPoint = controlPointCache.get(controlPoint);
             if (domainControlPoint == null) {
                 String controlPointName = controlPoint.getName();
-                Map<String, String> controlPointMetadata = parseControlPointMetadata(controlPoint);
+                final IMetadata controlPointIMetadata = controlPoint.getMetadata();
+                Map<String, String> controlPointMetadata;
+                if (controlPointIMetadata == null || controlPointIMetadata.isEmpty()) {
+                    controlPointMetadata = Collections.emptyMap();
+                } else {
+                    controlPointMetadata = parseControlPointMetadata(controlPointIMetadata.getText());
+                }
                 if (controlPoint.getHasTwoPoints()) {
                     // it's a gate
                     MarkType type1 = resolveMarkTypeFromMetadata(controlPointMetadata, "P1.Type");
@@ -189,19 +196,14 @@ public class DomainFactoryImpl implements DomainFactory {
     }
     
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    private Map<String, String> parseControlPointMetadata(ControlPoint controlPoint) {
+    private Map<String, String> parseControlPointMetadata(String controlPointMetadata) {
         Map<String, String> metadataMap = new HashMap<String, String>();
-        IMetadata metadata = controlPoint.getMetadata();
-        if (metadata != null && !metadata.isEmpty()) {
-            // we assume the format of the metadata is like in a java .properties file
-            String text = metadata.getText();
-            try {
-                Properties p = new Properties();
-                p.load(new StringReader(text));
-                metadataMap = new HashMap<String, String>((Map) p);
-            } catch (IOException e) {
-                // do nothing
-            }
+        try {
+            Properties p = new Properties();
+            p.load(new StringReader(controlPointMetadata));
+            metadataMap = new HashMap<String, String>((Map) p);
+        } catch (IOException e) {
+            // do nothing
         }
         return metadataMap;
     }

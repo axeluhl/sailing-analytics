@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.base;
 
 import com.sap.sailing.domain.common.MarkType;
+import com.sap.sailing.domain.common.WithID;
 
 
 /**
