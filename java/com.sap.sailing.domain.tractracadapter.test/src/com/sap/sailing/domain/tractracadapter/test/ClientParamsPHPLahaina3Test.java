@@ -4,9 +4,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
 import java.util.Iterator;
 import java.util.UUID;
 
@@ -14,19 +11,15 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sailing.domain.common.impl.Util;
-import com.sap.sailing.domain.tractracadapter.impl.ClientParamsPHP;
 import com.sap.sailing.domain.tractracadapter.impl.ClientParamsPHP.ControlPoint;
 import com.sap.sailing.domain.tractracadapter.impl.ClientParamsPHP.Mark;
 import com.sap.sailing.domain.tractracadapter.impl.ClientParamsPHP.Route;
 
-public class ClientParamsPHPTest {
-    private ClientParamsPHP clientParams;
+public class ClientParamsPHPLahaina3Test extends AbstractClientParamsPHPTest {
     
     @Before
     public void setUp() throws IOException {
-        InputStream is = getClass().getResourceAsStream("/clientparamsLahainaTest3.php");
-        Reader r = new InputStreamReader(is);
-        clientParams = new ClientParamsPHP(r);
+        setUp("/clientparamsLahainaTest3.php");
     }
     
     @Test

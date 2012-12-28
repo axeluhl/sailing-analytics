@@ -122,7 +122,11 @@ public class ClientParamsPHP {
 
 
         protected String getProperty(String propertyName) {
-            return properties.get(propertyNamePrefix+number+propertyName);
+            String result = properties.get(propertyNamePrefix+number+propertyName);
+            if (result != null) {
+                result = result.replace("###BREAKLINE###", "\n");
+            }
+            return result;
         }
     }
     
@@ -192,6 +196,10 @@ public class ClientParamsPHP {
         
         public String getShortName() {
             return getProperty("ShortName");
+        }
+        
+        public String getMetadata() {
+            return getProperty("DataSheet");
         }
         
         /**

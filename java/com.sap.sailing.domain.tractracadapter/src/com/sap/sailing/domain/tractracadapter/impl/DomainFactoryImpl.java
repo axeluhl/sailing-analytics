@@ -192,7 +192,7 @@ public class DomainFactoryImpl implements DomainFactory {
     private Map<String, String> parseControlPointMetadata(ControlPoint controlPoint) {
         Map<String, String> metadataMap = new HashMap<String, String>();
         IMetadata metadata = controlPoint.getMetadata();
-        if(metadata != null && !metadata.isEmpty()) {
+        if (metadata != null && !metadata.isEmpty()) {
             // we assume the format of the metadata is like in a java .properties file
             String text = metadata.getText();
             try {
