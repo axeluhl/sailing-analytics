@@ -28,6 +28,7 @@ import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.common.ScoringSchemeType;
+import com.sap.sailing.domain.racecommittee.impl.EmptyRaceCommitteeStore;
 import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
@@ -70,13 +71,13 @@ public class RaceTrackerStartStopTest {
         raceDef3 = new RaceDefinitionImpl(RACENAME3, new CourseImpl("Course3", new ArrayList<Waypoint>()), boatClass, new ArrayList<Competitor>());
         regatta.addRace(raceDef1);
         trackedRegatta1.createTrackedRace(raceDef1, /* windStore */ EmptyWindStore.INSTANCE, /* delayToLiveInMillis */ 0l, /* millisecondsOverWhichToAverageWind */ 0l,
-                /* millisecondsOverWhichToAverageSpeed */ 0l, /* raceDefinitionSetToUpdate */ null);
+                /* millisecondsOverWhichToAverageSpeed */ 0l, /* raceDefinitionSetToUpdate */ null, EmptyRaceCommitteeStore.INSTANCE);
         regatta.addRace(raceDef2);
         trackedRegatta1.createTrackedRace(raceDef2, /* windStore */ EmptyWindStore.INSTANCE, /* delayToLiveInMillis */ 0l, /* millisecondsOverWhichToAverageWind */ 0l,
-                /* millisecondsOverWhichToAverageSpeed */ 0l, /* raceDefinitionSetToUpdate */ null);
+                /* millisecondsOverWhichToAverageSpeed */ 0l, /* raceDefinitionSetToUpdate */ null, EmptyRaceCommitteeStore.INSTANCE);
         regatta.addRace(raceDef3);
         trackedRegatta1.createTrackedRace(raceDef3, /* windStore */ EmptyWindStore.INSTANCE, /* delayToLiveInMillis */ 0l, /* millisecondsOverWhichToAverageWind */ 0l,
-                /* millisecondsOverWhichToAverageSpeed */ 0l, /* raceDefinitionSetToUpdate */ null);
+                /* millisecondsOverWhichToAverageSpeed */ 0l, /* raceDefinitionSetToUpdate */ null, EmptyRaceCommitteeStore.INSTANCE);
         Set<RaceDefinition> raceDefinitionSetRace1 = new HashSet<RaceDefinition>();
         raceDefinitionSetRace1.add(raceDef1);
         Set<RaceDefinition> raceDefinitionSetRace2 = new HashSet<RaceDefinition>();

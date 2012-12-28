@@ -4,6 +4,8 @@ import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RaceIdentifier;
+import com.sap.sailing.domain.racecommittee.RaceCommitteeStore;
+import com.sap.sailing.domain.racecommittee.impl.EmptyRaceCommitteeStore;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindStore;
@@ -32,16 +34,28 @@ public class CreateTrackedRace extends AbstractRaceOperation<TrackedRace> {
      * {@link EmptyWindStore}.
      */
     private transient final WindStore windStore;
+    
+    /**
+     * If a {@link RaceCommitteeStore} is provided to this command, it will be used for the construction of the tracked race.
+     * However, after de-serialization, the race committee store will always be <code>null</code>, causing the use of an
+     * {@link EmptyRaceCommitteeStore}.
+     */
+    private transient final RaceCommitteeStore raceCommitteeStore;
 
     /**
      * @param windStore
      *            if <code>null</code>, an {@link EmptyWindStore} will be used. Note that the {@link #windStore} field
      *            won't be serialized. A receiver of this operation will therefore always use an {@link EmptyWindStore}.
+     * @param raceCommitteeStore
+     *            if <code>null</code>, an {@link EmptyRaceCommitteeStore} will be used. Note that the {@link #raceCommitteeStore} field
+     *            won't be serialized. A receiver of this operation will therefore always use an {@link EmptyRaceCommitteeStore}.
      */
     public CreateTrackedRace(RegattaAndRaceIdentifier raceIdentifier, WindStore windStore,
-            long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed) {
+            long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed, 
+            RaceCommitteeStore raceCommitteeStore) {
         super(raceIdentifier);
         this.windStore = windStore;
+        this.raceCommitteeStore = raceCommitteeStore;
         this.delayToLiveInMillis = delayToLiveInMillis;
         this.millisecondsOverWhichToAverageWind = millisecondsOverWhichToAverageWind;
         this.millisecondsOverWhichToAverageSpeed = millisecondsOverWhichToAverageSpeed;
@@ -62,7 +76,8 @@ public class CreateTrackedRace extends AbstractRaceOperation<TrackedRace> {
     @Override
     public TrackedRace internalApplyTo(RacingEventService toState) {
         return toState.createTrackedRace(getRaceIdentifier(), windStore == null ? EmptyWindStore.INSTANCE : windStore,
-                delayToLiveInMillis, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed);
+                delayToLiveInMillis, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed,
+                raceCommitteeStore == null ? EmptyRaceCommitteeStore.INSTANCE : raceCommitteeStore);
     }
 
 }

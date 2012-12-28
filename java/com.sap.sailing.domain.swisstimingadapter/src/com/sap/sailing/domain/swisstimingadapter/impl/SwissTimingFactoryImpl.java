@@ -9,6 +9,7 @@ import java.util.Map;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util.Triple;
+import com.sap.sailing.domain.racecommittee.RaceCommitteeStore;
 import com.sap.sailing.domain.swisstimingadapter.DomainFactory;
 import com.sap.sailing.domain.swisstimingadapter.Race;
 import com.sap.sailing.domain.swisstimingadapter.RaceSpecificMessageLoader;
@@ -80,19 +81,20 @@ public class SwissTimingFactoryImpl implements SwissTimingFactory {
     @Override
     public SwissTimingRaceTracker createRaceTracker(String raceID, String hostname, int port, boolean canSendRequests, long delayToLiveInMillis,
             WindStore windStore, RaceSpecificMessageLoader messageLoader, DomainFactory domainFactory,
-            TrackedRegattaRegistry trackedRegattaRegistry) throws InterruptedException, UnknownHostException, IOException,
+            TrackedRegattaRegistry trackedRegattaRegistry, RaceCommitteeStore raceCommitteeStore) throws InterruptedException, UnknownHostException, IOException,
             ParseException {
         return new SwissTimingRaceTrackerImpl(raceID, hostname, port, windStore, domainFactory, this, messageLoader,
-                trackedRegattaRegistry, canSendRequests, delayToLiveInMillis);
+                trackedRegattaRegistry, canSendRequests, delayToLiveInMillis, raceCommitteeStore);
     }
 
     @Override
     public RaceTracker createRaceTracker(Regatta regatta, String raceID, String hostname, int port,
             boolean canSendRequests, long delayToLiveInMillis, WindStore windStore, RaceSpecificMessageLoader messageLoader,
-            DomainFactory domainFactory, TrackedRegattaRegistry trackedRegattaRegistry) throws UnknownHostException,
+            DomainFactory domainFactory, TrackedRegattaRegistry trackedRegattaRegistry, 
+            RaceCommitteeStore raceCommitteeStore) throws UnknownHostException,
             InterruptedException, IOException, ParseException {
         return new SwissTimingRaceTrackerImpl(regatta, raceID, hostname, port, windStore, domainFactory, this,
-                messageLoader, trackedRegattaRegistry, canSendRequests, delayToLiveInMillis);
+                messageLoader, trackedRegattaRegistry, canSendRequests, delayToLiveInMillis, raceCommitteeStore);
     }
 
     @Override

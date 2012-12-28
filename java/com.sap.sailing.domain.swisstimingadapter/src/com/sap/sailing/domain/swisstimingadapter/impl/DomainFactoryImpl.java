@@ -29,6 +29,7 @@ import com.sap.sailing.domain.base.impl.TeamImpl;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util;
+import com.sap.sailing.domain.racecommittee.RaceCommitteeStore;
 import com.sap.sailing.domain.swisstimingadapter.Course;
 import com.sap.sailing.domain.swisstimingadapter.DomainFactory;
 import com.sap.sailing.domain.swisstimingadapter.Fix;
@@ -301,10 +302,10 @@ public class DomainFactoryImpl implements DomainFactory {
     @Override
     public RaceTrackingConnectivityParameters createTrackingConnectivityParameters(String hostname, int port, String raceID,
             boolean canSendRequests, long delayToLiveInMillis,
-            SwissTimingFactory swissTimingFactory, DomainFactory domainFactory, WindStore windStore,
+            SwissTimingFactory swissTimingFactory, DomainFactory domainFactory, WindStore windStore, RaceCommitteeStore raceCommitteeStore,
             RaceSpecificMessageLoader messageLoader) {
         return new SwissTimingTrackingConnectivityParameters(hostname, port, raceID, canSendRequests, delayToLiveInMillis, 
-                swissTimingFactory, domainFactory, windStore, messageLoader);
+                swissTimingFactory, domainFactory, windStore, raceCommitteeStore, messageLoader);
     }
 
 }

@@ -37,6 +37,7 @@ import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.LeaderboardRegistry;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
+import com.sap.sailing.domain.racecommittee.RaceCommitteeStore;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
 import com.sap.sailing.domain.tracking.RaceListener;
 import com.sap.sailing.domain.tracking.RaceTracker;
@@ -107,7 +108,8 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      *            if a race definition is not received for a race of this event within this time, the race tracker for
      *            that race is stopped; use -1 to wait forever
      */
-    Regatta addRegatta(URL jsonURL, URI liveURI, URI storedURI, WindStore windStore, long timeoutInMilliseconds)
+    Regatta addRegatta(URL jsonURL, URI liveURI, URI storedURI, WindStore windStore, long timeoutInMilliseconds, 
+    		RaceCommitteeStore raceCommitteeStore)
             throws MalformedURLException, FileNotFoundException, URISyntaxException, IOException, ParseException,
             org.json.simple.parser.ParseException, Exception;
 
@@ -133,7 +135,8 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      *            if the race definition is not received for the race within this time, the race tracker for
      *            that race is stopped; use -1 to wait forever
      */
-    RacesHandle addTracTracRace(URL paramURL, URI liveURI, URI storedURI, WindStore windStore, long timeoutInMilliseconds)
+    RacesHandle addTracTracRace(URL paramURL, URI liveURI, URI storedURI, WindStore windStore, long timeoutInMilliseconds, 
+    		RaceCommitteeStore raceCommitteeStore)
             throws MalformedURLException, FileNotFoundException, URISyntaxException, Exception;
 
     /**
@@ -150,7 +153,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      */
     RacesHandle addTracTracRace(RegattaIdentifier regattaToAddTo, URL paramURL, URI liveURI, URI storedURI,
             TimePoint trackingStartTime, TimePoint trackingEndTime, WindStore windStore,
-            long timeoutForReceivingRaceDefinitionInMilliseconds, boolean simulateWithStartTimeNow)
+            long timeoutForReceivingRaceDefinitionInMilliseconds, boolean simulateWithStartTimeNow, RaceCommitteeStore raceCommitteeStore)
             throws MalformedURLException, FileNotFoundException, URISyntaxException, Exception;
 
     /**
@@ -285,7 +288,8 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      *            to add the races to. Otherwise, a default regatta as described above will be created and used.
      */
     RacesHandle addSwissTimingRace(RegattaIdentifier regattaToAddTo, String raceID, String hostname, int port,
-            boolean canSendRequests, WindStore windStore, long timeoutInMilliseconds) throws InterruptedException, UnknownHostException,
+            boolean canSendRequests, WindStore windStore, long timeoutInMilliseconds, 
+            RaceCommitteeStore raceCommitteeStore) throws InterruptedException, UnknownHostException,
             IOException, ParseException, Exception;
 
     SwissTimingFactory getSwissTimingFactory();
@@ -363,11 +367,13 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * @param windStore
      *            must not be <code>null</code>, but can, e.g., be an {@link EmptyWindStore}
      */
-    RacesHandle addRace(RegattaIdentifier regattaToAddTo, RaceTrackingConnectivityParameters params, WindStore windStore, long timeoutInMilliseconds)
+    RacesHandle addRace(RegattaIdentifier regattaToAddTo, RaceTrackingConnectivityParameters params, WindStore windStore, long timeoutInMilliseconds,
+    		RaceCommitteeStore raceCommitteeStore)
             throws MalformedURLException, FileNotFoundException, URISyntaxException, Exception;
 
     TrackedRace createTrackedRace(RegattaAndRaceIdentifier raceIdentifier, WindStore windStore,
-            long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed);
+            long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
+            RaceCommitteeStore raceCommitteeStore);
 
     Regatta getOrCreateRegatta(String regattaName, String boatClassName);
 

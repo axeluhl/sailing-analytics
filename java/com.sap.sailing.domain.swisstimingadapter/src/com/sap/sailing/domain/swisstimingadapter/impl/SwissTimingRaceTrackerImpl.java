@@ -22,6 +22,7 @@ import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Triple;
+import com.sap.sailing.domain.racecommittee.RaceCommitteeStore;
 import com.sap.sailing.domain.swisstimingadapter.Course;
 import com.sap.sailing.domain.swisstimingadapter.DomainFactory;
 import com.sap.sailing.domain.swisstimingadapter.Fix;
@@ -59,6 +60,7 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
     private final Triple<String, String, Integer> id;
     private final Regatta regatta;
     private final WindStore windStore;
+    private final RaceCommitteeStore raceCommitteeStore;
 
     private RaceDefinition race;
     private Course course;
@@ -71,15 +73,17 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
     
     protected SwissTimingRaceTrackerImpl(String raceID, String hostname, int port, WindStore windStore,
             DomainFactory domainFactory, SwissTimingFactory factory, RaceSpecificMessageLoader messageLoader,
-            TrackedRegattaRegistry trackedRegattaRegistry, boolean canSendRequests, long delayToLiveInMillis) throws InterruptedException,
+            TrackedRegattaRegistry trackedRegattaRegistry, boolean canSendRequests, long delayToLiveInMillis, 
+            RaceCommitteeStore raceCommitteeStore) throws InterruptedException,
             UnknownHostException, IOException, ParseException {
         this(domainFactory.getOrCreateRegatta(raceID, trackedRegattaRegistry), raceID, hostname, port, windStore, domainFactory, factory,
-                messageLoader, trackedRegattaRegistry, canSendRequests, delayToLiveInMillis);
+                messageLoader, trackedRegattaRegistry, canSendRequests, delayToLiveInMillis, raceCommitteeStore);
     }
     
     protected SwissTimingRaceTrackerImpl(Regatta regatta, String raceID, String hostname, int port, WindStore windStore,
             DomainFactory domainFactory, SwissTimingFactory factory, RaceSpecificMessageLoader messageLoader,
-            TrackedRegattaRegistry trackedRegattaRegistry, boolean canSendRequests, long delayToLiveInMillis) throws InterruptedException,
+            TrackedRegattaRegistry trackedRegattaRegistry, boolean canSendRequests, long delayToLiveInMillis, 
+            RaceCommitteeStore raceCommitteeStore) throws InterruptedException,
             UnknownHostException, IOException, ParseException {
         super();
         this.regatta = regatta;
@@ -88,6 +92,7 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
         this.raceID = raceID;
         this.messageLoader = messageLoader;
         this.windStore = windStore;
+        this.raceCommitteeStore = raceCommitteeStore;
         this.id = createID(raceID, hostname, port);
         connector.addSailMasterListener(raceID, this);
         trackedRegatta = trackedRegattaRegistry.getOrCreateTrackedRegatta(regatta);
@@ -278,7 +283,7 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
                         // we already know our single RaceDefinition
                         assert SwissTimingRaceTrackerImpl.this.race == race;
                     }
-                });
+                }, raceCommitteeStore);
         logger.info("Created SwissTiming RaceDefinition and TrackedRace for "+race.getName());
     }
     

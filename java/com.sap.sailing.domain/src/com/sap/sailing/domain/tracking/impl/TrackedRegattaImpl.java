@@ -18,6 +18,7 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.racecommittee.RaceCommitteeStore;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.RaceListener;
@@ -169,10 +170,10 @@ public class TrackedRegattaImpl implements TrackedRegatta {
     @Override
     public DynamicTrackedRace createTrackedRace(RaceDefinition raceDefinition, WindStore windStore, long delayToLiveInMillis,
             long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
-            DynamicRaceDefinitionSet raceDefinitionSetToUpdate) {
+            DynamicRaceDefinitionSet raceDefinitionSetToUpdate, RaceCommitteeStore raceCommitteeStore) {
         logger.log(Level.INFO, "Creating DynamicTrackedRaceImpl for RaceDefinition " + raceDefinition.getName());
         DynamicTrackedRaceImpl result = new DynamicTrackedRaceImpl(this, raceDefinition,
-                windStore, delayToLiveInMillis, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed);
+                windStore, delayToLiveInMillis, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed, raceCommitteeStore);
         if (raceDefinitionSetToUpdate != null) {
             raceDefinitionSetToUpdate.addRaceDefinition(raceDefinition);
         }

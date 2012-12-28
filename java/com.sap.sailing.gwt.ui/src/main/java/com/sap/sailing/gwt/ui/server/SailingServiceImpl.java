@@ -100,6 +100,7 @@ import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
+import com.sap.sailing.domain.persistence.MongoRaceCommitteeStoreFactory;
 import com.sap.sailing.domain.persistence.MongoWindStoreFactory;
 import com.sap.sailing.domain.racecommittee.RaceCommitteeEvent;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingArchiveConfiguration;
@@ -1110,7 +1111,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 new URI(liveURI), new URI(storedURI), new MillisecondsTimePoint(rr.trackingStartTime),
                 new MillisecondsTimePoint(rr.trackingEndTime),
                 MongoWindStoreFactory.INSTANCE.getMongoWindStore(mongoObjectFactory, domainObjectFactory),
-                RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS, simulateWithStartTimeNow);
+                RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS, simulateWithStartTimeNow,
+                MongoRaceCommitteeStoreFactory.INSTANCE.getMongoRaceCommitteeStore(mongoObjectFactory, domainObjectFactory));
         if (trackWind) {
             new Thread("Wind tracking starter for race "+rr.regattaName+"/"+rr.name) {
                 public void run() {
@@ -2336,7 +2338,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         final RacesHandle raceHandle = getService().addSwissTimingRace(regattaToAddTo, rr.ID, hostname, port,
                 canSendRequests,
                 MongoWindStoreFactory.INSTANCE.getMongoWindStore(mongoObjectFactory, domainObjectFactory),
-                RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS);
+                RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS,
+                MongoRaceCommitteeStoreFactory.INSTANCE.getMongoRaceCommitteeStore(mongoObjectFactory, domainObjectFactory));
         if (trackWind) {
             new Thread("Wind tracking starter for race "+rr.ID+"/"+rr.description) {
                 public void run() {

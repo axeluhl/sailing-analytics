@@ -9,6 +9,7 @@ import java.net.URL;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util;
+import com.sap.sailing.domain.racecommittee.RaceCommitteeStore;
 import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
@@ -22,13 +23,14 @@ public class RaceTrackingConnectivityParametersImpl implements RaceTrackingConne
     private final TimePoint startOfTracking;
     private final TimePoint endOfTracking;
     private final WindStore windStore;
+    private final RaceCommitteeStore raceCommitteeStore;
     private final DomainFactory domainFactory;
     private final long delayToLiveInMillis;
     private final boolean simulateWithStartTimeNow;
 
     public RaceTrackingConnectivityParametersImpl(URL paramURL, URI liveURI, URI storedURI, TimePoint startOfTracking,
             TimePoint endOfTracking, long delayToLiveInMillis, boolean simulateWithStartTimeNow, WindStore windStore,
-            DomainFactory domainFactory) {
+            DomainFactory domainFactory, RaceCommitteeStore raceCommitteeStore) {
         super();
         this.paramURL = paramURL;
         this.liveURI = liveURI;
@@ -37,6 +39,7 @@ public class RaceTrackingConnectivityParametersImpl implements RaceTrackingConne
         this.endOfTracking = endOfTracking;
         this.delayToLiveInMillis = delayToLiveInMillis;
         this.windStore = windStore;
+        this.raceCommitteeStore = raceCommitteeStore;
         this.domainFactory = domainFactory;
         this.simulateWithStartTimeNow = simulateWithStartTimeNow;
     }
@@ -45,7 +48,7 @@ public class RaceTrackingConnectivityParametersImpl implements RaceTrackingConne
     public RaceTracker createRaceTracker(TrackedRegattaRegistry trackedRegattaRegistry) throws MalformedURLException,
             FileNotFoundException, URISyntaxException {
         RaceTracker tracker = domainFactory.createRaceTracker(paramURL, liveURI, storedURI, startOfTracking,
-                endOfTracking, delayToLiveInMillis, simulateWithStartTimeNow, windStore, trackedRegattaRegistry);
+                endOfTracking, delayToLiveInMillis, simulateWithStartTimeNow, windStore, trackedRegattaRegistry, raceCommitteeStore);
         return tracker;
     }
 
@@ -53,7 +56,7 @@ public class RaceTrackingConnectivityParametersImpl implements RaceTrackingConne
     public RaceTracker createRaceTracker(Regatta regatta, TrackedRegattaRegistry trackedRegattaRegistry)
             throws Exception {
         RaceTracker tracker = domainFactory.createRaceTracker(regatta, paramURL, liveURI, storedURI, startOfTracking,
-                endOfTracking, delayToLiveInMillis, simulateWithStartTimeNow, windStore, trackedRegattaRegistry);
+                endOfTracking, delayToLiveInMillis, simulateWithStartTimeNow, windStore, trackedRegattaRegistry, raceCommitteeStore);
         return tracker;
     }
 

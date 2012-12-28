@@ -8,6 +8,7 @@ import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.racecommittee.RaceCommitteeStore;
 
 /**
  * Manages a set of {@link TrackedRace} objects that belong to the same {@link Regatta} (regatta, sailing regatta for a
@@ -41,7 +42,7 @@ public interface TrackedRegatta extends Serializable {
      */
     DynamicTrackedRace createTrackedRace(RaceDefinition raceDefinition, WindStore windStore,
             long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
-            DynamicRaceDefinitionSet raceDefinitionSetToUpdate);
+            DynamicRaceDefinitionSet raceDefinitionSetToUpdate, RaceCommitteeStore raceCommitteeStore);
 
     /**
      * Obtains the tracked race for <code>race</code>. Blocks until the tracked race has been created

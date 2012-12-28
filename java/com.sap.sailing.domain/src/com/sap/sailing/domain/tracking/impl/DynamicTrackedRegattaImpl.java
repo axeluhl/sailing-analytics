@@ -2,6 +2,7 @@ package com.sap.sailing.domain.tracking.impl;
 
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.racecommittee.RaceCommitteeStore;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
@@ -27,9 +28,9 @@ public class DynamicTrackedRegattaImpl extends TrackedRegattaImpl implements Dyn
     @Override
     public DynamicTrackedRace createTrackedRace(RaceDefinition raceDefinition, WindStore windStore,
             long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
-            DynamicRaceDefinitionSet raceDefinitionSetToUpdate) {
+            DynamicRaceDefinitionSet raceDefinitionSetToUpdate, RaceCommitteeStore raceCommitteeStore) {
         DynamicTrackedRace result = (DynamicTrackedRace) super.createTrackedRace(raceDefinition, windStore, delayToLiveInMillis, millisecondsOverWhichToAverageWind,
-                millisecondsOverWhichToAverageSpeed, raceDefinitionSetToUpdate);
+                millisecondsOverWhichToAverageSpeed, raceDefinitionSetToUpdate, raceCommitteeStore);
         addTrackedRace(result);
         return result;
     }

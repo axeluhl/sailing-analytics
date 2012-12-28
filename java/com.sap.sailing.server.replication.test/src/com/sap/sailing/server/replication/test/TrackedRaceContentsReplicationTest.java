@@ -37,6 +37,7 @@ import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.persistence.MongoFactory;
+import com.sap.sailing.domain.persistence.MongoRaceCommitteeStoreFactory;
 import com.sap.sailing.domain.persistence.MongoWindStore;
 import com.sap.sailing.domain.persistence.MongoWindStoreFactory;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
@@ -89,7 +90,9 @@ public class TrackedRaceContentsReplicationTest extends AbstractServerReplicatio
         trackedRace = (DynamicTrackedRace) master.apply(new CreateTrackedRace(raceIdentifier,
                 MongoWindStoreFactory.INSTANCE.getMongoWindStore(MongoFactory.INSTANCE.getDefaultMongoObjectFactory(),
                         MongoFactory.INSTANCE.getDefaultDomainObjectFactory()), /* delayToLiveInMillis */ 5000,
-                /* millisecondsOverWhichToAverageWind */ 10000, /* millisecondsOverWhichToAverageSpeed */10000));
+                /* millisecondsOverWhichToAverageWind */ 10000, /* millisecondsOverWhichToAverageSpeed */10000,
+                MongoRaceCommitteeStoreFactory.INSTANCE.getMongoRaceCommitteeStore(MongoFactory.INSTANCE.getDefaultMongoObjectFactory(), 
+                		MongoFactory.INSTANCE.getDefaultDomainObjectFactory())));
         trackedRace.waitUntilWindLoadingComplete();
     }
     

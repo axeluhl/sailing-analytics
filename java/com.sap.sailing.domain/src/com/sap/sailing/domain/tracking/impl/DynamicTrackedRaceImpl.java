@@ -26,6 +26,7 @@ import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.racecommittee.RaceCommitteeEvent;
+import com.sap.sailing.domain.racecommittee.RaceCommitteeStore;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
@@ -56,9 +57,9 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
     
     public DynamicTrackedRaceImpl(TrackedRegatta trackedRegatta, RaceDefinition race,
             WindStore windStore, long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
-            long delayForCacheInvalidationOfWindEstimation) {
+            long delayForCacheInvalidationOfWindEstimation, RaceCommitteeStore raceCommitteeStore) {
         super(trackedRegatta, race, windStore, delayToLiveInMillis, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed,
-                delayForCacheInvalidationOfWindEstimation);
+                delayForCacheInvalidationOfWindEstimation, raceCommitteeStore);
         this.raceIsKnownToStartUpwind = race.getBoatClass().typicallyStartsUpwind();
         if (!raceIsKnownToStartUpwind) {
             Set<WindSource> windSourcesToExclude = new HashSet<WindSource>();
@@ -94,9 +95,9 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
      */
     public DynamicTrackedRaceImpl(TrackedRegatta trackedRegatta, RaceDefinition race,
             WindStore windStore, long delayToLiveInMillis,
-            long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed) {
+            long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed, RaceCommitteeStore raceCommitteeStore) {
         this(trackedRegatta, race, windStore, delayToLiveInMillis, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed,
-                millisecondsOverWhichToAverageWind/2);
+                millisecondsOverWhichToAverageWind/2, raceCommitteeStore);
     }
 
     @Override

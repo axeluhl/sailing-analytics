@@ -14,6 +14,7 @@ import com.maptrack.client.io.TypeController;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.racecommittee.impl.EmptyRaceCommitteeStore;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
@@ -83,7 +84,7 @@ public class ReceiveTrackingDataTest extends AbstractTracTracLiveTest {
                     @Override
                     public void addRaceDefinition(RaceDefinition race) {
                     }
-                }, /* trackedRegattaRegistry */ null)) {
+                }, /* trackedRegattaRegistry */ null, EmptyRaceCommitteeStore.INSTANCE)) {
             for (TypeController raceListener : receiver.getTypeControllersAndStart()) {
                 listeners.add(raceListener);
             }
@@ -94,7 +95,7 @@ public class ReceiveTrackingDataTest extends AbstractTracTracLiveTest {
                     @Override
                     public void addRaceDefinition(RaceDefinition race) {
                     }
-                }, /* trackedRegattaRegistry */ null));
+                }, /* trackedRegattaRegistry */ null, EmptyRaceCommitteeStore.INSTANCE));
     }
 
     @Test

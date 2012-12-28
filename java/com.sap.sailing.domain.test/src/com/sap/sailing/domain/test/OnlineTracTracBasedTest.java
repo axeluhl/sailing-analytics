@@ -26,6 +26,7 @@ import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.DegreePosition;
+import com.sap.sailing.domain.racecommittee.impl.EmptyRaceCommitteeStore;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
@@ -89,7 +90,7 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest {
             throws InterruptedException {
         setStoredDataLoaded(false);
         ArrayList<Receiver> receivers = new ArrayList<Receiver>();
-        for (Receiver r : domainFactory.getUpdateReceivers(trackedRegatta, getTracTracEvent(), EmptyWindStore.INSTANCE,
+        for (Receiver r : domainFactory.getUpdateReceivers(trackedRegatta, getTracTracEvent(), EmptyWindStore.INSTANCE, EmptyRaceCommitteeStore.INSTANCE,
         /* startOfTracking */null, /* endOfTracking */null, /* delayToLiveInMillis */0l, /* simulator */ null,
                 new DynamicRaceDefinitionSet() {
                     @Override

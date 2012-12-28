@@ -38,7 +38,10 @@ import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.persistence.MongoFactory;
+import com.sap.sailing.domain.persistence.MongoRaceCommitteeStoreFactory;
 import com.sap.sailing.domain.persistence.MongoWindStoreFactory;
+import com.sap.sailing.domain.racecommittee.RaceCommitteeStore;
+import com.sap.sailing.domain.racecommittee.impl.EmptyRaceCommitteeStore;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
@@ -115,9 +118,11 @@ public class AdminApp extends SailingServerHttpServlet {
 
     private static final String PARAM_NAME_WINDSTORE = "windstore";
 
-    private static final String WIND_STORE_EMPTY = "empty";
+    private static final String STORE_EMPTY = "empty";
 
-    private static final String WIND_STORE_MONGO = "mongo";
+    private static final String STORE_MONGO = "mongo";
+    
+    private static final String PARAM_NAME_RACECOMMITTEESTORE = "racecommitteestore";
 
     public AdminApp() {
     }
@@ -466,15 +471,15 @@ public class AdminApp extends SailingServerHttpServlet {
         URL jsonURL = new URL(req.getParameter(PARAM_NAME_EVENT_JSON_URL));
         URI liveURI = new URI(req.getParameter(PARAM_NAME_LIVE_URI));
         URI storedURI = new URI(req.getParameter(PARAM_NAME_STORED_URI));
-        getService().addRegatta(jsonURL, liveURI, storedURI, getWindStore(req), /* timeoutInMilliseconds */ 60000);
+        getService().addRegatta(jsonURL, liveURI, storedURI, getWindStore(req), /* timeoutInMilliseconds */ 60000, getRaceCommitteeStore(req));
     }
     
     private WindStore getWindStore(HttpServletRequest req) throws UnknownHostException, MongoException {
         String windStore = req.getParameter(PARAM_NAME_WINDSTORE);
         if (windStore != null) {
-            if (windStore.equals(WIND_STORE_EMPTY)) {
+            if (windStore.equals(STORE_EMPTY)) {
                 return EmptyWindStore.INSTANCE;
-            } else if (windStore.equals(WIND_STORE_MONGO)) {
+            } else if (windStore.equals(STORE_MONGO)) {
                 return MongoWindStoreFactory.INSTANCE.getMongoWindStore(
                         MongoFactory.INSTANCE.getDefaultMongoObjectFactory(),
                         MongoFactory.INSTANCE.getDefaultDomainObjectFactory());
@@ -490,7 +495,8 @@ public class AdminApp extends SailingServerHttpServlet {
         URL paramURL = new URL(req.getParameter(PARAM_NAME_PARAM_URL));
         URI liveURI = new URI(req.getParameter(PARAM_NAME_LIVE_URI));
         URI storedURI = new URI(req.getParameter(PARAM_NAME_STORED_URI));
-        getService().addTracTracRace(paramURL, liveURI, storedURI, getWindStore(req), /* timeoutInMilliseconds */ 60000);
+        getService().addTracTracRace(paramURL, liveURI, storedURI, getWindStore(req), /* timeoutInMilliseconds */ 60000,
+        		getRaceCommitteeStore(req));
     }
 
     private void stopRace(HttpServletRequest req, HttpServletResponse resp) throws MalformedURLException, IOException, InterruptedException {
@@ -505,6 +511,23 @@ public class AdminApp extends SailingServerHttpServlet {
         } else {
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Regatta not found");
         }
+    }
+    
+    private RaceCommitteeStore getRaceCommitteeStore(HttpServletRequest req) throws UnknownHostException, MongoException {
+        String raceCommitteStore = req.getParameter(PARAM_NAME_RACECOMMITTEESTORE);
+        if (raceCommitteStore != null) {
+            if (raceCommitteStore.equals(STORE_EMPTY)) {
+                return EmptyRaceCommitteeStore.INSTANCE;
+            } else if (raceCommitteStore.equals(STORE_MONGO)) {
+                return MongoRaceCommitteeStoreFactory.INSTANCE.getMongoRaceCommitteeStore(
+                        MongoFactory.INSTANCE.getDefaultMongoObjectFactory(),
+                        MongoFactory.INSTANCE.getDefaultDomainObjectFactory());
+            } else {
+                log("Couldn't find race committee store " + raceCommitteStore + ". Using EmptyRaceCommitteeStore instead.");
+                return EmptyRaceCommitteeStore.INSTANCE;
+            }
+        }
+        return EmptyRaceCommitteeStore.INSTANCE;
     }
 
 }

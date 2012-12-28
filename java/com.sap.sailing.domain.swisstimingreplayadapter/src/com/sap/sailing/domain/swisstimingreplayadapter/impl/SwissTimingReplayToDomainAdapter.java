@@ -34,6 +34,7 @@ import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.WindSourceWithAdditionalID;
+import com.sap.sailing.domain.racecommittee.impl.EmptyRaceCommitteeStore;
 import com.sap.sailing.domain.swisstimingadapter.DomainFactory;
 import com.sap.sailing.domain.swisstimingreplayadapter.CompetitorStatus;
 import com.sap.sailing.domain.swisstimingreplayadapter.SwissTimingReplayListener;
@@ -305,7 +306,7 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter {
                 createTrackedRace(race, EmptyWindStore.INSTANCE, TrackedRace.DEFAULT_LIVE_DELAY_IN_MILLISECONDS,
                         WindTrack.DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_WIND, 
                         /* time over which to average speed: */ race.getBoatClass().getApproximateManeuverDurationInMilliseconds(),
-                        /* raceDefinitionSetToUpdate */ null);
+                        /* raceDefinitionSetToUpdate */ null, EmptyRaceCommitteeStore.INSTANCE);
         TimePoint bestStartTimeKnownSoFar = bestStartTimePerRaceID.get(currentRaceID);
         if (bestStartTimeKnownSoFar != null) {
             trackedRace.setStartTimeReceived(bestStartTimeKnownSoFar);

@@ -256,7 +256,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     
     public TrackedRaceImpl(final TrackedRegatta trackedRegatta, RaceDefinition race, final WindStore windStore, 
             long delayToLiveInMillis, final long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
-            long delayForWindEstimationCacheInvalidation/*, final RaceCommitteeStore raceCommitteeStore*/) {
+            long delayForWindEstimationCacheInvalidation, final RaceCommitteeStore raceCommitteeStore) {
         super();
         locksForMarkPassings = new IdentityHashMap<Iterable<MarkPassing>, NamedReentrantReadWriteLock>();
         this.serializationLock = new NamedReentrantReadWriteLock("Serialization lock for tracked race "+race.getName(), /* fair */ true);
@@ -264,7 +264,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         this.updateCount = 0;
         this.race = race;
         this.windStore = windStore;
-        //this.raceCommitteeStore = raceCommitteeStore;
+        this.raceCommitteeStore = raceCommitteeStore;
         this.windSourcesToExclude = new HashSet<WindSource>();
         this.directionFromStartToNextMarkCache = new HashMap<TimePoint, Future<Wind>>();
         this.millisecondsOverWhichToAverageSpeed = millisecondsOverWhichToAverageSpeed;

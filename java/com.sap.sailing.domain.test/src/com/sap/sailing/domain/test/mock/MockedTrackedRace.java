@@ -445,7 +445,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
             @Override
             public DynamicTrackedRace createTrackedRace(RaceDefinition raceDefinition, WindStore windStore,
                     long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
-                    DynamicRaceDefinitionSet raceDefinitionSetToUpdate) {
+                    DynamicRaceDefinitionSet raceDefinitionSetToUpdate, RaceCommitteeStore raceCommitteeStore) {
                 // TODO Auto-generated method stub
                 return null;
             }
