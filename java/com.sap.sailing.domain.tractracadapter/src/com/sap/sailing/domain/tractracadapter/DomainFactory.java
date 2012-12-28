@@ -40,7 +40,6 @@ import com.sap.sailing.domain.tractracadapter.impl.RaceCourseReceiver;
 import com.sap.sailing.domain.tractracadapter.impl.Simulator;
 import com.tractrac.clientmodule.Competitor;
 import com.tractrac.clientmodule.CompetitorClass;
-import com.tractrac.clientmodule.ControlPoint;
 import com.tractrac.clientmodule.Event;
 import com.tractrac.clientmodule.Race;
 import com.tractrac.clientmodule.data.ControlPointPositionData;
@@ -58,7 +57,7 @@ public interface DomainFactory {
 
     com.sap.sailing.domain.common.TimePoint createTimePoint(long timestamp);
 
-    Course createCourse(String name, Iterable<ControlPoint> controlPoints);
+    Course createCourse(String name, Iterable<TracTracControlPoint> controlPoints);
 
     com.sap.sailing.domain.base.Competitor getOrCreateCompetitor(Competitor competitor);
 
@@ -193,9 +192,9 @@ public interface DomainFactory {
      * {@link ControlPointPositionData#getIndex() index} is used to determine
      * which of its marks is affected.
      */
-    Mark getMark(ControlPoint controlPoint, ControlPointPositionData record);
+    Mark getMark(TracTracControlPoint controlPoint, int zeroBasedMarkIndex);
 
-    com.sap.sailing.domain.base.ControlPoint getOrCreateControlPoint(ControlPoint controlPoint);
+    com.sap.sailing.domain.base.ControlPoint getOrCreateControlPoint(TracTracControlPoint controlPoint);
 
     MarkPassing createMarkPassing(TimePoint timePoint, Waypoint passed, com.sap.sailing.domain.base.Competitor competitor);
 
@@ -215,7 +214,7 @@ public interface DomainFactory {
      * of waypoints. The waypoints are created from the control points and represent usages of the control points
      * in a course. A single control point may be used more than once in a course's list of waypoints.
      */
-    void updateCourseWaypoints(Course courseToUpdate, List<ControlPoint> controlPoints) throws PatchFailedException;
+    void updateCourseWaypoints(Course courseToUpdate, Iterable<TracTracControlPoint> controlPoints) throws PatchFailedException;
 
     TracTracConfiguration createTracTracConfiguration(String name, String jsonURL, String liveDataURI, String storedDataURI);
 

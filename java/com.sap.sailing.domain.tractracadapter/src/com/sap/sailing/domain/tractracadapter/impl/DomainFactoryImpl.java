@@ -21,9 +21,9 @@ import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
-import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.Person;
 import com.sap.sailing.domain.base.RaceDefinition;
@@ -63,14 +63,12 @@ import com.sap.sailing.domain.tractracadapter.JSONService;
 import com.sap.sailing.domain.tractracadapter.Receiver;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
 import com.sap.sailing.domain.tractracadapter.TracTracConfiguration;
+import com.sap.sailing.domain.tractracadapter.TracTracControlPoint;
 import com.sap.sailing.domain.tractracadapter.TracTracRaceTracker;
 import com.sap.sailing.util.WeakIdentityHashMap;
 import com.tractrac.clientmodule.CompetitorClass;
-import com.tractrac.clientmodule.ControlPoint;
 import com.tractrac.clientmodule.Race;
 import com.tractrac.clientmodule.RaceCompetitor;
-import com.tractrac.clientmodule.data.ControlPointPositionData;
-import com.tractrac.clientmodule.metadata.IMetadata;
 
 import difflib.PatchFailedException;
 
@@ -80,8 +78,8 @@ public class DomainFactoryImpl implements DomainFactory {
     private final com.sap.sailing.domain.base.DomainFactory baseDomainFactory;
     
     // TODO consider (re-)introducing WeakHashMaps for cache structures, but such that the cache is maintained as long as our domain objects are strongly referenced
-    private final Map<ControlPoint, com.sap.sailing.domain.base.ControlPoint> controlPointCache =
-        new HashMap<ControlPoint, com.sap.sailing.domain.base.ControlPoint>();
+    private final Map<TracTracControlPoint, com.sap.sailing.domain.base.ControlPoint> controlPointCache =
+        new HashMap<TracTracControlPoint, com.sap.sailing.domain.base.ControlPoint>();
     
     private final Map<String, Person> personCache = new HashMap<String, Person>();
     
@@ -131,26 +129,26 @@ public class DomainFactoryImpl implements DomainFactory {
     }
     
     @Override
-    public void updateCourseWaypoints(Course courseToUpdate, List<ControlPoint> controlPoints) throws PatchFailedException {
+    public void updateCourseWaypoints(Course courseToUpdate, Iterable<TracTracControlPoint> controlPoints) throws PatchFailedException {
         List<com.sap.sailing.domain.base.ControlPoint> newDomainControlPoints = new ArrayList<com.sap.sailing.domain.base.ControlPoint>();
-        for (ControlPoint tractracControlPoint : controlPoints) {
+        for (TracTracControlPoint tractracControlPoint : controlPoints) {
             com.sap.sailing.domain.base.ControlPoint newDomainControlPoint = getOrCreateControlPoint(tractracControlPoint);
             newDomainControlPoints.add(newDomainControlPoint);
         }
         courseToUpdate.update(newDomainControlPoints, baseDomainFactory);
     }
 
-    public com.sap.sailing.domain.base.ControlPoint getOrCreateControlPoint(ControlPoint controlPoint) {
+    public com.sap.sailing.domain.base.ControlPoint getOrCreateControlPoint(TracTracControlPoint controlPoint) {
         synchronized (controlPointCache) {
             com.sap.sailing.domain.base.ControlPoint domainControlPoint = controlPointCache.get(controlPoint);
             if (domainControlPoint == null) {
                 String controlPointName = controlPoint.getName();
-                final IMetadata controlPointIMetadata = controlPoint.getMetadata();
+                final String controlPointMetadataString = controlPoint.getMetadata();
                 Map<String, String> controlPointMetadata;
-                if (controlPointIMetadata == null || controlPointIMetadata.isEmpty()) {
+                if (controlPointMetadataString == null) {
                     controlPointMetadata = Collections.emptyMap();
                 } else {
-                    controlPointMetadata = parseControlPointMetadata(controlPointIMetadata.getText());
+                    controlPointMetadata = parseControlPointMetadata(controlPointMetadataString);
                 }
                 if (controlPoint.getHasTwoPoints()) {
                     // it's a gate
@@ -209,9 +207,9 @@ public class DomainFactoryImpl implements DomainFactory {
     }
         
     @Override
-    public Course createCourse(String name, Iterable<ControlPoint> controlPoints) {
+    public Course createCourse(String name, Iterable<TracTracControlPoint> controlPoints) {
         List<Waypoint> waypointList = new ArrayList<Waypoint>();
-        for (ControlPoint controlPoint : controlPoints) {
+        for (TracTracControlPoint controlPoint : controlPoints) {
             Waypoint waypoint = baseDomainFactory.createWaypoint(getOrCreateControlPoint(controlPoint));
             waypointList.add(waypoint);
         }
@@ -525,12 +523,12 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public Mark getMark(ControlPoint controlPoint, ControlPointPositionData record) {
+    public Mark getMark(TracTracControlPoint controlPoint, int zeroBasedMarkIndex) {
         com.sap.sailing.domain.base.ControlPoint myControlPoint = getOrCreateControlPoint(controlPoint);
         Mark result;
         Iterator<Mark> iter = myControlPoint.getMarks().iterator();
         if (controlPoint.getHasTwoPoints()) {
-            if (record.getIndex() == 0) {
+            if (zeroBasedMarkIndex == 0) {
                 result = iter.next();
             } else {
                 iter.next();

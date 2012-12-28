@@ -14,6 +14,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -54,6 +55,8 @@ import com.sap.sailing.domain.tractracadapter.TracTracControlPoint;
  *
  */
 public class ClientParamsPHP {
+    private static final Logger logger = Logger.getLogger(ClientParamsPHP.class.getName());
+    
     private final Map<String, String> properties;
     
     /**
@@ -183,6 +186,22 @@ public class ClientParamsPHP {
         }
 
         /**
+         * Comment from Jorge Piera Llodrá on 2012-12-28T15:22:00Z:
+         * <p>
+         * 
+         * <em>"The lat/lon position for a control point is the latest known position 
+         * before the StartTrackingTime. Suppose that the GPS associated to a 
+         * control point doesn't send positions between the StartTrackingTime and 
+         * the EndTrackingTime: the control point won't appear in the map.
+         * 
+         * For this reason we decided to take the latest know position. The time 
+         * stamp is valid from the start of the simulation until a new position 
+         * arrives."</em>
+         * <p>
+         * 
+         * With this in mind, the position returned for this mark is a default position that is valid only until a
+         * position is received through TTCM with a time point after start of tracking.
+         * 
          * @return <code>null</code> in case the mark's position isn't known from the clientparams.php document
          */
         public Position getPosition() {
@@ -349,12 +368,24 @@ public class ClientParamsPHP {
         return getTimePoint("RaceEndTime");
     }
     
-    public TimePoint getRaceTrackingStartTime() throws ParseException {
-        return getTimePoint("RaceTrackingStartTime");
+    public TimePoint getRaceTrackingStartTime() {
+        try {
+            return getTimePoint("RaceTrackingStartTime");
+        } catch (ParseException e) {
+            logger.info("Exception trying to parse property RaceTrackingStartTime with value "+properties.get("RaceTrackingStartTime"));
+            logger.throwing(ClientParamsPHP.class.getName(), "getRaceTrackingStartTime", e);
+            return null;
+        }
     }
     
-    public TimePoint getRaceTrackingEndTime() throws ParseException {
-        return getTimePoint("RaceTrackingEndTime");
+    public TimePoint getRaceTrackingEndTime() {
+        try {
+            return getTimePoint("RaceTrackingEndTime");
+        } catch (ParseException e) {
+            logger.info("Exception trying to parse property RaceTrackingEndTime with value "+properties.get("RaceTrackingEndTime"));
+            logger.throwing(ClientParamsPHP.class.getName(), "RaceTrackingEndTime", e);
+            return null;
+        }
     }
     
     public Route getRaceDefaultRoute() {
@@ -363,6 +394,19 @@ public class ClientParamsPHP {
     
     public HandicapSystem getRaceHandicapSystem() {
         return HandicapSystem.valueOf(properties.get("RaceHandicapSystem"));
+    }
+
+    /**
+     * Determines all control points listed in the document, regardless of whether they are part of a route/course or not
+     */
+    public Iterable<ControlPoint> getControlPointList() {
+        List<ControlPoint> result = new ArrayList<>();
+        for (Map.Entry<String, String> e : properties.entrySet()) {
+            if (e.getKey().matches("ControlPoint[0-9][0-9]*UUID")) {
+                result.add(new ControlPoint(UUID.fromString(e.getValue())));
+            }
+        }
+        return result;
     }
     
 }
