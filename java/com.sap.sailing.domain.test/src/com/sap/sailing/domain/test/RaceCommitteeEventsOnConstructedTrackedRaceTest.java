@@ -50,7 +50,20 @@ public class RaceCommitteeEventsOnConstructedTrackedRaceTest extends TrackBasedT
     	} finally {
     		track.unlockAfterRead();
     	}
+    }
+    
+    @Test
+    public void testRaceCommitteeEventTrackInsertSomeEvents() {
+    	RaceCommitteeEventTrack track = getTrackedRace().getOrCreateRaceCommitteeEventTrack();
+    	assertNotNull(track);
     	
+    	track.lockForRead();
+    	try {
+    		assertEquals(Util.size(track.getRawFixes()), 0);
+        	assertEquals(Util.size(track.getFixes()), 0);
+    	} finally {
+    		track.unlockAfterRead();
+    	}
     }
 
 }

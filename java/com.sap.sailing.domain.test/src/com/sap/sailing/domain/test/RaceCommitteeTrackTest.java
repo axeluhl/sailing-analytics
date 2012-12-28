@@ -6,21 +6,18 @@ import static org.junit.Assert.fail;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.UUID;
 
 import org.junit.Test;
 
-import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.racecommittee.Flags;
 import com.sap.sailing.domain.racecommittee.RaceCommitteeEvent;
+import com.sap.sailing.domain.racecommittee.RaceCommitteeEventFactory;
 import com.sap.sailing.domain.racecommittee.RaceCommitteeEventTrack;
 import com.sap.sailing.domain.racecommittee.RaceCommitteeFlagEvent;
 import com.sap.sailing.domain.racecommittee.RaceCommitteeStartTimeEvent;
 import com.sap.sailing.domain.racecommittee.impl.RaceCommitteeEventTrackImpl;
-import com.sap.sailing.domain.racecommittee.impl.RaceCommitteeFlagEventImpl;
-import com.sap.sailing.domain.racecommittee.impl.RaceCommitteeStartTimeEventImpl;
 
 public class RaceCommitteeTrackTest {
 	
@@ -28,10 +25,9 @@ public class RaceCommitteeTrackTest {
 	public void testAddOfEvent() {
 		RaceCommitteeEventTrack rcEventTrack = new RaceCommitteeEventTrackImpl("RaceCommitteeEventTrack");
 		TimePoint t1 = MillisecondsTimePoint.now();
-		List<Competitor> competitors = new ArrayList<Competitor>();
 		int passId = 0;
 		boolean isDisplayed = true;
-		RaceCommitteeFlagEvent rcEvent = new RaceCommitteeFlagEventImpl(t1, UUID.randomUUID(), competitors, passId, Flags.CLASS, Flags.NONE, isDisplayed);
+		RaceCommitteeFlagEvent rcEvent = RaceCommitteeEventFactory.INSTANCE.createFlagEvent(t1, passId, Flags.CLASS, Flags.NONE, isDisplayed);
 		rcEventTrack.add(rcEvent);
 		
 		rcEventTrack.lockForRead();
@@ -65,13 +61,12 @@ public class RaceCommitteeTrackTest {
 		
 		TimePoint tx = new MillisecondsTimePoint(t1.asMillis() - 7000);
 		
-		List<Competitor> competitors = new ArrayList<Competitor>();
 		int passId = 0;
-		RaceCommitteeFlagEvent rcEvent1 = new RaceCommitteeFlagEventImpl(t1, UUID.randomUUID(), competitors, passId, Flags.CLASS, Flags.NONE, false);
-		RaceCommitteeFlagEvent rcEvent2 = new RaceCommitteeFlagEventImpl(t2, UUID.randomUUID(), competitors, passId, Flags.PAPA, Flags.NONE, false);
-		RaceCommitteeFlagEvent rcEvent3 = new RaceCommitteeFlagEventImpl(t3, UUID.randomUUID(), competitors, passId, Flags.PAPA, Flags.NONE, true);
-		RaceCommitteeFlagEvent rcEvent4 = new RaceCommitteeFlagEventImpl(t4, UUID.randomUUID(), competitors, passId, Flags.CLASS, Flags.NONE, true);
-		RaceCommitteeStartTimeEvent rcEvent5 = new RaceCommitteeStartTimeEventImpl(t5, UUID.randomUUID(), competitors, passId, t1);
+		RaceCommitteeFlagEvent rcEvent1 = RaceCommitteeEventFactory.INSTANCE.createFlagEvent(t1, passId, Flags.CLASS, Flags.NONE, false);
+		RaceCommitteeFlagEvent rcEvent2 = RaceCommitteeEventFactory.INSTANCE.createFlagEvent(t2, passId, Flags.PAPA, Flags.NONE, false);
+		RaceCommitteeFlagEvent rcEvent3 = RaceCommitteeEventFactory.INSTANCE.createFlagEvent(t3, passId, Flags.PAPA, Flags.NONE, true);
+		RaceCommitteeFlagEvent rcEvent4 = RaceCommitteeEventFactory.INSTANCE.createFlagEvent(t4, passId, Flags.CLASS, Flags.NONE, true);
+		RaceCommitteeStartTimeEvent rcEvent5 = RaceCommitteeEventFactory.INSTANCE.createStartTimeEvent(t5, passId, t1);
 		
 		rcEventTrack.add(rcEvent5);
 		rcEventTrack.add(rcEvent3);
