@@ -8,14 +8,18 @@ import java.net.URISyntaxException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.DegreePosition;
 
 /**
  * Parses and then represents the contents of a clientparams.php TracTrac document describing one race with
@@ -76,12 +80,20 @@ public class ClientParamsPHP {
         PL
     }
     
-    private class ObjectWithUUID {
+    /**
+     * Equality and hadh code of objects of this type are based on their UUID.
+     * 
+     * @author Axel Uhl (D043530)
+     *
+     */
+    private abstract class ObjectWithUUID {
         private final Pattern propertyNamePattern = Pattern.compile("([^0-9]*)(([0-9][0-9]*)(.*))?");
         private final String propertyNamePrefix;
         private final Integer number;
+        private final UUID uuid;
 
         public ObjectWithUUID(UUID uuid) {
+            this.uuid = uuid;
             String idPropertyName = propertiesByID.get(uuid);
             Matcher m = propertyNamePattern.matcher(idPropertyName);
             if (m.matches()) {
@@ -96,6 +108,19 @@ public class ClientParamsPHP {
             }
         }
         
+        
+        @Override
+        public int hashCode() {
+            return uuid.hashCode();
+        }
+
+
+        @Override
+        public boolean equals(Object obj) {
+            return uuid.equals(((ObjectWithUUID) obj).uuid);
+        }
+
+
         protected String getProperty(String propertyName) {
             return properties.get(propertyNamePrefix+number+propertyName);
         }
@@ -108,6 +133,17 @@ public class ClientParamsPHP {
 
         public Object getDescription() {
             return getProperty("Description");
+        }
+        
+        public Iterable<ControlPoint> getControlPoints() {
+            List<ControlPoint> result = new ArrayList<>();
+            int i=1;
+            String controlPointUUID;
+            while ((controlPointUUID=getProperty("ControlPoint"+i+"UUID")) != null) {
+                result.add(new ControlPoint(UUID.fromString(controlPointUUID)));
+                i++;
+            }
+            return result;
         }
     }
     
@@ -129,9 +165,52 @@ public class ClientParamsPHP {
         }
     }
     
+    public static class Mark {
+        private final Position position;
+
+        public Mark(Position position) {
+            super();
+            this.position = position;
+        }
+
+        /**
+         * @return <code>null</code> in case the mark's position isn't known from the clientparams.php document
+         */
+        public Position getPosition() {
+            return position;
+        }
+    }
+
     public class ControlPoint extends ObjectWithUUID {
         public ControlPoint(UUID uuid) {
             super(uuid);
+        }
+        
+        public String getName() {
+            return getProperty("Name");
+        }
+        
+        public String getShortName() {
+            return getProperty("ShortName");
+        }
+        
+        /**
+         * @return one or two marks that form the control point
+         */
+        public Iterable<Mark> getMarks() {
+            List<Mark> result = new ArrayList<>();
+            for (int i=1; i<=1+Integer.valueOf(getProperty("HasTwoPoints")); i++) {
+                String latDegString = getProperty("Mark"+i+"Lat");
+                Position position = null;
+                if (latDegString != null) {
+                    String lngDegString = getProperty("Mark"+i+"Lon");
+                    if (lngDegString != null) {
+                        position = new DegreePosition(Double.valueOf(latDegString), Double.valueOf(lngDegString));
+                    }
+                }
+                result.add(new Mark(position));
+            }
+            return result;
         }
     }
     
@@ -148,7 +227,7 @@ public class ClientParamsPHP {
                     String propertyName = line.substring(0, colonIndex).trim();
                     String propertyValue = line.substring(colonIndex + 1).trim();
                     properties.put(propertyName, propertyValue);
-                    if (propertyName.endsWith("ID")) {
+                    if (propertyName.matches("[^0-9]*[0-9][0-9]*UUID")) {
                         try {
                             final UUID uuid = UUID.fromString(propertyValue);
                             propertiesByID.put(uuid, propertyName);
@@ -237,8 +316,8 @@ public class ClientParamsPHP {
         return getTimePoint("RaceTrackingEndTime");
     }
     
-    public Image getRaceDefaultRoute() {
-        return new Image(UUID.fromString(properties.get("RaceDefaultRouteUUID")));
+    public Route getRaceDefaultRoute() {
+        return new Route(UUID.fromString(properties.get("RaceDefaultRouteUUID")));
     }
     
     public HandicapSystem getRaceHandicapSystem() {
