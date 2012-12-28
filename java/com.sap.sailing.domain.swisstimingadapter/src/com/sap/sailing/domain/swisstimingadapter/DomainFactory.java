@@ -26,7 +26,7 @@ public interface DomainFactory {
     
     com.sap.sailing.domain.base.DomainFactory getBaseDomainFactory();
 
-    Regatta getOrCreateRegatta(String raceID, TrackedRegattaRegistry trackedRegattaRegistry);
+    Regatta getOrCreateDefaultRegatta(String raceID, TrackedRegattaRegistry trackedRegattaRegistry);
 
     Nationality getOrCreateNationality(String threeLetterIOCCode);
 

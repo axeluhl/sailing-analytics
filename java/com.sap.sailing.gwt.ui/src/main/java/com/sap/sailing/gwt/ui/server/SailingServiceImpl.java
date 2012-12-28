@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.ui.server;
 
 import java.io.IOException;
 import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -20,6 +21,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.WeakHashMap;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -55,6 +57,7 @@ import com.sap.sailing.domain.base.impl.FleetImpl;
 import com.sap.sailing.domain.base.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Color;
@@ -2375,10 +2378,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         Regatta regatta;
         if (regattaIdentifier == null) {
             regatta = getService().createRegatta(replayRaceDTO.rsc, replayRaceDTO.boat_class,
+                    RegattaImpl.getFullName(replayRaceDTO.rsc, replayRaceDTO.boat_class),
                     Collections.singletonList(new SeriesImpl("Default", /* isMedal */false, Collections
-                            .singletonList(new FleetImpl("Default")), /* race column names */new ArrayList<String>(),
-                            getService())), false,
-                    baseDomainFactory.createScoringScheme(ScoringSchemeType.LOW_POINT));
+                                    .singletonList(new FleetImpl("Default")), /* race column names */new ArrayList<String>(),
+                                    getService())),
+                    false, baseDomainFactory.createScoringScheme(ScoringSchemeType.LOW_POINT));
         } else {
             regatta = getService().getRegatta(regattaIdentifier);
         }
@@ -2760,8 +2764,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public void updateEvent(String eventName, VenueDTO venue, String publicationUrl, boolean isPublic, List<String> regattaNames) {
-        getService().apply(new UpdateEvent(eventName, venue.name, publicationUrl, isPublic, regattaNames));
+    public void updateEvent(String eventName, Serializable id, VenueDTO venue, String publicationUrl, boolean isPublic, List<String> regattaNames) {
+        getService().apply(new UpdateEvent(id, eventName, venue.name, publicationUrl, isPublic, regattaNames));
     }
 
     @Override
@@ -2797,6 +2801,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         eventDTO.venue.name = event.getVenue() != null ? event.getVenue().getName() : null;
         eventDTO.publicationUrl = event.getPublicationUrl();
         eventDTO.isPublic = event.isPublic();
+        eventDTO.id = event.getId();
         eventDTO.regattas = new ArrayList<RegattaDTO>();
         for (Regatta regatta: event.getRegattas()) {
             RegattaDTO regattaDTO = new RegattaDTO();
@@ -2864,10 +2869,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public RegattaDTO createRegatta(String regattaName, String boatClassName, LinkedHashMap<String, Pair<List<Triple<String, Integer, Color>>, Boolean>> seriesNamesWithFleetNamesAndFleetOrderingAndMedal, boolean persistent, ScoringSchemeType scoringSchemeType) {
+    public RegattaDTO createRegatta(String regattaName, String boatClassName,
+            LinkedHashMap<String, Pair<List<Triple<String, Integer, Color>>, Boolean>> seriesNamesWithFleetNamesAndFleetOrderingAndMedal,
+            boolean persistent, ScoringSchemeType scoringSchemeType) {
         Regatta regatta = getService().apply(
-                new AddSpecificRegatta(regattaName, boatClassName, seriesNamesWithFleetNamesAndFleetOrderingAndMedal, persistent,
-                        baseDomainFactory.createScoringScheme(scoringSchemeType)));
+                new AddSpecificRegatta(regattaName, boatClassName, UUID.randomUUID(),
+                        seriesNamesWithFleetNamesAndFleetOrderingAndMedal,
+                        persistent, baseDomainFactory.createScoringScheme(scoringSchemeType)));
         return convertToRegattaDTO(regatta);
     }
 

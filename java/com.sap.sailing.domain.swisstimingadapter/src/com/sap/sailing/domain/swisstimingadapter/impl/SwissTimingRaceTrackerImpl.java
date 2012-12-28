@@ -76,7 +76,7 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
             TrackedRegattaRegistry trackedRegattaRegistry, boolean canSendRequests, long delayToLiveInMillis, 
             RaceCommitteeStore raceCommitteeStore) throws InterruptedException,
             UnknownHostException, IOException, ParseException {
-        this(domainFactory.getOrCreateRegatta(raceID, trackedRegattaRegistry), raceID, hostname, port, windStore, domainFactory, factory,
+        this(domainFactory.getOrCreateDefaultRegatta(raceID, trackedRegattaRegistry), raceID, hostname, port, windStore, domainFactory, factory,
                 messageLoader, trackedRegattaRegistry, canSendRequests, delayToLiveInMillis, raceCommitteeStore);
     }
     

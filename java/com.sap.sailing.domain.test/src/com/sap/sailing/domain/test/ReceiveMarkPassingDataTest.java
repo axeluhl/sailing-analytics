@@ -24,6 +24,7 @@ import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.Receiver;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
+import com.sap.sailing.domain.tractracadapter.impl.ControlPointAdapter;
 import com.tractrac.clientmodule.Race;
 import com.tractrac.clientmodule.RaceCompetitor;
 import com.tractrac.clientmodule.data.ICallbackData;
@@ -138,7 +139,7 @@ public class ReceiveMarkPassingDataTest extends AbstractTracTracLiveTest {
         // the first waypoint is used
         boolean found = false;
         for (Waypoint waypoint : raceDefinition.getCourse().getWaypoints()) {
-            if (waypoint.getControlPoint() == DomainFactory.INSTANCE.getOrCreateControlPoint(entry.getControlPoint())) {
+            if (waypoint.getControlPoint() == DomainFactory.INSTANCE.getOrCreateControlPoint(new ControlPointAdapter(entry.getControlPoint()))) {
                 found = true;
             }
         }

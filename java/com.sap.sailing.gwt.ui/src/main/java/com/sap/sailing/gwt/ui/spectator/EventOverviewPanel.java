@@ -211,7 +211,7 @@ public class EventOverviewPanel extends FormPanel {
             @Override
             public SafeHtml getValue(EventDTO event) {
                 String debugParam = Window.Location.getParameter("gwt.codesvr");
-                if(event.publicationUrl != null && !event.publicationUrl.isEmpty() && event.isPublic) {
+                if (event.publicationUrl != null && !event.publicationUrl.isEmpty() && event.isPublic) {
                     String link = URLFactory.INSTANCE.encode(event.publicationUrl
                             + (debugParam != null && !debugParam.isEmpty() ? "?gwt.codesvr=" + debugParam : ""));
                     return ANCHORTEMPLATE.anchor(link, event.name);

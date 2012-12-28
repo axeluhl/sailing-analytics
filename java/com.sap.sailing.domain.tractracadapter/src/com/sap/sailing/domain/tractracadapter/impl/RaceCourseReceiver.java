@@ -17,6 +17,7 @@ import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
+import com.sap.sailing.domain.tractracadapter.TracTracControlPoint;
 import com.tractrac.clientmodule.Race;
 import com.tractrac.clientmodule.Route;
 import com.tractrac.clientmodule.data.ICallbackData;
@@ -83,15 +84,19 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<Route, RouteDa
     @Override
     protected void handleEvent(Triple<Route, RouteData, Race> event) {
         System.out.print("R");
-        Course course = getDomainFactory().createCourse(event.getA().getName(), event.getB().getPoints());
+        List<TracTracControlPoint> ttControlPoints = new ArrayList<>();
+        for (com.tractrac.clientmodule.ControlPoint cp : event.getB().getPoints()) {
+            ttControlPoints.add(new ControlPointAdapter(cp));
+        }
+        Course course = getDomainFactory().createCourse(event.getA().getName(), ttControlPoints);
         RaceDefinition existingRaceDefinitionForRace = getDomainFactory().getExistingRaceDefinitionForRace(event.getC());
         if (existingRaceDefinitionForRace != null) {
             logger.log(Level.INFO, "Received course update for existing race "+event.getC().getName()+": "+
                     event.getB().getPoints());
-            // race already exists; this means that we obviously found a course re-definition (yuck...)
+            // Race already exists; this means that we obviously found a course change.
             // Therefore, don't create TrackedRace again because it already exists.
             try {
-                getDomainFactory().updateCourseWaypoints(existingRaceDefinitionForRace.getCourse(), event.getB().getPoints());
+                getDomainFactory().updateCourseWaypoints(existingRaceDefinitionForRace.getCourse(), ttControlPoints);
                 if (getTrackedRegatta().getExistingTrackedRace(existingRaceDefinitionForRace) == null) {
                     createTrackedRace(existingRaceDefinitionForRace);
                 }

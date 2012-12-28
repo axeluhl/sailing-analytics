@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.persistence;
 
+import java.io.Serializable;
+
 import com.mongodb.DBObject;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
@@ -72,12 +74,12 @@ public interface MongoObjectFactory {
     /**
      * Renames the event with the name <code>oldName</code>.
      */
-    void renameEvent(String oldName, String newName);
+    void renameEvent(Serializable id, String newName);
 
     /**
      * Removes the event named <code>eventName</code> from the database.
      */
-    void removeEvent(String eventName);
+    void removeEvent(Serializable id);
 
     /**
      * Stores the regatta together with its name, {@link Series} definitions and an optional link to the

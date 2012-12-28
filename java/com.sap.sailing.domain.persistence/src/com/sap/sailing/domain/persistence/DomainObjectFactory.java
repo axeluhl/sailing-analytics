@@ -23,6 +23,9 @@ import com.sap.sailing.domain.tracking.WindTrack;
  *
  */
 public interface DomainObjectFactory {
+    /**
+     * @param regatta only needed for backward compatibility because old wind tracks used the regatta name as part of the key
+     */
     WindTrack loadWindTrack(Regatta regatta, RaceDefinition race, WindSource windSource, long millisecondsOverWhichToAverage);
 
     /**
