@@ -105,6 +105,10 @@ public class ClientParamsPHP {
         public Route(UUID uuid) {
             super(uuid);
         }
+
+        public Object getDescription() {
+            return getProperty("Description");
+        }
     }
     
     public class Image extends ObjectWithUUID {
