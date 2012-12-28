@@ -8,14 +8,22 @@ import java.net.URISyntaxException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.WithID;
+import com.sap.sailing.domain.common.impl.DegreePosition;
+import com.sap.sailing.domain.tractracadapter.TracTracControlPoint;
 
 /**
  * Parses and then represents the contents of a clientparams.php TracTrac document describing one race with
@@ -47,6 +55,8 @@ import com.sap.sailing.domain.common.TimePoint;
  *
  */
 public class ClientParamsPHP {
+    private static final Logger logger = Logger.getLogger(ClientParamsPHP.class.getName());
+    
     private final Map<String, String> properties;
     
     /**
@@ -76,12 +86,20 @@ public class ClientParamsPHP {
         PL
     }
     
-    private class ObjectWithUUID {
+    /**
+     * Equality and hadh code of objects of this type are based on their UUID.
+     * 
+     * @author Axel Uhl (D043530)
+     *
+     */
+    private abstract class ObjectWithUUID implements WithID {
         private final Pattern propertyNamePattern = Pattern.compile("([^0-9]*)(([0-9][0-9]*)(.*))?");
         private final String propertyNamePrefix;
         private final Integer number;
+        private final UUID uuid;
 
         public ObjectWithUUID(UUID uuid) {
+            this.uuid = uuid;
             String idPropertyName = propertiesByID.get(uuid);
             Matcher m = propertyNamePattern.matcher(idPropertyName);
             if (m.matches()) {
@@ -96,8 +114,27 @@ public class ClientParamsPHP {
             }
         }
         
+        @Override
+        public UUID getId() {
+            return uuid;
+        }
+        
+        @Override
+        public int hashCode() {
+            return getId().hashCode();
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            return getId().equals(((WithID) obj).getId());
+        }
+
         protected String getProperty(String propertyName) {
-            return properties.get(propertyNamePrefix+number+propertyName);
+            String result = properties.get(propertyNamePrefix+number+propertyName);
+            if (result != null) {
+                result = result.replace("###BREAKLINE###", "\n");
+            }
+            return result;
         }
     }
     
@@ -108,6 +145,17 @@ public class ClientParamsPHP {
 
         public Object getDescription() {
             return getProperty("Description");
+        }
+        
+        public Iterable<ControlPoint> getControlPoints() {
+            List<ControlPoint> result = new ArrayList<>();
+            int i=1;
+            String controlPointUUID;
+            while ((controlPointUUID=getProperty("ControlPoint"+i+"UUID")) != null) {
+                result.add(new ControlPoint(UUID.fromString(controlPointUUID)));
+                i++;
+            }
+            return result;
         }
     }
     
@@ -129,9 +177,100 @@ public class ClientParamsPHP {
         }
     }
     
-    public class ControlPoint extends ObjectWithUUID {
+    public static class Mark {
+        private final Position position;
+
+        public Mark(Position position) {
+            super();
+            this.position = position;
+        }
+
+        /**
+         * Comment from Jorge Piera Llodrá on 2012-12-28T15:22:00Z:
+         * <p>
+         * 
+         * <em>"The lat/lon position for a control point is the latest known position 
+         * before the StartTrackingTime. Suppose that the GPS associated to a 
+         * control point doesn't send positions between the StartTrackingTime and 
+         * the EndTrackingTime: the control point won't appear in the map.
+         * 
+         * For this reason we decided to take the latest know position. The time 
+         * stamp is valid from the start of the simulation until a new position 
+         * arrives."</em>
+         * <p>
+         * 
+         * With this in mind, the position returned for this mark is a default position that is valid only until a
+         * position is received through TTCM with a time point after start of tracking.
+         * 
+         * @return <code>null</code> in case the mark's position isn't known from the clientparams.php document
+         */
+        public Position getPosition() {
+            return position;
+        }
+    }
+
+    public class ControlPoint extends ObjectWithUUID implements TracTracControlPoint {
         public ControlPoint(UUID uuid) {
             super(uuid);
+        }
+        
+        public String getName() {
+            return getProperty("Name");
+        }
+        
+        public String getShortName() {
+            return getProperty("ShortName");
+        }
+        
+        public String getMetadata() {
+            return getProperty("DataSheet");
+        }
+        
+        /**
+         * @return one or two marks that form the control point
+         */
+        public Iterable<Mark> getMarks() {
+            final List<Mark> result = new ArrayList<>();
+            for (int i=1; i<=1+Integer.valueOf(getProperty("HasTwoPoints")); i++) {
+                String latDegString = getProperty("Mark"+i+"Lat");
+                Position position = null;
+                if (latDegString != null) {
+                    String lngDegString = getProperty("Mark"+i+"Lon");
+                    if (lngDegString != null) {
+                        position = new DegreePosition(Double.valueOf(latDegString), Double.valueOf(lngDegString));
+                    }
+                }
+                result.add(new Mark(position));
+            }
+            return result;
+        }
+
+        @Override
+        public UUID getId() {
+            return super.getId();
+        }
+
+        @Override
+        public boolean getHasTwoPoints() {
+            return getProperty("HasTwoPoints").equals("1");
+        }
+
+        @Override
+        public Position getMark1Position() {
+            return getMarks().iterator().next().getPosition();
+        }
+
+        @Override
+        public Position getMark2Position() {
+            final Position result;
+            if (getHasTwoPoints()) {
+                Iterator<Mark> markIter = getMarks().iterator();
+                markIter.next(); // skip first mark
+                result = markIter.next().getPosition();
+            } else {
+                result = null;
+            }
+            return result;
         }
     }
     
@@ -148,7 +287,7 @@ public class ClientParamsPHP {
                     String propertyName = line.substring(0, colonIndex).trim();
                     String propertyValue = line.substring(colonIndex + 1).trim();
                     properties.put(propertyName, propertyValue);
-                    if (propertyName.endsWith("ID")) {
+                    if (propertyName.matches("[^0-9]*[0-9][0-9]*UUID")) {
                         try {
                             final UUID uuid = UUID.fromString(propertyValue);
                             propertiesByID.put(uuid, propertyName);
@@ -229,20 +368,45 @@ public class ClientParamsPHP {
         return getTimePoint("RaceEndTime");
     }
     
-    public TimePoint getRaceTrackingStartTime() throws ParseException {
-        return getTimePoint("RaceTrackingStartTime");
+    public TimePoint getRaceTrackingStartTime() {
+        try {
+            return getTimePoint("RaceTrackingStartTime");
+        } catch (ParseException e) {
+            logger.info("Exception trying to parse property RaceTrackingStartTime with value "+properties.get("RaceTrackingStartTime"));
+            logger.throwing(ClientParamsPHP.class.getName(), "getRaceTrackingStartTime", e);
+            return null;
+        }
     }
     
-    public TimePoint getRaceTrackingEndTime() throws ParseException {
-        return getTimePoint("RaceTrackingEndTime");
+    public TimePoint getRaceTrackingEndTime() {
+        try {
+            return getTimePoint("RaceTrackingEndTime");
+        } catch (ParseException e) {
+            logger.info("Exception trying to parse property RaceTrackingEndTime with value "+properties.get("RaceTrackingEndTime"));
+            logger.throwing(ClientParamsPHP.class.getName(), "RaceTrackingEndTime", e);
+            return null;
+        }
     }
     
-    public Image getRaceDefaultRoute() {
-        return new Image(UUID.fromString(properties.get("RaceDefaultRouteUUID")));
+    public Route getRaceDefaultRoute() {
+        return new Route(UUID.fromString(properties.get("RaceDefaultRouteUUID")));
     }
     
     public HandicapSystem getRaceHandicapSystem() {
         return HandicapSystem.valueOf(properties.get("RaceHandicapSystem"));
+    }
+
+    /**
+     * Determines all control points listed in the document, regardless of whether they are part of a route/course or not
+     */
+    public Iterable<ControlPoint> getControlPointList() {
+        List<ControlPoint> result = new ArrayList<>();
+        for (Map.Entry<String, String> e : properties.entrySet()) {
+            if (e.getKey().matches("ControlPoint[0-9][0-9]*UUID")) {
+                result.add(new ControlPoint(UUID.fromString(e.getValue())));
+            }
+        }
+        return result;
     }
     
 }

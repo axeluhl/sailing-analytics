@@ -15,8 +15,8 @@ import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util.Triple;
-import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
+import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
@@ -70,7 +70,7 @@ public class MarkPassingReceiver extends AbstractReceiverWithQueue<RaceCompetito
             for (MarkPassingsData.Entry passing : event.getB().getPassings()) {
                 ControlPoint controlPointPassed = passing.getControlPoint();
                 com.sap.sailing.domain.base.ControlPoint domainControlPoint = getDomainFactory()
-                        .getOrCreateControlPoint(controlPointPassed);
+                        .getOrCreateControlPoint(new ControlPointAdapter(controlPointPassed));
                 Waypoint passed = findWaypointForControlPoint(trackedRace, waypointsIter, domainControlPoint,
                         getDomainFactory().getOrCreateCompetitor(event.getA().getCompetitor()));
                 if (passed != null) {

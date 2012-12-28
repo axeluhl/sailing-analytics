@@ -1,19 +1,14 @@
 package com.sap.sailing.domain.tractracadapter.impl;
 
-import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.Executors;
@@ -23,15 +18,14 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 import com.maptrack.client.io.TypeController;
-import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Fleet;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.tracking.AbstractRaceTrackerImpl;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
@@ -49,6 +43,7 @@ import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.Receiver;
+import com.sap.sailing.domain.tractracadapter.TracTracControlPoint;
 import com.sap.sailing.domain.tractracadapter.TracTracRaceTracker;
 import com.tractrac.clientmodule.ControlPoint;
 import com.tractrac.clientmodule.Event;
@@ -75,7 +70,6 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
     private final WindStore windStore;
     private final Set<RaceDefinition> races;
     private final DynamicTrackedRegatta trackedRegatta;
-    private final static SimpleDateFormat tracTracDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z");
 
     /**
      * paramURL, liveURI and storedURI for TracTrac connection
@@ -108,7 +102,6 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
      *            if <code>null</code>, all stored data until the "end of time" will be loaded that the event has to
      *            provide, particularly for the mark positions which are stored per event, not per race; otherwise,
      *            particularly the mark position loading will be constrained to this end time.
-     * @param simulateWithStartTimeNow TODO
      * @param windStore
      *            Provides the capability to obtain the {@link WindTrack}s for the different wind sources. A trivial
      *            implementation is {@link EmptyWindStore} which simply provides new, empty tracks. This is always
@@ -241,26 +234,32 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
             @Override public void run() {
                 Set<RaceDefinition> raceDefinitions = getRaces();
                 if (raceDefinitions != null && !raceDefinitions.isEmpty()) {
-                    logger.info("fetching paramURL to check for new ControlPoint positions...");
-                    Event event = KeyValue.setup(paramURL);
-                    updateStartStopTimesAndLiveDelay(paramURL, simulator);
-                    for (ControlPoint controlPoint : event.getControlPointList()) {
-                        com.sap.sailing.domain.base.ControlPoint domainControlPoint = domainFactory.getOrCreateControlPoint(controlPoint);
-                        boolean first = true;
-                        for (Mark mark : domainControlPoint.getMarks()) {
-                            for (RaceDefinition raceDefinition : raceDefinitions) {
-                                DynamicTrackedRace trackedRace = getTrackedRegatta().getExistingTrackedRace(raceDefinition);
-                                if (trackedRace != null) {
-                                    DynamicGPSFixTrack<Mark, GPSFix> markTrack = trackedRace.getOrCreateTrack(mark);
-                                    if (markTrack.getFirstRawFix() == null) {
-                                        markTrack.addGPSFix(new GPSFixImpl(new DegreePosition(first ? controlPoint
-                                                .getLat1() : controlPoint.getLat2(), first ? controlPoint.getLon1()
-                                                : controlPoint.getLon2()), MillisecondsTimePoint.now()));
+                    logger.info("fetching paramURL "+paramURL+" to check for updates for race(s) "+getRaces());
+                    ClientParamsPHP clientParams;
+                    try {
+                        clientParams = new ClientParamsPHP(new InputStreamReader(paramURL.openStream()));
+                        // TODO see bug 1014: update course from clientParams if a change is detected; may be used also for initial course definition
+                        updateStartStopTimesAndLiveDelay(clientParams, simulator);
+                        for (TracTracControlPoint controlPoint : clientParams.getControlPointList()) {
+                            com.sap.sailing.domain.base.ControlPoint domainControlPoint = domainFactory.getOrCreateControlPoint(controlPoint);
+                            boolean first = true;
+                            for (Mark mark : domainControlPoint.getMarks()) {
+                                for (RaceDefinition raceDefinition : raceDefinitions) {
+                                    DynamicTrackedRace trackedRace = getTrackedRegatta().getExistingTrackedRace(raceDefinition);
+                                    if (trackedRace != null) {
+                                        DynamicGPSFixTrack<Mark, GPSFix> markTrack = trackedRace.getOrCreateTrack(mark);
+                                        if (markTrack.getFirstRawFix() == null) {
+                                            markTrack.addGPSFix(new GPSFixImpl(first ? controlPoint.getMark1Position()
+                                                    : controlPoint.getMark2Position(), MillisecondsTimePoint.now()));
+                                        }
                                     }
                                 }
+                                first = false;
                             }
-                            first = false;
                         }
+                    } catch (IOException e) {
+                        logger.info("Exception "+e.getMessage()+" while trying to read clientparams.php for races "+getRaces());
+                        logger.throwing(TracTracRaceTracker.class.getName(), "scheduleControlPointPositionPoller.run", e);
                     }
                 }
             }
@@ -268,70 +267,31 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         return task;
     }
 
-    private void updateStartStopTimesAndLiveDelay(URL paramURL, Simulator simulator) {
-        try {
-            BufferedReader br = new BufferedReader(new InputStreamReader((InputStream) paramURL.getContent()));
-            RaceDefinition currentRace = null;
-            String line = br.readLine();
-            Integer delayInSeconds = null;
-            while (line != null) {
-                int colonIndex = line.indexOf(':');
-                if (colonIndex >= 0) {
-                    String propertyName = line.substring(0, colonIndex);
-                    String propertyValue = line.substring(colonIndex+1);
-                    // TODO read RaceDefaultRouteUUID and the corresponding Route1UUID / Route2UUID / ..., then parse the route data and update if needed
-                    if (propertyName.equals("RaceName")) {
-                        RaceDefinition race = getRegatta().getRaceByName(propertyValue);
-                        if (race != null) {
-                            currentRace = race;
-                            if (delayInSeconds != null) {
-                                final DynamicTrackedRace trackedRace = getTrackedRegatta().getExistingTrackedRace(currentRace);
-                                if (trackedRace != null) {
-                                    trackedRace.setDelayToLiveInMillis(1000*delayInSeconds);
-                                }
-                            }
-                        }
-                    } else  if (propertyName.equals("LiveDelaySecs")) {
-                        try {
-                            delayInSeconds = Integer.valueOf(propertyValue.trim());
-                        } catch (NumberFormatException nfe) {
-                            logger.throwing(TracTracRaceTrackerImpl.class.getName(), "updateStartStopTimesAndLiveDelay", nfe);
-                        }
-                    } else {
-                        final DynamicTrackedRace trackedRace = getTrackedRegatta().getExistingTrackedRace(currentRace);
-                        if (trackedRace != null) {
-                            if (propertyName.equals("RaceTrackingStartTime")) {
-                                TimePoint startOfTracking = parseTimePoint(propertyValue);
-                                if (startOfTracking != null) {
-                                    trackedRace.setStartOfTrackingReceived(simulator==null?startOfTracking:simulator.advance(startOfTracking));
-                                }
-                            } else if (propertyName.equals("RaceTrackingEndTime")) {
-                                TimePoint endOfTracking = parseTimePoint(propertyValue);
-                                if (endOfTracking != null) {
-                                    trackedRace.setEndOfTrackingReceived(simulator==null?endOfTracking:simulator.advance(endOfTracking));
-                                }
-                            }
-                        }
-                    }
-                }
-                line = br.readLine();
+    private void updateStartStopTimesAndLiveDelay(ClientParamsPHP clientParams, Simulator simulator) {
+        RaceDefinition currentRace = null;
+        long delayInMillis = clientParams.getLiveDelayInMillis();
+        RaceDefinition race = getRegatta().getRaceByName(clientParams.getRaceName());
+        if (race != null) {
+            currentRace = race;
+            final DynamicTrackedRace trackedRace = getTrackedRegatta().getExistingTrackedRace(currentRace);
+            if (trackedRace != null) {
+                trackedRace.setDelayToLiveInMillis(delayInMillis);
             }
-            br.close();
-        } catch (IOException e) {
-            logger.throwing(TracTracRaceTrackerImpl.class.getName(), "updateStartStopTimes", e);
         }
-    }
-
-    /**
-     * @return <code>null</code> if the <code>dateTimeString</code> doesn't parse into a date according to
-     *         {@link #tracTracDateFormat}, or the time point parsed from the string otherwise
-     */
-    private TimePoint parseTimePoint(String dateTimeString) {
-        try {
-            Date date = tracTracDateFormat.parse(dateTimeString + " UTC");
-            return new MillisecondsTimePoint(date);
-        } catch (ParseException e) {
-            return null;
+        if (currentRace != null) {
+            final DynamicTrackedRace trackedRace = getTrackedRegatta().getExistingTrackedRace(currentRace);
+            if (trackedRace != null) {
+                TimePoint startOfTracking = clientParams.getRaceTrackingStartTime();
+                if (startOfTracking != null) {
+                    trackedRace.setStartOfTrackingReceived(simulator == null ? startOfTracking : simulator
+                            .advance(startOfTracking));
+                }
+                TimePoint endOfTracking = clientParams.getRaceTrackingEndTime();
+                if (endOfTracking != null) {
+                    trackedRace.setEndOfTrackingReceived(simulator == null ? endOfTracking : simulator
+                            .advance(endOfTracking));
+                }
+            }
         }
     }
 

@@ -2,6 +2,7 @@ package com.sap.sailing.domain.base;
 
 import com.sap.sailing.domain.common.Named;
 import com.sap.sailing.domain.common.Renamable;
+import com.sap.sailing.domain.common.WithID;
 
 /**
  * An event is a group of {@link Regatta regattas} carried out at a common venue within a common time frame. For

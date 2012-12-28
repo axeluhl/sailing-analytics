@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.base;
+package com.sap.sailing.domain.common;
 
 import java.io.Serializable;
 
