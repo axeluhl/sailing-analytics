@@ -14,7 +14,7 @@ public class LeaderboardGroupDTO extends NamedDTO implements IsSerializable {
 
     public String description;
     public List<StrippedLeaderboardDTO> leaderboards;
-    public boolean displayGroupsInReverseOrder;
+    public boolean displayLeaderboardsInReverseOrder;
     
     private int[] overallLeaderboardDiscardThresholds;
     private ScoringSchemeType overallLeaderboardScoringSchemeType;
@@ -130,9 +130,9 @@ public class LeaderboardGroupDTO extends NamedDTO implements IsSerializable {
     /**
      * @return <code>true</code> if the group contains a race which is live.
      */
-    public boolean containsLiveRace() {
+    public boolean hasLiveRace() {
         for (StrippedLeaderboardDTO leaderboard : leaderboards) {
-            if (leaderboard.containsLiveRace()) {
+            if (leaderboard.hasLiveRace()) {
                 return true;
             }
         }

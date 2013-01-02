@@ -9,13 +9,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 import org.junit.Before;
 import org.junit.Test;
 
 import com.mongodb.MongoException;
 import com.sap.sailing.domain.base.BoatClass;
-import com.sap.sailing.domain.base.Buoy;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Regatta;
@@ -73,16 +74,16 @@ public class TrackedRaceContentsReplicationTest extends AbstractServerReplicatio
                 new PersonImpl("Rigo de Mas", DomainFactory.INSTANCE.getOrCreateNationality("NED"), null, null)),
                 new BoatImpl("GER 61", DomainFactory.INSTANCE.getOrCreateBoatClass("470", /* typicallyStartsUpwind */ true), "GER 61"));
         final String baseEventName = "Test Event";
-        AddDefaultRegatta addEventOperation = new AddDefaultRegatta(baseEventName, boatClassName);
+        AddDefaultRegatta addEventOperation = new AddDefaultRegatta(baseEventName, boatClassName, UUID.randomUUID());
         Regatta regatta = master.apply(addEventOperation);
         final String raceName = "Test Race";
         final CourseImpl masterCourse = new CourseImpl("Test Course", new ArrayList<Waypoint>());
         RaceDefinition race = new RaceDefinitionImpl(raceName, masterCourse, boatClass, Collections.singletonList(competitor));
         AddRaceDefinition addRaceOperation = new AddRaceDefinition(new RegattaName(regatta.getName()), race);
         master.apply(addRaceOperation);
-        masterCourse.addWaypoint(0, masterDomainFactory.createWaypoint(masterDomainFactory.getOrCreateBuoy("Buoy1")));
-        masterCourse.addWaypoint(1, masterDomainFactory.createWaypoint(masterDomainFactory.getOrCreateBuoy("Buoy2")));
-        masterCourse.addWaypoint(2, masterDomainFactory.createWaypoint(masterDomainFactory.getOrCreateBuoy("Buoy3")));
+        masterCourse.addWaypoint(0, masterDomainFactory.createWaypoint(masterDomainFactory.getOrCreateMark("Mark1")));
+        masterCourse.addWaypoint(1, masterDomainFactory.createWaypoint(masterDomainFactory.getOrCreateMark("Mark2")));
+        masterCourse.addWaypoint(2, masterDomainFactory.createWaypoint(masterDomainFactory.getOrCreateMark("Mark3")));
         masterCourse.removeWaypoint(1);
         raceIdentifier = new RegattaNameAndRaceName(regatta.getName(), raceName);
         trackedRegatta = master.apply(new TrackRegatta(raceIdentifier));
@@ -114,23 +115,23 @@ public class TrackedRaceContentsReplicationTest extends AbstractServerReplicatio
     }
 
     @Test
-    public void testBuoyFixReplication() throws InterruptedException {
+    public void testMarkFixReplication() throws InterruptedException {
         final GPSFixMovingImpl fix = new GPSFixMovingImpl(new DegreePosition(2, 3), new MillisecondsTimePoint(3456),
                 new KnotSpeedWithBearingImpl(13, new DegreeBearingImpl(234)));
-        final Buoy masterBuoy = trackedRace.getRace().getCourse().getFirstWaypoint().getBuoys().iterator().next();
-        trackedRace.recordFix(masterBuoy, fix);
+        final Mark masterMark = trackedRace.getRace().getCourse().getFirstWaypoint().getMarks().iterator().next();
+        trackedRace.recordFix(masterMark, fix);
         Thread.sleep(1000);
         TrackedRace replicaTrackedRace = replica.getTrackedRace(raceIdentifier);
-        Buoy replicaBuoy = replicaTrackedRace.getRace().getCourse().getFirstWaypoint().getBuoys().iterator().next();
-//        assertNotSame(replicaBuoy, masterBuoy); // TODO this would require solving bug 592
-        GPSFixTrack<Buoy, GPSFix> replicaBuoyTrack = replicaTrackedRace.getOrCreateTrack(replicaBuoy);
-        replicaBuoyTrack.lockForRead();
+        Mark replicaMark = replicaTrackedRace.getRace().getCourse().getFirstWaypoint().getMarks().iterator().next();
+//        assertNotSame(replicaMark, masterMark); // TODO this would require solving bug 592
+        GPSFixTrack<Mark, GPSFix> replicaMarkTrack = replicaTrackedRace.getOrCreateTrack(replicaMark);
+        replicaMarkTrack.lockForRead();
         try {
-            assertEquals(1, Util.size(replicaBuoyTrack.getRawFixes()));
-            assertEquals(replicaBuoyTrack.getRawFixes().iterator().next(), fix);
-            assertNotSame(fix, replicaBuoyTrack.getRawFixes().iterator().next());
+            assertEquals(1, Util.size(replicaMarkTrack.getRawFixes()));
+            assertEquals(replicaMarkTrack.getRawFixes().iterator().next(), fix);
+            assertNotSame(fix, replicaMarkTrack.getRawFixes().iterator().next());
         } finally {
-            replicaBuoyTrack.unlockAfterRead();
+            replicaMarkTrack.unlockAfterRead();
         }
     }
 

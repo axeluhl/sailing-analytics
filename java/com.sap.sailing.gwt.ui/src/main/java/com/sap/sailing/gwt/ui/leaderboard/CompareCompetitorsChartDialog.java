@@ -55,14 +55,14 @@ public class CompareCompetitorsChartDialog extends DialogBoxExt implements RaceT
     
     public CompareCompetitorsChartDialog(SailingServiceAsync sailingService,
             List<RegattaAndRaceIdentifier> races, final RaceTimesInfoProvider raceTimesInfoProvider, final CompetitorSelectionProvider competitorSelectionProvider,
-            Timer timer, StringMessages stringConstants, ErrorReporter errorReporter) {
-        super(new Label(stringConstants.close()));
+            Timer timer, StringMessages stringMessages, ErrorReporter errorReporter) {
+        super(new Label(stringMessages.close()));
         this.sailingService = sailingService;
         this.timer = timer;
         this.errorReporter = errorReporter;
         this.timeRangeWithZoomProvider = new TimeRangeWithZoomModel(); 
         this.setPopupPosition(15, 15);
-        this.setHTML(stringConstants.compareCompetitors());
+        this.setHTML(stringMessages.competitorCharts());
         this.setWidth(Window.getClientWidth() - 250 + "px");
         this.setAnimationEnabled(true);
 
@@ -71,13 +71,13 @@ public class CompareCompetitorsChartDialog extends DialogBoxExt implements RaceT
         raceSelectionProvider.setAllRaces(races);
         
         multiChartPanel = new MultiChartPanel(sailingService, new AsyncActionsExecutor(), competitorSelectionProvider, raceSelectionProvider,
-                timer, timeRangeWithZoomProvider, stringConstants, errorReporter, false, false);
+                timer, timeRangeWithZoomProvider, stringMessages, errorReporter, false, false);
         multiChartPanel.setSize("100%", "100%");
         
         VerticalPanel contentPanel = new VerticalPanel();
         contentPanel.setSize("100%", "100%");
         
-        ComponentToolbar<MultiChartSettings> toolbar = new ComponentToolbar<MultiChartSettings>(multiChartPanel, stringConstants);
+        ComponentToolbar<MultiChartSettings> toolbar = new ComponentToolbar<MultiChartSettings>(multiChartPanel, stringMessages);
         toolbar.addSettingsButton();
 
         FlowPanel flowPanel = new FlowPanel();
@@ -85,7 +85,7 @@ public class CompareCompetitorsChartDialog extends DialogBoxExt implements RaceT
         HorizontalPanel raceSelectionPanel = new HorizontalPanel();
         raceSelectionPanel.setSpacing(3);
         racesListBox = new ListBox();
-        raceSelectionPanel.add(new Label(stringConstants.pleaseSelectARace() + ":"));
+        raceSelectionPanel.add(new Label(stringMessages.pleaseSelectARace() + ":"));
         raceSelectionPanel.add(racesListBox);
         for (RegattaAndRaceIdentifier race : raceSelectionProvider.getAllRaces()) {
             racesListBox.addItem(race.toString());

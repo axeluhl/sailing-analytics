@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.client;
 
+import com.google.gwt.i18n.client.NumberFormat;
 import com.sap.sailing.domain.common.DetailType;
 
 public class DetailTypeFormatter {
@@ -24,6 +25,10 @@ public class DetailTypeFormatter {
             return stringMessages.velocityMadeGoodInKnots();
         case GAP_TO_LEADER_IN_SECONDS:
             return stringMessages.gapToLeaderInSeconds();
+        case GAP_CHANGE_SINCE_LEG_START_IN_SECONDS:
+            return stringMessages.gapChangeSinceLegStartInSeconds();
+        case SIDE_TO_WHICH_MARK_AT_LEG_START_WAS_ROUNDED:
+            return stringMessages.sideToWhichMarkAtLegStartWasRounded();
         case WINDWARD_DISTANCE_TO_GO_IN_METERS:
             return stringMessages.windwardDistanceToGoInMeters();
         case RACE_DISTANCE_TRAVELED:
@@ -68,8 +73,24 @@ public class DetailTypeFormatter {
             return stringMessages.totalTimeSailedReachingInSeconds();
         case TOTAL_TIME_SAILED_IN_SECONDS:
             return stringMessages.totalTimeSailedInSeconds();
+        case AVERAGE_MANEUVER_LOSS_IN_METERS:
+            return stringMessages.averageManeuverLossInMeters();
+        case AVERAGE_TACK_LOSS_IN_METERS:
+            return stringMessages.averageTackLossInMeters();
+        case AVERAGE_JIBE_LOSS_IN_METERS:
+            return stringMessages.averageJibeLossInMeters();
         }
         return null;
+    }
 
+    public static NumberFormat getNumberFormat(DetailType detailType) {
+        String decimalPlaces = "";
+        for (int i = 0; i < detailType.getPrecision(); i++) {
+            if (i == 0) {
+                decimalPlaces += ".";
+            }
+            decimalPlaces += "0";
+        }
+        return NumberFormat.getFormat("0" + decimalPlaces);
     }
 }

@@ -12,6 +12,7 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
 import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
+import com.sap.sailing.gwt.ui.raceboard.GlobalNavigationPanel;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.panels.SimpleWelcomeWidget;
 
@@ -54,9 +55,12 @@ public class SpectatorEntryPoint extends AbstractEntryPoint implements RegattaRe
         boolean embedded = Window.Location.getParameter("embedded") != null
                 && Window.Location.getParameter("embedded").equalsIgnoreCase("true");
         if (!embedded) {
-            LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(groupName != null ? groupName
-                    : stringMessages.overview(), stringMessages);
+            String title = groupName != null ? groupName : stringMessages.overview();
+            LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(title, stringMessages, this);
             logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
+            FlowPanel globalNavigationPanel = new GlobalNavigationPanel(stringMessages, true, null, null);
+            logoAndTitlePanel.add(globalNavigationPanel);
+
             rootPanel.add(logoAndTitlePanel);
         } else {
             RootPanel.getBodyElement().getStyle().setPadding(0, Unit.PX);

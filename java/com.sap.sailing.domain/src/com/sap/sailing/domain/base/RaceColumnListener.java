@@ -19,6 +19,10 @@ public interface RaceColumnListener extends Serializable {
     
     void raceColumnMoved(RaceColumn raceColumn, int newIndex);
     
+    void factorChanged(RaceColumn raceColumn, Double oldFactor, Double newFactor);
+
+    void competitorDisplayNameChanged(Competitor competitor, String oldDisplayName, String displayName);
+
     /**
      * A listener can use this to specify that it must not be serialized together with other listeners.
      * Background: the collections holding race column listeners are usually non-transient. This will cause

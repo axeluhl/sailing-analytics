@@ -23,17 +23,12 @@ public class GlobalNavigationPanel extends FlowPanel {
 
     public GlobalNavigationPanel(StringMessages stringMessages, boolean showHomeNavigation, String leaderboardName, String leaderboardGroupName) {
         super();
-        
         setStyleName("globalNavigation");
-        
         debugParam = Window.Location.getParameter("gwt.codesvr");
-
         String spectatorViewLink = "/gwt/Spectator.html";
         String leaderboardViewLink = "/gwt/Leaderboard.html";
-    
-        String homeLink = spectatorViewLink;
-        
-        if(showHomeNavigation) {
+        String homeLink = "/";
+        if (showHomeNavigation) {
             if (leaderboardGroupName != null && !leaderboardGroupName.isEmpty()) {
                 String leaderBoardGroupLink = spectatorViewLink + "?showRaceDetails=true&leaderboardGroupName=" + leaderboardGroupName; 
                 addNavigationLink(leaderboardGroupName, leaderBoardGroupLink, "leaderBoardGroup", "Go to the Event overview.");
@@ -60,7 +55,7 @@ public class GlobalNavigationPanel extends FlowPanel {
         }
         
         HTML linkHtml = new HTML(ANCHORTEMPLATE.anchor(URLFactory.INSTANCE.encode(url), linkName));
-        linkHtml.addStyleName("gwt-Button");
+//        linkHtml.addStyleName("gwt-Button");
         linkHtml.addStyleName("globalNavigationLink");
         linkHtml.addStyleName(STYLE_NAME_PREFIX + styleNameExtension);
         linkHtml.setTitle(setHtmlTitle);

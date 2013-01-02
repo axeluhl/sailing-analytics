@@ -40,5 +40,4 @@ public class ExplicitRaceColumnSelectionWithPreselectedRace extends ExplicitRace
         }
         return columnsToAddImplicitly;
     }
-
 }

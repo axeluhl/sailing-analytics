@@ -36,6 +36,8 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
     private String leaderboardGroupName;
     private RaceBoardViewModes viewMode;
 
+    private GlobalNavigationPanel globalNavigationPanel;
+
     @Override
     public void onModuleLoad() {     
         super.onModuleLoad();
@@ -172,32 +174,37 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
     }
 
     private FlowPanel createLogoAndTitlePanel(RaceBoardPanel raceBoardPanel) {
-        LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(regattaName, selectedRace.name, stringMessages);
+        globalNavigationPanel = new GlobalNavigationPanel(stringMessages, true, leaderboardName, leaderboardGroupName);
+        LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(regattaName, selectedRace.name, stringMessages, this) {
+            @Override
+            public void onResize() {
+                super.onResize();
+                if (isSmallWidth()) {
+                    remove(globalNavigationPanel);
+                } else {
+                    add(globalNavigationPanel);
+                }
+            }
+        };
         logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
-
-        FlowPanel globalNavigationPanel = new GlobalNavigationPanel(stringMessages, true, leaderboardName, leaderboardGroupName);
-        logoAndTitlePanel.add(globalNavigationPanel);
-        
+        if (!isSmallWidth()) {
+            logoAndTitlePanel.add(globalNavigationPanel);
+        }
         return logoAndTitlePanel;
     }
     
     private void createRaceBoardInOneScreenMode(RaceBoardPanel raceBoardPanel) {
         DockLayoutPanel p = new DockLayoutPanel(Unit.PX);
         RootLayoutPanel.get().add(p);
-        
         FlowPanel toolbarPanel = new FlowPanel();
-        
         toolbarPanel.add(raceBoardPanel.getNavigationWidget());
-        
         if (!UserAgentChecker.INSTANCE.isUserAgentSupported(userAgent)) {
             HTML lbl = new HTML("This website is optimized to work with Google Chrome. <a target='_blank' href='https://www.google.com/intl/de/chrome/browser/'>Click here to download</a>");
             lbl.setStyleName("browserOptimizedMessage");
             toolbarPanel.add(lbl);
         }
-
         FlowPanel logoAndTitlePanel = createLogoAndTitlePanel(raceBoardPanel);
         FlowPanel timePanel = createTimePanel(raceBoardPanel);
-        
         p.addNorth(logoAndTitlePanel, 68);        
         p.addNorth(toolbarPanel, 40);
         p.addSouth(timePanel, 90);                     

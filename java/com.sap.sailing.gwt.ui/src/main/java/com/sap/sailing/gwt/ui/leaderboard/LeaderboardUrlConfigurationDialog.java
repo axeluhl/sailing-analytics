@@ -76,6 +76,7 @@ public class LeaderboardUrlConfigurationDialog extends SettingsDialog<Leaderboar
         private final StringMessages stringMessages;
         private CheckBox embeddedCheckbox;
         private CheckBox showRaceDetailsCheckbox;
+        private CheckBox autoExpandLastRaceBox;
         private CheckBox autoRefreshCheckbox;
         private Anchor resultingUrl;
         private final String leaderboardName;
@@ -90,13 +91,14 @@ public class LeaderboardUrlConfigurationDialog extends SettingsDialog<Leaderboar
             }
             LeaderboardSettings settings = LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(
                     namesOfRaceColumnsToShow, /* namesOfRacesToShow */null, /* nameOfRaceToSort */null, /* autoExpandPreSelectedRace */
-                    false);
+                    false, /* showMetaLeaderboardsOnSamePage */ false);
             List<DetailType> overallDetailsToShow = Collections.emptyList();
             leaderboardSettingsDialogComponent = new LeaderboardSettingsDialogComponent(settings.getManeuverDetailsToShow(),
-                settings.getLegDetailsToShow(), settings.getRaceDetailsToShow(), overallDetailsToShow, raceList,
-                /* select all races by default */ raceList, /* autoExpandPreSelectedRace */ false,
-                /* delayBetweenAutoAdvancesInMilliseconds */ 3000l,
-                /* delayInMilliseconds */ 3000l, stringMessages);
+                settings.getLegDetailsToShow(), settings.getRaceDetailsToShow(), overallDetailsToShow, raceList, 
+                /* select all races by default */ raceList, new ExplicitRaceColumnSelection(),
+                /* autoExpandPreSelectedRace */ false,
+                /* showOverallLeaderboardOnSamePage */ false,
+                /* delayBetweenAutoAdvancesInMilliseconds */ 3000l, /* delayInMilliseconds */ 3000l, stringMessages);
         }
 
         private void updateURL(LeaderboardUrlSettings settings, String leaderboardName) {
@@ -119,36 +121,41 @@ public class LeaderboardUrlConfigurationDialog extends SettingsDialog<Leaderboar
             Validator<LeaderboardUrlSettings> result = new Validator<LeaderboardUrlSettings>() {
                 @Override
                 public String getErrorMessage(LeaderboardUrlSettings settings) {
-                    updateURL(settings, leaderboardName);
-                    return superValidator.getErrorMessage(settings.getLeaderboardSettings());
+                    String errorMessage = superValidator.getErrorMessage(settings.getLeaderboardSettings());
+                    if (errorMessage == null) {
+                        updateURL(settings, leaderboardName);
+                    }
+                    return errorMessage;
                 }
             };
             return result;
         }
 
         private FlowPanel createAdditionalUrlSettingsPanel(DataEntryDialog<?> dialog) {
-            FlowPanel additionalPanel = new FlowPanel();
-            additionalPanel.addStyleName("SettingsDialogComponent");
-            FlowPanel content = new FlowPanel();
-            content.addStyleName("dialogInnerContent");
-            additionalPanel.add(content);
-            content.add(dialog.createHeadline(stringMessages.additionalUrlSettings(), true));
+            FlowPanel urlSettingsPanel = new FlowPanel();
+            urlSettingsPanel.addStyleName("SettingsDialogComponent");
+            urlSettingsPanel.add(dialog.createHeadline(stringMessages.additionalUrlSettings(), true));
+            FlowPanel urlSettingsContent = new FlowPanel();
+            urlSettingsContent.addStyleName("dialogInnerContent");
+            urlSettingsPanel.add(urlSettingsContent);
             embeddedCheckbox = dialog.createCheckbox(stringMessages.embedded());
-            content.add(embeddedCheckbox);
+            urlSettingsContent.add(embeddedCheckbox);
+            autoExpandLastRaceBox = dialog.createCheckbox(stringMessages.expandLastRace());
+            urlSettingsContent.add(autoExpandLastRaceBox);
             showRaceDetailsCheckbox = dialog.createCheckbox(stringMessages.showRaceDetails());
-            content.add(showRaceDetailsCheckbox);
+            urlSettingsContent.add(showRaceDetailsCheckbox);
             autoRefreshCheckbox = dialog.createCheckbox(stringMessages.autoRefresh());
-            content.add(autoRefreshCheckbox);
+            urlSettingsContent.add(autoRefreshCheckbox);
             resultingUrl = new Anchor(stringMessages.leaderboard());
-            content.add(resultingUrl);
-            return additionalPanel;
+            urlSettingsContent.add(resultingUrl);
+            return urlSettingsPanel;
         }
 
         @Override
         public LeaderboardUrlSettings getResult() {
             return new LeaderboardUrlSettings(leaderboardSettingsDialogComponent.getResult(),
                     embeddedCheckbox.getValue(),
-                    showRaceDetailsCheckbox.getValue(), autoRefreshCheckbox.getValue());
+                    showRaceDetailsCheckbox.getValue(), autoRefreshCheckbox.getValue(), autoExpandLastRaceBox.getValue());
         }
 
         @Override

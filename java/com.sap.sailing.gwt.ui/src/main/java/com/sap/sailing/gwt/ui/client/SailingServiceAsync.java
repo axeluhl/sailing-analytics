@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.client;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
 import java.util.LinkedHashMap;
@@ -18,12 +19,13 @@ import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
+import com.sap.sailing.gwt.ui.shared.SwissTimingArchiveConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.BulkScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 import com.sap.sailing.gwt.ui.shared.ControlPointDTO;
 import com.sap.sailing.gwt.ui.shared.CourseDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
-import com.sap.sailing.gwt.ui.shared.RaceBuoysDTO;
+import com.sap.sailing.gwt.ui.shared.RaceCourseMarksDTO;
 import com.sap.sailing.gwt.ui.shared.RaceColumnInSeriesDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
@@ -31,7 +33,7 @@ import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardEntryDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.ManeuverDTO;
-import com.sap.sailing.gwt.ui.shared.MultiCompetitorRaceDataDTO;
+import com.sap.sailing.gwt.ui.shared.CompetitorsRaceDataDTO;
 import com.sap.sailing.gwt.ui.shared.QuickRankDTO;
 import com.sap.sailing.gwt.ui.shared.RaceDTO;
 import com.sap.sailing.gwt.ui.shared.RaceMapDataDTO;
@@ -40,6 +42,7 @@ import com.sap.sailing.gwt.ui.shared.ReplicationStateDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.ScoreCorrectionProviderDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
+import com.sap.sailing.gwt.ui.shared.SwissTimingReplayRaceDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingRaceRecordDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracConfigurationDTO;
@@ -319,16 +322,6 @@ public interface SailingServiceAsync {
     void updateLeaderboardGroup(String oldName, String newName, String description,
             List<String> leaderboardNames, int[] overallLeaderboardDiscardThresholds, ScoringSchemeType overallLeaderboardScoringSchemeType, AsyncCallback<Void> callback);
 
-    /**
-     * Returns the mark passings and the data for the given {@link DetailType} of all competitors in
-     * <code>competitorsQuery</code> in the <code>race</code>, including the first dates in the query.<br />
-     * The Long part in the <code>competitorsQuery</code> defines the time point, from which on the data should be
-     * returned. If this time point is lesser than the start of race, all available data for this competitor is
-     * returned.<br />
-     * Returns <code>null</code>, if <code>race</code> isn't tracked. 
-     */
-    void getCompetitorsRaceData(RegattaAndRaceIdentifier race, List<Pair<Date,CompetitorDTO>> competitorsToLoad, Date toDate, long stepSize,
-            DetailType detailType, AsyncCallback<MultiCompetitorRaceDataDTO> callback);
 
     void setRaceIsKnownToStartUpwind(RegattaAndRaceIdentifier raceIdentifier, boolean raceIsKnownToStartUpwind,
             AsyncCallback<Void> callback);
@@ -367,8 +360,8 @@ public interface SailingServiceAsync {
     
     void createEvent(String eventName, String description, String publicationUrl, boolean isPublic, AsyncCallback<EventDTO> callback);
     
-    void updateEvent(String eventName, VenueDTO venue, String publicationUrl, boolean isPublic, List<String> regattaNames,
-            AsyncCallback<Void> callback);
+    void updateEvent(String eventName, Serializable id, VenueDTO venue, String publicationUrl, boolean isPublic,
+            List<String> regattaNames, AsyncCallback<Void> callback);
 
     void removeRegatta(RegattaIdentifier regattaIdentifier, AsyncCallback<Void> callback);
 
@@ -411,7 +404,7 @@ public interface SailingServiceAsync {
 
     void addFragUrl(String result, AsyncCallback<Void> asyncCallback);
 
-    void getRaceBuoys(RegattaAndRaceIdentifier raceIdentifier, Date date,	AsyncCallback<RaceBuoysDTO> callback);
+    void getRaceCourseMarks(RegattaAndRaceIdentifier raceIdentifier, Date date,	AsyncCallback<RaceCourseMarksDTO> callback);
 
     void addColumnsToLeaderboard(String leaderboardName, List<Pair<String, Boolean>> columnsToAdd,
             AsyncCallback<Void> callback);
@@ -422,4 +415,31 @@ public interface SailingServiceAsync {
 
     void suppressCompetitorInLeaderboard(String leaderboardName, String competitorIdAsString, boolean suppressed, AsyncCallback<Void> asyncCallback);
 
+    void updateLeaderboardColumnFactor(String leaderboardName, String columnName, Double newFactor,
+            AsyncCallback<Void> callback);
+
+    void listSwissTiminigReplayRaces(String swissTimingUrl, AsyncCallback<List<SwissTimingReplayRaceDTO>> asyncCallback);
+
+    void replaySwissTimingRace(RegattaIdentifier regattaIdentifier, SwissTimingReplayRaceDTO replayRace,
+            boolean trackWind, boolean correctWindByDeclination, boolean simulateWithStartTimeNow,
+            AsyncCallback<Void> asyncCallback);
+
+    void getRankedCompetitorsFromBestToWorstAfterEachRaceColumn(String leaderboardName, Date date,
+            AsyncCallback<List<Pair<String, List<CompetitorDTO>>>> callback);
+
+    void getCompetitorsRaceData(RegattaAndRaceIdentifier race, List<CompetitorDTO> competitors, Date from, Date to,
+            long stepSize, DetailType detailType, AsyncCallback<CompetitorsRaceDataDTO> callback);
+
+    /**
+     * Finds out the names of all {@link MetaLeaderboard}s managed by this server that
+     * {@link MetaLeaderboard#getLeaderboards() contain} the leaderboard identified by <code>leaderboardName</code>. The
+     * names of those meta-leaderboards are returned. The list returned is never <code>null</code> but may be empty if no such
+     * leaderboard is found.
+     */
+    void getOverallLeaderboardNamesContaining(String leaderboardName, AsyncCallback<List<String>> asyncCallback);
+
+    void getPreviousSwissTimingArchiveConfigurations(
+            AsyncCallback<List<SwissTimingArchiveConfigurationDTO>> asyncCallback);
+
+    void storeSwissTimingArchiveConfiguration(String swissTimingUrl, AsyncCallback<Void> asyncCallback);
 }

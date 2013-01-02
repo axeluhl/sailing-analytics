@@ -1,10 +1,11 @@
 package com.sap.sailing.domain.test.mock;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.NavigableSet;
 
 import com.sap.sailing.domain.base.BoatClass;
-import com.sap.sailing.domain.base.Buoy;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.RaceColumnListener;
 import com.sap.sailing.domain.base.Regatta;
@@ -154,7 +155,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public DynamicGPSFixTrack<Buoy, GPSFix> getOrCreateTrack(Buoy buoy) {
+    public DynamicGPSFixTrack<Mark, GPSFix> getOrCreateTrack(Mark mark) {
         // TODO Auto-generated method stub
         return null;
     }
@@ -287,6 +288,12 @@ public class MockedTrackedRace implements DynamicTrackedRace {
                     @Override
                     public String getName() {
                         return "A Mocked Test Regatta";
+                    }
+
+                    @Override
+                    public Serializable getId() {
+                        // TODO Auto-generated method stub
+                        return null;
                     }
 
                     @Override
@@ -607,7 +614,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public void recordFix(Buoy buoy, GPSFix fix) {
+    public void recordFix(Mark mark, GPSFix fix) {
         // TODO Auto-generated method stub
         
     }
@@ -672,7 +679,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
 	@Override
-	public Iterable<Buoy> getBuoys() {
+	public Iterable<Mark> getMarks() {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -687,5 +694,17 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     public boolean hasGPSData() {
         // TODO Auto-generated method stub
         return false;
+    }
+
+    @Override
+    public void lockForRead(Iterable<MarkPassing> markPassings) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void unlockAfterRead(Iterable<MarkPassing> markPassings) {
+        // TODO Auto-generated method stub
+        
     }
 }

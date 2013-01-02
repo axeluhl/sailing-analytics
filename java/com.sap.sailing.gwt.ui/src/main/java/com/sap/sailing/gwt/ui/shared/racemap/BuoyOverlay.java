@@ -5,7 +5,7 @@ import com.google.gwt.canvas.dom.client.CssColor;
 import com.google.gwt.maps.client.geom.LatLng;
 import com.google.gwt.maps.client.geom.Point;
 import com.google.gwt.maps.client.overlay.Overlay;
-import com.sap.sailing.gwt.ui.shared.BuoyDTO;
+import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.gwt.ui.shared.PositionDTO;
 
 /**
@@ -14,29 +14,29 @@ import com.sap.sailing.gwt.ui.shared.PositionDTO;
 public class BuoyOverlay extends CanvasOverlay {
 
     /**
-     * The buoy to draw
+     * The mark to draw
      */
-    private BuoyDTO buoy;
+    private MarkDTO mark;
     
     private PositionDTO position;
     
     private double buoyZoneRadiusInMeter;
     
-    public BuoyOverlay(BuoyDTO buoy, double buoyZoneRadiusInMeter) {
+    public BuoyOverlay(MarkDTO mark, double buoyZoneRadiusInMeter) {
         super();
-        this.buoy = buoy;
-        this.position = buoy.position;
+        this.mark = mark;
+        this.position = mark.position;
         this.buoyZoneRadiusInMeter = buoyZoneRadiusInMeter;
     }
 
     @Override
     protected Overlay copy() {
-        return new BuoyOverlay(buoy, buoyZoneRadiusInMeter);
+        return new BuoyOverlay(mark, buoyZoneRadiusInMeter);
     }
 
     @Override
     protected void redraw(boolean force) {
-        if (buoy != null && position != null) {
+        if (mark != null && position != null) {
             LatLng latLngPosition = LatLng.newInstance(position.latDeg, position.lngDeg);
             int buoyZoneRadiusInPixel = calculateRadiusOfBoundingBox(latLngPosition, buoyZoneRadiusInMeter);
             if(buoyZoneRadiusInPixel > 10) {
@@ -64,8 +64,8 @@ public class BuoyOverlay extends CanvasOverlay {
         }
     }
 
-    public BuoyDTO getBuoy() {
-        return buoy;
+    public MarkDTO getBuoy() {
+        return mark;
     }
 
     public void setBuoyPosition(PositionDTO position) {

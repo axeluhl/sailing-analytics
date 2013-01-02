@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.NavigableSet;
 import java.util.SortedSet;
 
-import com.sap.sailing.domain.base.Buoy;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Leg;
@@ -63,10 +63,12 @@ public interface TrackedRace extends Serializable {
      * Determine the race end time is tricky. Boats may sink, stop, not finish, although they started the race. We therefore
      * cannot wait for all boats to reach the finish line.
      * The following rules are used to calculate the endOfRace:
-     * 1. Returns <code>Null</code> if no boat passed the finish line 
-     * 2. Returns time of the last mark passing recorded for the finish line
-     * 3. TODO: Returns the time of the first passing of the finish line + the target window (defined in the competition rules)
-     *    if a target window has been defined for the race 
+     * <ol>
+     *  <li>Returns <code>null</code> if no boat passed the finish line</li>
+     *  <li>Returns time of the last mark passing recorded for the finish line</li>
+     *  <li>TODO: Returns the time of the first passing of the finish line + the target window (defined in the competition rules)
+     *    if a target window has been defined for the race</li>
+     * </ol> 
      */
     TimePoint getEndOfRace();
 
@@ -172,9 +174,10 @@ public interface TrackedRace extends Serializable {
      * that ends with <code>waypoint</code>. The remaining competitors need to be ordered by the advantage line-related
      * distance to the waypoint.
      * 
-     * @return the iterable sequence of {@link MarkPassing}s as described above. To iterate on the resulting collection
-     *         the caller needs to synchronize on the iterable returned because insertions into the underlying
-     *         collection will also synchronize on that collection.
+     * @return the iterable sequence of {@link MarkPassing}s as described above. If the caller wants to iterate on the
+     *         resulting collection, the caller needs to invoke {@link #lockForRead(Iterable)} with the collection
+     *         returned as parameter because insertions into the competitor's mark passing collection will obtain the
+     *         corresponding write lock.
      */
     Iterable<MarkPassing> getMarkPassingsInOrder(Waypoint waypoint);
 
@@ -185,19 +188,19 @@ public interface TrackedRace extends Serializable {
     MarkPassing getMarkPassing(Competitor competitor, Waypoint waypoint);
 
     /**
-     * Yields the track describing <code>buoy</code>'s movement over time; never <code>null</code> because a
-     * new track will be created in case no track was present for <code>buoy</code> so far.
+     * Yields the track describing <code>mark</code>'s movement over time; never <code>null</code> because a
+     * new track will be created in case no track was present for <code>mark</code> so far.
      */
-    GPSFixTrack<Buoy, GPSFix> getOrCreateTrack(Buoy buoy);
+    GPSFixTrack<Mark, GPSFix> getOrCreateTrack(Mark mark);
 
     /**
-     * Retrieves all buoys assigned to the race. They are not necessarily part of the race course.
+     * Retrieves all marks assigned to the race. They are not necessarily part of the race course.
      */
-    Iterable<Buoy> getBuoys();
+    Iterable<Mark> getMarks();
 
     /**
-     * If the <code>waypoint</code> only has one {@link #getBuoys() buoy}, its position at time <code>timePoint</code>
-     * is returned. Otherwise, the center of gravity between the buoys' positions is computed and returned.
+     * If the <code>waypoint</code> only has one {@link #getMarks() mark}, its position at time <code>timePoint</code>
+     * is returned. Otherwise, the center of gravity between the mark positions is computed and returned.
      */
     Position getApproximatePosition(Waypoint waypoint, TimePoint timePoint);
     
@@ -264,15 +267,19 @@ public interface TrackedRace extends Serializable {
 
     /**
      * @return the mark passings for <code>competitor</code> in this race received so far; the mark passing objects are
-     * returned such that their {@link MarkPassing#getWaypoint() waypoints} are ordered in the same way they are ordered
-     * in the race's {@link Course}. Note, that this doesn't necessarily guarantee ascending time points, particularly
-     * if premature mark passings have been detected accidentally as can be the case with some tracking providers such
-     * as TracTrac. If the caller wants to iterate on the resulting collection or construct a {@link SortedSet#headSet(Object)}
-     * or {@link SortedSet#tailSet(Object)} and then iterate over that, the caller needs to synchronize on the
-     * collection returned because insertions into the competitor's mark passing collection will also synchronize
-     * on that collection.
+     *         returned such that their {@link MarkPassing#getWaypoint() waypoints} are ordered in the same way they are
+     *         ordered in the race's {@link Course}. Note, that this doesn't necessarily guarantee ascending time
+     *         points, particularly if premature mark passings have been detected accidentally as can be the case with
+     *         some tracking providers such as TracTrac. If the caller wants to iterate on the resulting collection or
+     *         construct a {@link SortedSet#headSet(Object)} or {@link SortedSet#tailSet(Object)} and then iterate over
+     *         that, the caller needs to invoke {@link #lockForRead(Iterable)} with the collection returned as parameter
+     *         because insertions into the competitor's mark passing collection will obtain the corresponding write lock.
      */
     NavigableSet<MarkPassing> getMarkPassings(Competitor competitor);
+    
+    void lockForRead(Iterable<MarkPassing> markPassings);
+    
+    void unlockAfterRead(Iterable<MarkPassing> markPassings);
 
     /**
      * Time stamp that the event received last from the underlying push service carried on it.
@@ -346,7 +353,6 @@ public interface TrackedRace extends Serializable {
     List<GPSFixMoving> approximate(Competitor competitor, Distance maxDistance, TimePoint from, TimePoint to);
 
     /**
-     * @param waitForLatest TODO
      * @return a non-<code>null</code> but perhaps empty list of the maneuvers that <code>competitor</code> performed in
      *         this race between <code>from</code> and <code>to</code>.
      */

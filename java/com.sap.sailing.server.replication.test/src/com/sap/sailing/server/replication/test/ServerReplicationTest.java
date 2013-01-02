@@ -8,6 +8,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.UUID;
 
 import org.junit.Test;
 
@@ -79,26 +80,26 @@ public class ServerReplicationTest extends AbstractServerReplicationTest {
         final DomainFactory masterDomainFactory = DomainFactory.INSTANCE;
         BoatClass boatClass = masterDomainFactory.getOrCreateBoatClass(boatClassName);
         final String baseEventName = "Test Event";
-        AddDefaultRegatta addEventOperation = new AddDefaultRegatta(baseEventName, boatClassName);
-        Regatta regatta = master.apply(addEventOperation);
+        AddDefaultRegatta addRegattaOperation = new AddDefaultRegatta(baseEventName, boatClassName, UUID.randomUUID());
+        Regatta regatta = master.apply(addRegattaOperation);
         final String raceName = "Test Race";
         final CourseImpl masterCourse = new CourseImpl("Test Course", new ArrayList<Waypoint>());
         RaceDefinition race = new RaceDefinitionImpl(raceName, masterCourse, boatClass,
                 new ArrayList<Competitor>());
         AddRaceDefinition addRaceOperation = new AddRaceDefinition(new RegattaName(regatta.getName()), race);
         master.apply(addRaceOperation);
-        masterCourse.addWaypoint(0, masterDomainFactory.createWaypoint(masterDomainFactory.getOrCreateBuoy("Buoy1")));
-        masterCourse.addWaypoint(1, masterDomainFactory.createWaypoint(masterDomainFactory.getOrCreateBuoy("Buoy2")));
-        masterCourse.addWaypoint(2, masterDomainFactory.createWaypoint(masterDomainFactory.getOrCreateBuoy("Buoy3")));
+        masterCourse.addWaypoint(0, masterDomainFactory.createWaypoint(masterDomainFactory.getOrCreateMark("Mark1")));
+        masterCourse.addWaypoint(1, masterDomainFactory.createWaypoint(masterDomainFactory.getOrCreateMark("Mark2")));
+        masterCourse.addWaypoint(2, masterDomainFactory.createWaypoint(masterDomainFactory.getOrCreateMark("Mark3")));
         masterCourse.removeWaypoint(1);
-        Thread.sleep(1000); // wait 1s for JMS to deliver the message and the message to be applied
+        Thread.sleep(3000); // wait 1s for JMS to deliver the message and the message to be applied
         Regatta replicaEvent = replica.getRegatta(new RegattaName(regatta.getName()));
         assertNotNull(replicaEvent);
         RaceDefinition replicaRace = replicaEvent.getRaceByName(raceName);
         assertNotNull(replicaRace);
         Course replicaCourse = replicaRace.getCourse();
         assertEquals(2, Util.size(replicaCourse.getWaypoints()));
-        assertEquals("Buoy1", replicaCourse.getFirstWaypoint().getBuoys().iterator().next().getName());
-        assertEquals("Buoy3", replicaCourse.getLastWaypoint().getBuoys().iterator().next().getName());
+        assertEquals("Mark1", replicaCourse.getFirstWaypoint().getMarks().iterator().next().getName());
+        assertEquals("Mark3", replicaCourse.getLastWaypoint().getMarks().iterator().next().getName());
     }
 }

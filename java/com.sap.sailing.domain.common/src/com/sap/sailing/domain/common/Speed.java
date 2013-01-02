@@ -42,6 +42,10 @@ public interface Speed extends Comparable<Speed>, Serializable {
             return Distance.NULL;
         }
         
+        @Override
+        public String toString() {
+            return "0kn";
+        }
     };
     
     double getKnots();
@@ -58,5 +62,5 @@ public interface Speed extends Comparable<Speed>, Serializable {
      * amount then so will the resulting distance.
      */
     Distance travel(TimePoint from, TimePoint to);
-
+    
 }

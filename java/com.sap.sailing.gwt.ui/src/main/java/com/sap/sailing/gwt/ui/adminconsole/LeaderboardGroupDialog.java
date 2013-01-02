@@ -25,21 +25,55 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 
-public class LeaderboardGroupDialog extends DataEntryDialog<LeaderboardGroupDTO> {
-    
+public class LeaderboardGroupDialog extends DataEntryDialog<LeaderboardGroupDialog.LeaderboardGroupDescriptor> {
     protected StringMessages stringMessages;
-    protected LeaderboardGroupDTO group;
-    
     protected TextBox nameEntryField;
     protected TextArea descriptionEntryField;
-    protected CheckBox displayGroupsInReverseOrderCheckBox;
+    protected CheckBox displayLeaderboardsInReverseOrderCheckBox;
     protected CheckBox useOverallLeaderboardCheckBox;
-
     private Panel overallLeaderboardConfigPanel;
     private LongBox[] overallLeaderboardDiscardThresholdFields;
     private ListBox overallLeaderboardScoringSchemeListBox;
     
-    protected static class LeaderboardGroupParameterValidator implements Validator<LeaderboardGroupDTO> {
+    public static class LeaderboardGroupDescriptor {
+        private final String name;
+        private final String description;
+        private final boolean displayLeaderboardsInReverseOrder;
+        private final boolean useOverallLeaderboard;
+        private final int[] overallLeaderboardDiscardThresholds;
+        private final ScoringSchemeType overallLeaderboardScoringSchemeType;
+        public LeaderboardGroupDescriptor(String name, String description, boolean displayLeaderboardsInReverseOrder,
+                boolean useOverallLeaderboard, int[] overallLeaderboardDiscardThresholds,
+                ScoringSchemeType overallLeaderboardScoringSchemeType) {
+            super();
+            this.name = name;
+            this.description = description;
+            this.displayLeaderboardsInReverseOrder = displayLeaderboardsInReverseOrder;
+            this.useOverallLeaderboard = useOverallLeaderboard;
+            this.overallLeaderboardDiscardThresholds = overallLeaderboardDiscardThresholds;
+            this.overallLeaderboardScoringSchemeType = overallLeaderboardScoringSchemeType;
+        }
+        public String getName() {
+            return name;
+        }
+        public String getDescription() {
+            return description;
+        }
+        public boolean isDisplayLeaderboardsInReverseOrder() {
+            return displayLeaderboardsInReverseOrder;
+        }
+        public boolean isUseOverallLeaderboard() {
+            return useOverallLeaderboard;
+        }
+        public int[] getOverallLeaderboardDiscardThresholds() {
+            return overallLeaderboardDiscardThresholds;
+        }
+        public ScoringSchemeType getOverallLeaderboardScoringSchemeType() {
+            return overallLeaderboardScoringSchemeType;
+        }
+    }
+    
+    protected static class LeaderboardGroupParameterValidator implements Validator<LeaderboardGroupDescriptor> {
         private final StringMessages stringMessages;
         private final ArrayList<LeaderboardGroupDTO> existingGroups;
         
@@ -50,14 +84,14 @@ public class LeaderboardGroupDialog extends DataEntryDialog<LeaderboardGroupDTO>
         }
 
         @Override
-        public String getErrorMessage(LeaderboardGroupDTO groupToValidate) {
+        public String getErrorMessage(LeaderboardGroupDescriptor groupToValidate) {
             String errorMessage = null;
-            boolean nameNotEmpty = groupToValidate.name != null && groupToValidate.name.length() > 0;
-            boolean descrNotEmpty = groupToValidate.description != null && groupToValidate.description.length() > 0;
+            boolean nameNotEmpty = groupToValidate.getName() != null && groupToValidate.getName().length() > 0;
+            boolean descrNotEmpty = groupToValidate.getDescription() != null && groupToValidate.getDescription().length() > 0;
             
             boolean unique = true;
             for (LeaderboardGroupDTO group : existingGroups) {
-                if (group.name.equals(groupToValidate.name)) {
+                if (group.name.equals(groupToValidate.getName())) {
                     unique = false;
                     break;
                 }
@@ -90,12 +124,11 @@ public class LeaderboardGroupDialog extends DataEntryDialog<LeaderboardGroupDTO>
     }
 
     public LeaderboardGroupDialog(LeaderboardGroupDTO group, StringMessages stringMessages,
-            DialogCallback<LeaderboardGroupDTO> callback, Collection<LeaderboardGroupDTO> existingLeaderboardGroups) {
+            DialogCallback<LeaderboardGroupDescriptor> callback, Collection<LeaderboardGroupDTO> existingLeaderboardGroups) {
         super(stringMessages.leaderboardGroup(), null, stringMessages.ok(), stringMessages.cancel(),
                 new LeaderboardGroupParameterValidator(stringMessages, existingLeaderboardGroups), callback);
         this.stringMessages = stringMessages;
-        this.group = group;
-        displayGroupsInReverseOrderCheckBox = createCheckbox(stringMessages.displayGroupsInReverseOrder());
+        displayLeaderboardsInReverseOrderCheckBox = createCheckbox(stringMessages.displayGroupsInReverseOrder());
         useOverallLeaderboardCheckBox = createCheckbox(stringMessages.useOverallLeaderboard());
         Grid formGrid = new Grid(3,2);
         formGrid.setCellSpacing(3);
@@ -124,20 +157,14 @@ public class LeaderboardGroupDialog extends DataEntryDialog<LeaderboardGroupDTO>
     }
 
     @Override
-    protected LeaderboardGroupDTO getResult() {
-        group.name = nameEntryField.getText();
-        group.description = descriptionEntryField.getText();
-        group.displayGroupsInReverseOrder = displayGroupsInReverseOrderCheckBox.getValue();
-        if (useOverallLeaderboardCheckBox.getValue()) {
-            group.setOverallLeaderboardDiscardThresholds(AbstractLeaderboardDialog
-                    .getDiscardThresholds(getOverallLeaderboardDiscardThresholdFields()));
-            group.setOverallLeaderboardScoringSchemeType(AbstractLeaderboardDialog.getSelectedScoringSchemeType(
-                    overallLeaderboardScoringSchemeListBox, stringMessages));
-        } else {
-            group.setOverallLeaderboardDiscardThresholds(null);
-            group.setOverallLeaderboardScoringSchemeType(null);
-        }
-        return group;
+    protected LeaderboardGroupDescriptor getResult() {
+        return new LeaderboardGroupDescriptor(nameEntryField.getText(), descriptionEntryField.getText(),
+                displayLeaderboardsInReverseOrderCheckBox.getValue(),
+                useOverallLeaderboardCheckBox.getValue(),
+                useOverallLeaderboardCheckBox.getValue() ? AbstractLeaderboardDialog
+                        .getDiscardThresholds(getOverallLeaderboardDiscardThresholdFields()) : null,
+                        useOverallLeaderboardCheckBox.getValue() ? AbstractLeaderboardDialog.getSelectedScoringSchemeType(
+                                overallLeaderboardScoringSchemeListBox, stringMessages) : null);
     }
     
     @Override
@@ -154,27 +181,31 @@ public class LeaderboardGroupDialog extends DataEntryDialog<LeaderboardGroupDTO>
         descriptionEntryField.setVisibleLines(6);
         descriptionEntryField.getElement().getStyle().setProperty("resize", "none");
         panel.add(descriptionEntryField);
-        panel.add(displayGroupsInReverseOrderCheckBox);
+        panel.add(displayLeaderboardsInReverseOrderCheckBox);
         panel.add(useOverallLeaderboardCheckBox);
         useOverallLeaderboardCheckBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
             @Override
             public void onValueChange(ValueChangeEvent<Boolean> event) {
-                if (event.getValue()) {
-                    useOverallLeaderboard(panel);
-                } else {
-                    dontUseOverallLeaderboard(panel);
-                }
+                updateOverallLeaderboardDetailsVisibility(event.getValue(), panel);
             }
-
         });
+        updateOverallLeaderboardDetailsVisibility(useOverallLeaderboardCheckBox.getValue(), panel);
         return panel;
     }
 
-    protected void useOverallLeaderboard(final VerticalPanel panel) {
+    private void updateOverallLeaderboardDetailsVisibility(boolean overallLeaderboardDetailsVisible, Panel panel) {
+        if (overallLeaderboardDetailsVisible) {
+            useOverallLeaderboard(panel);
+        } else {
+            dontUseOverallLeaderboard(panel);
+        }
+    }
+
+    protected void useOverallLeaderboard(final Panel panel) {
         panel.add(overallLeaderboardConfigPanel);
     }
     
-    protected void dontUseOverallLeaderboard(final VerticalPanel panel) {
+    protected void dontUseOverallLeaderboard(final Panel panel) {
         panel.remove(overallLeaderboardConfigPanel);
     }
 

@@ -1,0 +1,466 @@
+package com.sap.sailing.gwt.ui.adminconsole;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.KeyUpEvent;
+import com.google.gwt.event.dom.client.KeyUpHandler;
+import com.google.gwt.user.cellview.client.CellTable;
+import com.google.gwt.user.cellview.client.Column;
+import com.google.gwt.user.cellview.client.ColumnSortEvent;
+import com.google.gwt.user.cellview.client.ColumnSortEvent.Handler;
+import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
+import com.google.gwt.user.cellview.client.TextColumn;
+import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.CaptionPanel;
+import com.google.gwt.user.client.ui.CheckBox;
+import com.google.gwt.user.client.ui.Grid;
+import com.google.gwt.user.client.ui.HasVerticalAlignment;
+import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.view.client.ListDataProvider;
+import com.google.gwt.view.client.MultiSelectionModel;
+import com.sap.sailing.domain.common.RegattaIdentifier;
+import com.sap.sailing.domain.common.RegattaName;
+import com.sap.sailing.gwt.ui.client.ErrorReporter;
+import com.sap.sailing.gwt.ui.client.RaceSelectionModel;
+import com.sap.sailing.gwt.ui.client.RegattaRefresher;
+import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.shared.RegattaDTO;
+import com.sap.sailing.gwt.ui.shared.SwissTimingArchiveConfigurationDTO;
+import com.sap.sailing.gwt.ui.shared.SwissTimingReplayRaceDTO;
+
+/**
+ * Allows the user to start and stop tracking of events, regattas and races using the SwissTiming connector.
+ * Inspired by TracTracEventManagementPanel  
+ * 
+ * @author Jens Rommel (D047974)
+ * 
+ */
+public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPanel {
+    private final ErrorReporter errorReporter;
+    private final TextBox filterEventsTextbox;
+    private final ListDataProvider<SwissTimingReplayRaceDTO> raceList;
+    private final CellTable<SwissTimingReplayRaceDTO> raceTable;
+    private final Map<String, SwissTimingArchiveConfigurationDTO> previousConfigurations;
+    private final ListBox previousConfigurationsComboBox;
+    private final TextBox jsonUrlBox;
+    private final Grid grid;
+    private final List<SwissTimingReplayRaceDTO> availableSwissTimingRaces;
+    private Iterable<RegattaDTO> allRegattas;
+    private final ListBox regattaListBox;
+
+    public SwissTimingReplayConnectorPanel(final SailingServiceAsync sailingService, ErrorReporter errorReporter,
+            RegattaRefresher regattaRefresher, StringMessages stringMessages) {
+        super(sailingService, regattaRefresher, errorReporter, new RaceSelectionModel(), stringMessages);
+        this.errorReporter = errorReporter;
+        availableSwissTimingRaces = new ArrayList<SwissTimingReplayRaceDTO>();
+        previousConfigurationsComboBox = new ListBox();
+        previousConfigurationsComboBox.addChangeHandler(new ChangeHandler() {
+            @Override
+            public void onChange(ChangeEvent event) {
+                updateJsonUrlFromSelectedPreviousConfiguration();
+            }
+        });
+        previousConfigurations = new HashMap<String, SwissTimingArchiveConfigurationDTO>();
+        getConnectionHistory();
+        VerticalPanel mainPanel = new VerticalPanel();
+        this.setWidget(mainPanel);
+        mainPanel.setWidth("100%");
+        
+        CaptionPanel captionPanelConnections = new CaptionPanel(stringMessages.connections());
+        mainPanel.add(captionPanelConnections);
+
+        VerticalPanel verticalPanel = new VerticalPanel();
+        
+        captionPanelConnections.setContentWidget(verticalPanel);
+        captionPanelConnections.setStyleName("bold");
+        
+        verticalPanel.setWidth("100%");
+        
+        grid = new Grid(4, 2);
+        verticalPanel.add(grid);
+        verticalPanel.setCellWidth(grid, "100%");
+
+        Label jsonUrlLabel = new Label(stringMessages.jsonUrl());
+        grid.setWidget(0, 0, jsonUrlLabel);
+        grid.setWidget(1, 0, previousConfigurationsComboBox);
+        Label connection = new Label(stringMessages.historyOfConnections());
+        grid.setWidget(2, 0, connection);
+        jsonUrlBox = new TextBox();
+        grid.setWidget(3, 0, jsonUrlBox);
+        Button btnListRaces = new Button(stringMessages.listRaces());
+        grid.setWidget(3, 1, btnListRaces);
+        btnListRaces.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                fillRaces(sailingService);
+            }
+        });
+        
+        TextColumn<SwissTimingReplayRaceDTO> regattaNameColumn = new TextColumn<SwissTimingReplayRaceDTO>() {
+            @Override
+            public String getValue(SwissTimingReplayRaceDTO object) {
+                return object.rsc;
+            }
+        };
+        TextColumn<SwissTimingReplayRaceDTO> raceNameColumn = new TextColumn<SwissTimingReplayRaceDTO>() {
+            @Override
+            public String getValue(SwissTimingReplayRaceDTO object) {
+                return object.name;
+            }
+        };
+        TextColumn<SwissTimingReplayRaceDTO> raceStartTrackingColumn = new TextColumn<SwissTimingReplayRaceDTO>() {
+            @Override
+            public String getValue(SwissTimingReplayRaceDTO object) {
+                return object.startTime == null ? "" : dateFormatter.render(object.startTime) + " " + timeFormatter.render(object.startTime);
+            }
+        };
+        TextColumn<SwissTimingReplayRaceDTO> boatClassNamesColumn = new TextColumn<SwissTimingReplayRaceDTO>() {
+            @Override
+            public String getValue(SwissTimingReplayRaceDTO object) {
+                return object.boat_class;
+            }
+
+        };
+        
+        HorizontalPanel racesSplitPanel = new HorizontalPanel();
+        mainPanel.add(racesSplitPanel);
+        
+        CaptionPanel racesCaptionPanel = new CaptionPanel(stringMessages.trackableRaces());
+        racesSplitPanel.add(racesCaptionPanel);
+        racesCaptionPanel.setWidth("50%");
+
+        CaptionPanel trackedRacesCaptionPanel = new CaptionPanel(stringMessages.trackedRaces());
+        racesSplitPanel.add(trackedRacesCaptionPanel);
+        trackedRacesCaptionPanel.setWidth("50%");
+
+        VerticalPanel racesPanel = new VerticalPanel();
+        racesCaptionPanel.setContentWidget(racesPanel);
+        racesCaptionPanel.setStyleName("bold");
+
+        VerticalPanel trackedRacesPanel = new VerticalPanel();
+        trackedRacesPanel.setWidth("100%");
+        trackedRacesCaptionPanel.setContentWidget(trackedRacesPanel);
+        trackedRacesCaptionPanel.setStyleName("bold");
+
+        // text box for filtering the cell table
+        // the regatta selection for a tracked race
+        HorizontalPanel regattaPanel = new HorizontalPanel();
+        racesPanel.add(regattaPanel);
+        Label lblRegattas = new Label("Regatta used for the tracked race:");
+        lblRegattas.setWordWrap(false);
+        regattaPanel.setCellVerticalAlignment(lblRegattas, HasVerticalAlignment.ALIGN_MIDDLE);
+        regattaPanel.setSpacing(5);
+        regattaPanel.add(lblRegattas);
+        regattaListBox = new ListBox();
+        regattaPanel.add(regattaListBox);
+        regattaPanel.setCellVerticalAlignment(regattaListBox, HasVerticalAlignment.ALIGN_MIDDLE);
+        
+        HorizontalPanel filterPanel = new HorizontalPanel();
+        filterPanel.setSpacing(5);
+        racesPanel.add(filterPanel);
+        
+        Label lblFilterEvents = new Label(stringMessages.filterRacesByName()+ ":");
+        filterPanel.add(lblFilterEvents);
+        filterPanel.setCellVerticalAlignment(lblFilterEvents, HasVerticalAlignment.ALIGN_MIDDLE);
+        
+        filterEventsTextbox = new TextBox();
+        filterEventsTextbox.addKeyUpHandler(new KeyUpHandler() {
+            @Override
+            public void onKeyUp(KeyUpEvent event) {
+                fillRaceListFromAvailableRacesApplyingFilter(SwissTimingReplayConnectorPanel.this.filterEventsTextbox.getText());
+            }
+        });
+        filterPanel.add(filterEventsTextbox);
+        HorizontalPanel racesHorizontalPanel = new HorizontalPanel();
+        racesPanel.add(racesHorizontalPanel);
+        VerticalPanel trackPanel = new VerticalPanel();
+        trackPanel.setStyleName("paddedPanel");
+        raceNameColumn.setSortable(true);
+        raceStartTrackingColumn.setSortable(true);
+        boatClassNamesColumn.setSortable(true);
+        AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
+        raceTable = new CellTable<SwissTimingReplayRaceDTO>(/* pageSize */ 10000, tableRes);
+        raceTable.addColumn(raceNameColumn, stringMessages.race());
+        raceTable.addColumn(regattaNameColumn, "RSC");
+        raceTable.addColumn(boatClassNamesColumn, stringMessages.boatClass());
+        raceTable.addColumn(raceStartTrackingColumn, stringMessages.startTime());
+        raceTable.setWidth("300px");
+        raceTable.setSelectionModel(new MultiSelectionModel<SwissTimingReplayRaceDTO>() {});
+
+        racesHorizontalPanel.add(raceTable);
+        racesHorizontalPanel.add(trackPanel);
+
+        raceList = new ListDataProvider<SwissTimingReplayRaceDTO>();
+        raceList.addDataDisplay(raceTable);
+        Handler columnSortHandler = getRaceTableColumnSortHandler(raceList.getList(), raceNameColumn, boatClassNamesColumn, raceStartTrackingColumn);
+        raceTable.addColumnSortHandler(columnSortHandler);
+
+        Label lblTrackSettings = new Label(stringMessages.trackNewEvent());
+        trackPanel.add(lblTrackSettings);
+        
+        final CheckBox trackWindCheckbox = new CheckBox(stringMessages.trackWind());
+        trackWindCheckbox.setWordWrap(false);
+        trackWindCheckbox.setValue(true);
+        trackPanel.add(trackWindCheckbox);
+
+        final CheckBox declinationCheckbox = new CheckBox(stringMessages.declinationCheckbox());
+        declinationCheckbox.setWordWrap(false);
+        declinationCheckbox.setValue(true);
+        trackPanel.add(declinationCheckbox);
+        
+        final CheckBox simulateWithStartTimeNow = new CheckBox(stringMessages.simulateWithStartTimeNow());
+        simulateWithStartTimeNow.setWordWrap(false);
+        simulateWithStartTimeNow.setValue(false);
+        trackPanel.add(simulateWithStartTimeNow);
+        
+        trackedRacesPanel.add(trackedRacesListComposite);
+
+        HorizontalPanel racesButtonPanel = new HorizontalPanel();
+        racesPanel.add(racesButtonPanel);
+
+        Button btnTrack = new Button(stringMessages.startTracking());
+        racesButtonPanel.add(btnTrack);
+        racesButtonPanel.setSpacing(10);
+        btnTrack.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                trackSelectedRaces(trackWindCheckbox.getValue(), declinationCheckbox.getValue(), simulateWithStartTimeNow.getValue());
+            }
+        });
+
+    }
+
+    private String getBoatClassNamesAsString(SwissTimingReplayRaceDTO object) {
+        return object.boat_class;
+    }
+
+    private ListHandler<SwissTimingReplayRaceDTO> getRaceTableColumnSortHandler(List<SwissTimingReplayRaceDTO> raceRecords,
+            Column<SwissTimingReplayRaceDTO, ?> nameColumn, Column<SwissTimingReplayRaceDTO, ?> boatClassColumn,
+            Column<SwissTimingReplayRaceDTO, ?> startTimeColumn) {
+        ListHandler<SwissTimingReplayRaceDTO> result = new ListHandler<SwissTimingReplayRaceDTO>(raceRecords);
+        result.setComparator(nameColumn, new Comparator<SwissTimingReplayRaceDTO>() {
+            @Override
+            public int compare(SwissTimingReplayRaceDTO o1, SwissTimingReplayRaceDTO o2) {
+                return o1.name.compareTo(o2.name);
+            }
+        });
+        result.setComparator(boatClassColumn, new Comparator<SwissTimingReplayRaceDTO>() {
+            @Override
+            public int compare(SwissTimingReplayRaceDTO o1, SwissTimingReplayRaceDTO o2) {
+                return getBoatClassNamesAsString(o1).compareTo(getBoatClassNamesAsString(o2));
+            }
+        });
+        result.setComparator(startTimeColumn, new Comparator<SwissTimingReplayRaceDTO>() {
+            @Override
+            public int compare(SwissTimingReplayRaceDTO o1, SwissTimingReplayRaceDTO o2) {
+                return o1.startTime == null ? -1 : o2.startTime == null ? 1 : o1.startTime
+                        .compareTo(o2.startTime);
+            }
+        });
+        return result;
+    }
+
+    private void getConnectionHistory() {
+        sailingService.getPreviousSwissTimingArchiveConfigurations(new AsyncCallback<List<SwissTimingArchiveConfigurationDTO>>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                errorReporter.reportError("Remote Procedure Call getPreviousConfigurations() - Failure: "
+                        + caught.getMessage());
+            }
+
+            @Override
+            public void onSuccess(List<SwissTimingArchiveConfigurationDTO> result) {
+                previousConfigurationsComboBox.clear();
+                previousConfigurations.clear();
+                for (SwissTimingArchiveConfigurationDTO configEntry : result) {
+                    String name = configEntry.getJsonUrl();
+                    previousConfigurations.put(name, configEntry);
+                    previousConfigurationsComboBox.addItem(name);
+                }
+                updateJsonUrlFromSelectedPreviousConfiguration();
+            }
+        });
+    }
+
+    private void fillRaces(final SailingServiceAsync sailingService) {
+        final String swissTimingJsonUrl = jsonUrlBox.getValue();
+        sailingService.listSwissTiminigReplayRaces(swissTimingJsonUrl, new AsyncCallback<List<SwissTimingReplayRaceDTO>>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                SwissTimingReplayConnectorPanel.this.errorReporter.reportError("Error trying to list SwissTiming races: "
+                        + caught.getMessage());
+            }
+
+            @Override
+            public void onSuccess(final List<SwissTimingReplayRaceDTO> races) {
+                availableSwissTimingRaces.clear();
+                availableSwissTimingRaces.addAll(races);
+                raceList.getList().clear();
+                raceList.getList().addAll(availableSwissTimingRaces);
+                filterEventsTextbox.setText(null);
+                // store a successful configuration in the database for later retrieval
+                sailingService.storeSwissTimingArchiveConfiguration(swissTimingJsonUrl,
+                        new AsyncCallback<Void>() {
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                errorReporter.reportError("Exception trying to store configuration in DB: "
+                                        + caught.getMessage());
+                            }
+
+                            @Override
+                            public void onSuccess(Void voidResult) {
+                                // refresh list of previous configurations
+                                SwissTimingArchiveConfigurationDTO stConfig = new SwissTimingArchiveConfigurationDTO(swissTimingJsonUrl);
+                                if (previousConfigurations.put(stConfig.getJsonUrl(), stConfig) == null) {
+                                    previousConfigurationsComboBox.addItem(stConfig.getJsonUrl());
+                                }
+                            }
+                        });
+            }
+        });
+    }
+
+    private boolean checkBoatClassMatch(SwissTimingReplayRaceDTO swissTimingRaceRecord, RegattaDTO selectedRegatta) {
+        String boatClassName = swissTimingRaceRecord.boat_class;
+        if (boatClassName != null) {
+            if (selectedRegatta == null) {
+                // in case no regatta has been selected we check if there would be a matching regatta
+                for (RegattaDTO regatta : allRegattas) {
+                    if (boatClassName.equalsIgnoreCase(regatta.boatClass.name)) {
+                        return false;
+                    }
+                }
+            } else {
+                if (!boatClassName.equalsIgnoreCase(selectedRegatta.boatClass.name)) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+    
+    private void trackSelectedRaces(boolean trackWind, boolean correctWindByDeclination, final boolean simulateWithStartTimeNow) {
+        RegattaDTO selectedRegatta = getSelectedRegatta();
+        RegattaIdentifier regattaIdentifier = null;
+        if (selectedRegatta != null) {
+            regattaIdentifier = new RegattaName(selectedRegatta.name);
+        }
+        
+        // Check if the assigned regatta makes sense
+        List<SwissTimingReplayRaceDTO> racesWithNotMatchingBoatClasses = new ArrayList<SwissTimingReplayRaceDTO>();  
+        for (SwissTimingReplayRaceDTO replayRace : raceList.getList()) {
+            if (raceTable.getSelectionModel().isSelected(replayRace)) {
+                if (!checkBoatClassMatch(replayRace, selectedRegatta)) {
+                    racesWithNotMatchingBoatClasses.add(replayRace);
+                }
+            }
+        }
+
+        if (racesWithNotMatchingBoatClasses.size() > 0) {
+            String warningText = "WARNING\n";
+            if (selectedRegatta != null) {
+                warningText += stringMessages.boatClassDoesNotMatchSelectedRegatta(selectedRegatta.boatClass.name, selectedRegatta.name);
+            } else {
+                warningText += stringMessages.regattaExistForSelectedBoatClass();
+            }
+            warningText += "\n\n";
+            warningText += stringMessages.races() + "\n";
+            for (SwissTimingReplayRaceDTO record : racesWithNotMatchingBoatClasses) {
+                warningText += record.name + "\n";
+            }
+            if(!Window.confirm(warningText)) {
+                return;
+            }
+        }
+        
+        for (final SwissTimingReplayRaceDTO replayRace : raceList.getList()) {
+            if (raceTable.getSelectionModel().isSelected(replayRace)) {
+                sailingService.replaySwissTimingRace(regattaIdentifier, replayRace, trackWind, 
+                        correctWindByDeclination, simulateWithStartTimeNow, new AsyncCallback<Void>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        errorReporter.reportError("Error trying to register race " + replayRace.name + " for tracking: "
+                                + caught.getMessage()+". Check live/stored URI syntax.");
+                    }
+
+                    @Override
+                    public void onSuccess(Void result) {
+                        regattaRefresher.fillRegattas();
+                    }
+                });
+            }
+        }
+    }
+
+    @Override
+    public void fillRegattas(List<RegattaDTO> regattas) {
+        trackedRacesListComposite.fillRegattas(regattas);
+        
+        RegattaDTO oldRegattaSelection = getSelectedRegatta();
+        regattaListBox.clear();
+        regattaListBox.addItem(stringMessages.noRegatta());
+        if (!regattas.isEmpty()) {
+            for (RegattaDTO regatta : regattas) {
+                regattaListBox.addItem(regatta.name);
+                if(oldRegattaSelection != null && oldRegattaSelection.name.equals(regatta.name)) {
+                    regattaListBox.setSelectedIndex(regattaListBox.getItemCount()-1);
+                }
+            }
+        }
+        allRegattas = new ArrayList<RegattaDTO>(regattas);
+    }
+
+    public RegattaDTO getSelectedRegatta() {
+        RegattaDTO result = null;
+        int selIndex = regattaListBox.getSelectedIndex();
+        if(selIndex > 0) { // the zero index represents the 'no selection' text
+            String itemText = regattaListBox.getItemText(selIndex);
+            for(RegattaDTO regattaDTO: allRegattas) {
+                if(regattaDTO.name.equals(itemText)) {
+                    result = regattaDTO;
+                    break;
+                }
+            }
+        }
+        return result;
+    }
+
+    private void fillRaceListFromAvailableRacesApplyingFilter(String text) {
+        List<String> wordsToFilter = Arrays.asList(text.split(" "));
+        raceList.getList().clear();
+        if (text != null && !text.isEmpty()) {
+            for (SwissTimingReplayRaceDTO replayRace : availableSwissTimingRaces) {
+                boolean found = textContainsStringsToCheck(wordsToFilter, replayRace.boat_class, replayRace.flight_number, replayRace.name, replayRace.race_id);
+                if (found) {
+                    raceList.getList().add(replayRace);
+                }
+            }
+        } else {
+            raceList.getList().addAll(availableSwissTimingRaces);
+        }
+        // now sort again according to selected criterion
+        ColumnSortEvent.fire(raceTable, raceTable.getColumnSortList());
+    }
+
+    private void updateJsonUrlFromSelectedPreviousConfiguration() {
+        jsonUrlBox.setText(previousConfigurationsComboBox.getItemText(previousConfigurationsComboBox.getSelectedIndex()));
+    }
+
+}

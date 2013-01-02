@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.ui.leaderboard;
 
 import java.util.Set;
 
+import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings.RaceColumnSelectionStrategies;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.RaceColumnDTO;
 
@@ -46,4 +47,8 @@ public interface RaceColumnSelection {
      * selection shall take this as an opportunity to make adjustments to the selection that are to happen automatically. 
      */
     void autoUpdateRaceColumnSelectionForUpdatedLeaderboard(LeaderboardDTO oldLeaderboard, LeaderboardDTO newLeaderboard);
+    
+    RaceColumnSelectionStrategies getType();
+    
+    Integer getNumberOfLastRaceColumnsToShow();
 }

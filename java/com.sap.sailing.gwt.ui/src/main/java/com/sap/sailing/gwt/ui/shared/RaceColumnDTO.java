@@ -13,11 +13,28 @@ import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 
 public class RaceColumnDTO extends NamedDTO implements IsSerializable {
+    private static final long IS_LIVE_GRACE_PERIOD_IN_MILLIS = 3 * 60 * 1000; // three minutes
+    
     private boolean medalRace;
     private List<FleetDTO> fleets;
     private Map<FleetDTO, RegattaAndRaceIdentifier> trackedRaceIdentifiersPerFleet;
     private Map<FleetDTO, RaceDTO> racesPerFleet;
     private Boolean isValidInTotalScore;
+    private Double explicitFactor;
+    
+    /**
+     * If the column has tracked races attached, this field tells the latest time point when one of those races was
+     * still running. It is necessary for the race to have GPS and wind data for the time point to be recorded here. If
+     * a tracked race has started but hasn't ended yet, the query time point is used for this field if it is after the
+     * time point when that race started, assuming that at the query time the race was still running. If the race hasn't
+     * started at the query time, the race isn't considered for setting this field. If the end of the race is known, it
+     * is used for this field if later than any other value set for this field.
+     * <p>
+     * 
+     * If no tracked race is attached to this column or none of the tracked races attached has started at the query time
+     * point, this field is <code>null</code>.
+     */
+    private Map<FleetDTO, Date> whenLastTrackedRaceWasLiveByFleet;
 
     RaceColumnDTO() {} // for GWT serialization
     
@@ -26,6 +43,7 @@ public class RaceColumnDTO extends NamedDTO implements IsSerializable {
         trackedRaceIdentifiersPerFleet = new HashMap<FleetDTO, RegattaAndRaceIdentifier>();
         racesPerFleet = new HashMap<FleetDTO, RaceDTO>();
         fleets = new ArrayList<FleetDTO>();
+        whenLastTrackedRaceWasLiveByFleet = new HashMap<FleetDTO, Date>();
     }
     
     public boolean isValidInTotalScore() {
@@ -36,6 +54,14 @@ public class RaceColumnDTO extends NamedDTO implements IsSerializable {
         return name;
     }
     
+    public Double getExplicitFactor() {
+        return explicitFactor;
+    }
+
+    public void setExplicitFactor(Double explicitFactor) {
+        this.explicitFactor = explicitFactor;
+    }
+
     public boolean hasTrackedRace(RaceIdentifier raceIdentifier) {
         return trackedRaceIdentifiersPerFleet.values().contains(raceIdentifier);
     }
@@ -119,17 +145,14 @@ public class RaceColumnDTO extends NamedDTO implements IsSerializable {
     /**
      * @return <code>true</code> if the startOfTracking is after the current date and there's no end of the race
      */
-    public boolean isLive() {
-        for (FleetDTO fleet : getFleets()) {
-            final RaceDTO raceDTO = racesPerFleet.get(fleet);
-            if (trackedRaceIdentifiersPerFleet.get(fleet) != null
-                    && raceDTO != null && raceDTO.trackedRace != null
-                    && raceDTO.endOfRace == null
-                    && (raceDTO.trackedRace.startOfTracking != null ? new Date().after(raceDTO.trackedRace.startOfTracking) : false)) {
-                return true;
-            }
+    public boolean isLive(FleetDTO fleet) {
+        boolean result = false;
+        final long now = System.currentTimeMillis();
+        Date whenLastTrackedRaceWasLive = getWhenLastTrackedRaceWasLive(fleet);
+        if (whenLastTrackedRaceWasLive != null && whenLastTrackedRaceWasLive.getTime() > now - IS_LIVE_GRACE_PERIOD_IN_MILLIS) {
+            result = true;
         }
-        return false;
+        return result;
     }
 
     @Override
@@ -184,5 +207,13 @@ public class RaceColumnDTO extends NamedDTO implements IsSerializable {
 
     public void addFleet(FleetDTO fleet) {
         fleets.add(fleet);
+    }
+
+    private Date getWhenLastTrackedRaceWasLive(FleetDTO fleet) {
+        return whenLastTrackedRaceWasLiveByFleet.get(fleet);
+    }
+
+    public void setWhenLastTrackedRaceWasLive(FleetDTO fleet, Date whenLastTrackedRaceWasLive) {
+        this.whenLastTrackedRaceWasLiveByFleet.put(fleet, whenLastTrackedRaceWasLive);
     }
 }
