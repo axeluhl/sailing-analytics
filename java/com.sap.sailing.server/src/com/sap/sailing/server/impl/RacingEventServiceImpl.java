@@ -547,6 +547,11 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         return Collections.unmodifiableCollection(new ArrayList<Event>(eventsById.values()));
     }
 
+	@Override
+	public Event getEvent(Serializable id) {
+		return id == null ? null : eventsById.get(id);
+	}
+
     @Override
     public Iterable<Regatta> getAllRegattas() {
         return Collections.unmodifiableCollection(new ArrayList<Regatta>(regattasByName.values()));
