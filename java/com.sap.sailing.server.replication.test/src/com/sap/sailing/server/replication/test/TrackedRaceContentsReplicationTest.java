@@ -12,15 +12,16 @@ import java.util.List;
 import java.util.UUID;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.mongodb.MongoException;
 import com.sap.sailing.domain.base.BoatClass;
-import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.DomainFactory;
-import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.BoatImpl;
 import com.sap.sailing.domain.base.impl.CourseImpl;
@@ -46,8 +47,8 @@ import com.sap.sailing.domain.racecommittee.RaceCommitteeEvent;
 import com.sap.sailing.domain.racecommittee.RaceCommitteeEventFactory;
 import com.sap.sailing.domain.racecommittee.RaceCommitteeEventTrack;
 import com.sap.sailing.domain.racecommittee.RaceCommitteeStartTimeEvent;
-import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
+import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
@@ -100,6 +101,7 @@ public class TrackedRaceContentsReplicationTest extends AbstractServerReplicatio
                 MongoRaceCommitteeStoreFactory.INSTANCE.getMongoRaceCommitteeStore(MongoFactory.INSTANCE.getDefaultMongoObjectFactory(), 
                 		MongoFactory.INSTANCE.getDefaultDomainObjectFactory())));
         trackedRace.waitUntilWindLoadingComplete();
+        trackedRace.waitUntilRaceCommitteeEventLoadingComplete();
     }
     
     @Test
@@ -241,6 +243,30 @@ public class TrackedRaceContentsReplicationTest extends AbstractServerReplicatio
             assertNotSame(startTimeEvent, replicaRaceCommitteeEvent);
         } finally {
         	replicaRCEventTrack.unlockAfterRead();
+        }
+    }
+    
+    @Ignore
+    public void testReplicationOfLoadingOfStoredRaceCommitteeTrack() throws UnknownHostException, MongoException, InterruptedException {
+    	TimePoint time = MillisecondsTimePoint.now();
+        final RaceCommitteeStartTimeEvent startTimeEvent = 
+        		RaceCommitteeEventFactory.INSTANCE.createStartTimeEvent(time, 0, new MillisecondsTimePoint(time.asMillis() + 500000));
+        trackedRace.recordRaceCommitteeEvent(startTimeEvent);
+        RaceCommitteeEventTrack trackedRaceRcEventTrack= trackedRace.getOrCreateRaceCommitteeEventTrack();
+        trackedRaceRcEventTrack.lockForRead();
+        try {
+            Thread.sleep(5000); // wait for replication to happen
+            TrackedRace replicaTrackedRace = replica.getTrackedRace(raceIdentifier);
+            RaceCommitteeEventTrack replicaRcEventTrack = replicaTrackedRace.getOrCreateRaceCommitteeEventTrack();
+            replicaRcEventTrack.lockForRead();
+            try {
+                assertEquals(Util.size(trackedRaceRcEventTrack.getRawFixes()), Util.size(replicaRcEventTrack.getRawFixes()));
+                assertEquals(trackedRaceRcEventTrack.getRawFixes().iterator().next(), replicaRcEventTrack.getRawFixes().iterator().next());
+            } finally {
+            	replicaRcEventTrack.unlockAfterRead();
+            }
+        } finally {
+        	trackedRaceRcEventTrack.unlockAfterRead();
         }
     }
 }
