@@ -8,8 +8,10 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -24,6 +26,7 @@ import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
+import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util.Triple;
@@ -238,7 +241,15 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
                     ClientParamsPHP clientParams;
                     try {
                         clientParams = new ClientParamsPHP(new InputStreamReader(paramURL.openStream()));
-                        // TODO see bug 1014: update course from clientParams if a change is detected; may be used also for initial course definition
+                        Iterable<? extends TracTracControlPoint> newCourseControlPoints = clientParams.getRaceDefaultRoute().getControlPoints();
+                        List<com.sap.sailing.domain.base.ControlPoint> currentCourseControlPoints = new ArrayList<>();
+                        for (Waypoint waypoint : getRaces().iterator().next().getCourse().getWaypoints()) {
+                            currentCourseControlPoints.add(waypoint.getControlPoint());
+                        }
+                        if (!newCourseControlPoints.equals(currentCourseControlPoints)) {
+                            logger.info("Detected course change based on clientparams.php contents for races "+getRaces());
+                            // TODO see bug 1014: update course from clientParams if a change is detected; may be used also for initial course definition
+                        }
                         updateStartStopTimesAndLiveDelay(clientParams, simulator);
                         for (TracTracControlPoint controlPoint : clientParams.getControlPointList()) {
                             com.sap.sailing.domain.base.ControlPoint domainControlPoint = domainFactory.getOrCreateControlPoint(controlPoint);
