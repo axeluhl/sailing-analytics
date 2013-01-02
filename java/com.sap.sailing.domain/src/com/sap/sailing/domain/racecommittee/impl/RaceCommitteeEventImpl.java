@@ -42,5 +42,14 @@ public abstract class RaceCommitteeEventImpl implements RaceCommitteeEvent {
 	public int getPassId() {
 		return passId;
 	}
+	
+	@Override
+	public boolean equals(Object object) {
+		return object instanceof RaceCommitteeEvent 
+				&& timePoint.equals(((RaceCommitteeEvent) object).getTimePoint())
+				&& id.equals(((RaceCommitteeEvent) object).getId())
+				&& involvedBoats.equals(((RaceCommitteeEvent) object).getInvolvedBoats())
+				&& passId == ((RaceCommitteeEvent) object).getPassId();
+	}
 
 }

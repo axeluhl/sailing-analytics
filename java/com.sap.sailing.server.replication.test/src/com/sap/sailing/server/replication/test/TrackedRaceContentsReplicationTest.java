@@ -31,6 +31,7 @@ import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
+import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
@@ -41,6 +42,10 @@ import com.sap.sailing.domain.persistence.MongoFactory;
 import com.sap.sailing.domain.persistence.MongoRaceCommitteeStoreFactory;
 import com.sap.sailing.domain.persistence.MongoWindStore;
 import com.sap.sailing.domain.persistence.MongoWindStoreFactory;
+import com.sap.sailing.domain.racecommittee.RaceCommitteeEvent;
+import com.sap.sailing.domain.racecommittee.RaceCommitteeEventFactory;
+import com.sap.sailing.domain.racecommittee.RaceCommitteeEventTrack;
+import com.sap.sailing.domain.racecommittee.RaceCommitteeStartTimeEvent;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFix;
@@ -216,6 +221,26 @@ public class TrackedRaceContentsReplicationTest extends AbstractServerReplicatio
         } finally {
             trackedRaceWebWindTrack.unlockAfterRead();
             windTrack.unlockAfterRead();
+        }
+    }
+    
+    @Test
+    public void testRaceCommitteeEventAdditionReplication() throws InterruptedException {
+    	TimePoint time = MillisecondsTimePoint.now();
+        final RaceCommitteeStartTimeEvent startTimeEvent = 
+        		RaceCommitteeEventFactory.INSTANCE.createStartTimeEvent(time, 0, new MillisecondsTimePoint(time.asMillis() + 500000));
+        trackedRace.recordRaceCommitteeEvent(startTimeEvent);
+        Thread.sleep(1000);
+        TrackedRace replicaTrackedRace = replica.getTrackedRace(raceIdentifier);
+        RaceCommitteeEventTrack replicaRCEventTrack = replicaTrackedRace.getOrCreateRaceCommitteeEventTrack();
+        replicaRCEventTrack.lockForRead();
+        try {
+            assertEquals(1, Util.size(replicaRCEventTrack.getRawFixes()));
+            RaceCommitteeEvent replicaRaceCommitteeEvent = replicaRCEventTrack.getRawFixes().iterator().next();
+            assertEquals(startTimeEvent, replicaRaceCommitteeEvent);
+            assertNotSame(startTimeEvent, replicaRaceCommitteeEvent);
+        } finally {
+        	replicaRCEventTrack.unlockAfterRead();
         }
     }
 }

@@ -36,5 +36,14 @@ public class RaceCommitteeFlagEventImpl extends RaceCommitteeEventImpl implement
 	public boolean isDisplayed() {
 		return isDisplayed;
 	}
+	
+	@Override
+	public boolean equals(Object object) {
+		return super.equals(object) 
+				&& object instanceof RaceCommitteeFlagEvent 
+				&& upperFlag.equals(((RaceCommitteeFlagEvent) object).getUpperFlag())
+				&& lowerFlag.equals(((RaceCommitteeFlagEvent) object).getLowerFlag())
+				&& isDisplayed == ((RaceCommitteeFlagEvent) object).isDisplayed();
+	}
 
 }
