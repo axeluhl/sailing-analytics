@@ -22,5 +22,12 @@ public class RaceCommitteeStartTimeEventImpl extends RaceCommitteeEventImpl
 	public TimePoint getStartTime() {
 		return startTime;
 	}
+	
+	@Override
+	public boolean equals(Object object) {
+		return super.equals(object) 
+				&& object instanceof RaceCommitteeStartTimeEvent 
+				&& startTime.equals(((RaceCommitteeStartTimeEvent) object).getStartTime());
+	}
 
 }

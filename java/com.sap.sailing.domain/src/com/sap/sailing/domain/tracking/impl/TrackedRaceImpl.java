@@ -2246,21 +2246,18 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     
     @Override
     public RaceCommitteeEventTrack getOrCreateRaceCommitteeEventTrack() {
-    	RaceCommitteeEventTrack result = raceCommitteeEventTrack;
-    	if (result == null)
-    		synchronized (raceCommitteeEventTrack) {
-    			result = createRaceCommitteeEventTrack();
-    			LockUtil.lockForRead(serializationLock);
-    			try {
-    				raceCommitteeEventTrack = result;
-    			} finally {
-    				LockUtil.unlockAfterRead(serializationLock);
-    			}
+    	if (raceCommitteeEventTrack == null) {
+    		LockUtil.lockForRead(serializationLock);
+    		try {
+    			raceCommitteeEventTrack = createRaceCommitteeEventTrack();
+    		} finally {
+    			LockUtil.unlockAfterRead(serializationLock);
     		}
-    	return result;
+    	}
+    	return raceCommitteeEventTrack;
     }
 
-	private RaceCommitteeEventTrack createRaceCommitteeEventTrack() {
+    private RaceCommitteeEventTrack createRaceCommitteeEventTrack() {
 		RaceCommitteeEventTrack track = raceCommitteeStore.getRaceCommitteeEventTrack(trackedRegatta, this); 
 		return track;
 	}
