@@ -11,4 +11,8 @@ import com.sap.sailing.domain.common.Named;
  */
 public interface CourseArea extends Named {
 
+	void addRace(RaceDefinition race);
+	
+	Iterable<RaceDefinition> getRaces();
+	
 }
