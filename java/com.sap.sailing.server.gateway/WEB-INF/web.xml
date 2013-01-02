@@ -13,6 +13,34 @@
 		<servlet-name>AdminApp</servlet-name>
 		<url-pattern>/admin</url-pattern>
 	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>RCRegattas</servlet-name>
+		<servlet-class>com.sap.sailing.server.gateway.impl.RegattasRaceCommitteeServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>RCRegattas</servlet-name>
+		<url-pattern>/rc/events/*</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>RCEvents</servlet-name>
+		<servlet-class>com.sap.sailing.server.gateway.impl.EventsRaceCommitteeServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>RCEvents</servlet-name>
+		<url-pattern>/rc/events</url-pattern>
+	</servlet-mapping>
+	
+	
+	<servlet>
+		<servlet-name>RCEventTrack</servlet-name>
+		<servlet-class>com.sap.sailing.server.gateway.impl.EventTrackRaceCommitteeServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>RCEventTrack</servlet-name>
+		<url-pattern>/rc/eventTrack</url-pattern>
+	</servlet-mapping>
 
 	<servlet>
 		<servlet-name>RegattaAndRaceDataJsonExportServlet</servlet-name>

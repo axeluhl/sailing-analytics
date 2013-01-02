@@ -21,7 +21,8 @@ Require-Bundle: com.sap.sailing.domain,
  com.mongodb.driver;bundle-version="2.6.2",
  javax.servlet;bundle-version="2.5.0",
  com.sap.sailing.domain.common,
- com.sap.sailing.udpconnector
+ com.sap.sailing.udpconnector,
+ com.sap.sailing.server.gateway.serialization;bundle-version="1.0.0"
 Bundle-ClassPath: .,
  lib/rome-1.0.jar,
  lib/org.jdom_1.0.0.v201005080400.jar
