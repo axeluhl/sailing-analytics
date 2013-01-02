@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
@@ -37,12 +38,13 @@ public class RaceCommitteeTrackTest {
 			
 			do 
 			{
-				iterator.next();
+				assertSame(iterator.next(), rcEvent);
 				count++;
 			} 
 			while(iterator.hasNext());
 			
 			assertEquals(count, 1);
+			
 			
 		} finally {
 			rcEventTrack.unlockAfterRead();
@@ -134,13 +136,13 @@ public class RaceCommitteeTrackTest {
 	private void checkOrderingAndListLength(List<RaceCommitteeEvent> expectedOrderingList, Iterator<RaceCommitteeEvent> iterator, int countOffset, int expectedLength) {
 		int count = 0;
 		
-		do 
+		while(iterator.hasNext()) 
 		{
 			RaceCommitteeEvent event = iterator.next();
 			assertEquals(event, expectedOrderingList.get(count + countOffset));
 			count++;
 		} 
-		while(iterator.hasNext());
+		
 		
 		//for Iterables the size of the list can also be retrieved via Util.size(Iterable<T> i)
 		assertEquals(count, expectedLength);
