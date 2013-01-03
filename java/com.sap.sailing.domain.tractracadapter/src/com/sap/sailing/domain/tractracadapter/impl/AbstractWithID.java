@@ -1,6 +1,6 @@
 package com.sap.sailing.domain.tractracadapter.impl;
 
-import com.sap.sailing.domain.tractracadapter.TracTracControlPoint;
+import com.sap.sailing.domain.common.WithID;
 
 /**
  * Implements hash code and equality based on the control point's UUID.
@@ -8,7 +8,7 @@ import com.sap.sailing.domain.tractracadapter.TracTracControlPoint;
  * @author Axel Uhl (D043530)
  *
  */
-public abstract class AbstractTracTracControlPoint implements TracTracControlPoint {
+public abstract class AbstractWithID implements WithID {
 
     @Override
     public int hashCode() {
@@ -17,7 +17,7 @@ public abstract class AbstractTracTracControlPoint implements TracTracControlPoi
 
     @Override
     public boolean equals(Object obj) {
-        return getId().equals(((TracTracControlPoint) obj).getId());
+        return getId().equals(((WithID) obj).getId());
     }
     
 }
