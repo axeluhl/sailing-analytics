@@ -55,6 +55,8 @@ import com.tractrac.clientmodule.data.DataController;
 import com.tractrac.clientmodule.data.DataController.Listener;
 import com.tractrac.clientmodule.setup.KeyValue;
 
+import difflib.PatchFailedException;
+
 public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements Listener, TracTracRaceTracker, DynamicRaceDefinitionSet {
     private static final Logger logger = Logger.getLogger(TracTracRaceTrackerImpl.class.getName());
     
@@ -241,14 +243,24 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
                     ClientParamsPHP clientParams;
                     try {
                         clientParams = new ClientParamsPHP(new InputStreamReader(paramURL.openStream()));
-                        Iterable<? extends TracTracControlPoint> newCourseControlPoints = clientParams.getRaceDefaultRoute().getControlPoints();
+                        List<com.sap.sailing.domain.base.ControlPoint> newCourseControlPoints = new ArrayList<>();
+                        final Iterable<? extends TracTracControlPoint> newTracTracControlPoints = clientParams.getRaceDefaultRoute().getControlPoints();
+                        for (TracTracControlPoint newTracTracControlPoint : newTracTracControlPoints) {
+                            newCourseControlPoints.add(domainFactory.getOrCreateControlPoint(newTracTracControlPoint));
+                        }
                         List<com.sap.sailing.domain.base.ControlPoint> currentCourseControlPoints = new ArrayList<>();
-                        for (Waypoint waypoint : getRaces().iterator().next().getCourse().getWaypoints()) {
+                        final Course course = getRaces().iterator().next().getCourse();
+                        for (Waypoint waypoint : course.getWaypoints()) {
                             currentCourseControlPoints.add(waypoint.getControlPoint());
                         }
                         if (!newCourseControlPoints.equals(currentCourseControlPoints)) {
                             logger.info("Detected course change based on clientparams.php contents for races "+getRaces());
-                            // TODO see bug 1014: update course from clientParams if a change is detected; may be used also for initial course definition
+                            try {
+                                domainFactory.updateCourseWaypoints(course, newTracTracControlPoints);
+                            } catch (PatchFailedException pfe) {
+                                logger.severe("Failed to apply course update "+newTracTracControlPoints+" to course "+course);
+                                logger.throwing(TracTracRaceTrackerImpl.class.getName(), "scheduleControlPointPositionController.run", pfe);
+                            }
                         }
                         updateStartStopTimesAndLiveDelay(clientParams, simulator);
                         for (TracTracControlPoint controlPoint : clientParams.getControlPointList()) {
