@@ -104,7 +104,7 @@ public class ReadWindVaneDataTest {
         br.close();
         Thread.sleep(3000);
         nmeaReader.stop();
-        assertEquals(609, sentences.size()); // we have 683 sentences altogether; 74 of those are WIBAT which are not understood
+        assertEquals(610, sentences.size()); // we have 684 sentences altogether; 74 of those are WIBAT which are not understood
     }
     
     @Test
