@@ -100,7 +100,8 @@ public class ReadWindVaneDataTest {
                 // NMEA0183 sentence
                 // Special hack for a bug with the WindVane's speed unit output which erroneously uses "K" for "knots":
                 line = nmeaUtil.replace(line, ",K,", ",N,");
-                if (lastTimestampFromFile != null) {
+                // Another special hack: exclude the WIBAT message which is not understood by marineapi-0.5 so the time stamps stay in sync
+                if (lastTimestampFromFile != null && !line.contains("$WIBAT")) {
                     lastTimestampFromFile = lastTimestampFromFile.plus(1000);
                     timePointsForSentences.add(lastTimestampFromFile);
                     // write the sentence only if we have a time stamp for it
