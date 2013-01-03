@@ -36,6 +36,7 @@ import slash.navigation.gpx.Gpx10Format;
 import slash.navigation.gpx.GpxPosition;
 import slash.navigation.gpx.GpxRoute;
 
+import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.impl.KilometersPerHourSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.Position;
@@ -44,9 +45,11 @@ import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
+import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.impl.DynamicGPSFixMovingTrackImpl;
 import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
+import com.sap.sailing.domain.tracking.impl.WindComparator;
 import com.sap.sailing.domain.tracking.impl.WindTrackImpl;
 import com.sap.sailing.nmeaconnector.NmeaFactory;
 import com.sap.sailing.nmeaconnector.NmeaUtil;
@@ -64,7 +67,7 @@ public class ReadWindVaneDataTest {
         final List<Sentence> sentences = new ArrayList<>();
         final List<TimePoint> timePointsForSentences = new ArrayList<>();
         readWindVaneNmeaFile(sentences, timePointsForSentences);
-        assertEquals(610, sentences.size()); // we have 684 sentences altogether; 74 of those are WIBAT which are not understood
+        assertEquals(601, sentences.size()); // we have 684 sentences altogether; 74 of those are WIBAT which are not understood and 9 have no timestamp yet
     }
 
     private void readWindVaneNmeaFile(final List<Sentence> sentences, final List<TimePoint> timePointsForSentences)
@@ -100,10 +103,11 @@ public class ReadWindVaneDataTest {
                 if (lastTimestampFromFile != null) {
                     lastTimestampFromFile = lastTimestampFromFile.plus(1000);
                     timePointsForSentences.add(lastTimestampFromFile);
+                    // write the sentence only if we have a time stamp for it
+                    pos.write(line.getBytes());
+                    pos.write(new byte[] { 13, 10 });
+                    pos.flush();
                 }
-                pos.write(line.getBytes());
-                pos.write(new byte[] { 13, 10 });
-                pos.flush();
             } else {
                 try {
                     // Maybe it's an interwoven timestamp. Try out...
@@ -152,12 +156,31 @@ public class ReadWindVaneDataTest {
             Position position = gpsTrack.getEstimatedPosition(timePoint, /* extrapolate */ true);
             if (SentenceId.MWV == SentenceId.valueOf(sentence.getSentenceId())) {
                 MWVSentence mwvSentence = (MWVSentence) sentence;
-                windTrack.add(nmeaUtil.getWind(timePoint, position, mwvSentence));
+                final Wind wind = nmeaUtil.getWind(timePoint, position, mwvSentence);
+                Wind oldWindAtOrAfter = windTrack.getFirstFixAtOrAfter(timePoint);
+                if (oldWindAtOrAfter != null && WindComparator.INSTANCE.compare(oldWindAtOrAfter, wind) == 0) {
+                    System.err.println("Surprise: two wind fixes for the same time point and the same position. Old: "
+                            + oldWindAtOrAfter + ". New: " + wind);
+                }
+                windTrack.add(wind);
             }
         }
         windTrack.lockForRead();
         try {
-            assertEquals(610, Util.size(windTrack.getRawFixes()));
+            assertEquals(601, Util.size(windTrack.getRawFixes()));
+            System.out.println("\n\nTimePoint"+"\t"
+                              +"AWS/kts"+"\t"
+                              +"AWA"+"\t"
+                              +"SOG/kts"+"\t"
+                              +"COG");
+            for (Wind rawWind : windTrack.getRawFixes()) {
+                final SpeedWithBearing estimatedSpeed = gpsTrack.getEstimatedSpeed(rawWind.getTimePoint());
+                System.out.println(rawWind.getTimePoint()+"\t"
+                                  +rawWind.getKnots()+"\t"
+                                  +rawWind.getBearing().getDegrees()+"\t"
+                                  +estimatedSpeed.getKnots()+"\t"
+                                  +estimatedSpeed.getBearing().getDegrees());
+            }
         } finally {
             windTrack.unlockAfterRead();
         }
