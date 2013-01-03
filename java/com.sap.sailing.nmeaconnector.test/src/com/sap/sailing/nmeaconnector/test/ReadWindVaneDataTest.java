@@ -15,13 +15,16 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 
 import net.sf.marineapi.nmea.event.SentenceEvent;
 import net.sf.marineapi.nmea.event.SentenceListener;
 import net.sf.marineapi.nmea.io.SentenceReader;
+import net.sf.marineapi.nmea.sentence.MWVSentence;
 import net.sf.marineapi.nmea.sentence.Sentence;
+import net.sf.marineapi.nmea.sentence.SentenceId;
 
 import org.junit.Test;
 
@@ -35,12 +38,18 @@ import slash.navigation.gpx.GpxRoute;
 
 import com.sap.sailing.domain.base.impl.KilometersPerHourSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
+import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
+import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.impl.DynamicGPSFixMovingTrackImpl;
 import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
+import com.sap.sailing.domain.tracking.impl.WindTrackImpl;
+import com.sap.sailing.nmeaconnector.NmeaFactory;
+import com.sap.sailing.nmeaconnector.NmeaUtil;
 
 public class ReadWindVaneDataTest {
     @Test
@@ -52,10 +61,17 @@ public class ReadWindVaneDataTest {
     
     @Test
     public void readWindVaneOutputWithInterlacedTimeStamps() throws IOException, InterruptedException {
-        DateFormat df = new SimpleDateFormat("EE, dd. MMM yyyy HH:mm:ss", Locale.GERMANY);
-        TimePoint lastTimestampFromFile = null;
         final List<Sentence> sentences = new ArrayList<>();
         final List<TimePoint> timePointsForSentences = new ArrayList<>();
+        readWindVaneNmeaFile(sentences, timePointsForSentences);
+        assertEquals(610, sentences.size()); // we have 684 sentences altogether; 74 of those are WIBAT which are not understood
+    }
+
+    private void readWindVaneNmeaFile(final List<Sentence> sentences, final List<TimePoint> timePointsForSentences)
+            throws IOException, InterruptedException {
+        NmeaUtil nmeaUtil = NmeaFactory.INSTANCE.getUtil();
+        DateFormat df = new SimpleDateFormat("EE, dd. MMM yyyy HH:mm:ss", Locale.GERMANY);
+        TimePoint lastTimestampFromFile = null;
         InputStream is = getClass().getResourceAsStream("/windvane.nmea");
         PipedInputStream pis = new PipedInputStream();
         PipedOutputStream pos = new PipedOutputStream(pis);
@@ -79,6 +95,8 @@ public class ReadWindVaneDataTest {
         while ((line=br.readLine()) != null) {
             if (line.startsWith("$") || line.startsWith("!")) {
                 // NMEA0183 sentence
+                // Special hack for a bug with the WindVane's speed unit output which erroneously uses "K" for "knots":
+                line = nmeaUtil.replace(line, ",K,", ",N,");
                 if (lastTimestampFromFile != null) {
                     lastTimestampFromFile = lastTimestampFromFile.plus(1000);
                     timePointsForSentences.add(lastTimestampFromFile);
@@ -104,11 +122,48 @@ public class ReadWindVaneDataTest {
         br.close();
         Thread.sleep(3000);
         nmeaReader.stop();
-        assertEquals(610, sentences.size()); // we have 684 sentences altogether; 74 of those are WIBAT which are not understood
     }
     
     @Test
     public void readGpxFile() throws IOException {
+        DynamicGPSFixMovingTrackImpl<Object> track = new DynamicGPSFixMovingTrackImpl<Object>("Wind Vane", /* millisecondsOverWhichToAverage */ 5000);
+        loadGpxFileIntoTrack(track);
+        track.lockForRead();
+        try {
+            assertEquals(489, track.getRawFixes().size());
+        } finally {
+            track.unlockAfterRead();
+        }
+    }
+    
+    @Test
+    public void readWindVaneNmeaIntoWindTrack() throws IOException, InterruptedException {
+        NmeaUtil nmeaUtil = NmeaFactory.INSTANCE.getUtil();
+        final List<Sentence> sentences = new ArrayList<>();
+        DynamicGPSFixMovingTrackImpl<Object> gpsTrack = new DynamicGPSFixMovingTrackImpl<Object>("Wind Vane", /* millisecondsOverWhichToAverage */ 5000);
+        loadGpxFileIntoTrack(gpsTrack);
+        final List<TimePoint> timePointsForSentences = new ArrayList<>();
+        WindTrack windTrack = new WindTrackImpl(/* millisecondsOverWhichToAverage */ 5000, /* useSpeed */ true,
+                /* nameForReadWriteLock */ "readWindVaneNmeaIntoWindTrack");
+        readWindVaneNmeaFile(sentences, timePointsForSentences);
+        Iterator<TimePoint> timePointIter = timePointsForSentences.iterator();
+        for (Sentence sentence : sentences) {
+            TimePoint timePoint = timePointIter.next();
+            Position position = gpsTrack.getEstimatedPosition(timePoint, /* extrapolate */ true);
+            if (SentenceId.MWV == SentenceId.valueOf(sentence.getSentenceId())) {
+                MWVSentence mwvSentence = (MWVSentence) sentence;
+                windTrack.add(nmeaUtil.getWind(timePoint, position, mwvSentence));
+            }
+        }
+        windTrack.lockForRead();
+        try {
+            assertEquals(610, Util.size(windTrack.getRawFixes()));
+        } finally {
+            windTrack.unlockAfterRead();
+        }
+    }
+
+    private void loadGpxFileIntoTrack(DynamicGPSFixMovingTrackImpl<Object> track) throws IOException {
         ParserResult read = new NavigationFormatParser().read(getClass().getResource("/20121219114023.gpx"),
                 Arrays.asList(new NavigationFormat[] { new Gpx10Format() }));
         @SuppressWarnings("rawtypes")
@@ -119,18 +174,11 @@ public class ReadWindVaneDataTest {
         GpxRoute route = (GpxRoute) routes.get(0);
         List<GpxPosition> gpsPositions = route.getPositions();
         assertNotNull(gpsPositions);
-        DynamicGPSFixMovingTrackImpl<Object> track = new DynamicGPSFixMovingTrackImpl<Object>("Wind Vane", /* millisecondsOverWhichToAverage */ 5000);
         for (GpxPosition gpxPosition : gpsPositions) {
             GPSFixMoving gpsFixMoving = new GPSFixMovingImpl(new DegreePosition(gpxPosition.getLatitude(), gpxPosition.getLongitude()),
                     new MillisecondsTimePoint(gpxPosition.getTime().getTimeInMillis()), new KilometersPerHourSpeedWithBearingImpl(
                             gpxPosition.getSpeed(), new DegreeBearingImpl(gpxPosition.getHeading())));
             track.addGPSFix(gpsFixMoving);
-        }
-        track.lockForRead();
-        try {
-            assertEquals(489, track.getRawFixes().size());
-        } finally {
-            track.unlockAfterRead();
         }
     }
 }
