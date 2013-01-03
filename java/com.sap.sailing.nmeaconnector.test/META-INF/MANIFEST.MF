@@ -7,4 +7,6 @@ Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
 Require-Bundle: com.sap.sailing.nmeaconnector,
- org.junit4;bundle-version="4.8.2"
+ org.junit4;bundle-version="4.8.2",
+ com.sap.sailing.domain,
+ com.sap.sailing.domain.common
