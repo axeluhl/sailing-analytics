@@ -3,7 +3,12 @@ package com.sap.sailing.domain.test;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -32,6 +37,7 @@ import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
+import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
@@ -46,6 +52,8 @@ import com.sap.sailing.domain.tractracadapter.ReceiverType;
  */
 public class MarkPassingTest extends OnlineTracTracBasedTest {
 
+	private boolean forceReload = false; // set to true to reload race data
+
 	public MarkPassingTest() throws MalformedURLException, URISyntaxException {
 		super();
 	}
@@ -53,19 +61,116 @@ public class MarkPassingTest extends OnlineTracTracBasedTest {
 	@Before
 	public void setUp() throws IOException, InterruptedException, URISyntaxException {
 		super.setUp();
-        super.setUp(	"event_20110609_KielerWoch",
-        				/* raceId */"357c700a-9d9a-11e0-85be-406186cbf87c", 
-        				new ReceiverType[] {	ReceiverType.MARKPASSINGS,
-        										ReceiverType.MARKPOSITIONS,
-                								ReceiverType.RACECOURSE, 
-                								ReceiverType.RAWPOSITIONS });
-        OnlineTracTracBasedTest.fixApproximateMarkPositionsForWindReadOut(getTrackedRace(), new MillisecondsTimePoint(
-                new GregorianCalendar(2011, 05, 23).getTime()));
-        getTrackedRace().recordWind(
-                new WindImpl(/* position */null, MillisecondsTimePoint.now(), new KnotSpeedWithBearingImpl(12,
-                        new DegreeBearingImpl(65))), new WindSourceImpl(WindSourceType.WEB));
+		String raceID = "357c700a-9d9a-11e0-85be-406186cbf87c";
+		if (!loadData(raceID) && !forceReload) {
+		    super.setUp(	"event_20110609_KielerWoch",
+		    				/* raceId */raceID, 
+		    				new ReceiverType[] {	ReceiverType.MARKPASSINGS,
+		    										ReceiverType.MARKPOSITIONS,
+		            								ReceiverType.RACECOURSE, 
+		            								ReceiverType.RAWPOSITIONS });
+		    OnlineTracTracBasedTest.fixApproximateMarkPositionsForWindReadOut(getTrackedRace(), new MillisecondsTimePoint(
+		            new GregorianCalendar(2011, 05, 23).getTime()));
+		    getTrackedRace().recordWind(
+		            new WindImpl(/* position */null, MillisecondsTimePoint.now(), new KnotSpeedWithBearingImpl(12,
+		                    new DegreeBearingImpl(65))), new WindSourceImpl(WindSourceType.WEB));
+		    saveData();
+		}
 	}
 	
+	/**
+	 * Loads stored data for the given raceID or returns false if no data is present.
+	 * @param raceID - ID of the race to load from disk
+	 * @return true if data was loaded, false if not
+	 */
+	private boolean loadData(String raceID) {
+		String path = null;
+		File file = new File("resources/");
+		if (file.exists() && file.isDirectory()) {
+			for (String fileName : file.list()) {
+				if (fileName.endsWith(".data") && fileName.contains(raceID)) {
+					path = "resources/" + fileName;
+					break;
+				}
+			}
+		}
+		if (path == null)
+			return false;
+		FileInputStream fs = null;
+		ObjectInputStream os = null;
+		Object obj = null;
+
+		try {
+			fs = new FileInputStream(path);
+			os = new ObjectInputStream(fs);
+			obj = os.readObject();
+		} catch (ClassNotFoundException | IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally {
+			if (os != null) {
+				try {
+					os.close();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			if (fs != null) {
+				try {
+					fs.close();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
+
+		if (obj != null && obj instanceof DynamicTrackedRace) {
+			setTrackedRace((DynamicTrackedRace) obj);
+			setRace(getTrackedRace().getRace());
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Saves current result of getTrackedRace to disk for future reuse.
+	 */
+	private void saveData() {
+		DynamicTrackedRace trackedRace = getTrackedRace();
+		String racePath = "resources/" + trackedRace.getRace().getId() + ".data";
+		FileOutputStream fs = null;
+		ObjectOutputStream os = null;
+		try {
+			File f = new File(racePath);
+			f.createNewFile();
+			fs = new FileOutputStream(f);
+			os = new ObjectOutputStream(fs);
+			os.writeObject(trackedRace);
+		} catch (IOException e) {
+			e.printStackTrace();
+			return;
+		} finally {
+			if (os != null) {
+				try {
+					os.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+					return;
+				}
+			}
+			if (fs != null) {
+				try {
+					fs.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+					return;
+				}
+			}
+		}
+	}
+
 	@Test
 	public void testMarkPassings() {
 		Iterable<Competitor> competitors = getRace().getCompetitors();
@@ -123,7 +228,8 @@ public class MarkPassingTest extends OnlineTracTracBasedTest {
 
 				averagePerCompetitorTimeDelta += timeDelta;
 			}
-			averagePerCompetitorTimeDelta /= computedPassings.size();
+			if (computedPassings.size() != 0)
+				averagePerCompetitorTimeDelta /= computedPassings.size();
 			System.out.println("Average TimeDelta for Competitor " + e.getKey().getName() + " is " + averagePerCompetitorTimeDelta + "ms");
 			//assertTrue(averagePerCompetitorTimeDelta < 10000);
 		}

@@ -177,9 +177,17 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest {
     protected RaceDefinition getRace() {
         return race;
     }
+    
+    protected void setRace(RaceDefinition race) {
+        this.race = race;
+    }
 
     protected DynamicTrackedRace getTrackedRace() {
         return trackedRace;
+    }
+    
+    protected void setTrackedRace(DynamicTrackedRace race) {
+        this.trackedRace = race;
     }
 
     /**
