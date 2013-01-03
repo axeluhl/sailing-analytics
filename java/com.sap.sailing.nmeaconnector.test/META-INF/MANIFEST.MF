@@ -10,3 +10,5 @@ Require-Bundle: com.sap.sailing.nmeaconnector,
  org.junit4;bundle-version="4.8.2",
  com.sap.sailing.domain,
  com.sap.sailing.domain.common
+Bundle-ClassPath: lib/routeconverter.jar,
+ .
