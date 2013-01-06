@@ -208,9 +208,9 @@ public class MediaSelector implements RaceTimesInfoProviderListener, PlayStateLi
     public void onSuccess(Collection<MediaTrack> mediaTracks) {
         for (MediaTrack mediaTrack : mediaTracks) {
             switch (mediaTrack.type) {
-            case VIDEO:
+            case video:
                 videoTracks.add(mediaTrack);
-            case AUDIO:
+            case audio:
                 audioTracks.add(mediaTrack);
                 break;
             }

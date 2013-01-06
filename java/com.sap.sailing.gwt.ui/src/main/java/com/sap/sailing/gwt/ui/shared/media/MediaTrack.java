@@ -3,12 +3,18 @@ package com.sap.sailing.gwt.ui.shared.media;
 import java.util.Date;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import com.sap.sailing.gwt.ui.adminconsole.TimeFormatUtil;
 
+/**
+ * See http://my.opera.com/core/blog/2010/03/03/everything-you-need-to-know-about-html5-video-and-audio-2
+ * @author D047974
+ *
+ */
 public class MediaTrack implements IsSerializable {
 
     public enum MimeFileType {
         
-        mp4(MediaType.VIDEO, MediaSubType.mpeg), ogv(MediaType.VIDEO, MediaSubType.ogg), qt(MediaType.VIDEO, MediaSubType.quicktime), mp3(MediaType.AUDIO, MediaSubType.mpeg), ogg(MediaType.AUDIO, MediaSubType.ogg), aac(MediaType.AUDIO, MediaSubType.aac), webm(MediaType.VIDEO, MediaSubType.webm);
+        mp4(MediaType.video, MediaSubType.mpeg), ogv(MediaType.video, MediaSubType.ogg), qt(MediaType.video, MediaSubType.quicktime), mp3(MediaType.audio, MediaSubType.mpeg), ogg(MediaType.audio, MediaSubType.ogg), aac(MediaType.audio, MediaSubType.aac), webm(MediaType.video, MediaSubType.webm);
         
         public final MediaType mediaType;
         public final MediaSubType mediaSubType;
@@ -25,7 +31,7 @@ public class MediaTrack implements IsSerializable {
     }
     
     public enum MediaType {
-        AUDIO, VIDEO;
+        audio, video;
     }
 
     public enum MediaSubType {
@@ -73,7 +79,17 @@ public class MediaTrack implements IsSerializable {
     }
     
     public String toString() {
-        return title + " - " + url + " [" + type + '/' + subType + ']' + startTime + " [" + durationInMillis / 1000d + "s]";  
+        return title + " - " + url + " [" + typeToString() + ']' + startTimeToString() + " [" + TimeFormatUtil.milliSecondsToHrsMinSec(durationInMillis) + ']';  
+    }
+
+    public String typeToString() {
+        String typeString = type == null ? "undefined" : type.name();
+        String subtypeString = subType == null ? "undefined" : subType.toString();
+        return typeString  + '/' + subtypeString ;
+    }
+
+    public String startTimeToString() {
+        return startTime == null ? "undefined" : TimeFormatUtil.DATETIME_FORMAT.format(startTime);
     }
 
 }

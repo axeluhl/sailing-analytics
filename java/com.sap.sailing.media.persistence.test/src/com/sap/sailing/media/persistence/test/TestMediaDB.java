@@ -39,7 +39,7 @@ public class TestMediaDB extends AbstractMongoDBTest {
         MediaDB mongoDB = MediaDBFactory.INSTANCE.getMediaDB(getMongoService());
         Date date = new Date();
         int durationInMillis = 23;
-        String mediaType = MediaType.VIDEO.name();
+        String mediaType = MediaType.video.name();
         String mediaSubType = MediaSubType.ogg.name();
         String dbId = mongoDB.insertMediaTrack(videoTitle, url, date, durationInMillis, mediaType, mediaSubType);
         DBMediaTrack videoTrack = mongoDB.loadMediaTrack(dbId);
@@ -68,7 +68,7 @@ public class TestMediaDB extends AbstractMongoDBTest {
         final String url = "http://localhost:8888/media/HTML5/1809147112001_1842870496001_SAP-Regatta-Day02-Final_libtheora.ogv";
         Date date = new Date();
         int durationInMillis = 23;
-        String mediaType = MediaType.VIDEO.name();
+        String mediaType = MediaType.video.name();
         String mediaSubType = MediaSubType.ogg.name();
 
         for (int i = 0; i < count; i++) {
@@ -84,7 +84,7 @@ public class TestMediaDB extends AbstractMongoDBTest {
         MediaDB mongoDB = MediaDBFactory.INSTANCE.getMediaDB(getMongoService());
         Date date = new Date();
         int durationInMillis = 23;
-        String mediaType = MediaType.VIDEO.name();
+        String mediaType = MediaType.video.name();
         String mediaSubType = MediaSubType.ogg.name();
         String dbId = mongoDB.insertMediaTrack(videoTitle, url, date, durationInMillis, mediaType, mediaSubType);
         
@@ -103,7 +103,7 @@ public class TestMediaDB extends AbstractMongoDBTest {
         MediaDB mongoDB = MediaDBFactory.INSTANCE.getMediaDB(getMongoService());
         Date originalDate = new Date();
         int durationInMillis = 23;
-        String mediaType = MediaType.VIDEO.name();
+        String mediaType = MediaType.video.name();
         String mediaSubType = MediaSubType.ogg.name();
         String dbId = mongoDB.insertMediaTrack(videoTitle, url, originalDate, durationInMillis, mediaType, mediaSubType);
         
@@ -207,7 +207,7 @@ public class TestMediaDB extends AbstractMongoDBTest {
         final String videoTitle = "Test Video";
         final String url = "test";
         MediaDB mongoDB = MediaDBFactory.INSTANCE.getMediaDB(getMongoService());
-        String mediaType = MediaType.VIDEO.name();
+        String mediaType = MediaType.video.name();
         String mediaSubType = MediaSubType.ogg.name();
         String dbId = mongoDB.insertMediaTrack(videoTitle, url, startTime, oneHourInMillis, mediaType, mediaSubType);
         
@@ -221,7 +221,7 @@ public class TestMediaDB extends AbstractMongoDBTest {
         final String videoTitle = "Test Video";
         final String url = "test";
         MediaDB mongoDB = MediaDBFactory.INSTANCE.getMediaDB(getMongoService());
-        String mediaType = MediaType.VIDEO.name();
+        String mediaType = MediaType.video.name();
         String mediaSubType = MediaSubType.ogg.name();
         String dbId = mongoDB.insertMediaTrack(videoTitle, url, startTime, oneHourInMillis, mediaType, mediaSubType);
         

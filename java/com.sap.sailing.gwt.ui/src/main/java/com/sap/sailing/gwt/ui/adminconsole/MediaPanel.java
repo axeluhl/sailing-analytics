@@ -9,8 +9,6 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.i18n.client.DateTimeFormat;
-import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
@@ -36,10 +34,6 @@ import com.sap.sailing.gwt.ui.shared.media.MediaTrack;
  * 
  */
 public class MediaPanel extends FlowPanel {
-
-//    private static final DateTimeFormat TIME_FORMAT = DateTimeFormat.getFormat(PredefinedFormat.HOUR24_MINUTE_SECOND);
-    private static final DateTimeFormat DATETIME_FORMAT = DateTimeFormat.getFormat(PredefinedFormat.DATE_TIME_MEDIUM);
-    // private Calendar calender = new GregorianCalendar();
 
     private final MediaServiceAsync mediaService;
     private final ErrorReporter errorReporter;
@@ -208,62 +202,11 @@ public class MediaPanel extends FlowPanel {
         });
         mediaTracksTable.setColumnWidth(urlColumn, 100, Unit.PCT);
 
-        // media types
-        // final Category[] categories = ContactDatabase.get().queryCategories();
-        // List<String> categoryNames = new ArrayList<String>();
-        // for (Category category : categories) {
-        // categoryNames.add(category.getDisplayName());
-        // }
-        // SelectionCell categoryCell = new SelectionCell(categoryNames);
-        // Column<ContactInfo, String> categoryColumn = new Column<ContactInfo, String>(categoryCell) {
-        // @Override
-        // public String getValue(ContactInfo object) {
-        // return object.getCategory().getDisplayName();
-        // }
-        // };
-        // cellTable.addColumn(categoryColumn, constants.cwCellTableColumnCategory());
-        // categoryColumn.setFieldUpdater(new FieldUpdater<ContactInfo, String>() {
-        // public void update(int index, ContactInfo object, String value) {
-        // for (Category category : categories) {
-        // if (category.getDisplayName().equals(value)) {
-        // object.setCategory(category);
-        // }
-        // }
-        // ContactDatabase.get().refreshDisplays();
-        // }
-        // });
-        // cellTable.setColumnWidth(categoryColumn, 130, Unit.PX);
-
-        // start date - TODO: provide convenient date & time picker. Not provided by standard gwt and also not even a
-        // Calender util is available on the client.
-        // Column<MediaTrackDTO, Date> startDateColumn = new Column<MediaTrackDTO, Date>(new DatePickerCell()) {
-        // @Override
-        // public Date getValue(MediaTrackDTO mediaTrack) {
-        // return mediaTrack.startTime;
-        // }
-        // };
-        // startDateColumn.setSortable(true);
-        // sortHandler.setComparator(startDateColumn, new Comparator<MediaTrackDTO>() {
-        // public int compare(MediaTrackDTO mediaTrack1, MediaTrackDTO mediaTrack2) {
-        // return mediaTrack1.startTime.compareTo(mediaTrack2.startTime);
-        // }
-        // });
-        // startDateColumn.setFieldUpdater(new FieldUpdater<MediaTrackDTO, Date>() {
-        // public void update(int index, MediaTrackDTO mediaTrack, Date newDate) {
-        // // Called when the user changes the value.
-        // calender.setTime(newDate);
-        // mediaTrack.startTime = newDate;
-        // mediaTrackListDataProvider.refresh();
-        // }
-        // });
-        // mediaTracksTable.addColumn(startDateColumn, stringMessages.startDate());
-        // mediaTracksTable.setColumnWidth(startDateColumn, 30, Unit.PCT);
-
         // start time
         Column<MediaTrack, String> startTimeColumn = new Column<MediaTrack, String>(new EditTextCell()) {
             @Override
             public String getValue(MediaTrack mediaTrack) {
-                return mediaTrack.startTime == null ? "" : DATETIME_FORMAT.format(mediaTrack.startTime);
+                return mediaTrack.startTime == null ? "" : mediaTrack.startTimeToString();
             }
         };
         startTimeColumn.setSortable(true);
@@ -275,7 +218,7 @@ public class MediaPanel extends FlowPanel {
         startTimeColumn.setFieldUpdater(new FieldUpdater<MediaTrack, String>() {
             public void update(int index, MediaTrack mediaTrack, String newStartTime) {
                 // Called when the user changes the value.
-                mediaTrack.startTime = DATETIME_FORMAT.parse(newStartTime);
+                mediaTrack.startTime = TimeFormatUtil.DATETIME_FORMAT.parse(newStartTime);
                 mediaService.updateStartTime(mediaTrack, new AsyncCallback<Void>() {
 
                     @Override

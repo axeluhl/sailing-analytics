@@ -2,21 +2,19 @@ package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.Date;
 
-import com.google.gwt.dom.client.VideoElement;
+import com.google.gwt.dom.client.MediaElement;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
-import com.google.gwt.media.client.Video;
+import com.google.gwt.media.client.Audio;
+import com.google.gwt.media.client.MediaBase;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.user.datepicker.client.DateBox;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.media.MediaTrack;
-import com.sap.sailing.gwt.ui.shared.media.MediaTrack.MediaSubType;
-import com.sap.sailing.gwt.ui.shared.media.MediaTrack.MediaType;
 import com.sap.sailing.gwt.ui.shared.media.MediaTrack.MimeFileType;
 
 public class MediaTrackDialog extends DataEntryDialog<MediaTrack> {
@@ -33,14 +31,18 @@ public class MediaTrackDialog extends DataEntryDialog<MediaTrack> {
     };
 
     private final StringMessages stringMessages;
-
-    private TextBox nameBox;
-
-    private DateBox startTimeBox;
+    
+    private MediaTrack mediaTrack = new MediaTrack();
 
     private TextBox urlBox;
+    
+    private TextBox titleBox;
 
-    private TextBox mimeTypeBox;
+    private Label startTimeLabel;
+
+    private Label mimeTypeLabel;
+    
+    private Label durationLabel;
 
     public MediaTrackDialog(StringMessages stringMessages, DialogCallback<MediaTrack> dialogCallback) {
         super("Media Track", "", stringMessages.ok(), stringMessages.cancel(), MEDIA_TRACK_VALIDATOR, dialogCallback);
@@ -49,73 +51,55 @@ public class MediaTrackDialog extends DataEntryDialog<MediaTrack> {
 
     @Override
     protected MediaTrack getResult() {
-        MediaType mediaType;
-        MediaSubType mediaSubType;
-        try {
-            String mimeType = mimeTypeBox.getValue();
-            MimeFileType mimeFileType = MimeFileType.valueOf(mimeType);
-            mediaType = mimeFileType.mediaType;
-            mediaSubType = mimeFileType.mediaSubType;
-        } catch (IllegalArgumentException e) {
-            // ignore. TODO: Somehow put it into the error message.
-            // throw new IllegalArgumentException("Unsupported media type '" + mimeType + "'.", e);
-            mediaType = null;
-            mediaSubType = null;
-        }
-        String title = nameBox.getValue();
-        String url = urlBox.getValue();
-        Date startTime = startTimeBox.getValue();
-        int durationInMillis = getMediaDuration(url, mediaType, mediaSubType);
-        MediaTrack result = new MediaTrack(title, url, startTime, durationInMillis, mediaType, mediaSubType);
-        return result;
+        return mediaTrack;
     }
-
-    private int getMediaDuration(String url, MediaType mediaType, MediaSubType mediaSubType) {
-        if (mediaType != null) {
-            switch (mediaType) {
-            case VIDEO:
-                Video videoControl = Video.createIfSupported();
-                if (videoControl != null) {
-                    videoControl.setPreload("true");
-                    videoControl.setSrc(url);
-                    VideoElement videoElement = videoControl.getVideoElement();
-                    int result = (int) Math.round(videoElement.getDuration());
-                    videoElement.load();
-                    videoElement.play();
-
-                    long timeout = System.currentTimeMillis() + 5 * 1000;
-                    while (System.currentTimeMillis() < timeout) {
-                        if (videoElement.getReadyState() > 0) {
-                            return (int) Math.round(videoElement.getDuration() * 1000);
-                        }
-                    }
-                    return result;
-                }
-            default:
-                return 0;
-            }
-        } else {
-            return 0;
+    
+    
+    private void loadMediaDuration() {
+        MediaBase mediaBase = Audio.createIfSupported();
+        if (mediaBase != null) {
+                addLoadMetadataHandler(mediaBase.getMediaElement());
+                mediaBase.setPreload(MediaElement.PRELOAD_METADATA);
+                mediaBase.setSrc(mediaTrack.url);
+                mediaBase.load();
         }
     }
 
+    native void addLoadMetadataHandler(MediaElement mediaElement) /*-{ 
+        var that = this;
+        mediaElement.addEventListener('loadedmetadata', function() {
+            that.@com.sap.sailing.gwt.ui.adminconsole.MediaTrackDialog::loadedmetadata(Lcom/google/gwt/dom/client/MediaElement;)(mediaElement);
+        });
+    }-*/;
+    
+    public void loadedmetadata(MediaElement mediaElement) {
+        double startOffsetTime = mediaElement.getStartOffsetTime();
+        mediaTrack.startTime = Double.isNaN(startOffsetTime) ? null : new Date(Math.round(startOffsetTime * 1000));
+        mediaTrack.durationInMillis = (int) Math.round(mediaElement.getDuration() * 1000);
+        refreshUI();
+    }
+
+    
     @Override
     protected Widget getAdditionalWidget() {
         VerticalPanel mainPanel = new VerticalPanel();
-        Grid formGrid = new Grid(4, 2);
+        Grid formGrid = new Grid(5, 2);
         formGrid.setCellSpacing(3);
-        formGrid.setWidget(0, 0, new Label(stringMessages.name() + ":"));
-        nameBox = createUrlBox();
-        formGrid.setWidget(0, 1, nameBox);
-        formGrid.setWidget(1, 0, new Label(stringMessages.mimeType() + ":"));
-        mimeTypeBox = createUrlBox();
-        formGrid.setWidget(1, 1, mimeTypeBox);
-        formGrid.setWidget(2, 0, new Label(stringMessages.url() + ":"));
+        formGrid.setWidget(0, 0, new Label(stringMessages.url() + ":"));
         urlBox = createUrlBox();
-        formGrid.setWidget(2, 1, urlBox);
+        formGrid.setWidget(0, 1, urlBox);
+        formGrid.setWidget(1, 0, new Label(stringMessages.name() + ":"));
+        titleBox = createTextBox(null);
+        formGrid.setWidget(1, 1, titleBox);
+        formGrid.setWidget(2, 0, new Label(stringMessages.mimeType() + ":"));
+        mimeTypeLabel = new Label();
+        formGrid.setWidget(2, 1, mimeTypeLabel);
         formGrid.setWidget(3, 0, new Label(stringMessages.startTime() + ":"));
-        startTimeBox = createDateBox(new Date().getTime(), 16);
-        formGrid.setWidget(3, 1, startTimeBox);
+        startTimeLabel = new Label();
+        formGrid.setWidget(3, 1, startTimeLabel);
+        formGrid.setWidget(4, 0, new Label(stringMessages.duration() + ":"));
+        durationLabel = new Label();
+        formGrid.setWidget(4, 1, durationLabel);
         mainPanel.add(formGrid);
         return mainPanel;
     }
@@ -126,23 +110,46 @@ public class MediaTrackDialog extends DataEntryDialog<MediaTrack> {
 
             @Override
             public void onChange(ChangeEvent event) {
-                deriveNameAndMimeType();
+                updateFromUrl();
             }
 
         });
         return result;
     }
 
-    protected void deriveNameAndMimeType() {
-        String url = urlBox.getValue();
+    protected void updateFromUrl() {
+        mediaTrack.url = urlBox.getValue();
+        loadMediaDuration();
 
-        String lastPathSegment = url.substring(url.lastIndexOf('/') + 1);
+        String lastPathSegment = mediaTrack.url.substring(mediaTrack.url.lastIndexOf('/') + 1);
         int dotPos = lastPathSegment.lastIndexOf('.');
-        String fileEnding = lastPathSegment.substring(dotPos + 1);
-        String fileName = lastPathSegment.substring(0, dotPos);
+        if (dotPos >= 0) {
+            mediaTrack.title = lastPathSegment.substring(0, dotPos);
+            String fileEnding = lastPathSegment.substring(dotPos + 1);
+    
+            try {
+                MimeFileType mimeFileType = MimeFileType.valueOf(fileEnding);
+                mediaTrack.type = mimeFileType.mediaType;
+                mediaTrack.subType = mimeFileType.mediaSubType;
+            } catch (IllegalArgumentException e) {
+                // ignore. TODO: Somehow put it into the error message.
+                // throw new IllegalArgumentException("Unsupported media type '" + mimeType + "'.", e);
+                mediaTrack.type = null;
+                mediaTrack.subType = null;
+            }
+        } else {
+            mediaTrack.title = mediaTrack.url;
+            mediaTrack.type = null;
+            mediaTrack.subType = null;
+        }
+        refreshUI();
+    }
 
-        nameBox.setValue(fileName, DONT_FIRE_EVENTS);
-        mimeTypeBox.setValue(fileEnding, DONT_FIRE_EVENTS);
+    private void refreshUI() {
+        titleBox.setValue(mediaTrack.title, DONT_FIRE_EVENTS);
+        mimeTypeLabel.setText(mediaTrack.typeToString());
+        startTimeLabel.setText(mediaTrack.startTimeToString());
+        durationLabel.setText(TimeFormatUtil.milliSecondsToHrsMinSec(mediaTrack.durationInMillis));        
     }
 
     @Override
