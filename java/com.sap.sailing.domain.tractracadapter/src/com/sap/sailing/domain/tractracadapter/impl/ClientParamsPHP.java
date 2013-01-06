@@ -21,7 +21,6 @@ import java.util.regex.Pattern;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.WithID;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.tractracadapter.TracTracControlPoint;
 
@@ -92,7 +91,7 @@ public class ClientParamsPHP {
      * @author Axel Uhl (D043530)
      *
      */
-    private abstract class ObjectWithUUID implements WithID {
+    private abstract class ObjectWithUUID extends AbstractWithID {
         private final Pattern propertyNamePattern = Pattern.compile("([^0-9]*)(([0-9][0-9]*)(.*))?");
         private final String propertyNamePrefix;
         private final Integer number;
@@ -119,16 +118,6 @@ public class ClientParamsPHP {
             return uuid;
         }
         
-        @Override
-        public int hashCode() {
-            return getId().hashCode();
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            return getId().equals(((WithID) obj).getId());
-        }
-
         protected String getProperty(String propertyName) {
             String result = properties.get(propertyNamePrefix+number+propertyName);
             if (result != null) {
