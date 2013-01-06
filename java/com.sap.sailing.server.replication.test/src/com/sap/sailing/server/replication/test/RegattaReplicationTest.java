@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.UUID;
 
 import org.junit.Test;
 
@@ -28,8 +29,8 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
         final String baseEventName = "Kiel Week 2012";
         final String boatClassName = "49er";
         final Iterable<Series> series = Collections.emptyList();
-        Regatta masterRegatta = master.createRegatta(baseEventName, boatClassName, series, /* persistent */ true,
-                DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT));
+        Regatta masterRegatta = master.createRegatta(baseEventName, boatClassName, UUID.randomUUID(), series,
+                /* persistent */ true, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT));
         Thread.sleep(1000);
         Regatta replicatedRegatta = replica.getRegatta(new RegattaName(masterRegatta.getName()));
         assertNotNull(replicatedRegatta);
@@ -49,7 +50,7 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
         Series medal = new SeriesImpl("Medal", /* isMedal */ true,
                 Arrays.asList(new Fleet[] { new FleetImpl("Medal") }), emptyRaceColumnNamesList, /* trackedRegattaRegistry */ null);
         Regatta masterRegatta = master.createRegatta(baseEventName, boatClassName,
-                Arrays.asList(new Series[] { qualification, finals, medal }), /* persistent */ true, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT));
+                UUID.randomUUID(), Arrays.asList(new Series[] { qualification, finals, medal }), /* persistent */ true, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT));
         Thread.sleep(1000);
         Regatta replicatedRegatta = replica.getRegatta(new RegattaName(masterRegatta.getName()));
         assertNotNull(replicatedRegatta);

@@ -1,13 +1,15 @@
 package com.sap.sailing.server.operationaltransformation;
 
+import java.io.Serializable;
+
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
 
 public class RemoveEvent extends AbstractEventOperation<Void> {
     private static final long serialVersionUID = 8242646632399136789L;
 
-    public RemoveEvent(String eventName) {
-        super(eventName);
+    public RemoveEvent(Serializable id) {
+        super(id);
     }
 
     @Override
@@ -24,7 +26,7 @@ public class RemoveEvent extends AbstractEventOperation<Void> {
 
     @Override
     public Void internalApplyTo(RacingEventService toState) {
-        toState.removeEvent(getEventName());
+        toState.removeEvent(getId());
         return null;
     }
 }

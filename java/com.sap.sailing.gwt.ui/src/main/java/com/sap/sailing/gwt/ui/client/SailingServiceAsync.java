@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.client;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
 import java.util.LinkedHashMap;
@@ -18,6 +19,7 @@ import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
+import com.sap.sailing.gwt.ui.shared.SwissTimingArchiveConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.BulkScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 import com.sap.sailing.gwt.ui.shared.ControlPointDTO;
@@ -40,6 +42,7 @@ import com.sap.sailing.gwt.ui.shared.ReplicationStateDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.ScoreCorrectionProviderDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
+import com.sap.sailing.gwt.ui.shared.SwissTimingReplayRaceDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingRaceRecordDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracConfigurationDTO;
@@ -357,8 +360,8 @@ public interface SailingServiceAsync {
     
     void createEvent(String eventName, String description, String publicationUrl, boolean isPublic, AsyncCallback<EventDTO> callback);
     
-    void updateEvent(String eventName, VenueDTO venue, String publicationUrl, boolean isPublic, List<String> regattaNames,
-            AsyncCallback<Void> callback);
+    void updateEvent(String eventName, Serializable id, VenueDTO venue, String publicationUrl, boolean isPublic,
+            List<String> regattaNames, AsyncCallback<Void> callback);
 
     void removeRegatta(RegattaIdentifier regattaIdentifier, AsyncCallback<Void> callback);
 
@@ -415,6 +418,12 @@ public interface SailingServiceAsync {
     void updateLeaderboardColumnFactor(String leaderboardName, String columnName, Double newFactor,
             AsyncCallback<Void> callback);
 
+    void listSwissTiminigReplayRaces(String swissTimingUrl, AsyncCallback<List<SwissTimingReplayRaceDTO>> asyncCallback);
+
+    void replaySwissTimingRace(RegattaIdentifier regattaIdentifier, SwissTimingReplayRaceDTO replayRace,
+            boolean trackWind, boolean correctWindByDeclination, boolean simulateWithStartTimeNow,
+            AsyncCallback<Void> asyncCallback);
+
     void getRankedCompetitorsFromBestToWorstAfterEachRaceColumn(String leaderboardName, Date date,
             AsyncCallback<List<Pair<String, List<CompetitorDTO>>>> callback);
 
@@ -428,4 +437,9 @@ public interface SailingServiceAsync {
      * leaderboard is found.
      */
     void getOverallLeaderboardNamesContaining(String leaderboardName, AsyncCallback<List<String>> asyncCallback);
+
+    void getPreviousSwissTimingArchiveConfigurations(
+            AsyncCallback<List<SwissTimingArchiveConfigurationDTO>> asyncCallback);
+
+    void storeSwissTimingArchiveConfiguration(String swissTimingUrl, AsyncCallback<Void> asyncCallback);
 }

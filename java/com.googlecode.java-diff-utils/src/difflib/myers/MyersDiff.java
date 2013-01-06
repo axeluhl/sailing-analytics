@@ -123,7 +123,7 @@ public class MyersDiff<T> implements DiffAlgorithm<T> {
     }
     
     /**
-     * Computes the minimum diffpath that expresses de differences
+     * Computes the minimum diffpath that expresses the differences
      * between the original and revised sequences, according
      * to Gene Myers differencing algorithm.
      *
@@ -155,7 +155,6 @@ public class MyersDiff<T> implements DiffAlgorithm<T> {
                 final int kplus = kmiddle + 1;
                 final int kminus = kmiddle - 1;
                 PathNode prev = null;
-                
                 int i;
                 if ((k == -d) || (k != d && diagonal[kminus].i < diagonal[kplus].i)) {
                     i = diagonal[kplus].i;
@@ -164,13 +163,9 @@ public class MyersDiff<T> implements DiffAlgorithm<T> {
                     i = diagonal[kminus].i + 1;
                     prev = diagonal[kminus];
                 }
-                
                 diagonal[kminus] = null; // no longer used
-                
                 int j = i - k;
-                
                 PathNode node = new DiffNode(i, j, prev);
-                
                 // orig and rev are zero-based
                 // but the algorithm is one-based
                 // that's why there's no +1 when indexing the sequences
@@ -178,17 +173,15 @@ public class MyersDiff<T> implements DiffAlgorithm<T> {
                     i++;
                     j++;
                 }
-                if (i > node.i)
+                if (i > node.i) {
                     node = new Snake(i, j, node);
-                
+                }
                 diagonal[kmiddle] = node;
-                
                 if (i >= N && j >= M) {
                     return diagonal[kmiddle];
                 }
             }
             diagonal[middle + d - 1] = null;
-            
         }
         // According to Myers, this cannot happen
         throw new DifferentiationFailedException("could not find a diff path");

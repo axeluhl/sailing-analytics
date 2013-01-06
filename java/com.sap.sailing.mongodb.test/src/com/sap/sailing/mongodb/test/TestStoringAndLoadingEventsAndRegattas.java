@@ -13,6 +13,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.UUID;
 import java.util.logging.Logger;
 
 import org.junit.Test;
@@ -81,7 +82,7 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
             venue.addCourseArea(courseArea);
         }
         MongoObjectFactory mof = MongoFactory.INSTANCE.getMongoObjectFactory(getMongoService());
-        Event event = new EventImpl(eventName, venue, publicationUrl, /*isPublic*/ true);
+        Event event = new EventImpl(eventName, venue, publicationUrl, /*isPublic*/ true, UUID.randomUUID());
         mof.storeEvent(event);
         
         DomainObjectFactory dof = MongoFactory.INSTANCE.getDomainObjectFactory(getMongoService());
@@ -107,7 +108,7 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
         BoatClass boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass("29erXX", /* typicallyStartsUpwind */ true);
         Regatta regattaProxy = createRegatta(regattaBaseName, boatClass, /* persistent */ true, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT));
         Regatta regatta = res.createRegatta(regattaProxy.getBaseName(), regattaProxy.getBoatClass().getName(),
-                regattaProxy.getSeries(), regattaProxy.isPersistent(), DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT));
+                "123", regattaProxy.getSeries(), regattaProxy.isPersistent(), DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT));
         addRaceColumns(numberOfQualifyingRaces, numberOfFinalRaces, regatta);
         res.addRegattaLeaderboard(regatta.getRegattaIdentifier(), new int[] { 3, 5 });
         DomainObjectFactory dof = MongoFactory.INSTANCE.getDomainObjectFactory(getMongoService());
@@ -148,7 +149,7 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
         final String regattaBaseName = "Kieler Woche";
         Regatta regattaProxy = createRegatta(regattaBaseName, boatClass, /* persistent */ true, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT));
         Regatta regatta = res.createRegatta(regattaProxy.getBaseName(), regattaProxy.getBoatClass().getName(),
-                regattaProxy.getSeries(), regattaProxy.isPersistent(), DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT));
+                "123", regattaProxy.getSeries(), regattaProxy.isPersistent(), DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT));
         trackedRegatta[0] = new DynamicTrackedRegattaImpl(regatta);
         addRaceColumns(numberOfQualifyingRaces, numberOfFinalRaces, regatta);
         logColumnsInRegatta(regatta);
@@ -375,7 +376,7 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
         medalFleets.add(new FleetImpl("Medal"));
         Series medalSeries = new SeriesImpl("Medal", /* isMedal */ true, medalFleets, emptyRaceColumnNames, /* trackedRegattaRegistry */ null);
         series.add(medalSeries);
-        Regatta regatta = new RegattaImpl(regattaBaseName, boatClass, series, persistent, scoringScheme);
+        Regatta regatta = new RegattaImpl(regattaBaseName, boatClass, series, persistent, scoringScheme, "123");
         return regatta;
     }
 

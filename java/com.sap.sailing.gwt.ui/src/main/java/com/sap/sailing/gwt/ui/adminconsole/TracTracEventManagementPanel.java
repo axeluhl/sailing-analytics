@@ -624,8 +624,8 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         raceList.getList().clear();
         if (text != null && !text.isEmpty()) {
             for (TracTracRaceRecordDTO triple : availableTracTracRaces) {
-                boolean failed = textContainingStringsToCheck(wordsToFilter, triple.regattaName, triple.name);
-                if (!failed) {
+                boolean found = textContainsStringsToCheck(wordsToFilter, triple.regattaName, triple.name);
+                if (found) {
                     raceList.getList().add(triple);
                 }
             }

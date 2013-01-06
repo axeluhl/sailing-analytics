@@ -239,6 +239,11 @@ public class TrackedLegImpl implements TrackedLeg, RaceChangeListener {
     public void delayToLiveChanged(long delayToLiveInMillis) {
     }
 
+    @Override
+    public void waypointsMayHaveChanges() {
+        clearCaches();
+    }
+
     private void clearCaches() {
         synchronized (competitorTracksOrderedByRank) {
             competitorTracksOrderedByRank.clear();

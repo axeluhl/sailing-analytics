@@ -113,7 +113,7 @@ public class MarkPositionReceiver extends AbstractReceiverWithQueue<ControlPoint
                 System.out.println();
             }
         }
-        Mark mark = getDomainFactory().getMark(event.getA(), event.getB());
+        Mark mark = getDomainFactory().getMark(new ControlPointAdapter(event.getA()), event.getB().getIndex());
         for (Race tractracRace : getTracTracEvent().getRaceList()) {
             DynamicTrackedRace trackedRace = getTrackedRace(tractracRace);
             if (trackedRace != null) {
