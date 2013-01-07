@@ -31,7 +31,7 @@ import net.sf.marineapi.nmea.util.FaaMode;
  * @author Kimmo Tuukkanen
  * @version $Revision$
  */
-class VTGParser extends SentenceParser implements VTGSentence {
+public class VTGParser extends SentenceParser implements VTGSentence {
 
     private static final int TRUE_COURSE = 0;
     private static final int TRUE_INDICATOR = 1;

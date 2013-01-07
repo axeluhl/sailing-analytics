@@ -35,7 +35,7 @@ import net.sf.marineapi.nmea.util.GpsFixStatus;
  * @author Kimmo Tuukkanen
  * @version $Revision$
  */
-class GSAParser extends SentenceParser implements GSASentence {
+public class GSAParser extends SentenceParser implements GSASentence {
 
     // field indices
     private static final int GPS_MODE = 0;

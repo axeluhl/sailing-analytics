@@ -35,7 +35,7 @@ import net.sf.marineapi.nmea.util.Time;
  * @author Kimmo Tuukkanen
  * @version $Revision$
  */
-class ZDAParser extends SentenceParser implements ZDASentence {
+public class ZDAParser extends SentenceParser implements ZDASentence {
 
     // field indices
     private static final int UTC_TIME = 0;

@@ -36,7 +36,7 @@ import net.sf.marineapi.nmea.util.Time;
  * @author Kimmo Tuukkanen
  * @version $Revision$
  */
-class RMCParser extends PositionParser implements RMCSentence {
+public class RMCParser extends PositionParser implements RMCSentence {
 
     private static final int UTC_TIME = 0;
     private static final int DATA_STATUS = 1;

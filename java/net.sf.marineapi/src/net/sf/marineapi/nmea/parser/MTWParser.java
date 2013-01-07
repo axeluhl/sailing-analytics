@@ -31,7 +31,7 @@ import net.sf.marineapi.nmea.util.Units;
  * @author Warren Zahra, Kimmo Tuukkanen
  * @version $Revision$
  */
-class MTWParser extends SentenceParser implements MTWSentence {
+public class MTWParser extends SentenceParser implements MTWSentence {
 
     private static final int TEMPERATURE = 0;
     private static final int UNIT_INDICATOR = 1;

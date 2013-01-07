@@ -34,7 +34,7 @@ import net.sf.marineapi.nmea.util.Waypoint;
  * @author Kimmo Tuukkanen
  * @version $Revision$
  */
-class RMBParser extends PositionParser implements RMBSentence {
+public class RMBParser extends PositionParser implements RMBSentence {
 
     // field indexes
     private static final int STATUS = 0;

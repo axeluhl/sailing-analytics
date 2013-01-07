@@ -35,7 +35,7 @@ import net.sf.marineapi.nmea.util.Units;
  * @author Kimmo Tuukkanen
  * @version $Revision$
  */
-class GGAParser extends PositionParser implements GGASentence {
+public class GGAParser extends PositionParser implements GGASentence {
 
     // GGA field indices
     private static final int UTC_TIME = 0;

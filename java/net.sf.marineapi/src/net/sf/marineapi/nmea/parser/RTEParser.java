@@ -34,7 +34,7 @@ import net.sf.marineapi.nmea.util.RouteType;
  * @author Kimmo Tuukkanen
  * @version $Revision$
  */
-class RTEParser extends SentenceParser implements RTESentence {
+public class RTEParser extends SentenceParser implements RTESentence {
 
     // fields indices
     private static final int NUMBER_OF_SENTENCES = 0;

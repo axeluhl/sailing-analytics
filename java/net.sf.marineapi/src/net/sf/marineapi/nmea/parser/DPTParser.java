@@ -30,7 +30,7 @@ import net.sf.marineapi.nmea.sentence.TalkerId;
  * @author Kimmo Tuukkanen
  * @version $Revision$
  */
-class DPTParser extends SentenceParser implements DPTSentence {
+public class DPTParser extends SentenceParser implements DPTSentence {
 
     private static final int DEPTH = 0;
     private static final int OFFSET = 1;

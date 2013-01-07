@@ -32,7 +32,7 @@ import net.sf.marineapi.nmea.util.Units;
  * @author Kimmo Tuukkanen
  * @version $Revision$
  */
-class MWVParser extends SentenceParser implements MWVSentence {
+public class MWVParser extends SentenceParser implements MWVSentence {
 
     private static final int WIND_ANGLE = 0;
     private static final int REFERENCE = 1;

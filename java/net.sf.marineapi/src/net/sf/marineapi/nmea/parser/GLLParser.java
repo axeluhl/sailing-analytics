@@ -34,7 +34,7 @@ import net.sf.marineapi.nmea.util.Time;
  * @author Kimmo Tuukkanen
  * @version $Revision$
  */
-class GLLParser extends PositionParser implements GLLSentence {
+public class GLLParser extends PositionParser implements GLLSentence {
 
     // field indices
     private static final int LATITUDE = 0;

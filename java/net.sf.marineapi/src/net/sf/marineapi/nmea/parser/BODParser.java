@@ -31,7 +31,7 @@ import net.sf.marineapi.nmea.sentence.TalkerId;
  * @version $Revision$
  * @see net.sf.marineapi.nmea.sentence.BODSentence
  */
-class BODParser extends SentenceParser implements BODSentence {
+public class BODParser extends SentenceParser implements BODSentence {
 
     // field indices
     private static final int BEARING_TRUE = 0;

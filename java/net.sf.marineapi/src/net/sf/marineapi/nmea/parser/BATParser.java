@@ -37,7 +37,7 @@ import net.sf.marineapi.nmea.sentence.TalkerId;
  * 
  * @author Axel Uhl
  */
-class BATParser extends SentenceParser implements BATSentence {
+public class BATParser extends SentenceParser implements BATSentence {
     private static final int WIND_VANE_BATTERY_STATUS = 0;
     private static final int BASE_UNIT_BATTERY_LEVEL = 1;
 

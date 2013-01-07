@@ -32,7 +32,7 @@ import net.sf.marineapi.nmea.util.Waypoint;
  * @author Kimmo Tuukkanen
  * @version $Revision$
  */
-class WPLParser extends PositionParser implements WPLSentence {
+public class WPLParser extends PositionParser implements WPLSentence {
 
     // field ids
     private static final int LATITUDE = 0;

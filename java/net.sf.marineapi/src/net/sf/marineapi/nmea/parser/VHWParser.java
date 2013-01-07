@@ -30,7 +30,7 @@ import net.sf.marineapi.nmea.sentence.VHWSentence;
  * @author Warren Zahra, Kimmo Tuukkanen
  * @version $Revision$
  */
-class VHWParser extends SentenceParser implements VHWSentence {
+public class VHWParser extends SentenceParser implements VHWSentence {
 
     private static final int TRUE_HEADING = 0;
     private static final int TRUE_INDICATOR = 1;

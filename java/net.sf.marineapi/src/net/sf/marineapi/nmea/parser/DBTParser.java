@@ -31,7 +31,7 @@ import net.sf.marineapi.nmea.util.Units;
  * @author Kimmo Tuukkanen
  * @version $Revision$
  */
-class DBTParser extends SentenceParser implements DBTSentence {
+public class DBTParser extends SentenceParser implements DBTSentence {
 
     // TODO calculate value for all units when setting a value
 

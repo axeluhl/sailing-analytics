@@ -30,7 +30,7 @@ import net.sf.marineapi.nmea.sentence.TalkerId;
  * @author Kimmo Tuukkanen
  * @version $Revision$
  */
-class HDTParser extends SentenceParser implements HDTSentence {
+public class HDTParser extends SentenceParser implements HDTSentence {
 
     private static final int HEADING = 0;
     private static final int TRUE_INDICATOR = 1;
