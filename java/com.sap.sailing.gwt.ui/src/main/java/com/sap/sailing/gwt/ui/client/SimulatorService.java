@@ -39,7 +39,7 @@ public interface SimulatorService extends RemoteService {
 
     PolarDiagramDTOAndNotificationMessage getPolarDiagramDTO(Double bearingStep, int boatClassIndex) throws ConfigurationException;
 
-    ResponseTotalTimeDTO getTotalTime(RequestTotalTimeDTO requestData) throws ConfigurationException;
+    ResponseTotalTimeDTO getTotalTime_old(RequestTotalTimeDTO requestData) throws ConfigurationException;
 
-    ResponseTotalTimeDTO getTotalTime2(RequestTotalTimeDTO requestData) throws ConfigurationException;
+    ResponseTotalTimeDTO getTotalTime_new(RequestTotalTimeDTO requestData) throws ConfigurationException;
 }

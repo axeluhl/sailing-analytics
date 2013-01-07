@@ -14,6 +14,7 @@ import java.util.logging.Logger;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.sap.sailing.domain.base.SpeedWithBearing;
+import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
@@ -581,10 +582,10 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         int index = noOfPaths - 1;
 
         if (mode == SailingSimulatorUtil.measured) {
-        // Adding the polyline
-        pathDTOs[0] = this.getPolylinePathDTO(pathsAndNames.get("6#GPS Poly"), pathsAndNames.get("7#GPS Track"));
+            // Adding the polyline
+            pathDTOs[0] = this.getPolylinePathDTO(pathsAndNames.get("6#GPS Poly"), pathsAndNames.get("7#GPS Track"));
         }
-        
+
         for (final Entry<String, Path> entry : pathsAndNames.entrySet()) {
             logger.info("Path " + entry.getKey());
 
@@ -601,7 +602,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
 
             index--;
         }
-        
+
 
         RaceMapDataDTO rcDTO;
         if (mode == SailingSimulatorUtil.measured) {
@@ -761,12 +762,14 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
 
 
     @Override
-    public ResponseTotalTimeDTO getTotalTime(final RequestTotalTimeDTO requestData) throws ConfigurationException {
+    public ResponseTotalTimeDTO getTotalTime_old(final RequestTotalTimeDTO requestData) throws ConfigurationException {
 
-        final SpeedWithBearing averageWind = SimulatorServiceUtils.getAverage(requestData.allPoints);
-        final double stepSizeMeters = SimulatorServiceUtils.knotsToMetersPerSecond(averageWind.getKnots()) * (STEP_DURATION_MILLISECONDS / 1000);
+        this.averageWind = requestData.useRealAverageWindSpeed ? SimulatorServiceUtils.getAverage(requestData.allPoints)
+                : DEFAULT_AVERAGE_WIND;
 
-        final List<Position> points = SimulatorServiceUtils.getIntermediatePoints2(requestData.turnPoints, stepSizeMeters);
+        this.stepSizeMeters = SimulatorServiceUtils.knotsToMetersPerSecond(this.averageWind.getKnots()) * (requestData.stepDurationMilliseconds / 1000);
+
+        final List<Position> points = SimulatorServiceUtils.getIntermediatePoints2(requestData.turnPoints, this.stepSizeMeters);
         final int noOfPointsMinus1 = points.size() - 1;
 
         final Pair<PolarDiagram, String> polarDiagramAndNotificationMessage = this.getPolarDiagram(requestData.boatClassID);
@@ -814,24 +817,18 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
             totalTimeSeconds += SimulatorServiceUtils.getTimeSeconds(startPoint, endPoint, endSpeed);
         }
 
-        return new ResponseTotalTimeDTO((long) totalTimeSeconds, notificationMessage);
+        return new ResponseTotalTimeDTO((long) totalTimeSeconds, notificationMessage, null);
     }
 
-    private static final int STEP_DURATION_MILLISECONDS = 2000;
-
     @Override
-    public ResponseTotalTimeDTO getTotalTime2(final RequestTotalTimeDTO requestData) throws ConfigurationException {
+    public ResponseTotalTimeDTO getTotalTime_new(final RequestTotalTimeDTO requestData) throws ConfigurationException {
 
-        final SpeedWithBearing averageWind = SimulatorServiceUtils.getAverage(requestData.allPoints);
-        // final SpeedWithBearing averageWind = DEFAULT_AVERAGE_WIND;
-        final double stepSizeMeters = SimulatorServiceUtils.knotsToMetersPerSecond(averageWind.getKnots()) * (STEP_DURATION_MILLISECONDS / 1000.);
-        // System.out
-        // .println("[DEBUG] average wind speed = " + averageWind.getKnots() + " knots, bearing = " +
-        // averageWind.getBearing().getDegrees() + " degrees");
-        // System.out.println("[DEBUG] step duration = " + STEP_DURATION_MILLISECONDS / 1000. + " seconds");
-        // System.out.println("[DEBUG] step size = " + stepSizeMeters + " meters");
+        this.averageWind = requestData.useRealAverageWindSpeed ? SimulatorServiceUtils.getAverage(requestData.allPoints)
+                : DEFAULT_AVERAGE_WIND;
 
-        final List<Position> points = SimulatorServiceUtils.getIntermediatePoints2(requestData.turnPoints, stepSizeMeters);
+        this.stepSizeMeters = SimulatorServiceUtils.knotsToMetersPerSecond(this.averageWind.getKnots()) * (requestData.stepDurationMilliseconds / 1000.);
+
+        final List<Position> points = SimulatorServiceUtils.getIntermediatePoints2(requestData.turnPoints, this.stepSizeMeters);
         final int noOfPointsMinus1 = points.size() - 1;
 
         final Pair<PolarDiagram, String> polarDiagramAndNotificationMessage = this.getPolarDiagram(requestData.boatClassID);
@@ -853,13 +850,13 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
 
         long stepTimeMilliseconds = 0L;
 
-        // final List<Quadruple<Position, Position, Double, Double>> segments = new ArrayList<Quadruple<Position,
-        // Position, Double, Double>>();
-        // Position segmentStart = points.get(0);
-        // Position segmentEnd = null;
-        // double segmentLength = 0.0;
-        // double segmentTime = 0.0;
-        // int turnIndex = 1;
+        // used only for debug mode
+        final List<Quadruple<PositionDTO, PositionDTO, Double, Double>> segments = new ArrayList<Quadruple<PositionDTO, PositionDTO, Double, Double>>();
+        Position segmentStart = points.get(0);
+        Position segmentEnd = null;
+        double segmentLength = 0.0;
+        double segmentTime = 0.0;
+        int turnIndex = 1;
 
         for (int index = 0; index < noOfPointsMinus1; index++) {
 
@@ -867,32 +864,36 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
             endPoint = points.get(index + 1);
             distanceMeters = SimulatorServiceUtils.getDistanceBetween(startPoint, endPoint);
 
-            windAtTimePoint = getWindAtTimepoint(timepointAsMillis, gpsTrack);
-            // windAtTimePoint = DEFAULT_AVERAGE_WIND;
+            windAtTimePoint = requestData.useRealAverageWindSpeed ? getWindAtTimepoint(timepointAsMillis, gpsTrack) : DEFAULT_AVERAGE_WIND;
 
             boatBearingDeg = SimulatorServiceUtils.getInitialBearing(startPoint, endPoint);
             polarDiagram.setWind(windAtTimePoint);
             boatSpeedMetersPerSecond = polarDiagram.getSpeedAtBearing(new DegreeBearingImpl(boatBearingDeg)).getMetersPerSecond();
             stepTimeMilliseconds = (long) ((distanceMeters / boatSpeedMetersPerSecond) * 1000);
 
-            // segmentTime += stepTimeMilliseconds;
-            // if (equals(endPoint, requestData.turnPoints.get(turnIndex))) {
-            //
-            // segmentEnd = endPoint;
-            // segmentLength = SimulatorServiceUtils.getDistanceBetween(segmentStart, segmentEnd);
-            // segments.add(new Quadruple<Position, Position, Double, Double>(segmentStart, segmentEnd, segmentLength,
-            // segmentTime));
-            //
-            // segmentTime = 0.0;
-            // segmentStart = endPoint;
-            // turnIndex++;
-            // }
+            if (requestData.debugMode) {
+
+                segmentTime += stepTimeMilliseconds;
+                if (equals(endPoint, requestData.turnPoints.get(turnIndex))) {
+
+                    segmentEnd = endPoint;
+                    segmentLength = SimulatorServiceUtils.getDistanceBetween(segmentStart, segmentEnd);
+                    segments.add(new Quadruple<PositionDTO, PositionDTO, Double, Double>(toPositionDTO(segmentStart), toPositionDTO(segmentEnd), segmentLength,
+                            segmentTime));
+
+                    segmentTime = 0.0;
+                    segmentStart = endPoint;
+                    turnIndex++;
+                }
+            }
 
             timepointAsMillis += stepTimeMilliseconds;
         }
 
         final double totalTimeSeconds = (timepointAsMillis - requestData.allPoints.get(0).timepoint) / 1000;
 
+        // if (requestData.debugMode) {
+        //
         // int stepIndex = 0;
         // for (final Quadruple<Position, Position, Double, Double> segment : segments) {
         // System.out.println("[DEBUG] Segment " + stepIndex + " from [" + segment.getA().getLatDeg() + "," +
@@ -902,8 +903,9 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         // / 1000. + " seconds");
         // stepIndex++;
         // }
+        // }
 
-        return new ResponseTotalTimeDTO((long) totalTimeSeconds, notificationMessage);
+        return new ResponseTotalTimeDTO((long) totalTimeSeconds, notificationMessage, (requestData.debugMode ? segments : null));
     }
 
     private static SpeedWithBearing getWindAtTimepoint(final long timepointAsMillis, final Path gpsTrack) {
@@ -920,8 +922,19 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         return pathPoints.get(indexOfMinDiff).getSpeed();
     }
 
-    // private static SpeedWithBearing DEFAULT_AVERAGE_WIND = new KnotSpeedWithBearingImpl(4.5, new
-    // DegreeBearingImpl(350));
+    private static SpeedWithBearing DEFAULT_AVERAGE_WIND = new KnotSpeedWithBearingImpl(4.5, new DegreeBearingImpl(350));
+
+    private SpeedWithBearing averageWind = null;
+
+    public SpeedWithBearing getAverageWind() {
+        return this.averageWind;
+    }
+
+    private double stepSizeMeters = 0.0;
+
+    public double getStepSizeMeters() {
+        return this.stepSizeMeters;
+    }
 
     public static boolean equals(final Position position, final PositionDTO positonDTO) {
         return (position.getLatDeg() == positonDTO.latDeg && position.getLngDeg() == positonDTO.lngDeg);
