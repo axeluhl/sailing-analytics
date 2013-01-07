@@ -2,6 +2,7 @@ package com.sap.sailing.nmeaconnector.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -22,9 +23,12 @@ import java.util.Locale;
 import net.sf.marineapi.nmea.event.SentenceEvent;
 import net.sf.marineapi.nmea.event.SentenceListener;
 import net.sf.marineapi.nmea.io.SentenceReader;
+import net.sf.marineapi.nmea.sentence.BATSentence;
 import net.sf.marineapi.nmea.sentence.MWVSentence;
 import net.sf.marineapi.nmea.sentence.Sentence;
 import net.sf.marineapi.nmea.sentence.SentenceId;
+import net.sf.marineapi.nmea.sentence.TalkerId;
+import net.sf.marineapi.nmea.sentence.BATSentence.WindVaneBatteryStatus;
 
 import org.junit.Test;
 
@@ -69,6 +73,25 @@ public class ReadWindVaneDataTest {
         readWindVaneNmeaFile(sentences, timePointsForSentences);
         assertEquals(601, sentences.size()); // we have 684 sentences altogether; 74 of those are WIBAT which are not understood and 9 have no timestamp yet
     }
+    
+    @Test
+    public void findProprietaryBatteryMessages() throws IOException, InterruptedException {
+        final List<Sentence> sentences = new ArrayList<>();
+        final List<TimePoint> timePointsForSentences = new ArrayList<>();
+        readWindVaneNmeaFile(sentences, timePointsForSentences);
+        boolean found = false;
+        for (Sentence sentence : sentences) {
+            if (sentence.getTalkerId() == TalkerId.WI) {
+                if (sentence.getSentenceId().equals("BAT")) {
+                    found = true;
+                    assertTrue(sentence instanceof BATSentence);
+                    assertEquals(WindVaneBatteryStatus.GOOD, ((BATSentence) sentence).getWindVaneBatteryStatus());
+                    assertEquals(5, ((BATSentence) sentence).getBaseUnitBatteryLevel());
+                }
+            }
+        }
+        assertTrue("Expected to find BAT message", found);
+    }
 
     private void readWindVaneNmeaFile(final List<Sentence> sentences, final List<TimePoint> timePointsForSentences)
             throws IOException, InterruptedException {
@@ -100,8 +123,7 @@ public class ReadWindVaneDataTest {
                 // NMEA0183 sentence
                 // Special hack for a bug with the WindVane's speed unit output which erroneously uses "K" for "knots":
                 line = nmeaUtil.replace(line, ",K,", ",N,");
-                // Another special hack: exclude the WIBAT message which is not understood by marineapi-0.5 so the time stamps stay in sync
-                if (lastTimestampFromFile != null && !line.contains("$WIBAT")) {
+                if (lastTimestampFromFile != null) {
                     lastTimestampFromFile = lastTimestampFromFile.plus(1000);
                     timePointsForSentences.add(lastTimestampFromFile);
                     // write the sentence only if we have a time stamp for it

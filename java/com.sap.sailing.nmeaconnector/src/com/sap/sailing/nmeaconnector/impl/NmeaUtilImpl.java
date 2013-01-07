@@ -55,27 +55,28 @@ public class NmeaUtilImpl implements NmeaUtil {
     }
 
     @Override
-    public String replace(String nmeaSentence, String sequenceToFind, String replaceWith) {
-        final String result;
-        final String resultWithOldChecksum = nmeaSentence.replace(sequenceToFind, replaceWith);
-        if (resultWithOldChecksum.matches(".*\\*[0-9a-fA-F][0-9a-fA-F]$")) {
-            // found checksum
-            int checksum = Integer.valueOf(resultWithOldChecksum.substring(resultWithOldChecksum.length()-2), 16);
-            for (char oldChar : sequenceToFind.toCharArray()) {
-                checksum ^= (byte) oldChar;
+    public String replace(String nmeaSentence, String regexToFind, String replaceWith) {
+        while (nmeaSentence.matches(".*" + regexToFind + ".*")) {
+            final String resultWithOldChecksum = nmeaSentence.replaceFirst(regexToFind, replaceWith);
+            if (resultWithOldChecksum.matches(".*\\*[0-9a-fA-F][0-9a-fA-F]$")) {
+                // found checksum
+                int checksum = Integer.valueOf(resultWithOldChecksum.substring(resultWithOldChecksum.length() - 2), 16);
+                for (char oldChar : regexToFind.toCharArray()) {
+                    checksum ^= (byte) oldChar;
+                }
+                for (char newChar : replaceWith.toCharArray()) {
+                    checksum ^= (byte) newChar;
+                }
+                String newHexChecksum = Integer.toHexString(checksum).toUpperCase();
+                if (newHexChecksum.length() == 1) {
+                    newHexChecksum = "0" + newHexChecksum;
+                }
+                nmeaSentence = resultWithOldChecksum.substring(0, resultWithOldChecksum.length() - 2) + newHexChecksum;
+            } else {
+                nmeaSentence = resultWithOldChecksum;
             }
-            for (char newChar : replaceWith.toCharArray()) {
-                checksum ^= (byte) newChar;
-            }
-            String newHexChecksum = Integer.toHexString(checksum).toUpperCase();
-            if (newHexChecksum.length() == 1) {
-                newHexChecksum = "0" + newHexChecksum;
-            }
-            result = resultWithOldChecksum.substring(0, resultWithOldChecksum.length()-2)+newHexChecksum;
-        } else {
-            result = resultWithOldChecksum;
         }
-        return result;
+        return nmeaSentence;
     }
     
 }

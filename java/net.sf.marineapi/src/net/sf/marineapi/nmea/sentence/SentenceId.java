@@ -69,7 +69,9 @@ public enum SentenceId {
     /** Waypoint location (latitude/longitude) */
     WPL,
     /** UTC time and date with local time zone offset */
-    ZDA;
+    ZDA,
+    /** Proprietary extension for SailTimer WindVane's battery indicator message */
+    BAT;
 
     /**
      * Parses the sentence id from specified sentence String and returns a
