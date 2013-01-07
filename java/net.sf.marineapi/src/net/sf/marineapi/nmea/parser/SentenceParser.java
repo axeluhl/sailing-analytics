@@ -122,7 +122,7 @@ public class SentenceParser implements Sentence {
      * @throws IllegalArgumentException If the specified sentence is not a valid
      *             or is not of expected type.
      */
-    protected SentenceParser(String nmea, String type) {
+    public SentenceParser(String nmea, String type) {
         this(nmea);
         if (type == null || "".equals(type)) {
             throw new IllegalArgumentException(
@@ -195,7 +195,7 @@ public class SentenceParser implements Sentence {
      * @param sid Sentence id to set in sentence
      * @param size Number of data fields following the sentence id field
      */
-    SentenceParser(TalkerId tid, SentenceId sid, int size) {
+    public SentenceParser(TalkerId tid, SentenceId sid, int size) {
         this(tid, sid.toString(), size);
     }
 
@@ -328,7 +328,7 @@ public class SentenceParser implements Sentence {
      * @throws net.sf.marineapi.parser.ParseException If field contains more
      *             than one character
      */
-    protected final char getCharValue(int index) {
+    public final char getCharValue(int index) {
         String val = getStringValue(index);
         if (val.length() > 1) {
             String msg = String.format("Expected char, found String [%s]", val);
@@ -343,7 +343,7 @@ public class SentenceParser implements Sentence {
      * @param index Data field index in sentence
      * @return Field as parsed by {@link java.lang.Double#parseDouble(String)}
      */
-    protected final double getDoubleValue(int index) {
+    public final double getDoubleValue(int index) {
         double value;
         try {
             value = Double.parseDouble(getStringValue(index));
@@ -359,7 +359,7 @@ public class SentenceParser implements Sentence {
      * @param index Field index in sentence
      * @return Field parsed by {@link java.lang.Integer#parseInt(String)}
      */
-    protected final int getIntValue(int index) {
+    public final int getIntValue(int index) {
         int value;
         try {
             value = Integer.parseInt(getStringValue(index));
@@ -383,7 +383,7 @@ public class SentenceParser implements Sentence {
      * @throws net.sf.marineapi.parser.DataNotAvailableException If the field is
      *             empty
      */
-    protected final String getStringValue(int index) {
+    public final String getStringValue(int index) {
         String value = fields.get(index);
         if (value == null || "".equals(value)) {
             throw new DataNotAvailableException("Data not available");
@@ -397,7 +397,7 @@ public class SentenceParser implements Sentence {
      * @param index Field index
      * @return True if field contains value, otherwise false.
      */
-    protected final boolean hasValue(int index) {
+    public final boolean hasValue(int index) {
         boolean result = true;
         try {
             getStringValue(index);
@@ -439,7 +439,7 @@ public class SentenceParser implements Sentence {
      * @param value Value to set
      * @see #setDoubleValue(int, double, int, int)
      */
-    protected final void setDoubleValue(int index, double value) {
+    public final void setDoubleValue(int index, double value) {
         setStringValue(index, String.valueOf(value));
     }
 
@@ -455,7 +455,7 @@ public class SentenceParser implements Sentence {
      * @param decimals Maximum number of digits after decimal separator
      * @see #setDoubleValue(int, double)
      */
-    protected final void setDoubleValue(int index, double value, int leading,
+    public final void setDoubleValue(int index, double value, int leading,
             int decimals) {
 
         StringBuilder pattern = new StringBuilder();
@@ -486,7 +486,7 @@ public class SentenceParser implements Sentence {
      * @param index Field index
      * @param value Value to set
      */
-    protected final void setIntValue(int index, int value) {
+    public final void setIntValue(int index, int value) {
         setStringValue(index, String.valueOf(value));
     }
 
@@ -498,7 +498,7 @@ public class SentenceParser implements Sentence {
      * @param value Value to set
      * @param leading Number of digits to use.
      */
-    protected final void setIntValue(int index, int value, int leading) {
+    public final void setIntValue(int index, int value, int leading) {
         String pattern = "%d";
         if (leading > 0) {
             pattern = "%0" + leading + "d";
@@ -512,7 +512,7 @@ public class SentenceParser implements Sentence {
      * @param index Field index
      * @param value String to set, <code>null</code> converts to empty String.
      */
-    protected final void setStringValue(int index, String value) {
+    public final void setStringValue(int index, String value) {
         fields.set(index, value == null ? "" : value);
     }
 
@@ -532,7 +532,7 @@ public class SentenceParser implements Sentence {
      * @param first Index of first field to set
      * @param newFields Array of Strings to set
      */
-    protected final void setStringValues(int first, String[] newFields) {
+    public final void setStringValues(int first, String[] newFields) {
 
         List<String> temp = new ArrayList<String>();
         for (int i = 0; i < getFieldCount(); i++) {

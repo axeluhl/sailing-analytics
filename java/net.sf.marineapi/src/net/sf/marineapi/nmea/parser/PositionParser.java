@@ -59,7 +59,7 @@ public abstract class PositionParser extends SentenceParser {
      * @param index Index of field that contains the latitude hemisphere value.
      * @return Hemisphere of latitude
      */
-    protected CompassPoint parseHemisphereLat(int index) {
+    public CompassPoint parseHemisphereLat(int index) {
         char ch = getCharValue(index);
         CompassPoint d = CompassPoint.valueOf(ch);
         if (d != CompassPoint.NORTH && d != CompassPoint.SOUTH) {
@@ -74,7 +74,7 @@ public abstract class PositionParser extends SentenceParser {
      * @param index Field index for longitude hemisphere indicator
      * @return Hemisphere of longitude
      */
-    protected CompassPoint parseHemisphereLon(int index) {
+    public CompassPoint parseHemisphereLon(int index) {
         char ch = getCharValue(index);
         CompassPoint d = CompassPoint.valueOf(ch);
         if (d != CompassPoint.EAST && d != CompassPoint.WEST) {
@@ -90,7 +90,7 @@ public abstract class PositionParser extends SentenceParser {
      * @param index Index of field containing the latitude value.
      * @return Latitude value in degrees
      */
-    protected double parseLatitude(int index) {
+    public double parseLatitude(int index) {
         String field = getStringValue(index);
         int deg = Integer.parseInt(field.substring(0, 2));
         double min = Double.parseDouble(field.substring(2));
@@ -104,7 +104,7 @@ public abstract class PositionParser extends SentenceParser {
      * @param index Index of field containing the longitude value.
      * @return Longitude value in degrees
      */
-    protected double parseLongitude(int index) {
+    public double parseLongitude(int index) {
         String field = getStringValue(index);
         int deg = Integer.parseInt(field.substring(0, 3));
         double min = Double.parseDouble(field.substring(3));
@@ -119,7 +119,7 @@ public abstract class PositionParser extends SentenceParser {
      * @throws IllegalArgumentException If specified Direction is other than
      *             NORTH or SOUTH.
      */
-    protected void setLatHemisphere(int field, CompassPoint hem) {
+    public void setLatHemisphere(int field, CompassPoint hem) {
         if (hem != CompassPoint.NORTH && hem != CompassPoint.SOUTH) {
             throw new IllegalArgumentException("Invalid latitude hemisphere: "
                     + hem);
@@ -133,7 +133,7 @@ public abstract class PositionParser extends SentenceParser {
      * @param index Field index
      * @param lat Latitude value in degrees
      */
-    protected void setLatitude(int index, double lat) {
+    public void setLatitude(int index, double lat) {
 
         int deg = (int) Math.floor(lat);
         double min = (lat - deg) * 60;
@@ -153,7 +153,7 @@ public abstract class PositionParser extends SentenceParser {
      * @param index Field index
      * @param lon Longitude value in degrees
      */
-    protected void setLongitude(int index, double lon) {
+    public void setLongitude(int index, double lon) {
 
         int deg = (int) Math.floor(lon);
         double min = (lon - deg) * 60;
@@ -175,7 +175,7 @@ public abstract class PositionParser extends SentenceParser {
      * @throws IllegalArgumentException If specified Direction is other than
      *             EAST or WEST.
      */
-    protected void setLonHemisphere(int field, CompassPoint hem) {
+    public void setLonHemisphere(int field, CompassPoint hem) {
         if (hem != CompassPoint.EAST && hem != CompassPoint.WEST) {
             throw new IllegalArgumentException("Invalid longitude hemisphere: "
                     + hem);
