@@ -37,7 +37,7 @@ import net.sf.marineapi.nmea.util.CompassPoint;
  * @author Kimmo Tuukkanen
  * @version $Revision$
  */
-abstract class PositionParser extends SentenceParser {
+public abstract class PositionParser extends SentenceParser {
 
     /**
      * @see SentenceParser#SentenceParser(String, SentenceId)
