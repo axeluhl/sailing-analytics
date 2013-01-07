@@ -850,13 +850,14 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
 
         long stepTimeMilliseconds = 0L;
 
-        // used only for debug mode
+        // start of [used only for debug mode]
         final List<Quadruple<PositionDTO, PositionDTO, Double, Double>> segments = new ArrayList<Quadruple<PositionDTO, PositionDTO, Double, Double>>();
         Position segmentStart = points.get(0);
         Position segmentEnd = null;
         double segmentLength = 0.0;
         double segmentTime = 0.0;
         int turnIndex = 1;
+        // end of [used only for debug mode]
 
         for (int index = 0; index < noOfPointsMinus1; index++) {
 
@@ -891,19 +892,6 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         }
 
         final double totalTimeSeconds = (timepointAsMillis - requestData.allPoints.get(0).timepoint) / 1000;
-
-        // if (requestData.debugMode) {
-        //
-        // int stepIndex = 0;
-        // for (final Quadruple<Position, Position, Double, Double> segment : segments) {
-        // System.out.println("[DEBUG] Segment " + stepIndex + " from [" + segment.getA().getLatDeg() + "," +
-        // segment.getA().getLngDeg() + "] to ["
-        // + segment.getB().getLatDeg() + "," + segment.getB().getLngDeg() + "], length = " + segment.getC() +
-        // " meters, time = " + segment.getD()
-        // / 1000. + " seconds");
-        // stepIndex++;
-        // }
-        // }
 
         return new ResponseTotalTimeDTO((long) totalTimeSeconds, notificationMessage, (requestData.debugMode ? segments : null));
     }
