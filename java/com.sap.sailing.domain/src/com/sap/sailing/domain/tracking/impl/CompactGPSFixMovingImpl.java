@@ -2,11 +2,13 @@ package com.sap.sailing.domain.tracking.impl;
 
 import com.sap.sailing.domain.base.CourseChange;
 import com.sap.sailing.domain.base.SpeedWithBearing;
+import com.sap.sailing.domain.base.impl.AbstractSpeedWithAbstractBearingImpl;
 import com.sap.sailing.domain.base.impl.AbstractSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.AbstractBearing;
 import com.sap.sailing.domain.common.AbstractSpeedImpl;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 
@@ -54,7 +56,7 @@ public class CompactGPSFixMovingImpl extends CompactGPSFixImpl implements GPSFix
 
         @Override
         public String toString() {
-            return super.toString()+" to "+getBearing().getDegrees()+"°";
+            return super.toString()+" to "+getBearing().getDegrees()+"Â°";
         }
         @Override
         public int hashCode() {
@@ -65,6 +67,11 @@ public class CompactGPSFixMovingImpl extends CompactGPSFixImpl implements GPSFix
         public boolean equals(Object object) {
             return super.equals(object) && object instanceof SpeedWithBearing
                     && getBearing().equals(((SpeedWithBearing) object).getBearing());
+        }
+
+        @Override
+        public Speed projectTo(Position position, Bearing projectTo) {
+            return AbstractSpeedWithAbstractBearingImpl.projectTo(this, position, projectTo);
         }
     }
     

@@ -40,7 +40,7 @@ public class SimpleDomainFactoryTest {
     public void testUnknownBoatClassInValidRaceID() {
         DomainFactory domainFactory = DomainFactory.INSTANCE;
         final String raceID = "SAX920103";
-        RaceDefinition raceDefinition = domainFactory.createRaceDefinition(domainFactory.getOrCreateRegatta(raceID,
+        RaceDefinition raceDefinition = domainFactory.createRaceDefinition(domainFactory.getOrCreateDefaultRegatta(raceID,
                 new RacingEventServiceImpl()),
                 new Race() {
                     @Override
@@ -92,7 +92,7 @@ public class SimpleDomainFactoryTest {
     public void testCourseConfigForMark() throws PatchFailedException {
         DomainFactory domainFactory = DomainFactory.INSTANCE;
         Regatta regatta = new RegattaImpl("TestEvent", /* boatClass */ null, new RacingEventServiceImpl(),
-                com.sap.sailing.domain.base.DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT));
+                com.sap.sailing.domain.base.DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), "123");
         Race race = new RaceImpl("1234", "Race 1234");
         Iterable<Competitor> competitors = Collections.emptyList();
         StartList startList = new StartListImpl("1234", competitors);
@@ -117,7 +117,7 @@ public class SimpleDomainFactoryTest {
     public void testCourseConfigForGate() throws PatchFailedException {
         DomainFactory domainFactory = DomainFactory.INSTANCE;
         Regatta regatta = new RegattaImpl("TestEvent", /* boatClass */ null, new RacingEventServiceImpl(),
-                com.sap.sailing.domain.base.DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT));
+                com.sap.sailing.domain.base.DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), "123");
         Race race = new RaceImpl("1234", "Race 1234");
         Iterable<Competitor> competitors = Collections.emptyList();
         StartList startList = new StartListImpl("1234", competitors);

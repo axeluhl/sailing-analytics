@@ -73,7 +73,7 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
             DomainFactory domainFactory, SwissTimingFactory factory, RaceSpecificMessageLoader messageLoader,
             TrackedRegattaRegistry trackedRegattaRegistry, boolean canSendRequests, long delayToLiveInMillis) throws InterruptedException,
             UnknownHostException, IOException, ParseException {
-        this(domainFactory.getOrCreateRegatta(raceID, trackedRegattaRegistry), raceID, hostname, port, windStore, domainFactory, factory,
+        this(domainFactory.getOrCreateDefaultRegatta(raceID, trackedRegattaRegistry), raceID, hostname, port, windStore, domainFactory, factory,
                 messageLoader, trackedRegattaRegistry, canSendRequests, delayToLiveInMillis);
     }
     
@@ -214,12 +214,15 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
             TreeMap<Integer, MarkPassing> markPassingsByMarkIndex = new TreeMap<Integer, MarkPassing>();
             // now fill with the already existing mark passings for the competitor identified by boatID...
             NavigableSet<MarkPassing> markPassings = trackedRace.getMarkPassings(competitor);
-            synchronized (markPassings) {
+            trackedRace.lockForRead(markPassings);
+            try {
                 for (MarkPassing markPassing : markPassings) {
                     markPassingsByMarkIndex.put(
                             trackedRace.getRace().getCourse().getIndexOfWaypoint(markPassing.getWaypoint()),
                             markPassing);
                 }
+            } finally {
+                trackedRace.unlockAfterRead(markPassings);
             }
             // ...and then overwrite those for which we received "new evidence"
             for (Triple<Integer, Integer, Long> markIndexRankAndTimeSinceStartInMilliseconds : markIndicesRanksAndTimesSinceStartInMilliseconds) {

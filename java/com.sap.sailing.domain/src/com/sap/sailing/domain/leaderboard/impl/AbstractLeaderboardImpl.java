@@ -107,8 +107,9 @@ public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardI
     }
 
     /**
-     * Per competitor disqualified ({@link ScoreCorrection} has a {@link MaxPointsReason} for the competitor), all
-     * competitors ranked worse by the tracking system need to have their rank corrected by one.
+     * Per competitor disqualified ({@link ScoreCorrection} has a {@link MaxPointsReason} for the competitor that has
+     * <code>{@link MaxPointsReason#isAdvanceCompetitorsTrackedWorse()}==true</code>), all competitors ranked worse by
+     * the tracking system need to have their rank corrected by one.
      * 
      * @param trackedRace
      *            the race to which the rank refers; look for disqualifications / max points reasons in this column
@@ -131,7 +132,8 @@ public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardI
         while (betterCompetitorRank < rank && ci.hasNext()) {
             Competitor betterTrackedCompetitor = ci.next();
             MaxPointsReason maxPointsReasonForBetterCompetitor = getScoreCorrection().getMaxPointsReason(betterTrackedCompetitor, raceColumn);
-            if (maxPointsReasonForBetterCompetitor != null && maxPointsReasonForBetterCompetitor != MaxPointsReason.NONE) {
+            if (maxPointsReasonForBetterCompetitor != null && maxPointsReasonForBetterCompetitor != MaxPointsReason.NONE &&
+                    maxPointsReasonForBetterCompetitor.isAdvanceCompetitorsTrackedWorse()) {
                 correctedRank--;
             }
             betterCompetitorRank++;

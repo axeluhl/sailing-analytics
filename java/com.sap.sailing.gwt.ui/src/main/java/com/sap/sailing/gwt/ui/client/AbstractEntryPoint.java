@@ -21,7 +21,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
-public abstract class AbstractEntryPoint implements EntryPoint, ErrorReporter {
+public abstract class AbstractEntryPoint implements EntryPoint, ErrorReporter, WindowSizeDetector {
     public static final String DEBUG_ID_ATTRIBUTE = "selenium-id";
     public static final String DEBUG_ID_PREFIX = "";
     
@@ -96,9 +96,15 @@ public abstract class AbstractEntryPoint implements EntryPoint, ErrorReporter {
             reportError(message);
         }
     }
+    
+    @Override
+    public boolean isSmallWidth() {
+        int width = Window.getClientWidth();
+        return width <= 720;
+    }
 
     public void createErrorPage(String message) {
-        LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(stringMessages);
+        LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(stringMessages, this);
         logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
         RootPanel.get().add(logoAndTitlePanel);
         RootPanel.get().add(new Label(message));

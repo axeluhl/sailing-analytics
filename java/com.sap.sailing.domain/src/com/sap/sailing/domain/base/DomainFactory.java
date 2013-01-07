@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.Serializable;
 
 import com.sap.sailing.domain.base.impl.DomainFactoryImpl;
+import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
@@ -26,7 +27,7 @@ public interface DomainFactory {
      * in that case. Otherwise, a new {@link Mark} is created with <code>color</code> as its {@link Mark#getColor()} 
      * and <code>shape</code> as its {@link Mark#getShape()}.
      */
-    Mark getOrCreateMark(String id, String color, String shape, String pattern);
+    Mark getOrCreateMark(String id, MarkType type, String color, String shape, String pattern);
 
     Gate createGate(Mark left, Mark right, String name);
     

@@ -69,7 +69,7 @@ public class ReachingLegTest extends TrackBasedTest {
         competitors.add(hunger);
         plattner = createCompetitor("Dr. Hasso Plattner");
         competitors.add(plattner);
-        schomaeker = createCompetitor("Meike Schomäker");
+        schomaeker = createCompetitor("Meike Schomï¿½ker");
         competitors.add(schomaeker);
         start = new MillisecondsTimePoint(new GregorianCalendar(2011, 05, 23).getTime());
         setTrackedRace(createTestTrackedRace("Kieler Woche", "505 Race 2", "505", competitors, start));
@@ -82,7 +82,8 @@ public class ReachingLegTest extends TrackBasedTest {
     protected DynamicTrackedRace createTestTrackedRace(String regattaName, String raceName, String boatClassName,
             Iterable<Competitor> competitors, TimePoint timePointForFixes) {
         BoatClassImpl boatClass = new BoatClassImpl(boatClassName, /* typicallyStartsUpwind */ true);
-        Regatta regatta = new RegattaImpl(regattaName, boatClass, /* trackedRegattaRegistry */ null, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT));
+        Regatta regatta = new RegattaImpl(regattaName, boatClass, /* trackedRegattaRegistry */ null,
+                DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), "123");
         TrackedRegatta trackedRegatta = new TrackedRegattaImpl(regatta);
         List<Waypoint> waypoints = new ArrayList<Waypoint>();
         // create a two-lap upwind/downwind course:

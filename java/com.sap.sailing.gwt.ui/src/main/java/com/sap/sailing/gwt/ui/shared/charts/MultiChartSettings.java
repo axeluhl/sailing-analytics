@@ -3,14 +3,14 @@ package com.sap.sailing.gwt.ui.shared.charts;
 import com.sap.sailing.domain.common.DetailType;
 
 public class MultiChartSettings extends ChartSettings {
-    private final DetailType dataToShow;
-    
-    public MultiChartSettings(ChartSettings superResult, DetailType dataToShow) {
+    private final DetailType detailType;
+
+    public MultiChartSettings(ChartSettings superResult, DetailType detailType) {
         super(superResult);
-        this.dataToShow = dataToShow;
+        this.detailType = detailType;
     }
 
-    public DetailType getDataToShow() {
-        return dataToShow;
+    public DetailType getDetailType() {
+        return detailType;
     }
 }

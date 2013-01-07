@@ -3,8 +3,9 @@ package com.sap.sailing.domain.base.impl;
 import java.io.Serializable;
 import java.util.Collections;
 
-import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.DomainFactory;
+import com.sap.sailing.domain.base.Mark;
+import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.impl.NamedImpl;
 
 public class MarkImpl extends NamedImpl implements Mark {
@@ -13,30 +14,43 @@ public class MarkImpl extends NamedImpl implements Mark {
     private final String color;
     private final String shape;
     private final String pattern;
+    private final MarkType type;
 
     public MarkImpl(String name) {
         super(name);
+        type = MarkType.BUOY;
+        color = null;
+        shape = null;
+        pattern = null;
+    }
+    
+    public MarkImpl(String name, MarkType type) {
+        super(name);
+        this.type = type;
         color = null;
         shape = null;
         pattern = null;
     }
 
-    public MarkImpl(String name, String color) {
+    public MarkImpl(String name, MarkType type, String color) {
         super(name);
+        this.type = type;
         this.color = color;
         shape = null;
         pattern = null;
     }
 
-    public MarkImpl(String name, String color, String shape) {
+    public MarkImpl(String name, MarkType type, String color, String shape) {
         super(name);
+        this.type = type;
         this.color = color;
         this.shape = shape;
         pattern = null;
     }
 
-    public MarkImpl(String name, String color, String shape, String pattern) {
+    public MarkImpl(String name, MarkType type, String color, String shape, String pattern) {
         super(name);
+        this.type = type;
         this.color = color;
         this.shape = shape;
         this.pattern = pattern;
@@ -56,7 +70,7 @@ public class MarkImpl extends NamedImpl implements Mark {
 
     @Override
     public Mark resolve(DomainFactory domainFactory) {
-        Mark result = domainFactory.getOrCreateMark(getName(), color, shape, pattern);
+        Mark result = domainFactory.getOrCreateMark(getName(), type, color, shape, pattern);
         return result;
     }
 
@@ -73,5 +87,10 @@ public class MarkImpl extends NamedImpl implements Mark {
     @Override
     public String getPattern() {
         return pattern;
+    }
+
+    @Override
+    public MarkType getType() {
+        return type;
     }
 }

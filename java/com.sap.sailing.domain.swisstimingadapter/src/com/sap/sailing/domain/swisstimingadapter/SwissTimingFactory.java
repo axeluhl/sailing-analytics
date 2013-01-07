@@ -62,4 +62,6 @@ public interface SwissTimingFactory {
 
     SailMasterMessage createMessage(String message, Long sequenceNumber);
 
+    SwissTimingArchiveConfiguration createSwissTimingArchiveConfiguration(String string);
+
 }

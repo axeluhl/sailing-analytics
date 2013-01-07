@@ -92,8 +92,7 @@ public class ExpeditionWindTracker implements ExpeditionListener, WindTracker {
                                 /* timeoutForOnlineFetchInMilliseconds */5000);
                         if (declination != null) {
                             windSpeed = new KnotSpeedWithBearingImpl(windSpeed.getKnots(), new DegreeBearingImpl(
-                                    windSpeed.getBearing().getDegrees()
-                                            + declination.getBearingCorrectedTo(message.getTimePoint()).getDegrees()));
+                                    windSpeed.getBearing().getDegrees()).add(declination.getBearingCorrectedTo(message.getTimePoint())));
                         } else {
                             logger.warning("Unable to obtain declination for wind bearing correction for time point "
                                     + message.getTimePoint() + " and position " + lastKnownPositionPerBoatID.get(message.getBoatID()));

@@ -17,11 +17,11 @@ public class RaceDefinitionImpl extends NamedImpl implements RaceDefinition {
     private final BoatClass boatClass;
     private final Serializable id;
     
-    public RaceDefinitionImpl(String name, Course course, BoatClass boatClass, Iterable<Competitor> competitors) {
+    public RaceDefinitionImpl(String name, Course course, BoatClass boatClass, Iterable<? extends Competitor> competitors) {
         this(name, course, boatClass, competitors, /* use name as default ID */ name);
     }
 
-    public RaceDefinitionImpl(String name, Course course, BoatClass boatClass, Iterable<Competitor> competitors, Serializable id) {
+    public RaceDefinitionImpl(String name, Course course, BoatClass boatClass, Iterable<? extends Competitor> competitors, Serializable id) {
         super(name);
         this.course = course;
         Set<Competitor> competitorsAsLinkedHashSet = new LinkedHashSet<Competitor>();

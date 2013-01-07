@@ -1,0 +1,17 @@
+package com.sap.sailing.domain.swisstimingadapter.impl;
+
+import com.sap.sailing.domain.swisstimingadapter.SwissTimingArchiveConfiguration;
+
+public class SwissTimingArchiveConfigurationImpl implements SwissTimingArchiveConfiguration {
+    private final String jsonUrl;
+    
+    public SwissTimingArchiveConfigurationImpl(String jsonUrl) {
+        super();
+        this.jsonUrl = jsonUrl;
+    }
+
+    @Override
+    public String getJsonUrl() {
+        return jsonUrl;
+    }
+}

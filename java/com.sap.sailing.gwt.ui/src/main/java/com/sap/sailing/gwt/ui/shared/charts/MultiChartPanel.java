@@ -17,8 +17,8 @@ import com.sap.sailing.gwt.ui.shared.components.SettingsDialogComponent;
  * leader) for different races in a chart. The chart type can be selected from the settings.
  * 
  * When calling the constructor a chart is created that creates a final amount of series (so the maximum number of
- * competitors cannot be changed in one chart) which are connected to competitors, when the sailing service returns the
- * data. So {@code seriesID, competitorID and markSeriesID} are linked with the index. So if u know for example the
+ * competitors cannot be changed in one chart) which are connected to competitors, when the SailingService returns the
+ * data. So {@code seriesID, competitorID and markSeriesID} are linked with the index. So if you know for example the
  * seriesID-index, you can get the competitor by calling competitorID.get(index).
  * 
  * @author Benjamin Ebling (D056866), Axel Uhl (d043530)
@@ -35,16 +35,16 @@ public class MultiChartPanel extends AbstractChartPanel<MultiChartSettings> impl
 
     @Override
     public SettingsDialogComponent<MultiChartSettings> getSettingsDialogComponent() {
-        return new MultiChartSettingsComponent(new MultiChartSettings(getAbstractSettings(), getDataToShow()), getStringMessages());
+        return new MultiChartSettingsComponent(new MultiChartSettings(getAbstractSettings(), getSelectedDetailType()), getStringMessages());
     }
 
     @Override
     public void updateSettings(MultiChartSettings newSettings) {
         boolean settingsChanged = updateSettingsOnly(newSettings);
-        boolean dataToShowChanged = setDataToShow(newSettings.getDataToShow());
-        if (dataToShowChanged || settingsChanged) {
+        boolean selectedDetailTypeChanged = setSelectedDetailType(newSettings.getDetailType());
+        if (selectedDetailTypeChanged || settingsChanged) {
             clearChart();
-            loadData(true);
+            timeChanged(timer.getTime());
         }
     }
 

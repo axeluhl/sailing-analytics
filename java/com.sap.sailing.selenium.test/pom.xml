@@ -95,6 +95,11 @@
                                     <autoStart>true</autoStart>
                                 </bundle>
                                 <bundle>
+                                    <id>com.sap.sailing.monitoring</id>
+                                    <level>5</level>
+                                    <autoStart>true</autoStart>
+                                </bundle>
+                                <bundle>
                                     <id>com.sap.sailing.server</id>
                                     <level>4</level>
                                     <autoStart>true</autoStart>
@@ -111,6 +116,11 @@
                                 </bundle>
                                 <bundle>
                                     <id>com.sap.sailing.www</id>
+                                    <level>4</level>
+                                    <autoStart>true</autoStart>
+                                </bundle>
+                                <bundle>
+                                    <id>com.sap.sailing.www.events</id>
                                     <level>4</level>
                                     <autoStart>true</autoStart>
                                 </bundle>

@@ -14,9 +14,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.BoatClass;
-import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
@@ -38,6 +38,8 @@ import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
+import com.sap.sailing.util.impl.LockUtil;
+import com.sap.sailing.util.impl.NamedReentrantReadWriteLock;
 
 public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
         DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
@@ -167,6 +169,7 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
 
             @Override
             public void gpsFixReceived(GPSFix fix, Mark mark) {
+                triggerManeuverCacheRecalculationForAllCompetitors();
                 notifyListeners(fix, mark);
             }
 
@@ -376,14 +379,17 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
         Map<Waypoint, MarkPassing> oldMarkPassings = new HashMap<Waypoint, MarkPassing>();
         MarkPassing oldStartMarkPassing = null;
         boolean requiresStartTimeUpdate = true;
-        NavigableSet<MarkPassing> markPassingsForCompetitor = getMarkPassings(competitor);
-        synchronized (markPassingsForCompetitor) {
+        final NavigableSet<MarkPassing> markPassingsForCompetitor = getMarkPassings(competitor);
+        lockForRead(markPassingsForCompetitor);
+        try {
             for (MarkPassing oldMarkPassing : markPassingsForCompetitor) {
                 if (oldStartMarkPassing == null) {
                     oldStartMarkPassing = oldMarkPassing;
                 }
                 oldMarkPassings.put(oldMarkPassing.getWaypoint(), oldMarkPassing);
             }
+        } finally {
+            unlockAfterRead(markPassingsForCompetitor);
         }
         clearMarkPassings(competitor);
         TimePoint timePointOfLatestEvent = new MillisecondsTimePoint(0);
@@ -396,7 +402,9 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
                     requiresStartTimeUpdate = false;
                 }
             }
-            synchronized (markPassingsForCompetitor) {
+            final NamedReentrantReadWriteLock markPassingsLock = getMarkPassingsLock(markPassingsForCompetitor);
+            LockUtil.lockForWrite(markPassingsLock);
+            try {
                 if (!Util.contains(getRace().getCourse().getWaypoints(), markPassing.getWaypoint())) {
                     StringBuilder courseWaypointsWithID = new StringBuilder();
                     boolean first = true;
@@ -417,11 +425,17 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
                 } else {
                     markPassingsForCompetitor.add(markPassing);
                 }
+            } finally {
+                LockUtil.unlockAfterWrite(markPassingsLock);
             }
             Collection<MarkPassing> markPassingsInOrderForWaypoint = getOrCreateMarkPassingsInOrderAsNavigableSet(markPassing
                     .getWaypoint());
-            synchronized (markPassingsInOrderForWaypoint) {
+            final NamedReentrantReadWriteLock markPassingsLock2 = getMarkPassingsLock(markPassingsInOrderForWaypoint);
+            LockUtil.lockForWrite(markPassingsLock2);
+            try {
                 markPassingsInOrderForWaypoint.add(markPassing);
+            } finally {
+                LockUtil.unlockAfterWrite(markPassingsLock2);
             }
             if (markPassing.getTimePoint().compareTo(timePointOfLatestEvent) > 0) {
                 timePointOfLatestEvent = markPassing.getTimePoint();
@@ -445,18 +459,35 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
         return (NavigableSet<MarkPassing>) super.getMarkPassingsInOrder(waypoint);
     }
 
+    @Override
+    public void lockForRead(Iterable<MarkPassing> markPassings) {
+        LockUtil.lockForRead(getMarkPassingsLock(markPassings));
+    }
+
+    @Override
+    public void unlockAfterRead(Iterable<MarkPassing> markPassings) {
+        LockUtil.unlockAfterRead(getMarkPassingsLock(markPassings));
+    }
+
     private void clearMarkPassings(Competitor competitor) {
         NavigableSet<MarkPassing> markPassings = getMarkPassings(competitor);
-        synchronized (markPassings) {
+        final NamedReentrantReadWriteLock markPassingsLock = getMarkPassingsLock(markPassings);
+        LockUtil.lockForWrite(markPassingsLock);
+        try {
             Iterator<MarkPassing> mpIter = markPassings.iterator();
             while (mpIter.hasNext()) {
                 MarkPassing mp = mpIter.next();
                 mpIter.remove();
                 Collection<MarkPassing> markPassingsInOrder = getMarkPassingsInOrderAsNavigableSet(mp.getWaypoint());
-                synchronized (markPassingsInOrder) {
+                LockUtil.lockForWrite(getMarkPassingsLock(markPassingsInOrder));
+                try {
                     markPassingsInOrder.remove(mp);
+                } finally {
+                    LockUtil.unlockAfterWrite(getMarkPassingsLock(markPassingsInOrder));
                 }
             }
+        } finally {
+            LockUtil.unlockAfterWrite(markPassingsLock);
         }
     }
 

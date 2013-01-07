@@ -93,8 +93,8 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
     
     @Override
     public int compare(Competitor o1, Competitor o2) {
-        List<Double> o1Scores = new ArrayList<Double>();
-        List<Double> o2Scores = new ArrayList<Double>();
+        List<Pair<RaceColumn, Double>> o1Scores = new ArrayList<Pair<RaceColumn, Double>>();
+        List<Pair<RaceColumn, Double>> o2Scores = new ArrayList<Pair<RaceColumn, Double>>();
         double o1ScoreSum = getLeaderboard().getCarriedPoints(o1);
         double o2ScoreSum = getLeaderboard().getCarriedPoints(o2);
         Double o1MedalRaceScore = 0.0;
@@ -104,12 +104,12 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
                 int preemptiveColumnResult = 0;
                 final Double o1Score = totalPointsCache.get(new Pair<Competitor, RaceColumn>(o1, raceColumn));
                 if (o1Score != null) {
-                    o1Scores.add(o1Score);
+                    o1Scores.add(new Pair<RaceColumn, Double>(raceColumn, o1Score));
                     o1ScoreSum += o1Score;
                 }
                 final Double o2Score = totalPointsCache.get(new Pair<Competitor, RaceColumn>(o2, raceColumn));
                 if (o2Score != null) {
-                    o2Scores.add(o2Score);
+                    o2Scores.add(new Pair<RaceColumn, Double>(raceColumn, o2Score));
                     o2ScoreSum += o2Score;
                 }
                 if (raceColumn.isMedalRace()) {
@@ -237,7 +237,7 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
      * 
      * @see ScoringScheme#compareByBetterScore(List, List, boolean)
      */
-    protected int compareByBetterScore(List<Double> o1Scores, List<Double> o2Scores) {
+    protected int compareByBetterScore(List<Pair<RaceColumn, Double>> o1Scores, List<Pair<RaceColumn, Double>> o2Scores) {
         return scoringScheme.compareByBetterScore(o1Scores, o2Scores, nullScoresAreBetter);
     }
     

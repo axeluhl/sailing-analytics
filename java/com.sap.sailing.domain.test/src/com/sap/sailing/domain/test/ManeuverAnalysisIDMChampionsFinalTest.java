@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -64,10 +65,10 @@ public class ManeuverAnalysisIDMChampionsFinalTest extends AbstractManeuverDetec
         TimePoint epoch = new MillisecondsTimePoint(0l);
         TimePoint now = MillisecondsTimePoint.now();
         Map<String, Position> markPositions = new HashMap<String, Position>();
-        markPositions.put("G2 Start-Finish (left)", new DegreePosition(53.96003300000019, 10.878697000000084));
-        markPositions.put("G2 Start-Finish (right)", new DegreePosition(53.9674420000693, 10.894410000058738));
-        markPositions.put("G2 Mark4 (right)", new DegreePosition(53.96002200000019, 10.878875000000063));
-        markPositions.put("G2 Mark4 (left)", new DegreePosition(53.9599880000002, 10.878665000000069));
+        markPositions.put("G2 Start-Finish (1)", new DegreePosition(53.96003300000019, 10.878697000000084));
+        markPositions.put("G2 Start-Finish (2)", new DegreePosition(53.9674420000693, 10.894410000058738));
+        markPositions.put("G2 Mark4 (2)", new DegreePosition(53.96002200000019, 10.878875000000063));
+        markPositions.put("G2 Mark4 (1)", new DegreePosition(53.9599880000002, 10.878665000000069));
         markPositions.put("G2 Mark1", new DegreePosition(53.96355800000006, 10.885751999999806));
         for (Waypoint w : race.getRace().getCourse().getWaypoints()) {
             for (Mark mark : w.getMarks()) {
@@ -91,12 +92,12 @@ public class ManeuverAnalysisIDMChampionsFinalTest extends AbstractManeuverDetec
         assertNotNull(competitor);
         Date toDate = new Date(1317650038784l); // that's shortly after their penalty circle
         Date fromDate = new Date(toDate.getTime()-450000l);
-        Date maneuverTime = new Date(1317649967712l);
+        final SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+        TimePoint maneuverTime = new MillisecondsTimePoint(dateFormatter.parse("2011-10-03T15:52:30.000+0200"));
         List<Maneuver> maneuvers = getTrackedRace().getManeuvers(competitor, new MillisecondsTimePoint(fromDate),
                 new MillisecondsTimePoint(toDate), /* waitForLatest */ true);
         maneuversInvalid = new ArrayList<Maneuver>(maneuvers);
-        assertManeuver(maneuvers, ManeuverType.PENALTY_CIRCLE,
-                new MillisecondsTimePoint(maneuverTime), PENALTYCIRCLE_TOLERANCE);
+        assertManeuver(maneuvers, ManeuverType.PENALTY_CIRCLE, maneuverTime, PENALTYCIRCLE_TOLERANCE);
         List<ManeuverType> maneuverTypesFound = new ArrayList<ManeuverType>();
         maneuverTypesFound.add(ManeuverType.PENALTY_CIRCLE);
         assertAllManeuversOfTypesDetected(maneuverTypesFound, maneuversInvalid);

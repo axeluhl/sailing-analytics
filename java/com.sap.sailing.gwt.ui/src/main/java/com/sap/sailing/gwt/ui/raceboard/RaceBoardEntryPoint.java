@@ -36,6 +36,8 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
     private String leaderboardGroupName;
     private RaceBoardViewModes viewMode;
 
+    private GlobalNavigationPanel globalNavigationPanel;
+
     @Override
     protected void doOnModuleLoad() {    
         super.doOnModuleLoad();
@@ -172,12 +174,22 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
     }
 
     private FlowPanel createLogoAndTitlePanel(RaceBoardPanel raceBoardPanel) {
-        LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(regattaName, selectedRace.name, stringMessages);
+        globalNavigationPanel = new GlobalNavigationPanel(stringMessages, true, leaderboardName, leaderboardGroupName);
+        LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(regattaName, selectedRace.name, stringMessages, this) {
+            @Override
+            public void onResize() {
+                super.onResize();
+                if (isSmallWidth()) {
+                    remove(globalNavigationPanel);
+                } else {
+                    add(globalNavigationPanel);
+                }
+            }
+        };
         logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
-
-        FlowPanel globalNavigationPanel = new GlobalNavigationPanel(stringMessages, true, leaderboardName, leaderboardGroupName);
-        logoAndTitlePanel.add(globalNavigationPanel);
-        
+        if (!isSmallWidth()) {
+            logoAndTitlePanel.add(globalNavigationPanel);
+        }
         return logoAndTitlePanel;
     }
     

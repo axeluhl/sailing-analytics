@@ -47,8 +47,11 @@ h1 {
 table {
   border-collapse: separate; }
 
+.leaderboardMargin {
+	margin: 5px;
+}
+
 .leaderboardContent {
-  margin: 5px;
 }
 
 .leaderboardContent td, .leaderboardContent th {
@@ -117,6 +120,12 @@ body, table td, select, button {
 	font-size: 18px;
 	color: #fff;
 	margin-top: 22px;
+}
+
+.leaderboardHeading {
+	font-size: 16px;
+	font-family: 'UbuntuRegular', Arial, Verdana, sans-serif;
+	font-weight: bold;
 }
 
 .gwt-DialogBox {

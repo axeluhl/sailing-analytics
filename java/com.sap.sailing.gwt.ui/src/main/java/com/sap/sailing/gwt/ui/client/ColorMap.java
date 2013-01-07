@@ -24,8 +24,8 @@ public class ColorMap<T> {
         baseColors[0] = new HSVColor(0.0f, 1.0f, 1.0f); // Red
         baseColors[1] = new HSVColor(30.0f, 1.0f, 1.0f); // Orange
         baseColors[2] = new HSVColor(45.f, 1.0f, 1.0f);
-        baseColors[3] = new HSVColor(120.0f, 1.0f, 1.0f); // Green
-        baseColors[4] = new HSVColor(180.0f, 1.0f, 1.0f); // Cyan
+        baseColors[3] = new HSVColor(120.0f, 1.0f, 0.8f); // Green
+        baseColors[4] = new HSVColor(200.0f, 1.0f, 1.0f); // Cyan
         baseColors[5] = new HSVColor(240.0f, 1.0f, 1.0f); // Blue
         baseColors[6] = new HSVColor(270.0f, 1.0f, 1.0f); // Pink
         baseColors[7] = new HSVColor(285.0f, 1.0f, 1.0f); 
@@ -63,7 +63,7 @@ public class ColorMap<T> {
         int baseColorCount = baseColors.length;
         int baseColorsIndex = index % baseColorCount;
         int factor = index / (baseColorCount*3);
-        float decreaseStepSize = 0.1f;
+        float decreaseStepSize = 0.075f;
         
         float brightnessDecrease = 0;
         float saturationDecrease = 0;

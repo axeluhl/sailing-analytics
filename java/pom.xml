@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <project
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
 	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
@@ -23,10 +23,13 @@
 		<module>com.sap.sailing.domain.persistence</module>
 		<module>com.sap.sailing.domain.test</module>
 		<module>com.sap.sailing.domain.tractracadapter</module>
+		<module>com.sap.sailing.domain.tractracadapter.test</module>
 		<module>com.sap.sailing.domain.tractracadapter.persistence</module>
 		<module>com.sap.sailing.domain.swisstimingadapter</module>
 		<module>com.sap.sailing.domain.swisstimingadapter.persistence</module>
 		<module>com.sap.sailing.domain.swisstimingadapter.test</module>
+		<module>com.sap.sailing.domain.swisstimingreplayadapter</module>
+		<module>com.sap.sailing.domain.swisstimingreplayadapter.test</module>
 		<module>com.sap.sailing.declination</module>
 		<module>com.sap.sailing.declination.test</module>
 		<module>com.sap.sailing.udpconnector</module>
@@ -62,6 +65,7 @@
 		<module>com.sap.sailing.freg.resultimport.test</module>
 		<module>com.sap.sailing.selenium.test</module>
 		<module>org.openqa.selenium.osgi</module>
+		<module>com.sap.sailing.monitoring</module>
 	</modules>
 	
 	<properties>

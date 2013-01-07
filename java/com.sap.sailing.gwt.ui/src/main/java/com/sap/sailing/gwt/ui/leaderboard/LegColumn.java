@@ -11,6 +11,7 @@ import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.InvertibleComparator;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.SortingOrder;
+import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.impl.InvertibleComparatorAdapter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.LegDetailColumn.LegDetailField;
@@ -91,6 +92,20 @@ public class LegColumn extends ExpandableSortableColumn<String> {
         @Override
         protected Double getFromNonNullEntry(LegEntryDTO entry) {
             return entry.gapToLeaderInSeconds;
+        }
+    }
+    
+    private class GapChangeSinceLegStartInSeconds extends AbstractLegDetailField<Double> {
+        @Override
+        protected Double getFromNonNullEntry(LegEntryDTO entry) {
+            return entry.gapChangeSinceLegStartInSeconds;
+        }
+    }
+    
+    private class SideToWhichMarkAtLegStartWasRounded extends AbstractLegDetailField<Tack> {
+        @Override
+        protected Tack getFromNonNullEntry(LegEntryDTO entry) {
+            return entry.sideToWhichMarkAtLegStartWasRounded;
         }
     }
     
@@ -212,7 +227,8 @@ public class LegColumn extends ExpandableSortableColumn<String> {
     
     public static DetailType[] getAvailableLegDetailColumnTypes() {
         return new DetailType[] { DetailType.AVERAGE_SPEED_OVER_GROUND_IN_KNOTS, DetailType.DISTANCE_TRAVELED,
-                DetailType.GAP_TO_LEADER_IN_SECONDS, DetailType.CURRENT_SPEED_OVER_GROUND_IN_KNOTS,
+                DetailType.GAP_TO_LEADER_IN_SECONDS, DetailType.GAP_CHANGE_SINCE_LEG_START_IN_SECONDS,
+                DetailType.SIDE_TO_WHICH_MARK_AT_LEG_START_WAS_ROUNDED, DetailType.CURRENT_SPEED_OVER_GROUND_IN_KNOTS,
                 DetailType.WINDWARD_DISTANCE_TO_GO_IN_METERS, DetailType.NUMBER_OF_MANEUVERS,
                 DetailType.ESTIMATED_TIME_TO_NEXT_WAYPOINT_IN_SECONDS, DetailType.VELOCITY_MADE_GOOD_IN_KNOTS,
                 DetailType.TIME_TRAVELED, DetailType.AVERAGE_CROSS_TRACK_ERROR_IN_METERS, DetailType.RANK_GAIN };
@@ -247,6 +263,14 @@ public class LegColumn extends ExpandableSortableColumn<String> {
                         new GapToLeaderInSeconds(), DetailType.GAP_TO_LEADER_IN_SECONDS.getPrecision(),
                         DetailType.GAP_TO_LEADER_IN_SECONDS.getDefaultSortingOrder(), 
                         detailHeaderStyle, detailColumnStyle));
+        result.put(DetailType.GAP_CHANGE_SINCE_LEG_START_IN_SECONDS,
+                new FormattedDoubleLegDetailColumn(stringMessages.gapChangeSinceLegStartInSeconds(), "["+stringMessages.gapToLeaderInSecondsUnit()+"]",
+                        new GapChangeSinceLegStartInSeconds(), DetailType.GAP_CHANGE_SINCE_LEG_START_IN_SECONDS.getPrecision(),
+                        DetailType.GAP_CHANGE_SINCE_LEG_START_IN_SECONDS.getDefaultSortingOrder(), 
+                        detailHeaderStyle, detailColumnStyle));
+        result.put(DetailType.SIDE_TO_WHICH_MARK_AT_LEG_START_WAS_ROUNDED,
+                new SideToWhichMarkAtLegStartWasRoundedColumn(stringMessages.sideToWhichMarkAtLegStartWasRounded(),
+                        new SideToWhichMarkAtLegStartWasRounded(), detailHeaderStyle, detailColumnStyle));
         result.put(DetailType.VELOCITY_MADE_GOOD_IN_KNOTS,
                 new FormattedDoubleLegDetailColumn(stringMessages.velocityMadeGoodInKnots(),
                         "["+stringMessages.velocityMadeGoodInKnotsUnit()+"]", new VelocityMadeGoodInKnots(),

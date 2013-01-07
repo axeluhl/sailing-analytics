@@ -1,7 +1,6 @@
 package com.sap.sailing.domain.tracking.impl;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.NavigableSet;
 
@@ -14,14 +13,12 @@ import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.SpeedWithBearingWithConfidenceImpl;
 import com.sap.sailing.domain.base.impl.SpeedWithConfidenceImpl;
 import com.sap.sailing.domain.common.Bearing;
-import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.confidence.ConfidenceBasedAverager;
 import com.sap.sailing.domain.confidence.ConfidenceFactory;
 import com.sap.sailing.domain.confidence.HasConfidence;
 import com.sap.sailing.domain.confidence.Weigher;
-import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 
 public class DynamicGPSFixMovingTrackImpl<ItemType> extends DynamicTrackImpl<ItemType, GPSFixMoving> {
@@ -53,13 +50,12 @@ public class DynamicGPSFixMovingTrackImpl<ItemType> extends DynamicTrackImpl<Ite
             NavigableSet<GPSFixMoving> fixesToUseForSpeedEstimation, Weigher<TimePoint> weigher) {
         lockForRead();
         try {
-            GPSFixMoving[] relevantFixes = getFixesRelevantForSpeedEstimation(at, fixesToUseForSpeedEstimation);
+            List<GPSFixMoving> relevantFixes = getFixesRelevantForSpeedEstimation(at, fixesToUseForSpeedEstimation);
             List<SpeedWithConfidence<TimePoint>> speeds = new ArrayList<SpeedWithConfidence<TimePoint>>();
-            BearingWithConfidenceCluster<TimePoint> bearingCluster = new BearingWithConfidenceCluster<TimePoint>(
-                    weigher);
-            if (relevantFixes.length != 0) {
+            BearingWithConfidenceCluster<TimePoint> bearingCluster = new BearingWithConfidenceCluster<TimePoint>(weigher);
+            if (!relevantFixes.isEmpty()) {
                 int i=0;
-                GPSFixMoving last = relevantFixes[i];
+                GPSFixMoving last = relevantFixes.get(i);
                 // add fix's own speed/bearing; this also works if only one "relevant" fix is found
                 SpeedWithConfidenceImpl<TimePoint> speedWithConfidence = new SpeedWithConfidenceImpl<TimePoint>(
                         last.getSpeed(),
@@ -67,9 +63,9 @@ public class DynamicGPSFixMovingTrackImpl<ItemType> extends DynamicTrackImpl<Ite
                 speeds.add(speedWithConfidence);
                 bearingCluster.add(new BearingWithConfidenceImpl<TimePoint>(last.getSpeed().getBearing(), /* confidence */
                         0.9, last.getTimePoint()));
-                while (i<relevantFixes.length-1) {
+                while (i<relevantFixes.size()-1) {
                     // add to average the position and time difference
-                    GPSFixMoving next = relevantFixes[++i];
+                    GPSFixMoving next = relevantFixes.get(++i);
                     aggregateSpeedAndBearingFromLastToNext(speeds, bearingCluster, last, next);
                     // add to average the speed and bearing provided by the GPSFixMoving
                     SpeedWithConfidenceImpl<TimePoint> computedSpeedWithConfidence = new SpeedWithConfidenceImpl<TimePoint>(
@@ -95,105 +91,6 @@ public class DynamicGPSFixMovingTrackImpl<ItemType> extends DynamicTrackImpl<Ite
             return result;
         } finally {
             unlockAfterRead();
-        }
-    }
-    
-    /**
-     * Note that no corresponding re-definition of {@link #getTimeIntervalWhoseEstimatedSpeedMayHaveChangedAfterAddingFix(GPSFix)} is
-     * necessary because the fixes affected are just the same. 
-     */
-    protected GPSFixMoving[] getFixesRelevantForSpeedEstimation(TimePoint at,
-            NavigableSet<GPSFixMoving> fixesToUseForSpeedEstimation) {
-        assertReadLock();
-        DummyGPSFixMoving atTimed = new DummyGPSFixMoving(at);
-        List<GPSFixMoving> relevantFixes = new LinkedList<GPSFixMoving>();
-        boolean beforeSetEmpty;
-        GPSFixMoving beforeSetLast = null;
-        lockForRead();
-        try {
-            NavigableSet<GPSFixMoving> beforeSet = fixesToUseForSpeedEstimation.headSet(atTimed, /* inclusive */ false);
-            beforeSetEmpty = beforeSet.isEmpty(); // ask this while holding the lock
-            if (!beforeSetEmpty) {
-                beforeSetLast = beforeSet.last();
-            }
-            for (GPSFixMoving beforeFix : beforeSet.descendingSet()) {
-                if (at.asMillis() - beforeFix.getTimePoint().asMillis() > getMillisecondsOverWhichToAverage() / 2) {
-                    break;
-                }
-                relevantFixes.add(0, beforeFix);
-            }
-        } finally {
-            unlockAfterRead();
-        }
-        boolean afterSetEmpty;
-        GPSFixMoving afterSetFirst = null;
-        lockForRead();
-        try {
-            NavigableSet<GPSFixMoving> afterSet = fixesToUseForSpeedEstimation.tailSet(atTimed, /* inclusive */ true);
-            afterSetEmpty = afterSet.isEmpty(); // ask this while holding the lock
-            if (!afterSetEmpty) {
-                afterSetFirst = afterSet.first();
-            }
-            for (GPSFixMoving afterFix : afterSet) {
-                if (afterFix.getTimePoint().asMillis() - at.asMillis() > getMillisecondsOverWhichToAverage() / 2) {
-                    break;
-                }
-                relevantFixes.add(afterFix);
-            }
-        } finally {
-            unlockAfterRead();
-        }
-        if (relevantFixes.isEmpty()) {
-            // find the fix closest to "at":
-            if (beforeSetEmpty) {
-                if (!afterSetEmpty) {
-                    relevantFixes.add(afterSetFirst);
-                }
-            } else {
-                if (afterSetEmpty) {
-                    relevantFixes.add(beforeSetLast);
-                } else {
-                    GPSFixMoving beforeFix = beforeSetLast;
-                    GPSFixMoving afterFix = afterSetFirst;
-                    relevantFixes.add(at.asMillis() - beforeFix.getTimePoint().asMillis() <= afterFix.getTimePoint()
-                            .asMillis() - at.asMillis() ? beforeFix : afterFix);
-                }
-            }
-        }
-        return relevantFixes.toArray(new GPSFixMoving[0]);
-    }
-
-    private class DummyGPSFixMoving extends DummyTimed implements GPSFixMoving {
-        private static final long serialVersionUID = 7135346050999824024L;
-        public DummyGPSFixMoving(TimePoint timePoint) {
-            super(timePoint);
-        }
-        @Override
-        public Position getPosition() {
-            return null;
-        }
-        @Override
-        public SpeedWithBearing getSpeed() {
-            return null;
-        }
-        @Override
-        public SpeedWithBearing getSpeedAndBearingRequiredToReach(GPSFix to) {
-            return null;
-        }
-        @Override
-        public boolean isValidityCached() {
-            return false;
-        }
-        @Override
-        public boolean isValid() {
-            return false;
-        }
-        @Override
-        public void invalidateCache() {
-            
-        }
-        @Override
-        public void cacheValidity(boolean isValid) {
         }
     }
     

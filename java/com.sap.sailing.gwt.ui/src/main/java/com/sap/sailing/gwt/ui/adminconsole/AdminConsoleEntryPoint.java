@@ -38,6 +38,7 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
 
         regattaDisplayers = new HashSet<RegattaDisplayer>();
 
+        // TODO for managing events and venues, the following two lines are preparing the addition of the respective panel
 //        SailingEventManagementPanel sailingEventManagementPanel = new SailingEventManagementPanel(sailingService, this, stringMessages);
 //        tabPanel.add(sailingEventManagementPanel, stringMessages.events());
 
@@ -51,6 +52,11 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
         tractracEventManagementPanel.setSize("90%", "90%");
         tabPanel.add(tractracEventManagementPanel, stringMessages.tracTracEvents(), false);
         regattaDisplayers.add(tractracEventManagementPanel);
+        
+        SwissTimingReplayConnectorPanel swissTimingReplayConnectorPanel = new SwissTimingReplayConnectorPanel(sailingService, this, this, stringMessages);
+        swissTimingReplayConnectorPanel.setSize("90%", "90%");
+        tabPanel.add(swissTimingReplayConnectorPanel, stringMessages.swissTimingArchiveConnector(), false);
+        regattaDisplayers.add(swissTimingReplayConnectorPanel);
         
         SwissTimingEventManagementPanel swisstimingEventManagementPanel = new SwissTimingEventManagementPanel(sailingService, this, this, stringMessages);
         //swisstimingEventManagementPanel.ensureDebugId("SwissTimingEventManagement");

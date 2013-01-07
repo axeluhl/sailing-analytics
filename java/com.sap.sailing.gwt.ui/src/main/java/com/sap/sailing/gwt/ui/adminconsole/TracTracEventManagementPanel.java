@@ -92,7 +92,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
     
     private ListBox connectionsHistoryListBox;
     
-    private TextBox regattaNameTextBox;
+    private TextBox eventNameTextBox;
     private TextBox hostnameTextBox;
 
     private IntegerBox storedDataPortIntegerBox;
@@ -206,20 +206,20 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         layoutTable.setWidget(2, 1, this.hostnameTextBox);
 
         // Regatta name
-        Label regattaNameLabel = new Label(this.stringMessages.regattaName() + ":");
+        Label eventNameLabel = new Label(this.stringMessages.eventName() + ":");
 
-        this.regattaNameTextBox = new TextBox();
-        this.regattaNameTextBox.ensureDebugId("RegattaName");
-        this.regattaNameTextBox.setText("event_2011...");
-        this.regattaNameTextBox.addKeyUpHandler(new KeyUpHandler() {
+        this.eventNameTextBox = new TextBox();
+        this.eventNameTextBox.ensureDebugId("RegattaName");
+        this.eventNameTextBox.setText("event_2011...");
+        this.eventNameTextBox.addKeyUpHandler(new KeyUpHandler() {
             @Override
             public void onKeyUp(KeyUpEvent event) {
                 synchURIs();
             }
         });
 
-        layoutTable.setWidget(3, 0, regattaNameLabel);
-        layoutTable.setWidget(3, 1, this.regattaNameTextBox);
+        layoutTable.setWidget(3, 0, eventNameLabel);
+        layoutTable.setWidget(3, 1, this.eventNameTextBox);
 
         // Ports (Live and Stored)
         Label portsLabel = new Label(this.stringMessages.ports() + ":");
@@ -522,7 +522,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
 
     private void synchURIs() {
         String hostName = this.hostnameTextBox.getValue();
-        String regattaName = this.regattaNameTextBox.getValue();
+        String regattaName = this.eventNameTextBox.getValue();
         Integer liveDataPort = this.liveDataPortIntegerBox.getValue();
         Integer storedDataPort = this.storedDataPortIntegerBox.getValue();
         
@@ -715,7 +715,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         TracTracConfigurationDTO config = this.previousConfigurations.get(configurationKey);
 
         this.hostnameTextBox.setValue("");
-        this.regattaNameTextBox.setValue("");
+        this.eventNameTextBox.setValue("");
         this.liveDataPortIntegerBox.setText("");
         this.storedDataPortIntegerBox.setText("");
         this.jsonURLTextBox.setValue(config.jsonURL);
@@ -767,7 +767,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         races.clear();
 
         for (TracTracRaceRecordDTO race : this.availableTracTracRaces) {
-            if (!textContainingStringsToCheck(wordsToFilter, race.regattaName, race.name)) {
+            if (!textContainsStringsToCheck(wordsToFilter, race.regattaName, race.name)) {
                 races.add(race);
             }
         }
@@ -775,5 +775,4 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         // now sort again according to selected criterion
         ColumnSortEvent.fire(this.racesTable, this.racesTable.getColumnSortList());
     }
-
 }

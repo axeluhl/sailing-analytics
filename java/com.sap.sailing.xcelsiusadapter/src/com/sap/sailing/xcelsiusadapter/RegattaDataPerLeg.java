@@ -5,6 +5,7 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.NavigableSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -177,13 +178,18 @@ public class RegattaDataPerLeg extends Action {
                     TimePoint compareLegEnd = new MillisecondsTimePoint(0);
 
                     // time elapsed / when did the competitor pass the end mark of the leg
-                    for (MarkPassing mp : trackedRace.getMarkPassings(competitor)) {
-                        if (mp.getWaypoint() == leg.getTo()) {
-                            compareLegEnd = mp.getTimePoint();
-                            break;
+                    final NavigableSet<MarkPassing> markPassings = trackedRace.getMarkPassings(competitor);
+                    trackedRace.lockForRead(markPassings);
+                    try {
+                        for (MarkPassing mp : markPassings) {
+                            if (mp.getWaypoint() == leg.getTo()) {
+                                compareLegEnd = mp.getTimePoint();
+                                break;
+                            }
                         }
+                    } finally {
+                        trackedRace.unlockAfterRead(markPassings);
                     }
-
                     // leg time / based on elapsed time
                     if (legTimesAlternate.containsKey(competitor.getName())) {
                         legTimesAlternate.put(

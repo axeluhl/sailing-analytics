@@ -611,7 +611,7 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
             result = textContainsStringsToCheck(forGroup.name, name.split("\\s"));
         }
         if (result && onlyLiveCheckBox.getValue()) {
-            result = forGroup.containsLiveRace();
+            result = forGroup.hasLiveRace();
         }else if (result) {
             Date startDate = forGroup.getGroupStartDate();
             if (startDate != null) {
