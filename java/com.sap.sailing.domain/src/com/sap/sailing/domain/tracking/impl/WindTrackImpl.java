@@ -65,7 +65,6 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
      *            whether the wind speed described by the fixes in this track are usable at all; example for an unusable
      *            wind speed would be that of an estimation that only estimates the wind direction and uses some default
      *            value for the speed
-     * @param nameForReadWriteLock TODO
      */
     public WindTrackImpl(long millisecondsOverWhichToAverage, double baseConfidence, boolean useSpeed, String nameForReadWriteLock) {
         super(new ArrayListNavigableSet<Timed>(WindComparator.INSTANCE), nameForReadWriteLock);

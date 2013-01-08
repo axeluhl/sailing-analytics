@@ -4,9 +4,10 @@ import java.util.UUID;
 
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.DegreePosition;
+import com.sap.sailing.domain.tractracadapter.TracTracControlPoint;
 import com.tractrac.clientmodule.ControlPoint;
 
-public class ControlPointAdapter extends AbstractTracTracControlPoint {
+public class ControlPointAdapter extends AbstractWithID implements TracTracControlPoint {
     private final ControlPoint controlPoint;
 
     public ControlPointAdapter(ControlPoint controlPoint) {

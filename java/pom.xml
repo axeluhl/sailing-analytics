@@ -64,6 +64,10 @@
 		<module>com.sap.sailing.freg.resultimport</module>
 		<module>com.sap.sailing.freg.resultimport.test</module>
 		<module>com.sap.sailing.monitoring</module>
+		<module>com.sap.sailing.nmeaconnector</module>
+		<module>com.sap.sailing.nmeaconnector.test</module>
+		<module>net.sf.marineapi</module>
+		<module>net.sf.marineapi.test</module>
 	</modules>
 	
 	<properties>
