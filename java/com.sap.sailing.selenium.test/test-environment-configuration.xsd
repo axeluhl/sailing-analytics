@@ -7,7 +7,7 @@
    <xsd:complexType name="test-environment">
       <xsd:sequence minOccurs="1" maxOccurs="1">
          <xsd:element name="context-root" type="xsd:string" minOccurs="1" maxOccurs="1" />
-         <xsd:element name="screenshots-folder" type="xsd:string" minOccurs="1" maxOccurs="1" />
+         <xsd:element name="screenshots-folder" type="xsd:string" minOccurs="0" maxOccurs="1" />
          <xsd:element name="system-properties" type="cfg:system-properties" minOccurs="0" maxOccurs="1" />
          <xsd:element name="driver-definition" type="cfg:driver-definition" minOccurs="1" maxOccurs="unbounded" />
       </xsd:sequence>

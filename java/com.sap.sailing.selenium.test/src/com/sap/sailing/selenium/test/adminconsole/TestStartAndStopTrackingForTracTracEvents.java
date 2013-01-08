@@ -31,6 +31,8 @@ public class TestStartAndStopTrackingForTracTracEvents extends AbstractSeleniumT
         
         TracTracEventManagementPanel tracTracEvents = adminConsole.goToTracTracEvents();
         tracTracEvents.listRaces(BMW_CUP_JSON_URL);
+        
+        // TODO: Complete the test case!
         //tracTracEvents.startTracking(BMW_CUP_RACE_8, BMW_CUP_REGATTA, false, false, false);
         
         //assertThat(tracTracEvents.getTrackedRaces(), hasItem(12));

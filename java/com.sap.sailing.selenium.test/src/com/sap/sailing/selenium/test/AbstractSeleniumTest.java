@@ -61,6 +61,11 @@ public abstract class AbstractSeleniumTest {
     }
         
     protected void captureScreenshot(String filename) throws URISyntaxException, IOException {
+        URL screenshotFolder = this.environment.getScreenshotFolder();
+        
+        if(screenshotFolder == null)
+            return;
+        
         WebDriver driver = getWebDriver();
         
         if(RemoteWebDriver.class.equals(driver.getClass())) {
@@ -72,11 +77,11 @@ public abstract class AbstractSeleniumTest {
         if(driver instanceof TakesScreenshot)
             source = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
         
-        URL destination = this.environment.getScreenshotFolder();
-        destination = new URL(destination, filename + ".png"); //$NON-NLS-1$
+        URL destination = new URL(screenshotFolder, filename + ".png"); //$NON-NLS-1$
         
         Files.copy(source.toPath(), new File(destination.toURI()).toPath(), StandardCopyOption.REPLACE_EXISTING);
         
+        // ATTENTION: Do not remove this line because it is needed for the JUnit Attachment Plugin!
         System.out.println(String.format(ATTACHMENT_FORMAT, destination));
     }
     

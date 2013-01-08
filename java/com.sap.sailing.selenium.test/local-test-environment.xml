@@ -13,9 +13,11 @@
   <!--
     The context root (the server) against which the tests should be executed.
   -->
-  <context-root>http://riccardo:riccardo@localhost:8888/</context-root>
+  <context-root>http://riccardo:riccardo@localhost:8086/</context-root>
   
+  <!--
   <screenshots-folder>file:///C:/Users/D049941/screenshots/</screenshots-folder>
+  -->
   
   <!--
     In this section necessary system properties for the different web drivers can be provided if needed. For more

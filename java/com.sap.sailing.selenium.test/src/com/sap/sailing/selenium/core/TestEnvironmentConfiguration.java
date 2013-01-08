@@ -196,6 +196,10 @@ public class TestEnvironmentConfiguration {
         return this.root;
     }
     
+    public boolean screenshotsEnabled() {
+        return (this.screenshotsFolder != null && !this.screenshotsFolder.isEmpty());
+    }
+    
     public String getScreenshotsFolder() {
         return this.screenshotsFolder;
     }

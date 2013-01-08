@@ -37,9 +37,4 @@ public class TestRaceFilterForTracTracEvents extends AbstractSeleniumTest {
         
         assertThat(tracTracEvents.getTrackableRaces().size(), is(5));
     }
-    
-    @Test
-    public void testStratRacking() {
-        
-    }
 }
