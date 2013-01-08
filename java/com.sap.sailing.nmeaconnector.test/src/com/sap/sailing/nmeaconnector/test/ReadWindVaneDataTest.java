@@ -71,7 +71,8 @@ public class ReadWindVaneDataTest {
         final List<Sentence> sentences = new ArrayList<>();
         final List<TimePoint> timePointsForSentences = new ArrayList<>();
         readWindVaneNmeaFile(sentences, timePointsForSentences);
-        assertEquals(601, sentences.size()); // we have 684 sentences altogether; 74 of those are WIBAT which are not understood and 9 have no timestamp yet
+        assertEquals(674, sentences.size()); // we have 684 sentences altogether; 74 of those are WIBAT which are now understood;
+                                             // 10 messages (one of them a WIBAT) have no timestamp yet
     }
     
     @Test
