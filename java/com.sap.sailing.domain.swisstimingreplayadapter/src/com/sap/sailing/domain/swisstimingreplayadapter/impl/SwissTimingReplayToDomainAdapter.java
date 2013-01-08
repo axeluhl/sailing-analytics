@@ -156,6 +156,7 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter {
     private BoatClass getCurrentBoatClass() {
         return domainFactory.getOrCreateBoatClassFromRaceID(currentRaceID);
     }
+    
     @Override
     public void referenceTimestamp(long referenceTimestampMillis) {
         referenceTimePoint = new MillisecondsTimePoint(referenceTimestampMillis);
