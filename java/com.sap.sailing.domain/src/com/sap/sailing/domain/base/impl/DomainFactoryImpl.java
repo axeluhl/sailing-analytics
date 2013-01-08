@@ -16,15 +16,16 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
-import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Gate;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.ObjectInputStreamResolvingAgainstDomainFactory;
 import com.sap.sailing.domain.base.Team;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
@@ -120,10 +121,10 @@ public class DomainFactoryImpl implements DomainFactory {
     }
     
     @Override
-    public Mark getOrCreateMark(String id, String color, String shape, String pattern) {
+    public Mark getOrCreateMark(String id, MarkType type, String color, String shape, String pattern) {
         Mark result = markCache.get(id);
         if (result == null) {
-            result = new MarkImpl(id, color, shape, pattern);
+            result = new MarkImpl(id, type, color, shape, pattern);
             markCache.put(id, result);
         }
         return result;

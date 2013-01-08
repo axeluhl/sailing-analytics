@@ -94,6 +94,7 @@ public interface StringMessages extends Messages {
     String trackableRaces();
     String trackWind();
     String regattaName();
+    String eventName();
     String event();
     String startTime();
     String regatta();
@@ -433,9 +434,19 @@ public interface StringMessages extends Messages {
     String pattern();
     String legend();
     String live();
+    String swissTimingArchiveConnector();
     String errorFetchingRankingChartData(String message);
     String loadingCompetitorData();
     String rankNAfterRace(long l, String string);
     String afterRace();
     String showRankChart();
+    String overallLeaderboardSelection();
+    String showOverallLeaderboardOnSamePage();
+    String errorTryingToObtainOverallLeaderboards(String message);
+    String finished();
+    String passedTo(String name);
+    String gapChangeSinceLegStartInSeconds();
+    String sideToWhichMarkAtLegStartWasRounded();
+    String raceIsLive(String raceName);
+    String racesAreLive(String raceNames);
 }

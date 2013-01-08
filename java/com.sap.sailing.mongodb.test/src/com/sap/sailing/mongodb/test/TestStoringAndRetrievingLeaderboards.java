@@ -106,6 +106,28 @@ public class TestStoringAndRetrievingLeaderboards extends AbstractMongoDBTest {
     }
     
     @Test
+    public void testStoreAndRetrieveLeaderboardWithDisplayNameSet() {
+        final String leaderboardName = "TestLeaderboard";
+        final int[] discardIndexResultsStartingWithHowManyRaces = new int[] { 5, 8 };
+        SettableScoreCorrection scoreCorrection = new ScoreCorrectionImpl();
+        FlexibleLeaderboardImpl leaderboard = new FlexibleLeaderboardImpl(leaderboardName, scoreCorrection,
+                new ResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces), new LowPoint());
+        Competitor competitor = createCompetitor();
+        TrackedRace raceWithOneCompetitor1 = new MockedTrackedRaceWithFixedRank(competitor, /* rank */ 1, /* started */ true);
+        final String raceColumnName1 = "My First Race 1";
+        leaderboard.addRace(raceWithOneCompetitor1, raceColumnName1, /* medalRace */ false, leaderboard.getFleet(null));
+        final String displayName = "$$$ ... The Renamed Competitor ... $$$";
+        leaderboard.setDisplayName(competitor, displayName);
+        new MongoObjectFactoryImpl(db).storeLeaderboard(leaderboard);
+        FlexibleLeaderboard loadedLeaderboard = (FlexibleLeaderboard) new DomainObjectFactoryImpl(db).loadLeaderboard(
+                leaderboardName, /* regattaRegistry */null);
+        // attach tracked race to leaderboard to ensure that competitor object is assigned properly
+        loadedLeaderboard.addRace(raceWithOneCompetitor1, raceColumnName1, /* medalRace, ignored */ false, leaderboard.getFleet(null));
+        Competitor loadedCompetitor = loadedLeaderboard.getCompetitorByName(competitor.getName());
+        assertEquals(displayName, loadedLeaderboard.getDisplayName(loadedCompetitor));
+    }
+    
+    @Test
     public void testStoreAndRetrieveSimpleLeaderboard() {
         final String leaderboardName = "TestLeaderboard";
         final int[] discardIndexResultsStartingWithHowManyRaces = new int[] { 5, 8 };

@@ -126,7 +126,7 @@ public class ManeuverAnalysis505Test extends AbstractManeuverDetectionTestCase {
         assertManeuver(maneuvers, ManeuverType.JIBE,
                 new MillisecondsTimePoint(dateFormat.parse("06/23/2011-16:13:28")), JIBE_TOLERANCE);
         assertManeuver(maneuvers, ManeuverType.JIBE,
-                new MillisecondsTimePoint(dateFormat.parse("06/23/2011-16:18:37")), JIBE_TOLERANCE);
+                new MillisecondsTimePoint(dateFormat.parse("06/23/2011-16:18:27")), JIBE_TOLERANCE);
         assertManeuver(maneuvers, ManeuverType.JIBE,
                 new MillisecondsTimePoint(dateFormat.parse("06/23/2011-16:21:28")), JIBE_TOLERANCE);
 

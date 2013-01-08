@@ -18,8 +18,9 @@ public class LeaderboardPanelMock extends LeaderboardPanel {
             String leaderboardName, ErrorReporter errorReporter,
             StringMessages stringConstants) {
         super(sailingService, null, LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(
-        /* racesToShow */null, /* namesOfRacesToShow */ null, null, /* autoExpandFirstRace */false), new CompetitorSelectionModel(
-                /* hasMultiSelection */true), leaderboardName, null, errorReporter, stringConstants, null, /* showRaceDetails */ true);
+        /* racesToShow */null, /* namesOfRacesToShow */ null, null, /* autoExpandFirstRace */ false,
+        /* showMetaLeaderboardsOnSamePage */ false), new CompetitorSelectionModel(
+                /* hasMultiSelection */true), leaderboardName, errorReporter, stringConstants, null, /* showRaceDetails */ true);
     }
 
     @Override

@@ -6,7 +6,6 @@ import java.util.List;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.SpeedWithBearing;
-import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NoWindException;
@@ -79,11 +78,14 @@ public interface TrackedLegOfCompetitor extends Serializable {
 
     /**
      * Infers the maneuvers of the competitor up to <code>timePoint</code> on this leg. If the competitor hasn't started
-     * the leg at the time point specified, <code>null</code> is returned. Otherwise, the list will be valid. If the
-     * time point is after the competitor has finished this leg, all of the competitor's maneuvers during this leg will
-     * be reported in chronological order. The list may be empty if no maneuvers happened between the point in time when
-     * the competitor started the leg and <code>timePoint</code>.
-     * @param waitForLatest TODO
+     * the leg at the time point specified, an empty list is returned. If the time point is after the competitor has
+     * finished this leg, all of the competitor's maneuvers during this leg will be reported in chronological order. The
+     * list may be empty if no maneuvers happened between the point in time when the competitor started the leg and
+     * <code>timePoint</code>.<p>
+     * 
+     * Note that the mark passing maneuver at leg start and finish are not guaranteed to be part of this leg's maneuvers. They
+     * may be part of the respective adjacent leg, depending on the maneuver's time point which may be slightly before, at, or
+     * after the corresponding mark passing event.
      */
     List<Maneuver> getManeuvers(TimePoint timePoint, boolean waitForLatest) throws NoWindException;
     
@@ -192,5 +194,7 @@ public interface TrackedLegOfCompetitor extends Serializable {
      * and the resulting extrapolated position's "windward distance" is computed to the competitor's actual position
      * at that time. This distance is returned as the result of this method. 
      */
-    Distance getManeuverLoss(MillisecondsTimePoint timePointBeforeManeuver, MillisecondsTimePoint timePointAfterManeuver) throws NoWindException;
+    Distance getManeuverLoss(TimePoint timePointBeforeManeuver, TimePoint maneuverTimePoint, TimePoint timePointAfterManeuver) throws NoWindException;
+
+    TrackedLeg getTrackedLeg();
 }

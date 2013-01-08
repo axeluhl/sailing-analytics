@@ -382,8 +382,8 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
         raceList.getList().clear();
         if (text != null && !text.isEmpty()) {
             for (SwissTimingRaceRecordDTO triple : availableSwissTimingRaces) {
-                boolean failed = textContainingStringsToCheck(wordsToFilter, triple.ID);
-                if (!failed) {
+                boolean found = textContainsStringsToCheck(wordsToFilter, triple.ID);
+                if (found) {
                     raceList.getList().add(triple);
                 }
             }

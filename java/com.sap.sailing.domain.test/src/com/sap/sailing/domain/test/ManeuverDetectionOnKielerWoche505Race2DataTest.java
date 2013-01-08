@@ -82,9 +82,10 @@ public class ManeuverDetectionOnKielerWoche505Race2DataTest extends OnlineTracTr
         List<Maneuver> maneuvers = getTrackedRace().getManeuvers(hasso, hassosMarkPassings.first().getTimePoint(),
                 hassosMarkPassings.last().getTimePoint(), /* waitForLatest */ true);
         Calendar c = new GregorianCalendar(TimeZone.getTimeZone("Europe/Berlin"));
-        c.set(2011, 6-1, 23, 16, 5, 49);
+        c.clear();
+        c.set(2011, 6-1, 23, 16, 5, 47);
         assertManeuver(maneuvers, ManeuverType.TACK, Tack.STARBOARD, new MillisecondsTimePoint(c.getTime()), /* tolerance in milliseconds */ 3000);
-        c.set(2011, 6-1, 23, 16, 8, 37);
+        c.set(2011, 6-1, 23, 16, 8, 31);
         assertManeuver(maneuvers, ManeuverType.TACK, Tack.PORT, new MillisecondsTimePoint(c.getTime()), /* tolerance in milliseconds */ 3000);
         c.set(2011, 6-1, 23, 16, 11, 03);
         assertManeuver(maneuvers, ManeuverType.TACK, Tack.STARBOARD, new MillisecondsTimePoint(c.getTime()), /* tolerance in milliseconds */ 3000);

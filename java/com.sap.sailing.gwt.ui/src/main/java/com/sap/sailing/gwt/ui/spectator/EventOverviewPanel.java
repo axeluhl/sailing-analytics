@@ -211,7 +211,7 @@ public class EventOverviewPanel extends FormPanel {
             @Override
             public SafeHtml getValue(EventDTO event) {
                 String debugParam = Window.Location.getParameter("gwt.codesvr");
-                if(event.publicationUrl != null && !event.publicationUrl.isEmpty() && event.isPublic) {
+                if (event.publicationUrl != null && !event.publicationUrl.isEmpty() && event.isPublic) {
                     String link = URLFactory.INSTANCE.encode(event.publicationUrl
                             + (debugParam != null && !debugParam.isEmpty() ? "?gwt.codesvr=" + debugParam : ""));
                     return ANCHORTEMPLATE.anchor(link, event.name);
@@ -611,7 +611,7 @@ public class EventOverviewPanel extends FormPanel {
             result = textContainsStringsToCheck(event.name, name.split("\\s"));
         }
         if (result && onlyLiveCheckBox.getValue()) {
-            result = event.leaderboardGroup.containsLiveRace();
+            result = event.leaderboardGroup.hasLiveRace();
         }else if (result) {
             Date startDate = event.leaderboardGroup.getGroupStartDate();
             if (startDate != null) {

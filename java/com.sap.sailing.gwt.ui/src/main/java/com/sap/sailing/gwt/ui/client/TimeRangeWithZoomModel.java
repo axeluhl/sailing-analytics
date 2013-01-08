@@ -42,6 +42,8 @@ public class TimeRangeWithZoomModel extends TimeRangeModel implements TimeRangeW
     
     public void resetTimeZoom(TimeZoomChangeListener... listenersNotToNotify) {
         isTimeZoomed = false;
+        this.zoomStartTimepoint = null;
+        this.zoomEndTimepoint = null;
         for (TimeZoomChangeListener listener : listeners) {
             if (listenersNotToNotify == null || !Arrays.asList(listenersNotToNotify).contains(listener)) {
                 listener.onTimeZoomReset();
@@ -55,5 +57,11 @@ public class TimeRangeWithZoomModel extends TimeRangeModel implements TimeRangeW
     
     public boolean isZoomed() {
         return isTimeZoomed;
+    }
+
+    @Override
+    public String toString() {
+        return "TimeRangeWithZoomModel [fromTime=" + fromTime + ", toTime=" + toTime + ", zoomStartTimepoint=" + zoomStartTimepoint + ", zoomEndTimepoint="
+                + zoomEndTimepoint + ", isTimeZoomed=" + isTimeZoomed + "]";
     }
 }
