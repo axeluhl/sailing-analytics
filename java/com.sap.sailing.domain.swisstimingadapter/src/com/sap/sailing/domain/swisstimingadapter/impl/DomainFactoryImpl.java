@@ -29,6 +29,7 @@ import com.sap.sailing.domain.base.impl.TeamImpl;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util;
+import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.swisstimingadapter.Course;
 import com.sap.sailing.domain.swisstimingadapter.DomainFactory;
 import com.sap.sailing.domain.swisstimingadapter.Fix;
@@ -112,13 +113,17 @@ public class DomainFactoryImpl implements DomainFactory {
     }
     
     @Override
-    public Competitor getCompetitorByBoatID(String boatID) {
-        return baseDomainFactory.getExistingCompetitorById(boatID);
+    public Competitor getCompetitorByBoatIDAndBoatClass(String boatID, BoatClass boatClass) {
+        return baseDomainFactory.getExistingCompetitorById(getCompetitorID(boatID, boatClass));
+    }
+
+    private Pair<String, BoatClass> getCompetitorID(String boatID, BoatClass boatClass) {
+        return new Util.Pair<String, BoatClass>(boatID, boatClass);
     }
     
     @Override
     public Competitor getOrCreateCompetitor(com.sap.sailing.domain.swisstimingadapter.Competitor competitor, BoatClass boatClass) {
-        Competitor result = getCompetitorByBoatID(competitor.getBoatID());
+        Competitor result = getCompetitorByBoatIDAndBoatClass(competitor.getBoatID(), boatClass);
         if (result == null) {
             Boat boat = new BoatImpl(competitor.getName(), boatClass, competitor.getBoatID());
             List<Person> teamMembers = new ArrayList<Person>();
@@ -127,7 +132,8 @@ public class DomainFactoryImpl implements DomainFactory {
                         /* dateOfBirth */ null, teamMemberName.trim()));
             }
             Team team = new TeamImpl(competitor.getName(), teamMembers, /* coach */ null);
-            result = baseDomainFactory.getOrCreateCompetitor(competitor.getBoatID(), competitor.getName(), team, boat);
+            result = baseDomainFactory.getOrCreateCompetitor(getCompetitorID(competitor.getBoatID(), boatClass),
+                    competitor.getName(), team, boat);
         }
         return result;
     }
