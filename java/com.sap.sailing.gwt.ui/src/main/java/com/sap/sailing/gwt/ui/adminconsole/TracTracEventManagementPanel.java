@@ -767,7 +767,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         races.clear();
 
         for (TracTracRaceRecordDTO race : this.availableTracTracRaces) {
-            if (!textContainsStringsToCheck(wordsToFilter, race.regattaName, race.name)) {
+            if (textContainsStringsToCheck(wordsToFilter, race.regattaName, race.name)) {
                 races.add(race);
             }
         }
