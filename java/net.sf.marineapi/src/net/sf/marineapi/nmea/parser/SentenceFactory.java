@@ -196,14 +196,11 @@ public final class SentenceFactory {
      */
     private Sentence createParserImpl(String sid, Class<?> paramClass,
             Object param) {
-
         if (!hasParser(sid)) {
             String msg = String.format("Parser for type '%s' not found", sid);
             throw new IllegalArgumentException(msg);
         }
-
         Sentence parser = null;
-
         try {
             Class<? extends SentenceParser> c = parsers.get(sid);
             Constructor<? extends SentenceParser> co = c
@@ -231,7 +228,7 @@ public final class SentenceFactory {
      * 
      * @return SentenceFactory instance
      */
-    public static SentenceFactory getInstance() {
+    public synchronized static SentenceFactory getInstance() {
         if (instance == null) {
             instance = new SentenceFactory();
         }
