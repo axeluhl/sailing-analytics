@@ -232,7 +232,8 @@ public class StoreAndForward implements Runnable {
     public void stop() throws UnknownHostException, IOException, InterruptedException {
         logger.entering(getClass().getName(), "stop");
         stopped = true;
-        new Socket("localhost", portForClients); // this is to stop the client listener thread
+        Socket closer = new Socket("localhost", portForClients); // this is to stop the client listener thread
+        closer.close();
         logger.info("joining clientListener thread "+clientListener);
         clientListener.join();
         socket.close(); // will let a read terminate abnormally

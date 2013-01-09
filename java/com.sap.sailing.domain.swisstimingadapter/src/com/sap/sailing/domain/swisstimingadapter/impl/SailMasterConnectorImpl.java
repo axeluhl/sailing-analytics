@@ -320,6 +320,8 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
         case TMD:
             notifyListenersTMD(message);
             break;
+		default:
+			throw new UnsupportedOperationException("Theres currently no support for the enum value '" + message.getType() + "' in this method.");
         }
     }
 

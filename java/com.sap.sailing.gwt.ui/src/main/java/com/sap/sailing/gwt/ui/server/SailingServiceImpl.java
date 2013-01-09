@@ -910,6 +910,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                                 result.sideToWhichMarkAtLegStartWasRounded = mpm.getSide();
                             }
                             break;
+                		default:
+                			throw new UnsupportedOperationException("Theres currently no support for the enum value '" + maneuver.getType() + "' in this method.");
                         }
                     }
                     result.averageManeuverLossInMeters = new HashMap<ManeuverType, Double>();
@@ -2434,6 +2436,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 case RACE_RANK:
                     result = (double) trackedLeg.getRank(timePoint);
                     break;
+        		default:
+        			throw new UnsupportedOperationException("Theres currently no support for the enum value '" + dataType + "' in this method.");
                 }
             }
             return result;

@@ -438,6 +438,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                                                         lastCombinedWindTrackInfoDTO = windTrackInfoDTO; 
                                                     }
                                                     break;
+                                        		default:
+                                        			throw new UnsupportedOperationException("Theres currently no support for the enum value '" + windSource.getType() + "' in this method.");
                                             }
                                         }
                                     }
