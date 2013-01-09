@@ -29,7 +29,7 @@ public class SystemInformationImpl implements SystemInformation {
     private long allocated_tcp_connections = -1;
     private long used_tcp_connections = -1;
     
-    public static SystemInformation getInstance() {
+    public synchronized static SystemInformation getInstance() {
         if (singleton == null)
             singleton = new SystemInformationImpl();
         return singleton;
