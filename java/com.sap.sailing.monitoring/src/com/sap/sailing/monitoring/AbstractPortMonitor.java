@@ -119,7 +119,6 @@ public abstract class AbstractPortMonitor extends Thread {
                         boolean handle = true;
                         if (currentendpoint.hasFailed() /* failed before */) {
                             if ( (currentendpoint.lastFailed()+Integer.parseInt(properties.getProperty("monitor.wait_after_failure", "60000"))) > System.currentTimeMillis()) {                
-                                log.finest("Not calling handler because failure has been shortly before this call");                                
                                 handle = false;
                             } else {
                                 log.info("Service has failed before but gracetime is over. Calling failure handler again.");
