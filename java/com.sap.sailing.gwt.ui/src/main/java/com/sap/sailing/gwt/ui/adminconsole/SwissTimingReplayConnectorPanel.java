@@ -460,7 +460,14 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
     }
 
     private void updateJsonUrlFromSelectedPreviousConfiguration() {
-        jsonUrlBox.setText(previousConfigurationsComboBox.getItemText(previousConfigurationsComboBox.getSelectedIndex()));
+        int selectedIndex = previousConfigurationsComboBox.getSelectedIndex();
+        String selectedConfiguration;
+        if (selectedIndex >= 0) {
+            selectedConfiguration = previousConfigurationsComboBox.getItemText(selectedIndex);
+        } else {
+            selectedConfiguration = null;
+        }
+        jsonUrlBox.setText(selectedConfiguration);
     }
-
+    
 }
