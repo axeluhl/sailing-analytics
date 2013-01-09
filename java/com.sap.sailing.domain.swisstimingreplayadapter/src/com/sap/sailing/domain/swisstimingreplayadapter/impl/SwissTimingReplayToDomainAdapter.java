@@ -134,7 +134,7 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter {
      *            use / creation of a default regatta per race
      */
     public SwissTimingReplayToDomainAdapter(Regatta regatta, DomainFactory domainFactory, TrackedRegattaRegistry trackedRegattaRegistry) {
-        this.regatta = null;
+        this.regatta = regatta;
         this.trackedRegattaRegistry = trackedRegattaRegistry;
         racePerRaceID = new HashMap<>();
         trackedRacePerRaceID = new HashMap<>();
@@ -156,6 +156,7 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter {
     private BoatClass getCurrentBoatClass() {
         return domainFactory.getOrCreateBoatClassFromRaceID(currentRaceID);
     }
+    
     @Override
     public void referenceTimestamp(long referenceTimestampMillis) {
         referenceTimePoint = new MillisecondsTimePoint(referenceTimestampMillis);

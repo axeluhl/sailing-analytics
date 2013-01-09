@@ -39,7 +39,7 @@ public interface DomainFactory {
     
     GPSFixMoving createGPSFix(TimePoint timePointOfTransmission, Fix fix);
 
-    Competitor getCompetitorByBoatID(String boatID);
+    Competitor getCompetitorByBoatIDAndBoatClass(String boatID, BoatClass boatClass);
 
     void updateCourseWaypoints(Course courseToUpdate, Iterable<Mark> marks) throws PatchFailedException;
     
