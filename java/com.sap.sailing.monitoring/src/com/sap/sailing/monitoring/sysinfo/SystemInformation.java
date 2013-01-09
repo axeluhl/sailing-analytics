@@ -73,7 +73,7 @@ public interface SystemInformation {
      * @return Open network Connections (providing information about port and address)
      * @throws Exception
      */
-    public NetConnection[] getOpenNetworkConnections() throws Exception;
+    public NetConnection[] getOpenNetworkConnections(int flags) throws Exception;
     
     /**
      * @return The number of currently running processes

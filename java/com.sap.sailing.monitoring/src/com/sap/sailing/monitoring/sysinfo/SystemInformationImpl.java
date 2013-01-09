@@ -157,9 +157,8 @@ public class SystemInformationImpl implements SystemInformation {
     }
 
     @Override
-    public NetConnection[] getOpenNetworkConnections() throws Exception {
-        // TODO Auto-generated method stub
-        return null;
+    public NetConnection[] getOpenNetworkConnections(int flags) throws Exception {
+        return sigar_manager.getNetConnectionList(flags);
     }
 
     @Override
@@ -235,7 +234,7 @@ public class SystemInformationImpl implements SystemInformation {
                 .append(getInboundOpenConnectionCount()).append(" (inbound conn count)").append("\n");
             
             int flags = NetFlags.CONN_TCP | NetFlags.CONN_UDP | NetFlags.CONN_SERVER;
-            NetConnection[] connections = sigar_manager.getNetConnectionList(flags);
+            NetConnection[] connections = getOpenNetworkConnections(flags);
 
             result.append("\nInbound Connections:\n");
             for (NetConnection ns : connections) {
@@ -256,7 +255,7 @@ public class SystemInformationImpl implements SystemInformation {
             }
 
             flags = NetFlags.CONN_TCP | NetFlags.CONN_UDP | NetFlags.CONN_CLIENT;
-            connections = sigar_manager.getNetConnectionList(flags);
+            connections = getOpenNetworkConnections(flags);
 
             result.append("\nOutbound Connections:\n");
             for (NetConnection ns : connections) {
