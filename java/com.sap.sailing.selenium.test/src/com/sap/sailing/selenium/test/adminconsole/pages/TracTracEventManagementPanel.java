@@ -29,9 +29,9 @@ public class TracTracEventManagementPanel extends PageObject {
     @FindBy(how = BySeleniumId.class, using = "FilterRaces")
     private WebElement filterTrackableRacesField;
     
-    private WebElement trackWindCheckBox;
-    private WebElement correctWindCheckbox;
-    private WebElement simulateWithNowCheckbox;
+//    private WebElement trackWindCheckBox;
+//    private WebElement correctWindCheckbox;
+//    private WebElement simulateWithNowCheckbox;
     
     public TracTracEventManagementPanel(WebDriver driver, SearchContext context) {
         super(driver, context);

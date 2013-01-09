@@ -74,76 +74,62 @@ public class TestEnvironmentConfiguration {
     private static TestEnvironmentConfiguration instance;
     
     public static TestEnvironmentConfiguration getInstance() {
-        if(instance == null) {
+        if (instance == null) {
             try {
                 instance = createTestEnvironmentConfiguration();
             } catch(Exception exception) {
                 throw new RuntimeException(exception);
             }
         }
-        
         return instance;
     }
     
     private static synchronized TestEnvironmentConfiguration createTestEnvironmentConfiguration() throws
             ParserConfigurationException, SAXException, IOException {
-        if(instance != null)
+        if (instance != null) {
             return instance;
-        
+        }
         Document document = readTestConfiguration();
-        
         Element testEnvironmentNode = document.getDocumentElement();
         testEnvironmentNode.normalize();
-                
         String contextRoot = XMLHelper.getContentTextNS(testEnvironmentNode, CONTEXT_ROOT, NAMESPACE_URI);
         String screenshotsFolder = XMLHelper.getContentTextNS(testEnvironmentNode, SCREENSHOTS_FOLDER, NAMESPACE_URI);
         Map<String, String> systemProperties = createSystemProperties(testEnvironmentNode);
         List<DriverDefinition> driverDefenitions = createDriverDefenitions(testEnvironmentNode);
-        
         return new TestEnvironmentConfiguration(contextRoot, screenshotsFolder, systemProperties, driverDefenitions);
     }
     
     private static synchronized Document readTestConfiguration() throws ParserConfigurationException,
             SAXException, IOException {
         String path = System.getProperty(TEST_ENVIRONMENT_CONFIGURATION);
-        
         SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
         Schema schema = schemaFactory.newSchema(new StreamSource(TEST_ENVIRONMENT_SCHEMA));
-        
         DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
         builderFactory.setNamespaceAware(true);
         builderFactory.setSchema(schema);
-        
         DocumentBuilder builder = builderFactory.newDocumentBuilder();
         InputSource source = new InputSource(new FileInputStream(path));
-        
         return builder.parse(source);
     }
     
     private static Map<String, String> createSystemProperties(Element testEnvironmentNode) {
         Element systemPropertiesNode = XMLHelper.getElementNS(testEnvironmentNode, SYSTEM_PROPERTIES, NAMESPACE_URI);
-        
-        if(systemPropertiesNode == null)
+        if (systemPropertiesNode == null) {
             return Collections.emptyMap();
-        
+        }
         Map<String, String> properties = new HashMap<>();
-        
         List<Element> systemPropertyNodes = XMLHelper.getElementsNS(systemPropertiesNode, SYSTEM_PROPERTY,
                 NAMESPACE_URI);
-        
         for(Element systemPropertyNode : systemPropertyNodes) {
             String propertyName = XMLHelper.getContentTextNS(systemPropertyNode, PARAMETER_NAME, NAMESPACE_URI);
             String propertyValue = XMLHelper.getContentTextNS(systemPropertyNode, PARAMETER_VALUE, NAMESPACE_URI);
-            
             properties.put(propertyName, propertyValue);
         }
-        
         return properties;
     }
     
     private static List<DriverDefinition> createDriverDefenitions(Element testEnvironmentNode) {
         List<DriverDefinition> defenitions = new LinkedList<>();
-        
         List<Element> driverDefinitionNodes = XMLHelper.getElementsNS(testEnvironmentNode, DRIVER_DEFINITION,
                 NAMESPACE_URI);
         
@@ -156,21 +142,17 @@ public class TestEnvironmentConfiguration {
     
     private static DriverDefinition createDriverDefinition(Element driverDefinitionNode) {
         String driverClass = XMLHelper.getAttributeValueNS(driverDefinitionNode, DRIVER_CLASS, null);;
-        
         Element capabilitiesNode = XMLHelper.getElementNS(driverDefinitionNode, DRIVER_CAPABILITIES, NAMESPACE_URI);
-        
-        if(capabilitiesNode == null)
-            return new DriverDefinition(driverClass, Collections.EMPTY_MAP);
-        
+        if (capabilitiesNode == null) {
+            Map<String, String> emptyCapabilities = Collections.emptyMap();
+            return new DriverDefinition(driverClass, emptyCapabilities);
+        }
         Map<String, String> capabilities = new HashMap<>();
-        
         for(Element capabilityNode : XMLHelper.getElementsNS(capabilitiesNode, DRIVER_CAPABILITY, NAMESPACE_URI)) {
             String capabilityName = XMLHelper.getContentTextNS(capabilityNode, PARAMETER_NAME, NAMESPACE_URI);
             String capabilityValue = XMLHelper.getContentTextNS(capabilityNode, PARAMETER_VALUE, NAMESPACE_URI);
-            
             capabilities.put(capabilityName, capabilityValue);
         }
-        
         return new DriverDefinition(driverClass, capabilities);
     }
     

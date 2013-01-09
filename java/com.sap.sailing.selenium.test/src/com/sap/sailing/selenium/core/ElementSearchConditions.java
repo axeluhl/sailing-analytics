@@ -1,7 +1,5 @@
 package com.sap.sailing.selenium.core;
 
-import java.util.List;
-
 import org.openqa.selenium.By;
 import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.StaleElementReferenceException;
@@ -42,10 +40,6 @@ public class ElementSearchConditions {
 
     private static WebElement findElement(SearchContext context, By by) {
         return context.findElement(by);
-    }
-
-    private static List<WebElement> findElements(SearchContext context, By by) {
-        return context.findElements(by);
     }
 
     private ElementSearchConditions() {

@@ -28,8 +28,6 @@ import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.Window;
 
-import com.google.gwt.user.client.rpc.AsyncCallback;
-
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.CheckBox;
