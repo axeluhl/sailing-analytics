@@ -320,6 +320,8 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
         case TMD:
             notifyListenersTMD(message);
             break;
+        default:
+            // ignore all other messages because there are no notification patterns for those
         }
     }
 

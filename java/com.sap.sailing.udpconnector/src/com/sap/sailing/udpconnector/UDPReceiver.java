@@ -86,7 +86,11 @@ public abstract class UDPReceiver<MessageType extends UDPMessage, ListenerType e
         stopped = true;
         byte[] buf = new byte[0];
         DatagramPacket stopPacket = new DatagramPacket(buf, 0, InetAddress.getLocalHost(), listeningOnPort);
-        new DatagramSocket().send(stopPacket);
+        
+        DatagramSocket stopper = new DatagramSocket();
+        stopper.send(stopPacket);
+        stopper.close();
+        
         if (!udpSocket.isConnected()) {
             udpSocket.close();
         }
