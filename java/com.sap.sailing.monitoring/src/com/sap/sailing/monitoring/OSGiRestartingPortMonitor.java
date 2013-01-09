@@ -87,10 +87,10 @@ public class OSGiRestartingPortMonitor extends AbstractPortMonitor {
                             + "This Mail won't be sent again if service continues to fail.";
                     
                     if (sysinfo_available) {
-                        content += "\nSystem Information BEFORE restart:\n" + info_before_restart;
+                        content += "\n\nSystem Information BEFORE restart:\n" + info_before_restart;
                         content += "\n\nSystem information AFTER restart:\n" + info.toString();
                     } else {
-                        content += "\nSystem information NOT available due to an error in the library";
+                        content += "\n\nSystem information NOT available due to an error in the library";
                     }
                     sendMail(endpoint, subject, content);
                 } catch (Throwable ex) {

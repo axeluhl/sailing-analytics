@@ -47,6 +47,8 @@ public class SystemInformationImpl implements SystemInformation {
     }
     
     public SystemInformationImpl() throws SigarException {
+        Sigar.load(); /* check if libraries can be loaded */
+
         this.sigar_manager = new Sigar();
         this.java_manager = ManagementFactory.getOperatingSystemMXBean();
     }
