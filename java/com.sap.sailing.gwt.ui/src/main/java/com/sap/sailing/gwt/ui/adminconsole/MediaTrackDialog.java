@@ -15,7 +15,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.media.MediaTrack;
-import com.sap.sailing.gwt.ui.shared.media.MediaTrack.MimeFileType;
+import com.sap.sailing.gwt.ui.shared.media.MediaTrack.MimeType;
 
 public class MediaTrackDialog extends DataEntryDialog<MediaTrack> {
 
@@ -51,6 +51,8 @@ public class MediaTrackDialog extends DataEntryDialog<MediaTrack> {
 
     @Override
     protected MediaTrack getResult() {
+        mediaTrack.url = urlBox.getValue();
+        mediaTrack.title = titleBox.getValue();
         return mediaTrack;
     }
     
@@ -125,22 +127,18 @@ public class MediaTrackDialog extends DataEntryDialog<MediaTrack> {
         int dotPos = lastPathSegment.lastIndexOf('.');
         if (dotPos >= 0) {
             mediaTrack.title = lastPathSegment.substring(0, dotPos);
-            String fileEnding = lastPathSegment.substring(dotPos + 1);
+            String fileEnding = lastPathSegment.substring(dotPos + 1).toLowerCase();
     
             try {
-                MimeFileType mimeFileType = MimeFileType.valueOf(fileEnding);
-                mediaTrack.type = mimeFileType.mediaType;
-                mediaTrack.subType = mimeFileType.mediaSubType;
+                mediaTrack.mimeType = MimeType.valueOf(fileEnding);
             } catch (IllegalArgumentException e) {
                 // ignore. TODO: Somehow put it into the error message.
                 // throw new IllegalArgumentException("Unsupported media type '" + mimeType + "'.", e);
-                mediaTrack.type = null;
-                mediaTrack.subType = null;
+                mediaTrack.mimeType = null;
             }
         } else {
             mediaTrack.title = mediaTrack.url;
-            mediaTrack.type = null;
-            mediaTrack.subType = null;
+            mediaTrack.mimeType = null;
         }
         refreshUI();
     }
@@ -148,7 +146,8 @@ public class MediaTrackDialog extends DataEntryDialog<MediaTrack> {
     private void refreshUI() {
         titleBox.setValue(mediaTrack.title, DONT_FIRE_EVENTS);
         mimeTypeLabel.setText(mediaTrack.typeToString());
-        startTimeLabel.setText(mediaTrack.startTimeToString());
+        String startTimeText = mediaTrack.startTime == null ? "undefined" : TimeFormatUtil.DATETIME_FORMAT.format(mediaTrack.startTime);
+        startTimeLabel.setText(startTimeText);
         durationLabel.setText(TimeFormatUtil.milliSecondsToHrsMinSec(mediaTrack.durationInMillis));        
     }
 

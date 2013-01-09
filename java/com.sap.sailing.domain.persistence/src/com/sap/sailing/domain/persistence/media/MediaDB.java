@@ -12,7 +12,7 @@ import java.util.List;
  */
 public interface MediaDB {
 
-    String insertMediaTrack(String title, String url, Date startTime, int durationInMillis, String mediaType, String mediaSubType);
+    String insertMediaTrack(String title, String url, Date startTime, int durationInMillis, String mimeType);
 
     DBMediaTrack loadMediaTrack(String dbId);
 

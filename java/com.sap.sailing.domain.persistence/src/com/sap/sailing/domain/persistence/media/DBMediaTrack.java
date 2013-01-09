@@ -10,9 +10,8 @@ public class DBMediaTrack {
     public final Date startTime;
     public final int durationInMillis;
     public final String mimeType;
-    public final String mimeSubType;
 
-    public DBMediaTrack(String dbId, String title, String url, Date startTime, int duration, String mimeType, String mimeSubType) {
+    public DBMediaTrack(String dbId, String title, String url, Date startTime, int duration, String mimeType) {
         super();
         this.dbId = dbId;
         this.title = title;
@@ -20,6 +19,5 @@ public class DBMediaTrack {
         this.startTime = startTime;
         this.durationInMillis = duration;
         this.mimeType = mimeType;
-        this.mimeSubType = mimeSubType;
     }
 }

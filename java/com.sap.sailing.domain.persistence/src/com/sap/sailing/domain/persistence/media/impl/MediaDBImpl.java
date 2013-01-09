@@ -24,23 +24,27 @@ import com.sap.sailing.domain.persistence.media.MediaDB;
  */
 public class MediaDBImpl implements MediaDB {
 
+    private static final int SORT_ASCENDING = 1;
     // private static Logger logger = Logger.getLogger(MediaDBImpl.class.getName());
     private final DB database;
+    private final BasicDBObject sortByStartTimeAndTitle;
 
     public MediaDBImpl(DB database) {
         super();
         this.database = database;
+        sortByStartTimeAndTitle = new BasicDBObject();
+        sortByStartTimeAndTitle.put(DbNames.Fields.STARTTIME.name(), SORT_ASCENDING);
+        sortByStartTimeAndTitle.put(DbNames.Fields.MEDIA_TITLE.name(), SORT_ASCENDING);
     }
 
     @Override
-    public String insertMediaTrack(String videoTitle, String url, Date startTime, int durationInMillis, String mediaType, String mediaSubType) {
+    public String insertMediaTrack(String videoTitle, String url, Date startTime, int durationInMillis, String mimeType) {
         BasicDBObject dbVideo = new BasicDBObject();
         dbVideo.put(DbNames.Fields.MEDIA_TITLE.name(), videoTitle);
         dbVideo.put(DbNames.Fields.MEDIA_URL.name(), url);
         dbVideo.put(DbNames.Fields.STARTTIME.name(), startTime);
         dbVideo.put(DbNames.Fields.DURATION_IN_MILLIS.name(), durationInMillis);
-        dbVideo.put(DbNames.Fields.MIME_TYPE.name(), mediaType);
-        dbVideo.put(DbNames.Fields.MIME_SUBTYPE.name(), mediaSubType);
+        dbVideo.put(DbNames.Fields.MIME_TYPE.name(), mimeType);
         DBCollection dbVideos = getVideoCollection();
         dbVideos.insert(dbVideo);
         return ((ObjectId) dbVideo.get(DbNames.Fields._id.name())).toString();
@@ -81,14 +85,13 @@ public class MediaDBImpl implements MediaDB {
         Date startTime = (Date) dbObject.get(DbNames.Fields.STARTTIME.name());
         Integer durationInMillis = (Integer) dbObject.get(DbNames.Fields.DURATION_IN_MILLIS.name());
         String mimeType = (String) dbObject.get(DbNames.Fields.MIME_TYPE.name());
-        String mimeSubType = (String) dbObject.get(DbNames.Fields.MIME_SUBTYPE.name());
-        DBMediaTrack dbMediaTrack = new DBMediaTrack(dbId, title, url, startTime, durationInMillis == null ? 0 : durationInMillis, mimeType, mimeSubType);
+        DBMediaTrack dbMediaTrack = new DBMediaTrack(dbId, title, url, startTime, durationInMillis == null ? 0 : durationInMillis, mimeType);
         return dbMediaTrack;
     }
 
     @Override
     public List<DBMediaTrack> loadAllMediaTracks() {
-        DBCursor cursor = getVideoCollection().find();
+        DBCursor cursor = getVideoCollection().find().sort(sortByStartTimeAndTitle);
         List<DBMediaTrack> result = new ArrayList<>(cursor.count());
         while (cursor.hasNext()) {
             result.add(createMediaObjectFromDB(cursor.next()));
@@ -159,8 +162,9 @@ public class MediaDBImpl implements MediaDB {
         // Instead do the remaining filtering on client side...
         endTimeCondition.put(DbNames.Fields.STARTTIME.name(), new BasicDBObject("$lt", rangeStart));
 
-        DBObject query = QueryBuilder.start().or(startTimeCondition, endTimeCondition).get(); 
-        DBCursor cursor = getVideoCollection().find(query);
+        DBObject query = QueryBuilder.start().or(startTimeCondition, endTimeCondition).get();
+        
+        DBCursor cursor = getVideoCollection().find(query).sort(sortByStartTimeAndTitle);
         
         List<DBMediaTrack> result = new ArrayList<>(cursor.count());
         while (cursor.hasNext()) {

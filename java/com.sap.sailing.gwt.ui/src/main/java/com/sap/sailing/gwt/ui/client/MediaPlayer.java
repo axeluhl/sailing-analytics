@@ -16,12 +16,16 @@ public interface MediaPlayer {
 
     MediaTrack getMediaTrack();
     
-    void setMediaTrack(MediaTrack mediaTrack);
-
+    double getDuration();
+    
+    void setTime(double mediaTime);
+    
+    double getTime();
+    
     void setPlaybackSpeed(double newPlaySpeedFactor);
 
-    boolean isMuted();
-
     void setMuted(boolean isToBeMuted);
-    
+
+    void destroy();
+
 }

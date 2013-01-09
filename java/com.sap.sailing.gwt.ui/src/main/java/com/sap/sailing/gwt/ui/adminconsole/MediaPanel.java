@@ -206,7 +206,7 @@ public class MediaPanel extends FlowPanel {
         Column<MediaTrack, String> startTimeColumn = new Column<MediaTrack, String>(new EditTextCell()) {
             @Override
             public String getValue(MediaTrack mediaTrack) {
-                return mediaTrack.startTime == null ? "" : mediaTrack.startTimeToString();
+                return mediaTrack.startTime == null ? "" : TimeFormatUtil.DATETIME_FORMAT.format(mediaTrack.startTime);
             }
         };
         startTimeColumn.setSortable(true);
@@ -330,4 +330,9 @@ public class MediaPanel extends FlowPanel {
         });
         dialog.show();
     }
+
+    public void onShow() {
+        loadMediaTracks();
+    }
+
 }

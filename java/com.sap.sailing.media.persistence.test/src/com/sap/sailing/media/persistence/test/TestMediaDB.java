@@ -12,8 +12,7 @@ import com.mongodb.MongoException;
 import com.sap.sailing.domain.persistence.media.DBMediaTrack;
 import com.sap.sailing.domain.persistence.media.MediaDB;
 import com.sap.sailing.domain.persistence.media.MediaDBFactory;
-import com.sap.sailing.gwt.ui.shared.media.MediaTrack.MediaSubType;
-import com.sap.sailing.gwt.ui.shared.media.MediaTrack.MediaType;
+import com.sap.sailing.gwt.ui.shared.media.MediaTrack.MimeType;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
@@ -39,9 +38,8 @@ public class TestMediaDB extends AbstractMongoDBTest {
         MediaDB mongoDB = MediaDBFactory.INSTANCE.getMediaDB(getMongoService());
         Date date = new Date();
         int durationInMillis = 23;
-        String mediaType = MediaType.video.name();
-        String mediaSubType = MediaSubType.ogg.name();
-        String dbId = mongoDB.insertMediaTrack(videoTitle, url, date, durationInMillis, mediaType, mediaSubType);
+        String mimeType = MimeType.ogv.name();
+        String dbId = mongoDB.insertMediaTrack(videoTitle, url, date, durationInMillis, mimeType);
         DBMediaTrack videoTrack = mongoDB.loadMediaTrack(dbId);
         assertNotNull(videoTrack);
         assertThat(videoTrack.title, Is.is(videoTitle));
@@ -68,11 +66,10 @@ public class TestMediaDB extends AbstractMongoDBTest {
         final String url = "http://localhost:8888/media/HTML5/1809147112001_1842870496001_SAP-Regatta-Day02-Final_libtheora.ogv";
         Date date = new Date();
         int durationInMillis = 23;
-        String mediaType = MediaType.video.name();
-        String mediaSubType = MediaSubType.ogg.name();
+        String mimeType = MimeType.ogv.name();
 
         for (int i = 0; i < count; i++) {
-            mongoDB.insertMediaTrack(videoTitleTemplate + i, url, date, durationInMillis, mediaType, mediaSubType);
+            mongoDB.insertMediaTrack(videoTitleTemplate + i, url, date, durationInMillis, mimeType);
         }
     }
 
@@ -84,9 +81,8 @@ public class TestMediaDB extends AbstractMongoDBTest {
         MediaDB mongoDB = MediaDBFactory.INSTANCE.getMediaDB(getMongoService());
         Date date = new Date();
         int durationInMillis = 23;
-        String mediaType = MediaType.video.name();
-        String mediaSubType = MediaSubType.ogg.name();
-        String dbId = mongoDB.insertMediaTrack(videoTitle, url, date, durationInMillis, mediaType, mediaSubType);
+        String mimeType = MimeType.ogv.name();
+        String dbId = mongoDB.insertMediaTrack(videoTitle, url, date, durationInMillis, mimeType);
         
         //delete
         mongoDB.deleteMediaTrack(videoTitle);
@@ -103,9 +99,8 @@ public class TestMediaDB extends AbstractMongoDBTest {
         MediaDB mongoDB = MediaDBFactory.INSTANCE.getMediaDB(getMongoService());
         Date originalDate = new Date();
         int durationInMillis = 23;
-        String mediaType = MediaType.video.name();
-        String mediaSubType = MediaSubType.ogg.name();
-        String dbId = mongoDB.insertMediaTrack(videoTitle, url, originalDate, durationInMillis, mediaType, mediaSubType);
+        String mimeType = MimeType.ogv.name();
+        String dbId = mongoDB.insertMediaTrack(videoTitle, url, originalDate, durationInMillis, mimeType);
         
         //update with new date
         Date newDate = new Date(originalDate.getTime() + 1000);
@@ -117,8 +112,7 @@ public class TestMediaDB extends AbstractMongoDBTest {
         assertThat(videoTrack.durationInMillis, is(durationInMillis));
         assertThat(videoTrack.title, is(videoTitle));
         assertThat(videoTrack.url, is(url));
-        assertThat(videoTrack.mimeType, is(mediaType));
-        assertThat(videoTrack.mimeSubType, is(mediaSubType));
+        assertThat(videoTrack.mimeType, is(mimeType));
     }
     
     
@@ -207,9 +201,8 @@ public class TestMediaDB extends AbstractMongoDBTest {
         final String videoTitle = "Test Video";
         final String url = "test";
         MediaDB mongoDB = MediaDBFactory.INSTANCE.getMediaDB(getMongoService());
-        String mediaType = MediaType.video.name();
-        String mediaSubType = MediaSubType.ogg.name();
-        String dbId = mongoDB.insertMediaTrack(videoTitle, url, startTime, oneHourInMillis, mediaType, mediaSubType);
+        String mimeType = MimeType.ogv.name();
+        String dbId = mongoDB.insertMediaTrack(videoTitle, url, startTime, oneHourInMillis, mimeType);
         
         Collection<DBMediaTrack> videoTracks = mongoDB.queryOverlappingMediaTracks(rangeStart, rangeEnd);
         assertThat(videoTracks.size(), is(1));
@@ -221,9 +214,8 @@ public class TestMediaDB extends AbstractMongoDBTest {
         final String videoTitle = "Test Video";
         final String url = "test";
         MediaDB mongoDB = MediaDBFactory.INSTANCE.getMediaDB(getMongoService());
-        String mediaType = MediaType.video.name();
-        String mediaSubType = MediaSubType.ogg.name();
-        String dbId = mongoDB.insertMediaTrack(videoTitle, url, startTime, oneHourInMillis, mediaType, mediaSubType);
+        String mimeType = MimeType.ogv.name();
+        mongoDB.insertMediaTrack(videoTitle, url, startTime, oneHourInMillis, mimeType);
         
         Collection<DBMediaTrack> videoTracks = mongoDB.queryOverlappingMediaTracks(rangeStart, rangeEnd);
         assertThat(videoTracks.size(), is(0));

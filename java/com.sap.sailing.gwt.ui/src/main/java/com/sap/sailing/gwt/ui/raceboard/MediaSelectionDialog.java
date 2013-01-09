@@ -1,6 +1,8 @@
 package com.sap.sailing.gwt.ui.raceboard;
 
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 import com.google.gwt.event.logical.shared.CloseEvent;
@@ -32,6 +34,7 @@ public class MediaSelectionDialog implements CloseHandler<PopupPanel> {
     
     private final DialogBox dialogControl;
     private final MediaSelectionListener mediaSelectionListener;
+    private final Map<MediaTrack, CheckBox> videoCheckBoxes = new HashMap<MediaTrack, CheckBox>();
     
     MediaSelectionDialog(MediaSelectionListener mediaSelectionListener) {
         this.mediaSelectionListener = mediaSelectionListener;
@@ -39,7 +42,7 @@ public class MediaSelectionDialog implements CloseHandler<PopupPanel> {
         dialogControl.setText("Select Playback Media");
         dialogControl.addCloseHandler(this);
     }
-
+    
     public void show(Collection<MediaTrack> videoTracks, Set<MediaTrack> selectedVideos, Collection<MediaTrack> audioTracks, MediaTrack selectedAudioTrack, UIObject popupLocation) {
         Panel grid = new VerticalPanel();
         if (!audioTracks.isEmpty()) {
@@ -52,18 +55,19 @@ public class MediaSelectionDialog implements CloseHandler<PopupPanel> {
         if (!videoTracks.isEmpty()) {
             grid.add(createVideoHeader());
             for (MediaTrack videoTrack : videoTracks) {
-                grid.add(createVideoItem(videoTrack, selectedVideos));
+                grid.add(createVideoCheckBox(videoTrack, selectedVideos));
             }
         }
         dialogControl.add(grid);
         dialogControl.showRelativeTo(popupLocation);
     }
 
-    private Widget createVideoItem(final MediaTrack videoTrack, Set<MediaTrack> selectedVideos) {
-        CheckBox videoItem = new CheckBox(videoTrack.title);
-        videoItem.setTitle(videoTrack.toString());
-        videoItem.setValue(selectedVideos.contains(videoTrack));
-        videoItem.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+    private Widget createVideoCheckBox(final MediaTrack videoTrack, Set<MediaTrack> selectedVideos) {
+        CheckBox videoCheckBox = new CheckBox(videoTrack.title);
+        videoCheckBoxes.put(videoTrack, videoCheckBox);
+        videoCheckBox.setTitle(videoTrack.toString());
+        videoCheckBox.setValue(selectedVideos.contains(videoTrack));
+        videoCheckBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
             
             @Override
             public void onValueChange(ValueChangeEvent<Boolean> changeEvent) {
@@ -74,7 +78,15 @@ public class MediaSelectionDialog implements CloseHandler<PopupPanel> {
                 }
             }
         });
-        return videoItem;
+        
+        return videoCheckBox;
+    }
+    
+    public void unselectVideo(MediaTrack videoTrack) {
+        CheckBox videoCheckBox = videoCheckBoxes.get(videoTrack);
+        if (videoCheckBox != null) {
+            videoCheckBox.setValue(false);
+        }
     }
 
     private Widget createVideoHeader() {
@@ -108,6 +120,7 @@ public class MediaSelectionDialog implements CloseHandler<PopupPanel> {
     @Override
     public void onClose(CloseEvent<PopupPanel> arg0) {
         dialogControl.clear();
+        videoCheckBoxes.clear();
     }
 
     public boolean isShowing() {

@@ -21,6 +21,7 @@ import com.sap.sailing.gwt.ui.client.MediaService;
 import com.sap.sailing.gwt.ui.shared.media.MediaTrack;
 import com.sap.sailing.gwt.ui.shared.media.MediaTrack.MediaSubType;
 import com.sap.sailing.gwt.ui.shared.media.MediaTrack.MediaType;
+import com.sap.sailing.gwt.ui.shared.media.MediaTrack.MimeType;
 import com.sap.sailing.server.RacingEventService;
 
 public class MediaServiceImpl extends RemoteServiceServlet implements MediaService {
@@ -45,8 +46,8 @@ public class MediaServiceImpl extends RemoteServiceServlet implements MediaServi
     public Collection<MediaTrack> getMediaTracksForRace(RegattaAndRaceIdentifier regattaAndRaceIdentifier) {
         TrackedRace trackedRace = racingEventServiceTracker.getService().getExistingTrackedRace(regattaAndRaceIdentifier);
         if (trackedRace != null) {
-            Date raceStart = trackedRace.getStartOfTracking().asDate();
-            Date raceEnd = trackedRace.getEndOfTracking().asDate();
+            Date raceStart = trackedRace.getStartOfRace().asDate();
+            Date raceEnd = trackedRace.getEndOfRace().asDate();
             return createMediaTracksFromDB(mediaDB().queryOverlappingMediaTracks(raceStart , raceEnd));
         } else {
             return Collections.emptyList();
@@ -81,17 +82,15 @@ public class MediaServiceImpl extends RemoteServiceServlet implements MediaServi
     }
 
     private MediaTrack createMediaTrackFromDB(DBMediaTrack dbMediaTrack) {
-        MediaType mediaType = dbMediaTrack.mimeType != null ? MediaType.valueOf(dbMediaTrack.mimeType) : null;
-        MediaSubType mediaSubType = dbMediaTrack.mimeSubType != null ? MediaSubType.valueOf(dbMediaTrack.mimeSubType) : null;
-        MediaTrack mediaTrack = new MediaTrack(dbMediaTrack.dbId, dbMediaTrack.title, dbMediaTrack.url, dbMediaTrack.startTime, dbMediaTrack.durationInMillis, mediaType, mediaSubType);
+        MimeType mimeType = dbMediaTrack.mimeType != null ? MimeType.valueOf(dbMediaTrack.mimeType) : null;
+        MediaTrack mediaTrack = new MediaTrack(dbMediaTrack.dbId, dbMediaTrack.title, dbMediaTrack.url, dbMediaTrack.startTime, dbMediaTrack.durationInMillis, mimeType);
         return mediaTrack;
     }
 
     @Override
     public void addMediaTrack(MediaTrack mediaTrack) {
-        String mediaType = mediaTrack.type != null ? mediaTrack.type.name() : null;
-        String mediaSubType = mediaTrack.subType != null ? mediaTrack.subType.name() : null;
-        mediaDB().insertMediaTrack(mediaTrack.title, mediaTrack.url, mediaTrack.startTime, mediaTrack.durationInMillis, mediaType, mediaSubType);
+        String mimeType = mediaTrack.mimeType != null ? mediaTrack.mimeType.name() : null;
+        mediaDB().insertMediaTrack(mediaTrack.title, mediaTrack.url, mediaTrack.startTime, mediaTrack.durationInMillis, mimeType);
     }
 
     private MediaDB mediaDB() {
