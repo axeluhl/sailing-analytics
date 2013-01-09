@@ -59,6 +59,9 @@ public class PathPolyline {
     private boolean warningAlreadyShown = false;
     private SimulatorMap simulatorMap = null;
 
+    private static int STEP_DURATION_MILLISECONDS = 2000;
+    private static boolean USE_REAL_AVERAGE_WIND = true;
+
     public static PathPolyline createPathPolyline(final List<SimulatorWindDTO> pathPoints, final ErrorReporter errorReporter,
             final SimulatorServiceAsync simulatorService, final MapWidget map, final SimulatorMap simulatorMap, final int boatClassID) {
 
@@ -193,8 +196,8 @@ public class PathPolyline {
         this.map.addOverlay(this.polyline);
         this.polyline.setEditingEnabled(PolyEditingOptions.newInstance(this.turnPoints.length - 1));
 
-        this.getTotalTime();
-        this.getTotalTime2();
+        this.getTotalTime_old();
+        this.getTotalTime_new();
     }
 
     private void drawDashLinesOnMap(final int zoomLevel) {
@@ -338,16 +341,17 @@ public class PathPolyline {
         return (first.getLatitude() == second.getLatitude() && first.getLongitude() == second.getLongitude());
     }
 
-    private void getTotalTime() {
+    private void getTotalTime_old() {
         final List<PositionDTO> turnPointsAsPositionDTO = new ArrayList<PositionDTO>();
 
         for (final LatLng point : this.turnPoints) {
             turnPointsAsPositionDTO.add(convertToPositionDTO(point));
         }
 
-        final RequestTotalTimeDTO requestData = new RequestTotalTimeDTO(this.boatClassID, this.allPoints, turnPointsAsPositionDTO);
+        final RequestTotalTimeDTO requestData = new RequestTotalTimeDTO(this.boatClassID, this.allPoints, turnPointsAsPositionDTO, USE_REAL_AVERAGE_WIND,
+                STEP_DURATION_MILLISECONDS, false);
 
-        this.simulatorService.getTotalTime(requestData, new AsyncCallback<ResponseTotalTimeDTO>() {
+        this.simulatorService.getTotalTime_old(requestData, new AsyncCallback<ResponseTotalTimeDTO>() {
 
             @Override
             public void onFailure(final Throwable error) {
@@ -374,16 +378,17 @@ public class PathPolyline {
         });
     }
 
-    private void getTotalTime2() {
+    private void getTotalTime_new() {
         final List<PositionDTO> turnPointsAsPositionDTO = new ArrayList<PositionDTO>();
 
         for (final LatLng point : this.turnPoints) {
             turnPointsAsPositionDTO.add(convertToPositionDTO(point));
         }
 
-        final RequestTotalTimeDTO requestData = new RequestTotalTimeDTO(this.boatClassID, this.allPoints, turnPointsAsPositionDTO);
+        final RequestTotalTimeDTO requestData = new RequestTotalTimeDTO(this.boatClassID, this.allPoints, turnPointsAsPositionDTO, USE_REAL_AVERAGE_WIND,
+                STEP_DURATION_MILLISECONDS, false);
 
-        this.simulatorService.getTotalTime2(requestData, new AsyncCallback<ResponseTotalTimeDTO>() {
+        this.simulatorService.getTotalTime_new(requestData, new AsyncCallback<ResponseTotalTimeDTO>() {
 
             @Override
             public void onFailure(final Throwable error) {
