@@ -41,8 +41,12 @@ public class OSGiRestartingPortMonitor extends AbstractPortMonitor {
     }
 
     @Override
-    public void handleFailure(Endpoint endpoint) {
+    public void handleFailure(Endpoint endpoint) {   
+        boolean sysinfo_available = true;
         SystemInformation info = SystemInformationImpl.getInstance();
+        if (info == null) {
+            sysinfo_available = false;
+        }
         
         Bundle bundle = getBundleByName(endpoint.getBundleName());
         if (bundle == null) {
@@ -55,7 +59,10 @@ public class OSGiRestartingPortMonitor extends AbstractPortMonitor {
                 log.throwing(getClass().getName(), "handleFailure", e);
             }
         } else {
-            final String info_before_restart = info.toString();
+            String info_before_restart = "";
+            if (sysinfo_available) {
+                info_before_restart = info.toString();
+            }
             if (bundle.getState() == BundleEvent.STARTED || bundle.getState() == BundleEvent.STOPPED) {
                 try {
                     bundle.stop();
@@ -78,8 +85,13 @@ public class OSGiRestartingPortMonitor extends AbstractPortMonitor {
                     String content = "The Bundle " + endpoint.getBundleName() + " has been restarted - check on "
                             + endpoint + " didn't respond!\n"
                             + "This Mail won't be sent again if service continues to fail.";
-                    content += "\nSystem Information BEFORE restart:\n" + info_before_restart;
-                    content += "\n\nSystem information AFTER restart:\n" + info.toString();
+                    
+                    if (sysinfo_available) {
+                        content += "\nSystem Information BEFORE restart:\n" + info_before_restart;
+                        content += "\n\nSystem information AFTER restart:\n" + info.toString();
+                    } else {
+                        content += "\nSystem information NOT available due to an error in the library";
+                    }
                     sendMail(endpoint, subject, content);
                 } catch (Throwable ex) {
                     ex.printStackTrace();

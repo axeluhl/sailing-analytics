@@ -12,6 +12,7 @@ import org.hyperic.sigar.FileSystem;
 import org.hyperic.sigar.NetConnection;
 import org.hyperic.sigar.NetFlags;
 import org.hyperic.sigar.Sigar;
+import org.hyperic.sigar.SigarException;
 
 /**
  * @see SystemInformation
@@ -29,13 +30,23 @@ public class SystemInformationImpl implements SystemInformation {
     private long allocated_tcp_connections = -1;
     private long used_tcp_connections = -1;
     
+    /**
+     * @return An instance in case SIGAR can be activated. You always have to check
+     *          for a null value.
+     */
     public synchronized static SystemInformation getInstance() {
-        if (singleton == null)
-            singleton = new SystemInformationImpl();
+        if (singleton == null) {
+            try {
+                singleton = new SystemInformationImpl();
+            } catch (SigarException ex) {
+                singleton = null;
+            }
+        }
+        
         return singleton;
     }
     
-    public SystemInformationImpl() {
+    public SystemInformationImpl() throws SigarException {
         this.sigar_manager = new Sigar();
         this.java_manager = ManagementFactory.getOperatingSystemMXBean();
     }
