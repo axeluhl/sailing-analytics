@@ -705,35 +705,38 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     private void showAdvantageLine(Iterable<CompetitorDTO> competitorsToShow, Date date) {
         if (map != null && lastRaceTimesInfo != null && quickRanks != null && lastCombinedWindTrackInfoDTO != null
                 && lastCombinedWindTrackInfoDTO.windFixes.size() > 0) {
-            // find competitor with highest rank
-            Pair<Integer, CompetitorDTO> visibleLeaderInfo = getLeadingVisibleCompetitorInfo(competitorsToShow);
-            // the boat fix may be null; may mean that no positions were loaded yet for the leading visible boat; don't show anything
-            GPSFixDTO lastBoatFix = null;
-            boolean isVisibleLeaderInfoComplete = false;
-            boolean isLegTypeKnown = false;
-            if (visibleLeaderInfo != null && lastShownFix.containsKey(visibleLeaderInfo.getB())
-                    && lastShownFix.get(visibleLeaderInfo.getB()) != -1 && visibleLeaderInfo.getA() > 0
-                    && visibleLeaderInfo.getA() <= lastRaceTimesInfo.getLegInfos().size()) {
-                isVisibleLeaderInfoComplete = true;
-                LegInfoDTO legInfoDTO = lastRaceTimesInfo.getLegInfos().get(visibleLeaderInfo.getA() - 1);
-                if (legInfoDTO.legType != null) {
-                    isLegTypeKnown = true;
+            boolean drewAdvantageLine = false;
+            if (settings.getHelpLinesSettings().containsHelpLine(HelpLineTypes.ADVANTAGELINE)) {
+                // find competitor with highest rank
+                Pair<Integer, CompetitorDTO> visibleLeaderInfo = getLeadingVisibleCompetitorInfo(competitorsToShow);
+                // the boat fix may be null; may mean that no positions were loaded yet for the leading visible boat;
+                // don't show anything
+                GPSFixDTO lastBoatFix = null;
+                boolean isVisibleLeaderInfoComplete = false;
+                boolean isLegTypeKnown = false;
+                if (visibleLeaderInfo != null && visibleLeaderInfo.getA() > 0
+                        && visibleLeaderInfo.getA() <= lastRaceTimesInfo.getLegInfos().size()) {
+                    isVisibleLeaderInfoComplete = true;
+                    LegInfoDTO legInfoDTO = lastRaceTimesInfo.getLegInfos().get(visibleLeaderInfo.getA() - 1);
+                    if (legInfoDTO.legType != null) {
+                        isLegTypeKnown = true;
+                    }
+                    lastBoatFix = getBoatFix(visibleLeaderInfo.getB(), date);
                 }
-                lastBoatFix = getBoatFix(visibleLeaderInfo.getB(), date);
-            }
-            if (settings.getHelpLinesSettings().containsHelpLine(HelpLineTypes.ADVANTAGELINE)
-                    && isVisibleLeaderInfoComplete && isLegTypeKnown && lastBoatFix != null) {
-                LegInfoDTO legInfoDTO = lastRaceTimesInfo.getLegInfos().get(visibleLeaderInfo.getA()-1);
-                double advantageLineLengthInKm = 1.0; // TODO this should probably rather scale with the visible area of the map; bug 616
-                double distanceFromBoatPositionInKm = visibleLeaderInfo.getB().boatClass.getHullLengthInMeters()/1000.; // one hull length
-                // implement and use Position.translateRhumb()
-                double bearingOfBoatInDeg = lastBoatFix.speedWithBearing.bearingInDegrees;
-                LatLng boatPosition = LatLng.newInstance(lastBoatFix.position.latDeg, lastBoatFix.position.lngDeg);
-                LatLng posAheadOfFirstBoat = calculatePositionAlongRhumbline(boatPosition, bearingOfBoatInDeg, distanceFromBoatPositionInKm);
-                double bearingOfCombinedWindInDeg = lastCombinedWindTrackInfoDTO.windFixes.get(0).trueWindBearingDeg;
-                double rotatedBearingDeg1 = 0.0;
-                double rotatedBearingDeg2 = 0.0;
-                switch(legInfoDTO.legType) {
+                if (isVisibleLeaderInfoComplete && isLegTypeKnown && lastBoatFix != null) {
+                    LegInfoDTO legInfoDTO = lastRaceTimesInfo.getLegInfos().get(visibleLeaderInfo.getA() - 1);
+                    double advantageLineLengthInKm = 1.0; // TODO this should probably rather scale with the visible
+                                                          // area of the map; bug 616
+                    double distanceFromBoatPositionInKm = visibleLeaderInfo.getB().boatClass.getHullLengthInMeters() / 1000.; // one hull length
+                    // implement and use Position.translateRhumb()
+                    double bearingOfBoatInDeg = lastBoatFix.speedWithBearing.bearingInDegrees;
+                    LatLng boatPosition = LatLng.newInstance(lastBoatFix.position.latDeg, lastBoatFix.position.lngDeg);
+                    LatLng posAheadOfFirstBoat = calculatePositionAlongRhumbline(boatPosition, bearingOfBoatInDeg,
+                            distanceFromBoatPositionInKm);
+                    double bearingOfCombinedWindInDeg = lastCombinedWindTrackInfoDTO.windFixes.get(0).trueWindBearingDeg;
+                    double rotatedBearingDeg1 = 0.0;
+                    double rotatedBearingDeg2 = 0.0;
+                    switch (legInfoDTO.legType) {
                     case UPWIND:
                     case DOWNWIND: {
                         rotatedBearingDeg1 = bearingOfCombinedWindInDeg + 90.0;
@@ -745,7 +748,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                             rotatedBearingDeg2 += 360.0;
                         }
                     }
-                    break;
+                        break;
                     case REACHING: {
                         rotatedBearingDeg1 = legInfoDTO.legBearingInDegrees + 90.0;
                         if (rotatedBearingDeg1 >= 360.0) {
@@ -756,38 +759,46 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                             rotatedBearingDeg2 += 360.0;
                         }
                     }
-                    break;
+                        break;
+                    }
+                    LatLng advantageLinePos1 = calculatePositionAlongRhumbline(posAheadOfFirstBoat, rotatedBearingDeg1,
+                            advantageLineLengthInKm / 2.0);
+                    LatLng advantageLinePos2 = calculatePositionAlongRhumbline(posAheadOfFirstBoat, rotatedBearingDeg2,
+                            advantageLineLengthInKm / 2.0);
+
+                    LatLng[] advantageLinePoints = new LatLng[2];
+                    advantageLinePoints[0] = LatLng.newInstance(advantageLinePos1.getLatitude(),
+                            advantageLinePos1.getLongitude());
+                    advantageLinePoints[1] = LatLng.newInstance(advantageLinePos2.getLatitude(),
+                            advantageLinePos2.getLongitude());
+                    if (advantageLine == null) {
+                        PolylineOptions options = PolylineOptions.newInstance(/* clickable must be true for hover sensitivity */ true,
+                                                                              /* geodesic */true);
+                        advantageLine = new Polyline(advantageLinePoints, /* color */"#000000", /* width */1, /* opacity */
+                                0.5, options);
+                        advantageLine.addPolylineMouseOverHandler(new PolylineMouseOverHandler() {
+                            @Override
+                            public void onMouseOver(PolylineMouseOverEvent event) {
+                                map.setTitle(stringMessages.advantageLine());
+                            }
+                        });
+                        advantageLine.addPolylineMouseOutHandler(new PolylineMouseOutHandler() {
+                            @Override
+                            public void onMouseOut(PolylineMouseOutEvent event) {
+                                map.setTitle("");
+                            }
+                        });
+                        map.addOverlay(advantageLine);
+                    } else {
+                        advantageLine.deleteVertex(1);
+                        advantageLine.deleteVertex(0);
+                        advantageLine.insertVertex(0, advantageLinePoints[0]);
+                        advantageLine.insertVertex(1, advantageLinePoints[1]);
+                    }
+                    drewAdvantageLine = true;
                 }
-                
-                LatLng advantageLinePos1 = calculatePositionAlongRhumbline(posAheadOfFirstBoat, rotatedBearingDeg1, advantageLineLengthInKm / 2.0);
-                LatLng advantageLinePos2 = calculatePositionAlongRhumbline(posAheadOfFirstBoat, rotatedBearingDeg2, advantageLineLengthInKm / 2.0);
-                
-                LatLng[] advantageLinePoints = new LatLng[2];
-                advantageLinePoints[0] = LatLng.newInstance(advantageLinePos1.getLatitude(), advantageLinePos1.getLongitude());
-                advantageLinePoints[1] = LatLng.newInstance(advantageLinePos2.getLatitude(), advantageLinePos2.getLongitude());; 
-                if (advantageLine == null) {
-                    PolylineOptions options = PolylineOptions.newInstance(/* clickable must be true for hover sensitivity*/ true, /* geodesic */true);
-                    advantageLine = new Polyline(advantageLinePoints, /* color */ "#000000", /* width */ 1, /* opacity */0.5, options);
-                    advantageLine.addPolylineMouseOverHandler(new PolylineMouseOverHandler() {
-                        @Override
-                        public void onMouseOver(PolylineMouseOverEvent event) {
-                            map.setTitle(stringMessages.advantageLine());
-                        }
-                    });
-                    advantageLine.addPolylineMouseOutHandler(new PolylineMouseOutHandler() {
-                        @Override
-                        public void onMouseOut(PolylineMouseOutEvent event) {
-                            map.setTitle("");
-                        }
-                    });
-                    map.addOverlay(advantageLine);
-                } else {
-                    advantageLine.deleteVertex(1);
-                    advantageLine.deleteVertex(0);
-                    advantageLine.insertVertex(0, advantageLinePoints[0]);
-                    advantageLine.insertVertex(1, advantageLinePoints[1]);
-                }
-            } else {
+            }
+            if (!drewAdvantageLine) {
                 if (advantageLine != null) {
                     map.removeOverlay(advantageLine);
                     advantageLine = null;

@@ -12,6 +12,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.logging.Logger;
 
+import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceDefinition;
@@ -183,7 +184,8 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
                         trackedRace.recordFix(mark, gpsFix);
                         break;
                     case COMPETITOR:
-                        Competitor competitor = domainFactory.getCompetitorByBoatID(fix.getBoatID());
+                        Competitor competitor = domainFactory.getCompetitorByBoatIDAndBoatClass(
+                                fix.getBoatID(), domainFactory.getOrCreateBoatClassFromRaceID(raceID));
                         DynamicGPSFixTrack<Competitor, GPSFixMoving> competitorTrack = trackedRace.getTrack(competitor);
                         competitorTrack.addGPSFix(gpsFix);
                         break;
@@ -208,7 +210,9 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
             List<Triple<Integer, Integer, Long>> markIndicesRanksAndTimesSinceStartInMilliseconds) {
         assert this.raceID.equals(raceID);
         if (isTrackedRaceStillReachable()) {
-            Competitor competitor = domainFactory.getCompetitorByBoatID(boatID);
+            final BoatClass boatClass = domainFactory.getOrCreateBoatClassFromRaceID(raceID);
+            Competitor competitor = domainFactory.getCompetitorByBoatIDAndBoatClass(boatID,
+                    boatClass);
             // the list of mark indices and time stamps is partial and usually only shows the last mark passing;
             // we need to use this to *update* the competitor's mark passings list, not *replace* it
             TreeMap<Integer, MarkPassing> markPassingsByMarkIndex = new TreeMap<Integer, MarkPassing>();
@@ -231,7 +235,7 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
                 MillisecondsTimePoint timePoint = trackedRace.getStartOfRace() == null ? null : new MillisecondsTimePoint(
                         trackedRace.getStartOfRace().asMillis() + markIndexRankAndTimeSinceStartInMilliseconds.getC());
                 MarkPassing markPassing = domainFactory.createMarkPassing(timePoint, waypoint,
-                        domainFactory.getCompetitorByBoatID(boatID));
+                        domainFactory.getCompetitorByBoatIDAndBoatClass(boatID, boatClass));
                 markPassingsByMarkIndex.put(markIndexRankAndTimeSinceStartInMilliseconds.getA(), markPassing);
             }
             trackedRace.updateMarkPassings(competitor, markPassingsByMarkIndex.values());
