@@ -90,10 +90,10 @@
           -Xmx1024m -XX:PermSize=256m -XX:-UseGCOverheadLimit -XX:+UseParallelGC
 		</parameters.vm-settings>
 		<parameters.tractrac>
-          -Dtractrac.tunnel=true -Dtractrac.tunnel.host=10.18.206.73
+          -Dtractrac.tunnel=true -Dtractrac.tunnel.host=10.18.22.156
 		</parameters.tractrac>
 		<parameters.mongodb>
-          -Dmongo.host=10.18.206.73
+          -Dmongo.host=10.18.22.156
 		</parameters.mongodb>
         <parameters.debug>
           -Xdebug
