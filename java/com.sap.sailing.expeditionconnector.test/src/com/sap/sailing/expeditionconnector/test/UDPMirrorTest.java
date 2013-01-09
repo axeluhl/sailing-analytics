@@ -53,6 +53,8 @@ public class UDPMirrorTest {
                         didReceive[0] = true;
                         didReceive.notifyAll();
                     }
+                    
+                    udpSocket.close();
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
@@ -67,6 +69,8 @@ public class UDPMirrorTest {
                 didReceive.wait();
             }
         }
+        sendingSocket.close();
+        
         assertTrue(Arrays.equals(buf1, buf2));
     }
     
