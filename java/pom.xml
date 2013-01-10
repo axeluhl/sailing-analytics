@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <project
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
 	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
@@ -63,6 +63,8 @@
 		<module>com.sap.sailing.ess40.resultimport.test</module>
 		<module>com.sap.sailing.freg.resultimport</module>
 		<module>com.sap.sailing.freg.resultimport.test</module>
+		<module>com.sap.sailing.selenium.test</module>
+		<module>org.openqa.selenium.osgi</module>
 		<module>com.sap.sailing.monitoring</module>
 		<module>com.sap.sailing.nmeaconnector</module>
 		<module>com.sap.sailing.nmeaconnector.test</module>
@@ -74,7 +76,74 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<tycho-version>0.13.0</tycho-version>
+        
+		<!--
+          QUESTION: Which properties or settings are system dependent and differ across
+                    different machines/environments?
+          QUESTION: Can we move the system property -Dmongo.dbName to "parameters.mongodb"?
+                    If so the IP of the host would be the same for all profiles.
+		-->
+        <parameters.common>
+		  -Dfile.encoding=cp1252 -Dreplication.brokerURL=tcp://localhost:61615 -Dmongo.dbName=winddbTest
+        </parameters.common>
+		<parameters.vm-settings>
+          -Xmx1024m -XX:PermSize=256m -XX:-UseGCOverheadLimit -XX:+UseParallelGC
+		</parameters.vm-settings>
+		<parameters.tractrac>
+          -Dtractrac.tunnel=true -Dtractrac.tunnel.host=10.18.22.156
+		</parameters.tractrac>
+		<parameters.mongodb>
+          -Dmongo.host=10.18.22.156
+		</parameters.mongodb>
+        <parameters.debug>
+          -Xdebug
+          -Xrunjdwp:transport=dt_socket,address=8000,server=y,suspend=y 
+        </parameters.debug>
+        <!--
+          "Forward declaration" for better readability. The actual value should be defined in the local settings.xml,
+          because of the differences between the CI-Build and the local setup.
+        -->
+        <parameters.proxy>
+        </parameters.proxy>
 	</properties>
+
+    <profiles>
+        <profile>
+            <id>no-debug.with-proxy</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                <tycho.build.argLine>
+				  ${parameters.common} ${parameters.vm-settings} ${parameters.proxy} ${parameters.tractrac} ${parameters.mongodb}
+				</tycho.build.argLine>
+            </properties>
+        </profile>
+        <profile>
+            <id>no-debug.without-proxy</id>
+            <properties>
+                <tycho.build.argLine>
+				  ${parameters.common} ${parameters.vm-settings}
+				</tycho.build.argLine>
+            </properties>
+        </profile>
+        <profile>
+            <id>debug.with-proxy</id>
+            <properties>
+                <tycho.build.argLine>
+			      ${parameters.common} ${parameters.vm-settings} ${parameters.proxy} ${parameters.debug}
+				</tycho.build.argLine>
+            </properties>
+        </profile>
+        <profile>
+            <id>debug.without-proxy</id>
+            <properties>
+                <tycho.build.argLine>
+                  ${parameters.common} ${parameters.vm-settings} ${parameters.debug}
+				</tycho.build.argLine>
+            </properties>
+        </profile>
+    </profiles>
 
 	<build>
 		<directory>bin</directory>
@@ -152,24 +221,10 @@
 				<artifactId>tycho-surefire-plugin</artifactId>
 				<version>${tycho-version}</version>
 				<configuration>
-<!-- non-debug -->
-<!-- proxy -->
-					<argLine>-Dfile.encoding=cp1252 -Dhttp.proxyHost=proxy -Dhttp.proxyPort=8080 -Dtractrac.tunnel=true -Dtractrac.tunnel.host=10.18.22.156 -Dmongo.host=10.18.22.156 -Dmongo.dbName=winddbTest -Dreplication.brokerURL=tcp://localhost:61615 -Xmx1024m -XX:PermSize=256m -XX:-UseGCOverheadLimit -XX:+UseParallelGC</argLine>
-<!-- -->
-<!-- no proxy
-					<argLine>-Dfile.encoding=cp1252 -Dmongo.dbName=winddbTest -Dreplication.brokerURL=tcp://localhost:61615 -Xmx1024m -XX:PermSize=256m -XX:-UseGCOverheadLimit -XX:+UseParallelGC</argLine>
--->
-<!-- -->
-<!-- debug, proxy
-					<argLine>-Dfile.encoding=cp1252 -Xdebug -Xrunjdwp:transport=dt_socket,address=8000,server=y,suspend=y -Dhttp.proxyHost=proxy -Dhttp.proxyPort=8080 -Dmongo.dbName=winddbTest -Dreplication.brokerURL=tcp://localhost:61615 -Xmx1024m -XX:PermSize=256m -XX:-UseGCOverheadLimit -XX:+UseParallelGC</argLine>
--->
-
-<!-- debug, no proxy 
-					<argLine>-Dfile.encoding=cp1252 -Xdebug -Xrunjdwp:transport=dt_socket,address=8000,server=y,suspend=y -Dmongo.dbName=winddbTest -Dreplication.brokerURL=tcp://localhost:61615 -Xmx1024m -XX:PermSize=256m -XX:-UseGCOverheadLimit -XX:+UseParallelGC</argLine>
--->
-
+				    <argLine>${tycho.build.argLine}</argLine>
 					<excludes>
-						<exclude>**/*$*</exclude> <!-- Exclude inner classes -->
+						<!-- Exclude inner classes -->
+						<exclude>**/*$*</exclude>
 					</excludes>
 				</configuration>
 			</plugin>
