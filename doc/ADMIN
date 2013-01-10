@@ -82,18 +82,6 @@ application.
 This will launch the MongoDB servers. If not, check for old mongod.lock
 files in the server directories and remove them, then try again.
 
-Launch Python Server
----------------------
-
-The Python Server implements the web applications used by the
-moderator as well as the iPhone/iPad web application.
-
- - log in as user "web"
-
- - "cd project/dev/python"
-
- - nohup bin/debug.sh
-
 Launch UDP Mirror
 -----------------
 
