@@ -9,8 +9,8 @@ import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
 public class RegattaOverviewEntryPoint extends AbstractEntryPoint  {
     
     @Override
-    public void onModuleLoad() {
-        super.onModuleLoad();
+    public void doOnModuleLoad() {
+        super.doOnModuleLoad();
 
         RootPanel rootPanel = RootPanel.get();
         boolean embedded = Window.Location.getParameter("embedded") != null

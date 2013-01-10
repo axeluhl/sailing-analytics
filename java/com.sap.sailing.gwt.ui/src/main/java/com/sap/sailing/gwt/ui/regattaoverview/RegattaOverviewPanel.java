@@ -12,8 +12,10 @@ import com.sap.sailing.gwt.ui.shared.RaceEventLogDTO;
 
 public class RegattaOverviewPanel extends FlowPanel {
     private final SailingServiceAsync sailingService;
-    private final ErrorReporter errorReporter;
-    private final StringMessages stringMessages;
+    @SuppressWarnings("unused")
+	private final ErrorReporter errorReporter;
+    @SuppressWarnings("unused")
+	private final StringMessages stringMessages;
 
     private final Label label;
     
