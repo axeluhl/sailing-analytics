@@ -92,7 +92,7 @@ public class SystemInformationImpl implements SystemInformation {
     
     @Override
     public ProcessInformation getProcessInformation(long pid) {
-        return new ProcessInformation(pid, sigar_manager);
+        return new ProcessInformationImpl(pid, sigar_manager);
     }
     
     @Override
