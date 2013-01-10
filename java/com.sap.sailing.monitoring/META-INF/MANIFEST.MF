@@ -8,5 +8,6 @@ Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: org.osgi.framework;version="1.3.0"
 Bundle-ActivationPolicy: lazy
-Bundle-ClassPath: lib/mail.jar,
- .
+Bundle-ClassPath: .
+Require-Bundle: org.hyperic.sigar;bundle-version="1.6.4",
+ com.sun.mail.javax.mail;bundle-version="1.4.5"

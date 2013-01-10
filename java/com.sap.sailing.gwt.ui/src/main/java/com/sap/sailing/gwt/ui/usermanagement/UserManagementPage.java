@@ -16,8 +16,8 @@ import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
 
 public class UserManagementPage extends AbstractEntryPoint {
     @Override
-    public void onModuleLoad() {
-        super.onModuleLoad();
+    protected void doOnModuleLoad() {
+        super.doOnModuleLoad();
         VerticalPanel vp = new VerticalPanel();
         RootPanel.get().add(vp);
         TextBox usernameField = new TextBox();

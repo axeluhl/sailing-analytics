@@ -180,8 +180,8 @@ public interface SailingServiceAsync {
      *            if <code>null</code>, no {@link LeaderboardEntryDTO#legDetails leg details} will be present in the
      *            result ({@link LeaderboardEntryDTO#legDetails} will be <code>null</code> for all
      *            {@link LeaderboardEntryDTO} objects contained). Otherwise, the {@link LeaderboardEntryDTO#legDetails}
-     *            list will contain one entry per leg of the race {@link Course} for those race columns whose
-     *            {@link RaceColumn#getType() name} is contained in <code>namesOfRacesForWhichToLoadLegDetails</code>.
+     *            list will contain one entry per leg of the race {@link com.sap.sailing.domain.base.Course} for those race columns whose
+     *            {@link com.sap.sailing.domain.base.RaceColumn#getType() name} is contained in <code>namesOfRacesForWhichToLoadLegDetails</code>.
      *            For all other columns, {@link LeaderboardEntryDTO#legDetails} is <code>null</code>.
      */
     void getLeaderboardByName(String leaderboardName, Date date,
@@ -341,7 +341,7 @@ public interface SailingServiceAsync {
     void getEvents(AsyncCallback<List<EventDTO>> callback);
 
     /**
-     * Creates a {@link EventDTO} for the {@link Event} with the name <code>eventName</code>, which contains the
+     * Creates a {@link EventDTO} for the {@link com.sap.sailing.domain.base.Event} with the name <code>eventName</code>, which contains the
      * name, the description and a list with {@link RegattaDTO RegattaDTOs} contained in the event.<br />
      * If no event with the name <code>eventName</code> is known, an {@link IllegalArgumentException} is thrown.
      */
@@ -434,8 +434,8 @@ public interface SailingServiceAsync {
             long stepSize, DetailType detailType, AsyncCallback<CompetitorsRaceDataDTO> callback);
 
     /**
-     * Finds out the names of all {@link MetaLeaderboard}s managed by this server that
-     * {@link MetaLeaderboard#getLeaderboards() contain} the leaderboard identified by <code>leaderboardName</code>. The
+     * Finds out the names of all {@link com.sap.sailing.domain.leaderboard.MetaLeaderboard}s managed by this server that
+     * {@link com.sap.sailing.domain.leaderboard.MetaLeaderboard#getLeaderboards() contain} the leaderboard identified by <code>leaderboardName</code>. The
      * names of those meta-leaderboards are returned. The list returned is never <code>null</code> but may be empty if no such
      * leaderboard is found.
      */

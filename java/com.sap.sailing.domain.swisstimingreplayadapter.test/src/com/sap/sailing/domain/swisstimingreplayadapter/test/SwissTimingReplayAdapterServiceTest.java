@@ -194,6 +194,20 @@ public class SwissTimingReplayAdapterServiceTest {
 
     @Test
     @Ignore
+    public void printRaceData_SAM009903_20120731_sapsailing_replay() throws Exception {
+        new SwissTimingReplayParserImpl().readData(getClass().getResourceAsStream("/SAM009903.20120731_sapsailing.replay"),
+                new SwissTimingReplayPrintListener());
+    }
+
+    @Test
+    @Ignore
+    public void printRaceData_SAM009903_20120731_replay() throws Exception {
+        new SwissTimingReplayParserImpl().readData(getClass().getResourceAsStream("/SAM009903.20120731.replay"),
+                new SwissTimingReplayPrintListener());
+    }
+
+    @Test
+    @Ignore
     public void printReadRaceData_SAW010955_20120802() throws Exception {
         new SwissTimingReplayParserImpl().readData(getClass().getResourceAsStream("/SAW010955.20120802.replay"), new SwissTimingReplayPrintListener());
     }

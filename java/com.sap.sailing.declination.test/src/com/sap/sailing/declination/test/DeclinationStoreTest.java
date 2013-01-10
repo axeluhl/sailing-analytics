@@ -313,6 +313,9 @@ public class DeclinationStoreTest extends AbstractDeclinationTest {
                 // this was to be expected
             }
             ois.close();
+            
+            oos1.close();
+            oos2.close();
         } finally {
             tmpFile.delete();
         }
