@@ -376,8 +376,11 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
         case WINDWARD_DISTANCE_TO_OVERALL_LEADER:
             detailTypeUnit = getStringMessages().windwardDistanceToGoInMetersUnit();
             break;
+        case RACE_RANK:
+        	detailTypeUnit = getStringMessages().raceRankUnit();
+        	break;
 		default:
-			throw new UnsupportedOperationException("Theres currently no support for the enum value '" + getSelectedDetailType() + "' in this method.");
+//			throw new UnsupportedOperationException("Theres currently no support for the enum value '" + getSelectedDetailType() + "' in this method.");
         }
         return detailTypeUnit;
     }
