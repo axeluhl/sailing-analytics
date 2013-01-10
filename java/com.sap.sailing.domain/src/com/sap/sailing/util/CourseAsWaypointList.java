@@ -20,7 +20,7 @@ import difflib.Patch;
  * <p>
  * 
  * Executions of all {@link #add(int, Waypoint)} operations that would lead to duplicate waypoint occurrences are
- * replaced by an insertion or a proxy waypoint. The insertion of the waypoint passed to {@link #add(int, Waypoint)} is
+ * replaced by an insertion of a proxy waypoint. The insertion of the waypoint passed to {@link #add(int, Waypoint)} is
  * delayed until its occurrence is removed. This is necessary because moving of waypoints may be represented as a
  * sequence of insert/remove (instead of remove/insert) which would lead to duplicate {@link Waypoint} occurrences in
  * the course which is not permitted.
