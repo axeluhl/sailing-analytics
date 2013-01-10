@@ -90,7 +90,7 @@ public class OSGiRestartingPortMonitor extends AbstractPortMonitor {
                         content += "\n\nSystem Information BEFORE restart:\n" + info_before_restart;
                         content += "\n\nSystem information AFTER restart:\n" + info.toString();
                     } else {
-                        content += "\n\nSystem information NOT available due to an error in the library";
+                        content += "\n\nSystem information NOT available due to an error in the library (in most cases caused by native libs not being available)";
                     }
                     sendMail(endpoint, subject, content);
                 } catch (Throwable ex) {
