@@ -55,7 +55,7 @@
          unpack="false"/>
 
    <plugin
-         id="javax.mail"
+         id="com.sun.mail.javax.mail"
          download-size="0"
          install-size="0"
          version="1.4.5"
