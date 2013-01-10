@@ -17,20 +17,20 @@ import org.hyperic.sigar.Sigar;
  */
 public class ProcessInformation {
     
-    private long pid;
-    private String name;
+    private long pid = -1;
+    private String name = "";
     
-    private long max_open_files = 0;
-    private long current_open_file_count;
+    private long max_open_files = -1;
+    private long current_open_file_count = -1;
     
-    private long current_thread_count;
+    private long current_thread_count = -1;
     
-    private long virtual_memory_size;
-    private long resident_memory_size;
-    private long shared_memory_size;
+    private long virtual_memory_size = -1;
+    private long resident_memory_size = -1;
+    private long shared_memory_size = -1;
     
-    private long kernel_cpu_time;
-    private long user_cpu_time;
+    private long kernel_cpu_time = -1;
+    private long user_cpu_time = -1;
     
     public ProcessInformation(long pid, Sigar sigar) {
         this.pid = pid;
@@ -62,12 +62,18 @@ public class ProcessInformation {
         }
     }
     
-    protected String[] readProc(String path) throws Exception {
-        BufferedReader reader = new BufferedReader(new FileReader(path));
+    protected String[] readProc(String path) {
+        BufferedReader reader = null; StringBuffer buf = new StringBuffer("");
+        try {
+            reader = new BufferedReader(new FileReader(path));
         
-        String line = ""; StringBuffer buf = new StringBuffer();
-        while ( (line = reader.readLine() ) != null) {
-            buf.append(line).append("\n");
+            String line = "";
+            while ( (line = reader.readLine() ) != null) {
+                buf.append(line).append("\n");
+            }
+            
+        } catch(Exception ex) {
+            return new String[]{};
         }
 
         return buf.toString().split("\\n");
@@ -75,11 +81,7 @@ public class ProcessInformation {
     
     protected void parseLimits() {        
         String[] limits = new String[]{};
-        try {
-             limits = readProc("/proc/" + getPid() + "/limits");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        limits = readProc("/proc/" + getPid() + "/limits");
         
         for (String line : limits) {
             String[] parts = line.split(" ");

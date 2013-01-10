@@ -47,7 +47,7 @@ public class SystemInformationImpl implements SystemInformation {
     }
     
     public SystemInformationImpl() throws SigarException {
-        Sigar.load(); /* check if libraries can be loaded */
+        Sigar.load(); /* check if native libraries can be loaded */
 
         this.sigar_manager = new Sigar();
         this.java_manager = ManagementFactory.getOperatingSystemMXBean();
@@ -59,7 +59,7 @@ public class SystemInformationImpl implements SystemInformation {
         try {
              reader = new BufferedReader(new FileReader(path));
         } catch (FileNotFoundException ex) {
-            return new String[]{};
+            return new String[]{}; /* return empty result */
         }
         
         String line = ""; StringBuffer buf = new StringBuffer();
