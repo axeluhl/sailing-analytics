@@ -1,27 +1,21 @@
 package com.sap.sailing.gwt.ui.video;
 
-import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.dom.client.MediaElement;
 import com.google.gwt.dom.client.VideoElement;
 import com.google.gwt.event.dom.client.ContextMenuEvent;
 import com.google.gwt.event.dom.client.ContextMenuHandler;
-import com.google.gwt.event.logical.shared.ResizeEvent;
-import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.media.client.Video;
-import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 
-public class VideoPopupWindow implements EntryPoint, ResizeHandler, ContextMenuHandler {
+public class VideoPopupWindow extends AbstractPopupWindow implements ContextMenuHandler {
 
     private Video video;
     private boolean isDebug;
 
     @Override
-    public void onModuleLoad() {
-
-        Window.addResizeHandler(this);
+    protected void initializePlayer() {
 
         RootLayoutPanel mainPanel = RootLayoutPanel.get();
 
@@ -69,135 +63,48 @@ public class VideoPopupWindow implements EntryPoint, ResizeHandler, ContextMenuH
                 });
     }-*/;
 
-    native void addCallbackMethods() /*-{
-		var that = this;
-		$wnd.videoPlayer = {
-			play : function() {
-				that.@com.sap.sailing.gwt.ui.video.VideoPopupWindow::play()();
-			},
-			pause : function() {
-				that.@com.sap.sailing.gwt.ui.video.VideoPopupWindow::pause()();
-			},
-			setTime : function(time) {
-				that.@com.sap.sailing.gwt.ui.video.VideoPopupWindow::setTime(D)(time);
-			},
-			setMuted : function(muted) {
-				that.@com.sap.sailing.gwt.ui.video.VideoPopupWindow::setMuted(Z)(muted);
-			},
-			isPaused : function() {
-				return that.@com.sap.sailing.gwt.ui.video.VideoPopupWindow::isPaused()();
-			},
-			getDuration : function() {
-				return that.@com.sap.sailing.gwt.ui.video.VideoPopupWindow::getDuration()();
-			},
-			getTime : function() {
-				return that.@com.sap.sailing.gwt.ui.video.VideoPopupWindow::getTime()();
-			},
-			setPlaybackSpeed : function(newPlaySpeedFactor) {
-				that.@com.sap.sailing.gwt.ui.video.VideoPopupWindow::setPlaybackSpeed(D)(newPlaySpeedFactor);
-			}
-		};
-    }-*/;
-
-    public void play() {
-        video.play();
-    }
-
-    public void pause() {
-        video.pause();
-    }
-
-    public void setTime(double time) {
-        video.setCurrentTime(time);
-    }
-
-    public void setMuted(boolean muted) {
-        video.setMuted(muted);
-    }
-
-    public boolean isPaused() {
-        return video.isPaused();
-    }
-
-    public double getDuration() {
-        return video.getDuration();
-    }
-
-    public double getTime() {
-        return video.getCurrentTime();
-    }
-
-    public void setPlaybackSpeed(double newPlaySpeedFactor) {
-        video.setPlaybackRate(newPlaySpeedFactor);
-    }
-
     public void loadedmetadata() {
         adjustWindowSize();
     }
     
-    public void initPlayState(double deferredMediaTime, boolean isDeferredMuted, double deferredPlaybackSpeed,
-            boolean isDeferredPlaying) {
-        
-        addCallbackMethods();
-        
-        setTime(deferredMediaTime);
-        setMuted(isDeferredMuted);
-        setPlaybackSpeed(deferredPlaybackSpeed);
-        if (isDeferredPlaying) {
-            play();
-        } else {
-            pause();
-        }
-
-    }
-
-    private void adjustWindowSize() {
-        int clientWidth = Window.getClientWidth();
-        int videoWidth = video.getVideoWidth();
-        int widthDelta = videoWidth - clientWidth;
-
-        int clientHeight = Window.getClientHeight();
-        int videoHeight = video.getVideoHeight();
-        int heightDelta = videoHeight - clientHeight;
-
-        Window.resizeBy(widthDelta, heightDelta);
+    @Override
+    public void play() {
+        video.play();
     }
 
     @Override
-    public void onResize(final ResizeEvent event) {
-        if (video != null) {
-            new Timer() {
-                @Override
-                public void run() {
-                    int videoWidth = video.getVideoWidth();
-                    if (videoWidth > 0) {
-                        int clientWidth = Window.getClientWidth();
-                        double widthResizeRatio = ((double) clientWidth) / videoWidth;
+    public void pause() {
+        video.pause();
+    }
 
-                        int videoHeight = video.getVideoHeight();
-                        if (videoHeight > 0) {
-                            int clientHeight = Window.getClientHeight();
-                            double heightResizeRatio = ((double) clientHeight) / videoHeight;
+    @Override
+    public void setTime(double time) {
+        video.setCurrentTime(time);
+    }
 
-                            double resizeRatio = Math.min(widthResizeRatio, heightResizeRatio);
+    @Override
+    public void setMuted(boolean muted) {
+        video.setMuted(muted);
+    }
 
-                            if (Math.abs(1.0 - resizeRatio) > 0.001) {
+    @Override
+    public boolean isPaused() {
+        return video.isPaused();
+    }
 
-                                int newVideoWidth = (int) Math.round(resizeRatio * videoWidth);
-                                int newVideoHeight = (int) Math.round(resizeRatio * videoHeight);
-                                video.setPixelSize(newVideoWidth, newVideoHeight);
+    @Override
+    public double getDuration() {
+        return video.getDuration();
+    }
 
-                                int widthDelta = newVideoWidth - clientWidth;
-                                int heightDelta = newVideoHeight - clientHeight;
+    @Override
+    public double getTime() {
+        return video.getCurrentTime();
+    }
 
-                                Window.resizeBy(widthDelta, heightDelta);
-                            }
-                        }
-                    }
-
-                }
-            }.schedule(100);
-        }
+    @Override
+    public void setPlaybackSpeed(double newPlaySpeedFactor) {
+        video.setPlaybackRate(newPlaySpeedFactor);
     }
 
     /**
@@ -210,5 +117,25 @@ public class VideoPopupWindow implements EntryPoint, ResizeHandler, ContextMenuH
             event.stopPropagation();
         }
     }
+
+    @Override
+    protected boolean hasVideoSizes() {
+        return video != null;
+    }
     
+    @Override
+    protected int getVideoWidth() {
+        return video.getVideoWidth();
+    }
+
+    @Override
+    protected int getVideoHeight() {
+        return video.getVideoHeight();
+    }
+
+    @Override
+    protected void setVideoSize(int width, int height) {
+        video.setPixelSize(width, height);
+    }
+
 }

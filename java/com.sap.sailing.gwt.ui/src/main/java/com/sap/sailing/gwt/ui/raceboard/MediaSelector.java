@@ -33,7 +33,7 @@ import com.sap.sailing.gwt.ui.client.TimeListener;
 import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.client.Timer.PlayStates;
 import com.sap.sailing.gwt.ui.raceboard.MediaSelectionDialog.MediaSelectionListener;
-import com.sap.sailing.gwt.ui.raceboard.VideoControl.VideoCloseListener;
+import com.sap.sailing.gwt.ui.raceboard.PopupWindowPlayer.PopupCloseListener;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.media.MediaTrack;
 
@@ -47,7 +47,7 @@ public class MediaSelector implements RaceTimesInfoProviderListener, PlayStateLi
     private final AudioElement mediaCanPlayTester; 
 
     private MediaPlayer activeAudioPlayer;
-    private final Map<MediaTrack, VideoControl> videoPlayers = new HashMap<MediaTrack, VideoControl>();
+    private final Map<MediaTrack, MediaPlayer> videoPlayers = new HashMap<MediaTrack, MediaPlayer>();
     private final Set<MediaTrack> audioTracks = new HashSet<MediaTrack>();
     private final Set<MediaTrack> videoTracks = new HashSet<MediaTrack>();
     private final ErrorReporter errorReporter;
@@ -113,11 +113,15 @@ public class MediaSelector implements RaceTimesInfoProviderListener, PlayStateLi
     
     private boolean canPlay(MediaTrack mediaTrack) {
         if (mediaCanPlayTester != null) {
-            String canPlay = mediaCanPlayTester.canPlayType(mediaTrack.typeToString());
-            if (mediaCanPlayTester != null) {
-                return MediaElement.CAN_PLAY_PROBABLY.equals(canPlay) || MediaElement.CAN_PLAY_MAYBE.equals(canPlay);
+            if (mediaTrack.isYoutube()) {
+                return true;
             } else {
-                return false;
+                String canPlay = mediaCanPlayTester.canPlayType(mediaTrack.typeToString());
+                if (mediaCanPlayTester != null) {
+                    return MediaElement.CAN_PLAY_PROBABLY.equals(canPlay) || MediaElement.CAN_PLAY_MAYBE.equals(canPlay);
+                } else {
+                    return false;
+                }
             }
         } else {
             return false;
@@ -183,7 +187,7 @@ public class MediaSelector implements RaceTimesInfoProviderListener, PlayStateLi
         if (activeAudioPlayer != null) {
             activeAudioPlayer.setPlaybackSpeed(this.currentPlaybackSpeed);
         }
-        for (VideoControl videoPlayer : videoPlayers.values()) {
+        for (MediaPlayer videoPlayer : videoPlayers.values()) {
             videoPlayer.setPlaybackSpeed(this.currentPlaybackSpeed);
         }
     }
@@ -258,7 +262,7 @@ public class MediaSelector implements RaceTimesInfoProviderListener, PlayStateLi
 
     @Override
     public void audioChanged(MediaTrack audioTrack) {
-        if (activeAudioPlayer != null) {
+        if (activeAudioPlayer != null) { // --> then reset active audio player 
             
             if (activeAudioPlayer.getMediaTrack() == audioTrack) {
                 return; //nothing changed
@@ -266,12 +270,16 @@ public class MediaSelector implements RaceTimesInfoProviderListener, PlayStateLi
             
             if (videoPlayers.containsKey(activeAudioPlayer.getMediaTrack())) { //pre-change audioPlayer is one of the videoPlayers
                 activeAudioPlayer.setMuted(true);
-            } else {//pre-change audioPlayer is a dedicated audio-only player
+            } else { //pre-change audioPlayer is a dedicated audio-only player
                 activeAudioPlayer.destroy();
             }
             activeAudioPlayer = null;
         }
-        VideoControl playingVideo = videoPlayers.get(audioTrack);
+        if ((audioTrack != null) && audioTrack.isYoutube()) { // --> Youtube videos can't be played for audio-only. So add a video player first.
+            videoSelected(audioTrack);
+            mediaSelectionDialog.selectVideo(audioTrack);
+        }
+        MediaPlayer playingVideo = videoPlayers.get(audioTrack);
         if (playingVideo != null) {
             activeAudioPlayer = playingVideo;
             activeAudioPlayer.setMuted(false);
@@ -285,23 +293,29 @@ public class MediaSelector implements RaceTimesInfoProviderListener, PlayStateLi
 
     @Override
     public void videoSelected(final MediaTrack videoTrack) {
-        VideoControl playingVideo = videoPlayers.get(videoTrack);
+        MediaPlayer playingVideo = videoPlayers.get(videoTrack);
         if (playingVideo == null) {
-            final VideoControl videoControl = new VideoControl(videoTrack, new VideoCloseListener() {
+            PopupCloseListener popCloseListener = new PopupCloseListener() {
                 @Override
-                public void onVideoClosed() {
+                public void popupClosed() {
                     videoDeselected(videoTrack);
                 }
-            });
-            videoPlayers.put(videoTrack, videoControl);
+            };
+            final PopupWindowPlayer popupPlayer;
+            if (videoTrack.isYoutube()) {
+                popupPlayer = new YoutubeWindowPlayer(videoTrack, popCloseListener);
+            } else {
+                popupPlayer = new VideoWindowPlayer(videoTrack, popCloseListener);
+            }
+            videoPlayers.put(videoTrack, popupPlayer);
             if ((activeAudioPlayer != null) && (activeAudioPlayer.getMediaTrack() == videoTrack)) { //selected video track has been playing as audio-only
                 activeAudioPlayer.pause();
-                activeAudioPlayer = videoControl;
-                videoControl.setMuted(false);
+                activeAudioPlayer = popupPlayer;
+                popupPlayer.setMuted(false);
             } else {
-                videoControl.setMuted(true);
+                popupPlayer.setMuted(true);
             }
-            synchPlayState(videoControl);
+            synchPlayState(popupPlayer);
         } else {
             //nothing changed 
         }
@@ -313,10 +327,14 @@ public class MediaSelector implements RaceTimesInfoProviderListener, PlayStateLi
     @Override
     public void videoDeselected(MediaTrack videoTrack) {
         mediaSelectionDialog.unselectVideo(videoTrack);
-        VideoControl removedVideoPlayer = videoPlayers.remove(videoTrack);
+        MediaPlayer removedVideoPlayer = videoPlayers.remove(videoTrack);
         removedVideoPlayer.destroy();
         if (removedVideoPlayer == activeAudioPlayer) { //in case this video has been the sound source, replace the video player with a dedicated audio player
-            assignNewAudioPlayer(removedVideoPlayer.getMediaTrack());
+            if (removedVideoPlayer.getMediaTrack().isYoutube()) {
+                assignNewAudioPlayer(null);
+            } else {
+                assignNewAudioPlayer(removedVideoPlayer.getMediaTrack());
+            }
         }
 
         updateToggleButton();
@@ -329,7 +347,7 @@ public class MediaSelector implements RaceTimesInfoProviderListener, PlayStateLi
 
     private void assignNewAudioPlayer(MediaTrack audioTrack) {
         if (audioTrack != null) {
-            activeAudioPlayer = new AudioControl(audioTrack);
+            activeAudioPlayer = new AudioPlayer(audioTrack);
             
             synchPlayState(activeAudioPlayer);
         } else {
@@ -373,7 +391,7 @@ public class MediaSelector implements RaceTimesInfoProviderListener, PlayStateLi
             activeAudioPlayer.destroy();
             activeAudioPlayer = null;
         }
-        for (VideoControl videoControl : videoPlayers.values()) {
+        for (MediaPlayer videoControl : videoPlayers.values()) {
             videoControl.destroy();
         }
         videoPlayers.clear();

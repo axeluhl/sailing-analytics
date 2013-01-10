@@ -13,7 +13,7 @@ public class MediaTrack implements IsSerializable {
 
     public enum MimeType {
         
-        mp4(MediaType.video, MediaSubType.mp4), ogv(MediaType.video, MediaSubType.ogg), qt(MediaType.video, MediaSubType.quicktime), mp3(MediaType.audio, MediaSubType.mpeg), ogg(MediaType.audio, MediaSubType.ogg), aac(MediaType.audio, MediaSubType.aac), webm(MediaType.video, MediaSubType.webm);
+        mp4(MediaType.video, MediaSubType.mp4), ogv(MediaType.video, MediaSubType.ogg), qt(MediaType.video, MediaSubType.quicktime), mp3(MediaType.audio, MediaSubType.mpeg), ogg(MediaType.audio, MediaSubType.ogg), aac(MediaType.audio, MediaSubType.aac), webm(MediaType.video, MediaSubType.webm), youtube(MediaType.video, MediaSubType.youtube);
         
         public final MediaType mediaType;
         public final MediaSubType mediaSubType;
@@ -34,7 +34,7 @@ public class MediaTrack implements IsSerializable {
     }
 
     public enum MediaSubType {
-        ogg, mp4, mpeg, x_aiff, quicktime, aac, webm;
+        ogg, mp4, mpeg, x_aiff, quicktime, aac, webm, youtube;
         
         public String toString() {
             return name().replace('_', '-');
@@ -76,6 +76,10 @@ public class MediaTrack implements IsSerializable {
 
     public String typeToString() {
         return mimeType == null ? "undefined" : mimeType.toString();
+    }
+    
+    public boolean isYoutube() {
+        return (mimeType != null) && MediaSubType.youtube.equals(mimeType.mediaSubType);
     }
 
 }

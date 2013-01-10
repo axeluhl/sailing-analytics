@@ -47,9 +47,9 @@ public class MediaSelectionDialog implements CloseHandler<PopupPanel> {
         Panel grid = new VerticalPanel();
         if (!audioTracks.isEmpty()) {
             grid.add(createAudioHeader());
-            grid.add((RadioButton) createAudioItem(null, selectedAudioTrack));
+            grid.add((RadioButton) createAudioButton(null, selectedAudioTrack));
             for (MediaTrack audioTrack : audioTracks) {
-                grid.add(createAudioItem(audioTrack, selectedAudioTrack));
+                grid.add(createAudioButton(audioTrack, selectedAudioTrack));
             }
         }
         if (!videoTracks.isEmpty()) {
@@ -82,6 +82,13 @@ public class MediaSelectionDialog implements CloseHandler<PopupPanel> {
         return videoCheckBox;
     }
     
+    public void selectVideo(MediaTrack videoTrack) {
+        CheckBox videoCheckBox = videoCheckBoxes.get(videoTrack);
+        if (videoCheckBox != null) {
+            videoCheckBox.setValue(true);
+        }
+    }
+
     public void unselectVideo(MediaTrack videoTrack) {
         CheckBox videoCheckBox = videoCheckBoxes.get(videoTrack);
         if (videoCheckBox != null) {
@@ -94,13 +101,13 @@ public class MediaSelectionDialog implements CloseHandler<PopupPanel> {
         return audioHeader;
     }
 
-    private Widget createAudioItem(final MediaTrack audioTrack, MediaTrack selectedAudioTrack) {
-        String title = audioTrack != null ? audioTrack.title: "Mute - play no sound";
-        String tooltip = audioTrack != null ? audioTrack.toString() : "Play no sound.";
-        RadioButton audioItem = new RadioButton("group-name", title);
-        audioItem.setTitle(tooltip);
-        audioItem.setValue(audioTrack == selectedAudioTrack);
-        audioItem.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+    private Widget createAudioButton(final MediaTrack audioTrack, MediaTrack selectedAudioTrack) {
+        String title = audioTrack != null ? audioTrack.title: "Sound off";
+        String tooltip = audioTrack != null ? audioTrack.toString() : "Turn off all sound channels.";
+        RadioButton audioButton = new RadioButton("group-name", title);
+        audioButton.setTitle(tooltip);
+        audioButton.setValue(audioTrack == selectedAudioTrack);
+        audioButton.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
             
             @Override
             public void onValueChange(ValueChangeEvent<Boolean> changeEvent) {
@@ -109,7 +116,7 @@ public class MediaSelectionDialog implements CloseHandler<PopupPanel> {
                 }
             }
         });
-        return audioItem;
+        return audioButton;
     }
 
     private Widget createAudioHeader() {

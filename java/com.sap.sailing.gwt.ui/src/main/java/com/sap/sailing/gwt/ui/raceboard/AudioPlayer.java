@@ -5,7 +5,7 @@ import com.google.gwt.dom.client.MediaElement;
 import com.google.gwt.media.client.Audio;
 import com.sap.sailing.gwt.ui.shared.media.MediaTrack;
 
-public class AudioControl extends AbstractMediaPlayer {
+public class AudioPlayer extends AbstractMediaPlayer {
     
     /**
      * isReady and the ..Cache fields are required because setting the audio element's play state 
@@ -19,7 +19,7 @@ public class AudioControl extends AbstractMediaPlayer {
     
     private final Audio audio;
 
-    public AudioControl(MediaTrack mediaTrack) {
+    public AudioPlayer(MediaTrack mediaTrack) {
         super(mediaTrack);
         audio = Audio.createIfSupported();
         if (audio != null) {
@@ -38,7 +38,7 @@ public class AudioControl extends AbstractMediaPlayer {
     var that = this;
     audioElement.addEventListener('canplay',
                                     function() {
-                                            that.@com.sap.sailing.gwt.ui.raceboard.AudioControl::initPlayState()();
+                                            that.@com.sap.sailing.gwt.ui.raceboard.AudioPlayer::initPlayState()();
                                     });
     }-*/;
     
