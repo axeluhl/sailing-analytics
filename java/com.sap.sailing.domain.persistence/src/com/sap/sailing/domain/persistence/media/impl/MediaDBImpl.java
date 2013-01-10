@@ -25,6 +25,7 @@ import com.sap.sailing.domain.persistence.media.MediaDB;
 public class MediaDBImpl implements MediaDB {
 
     private static final int SORT_ASCENDING = 1;
+    private static final int SORT_DESSCENDING = -1;
     // private static Logger logger = Logger.getLogger(MediaDBImpl.class.getName());
     private final DB database;
     private final BasicDBObject sortByStartTimeAndTitle;
@@ -33,7 +34,7 @@ public class MediaDBImpl implements MediaDB {
         super();
         this.database = database;
         sortByStartTimeAndTitle = new BasicDBObject();
-        sortByStartTimeAndTitle.put(DbNames.Fields.STARTTIME.name(), SORT_ASCENDING);
+        sortByStartTimeAndTitle.put(DbNames.Fields.STARTTIME.name(), SORT_DESSCENDING);
         sortByStartTimeAndTitle.put(DbNames.Fields.MEDIA_TITLE.name(), SORT_ASCENDING);
     }
 
