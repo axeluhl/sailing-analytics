@@ -88,7 +88,6 @@ public interface StringMessages extends Messages {
     String windwardDistanceToGoInMeters();
     String windwardDistanceToLeaderInMeters();
     String windwardDistanceToGoInMetersUnit();
-    String raceRankUnit();
     String name();
     String leaveEmptyForDefault();
     String trackNewEvent();
