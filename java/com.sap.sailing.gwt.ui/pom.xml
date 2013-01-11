@@ -66,4 +66,32 @@
     </plugins>
   </build>
 
+  <profiles>
+        <profile>
+            <id>debug.no-gwt-compile</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>gwt-maven-plugin</artifactId>
+                        <version>2.4.0</version>
+                        <executions>
+                          <execution>
+                              <configuration>
+                                  <modules>
+                                      <!-- Without a single entry Maven ignores whole tree -->
+                                      <module>FAIL-INTENTIONALLY</module>
+                                  </modules>
+                              </configuration>
+                              <goals>
+                                <goal>help</goal>
+                              </goals>
+                          </execution>
+                      </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
 </project>
