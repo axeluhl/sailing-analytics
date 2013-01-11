@@ -20,6 +20,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
@@ -119,7 +120,7 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
 
         @Override
         public void onValueChange(final ValueChangeEvent<Double> arg0) {
-            sliderBar.setTitle(String.valueOf(Math.round(sliderBar.getCurrentValue())));
+            sliderBar.setTitle(SimulatorMainPanel.formatSliderValue(sliderBar.getCurrentValue()));
             logger.info("Slider value : " + arg0.getValue());
             setting.setValue(arg0.getValue());
             if (autoUpdate) {
@@ -184,6 +185,10 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
 
     }
 
+    public static String formatSliderValue(double value) {
+        return NumberFormat.getFormat("0.0").format(value);
+    }
+    
     public SimulatorMainPanel(final SimulatorServiceAsync svc, final StringMessages stringMessages, final ErrorReporter errorReporter,
             final int xRes, final int yRes, final boolean autoUpdate, final char mode, final boolean showGrid, final boolean showLines, final char seedLines, final boolean showArrows, final boolean showStreamlets) {
 
@@ -388,8 +393,9 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
 
         sliderBar.getElement().getStyle().setProperty("width", "216px");
 
-        sliderBar.setStepSize(Math.round((maxValue - minValue) / 10.), false);
-        sliderBar.setNumTicks(10);
+        //sliderBar.setStepSize(Math.round((maxValue - minValue) / 10.), false);
+        sliderBar.setStepSize(((maxValue - minValue) / ((double)s.getSteps()) ), false);
+        sliderBar.setNumTicks(s.getSteps());
         sliderBar.setNumTickLabels(1);
 
         sliderBar.setEnabled(true);
@@ -401,11 +407,13 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
             @Override
             public String formatLabel(final SliderBar slider, final Double value, final Double previousValue) {
                 return String.valueOf(Math.round(value));
+                //return String.valueOf((value));
             }
         });
 
         sliderBar.setCurrentValue(defaultValue);
-        sliderBar.setTitle(String.valueOf(Math.round(sliderBar.getCurrentValue())));
+        //sliderBar.setTitle(String.valueOf(Math.round(sliderBar.getCurrentValue())));
+        sliderBar.setTitle(SimulatorMainPanel.formatSliderValue(sliderBar.getCurrentValue()));
         vp.add(sliderBar);
 
         parentPanel.add(vp);

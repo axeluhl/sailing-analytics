@@ -21,8 +21,10 @@ import java.util.logging.Logger;
 
 import org.osgi.framework.FrameworkUtil;
 
+import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MeterDistance;
 import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.simulator.Boundary;
 import com.sap.sailing.simulator.Path;
 import com.sap.sailing.simulator.PathGenerator;
@@ -126,9 +128,9 @@ public class SailingSimulatorImpl implements SailingSimulator {
             logger.info("base wind: "+this.simulationParameters.getBoatPolarDiagram().getWind().getKnots()+" kn, "+((wf.getWindParameters().baseWindBearing)%360.0)+"°");
 
             // set water current
-            // TODO: nicer initialize of polar diagram interpolate table
-            //this.simulationParameters.getBoatPolarDiagram().setCurrent(null); // initialize
-            //this.simulationParameters.getBoatPolarDiagram().setCurrent(new KnotSpeedWithBearingImpl(1.0,new DegreeBearingImpl((wf.getWindParameters().baseWindBearing+90.0)%360.0)));
+            this.simulationParameters.getBoatPolarDiagram().setCurrent(null); // initialize
+            //this.simulationParameters.getBoatPolarDiagram().setCurrent(new KnotSpeedWithBearingImpl(0.0,new DegreeBearingImpl((wf.getWindParameters().baseWindBearing+90.0)%360.0)));
+            this.simulationParameters.getBoatPolarDiagram().setCurrent(new KnotSpeedWithBearingImpl(wf.getWindParameters().curSpeed, new DegreeBearingImpl(wf.getWindParameters().curBearing)));
             //this.simulationParameters.getBoatPolarDiagram().setCurrent(new KnotSpeedWithBearingImpl(2.0,new DegreeBearingImpl((270.0)%360.0)));
             if (this.simulationParameters.getBoatPolarDiagram().getCurrent() != null) {
                 logger.info("water current: "+this.simulationParameters.getBoatPolarDiagram().getCurrent().getKnots()+" kn, "+this.simulationParameters.getBoatPolarDiagram().getCurrent().getBearing().getDegrees()+"°");

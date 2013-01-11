@@ -19,6 +19,17 @@ public class WindControlParameters implements Serializable {
      * Value range 0 to 360 degrees
      */
     public Double baseWindBearing;
+
+    /**
+     * Base wind speed in knots
+     * Value range 0 to 30
+     */
+    public Double curSpeed;
+    /**
+     * Base average wind direction in degrees
+     * Value range 0 to 360 degrees
+     */
+    public Double curBearing;
     
     /**
      * Oscillation parameter frequency
@@ -105,6 +116,9 @@ public class WindControlParameters implements Serializable {
     public void setDefaults() {
         
         baseWindSpeed = 12.0;
+        
+        curSpeed = 0.0;
+        curBearing = 0.0;
         
         baseWindBearing = 0.0;
         frequency = 0.0; //30.0;

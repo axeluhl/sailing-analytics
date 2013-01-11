@@ -149,7 +149,7 @@ public class PolarDiagramBase implements PolarDiagram {
                 
             NavigableMap<Double,Object> wcurSpeedMap = new TreeMap<Double,Object>();
                 
-            for(double wcurSpeed=0.0; wcurSpeed<=2.0; wcurSpeed+=0.1) {
+            for(double wcurSpeed=0.0; wcurSpeed<=2.2; wcurSpeed+=0.1) {
                     
                 NavigableMap<Double,Object> wcurBearMap = new TreeMap<Double,Object>();
                     
@@ -264,13 +264,12 @@ public class PolarDiagramBase implements PolarDiagram {
     
     @Override
     public void setCurrent(SpeedWithBearing newCurrent) {
-
+        
         if ((newCurrent == null)&&(extTable == null)) {
             extTable = this.extendSpeedMap();
         }
 
-        current = newCurrent;
-        
+        current = newCurrent;        
     }
     
     
@@ -332,7 +331,12 @@ public class PolarDiagramBase implements PolarDiagram {
     @Override
     public SpeedWithBearing getSpeedAtBearingOverGround(Bearing bearing) {
 
-        if (current == null) {
+        // TODO: check this new initialization, maybe keep previous current and reset current at end
+        /*if (extTable == null) {
+            extTable = this.extendSpeedMap();
+        }*/
+
+        if ((current == null)||(current.getKnots() == 0.0)) {
             
             return getSpeedAtBearingRaw(bearing);
             

@@ -6,6 +6,9 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 
 public class WindFieldDTO implements IsSerializable {
 
+    public double curSpeed;
+    public double curBearing;
+    
     private List<SimulatorWindDTO> matrix;
     
     private WindLinesDTO windLinesDTO;

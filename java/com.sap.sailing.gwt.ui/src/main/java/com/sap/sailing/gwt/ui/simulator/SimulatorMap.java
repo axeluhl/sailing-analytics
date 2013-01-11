@@ -148,6 +148,11 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
                     mapw.addOverlay(replayPathCanvasOverlay);
                     replayPathCanvasOverlay.setWindField(pathWindDTO);
                     replayPathCanvasOverlay.setRaceCourse(raceCourseCanvasOverlay.startPoint, raceCourseCanvasOverlay.endPoint);
+                    if (index == 0) {
+                        replayPathCanvasOverlay.setCurrent(result.getWindField().curSpeed,result.getWindField().curBearing);
+                    } else {
+                        replayPathCanvasOverlay.setCurrent(-1.0,0.0);
+                    }
                     replayPathCanvasOverlay.redraw(true);
                     legendCanvasOverlay.setPathOverlays(replayPathCanvasOverlays);
 

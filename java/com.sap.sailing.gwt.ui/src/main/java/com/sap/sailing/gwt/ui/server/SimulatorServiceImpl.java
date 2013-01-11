@@ -452,6 +452,9 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         if (isShowLines && seedLines == 'b') {
             this.getWindLinesFromEndLine(wf, windFieldDTO, startTime, endTime, timeStep);
         }
+        
+        windFieldDTO.curBearing = wf.getWindParameters().curBearing;
+        windFieldDTO.curSpeed = wf.getWindParameters().curSpeed;
 
         return windFieldDTO;
     }

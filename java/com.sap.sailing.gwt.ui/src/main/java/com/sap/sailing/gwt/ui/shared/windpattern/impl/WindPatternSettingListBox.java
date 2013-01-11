@@ -57,6 +57,12 @@ public class WindPatternSettingListBox implements WindPatternSetting<String>, Is
     }
 
     @Override
+    public int getSteps() {
+        // TODO Auto-generated method stub
+        return 0;
+    }
+
+    @Override
     public List<String> getValues() {
        return values;
     }

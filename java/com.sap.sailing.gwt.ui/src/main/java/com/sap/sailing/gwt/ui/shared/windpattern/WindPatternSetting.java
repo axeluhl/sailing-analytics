@@ -20,6 +20,8 @@ public interface WindPatternSetting<SettingsType> extends Named {
     
     public SettingsType getDefault();
     
+    public int getSteps();
+    
     public List<SettingsType> getValues();
     
     public void setValue(Double value);

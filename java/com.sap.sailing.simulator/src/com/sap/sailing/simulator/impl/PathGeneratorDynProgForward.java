@@ -151,7 +151,7 @@ public class PathGeneratorDynProgForward extends PathGeneratorBase {
         // grid
         // steps
         // Formula: sgridh ~ xscale*sgridv/tan(beatangle*pi/180)
-        int spatialGridsizeHorizontal = 21*5; //(41-1)*5; //(int) Math.round(2 *
+        int spatialGridsizeHorizontal = 23*6; //(41-1)*5; //(int) Math.round(2 *
         // simulationParameters.getProperty("Djikstra.gridh[int]").intValue()); // number
         // of
         // horizontal
