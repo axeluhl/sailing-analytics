@@ -157,7 +157,7 @@ First, check out the branch you want to re-build:
    run ~trac/.bash_profile in the build shell to set the limit of open files to at least
    4096.
 
- - rm -rf com.sap.sailing.gwt.ui/com.sap.sailing.gwt.ui.*; mvn -fae clean install 2>&1 | tee log
+ - rm -rf com.sap.sailing.gwt.ui/com.sap.sailing.gwt.ui.*; mvn -fae -s /home/trac/git/settings.xml -P debug.without-proxy clean install 2>&1 | tee log
 
 This will compile the sources, bundle them up in to OSGi bundle JAR
 files, run all tests which required online access to the TracTrac
