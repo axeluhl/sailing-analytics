@@ -30,6 +30,8 @@ import com.sap.sailing.monitoring.sysinfo.SystemInformationImpl;
 public class OSGiRestartingPortMonitor extends AbstractPortMonitor {
     Logger log = Logger.getLogger(OSGiRestartingPortMonitor.class.getName());
     
+    SystemInformation info = null;
+    
     public OSGiRestartingPortMonitor(Properties properties) {
         super(properties);
         
@@ -38,13 +40,16 @@ public class OSGiRestartingPortMonitor extends AbstractPortMonitor {
         for (int i=0; i<endpoints.length;i++) {
             endpoints[i].setBundleName(props_bundles[i].trim());
         }
+        
+        this.info = SystemInformationImpl.getInstance();
+
+        log.info("Started and initialized OSGi monitor. State of SIGAR sysstats library: " + (info == null ? "INACTIVE" : "ACTIVE"));
     }
 
     @Override
     public void handleFailure(Endpoint endpoint) {   
         boolean sysinfo_available = true;
-        SystemInformation info = SystemInformationImpl.getInstance();
-        if (info == null) {
+        if (this.info == null) {
             sysinfo_available = false;
         }
         
