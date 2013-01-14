@@ -51,5 +51,9 @@ public interface TrackedLeg extends Serializable {
      */
     void waypointsMayHaveChanges();
     
+    /**
+     * Computes the great-circle distance of this leg based on the position of the adjacent marks at <code>timePoint</code>.
+     * If any of the positions of the two adjacent marks cannot be found, <code>null</code> is returned.
+     */
     Distance getGreatCircleDistance(TimePoint timePoint);
 }
