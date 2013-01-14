@@ -58,14 +58,23 @@ public class MediaPanel extends FlowPanel {
 
         });
         add(refreshButton);
-        Button addButton = new Button(stringMessages.add());
-        addButton.addClickHandler(new ClickHandler() {
+        Button addUrlButton = new Button(stringMessages.addMediaTrack());
+        addUrlButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                addMediaTrack();
+                addUrlMediaTrack();
             }
         });
-        add(addButton);
+        add(addUrlButton);
+
+        Button addYoutubeButton = new Button(stringMessages.addYoutubeTrack());
+        addYoutubeButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                addYoutubeMediaTrack();
+            }
+        });
+        add(addYoutubeButton);
 
         createMediaTracksTable();
 
@@ -303,8 +312,36 @@ public class MediaPanel extends FlowPanel {
         });
     }
 
-    private void addMediaTrack() {
+    private void addUrlMediaTrack() {
         MediaTrackDialog dialog = new MediaTrackDialog(stringMessages, new DialogCallback<MediaTrack>() {
+
+            @Override
+            public void cancel() {
+                // no op
+            }
+
+            @Override
+            public void ok(MediaTrack mediaTrack) {
+                mediaService.addMediaTrack(mediaTrack, new AsyncCallback<Void>() {
+
+                    @Override
+                    public void onFailure(Throwable t) {
+                        errorReporter.reportError(t.toString());
+                    }
+
+                    @Override
+                    public void onSuccess(Void allMediaTracks) {
+                        loadMediaTracks();
+                    }
+                });
+
+            }
+        });
+        dialog.show();
+    }
+    
+    protected void addYoutubeMediaTrack() {
+        MediaTrackYoutubeDialog dialog = new MediaTrackYoutubeDialog(stringMessages, new DialogCallback<MediaTrack>() {
 
             @Override
             public void cancel() {

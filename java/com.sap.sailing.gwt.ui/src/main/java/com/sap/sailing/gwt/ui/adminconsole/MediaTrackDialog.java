@@ -45,7 +45,7 @@ public class MediaTrackDialog extends DataEntryDialog<MediaTrack> {
     private Label durationLabel;
 
     public MediaTrackDialog(StringMessages stringMessages, DialogCallback<MediaTrack> dialogCallback) {
-        super("Media Track", "", stringMessages.ok(), stringMessages.cancel(), MEDIA_TRACK_VALIDATOR, dialogCallback);
+        super(stringMessages.addMediaTrack(), "", stringMessages.ok(), stringMessages.cancel(), MEDIA_TRACK_VALIDATOR, dialogCallback);
         this.stringMessages = stringMessages;
     }
 

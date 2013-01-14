@@ -19,8 +19,6 @@ import com.sap.sailing.domain.persistence.media.MediaDBFactory;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.gwt.ui.client.MediaService;
 import com.sap.sailing.gwt.ui.shared.media.MediaTrack;
-import com.sap.sailing.gwt.ui.shared.media.MediaTrack.MediaSubType;
-import com.sap.sailing.gwt.ui.shared.media.MediaTrack.MediaType;
 import com.sap.sailing.gwt.ui.shared.media.MediaTrack.MimeType;
 import com.sap.sailing.server.RacingEventService;
 
