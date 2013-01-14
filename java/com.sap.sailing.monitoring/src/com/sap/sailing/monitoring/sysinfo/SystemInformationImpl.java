@@ -54,14 +54,16 @@ public class SystemInformationImpl implements SystemInformation {
     }
     
     protected String[] readProc(String path) throws Exception {
-        
         BufferedReader reader = null;
         try {
              reader = new BufferedReader(new FileReader(path));
         } catch (FileNotFoundException ex) {
             return new String[]{}; /* return empty result */
+        } finally {
+            if (reader != null) {
+                reader.close();
+            }
         }
-        
         String line = ""; StringBuffer buf = new StringBuffer();
         while ( (line = reader.readLine() ) != null) {
             buf.append(line).append("\n");
