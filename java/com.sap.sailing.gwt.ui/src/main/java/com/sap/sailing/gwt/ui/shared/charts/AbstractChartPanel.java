@@ -375,6 +375,13 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
             break;
         case WINDWARD_DISTANCE_TO_OVERALL_LEADER:
             detailTypeUnit = getStringMessages().windwardDistanceToGoInMetersUnit();
+            break;
+        case RACE_RANK:
+        	//Case for detail types without unit, so that an empty string is returned.
+        	break;
+		default:
+			//Throwing an exception to get notificated if an implementation of an detail type is missing.
+			throw new UnsupportedOperationException("Theres currently no support for the enum value '" + getSelectedDetailType() + "' in this method.");
         }
         return detailTypeUnit;
     }
@@ -495,11 +502,12 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
             }
             chart.setTitle(new ChartTitle().setText(DetailTypeFormatter.format(selectedDetailType, stringMessages)), null);
             final String unit = getDetailTypeUnit();
+            final String label = unit.isEmpty() ? "" : "[" + unit + "]";
             if (!compactChart) {
                 chart.getYAxis().setAxisTitleText(
-                        DetailTypeFormatter.format(selectedDetailType, stringMessages) + " [" + unit + "]");
+                        DetailTypeFormatter.format(selectedDetailType, stringMessages) + " " + label);
             } else {
-                chart.getYAxis().setAxisTitleText("[" + unit + "]");
+                chart.getYAxis().setAxisTitleText(label);
             }
             chart.getYAxis().setReversed(
                     selectedDetailType == DetailType.WINDWARD_DISTANCE_TO_OVERALL_LEADER || selectedDetailType == DetailType.GAP_TO_LEADER_IN_SECONDS);

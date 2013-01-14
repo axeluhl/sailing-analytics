@@ -320,15 +320,14 @@ public class SentenceReader {
             while (isRunning) {
                 try {
                     if (!input.ready()) {
+                        Thread.sleep(50);
                         continue;
                     }
-
                     String data = input.readLine();
                     if (SentenceValidator.isValid(data)) {
                         Sentence s = factory.createParser(data);
                         fireSentenceEvent(s);
                     }
-                    Thread.sleep(50);
                 } catch (Exception e) {
                     // nevermind, keep trying..
                 }
