@@ -412,6 +412,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                     List<String> windSourceTypeNames = new ArrayList<String>();
                     windSourceTypeNames.add(WindSourceType.EXPEDITION.name());
                     windSourceTypeNames.add(WindSourceType.COMBINED.name());
+                    
                     GetWindInfoAction getWindInfoAction = new GetWindInfoAction(sailingService, race, date, 1000L, 1, windSourceTypeNames,
                         new AsyncCallback<WindInfoForRaceDTO>() {
                                 @Override
@@ -439,6 +440,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                                                     }
                                                     break;
                                         		default:
+                                        			//Which wind sources are requested is defined in a list above this action.
+                                        			//So we throw here an exception to notice a missing source.
                                         			throw new UnsupportedOperationException("Theres currently no support for the enum value '" + windSource.getType() + "' in this method.");
                                             }
                                         }

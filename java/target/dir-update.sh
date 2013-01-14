@@ -10,7 +10,7 @@ clean="clean"
 offline=0
 extra=''
 
-options='gtoh'
+options='gtohc'
 while getopts $options option
 do
     case $option in
@@ -41,6 +41,16 @@ if [ $gwtcompile -eq 1 ]; then
 else
     echo "INFO: GWT Compilation disabled"
     extra="-Pdebug.no-gwt-compile"
+
+    if [ ! -d "com.sap.sailing.gwt.ui/com.sap.sailing.Spectator" ]; then
+        mkdir com.sap.sailing.gwt.ui/com.sap.sailing.Spectator
+        mkdir com.sap.sailing.gwt.ui/com.sap.sailing.RaceBoard
+        mkdir com.sap.sailing.gwt.ui/com.sap.sailing.LeaderboardEditing
+        mkdir com.sap.sailing.gwt.ui/com.sap.sailing.AdminConsole
+        mkdir com.sap.sailing.gwt.ui/com.sap.sailing.Leaderboard
+        mkdir com.sap.sailing.gwt.ui/com.sap.sailing.UserManagement
+        mkdir com.sap.sailing.gwt.ui/com.sap.sailing.TvView
+    fi
 fi
 
 if [ $testing -eq 0 ]; then
@@ -69,6 +79,20 @@ echo Done.
 cp custom/config.ini configuration/
 cp custom/start .
 cp custom/monitoring.properties configuration/
+
+if [ $gwtcompile -eq 0 ]; then
+    cd ../code/java
+    if [ -d "com.sap.sailing.gwt.ui/com.sap.sailing.Spectator" ]; then
+        rm -rf com.sap.sailing.gwt.ui/com.sap.sailing.Spectator
+        rm -rf com.sap.sailing.gwt.ui/com.sap.sailing.RaceBoard
+        rm -rf com.sap.sailing.gwt.ui/com.sap.sailing.LeaderboardEditing
+        rm -rf com.sap.sailing.gwt.ui/com.sap.sailing.AdminConsole
+        rm -rf com.sap.sailing.gwt.ui/com.sap.sailing.Leaderboard
+        rm -rf com.sap.sailing.gwt.ui/com.sap.sailing.UserManagement
+        rm -rf com.sap.sailing.gwt.ui/com.sap.sailing.TvView
+    fi
+    cd -
+fi
 
 echo ""
 echo "Make sure to start MongoDB before starting server"

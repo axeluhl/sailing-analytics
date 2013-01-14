@@ -77,10 +77,8 @@
                         <version>2.4.0</version>
                         <executions>
                           <execution>
-                              <configuration>
+                              <configuration combine.self="override">
                                   <modules>
-                                      <!-- Without a single entry Maven ignores whole tree -->
-                                      <module>FAIL-INTENTIONALLY</module>
                                   </modules>
                               </configuration>
                               <goals>
