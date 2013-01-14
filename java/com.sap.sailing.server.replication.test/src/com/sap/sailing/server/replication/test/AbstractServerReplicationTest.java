@@ -68,7 +68,7 @@ public abstract class AbstractServerReplicationTest {
      *            service will be created as replica
      */
     protected Pair<ReplicationServiceTestImpl, ReplicationMasterDescriptor> basicSetUp(
-            boolean dropDB, RacingEventServiceImpl master, RacingEventServiceImpl replica) throws IOException {
+            boolean dropDB, RacingEventServiceImpl master, RacingEventServiceImpl replica) throws IOException, InterruptedException {
         final String exchangeName = "test-sapsailinganalytics-exchange";
         final MongoDBService mongoDBService = MongoDBService.INSTANCE;
         if (dropDB) {
@@ -124,12 +124,17 @@ public abstract class AbstractServerReplicationTest {
             this.masterDescriptor = masterDescriptor;
         }
         
-        private void startInitialLoadTransmissionServlet() {
+        private void startInitialLoadTransmissionServlet() throws InterruptedException {
+            final boolean[] listening = new boolean[] { false };
             new Thread("Replication initial load test server") {
                 public void run() {
                     ServerSocket ss;
                     try {
                         ss = new ServerSocket(SERVLET_PORT);
+                        synchronized (listening) {
+                            listening[0] = true;
+                            listening.notifyAll();
+                        }
                         boolean stop = false;
                         while (!stop) {
                             Socket s = ss.accept();
@@ -157,6 +162,11 @@ public abstract class AbstractServerReplicationTest {
                     }
                 }
             }.start();
+            synchronized (listening) {
+                while (!listening[0]) {
+                    listening.wait();
+                }
+            }
         }
 
         /**
