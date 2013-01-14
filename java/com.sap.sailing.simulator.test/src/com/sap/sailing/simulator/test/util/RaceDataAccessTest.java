@@ -72,9 +72,6 @@ public class RaceDataAccessTest {
         // 49er 
         paramUrl = new URL("http://germanmaster.traclive.dk/events/event_20120615_KielerWoch/clientparams.php?event=event_20120615_KielerWoch&race=0b5969cc-b789-11e1-a845-406186cbf87c");
         
-        liveUri = new URI("tcp://10.18.206.73:1520");
-        storedUri = new URI("tcp://10.18.206.73:1521");
-
         System.setProperty("mongo.port", "10200");
         System.setProperty("http.proxyHost", "proxy.wdf.sap.corp");
         System.setProperty("http.proxyPort", "8080");
