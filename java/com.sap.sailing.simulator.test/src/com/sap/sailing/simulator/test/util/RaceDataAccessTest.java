@@ -8,8 +8,6 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.logging.Logger;
 
-import org.junit.Test;
-
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.common.RaceIdentifier;
@@ -29,11 +27,11 @@ public class RaceDataAccessTest {
     private static URL paramUrl;
     private static URI liveUri;
     private static URI storedUri;
-    private RacingEventServiceImpl service;
-    private RacesHandle raceHandle;
+    private static RacingEventServiceImpl service;
+    private static RacesHandle raceHandle;
     public boolean storedend = false;
 
-    public static void main(String[] args) throws MalformedURLException, URISyntaxException {
+    public static void main(String[] args) throws Exception, InterruptedException, MalformedURLException, URISyntaxException {
 
         // JSON URL: http://germanmaster.traclive.dk/events/event_20110929_Internatio/jsonservice.php
 
@@ -76,10 +74,6 @@ public class RaceDataAccessTest {
         
         liveUri = new URI("tcp://10.18.206.73:1520");
         storedUri = new URI("tcp://10.18.206.73:1521");
-    }
-
-    @Test
-    public void testDataAccess() throws Exception {
 
         System.setProperty("mongo.port", "10200");
         System.setProperty("http.proxyHost", "proxy.wdf.sap.corp");
@@ -102,11 +96,12 @@ public class RaceDataAccessTest {
         
         service = new RacingEventServiceImpl();
         logger.info("Calling service.addTracTracRace");
-        raceHandle = service.addTracTracRace(paramUrl, liveUri, storedUri, EmptyWindStore.INSTANCE, /* timeoutInMilliseconds */60000, this);
+        Object obj = new Object();
+        raceHandle = service.addTracTracRace(paramUrl, liveUri, storedUri, EmptyWindStore.INSTANCE, /* timeoutInMilliseconds */60000, obj);
         logger.info("Calling raceHandle.getRaces(): " + raceHandle);
 
-        synchronized (this) {
-            this.wait();
+        synchronized (obj) {
+            obj.wait();
         }
 
         Set<RaceDefinition> races = raceHandle.getRaces(); // wait for RaceDefinition to be completely wired in Regatta
