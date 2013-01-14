@@ -75,7 +75,7 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-		<tycho-version>0.15.0</tycho-version>
+		<tycho-version>0.13.0</tycho-version>
         
 		<!--
           QUESTION: Which properties or settings are system dependent and differ across
@@ -231,7 +231,7 @@
 			<plugin>
 				<groupId>org.sonatype.tycho</groupId>
 				<artifactId>maven-osgi-compiler-plugin</artifactId>
-				<version>0.11.1</version>
+                <version>${tycho-version}</version>
 				<configuration>
 					<source>1.7</source>
 					<target>1.7</target>
