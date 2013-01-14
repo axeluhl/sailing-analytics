@@ -46,5 +46,10 @@ public interface TrackedLeg extends Serializable {
 
     Distance getCrossTrackError(Position p, TimePoint timePoint);
 
+    /**
+     * Must be called when the start and finish waypoint of this leg may have changed.
+     */
     void waypointsMayHaveChanges();
+    
+    Distance getGreatCircleDistance(TimePoint timePoint);
 }
