@@ -14,6 +14,7 @@ import com.sap.sailing.domain.base.RaceColumnListener;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.leaderboard.DelayedLeaderboardCorrections;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
 /**
@@ -388,6 +389,10 @@ public class DelayedLeaderboardCorrectionsImpl implements DelayedLeaderboardCorr
 
     @Override
     public void competitorDisplayNameChanged(Competitor competitor, String oldDisplayName, String displayName) {
+    }
+
+    @Override
+    public void resultDiscardingRuleChanged(ThresholdBasedResultDiscardingRule oldDiscardingRule, ThresholdBasedResultDiscardingRule newDiscardingRule) {
     }
 
     @Override

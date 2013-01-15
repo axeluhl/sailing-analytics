@@ -9,6 +9,7 @@ import com.sap.sailing.domain.base.RaceColumnListener;
 import com.sap.sailing.domain.base.impl.SimpleAbstractRaceColumn;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
 /**
@@ -134,6 +135,12 @@ public class MetaLeaderboardColumn extends SimpleAbstractRaceColumn implements R
     @Override
     public void competitorDisplayNameChanged(Competitor competitor, String oldDisplayName, String displayName) {
         getRaceColumnListeners().notifyListenersAboutCompetitorDisplayNameChanged(competitor, oldDisplayName, displayName);
+    }
+
+    @Override
+    public void resultDiscardingRuleChanged(ThresholdBasedResultDiscardingRule oldDiscardingRule,
+            ThresholdBasedResultDiscardingRule newDiscardingRule) {
+        getRaceColumnListeners().notifyListenersAboutResultDiscardingRuleChanged(oldDiscardingRule, newDiscardingRule);
     }
 
     @Override
