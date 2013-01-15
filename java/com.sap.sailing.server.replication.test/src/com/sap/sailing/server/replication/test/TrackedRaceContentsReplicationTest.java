@@ -12,14 +12,13 @@ import java.util.List;
 import java.util.UUID;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.mongodb.MongoException;
 import com.sap.sailing.domain.base.BoatClass;
-import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.DomainFactory;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Waypoint;
@@ -246,7 +245,7 @@ public class TrackedRaceContentsReplicationTest extends AbstractServerReplicatio
         }
     }
     
-    @Ignore
+    @Test
     public void testReplicationOfLoadingOfStoredRaceCommitteeTrack() throws UnknownHostException, MongoException, InterruptedException {
     	TimePoint time = MillisecondsTimePoint.now();
         final RaceCommitteeStartTimeEvent startTimeEvent = 
