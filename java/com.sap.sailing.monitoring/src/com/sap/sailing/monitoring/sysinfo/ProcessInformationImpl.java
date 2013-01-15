@@ -2,6 +2,7 @@ package com.sap.sailing.monitoring.sysinfo;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.io.IOException;
 
 import org.hyperic.sigar.ProcCpu;
 import org.hyperic.sigar.ProcFd;
@@ -62,17 +63,24 @@ public class ProcessInformationImpl implements ProcessInformation {
     }
     
     protected String[] readProc(String path) {
-        BufferedReader reader = null; StringBuffer buf = new StringBuffer("");
+        BufferedReader reader = null;
+        StringBuffer buf = new StringBuffer("");
         try {
             reader = new BufferedReader(new FileReader(path));
-        
             String line = "";
             while ( (line = reader.readLine() ) != null) {
                 buf.append(line).append("\n");
             }
-            
-        } catch(Exception ex) {
+        } catch (Exception ex) {
             return new String[]{};
+        } finally {
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (IOException e) {
+                    return new String[]{};
+                }
+            }
         }
 
         return buf.toString().split("\\n");

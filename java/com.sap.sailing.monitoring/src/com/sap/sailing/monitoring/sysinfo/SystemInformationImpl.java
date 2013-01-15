@@ -1,8 +1,8 @@
 package com.sap.sailing.monitoring.sysinfo;
 
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.lang.management.OperatingSystemMXBean;
 import java.util.HashMap;
@@ -53,20 +53,26 @@ public class SystemInformationImpl implements SystemInformation {
         this.java_manager = ManagementFactory.getOperatingSystemMXBean();
     }
     
-    protected String[] readProc(String path) throws Exception {
-        
+    protected String[] readProc(String path) {
+        String line = ""; StringBuffer buf = new StringBuffer();
         BufferedReader reader = null;
         try {
              reader = new BufferedReader(new FileReader(path));
-        } catch (FileNotFoundException ex) {
-            return new String[]{}; /* return empty result */
-        }
-        
-        String line = ""; StringBuffer buf = new StringBuffer();
-        while ( (line = reader.readLine() ) != null) {
-            buf.append(line).append("\n");
-        }
+             while ( (line = reader.readLine() ) != null) {
+                 buf.append(line).append("\n");
+             }
 
+        } catch (Exception ex) {
+            return new String[]{}; /* return empty result */
+        } finally {
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (IOException ex) {
+                    /* ignore */
+                }
+            }
+        }
         return buf.toString().split("\\n");
     }    
     
@@ -75,7 +81,7 @@ public class SystemInformationImpl implements SystemInformation {
         try {
              sockstat = readProc("/proc/" + getPid() + "/net/sockstat");
         } catch (Exception e) {
-            e.printStackTrace();
+            /* ignore */
         }
         
         for (String line : sockstat) {
@@ -133,7 +139,7 @@ public class SystemInformationImpl implements SystemInformation {
     }
 
     @Override
-    public long getOpenFiles() throws Exception {
+    public long getOpenFiles() {
         String[] val = readProc("/proc/sys/fs/file-nr");
         
         if(val.length > 0)

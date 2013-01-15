@@ -23,7 +23,7 @@ package net.sf.marineapi.provider.test;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
-import java.io.InputStream;
+import java.io.ByteArrayInputStream;
 
 import net.sf.marineapi.nmea.event.SentenceEvent;
 import net.sf.marineapi.nmea.io.SentenceReader;
@@ -54,10 +54,10 @@ public class TPVProviderTest implements TPVListener {
      */
     @Before
     public void setUp() throws Exception {
-        InputStream str = getClass().getResourceAsStream("/data/Navibe-GM720.txt");
-        SentenceReader r = new SentenceReader(str);
+        SentenceReader r = new SentenceReader(new ByteArrayInputStream(new byte[]{}));
         instance = new TPVProvider(r);
         instance.addListener(this);
+        event = null;
         r.start();
     }
 

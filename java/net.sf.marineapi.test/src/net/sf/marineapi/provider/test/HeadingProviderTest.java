@@ -6,7 +6,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import java.io.InputStream;
+import java.io.ByteArrayInputStream;
 
 import net.sf.marineapi.nmea.event.SentenceEvent;
 import net.sf.marineapi.nmea.io.SentenceReader;
@@ -39,13 +39,11 @@ public class HeadingProviderTest implements HeadingListener {
     @Before
     public void setUp() throws Exception {
     	
-        InputStream str = getClass().getResourceAsStream("/data/sample1.txt");
-        SentenceReader r = new SentenceReader(str);
+        SentenceReader r = new SentenceReader(new ByteArrayInputStream(new byte[]{}));
         instance = new HeadingProvider(r);
         instance.addListener(this);
-        r.start();
-        
         event = null;
+        r.start();
     }
 
     @After

@@ -556,6 +556,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                                         && namesOfRaceColumnsForWhichToLoadLegDetails.contains(raceColumn.getName()),
                                         waitForLatestAnalyses, legRanksCache);
                             } catch (NoWindException e) {
+                                logger.info("Exception trying to compute leaderboard entry for competitor "+competitor.getName()+
+                                        " in race column "+raceColumn.getName()+": "+e.getMessage());
+                                logger.throwing(SailingServiceImpl.class.getName(), "computeLeaderboardByName.future.call()", e);
                                 throw new NoWindError(e);
                             }
                         }
@@ -922,7 +925,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                             }
                             break;
                 		default:
-                			throw new UnsupportedOperationException("Theres currently no support for the enum value '" + maneuver.getType() + "' in this method.");
+                			/* Do nothing here.
+                			 * Throwing an exception destroys the toggling (and maybe other behaviour) of the leaderboard.
+                			*/
                         }
                     }
                     result.averageManeuverLossInMeters = new HashMap<ManeuverType, Double>();

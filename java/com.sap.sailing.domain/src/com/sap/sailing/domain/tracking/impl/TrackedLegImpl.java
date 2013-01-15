@@ -263,4 +263,17 @@ public class TrackedLegImpl implements TrackedLeg, RaceChangeListener {
         return approximatePosition==null || legBearing==null ? null : p.crossTrackError(approximatePosition, legBearing);
     }
 
+    @Override
+    public Distance getGreatCircleDistance(TimePoint timePoint) {
+        final Distance result;
+        final Position approximatePositionOfFrom = getTrackedRace().getApproximatePosition(getLeg().getFrom(), timePoint);
+        final Position approximatePositionOfTo = getTrackedRace().getApproximatePosition(getLeg().getTo(), timePoint);
+        if (approximatePositionOfFrom != null && approximatePositionOfTo != null) {
+            result = approximatePositionOfFrom.getDistance(approximatePositionOfTo);
+        } else {
+            result = null;
+        }
+        return result;
+    }
+
 }

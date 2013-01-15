@@ -37,7 +37,7 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>gwt-maven-plugin</artifactId>
-        <version>2.4.0</version>
+        <version>2.5.0</version>
         <executions>
           <!-- GWT version detected from dependencyManagement -->
           <execution>
@@ -65,5 +65,31 @@
       </plugin>
     </plugins>
   </build>
+
+  <profiles>
+        <profile>
+            <id>debug.no-gwt-compile</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>gwt-maven-plugin</artifactId>
+                        <version>2.4.0</version>
+                        <executions>
+                          <execution>
+                              <configuration combine.self="override">
+                                  <modules>
+                                  </modules>
+                              </configuration>
+                              <goals>
+                                <goal>help</goal>
+                              </goals>
+                          </execution>
+                      </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
 </project>

@@ -28,6 +28,7 @@ import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.racecommittee.RaceCommitteeStore;
@@ -282,8 +283,10 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
                             if (trackedRace != null) {
                                 DynamicGPSFixTrack<Mark, GPSFix> markTrack = trackedRace.getOrCreateTrack(mark);
                                 if (markTrack.getFirstRawFix() == null) {
-                                    markTrack.addGPSFix(new GPSFixImpl(first ? controlPoint.getMark1Position()
-                                            : controlPoint.getMark2Position(), MillisecondsTimePoint.now()));
+                                    final Position position = first ? controlPoint.getMark1Position() : controlPoint.getMark2Position();
+                                    if (position != null) {
+                                        markTrack.addGPSFix(new GPSFixImpl(position, MillisecondsTimePoint.now()));
+                                    }
                                 }
                             }
                         }

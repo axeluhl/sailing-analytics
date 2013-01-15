@@ -49,6 +49,11 @@ public class TrackRaceReplicationTest extends AbstractServerReplicationTest {
     private final boolean[] notifier = new boolean[1];
     private RaceTrackingConnectivityParameters trackingParams;
 
+    @Test
+    public void testTearDownIsNotBeingCalledWhenSetUpFailsWithAnException() {
+        // no-op
+    }
+    
     @Before
     @Override
     public void setUp() throws Exception {
@@ -170,7 +175,9 @@ public class TrackRaceReplicationTest extends AbstractServerReplicationTest {
     @After
     @Override
     public void tearDown() throws Exception {
-        racesHandle.getRaceTracker().stop();
+        if (racesHandle != null) {
+            racesHandle.getRaceTracker().stop();
+        }
         super.tearDown();
     }
 }
