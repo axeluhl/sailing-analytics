@@ -222,8 +222,6 @@
 				<version>${tycho-version}</version>
 				<configuration>
 				    <argLine>${tycho.build.argLine}</argLine>
-<!-- no proxy -->
-					<argLine>-Dfile.encoding=cp1252 -Dreplication.brokerURL=tcp://localhost:61615 -Xmx1024m -XX:PermSize=256m -XX:-UseGCOverheadLimit -XX:+UseParallelGC</argLine>
 					<excludes>
 						<!-- Exclude inner classes -->
 						<exclude>**/*$*</exclude>
