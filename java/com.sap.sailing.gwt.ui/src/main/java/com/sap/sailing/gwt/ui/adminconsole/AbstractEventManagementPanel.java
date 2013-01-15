@@ -44,10 +44,9 @@ public abstract class AbstractEventManagementPanel extends AbstractRegattaPanel 
                 return o1.name.compareTo(o2.name);
             }
         });
-        for (RegattaDTO regatta : regattas) {
+        for (RegattaDTO regatta : regattasSortedByName) {
             this.availableRegattas.add(regatta);
             this.availableRegattasListBox.addItem(regatta.name);
-            
             if(selectedRegatta != null && selectedRegatta.name.equals(regatta.name)) {
                 this.availableRegattasListBox.setSelectedIndex(this.availableRegattasListBox.getItemCount() - 1);
             }
