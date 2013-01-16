@@ -9,3 +9,5 @@ java/com.sap.sailing.gwt.ui/war/WEB-INF/deploy/*
 sailing_debug0*
 /java/.settings/org.eclipse.jdt.core.prefs
 /mobile/com.sap.sailing.racecommittee.app/.settings/org.eclipse.jdt.core.prefs
+/mobile/com.sap.sailing.racecommittee.app/bin/*
+/mobile/com.sap.sailing.racecommittee.app/gen/*
