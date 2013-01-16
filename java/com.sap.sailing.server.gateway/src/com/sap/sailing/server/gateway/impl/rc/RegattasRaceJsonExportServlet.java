@@ -1,4 +1,4 @@
-package com.sap.sailing.server.gateway.impl;
+package com.sap.sailing.server.gateway.impl.rc;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -12,12 +12,13 @@ import org.json.simple.JSONArray;
 
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.server.gateway.impl.JsonExportServlet;
 import com.sap.sailing.server.gateway.serialization.BoatClassJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.RaceDefinitionJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.RegattaJsonSerializer;
 
 
-public class RegattasRaceCommitteeServlet extends JsonExportServlet {
+public class RegattasRaceJsonExportServlet extends JsonExportServlet {
 
 	private static final long serialVersionUID = -5661776042560467182L;
 	
