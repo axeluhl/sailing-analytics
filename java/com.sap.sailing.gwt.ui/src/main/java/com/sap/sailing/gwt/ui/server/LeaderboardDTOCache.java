@@ -32,6 +32,7 @@ import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.ScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ScoreCorrectionListener;
 import com.sap.sailing.domain.racecommittee.RaceCommitteeEvent;
+import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
@@ -292,6 +293,12 @@ public class LeaderboardDTOCache {
 
             @Override
             public void factorChanged(RaceColumn raceColumn, Double oldFactor, Double newFactor) {
+                removeFromCache(leaderboard);
+            }
+
+            @Override
+            public void resultDiscardingRuleChanged(ThresholdBasedResultDiscardingRule oldDiscardingRule,
+                    ThresholdBasedResultDiscardingRule newDiscardingRule) {
                 removeFromCache(leaderboard);
             }
 

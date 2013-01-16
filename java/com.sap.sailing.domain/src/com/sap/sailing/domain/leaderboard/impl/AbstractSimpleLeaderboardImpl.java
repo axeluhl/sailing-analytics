@@ -194,7 +194,9 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
 
     @Override
     public void setResultDiscardingRule(ThresholdBasedResultDiscardingRule discardingRule) {
+        ThresholdBasedResultDiscardingRule oldDiscardingRule = getResultDiscardingRule();
         this.resultDiscardingRule = discardingRule;
+        getRaceColumnListeners().notifyListenersAboutResultDiscardingRuleChanged(oldDiscardingRule, discardingRule);
     }
 
     @Override
@@ -479,6 +481,12 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     @Override
     public void competitorDisplayNameChanged(Competitor competitor, String oldDisplayName, String displayName) {
         getRaceColumnListeners().notifyListenersAboutCompetitorDisplayNameChanged(competitor, oldDisplayName, displayName);
+    }
+
+    @Override
+    public void resultDiscardingRuleChanged(ThresholdBasedResultDiscardingRule oldDiscardingRule,
+            ThresholdBasedResultDiscardingRule newDiscardingRule) {
+        getRaceColumnListeners().notifyListenersAboutResultDiscardingRuleChanged(oldDiscardingRule, newDiscardingRule);
     }
 
     @Override
