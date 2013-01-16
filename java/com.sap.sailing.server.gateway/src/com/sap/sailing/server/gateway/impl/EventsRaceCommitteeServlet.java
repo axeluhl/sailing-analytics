@@ -44,6 +44,7 @@ public class EventsRaceCommitteeServlet extends JsonExportServlet {
 		result.writeJSONString(response.getWriter());
 	}
 	
+	@SuppressWarnings("unused")
 	private Iterable<Event> exampleEvents() 
 	{
 		Event kielerWocheEvent = getService().addEvent(
