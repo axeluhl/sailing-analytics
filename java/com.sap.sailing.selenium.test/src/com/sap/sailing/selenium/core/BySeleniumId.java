@@ -1,12 +1,19 @@
 package com.sap.sailing.selenium.core;
 
 import java.text.MessageFormat;
+
 import java.util.List;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebElement;
 
+/**
+ * <p>A mechanism to locate elements by the value of the "selenium-id" attribute.</p>
+ *  
+ * @author
+ *   D049941
+ */
 public class BySeleniumId extends By {
     /**
      * <p>XPath expression for the search of an element with a given selenium identifier. The search is performed in the
@@ -17,6 +24,13 @@ public class BySeleniumId extends By {
     
     private String id;
     
+    /**
+     * <p>Creates a new location mechanism which search for an element or a list of elements with the given
+     *   identifier.</p>
+     * 
+     * @param id
+     *   The value of the "selenium-id" attribute to search for.
+     */
     public BySeleniumId(String id) {
         super();
         

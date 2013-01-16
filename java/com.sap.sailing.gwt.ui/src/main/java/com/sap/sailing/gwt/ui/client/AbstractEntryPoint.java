@@ -22,8 +22,15 @@ import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
 public abstract class AbstractEntryPoint implements EntryPoint, ErrorReporter, WindowSizeDetector {
-    public static final String DEBUG_ID_ATTRIBUTE = "selenium-id";
-    public static final String DEBUG_ID_PREFIX = "";
+    /**
+     * <p>The attribute which is used for the debug id.</p>
+     */
+    public static final String DEBUG_ID_ATTRIBUTE = "selenium-id"; //$NON-NLS-1$
+    
+    /**
+     * <p>The prefix which is used for the debug id.</p>
+     */
+    public static final String DEBUG_ID_PREFIX = ""; //$NON-NLS-1$
     
     private DialogBox errorDialogBox;
     private HTML serverResponseLabel;
@@ -62,7 +69,7 @@ public abstract class AbstractEntryPoint implements EntryPoint, ErrorReporter, W
         doOnModuleLoad();
         
         if(DebugInfo.isDebugIdEnabled()) {
-            PendingAjaxCallMarker.decrementPendingAjaxCalls();
+            PendingAjaxCallMarker.decrementPendingAjaxCalls(MarkedAsyncCallback.CATEGORY_GLOBAL);
         }
     }
     
