@@ -7,8 +7,9 @@ import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Venue;
 
 
-public class VenueJsonSerializer implements JsonSerializer<Venue>
-{
+public class VenueJsonSerializer implements JsonSerializer<Venue> {
+	public static final String FIELD_NAME = "name";
+	public static final String FIELD_COURSE_AREAS = "courseAreas";
 	
 	private JsonSerializer<CourseArea> areaSerializer;
 	
@@ -21,13 +22,13 @@ public class VenueJsonSerializer implements JsonSerializer<Venue>
 	public JSONObject serialize(Venue object) {
 		JSONObject result = new JSONObject();
 		
-		result.put("name", object.getName());
+		result.put(FIELD_NAME, object.getName());
 		JSONArray areas = new JSONArray();
 		for (CourseArea area : object.getCourseAreas())
 		{
 			areas.add(areaSerializer.serialize(area));
 		}
-		result.put("courseAreas", areas);
+		result.put(FIELD_COURSE_AREAS, areas);
 		
 		return result;
 	}

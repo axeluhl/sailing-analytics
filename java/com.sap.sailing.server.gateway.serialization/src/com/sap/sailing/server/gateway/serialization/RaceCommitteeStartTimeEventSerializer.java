@@ -9,7 +9,8 @@ import com.sap.sailing.domain.racecommittee.RaceCommitteeStartTimeEvent;
  * with {@link RaceCommitteeEventSerializerFactory}, see type-safeness of generics.
  */
 public class RaceCommitteeStartTimeEventSerializer implements JsonSerializer<RaceCommitteeEvent> {
-
+	public static final String FIELD_START_TIME = "startTime";
+	
 	private JsonSerializer<RaceCommitteeEvent> baseSerializer;
 	
 	public RaceCommitteeStartTimeEventSerializer(JsonSerializer<RaceCommitteeEvent> baseSerializer) {
@@ -22,7 +23,7 @@ public class RaceCommitteeStartTimeEventSerializer implements JsonSerializer<Rac
 		RaceCommitteeStartTimeEvent startTimeEvent = (RaceCommitteeStartTimeEvent) object;
 		
 		JSONObject result = baseSerializer.serialize(startTimeEvent);
-		result.put("startTime", startTimeEvent.getStartTime().asMillis());
+		result.put(FIELD_START_TIME, startTimeEvent.getStartTime().asMillis());
 		return result;
 	}
 

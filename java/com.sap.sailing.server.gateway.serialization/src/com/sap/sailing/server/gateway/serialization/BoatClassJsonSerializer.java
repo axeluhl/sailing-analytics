@@ -5,11 +5,12 @@ import org.json.simple.JSONObject;
 import com.sap.sailing.domain.base.BoatClass;
 
 public class BoatClassJsonSerializer implements JsonSerializer<BoatClass> {
+	public static final String FIELD_NAME = "name";
 
 	@Override
 	public JSONObject serialize(BoatClass object) {
 		JSONObject result = new JSONObject();
-		result.put("name", object.getName());
+		result.put(FIELD_NAME, object.getName());
 		return result;
 	}
 

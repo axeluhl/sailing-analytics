@@ -5,7 +5,6 @@ import com.sap.sailing.domain.racecommittee.RaceCommitteeFlagEvent;
 import com.sap.sailing.domain.racecommittee.RaceCommitteeStartTimeEvent;
 
 public class RaceCommitteeEventSerializerFactory {
-	
 	private JsonSerializer<RaceCommitteeEvent> baseEventSerializer;
 	
 	public RaceCommitteeEventSerializerFactory() {

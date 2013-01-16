@@ -8,7 +8,11 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 
 public class RegattaJsonSerializer implements JsonSerializer<Regatta> {
-
+	public static final String FIELD_ID = "id";
+	public static final String FIELD_BASE_NAME = "baseName";
+	public static final String FIELD_BOAT_CLASS = "boatClass";
+	public static final String FIELD_RACES = "races";
+	
 	private JsonSerializer<BoatClass> boatClassSerializer;
 	private JsonSerializer<RaceDefinition> raceDefinitionSerializer;
 	
@@ -24,16 +28,16 @@ public class RegattaJsonSerializer implements JsonSerializer<Regatta> {
 	public JSONObject serialize(Regatta object) {
 		JSONObject result = new JSONObject();
 		
-		result.put("id", object.getId().toString());
-		result.put("baseName", object.getBaseName());
-		result.put("boatClass", boatClassSerializer.serialize(object.getBoatClass()));
+		result.put(FIELD_ID, object.getId().toString());
+		result.put(FIELD_BASE_NAME, object.getBaseName());
+		result.put(FIELD_BOAT_CLASS, boatClassSerializer.serialize(object.getBoatClass()));
 		
 		JSONArray races = new JSONArray();
 		for (RaceDefinition race : object.getAllRaces())
 		{
 			races.add(raceDefinitionSerializer.serialize(race));
 		}
-		result.put("races", races);
+		result.put(FIELD_RACES, races);
 		
 		return result;
 	}
