@@ -1,0 +1,36 @@
+package com.sap.sailing.server.gateway.deserialization;
+
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+
+import com.sap.sailing.domain.base.CourseArea;
+import com.sap.sailing.domain.base.Venue;
+import com.sap.sailing.domain.base.impl.VenueImpl;
+import com.sap.sailing.server.gateway.serialization.VenueJsonSerializer;
+
+public class VenueJsonDeserializer implements JsonDeserializer<Venue> {
+	private JsonDeserializer<CourseArea> courseAreaDeserializer;
+	
+	public VenueJsonDeserializer(JsonDeserializer<CourseArea> courseAreaDeserializer) {
+		this.courseAreaDeserializer = courseAreaDeserializer;
+	}
+	
+	@Override
+	public Venue deserialize(JSONObject object)
+			throws JsonDeserializationException {
+		
+		String name = object.get(VenueJsonSerializer.FIELD_NAME).toString();
+		Venue venue = new VenueImpl(name);
+		
+		JSONArray courseAreaArray = Helpers.getNestedArraySafe(
+				object, 
+				VenueJsonSerializer.FIELD_COURSE_AREAS);
+		for (Object element : courseAreaArray) {
+			JSONObject courseAreaObject = Helpers.toJSONObjectSafe(element);
+			venue.addCourseArea(courseAreaDeserializer.deserialize(courseAreaObject));
+		}
+		
+		return venue;
+	}
+
+}

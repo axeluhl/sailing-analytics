@@ -36,7 +36,7 @@ public class EventImpl implements Event {
         this.regattas = new HashSet<Regatta>();
     }
 
-    @Override
+	@Override
     public Serializable getId() {
         return id;
     }

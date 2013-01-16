@@ -1,10 +1,8 @@
 package com.sap.sailing.server.gateway.serialization;
 
-import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.CourseArea;
-import com.sap.sailing.domain.base.RaceDefinition;
 
 public class CourseAreaJsonSerializer implements JsonSerializer<CourseArea> {
 	public static final String FIELD_NAME = "name";
@@ -15,12 +13,12 @@ public class CourseAreaJsonSerializer implements JsonSerializer<CourseArea> {
 		JSONObject result = new JSONObject();
 		
 		result.put(FIELD_NAME, object.getName());
-		JSONArray races = new JSONArray();
+		/*JSONArray races = new JSONArray();
 		for (RaceDefinition race : object.getRaces())
 		{
 			races.add(race.getId().toString());
 		}
-		result.put(FIELD_RACES, races);
+		result.put(FIELD_RACES, races);*/
 		
 		return result;
 	}
