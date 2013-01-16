@@ -29,11 +29,15 @@ public class RaceCommitteeEventTrackImpl extends TrackImpl<RaceCommitteeEvent> i
 
 	@Override
 	public void add(RaceCommitteeEvent event) {
+		System.out.println("RaceCommitteeEventTrackImpl.add() called for RC Event" + event + " with timestamp " + event.getTimePoint().toString() + " on " + this.toString());
 		lockForWrite();
+		System.out.println("RaceCommitteeEventTrackImpl.lockForWrite() called for RC Event" + event + " with timestamp " + event.getTimePoint().toString());
         try {
             getInternalRawFixes().add(event);
+            System.out.println("RaceCommitteeEventTrackImpl.getInternalRawFixes().add() called for RC Event" + event + " with timestamp " + event.getTimePoint().toString());
         } finally {
             unlockAfterWrite();
+            System.out.println("RaceCommitteeEventTrackImpl.unlockAfterWrite() called for RC Event" + event + " with timestamp " + event.getTimePoint().toString());
         }
         notifyListenersAboutReceive(event);
 	}

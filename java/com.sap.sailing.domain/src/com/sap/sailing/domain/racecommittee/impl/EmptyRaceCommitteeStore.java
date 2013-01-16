@@ -13,14 +13,8 @@ import com.sap.sailing.domain.tracking.TrackedRegatta;
 public class EmptyRaceCommitteeStore implements RaceCommitteeStore {
 	public static EmptyRaceCommitteeStore INSTANCE = new EmptyRaceCommitteeStore();
 	
-	private RaceCommitteeEventTrack track = null;
-
 	@Override
 	public RaceCommitteeEventTrack getRaceCommitteeEventTrack(TrackedRegatta trackedRegatta, TrackedRace trackedRace) {
-		if (track == null) {
-			track = new RaceCommitteeEventTrackImpl("Lock for " + trackedRace.toString());
-		}
-		
-		return track;
+		return new RaceCommitteeEventTrackImpl("Lock for " + trackedRace.toString());
 	}
 }
