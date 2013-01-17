@@ -86,7 +86,7 @@ public class TestStoringAndRetrievingRaceCommitteeEventTracksTest extends Abstra
         Mongo myFirstMongo = newMongo();
         DB firstDatabase = myFirstMongo.getDB(dbConfiguration.getDatabaseName());
         new MongoObjectFactoryImpl(firstDatabase).addRaceCommitteeEventTrackDumper(trackedRegatta, trackedRace);
-        RaceCommitteeEventTrack raceCommitteeEventTrack = trackedRace.getOrCreateRaceCommitteeEventTrack();
+        RaceCommitteeEventTrack raceCommitteeEventTrack = trackedRace.getRaceCommitteeEventTrack();
         
         TimePoint timePoint = MillisecondsTimePoint.now();
         TimePoint timePointStartTime = new MillisecondsTimePoint(timePoint.asMillis() + 60000);

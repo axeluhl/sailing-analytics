@@ -455,7 +455,7 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     }
 
 	@Override
-	public RaceCommitteeEventTrack getOrCreateRaceCommitteeEventTrack() {
+	public RaceCommitteeEventTrack getRaceCommitteeEventTrack() {
 		// TODO Auto-generated method stub
 		return null;
 	}

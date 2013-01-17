@@ -234,7 +234,7 @@ public class TrackedRaceContentsReplicationTest extends AbstractServerReplicatio
         trackedRace.recordRaceCommitteeEvent(startTimeEvent);
         Thread.sleep(1000);
         TrackedRace replicaTrackedRace = replica.getTrackedRace(raceIdentifier);
-        RaceCommitteeEventTrack replicaRCEventTrack = replicaTrackedRace.getOrCreateRaceCommitteeEventTrack();
+        RaceCommitteeEventTrack replicaRCEventTrack = replicaTrackedRace.getRaceCommitteeEventTrack();
         replicaRCEventTrack.lockForRead();
         try {
             assertEquals(1, Util.size(replicaRCEventTrack.getRawFixes()));
@@ -253,12 +253,12 @@ public class TrackedRaceContentsReplicationTest extends AbstractServerReplicatio
         		RaceCommitteeEventFactory.INSTANCE.createStartTimeEvent(time, 0, new MillisecondsTimePoint(time.asMillis() + 500000));
         System.out.println("testReplicationOfLoadingOfStoredRaceCommitteeTrack() created RC Event" + startTimeEvent + " with timestamp " + startTimeEvent.getTimePoint().toString());
         trackedRace.recordRaceCommitteeEvent(startTimeEvent);
-        RaceCommitteeEventTrack trackedRaceRcEventTrack= trackedRace.getOrCreateRaceCommitteeEventTrack();
+        RaceCommitteeEventTrack trackedRaceRcEventTrack= trackedRace.getRaceCommitteeEventTrack();
         trackedRaceRcEventTrack.lockForRead();
         try {
             Thread.sleep(1000); // wait for replication to happen
             TrackedRace replicaTrackedRace = replica.getTrackedRace(raceIdentifier);
-            RaceCommitteeEventTrack replicaRcEventTrack = replicaTrackedRace.getOrCreateRaceCommitteeEventTrack();
+            RaceCommitteeEventTrack replicaRcEventTrack = replicaTrackedRace.getRaceCommitteeEventTrack();
             replicaRcEventTrack.lockForRead();
             try {
                 assertEquals(Util.size(trackedRaceRcEventTrack.getRawFixes()), Util.size(replicaRcEventTrack.getRawFixes()));

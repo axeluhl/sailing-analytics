@@ -618,8 +618,7 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
 
 	@Override
 	public void recordRaceCommitteeEvent(RaceCommitteeEvent event) {
-		System.out.println("DynamicTrackedRaceImpl.recordRaceCommitteeEvent() called for RC Event" + event + " with timestamp " + event.getTimePoint().toString() + " on " + this.toString());
-		getOrCreateRaceCommitteeEventTrack().add(event);
+		getRaceCommitteeEventTrack().add(event);
         updated(/* time point */null); // TODO: updated has to be understood better, for now it shall have the same behaviour as in recordWind
         //TODO triggerRaceStateCalculation();
         notifyListeners(event);

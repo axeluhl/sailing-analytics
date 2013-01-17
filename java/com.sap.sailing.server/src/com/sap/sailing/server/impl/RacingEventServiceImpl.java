@@ -933,7 +933,6 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
 
 		@Override
 		public void raceCommitteeEventReceived(RaceCommitteeEvent event) {
-			System.out.println("RacingEventServiceImpl.raceCommitteeEventReceived() called for RC event " + event.toString() + " with timestamp " + event.getTimePoint().toString() + " in " + this.toString());
 			replicate(new RecordRaceCommitteeEvent(getRaceIdentifier(), event));
 		}
 

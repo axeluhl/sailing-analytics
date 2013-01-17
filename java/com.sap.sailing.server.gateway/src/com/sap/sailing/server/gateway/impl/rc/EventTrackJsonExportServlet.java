@@ -56,7 +56,7 @@ public class EventTrackJsonExportServlet extends JsonExportServlet {
 		JSONArray result = new JSONArray();
 		
 		RaceCommitteeEventSerializerFactory serializerFactory = new RaceCommitteeEventSerializerFactory();
-		RaceCommitteeEventTrack track = trackedRace.getOrCreateRaceCommitteeEventTrack();
+		RaceCommitteeEventTrack track = trackedRace.getRaceCommitteeEventTrack();
 		
 		track.lockForRead();
 		for (RaceCommitteeEvent event :  track.getFixes()) {

@@ -456,7 +456,7 @@ public interface TrackedRace extends Serializable {
     /**
      * Returns the race committee event track for this race or creates it if it did not exist yet
      */
-    RaceCommitteeEventTrack getOrCreateRaceCommitteeEventTrack();
+    RaceCommitteeEventTrack getRaceCommitteeEventTrack();
 
     /**
      * When provided with a {@link RaceCommitteeStore} during construction, the tracked race will asynchronously load the race committee event

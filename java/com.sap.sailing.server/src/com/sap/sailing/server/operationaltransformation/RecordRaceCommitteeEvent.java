@@ -20,7 +20,6 @@ public class RecordRaceCommitteeEvent extends AbstractRaceOperation<Void> {
 	public Void internalApplyTo(RacingEventService toState) throws Exception {
 		DynamicTrackedRace trackedRace = (DynamicTrackedRace) toState.getTrackedRace(getRaceIdentifier());
 		trackedRace.recordRaceCommitteeEvent(event);
-		System.out.println("RecordRaceCommitteeEvent.internalApplyTo() called for RC event " + event.toString() + " with timestamp " + event.getTimePoint().toString() + "for toState " + toState.toString());
 		return null;
 	}
 

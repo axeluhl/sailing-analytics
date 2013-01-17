@@ -700,7 +700,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
 	@Override
-	public RaceCommitteeEventTrack getOrCreateRaceCommitteeEventTrack() {
+	public RaceCommitteeEventTrack getRaceCommitteeEventTrack() {
 		// TODO Auto-generated method stub
 		return null;
 	}

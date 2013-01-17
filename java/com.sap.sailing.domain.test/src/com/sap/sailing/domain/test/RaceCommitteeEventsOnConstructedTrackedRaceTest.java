@@ -45,7 +45,7 @@ public class RaceCommitteeEventsOnConstructedTrackedRaceTest extends TrackBasedT
     
     @Test
     public void testRaceCommitteeEventTrackExists() {
-    	RaceCommitteeEventTrack track = getTrackedRace().getOrCreateRaceCommitteeEventTrack();
+    	RaceCommitteeEventTrack track = getTrackedRace().getRaceCommitteeEventTrack();
     	assertNotNull(track);
     	
     	track.lockForRead();
@@ -59,7 +59,7 @@ public class RaceCommitteeEventsOnConstructedTrackedRaceTest extends TrackBasedT
     
     @Test
     public void testRaceCommitteeEventTrackInsertSomeEvents() {
-    	RaceCommitteeEventTrack track = getTrackedRace().getOrCreateRaceCommitteeEventTrack();
+    	RaceCommitteeEventTrack track = getTrackedRace().getRaceCommitteeEventTrack();
     	assertNotNull(track);
     	
     	TimePoint t1 = MillisecondsTimePoint.now();

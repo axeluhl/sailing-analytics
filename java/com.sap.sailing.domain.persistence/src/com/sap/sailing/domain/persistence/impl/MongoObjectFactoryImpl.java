@@ -539,7 +539,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
 
 	@Override
 	public void addRaceCommitteeEventTrackDumper(TrackedRegatta trackedRegatta, TrackedRace trackedRace) {
-		RaceCommitteeEventTrack rcEventTrack = trackedRace.getOrCreateRaceCommitteeEventTrack();
+		RaceCommitteeEventTrack rcEventTrack = trackedRace.getRaceCommitteeEventTrack();
 		rcEventTrack.addListener(new MongoRaceCommitteeListener(trackedRegatta, trackedRace, this, database));		
 	}
 }
