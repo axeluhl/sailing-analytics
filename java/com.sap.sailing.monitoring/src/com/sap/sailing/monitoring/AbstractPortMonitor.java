@@ -105,7 +105,7 @@ public abstract class AbstractPortMonitor extends Thread {
                                         throw new ConnectException("Could not successfully connect to endpoint " + currentendpoint.toString());
                                     }
                                 }
-                                log.info("Connection succeeded to " + currentendpoint.toString());
+                                log.finest("Connection succeeded to " + currentendpoint.toString());
                                 handleConnection(currentendpoint);
                                 
                                 lastmillis = System.currentTimeMillis();
