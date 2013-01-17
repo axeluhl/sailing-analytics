@@ -358,34 +358,6 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
         return result;
     }
 
-    private String getDetailTypeUnit() {
-        String detailTypeUnit = "";
-        switch (getSelectedDetailType()) {
-        case CURRENT_SPEED_OVER_GROUND_IN_KNOTS:
-            detailTypeUnit = getStringMessages().currentSpeedOverGroundInKnotsUnit();
-            break;
-        case DISTANCE_TRAVELED:
-            detailTypeUnit = getStringMessages().distanceInMetersUnit();
-            break;
-        case GAP_TO_LEADER_IN_SECONDS:
-            detailTypeUnit = getStringMessages().gapToLeaderInSecondsUnit();
-            break;
-        case VELOCITY_MADE_GOOD_IN_KNOTS:
-            detailTypeUnit = getStringMessages().velocityMadeGoodInKnotsUnit();
-            break;
-        case WINDWARD_DISTANCE_TO_OVERALL_LEADER:
-            detailTypeUnit = getStringMessages().windwardDistanceToGoInMetersUnit();
-            break;
-        case RACE_RANK:
-        	//Case for detail types without unit, so that an empty string is returned.
-        	break;
-		default:
-			//Throwing an exception to get notificated if an implementation of an detail type is missing.
-			throw new UnsupportedOperationException("Theres currently no support for the enum value '" + getSelectedDetailType() + "' in this method.");
-        }
-        return detailTypeUnit;
-    }
-
     /**
      * 
      * @param competitor
@@ -501,7 +473,7 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
                 }
             }
             chart.setTitle(new ChartTitle().setText(DetailTypeFormatter.format(selectedDetailType)), null);
-            final String unit = getDetailTypeUnit();
+            final String unit = DetailTypeFormatter.getUnit(getSelectedDetailType());
             final String label = unit.isEmpty() ? "" : "[" + unit + "]";
             if (!compactChart) {
                 chart.getYAxis().setAxisTitleText(

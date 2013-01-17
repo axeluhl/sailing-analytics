@@ -86,6 +86,47 @@ public class DetailTypeFormatter {
         }
         return null;
     }
+    
+    /**
+     * Returns the unit of the given {@link DetailType}, like 'm', 'kts' or an empty string, if the detail type has no
+     * unit.<br>
+     * Throws an UnsupportedOperationException if the given detail type isn't supported.<br>
+     * Currently supported are:<br>
+     * <ul>
+     * <li>CURRENT_SPEED_OVER_GROUND_IN_KNOTS</li>
+     * <li>DISTANCE_TRAVELED</li>
+     * <li>GAP_TO_LEADER_IN_SECONDS</li>
+     * <li>VELOCITY_MADE_GOOD_IN_KNOTS</li>
+     * <li>WINDWARD_DISTANCE_TO_OVERALL_LEADER</li>
+     * <li>RACE_RANK</li>
+     * </ul>
+     * 
+     * @param detailType
+     * @return The unit of the detail type as string.
+     */
+    public static String getUnit(DetailType detailType) {
+        switch (detailType) {
+        case CURRENT_SPEED_OVER_GROUND_IN_KNOTS:
+            return stringMessages.currentSpeedOverGroundInKnotsUnit();
+        case DISTANCE_TRAVELED:
+            return stringMessages.distanceInMetersUnit();
+        case GAP_TO_LEADER_IN_SECONDS:
+            return stringMessages.gapToLeaderInSecondsUnit();
+        case VELOCITY_MADE_GOOD_IN_KNOTS:
+            return stringMessages.velocityMadeGoodInKnotsUnit();
+        case WINDWARD_DISTANCE_TO_OVERALL_LEADER:
+            return stringMessages.windwardDistanceToGoInMetersUnit();
+        case RACE_RANK:
+            // Case for detail types without unit, so that an empty string is
+            // returned.
+            return "";
+        default:
+            // Throwing an exception to get notificated if an implementation of
+            // an detail type is missing.
+            throw new UnsupportedOperationException("Theres currently no support for the enum value '" + detailType
+                    + "' in this method.");
+        }
+    }
 
     public static NumberFormat getNumberFormat(DetailType detailType) {
         String decimalPlaces = "";
