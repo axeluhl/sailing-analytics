@@ -16,6 +16,8 @@ public abstract class LegDetailColumn<FieldType extends Comparable<?>, Rendering
     private final String headerStyle;
     private final String columnStyle;
     private final String unit;
+    
+    private SafeHtmlHeader header;
 
     public interface LegDetailField<T extends Comparable<?>> {
         T get(LeaderboardRowDTO row);
@@ -30,9 +32,25 @@ public abstract class LegDetailColumn<FieldType extends Comparable<?>, Rendering
         this.field = field;
         this.headerStyle = headerStyle;
         this.columnStyle = columnStyle;
+        InitializeHeader();
     }
 
-    protected String getTitle() {
+    private void InitializeHeader() {
+    	//Code to add a tooltip to the title. Do NOT delete. This is saved to use it, after some refactorings are done.
+//      SafeHtmlBuilder builder = new SafeHtmlBuilder().appendHtmlConstant("<div title=\"Tooltip text.\">");
+//      builder.appendEscaped(title).appendHtmlConstant("<br>");
+    	
+    	SafeHtmlBuilder builder = new SafeHtmlBuilder().appendEscaped(title).appendHtmlConstant("<br>");
+        if (unit == null) {
+            builder.appendHtmlConstant("&nbsp;");
+        } else {
+            builder.appendEscaped(unit);
+        }
+        
+        header = new SafeHtmlHeader(builder.toSafeHtml());
+	}
+
+	protected String getTitle() {
         return title;
     }
 
@@ -70,13 +88,6 @@ public abstract class LegDetailColumn<FieldType extends Comparable<?>, Rendering
 
     @Override
     public Header<?> getHeader() {
-        SafeHtmlBuilder builder = new SafeHtmlBuilder().appendEscaped(title).appendHtmlConstant("<br>");
-        if (unit == null) {
-            builder.appendHtmlConstant("&nbsp;");
-        } else {
-            builder.appendEscaped(unit);
-        }
-        SafeHtmlHeader header = new SafeHtmlHeader(builder.toSafeHtml());
         return header;
     }
 
