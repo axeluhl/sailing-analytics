@@ -409,7 +409,7 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
         if(visible) {
             // Workaround for a highcharts bug: 
             // Set a chart title, overwrite the title, switch chart to invisible and visible again -> the old title appears  
-            chart.setTitle(new ChartTitle().setText(DetailTypeFormatter.format(selectedDetailType, stringMessages)),
+            chart.setTitle(new ChartTitle().setText(DetailTypeFormatter.format(selectedDetailType)),
                     null);
         }
     }
@@ -426,7 +426,7 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
     }
 
     public String getLocalizedShortName() {
-        return DetailTypeFormatter.format(getSelectedDetailType(), getStringMessages());
+        return DetailTypeFormatter.format(getSelectedDetailType());
     }
 
     public Widget getEntryWidget() {
@@ -500,12 +500,12 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
                     resetMinMaxAndExtremesInterval(/* redraw */ true);
                 }
             }
-            chart.setTitle(new ChartTitle().setText(DetailTypeFormatter.format(selectedDetailType, stringMessages)), null);
+            chart.setTitle(new ChartTitle().setText(DetailTypeFormatter.format(selectedDetailType)), null);
             final String unit = getDetailTypeUnit();
             final String label = unit.isEmpty() ? "" : "[" + unit + "]";
             if (!compactChart) {
                 chart.getYAxis().setAxisTitleText(
-                        DetailTypeFormatter.format(selectedDetailType, stringMessages) + " " + label);
+                        DetailTypeFormatter.format(selectedDetailType) + " " + label);
             } else {
                 chart.getYAxis().setAxisTitleText(label);
             }

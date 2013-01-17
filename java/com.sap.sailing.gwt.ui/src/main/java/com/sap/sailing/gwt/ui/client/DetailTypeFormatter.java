@@ -1,10 +1,14 @@
 package com.sap.sailing.gwt.ui.client;
 
+import com.google.gwt.core.shared.GWT;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.sap.sailing.domain.common.DetailType;
 
 public class DetailTypeFormatter {
-    public static String format(DetailType detailType, StringMessages stringMessages) {
+	
+	private static final StringMessages stringMessages = GWT.create(StringMessages.class);
+	
+    public static String format(DetailType detailType) {
         switch (detailType) {
         case DISTANCE_TRAVELED:
             return stringMessages.distanceInMeters();
