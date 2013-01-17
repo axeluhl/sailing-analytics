@@ -115,8 +115,8 @@
             </activation>
             <properties>
                 <tycho.build.argLine>
-				  ${parameters.common} ${parameters.vm-settings} ${parameters.proxy} ${parameters.tractrac} ${parameters.mongodb}
-				</tycho.build.argLine>
+		  ${parameters.common} ${parameters.vm-settings} ${parameters.proxy} ${parameters.tractrac} ${parameters.mongodb}
+		</tycho.build.argLine>
             </properties>
         </profile>
         <profile>

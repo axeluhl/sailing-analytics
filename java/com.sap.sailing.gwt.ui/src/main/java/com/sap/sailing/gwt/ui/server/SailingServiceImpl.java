@@ -552,6 +552,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                                         && namesOfRaceColumnsForWhichToLoadLegDetails.contains(raceColumn.getName()),
                                         waitForLatestAnalyses, legRanksCache);
                             } catch (NoWindException e) {
+                                logger.info("Exception trying to compute leaderboard entry for competitor "+competitor.getName()+
+                                        " in race column "+raceColumn.getName()+": "+e.getMessage());
+                                logger.throwing(SailingServiceImpl.class.getName(), "computeLeaderboardByName.future.call()", e);
                                 throw new NoWindError(e);
                             }
                         }
