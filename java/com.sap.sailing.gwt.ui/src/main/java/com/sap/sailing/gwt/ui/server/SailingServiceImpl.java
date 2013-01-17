@@ -31,6 +31,8 @@ import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.RunnableFuture;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.servlet.ServletContext;
 
@@ -550,6 +552,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                                         && namesOfRaceColumnsForWhichToLoadLegDetails.contains(raceColumn.getName()),
                                         waitForLatestAnalyses, legRanksCache);
                             } catch (NoWindException e) {
+                                logger.info("Exception trying to compute leaderboard entry for competitor "+competitor.getName()+
+                                        " in race column "+raceColumn.getName()+": "+e.getMessage());
+                                logger.throwing(SailingServiceImpl.class.getName(), "computeLeaderboardByName.future.call()", e);
                                 throw new NoWindError(e);
                             }
                         }
@@ -910,6 +915,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                                 result.sideToWhichMarkAtLegStartWasRounded = mpm.getSide();
                             }
                             break;
+                		default:
+                			/* Do nothing here.
+                			 * Throwing an exception destroys the toggling (and maybe other behaviour) of the leaderboard.
+                			*/
                         }
                     }
                     result.averageManeuverLossInMeters = new HashMap<ManeuverType, Double>();
@@ -2366,7 +2375,16 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             boolean trackWind, boolean correctWindByDeclination, boolean simulateWithStartTimeNow) {
         Regatta regatta;
         if (regattaIdentifier == null) {
-            regatta = getService().createRegatta(replayRaceDTO.rsc, replayRaceDTO.boat_class,
+            String boatClass = replayRaceDTO.boat_class;
+            for (String genderIndicator : new String[] { "Man", "Woman", "Men", "Women", "M", "W" }) {
+                Pattern p = Pattern.compile("(( - )|-| )"+genderIndicator+"$");
+                Matcher m = p.matcher(boatClass.trim());
+                if (m.find()) {
+                    boatClass = boatClass.trim().substring(0, m.start(1));
+                    break;
+                }
+            }
+            regatta = getService().createRegatta(replayRaceDTO.rsc, boatClass.trim(),
                     RegattaImpl.getFullName(replayRaceDTO.rsc, replayRaceDTO.boat_class),
                     Collections.singletonList(new SeriesImpl("Default", /* isMedal */false, Collections
                                     .singletonList(new FleetImpl("Default")), /* race column names */new ArrayList<String>(),
@@ -2434,6 +2452,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 case RACE_RANK:
                     result = (double) trackedLeg.getRank(timePoint);
                     break;
+        		default:
+        			throw new UnsupportedOperationException("Theres currently no support for the enum value '" + dataType + "' in this method.");
                 }
             }
             return result;
