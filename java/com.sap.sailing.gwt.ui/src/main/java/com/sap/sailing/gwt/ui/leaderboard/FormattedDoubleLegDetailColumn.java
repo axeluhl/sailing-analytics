@@ -4,7 +4,9 @@ import com.google.gwt.cell.client.Cell.Context;
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.SortingOrder;
+import com.sap.sailing.gwt.ui.client.DetailTypeFormatter;
 import com.sap.sailing.gwt.ui.client.NumberFormatterFactory;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardRowDTO;
@@ -12,6 +14,20 @@ import com.sap.sailing.gwt.ui.shared.LeaderboardRowDTO;
 public class FormattedDoubleLegDetailColumn extends LegDetailColumn<Double, String> implements HasStringAndDoubleValue {
     private final NumberFormat formatter;
     private final MinMaxRenderer minMaxRenderer;
+    
+    /**
+     * Creates a new column for the given {@link DetailType}. Have a look at
+     * {@link DetailTypeFormatter#getUnit(DetailType)}, to see if the given type is supported.
+     * 
+     * @param detailType
+     * @param field
+     * @param headerStyle
+     * @param columnStyle
+     */
+    public FormattedDoubleLegDetailColumn(DetailType detailType, LegDetailField<Double> field, String headerStyle, String columnStyle) {
+        this(DetailTypeFormatter.format(detailType), DetailTypeFormatter.getUnit(detailType).isEmpty() ? "" : "[" + DetailTypeFormatter.getUnit(detailType) + "]",
+                field, detailType.getPrecision(), detailType.getDefaultSortingOrder(), headerStyle, columnStyle);
+    }
 
     public FormattedDoubleLegDetailColumn(String title, String unit,
             com.sap.sailing.gwt.ui.leaderboard.LegDetailColumn.LegDetailField<Double> field, int decimals, SortingOrder preferredSortingOrder,

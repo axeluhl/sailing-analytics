@@ -42,7 +42,7 @@ public class MultiChartSettingsComponent extends AbstractChartSettingsComponent<
         chartTypeSelectionListBox = dialog.createListBox(/* isMultiSelect */ false);
         int i=0;
         for (DetailType detailType : availableDetailsTypes) {
-            chartTypeSelectionListBox.addItem(DetailTypeFormatter.format(detailType, stringMessages), detailType.name());
+            chartTypeSelectionListBox.addItem(DetailTypeFormatter.format(detailType), detailType.name());
             if (detailType == initialDetailType) {
                 chartTypeSelectionListBox.setSelectedIndex(i);
             }
