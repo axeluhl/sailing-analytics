@@ -91,33 +91,18 @@ public class DetailTypeFormatter {
      * Returns the unit of the given {@link DetailType}, like 'm', 'kts' or an empty string, if the detail type has no
      * unit.<br>
      * Throws an UnsupportedOperationException if the given detail type isn't supported.<br>
-     * Currently supported are:<br>
+     * Currently <b>not</b> supported are:<br>
      * <ul>
-     * <li>CURRENT_SPEED_OVER_GROUND_IN_KNOTS</li>
-     * <li>MAXIMUM_SPEED_OVER_GROUND_IN_KNOTS</li>
-     * <li>DISTANCE_TRAVELED</li>
-     * <li>GAP_TO_LEADER_IN_SECONDS</li>
-     * <li>VELOCITY_MADE_GOOD_IN_KNOTS</li>
-     * <li>WINDWARD_DISTANCE_TO_OVERALL_LEADER</li>
-     * <li>AVERAGE_SPEED_OVER_GROUND_IN_KNOTS</li>
-     * <li>ESTIMATED_TIME_TO_NEXT_WAYPOINT_IN_SECONDS</li>
-     * <li>GAP_CHANGE_SINCE_LEG_START_IN_SECONDS</li>
-     * <li>AVERAGE_CROSS_TRACK_ERROR_IN_METERS</li>
-     * <li>RACE_DISTANCE_TRAVELED</li>
-     * <li>RACE_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS</li>
-     * <li>RACE_GAP_TO_LEADER_IN_SECONDS</li>
-     * <li>RACE_CURRENT_SPEED_OVER_GROUND_IN_KNOTS</li>
-     * <li>RACE_DISTANCE_TO_LEADER_IN_METERS</li>
-     * <li>RACE_AVERAGE_CROSS_TRACK_ERROR_IN_METERS</li>
-     * <li>AVERAGE_TACK_LOSS_IN_METERS</li>
-     * <li>AVERAGE_JIBE_LOSS_IN_METERS</li>
-     * <li>TOTAL_TIME_SAILED_IN_SECONDS</li>
-     * 
-     * <li>RACE_RANK (no unit)</li>
-     * <li>CURRENT_LEG (no unit)</li>
-     * <li>TACK (no unit)</li>
-     * <li>JIBE (no unit)</li>
-     * <li>PENALTY_CIRCLE (no unit)</li>
+     * <li>BEAR_AWAY</li>
+     * <li>DISPLAY_LEGS</li>
+     * <li>HEAD_UP</li>
+     * <li>MARK_PASSING</li>
+     * <li>NUMBER_OF_MANEUVERS</li>
+     * <li>RANK_GAIN</li>
+     * <li>SIDE_TO_WHICH_MARK_AT_LEG_START_WAS_ROUNDED</li>
+     * <li>TOTAL_TIME_SAILED_DOWNWIND_IN_SECONDS</li>
+     * <li>TOTAL_TIME_SAILED_REACHING_IN_SECONDS</li>
+     * <li>TOTAL_TIME_SAILED_UPWIND_IN_SECONDS</li>
      * </ul>
      * 
      * @param detailType
