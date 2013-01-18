@@ -75,15 +75,12 @@ public class MediaPanel extends FlowPanel {
             }
         });
         add(addYoutubeButton);
-
         createMediaTracksTable();
-
     }
 
     protected void loadMediaTracks() {
         mediaTrackListDataProvider.getList().clear();
         mediaService.getAllMediaTracks(new AsyncCallback<Collection<MediaTrack>>() {
-
             @Override
             public void onFailure(Throwable t) {
                 errorReporter.reportError(t.toString());
