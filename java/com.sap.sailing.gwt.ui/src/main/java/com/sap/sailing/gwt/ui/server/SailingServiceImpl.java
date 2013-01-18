@@ -2471,7 +2471,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             TimePoint newestEvent = trackedRace.getTimePointOfNewestEvent();
             TimePoint startTime = from == null ? trackedRace.getStartOfTracking() : new MillisecondsTimePoint(from);
             TimePoint endTime = (to == null || to.after(newestEvent.asDate())) ? newestEvent : new MillisecondsTimePoint(to);
-            result = new CompetitorsRaceDataDTO(detailType, startTime.asDate(), endTime.asDate());
+            result = new CompetitorsRaceDataDTO(detailType, startTime==null?null:startTime.asDate(), endTime==null?null:endTime.asDate());
 
             for (CompetitorDTO competitorDTO : competitors) {
                 Competitor competitor = getCompetitorById(trackedRace.getRace().getCompetitors(), competitorDTO.id);
