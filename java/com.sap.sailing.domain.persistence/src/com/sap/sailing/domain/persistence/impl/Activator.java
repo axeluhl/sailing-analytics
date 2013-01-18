@@ -11,7 +11,7 @@ public class Activator implements BundleActivator {
 		CollectionNameService service = new CollectionNameServiceImpl();
 		context.registerService(CollectionNameService.class, service, null);
 		for (CollectionNames name : CollectionNames.values())
-			service.registerExclusively(name.name());
+			service.registerExclusively(CollectionNames.class, name.name());
 	}
 
 	@Override

@@ -17,6 +17,23 @@ package com.sap.sailing.domain.persistence;
  * 
  */
 public interface CollectionNameService {
-	void registerExclusively(String collectionName)
-			throws AlreadyRegisteredException;
+	/**
+	 * Should be called before accessing any collection.
+	 * 
+	 * @param registerForThisClass
+	 *            The class to register the collection for. This might be a
+	 *            placeholder Interface that is used by multiple classes
+	 *            accessing one and the same collection, demonstrating that they
+	 *            have knowledge of each other. Also, this provides safety in
+	 *            the case that a bundle is restarted, registering the
+	 *            collection name more than once.
+	 * @param collectionName
+	 * @throws AlreadyRegisteredException
+	 *             Is thrown if the collection name has already been registered
+	 *             for another class. This shouldn't happen in a productive
+	 *             version, but should make aware of the problem while
+	 *             developing.
+	 */
+	void registerExclusively(Class<?> registerForThisClass,
+			String collectionName) throws AlreadyRegisteredException;
 }

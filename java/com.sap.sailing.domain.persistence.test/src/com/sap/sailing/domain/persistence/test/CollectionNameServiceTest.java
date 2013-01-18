@@ -17,14 +17,15 @@ public class CollectionNameServiceTest {
 	
 	@Test
 	public void shouldWork() throws AlreadyRegisteredException {
-		service.registerExclusively("a");
-		service.registerExclusively("b");
-		service.registerExclusively("B");
+		service.registerExclusively(CollectionNameServiceTest.class, "a");
+		service.registerExclusively(CollectionNameServiceTest.class, "b");
+		service.registerExclusively(CollectionNameServiceTest.class, "B");
+		service.registerExclusively(CollectionNameServiceTest.class, "B");
 	}
 	
 	@Test(expected=AlreadyRegisteredException.class)
 	public void shouldNotWork() throws AlreadyRegisteredException {
-		service.registerExclusively("b");
-		service.registerExclusively("b");
+		service.registerExclusively(CollectionNameServiceTest.class, "b");
+		service.registerExclusively(Object.class, "b");
 	}
 }
