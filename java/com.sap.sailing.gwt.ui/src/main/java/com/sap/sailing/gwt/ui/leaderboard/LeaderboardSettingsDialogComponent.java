@@ -103,7 +103,7 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
         meneuverContent.addStyleName("dialogInnerContent");
         List<DetailType> currentMeneuverDetailSelection = maneuverDetailSelection;
         for (DetailType detailType : ManeuverCountRaceColumn.getAvailableManeuverDetailColumnTypes()) {
-            CheckBox checkbox = dialog.createCheckbox(DetailTypeFormatter.format(detailType, stringMessages));
+            CheckBox checkbox = dialog.createCheckbox(DetailTypeFormatter.format(detailType));
             checkbox.setValue(currentMeneuverDetailSelection.contains(detailType));
             maneuverDetailCheckboxes.put(detailType, checkbox);
             meneuverContent.add(checkbox);
@@ -150,7 +150,7 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
         raceDetailDialogContent.addStyleName("dialogInnerContent");
         List<DetailType> currentRaceDetailSelection = raceDetailSelection;
         for (DetailType type : LeaderboardPanel.getAvailableRaceDetailColumnTypes()) {
-            CheckBox checkbox = dialog.createCheckbox(DetailTypeFormatter.format(type, stringMessages));
+            CheckBox checkbox = dialog.createCheckbox(DetailTypeFormatter.format(type));
             checkbox.setValue(currentRaceDetailSelection.contains(type));
             raceDetailCheckboxes.put(type, checkbox);
             raceDetailDialogContent.add(checkbox);
@@ -167,7 +167,7 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
         overallDetailDialogContent.addStyleName("dialogInnerContent");
         List<DetailType> currentOverallDetailSelection = overallDetailSelection;
         for (DetailType type : LeaderboardPanel.getAvailableOverallDetailColumnTypes()) {
-            CheckBox checkbox = dialog.createCheckbox(DetailTypeFormatter.format(type, stringMessages));
+            CheckBox checkbox = dialog.createCheckbox(DetailTypeFormatter.format(type));
             checkbox.setValue(currentOverallDetailSelection.contains(type));
             overallDetailCheckboxes.put(type, checkbox);
             overallDetailDialogContent.add(checkbox);
@@ -184,7 +184,7 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
         legDetailsContent.addStyleName("dialogInnerContent");
         List<DetailType> currentLegDetailSelection = legDetailSelection;
         for (DetailType type : LegColumn.getAvailableLegDetailColumnTypes()) {
-            CheckBox checkbox = dialog.createCheckbox(DetailTypeFormatter.format(type, stringMessages));
+            CheckBox checkbox = dialog.createCheckbox(DetailTypeFormatter.format(type));
             checkbox.setValue(currentLegDetailSelection.contains(type));
             legDetailCheckboxes.put(type, checkbox);
             legDetailsContent.add(checkbox);

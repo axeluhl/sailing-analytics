@@ -249,7 +249,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         Set<RaceDefinition> raceDefinitions = getRaces();
         if (raceDefinitions != null && !raceDefinitions.isEmpty()) {
             logger.info("fetching paramURL "+paramURL+" to check for updates for race(s) "+getRaces());
-            ClientParamsPHP clientParams;
+            final ClientParamsPHP clientParams;
             try {
                 clientParams = new ClientParamsPHP(new InputStreamReader(paramURL.openStream()));
                 List<com.sap.sailing.domain.base.ControlPoint> newCourseControlPoints = new ArrayList<>();

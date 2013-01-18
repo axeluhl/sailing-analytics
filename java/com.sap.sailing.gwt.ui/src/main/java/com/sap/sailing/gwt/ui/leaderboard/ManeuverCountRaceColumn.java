@@ -238,29 +238,25 @@ public class ManeuverCountRaceColumn extends ExpandableSortableColumn<String> im
             LeaderboardPanel leaderboardPanel, StringMessages stringMessages, String detailHeaderStyle,
             String detailColumnStyle) {
         Map<DetailType, SortableColumn<LeaderboardRowDTO, ?>> result = new HashMap<DetailType, SortableColumn<LeaderboardRowDTO, ?>>();
-        result.put(DetailType.TACK, new FormattedDoubleLegDetailColumn(stringMessages.tack(), "", new NumberOfTacks(),
-                DetailType.TACK.getPrecision(), DetailType.TACK.getDefaultSortingOrder(), detailHeaderStyle, detailColumnStyle));
-        result.put(DetailType.JIBE, new FormattedDoubleLegDetailColumn(stringMessages.jibe(), "", new NumberOfJibes(),
-                DetailType.JIBE.getPrecision(), DetailType.JIBE.getDefaultSortingOrder(), detailHeaderStyle, detailColumnStyle));
+        result.put(DetailType.TACK, new FormattedDoubleLegDetailColumn(DetailType.TACK, new NumberOfTacks(), detailHeaderStyle, detailColumnStyle));
+        
+        result.put(DetailType.JIBE, new FormattedDoubleLegDetailColumn(DetailType.JIBE, new NumberOfJibes(), detailHeaderStyle, detailColumnStyle));
+        
         result.put(DetailType.PENALTY_CIRCLE,
-                new FormattedDoubleLegDetailColumn(stringMessages.penaltyCircle(), "", new NumberOfPenaltyCircles(),
-                        DetailType.PENALTY_CIRCLE.getPrecision(), DetailType.PENALTY_CIRCLE.getDefaultSortingOrder(),
-                        detailHeaderStyle, detailColumnStyle));
+                new FormattedDoubleLegDetailColumn(DetailType.PENALTY_CIRCLE, new NumberOfPenaltyCircles(), detailHeaderStyle, detailColumnStyle));
+        
         result.put(DetailType.AVERAGE_TACK_LOSS_IN_METERS,
-                new FormattedDoubleLegDetailColumn(stringMessages.averageTackLossInMeters(),
-                        stringMessages.distanceInMetersUnit(), new AverageTackLossInMeters(),
-                        DetailType.AVERAGE_TACK_LOSS_IN_METERS.getPrecision(), DetailType.AVERAGE_TACK_LOSS_IN_METERS.getDefaultSortingOrder(),
+                new FormattedDoubleLegDetailColumn(DetailType.AVERAGE_TACK_LOSS_IN_METERS, new AverageTackLossInMeters(),
                         detailHeaderStyle, detailColumnStyle));
+        
         result.put(DetailType.AVERAGE_JIBE_LOSS_IN_METERS,
-                new FormattedDoubleLegDetailColumn(stringMessages.averageJibeLossInMeters(),
-                        stringMessages.distanceInMetersUnit(), new AverageJibeLossInMeters(),
-                        DetailType.AVERAGE_JIBE_LOSS_IN_METERS.getPrecision(), DetailType.AVERAGE_JIBE_LOSS_IN_METERS.getDefaultSortingOrder(),
+                new FormattedDoubleLegDetailColumn(DetailType.AVERAGE_JIBE_LOSS_IN_METERS, new AverageJibeLossInMeters(),
                         detailHeaderStyle, detailColumnStyle));
+        
         result.put(DetailType.AVERAGE_MANEUVER_LOSS_IN_METERS,
-                new FormattedDoubleLegDetailColumn(stringMessages.averageManeuverLossInMeters(),
-                        stringMessages.distanceInMetersUnit(), new AverageManeuverLossInMeters(),
-                        DetailType.AVERAGE_MANEUVER_LOSS_IN_METERS.getPrecision(), DetailType.AVERAGE_MANEUVER_LOSS_IN_METERS.getDefaultSortingOrder(),
+                new FormattedDoubleLegDetailColumn(DetailType.AVERAGE_MANEUVER_LOSS_IN_METERS, new AverageManeuverLossInMeters(),
                         detailHeaderStyle, detailColumnStyle));
+        
         return result;
     }
 

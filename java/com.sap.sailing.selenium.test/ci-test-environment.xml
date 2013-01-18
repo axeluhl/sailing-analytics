@@ -52,7 +52,7 @@
     means that each test will be executed once for each driver defined here. This allows to perform the tests with
     different browsers to validate the proper functionality of the application across different browsers.
     
-    The capabilities section can be used for fine tuning of the driver (e.g. version). For more informations see the
+    The capabilities section can be used for fine tuning of the driver (e.g. version). For more information see the
     pages mentioned above.
   -->
   <driver-definition class="org.openqa.selenium.firefox.FirefoxDriver">

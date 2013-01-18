@@ -64,7 +64,7 @@ public class ClientParamsPHP {
      */
     private final Map<UUID, String> propertiesByID;
     
-    private static final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss Z");
+    private static final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z");
     
     public static enum HandicapSystem {
         NONE,
