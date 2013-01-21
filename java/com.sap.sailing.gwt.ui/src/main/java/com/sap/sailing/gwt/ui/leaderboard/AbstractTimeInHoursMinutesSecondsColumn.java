@@ -5,9 +5,9 @@ import com.sap.sailing.domain.common.SortingOrder;
 import com.sap.sailing.gwt.ui.client.NumberFormatterFactory;
 import com.sap.sailing.gwt.ui.shared.LeaderboardRowDTO;
 
-public class AbstractTimeInHoursMinutesSecondsColumn extends FormattedDoubleLegDetailColumn {
+public abstract class AbstractTimeInHoursMinutesSecondsColumn extends FormattedDoubleLegDetailColumn {
 
-    public AbstractTimeInHoursMinutesSecondsColumn(String title, String unit,
+    protected AbstractTimeInHoursMinutesSecondsColumn(String title, String unit,
             com.sap.sailing.gwt.ui.leaderboard.LegDetailColumn.LegDetailField<Double> field, int decimals, SortingOrder preferredSortingOrder,
             String headerStyle, String columnStyle) {
         super(title, unit, field, decimals, preferredSortingOrder, headerStyle, columnStyle);
