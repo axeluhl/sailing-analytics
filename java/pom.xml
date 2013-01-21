@@ -38,6 +38,7 @@
 		<module>com.sap.sailing.server</module>
 		<module>com.sap.sailing.server.gateway</module>
 		<module>com.sap.sailing.server.gateway.serialization</module>
+		<module>com.sap.sailing.server.gateway.serialization.test</module>
 		<module>com.sap.sailing.server.replication</module>
 		<module>com.sap.sailing.server.replication.test</module>
 		<module>com.sap.sailing.www</module>

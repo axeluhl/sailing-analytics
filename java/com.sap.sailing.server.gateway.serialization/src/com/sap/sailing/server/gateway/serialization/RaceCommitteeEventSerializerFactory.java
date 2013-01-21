@@ -5,18 +5,13 @@ import com.sap.sailing.domain.racecommittee.RaceCommitteeFlagEvent;
 import com.sap.sailing.domain.racecommittee.RaceCommitteeStartTimeEvent;
 
 public class RaceCommitteeEventSerializerFactory {
-	private JsonSerializer<RaceCommitteeEvent> baseEventSerializer;
-	
-	public RaceCommitteeEventSerializerFactory() {
-		this.baseEventSerializer = new RaceCommitteeEventSerializer();
-	}
 	
 	public JsonSerializer<RaceCommitteeEvent> getSerializer(RaceCommitteeEvent event) {
 		if (event instanceof RaceCommitteeFlagEvent) {
-			return new RaceCommitteeFlagEventSerializer(baseEventSerializer);
+			return new RaceCommitteeFlagEventSerializer();
 		}
 		if (event instanceof RaceCommitteeStartTimeEvent) {
-			return new RaceCommitteeStartTimeEventSerializer(baseEventSerializer);
+			return new RaceCommitteeStartTimeEventSerializer();
 		}
 		throw new UnsupportedOperationException(
 				String.format(
