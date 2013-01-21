@@ -36,21 +36,16 @@ public abstract class LegDetailColumn<FieldType extends Comparable<?>, Rendering
     }
 
     private void InitializeHeader() {
-    	//Code to add a tooltip to the title. Do NOT delete. This is saved to use it, after some refactorings are done.
-//      SafeHtmlBuilder builder = new SafeHtmlBuilder().appendHtmlConstant("<div title=\"Tooltip text.\">");
-//      builder.appendEscaped(title).appendHtmlConstant("<br>");
-    	
-    	SafeHtmlBuilder builder = new SafeHtmlBuilder().appendEscaped(title).appendHtmlConstant("<br>");
-        if (unit == null) {
-            builder.appendHtmlConstant("&nbsp;");
+        SafeHtmlBuilder titleBuilder = new SafeHtmlBuilder().appendEscaped(title).appendHtmlConstant("<br>");
+        if (unit == null || unit.isEmpty()) {
+            titleBuilder.appendHtmlConstant("&nbsp;");
         } else {
-            builder.appendEscaped(unit);
+            titleBuilder.appendEscaped(unit);
         }
-        
-        header = new SafeHtmlHeader(builder.toSafeHtml());
-	}
+        header = new SafeHtmlHeaderWithTooltip(titleBuilder.toSafeHtml(), "");
+    }
 
-	protected String getTitle() {
+    protected String getTitle() {
         return title;
     }
 
