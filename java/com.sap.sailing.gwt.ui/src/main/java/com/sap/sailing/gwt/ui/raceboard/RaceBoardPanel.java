@@ -25,6 +25,7 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
+import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
 import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.RaceSelectionProvider;
 import com.sap.sailing.gwt.ui.client.RaceTimePanel;
@@ -62,6 +63,7 @@ import com.sap.sailing.gwt.ui.shared.racemap.RaceMap;
  */
 public class RaceBoardPanel extends FormPanel implements RegattaDisplayer, RaceSelectionChangeListener {
     private final SailingServiceAsync sailingService;
+    private final MediaServiceAsync mediaService;
     private final StringMessages stringMessages;
     private final ErrorReporter errorReporter;
     private String raceBoardName;
@@ -101,11 +103,12 @@ public class RaceBoardPanel extends FormPanel implements RegattaDisplayer, RaceS
     
     private final RaceTimesInfoProvider raceTimesInfoProvider;
 
-    public RaceBoardPanel(SailingServiceAsync sailingService, UserDTO theUser, Timer timer,
+    public RaceBoardPanel(SailingServiceAsync sailingService, MediaServiceAsync mediaService, UserDTO theUser, Timer timer,
             RaceSelectionProvider theRaceSelectionProvider, String leaderboardName, String leaderboardGroupName,
             ErrorReporter errorReporter, final StringMessages stringMessages, UserAgentDetails userAgent,
             RaceBoardViewModes viewMode, RaceTimesInfoProvider raceTimesInfoProvider) {
         this.sailingService = sailingService;
+        this.mediaService = mediaService;
         this.stringMessages = stringMessages;
         this.raceSelectionProvider = theRaceSelectionProvider;
         this.raceTimesInfoProvider = raceTimesInfoProvider;
@@ -169,6 +172,20 @@ public class RaceBoardPanel extends FormPanel implements RegattaDisplayer, RaceS
         addComponentToNavigationMenu(leaderboardAndMapViewer, windChart,  true);
         addComponentToNavigationMenu(leaderboardAndMapViewer, competitorChart, true);
         addComponentToNavigationMenu(leaderboardAndMapViewer, raceMap, false);
+
+        addMediaSelectorToNavigationMenu();
+        
+    }
+
+    private void addMediaSelectorToNavigationMenu() {
+        MediaSelector mediaSelector = new MediaSelector(errorReporter);
+        raceTimesInfoProvider.addRaceTimesInfoProviderListener(mediaSelector);
+        timer.addPlayStateListener(mediaSelector);
+        timer.addTimeListener(mediaSelector);
+        mediaService.getMediaTracksForRace(selectedRaceIdentifier, mediaSelector);
+        for (Widget widget : mediaSelector.widgets()) {
+            componentsNavigationPanel.add(widget);
+        }
     }
 
     @SuppressWarnings("unused")
@@ -223,7 +240,7 @@ public class RaceBoardPanel extends FormPanel implements RegattaDisplayer, RaceS
         });
 
         componentsNavigationPanel.add(checkBox);
-        
+
         if(component.hasSettings()) {
             Button settingsButton = new Button("");
             settingsButton.addClickHandler(new ClickHandler() {

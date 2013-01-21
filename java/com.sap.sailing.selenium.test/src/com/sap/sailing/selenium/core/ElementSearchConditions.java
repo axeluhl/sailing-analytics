@@ -5,8 +5,13 @@ import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebElement;
 
+/**
+ * <p>Canned conditions which use a search context and which are generally useful within tests.</p>
+ * 
+ * @author
+ *   D049941
+ */
 public class ElementSearchConditions {
-
     /**
      * An expectation for checking that an element is present on the DOM of a page and visible. Visibility means that
      * the element is not only displayed but also has a height and width that is greater than 0.
@@ -29,7 +34,7 @@ public class ElementSearchConditions {
 
             @Override
             public String toString() {
-                return "visibility of element located by " + locator;
+                return "visibility of element located by " + locator; //$NON-NLS-1$
             }
         };
     }

@@ -8,26 +8,21 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.gwt.core.client.GWT;
-
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.dom.client.Style.Unit;
-
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
-
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
-
 import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.Window;
-
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.CheckBox;
@@ -41,24 +36,19 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
-
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.SelectionModel;
-
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
-
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
-
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.MarkedAsyncCallback;
 import com.sap.sailing.gwt.ui.client.RaceSelectionModel;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracRaceRecordDTO;
@@ -84,8 +74,6 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
 
     private final List<TracTracRaceRecordDTO> availableTracTracRaces;
     
-    private final List<RegattaDTO> availableRegattas;
-    
     private final ListDataProvider<TracTracRaceRecordDTO> raceList;
     
     private ListBox connectionsHistoryListBox;
@@ -100,7 +88,6 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
     private TextBox liveURITextBox;
     private TextBox jsonURLTextBox;
 
-    private ListBox availableRegattasListBox;
     private TextBox racesFilterTextBox;
     private CellTable<TracTracRaceRecordDTO> racesTable;
 
@@ -108,14 +95,10 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
     public TracTracEventManagementPanel(final SailingServiceAsync sailingService, ErrorReporter errorReporter,
             RegattaRefresher regattaRefresher, StringMessages stringMessages) {
         super(sailingService, regattaRefresher, errorReporter, new RaceSelectionModel(), stringMessages);
-        
         this.errorReporter = errorReporter;
-        
         this.previousConfigurations = new HashMap<String, TracTracConfigurationDTO>();
         this.availableTracTracRaces = new ArrayList<TracTracRaceRecordDTO>();
-        this.availableRegattas = new ArrayList<RegattaDTO>();
         this.raceList = new ListDataProvider<TracTracRaceRecordDTO>();
-        
         this.setWidget(createContent());
     }
     
@@ -358,11 +341,8 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         Label regattaForTrackingLabel = new Label("Regatta used for the tracked race:");
         regattaForTrackingLabel.setWordWrap(false);
         
-        this.availableRegattasListBox = new ListBox();
-        this.availableRegattasListBox.ensureDebugId("AvailableRegattas");
-        
         layoutTable.setWidget(0, 0, regattaForTrackingLabel);
-        layoutTable.setWidget(0, 1, this.availableRegattasListBox);
+        layoutTable.setWidget(0, 1, getAvailableRegattasListBox());
 
         // Track settings (wind)
         Label trackSettingsLabel = new Label(this.stringMessages.trackSettings() + ":");
@@ -616,23 +596,21 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
 
     private boolean checkBoatClassMatch(TracTracRaceRecordDTO tracTracRecord, RegattaDTO selectedRegatta) {
         Iterable<String> boatClassNames = tracTracRecord.boatClassNames;
-        
-        if(boatClassNames != null && Util.size(boatClassNames) > 0) {
+        if (boatClassNames != null && Util.size(boatClassNames) > 0) {
             String tracTracBoatClass = boatClassNames.iterator().next();
-            if(selectedRegatta == null) {
+            if (selectedRegatta == null) {
                 // in case no regatta has been selected we check if there would be a matching regatta
-                for(RegattaDTO regatta : this.availableRegattas) {
-                    if(tracTracBoatClass.equalsIgnoreCase(regatta.boatClass.name)) {
+                for (RegattaDTO regatta : getAvailableRegattas()) {
+                    if (tracTracBoatClass.equalsIgnoreCase(regatta.boatClass.name)) {
                         return false;
                     }
                 }
             } else {
-                if(!tracTracBoatClass.equalsIgnoreCase(selectedRegatta.boatClass.name)) {
+                if (!tracTracBoatClass.equalsIgnoreCase(selectedRegatta.boatClass.name)) {
                     return false;
                 }
             }
         }
-        
         return true;
     }
     
@@ -719,43 +697,6 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         this.jsonURLTextBox.setValue(config.jsonURL);
         this.liveURITextBox.setValue(config.liveDataURI);
         this.storedURITextBox.setValue(config.storedDataURI);
-    }
-
-    @Override
-    public void fillRegattas(List<RegattaDTO> regattas) {
-        this.trackedRacesListComposite.fillRegattas(regattas);
-        
-        RegattaDTO selectedRegatta = getSelectedRegatta();
-        
-        this.availableRegattas.clear();
-        this.availableRegattasListBox.clear();
-        this.availableRegattasListBox.addItem(this.stringMessages.noRegatta());
-        
-        for (RegattaDTO regatta : regattas) {
-            this.availableRegattas.add(regatta);
-            this.availableRegattasListBox.addItem(regatta.name);
-            
-            if(selectedRegatta != null && selectedRegatta.name.equals(regatta.name)) {
-                this.availableRegattasListBox.setSelectedIndex(this.availableRegattasListBox.getItemCount() - 1);
-            }
-        }
-    }
-
-    public RegattaDTO getSelectedRegatta() {
-        int selIndex = this.availableRegattasListBox.getSelectedIndex();
-        
-        // the zero index represents the 'no selection' text
-        if(selIndex > 0) {
-            String itemText = this.availableRegattasListBox.getItemText(selIndex);
-            
-            for(RegattaDTO regatta : this.availableRegattas) {
-                if(regatta.name.equals(itemText)) {
-                    return regatta;
-                }
-            }
-        }
-        
-        return null;
     }
 
     private void fillRaceListFromAvailableRacesApplyingFilter(String text) {

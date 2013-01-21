@@ -2240,6 +2240,11 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         oldPlayMode = playMode;
     }
 
+    @Override
+    public void playSpeedFactorChanged(double newPlaySpeedFactor) {
+        // nothing to do
+    }
+    
     private void showCompareCompetitorsDialog() {
         int selectedCompetitorsCount = Util.size(competitorSelectionProvider.getSelectedCompetitors());
         if (selectedCompetitorsCount < 1) {

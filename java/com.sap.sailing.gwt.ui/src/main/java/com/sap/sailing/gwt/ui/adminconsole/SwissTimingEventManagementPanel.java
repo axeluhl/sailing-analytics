@@ -35,11 +35,10 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
-import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.RaceSelectionModel;
+import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingRaceRecordDTO;
 
@@ -372,11 +371,6 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
         }
     }
 
-    @Override
-    public void fillRegattas(List<RegattaDTO> result) {
-        trackedRacesListComposite.fillRegattas(result);
-    }
-    
     private void fillRaceListFromAvailableRacesApplyingFilter(String text) {
         List<String> wordsToFilter = Arrays.asList(text.split(" "));
         raceList.getList().clear();

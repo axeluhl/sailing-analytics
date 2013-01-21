@@ -43,7 +43,7 @@ public class OSGiRestartingPortMonitor extends AbstractPortMonitor {
         
         this.info = SystemInformationImpl.getInstance();
 
-        log.info("Started and initialized OSGi monitor. State of SIGAR sysstats library: " + (info == null ? "INACTIVE" : "ACTIVE"));
+        log.info("Started and initialized OSGi monitor. State of SIGAR sysstats library: " + (info == null ? "INACTIVE" : "ACTIVE") + " java.library.path: " + System.getProperty("java.library.path"));
     }
 
     @Override
