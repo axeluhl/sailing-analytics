@@ -702,7 +702,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 raceDetails = new FutureTask<RaceDetails>(new Callable<RaceDetails>() {
                     @Override
                     public RaceDetails call() throws Exception {
-                        return calculateRaceDetails(trackedRace, competitor, trackedRace.getEndOfTracking(),
+                        TimePoint end = trackedRace.getEndOfRace();
+                        if (end == null) {
+                            end = trackedRace.getEndOfTracking();
+                        }
+                        return calculateRaceDetails(trackedRace, competitor, end,
                                 /* waitForLatestManeuverAnalysis */ true /* because this is done only once after end of tracking */, legRanksCache);
                     }
                 });
@@ -2482,7 +2486,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             TimePoint newestEvent = trackedRace.getTimePointOfNewestEvent();
             TimePoint startTime = from == null ? trackedRace.getStartOfTracking() : new MillisecondsTimePoint(from);
             TimePoint endTime = (to == null || to.after(newestEvent.asDate())) ? newestEvent : new MillisecondsTimePoint(to);
-            result = new CompetitorsRaceDataDTO(detailType, startTime.asDate(), endTime.asDate());
+            result = new CompetitorsRaceDataDTO(detailType, startTime==null?null:startTime.asDate(), endTime==null?null:endTime.asDate());
 
             for (CompetitorDTO competitorDTO : competitors) {
                 Competitor competitor = getCompetitorById(trackedRace.getRace().getCompetitors(), competitorDTO.id);

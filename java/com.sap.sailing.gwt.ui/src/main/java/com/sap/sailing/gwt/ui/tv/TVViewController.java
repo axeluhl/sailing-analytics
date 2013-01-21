@@ -15,6 +15,7 @@ import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
+import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
 import com.sap.sailing.gwt.ui.client.RaceSelectionModel;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProviderListener;
@@ -35,6 +36,7 @@ import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 
 public class TVViewController implements RaceTimesInfoProviderListener {
     private final SailingServiceAsync sailingService;
+    private final MediaServiceAsync mediaService;
     private final StringMessages stringMessages;
     private final ErrorReporter errorReporter;
     private final UserAgentDetails userAgent;
@@ -58,10 +60,11 @@ public class TVViewController implements RaceTimesInfoProviderListener {
     /**
      * @param logoAndTitlePanel allowed to be <code>null</code>
      */
-    public TVViewController(SailingServiceAsync sailingService, StringMessages stringMessages, ErrorReporter errorReporter,
+    public TVViewController(SailingServiceAsync sailingService, MediaServiceAsync mediaService, StringMessages stringMessages, ErrorReporter errorReporter,
             String leaderboardName, UserAgentDetails userAgent, LogoAndTitlePanel logoAndTitlePanel,
             DockLayoutPanel dockPanel, long delayToLiveInMillis, boolean showRaceDetails) {
         this.sailingService = sailingService;
+        this.mediaService = mediaService;
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
         this.leaderboardName = leaderboardName;
@@ -119,7 +122,7 @@ public class TVViewController implements RaceTimesInfoProviderListener {
         RaceSelectionModel raceSelectionModel = new RaceSelectionModel();
         List<RegattaAndRaceIdentifier> singletonList = Collections.singletonList(raceToShow);
         raceSelectionModel.setSelection(singletonList);
-        RaceBoardPanel raceBoardPanel = new RaceBoardPanel(sailingService, null, timer, raceSelectionModel, leaderboardName, null,
+        RaceBoardPanel raceBoardPanel = new RaceBoardPanel(sailingService, mediaService, null, timer, raceSelectionModel, leaderboardName, null,
                 errorReporter, stringMessages, userAgent, RaceBoardViewModes.ONESCREEN, raceTimesInfoProvider);
         return raceBoardPanel;
     }

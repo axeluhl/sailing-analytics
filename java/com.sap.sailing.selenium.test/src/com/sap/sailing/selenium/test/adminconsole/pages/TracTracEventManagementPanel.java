@@ -4,7 +4,6 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.openqa.selenium.By;
-import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
@@ -14,18 +13,21 @@ import org.openqa.selenium.WebElement;
 import com.sap.sailing.selenium.core.FindBy;
 import com.sap.sailing.selenium.core.BySeleniumId;
 
-import com.sap.sailing.selenium.test.PageObject;
+import com.sap.sailing.selenium.test.PageArea;
 
-public class TracTracEventManagementPanel extends PageObject {
-    //@FindBy(how = How.XPATH, using = ".//*[@selenium-id='JSONURL']")
+/**
+ * <p>The page object representing the TracTrac Events tab.</p>
+ * 
+ * @author
+ *   D049941
+ */
+public class TracTracEventManagementPanel extends PageArea {
     @FindBy(how = BySeleniumId.class, using = "JSONURL")
     private WebElement jsonURLField;
     
-    //@FindBy(how = How.XPATH, using = ".//*[@selenium-id='ListRaces']")
     @FindBy(how = BySeleniumId.class, using = "ListRaces")
     private WebElement listRacesButton;
     
-    //@FindBy(how = How.XPATH, using = ".//*[@selenium-id='FilterRaces']")
     @FindBy(how = BySeleniumId.class, using = "FilterRaces")
     private WebElement filterTrackableRacesField;
     
@@ -33,10 +35,25 @@ public class TracTracEventManagementPanel extends PageObject {
 //    private WebElement correctWindCheckbox;
 //    private WebElement simulateWithNowCheckbox;
     
-    public TracTracEventManagementPanel(WebDriver driver, SearchContext context) {
-        super(driver, context);
+    /**
+     * <p></p>
+     * 
+     * @param driver
+     *   
+     * @param element
+     *   
+     */
+    protected TracTracEventManagementPanel(WebDriver driver, WebElement element) {
+        super(driver, element);
     }
     
+    /**
+     * <p>Lists all available trackable races for the given URL. The list of the races can be obtained via
+     *   {@link #getTrackableRaces()}.</p>
+     * 
+     * @param url
+     *   The URL for which the races are to list.
+     */
     public void listRaces(String url) {
         this.jsonURLField.clear();
         this.jsonURLField.sendKeys(url);
@@ -45,9 +62,17 @@ public class TracTracEventManagementPanel extends PageObject {
         waitForAjaxRequests();
     }
     
+    /**
+     * <p>Returns the list of all available trackable races. This list will be empty if no race is available or if no
+     *   race was specified before.</p>
+     * 
+     * @return
+     *   The list of all available trackable races.
+     */
+    // QUESTION: Should we return something different instead of WebElements since it is not recommended to do so?
     public List<WebElement> getTrackableRaces() {
-        WebElement availableRacesTabel = findElementBySeleniumId(this.context, "RacesTable");
-        List<WebElement> elements = availableRacesTabel.findElements(By.xpath("./tbody/tr"));
+        WebElement availableRacesTabel = findElementBySeleniumId(this.context, "RacesTable"); //$NON-NLS-1$
+        List<WebElement> elements = availableRacesTabel.findElements(By.xpath("./tbody/tr")); //$NON-NLS-1$
         Iterator<WebElement> iterator = elements.iterator();
         
         while(iterator.hasNext()) {
@@ -72,6 +97,13 @@ public class TracTracEventManagementPanel extends PageObject {
 //        
 //    }
     
+    /**
+     * <p>Sets the filter for the trackable races. After the filter is set you can obtain the new resulting list via
+     *   {@link #getTrackableRaces}</p>
+     * 
+     * @param filter
+     *   The filter to apply to the trackable races.
+     */
     public void setFilterForTrackableRaces(String filter) {
         this.filterTrackableRacesField.clear();
         this.filterTrackableRacesField.sendKeys(filter);

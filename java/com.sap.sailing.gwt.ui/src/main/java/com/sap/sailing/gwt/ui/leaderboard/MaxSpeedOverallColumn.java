@@ -22,11 +22,7 @@ public class MaxSpeedOverallColumn extends FormattedDoubleLegDetailColumn {
     }
 
     public MaxSpeedOverallColumn(StringMessages stringMessages, String headerStyle, String columnStyle) {
-        super(stringMessages.maximumSpeedOverGroundInKnots(), "[" + stringMessages.currentSpeedOverGroundInKnotsUnit() + "]",
-                new MaxSpeedOverallField(),
-                DetailType.MAXIMUM_SPEED_OVER_GROUND_IN_KNOTS.getPrecision(),
-                DetailType.MAXIMUM_SPEED_OVER_GROUND_IN_KNOTS.getDefaultSortingOrder(),
-                headerStyle, columnStyle);
+        super(DetailType.MAXIMUM_SPEED_OVER_GROUND_IN_KNOTS, new MaxSpeedOverallField(), headerStyle, columnStyle);
     }
 
     /**

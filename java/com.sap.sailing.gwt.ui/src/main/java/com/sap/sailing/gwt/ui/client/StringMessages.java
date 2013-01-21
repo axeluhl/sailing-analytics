@@ -413,6 +413,15 @@ public interface StringMessages extends Messages {
     String actionConfigureUrl();
     String configureLeaderboardUrlDescription();
     String embedded();
+    String mediaPanel();
+    String url();
+    String mimeType();
+    String title();
+    String reallyRemoveMediaTrack(String mediaTrackTitle);
+    String duration();
+    String addMediaTrack();
+    String addYoutubeTrack();
+    String youtubeId();
     String additionalUrlSettings();
     String restrictToSingleSelectedRace();
     String expandSelectedRace();

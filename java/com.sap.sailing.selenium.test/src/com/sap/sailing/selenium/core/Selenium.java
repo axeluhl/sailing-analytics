@@ -34,67 +34,20 @@ import com.sap.sailing.selenium.core.TestEnvironmentConfiguration.DriverDefiniti
 import com.sap.sailing.selenium.core.impl.TestEnvironmentImpl;
 
 /**
+ * <p>The Selenium runner is a JUnit runner that runs a test case, using the WebDriver API of Selenium, as a suite of
+ *   tests. The runner takes a configuration file and runs the test for each defined browser.</p>
+ * 
  * @author
  *   D049941
  */
 public class Selenium extends ParentRunner<SeleniumJUnit4ClassRunner> {
-    private final List<SeleniumJUnit4ClassRunner> children;
-
-    public Selenium(Class<?> klass) throws InitializationError {
-        super(klass);
-
-        this.children = new LinkedList<>();
-
-        initializeRunners();
-    }
-
-    @Override
-    protected List<SeleniumJUnit4ClassRunner> getChildren() {
-        return this.children;
-    }
-
-    @Override
-    protected Description describeChild(SeleniumJUnit4ClassRunner child) {
-        return child.getDescription();
-    }
-
-    @Override
-    protected void runChild(SeleniumJUnit4ClassRunner child, RunNotifier notifier) {
-        child.run(notifier);
-    }
-
-    @Override
-    protected void collectInitializationErrors(java.util.List<java.lang.Throwable> errors) {
-        super.collectInitializationErrors(errors);
-
-        // QUESTION: Do we need addional checks here?
-    }
-
-    private void initializeRunners() throws InitializationError {
-        try {
-            TestEnvironmentConfiguration configuration = TestEnvironmentConfiguration.getInstance();
-            String contextRoot = configuration.getContextRoot();
-            String screenshotsFolder = configuration.getScreenshotsFolder();
-            Map<String, String> systemProperties = configuration.getSystemProperties();
-
-            for (Entry<String, String> property : systemProperties.entrySet()) {
-                System.setProperty(property.getKey(), property.getValue());
-            }
-
-            TestClass test = getTestClass();
-            URL screenshotsStorage = (configuration.screenshotsEnabled() ? new URL(screenshotsFolder) : null);
-            
-            for (DriverDefinition defenition : configuration.getDriverDefinitions()) {
-                SeleniumJUnit4ClassRunner child = new SeleniumJUnit4ClassRunner(test.getJavaClass(), contextRoot,
-                        screenshotsStorage, defenition);
-                
-                this.children.add(child);
-            }
-        } catch (Exception exception) {
-            throw new InitializationError(exception);
-        }
-    }
-
+    /**
+     * <p>A test runner that will run the tests for a specific browser instance using a Selenium web driver. The web
+     *   driver is provided to the tests by injecting it to annotated fields.</p>
+     * 
+     * @author
+     *   D049941
+     */
     protected class SeleniumJUnit4ClassRunner extends BlockJUnit4ClassRunner {
         private String root;
         private URL screenshots;
@@ -102,6 +55,21 @@ public class Selenium extends ParentRunner<SeleniumJUnit4ClassRunner> {
 
         private TestEnvironmentImpl environment;
 
+        /**
+         * <p>Creates a new runner to run the test cases, encapsulated within the given class, for a specific browser
+         *   instance using a Selenium web driver.</p>
+         * 
+         * @param klass
+         *   The class containing the tests.
+         * @param root
+         *   The context root (base URL) against the tests should be executed.
+         * @param screenshots
+         *   The folder where screenshots should be stored.
+         * @param definition
+         *   Definition of the web driver to use.
+         * @throws InitializationError
+         *   
+         */
         public SeleniumJUnit4ClassRunner(Class<?> klass, String root, URL screenshots, DriverDefinition definition)
                 throws InitializationError {
             super(klass);
@@ -112,12 +80,13 @@ public class Selenium extends ParentRunner<SeleniumJUnit4ClassRunner> {
         }
 
         /**
-         * Create the test object and inject Selenium server or web driver into fields that were annotated with
-         * {@code annotationType}.
+         * <p>Creates the test object and injects the test environment to use into fields that were annotated with
+         *   {@link Managed}.</p>
          * 
-         * @return The test object.
+         * @return
+         *   The test object.
          * @throws Exception
-         *             If there was an error creating the test object.
+         *   If there was an error creating the test object.
          */
         @Override
         protected Object createTest() throws Exception {
@@ -234,6 +203,75 @@ public class Selenium extends ParentRunner<SeleniumJUnit4ClassRunner> {
                 IllegalAccessException {
             field.setAccessible(true);
             field.set(instance, value);
+        }
+    }
+    
+    private final List<SeleniumJUnit4ClassRunner> children;
+
+    /**
+     * <p>Creates a runner to run the test cases encapsulated within the given class.</p>
+     * 
+     * @param klass
+     *   The class that encapsulates the test cases.
+     * @throws InitializationError
+     *   If there was an error during the initialization of the test runner.
+     */
+    public Selenium(Class<?> klass) throws InitializationError {
+        super(klass);
+
+        this.children = new LinkedList<>();
+
+        initializeRunners();
+    }
+
+    @Override
+    protected List<SeleniumJUnit4ClassRunner> getChildren() {
+        return this.children;
+    }
+
+    @Override
+    protected Description describeChild(SeleniumJUnit4ClassRunner child) {
+        return child.getDescription();
+    }
+
+    @Override
+    protected void runChild(SeleniumJUnit4ClassRunner child, RunNotifier notifier) {
+        child.run(notifier);
+    }
+
+    @Override
+    protected void collectInitializationErrors(java.util.List<java.lang.Throwable> errors) {
+        super.collectInitializationErrors(errors);
+
+        // QUESTION: Do we need addional checks here?
+    }
+
+    /**
+     * <p>Builds the test runners for each browser for test cases. A test runner is created for each web driver
+     *   specified in the used configuration.</p>
+     */
+    private void initializeRunners() throws InitializationError {
+        try {
+            TestEnvironmentConfiguration configuration = TestEnvironmentConfiguration.getInstance();
+            String contextRoot = configuration.getContextRoot();
+            String screenshotsFolder = configuration.getScreenshotsFolder();
+            Map<String, String> systemProperties = configuration.getSystemProperties();
+
+            for (Entry<String, String> property : systemProperties.entrySet()) {
+                System.setProperty(property.getKey(), property.getValue());
+            }
+
+            TestClass test = getTestClass();
+            URL screenshotsStorage = (configuration.screenshotsEnabled() ? new URL(screenshotsFolder) : null);
+            
+            for (DriverDefinition defenition : configuration.getDriverDefinitions()) {
+                SeleniumJUnit4ClassRunner child = new SeleniumJUnit4ClassRunner(test.getJavaClass(), contextRoot,
+                        screenshotsStorage, defenition);
+                
+                this.children.add(child);
+            }
+        } catch (Exception exception) {
+            throw new InitializationError(exception);
         }
     }
 }
