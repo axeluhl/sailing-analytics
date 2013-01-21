@@ -5,8 +5,10 @@ import com.google.gwt.i18n.client.NumberFormat;
 import com.sap.sailing.domain.common.DetailType;
 
 public class DetailTypeFormatter {
+    
+    private DetailTypeFormatter() { }
 	
-	private static final StringMessages stringMessages = GWT.create(StringMessages.class);
+    private static final StringMessages stringMessages = GWT.create(StringMessages.class);
 	
     public static String format(DetailType detailType) {
         switch (detailType) {
@@ -168,6 +170,10 @@ public class DetailTypeFormatter {
             throw new UnsupportedOperationException("Theres currently no support for the enum value '" + detailType
                     + "' in this method.");
         }
+    }
+    
+    public static String getTooltip(DetailType detailType) {
+        return "";
     }
 
     public static NumberFormat getNumberFormat(DetailType detailType) {

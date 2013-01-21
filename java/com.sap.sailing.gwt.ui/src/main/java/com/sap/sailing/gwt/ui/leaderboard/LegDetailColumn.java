@@ -11,6 +11,9 @@ import com.sap.sailing.gwt.ui.shared.LeaderboardRowDTO;
 
 public abstract class LegDetailColumn<FieldType extends Comparable<?>, RenderingType> extends
         SortableColumn<LeaderboardRowDTO, RenderingType> {
+    
+    private static final String HtmlConstantToInlineHeadersWithAndWithoutUnit = "&nbsp;";
+    
     private final String title;
     private final LegDetailField<FieldType> field;
     private final String headerStyle;
@@ -38,7 +41,7 @@ public abstract class LegDetailColumn<FieldType extends Comparable<?>, Rendering
     private void InitializeHeader() {
         SafeHtmlBuilder titleBuilder = new SafeHtmlBuilder().appendEscaped(title).appendHtmlConstant("<br>");
         if (unit == null || unit.isEmpty()) {
-            titleBuilder.appendHtmlConstant("&nbsp;");
+            titleBuilder.appendHtmlConstant(HtmlConstantToInlineHeadersWithAndWithoutUnit);
         } else {
             titleBuilder.appendEscaped(unit);
         }
