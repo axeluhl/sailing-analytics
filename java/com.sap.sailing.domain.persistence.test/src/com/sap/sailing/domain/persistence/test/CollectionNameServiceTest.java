@@ -17,15 +17,15 @@ public class CollectionNameServiceTest {
 	
 	@Test
 	public void shouldWork() throws AlreadyRegisteredException {
-		service.registerExclusively(CollectionNameServiceTest.class, "a");
-		service.registerExclusively(CollectionNameServiceTest.class, "b");
-		service.registerExclusively(CollectionNameServiceTest.class, "B");
-		service.registerExclusively(CollectionNameServiceTest.class, "B");
+		service.registerExclusively(TestInterface.class, "a");
+		service.registerExclusively(TestInterface.class, "b");
+		service.registerExclusively(TestInterface.class, "B");
+		service.registerExclusively(TestInterface.class, "B");
 	}
 	
 	@Test(expected=AlreadyRegisteredException.class)
 	public void shouldNotWork() throws AlreadyRegisteredException {
-		service.registerExclusively(CollectionNameServiceTest.class, "b");
-		service.registerExclusively(Object.class, "b");
+		service.registerExclusively(TestInterface.class, "b");
+		service.registerExclusively(com.sap.sailing.domain.persistence.test.needadifferentpackage.TestInterface.class, "b");
 	}
 }

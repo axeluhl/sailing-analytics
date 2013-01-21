@@ -9,21 +9,25 @@ import com.sap.sailing.domain.persistence.AlreadyRegisteredException;
 import com.sap.sailing.domain.persistence.CollectionNameService;
 
 public class CollectionNameServiceImpl implements CollectionNameService {
-	private Map<String, Class<?>> registered = new HashMap<String, Class<?>>();
+	/**
+	 * collection name -> fully qualified class name
+	 */
+	private Map<String, String> registered = new HashMap<String, String>();
 	
 	private static final Logger logger = Logger.getLogger(CollectionNameService.class.getName());
 	
 	@Override
-	public void registerExclusively(Class<?> registerForThisClass, String collectionName)
+	public void registerExclusively(Class<?> registerForInterface, String collectionName)
 			throws AlreadyRegisteredException {
-		if (registered.keySet().contains(collectionName) && registered.get(collectionName) != registerForThisClass) {
+		String fullyQualified = registerForInterface.getName();
+		if (registered.keySet().contains(collectionName) && registered.get(collectionName) != fullyQualified) {
 			logger.log(Level.SEVERE, "Same collection name (" + collectionName + " is required in two different places - this may lead to problems: \n" 
-					+ " - already registered for: " + registered.get(collectionName).getName() + "\n"
-					+ " - tried to register for: " + registerForThisClass.getName());
+					+ " - already registered for: " + registered.get(collectionName) + "\n"
+					+ " - tried to register for: " + fullyQualified);
 			throw new AlreadyRegisteredException();
 		}
 		logger.log(Level.INFO, "Registered collection name: " + collectionName);
-		registered.put(collectionName, registerForThisClass);
+		registered.put(collectionName, fullyQualified);
 	}
 
 }
