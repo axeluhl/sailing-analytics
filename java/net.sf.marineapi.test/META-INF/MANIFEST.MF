@@ -4,5 +4,5 @@ Bundle-Name: Test
 Bundle-SymbolicName: net.sf.marineapi.test
 Bundle-Version: 1.0.0.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Require-Bundle: net.sf.marineapi;bundle-version="0.5.0",
- org.junit4;bundle-version="4.8.2"
+Fragment-Host: net.sf.marineapi
+Require-Bundle: org.junit4;bundle-version="4.8.2"
