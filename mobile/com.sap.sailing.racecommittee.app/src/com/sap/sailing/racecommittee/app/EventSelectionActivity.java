@@ -9,20 +9,18 @@ import java.net.URL;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
-
-import com.sap.sailing.domain.base.Event;
-import com.sap.sailing.server.gateway.deserialization.CourseAreaJsonDeserializer;
-import com.sap.sailing.server.gateway.deserialization.EventJsonDeserializer;
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
-import com.sap.sailing.server.gateway.deserialization.VenueJsonDeserializer;
 
 import android.app.Activity;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.Menu;
 import android.widget.TextView;
+
+import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.server.gateway.deserialization.CourseAreaJsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.EventJsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.VenueJsonDeserializer;
 
 public class EventSelectionActivity extends Activity {
 
@@ -48,6 +46,11 @@ public class EventSelectionActivity extends Activity {
 		try {
 			JSONArray o = (JSONArray) p.parse(result);
 			for (Object e : o) {
+				
+				/*JSONObject json = (JSONObject) e;
+				RaceCommitteeEventDeserializerFactory factory = new RaceCommitteeEventDeserializerFactory();
+				RaceCommitteeEvent event = factory.getDeserializer(json).deserialize(json);*/
+				
 				Event event = deserializer.deserialize((JSONObject)e);
 				tv.setText(event.getName());
 			}

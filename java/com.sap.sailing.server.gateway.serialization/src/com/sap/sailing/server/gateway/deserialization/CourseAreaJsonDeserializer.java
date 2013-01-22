@@ -15,9 +15,9 @@ public class CourseAreaJsonDeserializer implements JsonDeserializer<CourseArea> 
 		
 		CourseArea courseArea = new CourseAreaImpl(name);
 		
+		/// TODO: link races to courseArea...
 		/*JSONArray racesArray = Helpers.getNestedArraySafe(object, CourseAreaJsonSerializer.FIELD_RACES);
 		for (Object element : racesArray) {
-			/// TODO: add races to courseArea...
 			System.out.println(element.toString());
 		}*/
 		

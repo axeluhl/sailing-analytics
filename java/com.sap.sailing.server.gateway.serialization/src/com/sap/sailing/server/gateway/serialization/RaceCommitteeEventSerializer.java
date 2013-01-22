@@ -4,6 +4,7 @@ import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.racecommittee.RaceCommitteeEvent;
 
+/// TODO serialize involved boats
 public abstract class RaceCommitteeEventSerializer implements JsonSerializer<RaceCommitteeEvent> {
 	public static final String FIELD_CLASS = "@class";
 	public static final String FIELD_ID = "id";
