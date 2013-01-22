@@ -14,7 +14,7 @@ import com.sap.sailing.selenium.core.BySeleniumId;
 import com.sap.sailing.selenium.core.ElementSearchConditions;
 import com.sap.sailing.selenium.core.FindBy;
 
-import com.sap.sailing.selenium.test.AbstractEntryPoint;
+import com.sap.sailing.selenium.test.HostPage;
 
 /**
  * <p>The page object representing the administration console. The console consists of multiple tabs with its content
@@ -23,7 +23,7 @@ import com.sap.sailing.selenium.test.AbstractEntryPoint;
  * @author
  *   D049941
  */
-public class AdminConsolePage extends AbstractEntryPoint {
+public class AdminConsolePage extends HostPage {
     private static final String PAGE_TITLE = "SAP Sailing Analytics Administration Console"; //$NON-NLS-1$
     
     private static final MessageFormat TAB_EXPRESSION = new MessageFormat(

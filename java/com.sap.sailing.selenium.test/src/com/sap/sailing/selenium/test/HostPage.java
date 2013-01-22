@@ -9,7 +9,7 @@ import org.openqa.selenium.WebDriver;
  * @author
  *   D049941
  */
-public class AbstractEntryPoint extends PageObject {
+public class HostPage extends PageObject {
     /**
      * <p>Creates a new page object with the given web driver. In GWT an entry point is connected to a HTML page in
      *   which the code for the application is executed, whereby the page is represented by the web driver.</p>
@@ -17,7 +17,7 @@ public class AbstractEntryPoint extends PageObject {
      * @param driver
      *   The web driver to use.
      */
-    public AbstractEntryPoint(WebDriver driver) {
+    public HostPage(WebDriver driver) {
         super(driver);
     }
     

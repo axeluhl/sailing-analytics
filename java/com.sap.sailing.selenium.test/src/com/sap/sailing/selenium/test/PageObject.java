@@ -59,22 +59,22 @@ public class PageObject {
     
     /**
      * <p>Creates a new page object with the given web driver. This constructor is equivalent to the two argument
-     *   constructor whereby the web driver is also used as the search context for the page object.</p>
+     *   constructor whereby the web driver is also used as the context for the page object.</p>
      * 
      * @param driver
-     *   The web driver which also acts as the search context to use.
+     *   The web driver which also acts as the context to use.
      */
     public PageObject(WebDriver driver) {
         this(driver, driver);
     }
     
     /**
-     * <p>Creates a new page object with the given web driver and search context.</p>
+     * <p>Creates a new page object with the given web driver and context.</p>
      * 
      * @param driver
      *   The web driver to use.
      * @param context
-     *   The search context to use.
+     *   The context to use.
      */
     public PageObject(WebDriver driver, SearchContext context) {
         this.driver = driver;
@@ -86,14 +86,14 @@ public class PageObject {
     
     /**
      * <p>Verifies the page object. This method can be overwritten to check that the browser is on the correct page or
-     *   that the provided search context represents the right element. The default implementation does nothing.</p>
+     *   that the provided context represents the right element. The default implementation does nothing.</p>
      */
     protected void verify() {
     }
     
     /**
      * <p>Initialize the page object. The default implementation use a factory to lazily initialize the elements
-     *   (annotated fields) of the page object using the timeout duration returned by {@link #initElements}. To get a
+     *   (annotated fields) of the page object using the timeout duration returned by {@link #getTimeOut()}. To get a
      *   field lazily initialized you have to annotate the field either with {@link FindBy} or with {@link FindBys}.
      *   If the element never changes (that is, that the same instance in the DOM can always be used) it is also
      *   possible to use a cache for the lookup by using the annotation {@code CacheLookup} in addition.</p>
