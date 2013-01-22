@@ -20,10 +20,6 @@ public class KingOfTheReachingColumn extends AbstractTimeInHoursMinutesSecondsCo
     }
 
     public KingOfTheReachingColumn(StringMessages stringMessages, String headerStyle, String columnStyle) {
-        super(stringMessages.totalTimeSailedReachingInSeconds(), "[" + stringMessages.hhmmssUnit() + "]",
-                new KingOfTheReachingField(),
-                DetailType.TOTAL_TIME_SAILED_REACHING_IN_SECONDS.getPrecision(),
-                DetailType.TOTAL_TIME_SAILED_REACHING_IN_SECONDS.getDefaultSortingOrder(),
-                headerStyle, columnStyle);
+        super(DetailType.TOTAL_TIME_SAILED_REACHING_IN_SECONDS, new KingOfTheReachingField(), headerStyle, columnStyle);
     }
 }

@@ -16,7 +16,7 @@ import com.sap.sailing.selenium.core.ScreenShotFilenameGenerator;
  *   D049941
  */
 public class ScreenShotFilenameGeneratorImpl implements ScreenShotFilenameGenerator {
-    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyyMMddhhmmssSSS"); //$NON-NLS-1$
+    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyyMMddHHmmssSSS"); //$NON-NLS-1$
         
     private final File directory;
 

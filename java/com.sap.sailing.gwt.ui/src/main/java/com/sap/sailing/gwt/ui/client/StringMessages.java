@@ -67,9 +67,7 @@ public interface StringMessages extends Messages {
     String expand();
     String leg();
     String distanceInMeters();
-    String distanceInMetersUnit();
     String averageSpeedInKnots();
-    String averageSpeedInKnotsUnit();
     String rankGain();
     String sapSailingAnalytics();
     String leaderboard();
@@ -78,16 +76,11 @@ public interface StringMessages extends Messages {
     String settings();
     String selectAtLeastOneLegDetail();
     String currentSpeedOverGroundInKnots();
-    String currentSpeedOverGroundInKnotsUnit();
     String estimatedTimeToNextWaypointInSeconds();
-    String estimatedTimeToNextWaypointInSecondsUnit();
     String gapToLeaderInSeconds();
-    String gapToLeaderInSecondsUnit();
     String velocityMadeGoodInKnots();
-    String velocityMadeGoodInKnotsUnit();
     String windwardDistanceToGoInMeters();
     String windwardDistanceToLeaderInMeters();
-    String windwardDistanceToGoInMetersUnit();
     String name();
     String leaveEmptyForDefault();
     String trackNewEvent();
@@ -413,6 +406,15 @@ public interface StringMessages extends Messages {
     String actionConfigureUrl();
     String configureLeaderboardUrlDescription();
     String embedded();
+    String mediaPanel();
+    String url();
+    String mimeType();
+    String title();
+    String reallyRemoveMediaTrack(String mediaTrackTitle);
+    String duration();
+    String addMediaTrack();
+    String addYoutubeTrack();
+    String youtubeId();
     String additionalUrlSettings();
     String restrictToSingleSelectedRace();
     String expandSelectedRace();
@@ -449,4 +451,5 @@ public interface StringMessages extends Messages {
     String sideToWhichMarkAtLegStartWasRounded();
     String raceIsLive(String raceName);
     String racesAreLive(String raceNames);
+    String knotsUnit();
 }

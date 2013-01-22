@@ -44,13 +44,15 @@
 	        <configuration>
 		   <extraJvmArgs>-Dgwt.persistentunitcache=false</extraJvmArgs>
 	          <modules>
-		        <module>com.sap.sailing.gwt.ui.RaceBoard</module>
-		        <module>com.sap.sailing.gwt.ui.Spectator</module>
-		        <module>com.sap.sailing.gwt.ui.LeaderboardEditing</module>
 		        <module>com.sap.sailing.gwt.ui.AdminConsole</module>
 		        <module>com.sap.sailing.gwt.ui.Leaderboard</module>
-		        <module>com.sap.sailing.gwt.ui.UserManagement</module>
+		        <module>com.sap.sailing.gwt.ui.LeaderboardEditing</module>
+		        <module>com.sap.sailing.gwt.ui.RaceBoard</module>
+		        <module>com.sap.sailing.gwt.ui.Spectator</module>
 		        <module>com.sap.sailing.gwt.ui.TvView</module>
+		        <module>com.sap.sailing.gwt.ui.UserManagement</module>
+		        <module>com.sap.sailing.gwt.ui.VideoPopup</module>
+		        <module>com.sap.sailing.gwt.ui.YoutubePopup</module>
 		      </modules>
 		      <gen>${basedir}/.generated</gen>
 		      <localWorkers>3</localWorkers>

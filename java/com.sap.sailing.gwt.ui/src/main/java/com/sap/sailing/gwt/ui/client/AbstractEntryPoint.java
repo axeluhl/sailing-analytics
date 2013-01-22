@@ -44,6 +44,11 @@ public abstract class AbstractEntryPoint implements EntryPoint, ErrorReporter, W
     protected final SailingServiceAsync sailingService = GWT.create(SailingService.class);
 
     /**
+     * Create a remote service proxy to talk to the server-side media service.
+     */
+    protected final MediaServiceAsync mediaService = GWT.create(MediaService.class);
+
+    /**
      * Create a remote service proxy to talk to the server-side user management service.
      */
     protected final UserManagementServiceAsync userManagementService = GWT.create(UserManagementService.class);
@@ -79,10 +84,12 @@ public abstract class AbstractEntryPoint implements EntryPoint, ErrorReporter, W
         userAgent = new UserAgentDetails(Window.Navigator.getUserAgent());
         
         ServiceDefTarget sailingServiceDef = (ServiceDefTarget) sailingService;
+        ServiceDefTarget mediaServiceDef = (ServiceDefTarget) mediaService;
         ServiceDefTarget userManagementServiceDef = (ServiceDefTarget) userManagementService;
         String moduleBaseURL = GWT.getModuleBaseURL();
         String baseURL = moduleBaseURL.substring(0, moduleBaseURL.lastIndexOf('/', moduleBaseURL.length()-2)+1);
         sailingServiceDef.setServiceEntryPoint(baseURL + "sailing");
+        mediaServiceDef.setServiceEntryPoint(baseURL + "media");
         userManagementServiceDef.setServiceEntryPoint(baseURL + "usermanagement");
     }
     

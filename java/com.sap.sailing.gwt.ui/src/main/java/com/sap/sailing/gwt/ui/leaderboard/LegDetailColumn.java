@@ -4,13 +4,17 @@ import com.google.gwt.cell.client.Cell;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.Header;
 import com.google.gwt.user.cellview.client.SafeHtmlHeader;
+import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.InvertibleComparator;
-import com.sap.sailing.domain.common.SortingOrder;
 import com.sap.sailing.domain.common.impl.InvertibleComparatorAdapter;
+import com.sap.sailing.gwt.ui.client.DetailTypeFormatter;
 import com.sap.sailing.gwt.ui.shared.LeaderboardRowDTO;
 
 public abstract class LegDetailColumn<FieldType extends Comparable<?>, RenderingType> extends
         SortableColumn<LeaderboardRowDTO, RenderingType> {
+    
+    private static final String HtmlConstantToInlineHeadersWithAndWithoutUnit = "&nbsp;";
+    
     private final String title;
     private final LegDetailField<FieldType> field;
     private final String headerStyle;
@@ -23,12 +27,11 @@ public abstract class LegDetailColumn<FieldType extends Comparable<?>, Rendering
         T get(LeaderboardRowDTO row);
     }
 
-    protected LegDetailColumn(String title, String unit, LegDetailField<FieldType> field, Cell<RenderingType> cell,
-            SortingOrder preferredSortingOrder, String headerStyle, String columnStyle) {
-        super(cell, preferredSortingOrder);
+    protected LegDetailColumn(DetailType detailType, LegDetailField<FieldType> field, Cell<RenderingType> cell, String headerStyle, String columnStyle) {
+        super(cell, detailType.getDefaultSortingOrder());
         setHorizontalAlignment(ALIGN_CENTER);
-        this.title = title;
-        this.unit = unit;
+        this.title = DetailTypeFormatter.format(detailType);
+        this.unit = DetailTypeFormatter.getUnit(detailType).isEmpty() ? "" : "[" + DetailTypeFormatter.getUnit(detailType) + "]";
         this.field = field;
         this.headerStyle = headerStyle;
         this.columnStyle = columnStyle;
@@ -36,21 +39,16 @@ public abstract class LegDetailColumn<FieldType extends Comparable<?>, Rendering
     }
 
     private void InitializeHeader() {
-    	//Code to add a tooltip to the title. Do NOT delete. This is saved to use it, after some refactorings are done.
-//      SafeHtmlBuilder builder = new SafeHtmlBuilder().appendHtmlConstant("<div title=\"Tooltip text.\">");
-//      builder.appendEscaped(title).appendHtmlConstant("<br>");
-    	
-    	SafeHtmlBuilder builder = new SafeHtmlBuilder().appendEscaped(title).appendHtmlConstant("<br>");
-        if (unit == null) {
-            builder.appendHtmlConstant("&nbsp;");
+        SafeHtmlBuilder titleBuilder = new SafeHtmlBuilder().appendEscaped(title).appendHtmlConstant("<br>");
+        if (unit == null || unit.isEmpty()) {
+            titleBuilder.appendHtmlConstant(HtmlConstantToInlineHeadersWithAndWithoutUnit);
         } else {
-            builder.appendEscaped(unit);
+            titleBuilder.appendEscaped(unit);
         }
-        
-        header = new SafeHtmlHeader(builder.toSafeHtml());
-	}
+        header = new SafeHtmlHeaderWithTooltip(titleBuilder.toSafeHtml(), "");
+    }
 
-	protected String getTitle() {
+    protected String getTitle() {
         return title;
     }
 

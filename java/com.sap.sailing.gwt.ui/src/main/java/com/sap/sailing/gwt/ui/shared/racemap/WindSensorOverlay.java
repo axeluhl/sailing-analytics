@@ -73,7 +73,7 @@ public class WindSensorOverlay extends CanvasOverlay {
                 getPane().setWidgetPosition(getCanvas(), sensorPositionInPx.getX() - canvasWidth / 2, sensorPositionInPx.getY() - canvasHeight / 2);
                 String title = stringMessages.wind() + " ("+ WindSourceTypeFormatter.format(windSource, stringMessages) + "): "; 
                 title += Math.round(windDTO.dampenedTrueWindFromDeg) + " " + stringMessages.degreesShort()+ ",  ";
-                title += numberFormat.format(windDTO.dampenedTrueWindSpeedInKnots) + " " + stringMessages.averageSpeedInKnotsUnit();
+                title += numberFormat.format(windDTO.dampenedTrueWindSpeedInKnots) + " " + stringMessages.knotsUnit();
                 
                 getCanvas().setTitle(title);
                 hasValidWind = true;
