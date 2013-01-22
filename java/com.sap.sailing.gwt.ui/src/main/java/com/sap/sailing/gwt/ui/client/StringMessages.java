@@ -452,4 +452,9 @@ public interface StringMessages extends Messages {
     String raceIsLive(String raceName);
     String racesAreLive(String raceNames);
     String knotsUnit();
+    String averageJibeLossInMetersTooltip();
+    String averageManeuverLossInMetersTooltip();
+    String averageTackLossInMetersTooltip();
+    String currentLegTooltip();
+    String distanceTraveledTooltip();
 }

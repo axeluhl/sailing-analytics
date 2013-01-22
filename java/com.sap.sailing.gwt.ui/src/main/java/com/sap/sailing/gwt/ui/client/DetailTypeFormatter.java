@@ -138,7 +138,7 @@ public class DetailTypeFormatter {
         case TOTAL_TIME_SAILED_REACHING_IN_SECONDS:
             return stringMessages.hhmmssUnit();
 
-            // Case for detail types without unit, so that an empty string is returned.
+        // Cases for detail types without unit, so that an empty string is returned.
         case RACE_RANK:
         case CURRENT_LEG:
         case TACK:
@@ -158,7 +158,97 @@ public class DetailTypeFormatter {
         }
     }
     
+    /**
+     * Returns a tooltip text for the given detail type or
+     * throws an UnsupportedOperationException if it isn't supported.
+     * @param detailType
+     * @return A tooltip string for the given detail type.
+     */
     public static String getTooltip(DetailType detailType) {
+        switch (detailType) {
+        case AVERAGE_CROSS_TRACK_ERROR_IN_METERS:
+            break;
+        case AVERAGE_SPEED_OVER_GROUND_IN_KNOTS:
+            break;
+        case BEAR_AWAY:
+            break;
+        case CURRENT_SPEED_OVER_GROUND_IN_KNOTS:
+            break;
+        case AVERAGE_JIBE_LOSS_IN_METERS:
+            return stringMessages.averageJibeLossInMetersTooltip();
+        case AVERAGE_MANEUVER_LOSS_IN_METERS:
+            return stringMessages.averageManeuverLossInMetersTooltip();
+        case AVERAGE_TACK_LOSS_IN_METERS:
+            return stringMessages.averageTackLossInMetersTooltip();
+        case CURRENT_LEG:
+            return stringMessages.currentLegTooltip();
+        case DISPLAY_LEGS:
+            return "";
+        case DISTANCE_TRAVELED:
+            return stringMessages.distanceTraveledTooltip();
+        case ESTIMATED_TIME_TO_NEXT_WAYPOINT_IN_SECONDS:
+            break;
+        case GAP_CHANGE_SINCE_LEG_START_IN_SECONDS:
+            break;
+        case GAP_TO_LEADER_IN_SECONDS:
+            break;
+        case HEAD_UP:
+            break;
+        case JIBE:
+            break;
+        case MARK_PASSING:
+            break;
+        case MAXIMUM_SPEED_OVER_GROUND_IN_KNOTS:
+            break;
+        case NUMBER_OF_MANEUVERS:
+            break;
+        case PENALTY_CIRCLE:
+            break;
+        case RACE_AVERAGE_CROSS_TRACK_ERROR_IN_METERS:
+            break;
+        case RACE_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS:
+            break;
+        case RACE_CURRENT_SPEED_OVER_GROUND_IN_KNOTS:
+            break;
+        case RACE_DISTANCE_TO_LEADER_IN_METERS:
+            break;
+        case RACE_DISTANCE_TRAVELED:
+            break;
+        case RACE_GAP_TO_LEADER_IN_SECONDS:
+            break;
+        case RACE_RANK:
+            break;
+        case RANK_GAIN:
+            break;
+        case SIDE_TO_WHICH_MARK_AT_LEG_START_WAS_ROUNDED:
+            break;
+        case TACK:
+            break;
+        case TIME_TRAVELED:
+            break;
+        case TOTAL_TIME_SAILED_DOWNWIND_IN_SECONDS:
+            break;
+        case TOTAL_TIME_SAILED_IN_SECONDS:
+            break;
+        case TOTAL_TIME_SAILED_REACHING_IN_SECONDS:
+            break;
+        case TOTAL_TIME_SAILED_UPWIND_IN_SECONDS:
+            break;
+        case VELOCITY_MADE_GOOD_IN_KNOTS:
+            break;
+        case WINDWARD_DISTANCE_TO_GO_IN_METERS:
+            break;
+        case WINDWARD_DISTANCE_TO_OVERALL_LEADER:
+            break;
+            
+        default:
+            // Throwing an exception to get notificated if an implementation of
+            // an detail type is missing.
+//            throw new UnsupportedOperationException("Theres currently no support for the enum value '" + detailType
+//                    + "' in this method.");
+            return "";
+        }
+        
         return "";
     }
 
