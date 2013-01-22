@@ -11,4 +11,6 @@ public interface PlayStateListener {
      *            <code>true</code> if the timer is now automatically updating its time
      */
     void playStateChanged(PlayStates playState, PlayModes playMode);
+    
+    void playSpeedFactorChanged(double newPlaySpeedFactor);
 }       

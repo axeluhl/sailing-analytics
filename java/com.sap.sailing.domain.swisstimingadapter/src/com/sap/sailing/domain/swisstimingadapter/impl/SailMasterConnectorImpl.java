@@ -126,7 +126,7 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
     public SailMasterConnectorImpl(String host, int port, RaceSpecificMessageLoader messageLoader, boolean canSendRequests) throws InterruptedException {
         super();
         this.messageLoader = messageLoader;
-        dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ssZ");
+        dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
         idsOfTrackedRaces = new HashSet<String>();
         this.host = host;
         this.port = port;

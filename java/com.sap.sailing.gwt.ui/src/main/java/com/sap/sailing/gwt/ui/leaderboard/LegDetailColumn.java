@@ -11,11 +11,16 @@ import com.sap.sailing.gwt.ui.shared.LeaderboardRowDTO;
 
 public abstract class LegDetailColumn<FieldType extends Comparable<?>, RenderingType> extends
         SortableColumn<LeaderboardRowDTO, RenderingType> {
+    
+    private static final String HtmlConstantToInlineHeadersWithAndWithoutUnit = "&nbsp;";
+    
     private final String title;
     private final LegDetailField<FieldType> field;
     private final String headerStyle;
     private final String columnStyle;
     private final String unit;
+    
+    private SafeHtmlHeader header;
 
     public interface LegDetailField<T extends Comparable<?>> {
         T get(LeaderboardRowDTO row);
@@ -30,6 +35,17 @@ public abstract class LegDetailColumn<FieldType extends Comparable<?>, Rendering
         this.field = field;
         this.headerStyle = headerStyle;
         this.columnStyle = columnStyle;
+        InitializeHeader();
+    }
+
+    private void InitializeHeader() {
+        SafeHtmlBuilder titleBuilder = new SafeHtmlBuilder().appendEscaped(title).appendHtmlConstant("<br>");
+        if (unit == null || unit.isEmpty()) {
+            titleBuilder.appendHtmlConstant(HtmlConstantToInlineHeadersWithAndWithoutUnit);
+        } else {
+            titleBuilder.appendEscaped(unit);
+        }
+        header = new SafeHtmlHeaderWithTooltip(titleBuilder.toSafeHtml(), "");
     }
 
     protected String getTitle() {
@@ -70,13 +86,6 @@ public abstract class LegDetailColumn<FieldType extends Comparable<?>, Rendering
 
     @Override
     public Header<?> getHeader() {
-        SafeHtmlBuilder builder = new SafeHtmlBuilder().appendEscaped(title).appendHtmlConstant("<br>");
-        if (unit == null) {
-            builder.appendHtmlConstant("&nbsp;");
-        } else {
-            builder.appendEscaped(unit);
-        }
-        SafeHtmlHeader header = new SafeHtmlHeader(builder.toSafeHtml());
         return header;
     }
 
