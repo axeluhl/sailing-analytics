@@ -1,16 +1,14 @@
 package com.sap.sailing.gwt.ui.leaderboard;
 
 import com.google.gwt.i18n.client.NumberFormat;
-import com.sap.sailing.domain.common.SortingOrder;
+import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.gwt.ui.client.NumberFormatterFactory;
 import com.sap.sailing.gwt.ui.shared.LeaderboardRowDTO;
 
 public abstract class AbstractTimeInHoursMinutesSecondsColumn extends FormattedDoubleLegDetailColumn {
 
-    protected AbstractTimeInHoursMinutesSecondsColumn(String title, String unit,
-            com.sap.sailing.gwt.ui.leaderboard.LegDetailColumn.LegDetailField<Double> field, int decimals, SortingOrder preferredSortingOrder,
-            String headerStyle, String columnStyle) {
-        super(title, unit, field, decimals, preferredSortingOrder, headerStyle, columnStyle);
+    protected AbstractTimeInHoursMinutesSecondsColumn(DetailType detailType, LegDetailField<Double> field, String headerStyle, String columnStyle) {
+        super(detailType, field, headerStyle, columnStyle);
     }
 
     @Override

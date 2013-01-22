@@ -99,12 +99,6 @@ public class DetailTypeFormatter {
      * <li>DISPLAY_LEGS</li>
      * <li>HEAD_UP</li>
      * <li>MARK_PASSING</li>
-     * <li>NUMBER_OF_MANEUVERS</li>
-     * <li>RANK_GAIN</li>
-     * <li>SIDE_TO_WHICH_MARK_AT_LEG_START_WAS_ROUNDED</li>
-     * <li>TOTAL_TIME_SAILED_DOWNWIND_IN_SECONDS</li>
-     * <li>TOTAL_TIME_SAILED_REACHING_IN_SECONDS</li>
-     * <li>TOTAL_TIME_SAILED_UPWIND_IN_SECONDS</li>
      * </ul>
      * 
      * @param detailType
@@ -151,6 +145,9 @@ public class DetailTypeFormatter {
             return stringMessages.secondsUnit();
             
         case TOTAL_TIME_SAILED_IN_SECONDS:
+        case TOTAL_TIME_SAILED_DOWNWIND_IN_SECONDS:
+        case TOTAL_TIME_SAILED_UPWIND_IN_SECONDS:
+        case TOTAL_TIME_SAILED_REACHING_IN_SECONDS:
             return stringMessages.hhmmssUnit();
             
         case RACE_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS:
@@ -162,6 +159,9 @@ public class DetailTypeFormatter {
         case TACK:
         case JIBE:
         case PENALTY_CIRCLE:
+        case RANK_GAIN:
+        case NUMBER_OF_MANEUVERS:
+        case SIDE_TO_WHICH_MARK_AT_LEG_START_WAS_ROUNDED:
             return "";
             
         default:
