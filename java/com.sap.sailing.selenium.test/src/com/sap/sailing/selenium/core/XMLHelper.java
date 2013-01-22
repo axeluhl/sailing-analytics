@@ -8,11 +8,38 @@ import org.w3c.dom.Attr;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
+/**
+ * <p>Utility class for working with the Java representation of the Document Object Model.</p>
+ * 
+ * @author
+ *   D049941
+ */
 public class XMLHelper {
+    /**
+     * <p></p>
+     * 
+     * @param element
+     *   
+     * @param name
+     *   
+     * @param uri
+     *   
+     * @return
+     *   
+     */
     public static String getAttributeValueNS(Element element, String name, String uri) {
         return getAttributeValueNS(element, name, uri, null);
     }
     
+    /**
+     * <p></p>
+     * 
+     * @param element
+     * @param name
+     * @param uri
+     * @param defaultValue
+     * @return
+     */
     public static String getAttributeValueNS(Element element, String name, String uri, String defaultValue) {
         Attr attribute = element.getAttributeNodeNS(uri, name);
         
@@ -22,6 +49,14 @@ public class XMLHelper {
         return defaultValue;
     }
 
+    /**
+     * <p></p>
+     * 
+     * @param element
+     *   
+     * @return
+     *   
+     */
     public static String getContentText(Element element) {
         if(element == null)
             return null;
@@ -29,10 +64,36 @@ public class XMLHelper {
         return element.getTextContent();
     }
     
+    /**
+     * <p></p>
+     * 
+     * @param element
+     *   
+     * @param name
+     *   
+     * @param uri
+     *   
+     * @return
+     *   
+     */
     public static String getContentTextNS(Element element, String name, String uri) {
         return getContentTextNS(element, name, uri, null);
     }
     
+    /**
+     * <p></p>
+     * 
+     * @param element
+     *   
+     * @param name
+     *   
+     * @param uri
+     *   
+     * @param defaultValue
+     *   
+     * @return
+     *   
+     */
     public static String getContentTextNS(Element element, String name, String uri, String defaultValue) {
         Element child = getElementNS(element, name, uri);
         
@@ -42,6 +103,18 @@ public class XMLHelper {
         return defaultValue;
     }
     
+    /**
+     * <p></p>
+     * 
+     * @param element
+     *   
+     * @param name
+     *   
+     * @param uri
+     *   
+     * @return
+     *   
+     */
     public static Element getElementNS(Element element, String name, String uri) {
         if(element == null || !element.hasChildNodes())
             return null;
@@ -57,10 +130,32 @@ public class XMLHelper {
         return null;
     }
     
+    /**
+     * <p></p>
+     * 
+     * @param element
+     *   
+     * @param name
+     *   
+     * @return
+     *   
+     */
     public static List<Element> getElements(Element element, String name) {
         return getElementsNS(element, name, null);
     }
     
+    /**
+     * <p></p>
+     * 
+     * @param element
+     *   
+     * @param name
+     *   
+     * @param uri
+     *   
+     * @return
+     *   
+     */
     public static List<Element> getElementsNS(Element element, String name, String uri) {
         if(element == null || !element.hasChildNodes())
             return Collections.emptyList();

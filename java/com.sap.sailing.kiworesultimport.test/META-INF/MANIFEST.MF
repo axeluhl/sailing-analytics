@@ -5,7 +5,5 @@ Bundle-SymbolicName: com.sap.sailing.kiworesultimport.test
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Require-Bundle: org.junit4;bundle-version="4.8.2",
- com.sap.sailing.kiworesultimport,
- com.sap.sailing.domain.common,
- com.sap.sailing.domain
+Fragment-Host: com.sap.sailing.kiworesultimport
+Require-Bundle: org.junit4;bundle-version="4.8.2"

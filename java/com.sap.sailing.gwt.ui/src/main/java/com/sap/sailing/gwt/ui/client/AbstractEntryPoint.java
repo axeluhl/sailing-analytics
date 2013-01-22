@@ -22,8 +22,15 @@ import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
 public abstract class AbstractEntryPoint implements EntryPoint, ErrorReporter, WindowSizeDetector {
-    public static final String DEBUG_ID_ATTRIBUTE = "selenium-id";
-    public static final String DEBUG_ID_PREFIX = "";
+    /**
+     * <p>The attribute which is used for the debug id.</p>
+     */
+    public static final String DEBUG_ID_ATTRIBUTE = "selenium-id"; //$NON-NLS-1$
+    
+    /**
+     * <p>The prefix which is used for the debug id.</p>
+     */
+    public static final String DEBUG_ID_PREFIX = ""; //$NON-NLS-1$
     
     private DialogBox errorDialogBox;
     private HTML serverResponseLabel;
@@ -35,6 +42,11 @@ public abstract class AbstractEntryPoint implements EntryPoint, ErrorReporter, W
      * Create a remote service proxy to talk to the server-side sailing service.
      */
     protected final SailingServiceAsync sailingService = GWT.create(SailingService.class);
+
+    /**
+     * Create a remote service proxy to talk to the server-side media service.
+     */
+    protected final MediaServiceAsync mediaService = GWT.create(MediaService.class);
 
     /**
      * Create a remote service proxy to talk to the server-side user management service.
@@ -62,7 +74,7 @@ public abstract class AbstractEntryPoint implements EntryPoint, ErrorReporter, W
         doOnModuleLoad();
         
         if(DebugInfo.isDebugIdEnabled()) {
-            PendingAjaxCallMarker.decrementPendingAjaxCalls();
+            PendingAjaxCallMarker.decrementPendingAjaxCalls(MarkedAsyncCallback.CATEGORY_GLOBAL);
         }
     }
     
@@ -72,10 +84,12 @@ public abstract class AbstractEntryPoint implements EntryPoint, ErrorReporter, W
         userAgent = new UserAgentDetails(Window.Navigator.getUserAgent());
         
         ServiceDefTarget sailingServiceDef = (ServiceDefTarget) sailingService;
+        ServiceDefTarget mediaServiceDef = (ServiceDefTarget) mediaService;
         ServiceDefTarget userManagementServiceDef = (ServiceDefTarget) userManagementService;
         String moduleBaseURL = GWT.getModuleBaseURL();
         String baseURL = moduleBaseURL.substring(0, moduleBaseURL.lastIndexOf('/', moduleBaseURL.length()-2)+1);
         sailingServiceDef.setServiceEntryPoint(baseURL + "sailing");
+        mediaServiceDef.setServiceEntryPoint(baseURL + "media");
         userManagementServiceDef.setServiceEntryPoint(baseURL + "usermanagement");
     }
     

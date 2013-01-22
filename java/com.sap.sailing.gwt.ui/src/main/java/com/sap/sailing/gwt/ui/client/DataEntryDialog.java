@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.ui.client;
 
 import java.util.Date;
 
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.dom.client.Style.FontWeight;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ChangeEvent;
@@ -375,6 +376,10 @@ public abstract class DataEntryDialog<T> {
      */
     protected Label getStatusLabel() {
         return statusLabel;
+    }
+
+    protected void setCursor(Style.Cursor cursor) {
+        dateEntryDialog.getElement().getStyle().setCursor(cursor);
     }
 
     public void show() {

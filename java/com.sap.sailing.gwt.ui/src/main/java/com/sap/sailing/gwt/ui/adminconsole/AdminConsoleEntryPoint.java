@@ -40,7 +40,6 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
 
         // TODO for managing events and venues, the following two lines are preparing the addition of the respective panel
 //        SailingEventManagementPanel sailingEventManagementPanel = new SailingEventManagementPanel(sailingService, this, stringMessages);
-//        tabPanel.add(sailingEventManagementPanel, stringMessages.events());
 
         RegattaStructureManagementPanel eventStructureManagementPanel = new RegattaStructureManagementPanel(sailingService, this, stringMessages, this);
         //eventStructureManagementPanel.ensureDebugId("RegattaStructureManagement");
@@ -109,6 +108,8 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
         ReplicationPanel replicationPanel = new ReplicationPanel(sailingService, this, stringMessages);
         //replicationPanel.ensureDebugId("ReplicationManagement");
         tabPanel.add(replicationPanel, stringMessages.replication(), /* asHTML */ false);
+        final MediaPanel mediaPanel = new MediaPanel(mediaService, this, stringMessages);
+        tabPanel.add(mediaPanel, stringMessages.mediaPanel(), /* asHTML */ false);
         
         tabPanel.selectTab(0);
         tabPanel.addSelectionHandler(new SelectionHandler<Integer>() {
@@ -116,6 +117,9 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
             public void onSelection(SelectionEvent<Integer> event) {
                 if (leaderboardConfigPanel.isVisible()) {
                     leaderboardConfigPanel.loadAndRefreshLeaderboards();
+                }
+                if (mediaPanel.isVisible()) {
+                    mediaPanel.onShow();
                 }
             }
         });

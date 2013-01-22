@@ -51,7 +51,7 @@ public class MessageFileServiceImpl implements MessageFileService {
     private final DateFormat timeFormat;
 
     public MessageFileServiceImpl() {
-        dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ssZ");
+        dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
         timeFormat = new SimpleDateFormat("HH:mm:ss");
     }
 
