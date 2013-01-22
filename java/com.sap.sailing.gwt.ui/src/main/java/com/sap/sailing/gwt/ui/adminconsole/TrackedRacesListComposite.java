@@ -289,9 +289,9 @@ public class TrackedRacesListComposite extends SimplePanel implements Component<
         TextColumn<RaceDTO> raceTrackedColumn = new TextColumn<RaceDTO>() {
             @Override
             public String getValue(RaceDTO raceDTO) {
-                if (raceDTO.isTracked == true)
+                if (raceDTO.isTracked == true) {
                     return stringMessages.tracked();
-
+                }
                 return "";
             }
         };
@@ -299,10 +299,11 @@ public class TrackedRacesListComposite extends SimplePanel implements Component<
         TextColumn<RaceDTO> hasWindDataColumn = new TextColumn<RaceDTO>() {
             @Override
             public String getValue(RaceDTO raceDTO) {
-                if (raceDTO.trackedRace != null && raceDTO.trackedRace.hasWindData == true)
+                if (raceDTO.trackedRace != null && raceDTO.trackedRace.hasWindData == true) {
                     return stringMessages.yes();
-                else
+                } else {
                     return stringMessages.no();
+                }
             }
         };
 

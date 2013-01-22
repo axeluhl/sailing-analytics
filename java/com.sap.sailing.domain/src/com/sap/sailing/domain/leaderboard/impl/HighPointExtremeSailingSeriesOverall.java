@@ -61,7 +61,7 @@ public class HighPointExtremeSailingSeriesOverall extends HighPoint {
     private int getWins(List<Pair<RaceColumn, Double>> scores) {
         int wins = 0;
         for (Pair<RaceColumn, Double> score : scores) {
-            if (score.getB() == MAX_POINTS * score.getA().getFactor()) {
+            if (Math.abs(score.getB() - MAX_POINTS * score.getA().getFactor()) < 0.0000001) {
                 wins++;
             }
         }
