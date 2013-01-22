@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE module PUBLIC "-//Google Inc.//DTD Google Web Toolkit 2.5.0//EN" "http://google-web-toolkit.googlecode.com/svn/tags/2.5.0/distro-source/core/src/gwt-module.dtd">
+<module>
+	<stylesheet src="../reset.css" />
+	<inherits name="com.google.gwt.user.User" />
+
+	<!-- Specify the paths for translatable code -->
+	<extend-property name="locale" values="de" />
+
+	<source path="client" />
+	<source path="polarsheets" />
+	<source path='leaderboard' />
+	<source path='raceboard' />
+	<source path='adminconsole' />
+	<source path='usermanagement' />
+	<source path='shared' />
+	<source path='common' />
+	<source path='actions' />
+	<entry-point class="com.sap.sailing.gwt.ui.polarsheets.PolarSheetsEntryPoint">
+	</entry-point>
+
+	<!-- Google Maps API -->
+	<inherits name='com.google.gwt.maps.GoogleMaps' />
+
+	<!-- Highcharts API -->
+	<inherits name="org.moxieapps.gwt.highcharts.Highcharts" />
+
+	<!-- Other module inherits -->
+	<inherits name="com.sap.sailing.domain.SailingDomain" />
+</module>
