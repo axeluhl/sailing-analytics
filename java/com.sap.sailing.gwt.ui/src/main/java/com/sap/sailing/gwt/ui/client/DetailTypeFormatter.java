@@ -96,7 +96,6 @@ public class DetailTypeFormatter {
      * Currently <b>not</b> supported are:<br>
      * <ul>
      * <li>BEAR_AWAY</li>
-     * <li>DISPLAY_LEGS</li>
      * <li>HEAD_UP</li>
      * <li>MARK_PASSING</li>
      * </ul>
@@ -109,51 +108,37 @@ public class DetailTypeFormatter {
         case CURRENT_SPEED_OVER_GROUND_IN_KNOTS:
         case RACE_CURRENT_SPEED_OVER_GROUND_IN_KNOTS:
         case MAXIMUM_SPEED_OVER_GROUND_IN_KNOTS:
-            return stringMessages.currentSpeedOverGroundInKnotsUnit();
-            
+        case RACE_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS:
+        case VELOCITY_MADE_GOOD_IN_KNOTS:
+        case AVERAGE_SPEED_OVER_GROUND_IN_KNOTS:
+            return stringMessages.knotsUnit();
+
+        case WINDWARD_DISTANCE_TO_OVERALL_LEADER:
+        case WINDWARD_DISTANCE_TO_GO_IN_METERS:
         case DISTANCE_TRAVELED:
         case RACE_DISTANCE_TO_LEADER_IN_METERS:
         case RACE_DISTANCE_TRAVELED:
         case AVERAGE_TACK_LOSS_IN_METERS:
         case AVERAGE_JIBE_LOSS_IN_METERS:
         case AVERAGE_MANEUVER_LOSS_IN_METERS:
-            return stringMessages.distanceInMetersUnit();
-            
-        case GAP_TO_LEADER_IN_SECONDS:
-        case GAP_CHANGE_SINCE_LEG_START_IN_SECONDS:
-        case RACE_GAP_TO_LEADER_IN_SECONDS:
-            return stringMessages.gapToLeaderInSecondsUnit();
-            
-        case VELOCITY_MADE_GOOD_IN_KNOTS:
-            return stringMessages.velocityMadeGoodInKnotsUnit();
-            
-        case WINDWARD_DISTANCE_TO_OVERALL_LEADER:
-        case WINDWARD_DISTANCE_TO_GO_IN_METERS:
-            return stringMessages.windwardDistanceToGoInMetersUnit();
-            
-        case AVERAGE_SPEED_OVER_GROUND_IN_KNOTS:
-            return stringMessages.averageSpeedInKnotsUnit();
-            
-        case ESTIMATED_TIME_TO_NEXT_WAYPOINT_IN_SECONDS:
-            return stringMessages.estimatedTimeToNextWaypointInSecondsUnit();
-            
         case AVERAGE_CROSS_TRACK_ERROR_IN_METERS:
         case RACE_AVERAGE_CROSS_TRACK_ERROR_IN_METERS:
             return stringMessages.metersUnit();
-            
+
+        case GAP_TO_LEADER_IN_SECONDS:
+        case GAP_CHANGE_SINCE_LEG_START_IN_SECONDS:
+        case RACE_GAP_TO_LEADER_IN_SECONDS:
+        case ESTIMATED_TIME_TO_NEXT_WAYPOINT_IN_SECONDS:
         case TIME_TRAVELED:
             return stringMessages.secondsUnit();
-            
+
         case TOTAL_TIME_SAILED_IN_SECONDS:
         case TOTAL_TIME_SAILED_DOWNWIND_IN_SECONDS:
         case TOTAL_TIME_SAILED_UPWIND_IN_SECONDS:
         case TOTAL_TIME_SAILED_REACHING_IN_SECONDS:
             return stringMessages.hhmmssUnit();
-            
-        case RACE_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS:
-            return stringMessages.averageSpeedInKnotsUnit();
-            
-        // Case for detail types without unit, so that an empty string is returned.
+
+            // Case for detail types without unit, so that an empty string is returned.
         case RACE_RANK:
         case CURRENT_LEG:
         case TACK:
@@ -161,9 +146,10 @@ public class DetailTypeFormatter {
         case PENALTY_CIRCLE:
         case RANK_GAIN:
         case NUMBER_OF_MANEUVERS:
+        case DISPLAY_LEGS:
         case SIDE_TO_WHICH_MARK_AT_LEG_START_WAS_ROUNDED:
             return "";
-            
+
         default:
             // Throwing an exception to get notificated if an implementation of
             // an detail type is missing.
