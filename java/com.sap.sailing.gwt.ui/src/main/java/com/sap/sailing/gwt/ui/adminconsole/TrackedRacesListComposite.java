@@ -64,7 +64,8 @@ import com.sap.sailing.gwt.ui.shared.components.SettingsDialogComponent;
  * Shows the currently tracked events/races in a table. Updated if subscribed as an {@link RegattaDisplayer}, e.g., with
  * the {@link AdminConsoleEntryPoint}.
  */
-public class TrackedRacesListComposite extends SimplePanel implements Component<TrackedRacesSettings>, RegattaDisplayer, RaceSelectionChangeListener {
+public class TrackedRacesListComposite extends SimplePanel implements Component<TrackedRacesSettings>,
+        RegattaDisplayer, RaceSelectionChangeListener {
     private final long DEFAULT_LIVE_DELAY_IN_MILLISECONDS = 5000;
 
     private final Set<TrackedRaceChangedListener> raceIsTrackedRaceChangeListener;
@@ -78,9 +79,9 @@ public class TrackedRacesListComposite extends SimplePanel implements Component<
     private final CellTable<RaceDTO> raceTable;
 
     private ListDataProvider<RaceDTO> raceList;
-    
+
     private Iterable<RaceDTO> allRaces;
-    
+
     private final VerticalPanel panel;
 
     private DateTimeFormatRenderer dateFormatter = new DateTimeFormatRenderer(
@@ -102,7 +103,7 @@ public class TrackedRacesListComposite extends SimplePanel implements Component<
     private final Button btnSetDelayToLive;
 
     private final TextBox filterRacesTextbox;
-    
+
     private final TrackedRacesSettings settings;
 
     public static class AnchorCell extends AbstractCell<SafeHtml> {
@@ -130,12 +131,12 @@ public class TrackedRacesListComposite extends SimplePanel implements Component<
         this.raceSelectionProvider = raceSelectionProvider;
         this.stringMessages = stringMessages;
         this.raceIsTrackedRaceChangeListener = new HashSet<TrackedRaceChangedListener>();
-        
+
         raceList = new ListDataProvider<RaceDTO>();
         selectionModel = multiSelection ? new MultiSelectionModel<RaceDTO>() : new SingleSelectionModel<RaceDTO>();
         settings = new TrackedRacesSettings();
         settings.setDelayToLiveInSeconds(DEFAULT_LIVE_DELAY_IN_MILLISECONDS / 1000l);
-        
+
         panel = new VerticalPanel();
         setWidget(panel);
 
@@ -162,8 +163,7 @@ public class TrackedRacesListComposite extends SimplePanel implements Component<
         AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
         raceTable = new CellTable<RaceDTO>(/* pageSize */10000, tableRes);
         raceTable.ensureDebugId("TrackedRaces");
-        ListHandler<RaceDTO> columnSortHandler = new ListHandler<RaceDTO>(
-                raceList.getList());
+        ListHandler<RaceDTO> columnSortHandler = new ListHandler<RaceDTO>(raceList.getList());
         TextColumn<RaceDTO> regattaNameColumn = new TextColumn<RaceDTO>() {
             @Override
             public String getValue(RaceDTO raceDTO) {
@@ -245,7 +245,8 @@ public class TrackedRacesListComposite extends SimplePanel implements Component<
                     return 0;
                 }
                 int val = -1;
-                val = (t1 != null && t2 != null && ascending) ? (t1.name.compareTo(t2.name)) : -(t2.name.compareTo(t1.name));
+                val = (t1 != null && t2 != null && ascending) ? (t1.name.compareTo(t2.name)) : -(t2.name
+                        .compareTo(t1.name));
                 return val;
             }
 
@@ -259,8 +260,7 @@ public class TrackedRacesListComposite extends SimplePanel implements Component<
             @Override
             public String getValue(RaceDTO raceDTO) {
                 if (raceDTO.startOfRace != null) {
-                    return dateFormatter.render(raceDTO.startOfRace) + " "
-                            + timeFormatter.render(raceDTO.startOfRace);
+                    return dateFormatter.render(raceDTO.startOfRace) + " " + timeFormatter.render(raceDTO.startOfRace);
                 }
 
                 return "";
@@ -334,7 +334,7 @@ public class TrackedRacesListComposite extends SimplePanel implements Component<
         raceTable.addColumn(raceTrackedColumn, stringMessages.tracked());
         raceTable.addColumn(hasWindDataColumn, "Wind data");
         raceTable.addColumn(hasGPSDataColumn, "GPS data");
-        
+
         raceTable.addColumn(raceLiveDelayColumn, stringMessages.delayInSeconds());
         raceTable.setWidth("300px");
         raceTable.setSelectionModel(selectionModel);
@@ -360,7 +360,8 @@ public class TrackedRacesListComposite extends SimplePanel implements Component<
                     for (RaceDTO selectedRace : selectedRaces) {
                         selectedRaceIdentifiers.add(selectedRace.getRaceIdentifier());
                     }
-                    TrackedRacesListComposite.this.raceSelectionProvider.setSelection(selectedRaceIdentifiers, TrackedRacesListComposite.this);
+                    TrackedRacesListComposite.this.raceSelectionProvider.setSelection(selectedRaceIdentifiers,
+                            TrackedRacesListComposite.this);
                 }
             }
         });
@@ -403,7 +404,7 @@ public class TrackedRacesListComposite extends SimplePanel implements Component<
             }
         });
         trackedRacesButtonPanel.add(btnRefresh);
-        
+
         btnSetDelayToLive = new Button(stringMessages.setDelayToLive() + "...");
         btnSetDelayToLive.ensureDebugId("SetDelayToLive");
         btnSetDelayToLive.addClickHandler(new ClickHandler() {
@@ -418,8 +419,9 @@ public class TrackedRacesListComposite extends SimplePanel implements Component<
     private void showSetDelayToLiveDialog() {
         TrackedRacesSettings settings = new TrackedRacesSettings();
         settings.setDelayToLiveInSeconds(DEFAULT_LIVE_DELAY_IN_MILLISECONDS);
-        
-        SettingsDialog<TrackedRacesSettings> settingsDialog = new SettingsDialog<TrackedRacesSettings>(this, stringMessages);
+
+        SettingsDialog<TrackedRacesSettings> settingsDialog = new SettingsDialog<TrackedRacesSettings>(this,
+                stringMessages);
         settingsDialog.show();
     }
 
@@ -427,7 +429,7 @@ public class TrackedRacesListComposite extends SimplePanel implements Component<
         RaceDTO result = null;
         if (raceList != null) {
             for (RaceDTO race : raceList.getList()) {
-                if(race.getRaceIdentifier().equals(raceIdentifier)) {
+                if (race.getRaceIdentifier().equals(raceIdentifier)) {
                     result = race;
                     break;
                 }
@@ -452,7 +454,8 @@ public class TrackedRacesListComposite extends SimplePanel implements Component<
         if (raceList != null) {
             for (RaceDTO race : raceList.getList()) {
                 String regattaName = race.getRegattaName();
-                if (regattaName.equals(raceIdentifier.getRegattaName()) && race.name.equals(raceIdentifier.getRaceName())) {
+                if (regattaName.equals(raceIdentifier.getRegattaName())
+                        && race.name.equals(raceIdentifier.getRaceName())) {
                     dontFireNextSelectionChangeEvent = true;
                     selectionModel.setSelected(race, true);
                     break;
@@ -462,8 +465,9 @@ public class TrackedRacesListComposite extends SimplePanel implements Component<
     }
 
     public void clearSelection() {
-        List<RegattaAndRaceIdentifier> emptySelection =  Collections.emptyList();
-        raceSelectionProvider.setSelection(emptySelection, /* listenersNotToNotify */ this);
+        List<RegattaAndRaceIdentifier> emptySelection = Collections.emptyList();
+        raceSelectionProvider.setSelection(emptySelection, /* listenersNotToNotify */
+                this);
         if (raceList != null) {
             for (RaceDTO race : raceList.getList()) {
                 selectionModel.setSelected(race, false);
@@ -473,6 +477,40 @@ public class TrackedRacesListComposite extends SimplePanel implements Component<
 
     @Override
     public void fillRegattas(List<RegattaDTO> regattas) {
+        setUiElementVisibilty(regattas);
+        List<RaceDTO> newAllRaces = new ArrayList<RaceDTO>();
+        List<RegattaDTO> newAllRegattas = new ArrayList<RegattaDTO>();
+        List<RegattaAndRaceIdentifier> newAllRaceIdentifiers = new ArrayList<RegattaAndRaceIdentifier>();
+        for (RegattaDTO regatta : regattas) {
+            newAllRegattas.add(regatta);
+            for (RaceDTO race : regatta.races) {
+                if (race != null) {
+                    if (raceCompliesToFilter(race)) {
+                        newAllRaces.add(race);
+                        newAllRaceIdentifiers.add(race.getRaceIdentifier());
+                    }
+                }
+            }
+        }
+        allRaces = newAllRaces;
+        fillRaceListFromAvailableRacesApplyingFilter();
+        raceSelectionProvider.setAllRaces(newAllRaceIdentifiers); // have this
+                                                                  // object be
+                                                                  // notified;
+                                                                  // triggers
+                                                                  // onRaceSelectionChange
+    }
+
+    /**
+     * Allows subclasses to add a racefilter, so that only races with specific characteristics are displayed.
+     * @param race
+     * @return
+     */
+    protected boolean raceCompliesToFilter(RaceDTO race) {
+        return true;
+    }
+
+    private void setUiElementVisibilty(List<RegattaDTO> regattas) {
         if (regattas.isEmpty()) {
             raceTable.setVisible(false);
             btnUntrack.setVisible(false);
@@ -488,27 +526,12 @@ public class TrackedRacesListComposite extends SimplePanel implements Component<
             noTrackedRacesLabel.setVisible(false);
             btnSetDelayToLive.setVisible(true);
         }
-        List<RaceDTO> newAllRaces = new ArrayList<RaceDTO>();
-        List<RegattaDTO> newAllRegattas = new ArrayList<RegattaDTO>();
-        List<RegattaAndRaceIdentifier> newAllRaceIdentifiers = new ArrayList<RegattaAndRaceIdentifier>();
-        for (RegattaDTO regatta : regattas) {
-            newAllRegattas.add(regatta);
-            for (RaceDTO race : regatta.races) {
-                if (race != null) {
-                    newAllRaces.add(race);
-                    newAllRaceIdentifiers.add(race.getRaceIdentifier());
-                }
-            }
-        }
-        allRaces = newAllRaces;
-        fillRaceListFromAvailableRacesApplyingFilter();
-        raceSelectionProvider.setAllRaces(newAllRaceIdentifiers); // have this object be notified; triggers onRaceSelectionChange
     }
 
     public void addRaceSelectionChangeListener(RaceSelectionChangeListener listener) {
         this.raceSelectionProvider.addRaceSelectionChangeListener(listener);
     }
-    
+
     public void addTrackedRaceChangeListener(TrackedRaceChangedListener listener) {
         this.raceIsTrackedRaceChangeListener.add(listener);
     }
@@ -534,22 +557,21 @@ public class TrackedRacesListComposite extends SimplePanel implements Component<
 
     private void removeAndUntrackRace(final RaceDTO race) {
         final RegattaNameAndRaceName regattaNameAndRaceName = (RegattaNameAndRaceName) race.getRaceIdentifier();
-        sailingService.removeAndUntrackRace(regattaNameAndRaceName,
-                new AsyncCallback<Void>() {
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        errorReporter.reportError("Exception trying to stop tracking race " + race.name + "in regatta "
-                                + race.getRegattaName() + ": " + caught.getMessage());
-                    }
+        sailingService.removeAndUntrackRace(regattaNameAndRaceName, new AsyncCallback<Void>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                errorReporter.reportError("Exception trying to stop tracking race " + race.name + "in regatta "
+                        + race.getRegattaName() + ": " + caught.getMessage());
+            }
 
-                    @Override
-                    public void onSuccess(Void result) {
-                        regattaRefresher.fillRegattas();
-                        for (TrackedRaceChangedListener listener : raceIsTrackedRaceChangeListener) {
-                            listener.changeTrackingRace(regattaNameAndRaceName, false);
-                        }
-                    }
-                });
+            @Override
+            public void onSuccess(Void result) {
+                regattaRefresher.fillRegattas();
+                for (TrackedRaceChangedListener listener : raceIsTrackedRaceChangeListener) {
+                    listener.changeTrackingRace(regattaNameAndRaceName, false);
+                }
+            }
+        });
     }
 
     private void fillRaceListFromAvailableRacesApplyingFilter() {
@@ -579,7 +601,15 @@ public class TrackedRacesListComposite extends SimplePanel implements Component<
         }
         // now sort again according to selected criterion
         ColumnSortEvent.fire(raceTable, raceTable.getColumnSortList());
-        onRaceSelectionChange(raceSelectionProvider.getSelectedRaces()); // update selection based on underlying domain race selection model
+        onRaceSelectionChange(raceSelectionProvider.getSelectedRaces()); // update
+                                                                         // selection
+                                                                         // based
+                                                                         // on
+                                                                         // underlying
+                                                                         // domain
+                                                                         // race
+                                                                         // selection
+                                                                         // model
     }
 
     @Override
@@ -602,7 +632,7 @@ public class TrackedRacesListComposite extends SimplePanel implements Component<
     public SettingsDialogComponent<TrackedRacesSettings> getSettingsDialogComponent() {
         return new TrackedRacesSettingsDialogComponent<TrackedRacesSettings>(settings, stringMessages);
     }
-    
+
     @Override
     public void updateSettings(TrackedRacesSettings newSettings) {
         settings.setDelayToLiveInSeconds(newSettings.getDelayToLiveInSeconds());
