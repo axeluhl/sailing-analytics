@@ -450,6 +450,7 @@ public interface StringMessages extends Messages {
     String sideToWhichMarkAtLegStartWasRounded();
     String raceIsLive(String raceName);
     String racesAreLive(String raceNames);
+    String scoringSchemeHighPointFirstGetsTen();
     String knotsUnit();
     String averageJibeLossInMetersTooltip();
     String averageManeuverLossInMetersTooltip();
@@ -476,5 +477,10 @@ public interface StringMessages extends Messages {
     String totalTimeSailedReachingInSecondsTooltip();
     String totalTimeSailedUpwindInSecondsTooltip();
     String windwardDistanceToGoInMetersTooltip();
+    String averageCrossTrackErrorInMetersTooltip();
+    String raceAverageCrossTrackErrorInMetersTooltip();
+    String gapChangeSinceLegStartInSecondsTooltip();
+    String velocityMadeGoodInKnotsTooltip();
+    String sideToWhichMarkAtLegStartWasRoundedTooltip();
     String generatePolarSheet();
 }

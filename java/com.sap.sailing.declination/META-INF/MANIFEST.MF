@@ -8,8 +8,7 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
 Require-Bundle: com.sap.sailing.domain,
  com.sap.sailing.domain.common
-Export-Package: com.sap.sailing.declination,
- com.sap.sailing.declination.impl;x-friends:="com.sap.sailing.declination.test"
+Export-Package: com.sap.sailing.declination
 Import-Package: com.sap.sailing.domain.common,
  com.sap.sailing.domain.common.impl,
  com.sap.sailing.domain.common.quadtree
