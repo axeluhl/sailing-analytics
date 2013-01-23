@@ -169,7 +169,7 @@ public class ManeuverCountRaceColumn extends ExpandableSortableColumn<String> im
     @Override
     public Header<SafeHtml> getHeader() {
         SortableExpandableColumnHeader result = new SortableExpandableColumnHeader(
-        /* title */stringMessages.maneuverTypes(),
+        /* title */stringMessages.maneuverTypes(), /* tooltip */ stringMessages.numberOfManeuversInRaceTooltip(),
         /* iconURL */null, getLeaderboardPanel(), this, stringMessages);
         return result;
     }

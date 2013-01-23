@@ -481,4 +481,5 @@ public interface StringMessages extends Messages {
     String gapChangeSinceLegStartInSecondsTooltip();
     String velocityMadeGoodInKnotsTooltip();
     String sideToWhichMarkAtLegStartWasRoundedTooltip();
+    String numberOfManeuversInRaceTooltip();
 }
