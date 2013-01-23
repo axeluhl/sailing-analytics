@@ -7,8 +7,7 @@ Bundle-Activator: com.sap.sailing.server.replication.impl.Activator
 Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
-Export-Package: com.sap.sailing.server.replication,
- com.sap.sailing.server.replication.impl;x-friends:="com.sap.sailing.server.replication.test"
+Export-Package: com.sap.sailing.server.replication
 Require-Bundle: com.sap.sailing.server,
  com.sap.sailing.server.gateway,
  com.sap.sailing.domain.common,

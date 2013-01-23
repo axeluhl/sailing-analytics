@@ -14,6 +14,8 @@ public class ScoringSchemeTypeFormatter {
             return stringConstants.scoringSchemeHighPointEssOverall();
         case HIGH_POINT_LAST_BREAKS_TIE:
             return stringConstants.scoringSchemeHighPointLastBreaksTie();
+        case HIGH_POINT_FIRST_GETS_TEN:
+            return stringConstants.scoringSchemeHighPointFirstGetsTen();
         }
         return null;
     }
