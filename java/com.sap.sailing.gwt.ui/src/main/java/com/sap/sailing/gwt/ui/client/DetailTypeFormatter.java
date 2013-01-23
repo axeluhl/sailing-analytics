@@ -49,18 +49,12 @@ public class DetailTypeFormatter {
             return stringMessages.averageCrossTrackErrorInMeters();
         case WINDWARD_DISTANCE_TO_OVERALL_LEADER:
             return stringMessages.windwardDistanceToLeaderInMeters();
-        case HEAD_UP:
-            return stringMessages.headUp();
-        case BEAR_AWAY:
-            return stringMessages.bearAway();
         case TACK:
             return stringMessages.tack();
         case JIBE:
             return stringMessages.jibe();
         case PENALTY_CIRCLE:
             return stringMessages.penaltyCircle();
-        case MARK_PASSING:
-            return stringMessages.markPassing();
         case DISPLAY_LEGS:
             return stringMessages.legs();
         case CURRENT_LEG:
@@ -92,13 +86,7 @@ public class DetailTypeFormatter {
     /**
      * Returns the unit of the given {@link DetailType}, like 'm', 'kts' or an empty string, if the detail type has no
      * unit.<br>
-     * Throws an UnsupportedOperationException if the given detail type isn't supported.<br>
-     * Currently <b>not</b> supported are:<br>
-     * <ul>
-     * <li>BEAR_AWAY</li>
-     * <li>HEAD_UP</li>
-     * <li>MARK_PASSING</li>
-     * </ul>
+     * Throws an UnsupportedOperationException if the given detail type isn't supported.
      * 
      * @param detailType
      * @return The unit of the detail type as string.
@@ -168,17 +156,13 @@ public class DetailTypeFormatter {
         switch (detailType) {
         case AVERAGE_CROSS_TRACK_ERROR_IN_METERS:
             break;
-        case BEAR_AWAY:
-            break;
         case GAP_CHANGE_SINCE_LEG_START_IN_SECONDS:
-            break;
-        case HEAD_UP:
-            break;
-        case MARK_PASSING:
             break;
         case RACE_AVERAGE_CROSS_TRACK_ERROR_IN_METERS:
             break;
         case SIDE_TO_WHICH_MARK_AT_LEG_START_WAS_ROUNDED:
+            break;
+        case VELOCITY_MADE_GOOD_IN_KNOTS:
             break;
         case AVERAGE_JIBE_LOSS_IN_METERS:
             return stringMessages.averageJibeLossInMetersTooltip();
@@ -239,12 +223,12 @@ public class DetailTypeFormatter {
         case WINDWARD_DISTANCE_TO_GO_IN_METERS:
             return stringMessages.windwardDistanceToGoInMetersTooltip();
             
-        default:
-            // Throwing an exception to get notificated if an implementation of
-            // an detail type is missing.
-//            throw new UnsupportedOperationException("Theres currently no support for the enum value '" + detailType
-//                    + "' in this method.");
-            return "Unsupported";
+//        default:
+//            // Throwing an exception to get notificated if an implementation of
+//            // an detail type is missing.
+////            throw new UnsupportedOperationException("Theres currently no support for the enum value '" + detailType
+////                    + "' in this method.");
+//            return "Unsupported";
         }
         
         return "Empty Tooltip";
