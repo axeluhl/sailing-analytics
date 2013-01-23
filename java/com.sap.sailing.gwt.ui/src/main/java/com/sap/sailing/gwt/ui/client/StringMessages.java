@@ -476,4 +476,9 @@ public interface StringMessages extends Messages {
     String totalTimeSailedReachingInSecondsTooltip();
     String totalTimeSailedUpwindInSecondsTooltip();
     String windwardDistanceToGoInMetersTooltip();
+    String averageCrossTrackErrorInMetersTooltip();
+    String raceAverageCrossTrackErrorInMetersTooltip();
+    String gapChangeSinceLegStartInSecondsTooltip();
+    String velocityMadeGoodInKnotsTooltip();
+    String sideToWhichMarkAtLegStartWasRoundedTooltip();
 }

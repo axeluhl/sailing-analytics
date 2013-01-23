@@ -147,23 +147,22 @@ public class DetailTypeFormatter {
     }
     
     /**
-     * Returns a tooltip text for the given detail type or
-     * throws an UnsupportedOperationException if it isn't supported.
+     * Returns a tooltip text for the given detail type or an empty string, if there's none.
      * @param detailType
      * @return A tooltip string for the given detail type.
      */
     public static String getTooltip(DetailType detailType) {
         switch (detailType) {
         case AVERAGE_CROSS_TRACK_ERROR_IN_METERS:
-            break;
+            return stringMessages.averageCrossTrackErrorInMetersTooltip();
         case GAP_CHANGE_SINCE_LEG_START_IN_SECONDS:
-            break;
+            return stringMessages.gapChangeSinceLegStartInSecondsTooltip();
         case RACE_AVERAGE_CROSS_TRACK_ERROR_IN_METERS:
-            break;
+            return stringMessages.raceAverageCrossTrackErrorInMetersTooltip();
         case SIDE_TO_WHICH_MARK_AT_LEG_START_WAS_ROUNDED:
-            break;
+            return stringMessages.sideToWhichMarkAtLegStartWasRoundedTooltip();
         case VELOCITY_MADE_GOOD_IN_KNOTS:
-            break;
+            return stringMessages.velocityMadeGoodInKnotsTooltip();
         case AVERAGE_JIBE_LOSS_IN_METERS:
             return stringMessages.averageJibeLossInMetersTooltip();
         case AVERAGE_MANEUVER_LOSS_IN_METERS:
@@ -222,16 +221,9 @@ public class DetailTypeFormatter {
             return stringMessages.totalTimeSailedUpwindInSecondsTooltip();
         case WINDWARD_DISTANCE_TO_GO_IN_METERS:
             return stringMessages.windwardDistanceToGoInMetersTooltip();
-            
-//        default:
-//            // Throwing an exception to get notificated if an implementation of
-//            // an detail type is missing.
-////            throw new UnsupportedOperationException("Theres currently no support for the enum value '" + detailType
-////                    + "' in this method.");
-//            return "Unsupported";
         }
         
-        return "Empty Tooltip";
+        return "";
     }
 
     public static NumberFormat getNumberFormat(DetailType detailType) {
