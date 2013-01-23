@@ -57,11 +57,11 @@ import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.components.Component;
 import com.sap.sailing.gwt.ui.shared.components.SettingsDialogComponent;
 
-public abstract class AbstractTrackedRacesListComposite extends SimplePanel implements Component<TrackedRacesSettings>, 
-                                                                RegattaDisplayer, RaceSelectionChangeListener {
-    
+public abstract class AbstractTrackedRacesListComposite extends SimplePanel implements Component<TrackedRacesSettings>,
+        RegattaDisplayer, RaceSelectionChangeListener {
+
     protected final long DEFAULT_LIVE_DELAY_IN_MILLISECONDS = 5000;
-    
+
     private final boolean multiSelection;
 
     private boolean dontFireNextSelectionChangeEvent;
@@ -71,9 +71,9 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
     private final CellTable<RaceDTO> raceTable;
 
     private ListDataProvider<RaceDTO> raceList;
-    
+
     private Iterable<RaceDTO> allRaces;
-    
+
     private final VerticalPanel panel;
 
     private DateTimeFormatRenderer dateFormatter = new DateTimeFormatRenderer(
@@ -92,7 +92,7 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
     private final Button btnRefresh;
 
     private final TextBox filterRacesTextbox;
-    
+
     protected final TrackedRacesSettings settings;
 
     public static class AnchorCell extends AbstractCell<SafeHtml> {
@@ -109,22 +109,22 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
     }
 
     private static AnchorTemplates ANCHORTEMPLATE = GWT.create(AnchorTemplates.class);
-    
-    public AbstractTrackedRacesListComposite(final SailingServiceAsync sailingService, final ErrorReporter errorReporter,
-            final RegattaRefresher regattaRefresher, RaceSelectionProvider raceSelectionProvider,
-            final StringMessages stringMessages, boolean hasMultiSelection) {
+
+    public AbstractTrackedRacesListComposite(final SailingServiceAsync sailingService,
+            final ErrorReporter errorReporter, final RegattaRefresher regattaRefresher,
+            RaceSelectionProvider raceSelectionProvider, final StringMessages stringMessages, boolean hasMultiSelection) {
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
         this.regattaRefresher = regattaRefresher;
         this.multiSelection = hasMultiSelection;
         this.raceSelectionProvider = raceSelectionProvider;
         this.stringMessages = stringMessages;
-        
+
         raceList = new ListDataProvider<RaceDTO>();
         selectionModel = multiSelection ? new MultiSelectionModel<RaceDTO>() : new SingleSelectionModel<RaceDTO>();
         settings = new TrackedRacesSettings();
         settings.setDelayToLiveInSeconds(DEFAULT_LIVE_DELAY_IN_MILLISECONDS / 1000l);
-        
+
         panel = new VerticalPanel();
         setWidget(panel);
 
@@ -170,14 +170,15 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
                     for (RaceDTO selectedRace : selectedRaces) {
                         selectedRaceIdentifiers.add(selectedRace.getRaceIdentifier());
                     }
-                    AbstractTrackedRacesListComposite.this.raceSelectionProvider.setSelection(selectedRaceIdentifiers, AbstractTrackedRacesListComposite.this);
+                    AbstractTrackedRacesListComposite.this.raceSelectionProvider.setSelection(selectedRaceIdentifiers,
+                            AbstractTrackedRacesListComposite.this);
                 }
             }
         });
         HorizontalPanel trackedRacesButtonPanel = new HorizontalPanel();
         trackedRacesButtonPanel.setSpacing(10);
         panel.add(trackedRacesButtonPanel);
-        
+
         btnRefresh = new Button(stringMessages.refresh());
         btnRefresh.ensureDebugId("Refresh");
         btnRefresh.addClickHandler(new ClickHandler() {
@@ -187,21 +188,17 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
             }
         });
         trackedRacesButtonPanel.add(btnRefresh);
-        
-        addControlButtons(trackedRacesButtonPanel);
-        
-    }
 
+        addControlButtons(trackedRacesButtonPanel);
+
+    }
 
     abstract protected void makeControlsReactToSelectionChange(List<RaceDTO> selectedRaces);
 
-
     abstract protected void addControlButtons(HorizontalPanel trackedRacesButtonPanel);
 
-
     private ListHandler<RaceDTO> setupTableColumns(final StringMessages stringMessages) {
-        ListHandler<RaceDTO> columnSortHandler = new ListHandler<RaceDTO>(
-                raceList.getList());
+        ListHandler<RaceDTO> columnSortHandler = new ListHandler<RaceDTO>(raceList.getList());
         TextColumn<RaceDTO> regattaNameColumn = new TextColumn<RaceDTO>() {
             @Override
             public String getValue(RaceDTO raceDTO) {
@@ -283,7 +280,8 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
                     return 0;
                 }
                 int val = -1;
-                val = (t1 != null && t2 != null && ascending) ? (t1.name.compareTo(t2.name)) : -(t2.name.compareTo(t1.name));
+                val = (t1 != null && t2 != null && ascending) ? (t1.name.compareTo(t2.name)) : -(t2.name
+                        .compareTo(t1.name));
                 return val;
             }
 
@@ -297,8 +295,7 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
             @Override
             public String getValue(RaceDTO raceDTO) {
                 if (raceDTO.startOfRace != null) {
-                    return dateFormatter.render(raceDTO.startOfRace) + " "
-                            + timeFormatter.render(raceDTO.startOfRace);
+                    return dateFormatter.render(raceDTO.startOfRace) + " " + timeFormatter.render(raceDTO.startOfRace);
                 }
 
                 return "";
@@ -364,7 +361,7 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
                 return "";
             }
         };
-        
+
         raceTable.addColumn(regattaNameColumn, stringMessages.regatta());
         raceTable.addColumn(boatClassNameColumn, stringMessages.boatClass());
         raceTable.addColumn(raceNameColumn, stringMessages.race());
@@ -372,12 +369,11 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
         raceTable.addColumn(raceTrackedColumn, stringMessages.tracked());
         raceTable.addColumn(hasWindDataColumn, "Wind data");
         raceTable.addColumn(hasGPSDataColumn, "GPS data");
-        
+
         raceTable.addColumn(raceLiveDelayColumn, stringMessages.delayInSeconds());
         return columnSortHandler;
     }
-    
-    
+
     private void fillRaceListFromAvailableRacesApplyingFilter() {
         String text = filterRacesTextbox.getText();
         List<String> wordsToFilter = Arrays.asList(text.split(" "));
@@ -405,7 +401,8 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
         }
         // now sort again according to selected criterion
         ColumnSortEvent.fire(raceTable, raceTable.getColumnSortList());
-        onRaceSelectionChange(raceSelectionProvider.getSelectedRaces()); // update selection based on underlying domain race selection model
+        onRaceSelectionChange(raceSelectionProvider.getSelectedRaces()); // update selection based on underlying domain
+                                                                         // race selection model
     }
 
     @Override
@@ -428,7 +425,7 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
     public SettingsDialogComponent<TrackedRacesSettings> getSettingsDialogComponent() {
         return new TrackedRacesSettingsDialogComponent<TrackedRacesSettings>(settings, stringMessages);
     }
-    
+
     @Override
     public void updateSettings(TrackedRacesSettings newSettings) {
         settings.setDelayToLiveInSeconds(newSettings.getDelayToLiveInSeconds());
@@ -466,16 +463,16 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
     public Widget getEntryWidget() {
         return this;
     }
-    
+
     public void addRaceSelectionChangeListener(RaceSelectionChangeListener listener) {
         this.raceSelectionProvider.addRaceSelectionChangeListener(listener);
     }
-    
+
     public RaceDTO getRaceByIdentifier(RaceIdentifier raceIdentifier) {
         RaceDTO result = null;
         if (raceList != null) {
             for (RaceDTO race : raceList.getList()) {
-                if(race.getRaceIdentifier().equals(raceIdentifier)) {
+                if (race.getRaceIdentifier().equals(raceIdentifier)) {
                     result = race;
                     break;
                 }
@@ -500,7 +497,8 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
         if (raceList != null) {
             for (RaceDTO race : raceList.getList()) {
                 String regattaName = race.getRegattaName();
-                if (regattaName.equals(raceIdentifier.getRegattaName()) && race.name.equals(raceIdentifier.getRaceName())) {
+                if (regattaName.equals(raceIdentifier.getRegattaName())
+                        && race.name.equals(raceIdentifier.getRaceName())) {
                     dontFireNextSelectionChangeEvent = true;
                     selectionModel.setSelected(race, true);
                     break;
@@ -510,8 +508,8 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
     }
 
     public void clearSelection() {
-        List<RegattaAndRaceIdentifier> emptySelection =  Collections.emptyList();
-        raceSelectionProvider.setSelection(emptySelection, /* listenersNotToNotify */ this);
+        List<RegattaAndRaceIdentifier> emptySelection = Collections.emptyList();
+        raceSelectionProvider.setSelection(emptySelection, /* listenersNotToNotify */this);
         if (raceList != null) {
             for (RaceDTO race : raceList.getList()) {
                 selectionModel.setSelected(race, false);
@@ -536,18 +534,29 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
             newAllRegattas.add(regatta);
             for (RaceDTO race : regatta.races) {
                 if (race != null) {
-                    newAllRaces.add(race);
-                    newAllRaceIdentifiers.add(race.getRaceIdentifier());
+                    if (raceIsToBeAddedToList(race)) {
+                        newAllRaces.add(race);
+                        newAllRaceIdentifiers.add(race.getRaceIdentifier());
+                    }
                 }
             }
         }
         allRaces = newAllRaces;
         fillRaceListFromAvailableRacesApplyingFilter();
-        raceSelectionProvider.setAllRaces(newAllRaceIdentifiers); // have this object be notified; triggers onRaceSelectionChange
+        raceSelectionProvider.setAllRaces(newAllRaceIdentifiers); // have this object be notified; triggers
+                                                                  // onRaceSelectionChange
     }
 
+    /**
+     * Allows applying some sort of filter to the process of adding races.
+     * Defaults to true in standard implementation. Override for custom behavior
+     * @param race
+     * @return
+     */
+    protected boolean raceIsToBeAddedToList(RaceDTO race) {
+        return true;
+    }
 
     abstract protected void makeControlsReactToFillRegattas(List<RegattaDTO> regattas);
-    
 
 }
