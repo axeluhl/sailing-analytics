@@ -25,7 +25,7 @@ public class PolarSheetsPanel extends FormPanel implements RaceSelectionChangeLi
 
     private FlowPanel mainPanel;
     private SailingServiceAsync sailingService;
-    private FilteredTrackedRacesList filteredTrackedRacesList;
+    private PolarSheetsTrackedRacesList polarSheetsTrackedRacesList;
     private ErrorReporter errorReporter;
     private StringMessages stringMessages;
     private RaceSelectionModel raceSelectionProvider;
@@ -50,30 +50,33 @@ public class PolarSheetsPanel extends FormPanel implements RaceSelectionChangeLi
         trackedRacesPanel.setWidth("100%");
         
         createFilteredTrackedList();
-        trackedRacesPanel.add(filteredTrackedRacesList);
+        trackedRacesPanel.add(polarSheetsTrackedRacesList);
         
-        Button polarSheetGenerationStartButton = createPolarSheetCalculationStartButton();
-        trackedRacesPanel.add(polarSheetGenerationStartButton);
         mainPanel.add(trackedRacesPanel);
     }
 
     private Button createPolarSheetCalculationStartButton() {
-        Button polarSheetGenerationStartButton = new Button("Generate Polar Sheet");
+        Button polarSheetGenerationStartButton = new Button(stringMessages.generatePolarSheet());
+        polarSheetGenerationStartButton.ensureDebugId("PolarSheetGeneration");
         polarSheetGenerationStartButton.addClickHandler(new ClickHandler() {
             
             @Override
             public void onClick(ClickEvent arg0) {
-                // TODO Auto-generated method stub
-                
+                startPolarSheetGeneration();
             }
         });
         return polarSheetGenerationStartButton;
     }
 
+    protected void startPolarSheetGeneration() {
+        // TODO Auto-generated method stub
+        
+    }
+
     private void createFilteredTrackedList() {
         raceSelectionProvider = new RaceSelectionModel();
-        filteredTrackedRacesList = new FilteredTrackedRacesList(sailingService, errorReporter, polarSheetsEntryPoint,
-                raceSelectionProvider, stringMessages, true, new RaceFilter(true, true));
+        polarSheetsTrackedRacesList = new PolarSheetsTrackedRacesList(sailingService, errorReporter, polarSheetsEntryPoint,
+                raceSelectionProvider, stringMessages, true, new RaceFilter(true, true), createPolarSheetCalculationStartButton());
         raceSelectionProvider.addRaceSelectionChangeListener(this);
     }
 
@@ -84,7 +87,7 @@ public class PolarSheetsPanel extends FormPanel implements RaceSelectionChangeLi
 
     @Override
     public void fillRegattas(List<RegattaDTO> regattas) {
-        filteredTrackedRacesList.fillRegattas(regattas);
+        polarSheetsTrackedRacesList.fillRegattas(regattas);
     }
 
 }

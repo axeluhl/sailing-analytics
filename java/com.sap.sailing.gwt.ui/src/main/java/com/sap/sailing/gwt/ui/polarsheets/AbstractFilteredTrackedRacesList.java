@@ -12,11 +12,11 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.RaceDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 
-public class FilteredTrackedRacesList extends AbstractTrackedRacesListComposite {
+public abstract class AbstractFilteredTrackedRacesList extends AbstractTrackedRacesListComposite {
     
     private RaceFilter filter;
 
-    public FilteredTrackedRacesList(SailingServiceAsync sailingService, ErrorReporter errorReporter,
+    public AbstractFilteredTrackedRacesList(SailingServiceAsync sailingService, ErrorReporter errorReporter,
             RegattaRefresher regattaRefresher, RaceSelectionProvider raceSelectionProvider,
             StringMessages stringMessages, boolean hasMultiSelection, RaceFilter filter) {
         super(sailingService, errorReporter, regattaRefresher, raceSelectionProvider, stringMessages, hasMultiSelection);
@@ -30,25 +30,6 @@ public class FilteredTrackedRacesList extends AbstractTrackedRacesListComposite 
         }
         return true;
     }
-
-    @Override
-    protected void makeControlsReactToSelectionChange(List<RaceDTO> selectedRaces) {
-        // TODO Auto-generated method stub
-        
-    }
-
-    @Override
-    protected void addControlButtons(HorizontalPanel trackedRacesButtonPanel) {
-        // TODO Auto-generated method stub
-        
-    }
-
-    @Override
-    protected void makeControlsReactToFillRegattas(List<RegattaDTO> regattas) {
-        // TODO Auto-generated method stub
-        
-    }
-
   
 
 }
