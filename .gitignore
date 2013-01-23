@@ -16,3 +16,6 @@ sailing_debug0*
 /mobile/com.sap.sailing.racecommittee.glue/gen/*
 /mobile/com.sap.sailing.racecommittee.glue/bin
 /mobile/com.sap.sailing.racecommittee.glue/gen
+/mobile/com.sap.sailing.racecommittee.glue/bin/com.sap.sailing.racecommittee.glue.jar
+/mobile/com.sap.sailing.racecommittee.glue/bin/jarlist.cache
+/java/com.sap.sailing.server.gateway.serialization.test/.settings/*.prefs

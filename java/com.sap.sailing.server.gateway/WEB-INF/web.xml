@@ -16,7 +16,7 @@
 	
 	<servlet>
 		<servlet-name>RCRegattas</servlet-name>
-		<servlet-class>com.sap.sailing.server.gateway.impl.RegattasRaceCommitteeServlet</servlet-class>
+		<servlet-class>com.sap.sailing.server.gateway.impl.rc.RegattasRaceJsonExportServlet</servlet-class>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>RCRegattas</servlet-name>
@@ -25,17 +25,16 @@
 	
 	<servlet>
 		<servlet-name>RCEvents</servlet-name>
-		<servlet-class>com.sap.sailing.server.gateway.impl.EventsRaceCommitteeServlet</servlet-class>
+		<servlet-class>com.sap.sailing.server.gateway.impl.rc.EventsJsonExportServlet</servlet-class>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>RCEvents</servlet-name>
 		<url-pattern>/rc/events</url-pattern>
 	</servlet-mapping>
 	
-	
 	<servlet>
 		<servlet-name>RCEventTrack</servlet-name>
-		<servlet-class>com.sap.sailing.server.gateway.impl.EventTrackRaceCommitteeServlet</servlet-class>
+		<servlet-class>com.sap.sailing.server.gateway.impl.rc.EventTrackJsonExportServlet</servlet-class>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>RCEventTrack</servlet-name>

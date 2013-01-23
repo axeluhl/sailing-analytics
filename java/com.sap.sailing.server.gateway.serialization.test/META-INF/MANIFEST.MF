@@ -1,0 +1,14 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: com.sap.sailing.server.gateway.serialization.test
+Bundle-SymbolicName: com.sap.sailing.server.gateway.serialization.test
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: SAP
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Require-Bundle: com.sap.sailing.server.gateway.serialization;bundle-version="1.0.0",
+ com.sap.sailing.domain;bundle-version="1.0.0",
+ com.sap.sailing.domain.common;bundle-version="1.0.0",
+ org.junit4;bundle-version="4.8.2"
+Import-Package: org.json.simple
+Bundle-ClassPath: libs/mockito-all-1.9.5.jar,
+ .

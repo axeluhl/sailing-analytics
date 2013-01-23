@@ -5,30 +5,26 @@ import org.json.simple.JSONObject;
 import com.sap.sailing.domain.racecommittee.RaceCommitteeEvent;
 import com.sap.sailing.domain.racecommittee.RaceCommitteeFlagEvent;
 
-/**
- * Implements JsonSerializer<RaceCommitteeEvent> to enable a consistent interface when used
- * with {@link RaceCommitteeEventSerializerFactory}, see type-safeness of generics.
- */
-public class RaceCommitteeFlagEventSerializer implements JsonSerializer<RaceCommitteeEvent> {
+public class RaceCommitteeFlagEventSerializer extends RaceCommitteeEventSerializer {
+	public static final String VALUE_CLASS = RaceCommitteeFlagEvent.class.getSimpleName();
 	public static final String FIELD_UPPER_FLAG = "upperFlag";
 	public static final String FIELD_LOWER_FLAG = "lowerFlag";
 	public static final String FIELD_DISPLAYED = "displayed";
 	
-	private JsonSerializer<RaceCommitteeEvent> baseSerializer;
-	
-	public RaceCommitteeFlagEventSerializer(JsonSerializer<RaceCommitteeEvent> baseSerializer) {
-		this.baseSerializer = baseSerializer;
+	@Override
+	protected String getClassFieldValue() {
+		return VALUE_CLASS;
 	}
 	
 	@Override
 	public JSONObject serialize(RaceCommitteeEvent object) {
-		// We have to cast here, see class comment
 		RaceCommitteeFlagEvent flagEvent = (RaceCommitteeFlagEvent) object;
 		
-		JSONObject result = baseSerializer.serialize(flagEvent);
+		JSONObject result = super.serialize(flagEvent);
 		result.put(FIELD_UPPER_FLAG, flagEvent.getUpperFlag());
 		result.put(FIELD_LOWER_FLAG, flagEvent.getLowerFlag());
 		result.put(FIELD_DISPLAYED, flagEvent.isDisplayed());
+		
 		return result;
 	}
 

@@ -5,23 +5,26 @@ import com.sap.sailing.domain.racecommittee.RaceCommitteeFlagEvent;
 import com.sap.sailing.domain.racecommittee.RaceCommitteeStartTimeEvent;
 
 public class RaceCommitteeEventSerializerFactory {
-	private JsonSerializer<RaceCommitteeEvent> baseEventSerializer;
-	
+
+	private JsonSerializer<RaceCommitteeEvent> flagEventSerializer;
+	private JsonSerializer<RaceCommitteeEvent> startTimeSerializer;
+
 	public RaceCommitteeEventSerializerFactory() {
-		this.baseEventSerializer = new RaceCommitteeEventSerializer();
+		flagEventSerializer = new RaceCommitteeFlagEventSerializer();
+		startTimeSerializer = new RaceCommitteeStartTimeEventSerializer();
 	}
-	
-	public JsonSerializer<RaceCommitteeEvent> getSerializer(RaceCommitteeEvent event) {
+
+	public JsonSerializer<RaceCommitteeEvent> getSerializer(
+			RaceCommitteeEvent event) {
 		if (event instanceof RaceCommitteeFlagEvent) {
-			return new RaceCommitteeFlagEventSerializer(baseEventSerializer);
+			return flagEventSerializer;
+		} else if (event instanceof RaceCommitteeStartTimeEvent) {
+			return startTimeSerializer;
 		}
-		if (event instanceof RaceCommitteeStartTimeEvent) {
-			return new RaceCommitteeStartTimeEventSerializer(baseEventSerializer);
-		}
-		throw new UnsupportedOperationException(
-				String.format(
-						"There is no serializer defined for event type %s", 
-						event.getClass().getName()));
+
+		throw new UnsupportedOperationException(String.format(
+				"There is no serializer defined for event type %s", event
+						.getClass().getName()));
 	}
-	
+
 }
