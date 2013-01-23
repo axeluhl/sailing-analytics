@@ -5,7 +5,6 @@ import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.sap.sailing.domain.common.DetailType;
-import com.sap.sailing.domain.common.SortingOrder;
 import com.sap.sailing.gwt.ui.client.DetailTypeFormatter;
 import com.sap.sailing.gwt.ui.client.NumberFormatterFactory;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
@@ -25,15 +24,8 @@ public class FormattedDoubleLegDetailColumn extends LegDetailColumn<Double, Stri
      * @param columnStyle
      */
     public FormattedDoubleLegDetailColumn(DetailType detailType, LegDetailField<Double> field, String headerStyle, String columnStyle) {
-        this(DetailTypeFormatter.format(detailType), DetailTypeFormatter.getUnit(detailType).isEmpty() ? "" : "[" + DetailTypeFormatter.getUnit(detailType) + "]",
-                field, detailType.getPrecision(), detailType.getDefaultSortingOrder(), headerStyle, columnStyle);
-    }
-
-    public FormattedDoubleLegDetailColumn(String title, String unit,
-            com.sap.sailing.gwt.ui.leaderboard.LegDetailColumn.LegDetailField<Double> field, int decimals, SortingOrder preferredSortingOrder,
-            String headerStyle, String columnStyle) {
-        super(title, unit, field, new TextCell(), preferredSortingOrder, headerStyle, columnStyle);
-        formatter = NumberFormatterFactory.getDecimalFormat(decimals);
+        super(detailType, field, new TextCell(), headerStyle, columnStyle);
+        formatter = NumberFormatterFactory.getDecimalFormat(detailType.getPrecision());
         this.minMaxRenderer = new MinMaxRenderer(this, getComparator());
     }
 

@@ -67,9 +67,7 @@ public interface StringMessages extends Messages {
     String expand();
     String leg();
     String distanceInMeters();
-    String distanceInMetersUnit();
     String averageSpeedInKnots();
-    String averageSpeedInKnotsUnit();
     String rankGain();
     String sapSailingAnalytics();
     String leaderboard();
@@ -78,16 +76,11 @@ public interface StringMessages extends Messages {
     String settings();
     String selectAtLeastOneLegDetail();
     String currentSpeedOverGroundInKnots();
-    String currentSpeedOverGroundInKnotsUnit();
     String estimatedTimeToNextWaypointInSeconds();
-    String estimatedTimeToNextWaypointInSecondsUnit();
     String gapToLeaderInSeconds();
-    String gapToLeaderInSecondsUnit();
     String velocityMadeGoodInKnots();
-    String velocityMadeGoodInKnotsUnit();
     String windwardDistanceToGoInMeters();
     String windwardDistanceToLeaderInMeters();
-    String windwardDistanceToGoInMetersUnit();
     String name();
     String leaveEmptyForDefault();
     String trackNewEvent();
@@ -458,4 +451,5 @@ public interface StringMessages extends Messages {
     String sideToWhichMarkAtLegStartWasRounded();
     String raceIsLive(String raceName);
     String racesAreLive(String raceNames);
+    String knotsUnit();
 }

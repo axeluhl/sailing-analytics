@@ -4,9 +4,10 @@ import com.google.gwt.cell.client.Cell;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.Header;
 import com.google.gwt.user.cellview.client.SafeHtmlHeader;
+import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.InvertibleComparator;
-import com.sap.sailing.domain.common.SortingOrder;
 import com.sap.sailing.domain.common.impl.InvertibleComparatorAdapter;
+import com.sap.sailing.gwt.ui.client.DetailTypeFormatter;
 import com.sap.sailing.gwt.ui.shared.LeaderboardRowDTO;
 
 public abstract class LegDetailColumn<FieldType extends Comparable<?>, RenderingType> extends
@@ -26,12 +27,11 @@ public abstract class LegDetailColumn<FieldType extends Comparable<?>, Rendering
         T get(LeaderboardRowDTO row);
     }
 
-    protected LegDetailColumn(String title, String unit, LegDetailField<FieldType> field, Cell<RenderingType> cell,
-            SortingOrder preferredSortingOrder, String headerStyle, String columnStyle) {
-        super(cell, preferredSortingOrder);
+    protected LegDetailColumn(DetailType detailType, LegDetailField<FieldType> field, Cell<RenderingType> cell, String headerStyle, String columnStyle) {
+        super(cell, detailType.getDefaultSortingOrder());
         setHorizontalAlignment(ALIGN_CENTER);
-        this.title = title;
-        this.unit = unit;
+        this.title = DetailTypeFormatter.format(detailType);
+        this.unit = DetailTypeFormatter.getUnit(detailType).isEmpty() ? "" : "[" + DetailTypeFormatter.getUnit(detailType) + "]";
         this.field = field;
         this.headerStyle = headerStyle;
         this.columnStyle = columnStyle;
