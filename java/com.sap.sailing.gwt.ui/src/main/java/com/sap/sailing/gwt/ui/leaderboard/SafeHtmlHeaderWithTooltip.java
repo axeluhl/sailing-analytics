@@ -9,7 +9,7 @@ public class SafeHtmlHeaderWithTooltip extends SafeHtmlHeader {
     private static SafeHtml buildHeader(SafeHtml title, String tooltip) {
         //Escaping the tooltip to be able, to add it in the div safely with standard string concatenation.
         //If you try to append it with the SafeHtmlBuilder methods, an exception will be thrown (because of the unclosed div).
-        String safeTooltip = new SafeHtmlBuilder().appendEscapedLines(tooltip).toSafeHtml().asString();
+        String safeTooltip = new SafeHtmlBuilder().appendEscaped(tooltip).toSafeHtml().asString();
         return new SafeHtmlBuilder().appendHtmlConstant("<span title=\"" + safeTooltip + "\">")
                    .append(title).appendHtmlConstant("</ span>").toSafeHtml();
     }

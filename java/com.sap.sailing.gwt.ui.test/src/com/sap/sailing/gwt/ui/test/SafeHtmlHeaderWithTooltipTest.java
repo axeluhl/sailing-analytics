@@ -13,15 +13,15 @@ public class SafeHtmlHeaderWithTooltipTest {
     public void textCreation() {
         SafeHtmlBuilder titleBuilder = new SafeHtmlBuilder().appendEscaped("Title Text");
         SafeHtmlHeaderWithTooltip header = new SafeHtmlHeaderWithTooltip(titleBuilder.toSafeHtml(), "Tooltip");
-        assertEquals("<div title=\"Tooltip\">Title Text</ div>", header.getValue().asString());
+        assertEquals("<span title=\"Tooltip\">Title Text</ span>", header.getValue().asString());
         
         titleBuilder = new SafeHtmlBuilder().appendEscapedLines("Title\nText");
         header =  new SafeHtmlHeaderWithTooltip(titleBuilder.toSafeHtml(), "Tooltip");
-        assertEquals("<div title=\"Tooltip\">Title<br>Text</ div>", header.getValue().asString());
+        assertEquals("<span title=\"Tooltip\">Title<br>Text</ span>", header.getValue().asString());
         
         titleBuilder = new SafeHtmlBuilder().appendEscaped("Title Text");
         header = new SafeHtmlHeaderWithTooltip(titleBuilder.toSafeHtml(), "Tooltip with\nline break.");
-        assertEquals("<div title=\"Tooltip with<br>line break.\">Title Text</ div>", header.getValue().asString());
+        assertEquals("<span title=\"Tooltip with\nline break.\">Title Text</ span>", header.getValue().asString());
     }
 
 }

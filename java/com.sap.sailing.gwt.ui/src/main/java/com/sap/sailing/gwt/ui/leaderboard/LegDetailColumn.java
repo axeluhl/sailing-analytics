@@ -20,6 +20,7 @@ public abstract class LegDetailColumn<FieldType extends Comparable<?>, Rendering
     private final String headerStyle;
     private final String columnStyle;
     private final String unit;
+    private final String tooltip;
     
     private SafeHtmlHeader header;
 
@@ -32,6 +33,7 @@ public abstract class LegDetailColumn<FieldType extends Comparable<?>, Rendering
         setHorizontalAlignment(ALIGN_CENTER);
         this.title = DetailTypeFormatter.format(detailType);
         this.unit = DetailTypeFormatter.getUnit(detailType).isEmpty() ? "" : "[" + DetailTypeFormatter.getUnit(detailType) + "]";
+        tooltip = DetailTypeFormatter.getTooltip(detailType);
         this.field = field;
         this.headerStyle = headerStyle;
         this.columnStyle = columnStyle;
@@ -45,7 +47,7 @@ public abstract class LegDetailColumn<FieldType extends Comparable<?>, Rendering
         } else {
             titleBuilder.appendEscaped(unit);
         }
-        header = new SafeHtmlHeaderWithTooltip(titleBuilder.toSafeHtml(), "");
+        header = new SafeHtmlHeaderWithTooltip(titleBuilder.toSafeHtml(), tooltip);
     }
 
     protected String getTitle() {

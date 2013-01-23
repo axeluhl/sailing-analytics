@@ -48,7 +48,7 @@ public class DetailTypeFormatter {
         case RACE_AVERAGE_CROSS_TRACK_ERROR_IN_METERS:
             return stringMessages.averageCrossTrackErrorInMeters();
         case WINDWARD_DISTANCE_TO_OVERALL_LEADER:
-            return stringMessages.windwardDistanceToLeader();
+            return stringMessages.windwardDistanceToLeaderInMeters();
         case HEAD_UP:
             return stringMessages.headUp();
         case BEAR_AWAY:
@@ -138,7 +138,7 @@ public class DetailTypeFormatter {
         case TOTAL_TIME_SAILED_REACHING_IN_SECONDS:
             return stringMessages.hhmmssUnit();
 
-            // Case for detail types without unit, so that an empty string is returned.
+        // Cases for detail types without unit, so that an empty string is returned.
         case RACE_RANK:
         case CURRENT_LEG:
         case TACK:
@@ -158,8 +158,96 @@ public class DetailTypeFormatter {
         }
     }
     
+    /**
+     * Returns a tooltip text for the given detail type or
+     * throws an UnsupportedOperationException if it isn't supported.
+     * @param detailType
+     * @return A tooltip string for the given detail type.
+     */
     public static String getTooltip(DetailType detailType) {
-        return "";
+        switch (detailType) {
+        case AVERAGE_CROSS_TRACK_ERROR_IN_METERS:
+            break;
+        case BEAR_AWAY:
+            break;
+        case GAP_CHANGE_SINCE_LEG_START_IN_SECONDS:
+            break;
+        case HEAD_UP:
+            break;
+        case MARK_PASSING:
+            break;
+        case RACE_AVERAGE_CROSS_TRACK_ERROR_IN_METERS:
+            break;
+        case SIDE_TO_WHICH_MARK_AT_LEG_START_WAS_ROUNDED:
+            break;
+        case AVERAGE_JIBE_LOSS_IN_METERS:
+            return stringMessages.averageJibeLossInMetersTooltip();
+        case AVERAGE_MANEUVER_LOSS_IN_METERS:
+            return stringMessages.averageManeuverLossInMetersTooltip();
+        case AVERAGE_TACK_LOSS_IN_METERS:
+            return stringMessages.averageTackLossInMetersTooltip();
+        case CURRENT_LEG:
+            return stringMessages.currentLegTooltip();
+        case DISPLAY_LEGS:
+            return "";
+        case DISTANCE_TRAVELED:
+            return stringMessages.distanceTraveledTooltip();
+        case AVERAGE_SPEED_OVER_GROUND_IN_KNOTS:
+            return stringMessages.averageSpeedInKnotsTooltip();
+        case ESTIMATED_TIME_TO_NEXT_WAYPOINT_IN_SECONDS:
+            return stringMessages.estimatedTimeToNextWaypointInSecondsTooltip();
+        case GAP_TO_LEADER_IN_SECONDS:
+            return stringMessages.gapToLeaderInSecondsTooltip();
+        case JIBE:
+            return stringMessages.jibeTooltip();
+        case MAXIMUM_SPEED_OVER_GROUND_IN_KNOTS:
+            return stringMessages.maximumSpeedOverGroundInKnotsTooltip();
+        case NUMBER_OF_MANEUVERS:
+            return stringMessages.numberOfManeuversTooltip();
+        case PENALTY_CIRCLE:
+            return stringMessages.penaltyCircleTooltip();
+        case RACE_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS:
+            return stringMessages.raceAverageSpeedInKnotsTooltip();
+        case CURRENT_SPEED_OVER_GROUND_IN_KNOTS:
+            return stringMessages.currentSpeedOverGroundInKnotsTooltip();
+        case RACE_CURRENT_SPEED_OVER_GROUND_IN_KNOTS:
+            return stringMessages.currentSpeedOverGroundInKnotsTooltip();
+        case RACE_DISTANCE_TO_LEADER_IN_METERS:
+            return stringMessages.windwardDistanceToLeaderInMetersTooltip();
+        case WINDWARD_DISTANCE_TO_OVERALL_LEADER:
+            return stringMessages.windwardDistanceToLeaderInMetersTooltip();
+        case RACE_DISTANCE_TRAVELED:
+            return stringMessages.raceDistanceTraveledTooltip();
+        case RACE_GAP_TO_LEADER_IN_SECONDS:
+            return stringMessages.gapToLeaderInSecondsTooltip();
+        case RACE_RANK:
+            return stringMessages.rankTooltip();
+        case RANK_GAIN:
+            return stringMessages.rankGainTooltip();
+        case TACK:
+            return stringMessages.tackTooltip();
+        case TIME_TRAVELED:
+            return stringMessages.timeTooltip();
+        case TOTAL_TIME_SAILED_DOWNWIND_IN_SECONDS:
+            return stringMessages.totalTimeSailedDownwindInSecondsTooltip();
+        case TOTAL_TIME_SAILED_IN_SECONDS:
+            return stringMessages.totalTimeSailedInSecondsTooltip();
+        case TOTAL_TIME_SAILED_REACHING_IN_SECONDS:
+            return stringMessages.totalTimeSailedReachingInSecondsTooltip();
+        case TOTAL_TIME_SAILED_UPWIND_IN_SECONDS:
+            return stringMessages.totalTimeSailedUpwindInSecondsTooltip();
+        case WINDWARD_DISTANCE_TO_GO_IN_METERS:
+            return stringMessages.windwardDistanceToGoInMetersTooltip();
+            
+        default:
+            // Throwing an exception to get notificated if an implementation of
+            // an detail type is missing.
+//            throw new UnsupportedOperationException("Theres currently no support for the enum value '" + detailType
+//                    + "' in this method.");
+            return "Unsupported";
+        }
+        
+        return "Empty Tooltip";
     }
 
     public static NumberFormat getNumberFormat(DetailType detailType) {
