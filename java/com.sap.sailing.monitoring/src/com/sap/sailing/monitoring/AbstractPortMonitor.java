@@ -104,6 +104,7 @@ public abstract class AbstractPortMonitor extends Thread {
                                     if (code != 200) {
                                         throw new ConnectException("Could not successfully connect to endpoint " + currentendpoint.toString());
                                     }
+                                    conn.disconnect();
                                 }
                                 log.finest("Connection succeeded to " + currentendpoint.toString());
                                 handleConnection(currentendpoint);
