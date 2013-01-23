@@ -187,7 +187,6 @@ public interface StringMessages extends Messages {
     String actionRaceUnlink();
     String actionRaceRemove();
     String filterLeaderboardsByName();
-    String windwardDistanceToLeader();
     String actions();
     String islinked();
     String yes();
@@ -457,4 +456,24 @@ public interface StringMessages extends Messages {
     String averageTackLossInMetersTooltip();
     String currentLegTooltip();
     String distanceTraveledTooltip();
+    String estimatedTimeToNextWaypointInSecondsTooltip();
+    String gapToLeaderInSecondsTooltip();
+    String averageSpeedInKnotsTooltip();
+    String jibeTooltip();
+    String maximumSpeedOverGroundInKnotsTooltip();
+    String numberOfManeuversTooltip();
+    String penaltyCircleTooltip();
+    String raceAverageSpeedInKnotsTooltip();
+    String currentSpeedOverGroundInKnotsTooltip();
+    String windwardDistanceToLeaderInMetersTooltip();
+    String raceDistanceTraveledTooltip();
+    String rankTooltip();
+    String rankGainTooltip();
+    String tackTooltip();
+    String timeTooltip();
+    String totalTimeSailedDownwindInSecondsTooltip();
+    String totalTimeSailedInSecondsTooltip();
+    String totalTimeSailedReachingInSecondsTooltip();
+    String totalTimeSailedUpwindInSecondsTooltip();
+    String windwardDistanceToGoInMetersTooltip();
 }
