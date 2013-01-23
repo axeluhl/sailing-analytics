@@ -14,3 +14,5 @@ sailing_debug0*
 /mobile/com.sap.sailing.racecommittee.glue/.settings/org.eclipse.jdt.core.prefs
 /mobile/com.sap.sailing.racecommittee.glue/bin/*
 /mobile/com.sap.sailing.racecommittee.glue/gen/*
+/mobile/com.sap.sailing.racecommittee.glue/bin
+/mobile/com.sap.sailing.racecommittee.glue/gen
