@@ -84,7 +84,6 @@ public class TrackedRacesListComposite extends AbstractTrackedRacesListComposite
                     public void onFailure(Throwable caught) {
                         errorReporter.reportError("Exception trying to stop tracking race " + race.name + "in regatta "
                                 + race.getRegattaName() + ": " + caught.getMessage());
-                }
                     }
 
                     @Override
