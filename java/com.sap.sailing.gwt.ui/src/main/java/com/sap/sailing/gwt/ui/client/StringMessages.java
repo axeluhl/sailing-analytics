@@ -483,4 +483,5 @@ public interface StringMessages extends Messages {
     String velocityMadeGoodInKnotsTooltip();
     String sideToWhichMarkAtLegStartWasRoundedTooltip();
     String generatePolarSheet();
+    String polarSheetChart();
 }

@@ -6,6 +6,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FormPanel;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
@@ -40,20 +41,31 @@ public class PolarSheetsPanel extends FormPanel implements RaceSelectionChangeLi
         this.mainPanel = new FlowPanel();
         mainPanel.setSize("100%", "100%");
         setWidget(mainPanel);
-        addFilteredTrackedRacesList();
+        HorizontalPanel splitPanel = createSplitPanel();
+        addFilteredTrackedRacesList(splitPanel);
+        addPolarSheetsChartPanel(splitPanel);
     }
 
-    private void addFilteredTrackedRacesList() {
+    private void addPolarSheetsChartPanel(HorizontalPanel splitPanel) {
+
+    }
+
+    private HorizontalPanel createSplitPanel() {
+        HorizontalPanel splitPanel = new HorizontalPanel();
+        splitPanel.setSize("100%", "100%");
+        return splitPanel;
+    }
+
+    private void addFilteredTrackedRacesList(HorizontalPanel splitPanel) {
         VerticalPanel trackedRacesPanel = new VerticalPanel();
         trackedRacesPanel.setWidth("100%");
 
-        createFilteredTrackedList();
-        trackedRacesPanel.add(polarSheetsTrackedRacesList);
+        trackedRacesPanel.add(createPolarSheetsTrackedRacesList());
 
-        mainPanel.add(trackedRacesPanel);
+        splitPanel.add(trackedRacesPanel);
     }
 
-    private void createFilteredTrackedList() {
+    private PolarSheetsTrackedRacesList createPolarSheetsTrackedRacesList() {
         raceSelectionProvider = new RaceSelectionModel();
         ClickHandler polarSheetsGenerationButtonClickHandler = new ClickHandler() {
 
@@ -66,6 +78,7 @@ public class PolarSheetsPanel extends FormPanel implements RaceSelectionChangeLi
                 polarSheetsEntryPoint, raceSelectionProvider, stringMessages, true, new RaceFilter(true, true),
                 polarSheetsGenerationButtonClickHandler);
         raceSelectionProvider.addRaceSelectionChangeListener(this);
+        return polarSheetsTrackedRacesList;
     }
 
     protected void startPolarSheetGeneration() {
