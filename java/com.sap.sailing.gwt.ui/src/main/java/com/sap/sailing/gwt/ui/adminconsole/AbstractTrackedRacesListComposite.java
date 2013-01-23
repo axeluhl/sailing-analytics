@@ -22,9 +22,9 @@ import com.google.gwt.text.client.DateTimeFormatRenderer;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
+import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.ColumnSortList;
 import com.google.gwt.user.cellview.client.TextColumn;
-import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
@@ -38,9 +38,9 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.SelectionChangeEvent;
+import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.google.gwt.view.client.SelectionModel;
 import com.google.gwt.view.client.SingleSelectionModel;
-import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
@@ -151,13 +151,13 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
         AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
         raceTable = new CellTable<RaceDTO>(/* pageSize */10000, tableRes);
         raceTable.ensureDebugId("TrackedRaces");
-        ListHandler<RaceDTO> columnSortHandler = setupTableColumns(stringMessages);
+        setupTableColumns(stringMessages);
         raceTable.setWidth("300px");
         raceTable.setSelectionModel(selectionModel);
         raceTable.setVisible(false);
         panel.add(raceTable);
         raceList.addDataDisplay(raceTable);
-        raceTable.addColumnSortHandler(columnSortHandler);
+
         raceTable.getSelectionModel().addSelectionChangeHandler(new Handler() {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
@@ -197,7 +197,7 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
 
     abstract protected void addControlButtons(HorizontalPanel trackedRacesButtonPanel);
 
-    private ListHandler<RaceDTO> setupTableColumns(final StringMessages stringMessages) {
+    private void setupTableColumns(final StringMessages stringMessages) {
         ListHandler<RaceDTO> columnSortHandler = new ListHandler<RaceDTO>(raceList.getList());
         TextColumn<RaceDTO> regattaNameColumn = new TextColumn<RaceDTO>() {
             @Override
@@ -371,7 +371,8 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
         raceTable.addColumn(hasGPSDataColumn, "GPS data");
 
         raceTable.addColumn(raceLiveDelayColumn, stringMessages.delayInSeconds());
-        return columnSortHandler;
+
+        raceTable.addColumnSortHandler(columnSortHandler);
     }
 
     private void fillRaceListFromAvailableRacesApplyingFilter() {
@@ -548,8 +549,9 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
     }
 
     /**
-     * Allows applying some sort of filter to the process of adding races.
-     * Defaults to true in standard implementation. Override for custom behavior
+     * Allows applying some sort of filter to the process of adding races. Defaults to true in standard implementation.
+     * Override for custom behavior
+     * 
      * @param race
      * @return
      */

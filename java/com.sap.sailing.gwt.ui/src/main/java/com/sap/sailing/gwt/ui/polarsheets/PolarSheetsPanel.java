@@ -4,7 +4,6 @@ import java.util.List;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -17,8 +16,7 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 
-public class PolarSheetsPanel extends FormPanel implements RaceSelectionChangeListener,
-        RegattaDisplayer {
+public class PolarSheetsPanel extends FormPanel implements RaceSelectionChangeListener, RegattaDisplayer {
 
     // TODO UI stuff
     public static final String POLARSHEETS_STYLE = "polarSheets";
@@ -48,36 +46,30 @@ public class PolarSheetsPanel extends FormPanel implements RaceSelectionChangeLi
     private void addFilteredTrackedRacesList() {
         VerticalPanel trackedRacesPanel = new VerticalPanel();
         trackedRacesPanel.setWidth("100%");
-        
+
         createFilteredTrackedList();
         trackedRacesPanel.add(polarSheetsTrackedRacesList);
-        
+
         mainPanel.add(trackedRacesPanel);
-    }
-
-    private Button createPolarSheetCalculationStartButton() {
-        Button polarSheetGenerationStartButton = new Button(stringMessages.generatePolarSheet());
-        polarSheetGenerationStartButton.ensureDebugId("PolarSheetGeneration");
-        polarSheetGenerationStartButton.addClickHandler(new ClickHandler() {
-            
-            @Override
-            public void onClick(ClickEvent arg0) {
-                startPolarSheetGeneration();
-            }
-        });
-        return polarSheetGenerationStartButton;
-    }
-
-    protected void startPolarSheetGeneration() {
-        // TODO Auto-generated method stub
-        
     }
 
     private void createFilteredTrackedList() {
         raceSelectionProvider = new RaceSelectionModel();
-        polarSheetsTrackedRacesList = new PolarSheetsTrackedRacesList(sailingService, errorReporter, polarSheetsEntryPoint,
-                raceSelectionProvider, stringMessages, true, new RaceFilter(true, true), createPolarSheetCalculationStartButton());
+        ClickHandler polarSheetsGenerationButtonClickHandler = new ClickHandler() {
+
+            @Override
+            public void onClick(ClickEvent arg0) {
+                startPolarSheetGeneration();
+            }
+        };
+        polarSheetsTrackedRacesList = new PolarSheetsTrackedRacesList(sailingService, errorReporter,
+                polarSheetsEntryPoint, raceSelectionProvider, stringMessages, true, new RaceFilter(true, true),
+                polarSheetsGenerationButtonClickHandler);
         raceSelectionProvider.addRaceSelectionChangeListener(this);
+    }
+
+    protected void startPolarSheetGeneration() {
+        // TODO Auto-generated method stub
     }
 
     @Override

@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.ui.polarsheets;
 
 import java.util.List;
 
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
@@ -18,16 +19,19 @@ public class PolarSheetsTrackedRacesList extends AbstractFilteredTrackedRacesLis
 
     public PolarSheetsTrackedRacesList(SailingServiceAsync sailingService, ErrorReporter errorReporter,
             RegattaRefresher regattaRefresher, RaceSelectionProvider raceSelectionProvider,
-            StringMessages stringMessages, boolean hasMultiSelection, RaceFilter filter, Button btnPolarSheetGeneration) {
-        super(sailingService, errorReporter, regattaRefresher, raceSelectionProvider, stringMessages, hasMultiSelection, filter);
-        this.btnPolarSheetGeneration = btnPolarSheetGeneration;
-    }
-    
-    @Override
-    protected void addControlButtons(HorizontalPanel trackedRacesButtonPanel) {
-        trackedRacesButtonPanel.add(btnPolarSheetGeneration);
+            StringMessages stringMessages, boolean hasMultiSelection, RaceFilter filter,
+            ClickHandler polarSheetsGenerationButtonClickedHandler) {
+        super(sailingService, errorReporter, regattaRefresher, raceSelectionProvider, stringMessages,
+                hasMultiSelection, filter);
+        btnPolarSheetGeneration.addClickHandler(polarSheetsGenerationButtonClickedHandler);
     }
 
+    @Override
+    protected void addControlButtons(HorizontalPanel trackedRacesButtonPanel) {
+        btnPolarSheetGeneration = new Button(stringMessages.generatePolarSheet());
+        btnPolarSheetGeneration.ensureDebugId("PolarSheetGeneration");
+        trackedRacesButtonPanel.add(btnPolarSheetGeneration);
+    }
 
     @Override
     protected void makeControlsReactToSelectionChange(List<RaceDTO> selectedRaces) {
