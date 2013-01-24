@@ -20,11 +20,7 @@ public class KingOfTheUpwindColumn extends AbstractTimeInHoursMinutesSecondsColu
     }
 
     public KingOfTheUpwindColumn(StringMessages stringMessages, String headerStyle, String columnStyle) {
-        super(stringMessages.totalTimeSailedUpwindInSeconds(), "[" + stringMessages.hhmmssUnit() + "]",
-                new KingOfTheUpwindField(),
-                DetailType.TOTAL_TIME_SAILED_UPWIND_IN_SECONDS.getPrecision(),
-                DetailType.TOTAL_TIME_SAILED_UPWIND_IN_SECONDS.getDefaultSortingOrder(),
-                headerStyle, columnStyle);
+        super(DetailType.TOTAL_TIME_SAILED_UPWIND_IN_SECONDS, new KingOfTheUpwindField(), headerStyle, columnStyle);
     }
 
 }

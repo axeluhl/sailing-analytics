@@ -20,11 +20,7 @@ public class KingOfTheDownwindColumn extends AbstractTimeInHoursMinutesSecondsCo
     }
 
     public KingOfTheDownwindColumn(StringMessages stringMessages, String headerStyle, String columnStyle) {
-        super(stringMessages.totalTimeSailedDownwindInSeconds(), "[" + stringMessages.hhmmssUnit() + "]",
-                new KingOfTheDownwindField(),
-                DetailType.TOTAL_TIME_SAILED_DOWNWIND_IN_SECONDS.getPrecision(),
-                DetailType.TOTAL_TIME_SAILED_DOWNWIND_IN_SECONDS.getDefaultSortingOrder(),
-                headerStyle, columnStyle);
+        super(DetailType.TOTAL_TIME_SAILED_DOWNWIND_IN_SECONDS, new KingOfTheDownwindField(), headerStyle, columnStyle);
     }
 
 }

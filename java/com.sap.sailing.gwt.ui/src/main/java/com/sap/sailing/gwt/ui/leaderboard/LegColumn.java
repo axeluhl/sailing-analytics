@@ -138,9 +138,8 @@ public class LegColumn extends ExpandableSortableColumn<String> {
     }
     
     private class ManeuverCountLegDetailsColumn extends FormattedDoubleLegDetailColumn {
-        public ManeuverCountLegDetailsColumn(String title, String headerStyle, String columnStyle) {
-            super(title, /*unit*/null, /* field */ null, /* decimals */ 0, DetailType.NUMBER_OF_MANEUVERS.getDefaultSortingOrder(),
-                    headerStyle, columnStyle);
+        public ManeuverCountLegDetailsColumn(String headerStyle, String columnStyle) {
+            super(DetailType.NUMBER_OF_MANEUVERS, null, headerStyle, columnStyle);
         }
         
         @Override
@@ -272,7 +271,7 @@ public class LegColumn extends ExpandableSortableColumn<String> {
                 
         result.put(DetailType.RANK_GAIN, new RankGainColumn(stringMessages.rankGain(), new RankGain(), detailHeaderStyle, detailColumnStyle));
         
-        result.put(DetailType.NUMBER_OF_MANEUVERS, new ManeuverCountLegDetailsColumn(stringMessages.numberOfManeuvers(), detailHeaderStyle, detailColumnStyle));
+        result.put(DetailType.NUMBER_OF_MANEUVERS, new ManeuverCountLegDetailsColumn(detailHeaderStyle, detailColumnStyle));
         
         result.put(DetailType.TIME_TRAVELED,
                 new FormattedDoubleLegDetailColumn(DetailType.TIME_TRAVELED, new TimeTraveledInSeconds(), detailHeaderStyle, detailColumnStyle));

@@ -52,9 +52,9 @@ public class ManeuverDTO implements IsSerializable {
                 + ((int) this.directionChangeInDegrees) + " "+stringMessages.degreesShort()+" ("
                 + ((int) before.bearingInDegrees) + " deg -> " + ((int) after.bearingInDegrees) + " "+stringMessages.degreesShort()+")";
         String speedChange = stringMessages.speedChange() + ": " 
-                + NumberFormat.getDecimalFormat().format(after.speedInKnots - before.speedInKnots) + " "+stringMessages.averageSpeedInKnotsUnit()+" ("
-                + NumberFormat.getDecimalFormat().format(before.speedInKnots) + " "+stringMessages.averageSpeedInKnotsUnit()+" -> "
-                + NumberFormat.getDecimalFormat().format(after.speedInKnots) + " "+stringMessages.averageSpeedInKnotsUnit()+")";
+                + NumberFormat.getDecimalFormat().format(after.speedInKnots - before.speedInKnots) + " "+stringMessages.knotsUnit()+" ("
+                + NumberFormat.getDecimalFormat().format(before.speedInKnots) + " "+stringMessages.knotsUnit()+" -> "
+                + NumberFormat.getDecimalFormat().format(after.speedInKnots) + " "+stringMessages.knotsUnit()+")";
         String maneuverLoss = this.maneuverLossInMeters == null ? "" : ("; "+stringMessages.maneuverLoss()+": "+
                 NumberFormat.getDecimalFormat().format(this.maneuverLossInMeters)+"m");
         String maneuverTitle = timeAndManeuver + "; " + directionChange + "; " + speedChange + maneuverLoss;
