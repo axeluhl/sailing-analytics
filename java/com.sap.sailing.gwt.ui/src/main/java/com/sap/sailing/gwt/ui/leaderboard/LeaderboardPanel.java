@@ -1433,19 +1433,19 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         result.put(DetailType.MAXIMUM_SPEED_OVER_GROUND_IN_KNOTS, new MaxSpeedOverallColumn(RACE_COLUMN_HEADER_STYLE,
                 RACE_COLUMN_STYLE));
         
-        result.put(DetailType.TOTAL_TIME_SAILED_UPWIND_IN_SECONDS, new TimeInHoursMinutesSecondsColumn(
+        result.put(DetailType.TOTAL_TIME_SAILED_UPWIND_IN_SECONDS, new TotalTimeColumn(
                 DetailType.TOTAL_TIME_SAILED_UPWIND_IN_SECONDS, new KingOfTheUpwindField(),
                 RACE_COLUMN_HEADER_STYLE, RACE_COLUMN_STYLE));
         
-        result.put(DetailType.TOTAL_TIME_SAILED_DOWNWIND_IN_SECONDS, new TimeInHoursMinutesSecondsColumn(
+        result.put(DetailType.TOTAL_TIME_SAILED_DOWNWIND_IN_SECONDS, new TotalTimeColumn(
                 DetailType.TOTAL_TIME_SAILED_DOWNWIND_IN_SECONDS, new KingOfTheDownwindField(),
                 RACE_COLUMN_HEADER_STYLE, RACE_COLUMN_STYLE));
         
-        result.put(DetailType.TOTAL_TIME_SAILED_REACHING_IN_SECONDS, new TimeInHoursMinutesSecondsColumn(
+        result.put(DetailType.TOTAL_TIME_SAILED_REACHING_IN_SECONDS, new TotalTimeColumn(
                 DetailType.TOTAL_TIME_SAILED_REACHING_IN_SECONDS, new KingOfTheReachingField(),
                 RACE_COLUMN_HEADER_STYLE, RACE_COLUMN_STYLE));
         
-        result.put(DetailType.TOTAL_TIME_SAILED_IN_SECONDS, new TimeInHoursMinutesSecondsColumn(
+        result.put(DetailType.TOTAL_TIME_SAILED_IN_SECONDS, new TotalTimeColumn(
                 DetailType.TOTAL_TIME_SAILED_IN_SECONDS, new TotalTimeSailedField(),
                 RACE_COLUMN_HEADER_STYLE, RACE_COLUMN_STYLE));
         return result;
