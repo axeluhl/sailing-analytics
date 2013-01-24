@@ -11,7 +11,7 @@ import com.sap.sailing.gwt.ui.shared.LeaderboardRowDTO;
  * @author Axel Uhl (d043530)
  *
  */
-public class MaxSpeedOverallColumn extends FormattedDoubleLegDetailColumn {
+public class MaxSpeedOverallColumn extends FormattedDoubleDetailTypeColumn {
     
     private static class MaxSpeedOverallField implements LegDetailField<Double> {
         @Override

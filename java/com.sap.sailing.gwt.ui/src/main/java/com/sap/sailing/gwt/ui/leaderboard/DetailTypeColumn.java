@@ -9,7 +9,7 @@ import com.sap.sailing.domain.common.impl.InvertibleComparatorAdapter;
 import com.sap.sailing.gwt.ui.client.DetailTypeFormatter;
 import com.sap.sailing.gwt.ui.shared.LeaderboardRowDTO;
 
-public abstract class LegDetailColumn<FieldType extends Comparable<?>, RenderingType> extends
+public abstract class DetailTypeColumn<FieldType extends Comparable<?>, RenderingType> extends
         SortableColumn<LeaderboardRowDTO, RenderingType> {
     
     private static final String HtmlConstantToInlineHeadersWithAndWithoutUnit = "&nbsp;";
@@ -25,7 +25,7 @@ public abstract class LegDetailColumn<FieldType extends Comparable<?>, Rendering
         T get(LeaderboardRowDTO row);
     }
 
-    protected LegDetailColumn(DetailType detailType, LegDetailField<FieldType> field, Cell<RenderingType> cell, String headerStyle, String columnStyle) {
+    protected DetailTypeColumn(DetailType detailType, LegDetailField<FieldType> field, Cell<RenderingType> cell, String headerStyle, String columnStyle) {
         super(cell, detailType.getDefaultSortingOrder());
         setHorizontalAlignment(ALIGN_CENTER);
         this.title = DetailTypeFormatter.format(detailType);

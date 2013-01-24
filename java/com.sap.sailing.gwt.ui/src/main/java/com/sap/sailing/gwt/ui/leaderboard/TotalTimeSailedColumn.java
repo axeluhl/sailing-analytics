@@ -12,7 +12,7 @@ import com.sap.sailing.gwt.ui.shared.LeaderboardRowDTO;
  * @author Axel Uhl (d043530)
  *
  */
-public class TotalTimeSailedColumn extends FormattedDoubleLegDetailColumn {
+public class TotalTimeSailedColumn extends FormattedDoubleDetailTypeColumn {
     
     private static class TotalTimeSailedField implements LegDetailField<Double> {
         @Override
