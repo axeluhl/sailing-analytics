@@ -484,4 +484,10 @@ public interface StringMessages extends Messages {
     String sideToWhichMarkAtLegStartWasRoundedTooltip();
     String generatePolarSheet();
     String polarSheetChart();
+    String numberOfManeuversInRaceTooltip();
+    String competitorColumnTooltip();
+    String sailIdColumnTooltip();
+    String rankColumnTooltip();
+    String carryColumnTooltip();
+    String totalsColumnTooltip();
 }

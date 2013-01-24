@@ -44,19 +44,27 @@ public class SortableExpandableColumnHeader extends Header<SafeHtml> {
     }
 
     interface RaceCellTemplates extends SafeHtmlTemplates {
+        @SafeHtmlTemplates.Template("<span class=\"race-name\" title=\"{1}\">{0}</span>")
+        SafeHtml cellWithTooltip(SafeHtml title, String tooltip);
+
         @SafeHtmlTemplates.Template("<span class=\"race-name\">{0}</span>")
-        SafeHtml cell(SafeHtml value);
+        SafeHtml cell(SafeHtml title);
     }
     
     private static RaceCellTemplates template = GWT.create(RaceCellTemplates.class);
     
     public SortableExpandableColumnHeader(String title, String iconURL, LeaderboardPanel leaderboardPanel,
-            ExpandableSortableColumn<?> column, StringMessages stringConstants) {
-        super(constructCell(title, iconURL, column.isExpansionEnabled(), leaderboardPanel, column, stringConstants));
+    ExpandableSortableColumn<?> column, StringMessages stringConstants) {
+        this(title, null, iconURL, leaderboardPanel, column, stringConstants);
     }
 
-    private static <T> Cell<SafeHtml> constructCell(final String title, final String iconURL, boolean isExpansionEnabled,
-            final LeaderboardPanel leaderboardPanel, final ExpandableSortableColumn<?> column, final StringMessages stringConstants) {
+    public SortableExpandableColumnHeader(String title, String tooltip, String iconURL,
+            LeaderboardPanel leaderboardPanel, ExpandableSortableColumn<?> column, StringMessages stringConstants) {
+        super(constructCell(title, tooltip, iconURL, column.isExpansionEnabled(), leaderboardPanel, column, stringConstants));
+    }
+
+    private static <T> Cell<SafeHtml> constructCell(final String title, final String tooltip, final String iconURL,
+            boolean isExpansionEnabled, final LeaderboardPanel leaderboardPanel, final ExpandableSortableColumn<?> column, final StringMessages stringConstants) {
         final List<HasCell<SafeHtml, ?>> cells = new ArrayList<HasCell<SafeHtml, ?>>(3);
         // if it's a medal race, add the cell rendering the medal image
         // add the cell rendering the expand/collapse button:
@@ -108,7 +116,11 @@ public class SortableExpandableColumnHeader extends Header<SafeHtml> {
             }
             @Override
             public SafeHtml getValue(SafeHtml object) {
-                return template.cell(SafeHtmlUtils.fromString(title));
+                if (tooltip == null) {
+                    return template.cell(SafeHtmlUtils.fromString(title));
+                } else {
+                    return template.cellWithTooltip(SafeHtmlUtils.fromString(title), SafeHtmlUtils.htmlEscape(tooltip));
+                }
             }
         });
         
