@@ -10,7 +10,7 @@ import com.sap.sailing.gwt.ui.shared.LeaderboardRowDTO;
  * @author Axel Uhl (d043530)
  *
  */
-public class KingOfTheReachingColumn extends AbstractTimeInHoursMinutesSecondsColumn {
+public class KingOfTheReachingColumn extends TimeInHoursMinutesSecondsColumn {
     
     private static class KingOfTheReachingField implements LegDetailField<Double> {
         @Override

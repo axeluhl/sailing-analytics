@@ -5,9 +5,9 @@ import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.gwt.ui.client.NumberFormatterFactory;
 import com.sap.sailing.gwt.ui.shared.LeaderboardRowDTO;
 
-public abstract class AbstractTimeInHoursMinutesSecondsColumn extends FormattedDoubleDetailTypeColumn {
+public class TimeInHoursMinutesSecondsColumn extends FormattedDoubleDetailTypeColumn {
 
-    protected AbstractTimeInHoursMinutesSecondsColumn(DetailType detailType, LegDetailField<Double> field, String headerStyle, String columnStyle) {
+    protected TimeInHoursMinutesSecondsColumn(DetailType detailType, LegDetailField<Double> field, String headerStyle, String columnStyle) {
         super(detailType, field, headerStyle, columnStyle);
     }
 

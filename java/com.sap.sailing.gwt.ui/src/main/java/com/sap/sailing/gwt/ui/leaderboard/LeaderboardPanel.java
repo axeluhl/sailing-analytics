@@ -1399,18 +1399,54 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         setWidget(contentPanel);
         raceNameForDefaultSorting = settings.getNameOfRaceToSort();
     }
+    
+    private static class KingOfTheDownwindField implements LegDetailField<Double> {
+        @Override
+        public Double get(LeaderboardRowDTO row) {
+            return row.totalTimeSailedDownwindInSeconds;
+        }
+    }
+    
+    private static class KingOfTheReachingField implements LegDetailField<Double> {
+        @Override
+        public Double get(LeaderboardRowDTO row) {
+            return row.totalTimeSailedReachingInSeconds;
+        }
+    }
+
+    private static class KingOfTheUpwindField implements LegDetailField<Double> {
+        @Override
+        public Double get(LeaderboardRowDTO row) {
+            return row.totalTimeSailedUpwindInSeconds;
+        }
+    }
+    
+    private static class TotalTimeSailedField implements LegDetailField<Double> {
+        @Override
+        public Double get(LeaderboardRowDTO row) {
+            return row.totalTimeSailedInSeconds;
+        }
+    }
 
     private Map<DetailType, SortableColumn<LeaderboardRowDTO, ?>> createOverallDetailColumnMap() {
         Map<DetailType, SortableColumn<LeaderboardRowDTO, ?>> result = new HashMap<DetailType, SortableColumn<LeaderboardRowDTO, ?>>();
         result.put(DetailType.MAXIMUM_SPEED_OVER_GROUND_IN_KNOTS, new MaxSpeedOverallColumn(RACE_COLUMN_HEADER_STYLE,
                 RACE_COLUMN_STYLE));
-        result.put(DetailType.TOTAL_TIME_SAILED_UPWIND_IN_SECONDS, new KingOfTheUpwindColumn(stringMessages,
+        
+        result.put(DetailType.TOTAL_TIME_SAILED_UPWIND_IN_SECONDS, new TimeInHoursMinutesSecondsColumn(
+                DetailType.TOTAL_TIME_SAILED_UPWIND_IN_SECONDS, new KingOfTheUpwindField(),
                 RACE_COLUMN_HEADER_STYLE, RACE_COLUMN_STYLE));
-        result.put(DetailType.TOTAL_TIME_SAILED_DOWNWIND_IN_SECONDS, new KingOfTheDownwindColumn(stringMessages,
+        
+        result.put(DetailType.TOTAL_TIME_SAILED_DOWNWIND_IN_SECONDS, new TimeInHoursMinutesSecondsColumn(
+                DetailType.TOTAL_TIME_SAILED_DOWNWIND_IN_SECONDS, new KingOfTheDownwindField(),
                 RACE_COLUMN_HEADER_STYLE, RACE_COLUMN_STYLE));
-        result.put(DetailType.TOTAL_TIME_SAILED_REACHING_IN_SECONDS, new KingOfTheReachingColumn(stringMessages,
+        
+        result.put(DetailType.TOTAL_TIME_SAILED_REACHING_IN_SECONDS, new TimeInHoursMinutesSecondsColumn(
+                DetailType.TOTAL_TIME_SAILED_REACHING_IN_SECONDS, new KingOfTheReachingField(),
                 RACE_COLUMN_HEADER_STYLE, RACE_COLUMN_STYLE));
-        result.put(DetailType.TOTAL_TIME_SAILED_IN_SECONDS, new TotalTimeSailedColumn(stringMessages,
+        
+        result.put(DetailType.TOTAL_TIME_SAILED_IN_SECONDS, new TimeInHoursMinutesSecondsColumn(
+                DetailType.TOTAL_TIME_SAILED_IN_SECONDS, new TotalTimeSailedField(),
                 RACE_COLUMN_HEADER_STYLE, RACE_COLUMN_STYLE));
         return result;
     }
