@@ -3,7 +3,6 @@ package com.sap.sailing.gwt.ui.leaderboard;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.Header;
-import com.google.gwt.user.cellview.client.SafeHtmlHeader;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.InvertibleComparator;
 import com.sap.sailing.domain.common.impl.InvertibleComparatorAdapter;
@@ -22,8 +21,6 @@ public abstract class LegDetailColumn<FieldType extends Comparable<?>, Rendering
     private final String unit;
     private final String tooltip;
     
-    private SafeHtmlHeader header;
-
     public interface LegDetailField<T extends Comparable<?>> {
         T get(LeaderboardRowDTO row);
     }
@@ -37,17 +34,6 @@ public abstract class LegDetailColumn<FieldType extends Comparable<?>, Rendering
         this.field = field;
         this.headerStyle = headerStyle;
         this.columnStyle = columnStyle;
-        InitializeHeader();
-    }
-
-    private void InitializeHeader() {
-        SafeHtmlBuilder titleBuilder = new SafeHtmlBuilder().appendEscaped(title).appendHtmlConstant("<br>");
-        if (unit == null || unit.isEmpty()) {
-            titleBuilder.appendHtmlConstant(HtmlConstantToInlineHeadersWithAndWithoutUnit);
-        } else {
-            titleBuilder.appendEscaped(unit);
-        }
-        header = new SafeHtmlHeaderWithTooltip(titleBuilder.toSafeHtml(), tooltip);
     }
 
     protected String getTitle() {
@@ -88,7 +74,13 @@ public abstract class LegDetailColumn<FieldType extends Comparable<?>, Rendering
 
     @Override
     public Header<?> getHeader() {
-        return header;
+        SafeHtmlBuilder titleBuilder = new SafeHtmlBuilder().appendEscaped(title).appendHtmlConstant("<br>");
+        if (unit == null || unit.isEmpty()) {
+            titleBuilder.appendHtmlConstant(HtmlConstantToInlineHeadersWithAndWithoutUnit);
+        } else {
+            titleBuilder.appendEscaped(unit);
+        }
+        return new SafeHtmlHeaderWithTooltip(titleBuilder.toSafeHtml(), tooltip);
     }
 
     /**

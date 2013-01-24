@@ -3,7 +3,6 @@ package com.sap.sailing.gwt.ui.leaderboard;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
 import com.sap.sailing.domain.common.DetailType;
-import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.LeaderboardRowDTO;
 
 /**
@@ -21,7 +20,7 @@ public class MaxSpeedOverallColumn extends FormattedDoubleLegDetailColumn {
         }
     }
 
-    public MaxSpeedOverallColumn(StringMessages stringMessages, String headerStyle, String columnStyle) {
+    public MaxSpeedOverallColumn(String headerStyle, String columnStyle) {
         super(DetailType.MAXIMUM_SPEED_OVER_GROUND_IN_KNOTS, new MaxSpeedOverallField(), headerStyle, columnStyle);
     }
 
