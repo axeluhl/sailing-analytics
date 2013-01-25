@@ -226,9 +226,9 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
         for (RaceChangeListener listener : listeners) {
             try {
                 listener.windSourcesToExcludeChanged(windSourcesToExclude);
-            } catch (Throwable t) {
-                logger.log(Level.SEVERE, "RaceChangeListener " + listener + " threw exception " + t.getMessage());
-                logger.throwing(DynamicTrackedRaceImpl.class.getName(), "notifyListenersWindSourcesToExcludeChanged(Iterable<WindSource>)", t);
+            } catch (Exception e) {
+                logger.log(Level.SEVERE, "RaceChangeListener " + listener + " threw exception " + e.getMessage());
+                logger.throwing(DynamicTrackedRaceImpl.class.getName(), "notifyListenersWindSourcesToExcludeChanged(Iterable<WindSource>)", e);
             }
         }
     }
@@ -242,9 +242,9 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
         for (RaceChangeListener listener : listeners) {
             try {
                 listener.raceTimesChanged(startOfTracking, endOfTracking, startTimeReceived);
-            } catch (Throwable t) {
-                logger.log(Level.SEVERE, "RaceChangeListener " + listener + " threw exception " + t.getMessage());
-                logger.throwing(DynamicTrackedRaceImpl.class.getName(), "notifyListenersRaceTimesChanged(TimePoint, TimePoint, TimePoint)", t);
+            } catch (Exception e) {
+                logger.log(Level.SEVERE, "RaceChangeListener " + listener + " threw exception " + e.getMessage());
+                logger.throwing(DynamicTrackedRaceImpl.class.getName(), "notifyListenersRaceTimesChanged(TimePoint, TimePoint, TimePoint)", e);
             }
         }
     }
@@ -257,9 +257,9 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
         for (RaceChangeListener listener : listeners) {
             try {
                 listener.markPositionChanged(fix, mark);
-            } catch (Throwable t) {
-                logger.log(Level.SEVERE, "RaceChangeListener " + listener + " threw exception " + t.getMessage());
-                logger.throwing(DynamicTrackedRaceImpl.class.getName(), "notifyListeners(GPSFix, Competitor)", t);
+            } catch (Exception e) {
+                logger.log(Level.SEVERE, "RaceChangeListener " + listener + " threw exception " + e.getMessage());
+                logger.throwing(DynamicTrackedRaceImpl.class.getName(), "notifyListeners(GPSFix, Competitor)", e);
             }
         }
     }
@@ -272,9 +272,9 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
         for (RaceChangeListener listener : listeners) {
             try {
                 listener.competitorPositionChanged(fix, competitor);
-            } catch (Throwable t) {
-                logger.log(Level.SEVERE, "RaceChangeListener " + listener + " threw exception " + t.getMessage());
-                logger.throwing(DynamicTrackedRaceImpl.class.getName(), "notifyListeners(GPSFix, Competitor)", t);
+            } catch (Exception e) {
+                logger.log(Level.SEVERE, "RaceChangeListener " + listener + " threw exception " + e.getMessage());
+                logger.throwing(DynamicTrackedRaceImpl.class.getName(), "notifyListeners(GPSFix, Competitor)", e);
             }
         }
     }
@@ -287,9 +287,9 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
         for (RaceChangeListener listener : listeners) {
             try {
                 listener.windDataReceived(wind, windSource);
-            } catch (Throwable t) {
-                logger.log(Level.SEVERE, "RaceChangeListener " + listener + " threw exception " + t.getMessage());
-                logger.throwing(DynamicTrackedRaceImpl.class.getName(), "notifyListeners(Wind)", t);
+            } catch (Exception e) {
+                logger.log(Level.SEVERE, "RaceChangeListener " + listener + " threw exception " + e.getMessage());
+                logger.throwing(DynamicTrackedRaceImpl.class.getName(), "notifyListeners(Wind)", e);
             }
         }
     }
@@ -303,10 +303,10 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
             try {
                 listener.speedAveragingChanged(oldMillisecondsOverWhichToAverageSpeed,
                         newMillisecondsOverWhichToAverageSpeed);
-            } catch (Throwable t) {
-                logger.log(Level.SEVERE, "RaceChangeListener " + listener + " threw exception " + t.getMessage());
+            } catch (Exception e) {
+                logger.log(Level.SEVERE, "RaceChangeListener " + listener + " threw exception " + e.getMessage());
                 logger.throwing(DynamicTrackedRaceImpl.class.getName(),
-                        "notifyListenersSpeedAveragingChanged(long, long)", t);
+                        "notifyListenersSpeedAveragingChanged(long, long)", e);
             }
         }
     }
@@ -320,10 +320,10 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
             try {
                 listener.windAveragingChanged(oldMillisecondsOverWhichToAverageWind,
                         newMillisecondsOverWhichToAverageWind);
-            } catch (Throwable t) {
-                logger.log(Level.SEVERE, "RaceChangeListener " + listener + " threw exception " + t.getMessage());
+            } catch (Exception e) {
+                logger.log(Level.SEVERE, "RaceChangeListener " + listener + " threw exception " + e.getMessage());
                 logger.throwing(DynamicTrackedRaceImpl.class.getName(),
-                        "notifyListenersWindAveragingChanged(long, long)", t);
+                        "notifyListenersWindAveragingChanged(long, long)", e);
             }
         }
     }
@@ -336,10 +336,10 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
         for (RaceChangeListener listener : listeners) {
             try {
                 listener.delayToLiveChanged(delayToLiveInMillis);
-            } catch (Throwable t) {
-                logger.log(Level.SEVERE, "RaceChangeListener " + listener + " threw exception " + t.getMessage());
+            } catch (Exception e) {
+                logger.log(Level.SEVERE, "RaceChangeListener " + listener + " threw exception " + e.getMessage());
                 logger.throwing(DynamicTrackedRaceImpl.class.getName(),
-                        "notifyListenersDelayToLiveChanged(long)", t);
+                        "notifyListenersDelayToLiveChanged(long)", e);
             }
         }
     }
@@ -352,9 +352,9 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
         for (RaceChangeListener listener : listeners) {
             try {
                 listener.windDataRemoved(wind, windSource);
-            } catch (Throwable t) {
-                logger.log(Level.SEVERE, "RaceChangeListener " + listener + " threw exception " + t.getMessage());
-                logger.throwing(DynamicTrackedRaceImpl.class.getName(), "notifyListenersWindRemoved(Wind)", t);
+            } catch (Exception e) {
+                logger.log(Level.SEVERE, "RaceChangeListener " + listener + " threw exception " + e.getMessage());
+                logger.throwing(DynamicTrackedRaceImpl.class.getName(), "notifyListenersWindRemoved(Wind)", e);
             }
         }
     }
@@ -367,9 +367,9 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
         for (RaceChangeListener listener : listeners) {
             try {
                 listener.markPassingReceived(competitor, oldMarkPassings, markPassings);
-            } catch (Throwable t) {
-                logger.log(Level.SEVERE, "RaceChangeListener " + listener + " threw exception " + t.getMessage());
-                logger.throwing(DynamicTrackedRaceImpl.class.getName(), "notifyListeners(MarkPassing)", t);
+            } catch (Exception e) {
+                logger.log(Level.SEVERE, "RaceChangeListener " + listener + " threw exception " + e.getMessage());
+                logger.throwing(DynamicTrackedRaceImpl.class.getName(), "notifyListeners(MarkPassing)", e);
             }
         }
     }

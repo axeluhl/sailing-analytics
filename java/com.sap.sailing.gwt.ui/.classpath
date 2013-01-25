@@ -4,7 +4,7 @@
 	<classpathentry kind="src" path="src/main/java"/>
 	<classpathentry exported="true" kind="lib" path="WEB-INF/classes/"/>
 	<classpathentry exported="true" kind="lib" path="WEB-INF/lib/gwt-maps.jar"/>
-	<classpathentry exported="true" kind="lib" path="WEB-INF/lib/gwt-servlet.jar" sourcepath="C:/apps/eclipse371/plugins/com.google.gwt.eclipse.sdkbundle_2.4.0.v201202290255-rel-r37/gwt-2.4.0/gwt-user.jar"/>
+	<classpathentry exported="true" kind="lib" path="WEB-INF/lib/gwt-servlet.jar" sourcepath="/com.google.gwt.osgi/lib/gwt-user.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
 	<classpathentry exported="true" kind="con" path="com.google.gwt.eclipse.core.GWT_CONTAINER"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>

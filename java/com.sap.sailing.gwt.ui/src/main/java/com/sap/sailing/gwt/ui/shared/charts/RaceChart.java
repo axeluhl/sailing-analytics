@@ -85,7 +85,7 @@ public abstract class RaceChart extends SimplePanel implements RaceSelectionChan
                 isZoomed = true;
             }
             timeRangeWithZoomProvider.setTimeZoom(new Date(xAxisMin), new Date(xAxisMax), this);
-        } catch (Throwable t) {
+        } catch (Exception e) {
             // in case the user clicks the "reset zoom" button chartSelectionEvent.getXAxisMinAsLong() throws in exception
             timeRangeWithZoomProvider.resetTimeZoom(this);
             // Trigger the redrawing... otherwise chart wouldn't reset the zoom

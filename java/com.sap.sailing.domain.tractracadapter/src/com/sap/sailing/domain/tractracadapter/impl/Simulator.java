@@ -200,8 +200,8 @@ public class Simulator {
                     public void run() {
                         try {
                             delayMarkPassings(competitor, deliverLater);
-                        } catch (Throwable t) {
-                            logger.throwing(Simulator.class.getName(), "scheduleMarkPosition", t);
+                        } catch (Exception e) {
+                            logger.throwing(Simulator.class.getName(), "scheduleMarkPosition", e);
                         }
                     }
                 }, transformedTimepoint.asDate());
@@ -225,8 +225,8 @@ public class Simulator {
                 public void run() {
                     try {
                         trackedRace.recordFix(mark, transformedMarkFix);
-                    } catch (Throwable t) {
-                        logger.throwing(Simulator.class.getName(), "scheduleMarkPosition", t);
+                    } catch (Exception e) {
+                        logger.throwing(Simulator.class.getName(), "scheduleMarkPosition", e);
                     }
                 }
             }, transformedTimepoint.asDate());

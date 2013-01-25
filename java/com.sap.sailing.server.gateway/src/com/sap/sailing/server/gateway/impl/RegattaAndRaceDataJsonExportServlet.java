@@ -78,7 +78,7 @@ public class RegattaAndRaceDataJsonExportServlet extends JsonExportServlet {
             } else {
                 resp.getWriter().println("No action specified!");
             }
-        } catch (Throwable e) {
+        } catch (Exception e) {
             resp.getWriter().println("Error processing request:");
             e.printStackTrace(resp.getWriter());
         }
