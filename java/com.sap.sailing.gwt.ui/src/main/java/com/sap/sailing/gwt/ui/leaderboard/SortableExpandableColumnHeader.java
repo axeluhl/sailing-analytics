@@ -147,7 +147,7 @@ public class SortableExpandableColumnHeader extends Header<SafeHtml> {
                         // implementation-dependant and may easily break. We should probably file
                         // a bug with Google...
                         wrapper = wrapper.getFirstChildElement().getNextSiblingElement().getFirstChildElement();
-                    } catch (Throwable t) {
+                    } catch (Exception e) {
                         // wrapper was no div, so no action necessary
                     }
                     while (wrapper != null) {

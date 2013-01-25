@@ -35,8 +35,8 @@ public class InitialLoadReplicationObjectIdentityTest extends AbstractServerRepl
         try {
             replicationDescriptorPair = basicSetUp(true, /* master=null means create a new one */ null,
             /* replica=null means create a new one */null);
-        } catch (Throwable t) {
-            t.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
             tearDown();
         }
     }

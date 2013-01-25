@@ -113,9 +113,9 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
             for (WindListener listener : listeners) {
                 try {
                     listener.windDataReceived(wind);
-                } catch (Throwable t) {
-                    logger.log(Level.SEVERE, "WindListener " + listener + " threw exception " + t.getMessage());
-                    logger.throwing(WindTrackImpl.class.getName(), "notifyListenersAboutReceive(Wind)", t);
+                } catch (Exception e) {
+                    logger.log(Level.SEVERE, "WindListener " + listener + " threw exception " + e.getMessage());
+                    logger.throwing(WindTrackImpl.class.getName(), "notifyListenersAboutReceive(Wind)", e);
                 }
             }
         }
@@ -126,9 +126,9 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
             for (WindListener listener : listeners) {
                 try {
                     listener.windAveragingChanged(oldMillisecondsOverWhichToAverage, newMillisecondsOverWhichToAverage);
-                } catch (Throwable t) {
-                    logger.log(Level.SEVERE, "WindListener " + listener + " threw exception " + t.getMessage());
-                    logger.throwing(WindTrackImpl.class.getName(), "notifyListenersAboutAveragingChange(long, long)", t);
+                } catch (Exception e) {
+                    logger.log(Level.SEVERE, "WindListener " + listener + " threw exception " + e.getMessage());
+                    logger.throwing(WindTrackImpl.class.getName(), "notifyListenersAboutAveragingChange(long, long)", e);
                 }
             }
         }
@@ -139,9 +139,9 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
             for (WindListener listener : listeners) {
                 try {
                     listener.windDataRemoved(wind);
-                } catch (Throwable t) {
-                    logger.log(Level.SEVERE, "WindListener " + listener + " threw exception " + t.getMessage());
-                    logger.throwing(WindTrackImpl.class.getName(), "notifyListenersAboutRemoval(Wind)", t);
+                } catch (Exception e) {
+                    logger.log(Level.SEVERE, "WindListener " + listener + " threw exception " + e.getMessage());
+                    logger.throwing(WindTrackImpl.class.getName(), "notifyListenersAboutRemoval(Wind)", e);
                 }
             }
         }
