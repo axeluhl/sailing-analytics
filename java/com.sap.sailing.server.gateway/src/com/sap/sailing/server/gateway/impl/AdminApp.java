@@ -159,7 +159,7 @@ public class AdminApp extends SailingServerHttpServlet {
             } else {
                 resp.getWriter().println("Hello admin!");
             }
-        } catch (Throwable e) {
+        } catch (Exception e) {
             resp.getWriter().println("Error processing request:");
             e.printStackTrace(resp.getWriter());
         }

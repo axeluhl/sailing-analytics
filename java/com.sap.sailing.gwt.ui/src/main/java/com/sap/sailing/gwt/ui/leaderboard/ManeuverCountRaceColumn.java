@@ -14,7 +14,7 @@ import com.sap.sailing.domain.common.InvertibleComparator;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.impl.InvertibleComparatorAdapter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.leaderboard.LegDetailColumn.LegDetailField;
+import com.sap.sailing.gwt.ui.leaderboard.DetailTypeColumn.LegDetailField;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardEntryDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardRowDTO;
@@ -238,23 +238,23 @@ public class ManeuverCountRaceColumn extends ExpandableSortableColumn<String> im
             LeaderboardPanel leaderboardPanel, StringMessages stringMessages, String detailHeaderStyle,
             String detailColumnStyle) {
         Map<DetailType, SortableColumn<LeaderboardRowDTO, ?>> result = new HashMap<DetailType, SortableColumn<LeaderboardRowDTO, ?>>();
-        result.put(DetailType.TACK, new FormattedDoubleLegDetailColumn(DetailType.TACK, new NumberOfTacks(), detailHeaderStyle, detailColumnStyle));
+        result.put(DetailType.TACK, new FormattedDoubleDetailTypeColumn(DetailType.TACK, new NumberOfTacks(), detailHeaderStyle, detailColumnStyle));
         
-        result.put(DetailType.JIBE, new FormattedDoubleLegDetailColumn(DetailType.JIBE, new NumberOfJibes(), detailHeaderStyle, detailColumnStyle));
+        result.put(DetailType.JIBE, new FormattedDoubleDetailTypeColumn(DetailType.JIBE, new NumberOfJibes(), detailHeaderStyle, detailColumnStyle));
         
         result.put(DetailType.PENALTY_CIRCLE,
-                new FormattedDoubleLegDetailColumn(DetailType.PENALTY_CIRCLE, new NumberOfPenaltyCircles(), detailHeaderStyle, detailColumnStyle));
+                new FormattedDoubleDetailTypeColumn(DetailType.PENALTY_CIRCLE, new NumberOfPenaltyCircles(), detailHeaderStyle, detailColumnStyle));
         
         result.put(DetailType.AVERAGE_TACK_LOSS_IN_METERS,
-                new FormattedDoubleLegDetailColumn(DetailType.AVERAGE_TACK_LOSS_IN_METERS, new AverageTackLossInMeters(),
+                new FormattedDoubleDetailTypeColumn(DetailType.AVERAGE_TACK_LOSS_IN_METERS, new AverageTackLossInMeters(),
                         detailHeaderStyle, detailColumnStyle));
         
         result.put(DetailType.AVERAGE_JIBE_LOSS_IN_METERS,
-                new FormattedDoubleLegDetailColumn(DetailType.AVERAGE_JIBE_LOSS_IN_METERS, new AverageJibeLossInMeters(),
+                new FormattedDoubleDetailTypeColumn(DetailType.AVERAGE_JIBE_LOSS_IN_METERS, new AverageJibeLossInMeters(),
                         detailHeaderStyle, detailColumnStyle));
         
         result.put(DetailType.AVERAGE_MANEUVER_LOSS_IN_METERS,
-                new FormattedDoubleLegDetailColumn(DetailType.AVERAGE_MANEUVER_LOSS_IN_METERS, new AverageManeuverLossInMeters(),
+                new FormattedDoubleDetailTypeColumn(DetailType.AVERAGE_MANEUVER_LOSS_IN_METERS, new AverageManeuverLossInMeters(),
                         detailHeaderStyle, detailColumnStyle));
         
         return result;
