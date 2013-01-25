@@ -44,8 +44,8 @@ public class MediaServiceImpl extends RemoteServiceServlet implements MediaServi
     public Collection<MediaTrack> getMediaTracksForRace(RegattaAndRaceIdentifier regattaAndRaceIdentifier) {
         TrackedRace trackedRace = racingEventServiceTracker.getService().getExistingTrackedRace(regattaAndRaceIdentifier);
         if (trackedRace != null) {
-            Date raceStart = trackedRace.getStartOfRace().asDate();
-            Date raceEnd = trackedRace.getEndOfRace().asDate();
+            Date raceStart = trackedRace.getStartOfRace() == null ? null : trackedRace.getStartOfRace().asDate();
+            Date raceEnd = trackedRace.getEndOfRace() == null ? null : trackedRace.getEndOfRace().asDate();
             return createMediaTracksFromDB(mediaDB().queryOverlappingMediaTracks(raceStart , raceEnd));
         } else {
             return Collections.emptyList();
