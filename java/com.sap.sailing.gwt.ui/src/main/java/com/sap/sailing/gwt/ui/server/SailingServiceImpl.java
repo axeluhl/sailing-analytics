@@ -3192,7 +3192,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public String generatePolarSheetForRaces(List<RegattaAndRaceIdentifier> selectedRaces) {
         String id = UUID.randomUUID().toString();
-        PolarSheetGenerationWorker genWorker = new PolarSheetGenerationWorker(selectedRaces);
+        RacingEventService service = getService();
+        Set<TrackedRace> trackedRaces = new HashSet<TrackedRace>();
+        for (RegattaAndRaceIdentifier race : selectedRaces) {
+            trackedRaces.add(service.getTrackedRace(race));
+        }
+        PolarSheetGenerationWorker genWorker = new PolarSheetGenerationWorker(trackedRaces);
         polarSheetGenerationWorkers.put(id, genWorker);
         genWorker.startPolarSheetGeneration();
         return id;
