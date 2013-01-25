@@ -70,7 +70,7 @@ public class RaceColumnInLeaderboardDialog extends DataEntryDialog<RaceColumnInL
             String errorMessage;
             String racename = valueToValidate.getName();
             Boolean isMedalRace = valueToValidate.isMedalRace();
-            boolean isNameNotEmpty = racename != null & racename != "";
+            boolean isNameNotEmpty = racename != null & !racename.isEmpty();
             boolean medalRaceNotNull = isMedalRace != null;
 
             boolean unique = true;
