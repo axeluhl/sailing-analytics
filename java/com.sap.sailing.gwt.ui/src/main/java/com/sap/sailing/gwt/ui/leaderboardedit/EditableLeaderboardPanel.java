@@ -32,6 +32,7 @@ import com.google.gwt.user.cellview.client.CellTable.Resources;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.Header;
+import com.google.gwt.user.cellview.client.SafeHtmlHeader;
 import com.google.gwt.user.cellview.client.TextHeader;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -184,7 +185,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
         }
 
         @Override
-        public Header<String> getHeader() {
+        public SafeHtmlHeader getHeader() {
             return base.getHeader();
         }
 

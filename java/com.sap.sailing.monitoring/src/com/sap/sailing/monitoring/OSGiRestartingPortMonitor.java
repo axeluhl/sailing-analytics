@@ -59,7 +59,7 @@ public class OSGiRestartingPortMonitor extends AbstractPortMonitor {
             try {
                 sendMail(endpoint, "Couldn't find non-responsive bundle "+endpoint.getBundleName(),
                         "Couldn't find bundle "+endpoint.getBundleName()+". Cannot restart. Please check monitoring.properties file");
-            } catch (Throwable e) {
+            } catch (Exception e) {
                 e.printStackTrace();
                 log.throwing(getClass().getName(), "handleFailure", e);
             }
@@ -98,9 +98,9 @@ public class OSGiRestartingPortMonitor extends AbstractPortMonitor {
                         content += "\n\nSystem information NOT available due to an error in the library (in most cases caused by native libs not being available)";
                     }
                     sendMail(endpoint, subject, content);
-                } catch (Throwable ex) {
-                    ex.printStackTrace();
-                    log.throwing(getClass().getName(), "handleFailure", ex);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    log.throwing(getClass().getName(), "handleFailure", e);
                 }
             }
         }

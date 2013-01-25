@@ -2,6 +2,7 @@ package com.sap.sailing.domain.persistence.media.impl;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -153,28 +154,32 @@ public class MediaDBImpl implements MediaDB {
 
     @Override
     public Collection<DBMediaTrack> queryOverlappingMediaTracks(Date rangeStart, Date rangeEnd) {
-        BasicDBObject startTimeCondition = new BasicDBObject();
-        startTimeCondition.put(DbNames.Fields.STARTTIME.name(), new BasicDBObject("$gt", rangeStart));
-        startTimeCondition.put(DbNames.Fields.STARTTIME.name(), new BasicDBObject("$lt", rangeEnd));
-        BasicDBObject endTimeCondition = new BasicDBObject();
-        
-        // Should actually be "AND greater than rangeStart - duration".
-        // However, using values calculated on server side turns out to be a nightmare with mongodb.
-        // Instead do the remaining filtering on client side...
-        endTimeCondition.put(DbNames.Fields.STARTTIME.name(), new BasicDBObject("$lt", rangeStart));
-
-        DBObject query = QueryBuilder.start().or(startTimeCondition, endTimeCondition).get();
-        
-        DBCursor cursor = getVideoCollection().find(query).sort(sortByStartTimeAndTitle);
-        
-        List<DBMediaTrack> result = new ArrayList<>(cursor.count());
-        while (cursor.hasNext()) {
-            DBMediaTrack resultCandidate = createMediaObjectFromDB(cursor.next());
-            if (resultCandidate.durationInMillis > rangeStart.getTime() - resultCandidate.startTime.getTime()) {
-                result.add(resultCandidate);
+        if ((rangeStart != null) && (rangeEnd != null)) {
+            BasicDBObject startTimeCondition = new BasicDBObject();
+            startTimeCondition.put(DbNames.Fields.STARTTIME.name(), new BasicDBObject("$gt", rangeStart));
+            startTimeCondition.put(DbNames.Fields.STARTTIME.name(), new BasicDBObject("$lt", rangeEnd));
+            BasicDBObject endTimeCondition = new BasicDBObject();
+            
+            // Should actually be "AND greater than rangeStart - duration".
+            // However, using values calculated on server side turns out to be a nightmare with mongodb.
+            // Instead do the remaining filtering on client side...
+            endTimeCondition.put(DbNames.Fields.STARTTIME.name(), new BasicDBObject("$lt", rangeStart));
+    
+            DBObject query = QueryBuilder.start().or(startTimeCondition, endTimeCondition).get();
+            
+            DBCursor cursor = getVideoCollection().find(query).sort(sortByStartTimeAndTitle);
+            
+            List<DBMediaTrack> result = new ArrayList<>(cursor.count());
+            while (cursor.hasNext()) {
+                DBMediaTrack resultCandidate = createMediaObjectFromDB(cursor.next());
+                if (resultCandidate.durationInMillis > rangeStart.getTime() - resultCandidate.startTime.getTime()) {
+                    result.add(resultCandidate);
+                }
             }
+            return result;
+        } else {
+            return Collections.emptyList();
         }
-        return result;
     }
     
 }

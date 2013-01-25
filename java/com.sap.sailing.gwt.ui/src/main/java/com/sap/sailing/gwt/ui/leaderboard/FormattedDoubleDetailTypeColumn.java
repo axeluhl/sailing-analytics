@@ -10,7 +10,7 @@ import com.sap.sailing.gwt.ui.client.NumberFormatterFactory;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardRowDTO;
 
-public class FormattedDoubleLegDetailColumn extends LegDetailColumn<Double, String> implements HasStringAndDoubleValue {
+public class FormattedDoubleDetailTypeColumn extends DetailTypeColumn<Double, String> implements HasStringAndDoubleValue {
     private final NumberFormat formatter;
     private final MinMaxRenderer minMaxRenderer;
     
@@ -23,7 +23,7 @@ public class FormattedDoubleLegDetailColumn extends LegDetailColumn<Double, Stri
      * @param headerStyle
      * @param columnStyle
      */
-    public FormattedDoubleLegDetailColumn(DetailType detailType, LegDetailField<Double> field, String headerStyle, String columnStyle) {
+    public FormattedDoubleDetailTypeColumn(DetailType detailType, LegDetailField<Double> field, String headerStyle, String columnStyle) {
         super(detailType, field, new TextCell(), headerStyle, columnStyle);
         formatter = NumberFormatterFactory.getDecimalFormat(detailType.getPrecision());
         this.minMaxRenderer = new MinMaxRenderer(this, getComparator());

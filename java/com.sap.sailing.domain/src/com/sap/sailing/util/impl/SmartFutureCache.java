@@ -225,7 +225,7 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
                                     LockUtil.unlockAfterWrite(lock);
                                     ongoingRecalculations.remove(key);
                                 }
-                            } catch (Throwable e) {
+                            } catch (Exception e) {
                                 // cache won't be updated
                                 logger.throwing(SmartFutureCache.class.getName(), "triggerUpdate", e);
                                 throw new RuntimeException(e);
