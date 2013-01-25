@@ -53,6 +53,7 @@
 		        <module>com.sap.sailing.gwt.ui.UserManagement</module>
 		        <module>com.sap.sailing.gwt.ui.VideoPopup</module>
 		        <module>com.sap.sailing.gwt.ui.YoutubePopup</module>
+		        <module>com.sap.sailing.gwt.ui.RegattaOverview</module>
 		      </modules>
 		      <gen>${basedir}/.generated</gen>
 		      <localWorkers>3</localWorkers>
