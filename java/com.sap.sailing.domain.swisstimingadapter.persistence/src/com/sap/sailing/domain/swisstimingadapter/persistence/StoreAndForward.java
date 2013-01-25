@@ -287,19 +287,19 @@ public class StoreAndForward implements Runnable {
                                 try {
                                 // TODO if forwarding to os doesn't work, e.g., because the socket was closed or the client died, remove os from streamsToForwardTo and the socket from socketsToForwardTo
                                     transceiver.sendMessage(message, os);
-                                } catch (Throwable e) {
+                                } catch (Exception e) {
                                     int i=streamsToForwardTo.indexOf(os);
                                     try {
                                         os.close();
-                                    } catch (Throwable t) {
-                                        logger.throwing(StoreAndForward.class.getName(), "run", t);
+                                    } catch (Exception exc) {
+                                        logger.throwing(StoreAndForward.class.getName(), "run", exc);
                                     }
                                     streamsToForwardTo.remove(os);
                                     Socket s = socketsToForwardTo.remove(i);
                                     try {
                                         s.close();
-                                    } catch (Throwable t) {
-                                        logger.throwing(StoreAndForward.class.getName(), "run", t);
+                                    } catch (Exception exc) {
+                                        logger.throwing(StoreAndForward.class.getName(), "run", exc);
                                     }
                                 }
                             }
@@ -314,7 +314,7 @@ public class StoreAndForward implements Runnable {
                     for (Socket socketToForwardTo : socketsToForwardTo) {
                         socketToForwardTo.close();
                     }
-                } catch (Throwable e) {
+                } catch (Exception e) {
                     e.printStackTrace();
                     if (!stopped) {
                         logger.throwing(StoreAndForward.class.getName(), "Error during forwarding message. Continuing...", e);

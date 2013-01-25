@@ -83,11 +83,11 @@ public class SwissTimingAdapterPersistenceImpl implements SwissTimingAdapterPers
                 result.add(stConfig);
             }
             Collections.reverse(result);
-        } catch (Throwable t) {
+        } catch (Exception e) {
             // something went wrong during DB access; report, then use empty new wind track
             logger.log(Level.SEVERE,
                     "Error connecting to MongoDB, unable to load recorded SwissTiming configurations. Check MongoDB settings.");
-            logger.throwing(SwissTimingAdapterPersistenceImpl.class.getName(), "getSwissTimingConfigurations", t);
+            logger.throwing(SwissTimingAdapterPersistenceImpl.class.getName(), "getSwissTimingConfigurations", e);
         }
         return result;
     }
@@ -109,11 +109,11 @@ public class SwissTimingAdapterPersistenceImpl implements SwissTimingAdapterPers
                 result.add(stConfig);
             }
             Collections.reverse(result);
-        } catch (Throwable t) {
+        } catch (Exception e) {
             // something went wrong during DB access; report, then use empty new wind track
             logger.log(Level.SEVERE,
                     "Error connecting to MongoDB, unable to load recorded SwissTiming archive configurations. Check MongoDB settings.");
-            logger.throwing(SwissTimingAdapterPersistenceImpl.class.getName(), "getSwissTimingArchiveConfigurations", t);
+            logger.throwing(SwissTimingAdapterPersistenceImpl.class.getName(), "getSwissTimingArchiveConfigurations", e);
         }
         return result;
     }

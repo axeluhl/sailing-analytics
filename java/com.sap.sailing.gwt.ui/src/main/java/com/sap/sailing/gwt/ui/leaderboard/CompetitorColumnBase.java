@@ -3,9 +3,9 @@ package com.sap.sailing.gwt.ui.leaderboard;
 import com.google.gwt.cell.client.AbstractSafeHtmlCell;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.text.shared.AbstractSafeHtmlRenderer;
-import com.google.gwt.user.cellview.client.Header;
-import com.google.gwt.user.cellview.client.TextHeader;
+import com.google.gwt.user.cellview.client.SafeHtmlHeader;
 import com.sap.sailing.domain.common.InvertibleComparator;
 import com.sap.sailing.domain.common.impl.InvertibleComparatorAdapter;
 import com.sap.sailing.gwt.ui.client.Collator;
@@ -57,8 +57,8 @@ public class CompetitorColumnBase<T> {
         };
     }
     
-    public Header<String> getHeader() {
-        return new TextHeader(getStringMessages().name());
+    public SafeHtmlHeader getHeader() {
+        return new SafeHtmlHeaderWithTooltip(SafeHtmlUtils.fromString(getStringMessages().name()), getStringMessages().competitorColumnTooltip());
     }
 
     public void render(T t, String competitorColorBarStyle, SafeHtmlBuilder sb) {
