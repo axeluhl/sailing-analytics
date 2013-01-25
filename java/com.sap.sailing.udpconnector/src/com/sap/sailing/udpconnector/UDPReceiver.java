@@ -128,8 +128,8 @@ public abstract class UDPReceiver<MessageType extends UDPMessage, ListenerType e
                                 try {
                                     ToListenerDispatcher dispatcher = listenerThreads.get(listener);
                                     dispatcher.dispatch(msg);
-                                } catch (Throwable t) {
-                                    logger.info("Exception while dispatching UDP packet received to "+listener+": "+t.getMessage());
+                                } catch (Exception e) {
+                                    logger.info("Exception while dispatching UDP packet received to "+listener+": "+e.getMessage());
                                 }
                             }
                         }

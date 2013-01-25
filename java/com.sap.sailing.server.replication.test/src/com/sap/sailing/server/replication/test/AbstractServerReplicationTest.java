@@ -51,8 +51,8 @@ public abstract class AbstractServerReplicationTest {
                     true, /* master=null means create a new one */ null,
             /* replica=null means create a new one */null);
             result.getA().startToReplicateFrom(result.getB());
-        } catch (Throwable t) {
-            t.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
             tearDown();
         }
     }

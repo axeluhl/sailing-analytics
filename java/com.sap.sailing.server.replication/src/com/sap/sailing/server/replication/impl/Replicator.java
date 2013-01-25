@@ -84,7 +84,7 @@ public class Replicator implements Runnable {
             } catch (ShutdownSignalException sse) {
                 logger.info("Received "+sse.getMessage()+". Terminating "+this);
                 break;
-            } catch (Throwable e) {
+            } catch (Exception e) {
                 logger.info("Exception while processing replica: "+e.getMessage());
                 logger.throwing(Replicator.class.getName(), "run", e);
             } finally {
