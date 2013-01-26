@@ -43,8 +43,10 @@ import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
+import com.sap.sailing.domain.tracking.TrackedRaceStatus.Status;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tracking.impl.GPSFixImpl;
+import com.sap.sailing.domain.tracking.impl.TrackedRaceStatusImpl;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.Receiver;
 import com.sap.sailing.domain.tractracadapter.TracTracControlPoint;
@@ -406,22 +408,45 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
     @Override
     public void stopped() {
         logger.info("stopped TracTrac tracking for "+getRaces());
+        for (RaceDefinition race : getRaces()) {
+            DynamicTrackedRace trackedRace = getTrackedRegatta().getExistingTrackedRace(race);
+            if (trackedRace != null) {
+                trackedRace.setStatus(new TrackedRaceStatusImpl(Status.FINISHED, 1.0));
+            }
+        }
     }
 
     @Override
     public void storedDataBegin() {
         logger.info("Stored data begin for race(s) "+getRaces());
+        for (RaceDefinition race : getRaces()) {
+            DynamicTrackedRace trackedRace = getTrackedRegatta().getExistingTrackedRace(race);
+            if (trackedRace != null) {
+                trackedRace.setStatus(new TrackedRaceStatusImpl(Status.LOADING, 0));
+            }
+        }
     }
 
     @Override
     public void storedDataEnd() {
         logger.info("Stored data end for race(s) "+getRaces());
+        for (RaceDefinition race : getRaces()) {
+            DynamicTrackedRace trackedRace = getTrackedRegatta().getExistingTrackedRace(race);
+            if (trackedRace != null) {
+                trackedRace.setStatus(new TrackedRaceStatusImpl(Status.TRACKING, 1));
+            }
+        }
     }
 
     @Override
     public void storedDataProgress(float progress) {
         logger.info("Stored data progress for race(s) "+getRaces()+": "+progress);
-        
+        for (RaceDefinition race : getRaces()) {
+            DynamicTrackedRace trackedRace = getTrackedRegatta().getExistingTrackedRace(race);
+            if (trackedRace != null) {
+                trackedRace.setStatus(new TrackedRaceStatusImpl(Status.LOADING, progress));
+            }
+        }
     }
 
     @Override

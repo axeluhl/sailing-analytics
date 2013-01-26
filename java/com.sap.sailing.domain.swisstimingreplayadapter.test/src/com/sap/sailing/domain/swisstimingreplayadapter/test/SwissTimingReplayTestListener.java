@@ -112,4 +112,8 @@ public class SwissTimingReplayTestListener implements SwissTimingReplayListener 
         eotCount++;
     }
 
+    @Override
+    public void progress(double progress) {
+    }
+
 }

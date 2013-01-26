@@ -11,9 +11,13 @@ import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceChangeListener;
+import com.sap.sailing.domain.tracking.TrackedRaceStatus;
 import com.sap.sailing.domain.tracking.Wind;
 
 public abstract class AbstractRaceChangeListener implements RaceChangeListener {
+
+    @Override
+    public void statusChanged(TrackedRaceStatus newStatus) {}
 
     @Override
     public void windSourcesToExcludeChanged(Iterable<? extends WindSource> windSourcesToExclude) {
