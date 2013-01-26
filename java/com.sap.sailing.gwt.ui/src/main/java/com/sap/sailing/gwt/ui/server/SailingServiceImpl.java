@@ -172,6 +172,7 @@ import com.sap.sailing.gwt.ui.shared.RaceColumnInSeriesDTO;
 import com.sap.sailing.gwt.ui.shared.RaceCourseMarksDTO;
 import com.sap.sailing.gwt.ui.shared.RaceDTO;
 import com.sap.sailing.gwt.ui.shared.RaceMapDataDTO;
+import com.sap.sailing.gwt.ui.shared.RaceStatusDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.RaceWithCompetitorsDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
@@ -1072,6 +1073,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             if (trackedRace != null) {
                 raceDTO.startOfRace = trackedRace.getStartOfRace() == null ? null : trackedRace.getStartOfRace().asDate();
                 raceDTO.endOfRace = trackedRace.getEndOfRace() == null ? null : trackedRace.getEndOfRace().asDate();
+                raceDTO.status = new RaceStatusDTO();
+                raceDTO.status.status = trackedRace.getStatus().getStatus();
+                raceDTO.status.loadingProgress = trackedRace.getStatus().getLoadingProgress();
             }
             raceDTO.boatClass = regatta.getBoatClass() == null ? null : regatta.getBoatClass().getName(); 
             result.add(raceDTO);

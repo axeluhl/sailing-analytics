@@ -488,4 +488,7 @@ public interface StringMessages extends Messages {
     String rankColumnTooltip();
     String carryColumnTooltip();
     String totalsColumnTooltip();
+    String windData();
+    String gpsData();
+    String status();
 }
