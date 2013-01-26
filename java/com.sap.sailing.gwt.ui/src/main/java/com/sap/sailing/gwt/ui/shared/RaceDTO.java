@@ -16,6 +16,7 @@ public class RaceDTO extends NamedDTO implements IsSerializable {
 
     public Date startOfRace;
     public Date endOfRace;
+    public RaceStatusDTO status;
 
     public PlacemarkOrderDTO places;
 

@@ -30,6 +30,7 @@ import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.tracking.AbstractRaceTrackerImpl;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
@@ -43,7 +44,6 @@ import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
-import com.sap.sailing.domain.tracking.TrackedRaceStatus.Status;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.tracking.impl.TrackedRaceStatusImpl;
@@ -411,7 +411,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         for (RaceDefinition race : getRaces()) {
             DynamicTrackedRace trackedRace = getTrackedRegatta().getExistingTrackedRace(race);
             if (trackedRace != null) {
-                trackedRace.setStatus(new TrackedRaceStatusImpl(Status.FINISHED, 1.0));
+                trackedRace.setStatus(new TrackedRaceStatusImpl(TrackedRaceStatusEnum.FINISHED, 1.0));
             }
         }
     }
@@ -422,7 +422,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         for (RaceDefinition race : getRaces()) {
             DynamicTrackedRace trackedRace = getTrackedRegatta().getExistingTrackedRace(race);
             if (trackedRace != null) {
-                trackedRace.setStatus(new TrackedRaceStatusImpl(Status.LOADING, 0));
+                trackedRace.setStatus(new TrackedRaceStatusImpl(TrackedRaceStatusEnum.LOADING, 0));
             }
         }
     }
@@ -433,7 +433,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         for (RaceDefinition race : getRaces()) {
             DynamicTrackedRace trackedRace = getTrackedRegatta().getExistingTrackedRace(race);
             if (trackedRace != null) {
-                trackedRace.setStatus(new TrackedRaceStatusImpl(Status.TRACKING, 1));
+                trackedRace.setStatus(new TrackedRaceStatusImpl(TrackedRaceStatusEnum.TRACKING, 1));
             }
         }
     }
@@ -444,7 +444,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         for (RaceDefinition race : getRaces()) {
             DynamicTrackedRace trackedRace = getTrackedRegatta().getExistingTrackedRace(race);
             if (trackedRace != null) {
-                trackedRace.setStatus(new TrackedRaceStatusImpl(Status.LOADING, progress));
+                trackedRace.setStatus(new TrackedRaceStatusImpl(TrackedRaceStatusEnum.LOADING, progress));
             }
         }
     }
