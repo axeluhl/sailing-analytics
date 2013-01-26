@@ -76,4 +76,6 @@ public interface DynamicTrackedRace extends TrackedRace {
      * the start leg's direction as a fallback for estimating the wind direction.
      */
     void setRaceIsKnownToStartUpwind(boolean raceIsKnownToStartUpwind);
+    
+    void setStatus(TrackedRaceStatus newStatus);
 }

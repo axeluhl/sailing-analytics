@@ -44,9 +44,11 @@ import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.WindTrack;
+import com.sap.sailing.domain.tracking.TrackedRaceStatus.Status;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
+import com.sap.sailing.domain.tracking.impl.TrackedRaceStatusImpl;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
 
 import difflib.PatchFailedException;
@@ -149,7 +151,7 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter {
         this.domainFactory = domainFactory;
     }
     
-    public Iterable<? extends TrackedRace> getTrackedRaces() {
+    public Iterable<DynamicTrackedRace> getTrackedRaces() {
         return trackedRacePerRaceID.values();
     }
 
@@ -307,6 +309,7 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter {
                         WindTrack.DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_WIND, 
                         /* time over which to average speed: */ race.getBoatClass().getApproximateManeuverDurationInMilliseconds(),
                         /* raceDefinitionSetToUpdate */ null);
+        trackedRace.setStatus(new TrackedRaceStatusImpl(Status.LOADING, 0));
         TimePoint bestStartTimeKnownSoFar = bestStartTimePerRaceID.get(currentRaceID);
         if (bestStartTimeKnownSoFar != null) {
             trackedRace.setStartTimeReceived(bestStartTimeKnownSoFar);
@@ -363,6 +366,19 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter {
             } else {
                 logger.warning("Couldn't find hash value "+hashValue+" in either the mark or the competitor map");
             }
+        }
+    }
+
+    @Override
+    public void progress(double progress) {
+        DynamicTrackedRace trackedRace = trackedRacePerRaceID.get(currentRaceID);
+        trackedRace.setStatus(new TrackedRaceStatusImpl(Status.LOADING, progress));
+    }
+
+    @Override
+    public void eot() {
+        for (DynamicTrackedRace trackedRace : getTrackedRaces()) {
+            trackedRace.setStatus(new TrackedRaceStatusImpl(Status.FINISHED, 1.0));
         }
     }
 }

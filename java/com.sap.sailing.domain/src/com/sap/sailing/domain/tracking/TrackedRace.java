@@ -450,4 +450,6 @@ public interface TrackedRace extends Serializable {
      * until the wind loading has completed.
      */
     void waitUntilWindLoadingComplete() throws InterruptedException;
+    
+    TrackedRaceStatus getStatus();
 }

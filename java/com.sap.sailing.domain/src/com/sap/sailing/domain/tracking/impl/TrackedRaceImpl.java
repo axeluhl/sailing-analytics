@@ -77,6 +77,8 @@ import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.TrackedRaceStatus;
+import com.sap.sailing.domain.tracking.TrackedRaceStatus.Status;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindStore;
@@ -102,6 +104,8 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     private final RaceDefinition race;
 
     private final TrackedRegatta trackedRegatta;
+    
+    private TrackedRaceStatus status;
 
     /**
      * By default, all wind sources are used, none are excluded. However, e.g., for performance reasons, particular wind
@@ -246,6 +250,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
             long delayForWindEstimationCacheInvalidation) {
         super();
         locksForMarkPassings = new IdentityHashMap<>();
+        this.status = new TrackedRaceStatusImpl(Status.PREPARED, 0.0);
         this.serializationLock = new NamedReentrantReadWriteLock("Serialization lock for tracked race "+race.getName(), /* fair */ true);
         this.cacheInvalidationTimerLock = new Object();
         this.updateCount = 0;
@@ -2190,5 +2195,14 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     
     protected void setDelayToLiveInMillis(long delayToLiveInMillis) {
         this.delayToLiveInMillis = delayToLiveInMillis; 
+    }
+
+    @Override
+    public TrackedRaceStatus getStatus() {
+        return status;
+    }
+
+    protected void setStatus(TrackedRaceStatus newStatus) {
+        this.status = newStatus;
     }
 }

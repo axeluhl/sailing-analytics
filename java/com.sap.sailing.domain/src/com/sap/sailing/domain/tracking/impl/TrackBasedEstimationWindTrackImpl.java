@@ -33,6 +33,7 @@ import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceChangeListener;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.TrackedRaceStatus;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
@@ -174,7 +175,7 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
         virtualInternalRawFixes = new EstimatedWindFixesAsNavigableSet(trackedRace);
         weigher = ConfidenceFactory.INSTANCE
                 .createHyperbolicTimeDifferenceWeigher(getMillisecondsOverWhichToAverageWind());
-        trackedRace.addListener(this);
+        trackedRace.addListener(this); // in particular, race status changes will be notified, unblocking waiting computations after LOADING phase
         this.timePointsWithCachedNullResult = new ArrayListNavigableSet<TimePoint>(
                 AbstractTimePoint.TIMEPOINT_COMPARATOR);
         this.timePointsWithCachedNullResultFastContains = new HashSet<TimePoint>();
@@ -501,6 +502,11 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
                 .getTimePoint().asMillis() - averagingInterval));
         TimePoint endOfInvalidation = new MillisecondsTimePoint(fix.getTimePoint().asMillis() + averagingInterval);
         scheduleCacheRefresh(startOfInvalidation, endOfInvalidation);
+    }
+    
+    @Override
+    public void statusChanged(TrackedRaceStatus newStatus) {
+        // TODO bug 1175: block recomputation in LOADING state, unblock them when changing state away from LOADING 
     }
 
     @Override

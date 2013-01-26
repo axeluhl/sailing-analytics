@@ -125,4 +125,9 @@ public class SwissTimingReplayPrintListener implements SwissTimingReplayListener
     public void eot() {
         System.out.println("EOT");
     }
+
+    @Override
+    public void progress(double progress) {
+        System.out.println("Progress: "+progress);
+    }
 }
