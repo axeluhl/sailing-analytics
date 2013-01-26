@@ -29,7 +29,10 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.RunnableFuture;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -317,7 +320,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         tractracMongoObjectFactory = com.sap.sailing.domain.tractracadapter.persistence.MongoObjectFactory.INSTANCE;
         swissTimingFactory = SwissTimingFactory.INSTANCE;
         countryCodeFactory = com.sap.sailing.domain.common.CountryCodeFactory.INSTANCE;
-        executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+        executor = new ThreadPoolExecutor(/* corePoolSize */ 0,
+                /* maximumPoolSize */ Runtime.getRuntime().availableProcessors(),
+                /* keepAliveTime */ 60, TimeUnit.SECONDS,
+                /* workQueue */ new LinkedBlockingQueue<Runnable>());
         raceDetailsExecutor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
         leaderboardByNameLiveUpdaters = new HashMap<String, LiveLeaderboardUpdater>();
         leaderboardDTOCacheWaitingForLatestAnalysis = new LeaderboardDTOCache(this, /* waitForLatestAnalyses */ true);
