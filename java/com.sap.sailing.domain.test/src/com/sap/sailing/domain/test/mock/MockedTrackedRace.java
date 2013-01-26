@@ -718,6 +718,10 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     @Override
     public void setStatus(TrackedRaceStatus newStatus) {
         // TODO Auto-generated method stub
-        
+    }
+
+    @Override
+    public void waitUntilNotLoading() {
+        // TODO Auto-generated method stub
     }
 }

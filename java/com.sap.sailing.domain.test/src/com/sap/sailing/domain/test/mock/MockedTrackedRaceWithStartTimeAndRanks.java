@@ -456,18 +456,21 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     @Override
     public void lockForRead(Iterable<MarkPassing> markPassings) {
         // TODO Auto-generated method stub
-        
     }
 
     @Override
     public void unlockAfterRead(Iterable<MarkPassing> markPassings) {
         // TODO Auto-generated method stub
-        
     }
 
     @Override
     public TrackedRaceStatus getStatus() {
         // TODO Auto-generated method stub
         return null;
+    }
+
+    @Override
+    public void waitUntilNotLoading() {
+        // TODO Auto-generated method stub
     }
 }

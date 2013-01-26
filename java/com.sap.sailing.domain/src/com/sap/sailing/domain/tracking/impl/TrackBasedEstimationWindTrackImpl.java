@@ -398,6 +398,7 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
                 public void run() {
                     // no locking required here; the incremental cache refresh protects the inner cache structures from concurrent modifications
                     cacheInvalidationTimer.cancel(); // terminates the timer thread
+                    getTrackedRace().waitUntilNotLoading();
                     refreshCacheIncrementally();
                 }
             }, delayForCacheInvalidationInMilliseconds);
@@ -506,7 +507,8 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
     
     @Override
     public void statusChanged(TrackedRaceStatus newStatus) {
-        // TODO bug 1175: block recomputation in LOADING state, unblock them when changing state away from LOADING 
+        // If the status changes from LOADING to something else, the waitUntilNotLoading call in the scheduler's
+        // run() method will be unblocked. Therefore no action is required here.
     }
 
     @Override
