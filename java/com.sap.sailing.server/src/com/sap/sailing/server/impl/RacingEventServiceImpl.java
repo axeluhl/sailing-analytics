@@ -807,7 +807,6 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     @Override
     public RacesHandle addTracTracRace(RegattaIdentifier regattaToAddTo, URL paramURL, URI liveURI,
             URI storedURI, TimePoint startOfTracking, TimePoint endOfTracking,
-            WindStore windStore, long timeoutInMilliseconds, boolean simulateWithStartTimeNow) throws Exception {
             WindStore windStore, long timeoutInMilliseconds, boolean simulateWithStartTimeNow, 
             RaceCommitteeStore raceCommitteeStore) throws Exception {
         return addRace(regattaToAddTo, getTracTracDomainFactory().createTrackingConnectivityParameters(paramURL, liveURI, storedURI, startOfTracking,
