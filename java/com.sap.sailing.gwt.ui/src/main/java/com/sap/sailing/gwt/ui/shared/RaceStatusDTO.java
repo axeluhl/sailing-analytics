@@ -1,14 +1,14 @@
 package com.sap.sailing.gwt.ui.shared;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
-import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
+import com.sap.sailing.domain.lifecycle.impl.TrackedRaceState;
 
 public class RaceStatusDTO implements IsSerializable {
-    public TrackedRaceStatusEnum status;
+    public TrackedRaceState status;
     public double loadingProgress;
     
     @Override
     public String toString() {
-        return status.name() + (status==TrackedRaceStatusEnum.LOADING ? " ("+((int) (loadingProgress*100))+"%)" : "");
+        return status.name() + (status==TrackedRaceState.LOADING ? " ("+((int) (loadingProgress*100))+"%)" : "");
     }
 }

@@ -30,12 +30,12 @@ import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.BearingWithConfidence;
 import com.sap.sailing.domain.base.BoatClass;
-import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.CourseChange;
 import com.sap.sailing.domain.base.CourseListener;
 import com.sap.sailing.domain.base.Leg;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
@@ -56,7 +56,6 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.Util;
@@ -69,6 +68,10 @@ import com.sap.sailing.domain.confidence.HasConfidence;
 import com.sap.sailing.domain.confidence.Weigher;
 import com.sap.sailing.domain.confidence.impl.HyperbolicTimeDifferenceWeigher;
 import com.sap.sailing.domain.confidence.impl.PositionAndTimePointWeigher;
+import com.sap.sailing.domain.lifecycle.Lifecycle;
+import com.sap.sailing.domain.lifecycle.LifecycleState;
+import com.sap.sailing.domain.lifecycle.impl.TrackedRaceLifecycle;
+import com.sap.sailing.domain.lifecycle.impl.TrackedRaceState;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
@@ -78,7 +81,6 @@ import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.domain.tracking.TrackedRaceStatus;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindStore;
@@ -105,10 +107,8 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
 
     private final TrackedRegatta trackedRegatta;
     
-    private TrackedRaceStatus status;
+    private final Lifecycle lifecycle;
     
-    private final Object statusNotifier;
-
     /**
      * By default, all wind sources are used, none are excluded. However, e.g., for performance reasons, particular wind
      * sources such as the track-based estimation wind source, may be excluded by adding them to this set.
@@ -252,8 +252,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
             long delayForWindEstimationCacheInvalidation) {
         super();
         locksForMarkPassings = new IdentityHashMap<>();
-        this.status = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.PREPARED, 0.0);
-        this.statusNotifier = new Object[0];
+        this.lifecycle = new TrackedRaceLifecycle(this);
         this.serializationLock = new NamedReentrantReadWriteLock("Serialization lock for tracked race "+race.getName(), /* fair */ true);
         this.cacheInvalidationTimerLock = new Object();
         this.updateCount = 0;
@@ -1758,7 +1757,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     }
     
     protected void triggerManeuverCacheRecalculation(final Competitor competitor) {
-        if (getStatus().getStatus() != TrackedRaceStatusEnum.LOADING) {
+        if (getLifecycle().getCurrentState() != TrackedRaceState.LOADING) {
             maneuverCache.triggerUpdate(competitor, /* updateInterval */ null);
         }
     }
@@ -2203,31 +2202,34 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     }
 
     @Override
-    public TrackedRaceStatus getStatus() {
-        return status;
+    public void statusChanged(LifecycleState newState, LifecycleState oldState) {
+        if (newState == TrackedRaceState.LOADING && oldState != TrackedRaceState.LOADING) {
+            suspendAllCachesNotUpdatingWhileLoading();
+        } else if (oldState == TrackedRaceState.LOADING && newState != TrackedRaceState.LOADING) {
+            resumeAllCachesNotUpdatingWhileLoading();
+        }
     }
 
     /**
-     * Changes to the {@link #status} variable are synchronized on the {@link #statusNotifier} field.
-     * @return
+     * Waits on the current ("old") status object which is notified in {@link #setStatus(TrackedRaceStatus)} when the status
+     * is changed. The change as well as the check synchronize on the old status object.
      */
-    protected Object getStatusNotifier() {
-        return statusNotifier;
+    @Override
+    public void waitUntilNotLoading() {
+        synchronized (getLifecycle().getMonitor()) {
+            while (getLifecycle().getCurrentState() == TrackedRaceState.LOADING) {
+                try {
+                    getLifecycle().getMonitor().wait();
+                } catch (InterruptedException e) {
+                    logger.info("waitUntilNotLoading on tracked race "+this+" interrupted: "+e.getMessage()+". Continuing to wait.");
+                }
+            }
+        }
     }
     
-    protected void setStatus(TrackedRaceStatus newStatus) {
-        final TrackedRaceStatusEnum oldStatus;
-        synchronized (getStatusNotifier()) {
-            oldStatus = getStatus().getStatus();
-            this.status = newStatus;
-            getStatusNotifier().notifyAll();
-        }
-        if (newStatus.getStatus() == TrackedRaceStatusEnum.LOADING && oldStatus != TrackedRaceStatusEnum.LOADING) {
-            suspendAllCachesNotUpdatingWhileLoading();
-        } else if (oldStatus == TrackedRaceStatusEnum.LOADING && newStatus.getStatus() != TrackedRaceStatusEnum.LOADING) {
-            resumeAllCachesNotUpdatingWhileLoading();
-        }
-
+    @Override
+    public Lifecycle getLifecycle() {
+        return lifecycle;
     }
 
     private void suspendAllCachesNotUpdatingWhileLoading() {
@@ -2238,22 +2240,5 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     private void resumeAllCachesNotUpdatingWhileLoading() {
         crossTrackErrorCache.resume();
         maneuverCache.resume();
-    }
-
-    /**
-     * Waits on the current ("old") status object which is notified in {@link #setStatus(TrackedRaceStatus)} when the status
-     * is changed. The change as well as the check synchronize on the old status object.
-     */
-    @Override
-    public void waitUntilNotLoading() {
-        synchronized (getStatusNotifier()) {
-            while (getStatus().getStatus() == TrackedRaceStatusEnum.LOADING) {
-                try {
-                    getStatusNotifier().wait();
-                } catch (InterruptedException e) {
-                    logger.info("waitUntilNotLoading on tracked race "+this+" interrupted: "+e.getMessage()+". Continuing to wait.");
-                }
-            }
-        }
     }
 }

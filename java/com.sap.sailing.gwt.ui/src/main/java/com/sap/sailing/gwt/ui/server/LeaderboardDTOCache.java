@@ -34,12 +34,12 @@ import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.ScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ScoreCorrectionListener;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
+import com.sap.sailing.domain.lifecycle.LifecycleState;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceChangeListener;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.domain.tracking.TrackedRaceStatus;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
 
@@ -105,7 +105,7 @@ public class LeaderboardDTOCache {
         }
 
         @Override
-        public void statusChanged(TrackedRaceStatus newStatus) {
+        public void statusChanged(LifecycleState newStatus) {
             removeFromCache(leaderboard);
         }
 

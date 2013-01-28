@@ -17,6 +17,7 @@ import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.MeterDistance;
+import com.sap.sailing.domain.lifecycle.LifecycleState;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
@@ -329,6 +330,12 @@ public class CrossTrackErrorCache extends AbstractRaceChangeListener {
     public void competitorPositionChanged(GPSFixMoving fix, Competitor competitor) {
         TimePoint from = owner.getTrack(competitor).getEstimatedPositionTimePeriodAffectedBy(fix).getA();
         invalidate(competitor, from);
+    }
+
+    @Override
+    public void statusChanged(LifecycleState newStatus) {
+        // no-op; race status change doesn't have an impact on the cross track error; only the loaded fixes for
+        // competitors and mark do
     }
 
     @Override

@@ -21,6 +21,8 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.domain.lifecycle.LifecycleState;
+import com.sap.sailing.domain.lifecycle.impl.LifecycleImpl;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
@@ -30,7 +32,6 @@ import com.sap.sailing.domain.tracking.RaceChangeListener;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.domain.tracking.TrackedRaceStatus;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindStore;
@@ -464,13 +465,19 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     }
 
     @Override
-    public TrackedRaceStatus getStatus() {
+    public void waitUntilNotLoading() {
+        // TODO Auto-generated method stub
+    }
+
+    @Override
+    public LifecycleImpl getLifecycle() {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public void waitUntilNotLoading() {
+    public void statusChanged(LifecycleState newState, LifecycleState oldState) {
         // TODO Auto-generated method stub
+        
     }
 }

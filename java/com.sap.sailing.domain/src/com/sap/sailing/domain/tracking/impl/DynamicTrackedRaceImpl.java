@@ -25,6 +25,7 @@ import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
+import com.sap.sailing.domain.lifecycle.LifecycleState;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
@@ -34,7 +35,6 @@ import com.sap.sailing.domain.tracking.GPSTrackListener;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceChangeListener;
 import com.sap.sailing.domain.tracking.TrackedLeg;
-import com.sap.sailing.domain.tracking.TrackedRaceStatus;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindStore;
@@ -105,12 +105,6 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
         track.addGPSFix(fix); // the track notifies this tracked race which in turn notifies its listeners
     }
     
-    @Override
-    public void setStatus(TrackedRaceStatus newStatus) {
-        super.setStatus(newStatus);
-        notifyListeners(newStatus);
-    }
-
     @Override
     public void recordFix(Mark mark, GPSFix fix) {
         getOrCreateTrack(mark).addGPSFix(fix);
@@ -286,7 +280,7 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
         }
     }
 
-    private void notifyListeners(TrackedRaceStatus status) {
+    private void notifyListeners(LifecycleState status) {
         RaceChangeListener[] listeners;
         synchronized (getListeners()) {
             listeners = getListeners().toArray(new RaceChangeListener[getListeners().size()]);
@@ -634,6 +628,12 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
     @Override
     public boolean raceIsKnownToStartUpwind() {
         return raceIsKnownToStartUpwind;
+    }
+
+    @Override
+    public void statusChanged(LifecycleState newState, LifecycleState oldState) {
+        //FIXME: super.statusChanged(newState);
+        notifyListeners(newState);
     }
 
 }
