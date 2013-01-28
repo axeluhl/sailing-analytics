@@ -22,6 +22,7 @@ import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
@@ -398,8 +399,12 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
                 public void run() {
                     // no locking required here; the incremental cache refresh protects the inner cache structures from concurrent modifications
                     cacheInvalidationTimer.cancel(); // terminates the timer thread
-                    getTrackedRace().waitUntilNotLoading();
-                    refreshCacheIncrementally();
+                    if (getTrackedRace().getStatus().getStatus() == TrackedRaceStatusEnum.LOADING) {
+                        // during loading, only invalidate the cache after the interval expired but don't trigger incremental re-calculation
+                        invalidateCache();
+                    } else {
+                        refreshCacheIncrementally();
+                    }
                 }
             }, delayForCacheInvalidationInMilliseconds);
         }
@@ -507,8 +512,8 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
     
     @Override
     public void statusChanged(TrackedRaceStatus newStatus) {
-        // If the status changes from LOADING to something else, the waitUntilNotLoading call in the scheduler's
-        // run() method will be unblocked. Therefore no action is required here.
+        // This virtual wind track's cache can cope with an empty cache after the LOADING phase and populates the cache
+        // upon request. Invalidation happens also during the LOADING phase, preserving the cache's invariant.
     }
 
     @Override
