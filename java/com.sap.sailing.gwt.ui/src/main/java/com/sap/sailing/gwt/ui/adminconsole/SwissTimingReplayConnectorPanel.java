@@ -387,14 +387,18 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
             }
         }
         
-        for (final SwissTimingReplayRaceDTO replayRace : raceList.getList()) {
-            if (raceTable.getSelectionModel().isSelected(replayRace)) {
-                sailingService.replaySwissTimingRace(regattaIdentifier, replayRace, trackWind, 
-                        correctWindByDeclination, simulateWithStartTimeNow, new AsyncCallback<Void>() {
+        final List<SwissTimingReplayRaceDTO> selectedRaces = new ArrayList<SwissTimingReplayRaceDTO>();
+        for (final SwissTimingReplayRaceDTO race : this.raceList.getList()) {
+            if (raceTable.getSelectionModel().isSelected(race)) {
+                selectedRaces.add(race);
+            }
+        }
+        sailingService.replaySwissTimingRace(regattaIdentifier, selectedRaces, trackWind, correctWindByDeclination,
+                simulateWithStartTimeNow, new AsyncCallback<Void>() {
                     @Override
                     public void onFailure(Throwable caught) {
-                        errorReporter.reportError("Error trying to register race " + replayRace.name + " for tracking: "
-                                + caught.getMessage()+". Check live/stored URI syntax.");
+                        errorReporter.reportError("Error trying to register races " + selectedRaces
+                                + " for tracking: " + caught.getMessage() + ". Check live/stored URI syntax.");
                     }
 
                     @Override
@@ -402,8 +406,6 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
                         regattaRefresher.fillRegattas();
                     }
                 });
-            }
-        }
     }
 
     private void fillRaceListFromAvailableRacesApplyingFilter(String text) {
