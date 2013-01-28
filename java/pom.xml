@@ -21,7 +21,6 @@
 		<module>com.sap.sailing.geocoding</module>
 		<module>com.sap.sailing.geocoding.test</module>
 		<module>com.sap.sailing.domain.persistence</module>
-		<module>com.sap.sailing.domain.persistence.test</module>
 		<module>com.sap.sailing.domain.test</module>
 		<module>com.sap.sailing.domain.tractracadapter</module>
 		<module>com.sap.sailing.domain.tractracadapter.test</module>

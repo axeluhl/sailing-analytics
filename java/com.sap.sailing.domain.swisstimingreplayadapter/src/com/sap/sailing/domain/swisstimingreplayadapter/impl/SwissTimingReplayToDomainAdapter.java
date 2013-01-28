@@ -29,6 +29,7 @@ import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
@@ -48,6 +49,7 @@ import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
+import com.sap.sailing.domain.tracking.impl.TrackedRaceStatusImpl;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
 
 import difflib.PatchFailedException;
@@ -150,7 +152,7 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter {
         this.domainFactory = domainFactory;
     }
     
-    public Iterable<? extends TrackedRace> getTrackedRaces() {
+    public Iterable<DynamicTrackedRace> getTrackedRaces() {
         return trackedRacePerRaceID.values();
     }
 
@@ -308,6 +310,7 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter {
                         WindTrack.DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_WIND, 
                         /* time over which to average speed: */ race.getBoatClass().getApproximateManeuverDurationInMilliseconds(),
                         /* raceDefinitionSetToUpdate */ null, EmptyRaceCommitteeStore.INSTANCE);
+        trackedRace.setStatus(new TrackedRaceStatusImpl(TrackedRaceStatusEnum.LOADING, 0));
         TimePoint bestStartTimeKnownSoFar = bestStartTimePerRaceID.get(currentRaceID);
         if (bestStartTimeKnownSoFar != null) {
             trackedRace.setStartTimeReceived(bestStartTimeKnownSoFar);
@@ -364,6 +367,19 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter {
             } else {
                 logger.warning("Couldn't find hash value "+hashValue+" in either the mark or the competitor map");
             }
+        }
+    }
+
+    @Override
+    public void progress(double progress) {
+        DynamicTrackedRace trackedRace = trackedRacePerRaceID.get(currentRaceID);
+        trackedRace.setStatus(new TrackedRaceStatusImpl(TrackedRaceStatusEnum.LOADING, progress));
+    }
+
+    @Override
+    public void eot() {
+        for (DynamicTrackedRace trackedRace : getTrackedRaces()) {
+            trackedRace.setStatus(new TrackedRaceStatusImpl(TrackedRaceStatusEnum.FINISHED, 1.0));
         }
     }
 }

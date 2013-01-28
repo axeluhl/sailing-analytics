@@ -26,12 +26,9 @@ import com.sap.sailing.gwt.ui.shared.components.SettingsDialog;
  * the {@link AdminConsoleEntryPoint}.
  */
 public class TrackedRacesListComposite extends AbstractTrackedRacesListComposite {
-    
     private final Set<TrackedRaceChangedListener> raceIsTrackedRaceChangeListener;
-
     private Button btnUntrack;
     private Button btnRemoveRace;
-
     private Button btnSetDelayToLive;
 
     public TrackedRacesListComposite(final SailingServiceAsync sailingService, final ErrorReporter errorReporter,
@@ -48,10 +45,6 @@ public class TrackedRacesListComposite extends AbstractTrackedRacesListComposite
         SettingsDialog<TrackedRacesSettings> settingsDialog = new SettingsDialog<TrackedRacesSettings>(this, stringMessages);
         settingsDialog.show();
     }
-
-
-
-
     
     public void addTrackedRaceChangeListener(TrackedRaceChangedListener listener) {
         this.raceIsTrackedRaceChangeListener.add(listener);

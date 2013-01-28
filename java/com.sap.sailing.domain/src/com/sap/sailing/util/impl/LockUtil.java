@@ -69,7 +69,7 @@ public class LockUtil {
     }
     
     public static void lockForRead(NamedReentrantReadWriteLock lock) {
-        lock(lock.readLock(), "readLock "+lock.getName(), lock);
+        lock(lock.readLock(), lock.getReadLockName(), lock);
     }
     
     public static void unlockAfterRead(NamedReentrantReadWriteLock lock) {
@@ -77,7 +77,7 @@ public class LockUtil {
     }
     
     public static void lockForWrite(NamedReentrantReadWriteLock lock) {
-        lock(lock.writeLock(), "writeLock "+lock.getName(), lock);
+        lock(lock.writeLock(), lock.getWriteLockName(), lock);
         synchronized (lastTimeWriteLockWasObtained) {
             lastTimeWriteLockWasObtained.put(lock, MillisecondsTimePoint.now());
         }

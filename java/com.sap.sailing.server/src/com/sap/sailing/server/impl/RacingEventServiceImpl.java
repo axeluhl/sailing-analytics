@@ -87,6 +87,7 @@ import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
 import com.sap.sailing.domain.tracking.RacesHandle;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.TrackedRaceStatus;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindStore;
@@ -118,6 +119,7 @@ import com.sap.sailing.server.operationaltransformation.TrackRegatta;
 import com.sap.sailing.server.operationaltransformation.UpdateMarkPassings;
 import com.sap.sailing.server.operationaltransformation.UpdateRaceDelayToLive;
 import com.sap.sailing.server.operationaltransformation.UpdateRaceTimes;
+import com.sap.sailing.server.operationaltransformation.UpdateTrackedRaceStatus;
 import com.sap.sailing.server.operationaltransformation.UpdateWindAveragingTime;
 import com.sap.sailing.server.operationaltransformation.UpdateWindSourcesToExclude;
 
@@ -805,6 +807,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     @Override
     public RacesHandle addTracTracRace(RegattaIdentifier regattaToAddTo, URL paramURL, URI liveURI,
             URI storedURI, TimePoint startOfTracking, TimePoint endOfTracking,
+            WindStore windStore, long timeoutInMilliseconds, boolean simulateWithStartTimeNow) throws Exception {
             WindStore windStore, long timeoutInMilliseconds, boolean simulateWithStartTimeNow, 
             RaceCommitteeStore raceCommitteeStore) throws Exception {
         return addRace(regattaToAddTo, getTracTracDomainFactory().createTrackingConnectivityParameters(paramURL, liveURI, storedURI, startOfTracking,
@@ -914,6 +917,11 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         @Override
         public void competitorPositionChanged(GPSFixMoving fix, Competitor competitor) {
             replicate(new RecordCompetitorGPSFix(getRaceIdentifier(), competitor, fix));
+        }
+
+        @Override
+        public void statusChanged(TrackedRaceStatus newStatus) {
+            replicate(new UpdateTrackedRaceStatus(getRaceIdentifier(), newStatus));
         }
 
         @Override

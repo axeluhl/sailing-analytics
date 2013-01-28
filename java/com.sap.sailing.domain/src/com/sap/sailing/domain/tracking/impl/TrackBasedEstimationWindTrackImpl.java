@@ -34,6 +34,7 @@ import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceChangeListener;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.TrackedRaceStatus;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
@@ -175,7 +176,7 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
         virtualInternalRawFixes = new EstimatedWindFixesAsNavigableSet(trackedRace);
         weigher = ConfidenceFactory.INSTANCE
                 .createHyperbolicTimeDifferenceWeigher(getMillisecondsOverWhichToAverageWind());
-        trackedRace.addListener(this);
+        trackedRace.addListener(this); // in particular, race status changes will be notified, unblocking waiting computations after LOADING phase
         this.timePointsWithCachedNullResult = new ArrayListNavigableSet<TimePoint>(
                 AbstractTimePoint.TIMEPOINT_COMPARATOR);
         this.timePointsWithCachedNullResultFastContains = new HashSet<TimePoint>();
@@ -398,6 +399,7 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
                 public void run() {
                     // no locking required here; the incremental cache refresh protects the inner cache structures from concurrent modifications
                     cacheInvalidationTimer.cancel(); // terminates the timer thread
+                    getTrackedRace().waitUntilNotLoading();
                     refreshCacheIncrementally();
                 }
             }, delayForCacheInvalidationInMilliseconds);
@@ -506,6 +508,12 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
                 .getTimePoint().asMillis() - averagingInterval));
         TimePoint endOfInvalidation = new MillisecondsTimePoint(fix.getTimePoint().asMillis() + averagingInterval);
         scheduleCacheRefresh(startOfInvalidation, endOfInvalidation);
+    }
+    
+    @Override
+    public void statusChanged(TrackedRaceStatus newStatus) {
+        // If the status changes from LOADING to something else, the waitUntilNotLoading call in the scheduler's
+        // run() method will be unblocked. Therefore no action is required here.
     }
 
     @Override

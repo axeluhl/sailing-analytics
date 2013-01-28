@@ -554,9 +554,12 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         DBCollection leaderboardCollection = database.getCollection(CollectionNames.LEADERBOARDS.name());
         Set<Leaderboard> result = new HashSet<Leaderboard>();
         try {
-            //Don't change the query object, unless you know what you're doing
+            // Don't change the query object, unless you know what you're doing
             BasicDBObject query = new BasicDBObject("$where", "function() { return db." + CollectionNames.LEADERBOARD_GROUPS.name() + ".find({ "
-                    + FieldNames.LEADERBOARD_GROUP_LEADERBOARDS.name() + ": this._id }).count() == 0; }");
+                    + FieldNames.LEADERBOARD_GROUP_LEADERBOARDS.name() + ": this._id }).count() == 0 && "
+                            + "db."+CollectionNames.LEADERBOARD_GROUPS.name()+".find({ "+FieldNames.LEADERBOARD_GROUP_OVERALL_LEADERBOARD.name() + ": this._id }).count() == 0 && "
+                            + "db."+CollectionNames.LEADERBOARD_GROUPS.name()+".find({ "+FieldNames.LEADERBOARD_GROUP_OVERALL_LEADERBOARD.name()+
+                            ": this."+FieldNames.LEADERBOARD_NAME.name()+" }).count() == 0; }}");
             for (DBObject o : leaderboardCollection.find(query)) {
                 final Leaderboard loadedLeaderboard = loadLeaderboard(o, regattaRegistry, leaderboardRegistry, /* groupForMetaLeaderboard */ null);
                 if (loadedLeaderboard != null) {

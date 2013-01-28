@@ -56,6 +56,7 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.Util;
@@ -80,6 +81,7 @@ import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.TrackedRaceStatus;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindStore;
@@ -105,6 +107,10 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     private final RaceDefinition race;
 
     private final TrackedRegatta trackedRegatta;
+    
+    private TrackedRaceStatus status;
+    
+    private final Object statusNotifier;
 
     /**
      * By default, all wind sources are used, none are excluded. However, e.g., for performance reasons, particular wind
@@ -259,6 +265,8 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
             long delayForWindEstimationCacheInvalidation, final RaceCommitteeStore raceCommitteeStore) {
         super();
         locksForMarkPassings = new IdentityHashMap<Iterable<MarkPassing>, NamedReentrantReadWriteLock>();
+        this.status = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.PREPARED, 0.0);
+        this.statusNotifier = new Object[0];
         this.serializationLock = new NamedReentrantReadWriteLock("Serialization lock for tracked race "+race.getName(), /* fair */ true);
         this.cacheInvalidationTimerLock = new Object();
         this.updateCount = 0;
@@ -414,6 +422,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                     @Override
                     public Triple<TimePoint, TimePoint, List<Maneuver>> computeCacheUpdate(Competitor competitor,
                             EmptyUpdateInterval updateInterval) throws NoWindException {
+                        waitUntilNotLoading();
                         return computeManeuvers(competitor);
                     }
                 }, /* nameForLocks */ "Maneuver cache for race "+getRace().getName());
@@ -2241,7 +2250,8 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     protected void setDelayToLiveInMillis(long delayToLiveInMillis) {
         this.delayToLiveInMillis = delayToLiveInMillis; 
     }
-    
+
+   
     @Override
     public RaceCommitteeEventTrack getRaceCommitteeEventTrack() {
     	if (raceCommitteeEventTrack == null) {
@@ -2252,5 +2262,42 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     		}
     	}
     	return raceCommitteeEventTrack;
+    }
+
+    @Override
+    public TrackedRaceStatus getStatus() {
+        return status;
+    }
+
+    /**
+     * Changes to the {@link #status} variable are synchronized on the {@link #statusNotifier} field.
+     * @return
+     */
+    protected Object getStatusNotifier() {
+        return statusNotifier;
+    }
+    
+    protected void setStatus(TrackedRaceStatus newStatus) {
+        synchronized (getStatusNotifier()) {
+            this.status = newStatus;
+            getStatusNotifier().notifyAll();
+        }
+    }
+
+    /**
+     * Waits on the current ("old") status object which is notified in {@link #setStatus(TrackedRaceStatus)} when the status
+     * is changed. The change as well as the check synchronize on the old status object.
+     */
+    @Override
+    public void waitUntilNotLoading() {
+        synchronized (getStatusNotifier()) {
+            while (getStatus().getStatus() == TrackedRaceStatusEnum.LOADING) {
+                try {
+                    getStatusNotifier().wait();
+                } catch (InterruptedException e) {
+                    logger.info("waitUntilNotLoading on tracked race "+this+" interrupted: "+e.getMessage()+". Continuing to wait.");
+                }
+            }
+        }
     }
 }

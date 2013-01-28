@@ -24,6 +24,7 @@ import com.sap.sailing.domain.tracking.RaceChangeListener;
 import com.sap.sailing.domain.tracking.Track;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.TrackedRaceStatus;
 import com.sap.sailing.util.impl.SmartFutureCache;
 import com.sap.sailing.util.impl.SmartFutureCache.CacheUpdater;
 import com.sap.sailing.util.impl.SmartFutureCache.UpdateInterval;
@@ -321,6 +322,12 @@ public class CrossTrackErrorCache extends AbstractRaceChangeListener {
     public void competitorPositionChanged(GPSFixMoving fix, Competitor competitor) {
         TimePoint from = owner.getTrack(competitor).getEstimatedPositionTimePeriodAffectedBy(fix).getA();
         invalidate(competitor, from);
+    }
+
+    @Override
+    public void statusChanged(TrackedRaceStatus newStatus) {
+        // no-op; race status change doesn't have an impact on the cross track error; only the loaded fixes for
+        // competitors and mark do
     }
 
     @Override

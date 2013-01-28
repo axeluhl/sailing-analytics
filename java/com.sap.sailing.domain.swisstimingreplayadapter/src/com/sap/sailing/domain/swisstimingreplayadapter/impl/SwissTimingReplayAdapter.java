@@ -59,4 +59,7 @@ public class SwissTimingReplayAdapter implements SwissTimingReplayListener {
     @Override
     public void eot() {}
 
+    @Override
+    public void progress(double progress) {}
+
 }
