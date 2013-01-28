@@ -11,14 +11,16 @@ import java.util.WeakHashMap;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
-import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnListener;
 import com.sap.sailing.domain.base.Waypoint;
@@ -37,6 +39,7 @@ import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceChangeListener;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.TrackedRaceStatus;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
 
@@ -98,6 +101,11 @@ public class LeaderboardDTOCache {
         
         @Override
         public void competitorPositionChanged(GPSFixMoving fix, Competitor competitor) {
+            removeFromCache(leaderboard);
+        }
+
+        @Override
+        public void statusChanged(TrackedRaceStatus newStatus) {
             removeFromCache(leaderboard);
         }
 
@@ -186,7 +194,11 @@ public class LeaderboardDTOCache {
         this.waitForLatestAnalyses = waitForLatestAnalyses;
         // if the leaderboard becomes weakly referenced and eventually GCed, then so can the cached results for it
         this.leaderboardCache = new WeakHashMap<Leaderboard, Map<Util.Pair<TimePoint, Collection<String>>, FutureTask<LeaderboardDTO>>>();
-        this.computeLeadearboardByNameExecutor = Executors.newFixedThreadPool(10*Runtime.getRuntime().availableProcessors());
+        this.computeLeadearboardByNameExecutor =
+                new ThreadPoolExecutor(/* corePoolSize */ 0,
+                        /* maximumPoolSize */ 10*Runtime.getRuntime().availableProcessors(),
+                        /* keepAliveTime */ 60, TimeUnit.SECONDS,
+                        /* workQueue */ new LinkedBlockingQueue<Runnable>());
         this.invalidationListenersPerLeaderboard = new WeakHashMap<Leaderboard, Map<TrackedRace, Set<CacheInvalidationListener>>>();
         this.raceColumnListeners = new WeakHashMap<Leaderboard, RaceColumnListener>();
         this.scoreCorrectionListeners = new WeakHashMap<Leaderboard, CacheInvalidationUponScoreCorrectionListener>();

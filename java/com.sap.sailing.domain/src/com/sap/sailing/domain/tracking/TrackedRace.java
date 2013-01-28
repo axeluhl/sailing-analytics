@@ -19,6 +19,7 @@ import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.Util.Pair;
@@ -454,4 +455,12 @@ public interface TrackedRace extends Serializable {
      * which will block until the wind loading has completed.
      */
     void waitUntilWindLoadingComplete() throws InterruptedException;
+    
+    TrackedRaceStatus getStatus();
+
+    /**
+     * If the {@link #getStatus() status} is currently {@link TrackedRaceStatusEnum#LOADING}, blocks until the status changes to any
+     * other status.
+     */
+    void waitUntilNotLoading();
 }

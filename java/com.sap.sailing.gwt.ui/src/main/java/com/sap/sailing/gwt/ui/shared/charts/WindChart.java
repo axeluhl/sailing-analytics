@@ -402,10 +402,10 @@ public class WindChart extends RaceChart implements Component<WindChartSettings>
             double deltaMax = Math.abs(yMax - y);
 
             double yDown = y - 360;
-            double deltaMinDown = Math.abs(yMin - Math.abs(yDown));
+            double deltaMinDown = Math.abs(yMin - yDown);
 
             double yUp = y + 360;
-            double deltaMaxUp = Math.abs(yMax - Math.abs(yUp));
+            double deltaMaxUp = Math.abs(yMax - yUp);
 
             if (!(deltaMin <= deltaMinDown && deltaMin <= deltaMaxUp)
                     && !(deltaMax <= deltaMinDown && deltaMax <= deltaMaxUp)) {

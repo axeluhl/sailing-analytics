@@ -28,6 +28,7 @@ import com.sap.sailing.domain.tracking.RaceChangeListener;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.TrackedRaceStatus;
 import com.sap.sailing.domain.tracking.Wind;
 
 public class TrackedLegImpl implements TrackedLeg, RaceChangeListener {
@@ -194,6 +195,11 @@ public class TrackedLegImpl implements TrackedLeg, RaceChangeListener {
     @Override
     public void competitorPositionChanged(GPSFixMoving fix, Competitor competitor) {
         clearCaches();
+    }
+
+    @Override
+    public void statusChanged(TrackedRaceStatus newStatus) {
+        // no-op; the leg doesn't mind the tracked race's status being updated
     }
 
     @Override

@@ -411,7 +411,7 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
         raceList.getList().clear();
         if (text != null && !text.isEmpty()) {
             for (SwissTimingReplayRaceDTO replayRace : availableSwissTimingRaces) {
-                boolean found = textContainsStringsToCheck(wordsToFilter, replayRace.boat_class, replayRace.flight_number, replayRace.name, replayRace.race_id);
+                boolean found = textContainsStringsToCheck(wordsToFilter, replayRace.boat_class, replayRace.flight_number, replayRace.name, replayRace.race_id, replayRace.rsc);
                 if (found) {
                     raceList.getList().add(replayRace);
                 }
