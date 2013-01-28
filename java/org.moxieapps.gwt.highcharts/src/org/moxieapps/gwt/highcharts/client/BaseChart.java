@@ -2663,7 +2663,7 @@ public abstract class BaseChart<T> extends Widget {
         var series = chart.series;
         for(var i= 0; i<series.length; i++) {
             if(series[i].legendItem && series[i].checkbox) {
-                series[i].checkbox.style.marginLeft = - series[i].legendItemWidth + 20 + "px";
+                series[i].checkbox.style.marginLeft = - series[i].legendItemWidth + 40 + "px";
                 series[i].checkbox.style.marginTop = '0px';
             }
         }
