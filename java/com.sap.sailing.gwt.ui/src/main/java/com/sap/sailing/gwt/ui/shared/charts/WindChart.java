@@ -346,7 +346,7 @@ public class WindChart extends RaceChart implements Component<WindChartSettings>
                         newDirectionPoint.setName(name);
                     }
                     
-                    newDirectionPoint = recalculateDirectionPoint(directionMin, directionMax, newDirectionPoint);
+                    newDirectionPoint = WindChartPointRecalculator.recalculateDirectionPoint(directionMin, directionMax, newDirectionPoint);
                     directionPoints[currentPointIndex] = newDirectionPoint;
 
                     double direction = newDirectionPoint.getY().doubleValue();
@@ -393,30 +393,6 @@ public class WindChart extends RaceChart implements Component<WindChartSettings>
         timeOfLatestRequestInMillis = newMaxTimepoint;
     }
     
-    private Point recalculateDirectionPoint(Double yMin, Double yMax, Point directionPoint) {
-        double y = directionPoint.getY().doubleValue();
-        boolean recalculated = false;
-
-        if (yMax != null && yMin != null && (y < yMin || y > yMax)) {
-            double deltaMin = Math.abs(yMin - y);
-            double deltaMax = Math.abs(yMax - y);
-
-            double yDown = y - 360;
-            double deltaMinDown = Math.abs(yMin - yDown);
-
-            double yUp = y + 360;
-            double deltaMaxUp = Math.abs(yMax - yUp);
-
-            if (!(deltaMin <= deltaMinDown && deltaMin <= deltaMaxUp)
-                    && !(deltaMax <= deltaMinDown && deltaMax <= deltaMaxUp)) {
-                y = deltaMaxUp <= deltaMinDown ? yUp : yDown;
-                recalculated = true;
-            }
-        }
-        
-        return recalculated ? new Point(directionPoint.getX(), y) : directionPoint;
-    }
-
     @Override
     public boolean hasSettings() {
         return true;
