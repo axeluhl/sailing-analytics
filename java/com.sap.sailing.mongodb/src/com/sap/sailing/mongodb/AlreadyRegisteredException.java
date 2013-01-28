@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.persistence;
+package com.sap.sailing.mongodb;
 
 public class AlreadyRegisteredException extends Exception {
 

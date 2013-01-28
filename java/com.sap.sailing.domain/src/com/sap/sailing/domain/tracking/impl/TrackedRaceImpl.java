@@ -379,7 +379,6 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                     @Override
                     public Triple<TimePoint, TimePoint, List<Maneuver>> computeCacheUpdate(Competitor competitor,
                             EmptyUpdateInterval updateInterval) throws NoWindException {
-                        waitUntilNotLoading();
                         return computeManeuvers(competitor);
                     }
                 }, /* nameForLocks */ "Maneuver cache for race "+getRace().getName());
@@ -1759,7 +1758,9 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     }
     
     protected void triggerManeuverCacheRecalculation(final Competitor competitor) {
-        maneuverCache.triggerUpdate(competitor, /* updateInterval */ null);
+        if (getStatus().getStatus() != TrackedRaceStatusEnum.LOADING) {
+            maneuverCache.triggerUpdate(competitor, /* updateInterval */ null);
+        }
     }
 
     private Triple<TimePoint, TimePoint, List<Maneuver>> computeManeuvers(Competitor competitor) throws NoWindException {
@@ -2215,10 +2216,28 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     }
     
     protected void setStatus(TrackedRaceStatus newStatus) {
+        final TrackedRaceStatusEnum oldStatus;
         synchronized (getStatusNotifier()) {
+            oldStatus = getStatus().getStatus();
             this.status = newStatus;
             getStatusNotifier().notifyAll();
         }
+        if (newStatus.getStatus() == TrackedRaceStatusEnum.LOADING && oldStatus != TrackedRaceStatusEnum.LOADING) {
+            suspendAllCachesNotUpdatingWhileLoading();
+        } else if (oldStatus == TrackedRaceStatusEnum.LOADING && newStatus.getStatus() != TrackedRaceStatusEnum.LOADING) {
+            resumeAllCachesNotUpdatingWhileLoading();
+        }
+
+    }
+
+    private void suspendAllCachesNotUpdatingWhileLoading() {
+        crossTrackErrorCache.suspend();
+        maneuverCache.suspend();
+    }
+
+    private void resumeAllCachesNotUpdatingWhileLoading() {
+        crossTrackErrorCache.resume();
+        maneuverCache.resume();
     }
 
     /**
