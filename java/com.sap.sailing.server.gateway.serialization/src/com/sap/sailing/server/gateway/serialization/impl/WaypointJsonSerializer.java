@@ -24,7 +24,9 @@ public class WaypointJsonSerializer implements JsonSerializer<Waypoint> {
 		
 		result.put(FIELD_ID, object.getId().toString());
 		result.put(FIELD_NAME, object.getName());
-		result.put(FIELD_PASSING_SIDE, object.getPassingSide().toString());
+		if (object.getPassingSide() != null) {
+			result.put(FIELD_PASSING_SIDE, object.getPassingSide());
+		}
 		result.put(FIELD_CONTROL_POINT, 
 				controlPointSerializer.serialize(object.getControlPoint()));
 		
