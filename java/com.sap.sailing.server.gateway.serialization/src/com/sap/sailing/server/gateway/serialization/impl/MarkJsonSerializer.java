@@ -26,10 +26,18 @@ public class MarkJsonSerializer extends BaseControlPointJsonSerializer implement
 		JSONObject result = super.serialize(mark);
 		
 		result.put(FIELD_ID, mark.getId().toString());
-		result.put(FIELD_COLOR, mark.getColor());
-		result.put(FIELD_PATTERN, mark.getPattern());
-		result.put(FIELD_SHAPE, mark.getShape());
-		result.put(FIELD_TYPE, mark.getType().toString());
+		if (mark.getColor() != null) {
+			result.put(FIELD_COLOR, mark.getColor());
+		}
+		if (mark.getPattern() != null) {
+			result.put(FIELD_PATTERN, mark.getPattern());
+		}
+		if (mark.getShape() != null) {
+			result.put(FIELD_SHAPE, mark.getShape());
+		}
+		if (mark.getType() != null) {
+			result.put(FIELD_TYPE, mark.getType());
+		}
 		
 		return result;
 	}

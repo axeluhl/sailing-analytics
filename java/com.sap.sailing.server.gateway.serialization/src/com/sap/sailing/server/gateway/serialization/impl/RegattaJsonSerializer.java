@@ -10,6 +10,7 @@ import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 
 public class RegattaJsonSerializer implements JsonSerializer<Regatta> {
 	public static final String FIELD_ID = "id";
+	public static final String FIELD_NAME = "name";
 	public static final String FIELD_BASE_NAME = "baseName";
 	public static final String FIELD_BOAT_CLASS = "boatClass";
 	public static final String FIELD_RACES = "races";
@@ -30,6 +31,7 @@ public class RegattaJsonSerializer implements JsonSerializer<Regatta> {
 		JSONObject result = new JSONObject();
 		
 		result.put(FIELD_ID, object.getId().toString());
+		result.put(FIELD_NAME, object.getName());
 		result.put(FIELD_BASE_NAME, object.getBaseName());
 		result.put(FIELD_BOAT_CLASS, boatClassSerializer.serialize(object.getBoatClass()));
 		
