@@ -1,11 +1,11 @@
-package com.sap.sailing.server.gateway.serialization;
+package com.sap.sailing.server.gateway.serialization.impl;
 
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.racecommittee.RaceCommitteeEvent;
 import com.sap.sailing.domain.racecommittee.RaceCommitteeStartTimeEvent;
 
-public class RaceCommitteeStartTimeEventSerializer extends RaceCommitteeEventSerializer {
+public class RaceCommitteeStartTimeEventSerializer extends BaseRaceCommitteeEventSerializer {
 	public static final String VALUE_CLASS = RaceCommitteeStartTimeEvent.class.getSimpleName();
 	public static final String FIELD_START_TIME = "startTime";
 	

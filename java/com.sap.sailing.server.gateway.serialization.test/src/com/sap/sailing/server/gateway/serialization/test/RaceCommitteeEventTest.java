@@ -8,14 +8,14 @@ import org.junit.Test;
 
 import com.sap.sailing.domain.racecommittee.RaceCommitteeEvent;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
-import com.sap.sailing.server.gateway.serialization.RaceCommitteeEventSerializer;
-import com.sap.sailing.server.gateway.serialization.RaceCommitteeFlagEventSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.BaseRaceCommitteeEventSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.RaceCommitteeFlagEventSerializer;
 
 public class RaceCommitteeEventTest extends BaseRaceCommitteEventTest<RaceCommitteeEvent> {
 
 	protected final String expectedClassValue = "AllYourBaseAreBelongToUs";
 	
-	private class TestRaceCommitteeEventSerializer extends RaceCommitteeEventSerializer {
+	private class TestRaceCommitteeEventSerializer extends BaseRaceCommitteeEventSerializer {
 		@Override
 		protected String getClassFieldValue() {
 			return expectedClassValue;

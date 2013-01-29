@@ -1,7 +1,9 @@
-package com.sap.sailing.server.gateway.deserialization;
+package com.sap.sailing.server.gateway.deserialization.impl;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+
+import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 
 public class Helpers {
 	

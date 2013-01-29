@@ -17,10 +17,10 @@ import android.view.Menu;
 import android.widget.TextView;
 
 import com.sap.sailing.domain.base.Event;
-import com.sap.sailing.server.gateway.deserialization.CourseAreaJsonDeserializer;
-import com.sap.sailing.server.gateway.deserialization.EventJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
-import com.sap.sailing.server.gateway.deserialization.VenueJsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.CourseAreaJsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.EventJsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.VenueJsonDeserializer;
 
 public class EventSelectionActivity extends Activity {
 

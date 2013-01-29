@@ -1,4 +1,4 @@
-package com.sap.sailing.server.gateway.deserialization;
+package com.sap.sailing.server.gateway.deserialization.impl;
 
 import java.util.UUID;
 
@@ -7,7 +7,9 @@ import org.json.simple.JSONObject;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Venue;
 import com.sap.sailing.domain.base.impl.EventImpl;
-import com.sap.sailing.server.gateway.serialization.EventJsonSerializer;
+import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
+import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
+import com.sap.sailing.server.gateway.serialization.impl.EventJsonSerializer;
 
 public class EventJsonDeserializer implements JsonDeserializer<Event> {
 	private JsonDeserializer<Venue> venueDeserializer;

@@ -13,9 +13,9 @@ import org.json.simple.JSONArray;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.server.gateway.impl.JsonExportServlet;
-import com.sap.sailing.server.gateway.serialization.BoatClassJsonSerializer;
-import com.sap.sailing.server.gateway.serialization.RaceDefinitionJsonSerializer;
-import com.sap.sailing.server.gateway.serialization.RegattaJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.BoatClassJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.RaceDefinitionJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.RegattaJsonSerializer;
 
 
 public class RegattasRaceJsonExportServlet extends JsonExportServlet {
@@ -34,7 +34,7 @@ public class RegattasRaceJsonExportServlet extends JsonExportServlet {
 		
 		RegattaJsonSerializer serializer = new RegattaJsonSerializer(
 				new BoatClassJsonSerializer(),
-				new RaceDefinitionJsonSerializer());
+				new RaceDefinitionJsonSerializer(null));
 		JSONArray result = new JSONArray();
 		for (Regatta regatta : event.getRegattas())
 		{
