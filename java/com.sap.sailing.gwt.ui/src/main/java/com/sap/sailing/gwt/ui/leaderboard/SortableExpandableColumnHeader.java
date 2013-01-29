@@ -17,6 +17,7 @@ import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.EventTarget;
 import com.google.gwt.dom.client.NativeEvent;
+import com.google.gwt.dom.client.SpanElement;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
@@ -141,7 +142,7 @@ public class SortableExpandableColumnHeader extends Header<SafeHtml> {
                     Element container = getContainerElement(parent);
                     Element wrapper = container.getFirstChildElement();
                     try {
-                        DivElement.as(wrapper);
+                        DivElement.as(SpanElement.as(wrapper).getChild(0));
                         // this must be a div inserted by the table after the column was sorted;
                         // delegate on to the div's second child's child; note that this is highly
                         // implementation-dependant and may easily break. We should probably file
