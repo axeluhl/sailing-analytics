@@ -22,9 +22,8 @@ import com.google.gwt.text.client.DateTimeFormatRenderer;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
-import com.google.gwt.user.cellview.client.ColumnSortList;
-import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
+import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
@@ -38,9 +37,9 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.SelectionChangeEvent;
+import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.google.gwt.view.client.SelectionModel;
 import com.google.gwt.view.client.SingleSelectionModel;
-import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
@@ -207,23 +206,10 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
             }
         };
         regattaNameColumn.setSortable(true);
-
         columnSortHandler.setComparator(regattaNameColumn, new Comparator<RaceDTO>() {
             @Override
-            public int compare(RaceDTO t1, RaceDTO t2) {
-                String regatta1Name = t1.getRegattaName();
-                String regatta2Name = t2.getRegattaName();
-                boolean ascending = isSortedAscending();
-                if (regatta1Name.equals(regatta2Name)) {
-                    return 0;
-                }
-                int val = ascending ? regatta1Name.compareTo(regatta2Name) : -(regatta2Name.compareTo(regatta1Name));
-                return val;
-            }
-
-            private boolean isSortedAscending() {
-                ColumnSortList sortList = raceTable.getColumnSortList();
-                return sortList.size() > 0 & sortList.get(0).isAscending();
+            public int compare(RaceDTO r1, RaceDTO r2) {
+                return r1.getRegattaName().compareTo(r2.getRegattaName());
             }
         });
 
@@ -234,23 +220,10 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
             }
         };
         boatClassNameColumn.setSortable(true);
-
         columnSortHandler.setComparator(boatClassNameColumn, new Comparator<RaceDTO>() {
             @Override
-            public int compare(RaceDTO t1, RaceDTO t2) {
-                String boatClass1 = t1.boatClass;
-                String boatClass2 = t2.boatClass;
-                boolean ascending = isSortedAscending();
-                if (boatClass1.equals(boatClass2)) {
-                    return 0;
-                }
-                int val = ascending ? boatClass1.compareTo(boatClass2) : -(boatClass2.compareTo(boatClass1));
-                return val;
-            }
-
-            private boolean isSortedAscending() {
-                ColumnSortList sortList = raceTable.getColumnSortList();
-                return sortList.size() > 0 & sortList.get(0).isAscending();
+            public int compare(RaceDTO r1, RaceDTO r2) {
+                return r1.boatClass.compareTo(r2.boatClass);
             }
         });
 
@@ -270,25 +243,11 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
                 }
             }
         };
-
         raceNameColumn.setSortable(true);
-
         columnSortHandler.setComparator(raceNameColumn, new Comparator<RaceDTO>() {
             @Override
-            public int compare(RaceDTO t1, RaceDTO t2) {
-                boolean ascending = isSortedAscending();
-                if (t1.name.equals(t2.name)) {
-                    return 0;
-                }
-                int val = -1;
-                val = (t1 != null && t2 != null && ascending) ? (t1.name.compareTo(t2.name)) : -(t2.name
-                        .compareTo(t1.name));
-                return val;
-            }
-
-            private boolean isSortedAscending() {
-                ColumnSortList sortList = raceTable.getColumnSortList();
-                return sortList.size() > 0 & sortList.get(0).isAscending();
+            public int compare(RaceDTO r1, RaceDTO r2) {
+                return r1.name.compareTo(r2.name);
             }
         });
 
@@ -303,23 +262,14 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
             }
         };
         raceStartColumn.setSortable(true);
-
         columnSortHandler.setComparator(raceStartColumn, new Comparator<RaceDTO>() {
             @Override
             public int compare(RaceDTO r1, RaceDTO r2) {
                 if (r1.startOfRace != null && r2.startOfRace != null) {
-                    boolean ascending = isSortedAscending();
-                    int val = -1;
-                    val = (r1.startOfRace.after(r2.startOfRace) && ascending) ? 1 : -1;
-                    return val;
+                    return r1.startOfRace.compareTo(r2.startOfRace);
                 }
                 
                 return r1.startOfRace == null ? (r2.startOfRace == null ? 0 : -1) : 1;
-            }
-
-            private boolean isSortedAscending() {
-                ColumnSortList sortList = raceTable.getColumnSortList();
-                return sortList.size() > 0 & sortList.get(0).isAscending();
             }
         });
 
@@ -333,7 +283,6 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
             }
         };
         hasWindDataColumn.setSortable(true);
-        
         columnSortHandler.setComparator(hasWindDataColumn, new Comparator<RaceDTO>() {
 
             @Override
@@ -358,7 +307,6 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
             }
         };
         hasGPSDataColumn.setSortable(true);
-        
         columnSortHandler.setComparator(hasGPSDataColumn, new Comparator<RaceDTO>() {
 
             @Override
@@ -379,7 +327,6 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
             }
         };
         raceStatusColumn.setSortable(true);
-        
         columnSortHandler.setComparator(raceStatusColumn, new Comparator<RaceDTO>() {
             @Override
             public int compare(RaceDTO r1, RaceDTO r2) {
@@ -404,7 +351,6 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
             }
         };
         raceLiveDelayColumn.setSortable(true);
-        
         columnSortHandler.setComparator(raceLiveDelayColumn, new Comparator<RaceDTO>() {
             @Override
             public int compare(RaceDTO r1, RaceDTO r2) {
