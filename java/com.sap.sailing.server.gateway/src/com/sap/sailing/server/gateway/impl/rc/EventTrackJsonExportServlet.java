@@ -31,7 +31,9 @@ import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.server.gateway.impl.JsonExportServlet;
-import com.sap.sailing.server.gateway.serialization.RaceCommitteeEventSerializerFactory;
+import com.sap.sailing.server.gateway.serialization.impl.RaceCommitteeEventSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.RaceCommitteeFlagEventSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.RaceCommitteeStartTimeEventSerializer;
 
 
 public class EventTrackJsonExportServlet extends JsonExportServlet {
@@ -55,12 +57,14 @@ public class EventTrackJsonExportServlet extends JsonExportServlet {
 	private JSONArray serizalizeTrack(TrackedRace trackedRace) {
 		JSONArray result = new JSONArray();
 		
-		RaceCommitteeEventSerializerFactory serializerFactory = new RaceCommitteeEventSerializerFactory();
+		RaceCommitteeEventSerializer serializer = new RaceCommitteeEventSerializer(
+				new RaceCommitteeFlagEventSerializer(),
+				new RaceCommitteeStartTimeEventSerializer());
 		RaceCommitteeEventTrack track = trackedRace.getRaceCommitteeEventTrack();
 		
 		track.lockForRead();
 		for (RaceCommitteeEvent event :  track.getFixes()) {
-				result.add(serializerFactory.getSerializer(event).serialize(event));
+				result.add(serializer.serialize(event));
 		}
 		track.unlockAfterRead();
 		

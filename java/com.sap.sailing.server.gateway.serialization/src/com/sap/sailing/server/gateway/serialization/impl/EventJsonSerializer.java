@@ -1,9 +1,10 @@
-package com.sap.sailing.server.gateway.serialization;
+package com.sap.sailing.server.gateway.serialization.impl;
 
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Venue;
+import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 
 public class EventJsonSerializer implements JsonSerializer<Event> {
 	public static final String FIELD_ID = "id";

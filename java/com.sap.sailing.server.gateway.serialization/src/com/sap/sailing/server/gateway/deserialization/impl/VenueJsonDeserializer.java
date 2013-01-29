@@ -1,4 +1,4 @@
-package com.sap.sailing.server.gateway.deserialization;
+package com.sap.sailing.server.gateway.deserialization.impl;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -6,7 +6,9 @@ import org.json.simple.JSONObject;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Venue;
 import com.sap.sailing.domain.base.impl.VenueImpl;
-import com.sap.sailing.server.gateway.serialization.VenueJsonSerializer;
+import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
+import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
+import com.sap.sailing.server.gateway.serialization.impl.VenueJsonSerializer;
 
 public class VenueJsonDeserializer implements JsonDeserializer<Venue> {
 	private JsonDeserializer<CourseArea> courseAreaDeserializer;

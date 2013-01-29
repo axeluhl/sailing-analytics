@@ -15,7 +15,7 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.racecommittee.RaceCommitteeEvent;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
-import com.sap.sailing.server.gateway.serialization.RaceCommitteeEventSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.BaseRaceCommitteeEventSerializer;
 
 public abstract class BaseRaceCommitteEventTest<FlagType extends RaceCommitteeEvent> {
 
@@ -52,11 +52,11 @@ public abstract class BaseRaceCommitteEventTest<FlagType extends RaceCommitteeEv
 		assertEquals(
 				expectedId,
 				UUID.fromString(json.get(
-						RaceCommitteeEventSerializer.FIELD_ID).toString()));
+						BaseRaceCommitteeEventSerializer.FIELD_ID).toString()));
 		assertEquals(expectedTimestamp,
-				json.get(RaceCommitteeEventSerializer.FIELD_TIMESTAMP));
+				json.get(BaseRaceCommitteeEventSerializer.FIELD_TIMESTAMP));
 		assertEquals(expectedPassId,
-				json.get(RaceCommitteeEventSerializer.FIELD_PASS_ID));
+				json.get(BaseRaceCommitteeEventSerializer.FIELD_PASS_ID));
 	}
 
 }

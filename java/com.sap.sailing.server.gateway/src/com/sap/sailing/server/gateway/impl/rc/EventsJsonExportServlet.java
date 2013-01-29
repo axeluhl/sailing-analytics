@@ -21,9 +21,9 @@ import com.sap.sailing.domain.base.impl.CourseAreaImpl;
 import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.server.gateway.impl.JsonExportServlet;
-import com.sap.sailing.server.gateway.serialization.CourseAreaJsonSerializer;
-import com.sap.sailing.server.gateway.serialization.EventJsonSerializer;
-import com.sap.sailing.server.gateway.serialization.VenueJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.CourseAreaJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.EventJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.VenueJsonSerializer;
 
 public class EventsJsonExportServlet extends JsonExportServlet {
 	private static final long serialVersionUID = 4515246650108245796L;

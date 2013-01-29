@@ -12,8 +12,8 @@ import org.junit.Test;
 
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Venue;
-import com.sap.sailing.server.gateway.serialization.EventJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.EventJsonSerializer;
 
 public class EventJsonSerializerTest {
 	

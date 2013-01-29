@@ -1,4 +1,4 @@
-package com.sap.sailing.server.gateway.serialization;
+package com.sap.sailing.server.gateway.serialization.impl;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -6,6 +6,7 @@ import org.json.simple.JSONObject;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 
 public class RegattaJsonSerializer implements JsonSerializer<Regatta> {
 	public static final String FIELD_ID = "id";

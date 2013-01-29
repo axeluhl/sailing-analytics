@@ -11,7 +11,7 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.racecommittee.RaceCommitteeEvent;
 import com.sap.sailing.domain.racecommittee.RaceCommitteeStartTimeEvent;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
-import com.sap.sailing.server.gateway.serialization.RaceCommitteeStartTimeEventSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.RaceCommitteeStartTimeEventSerializer;
 
 public class RaceCommitteeStartTimeEventSerializerTest extends BaseRaceCommitteEventTest<RaceCommitteeStartTimeEvent> {
 	

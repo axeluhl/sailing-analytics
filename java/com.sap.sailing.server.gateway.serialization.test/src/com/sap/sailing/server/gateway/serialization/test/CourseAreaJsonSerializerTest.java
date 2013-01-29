@@ -10,7 +10,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.CourseArea;
-import com.sap.sailing.server.gateway.serialization.CourseAreaJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.CourseAreaJsonSerializer;
 
 public class CourseAreaJsonSerializerTest {
 	

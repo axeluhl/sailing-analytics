@@ -1,11 +1,12 @@
-package com.sap.sailing.server.gateway.serialization;
+package com.sap.sailing.server.gateway.serialization.impl;
 
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.racecommittee.RaceCommitteeEvent;
+import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 
 /// TODO serialize involved boats
-public abstract class RaceCommitteeEventSerializer implements JsonSerializer<RaceCommitteeEvent> {
+public abstract class BaseRaceCommitteeEventSerializer implements JsonSerializer<RaceCommitteeEvent> {
 	public static final String FIELD_CLASS = "@class";
 	public static final String FIELD_ID = "id";
 	public static final String FIELD_TIMESTAMP = "timestamp";

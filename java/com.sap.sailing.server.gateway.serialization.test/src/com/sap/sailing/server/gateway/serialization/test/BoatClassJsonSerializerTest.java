@@ -9,7 +9,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.BoatClass;
-import com.sap.sailing.server.gateway.serialization.BoatClassJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.BoatClassJsonSerializer;
 
 public class BoatClassJsonSerializerTest {
 	

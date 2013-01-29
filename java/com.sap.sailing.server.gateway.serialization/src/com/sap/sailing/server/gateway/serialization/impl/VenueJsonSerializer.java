@@ -1,10 +1,11 @@
-package com.sap.sailing.server.gateway.serialization;
+package com.sap.sailing.server.gateway.serialization.impl;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Venue;
+import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 
 
 public class VenueJsonSerializer implements JsonSerializer<Venue> {
