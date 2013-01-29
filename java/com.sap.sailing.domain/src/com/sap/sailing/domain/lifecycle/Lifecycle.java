@@ -28,7 +28,7 @@ public interface Lifecycle {
     
     /**
      * @return List of {@link LifecycleState} this object has passed until now. The
-     * list also includes the current state.
+     * list DOES NOT include the current state.
      */
     public List<LifecycleState> getStateHistory();
     

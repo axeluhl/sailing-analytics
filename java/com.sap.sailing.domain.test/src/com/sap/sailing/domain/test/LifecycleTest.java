@@ -11,7 +11,9 @@ import org.junit.Test;
 
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.common.NoWindException;
+import com.sap.sailing.domain.lifecycle.Lifecycle;
 import com.sap.sailing.domain.lifecycle.LifecycleState;
+import com.sap.sailing.domain.lifecycle.impl.TrackedRaceLifecycle;
 import com.sap.sailing.domain.lifecycle.impl.TrackedRaceState;
 import com.sap.sailing.domain.test.mock.MockedTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
@@ -21,6 +23,26 @@ public class LifecycleTest extends OnlineTracTracBasedTest {
 
     public LifecycleTest() throws URISyntaxException, MalformedURLException {
         super();
+    }
+
+    @Test
+    public void testLifecycleStateUpdate() throws URISyntaxException, NoWindException, IOException, InterruptedException {
+        Lifecycle life_of_pi = new TrackedRaceLifecycle(null);
+        life_of_pi.performTransitionTo(TrackedRaceState.INITIAL);
+
+        LifecycleState state = TrackedRaceState.LOADING_STORED_DATA;
+        state.updateProperty(TrackedRaceState.PROPERTY_LOADING_INDICATOR, 0.5);
+        life_of_pi.performTransitionTo(state);
+
+        state = TrackedRaceState.LOADING_STORED_DATA;
+        state.updateProperty(TrackedRaceState.PROPERTY_LOADING_INDICATOR, 0.6);
+        life_of_pi.performTransitionTo(TrackedRaceState.LOADING_STORED_DATA);
+        
+        assertEquals(0.6, life_of_pi.getCurrentState().getProperty(TrackedRaceState.PROPERTY_LOADING_INDICATOR));
+        assertEquals(1, life_of_pi.getStateHistory().size());
+
+        life_of_pi.performTransitionTo(TrackedRaceState.TRACKING_LIVE_DATA);
+        assertEquals(2, life_of_pi.getStateHistory().size());
     }
 
     @Test

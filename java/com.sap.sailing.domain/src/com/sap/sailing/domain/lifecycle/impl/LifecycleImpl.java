@@ -9,7 +9,7 @@ import com.sap.sailing.domain.lifecycle.LifecycleState;
 import com.sap.sailing.domain.lifecycle.WithLifecycle;
 
 /**
- * Implementation of a lifecycle featuring properties saved to a HasMap.
+ * <p>Implementation of a lifecycle featuring properties saved to a HasMap.</p>a
  * 
  * @author Simon Pamies (info@pamies.de)
  * @since Jan 29, 2013
@@ -25,7 +25,6 @@ public abstract class LifecycleImpl implements Lifecycle {
     public LifecycleImpl(WithLifecycle observer) {
         this.monitor = new Object[0];
         this.observer = observer;
-        
         this.history = new ArrayList<LifecycleState>();
     }
         
@@ -47,7 +46,7 @@ public abstract class LifecycleImpl implements Lifecycle {
                 old = to;
             }
             
-            if (old == to) {
+            if (old.equals(to)) {
                 /* Equal states, just update properties. We try to join non-existing
                  * ones and using "to" provided ones thus declaring new state as canonical.
                  * This will fail for null based properties. */
@@ -60,7 +59,9 @@ public abstract class LifecycleImpl implements Lifecycle {
                 
                 /* first notify monitors and then the observer */
                 this.getMonitor().notifyAll();
-                this.getObserver().statusChanged(to, old);
+                if (this.getObserver() != null) {
+                    this.getObserver().statusChanged(to, old);
+                }
             }
         }
     }
