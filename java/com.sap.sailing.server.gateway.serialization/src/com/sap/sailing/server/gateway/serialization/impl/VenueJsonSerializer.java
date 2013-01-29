@@ -12,7 +12,7 @@ public class VenueJsonSerializer implements JsonSerializer<Venue> {
 	public static final String FIELD_NAME = "name";
 	public static final String FIELD_COURSE_AREAS = "courseAreas";
 	
-	private JsonSerializer<CourseArea> areaSerializer;
+	private final JsonSerializer<CourseArea> areaSerializer;
 	
 	public VenueJsonSerializer(JsonSerializer<CourseArea> areaSerializer)
 	{

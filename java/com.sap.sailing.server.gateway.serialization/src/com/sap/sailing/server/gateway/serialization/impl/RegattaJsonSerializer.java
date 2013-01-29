@@ -14,8 +14,8 @@ public class RegattaJsonSerializer implements JsonSerializer<Regatta> {
 	public static final String FIELD_BOAT_CLASS = "boatClass";
 	public static final String FIELD_RACES = "races";
 	
-	private JsonSerializer<BoatClass> boatClassSerializer;
-	private JsonSerializer<RaceDefinition> raceDefinitionSerializer;
+	private final JsonSerializer<BoatClass> boatClassSerializer;
+	private final JsonSerializer<RaceDefinition> raceDefinitionSerializer;
 	
 	public RegattaJsonSerializer(
 			JsonSerializer<BoatClass> boatClassSerializer,

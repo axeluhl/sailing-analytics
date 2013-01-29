@@ -11,7 +11,7 @@ public class RaceDefinitionJsonSerializer implements JsonSerializer<RaceDefiniti
 	public static final String FIELD_NAME = "name";
 	public static final String FIELD_COURSE = "course";
 	
-	private JsonSerializer<Course> courseSerializer;
+	private final JsonSerializer<Course> courseSerializer;
 	
 	public RaceDefinitionJsonSerializer(JsonSerializer<Course> courseSerializer) {
 		this.courseSerializer = courseSerializer;

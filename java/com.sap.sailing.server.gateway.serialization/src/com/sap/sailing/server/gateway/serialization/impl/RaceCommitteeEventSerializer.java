@@ -9,8 +9,8 @@ import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 
 public class RaceCommitteeEventSerializer implements JsonSerializer<RaceCommitteeEvent> {
 
-	private JsonSerializer<RaceCommitteeEvent> flagEventSerializer;
-	private JsonSerializer<RaceCommitteeEvent> startTimeSerializer;
+	private final JsonSerializer<RaceCommitteeEvent> flagEventSerializer;
+	private final JsonSerializer<RaceCommitteeEvent> startTimeSerializer;
 
 	public RaceCommitteeEventSerializer(
 			JsonSerializer<RaceCommitteeEvent> flagEventSerializer,

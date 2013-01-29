@@ -12,7 +12,7 @@ public class GateJsonSerializer extends BaseControlPointJsonSerializer implement
 	public static final String FIELD_LEFT = "left";
 	public static final String FIELD_RIGHT = "right";
 	
-	private JsonSerializer<ControlPoint> markSerializer;
+	private final JsonSerializer<ControlPoint> markSerializer;
 	
 	public GateJsonSerializer(JsonSerializer<ControlPoint> markSerializer) {
 		this.markSerializer = markSerializer;

@@ -11,7 +11,7 @@ public class CourseJsonSerializer implements JsonSerializer<Course> {
 	public static final String FIELD_NAME = "name";
 	public static final String FIELD_WAYPOINTS = "waypoints";
 	
-	private JsonSerializer<Waypoint> waypointSerializer;
+	private final JsonSerializer<Waypoint> waypointSerializer;
 	
 	public CourseJsonSerializer(JsonSerializer<Waypoint> waypointSerializer) {
 		this.waypointSerializer = waypointSerializer;
