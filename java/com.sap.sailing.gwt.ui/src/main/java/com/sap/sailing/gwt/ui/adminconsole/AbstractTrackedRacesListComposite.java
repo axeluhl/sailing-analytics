@@ -321,16 +321,6 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
             }
         });
 
-        TextColumn<RaceDTO> raceTrackedColumn = new TextColumn<RaceDTO>() {
-            @Override
-            public String getValue(RaceDTO raceDTO) {
-                if (raceDTO.isTracked == true)
-                    return stringMessages.tracked();
-
-                return "";
-            }
-        };
-
         TextColumn<RaceDTO> hasWindDataColumn = new TextColumn<RaceDTO>() {
             @Override
             public String getValue(RaceDTO raceDTO) {
@@ -373,12 +363,11 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
         raceTable.addColumn(boatClassNameColumn, stringMessages.boatClass());
         raceTable.addColumn(raceNameColumn, stringMessages.race());
         raceTable.addColumn(raceStartColumn, stringMessages.startTime());
-        raceTable.addColumn(raceTrackedColumn, stringMessages.tracked());
         raceTable.addColumn(hasWindDataColumn, stringMessages.windData());
         raceTable.addColumn(hasGPSDataColumn, stringMessages.gpsData());
         raceTable.addColumn(raceStatusColumn, stringMessages.status());
-
         raceTable.addColumn(raceLiveDelayColumn, stringMessages.delayInSeconds());
+        
         return columnSortHandler;
     }
 
