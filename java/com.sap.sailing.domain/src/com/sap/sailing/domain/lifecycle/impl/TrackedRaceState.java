@@ -72,4 +72,9 @@ public enum TrackedRaceState implements LifecycleState {
         }
     }
 
+    @Override
+    public HashMap<String, Object> allProperties() {
+        return this.properties;
+    }
+
 }

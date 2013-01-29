@@ -2,6 +2,7 @@ package com.sap.sailing.domain.lifecycle.impl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map.Entry;
 
 import com.sap.sailing.domain.lifecycle.Lifecycle;
 import com.sap.sailing.domain.lifecycle.LifecycleState;
@@ -40,12 +41,21 @@ public abstract class LifecycleImpl implements Lifecycle {
                 old = to;
             }
             
-            this.history.add(this.state);
-            this.state = to;
-            
-            /* first notify monitors and then the observer */
-            this.getMonitor().notifyAll();
-            this.getObserver().statusChanged(to, old);
+            if (old == to) {
+                /* Equal states, just update properties. We try to join non-existing
+                 * ones and using "to" provided ones thus declaring new state as canonical.
+                 * This will fail for null based properties. */
+                for (Entry<String, Object> entry : to.allProperties().entrySet()) {
+                      old.updateProperty(entry.getKey(), entry.getValue());
+                }
+            } else {
+                this.history.add(this.state);
+                this.state = to;
+                
+                /* first notify monitors and then the observer */
+                this.getMonitor().notifyAll();
+                this.getObserver().statusChanged(to, old);
+            }
         }
     }
     

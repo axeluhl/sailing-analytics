@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.lifecycle;
 
+import java.util.HashMap;
+
 
 /**
  * <p>An object can undergo different states during its lifecycle. This interface is the base
@@ -22,4 +24,9 @@ public interface LifecycleState {
      * @param value
      */
     public void updateProperty(String name, Object value);
+
+    /**
+     * @return All properties contained
+     */
+    public HashMap<String, Object> allProperties();
 }

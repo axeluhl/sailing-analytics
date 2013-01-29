@@ -5,6 +5,7 @@ import static org.junit.Assert.assertEquals;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
+import java.util.List;
 
 import org.junit.Test;
 
@@ -81,6 +82,11 @@ public class LifecycleTest extends OnlineTracTracBasedTest {
         DynamicTrackedRace trackedRace = getTrackedRegatta().getExistingTrackedRace(race);
         if (trackedRace != null) {
             assertEquals(TrackedRaceState.TRACKING_LIVE_DATA, trackedRace.getLifecycle().getCurrentState());
+            
+            List<LifecycleState> states = trackedRace.getLifecycle().getStateHistory();
+            assertEquals(2, states.size());
+            assertEquals(TrackedRaceState.LOADING_STORED_DATA, states.get(states.size()-1));
+            assertEquals(1.0f, states.get(states.size()-1).getProperty(TrackedRaceState.PROPERTY_LOADING_INDICATOR));
         }
 
         updateStatusOfTrackedRaces(TrackedRaceState.FINISHED);
