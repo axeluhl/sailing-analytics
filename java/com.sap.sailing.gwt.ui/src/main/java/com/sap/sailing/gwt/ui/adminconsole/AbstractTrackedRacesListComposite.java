@@ -334,7 +334,7 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
                     if (r1.status.status == TrackedRaceStatusEnum.LOADING && r2.status.status == TrackedRaceStatusEnum.LOADING) {
                         return new Double(r1.status.loadingProgress).compareTo(r2.status.loadingProgress);
                     }
-                    return new Integer(r1.status.status.ordinal()).compareTo(r2.status.status.ordinal());
+                    return new Integer(r1.status.status.getOrder()).compareTo(r2.status.status.getOrder());
                 }
                 
                 return r1.status == null ? (r2.status == null ? 0 : -1) : 1;
