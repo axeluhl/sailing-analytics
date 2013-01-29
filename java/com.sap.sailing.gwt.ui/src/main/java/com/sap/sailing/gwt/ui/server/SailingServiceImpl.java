@@ -3228,8 +3228,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         if (polarSheetGenerationWorkers.containsKey(id)) {
             PolarSheetGenerationWorker worker = polarSheetGenerationWorkers.get(id);
             boolean complete = worker.isFinished();
-            Map<Integer,Double> rawData = worker.getPolarData();
-            data = new PolarSheetsDataImpl(rawData, complete);
+            Number[] values = worker.getPolarData();
+            data = new PolarSheetsDataImpl(values, complete);
             if (complete) {
                 polarSheetGenerationWorkers.remove(id);
             }

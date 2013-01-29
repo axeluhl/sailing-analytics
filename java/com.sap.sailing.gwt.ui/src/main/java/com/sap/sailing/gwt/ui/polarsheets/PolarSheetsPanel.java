@@ -116,7 +116,7 @@ public class PolarSheetsPanel extends FormPanel implements RaceSelectionChangeLi
 
             @Override
             public void onSuccess(PolarSheetsData result) {
-                chartPanel.setData(result.getData(), id);
+                chartPanel.setData(result.getValues(), id);
                 if (!result.isComplete()) {
                     Timer timer = new Timer() {
                         
@@ -126,7 +126,7 @@ public class PolarSheetsPanel extends FormPanel implements RaceSelectionChangeLi
                         }
                     };
                     
-                    timer.schedule(500);
+                    timer.schedule(1500);
                     
                 }
             }

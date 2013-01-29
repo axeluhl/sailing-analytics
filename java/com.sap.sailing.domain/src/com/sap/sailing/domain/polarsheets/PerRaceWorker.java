@@ -1,6 +1,10 @@
 package com.sap.sailing.domain.polarsheets;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.RaceDefinition;
@@ -28,18 +32,58 @@ public class PerRaceWorker implements Runnable {
     public void run() {
         TimePoint startTime = race.getStartOfRace();
         TimePoint endTime = race.getEndOfRace();
+        if (endTime == null) {
+            //TODO Figure out if there is an alternative:
+            endTime = race.getTimePointOfNewestEvent();
+        }
         RaceDefinition raceDefinition = race.getRace();
         Iterable<Competitor> competitors = raceDefinition.getCompetitors();
+        
+        final List<Thread> perCompetitorWorkers = new ArrayList<Thread>();
 
+        
         for (Competitor competitor : competitors) {
-            getPolarDataForCompetitor(startTime, endTime, competitor);
+            Thread competitorWorkerThread = getPerCompetitorWorkerThread(startTime, endTime, competitor);
+            competitorWorkerThread.start();
+            perCompetitorWorkers.add(competitorWorkerThread);
         }
+        
+        final Timer timer = new Timer();
+        
+        TimerTask threadMonitoringTask = new TimerTask() {
+            
+            @Override
+            public void run() {
+                boolean perCompetitorWorkersDone = false;
+                do {
+                    boolean currentWorkerAlive = true;
+                    Thread currentWorker = null;
+                    for (Thread worker : perCompetitorWorkers) {
+                        currentWorker = worker;
+                        if (!worker.isAlive()) {
+                            currentWorkerAlive = false;
+                        }
+                    }
+                    if (!currentWorkerAlive) {
+                        perCompetitorWorkers.remove(currentWorker);
+                        if (perCompetitorWorkers.isEmpty()) {
+                            perCompetitorWorkersDone = true;
+                        }
+                    }
+                } while (!perCompetitorWorkersDone);
 
-        polarSheetGenerationWorker.workerDone(this);
+                polarSheetGenerationWorker.workerDone(PerRaceWorker.this);
+                timer.cancel();
+            }
+        };
+        
+        timer.schedule(threadMonitoringTask, 500, 500);
+        
+        
 
     }
 
-    private void getPolarDataForCompetitor(final TimePoint startTime, final TimePoint endTime,
+    private Thread getPerCompetitorWorkerThread(final TimePoint startTime, final TimePoint endTime,
             final Competitor competitor) {
         Runnable perCompetitorWorker = new Runnable() {
 
@@ -62,12 +106,12 @@ public class PerRaceWorker implements Runnable {
                     Bearing bearing = speedWithBearing.getBearing();
                     Position position = fix.getPosition();
                     Wind wind = race.getWind(position, fix.getTimePoint());
-                    Bearing windBearing = wind.getBearing();
+                    Bearing windBearing = wind.getFrom();
                     double windSpeed = wind.getMetersPerSecond();
 
                     // TODO Figure out if this normalizing is okay concerning different windspeeds and bearings
                     double normalizedSpeed = speed / windSpeed;
-                    double angleToWind = bearing.getDifferenceTo(windBearing).getDegrees();
+                    double angleToWind = 180 + bearing.getDifferenceTo(windBearing).getDegrees();
 
                     polarSheetGenerationWorker.addPolarData(Math.round(angleToWind), normalizedSpeed);
                 }
@@ -77,7 +121,7 @@ public class PerRaceWorker implements Runnable {
         };
 
         Thread perCompetitorThread = new Thread(perCompetitorWorker);
-        perCompetitorThread.start();
+        return perCompetitorThread;
 
     }
 }

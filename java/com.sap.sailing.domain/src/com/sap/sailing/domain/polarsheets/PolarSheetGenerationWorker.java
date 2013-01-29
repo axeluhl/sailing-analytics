@@ -1,11 +1,8 @@
 package com.sap.sailing.domain.polarsheets;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -16,7 +13,9 @@ public class PolarSheetGenerationWorker {
 
     private final Set<PerRaceWorker> workers;
 
-    private final Map<Integer, List<Double>> polarData;
+    private final List<List<Double>> polarData;
+
+    private boolean workerInitDone = false;
 
     public PolarSheetGenerationWorker(Set<TrackedRace> trackedRaces) {
         polarData = initializePolarDataContainer();
@@ -26,10 +25,10 @@ public class PolarSheetGenerationWorker {
         }
     }
 
-    private Map<Integer, List<Double>> initializePolarDataContainer() {
-        HashMap<Integer, List<Double>> container = new HashMap<Integer, List<Double>>();
-        for (int i = 0; i < 360; i++) {
-            container.put(i, new ArrayList<Double>());
+    private List<List<Double>> initializePolarDataContainer() {
+        List<List<Double>> container = new ArrayList<List<Double>>();
+        for (int i = 0; i < 181; i++) {
+            container.add(new ArrayList<Double>());
         }
         return container;
     }
@@ -39,34 +38,57 @@ public class PolarSheetGenerationWorker {
             Thread workerThread = new Thread(worker);
             workerThread.start();
         }
+        workerInitDone = true;
     }
 
-    public void addPolarData(long round, double normalizedSpeed) {
-        if (round >= 0 && round < 360) {
-            polarData.get((int) round).add(normalizedSpeed);
+    public void addPolarData(long roundedAngle, double normalizedSpeed) {
+        int angle = (int) roundedAngle;
+        if (angle > 180) {
+            angle = (360 - angle);
         }
+        polarData.get(angle).add(normalizedSpeed);
     }
 
-    public Map<Integer, Double> getPolarData() {
-        Map<Integer, Double> averagedPolarData = new HashMap<Integer, Double>();
-        for (Entry<Integer, List<Double>> entry : polarData.entrySet()) {
-            if (entry.getValue().size() < 1) {
-                averagedPolarData.put(entry.getKey(), new Double(0));
+    public Number[] getPolarData() {
+        Number[] averagedPolarData = new Number[360];
+        for (int i = 0; i < 181; i++) {
+            // Avoid Concurrent modification, lock would slow things down
+            Double[] values = polarData.get(i).toArray(new Double[polarData.get(i).size()]);
+            if (values.length < 20) {
+                averagedPolarData[i] = 0;
             } else {
                 double sum = 0;
-                for (Double singleData : entry.getValue()) {
-                    sum = sum + singleData;
+                for (Double singleData : values) {
+                    if (singleData != null) {
+                        sum = sum + singleData;
+                    }
                 }
-                double average = sum / entry.getValue().size();
-                averagedPolarData.put(entry.getKey(), average);
+                double average = sum / values.length;
+                averagedPolarData[i] = average;
             }
+        }
+
+        for (int i = 1; i < 180; i++) {
+            if (averagedPolarData[i].doubleValue() == 0) {
+                double next = 0;
+                int currentIndex = i;
+                while (next <= 0 && currentIndex < 181) {
+                    currentIndex++;
+                    if (averagedPolarData[currentIndex] != null) {
+                        next = averagedPolarData[currentIndex].doubleValue();
+                    }
+                }
+                averagedPolarData[i] = (averagedPolarData[i - 1].doubleValue() + next) / 2;
+            }
+
+            averagedPolarData[360 - i] = averagedPolarData[i];
         }
 
         return averagedPolarData;
     }
 
     public void workerDone(PerRaceWorker worker) {
-        if (workers.contains(worker)) {
+        if (workers.contains(worker) && workerInitDone) {
             workers.remove(worker);
             if (workers.isEmpty()) {
                 finished = true;

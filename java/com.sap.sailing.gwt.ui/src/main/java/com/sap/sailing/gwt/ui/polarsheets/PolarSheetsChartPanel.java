@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.moxieapps.gwt.highcharts.client.Chart;
 import org.moxieapps.gwt.highcharts.client.Series;
+import org.moxieapps.gwt.highcharts.client.plotOptions.LinePlotOptions;
 
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -24,9 +25,10 @@ public class PolarSheetsChartPanel extends SimplePanel {
     }
 
     private Chart createPolarSheetChart() {
-        Chart polarSheetChart = new Chart().setType(Series.Type.LINE).setZoomType(Chart.ZoomType.X_AND_Y)
+        Chart polarSheetChart = new Chart().setType(Series.Type.LINE).setLinePlotOptions(new LinePlotOptions().setLineWidth(1)).setZoomType(Chart.ZoomType.X_AND_Y)
                 .setPolar(true).setSize(700, 700);
         polarSheetChart.setChartTitleText(stringMessages.polarSheetChart());
+        polarSheetChart.getYAxis().setMin(0);
         return polarSheetChart;
     }
 
@@ -47,18 +49,18 @@ public class PolarSheetsChartPanel extends SimplePanel {
         return forEachDeg;
     }
 
-    private void addDataToSeries(String seriesName, int deg, double value) {
-        if (seriesMap.containsKey(seriesName)) {
-            Series series = seriesMap.get(seriesName);
-            series.addPoint(deg, value);
+    private void addValuesToSeries(String seriesId, Number[] values) {
+        if (seriesMap.containsKey(seriesId)) {
+            Series series = seriesMap.get(seriesId);
+            series.setPoints(values, false);
         }
     }
 
-    public void removeSeries(String seriesName) {
-        if (seriesMap.containsKey(seriesName)) {
-            Series series = seriesMap.get(seriesName);
+    public void removeSeries(String seriesId) {
+        if (seriesMap.containsKey(seriesId)) {
+            Series series = seriesMap.get(seriesId);
             chart.removeSeries(series);
-            seriesMap.remove(seriesName);
+            seriesMap.remove(seriesId);
         }
     }
 
@@ -67,17 +69,15 @@ public class PolarSheetsChartPanel extends SimplePanel {
         seriesMap.clear();
     }
 
-    public void setData(Map<Integer, Double> data, String id) {
-        if (data == null) {
-            //TODO Exception handling
+    public void setData(Number[] values, String id) {
+        if (values == null) {
+            // TODO Exception handling
             return;
         }
         if (!seriesMap.containsKey(id)) {
             newSeries(id);
         }
-        for (int i = 0; i < 360; i++) {
-            addDataToSeries(id, i, data.get(i));
-        }
+        addValuesToSeries(id, values);
         chart.redraw();
     }
 
