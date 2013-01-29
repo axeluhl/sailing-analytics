@@ -5,7 +5,7 @@ import com.sap.sailing.domain.common.TrackedRaceState;
 
 public class RaceStatusDTO implements IsSerializable {
     public TrackedRaceState status;
-    public double loadingProgress;
+    public float loadingProgress;
     
     @Override
     public String toString() {
