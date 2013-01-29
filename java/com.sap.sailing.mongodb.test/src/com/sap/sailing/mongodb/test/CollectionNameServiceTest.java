@@ -1,22 +1,15 @@
-package com.sap.sailing.domain.persistence.test;
+package com.sap.sailing.mongodb.test;
 
-import org.junit.Before;
 import org.junit.Test;
 
-import com.sap.sailing.domain.persistence.AlreadyRegisteredException;
-import com.sap.sailing.domain.persistence.CollectionNameService;
-import com.sap.sailing.domain.persistence.impl.CollectionNameServiceImpl;
+import com.sap.sailing.mongodb.AlreadyRegisteredException;
+import com.sap.sailing.mongodb.MongoDBService;
 
 public class CollectionNameServiceTest {
-	private CollectionNameService service;
-	
-	@Before
-	public void setUp() {
-		service = new CollectionNameServiceImpl();
-	}
 	
 	@Test
 	public void shouldWork() throws AlreadyRegisteredException {
+		MongoDBService service = MongoDBService.INSTANCE;
 		service.registerExclusively(TestInterface.class, "a");
 		service.registerExclusively(TestInterface.class, "b");
 		service.registerExclusively(TestInterface.class, "B");
@@ -25,7 +18,8 @@ public class CollectionNameServiceTest {
 	
 	@Test(expected=AlreadyRegisteredException.class)
 	public void shouldNotWork() throws AlreadyRegisteredException {
+		MongoDBService service = MongoDBService.INSTANCE;
 		service.registerExclusively(TestInterface.class, "b");
-		service.registerExclusively(com.sap.sailing.domain.persistence.test.needadifferentpackage.TestInterface.class, "b");
+		service.registerExclusively(com.sap.sailing.mongodb.test.needadifferentpackage.TestInterface.class, "b");
 	}
 }
