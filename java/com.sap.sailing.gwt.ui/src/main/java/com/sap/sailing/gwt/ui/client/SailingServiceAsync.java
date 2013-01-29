@@ -15,6 +15,7 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.RaceIdentifier;
+import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.impl.Util.Pair;
@@ -83,8 +84,16 @@ public interface SailingServiceAsync {
      *            {@link TracTracRaceRecordDTO#storedURI} from the <code>rr</code> race record.
      */
     void trackWithTracTrac(RegattaIdentifier regattaToAddTo,
-            TracTracRaceRecordDTO rr, String liveURI, String storedURI, boolean trackWind, boolean correctWindByDeclination,
+            Iterable<TracTracRaceRecordDTO> rrs, String liveURI, String storedURI, boolean trackWind, boolean correctWindByDeclination,
             boolean simulateWithStartTimeNow, AsyncCallback<Void> callback);
+
+    void trackWithSwissTiming(RegattaIdentifier regattaToAddTo, Iterable<SwissTimingRaceRecordDTO> rrs,
+            String hostname, int port, boolean canSendRequests, boolean trackWind, boolean correctWindByDeclination,
+            AsyncCallback<Void> asyncCallback);
+
+    void replaySwissTimingRace(RegattaIdentifier regattaIdentifier, Iterable<SwissTimingReplayRaceDTO> replayRaces,
+            boolean trackWind, boolean correctWindByDeclination, boolean simulateWithStartTimeNow,
+            AsyncCallback<Void> asyncCallback);
 
     void getPreviousTracTracConfigurations(AsyncCallback<List<TracTracConfigurationDTO>> callback);
 
@@ -93,13 +102,13 @@ public interface SailingServiceAsync {
 
     void stopTrackingEvent(RegattaIdentifier eventIdentifier, AsyncCallback<Void> callback);
 
-    void stopTrackingRace(RegattaAndRaceIdentifier raceIdentifier, AsyncCallback<Void> asyncCallback);
+    void stopTrackingRaces(Iterable<RegattaAndRaceIdentifier> racesToStopTracking, AsyncCallback<Void> asyncCallback);
     
     /**
      * Untracks the race and removes it from the regatta. It will also be removed in all leaderboards
-     * @param regattaAndRaceidentifier The identifier for the regatta name, and the race name to remove
+     * @param regattaNamesAndRaceNames The identifier for the regatta name, and the race name to remove
      */
-    void removeAndUntrackRace(RegattaAndRaceIdentifier regattaAndRaceidentifier, AsyncCallback<Void> callback);
+    void removeAndUntrackRaces(Iterable<RegattaNameAndRaceName> regattaNamesAndRaceNames, AsyncCallback<Void> callback);
 
     void getRawWindFixes(RegattaAndRaceIdentifier raceIdentifier, Collection<WindSource> windSources, AsyncCallback<WindInfoForRaceDTO> callback);
 
@@ -264,18 +273,6 @@ public interface SailingServiceAsync {
 
     void storeSwissTimingConfiguration(String configName, String hostname, int port, boolean canSendRequests, AsyncCallback<Void> asyncCallback);
 
-    /**
-     * @param regattaToAddTo
-     *            if <code>null</code>, an existing regatta by the name of the TracTrac event with the boat class name
-     *            appended in parentheses will be looked up; if not found, a default regatta with that name will be
-     *            created, with a single default series and a single default fleet. If a valid {@link RegattaIdentifier}
-     *            is specified, a regatta lookup is performed with that identifier; if the regatta is found, it is used
-     *            to add the races to. Otherwise, a default regatta as described above will be created and used.
-     */
-    void trackWithSwissTiming(RegattaIdentifier regattaToAddTo, SwissTimingRaceRecordDTO rr, String hostname, int port,
-            boolean canSendRequests, boolean trackWind, boolean correctWindByDeclination,
-            AsyncCallback<Void> asyncCallback);
-
     void sendSwissTimingDummyRace(String racMessage, String stlMesssage, String ccgMessage, AsyncCallback<Void> callback);
     
     void getCountryCodes(AsyncCallback<String[]> callback);
@@ -419,10 +416,6 @@ public interface SailingServiceAsync {
             AsyncCallback<Void> callback);
 
     void listSwissTiminigReplayRaces(String swissTimingUrl, AsyncCallback<List<SwissTimingReplayRaceDTO>> asyncCallback);
-
-    void replaySwissTimingRace(RegattaIdentifier regattaIdentifier, SwissTimingReplayRaceDTO replayRace,
-            boolean trackWind, boolean correctWindByDeclination, boolean simulateWithStartTimeNow,
-            AsyncCallback<Void> asyncCallback);
 
     void getRankedCompetitorsFromBestToWorstAfterEachRaceColumn(String leaderboardName, Date date,
             AsyncCallback<List<Pair<String, List<CompetitorDTO>>>> callback);

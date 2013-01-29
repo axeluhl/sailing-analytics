@@ -662,13 +662,17 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
             }
         }
         
+        final List<TracTracRaceRecordDTO> selectedRaces = new ArrayList<TracTracRaceRecordDTO>();
         for (final TracTracRaceRecordDTO race : this.raceList.getList()) {
             if (selectionModel.isSelected(race)) {
-                this.sailingService.trackWithTracTrac(regattaIdentifier, race, liveURI, storedURI, trackWind, 
-                        correctWind, simulateWithStartTimeNow, new MarkedAsyncCallback<Void>() {
+                selectedRaces.add(race);
+            }
+        }
+        this.sailingService.trackWithTracTrac(regattaIdentifier, selectedRaces, liveURI, storedURI, trackWind, correctWind,
+                simulateWithStartTimeNow, new MarkedAsyncCallback<Void>() {
                     @Override
                     public void handleFailure(Throwable caught) {
-                        reportError("Error trying to register race " + race.name + " for tracking: "
+                        reportError("Error trying to register races " + selectedRaces + " for tracking: "
                                 + caught.getMessage() + ". Check live/stored URI syntax.");
                     }
 
@@ -677,8 +681,6 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
                         TracTracEventManagementPanel.this.regattaRefresher.fillRegattas();
                     }
                 });
-            }
-        }
     }
 
     private void updatePanelFromSelectedStoredConfiguration() {
