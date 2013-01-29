@@ -37,7 +37,7 @@ public enum TrackedRaceState implements LifecycleState {
      *         1.0 will, however, hardly be seen in state {@link TrackedRaceState#LOADING} because the status will probably
      *         already have transitioned to {@link TrackedRaceState#TRACKING} or {@link TrackedRaceState#FINISHED}.
      */
-    LOADING,
+    LOADING_STORED_DATA,
     
     /**
      * Tracking data is being received. This state does not indicate that the race has finished or all
@@ -45,7 +45,7 @@ public enum TrackedRaceState implements LifecycleState {
      * 
      * This state has no additional properties.
      */
-    TRACKING,
+    TRACKING_LIVE_DATA,
     
     /**
      * The race is completely loaded into memory. No further changes will occur.

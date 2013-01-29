@@ -1757,7 +1757,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     }
     
     protected void triggerManeuverCacheRecalculation(final Competitor competitor) {
-        if (getLifecycle().getCurrentState() != TrackedRaceState.LOADING) {
+        if (getLifecycle().getCurrentState() != TrackedRaceState.LOADING_STORED_DATA) {
             maneuverCache.triggerUpdate(competitor, /* updateInterval */ null);
         }
     }
@@ -2203,9 +2203,9 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
 
     @Override
     public void statusChanged(LifecycleState newState, LifecycleState oldState) {
-        if (newState == TrackedRaceState.LOADING && oldState != TrackedRaceState.LOADING) {
+        if (newState == TrackedRaceState.LOADING_STORED_DATA && oldState != TrackedRaceState.LOADING_STORED_DATA) {
             suspendAllCachesNotUpdatingWhileLoading();
-        } else if (oldState == TrackedRaceState.LOADING && newState != TrackedRaceState.LOADING) {
+        } else if (oldState == TrackedRaceState.LOADING_STORED_DATA && newState != TrackedRaceState.LOADING_STORED_DATA) {
             resumeAllCachesNotUpdatingWhileLoading();
         }
     }
@@ -2217,7 +2217,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     @Override
     public void waitUntilNotLoading() {
         synchronized (getLifecycle().getMonitor()) {
-            while (getLifecycle().getCurrentState() == TrackedRaceState.LOADING) {
+            while (getLifecycle().getCurrentState() == TrackedRaceState.LOADING_STORED_DATA) {
                 try {
                     getLifecycle().getMonitor().wait();
                 } catch (InterruptedException e) {

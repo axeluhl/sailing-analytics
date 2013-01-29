@@ -13,7 +13,7 @@ public class TrackedRaceLifecycle extends LifecycleImpl {
 
     public TrackedRaceLifecycle(WithLifecycle observer) {
         super(observer);
-        this.state = TrackedRaceState.LOADING;
+        this.state = TrackedRaceState.INITIAL;
     }
 
 }

@@ -9,6 +9,6 @@ public class RaceStatusDTO implements IsSerializable {
     
     @Override
     public String toString() {
-        return status.name() + (status==TrackedRaceState.LOADING ? " ("+((int) (loadingProgress*100))+"%)" : "");
+        return status.name() + (status==TrackedRaceState.LOADING_STORED_DATA ? " ("+((int) (loadingProgress*100))+"%)" : "");
     }
 }

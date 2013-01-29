@@ -399,7 +399,7 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
                 public void run() {
                     // no locking required here; the incremental cache refresh protects the inner cache structures from concurrent modifications
                     cacheInvalidationTimer.cancel(); // terminates the timer thread
-                    if (getTrackedRace().getLifecycle().getCurrentState() == TrackedRaceState.LOADING) {
+                    if (getTrackedRace().getLifecycle().getCurrentState() == TrackedRaceState.LOADING_STORED_DATA) {
                         // during loading, only invalidate the cache after the interval expired but don't trigger incremental re-calculation
                         invalidateCache();
                     } else {

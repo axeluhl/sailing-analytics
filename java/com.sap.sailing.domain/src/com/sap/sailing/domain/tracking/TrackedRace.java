@@ -453,7 +453,7 @@ public interface TrackedRace extends Serializable, WithLifecycle {
     void waitUntilWindLoadingComplete() throws InterruptedException;
     
     /**
-     * If the {@link #getStatus() status} is currently {@link TrackedRaceStatusEnum#LOADING}, blocks until the status changes to any
+     * If the {@link #getStatus() status} is currently {@link TrackedRaceStatusEnum#LOADING_STORED_DATA}, blocks until the status changes to any
      * other status.
      */
     void waitUntilNotLoading();

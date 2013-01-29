@@ -423,13 +423,15 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         DynamicTrackedRace trackedRace = getTrackedRegatta().getExistingTrackedRace(race);
         if (trackedRace != null) {
             trackedRace.getLifecycle().performTransitionTo(state);
+        } else {
+            logger.severe("Could not update state of race " + race.getName() + " because TrackedRace is empty.");
         }
     }
 
     @Override
     public void storedDataBegin() {
         logger.info("Stored data begin for race(s) "+getRaces());
-        LifecycleState state = TrackedRaceState.LOADING;
+        LifecycleState state = TrackedRaceState.LOADING_STORED_DATA;
         state.updateProperty(TrackedRaceState.PROPERTY_LOADING_INDICATOR, 0);
         updateStatusOfTrackedRaces(state);
     }
@@ -437,7 +439,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
     @Override
     public void storedDataEnd() {
         logger.info("Stored data end for race(s) "+getRaces());
-        LifecycleState state = TrackedRaceState.TRACKING;
+        LifecycleState state = TrackedRaceState.TRACKING_LIVE_DATA;
         state.updateProperty(TrackedRaceState.PROPERTY_LOADING_INDICATOR, 1.0);
         updateStatusOfTrackedRaces(state);
     }
@@ -445,7 +447,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
     @Override
     public void storedDataProgress(float progress) {
         logger.info("Stored data progress for race(s) "+getRaces()+": "+progress);
-        LifecycleState state = TrackedRaceState.LOADING;
+        LifecycleState state = TrackedRaceState.LOADING_STORED_DATA;
         state.updateProperty(TrackedRaceState.PROPERTY_LOADING_INDICATOR, progress);
         updateStatusOfTrackedRaces(state);
     }

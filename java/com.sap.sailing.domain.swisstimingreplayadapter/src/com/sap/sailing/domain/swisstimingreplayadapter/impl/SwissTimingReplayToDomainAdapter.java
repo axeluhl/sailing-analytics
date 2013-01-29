@@ -309,7 +309,7 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter {
                         WindTrack.DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_WIND, 
                         /* time over which to average speed: */ race.getBoatClass().getApproximateManeuverDurationInMilliseconds(),
                         /* raceDefinitionSetToUpdate */ null);
-        LifecycleState state = TrackedRaceState.LOADING;
+        LifecycleState state = TrackedRaceState.LOADING_STORED_DATA;
         state.updateProperty(TrackedRaceState.PROPERTY_LOADING_INDICATOR, 0);
         trackedRace.getLifecycle().performTransitionTo(state);
         TimePoint bestStartTimeKnownSoFar = bestStartTimePerRaceID.get(currentRaceID);
@@ -374,7 +374,7 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter {
     @Override
     public void progress(double progress) {
         DynamicTrackedRace trackedRace = trackedRacePerRaceID.get(currentRaceID);
-        LifecycleState state = TrackedRaceState.LOADING;
+        LifecycleState state = TrackedRaceState.LOADING_STORED_DATA;
         state.updateProperty(TrackedRaceState.PROPERTY_LOADING_INDICATOR, progress);
         trackedRace.getLifecycle().performTransitionTo(state);
     }

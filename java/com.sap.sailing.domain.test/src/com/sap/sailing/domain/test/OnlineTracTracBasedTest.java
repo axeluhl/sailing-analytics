@@ -51,11 +51,11 @@ import com.tractrac.clientmodule.Race;
  * 
  */
 public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest {
-    private DomainFactoryImpl domainFactory;
-    private Regatta domainEvent;
-    private DynamicTrackedRegatta trackedRegatta;
-    private RaceDefinition race;
-    private DynamicTrackedRace trackedRace;
+    protected DomainFactoryImpl domainFactory;
+    protected Regatta domainEvent;
+    protected DynamicTrackedRegatta trackedRegatta;
+    protected RaceDefinition race;
+    protected DynamicTrackedRace trackedRace;
 
     private final Object semaphor = new Object();
     
@@ -119,7 +119,7 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest {
     }
 
 
-    private void setStoredDataLoaded(boolean storedDataLoaded) {
+    protected void setStoredDataLoaded(boolean storedDataLoaded) {
         this.storedDataLoaded = storedDataLoaded;
     }
 
