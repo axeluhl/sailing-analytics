@@ -2,6 +2,8 @@ package com.sap.sailing.domain.lifecycle;
 
 import java.util.List;
 
+import com.sap.sailing.domain.common.LifecycleState;
+
 /**
  * <p>Interface describing a lifecycle of an object. There are two possibilities
  * to be notified of lifecycle status changes: </p>

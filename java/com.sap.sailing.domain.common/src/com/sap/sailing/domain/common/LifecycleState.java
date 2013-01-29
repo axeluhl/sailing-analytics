@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.lifecycle;
+package com.sap.sailing.domain.common;
 
 import java.util.HashMap;
 

@@ -2,6 +2,8 @@ package com.sap.sailing.domain.lifecycle;
 
 import java.util.EventListener;
 
+import com.sap.sailing.domain.common.LifecycleState;
+
 /**
  * <p>During a lifecycle of an object many state changes can occur (see {@link LifecycleState}). These changes
  * can trigger different actions. To achieve this goal one can register for such state changes and perform

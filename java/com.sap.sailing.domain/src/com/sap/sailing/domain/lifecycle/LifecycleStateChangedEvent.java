@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.lifecycle;
 
+import com.sap.sailing.domain.common.LifecycleState;
+
 /**
  * <p>When a state change occurs during a lifecycle a {@link LifecycleStateChangeListener} is triggered
  * and gets an instance of a {@link LifecycleStateChangedEvent}.</p>

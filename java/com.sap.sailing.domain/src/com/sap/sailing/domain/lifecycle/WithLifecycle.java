@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.lifecycle;
 
+import com.sap.sailing.domain.common.LifecycleState;
+
 /**
  * <p>Interface all objects need to implement that have a lifecycle.
  * See {@link Lifecycle} for more information. </p>

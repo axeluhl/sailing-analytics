@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.lifecycle.impl;
 
+import com.sap.sailing.domain.common.TrackedRaceState;
 import com.sap.sailing.domain.lifecycle.WithLifecycle;
 import com.sap.sailing.domain.tracking.TrackedRace;
 

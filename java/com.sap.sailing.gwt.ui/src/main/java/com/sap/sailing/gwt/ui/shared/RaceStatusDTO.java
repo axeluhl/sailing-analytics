@@ -1,7 +1,7 @@
 package com.sap.sailing.gwt.ui.shared;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
-import com.sap.sailing.domain.lifecycle.impl.TrackedRaceState;
+import com.sap.sailing.domain.common.TrackedRaceState;
 
 public class RaceStatusDTO implements IsSerializable {
     public TrackedRaceState status;
