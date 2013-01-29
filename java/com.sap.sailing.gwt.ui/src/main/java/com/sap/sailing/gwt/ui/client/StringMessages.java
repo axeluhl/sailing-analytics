@@ -293,6 +293,8 @@ public interface StringMessages extends Messages {
     String finishLine();
     String advantageLine();
     String courseMiddleLine();
+    String buoyZone();
+    String radiusInMeters();
     String messagingPortNumber();
     String servletPortNumber();
     String registeredAt(String string);
