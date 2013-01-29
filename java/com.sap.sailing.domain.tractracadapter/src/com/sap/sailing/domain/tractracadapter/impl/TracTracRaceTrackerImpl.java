@@ -30,8 +30,9 @@ import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.impl.Util.Triple;
+import com.sap.sailing.domain.lifecycle.LifecycleState;
+import com.sap.sailing.domain.lifecycle.impl.TrackedRaceState;
 import com.sap.sailing.domain.tracking.AbstractRaceTrackerImpl;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
@@ -40,14 +41,12 @@ import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.RacesHandle;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.domain.tracking.TrackedRaceStatus;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tracking.impl.GPSFixImpl;
-import com.sap.sailing.domain.tracking.impl.TrackedRaceStatusImpl;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.Receiver;
 import com.sap.sailing.domain.tractracadapter.TracTracControlPoint;
@@ -79,7 +78,6 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
     private final WindStore windStore;
     private final Set<RaceDefinition> races;
     private final DynamicTrackedRegatta trackedRegatta;
-    private TrackedRaceStatus lastStatus;
 
     /**
      * paramURL, liveURI and storedURI for TracTrac connection
@@ -410,42 +408,48 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
     @Override
     public void stopped() {
         logger.info("stopped TracTrac tracking for "+getRaces());
-        lastStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.FINISHED, 1.0);
-        updateStatusOfTrackedRaces();
+        LifecycleState state = TrackedRaceState.FINISHED;
+        state.updateProperty(TrackedRaceState.PROPERTY_LOADING_INDICATOR, 1.0);
+        updateStatusOfTrackedRaces(state);
     }
 
-    private void updateStatusOfTrackedRaces() {
+    private void updateStatusOfTrackedRaces(LifecycleState state) {
         for (RaceDefinition race : getRaces()) {
-            updateStatusOfTrackedRace(race);
+            updateStatusOfTrackedRace(race, state);
         }
     }
 
-    private void updateStatusOfTrackedRace(RaceDefinition race) {
+    private void updateStatusOfTrackedRace(RaceDefinition race, LifecycleState state) {
         DynamicTrackedRace trackedRace = getTrackedRegatta().getExistingTrackedRace(race);
         if (trackedRace != null) {
-            trackedRace.setStatus(lastStatus);
+            trackedRace.getLifecycle().performTransitionTo(state);
+        } else {
+            logger.severe("Could not update state of race " + race.getName() + " because TrackedRace is empty.");
         }
     }
 
     @Override
     public void storedDataBegin() {
         logger.info("Stored data begin for race(s) "+getRaces());
-        lastStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.LOADING, 0);
-        updateStatusOfTrackedRaces();
+        LifecycleState state = TrackedRaceState.LOADING_STORED_DATA;
+        state.updateProperty(TrackedRaceState.PROPERTY_LOADING_INDICATOR, 0);
+        updateStatusOfTrackedRaces(state);
     }
 
     @Override
     public void storedDataEnd() {
         logger.info("Stored data end for race(s) "+getRaces());
-        lastStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.TRACKING, 1);
-        updateStatusOfTrackedRaces();
+        LifecycleState state = TrackedRaceState.TRACKING_LIVE_DATA;
+        state.updateProperty(TrackedRaceState.PROPERTY_LOADING_INDICATOR, 1.0);
+        updateStatusOfTrackedRaces(state);
     }
 
     @Override
     public void storedDataProgress(float progress) {
         logger.info("Stored data progress for race(s) "+getRaces()+": "+progress);
-        lastStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.LOADING, progress);
-        updateStatusOfTrackedRaces();
+        LifecycleState state = TrackedRaceState.LOADING_STORED_DATA;
+        state.updateProperty(TrackedRaceState.PROPERTY_LOADING_INDICATOR, progress);
+        updateStatusOfTrackedRaces(state);
     }
 
     @Override
@@ -461,7 +465,6 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
     @Override
     public void addRaceDefinition(RaceDefinition race) {
         races.add(race);
-        updateStatusOfTrackedRace(race);
     }
 
 }

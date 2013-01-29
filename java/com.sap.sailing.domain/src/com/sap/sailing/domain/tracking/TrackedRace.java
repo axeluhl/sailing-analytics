@@ -5,10 +5,10 @@ import java.util.List;
 import java.util.NavigableSet;
 import java.util.SortedSet;
 
-import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Leg;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.DouglasPeucker;
@@ -19,10 +19,10 @@ import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.domain.lifecycle.WithLifecycle;
 
 /**
  * Live tracking data of a single race. The race follows a defined {@link Course} with a sequence of {@link Leg}s. The
@@ -39,7 +39,7 @@ import com.sap.sailing.domain.common.impl.Util.Pair;
  * @author Axel Uhl (d043530)
  * 
  */
-public interface TrackedRace extends Serializable {
+public interface TrackedRace extends Serializable, WithLifecycle {
     final long MAX_TIME_BETWEEN_START_AND_FIRST_MARK_PASSING_IN_MILLISECONDS = 30000;
     
     final long DEFAULT_LIVE_DELAY_IN_MILLISECONDS = 5000;
@@ -452,10 +452,8 @@ public interface TrackedRace extends Serializable {
      */
     void waitUntilWindLoadingComplete() throws InterruptedException;
     
-    TrackedRaceStatus getStatus();
-
     /**
-     * If the {@link #getStatus() status} is currently {@link TrackedRaceStatusEnum#LOADING}, blocks until the status changes to any
+     * If the {@link #getStatus() status} is currently {@link TrackedRaceStatusEnum#LOADING_STORED_DATA}, blocks until the status changes to any
      * other status.
      */
     void waitUntilNotLoading();

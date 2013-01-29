@@ -1,16 +1,16 @@
 package com.sap.sailing.server.operationaltransformation;
 
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.domain.lifecycle.LifecycleState;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
-import com.sap.sailing.domain.tracking.TrackedRaceStatus;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
 
 public class UpdateTrackedRaceStatus extends AbstractRaceOperation<Void> {
     private static final long serialVersionUID = 5847067037829132465L;
-    private final TrackedRaceStatus newStatus;
+    private final LifecycleState newStatus;
     
-    public UpdateTrackedRaceStatus(RegattaAndRaceIdentifier raceIdentifier, TrackedRaceStatus newStatus) {
+    public UpdateTrackedRaceStatus(RegattaAndRaceIdentifier raceIdentifier, LifecycleState newStatus) {
         super(raceIdentifier);
         this.newStatus = newStatus;
     }
@@ -18,7 +18,7 @@ public class UpdateTrackedRaceStatus extends AbstractRaceOperation<Void> {
     @Override
     public Void internalApplyTo(RacingEventService toState) throws Exception {
         DynamicTrackedRace trackedRace = (DynamicTrackedRace) toState.getTrackedRace(getRaceIdentifier());
-        trackedRace.setStatus(newStatus);
+        trackedRace.getLifecycle().performTransitionTo(newStatus);
         return null;
     }
 

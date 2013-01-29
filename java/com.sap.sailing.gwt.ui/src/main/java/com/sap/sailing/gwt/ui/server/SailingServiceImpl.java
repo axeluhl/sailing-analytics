@@ -105,6 +105,8 @@ import com.sap.sailing.domain.leaderboard.Leaderboard.Entry;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.MetaLeaderboard;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
+import com.sap.sailing.domain.lifecycle.LifecycleState;
+import com.sap.sailing.domain.lifecycle.impl.TrackedRaceState;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
@@ -129,7 +131,6 @@ import com.sap.sailing.domain.tracking.RacesHandle;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.domain.tracking.TrackedRaceStatus;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
@@ -758,8 +759,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         }
 
         @Override
-        public void statusChanged(TrackedRaceStatus newStatus) {
+        public void statusChanged(LifecycleState newStatus) {
             // when the status changes away from LOADING, calculations may start or resume, making it necessary to clear the cache
+            // FIXME: Check newState if it really moved away from LOADING
             invalidateCacheAndRemoveThisListenerFromTrackedRace();
         }
 
@@ -1074,8 +1076,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 raceDTO.startOfRace = trackedRace.getStartOfRace() == null ? null : trackedRace.getStartOfRace().asDate();
                 raceDTO.endOfRace = trackedRace.getEndOfRace() == null ? null : trackedRace.getEndOfRace().asDate();
                 raceDTO.status = new RaceStatusDTO();
-                raceDTO.status.status = trackedRace.getStatus().getStatus();
-                raceDTO.status.loadingProgress = trackedRace.getStatus().getLoadingProgress();
+                raceDTO.status.status = (TrackedRaceState)trackedRace.getLifecycle().getCurrentState();
+                raceDTO.status.loadingProgress = (Double)trackedRace.getLifecycle().getCurrentState().getProperty(TrackedRaceState.PROPERTY_LOADING_INDICATOR);
             }
             raceDTO.boatClass = regatta.getBoatClass() == null ? null : regatta.getBoatClass().getName(); 
             result.add(raceDTO);
