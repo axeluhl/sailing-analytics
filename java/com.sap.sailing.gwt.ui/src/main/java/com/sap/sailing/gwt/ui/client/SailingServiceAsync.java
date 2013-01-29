@@ -101,7 +101,7 @@ public interface SailingServiceAsync {
 
     void stopTrackingEvent(RegattaIdentifier eventIdentifier, AsyncCallback<Void> callback);
 
-    void stopTrackingRace(RegattaAndRaceIdentifier raceIdentifier, AsyncCallback<Void> asyncCallback);
+    void stopTrackingRaces(Iterable<RegattaAndRaceIdentifier> racesToStopTracking, AsyncCallback<Void> asyncCallback);
     
     /**
      * Untracks the race and removes it from the regatta. It will also be removed in all leaderboards

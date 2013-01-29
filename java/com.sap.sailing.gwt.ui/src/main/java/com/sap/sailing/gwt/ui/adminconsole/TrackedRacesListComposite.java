@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -50,20 +52,24 @@ public class TrackedRacesListComposite extends AbstractTrackedRacesListComposite
         this.raceIsTrackedRaceChangeListener.add(listener);
     }
 
-    private void stopTrackingRace(final RaceDTO race) {
-        final RegattaAndRaceIdentifier regattaAndRaceIdentifier = race.getRaceIdentifier();
-        sailingService.stopTrackingRace(regattaAndRaceIdentifier, new AsyncCallback<Void>() {
+    private void stopTrackingRaces(final Iterable<RaceDTO> races) {
+        final List<RegattaAndRaceIdentifier> racesToStopTracking = new ArrayList<RegattaAndRaceIdentifier>();
+        for (RaceDTO race : races) {
+            if (race.isTracked) {
+                racesToStopTracking.add(race.getRaceIdentifier());
+            }
+        }
+        sailingService.stopTrackingRaces(racesToStopTracking, new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable caught) {
-                errorReporter.reportError("Exception trying to stop tracking race " + race.name + "in event "
-                        + race.getRegattaName() + ": " + caught.getMessage());
+                errorReporter.reportError("Exception trying to stop tracking races " + races + ": " + caught.getMessage());
             }
 
             @Override
             public void onSuccess(Void result) {
                 regattaRefresher.fillRegattas();
                 for (TrackedRaceChangedListener listener : raceIsTrackedRaceChangeListener) {
-                    listener.changeTrackingRace(regattaAndRaceIdentifier, false);
+                    listener.changeTrackingRace(racesToStopTracking, false);
                 }
             }
         });
@@ -83,7 +89,7 @@ public class TrackedRacesListComposite extends AbstractTrackedRacesListComposite
                     public void onSuccess(Void result) {
                         regattaRefresher.fillRegattas();
                         for (TrackedRaceChangedListener listener : raceIsTrackedRaceChangeListener) {
-                            listener.changeTrackingRace(regattaNameAndRaceName, false);
+                            listener.changeTrackingRace(Collections.singleton(regattaNameAndRaceName), false);
                         }
                     }
                 });
@@ -108,11 +114,7 @@ public class TrackedRacesListComposite extends AbstractTrackedRacesListComposite
         btnUntrack.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent click) {
-                for (RaceDTO selectedRace : getSelectedRaces()) {
-                    if (selectedRace.isTracked) {
-                        stopTrackingRace(selectedRace);
-                    }
-                }
+                stopTrackingRaces(getSelectedRaces());
             }
         });
         btnUntrack.setEnabled(false);

@@ -78,7 +78,7 @@ public interface SailingService extends RemoteService {
 
     void stopTrackingEvent(RegattaIdentifier eventIdentifier) throws Exception;
 
-    void stopTrackingRace(RegattaAndRaceIdentifier regattaAndRaceIdentifier) throws Exception;
+    void stopTrackingRaces(Iterable<RegattaAndRaceIdentifier> racesToStopTracking) throws Exception;
     
     void removeAndUntrackRace(RegattaAndRaceIdentifier regattaAndRaceidentifier) throws Exception;
 
