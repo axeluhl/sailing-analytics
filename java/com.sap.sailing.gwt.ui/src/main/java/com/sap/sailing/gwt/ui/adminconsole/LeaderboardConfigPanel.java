@@ -58,7 +58,7 @@ import com.sap.sailing.gwt.ui.client.RaceSelectionProvider;
 import com.sap.sailing.gwt.ui.client.RegattaDisplayer;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.URLFactory;
+import com.sap.sailing.gwt.ui.client.URLEncoder;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardEntryPoint;
 import com.sap.sailing.gwt.ui.leaderboard.ScoringSchemeTypeFormatter;
 import com.sap.sailing.gwt.ui.shared.AbstractLeaderboardDTO;
@@ -171,7 +171,7 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
             @Override
             public SafeHtml getValue(StrippedLeaderboardDTO object) {
                 String debugParam = Window.Location.getParameter("gwt.codesvr");
-                String link = URLFactory.INSTANCE.encode("/gwt/Leaderboard.html?name=" + object.name
+                String link = URLEncoder.encode("/gwt/Leaderboard.html?name=" + object.name
                         + (showRaceDetails ? "&showRaceDetails=true" : "")
                         + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""));
                 return ANCHORTEMPLATE.cell(link, object.name);
@@ -371,7 +371,7 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
                     RegattaNameAndRaceName raceIdentifier = (RegattaNameAndRaceName) raceInLeaderboardDTOAndFleetName
                             .getA().getRaceIdentifier(raceInLeaderboardDTOAndFleetName.getB());
                     String debugParam = Window.Location.getParameter("gwt.codesvr");
-                    String link = URLFactory.INSTANCE.encode("/gwt/RaceBoard.html?leaderboardName="
+                    String link = URLEncoder.encode("/gwt/RaceBoard.html?leaderboardName="
                             + selectedLeaderboard.name + "&raceName=" + raceIdentifier.getRaceName() + "&regattaName="
                             + raceIdentifier.getRegattaName()
                             + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""));
