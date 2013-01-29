@@ -10,11 +10,11 @@ import java.util.List;
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.common.LifecycleState;
 import com.sap.sailing.domain.common.NoWindException;
+import com.sap.sailing.domain.common.TrackedRaceState;
 import com.sap.sailing.domain.lifecycle.Lifecycle;
-import com.sap.sailing.domain.lifecycle.LifecycleState;
 import com.sap.sailing.domain.lifecycle.impl.TrackedRaceLifecycle;
-import com.sap.sailing.domain.lifecycle.impl.TrackedRaceState;
 import com.sap.sailing.domain.test.mock.MockedTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;

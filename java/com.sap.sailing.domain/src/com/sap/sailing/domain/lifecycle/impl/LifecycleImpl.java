@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
 
+import com.sap.sailing.domain.common.LifecycleState;
 import com.sap.sailing.domain.lifecycle.Lifecycle;
-import com.sap.sailing.domain.lifecycle.LifecycleState;
 import com.sap.sailing.domain.lifecycle.WithLifecycle;
 
 /**

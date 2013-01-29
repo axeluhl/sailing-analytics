@@ -1,8 +1,6 @@
-package com.sap.sailing.domain.lifecycle.impl;
+package com.sap.sailing.domain.common;
 
 import java.util.HashMap;
-
-import com.sap.sailing.domain.lifecycle.LifecycleState;
 
 /**
  * <p>Races undergo a variety of different states in our application. They may be created with a competitor list, maybe not
