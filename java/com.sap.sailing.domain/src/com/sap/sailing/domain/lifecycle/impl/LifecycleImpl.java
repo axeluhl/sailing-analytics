@@ -8,6 +8,12 @@ import com.sap.sailing.domain.lifecycle.Lifecycle;
 import com.sap.sailing.domain.lifecycle.LifecycleState;
 import com.sap.sailing.domain.lifecycle.WithLifecycle;
 
+/**
+ * Implementation of a lifecycle featuring properties saved to a HasMap.
+ * 
+ * @author Simon Pamies (info@pamies.de)
+ * @since Jan 29, 2013
+ */
 public abstract class LifecycleImpl implements Lifecycle {
     
     protected List<LifecycleState> history;
