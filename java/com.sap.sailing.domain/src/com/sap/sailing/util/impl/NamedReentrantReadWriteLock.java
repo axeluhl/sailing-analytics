@@ -14,6 +14,8 @@ import com.sap.sailing.domain.common.Named;
 public class NamedReentrantReadWriteLock extends ReentrantReadWriteLock implements Named {
     private static final long serialVersionUID = 2906084982209339774L;
     private final String name;
+    private final String readLockName;
+    private final String writeLockName;
     private final WriteLockWrapper writeLockWrapper;
     private final ReadLockWrapper readLockWrapper;
     private transient List<Thread> readers;
@@ -136,6 +138,8 @@ public class NamedReentrantReadWriteLock extends ReentrantReadWriteLock implemen
     public NamedReentrantReadWriteLock(String name, boolean fair) {
         super(fair);
         this.name = name;
+        this.readLockName = "readLock "+name;
+        this.writeLockName = "writeLock "+name;
         this.writeLockWrapper = new WriteLockWrapper(super.writeLock());
         this.readLockWrapper = new ReadLockWrapper(super.readLock());
         this.readers = Collections.synchronizedList(new ArrayList<Thread>());
@@ -172,5 +176,13 @@ public class NamedReentrantReadWriteLock extends ReentrantReadWriteLock implemen
     @Override
     public String toString() {
         return "ReentrantReadWriteLock "+getName()+" ("+(isFair()?"fair":"unfair")+")";
+    }
+
+    protected String getReadLockName() {
+        return readLockName;
+    }
+
+    protected String getWriteLockName() {
+        return writeLockName;
     }
 }

@@ -8,7 +8,7 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.sap.sailing.gwt.ui.shared.LeaderboardRowDTO;
 
 /**
- * Renders the values and the percentage bar of the {@link LegDetailColumn} and {@link ManeuverCountRaceColumn}.
+ * Renders the values and the percentage bar of the {@link DetailTypeColumn} and {@link ManeuverCountRaceColumn}.
  * It is used to update the minimum and maximum values of the columns, and to render the column content.
  * 
  * @author Fabian Schwarz-Fritz
@@ -21,7 +21,7 @@ public class MinMaxRenderer {
     private Double maximumValue;
 
     /**
-     * Renders the value and the percentage bar of the columns {@link LegDetailColumn} and
+     * Renders the value and the percentage bar of the columns {@link DetailTypeColumn} and
      * {@link ManeuverCountRaceColumn}.
      * 
      * @param valueProvider

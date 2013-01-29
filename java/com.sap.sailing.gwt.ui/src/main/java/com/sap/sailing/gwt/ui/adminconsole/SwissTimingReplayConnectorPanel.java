@@ -62,8 +62,6 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
     private final TextBox jsonUrlBox;
     private final Grid grid;
     private final List<SwissTimingReplayRaceDTO> availableSwissTimingRaces;
-    private Iterable<RegattaDTO> allRegattas;
-    private final ListBox regattaListBox;
 
     public SwissTimingReplayConnectorPanel(final SailingServiceAsync sailingService, ErrorReporter errorReporter,
             RegattaRefresher regattaRefresher, StringMessages stringMessages) {
@@ -168,9 +166,8 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
         regattaPanel.setCellVerticalAlignment(lblRegattas, HasVerticalAlignment.ALIGN_MIDDLE);
         regattaPanel.setSpacing(5);
         regattaPanel.add(lblRegattas);
-        regattaListBox = new ListBox();
-        regattaPanel.add(regattaListBox);
-        regattaPanel.setCellVerticalAlignment(regattaListBox, HasVerticalAlignment.ALIGN_MIDDLE);
+        regattaPanel.add(getAvailableRegattasListBox());
+        regattaPanel.setCellVerticalAlignment(getAvailableRegattasListBox(), HasVerticalAlignment.ALIGN_MIDDLE);
         
         HorizontalPanel filterPanel = new HorizontalPanel();
         filterPanel.setSpacing(5);
@@ -342,7 +339,7 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
         if (boatClassName != null) {
             if (selectedRegatta == null) {
                 // in case no regatta has been selected we check if there would be a matching regatta
-                for (RegattaDTO regatta : allRegattas) {
+                for (RegattaDTO regatta : getAvailableRegattas()) {
                     if (boatClassName.equalsIgnoreCase(regatta.boatClass.name)) {
                         return false;
                     }
@@ -409,45 +406,12 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
         }
     }
 
-    @Override
-    public void fillRegattas(List<RegattaDTO> regattas) {
-        trackedRacesListComposite.fillRegattas(regattas);
-        
-        RegattaDTO oldRegattaSelection = getSelectedRegatta();
-        regattaListBox.clear();
-        regattaListBox.addItem(stringMessages.noRegatta());
-        if (!regattas.isEmpty()) {
-            for (RegattaDTO regatta : regattas) {
-                regattaListBox.addItem(regatta.name);
-                if(oldRegattaSelection != null && oldRegattaSelection.name.equals(regatta.name)) {
-                    regattaListBox.setSelectedIndex(regattaListBox.getItemCount()-1);
-                }
-            }
-        }
-        allRegattas = new ArrayList<RegattaDTO>(regattas);
-    }
-
-    public RegattaDTO getSelectedRegatta() {
-        RegattaDTO result = null;
-        int selIndex = regattaListBox.getSelectedIndex();
-        if(selIndex > 0) { // the zero index represents the 'no selection' text
-            String itemText = regattaListBox.getItemText(selIndex);
-            for(RegattaDTO regattaDTO: allRegattas) {
-                if(regattaDTO.name.equals(itemText)) {
-                    result = regattaDTO;
-                    break;
-                }
-            }
-        }
-        return result;
-    }
-
     private void fillRaceListFromAvailableRacesApplyingFilter(String text) {
         List<String> wordsToFilter = Arrays.asList(text.split(" "));
         raceList.getList().clear();
         if (text != null && !text.isEmpty()) {
             for (SwissTimingReplayRaceDTO replayRace : availableSwissTimingRaces) {
-                boolean found = textContainsStringsToCheck(wordsToFilter, replayRace.boat_class, replayRace.flight_number, replayRace.name, replayRace.race_id);
+                boolean found = textContainsStringsToCheck(wordsToFilter, replayRace.boat_class, replayRace.flight_number, replayRace.name, replayRace.race_id, replayRace.rsc);
                 if (found) {
                     raceList.getList().add(replayRace);
                 }
@@ -460,7 +424,14 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
     }
 
     private void updateJsonUrlFromSelectedPreviousConfiguration() {
-        jsonUrlBox.setText(previousConfigurationsComboBox.getItemText(previousConfigurationsComboBox.getSelectedIndex()));
+        int selectedIndex = previousConfigurationsComboBox.getSelectedIndex();
+        String selectedConfiguration;
+        if (selectedIndex >= 0) {
+            selectedConfiguration = previousConfigurationsComboBox.getItemText(selectedIndex);
+        } else {
+            selectedConfiguration = null;
+        }
+        jsonUrlBox.setText(selectedConfiguration);
     }
-
+    
 }

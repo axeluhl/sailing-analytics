@@ -3,11 +3,13 @@ package com.sap.sailing.mongodb.internal;
 import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.mongodb.DB;
 import com.mongodb.Mongo;
 import com.sap.sailing.domain.common.impl.Util;
+import com.sap.sailing.mongodb.AlreadyRegisteredException;
 import com.sap.sailing.mongodb.MongoDBConfiguration;
 import com.sap.sailing.mongodb.MongoDBService;
 
@@ -66,4 +68,23 @@ public class MongoDBServiceImpl implements MongoDBService {
         }
         return db;
     }
+    
+	/**
+	 * collection name -> fully qualified class name
+	 */
+	private Map<String, String> registered = new HashMap<String, String>();
+	
+	@Override
+	public void registerExclusively(Class<?> registerForInterface, String collectionName)
+			throws AlreadyRegisteredException {
+		String fullyQualified = registerForInterface.getName();
+		if (registered.keySet().contains(collectionName) && registered.get(collectionName) != fullyQualified) {
+			logger.log(Level.SEVERE, "Same collection name (" + collectionName + " is required in two different places - this may lead to problems: \n" 
+					+ " - already registered for: " + registered.get(collectionName) + "\n"
+					+ " - tried to register for: " + fullyQualified);
+			throw new AlreadyRegisteredException();
+		}
+		logger.log(Level.INFO, "Registered collection name: " + collectionName);
+		registered.put(collectionName, fullyQualified);
+	}
 }

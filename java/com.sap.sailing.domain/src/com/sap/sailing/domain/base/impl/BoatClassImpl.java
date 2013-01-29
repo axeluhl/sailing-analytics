@@ -42,14 +42,10 @@ public class BoatClassImpl extends NamedImpl implements BoatClass {
         super(name);
         this.typicallyStartsUpwind = typicallyStartsUpwind;
         approximateManeuverDurationInMilliseconds = 8000; // as discussed with Dennis Gehrlein
-        
-        // check with boat class masterdata
-        BoatClassMasterdata knownBoatClass = BoatClassMasterdata.resolveBoatClass(name);
-        if(knownBoatClass != null) {
-            hullLength = new MeterDistance(knownBoatClass.getHullLengthInMeter());
-        } else {
-            hullLength = new MeterDistance(5); // a good average for the olympic classes...
-        }
+        // TODO see bug 911: these values need to come from a master data base
+        hullLength = name.toLowerCase().contains("extreme") && name.contains("40")
+                ? new MeterDistance(40*12*2.54/100)
+                : new MeterDistance(5); // a good average for the olympic classes...
     }
 
     @Override

@@ -29,8 +29,13 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.RunnableFuture;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.servlet.ServletContext;
 
@@ -124,6 +129,7 @@ import com.sap.sailing.domain.tracking.RacesHandle;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.TrackedRaceStatus;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
@@ -166,6 +172,7 @@ import com.sap.sailing.gwt.ui.shared.RaceColumnInSeriesDTO;
 import com.sap.sailing.gwt.ui.shared.RaceCourseMarksDTO;
 import com.sap.sailing.gwt.ui.shared.RaceDTO;
 import com.sap.sailing.gwt.ui.shared.RaceMapDataDTO;
+import com.sap.sailing.gwt.ui.shared.RaceStatusDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.RaceWithCompetitorsDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
@@ -315,7 +322,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         tractracMongoObjectFactory = com.sap.sailing.domain.tractracadapter.persistence.MongoObjectFactory.INSTANCE;
         swissTimingFactory = SwissTimingFactory.INSTANCE;
         countryCodeFactory = com.sap.sailing.domain.common.CountryCodeFactory.INSTANCE;
-        executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+        executor = new ThreadPoolExecutor(/* corePoolSize */ 0,
+                /* maximumPoolSize */ Runtime.getRuntime().availableProcessors(),
+                /* keepAliveTime */ 60, TimeUnit.SECONDS,
+                /* workQueue */ new LinkedBlockingQueue<Runnable>());
         raceDetailsExecutor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
         leaderboardByNameLiveUpdaters = new HashMap<String, LiveLeaderboardUpdater>();
         leaderboardDTOCacheWaitingForLatestAnalysis = new LeaderboardDTOCache(this, /* waitForLatestAnalyses */ true);
@@ -550,6 +560,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                                         && namesOfRaceColumnsForWhichToLoadLegDetails.contains(raceColumn.getName()),
                                         waitForLatestAnalyses, legRanksCache);
                             } catch (NoWindException e) {
+                                logger.info("Exception trying to compute leaderboard entry for competitor "+competitor.getName()+
+                                        " in race column "+raceColumn.getName()+": "+e.getMessage());
+                                logger.throwing(SailingServiceImpl.class.getName(), "computeLeaderboardByName.future.call()", e);
                                 throw new NoWindError(e);
                             }
                         }
@@ -693,7 +706,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 raceDetails = new FutureTask<RaceDetails>(new Callable<RaceDetails>() {
                     @Override
                     public RaceDetails call() throws Exception {
-                        return calculateRaceDetails(trackedRace, competitor, trackedRace.getEndOfTracking(),
+                        TimePoint end = trackedRace.getEndOfRace();
+                        if (end == null) {
+                            end = trackedRace.getEndOfTracking();
+                        }
+                        return calculateRaceDetails(trackedRace, competitor, end,
                                 /* waitForLatestManeuverAnalysis */ true /* because this is done only once after end of tracking */, legRanksCache);
                     }
                 });
@@ -737,6 +754,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
         @Override
         public void competitorPositionChanged(GPSFixMoving fix, Competitor competitor) {
+            invalidateCacheAndRemoveThisListenerFromTrackedRace();
+        }
+
+        @Override
+        public void statusChanged(TrackedRaceStatus newStatus) {
+            // when the status changes away from LOADING, calculations may start or resume, making it necessary to clear the cache
             invalidateCacheAndRemoveThisListenerFromTrackedRace();
         }
 
@@ -910,6 +933,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                                 result.sideToWhichMarkAtLegStartWasRounded = mpm.getSide();
                             }
                             break;
+                		default:
+                			/* Do nothing here.
+                			 * Throwing an exception destroys the toggling (and maybe other behaviour) of the leaderboard.
+                			*/
                         }
                     }
                     result.averageManeuverLossInMeters = new HashMap<ManeuverType, Double>();
@@ -1046,6 +1073,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             if (trackedRace != null) {
                 raceDTO.startOfRace = trackedRace.getStartOfRace() == null ? null : trackedRace.getStartOfRace().asDate();
                 raceDTO.endOfRace = trackedRace.getEndOfRace() == null ? null : trackedRace.getEndOfRace().asDate();
+                raceDTO.status = new RaceStatusDTO();
+                raceDTO.status.status = trackedRace.getStatus().getStatus();
+                raceDTO.status.loadingProgress = trackedRace.getStatus().getLoadingProgress();
             }
             raceDTO.boatClass = regatta.getBoatClass() == null ? null : regatta.getBoatClass().getName(); 
             result.add(raceDTO);
@@ -2377,7 +2407,16 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             boolean trackWind, boolean correctWindByDeclination, boolean simulateWithStartTimeNow) {
         Regatta regatta;
         if (regattaIdentifier == null) {
-            regatta = getService().createRegatta(replayRaceDTO.rsc, replayRaceDTO.boat_class,
+            String boatClass = replayRaceDTO.boat_class;
+            for (String genderIndicator : new String[] { "Man", "Woman", "Men", "Women", "M", "W" }) {
+                Pattern p = Pattern.compile("(( - )|-| )"+genderIndicator+"$");
+                Matcher m = p.matcher(boatClass.trim());
+                if (m.find()) {
+                    boatClass = boatClass.trim().substring(0, m.start(1));
+                    break;
+                }
+            }
+            regatta = getService().createRegatta(replayRaceDTO.rsc, boatClass.trim(),
                     RegattaImpl.getFullName(replayRaceDTO.rsc, replayRaceDTO.boat_class),
                     Collections.singletonList(new SeriesImpl("Default", /* isMedal */false, Collections
                                     .singletonList(new FleetImpl("Default")), /* race column names */new ArrayList<String>(),
@@ -2445,6 +2484,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 case RACE_RANK:
                     result = (double) trackedLeg.getRank(timePoint);
                     break;
+        		default:
+        			throw new UnsupportedOperationException("Theres currently no support for the enum value '" + dataType + "' in this method.");
                 }
             }
             return result;
@@ -2462,7 +2503,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             TimePoint newestEvent = trackedRace.getTimePointOfNewestEvent();
             TimePoint startTime = from == null ? trackedRace.getStartOfTracking() : new MillisecondsTimePoint(from);
             TimePoint endTime = (to == null || to.after(newestEvent.asDate())) ? newestEvent : new MillisecondsTimePoint(to);
-            result = new CompetitorsRaceDataDTO(detailType, startTime.asDate(), endTime.asDate());
+            result = new CompetitorsRaceDataDTO(detailType, startTime==null?null:startTime.asDate(), endTime==null?null:endTime.asDate());
 
             for (CompetitorDTO competitorDTO : competitors) {
                 Competitor competitor = getCompetitorById(trackedRace.getRace().getCompetitors(), competitorDTO.id);

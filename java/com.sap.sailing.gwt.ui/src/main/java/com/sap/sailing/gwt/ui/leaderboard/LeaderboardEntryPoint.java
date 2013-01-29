@@ -58,8 +58,8 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
     private GlobalNavigationPanel globalNavigationPanel;
     
     @Override
-    public void onModuleLoad() {     
-        super.onModuleLoad();
+    protected void doOnModuleLoad() {
+        super.doOnModuleLoad();
         final boolean showRaceDetails = Window.Location.getParameter(PARAM_SHOW_RACE_DETAILS) != null
                 && Window.Location.getParameter(PARAM_SHOW_RACE_DETAILS).equalsIgnoreCase("true");
         final boolean embedded = Window.Location.getParameter(PARAM_EMBEDDED) != null

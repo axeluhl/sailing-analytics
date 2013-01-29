@@ -25,9 +25,10 @@ import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.Header;
-import com.google.gwt.user.cellview.client.TextHeader;
+import com.google.gwt.user.cellview.client.SafeHtmlHeader;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
@@ -74,7 +75,7 @@ import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.client.Timer.PlayStates;
 import com.sap.sailing.gwt.ui.client.UserAgentDetails;
-import com.sap.sailing.gwt.ui.leaderboard.LegDetailColumn.LegDetailField;
+import com.sap.sailing.gwt.ui.leaderboard.DetailTypeColumn.LegDetailField;
 import com.sap.sailing.gwt.ui.shared.AbstractLeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 import com.sap.sailing.gwt.ui.shared.FleetDTO;
@@ -561,7 +562,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         }
 
         @Override
-        public Header<String> getHeader() {
+        public SafeHtmlHeader getHeader() {
             return base.getHeader();
         }
 
@@ -614,8 +615,8 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         }
 
         @Override
-        public Header<String> getHeader() {
-            return new TextHeader(stringMessages.competitor());
+        public SafeHtmlHeader getHeader() {
+            return new SafeHtmlHeaderWithTooltip(SafeHtmlUtils.fromString(stringMessages.competitor()), stringMessages.sailIdColumnTooltip());
         }
 
         @Override
@@ -762,10 +763,8 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
 
         @Override
         public Header<SafeHtml> getHeader() {
-            SortableExpandableColumnHeader header = new SortableExpandableColumnHeader(
-            /* title */race.getRaceColumnName(),
-            /* iconURL */race.isMedalRace() ? "/gwt/images/medal_small.png" : null, LeaderboardPanel.this, this,
-                    stringMessages);
+            SortableExpandableColumnHeader header = new SortableExpandableColumnHeader(/* title */race.getRaceColumnName(),
+            /* iconURL */race.isMedalRace() ? "/gwt/images/medal_small.png" : null, LeaderboardPanel.this, this, stringMessages);
             return header;
         }
     }
@@ -836,49 +835,35 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                 LeaderboardPanel leaderboardPanel, StringMessages stringMessages, String detailHeaderStyle,
                 String detailColumnStyle) {
             Map<DetailType, SortableColumn<LeaderboardRowDTO, ?>> result = new HashMap<DetailType, SortableColumn<LeaderboardRowDTO, ?>>();
-            result.put(
-                    DetailType.RACE_DISTANCE_TRAVELED,
-                    new FormattedDoubleLegDetailColumn(stringMessages.distanceInMeters(), "["
-                            + stringMessages.distanceInMetersUnit() + "]", new RaceDistanceTraveledInMeters(),
-                            DetailType.RACE_DISTANCE_TRAVELED.getPrecision(), DetailType.RACE_DISTANCE_TRAVELED
-                                    .getDefaultSortingOrder(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
-            result.put(DetailType.RACE_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS, new FormattedDoubleLegDetailColumn(
-                    stringMessages.averageSpeedInKnots(), "[" + stringMessages.averageSpeedInKnotsUnit() + "]",
-                    new RaceAverageSpeedInKnots(), DetailType.RACE_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS.getPrecision(),
-                    DetailType.RACE_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS.getDefaultSortingOrder(),
-                    LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
-            result.put(
-                    DetailType.RACE_GAP_TO_LEADER_IN_SECONDS,
-                    new FormattedDoubleLegDetailColumn(stringMessages.gapToLeaderInSeconds(), "["
-                            + stringMessages.gapToLeaderInSecondsUnit() + "]", new RaceGapToLeaderInSeconds(),
-                            DetailType.RACE_GAP_TO_LEADER_IN_SECONDS.getPrecision(),
-                            DetailType.RACE_GAP_TO_LEADER_IN_SECONDS.getDefaultSortingOrder(), LEG_COLUMN_HEADER_STYLE,
-                            LEG_COLUMN_STYLE));
-            result.put(
-                    DetailType.RACE_CURRENT_SPEED_OVER_GROUND_IN_KNOTS,
-                    new FormattedDoubleLegDetailColumn(stringMessages.currentSpeedOverGroundInKnots(), "["
-                            + stringMessages.currentSpeedOverGroundInKnotsUnit() + "]", new CurrentSpeedOverGroundInKnots(),
-                            DetailType.RACE_CURRENT_SPEED_OVER_GROUND_IN_KNOTS.getPrecision(),
-                            DetailType.RACE_CURRENT_SPEED_OVER_GROUND_IN_KNOTS.getDefaultSortingOrder(),
+            
+            result.put(DetailType.RACE_DISTANCE_TRAVELED,
+                    new FormattedDoubleDetailTypeColumn(DetailType.RACE_DISTANCE_TRAVELED, new RaceDistanceTraveledInMeters(),
                             LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
-            result.put(
-                    DetailType.RACE_DISTANCE_TO_LEADER_IN_METERS,
-                    new FormattedDoubleLegDetailColumn(stringMessages.windwardDistanceToLeader(), "["
-                            + stringMessages.distanceInMetersUnit() + "]", new RaceDistanceToLeaderInMeters(),
-                            DetailType.RACE_DISTANCE_TO_LEADER_IN_METERS.getPrecision(),
-                            DetailType.RACE_DISTANCE_TO_LEADER_IN_METERS.getDefaultSortingOrder(),
+                    
+            result.put(DetailType.RACE_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS, 
+                    new FormattedDoubleDetailTypeColumn(DetailType.RACE_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS, new RaceAverageSpeedInKnots(),
                             LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
+
+            result.put(DetailType.RACE_GAP_TO_LEADER_IN_SECONDS,
+                    new FormattedDoubleDetailTypeColumn(DetailType.RACE_GAP_TO_LEADER_IN_SECONDS, new RaceGapToLeaderInSeconds(),
+                            LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
+
+            result.put(DetailType.RACE_CURRENT_SPEED_OVER_GROUND_IN_KNOTS,
+                    new FormattedDoubleDetailTypeColumn(DetailType.RACE_CURRENT_SPEED_OVER_GROUND_IN_KNOTS, new CurrentSpeedOverGroundInKnots(),
+                            LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
+
+            result.put(DetailType.RACE_DISTANCE_TO_LEADER_IN_METERS,
+                    new FormattedDoubleDetailTypeColumn(DetailType.RACE_DISTANCE_TO_LEADER_IN_METERS, new RaceDistanceToLeaderInMeters(),
+                            LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
+            
             result.put(DetailType.RACE_AVERAGE_CROSS_TRACK_ERROR_IN_METERS,
-                    new FormattedDoubleLegDetailColumn(stringMessages.averageCrossTrackErrorInMeters(), "["
-                            + stringMessages.metersUnit() + "]", new RaceAverageCrossTrackErrorInMeters(),
-                            DetailType.RACE_AVERAGE_CROSS_TRACK_ERROR_IN_METERS.getPrecision(),
-                            DetailType.RACE_AVERAGE_CROSS_TRACK_ERROR_IN_METERS.getDefaultSortingOrder(),
+                    new FormattedDoubleDetailTypeColumn(DetailType.RACE_AVERAGE_CROSS_TRACK_ERROR_IN_METERS, new RaceAverageCrossTrackErrorInMeters(),
                             LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
+            
             result.put(DetailType.NUMBER_OF_MANEUVERS, getManeuverCountRaceColumn());
+            
             result.put(DetailType.CURRENT_LEG,
-                    new FormattedDoubleLegDetailColumn(stringMessages.currentLeg(), "", new CurrentLeg(),
-                            DetailType.CURRENT_LEG.getPrecision(), DetailType.CURRENT_LEG.getDefaultSortingOrder(),
-                            LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
+                    new FormattedDoubleDetailTypeColumn(DetailType.CURRENT_LEG, new CurrentLeg(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
 
             return result;
         }
@@ -1139,8 +1124,8 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         }
 
         @Override
-        public Header<String> getHeader() {
-            return new TextHeader(stringMessages.total());
+        public SafeHtmlHeader getHeader() {
+            return new SafeHtmlHeaderWithTooltip(SafeHtmlUtils.fromString(stringMessages.total()), stringMessages.totalsColumnTooltip());
         }
     }
 
@@ -1179,8 +1164,8 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         }
 
         @Override
-        public Header<String> getHeader() {
-            return new TextHeader(stringMessages.carry());
+        public SafeHtmlHeader getHeader() {
+            return new SafeHtmlHeaderWithTooltip(SafeHtmlUtils.fromString(stringMessages.carry()), stringMessages.carryColumnTooltip());
         }
     }
 
@@ -1210,8 +1195,8 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         }
 
         @Override
-        public Header<String> getHeader() {
-            return new TextHeader(stringMessages.totalRank());
+        public SafeHtmlHeader getHeader() {
+            return new SafeHtmlHeaderWithTooltip(SafeHtmlUtils.fromString(stringMessages.totalRank()), stringMessages.rankColumnTooltip());
         }
     }
 
@@ -1414,18 +1399,54 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         setWidget(contentPanel);
         raceNameForDefaultSorting = settings.getNameOfRaceToSort();
     }
+    
+    private static class KingOfTheDownwindField implements LegDetailField<Double> {
+        @Override
+        public Double get(LeaderboardRowDTO row) {
+            return row.totalTimeSailedDownwindInSeconds;
+        }
+    }
+    
+    private static class KingOfTheReachingField implements LegDetailField<Double> {
+        @Override
+        public Double get(LeaderboardRowDTO row) {
+            return row.totalTimeSailedReachingInSeconds;
+        }
+    }
+
+    private static class KingOfTheUpwindField implements LegDetailField<Double> {
+        @Override
+        public Double get(LeaderboardRowDTO row) {
+            return row.totalTimeSailedUpwindInSeconds;
+        }
+    }
+    
+    private static class TotalTimeSailedField implements LegDetailField<Double> {
+        @Override
+        public Double get(LeaderboardRowDTO row) {
+            return row.totalTimeSailedInSeconds;
+        }
+    }
 
     private Map<DetailType, SortableColumn<LeaderboardRowDTO, ?>> createOverallDetailColumnMap() {
         Map<DetailType, SortableColumn<LeaderboardRowDTO, ?>> result = new HashMap<DetailType, SortableColumn<LeaderboardRowDTO, ?>>();
-        result.put(DetailType.MAXIMUM_SPEED_OVER_GROUND_IN_KNOTS, new MaxSpeedOverallColumn(stringMessages,
+        result.put(DetailType.MAXIMUM_SPEED_OVER_GROUND_IN_KNOTS, new MaxSpeedOverallColumn(RACE_COLUMN_HEADER_STYLE,
+                RACE_COLUMN_STYLE));
+        
+        result.put(DetailType.TOTAL_TIME_SAILED_UPWIND_IN_SECONDS, new TotalTimeColumn(
+                DetailType.TOTAL_TIME_SAILED_UPWIND_IN_SECONDS, new KingOfTheUpwindField(),
                 RACE_COLUMN_HEADER_STYLE, RACE_COLUMN_STYLE));
-        result.put(DetailType.TOTAL_TIME_SAILED_UPWIND_IN_SECONDS, new KingOfTheUpwindColumn(stringMessages,
+        
+        result.put(DetailType.TOTAL_TIME_SAILED_DOWNWIND_IN_SECONDS, new TotalTimeColumn(
+                DetailType.TOTAL_TIME_SAILED_DOWNWIND_IN_SECONDS, new KingOfTheDownwindField(),
                 RACE_COLUMN_HEADER_STYLE, RACE_COLUMN_STYLE));
-        result.put(DetailType.TOTAL_TIME_SAILED_DOWNWIND_IN_SECONDS, new KingOfTheDownwindColumn(stringMessages,
+        
+        result.put(DetailType.TOTAL_TIME_SAILED_REACHING_IN_SECONDS, new TotalTimeColumn(
+                DetailType.TOTAL_TIME_SAILED_REACHING_IN_SECONDS, new KingOfTheReachingField(),
                 RACE_COLUMN_HEADER_STYLE, RACE_COLUMN_STYLE));
-        result.put(DetailType.TOTAL_TIME_SAILED_REACHING_IN_SECONDS, new KingOfTheReachingColumn(stringMessages,
-                RACE_COLUMN_HEADER_STYLE, RACE_COLUMN_STYLE));
-        result.put(DetailType.TOTAL_TIME_SAILED_IN_SECONDS, new TotalTimeSailedColumn(stringMessages,
+        
+        result.put(DetailType.TOTAL_TIME_SAILED_IN_SECONDS, new TotalTimeColumn(
+                DetailType.TOTAL_TIME_SAILED_IN_SECONDS, new TotalTimeSailedField(),
                 RACE_COLUMN_HEADER_STYLE, RACE_COLUMN_STYLE));
         return result;
     }
@@ -2254,6 +2275,11 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         oldPlayMode = playMode;
     }
 
+    @Override
+    public void playSpeedFactorChanged(double newPlaySpeedFactor) {
+        // nothing to do
+    }
+    
     private void showCompareCompetitorsDialog() {
         int selectedCompetitorsCount = Util.size(competitorSelectionProvider.getSelectedCompetitors());
         if (selectedCompetitorsCount < 1) {

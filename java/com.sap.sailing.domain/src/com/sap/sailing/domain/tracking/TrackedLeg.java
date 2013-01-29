@@ -46,5 +46,14 @@ public interface TrackedLeg extends Serializable {
 
     Distance getCrossTrackError(Position p, TimePoint timePoint);
 
+    /**
+     * Must be called when the start and finish waypoint of this leg may have changed.
+     */
     void waypointsMayHaveChanges();
+    
+    /**
+     * Computes the great-circle distance of this leg based on the position of the adjacent marks at <code>timePoint</code>.
+     * If any of the positions of the two adjacent marks cannot be found, <code>null</code> is returned.
+     */
+    Distance getGreatCircleDistance(TimePoint timePoint);
 }

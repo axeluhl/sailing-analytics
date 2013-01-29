@@ -101,11 +101,12 @@ public abstract class AbstractPortMonitor extends Thread {
                                     conn.setRequestMethod("GET");
                                     conn.connect();
                                     int code = conn.getResponseCode();
+                                    conn.disconnect();
                                     if (code != 200) {
                                         throw new ConnectException("Could not successfully connect to endpoint " + currentendpoint.toString());
                                     }
                                 }
-                                log.info("Connection succeeded to " + currentendpoint.toString());
+                                log.finest("Connection succeeded to " + currentendpoint.toString());
                                 handleConnection(currentendpoint);
                                 
                                 lastmillis = System.currentTimeMillis();
@@ -113,15 +114,16 @@ public abstract class AbstractPortMonitor extends Thread {
                             }
                         }
                     } catch (SocketTimeoutException|ConnectException ex) {
-                        log.info("Connection FAILED to " + currentendpoint.toString());
-
                         /* if service has failed before then wait at least some time before checking it again */
                         boolean handle = true;
                         if (currentendpoint.hasFailed() /* failed before */) {
                             if ( (currentendpoint.lastFailed()+Integer.parseInt(properties.getProperty("monitor.wait_after_failure", "60000"))) > System.currentTimeMillis()) {                
-                                log.info("Not calling handler because failure has been shortly before this call");                                
                                 handle = false;
+                            } else {
+                                log.info("Service has failed (" + currentendpoint.toString() + ") before and gracetime is over. Calling failure handler again.");
                             }
+                        } else {
+                            log.info("Connection FAILED to " + currentendpoint.toString());                            
                         }
                         
                         if (handle) {

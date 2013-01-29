@@ -35,4 +35,6 @@ public interface RaceChangeListener {
     void delayToLiveChanged(long delayToLiveInMillis);
 
     void windSourcesToExcludeChanged(Iterable<? extends WindSource> windSourcesToExclude);
+    
+    void statusChanged(TrackedRaceStatus newStatus);
 }

@@ -54,7 +54,7 @@ public class CombinedWindPanel extends FlowPanel {
                 String title = stringMessages.wind() + ": " +  Math.round(windFromDeg) + " " 
                         + stringMessages.degreesShort() + " (" + WindSourceTypeFormatter.format(windSource, stringMessages) + ")"; 
                 canvas.setTitle(title);
-                textLabel.setText(numberFormat.format(speedInKnots) + " " + stringMessages.averageSpeedInKnotsUnit());
+                textLabel.setText(numberFormat.format(speedInKnots) + " " + stringMessages.knotsUnit());
                 if (!isVisible()) {
                     setVisible(true);
                 }

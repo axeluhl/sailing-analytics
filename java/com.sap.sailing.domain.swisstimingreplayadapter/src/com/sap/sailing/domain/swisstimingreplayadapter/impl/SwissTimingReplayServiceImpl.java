@@ -132,6 +132,7 @@ public class SwissTimingReplayServiceImpl implements SwissTimingReplayService {
                 bos.write(buf, 0, read);
             }
             new SwissTimingReplayParserImpl().readData(new ByteArrayInputStream(bos.getBuffer(), 0, bos.size()), replayListener);
+            bos.close();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

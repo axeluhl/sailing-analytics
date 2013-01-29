@@ -126,5 +126,12 @@ public interface SwissTimingReplayListener {
     void rankingMark(short marksRank, short marksRankIndex, int marksGap_seconds, int marksRaceTime_seconds);
 
     void eot();
+    
+    /**
+     * If a loading progress can be estimated, a progress ratio between 0.0 and 1.0 is provided as argument.
+     * 
+     * @param progress 0.0 meaning "just begun," 1.0 meaning "finished."
+     */
+    void progress(double progress);
 
 }

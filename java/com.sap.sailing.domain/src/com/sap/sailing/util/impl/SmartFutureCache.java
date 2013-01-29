@@ -6,9 +6,11 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 import com.sap.sailing.util.impl.SmartFutureCache.UpdateInterval;
@@ -171,7 +173,9 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
     public SmartFutureCache(CacheUpdater<K, V, U> cacheUpdateComputer, String nameForLocks) {
         this.ongoingRecalculations = new ConcurrentHashMap<K, FutureTaskWithCancelBlocking<V, U>>();
         this.cache = new ConcurrentHashMap<K, V>();
-        this.recalculator = Executors.newSingleThreadExecutor();
+        this.recalculator = new ThreadPoolExecutor(/* corePoolSize */ 0,
+                /* maximumPoolSize */ 1, /* keepAliveTime */ 60, TimeUnit.SECONDS,
+                /* workQueue */ new LinkedBlockingQueue<Runnable>());
         this.cacheUpdateComputer = cacheUpdateComputer;
         this.locksForKeys = new ConcurrentHashMap<K, NamedReentrantReadWriteLock>();
         this.nameForLocks = nameForLocks;
@@ -225,7 +229,7 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
                                     LockUtil.unlockAfterWrite(lock);
                                     ongoingRecalculations.remove(key);
                                 }
-                            } catch (Throwable e) {
+                            } catch (Exception e) {
                                 // cache won't be updated
                                 logger.throwing(SmartFutureCache.class.getName(), "triggerUpdate", e);
                                 throw new RuntimeException(e);

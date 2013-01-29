@@ -31,6 +31,7 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.leaderboard.impl.HighPoint;
 import com.sap.sailing.domain.leaderboard.impl.HighPointExtremeSailingSeriesOverall;
+import com.sap.sailing.domain.leaderboard.impl.HighPointFirstGets10;
 import com.sap.sailing.domain.leaderboard.impl.HighPointLastBreaksTie;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
 import com.sap.sailing.domain.tracking.MarkPassing;
@@ -251,6 +252,8 @@ public class DomainFactoryImpl implements DomainFactory {
             return new HighPointExtremeSailingSeriesOverall();
         case HIGH_POINT_LAST_BREAKS_TIE:
             return new HighPointLastBreaksTie();
+        case HIGH_POINT_FIRST_GETS_TEN:
+            return new HighPointFirstGets10();
         default:
             throw new RuntimeException("Unknown scoring scheme type "+scoringSchemeType.name());
         }

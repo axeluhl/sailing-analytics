@@ -5,8 +5,8 @@ Bundle-SymbolicName: com.sap.sailing.server.test
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Require-Bundle: com.sap.sailing.server,
- com.sap.sailing.domain,
+Fragment-Host: com.sap.sailing.server
+Require-Bundle: com.sap.sailing.domain,
  com.sap.sailing.domain.tractracadapter,
  com.sap.sailing.domain.swisstimingadapter,
  com.sap.sailing.domain.common,
@@ -19,3 +19,5 @@ Require-Bundle: com.sap.sailing.server,
 Import-Package: junit.framework;version="4.8.1",
  org.junit;version="4.8.1",
  org.json.simple
+Export-Package: com.sap.sailing.server,
+ com.sap.sailing.server.impl

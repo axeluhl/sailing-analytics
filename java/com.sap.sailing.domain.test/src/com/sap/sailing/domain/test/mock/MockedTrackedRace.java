@@ -38,6 +38,7 @@ import com.sap.sailing.domain.tracking.RaceListener;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.TrackedRaceStatus;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
@@ -706,5 +707,21 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     public void unlockAfterRead(Iterable<MarkPassing> markPassings) {
         // TODO Auto-generated method stub
         
+    }
+
+    @Override
+    public TrackedRaceStatus getStatus() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public void setStatus(TrackedRaceStatus newStatus) {
+        // TODO Auto-generated method stub
+    }
+
+    @Override
+    public void waitUntilNotLoading() {
+        // TODO Auto-generated method stub
     }
 }

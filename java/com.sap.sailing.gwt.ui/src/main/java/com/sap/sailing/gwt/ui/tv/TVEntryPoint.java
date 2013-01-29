@@ -22,8 +22,9 @@ public class TVEntryPoint extends AbstractEntryPoint {
     private TVViewController tvViewController;
     
     @Override
-    public void onModuleLoad() {     
-        super.onModuleLoad();
+    public void doOnModuleLoad() {     
+        super.doOnModuleLoad();
+        
         final boolean showRaceDetails = Window.Location.getParameter(PARAM_SHOW_RACE_DETAILS) != null
                 && Window.Location.getParameter(PARAM_SHOW_RACE_DETAILS).equalsIgnoreCase("true");
         final boolean embedded = Window.Location.getParameter(PARAM_EMBEDDED) != null
@@ -63,7 +64,7 @@ public class TVEntryPoint extends AbstractEntryPoint {
             mainPanel.addNorth(logoAndTitlePanel, 68);
         }
         
-        tvViewController = new TVViewController(sailingService, stringMessages, this, leaderboardName,
+        tvViewController = new TVViewController(sailingService, mediaService, stringMessages, this, leaderboardName,
                 userAgent, logoAndTitlePanel, mainPanel, delayToLiveMillis, showRaceDetails);
         tvViewController.updateTvView(TVViews.Leaderboard);
     }

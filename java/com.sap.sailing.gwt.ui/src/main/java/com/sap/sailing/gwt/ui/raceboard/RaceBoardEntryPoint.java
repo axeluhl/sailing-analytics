@@ -39,8 +39,8 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
     private GlobalNavigationPanel globalNavigationPanel;
 
     @Override
-    public void onModuleLoad() {     
-        super.onModuleLoad();
+    protected void doOnModuleLoad() {    
+        super.doOnModuleLoad();
         regattaName = Window.Location.getParameter("regattaName");
         raceName = Window.Location.getParameter("raceName");
         String leaderboardNameParamValue = Window.Location.getParameter("leaderboardName");
@@ -133,7 +133,7 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         raceSelectionModel.setSelection(singletonList);
         Timer timer = new Timer(PlayModes.Replay, 1000l);
         RaceTimesInfoProvider raceTimesInfoProvider = new RaceTimesInfoProvider(sailingService, this, singletonList, 5000l /* requestInterval*/);
-        RaceBoardPanel raceBoardPanel = new RaceBoardPanel(sailingService, user, timer, raceSelectionModel, leaderboardName, leaderboardGroupName,
+        RaceBoardPanel raceBoardPanel = new RaceBoardPanel(sailingService, mediaService, user, timer, raceSelectionModel, leaderboardName, leaderboardGroupName,
                 RaceBoardEntryPoint.this, stringMessages, userAgent, viewMode, raceTimesInfoProvider);
         raceBoardPanel.fillRegattas(regattas);
 
@@ -199,7 +199,7 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         FlowPanel toolbarPanel = new FlowPanel();
         toolbarPanel.add(raceBoardPanel.getNavigationWidget());
         if (!UserAgentChecker.INSTANCE.isUserAgentSupported(userAgent)) {
-            HTML lbl = new HTML("This website is optimized to work with Google Chrome. <a target='_blank' href='https://www.google.com/intl/de/chrome/browser/'>Click here to download</a>");
+            HTML lbl = new HTML(stringMessages.warningBrowserUnsupported());
             lbl.setStyleName("browserOptimizedMessage");
             toolbarPanel.add(lbl);
         }

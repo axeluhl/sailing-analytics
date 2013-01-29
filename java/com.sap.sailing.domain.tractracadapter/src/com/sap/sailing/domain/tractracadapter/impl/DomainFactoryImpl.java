@@ -129,7 +129,7 @@ public class DomainFactoryImpl implements DomainFactory {
     }
     
     @Override
-    public void updateCourseWaypoints(Course courseToUpdate, Iterable<TracTracControlPoint> controlPoints) throws PatchFailedException {
+    public void updateCourseWaypoints(Course courseToUpdate, Iterable<? extends TracTracControlPoint> controlPoints) throws PatchFailedException {
         List<com.sap.sailing.domain.base.ControlPoint> newDomainControlPoints = new ArrayList<com.sap.sailing.domain.base.ControlPoint>();
         for (TracTracControlPoint tractracControlPoint : controlPoints) {
             com.sap.sailing.domain.base.ControlPoint newDomainControlPoint = getOrCreateControlPoint(tractracControlPoint);

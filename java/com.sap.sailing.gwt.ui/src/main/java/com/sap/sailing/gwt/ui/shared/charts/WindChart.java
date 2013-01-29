@@ -134,7 +134,7 @@ public class WindChart extends RaceChart implements Component<WindChartSettings>
                     return "<b>" + seriesName + (toolTipData.getPointName() != null ? " "+toolTipData.getPointName() : "")
                             + "</b><br/>" +  
                             dateFormat.format(new Date(toolTipData.getXAsLong())) + ": " +
-                            numberFormat.format(toolTipData.getYAsDouble()) + stringMessages.averageSpeedInKnotsUnit();
+                            numberFormat.format(toolTipData.getYAsDouble()) + stringMessages.knotsUnit();
                 }
             }
         }));
@@ -172,7 +172,7 @@ public class WindChart extends RaceChart implements Component<WindChartSettings>
                     }
                 }));
         
-        chart.getYAxis(1).setOpposite(true).setAxisTitleText(stringMessages.speed()+" ("+stringMessages.averageSpeedInKnotsUnit()+")")
+        chart.getYAxis(1).setOpposite(true).setAxisTitleText(stringMessages.speed()+" ("+stringMessages.knotsUnit()+")")
             .setStartOnTick(false).setShowFirstLabel(false).setGridLineWidth(0).setMinorGridLineWidth(0);
         
         if (compactChart) {
@@ -341,7 +341,7 @@ public class WindChart extends RaceChart implements Component<WindChartSettings>
                     timeOfLatestRequestInMillis == null || wind.requestTimepoint > timeOfLatestRequestInMillis) {
                     Point newDirectionPoint = new Point(wind.requestTimepoint, wind.dampenedTrueWindFromDeg);
                     if (wind.dampenedTrueWindSpeedInKnots != null) {
-                        String name = numberFormat.format(wind.dampenedTrueWindSpeedInKnots)+ stringMessages.averageSpeedInKnotsUnit();
+                        String name = numberFormat.format(wind.dampenedTrueWindSpeedInKnots)+ stringMessages.knotsUnit();
                         // name += " Confidence:" + wind.confidence;
                         newDirectionPoint.setName(name);
                     }
@@ -402,10 +402,10 @@ public class WindChart extends RaceChart implements Component<WindChartSettings>
             double deltaMax = Math.abs(yMax - y);
 
             double yDown = y - 360;
-            double deltaMinDown = Math.abs(yMin - Math.abs(yDown));
+            double deltaMinDown = Math.abs(yMin - yDown);
 
             double yUp = y + 360;
-            double deltaMaxUp = Math.abs(yMax - Math.abs(yUp));
+            double deltaMaxUp = Math.abs(yMax - yUp);
 
             if (!(deltaMin <= deltaMinDown && deltaMin <= deltaMaxUp)
                     && !(deltaMax <= deltaMinDown && deltaMax <= deltaMaxUp)) {

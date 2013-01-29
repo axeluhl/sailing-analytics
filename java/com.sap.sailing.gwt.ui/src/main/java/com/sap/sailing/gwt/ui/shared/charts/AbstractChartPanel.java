@@ -358,27 +358,6 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
         return result;
     }
 
-    private String getDetailTypeUnit() {
-        String detailTypeUnit = "";
-        switch (getSelectedDetailType()) {
-        case CURRENT_SPEED_OVER_GROUND_IN_KNOTS:
-            detailTypeUnit = getStringMessages().currentSpeedOverGroundInKnotsUnit();
-            break;
-        case DISTANCE_TRAVELED:
-            detailTypeUnit = getStringMessages().distanceInMetersUnit();
-            break;
-        case GAP_TO_LEADER_IN_SECONDS:
-            detailTypeUnit = getStringMessages().gapToLeaderInSecondsUnit();
-            break;
-        case VELOCITY_MADE_GOOD_IN_KNOTS:
-            detailTypeUnit = getStringMessages().velocityMadeGoodInKnotsUnit();
-            break;
-        case WINDWARD_DISTANCE_TO_OVERALL_LEADER:
-            detailTypeUnit = getStringMessages().windwardDistanceToGoInMetersUnit();
-        }
-        return detailTypeUnit;
-    }
-
     /**
      * 
      * @param competitor
@@ -402,7 +381,7 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
         if(visible) {
             // Workaround for a highcharts bug: 
             // Set a chart title, overwrite the title, switch chart to invisible and visible again -> the old title appears  
-            chart.setTitle(new ChartTitle().setText(DetailTypeFormatter.format(selectedDetailType, stringMessages)),
+            chart.setTitle(new ChartTitle().setText(DetailTypeFormatter.format(selectedDetailType)),
                     null);
         }
     }
@@ -419,7 +398,7 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
     }
 
     public String getLocalizedShortName() {
-        return DetailTypeFormatter.format(getSelectedDetailType(), getStringMessages());
+        return DetailTypeFormatter.format(getSelectedDetailType());
     }
 
     public Widget getEntryWidget() {
@@ -493,13 +472,14 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
                     resetMinMaxAndExtremesInterval(/* redraw */ true);
                 }
             }
-            chart.setTitle(new ChartTitle().setText(DetailTypeFormatter.format(selectedDetailType, stringMessages)), null);
-            final String unit = getDetailTypeUnit();
+            chart.setTitle(new ChartTitle().setText(DetailTypeFormatter.format(selectedDetailType)), null);
+            final String unit = DetailTypeFormatter.getUnit(getSelectedDetailType());
+            final String label = unit.isEmpty() ? "" : "[" + unit + "]";
             if (!compactChart) {
                 chart.getYAxis().setAxisTitleText(
-                        DetailTypeFormatter.format(selectedDetailType, stringMessages) + " [" + unit + "]");
+                        DetailTypeFormatter.format(selectedDetailType) + " " + label);
             } else {
-                chart.getYAxis().setAxisTitleText("[" + unit + "]");
+                chart.getYAxis().setAxisTitleText(label);
             }
             chart.getYAxis().setReversed(
                     selectedDetailType == DetailType.WINDWARD_DISTANCE_TO_OVERALL_LEADER || selectedDetailType == DetailType.GAP_TO_LEADER_IN_SECONDS);

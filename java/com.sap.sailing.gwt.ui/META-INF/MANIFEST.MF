@@ -6,8 +6,8 @@ Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Require-Bundle: com.sap.sailing.domain,
- com.sap.sailing.server,
  com.sap.sailing.server.gateway,
+ com.sap.sailing.server,
  com.sap.sailing.domain.tractracadapter,
  com.sap.sailing.mongodb,
  com.mongodb.driver;bundle-version="2.6.2",
@@ -25,12 +25,7 @@ Require-Bundle: com.sap.sailing.domain,
  com.sap.sailing.domain.swisstimingreplayadapter
 Bundle-Activator: com.sap.sailing.gwt.ui.server.Activator
 Bundle-ActivationPolicy: lazy
-Export-Package: com.sap.sailing.gwt.ui.client;x-friends:="com.sap.sailing.gwt.ui.test",
- com.sap.sailing.gwt.ui.adminconsole;x-friends:="com.sap.sailing.gwt.ui.test",
- com.sap.sailing.gwt.ui.leaderboard;x-friends:="com.sap.sailing.gwt.ui.test",
- com.sap.sailing.gwt.ui.leaderboardedit;x-friends:="com.sap.sailing.gwt.ui.test",
- com.sap.sailing.gwt.ui.server;x-friends:="com.sap.sailing.gwt.ui.test",
- com.sap.sailing.gwt.ui.shared;x-friends:="com.sap.sailing.gwt.ui.test"
+Export-Package: com.sap.sailing.gwt.ui.shared.media
 Import-Package: javax.jms;version="1.1.0",
  javax.servlet;version="2.5.0",
  javax.servlet.http;version="2.5.0",
