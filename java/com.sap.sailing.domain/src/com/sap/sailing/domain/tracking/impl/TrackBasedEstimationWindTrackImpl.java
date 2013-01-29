@@ -13,17 +13,16 @@ import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Mark;
+import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.AbstractTimePoint;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.common.LifecycleState;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.TrackedRaceState;
+import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
@@ -35,6 +34,7 @@ import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceChangeListener;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.TrackedRaceStatus;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
@@ -399,7 +399,7 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
                 public void run() {
                     // no locking required here; the incremental cache refresh protects the inner cache structures from concurrent modifications
                     cacheInvalidationTimer.cancel(); // terminates the timer thread
-                    if (getTrackedRace().getLifecycle().getCurrentState() == TrackedRaceState.LOADING_STORED_DATA) {
+                    if (getTrackedRace().getStatus().getStatus() == TrackedRaceStatusEnum.LOADING) {
                         // during loading, only invalidate the cache after the interval expired but don't trigger incremental re-calculation
                         invalidateCache();
                     } else {
@@ -511,9 +511,9 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
     }
     
     @Override
-    public void statusChanged(LifecycleState newStatus) {
-    // This virtual wind track's cache can cope with an empty cache after the LOADING phase and populates the cache
-    // upon request. Invalidation happens also during the LOADING phase, preserving the cache's invariant.
+    public void statusChanged(TrackedRaceStatus newStatus) {
+        // This virtual wind track's cache can cope with an empty cache after the LOADING phase and populates the cache
+        // upon request. Invalidation happens also during the LOADING phase, preserving the cache's invariant.
     }
 
     @Override

@@ -2,22 +2,22 @@ package com.sap.sailing.domain.tracking.impl;
 
 import java.util.Map;
 
-import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Mark;
+import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Waypoint;
-import com.sap.sailing.domain.common.LifecycleState;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceChangeListener;
+import com.sap.sailing.domain.tracking.TrackedRaceStatus;
 import com.sap.sailing.domain.tracking.Wind;
 
 public abstract class AbstractRaceChangeListener implements RaceChangeListener {
 
     @Override
-    public void statusChanged(LifecycleState newStatus) {}
+    public void statusChanged(TrackedRaceStatus newStatus) {}
 
     @Override
     public void windSourcesToExcludeChanged(Iterable<? extends WindSource> windSourcesToExclude) {

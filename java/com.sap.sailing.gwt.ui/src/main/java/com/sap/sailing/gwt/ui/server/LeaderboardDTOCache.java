@@ -24,7 +24,6 @@ import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnListener;
 import com.sap.sailing.domain.base.Waypoint;
-import com.sap.sailing.domain.common.LifecycleState;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.TimePoint;
@@ -40,6 +39,7 @@ import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceChangeListener;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.TrackedRaceStatus;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
 
@@ -105,7 +105,7 @@ public class LeaderboardDTOCache {
         }
 
         @Override
-        public void statusChanged(LifecycleState newStatus) {
+        public void statusChanged(TrackedRaceStatus newStatus) {
             removeFromCache(leaderboard);
         }
 

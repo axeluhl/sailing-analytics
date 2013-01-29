@@ -445,7 +445,7 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public DynamicTrackedRace createRaceDefinitionAndTrackedRace(TrackedRegatta trackedRegatta,
+    public DynamicTrackedRace getOrCreateRaceDefinitionAndTrackedRace(TrackedRegatta trackedRegatta,
             Race race, Course course, WindStore windStore, long delayToLiveInMillis, long millisecondsOverWhichToAverageWind,
             DynamicRaceDefinitionSet raceDefinitionSetToUpdate) {
         synchronized (raceCache) {

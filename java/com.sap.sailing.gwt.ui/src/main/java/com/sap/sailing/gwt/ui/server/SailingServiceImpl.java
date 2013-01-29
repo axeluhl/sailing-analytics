@@ -70,7 +70,6 @@ import com.sap.sailing.domain.common.CountryCode;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LegType;
-import com.sap.sailing.domain.common.LifecycleState;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindError;
@@ -84,7 +83,6 @@ import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.RegattaScoreCorrections;
-import com.sap.sailing.domain.common.TrackedRaceState;
 import com.sap.sailing.domain.common.RegattaScoreCorrections.ScoreCorrectionForCompetitorInRace;
 import com.sap.sailing.domain.common.RegattaScoreCorrections.ScoreCorrectionsForRace;
 import com.sap.sailing.domain.common.ScoreCorrectionProvider;
@@ -131,6 +129,7 @@ import com.sap.sailing.domain.tracking.RacesHandle;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.TrackedRaceStatus;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
@@ -759,9 +758,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         }
 
         @Override
-        public void statusChanged(LifecycleState newStatus) {
+        public void statusChanged(TrackedRaceStatus newStatus) {
             // when the status changes away from LOADING, calculations may start or resume, making it necessary to clear the cache
-            // FIXME: Check newState if it really moved away from LOADING
             invalidateCacheAndRemoveThisListenerFromTrackedRace();
         }
 
@@ -1076,8 +1074,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 raceDTO.startOfRace = trackedRace.getStartOfRace() == null ? null : trackedRace.getStartOfRace().asDate();
                 raceDTO.endOfRace = trackedRace.getEndOfRace() == null ? null : trackedRace.getEndOfRace().asDate();
                 raceDTO.status = new RaceStatusDTO();
-                raceDTO.status.status = (TrackedRaceState)trackedRace.getLifecycle().getCurrentState();
-                raceDTO.status.loadingProgress = (Float)trackedRace.getLifecycle().getCurrentState().getProperty(TrackedRaceState.PROPERTY_LOADING_INDICATOR);
+                raceDTO.status.status = trackedRace.getStatus().getStatus();
+                raceDTO.status.loadingProgress = trackedRace.getStatus().getLoadingProgress();
             }
             raceDTO.boatClass = regatta.getBoatClass() == null ? null : regatta.getBoatClass().getName(); 
             result.add(raceDTO);

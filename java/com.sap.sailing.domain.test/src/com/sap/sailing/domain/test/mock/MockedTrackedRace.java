@@ -5,33 +5,30 @@ import java.util.List;
 import java.util.NavigableSet;
 
 import com.sap.sailing.domain.base.BoatClass;
-import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Mark;
+import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.RaceColumnListener;
-import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RegattaListener;
+import com.sap.sailing.domain.base.Leg;
+import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.Distance;
-import com.sap.sailing.domain.common.LifecycleState;
-import com.sap.sailing.domain.common.NoWindException;
-import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaIdentifier;
+import com.sap.sailing.domain.common.NoWindException;
+import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
-import com.sap.sailing.domain.lifecycle.Lifecycle;
-import com.sap.sailing.domain.lifecycle.impl.TrackedRaceLifecycle;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
-import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
+import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.Maneuver;
@@ -41,6 +38,7 @@ import com.sap.sailing.domain.tracking.RaceListener;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.TrackedRaceStatus;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
@@ -50,8 +48,6 @@ import com.sap.sailing.domain.tracking.impl.WindTrackImpl;
 public class MockedTrackedRace implements DynamicTrackedRace {
     private static final long serialVersionUID = 5827912985564121181L;
     private final WindTrack windTrack = new WindTrackImpl(/* millisecondsOverWhichToAverage */ 30000, /* useSpeed */ true, "TestWindTrack");
-    
-    private Lifecycle lifecycle = null;
     
     public WindTrack getWindTrack() {
         return windTrack;
@@ -714,22 +710,18 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
+    public TrackedRaceStatus getStatus() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public void setStatus(TrackedRaceStatus newStatus) {
+        // TODO Auto-generated method stub
+    }
+
+    @Override
     public void waitUntilNotLoading() {
         // TODO Auto-generated method stub
-    }
-
-    @Override
-    public Lifecycle getLifecycle() {
-        if (lifecycle == null) {
-            this.lifecycle = new TrackedRaceLifecycle(this);
-        }
-        
-        return this.lifecycle;
-    }
-
-    @Override
-    public void statusChanged(LifecycleState newState, LifecycleState oldState) {
-        // TODO Auto-generated method stub
-        
     }
 }

@@ -104,7 +104,7 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<Route, RouteDa
         } else {
             logger.log(Level.INFO, "Received course for non-existing race "+event.getC().getName()+". Creating RaceDefinition.");
             // create race definition and add to event
-            DynamicTrackedRace trackedRace = getDomainFactory().createRaceDefinitionAndTrackedRace(
+            DynamicTrackedRace trackedRace = getDomainFactory().getOrCreateRaceDefinitionAndTrackedRace(
                     getTrackedRegatta(), event.getC(), course, windStore, delayToLiveInMillis,
                     millisecondsOverWhichToAverageWind, raceDefinitionSetToUpdate);
             if (getSimulator() != null) {

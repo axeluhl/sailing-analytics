@@ -27,10 +27,9 @@ import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.Bearing;
-import com.sap.sailing.domain.common.LifecycleState;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.TrackedRaceState;
+import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
@@ -49,6 +48,7 @@ import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
+import com.sap.sailing.domain.tracking.impl.TrackedRaceStatusImpl;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
 
 import difflib.PatchFailedException;
@@ -309,9 +309,7 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter {
                         WindTrack.DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_WIND, 
                         /* time over which to average speed: */ race.getBoatClass().getApproximateManeuverDurationInMilliseconds(),
                         /* raceDefinitionSetToUpdate */ null);
-        LifecycleState state = TrackedRaceState.LOADING_STORED_DATA;
-        state.updateProperty(TrackedRaceState.PROPERTY_LOADING_INDICATOR, 0);
-        trackedRace.getLifecycle().performTransitionTo(state);
+        trackedRace.setStatus(new TrackedRaceStatusImpl(TrackedRaceStatusEnum.LOADING, 0));
         TimePoint bestStartTimeKnownSoFar = bestStartTimePerRaceID.get(currentRaceID);
         if (bestStartTimeKnownSoFar != null) {
             trackedRace.setStartTimeReceived(bestStartTimeKnownSoFar);
@@ -374,17 +372,21 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter {
     @Override
     public void progress(double progress) {
         DynamicTrackedRace trackedRace = trackedRacePerRaceID.get(currentRaceID);
-        LifecycleState state = TrackedRaceState.LOADING_STORED_DATA;
-        state.updateProperty(TrackedRaceState.PROPERTY_LOADING_INDICATOR, progress);
-        trackedRace.getLifecycle().performTransitionTo(state);
+        if (trackedRace != null) {
+            final TrackedRaceStatusEnum newStatus;
+            if (progress == 1.0) {
+                newStatus = TrackedRaceStatusEnum.FINISHED;
+            } else {
+                newStatus = TrackedRaceStatusEnum.LOADING;
+            }
+            trackedRace.setStatus(new TrackedRaceStatusImpl(newStatus, progress));
+        }
     }
 
     @Override
     public void eot() {
         for (DynamicTrackedRace trackedRace : getTrackedRaces()) {
-            LifecycleState state = TrackedRaceState.FINISHED;
-            state.updateProperty(TrackedRaceState.PROPERTY_LOADING_INDICATOR, 1.0);
-            trackedRace.getLifecycle().performTransitionTo(state);
+            trackedRace.setStatus(new TrackedRaceStatusImpl(TrackedRaceStatusEnum.FINISHED, 1.0));
         }
     }
 }
