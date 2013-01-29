@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -75,21 +74,24 @@ public class TrackedRacesListComposite extends AbstractTrackedRacesListComposite
         });
     }
 
-    private void removeAndUntrackRace(final RaceDTO race) {
-        final RegattaNameAndRaceName regattaNameAndRaceName = (RegattaNameAndRaceName) race.getRaceIdentifier();
-        sailingService.removeAndUntrackRace(regattaNameAndRaceName,
+    private void removeAndUntrackRaces(final Iterable<RaceDTO> races) {
+        final List<RegattaNameAndRaceName> regattaNamesAndRaceNames = new ArrayList<RegattaNameAndRaceName>();
+        for (RaceDTO race : races) {
+            regattaNamesAndRaceNames.add((RegattaNameAndRaceName) race.getRaceIdentifier());
+        }
+        sailingService.removeAndUntrackRaces(regattaNamesAndRaceNames,
                 new AsyncCallback<Void>() {
                     @Override
                     public void onFailure(Throwable caught) {
-                        errorReporter.reportError("Exception trying to stop tracking race " + race.name + "in regatta "
-                                + race.getRegattaName() + ": " + caught.getMessage());
+                        errorReporter.reportError("Exception trying to remove races " + regattaNamesAndRaceNames +
+                                ": " + caught.getMessage());
                     }
 
                     @Override
                     public void onSuccess(Void result) {
                         regattaRefresher.fillRegattas();
                         for (TrackedRaceChangedListener listener : raceIsTrackedRaceChangeListener) {
-                            listener.changeTrackingRace(Collections.singleton(regattaNameAndRaceName), false);
+                            listener.changeTrackingRace(regattaNamesAndRaceNames, false);
                         }
                     }
                 });
@@ -102,9 +104,7 @@ public class TrackedRacesListComposite extends AbstractTrackedRacesListComposite
         btnRemoveRace.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                for (RaceDTO selectedRace : getSelectedRaces()) {
-                    removeAndUntrackRace(selectedRace);
-                }
+                removeAndUntrackRaces(getSelectedRaces());
             }
         });
         btnRemoveRace.setEnabled(false);

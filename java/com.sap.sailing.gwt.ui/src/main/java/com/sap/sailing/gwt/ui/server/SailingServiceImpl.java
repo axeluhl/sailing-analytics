@@ -1189,8 +1189,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
     
     @Override
-    public void removeAndUntrackRace(RegattaAndRaceIdentifier regattatAndRaceidentifier) {
-        getService().apply(new RemoveAndUntrackRace(regattatAndRaceidentifier));
+    public void removeAndUntrackRaces(Iterable<RegattaAndRaceIdentifier> regattaAndRaceIdentifiers) {
+        for (RegattaAndRaceIdentifier regattaAndRaceIdentifier : regattaAndRaceIdentifiers) {
+            getService().apply(new RemoveAndUntrackRace(regattaAndRaceIdentifier));
+        }
     }
     
     /**
