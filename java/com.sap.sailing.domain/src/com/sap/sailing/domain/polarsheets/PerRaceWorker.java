@@ -46,6 +46,7 @@ public class PerRaceWorker implements Runnable {
             @Override
             public void run() {
                 GPSFixTrack<Competitor, GPSFixMoving> track = race.getTrack(competitor);
+                track.lockForRead();
                 Iterator<GPSFixMoving> fixesIterator = track.getFixesIterator(startTime, true);
                 // TODO maneuver exclusion
                 // List<Maneuver> maneuvers = race.getManeuvers(competitor, startTime, endTime, false);
@@ -70,6 +71,8 @@ public class PerRaceWorker implements Runnable {
 
                     polarSheetGenerationWorker.addPolarData(Math.round(angleToWind), normalizedSpeed);
                 }
+                
+                track.unlockAfterRead();
             }
         };
 

@@ -42,18 +42,24 @@ public class PolarSheetGenerationWorker {
     }
 
     public void addPolarData(long round, double normalizedSpeed) {
-        polarData.get(round).add(normalizedSpeed);
+        if (round >= 0 && round < 360) {
+            polarData.get((int) round).add(normalizedSpeed);
+        }
     }
 
     public Map<Integer, Double> getPolarData() {
         Map<Integer, Double> averagedPolarData = new HashMap<Integer, Double>();
         for (Entry<Integer, List<Double>> entry : polarData.entrySet()) {
-            double sum = 0;
-            for (Double singleData : entry.getValue()) {
-                sum = sum + singleData;
+            if (entry.getValue().size() < 1) {
+                averagedPolarData.put(entry.getKey(), new Double(0));
+            } else {
+                double sum = 0;
+                for (Double singleData : entry.getValue()) {
+                    sum = sum + singleData;
+                }
+                double average = sum / entry.getValue().size();
+                averagedPolarData.put(entry.getKey(), average);
             }
-            double average = sum / entry.getValue().size();
-            averagedPolarData.put(entry.getKey(), average);
         }
 
         return averagedPolarData;

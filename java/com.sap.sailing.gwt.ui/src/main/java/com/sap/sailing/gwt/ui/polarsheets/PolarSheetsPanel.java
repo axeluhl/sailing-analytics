@@ -1,14 +1,17 @@
 package com.sap.sailing.gwt.ui.polarsheets;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.sap.sailing.domain.common.PolarSheetsData;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
@@ -90,20 +93,51 @@ public class PolarSheetsPanel extends FormPanel implements RaceSelectionChangeLi
     }
 
     protected void startPolarSheetGeneration() {
-        sailingService.generatePolarSheetForRaces(selectedRaces, new AsyncCallback<String>() {
+        //List conversion, to make List serializable
+        List<RegattaAndRaceIdentifier> selectedRacesInArrayList = new ArrayList<RegattaAndRaceIdentifier>();
+        selectedRacesInArrayList.addAll(selectedRaces);
+        sailingService.generatePolarSheetForRaces(selectedRacesInArrayList, new AsyncCallback<String>() {
 
             @Override
             public void onSuccess(String result) {
-                // TODO Auto-generated method stub
-
+                startPullingResults(result);
             }
 
             @Override
             public void onFailure(Throwable caught) {
-                // TODO Auto-generated method stub
-
+                errorReporter.reportError(caught.getLocalizedMessage());
             }
         });
+    }
+
+    protected void startPullingResults(final String id) {
+
+        sailingService.getPolarSheetsGenerationResults(id, new AsyncCallback<PolarSheetsData>() {
+
+            @Override
+            public void onSuccess(PolarSheetsData result) {
+                chartPanel.setData(result.getData(), id);
+                if (!result.isComplete()) {
+                    Timer timer = new Timer() {
+                        
+                        @Override
+                        public void run() {
+                            startPullingResults(id);
+                        }
+                    };
+                    
+                    timer.schedule(500);
+                    
+                }
+            }
+
+            @Override
+            public void onFailure(Throwable caught) {
+                // TODO Exception handling
+            }
+
+        });
+
     }
 
     @Override

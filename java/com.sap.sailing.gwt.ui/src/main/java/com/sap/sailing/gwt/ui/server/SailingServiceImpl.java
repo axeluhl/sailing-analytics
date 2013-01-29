@@ -75,6 +75,7 @@ import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindError;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Placemark;
+import com.sap.sailing.domain.common.PolarSheetsData;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RaceFetcher;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -96,6 +97,7 @@ import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KilometersPerHourSpeedImpl;
 import com.sap.sailing.domain.common.impl.MeterDistance;
+import com.sap.sailing.domain.common.impl.PolarSheetsDataImpl;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
@@ -3218,5 +3220,24 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         polarSheetGenerationWorkers.put(id, genWorker);
         genWorker.startPolarSheetGeneration();
         return id;
+    }
+
+    @Override
+    public PolarSheetsData getPolarSheetsGenerationResults(String id) {
+        PolarSheetsData data = null;
+        if (polarSheetGenerationWorkers.containsKey(id)) {
+            PolarSheetGenerationWorker worker = polarSheetGenerationWorkers.get(id);
+            boolean complete = worker.isFinished();
+            Map<Integer,Double> rawData = worker.getPolarData();
+            data = new PolarSheetsDataImpl(rawData, complete);
+            if (complete) {
+                polarSheetGenerationWorkers.remove(id);
+            }
+        } else {
+            //TODO Exception handling
+        }
+        
+        return data;
+        
     }
 }

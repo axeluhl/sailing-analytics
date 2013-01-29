@@ -14,6 +14,7 @@ import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindException;
+import com.sap.sailing.domain.common.PolarSheetsData;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.ScoringSchemeType;
@@ -301,4 +302,6 @@ public interface SailingService extends RemoteService {
     void storeSwissTimingArchiveConfiguration(String swissTimingUrl);
 
     String generatePolarSheetForRaces(List<RegattaAndRaceIdentifier> selectedRaces);
+    
+    PolarSheetsData getPolarSheetsGenerationResults(String id);
 }

@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.polarsheets;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.moxieapps.gwt.highcharts.client.Chart;
@@ -18,6 +19,7 @@ public class PolarSheetsChartPanel extends SimplePanel {
         this.stringMessages = stringMessages;
         setSize("100%", "100%");
         chart = createPolarSheetChart();
+        seriesMap = new HashMap<String, Series>();
         setWidget(chart);
     }
 
@@ -28,7 +30,7 @@ public class PolarSheetsChartPanel extends SimplePanel {
         return polarSheetChart;
     }
 
-    public void newSeries(String name) {
+    private void newSeries(String name) {
         if (!seriesMap.containsKey(name)) {
             Number[] forEachDeg = initializeDataForNewSeries();
             Series newSeries = chart.createSeries().setPoints(forEachDeg);
@@ -45,7 +47,7 @@ public class PolarSheetsChartPanel extends SimplePanel {
         return forEachDeg;
     }
 
-    public void addDataToSeries(String seriesName, int deg, double value) {
+    private void addDataToSeries(String seriesName, int deg, double value) {
         if (seriesMap.containsKey(seriesName)) {
             Series series = seriesMap.get(seriesName);
             series.addPoint(deg, value);
@@ -63,6 +65,20 @@ public class PolarSheetsChartPanel extends SimplePanel {
     public void removeAllSeries() {
         chart.removeAllSeries();
         seriesMap.clear();
+    }
+
+    public void setData(Map<Integer, Double> data, String id) {
+        if (data == null) {
+            //TODO Exception handling
+            return;
+        }
+        if (!seriesMap.containsKey(id)) {
+            newSeries(id);
+        }
+        for (int i = 0; i < 360; i++) {
+            addDataToSeries(id, i, data.get(i));
+        }
+        chart.redraw();
     }
 
 }
