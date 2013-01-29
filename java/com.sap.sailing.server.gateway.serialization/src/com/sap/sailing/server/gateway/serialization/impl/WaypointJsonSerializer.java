@@ -12,7 +12,7 @@ public class WaypointJsonSerializer implements JsonSerializer<Waypoint> {
 	public static final String FIELD_PASSING_SIDE = "passingSide";
 	public static final String FIELD_CONTROL_POINT = "controlPoint";
 	
-	private JsonSerializer<ControlPoint> controlPointSerializer;
+	private final JsonSerializer<ControlPoint> controlPointSerializer;
 	
 	public WaypointJsonSerializer(JsonSerializer<ControlPoint> controlPointSerializer) {
 		this.controlPointSerializer = controlPointSerializer;

@@ -12,7 +12,7 @@ public class EventJsonSerializer implements JsonSerializer<Event> {
 	public static final String FIELD_PUBLICATION_URL = "publicationUrl";
 	public static final String FIELD_VENUE = "venue";
 	
-	private JsonSerializer<Venue> venueSerializer;
+	private final JsonSerializer<Venue> venueSerializer;
 	
 	public EventJsonSerializer(JsonSerializer<Venue> venueSerializer)
 	{
