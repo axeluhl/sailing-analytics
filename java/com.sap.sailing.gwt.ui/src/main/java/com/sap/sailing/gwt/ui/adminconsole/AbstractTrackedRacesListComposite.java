@@ -306,14 +306,15 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
 
         columnSortHandler.setComparator(raceStartColumn, new Comparator<RaceDTO>() {
             @Override
-            public int compare(RaceDTO t1, RaceDTO t2) {
-                if (t1.startOfRace != null && t2.startOfRace != null) {
+            public int compare(RaceDTO r1, RaceDTO r2) {
+                if (r1.startOfRace != null && r2.startOfRace != null) {
                     boolean ascending = isSortedAscending();
                     int val = -1;
-                    val = (t1.startOfRace.after(t2.startOfRace) && ascending) ? 1 : -1;
+                    val = (r1.startOfRace.after(r2.startOfRace) && ascending) ? 1 : -1;
                     return val;
                 }
-                return 0;
+                
+                return r1.startOfRace == null ? (r2.startOfRace == null ? 0 : -1) : 1;
             }
 
             private boolean isSortedAscending() {
@@ -388,7 +389,8 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
                     }
                     return new Integer(r1.status.status.ordinal()).compareTo(r2.status.status.ordinal());
                 }
-                return 0;
+                
+                return r1.status == null ? (r2.status == null ? 0 : -1) : 1;
             }
         });
 
@@ -404,7 +406,6 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
         raceLiveDelayColumn.setSortable(true);
         
         columnSortHandler.setComparator(raceLiveDelayColumn, new Comparator<RaceDTO>() {
-
             @Override
             public int compare(RaceDTO r1, RaceDTO r2) {
                 Long r1Delay = getDelay(r1);
@@ -412,7 +413,8 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
                 if (r1Delay != null && r2Delay != null) {
                     return r1Delay.compareTo(r2Delay);
                 }
-                return 0;
+                
+                return r1Delay == null ? (r2Delay == null ? 0 : -1) : 1;
             }
 
             private Long getDelay(RaceDTO race) {
