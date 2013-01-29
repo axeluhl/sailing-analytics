@@ -1077,7 +1077,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 raceDTO.endOfRace = trackedRace.getEndOfRace() == null ? null : trackedRace.getEndOfRace().asDate();
                 raceDTO.status = new RaceStatusDTO();
                 raceDTO.status.status = (TrackedRaceState)trackedRace.getLifecycle().getCurrentState();
-                raceDTO.status.loadingProgress = (Double)trackedRace.getLifecycle().getCurrentState().getProperty(TrackedRaceState.PROPERTY_LOADING_INDICATOR);
+                raceDTO.status.loadingProgress = (Float)trackedRace.getLifecycle().getCurrentState().getProperty(TrackedRaceState.PROPERTY_LOADING_INDICATOR);
             }
             raceDTO.boatClass = regatta.getBoatClass() == null ? null : regatta.getBoatClass().getName(); 
             result.add(raceDTO);
