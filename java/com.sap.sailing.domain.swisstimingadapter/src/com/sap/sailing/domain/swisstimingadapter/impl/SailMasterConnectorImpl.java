@@ -171,8 +171,10 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
         }
         idsOfTrackedRaces.add(raceID); // from this time on, the connector interprets messages for raceID
         if (messageLoader != null) {
+            notifyListenersStoredDataProgress(raceID, 0.0);
             List<SailMasterMessage> messages = messageLoader.loadRaceMessages(raceID);
             long maxSequenceNumber = -1;
+            int i = 0;
             for (SailMasterMessage message : messages) {
                 logger.fine("notifying loaded message "+message);
                 notifyListeners(message);
@@ -180,6 +182,7 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
                 if (message.getSequenceNumber() != null) {
                     maxSequenceNumber = message.getSequenceNumber();
                 }
+                notifyListenersStoredDataProgress(raceID, ((double) i)/(double) messages.size());
             }
             // now process the buffered messages one by one:
             SailMasterMessage bufferedMessage;
@@ -208,6 +211,7 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
                 }
             } while (raceSpecificMessageBuffers.containsKey(raceID));
         }
+        notifyListenersStoredDataProgress(raceID, 1.0);
     }
     
     @Override
@@ -322,6 +326,17 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
             break;
         default:
             // ignore all other messages because there are no notification patterns for those
+        }
+    }
+    
+    private void notifyListenersStoredDataProgress(String raceID, double progress) {
+        for (SailMasterListener listener : getGeneralAndRaceSpecificListeners(raceID)) {
+            try {
+                listener.storedDataProgress(raceID, progress);
+            } catch (Exception e) {
+                logger.info("Exception occurred trying to notify listener "+listener+" about progress "+progress);
+                logger.throwing(SailMasterConnectorImpl.class.getName(), "notifyStoredDataProgress", e);
+            }
         }
     }
 

@@ -35,7 +35,7 @@ import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.HasWelcomeWidget;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.URLFactory;
+import com.sap.sailing.gwt.ui.client.URLEncoder;
 import com.sap.sailing.gwt.ui.shared.FleetDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RaceColumnDTO;
@@ -190,7 +190,7 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
             
             if (leaderboardGroup.hasOverallLeaderboard()) {
                 String debugParam = Window.Location.getParameter("gwt.codesvr");
-                String link = URLFactory.INSTANCE.encode("/gwt/Leaderboard.html?name=" + leaderboardGroup.name+" "+LeaderboardNameConstants.OVERALL
+                String link = URLEncoder.encode("/gwt/Leaderboard.html?name=" + leaderboardGroup.name+" "+LeaderboardNameConstants.OVERALL
                         + (showRaceDetails ? "&showRaceDetails=true" : "")
                         + (isEmbedded ? "&embedded=true" : "")
                         + "&displayName=" + stringMessages.overallStandings() 
@@ -225,7 +225,7 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
             @Override
             public SafeHtml getValue(StrippedLeaderboardDTO leaderboard) {
                 String debugParam = Window.Location.getParameter("gwt.codesvr");
-                String link = URLFactory.INSTANCE.encode("/gwt/Leaderboard.html?name=" + leaderboard.name
+                String link = URLEncoder.encode("/gwt/Leaderboard.html?name=" + leaderboard.name
                         + (showRaceDetails ? "&showRaceDetails=true" : "")
                         + (isEmbedded ? "&embedded=true" : "")
                         + "&leaderboardGroupName=" + leaderboardGroup.name + "&root=" + root
@@ -359,7 +359,7 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
         String debugParam = Window.Location.getParameter("gwt.codesvr");
         if (race != null) {
             RegattaAndRaceIdentifier raceIdentifier = race.getRaceIdentifier();
-            String link = URLFactory.INSTANCE.encode("/gwt/RaceBoard.html?leaderboardName=" + leaderboardName
+            String link = URLEncoder.encode("/gwt/RaceBoard.html?leaderboardName=" + leaderboardName
                     + "&raceName=" + raceIdentifier.getRaceName() + "&root=" + root + raceIdentifier.getRaceName()
                     + "&regattaName=" + raceIdentifier.getRegattaName() + "&leaderboardGroupName=" + leaderboardGroup.name);
             if (debugParam != null && !debugParam.isEmpty()) {
