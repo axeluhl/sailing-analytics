@@ -7,6 +7,15 @@ import com.sap.sailing.server.gateway.deserialization.JsonDeserializationExcepti
 
 public class Helpers {
 	
+	public static JSONArray toJSONArraySafe(Object object)
+			throws JsonDeserializationException {
+		if (object instanceof JSONArray) {
+			return (JSONArray) object;
+		}
+		throw new JsonDeserializationException(
+				String.format("Expected a JSONArray, got %s.", object.getClass().getName()));
+	}
+	
 	public static JSONObject toJSONObjectSafe(Object object)
 			throws JsonDeserializationException {
 		if (object instanceof JSONObject) {
