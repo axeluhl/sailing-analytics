@@ -1,28 +1,35 @@
 package com.sap.sailing.gwt.ui.shared.racemap;
 
-import com.google.gwt.maps.client.overlay.Icon;
+import com.google.gwt.maps.client.geom.Point;
+import com.google.gwt.resources.client.ImageResource;
 import com.sap.sailing.domain.common.MarkType;
 
 /**
- * A descriptor class for display properties of a mark icon.
+ * A descriptor class for display properties of a mark image.
  */
-public class MarkIconDescriptor {
-    private final Icon icon;
+public class MarkImageDescriptor {
+    private final ImageResource imgageResource;
     private final String color;
     private final String shape;
     private final String pattern;
     private final MarkType type;
+    private final Point anchorPoint;
 
-    public MarkIconDescriptor(Icon icon, MarkType type, String color, String shape, String pattern) {
-        this.icon = icon;
+    public MarkImageDescriptor(final ImageResource imgageResource, final Point anchorPoint, MarkType type, String color, String shape, String pattern) {
+        this.imgageResource = imgageResource;
+        this.anchorPoint = anchorPoint;
         this.type = type;
         this.color = color;
         this.shape = shape;
         this.pattern = pattern;
     }
 
-    public Icon getIcon() {
-        return icon;
+    public ImageResource getImgageResource() {
+        return imgageResource;
+    }
+
+    public Point getAnchorPoint() {
+        return anchorPoint;
     }
 
     public String getColor() {

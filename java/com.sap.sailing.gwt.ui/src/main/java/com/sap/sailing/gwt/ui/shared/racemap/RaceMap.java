@@ -29,13 +29,11 @@ import com.google.gwt.maps.client.control.ScaleControl;
 import com.google.gwt.maps.client.event.MapDragEndHandler;
 import com.google.gwt.maps.client.event.MapMouseMoveHandler;
 import com.google.gwt.maps.client.event.MapZoomEndHandler;
-import com.google.gwt.maps.client.event.MarkerClickHandler;
 import com.google.gwt.maps.client.event.PolylineClickHandler;
 import com.google.gwt.maps.client.event.PolylineMouseOutHandler;
 import com.google.gwt.maps.client.event.PolylineMouseOverHandler;
 import com.google.gwt.maps.client.geom.LatLng;
 import com.google.gwt.maps.client.geom.LatLngBounds;
-import com.google.gwt.maps.client.overlay.Icon;
 import com.google.gwt.maps.client.overlay.Marker;
 import com.google.gwt.maps.client.overlay.MarkerOptions;
 import com.google.gwt.maps.client.overlay.Polyline;
@@ -158,9 +156,12 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
      * Map overlays with html5 canvas used to display wind sensors
      */
     private final Map<WindSource, WindSensorOverlay> windSensorOverlays;
-    
-    private final Map<String, Marker> courseMarkMarkers;
-    
+
+    /**
+     * Map overlays with html5 canvas used to display course marks including buoy zones
+     */
+    private final Map<String, CourseMarkOverlay> courseMarkOverlays;
+
     private final Map<String, MarkDTO> markDTOs;
 
     /**
@@ -246,11 +247,11 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         tails = new HashMap<CompetitorDTO, Polyline>();
         firstShownFix = new HashMap<CompetitorDTO, Integer>();
         lastShownFix = new HashMap<CompetitorDTO, Integer>();
-        courseMarkMarkers = new HashMap<String, Marker>();
         markDTOs = new HashMap<String, MarkDTO>();
         boatCanvasOverlays = new HashMap<CompetitorDTO, BoatCanvasOverlay>();
         competitorInfoOverlays = new HashMap<CompetitorDTO, CompetitorInfoOverlay>();
         windSensorOverlays = new HashMap<WindSource, WindSensorOverlay>();
+        courseMarkOverlays = new HashMap<String, CourseMarkOverlay>();
         fixes = new HashMap<CompetitorDTO, List<GPSFixDTO>>();
         this.competitorSelection = competitorSelection;
         competitorSelection.addCompetitorSelectionChangeListener(this);
@@ -546,27 +547,56 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         }
     }
 
+//    protected void showCourseMarksOnMap(CourseDTO courseDTO) {
+//        if (map != null && courseDTO != null) {
+//            Map<String, MarkDTO> toRemove = new HashMap<String, MarkDTO>(markDTOs);
+//            if (courseDTO.marks != null) {
+//                for (MarkDTO markDTO : courseDTO.marks) {
+//                    Marker markMarker = courseMarkMarkers.get(markDTO.name);
+//                    if (markMarker == null) {
+//                        markMarker = createCourseMarkMarker(markDTO);
+//                        courseMarkMarkers.put(markDTO.name, markMarker);
+//                        markDTOs.put(markDTO.name, markDTO);
+//                        map.addOverlay(markMarker);
+//                    } else {
+//                        markMarker.setLatLng(LatLng.newInstance(markDTO.position.latDeg, markDTO.position.lngDeg));
+//                        toRemove.remove(markDTO.name);
+//                    }
+//                }
+//                for (String toRemoveMarkName : toRemove.keySet()) {
+//                    Marker marker = courseMarkMarkers.remove(toRemoveMarkName);
+//                    map.removeOverlay(marker);
+//                    markDTOs.remove(toRemoveMarkName);
+//                }
+//            }
+//        }
+//    }
+
     protected void showCourseMarksOnMap(CourseDTO courseDTO) {
         if (map != null && courseDTO != null) {
-            Map<String, MarkDTO> toRemove = new HashMap<String, MarkDTO>(markDTOs);
+            Map<String, CourseMarkOverlay> toRemoveCourseMarks = new HashMap<String, CourseMarkOverlay>(courseMarkOverlays);
             if (courseDTO.marks != null) {
                 for (MarkDTO markDTO : courseDTO.marks) {
-                    Marker markMarker = courseMarkMarkers.get(markDTO.name);
-                    if (markMarker == null) {
-                        markMarker = createCourseMarkMarker(markDTO);
-                        courseMarkMarkers.put(markDTO.name, markMarker);
+                    CourseMarkOverlay courseMarkOverlay = courseMarkOverlays.get(markDTO.name);
+                    if (courseMarkOverlay == null) {
+                        courseMarkOverlay = createCourseMarkOverlay(markDTO);
+                        courseMarkOverlay.setShowBuoyZone(settings.getHelpLinesSettings().isVisible(HelpLineTypes.BUOYZONE));
+                        courseMarkOverlay.setBuoyZoneRadiusInMeter(settings.getBuoyZoneRadiusInMeters());
+                        courseMarkOverlays.put(markDTO.name, courseMarkOverlay);
                         markDTOs.put(markDTO.name, markDTO);
-                        map.addOverlay(markMarker);
+                        map.addOverlay(courseMarkOverlay);
                     } else {
-                        markMarker.setLatLng(LatLng.newInstance(markDTO.position.latDeg, markDTO.position.lngDeg));
-                        toRemove.remove(markDTO.name);
+                        courseMarkOverlay.setMarkPosition(markDTO.position);
+                        courseMarkOverlay.setShowBuoyZone(settings.getHelpLinesSettings().isVisible(HelpLineTypes.BUOYZONE));
+                        courseMarkOverlay.setBuoyZoneRadiusInMeter(settings.getBuoyZoneRadiusInMeters());
+                        courseMarkOverlay.redraw(true);
+                        toRemoveCourseMarks.remove(markDTO.name);
                     }
                 }
-                for (String toRemoveMarkName : toRemove.keySet()) {
-                    Marker marker = courseMarkMarkers.remove(toRemoveMarkName);
-                    map.removeOverlay(marker);
-                    markDTOs.remove(toRemoveMarkName);
-                }
+            }
+            for (String toRemoveMarkName : toRemoveCourseMarks.keySet()) {
+                CourseMarkOverlay overlay = courseMarkOverlays.remove(toRemoveMarkName);
+                map.removeOverlay(overlay);
             }
         }
     }
@@ -964,24 +994,36 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         return !settings.isShowOnlySelectedCompetitors() && competitorSelection.isSelected(competitorDTO);
     }
 
-    protected Marker createCourseMarkMarker(final MarkDTO markDTO) {
-        MarkerOptions options = MarkerOptions.newInstance();
-        final Icon markIcon = raceMapImageManager.resolveMarkIcon(markDTO.type, markDTO.color, markDTO.shape, markDTO.pattern);
-        if (markIcon != null) {
-            options.setIcon(markIcon);
-        }
-        options.setTitle(markDTO.name);
-        final Marker courseMarkMarker = new Marker(LatLng.newInstance(markDTO.position.latDeg, markDTO.position.lngDeg),
-                options);
-        courseMarkMarker.addMarkerClickHandler(new MarkerClickHandler() {
+    protected CourseMarkOverlay createCourseMarkOverlay(final MarkDTO markDTO) {
+        final CourseMarkOverlay courseMarkOverlay = new CourseMarkOverlay(raceMapImageManager, markDTO);
+        courseMarkOverlay.getCanvas().addClickHandler(new ClickHandler() {
             @Override
-            public void onClick(MarkerClickEvent event) {
-                LatLng latlng = courseMarkMarker.getLatLng();
+            public void onClick(ClickEvent event) {
+                LatLng latlng = courseMarkOverlay.getMarkPosition();
                 showMarkInfoWindow(markDTO, latlng);
             }
         });
-        return courseMarkMarker;
+        return courseMarkOverlay;
     }
+
+//    protected Marker createCourseMarkMarker(final MarkDTO markDTO) {
+//        MarkerOptions options = MarkerOptions.newInstance();
+//        final Icon markIcon = raceMapImageManager.resolveMarkIcon(markDTO.type, markDTO.color, markDTO.shape, markDTO.pattern);
+//        if (markIcon != null) {
+//            options.setIcon(markIcon);
+//        }
+//        options.setTitle(markDTO.name);
+//        final Marker courseMarkMarker = new Marker(LatLng.newInstance(markDTO.position.latDeg, markDTO.position.lngDeg),
+//                options);
+//        courseMarkMarker.addMarkerClickHandler(new MarkerClickHandler() {
+//            @Override
+//            public void onClick(MarkerClickEvent event) {
+//                LatLng latlng = courseMarkMarker.getLatLng();
+//                showMarkInfoWindow(markDTO, latlng);
+//            }
+//        });
+//        return courseMarkMarker;
+//    }
 
     private CompetitorInfoOverlay createCompetitorInfoOverlay(final CompetitorDTO competitorDTO) {
         return new CompetitorInfoOverlay(competitorDTO, raceMapImageManager);
@@ -1627,6 +1669,10 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         }
         if (newSettings.getTailLengthInMilliseconds() != settings.getTailLengthInMilliseconds()) {
             settings.setTailLengthInMilliseconds(newSettings.getTailLengthInMilliseconds());
+            requiredRedraw = true;
+        }
+        if (newSettings.getBuoyZoneRadiusInMeters() != settings.getBuoyZoneRadiusInMeters()) {
+            settings.setBuoyZoneRadiusInMeters(newSettings.getBuoyZoneRadiusInMeters());
             requiredRedraw = true;
         }
         if (newSettings.isShowOnlySelectedCompetitors() != settings.isShowOnlySelectedCompetitors()) {
