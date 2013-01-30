@@ -6,6 +6,10 @@ public interface PolarSheetsData extends Serializable {
     
     Number[] getValues();
     
+    int getDataCount();
+    
     boolean isComplete();
+    
+    Integer[] getDataCountPerAngle();
 
 }

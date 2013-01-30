@@ -10,6 +10,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.domain.common.PolarSheetsData;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -36,6 +37,9 @@ public class PolarSheetsPanel extends FormPanel implements RaceSelectionChangeLi
     private List<RegattaAndRaceIdentifier> selectedRaces;
     private PolarSheetsChartPanel chartPanel;
 
+    private Label polarSheetsGenerationLabel;
+    private Label dataCountLabel;
+
     public PolarSheetsPanel(SailingServiceAsync sailingService, ErrorReporter errorReporter,
             StringMessages stringMessages, PolarSheetsEntryPoint polarSheetsEntryPoint) {
         this.polarSheetsEntryPoint = polarSheetsEntryPoint;
@@ -49,9 +53,18 @@ public class PolarSheetsPanel extends FormPanel implements RaceSelectionChangeLi
         mainPanel.setSize("100%", "100%");
         setWidget(mainPanel);
         HorizontalPanel splitPanel = createSplitPanel();
-        addFilteredTrackedRacesList(splitPanel);
+        VerticalPanel leftPanel = addFilteredTrackedRacesList(splitPanel);
+        polarSheetsGenerationLabel = createPolarSheetGenerationStatusLabel();
+        leftPanel.add(polarSheetsGenerationLabel);
+        dataCountLabel = new Label();
+        leftPanel.add(dataCountLabel);
         addPolarSheetsChartPanel(splitPanel);
         mainPanel.add(splitPanel);
+    }
+
+    private Label createPolarSheetGenerationStatusLabel() {
+        Label polarSheetsGenerationStatusLabel = new Label();
+        return polarSheetsGenerationStatusLabel;
     }
 
     private void addPolarSheetsChartPanel(HorizontalPanel splitPanel) {
@@ -66,7 +79,7 @@ public class PolarSheetsPanel extends FormPanel implements RaceSelectionChangeLi
         return splitPanel;
     }
 
-    private void addFilteredTrackedRacesList(HorizontalPanel splitPanel) {
+    private VerticalPanel addFilteredTrackedRacesList(HorizontalPanel splitPanel) {
         VerticalPanel trackedRacesPanel = new VerticalPanel();
         trackedRacesPanel.setWidth("100%");
 
@@ -75,6 +88,7 @@ public class PolarSheetsPanel extends FormPanel implements RaceSelectionChangeLi
 
         splitPanel.add(trackedRacesPanel);
         splitPanel.setCellWidth(trackedRacesPanel, "50%");
+        return trackedRacesPanel;
     }
 
     private void createPolarSheetsTrackedRacesList() {
@@ -93,13 +107,15 @@ public class PolarSheetsPanel extends FormPanel implements RaceSelectionChangeLi
     }
 
     protected void startPolarSheetGeneration() {
-        //List conversion, to make List serializable
+        // List conversion, to make List serializable
         List<RegattaAndRaceIdentifier> selectedRacesInArrayList = new ArrayList<RegattaAndRaceIdentifier>();
         selectedRacesInArrayList.addAll(selectedRaces);
         sailingService.generatePolarSheetForRaces(selectedRacesInArrayList, new AsyncCallback<String>() {
 
             @Override
             public void onSuccess(String result) {
+                // TODO string messages
+                setCompletionLabel("Generating...");
                 startPullingResults(result);
             }
 
@@ -116,28 +132,38 @@ public class PolarSheetsPanel extends FormPanel implements RaceSelectionChangeLi
 
             @Override
             public void onSuccess(PolarSheetsData result) {
-                chartPanel.setData(result.getValues(), id);
+                // TODO string messages
+                setCompletionLabel("Generating...");
+                dataCountLabel.setText("DataCount: " + result.getDataCount());
+                chartPanel.setData(id, result);
                 if (!result.isComplete()) {
                     Timer timer = new Timer() {
-                        
+
                         @Override
                         public void run() {
                             startPullingResults(id);
                         }
                     };
-                    
+
                     timer.schedule(1500);
-                    
+
+                } else {
+                    // TODO string messages
+                    setCompletionLabel("Generation finished!");
                 }
             }
 
             @Override
             public void onFailure(Throwable caught) {
-                // TODO Exception handling
+                errorReporter.reportError(caught.getLocalizedMessage());
             }
 
         });
 
+    }
+
+    protected void setCompletionLabel(String string) {
+        polarSheetsGenerationLabel.setText(string);
     }
 
     @Override

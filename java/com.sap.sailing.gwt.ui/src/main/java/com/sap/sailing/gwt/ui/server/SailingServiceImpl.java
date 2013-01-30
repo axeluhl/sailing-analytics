@@ -97,7 +97,6 @@ import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KilometersPerHourSpeedImpl;
 import com.sap.sailing.domain.common.impl.MeterDistance;
-import com.sap.sailing.domain.common.impl.PolarSheetsDataImpl;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
@@ -3083,10 +3082,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         PolarSheetsData data = null;
         if (polarSheetGenerationWorkers.containsKey(id)) {
             PolarSheetGenerationWorker worker = polarSheetGenerationWorkers.get(id);
-            boolean complete = worker.isFinished();
-            Number[] values = worker.getPolarData();
-            data = new PolarSheetsDataImpl(values, complete);
-            if (complete) {
+            data = worker.getPolarData();
+            if (data.isComplete()) {
                 polarSheetGenerationWorkers.remove(id);
             }
         } else {

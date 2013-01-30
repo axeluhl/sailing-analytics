@@ -92,13 +92,15 @@ public class PerRaceWorker implements Runnable {
                 GPSFixTrack<Competitor, GPSFixMoving> track = race.getTrack(competitor);
                 track.lockForRead();
                 Iterator<GPSFixMoving> fixesIterator = track.getFixesIterator(startTime, true);
-                // TODO maneuver exclusion
-                // List<Maneuver> maneuvers = race.getManeuvers(competitor, startTime, endTime, false);
 
                 while (fixesIterator.hasNext()) {
                     GPSFixMoving fix = fixesIterator.next();
                     if (fix.getTimePoint().after(endTime)) {
                         break;
+                    }
+                    
+                    if (track.hasDirectionChange(fix.getTimePoint(), race.getRace().getBoatClass().getManeuverDegreeAngleThreshold())) {
+                        continue;
                     }
 
                     SpeedWithBearing speedWithBearing = fix.getSpeed();
@@ -111,7 +113,7 @@ public class PerRaceWorker implements Runnable {
 
                     // TODO Figure out if this normalizing is okay concerning different windspeeds and bearings
                     double normalizedSpeed = speed / windSpeed;
-                    double angleToWind = 180 + bearing.getDifferenceTo(windBearing).getDegrees();
+                    double angleToWind = bearing.getDifferenceTo(windBearing).getDegrees();
 
                     polarSheetGenerationWorker.addPolarData(Math.round(angleToWind), normalizedSpeed);
                 }

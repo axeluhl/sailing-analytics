@@ -1,13 +1,20 @@
 package com.sap.sailing.gwt.ui.polarsheets;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.moxieapps.gwt.highcharts.client.Chart;
+import org.moxieapps.gwt.highcharts.client.Color;
+import org.moxieapps.gwt.highcharts.client.Point;
 import org.moxieapps.gwt.highcharts.client.Series;
 import org.moxieapps.gwt.highcharts.client.plotOptions.LinePlotOptions;
+import org.moxieapps.gwt.highcharts.client.plotOptions.Marker;
 
 import com.google.gwt.user.client.ui.SimplePanel;
+import com.sap.sailing.domain.common.PolarSheetsData;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
 public class PolarSheetsChartPanel extends SimplePanel {
@@ -25,7 +32,8 @@ public class PolarSheetsChartPanel extends SimplePanel {
     }
 
     private Chart createPolarSheetChart() {
-        Chart polarSheetChart = new Chart().setType(Series.Type.LINE).setLinePlotOptions(new LinePlotOptions().setLineWidth(1)).setZoomType(Chart.ZoomType.X_AND_Y)
+        Chart polarSheetChart = new Chart().setType(Series.Type.LINE)
+                .setLinePlotOptions(new LinePlotOptions().setLineWidth(1)).setZoomType(Chart.ZoomType.X_AND_Y)
                 .setPolar(true).setSize(700, 700);
         polarSheetChart.setChartTitleText(stringMessages.polarSheetChart());
         polarSheetChart.getYAxis().setMin(0);
@@ -49,11 +57,28 @@ public class PolarSheetsChartPanel extends SimplePanel {
         return forEachDeg;
     }
 
-    private void addValuesToSeries(String seriesId, Number[] values) {
+    private void addValuesToSeries(String seriesId, PolarSheetsData result) {
         if (seriesMap.containsKey(seriesId)) {
             Series series = seriesMap.get(seriesId);
-            series.setPoints(values, false);
+            series.setPoints(result.getValues(), false);
+            Point[] points = createPointsWithMarkerAlphaAccordingToDataCount(result);
+            series.setPoints(points);
         }
+    }
+
+    private Point[] createPointsWithMarkerAlphaAccordingToDataCount(PolarSheetsData result) {
+        Point[] points = new Point[360];
+        List<Integer> dataCountList = Arrays.asList(result.getDataCountPerAngle());
+        Integer max = Collections.max(dataCountList);
+        if (max > 0) {
+            for (int i = 0; i < 360; i++) {
+                points[i] = new Point(result.getValues()[i]);
+                double alpha = (double) dataCountList.get(i) / (double) max;
+                // TODO set to series color and change alpha
+                points[i].setMarker(new Marker().setFillColor(new Color(1, 1, 1, alpha)));
+            }
+        }
+        return points;
     }
 
     public void removeSeries(String seriesId) {
@@ -69,15 +94,15 @@ public class PolarSheetsChartPanel extends SimplePanel {
         seriesMap.clear();
     }
 
-    public void setData(Number[] values, String id) {
-        if (values == null) {
+    public void setData(String id, PolarSheetsData result) {
+        if (id == null) {
             // TODO Exception handling
             return;
         }
         if (!seriesMap.containsKey(id)) {
             newSeries(id);
         }
-        addValuesToSeries(id, values);
+        addValuesToSeries(id, result);
         chart.redraw();
     }
 

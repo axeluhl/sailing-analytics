@@ -10,12 +10,18 @@ public class PolarSheetsDataImpl implements PolarSheetsData {
     
     private boolean complete;
     
+    private int dataCount;
+
+    private Integer[] dataCountPerAngle;
+    
     //For GWT Serialization
     PolarSheetsDataImpl() {};
    
-    public PolarSheetsDataImpl(Number[] values, boolean complete) {
+    public PolarSheetsDataImpl(Number[] values, boolean complete, int dataCount, Integer[] dataCountPerAngle) {
         this.values = values;
         this.complete = complete;
+        this.dataCount = dataCount;
+        this.dataCountPerAngle = dataCountPerAngle;
     }
 
     @Override
@@ -26,6 +32,16 @@ public class PolarSheetsDataImpl implements PolarSheetsData {
     @Override
     public boolean isComplete() {
         return complete;
+    }
+
+    @Override
+    public int getDataCount() {
+        return dataCount;
+    }
+
+    @Override
+    public Integer[] getDataCountPerAngle() {
+        return dataCountPerAngle;
     }
 
 }

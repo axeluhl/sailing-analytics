@@ -5,6 +5,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.sap.sailing.domain.common.PolarSheetsData;
+import com.sap.sailing.domain.common.impl.PolarSheetsDataImpl;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
 public class PolarSheetGenerationWorker {
@@ -27,7 +29,7 @@ public class PolarSheetGenerationWorker {
 
     private List<List<Double>> initializePolarDataContainer() {
         List<List<Double>> container = new ArrayList<List<Double>>();
-        for (int i = 0; i < 181; i++) {
+        for (int i = 0; i < 360; i++) {
             container.add(new ArrayList<Double>());
         }
         return container;
@@ -43,18 +45,22 @@ public class PolarSheetGenerationWorker {
 
     public void addPolarData(long roundedAngle, double normalizedSpeed) {
         int angle = (int) roundedAngle;
-        if (angle > 180) {
-            angle = (360 - angle);
+        if (angle < 0) {
+            angle = (360 + angle);
         }
         polarData.get(angle).add(normalizedSpeed);
     }
 
-    public Number[] getPolarData() {
+    public PolarSheetsData getPolarData() {
         Number[] averagedPolarData = new Number[360];
-        for (int i = 0; i < 181; i++) {
+        Integer[] dataCountPerAngle = new Integer[360];
+        int dataCount = 0;
+        for (int i = 0; i < 360; i++) {
             // Avoid Concurrent modification, lock would slow things down
             Double[] values = polarData.get(i).toArray(new Double[polarData.get(i).size()]);
-            if (values.length < 20) {
+            dataCount = dataCount + values.length;
+            dataCountPerAngle[i] = values.length;
+            if (values.length < 1) {
                 averagedPolarData[i] = 0;
             } else {
                 double sum = 0;
@@ -67,24 +73,11 @@ public class PolarSheetGenerationWorker {
                 averagedPolarData[i] = average;
             }
         }
+        
+        PolarSheetsData data = new PolarSheetsDataImpl(averagedPolarData, finished, dataCount, dataCountPerAngle);
 
-        for (int i = 1; i < 180; i++) {
-            if (averagedPolarData[i].doubleValue() == 0) {
-                double next = 0;
-                int currentIndex = i;
-                while (next <= 0 && currentIndex < 181) {
-                    currentIndex++;
-                    if (averagedPolarData[currentIndex] != null) {
-                        next = averagedPolarData[currentIndex].doubleValue();
-                    }
-                }
-                averagedPolarData[i] = (averagedPolarData[i - 1].doubleValue() + next) / 2;
-            }
-
-            averagedPolarData[360 - i] = averagedPolarData[i];
-        }
-
-        return averagedPolarData;
+        
+        return data;
     }
 
     public void workerDone(PerRaceWorker worker) {
@@ -94,10 +87,6 @@ public class PolarSheetGenerationWorker {
                 finished = true;
             }
         }
-    }
-
-    public boolean isFinished() {
-        return finished;
     }
 
 }
