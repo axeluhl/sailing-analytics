@@ -10,6 +10,10 @@ public enum InMemoryDataStore implements DataStore {
 	INSTANCE;
 	
 	private HashMap<Serializable, Event> eventsById;
+	
+	private InMemoryDataStore() {
+		this.eventsById = new HashMap<Serializable, Event>();
+	}
 
 	public Collection<Event> getEvents() {
 		return eventsById.values();

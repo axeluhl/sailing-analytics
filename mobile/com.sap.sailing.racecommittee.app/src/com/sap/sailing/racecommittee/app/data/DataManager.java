@@ -53,7 +53,7 @@ public class DataManager {
 				URI.create("http://10.0.2.2:8888/sailingserver/rc/events"), 
 				parser, 
 				handler);
-		loader.startLoading();
+		loader.forceLoad();
 	}
 	
 	

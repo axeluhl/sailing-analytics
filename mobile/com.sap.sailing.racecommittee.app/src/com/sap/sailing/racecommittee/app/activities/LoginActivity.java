@@ -1,6 +1,7 @@
 package com.sap.sailing.racecommittee.app.activities;
 
 import java.io.Serializable;
+import java.util.Collection;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -16,10 +17,13 @@ import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.data.DataManager;
+import com.sap.sailing.racecommittee.app.data.InMemoryDataStore;
+import com.sap.sailing.racecommittee.app.data.clients.EventsLoadClient;
 import com.sap.sailing.racecommittee.app.fragments.list.NamedListFragment.ItemSelectedListener;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 
-public class LoginActivity extends TwoPaneActivity  {
+public class LoginActivity extends TwoPaneActivity implements EventsLoadClient  {
 	
 	private final static String TAG ="LoginActivity";
 	
@@ -107,6 +111,12 @@ public class LoginActivity extends TwoPaneActivity  {
 	}
 
 	private void addEventListFragment() {
+		
+		DataManager dataManager = new DataManager(
+				this, 
+				InMemoryDataStore.INSTANCE);
+		dataManager.getEvents(this);
+		
 		/*FragmentTransaction transaction = getFragmentManager().beginTransaction();
 		transaction.add(R.id.leftContainer, new EventListFragment());
 		transaction.setTransition(FragmentTransaction.TRANSIT_NONE);
@@ -188,6 +198,14 @@ public class LoginActivity extends TwoPaneActivity  {
 		/*Intent message = new Intent(this, RacingActivity.class);
 		message.putExtra(AppConstants.COURSE_AREA_UUID_KEY, course.getId());
 		fadeActivity(message);*/
+	}
+
+	public void onFailed(Exception reason) {
+		Toast.makeText(this, "FAIL!", Toast.LENGTH_LONG).show();
+	}
+
+	public void onEventsLoaded(Collection<Event> events) {
+		Toast.makeText(this, "SUCCESS!", Toast.LENGTH_LONG).show();
 	}
 
 }
