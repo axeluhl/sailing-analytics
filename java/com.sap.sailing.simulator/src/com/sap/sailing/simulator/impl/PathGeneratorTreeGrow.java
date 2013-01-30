@@ -51,11 +51,19 @@ public class PathGeneratorTreeGrow extends PathGeneratorBase {
         double hrz;
         String path;
 
-        @Override
+        /*@Override
+        // sort ascending by horizontal distance
         public int compareTo(PathCand other) {
             if (Math.abs(this.hrz) == Math.abs(other.hrz))
                 return 0;
             return (Math.abs(this.hrz) < Math.abs(other.hrz) ? -1 : +1);
+        }*/
+        @Override
+        // sort descending by height
+        public int compareTo(PathCand other) {
+            if (this.vrt == other.vrt)
+                return 0;
+            return (this.vrt > other.vrt ? -1 : +1);
         }
 
     }
