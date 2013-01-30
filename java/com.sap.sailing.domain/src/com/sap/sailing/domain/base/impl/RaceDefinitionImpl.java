@@ -23,6 +23,8 @@ public class RaceDefinitionImpl extends NamedImpl implements RaceDefinition {
 
     public RaceDefinitionImpl(String name, Course course, BoatClass boatClass, Iterable<? extends Competitor> competitors, Serializable id) {
         super(name);
+        assert name != null;
+        
         this.course = course;
         Set<Competitor> competitorsAsLinkedHashSet = new LinkedHashSet<Competitor>();
         for (Competitor competitor : competitors) {

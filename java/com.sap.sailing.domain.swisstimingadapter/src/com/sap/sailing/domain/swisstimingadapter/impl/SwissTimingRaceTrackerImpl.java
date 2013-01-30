@@ -21,6 +21,7 @@ import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.racecommittee.RaceCommitteeStore;
@@ -48,6 +49,7 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
+import com.sap.sailing.domain.tracking.impl.TrackedRaceStatusImpl;
 
 import difflib.PatchFailedException;
 
@@ -253,6 +255,22 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
             }
         }
 
+    }
+
+    @Override
+    public void storedDataProgress(String raceID, double progress) {
+        assert this.raceID.equals(raceID);
+        if (isTrackedRaceStillReachable()) {
+            final TrackedRaceStatusImpl newStatus;
+            if (progress == 0.0) {
+                newStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.PREPARED, 0.0);
+            } else if (progress == 1.0) {
+                newStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.TRACKING, progress);
+            } else {
+                newStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.LOADING, progress);
+            }
+            trackedRace.setStatus(newStatus);
+        }
     }
 
     @Override

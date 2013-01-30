@@ -373,7 +373,15 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter {
     @Override
     public void progress(double progress) {
         DynamicTrackedRace trackedRace = trackedRacePerRaceID.get(currentRaceID);
-        trackedRace.setStatus(new TrackedRaceStatusImpl(TrackedRaceStatusEnum.LOADING, progress));
+        if (trackedRace != null) {
+            final TrackedRaceStatusEnum newStatus;
+            if (progress == 1.0) {
+                newStatus = TrackedRaceStatusEnum.FINISHED;
+            } else {
+                newStatus = TrackedRaceStatusEnum.LOADING;
+            }
+            trackedRace.setStatus(new TrackedRaceStatusImpl(newStatus, progress));
+        }
     }
 
     @Override

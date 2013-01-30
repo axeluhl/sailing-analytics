@@ -21,4 +21,11 @@ public interface SailMasterListener {
     void receivedCourseConfiguration(String raceID, Course course);
     
     void receivedAvailableRaces(Iterable<Race> races);
+    
+    /**
+     * Announces the progress of data loaded from a local persistent store (as opposed to receiving it live from a
+     * SailMaster instance). 0.0 means no progress so far, 1.0 means loading from persistent store completed.
+     * @param raceID TODO
+     */
+    void storedDataProgress(String raceID, double progress);
 }
