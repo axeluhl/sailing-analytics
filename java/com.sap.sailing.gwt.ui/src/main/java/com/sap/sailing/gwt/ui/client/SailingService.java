@@ -286,3 +286,4 @@ public interface SailingService extends RemoteService {
     List<SwissTimingArchiveConfigurationDTO> getPreviousSwissTimingArchiveConfigurations();
 
     void storeSwissTimingArchiveConfiguration(String swissTimingUrl);
+}

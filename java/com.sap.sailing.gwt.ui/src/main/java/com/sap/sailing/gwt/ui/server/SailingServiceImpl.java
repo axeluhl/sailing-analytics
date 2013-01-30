@@ -1144,8 +1144,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             final RacesHandle raceHandle = getService().addTracTracRace(regattaToAddTo, new URL(rr.paramURL),
                     new URI(liveURI), new URI(storedURI), new MillisecondsTimePoint(rr.trackingStartTime),
                     new MillisecondsTimePoint(rr.trackingEndTime),
-                RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS, simulateWithStartTimeNow,
-                MongoRaceCommitteeStoreFactory.INSTANCE.getMongoRaceCommitteeStore(mongoObjectFactory, domainObjectFactory));
+                    MongoWindStoreFactory.INSTANCE.getMongoWindStore(mongoObjectFactory, domainObjectFactory),
+                    RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS, simulateWithStartTimeNow,
+                    MongoRaceCommitteeStoreFactory.INSTANCE.getMongoRaceCommitteeStore(mongoObjectFactory, domainObjectFactory));
             if (trackWind) {
                 new Thread("Wind tracking starter for race " + rr.regattaName + "/" + rr.name) {
                     public void run() {
@@ -2377,8 +2378,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         for (SwissTimingRaceRecordDTO rr : rrs) {
             final RacesHandle raceHandle = getService().addSwissTimingRace(regattaToAddTo, rr.ID, hostname, port,
                     canSendRequests,
-                RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS,
-                MongoRaceCommitteeStoreFactory.INSTANCE.getMongoRaceCommitteeStore(mongoObjectFactory, domainObjectFactory));
+                    MongoWindStoreFactory.INSTANCE.getMongoWindStore(mongoObjectFactory, domainObjectFactory),
+                    RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS,
+                    MongoRaceCommitteeStoreFactory.INSTANCE.getMongoRaceCommitteeStore(mongoObjectFactory, domainObjectFactory));
             if (trackWind) {
                 new Thread("Wind tracking starter for race " + rr.ID + "/" + rr.description) {
                     public void run() {
