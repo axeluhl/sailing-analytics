@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="welter_sap_gold">#fff0ab00</color>
+    <color name="welter_selection_top">#ff0090d5</color>
+    <color name="welter_selection_bottom">#ff0062a9</color>
+    <color name="welter_extralight_gray">#ffe6e6e6</color>
+    <color name="welter_extralight_gray_transparent">#eee6e6e6</color>
+    
+    <color name="welter_light_gray">#ffcccccc</color>
+    <color name="welter_light_gray_transparent">#eecccccc</color>
+    
+    <color name="welter_medium_gray">#ff999999</color>
+    <color name="welter_medium_darkgray">#ff808080</color>
+    <color name="welter_dark_gray">#ff666666</color>
+    <color name="welter_deep_gray">#ff333333</color>
+    <color name="welter_white">#ffffffff</color>
+    <color name="welter_offwhite">#fff3f3f3</color>
+    <color name="welter_medium_blue">#ff226ca9</color>
+    <color name="welter_black">#ff000000</color>
+    <color name="welter_title_bar_background">#323232</color>
+    
+    <color name="sapstore_background_gray">#FFD5D5D6</color>
+    <color name="sapstore_background_light_gray">#FFF3F3F3</color>
+    
+    <!-- 
+    <color name="tabMedium">#D6D6D7</color>
+	<color name="tabDark">#CBCBCC</color>
+    -->
+    <color name="tabMedium">#2B2B2B</color>
+	<color name="tabDark">#000000</color>
+	
+	<color name="tabTransparent">#10ffffff</color>
+	<color name="welter_red">#ffff0000</color>
+	<color name="welter_yellow">#ffffff00</color>
+	<color name="welter_green">#ff00ff00</color>
+	<color name="welter_blue">#ff0000ff</color>
+</resources>
