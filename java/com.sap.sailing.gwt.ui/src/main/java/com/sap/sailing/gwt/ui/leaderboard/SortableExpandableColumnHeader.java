@@ -11,12 +11,7 @@ import com.google.gwt.cell.client.HasCell;
 import com.google.gwt.cell.client.ImageCell;
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.cell.client.TextCell;
-import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.DivElement;
-import com.google.gwt.dom.client.Element;
-import com.google.gwt.dom.client.EventTarget;
-import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
@@ -124,45 +119,7 @@ public class SortableExpandableColumnHeader extends Header<SafeHtml> {
             }
         });
         
-        CompositeCell<SafeHtml> abc = new CompositeCell<SafeHtml>(cells) {
-            /**
-             * Redefining this method because when a table column is sorted, GWT wraps a div element
-             * around the column header. Subsequently, the div's index no longer corresponds with the
-             * cell indexes and a isOrHasChild doesn't make sense. We need to drill into the div's
-             * elements and skip the sort indicator
-             */
-            @Override
-            public void onBrowserEvent(Context context, Element parent, SafeHtml value, NativeEvent event,
-                    ValueUpdater<SafeHtml> valueUpdater) {
-                int index = 0;
-                EventTarget eventTarget = event.getEventTarget();
-                if (Element.is(eventTarget)) {
-                    Element target = eventTarget.cast();
-                    Element container = getContainerElement(parent);
-                    Element wrapper = container.getFirstChildElement();
-                    try {
-                        DivElement.as(wrapper);
-                        // this must be a div inserted by the table after the column was sorted;
-                        // delegate on to the div's second child's child; note that this is highly
-                        // implementation-dependant and may easily break. We should probably file
-                        // a bug with Google...
-                        wrapper = wrapper.getFirstChildElement().getNextSiblingElement().getFirstChildElement();
-                    } catch (Exception e) {
-                        // wrapper was no div, so no action necessary
-                    }
-                    while (wrapper != null) {
-                        if (wrapper.isOrHasChild(target)) {
-                            @SuppressWarnings("unchecked")
-                            Cell<Object> cell = (Cell<Object>) cells.get(index).getCell();
-                            cell.onBrowserEvent(context, wrapper, cells.get(index).getValue(value), event, null); // tempUpdater
-                        }
-                        index++;
-                        wrapper = wrapper.getNextSiblingElement();
-                    }
-                }
-            }
-        };
-        return abc;
+        return new CompositeCell<SafeHtml>(cells);
     }
 
     @Override

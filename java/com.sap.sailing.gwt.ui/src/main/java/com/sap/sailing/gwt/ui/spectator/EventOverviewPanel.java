@@ -42,7 +42,7 @@ import com.sap.sailing.gwt.ui.adminconsole.LeaderboardConfigPanel.AnchorCell;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.URLFactory;
+import com.sap.sailing.gwt.ui.client.URLEncoder;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.FleetDTO;
 import com.sap.sailing.gwt.ui.shared.PlacemarkOrderDTO;
@@ -212,7 +212,7 @@ public class EventOverviewPanel extends FormPanel {
             public SafeHtml getValue(EventDTO event) {
                 String debugParam = Window.Location.getParameter("gwt.codesvr");
                 if (event.publicationUrl != null && !event.publicationUrl.isEmpty() && event.isPublic) {
-                    String link = URLFactory.INSTANCE.encode(event.publicationUrl
+                    String link = URLEncoder.encode(event.publicationUrl
                             + (debugParam != null && !debugParam.isEmpty() ? "?gwt.codesvr=" + debugParam : ""));
                     return ANCHORTEMPLATE.anchor(link, event.name);
                 } else {
@@ -358,7 +358,7 @@ public class EventOverviewPanel extends FormPanel {
             public SafeHtml getValue(StrippedLeaderboardDTO leaderboard) {
                 EventDTO selectedGroup = eventSelectionModel.getSelectedObject();
                 String debugParam = Window.Location.getParameter("gwt.codesvr");
-                String link = URLFactory.INSTANCE.encode("/gwt/Leaderboard.html?name=" + leaderboard.name
+                String link = URLEncoder.encode("/gwt/Leaderboard.html?name=" + leaderboard.name
                         + (showRaceDetails ? "&showRaceDetails=true" : "")
                         + "&leaderboardGroupName=" + selectedGroup.name + "&root=overview"
                         + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""));
@@ -451,7 +451,7 @@ public class EventOverviewPanel extends FormPanel {
                         StrippedLeaderboardDTO selectedLeaderboard = leaderboardsSelectionModel.getSelectedObject();
                         RegattaNameAndRaceName raceId = (RegattaNameAndRaceName) race.getRaceIdentifier(fleet);
                         String debugParam = Window.Location.getParameter("gwt.codesvr");
-                        String link = URLFactory.INSTANCE.encode("/gwt/RaceBoard.html?leaderboardName="
+                        String link = URLEncoder.encode("/gwt/RaceBoard.html?leaderboardName="
                                 + selectedLeaderboard.name + "&raceName=" + raceId.getRaceName() + "&regattaName="
                                 + raceId.getRegattaName() + "&leaderboardGroupName=" + selectedGroup.name
                                 + "&root=overview"
