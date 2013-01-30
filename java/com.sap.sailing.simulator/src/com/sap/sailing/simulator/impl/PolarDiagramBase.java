@@ -149,11 +149,11 @@ public class PolarDiagramBase implements PolarDiagram {
                 
             NavigableMap<Double,Object> wcurSpeedMap = new TreeMap<Double,Object>();
                 
-            for(double wcurSpeed=0.0; wcurSpeed<=2.2; wcurSpeed+=0.1) {
+            for(double wcurSpeed=0.0; wcurSpeed<=2.2; wcurSpeed+=0.2) {
                     
                 NavigableMap<Double,Object> wcurBearMap = new TreeMap<Double,Object>();
                     
-                for(double wcurBear=0.0; wcurBear<360.0; wcurBear+=5) {
+                for(double wcurBear=0.0; wcurBear<360.0; wcurBear+=10) {
                      
                     SpeedWithBearing trueWind = new KnotSpeedWithBearingImpl(windSpeed, new DegreeBearingImpl(180.0));
                     this.setCurrent(new KnotSpeedWithBearingImpl(wcurSpeed, new DegreeBearingImpl(wcurBear)));
@@ -161,11 +161,13 @@ public class PolarDiagramBase implements PolarDiagram {
                         
                     NavigableMap<Double,Double> boatBearMap = new TreeMap<Double,Double>();
                     Bearing[] optBear = this.optimalDirectionsUpwind();
-                    int stepSize = 5;
+                    int stepSize = 1;
 
                     // determine non-sailable area, i.e. bearings lower to the wind than beat angle
-                    double minBear = optBear[1].getDegrees() - (optBear[1].getDegrees() % stepSize);
-                    double maxBear = optBear[0].getDegrees() - (optBear[0].getDegrees() % stepSize) + stepSize;
+                    double minBear = optBear[1].getDegrees() - optBear[1].getDegrees() % stepSize;
+                    double maxBear = optBear[0].getDegrees() + (stepSize - optBear[0].getDegrees() % stepSize);
+                    Double minBearSOG = null;
+                    Double maxBearSOG = null;
                     
                     // calculate wind/current-specific polar diagram
                     for(double boatBearSMF=minBear; boatBearSMF<=maxBear; boatBearSMF+=stepSize) {
@@ -182,18 +184,22 @@ public class PolarDiagramBase implements PolarDiagram {
                         
                         // calculate speed of boat floating with current in non-sailable area, i.e. no sail force
                         if (boatBearSMF == minBear) {
-                            for(double tmpBear=(Math.floor(boatBearSOG)-1.0);tmpBear>=0.0; tmpBear-=1.0) {
-                                double relBear = tmpBear-wcurBear;
-                                boatBearMap.put(tmpBear, wcurSpeed*Math.cos(relBear/180.0*Math.PI));                                    
-                            }
+                            minBearSOG = boatBearSOG;
                         }
                         if (boatBearSMF == maxBear) {
-                            for(double tmpBear=(Math.ceil(boatBearSOG)+1.0);tmpBear<=360.0; tmpBear+=1.0) {
-                                double relBear = tmpBear-wcurBear;
-                                boatBearMap.put(tmpBear, wcurSpeed*Math.cos(relBear/180.0*Math.PI));
-                            }
+                            maxBearSOG = boatBearSOG;
                         }
-                    }                        
+                    }
+                    if (minBearSOG != null) {
+                        for(double tmpBear=(Math.floor(minBearSOG)-1.0);tmpBear>=0.0; tmpBear-=1.0) {
+                            boatBearMap.put(tmpBear, 0.0);
+                        }
+                    }
+                    if (maxBearSOG != null) {
+                        for(double tmpBear=(Math.ceil(maxBearSOG)+1.0);tmpBear<=360.0; tmpBear+=1.0) {
+                            boatBearMap.put(tmpBear, 0.0);
+                        }
+                    }
                         
                     wcurBearMap.put(wcurBear, boatBearMap);
                         
