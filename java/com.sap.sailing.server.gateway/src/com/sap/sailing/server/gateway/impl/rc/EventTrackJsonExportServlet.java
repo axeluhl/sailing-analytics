@@ -1,9 +1,6 @@
 package com.sap.sailing.server.gateway.impl.rc;
 
 import java.io.IOException;
-import java.util.Collections;
-import java.util.Date;
-import java.util.UUID;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -11,26 +8,11 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.json.simple.JSONArray;
 
-import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.Regatta;
-import com.sap.sailing.domain.base.Waypoint;
-import com.sap.sailing.domain.base.impl.BoatClassImpl;
-import com.sap.sailing.domain.base.impl.CourseImpl;
-import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
-import com.sap.sailing.domain.racecommittee.Flags;
 import com.sap.sailing.domain.racecommittee.RaceCommitteeEvent;
 import com.sap.sailing.domain.racecommittee.RaceCommitteeEventTrack;
-import com.sap.sailing.domain.racecommittee.RaceCommitteeStore;
-import com.sap.sailing.domain.racecommittee.impl.EmptyRaceCommitteeStore;
-import com.sap.sailing.domain.racecommittee.impl.RaceCommitteeEventTrackImpl;
-import com.sap.sailing.domain.racecommittee.impl.RaceCommitteeFlagEventImpl;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.domain.tracking.TrackedRegatta;
-import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
-import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.server.gateway.impl.JsonExportServlet;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.RaceCommitteeEventSerializer;
@@ -113,34 +95,6 @@ public class EventTrackJsonExportServlet extends JsonExportServlet {
 							getExistingTrackedRace(getService().getRace(nameIdentifier));
 		return trackedRace;
 	}
-
-	/*@Override
-	protected TrackedRace getTrackedRace(HttpServletRequest request) {
-		RaceCommitteeStore store = new FakeStore();
-		TrackedRace trackedRace = new DynamicTrackedRaceImpl(
-				null, 
-				new RaceDefinitionImpl("Race One", 
-						new CourseImpl("Course IA", Collections.<Waypoint>emptyList()), 
-						new BoatClassImpl("MyBoats", false), 
-						Collections.<Competitor>emptyList()), 
-				EmptyWindStore.INSTANCE, 
-				1, 1, 1, 
-				store);
-		return trackedRace;
-	}
-	
-	class FakeStore extends EmptyRaceCommitteeStore implements RaceCommitteeStore {
-		@Override
-		public RaceCommitteeEventTrack getRaceCommitteeEventTrack(
-				TrackedRegatta trackedRegatta, TrackedRace trackedRace) {
-			
-			RaceCommitteeEventTrack track = new RaceCommitteeEventTrackImpl("karlos");
-			track.add(
-					new RaceCommitteeFlagEventImpl(new MillisecondsTimePoint(new Date()), UUID.randomUUID(), null, 
-							0, Flags.ALPHA, Flags.NOVEMBER,  true));
-			return track;
-		}
-	}*/
 	
 	private boolean validateParameter(HttpServletResponse response, String... parameters) throws IOException {
 		for (String parameter : parameters) {
