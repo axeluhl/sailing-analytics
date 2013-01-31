@@ -220,14 +220,19 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
         for (Pair<CheckBox, ManeuverType> p : checkboxAndManeuverType) {
             result.showManeuverType(p.getB(), p.getA().getValue());
         }
+        RaceMapHelpLinesSettings helpLinesSettings = getHelpLinesSettings();
         result.setZoomSettings(getZoomSettings());
-        result.setHelpLinesSettings(getHelpLinesSettings());
+        result.setHelpLinesSettings(helpLinesSettings);
         result.setShowDouglasPeuckerPoints(showDouglasPeuckerPointsCheckBox.getValue());
         result.setShowOnlySelectedCompetitors(showOnlySelectedCompetitorsCheckBox.getValue());
         result.setShowSelectedCompetitorsInfo(showSelectedCompetitorsInfoCheckBox.getValue());
         result.setShowAllCompetitors(showAllCompetitorsCheckBox.getValue());
-        result.setTailLengthInMilliseconds(tailLengthBox.getValue() == null ? -1 : tailLengthBox.getValue()*1000l);
-        result.setBuoyZoneRadiusInMeters(buoyZoneRadiusBox.getValue());
+        if(helpLinesSettings.isVisible(HelpLineTypes.BOATTAILS)) {
+            result.setTailLengthInMilliseconds(tailLengthBox.getValue() == null ? -1 : tailLengthBox.getValue()*1000l);
+        }
+        if(helpLinesSettings.isVisible(HelpLineTypes.BUOYZONE)) {
+            result.setBuoyZoneRadiusInMeters(buoyZoneRadiusBox.getValue());
+        }
         result.setMaxVisibleCompetitorsCount(maxVisibleCompetitorsCountBox.getValue() == null ? -1 : maxVisibleCompetitorsCountBox.getValue());
         
         return result;
@@ -266,6 +271,9 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
                 String errorMessage = null;
                 if (valueToValidate.getHelpLinesSettings().isVisible(HelpLineTypes.BOATTAILS) && valueToValidate.getTailLengthInMilliseconds() <= 0) {
                     errorMessage = stringMessages.tailLengthMustBePositive();
+                } else if (valueToValidate.getHelpLinesSettings().isVisible(HelpLineTypes.BUOYZONE) 
+                        && (valueToValidate.getBuoyZoneRadiusInMeters() < 0.0 || valueToValidate.getBuoyZoneRadiusInMeters() > 100.0)) {
+                        errorMessage = stringMessages.valueMustBeBetweenMinMax(stringMessages.buoyZone(), "0", "100");
                 } else if (!valueToValidate.isShowAllCompetitors() && valueToValidate.getMaxVisibleCompetitorsCount() <= 0) {
                     errorMessage = stringMessages.maxVisibleCompetitorsCountMustBePositive();
                 }
