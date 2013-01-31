@@ -68,7 +68,7 @@
 		<servlet-name>LiveRaceRankingAsRssFeedServlet</servlet-name>
 		<url-pattern>/rss/liveRaceRanking</url-pattern>
 	</servlet-mapping>
-
+ 
 	<servlet id="jsp">
      <servlet-name>jspServet</servlet-name>
      <servlet-class>org.apache.jasper.servlet.JspServlet</servlet-class>
@@ -87,19 +87,20 @@
  
      <load-on-startup>0</load-on-startup>
    </servlet>
- 
+<!-- 
    <servlet-mapping>
      <servlet-name>jspServet</servlet-name>
      <url-pattern>*.jsp</url-pattern>
    </servlet-mapping>
-   
+ --> 
+  
    	<servlet>
 		<servlet-name>SimpleJspForwardServlet</servlet-name>
 		<servlet-class>com.sap.sailing.server.gateway.impl.SimpleJspForwardServlet</servlet-class>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>SimpleJspForwardServlet</servlet-name>
-		<url-pattern>/events</url-pattern>
+		<url-pattern>/html/*</url-pattern>
 	</servlet-mapping>
    
  </web-app>
