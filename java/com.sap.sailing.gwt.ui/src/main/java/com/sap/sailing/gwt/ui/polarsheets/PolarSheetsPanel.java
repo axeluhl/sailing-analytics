@@ -110,6 +110,7 @@ public class PolarSheetsPanel extends FormPanel implements RaceSelectionChangeLi
         // List conversion, to make List serializable
         List<RegattaAndRaceIdentifier> selectedRacesInArrayList = new ArrayList<RegattaAndRaceIdentifier>();
         selectedRacesInArrayList.addAll(selectedRaces);
+        polarSheetsTrackedRacesList.changeGenerationButtonState(false);
         sailingService.generatePolarSheetForRaces(selectedRacesInArrayList, new AsyncCallback<String>() {
 
             @Override
@@ -150,6 +151,7 @@ public class PolarSheetsPanel extends FormPanel implements RaceSelectionChangeLi
                 } else {
                     // TODO string messages
                     setCompletionLabel("Generation finished!");
+                    polarSheetsTrackedRacesList.changeGenerationButtonState(true);
                 }
             }
 

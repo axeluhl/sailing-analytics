@@ -4,26 +4,45 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.Executor;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.RunnableFuture;
 
+import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.common.PolarSheetsData;
+import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.PolarSheetsDataImpl;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
 public class PolarSheetGenerationWorker {
 
-    private boolean finished = false;
-
-    private final Set<PerRaceWorker> workers;
+    private final Set<RunnableFuture<Void>> workers;
 
     private final List<List<Double>> polarData;
 
-    private boolean workerInitDone = false;
+    private final Executor executor;
 
-    public PolarSheetGenerationWorker(Set<TrackedRace> trackedRaces) {
+    public PolarSheetGenerationWorker(Set<TrackedRace> trackedRaces, Executor executor) {
         polarData = initializePolarDataContainer();
-        workers = new HashSet<PerRaceWorker>();
+        this.executor = executor;
+        workers = new HashSet<RunnableFuture<Void>>();
         for (TrackedRace race : trackedRaces) {
-            workers.add(new PerRaceWorker(this, race));
+            TimePoint startTime = race.getStartOfRace();
+            TimePoint endTime = race.getEndOfRace();
+            if (endTime == null) {
+                //TODO Figure out if there is an alternative:
+                endTime = race.getTimePointOfNewestEvent();
+            }
+            RaceDefinition raceDefinition = race.getRace();
+            Iterable<Competitor> competitors = raceDefinition.getCompetitors();
+
+            
+            for (Competitor competitor : competitors) {
+                RunnableFuture<Void> futureTask = new FutureTask<Void>(new PerRaceAndCompetitorWorker(race, this, startTime, endTime, competitor));
+                workers.add(futureTask);
+            }
+           
         }
     }
 
@@ -36,11 +55,9 @@ public class PolarSheetGenerationWorker {
     }
 
     public void startPolarSheetGeneration() {
-        for (PerRaceWorker worker : workers) {
-            Thread workerThread = new Thread(worker);
-            workerThread.start();
+        for (RunnableFuture<Void> future : workers) {
+            executor.execute(future);
         }
-        workerInitDone = true;
     }
 
     public void addPolarData(long roundedAngle, double normalizedSpeed) {
@@ -73,20 +90,19 @@ public class PolarSheetGenerationWorker {
                 averagedPolarData[i] = average;
             }
         }
+        boolean complete = true;
+        for (RunnableFuture<Void> future : workers) {
+            if (!future.isDone()) {
+                complete = false;
+                break;
+            }
+        }
         
-        PolarSheetsData data = new PolarSheetsDataImpl(averagedPolarData, finished, dataCount, dataCountPerAngle);
+        PolarSheetsData data = new PolarSheetsDataImpl(averagedPolarData, complete, dataCount, dataCountPerAngle);
 
         
         return data;
     }
 
-    public void workerDone(PerRaceWorker worker) {
-        if (workers.contains(worker) && workerInitDone) {
-            workers.remove(worker);
-            if (workers.isEmpty()) {
-                finished = true;
-            }
-        }
-    }
 
 }

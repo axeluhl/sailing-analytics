@@ -52,4 +52,12 @@ public class PolarSheetsTrackedRacesList extends AbstractFilteredTrackedRacesLis
         }
     }
 
+    /**
+     * Changes the state of the generation-start button
+     * @param enable
+     */
+    public void changeGenerationButtonState(boolean enable) {
+        btnPolarSheetGeneration.setEnabled(enable);
+    }
+
 }

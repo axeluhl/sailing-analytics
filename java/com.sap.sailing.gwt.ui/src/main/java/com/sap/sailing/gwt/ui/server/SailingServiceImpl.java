@@ -3071,7 +3071,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         for (RegattaAndRaceIdentifier race : selectedRaces) {
             trackedRaces.add(service.getTrackedRace(race));
         }
-        PolarSheetGenerationWorker genWorker = new PolarSheetGenerationWorker(trackedRaces);
+        PolarSheetGenerationWorker genWorker = new PolarSheetGenerationWorker(trackedRaces, executor);
         polarSheetGenerationWorkers.put(id, genWorker);
         genWorker.startPolarSheetGeneration();
         return id;
