@@ -19,11 +19,12 @@ import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.DataManager;
 import com.sap.sailing.racecommittee.app.data.InMemoryDataStore;
-import com.sap.sailing.racecommittee.app.data.clients.EventsLoadClient;
+import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
+import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 import com.sap.sailing.racecommittee.app.fragments.list.NamedListFragment.ItemSelectedListener;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 
-public class LoginActivity extends TwoPaneActivity implements EventsLoadClient  {
+public class LoginActivity extends TwoPaneActivity  {
 	
 	private final static String TAG ="LoginActivity";
 	
@@ -112,10 +113,18 @@ public class LoginActivity extends TwoPaneActivity implements EventsLoadClient  
 
 	private void addEventListFragment() {
 		
-		DataManager dataManager = new DataManager(
+		ReadonlyDataManager dataManager = new DataManager(
 				this, 
 				InMemoryDataStore.INSTANCE);
-		dataManager.getEvents(this);
+		dataManager.getEvents(new LoadClient<Collection<Event>>() {
+			public void onLoadSucceded(Collection<Event> data) {
+				Toast.makeText(LoginActivity.this, "Success", Toast.LENGTH_LONG).show();
+			}
+			
+			public void onLoadFailed(Exception reason) {
+				Toast.makeText(LoginActivity.this, "Fail", Toast.LENGTH_LONG).show();
+			}
+		});
 		
 		/*FragmentTransaction transaction = getFragmentManager().beginTransaction();
 		transaction.add(R.id.leftContainer, new EventListFragment());
@@ -200,12 +209,12 @@ public class LoginActivity extends TwoPaneActivity implements EventsLoadClient  
 		fadeActivity(message);*/
 	}
 
-	public void onFailed(Exception reason) {
+	/*public void onLoadFailed(Exception reason) {
 		Toast.makeText(this, "FAIL!", Toast.LENGTH_LONG).show();
 	}
 
 	public void onEventsLoaded(Collection<Event> events) {
 		Toast.makeText(this, "SUCCESS!", Toast.LENGTH_LONG).show();
-	}
+	}*/
 
 }

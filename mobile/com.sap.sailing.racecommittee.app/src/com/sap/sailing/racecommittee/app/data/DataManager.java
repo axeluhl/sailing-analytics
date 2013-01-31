@@ -6,7 +6,7 @@ import java.util.Collection;
 import android.content.Context;
 
 import com.sap.sailing.domain.base.Event;
-import com.sap.sailing.racecommittee.app.data.clients.EventsLoadClient;
+import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 import com.sap.sailing.racecommittee.app.data.handlers.DataHandler;
 import com.sap.sailing.racecommittee.app.data.handlers.EventsDataHandler;
 import com.sap.sailing.racecommittee.app.data.loaders.DataLoader;
@@ -19,7 +19,7 @@ import com.sap.sailing.server.gateway.deserialization.impl.VenueJsonDeserializer
 /**
  * Enables accessing of data.
  */
-public class DataManager {
+public class DataManager implements ReadonlyDataManager {
 	
 	private Context context;
 	private DataStore dataStore;
@@ -33,15 +33,23 @@ public class DataManager {
 		return context;
 	}
 	
-	public void getEvents(EventsLoadClient client) {
+	public void getEvents(LoadClient<Collection<Event>> client) {
 		if (dataStore.getEvents().isEmpty()) {
 			loadEvents(client);
 		} else {
-			client.onEventsLoaded(dataStore.getEvents());
+			client.onLoadSucceded(dataStore.getEvents());
 		}
 	}
 
-	protected void loadEvents(EventsLoadClient client) {
+	public void addEvents(Collection<Event> events) {
+		for (Event event : events) {
+			if (!dataStore.hasEvent(event.getId())) {
+				dataStore.addEvent(event);
+			}
+		}
+	}
+
+	protected void loadEvents(LoadClient<Collection<Event>> client) {
 		DataParser<Collection<Event>> parser = new EventsDataParser(
 				new EventJsonDeserializer(
 					new VenueJsonDeserializer(

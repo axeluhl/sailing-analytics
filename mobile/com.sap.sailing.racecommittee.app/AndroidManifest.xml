@@ -5,16 +5,22 @@
 
     <uses-sdk
         android:minSdkVersion="13"
-        android:targetSdkVersion="17" />
+        android:targetSdkVersion="17" 
+        android:maxSdkVersion="17" />
     
-    <uses-permission android:name="android.permission.INTERNET"></uses-permission>
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+	<uses-permission android:name="android.permission.VIBRATE"/>
 
     <application
 		android:icon="@drawable/sap_sailing_app_icon"
         android:label="@string/app_name"
         android:theme="@style/Theme.Welter" 
-        android:hardwareAccelerated="true"
-        android:name="RaceApplication">
+        android:name="RaceApplication"
+        android:allowBackup="true"
+        android:hardwareAccelerated="true" >
         
         <activity android:name=".activities.LoginActivity">
             <intent-filter>

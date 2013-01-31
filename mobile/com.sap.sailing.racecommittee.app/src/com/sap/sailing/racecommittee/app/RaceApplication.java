@@ -8,6 +8,10 @@ import com.sap.sailing.racecommittee.app.logging.FileLoggingTask;
 import android.app.Application;
 import android.util.Log;
 
+/**
+ * Register a additional exception handler for uncaught exception to have
+ * some crash logging.
+ */
 public class RaceApplication extends Application {
 
 	private final static String TAG = RaceApplication.class.getName();

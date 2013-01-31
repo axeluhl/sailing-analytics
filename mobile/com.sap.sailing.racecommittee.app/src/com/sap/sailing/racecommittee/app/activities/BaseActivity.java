@@ -5,9 +5,10 @@ import android.content.Intent;
 import android.view.Menu;
 import android.view.MenuItem;
 
+
 /**
- * A two-pane activity - saves the visibility state of the right pane.
- *
+ * Base activity for all race committee cockpit activities enabling basic
+ * menu functionality.
  */
 public abstract class BaseActivity extends Activity {
 	

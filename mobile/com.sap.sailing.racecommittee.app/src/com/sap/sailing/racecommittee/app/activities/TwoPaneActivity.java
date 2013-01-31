@@ -5,6 +5,10 @@ import com.sap.sailing.racecommittee.app.R;
 import android.os.Bundle;
 import android.view.View;
 
+/**
+ * A two-pane activity - saves the visibility state of the right pane.
+ *
+ */
 public class TwoPaneActivity extends BaseActivity {
 
 	private final static String VisibilityTag = "RIGHTVISIBILITY";

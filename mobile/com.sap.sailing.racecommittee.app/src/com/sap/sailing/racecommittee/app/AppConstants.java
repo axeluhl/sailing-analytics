@@ -7,56 +7,7 @@ import android.preference.PreferenceManager;
 
 public class AppConstants {
 	
-	public final static String ApplicationVersion = "0.7 - Gloria";
-	
-	public final static int EXTENDED_STARTPHASE_CLASS_DISPLAYED_MINUTES_BEFORE_START = 8;
-	public final static int EXTENDED_STARTPHASE_CLASS_DISPLAYED_MILLISECONDS_BEFORE_START = 
-			EXTENDED_STARTPHASE_CLASS_DISPLAYED_MINUTES_BEFORE_START * 60 * 1000;
-
-	public final static int STARTPHASE_CLASS_DISPLAYED_MINUTES_BEFORE_START = 5;
-	public final static int STARTPHASE_CLASS_DISPLAYED_MILLISECONDS_BEFORE_START = STARTPHASE_CLASS_DISPLAYED_MINUTES_BEFORE_START * 60 * 1000;
-	public final static int STARTPHASE_STARTMODE_DISPLAYED_MINUTES_BEFORE_START = 4;
-	public final static int STARTPHASE_STARTMODE_DISPLAYED_MILLISECONDS_BEFORE_START = STARTPHASE_STARTMODE_DISPLAYED_MINUTES_BEFORE_START * 60 * 1000;
-	public final static int STARTPHASE_STARTMODE_REMOVED_MINUTES_BEFORE_START = 1;
-	public final static int STARTPHASE_STARTMODE_REMOVED_MILLISECONDS_BEFORE_START = STARTPHASE_STARTMODE_REMOVED_MINUTES_BEFORE_START * 60 * 1000;
-	public final static int STARTPHASE_CLASS_REMOVED_MINUTES_BEFORE_START = 0;
-	public final static int STARTPHASE_CLASS_REMOVED_MILLISECONDS_BEFORE_START = STARTPHASE_CLASS_REMOVED_MINUTES_BEFORE_START;
-	
-	public final static int STARTPHASE_ESSAP_REMOVED_MINUTES_BEFORE_START = 4;
-	public final static int STARTPHASE_ESSAP_REMOVED_MILLISECONDS_BEFORE_START = STARTPHASE_ESSAP_REMOVED_MINUTES_BEFORE_START * 60 * 1000;
-	public final static int STARTPHASE_ESSTHREE_DISPLAYED_MINUTES_BEFORE_START = 3;
-	public final static int STARTPHASE_ESSTHREE_DISPLAYED_MILLISECONDS_BEFORE_START = STARTPHASE_ESSTHREE_DISPLAYED_MINUTES_BEFORE_START * 60 * 1000;
-	public final static int STARTPHASE_ESSTWO_DISPLAYED_MINUTES_BEFORE_START = 2;
-	public final static int STARTPHASE_ESSTWO_DISPLAYED_MILLISECONDS_BEFORE_START = STARTPHASE_ESSTWO_DISPLAYED_MINUTES_BEFORE_START * 60 * 1000;
-	public final static int STARTPHASE_ESSONE_DISPLAYED_MINUTES_BEFORE_START = 1;
-	public final static int STARTPHASE_ESSONE_DISPLAYED_MILLISECONDS_BEFORE_START = STARTPHASE_ESSONE_DISPLAYED_MINUTES_BEFORE_START * 60 * 1000;
-	public final static int STARTPHASE_ESSONE_REMOVED_MINUTES_BEFORE_START = 0;
-	public final static int STARTPHASE_ESSONE_REMOVED_MILLISECONDS_BEFORE_START = STARTPHASE_ESSONE_REMOVED_MINUTES_BEFORE_START;
-	
-	public static final int INDIVIDUAL_RECALL_TIME_MINUTES = 4;
-	public static final int INDIVIDUAL_RECALL_TIME_MILLISECONDS = INDIVIDUAL_RECALL_TIME_MINUTES * 60 * 1000;
-	
-	public static final int DEFAULT_GATE_TIME_MINUTES = 3;
-	public static final int DEFAULT_GATE_TIME_MILLISECONDS = DEFAULT_GATE_TIME_MINUTES * 60 * 1000;
-	
-	// -1 if not removed automatically
-	//public static int GOLF_FLAG_REMOVE_TIME_MILLISECONDS = (8 * 60 * 1000) + 60000;
-	
-	
-	// Fired by the alarm manager - racing service reacts to them
-	public final static String ACTION_RACE_CLASSFLAG_UP = "com.sap.sailing.racecommittee.app.action.classFlagUp";
-	public final static String ACTION_RACE_STARTMODE_UP = "com.sap.sailing.racecommittee.app.action.startModeFlagUp";
-	public final static String ACTION_RACE_STARTMODE_DOWN = "com.sap.sailing.racecommittee.app.action.startModeFlagDown";
-	public final static String ACTION_RACE_CLASSFLAG_DOWN = "com.sap.sailing.racecommittee.app.action.startRace";
-	
-	public final static String ACTION_RACE_XRAYFLAG_DOWN = "com.sap.sailing.racecommittee.app.action.xrayFlagDown";
-	public final static String ACTION_RACE_GOLFFLAG_DOWN = "com.sap.sailing.racecommittee.app.action.golfFlagDown";
-	
-	public final static String ACTION_RACE_ESS_APFLAG_DOWN = "com.sap.sailing.racecommittee.app.action.apFlagDown";
-	public final static String ACTION_RACE_ESS_THREE_UP = "com.sap.sailing.racecommittee.app.action.essThreeFlagUp";
-	public final static String ACTION_RACE_ESS_TWO_UP = "com.sap.sailing.racecommittee.app.action.essTwoFlagUp";
-	public final static String ACTION_RACE_ESS_ONE_UP = "com.sap.sailing.racecommittee.app.action.essOneFlagUp";
-	public final static String ACTION_RACE_ESS_ONE_DOWN = "com.sap.sailing.racecommittee.app.action.essOneFlagDown";
+	public final static String ApplicationVersion = "2.0 Beta 1 - Jumbotron";
 	
 	// Communication between the Connectivity watcher and the event sender
 	public final static String SAVE_INTENT_ACTION = "com.sap.sailing.racecommittee.app.action.saveIntent";
@@ -74,7 +25,7 @@ public class AppConstants {
 	public final static String FLAG_KEY = "raceFlag";
 	
 	public final static String IS_SET_FRAGMENT = "isSetFragment";
-	public final static String logFolder = "/racecommittee";
+	public final static String LogFolder = "/racecommittee";
 	
 	// Login activity
 	public final static String EventIdTag = "EventId";

@@ -22,4 +22,12 @@ public enum InMemoryDataStore implements DataStore {
 	public Event getEvent(Serializable id) {
 		return eventsById.get(id);
 	}
+
+	public boolean hasEvent(Serializable id) {
+		return eventsById.containsKey(id);
+	}
+
+	public void addEvent(Event event) {
+		eventsById.put(event.getId(), event);
+	}
 }

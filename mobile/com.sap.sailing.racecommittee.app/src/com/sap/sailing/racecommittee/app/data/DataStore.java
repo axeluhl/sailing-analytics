@@ -9,5 +9,7 @@ public interface DataStore {
 
 	public Collection<Event> getEvents();
 	public Event getEvent(Serializable id);
+	public boolean hasEvent(Serializable id);
+	public void addEvent(Event event);
 	
 }
