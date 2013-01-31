@@ -13,7 +13,7 @@ import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
 
-public class PerRaceAndCompetitorWorker implements Callable<Void>{
+public class PerRaceAndCompetitorPolarSheetGenerationWorker implements Callable<Void>{
 
     private final TrackedRace race;
 
@@ -28,7 +28,7 @@ public class PerRaceAndCompetitorWorker implements Callable<Void>{
 
     
 
-    public PerRaceAndCompetitorWorker(TrackedRace race, PolarSheetGenerationWorker polarSheetGenerationWorker,
+    public PerRaceAndCompetitorPolarSheetGenerationWorker(TrackedRace race, PolarSheetGenerationWorker polarSheetGenerationWorker,
             TimePoint startTime, TimePoint endTime, Competitor competitor) {
         super();
         this.race = race;
@@ -55,15 +55,15 @@ public class PerRaceAndCompetitorWorker implements Callable<Void>{
             }
 
             SpeedWithBearing speedWithBearing = fix.getSpeed();
-            double speed = speedWithBearing.getMetersPerSecond();
+            double speed = speedWithBearing.getKnots();
             Bearing bearing = speedWithBearing.getBearing();
             Position position = fix.getPosition();
             Wind wind = race.getWind(position, fix.getTimePoint());
             Bearing windBearing = wind.getFrom();
-            double windSpeed = wind.getMetersPerSecond();
+            double windSpeed = wind.getKnots();
 
             // TODO Figure out if this normalizing is okay concerning different windspeeds and bearings
-            double normalizedSpeed = speed / windSpeed;
+            double normalizedSpeed = speed/* / windSpeed*/;
             double angleToWind = bearing.getDifferenceTo(windBearing).getDegrees();
 
             polarSheetGenerationWorker.addPolarData(Math.round(angleToWind), normalizedSpeed);

@@ -38,6 +38,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
@@ -76,6 +78,7 @@ import com.sap.sailing.domain.common.NoWindError;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Placemark;
 import com.sap.sailing.domain.common.PolarSheetsData;
+import com.sap.sailing.domain.common.PolarSheetsHistogramData;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RaceFetcher;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -97,6 +100,7 @@ import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KilometersPerHourSpeedImpl;
 import com.sap.sailing.domain.common.impl.MeterDistance;
+import com.sap.sailing.domain.common.impl.PolarSheetsHistogramDataImpl;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
@@ -3084,14 +3088,60 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             PolarSheetGenerationWorker worker = polarSheetGenerationWorkers.get(id);
             data = worker.getPolarData();
             if (data.isComplete()) {
+                HttpServletRequest httpServletRequest = this.getThreadLocalRequest();
+                HttpSession session = httpServletRequest.getSession();
+                session.setAttribute(id, worker.getCompleteData());
                 polarSheetGenerationWorkers.remove(id);
             }
         } else {
             //TODO Exception handling
         }
         
-        return data;
+        return data;      
+    }
+
+    @Override
+    public PolarSheetsHistogramData getPolarSheetData(String polarSheetId, int angle) {
+        HttpServletRequest httpServletRequest = this.getThreadLocalRequest();
+        HttpSession session = httpServletRequest.getSession();
+        @SuppressWarnings("unchecked")
+        List<List<Double>> data = (List<List<Double>>) session.getAttribute(polarSheetId);
+        if (data == null) {
+          //TODO exception handling
+            return null;
+        }
+        List<Double> dataForAngle = data.get(angle);
+        if (dataForAngle.size() < 1) {
+            //TODO exception handling
+            return null;
+        }
+        Double min = Collections.min(dataForAngle);
+        Double max = Collections.max(dataForAngle);
+        //TODO make number of columns dynamic to chart size
+        int numberOfColumns = 20;
+        double range = (max - min) / numberOfColumns;
+        Double[] xValues = new Double[numberOfColumns];
+        for (int i = 0; i < numberOfColumns; i++) {
+            xValues[i] = min + i * range + ( 0.5 * range);
+        }
         
+        Integer[] yValues = new Integer[numberOfColumns];
+        for (Double dataPoint : dataForAngle) {
+            int i = (int) (((dataPoint - min) / range));
+            if (i == numberOfColumns) {
+                //For max value
+                i = 19;
+            }
+            if (yValues[i] == null) {
+                yValues[i] = 0;
+            }
+            yValues[i]++;
+        }
+        
+        PolarSheetsHistogramData histogramData = new PolarSheetsHistogramDataImpl(xValues,yValues);
+
+        
+        return histogramData;
     }
 
 }

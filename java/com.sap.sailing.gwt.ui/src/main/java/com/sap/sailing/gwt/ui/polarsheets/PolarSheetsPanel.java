@@ -3,6 +3,9 @@ package com.sap.sailing.gwt.ui.polarsheets;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.moxieapps.gwt.highcharts.client.events.PointMouseOverEvent;
+import org.moxieapps.gwt.highcharts.client.events.PointMouseOverEventHandler;
+
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Timer;
@@ -13,7 +16,10 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.domain.common.PolarSheetsData;
+import com.sap.sailing.domain.common.PolarSheetsHistogramData;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
+import com.sap.sailing.gwt.ui.actions.GetPolarSheetDataByAngleAction;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.RaceSelectionModel;
@@ -36,6 +42,8 @@ public class PolarSheetsPanel extends FormPanel implements RaceSelectionChangeLi
     private PolarSheetsEntryPoint polarSheetsEntryPoint;
     private List<RegattaAndRaceIdentifier> selectedRaces;
     private PolarSheetsChartPanel chartPanel;
+    private PolarSheetsHistogramPanel histogramPanel;
+    private AsyncActionsExecutor asyncActionsExecutor;
 
     private Label polarSheetsGenerationLabel;
     private Label dataCountLabel;
@@ -58,8 +66,43 @@ public class PolarSheetsPanel extends FormPanel implements RaceSelectionChangeLi
         leftPanel.add(polarSheetsGenerationLabel);
         dataCountLabel = new Label();
         leftPanel.add(dataCountLabel);
-        addPolarSheetsChartPanel(splitPanel);
+        VerticalPanel rightPanel = addPolarSheetsChartPanel(splitPanel);
+        histogramPanel = new PolarSheetsHistogramPanel(stringMessages);
+        rightPanel.add(histogramPanel);
         mainPanel.add(splitPanel);
+
+        asyncActionsExecutor = new AsyncActionsExecutor();
+        setEventListenersForPolarSheetChart();
+    }
+
+    private void setEventListenersForPolarSheetChart() {
+        PointMouseOverEventHandler pointMouseOverHandler = new PointMouseOverEventHandler() {
+
+            @Override
+            public boolean onMouseOver(PointMouseOverEvent pointMouseOverEvent) {
+                int x = (int) pointMouseOverEvent.getXAsLong();
+                String polarSheetId = pointMouseOverEvent.getSeriesName();
+                GetPolarSheetDataByAngleAction action = new GetPolarSheetDataByAngleAction(sailingService,
+                        polarSheetId, x, new AsyncCallback<PolarSheetsHistogramData>() {
+
+                            @Override
+                            public void onSuccess(PolarSheetsHistogramData result) {
+                                if (result != null) {
+                                    histogramPanel.setData(result);
+                                }
+                            }
+
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                errorReporter.reportError(caught.getLocalizedMessage());
+                            }
+
+                        });
+                asyncActionsExecutor.execute(action);
+                return true;
+            }
+        };
+        chartPanel.setSeriesPointMouseOverHandler(pointMouseOverHandler);
     }
 
     private Label createPolarSheetGenerationStatusLabel() {
@@ -67,10 +110,13 @@ public class PolarSheetsPanel extends FormPanel implements RaceSelectionChangeLi
         return polarSheetsGenerationStatusLabel;
     }
 
-    private void addPolarSheetsChartPanel(HorizontalPanel splitPanel) {
+    private VerticalPanel addPolarSheetsChartPanel(HorizontalPanel splitPanel) {
+        VerticalPanel verticalPanel = new VerticalPanel();
         chartPanel = new PolarSheetsChartPanel(stringMessages);
-        splitPanel.add(chartPanel);
-        splitPanel.setCellWidth(chartPanel, "50%");
+        verticalPanel.add(chartPanel);
+        splitPanel.add(verticalPanel);
+        splitPanel.setCellWidth(verticalPanel, "50%");
+        return verticalPanel;
     }
 
     private HorizontalPanel createSplitPanel() {

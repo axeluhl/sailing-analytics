@@ -39,7 +39,7 @@ public class PolarSheetGenerationWorker {
 
             
             for (Competitor competitor : competitors) {
-                RunnableFuture<Void> futureTask = new FutureTask<Void>(new PerRaceAndCompetitorWorker(race, this, startTime, endTime, competitor));
+                RunnableFuture<Void> futureTask = new FutureTask<Void>(new PerRaceAndCompetitorPolarSheetGenerationWorker(race, this, startTime, endTime, competitor));
                 workers.add(futureTask);
             }
            
@@ -102,6 +102,10 @@ public class PolarSheetGenerationWorker {
 
         
         return data;
+    }
+
+    public List<List<Double>> getCompleteData() {
+        return polarData;
     }
 
 

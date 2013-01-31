@@ -10,14 +10,17 @@ import org.moxieapps.gwt.highcharts.client.Chart;
 import org.moxieapps.gwt.highcharts.client.Color;
 import org.moxieapps.gwt.highcharts.client.Point;
 import org.moxieapps.gwt.highcharts.client.Series;
+import org.moxieapps.gwt.highcharts.client.events.PointMouseOverEventHandler;
 import org.moxieapps.gwt.highcharts.client.plotOptions.LinePlotOptions;
 import org.moxieapps.gwt.highcharts.client.plotOptions.Marker;
+import org.moxieapps.gwt.highcharts.client.plotOptions.SeriesPlotOptions;
 
+import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.sap.sailing.domain.common.PolarSheetsData;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
-public class PolarSheetsChartPanel extends SimplePanel {
+public class PolarSheetsChartPanel extends SimplePanel implements RequiresResize{
 
     private StringMessages stringMessages;
     private Chart chart;
@@ -34,7 +37,7 @@ public class PolarSheetsChartPanel extends SimplePanel {
     private Chart createPolarSheetChart() {
         Chart polarSheetChart = new Chart().setType(Series.Type.LINE)
                 .setLinePlotOptions(new LinePlotOptions().setLineWidth(1)).setZoomType(Chart.ZoomType.X_AND_Y)
-                .setPolar(true).setSize(700, 700);
+                .setPolar(true).setSize(700,700);
         polarSheetChart.setChartTitleText(stringMessages.polarSheetChart());
         polarSheetChart.getYAxis().setMin(0);
         return polarSheetChart;
@@ -73,6 +76,9 @@ public class PolarSheetsChartPanel extends SimplePanel {
         if (max > 0) {
             for (int i = 0; i < 360; i++) {
                 points[i] = new Point(result.getValues()[i]);
+                if (points[i] == null) {
+                    points[i] = new Point(0);
+                }
                 double alpha = (double) dataCountList.get(i) / (double) max;
                 // TODO set to series color and change alpha
                 points[i].setMarker(new Marker().setFillColor(new Color(1, 1, 1, alpha)));
@@ -103,6 +109,16 @@ public class PolarSheetsChartPanel extends SimplePanel {
             newSeries(id);
         }
         addValuesToSeries(id, result);
+        chart.redraw();
+    }
+
+    public void setSeriesPointMouseOverHandler(PointMouseOverEventHandler pointMouseOverHandler) {
+        chart.setSeriesPlotOptions(new SeriesPlotOptions().setPointMouseOverEventHandler(pointMouseOverHandler));
+    }
+
+    @Override
+    public void onResize() {
+        chart.setSizeToMatchContainer();
         chart.redraw();
     }
 
