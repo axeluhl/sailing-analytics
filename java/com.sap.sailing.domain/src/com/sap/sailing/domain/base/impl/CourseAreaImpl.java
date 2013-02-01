@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.base.impl;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -11,10 +12,12 @@ public class CourseAreaImpl extends NamedImpl implements CourseArea {
     private static final long serialVersionUID = 5912385360170509150L;
     
     private ArrayList<RaceDefinition> races;
+    private final Serializable id;
 
-    public CourseAreaImpl(String name) {
+    public CourseAreaImpl(String name, Serializable id) {
         super(name);
         this.races = new ArrayList<RaceDefinition>();
+        this.id = id;
     }
 
 	@Override
@@ -27,5 +30,10 @@ public class CourseAreaImpl extends NamedImpl implements CourseArea {
 	@Override
 	public Iterable<RaceDefinition> getRaces() {
 		return Collections.unmodifiableList(races);
+	}
+
+	@Override
+	public Serializable getId() {
+		return id;
 	}
 }

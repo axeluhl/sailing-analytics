@@ -66,7 +66,7 @@ public class EventsJsonExportServlet extends JsonExportServlet {
 				
 		Venue schilksee = kielerWocheEvent.getVenue();
 		
-		CourseArea alpha = new CourseAreaImpl("Alpha");
+		CourseArea alpha = new CourseAreaImpl("Alpha", UUID.randomUUID());
 		schilksee.addCourseArea(alpha);
 		
 		//Fleet allBoats = new FleetImpl("Blue");
