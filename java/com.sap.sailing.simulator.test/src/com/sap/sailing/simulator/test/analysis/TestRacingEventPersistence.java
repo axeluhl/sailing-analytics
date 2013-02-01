@@ -1,21 +1,16 @@
 package com.sap.sailing.simulator.test.analysis;
 
-import static org.junit.Assert.*;
-
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.net.MalformedURLException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.Competitor;
@@ -29,13 +24,17 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
 
-public class TestRacingEventService {
+public class TestRacingEventPersistence {
 
 	RacingEventServiceImpl service;
 	private RacesHandle raceHandle;
 	String paramURLStr = "http://germanmaster.traclive.dk/events/event_20110929_Internatio/clientparams.php?event=event_20110929_Internatio&race=d1f521fa-ec52-11e0-a523-406186cbf87c";
+	//proxy
 	String liveURIStr = "tcp://10.18.22.156:1520";
 	String storedURIStr = "tcp://10.18.22.156:1521";
+	//non-proxy
+	//String liveURIStr = "tcp://germanmaster.traclive.dk:4400";
+	//String storedURIStr = "tcp://germanmaster.traclive.dk:4401";
 	
 	//@Before
 	//public void setUp() throws Exception {	
@@ -54,7 +53,6 @@ public class TestRacingEventService {
 		URI liveURI = new URI(liveURIStr);
 		URI storedURI = new URI(storedURIStr);
 		
-		//Object obj = new Object();
 		raceHandle = service.addTracTracRace(paramURL, liveURI, storedURI, EmptyWindStore.INSTANCE, 60000, this);
 		
 		synchronized (this) {
@@ -84,8 +82,10 @@ public class TestRacingEventService {
 		FileInputStream f_in = new FileInputStream(regatta + ".data");
 		ObjectInputStream obj_in = new ObjectInputStream (f_in);
 		retrievedRacesList = (ArrayList<TrackedRace>) obj_in.readObject();
+		obj_in.close();
 		
 		for( TrackedRace r : retrievedRacesList) {
+			System.out.println(r.getRaceIdentifier().getRegattaName());
 			Iterable<Competitor> competitors = r.getRace().getCompetitors();
             System.out.println("" + competitors);
             Iterator<Competitor> comIter = competitors.iterator();
