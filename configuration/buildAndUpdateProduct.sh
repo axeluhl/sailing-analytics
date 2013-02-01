@@ -43,7 +43,7 @@ active_branch=`basename $active_branch`
 cd $ACDIR
 active_server=`basename $ACDIR`
 
-if [ "$active_branch" = "$server_instance" ]; then
+if [[ "$active_branch" == "$active_server" ]]; then
     echo "INFO: GIT branch and server branch matching ($active_server)"
 else
     echo "ERROR: The current branch ($active_branch) does not match the current server ($active_server)."
@@ -51,7 +51,7 @@ else
 fi
 
 shift $((OPTIND-1))
-echo "Starting $@ of server...""
+echo "Starting $@ of server..."
 
 if [ ! -d "plugins" ]; then
     mkdir plugins
@@ -60,7 +60,7 @@ fi
 # yield build so that we get updated product
 cd $PROJECT_HOME/java
 if [ $gwtcompile -eq 1 ]; then
-    echo "INFO: Compiling GWT"
+    echo "INFO: Compiling GWT (rm -rf com.sap.sailing.gwt.ui/com.sap.sailing.*)"
     rm -rf com.sap.sailing.gwt.ui/com.sap.sailing.*
 else
     echo "INFO: GWT Compilation disabled"
