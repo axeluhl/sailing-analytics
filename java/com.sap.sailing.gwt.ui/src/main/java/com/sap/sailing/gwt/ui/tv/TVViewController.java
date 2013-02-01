@@ -50,6 +50,7 @@ public class TVViewController implements RaceTimesInfoProviderListener {
     // leaderboard related attributes
     private LeaderboardDTO leaderboard;
     private final String leaderboardName;
+    private final String leaderboardGroupName;
     private LeaderboardSettings leaderboardSettings; 
    
     // raceboard related attributes
@@ -58,16 +59,18 @@ public class TVViewController implements RaceTimesInfoProviderListener {
     private boolean showWindChart;
     
     /**
+     * @param leaderboardGroupName TODO
      * @param logoAndTitlePanel allowed to be <code>null</code>
      */
     public TVViewController(SailingServiceAsync sailingService, MediaServiceAsync mediaService, StringMessages stringMessages, ErrorReporter errorReporter,
-            String leaderboardName, UserAgentDetails userAgent, LogoAndTitlePanel logoAndTitlePanel,
-            DockLayoutPanel dockPanel, long delayToLiveInMillis, boolean showRaceDetails) {
+            String leaderboardGroupName, String leaderboardName, UserAgentDetails userAgent,
+            LogoAndTitlePanel logoAndTitlePanel, DockLayoutPanel dockPanel, long delayToLiveInMillis, boolean showRaceDetails) {
         this.sailingService = sailingService;
         this.mediaService = mediaService;
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
         this.leaderboardName = leaderboardName;
+        this.leaderboardGroupName = leaderboardGroupName;
         this.userAgent = userAgent;
         this.logoAndTitlePanel = logoAndTitlePanel;
         this.dockPanel = dockPanel;
@@ -86,11 +89,11 @@ public class TVViewController implements RaceTimesInfoProviderListener {
         raceTimesInfoProvider.addRaceTimesInfoProviderListener(this);
     }
     
-    private LeaderboardPanel createLeaderboardPanel(String leaderboardName, boolean showRaceDetails) {
+    private LeaderboardPanel createLeaderboardPanel(String leaderboardGroupName, String leaderboardName, boolean showRaceDetails) {
         CompetitorSelectionModel selectionModel = new CompetitorSelectionModel(/* hasMultiSelection */ true);
         LeaderboardPanel leaderboardPanel = new LeaderboardPanel(sailingService, new AsyncActionsExecutor(), leaderboardSettings,
-        /* preSelectedRace */null, selectionModel, timer, leaderboardName, errorReporter, stringMessages, userAgent,
-                showRaceDetails, /* raceTimesInfoProvider */ null, /* autoExpandLastRaceColumn */ false) {
+        /* preSelectedRace */null, selectionModel, timer, leaderboardGroupName, leaderboardName, errorReporter, stringMessages,
+                userAgent, showRaceDetails, /* raceTimesInfoProvider */ null, /* autoExpandLastRaceColumn */ false) {
             @Override
             protected void setLeaderboard(LeaderboardDTO leaderboard) {
                 super.setLeaderboard(leaderboard);
@@ -142,7 +145,7 @@ public class TVViewController implements RaceTimesInfoProviderListener {
     private void showLeaderboard() {
         if (activeTvView != TVViews.Leaderboard) {
             clearContentPanels();
-            LeaderboardPanel leaderboardPanel = createLeaderboardPanel(leaderboardName, showRaceDetails);
+            LeaderboardPanel leaderboardPanel = createLeaderboardPanel(leaderboardGroupName, leaderboardName, showRaceDetails);
             ScrollPanel leaderboardContentPanel = new ScrollPanel();
             leaderboardContentPanel.add(leaderboardPanel);
             dockPanel.add(leaderboardContentPanel);

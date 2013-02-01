@@ -134,6 +134,8 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
      * obtain the leaderboard contents} from the server. It may change in case the leaderboard is renamed.
      */
     private String leaderboardName;
+    
+    private String leaderboardGroupName;
 
     private final ErrorReporter errorReporter;
 
@@ -478,8 +480,8 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                                   /* namesOfRaceColumnsToShow */ null, /* namesOfRacesToShow */ null, /* nameOfRaceToSort */ null,
                                   /* autoExpandPreSelectedRace */ false, /* showOverallLeaderboardsOnSamePage */ false),
                                   /* preSelectedRace */ null, new CompetitorSelectionModel(/* hasMultiSelection */ true),
-                            timer, overallLeaderboardName, errorReporter, stringMessages, userAgent, showRaceDetails,
-                            /* optionalRaceTimesInfoProvider */ null, /* autoExpandLastRaceColumn */ false);
+                            timer, leaderboardGroupName, overallLeaderboardName, errorReporter, stringMessages, userAgent,
+                            showRaceDetails, /* optionalRaceTimesInfoProvider */ null, /* autoExpandLastRaceColumn */ false);
                     overallLeaderboardPanels.add(overallLeaderboardPanel);
                     overallLeaderboardsPanel.add(overallLeaderboardPanel);
                 }
@@ -1205,31 +1207,32 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             String leaderboardName, ErrorReporter errorReporter, final StringMessages stringMessages,
             final UserAgentDetails userAgent, boolean showRaceDetails) {
         this(sailingService, asyncActionsExecutor, settings, /* preSelectedRace */null, competitorSelectionProvider,
-                leaderboardName, errorReporter, stringMessages, userAgent, showRaceDetails);
+                null, leaderboardName, errorReporter, stringMessages, userAgent, showRaceDetails);
     }
 
     public LeaderboardPanel(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
             LeaderboardSettings settings, RaceIdentifier preSelectedRace,
-            CompetitorSelectionProvider competitorSelectionProvider, String leaderboardName,
-            ErrorReporter errorReporter, final StringMessages stringMessages, final UserAgentDetails userAgent,
-            boolean showRaceDetails) {
+            CompetitorSelectionProvider competitorSelectionProvider, String leaderboardGroupName,
+            String leaderboardName, ErrorReporter errorReporter, final StringMessages stringMessages,
+            final UserAgentDetails userAgent, boolean showRaceDetails) {
         this(sailingService, asyncActionsExecutor, settings, preSelectedRace, competitorSelectionProvider, new Timer(
-                PlayModes.Replay, /* delayBetweenAutoAdvancesInMilliseconds */3000l), leaderboardName,
-                errorReporter, stringMessages, userAgent, showRaceDetails, /* optionalRaceTimesInfoProvider */ null,
-                /* autoExpandLastRaceColumn */ false);
+                PlayModes.Replay, /* delayBetweenAutoAdvancesInMilliseconds */3000l), leaderboardGroupName,
+                leaderboardName, errorReporter, stringMessages, userAgent, showRaceDetails,
+                /* optionalRaceTimesInfoProvider */ null, /* autoExpandLastRaceColumn */ false);
     }
 
     public LeaderboardPanel(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
             LeaderboardSettings settings, RaceIdentifier preSelectedRace,
-            CompetitorSelectionProvider competitorSelectionProvider, Timer timer, String leaderboardName,
-            ErrorReporter errorReporter, final StringMessages stringMessages, final UserAgentDetails userAgent,
-            boolean showRaceDetails, RaceTimesInfoProvider optionalRaceTimesInfoProvider, boolean autoExpandLastRaceColumn) {
+            CompetitorSelectionProvider competitorSelectionProvider, Timer timer, String leaderboardGroupName,
+            String leaderboardName, ErrorReporter errorReporter, final StringMessages stringMessages,
+            final UserAgentDetails userAgent, boolean showRaceDetails, RaceTimesInfoProvider optionalRaceTimesInfoProvider, boolean autoExpandLastRaceColumn) {
         this.showRaceDetails = showRaceDetails;
         this.sailingService = sailingService;
         this.asyncActionsExecutor = asyncActionsExecutor;
         this.preSelectedRace = preSelectedRace;
         this.competitorSelectionProvider = competitorSelectionProvider;
         competitorSelectionProvider.addCompetitorSelectionChangeListener(this);
+        this.leaderboardGroupName = leaderboardGroupName;
         this.setLeaderboardName(leaderboardName);
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
@@ -2288,7 +2291,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             List<RegattaAndRaceIdentifier> races = getTrackedRacesIdentifiers();
             RaceTimesInfoProvider raceTimesInfoProvider = new RaceTimesInfoProvider(sailingService, errorReporter, races, 5000l /* requestInterval*/);
             CompareCompetitorsChartDialog chartDialog = new CompareCompetitorsChartDialog(sailingService, races, raceTimesInfoProvider,
-                    competitorSelectionProvider, timer, stringMessages, errorReporter);
+                    competitorSelectionProvider, timer, stringMessages, errorReporter, leaderboardGroupName, leaderboardName);
             chartDialog.show();
         }
     }

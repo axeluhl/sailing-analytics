@@ -153,7 +153,7 @@ public class RaceBoardPanel extends FormPanel implements RegattaDisplayer, RaceS
         raceMap.onRaceSelectionChange(Collections.singletonList(selectedRaceIdentifier));
         List<Component<?>> components = new ArrayList<Component<?>>();
         competitorChart = new MultiChartPanel(sailingService, asyncActionsExecutor, competitorSelectionModel, raceSelectionProvider,
-                    timer, timeRangeWithZoomModel, stringMessages, errorReporter, true, true);
+                    timer, timeRangeWithZoomModel, stringMessages, errorReporter, true, true, leaderboardGroupName, leaderboardName);
         competitorChart.setVisible(false);
         competitorChart.onRaceSelectionChange(raceSelectionProvider.getSelectedRaces());
         components.add(competitorChart);
@@ -207,8 +207,8 @@ public class RaceBoardPanel extends FormPanel implements RegattaDisplayer, RaceS
                         new ExplicitRaceColumnSelectionWithPreselectedRace(selectedRaceIdentifier),
                         /* showOverallLeaderboardsOnSamePage */ false);
         return new LeaderboardPanel(sailingService, asyncActionsExecutor, leaderBoardSettings, selectedRaceIdentifier,
-                competitorSelectionModel, timer, leaderboardName, errorReporter, stringMessages, userAgent,
-                /* showRaceDetails */ true, raceTimesInfoProvider, /* autoExpandLastRaceColumn */ false);
+                competitorSelectionModel, timer, leaderboardGroupName, leaderboardName, errorReporter, stringMessages,
+                userAgent, /* showRaceDetails */ true, raceTimesInfoProvider, /* autoExpandLastRaceColumn */ false);
      }
 
     private <SettingsType> void addComponentToNavigationMenu(final ComponentViewer componentViewer,
