@@ -372,7 +372,7 @@ public class WindPanel extends FormPanel implements RegattaDisplayer, WindShower
         RegattaAndRaceIdentifier selectedRace = getSelectedRace();
         RaceDTO raceDTO = selectedRace != null ? trackedRacesListComposite.getRaceByIdentifier(selectedRace) : null;
 
-        if (selectedRace != null && raceDTO != null && raceDTO.isTracked) {
+        if (selectedRace != null && raceDTO != null && raceDTO.trackedRace != null) {
             windCaptionPanel.setVisible(true);
             windCaptionPanel.setCaptionText(stringMessages.wind() + ": " + selectedRace.getRaceName());
 

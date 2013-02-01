@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.ui.shared;
 
+import java.io.Serializable;
+
 /**
  * Equality and hash code are defined based on Java object identity
  * 
@@ -7,12 +9,19 @@ package com.sap.sailing.gwt.ui.shared;
  *
  */
 public abstract class ControlPointDTO extends NamedDTO {
+    private Serializable id;
+    
     public ControlPointDTO() {}
     
-    public ControlPointDTO(String name) {
+    public ControlPointDTO(Serializable id, String name) {
         super(name);
+        this.id = id;
     }
     
+    public Serializable getId() {
+        return id;
+    }
+
     @Override
     public boolean equals(Object o) {
         return this == o;

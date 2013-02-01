@@ -1004,7 +1004,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     private MarkDTO convertToMarkDTO(Mark mark, Position position) {
-        MarkDTO markDTO = new MarkDTO(mark.getName(), position.getLatDeg(), position.getLngDeg());
+        MarkDTO markDTO = new MarkDTO(mark.getId(), mark.getName(), position.getLatDeg(), position.getLngDeg());
         markDTO.color = mark.getColor();
         markDTO.shape = mark.getShape();
         markDTO.pattern = mark.getPattern();
@@ -1767,11 +1767,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             final Position leftPos = trackedRace.getOrCreateTrack(left).getEstimatedPosition(timePoint, /* extrapolate */ false);
             final Mark right = ((Gate) controlPoint).getRight();
             final Position rightPos = trackedRace.getOrCreateTrack(right).getEstimatedPosition(timePoint, /* extrapolate */ false);
-            result = new GateDTO(controlPoint.getName(), convertToMarkDTO(left, leftPos), convertToMarkDTO(right, rightPos)); 
+            result = new GateDTO(controlPoint.getId(), controlPoint.getName(), convertToMarkDTO(left, leftPos), convertToMarkDTO(right, rightPos)); 
         } else {
             final Position posOfFirst = trackedRace.getOrCreateTrack(controlPoint.getMarks().iterator().next()).
                     getEstimatedPosition(timePoint, /* extrapolate */ false);
-            result = new MarkDTO(controlPoint.getName(), posOfFirst.getLatDeg(), posOfFirst.getLngDeg());
+            result = new MarkDTO(controlPoint.getId(), controlPoint.getName(), posOfFirst.getLatDeg(), posOfFirst.getLngDeg());
         }
         return result;
     }
@@ -1810,7 +1810,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                         GateDTO gateDTO = (GateDTO) controlPointDTO;
                         Mark left = baseDomainFactory.getOrCreateMark(gateDTO.getLeft().name);
                         Mark right = baseDomainFactory.getOrCreateMark(gateDTO.getRight().name);
-                        newControlPoint = baseDomainFactory.createGate(left, right, gateDTO.name);
+                        newControlPoint = baseDomainFactory.createGate(UUID.randomUUID(), left, right, gateDTO.name);
                     } else {
                         newControlPoint = baseDomainFactory.getOrCreateMark(controlPointDTO.name);
                     }

@@ -231,7 +231,7 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
         Column<RaceDTO, SafeHtml> raceNameColumn = new Column<RaceDTO, SafeHtml>(anchorCell) {
             @Override
             public SafeHtml getValue(RaceDTO raceDTO) {
-                if (raceDTO.isTracked == true) {
+                if (raceDTO.trackedRace != null) {
                     RegattaNameAndRaceName raceIdentifier = (RegattaNameAndRaceName) raceDTO.getRaceIdentifier();
                     String debugParam = Window.Location.getParameter("gwt.codesvr");
                     String link = URLEncoder.encode("/gwt/RaceBoard.html?raceName="
