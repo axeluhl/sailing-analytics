@@ -173,8 +173,8 @@ public class PathGeneratorTreeGrowWind extends PathGeneratorBase {
         
         // calculate height-position with reference to race course
         Position posHeight = pathPos.getPosition().projectToLineThrough(posEnd, posWind.getBearing());
-        //Bearing bearVrt = posStart.getBearingGreatCircle(posEnd);
-        //Position posHeightTrgt = pathPos.getPosition().projectToLineThrough(posStart, bearVrt);
+        Bearing bearVrt = posStart.getBearingGreatCircle(posEnd);
+        Position posHeightTrgt = pathPos.getPosition().projectToLineThrough(posStart, bearVrt);
         //Position posHeightWind = pathPos.getPosition().projectToLineThrough(posRef, posWind.getBearing());
         
         // calculate vertical distance as distance of height-position to start
@@ -194,7 +194,8 @@ public class PathGeneratorTreeGrowWind extends PathGeneratorBase {
         
         // calculate horizontal side: left or right in reference to race course
         double posSide = 1;
-        double posBear = posWind.getBearing().getDegrees() - posEnd.getBearingGreatCircle(pathPos.getPosition()).getDegrees();
+        //double posBear = posWind.getBearing().getDegrees() - posEnd.getBearingGreatCircle(pathPos.getPosition()).getDegrees();
+        double posBear = posStart.getBearingGreatCircle(pathPos.getPosition()).getDegrees();
         if ((posBear < 0.0)||(posBear > 180.0)) {
             posSide = -1;
         } else if ((posBear == 0.0)||(posBear == 180.0)) {
@@ -202,7 +203,7 @@ public class PathGeneratorTreeGrowWind extends PathGeneratorBase {
         }
         // calculate horizontal distance as distance of height-position to current position
         //double hrzDist = Math.round(posSide*posHeight.getDistance(pathPos.getPosition()).getMeters()*100.0)/100.0;
-        double hrzDist = Math.round(posSide*posHeight.getDistance(pathPos.getPosition()).getMeters()*100.0)/100.0;
+        double hrzDist = Math.round(posSide*posHeightTrgt.getDistance(pathPos.getPosition()).getMeters()*100.0)/100.0;
         
         //System.out.println(""+hrzDist+", "+vrtDist+", "+pathPos.getPosition().getLatDeg()+", "+pathPos.getPosition().getLngDeg()+", "+posHeight.getLatDeg()+", "+posHeight.getLngDeg());
         
