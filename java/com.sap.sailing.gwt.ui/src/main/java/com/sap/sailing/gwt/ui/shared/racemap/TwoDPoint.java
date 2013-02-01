@@ -118,28 +118,22 @@ public class TwoDPoint {
         return new TwoDPoint(x, y);
     }
 
-    // A //B //C //B'
-    public static boolean isOnTheInside(final TwoDPoint beforePoint, final TwoDPoint origin, final TwoDPoint afterPoint,
-            final TwoDPoint newOrigin) {
-        final TwoDSegment ab = new TwoDSegment(beforePoint, origin);
+    public static boolean isOnTheInside(final TwoDPoint beforeOriginPoint, final TwoDPoint originPoint, final TwoDPoint afterOriginPoint, final TwoDPoint newOriginPoint) {
 
-        final double valueOf_C_AB = ab.getLineSlope() * afterPoint.x - afterPoint.y + ab.getLineIntercept();
-        final double valueOf_Bfirst_AB = ab.getLineSlope() * newOrigin.x - newOrigin.y + ab.getLineIntercept();
+        final double xA = beforeOriginPoint.getX();
+        final double yA = beforeOriginPoint.getY();
+        final double xB = originPoint.getX();
+        final double yB = originPoint.getY();
+        final double xC = afterOriginPoint.getX();
+        final double yC = afterOriginPoint.getY();
+        final double xD = newOriginPoint.getX();
+        final double yD = newOriginPoint.getY();
 
-        final boolean sameSide_BFirst_C_AB = ((valueOf_C_AB * valueOf_Bfirst_AB) > 0);
+        final boolean firstCondition = (yD - yA) >= ((yB - yA) * (xD - xA) / (xB - xA));
+        final boolean secondCondition = (yD - yB) <= ((yC - yB) * (xD - xB) / (xC - xB));
 
-        if (sameSide_BFirst_C_AB == false) {
-            return false;
-        }
+        return firstCondition && secondCondition;
 
-        final TwoDSegment bc = new TwoDSegment(origin, afterPoint);
-
-        final double valueOf_A_BC = bc.getLineSlope() * beforePoint.x - beforePoint.y + bc.getLineIntercept();
-        final double valueOf_Bfirst_BC = bc.getLineSlope() * newOrigin.x - newOrigin.y + bc.getLineIntercept();
-
-        final boolean sameSide_BFirst_A_BC = ((valueOf_A_BC * valueOf_Bfirst_BC) > 0);
-
-        return sameSide_BFirst_A_BC;
     }
 
     // A //B //C //Bfirst
