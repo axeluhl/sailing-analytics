@@ -64,8 +64,8 @@ public class TVEntryPoint extends AbstractEntryPoint {
             mainPanel.addNorth(logoAndTitlePanel, 68);
         }
         
-        tvViewController = new TVViewController(sailingService, mediaService, stringMessages, this, leaderboardName,
-                userAgent, logoAndTitlePanel, mainPanel, delayToLiveMillis, showRaceDetails);
+        tvViewController = new TVViewController(sailingService, mediaService, stringMessages, this, leaderboardGroupName,
+                leaderboardName, userAgent, logoAndTitlePanel, mainPanel, delayToLiveMillis, showRaceDetails);
         tvViewController.updateTvView(TVViews.Leaderboard);
     }
 }

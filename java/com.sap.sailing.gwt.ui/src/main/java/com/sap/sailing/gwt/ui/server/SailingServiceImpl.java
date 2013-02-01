@@ -2459,7 +2459,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
     
     private Double getCompetitorRaceDataEntry(DetailType dataType, TrackedRace trackedRace, Competitor competitor,
-            TimePoint timePoint) throws NoWindException {
+            TimePoint timePoint, String leaderboardGroupName, String leaderboardName) throws NoWindException {
         Double result = null;
         Course course = trackedRace.getRace().getCourse();
         course.lockForRead(); // make sure the tracked leg survives this call even if a course update is pending
@@ -2489,8 +2489,17 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 case RACE_RANK:
                     result = (double) trackedLeg.getRank(timePoint);
                     break;
-        		default:
-        			throw new UnsupportedOperationException("Theres currently no support for the enum value '" + dataType + "' in this method.");
+                case REGATTA_RANK:
+                    if (leaderboardName == null || leaderboardName.isEmpty()) {
+                        break;
+                    }
+                    
+                    Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+                    result = leaderboard == null ? null : (double) leaderboard.getTotalRankOfCompetitor(competitor, timePoint);
+                    break;
+                default:
+                    throw new UnsupportedOperationException("Theres currently no support for the enum value '"
+                            + dataType + "' in this method.");
                 }
             }
             return result;
@@ -2501,7 +2510,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     
     @Override
     public CompetitorsRaceDataDTO getCompetitorsRaceData(RegattaAndRaceIdentifier race, List<CompetitorDTO> competitors, Date from, Date to,
-            long stepSizeInMs, DetailType detailType) throws NoWindException {
+            long stepSizeInMs, DetailType detailType, String leaderboardGroupName, String leaderboardName) throws NoWindException {
         CompetitorsRaceDataDTO result = null;
         TrackedRace trackedRace = getExistingTrackedRace(race);
         if (trackedRace != null) {
@@ -2523,7 +2532,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                             MillisecondsTimePoint time = new MillisecondsTimePoint(markPassing.getTimePoint().asMillis());
                             markPassingsData.add(new Triple<String, Date, Double>(markPassing.getWaypoint().getName(),
                                     time.asDate(),
-                                    getCompetitorRaceDataEntry(detailType, trackedRace, competitor, time)));
+                                    getCompetitorRaceDataEntry(detailType, trackedRace, competitor, time, leaderboardGroupName, leaderboardName)));
                         }
                     } finally {
                         trackedRace.unlockAfterRead(competitorMarkPassings);
@@ -2533,7 +2542,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     for (long i = startTime.asMillis(); i <= endTime.asMillis(); i += stepSizeInMs) {
                         MillisecondsTimePoint time = new MillisecondsTimePoint(i);
                         raceData.add(new Pair<Date, Double>(time.asDate(), getCompetitorRaceDataEntry(detailType, trackedRace,
-                                competitor, time)));
+                                competitor, time, leaderboardGroupName, leaderboardName)));
                     }
                 }
                 result.setCompetitorData(competitorDTO, new CompetitorRaceDataDTO(competitorDTO, detailType, markPassingsData, raceData));
