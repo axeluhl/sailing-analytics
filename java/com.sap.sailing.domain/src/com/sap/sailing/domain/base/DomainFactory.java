@@ -20,14 +20,20 @@ public interface DomainFactory {
      */
     Nationality getOrCreateNationality(String threeLetterIOCCode);
 
-    Mark getOrCreateMark(String id);
+    /**
+     * The name will also be used as the mark's ID. If you have a unique ID, use {@link #getOrCreateMark(Serializable, String)} instead.
+     */
+    Mark getOrCreateMark(String name);
+    
+    Mark getOrCreateMark(Serializable id, String name);
     
     /**
-     * If the single mark with ID <code>id</code> already exists, it is returned. Its color may differ from <code>color</code>
+     * If the single mark with ID <code>name</code> already exists, it is returned. Its color may differ from <code>color</code>
      * in that case. Otherwise, a new {@link Mark} is created with <code>color</code> as its {@link Mark#getColor()} 
      * and <code>shape</code> as its {@link Mark#getShape()}.
+     * @param id TODO
      */
-    Mark getOrCreateMark(String id, MarkType type, String color, String shape, String pattern);
+    Mark getOrCreateMark(Serializable id, String name, MarkType type, String color, String shape, String pattern);
 
     Gate createGate(Mark left, Mark right, String name);
     

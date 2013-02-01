@@ -1,6 +1,5 @@
 package com.sap.sailing.domain.base.impl;
 
-import java.awt.TrayIcon.MessageType;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
@@ -44,7 +43,7 @@ public class DomainFactoryImpl implements DomainFactory {
      */
     private final Map<String, Nationality> nationalityCache;
     
-    private final Map<String, Mark> markCache;
+    private final Map<Serializable, Mark> markCache;
     
     private final Map<String, BoatClass> boatClassCache;
     
@@ -87,7 +86,7 @@ public class DomainFactoryImpl implements DomainFactory {
     public DomainFactoryImpl() {
         waypointCacheReferenceQueue = new ReferenceQueue<Waypoint>();
         nationalityCache = new HashMap<String, Nationality>();
-        markCache = new HashMap<String, Mark>();
+        markCache = new HashMap<Serializable, Mark>();
         boatClassCache = new HashMap<String, BoatClass>();
         competitorCache = new HashMap<Serializable, Competitor>();
         waypointCache = new ConcurrentHashMap<Serializable, WeakWaypointReference>();
@@ -106,27 +105,29 @@ public class DomainFactoryImpl implements DomainFactory {
         }
     }
     
-    /**
-     * @param id
-     * the ID which is probably also used as the "device name" and the "sail number" in case of an
-     * {@link MessageType#RPD RPD} message
-     */
     @Override
-    public Mark getOrCreateMark(String id) {
+    public Mark getOrCreateMark(String name) {
+        return getOrCreateMark(name, name);
+    }
+    
+    @Override
+    public Mark getOrCreateMark(Serializable id, String name) {
         Mark result = markCache.get(id);
         if (result == null) {
-            result = new MarkImpl(id);
+            result = new MarkImpl(id, name);
             markCache.put(id, result);
         }
         return result;
     }
     
+    
+    
     @Override
-    public Mark getOrCreateMark(String id, MarkType type, String color, String shape, String pattern) {
-        Mark result = markCache.get(id);
+    public Mark getOrCreateMark(Serializable id, String name, MarkType type, String color, String shape, String pattern) {
+        Mark result = markCache.get(name);
         if (result == null) {
-            result = new MarkImpl(id, type, color, shape, pattern);
-            markCache.put(id, result);
+            result = new MarkImpl(id, name, type, color, shape, pattern);
+            markCache.put(name, result);
         }
         return result;
     }

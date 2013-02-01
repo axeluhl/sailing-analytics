@@ -15,41 +15,19 @@ public class MarkImpl extends NamedImpl implements Mark {
     private final String shape;
     private final String pattern;
     private final MarkType type;
+    private final Serializable id;
 
     public MarkImpl(String name) {
-        super(name);
-        type = MarkType.BUOY;
-        color = null;
-        shape = null;
-        pattern = null;
+        this(name, name);
     }
     
-    public MarkImpl(String name, MarkType type) {
-        super(name);
-        this.type = type;
-        color = null;
-        shape = null;
-        pattern = null;
+    public MarkImpl(Serializable id, String name) {
+        this(id, name, MarkType.BUOY, /* color */ null, /* shape */ null, /* pattern */ null);
     }
-
-    public MarkImpl(String name, MarkType type, String color) {
+    
+    public MarkImpl(Serializable id, String name, MarkType type, String color, String shape, String pattern) {
         super(name);
-        this.type = type;
-        this.color = color;
-        shape = null;
-        pattern = null;
-    }
-
-    public MarkImpl(String name, MarkType type, String color, String shape) {
-        super(name);
-        this.type = type;
-        this.color = color;
-        this.shape = shape;
-        pattern = null;
-    }
-
-    public MarkImpl(String name, MarkType type, String color, String shape, String pattern) {
-        super(name);
+        this.id = id;
         this.type = type;
         this.color = color;
         this.shape = shape;
@@ -58,7 +36,7 @@ public class MarkImpl extends NamedImpl implements Mark {
 
     @Override
     public Serializable getId() {
-        return getName();
+        return id;
     }
 
     @SuppressWarnings("unchecked")
@@ -70,7 +48,7 @@ public class MarkImpl extends NamedImpl implements Mark {
 
     @Override
     public Mark resolve(DomainFactory domainFactory) {
-        Mark result = domainFactory.getOrCreateMark(getName(), type, color, shape, pattern);
+        Mark result = domainFactory.getOrCreateMark(getId(), getName(), type, color, shape, pattern);
         return result;
     }
 
