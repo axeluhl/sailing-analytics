@@ -25,32 +25,38 @@ import com.sap.sailing.simulator.windfield.WindFieldGenerator;
 public class PathGeneratorTreeGrowWind extends PathGeneratorBase {
 
     private static Logger logger = Logger.getLogger("com.sap.sailing");
+    private boolean debugMsgOn = false;
     SimulationParameters simulationParameters;
-    int maxLeft;
-    int maxRight;
-    boolean startLeft;
+    int maxTurns = 0;
+    String initPathStr = "0";
+    PathCand bestCand = null;
 
     public PathGeneratorTreeGrowWind(SimulationParameters params) {
         simulationParameters = params;
     }
 
-    public void setEvaluationParameters(int maxLeftVal, int maxRightVal, boolean startLeftVal) {
-        this.maxLeft = maxLeftVal;
-        this.maxRight = maxRightVal;
-        this.startLeft = startLeftVal;
+    public void setEvaluationParameters(String startDirection, int maxTurns) {
+        if (startDirection != null) {
+            this.initPathStr = "0" + startDirection;
+        } else {
+            this.initPathStr = "0";
+        }
+        this.maxTurns = maxTurns;
     }
 
     class PathCand implements Comparable<PathCand> {
-        public PathCand(TimedPosition pos, double vrt, double hrz, String path) {
+        public PathCand(TimedPosition pos, double vrt, double hrz, int trn, String path) {
             this.pos = pos;
             this.vrt = vrt;
             this.hrz = hrz;
+            this.trn = trn;
             this.path = path;
         }
 
         TimedPosition pos;
         double vrt;
         double hrz;
+        int trn;
         String path;
 
         /*@Override
@@ -76,9 +82,16 @@ public class PathGeneratorTreeGrowWind extends PathGeneratorBase {
 
     }
     
+    // getter for evaluating best path cand propoerties further
+    PathCand getBestCand() {
+        return this.bestCand;
+    }
     
-    // generate step
-    Pair<TimedPosition,Wind> getStep(TimedPosition pos, long timeStep, long turnLoss, char prevDirection, char nextDirection) {
+    
+    // generate step in one of the possible directions
+    // default: L - left, R - right
+    // extended: M - wide left, S - wide right
+    Pair<TimedPosition,Wind> getStep(TimedPosition pos, long timeStep, long turnLoss, boolean sameBaseDirection, char nextDirection) {
         
         double offDeg = 5.0;
         WindFieldGenerator wf = simulationParameters.getWindField();
@@ -110,21 +123,6 @@ public class PathGeneratorTreeGrowWind extends PathGeneratorBase {
 
         TimePoint travelTime;
         TimePoint nextTime = new MillisecondsTimePoint(curTime.asMillis()+timeStep);
-        char prevBaseDirection = prevDirection;
-        if (prevBaseDirection == 'M') {
-            prevBaseDirection = 'L';
-        }
-        if (prevBaseDirection == 'S') {
-            prevBaseDirection = 'R';
-        }
-        char nextBaseDirection = nextDirection;
-        if (nextBaseDirection == 'M') {
-            nextBaseDirection = 'L';
-        }
-        if (nextBaseDirection == 'S') {
-            nextBaseDirection = 'R';
-        }
-        boolean sameBaseDirection = (nextBaseDirection == prevBaseDirection)||(prevBaseDirection == '0'); 
         if (sameBaseDirection) {
             travelTime = nextTime;
         } else {
@@ -133,18 +131,50 @@ public class PathGeneratorTreeGrowWind extends PathGeneratorBase {
 
         return new Pair<TimedPosition,Wind>(new TimedPositionImpl(nextTime, travelSpeed.travelTo(curPosition, curTime, travelTime)), appWind);
     }
+
+    // use base direction to distinguish direction changes that do or don't require a turn
+    char getBaseDirection(char direction) {
+        char baseDirection = direction;
         
+        if (direction == 'M') {
+            baseDirection = 'L';
+        }
+        if (direction == 'S') {
+            baseDirection = 'R';
+        }
+        
+        return baseDirection;
+    }
     
+    // check whether nextDirection is same base direction as previous direction, i.e. no turn
+    boolean isSameDirection(char prevDirection, char nextDirection) {
+
+        char prevBaseDirection = this.getBaseDirection(prevDirection);
+        char nextBaseDirection = this.getBaseDirection(nextDirection);
+
+        return ((nextBaseDirection == prevBaseDirection)||(prevBaseDirection == '0')); 
+    }
+    
+    // get path candidate measuring height towards (local, current-apparent) wind
     PathCand getPathCandWind(PathCand path, char nextDirection, long timeStep, long turnLoss, Position posStart, Position posEnd, double tgtHeight) {
+
+        char prevDirection = path.path.charAt(path.path.length()-1);
+        boolean sameBaseDirection = this.isSameDirection(prevDirection, nextDirection); 
+
+        int turnCount = path.trn;
+        if (!sameBaseDirection) {
+            turnCount++;
+        }
         
         // calculate next path position (taking turn-loss into account)
-        Pair<TimedPosition,Wind> nextStep = this.getStep(path.pos, timeStep, turnLoss, path.path.charAt(path.path.length()-1), nextDirection);
+        Pair<TimedPosition,Wind> nextStep = this.getStep(path.pos, timeStep, turnLoss, sameBaseDirection, nextDirection);
         TimedPosition pathPos = nextStep.getA(); 
         Wind posWind = nextStep.getB();
         
         // calculate height-position with reference to race course
         Position posHeight = pathPos.getPosition().projectToLineThrough(posEnd, posWind.getBearing());
-        //Position posHeightTrgt = pathPos.getPosition().projectToLineThrough(posEnd, bearVrt);
+        //Bearing bearVrt = posStart.getBearingGreatCircle(posEnd);
+        //Position posHeightTrgt = pathPos.getPosition().projectToLineThrough(posStart, bearVrt);
         //Position posHeightWind = pathPos.getPosition().projectToLineThrough(posRef, posWind.getBearing());
         
         // calculate vertical distance as distance of height-position to start
@@ -171,6 +201,7 @@ public class PathGeneratorTreeGrowWind extends PathGeneratorBase {
             posSide = 0;
         }
         // calculate horizontal distance as distance of height-position to current position
+        //double hrzDist = Math.round(posSide*posHeight.getDistance(pathPos.getPosition()).getMeters()*100.0)/100.0;
         double hrzDist = Math.round(posSide*posHeight.getDistance(pathPos.getPosition()).getMeters()*100.0)/100.0;
         
         //System.out.println(""+hrzDist+", "+vrtDist+", "+pathPos.getPosition().getLatDeg()+", "+pathPos.getPosition().getLngDeg()+", "+posHeight.getLatDeg()+", "+posHeight.getLngDeg());
@@ -178,7 +209,7 @@ public class PathGeneratorTreeGrowWind extends PathGeneratorBase {
         // extend path-string by step-direction
         String pathStr = path.path + nextDirection;
         
-        return (new PathCand(pathPos, vrtDist, hrzDist, pathStr));
+        return (new PathCand(pathPos, vrtDist, hrzDist, turnCount, pathStr));
     }
     
     
@@ -187,22 +218,39 @@ public class PathGeneratorTreeGrowWind extends PathGeneratorBase {
         
         List<PathCand> result = new ArrayList<PathCand>();
         PathCand newPathCand;
+        
+        if (this.maxTurns > 0) {
 
+            char prevDirection = path.path.charAt(path.path.length()-1);
+            if ((path.trn < this.maxTurns)||(this.isSameDirection(prevDirection, 'L'))) {
+                newPathCand = getPathCandWind(path, 'L', timeStep, turnLoss, posStart, posEnd, tgtHeight);
+                result.add(newPathCand);
+            }
+
+            if ((path.trn < this.maxTurns)||(this.isSameDirection(prevDirection, 'R'))) {
+                newPathCand = getPathCandWind(path, 'R', timeStep, turnLoss, posStart, posEnd, tgtHeight);
+                result.add(newPathCand);
+            }
+
+        } else {
+            
         // step left
         newPathCand = getPathCandWind(path, 'L', timeStep, turnLoss, posStart, posEnd, tgtHeight);
         result.add(newPathCand);
 
         // step wide left
-        newPathCand = getPathCandWind(path, 'M', timeStep, turnLoss, posStart, posEnd, tgtHeight);
-        result.add(newPathCand);
+        //newPathCand = getPathCandWind(path, 'M', timeStep, turnLoss, posStart, posEnd, tgtHeight);
+        //result.add(newPathCand);
 
         // step right
         newPathCand = getPathCandWind(path, 'R', timeStep, turnLoss, posStart, posEnd, tgtHeight);
         result.add(newPathCand);
 
         // step wide right
-        newPathCand = getPathCandWind(path, 'S', timeStep, turnLoss, posStart, posEnd, tgtHeight);
-        result.add(newPathCand);
+        //newPathCand = getPathCandWind(path, 'S', timeStep, turnLoss, posStart, posEnd, tgtHeight);
+        //result.add(newPathCand);
+
+        }
 
         return result;
     }
@@ -234,27 +282,21 @@ public class PathGeneratorTreeGrowWind extends PathGeneratorBase {
         Bearing bearVrt = startPos.getBearingGreatCircle(endPos);
         //Bearing bearHrz = bearVrt.add(new DegreeBearingImpl(90.0));
         Position middlePos = startPos.translateGreatCircle(bearVrt, distStartEnd.scale(0.5));
-             
-        System.out.println("start : "+startPos.getLatDeg()+", "+startPos.getLngDeg());
-        System.out.println("middle: "+middlePos.getLatDeg()+", "+middlePos.getLngDeg());
-        System.out.println("end   : "+endPos.getLatDeg()+", "+endPos.getLngDeg());
         
-        // initialize list of paths
-        PathCand initPath = new PathCand(new TimedPositionImpl(currentTime, currentPosition), 0.0, 0.0, "0");
-        String initPathStr = "0";
-        //String initPathStr = "0RRRRRRRRRRRRRRRLLL";
-        //String initPathStr = "0RRRRRRRRRRRRRRRRRR";
-        //PathCand initPath = new PathCand(new TimedPositionImpl(currentTime, currentPosition), 0.0, 0.0, ); //"0RRRRRRRRRRRRRRR");
+        if (debugMsgOn) {
+            System.out.println("start : "+startPos.getLatDeg()+", "+startPos.getLngDeg());
+            System.out.println("middle: "+middlePos.getLatDeg()+", "+middlePos.getLngDeg());
+            System.out.println("end   : "+endPos.getLatDeg()+", "+endPos.getLngDeg());
+        }
+        
+        // calculate initial position according to initPathStr
+        PathCand initPath = new PathCand(new TimedPositionImpl(currentTime, currentPosition), 0.0, 0.0, 0, "0");
         if (initPathStr.length()>1) {
-            //char prevDirection = '0';
             char nextDirection = '0';            
             for(int idx=1; idx<initPathStr.length(); idx++) {
                 nextDirection = initPathStr.charAt(idx);
-                //TimedPosition newPosition = this.getStep(initPath.pos, timeStep, turnLoss, prevDirection, nextDirection);
-                //initPath.pos = newPosition;
                 PathCand newPathCand = getPathCandWind(initPath, nextDirection, timeStep, turnLoss, startPos, endPos, distStartEndMeters);
                 initPath = newPathCand;
-                //prevDirection = nextDirection;
             }
         }
         List<PathCand> allPaths = new ArrayList<PathCand>();
@@ -262,22 +304,21 @@ public class PathGeneratorTreeGrowWind extends PathGeneratorBase {
         allPaths.add(initPath);
         
         
-        TimedPosition tstPosition = this.getStep(new TimedPositionImpl(startTime, startPos), timeStep, turnLoss, '0', 'L').getA();
+        TimedPosition tstPosition = this.getStep(new TimedPositionImpl(startTime, startPos), timeStep, turnLoss, true, 'L').getA();
         double tstDist1 = startPos.getDistance(tstPosition.getPosition()).getMeters();
-        tstPosition = this.getStep(new TimedPositionImpl(startTime, startPos), timeStep, turnLoss, '0', 'R').getA();
+        tstPosition = this.getStep(new TimedPositionImpl(startTime, startPos), timeStep, turnLoss, true, 'R').getA();
         double tstDist2 = startPos.getDistance(tstPosition.getPosition()).getMeters();
         
-        double hrzBinSize = (tstDist1 + tstDist2)/3; // horizontal bin size in meters
-        System.out.println("Horizontal Bin Size: "+hrzBinSize);
+        double hrzBinSize = (tstDist1 + tstDist2)/4; // horizontal bin size in meters
+        if (debugMsgOn) {
+            System.out.println("Horizontal Bin Size: "+hrzBinSize);
+        }
         
         double oobFact = 0.75; // out-of-bounds factor
-        //int hrzLeft = (int)Math.round(Math.floor( -distStartEndMeters / 2.0 / hrzBinSize / oobFact ));
-        //int hrzRight = (int)Math.round(Math.floor( distStartEndMeters / 2.0 / hrzBinSize / oobFact ));
-        
         boolean reachedEnd = false;
         int addSteps = 0;
         int finalSteps = 0; // maximum number of additional steps after first target-path found
-        //for(int count=0; count<10; count++) {
+
         while ((!reachedEnd)||(addSteps<finalSteps)) {
 
             if (reachedEnd) {
@@ -320,9 +361,18 @@ public class PathGeneratorTreeGrowWind extends PathGeneratorBase {
             //System.out.println("MapSize: "+mapSize);
             
             int[] binIdx = new int[mapSize]; // TODO: init with zero?
-            double[] binVal = new double[mapSize]; // TODO: init with zero?
+            double[] binVal = new double[mapSize];
+            // TODO: init of binVal
+            /*for(int idx = 0; idx < mapSize; idx++) {
+                binVal[idx] = 2*distStartEndMeters;
+            }*/
             for(int curIdx=0; curIdx<newPaths.size(); curIdx++) {
                 PathCand curPath = newPaths.get(curIdx);
+                //if (curPath.vrt > 3900) {
+                if (debugMsgOn) {
+                    System.out.println(""+curPath.path+": "+curPath.hrz+", "+curPath.vrt+", "+curPath.pos.getPosition().getLatDeg()+", "+curPath.pos.getPosition().getLngDeg());
+                }
+                //}
                 
                 // check whether path is *outside* regatta-area
                 double distFromMiddleMeters = middlePos.getDistance(curPath.pos.getPosition()).getMeters();
@@ -361,13 +411,13 @@ public class PathGeneratorTreeGrowWind extends PathGeneratorBase {
                         allPaths.add(curPath);
                         
                         // debug output
-                        /*if ((Math.abs(curKey + hrzLeft) <= 3)) {
+                        /*if ((Math.abs(curKey + hrzLeft) <= 10)) {
                             System.out.println("" + curPath.path + ": " + (curKey + hrzLeft) + ", vrt:" + curPath.vrt + ", hrz:" + curPath.hrz + ", bin:" + (Math.floor((curPath.hrz + hrzBinSize / 2.0) / hrzBinSize)));
                         }*/                       
                         
                         // terminate path-search if paths close enough to target are found
                         if ((curPath.vrt > distStartEndMeters)) {
-                            if ((Math.abs(curKey + hrzLeft) <= 2)) {
+                            if ((Math.abs(curKey + hrzLeft) <= 3)) {
                                 reachedEnd = true;
                                 trgPaths.add(curPath); // add path to list of target-paths
                             }
@@ -384,6 +434,8 @@ public class PathGeneratorTreeGrowWind extends PathGeneratorBase {
         // if no target-paths were found, return empty path
         if (trgPaths.size() == 0) {
             //trgPaths = allPaths; // TODO: only for testing; remove lateron
+            TimedPositionWithSpeed curPosition = new TimedPositionWithSpeedImpl(startTime, startPos, null);
+            path.add(curPosition);
             return new PathImpl(path, wf); // return empty path
         }
         
@@ -391,9 +443,11 @@ public class PathGeneratorTreeGrowWind extends PathGeneratorBase {
         Collections.sort(trgPaths);
         
         // debug output
-        for(PathCand curPath : trgPaths) {            
-            System.out.print(""+curPath.path+": "+curPath.pos.getTimePoint().asMillis()+", "+curPath.pos.getPosition().getLatDeg()+", "+curPath.pos.getPosition().getLngDeg()+", ");
-            System.out.println(" height:"+curPath.vrt+" of "+startPos.getDistance(endPos).getMeters()+", dist:"+curPath.hrz+" ~ "+curPath.pos.getPosition().getDistance(endPos));
+        if (debugMsgOn) {
+            for(PathCand curPath : trgPaths) {            
+                System.out.print(""+curPath.path+": "+curPath.pos.getTimePoint().asMillis()+", "+curPath.pos.getPosition().getLatDeg()+", "+curPath.pos.getPosition().getLngDeg()+", ");
+                System.out.println(" height:"+curPath.vrt+" of "+startPos.getDistance(endPos).getMeters()+", dist:"+curPath.hrz+" ~ "+curPath.pos.getPosition().getDistance(endPos));
+            }
         }
         
         //
@@ -401,13 +455,13 @@ public class PathGeneratorTreeGrowWind extends PathGeneratorBase {
         //
         
         // generate intermediate steps
-        PathCand bstPath = trgPaths.get(0); // target-path ending closest to target
+        bestCand = trgPaths.get(0); // target-path ending closest to target
         TimedPositionWithSpeed curPosition = null;
         char nextDirection = '0';
         char prevDirection = '0';
-        for(int step=0; step<(bstPath.path.length()-1); step++) {
+        for(int step=0; step<(bestCand.path.length()-1); step++) {
             
-           nextDirection = bstPath.path.charAt(step);
+           nextDirection = bestCand.path.charAt(step);
             
            if (nextDirection == '0') {
                
@@ -416,7 +470,8 @@ public class PathGeneratorTreeGrowWind extends PathGeneratorBase {
                
            } else {
                
-               TimedPosition newPosition = this.getStep(curPosition, timeStep, turnLoss, prevDirection, nextDirection).getA();
+               boolean sameBaseDirection = this.isSameDirection(prevDirection, nextDirection);
+               TimedPosition newPosition = this.getStep(curPosition, timeStep, turnLoss, sameBaseDirection, nextDirection).getA();
                curPosition = new TimedPositionWithSpeedImpl(newPosition.getTimePoint(), newPosition.getPosition(), null);
                path.add(curPosition);
                
@@ -426,7 +481,7 @@ public class PathGeneratorTreeGrowWind extends PathGeneratorBase {
         }
         
         // add final position (rescaled before to end on height of target)
-        path.add(new TimedPositionWithSpeedImpl(bstPath.pos.getTimePoint(), bstPath.pos.getPosition(), null));
+        path.add(new TimedPositionWithSpeedImpl(bestCand.pos.getTimePoint(), bestCand.pos.getPosition(), null));
 
         return new PathImpl(path, wf);
 
