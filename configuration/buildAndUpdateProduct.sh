@@ -1,10 +1,12 @@
 #/bin/bash
 
+source /home/trac/.bash_profile
+
 ARCH=x86_64
 PROJECT_HOME=/home/trac/git
-MAVEN_SETTINGS=$PROJECT_HOME/settings.xml
 
 ACDIR=`pwd`
+MAVEN_SETTINGS=$ACDIR/configuration/maven-settings.xml
 
 gwtcompile=1
 testing=1
@@ -13,14 +15,16 @@ offline=0
 extra=''
 
 if [ $# -eq 0 ]; then
-    echo "buildAndUpdateProduct [-g -t -o -c] [build|install]"
+    echo "buildAndUpdateProduct [-g -t -o -c] [build|install|all]"
+    echo ""
     echo "-g Disable GWT compile, no gwt files will be generated."
     echo "-t Disable tests"
     echo "-o Enable offline mode"
     echo "-c Disable cleaning"
     echo ""
-    echo "build: builds the server code but does not install"
-    echo "install: builds and installs"
+    echo "build: builds the server code to $PROJECT_HOME"
+    echo "install: installs product to $ACDIR"
+    echo "all: calls build and then install"
     exit 2
 fi
 
@@ -51,40 +55,52 @@ else
 fi
 
 shift $((OPTIND-1))
+
+if [[ $@ == "" ]]; then
+	echo "You need to specify an action [build|install]"
+	exit 2
+fi
+
 echo "Starting $@ of server..."
 
-if [ ! -d "plugins" ]; then
-    mkdir plugins
+if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
+	if [ ! -d "plugins" ]; then
+	    mkdir plugins
+	fi
+
+	# yield build so that we get updated product
+	cd $PROJECT_HOME/java
+	if [ $gwtcompile -eq 1 ]; then
+	    echo "INFO: Compiling GWT (rm -rf com.sap.sailing.gwt.ui/com.sap.sailing.*)"
+	    rm -rf com.sap.sailing.gwt.ui/com.sap.sailing.*
+	else
+	    echo "INFO: GWT Compilation disabled"
+	    extra="-Pdebug.no-gwt-compile"
+	fi
+
+	if [ $testing -eq 0 ]; then
+	    echo "INFO: Skipping tests"
+	    extra="$extra -Dmaven.test.skip=true"
+	fi
+
+	if [ $offline -eq 1 ]; then
+	    echo "INFO: Activating offline mode"
+	    extra="$extra -o"
+	fi
+
+	echo "Using following command: mvn $extra -P no-debug.without-proxy -fae -s $MAVEN_SETTINGS $clean install"
+	mvn $extra -P no-debug.without-proxy -fae -s $MAVEN_SETTINGS $clean install 2>&1 | tee $ACDIR/build.log
+
+	echo "Build complete. Do not forget to install product..."
 fi
 
-# yield build so that we get updated product
-cd $PROJECT_HOME/java
-if [ $gwtcompile -eq 1 ]; then
-    echo "INFO: Compiling GWT (rm -rf com.sap.sailing.gwt.ui/com.sap.sailing.*)"
-    rm -rf com.sap.sailing.gwt.ui/com.sap.sailing.*
-else
-    echo "INFO: GWT Compilation disabled"
-    extra="-Pdebug.no-gwt-compile"
+if [[ "$@" == "install" ]] || [[ "$@" == "all" ]]; then
+
+	cd $ACDIR
+	p2PluginRepository=$PROJECT_HOME/java/com.sap.sailing.feature.p2build/bin/products/raceanalysis.product.id/linux/gtk/$ARCH
+	cp -v $p2PluginRepository/configuration/config.ini configuration/
+	cp -r -v $p2PluginRepository/configuration/org.eclipse.equinox.simpleconfigurator configuration/
+	cp -v $p2PluginRepository/plugins/*.jar plugins/
+
+	echo "Installation complete. You may now start the server using ./start"
 fi
-
-if [ $testing -eq 0 ]; then
-    echo "INFO: Skipping tests"
-    extra="$extra -Dmaven.test.skip=true"
-fi
-
-if [ $offline -eq 1 ]; then
-    echo "INFO: Activating offline mode"
-    extra="$extra -o"
-fi
-
-echo "Using following command: mvn $extra -P no-debug.without-proxy -fae -s $MAVEN_SETTINGS $clean install"
-mvn $extra -P no-debug.without-proxy -fae -s $MAVEN_SETTINGS $clean install 2>&1 | tee log
-
-# now we have the product and can extract everything from there
-cd $ACDIR
-p2PluginRepository=$PROJECT_HOME/java/com.sap.sailing.feature.p2build/bin/products/raceanalysis.product.id/linux/gtk/$ARCH
-cp -v $p2PluginRepository/configuration/config.ini configuration/
-cp -r -v $p2PluginRepository/configuration/org.eclipse.equinox.simpleconfigurator configuration/
-cp -v $p2PluginRepository/plugins/*.jar plugins/
-
-echo "Build and installation complete. You may now start the server using ./start"
