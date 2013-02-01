@@ -20,7 +20,7 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.sap.sailing.domain.common.PolarSheetsData;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
-public class PolarSheetsChartPanel extends SimplePanel implements RequiresResize{
+public class PolarSheetsChartPanel extends SimplePanel implements RequiresResize {
 
     private StringMessages stringMessages;
     private Chart chart;
@@ -37,7 +37,7 @@ public class PolarSheetsChartPanel extends SimplePanel implements RequiresResize
     private Chart createPolarSheetChart() {
         Chart polarSheetChart = new Chart().setType(Series.Type.LINE)
                 .setLinePlotOptions(new LinePlotOptions().setLineWidth(1)).setZoomType(Chart.ZoomType.X_AND_Y)
-                .setPolar(true).setSize(700,700);
+                .setPolar(true).setSize(800, 800);
         polarSheetChart.setChartTitleText(stringMessages.polarSheetChart());
         polarSheetChart.getYAxis().setMin(0);
         return polarSheetChart;
@@ -65,7 +65,9 @@ public class PolarSheetsChartPanel extends SimplePanel implements RequiresResize
             Series series = seriesMap.get(seriesId);
             series.setPoints(result.getValues(), false);
             Point[] points = createPointsWithMarkerAlphaAccordingToDataCount(result);
-            series.setPoints(points);
+            if (points != null) {
+                series.setPoints(points);
+            }
         }
     }
 
@@ -73,17 +75,19 @@ public class PolarSheetsChartPanel extends SimplePanel implements RequiresResize
         Point[] points = new Point[360];
         List<Integer> dataCountList = Arrays.asList(result.getDataCountPerAngle());
         Integer max = Collections.max(dataCountList);
-        if (max > 0) {
-            for (int i = 0; i < 360; i++) {
-                points[i] = new Point(result.getValues()[i]);
-                if (points[i] == null) {
-                    points[i] = new Point(0);
-                }
-                double alpha = (double) dataCountList.get(i) / (double) max;
-                // TODO set to series color and change alpha
-                points[i].setMarker(new Marker().setFillColor(new Color(1, 1, 1, alpha)));
-            }
+        if (max <= 0) {
+            return null;
         }
+        for (int i = 0; i < 360; i++) {
+            points[i] = new Point(result.getValues()[i]);
+            if (points[i] == null) {
+                points[i] = new Point(0);
+            }
+            double alpha = (double) dataCountList.get(i) / (double) max;
+            // TODO set to series color and change alpha
+            points[i].setMarker(new Marker().setFillColor(new Color(1, 1, 1, alpha)));
+        }
+
         return points;
     }
 

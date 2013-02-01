@@ -10,13 +10,19 @@ public class PolarSheetsHistogramDataImpl implements PolarSheetsHistogramData {
     
     private Number[] xValues;
     
+    private int angle;
+    
+    private int dataCount;
+    
     //For GWT serialization
     PolarSheetsHistogramDataImpl() {}
 
-    public PolarSheetsHistogramDataImpl(Number[] xValues, Number[] yValues) {
+    public PolarSheetsHistogramDataImpl(int angle, Number[] xValues, Number[] yValues, int dataCount) {
         super();
+        this.angle = angle;
         this.yValues = yValues;
         this.xValues = xValues;
+        this.dataCount = dataCount;
     }
 
     @Override
@@ -27,6 +33,16 @@ public class PolarSheetsHistogramDataImpl implements PolarSheetsHistogramData {
     @Override
     public Number[] getxValues() {
         return xValues;
+    }
+
+    @Override
+    public int getAngle() {
+        return angle;
+    }
+
+    @Override
+    public int getDataCount() {
+        return dataCount;
     }
 
 }

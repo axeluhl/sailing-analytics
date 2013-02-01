@@ -1,7 +1,9 @@
 package com.sap.sailing.gwt.ui.polarsheets;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.moxieapps.gwt.highcharts.client.events.PointMouseOverEvent;
 import org.moxieapps.gwt.highcharts.client.events.PointMouseOverEventHandler;
@@ -15,6 +17,7 @@ import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.sap.sailing.domain.common.PolarSheetGenerationTriggerResponse;
 import com.sap.sailing.domain.common.PolarSheetsData;
 import com.sap.sailing.domain.common.PolarSheetsHistogramData;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -47,6 +50,11 @@ public class PolarSheetsPanel extends FormPanel implements RaceSelectionChangeLi
 
     private Label polarSheetsGenerationLabel;
     private Label dataCountLabel;
+    
+    //Dual mapping. Another solution would be using commons BidiMap. 
+    //But this would require to attach source code for gwt
+    private Map<String,String> idNameMapping;
+    private Map<String,String> nameIdMapping;
 
     public PolarSheetsPanel(SailingServiceAsync sailingService, ErrorReporter errorReporter,
             StringMessages stringMessages, PolarSheetsEntryPoint polarSheetsEntryPoint) {
@@ -54,6 +62,9 @@ public class PolarSheetsPanel extends FormPanel implements RaceSelectionChangeLi
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
+        
+        idNameMapping = new HashMap<String, String>();
+        nameIdMapping = new HashMap<String, String>();
 
         this.mainPanel = new FlowPanel();
         setSize("100%", "100%");
@@ -81,7 +92,8 @@ public class PolarSheetsPanel extends FormPanel implements RaceSelectionChangeLi
             @Override
             public boolean onMouseOver(PointMouseOverEvent pointMouseOverEvent) {
                 int x = (int) pointMouseOverEvent.getXAsLong();
-                String polarSheetId = pointMouseOverEvent.getSeriesName();
+                String polarSheetName = pointMouseOverEvent.getSeriesName();
+                String polarSheetId = nameIdMapping.get(polarSheetName);
                 GetPolarSheetDataByAngleAction action = new GetPolarSheetDataByAngleAction(sailingService,
                         polarSheetId, x, new AsyncCallback<PolarSheetsHistogramData>() {
 
@@ -112,6 +124,7 @@ public class PolarSheetsPanel extends FormPanel implements RaceSelectionChangeLi
 
     private VerticalPanel addPolarSheetsChartPanel(HorizontalPanel splitPanel) {
         VerticalPanel verticalPanel = new VerticalPanel();
+        verticalPanel.setSize("100%", "100%");
         chartPanel = new PolarSheetsChartPanel(stringMessages);
         verticalPanel.add(chartPanel);
         splitPanel.add(verticalPanel);
@@ -154,16 +167,17 @@ public class PolarSheetsPanel extends FormPanel implements RaceSelectionChangeLi
 
     protected void startPolarSheetGeneration() {
         // List conversion, to make List serializable
-        List<RegattaAndRaceIdentifier> selectedRacesInArrayList = new ArrayList<RegattaAndRaceIdentifier>();
+        final List<RegattaAndRaceIdentifier> selectedRacesInArrayList = new ArrayList<RegattaAndRaceIdentifier>();
         selectedRacesInArrayList.addAll(selectedRaces);
         polarSheetsTrackedRacesList.changeGenerationButtonState(false);
-        sailingService.generatePolarSheetForRaces(selectedRacesInArrayList, new AsyncCallback<String>() {
+        sailingService.generatePolarSheetForRaces(selectedRacesInArrayList, new AsyncCallback<PolarSheetGenerationTriggerResponse>() {
 
             @Override
-            public void onSuccess(String result) {
+            public void onSuccess(PolarSheetGenerationTriggerResponse result) {
                 // TODO string messages
                 setCompletionLabel("Generating...");
-                startPullingResults(result);
+                startPullingResults(result.getId());
+                addNameForPolarSheet(result);
             }
 
             @Override
@@ -171,6 +185,18 @@ public class PolarSheetsPanel extends FormPanel implements RaceSelectionChangeLi
                 errorReporter.reportError(caught.getLocalizedMessage());
             }
         });
+    }
+
+    protected void addNameForPolarSheet(PolarSheetGenerationTriggerResponse result) {
+        String boatClassName = result.getBoatClassName();
+        int index = 0;
+        String name = "";
+        do {
+            index++;
+            name = boatClassName + "-" + index;
+        } while (nameIdMapping.containsKey(name));
+        idNameMapping.put(result.getId(), name);
+        nameIdMapping.put(name, result.getId());
     }
 
     protected void startPullingResults(final String id) {
@@ -182,7 +208,7 @@ public class PolarSheetsPanel extends FormPanel implements RaceSelectionChangeLi
                 // TODO string messages
                 setCompletionLabel("Generating...");
                 dataCountLabel.setText("DataCount: " + result.getDataCount());
-                chartPanel.setData(id, result);
+                chartPanel.setData(idNameMapping.get(id), result);
                 if (!result.isComplete()) {
                     Timer timer = new Timer() {
 

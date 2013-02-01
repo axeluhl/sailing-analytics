@@ -12,6 +12,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.MaxPointsReason;
+import com.sap.sailing.domain.common.PolarSheetGenerationTriggerResponse;
 import com.sap.sailing.domain.common.PolarSheetsData;
 import com.sap.sailing.domain.common.PolarSheetsHistogramData;
 import com.sap.sailing.domain.common.RaceIdentifier;
@@ -438,7 +439,7 @@ public interface SailingServiceAsync {
 
     void storeSwissTimingArchiveConfiguration(String swissTimingUrl, AsyncCallback<Void> asyncCallback);
 
-    void generatePolarSheetForRaces(List<RegattaAndRaceIdentifier> selectedRaces, AsyncCallback<String> asyncCallback);
+    void generatePolarSheetForRaces(List<RegattaAndRaceIdentifier> selectedRaces, AsyncCallback<PolarSheetGenerationTriggerResponse> asyncCallback);
 
     void getPolarSheetsGenerationResults(String id, AsyncCallback<PolarSheetsData> asyncCallback);
 

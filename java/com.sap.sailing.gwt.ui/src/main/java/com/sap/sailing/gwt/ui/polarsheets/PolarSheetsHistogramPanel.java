@@ -1,6 +1,9 @@
 package com.sap.sailing.gwt.ui.polarsheets;
 
+import org.moxieapps.gwt.highcharts.client.AxisTitle;
 import org.moxieapps.gwt.highcharts.client.Chart;
+import org.moxieapps.gwt.highcharts.client.ChartSubtitle;
+import org.moxieapps.gwt.highcharts.client.ChartTitle;
 import org.moxieapps.gwt.highcharts.client.Legend;
 import org.moxieapps.gwt.highcharts.client.Point;
 import org.moxieapps.gwt.highcharts.client.Series;
@@ -25,17 +28,18 @@ public class PolarSheetsHistogramPanel extends SimplePanel implements RequiresRe
     }
 
     private Chart createHistogramChart() {
-        Chart histogramChart = new Chart().setType(Type.COLUMN).setZoomType(Chart.ZoomType.X);
+        Chart histogramChart = new Chart().setType(Type.COLUMN).setZoomType(Chart.ZoomType.X).setWidth(800);
         //TODO string messages
         histogramChart.setChartTitleText("Histogram:");
-        histogramChart.getYAxis().setMin(0);
-        histogramChart.getXAxis().setLabels(new XAxisLabels().setRotation(-90f).setY(20));
+        histogramChart.getYAxis().setMin(0).setAxisTitle(new AxisTitle().setText("Number of data-points"));
+        histogramChart.getXAxis().setLabels(new XAxisLabels().setRotation(-90f).setY(10)).setAxisTitle(new AxisTitle().setText("Speed in knots"));
         histogramChart.setLegend(new Legend().setEnabled(false));
         return histogramChart;
     }
 
     public void setData(PolarSheetsHistogramData data) {
         chart.removeAllSeries();
+        chart.setTitle(new ChartTitle().setText("Histogram"), new ChartSubtitle().setText("Angle: " + data.getAngle() + "; Total number of data-points: " + data.getDataCount()));
         Point[] points = toPoints(data);
         Series series = chart.createSeries();
         series.setPoints(points);

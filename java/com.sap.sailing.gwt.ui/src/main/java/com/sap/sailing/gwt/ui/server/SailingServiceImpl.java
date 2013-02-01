@@ -77,6 +77,7 @@ import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindError;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Placemark;
+import com.sap.sailing.domain.common.PolarSheetGenerationTriggerResponse;
 import com.sap.sailing.domain.common.PolarSheetsData;
 import com.sap.sailing.domain.common.PolarSheetsHistogramData;
 import com.sap.sailing.domain.common.Position;
@@ -100,6 +101,7 @@ import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KilometersPerHourSpeedImpl;
 import com.sap.sailing.domain.common.impl.MeterDistance;
+import com.sap.sailing.domain.common.impl.PolarSheetGenerationTriggerResponseImpl;
 import com.sap.sailing.domain.common.impl.PolarSheetsHistogramDataImpl;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
@@ -3068,7 +3070,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
     
     @Override
-    public String generatePolarSheetForRaces(List<RegattaAndRaceIdentifier> selectedRaces) {
+    public PolarSheetGenerationTriggerResponse generatePolarSheetForRaces(List<RegattaAndRaceIdentifier> selectedRaces) {
         String id = UUID.randomUUID().toString();
         RacingEventService service = getService();
         Set<TrackedRace> trackedRaces = new HashSet<TrackedRace>();
@@ -3078,7 +3080,22 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         PolarSheetGenerationWorker genWorker = new PolarSheetGenerationWorker(trackedRaces, executor);
         polarSheetGenerationWorkers.put(id, genWorker);
         genWorker.startPolarSheetGeneration();
-        return id;
+        String name = getCommonBoatClass(trackedRaces);
+        return new PolarSheetGenerationTriggerResponseImpl(id, name);
+    }
+
+    private String getCommonBoatClass(Set<TrackedRace> trackedRaces) {
+        BoatClass boatClass = null;
+        for (TrackedRace race : trackedRaces) {
+            if (boatClass == null) {
+                boatClass = race.getRace().getBoatClass();
+            }
+            if (!boatClass.getName().matches(race.getRace().getBoatClass().getName())) {
+                return "Mixed";
+            }
+        }
+        
+        return boatClass.getName();
     }
 
     @Override
@@ -3138,7 +3155,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             yValues[i]++;
         }
         
-        PolarSheetsHistogramData histogramData = new PolarSheetsHistogramDataImpl(xValues,yValues);
+        PolarSheetsHistogramData histogramData = new PolarSheetsHistogramDataImpl(angle, xValues, yValues, dataForAngle.size());
 
         
         return histogramData;
