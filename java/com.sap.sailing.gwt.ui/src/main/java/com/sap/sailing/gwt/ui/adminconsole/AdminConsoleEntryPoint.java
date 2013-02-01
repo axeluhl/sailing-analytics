@@ -39,7 +39,9 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
         regattaDisplayers = new HashSet<RegattaDisplayer>();
 
         // TODO for managing events and venues, the following two lines are preparing the addition of the respective panel
-//        SailingEventManagementPanel sailingEventManagementPanel = new SailingEventManagementPanel(sailingService, this, stringMessages);
+        // TODO RC: the panel throws an exception to be fixed: com.google.gwt.user.client.rpc.SerializationException: Type 'java.util.UUID' was not included in the set of types which can be serialized by this SerializationPolicy or its Class object could not be loaded.
+        //SailingEventManagementPanel sailingEventManagementPanel = new SailingEventManagementPanel(sailingService, this, stringMessages);
+        //tabPanel.add(sailingEventManagementPanel, stringMessages.events(), false);
 
         RegattaStructureManagementPanel eventStructureManagementPanel = new RegattaStructureManagementPanel(sailingService, this, stringMessages, this);
         //eventStructureManagementPanel.ensureDebugId("RegattaStructureManagement");
