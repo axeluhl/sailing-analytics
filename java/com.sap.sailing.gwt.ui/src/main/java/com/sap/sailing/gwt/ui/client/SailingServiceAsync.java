@@ -421,7 +421,7 @@ public interface SailingServiceAsync {
             AsyncCallback<List<Pair<String, List<CompetitorDTO>>>> callback);
 
     void getCompetitorsRaceData(RegattaAndRaceIdentifier race, List<CompetitorDTO> competitors, Date from, Date to,
-            long stepSize, DetailType detailType, AsyncCallback<CompetitorsRaceDataDTO> callback);
+            long stepSize, DetailType detailType, String leaderboarGroupName, String leaderboardName, AsyncCallback<CompetitorsRaceDataDTO> callback);
 
     /**
      * Finds out the names of all {@link com.sap.sailing.domain.leaderboard.MetaLeaderboard}s managed by this server that
