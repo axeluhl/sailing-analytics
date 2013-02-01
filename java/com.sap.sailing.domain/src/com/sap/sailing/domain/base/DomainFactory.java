@@ -28,15 +28,19 @@ public interface DomainFactory {
     Mark getOrCreateMark(Serializable id, String name);
     
     /**
-     * If the single mark with ID <code>name</code> already exists, it is returned. Its color may differ from <code>color</code>
+     * If the single mark with ID <code>id</code> already exists, it is returned. Its color may differ from <code>color</code>
      * in that case. Otherwise, a new {@link Mark} is created with <code>color</code> as its {@link Mark#getColor()} 
      * and <code>shape</code> as its {@link Mark#getShape()}.
-     * @param id TODO
      */
     Mark getOrCreateMark(Serializable id, String name, MarkType type, String color, String shape, String pattern);
 
+    /**
+     * @param name also uses the name as the gate's ID; if you have a real ID, use {@link #createGate(Serializable, Mark, Mark, String)} instead
+     */
     Gate createGate(Mark left, Mark right, String name);
     
+    Gate createGate(Serializable id, Mark left, Mark right, String name);
+
     /**
      * The waypoint created is weakly cached so that when requested again by
      * {@link #getExistingWaypointById(Waypoint)} it is found.

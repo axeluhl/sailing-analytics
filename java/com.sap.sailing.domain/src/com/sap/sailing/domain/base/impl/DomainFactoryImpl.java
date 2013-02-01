@@ -124,10 +124,10 @@ public class DomainFactoryImpl implements DomainFactory {
     
     @Override
     public Mark getOrCreateMark(Serializable id, String name, MarkType type, String color, String shape, String pattern) {
-        Mark result = markCache.get(name);
+        Mark result = markCache.get(id);
         if (result == null) {
             result = new MarkImpl(id, name, type, color, shape, pattern);
-            markCache.put(name, result);
+            markCache.put(id, result);
         }
         return result;
     }
@@ -135,6 +135,11 @@ public class DomainFactoryImpl implements DomainFactory {
     @Override
     public Gate createGate(Mark left, Mark right, String name) {
        return new GateImpl(left, right, name);
+    }
+
+    @Override
+    public Gate createGate(Serializable id, Mark left, Mark right, String name) {
+       return new GateImpl(id, left, right, name);
     }
 
     @Override

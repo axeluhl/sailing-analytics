@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.shared;
 
+import java.io.Serializable;
 import java.util.Collections;
 
 import com.sap.sailing.domain.common.MarkType;
@@ -13,8 +14,8 @@ public class MarkDTO extends ControlPointDTO {
 
     MarkDTO() {}
     
-    public MarkDTO(String name, double latDeg, double lngDeg) {
-        super(name);
+    public MarkDTO(Serializable id, String name, double latDeg, double lngDeg) {
+        super(id, name);
         this.position = new PositionDTO(latDeg, lngDeg);
     }
 

@@ -166,14 +166,13 @@ public class DomainFactoryImpl implements DomainFactory {
                     final String name2 = controlPointName + " (2)";
                     final Serializable id2 = name2; // TODO bug 1184; need to obtain mark ID through TTCM
                     Mark mark2 = baseDomainFactory.getOrCreateMark(id2, name2, type2, color2, shape2, pattern2);
-                    domainControlPoint = baseDomainFactory.createGate(mark1, mark2, controlPointName);
+                    domainControlPoint = baseDomainFactory.createGate(controlPoint.getId(), mark1, mark2, controlPointName);
                 } else {
                     MarkType type = resolveMarkTypeFromMetadata(controlPointMetadata, "Type");
                     String color = controlPointMetadata.get("Color");
                     String shape = controlPointMetadata.get("Shape");
                     String pattern = controlPointMetadata.get("Pattern");
-                    final Serializable id = controlPointName; // TODO bug 1184; need to obtain mark ID through TTCM
-                    Mark mark = baseDomainFactory.getOrCreateMark(id, controlPointName, type, color, shape, pattern);
+                    Mark mark = baseDomainFactory.getOrCreateMark(controlPoint.getId(), controlPointName, type, color, shape, pattern);
                     domainControlPoint = mark;
                 }
                 controlPointCache.put(controlPoint, domainControlPoint);

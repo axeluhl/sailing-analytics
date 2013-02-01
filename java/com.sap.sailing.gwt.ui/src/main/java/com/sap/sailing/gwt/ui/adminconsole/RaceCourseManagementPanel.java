@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.client.GWT;
@@ -134,7 +135,7 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
                     right = first;
                 }
                 gateName = left.name.replaceFirst(REGEX_FOR_LEFT, "");
-                result = new GateDTO(gateName, left, right);
+                result = new GateDTO(UUID.randomUUID(), gateName, left, right);
             }
             return result;
         }
@@ -375,7 +376,7 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
             }
         }
         assert newLeft != null && newRight != null;
-        return new GateDTO(oldGate.name, newLeft, newRight);
+        return new GateDTO(oldGate.getId(), oldGate.name, newLeft, newRight);
     }
 
     private CellTable<MarkDTO> createAvailableMarksTable(final StringMessages stringMessages, AdminConsoleTableResources tableRes,

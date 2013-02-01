@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.shared;
 
+import java.io.Serializable;
 import java.util.Arrays;
 
 public class GateDTO extends ControlPointDTO {
@@ -8,8 +9,8 @@ public class GateDTO extends ControlPointDTO {
     
     public GateDTO() {}
     
-    public GateDTO(String name, MarkDTO left, MarkDTO right) {
-        super(name);
+    public GateDTO(Serializable id, String name, MarkDTO left, MarkDTO right) {
+        super(id, name);
         this.left = left;
         this.right = right;
     }
