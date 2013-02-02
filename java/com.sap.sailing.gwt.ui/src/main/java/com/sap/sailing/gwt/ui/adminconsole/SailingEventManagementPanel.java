@@ -135,7 +135,7 @@ public class SailingEventManagementPanel extends SimplePanel {
     }
     
     private void removeEvent(final EventDTO event) {
-        sailingService.removeEvent(event.name, new AsyncCallback<Void>() {
+        sailingService.removeEvent(event.id, new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError("Error trying to remove event " + event.name + ": " + caught.getMessage());
@@ -186,6 +186,7 @@ public class SailingEventManagementPanel extends SimplePanel {
         for(RegattaDTO regatta: updatedEvent.regattas) {
             regattaNames.add(regatta.name);
         }
+        
         sailingService.updateEvent(oldEventName, oldEventId, updatedEvent.venue, updatedEvent.publicationUrl, 
                 updatedEvent.isPublic, regattaNames, new AsyncCallback<Void>() {
             @Override
@@ -197,14 +198,14 @@ public class SailingEventManagementPanel extends SimplePanel {
             public void onSuccess(Void result) {
                 fillEvents();
                 if(!oldEventName.equals(updatedEvent.name)) {
-                    sailingService.renameEvent(oldEventName, updatedEvent.name, new AsyncCallback<Void>() {
+                    sailingService.renameEvent(oldEventId, updatedEvent.name, new AsyncCallback<Void>() {
                         @Override
                         public void onSuccess(Void result) {
                             fillEvents();
                         }
                         @Override
                         public void onFailure(Throwable t) {
-                            errorReporter.reportError("Error trying to rename sailing event" + oldEventName + ": " + t.getMessage());
+                            errorReporter.reportError("Error trying to rename sailing event " + oldEventName + ": " + t.getMessage());
                         }
                     });
                 }

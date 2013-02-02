@@ -2822,7 +2822,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public void updateEvent(String eventName, Serializable id, VenueDTO venue, String publicationUrl, boolean isPublic, List<String> regattaNames) {
-        getService().apply(new UpdateEvent(id, eventName, venue.name, publicationUrl, isPublic, regattaNames));
+    	UUID uuid = UUID.fromString(id.toString());
+    	getService().apply(new UpdateEvent(uuid, eventName, venue.name, publicationUrl, isPublic, regattaNames));
     }
 
     @Override
@@ -2831,13 +2832,15 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public void removeEvent(String eventName) {
-        getService().apply(new RemoveEvent(eventName));
+    public void removeEvent(Serializable id) {
+    	UUID uuid = UUID.fromString(id.toString());
+        getService().apply(new RemoveEvent(uuid));
     }
 
     @Override
-    public void renameEvent(String oldName, String newName) {
-        getService().apply(new RenameEvent(oldName, newName));
+    public void renameEvent(Serializable id, String newName) {
+    	UUID uuid = UUID.fromString(id.toString());
+        getService().apply(new RenameEvent(uuid, newName));
     }
 
     @Override
@@ -2858,7 +2861,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         eventDTO.venue.name = event.getVenue() != null ? event.getVenue().getName() : null;
         eventDTO.publicationUrl = event.getPublicationUrl();
         eventDTO.isPublic = event.isPublic();
-        eventDTO.id = event.getId();
+        eventDTO.id = event.getId().toString();
         eventDTO.regattas = new ArrayList<RegattaDTO>();
         for (Regatta regatta: event.getRegattas()) {
             RegattaDTO regattaDTO = new RegattaDTO();

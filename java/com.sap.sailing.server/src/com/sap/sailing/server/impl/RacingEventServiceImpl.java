@@ -117,8 +117,11 @@ import com.sap.sailing.server.operationaltransformation.RecordCompetitorGPSFix;
 import com.sap.sailing.server.operationaltransformation.RecordMarkGPSFix;
 import com.sap.sailing.server.operationaltransformation.RecordRaceLogEvent;
 import com.sap.sailing.server.operationaltransformation.RecordWindFix;
+import com.sap.sailing.server.operationaltransformation.RemoveEvent;
 import com.sap.sailing.server.operationaltransformation.RemoveWindFix;
+import com.sap.sailing.server.operationaltransformation.RenameEvent;
 import com.sap.sailing.server.operationaltransformation.TrackRegatta;
+import com.sap.sailing.server.operationaltransformation.UpdateEvent;
 import com.sap.sailing.server.operationaltransformation.UpdateMarkPassings;
 import com.sap.sailing.server.operationaltransformation.UpdateRaceDelayToLive;
 import com.sap.sailing.server.operationaltransformation.UpdateRaceTimes;
@@ -1571,8 +1574,11 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
             event.setPublicationUrl(publicationUrl);
             event.setPublic(isPublic);
             event.getVenue().setName(venueName);
+            
             // TODO need to update regattas if they are once linked to event objects
             mongoObjectFactory.storeEvent(event);
+            
+            replicate(new UpdateEvent(id, eventName, venueName, publicationUrl, isPublic, regattaNames));
         }
     }
 
@@ -1585,6 +1591,8 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
             Event toRename = eventsById.get(id);
             toRename.setName(newName);
             mongoObjectFactory.renameEvent(id, newName);
+            
+            replicate(new RenameEvent(id, newName));
         }
     }
 
@@ -1592,6 +1600,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     public void removeEvent(Serializable id) {
         removeEventFromEventsById(id);
         mongoObjectFactory.removeEvent(id);
+        replicate(new RemoveEvent(id));
     }
 
     protected void removeEventFromEventsById(Serializable id) {

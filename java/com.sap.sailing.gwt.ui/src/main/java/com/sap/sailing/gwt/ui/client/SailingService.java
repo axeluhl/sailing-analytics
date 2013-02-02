@@ -237,9 +237,9 @@ public interface SailingService extends RemoteService {
 
     EventDTO createEvent(String eventName, String venueName, String publicationUrl, boolean isPublic);
 
-    void removeEvent(String eventName);
+    void removeEvent(Serializable id);
 
-    void renameEvent(String oldName, String newName);
+    void renameEvent(Serializable id, String newName);
 
     EventDTO getEventByName(String eventName);
 

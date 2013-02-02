@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -21,7 +20,7 @@ public class EventDialog extends DataEntryDialog<EventDTO> {
     protected TextBox venueEntryField;
     protected TextBox publicationUrlEntryField;
     protected CheckBox isPublicCheckBox;
-    protected Serializable id;
+    protected String id;
 
     protected static class EventParameterValidator implements Validator<EventDTO> {
 
