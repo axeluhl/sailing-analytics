@@ -29,6 +29,7 @@ import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
+import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Mark;
@@ -39,6 +40,7 @@ import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RegattaListener;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.base.impl.CourseAreaImpl;
 import com.sap.sailing.domain.base.impl.EventImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.common.Color;
@@ -104,6 +106,7 @@ import com.sap.sailing.operationaltransformation.Operation;
 import com.sap.sailing.server.OperationExecutionListener;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
+import com.sap.sailing.server.operationaltransformation.AddCourseArea;
 import com.sap.sailing.server.operationaltransformation.AddDefaultRegatta;
 import com.sap.sailing.server.operationaltransformation.AddRaceDefinition;
 import com.sap.sailing.server.operationaltransformation.AddSpecificRegatta;
@@ -1612,5 +1615,20 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         persistentRegattasForRaceIDs.put(race.getId().toString(), regatta);
         mongoObjectFactory.storeRegattaForRaceID(race.getId().toString(), regatta);
     }
+
+	@Override
+	public CourseArea addCourseArea(Serializable eventId, String courseAreaName, Serializable courseAreaId) {
+		CourseArea courseArea = new CourseAreaImpl(courseAreaName, courseAreaId);
+		synchronized (eventsById) {
+            if (!eventsById.containsKey(eventId)) {
+                throw new IllegalArgumentException("No sailing event with ID " + eventId + " found.");
+            }
+            Event event = eventsById.get(eventId);
+            event.getVenue().addCourseArea(courseArea);
+    		replicate(new AddCourseArea(eventId, courseAreaName, courseAreaId));
+            mongoObjectFactory.storeEvent(event);
+        }
+		return courseArea;
+	}
 
 }

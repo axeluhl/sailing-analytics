@@ -16,6 +16,7 @@ import java.util.ConcurrentModificationException;
 import java.util.List;
 import java.util.Map;
 
+import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
@@ -490,6 +491,8 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     void renameEvent(Serializable id, String newEventName);
     
     void removeEvent(Serializable id);
+    
+    CourseArea addCourseArea(Serializable eventId, String courseAreaName, Serializable courseAreaId);
 
     com.sap.sailing.domain.base.DomainFactory getBaseDomainFactory();
 
