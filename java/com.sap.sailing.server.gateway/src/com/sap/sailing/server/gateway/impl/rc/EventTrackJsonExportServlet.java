@@ -15,6 +15,7 @@ import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.gateway.impl.JsonExportServlet;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.RaceCommitteeCourseAreaChangedEventSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.RaceCommitteeEventSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.RaceCommitteeFlagEventSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.RaceCommitteeStartTimeEventSerializer;
@@ -34,7 +35,8 @@ public class EventTrackJsonExportServlet extends JsonExportServlet {
 		
 		rcEventSerializer = new RaceCommitteeEventSerializer(
 				new RaceCommitteeFlagEventSerializer(),
-				new RaceCommitteeStartTimeEventSerializer());
+				new RaceCommitteeStartTimeEventSerializer(),
+				new RaceCommitteeCourseAreaChangedEventSerializer());
 	}
 	
 	@Override

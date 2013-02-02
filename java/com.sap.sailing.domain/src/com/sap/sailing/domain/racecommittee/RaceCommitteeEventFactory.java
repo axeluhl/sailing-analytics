@@ -15,5 +15,8 @@ public interface RaceCommitteeEventFactory {
 	
 	RaceCommitteeStartTimeEvent createStartTimeEvent(TimePoint timePoint, Serializable id, List<Competitor> involvedBoats, int passId, TimePoint startTime);
 	RaceCommitteeStartTimeEvent createStartTimeEvent(TimePoint timePoint, int passId, TimePoint startTime);
+	
+	RaceCommitteeCourseAreaChangedEvent createCourseAreaChangedEvent(TimePoint timePoint, Serializable id, List<Competitor> involvedBoats, int passId, Serializable courseAreaId);
+	RaceCommitteeCourseAreaChangedEvent createCourseAreaChangedEvent(TimePoint timePoint, int passId, Serializable courseAreaId);
 
 }

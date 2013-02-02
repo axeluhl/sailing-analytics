@@ -2,6 +2,7 @@ package com.sap.sailing.server.gateway.serialization.impl;
 
 import org.json.simple.JSONObject;
 
+import com.sap.sailing.domain.racecommittee.RaceCommitteeCourseAreaChangedEvent;
 import com.sap.sailing.domain.racecommittee.RaceCommitteeEvent;
 import com.sap.sailing.domain.racecommittee.RaceCommitteeFlagEvent;
 import com.sap.sailing.domain.racecommittee.RaceCommitteeStartTimeEvent;
@@ -11,12 +12,15 @@ public class RaceCommitteeEventSerializer implements JsonSerializer<RaceCommitte
 
 	private final JsonSerializer<RaceCommitteeEvent> flagEventSerializer;
 	private final JsonSerializer<RaceCommitteeEvent> startTimeSerializer;
+	private final JsonSerializer<RaceCommitteeEvent> courseAreaChangedSerializer;
 
 	public RaceCommitteeEventSerializer(
 			JsonSerializer<RaceCommitteeEvent> flagEventSerializer,
-			JsonSerializer<RaceCommitteeEvent> startTimeSerializer) {
+			JsonSerializer<RaceCommitteeEvent> startTimeSerializer,
+			JsonSerializer<RaceCommitteeEvent> courseAreaChangedSerializer) {
 		this.flagEventSerializer = flagEventSerializer;
 		this.startTimeSerializer = startTimeSerializer;
+		this.courseAreaChangedSerializer = courseAreaChangedSerializer;
 	}
 
 	protected JsonSerializer<RaceCommitteeEvent> getSerializer(
@@ -25,6 +29,8 @@ public class RaceCommitteeEventSerializer implements JsonSerializer<RaceCommitte
 			return flagEventSerializer;
 		} else if (event instanceof RaceCommitteeStartTimeEvent) {
 			return startTimeSerializer;
+		} else if (event instanceof RaceCommitteeCourseAreaChangedEvent) {
+			return courseAreaChangedSerializer;
 		}
 
 		throw new UnsupportedOperationException(String.format(
