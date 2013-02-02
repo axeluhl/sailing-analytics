@@ -15,7 +15,7 @@ public class CourseAreaJsonSerializer implements JsonSerializer<CourseArea> {
 		JSONObject result = new JSONObject();
 		
 		result.put(FIELD_NAME, object.getName());
-		result.put(FIELD_ID, object.getId());
+		result.put(FIELD_ID, object.getId().toString());
 		
 		return result;
 	}
