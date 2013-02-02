@@ -8,6 +8,7 @@ import android.app.Fragment;
 import android.app.FragmentTransaction;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.view.Window;
@@ -18,6 +19,7 @@ import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
+import com.sap.sailing.racecommittee.app.ui.fragments.list.CourseAreaListFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.list.EventListFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.list.selection.CourseAreaSelectedListenerHost;
 import com.sap.sailing.racecommittee.app.ui.fragments.list.selection.EventSelectedListenerHost;
@@ -121,13 +123,13 @@ public class LoginActivity extends TwoPaneActivity implements EventSelectedListe
 		Bundle args = new Bundle();
 		args.putSerializable(AppConstants.EventIdTag, eventId);
 		
-		/*Fragment fragment = new CourseAreaListFragment();
+		Fragment fragment = new CourseAreaListFragment();
 		fragment.setArguments(args);
 		FragmentTransaction transaction = getFragmentManager().beginTransaction();
 		transaction.setCustomAnimations(R.animator.slide_in, R.animator.slide_out);
 		transaction.replace(R.id.rightContainer, fragment);
 		transaction.commit();
-		ExLog.i("LoginActivity", "CourseFragment created.");*/
+		ExLog.i("LoginActivity", "CourseFragment created.");
 	}
     
 	private ItemSelectedListener<Event> eventSelectionListener = new ItemSelectedListener<Event>() {
@@ -189,10 +191,10 @@ public class LoginActivity extends TwoPaneActivity implements EventSelectedListe
 			return;
 		}
 		
-		Toast.makeText(this, "Course area " + courseArea.getName(), Toast.LENGTH_LONG).show();
-		/*Intent message = new Intent(this, RacingActivity.class);
-		message.putExtra(AppConstants.COURSE_AREA_UUID_KEY, course.getId());
-		fadeActivity(message);*/
+		Toast.makeText(this, courseArea.getId().toString(), Toast.LENGTH_LONG).show();
+		Intent message = new Intent(this, RacingActivity.class);
+		message.putExtra(AppConstants.COURSE_AREA_UUID_KEY, courseArea.getId());
+		fadeActivity(message);
 	}
 
 }

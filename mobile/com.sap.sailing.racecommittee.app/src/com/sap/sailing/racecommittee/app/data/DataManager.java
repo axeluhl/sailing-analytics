@@ -1,17 +1,27 @@
 package com.sap.sailing.racecommittee.app.data;
 
+import java.io.Serializable;
 import java.net.URI;
 import java.util.Collection;
 
 import android.content.Context;
 
+import com.sap.sailing.domain.base.BoatClass;
+import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 import com.sap.sailing.racecommittee.app.data.handlers.DataHandler;
 import com.sap.sailing.racecommittee.app.data.handlers.EventsDataHandler;
+import com.sap.sailing.racecommittee.app.data.handlers.ManagedRacesDataHandler;
 import com.sap.sailing.racecommittee.app.data.loaders.DataLoader;
 import com.sap.sailing.racecommittee.app.data.parsers.DataParser;
 import com.sap.sailing.racecommittee.app.data.parsers.EventsDataParser;
+import com.sap.sailing.racecommittee.app.data.parsers.ManagedRacesDataParser;
+import com.sap.sailing.racecommittee.app.domain.deserialization.RaceDefinitionJsonDeserializer;
+import com.sap.sailing.racecommittee.app.domain.deserialization.RegattaJsonDeserializer;
+import com.sap.sailing.racecommittee.app.domain.ManagedRace;
+import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.BoatClassJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.CourseAreaJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.EventJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.VenueJsonDeserializer;
@@ -21,8 +31,8 @@ import com.sap.sailing.server.gateway.deserialization.impl.VenueJsonDeserializer
  */
 public class DataManager implements ReadonlyDataManager {
 	
-	public static ReadonlyDataManager create(Context context, DataStore dataStore) {
-		return new DataManager(context, dataStore);
+	public static ReadonlyDataManager create(Context context) {
+		return new DataManager(context, InMemoryDataStore.INSTANCE);
 	}
 	
 	private Context context;
@@ -51,9 +61,7 @@ public class DataManager implements ReadonlyDataManager {
 
 	public void addEvents(Collection<Event> events) {
 		for (Event event : events) {
-			if (!dataStore.hasEvent(event.getId())) {
-				dataStore.addEvent(event);
-			}
+			dataStore.addEvent(event);
 		}
 	}
 
@@ -66,10 +74,52 @@ public class DataManager implements ReadonlyDataManager {
 		
 		DataLoader<Collection<Event>> loader = new DataLoader<Collection<Event>>(
 				context, 
-				URI.create("http://10.0.2.2:8888/sailingserver/rc/events"), 
+				URI.create("http://192.168.178.22:8888/sailingserver/rc/events"), 
 				parser, 
 				handler);
 		loader.forceLoad();
+	}
+
+	public void loadCourseAreas(Serializable parentEventId,
+			LoadClient<Collection<CourseArea>> client) {
+		
+		if (dataStore.hasEvent(parentEventId)) {
+			Event event = dataStore.getEvent(parentEventId);
+			client.onLoadSucceded(dataStore.getCourseAreas(event));
+		} else {
+			client.onLoadFailed(new IllegalStateException("Unknown event id..."));
+		}
+		
+	}
+
+	public void addRaces(Collection<ManagedRace> data) {
+		for (ManagedRace race : data) {
+			dataStore.addRace(race);
+		}
+	}
+
+	public void loadRaces(Serializable courseAreaId, LoadClient<Collection<ManagedRace>> client) {
+		
+		if (!dataStore.hasCourseArea(courseAreaId)) {
+			client.onLoadFailed(new IllegalStateException("No course area found with given id"));
+			return;
+		}
+		
+		JsonDeserializer<BoatClass> boatClassDeserializer = new BoatClassJsonDeserializer();
+		DataParser<Collection<ManagedRace>> parser = new ManagedRacesDataParser(
+				new RegattaJsonDeserializer(
+						boatClassDeserializer,
+						new RaceDefinitionJsonDeserializer(
+								boatClassDeserializer)));
+		DataHandler<Collection<ManagedRace>> handler = new ManagedRacesDataHandler(this, client);
+		
+		DataLoader<Collection<ManagedRace>> loader = new DataLoader<Collection<ManagedRace>>(
+				context, 
+				URI.create("http://192.168.178.22:8888/sailingserver/rc/regattas?courseArea=" + courseAreaId.toString()), 
+				parser, 
+				handler);
+		loader.forceLoad();
+		
 	}
 	
 	

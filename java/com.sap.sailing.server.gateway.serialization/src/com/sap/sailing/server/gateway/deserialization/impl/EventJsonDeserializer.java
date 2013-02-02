@@ -1,7 +1,5 @@
 package com.sap.sailing.server.gateway.deserialization.impl;
 
-import java.util.UUID;
-
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.Event;
@@ -23,15 +21,6 @@ public class EventJsonDeserializer implements JsonDeserializer<Event> {
 		String name = object.get(EventJsonSerializer.FIELD_NAME).toString();
 		String publicationUrl = object.get(EventJsonSerializer.FIELD_PUBLICATION_URL).toString();
 		
-		UUID uuid = null;
-		try {
-			uuid = UUID.fromString(id);
-		} catch (IllegalArgumentException iae) {
-			throw new JsonDeserializationException(
-					String.format("Field %s with %s couldn't be parsed as UUID.", EventJsonSerializer.FIELD_ID, id), 
-					iae);
-		}
-		
 		JSONObject venueObject = Helpers.getNestedObjectSafe(
 				object, 
 				EventJsonSerializer.FIELD_VENUE);
@@ -42,7 +31,7 @@ public class EventJsonDeserializer implements JsonDeserializer<Event> {
 				venue, 
 				publicationUrl, 
 				true, 
-				uuid);
+				Helpers.tryUuidConversion(id));
 	}
 
 }

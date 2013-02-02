@@ -25,6 +25,7 @@ import com.sap.sailing.domain.base.impl.WaypointImpl;
 import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.BoatClassJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.ControlPointJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CourseJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.GateJsonSerializer;
@@ -62,11 +63,13 @@ public class EverythingTest {
 		
 		JsonSerializer<ControlPoint> markSerializer = new MarkJsonSerializer();
 		JsonSerializer<RaceDefinition> serializer = 
-				new RaceDefinitionJsonSerializer(new CourseJsonSerializer(
-					new WaypointJsonSerializer(
-							new ControlPointJsonSerializer(
-									markSerializer, 
-									new GateJsonSerializer(markSerializer)))));
+				new RaceDefinitionJsonSerializer(
+					new BoatClassJsonSerializer(),
+					new CourseJsonSerializer(
+						new WaypointJsonSerializer(
+								new ControlPointJsonSerializer(
+										markSerializer, 
+										new GateJsonSerializer(markSerializer)))));
 		
 		JSONObject result = serializer.serialize(race);
 		

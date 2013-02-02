@@ -5,6 +5,7 @@ import java.util.Collection;
 
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 
 public interface DataStore {
 
@@ -14,8 +15,12 @@ public interface DataStore {
 	public void addEvent(Event event);
 	
 	public Collection<CourseArea> getCourseAreas(Event event);
-	public CourseArea getCourseArea(Event event, String name);
-	public boolean hasCourseArea(Event event, String name);
+	public CourseArea getCourseArea(Serializable id);
+	public boolean hasCourseArea(Serializable id);
 	public void addCourseArea(Event event, CourseArea courseArea);
+	
+	public void addRace(ManagedRace race);
+	public ManagedRace getRace(Serializable id);
+	public boolean hasRace(Serializable id);
 	
 }

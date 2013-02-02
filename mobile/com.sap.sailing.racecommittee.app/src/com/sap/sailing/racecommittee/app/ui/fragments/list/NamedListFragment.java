@@ -2,6 +2,7 @@ package com.sap.sailing.racecommittee.app.ui.fragments.list;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -18,10 +19,10 @@ import android.widget.TextView;
 import com.sap.sailing.domain.common.Named;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.DataManager;
-import com.sap.sailing.racecommittee.app.data.InMemoryDataStore;
 import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 import com.sap.sailing.racecommittee.app.ui.adapters.NamedArrayAdapter;
+import com.sap.sailing.racecommittee.app.ui.comparators.NamedComparator;
 import com.sap.sailing.racecommittee.app.ui.fragments.list.selection.ItemSelectedListener;
 
 public abstract class NamedListFragment<T extends Named> extends ListFragment implements LoadClient<Collection<T>> {
@@ -64,7 +65,7 @@ public abstract class NamedListFragment<T extends Named> extends ListFragment im
 		this.setListAdapter(listAdapter);
 		
 		showProgressBar(true);
-		dataManager = DataManager.create(getActivity(), InMemoryDataStore.INSTANCE);
+		dataManager = DataManager.create(getActivity());
 	}
 	
 	@Override
@@ -88,7 +89,7 @@ public abstract class NamedListFragment<T extends Named> extends ListFragment im
 	public void onLoadSucceded(Collection<T> data) {
 		namedList.clear();
 		namedList.addAll(data);
-		/// TODO: Collections.sort(namedList, new NamedComparator());
+		Collections.sort(namedList, new NamedComparator());
 		listAdapter.notifyDataSetChanged();
 		
 		showProgressBar(false);

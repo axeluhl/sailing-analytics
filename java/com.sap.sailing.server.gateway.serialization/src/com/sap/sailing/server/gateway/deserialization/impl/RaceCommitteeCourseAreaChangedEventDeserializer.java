@@ -1,5 +1,6 @@
 package com.sap.sailing.server.gateway.deserialization.impl;
 
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.UUID;
 
@@ -16,7 +17,7 @@ public class RaceCommitteeCourseAreaChangedEventDeserializer extends
 		BaseRaceCommitteeEventDeserializer {
 
 	@Override
-	protected RaceCommitteeEvent deserialize(JSONObject object, UUID id,
+	protected RaceCommitteeEvent deserialize(JSONObject object, Serializable id,
 			TimePoint timePoint, int passId) throws JsonDeserializationException {
 		
 		String courseAreaId = object.get(RaceCommitteeCourseAreaChangedEventSerializer.FIELD_COURSE_AREA_ID).toString(); 

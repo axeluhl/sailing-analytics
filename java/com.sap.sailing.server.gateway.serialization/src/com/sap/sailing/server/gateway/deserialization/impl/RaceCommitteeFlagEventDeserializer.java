@@ -1,7 +1,7 @@
 package com.sap.sailing.server.gateway.deserialization.impl;
 
+import java.io.Serializable;
 import java.util.Collections;
-import java.util.UUID;
 
 import org.json.simple.JSONObject;
 
@@ -16,7 +16,7 @@ public class RaceCommitteeFlagEventDeserializer extends
 		BaseRaceCommitteeEventDeserializer {
 
 	@Override
-	protected RaceCommitteeEvent deserialize(JSONObject object, UUID id,
+	protected RaceCommitteeEvent deserialize(JSONObject object, Serializable id,
 			TimePoint timePoint, int passId) {
 
 		Flags upperFlag = Flags.valueOf(object.get(

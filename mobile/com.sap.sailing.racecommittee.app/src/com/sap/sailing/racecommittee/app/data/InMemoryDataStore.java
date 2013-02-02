@@ -6,15 +6,18 @@ import java.util.HashMap;
 
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.utils.CollectionUtils;
 
 public enum InMemoryDataStore implements DataStore {
 	INSTANCE;
 	
 	private HashMap<Serializable, Event> eventsById;
+	private HashMap<Serializable, ManagedRace> managedRaceById;
 	
 	private InMemoryDataStore() {
 		this.eventsById = new HashMap<Serializable, Event>();
+		this.managedRaceById = new HashMap<Serializable, ManagedRace>();
 	}
 	
 	/*
@@ -64,13 +67,21 @@ public enum InMemoryDataStore implements DataStore {
 		return null;
 	}
 
-	public boolean hasCourseArea(Event event, String name) {
-		Collection<CourseArea> courseAreas = getCourseAreas(event);
-		if (courseAreas != null) {
-			for (CourseArea courseArea : courseAreas) {
-				if (courseArea.getName().equals(name)) {
+	public CourseArea getCourseArea(Serializable id) {
+		for (Event event : eventsById.values()) {
+			for (CourseArea courseArea : getCourseAreas(event)) {
+				if (courseArea.getId().equals(id))
+					return courseArea;
+			}
+		}
+		return null;
+	}
+
+	public boolean hasCourseArea(Serializable id) {
+		for (Event event : eventsById.values()) {
+			for (CourseArea courseArea : getCourseAreas(event)) {
+				if (courseArea.getId().equals(id))
 					return true;
-				}
 			}
 		}
 		return false;
@@ -80,5 +91,23 @@ public enum InMemoryDataStore implements DataStore {
 		if (event.getVenue() != null) {
 			event.getVenue().addCourseArea(courseArea);
 		}
+	}
+	
+	/*
+	 * * * * * * *  *
+	 * MANAGED RACE *
+	 * * * * * * *  *
+	 */
+
+	public void addRace(ManagedRace race) {
+		managedRaceById.put(race.getId(), race);
+	}
+
+	public ManagedRace getRace(Serializable id) {
+		return managedRaceById.get(id);
+	}
+
+	public boolean hasRace(Serializable id) {
+		return managedRaceById.containsKey(id);
 	}
 }

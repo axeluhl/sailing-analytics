@@ -20,8 +20,6 @@ public class CourseAreaListFragment extends NamedListFragment<CourseArea>  {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		
-		// retrieve event id from bundle
 		this.parentEventId = getArguments().getSerializable(AppConstants.EventIdTag);
 	}
 	
@@ -51,7 +49,7 @@ public class CourseAreaListFragment extends NamedListFragment<CourseArea>  {
 
 	@Override
 	protected void loadItems(ReadonlyDataManager manager) {
-		/// TODO: load course areas..
+		manager.loadCourseAreas(parentEventId, this);
 	}
 
 }

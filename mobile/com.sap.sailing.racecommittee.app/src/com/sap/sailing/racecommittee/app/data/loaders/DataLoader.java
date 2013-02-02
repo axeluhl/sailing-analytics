@@ -50,8 +50,12 @@ public class DataLoader<T> extends AsyncTaskLoader<T> {
 			inputReader = new InputStreamReader(inputStream);
 			return dataParser.parse(inputReader);
 		} finally {
-			inputStream.close();
-			inputReader.close();
+			if (inputStream != null) {
+				inputStream.close();
+			}
+			if (inputReader != null) {
+				inputReader.close();
+			}
 		}
 	}
 	

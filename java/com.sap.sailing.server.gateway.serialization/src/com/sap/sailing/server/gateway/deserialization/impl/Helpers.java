@@ -1,5 +1,8 @@
 package com.sap.sailing.server.gateway.deserialization.impl;
 
+import java.io.Serializable;
+import java.util.UUID;
+
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -45,6 +48,15 @@ public class Helpers {
 							fieldName, childObject.toString()));
 		}
 		return (JSONArray) childObject;
+	}
+	
+	public static Serializable tryUuidConversion(String id) {
+		try {
+			return UUID.fromString(id);
+		} catch (IllegalArgumentException iae) {
+			/// TODO: insert warning of non-uuid id.
+		}
+		return id;
 	}
 
 }

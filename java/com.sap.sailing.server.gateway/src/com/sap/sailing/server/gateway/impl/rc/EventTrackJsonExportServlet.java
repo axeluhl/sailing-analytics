@@ -9,10 +9,13 @@ import javax.servlet.http.HttpServletResponse;
 import org.json.simple.JSONArray;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.racecommittee.RaceCommitteeEvent;
 import com.sap.sailing.domain.racecommittee.RaceCommitteeEventTrack;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
+import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.gateway.impl.JsonExportServlet;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
@@ -91,13 +94,15 @@ public class EventTrackJsonExportServlet extends JsonExportServlet {
 		
 	}
 
-	private DynamicTrackedRace getDynamicTrackedRace(String regattaName,
-			String raceName) {
-		RegattaNameAndRaceName nameIdentifier = new RegattaNameAndRaceName(regattaName, raceName);
-		DynamicTrackedRace trackedRace = 
-				getService().getOrCreateTrackedRegatta(
-						getService().getRegattaByName(regattaName)).
-							getExistingTrackedRace(getService().getRace(nameIdentifier));
+	private DynamicTrackedRace getDynamicTrackedRace(String regattaName, String raceName) {
+		RegattaNameAndRaceName raceAndRegattaIdentifier = new RegattaNameAndRaceName(regattaName, raceName);
+		
+		RaceDefinition raceDefinition = getService().getRace(raceAndRegattaIdentifier);
+		Regatta regatta = getService().getRegatta(raceAndRegattaIdentifier);
+		
+		DynamicTrackedRegatta trackedRegatta = getService().getTrackedRegatta(regatta);
+		DynamicTrackedRace trackedRace = trackedRegatta.getExistingTrackedRace(raceDefinition);
+		
 		return trackedRace;
 	}
 	
