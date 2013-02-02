@@ -349,12 +349,12 @@ public interface SailingServiceAsync {
     * If there's no event with the name <code>oldName</code> or there's already a event with the name
     * <code>newName</code> a {@link IllegalArgumentException} is thrown.
     */
-    void renameEvent(String oldName, String newName, AsyncCallback<Void> callback);
+    void renameEvent(Serializable id, String newName, AsyncCallback<Void> callback);
     
     /**
-     * Removes the event with the name <code>eventName</code> from the service and the persistence store.
+     * Removes the event with the id <code>id</code> from the service and the persistence store.
      */
-    void removeEvent(String eventName, AsyncCallback<Void> callback);
+    void removeEvent(Serializable id, AsyncCallback<Void> callback);
     
     void createEvent(String eventName, String description, String publicationUrl, boolean isPublic, AsyncCallback<EventDTO> callback);
     
