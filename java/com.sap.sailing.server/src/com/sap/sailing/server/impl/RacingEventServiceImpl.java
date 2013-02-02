@@ -19,7 +19,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -109,6 +108,7 @@ import com.sap.sailing.server.operationaltransformation.AddDefaultRegatta;
 import com.sap.sailing.server.operationaltransformation.AddRaceDefinition;
 import com.sap.sailing.server.operationaltransformation.AddSpecificRegatta;
 import com.sap.sailing.server.operationaltransformation.ConnectTrackedRaceToLeaderboardColumn;
+import com.sap.sailing.server.operationaltransformation.CreateEvent;
 import com.sap.sailing.server.operationaltransformation.CreateTrackedRace;
 import com.sap.sailing.server.operationaltransformation.RecordCompetitorGPSFix;
 import com.sap.sailing.server.operationaltransformation.RecordMarkGPSFix;
@@ -1544,13 +1544,14 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     }
 
     @Override
-    public Event addEvent(String eventName, String venue, String publicationUrl, boolean isPublic, List<String> regattaNames) {
-        Event result = new EventImpl(eventName, venue, publicationUrl, isPublic, UUID.randomUUID());
+    public Event addEvent(String eventName, String venue, String publicationUrl, boolean isPublic, Serializable id, List<String> regattaNames) {
+        Event result = new EventImpl(eventName, venue, publicationUrl, isPublic, id);
         synchronized (eventsById) {
             if (eventsById.containsKey(result.getId())) {
                 throw new IllegalArgumentException("Event with ID " + result.getId() + " already exists which is pretty surprising...");
             }
             eventsById.put(result.getId(), result);
+            replicate(new CreateEvent(eventName, venue, publicationUrl, isPublic, id, regattaNames));
         }
         mongoObjectFactory.storeEvent(result);
         return result;

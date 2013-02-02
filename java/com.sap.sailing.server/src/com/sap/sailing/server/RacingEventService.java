@@ -453,11 +453,13 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      *            The publication URL of the new event
      * @param isPublic
      *            Indicates whether the event is public accessible via the publication URL or not
+     * @param id
+     *            The id of the new event
      * @param regattaNames
      *            The names of the regattas contained in the new event.<br />
      * @return The new event
      */
-    Event addEvent(String eventName, String venueName, String publicationUrl, boolean isPublic, List<String> regattaNames);
+    Event addEvent(String eventName, String venueName, String publicationUrl, boolean isPublic, Serializable id, List<String> regattaNames);
 
     /**
      * Updates a sailing event with the name <code>eventName</code>, the venue<code>venue</code> and the

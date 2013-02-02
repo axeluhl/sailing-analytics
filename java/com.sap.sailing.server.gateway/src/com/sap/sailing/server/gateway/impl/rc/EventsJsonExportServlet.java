@@ -62,7 +62,8 @@ public class EventsJsonExportServlet extends JsonExportServlet {
 				"Kieler Woche 2012 - Where Sailing meets people", 
 				"Schilksee", 
 				"http://www.youtube.com", 
-				true, Collections.<String>emptyList());
+				true, UUID.randomUUID(),
+				Collections.<String>emptyList());
 				
 		Venue schilksee = kielerWocheEvent.getVenue();
 		

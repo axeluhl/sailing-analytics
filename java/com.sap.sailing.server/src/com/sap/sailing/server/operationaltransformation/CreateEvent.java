@@ -1,5 +1,6 @@
 package com.sap.sailing.server.operationaltransformation;
 
+import java.io.Serializable;
 import java.util.List;
 
 import com.sap.sailing.domain.base.Event;
@@ -14,8 +15,8 @@ public class CreateEvent extends AbstractEventOperation<Event> {
     private final List<String> regattaNames;
     private final String eventName;
     
-    public CreateEvent(String eventName, String venue, String publicationUrl, boolean isPublic, List<String> regattaNames) {
-        super(/* id */ null);
+    public CreateEvent(String eventName, String venue, String publicationUrl, boolean isPublic, Serializable id,  List<String> regattaNames) {
+        super(id);
         this.eventName = eventName;
         this.venue = venue;
         this.regattaNames = regattaNames;
@@ -41,7 +42,7 @@ public class CreateEvent extends AbstractEventOperation<Event> {
 
     @Override
     public Event internalApplyTo(RacingEventService toState) {
-        return toState.addEvent(getEventName(), venue, publicationUrl, isPublic, regattaNames);
+        return toState.addEvent(getEventName(), venue, publicationUrl, isPublic, getId(), regattaNames);
     }
 
 }

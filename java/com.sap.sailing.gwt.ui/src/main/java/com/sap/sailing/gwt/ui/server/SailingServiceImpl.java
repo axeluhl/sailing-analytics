@@ -2827,7 +2827,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public EventDTO createEvent(String eventName, String venue, String publicationUrl, boolean isPublic) {
-        return convertToEventDTO(getService().apply(new CreateEvent(eventName, venue, publicationUrl, isPublic, new ArrayList<String>())));
+        return convertToEventDTO(getService().apply(new CreateEvent(eventName, venue, publicationUrl, isPublic, UUID.randomUUID(), new ArrayList<String>())));
     }
 
     @Override
