@@ -1,11 +1,11 @@
-package com.sap.sailing.racecommittee.app.activities;
+package com.sap.sailing.racecommittee.app.ui.activities;
 
 import java.io.Serializable;
-import java.util.Collection;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.Fragment;
+import android.app.FragmentTransaction;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.os.Bundle;
@@ -17,16 +17,15 @@ import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.data.DataManager;
-import com.sap.sailing.racecommittee.app.data.InMemoryDataStore;
-import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
-import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
-import com.sap.sailing.racecommittee.app.fragments.list.NamedListFragment.ItemSelectedListener;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
+import com.sap.sailing.racecommittee.app.ui.fragments.list.EventListFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.list.selection.CourseAreaSelectedListenerHost;
+import com.sap.sailing.racecommittee.app.ui.fragments.list.selection.EventSelectedListenerHost;
+import com.sap.sailing.racecommittee.app.ui.fragments.list.selection.ItemSelectedListener;
 
-public class LoginActivity extends TwoPaneActivity  {
+public class LoginActivity extends TwoPaneActivity implements EventSelectedListenerHost, CourseAreaSelectedListenerHost  {
 	
-	private final static String TAG ="LoginActivity";
+	private final static String TAG = LoginActivity.class.getName();
 	
 	private enum LoginType {
 		OFFICER, VIEWER;
@@ -111,41 +110,24 @@ public class LoginActivity extends TwoPaneActivity  {
 		return builder.create();
 	}
 
-	private void addEventListFragment() {
-		
-		ReadonlyDataManager dataManager = new DataManager(
-				this, 
-				InMemoryDataStore.INSTANCE);
-		dataManager.getEvents(new LoadClient<Collection<Event>>() {
-			public void onLoadSucceded(Collection<Event> data) {
-				Toast.makeText(LoginActivity.this, "Success", Toast.LENGTH_LONG).show();
-			}
-			
-			public void onLoadFailed(Exception reason) {
-				Toast.makeText(LoginActivity.this, "Fail", Toast.LENGTH_LONG).show();
-			}
-		});
-		
-		/*FragmentTransaction transaction = getFragmentManager().beginTransaction();
+	private void addEventListFragment() {	
+		FragmentTransaction transaction = getFragmentManager().beginTransaction();
 		transaction.add(R.id.leftContainer, new EventListFragment());
 		transaction.setTransition(FragmentTransaction.TRANSIT_NONE);
-		transaction.commit();*/
+		transaction.commit();
 	}
 	
-	/*private void addCourseListFragment(Serializable eventId) {
-		Fragment fragment = new CourseAreaListFragment();
+	private void addCourseAreaListFragment(Serializable eventId) {
 		Bundle args = new Bundle();
 		args.putSerializable(AppConstants.EventIdTag, eventId);
+		
+		/*Fragment fragment = new CourseAreaListFragment();
 		fragment.setArguments(args);
 		FragmentTransaction transaction = getFragmentManager().beginTransaction();
 		transaction.setCustomAnimations(R.animator.slide_in, R.animator.slide_out);
 		transaction.replace(R.id.rightContainer, fragment);
 		transaction.commit();
-		ExLog.i("LoginActivity", "CourseFragment created.");
-	}*/
-	
-	public ItemSelectedListener<Event> getEventSelectionListener() {
-		return eventSelectionListener;
+		ExLog.i("LoginActivity", "CourseFragment created.");*/
 	}
     
 	private ItemSelectedListener<Event> eventSelectionListener = new ItemSelectedListener<Event>() {
@@ -153,35 +135,39 @@ public class LoginActivity extends TwoPaneActivity  {
 		public void itemSelected(Fragment sender, Event event) {
 			Serializable eventId = event.getId();
 			ExLog.i(ExLog.EVENT_SELECTED, eventId.toString(), getBaseContext());
-			showCourseListFragment(eventId);
+			showCourseAreaListFragment(eventId);
 		}
 	};
+
+	public ItemSelectedListener<Event> getEventSelectionListener() {
+		return eventSelectionListener;
+	}
 	
-	private void showCourseListFragment(Serializable eventId) {
+	private void showCourseAreaListFragment(Serializable eventId) {
 		Toast.makeText(LoginActivity.this, eventId.toString(), Toast.LENGTH_LONG).show();
 		getRightLayout().setVisibility(View.VISIBLE);
-		/*addCourseListFragment(eventId);*/
+		addCourseAreaListFragment(eventId);
 	}
 	
-	public ItemSelectedListener<CourseArea> getCourseSelectionListener() {
-		return courseSelectionListener;
-	}
-	
-	private ItemSelectedListener<CourseArea> courseSelectionListener = new ItemSelectedListener<CourseArea>() {
+	private ItemSelectedListener<CourseArea> courseAreaSelectionListener = new ItemSelectedListener<CourseArea>() {
 
-		public void itemSelected(Fragment sender, CourseArea course) {
-			ExLog.i(TAG, "Starting view for " + course.getName());
-			ExLog.i(ExLog.COURSE_SELECTED, course.getName(), getBaseContext());
-			selectCourse(course);
+		public void itemSelected(Fragment sender, CourseArea courseArea) {
+			ExLog.i(TAG, "Starting view for " + courseArea.getName());
+			ExLog.i(ExLog.COURSE_SELECTED, courseArea.getName(), getBaseContext());
+			selectCourseArea(courseArea);
 		}
 	};
+
+	public ItemSelectedListener<CourseArea> getCourseAreaSelectionListener() {
+		return courseAreaSelectionListener;
+	}
 	
-	private void selectCourse(CourseArea course) {
-		selectedCourse = course;
+	private void selectCourseArea(CourseArea courseArea) {
+		selectedCourse = courseArea;
 		showDialog(DIALOG_LOGIN_TYPE);
 	}
 	
-	private void startRaceActivity(CourseArea course) {
+	private void startRaceActivity(CourseArea courseArea) {
 		
 		switch (selectedLoginType) {
 		case OFFICER:
@@ -197,24 +183,16 @@ public class LoginActivity extends TwoPaneActivity  {
 			return;
 		}
 		
-		if (course == null) {
+		if (courseArea == null) {
 			Toast.makeText(this, "The selected course was lost.", Toast.LENGTH_LONG).show();
 			ExLog.e(TAG, "Course reference was not set - cannot start racing activity.");
 			return;
 		}
 		
-		Toast.makeText(this, "Course " + course.getName(), Toast.LENGTH_LONG).show();
+		Toast.makeText(this, "Course area " + courseArea.getName(), Toast.LENGTH_LONG).show();
 		/*Intent message = new Intent(this, RacingActivity.class);
 		message.putExtra(AppConstants.COURSE_AREA_UUID_KEY, course.getId());
 		fadeActivity(message);*/
 	}
-
-	/*public void onLoadFailed(Exception reason) {
-		Toast.makeText(this, "FAIL!", Toast.LENGTH_LONG).show();
-	}
-
-	public void onEventsLoaded(Collection<Event> events) {
-		Toast.makeText(this, "SUCCESS!", Toast.LENGTH_LONG).show();
-	}*/
 
 }

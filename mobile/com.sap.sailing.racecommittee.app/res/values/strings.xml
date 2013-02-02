@@ -41,7 +41,7 @@
     <string name="flag_golf">Gate start</string>
     <string name="flag_foxtrott">Fixed line start</string>
     <string name="label_login_events">Select an event:</string>
-    <string name="label_login_course">Select a course area:</string>
+    <string name="label_login_course_area">Select a course area:</string>
 	<string name="please_pick_a_time">Please schedule the start time to</string>
 	<string name="select_raceStartType">Select a race starting mode</string>
 	<string name="time_until_start">Time to start (with time selected above)</string>
@@ -82,7 +82,7 @@
 	<string name="settings_category_general">General Settings</string>
 	<string name="settings_category_race">Race Settings</string>
 	<string name="settings_general_manageareas_header">Managed Course Areas</string>
-	<string name="settings_general_manageareas_description">Enter course area names managed by you (comma-seperated)</string>
+	<string name="settings_general_manageareas_description">Enter course area names managed by you (comma-separated)</string>
 	<string name="settings_general_manageareas_default">Alpha</string>
 	<string name="settings_advanced_service_header">Webservice URL</string>
 	<string name="settings_advanced_service_description">Select the JSON Webservice URL</string>

@@ -6,5 +6,7 @@ import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 
 public interface ReadonlyDataManager {
-	public void getEvents(LoadClient<Collection<Event>> client);
+	public DataStore getDataStore();
+	
+	public void loadEvents(LoadClient<Collection<Event>> client);
 }

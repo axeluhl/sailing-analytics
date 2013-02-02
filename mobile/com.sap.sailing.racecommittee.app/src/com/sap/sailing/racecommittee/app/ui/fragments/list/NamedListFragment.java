@@ -1,12 +1,10 @@
-package com.sap.sailing.racecommittee.app.fragments.list;
+package com.sap.sailing.racecommittee.app.ui.fragments.list;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.Fragment;
 import android.app.ListFragment;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -16,25 +14,36 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 import android.widget.TextView;
+
 import com.sap.sailing.domain.common.Named;
 import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.data.DataManager;
+import com.sap.sailing.racecommittee.app.data.InMemoryDataStore;
+import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
+import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
+import com.sap.sailing.racecommittee.app.ui.adapters.NamedArrayAdapter;
+import com.sap.sailing.racecommittee.app.ui.fragments.list.selection.ItemSelectedListener;
 
-public abstract class NamedListFragment<T extends Named> extends ListFragment/* implements BaseLoadedListener<T>*/ {
+public abstract class NamedListFragment<T extends Named> extends ListFragment implements LoadClient<Collection<T>> {
+	private ItemSelectedListener<T> listener;
+	private NamedArrayAdapter<T> listAdapter;
+	private ReadonlyDataManager dataManager;
 	
-	public interface ItemSelectedListener<T> {
-		public void itemSelected(Fragment sender, T event);
-	}
-	
-	/*private ItemSelectedListener<T> listener;
-	private NamedAdapter<T> listAdapter;
 	protected ArrayList<T> namedList;
-	private ResourceManager resourceManager;
 	
-	protected String getHeaderText() {
-		return "Undefined";
+	protected abstract ItemSelectedListener<T> attachListener(Activity activity);
+	
+	protected abstract String getHeaderText();
+	
+	protected abstract void loadItems(ReadonlyDataManager manager);
+	
+	protected NamedArrayAdapter<T> createAdapter(Context context, int layoutId, ArrayList<T> items) {
+		return new NamedArrayAdapter<T>(context, layoutId, items);
 	}
 	
-	abstract protected ItemSelectedListener<T> attachListener(Activity activity);
+	protected void loadItems() {
+		loadItems(dataManager);
+	}
 	
 	@Override
 	public void onAttach(Activity activity) {
@@ -47,15 +56,26 @@ public abstract class NamedListFragment<T extends Named> extends ListFragment/* 
 		super.onActivityCreated(savedInstanceState);
 		
 		addHeader();
+		
 		namedList = new ArrayList<T>();
 		listAdapter = createAdapter(getActivity(), android.R.layout.simple_list_item_single_choice, namedList);
+		
 		this.getListView().setChoiceMode(ListView.CHOICE_MODE_SINGLE);
 		this.setListAdapter(listAdapter);
 		
-		getActivity().setProgressBarIndeterminateVisibility(true);
-		resourceManager = new ResourceManager(getActivity());
+		showProgressBar(true);
+		dataManager = DataManager.create(getActivity(), InMemoryDataStore.INSTANCE);
 	}
-
+	
+	@Override
+	public void onListItemClick(ListView l, View v, int position, long id) {
+		super.onListItemClick(l, v, position, id);
+		// this unchecked cast here seems unavoidable.
+		// even SDK example code does it...
+		@SuppressWarnings("unchecked")
+		T item = (T) l.getItemAtPosition(position);
+		listener.itemSelected(this, item);
+	}
 
 	private void addHeader() {
 		LayoutInflater inflater = getActivity().getLayoutInflater();
@@ -65,35 +85,13 @@ public abstract class NamedListFragment<T extends Named> extends ListFragment/* 
 		textText.setText(getHeaderText());
 	}
 	
-	protected NamedAdapter<T> createAdapter(Context context, int layoutId, ArrayList<T> items) {
-		return new NamedAdapter<T>(context, layoutId, items);
-	}
-	
-	protected void loadItems() {
-		loadItems(resourceManager);
-	}
-	
-	protected abstract void loadItems(ResourceManager manager);
-	
-	@Override
-	public void onListItemClick(ListView l, View v, int position, long id) {
-		super.onListItemClick(l, v, position, id);
-		// this unchecked cast here seems unavoidable.
-		// even sdk example code does it...
-		@SuppressWarnings("unchecked")
-		T item = (T) l.getItemAtPosition(position);
-		listener.itemSelected(this, item);
-	}
-
-	protected void onResourcesLoaded(Collection<T> aListOfNamed) {
+	public void onLoadSucceded(Collection<T> data) {
 		namedList.clear();
-		namedList.addAll(aListOfNamed);
-		Collections.sort(namedList, new NamedComparator());
+		namedList.addAll(data);
+		/// TODO: Collections.sort(namedList, new NamedComparator());
 		listAdapter.notifyDataSetChanged();
-		Activity activity = getActivity();
-		if (activity != null) {
-			activity.setProgressBarIndeterminateVisibility(false);
-		}
+		
+		showProgressBar(false);
 		
 		// we set this here to ensure that the screen is initially
 		// not covered with the following text while loading
@@ -101,12 +99,15 @@ public abstract class NamedListFragment<T extends Named> extends ListFragment/* 
 	}
 	
 	public void onLoadFailed(Exception reason) {
+		showProgressBar(false);
+		showLoadFailedDialog(reason.getMessage());
+	}
+
+	private void showProgressBar(boolean visible) {
 		Activity activity = getActivity();
 		if (activity != null) {
-			activity.setProgressBarIndeterminateVisibility(false);
+			activity.setProgressBarIndeterminateVisibility(visible);
 		}
-		//this.setEmptyText("Load failure.");
-		showLoadFailedDialog(reason.getMessage());
 	}
 	
 	private void showLoadFailedDialog(String message) {
@@ -127,5 +128,5 @@ public abstract class NamedListFragment<T extends Named> extends ListFragment/* 
 		       }); 
 		AlertDialog alert = builder.create(); 
 		alert.show(); 
-	}*/
+	}
 }

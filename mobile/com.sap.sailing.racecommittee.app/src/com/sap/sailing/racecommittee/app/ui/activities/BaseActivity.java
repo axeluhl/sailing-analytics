@@ -1,4 +1,4 @@
-package com.sap.sailing.racecommittee.app.activities;
+package com.sap.sailing.racecommittee.app.ui.activities;
 
 import android.app.Activity;
 import android.content.Intent;

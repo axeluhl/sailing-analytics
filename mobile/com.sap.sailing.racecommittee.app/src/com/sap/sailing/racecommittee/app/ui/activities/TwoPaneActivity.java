@@ -1,4 +1,4 @@
-package com.sap.sailing.racecommittee.app.activities;
+package com.sap.sailing.racecommittee.app.ui.activities;
 
 import com.sap.sailing.racecommittee.app.R;
 
@@ -7,17 +7,15 @@ import android.view.View;
 
 /**
  * A two-pane activity - saves the visibility state of the right pane.
- *
  */
 public class TwoPaneActivity extends BaseActivity {
 
-	private final static String VisibilityTag = "RIGHTVISIBILITY";
+	private final static String VisibilityTag = TwoPaneActivity.class.getName() + ".rightlayoutvisibility";
 	
 	@Override
 	protected void onRestoreInstanceState(Bundle savedInstanceState) {
 		super.onRestoreInstanceState(savedInstanceState);
 		if (savedInstanceState != null) {
-	    	// restore visibility property of course fragment container
 	    	if (savedInstanceState.getBoolean(VisibilityTag)) {
 	    		getRightLayout().setVisibility(View.VISIBLE);
 	    	}

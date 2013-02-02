@@ -21,10 +21,14 @@ import com.sap.sailing.server.gateway.deserialization.impl.VenueJsonDeserializer
  */
 public class DataManager implements ReadonlyDataManager {
 	
+	public static ReadonlyDataManager create(Context context, DataStore dataStore) {
+		return new DataManager(context, dataStore);
+	}
+	
 	private Context context;
 	private DataStore dataStore;
 
-	public DataManager(Context context, DataStore dataStore) {
+	private DataManager(Context context, DataStore dataStore) {
 		this.context = context;
 		this.dataStore = dataStore;
 	}
@@ -33,9 +37,13 @@ public class DataManager implements ReadonlyDataManager {
 		return context;
 	}
 	
-	public void getEvents(LoadClient<Collection<Event>> client) {
+	public DataStore getDataStore() {
+		return dataStore;
+	}
+	
+	public void loadEvents(LoadClient<Collection<Event>> client) {
 		if (dataStore.getEvents().isEmpty()) {
-			loadEvents(client);
+			reloadEvents(client);
 		} else {
 			client.onLoadSucceded(dataStore.getEvents());
 		}
@@ -49,7 +57,7 @@ public class DataManager implements ReadonlyDataManager {
 		}
 	}
 
-	protected void loadEvents(LoadClient<Collection<Event>> client) {
+	protected void reloadEvents(LoadClient<Collection<Event>> client) {
 		DataParser<Collection<Event>> parser = new EventsDataParser(
 				new EventJsonDeserializer(
 					new VenueJsonDeserializer(
