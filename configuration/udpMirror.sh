@@ -9,4 +9,5 @@ else
     ARGS=$*
 fi
 
+echo "Using $ARGS"
 java -cp "$jar" -Djava.util.logging.config.file=udpmirrorLog.properties com.sap.sailing.expeditionconnector.UDPMirror $ARGS
