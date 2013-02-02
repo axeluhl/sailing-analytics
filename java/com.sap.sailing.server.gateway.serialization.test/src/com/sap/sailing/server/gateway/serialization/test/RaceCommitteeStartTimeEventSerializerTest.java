@@ -29,9 +29,10 @@ public class RaceCommitteeStartTimeEventSerializerTest extends BaseRaceCommitteE
 		return event;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	protected JsonSerializer<RaceCommitteeEvent> createSerializer() {
-		return new RaceCommitteeStartTimeEventSerializer();
+		return new RaceCommitteeStartTimeEventSerializer(mock(JsonSerializer.class));
 	}
 	
 	@Test

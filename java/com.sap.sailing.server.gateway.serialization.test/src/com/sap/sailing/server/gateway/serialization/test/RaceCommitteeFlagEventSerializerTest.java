@@ -32,9 +32,10 @@ public class RaceCommitteeFlagEventSerializerTest extends BaseRaceCommitteEventT
 		return event;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	protected JsonSerializer<RaceCommitteeEvent> createSerializer() {
-		return new RaceCommitteeFlagEventSerializer();
+		return new RaceCommitteeFlagEventSerializer(mock(JsonSerializer.class));
 	}
 	
 	@Before

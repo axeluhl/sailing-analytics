@@ -16,6 +16,11 @@ public class RaceCommitteeEventTest extends BaseRaceCommitteEventTest<RaceCommit
 	protected final String expectedClassValue = "AllYourBaseAreBelongToUs";
 	
 	private class TestRaceCommitteeEventSerializer extends BaseRaceCommitteeEventSerializer {
+		@SuppressWarnings("unchecked")
+		public TestRaceCommitteeEventSerializer() {
+			super(mock(JsonSerializer.class));
+		}
+
 		@Override
 		protected String getClassFieldValue() {
 			return expectedClassValue;

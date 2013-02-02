@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.json.simple.JSONArray;
 
+import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.racecommittee.RaceCommitteeEvent;
 import com.sap.sailing.domain.racecommittee.RaceCommitteeEventTrack;
@@ -15,6 +16,7 @@ import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.gateway.impl.JsonExportServlet;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.CompetitorIdJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.RaceCommitteeCourseAreaChangedEventSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.RaceCommitteeEventSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.RaceCommitteeFlagEventSerializer;
@@ -33,10 +35,11 @@ public class EventTrackJsonExportServlet extends JsonExportServlet {
 	public void init() throws ServletException {
 		super.init();
 		
+		JsonSerializer<Competitor> competitorSerializer = new CompetitorIdJsonSerializer();
 		rcEventSerializer = new RaceCommitteeEventSerializer(
-				new RaceCommitteeFlagEventSerializer(),
-				new RaceCommitteeStartTimeEventSerializer(),
-				new RaceCommitteeCourseAreaChangedEventSerializer());
+				new RaceCommitteeFlagEventSerializer(competitorSerializer),
+				new RaceCommitteeStartTimeEventSerializer(competitorSerializer),
+				new RaceCommitteeCourseAreaChangedEventSerializer(competitorSerializer));
 	}
 	
 	@Override
