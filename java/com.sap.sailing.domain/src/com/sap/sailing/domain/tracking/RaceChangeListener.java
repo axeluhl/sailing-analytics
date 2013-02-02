@@ -7,7 +7,7 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
-import com.sap.sailing.domain.racecommittee.RaceCommitteeEvent;
+import com.sap.sailing.domain.racelog.RaceLogEvent;
 
 
 public interface RaceChangeListener {
@@ -36,7 +36,7 @@ public interface RaceChangeListener {
     void delayToLiveChanged(long delayToLiveInMillis);
 
     void windSourcesToExcludeChanged(Iterable<? extends WindSource> windSourcesToExclude);
-	void raceCommitteeEventReceived(RaceCommitteeEvent event);
+	void raceLogEventReceived(RaceLogEvent event);
 
     void statusChanged(TrackedRaceStatus newStatus);
 }

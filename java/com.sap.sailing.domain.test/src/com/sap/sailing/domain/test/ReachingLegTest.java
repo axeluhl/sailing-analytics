@@ -40,7 +40,7 @@ import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
-import com.sap.sailing.domain.racecommittee.impl.EmptyRaceCommitteeStore;
+import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedLeg;
@@ -103,7 +103,7 @@ public class ReachingLegTest extends TrackBasedTest {
                 /* delayToLiveInMillis */ 0,
                 /* millisecondsOverWhichToAverageWind */ 30000, /* millisecondsOverWhichToAverageSpeed */ 30000,
                 /* delay for wind estimation cache invalidation */ 0,
-                EmptyRaceCommitteeStore.INSTANCE);
+                EmptyRaceLogStore.INSTANCE);
         // in this simplified artificial course, the top mark is exactly north of the right leeward gate, the offset
         // mark is slightly west of the top mark; wind from the north makes the leg from top to offset a reaching leg
         Position leftPosition = new DegreePosition(0, -0.00001);

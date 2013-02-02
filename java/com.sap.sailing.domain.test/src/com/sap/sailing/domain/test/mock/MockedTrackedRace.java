@@ -25,9 +25,9 @@ import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
-import com.sap.sailing.domain.racecommittee.RaceCommitteeEvent;
-import com.sap.sailing.domain.racecommittee.RaceCommitteeEventTrack;
-import com.sap.sailing.domain.racecommittee.RaceCommitteeStore;
+import com.sap.sailing.domain.racelog.RaceLogEvent;
+import com.sap.sailing.domain.racelog.RaceLog;
+import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
@@ -453,7 +453,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
             @Override
             public DynamicTrackedRace createTrackedRace(RaceDefinition raceDefinition, WindStore windStore,
                     long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
-                    DynamicRaceDefinitionSet raceDefinitionSetToUpdate, RaceCommitteeStore raceCommitteeStore) {
+                    DynamicRaceDefinitionSet raceDefinitionSetToUpdate, RaceLogStore raceLogStore) {
                 // TODO Auto-generated method stub
                 return null;
             }
@@ -701,13 +701,13 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
 	@Override
-	public RaceCommitteeEventTrack getRaceCommitteeEventTrack() {
+	public RaceLog getRaceLog() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 	
 	@Override
-	public void recordRaceCommitteeEvent(RaceCommitteeEvent event) {
+	public void recordRaceLogEvent(RaceLogEvent event) {
 		// TODO Auto-generated method stub
 		
 	}
@@ -724,14 +724,14 @@ public class MockedTrackedRace implements DynamicTrackedRace {
         
     }
 	@Override
-	public void waitUntilRaceCommitteeEventLoadingComplete()
+	public void waitUntilRaceLogLoadingComplete()
 			throws InterruptedException {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public RaceCommitteeStore getRaceCommitteeStore() {
+	public RaceLogStore getRaceLogStore() {
 		// TODO Auto-generated method stub
 		return null;
 	}

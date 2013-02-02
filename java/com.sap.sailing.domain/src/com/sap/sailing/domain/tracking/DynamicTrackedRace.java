@@ -4,7 +4,7 @@ import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
-import com.sap.sailing.domain.racecommittee.RaceCommitteeEvent;
+import com.sap.sailing.domain.racelog.RaceLogEvent;
 
 public interface DynamicTrackedRace extends TrackedRace {
     void recordFix(Competitor competitor, GPSFixMoving fix);
@@ -15,7 +15,7 @@ public interface DynamicTrackedRace extends TrackedRace {
 
     void removeWind(Wind wind, WindSource windSource);
     
-    void recordRaceCommitteeEvent(RaceCommitteeEvent event);
+    void recordRaceLogEvent(RaceLogEvent event);
 
     /**
      * The raw, updating feed of a single competitor participating in this race

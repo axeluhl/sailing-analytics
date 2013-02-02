@@ -37,10 +37,10 @@ import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
-import com.sap.sailing.domain.racecommittee.RaceCommitteeEvent;
-import com.sap.sailing.domain.racecommittee.RaceCommitteeEventTrack;
-import com.sap.sailing.domain.racecommittee.RaceCommitteeFlagEvent;
-import com.sap.sailing.domain.racecommittee.RaceCommitteeStartTimeEvent;
+import com.sap.sailing.domain.racelog.RaceLog;
+import com.sap.sailing.domain.racelog.RaceLogEvent;
+import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
+import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.tracking.Positioned;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
@@ -471,66 +471,66 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         regattaForRaceIDCollection.update(query, entry, /* upsrt */ true, /* multi */ false);
     }
     
-    public DBCollection getRaceCommitteeTrackCollection() {
-        DBCollection result = database.getCollection(CollectionNames.RACECOMMITTEE_TRACKS.name());
+    public DBCollection getRaceLogCollection() {
+        DBCollection result = database.getCollection(CollectionNames.RACE_LOGS.name());
         result.ensureIndex(new BasicDBObject(FieldNames.RACE_NAME.name(), null));
         //TODO: Clarify which field shall be the index/ which fields identifies a race uniquely over all events and regattas
         return result;
     }
 
-	public DBObject storeRaceCommitteeTrackEntry(Regatta regatta, RaceDefinition race, RaceCommitteeFlagEvent flagEvent) {
+	public DBObject storeRaceLogEntry(Regatta regatta, RaceDefinition race, RaceLogFlagEvent flagEvent) {
 		BasicDBObject result = new BasicDBObject();
-		storeRegattaAndRaceForRaceCommitteeEvent(regatta, race, result);
+		storeRegattaAndRaceForRaceLogEvent(regatta, race, result);
         
-        result.put(FieldNames.RC_EVENT.name(), storeRaceCommitteeFlagEvent(flagEvent));
+        result.put(FieldNames.RACE_LOG_EVENT.name(), storeRaceLogFlagEvent(flagEvent));
         return result;
 	}
 	
-	public DBObject storeRaceCommitteeTrackEntry(Regatta regatta, RaceDefinition race, RaceCommitteeStartTimeEvent startTimeEvent) {
+	public DBObject storeRaceLogEntry(Regatta regatta, RaceDefinition race, RaceLogStartTimeEvent startTimeEvent) {
 		BasicDBObject result = new BasicDBObject();
-		storeRegattaAndRaceForRaceCommitteeEvent(regatta, race, result);
+		storeRegattaAndRaceForRaceLogEvent(regatta, race, result);
         
-        result.put(FieldNames.RC_EVENT.name(), storeRaceCommitteeStartTimeEvent(startTimeEvent));
+        result.put(FieldNames.RACE_LOG_EVENT.name(), storeRaceLogStartTimeEvent(startTimeEvent));
         return result;
 	}
 	
-	private void storeRegattaAndRaceForRaceCommitteeEvent(Regatta regatta, RaceDefinition race, DBObject result) {
+	private void storeRegattaAndRaceForRaceLogEvent(Regatta regatta, RaceDefinition race, DBObject result) {
 		result.put(FieldNames.REGATTA_NAME.name(), regatta.getName());
         result.put(FieldNames.RACE_NAME.name(), race.getName());
 	}
 
-	private Object storeRaceCommitteeStartTimeEvent(RaceCommitteeStartTimeEvent startTimeEvent) {
+	private Object storeRaceLogStartTimeEvent(RaceLogStartTimeEvent startTimeEvent) {
 		DBObject result = new BasicDBObject();
         storeTimed(startTimeEvent, result);
-        storeRaceCommitteeEventProperties(startTimeEvent, result);
+        storeRaceLogEventProperties(startTimeEvent, result);
         
-        result.put(FieldNames.RC_EVENT_CLASS.name(), RaceCommitteeStartTimeEvent.class.getSimpleName());
+        result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogStartTimeEvent.class.getSimpleName());
         
-        result.put(FieldNames.RC_EVENT_START_TIME.name(), startTimeEvent.getStartTime().asMillis());
+        result.put(FieldNames.RACE_LOG_EVENT_START_TIME.name(), startTimeEvent.getStartTime().asMillis());
         return result;
 	}
 
-	public DBObject storeRaceCommitteeFlagEvent(RaceCommitteeFlagEvent flagEvent) {
+	public DBObject storeRaceLogFlagEvent(RaceLogFlagEvent flagEvent) {
 		DBObject result = new BasicDBObject();
         storeTimed(flagEvent, result);
-        storeRaceCommitteeEventProperties(flagEvent, result);
+        storeRaceLogEventProperties(flagEvent, result);
         
-        result.put(FieldNames.RC_EVENT_CLASS.name(), RaceCommitteeFlagEvent.class.getSimpleName());
+        result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogFlagEvent.class.getSimpleName());
         
-        result.put(FieldNames.RC_EVENT_FLAG_UPPER.name(), flagEvent.getUpperFlag().name());
-        result.put(FieldNames.RC_EVENT_FLAG_LOWER.name(), flagEvent.getLowerFlag().name());
-        result.put(FieldNames.RC_EVENT_FLAG_DISPLAYED.name(), String.valueOf(flagEvent.isDisplayed()));
+        result.put(FieldNames.RACE_LOG_EVENT_FLAG_UPPER.name(), flagEvent.getUpperFlag().name());
+        result.put(FieldNames.RACE_LOG_EVENT_FLAG_LOWER.name(), flagEvent.getLowerFlag().name());
+        result.put(FieldNames.RACE_LOG_EVENT_FLAG_DISPLAYED.name(), String.valueOf(flagEvent.isDisplayed()));
         return result;
 	}
 	
-	private void storeRaceCommitteeEventProperties(RaceCommitteeEvent event, DBObject result) {
-		result.put(FieldNames.RC_EVENT_ID.name(), event.getId());
-        result.put(FieldNames.RC_EVENT_PASS_ID.name(), event.getPassId());
-        result.put(FieldNames.RC_EVENT_INVOLVED_BOATS.name(), storeInvolvedBoatsForRaceCommitteeEvent(event.getInvolvedBoats()));
+	private void storeRaceLogEventProperties(RaceLogEvent event, DBObject result) {
+		result.put(FieldNames.RACE_LOG_EVENT_ID.name(), event.getId());
+        result.put(FieldNames.RACE_LOG_EVENT_PASS_ID.name(), event.getPassId());
+        result.put(FieldNames.RACE_LOG_EVENT_INVOLVED_BOATS.name(), storeInvolvedBoatsForRaceLogEvent(event.getInvolvedBoats()));
 	}
 	
 	
-	private BasicDBList storeInvolvedBoatsForRaceCommitteeEvent(List<Competitor> competitors) {
+	private BasicDBList storeInvolvedBoatsForRaceLogEvent(List<Competitor> competitors) {
 		BasicDBList dbInvolvedCompetitorNames = new BasicDBList();
         for (Competitor competitor : competitors) {
         	dbInvolvedCompetitorNames.add(MongoUtils.escapeDollarAndDot(competitor.getName()));
@@ -539,8 +539,8 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
 	}
 
 	@Override
-	public void addRaceCommitteeEventTrackDumper(TrackedRegatta trackedRegatta, TrackedRace trackedRace) {
-		RaceCommitteeEventTrack rcEventTrack = trackedRace.getRaceCommitteeEventTrack();
-		rcEventTrack.addListener(new MongoRaceCommitteeListener(trackedRegatta, trackedRace, this, database));		
+	public void addRaceLogDumper(TrackedRegatta trackedRegatta, TrackedRace trackedRace) {
+		RaceLog rcEventTrack = trackedRace.getRaceLog();
+		rcEventTrack.addListener(new MongoRaceLogListener(trackedRegatta, trackedRace, this, database));		
 	}
 }

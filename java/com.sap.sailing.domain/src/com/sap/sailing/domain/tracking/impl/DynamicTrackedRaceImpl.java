@@ -25,8 +25,8 @@ import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
-import com.sap.sailing.domain.racecommittee.RaceCommitteeEvent;
-import com.sap.sailing.domain.racecommittee.RaceCommitteeStore;
+import com.sap.sailing.domain.racelog.RaceLogEvent;
+import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
@@ -58,9 +58,9 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
     
     public DynamicTrackedRaceImpl(TrackedRegatta trackedRegatta, RaceDefinition race,
             WindStore windStore, long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
-            long delayForCacheInvalidationOfWindEstimation, RaceCommitteeStore raceCommitteeStore) {
+            long delayForCacheInvalidationOfWindEstimation, RaceLogStore raceLogStore) {
         super(trackedRegatta, race, windStore, delayToLiveInMillis, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed,
-                delayForCacheInvalidationOfWindEstimation, raceCommitteeStore);
+                delayForCacheInvalidationOfWindEstimation, raceLogStore);
         this.raceIsKnownToStartUpwind = race.getBoatClass().typicallyStartsUpwind();
         if (!raceIsKnownToStartUpwind) {
             Set<WindSource> windSourcesToExclude = new HashSet<WindSource>();
@@ -96,9 +96,9 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
      */
     public DynamicTrackedRaceImpl(TrackedRegatta trackedRegatta, RaceDefinition race,
             WindStore windStore, long delayToLiveInMillis,
-            long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed, RaceCommitteeStore raceCommitteeStore) {
+            long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed, RaceLogStore raceLogStore) {
         this(trackedRegatta, race, windStore, delayToLiveInMillis, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed,
-                millisecondsOverWhichToAverageWind/2, raceCommitteeStore);
+                millisecondsOverWhichToAverageWind/2, raceLogStore);
     }
 
     @Override
@@ -639,24 +639,24 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
     }
 
 	@Override
-	public void recordRaceCommitteeEvent(RaceCommitteeEvent event) {
-		getRaceCommitteeEventTrack().add(event);
+	public void recordRaceLogEvent(RaceLogEvent event) {
+		getRaceLog().add(event);
         updated(/* time point */null); // TODO: updated has to be understood better, for now it shall have the same behaviour as in recordWind
         //TODO triggerRaceStateCalculation();
         notifyListeners(event);
 	}
 
-	private void notifyListeners(RaceCommitteeEvent event) {
+	private void notifyListeners(RaceLogEvent event) {
 		 RaceChangeListener[] listeners;
 	        synchronized (getListeners()) {
 	            listeners = getListeners().toArray(new RaceChangeListener[getListeners().size()]);
 	        }
 	        for (RaceChangeListener listener : listeners) {
 	            try {
-	                listener.raceCommitteeEventReceived(event);
+	                listener.raceLogEventReceived(event);
 	            } catch (Throwable t) {
 	                logger.log(Level.SEVERE, "RaceChangeListener " + listener + " threw exception " + t.getMessage());
-	                logger.throwing(DynamicTrackedRaceImpl.class.getName(), "notifyListeners(RaceCommitteeEvent)", t);
+	                logger.throwing(DynamicTrackedRaceImpl.class.getName(), "notifyListeners(RaceLogEvent)", t);
 	            }
 	        }
 	}

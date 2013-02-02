@@ -23,8 +23,8 @@ import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.Util.Pair;
-import com.sap.sailing.domain.racecommittee.RaceCommitteeEventTrack;
-import com.sap.sailing.domain.racecommittee.RaceCommitteeStore;
+import com.sap.sailing.domain.racelog.RaceLog;
+import com.sap.sailing.domain.racelog.RaceLogStore;
 
 /**
  * Live tracking data of a single race. The race follows a defined {@link Course} with a sequence of {@link Leg}s. The
@@ -455,19 +455,19 @@ public interface TrackedRace extends Serializable {
     void waitUntilWindLoadingComplete() throws InterruptedException;
     
     /**
-     * Returns the race committee event track for this race or creates it if it did not exist yet
+     * Returns the race log event track for this race or creates it if it did not exist yet
      */
-    RaceCommitteeEventTrack getRaceCommitteeEventTrack();
+    RaceLog getRaceLog();
 
     /**
-     * When provided with a {@link RaceCommitteeStore} during construction, the tracked race will asynchronously load the race committee event
-     * data for this tracked race from the race committee store in a background thread and update this tracked race with the results.
-     * Clients that want to wait for the race committee event loading process to complete can do so by calling this method which will block
-     * until the race committee event loading has completed.
+     * When provided with a {@link RaceLogStore} during construction, the tracked race will asynchronously load the race log event
+     * data for this tracked race from the race log store in a background thread and update this tracked race with the results.
+     * Clients that want to wait for the race log event loading process to complete can do so by calling this method which will block
+     * until the race log event loading has completed.
      */
-	void waitUntilRaceCommitteeEventLoadingComplete() throws InterruptedException;
+	void waitUntilRaceLogLoadingComplete() throws InterruptedException;
 
-	RaceCommitteeStore getRaceCommitteeStore();
+	RaceLogStore getRaceLogStore();
 
     
     TrackedRaceStatus getStatus();

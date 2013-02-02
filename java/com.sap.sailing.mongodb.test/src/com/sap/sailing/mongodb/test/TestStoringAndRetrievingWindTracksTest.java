@@ -27,7 +27,7 @@ import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.persistence.impl.DomainObjectFactoryImpl;
 import com.sap.sailing.domain.persistence.impl.MongoObjectFactoryImpl;
-import com.sap.sailing.domain.racecommittee.impl.EmptyRaceCommitteeStore;
+import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.test.AbstractTracTracLiveTest;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
@@ -74,7 +74,7 @@ public class TestStoringAndRetrievingWindTracksTest extends AbstractTracTracLive
         Regatta domainEvent = domainFactory.getOrCreateDefaultRegatta(getTracTracEvent(), /* trackedRegattaRegistry */ null);
         DynamicTrackedRegatta trackedRegatta = new RacingEventServiceImpl().getOrCreateTrackedRegatta(domainEvent);
         Iterable<Receiver> typeControllers = domainFactory.getUpdateReceivers(trackedRegatta, getTracTracEvent(),
-                EmptyWindStore.INSTANCE, EmptyRaceCommitteeStore.INSTANCE,
+                EmptyWindStore.INSTANCE, EmptyRaceLogStore.INSTANCE,
                 /* startOfTracking */null, /* endOfTracking */null, /* delayToLiveInMillis */
                 0l, /* simulator */ null, new DynamicRaceDefinitionSet() {
                     @Override
@@ -88,7 +88,7 @@ public class TestStoringAndRetrievingWindTracksTest extends AbstractTracTracLive
                     @Override
                     public void addRaceDefinition(RaceDefinition race) {
                     }
-                }, EmptyRaceCommitteeStore.INSTANCE);
+                }, EmptyRaceLogStore.INSTANCE);
         WindSource windSource = new WindSourceImpl(WindSourceType.WEB);
         Mongo myFirstMongo = newMongo();
         DB firstDatabase = myFirstMongo.getDB(dbConfiguration.getDatabaseName());

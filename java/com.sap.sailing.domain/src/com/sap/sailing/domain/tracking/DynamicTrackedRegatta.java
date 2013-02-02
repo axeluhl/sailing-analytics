@@ -1,7 +1,7 @@
 package com.sap.sailing.domain.tracking;
 
 import com.sap.sailing.domain.base.RaceDefinition;
-import com.sap.sailing.domain.racecommittee.RaceCommitteeStore;
+import com.sap.sailing.domain.racelog.RaceLogStore;
 
 public interface DynamicTrackedRegatta extends TrackedRegatta {
 
@@ -20,6 +20,6 @@ public interface DynamicTrackedRegatta extends TrackedRegatta {
      */
     DynamicTrackedRace createTrackedRace(RaceDefinition raceDefinition, WindStore windStore,
             long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
-            DynamicRaceDefinitionSet raceDefinitionSetToUpdate, RaceCommitteeStore raceCommitteeStore);
+            DynamicRaceDefinitionSet raceDefinitionSetToUpdate, RaceLogStore raceLogStore);
 
 }

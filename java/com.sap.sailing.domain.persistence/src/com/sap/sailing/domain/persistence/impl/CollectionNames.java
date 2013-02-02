@@ -49,7 +49,7 @@ public enum CollectionNames {
     REGATTA_FOR_RACE_ID, 
     
     /**
-     * Stores the race committee events for a tracked race.
+     * Stores the race log events for a tracked race.
      */
-    RACECOMMITTEE_TRACKS;
+    RACE_LOGS;
 }

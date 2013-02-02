@@ -15,7 +15,7 @@ import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
-import com.sap.sailing.domain.racecommittee.RaceCommitteeEventTrack;
+import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.gateway.impl.JsonExportServlet;
@@ -118,12 +118,12 @@ public class RegattasJsonExportServlet extends JsonExportServlet {
 					return true;
 				} else {
 					TrackedRace trackedRace = service.getTrackedRace(regatta, race);
-					RaceCommitteeEventTrack track = trackedRace.getRaceCommitteeEventTrack();
-					track.lockForRead();
+					RaceLog log = trackedRace.getRaceLog();
+					log.lockForRead();
 					
 					// filter for courseAreaId!
 					
-					track.unlockAfterRead();
+					log.unlockAfterRead();
 					return trackedRace == null;
 				}
 			}
