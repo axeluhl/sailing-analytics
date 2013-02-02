@@ -102,10 +102,10 @@ public class MediaSelectionDialog implements CloseHandler<PopupPanel> {
     }
 
     private Widget createAudioButton(final MediaTrack audioTrack, MediaTrack selectedAudioTrack) {
-        String title = audioTrack != null ? audioTrack.title: "Sound off";
-        String tooltip = audioTrack != null ? audioTrack.toString() : "Turn off all sound channels.";
-        RadioButton audioButton = new RadioButton("group-name", title);
-        audioButton.setTitle(tooltip);
+        String label = audioTrack != null ? audioTrack.title: "Sound off";
+        String title = audioTrack != null ? audioTrack.toString() : "Turn off all sound channels.";
+        RadioButton audioButton = new RadioButton("group-name", label);
+        audioButton.setTitle(title);
         audioButton.setValue(audioTrack == selectedAudioTrack);
         audioButton.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
             
