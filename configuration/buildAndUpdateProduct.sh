@@ -1,12 +1,16 @@
 #/bin/bash
 
-source /home/trac/.bash_profile
+USER_HOME=~
+PROJECT_HOME=$USER_HOME/git
 
+# x86 or x86_64 should work for most cases
 ARCH=x86_64
-PROJECT_HOME=/home/trac/git
 
 ACDIR=`pwd`
 MAVEN_SETTINGS=$ACDIR/configuration/maven-settings.xml
+
+# needed for maven to work correctly
+source $USER_HOME/.bash_profile
 
 gwtcompile=1
 testing=1
@@ -17,10 +21,10 @@ extra=''
 if [ $# -eq 0 ]; then
     echo "buildAndUpdateProduct [-g -t -o -c] [build|install|all]"
     echo ""
-    echo "-g Disable GWT compile, no gwt files will be generated."
+    echo "-g Disable GWT compile, no gwt files will be generated, old ones will be preserved."
     echo "-t Disable tests"
-    echo "-o Enable offline mode"
-    echo "-c Disable cleaning"
+    echo "-o Enable offline mode (does not work for tycho surefire plugin)"
+    echo "-c Disable cleaning (use only if you are sure that no java file has changed)"
     echo ""
     echo "build: builds the server code to $PROJECT_HOME"
     echo "install: installs product to $ACDIR"

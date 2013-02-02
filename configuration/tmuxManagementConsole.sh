@@ -1,4 +1,7 @@
 #!/bin/bash
+
+command -v tmux >/dev/null 2>&1 || { echo "I require tmux but it's not installed. Aborting." >&2; exit 1; }
+
 sn=sailing
 
 SERVERS_DIR=/home/trac/servers
