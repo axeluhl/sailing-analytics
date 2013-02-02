@@ -4,6 +4,8 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.util.UUID;
+
 import org.json.simple.JSONObject;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -14,6 +16,9 @@ import com.sap.sailing.server.gateway.serialization.impl.CourseAreaJsonSerialize
 
 public class CourseAreaJsonSerializerTest {
 	
+	protected final UUID expectedId = UUID.randomUUID();
+	protected final String expectedName = "Cruiser";
+	
 	protected CourseArea courseArea;
 	protected CourseAreaJsonSerializer serializer;
 	
@@ -21,22 +26,24 @@ public class CourseAreaJsonSerializerTest {
 	public void setUp() {
 		courseArea = mock(CourseArea.class);
 		serializer = new CourseAreaJsonSerializer();
+		
+		when(courseArea.getName()).thenReturn(expectedName);
+		when(courseArea.getId()).thenReturn(expectedId);
 	}
 	
 	@Test
-	public void testName() {
-		String expectedName = "Cruiser";
-		when(courseArea.getName()).thenReturn(expectedName);
-		
+	public void testBasicAttributes() {
 		JSONObject result = serializer.serialize(courseArea);
 		
 		assertEquals(
 				expectedName, 
 				result.get(CourseAreaJsonSerializer.FIELD_NAME));
+		assertEquals(
+				expectedId, 
+				result.get(CourseAreaJsonSerializer.FIELD_ID));
 	}
 	
 	@Ignore
-	@Test
 	public void testRaces() {
 		/// TODO: Implement a test for checking if races are correctly serialized on course areas
 	}

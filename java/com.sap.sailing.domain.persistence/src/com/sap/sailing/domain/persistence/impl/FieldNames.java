@@ -36,6 +36,7 @@ public enum FieldNames {
     
     COURSE_AREAS,
     COURSE_AREA_NAME,
+    COURSE_AREA_ID,
     
     BOAT_CLASS_NAME,
     BOAT_CLASS_TYPICALLY_STARTS_UPWIND,

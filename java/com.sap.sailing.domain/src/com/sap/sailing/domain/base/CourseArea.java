@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.base;
 
 import com.sap.sailing.domain.common.Named;
+import com.sap.sailing.domain.common.WithID;
 
 /**
  * A named area in a sailing {@link Venue} where races take place. Usually, the areas carry names according to the NATO
@@ -9,7 +10,7 @@ import com.sap.sailing.domain.common.Named;
  * @author Axel Uhl (D043530)
  *
  */
-public interface CourseArea extends Named {
+public interface CourseArea extends Named, WithID {
 
 	void addRace(RaceDefinition race);
 	

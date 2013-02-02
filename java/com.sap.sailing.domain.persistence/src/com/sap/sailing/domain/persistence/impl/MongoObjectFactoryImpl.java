@@ -390,6 +390,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
             DBObject dbCourseArea = new BasicDBObject();
             courseAreaList.add(dbCourseArea);
             dbCourseArea.put(FieldNames.COURSE_AREA_NAME.name(), courseArea.getName());
+            dbCourseArea.put(FieldNames.COURSE_AREA_ID.name(), courseArea.getId());
         }
         return result;
     }

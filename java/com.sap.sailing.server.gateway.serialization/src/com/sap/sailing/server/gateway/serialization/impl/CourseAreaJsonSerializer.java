@@ -7,6 +7,7 @@ import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 
 public class CourseAreaJsonSerializer implements JsonSerializer<CourseArea> {
 	public static final String FIELD_NAME = "name";
+	public static final String FIELD_ID = "id";
 	public static final String FIELD_RACES = "races";
 
 	@Override
@@ -14,6 +15,7 @@ public class CourseAreaJsonSerializer implements JsonSerializer<CourseArea> {
 		JSONObject result = new JSONObject();
 		
 		result.put(FIELD_NAME, object.getName());
+		result.put(FIELD_ID, object.getId());
 		
 		return result;
 	}

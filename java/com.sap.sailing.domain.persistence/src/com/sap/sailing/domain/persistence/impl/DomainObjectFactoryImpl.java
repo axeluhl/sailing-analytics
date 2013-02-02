@@ -723,7 +723,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
 
     private CourseArea loadCourseArea(DBObject courseAreaDBObject) {
         String name = (String) courseAreaDBObject.get(FieldNames.COURSE_AREA_NAME.name());
-        return new CourseAreaImpl(name);
+        Serializable id = (Serializable) courseAreaDBObject.get(FieldNames.COURSE_AREA_ID.name());
+        return new CourseAreaImpl(name, id);
     }
     
     @Override
