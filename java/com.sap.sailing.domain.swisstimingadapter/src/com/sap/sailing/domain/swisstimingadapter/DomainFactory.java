@@ -11,7 +11,7 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.racecommittee.RaceCommitteeStore;
+import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.swisstimingadapter.impl.DomainFactoryImpl;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
@@ -50,7 +50,7 @@ public interface DomainFactory {
     
     RaceTrackingConnectivityParameters createTrackingConnectivityParameters(String hostname, int port, String raceID, 
             boolean canSendRequests, long delayToLiveInMillis,
-            SwissTimingFactory swissTimingFactory, DomainFactory domainFactory, WindStore windStore, RaceCommitteeStore raceCommitteeStore,
+            SwissTimingFactory swissTimingFactory, DomainFactory domainFactory, WindStore windStore, RaceLogStore raceLogStore,
             RaceSpecificMessageLoader messageLoader);
 
     BoatClass getOrCreateBoatClassFromRaceID(String raceID);

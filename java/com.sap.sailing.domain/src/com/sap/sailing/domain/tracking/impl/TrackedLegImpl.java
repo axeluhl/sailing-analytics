@@ -21,7 +21,7 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.Util;
-import com.sap.sailing.domain.racecommittee.RaceCommitteeEvent;
+import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
@@ -247,7 +247,7 @@ public class TrackedLegImpl implements TrackedLeg, RaceChangeListener {
     }
     
 	@Override
-	public void raceCommitteeEventReceived(RaceCommitteeEvent event) {
+	public void raceLogEventReceived(RaceLogEvent event) {
 		clearCaches();
 	}
 

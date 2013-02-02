@@ -31,7 +31,7 @@ import com.sap.sailing.domain.base.impl.MarkImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Triple;
-import com.sap.sailing.domain.racecommittee.impl.EmptyRaceCommitteeStore;
+import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedLeg;
@@ -79,7 +79,7 @@ public class CourseUpdateTest extends AbstractTracTracLiveTest {
                     public void addRaceDefinition(RaceDefinition race) {}
                 }, /* delayToLiveInMillis */ 0l, 
                 /* millisecondsOverWhichToAverageWind */ 30000, /* simulator */ null,
-                EmptyRaceCommitteeStore.INSTANCE) {
+                EmptyRaceLogStore.INSTANCE) {
             @Override
             protected void handleEvent(Triple<Route, RouteData, Race> event) {
                 super.handleEvent(event);

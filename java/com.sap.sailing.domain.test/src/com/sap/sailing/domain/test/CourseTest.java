@@ -25,7 +25,7 @@ import com.sap.sailing.domain.base.impl.MarkImpl;
 import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
 import com.sap.sailing.domain.common.impl.Util;
-import com.sap.sailing.domain.racecommittee.impl.EmptyRaceCommitteeStore;
+import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
@@ -245,7 +245,7 @@ public class CourseTest {
                         EmptyWindStore.INSTANCE, /* delayToLiveInMillis */ 3000,
                         /* millisecondsOverWhichToAverageWind */ 30000,
                         /* millisecondsOverWhichToAverageSpeed */ 8000,
-                        EmptyRaceCommitteeStore.INSTANCE);
+                        EmptyRaceLogStore.INSTANCE);
         assertLegStructure(course, trackedRace);
         course.removeWaypoint(0);
         assertLegStructure(course, trackedRace);
@@ -276,7 +276,7 @@ public class CourseTest {
                         EmptyWindStore.INSTANCE, /* delayToLiveInMillis */ 3000,
                         /* millisecondsOverWhichToAverageWind */ 30000,
                         /* millisecondsOverWhichToAverageSpeed */ 8000,
-                        EmptyRaceCommitteeStore.INSTANCE);
+                        EmptyRaceLogStore.INSTANCE);
         assertLegStructure(course, trackedRace);
         final WaypointImpl wp1_5 = new WaypointImpl(new MarkImpl("Test Mark 1.5"));
         assertWaypointIndexes(course);

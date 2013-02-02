@@ -29,7 +29,7 @@ import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.confidence.ConfidenceFactory;
 import com.sap.sailing.domain.confidence.Weigher;
-import com.sap.sailing.domain.racecommittee.RaceCommitteeEvent;
+import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
@@ -480,7 +480,7 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
     }
     
 	@Override
-	public void raceCommitteeEventReceived(RaceCommitteeEvent event) {
+	public void raceLogEventReceived(RaceLogEvent event) {
 	}
 
     private void invalidateForNewWind(Wind wind) {

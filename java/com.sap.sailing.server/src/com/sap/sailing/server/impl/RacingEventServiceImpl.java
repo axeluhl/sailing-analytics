@@ -70,8 +70,8 @@ import com.sap.sailing.domain.leaderboard.meta.LeaderboardGroupMetaLeaderboard;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
-import com.sap.sailing.domain.racecommittee.RaceCommitteeEvent;
-import com.sap.sailing.domain.racecommittee.RaceCommitteeStore;
+import com.sap.sailing.domain.racelog.RaceLogEvent;
+import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.swisstimingadapter.Race;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterConnector;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterMessage;
@@ -112,7 +112,7 @@ import com.sap.sailing.server.operationaltransformation.ConnectTrackedRaceToLead
 import com.sap.sailing.server.operationaltransformation.CreateTrackedRace;
 import com.sap.sailing.server.operationaltransformation.RecordCompetitorGPSFix;
 import com.sap.sailing.server.operationaltransformation.RecordMarkGPSFix;
-import com.sap.sailing.server.operationaltransformation.RecordRaceCommitteeEvent;
+import com.sap.sailing.server.operationaltransformation.RecordRaceLogEvent;
 import com.sap.sailing.server.operationaltransformation.RecordWindFix;
 import com.sap.sailing.server.operationaltransformation.RemoveWindFix;
 import com.sap.sailing.server.operationaltransformation.TrackRegatta;
@@ -580,12 +580,12 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
 
     @Override
     public Regatta addRegatta(URL jsonURL, URI liveURI, URI storedURI, WindStore windStore, long timeoutInMilliseconds,
-    		RaceCommitteeStore raceCommitteeStore) throws Exception {
+    		RaceLogStore raceLogStore) throws Exception {
         JSONService jsonService = getTracTracDomainFactory().parseJSONURL(jsonURL);
         Regatta regatta = null;
         for (RaceRecord rr : jsonService.getRaceRecords()) {
             URL paramURL = rr.getParamURL();
-            regatta = addTracTracRace(paramURL, liveURI, storedURI, windStore, timeoutInMilliseconds, raceCommitteeStore).getRegatta();
+            regatta = addTracTracRace(paramURL, liveURI, storedURI, windStore, timeoutInMilliseconds, raceLogStore).getRegatta();
         }
         return regatta;
     }
@@ -641,22 +641,22 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     @Override
     public RacesHandle addSwissTimingRace(RegattaIdentifier regattaToAddTo, String raceID, String hostname,
             int port, boolean canSendRequests, WindStore windStore, long timeoutInMilliseconds, 
-            RaceCommitteeStore raceCommitteeStore) throws Exception {
+            RaceLogStore raceLogStore) throws Exception {
         return addRace(
                 regattaToAddTo,
                 swissTimingDomainFactory.createTrackingConnectivityParameters(hostname, port, raceID, canSendRequests, delayToLiveInMillis,
-                        swissTimingFactory, swissTimingDomainFactory, windStore, raceCommitteeStore, swissTimingAdapterPersistence), windStore, timeoutInMilliseconds,
-                        raceCommitteeStore);
+                        swissTimingFactory, swissTimingDomainFactory, windStore, raceLogStore, swissTimingAdapterPersistence), windStore, timeoutInMilliseconds,
+                        raceLogStore);
     }
 
     @Override
     public RacesHandle addTracTracRace(URL paramURL, URI liveURI, URI storedURI, WindStore windStore,
-            long timeoutInMilliseconds, RaceCommitteeStore raceCommitteeStore) throws Exception {
+            long timeoutInMilliseconds, RaceLogStore raceLogStore) throws Exception {
         return addRace(
         /* regattaToAddTo */null, getTracTracDomainFactory().createTrackingConnectivityParameters(paramURL, liveURI, storedURI,
         /* startOfTracking */null,
-        /* endOfTracking */null, delayToLiveInMillis, /* simulateWithStartTimeNow */false, windStore, raceCommitteeStore), windStore,
-                timeoutInMilliseconds, raceCommitteeStore);
+        /* endOfTracking */null, delayToLiveInMillis, /* simulateWithStartTimeNow */false, windStore, raceLogStore), windStore,
+                timeoutInMilliseconds, raceLogStore);
     }
     
     @Override
@@ -687,7 +687,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
 
     @Override
     public RacesHandle addRace(RegattaIdentifier regattaToAddTo, RaceTrackingConnectivityParameters params,
-            WindStore windStore, long timeoutInMilliseconds, RaceCommitteeStore raceCommitteeStore) throws Exception {
+            WindStore windStore, long timeoutInMilliseconds, RaceLogStore raceLogStore) throws Exception {
         RaceTracker tracker = raceTrackersByID.get(params.getTrackerID());
         if (tracker == null) {
             Regatta regatta = regattaToAddTo == null ? null : getRegatta(regattaToAddTo);
@@ -796,22 +796,22 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     @Override
     public TrackedRace createTrackedRace(RegattaAndRaceIdentifier raceIdentifier, WindStore windStore,
             long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
-            RaceCommitteeStore raceCommitteeStore) {
+            RaceLogStore raceLogStore) {
         DynamicTrackedRegatta trackedRegatta = getOrCreateTrackedRegatta(getRegatta(raceIdentifier));
         RaceDefinition race = getRace(raceIdentifier);
         return trackedRegatta.createTrackedRace(race, windStore, delayToLiveInMillis,
                 millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed,
-                /* raceDefinitionSetToUpdate */null, raceCommitteeStore);
+                /* raceDefinitionSetToUpdate */null, raceLogStore);
     }
     
     @Override
     public RacesHandle addTracTracRace(RegattaIdentifier regattaToAddTo, URL paramURL, URI liveURI,
             URI storedURI, TimePoint startOfTracking, TimePoint endOfTracking,
             WindStore windStore, long timeoutInMilliseconds, boolean simulateWithStartTimeNow, 
-            RaceCommitteeStore raceCommitteeStore) throws Exception {
+            RaceLogStore raceLogStore) throws Exception {
         return addRace(regattaToAddTo, getTracTracDomainFactory().createTrackingConnectivityParameters(paramURL, liveURI, storedURI, startOfTracking,
-                        endOfTracking, delayToLiveInMillis, simulateWithStartTimeNow, windStore, raceCommitteeStore), windStore, timeoutInMilliseconds,
-                        raceCommitteeStore);
+                        endOfTracking, delayToLiveInMillis, simulateWithStartTimeNow, windStore, raceLogStore), windStore, timeoutInMilliseconds,
+                        raceLogStore);
     }
 
     private void ensureRegattaIsObservedForDefaultLeaderboardAndAutoLeaderboardLinking(DynamicTrackedRegatta trackedRegatta) {
@@ -862,7 +862,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
             CreateTrackedRace op = new CreateTrackedRace(trackedRace.getRaceIdentifier(), trackedRace.getWindStore(),
                     trackedRace.getDelayToLiveInMillis(),
                     trackedRace.getMillisecondsOverWhichToAverageWind(), trackedRace.getMillisecondsOverWhichToAverageSpeed(),
-                    trackedRace.getRaceCommitteeStore());
+                    trackedRace.getRaceLogStore());
             replicate(op);
             linkRaceToConfiguredLeaderboardColumns(trackedRace);
             final FlexibleLeaderboard defaultLeaderboard = (FlexibleLeaderboard) leaderboardsByName.get(LeaderboardNameConstants.DEFAULT_LEADERBOARD_NAME);
@@ -939,8 +939,8 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         }
 
 		@Override
-		public void raceCommitteeEventReceived(RaceCommitteeEvent event) {
-			replicate(new RecordRaceCommitteeEvent(getRaceIdentifier(), event));
+		public void raceLogEventReceived(RaceLogEvent event) {
+			replicate(new RecordRaceLogEvent(getRaceIdentifier(), event));
 		}
 
 		private RegattaAndRaceIdentifier getRaceIdentifier() {

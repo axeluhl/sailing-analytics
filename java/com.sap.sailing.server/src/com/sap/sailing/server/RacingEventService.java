@@ -38,7 +38,7 @@ import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.LeaderboardRegistry;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
-import com.sap.sailing.domain.racecommittee.RaceCommitteeStore;
+import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
 import com.sap.sailing.domain.tracking.RaceListener;
 import com.sap.sailing.domain.tracking.RaceTracker;
@@ -110,7 +110,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      *            that race is stopped; use -1 to wait forever
      */
     Regatta addRegatta(URL jsonURL, URI liveURI, URI storedURI, WindStore windStore, long timeoutInMilliseconds, 
-    		RaceCommitteeStore raceCommitteeStore)
+    		RaceLogStore raceLogStore)
             throws MalformedURLException, FileNotFoundException, URISyntaxException, IOException, ParseException,
             org.json.simple.parser.ParseException, Exception;
 
@@ -137,7 +137,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      *            that race is stopped; use -1 to wait forever
      */
     RacesHandle addTracTracRace(URL paramURL, URI liveURI, URI storedURI, WindStore windStore, long timeoutInMilliseconds, 
-    		RaceCommitteeStore raceCommitteeStore)
+    		RaceLogStore raceLogStore)
             throws MalformedURLException, FileNotFoundException, URISyntaxException, Exception;
 
     /**
@@ -154,7 +154,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      */
     RacesHandle addTracTracRace(RegattaIdentifier regattaToAddTo, URL paramURL, URI liveURI, URI storedURI,
             TimePoint trackingStartTime, TimePoint trackingEndTime, WindStore windStore,
-            long timeoutForReceivingRaceDefinitionInMilliseconds, boolean simulateWithStartTimeNow, RaceCommitteeStore raceCommitteeStore)
+            long timeoutForReceivingRaceDefinitionInMilliseconds, boolean simulateWithStartTimeNow, RaceLogStore raceLogStore)
             throws MalformedURLException, FileNotFoundException, URISyntaxException, Exception;
 
     /**
@@ -290,7 +290,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      */
     RacesHandle addSwissTimingRace(RegattaIdentifier regattaToAddTo, String raceID, String hostname, int port,
             boolean canSendRequests, WindStore windStore, long timeoutInMilliseconds, 
-            RaceCommitteeStore raceCommitteeStore) throws InterruptedException, UnknownHostException,
+            RaceLogStore raceLogStore) throws InterruptedException, UnknownHostException,
             IOException, ParseException, Exception;
 
     SwissTimingFactory getSwissTimingFactory();
@@ -369,12 +369,12 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      *            must not be <code>null</code>, but can, e.g., be an {@link EmptyWindStore}
      */
     RacesHandle addRace(RegattaIdentifier regattaToAddTo, RaceTrackingConnectivityParameters params, WindStore windStore, long timeoutInMilliseconds,
-    		RaceCommitteeStore raceCommitteeStore)
+    		RaceLogStore raceLogStore)
             throws MalformedURLException, FileNotFoundException, URISyntaxException, Exception;
 
     TrackedRace createTrackedRace(RegattaAndRaceIdentifier raceIdentifier, WindStore windStore,
             long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
-            RaceCommitteeStore raceCommitteeStore);
+            RaceLogStore raceLogStore);
 
     Regatta getOrCreateRegatta(String regattaName, String boatClassName, Serializable id);
 

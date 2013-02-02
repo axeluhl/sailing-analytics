@@ -9,15 +9,15 @@ import javax.servlet.http.HttpServletResponse;
 import org.json.simple.JSONArray;
 
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
-import com.sap.sailing.domain.racecommittee.RaceCommitteeEvent;
-import com.sap.sailing.domain.racecommittee.RaceCommitteeEventTrack;
+import com.sap.sailing.domain.racelog.RaceLog;
+import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.gateway.impl.JsonExportServlet;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
-import com.sap.sailing.server.gateway.serialization.impl.RaceCommitteeEventSerializer;
-import com.sap.sailing.server.gateway.serialization.impl.RaceCommitteeFlagEventSerializer;
-import com.sap.sailing.server.gateway.serialization.impl.RaceCommitteeStartTimeEventSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.RaceLogEventSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.RaceLogFlagEventSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.RaceLogStartTimeEventSerializer;
 
 
 public class EventTrackJsonExportServlet extends JsonExportServlet {
@@ -26,15 +26,15 @@ public class EventTrackJsonExportServlet extends JsonExportServlet {
 	/**
 	 * Created in init() - access is thread-safe.
 	 */
-	private JsonSerializer<RaceCommitteeEvent> rcEventSerializer;
+	private JsonSerializer<RaceLogEvent> raceLogEventSerializer;
 	
 	@Override
 	public void init() throws ServletException {
 		super.init();
 		
-		rcEventSerializer = new RaceCommitteeEventSerializer(
-				new RaceCommitteeFlagEventSerializer(),
-				new RaceCommitteeStartTimeEventSerializer());
+		raceLogEventSerializer = new RaceLogEventSerializer(
+				new RaceLogFlagEventSerializer(),
+				new RaceLogStartTimeEventSerializer());
 	}
 	
 	@Override
@@ -55,10 +55,10 @@ public class EventTrackJsonExportServlet extends JsonExportServlet {
 	private JSONArray serizalizeTrack(TrackedRace trackedRace) {
 		JSONArray result = new JSONArray();
 		
-		RaceCommitteeEventTrack track = trackedRace.getRaceCommitteeEventTrack();
+		RaceLog track = trackedRace.getRaceLog();
 		track.lockForRead();
-		for (RaceCommitteeEvent event :  track.getFixes()) {
-				result.add(rcEventSerializer.serialize(event));
+		for (RaceLogEvent event :  track.getFixes()) {
+				result.add(raceLogEventSerializer.serialize(event));
 		}
 		track.unlockAfterRead();
 		
@@ -81,7 +81,7 @@ public class EventTrackJsonExportServlet extends JsonExportServlet {
 		}
 		
 		// TODO: add event to trackedRace...
-		// trackedRace.recordRaceCommitteeEvent(null);
+		// trackedRace.recordRaceLogEvent(null);
 		response.sendError(HttpServletResponse.SC_NO_CONTENT);
 		
 	}
