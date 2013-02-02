@@ -86,8 +86,6 @@ public class EventsJsonExportServlet extends JsonExportServlet {
 				UUID.fromString("c2775b10-5b3f-11e2-bcfd-0800200c9a66"));
 		regatta.addRace(myRace);
 		
-		alpha.addRace(myRace);
-		
 		
 		return Collections.<Event>singleton(kielerWocheEvent);
 	}

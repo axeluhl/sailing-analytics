@@ -11,9 +11,5 @@ import com.sap.sailing.domain.common.WithID;
  *
  */
 public interface CourseArea extends Named, WithID {
-
-	void addRace(RaceDefinition race);
-	
-	Iterable<RaceDefinition> getRaces();
 	
 }
