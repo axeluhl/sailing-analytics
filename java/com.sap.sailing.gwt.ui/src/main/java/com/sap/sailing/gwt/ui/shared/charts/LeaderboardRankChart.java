@@ -145,12 +145,13 @@ public class LeaderboardRankChart extends SimplePanel implements RequiresResize,
                                 if (Util.isEmpty(competitorSelectionProvider.getSelectedCompetitors()) ||
                                         competitorSelectionProvider.isSelected(competitor)) {
                                     Series series = getOrCreateSeries(competitor);
+                                    series.addPoint(raceNumber, -rank, /* redraw */ false, /* shift */ false, /* animation */ false);
+                                    
                                     unusedSeries.remove(series);
                                     if (!chartSeries.contains(series)) {
                                         chart.addSeries(series);
                                         chartSeries.add(series);
                                     }
-                                    series.addPoint(raceNumber, -rank, /* redraw */ false, /* shift */ false, /* animation */ false);
                                 }
                                 rank++;
                             }
