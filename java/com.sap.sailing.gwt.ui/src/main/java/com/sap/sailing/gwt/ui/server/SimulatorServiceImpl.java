@@ -494,7 +494,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         final Path gpsTrack = simulator.getGPSTrack();
 
         final Position startPosition = toPosition(requestData.firstPoint.position);
-        final Position endPosition = toPosition(requestData.secondPoint.position);
+        final Position endPosition = toPosition(requestData.secondPoint);
 
         final TimedPositionWithSpeed oneTurner = this.get1TurnerPosition(polarDiagram, startPosition, endPosition, requestData.firstPoint.timepoint,
                 requestData.stepDurationMilliseconds, requestData.leftSide, gpsTrack, requestData.useRealAverageWindSpeed);
