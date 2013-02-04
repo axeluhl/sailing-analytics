@@ -4,8 +4,6 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.util.List;
 
-import org.apache.tools.ant.types.CommandlineJava.SysProperties;
-
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.simulator.test.util.TracTracReader;
@@ -28,7 +26,6 @@ public class TestTracTracReader {
 			RegattaAndRaceIdentifier id = r.getRaceIdentifier();
 			System.out.println(id.getRegattaName() + " / " + id.getRaceName());
 		}
-	
 		
 	}
 	
