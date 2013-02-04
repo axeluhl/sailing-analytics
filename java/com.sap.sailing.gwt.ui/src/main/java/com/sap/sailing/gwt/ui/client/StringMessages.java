@@ -495,4 +495,5 @@ public interface StringMessages extends Messages {
     String regattaRankTooltip();
     String overallRank();
     String overallRankTooltip();
+    String noDataFound();
 }

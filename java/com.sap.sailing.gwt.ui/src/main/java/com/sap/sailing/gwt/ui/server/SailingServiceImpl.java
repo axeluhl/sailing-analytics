@@ -2545,9 +2545,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     try {
                         for (MarkPassing markPassing : competitorMarkPassings) {
                             MillisecondsTimePoint time = new MillisecondsTimePoint(markPassing.getTimePoint().asMillis());
-                            markPassingsData.add(new Triple<String, Date, Double>(markPassing.getWaypoint().getName(),
-                                    time.asDate(),
-                                    getCompetitorRaceDataEntry(detailType, trackedRace, competitor, time, leaderboardGroupName, leaderboardName)));
+                            Double competitorMarkPassingsData = getCompetitorRaceDataEntry(detailType, trackedRace, competitor, time, leaderboardGroupName, leaderboardName);
+                            if (competitorMarkPassingsData != null) {
+                                markPassingsData.add(new Triple<String, Date, Double>(markPassing.getWaypoint()
+                                        .getName(), time.asDate(), competitorMarkPassingsData));
+                            }
                         }
                     } finally {
                         trackedRace.unlockAfterRead(competitorMarkPassings);
@@ -2556,8 +2558,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 if (startTime != null && endTime != null) {
                     for (long i = startTime.asMillis(); i <= endTime.asMillis(); i += stepSizeInMs) {
                         MillisecondsTimePoint time = new MillisecondsTimePoint(i);
-                        raceData.add(new Pair<Date, Double>(time.asDate(), getCompetitorRaceDataEntry(detailType, trackedRace,
-                                competitor, time, leaderboardGroupName, leaderboardName)));
+                        Double competitorRaceData = getCompetitorRaceDataEntry(detailType, trackedRace, competitor, time, leaderboardGroupName, leaderboardName);
+                        if (competitorRaceData != null) {
+                            raceData.add(new Pair<Date, Double>(time.asDate(), competitorRaceData));
+                        }
                     }
                 }
                 result.setCompetitorData(competitorDTO, new CompetitorRaceDataDTO(competitorDTO, detailType, markPassingsData, raceData));

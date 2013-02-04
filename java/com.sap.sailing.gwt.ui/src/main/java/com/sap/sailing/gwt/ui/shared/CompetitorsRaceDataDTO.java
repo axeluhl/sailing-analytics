@@ -112,7 +112,12 @@ public class CompetitorsRaceDataDTO implements IsSerializable {
     }
 
     public boolean isEmpty() {
-        return competitorsData.isEmpty();
+        for (CompetitorRaceDataDTO competitorRaceData : competitorsData.values()) {
+            if (!competitorRaceData.getRaceData().isEmpty()) {
+                return false;
+            }
+        }
+        return true;
     }
 
     public boolean contains(CompetitorDTO competitor) {
