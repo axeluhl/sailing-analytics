@@ -304,7 +304,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                     MarkPassingByTimeComparator.INSTANCE));
         }
         markPassingsTimes = new ArrayList<Pair<Waypoint, Pair<TimePoint, TimePoint>>>();
-        windTracks = new HashMap<WindSource, WindTrack>();
+        windTracks = new ConcurrentHashMap<WindSource, WindTrack>();
         new Thread("Wind loader for tracked race "+getRace().getName()) {
             @Override
             public void run() {
