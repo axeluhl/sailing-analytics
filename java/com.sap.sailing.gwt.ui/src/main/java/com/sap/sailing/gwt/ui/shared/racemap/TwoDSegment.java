@@ -92,4 +92,13 @@ public class TwoDSegment {
         return new TwoDPoint(x, y);
     }
 
+    public boolean contains(TwoDPoint point) {
+        double maxX = Math.max(this.firstPoint.getX(), this.secondPoint.getX());
+        double minX = Math.min(this.firstPoint.getX(), this.secondPoint.getX());
+
+        double maxY = Math.max(this.firstPoint.getY(), this.secondPoint.getY());
+        double minY = Math.min(this.firstPoint.getY(), this.secondPoint.getY());
+
+        return (minX <= point.getX() && point.getX() <= maxX) && (minY <= point.getY() && point.getY() <= maxY);
+    }
 }
