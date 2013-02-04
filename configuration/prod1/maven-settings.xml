@@ -7,8 +7,6 @@
     </server>
   </servers>
   
-  <!-- Uncomment if your environment requires a proxy for web access -->
-  <!--
   <proxies>
     <proxy>
       <active>true</active>
@@ -18,7 +16,6 @@
       <nonProxyHosts>localhost|*.sap.corp</nonProxyHosts>
     </proxy>
   </proxies>
-  -->
   
   <profiles>
     <profile>
@@ -28,11 +25,9 @@
       </activation>
       <properties>
         <!-- Leave empty, if no proxy is needed in your environment! -->
-        <!--
         <parameters.proxy>
 	  -Dhttp.proxyHost=proxy -Dhttp.proxyPort=8080
 	</parameters.proxy>
-        -->
 	<!-- Change the configuration file to the one you like to use for the tests. -->
         <parameters.integration-tests>
 	  -Dselenium.test.environment.configuration=ci-test-environment.xml
