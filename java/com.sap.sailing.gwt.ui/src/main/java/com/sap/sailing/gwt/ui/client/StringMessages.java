@@ -493,4 +493,6 @@ public interface StringMessages extends Messages {
     String status();
     String regattaRank();
     String regattaRankTooltip();
+    String overallRank();
+    String overallRankTooltip();
 }

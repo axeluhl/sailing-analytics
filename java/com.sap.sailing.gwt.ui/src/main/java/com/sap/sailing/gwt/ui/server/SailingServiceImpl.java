@@ -2503,6 +2503,15 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
                     result = leaderboard == null ? null : (double) leaderboard.getTotalRankOfCompetitor(competitor, timePoint);
                     break;
+                case OVERALL_RANK:
+                    if (leaderboardGroupName == null || leaderboardGroupName.isEmpty()) {
+                        break;
+                    }
+                    
+                    LeaderboardGroup group = getService().getLeaderboardGroupByName(leaderboardGroupName);
+                    Leaderboard overall = group.getOverallLeaderboard();
+                    result = overall == null ? null : (double) overall.getTotalRankOfCompetitor(competitor, timePoint);
+                    break;
                 default:
                     throw new UnsupportedOperationException("Theres currently no support for the enum value '"
                             + dataType + "' in this method.");

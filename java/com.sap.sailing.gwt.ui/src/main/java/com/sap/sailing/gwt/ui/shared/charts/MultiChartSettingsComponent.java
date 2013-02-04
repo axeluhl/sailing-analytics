@@ -31,6 +31,7 @@ public class MultiChartSettingsComponent extends AbstractChartSettingsComponent<
         availableDetailsTypes.add(DetailType.CURRENT_SPEED_OVER_GROUND_IN_KNOTS);
         availableDetailsTypes.add(DetailType.RACE_RANK);
         availableDetailsTypes.add(DetailType.REGATTA_RANK);
+        availableDetailsTypes.add(DetailType.OVERALL_RANK);
     }
 
     @Override
