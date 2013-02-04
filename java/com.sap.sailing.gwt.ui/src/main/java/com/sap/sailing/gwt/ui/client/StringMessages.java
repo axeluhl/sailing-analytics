@@ -493,4 +493,9 @@ public interface StringMessages extends Messages {
     String windData();
     String gpsData();
     String status();
+    String regattaRank();
+    String regattaRankTooltip();
+    String overallRank();
+    String overallRankTooltip();
+    String noDataFound();
 }

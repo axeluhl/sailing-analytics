@@ -41,6 +41,10 @@ public class MediaTrack implements IsSerializable {
         };
         
     }
+    
+    public enum Status {
+        UNDEFINED, CANNOT_PLAY, NOT_REACHABLE, REACHABLE; 
+    }
 
     public class MediaSection implements IsSerializable {
         public String title;
@@ -55,6 +59,7 @@ public class MediaTrack implements IsSerializable {
     public Date startTime;
     public int durationInMillis;
     public MimeType mimeType;
+    public Status status = Status.UNDEFINED;
 
     public MediaTrack() {
         super();

@@ -160,17 +160,19 @@ public class DomainFactoryImpl implements DomainFactory {
                     String shape2 = controlPointMetadata.get("P2.Shape");
                     String pattern1 = controlPointMetadata.get("P1.Pattern");
                     String pattern2 = controlPointMetadata.get("P2.Pattern");
-                    
-                    Mark mark1 = baseDomainFactory.getOrCreateMark(controlPointName + " (1)", type1, color1, shape1, pattern1);
-                    Mark mark2 = baseDomainFactory.getOrCreateMark(controlPointName + " (2)", type2, color2, shape2, pattern2);
-                    domainControlPoint = baseDomainFactory.createGate(mark1, mark2, controlPointName);
+                    final String name1 = controlPointName + " (1)";
+                    final Serializable id1 = name1; // TODO bug 1184; need to obtain mark ID through TTCM
+                    Mark mark1 = baseDomainFactory.getOrCreateMark(id1, name1, type1, color1, shape1, pattern1);
+                    final String name2 = controlPointName + " (2)";
+                    final Serializable id2 = name2; // TODO bug 1184; need to obtain mark ID through TTCM
+                    Mark mark2 = baseDomainFactory.getOrCreateMark(id2, name2, type2, color2, shape2, pattern2);
+                    domainControlPoint = baseDomainFactory.createGate(controlPoint.getId(), mark1, mark2, controlPointName);
                 } else {
                     MarkType type = resolveMarkTypeFromMetadata(controlPointMetadata, "Type");
                     String color = controlPointMetadata.get("Color");
                     String shape = controlPointMetadata.get("Shape");
                     String pattern = controlPointMetadata.get("Pattern");
-                    
-                    Mark mark = baseDomainFactory.getOrCreateMark(controlPointName, type, color, shape, pattern);
+                    Mark mark = baseDomainFactory.getOrCreateMark(controlPoint.getId(), controlPointName, type, color, shape, pattern);
                     domainControlPoint = mark;
                 }
                 controlPointCache.put(controlPoint, domainControlPoint);
