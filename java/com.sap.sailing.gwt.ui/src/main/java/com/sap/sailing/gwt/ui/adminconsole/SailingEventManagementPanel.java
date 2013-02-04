@@ -5,10 +5,14 @@ import java.util.Collections;
 import java.util.List;
 
 import com.google.gwt.cell.client.FieldUpdater;
+import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.CellTable;
+import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -95,6 +99,24 @@ public class SailingEventManagementPanel extends SimplePanel {
                 return event.isPublic ? stringMessages.yes() : stringMessages.no();
             }
         };
+        
+        final SafeHtmlCell courseAreasCell = new SafeHtmlCell();
+        Column<EventDTO, SafeHtml> courseAreasColumn = new Column<EventDTO, SafeHtml>(courseAreasCell) {
+            @Override
+            public SafeHtml getValue(EventDTO event) {
+                SafeHtmlBuilder builder = new SafeHtmlBuilder();
+                int courseAreasCount = event.venue.getCourseAreas().size();
+                int i = 1;
+                for (CourseAreaDTO courseArea : event.venue.getCourseAreas()) {
+                    builder.appendEscaped(courseArea.name);
+                    if (i < courseAreasCount) {
+                        builder.appendHtmlConstant("<br>");
+                    }
+                    i++;
+                }
+                return builder.toSafeHtml();
+            }
+        };
 
         ImagesBarColumn<EventDTO, RegattaConfigImagesBarCell> eventActionColumn = new ImagesBarColumn<EventDTO, RegattaConfigImagesBarCell>(
                 new RegattaConfigImagesBarCell(stringMessages));
@@ -116,6 +138,7 @@ public class SailingEventManagementPanel extends SimplePanel {
         eventTable.addColumn(venueNameColumn, stringMessages.venue());
         eventTable.addColumn(publicationUrlColumn, stringMessages.publicationUrl());
         eventTable.addColumn(isPublicColumn, stringMessages.isPublic());
+        eventTable.addColumn(courseAreasColumn, stringMessages.courseAreas());
         eventTable.addColumn(eventActionColumn, stringMessages.actions());
         
         eventSelectionModel = new SingleSelectionModel<EventDTO>();
