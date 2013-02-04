@@ -60,10 +60,9 @@ public class PerRaceAndCompetitorPolarSheetGenerationWorker implements Callable<
             Position position = fix.getPosition();
             Wind wind = race.getWind(position, fix.getTimePoint());
             Bearing windBearing = wind.getFrom();
-            double windSpeed = wind.getKnots();
-
-            // TODO Figure out if this normalizing is okay concerning different windspeeds and bearings
-            double normalizedSpeed = speed/* / windSpeed*/;
+            // TODO windspeed stuff
+            // double windSpeed = wind.getKnots();
+            double normalizedSpeed = speed;
             double angleToWind = bearing.getDifferenceTo(windBearing).getDegrees();
 
             polarSheetGenerationWorker.addPolarData(Math.round(angleToWind), normalizedSpeed);
