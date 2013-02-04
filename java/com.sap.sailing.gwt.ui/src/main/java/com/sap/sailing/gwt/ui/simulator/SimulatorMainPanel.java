@@ -188,7 +188,7 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
     public static String formatSliderValue(double value) {
         return NumberFormat.getFormat("0.0").format(value);
     }
-    
+
     public SimulatorMainPanel(final SimulatorServiceAsync svc, final StringMessages stringMessages, final ErrorReporter errorReporter,
             final int xRes, final int yRes, final boolean autoUpdate, final char mode, final boolean showGrid, final boolean showLines, final char seedLines, final boolean showArrows, final boolean showStreamlets) {
 
@@ -394,7 +394,7 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
         sliderBar.getElement().getStyle().setProperty("width", "216px");
 
         //sliderBar.setStepSize(Math.round((maxValue - minValue) / 10.), false);
-        sliderBar.setStepSize(((maxValue - minValue) / ((double)s.getSteps()) ), false);
+        sliderBar.setStepSize(((maxValue - minValue) / (s.getSteps()) ), false);
         sliderBar.setNumTicks(s.getSteps());
         sliderBar.setNumTickLabels(1);
 
@@ -448,7 +448,7 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
         initDisplayOptions(mapOptions);
 
         simulatorMap = new SimulatorMap(simulatorSvc, stringMessages, errorReporter, xRes, yRes, timer, timePanel,
-                windParams, busyIndicator, mode);
+                windParams, busyIndicator, mode, this);
         simulatorMap.setSize("100%", "100%");
 
         this.rightPanel.add(this.simulatorMap);
@@ -822,5 +822,9 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
 
         return dialogBox;
     }
-    
+
+    public int getBoatClassID() {
+        return boatSelector.getSelectedIndex();
+    }
+
 }
