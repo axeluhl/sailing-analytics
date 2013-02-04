@@ -10,7 +10,7 @@ public class Request1TurnerDTO implements IsSerializable {
     public Integer boatClassID = 0;
     public List<SimulatorWindDTO> allPoints = null;
     public SimulatorWindDTO firstPoint = null;
-    public SimulatorWindDTO secondPoint = null;
+    public PositionDTO secondPoint = null;
     public Boolean useRealAverageWindSpeed = false;
     public Integer stepDurationMilliseconds = 0;
     public Boolean leftSide = false;
@@ -25,8 +25,8 @@ public class Request1TurnerDTO implements IsSerializable {
         this.leftSide = false;
     }
 
-    public Request1TurnerDTO(final int boatClassID, final List<SimulatorWindDTO> allPoints, final SimulatorWindDTO firstPoint,
-            final SimulatorWindDTO secondPoint, final boolean useRealAverageWindSpeed, final int stepDurationMilliseconds, final boolean leftSide) {
+    public Request1TurnerDTO(int boatClassID, List<SimulatorWindDTO> allPoints, SimulatorWindDTO firstPoint, PositionDTO secondPoint,
+            boolean useRealAverageWindSpeed, int stepDurationMilliseconds, boolean leftSide) {
         this.boatClassID = boatClassID;
         this.allPoints = allPoints;
         this.firstPoint = firstPoint;
