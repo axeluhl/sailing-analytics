@@ -24,6 +24,7 @@ import com.sap.sailing.gwt.ui.shared.BulkScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorsRaceDataDTO;
 import com.sap.sailing.gwt.ui.shared.ControlPointDTO;
+import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.shared.CourseDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
@@ -235,13 +236,17 @@ public interface SailingService extends RemoteService {
     void updateEvent(String eventName, Serializable id, VenueDTO venue, String publicationUrl, boolean isPublic,
             List<String> regattaNames);
 
-    EventDTO createEvent(String eventName, String venueName, String publicationUrl, boolean isPublic);
+    EventDTO createEvent(String eventName, String venueName, String publicationUrl, boolean isPublic, List<String> courseAreas);
 
     void removeEvent(Serializable id);
 
     void renameEvent(Serializable id, String newName);
 
     EventDTO getEventByName(String eventName);
+    
+    CourseAreaDTO createCourseArea(Serializable id, String courseAreaName);
+    
+    EventDTO getEventById(Serializable id);
 
     Iterable<ScoreCorrectionProviderDTO> getScoreCorrectionProviderDTOs() throws Exception;
 

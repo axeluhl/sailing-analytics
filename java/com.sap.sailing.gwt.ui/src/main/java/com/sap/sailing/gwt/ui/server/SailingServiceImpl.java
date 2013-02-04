@@ -46,6 +46,7 @@ import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Course;
+import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Gate;
@@ -150,6 +151,7 @@ import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorRaceDataDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorsRaceDataDTO;
 import com.sap.sailing.gwt.ui.shared.ControlPointDTO;
+import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.shared.CourseDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.FleetDTO;
@@ -204,6 +206,7 @@ import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
 import com.sap.sailing.server.operationaltransformation.AddColumnToLeaderboard;
 import com.sap.sailing.server.operationaltransformation.AddColumnToSeries;
+import com.sap.sailing.server.operationaltransformation.AddCourseArea;
 import com.sap.sailing.server.operationaltransformation.AddSpecificRegatta;
 import com.sap.sailing.server.operationaltransformation.ConnectTrackedRaceToLeaderboardColumn;
 import com.sap.sailing.server.operationaltransformation.CreateEvent;
@@ -2827,8 +2830,22 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public EventDTO createEvent(String eventName, String venue, String publicationUrl, boolean isPublic) {
-        return convertToEventDTO(getService().apply(new CreateEvent(eventName, venue, publicationUrl, isPublic, UUID.randomUUID(), new ArrayList<String>())));
+    public EventDTO createEvent(String eventName, String venue, String publicationUrl, boolean isPublic, List<String> courseAreaNames) {
+    	UUID uuid = UUID.randomUUID();
+    	getService().apply(new CreateEvent(eventName, venue, publicationUrl, isPublic, uuid, courseAreaNames));
+
+    	for (String courseAreaName : courseAreaNames) {
+    		createCourseArea(uuid, courseAreaName);
+    	}
+
+        return getEventById(uuid);
+    }
+    
+    @Override
+    public CourseAreaDTO createCourseArea(Serializable id, String courseAreaName) {
+    	UUID uuid = UUID.fromString(id.toString());
+    	CourseArea courseArea = getService().apply(new AddCourseArea(uuid, courseAreaName, UUID.randomUUID()));
+    	return convertToCourseAreaDTO(courseArea);
     }
 
     @Override
@@ -2855,6 +2872,17 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return result;
     }
     
+    public EventDTO getEventById(Serializable id) {
+        EventDTO result = null;
+        for (Event event : getService().getAllEvents()) {
+            if(event.getId().equals(id)) {
+                result = convertToEventDTO(event);
+                break;
+            }
+        }
+        return result;
+    }
+    
     private EventDTO convertToEventDTO(Event event) {
         EventDTO eventDTO = new EventDTO(event.getName());
         eventDTO.venue = new VenueDTO();
@@ -2868,7 +2896,17 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             regattaDTO.name = regatta.getName();
             eventDTO.regattas.add(regattaDTO);
         }
+        eventDTO.venue.setCourseAreas(new ArrayList<CourseAreaDTO>());
+        for (CourseArea courseArea : event.getVenue().getCourseAreas()) {
+        	CourseAreaDTO courseAreaDTO = convertToCourseAreaDTO(courseArea);
+        	eventDTO.venue.getCourseAreas().add(courseAreaDTO);
+        }
         return eventDTO;
+    }
+    
+    private CourseAreaDTO convertToCourseAreaDTO(CourseArea courseArea) {
+    	CourseAreaDTO courseAreaDTO = new CourseAreaDTO(courseArea.getName());
+    	return courseAreaDTO;
     }
 
     @Override
