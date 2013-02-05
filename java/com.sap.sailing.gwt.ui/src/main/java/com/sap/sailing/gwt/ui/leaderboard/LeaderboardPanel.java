@@ -2112,7 +2112,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     }
 
     private boolean shallExpandRaceColumn(RaceColumnDTO raceColumnDTO) {
-        return showRaceDetails && raceColumnDTO.hasTrackedRaces();
+        return showRaceDetails && raceColumnDTO.hasTrackedRaces() && raceColumnDTO.hasGPSData() && raceColumnDTO.hasWindData();
     }
 
     private void removeUnusedRaceColumns(LeaderboardDTO leaderboard) {

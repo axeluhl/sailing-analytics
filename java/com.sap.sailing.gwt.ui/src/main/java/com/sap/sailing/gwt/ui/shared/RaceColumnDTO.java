@@ -155,6 +155,46 @@ public class RaceColumnDTO extends NamedDTO implements IsSerializable {
         return result;
     }
 
+    public boolean containsRace(RaceIdentifier preSelectedRace) {
+        return trackedRaceIdentifiersPerFleet.values().contains(preSelectedRace);
+    }
+
+    public boolean hasTrackedRaces() {
+        Set<RegattaAndRaceIdentifier> raceIdentifiers = new HashSet<RegattaAndRaceIdentifier>(trackedRaceIdentifiersPerFleet.values());
+        raceIdentifiers.remove(null);
+        return !raceIdentifiers.isEmpty();
+    }
+
+    public void addFleet(FleetDTO fleet) {
+        fleets.add(fleet);
+    }
+
+    private Date getWhenLastTrackedRaceWasLive(FleetDTO fleet) {
+        return whenLastTrackedRaceWasLiveByFleet.get(fleet);
+    }
+
+    public void setWhenLastTrackedRaceWasLive(FleetDTO fleet, Date whenLastTrackedRaceWasLive) {
+        this.whenLastTrackedRaceWasLiveByFleet.put(fleet, whenLastTrackedRaceWasLive);
+    }
+
+    public boolean hasGPSData() {
+        for (RaceDTO race : racesPerFleet.values()) {
+            if (race != null && race.trackedRace != null && race.trackedRace.hasGPSData) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean hasWindData() {
+        for (RaceDTO race : racesPerFleet.values()) {
+            if (race != null && race.trackedRace != null && race.trackedRace.hasWindData) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -193,27 +233,5 @@ public class RaceColumnDTO extends NamedDTO implements IsSerializable {
         } else if (!racesPerFleet.equals(other.racesPerFleet))
             return false;
         return true;
-    }
-
-    public boolean containsRace(RaceIdentifier preSelectedRace) {
-        return trackedRaceIdentifiersPerFleet.values().contains(preSelectedRace);
-    }
-
-    public boolean hasTrackedRaces() {
-        Set<RegattaAndRaceIdentifier> raceIdentifiers = new HashSet<RegattaAndRaceIdentifier>(trackedRaceIdentifiersPerFleet.values());
-        raceIdentifiers.remove(null);
-        return !raceIdentifiers.isEmpty();
-    }
-
-    public void addFleet(FleetDTO fleet) {
-        fleets.add(fleet);
-    }
-
-    private Date getWhenLastTrackedRaceWasLive(FleetDTO fleet) {
-        return whenLastTrackedRaceWasLiveByFleet.get(fleet);
-    }
-
-    public void setWhenLastTrackedRaceWasLive(FleetDTO fleet, Date whenLastTrackedRaceWasLive) {
-        this.whenLastTrackedRaceWasLiveByFleet.put(fleet, whenLastTrackedRaceWasLive);
     }
 }
