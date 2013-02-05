@@ -20,10 +20,10 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.gateway.impl.JsonExportServlet;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CompetitorIdJsonSerializer;
-import com.sap.sailing.server.gateway.serialization.impl.RaceLogCourseAreaChangedEventSerializer;
-import com.sap.sailing.server.gateway.serialization.impl.RaceLogEventSerializer;
-import com.sap.sailing.server.gateway.serialization.impl.RaceLogFlagEventSerializer;
-import com.sap.sailing.server.gateway.serialization.impl.RaceLogStartTimeEventSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.racelog.RaceLogCourseAreaChangedEventSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.racelog.RaceLogEventSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.racelog.RaceLogFlagEventSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.racelog.RaceLogStartTimeEventSerializer;
 
 
 public class EventTrackJsonExportServlet extends JsonExportServlet {

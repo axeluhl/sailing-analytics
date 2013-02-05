@@ -9,7 +9,7 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
-import com.sap.sailing.server.gateway.serialization.impl.BaseRaceLogEventSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.racelog.BaseRaceLogEventSerializer;
 
 /// TODO deserialize involved boats
 public abstract class BaseRaceLogEventDeserializer implements JsonDeserializer<RaceLogEvent> {

@@ -8,8 +8,8 @@ import org.junit.Test;
 
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
-import com.sap.sailing.server.gateway.serialization.impl.BaseRaceLogEventSerializer;
-import com.sap.sailing.server.gateway.serialization.impl.RaceLogFlagEventSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.racelog.BaseRaceLogEventSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.racelog.RaceLogFlagEventSerializer;
 
 public class RaceLogEventTest extends BaseRaceLogEventTest<RaceLogEvent> {
 

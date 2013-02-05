@@ -11,7 +11,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.json.simple.JSONArray;
 
 import com.sap.sailing.domain.base.BoatClass;
-import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
@@ -20,15 +19,16 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.gateway.impl.JsonExportServlet;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
-import com.sap.sailing.server.gateway.serialization.SerializationFilter;
+import com.sap.sailing.server.gateway.serialization.filter.Filter;
 import com.sap.sailing.server.gateway.serialization.impl.BoatClassJsonSerializer;
-import com.sap.sailing.server.gateway.serialization.impl.ControlPointJsonSerializer;
-import com.sap.sailing.server.gateway.serialization.impl.CourseJsonSerializer;
-import com.sap.sailing.server.gateway.serialization.impl.GateJsonSerializer;
-import com.sap.sailing.server.gateway.serialization.impl.MarkJsonSerializer;
-import com.sap.sailing.server.gateway.serialization.impl.RaceDefinitionJsonSerializer;
-import com.sap.sailing.server.gateway.serialization.impl.RegattaJsonSerializer;
-import com.sap.sailing.server.gateway.serialization.impl.WaypointJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.race.RaceDefinitionJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.regatta.ColorJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.regatta.FleetJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.regatta.FleetWithRacesJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.regatta.FleetWithRacesOfSeriesExtensionSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.regatta.RegattaJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.regatta.SeriesJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.regatta.SeriesOfRegattaExtensionSerializer;
 
 
 public class RegattasJsonExportServlet extends JsonExportServlet {
@@ -67,12 +67,11 @@ public class RegattasJsonExportServlet extends JsonExportServlet {
 			}
 		}
 		
-		SerializationFilter<RaceDefinition> raceFilter = null;
+		Filter<RaceDefinition> raceFilter = null;
 		if (courseAreaFilter != null) {
-			System.out.println(courseAreaFilter);
 			raceFilter = createFilter(courseAreaFilter);
 		} else {
-			raceFilter = new SerializationFilter.NoFilter<RaceDefinition>();
+			raceFilter = new Filter.NoFilter<RaceDefinition>();
 		}
 		
 		serializeRegattas(createSerializer(raceFilter), regattas, response);
@@ -92,24 +91,24 @@ public class RegattasJsonExportServlet extends JsonExportServlet {
 		
 	}
 	
-	private JsonSerializer<Regatta> createSerializer(SerializationFilter<RaceDefinition> raceFilter) {
+	private JsonSerializer<Regatta> createSerializer(Filter<RaceDefinition> raceFilter) {
 		JsonSerializer<BoatClass> boatClassSerializer = new BoatClassJsonSerializer();
-		JsonSerializer<ControlPoint> markSerializer = new MarkJsonSerializer();
 		return new RegattaJsonSerializer(
-			boatClassSerializer,
-			new RaceDefinitionJsonSerializer(
-				boatClassSerializer,
-				new CourseJsonSerializer(
-					new WaypointJsonSerializer(
-						new ControlPointJsonSerializer(
-								markSerializer, 
-								new GateJsonSerializer(markSerializer))))),
-			raceFilter);
+						boatClassSerializer, 
+						new SeriesOfRegattaExtensionSerializer(
+								new SeriesJsonSerializer(
+										new FleetWithRacesOfSeriesExtensionSerializer(
+												new FleetWithRacesJsonSerializer(
+														new FleetJsonSerializer(
+																new ColorJsonSerializer()), 
+																raceFilter, 
+																new RaceDefinitionJsonSerializer(
+																		boatClassSerializer))))));
 	}
 	
-	private SerializationFilter<RaceDefinition> createFilter(final String courseAreaId) {
+	private Filter<RaceDefinition> createFilter(final String courseAreaId) {
 		
-		return new SerializationFilter<RaceDefinition>() {
+		return new Filter<RaceDefinition>() {
 			@Override
 			public boolean isFiltered(RaceDefinition race) {
 				RacingEventService service = getService();

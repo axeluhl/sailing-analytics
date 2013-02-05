@@ -13,6 +13,7 @@ import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.impl.FleetImpl;
+import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.impl.ManagedRaceImpl;
 import com.sap.sailing.racecommittee.app.domain.impl.SeriesDataImpl;
@@ -37,7 +38,7 @@ public class ManagedRacesDataParser implements DataParser<Collection<ManagedRace
 			JSONObject json = Helpers.toJSONObjectSafe(element);
 			Regatta regatta = regattaDeserializer.deserialize(json);
 			
-			if (regatta.getAllRaces().iterator().hasNext()) {
+			if (!Util.isEmpty(regatta.getAllRaces())) {
 				addManagedRaces(managedRaces, regatta);
 			}
 		}

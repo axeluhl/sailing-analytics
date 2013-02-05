@@ -11,4 +11,8 @@ Require-Bundle: com.sap.sailing.domain;bundle-version="1.0.0",
 Export-Package: com.sap.sailing.server.gateway.deserialization,
  com.sap.sailing.server.gateway.deserialization.impl,
  com.sap.sailing.server.gateway.serialization,
- com.sap.sailing.server.gateway.serialization.impl
+ com.sap.sailing.server.gateway.serialization.filter,
+ com.sap.sailing.server.gateway.serialization.impl,
+ com.sap.sailing.server.gateway.serialization.impl.race,
+ com.sap.sailing.server.gateway.serialization.impl.racelog,
+ com.sap.sailing.server.gateway.serialization.impl.regatta

@@ -15,7 +15,7 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
-import com.sap.sailing.server.gateway.serialization.impl.BaseRaceLogEventSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.racelog.BaseRaceLogEventSerializer;
 
 public abstract class BaseRaceLogEventTest<FlagType extends RaceLogEvent> {
 

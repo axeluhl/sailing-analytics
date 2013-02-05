@@ -10,7 +10,7 @@ import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.impl.RaceLogStartTimeEventImpl;
-import com.sap.sailing.server.gateway.serialization.impl.RaceLogStartTimeEventSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.racelog.RaceLogStartTimeEventSerializer;
 
 public class RaceLogStartTimeEventDeserializer extends BaseRaceLogEventDeserializer {
 

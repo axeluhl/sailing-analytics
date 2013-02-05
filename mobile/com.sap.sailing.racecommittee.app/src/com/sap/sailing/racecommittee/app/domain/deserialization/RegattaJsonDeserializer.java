@@ -1,6 +1,5 @@
 package com.sap.sailing.racecommittee.app.domain.deserialization;
 
-import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.BoatClass;
@@ -10,7 +9,7 @@ import com.sap.sailing.racecommittee.app.domain.impl.SimpleRegattaImpl;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
-import com.sap.sailing.server.gateway.serialization.impl.RegattaJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.regatta.RegattaJsonSerializer;
 
 public class RegattaJsonDeserializer implements JsonDeserializer<Regatta> {
 
@@ -33,13 +32,13 @@ public class RegattaJsonDeserializer implements JsonDeserializer<Regatta> {
 		
 		Regatta regatta = new SimpleRegattaImpl(Helpers.tryUuidConversion(id), baseName, boatClass);
 		
-		JSONArray races = Helpers.getNestedArraySafe(
+		/*JSONArray races = Helpers.getNestedArraySafe(
 				object, 
 				RegattaJsonSerializer.FIELD_RACES);
 		for (Object element : races) {
 			JSONObject race = Helpers.toJSONObjectSafe(element);
 			regatta.addRace(raceDefinitionDeserializer.deserialize(race));
-		}
+		}*/
 		
 		return regatta;
 	}

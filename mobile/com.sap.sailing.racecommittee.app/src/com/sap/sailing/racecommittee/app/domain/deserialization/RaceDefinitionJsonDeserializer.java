@@ -11,7 +11,7 @@ import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
-import com.sap.sailing.server.gateway.serialization.impl.RaceDefinitionJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.race.RaceDefinitionJsonSerializer;
 
 public class RaceDefinitionJsonDeserializer implements JsonDeserializer<RaceDefinition> {
 

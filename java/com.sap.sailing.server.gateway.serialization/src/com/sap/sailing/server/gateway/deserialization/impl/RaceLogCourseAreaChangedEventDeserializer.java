@@ -11,7 +11,7 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.impl.RaceLogCourseAreaChangeEventImpl;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
-import com.sap.sailing.server.gateway.serialization.impl.RaceLogCourseAreaChangedEventSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.racelog.RaceLogCourseAreaChangedEventSerializer;
 
 public class RaceLogCourseAreaChangedEventDeserializer extends
 		BaseRaceLogEventDeserializer {
