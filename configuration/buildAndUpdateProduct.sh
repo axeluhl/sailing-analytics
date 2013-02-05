@@ -17,8 +17,6 @@ fi
 # needed for maven to work correctly
 source $USER_HOME/.bash_profile
 
-MAVEN_SETTINGS=$ACDIR/maven-settings.xml
-
 gwtcompile=1
 testing=1
 clean="clean"
@@ -82,6 +80,10 @@ if [ ! -d "$ACDIR/configuration" ]; then
     mkdir $ACDIR/configuration
 fi
 
+# make sure to have maven configuration here
+cp -v $PROJECT_HOME/configuration/maven-settings.xml $ACDIR/
+MAVEN_SETTINGS=$ACDIR/maven-settings.xml
+
 if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
 	# yield build so that we get updated product
 	cd $PROJECT_HOME/java
@@ -128,11 +130,11 @@ if [[ "$@" == "install" ]] || [[ "$@" == "all" ]]; then
     cp -v $PROJECT_HOME/java/target/configuration/monitoring.properties configuration/
 
     # Make sure mongodb configuration is active
-    cp -v $PROJECT_HOME/configuration/mongodb.cfg .
-    cp -rv $PROJECT_HOME/configuration/native-libraries .
+    cp -v $PROJECT_HOME/configuration/mongodb.cfg $ACDIR/
+    cp -rv $PROJECT_HOME/configuration/native-libraries $ACDIR/
 
-    # Make sure this script is up2date
-    cp -v $PROJECT_HOME/configuration/buildAndUpdateProduct.sh .
+    # Make sure this script is up2date at least for the next run
+    cp -v $PROJECT_HOME/configuration/buildAndUpdateProduct.sh $ACDIR/
 
 	echo "Installation complete. You may now start the server using ./start"
 fi
