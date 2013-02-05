@@ -112,12 +112,20 @@ fi
 if [[ "$@" == "install" ]] || [[ "$@" == "all" ]]; then
 
 	cd $ACDIR
-    mkdir $ACDIR/configuration
+
+    rm -rf $ACDIR/plugins/*.*
+    rm -rf $ACDIR/org.eclipse.*
+    rm -rf $ACDIR/configuration/org.eclipse.*
 
 	p2PluginRepository=$PROJECT_HOME/java/com.sap.sailing.feature.p2build/bin/products/raceanalysis.product.id/linux/gtk/$ARCH
 	cp -v $p2PluginRepository/configuration/config.ini configuration/
 	cp -r -v $p2PluginRepository/configuration/org.eclipse.equinox.simpleconfigurator configuration/
 	cp -v $p2PluginRepository/plugins/*.jar plugins/
+
+    mkdir -p configuration/jetty/etc
+    cp -v $PROJECT_HOME/java/target/configuration/jetty/etc/jetty.xml configuration/jetty/etc
+    cp -v $PROJECT_HOME/java/target/configuration/jetty/etc/realm.properties configuration/jetty/etc
+    cp -v $PROJECT_HOME/java/target/configuration/monitoring.properties configuration/
 
     # Make sure mongodb configuration is active
     cp -v $PROJECT_HOME/configuration/mongodb.cfg .
