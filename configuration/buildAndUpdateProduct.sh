@@ -1,5 +1,6 @@
 #/bin/bash
 
+# this holds for default installation
 USER_HOME=~
 PROJECT_HOME=$USER_HOME/git
 
@@ -7,6 +8,12 @@ PROJECT_HOME=$USER_HOME/git
 ARCH=x86_64
 
 ACDIR=`pwd`
+
+if [ $ACDIR==$PROJECT_HOME/configuration ] || [ $ACDIR==$PROJECT_HOME ]; then
+    echo "Please DO NOT run this script from $PROJECT_HOME/configuration or $PROJECT_HOME. Your directory should differ from the GIT repo."
+    exit 2
+fi
+
 MAVEN_SETTINGS=$ACDIR/configuration/maven-settings.xml
 
 # needed for maven to work correctly
@@ -26,8 +33,8 @@ if [ $# -eq 0 ]; then
     echo "-o Enable offline mode (does not work for tycho surefire plugin)"
     echo "-c Disable cleaning (use only if you are sure that no java file has changed)"
     echo ""
-    echo "build: builds the server code to $PROJECT_HOME"
-    echo "install: installs product to $ACDIR"
+    echo "build: builds the server code using Maven to $PROJECT_HOME"
+    echo "install: installs product and configuration to $ACDIR"
     echo "all: calls build and then install"
     exit 2
 fi
@@ -105,6 +112,13 @@ if [[ "$@" == "install" ]] || [[ "$@" == "all" ]]; then
 	cp -v $p2PluginRepository/configuration/config.ini configuration/
 	cp -r -v $p2PluginRepository/configuration/org.eclipse.equinox.simpleconfigurator configuration/
 	cp -v $p2PluginRepository/plugins/*.jar plugins/
+
+    # Make sure mongodb configuration is active
+    cp -v $PROJECT_HOME/configuration/mongodb.cfg .
+    cp -rv $PROJECT_HOME/configuration/native-libraries .
+
+    # Make sure this script is up2date
+    cp -v $PROJECT_HOME/configuration/buildAndUpdateProduct.sh .
 
 	echo "Installation complete. You may now start the server using ./start"
 fi
