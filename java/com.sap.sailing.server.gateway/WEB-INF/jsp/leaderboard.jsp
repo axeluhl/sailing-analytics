@@ -39,7 +39,7 @@
 <table id="leaderboardTable" class="tablesorter">
 	<thead>
 	<tr>
-		<th>Rank</th>
+		<th width="50">Rank</th>
 		<th>Name</th>
 		<% 	for (RaceColumn raceColumn : raceColumns) { %>
 			<th><%= raceColumn.getName() %></th>
