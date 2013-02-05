@@ -17,9 +17,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SimulatorServiceAsync;
 import com.sap.sailing.gwt.ui.shared.PositionDTO;
-import com.sap.sailing.gwt.ui.shared.Request1TurnerDTO;
 import com.sap.sailing.gwt.ui.shared.RequestTotalTimeDTO;
-import com.sap.sailing.gwt.ui.shared.Response1TurnerDTO;
 import com.sap.sailing.gwt.ui.shared.ResponseTotalTimeDTO;
 import com.sap.sailing.gwt.ui.shared.SimulatorWindDTO;
 import com.sap.sailing.gwt.ui.shared.racemap.TwoDPoint;
@@ -60,6 +58,9 @@ public class PathPolyline {
 
     private static int STEP_DURATION_MILLISECONDS = 2000;
     private static boolean USE_REAL_AVERAGE_WIND = true;
+
+    private static boolean FIX_CUT_SPIKES = true;
+    private static boolean FIX_CUT_TRIANGLES = true;
 
     public static PathPolyline createPathPolyline(List<SimulatorWindDTO> pathPoints, ErrorReporter errorReporter, SimulatorServiceAsync simulatorService,
             MapWidget map, SimulatorMap simulatorMap, int boatClassID) {
@@ -112,6 +113,17 @@ public class PathPolyline {
         });
     }
 
+    @SuppressWarnings("unused")
+    private void printTurnPoints() {
+        System.out.println("-----------------------------");
+
+        for (int index = 0; index < this.turnPoints.length; index++) {
+            System.out.println("Point no. " + index + " at " + this.turnPoints[index].toString());
+        }
+
+        System.out.println("-----------------------------");
+    }
+
     private void drawPolylineOnMap() {
         if (this.polyline != null) {
             this.map.removeOverlay(this.polyline);
@@ -130,16 +142,17 @@ public class PathPolyline {
                 if (indexOfMovedPoint == 0 || indexOfMovedPoint == noOfPoints - 1) {
                     // start and end points cannot be moved!
                 } else {
-                    // System.err.println("INDEX OF MOVED POINT = " + indexOfMovedPoint);
-
                     TwoDPoint newOrigin = computeNewOrigin(indexOfMovedPoint);
                     final boolean projectionOnBeforeLine = projectedToBeforeLine(indexOfMovedPoint);
+
+                    SpecialCaseResult specialCase = null;
 
                     if (indexOfMovedPoint == 1) {
                         turnPoints[indexOfMovedPoint + 1] = toLatLng(computeAfterNewOrigin(indexOfMovedPoint, newOrigin));
                     } else if (indexOfMovedPoint == noOfPoints - 2) {
                         turnPoints[indexOfMovedPoint - 1] = toLatLng(computeBeforeNewOrigin(indexOfMovedPoint, newOrigin));
                     } else {
+                        specialCase = isSepecialCase(indexOfMovedPoint, newOrigin);
                         turnPoints[indexOfMovedPoint - 1] = toLatLng(computeBeforeNewOrigin(indexOfMovedPoint, newOrigin));
                         turnPoints[indexOfMovedPoint + 1] = toLatLng(computeAfterNewOrigin(indexOfMovedPoint, newOrigin));
                     }
@@ -148,87 +161,58 @@ public class PathPolyline {
 
                     LatLng newOriginLng = turnPoints[indexOfMovedPoint];
 
-                    // start of "cut the triangles" fix
-                    if (noOfPoints > 3) {
-                        LatLng first = null;
-                        LatLng second = null;
-                        LatLng third = null;
-                        LatLng fourth = null;
-
-                        for (int index = 0; (index + 3) < noOfPoints; index++) {
-                            first = turnPoints[index];
-                            second = turnPoints[index + 1];
-                            third = turnPoints[index + 2];
-                            fourth = turnPoints[index + 3];
-
-                            if (TwoDPoint.areIntersecting(toTwoDPoint(first), toTwoDPoint(second), toTwoDPoint(third), toTwoDPoint(fourth))) {
-
-                                TwoDSegment firstSegment = new TwoDSegment(toTwoDPoint(first), toTwoDPoint(second));
-                                TwoDSegment secondSegment = new TwoDSegment(toTwoDPoint(third), toTwoDPoint(fourth));
-                                List<LatLng> newTurnPoints = new ArrayList<LatLng>();
-
-                                for (int index2 = 0; index2 < noOfPoints; index2++) {
-                                    if (index2 == index + 1) {
-                                        continue;
-                                    } else if (index2 == index + 2) {
-                                        newTurnPoints.add(toLatLng(firstSegment.intersectionPointWith(secondSegment)));
-                                    } else {
-                                        newTurnPoints.add(LatLng.newInstance(turnPoints[index2].getLatitude(), turnPoints[index2].getLongitude()));
-                                    }
-                                }
-
-                                turnPoints = null;
-                                turnPoints = newTurnPoints.toArray(new LatLng[0]);
-
-                                break;
-                            }
-                        }
+                    if (FIX_CUT_SPIKES) {
+                        fix_cutSpikes(specialCase, indexOfMovedPoint);
                     }
-                    // end of "cut the triangles" fix
+
+                    if (FIX_CUT_TRIANGLES) {
+                        fix_cutTriangles();
+                    }
 
                     // start of "optimal towards wind" fix
-                    SimulatorWindDTO firstPoint = toSimulatorWindDTO(originalOriginLng);
-                    PositionDTO secondPoint = toPositionDTO(newOriginLng);
-
-                    Request1TurnerDTO requestData = new Request1TurnerDTO(boatClassID, allPoints, firstPoint, secondPoint, USE_REAL_AVERAGE_WIND,
-                            STEP_DURATION_MILLISECONDS, !projectionOnBeforeLine);
-
-                    simulatorService.get1Turner(requestData, new AsyncCallback<Response1TurnerDTO>() {
-
-                        @Override
-                        public void onFailure(Throwable error) {
-                            System.out.println("eroare");
-                            errorReporter.reportError("Failed to initialize boat classes!\r\n" + error.getMessage());
-
-                        }
-
-                        @Override
-                        public void onSuccess(Response1TurnerDTO receiveData) {
-                            System.out.println("succes");
-
-                            SimulatorWindDTO oneTurner = receiveData.oneTurner;
-                            List<LatLng> newTurnPoints = new ArrayList<LatLng>();
-
-                            for (int index2 = 0; index2 < noOfPoints; index2++) {
-                                if (index2 == indexOfMovedPoint) {
-                                    if (projectionOnBeforeLine) {
-                                        newTurnPoints.add(originalOriginLng);
-                                        newTurnPoints.add(LatLng.newInstance(oneTurner.position.latDeg, oneTurner.position.lngDeg));
-                                        newTurnPoints.add(turnPoints[index2]);
-                                    } else {
-                                        newTurnPoints.add(turnPoints[index2]);
-                                        newTurnPoints.add(LatLng.newInstance(oneTurner.position.latDeg, oneTurner.position.lngDeg));
-                                        newTurnPoints.add(originalOriginLng);
-                                    }
-                                } else {
-                                    newTurnPoints.add(turnPoints[index2]);
-                                }
-                            }
-
-                            turnPoints = null;
-                            turnPoints = newTurnPoints.toArray(new LatLng[0]);
-                        }
-                    });
+                    // SimulatorWindDTO firstPoint = toSimulatorWindDTO(originalOriginLng);
+                    // PositionDTO secondPoint = toPositionDTO(newOriginLng);
+                    //
+                    // Request1TurnerDTO requestData = new Request1TurnerDTO(boatClassID, allPoints, firstPoint,
+                    // secondPoint, USE_REAL_AVERAGE_WIND,
+                    // STEP_DURATION_MILLISECONDS, !projectionOnBeforeLine);
+                    //
+                    // simulatorService.get1Turner(requestData, new AsyncCallback<Response1TurnerDTO>() {
+                    //
+                    // @Override
+                    // public void onFailure(Throwable error) {
+                    // System.out.println("eroare");
+                    // errorReporter.reportError("Failed to initialize boat classes!\r\n" + error.getMessage());
+                    //
+                    // }
+                    //
+                    // @Override
+                    // public void onSuccess(Response1TurnerDTO receiveData) {
+                    // System.out.println("succes");
+                    //
+                    // SimulatorWindDTO oneTurner = receiveData.oneTurner;
+                    // List<LatLng> newTurnPoints = new ArrayList<LatLng>();
+                    //
+                    // for (int index2 = 0; index2 < noOfPoints; index2++) {
+                    // if (index2 == indexOfMovedPoint) {
+                    // if (projectionOnBeforeLine) {
+                    // newTurnPoints.add(originalOriginLng);
+                    // newTurnPoints.add(LatLng.newInstance(oneTurner.position.latDeg, oneTurner.position.lngDeg));
+                    // newTurnPoints.add(turnPoints[index2]);
+                    // } else {
+                    // newTurnPoints.add(turnPoints[index2]);
+                    // newTurnPoints.add(LatLng.newInstance(oneTurner.position.latDeg, oneTurner.position.lngDeg));
+                    // newTurnPoints.add(originalOriginLng);
+                    // }
+                    // } else {
+                    // newTurnPoints.add(turnPoints[index2]);
+                    // }
+                    // }
+                    //
+                    // turnPoints = null;
+                    // turnPoints = newTurnPoints.toArray(new LatLng[0]);
+                    // }
+                    // });
                     // end of "optimal towards wind" fix
                 }
 
@@ -242,6 +226,77 @@ public class PathPolyline {
 
         // this.getTotalTime_old();
         this.getTotalTime_new();
+    }
+
+    private void fix_cutSpikes(SpecialCaseResult specialCase, int indexOfMovedPoint) {
+
+        int noOfPoints = this.turnPoints.length;
+
+        if (specialCase != null && specialCase.isSpecialCase) {
+            List<LatLng> newTurnPoints = new ArrayList<LatLng>();
+
+            if (specialCase.isBefore) {
+                for (int index2 = 0; index2 < noOfPoints; index2++) {
+                    if (index2 == indexOfMovedPoint + 1) {
+                        continue;
+                    } else {
+                        newTurnPoints.add(LatLng.newInstance(this.turnPoints[index2].getLatitude(), this.turnPoints[index2].getLongitude()));
+                    }
+                }
+            } else {
+                for (int index2 = 0; index2 < noOfPoints; index2++) {
+                    if (index2 == indexOfMovedPoint - 1) {
+                        continue;
+                    } else {
+                        newTurnPoints.add(LatLng.newInstance(this.turnPoints[index2].getLatitude(), this.turnPoints[index2].getLongitude()));
+                    }
+                }
+            }
+
+            this.turnPoints[indexOfMovedPoint] = toLatLng(specialCase.intersection);
+
+            this.turnPoints = null;
+            this.turnPoints = newTurnPoints.toArray(new LatLng[0]);
+        }
+    }
+
+    private void fix_cutTriangles() {
+        int noOfPoints = this.turnPoints.length;
+        if (noOfPoints > 3) {
+            LatLng first = null;
+            LatLng second = null;
+            LatLng third = null;
+            LatLng fourth = null;
+
+            for (int index = 0; (index + 3) < noOfPoints; index++) {
+                first = this.turnPoints[index];
+                second = this.turnPoints[index + 1];
+                third = this.turnPoints[index + 2];
+                fourth = this.turnPoints[index + 3];
+
+                if (TwoDPoint.areIntersecting(toTwoDPoint(first), toTwoDPoint(second), toTwoDPoint(third), toTwoDPoint(fourth))) {
+
+                    TwoDSegment firstSegment = new TwoDSegment(toTwoDPoint(first), toTwoDPoint(second));
+                    TwoDSegment secondSegment = new TwoDSegment(toTwoDPoint(third), toTwoDPoint(fourth));
+                    List<LatLng> newTurnPoints = new ArrayList<LatLng>();
+
+                    for (int index2 = 0; index2 < noOfPoints; index2++) {
+                        if (index2 == index + 1) {
+                            continue;
+                        } else if (index2 == index + 2) {
+                            newTurnPoints.add(toLatLng(firstSegment.intersectionPointWith(secondSegment)));
+                        } else {
+                            newTurnPoints.add(LatLng.newInstance(this.turnPoints[index2].getLatitude(), this.turnPoints[index2].getLongitude()));
+                        }
+                    }
+
+                    this.turnPoints = null;
+                    this.turnPoints = newTurnPoints.toArray(new LatLng[0]);
+
+                    break;
+                }
+            }
+        }
     }
 
     private SimulatorWindDTO toSimulatorWindDTO(LatLng latLng) {
@@ -258,6 +313,51 @@ public class PathPolyline {
         }
 
         return temp;
+    }
+
+    private class SpecialCaseResult {
+        boolean isSpecialCase = false;
+        TwoDPoint intersection = null;
+        boolean isBefore = false;
+    }
+
+    private SpecialCaseResult isSepecialCase(int indexOfMovedPoint, TwoDPoint newC) {
+
+        TwoDPoint A = toTwoDPoint(this.turnPoints[indexOfMovedPoint - 2]);
+        TwoDPoint B = toTwoDPoint(this.turnPoints[indexOfMovedPoint - 1]);
+        TwoDPoint C = toTwoDPoint(this.turnPoints[indexOfMovedPoint]);
+        TwoDPoint D = toTwoDPoint(this.turnPoints[indexOfMovedPoint + 1]);
+        TwoDPoint E = toTwoDPoint(this.turnPoints[indexOfMovedPoint + 2]);
+
+        TwoDSegment BC = new TwoDSegment(B, C);
+        TwoDSegment DE = new TwoDSegment(D, E);
+        TwoDPoint intersection_BC_and_DE = TwoDSegment.getIntersection(BC, DE);
+
+        TwoDSegment AB = new TwoDSegment(A, B);
+        TwoDSegment CD = new TwoDSegment(C, D);
+        TwoDPoint intersection_AB_and_CD = TwoDSegment.getIntersection(AB, CD);
+
+        SpecialCaseResult result = new SpecialCaseResult();
+
+        if (BC.contains(intersection_BC_and_DE)) {
+            TwoDSegment firstPartOfBC = new TwoDSegment(B, intersection_BC_and_DE);
+            if (firstPartOfBC.contains(newC)) {
+                result.isSpecialCase = true;
+                result.isBefore = true;
+                result.intersection = intersection_BC_and_DE;
+                return result;
+            }
+        } else if (CD.contains(intersection_AB_and_CD)) {
+            TwoDSegment secondPartOfCD = new TwoDSegment(intersection_AB_and_CD, D);
+            if (secondPartOfCD.contains(newC)) {
+                result.isSpecialCase = true;
+                result.isBefore = false;
+                result.intersection = intersection_AB_and_CD;
+                return result;
+            }
+        }
+
+        return result;
     }
 
     private TwoDPoint computeNewOrigin(int indexOfMovedPoint) {

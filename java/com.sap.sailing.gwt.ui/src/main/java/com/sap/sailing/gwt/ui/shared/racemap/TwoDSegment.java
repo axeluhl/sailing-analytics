@@ -8,15 +8,13 @@ public class TwoDSegment {
     private TwoDPoint firstPoint = null;
     private TwoDPoint secondPoint = null;
 
-    public TwoDSegment(final TwoDPoint p1, final TwoDPoint p2) {
+    public TwoDSegment(TwoDPoint p1, TwoDPoint p2) {
         this(p1.getX(), p1.getY(), p2.getX(), p2.getY());
     }
 
-    public TwoDSegment(final double x1, final double y1, final double x2, final double y2) {
+    public TwoDSegment(double x1, double y1, double x2, double y2) {
         if (x1 == x2) {
             // FIXME:
-            // this.slope = Double.MAX_VALUE;
-
         } else {
             this.lineSlope = (y2 - y1) / (x2 - x1);
             this.lineIntercept = (x2 * y1 - x1 * y2) / (x2 - x1);
@@ -34,15 +32,15 @@ public class TwoDSegment {
         return this.lineIntercept;
     }
 
-    public TwoDPoint projectionOfPointOnLine(final TwoDPoint p) {
-        final double x = (this.lineSlope * p.getY() + p.getX() - this.lineSlope * this.lineIntercept)
+    public TwoDPoint projectionOfPointOnLine(TwoDPoint p) {
+        double x = (this.lineSlope * p.getY() + p.getX() - this.lineSlope * this.lineIntercept)
                 / (this.lineSlope * this.lineSlope + 1);
-        final double y = this.lineSlope * x + this.lineIntercept;
+        double y = this.lineSlope * x + this.lineIntercept;
 
         return new TwoDPoint(x, y);
     }
 
-    public double distanceToLine(final TwoDPoint p) {
+    public double distanceToLine(TwoDPoint p) {
         return TwoDPoint.distanceBetween(p, this.projectionOfPointOnLine(p));
     }
 
@@ -63,36 +61,37 @@ public class TwoDSegment {
         return new TwoDVector(this.firstPoint, this.secondPoint);
     }
 
-    public static boolean areIntersecting(final TwoDSegment s1, final TwoDSegment s2) {
+    public static boolean areIntersecting(TwoDSegment s1, TwoDSegment s2) {
         return TwoDPoint.areIntersecting(s1.firstPoint, s1.secondPoint, s2.firstPoint, s2.secondPoint);
     }
 
-    public TwoDPoint intersectionPointWith(final TwoDSegment segment2) {
-        return getIntersectionPoint(this, segment2);
+    public TwoDPoint intersectionPointWith(TwoDSegment segment2) {
+        return getIntersection(this, segment2);
     }
 
-    public static TwoDPoint getIntersectionPoint(final TwoDSegment segment1, final TwoDSegment segment2) {
+    public static TwoDPoint getIntersection(TwoDSegment segment1, TwoDSegment segment2) {
 
-        final double x1 = segment1.firstPoint.getX();
-        final double x2 = segment1.secondPoint.getX();
-        final double x3 = segment2.firstPoint.getX();
-        final double x4 = segment2.secondPoint.getX();
+        double xA = segment1.firstPoint.getX();
+        double yA = segment1.firstPoint.getY();
 
-        final double y1 = segment1.firstPoint.getY();
-        final double y2 = segment1.secondPoint.getY();
-        final double y3 = segment2.firstPoint.getY();
-        final double y4 = segment2.secondPoint.getY();
+        double xC = segment2.firstPoint.getX();
+        double yC = segment2.firstPoint.getY();
 
-        final double temp1 = (y2 - y1) / (x2 - x1);
-        final double temp2 = (y4 - y3) / (x4 - x3);
+        double m1 = segment1.lineSlope;
+        double m2 = segment2.lineSlope;
 
-        final double x = (y3 - y1 + x1 * temp1 - x3 * temp2) / (temp1 - temp2);
-        final double y = x * temp1 + y1 - x1 * temp1;
+        double x = (yC - yA + m1 * xA - m2 * xC) / (m1 - m2);
+        double y = (yC - yA + m2 * (xA - xC)) * m1 / (m1 - m2) + yA;
 
         return new TwoDPoint(x, y);
     }
 
     public boolean contains(TwoDPoint point) {
+
+        if (Math.abs(point.getY() - (this.lineSlope * point.getX() + this.lineIntercept)) > 0.00001) {
+            return false;
+        }
+
         double maxX = Math.max(this.firstPoint.getX(), this.secondPoint.getX());
         double minX = Math.min(this.firstPoint.getX(), this.secondPoint.getX());
 
