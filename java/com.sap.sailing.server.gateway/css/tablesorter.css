@@ -1,4 +1,4 @@
-/* tables */
+/* table sorter table */
 table.tablesorter {
 	font-family:arial;
 	background-color: #CDCDCD;
@@ -7,6 +7,7 @@ table.tablesorter {
 	width: 100%;
 	text-align: left;
 }
+
 table.tablesorter thead tr th, table.tablesorter tfoot tr th {
 	background-color: #4d4d4d;
 	border-bottom: 1px solid #4d4d4d;
@@ -15,13 +16,14 @@ table.tablesorter thead tr th, table.tablesorter tfoot tr th {
 	color: #fff;
 	border-right: 1px solid #9c9c9c;
 }
+
 table.tablesorter thead tr .header {
 	background-image: url(bg.gif);
 	background-repeat: no-repeat;
 	background-position: center right;
 	cursor: pointer;
+	padding-left: 10px;
 }
-
 
 table.tablesorter tbody td {
 	color: #fff;
@@ -35,19 +37,22 @@ table.tablesorter tbody td {
 	font-weight: bold;
 }
 
-table.tablesorter tbody td:last-child, table.tablesorter thead tr th:last-child, table.tablesorter tfoot tr th:last-child {
-	border: none;
+table.tablesorter tbody tr:last-child td {
+	height: 30px;
 }
 
 table.tablesorter tbody tr.odd td {
 	background-color:#F0F0F6;
 }
-table.tablesorter thead tr .headerSortUp {
+
+table.tablesorter thead tr .headerSortUp { 	
 	background-image: url(asc.gif);
 }
+
 table.tablesorter thead tr .headerSortDown {
 	background-image: url(desc.gif);
 }
+
 table.tablesorter thead tr .headerSortDown, table.tablesorter thead tr .headerSortUp {
     background-color: #949494;
 }

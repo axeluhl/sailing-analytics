@@ -18,7 +18,7 @@
 	<script type="text/javascript" src="<%= request.getContextPath() %>/js/jquery.tablesorter.js"></script>
 	<script type="text/javascript">
 	$(document).ready(function() {
-	    $("#leaderboardTable").tablesorter(); 
+	    $("#leaderboardTable").tablesorter();
 	});
 	</script>
 </head>
@@ -40,7 +40,7 @@
 	<thead>
 	<tr>
 		<th width="50">Rank</th>
-		<th>Name</th>
+		<th>Team</th>
 		<% 	for (RaceColumn raceColumn : raceColumns) { %>
 			<th><%= raceColumn.getName() %></th>
 		<% } %>
@@ -53,14 +53,13 @@
 	%>
     <tr>
 		<td><%= totalRank %></td>
-		<td><img src="<%= imgFlagPath + nationality.getCountryCode().getTwoLetterISOCode().toLowerCase() + ".png"%>" />&nbsp;<%= competitor.getName() %></td>
+		<td><img src="<%= imgFlagPath + nationality.getCountryCode().getTwoLetterISOCode().toLowerCase() + ".png"%>" />&nbsp;&nbsp;<%= competitor.getName() %></td>
 		<% 	for (RaceColumn raceColumn : raceColumns) { 
                 List<Competitor> rankedCompetitorsForColumn = rankedCompetitorsPerColumn.get(raceColumn);
                 if (rankedCompetitorsForColumn == null) {
                     rankedCompetitorsForColumn = leaderboard.getCompetitorsFromBestToWorst(raceColumn, timePoint);
                     rankedCompetitorsPerColumn.put(raceColumn, rankedCompetitorsForColumn);
                 }
-				Fleet fleetOfCompetitor = raceColumn.getFleetOfCompetitor(competitor);
                 Double netPoints = leaderboard.getNetPoints(competitor, raceColumn, timePoint);
                 Double totalPoints = leaderboard.getTotalPoints(competitor, raceColumn, timePoint);
 				MaxPointsReason maxPointsReason = leaderboard.getMaxPointsReason(competitor, raceColumn, timePoint);
@@ -77,18 +76,7 @@
                 scoreFormat.setMinimumFractionDigits(digitPresicion);
                 scoreFormat.setMaximumFractionDigits(digitPresicion);
 
-                String IS_LIVE_TEXT_COLOR = "#1876B3";
-                String DEFAULT_TEXT_COLOR = "#000000";
-
                 String racePointsStyleClasses = "";
-                
-            	boolean isLive = false; //isLive(entry.fleet);
-            	
-                String textColor = isLive ? IS_LIVE_TEXT_COLOR : DEFAULT_TEXT_COLOR;
-
-                if (fleetOfCompetitor != null && fleetOfCompetitor.getColor() != null) {
-                    // add the fleet color as border here
-                }
 
                 String racePoints = "&nbsp;";
                 if (maxPointsReason == null || maxPointsReason == MaxPointsReason.NONE) {
