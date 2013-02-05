@@ -1004,7 +1004,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     private MarkDTO convertToMarkDTO(Mark mark, Position position) {
-        MarkDTO markDTO = new MarkDTO(mark.getName(), position.getLatDeg(), position.getLngDeg());
+        MarkDTO markDTO = new MarkDTO(mark.getId().toString(), mark.getName(), position.getLatDeg(), position.getLngDeg());
         markDTO.color = mark.getColor();
         markDTO.shape = mark.getShape();
         markDTO.pattern = mark.getPattern();
@@ -1767,11 +1767,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             final Position leftPos = trackedRace.getOrCreateTrack(left).getEstimatedPosition(timePoint, /* extrapolate */ false);
             final Mark right = ((Gate) controlPoint).getRight();
             final Position rightPos = trackedRace.getOrCreateTrack(right).getEstimatedPosition(timePoint, /* extrapolate */ false);
-            result = new GateDTO(controlPoint.getName(), convertToMarkDTO(left, leftPos), convertToMarkDTO(right, rightPos)); 
+            result = new GateDTO(controlPoint.getId().toString(), controlPoint.getName(), convertToMarkDTO(left, leftPos), convertToMarkDTO(right, rightPos)); 
         } else {
             final Position posOfFirst = trackedRace.getOrCreateTrack(controlPoint.getMarks().iterator().next()).
                     getEstimatedPosition(timePoint, /* extrapolate */ false);
-            result = new MarkDTO(controlPoint.getName(), posOfFirst.getLatDeg(), posOfFirst.getLngDeg());
+            result = new MarkDTO(controlPoint.getId().toString(), controlPoint.getName(), posOfFirst.getLatDeg(), posOfFirst.getLngDeg());
         }
         return result;
     }
@@ -1797,7 +1797,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 for (int i=lastMatchPosition+1; matchFromOldCourse == null && i<Util.size(waypoints); i++) {
                     Waypoint waypointAtI = Util.get(waypoints, i);
                     ControlPoint controlPointAtI = waypointAtI.getControlPoint();
-                    if (controlPointAtI.getName().equals(controlPointDTO.name) && markNamesMatch(controlPointAtI.getMarks(), controlPointDTO.getMarks())) {
+                    if (controlPointAtI.getId().toString().equals(controlPointDTO.getIdAsString()) && markIDsMatch(controlPointAtI.getMarks(), controlPointDTO.getMarks())) {
                         matchFromOldCourse = controlPointAtI;
                         newControlPoints.add(matchFromOldCourse);
                         lastMatchPosition = i;
@@ -1808,11 +1808,17 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     ControlPoint newControlPoint;
                     if (controlPointDTO instanceof GateDTO) {
                         GateDTO gateDTO = (GateDTO) controlPointDTO;
-                        Mark left = baseDomainFactory.getOrCreateMark(gateDTO.getLeft().name);
-                        Mark right = baseDomainFactory.getOrCreateMark(gateDTO.getRight().name);
-                        newControlPoint = baseDomainFactory.createGate(left, right, gateDTO.name);
+                        final Serializable id;
+                        if (gateDTO.getIdAsString() == null) {
+                            id = UUID.randomUUID();
+                        } else {
+                            id = gateDTO.getIdAsString();
+                        }
+                        Mark left = baseDomainFactory.getOrCreateMark(gateDTO.getLeft().getIdAsString(), gateDTO.getLeft().name);
+                        Mark right = baseDomainFactory.getOrCreateMark(gateDTO.getRight().getIdAsString(), gateDTO.getRight().name);
+                        newControlPoint = baseDomainFactory.createGate(id, left, right, gateDTO.name);
                     } else {
-                        newControlPoint = baseDomainFactory.getOrCreateMark(controlPointDTO.name);
+                        newControlPoint = baseDomainFactory.getOrCreateMark(controlPointDTO.getIdAsString(), controlPointDTO.name);
                     }
                     newControlPoints.add(newControlPoint);
                 }
@@ -1825,13 +1831,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         }
     }
 
-    private boolean markNamesMatch(Iterable<Mark> marks, Iterable<MarkDTO> marksDTOs) {
+    private boolean markIDsMatch(Iterable<Mark> marks, Iterable<MarkDTO> marksDTOs) {
         Iterator<Mark> marksIter = marks.iterator();
         Iterator<MarkDTO> markDTOsIter = marksDTOs.iterator();
         while (marksIter.hasNext() && markDTOsIter.hasNext()) {
             Mark nextMark = marksIter.next();
             MarkDTO nextMarkDTO = markDTOsIter.next();
-            if (!nextMark.getName().equals(nextMarkDTO.name)) {
+            if (!nextMark.getId().toString().equals(nextMarkDTO.getIdAsString())) {
                 return false;
             }
         }
@@ -2459,7 +2465,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
     
     private Double getCompetitorRaceDataEntry(DetailType dataType, TrackedRace trackedRace, Competitor competitor,
-            TimePoint timePoint) throws NoWindException {
+            TimePoint timePoint, String leaderboardGroupName, String leaderboardName) throws NoWindException {
         Double result = null;
         Course course = trackedRace.getRace().getCourse();
         course.lockForRead(); // make sure the tracked leg survives this call even if a course update is pending
@@ -2489,8 +2495,17 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 case RACE_RANK:
                     result = (double) trackedLeg.getRank(timePoint);
                     break;
-        		default:
-        			throw new UnsupportedOperationException("Theres currently no support for the enum value '" + dataType + "' in this method.");
+                case REGATTA_RANK:
+                    if (leaderboardName == null || leaderboardName.isEmpty()) {
+                        break;
+                    }
+                    
+                    Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+                    result = leaderboard == null ? null : (double) leaderboard.getTotalRankOfCompetitor(competitor, timePoint);
+                    break;
+                default:
+                    throw new UnsupportedOperationException("Theres currently no support for the enum value '"
+                            + dataType + "' in this method.");
                 }
             }
             return result;
@@ -2501,7 +2516,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     
     @Override
     public CompetitorsRaceDataDTO getCompetitorsRaceData(RegattaAndRaceIdentifier race, List<CompetitorDTO> competitors, Date from, Date to,
-            long stepSizeInMs, DetailType detailType) throws NoWindException {
+            long stepSizeInMs, DetailType detailType, String leaderboardGroupName, String leaderboardName) throws NoWindException {
         CompetitorsRaceDataDTO result = null;
         TrackedRace trackedRace = getExistingTrackedRace(race);
         if (trackedRace != null) {
@@ -2523,7 +2538,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                             MillisecondsTimePoint time = new MillisecondsTimePoint(markPassing.getTimePoint().asMillis());
                             markPassingsData.add(new Triple<String, Date, Double>(markPassing.getWaypoint().getName(),
                                     time.asDate(),
-                                    getCompetitorRaceDataEntry(detailType, trackedRace, competitor, time)));
+                                    getCompetitorRaceDataEntry(detailType, trackedRace, competitor, time, leaderboardGroupName, leaderboardName)));
                         }
                     } finally {
                         trackedRace.unlockAfterRead(competitorMarkPassings);
@@ -2533,7 +2548,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     for (long i = startTime.asMillis(); i <= endTime.asMillis(); i += stepSizeInMs) {
                         MillisecondsTimePoint time = new MillisecondsTimePoint(i);
                         raceData.add(new Pair<Date, Double>(time.asDate(), getCompetitorRaceDataEntry(detailType, trackedRace,
-                                competitor, time)));
+                                competitor, time, leaderboardGroupName, leaderboardName)));
                     }
                 }
                 result.setCompetitorData(competitorDTO, new CompetitorRaceDataDTO(competitorDTO, detailType, markPassingsData, raceData));

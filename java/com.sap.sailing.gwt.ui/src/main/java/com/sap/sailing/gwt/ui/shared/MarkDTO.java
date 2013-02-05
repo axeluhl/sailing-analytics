@@ -13,8 +13,8 @@ public class MarkDTO extends ControlPointDTO {
 
     MarkDTO() {}
     
-    public MarkDTO(String name, double latDeg, double lngDeg) {
-        super(name);
+    public MarkDTO(String idAsString, String name, double latDeg, double lngDeg) {
+        super(idAsString, name);
         this.position = new PositionDTO(latDeg, lngDeg);
     }
 

@@ -31,12 +31,6 @@ public class YoutubePopupWindow extends AbstractPopupWindow {
         
 		var that = this;
 
-		// This is a protocol-relative URL as described here: http://paulirish.com/2010/the-protocol-relative-url/
-		var tag = $doc.createElement('script');
-		tag.src = "//www.youtube.com/iframe_api";
-		var firstScriptTag = $doc.getElementsByTagName('script')[0];
-		firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-
 		// This function creates an <iframe> containing a YouTube player after the API code downloads.
 		var player;
 		$wnd.onYouTubeIframeAPIReady = function() {
@@ -57,9 +51,14 @@ public class YoutubePopupWindow extends AbstractPopupWindow {
 					'controls' : 0
 				}
 			});
-//			player.addEventListener("onStateChange", "handleStateChange");
 			that.@com.sap.sailing.gwt.ui.video.YoutubePopupWindow::setYoutubePlayer(Lcom/google/gwt/core/client/JavaScriptObject;)(player);
 		}
+
+                // Use script tag trick to cope with browser's cross domain restrictions
+                var tag = $doc.createElement('script');
+                tag.src = "//www.youtube.com/iframe_api"; // This is a protocol-relative URL as described here: http://paulirish.com/2010/the-protocol-relative-url/
+                var firstScriptTag = $doc.getElementsByTagName('script')[0];
+                firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
     }-*/;
 
