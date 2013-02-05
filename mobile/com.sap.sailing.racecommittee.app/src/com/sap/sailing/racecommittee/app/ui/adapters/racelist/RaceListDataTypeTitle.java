@@ -2,7 +2,7 @@ package com.sap.sailing.racecommittee.app.ui.adapters.racelist;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Fleet;
-import com.sap.sailing.racecommittee.app.domain.SeriesData;
+import com.sap.sailing.domain.base.SeriesData;
 
 public class RaceListDataTypeTitle extends RaceListDataType {
 

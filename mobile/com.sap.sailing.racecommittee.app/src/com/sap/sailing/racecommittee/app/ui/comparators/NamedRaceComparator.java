@@ -7,6 +7,7 @@ import com.sap.sailing.domain.common.Named;
 public class NamedRaceComparator extends RaceNameComparator implements Comparator<Named> {
 
 	public int compare(Named lhs, Named rhs) {
+		
 		String left = lhs.getName();
 		String right = rhs.getName();
 		

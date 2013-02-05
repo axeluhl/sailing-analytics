@@ -1,4 +1,4 @@
-package com.sap.sailing.server.gateway.deserialization.impl;
+package com.sap.sailing.racecommittee.app.domain.deserialization.impl;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -8,6 +8,7 @@ import com.sap.sailing.domain.base.Venue;
 import com.sap.sailing.domain.base.impl.VenueImpl;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
 import com.sap.sailing.server.gateway.serialization.impl.VenueJsonSerializer;
 
 public class VenueJsonDeserializer implements JsonDeserializer<Venue> {
@@ -17,7 +18,6 @@ public class VenueJsonDeserializer implements JsonDeserializer<Venue> {
 		this.courseAreaDeserializer = courseAreaDeserializer;
 	}
 	
-	@Override
 	public Venue deserialize(JSONObject object)
 			throws JsonDeserializationException {
 		

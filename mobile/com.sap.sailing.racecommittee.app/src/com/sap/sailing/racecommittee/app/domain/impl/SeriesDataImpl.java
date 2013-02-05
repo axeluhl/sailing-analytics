@@ -1,7 +1,7 @@
 package com.sap.sailing.racecommittee.app.domain.impl;
 
 import com.sap.sailing.domain.base.Fleet;
-import com.sap.sailing.racecommittee.app.domain.SeriesData;
+import com.sap.sailing.domain.base.SeriesData;
 
 public class SeriesDataImpl implements SeriesData {
 	private static final long serialVersionUID = 8825402393444809944L;
@@ -26,11 +26,6 @@ public class SeriesDataImpl implements SeriesData {
 
 	public boolean isMedal() {
 		return isMedal;
-	}
-
-	public Integer getOrderNumber() {
-		/// TODO: implement order number on seriesdata
-		return 0;
 	}
 
 }

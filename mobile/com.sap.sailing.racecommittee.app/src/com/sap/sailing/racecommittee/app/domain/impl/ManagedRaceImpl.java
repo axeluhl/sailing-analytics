@@ -2,68 +2,54 @@ package com.sap.sailing.racecommittee.app.domain.impl;
 
 import java.io.Serializable;
 
-import com.sap.sailing.domain.base.BoatClass;
-import com.sap.sailing.domain.base.Fleet;
-import com.sap.sailing.domain.base.RaceDefinition;
-import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.base.FleetWithRaceNames;
+import com.sap.sailing.domain.base.RaceGroup;
+import com.sap.sailing.domain.base.SeriesData;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
+import com.sap.sailing.racecommittee.app.domain.ManagedRaceIdentifier;
 import com.sap.sailing.racecommittee.app.domain.RaceStatus;
-import com.sap.sailing.racecommittee.app.domain.SeriesData;
 
 public class ManagedRaceImpl implements ManagedRace {
 	private static final long serialVersionUID = -4936566684992524001L;
 	
 	//private static final String TAG = ManagedRace.class.getName();
+
+	private ManagedRaceIdentifier identifier;
 	
-	private RaceDefinition raceDefinition;
-	private Regatta regatta;
-	private BoatClass boatClass;
-	private SeriesData seriesData;
-	private Fleet fleet;
-	
-	public ManagedRaceImpl(
-			RaceDefinition raceDefinition, 
-			Regatta regatta,
-			BoatClass boatClass, 
-			SeriesData seriesData, 
-			Fleet fleet) {
-		this.raceDefinition = raceDefinition;
-		this.regatta = regatta;
-		this.boatClass = boatClass;
-		this.seriesData = seriesData;
-		this.fleet = fleet;
+	public ManagedRaceImpl(ManagedRaceIdentifier identifier) {
+		this.identifier = identifier;
 	}
 
 	public Serializable getId() {
-		return raceDefinition.getId();
+		return identifier.getId();
 	}
 
 	public String getName() {
-		return raceDefinition.getName();
+		return identifier.getRaceName();
 	}
 
-	public Regatta getRegatta() {
-		return regatta;
+	public String getRaceName() {
+		return getName();
 	}
-	
-	public RaceDefinition getRaceDefinition() {
-		return raceDefinition;
+
+	public FleetWithRaceNames getFleet() {
+		return identifier.getFleet();
+	}
+
+	public SeriesData getSeries() {
+		return identifier.getSeries();
+	}
+
+	public RaceGroup getRaceGroup() {
+		return identifier.getRaceGroup();
+	}
+
+	public ManagedRaceIdentifier getIdentifier() {
+		return identifier;
 	}
 
 	public RaceStatus getStatus() {
 		return RaceStatus.UNKNOWN;
-	}
-
-	public BoatClass getBoatClass() {
-		return boatClass;
-	}
-
-	public SeriesData getSeriesData() {
-		return seriesData;
-	}
-
-	public Fleet getFleet() {
-		return fleet;
 	}
 
 }

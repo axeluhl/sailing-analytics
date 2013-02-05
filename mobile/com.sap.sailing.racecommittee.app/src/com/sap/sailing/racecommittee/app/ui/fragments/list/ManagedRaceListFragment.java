@@ -14,6 +14,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.ListView;
 
+import com.sap.sailing.domain.base.impl.BoatClassImpl;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.RaceStatus;
@@ -106,7 +107,7 @@ public class ManagedRaceListFragment extends ListFragment implements JuryFlagCli
 			// Group Managed Races by boat class and group
 			for (ManagedRace m : managedRacesById.values()) {
 				BoatClassSeriesDataFleet ser = 
-						new BoatClassSeriesDataFleet(m.getBoatClass(), m.getSeriesData(), m.getFleet());
+						new BoatClassSeriesDataFleet(new BoatClassImpl("A", false), m.getSeries(), m.getFleet());
 
 				if (raceListHashMap.containsKey(ser)) {
 					raceListHashMap.get(ser).add(m);

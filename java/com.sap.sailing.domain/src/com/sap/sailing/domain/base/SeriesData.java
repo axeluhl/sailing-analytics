@@ -1,6 +1,5 @@
-package com.sap.sailing.racecommittee.app.domain;
+package com.sap.sailing.domain.base;
 
-import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.common.Named;
 
 public interface SeriesData extends Named {
@@ -15,6 +14,4 @@ public interface SeriesData extends Named {
      * on the scoring scheme (usually, medal races scores are doubled and cannot be discarded).
      */
     boolean isMedal();
-    
-    Integer getOrderNumber();
 }

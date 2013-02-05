@@ -6,7 +6,6 @@ import java.util.Collection;
 
 import android.content.Context;
 
-import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
@@ -17,14 +16,15 @@ import com.sap.sailing.racecommittee.app.data.loaders.DataLoader;
 import com.sap.sailing.racecommittee.app.data.parsers.DataParser;
 import com.sap.sailing.racecommittee.app.data.parsers.EventsDataParser;
 import com.sap.sailing.racecommittee.app.data.parsers.ManagedRacesDataParser;
-import com.sap.sailing.racecommittee.app.domain.deserialization.RaceDefinitionJsonDeserializer;
-import com.sap.sailing.racecommittee.app.domain.deserialization.RegattaJsonDeserializer;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
-import com.sap.sailing.server.gateway.deserialization.impl.BoatClassJsonDeserializer;
-import com.sap.sailing.server.gateway.deserialization.impl.CourseAreaJsonDeserializer;
-import com.sap.sailing.server.gateway.deserialization.impl.EventJsonDeserializer;
-import com.sap.sailing.server.gateway.deserialization.impl.VenueJsonDeserializer;
+import com.sap.sailing.racecommittee.app.domain.deserialization.impl.ColorDeserializer;
+import com.sap.sailing.racecommittee.app.domain.deserialization.impl.CourseAreaJsonDeserializer;
+import com.sap.sailing.racecommittee.app.domain.deserialization.impl.EventJsonDeserializer;
+import com.sap.sailing.racecommittee.app.domain.deserialization.impl.FleetDeserializer;
+import com.sap.sailing.racecommittee.app.domain.deserialization.impl.FleetWithRaceNamesDeserializer;
+import com.sap.sailing.racecommittee.app.domain.deserialization.impl.RaceGroupDeserializer;
+import com.sap.sailing.racecommittee.app.domain.deserialization.impl.SeriesDataDeserializer;
+import com.sap.sailing.racecommittee.app.domain.deserialization.impl.VenueJsonDeserializer;
 
 /**
  * Enables accessing of data.
@@ -105,17 +105,18 @@ public class DataManager implements ReadonlyDataManager {
 			return;
 		}
 		
-		JsonDeserializer<BoatClass> boatClassDeserializer = new BoatClassJsonDeserializer();
-		DataParser<Collection<ManagedRace>> parser = new ManagedRacesDataParser(
-				new RegattaJsonDeserializer(
-						boatClassDeserializer,
-						new RaceDefinitionJsonDeserializer(
-								boatClassDeserializer)));
+		//JsonDeserializer<BoatClass> boatClassDeserializer = new BoatClassJsonDeserializer();
+		DataParser<Collection<ManagedRace>> parser =  new ManagedRacesDataParser(
+				new RaceGroupDeserializer(
+						new SeriesDataDeserializer(
+								new FleetWithRaceNamesDeserializer(
+										new FleetDeserializer(
+												new ColorDeserializer())))));
 		DataHandler<Collection<ManagedRace>> handler = new ManagedRacesDataHandler(this, client);
 		
 		DataLoader<Collection<ManagedRace>> loader = new DataLoader<Collection<ManagedRace>>(
 				context, 
-				URI.create("http://192.168.178.22:8888/sailingserver/rc/regattas?courseArea=" + courseAreaId.toString()), 
+				URI.create("http://192.168.178.22:8888/sailingserver/rc/leaderboards?courseArea=" + courseAreaId.toString()), 
 				parser, 
 				handler);
 		loader.forceLoad();

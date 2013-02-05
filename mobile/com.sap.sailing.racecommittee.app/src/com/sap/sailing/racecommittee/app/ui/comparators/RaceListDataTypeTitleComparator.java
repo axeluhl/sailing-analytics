@@ -19,9 +19,9 @@ public class RaceListDataTypeTitleComparator implements Comparator<RaceListDataT
 		if (left.getSeries().getName() == null || right.getSeries().getName() == null)
 			return 0;
 		
-		int seriesResult = left.getSeries().getOrderNumber().compareTo(right.getSeries().getOrderNumber());
+		/*int seriesResult = left.getSeries().getOrderNumber().compareTo(right.getSeries().getOrderNumber());
 		if (seriesResult != 0)
-			return seriesResult;
+			return seriesResult;*/
 		
 		if (left.getFleet().getName() == null || right.getFleet().getName() == null)
 			return 0;

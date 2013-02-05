@@ -13,6 +13,7 @@ Export-Package: com.sap.sailing.server.gateway.deserialization,
  com.sap.sailing.server.gateway.serialization,
  com.sap.sailing.server.gateway.serialization.filter,
  com.sap.sailing.server.gateway.serialization.impl,
+ com.sap.sailing.server.gateway.serialization.impl.leaderboard,
  com.sap.sailing.server.gateway.serialization.impl.race,
  com.sap.sailing.server.gateway.serialization.impl.racelog,
  com.sap.sailing.server.gateway.serialization.impl.regatta

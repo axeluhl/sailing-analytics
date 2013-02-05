@@ -17,6 +17,15 @@
 	<!-- RACE COMMITTEE START -->
 	
 	<servlet>
+		<servlet-name>RCLeaderboards</servlet-name>
+		<servlet-class>com.sap.sailing.server.gateway.impl.rc.LeaderboardJsonExportServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>RCLeaderboards</servlet-name>
+		<url-pattern>/rc/leaderboards</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
 		<servlet-name>RCRegattas</servlet-name>
 		<servlet-class>com.sap.sailing.server.gateway.impl.rc.RegattasJsonExportServlet</servlet-class>
 	</servlet>

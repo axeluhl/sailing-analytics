@@ -92,7 +92,6 @@ public class RegattasJsonExportServlet extends JsonExportServlet {
 	}
 	
 	private Filter<RaceDefinition> createFilter(final String courseAreaId) {
-		
 		return new Filter<RaceDefinition>() {
 			@Override
 			public boolean isFiltered(RaceDefinition race) {
