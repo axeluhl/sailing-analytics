@@ -14,10 +14,10 @@ if [[ "$ACDIR" == "$PROJECT_HOME/configuration" ]] || [[ "$ACDIR" == "$PROJECT_H
     exit 2
 fi
 
-MAVEN_SETTINGS=$ACDIR/configuration/maven-settings.xml
-
 # needed for maven to work correctly
 source $USER_HOME/.bash_profile
+
+MAVEN_SETTINGS=$ACDIR/maven-settings.xml
 
 gwtcompile=1
 testing=1
