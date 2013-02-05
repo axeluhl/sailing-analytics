@@ -1,21 +1,15 @@
 package com.sap.sailing.racecommittee.app.utils;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
+
+import com.sap.sailing.domain.common.impl.Util;
 
 public class CollectionUtils {
 
 	public static <T> ArrayList<T> newArrayList(Iterable<T> iterable) {
 		ArrayList<T> list = new ArrayList<T>();
-		addAll(list, iterable.iterator());
+		Util.addAll(iterable, list);
 		return list;
-	}
-	
-	public static <T> void addAll(Collection<T> collection, Iterator<T> iterator) {
-	    while (iterator.hasNext()) {
-	        collection.add(iterator.next());
-	    }
 	}
 
 }
