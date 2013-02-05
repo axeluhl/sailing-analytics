@@ -2,6 +2,7 @@ package com.sap.sailing.domain.test;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.NavigableSet;
 import java.util.UUID;
 import java.util.concurrent.Executor;
 import java.util.concurrent.FutureTask;
@@ -16,6 +17,7 @@ import org.junit.Test;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
 import com.sap.sailing.domain.base.impl.BoatImpl;
@@ -62,7 +64,7 @@ public class PolarSheetGenerationTest {
         
         executor.execute(futureTask);
         
-        double timeUntilTimeout = 100;
+        double timeUntilTimeout = 1000;
         while (!futureTask.isDone() && timeUntilTimeout > 0) {
             Thread.sleep(100);
             timeUntilTimeout = timeUntilTimeout - 0.1;
@@ -83,11 +85,11 @@ public class PolarSheetGenerationTest {
     private class MockTrackedRaceForPolarSheetGeneration extends MockedTrackedRace {
         @Override
         public DynamicGPSFixTrack<Competitor, GPSFixMoving> getTrack(Competitor competitor) {
-            DynamicGPSFixTrack<Competitor, GPSFixMoving> track = new DynamicGPSFixMovingTrackImpl<Competitor>(competitor, 0);
-            track.addGPSFix(new GPSFixMovingImpl(new DegreePosition(1.0, 2.0), new MillisecondsTimePoint(1), new KnotSpeedWithBearingImpl(3.0, new DegreeBearingImpl(-45.0))));
-            track.addGPSFix(new GPSFixMovingImpl(new DegreePosition(1.0, 2.0), new MillisecondsTimePoint(2), new KnotSpeedWithBearingImpl(5.0, new DegreeBearingImpl(-45.0))));
-            track.addGPSFix(new GPSFixMovingImpl(new DegreePosition(1.0, 2.0), new MillisecondsTimePoint(3), new KnotSpeedWithBearingImpl(2.0, new DegreeBearingImpl(-55.0))));
-            track.addGPSFix(new GPSFixMovingImpl(new DegreePosition(1.0, 2.0), new MillisecondsTimePoint(4), new KnotSpeedWithBearingImpl(6.0, new DegreeBearingImpl(-30.0))));
+            DynamicGPSFixTrack<Competitor, GPSFixMoving> track = new MockDynamicGPSFixMovinTrackForPolarSheetGeneration<Competitor>(competitor, 0);
+            track.addGPSFix(new MockGPSFixMovingForPolarSheetGeneration(new DegreePosition(1.0, 1.0), new MillisecondsTimePoint(1), new KnotSpeedWithBearingImpl(3.0, new DegreeBearingImpl(-45.0))));
+            track.addGPSFix(new MockGPSFixMovingForPolarSheetGeneration(new DegreePosition(1.001, 1.001), new MillisecondsTimePoint(2), new KnotSpeedWithBearingImpl(5.0, new DegreeBearingImpl(-45.0))));
+            track.addGPSFix(new MockGPSFixMovingForPolarSheetGeneration(new DegreePosition(1.002, 1.002), new MillisecondsTimePoint(3), new KnotSpeedWithBearingImpl(2.0, new DegreeBearingImpl(-55.0))));
+            track.addGPSFix(new MockGPSFixMovingForPolarSheetGeneration(new DegreePosition(1.003, 1.003), new MillisecondsTimePoint(4), new KnotSpeedWithBearingImpl(6.0, new DegreeBearingImpl(-30.0))));
             return track;
         }
         
@@ -103,6 +105,35 @@ public class PolarSheetGenerationTest {
             RaceDefinition race = new RaceDefinitionImpl("Forelle1", new CourseImpl("ForelleCourse", new ArrayList<Waypoint>()), forelle, new ArrayList<Competitor>());
             return race;
         }
+    }
+    
+    @SuppressWarnings("serial")
+    private class MockGPSFixMovingForPolarSheetGeneration extends GPSFixMovingImpl {
+
+        public MockGPSFixMovingForPolarSheetGeneration(Position position, TimePoint timePoint, SpeedWithBearing speed) {
+            super(position, timePoint, speed);
+        }
+        
+        @Override
+        public boolean isValid() {
+            return true;
+        }
+        
+    }
+    
+    @SuppressWarnings("serial")
+    private class MockDynamicGPSFixMovinTrackForPolarSheetGeneration<ItemType> extends DynamicGPSFixMovingTrackImpl<ItemType> {
+
+        public MockDynamicGPSFixMovinTrackForPolarSheetGeneration(ItemType trackedItem,
+                long millisecondsOverWhichToAverage) {
+            super(trackedItem, millisecondsOverWhichToAverage);
+        }
+        
+        @Override
+        protected boolean isValid(NavigableSet<GPSFixMoving> rawFixes, GPSFixMoving e) {
+            return true;
+        }
+        
     }
 
 }

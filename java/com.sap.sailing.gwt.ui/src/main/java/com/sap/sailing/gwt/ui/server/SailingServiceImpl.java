@@ -363,7 +363,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     /**
      * Asks the OSGi system for registered score correction provider services
      */
-    private ServiceTracker<ScoreCorrectionProvider, ScoreCorrectionProvider> createAndOpenScoreCorrectionProviderServiceTracker(
+    protected ServiceTracker<ScoreCorrectionProvider, ScoreCorrectionProvider> createAndOpenScoreCorrectionProviderServiceTracker(
             BundleContext bundleContext) {
         ServiceTracker<ScoreCorrectionProvider, ScoreCorrectionProvider> tracker = new ServiceTracker<ScoreCorrectionProvider, ScoreCorrectionProvider>(bundleContext,
                 ScoreCorrectionProvider.class.getName(),
@@ -3133,10 +3133,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             PolarSheetGenerationWorker worker = polarSheetGenerationWorkers.get(id);
             data = worker.getPolarData();
             if (data.isComplete()) {
-                HttpServletRequest httpServletRequest = this.getThreadLocalRequest();
-                HttpSession session = httpServletRequest.getSession();
-                session.setAttribute(id, worker.getCompleteData());
                 polarSheetGenerationWorkers.remove(id);
+                HttpServletRequest httpServletRequest = this.getThreadLocalRequest();
+                if (httpServletRequest != null) {
+                    HttpSession session = httpServletRequest.getSession();
+                    session.setAttribute(id, worker.getCompleteData());
+                }       
             }
         } else {
             //TODO Exception handling
