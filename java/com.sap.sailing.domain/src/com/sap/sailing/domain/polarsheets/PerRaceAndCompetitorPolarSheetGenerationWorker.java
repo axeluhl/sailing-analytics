@@ -13,23 +13,28 @@ import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
 
-public class PerRaceAndCompetitorPolarSheetGenerationWorker implements Callable<Void>{
+/**
+ * Iterates through the fixes of one competitor in one tracked race and fills the {@link PolarSheetGenerationWorker}
+ * with datapoints that are found for the speed of the boat and its angle to the wind
+ * 
+ * @author D054528 Frederik Petersen
+ * 
+ */
+public class PerRaceAndCompetitorPolarSheetGenerationWorker implements Callable<Void> {
 
     private final TrackedRace race;
 
     private final PolarSheetGenerationWorker polarSheetGenerationWorker;
-    
+
     private final TimePoint startTime;
-    
+
     private final TimePoint endTime;
-    
+
     private final Competitor competitor;
-    
 
-    
-
-    public PerRaceAndCompetitorPolarSheetGenerationWorker(TrackedRace race, PolarSheetGenerationWorker polarSheetGenerationWorker,
-            TimePoint startTime, TimePoint endTime, Competitor competitor) {
+    public PerRaceAndCompetitorPolarSheetGenerationWorker(TrackedRace race,
+            PolarSheetGenerationWorker polarSheetGenerationWorker, TimePoint startTime, TimePoint endTime,
+            Competitor competitor) {
         super();
         this.race = race;
         this.polarSheetGenerationWorker = polarSheetGenerationWorker;
@@ -49,8 +54,9 @@ public class PerRaceAndCompetitorPolarSheetGenerationWorker implements Callable<
             if (fix.getTimePoint().after(endTime)) {
                 break;
             }
-            
-            if (track.hasDirectionChange(fix.getTimePoint(), race.getRace().getBoatClass().getManeuverDegreeAngleThreshold())) {
+
+            if (track.hasDirectionChange(fix.getTimePoint(), race.getRace().getBoatClass()
+                    .getManeuverDegreeAngleThreshold())) {
                 continue;
             }
 
@@ -67,7 +73,7 @@ public class PerRaceAndCompetitorPolarSheetGenerationWorker implements Callable<
 
             polarSheetGenerationWorker.addPolarData(Math.round(angleToWind), normalizedSpeed);
         }
-        
+
         track.unlockAfterRead();
         return null;
     }
