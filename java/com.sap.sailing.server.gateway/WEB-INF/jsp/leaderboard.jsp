@@ -86,13 +86,10 @@
             	
                 String textColor = isLive ? IS_LIVE_TEXT_COLOR : DEFAULT_TEXT_COLOR;
 
-                // if (fleet != null && fleet.getColor() != null) {
-                //	 html.append(raceColumnTemplate.cellFrameWithTextColorAndFleetBorder(textColor, fleet.getColor().getAsHtml()));
-                // } else {
-                // 	html.append(raceColumnTemplate.cellFrameWithTextColor(textColor));
-                //}
+                if (fleetOfCompetitor != null && fleetOfCompetitor.getColor() != null) {
+                    // add the fleet color as border here
+                }
 
-                // don't show points if max points / penalty
                 String racePoints = "&nbsp;";
                 if (maxPointsReason == null || maxPointsReason == MaxPointsReason.NONE) {
                     if (!isDiscarded) {
