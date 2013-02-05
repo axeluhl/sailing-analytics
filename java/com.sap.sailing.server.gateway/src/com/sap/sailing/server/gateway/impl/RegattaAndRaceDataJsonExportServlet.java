@@ -34,6 +34,7 @@ import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
+import com.sap.sailing.server.gateway.JsonExportServlet;
 import com.sap.sailing.util.InvalidDateException;
 
 public class RegattaAndRaceDataJsonExportServlet extends JsonExportServlet {

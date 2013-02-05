@@ -1,8 +1,7 @@
-package com.sap.sailing.server.gateway.impl;
+package com.sap.sailing.server.gateway;
 
 import javax.servlet.http.HttpServletResponse;
 
-import com.sap.sailing.server.gateway.SailingServerHttpServlet;
 
 public abstract class JsonExportServlet extends SailingServerHttpServlet {
     private static final long serialVersionUID = 7007196727805110847L;

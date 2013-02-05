@@ -93,14 +93,4 @@
      <url-pattern>*.jsp</url-pattern>
    </servlet-mapping>
  --> 
-  
-   	<servlet>
-		<servlet-name>SimpleJspForwardServlet</servlet-name>
-		<servlet-class>com.sap.sailing.server.gateway.impl.SimpleJspForwardServlet</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>SimpleJspForwardServlet</servlet-name>
-		<url-pattern>/html/*</url-pattern>
-	</servlet-mapping>
-   
  </web-app>
