@@ -2,7 +2,11 @@ package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
@@ -11,6 +15,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.VenueDTO;
 
@@ -21,6 +26,11 @@ public class EventDialog extends DataEntryDialog<EventDTO> {
     protected TextBox publicationUrlEntryField;
     protected CheckBox isPublicCheckBox;
     protected String id;
+    protected List<TextBox> courseAreaNameEntryFields;
+    
+    private EventDTO event;
+    
+    private Grid courseAreasGrid;
 
     protected static class EventParameterValidator implements Validator<EventDTO> {
 
@@ -37,6 +47,15 @@ public class EventDialog extends DataEntryDialog<EventDTO> {
             String errorMessage = null;
             boolean nameNotEmpty = eventToValidate.name != null && eventToValidate.name.length() > 0;
             boolean venueNotEmpty = eventToValidate.venue.name != null && eventToValidate.venue.name.length() > 0;
+            boolean courseAreaNotEmpty = eventToValidate.venue.getCourseAreas() != null && eventToValidate.venue.getCourseAreas().size() > 0;
+            
+            if (courseAreaNotEmpty) {
+            	for (CourseAreaDTO courseArea : eventToValidate.venue.getCourseAreas()) {
+            		courseAreaNotEmpty = courseArea.name != null && courseArea.name.length() > 0;
+            		if (!courseAreaNotEmpty)
+            			break;
+            	}
+            }
 
             boolean unique = true;
             for (EventDTO event : existingEvents) {
@@ -50,6 +69,8 @@ public class EventDialog extends DataEntryDialog<EventDTO> {
                 errorMessage = stringConstants.pleaseEnterAName();
             } else if (!venueNotEmpty) {
                 errorMessage = stringConstants.pleaseEnterNonEmptyVenue();
+            } else if (!courseAreaNotEmpty) {
+                errorMessage = stringConstants.pleaseEnterNonEmptyCourseArea();
             } else if (!unique) {
                 errorMessage = stringConstants.eventWithThisNameAlreadyExists();
             }
@@ -63,22 +84,48 @@ public class EventDialog extends DataEntryDialog<EventDTO> {
             DialogCallback<EventDTO> callback) {
         super(stringConstants.event(), null, stringConstants.ok(), stringConstants.cancel(), validator,
                 callback);
+        this.event = new EventDTO();
         this.stringConstants = stringConstants;
+        courseAreaNameEntryFields = new ArrayList<TextBox>();
+        courseAreasGrid = new Grid(0, 0);
+    }
+    
+    protected void addCourseAreaWidget(String courseAreaName, boolean isEnabled) {
+        createCourseAreaNameWidget(courseAreaName, isEnabled);
+    }
+    
+    private Widget createCourseAreaNameWidget(String defaultName, boolean isEnabled) {
+        TextBox textBox = createTextBox(defaultName); 
+        textBox.setVisibleLength(40);
+        textBox.setEnabled(isEnabled);
+        textBox.setWidth("175px");
+        courseAreaNameEntryFields.add(textBox);
+        return textBox; 
     }
 
     @Override
     protected EventDTO getResult() {
-        EventDTO eventDTO = new EventDTO(nameEntryField.getText());
-        eventDTO.venue = new VenueDTO(venueEntryField.getText());
-        eventDTO.publicationUrl = publicationUrlEntryField.getText();
-        eventDTO.isPublic = isPublicCheckBox.getValue();
-        eventDTO.id = id;
-        return eventDTO;
+    	this.event.name = nameEntryField.getText();
+    	this.event.publicationUrl = publicationUrlEntryField.getText();
+    	this.event.isPublic = isPublicCheckBox.getValue();
+    	this.event.id = id;
+    	
+    	List<CourseAreaDTO> courseAreas = new ArrayList<CourseAreaDTO>();
+    	int count = courseAreaNameEntryFields.size();
+    	for(int i = 0; i < count; i++) {
+    		CourseAreaDTO courseAreaDTO = new CourseAreaDTO();
+    		courseAreaDTO.name = courseAreaNameEntryFields.get(i).getValue();
+    		courseAreas.add(courseAreaDTO);
+    	}
+    	
+    	this.event.venue = new VenueDTO(venueEntryField.getText(), courseAreas);
+    	
+        return this.event;
     }
 
     @Override
     protected Widget getAdditionalWidget() {
-        VerticalPanel panel = new VerticalPanel();
+        final VerticalPanel panel = new VerticalPanel();
         Widget additionalWidget = super.getAdditionalWidget();
         if (additionalWidget != null) {
             panel.add(additionalWidget);
@@ -95,7 +142,34 @@ public class EventDialog extends DataEntryDialog<EventDTO> {
         formGrid.setWidget(2, 1, publicationUrlEntryField);
         formGrid.setWidget(3, 0, new Label(stringConstants.isPublic() + ":"));
         formGrid.setWidget(3, 1, isPublicCheckBox);
+        
+        panel.add(createHeadlineLabel(stringConstants.courseAreas()));
+        panel.add(courseAreasGrid);
+        updateCourseAreasGrid(panel);
+        
+        Button addCourseAreaButton = new Button(stringConstants.addCourseArea());
+        addCourseAreaButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                addCourseAreaWidget("", true);
+                updateCourseAreasGrid(panel);
+            }
+        });
+        panel.add(addCourseAreaButton);
         return panel;
+    }
+    
+    protected void updateCourseAreasGrid(VerticalPanel parentPanel) {
+        int widgetIndex = parentPanel.getWidgetIndex(courseAreasGrid);
+        parentPanel.remove(courseAreasGrid);
+        int courseAreasCount = courseAreaNameEntryFields.size();
+        courseAreasGrid = new Grid(courseAreasCount + 1, 1);
+        courseAreasGrid.setCellSpacing(4);
+        courseAreasGrid.setHTML(0, 0, stringConstants.name());
+        for(int i = 0; i < courseAreasCount; i++) {
+        	courseAreasGrid.setWidget(i+1, 0, courseAreaNameEntryFields.get(i));
+        }
+        parentPanel.insert(courseAreasGrid, widgetIndex);
     }
 
     @Override

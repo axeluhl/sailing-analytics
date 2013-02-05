@@ -491,4 +491,7 @@ public interface StringMessages extends Messages {
     String windData();
     String gpsData();
     String status();
+    String addCourseArea();
+    String courseAreas();
+    String pleaseEnterNonEmptyCourseArea();
 }

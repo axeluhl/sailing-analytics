@@ -20,6 +20,7 @@ import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
+import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingArchiveConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.BulkScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
@@ -344,6 +345,8 @@ public interface SailingServiceAsync {
      */
     void getEventByName(String eventName, AsyncCallback<EventDTO> callback);
     
+    void getEventById(Serializable id, AsyncCallback<EventDTO> callback);
+    
     /**
     * Renames the event with the name <code>oldName</code> to the <code>newName</code>.<br />
     * If there's no event with the name <code>oldName</code> or there's already a event with the name
@@ -356,10 +359,12 @@ public interface SailingServiceAsync {
      */
     void removeEvent(Serializable id, AsyncCallback<Void> callback);
     
-    void createEvent(String eventName, String description, String publicationUrl, boolean isPublic, AsyncCallback<EventDTO> callback);
+    void createEvent(String eventName, String description, String publicationUrl, boolean isPublic, List<String> courseAreaNames, AsyncCallback<EventDTO> callback);
     
     void updateEvent(String eventName, Serializable id, VenueDTO venue, String publicationUrl, boolean isPublic,
             List<String> regattaNames, AsyncCallback<Void> callback);
+    
+    void createCourseArea(Serializable id, String courseAreaName, AsyncCallback<CourseAreaDTO> callback);
 
     void removeRegatta(RegattaIdentifier regattaIdentifier, AsyncCallback<Void> callback);
 
