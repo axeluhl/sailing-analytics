@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Set;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnListener;
@@ -171,6 +172,12 @@ public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardI
             }
         }
         return delayToLiveInMillisForLatestRace;
+    }
+    
+    @Override
+    public CourseArea getDefaultCourseArea() {
+    	// TODO Implement leaderboard <-> CourseArea relationship
+    	return null;
     }
 
 }

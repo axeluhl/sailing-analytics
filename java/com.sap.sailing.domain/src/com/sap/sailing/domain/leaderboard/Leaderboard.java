@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnListener;
@@ -32,6 +33,10 @@ import com.sap.sailing.domain.tracking.TrackedRace;
  * 
  * @author Axel Uhl (d043530)
  * 
+ */
+/**
+ * @author Hugo
+ *
  */
 public interface Leaderboard extends Named {
     /**
@@ -347,4 +352,9 @@ public interface Leaderboard extends Named {
 
     TimePoint getNowMinusDelay();
     
+    /**
+     * Get the default {@link CourseArea} of this leaderboard.
+     * @return the default {@link CourseArea} for all races of this leaderboard.
+     */
+    CourseArea getDefaultCourseArea();
 }
