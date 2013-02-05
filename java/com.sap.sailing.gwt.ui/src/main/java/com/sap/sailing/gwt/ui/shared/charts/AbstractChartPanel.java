@@ -75,6 +75,7 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
     private static final int MAX_SERIES_POINTS = 10000;
     
     private final Label noCompetitorsSelectedLabel;
+    private final Label noDataFoundLabel;
     private final CompetitorSelectionProvider competitorSelectionProvider;
     private DetailType selectedDetailType;
 
@@ -115,6 +116,8 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
         setSize("100%", "100%");
         noCompetitorsSelectedLabel = new Label(stringMessages.selectAtLeastOneCompetitor() + ".");
         noCompetitorsSelectedLabel.setStyleName("abstractChartPanel-importantMessageOfChart");
+        noDataFoundLabel = new Label(stringMessages.noDataFound() + ".");
+        noDataFoundLabel.setStyleName("abstractChartPanel-importantMessageOfChart");
         createChart();
         setSelectedDetailType(detailType);
         
@@ -225,7 +228,11 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
                         hideLoading();
 
                         if (result != null) {
-                            updateChartSeries(result, append);
+                            if (result.isEmpty()) {
+                                setWidget(noDataFoundLabel);
+                            } else {
+                                updateChartSeries(result, append);
+                            }
                         } else {
                             if (!append) {
                                 clearChart();
@@ -499,8 +506,7 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
             } else {
                 chart.getYAxis().setAxisTitleText(label);
             }
-            chart.getYAxis().setReversed(
-                    selectedDetailType == DetailType.WINDWARD_DISTANCE_TO_OVERALL_LEADER || selectedDetailType == DetailType.GAP_TO_LEADER_IN_SECONDS);
+            chart.getYAxis().setReversed(isYAxisReversed());
             final NumberFormat numberFormat = DetailTypeFormatter.getNumberFormat(selectedDetailType);
             chart.setToolTip(new ToolTip().setEnabled(true).setFormatter(new ToolTipFormatter() {
                 @Override
@@ -520,6 +526,14 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
             }));
         }
         return hasDetailTypeChanged;
+    }
+
+    private boolean isYAxisReversed() {
+        return selectedDetailType == DetailType.WINDWARD_DISTANCE_TO_OVERALL_LEADER ||
+               selectedDetailType == DetailType.GAP_TO_LEADER_IN_SECONDS ||
+               selectedDetailType == DetailType.RACE_RANK ||
+               selectedDetailType == DetailType.REGATTA_RANK ||
+               selectedDetailType == DetailType.OVERALL_RANK;
     }
 
     @Override
