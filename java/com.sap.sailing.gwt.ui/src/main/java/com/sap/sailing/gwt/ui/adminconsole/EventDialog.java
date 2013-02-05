@@ -90,13 +90,14 @@ public class EventDialog extends DataEntryDialog<EventDTO> {
         courseAreasGrid = new Grid(0, 0);
     }
     
-    protected void addCourseAreaWidget(String courseAreaName) {
-        createCourseAreaNameWidget(courseAreaName);
+    protected void addCourseAreaWidget(String courseAreaName, boolean isEnabled) {
+        createCourseAreaNameWidget(courseAreaName, isEnabled);
     }
     
-    private Widget createCourseAreaNameWidget(String defaultName) {
+    private Widget createCourseAreaNameWidget(String defaultName, boolean isEnabled) {
         TextBox textBox = createTextBox(defaultName); 
         textBox.setVisibleLength(40);
+        textBox.setEnabled(isEnabled);
         textBox.setWidth("175px");
         courseAreaNameEntryFields.add(textBox);
         return textBox; 
@@ -150,7 +151,7 @@ public class EventDialog extends DataEntryDialog<EventDTO> {
         addCourseAreaButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                addCourseAreaWidget("");
+                addCourseAreaWidget("", true);
                 updateCourseAreasGrid(panel);
             }
         });

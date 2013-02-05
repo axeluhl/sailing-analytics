@@ -24,7 +24,7 @@ public class EventEditDialog extends EventDialog {
         
         if (event.venue.getCourseAreas() != null && event.venue.getCourseAreas().size() > 0) {
         	for (CourseAreaDTO courseArea : event.venue.getCourseAreas()) {
-        		addCourseAreaWidget(courseArea.name);
+        		addCourseAreaWidget(courseArea.name, false);
         	}
         	
         }
