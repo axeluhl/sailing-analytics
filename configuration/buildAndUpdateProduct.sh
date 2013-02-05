@@ -9,7 +9,7 @@ ARCH=x86_64
 
 ACDIR=`pwd`
 
-if [ $ACDIR==$PROJECT_HOME/configuration ] || [ $ACDIR==$PROJECT_HOME ]; then
+if [[ "$ACDIR" == "$PROJECT_HOME/configuration" ]] || [[ "$ACDIR" == "$PROJECT_HOME" ]]; then
     echo "Please DO NOT run this script from $PROJECT_HOME/configuration or $PROJECT_HOME. Your directory should differ from the GIT repo."
     exit 2
 fi
@@ -74,11 +74,15 @@ fi
 
 echo "Starting $@ of server..."
 
-if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
-	if [ ! -d "plugins" ]; then
-	    mkdir plugins
-	fi
+if [ ! -d "$ACDIR/plugins" ]; then
+    mkdir $ACDIR/plugins
+fi
 
+if [ ! -d "$ACDIR/configuration" ]; then
+    mkdir $ACDIR/configuration
+fi
+
+if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
 	# yield build so that we get updated product
 	cd $PROJECT_HOME/java
 	if [ $gwtcompile -eq 1 ]; then
@@ -108,6 +112,8 @@ fi
 if [[ "$@" == "install" ]] || [[ "$@" == "all" ]]; then
 
 	cd $ACDIR
+    mkdir $ACDIR/configuration
+
 	p2PluginRepository=$PROJECT_HOME/java/com.sap.sailing.feature.p2build/bin/products/raceanalysis.product.id/linux/gtk/$ARCH
 	cp -v $p2PluginRepository/configuration/config.ini configuration/
 	cp -r -v $p2PluginRepository/configuration/org.eclipse.equinox.simpleconfigurator configuration/
