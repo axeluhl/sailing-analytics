@@ -11,6 +11,8 @@ import com.sap.sailing.domain.base.impl.RaceGroupImpl;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
+import com.sap.sailing.server.gateway.serialization.impl.leaderboard.LeaderboardJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.leaderboard.SeriesOfLeaderboardExtensionSerializer;
 
 public class RaceGroupDeserializer implements JsonDeserializer<RaceGroup> {
 	
@@ -22,9 +24,14 @@ public class RaceGroupDeserializer implements JsonDeserializer<RaceGroup> {
 
 	public RaceGroup deserialize(JSONObject object)
 			throws JsonDeserializationException {
-		String name = object.get("name").toString();
+		String name = object.get(LeaderboardJsonSerializer.FIELD_NAME).toString();
+		
+		// CourseArea ... 
+		
 		Collection<SeriesData> series = new ArrayList<SeriesData>();
-		for (Object seriesObject : Helpers.getNestedArraySafe(object, "series")) {
+		for (Object seriesObject : Helpers.getNestedArraySafe(
+				object, 
+				SeriesOfLeaderboardExtensionSerializer.FIELD_SERIES)) {
 			JSONObject seriesJson = Helpers.toJSONObjectSafe(seriesObject);
 			 series.add(seriesDeserializer.deserialize(seriesJson));
 		}
