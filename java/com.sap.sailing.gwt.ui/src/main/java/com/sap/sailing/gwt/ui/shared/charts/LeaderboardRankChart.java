@@ -22,7 +22,6 @@ import org.moxieapps.gwt.highcharts.client.ToolTipFormatter;
 import org.moxieapps.gwt.highcharts.client.labels.AxisLabelsData;
 import org.moxieapps.gwt.highcharts.client.labels.AxisLabelsFormatter;
 import org.moxieapps.gwt.highcharts.client.labels.XAxisLabels;
-import org.moxieapps.gwt.highcharts.client.labels.YAxisLabels;
 import org.moxieapps.gwt.highcharts.client.plotOptions.LinePlotOptions;
 import org.moxieapps.gwt.highcharts.client.plotOptions.Marker;
 import org.moxieapps.gwt.highcharts.client.plotOptions.Marker.Symbol;
@@ -87,7 +86,7 @@ public class LeaderboardRankChart extends SimplePanel implements RequiresResize,
             @Override
             public String format(ToolTipData toolTipData) {
                 String seriesName = toolTipData.getSeriesName();
-                return "<b>" + seriesName + ":</b> " + stringMessages.rankNAfterRace(-toolTipData.getYAsLong(),
+                return "<b>" + seriesName + ":</b> " + stringMessages.rankNAfterRace(toolTipData.getYAsLong(),
                         raceColumnNames.get((int) toolTipData.getXAsLong()));
             }
         }));
@@ -99,14 +98,7 @@ public class LeaderboardRankChart extends SimplePanel implements RequiresResize,
             }
         }));
         chart.getYAxis().setAllowDecimals(false).setStartOnTick(true).setEndOnTick(true).setAxisTitleText(stringMessages.rank())
-        .setShowFirstLabel(false).setShowLastLabel(false)
-        .setLabels(new YAxisLabels().setFormatter(new AxisLabelsFormatter() {
-            @Override
-            public String format(AxisLabelsData axisLabelsData) {
-                // invert signum to ensure best are at the top
-                return "" + (-axisLabelsData.getValueAsLong());
-            }
-        }));
+        .setShowFirstLabel(false).setShowLastLabel(false).setReversed(true);
         if (compactChart) {
             chart.setSpacingBottom(10).setSpacingLeft(10).setSpacingRight(10).setSpacingTop(2)
                  .setOption("legend/margin", 2)
@@ -145,7 +137,7 @@ public class LeaderboardRankChart extends SimplePanel implements RequiresResize,
                                 if (Util.isEmpty(competitorSelectionProvider.getSelectedCompetitors()) ||
                                         competitorSelectionProvider.isSelected(competitor)) {
                                     Series series = getOrCreateSeries(competitor);
-                                    series.addPoint(raceNumber, -rank, /* redraw */ false, /* shift */ false, /* animation */ false);
+                                    series.addPoint(raceNumber, rank, /* redraw */ false, /* shift */ false, /* animation */ false);
                                     
                                     unusedSeries.remove(series);
                                     if (!chartSeries.contains(series)) {

@@ -143,7 +143,7 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
                                 for(RegattaDTO regattaDTO: regattaDTOs) {
                                     regattasByName.put(regattaDTO.name, regattaDTO);
                                 }
-                                createdPageContent();
+                                createPageContent();
                             }
                             
                             @Override
@@ -152,7 +152,7 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
                             }
                         });
                     } else {
-                        createdPageContent();
+                        createPageContent();
                     }
                 } else {
                     errorReporter.reportError(stringMessages.noLeaderboardGroupWithNameFound(leaderboardGroupName));
@@ -165,7 +165,7 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
         });
     }
 
-    private void createdPageContent() {
+    private void createPageContent() {
         if (!isEmbedded) {
             Label groupNameLabel = new Label(leaderboardGroup.name + ":");
             groupNameLabel.setStyleName(STYLE_NAME_PREFIX + "GroupName");

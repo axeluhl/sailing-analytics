@@ -498,11 +498,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 for (Fleet fleet : raceColumn.getFleets()) {
                     TimePoint latestTimePointAfterQueryTimePointWhenATrackedRaceWasLive = null;
                     RegattaAndRaceIdentifier raceIdentifier = null;
+                    RaceDTO race = null;
                     TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
                     final FleetDTO fleetDTO = convertToFleetDTO(fleet);
                     if (trackedRace != null) {
                         raceIdentifier = new RegattaNameAndRaceName(trackedRace.getTrackedRegatta().getRegatta()
                                 .getName(), trackedRace.getRace().getName());
+                        race = createRaceDTO(false, raceIdentifier, trackedRace);
                         if (trackedRace.hasStarted(timePoint) && trackedRace.hasGPSData() && trackedRace.hasWindData()) {
                             TimePoint liveTimePointForTrackedRace = timePoint;
                             final TimePoint endOfRace = trackedRace.getEndOfRace();
@@ -512,10 +514,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                             latestTimePointAfterQueryTimePointWhenATrackedRaceWasLive = liveTimePointForTrackedRace;
                         }
                     }
+                    
                     // Note: the RaceColumnDTO won't be created by the following addRace call because it has been created
                     // above by the result.createEmptyRaceColumn call
                     result.addRace(raceColumn.getName(), raceColumn.getExplicitFactor(), fleetDTO,
-                            raceColumn.isMedalRace(), raceIdentifier, /* StrippedRaceDTO */ null);
+                            raceColumn.isMedalRace(), raceIdentifier, race);
                     if (latestTimePointAfterQueryTimePointWhenATrackedRaceWasLive != null) {
                         raceColumnDTO.setWhenLastTrackedRaceWasLive(fleetDTO, latestTimePointAfterQueryTimePointWhenATrackedRaceWasLive.asDate());
                     }
@@ -2088,17 +2091,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                         delayToLiveInMillisForLatestRace = trackedRace.getDelayToLiveInMillis();
                     }
                     raceIdentifier = new RegattaNameAndRaceName(trackedRace.getTrackedRegatta().getRegatta().getName(), trackedRace.getRace().getName());
-                    // Optional: Getting the places of the race
-                    PlacemarkOrderDTO racePlaces = withGeoLocationData ? getRacePlaces(trackedRace) : null;
-
-                    TrackedRaceDTO trackedRaceDTO = new TrackedRaceDTO();
-                    trackedRaceDTO.startOfTracking = trackedRace.getStartOfTracking() == null ? null : trackedRace.getStartOfTracking().asDate();
-                    trackedRaceDTO.hasWindData = trackedRace.hasWindData();
-                    trackedRaceDTO.hasGPSData = trackedRace.hasGPSData();
-                    raceDTO = new RaceDTO(raceIdentifier, trackedRaceDTO, getService().isRaceBeingTracked(trackedRace.getRace()));
-                    raceDTO.places = racePlaces;
-                    raceDTO.startOfRace = trackedRace.getStartOfRace() == null ? null : trackedRace.getStartOfRace().asDate();
-                    raceDTO.endOfRace = trackedRace.getEndOfRace() == null ? null : trackedRace.getEndOfRace().asDate();
+                    raceDTO = createRaceDTO(withGeoLocationData, raceIdentifier, trackedRace);
                     if (trackedRace.hasStarted(now) && trackedRace.hasGPSData() && trackedRace.hasWindData()) {
                         TimePoint liveTimePointForTrackedRace = now;
                         final TimePoint endOfRace = trackedRace.getEndOfRace();
@@ -2117,6 +2110,21 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             }
         }
         return leaderboardDTO;
+    }
+
+    private RaceDTO createRaceDTO(boolean withGeoLocationData, RegattaAndRaceIdentifier raceIdentifier, TrackedRace trackedRace) {
+        // Optional: Getting the places of the race
+        PlacemarkOrderDTO racePlaces = withGeoLocationData ? getRacePlaces(trackedRace) : null;
+
+        TrackedRaceDTO trackedRaceDTO = new TrackedRaceDTO();
+        trackedRaceDTO.startOfTracking = trackedRace.getStartOfTracking() == null ? null : trackedRace.getStartOfTracking().asDate();
+        trackedRaceDTO.hasWindData = trackedRace.hasWindData();
+        trackedRaceDTO.hasGPSData = trackedRace.hasGPSData();
+        RaceDTO raceDTO = new RaceDTO(raceIdentifier, trackedRaceDTO, getService().isRaceBeingTracked(trackedRace.getRace()));
+        raceDTO.places = racePlaces;
+        raceDTO.startOfRace = trackedRace.getStartOfRace() == null ? null : trackedRace.getStartOfRace().asDate();
+        raceDTO.endOfRace = trackedRace.getEndOfRace() == null ? null : trackedRace.getEndOfRace().asDate();
+        return raceDTO;
     }
 
     private PlacemarkOrderDTO getRacePlaces(TrackedRace trackedRace) {
