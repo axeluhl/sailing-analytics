@@ -30,3 +30,6 @@ Kieler Woche 2012:
 http://germanmaster.traclive.dk/events/event_20120615_KielerWoch/jsonservice.php
 http://germanmaster.traclive.dk/events/event_20120621_KielerWoch/jsonservice.php
 http://germanmaster.traclive.dk/events/event_20120615_KielerWoch1/jsonservice.php
+
+Extreme Sailing Series 2012:
+http://germanmaster.traclive.dk/events/event_20120101_ExtremeSai/jsonservice.php
