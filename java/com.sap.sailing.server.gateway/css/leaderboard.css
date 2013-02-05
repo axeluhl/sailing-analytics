@@ -1,6 +1,17 @@
-.leaderboard-table {
-	border: 1px solid blue;
-	
+body {
+	background: #4d4d4d;
+	font-family: Verdana, Arial, sans-serif;
+}
+
+h1,h2,h3,h4 {
+	color: #fff;
+	font-size: 18px;
+}
+
+table {
+	border-collapse: separate;
+	border: none;
+	border-spacing: 0;
 }
 
 .leaderboard-points-TotalPoints-NotDiscarded {
