@@ -34,7 +34,7 @@ if [ $# -eq 0 ]; then
     echo "-c Disable cleaning (use only if you are sure that no java file has changed)"
     echo ""
     echo "build: builds the server code using Maven to $PROJECT_HOME"
-    echo "install: installs product and configuration to $ACDIR"
+    echo "install: installs product and configuration to $ACDIR. Overwrites any configuration by using config from branch."
     echo "all: calls build and then install"
     exit 2
 fi
@@ -117,10 +117,10 @@ if [[ "$@" == "install" ]] || [[ "$@" == "all" ]]; then
     rm -rf $ACDIR/org.eclipse.*
     rm -rf $ACDIR/configuration/org.eclipse.*
 
-	p2PluginRepository=$PROJECT_HOME/java/com.sap.sailing.feature.p2build/bin/products/raceanalysis.product.id/linux/gtk/$ARCH
-	cp -v $p2PluginRepository/configuration/config.ini configuration/
-	cp -r -v $p2PluginRepository/configuration/org.eclipse.equinox.simpleconfigurator configuration/
-	cp -v $p2PluginRepository/plugins/*.jar plugins/
+    p2PluginRepository=$PROJECT_HOME/java/com.sap.sailing.feature.p2build/bin/products/raceanalysis.product.id/linux/gtk/$ARCH
+    cp -v $p2PluginRepository/configuration/config.ini configuration/
+    cp -r -v $p2PluginRepository/configuration/org.eclipse.equinox.simpleconfigurator configuration/
+    cp -v $p2PluginRepository/plugins/*.jar plugins/
 
     mkdir -p configuration/jetty/etc
     cp -v $PROJECT_HOME/java/target/configuration/jetty/etc/jetty.xml configuration/jetty/etc
