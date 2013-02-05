@@ -20,9 +20,6 @@ table {
 
 .leaderboard-points-MaxPoints-NotDiscarded {
 	font-weight: bold;
-	filter: Alpha(opacity=50);
-    opacity: 0.5;
-    moz-opacity: 0.5;
 }
 
 .leaderboard-points-TotalPoints-Discarded {
@@ -37,4 +34,8 @@ table {
     opacity: 0.5;
     moz-opacity: 0.5;
 	text-decoration: line-through;
+}
+
+table.tablesorter tbody td.last-row {
+	height: 29px;
 }
