@@ -29,22 +29,6 @@ import com.sap.sailing.server.gateway.serialization.impl.racelog.RaceLogStartTim
 public class EventTrackJsonExportServlet extends JsonExportServlet {
 	private static final long serialVersionUID = 2197006949440887925L;
 	
-	/**
-	 * Created in init() - access is thread-safe.
-	 */
-	private JsonSerializer<RaceLogEvent> rcEventSerializer;
-	
-	@Override
-	public void init() throws ServletException {
-		super.init();
-		
-		JsonSerializer<Competitor> competitorSerializer = new CompetitorIdJsonSerializer();
-		rcEventSerializer = new RaceLogEventSerializer(
-				new RaceLogFlagEventSerializer(competitorSerializer),
-				new RaceLogStartTimeEventSerializer(competitorSerializer),
-				new RaceLogCourseAreaChangedEventSerializer(competitorSerializer));
-	}
-	
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
@@ -61,6 +45,7 @@ public class EventTrackJsonExportServlet extends JsonExportServlet {
 	}
 
 	private JSONArray serizalizeTrack(TrackedRace trackedRace) {
+		JsonSerializer<RaceLogEvent> rcEventSerializer = createSerializer();
 		JSONArray result = new JSONArray();
 		
 		RaceLog track = trackedRace.getRaceLog();
@@ -114,6 +99,14 @@ public class EventTrackJsonExportServlet extends JsonExportServlet {
 			}
 		}
 		return true;
+	}
+
+	private static JsonSerializer<RaceLogEvent> createSerializer() {
+		JsonSerializer<Competitor> competitorSerializer = new CompetitorIdJsonSerializer();
+		return new RaceLogEventSerializer(
+				new RaceLogFlagEventSerializer(competitorSerializer),
+				new RaceLogStartTimeEventSerializer(competitorSerializer),
+				new RaceLogCourseAreaChangedEventSerializer(competitorSerializer));
 	}
 
 }

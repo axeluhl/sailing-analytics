@@ -24,7 +24,7 @@ public class SeriesOfRegattaExtensionSerializer extends ExtensionJsonSerializer<
 		JSONArray result = new JSONArray();
 		if (object.getSeries() != null) {
 			for (Series series : object.getSeries()) {
-				serialize(series);
+				result.add(serialize(series));
 			}
 		}
 		return result;

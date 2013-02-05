@@ -34,7 +34,11 @@ public class FleetWithRacesOfSeriesExtensionSerializer extends ExtensionJsonSeri
 			
 			Collection<RaceDefinition> races = new ArrayList<RaceDefinition>();
 			for (RaceColumnInSeries raceColumn : object.getRaceColumns()) {
-				races.add(raceColumn.getRaceDefinition(fleet));
+				RaceDefinition race = raceColumn.getRaceDefinition(fleet);
+				if (race != null) {
+					System.out.println(race);
+					races.add(race);
+				}
 			}
 		
 			result.add(serialize(new FleetWithRacesImpl(fleet, races)));

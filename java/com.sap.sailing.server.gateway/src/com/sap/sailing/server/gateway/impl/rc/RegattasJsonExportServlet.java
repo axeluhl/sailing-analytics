@@ -91,21 +91,6 @@ public class RegattasJsonExportServlet extends JsonExportServlet {
 		
 	}
 	
-	private JsonSerializer<Regatta> createSerializer(Filter<RaceDefinition> raceFilter) {
-		JsonSerializer<BoatClass> boatClassSerializer = new BoatClassJsonSerializer();
-		return new RegattaJsonSerializer(
-						boatClassSerializer, 
-						new SeriesOfRegattaExtensionSerializer(
-								new SeriesJsonSerializer(
-										new FleetWithRacesOfSeriesExtensionSerializer(
-												new FleetWithRacesJsonSerializer(
-														new FleetJsonSerializer(
-																new ColorJsonSerializer()), 
-																raceFilter, 
-																new RaceDefinitionJsonSerializer(
-																		boatClassSerializer))))));
-	}
-	
 	private Filter<RaceDefinition> createFilter(final String courseAreaId) {
 		
 		return new Filter<RaceDefinition>() {
@@ -127,6 +112,21 @@ public class RegattasJsonExportServlet extends JsonExportServlet {
 				}
 			}
 		};
+	}
+	
+	private static JsonSerializer<Regatta> createSerializer(Filter<RaceDefinition> raceFilter) {
+		JsonSerializer<BoatClass> boatClassSerializer = new BoatClassJsonSerializer();
+		return new RegattaJsonSerializer(
+						boatClassSerializer, 
+						new SeriesOfRegattaExtensionSerializer(
+								new SeriesJsonSerializer(
+										new FleetWithRacesOfSeriesExtensionSerializer(
+												new FleetWithRacesJsonSerializer(
+														new FleetJsonSerializer(
+																new ColorJsonSerializer()), 
+																raceFilter, 
+																new RaceDefinitionJsonSerializer(
+																		boatClassSerializer))))));
 	}
 
 }

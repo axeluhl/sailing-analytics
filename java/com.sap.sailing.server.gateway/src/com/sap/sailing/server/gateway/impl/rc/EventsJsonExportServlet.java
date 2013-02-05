@@ -18,27 +18,21 @@ import com.sap.sailing.server.gateway.serialization.impl.VenueJsonSerializer;
 public class EventsJsonExportServlet extends JsonExportServlet {
 	private static final long serialVersionUID = 4515246650108245796L;
 	
-	/**
-	 * Created in init() - access is thread-safe.
-	 */
-	private JsonSerializer<Event> eventSerializer;
-	
 	@Override
 	public void init() throws ServletException {
 		super.init();
-		
-		eventSerializer = new EventJsonSerializer(
-				new VenueJsonSerializer(
-						new CourseAreaJsonSerializer()));
 	}
 	
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 		
+		JsonSerializer<Event> eventSerializer = new EventJsonSerializer(
+				new VenueJsonSerializer(
+						new CourseAreaJsonSerializer()));
+		
 		JSONArray result = new JSONArray();
 		for (Event event : getService().getAllEvents())
-		//for (Event event : exampleEvents())
 		{
 			result.add(eventSerializer.serialize(event));
 		}
