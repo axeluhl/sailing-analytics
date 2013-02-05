@@ -26,15 +26,6 @@
 	</servlet-mapping>
 	
 	<servlet>
-		<servlet-name>RCRegattas</servlet-name>
-		<servlet-class>com.sap.sailing.server.gateway.impl.rc.RegattasJsonExportServlet</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>RCRegattas</servlet-name>
-		<url-pattern>/rc/regattas</url-pattern>
-	</servlet-mapping>
-	
-	<servlet>
 		<servlet-name>RCEvents</servlet-name>
 		<servlet-class>com.sap.sailing.server.gateway.impl.rc.EventsJsonExportServlet</servlet-class>
 	</servlet>
