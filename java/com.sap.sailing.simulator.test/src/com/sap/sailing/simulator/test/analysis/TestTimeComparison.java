@@ -22,9 +22,11 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.SpeedWithBearing;
+import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
+import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util.Quadruple;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
@@ -32,6 +34,7 @@ import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.gwt.ui.server.SimulatorServiceImpl;
 import com.sap.sailing.gwt.ui.shared.ConfigurationException;
 import com.sap.sailing.gwt.ui.shared.PositionDTO;
@@ -68,14 +71,12 @@ public class TestTimeComparison {
 			
 			String csvLine = "";
 			RegattaAndRaceIdentifier id = tr.getRaceIdentifier();
-			
-			//System.out.println(id.getRaceName() + "/" + id.getRegattaName());
-			
 			Iterable<Competitor> competitors = tr.getRace().getCompetitors();
 			List<Leg> legs = tr.getRace().getCourse().getLegs();
+			//System.out.println(legs);
+			//System.out.println(id.getRaceName() + "/" + id.getRegattaName());
 			
-			for( Competitor competitor: competitors) {
-					
+			for( Competitor competitor: competitors) {	
 				GPSFixTrack<Competitor, GPSFixMoving> track = tr.getTrack(competitor);
 				track.lockForRead();
 				Iterator<GPSFixMoving> it = track.getFixes().iterator();
@@ -84,28 +85,17 @@ public class TestTimeComparison {
 					MarkPassing mp = tr.getMarkPassing(competitor, leg.getTo());
 					GPSFixMoving current;
 					while( mp.getTimePoint().after((current = it.next()).getTimePoint()) ) {
-						System.out.println(leg + ":" + current);
+						
+						Position currentPosition = current.getPosition();
+						TimePoint currentTime = current.getTimePoint();
+						Wind currentWind = tr.getWind(currentPosition, currentTime);
+						SimulatorWindDTO currentSWDTO = new SimulatorWindDTO(new PositionDTO(currentPosition.getLatDeg(),currentPosition.getLngDeg()),
+								currentWind.getKnots(), currentWind.getBearing().getDegrees(), currentTime.asMillis());
+						allPoints.add(currentSWDTO);
 					}
-					//track.lockForRead();
-					//track.get
-					//System.out.println(mp);
 				}
 					
-				
 			}
-			
-			/*for( TrackedLeg tl : trackedLegs ) {
-				
-				for( Competitor c : competitors ) {
-					
-					TrackedLegOfCompetitor tlc = tl.getTrackedLeg(c);
-				
-					
-				}
-			}*/
-			
-			
-			
 			
 		
 			/*
