@@ -12,6 +12,7 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.RaceColumn;
@@ -689,5 +690,13 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
         final Long delayToLiveInMillis = getDelayToLiveInMillis();
         TimePoint timePoint = delayToLiveInMillis == null ? now : now.minus(delayToLiveInMillis);
         return timePoint;
+    }
+    
+
+    
+    @Override
+    public CourseArea getDefaultCourseArea() {
+    	// TODO Implement leaderboard <-> CourseArea relationship
+    	return null;
     }
 }
