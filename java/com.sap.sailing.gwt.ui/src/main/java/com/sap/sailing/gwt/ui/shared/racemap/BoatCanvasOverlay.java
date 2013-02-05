@@ -38,7 +38,7 @@ public class BoatCanvasOverlay extends CanvasOverlay {
     private final BoatClassImageData boatClassImageData;    
 
     public BoatCanvasOverlay(CompetitorDTO competitorDTO) {
-        super();
+        super(RaceMapOverlaysZIndexes.BOATS_ZINDEX);
         this.competitorDTO = competitorDTO;
         this.boatClass = competitorDTO.boatClass;
         this.boatClassImageData = BoatClassImageDataResolver.getBoatClassImages(boatClass.name);
@@ -52,6 +52,8 @@ public class BoatCanvasOverlay extends CanvasOverlay {
     @Override
     protected void redraw(boolean force) {
         if (boatFix != null) {
+            getCanvas().setTitle(getTitle());
+
             ImageTransformer boatImageTransformer;
             if (boatFix.legType != null) {
                 boatImageTransformer = boatClassImageData.getBoatImageTransformerByLegTypeAndTack(boatFix.legType,
@@ -71,6 +73,10 @@ public class BoatCanvasOverlay extends CanvasOverlay {
                     boatPositionInPx.getX() - getCanvas().getCoordinateSpaceWidth() / 2,
                     boatPositionInPx.getY() - getCanvas().getCoordinateSpaceHeight() / 2);
         }
+    }
+
+    private String getTitle() {
+        return competitorDTO.sailID + ", " + competitorDTO.name;
     }
     
     public GPSFixDTO getBoatFix() {

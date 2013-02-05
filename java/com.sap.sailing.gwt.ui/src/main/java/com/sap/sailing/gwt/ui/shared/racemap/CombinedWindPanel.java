@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.shared.racemap;
 
 import com.google.gwt.canvas.client.Canvas;
+import com.google.gwt.dom.client.Style.Cursor;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -33,6 +34,7 @@ public class CombinedWindPanel extends FlowPanel {
         this.raceMapResources = theRaceMapResources;
         transformer = raceMapResources.getCombinedWindIconTransformer();
         canvas = transformer.getCanvas();
+        canvas.getElement().getStyle().setCursor(Cursor.POINTER);
         textLabel = new Label("");
         textLabel.setSize(""+2*transformer.getRadius()+"px", ""+LABEL_HEIGHT+"px");
         textLabel.getElement().getStyle().setFontSize(LABEL_HEIGHT, Unit.PX);

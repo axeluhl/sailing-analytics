@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.shared.racemap;
 
 import com.google.gwt.canvas.client.Canvas;
+import com.google.gwt.dom.client.Style.Cursor;
 import com.google.gwt.maps.client.MapPane;
 import com.google.gwt.maps.client.MapPaneType;
 import com.google.gwt.maps.client.MapWidget;
@@ -43,8 +44,12 @@ public abstract class CanvasOverlay extends Overlay {
      */
     protected LatLng latLngPosition;
 
-    public CanvasOverlay() {
+    public CanvasOverlay(int zIndex) {
         canvas = Canvas.createIfSupported();
+        if(canvas != null) {
+            canvas.getElement().getStyle().setZIndex(zIndex);
+            canvas.getElement().getStyle().setCursor(Cursor.POINTER);
+        }
     }
 
     protected void setCanvasSize(int newWidthInPx, int newHeightInPx) {

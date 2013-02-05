@@ -33,7 +33,7 @@ public class CompetitorInfoOverlay extends CanvasOverlay {
     private double cornerRadius;
     
     public CompetitorInfoOverlay(CompetitorDTO competitorDTO, RaceMapImageManager raceMapImageManager) {
-        super();
+        super(RaceMapOverlaysZIndexes.COMPETITOR_INFO_ZINDEX);
         this.competitorDTO = competitorDTO;
         this.raceMapImageManager = raceMapImageManager;
         

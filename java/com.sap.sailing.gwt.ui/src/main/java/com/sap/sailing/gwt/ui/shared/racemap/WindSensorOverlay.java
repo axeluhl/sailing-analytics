@@ -38,7 +38,7 @@ public class WindSensorOverlay extends CanvasOverlay {
     private final NumberFormat numberFormat = NumberFormat.getFormat("0.0");
     
     public WindSensorOverlay(RaceMapImageManager raceMapImageManager, StringMessages stringMessages) {
-        super();
+        super(RaceMapOverlaysZIndexes.WINDSENSOR_ZINDEX);
         this.raceMapImageManager = raceMapImageManager;
         this.stringMessages = stringMessages;
         canvasWidth = 28;
@@ -71,11 +71,8 @@ public class WindSensorOverlay extends CanvasOverlay {
                 setLatLngPosition(LatLng.newInstance(windDTO.position.latDeg, windDTO.position.lngDeg));
                 Point sensorPositionInPx = getMap().convertLatLngToDivPixel(getLatLngPosition());
                 getPane().setWidgetPosition(getCanvas(), sensorPositionInPx.getX() - canvasWidth / 2, sensorPositionInPx.getY() - canvasHeight / 2);
-                String title = stringMessages.wind() + " ("+ WindSourceTypeFormatter.format(windSource, stringMessages) + "): "; 
-                title += Math.round(windDTO.dampenedTrueWindFromDeg) + " " + stringMessages.degreesShort()+ ",  ";
-                title += numberFormat.format(windDTO.dampenedTrueWindSpeedInKnots) + " " + stringMessages.knotsUnit();
                 
-                getCanvas().setTitle(title);
+//                getCanvas().setTitle(title);
                 hasValidWind = true;
             }
         }
@@ -85,6 +82,13 @@ public class WindSensorOverlay extends CanvasOverlay {
         getCanvas().setVisible(hasValidWind);
     }
 
+    protected String getTitle(WindDTO windDTO) {
+        String title = stringMessages.wind() + " ("+ WindSourceTypeFormatter.format(windSource, stringMessages) + "): "; 
+        title += Math.round(windDTO.dampenedTrueWindFromDeg) + " " + stringMessages.degreesShort()+ ",  ";
+        title += numberFormat.format(windDTO.dampenedTrueWindSpeedInKnots) + " " + stringMessages.knotsUnit();
+        return title;
+    }
+    
     public WindTrackInfoDTO getWindTrackInfoDTO() {
         return windTrackInfoDTO;
     }
