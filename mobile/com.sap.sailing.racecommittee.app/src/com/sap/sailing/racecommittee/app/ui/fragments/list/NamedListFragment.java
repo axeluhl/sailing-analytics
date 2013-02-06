@@ -113,7 +113,7 @@ public abstract class NamedListFragment<T extends Named> extends ListFragment im
 	
 	private void showLoadFailedDialog(String message) {
 		AlertDialog.Builder builder = new AlertDialog.Builder(getActivity()); 
-		builder.setMessage(String.format("There was an error loading the requested data: %s\nDo you want to retry?", message))
+		builder.setMessage(String.format("There was an error loading the requested data:\n%s\nDo you want to retry?", message))
 			   .setTitle("Load failure")
 			   .setIcon(R.drawable.ic_dialog_alert_holo_light)
 		       .setCancelable(true) 

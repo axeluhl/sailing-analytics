@@ -17,7 +17,7 @@ public class AppConstants {
 	
 	// Intent extra fields
 	public final static String COURSE_AREA_UUID_KEY = "courseUuid";
-	public final static String RACE_UUID_KEY = "raceUuid";
+	public final static String RACE_ID_KEY = "raceUuid";
 	public final static String SERVICE_UNIQUE_ID = "serviceUID";
 	public final static String RACING_EVENT_TIME = "racingEventTime";
 	public final static String EXTRAS_JSON_KEY = "json";

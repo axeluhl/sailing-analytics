@@ -2,10 +2,12 @@ package com.sap.sailing.racecommittee.app.ui.activities;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.Map;
 
 import android.app.AlertDialog;
 import android.app.FragmentTransaction;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Window;
@@ -13,17 +15,19 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.sap.sailing.domain.base.CourseArea;
+import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.DataManager;
 import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
+import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.ui.fragments.list.ManagedRaceListFragment;
 
 public class RacingActivity extends TwoPaneActivity /*implements ResetTimeListener, 
 StartModeSelectionListener, PathfinderSelectionListener, GateLineOpeningTimeSelectionListener, CourseDesignSelectionListener*/ {
-	//private final static String TAG = RacingActivity.class.getName();
+	private final static String TAG = RacingActivity.class.getName();
 	
 	private final static String ListFragmentTag = RacingActivity.class.getName() + ".ManagedRaceListFragment";
 	
@@ -106,21 +110,52 @@ StartModeSelectionListener, PathfinderSelectionListener, GateLineOpeningTimeSele
 		
 		dataManager.loadRaces(courseAreaId, new LoadClient<Collection<ManagedRace>>() {
 			public void onLoadSucceded(Collection<ManagedRace> data) {
-				setProgressBarIndeterminateVisibility(false);
-				
-				/// TODO: register races on SERVICE
-				/*registerOnService(races);*/
-				listFragment.setupOn(data);
-				
-				Toast.makeText(RacingActivity.this, 
-						"Loaded "  + data.size() + " races for course " + courseAreaId.toString(), 
-						Toast.LENGTH_LONG).show();
+				onLoadRacesSucceded(courseAreaId, data);
+
 			}
 			public void onLoadFailed(Exception reason) {
-				setProgressBarIndeterminateVisibility(false);
-				showLoadFailedDialog(courseAreaId, reason.getMessage());
+				onLoadRacesFailed(courseAreaId, reason);
 			}
 		});
+	}
+	
+	private void onLoadRacesSucceded(Serializable courseAreaId, Collection<ManagedRace> data) {
+		setProgressBarIndeterminateVisibility(false);
+
+		dataManager.loadRaceLogs(data, new LoadClient<Map<ManagedRace,Collection<RaceLogEvent>>>() {
+			
+			public void onLoadSucceded(Map<ManagedRace, Collection<RaceLogEvent>> data) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			public void onLoadFailed(Exception reason) {
+				ExLog.w(TAG, "Loading of race logs failed:\n" + reason.toString());
+			}
+		});
+		
+		registerOnService(data);
+		listFragment.setupOn(data);
+		
+		Toast.makeText(RacingActivity.this, 
+				"Loaded "  + data.size() + " races for course " + courseAreaId.toString(), 
+				Toast.LENGTH_LONG).show();
+	}
+
+	private void onLoadRacesFailed(final Serializable courseAreaId, Exception reason) {
+		setProgressBarIndeterminateVisibility(false);
+		showLoadFailedDialog(courseAreaId, reason.getMessage());
+	}
+	
+	private void registerOnService(Collection<ManagedRace> races) {
+		// since the service is the long-living component
+		// he should decide whether these races are already
+		// registered or not.
+		for (ManagedRace race : races) {
+	        Intent registerIntent = new Intent(AppConstants.REGISTER_RACE_ACTION);
+	        registerIntent.putExtra(AppConstants.RACE_ID_KEY, race.getId());
+	        this.startService(registerIntent);
+		}
 	}
 	
 	private void showLoadFailedDialog(final Serializable courseId, String message) {
@@ -141,6 +176,10 @@ StartModeSelectionListener, PathfinderSelectionListener, GateLineOpeningTimeSele
 		       }); 
 		AlertDialog alert = builder.create(); 
 		alert.show(); 
+	}
+	
+	public void onRaceItemClicked(ManagedRace race) {
+		
 	}
 
 	/*public void onRaceItemClicked(ManagedRace race) {
@@ -163,17 +202,6 @@ StartModeSelectionListener, PathfinderSelectionListener, GateLineOpeningTimeSele
 		transaction.setTransition(FragmentTransaction.TRANSIT_NONE);
 		transaction.commit();
 	}
-	
-	/*private void registerOnService(List<ManagedRace> races) {
-		// since the service is the long-living component
-		// he should decide whether these races are already
-		// registered or not.
-		for (ManagedRace race : races) {
-	        Intent registerIntent = new Intent(AppConstants.REGISTER_RACE_ACTION);
-	        registerIntent.putExtra(AppConstants.RACE_UUID_KEY, race.getId());
-	        RacingActivity.this.startService(registerIntent);
-		}
-	}*/
 
 	/*public void onResetTimeClick() {
 		infoFragment.displayResetTimeFragment();

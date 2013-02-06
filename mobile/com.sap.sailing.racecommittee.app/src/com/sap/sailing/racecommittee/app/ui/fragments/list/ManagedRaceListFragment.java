@@ -12,30 +12,33 @@ import java.util.TreeMap;
 import android.app.ListFragment;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.ListView;
 
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.RaceStatus;
-import com.sap.sailing.racecommittee.app.ui.adapters.RaceListAdapter;
-import com.sap.sailing.racecommittee.app.ui.adapters.RaceListAdapter.JuryFlagClickedListener;
+import com.sap.sailing.racecommittee.app.logging.ExLog;
+import com.sap.sailing.racecommittee.app.ui.activities.RacingActivity;
 import com.sap.sailing.racecommittee.app.ui.adapters.racelist.BoatClassSeriesDataFleet;
+import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListAdapter;
 import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataType;
 import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataTypeElement;
 import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataTypeTitle;
+import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListAdapter.JuryFlagClickedListener;
 import com.sap.sailing.racecommittee.app.ui.comparators.NamedRaceComparator;
 import com.sap.sailing.racecommittee.app.ui.comparators.SeriesComparator;
 
 public class ManagedRaceListFragment extends ListFragment implements JuryFlagClickedListener {
 
-	//private Serializable selectedRaceId;
+	private Serializable selectedRaceId;
 	private HashMap<Serializable, ManagedRace> managedRacesById;
 	private RaceListAdapter adapter;
 	private ArrayList<RaceListDataType> raceDataTypeList;
 	
 	public ManagedRaceListFragment() {
-		//this.selectedRaceId = null;
+		this.selectedRaceId = null;
 		this.managedRacesById = new HashMap<Serializable, ManagedRace>();
 		this.raceDataTypeList = new ArrayList<RaceListDataType>();
 	}
@@ -137,13 +140,57 @@ public class ManagedRaceListFragment extends ListFragment implements JuryFlagCli
 	}
 	
 	@Override
-	public void onListItemClick(ListView l, View v, int position, long id) {
-		super.onListItemClick(l, v, position, id);
-		/// TODO: implement.
+	public void onListItemClick(ListView listView, View view, int position, long id) {
+		super.onListItemClick(listView, view, position, id);
+		
+		RaceListDataType selectedItem = adapter.getItem(position);
+		if (selectedItem instanceof RaceListDataTypeElement) {
+			RaceListDataTypeElement selectedElement = (RaceListDataTypeElement) selectedItem;
+			selectedElement.setUpdateIndicator(false);
+			((ImageView) view.findViewById(R.id.Welter_Cell_UpdateLabel)).setVisibility(View.GONE);
+			
+			ManagedRace selectedRace = selectedElement.getRace();
+			this.selectedRaceId = selectedRace.getId();
+			
+			ExLog.i(
+					ExLog.RACE_SELECTED_ELEMENT, 
+					selectedRace.getId() + " " + selectedRace.getStatus(), 
+					getActivity());
+			
+			((RacingActivity) getActivity()).onRaceItemClicked(selectedRace);
+			
+		} else if (selectedItem instanceof RaceListDataTypeTitle) {
+			RaceListDataTypeTitle selectedTitle = (RaceListDataTypeTitle) selectedItem;
+			ExLog.i(
+					ExLog.RACE_SELECTED_TITLE, 
+					selectedTitle.toString(), 
+					getActivity());
+		}
 	}
 	
 	public void notifyDataChanged() {
-		/// TODO: implement.
+		List<RaceListDataType> list = adapter.getItems();
+		for (int i = 0; i < list.size(); ++i) {
+			if (list.get(i) instanceof RaceListDataTypeElement) {
+				RaceListDataTypeElement listElement = (RaceListDataTypeElement) list.get(i);
+				ManagedRace mr = this.managedRacesById.get(listElement.getRace().getId());
+				if (mr != null) {
+					if (!listElement.getPreviousRaceStatus().name().equals(mr.getStatus().name())) {
+						listElement.setRace(mr);
+						
+						if (!listElement.getRace().getId().equals(this.selectedRaceId)) {
+							listElement.setUpdateIndicator(true);
+						}
+						/// TODO: StaticVibrator.vibrate(1000);
+					}
+					
+				}
+			}
+		}
+		if (adapter != null) {
+			adapter.getFilter().filter("");
+			adapter.notifyDataSetChanged();
+		}
 	}
 
 	public void onJuryFlagClicked(BoatClassSeriesDataFleet clicked) {
@@ -152,28 +199,6 @@ public class ManagedRaceListFragment extends ListFragment implements JuryFlagCli
 	
 	
 	/*
-	@Override
-	public void onListItemClick(ListView listView, View view, int position,
-			long id) {
-		super.onListItemClick(listView, view, position, id);
-
-		// listener only for elements, not for titles
-		RaceListDataType element = adapter.getItem(position);
-		if (element instanceof RaceListDataTypeElement) {
-
-			RaceListDataTypeElement rldte = (RaceListDataTypeElement) element;
-			selectedRaceId = rldte.getRace().getId();
-			ManagedRace toLoad = managedRacesMap.get(rldte.getRace().getId());
-			ExLog.i(ExLog.RACE_SELECTED_ELEMENT, rldte.getRace().getId().toString() + " " + rldte.getStatus(), getActivity());
-			((ImageView) view.findViewById(R.id.Welter_Cell_UpdateLabel)).setVisibility(View.GONE);
-			((RacingActivity) getActivity()).onRaceItemClicked(toLoad);
-			rldte.setUpdateIndicator(false);
-		} else if (element instanceof RaceListDataTypeTitle) {
-			RaceListDataTypeTitle rlt = (RaceListDataTypeTitle) element;
-			ExLog.i(ExLog.RACE_SELECTED_LABEL, rlt.toString(), getActivity());
-		}
-
-	}
 	
 	public void notifyDataChanged() {
 		List<RaceListDataType> list = adapter.getItems();

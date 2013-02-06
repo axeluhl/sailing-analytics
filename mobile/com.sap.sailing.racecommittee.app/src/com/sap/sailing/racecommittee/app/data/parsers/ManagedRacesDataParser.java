@@ -14,7 +14,7 @@ import com.sap.sailing.domain.base.RaceGroup;
 import com.sap.sailing.domain.base.SeriesData;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.ManagedRaceIdentifier;
-import com.sap.sailing.racecommittee.app.domain.impl.ManagedRaceIdentifierImpl;
+import com.sap.sailing.racecommittee.app.domain.impl.RaceIdentifierImpl;
 import com.sap.sailing.racecommittee.app.domain.impl.ManagedRaceImpl;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
@@ -72,7 +72,7 @@ public class ManagedRacesDataParser implements DataParser<Collection<ManagedRace
 			FleetWithRaceNames fleetWithRaceNames,
 			String raceName) {
 		ManagedRaceIdentifier identifier = 
-				new ManagedRaceIdentifierImpl(raceName, fleetWithRaceNames, series, raceGroup);
+				new RaceIdentifierImpl(raceName, fleetWithRaceNames, series, raceGroup);
 		ManagedRace managedRace = new ManagedRaceImpl(identifier);
 		return managedRace;
 	}

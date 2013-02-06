@@ -1,4 +1,4 @@
-package com.sap.sailing.racecommittee.app.ui.adapters;
+package com.sap.sailing.racecommittee.app.ui.adapters.racelist;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -19,10 +19,6 @@ import android.widget.TextView;
 
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.RaceStatus;
-import com.sap.sailing.racecommittee.app.ui.adapters.racelist.BoatClassSeriesDataFleet;
-import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataType;
-import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataTypeElement;
-import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataTypeTitle;
 import com.sap.sailing.racecommittee.app.ui.comparators.RaceListDataTypeElementComparator;
 import com.sap.sailing.racecommittee.app.ui.comparators.RaceListDataTypeTitleComparator;
 
@@ -126,7 +122,7 @@ public class RaceListAdapter extends ArrayAdapter<RaceListDataType> {
 			holder.line1.setText(element.getRaceName());
 			holder.line2.setText(element.getStatus());
 			
-			if (element.getUpdateIndicator()) {
+			if (element.isUpdateIndicatorVisible()) {
 				holder.updateLabel.setVisibility(View.VISIBLE);
 			}
 		}

@@ -7,13 +7,16 @@ import java.net.URI;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpRequestBase;
 
-public class GetHttpRequest extends HttpRequest {
+public class HttpGetRequest extends HttpRequest {
 
-	public InputStream get(URI requestUri) throws IOException {
-		HttpRequestBase get = new HttpGet(requestUri);
-		HttpResponse response = executeRequest(get);
+
+	public HttpGetRequest(URI requestUri) {
+		super(new HttpGet(requestUri));
+	}
+
+	@Override
+	protected InputStream processResponse(HttpResponse response) throws IllegalStateException, IOException {
 		HttpEntity entity = response.getEntity();
 		return entity.getContent();
 	}

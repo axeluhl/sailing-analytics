@@ -8,7 +8,7 @@ import com.sap.sailing.racecommittee.app.domain.RaceStatus;
 
 public class RaceListDataTypeElement extends RaceListDataType {
 	
-	private boolean updateIndicator = false;
+	private boolean updateIndicatorVisible = false;
 	
 	private ManagedRace race;
 	private RaceStatus currentRaceStatus;
@@ -44,12 +44,12 @@ public class RaceListDataTypeElement extends RaceListDataType {
 		this.currentRaceStatus = race.getStatus();
 	}
 	
-	public void setUpdateIndicator(boolean ui) {
-		this.updateIndicator = ui;
+	public void setUpdateIndicator(boolean visible) {
+		this.updateIndicatorVisible = visible;
 	}
 	
-	public boolean getUpdateIndicator() {
-		return updateIndicator;
+	public boolean isUpdateIndicatorVisible() {
+		return updateIndicatorVisible;
 	}
 	
 	public String getRaceName() {
