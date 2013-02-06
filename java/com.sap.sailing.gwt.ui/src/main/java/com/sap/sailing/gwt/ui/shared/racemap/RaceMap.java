@@ -1047,7 +1047,6 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     protected WindSensorOverlay createWindSensorOverlay(final WindSource windSource, final WindTrackInfoDTO windTrackInfoDTO) {
         final WindSensorOverlay windSensorOverlay = new WindSensorOverlay(raceMapImageManager, stringMessages);
         windSensorOverlay.setWindInfo(windTrackInfoDTO, windSource);
-//        windSensorOverlay.setTitle(");
         windSensorOverlay.getCanvas().addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {

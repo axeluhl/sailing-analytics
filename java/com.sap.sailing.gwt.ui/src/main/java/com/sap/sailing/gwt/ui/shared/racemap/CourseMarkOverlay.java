@@ -55,6 +55,8 @@ public class CourseMarkOverlay extends CanvasOverlay {
     @Override
     protected void redraw(boolean force) {
         if (mark != null && position != null && markImageCanvas.isImageLoaded()) {
+            getCanvas().setTitle(getTitle());
+            
             LatLng latLngPosition = LatLng.newInstance(position.latDeg, position.lngDeg);
 
             // calculate canvas size
@@ -108,6 +110,10 @@ public class CourseMarkOverlay extends CanvasOverlay {
         }
     }
 
+    private String getTitle() {
+        return mark.name;
+    }
+    
     public boolean isShowBuoyZone() {
         return showBuoyZone;
     }
