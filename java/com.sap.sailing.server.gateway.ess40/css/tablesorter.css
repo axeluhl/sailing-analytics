@@ -4,7 +4,6 @@ table.tablesorter {
 	background-color: #CDCDCD;
 	margin:10px 0pt 15px;
 	font-size: 8pt;
-	width: 100%;
 	text-align: left;
 }
 
@@ -23,6 +22,7 @@ table.tablesorter thead tr .header {
 	background-position: center right;
 	cursor: pointer;
 	padding-left: 10px;
+	padding-right: 20px;
 }
 
 table.tablesorter tbody td {
@@ -38,7 +38,7 @@ table.tablesorter tbody td {
 }
 
 table.tablesorter tbody tr:last-child td {
-	height: 30px;
+	height: 29px;
 }
 
 table.tablesorter tbody tr.odd td {

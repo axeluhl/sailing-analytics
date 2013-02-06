@@ -6,7 +6,7 @@
 	http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" version="2.5">
  
 	<servlet id="jsp">
-		<servlet-name>jspServet</servlet-name>
+		<servlet-name>jspServlet</servlet-name>
 		<servlet-class>org.apache.jasper.servlet.JspServlet</servlet-class>
 		<init-param>
 		    <param-name>logVerbosityLevel</param-name>
@@ -23,13 +23,17 @@
 		
 		<load-on-startup>0</load-on-startup>
    </servlet>
+     <servlet-mapping>
+     <servlet-name>jspServlet</servlet-name>
+     <url-pattern>*.jsp</url-pattern>
+   </servlet-mapping>
   
    	<servlet>
-		<servlet-name>SimpleJspForwardServlet</servlet-name>
-		<servlet-class>com.sap.sailing.server.gateway.SimpleJspForwardServlet</servlet-class>
+		<servlet-name>ESS40JspForwardServlet</servlet-name>
+		<servlet-class>com.sap.sailing.server.gateway.ess40.ESS40JspForwardServlet</servlet-class>
 	</servlet>
 	<servlet-mapping>
-		<servlet-name>SimpleJspForwardServlet</servlet-name>
+		<servlet-name>ESS40JspForwardServlet</servlet-name>
 		<url-pattern>/html/*</url-pattern>
 	</servlet-mapping>
    

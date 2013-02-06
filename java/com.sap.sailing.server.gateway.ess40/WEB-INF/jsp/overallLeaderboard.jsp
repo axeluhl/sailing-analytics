@@ -2,7 +2,8 @@
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <%@ page import="java.util.*" %>
 <%@ page import="java.text.*" %>
-<%@ page import="com.sap.sailing.domain.leaderboard.Leaderboard" %>
+<%@ page import="com.sap.sailing.domain.leaderboard.*" %>
+<%@ page import="com.sap.sailing.domain.leaderboard.meta.*" %>
 <%@ page import="com.sap.sailing.domain.base.*" %>
 <%@ page import="com.sap.sailing.domain.base.impl.*" %>
 <%@ page import="com.sap.sailing.domain.common.*" %>
@@ -26,7 +27,8 @@
 
 <%
 	TimePoint timePoint = MillisecondsTimePoint.now();
-	Leaderboard leaderboard = (Leaderboard) request.getAttribute("leaderboard");
+	LeaderboardGroupMetaLeaderboard leaderboard = (LeaderboardGroupMetaLeaderboard) request.getAttribute("leaderboard");
+	Boolean showDetails = (Boolean) request.getAttribute("showDetails");
 
 	// competitors are ordered according to total rank
 	List<Competitor> competitorsFromBestToWorst = leaderboard.getCompetitorsFromBestToWorst(timePoint);
@@ -40,14 +42,20 @@
 
 	String imgFlagPath = "/gwt/images/flags/";
 %>
-<h3>Leaderboard: <%= leaderboard.getName() %></h3>
+<h3>Overall Leaderboard: <%= leaderboard.getName() %></h3>
 <table id="leaderboardTable" class="tablesorter">
 	<thead>
 	<tr>
 		<th>Rank</th>
 		<th>Team</th>
 		<% 	for (RaceColumn raceColumn : raceColumns) { %>
-			<th><%= raceColumn.getName() %></th>
+			<th><% 
+					String raceColumnName = raceColumn.getName();
+					String prefixToCut = "Extreme 40 ";
+					if(raceColumnName.startsWith(prefixToCut)) {
+					    raceColumnName = raceColumnName.substring(prefixToCut.length(), raceColumnName.length());
+					}
+				%><%= raceColumnName %></th>
 		<% } %>
 		<th>Points</th>
 	</tr>
@@ -55,8 +63,8 @@
 	<tbody>
 	<% 
 		for (Competitor competitor : competitorsFromBestToWorst) {
-	    	int totalRank = competitorsFromBestToWorst.indexOf(competitor) + 1;
-	    	Nationality nationality = competitor.getTeam().getNationality();
+		    int totalRank = competitorsFromBestToWorst.indexOf(competitor) + 1;
+		    Nationality nationality = competitor.getTeam().getNationality();
 			Double totalPoints = leaderboard.getTotalPoints(competitor, timePoint);
 			if(leaderboard.hasCarriedPoints(competitor)) {
 			    Double carriedPoints = leaderboard.getCarriedPoints(competitor);
