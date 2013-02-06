@@ -339,24 +339,27 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
     private void trackSelectedRaces(boolean trackWind, boolean correctWindByDeclination) {
         String hostname = hostnameTextbox.getValue();
         int port = portIntegerbox.getValue();
-        for (final SwissTimingRaceRecordDTO rr : raceList.getList()) {
-            if (raceTable.getSelectionModel().isSelected(rr)) {
-                sailingService.trackWithSwissTiming(/* regattaToAddTo */ null, // TODO allow user to select a pre-defined regatta
-                        rr, hostname, port, /* canSendRequests */false, 
-                        trackWind, correctWindByDeclination, new AsyncCallback<Void>() {
+        final List<SwissTimingRaceRecordDTO> selectedRaces = new ArrayList<SwissTimingRaceRecordDTO>();
+        for (final SwissTimingRaceRecordDTO race : this.raceList.getList()) {
+            if (raceTable.getSelectionModel().isSelected(race)) {
+                selectedRaces.add(race);
+            }
+        }
+        sailingService.trackWithSwissTiming(
+                /* regattaToAddTo */null, // TODO allow user to select a pre-defined regatta
+                selectedRaces, hostname, port, /* canSendRequests */false, trackWind, correctWindByDeclination,
+                new AsyncCallback<Void>() {
                     @Override
                     public void onFailure(Throwable caught) {
-                        errorReporter.reportError("Error trying to register race " + rr.ID + " for tracking: "
+                        errorReporter.reportError("Error trying to register races " + selectedRaces + " for tracking: "
                                 + caught.getMessage());
                     }
 
-                    @Override 
+                    @Override
                     public void onSuccess(Void result) {
                         regattaRefresher.fillRegattas();
                     }
                 });
-            }
-        }
     }
 
     private void updatePanelFromSelectedStoredConfiguration() {

@@ -7,7 +7,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.URLFactory;
+import com.sap.sailing.gwt.ui.client.URLEncoder;
 
 public class GlobalNavigationPanel extends FlowPanel {
 
@@ -54,7 +54,7 @@ public class GlobalNavigationPanel extends FlowPanel {
             url += "gwt.codesvr=" + debugParam;
         }
         
-        HTML linkHtml = new HTML(ANCHORTEMPLATE.anchor(URLFactory.INSTANCE.encode(url), linkName));
+        HTML linkHtml = new HTML(ANCHORTEMPLATE.anchor(URLEncoder.encode(url), linkName));
 //        linkHtml.addStyleName("gwt-Button");
         linkHtml.addStyleName("globalNavigationLink");
         linkHtml.addStyleName(STYLE_NAME_PREFIX + styleNameExtension);

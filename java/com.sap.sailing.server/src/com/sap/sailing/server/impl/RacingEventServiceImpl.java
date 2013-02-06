@@ -89,6 +89,7 @@ import com.sap.sailing.domain.tracking.TrackedRaceStatus;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindStore;
+import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.WindTracker;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
@@ -857,7 +858,23 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
             }
             TrackedRaceReplicator trackedRaceReplicator = new TrackedRaceReplicator(trackedRace);
             trackedRaceReplicators.put(trackedRace, trackedRaceReplicator);
-            trackedRace.addListener(trackedRaceReplicator);
+            trackedRace.addListener(trackedRaceReplicator); // register as listener first; redundant events for wind fixes are idempotent and don't hurt
+            // Now notify all wind fixes we can get from the race by now. TrackedRace.getWindSource() delivers all wind sources known so far.
+            // If there is a wind track being loaded, it will be separately notified later by DynamicTrackedRaceImpl.createWindTrack(...).
+            for (WindSource windSource : trackedRace.getWindSources()) {
+                if (windSource.getType().canBeStored()) {
+                    WindTrack windTrack = trackedRace.getOrCreateWindTrack(windSource);
+                    // replicate all wind fixed that may have been loaded by the wind store
+                    windTrack.lockForRead();
+                    try {
+                        for (Wind wind : windTrack.getRawFixes()) {
+                            trackedRaceReplicator.windDataReceived(wind, windSource);
+                        }
+                    } finally {
+                        windTrack.unlockAfterRead();
+                    }
+                }
+            }
         }
     }
     

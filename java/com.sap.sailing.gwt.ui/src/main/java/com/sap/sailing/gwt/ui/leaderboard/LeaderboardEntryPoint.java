@@ -25,7 +25,7 @@ import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
-import com.sap.sailing.gwt.ui.client.URLFactory;
+import com.sap.sailing.gwt.ui.client.URLEncoder;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings.RaceColumnSelectionStrategies;
 import com.sap.sailing.gwt.ui.raceboard.GlobalNavigationPanel;
 import com.sap.sailing.gwt.ui.shared.AbstractLeaderboardDTO;
@@ -125,9 +125,9 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
         LeaderboardPanel leaderboardPanel = new LeaderboardPanel(sailingService, new AsyncActionsExecutor(),
                 leaderboardSettings,
                     preselectedRace, new CompetitorSelectionModel(
-                        /* hasMultiSelection */true), timer, leaderboardName, LeaderboardEntryPoint.this,
-                    stringMessages, userAgent, showRaceDetails, /* raceTimesInfoProvider */ null, Window.Location.getParameterMap().containsKey(PARAM_AUTO_EXPAND_LAST_RACE_COLUMN) ?
-                            Boolean.valueOf(Window.Location.getParameterMap().get(PARAM_AUTO_EXPAND_LAST_RACE_COLUMN).get(0)) : false);
+                        /* hasMultiSelection */true), timer, leaderboardGroupName, leaderboardName,
+                    LeaderboardEntryPoint.this, stringMessages, userAgent, showRaceDetails, /* raceTimesInfoProvider */ null, Window.Location.getParameterMap().containsKey(PARAM_AUTO_EXPAND_LAST_RACE_COLUMN) ?
+                                    Boolean.valueOf(Window.Location.getParameterMap().get(PARAM_AUTO_EXPAND_LAST_RACE_COLUMN).get(0)) : false);
         leaderboardPanel.addStyleName(LeaderboardPanel.LEADERBOARD_MARGIN_STYLE);
         contentScrollPanel.setWidget(leaderboardPanel);
 
@@ -305,7 +305,7 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
             maneuverDetails.append(maneuverDetail.name());
         }
         String debugParam = Window.Location.getParameter("gwt.codesvr");
-        String link = URLFactory.INSTANCE.encode("/gwt/Leaderboard.html?name=" + leaderboardName
+        String link = URLEncoder.encode("/gwt/Leaderboard.html?name=" + leaderboardName
                 + (settings.isShowRaceDetails() ? "&"+PARAM_SHOW_RACE_DETAILS+"=true" : "")
                 + (settings.isEmbedded() ? "&"+PARAM_EMBEDDED+"=true" : "")
                 + (settings.getLeaderboardSettings().isShowOverallLeaderboardsOnSamePage() ? "&"+PARAM_SHOW_OVERALL_LEADERBOARDS_ON_SAME_PAGE+"=true" : "")

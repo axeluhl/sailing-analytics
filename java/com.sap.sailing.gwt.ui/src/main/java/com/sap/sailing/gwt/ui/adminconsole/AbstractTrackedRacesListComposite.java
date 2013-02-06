@@ -22,9 +22,8 @@ import com.google.gwt.text.client.DateTimeFormatRenderer;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
-import com.google.gwt.user.cellview.client.ColumnSortList;
-import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
+import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
@@ -38,12 +37,13 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.SelectionChangeEvent;
+import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.google.gwt.view.client.SelectionModel;
 import com.google.gwt.view.client.SingleSelectionModel;
-import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
+import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.RaceSelectionProvider;
@@ -51,7 +51,7 @@ import com.sap.sailing.gwt.ui.client.RegattaDisplayer;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.URLFactory;
+import com.sap.sailing.gwt.ui.client.URLEncoder;
 import com.sap.sailing.gwt.ui.shared.RaceDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.components.Component;
@@ -206,23 +206,10 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
             }
         };
         regattaNameColumn.setSortable(true);
-
         columnSortHandler.setComparator(regattaNameColumn, new Comparator<RaceDTO>() {
             @Override
-            public int compare(RaceDTO t1, RaceDTO t2) {
-                String regatta1Name = t1.getRegattaName();
-                String regatta2Name = t2.getRegattaName();
-                boolean ascending = isSortedAscending();
-                if (regatta1Name.equals(regatta2Name)) {
-                    return 0;
-                }
-                int val = ascending ? regatta1Name.compareTo(regatta2Name) : -(regatta2Name.compareTo(regatta1Name));
-                return val;
-            }
-
-            private boolean isSortedAscending() {
-                ColumnSortList sortList = raceTable.getColumnSortList();
-                return sortList.size() > 0 & sortList.get(0).isAscending();
+            public int compare(RaceDTO r1, RaceDTO r2) {
+                return r1.getRegattaName().compareTo(r2.getRegattaName());
             }
         });
 
@@ -233,23 +220,10 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
             }
         };
         boatClassNameColumn.setSortable(true);
-
         columnSortHandler.setComparator(boatClassNameColumn, new Comparator<RaceDTO>() {
             @Override
-            public int compare(RaceDTO t1, RaceDTO t2) {
-                String boatClass1 = t1.boatClass;
-                String boatClass2 = t2.boatClass;
-                boolean ascending = isSortedAscending();
-                if (boatClass1.equals(boatClass2)) {
-                    return 0;
-                }
-                int val = ascending ? boatClass1.compareTo(boatClass2) : -(boatClass2.compareTo(boatClass1));
-                return val;
-            }
-
-            private boolean isSortedAscending() {
-                ColumnSortList sortList = raceTable.getColumnSortList();
-                return sortList.size() > 0 & sortList.get(0).isAscending();
+            public int compare(RaceDTO r1, RaceDTO r2) {
+                return r1.boatClass.compareTo(r2.boatClass);
             }
         });
 
@@ -257,10 +231,10 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
         Column<RaceDTO, SafeHtml> raceNameColumn = new Column<RaceDTO, SafeHtml>(anchorCell) {
             @Override
             public SafeHtml getValue(RaceDTO raceDTO) {
-                if (raceDTO.isTracked == true) {
+                if (raceDTO.trackedRace != null) {
                     RegattaNameAndRaceName raceIdentifier = (RegattaNameAndRaceName) raceDTO.getRaceIdentifier();
                     String debugParam = Window.Location.getParameter("gwt.codesvr");
-                    String link = URLFactory.INSTANCE.encode("/gwt/RaceBoard.html?raceName="
+                    String link = URLEncoder.encode("/gwt/RaceBoard.html?raceName="
                             + raceIdentifier.getRaceName() + "&regattaName=" + raceIdentifier.getRegattaName()
                             + ((debugParam != null && !debugParam.isEmpty()) ? "&gwt.codesvr=" + debugParam : ""));
                     return ANCHORTEMPLATE.cell(link, raceDTO.name);
@@ -269,25 +243,11 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
                 }
             }
         };
-
         raceNameColumn.setSortable(true);
-
         columnSortHandler.setComparator(raceNameColumn, new Comparator<RaceDTO>() {
             @Override
-            public int compare(RaceDTO t1, RaceDTO t2) {
-                boolean ascending = isSortedAscending();
-                if (t1.name.equals(t2.name)) {
-                    return 0;
-                }
-                int val = -1;
-                val = (t1 != null && t2 != null && ascending) ? (t1.name.compareTo(t2.name)) : -(t2.name
-                        .compareTo(t1.name));
-                return val;
-            }
-
-            private boolean isSortedAscending() {
-                ColumnSortList sortList = raceTable.getColumnSortList();
-                return sortList.size() > 0 & sortList.get(0).isAscending();
+            public int compare(RaceDTO r1, RaceDTO r2) {
+                return r1.name.compareTo(r2.name);
             }
         });
 
@@ -302,34 +262,16 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
             }
         };
         raceStartColumn.setSortable(true);
-
         columnSortHandler.setComparator(raceStartColumn, new Comparator<RaceDTO>() {
             @Override
-            public int compare(RaceDTO t1, RaceDTO t2) {
-                if (t1.startOfRace != null && t2.startOfRace != null) {
-                    boolean ascending = isSortedAscending();
-                    int val = -1;
-                    val = (t1.startOfRace.after(t2.startOfRace) && ascending) ? 1 : -1;
-                    return val;
+            public int compare(RaceDTO r1, RaceDTO r2) {
+                if (r1.startOfRace != null && r2.startOfRace != null) {
+                    return r1.startOfRace.compareTo(r2.startOfRace);
                 }
-                return 0;
-            }
-
-            private boolean isSortedAscending() {
-                ColumnSortList sortList = raceTable.getColumnSortList();
-                return sortList.size() > 0 & sortList.get(0).isAscending();
+                
+                return r1.startOfRace == null ? (r2.startOfRace == null ? 0 : -1) : 1;
             }
         });
-
-        TextColumn<RaceDTO> raceTrackedColumn = new TextColumn<RaceDTO>() {
-            @Override
-            public String getValue(RaceDTO raceDTO) {
-                if (raceDTO.isTracked == true)
-                    return stringMessages.tracked();
-
-                return "";
-            }
-        };
 
         TextColumn<RaceDTO> hasWindDataColumn = new TextColumn<RaceDTO>() {
             @Override
@@ -340,6 +282,19 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
                     return stringMessages.no();
             }
         };
+        hasWindDataColumn.setSortable(true);
+        columnSortHandler.setComparator(hasWindDataColumn, new Comparator<RaceDTO>() {
+
+            @Override
+            public int compare(RaceDTO r1, RaceDTO r2) {
+                return new Boolean(hasWindData(r1)).compareTo(hasWindData(r2));
+            }
+
+            private boolean hasWindData(RaceDTO race) {
+                return race.trackedRace != null && race.trackedRace.hasWindData == true;
+            }
+            
+        });
 
         TextColumn<RaceDTO> hasGPSDataColumn = new TextColumn<RaceDTO>() {
             @Override
@@ -351,6 +306,40 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
                 }
             }
         };
+        hasGPSDataColumn.setSortable(true);
+        columnSortHandler.setComparator(hasGPSDataColumn, new Comparator<RaceDTO>() {
+
+            @Override
+            public int compare(RaceDTO r1, RaceDTO r2) {
+                return new Boolean(hasGPSData(r1)).compareTo(hasGPSData(r2));
+            }
+
+            private boolean hasGPSData(RaceDTO race) {
+                return race.trackedRace != null && race.trackedRace.hasGPSData == true;
+            }
+            
+        });
+
+        TextColumn<RaceDTO> raceStatusColumn = new TextColumn<RaceDTO>() {
+            @Override
+            public String getValue(RaceDTO raceDTO) {
+                return raceDTO.status == null ? "" : raceDTO.status.toString();
+            }
+        };
+        raceStatusColumn.setSortable(true);
+        columnSortHandler.setComparator(raceStatusColumn, new Comparator<RaceDTO>() {
+            @Override
+            public int compare(RaceDTO r1, RaceDTO r2) {
+                if (r1.status != null && r2.status != null) {
+                    if (r1.status.status == TrackedRaceStatusEnum.LOADING && r2.status.status == TrackedRaceStatusEnum.LOADING) {
+                        return new Double(r1.status.loadingProgress).compareTo(r2.status.loadingProgress);
+                    }
+                    return new Integer(r1.status.status.getOrder()).compareTo(r2.status.status.getOrder());
+                }
+                
+                return r1.status == null ? (r2.status == null ? 0 : -1) : 1;
+            }
+        });
 
         TextColumn<RaceDTO> raceLiveDelayColumn = new TextColumn<RaceDTO>() {
             @Override
@@ -361,24 +350,33 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
                 return "";
             }
         };
-
-        TextColumn<RaceDTO> raceStatusColumn = new TextColumn<RaceDTO>() {
+        raceLiveDelayColumn.setSortable(true);
+        columnSortHandler.setComparator(raceLiveDelayColumn, new Comparator<RaceDTO>() {
             @Override
-            public String getValue(RaceDTO raceDTO) {
-                return raceDTO.status == null ? "" : raceDTO.status.toString();
+            public int compare(RaceDTO r1, RaceDTO r2) {
+                Long r1Delay = getDelay(r1);
+                Long r2Delay = getDelay(r2);
+                if (r1Delay != null && r2Delay != null) {
+                    return r1Delay.compareTo(r2Delay);
+                }
+                
+                return r1Delay == null ? (r2Delay == null ? 0 : -1) : 1;
             }
-        };
+
+            private Long getDelay(RaceDTO race) {
+                return race.isTracked && race.trackedRace != null ? race.trackedRace.delayToLiveInMs : null;
+            }
+        });
 
         raceTable.addColumn(regattaNameColumn, stringMessages.regatta());
         raceTable.addColumn(boatClassNameColumn, stringMessages.boatClass());
         raceTable.addColumn(raceNameColumn, stringMessages.race());
         raceTable.addColumn(raceStartColumn, stringMessages.startTime());
-        raceTable.addColumn(raceTrackedColumn, stringMessages.tracked());
         raceTable.addColumn(hasWindDataColumn, stringMessages.windData());
         raceTable.addColumn(hasGPSDataColumn, stringMessages.gpsData());
         raceTable.addColumn(raceStatusColumn, stringMessages.status());
-
         raceTable.addColumn(raceLiveDelayColumn, stringMessages.delayInSeconds());
+        
         return columnSortHandler;
     }
 

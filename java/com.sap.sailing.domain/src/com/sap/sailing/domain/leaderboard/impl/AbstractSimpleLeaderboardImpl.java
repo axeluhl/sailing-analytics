@@ -322,6 +322,12 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
         Collections.sort(result, getTotalRankComparator(raceColumnsToConsider, timePoint));
         return result;
     }
+    
+    @Override
+    public int getTotalRankOfCompetitor(Competitor competitor, TimePoint timePoint) throws NoWindException {
+        List<Competitor> competitorsFromBestToWorst = getCompetitorsFromBestToWorst(timePoint);
+        return competitorsFromBestToWorst.indexOf(competitor) + 1;
+    }
 
     protected Comparator<? super Competitor> getTotalRankComparator(Iterable<RaceColumn> raceColumnsToConsider, TimePoint timePoint) throws NoWindException {
         return new LeaderboardTotalRankComparator(this, timePoint, getScoringScheme(), /* nullScoresAreBetter */ false, raceColumnsToConsider);

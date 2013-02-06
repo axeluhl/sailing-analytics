@@ -73,33 +73,54 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
         CompetitorSelectionChangeListener, RequiresResize {
     private static final int LINE_WIDTH = 1;
     private static final int MAX_SERIES_POINTS = 10000;
-    private boolean compactChart;
+    
     private final Label noCompetitorsSelectedLabel;
+    private final Label noDataFoundLabel;
+    private final CompetitorSelectionProvider competitorSelectionProvider;
+    private DetailType selectedDetailType;
+
+    private boolean compactChart;
+    private final boolean allowTimeAdjust;
+    private final String leaderboardGroupName;
+    private final String leaderboardName;
+    private long stepSize = 5000;
     private final Map<CompetitorDTO, Series> dataSeriesByCompetitor;
     private final Map<CompetitorDTO, Series> markPassingSeriesByCompetitor;
-    private final boolean allowTimeAdjust;
-    private long stepSize = 5000;
-    private DetailType selectedDetailType;
-    private final CompetitorSelectionProvider competitorSelectionProvider;
-
     private Long timeOfEarliestRequestInMillis;
     private Long timeOfLatestRequestInMillis;
-
+    
     public AbstractChartPanel(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
             CompetitorSelectionProvider competitorSelectionProvider, RaceSelectionProvider raceSelectionProvider,
             Timer timer, TimeRangeWithZoomProvider timeRangeWithZoomProvider, final StringMessages stringMessages,
             ErrorReporter errorReporter, DetailType detailType, boolean compactChart, boolean allowTimeAdjust) {
+        this(sailingService, asyncActionsExecutor, competitorSelectionProvider, raceSelectionProvider, timer,
+                timeRangeWithZoomProvider, stringMessages, errorReporter, detailType, compactChart, allowTimeAdjust,
+                null, null);
+    }
+
+    public AbstractChartPanel(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
+            CompetitorSelectionProvider competitorSelectionProvider, RaceSelectionProvider raceSelectionProvider,
+            Timer timer, TimeRangeWithZoomProvider timeRangeWithZoomProvider, final StringMessages stringMessages,
+            ErrorReporter errorReporter, DetailType detailType, boolean compactChart, boolean allowTimeAdjust,
+            String leaderboardGroupName, String leaderboardName) {
         super(sailingService, timer, timeRangeWithZoomProvider, stringMessages, asyncActionsExecutor, errorReporter);
         this.competitorSelectionProvider = competitorSelectionProvider;
         this.compactChart = compactChart;
         this.allowTimeAdjust = allowTimeAdjust;
+        this.leaderboardGroupName = leaderboardGroupName;
+        this.leaderboardName = leaderboardName;
+        
         dataSeriesByCompetitor = new HashMap<CompetitorDTO, Series>();
         markPassingSeriesByCompetitor = new HashMap<CompetitorDTO, Series>();
+        
         setSize("100%", "100%");
         noCompetitorsSelectedLabel = new Label(stringMessages.selectAtLeastOneCompetitor() + ".");
         noCompetitorsSelectedLabel.setStyleName("abstractChartPanel-importantMessageOfChart");
+        noDataFoundLabel = new Label(stringMessages.noDataFound() + ".");
+        noDataFoundLabel.setStyleName("abstractChartPanel-importantMessageOfChart");
         createChart();
         setSelectedDetailType(detailType);
+        
         competitorSelectionProvider.addCompetitorSelectionChangeListener(this);
         raceSelectionProvider.addRaceSelectionChangeListener(this);
     }
@@ -200,14 +221,18 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
         }
 
         GetCompetitorsRaceDataAction getCompetitorsRaceDataAction = new GetCompetitorsRaceDataAction(sailingService,
-                selectedRaceIdentifier, competitorsToLoad, from, to, getStepSize(),
-                getSelectedDetailType(), new AsyncCallback<CompetitorsRaceDataDTO>() {
+                selectedRaceIdentifier, competitorsToLoad, from, to, getStepSize(), getSelectedDetailType(),
+                leaderboardGroupName, leaderboardName, new AsyncCallback<CompetitorsRaceDataDTO>() {
                     @Override
                     public void onSuccess(final CompetitorsRaceDataDTO result) {
                         hideLoading();
 
                         if (result != null) {
-                            updateChartSeries(result, append);
+                            if (result.isEmpty()) {
+                                setWidget(noDataFoundLabel);
+                            } else {
+                                updateChartSeries(result, append);
+                            }
                         } else {
                             if (!append) {
                                 clearChart();
@@ -481,8 +506,7 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
             } else {
                 chart.getYAxis().setAxisTitleText(label);
             }
-            chart.getYAxis().setReversed(
-                    selectedDetailType == DetailType.WINDWARD_DISTANCE_TO_OVERALL_LEADER || selectedDetailType == DetailType.GAP_TO_LEADER_IN_SECONDS);
+            chart.getYAxis().setReversed(isYAxisReversed());
             final NumberFormat numberFormat = DetailTypeFormatter.getNumberFormat(selectedDetailType);
             chart.setToolTip(new ToolTip().setEnabled(true).setFormatter(new ToolTipFormatter() {
                 @Override
@@ -502,6 +526,14 @@ public abstract class AbstractChartPanel<SettingsType extends ChartSettings> ext
             }));
         }
         return hasDetailTypeChanged;
+    }
+
+    private boolean isYAxisReversed() {
+        return selectedDetailType == DetailType.WINDWARD_DISTANCE_TO_OVERALL_LEADER ||
+               selectedDetailType == DetailType.GAP_TO_LEADER_IN_SECONDS ||
+               selectedDetailType == DetailType.RACE_RANK ||
+               selectedDetailType == DetailType.REGATTA_RANK ||
+               selectedDetailType == DetailType.OVERALL_RANK;
     }
 
     @Override

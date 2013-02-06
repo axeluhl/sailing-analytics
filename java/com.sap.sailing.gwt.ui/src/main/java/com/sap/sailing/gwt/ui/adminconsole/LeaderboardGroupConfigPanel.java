@@ -43,7 +43,7 @@ import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.URLFactory;
+import com.sap.sailing.gwt.ui.client.URLEncoder;
 import com.sap.sailing.gwt.ui.leaderboard.ScoringSchemeTypeFormatter;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RaceColumnDTO;
@@ -412,7 +412,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel {
             @Override
             public SafeHtml getValue(LeaderboardGroupDTO group) {
                 String debugParam = Window.Location.getParameter("gwt.codesvr");
-                String link = URLFactory.INSTANCE.encode("/gwt/Spectator.html?leaderboardGroupName=" + group.name
+                String link = URLEncoder.encode("/gwt/Spectator.html?leaderboardGroupName=" + group.name
                         + "&showRaceDetails=true"
                         + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""));
                 return ANCHORTEMPLATE.cell(link, group.name);

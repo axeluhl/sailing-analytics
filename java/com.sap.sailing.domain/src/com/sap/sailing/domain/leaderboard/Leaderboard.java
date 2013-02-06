@@ -212,6 +212,15 @@ public interface Leaderboard extends Named {
      * @throws NoWindException 
      */
     List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint) throws NoWindException;
+    
+    /**
+     * Returns the total rank of the given competitor.
+     * @param competitor
+     * @param timePoint
+     * @return
+     * @throws NoWindException
+     */
+    int getTotalRankOfCompetitor(Competitor competitor, TimePoint timePoint) throws NoWindException;
 
     /**
      * Fetches all entries for all competitors of all races tracked by this leaderboard in one sweep. This saves some

@@ -293,8 +293,6 @@ public interface StringMessages extends Messages {
     String finishLine();
     String advantageLine();
     String courseMiddleLine();
-    String buoyZone();
-    String radiusInMeters();
     String messagingPortNumber();
     String servletPortNumber();
     String registeredAt(String string);
@@ -493,4 +491,9 @@ public interface StringMessages extends Messages {
     String windData();
     String gpsData();
     String status();
+    String regattaRank();
+    String regattaRankTooltip();
+    String overallRank();
+    String overallRankTooltip();
+    String noDataFound();
 }

@@ -28,6 +28,7 @@ import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.WithID;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.swisstimingadapter.Course;
@@ -248,13 +249,13 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     /**
-     * @param id
-     *            the ID which is probably also used as the "device name" and the "sail number" in case of an
-     *            {@link MessageType#RPD RPD} message
+     * @param trackerID
+     *            the "device name" and the "sail number" in case of an {@link MessageType#RPD RPD} message, used as the mark's
+     *            {@link Named#getName() name} and {@link WithID#getId() ID}.
      */
     @Override
-    public com.sap.sailing.domain.base.Mark getOrCreateMark(String id) {
-        return baseDomainFactory.getOrCreateMark(id);
+    public com.sap.sailing.domain.base.Mark getOrCreateMark(String trackerID) {
+        return baseDomainFactory.getOrCreateMark(trackerID);
     }
 
     @Override

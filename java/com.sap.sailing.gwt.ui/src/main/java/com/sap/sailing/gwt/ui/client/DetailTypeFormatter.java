@@ -20,6 +20,10 @@ public class DetailTypeFormatter {
             return stringMessages.rankGain();
         case RACE_RANK:
             return stringMessages.rank();
+        case REGATTA_RANK:
+            return stringMessages.regattaRank();
+        case OVERALL_RANK:
+            return stringMessages.overallRank();
         case NUMBER_OF_MANEUVERS:
             return stringMessages.numberOfManeuvers();
         case CURRENT_SPEED_OVER_GROUND_IN_KNOTS:
@@ -128,6 +132,8 @@ public class DetailTypeFormatter {
 
         // Cases for detail types without unit, so that an empty string is returned.
         case RACE_RANK:
+        case REGATTA_RANK:
+        case OVERALL_RANK:
         case CURRENT_LEG:
         case TACK:
         case JIBE:
@@ -205,6 +211,10 @@ public class DetailTypeFormatter {
             return stringMessages.gapToLeaderInSecondsTooltip();
         case RACE_RANK:
             return stringMessages.rankTooltip();
+        case REGATTA_RANK:
+            return stringMessages.regattaRankTooltip();
+        case OVERALL_RANK:
+            return stringMessages.overallRankTooltip();
         case RANK_GAIN:
             return stringMessages.rankGainTooltip();
         case TACK:

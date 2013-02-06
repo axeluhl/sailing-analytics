@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.shared;
 
+
 /**
  * Equality and hash code are defined based on Java object identity
  * 
@@ -7,12 +8,19 @@ package com.sap.sailing.gwt.ui.shared;
  *
  */
 public abstract class ControlPointDTO extends NamedDTO {
+    private String idAsString;
+    
     public ControlPointDTO() {}
     
-    public ControlPointDTO(String name) {
+    public ControlPointDTO(String idAsString, String name) {
         super(name);
+        this.idAsString = idAsString;
     }
     
+    public String getIdAsString() {
+        return idAsString;
+    }
+
     @Override
     public boolean equals(Object o) {
         return this == o;

@@ -304,7 +304,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                     MarkPassingByTimeComparator.INSTANCE));
         }
         markPassingsTimes = new ArrayList<Pair<Waypoint, Pair<TimePoint, TimePoint>>>();
-        windTracks = new HashMap<WindSource, WindTrack>();
+        windTracks = new ConcurrentHashMap<WindSource, WindTrack>();
         new Thread("Wind loader for tracked race "+getRace().getName()) {
             @Override
             public void run() {
@@ -315,19 +315,20 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                 try {
                     final Map<? extends WindSource, ? extends WindTrack> loadedWindTracks = windStore.loadWindTracks(
                             trackedRegatta, TrackedRaceImpl.this, millisecondsOverWhichToAverageWind);
-                    windTracks.putAll(loadedWindTracks);
+                    synchronized (windTracks) {
+                        windTracks.putAll(loadedWindTracks);
+                    }
                 } finally {
                     LockUtil.unlockAfterRead(serializationLock);
-                }
-                synchronized (TrackedRaceImpl.this) {
-                    windLoadingCompleted = true;
-                    TrackedRaceImpl.this.notifyAll();
+                    synchronized (TrackedRaceImpl.this) {
+                        windLoadingCompleted = true;
+                        TrackedRaceImpl.this.notifyAll();
+                    }
                 }
             }
         }.start();
-        // by default, a tracked race offers one course-based wind estimation, one track-based wind estimation track and
-        // one "WEB" track for manual or REST-based wind reception; other wind tracks may be added as fixes are received
-        // for them.
+        // by default, a tracked race offers one course-based wind estimation and one track-based wind estimation track;
+        // other wind tracks may be added as fixes are received for them and as they are loaded from the persistent store
         WindSource courseBasedWindSource = new WindSourceImpl(WindSourceType.COURSE_BASED);
         windTracks.put(courseBasedWindSource, getOrCreateWindTrack(courseBasedWindSource, delayForWindEstimationCacheInvalidation));
         WindSource trackBasedWindSource = new WindSourceImpl(WindSourceType.TRACK_BASED_ESTIMATION);
@@ -379,7 +380,6 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                     @Override
                     public Triple<TimePoint, TimePoint, List<Maneuver>> computeCacheUpdate(Competitor competitor,
                             EmptyUpdateInterval updateInterval) throws NoWindException {
-                        waitUntilNotLoading();
                         return computeManeuvers(competitor);
                     }
                 }, /* nameForLocks */ "Maneuver cache for race "+getRace().getName());
@@ -1759,7 +1759,9 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     }
     
     protected void triggerManeuverCacheRecalculation(final Competitor competitor) {
-        maneuverCache.triggerUpdate(competitor, /* updateInterval */ null);
+        if (getStatus().getStatus() != TrackedRaceStatusEnum.LOADING) {
+            maneuverCache.triggerUpdate(competitor, /* updateInterval */ null);
+        }
     }
 
     private Triple<TimePoint, TimePoint, List<Maneuver>> computeManeuvers(Competitor competitor) throws NoWindException {
@@ -2174,7 +2176,9 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     public Iterable<WindSource> getWindSources() {
         while (true) {
             try {
-                return new HashSet<WindSource>(windTracks.keySet());
+                synchronized (windTracks) {
+                    return new HashSet<WindSource>(windTracks.keySet());
+                }
             } catch (ConcurrentModificationException cme) {
                 logger.info("Caught " + cme + "; trying again.");
             }
@@ -2215,10 +2219,28 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     }
     
     protected void setStatus(TrackedRaceStatus newStatus) {
+        final TrackedRaceStatusEnum oldStatus;
         synchronized (getStatusNotifier()) {
+            oldStatus = getStatus().getStatus();
             this.status = newStatus;
             getStatusNotifier().notifyAll();
         }
+        if (newStatus.getStatus() == TrackedRaceStatusEnum.LOADING && oldStatus != TrackedRaceStatusEnum.LOADING) {
+            suspendAllCachesNotUpdatingWhileLoading();
+        } else if (oldStatus == TrackedRaceStatusEnum.LOADING && newStatus.getStatus() != TrackedRaceStatusEnum.LOADING) {
+            resumeAllCachesNotUpdatingWhileLoading();
+        }
+
+    }
+
+    private void suspendAllCachesNotUpdatingWhileLoading() {
+        crossTrackErrorCache.suspend();
+        maneuverCache.suspend();
+    }
+
+    private void resumeAllCachesNotUpdatingWhileLoading() {
+        crossTrackErrorCache.resume();
+        maneuverCache.resume();
     }
 
     /**

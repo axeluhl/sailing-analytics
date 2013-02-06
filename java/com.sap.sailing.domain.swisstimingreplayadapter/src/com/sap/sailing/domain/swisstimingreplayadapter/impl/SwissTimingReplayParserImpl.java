@@ -70,10 +70,13 @@ public class SwissTimingReplayParserImpl implements SwissTimingReplayParser {
     @Override
     public void readData(InputStream urlInputStream, SwissTimingReplayListener replayListener) throws IOException,
             UnknownMessageIdentificationCode, UnexpectedStartByte, PayloadMismatch, PrematureEndOfData {
+        replayListener.progress(0.0);
+        long initiallyAvailable = urlInputStream.available();
         DataInputStream data = new DataInputStream(urlInputStream);
         byte[] startByteBuffer = new byte[1];
         int readSuccess = data.read(startByteBuffer);
         while (readSuccess != -1) {
+            replayListener.progress((double) (initiallyAvailable-urlInputStream.available())/(double) initiallyAvailable);
             byte startByte = startByteBuffer[0];
             if (startByte != STX) {
                 throw new UnexpectedStartByte(startByte);
@@ -235,6 +238,7 @@ public class SwissTimingReplayParserImpl implements SwissTimingReplayParser {
                 if (payloadSize != 0) {
                     throw new PayloadMismatch(payloadSize);
                 }
+                replayListener.progress((double) (initiallyAvailable-urlInputStream.available())/(double) initiallyAvailable);
             }
             byte endByte = data.readByte();
             if (endByte == EOT) {
@@ -246,6 +250,7 @@ public class SwissTimingReplayParserImpl implements SwissTimingReplayParser {
             }
             readSuccess = data.read(startByteBuffer);
         }
+        replayListener.progress(1.0);
     }
 
     private static int read3ByteInt(DataInputStream data) throws IOException {
