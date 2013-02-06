@@ -50,7 +50,7 @@ public class WindSensorOverlay extends CanvasOverlay {
             getCanvas().setCoordinateSpaceWidth(canvasWidth);
             getCanvas().setCoordinateSpaceHeight(canvasHeight);
         }
-        transformer = raceMapImageManager.getExpeditionWindIconTransformer();
+        transformer = raceMapImageManager.getWindSensorIconTransformer();
     }
     
     @Override

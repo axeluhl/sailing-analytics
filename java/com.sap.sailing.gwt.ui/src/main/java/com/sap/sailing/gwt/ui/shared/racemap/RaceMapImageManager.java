@@ -25,7 +25,7 @@ public class RaceMapImageManager {
     /**
      * An arrow showing the wind provided by a wind sensor on a boat 
      */
-    protected ImageTransformer expeditionWindIconTransformer;
+    protected ImageTransformer windSensorIconTransformer;
 
     /**
      * The default image for a course mark
@@ -44,7 +44,7 @@ public class RaceMapImageManager {
         maneuverIconsForTypeAndTargetTack = new HashMap<Pair<ManeuverType, Tack>, Icon>();
         
         combinedWindIconTransformer = new ImageTransformer(resources.combinedWindIcon());
-        expeditionWindIconTransformer = new ImageTransformer(resources.expeditionWindIcon());
+        windSensorIconTransformer = new ImageTransformer(resources.expeditionWindIcon());
     }
 
     public MarkImageDescriptor resolveMarkImage(MarkType type, String color, String shape, String pattern) {
@@ -154,7 +154,7 @@ public class RaceMapImageManager {
         return combinedWindIconTransformer;
     }
 
-    public ImageTransformer getExpeditionWindIconTransformer() {
-        return expeditionWindIconTransformer;
+    public ImageTransformer getWindSensorIconTransformer() {
+        return windSensorIconTransformer;
     }
 }
