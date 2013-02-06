@@ -1,5 +1,0 @@
-#!/bin/sh
-export JAVA_HOME=/home/trac/jdk1.7.0_02
-LIB_PATH=`pwd`/native-libraries 
-echo Loading native libraries from $LIB_PATH
-java -DDEV -XX:+UseMembar -Dfile.encoding=cp1252 -Djetty.home=configuration/jetty -Djava.library.path=$LIB_PATH -Djava.util.logging.config.file=configuration/logging.properties -Xmx8192m -jar plugins/org.eclipse.equinox.launcher_1.2.0.v20110502.jar -console -configuration ./ -clean
