@@ -493,5 +493,7 @@ public interface StringMessages extends Messages {
     String status();
     String addCourseArea();
     String courseAreas();
+    String courseArea();
     String pleaseEnterNonEmptyCourseArea();
+    String pleaseSelectACourseArea();
 }

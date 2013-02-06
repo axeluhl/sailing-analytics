@@ -61,7 +61,7 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
     private Leaderboard createLeaderboard(Regatta regatta, int[] discardingThresholds) {
         ScoreCorrectionImpl scoreCorrections = new ScoreCorrectionImpl();
         ResultDiscardingRuleImpl discardingRules = new ResultDiscardingRuleImpl(discardingThresholds);
-        return new RegattaLeaderboardImpl(regatta, scoreCorrections, discardingRules);
+        return new RegattaLeaderboardImpl(regatta, scoreCorrections, discardingRules, null);
     }
 
     @Test
@@ -757,7 +757,7 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
         TimePoint now = MillisecondsTimePoint.now();
         TimePoint later = new MillisecondsTimePoint(now.asMillis()+1000);
         FlexibleLeaderboard leaderboard1 = new FlexibleLeaderboardImpl("Leaderboard 1", new ScoreCorrectionImpl(),
-                new ResultDiscardingRuleImpl(/* discarding thresholds */ new int[0]), new HighPoint());
+                new ResultDiscardingRuleImpl(/* discarding thresholds */ new int[0]), new HighPoint(), null);
         leaderboard1.addRace(new MockedTrackedRaceWithStartTimeAndRanks(now, Arrays.asList(f1)), "R1", /* medalRace */ false,
                 leaderboard1.getFleet(null));
         leaderboard1.addRace(new MockedTrackedRaceWithStartTimeAndRanks(now, Arrays.asList(f2)), "R2", /* medalRace */ false,
@@ -765,7 +765,7 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
         assertTrue(leaderboard1.getScoringScheme().getScoreComparator(/* nullScoresAreBetter */ false).compare(
                 leaderboard1.getTotalPoints(c[0], later), leaderboard1.getTotalPoints(c[3], later)) < 0); // c0 better than c3
         FlexibleLeaderboard leaderboard2 = new FlexibleLeaderboardImpl("Leaderboard 3", new ScoreCorrectionImpl(),
-                new ResultDiscardingRuleImpl(/* discarding thresholds */ new int[0]), new HighPoint());
+                new ResultDiscardingRuleImpl(/* discarding thresholds */ new int[0]), new HighPoint(), null);
         leaderboard2.addRace(new MockedTrackedRaceWithStartTimeAndRanks(now, Arrays.asList(f3)), "R1", /* medalRace */ false,
                 leaderboard1.getFleet(null));
         leaderboard2.addRace(new MockedTrackedRaceWithStartTimeAndRanks(now, Arrays.asList(f4)), "R2", /* medalRace */ false,
@@ -773,7 +773,7 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
         assertTrue(leaderboard2.getScoringScheme().getScoreComparator(/* nullScoresAreBetter */ false).compare(
                 leaderboard2.getTotalPoints(c[3], later), leaderboard2.getTotalPoints(c[0], later)) < 0); // c3 better than c0
         FlexibleLeaderboard leaderboard3 = new FlexibleLeaderboardImpl("Leaderboard 3", new ScoreCorrectionImpl(),
-                new ResultDiscardingRuleImpl(/* discarding thresholds */ new int[0]), new HighPoint());
+                new ResultDiscardingRuleImpl(/* discarding thresholds */ new int[0]), new HighPoint(), null);
         leaderboard3.addRace(new MockedTrackedRaceWithStartTimeAndRanks(now, Arrays.asList(f5)), "R1", /* medalRace */ false,
                 leaderboard1.getFleet(null));
         leaderboard3.addRace(new MockedTrackedRaceWithStartTimeAndRanks(now, Arrays.asList(f6)), "R2", /* medalRace */ false,

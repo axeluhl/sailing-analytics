@@ -240,9 +240,9 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * 
      * @return the leaderboard created
      */
-    FlexibleLeaderboard addFlexibleLeaderboard(String name, int[] discardThresholds, ScoringScheme scoringScheme);
+    FlexibleLeaderboard addFlexibleLeaderboard(String name, int[] discardThresholds, ScoringScheme scoringScheme, Serializable courseAreaId);
     
-    RegattaLeaderboard addRegattaLeaderboard(RegattaIdentifier regattaIdentifier, int[] discardThresholds);
+    RegattaLeaderboard addRegattaLeaderboard(RegattaIdentifier regattaIdentifier, int[] discardThresholds, Serializable courseAreaId);
 
     void removeLeaderboard(String leaderboardName);
     

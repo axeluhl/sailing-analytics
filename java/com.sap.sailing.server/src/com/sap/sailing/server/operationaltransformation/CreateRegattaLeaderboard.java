@@ -1,5 +1,7 @@
 package com.sap.sailing.server.operationaltransformation;
 
+import java.io.Serializable;
+
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.server.RacingEventService;
@@ -9,15 +11,17 @@ public class CreateRegattaLeaderboard extends AbstractRacingEventServiceOperatio
     private static final long serialVersionUID = 891352705068098580L;
     private final int[] discardThresholds;
     private final RegattaIdentifier regattaIdentifier;
+    private final Serializable courseAreaId;
 
-    public CreateRegattaLeaderboard(RegattaIdentifier regattaIdentifier, int[] discardThresholds) {
+    public CreateRegattaLeaderboard(RegattaIdentifier regattaIdentifier, int[] discardThresholds, Serializable courseAreaId) {
         this.regattaIdentifier = regattaIdentifier;
         this.discardThresholds = discardThresholds;
+        this.courseAreaId = courseAreaId;
     }
 
     @Override
     public RegattaLeaderboard internalApplyTo(RacingEventService toState) {
-        RegattaLeaderboard result = toState.addRegattaLeaderboard(regattaIdentifier, discardThresholds);
+        RegattaLeaderboard result = toState.addRegattaLeaderboard(regattaIdentifier, discardThresholds, courseAreaId);
         return result;
     }
 

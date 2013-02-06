@@ -10,6 +10,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 
@@ -69,8 +70,8 @@ public abstract class RegattaLeaderboardDialog extends AbstractLeaderboardDialog
     }
     
     public RegattaLeaderboardDialog(String title, LeaderboardDescriptor leaderboardDTO, Collection<RegattaDTO> existingRegattas, StringMessages stringConstants,
-            ErrorReporter errorReporter, LeaderboardParameterValidator validator,  DialogCallback<LeaderboardDescriptor> callback) {
-        super(title, leaderboardDTO, stringConstants, validator, callback);
+    		Collection<EventDTO> existingEvents, ErrorReporter errorReporter, LeaderboardParameterValidator validator,  DialogCallback<LeaderboardDescriptor> callback) {
+        super(title, leaderboardDTO, stringConstants, existingEvents, validator, callback);
         this.existingRegattas = existingRegattas;
     }
     
@@ -85,12 +86,16 @@ public abstract class RegattaLeaderboardDialog extends AbstractLeaderboardDialog
     protected Widget getAdditionalWidget() {
         VerticalPanel mainPanel = new VerticalPanel();
         
-        Grid formGrid = new Grid(3,2);
+        Grid formGrid = new Grid(5,2);
         formGrid.setCellSpacing(3);
         formGrid.setWidget(0,  0, new Label(stringMessages.name() + ":"));
         formGrid.setWidget(0, 1, nameTextBox);
         formGrid.setWidget(1, 0, new Label(stringMessages.regatta() + ":"));
         formGrid.setWidget(1, 1, regattaListBox);
+        formGrid.setWidget(2, 0, new Label(stringMessages.event() + ":"));
+        formGrid.setWidget(2, 1, sailingEventsListBox);
+        formGrid.setWidget(3, 0, new Label(stringMessages.courseArea() + ":"));
+        formGrid.setWidget(3, 1, courseAreaListBox);
                 
         mainPanel.add(formGrid);
         

@@ -12,21 +12,24 @@ public class LeaderboardDescriptor {
     private ScoringSchemeType scoringScheme; 
     private int[] discardThresholds;
     private String regattaName;
+    private String courseAreaId;
 
     public LeaderboardDescriptor() {
     }
-
-    public LeaderboardDescriptor(String name, ScoringSchemeType scoringScheme, int[] discardThresholds, String regattaName) {
+    
+    public LeaderboardDescriptor(String name, ScoringSchemeType scoringScheme, int[] discardThresholds, String regattaName, String courseAreaId) {
         this.name = name;
         this.scoringScheme = scoringScheme;
         this.discardThresholds = discardThresholds;
         this.regattaName = regattaName;
+        this.courseAreaId = courseAreaId;
     }
 
-    public LeaderboardDescriptor(String name, ScoringSchemeType scoringScheme, int[] discardThresholds) {
+    public LeaderboardDescriptor(String name, ScoringSchemeType scoringScheme, int[] discardThresholds, String courseAreaId) {
         this.name = name;
         this.scoringScheme = scoringScheme;
         this.discardThresholds = discardThresholds;
+        this.courseAreaId = courseAreaId;
     }
         
     public String getName() {
@@ -60,4 +63,12 @@ public class LeaderboardDescriptor {
     public void setRegattaName(String regattaName) {
         this.regattaName = regattaName;
     }
+
+	public String getCourseAreaId() {
+		return courseAreaId;
+	}
+
+	public void setCourseAreaId(String courseAreaId) {
+		this.courseAreaId = courseAreaId;
+	}
 }

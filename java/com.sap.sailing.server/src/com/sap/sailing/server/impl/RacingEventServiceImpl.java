@@ -236,7 +236,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         // Add one default leaderboard that aggregates all races currently tracked by this service.
         // This is more for debugging purposes than for anything else.
         addFlexibleLeaderboard(LeaderboardNameConstants.DEFAULT_LEADERBOARD_NAME, new int[] { 5, 8 },
-                tractracDomainFactory.getBaseDomainFactory().createScoringScheme(ScoringSchemeType.LOW_POINT));
+                tractracDomainFactory.getBaseDomainFactory().createScoringScheme(ScoringSchemeType.LOW_POINT), null);
         loadStoredRegattas();
         loadRaceIDToRegattaAssociations();
         loadStoredLeaderboardsAndGroups();
@@ -304,10 +304,12 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     }
     
     @Override
-    public FlexibleLeaderboard addFlexibleLeaderboard(String name, int[] discardThresholds, ScoringScheme scoringScheme) {
+    public FlexibleLeaderboard addFlexibleLeaderboard(String name, int[] discardThresholds, ScoringScheme scoringScheme, 
+    		Serializable courseAreaId) {
         logger.info("adding flexible leaderboard "+name);
+        CourseArea courseArea = getCourseArea(courseAreaId);
         FlexibleLeaderboard result = new FlexibleLeaderboardImpl(name, new ScoreCorrectionImpl(), new ResultDiscardingRuleImpl(
-                discardThresholds), scoringScheme);
+                discardThresholds), scoringScheme, courseArea);
         synchronized (leaderboardsByName) {
             if (getLeaderboardByName(name) != null) {
                 throw new IllegalArgumentException("Leaderboard with name "+name+" already exists");
@@ -318,15 +320,27 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         return result;
     }
     
-    @Override
-    public RegattaLeaderboard addRegattaLeaderboard(RegattaIdentifier regattaIdentifier, int[] discardThresholds) {
+    private CourseArea getCourseArea(Serializable courseAreaId) {
+		for (Event event : getAllEvents()) {
+			for (CourseArea courseArea : event.getVenue().getCourseAreas()) {
+				if (courseArea.getId().equals(courseAreaId)) {
+					return courseArea;
+				}
+			}
+		}
+		return null;
+	}
+
+	@Override
+    public RegattaLeaderboard addRegattaLeaderboard(RegattaIdentifier regattaIdentifier, int[] discardThresholds, Serializable courseAreaId) {
         Regatta regatta = getRegatta(regattaIdentifier);
         logger.info("adding regatta leaderboard for regatta "
                 + (regatta == null ? "null" : (regatta.getName() + " (" + regatta.hashCode() + ")")) + " to " + this);
+        CourseArea courseArea = getCourseArea(courseAreaId);
         RegattaLeaderboard result = null;
         if (regatta != null) {
             result = new RegattaLeaderboardImpl(regatta, new ScoreCorrectionImpl(), new ResultDiscardingRuleImpl(
-                    discardThresholds));
+                    discardThresholds), courseArea);
             synchronized (leaderboardsByName) {
                 if (getLeaderboardByName(result.getName()) != null) {
                     throw new IllegalArgumentException("Leaderboard with name " + result.getName() + " already exists in "+this);

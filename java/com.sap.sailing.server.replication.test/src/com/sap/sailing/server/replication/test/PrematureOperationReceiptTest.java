@@ -43,7 +43,7 @@ public class PrematureOperationReceiptTest extends AbstractServerReplicationTest
     public void testRaceColumnInLeaderboardReplicationAfterInitialLoad() throws InterruptedException, ClassNotFoundException, IOException {
         final String leaderboardName = "My new leaderboard";
         final int[] discardThresholds = new int[] { 17, 23 };
-        CreateFlexibleLeaderboard createTestLeaderboard = new CreateFlexibleLeaderboard(leaderboardName, discardThresholds, new LowPoint());
+        CreateFlexibleLeaderboard createTestLeaderboard = new CreateFlexibleLeaderboard(leaderboardName, discardThresholds, new LowPoint(), null);
         assertNull(master.getLeaderboardByName(leaderboardName));
         master.apply(createTestLeaderboard);
         final Leaderboard masterLeaderboard = master.getLeaderboardByName(leaderboardName);

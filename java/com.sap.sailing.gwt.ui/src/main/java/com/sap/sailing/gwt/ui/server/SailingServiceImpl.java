@@ -1975,14 +1975,23 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public StrippedLeaderboardDTO createFlexibleLeaderboard(String leaderboardName, int[] discardThresholds, ScoringSchemeType scoringSchemeType) {
+    public StrippedLeaderboardDTO createFlexibleLeaderboard(String leaderboardName, int[] discardThresholds, ScoringSchemeType scoringSchemeType,
+    		Serializable courseAreaId) {
+    	UUID courseAreaUuid = null;
+    	if (courseAreaId != null) {
+    		courseAreaUuid = UUID.fromString(courseAreaId.toString());
+    	}
         return createStrippedLeaderboardDTO(getService().apply(new CreateFlexibleLeaderboard(leaderboardName, discardThresholds,
-                baseDomainFactory.createScoringScheme(scoringSchemeType))), false);
+                baseDomainFactory.createScoringScheme(scoringSchemeType), courseAreaUuid)), false);
     }
 
     @Override
-    public StrippedLeaderboardDTO createRegattaLeaderboard(RegattaIdentifier regattaIdentifier, int[] discardThresholds) {
-        return createStrippedLeaderboardDTO(getService().apply(new CreateRegattaLeaderboard(regattaIdentifier, discardThresholds)), false);
+    public StrippedLeaderboardDTO createRegattaLeaderboard(RegattaIdentifier regattaIdentifier, int[] discardThresholds, Serializable courseAreaId) {
+    	UUID courseAreaUuid = null;
+    	if (courseAreaId != null) {
+    		courseAreaUuid = UUID.fromString(courseAreaId.toString());
+    	}
+        return createStrippedLeaderboardDTO(getService().apply(new CreateRegattaLeaderboard(regattaIdentifier, discardThresholds, courseAreaUuid)), false);
     }
 
     @Override
@@ -2906,6 +2915,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     
     private CourseAreaDTO convertToCourseAreaDTO(CourseArea courseArea) {
     	CourseAreaDTO courseAreaDTO = new CourseAreaDTO(courseArea.getName());
+    	courseAreaDTO.id = courseArea.getId().toString();
     	return courseAreaDTO;
     }
 

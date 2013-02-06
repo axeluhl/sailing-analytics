@@ -74,7 +74,7 @@ public abstract class AbstractMetaLeaderboard extends AbstractSimpleLeaderboardI
     }
     
     public AbstractMetaLeaderboard(String name, ScoringScheme scoringScheme, ThresholdBasedResultDiscardingRule resultDiscardingRule) {
-        super(new MetaLeaderboardScoreCorrection(), resultDiscardingRule);
+        super(new MetaLeaderboardScoreCorrection(), resultDiscardingRule, null);
         getScoreCorrection().setMetaLeaderboard(this);
         metaFleet = new FleetImpl("MetaFleet");
         this.scoringScheme = scoringScheme;

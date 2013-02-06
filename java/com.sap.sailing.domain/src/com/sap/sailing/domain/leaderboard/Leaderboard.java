@@ -34,10 +34,6 @@ import com.sap.sailing.domain.tracking.TrackedRace;
  * @author Axel Uhl (d043530)
  * 
  */
-/**
- * @author Hugo
- *
- */
 public interface Leaderboard extends Named {
     /**
      * If the leaderboard is a "matrix" with the cells being defined by a competitor / race "coordinate,"

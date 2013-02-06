@@ -22,6 +22,7 @@ public abstract class AbstractLeaderboardDTO implements IsSerializable {
     public boolean hasCarriedPoints;
     public int[] discardThresholds;
     public String regattaName;
+    public String courseAreaId;
     public ScoringSchemeType scoringScheme;
     public boolean isMetaLeaderboard;
     public boolean isRegattaLeaderboard;

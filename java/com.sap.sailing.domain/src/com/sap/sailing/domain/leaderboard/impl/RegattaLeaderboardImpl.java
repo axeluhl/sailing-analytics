@@ -3,6 +3,7 @@ package com.sap.sailing.domain.leaderboard.impl;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnInSeries;
@@ -36,8 +37,8 @@ public class RegattaLeaderboardImpl extends AbstractLeaderboardImpl implements R
     private String displayName;
 
     public RegattaLeaderboardImpl(Regatta regatta, SettableScoreCorrection scoreCorrection,
-            ThresholdBasedResultDiscardingRule resultDiscardingRule) {
-        super(scoreCorrection, resultDiscardingRule);
+            ThresholdBasedResultDiscardingRule resultDiscardingRule, CourseArea courseArea) {
+        super(scoreCorrection, resultDiscardingRule, courseArea);
         this.regatta = regatta;
         regatta.addRaceColumnListener(this);
     }

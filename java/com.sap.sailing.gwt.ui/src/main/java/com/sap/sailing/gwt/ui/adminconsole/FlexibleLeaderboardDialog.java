@@ -10,6 +10,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 
 public abstract class FlexibleLeaderboardDialog extends AbstractLeaderboardDialog {
@@ -61,9 +62,10 @@ public abstract class FlexibleLeaderboardDialog extends AbstractLeaderboardDialo
         }
     }
     
-    public FlexibleLeaderboardDialog(String title, LeaderboardDescriptor leaderboardDTO, StringMessages stringMessages,
+    public FlexibleLeaderboardDialog(String title, LeaderboardDescriptor leaderboardDTO, StringMessages stringMessages, 
+    		Collection<EventDTO> existingEvents,
             ErrorReporter errorReporter, LeaderboardParameterValidator validator,  DialogCallback<LeaderboardDescriptor> callback) {
-        super(title, leaderboardDTO, stringMessages, validator, callback);
+        super(title, leaderboardDTO, stringMessages, existingEvents, validator, callback);
     }
     
     @Override
@@ -77,12 +79,16 @@ public abstract class FlexibleLeaderboardDialog extends AbstractLeaderboardDialo
     @Override
     protected Widget getAdditionalWidget() {
         VerticalPanel mainPanel = new VerticalPanel();
-        Grid formGrid = new Grid(3,2);
+        Grid formGrid = new Grid(5,2);
         formGrid.setCellSpacing(3);
         formGrid.setWidget(0,  0, new Label(stringMessages.name() + ":"));
         formGrid.setWidget(0, 1, nameTextBox);
         formGrid.setWidget(1, 0, new Label(stringMessages.scoringSystem() + ":"));
         formGrid.setWidget(1, 1, scoringSchemeListBox);
+        formGrid.setWidget(2, 0, new Label(stringMessages.event() + ":"));
+        formGrid.setWidget(2, 1, sailingEventsListBox);
+        formGrid.setWidget(3, 0, new Label(stringMessages.courseArea() + ":"));
+        formGrid.setWidget(3, 1, courseAreaListBox);
         mainPanel.add(formGrid);
         mainPanel.add(new Label(stringMessages.discardRacesFromHowManyStartedRacesOn()));
         HorizontalPanel hp = new HorizontalPanel();

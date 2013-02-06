@@ -163,6 +163,11 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
             // at least store the scoring scheme
             dbLeaderboard.put(FieldNames.SCORING_SCHEME_TYPE.name(), leaderboard.getScoringScheme().getType().name());
         }
+        if (leaderboard.getDefaultCourseArea() != null) {
+        	dbLeaderboard.put(FieldNames.COURSE_AREA_ID.name(), leaderboard.getDefaultCourseArea().getId().toString());
+        } else {
+        	dbLeaderboard.put(FieldNames.COURSE_AREA_ID.name(), null);
+        }
         storeColumnFactors(leaderboard, dbLeaderboard);
         storeLeaderboardCorrectionsAndDiscards(leaderboard, dbLeaderboard);
         leaderboardCollection.update(query, dbLeaderboard, /* upsrt */ true, /* multi */ false);

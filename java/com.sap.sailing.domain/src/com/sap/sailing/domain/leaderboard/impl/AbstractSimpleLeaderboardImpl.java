@@ -72,6 +72,8 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
      * A synchronized set that manages the difference between {@link #getCompetitors()} and {@link #getAllCompetitors()}.
      */
     private final Set<Competitor> suppressedCompetitors;
+    
+    private final CourseArea courseArea;
 
     /**
      * A leaderboard entry representing a snapshot of a cell at a given time point for a single race/competitor.
@@ -134,12 +136,13 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     }
 
     public AbstractSimpleLeaderboardImpl(SettableScoreCorrection scoreCorrection,
-            ThresholdBasedResultDiscardingRule resultDiscardingRule) {
+            ThresholdBasedResultDiscardingRule resultDiscardingRule, CourseArea courseArea) {
         this.carriedPoints = new HashMap<Competitor, Double>();
         this.scoreCorrection = scoreCorrection;
         this.displayNames = new HashMap<Competitor, String>();
         this.resultDiscardingRule = resultDiscardingRule;
         this.suppressedCompetitors = Collections.synchronizedSet(new HashSet<Competitor>());
+        this.courseArea = courseArea;
         raceColumnListeners = new RaceColumnListeners();
     }
 
@@ -697,6 +700,6 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     @Override
     public CourseArea getDefaultCourseArea() {
     	// TODO Implement leaderboard <-> CourseArea relationship
-    	return null;
+    	return courseArea;
     }
 }
