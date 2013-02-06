@@ -34,7 +34,11 @@
 	List<Competitor> competitorsFromBestToWorst = leaderboard.getCompetitorsFromBestToWorst(timePoint);
 	Map<RaceColumn, List<Competitor>> rankedCompetitorsPerColumn = new HashMap<RaceColumn, List<Competitor>>();
 	Iterable<RaceColumn> raceColumns = leaderboard.getRaceColumns();
-
+	List<Competitor> suppressedCompetitors = new ArrayList<Competitor>();
+	for(Competitor c: leaderboard.getSuppressedCompetitors()) {
+	    suppressedCompetitors.add(c);
+	}
+	
 	NumberFormat scoreFormat = NumberFormat.getNumberInstance();
 	int digitPresicion = 1;
 	scoreFormat.setMinimumFractionDigits(digitPresicion);
@@ -72,6 +76,7 @@
 			        totalPoints = totalPoints != null ? totalPoints += carriedPoints : carriedPoints;  
 			    }
 			}
+			if(!suppressedCompetitors.contains(competitor)) {
 	%>
     <tr>
 		<td><%= totalRank %></td>
@@ -121,7 +126,7 @@
 		<% } %>
 		<td><%= totalPoints %></td>
     </tr>
-	<% } %>
+	<% 	} } %>
 	</tbody>
 </table>
 </body>
