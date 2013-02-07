@@ -25,8 +25,8 @@ Require-Bundle: com.sap.sailing.domain,
  org.jdom;bundle-version="1.0.0",
  javax.servlet.jsp.jstl;bundle-version="1.2.0",
  javax.servlet.jsp;bundle-version="2.1.0",
- javax.el;bundle-version="2.1.0"
-Bundle-ClassPath: .,
- lib/rome-1.0.jar
+ javax.el;bundle-version="2.1.0",
+ rome;bundle-version="1.0.0"
+Bundle-ClassPath: .
 Web-ContextPath: /sailingserver
 Export-Package: com.sap.sailing.server.gateway
