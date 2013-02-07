@@ -8,6 +8,7 @@ import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
+import com.sap.sailing.server.gateway.serialization.impl.regatta.FleetJsonSerializer;
 
 public class FleetDeserializer implements JsonDeserializer<Fleet> {
 
@@ -20,11 +21,11 @@ public class FleetDeserializer implements JsonDeserializer<Fleet> {
 	public Fleet deserialize(JSONObject object)
 			throws JsonDeserializationException {
 		Color color = null;
-		if (object.containsKey("color")) {
-			color = colorDeserializer.deserialize(Helpers.getNestedObjectSafe(object, "color"));
+		if (object.containsKey(FleetJsonSerializer.FIELD_COLOR)) {
+			color = colorDeserializer.deserialize(Helpers.getNestedObjectSafe(object, FleetJsonSerializer.FIELD_COLOR));
 		}
-		String name = object.get("name").toString();
-		Number ordering = (Number) object.get("ordering");
+		String name = object.get(FleetJsonSerializer.FIELD_NAME).toString();
+		Number ordering = (Number) object.get(FleetJsonSerializer.FIELD_ORDERING);
 		
 		return new FleetImpl(name, ordering.intValue(), color);
 	}

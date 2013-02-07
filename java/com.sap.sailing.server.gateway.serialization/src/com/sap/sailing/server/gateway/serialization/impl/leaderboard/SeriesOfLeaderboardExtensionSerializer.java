@@ -19,6 +19,8 @@ import com.sap.sailing.server.gateway.serialization.ExtensionJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 
 public class SeriesOfLeaderboardExtensionSerializer extends ExtensionJsonSerializer<Leaderboard, Series> {
+	public static final String FIELD_SERIES = "series";
+	
 	
 	public SeriesOfLeaderboardExtensionSerializer(JsonSerializer<Series> extensionSerializer) {
 		super(extensionSerializer);
@@ -26,7 +28,7 @@ public class SeriesOfLeaderboardExtensionSerializer extends ExtensionJsonSeriali
 
 	@Override
 	public String getExtensionFieldName() {
-		return "series";
+		return FIELD_SERIES;
 	}
 
 	@Override

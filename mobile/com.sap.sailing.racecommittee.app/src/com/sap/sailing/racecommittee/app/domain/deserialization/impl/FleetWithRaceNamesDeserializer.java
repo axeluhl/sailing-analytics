@@ -11,6 +11,7 @@ import com.sap.sailing.domain.base.impl.FleetWithRaceNamesImpl;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
+import com.sap.sailing.server.gateway.serialization.impl.leaderboard.FleetWithRaceNamesJsonSerializer;
 
 public class FleetWithRaceNamesDeserializer implements JsonDeserializer<FleetWithRaceNames> {
 
@@ -25,7 +26,9 @@ public class FleetWithRaceNamesDeserializer implements JsonDeserializer<FleetWit
 		Fleet fleet = fleetDeserializer.deserialize(object);
 		
 		Collection<String> raceNames = new ArrayList<String>();
-		for (Object raceName : Helpers.getNestedArraySafe(object, "races")) {
+		for (Object raceName : Helpers.getNestedArraySafe(
+				object, 
+				FleetWithRaceNamesJsonSerializer.FIELD_RACES)) {
 			raceNames.add(raceName.toString());
 		}
 		

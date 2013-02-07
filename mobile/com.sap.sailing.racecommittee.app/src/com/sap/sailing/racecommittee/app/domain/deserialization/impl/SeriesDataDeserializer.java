@@ -11,6 +11,7 @@ import com.sap.sailing.racecommittee.app.domain.impl.SeriesDataImpl;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
+import com.sap.sailing.server.gateway.serialization.impl.leaderboard.FleetWithRaceNamesOfSeriesExtensionSerializer;
 
 public class SeriesDataDeserializer implements JsonDeserializer<SeriesData> {
 
@@ -26,7 +27,9 @@ public class SeriesDataDeserializer implements JsonDeserializer<SeriesData> {
 		boolean isMedal = (Boolean) object.get("isMedal");
 		
 		Collection<FleetWithRaceNames> fleets = new ArrayList<FleetWithRaceNames>();
-		for (Object fleetObject : Helpers.getNestedArraySafe(object, "fleets")) {
+		for (Object fleetObject : Helpers.getNestedArraySafe(
+				object, 
+				FleetWithRaceNamesOfSeriesExtensionSerializer.FIELD_FLEETS)) {
 			JSONObject fleetJson = Helpers.toJSONObjectSafe(fleetObject);
 			fleets.add(fleetDeserializer.deserialize(fleetJson));
 		}

@@ -28,7 +28,7 @@ public class ExLog {
 	public final static int EVENT_SELECTED = 3;
 	public final static int COURSE_SELECTED = 4;
 	public final static int RACE_SELECTED_ELEMENT = 5;
-	public final static int RACE_SELECTED_LABEL = 6;
+	public final static int RACE_SELECTED_TITLE = 6;
 	public final static int FLAG_XRAY_SET = 7;
 	public final static int FLAG_XRAY_REMOVE = 8;
 	public final static int FLAG_FIRST_SUBSTITUTE = 9;

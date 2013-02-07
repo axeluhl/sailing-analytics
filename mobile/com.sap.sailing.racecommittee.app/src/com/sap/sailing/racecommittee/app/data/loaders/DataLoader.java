@@ -9,22 +9,28 @@ import android.content.AsyncTaskLoader;
 import android.content.Context;
 
 import com.sap.sailing.racecommittee.app.data.handlers.DataHandler;
-import com.sap.sailing.racecommittee.app.data.http.GetHttpRequest;
+import com.sap.sailing.racecommittee.app.data.http.HttpGetRequest;
+import com.sap.sailing.racecommittee.app.data.http.HttpRequest;
 import com.sap.sailing.racecommittee.app.data.parsers.DataParser;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 
 public class DataLoader<T> extends AsyncTaskLoader<T> {
 	private static final String TAG = DataLoader.class.getName();
 	
-	protected URI requestUri;
 	protected DataParser<T> dataParser;
 	protected DataHandler<T> dataHandler;
+	protected HttpRequest httpRequest;
 	protected volatile Exception lastException;
 
-	public DataLoader(Context context, URI requestUri,
+	public DataLoader(Context context, URI httpGetUri,
+			DataParser<T> dataParser, DataHandler<T> dataHandler) {
+		this(context, new HttpGetRequest(httpGetUri), dataParser, dataHandler);
+	}
+	
+	public DataLoader(Context context, HttpRequest request,
 			DataParser<T> dataParser, DataHandler<T> dataHandler) {
 		super(context);
-		this.requestUri = requestUri;
+		this.httpRequest = request;
 		this.dataParser = dataParser;
 		this.dataHandler = dataHandler;
 	}
@@ -42,11 +48,10 @@ public class DataLoader<T> extends AsyncTaskLoader<T> {
 	}
 
 	private T loadDataInBackground() throws Exception {
-		GetHttpRequest getRequest = new GetHttpRequest();
 		InputStream inputStream = null;
 		Reader inputReader = null;
 		try {
-			inputStream = getRequest.get(requestUri);
+			inputStream = httpRequest.execute();
 			inputReader = new InputStreamReader(inputStream);
 			return dataParser.parse(inputReader);
 		} finally {

@@ -1,6 +1,7 @@
 package com.sap.sailing.racecommittee.app.data.http;
 
 import java.io.IOException;
+import java.io.InputStream;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -30,21 +31,24 @@ public abstract class HttpRequest {
 		throw new IOException(String.format("Request response had no valid status."));
 	}
 	
-	//protected final static String JsonUTF8 = "application/json;charset=UTF-8";
+	private HttpClient client;
+	private HttpRequestBase httpRequestBase;
 	
-	protected HttpClient client;
-	
-	public HttpRequest() {
-		client = new DefaultHttpClient();
+	public HttpRequest(HttpRequestBase request) {
+		this.httpRequestBase = request;
+		this.client = new DefaultHttpClient();
 	}
-	
-	protected HttpResponse executeRequest(HttpRequestBase request) throws IOException {
-		ExLog.i(TAG, "Requesting " + request.getMethod() +  " " + request.getURI().toString());
-		HttpResponse response = client.execute(request);
+	protected abstract InputStream processResponse(HttpResponse response) throws Exception;
+
+	public InputStream execute() throws Exception {
+		ExLog.i(TAG, "Executing request " + httpRequestBase.getMethod() +  " on " + httpRequestBase.getURI());
+		HttpResponse response = client.execute(httpRequestBase);
 		validateHttpResponse(response);
-		ExLog.i(TAG, "Response " + response.getStatusLine().toString());
-		return response;
+		ExLog.i(TAG, "Received reseponse " + response.getStatusLine());
+		return processResponse(response);
 	}
+
+	
 	
 
 	

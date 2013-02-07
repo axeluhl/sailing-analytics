@@ -14,7 +14,8 @@ import com.sap.sailing.server.gateway.serialization.ExtensionJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 
 public class FleetWithRaceNamesOfSeriesExtensionSerializer extends ExtensionJsonSerializer<Series, FleetWithRaceNames> {
-
+	public static final String FIELD_FLEETS = "fleets";
+	
 	public FleetWithRaceNamesOfSeriesExtensionSerializer(
 			JsonSerializer<FleetWithRaceNames> extensionSerializer) {
 		super(extensionSerializer);
@@ -22,7 +23,7 @@ public class FleetWithRaceNamesOfSeriesExtensionSerializer extends ExtensionJson
 
 	@Override
 	public String getExtensionFieldName() {
-		return "fleets";
+		return FIELD_FLEETS;
 	}
 
 	@Override

@@ -9,7 +9,10 @@ import com.sap.sailing.server.gateway.serialization.ExtensionJsonSerializer;
 
 
 public class LeaderboardJsonSerializer extends ExtendableJsonSerializer<Leaderboard> {
-
+	public static final String FIELD_NAME = "name";
+	public static final String FIELD_COURSE_AREA = "courseArea";
+	
+	
 	public LeaderboardJsonSerializer(
 			ExtensionJsonSerializer<Leaderboard, ?> extensionSerializer) {
 		super(extensionSerializer);
@@ -19,8 +22,8 @@ public class LeaderboardJsonSerializer extends ExtendableJsonSerializer<Leaderbo
 	protected JSONObject serializeFields(Leaderboard object) {
 		JSONObject result = new JSONObject();
 		
-		result.put("name", object.getName());
-		result.put("courseArea", "tdb");
+		result.put(FIELD_NAME, object.getName());
+		result.put(FIELD_COURSE_AREA, "tdb");
 		
 		return result;
 	}
