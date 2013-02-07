@@ -8,6 +8,11 @@ The syntax is relatively easy and is documented here http://daringfireball.net/p
 
 If you have any questions then either contact Axel Uhl, Jens Rommel or Simon Pamiés.
 
+### Services that you can access
+
+1. (http://bugzilla.sapsailing.com/bugzilla/ "Bugzilla")
+
+
 ### Table of Contents
 
 [[Configure Races on Server|wiki/configure-races-on-server]]
