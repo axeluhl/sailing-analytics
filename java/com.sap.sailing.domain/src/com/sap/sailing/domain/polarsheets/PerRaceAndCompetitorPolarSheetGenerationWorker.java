@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.polarsheets;
 
 import java.util.Iterator;
+import java.util.NavigableSet;
 import java.util.concurrent.Callable;
 
 import com.sap.sailing.domain.base.Competitor;
@@ -10,6 +11,7 @@ import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
+import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
 
@@ -26,9 +28,9 @@ public class PerRaceAndCompetitorPolarSheetGenerationWorker implements Callable<
 
     private final PolarSheetGenerationWorker polarSheetGenerationWorker;
 
-    private final TimePoint startTime;
+    private TimePoint startTime;
 
-    private final TimePoint endTime;
+    private TimePoint endTime;
 
     private final Competitor competitor;
 
@@ -41,6 +43,32 @@ public class PerRaceAndCompetitorPolarSheetGenerationWorker implements Callable<
         this.startTime = startTime;
         this.endTime = endTime;
         this.competitor = competitor;
+        optimizeStartTime();
+        optimizeEndTime();
+    }
+
+    private void optimizeEndTime() {
+        NavigableSet<MarkPassing> markPassings = race.getMarkPassings(competitor);
+        if (markPassings.size() < 1) {
+            return;
+        }
+        MarkPassing passedFinish = markPassings.last();
+        TimePoint passedFinishTimePoint = passedFinish.getTimePoint();
+        if (passedFinishTimePoint.before(endTime)) {
+            endTime = passedFinishTimePoint;
+        }
+    }
+
+    private void optimizeStartTime() {
+        NavigableSet<MarkPassing> markPassings = race.getMarkPassings(competitor);
+        if (markPassings.size() < 1) {
+            return;
+        }
+        MarkPassing passedStart = markPassings.first();
+        TimePoint passedStartTimePoint = passedStart.getTimePoint();
+        if (passedStartTimePoint.after(startTime)) {
+            startTime = passedStartTimePoint;
+        }
     }
 
     @Override
