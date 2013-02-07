@@ -10,7 +10,7 @@ The syntax is relatively easy and is documented here http://daringfireball.net/p
 
 * Password can be found in the encrypted page [[Passwords|wiki/passwords]]. You can decrypt it by using `gpg -d < passwords.md` after having entered the password. If you want to edit, first decrypt and then encrypt again using `gpg -a --symmetric passwords.md`. Make sure to never save the unencrypted version!
 
-If you have any questions then either contact Axel Uhl, Jens Rommel or Simon Pamiés.
+If you have any questions then either contact Axel Uhl, Jens Rommel, Frank Mittag or Simon Pamiés.
 
 ### Internal services that you can access
 
