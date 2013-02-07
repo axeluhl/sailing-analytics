@@ -8,7 +8,7 @@ The syntax is relatively easy and is documented here http://daringfireball.net/p
 
 * Make sure to always have _wiki/_ as the base path. So if you want to create `server/SystemBoot` then the correct URL is `wiki/server/SystemBoot`. Make sure to add you Page to the Table of Contents below by editing the document.
 
-* Make sure to encrypt passwords and other sensitive data using the symmetric cipher available from the administrator. Encryption and decryption can be done by using gpg. Encryption `echo "username, my-password" | gpg -a --symmetric` and `Decryption gpg -d < my-data.gpg`
+* Make sure to encrypt passwords and other sensitive data using the symmetric cipher available from the administrator. Encryption and decryption can be done by using gpg. Encryption `echo "username, my-password" | gpg -a --symmetric` and decryption `gpg -d < my-data.gpg`
 
 If you have any questions then either contact Axel Uhl, Jens Rommel or Simon Pamiés.
 
