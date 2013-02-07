@@ -84,8 +84,24 @@ public class PolarSheetsChartPanel extends SimplePanel implements RequiresResize
                 points[i] = new Point(0);
             }
             double alpha = (double) dataCountList.get(i) / (double) max;
-            // TODO set to series color and change alpha
-            points[i].setMarker(new Marker().setFillColor(new Color(1, 1, 1, alpha)));
+            int blue;
+            int red;
+            int radius;
+            if (alpha > 0.2) {
+                red = (int) (alpha * 255);
+                blue = 0;
+                radius = 4;
+            } else {
+                blue = (int) ((1 - alpha) * 255);
+                red = 0;
+                radius = 2;
+            }
+
+            // Don't let the markers be invisible
+            alpha = 0.5 + 0.5 * alpha;
+            // TODO maybe set to series color. Not sure if this (highcharts-generated color) can be queried before
+            // rendering
+            points[i].setMarker(new Marker().setFillColor(new Color(red, 0, blue, alpha)).setRadius(radius));
         }
 
         return points;
