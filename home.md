@@ -1,6 +1,6 @@
 # Welcome to the SAP Sailing Wiki
 
-This is the SAP Sailing Analytics Wiki where useful information regarding this project can be found. This Wiki is being stored directly into the default GIT repository on branch **master**. You can edit information here freely but do not leave any nonsense here.
+![SAP Logo](http://analysis.sapsailing.com/themes/logo.png) This is the SAP Sailing Analytics Wiki where useful information regarding this project can be found. This Wiki is being stored directly into the default GIT repository on branch **master**. You can edit information here freely but do not leave any nonsense here.
 
 The syntax is relatively easy and is documented here http://daringfireball.net/projects/markdown/dingus. When you create a new Page then make sure to put some thinking into the right tree structure and then just extend the URL above. 
 
