@@ -23,8 +23,9 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.server.gateway.AbstractJsonHttpServlet;
 
-public class LeaderboardJsonExportServlet extends JsonExportServlet {
+public class LeaderboardJsonExportServlet extends AbstractJsonHttpServlet {
     private static final long serialVersionUID = -2460691283231361152L;
     private static final String PARAM_NAME_LEADERBOARDNAME = "leaderboardName";
 
