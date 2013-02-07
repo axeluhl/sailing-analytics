@@ -10,9 +10,9 @@ import javax.servlet.http.HttpServletResponse;
 import org.json.simple.JSONArray;
 
 import com.sap.sailing.domain.leaderboard.Leaderboard;
-import com.sap.sailing.server.gateway.JsonExportServlet;
+import com.sap.sailing.server.gateway.AbstractJsonHttpServlet;
 
-public class LeaderboardsJsonExportServlet extends JsonExportServlet {
+public class LeaderboardsJsonExportServlet extends AbstractJsonHttpServlet {
     private static final long serialVersionUID = -2193421590275280102L;
 
     @Override

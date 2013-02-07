@@ -17,6 +17,7 @@ public class ESS40JspForwardServlet extends SailingServerHttpServlet {
     private static final long serialVersionUID = -1017961881555515288L;
 
     private static final String PARAM_NAME_LEADERBOARDNAME = "leaderboardName";
+    private static final String PARAM_NAME_SHOWDETAILS = "showDetails";
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -24,6 +25,8 @@ public class ESS40JspForwardServlet extends SailingServerHttpServlet {
         String pathInfo = request.getPathInfo();
         String jspPath = "/WEB-INF/jsp";
         String leaderboardNameParam = request.getParameter(PARAM_NAME_LEADERBOARDNAME);
+        String showDetailsParam = request.getParameter(PARAM_NAME_SHOWDETAILS);
+        Boolean showRaceDetails = showDetailsParam != null && showDetailsParam.equalsIgnoreCase("true");
         
         if (leaderboardNameParam == null) {
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "You need to specify a leaderboard name using the "+
@@ -40,6 +43,7 @@ public class ESS40JspForwardServlet extends SailingServerHttpServlet {
             } else {
                 jspFile = "leaderboard.jsp";
             }
+            request.setAttribute("showRaceDetails", showRaceDetails);
             request.setAttribute("leaderboard", leaderboard);           
             request.setAttribute("racingEventService", racingEventService);           
 
@@ -47,7 +51,7 @@ public class ESS40JspForwardServlet extends SailingServerHttpServlet {
             RequestDispatcher requestDispatcher = sc.getRequestDispatcher(jspPath + "/" + jspFile);
             requestDispatcher.forward(request, response);
         } else {
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error during rendering of the leaderboard");
+            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error during leaderboard export.");
         }            
     }
 

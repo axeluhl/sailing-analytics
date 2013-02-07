@@ -22,9 +22,9 @@ import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.server.gateway.JsonExportServlet;
+import com.sap.sailing.server.gateway.AbstractJsonHttpServlet;
 
-public class LeaderboardGroupJsonExportServlet extends JsonExportServlet {
+public class LeaderboardGroupJsonExportServlet extends AbstractJsonHttpServlet {
     private static final long serialVersionUID = 1351616646322956825L;
     private static final String PARAM_NAME_LEADERBOARDGROUPNAME = "leaderboardGroupName";
 

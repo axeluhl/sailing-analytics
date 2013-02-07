@@ -37,4 +37,13 @@
 		<url-pattern>/html/*</url-pattern>
 	</servlet-mapping>
    
+
+   	<servlet>
+		<servlet-name>ESS40ResultsAsCSVServlet</servlet-name>
+		<servlet-class>com.sap.sailing.server.gateway.ess40.ESS40ResultsAsCSVServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>ESS40ResultsAsCSVServlet</servlet-name>
+		<url-pattern>/csv/*</url-pattern>
+	</servlet-mapping>
  </web-app>

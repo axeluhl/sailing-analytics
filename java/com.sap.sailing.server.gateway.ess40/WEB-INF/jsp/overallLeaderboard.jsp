@@ -28,7 +28,7 @@
 <%
 	TimePoint timePoint = MillisecondsTimePoint.now();
 	LeaderboardGroupMetaLeaderboard leaderboard = (LeaderboardGroupMetaLeaderboard) request.getAttribute("leaderboard");
-	Boolean showDetails = (Boolean) request.getAttribute("showDetails");
+	Boolean showRaceDetails = (Boolean) request.getAttribute("showRaceDetails");
 
 	// competitors are ordered according to total rank
 	List<Competitor> competitorsFromBestToWorst = leaderboard.getCompetitorsFromBestToWorst(timePoint);
@@ -52,15 +52,16 @@
 	<tr>
 		<th>Rank</th>
 		<th>Team</th>
-		<% 	for (RaceColumn raceColumn : raceColumns) { %>
-			<th><% 
-					String raceColumnName = raceColumn.getName();
-					String prefixToCut = "Extreme 40 ";
-					if(raceColumnName.startsWith(prefixToCut)) {
-					    raceColumnName = raceColumnName.substring(prefixToCut.length(), raceColumnName.length());
-					}
-				%><%= raceColumnName %></th>
-		<% } %>
+		<% 	if(showRaceDetails) {
+				for (RaceColumn raceColumn : raceColumns) { %>
+				<th><% 
+						String raceColumnName = raceColumn.getName();
+						String prefixToCut = "Extreme 40 ";
+						if(raceColumnName.startsWith(prefixToCut)) {
+						    raceColumnName = raceColumnName.substring(prefixToCut.length(), raceColumnName.length());
+						}
+					%><%= raceColumnName %></th>
+		<% } } %>
 		<th>Points</th>
 	</tr>
 	</thead>
@@ -81,49 +82,50 @@
     <tr>
 		<td><%= totalRank %></td>
 		<td style="white-space:nowrap;"><img src="<%= imgFlagPath + nationality.getCountryCode().getTwoLetterISOCode().toLowerCase() + ".png"%>" />&nbsp;&nbsp;<%= competitor.getName() %></td>
-		<% 	for (RaceColumn raceColumn : raceColumns) { 
-                List<Competitor> rankedCompetitorsForColumn = rankedCompetitorsPerColumn.get(raceColumn);
-                if (rankedCompetitorsForColumn == null) {
-                    rankedCompetitorsForColumn = leaderboard.getCompetitorsFromBestToWorst(raceColumn, timePoint);
-                    rankedCompetitorsPerColumn.put(raceColumn, rankedCompetitorsForColumn);
-                }
-                Double netRacePoints = leaderboard.getNetPoints(competitor, raceColumn, timePoint);
-                Double totalRacePoints = leaderboard.getTotalPoints(competitor, raceColumn, timePoint);
-				MaxPointsReason maxPointsReason = leaderboard.getMaxPointsReason(competitor, raceColumn, timePoint);
-                int rank = rankedCompetitorsForColumn.indexOf(competitor)+1;
-                TrackedRace trackedRace = raceColumn.getTrackedRace(competitor);
-                if (trackedRace != null) {
-                    int raceRank = trackedRace.getRank(competitor, timePoint);
-                }
-                boolean isDiscarded = leaderboard.isDiscarded(competitor, raceColumn, timePoint);
-                boolean isCorrected = leaderboard.getScoreCorrection().isScoreCorrected(competitor, raceColumn);
-
-                String racePointsStyleClasses = "";
-
-                String racePoints = "&nbsp;";
-                if (maxPointsReason == null || maxPointsReason == MaxPointsReason.NONE) {
-                    if (!isDiscarded) {
-                        racePointsStyleClasses = "leaderboard-points-TotalPoints-NotDiscarded";
-						if(totalRacePoints != null) {
-						    racePoints = scoreFormat.format(totalRacePoints);
-						}
-                    } else {
-                        racePointsStyleClasses = "leaderboard-points-TotalPoints-Discarded";
-						if(netRacePoints != null) {
-						    racePoints = scoreFormat.format(netRacePoints);
-						}
-                    }
-                } else {
-                    if (!isDiscarded) {
-                    	racePointsStyleClasses = "leaderboard-points-MaxPoints-NotDiscarded";
-                    } else {
-                    	racePointsStyleClasses = "leaderboard-points-MaxPoints-Discarded";
-                    }
-					racePoints = maxPointsReason.name();
-                }
+		<% 	if(showRaceDetails) {
+				for (RaceColumn raceColumn : raceColumns) { 
+	                List<Competitor> rankedCompetitorsForColumn = rankedCompetitorsPerColumn.get(raceColumn);
+	                if (rankedCompetitorsForColumn == null) {
+	                    rankedCompetitorsForColumn = leaderboard.getCompetitorsFromBestToWorst(raceColumn, timePoint);
+	                    rankedCompetitorsPerColumn.put(raceColumn, rankedCompetitorsForColumn);
+	                }
+	                Double netRacePoints = leaderboard.getNetPoints(competitor, raceColumn, timePoint);
+	                Double totalRacePoints = leaderboard.getTotalPoints(competitor, raceColumn, timePoint);
+					MaxPointsReason maxPointsReason = leaderboard.getMaxPointsReason(competitor, raceColumn, timePoint);
+	                int rank = rankedCompetitorsForColumn.indexOf(competitor)+1;
+	                TrackedRace trackedRace = raceColumn.getTrackedRace(competitor);
+	                if (trackedRace != null) {
+	                    int raceRank = trackedRace.getRank(competitor, timePoint);
+	                }
+	                boolean isDiscarded = leaderboard.isDiscarded(competitor, raceColumn, timePoint);
+	                boolean isCorrected = leaderboard.getScoreCorrection().isScoreCorrected(competitor, raceColumn);
+	
+	                String racePointsStyleClasses = "";
+	
+	                String racePoints = "&nbsp;";
+	                if (maxPointsReason == null || maxPointsReason == MaxPointsReason.NONE) {
+	                    if (!isDiscarded) {
+	                        racePointsStyleClasses = "leaderboard-points-TotalPoints-NotDiscarded";
+							if(totalRacePoints != null) {
+							    racePoints = scoreFormat.format(totalRacePoints);
+							}
+	                    } else {
+	                        racePointsStyleClasses = "leaderboard-points-TotalPoints-Discarded";
+							if(netRacePoints != null) {
+							    racePoints = scoreFormat.format(netRacePoints);
+							}
+	                    }
+	                } else {
+	                    if (!isDiscarded) {
+	                    	racePointsStyleClasses = "leaderboard-points-MaxPoints-NotDiscarded";
+	                    } else {
+	                    	racePointsStyleClasses = "leaderboard-points-MaxPoints-Discarded";
+	                    }
+						racePoints = maxPointsReason.name();
+	                }
 		%>
 			<td class="<%= racePointsStyleClasses %>"><%= racePoints  %></td>
-		<% } %>
+		<% } } %>
 		<td><%= totalPoints %></td>
     </tr>
 	<% 	} } %>
