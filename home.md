@@ -17,6 +17,7 @@ If you have any questions then either contact Axel Uhl, Jens Rommel, Frank Mitta
 * [Bugzilla Issue Tracking System](http://bugzilla.sapsailing.com/bugzilla/)
 * [Maven Repository Browser](http://maven.sapsailing.com/maven/)
 * [Main Sailing Website](http://www.sapsailing.com)
+* [Visitor Statistics](http://analysis.sapsailing.com/)
 
 ### Table of Contents Wiki
 
