@@ -8,11 +8,11 @@ After a restart of a java production server that contained archived races one ne
 * Load races list
 * Select correct regatta
 * Select races according to the rules below
-* Make sure Track Wind Option is unchecked
-* Hit Start Tracking Button
+* Make sure `Track Wind` Option is unchecked
+* Hit `Start Tracking` Button
 * Check that all races appear in the Tracked Races area
 * Make sure their state resolves after some time to TRACKING
-* For each race in the state TRACKING select it and Stop Tracking
+* For each race in the state TRACKING select it and `Stop Tracking`
 
 ### Default excludes for races
 
