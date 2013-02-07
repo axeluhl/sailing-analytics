@@ -2,20 +2,28 @@
 
 After a restart of a java production server that contained archived races one need to reconfigure all these archived races. Here you find the steps needed including all druid knowledge required :-)
 
-### Default excludes for races
-
-* Do not have a boat class
-* Time higher than 20:00 (e.g. 21:14)
-* Have Test somewhere in the name
-
 ### General process
 
 * Select TracTrac Configuration
 * Load races list
 * Select correct regatta
 * Select races according to the rules below
+* Make sure Track Wind Option is unchecked
+* Hit Start Tracking Button
+* Check that all races appear in the Tracked Races area
+* Make sure their state resolves after some time to TRACKING
+* For each race in the state TRACKING select it and Stop Tracking
+
+### Default excludes for races
+
+* Do not have a boat class
+* Time higher than 20:00 (e.g. 21:14)
+* Have "Test" somewhere in the name
 
 ### Desaster recovery
+
+* Check loading state
+* ...
 
 ### Table with associations
 
