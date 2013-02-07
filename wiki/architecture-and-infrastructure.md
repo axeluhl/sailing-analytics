@@ -1,5 +1,13 @@
 # Architecture and Infrastructure
 
+### Table of Contents
+
+* [[Runtime Environment|wiki/runtime-environment]]
+* [[Basic Architectural Principles|wiki/basic-architectural-principles]]
+* [[Development Environment|wiki/development-environment]]
+* [[Production Environment|wiki/production-environment]]
+* [[Typical Development Scenarios|wiki/typical-development-scenarios]]
+
 ## Introduction, Project Background and History
 
 The SAP Sailing Analytics are a technology show-case demonstrating SAP technologies, concepts, skills and values applied to the domain of regatta sailing. They started as a small tool primarily intended to support a commentator in his job by displaying a live leaderboard for a sailing regatta with data interesting for the commentary. GPS and wind data travel from sensors to the server where the application keeps it in memory. When a request for a leaderboard is received, the data is aggregated on the fly, performing geometric computations including wind projections and involving a virtual "advantage line" orthogonal to the wind direction.
