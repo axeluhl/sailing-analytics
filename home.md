@@ -14,6 +14,6 @@ If you have any questions then either contact Axel Uhl, Jens Rommel or Simon Pam
 2. [Maven Repository Browser](http://maven.sapsailing.com/maven/)
 3. [Main Sailing Website](http://www.sapsailing.com)
 
-### Table of Contents
+### Table of Contents Wiki
 
 [[Configure Races on Server|wiki/configure-races-on-server]]
