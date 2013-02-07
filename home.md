@@ -16,4 +16,4 @@ If you have any questions then either contact Axel Uhl, Jens Rommel or Simon Pam
 
 ### Table of Contents Wiki
 
-[[Configure Races on Server|wiki/configure-races-on-server]]
+* [[Configure Races on Server|wiki/configure-races-on-server]]
