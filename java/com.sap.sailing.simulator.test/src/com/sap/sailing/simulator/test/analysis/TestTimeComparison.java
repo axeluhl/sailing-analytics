@@ -27,6 +27,7 @@ import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.Util.Quadruple;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
@@ -197,6 +198,21 @@ public class TestTimeComparison {
     	long finishTime = this.allPoints.get(noPoints-1).timepoint;
     	long startTime = this.allPoints.get(0).timepoint;
     	double gpsTime = (finishTime - startTime) / 1000;
+    	long totalDistanceMeters = 0;
+    	Iterator<SimulatorWindDTO> it = this.allPoints.iterator();
+    	SimulatorWindDTO prec = it.next();
+    	SimulatorWindDTO succ = null;
+    	double avgBearing = 0.0;
+    	while( it.hasNext() ) {
+    		succ = it.next();
+    		Position p1 = new DegreePosition(prec.position.latDeg, prec.position.lngDeg);
+    		Position p2 = new DegreePosition(succ.position.latDeg, succ.position.lngDeg);
+    		totalDistanceMeters += p2.getDistance(p1).getMeters();
+    		avgBearing += 1.0/noPoints * p1.getBearingGreatCircle(p2).getDegrees();
+    		prec = succ;
+    	}
+    	double speedMetersPerSecond = totalDistanceMeters / gpsTime;
+    	double speedKnots = speedMetersPerSecond * 1.94;
     	String result = "";
     	//result = id.getRegattaName() + ", " + id.getRaceName();
         result += ", " + competitor.getName() + ", " + leg.toString() + ", " + gpsTime;
@@ -208,9 +224,10 @@ public class TestTimeComparison {
         	final RequestTotalTimeDTO requestData = new RequestTotalTimeDTO(boatClassIndex, this.allPoints, this.turnPoints, false, 1000, true);
         	final ResponseTotalTimeDTO receiveData = simulatorService.getTotalTime_new(requestData);
         	averageWind = simulatorService.getAverageWind();
-        	result += ", " + receiveData.totalTimeSeconds;
+        	result += ", " + receiveData.totalTimeSeconds;      	
         }
         result += ", " + averageWind.getKnots() + ", " + averageWind.getBearing();
+        result += ", " + speedKnots + ", " + avgBearing;
     	
     	return result;
     	
