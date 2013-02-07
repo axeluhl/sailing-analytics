@@ -16,4 +16,5 @@ If you have any questions then either contact Axel Uhl, Jens Rommel or Simon Pam
 
 ### Table of Contents Wiki
 
+* [[Architecture and Infrastructure|wiki/architecture-and-infrastructure]]
 * [[Configure Races on Server|wiki/configure-races-on-server]]
