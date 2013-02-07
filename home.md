@@ -8,10 +8,11 @@ The syntax is relatively easy and is documented here http://daringfireball.net/p
 
 If you have any questions then either contact Axel Uhl, Jens Rommel or Simon Pamiés.
 
-### Services that you can access
+### Internal services that you can access
 
-1. (http://bugzilla.sapsailing.com/bugzilla/ "Bugzilla")
-
+1. [Bugzilla Issue Tracking System](http://bugzilla.sapsailing.com/bugzilla/)
+2. [Maven Repository Browser](http://maven.sapsailing.com/maven/)
+3. [Main Sailing Website](http://www.sapsailing.com)
 
 ### Table of Contents
 
