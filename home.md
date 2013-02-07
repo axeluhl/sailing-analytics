@@ -6,4 +6,6 @@ The syntax is relatively easy and is documented here http://daringfireball.net/p
 
 **ATTENTION**: Make sure to always have _wiki/_ as the base path. So if you want to create `server/SystemBoot` then the correct URL is `wiki/server/SystemBoot`.
 
+If you have any questions then either contact Axel Uhl, Jens Rommel or Simon Pamiés.
+
 [[_TOC_]]
