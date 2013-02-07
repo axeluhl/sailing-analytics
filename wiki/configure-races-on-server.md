@@ -5,5 +5,4 @@ After a restart of a java production server that contained archived races one ne
 | TracTrac Configuration Name | Regatta Name | Race Rules |
 |:-----------|------------:|:------------:|
 | 49 European Championship      |        49er Qualification Round 1 |     Yellow, Blue     |
-| 49 European Championship      |        49er Qualification Round 2 |     Silver, Gold
-except Gold Race 9     | 
+| 49 European Championship      |        49er Qualification Round 2 |     Silver, Gold   * except Gold Race 9     | 
