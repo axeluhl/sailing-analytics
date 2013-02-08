@@ -5,7 +5,6 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -63,6 +62,7 @@ import com.sap.sailing.simulator.SimulationParameters;
 import com.sap.sailing.simulator.TimedPosition;
 import com.sap.sailing.simulator.TimedPositionWithSpeed;
 import com.sap.sailing.simulator.impl.ConfigurationManager;
+import com.sap.sailing.simulator.impl.PathGenerator1Turner;
 import com.sap.sailing.simulator.impl.PathImpl;
 import com.sap.sailing.simulator.impl.PolarDiagramCSV;
 import com.sap.sailing.simulator.impl.ReadingConfigurationFileStatus;
@@ -75,6 +75,7 @@ import com.sap.sailing.simulator.util.SailingSimulatorUtil;
 import com.sap.sailing.simulator.windfield.WindControlParameters;
 import com.sap.sailing.simulator.windfield.WindFieldGenerator;
 import com.sap.sailing.simulator.windfield.WindFieldGeneratorFactory;
+import com.sap.sailing.simulator.windfield.impl.WindFieldGeneratorMeasured;
 
 public class SimulatorServiceImpl extends RemoteServiceServlet implements SimulatorService {
 
@@ -84,8 +85,8 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
     private static final WindFieldGeneratorFactory wfGenFactory = WindFieldGeneratorFactory.INSTANCE;
     private static final WindPatternDisplayManager wpDisplayManager = WindPatternDisplayManager.INSTANCE;
     private static final String POLYLINE_PATH_NAME = "Polyline";
-    private static final double REACHING_TOLERANCE_FACTOR = 0.03;
-    private static final int MAX_NO_OF_STEPS = 800;
+    // private static final double REACHING_TOLERANCE_FACTOR = 0.03;
+    // private static final int MAX_NO_OF_STEPS = 800;
 
     private WindControlParameters controlParameters = new WindControlParameters(0, 0);
 
@@ -490,133 +491,26 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         PolarDiagram polarDiagram = polarDiagramAndNotificationMessage.getA();
         String notificationMessage = polarDiagramAndNotificationMessage.getB();
 
-        SailingSimulator simulator = new SailingSimulatorImpl(new SimulationParametersImpl(null, polarDiagram, null, SailingSimulatorUtil.measured));
-        Path gpsTrack = simulator.getGPSTrack();
-
         Position startPosition = toPosition(requestData.firstPoint.position);
         Position endPosition = toPosition(requestData.secondPoint);
+        RectangularBoundary rectangularBoundry = new RectangularBoundary(startPosition, endPosition, 0.1);
 
-        TimedPositionWithSpeed oneTurner = this.get1TurnerPosition(polarDiagram, startPosition, endPosition, requestData.firstPoint.timepoint,
-                requestData.stepDurationMilliseconds, requestData.leftSide, gpsTrack, requestData.useRealAverageWindSpeed);
+        SimulationParameters simulationParameters = new SimulationParametersImpl(null, polarDiagram, null, SailingSimulatorUtil.measured);
+        SailingSimulator sailingSimulator = new SailingSimulatorImpl(simulationParameters);
+        Path gpsWind = sailingSimulator.getGPSTrack();
 
-        return new Response1TurnerDTO(new SimulatorWindDTO(oneTurner.getPosition().getLatDeg(), oneTurner.getPosition().getLngDeg(),
-                oneTurner.getSpeed().getKnots(), oneTurner.getSpeed().getBearing().getDegrees(), oneTurner.getTimePoint().asMillis()), notificationMessage);
-    }
+        this.controlParameters.baseWindBearing += rectangularBoundry.getSouth().getDegrees();
+        WindFieldGeneratorMeasured windFieldGenerator = new WindFieldGeneratorMeasured(rectangularBoundry, this.controlParameters);
+        windFieldGenerator.setGPSWind(gpsWind);
 
-    /* PRIVATE MEMBERS */
+        TimePoint startTime = new MillisecondsTimePoint(requestData.firstPoint.timepoint);
 
-    private TimedPositionWithSpeed get1TurnerPosition(PolarDiagram polarDiagram, Position startPosition, Position endPosition, long startTimeMilliseconds,
-            int stepDurationMilliseconds, boolean leftSide, Path gpsTrack, boolean useRealAverageWindSpeed) {
+        PathGenerator1Turner pathGenerator = new PathGenerator1Turner(null);
+        TimedPositionWithSpeed oneTurner = pathGenerator.get1Turner(windFieldGenerator, polarDiagram, startPosition, endPosition, startTime,
+                requestData.leftSide);
 
-        long turnloss = polarDiagram.getTurnLoss();
-        Distance courseLength = startPosition.getDistance(endPosition);
-        Bearing bearStart2End = startPosition.getBearingGreatCircle(endPosition);
-        double reachingToleranceMeters = REACHING_TOLERANCE_FACTOR * courseLength.getMeters();
-        double[] reachTime = new double[MAX_NO_OF_STEPS];
-
-        Position currentPosition = startPosition;
-        TimePoint startTime = new MillisecondsTimePoint(startTimeMilliseconds);
-        TimePoint currentTimePoint = startTime;
-        TimePoint nextTimePoint = null;
-        boolean targetFound = false;
-        Bearing direction = null;
-        double newDistanceMeters = 0.0;
-        double minimumDistanceMeters = courseLength.getMeters();
-        double overallMinimumDistanceMeters = courseLength.getMeters();
-        int stepOfOverallMinimumDistance = MAX_NO_OF_STEPS;
-        LinkedList<TimedPositionWithSpeed> path = null;
-        LinkedList<TimedPositionWithSpeed> oneTurnerPath = null;
-        SpeedWithBearing currentWindSpeed = null;
-        SpeedWithBearing currentBoatSpeed = null;
-        Position nextPosition = null;
-
-        for (int stepIndex = 0; stepIndex < MAX_NO_OF_STEPS; stepIndex++) {
-
-            currentPosition = startPosition;
-            currentTimePoint = startTime;
-            reachTime[stepIndex] = courseLength.getMeters();
-            targetFound = false;
-            minimumDistanceMeters = courseLength.getMeters();
-            path = new LinkedList<TimedPositionWithSpeed>();
-            path.addLast(new TimedPositionWithSpeedImpl(currentTimePoint, currentPosition, null));
-
-            int stepIndexLeft = 0;
-            while (stepIndexLeft < stepIndex && targetFound == false) {
-
-                currentWindSpeed = useRealAverageWindSpeed ? getWindAtTimepoint(currentTimePoint.asMillis(), gpsTrack) : DEFAULT_AVERAGE_WIND;
-                polarDiagram.setWind(currentWindSpeed);
-
-                direction = polarDiagram.optimalDirectionsUpwind()[leftSide ? 0 : 1];
-                currentBoatSpeed = polarDiagram.getSpeedAtBearing(direction);
-
-                nextTimePoint = new MillisecondsTimePoint(currentTimePoint.asMillis() + stepDurationMilliseconds);
-                nextPosition = currentBoatSpeed.travelTo(currentPosition, currentTimePoint, nextTimePoint);
-                newDistanceMeters = nextPosition.getDistance(endPosition).getMeters();
-
-                if (newDistanceMeters < minimumDistanceMeters) {
-                    minimumDistanceMeters = newDistanceMeters;
-                }
-
-                currentPosition = nextPosition;
-                currentTimePoint = nextTimePoint;
-                path.addLast(new TimedPositionWithSpeedImpl(currentTimePoint, currentPosition, null));
-
-                if (currentPosition.getDistance(endPosition).getMeters() < reachingToleranceMeters) {
-
-                    reachTime[stepIndex] = minimumDistanceMeters;
-                    targetFound = true;
-
-                    if (minimumDistanceMeters < overallMinimumDistanceMeters) {
-
-                        overallMinimumDistanceMeters = minimumDistanceMeters;
-                        stepOfOverallMinimumDistance = stepIndex;
-                        oneTurnerPath = new LinkedList<TimedPositionWithSpeed>(path);
-                    }
-                }
-                stepIndexLeft++;
-            }
-
-            currentTimePoint = new MillisecondsTimePoint(currentTimePoint.asMillis() + turnloss);
-
-            int stepIndexRight = 0;
-            while (stepIndexRight < (MAX_NO_OF_STEPS - stepIndex) && targetFound == false) {
-
-                currentWindSpeed = useRealAverageWindSpeed ? getWindAtTimepoint(currentTimePoint.asMillis(), gpsTrack) : DEFAULT_AVERAGE_WIND;
-                polarDiagram.setWind(currentWindSpeed);
-
-                direction = polarDiagram.optimalDirectionsUpwind()[leftSide ? 1 : 0];
-                currentBoatSpeed = polarDiagram.getSpeedAtBearing(direction);
-
-                nextTimePoint = new MillisecondsTimePoint(currentTimePoint.asMillis() + stepDurationMilliseconds);
-                nextPosition = currentBoatSpeed.travelTo(currentPosition, currentTimePoint, nextTimePoint);
-                newDistanceMeters = nextPosition.getDistance(endPosition).getMeters();
-
-                if (newDistanceMeters < minimumDistanceMeters) {
-                    minimumDistanceMeters = newDistanceMeters;
-                }
-
-                currentPosition = nextPosition;
-                currentTimePoint = nextTimePoint;
-                path.addLast(new TimedPositionWithSpeedImpl(currentTimePoint, currentPosition, null));
-
-                if (currentPosition.getDistance(endPosition).getMeters() < reachingToleranceMeters) {
-
-                    reachTime[stepIndex] = minimumDistanceMeters
-                            * Math.signum(currentPosition.getBearingGreatCircle(endPosition).getDegrees() - bearStart2End.getDegrees());
-                    targetFound = (startPosition.getDistance(currentPosition).getMeters() > startPosition.getDistance(endPosition).getMeters());
-
-                    if (minimumDistanceMeters < overallMinimumDistanceMeters) {
-
-                        overallMinimumDistanceMeters = minimumDistanceMeters;
-                        stepOfOverallMinimumDistance = stepIndex;
-                        oneTurnerPath = new LinkedList<TimedPositionWithSpeed>(path);
-                    }
-                }
-                stepIndexRight++;
-            }
-        }
-
-        return oneTurnerPath.get(stepOfOverallMinimumDistance);
+        return new Response1TurnerDTO(new SimulatorWindDTO(oneTurner.getPosition().getLatDeg(), oneTurner.getPosition().getLngDeg(), oneTurner.getSpeed()
+                .getKnots(), oneTurner.getSpeed().getBearing().getDegrees(), oneTurner.getTimePoint().asMillis()), notificationMessage);
     }
 
     private void retreiveWindControlParameters(WindPatternDisplay pattern) {
