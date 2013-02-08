@@ -22,8 +22,23 @@ After a restart of a java production server that contained archived races one ne
 
 ### Desaster recovery
 
-* Check loading state
-* ...
+#### Problems
+
+* If a race switches automatically to state FINISHED then this is bad.
+* If a race after some time still indicates that there is no wind associated than this is bad.
+* If a race is stucked while LOADING then this is bad. Stucked means that for 5+ minutes no progress is happening.
+* If there is no start time then this is bad
+
+If one of these problems occur then you have to safely remove the race and re-add it. This does not hold for Swiss Timing Races as they are known to have multiple problems.
+
+#### Safely remove a race
+
+* Remove race from list. This will also trigger removal from leaderboard
+* Follow process described in "General process"
+* Navigate to the "Leaderboard Configuration" tab
+* Locate the Leaderboard you just removed the race from
+* Re-Apply link between RaceInLeaderboard and TrackedRace
+* Check results
 
 ### Table with associations
 
