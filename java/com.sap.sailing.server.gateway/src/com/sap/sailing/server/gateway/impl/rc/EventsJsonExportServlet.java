@@ -19,24 +19,22 @@ public class EventsJsonExportServlet extends JsonExportServlet {
 	private static final long serialVersionUID = 4515246650108245796L;
 	
 	@Override
-	public void init() throws ServletException {
-		super.init();
-	}
-	
-	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 		
-		JsonSerializer<Event> eventSerializer = new EventJsonSerializer(
-				new VenueJsonSerializer(
-						new CourseAreaJsonSerializer()));
-		
+		JsonSerializer<Event> eventSerializer = createSerializer();
 		JSONArray result = new JSONArray();
 		for (Event event : getService().getAllEvents())
 		{
 			result.add(eventSerializer.serialize(event));
 		}
 		result.writeJSONString(response.getWriter());
+	}
+
+	private static JsonSerializer<Event> createSerializer() {
+		return new EventJsonSerializer(
+				new VenueJsonSerializer(
+						new CourseAreaJsonSerializer()));
 	}
 
 }
