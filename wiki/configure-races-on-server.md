@@ -77,4 +77,4 @@ If one of these problems occur then you have to safely remove the race and re-ad
 |:-----------|------------:|:------------:|
 | http://mrtg.sapsailing.com/2012_OSG.json      |        No Regatta  |     All except Elliott     |
 
-[[RacesKielerWocheProxy2012.jpg]]
+[[wiki/images/RacesKielerWocheProxy2012.jpg]]
