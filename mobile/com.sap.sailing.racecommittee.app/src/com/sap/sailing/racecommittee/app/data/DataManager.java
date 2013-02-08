@@ -18,11 +18,13 @@ import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 import com.sap.sailing.racecommittee.app.data.handlers.DataHandler;
 import com.sap.sailing.racecommittee.app.data.handlers.EventsDataHandler;
 import com.sap.sailing.racecommittee.app.data.handlers.ManagedRacesDataHandler;
+import com.sap.sailing.racecommittee.app.data.handlers.RaceLogsDataHandler;
 import com.sap.sailing.racecommittee.app.data.http.HttpJsonPostRequest;
 import com.sap.sailing.racecommittee.app.data.loaders.DataLoader;
 import com.sap.sailing.racecommittee.app.data.parsers.DataParser;
 import com.sap.sailing.racecommittee.app.data.parsers.EventsDataParser;
 import com.sap.sailing.racecommittee.app.data.parsers.ManagedRacesDataParser;
+import com.sap.sailing.racecommittee.app.data.parsers.RaceLogsDataParser;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.deserialization.impl.ColorDeserializer;
 import com.sap.sailing.racecommittee.app.domain.deserialization.impl.CourseAreaJsonDeserializer;
@@ -169,15 +171,20 @@ public class DataManager implements ReadonlyDataManager {
 			return;
 		}
 		
-		/*DataLoader<Map<ManagedRace, Collection<RaceLogEvent>>> loader = 
+		DataParser<Map<ManagedRace, Collection<RaceLogEvent>>> parser = new RaceLogsDataParser();
+		
+		DataHandler<Map<ManagedRace, Collection<RaceLogEvent>>> handler = new RaceLogsDataHandler(this, client);
+		
+		DataLoader<Map<ManagedRace, Collection<RaceLogEvent>>> loader = 
 				new DataLoader<Map<ManagedRace,Collection<RaceLogEvent>>>(
 						context,
 						request, 
-						null, 
-						null);*/
+						parser, 
+						handler);
+		loader.forceLoad();
 	}
 	
-	private static final String TargetHost = "http://192.168.42.100:8888";
+	private static final String TargetHost = "http://192.168.178.22:8888";
 	
 	
 

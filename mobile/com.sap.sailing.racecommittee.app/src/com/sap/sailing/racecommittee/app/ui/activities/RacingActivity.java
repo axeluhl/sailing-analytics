@@ -125,8 +125,7 @@ StartModeSelectionListener, PathfinderSelectionListener, GateLineOpeningTimeSele
 		dataManager.loadRaceLogs(data, new LoadClient<Map<ManagedRace,Collection<RaceLogEvent>>>() {
 			
 			public void onLoadSucceded(Map<ManagedRace, Collection<RaceLogEvent>> data) {
-				// TODO Auto-generated method stub
-				
+				Toast.makeText(RacingActivity.this, "OKOKOKOK", Toast.LENGTH_LONG).show();
 			}
 			
 			public void onLoadFailed(Exception reason) {
