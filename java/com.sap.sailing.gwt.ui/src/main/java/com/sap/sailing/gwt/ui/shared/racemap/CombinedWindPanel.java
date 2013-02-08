@@ -27,6 +27,8 @@ public class CombinedWindPanel extends FlowPanel {
     
     private Canvas canvas;
 
+    private static String CSS_STYLE_COMBINED_WIND_PANEL = "CombinedWindPanel";
+   
     /**
      */
     public CombinedWindPanel(RaceMapImageManager theRaceMapResources, StringMessages stringMessages) {
@@ -34,9 +36,14 @@ public class CombinedWindPanel extends FlowPanel {
         this.raceMapResources = theRaceMapResources;
         transformer = raceMapResources.getCombinedWindIconTransformer();
         canvas = transformer.getCanvas();
+        int canvasWidth = canvas.getCanvasElement().getWidth();
+        
+        addStyleName(CSS_STYLE_COMBINED_WIND_PANEL);
+        
         canvas.getElement().getStyle().setCursor(Cursor.POINTER);
+        canvas.setWidth(canvasWidth + LABEL_HEIGHT + "px");
         textLabel = new Label("");
-        textLabel.setSize(""+2*transformer.getRadius()+"px", ""+LABEL_HEIGHT+"px");
+        textLabel.setSize(canvasWidth + LABEL_HEIGHT +"px", ""+LABEL_HEIGHT+"px");
         textLabel.getElement().getStyle().setFontSize(LABEL_HEIGHT, Unit.PX);
         textLabel.setWordWrap(false);
         textLabel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
