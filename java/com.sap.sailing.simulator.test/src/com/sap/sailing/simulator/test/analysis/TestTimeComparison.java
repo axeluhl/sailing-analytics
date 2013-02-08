@@ -2,7 +2,9 @@ package com.sap.sailing.simulator.test.analysis;
 
 import static org.junit.Assert.*;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -94,6 +96,16 @@ public class TestTimeComparison {
 		
 		//List<String> csvRows = new ArrayList<String>();
 		
+		BufferedWriter outputCSV = new BufferedWriter(new FileWriter("test.csv"));
+		String header = "Event, Race, Competitor, Leg, GPS time";
+		
+		for(String pd : boatClassesIndexes.values()) 
+			header += ", " + pd;
+		header += ", Avg Wind Speed, Avg Wind Bearing, Avg Boat Speed, Avg Boat Bearing";
+		
+		outputCSV.write(header);
+		outputCSV.newLine();
+		
 		for( TrackedRace tr : lst ) {
 			
 			//String csvLine = "";
@@ -150,7 +162,9 @@ public class TestTimeComparison {
 				    }
 				    
 				    //getTotalTime(0, 0, 1000);
-			        System.out.println(getSummary(id, competitor, leg));
+			        //System.out.println(getSummary(id, competitor, leg));
+				    outputCSV.write(getSummary(id, competitor, leg));
+				    outputCSV.newLine();
 				    
 				//end legs loop
 				}
@@ -161,6 +175,7 @@ public class TestTimeComparison {
 		//end tracked races loop	
 		}
 		
+		outputCSV.close();
 	//end method	
 	}
 	
@@ -214,7 +229,7 @@ public class TestTimeComparison {
     	double speedMetersPerSecond = totalDistanceMeters / gpsTime;
     	double speedKnots = speedMetersPerSecond * 1.94;
     	String result = "";
-    	//result = id.getRegattaName() + ", " + id.getRaceName();
+    	result = id.getRegattaName() + ", " + id.getRaceName();
         result += ", " + competitor.getName() + ", " + leg.toString() + ", " + gpsTime;
     	
         SpeedWithBearing averageWind = null;
