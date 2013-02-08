@@ -1,5 +1,7 @@
 # Configure Races On Server
 
+[[_TOC_]]
+
 After a restart of a java production server that contained archived races one need to reconfigure all these archived races. Here you find the steps needed including all druid knowledge required :-)
 
 ### General process
@@ -77,4 +79,6 @@ If one of these problems occur then you have to safely remove the race and re-ad
 |:-----------|------------:|:------------:|
 | http://mrtg.sapsailing.com/2012_OSG.json      |        No Regatta  |     All except Elliott     |
 
-[[wiki/images/RacesKielerWocheProxy2012.jpg]]
+### Screenshot(s)
+
+[Screenshot of Kieler Woche Proxy 2012 Races selection](wiki/images/RacesKielerWocheProxy2012.jpg)
