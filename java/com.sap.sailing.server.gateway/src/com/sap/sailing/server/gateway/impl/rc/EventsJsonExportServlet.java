@@ -24,8 +24,7 @@ public class EventsJsonExportServlet extends JsonExportServlet {
 		
 		JsonSerializer<Event> eventSerializer = createSerializer();
 		JSONArray result = new JSONArray();
-		for (Event event : getService().getAllEvents())
-		{
+		for (Event event : getService().getAllEvents()) {
 			result.add(eventSerializer.serialize(event));
 		}
 		result.writeJSONString(response.getWriter());
