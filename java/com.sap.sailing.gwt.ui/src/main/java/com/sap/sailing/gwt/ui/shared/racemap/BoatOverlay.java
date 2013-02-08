@@ -38,7 +38,7 @@ public class BoatOverlay extends CanvasOverlay {
     private final BoatClassImageData boatClassImageData;    
 
     public BoatOverlay(CompetitorDTO competitorDTO) {
-        super(RaceMapOverlaysZIndexes.BOATS_ZINDEX);
+        super();
         this.competitorDTO = competitorDTO;
         this.boatClass = competitorDTO.boatClass;
         this.boatClassImageData = BoatClassImageDataResolver.getBoatClassImages(boatClass.name);

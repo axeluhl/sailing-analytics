@@ -36,7 +36,7 @@ public class CourseMarkOverlay extends CanvasOverlay {
     private final int MIN_BUOYZONE_RADIUS_IN_PX = 25;
     
     public CourseMarkOverlay(final RaceMapImageManager raceMapImageManager, MarkDTO markDTO) {
-        super(RaceMapOverlaysZIndexes.COURSEMARK_ZINDEX);
+        super();
         this.raceMapImageManager = raceMapImageManager;
         this.mark = markDTO;
         this.position = markDTO.position;

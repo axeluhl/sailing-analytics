@@ -44,11 +44,20 @@ public abstract class CanvasOverlay extends Overlay {
      */
     protected LatLng latLngPosition;
 
-    public CanvasOverlay(int zIndex) {
+    public CanvasOverlay() {
         canvas = Canvas.createIfSupported();
         if(canvas != null) {
-            canvas.getElement().getStyle().setZIndex(zIndex);
             canvas.getElement().getStyle().setCursor(Cursor.POINTER);
+        }
+    }
+
+    /** 
+     * Sets the z-Index of the map pane
+     */
+    protected void setPaneZIndex(int zIndex) {
+        MapPane pane = getPane();
+        if(pane != null) {
+            pane.getElement().getStyle().setZIndex(zIndex);
         }
     }
 

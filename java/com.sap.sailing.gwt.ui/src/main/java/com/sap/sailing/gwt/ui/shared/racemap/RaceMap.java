@@ -585,6 +585,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                         courseMarkOverlays.put(markDTO.name, courseMarkOverlay);
                         markDTOs.put(markDTO.name, markDTO);
                         map.addOverlay(courseMarkOverlay);
+                        courseMarkOverlay.setPaneZIndex(RaceMapOverlaysZIndexes.COURSEMARK_ZINDEX);
                     } else {
                         courseMarkOverlay.setMarkPosition(markDTO.position);
                         courseMarkOverlay.setShowBuoyZone(settings.getHelpLinesSettings().isVisible(HelpLineTypes.BUOYZONE));
@@ -620,6 +621,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                     windSensorOverlay = createWindSensorOverlay(windSource, windTrackInfoDTO);
                     windSensorOverlays.put(windSource, windSensorOverlay);
                     map.addOverlay(windSensorOverlay);
+                    windSensorOverlay.setPaneZIndex(RaceMapOverlaysZIndexes.WINDSENSOR_ZINDEX);
                 } else {
                     windSensorOverlay.setWindInfo(windTrackInfoDTO, windSource);
                     windSensorOverlay.redraw(true);
@@ -646,6 +648,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                             	competitorInfoOverlay = createCompetitorInfoOverlay(competitorDTO);
                             	competitorInfoOverlays.put(competitorDTO, competitorInfoOverlay);
                                 map.addOverlay(competitorInfoOverlay);
+                                competitorInfoOverlay.setPaneZIndex(RaceMapOverlaysZIndexes.COMPETITOR_INFO_ZINDEX);
                                 competitorInfoOverlay.setBoatFix(lastBoatFix);
                             	competitorInfoOverlay.redraw(true);
                             } else {
@@ -972,19 +975,20 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         boolean usedExistingCanvas = false;
         GPSFixDTO lastBoatFix = getBoatFix(competitorDTO, date);
         if (lastBoatFix != null) {
-            BoatOverlay boatCanvas = boatOverlays.get(competitorDTO);
-            if (boatCanvas == null) {
-                boatCanvas = createBoatOverlay(competitorDTO, displayHighlighted(competitorDTO));
-                map.addOverlay(boatCanvas);
-                boatOverlays.put(competitorDTO, boatCanvas);
-                boatCanvas.setSelected(displayHighlighted(competitorDTO));
-                boatCanvas.setBoatFix(lastBoatFix);
-                boatCanvas.redraw(true);
+            BoatOverlay boatOverlay = boatOverlays.get(competitorDTO);
+            if (boatOverlay == null) {
+                boatOverlay = createBoatOverlay(competitorDTO, displayHighlighted(competitorDTO));
+                map.addOverlay(boatOverlay);
+                boatOverlays.put(competitorDTO, boatOverlay);
+                boatOverlay.setPaneZIndex(RaceMapOverlaysZIndexes.BOATS_ZINDEX);
+                boatOverlay.setSelected(displayHighlighted(competitorDTO));
+                boatOverlay.setBoatFix(lastBoatFix);
+                boatOverlay.redraw(true);
             } else {
                 usedExistingCanvas = true;
-                boatCanvas.setSelected(displayHighlighted(competitorDTO));
-                boatCanvas.setBoatFix(lastBoatFix);
-                boatCanvas.redraw(true);
+                boatOverlay.setSelected(displayHighlighted(competitorDTO));
+                boatOverlay.setBoatFix(lastBoatFix);
+                boatOverlay.redraw(true);
             }
         }
         return usedExistingCanvas;

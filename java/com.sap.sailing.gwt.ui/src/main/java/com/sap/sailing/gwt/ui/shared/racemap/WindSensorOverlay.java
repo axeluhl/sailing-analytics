@@ -38,7 +38,7 @@ public class WindSensorOverlay extends CanvasOverlay {
     private final NumberFormat numberFormat = NumberFormat.getFormat("0.0");
     
     public WindSensorOverlay(RaceMapImageManager raceMapImageManager, StringMessages stringMessages) {
-        super(RaceMapOverlaysZIndexes.WINDSENSOR_ZINDEX);
+        super();
         this.raceMapImageManager = raceMapImageManager;
         this.stringMessages = stringMessages;
         canvasWidth = 28;
@@ -52,7 +52,7 @@ public class WindSensorOverlay extends CanvasOverlay {
         }
         transformer = raceMapImageManager.getWindSensorIconTransformer();
     }
-    
+
     @Override
     protected Overlay copy() {
       return new WindSensorOverlay(raceMapImageManager, stringMessages);
