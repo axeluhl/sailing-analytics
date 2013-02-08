@@ -43,19 +43,21 @@ public class PolarSheetsChartPanel extends SimplePanel implements RequiresResize
         return polarSheetChart;
     }
 
-    private void newSeries(String name) {
+    private void newSeriesArray(String name) {
         if (!seriesMap.containsKey(name)) {
-            Series[] seriesPerWindSpeed = new Series[13];        
-            for (int i = 0; i < 13; i++) {
-                Number[] forEachDeg = initializeDataForNewSeries();
-                seriesPerWindSpeed[i] = chart.createSeries().setPoints(forEachDeg);
-                seriesPerWindSpeed[i].setName(name+"-"+(i));
-                chart.addSeries(seriesPerWindSpeed[i]);
-            }       
+            Series[] seriesPerWindSpeed = new Series[13];
             seriesMap.put(name, seriesPerWindSpeed);
         } else {
             // TODO exception handling
         }
+    }
+
+    private void createSeriesForWindspeed(String name, int windSpeed) {
+        Series[] seriesPerWindSpeed = seriesMap.get(name);
+        Number[] forEachDeg = initializeDataForNewSeries();
+        seriesPerWindSpeed[windSpeed] = chart.createSeries().setPoints(forEachDeg);
+        seriesPerWindSpeed[windSpeed].setName(name + "-" + (windSpeed));
+        chart.addSeries(seriesPerWindSpeed[windSpeed]);
     }
 
     private Number[] initializeDataForNewSeries() {
@@ -66,14 +68,31 @@ public class PolarSheetsChartPanel extends SimplePanel implements RequiresResize
     private void addValuesToSeries(String seriesId, PolarSheetsData result) {
         if (seriesMap.containsKey(seriesId)) {
             for (int i = 0; i < 13; i++) {
-                Series series = seriesMap.get(seriesId)[i];
-                series.setPoints(result.getAveragedPolarDataByWindSpeed()[i], false);
-                Point[] points = createPointsWithMarkerAlphaAccordingToDataCount(result, i);
-                if (points != null) {
-                    series.setPoints(points);
+                if (hasSufficientDataForWindspeed(result.getDataCountPerAngleForWindspeed(i), result.getDataCount())) {
+                    if (seriesMap.get(seriesId)[i] == null) {
+                        createSeriesForWindspeed(seriesId, i);
+                    }
+                    Series series = seriesMap.get(seriesId)[i];
+                    series.setPoints(result.getAveragedPolarDataByWindSpeed()[i], false);
+                    Point[] points = createPointsWithMarkerAlphaAccordingToDataCount(result, i);
+                    if (points != null) {
+                        series.setPoints(points);
+                    }
                 }
             }
         }
+    }
+
+    private boolean hasSufficientDataForWindspeed(Integer[] dataCountPerAngleForWindspeed, int countOverall) {
+        int sum = 0;
+        for (int count : dataCountPerAngleForWindspeed) {
+            sum = sum + count;
+        }
+        //TODO make configurable
+        if (sum >= (0.05 * countOverall)) {
+            return true;
+        }
+        return false;
     }
 
     private Point[] createPointsWithMarkerAlphaAccordingToDataCount(PolarSheetsData result, int beaufort) {
@@ -133,7 +152,7 @@ public class PolarSheetsChartPanel extends SimplePanel implements RequiresResize
             return;
         }
         if (!seriesMap.containsKey(id)) {
-            newSeries(id);
+            newSeriesArray(id);
         }
         addValuesToSeries(id, result);
         chart.redraw();
