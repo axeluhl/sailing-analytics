@@ -18,7 +18,7 @@ After a restart of a java production server that contained archived races one ne
 
 * Do not have a boat class
 * Time higher than 20:00 (e.g. 21:14)
-* Have "Test" somewhere in the name
+* Have "Test", "Find it", "Gone out", "PreRace" somewhere in the name
 
 ### Desaster recovery
 
@@ -31,4 +31,34 @@ After a restart of a java production server that contained archived races one ne
 |:-----------|------------:|:------------:|
 | 49 European Championship      |        49er Qualification Round 1 |     Yellow, Blue     |
 | 49 European Championship      |        49er Qualification Round 2 |     Silver, Gold (except Gold Race 9)  |
-| 49 European Championship      |        No Regatta |     All except _default excludes_  | 
+| 49 European Championship      |        No Regatta |     All remaining  | 
+| Internationale Deutche Meisterschaft (notice the missing s)     |        IDM 2011 Champions Cup |     Only Champions Cup Races  | 
+| Internationale Deutche Meisterschaft      |        No Regatta |     All remaining  | 
+| Kieler Woche IC 2012 | Kieler Woche 2012 29er | Only 29er |
+| Kieler Woche IC 2012 | No Regatta | Star, 505, F18 |
+| Kieler Woche 2012 - Proxy | Kieler Woche 2012 420 | All except "420YES" |
+| Kieler Woche 2012 - Proxy | No Regatta | See Screenshot below |
+| Kieler Woche 2012 | Kieler Woche 2012 (49er) | All  |
+| Kieler Woche 2012 | KW 2012 Laser | All except RADIAL  |
+| Kieler Woche 2012 | No Regatta | Radial |
+| Kieler Woche 2012 | No Regatta | 470* |
+| KW 2012 | No Regatta | SWAN |
+| OBMR 2012 | Vorrunde (Laser SB3) | *VR* |
+| OBMR 2012 | No Regatta | All remaining except *VR* |
+| IDM Drachen | No Regatta | All |
+| YES | YES 2012 29er | 29er |
+| YES | No Regatta | Laser |
+| BMW Cup | No Regatta | All |
+| Academy Tracking 2011 | No Regatta | boatClass=MdM && boatClass=Melges24 && Lahaina Monday-Wednesday - Finale has no tracks! |
+| Arenal Training 2012 | No Regatta | All |
+| SAP 505 World Championship 2012 | No Regatta | All |
+| Academy Tracking 2012 | No Regatta | All |
+| Extreme Sailing Series | No Regatta | All |
+| SAP 2011 505 | No Regatta | All |
+| 505 Worlds 2010 | No Regatta | All |
+| Kieler Woche | No Regatta | 470 and 505 |
+
+| SwissTiming URL | Regatta Name | Race Rules |
+|:-----------|------------:|:------------:|
+| http://mrtg.sapsailing.com/2012_OSG.json      |        No Regatta  |     All except Elliott     |
+
