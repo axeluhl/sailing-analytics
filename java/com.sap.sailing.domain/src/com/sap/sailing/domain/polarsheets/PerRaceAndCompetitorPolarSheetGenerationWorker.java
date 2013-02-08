@@ -49,7 +49,7 @@ public class PerRaceAndCompetitorPolarSheetGenerationWorker implements Callable<
 
     private void optimizeEndTime() {
         NavigableSet<MarkPassing> markPassings = race.getMarkPassings(competitor);
-        if (markPassings.size() < 1) {
+        if (markPassings == null || markPassings.size() < 1) {
             return;
         }
         MarkPassing passedFinish = markPassings.last();
@@ -61,7 +61,7 @@ public class PerRaceAndCompetitorPolarSheetGenerationWorker implements Callable<
 
     private void optimizeStartTime() {
         NavigableSet<MarkPassing> markPassings = race.getMarkPassings(competitor);
-        if (markPassings.size() < 1) {
+        if (markPassings == null || markPassings.size() < 1) {
             return;
         }
         MarkPassing passedStart = markPassings.first();
@@ -89,17 +89,13 @@ public class PerRaceAndCompetitorPolarSheetGenerationWorker implements Callable<
             }
 
             SpeedWithBearing speedWithBearing = fix.getSpeed();
-            double speed = speedWithBearing.getKnots();
             Bearing bearing = speedWithBearing.getBearing();
             Position position = fix.getPosition();
             Wind wind = race.getWind(position, fix.getTimePoint());
             Bearing windBearing = wind.getFrom();
-            // TODO windspeed stuff
-            // double windSpeed = wind.getKnots();
-            double normalizedSpeed = speed;
             double angleToWind = bearing.getDifferenceTo(windBearing).getDegrees();
 
-            polarSheetGenerationWorker.addPolarData(Math.round(angleToWind), normalizedSpeed);
+            polarSheetGenerationWorker.addPolarData(Math.round(angleToWind), speedWithBearing, wind);
         }
 
         track.unlockAfterRead();

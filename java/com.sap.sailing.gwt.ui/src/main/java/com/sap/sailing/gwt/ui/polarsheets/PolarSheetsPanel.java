@@ -79,6 +79,7 @@ public class PolarSheetsPanel extends FormPanel implements RaceSelectionChangeLi
         leftPanel.add(dataCountLabel);
         VerticalPanel rightPanel = addPolarSheetsChartPanel(splitPanel);
         histogramPanel = new PolarSheetsHistogramPanel(stringMessages);
+        histogramPanel.getElement().setAttribute("align", "top");
         rightPanel.add(histogramPanel);
         mainPanel.add(splitPanel);
 
@@ -91,11 +92,15 @@ public class PolarSheetsPanel extends FormPanel implements RaceSelectionChangeLi
 
             @Override
             public boolean onMouseOver(PointMouseOverEvent pointMouseOverEvent) {
-                int x = (int) pointMouseOverEvent.getXAsLong();
-                String polarSheetName = pointMouseOverEvent.getSeriesName();
+                int angle = (int) pointMouseOverEvent.getXAsLong();
+                String polarSheetNameWithWind = pointMouseOverEvent.getSeriesName();
+                String[] split = polarSheetNameWithWind.split("-");
+                String polarSheetName = split[0] + "-" + split[1];
                 String polarSheetId = nameIdMapping.get(polarSheetName);
+                int windSpeed = Integer.parseInt(split[2]); 
+                
                 GetPolarSheetDataByAngleAction action = new GetPolarSheetDataByAngleAction(sailingService,
-                        polarSheetId, x, new AsyncCallback<PolarSheetsHistogramData>() {
+                        polarSheetId, angle, windSpeed, new AsyncCallback<PolarSheetsHistogramData>() {
 
                             @Override
                             public void onSuccess(PolarSheetsHistogramData result) {
@@ -127,6 +132,7 @@ public class PolarSheetsPanel extends FormPanel implements RaceSelectionChangeLi
         verticalPanel.setSize("100%", "100%");
         chartPanel = new PolarSheetsChartPanel(stringMessages);
         verticalPanel.add(chartPanel);
+        verticalPanel.setCellHeight(chartPanel, "800px");
         splitPanel.add(verticalPanel);
         splitPanel.setCellWidth(verticalPanel, "50%");
         return verticalPanel;

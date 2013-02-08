@@ -24,6 +24,7 @@ public class PolarSheetsHistogramPanel extends SimplePanel implements RequiresRe
         this.stringMessages = stringMessages;
         setSize("100%", "100%");
         chart = createHistogramChart();
+        chart.getElement().setAttribute("align", "top");
         setWidget(chart);
     }
 

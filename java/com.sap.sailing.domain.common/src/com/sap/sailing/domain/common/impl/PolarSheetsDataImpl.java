@@ -1,32 +1,34 @@
 package com.sap.sailing.domain.common.impl;
 
+import java.util.Map;
+
 import com.sap.sailing.domain.common.PolarSheetsData;
 
 public class PolarSheetsDataImpl implements PolarSheetsData {
 
     private static final long serialVersionUID = -4649254807341866894L;
 
-    private Number[] values;
+    private Number[][] averagedPolarDataByWindSpeed;
     
     private boolean complete;
     
     private int dataCount;
 
-    private Integer[] dataCountPerAngle;
+    private Map<Integer,Integer[]> dataCountPerAngleForWindspeed;
     
     //For GWT Serialization
     PolarSheetsDataImpl() {};
    
-    public PolarSheetsDataImpl(Number[] values, boolean complete, int dataCount, Integer[] dataCountPerAngle) {
-        this.values = values;
+    public PolarSheetsDataImpl(Number[][] averagedPolarDataByWindSpeed, boolean complete, int dataCount, Map<Integer,Integer[]> dataCountPerAngleForWindspeed) {
+        this.averagedPolarDataByWindSpeed = averagedPolarDataByWindSpeed;
         this.complete = complete;
         this.dataCount = dataCount;
-        this.dataCountPerAngle = dataCountPerAngle;
+        this.dataCountPerAngleForWindspeed = dataCountPerAngleForWindspeed;
     }
 
     @Override
-    public Number[] getValues() {
-        return values;
+    public Number[][] getAveragedPolarDataByWindSpeed() {
+        return averagedPolarDataByWindSpeed;
     }
 
     @Override
@@ -39,9 +41,10 @@ public class PolarSheetsDataImpl implements PolarSheetsData {
         return dataCount;
     }
 
+
     @Override
-    public Integer[] getDataCountPerAngle() {
-        return dataCountPerAngle;
+    public Integer[] getDataCountPerAngleForWindspeed(int beaufort) {
+        return dataCountPerAngleForWindspeed.get(beaufort);
     }
 
 }

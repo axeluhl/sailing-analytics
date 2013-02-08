@@ -1,8 +1,10 @@
 package com.sap.sailing.domain.polarsheets;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.concurrent.FutureTask;
@@ -11,6 +13,7 @@ import java.util.concurrent.RunnableFuture;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.common.PolarSheetsData;
+import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.PolarSheetsDataImpl;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -27,7 +30,7 @@ public class PolarSheetGenerationWorker {
 
     private final Set<RunnableFuture<Void>> workers;
 
-    private final List<List<Double>> polarData;
+    private final List<List<BoatAndWindSpeed>> polarData;
 
     private final Executor executor;
 
@@ -63,10 +66,10 @@ public class PolarSheetGenerationWorker {
         }
     }
 
-    private List<List<Double>> initializePolarDataContainer() {
-        List<List<Double>> container = new ArrayList<List<Double>>();
+    private List<List<BoatAndWindSpeed>> initializePolarDataContainer() {
+        List<List<BoatAndWindSpeed>> container = new ArrayList<List<BoatAndWindSpeed>>();
         for (int i = 0; i < 360; i++) {
-            container.add(new ArrayList<Double>());
+            container.add(new ArrayList<BoatAndWindSpeed>());
         }
         return container;
     }
@@ -86,15 +89,18 @@ public class PolarSheetGenerationWorker {
      * 
      * @param roundedAngle
      *            boat's angle to the wind
-     * @param speed
-     *            boat's speed
+     * @param boatSpeed
+     *            boat's speed in knots
+     * @param windSpeed
+     *            wind's speed in knots
      */
-    protected void addPolarData(long roundedAngle, double speed) {
+    protected void addPolarData(long roundedAngle, Speed boatSpeed, Speed windSpeed) {
         int angle = (int) roundedAngle;
         if (angle < 0) {
             angle = (360 + angle);
         }
-        polarData.get(angle).add(speed);
+        BoatAndWindSpeed speeds = new BoatAndWindSpeedImpl(boatSpeed, windSpeed);
+        polarData.get(angle).add(speeds);
     }
 
     /**
@@ -104,26 +110,41 @@ public class PolarSheetGenerationWorker {
      *         product.
      */
     public PolarSheetsData getPolarData() {
-        Number[] averagedPolarData = new Number[360];
+        Number[][] averagedPolarDataByWindSpeed = new Number[13][360];
         Integer[] dataCountPerAngle = new Integer[360];
         int dataCount = 0;
+        Map<Integer, Integer[]> dataCountPerAngleForWindspeed = new HashMap<Integer, Integer[]>();
+        for (int i = 0; i < 13; i++) {
+            dataCountPerAngleForWindspeed.put(i, new Integer[360]);
+        }
         for (int i = 0; i < 360; i++) {
             // Avoid Concurrent modification, lock would slow things down
-            Double[] values = polarData.get(i).toArray(new Double[polarData.get(i).size()]);
+            BoatAndWindSpeed[] values = polarData.get(i).toArray(new BoatAndWindSpeed[polarData.get(i).size()]);
             dataCount = dataCount + values.length;
             dataCountPerAngle[i] = values.length;
-            if (values.length < 1) {
-                averagedPolarData[i] = 0;
-            } else {
-                double sum = 0;
-                for (Double singleData : values) {
-                    if (singleData != null) {
-                        sum = sum + singleData;
-                    }
+            double[] sumsPerWindSpeed = new double[13];
+            int[] dataCountPerWindSpeed = new int[13];
+            for (BoatAndWindSpeed singleDataPoint : values) {
+                if (singleDataPoint != null) {
+                    int windSpeed = (int) singleDataPoint.getWindSpeed().getBeaufort();
+                    //TODO enable different kinds of metrics for boats speed
+                    sumsPerWindSpeed[windSpeed] = sumsPerWindSpeed[windSpeed] + singleDataPoint.getBoatSpeed().getKnots();
+                    dataCountPerWindSpeed[windSpeed]++;
                 }
-                double average = sum / values.length;
-                averagedPolarData[i] = average;
             }
+            
+            for (int j = 0; j < 13; j++) {
+                Double average = sumsPerWindSpeed[j] / dataCountPerWindSpeed[j];
+                if (average.isNaN()) {
+                    average = new Double(0);
+                }
+                averagedPolarDataByWindSpeed[j][i] = average;
+                dataCountPerAngleForWindspeed.get(j)[i] = dataCountPerWindSpeed[j];
+            }
+            
+            
+            
+
         }
         boolean complete = true;
         for (RunnableFuture<Void> future : workers) {
@@ -133,7 +154,8 @@ public class PolarSheetGenerationWorker {
             }
         }
 
-        PolarSheetsData data = new PolarSheetsDataImpl(averagedPolarData, complete, dataCount, dataCountPerAngle);
+        PolarSheetsData data = new PolarSheetsDataImpl(averagedPolarDataByWindSpeed, complete, dataCount,
+                dataCountPerAngleForWindspeed);
 
         return data;
     }
@@ -144,7 +166,7 @@ public class PolarSheetGenerationWorker {
      * @return The complete set of datapoints that have been added. Can be quite big, depending on the amount of races
      *         and competitors.
      */
-    public List<List<Double>> getCompleteData() {
+    public List<List<BoatAndWindSpeed>> getCompleteData() {
         return polarData;
     }
 

@@ -24,13 +24,13 @@ public class PolarSheetsChartPanel extends SimplePanel implements RequiresResize
 
     private StringMessages stringMessages;
     private Chart chart;
-    private Map<String, Series> seriesMap;
+    private Map<String, Series[]> seriesMap;
 
     public PolarSheetsChartPanel(StringMessages stringMessages) {
         this.stringMessages = stringMessages;
-        setSize("100%", "100%");
+        setPixelSize(800, 800);
         chart = createPolarSheetChart();
-        seriesMap = new HashMap<String, Series>();
+        seriesMap = new HashMap<String, Series[]>();
         setWidget(chart);
     }
 
@@ -45,11 +45,14 @@ public class PolarSheetsChartPanel extends SimplePanel implements RequiresResize
 
     private void newSeries(String name) {
         if (!seriesMap.containsKey(name)) {
-            Number[] forEachDeg = initializeDataForNewSeries();
-            Series newSeries = chart.createSeries().setPoints(forEachDeg);
-            newSeries.setName(name);
-            chart.addSeries(newSeries);
-            seriesMap.put(name, newSeries);
+            Series[] seriesPerWindSpeed = new Series[13];        
+            for (int i = 0; i < 13; i++) {
+                Number[] forEachDeg = initializeDataForNewSeries();
+                seriesPerWindSpeed[i] = chart.createSeries().setPoints(forEachDeg);
+                seriesPerWindSpeed[i].setName(name+"-"+(i));
+                chart.addSeries(seriesPerWindSpeed[i]);
+            }       
+            seriesMap.put(name, seriesPerWindSpeed);
         } else {
             // TODO exception handling
         }
@@ -62,24 +65,26 @@ public class PolarSheetsChartPanel extends SimplePanel implements RequiresResize
 
     private void addValuesToSeries(String seriesId, PolarSheetsData result) {
         if (seriesMap.containsKey(seriesId)) {
-            Series series = seriesMap.get(seriesId);
-            series.setPoints(result.getValues(), false);
-            Point[] points = createPointsWithMarkerAlphaAccordingToDataCount(result);
-            if (points != null) {
-                series.setPoints(points);
+            for (int i = 0; i < 13; i++) {
+                Series series = seriesMap.get(seriesId)[i];
+                series.setPoints(result.getAveragedPolarDataByWindSpeed()[i], false);
+                Point[] points = createPointsWithMarkerAlphaAccordingToDataCount(result, i);
+                if (points != null) {
+                    series.setPoints(points);
+                }
             }
         }
     }
 
-    private Point[] createPointsWithMarkerAlphaAccordingToDataCount(PolarSheetsData result) {
+    private Point[] createPointsWithMarkerAlphaAccordingToDataCount(PolarSheetsData result, int beaufort) {
         Point[] points = new Point[360];
-        List<Integer> dataCountList = Arrays.asList(result.getDataCountPerAngle());
+        List<Integer> dataCountList = Arrays.asList(result.getDataCountPerAngleForWindspeed(beaufort));
         Integer max = Collections.max(dataCountList);
         if (max <= 0) {
             return null;
         }
         for (int i = 0; i < 360; i++) {
-            points[i] = new Point(result.getValues()[i]);
+            points[i] = new Point(result.getAveragedPolarDataByWindSpeed()[beaufort][i]);
             if (points[i] == null) {
                 points[i] = new Point(0);
             }
@@ -109,8 +114,10 @@ public class PolarSheetsChartPanel extends SimplePanel implements RequiresResize
 
     public void removeSeries(String seriesId) {
         if (seriesMap.containsKey(seriesId)) {
-            Series series = seriesMap.get(seriesId);
-            chart.removeSeries(series);
+            Series[] seriesPerWindSpeed = seriesMap.get(seriesId);
+            for (Series series : seriesPerWindSpeed) {
+                chart.removeSeries(series);
+            }
             seriesMap.remove(seriesId);
         }
     }

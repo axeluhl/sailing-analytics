@@ -4,12 +4,12 @@ import java.io.Serializable;
 
 public interface PolarSheetsData extends Serializable {
     
-    Number[] getValues();
+    Number[][] getAveragedPolarDataByWindSpeed();
     
     int getDataCount();
     
     boolean isComplete();
-    
-    Integer[] getDataCountPerAngle();
+
+    Integer[] getDataCountPerAngleForWindspeed(int beaufort);
 
 }

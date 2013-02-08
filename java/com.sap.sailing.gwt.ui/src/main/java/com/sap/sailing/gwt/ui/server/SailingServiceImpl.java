@@ -116,6 +116,7 @@ import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.MongoWindStoreFactory;
+import com.sap.sailing.domain.polarsheets.BoatAndWindSpeed;
 import com.sap.sailing.domain.polarsheets.PolarSheetGenerationWorker;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingArchiveConfiguration;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingConfiguration;
@@ -3156,22 +3157,36 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public PolarSheetsHistogramData getPolarSheetData(String polarSheetId, int angle) {
+    public PolarSheetsHistogramData getPolarSheetData(String polarSheetId, int angle, int windSpeed) {
         HttpServletRequest httpServletRequest = this.getThreadLocalRequest();
         HttpSession session = httpServletRequest.getSession();
         @SuppressWarnings("unchecked")
-        List<List<Double>> data = (List<List<Double>>) session.getAttribute(polarSheetId);
+        List<List<BoatAndWindSpeed>> data = (List<List<BoatAndWindSpeed>>) session.getAttribute(polarSheetId);
         if (data == null) {
           //TODO exception handling
             return null;
         }
-        List<Double> dataForAngle = data.get(angle);
+        List<BoatAndWindSpeed> dataForAngle = data.get(angle);
         if (dataForAngle.size() < 1) {
             //TODO exception handling
             return null;
         }
-        Double min = Collections.min(dataForAngle);
-        Double max = Collections.max(dataForAngle);
+        
+        List<Double> dataForAngleAndWindSpeed = new ArrayList<Double>();
+        
+        for (BoatAndWindSpeed dataPoint: dataForAngle) {
+            if (((int) dataPoint.getWindSpeed().getBeaufort()) == windSpeed) {
+                dataForAngleAndWindSpeed.add(dataPoint.getBoatSpeed().getKnots());
+            }
+        }
+        
+        if (dataForAngleAndWindSpeed.size() < 1) {
+            //TODO exception handling
+            return null;
+        }
+        
+        Double min = Collections.min(dataForAngleAndWindSpeed);
+        Double max = Collections.max(dataForAngleAndWindSpeed);
         //TODO make number of columns dynamic to chart size
         int numberOfColumns = 20;
         double range = (max - min) / numberOfColumns;
@@ -3181,7 +3196,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         }
         
         Integer[] yValues = new Integer[numberOfColumns];
-        for (Double dataPoint : dataForAngle) {
+        for (Double dataPoint : dataForAngleAndWindSpeed) {
             int i = (int) (((dataPoint - min) / range));
             if (i == numberOfColumns) {
                 //For max value
@@ -3193,7 +3208,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             yValues[i]++;
         }
         
-        PolarSheetsHistogramData histogramData = new PolarSheetsHistogramDataImpl(angle, xValues, yValues, dataForAngle.size());
+        PolarSheetsHistogramData histogramData = new PolarSheetsHistogramDataImpl(angle, xValues, yValues, dataForAngleAndWindSpeed.size());
 
         
         return histogramData;

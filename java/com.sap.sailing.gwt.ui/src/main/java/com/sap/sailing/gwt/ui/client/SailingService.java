@@ -291,5 +291,5 @@ public interface SailingService extends RemoteService {
     
     PolarSheetsData getPolarSheetsGenerationResults(String id);
     
-    PolarSheetsHistogramData getPolarSheetData(String polarSheetId, int angle);
+    PolarSheetsHistogramData getPolarSheetData(String polarSheetId, int angle, int windSpeed);
 }

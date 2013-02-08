@@ -77,9 +77,9 @@ public class PolarSheetGenerationServiceTest {
         Assert.assertNotNull(results);
         
         Assert.assertEquals(4, results.getDataCount());
-        Assert.assertEquals(4.0, results.getValues()[45]);
-        Assert.assertEquals(2.0, results.getValues()[55]);
-        Assert.assertEquals(6.0, results.getValues()[30]);
+        Assert.assertEquals(4.0, results.getAveragedPolarDataByWindSpeed()[1][45]);
+        Assert.assertEquals(2.0, results.getAveragedPolarDataByWindSpeed()[1][55]);
+        Assert.assertEquals(6.0, results.getAveragedPolarDataByWindSpeed()[1][30]);
         
         
         
