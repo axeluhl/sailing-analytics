@@ -271,6 +271,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     private void loadStoredEvents() {
         for (Event event : domainObjectFactory.loadAllEvents()) {
             synchronized (eventsById) {
+                if(event.getId() != null)
                 eventsById.put(event.getId(), event);
             }
         }
