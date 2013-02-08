@@ -5,9 +5,7 @@ import java.util.HashSet;
 import java.util.NavigableSet;
 import java.util.UUID;
 import java.util.concurrent.Executor;
-import java.util.concurrent.FutureTask;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.RunnableFuture;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -60,17 +58,17 @@ public class PolarSheetGenerationTest {
         PolarSheetGenerationWorker resultContainer = new PolarSheetGenerationWorker(new HashSet<TrackedRace>(), executor);
         BoatClass forelle = new BoatClassImpl("Forelle", true);
         Competitor competitor = new CompetitorImpl(UUID.randomUUID(), "Hans Frantz", new TeamImpl("SAP", null, null), new BoatImpl("Schnelle Forelle", forelle, "GER000"));
-        RunnableFuture<Void> futureTask = new FutureTask<Void>(new PerRaceAndCompetitorPolarSheetGenerationWorker(race, resultContainer, startTime, endTime, competitor));
+        PerRaceAndCompetitorPolarSheetGenerationWorker task = new PerRaceAndCompetitorPolarSheetGenerationWorker(race, resultContainer, startTime, endTime, competitor);
         
-        executor.execute(futureTask);
+        executor.execute(task);
         
         double timeUntilTimeout = 1000;
-        while (!futureTask.isDone() && timeUntilTimeout > 0) {
+        while (!task.isDone() && timeUntilTimeout > 0) {
             Thread.sleep(100);
             timeUntilTimeout = timeUntilTimeout - 0.1;
         }
         
-        Assert.assertTrue(futureTask.isDone());
+        Assert.assertTrue(task.isDone());
         
         PolarSheetsData data = resultContainer.getPolarData();
         Assert.assertEquals(4, data.getDataCount());

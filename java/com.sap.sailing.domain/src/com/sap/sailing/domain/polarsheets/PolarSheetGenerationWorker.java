@@ -7,8 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Executor;
-import java.util.concurrent.FutureTask;
-import java.util.concurrent.RunnableFuture;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.RaceDefinition;
@@ -28,7 +26,7 @@ import com.sap.sailing.domain.tracking.TrackedRace;
  */
 public class PolarSheetGenerationWorker {
 
-    private final Set<RunnableFuture<Void>> workers;
+    private final Set<PerRaceAndCompetitorPolarSheetGenerationWorker> workers;
 
     private final List<List<BoatAndWindSpeed>> polarData;
 
@@ -46,7 +44,7 @@ public class PolarSheetGenerationWorker {
     public PolarSheetGenerationWorker(Set<TrackedRace> trackedRaces, Executor executor) {
         polarData = initializePolarDataContainer();
         this.executor = executor;
-        workers = new HashSet<RunnableFuture<Void>>();
+        workers = new HashSet<PerRaceAndCompetitorPolarSheetGenerationWorker>();
         for (TrackedRace race : trackedRaces) {
             TimePoint startTime = race.getStartOfRace();
             TimePoint endTime = race.getEndOfRace();
@@ -58,9 +56,8 @@ public class PolarSheetGenerationWorker {
             Iterable<Competitor> competitors = raceDefinition.getCompetitors();
 
             for (Competitor competitor : competitors) {
-                RunnableFuture<Void> futureTask = new FutureTask<Void>(
-                        new PerRaceAndCompetitorPolarSheetGenerationWorker(race, this, startTime, endTime, competitor));
-                workers.add(futureTask);
+                PerRaceAndCompetitorPolarSheetGenerationWorker task = new PerRaceAndCompetitorPolarSheetGenerationWorker(race, this, startTime, endTime, competitor);
+                workers.add(task);
             }
 
         }
@@ -78,8 +75,8 @@ public class PolarSheetGenerationWorker {
      * Starts the {@link PerRaceAndCompetitorPolarSheetGenerationWorker}s
      */
     public void startPolarSheetGeneration() {
-        for (RunnableFuture<Void> future : workers) {
-            executor.execute(future);
+        for (Runnable task : workers) {
+            executor.execute(task);
         }
     }
 
@@ -127,6 +124,10 @@ public class PolarSheetGenerationWorker {
             for (BoatAndWindSpeed singleDataPoint : values) {
                 if (singleDataPoint != null) {
                     int windSpeed = (int) singleDataPoint.getWindSpeed().getBeaufort();
+                    //Somehow beaufort sometimes gets bigger than twelve. TODO: Investigation
+                    if (windSpeed > 12) {
+                        windSpeed = 12;
+                    }
                     //TODO enable different kinds of metrics for boats speed
                     sumsPerWindSpeed[windSpeed] = sumsPerWindSpeed[windSpeed] + singleDataPoint.getBoatSpeed().getKnots();
                     dataCountPerWindSpeed[windSpeed]++;
@@ -147,8 +148,8 @@ public class PolarSheetGenerationWorker {
 
         }
         boolean complete = true;
-        for (RunnableFuture<Void> future : workers) {
-            if (!future.isDone()) {
+        for (PerRaceAndCompetitorPolarSheetGenerationWorker task : workers) {
+            if (!task.isDone()) {
                 complete = false;
                 break;
             }

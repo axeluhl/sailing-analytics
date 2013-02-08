@@ -2,7 +2,6 @@ package com.sap.sailing.domain.polarsheets;
 
 import java.util.Iterator;
 import java.util.NavigableSet;
-import java.util.concurrent.Callable;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.SpeedWithBearing;
@@ -22,7 +21,7 @@ import com.sap.sailing.domain.tracking.Wind;
  * @author D054528 Frederik Petersen
  * 
  */
-public class PerRaceAndCompetitorPolarSheetGenerationWorker implements Callable<Void> {
+public class PerRaceAndCompetitorPolarSheetGenerationWorker implements Runnable{
 
     private final TrackedRace race;
 
@@ -33,6 +32,8 @@ public class PerRaceAndCompetitorPolarSheetGenerationWorker implements Callable<
     private TimePoint endTime;
 
     private final Competitor competitor;
+
+    private boolean done = false;
 
     public PerRaceAndCompetitorPolarSheetGenerationWorker(TrackedRace race,
             PolarSheetGenerationWorker polarSheetGenerationWorker, TimePoint startTime, TimePoint endTime,
@@ -72,7 +73,7 @@ public class PerRaceAndCompetitorPolarSheetGenerationWorker implements Callable<
     }
 
     @Override
-    public Void call() throws Exception {
+    public void run() {
         GPSFixTrack<Competitor, GPSFixMoving> track = race.getTrack(competitor);
         track.lockForRead();
         Iterator<GPSFixMoving> fixesIterator = track.getFixesIterator(startTime, true);
@@ -99,6 +100,10 @@ public class PerRaceAndCompetitorPolarSheetGenerationWorker implements Callable<
         }
 
         track.unlockAfterRead();
-        return null;
+        done = true;
+    }
+    
+    public boolean isDone() {
+        return done;
     }
 }
