@@ -1,7 +1,7 @@
 Extreme Sailing Series 2012 - Cardiff
 
 Move wind data from test
-  /opt/mongodb/bin/mongoexport --port 10201 -d winddb -c WIND_TRACKS -q "{ EVENT_NAME: 'Extreme Sailing Series (Extreme40)'}" > /tmp/windtracks-ess40_cardiff.json
+  /opt/mongodb/bin/mongoexport --port 10201 -d winddb -c WIND_TRACKS -q "{ REGATTA_NAME: 'Extreme Sailing Series (Extreme40)'}" > /tmp/windtracks-ess40_cardiff.json
 
 to prod
   /opt/mongodb/bin/mongoimport --port 10202 -d winddb -c WIND_TRACKS /tmp/windtracks-ess40_cardiff.json
