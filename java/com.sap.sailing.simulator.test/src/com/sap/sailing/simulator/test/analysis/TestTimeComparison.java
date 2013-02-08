@@ -97,7 +97,7 @@ public class TestTimeComparison {
 		
 		//List<String> csvRows = new ArrayList<String>();
 		
-		BufferedWriter outputCSV = new BufferedWriter(new FileWriter("Resources\\test.csv"));
+		BufferedWriter outputCSV = new BufferedWriter(new FileWriter("src\\com\\sap\\sailing\\simulator\\test\\analysis\\Resources\\test.csv"));
 		String header = "Event, Race, Competitor, Leg#, Leg, GPS time";
 		
 		for(String pd : boatClassesIndexes.values()) 
