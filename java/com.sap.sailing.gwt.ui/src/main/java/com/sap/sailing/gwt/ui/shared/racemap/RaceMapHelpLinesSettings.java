@@ -24,7 +24,6 @@ public class RaceMapHelpLinesSettings {
         visibleHelpLines.add(HelpLineTypes.STARTLINE);
         visibleHelpLines.add(HelpLineTypes.FINISHLINE);
         visibleHelpLines.add(HelpLineTypes.ADVANTAGELINE);
-        visibleHelpLines.add(HelpLineTypes.BUOYZONE);
         visibleHelpLines.add(HelpLineTypes.BOATTAILS);
     }
     
