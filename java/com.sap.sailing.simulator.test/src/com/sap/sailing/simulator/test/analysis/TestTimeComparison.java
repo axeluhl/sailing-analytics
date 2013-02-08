@@ -56,8 +56,9 @@ public class TestTimeComparison {
     private List<SimulatorWindDTO> allPoints = null;
 
     private Map<Integer, String> boatClassesIndexes = null;
-    private Map<Integer, String> averageWindFlags = null;
-    private List<Integer> timeStepMillisecondsSizes = null;
+    //private Map<Integer, String> averageWindFlags = null;
+    //private List<Integer> timeStepMillisecondsSizes = null;
+    private Integer timeStepMilliseconds = 1000;
     
     @Before
     public void initialize() {
@@ -69,16 +70,16 @@ public class TestTimeComparison {
         this.boatClassesIndexes.put(3, "49er STG");
         this.boatClassesIndexes.put(4, "505 STG");
 
-        this.averageWindFlags = new HashMap<Integer, String>();
+        /*this.averageWindFlags = new HashMap<Integer, String>();
         this.averageWindFlags.put(0, "default average wind");
-        this.averageWindFlags.put(1, "real average wind");
+        this.averageWindFlags.put(1, "real average wind");*/
 
-        this.timeStepMillisecondsSizes = new ArrayList<Integer>();
+        /*this.timeStepMillisecondsSizes = new ArrayList<Integer>();
         this.timeStepMillisecondsSizes.add(1000);
         this.timeStepMillisecondsSizes.add(1250);
         this.timeStepMillisecondsSizes.add(1500);
         this.timeStepMillisecondsSizes.add(1750);
-        this.timeStepMillisecondsSizes.add(2000);
+        this.timeStepMillisecondsSizes.add(2000);*/
     }
 
 	@Test
@@ -96,8 +97,8 @@ public class TestTimeComparison {
 		
 		//List<String> csvRows = new ArrayList<String>();
 		
-		BufferedWriter outputCSV = new BufferedWriter(new FileWriter("test.csv"));
-		String header = "Event, Race, Competitor, Leg, GPS time";
+		BufferedWriter outputCSV = new BufferedWriter(new FileWriter("Resources\\test.csv"));
+		String header = "Event, Race, Competitor, Leg#, Leg, GPS time";
 		
 		for(String pd : boatClassesIndexes.values()) 
 			header += ", " + pd;
@@ -121,7 +122,9 @@ public class TestTimeComparison {
 				track.lockForRead();
 				Iterator<GPSFixMoving> it = track.getFixes().iterator();
 				
+				int legIndex = 0;
 				for ( Leg leg : legs ) {
+					legIndex++;
 					List<TimedPositionWithSpeed> polylinePoints = new ArrayList<TimedPositionWithSpeed>();
 					MarkPassing mp = tr.getMarkPassing(competitor, leg.getTo());
 					GPSFixMoving current;
@@ -163,7 +166,7 @@ public class TestTimeComparison {
 				    
 				    //getTotalTime(0, 0, 1000);
 			        //System.out.println(getSummary(id, competitor, leg));
-				    outputCSV.write(getSummary(id, competitor, leg));
+				    outputCSV.write(getSummary(id, competitor, leg, legIndex));
 				    outputCSV.newLine();
 				    
 				//end legs loop
@@ -179,7 +182,7 @@ public class TestTimeComparison {
 	//end method	
 	}
 	
-    private void getTotalTime(final int boatClassIndex, final int useRealAverageWindSpeed, final int stepDurationMilliseconds) throws ConfigurationException {
+    /*private void getTotalTime(final int boatClassIndex, final int useRealAverageWindSpeed, final int stepDurationMilliseconds) throws ConfigurationException {
 
         final SimulatorServiceImpl simulatorService = new SimulatorServiceImpl();
         final RequestTotalTimeDTO requestData = new RequestTotalTimeDTO(boatClassIndex, this.allPoints, this.turnPoints, useRealAverageWindSpeed == 1,
@@ -205,14 +208,14 @@ public class TestTimeComparison {
                 + stepDurationMilliseconds + "milliseconds timestep, total time: " + receiveData.totalTimeSeconds
                 + " seconds");
         System.err.println("==================================================");
-    }
+    }*/
     
-    private String getSummary(final RegattaAndRaceIdentifier id, final Competitor competitor, final Leg leg) throws ConfigurationException {
+    private String getSummary(final RegattaAndRaceIdentifier id, final Competitor competitor, final Leg leg, final int legIndex) throws ConfigurationException {
 		
     	int noPoints = this.allPoints.size();
     	long finishTime = this.allPoints.get(noPoints-1).timepoint;
     	long startTime = this.allPoints.get(0).timepoint;
-    	double gpsTime = (finishTime - startTime) / 1000;
+    	double gpsTime = (finishTime - startTime) / 1000.0;
     	long totalDistanceMeters = 0;
     	Iterator<SimulatorWindDTO> it = this.allPoints.iterator();
     	SimulatorWindDTO prec = it.next();
@@ -230,13 +233,13 @@ public class TestTimeComparison {
     	double speedKnots = speedMetersPerSecond * 1.94;
     	String result = "";
     	result = id.getRegattaName() + ", " + id.getRaceName();
-        result += ", " + competitor.getName() + ", " + leg.toString() + ", " + gpsTime;
+        result += ", " + competitor.getName() + ", " + legIndex + ", " + leg.toString() + ", " + gpsTime;
     	
         SpeedWithBearing averageWind = null;
         
         for (Integer boatClassIndex : boatClassesIndexes.keySet()) {
             final SimulatorServiceImpl simulatorService = new SimulatorServiceImpl();
-        	final RequestTotalTimeDTO requestData = new RequestTotalTimeDTO(boatClassIndex, this.allPoints, this.turnPoints, false, 1000, true);
+        	final RequestTotalTimeDTO requestData = new RequestTotalTimeDTO(boatClassIndex, this.allPoints, this.turnPoints, false, timeStepMilliseconds, true);
         	final ResponseTotalTimeDTO receiveData = simulatorService.getTotalTime_new(requestData);
         	averageWind = simulatorService.getAverageWind();
         	result += ", " + receiveData.totalTimeSeconds;      	
