@@ -12,14 +12,14 @@ The syntax is relatively easy and is documented here http://daringfireball.net/p
 
 If you have any questions then either contact Axel Uhl, Jens Rommel, Frank Mittag or Simon Pamiés.
 
-### Internal services that you can access
+### Table of Contents Wiki
+
+* [[Architecture and Infrastructure|wiki/architecture-and-infrastructure]]
+* [[Configure Races on Server|wiki/configure-races-on-server]]
+
+### Internal services (not related to wiki but useful)
 
 * [Bugzilla Issue Tracking System](http://bugzilla.sapsailing.com/bugzilla/)
 * [Maven Repository Browser](http://maven.sapsailing.com/maven/)
 * [Main Sailing Website](http://www.sapsailing.com)
 * [Visitor Statistics](http://analysis.sapsailing.com/)
-
-### Table of Contents Wiki
-
-* [[Architecture and Infrastructure|wiki/architecture-and-infrastructure]]
-* [[Configure Races on Server|wiki/configure-races-on-server]]
