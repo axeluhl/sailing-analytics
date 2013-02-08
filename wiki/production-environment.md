@@ -1,5 +1,7 @@
 # Production Environment
 
+[[_TOC_]]
+
 ## Configuration Files
 Configuration files are coming from a git repository that is located at server:/home/trac/git-serverconfig. There is a clone at server:/home/trac/serverconfig/production. This clone is based on the branch production. Files from this directory are used as the base for all configuration files on the server. NEVER touch git-serverconfig (the ORIGIN).
 
@@ -19,9 +21,9 @@ Use Spectator-PROD2 49-euros2012.sapsailing.com “49er European 2012”
 
 Make sure to use the domain defined by the ServerName directive. Other domains could not work. There are currently three different types of macros that can be used:
 
--	Leaderboard make a parametrized leaderboard view available
--	Spectator yields a view suited for spectators
--	Event generates specific views that contains information about an event
+1.	Leaderboard make a parametrized leaderboard view available
+2.	Spectator yields a view suited for spectators
+3.	Event generates specific views that contains information about an event
 
 The current macro definition is prepared for GWT handling and redirects all other URLs directly to the Jetty server without interfering. You need to be aware of the fact, that all POST requests are altered by adding a new Header Cache-Control: no-cache, no-store to the HTTP header section.
 For new server deployments make sure to adapt the macros file according to the network configuration. It is crucial to at least change the IP address otherwise directives won’t work.
