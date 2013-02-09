@@ -6,18 +6,19 @@ import java.util.Collection;
 import org.json.simple.JSONArray;
 
 import com.sap.sailing.domain.base.Fleet;
-import com.sap.sailing.domain.base.FleetWithRaceNames;
+import com.sap.sailing.domain.base.RaceCell;
 import com.sap.sailing.domain.base.RaceColumn;
-import com.sap.sailing.domain.base.Series;
-import com.sap.sailing.domain.base.impl.FleetWithRaceNamesImpl;
+import com.sap.sailing.domain.base.RaceRow;
+import com.sap.sailing.domain.base.SeriesData;
+import com.sap.sailing.domain.base.impl.RaceCellImpl;
+import com.sap.sailing.domain.base.impl.RaceRowImpl;
 import com.sap.sailing.server.gateway.serialization.ExtensionJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 
-public class FleetWithRaceNamesOfSeriesExtensionSerializer extends ExtensionJsonSerializer<Series, FleetWithRaceNames> {
+public class RaceRowsOfSeriesDataExtensionSerializer extends ExtensionJsonSerializer<SeriesData, RaceRow> {
 	public static final String FIELD_FLEETS = "fleets";
 	
-	public FleetWithRaceNamesOfSeriesExtensionSerializer(
-			JsonSerializer<FleetWithRaceNames> extensionSerializer) {
+	public RaceRowsOfSeriesDataExtensionSerializer(JsonSerializer<RaceRow> extensionSerializer) {
 		super(extensionSerializer);
 	}
 
@@ -27,15 +28,15 @@ public class FleetWithRaceNamesOfSeriesExtensionSerializer extends ExtensionJson
 	}
 
 	@Override
-	public Object serializeExtension(Series parent) {
+	public Object serializeExtension(SeriesData parent) {
 		JSONArray result = new JSONArray();
 		
 		for (Fleet fleet : parent.getFleets()) {
-			Collection<String> raceNames = new ArrayList<String>();
+			Collection<RaceCell> raceCells = new ArrayList<RaceCell>();
 			for (RaceColumn column : parent.getRaceColumns()) {
-				raceNames.add(column.getName());
+				raceCells.add(new RaceCellImpl(column.getName(), null)); /// TODO: get racelog from column
 			}
-			result.add(serialize(new FleetWithRaceNamesImpl(fleet, raceNames)));
+			result.add(serialize(new RaceRowImpl(fleet, raceCells)));
 		}
 		
 		return result;

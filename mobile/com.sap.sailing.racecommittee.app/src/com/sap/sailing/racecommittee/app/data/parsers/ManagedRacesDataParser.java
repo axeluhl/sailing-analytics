@@ -9,20 +9,20 @@ import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
 import com.sap.sailing.domain.base.Fleet;
-import com.sap.sailing.domain.base.FleetWithRaceNames;
-import com.sap.sailing.domain.base.RaceGroup;
-import com.sap.sailing.domain.base.SeriesData;
+import com.sap.sailing.domain.base.RaceCell;
+import com.sap.sailing.domain.base.RaceRow;
+import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
-import com.sap.sailing.racecommittee.app.domain.ManagedRaceIdentifier;
-import com.sap.sailing.racecommittee.app.domain.impl.RaceIdentifierImpl;
+import com.sap.sailing.racecommittee.app.domain.RaceGroup;
+import com.sap.sailing.racecommittee.app.domain.SeriesWithRows;
+import com.sap.sailing.racecommittee.app.domain.impl.FleetIdentifierImpl;
+import com.sap.sailing.racecommittee.app.domain.impl.ManagedRaceIdentifierImpl;
 import com.sap.sailing.racecommittee.app.domain.impl.ManagedRaceImpl;
-import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
 
 public class ManagedRacesDataParser implements DataParser<Collection<ManagedRace>> {
-	private static final String TAG = ManagedRacesDataParser.class.getName();
-	
+	// private static final String TAG = ManagedRacesDataParser.class.getName();
 	
 	private JsonDeserializer<RaceGroup> deserializer;
 	
@@ -46,35 +46,24 @@ public class ManagedRacesDataParser implements DataParser<Collection<ManagedRace
 	}
 
 	private void addManagedRaces(Collection<ManagedRace> target, RaceGroup raceGroup) {
-		for (SeriesData series : raceGroup.getSeries()) {
-			for (Fleet fleet : series.getFleets()) {
-				if (fleet instanceof FleetWithRaceNames) {
-					FleetWithRaceNames fleetWithRaceNames = (FleetWithRaceNames) fleet;
-					for (String raceName : fleetWithRaceNames.getRaceNames()) {
-						ManagedRace managedRace = createManagedRace(
-								raceGroup,
-								series, 
-								fleetWithRaceNames, 
-								raceName);
-						target.add(managedRace);
-					}
-				} else {
-					ExLog.w(TAG, String.format("Fleet %s had no race information attached.", fleet));
+		for (SeriesWithRows series : raceGroup.getSeries()) {
+			for (RaceRow raceRow : series.getRaceRows()) {
+				Fleet fleet = raceRow.getFleet();
+				for (RaceCell cell : raceRow.getCells()) {
+					ManagedRace race = createManagedRace(raceGroup, series, fleet, cell.getName(), cell.getRaceLog());
+					target.add(race);
 				}
 			}
 		}
-		
 	}
 
-	private ManagedRace createManagedRace(
-			RaceGroup raceGroup,
-			SeriesData series, 
-			FleetWithRaceNames fleetWithRaceNames,
-			String raceName) {
-		ManagedRaceIdentifier identifier = 
-				new RaceIdentifierImpl(raceName, fleetWithRaceNames, series, raceGroup);
-		ManagedRace managedRace = new ManagedRaceImpl(identifier);
-		return managedRace;
+	private ManagedRace createManagedRace(RaceGroup raceGroup, SeriesWithRows series,
+			Fleet fleet, String name, RaceLog raceLog) {
+		return new ManagedRaceImpl(
+				new ManagedRaceIdentifierImpl(name, 
+						new FleetIdentifierImpl(fleet, series, raceGroup)),
+				raceLog);
+		
 	}
 
 }

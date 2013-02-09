@@ -1,4 +1,4 @@
-package com.sap.sailing.racecommittee.app.domain.deserialization.impl;
+package com.sap.sailing.racecommittee.app.deserialization.impl;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;

@@ -1,24 +1,24 @@
-package com.sap.sailing.racecommittee.app.domain.deserialization.impl;
+package com.sap.sailing.racecommittee.app.deserialization.impl;
 
 import java.util.ArrayList;
 import java.util.Collection;
 
 import org.json.simple.JSONObject;
 
-import com.sap.sailing.domain.base.RaceGroup;
-import com.sap.sailing.domain.base.SeriesData;
-import com.sap.sailing.domain.base.impl.RaceGroupImpl;
+import com.sap.sailing.racecommittee.app.domain.RaceGroup;
+import com.sap.sailing.racecommittee.app.domain.SeriesWithRows;
+import com.sap.sailing.racecommittee.app.domain.impl.RaceGroupImpl;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
 import com.sap.sailing.server.gateway.serialization.impl.leaderboard.LeaderboardJsonSerializer;
-import com.sap.sailing.server.gateway.serialization.impl.leaderboard.SeriesOfLeaderboardExtensionSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.leaderboard.SeriesDataOfLeaderboardExtensionSerializer;
 
 public class RaceGroupDeserializer implements JsonDeserializer<RaceGroup> {
 	
-	private JsonDeserializer<SeriesData> seriesDeserializer;
+	private JsonDeserializer<SeriesWithRows> seriesDeserializer;
 
-	public RaceGroupDeserializer(JsonDeserializer<SeriesData> seriesDeserializer) {
+	public RaceGroupDeserializer(JsonDeserializer<SeriesWithRows> seriesDeserializer) {
 		this.seriesDeserializer = seriesDeserializer;
 	}
 
@@ -28,10 +28,10 @@ public class RaceGroupDeserializer implements JsonDeserializer<RaceGroup> {
 		
 		// CourseArea ... 
 		
-		Collection<SeriesData> series = new ArrayList<SeriesData>();
+		Collection<SeriesWithRows> series = new ArrayList<SeriesWithRows>();
 		for (Object seriesObject : Helpers.getNestedArraySafe(
 				object, 
-				SeriesOfLeaderboardExtensionSerializer.FIELD_SERIES)) {
+				SeriesDataOfLeaderboardExtensionSerializer.FIELD_SERIES)) {
 			JSONObject seriesJson = Helpers.toJSONObjectSafe(seriesObject);
 			 series.add(seriesDeserializer.deserialize(seriesJson));
 		}

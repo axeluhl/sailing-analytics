@@ -2,28 +2,28 @@ package com.sap.sailing.racecommittee.app.domain.impl;
 
 import java.io.Serializable;
 
-import com.sap.sailing.domain.base.FleetWithRaceNames;
-import com.sap.sailing.domain.base.RaceGroup;
+import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.SeriesData;
 import com.sap.sailing.racecommittee.app.domain.FleetIdentifier;
+import com.sap.sailing.racecommittee.app.domain.RaceGroup;
 
 public class FleetIdentifierImpl implements FleetIdentifier {
 
-	private FleetWithRaceNames fleetWithRaceNames;
+	private Fleet fleet;
 	private SeriesData series;
 	private RaceGroup raceGroup;
 	
 	public FleetIdentifierImpl(
-			FleetWithRaceNames fleetWithRaceNames,
+			Fleet fleet,
 			SeriesData series, 
 			RaceGroup raceGroup) {
-		this.fleetWithRaceNames = fleetWithRaceNames;
+		this.fleet = fleet;
 		this.series = series;
 		this.raceGroup = raceGroup;
 	}
 
-	public FleetWithRaceNames getFleet() {
-		return fleetWithRaceNames;
+	public Fleet getFleet() {
+		return fleet;
 	}
 
 	public SeriesData getSeries() {

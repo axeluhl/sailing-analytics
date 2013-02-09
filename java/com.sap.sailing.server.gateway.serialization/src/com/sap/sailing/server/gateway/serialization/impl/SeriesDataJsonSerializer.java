@@ -1,21 +1,21 @@
-package com.sap.sailing.server.gateway.serialization.impl.regatta;
+package com.sap.sailing.server.gateway.serialization.impl;
 
 import org.json.simple.JSONObject;
 
-import com.sap.sailing.domain.base.Series;
+import com.sap.sailing.domain.base.SeriesData;
 import com.sap.sailing.server.gateway.serialization.ExtendableJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.ExtensionJsonSerializer;
 
-public class SeriesJsonSerializer extends ExtendableJsonSerializer<Series> {
+public class SeriesDataJsonSerializer extends ExtendableJsonSerializer<SeriesData> {
 	public static final String FIELD_NAME = "name";
 	public static final String FIELD_IS_MEDAL = "isMedal";
 	
-	public SeriesJsonSerializer(ExtensionJsonSerializer<Series, ?> extensionSerializer) {
+	public SeriesDataJsonSerializer(ExtensionJsonSerializer<SeriesData, ?> extensionSerializer) {
 		super(extensionSerializer);
 	}
 
 	@Override
-	protected JSONObject serializeFields(Series object) {
+	protected JSONObject serializeFields(SeriesData object) {
 		JSONObject result = new JSONObject();
 		
 		result.put(FIELD_NAME, object.getName());

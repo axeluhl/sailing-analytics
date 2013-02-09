@@ -2,11 +2,12 @@ package com.sap.sailing.racecommittee.app.domain.impl;
 
 import java.io.Serializable;
 
-import com.sap.sailing.domain.base.FleetWithRaceNames;
-import com.sap.sailing.domain.base.RaceGroup;
+import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.SeriesData;
+import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.ManagedRaceIdentifier;
+import com.sap.sailing.racecommittee.app.domain.RaceGroup;
 import com.sap.sailing.racecommittee.app.domain.RaceStatus;
 
 public class ManagedRaceImpl implements ManagedRace {
@@ -16,7 +17,7 @@ public class ManagedRaceImpl implements ManagedRace {
 
 	private ManagedRaceIdentifier identifier;
 	
-	public ManagedRaceImpl(ManagedRaceIdentifier identifier) {
+	public ManagedRaceImpl(ManagedRaceIdentifier identifier, RaceLog raceLog) {
 		this.identifier = identifier;
 	}
 
@@ -32,7 +33,7 @@ public class ManagedRaceImpl implements ManagedRace {
 		return getName();
 	}
 
-	public FleetWithRaceNames getFleet() {
+	public Fleet getFleet() {
 		return identifier.getFleet();
 	}
 

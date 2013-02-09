@@ -1,46 +1,38 @@
 package com.sap.sailing.racecommittee.app.data;
 
 import java.io.Serializable;
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Map;
-
-import org.json.simple.JSONValue;
 
 import android.content.Context;
 
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Event;
-import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 import com.sap.sailing.racecommittee.app.data.handlers.DataHandler;
 import com.sap.sailing.racecommittee.app.data.handlers.EventsDataHandler;
 import com.sap.sailing.racecommittee.app.data.handlers.ManagedRacesDataHandler;
-import com.sap.sailing.racecommittee.app.data.handlers.RaceLogsDataHandler;
-import com.sap.sailing.racecommittee.app.data.http.HttpJsonPostRequest;
 import com.sap.sailing.racecommittee.app.data.loaders.DataLoader;
 import com.sap.sailing.racecommittee.app.data.parsers.DataParser;
 import com.sap.sailing.racecommittee.app.data.parsers.EventsDataParser;
 import com.sap.sailing.racecommittee.app.data.parsers.ManagedRacesDataParser;
-import com.sap.sailing.racecommittee.app.data.parsers.RaceLogsDataParser;
+import com.sap.sailing.racecommittee.app.deserialization.impl.ColorDeserializer;
+import com.sap.sailing.racecommittee.app.deserialization.impl.CourseAreaJsonDeserializer;
+import com.sap.sailing.racecommittee.app.deserialization.impl.EventJsonDeserializer;
+import com.sap.sailing.racecommittee.app.deserialization.impl.FleetDeserializer;
+import com.sap.sailing.racecommittee.app.deserialization.impl.RaceCellDeserializer;
+import com.sap.sailing.racecommittee.app.deserialization.impl.RaceGroupDeserializer;
+import com.sap.sailing.racecommittee.app.deserialization.impl.RaceLogDeserializer;
+import com.sap.sailing.racecommittee.app.deserialization.impl.RaceRowDeserializer;
+import com.sap.sailing.racecommittee.app.deserialization.impl.SeriesWithRowsDeserializer;
+import com.sap.sailing.racecommittee.app.deserialization.impl.VenueJsonDeserializer;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
-import com.sap.sailing.racecommittee.app.domain.deserialization.impl.ColorDeserializer;
-import com.sap.sailing.racecommittee.app.domain.deserialization.impl.CourseAreaJsonDeserializer;
-import com.sap.sailing.racecommittee.app.domain.deserialization.impl.EventJsonDeserializer;
-import com.sap.sailing.racecommittee.app.domain.deserialization.impl.FleetDeserializer;
-import com.sap.sailing.racecommittee.app.domain.deserialization.impl.FleetWithRaceNamesDeserializer;
-import com.sap.sailing.racecommittee.app.domain.deserialization.impl.RaceGroupDeserializer;
-import com.sap.sailing.racecommittee.app.domain.deserialization.impl.SeriesDataDeserializer;
-import com.sap.sailing.racecommittee.app.domain.deserialization.impl.VenueJsonDeserializer;
-import com.sap.sailing.racecommittee.app.logging.ExLog;
 
 /**
  * Enables accessing of data.
  */
 public class DataManager implements ReadonlyDataManager {
-	private static final String TAG = DataManager.class.getName();
+	// private static final String TAG = DataManager.class.getName();
 	
 	public static ReadonlyDataManager create(Context context) {
 		return new DataManager(context, InMemoryDataStore.INSTANCE);
@@ -134,10 +126,12 @@ public class DataManager implements ReadonlyDataManager {
 		//JsonDeserializer<BoatClass> boatClassDeserializer = new BoatClassJsonDeserializer();
 		DataParser<Collection<ManagedRace>> parser =  new ManagedRacesDataParser(
 				new RaceGroupDeserializer(
-						new SeriesDataDeserializer(
-								new FleetWithRaceNamesDeserializer(
+						new SeriesWithRowsDeserializer(
+								new RaceRowDeserializer(
 										new FleetDeserializer(
-												new ColorDeserializer())))));
+												new ColorDeserializer()),
+										new RaceCellDeserializer(
+												new RaceLogDeserializer())))));
 		DataHandler<Collection<ManagedRace>> handler = new ManagedRacesDataHandler(this, client);
 		
 		DataLoader<Collection<ManagedRace>> loader = new DataLoader<Collection<ManagedRace>>(
@@ -147,41 +141,6 @@ public class DataManager implements ReadonlyDataManager {
 				handler);
 		loader.forceLoad();
 		
-	}
-
-	public void loadRaceLogs(
-			Collection<ManagedRace> data,
-			LoadClient<Map<ManagedRace, Collection<RaceLogEvent>>> client) {
-		Collection<Serializable> ids = new ArrayList<Serializable>();
-		for (ManagedRace race : data) {
-			if (!dataStore.hasRace(race.getId())) {
-				ExLog.w(TAG, "Tried to load race log for unknown race " + race.getId());
-				continue;
-			}
-			ids.add(race.getId());
-		}
-		
-		HttpJsonPostRequest request = null;
-		try {
-			String value = JSONValue.toJSONString(ids);
-			ExLog.e(TAG, value);
-			request = new HttpJsonPostRequest(URI.create(TargetHost + "sailingserver/rc/racelogs"), value);
-		} catch (UnsupportedEncodingException e) {
-			ExLog.e(TAG, "Exception while trying to create POST request. Aborting:\n" + e);
-			return;
-		}
-		
-		DataParser<Map<ManagedRace, Collection<RaceLogEvent>>> parser = new RaceLogsDataParser();
-		
-		DataHandler<Map<ManagedRace, Collection<RaceLogEvent>>> handler = new RaceLogsDataHandler(this, client);
-		
-		DataLoader<Map<ManagedRace, Collection<RaceLogEvent>>> loader = 
-				new DataLoader<Map<ManagedRace,Collection<RaceLogEvent>>>(
-						context,
-						request, 
-						parser, 
-						handler);
-		loader.forceLoad();
 	}
 	
 	private static final String TargetHost = "http://192.168.178.22:8888";

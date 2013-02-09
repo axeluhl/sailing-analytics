@@ -1,4 +1,4 @@
-package com.sap.sailing.racecommittee.app.domain.deserialization.impl;
+package com.sap.sailing.racecommittee.app.deserialization.impl;
 
 import org.json.simple.JSONObject;
 
@@ -8,7 +8,7 @@ import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
-import com.sap.sailing.server.gateway.serialization.impl.regatta.FleetJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.FleetJsonSerializer;
 
 public class FleetDeserializer implements JsonDeserializer<Fleet> {
 

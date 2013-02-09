@@ -2,7 +2,6 @@ package com.sap.sailing.racecommittee.app.ui.activities;
 
 import java.io.Serializable;
 import java.util.Collection;
-import java.util.Map;
 
 import android.app.AlertDialog;
 import android.app.FragmentTransaction;
@@ -15,14 +14,12 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.sap.sailing.domain.base.CourseArea;
-import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.DataManager;
 import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
-import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.ui.fragments.list.ManagedRaceListFragment;
 
 public class RacingActivity extends TwoPaneActivity /*implements ResetTimeListener, 
@@ -121,17 +118,6 @@ StartModeSelectionListener, PathfinderSelectionListener, GateLineOpeningTimeSele
 	
 	private void onLoadRacesSucceded(Serializable courseAreaId, Collection<ManagedRace> data) {
 		setProgressBarIndeterminateVisibility(false);
-
-		dataManager.loadRaceLogs(data, new LoadClient<Map<ManagedRace,Collection<RaceLogEvent>>>() {
-			
-			public void onLoadSucceded(Map<ManagedRace, Collection<RaceLogEvent>> data) {
-				Toast.makeText(RacingActivity.this, "OKOKOKOK", Toast.LENGTH_LONG).show();
-			}
-			
-			public void onLoadFailed(Exception reason) {
-				ExLog.w(TAG, "Loading of race logs failed:\n" + reason.toString());
-			}
-		});
 		
 		registerOnService(data);
 		listFragment.setupOn(data);

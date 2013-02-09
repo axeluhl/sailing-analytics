@@ -8,19 +8,24 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.server.gateway.impl.JsonExportServlet;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
-import com.sap.sailing.server.gateway.serialization.impl.leaderboard.FleetWithRaceNamesJsonSerializer;
-import com.sap.sailing.server.gateway.serialization.impl.leaderboard.FleetWithRaceNamesOfSeriesExtensionSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.BoatClassJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.ColorJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.CourseAreaJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.FleetJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.SeriesDataJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.leaderboard.LeaderboardJsonSerializer;
-import com.sap.sailing.server.gateway.serialization.impl.leaderboard.SeriesOfLeaderboardExtensionSerializer;
-import com.sap.sailing.server.gateway.serialization.impl.regatta.ColorJsonSerializer;
-import com.sap.sailing.server.gateway.serialization.impl.regatta.FleetJsonSerializer;
-import com.sap.sailing.server.gateway.serialization.impl.regatta.SeriesJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.leaderboard.RaceCellJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.leaderboard.RaceRowJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.leaderboard.RaceRowsOfSeriesDataExtensionSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.leaderboard.SeriesDataOfLeaderboardExtensionSerializer;
 
 public class LeaderboardJsonExportServlet extends JsonExportServlet {
 	private static final long serialVersionUID = 4510175441769759252L;
@@ -48,7 +53,7 @@ public class LeaderboardJsonExportServlet extends JsonExportServlet {
 		JSONArray result = new JSONArray();
 		
 		for (Leaderboard leaderboard : getService().getLeaderboards().values()) {
-			if (leaderboard.getDefaultCourseArea().equals(filterCourseArea)) {
+			if (filterCourseArea.equals(leaderboard.getDefaultCourseArea())) {
 				result.add(serializer.serialize(leaderboard));
 			}
 		}
@@ -80,13 +85,26 @@ public class LeaderboardJsonExportServlet extends JsonExportServlet {
 	
 	private static JsonSerializer<Leaderboard> createSerializer() {
 		return new LeaderboardJsonSerializer(
-						new SeriesOfLeaderboardExtensionSerializer(
-								new SeriesJsonSerializer(
-										new FleetWithRaceNamesOfSeriesExtensionSerializer(
-												new FleetWithRaceNamesJsonSerializer(
-														new FleetJsonSerializer(
-																new ColorJsonSerializer()))))));
-		
+				new BoatClassJsonSerializer(),
+				new CourseAreaJsonSerializer(),
+				new SeriesDataOfLeaderboardExtensionSerializer(
+						new SeriesDataJsonSerializer(
+								new RaceRowsOfSeriesDataExtensionSerializer(
+										new RaceRowJsonSerializer(
+												new FleetJsonSerializer(
+														new ColorJsonSerializer()), 
+														new RaceCellJsonSerializer(createRaceLogSerializer()))))));
+
+	}
+	
+	/// TODO: replace with real racelog serializer
+	private static JsonSerializer<RaceLog> createRaceLogSerializer() {
+		return new JsonSerializer<RaceLog>() {
+			@Override
+			public JSONObject serialize(RaceLog object) {
+				return new JSONObject();
+			}
+		};
 	}
 
 }

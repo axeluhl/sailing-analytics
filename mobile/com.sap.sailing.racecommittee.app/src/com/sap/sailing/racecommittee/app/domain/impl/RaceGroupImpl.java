@@ -1,0 +1,32 @@
+package com.sap.sailing.racecommittee.app.domain.impl;
+
+import com.sap.sailing.domain.base.CourseArea;
+import com.sap.sailing.domain.common.impl.NamedImpl;
+import com.sap.sailing.racecommittee.app.domain.RaceGroup;
+import com.sap.sailing.racecommittee.app.domain.SeriesWithRows;
+
+
+public class RaceGroupImpl extends NamedImpl implements RaceGroup {
+	private static final long serialVersionUID = 7760879536339600827L;
+	
+	private final CourseArea courseArea;
+	private final Iterable<SeriesWithRows> series;
+	
+	public RaceGroupImpl(
+			String name, 
+			CourseArea courseArea,
+			Iterable<SeriesWithRows> series) {
+		super(name);
+		this.courseArea = courseArea;
+		this.series = series;
+	}
+
+	public CourseArea getDefaultCourseArea() {
+		return courseArea;
+	}
+
+	public Iterable<SeriesWithRows> getSeries() {
+		return series;
+	}
+
+}

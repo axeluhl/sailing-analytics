@@ -1,4 +1,4 @@
-package com.sap.sailing.server.gateway.serialization.impl.regatta;
+package com.sap.sailing.server.gateway.serialization.impl;
 
 import org.json.simple.JSONObject;
 
