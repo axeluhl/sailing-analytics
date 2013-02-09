@@ -42,22 +42,22 @@ public class TestColumnSwapping {
         service = new SailingServiceImplMock();
         int[] disc = { 5, 8, 9, 0, 7, 5, 43 };
         service.createFlexibleLeaderboard(LEADERBOARDNAME, disc, ScoringSchemeType.LOW_POINT, null);
-        service.addColumnToLeaderboard("Race1", LEADERBOARDNAME, true);
-        service.addColumnToLeaderboard("Race2", LEADERBOARDNAME, true);
-        service.addColumnToLeaderboard("Race3", LEADERBOARDNAME, true);
-        leglist = new ArrayList<String>();
-        leglist.add("Race1");
-        leglist.add("Race2");
-        leglist.add("Race3");
-        leaderboardCreationDate = new Date();
         try {
-            // get Leaderboard with name and current date
-            leaderboardOriginalDTO = new LeaderboardDTO(null, null, /* higherScoreIsBetter */ false);
-            leaderboardOriginalDTO.addRace("Race1", /* explicitFactor */ null, DEFAULT_FLEET, true, null, null);
-            leaderboardOriginalDTO.addRace("Race3", /* explicitFactor */ null, DEFAULT_FLEET, true, null, null);
-            leaderboardOriginalDTO.addRace("Race2", /* explicitFactor */ null, DEFAULT_FLEET, true, null, null);
+        	service.addColumnToLeaderboard("Race1", LEADERBOARDNAME, true);
+        	service.addColumnToLeaderboard("Race2", LEADERBOARDNAME, true);
+        	service.addColumnToLeaderboard("Race3", LEADERBOARDNAME, true);
+        	leglist = new ArrayList<String>();
+        	leglist.add("Race1");
+        	leglist.add("Race2");
+        	leglist.add("Race3");
+        	leaderboardCreationDate = new Date();
+        	// get Leaderboard with name and current date
+        	leaderboardOriginalDTO = new LeaderboardDTO(null, null, /* higherScoreIsBetter */ false);
+        	leaderboardOriginalDTO.addRace("Race1", /* explicitFactor */ null, DEFAULT_FLEET, true, null, null);
+        	leaderboardOriginalDTO.addRace("Race3", /* explicitFactor */ null, DEFAULT_FLEET, true, null, null);
+        	leaderboardOriginalDTO.addRace("Race2", /* explicitFactor */ null, DEFAULT_FLEET, true, null, null);
         } catch (Exception e) {
-            e.printStackTrace();
+        	e.printStackTrace();
         }
     }
 
@@ -74,6 +74,7 @@ public class TestColumnSwapping {
         assertNotNull("Sailingservice != NULL", sailingService);
         int td[] = { 5, 8 };
         sailingService.createFlexibleLeaderboard(TEST_LEADERBOARD_NAME, td, ScoringSchemeType.LOW_POINT, null);
+        try {
         for (int i = 0; i < races.length; i++)
             sailingService.addColumnToLeaderboard(races[i], TEST_LEADERBOARD_NAME, isMedalRace[i]);
         sailingService.moveLeaderboardColumnDown(TEST_LEADERBOARD_NAME, races[0]);
@@ -81,7 +82,6 @@ public class TestColumnSwapping {
         sailingService.moveLeaderboardColumnUp(TEST_LEADERBOARD_NAME, races[2]);
         sailingService.updateIsMedalRace(TEST_LEADERBOARD_NAME, races[0], true);
         sailingService.updateIsMedalRace(TEST_LEADERBOARD_NAME, races[2], false);
-        try {
             lb = sailingService.getLeaderboardByName(TEST_LEADERBOARD_NAME, new Date(), /* races to load */ null);
         } catch (Exception e) {
             // e.printStackTrace();

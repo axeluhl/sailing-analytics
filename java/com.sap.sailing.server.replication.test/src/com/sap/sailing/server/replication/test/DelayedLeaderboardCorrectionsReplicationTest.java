@@ -23,6 +23,7 @@ import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.DelayedLeaderboardCorrections;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
+import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.test.AbstractLeaderboardTest;
 import com.sap.sailing.domain.test.mock.MockedTrackedRaceWithFixedRank;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -79,7 +80,7 @@ public class DelayedLeaderboardCorrectionsReplicationTest extends AbstractServer
         master.apply(createTestLeaderboard);
         final Leaderboard masterLeaderboard = master.getLeaderboardByName(leaderboardName);
         assertNotNull(masterLeaderboard);
-        master.apply(new AddColumnToLeaderboard(Q2, leaderboardName, /* medalRace */ false)); // uses leaderboard's default fleet 
+        master.apply(new AddColumnToLeaderboard(Q2, leaderboardName, /* medalRace */ false, EmptyRaceLogStore.INSTANCE)); // uses leaderboard's default fleet 
         master.apply(new ConnectTrackedRaceToLeaderboardColumn(masterLeaderboard.getName(), Q2, /* default fleet */
                 masterLeaderboard.getFleet(null).getName(), q2YellowTrackedRace.getRaceIdentifier()));
         master.apply(new UpdateLeaderboardMaxPointsReason(masterLeaderboard.getName(), Q2, hasso.getId().toString(),

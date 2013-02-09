@@ -14,6 +14,7 @@ import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
+import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.mongodb.MongoDBService;
 import com.sap.sailing.operationaltransformation.Peer;
 import com.sap.sailing.operationaltransformation.Peer.Role;
@@ -66,7 +67,8 @@ public class OperationalTransformationTest {
     @Test
     public void testAddColumnToLeaderboardOnClientAndRemoveLeaderboardOnServer() throws InterruptedException {
         RacingEventServiceOperation<RaceColumn> addLeaderboardColumn = new AddColumnToLeaderboard(
-                "newColumn", LeaderboardNameConstants.DEFAULT_LEADERBOARD_NAME, /* medalRace */ true);
+                "newColumn", LeaderboardNameConstants.DEFAULT_LEADERBOARD_NAME, /* medalRace */ true,
+                EmptyRaceLogStore.INSTANCE);
         server.apply(addLeaderboardColumn);
         RacingEventServiceOperation<Void> removeDefaultLeaderboard = new RemoveLeaderboard(LeaderboardNameConstants.DEFAULT_LEADERBOARD_NAME);
         replica.apply(removeDefaultLeaderboard);
@@ -79,10 +81,12 @@ public class OperationalTransformationTest {
     @Test
     public void testAddOneColumnOnEachSideThenMoveOneUpOnServerAndRemoveLeaderboardOnClient() throws InterruptedException {
         RacingEventServiceOperation<RaceColumn> addLeaderboardColumnOnServer = new AddColumnToLeaderboard(
-                "newColumn1", LeaderboardNameConstants.DEFAULT_LEADERBOARD_NAME, /* medalRace */ true);
+                "newColumn1", LeaderboardNameConstants.DEFAULT_LEADERBOARD_NAME, /* medalRace */ true,
+                EmptyRaceLogStore.INSTANCE);
         server.apply(addLeaderboardColumnOnServer);
         RacingEventServiceOperation<RaceColumn> addLeaderboardColumnOnReplica = new AddColumnToLeaderboard(
-                "newColumn2", LeaderboardNameConstants.DEFAULT_LEADERBOARD_NAME, /* medalRace */ true);
+                "newColumn2", LeaderboardNameConstants.DEFAULT_LEADERBOARD_NAME, /* medalRace */ true,
+                EmptyRaceLogStore.INSTANCE);
         replica.apply(addLeaderboardColumnOnReplica);
         replica.waitForNotRunning();
         server.waitForNotRunning();
