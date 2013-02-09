@@ -31,6 +31,7 @@ import com.sap.sailing.domain.leaderboard.impl.FlexibleLeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
 import com.sap.sailing.domain.leaderboard.impl.ResultDiscardingRuleImpl;
 import com.sap.sailing.domain.leaderboard.impl.ScoreCorrectionImpl;
+import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.test.mock.MockedTrackedRaceWithFixedRank;
 import com.sap.sailing.domain.test.mock.MockedTrackedRaceWithFixedRankAndManyCompetitors;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -95,7 +96,7 @@ public class LeaderboardOfflineTest extends AbstractLeaderboardTest {
         Fleet defaultFleet = leaderboard.getFleet(null);
         final String columnName = "abc";
         setupRaces(1, 0);
-        leaderboard.addRaceColumn(columnName, /* medalRace */ true);
+        leaderboard.addRaceColumn(columnName, /* medalRace */ true, EmptyRaceLogStore.INSTANCE);
         leaderboard.addRace(testRaces.iterator().next(), columnName, /* medalRace */ false, defaultFleet);
         assertTrue(leaderboard.getRaceColumnByName(columnName).isMedalRace());
     }
@@ -181,7 +182,7 @@ public class LeaderboardOfflineTest extends AbstractLeaderboardTest {
         Fleet defaultFleet = leaderboard.getFleet(null);
         RaceColumn r1 = leaderboard.addRace(testRace, "R1", /* medalRace */ false, defaultFleet);
         raceColumnsInLeaderboard.put(testRace, r1);
-        RaceColumn r2 = leaderboard.addRaceColumn("R2", /* medalRace */ false, defaultFleet);
+        RaceColumn r2 = leaderboard.addRaceColumn("R2", /* medalRace */ false, EmptyRaceLogStore.INSTANCE, defaultFleet);
         scoreCorrection.setMaxPointsReason(competitor, r2, MaxPointsReason.DND); // non-discardable disqualification
         // assert that max points were given before discarding...
         assertEquals(4.0, leaderboard.getEntry(competitor, r2, MillisecondsTimePoint.now()).getNetPoints(), 0.000000001);
@@ -243,7 +244,7 @@ public class LeaderboardOfflineTest extends AbstractLeaderboardTest {
         // add a few race columns not yet connected to a tracked race
         for (int j=0; j<numberOfUntrackedRaces; j++) {
             i++;
-            leaderboard.addRaceColumn("Test Race "+i, /* medalRace */ addOneMedalRace && j == numberOfUntrackedRaces-1);
+            leaderboard.addRaceColumn("Test Race "+i, /* medalRace */ addOneMedalRace && j == numberOfUntrackedRaces-1, EmptyRaceLogStore.INSTANCE);
         }
         if (carry != null) {
             leaderboard.setCarriedPoints(competitor, carry);

@@ -34,6 +34,7 @@ import com.sap.sailing.domain.leaderboard.impl.ResultDiscardingRuleImpl;
 import com.sap.sailing.domain.leaderboard.impl.ScoreCorrectionImpl;
 import com.sap.sailing.domain.persistence.impl.DomainObjectFactoryImpl;
 import com.sap.sailing.domain.persistence.impl.MongoObjectFactoryImpl;
+import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.test.mock.MockedTrackedRaceWithFixedRank;
 import com.sap.sailing.domain.test.mock.MockedTrackedRaceWithFixedRankAndManyCompetitors;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -49,10 +50,10 @@ public class TestStoringAndRetrievingLeaderboards extends AbstractMongoDBTest {
         final int[] discardIndexResultsStartingWithHowManyRaces = new int[] { 5, 8 };
         FlexibleLeaderboardImpl leaderboard = new FlexibleLeaderboardImpl(leaderboardName, new ScoreCorrectionImpl(),
                 new ResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces), new LowPoint(), null);
-        leaderboard.addRaceColumn("R1", /* medalRace */ false);
-        RaceColumn r2 = leaderboard.addRaceColumn("R2", /* medalRace */ false);
+        leaderboard.addRaceColumn("R1", /* medalRace */ false, EmptyRaceLogStore.INSTANCE);
+        RaceColumn r2 = leaderboard.addRaceColumn("R2", /* medalRace */ false, EmptyRaceLogStore.INSTANCE);
         r2.setFactor(1.5);
-        RaceColumn r3 = leaderboard.addRaceColumn("R3", /* medalRace */ false);
+        RaceColumn r3 = leaderboard.addRaceColumn("R3", /* medalRace */ false, EmptyRaceLogStore.INSTANCE);
         r3.setFactor(2.5);
         new MongoObjectFactoryImpl(db).storeLeaderboard(leaderboard);
         Leaderboard loadedLeaderboard = new DomainObjectFactoryImpl(db).loadLeaderboard(leaderboardName, /* regattaRegistry */ null);

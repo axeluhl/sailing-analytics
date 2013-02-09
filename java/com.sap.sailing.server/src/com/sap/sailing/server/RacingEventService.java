@@ -39,6 +39,7 @@ import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.LeaderboardRegistry;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
+import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
 import com.sap.sailing.domain.tracking.RaceListener;
 import com.sap.sailing.domain.tracking.RaceTracker;
@@ -252,7 +253,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      */
     void renameLeaderboard(String oldName, String newName);
 
-    RaceColumn addColumnToLeaderboard(String columnName, String leaderboardName, boolean medalRace);
+    RaceColumn addColumnToLeaderboard(String columnName, String leaderboardName, boolean medalRace, RaceLogStore raceLogStore);
 
     void moveLeaderboardColumnUp(String leaderboardName, String columnName);
 

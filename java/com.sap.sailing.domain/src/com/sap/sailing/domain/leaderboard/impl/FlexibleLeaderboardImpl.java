@@ -16,6 +16,7 @@ import com.sap.sailing.domain.leaderboard.FlexibleRaceColumn;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
+import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
 /**
@@ -64,7 +65,7 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
     }
     
     @Override
-    public RaceColumn addRaceColumn(String name, boolean medalRace, Fleet... fleets) {
+    public RaceColumn addRaceColumn(String name, boolean medalRace, RaceLogStore raceLogStore, Fleet... fleets) {
         FlexibleRaceColumn column = getRaceColumnByName(name);
         if (column != null) {
             final String msg = "Trying to create race column with duplicate name "+name+" in leaderboard +"+getName();

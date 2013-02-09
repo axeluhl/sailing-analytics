@@ -25,7 +25,7 @@ public class AddColumnToLeaderboard extends AbstractLeaderboardColumnOperation<R
 
     @Override
     public RaceColumn internalApplyTo(RacingEventService toState) {
-        return toState.addColumnToLeaderboard(getColumnName(), getLeaderboardName(), medalRace);
+        return toState.addColumnToLeaderboard(getColumnName(), getLeaderboardName(), medalRace, raceLogStore);
     }
 
     @Override
