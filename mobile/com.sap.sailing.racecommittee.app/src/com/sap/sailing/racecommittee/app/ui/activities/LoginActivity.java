@@ -48,7 +48,7 @@ public class LoginActivity extends TwoPaneActivity implements EventSelectedListe
 				
 		getWindow().requestFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
         setContentView(R.layout.login_view);
-        setProgressBarIndeterminateVisibility(false);
+        setProgressBarIndeterminateVisibility(false);      
         
         loginTypeDescriptions = new CharSequence[2];
 		loginTypeDescriptions[0] = getString(R.string.login_type_officer);

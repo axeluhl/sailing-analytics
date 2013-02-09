@@ -35,12 +35,12 @@
 	</servlet-mapping>
 	
 	<servlet>
-		<servlet-name>RCQueryRaceLog</servlet-name>
-		<servlet-class>com.sap.sailing.server.gateway.impl.rc.QueryRaceLogJsonExportServlet</servlet-class>
+		<servlet-name>RCAddToRaceLog</servlet-name>
+		<servlet-class>com.sap.sailing.server.gateway.impl.rc.AddToRaceLogJsonExportServlet</servlet-class>
 	</servlet>
 	<servlet-mapping>
-		<servlet-name>RCQueryRaceLog</servlet-name>
-		<url-pattern>/rc/racelogs</url-pattern>
+		<servlet-name>RCAddToRaceLog</servlet-name>
+		<url-pattern>/rc/racelog</url-pattern>
 	</servlet-mapping>
 	
 	<!-- RACE COMMITTEE END -->
