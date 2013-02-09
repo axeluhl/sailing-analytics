@@ -1,7 +1,6 @@
 package com.sap.sailing.domain.persistence.impl;
 
 import java.io.Serializable;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -74,8 +73,6 @@ import com.sap.sailing.domain.leaderboard.impl.ResultDiscardingRuleImpl;
 import com.sap.sailing.domain.leaderboard.impl.ScoreCorrectionImpl;
 import com.sap.sailing.domain.leaderboard.meta.LeaderboardGroupMetaLeaderboard;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
-import com.sap.sailing.domain.persistence.MongoFactory;
-import com.sap.sailing.domain.persistence.MongoRaceLogStoreFactory;
 import com.sap.sailing.domain.racelog.Flags;
 import com.sap.sailing.domain.racelog.RaceColumnIdentifier;
 import com.sap.sailing.domain.racelog.RaceLog;
@@ -361,18 +358,12 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             if (fleets.isEmpty()) {
                 fleets.add(result.getFleet(null));
             }
-			try {
-				RaceColumn raceColumn = result.addRaceColumn((String) dbRaceColumn.get(FieldNames.LEADERBOARD_COLUMN_NAME.name()),
-				        (Boolean) dbRaceColumn.get(FieldNames.LEADERBOARD_IS_MEDAL_RACE_COLUMN.name()), 
-				        MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(MongoFactory.INSTANCE.getDefaultMongoObjectFactory(), this)
-				        ,fleets.toArray(new Fleet[0]));
-				for (Map.Entry<String, RaceIdentifier> e : raceIdentifiers.entrySet()) {
-	                raceColumn.setRaceIdentifier(fleetsByName.get(e.getKey()), e.getValue());
-	            }
-			} catch (UnknownHostException e) {
-				e.printStackTrace();
-			}
-            
+            RaceColumn raceColumn = result.addRaceColumn((String) dbRaceColumn.get(FieldNames.LEADERBOARD_COLUMN_NAME.name()),
+            		(Boolean) dbRaceColumn.get(FieldNames.LEADERBOARD_IS_MEDAL_RACE_COLUMN.name()), fleets.toArray(new Fleet[0]));
+            for (Map.Entry<String, RaceIdentifier> e : raceIdentifiers.entrySet()) {
+            	raceColumn.setRaceIdentifier(fleetsByName.get(e.getKey()), e.getValue());
+            }
+
         }
         return result;
     }

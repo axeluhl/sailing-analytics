@@ -72,7 +72,6 @@ import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
-import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.swisstimingadapter.Race;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterConnector;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterMessage;
@@ -356,12 +355,12 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     }
 
     @Override
-    public RaceColumn addColumnToLeaderboard(String columnName, String leaderboardName, boolean medalRace, RaceLogStore raceLogStore) {
+    public RaceColumn addColumnToLeaderboard(String columnName, String leaderboardName, boolean medalRace) {
         Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
         if (leaderboard != null) {
             if (leaderboard instanceof FlexibleLeaderboard) {
                 // uses the default fleet as the single fleet for the new column
-                RaceColumn result = ((FlexibleLeaderboard) leaderboard).addRaceColumn(columnName, medalRace, raceLogStore,
+                RaceColumn result = ((FlexibleLeaderboard) leaderboard).addRaceColumn(columnName, medalRace,
                         leaderboard.getFleet(null));
                 updateStoredLeaderboard((FlexibleLeaderboard) leaderboard);
                 return result;

@@ -28,7 +28,6 @@ import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
-import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.test.AbstractTracTracLiveTest;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
@@ -123,8 +122,7 @@ public class TrackRaceReplicationTest extends AbstractServerReplicationTest {
         final String leaderboardName = "Test Leaderboard";
         Leaderboard masterLeaderboard = master.apply(new CreateFlexibleLeaderboard(leaderboardName, new int[0], new LowPoint(), null));
         final String columnName = "R1";
-        RaceColumn masterColumn = master.apply(new AddColumnToLeaderboard(columnName, leaderboardName, /* medalRace */ false,
-        		EmptyRaceLogStore.INSTANCE));
+        RaceColumn masterColumn = master.apply(new AddColumnToLeaderboard(columnName, leaderboardName, /* medalRace */ false));
         final Fleet defaultFleet = masterLeaderboard.getFleet(null);
         master.apply(new ConnectTrackedRaceToLeaderboardColumn(leaderboardName, columnName, defaultFleet.getName(),
                 new RegattaNameAndRaceName("Academy Tracking 2011 (STG)", "weym470may122011")));
