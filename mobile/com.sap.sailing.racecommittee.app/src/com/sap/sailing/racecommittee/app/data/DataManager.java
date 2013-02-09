@@ -6,6 +6,7 @@ import java.util.Collection;
 
 import android.content.Context;
 
+import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
@@ -16,6 +17,7 @@ import com.sap.sailing.racecommittee.app.data.loaders.DataLoader;
 import com.sap.sailing.racecommittee.app.data.parsers.DataParser;
 import com.sap.sailing.racecommittee.app.data.parsers.EventsDataParser;
 import com.sap.sailing.racecommittee.app.data.parsers.ManagedRacesDataParser;
+import com.sap.sailing.racecommittee.app.deserialization.impl.BoatClassJsonDeserializer;
 import com.sap.sailing.racecommittee.app.deserialization.impl.ColorDeserializer;
 import com.sap.sailing.racecommittee.app.deserialization.impl.CourseAreaJsonDeserializer;
 import com.sap.sailing.racecommittee.app.deserialization.impl.EventJsonDeserializer;
@@ -27,6 +29,7 @@ import com.sap.sailing.racecommittee.app.deserialization.impl.RaceRowDeserialize
 import com.sap.sailing.racecommittee.app.deserialization.impl.SeriesWithRowsDeserializer;
 import com.sap.sailing.racecommittee.app.deserialization.impl.VenueJsonDeserializer;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
+import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 
 /**
  * Enables accessing of data.
@@ -123,9 +126,10 @@ public class DataManager implements ReadonlyDataManager {
 			return;
 		}
 		
-		//JsonDeserializer<BoatClass> boatClassDeserializer = new BoatClassJsonDeserializer();
+		JsonDeserializer<BoatClass> boatClassDeserializer = new BoatClassJsonDeserializer();
 		DataParser<Collection<ManagedRace>> parser =  new ManagedRacesDataParser(
 				new RaceGroupDeserializer(
+						boatClassDeserializer,
 						new SeriesWithRowsDeserializer(
 								new RaceRowDeserializer(
 										new FleetDeserializer(

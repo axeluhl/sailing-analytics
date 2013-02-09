@@ -16,13 +16,19 @@ public class ManagedRaceImpl implements ManagedRace {
 	//private static final String TAG = ManagedRace.class.getName();
 
 	private ManagedRaceIdentifier identifier;
+	private RaceLog raceLog;
 	
 	public ManagedRaceImpl(ManagedRaceIdentifier identifier, RaceLog raceLog) {
 		this.identifier = identifier;
+		this.raceLog = raceLog;
 	}
 
 	public Serializable getId() {
 		return identifier.getId();
+	}
+
+	public RaceLog getRaceLog() {
+		return raceLog;
 	}
 
 	public String getName() {

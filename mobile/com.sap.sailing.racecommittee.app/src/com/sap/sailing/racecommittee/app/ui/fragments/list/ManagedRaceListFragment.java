@@ -15,6 +15,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.ListView;
 
+import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
@@ -23,10 +24,10 @@ import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.ui.activities.RacingActivity;
 import com.sap.sailing.racecommittee.app.ui.adapters.racelist.BoatClassSeriesDataFleet;
 import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListAdapter;
+import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListAdapter.JuryFlagClickedListener;
 import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataType;
 import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataTypeElement;
 import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataTypeTitle;
-import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListAdapter.JuryFlagClickedListener;
 import com.sap.sailing.racecommittee.app.ui.comparators.NamedRaceComparator;
 import com.sap.sailing.racecommittee.app.ui.comparators.SeriesComparator;
 
@@ -88,6 +89,13 @@ public class ManagedRaceListFragment extends ListFragment implements JuryFlagCli
 		}
 	}
 	
+	private BoatClass getBoatClassForRace(ManagedRace managedRace) {
+		if (managedRace.getRaceGroup().getBoatClass() == null) {
+			return new BoatClassImpl(managedRace.getRaceGroup().getName(), false);
+		}
+		return managedRace.getRaceGroup().getBoatClass();
+	}
+	
 	private void initListElements(boolean clearFirst) {
 	
 		HashMap<Serializable, RaceStatus> savedStates = new HashMap<Serializable, RaceStatus>();
@@ -109,8 +117,10 @@ public class ManagedRaceListFragment extends ListFragment implements JuryFlagCli
 			
 			// Group Managed Races by boat class and group
 			for (ManagedRace m : managedRacesById.values()) {
-				BoatClassSeriesDataFleet ser = 
-						new BoatClassSeriesDataFleet(new BoatClassImpl("A", false), m.getSeries(), m.getFleet());
+				BoatClassSeriesDataFleet ser = new BoatClassSeriesDataFleet(
+								getBoatClassForRace(m), 
+								m.getSeries(), 
+								m.getFleet());
 
 				if (raceListHashMap.containsKey(ser)) {
 					raceListHashMap.get(ser).add(m);
