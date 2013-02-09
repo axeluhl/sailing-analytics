@@ -7,10 +7,9 @@ import com.mongodb.MongoException;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.MongoRaceLogStore;
+import com.sap.sailing.domain.racelog.RaceColumnIdentifier;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
-import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.domain.tracking.TrackedRegatta;
 
 public class MongoRaceLogStoreImpl extends EmptyRaceLogStore implements MongoRaceLogStore {
 	private transient final DB db;
@@ -25,10 +24,10 @@ public class MongoRaceLogStoreImpl extends EmptyRaceLogStore implements MongoRac
     }
 
 	@Override
-	public RaceLog getRaceLog(TrackedRegatta trackedRegatta, TrackedRace trackedRace) {
+	public RaceLog getRaceLog(RaceColumnIdentifier identifier) {
 		RaceLog track;
-		track = domainObjectFactory.loadRaceLog(trackedRegatta.getRegatta(), trackedRace.getRace());
-		track.addListener(new MongoRaceLogListener(trackedRegatta, trackedRace, mongoObjectFactory, db));
+		track = domainObjectFactory.loadRaceLog(identifier);
+		track.addListener(new MongoRaceLogListener(identifier, mongoObjectFactory, db));
 		return track;
 	}
 

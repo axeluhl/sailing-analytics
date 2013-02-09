@@ -18,11 +18,12 @@ import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.persistence.impl.DomainObjectFactoryImpl;
-import com.sap.sailing.domain.persistence.impl.MongoObjectFactoryImpl;
+import com.sap.sailing.domain.racelog.RaceColumnIdentifier;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogEventFactory;
 import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
+import com.sap.sailing.domain.racelog.impl.RaceColumnIdentifierImpl;
 import com.sap.sailing.domain.test.AbstractTracTracLiveTest;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
@@ -84,7 +85,8 @@ public class TestStoringAndRetrievingRaceLogsTest extends AbstractTracTracLiveTe
         
         Mongo myFirstMongo = newMongo();
         DB firstDatabase = myFirstMongo.getDB(dbConfiguration.getDatabaseName());
-        new MongoObjectFactoryImpl(firstDatabase).addRaceLogDumper(trackedRegatta, trackedRace);
+        //new MongoObjectFactoryImpl(firstDatabase).addRaceLogDumper(trackedRegatta, trackedRace);
+        //TODO load race log from race column
         RaceLog raceLog = trackedRace.getRaceLog();
         
         TimePoint timePoint = MillisecondsTimePoint.now();
@@ -100,7 +102,9 @@ public class TestStoringAndRetrievingRaceLogsTest extends AbstractTracTracLiveTe
         
         Mongo mySecondMongo = newMongo();
         DB secondDatabase = mySecondMongo.getDB(dbConfiguration.getDatabaseName());
-        RaceLog result = new DomainObjectFactoryImpl(secondDatabase).loadRaceLog(domainEvent, race);
+        RaceColumnIdentifier identifier = new RaceColumnIdentifierImpl();
+        //TODO work on correct identifier
+        RaceLog result = new DomainObjectFactoryImpl(secondDatabase).loadRaceLog(identifier);
         int resultingPassId = 0;
         timePointStartTime = initialTimePointStartTime;
         

@@ -74,6 +74,7 @@ import com.sap.sailing.domain.leaderboard.impl.ScoreCorrectionImpl;
 import com.sap.sailing.domain.leaderboard.meta.LeaderboardGroupMetaLeaderboard;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.racelog.Flags;
+import com.sap.sailing.domain.racelog.RaceColumnIdentifier;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogEventFactory;
@@ -895,12 +896,11 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
 
 	@Override
-	public RaceLog loadRaceLog(Regatta regatta, RaceDefinition race) {
+	public RaceLog loadRaceLog(RaceColumnIdentifier identifier) {
 		RaceLog result = new RaceLogImpl(RaceLogImpl.class.getSimpleName());
         try {
             BasicDBObject query = new BasicDBObject();
-            query.put(FieldNames.REGATTA_NAME.name(), regatta.getName());
-            query.put(FieldNames.RACE_NAME.name(), race.getName());
+            query.put(FieldNames.RACE_COLUMN_IDENTIFIER.name(), identifier.getIdentifier());
             DBCollection raceLog = database.getCollection(CollectionNames.RACE_LOGS.name());
             for (DBObject o : raceLog.find(query)) {
                 RaceLogEvent raceLogEvent = loadRaceLogEvent((DBObject) o.get(FieldNames.RACE_LOG_EVENT.name()));

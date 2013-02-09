@@ -1,7 +1,7 @@
 package com.sap.sailing.domain.persistence.impl;
 
-import java.util.List;
 import java.io.Serializable;
+import java.util.List;
 import java.util.logging.Logger;
 
 import org.bson.types.ObjectId;
@@ -37,7 +37,7 @@ import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
-import com.sap.sailing.domain.racelog.RaceLog;
+import com.sap.sailing.domain.racelog.RaceColumnIdentifier;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
 import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
@@ -478,30 +478,24 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     
     public DBCollection getRaceLogCollection() {
         DBCollection result = database.getCollection(CollectionNames.RACE_LOGS.name());
-        result.ensureIndex(new BasicDBObject(FieldNames.RACE_NAME.name(), null));
-        //TODO: Clarify which field shall be the index/ which fields identifies a race uniquely over all events and regattas
+        result.ensureIndex(new BasicDBObject(FieldNames.RACE_COLUMN_IDENTIFIER.name(), null));
         return result;
     }
 
-	public DBObject storeRaceLogEntry(Regatta regatta, RaceDefinition race, RaceLogFlagEvent flagEvent) {
+	public DBObject storeRaceLogEntry(RaceColumnIdentifier raceColumnIdentifier, RaceLogFlagEvent flagEvent) {
 		BasicDBObject result = new BasicDBObject();
-		storeRegattaAndRaceForRaceLogEvent(regatta, race, result);
+		result.put(FieldNames.RACE_COLUMN_IDENTIFIER.name(), raceColumnIdentifier.getIdentifier());
         
         result.put(FieldNames.RACE_LOG_EVENT.name(), storeRaceLogFlagEvent(flagEvent));
         return result;
 	}
 	
-	public DBObject storeRaceLogEntry(Regatta regatta, RaceDefinition race, RaceLogStartTimeEvent startTimeEvent) {
+	public DBObject storeRaceLogEntry(RaceColumnIdentifier raceColumnIdentifier, RaceLogStartTimeEvent startTimeEvent) {
 		BasicDBObject result = new BasicDBObject();
-		storeRegattaAndRaceForRaceLogEvent(regatta, race, result);
+		result.put(FieldNames.RACE_COLUMN_IDENTIFIER.name(), raceColumnIdentifier.getIdentifier());
         
         result.put(FieldNames.RACE_LOG_EVENT.name(), storeRaceLogStartTimeEvent(startTimeEvent));
         return result;
-	}
-	
-	private void storeRegattaAndRaceForRaceLogEvent(Regatta regatta, RaceDefinition race, DBObject result) {
-		result.put(FieldNames.REGATTA_NAME.name(), regatta.getName());
-        result.put(FieldNames.RACE_NAME.name(), race.getName());
 	}
 
 	private Object storeRaceLogStartTimeEvent(RaceLogStartTimeEvent startTimeEvent) {
@@ -541,11 +535,5 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         	dbInvolvedCompetitorNames.add(MongoUtils.escapeDollarAndDot(competitor.getName()));
         }
         return dbInvolvedCompetitorNames;
-	}
-
-	@Override
-	public void addRaceLogDumper(TrackedRegatta trackedRegatta, TrackedRace trackedRace) {
-		RaceLog rcEventTrack = trackedRace.getRaceLog();
-		rcEventTrack.addListener(new MongoRaceLogListener(trackedRegatta, trackedRace, this, database));		
 	}
 }
