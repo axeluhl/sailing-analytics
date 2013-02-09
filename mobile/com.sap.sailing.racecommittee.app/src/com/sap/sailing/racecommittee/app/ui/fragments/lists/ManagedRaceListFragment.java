@@ -1,4 +1,4 @@
-package com.sap.sailing.racecommittee.app.ui.fragments.list;
+package com.sap.sailing.racecommittee.app.ui.fragments.lists;
 
 import java.io.Serializable;
 import java.util.ArrayList;

@@ -1,4 +1,4 @@
-package com.sap.sailing.racecommittee.app.ui.fragments.list;
+package com.sap.sailing.racecommittee.app.ui.fragments.lists;
 
 import java.io.Serializable;
 
@@ -9,9 +9,9 @@ import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
-import com.sap.sailing.racecommittee.app.ui.fragments.list.selection.CourseAreaSelectedListenerHost;
-import com.sap.sailing.racecommittee.app.ui.fragments.list.selection.EventSelectedListenerHost;
-import com.sap.sailing.racecommittee.app.ui.fragments.list.selection.ItemSelectedListener;
+import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.CourseAreaSelectedListenerHost;
+import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.EventSelectedListenerHost;
+import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.ItemSelectedListener;
 
 public class CourseAreaListFragment extends NamedListFragment<CourseArea>  {
 

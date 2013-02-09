@@ -4,11 +4,13 @@ import java.io.Serializable;
 import java.util.Collection;
 
 import android.app.AlertDialog;
+import android.app.Fragment;
 import android.app.FragmentTransaction;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.view.Window;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -20,11 +22,13 @@ import com.sap.sailing.racecommittee.app.data.DataManager;
 import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
-import com.sap.sailing.racecommittee.app.ui.fragments.list.ManagedRaceListFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.RaceInfoFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.lists.ManagedRaceListFragment;
 
 public class RacingActivity extends TwoPaneActivity /*implements ResetTimeListener, 
 StartModeSelectionListener, PathfinderSelectionListener, GateLineOpeningTimeSelectionListener, CourseDesignSelectionListener*/ {
-	private final static String TAG = RacingActivity.class.getName();
+	// private final static String TAG = RacingActivity.class.getName();
 	
 	private final static String ListFragmentTag = RacingActivity.class.getName() + ".ManagedRaceListFragment";
 	
@@ -36,7 +40,7 @@ StartModeSelectionListener, PathfinderSelectionListener, GateLineOpeningTimeSele
 	/**
 	 * Container fragment for currently selected race
 	 */
-	//private RaceInfoFragment infoFragment;
+	private RaceInfoFragment infoFragment;
 	
 	private ReadonlyDataManager dataManager;
 	
@@ -57,22 +61,41 @@ StartModeSelectionListener, PathfinderSelectionListener, GateLineOpeningTimeSele
 		setContentView(R.layout.racing_view);
 		setProgressBarIndeterminateVisibility(false);
 		
-		// on first create add race list fragment
-		if (savedInstanceState == null) {
-			addListFragment();
-		} else {
-			listFragment = (ManagedRaceListFragment) getFragmentManager().findFragmentByTag(ListFragmentTag);
-		}
+		listFragment = getListFragment();
 		
 		Serializable courseAreaId = getCourseAreaIdFromIntent();
 		if (courseAreaId == null) {
 			throw new IllegalStateException("There was no course area id transmitted...");
 		}
-		setupTitle(courseAreaId);
-		loadRaces(courseAreaId);
-		//StaticVibrator.prepareVibrator(this);
+		CourseArea courseArea = dataManager.getDataStore().getCourseArea(courseAreaId);
+		if (courseArea == null) {
+			throw new IllegalStateException("Course Area was not found.");
+		}
 		
+		setupTitle(courseArea);
+		loadRaces(courseArea);
+		//StaticVibrator.prepareVibrator(this);
 	}
+
+	private ManagedRaceListFragment getListFragment() {
+		Fragment fragment = getFragmentManager().findFragmentByTag(ListFragmentTag);
+		// on first create add race list fragment
+		if (fragment == null) {
+			fragment = createListFragment();
+		}
+		return (ManagedRaceListFragment) fragment;
+	}
+
+
+	private Fragment createListFragment() {
+		Fragment fragment = new ManagedRaceListFragment();
+		FragmentTransaction transaction = getFragmentManager().beginTransaction();
+		transaction.add(R.id.races_and_details_left, fragment, ListFragmentTag);
+		transaction.setTransition(FragmentTransaction.TRANSIT_NONE);
+		transaction.commit();
+		return fragment;
+	}
+
 
 	private Serializable getCourseAreaIdFromIntent() {
 		if (getIntent() == null || getIntent().getExtras() == null) {
@@ -92,44 +115,39 @@ StartModeSelectionListener, PathfinderSelectionListener, GateLineOpeningTimeSele
 		return courseId;
 	}
 
-	private void setupTitle(Serializable courseAreaId) {
-		CourseArea courseArea = dataManager.getDataStore().getCourseArea(courseAreaId);
-		if (courseArea == null) {
-			throw new IllegalStateException("No course area with id found: " + courseAreaId);
-		}
-		
+	private void setupTitle(CourseArea courseArea) {
 		TextView label = (TextView) findViewById(R.id.textListHeader);
 		label.setText(String.format(getString(R.string.racingview_header), courseArea.getName()));
 	}
 	
-	private void loadRaces(final Serializable courseAreaId) {
+	private void loadRaces(final CourseArea courseArea) {
 		setProgressBarIndeterminateVisibility(true);
 		
-		dataManager.loadRaces(courseAreaId, new LoadClient<Collection<ManagedRace>>() {
+		dataManager.loadRaces(courseArea.getId(), new LoadClient<Collection<ManagedRace>>() {
 			public void onLoadSucceded(Collection<ManagedRace> data) {
-				onLoadRacesSucceded(courseAreaId, data);
+				onLoadRacesSucceded(courseArea, data);
 
 			}
 			public void onLoadFailed(Exception reason) {
-				onLoadRacesFailed(courseAreaId, reason);
+				onLoadRacesFailed(courseArea, reason);
 			}
 		});
 	}
 	
-	private void onLoadRacesSucceded(Serializable courseAreaId, Collection<ManagedRace> data) {
+	private void onLoadRacesSucceded(CourseArea courseArea, Collection<ManagedRace> data) {
 		setProgressBarIndeterminateVisibility(false);
 		
 		registerOnService(data);
 		listFragment.setupOn(data);
 		
 		Toast.makeText(RacingActivity.this, 
-				"Loaded "  + data.size() + " races for course " + courseAreaId.toString(), 
+				"Loaded "  + data.size() + " races for course " + courseArea.getId(), 
 				Toast.LENGTH_LONG).show();
 	}
 
-	private void onLoadRacesFailed(final Serializable courseAreaId, Exception reason) {
+	private void onLoadRacesFailed(final CourseArea courseArea, Exception reason) {
 		setProgressBarIndeterminateVisibility(false);
-		showLoadFailedDialog(courseAreaId, reason.getMessage());
+		showLoadFailedDialog(courseArea, reason.getMessage());
 	}
 	
 	private void registerOnService(Collection<ManagedRace> races) {
@@ -143,7 +161,7 @@ StartModeSelectionListener, PathfinderSelectionListener, GateLineOpeningTimeSele
 		}
 	}
 	
-	private void showLoadFailedDialog(final Serializable courseId, String message) {
+	private void showLoadFailedDialog(final CourseArea courseArea, String message) {
 		AlertDialog.Builder builder = new AlertDialog.Builder(this); 
 		builder.setMessage(String.format("There was an error loading the requested data: %s\nDo you want to retry?", message))
 			   .setTitle("Load failure")
@@ -151,7 +169,7 @@ StartModeSelectionListener, PathfinderSelectionListener, GateLineOpeningTimeSele
 		       .setCancelable(true) 
 		       .setPositiveButton("Retry", new DialogInterface.OnClickListener() { 
 		           public void onClick(DialogInterface dialog, int id) { 
-		        	   loadRaces(courseId);
+		        	   loadRaces(courseArea);
 		           } 
 		       }) 
 		       .setNegativeButton("Cancel", new DialogInterface.OnClickListener() { 
@@ -163,29 +181,16 @@ StartModeSelectionListener, PathfinderSelectionListener, GateLineOpeningTimeSele
 		alert.show(); 
 	}
 	
-	public void onRaceItemClicked(ManagedRace race) {
+	public void onRaceItemClicked(ManagedRace managedRace) {
+		this.infoFragment = new RaceInfoFragment();
+		infoFragment.setArguments(RaceFragment.createArguments(managedRace));
 		
-	}
-
-	/*public void onRaceItemClicked(ManagedRace race) {
-		infoFragment = new RaceInfoFragment();
-		Bundle args = new Bundle();
-		args.putSerializable(AppConstants.RACE_UUID_KEY, race.getId());
-		infoFragment.setArguments(args);
 		FragmentTransaction transaction = getFragmentManager().beginTransaction();
 		transaction.setCustomAnimations(R.animator.slide_in, R.animator.slide_out);
 		transaction.replace(R.id.races_and_details_right, infoFragment);
 		transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
 		transaction.commit();
 		getRightLayout().setVisibility(View.VISIBLE);
-	}*/
-	
-	private void addListFragment() {
-		listFragment = new ManagedRaceListFragment();
-		FragmentTransaction transaction = getFragmentManager().beginTransaction();
-		transaction.add(R.id.races_and_details_left, listFragment, ListFragmentTag);
-		transaction.setTransition(FragmentTransaction.TRANSIT_NONE);
-		transaction.commit();
 	}
 
 	/*public void onResetTimeClick() {

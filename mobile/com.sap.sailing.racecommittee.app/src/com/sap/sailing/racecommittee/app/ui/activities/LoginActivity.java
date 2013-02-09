@@ -19,11 +19,11 @@ import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
-import com.sap.sailing.racecommittee.app.ui.fragments.list.CourseAreaListFragment;
-import com.sap.sailing.racecommittee.app.ui.fragments.list.EventListFragment;
-import com.sap.sailing.racecommittee.app.ui.fragments.list.selection.CourseAreaSelectedListenerHost;
-import com.sap.sailing.racecommittee.app.ui.fragments.list.selection.EventSelectedListenerHost;
-import com.sap.sailing.racecommittee.app.ui.fragments.list.selection.ItemSelectedListener;
+import com.sap.sailing.racecommittee.app.ui.fragments.lists.CourseAreaListFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.lists.EventListFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.CourseAreaSelectedListenerHost;
+import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.EventSelectedListenerHost;
+import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.ItemSelectedListener;
 
 public class LoginActivity extends TwoPaneActivity implements EventSelectedListenerHost, CourseAreaSelectedListenerHost  {
 	

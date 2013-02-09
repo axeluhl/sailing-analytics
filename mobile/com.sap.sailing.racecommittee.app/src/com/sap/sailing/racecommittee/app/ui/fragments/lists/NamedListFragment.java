@@ -1,4 +1,4 @@
-package com.sap.sailing.racecommittee.app.ui.fragments.list;
+package com.sap.sailing.racecommittee.app.ui.fragments.lists;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -23,7 +23,7 @@ import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 import com.sap.sailing.racecommittee.app.ui.adapters.NamedArrayAdapter;
 import com.sap.sailing.racecommittee.app.ui.comparators.NamedComparator;
-import com.sap.sailing.racecommittee.app.ui.fragments.list.selection.ItemSelectedListener;
+import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.ItemSelectedListener;
 
 public abstract class NamedListFragment<T extends Named> extends ListFragment implements LoadClient<Collection<T>> {
 	private ItemSelectedListener<T> listener;
