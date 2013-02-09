@@ -76,7 +76,7 @@ public class ModifyRaceLogJsonExportServlet extends JsonExportServlet {
 				return;
 			}
 			
-			dynamicTrackedRace.recordRaceLogEvent(raceLogEvent);
+			//TODO dynamicTrackedRace.recordRaceLogEvent(raceLogEvent);
 		} catch (ParseException e) {
 			throw new JsonDeserializationException("Invalid JSON in request body.", e);
 		}

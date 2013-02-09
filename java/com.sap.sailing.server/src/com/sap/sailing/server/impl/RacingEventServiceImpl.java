@@ -72,7 +72,6 @@ import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
-import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.swisstimingadapter.Race;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterConnector;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterMessage;
@@ -600,13 +599,12 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     }
 
     @Override
-    public Regatta addRegatta(URL jsonURL, URI liveURI, URI storedURI, WindStore windStore, long timeoutInMilliseconds,
-    		RaceLogStore raceLogStore) throws Exception {
+    public Regatta addRegatta(URL jsonURL, URI liveURI, URI storedURI, WindStore windStore, long timeoutInMilliseconds) throws Exception {
         JSONService jsonService = getTracTracDomainFactory().parseJSONURL(jsonURL);
         Regatta regatta = null;
         for (RaceRecord rr : jsonService.getRaceRecords()) {
             URL paramURL = rr.getParamURL();
-            regatta = addTracTracRace(paramURL, liveURI, storedURI, windStore, timeoutInMilliseconds, raceLogStore).getRegatta();
+            regatta = addTracTracRace(paramURL, liveURI, storedURI, windStore, timeoutInMilliseconds).getRegatta();
         }
         return regatta;
     }
@@ -661,23 +659,21 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
 
     @Override
     public RacesHandle addSwissTimingRace(RegattaIdentifier regattaToAddTo, String raceID, String hostname,
-            int port, boolean canSendRequests, WindStore windStore, long timeoutInMilliseconds, 
-            RaceLogStore raceLogStore) throws Exception {
+            int port, boolean canSendRequests, WindStore windStore, long timeoutInMilliseconds) throws Exception {
         return addRace(
                 regattaToAddTo,
                 swissTimingDomainFactory.createTrackingConnectivityParameters(hostname, port, raceID, canSendRequests, delayToLiveInMillis,
-                        swissTimingFactory, swissTimingDomainFactory, windStore, raceLogStore, swissTimingAdapterPersistence), windStore, timeoutInMilliseconds,
-                        raceLogStore);
+                        swissTimingFactory, swissTimingDomainFactory, windStore, swissTimingAdapterPersistence), windStore, timeoutInMilliseconds);
     }
 
     @Override
     public RacesHandle addTracTracRace(URL paramURL, URI liveURI, URI storedURI, WindStore windStore,
-            long timeoutInMilliseconds, RaceLogStore raceLogStore) throws Exception {
+            long timeoutInMilliseconds) throws Exception {
         return addRace(
         /* regattaToAddTo */null, getTracTracDomainFactory().createTrackingConnectivityParameters(paramURL, liveURI, storedURI,
         /* startOfTracking */null,
-        /* endOfTracking */null, delayToLiveInMillis, /* simulateWithStartTimeNow */false, windStore, raceLogStore), windStore,
-                timeoutInMilliseconds, raceLogStore);
+        /* endOfTracking */null, delayToLiveInMillis, /* simulateWithStartTimeNow */false, windStore), windStore,
+                timeoutInMilliseconds);
     }
     
     @Override
@@ -708,7 +704,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
 
     @Override
     public RacesHandle addRace(RegattaIdentifier regattaToAddTo, RaceTrackingConnectivityParameters params,
-            WindStore windStore, long timeoutInMilliseconds, RaceLogStore raceLogStore) throws Exception {
+            WindStore windStore, long timeoutInMilliseconds) throws Exception {
         RaceTracker tracker = raceTrackersByID.get(params.getTrackerID());
         if (tracker == null) {
             Regatta regatta = regattaToAddTo == null ? null : getRegatta(regattaToAddTo);
@@ -816,23 +812,20 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     
     @Override
     public TrackedRace createTrackedRace(RegattaAndRaceIdentifier raceIdentifier, WindStore windStore,
-            long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
-            RaceLogStore raceLogStore) {
+            long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed) {
         DynamicTrackedRegatta trackedRegatta = getOrCreateTrackedRegatta(getRegatta(raceIdentifier));
         RaceDefinition race = getRace(raceIdentifier);
         return trackedRegatta.createTrackedRace(race, windStore, delayToLiveInMillis,
                 millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed,
-                /* raceDefinitionSetToUpdate */null, raceLogStore);
+                /* raceDefinitionSetToUpdate */null);
     }
     
     @Override
     public RacesHandle addTracTracRace(RegattaIdentifier regattaToAddTo, URL paramURL, URI liveURI,
             URI storedURI, TimePoint startOfTracking, TimePoint endOfTracking,
-            WindStore windStore, long timeoutInMilliseconds, boolean simulateWithStartTimeNow, 
-            RaceLogStore raceLogStore) throws Exception {
+            WindStore windStore, long timeoutInMilliseconds, boolean simulateWithStartTimeNow) throws Exception {
         return addRace(regattaToAddTo, getTracTracDomainFactory().createTrackingConnectivityParameters(paramURL, liveURI, storedURI, startOfTracking,
-                        endOfTracking, delayToLiveInMillis, simulateWithStartTimeNow, windStore, raceLogStore), windStore, timeoutInMilliseconds,
-                        raceLogStore);
+                        endOfTracking, delayToLiveInMillis, simulateWithStartTimeNow, windStore), windStore, timeoutInMilliseconds);
     }
 
     private void ensureRegattaIsObservedForDefaultLeaderboardAndAutoLeaderboardLinking(DynamicTrackedRegatta trackedRegatta) {
@@ -882,8 +875,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
             // replicate the addition of the tracked race:
             CreateTrackedRace op = new CreateTrackedRace(trackedRace.getRaceIdentifier(), trackedRace.getWindStore(),
                     trackedRace.getDelayToLiveInMillis(),
-                    trackedRace.getMillisecondsOverWhichToAverageWind(), trackedRace.getMillisecondsOverWhichToAverageSpeed(),
-                    trackedRace.getRaceLogStore());
+                    trackedRace.getMillisecondsOverWhichToAverageWind(), trackedRace.getMillisecondsOverWhichToAverageSpeed());
             replicate(op);
             linkRaceToConfiguredLeaderboardColumns(trackedRace);
             final FlexibleLeaderboard defaultLeaderboard = (FlexibleLeaderboard) leaderboardsByName.get(LeaderboardNameConstants.DEFAULT_LEADERBOARD_NAME);

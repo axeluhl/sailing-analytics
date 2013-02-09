@@ -39,7 +39,6 @@ import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.persistence.MongoFactory;
-import com.sap.sailing.domain.persistence.MongoRaceLogStoreFactory;
 import com.sap.sailing.domain.persistence.MongoWindStore;
 import com.sap.sailing.domain.persistence.MongoWindStoreFactory;
 import com.sap.sailing.domain.racelog.RaceLog;
@@ -96,11 +95,8 @@ public class TrackedRaceContentsReplicationTest extends AbstractServerReplicatio
         trackedRace = (DynamicTrackedRace) master.apply(new CreateTrackedRace(raceIdentifier,
                 MongoWindStoreFactory.INSTANCE.getMongoWindStore(MongoFactory.INSTANCE.getDefaultMongoObjectFactory(),
                         MongoFactory.INSTANCE.getDefaultDomainObjectFactory()), /* delayToLiveInMillis */ 5000,
-                /* millisecondsOverWhichToAverageWind */ 10000, /* millisecondsOverWhichToAverageSpeed */10000,
-                MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(MongoFactory.INSTANCE.getDefaultMongoObjectFactory(), 
-                		MongoFactory.INSTANCE.getDefaultDomainObjectFactory())));
+                /* millisecondsOverWhichToAverageWind */ 10000, /* millisecondsOverWhichToAverageSpeed */10000));
         trackedRace.waitUntilWindLoadingComplete();
-        trackedRace.waitUntilRaceLogLoadingComplete();
     }
     
     @Test
@@ -230,7 +226,7 @@ public class TrackedRaceContentsReplicationTest extends AbstractServerReplicatio
     	TimePoint time = MillisecondsTimePoint.now();
         final RaceLogStartTimeEvent startTimeEvent = 
         		RaceLogEventFactory.INSTANCE.createStartTimeEvent(time, 0, new MillisecondsTimePoint(time.asMillis() + 500000));
-        trackedRace.recordRaceLogEvent(startTimeEvent);
+        //trackedRace.recordRaceLogEvent(startTimeEvent);
         Thread.sleep(1000);
         TrackedRace replicaTrackedRace = replica.getTrackedRace(raceIdentifier);
         RaceLog replicaRaceLog = replicaTrackedRace.getRaceLog();
@@ -250,7 +246,7 @@ public class TrackedRaceContentsReplicationTest extends AbstractServerReplicatio
     	TimePoint time = MillisecondsTimePoint.now();
         final RaceLogStartTimeEvent startTimeEvent = 
         		RaceLogEventFactory.INSTANCE.createStartTimeEvent(time, 0, new MillisecondsTimePoint(time.asMillis() + 500000));
-        trackedRace.recordRaceLogEvent(startTimeEvent);
+        //trackedRace.recordRaceLogEvent(startTimeEvent);
         RaceLog trackedRaceRaceLog= trackedRace.getRaceLog();
         trackedRaceRaceLog.lockForRead();
         try {

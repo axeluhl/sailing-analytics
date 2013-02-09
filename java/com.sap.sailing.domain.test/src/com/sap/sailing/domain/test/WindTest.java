@@ -36,7 +36,6 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.Util;
-import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.Wind;
@@ -269,8 +268,7 @@ public class WindTest {
                         boatClass, Collections.singleton(competitor)),
                         EmptyWindStore.INSTANCE, /* delayToLiveInMillis */ 1000,
                         /* millisecondsOverWhichToAverageWind */ 30000,
-                        /* millisecondsOverWhichToAverageSpeed */ 30000,
-                        EmptyRaceLogStore.INSTANCE);
+                        /* millisecondsOverWhichToAverageSpeed */ 30000);
         TimePoint start = MillisecondsTimePoint.now();
         TimePoint topMarkRounding = start.plus(30000);
         TimePoint finish = topMarkRounding.plus(30000);

@@ -2,7 +2,6 @@ package com.sap.sailing.server.operationaltransformation;
 
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
-import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
 
@@ -18,8 +17,8 @@ public class RecordRaceLogEvent extends AbstractRaceOperation<Void> {
 
 	@Override
 	public Void internalApplyTo(RacingEventService toState) throws Exception {
-		DynamicTrackedRace trackedRace = (DynamicTrackedRace) toState.getTrackedRace(getRaceIdentifier());
-		trackedRace.recordRaceLogEvent(event);
+//		DynamicTrackedRace trackedRace = (DynamicTrackedRace) toState.getTrackedRace(getRaceIdentifier());
+//		trackedRace.recordRaceLogEvent(event);
 		return null;
 	}
 

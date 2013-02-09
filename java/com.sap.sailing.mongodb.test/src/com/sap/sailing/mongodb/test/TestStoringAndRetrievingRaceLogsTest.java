@@ -23,7 +23,6 @@ import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogEventFactory;
 import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
-import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.test.AbstractTracTracLiveTest;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
@@ -67,7 +66,7 @@ public class TestStoringAndRetrievingRaceLogsTest extends AbstractTracTracLiveTe
         Regatta domainEvent = domainFactory.getOrCreateDefaultRegatta(getTracTracEvent(), /* trackedRegattaRegistry */ null);
         DynamicTrackedRegatta trackedRegatta = new RacingEventServiceImpl().getOrCreateTrackedRegatta(domainEvent);
         Iterable<Receiver> typeControllers = domainFactory.getUpdateReceivers(trackedRegatta, getTracTracEvent(),
-                EmptyWindStore.INSTANCE, EmptyRaceLogStore.INSTANCE,
+                EmptyWindStore.INSTANCE,
                 /* startOfTracking */null, /* endOfTracking */null, /* delayToLiveInMillis */
                 0l, /* simulator */ null, new DynamicRaceDefinitionSet() {
                     @Override
@@ -81,7 +80,7 @@ public class TestStoringAndRetrievingRaceLogsTest extends AbstractTracTracLiveTe
                     @Override
                     public void addRaceDefinition(RaceDefinition race) {
                     }
-                }, EmptyRaceLogStore.INSTANCE);
+                });
         
         Mongo myFirstMongo = newMongo();
         DB firstDatabase = myFirstMongo.getDB(dbConfiguration.getDatabaseName());

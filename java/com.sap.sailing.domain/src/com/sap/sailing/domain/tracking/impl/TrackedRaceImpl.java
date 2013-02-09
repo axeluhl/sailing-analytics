@@ -30,12 +30,12 @@ import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.BearingWithConfidence;
 import com.sap.sailing.domain.base.BoatClass;
-import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.CourseChange;
 import com.sap.sailing.domain.base.CourseListener;
 import com.sap.sailing.domain.base.Leg;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
@@ -70,8 +70,6 @@ import com.sap.sailing.domain.confidence.Weigher;
 import com.sap.sailing.domain.confidence.impl.HyperbolicTimeDifferenceWeigher;
 import com.sap.sailing.domain.confidence.impl.PositionAndTimePointWeigher;
 import com.sap.sailing.domain.racelog.RaceLog;
-import com.sap.sailing.domain.racelog.RaceLogStore;
-import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
@@ -247,22 +245,12 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
      * synchronization or locking.
      */
     private final NamedReentrantReadWriteLock serializationLock;
-    
-    private transient RaceLog raceLog;
-    
-    private transient RaceLogStore raceLogStore;
-    
-    /**
-     * The constructor loads race log events from the {@link #raceLogStore} asynchronously. When completed, this flag is set to
-     * <code>true</code>, and all threads currently waiting on this object are notified.
-     */
-    private boolean raceLogLoadingCompleted;
 
     private final Map<Iterable<MarkPassing>, NamedReentrantReadWriteLock> locksForMarkPassings;
     
     public TrackedRaceImpl(final TrackedRegatta trackedRegatta, RaceDefinition race, final WindStore windStore, 
             long delayToLiveInMillis, final long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
-            long delayForWindEstimationCacheInvalidation, final RaceLogStore raceLogStore) {
+            long delayForWindEstimationCacheInvalidation) {
         super();
         locksForMarkPassings = new IdentityHashMap<Iterable<MarkPassing>, NamedReentrantReadWriteLock>();
         this.status = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.PREPARED, 0.0);
@@ -272,7 +260,6 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         this.updateCount = 0;
         this.race = race;
         this.windStore = windStore;
-        this.raceLogStore = raceLogStore;
         this.windSourcesToExclude = new HashSet<WindSource>();
         this.directionFromStartToNextMarkCache = new HashMap<TimePoint, Future<Wind>>();
         this.millisecondsOverWhichToAverageSpeed = millisecondsOverWhichToAverageSpeed;
@@ -340,25 +327,6 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
             }
         }.start();
         
-        new Thread("Race log event loader for tracked race " + getRace().getName()) {
-            @Override
-            public void run() {
-                // When this tracked race is to be serialized, wait for the loading of the according race log to complete.
-                // It seems sufficiently unlikely that serialization is requested after the constructor succeeds and
-                // before this thread obtains the lock.
-                LockUtil.lockForRead(serializationLock);
-                try {
-                    raceLog = raceLogStore.getRaceLog(trackedRegatta, TrackedRaceImpl.this);
-                } finally {
-                    LockUtil.unlockAfterRead(serializationLock);
-                }
-                synchronized (TrackedRaceImpl.this) {
-                	raceLogLoadingCompleted = true;
-                    TrackedRaceImpl.this.notifyAll();
-                }
-            }
-        }.start();
-        
         // by default, a tracked race offers one course-based wind estimation, one track-based wind estimation track and
         // one "WEB" track for manual or REST-based wind reception; other wind tracks may be added as fixes are received
         // for them.
@@ -386,15 +354,13 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     /**
      * Deserialization has to be maintained in lock-step with {@link #writeObject(ObjectOutputStream) serialization}.
      * When de-serializing, a possibly remote {@link #windStore} is ignored because it is transient. Instead, an
-     * {@link EmptyWindStore} is used for the de-serialized instance. Same counts for the {@link #raceLogStore}, which is then initialized
-     * with a {@link EmptyRaceLogStore}.
+     * {@link EmptyWindStore} is used for the de-serialized instance.
      */
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
         ois.defaultReadObject();
         markPassingsTimes = new ArrayList<Pair<Waypoint, Pair<TimePoint, TimePoint>>>();
         cacheInvalidationTimerLock = new Object();
         windStore = EmptyWindStore.INSTANCE;
-        raceLogStore = EmptyRaceLogStore.INSTANCE;
         competitorRankings = new HashMap<TimePoint, List<Competitor>>();
         competitorRankingsLocks = new HashMap<TimePoint, NamedReentrantReadWriteLock>();
         directionFromStartToNextMarkCache = new HashMap<TimePoint, Future<Wind>>();
@@ -405,13 +371,6 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     @Override
     public synchronized void waitUntilWindLoadingComplete() throws InterruptedException {
         while (!windLoadingCompleted) {
-            wait();
-        }
-    }
-    
-    @Override
-    public synchronized void waitUntilRaceLogLoadingComplete() throws InterruptedException {
-        while (!raceLogLoadingCompleted) {
             wait();
         }
     }
@@ -448,11 +407,6 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     @Override
     public WindStore getWindStore() {
         return windStore;
-    }
-    
-    @Override
-    public RaceLogStore getRaceLogStore() {
-        return raceLogStore;
     }
 
     @Override
@@ -2254,19 +2208,6 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         this.delayToLiveInMillis = delayToLiveInMillis; 
     }
 
-   
-    @Override
-    public RaceLog getRaceLog() {
-    	if (raceLog == null) {
-    		try {
-    			waitUntilRaceLogLoadingComplete();
-    		} catch (InterruptedException e) {
-    			e.printStackTrace();
-    		}
-    	}
-    	return raceLog;
-    }
-
     @Override
     public TrackedRaceStatus getStatus() {
         return status;
@@ -2320,5 +2261,10 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                 }
             }
         }
+    }
+    
+    @Override
+    public RaceLog getRaceLog() {
+    	return null;
     }
 }

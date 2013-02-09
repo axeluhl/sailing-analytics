@@ -38,10 +38,7 @@ import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.persistence.MongoFactory;
-import com.sap.sailing.domain.persistence.MongoRaceLogStoreFactory;
 import com.sap.sailing.domain.persistence.MongoWindStoreFactory;
-import com.sap.sailing.domain.racelog.RaceLogStore;
-import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
@@ -122,8 +119,6 @@ public class AdminApp extends SailingServerHttpServlet {
 
     private static final String STORE_MONGO = "mongo";
     
-    private static final String PARAM_NAME_RACELOGSTORE = "racelogstore";
-
     public AdminApp() {
     }
     
@@ -471,7 +466,7 @@ public class AdminApp extends SailingServerHttpServlet {
         URL jsonURL = new URL(req.getParameter(PARAM_NAME_EVENT_JSON_URL));
         URI liveURI = new URI(req.getParameter(PARAM_NAME_LIVE_URI));
         URI storedURI = new URI(req.getParameter(PARAM_NAME_STORED_URI));
-        getService().addRegatta(jsonURL, liveURI, storedURI, getWindStore(req), /* timeoutInMilliseconds */ 60000, getRaceLogStore(req));
+        getService().addRegatta(jsonURL, liveURI, storedURI, getWindStore(req), /* timeoutInMilliseconds */ 60000);
     }
     
     private WindStore getWindStore(HttpServletRequest req) throws UnknownHostException, MongoException {
@@ -495,8 +490,7 @@ public class AdminApp extends SailingServerHttpServlet {
         URL paramURL = new URL(req.getParameter(PARAM_NAME_PARAM_URL));
         URI liveURI = new URI(req.getParameter(PARAM_NAME_LIVE_URI));
         URI storedURI = new URI(req.getParameter(PARAM_NAME_STORED_URI));
-        getService().addTracTracRace(paramURL, liveURI, storedURI, getWindStore(req), /* timeoutInMilliseconds */ 60000,
-        		getRaceLogStore(req));
+        getService().addTracTracRace(paramURL, liveURI, storedURI, getWindStore(req), /* timeoutInMilliseconds */ 60000);
     }
 
     private void stopRace(HttpServletRequest req, HttpServletResponse resp) throws MalformedURLException, IOException, InterruptedException {
@@ -512,22 +506,4 @@ public class AdminApp extends SailingServerHttpServlet {
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Regatta not found");
         }
     }
-    
-    private RaceLogStore getRaceLogStore(HttpServletRequest req) throws UnknownHostException, MongoException {
-        String raceCommitteStore = req.getParameter(PARAM_NAME_RACELOGSTORE);
-        if (raceCommitteStore != null) {
-            if (raceCommitteStore.equals(STORE_EMPTY)) {
-                return EmptyRaceLogStore.INSTANCE;
-            } else if (raceCommitteStore.equals(STORE_MONGO)) {
-                return MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(
-                        MongoFactory.INSTANCE.getDefaultMongoObjectFactory(),
-                        MongoFactory.INSTANCE.getDefaultDomainObjectFactory());
-            } else {
-                log("Couldn't find race log store " + raceCommitteStore + ". Using EmptyRaceLogStore instead.");
-                return EmptyRaceLogStore.INSTANCE;
-            }
-        }
-        return EmptyRaceLogStore.INSTANCE;
-    }
-
 }

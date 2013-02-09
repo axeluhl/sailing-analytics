@@ -5,9 +5,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.NavigableSet;
 
-import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.CourseImpl;
@@ -22,7 +22,6 @@ import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.racelog.RaceLog;
-import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
@@ -470,19 +469,6 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     public void unlockAfterRead(Iterable<MarkPassing> markPassings) {
         // TODO Auto-generated method stub
     }
-
-	@Override
-	public void waitUntilRaceLogLoadingComplete()
-			throws InterruptedException {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public RaceLogStore getRaceLogStore() {
-		// TODO Auto-generated method stub
-		return null;
-	}
 
     @Override
     public TrackedRaceStatus getStatus() {

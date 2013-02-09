@@ -12,12 +12,11 @@ import org.junit.Test;
 
 import com.maptrack.client.io.TypeController;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RaceDefinition;
-import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
-import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
+import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.RaceChangeListener;
@@ -84,7 +83,7 @@ public class ReceiveTrackingDataTest extends AbstractTracTracLiveTest {
                     @Override
                     public void addRaceDefinition(RaceDefinition race) {
                     }
-                }, /* trackedRegattaRegistry */ null, EmptyRaceLogStore.INSTANCE)) {
+                }, /* trackedRegattaRegistry */ null)) {
             for (TypeController raceListener : receiver.getTypeControllersAndStart()) {
                 listeners.add(raceListener);
             }
@@ -95,7 +94,7 @@ public class ReceiveTrackingDataTest extends AbstractTracTracLiveTest {
                     @Override
                     public void addRaceDefinition(RaceDefinition race) {
                     }
-                }, /* trackedRegattaRegistry */ null, EmptyRaceLogStore.INSTANCE));
+                }, /* trackedRegattaRegistry */ null));
     }
 
     @Test

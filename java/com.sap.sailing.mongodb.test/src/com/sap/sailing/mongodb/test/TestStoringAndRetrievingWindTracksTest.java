@@ -14,8 +14,8 @@ import org.junit.Test;
 import com.mongodb.DB;
 import com.mongodb.Mongo;
 import com.mongodb.MongoException;
-import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.Position;
@@ -27,11 +27,10 @@ import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.persistence.impl.DomainObjectFactoryImpl;
 import com.sap.sailing.domain.persistence.impl.MongoObjectFactoryImpl;
-import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.test.AbstractTracTracLiveTest;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
-import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
+import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
@@ -74,7 +73,7 @@ public class TestStoringAndRetrievingWindTracksTest extends AbstractTracTracLive
         Regatta domainEvent = domainFactory.getOrCreateDefaultRegatta(getTracTracEvent(), /* trackedRegattaRegistry */ null);
         DynamicTrackedRegatta trackedRegatta = new RacingEventServiceImpl().getOrCreateTrackedRegatta(domainEvent);
         Iterable<Receiver> typeControllers = domainFactory.getUpdateReceivers(trackedRegatta, getTracTracEvent(),
-                EmptyWindStore.INSTANCE, EmptyRaceLogStore.INSTANCE,
+                EmptyWindStore.INSTANCE,
                 /* startOfTracking */null, /* endOfTracking */null, /* delayToLiveInMillis */
                 0l, /* simulator */ null, new DynamicRaceDefinitionSet() {
                     @Override
@@ -88,7 +87,7 @@ public class TestStoringAndRetrievingWindTracksTest extends AbstractTracTracLive
                     @Override
                     public void addRaceDefinition(RaceDefinition race) {
                     }
-                }, EmptyRaceLogStore.INSTANCE);
+                });
         WindSource windSource = new WindSourceImpl(WindSourceType.WEB);
         Mongo myFirstMongo = newMongo();
         DB firstDatabase = myFirstMongo.getDB(dbConfiguration.getDatabaseName());
