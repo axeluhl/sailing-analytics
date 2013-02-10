@@ -1,9 +1,7 @@
 package com.sap.sailing.domain.persistence;
 
-import java.net.UnknownHostException;
-
-import com.mongodb.MongoException;
 import com.sap.sailing.domain.persistence.impl.MongoRaceLogStoreFactoryImpl;
+import com.sap.sailing.domain.racelog.RaceColumnIdentifier;
 import com.sap.sailing.mongodb.MongoDBService;
 
 public interface MongoRaceLogStoreFactory {
@@ -13,6 +11,6 @@ public interface MongoRaceLogStoreFactory {
      * Gets the default Mongo store based on the properties mongo.hostname[=localhost], mongo.port[=27017]
      * and mongo.dbName[=&lt;contents of constant {@link #DEFAULT_DB_NAME}&gt;] specified in the bundle context
      */
-	MongoRaceLogStore getMongoRaceLogStore(MongoObjectFactory mongoObjectFactory, DomainObjectFactory domainObjectFactory)
-            throws UnknownHostException, MongoException;
+	MongoRaceLogStore getMongoRaceLogStore(MongoObjectFactory mongoObjectFactory, DomainObjectFactory domainObjectFactory,
+			RaceColumnIdentifier identifier);
 }

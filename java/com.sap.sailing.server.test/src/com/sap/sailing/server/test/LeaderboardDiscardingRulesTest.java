@@ -22,6 +22,7 @@ import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.impl.HighPoint;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
 import com.sap.sailing.domain.leaderboard.impl.ResultDiscardingRuleImpl;
+import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.test.AbstractLeaderboardTest;
 import com.sap.sailing.domain.test.mock.MockedTrackedRaceWithFixedRank;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -70,15 +71,15 @@ public class LeaderboardDiscardingRulesTest {
 
         Competitor hasso = AbstractLeaderboardTest.createCompetitor("Dr. Hasso Plattner");
         final TrackedRace race1 = new MockedTrackedRaceWithFixedRank(hasso, /* rank */ 123, /* started */ true, boatClass);
-        leaderboard.addRace(race1, "R1", /* medalRace */ false, fleet);
+        leaderboard.addRace(race1, "R1", /* medalRace */ false, EmptyRaceLogStore.INSTANCE, fleet);
         final TrackedRace race2 = new MockedTrackedRaceWithFixedRank(hasso, /* rank */ 123, /* started */ true, boatClass);
-        leaderboard.addRace(race2, "R2", /* medalRace */ false, fleet);
+        leaderboard.addRace(race2, "R2", /* medalRace */ false, EmptyRaceLogStore.INSTANCE, fleet);
 
         Competitor wolfgang = AbstractLeaderboardTest.createCompetitor("Wolfgang Hunger");
         final TrackedRace race3 = new MockedTrackedRaceWithFixedRank(wolfgang, /* rank */ 123, /* started */ true, boatClass);
-        leaderboard.addRace(race3, "R3", /* medalRace */ false, fleet);
+        leaderboard.addRace(race3, "R3", /* medalRace */ false, EmptyRaceLogStore.INSTANCE, fleet);
         final TrackedRace race4 = new MockedTrackedRaceWithFixedRank(wolfgang, /* rank */ 124, /* started */ true, boatClass);
-        leaderboard.addRace(race4, "R4", /* medalRace */ false, fleet);
+        leaderboard.addRace(race4, "R4", /* medalRace */ false, EmptyRaceLogStore.INSTANCE, fleet);
 
         leaderboard.getScoreCorrection().correctScore(hasso, leaderboard.getRaceColumnByName("R3"), 123.);
         leaderboard.getScoreCorrection().correctScore(hasso, leaderboard.getRaceColumnByName("R4"), 123.);
@@ -110,19 +111,19 @@ public class LeaderboardDiscardingRulesTest {
 
         Competitor rasmus = AbstractLeaderboardTest.createCompetitor("Rasmus");
         final TrackedRace race1 = new MockedTrackedRaceWithFixedRank(rasmus, /* rank */ 2, /* started */ true, boatClass); // score 2.0
-        leaderboard.addRace(race1, "R1", /* medalRace */ false, fleet);
+        leaderboard.addRace(race1, "R1", /* medalRace */ false, EmptyRaceLogStore.INSTANCE, fleet);
         final TrackedRace race2 = new MockedTrackedRaceWithFixedRank(rasmus, /* rank */ 2, /* started */ true, boatClass); // score 2.0
-        leaderboard.addRace(race2, "R2", /* medalRace */ false, fleet);
+        leaderboard.addRace(race2, "R2", /* medalRace */ false, EmptyRaceLogStore.INSTANCE, fleet);
 
         Competitor jes = AbstractLeaderboardTest.createCompetitor("Jes");
         final TrackedRace race3 = new MockedTrackedRaceWithFixedRank(jes, /* rank */ 2, /* started */ true, boatClass); // score 2.0
-        leaderboard.addRace(race3, "R3", /* medalRace */ false, fleet);
+        leaderboard.addRace(race3, "R3", /* medalRace */ false, EmptyRaceLogStore.INSTANCE, fleet);
         final TrackedRace race4 = new MockedTrackedRaceWithFixedRank(jes, /* rank */ 3, /* started */ true, boatClass); // score 1.0
-        leaderboard.addRace(race4, "R4", /* medalRace */ false, fleet);
+        leaderboard.addRace(race4, "R4", /* medalRace */ false, EmptyRaceLogStore.INSTANCE, fleet);
         
         Competitor nobody = AbstractLeaderboardTest.createCompetitor("Nobody");
         final TrackedRace race5 = new MockedTrackedRaceWithFixedRank(nobody, /* rank */ 3, /* started */ true, boatClass); // score 1.0
-        leaderboard.addRace(race5, "R5", /* medalRace */ false, fleet);
+        leaderboard.addRace(race5, "R5", /* medalRace */ false, EmptyRaceLogStore.INSTANCE, fleet);
 
         leaderboard.getScoreCorrection().correctScore(rasmus, leaderboard.getRaceColumnByName("R3"), 2.0);
         leaderboard.getScoreCorrection().correctScore(rasmus, leaderboard.getRaceColumnByName("R4"), 2.0);
@@ -155,15 +156,15 @@ public class LeaderboardDiscardingRulesTest {
 
         Competitor hasso = AbstractLeaderboardTest.createCompetitor("Dr. Hasso Plattner");
         final TrackedRace race1 = new MockedTrackedRaceWithFixedRank(hasso, /* rank */ 123, /* started */ true, boatClass);
-        leaderboard.addRace(race1, "R1", /* medalRace */ false, fleet);
+        leaderboard.addRace(race1, "R1", /* medalRace */ false, EmptyRaceLogStore.INSTANCE, fleet);
         final TrackedRace race2 = new MockedTrackedRaceWithFixedRank(hasso, /* rank */ 123, /* started */ true, boatClass);
-        leaderboard.addRace(race2, "R2", /* medalRace */ false, fleet);
+        leaderboard.addRace(race2, "R2", /* medalRace */ false, EmptyRaceLogStore.INSTANCE, fleet);
 
         Competitor wolfgang = AbstractLeaderboardTest.createCompetitor("Wolfgang Hunger");
         final TrackedRace race3 = new MockedTrackedRaceWithFixedRank(wolfgang, /* rank */ 123, /* started */ true, boatClass);
-        leaderboard.addRace(race3, "R3", /* medalRace */ false, fleet);
+        leaderboard.addRace(race3, "R3", /* medalRace */ false, EmptyRaceLogStore.INSTANCE, fleet);
         final TrackedRace race4 = new MockedTrackedRaceWithFixedRank(wolfgang, /* rank */ 124, /* started */ true, boatClass);
-        leaderboard.addRace(race4, "R4", /* medalRace */ false, fleet);
+        leaderboard.addRace(race4, "R4", /* medalRace */ false, EmptyRaceLogStore.INSTANCE, fleet);
 
         leaderboard.getScoreCorrection().correctScore(hasso, leaderboard.getRaceColumnByName("R3"), 123.);
         leaderboard.getScoreCorrection().correctScore(hasso, leaderboard.getRaceColumnByName("R4"), 123.);

@@ -16,6 +16,7 @@ import com.sap.sailing.domain.leaderboard.FlexibleRaceColumn;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
+import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
 /**
@@ -64,13 +65,13 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
     }
     
     @Override
-    public RaceColumn addRaceColumn(String name, boolean medalRace, Fleet... fleets) {
+    public RaceColumn addRaceColumn(String name, boolean medalRace, RaceLogStore raceLogStore, Fleet... fleets) {
         FlexibleRaceColumn column = getRaceColumnByName(name);
         if (column != null) {
             final String msg = "Trying to create race column with duplicate name "+name+" in leaderboard +"+getName();
             logger.severe(msg);
         } else {
-            column = createRaceColumn(name, medalRace, fleets);
+            column = createRaceColumn(name, medalRace, raceLogStore, fleets);
             column.addRaceColumnListener(this);
             races.add(column);
             getRaceColumnListeners().notifyListenersAboutRaceColumnAddedToContainer(column);
@@ -108,10 +109,10 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
     }
     
     @Override
-    public RaceColumn addRace(TrackedRace race, String columnName, boolean medalRace, Fleet fleet) {
+    public RaceColumn addRace(TrackedRace race, String columnName, boolean medalRace, RaceLogStore raceLogStore, Fleet fleet) {
         FlexibleRaceColumn column = getRaceColumnByName(columnName);
         if (column == null) {
-            column = createRaceColumn(columnName, medalRace, fleet);
+            column = createRaceColumn(columnName, medalRace, raceLogStore, fleet);
             column.addRaceColumnListener(this);
             races.add(column);
         }
@@ -119,8 +120,8 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
         return column;
     }
 
-    protected RaceColumnImpl createRaceColumn(String columnName, boolean medalRace, Fleet... fleets) {
-        return new RaceColumnImpl(columnName, medalRace, turnNullOrEmptyFleetsIntoDefaultFleet(fleets));
+    protected RaceColumnImpl createRaceColumn(String columnName, boolean medalRace, RaceLogStore raceLogStore, Fleet... fleets) {
+        return new RaceColumnImpl(columnName, medalRace, raceLogStore, turnNullOrEmptyFleetsIntoDefaultFleet(fleets));
     }
 
     protected Iterable<Fleet> turnNullOrEmptyFleetsIntoDefaultFleet(Fleet... fleets) {

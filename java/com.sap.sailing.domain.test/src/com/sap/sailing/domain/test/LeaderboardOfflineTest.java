@@ -31,6 +31,7 @@ import com.sap.sailing.domain.leaderboard.impl.FlexibleLeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
 import com.sap.sailing.domain.leaderboard.impl.ResultDiscardingRuleImpl;
 import com.sap.sailing.domain.leaderboard.impl.ScoreCorrectionImpl;
+import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.test.mock.MockedTrackedRaceWithFixedRank;
 import com.sap.sailing.domain.test.mock.MockedTrackedRaceWithFixedRankAndManyCompetitors;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -95,8 +96,9 @@ public class LeaderboardOfflineTest extends AbstractLeaderboardTest {
         Fleet defaultFleet = leaderboard.getFleet(null);
         final String columnName = "abc";
         setupRaces(1, 0);
-        leaderboard.addRaceColumn(columnName, /* medalRace */ true);
-        leaderboard.addRace(testRaces.iterator().next(), columnName, /* medalRace */ false, defaultFleet);
+        
+        leaderboard.addRaceColumn(columnName, /* medalRace */ true, EmptyRaceLogStore.INSTANCE);
+        leaderboard.addRace(testRaces.iterator().next(), columnName, /* medalRace */ false, EmptyRaceLogStore.INSTANCE, defaultFleet);
         assertTrue(leaderboard.getRaceColumnByName(columnName).isMedalRace());
     }
 
@@ -121,7 +123,7 @@ public class LeaderboardOfflineTest extends AbstractLeaderboardTest {
         RaceColumn bestScoringRaceColumn = null;
         for (TrackedRace race : testRaces) {
             i++;
-            RaceColumn raceColumn = leaderboard.addRace(race, "Test Race " + i, /* medalRace */ false, defaultFleet);
+            RaceColumn raceColumn = leaderboard.addRace(race, "Test Race " + i, /* medalRace */ false, EmptyRaceLogStore.INSTANCE, defaultFleet);
             raceColumnsInLeaderboard.put(race, raceColumn);
             if (race.getRank(competitor) < bestScore) {
                 bestScore = race.getRank(competitor);
@@ -150,7 +152,7 @@ public class LeaderboardOfflineTest extends AbstractLeaderboardTest {
         FlexibleLeaderboard leaderboard = new FlexibleLeaderboardImpl("Test Leaderboard", scoreCorrection, new ResultDiscardingRuleImpl(
                 new int[] { 2 }), new LowPoint(), null);
         Fleet defaultFleet = leaderboard.getFleet(null);
-        leaderboard.addRace(testRace, "R1", /* medalRace */ false, defaultFleet);
+        leaderboard.addRace(testRace, "R1", /* medalRace */ false, EmptyRaceLogStore.INSTANCE, defaultFleet);
         assertEquals(1., leaderboard.getTotalPoints(competitor, now), 0.00000001);
         assertEquals(1., leaderboard.getTotalPoints(c2, now), 0.00000001);
         assertEquals(1., leaderboard.getTotalPoints(c3, now), 0.00000001);
@@ -179,9 +181,9 @@ public class LeaderboardOfflineTest extends AbstractLeaderboardTest {
         FlexibleLeaderboard leaderboard = new FlexibleLeaderboardImpl("Test Leaderboard", scoreCorrection, new ResultDiscardingRuleImpl(
                 new int[] { 2 }), new LowPoint(), null);
         Fleet defaultFleet = leaderboard.getFleet(null);
-        RaceColumn r1 = leaderboard.addRace(testRace, "R1", /* medalRace */ false, defaultFleet);
+        RaceColumn r1 = leaderboard.addRace(testRace, "R1", /* medalRace */ false, EmptyRaceLogStore.INSTANCE, defaultFleet);
         raceColumnsInLeaderboard.put(testRace, r1);
-        RaceColumn r2 = leaderboard.addRaceColumn("R2", /* medalRace */ false, defaultFleet);
+        RaceColumn r2 = leaderboard.addRaceColumn("R2", /* medalRace */ false, EmptyRaceLogStore.INSTANCE, defaultFleet);
         scoreCorrection.setMaxPointsReason(competitor, r2, MaxPointsReason.DND); // non-discardable disqualification
         // assert that max points were given before discarding...
         assertEquals(4.0, leaderboard.getEntry(competitor, r2, MillisecondsTimePoint.now()).getNetPoints(), 0.000000001);
@@ -212,7 +214,7 @@ public class LeaderboardOfflineTest extends AbstractLeaderboardTest {
         RaceColumn bestScoringRaceColumn = null;
         for (TrackedRace race : testRaces) {
             i++;
-            RaceColumn raceColumn = leaderboard.addRace(race, "Test Race " + i, /* medalRace */ false, defaultFleet);
+            RaceColumn raceColumn = leaderboard.addRace(race, "Test Race " + i, /* medalRace */ false, EmptyRaceLogStore.INSTANCE, defaultFleet);
             raceColumnsInLeaderboard.put(race, raceColumn);
             if (race.getRank(competitor) < bestScore) {
                 bestScore = race.getRank(competitor);
@@ -238,12 +240,13 @@ public class LeaderboardOfflineTest extends AbstractLeaderboardTest {
         for (TrackedRace race : testRaces) {
             i++;
             raceColumnsInLeaderboard.put(race, leaderboard.addRace(race, "Test Race "+i,
-                    /* medalRace */ numberOfUntrackedRaces == 0 && addOneMedalRace && i == testRaces.size(), defaultFleet));
+                    /* medalRace */ numberOfUntrackedRaces == 0 && addOneMedalRace && i == testRaces.size(), 
+                    		EmptyRaceLogStore.INSTANCE, defaultFleet));
         }
         // add a few race columns not yet connected to a tracked race
         for (int j=0; j<numberOfUntrackedRaces; j++) {
             i++;
-            leaderboard.addRaceColumn("Test Race "+i, /* medalRace */ addOneMedalRace && j == numberOfUntrackedRaces-1);
+            leaderboard.addRaceColumn("Test Race "+i, /* medalRace */ addOneMedalRace && j == numberOfUntrackedRaces-1, EmptyRaceLogStore.INSTANCE);
         }
         if (carry != null) {
             leaderboard.setCarriedPoints(competitor, carry);
