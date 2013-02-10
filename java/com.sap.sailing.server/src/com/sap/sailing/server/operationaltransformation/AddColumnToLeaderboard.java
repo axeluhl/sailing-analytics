@@ -1,7 +1,6 @@
 package com.sap.sailing.server.operationaltransformation;
 
 import com.sap.sailing.domain.base.RaceColumn;
-import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
 
@@ -15,12 +14,10 @@ import com.sap.sailing.server.RacingEventServiceOperation;
 public class AddColumnToLeaderboard extends AbstractLeaderboardColumnOperation<RaceColumn> {
     private static final long serialVersionUID = -7670764349119941051L;
     private final boolean medalRace;
-    private final RaceLogStore raceLogStore;
     
-    public AddColumnToLeaderboard(String columnName, String leaderboardName, boolean medalRace, RaceLogStore raceLogStore) {
+    public AddColumnToLeaderboard(String columnName, String leaderboardName, boolean medalRace) {
         super(leaderboardName, columnName);
         this.medalRace = medalRace;
-        this.raceLogStore = raceLogStore;
     }
 
     @Override
