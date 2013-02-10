@@ -3,7 +3,7 @@ package com.sap.sailing.racecommittee.app.ui.fragments.chooser;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
-import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.DummyInfoFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.ErrorInfoFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.FinishedRaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.SetTimeRaceFragment;
 
@@ -16,14 +16,13 @@ public class RaceInfoFragmentChooser {
 			return createInfoFragment(SetTimeRaceFragment.class, managedRace);
 		case SCHEDULED:
 		case STARTPHASE:
-			return createInfoFragment(DummyInfoFragment.class, managedRace);
+			return createInfoFragment(ErrorInfoFragment.class, managedRace);
 		case RUNNING:
-			return createInfoFragment(DummyInfoFragment.class, managedRace);
+			return createInfoFragment(ErrorInfoFragment.class, managedRace);
 		case FINISHED:
 			return createInfoFragment(FinishedRaceFragment.class, managedRace);
 		default:
-			throw new IllegalStateException(
-					"Couldn't choose fragment for unknown race status " + managedRace.getStatus());
+			return createInfoFragment(ErrorInfoFragment.class, managedRace);
 		}
 	}
 
@@ -34,7 +33,7 @@ public class RaceInfoFragmentChooser {
 			return fragment;
 		} catch (Exception e) {
 			ExLog.e(TAG, String.format("Exception while instantiating race info fragment:\n%s", e.toString()));
-			return new DummyInfoFragment();
+			return new ErrorInfoFragment();
 		}
 	}
 
