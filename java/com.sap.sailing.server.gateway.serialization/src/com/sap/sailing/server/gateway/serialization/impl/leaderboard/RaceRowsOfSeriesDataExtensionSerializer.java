@@ -35,6 +35,7 @@ public class RaceRowsOfSeriesDataExtensionSerializer extends ExtensionJsonSerial
 			Collection<RaceCell> raceCells = new ArrayList<RaceCell>();
 			for (RaceColumn column : parent.getRaceColumns()) {
 				raceCells.add(new RaceCellImpl(column.getName(), null)); /// TODO: get racelog from column
+				//column.getRaceLog(leaderboardName, fleet)
 			}
 			result.add(serialize(new RaceRowImpl(fleet, raceCells)));
 		}
