@@ -26,7 +26,6 @@ public class MongoRaceLogStoreImpl extends EmptyRaceLogStore implements MongoRac
         this.domainObjectFactory = domainObjectFactory;
         this.identifier = identifier;
         this.raceLogCache = new HashMap<Fleet, RaceLog>();
-        
     }
 
 	@Override

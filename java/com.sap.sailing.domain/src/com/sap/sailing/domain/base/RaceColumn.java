@@ -5,6 +5,7 @@ import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.util.impl.RaceColumnListeners;
 
@@ -143,4 +144,7 @@ public interface RaceColumn extends Named {
      * medal races. Otherwise, the explicit factor is used.
      */
     Double getExplicitFactor();
+    
+    RaceLog getRaceLog(Fleet fleet);
+    
 }

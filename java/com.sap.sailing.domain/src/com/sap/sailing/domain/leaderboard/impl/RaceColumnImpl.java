@@ -7,11 +7,13 @@ import java.util.List;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.impl.AbstractRaceColumn;
 import com.sap.sailing.domain.leaderboard.FlexibleRaceColumn;
+import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 
 public class RaceColumnImpl extends AbstractRaceColumn implements FlexibleRaceColumn {
     private static final long serialVersionUID = -7801617988982540470L;
     private String name;
+    private RaceLogStore raceLogStore;
 
     /**
      * All fleets for which this column can contain a race. This is the maximum set of keys possible for
@@ -24,6 +26,7 @@ public class RaceColumnImpl extends AbstractRaceColumn implements FlexibleRaceCo
         super();
         this.name = name;
         this.medalRace = medalRace;
+        this.raceLogStore = raceLogStore;
         List<Fleet> myFleets = new ArrayList<Fleet>();
         for (Fleet fleet : fleets) {
             myFleets.add(fleet);
@@ -57,5 +60,10 @@ public class RaceColumnImpl extends AbstractRaceColumn implements FlexibleRaceCo
     public Iterable<Fleet> getFleets() {
         return fleets;
     }
+    
+    @Override
+	public RaceLog getRaceLog(Fleet fleet) {
+		return raceLogStore.getRaceLog(fleet);
+	}
 
 }

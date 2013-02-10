@@ -15,9 +15,12 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
     
     private final Map<Fleet, TrackedRace> trackedRaces;
     private final Map<Fleet, RaceIdentifier> raceIdentifiers;
+  
+    
     public AbstractRaceColumn() {
         this.trackedRaces = new HashMap<Fleet, TrackedRace>();
         this.raceIdentifiers = new HashMap<Fleet, RaceIdentifier>();
+        
     }
     
     @Override

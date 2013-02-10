@@ -5,6 +5,7 @@ import com.sap.sailing.domain.base.RaceColumnInSeries;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
+import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
@@ -87,5 +88,11 @@ public class RaceColumnInSeriesImpl extends AbstractRaceColumn implements RaceCo
         // re-associating the TrackedRace needs to happen before the super call because the RaceIdentifier may have changed
         super.setTrackedRace(fleet, trackedRace);
     }
+
+	@Override
+	public RaceLog getRaceLog(Fleet fleet) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
 }
