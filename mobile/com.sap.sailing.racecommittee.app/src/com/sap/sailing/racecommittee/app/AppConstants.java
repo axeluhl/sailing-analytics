@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.SetTimeRaceFragment;
+
 
 public class AppConstants {
 	
@@ -24,7 +26,6 @@ public class AppConstants {
 	public final static String EXTRAS_URL = "url";
 	public final static String FLAG_KEY = "raceFlag";
 	
-	public final static String IS_SET_FRAGMENT = "isSetFragment";
 	public final static String LogFolder = "/racecommittee";
 	
 	// Login activity
@@ -35,6 +36,10 @@ public class AppConstants {
 	private final static String PREFERENCE_SERVICE_URL = "webserviceUrlPref";
 	private final static String PREFERENCE_SENDING_ACTIVE = "sendingActivePref";
 	private final static String PREFERENCE_RACE_FINISHING_TIME_FRAME = "edittextRaceTimeFrameAfterFinish";
+
+	public static final String RESET_TIME_FRAGMENT_IS_RESET = SetTimeRaceFragment.class.getName() + ".isReset";
+	
+	public static final int DefaultStartTimeMinuteOffset = 10;
 	
 	
 	public static String getURL(Context context) {

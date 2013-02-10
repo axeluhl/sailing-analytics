@@ -76,7 +76,7 @@
                 android:layout_marginRight="10dp"
                 android:textAppearance="@style/TextAppearance.Welter.BigTitleLabel" />
             
-            <com.sap.sailing.racecommittee.app.utils.views.MyDigitalClock
+            <com.sap.sailing.racecommittee.app.ui.views.DigitalClock
                 android:id="@+id/digitalClock"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

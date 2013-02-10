@@ -1,4 +1,4 @@
-package com.sap.sailing.racecommittee.app.ui.fragments.list.selection;
+package com.sap.sailing.racecommittee.app.ui.fragments.lists.selection;
 
 import com.sap.sailing.domain.base.Event;
 
