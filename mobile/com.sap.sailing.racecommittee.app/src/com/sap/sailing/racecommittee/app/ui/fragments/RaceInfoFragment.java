@@ -41,10 +41,17 @@ public class RaceInfoFragment extends RaceFragment {
 		this.raceInfoHeader = (TextView) getView().findViewById(R.id.raceInfoHeader);
 		this.courseInfoHeader = (TextView) getView().findViewById(R.id.courseInfoHeader);
 		
+		courseInfoHeader.setText(getString(R.string.running_on_unknown));
+		fleetInfoHeader.setText(String.format("%s - %s", 
+				getRace().getRaceGroup().getName(), 
+				getRace().getFleet().getName()));
+		raceInfoHeader.setText(String.format("%s", getRace().getName()));
+		
 		/// TODO: implement course selection
 		
 		/// TODO: implement reset button
 		Button resetButton = ((Button) getView().findViewById(R.id.btnResetRace));
+		resetButton.setText("No yet");
 		resetButton.setActivated(false);
 		
 		// Initial fragment selection...
