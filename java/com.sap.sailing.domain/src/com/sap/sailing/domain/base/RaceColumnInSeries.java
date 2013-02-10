@@ -7,5 +7,5 @@ public interface RaceColumnInSeries extends RaceColumn {
     
     Regatta getRegatta();
     
-    RaceColumnIdentifier getRaceColumnIdentifier();
+    RaceColumnIdentifier getRaceColumnIdentifier(String leaderboardName);
 }

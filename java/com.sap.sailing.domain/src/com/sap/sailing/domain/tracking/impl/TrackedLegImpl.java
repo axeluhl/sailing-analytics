@@ -8,9 +8,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
-import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
@@ -21,7 +21,6 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.Util;
-import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
@@ -245,11 +244,6 @@ public class TrackedLegImpl implements TrackedLeg, RaceChangeListener {
     @Override
     public void delayToLiveChanged(long delayToLiveInMillis) {
     }
-    
-	@Override
-	public void raceLogEventReceived(RaceLogEvent event) {
-		clearCaches();
-	}
 
     @Override
     public void waypointsMayHaveChanges() {

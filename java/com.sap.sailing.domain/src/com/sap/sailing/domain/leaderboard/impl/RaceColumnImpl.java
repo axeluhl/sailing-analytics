@@ -60,8 +60,11 @@ public class RaceColumnImpl extends AbstractRaceColumn implements FlexibleRaceCo
     }
     
     @Override
-	public RaceLog getRaceLog(Fleet fleet) {
+	public RaceLog getRaceLog(String leaderboardName, Fleet fleet) {
 		return raceLogStore.getRaceLog(fleet);
 	}
 
+    public RaceLog getRaceLog(Fleet fleet) {
+		return getRaceLog("", fleet);
+	}
 }

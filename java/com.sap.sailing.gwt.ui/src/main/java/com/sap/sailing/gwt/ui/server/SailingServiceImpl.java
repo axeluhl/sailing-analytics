@@ -111,7 +111,6 @@ import com.sap.sailing.domain.persistence.MongoFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.MongoRaceLogStoreFactory;
 import com.sap.sailing.domain.persistence.MongoWindStoreFactory;
-import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingArchiveConfiguration;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingConfiguration;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
@@ -815,11 +814,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         public void windSourcesToExcludeChanged(Iterable<? extends WindSource> windSourcesToExclude) {
             invalidateCacheAndRemoveThisListenerFromTrackedRace();
         }
-
-		@Override
-		public void raceLogEventReceived(RaceLogEvent event) {
-			invalidateCacheAndRemoveThisListenerFromTrackedRace();
-		}
     }
 
     private RaceDetails calculateRaceDetails(TrackedRace trackedRace, Competitor competitor, TimePoint timePoint,

@@ -2,12 +2,11 @@ package com.sap.sailing.domain.tracking.impl;
 
 import java.util.Map;
 
-import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
-import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
@@ -60,8 +59,4 @@ public abstract class AbstractRaceChangeListener implements RaceChangeListener {
     public void delayToLiveChanged(long delayToLiveInMillis) {
     }
     
-    @Override
-	public void raceLogEventReceived(RaceLogEvent event) {
-	}
-
 }

@@ -13,8 +13,8 @@ import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.AbstractTimePoint;
@@ -29,7 +29,6 @@ import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.confidence.ConfidenceFactory;
 import com.sap.sailing.domain.confidence.Weigher;
-import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
@@ -478,10 +477,6 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
     @Override
     public void delayToLiveChanged(long delayToLiveInMillis) {
     }
-    
-	@Override
-	public void raceLogEventReceived(RaceLogEvent event) {
-	}
 
     private void invalidateForNewWind(Wind wind) {
         long averagingInterval = getTrackedRace().getMillisecondsOverWhichToAverageWind();

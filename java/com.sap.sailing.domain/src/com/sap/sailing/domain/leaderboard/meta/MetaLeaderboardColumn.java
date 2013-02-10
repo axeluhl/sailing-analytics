@@ -150,7 +150,7 @@ public class MetaLeaderboardColumn extends SimpleAbstractRaceColumn implements R
     }
 
 	@Override
-	public RaceLog getRaceLog(Fleet fleet) {
+	public RaceLog getRaceLog(String leaderboardName, Fleet fleet) {
 		return null;
 	}
 }

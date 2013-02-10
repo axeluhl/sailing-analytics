@@ -94,13 +94,13 @@ public class RaceColumnInSeriesImpl extends AbstractRaceColumn implements RaceCo
     }
 
 	@Override
-	public RaceLog getRaceLog(Fleet fleet) {
-		return raceLogStore.getRaceLog(getRaceColumnIdentifier(), fleet);
+	public RaceLog getRaceLog(String leaderboardName, Fleet fleet) {
+		return raceLogStore.getRaceLog(getRaceColumnIdentifier(leaderboardName), fleet);
 	}
 
 	@Override
-	public RaceColumnIdentifier getRaceColumnIdentifier() {
-		return new RaceColumnIdentifierImpl(getRegatta(), getName());
+	public RaceColumnIdentifier getRaceColumnIdentifier(String leaderboardName) {
+		return new RaceColumnIdentifierImpl(leaderboardName, getName());
 	}
 
 }

@@ -145,6 +145,6 @@ public interface RaceColumn extends Named {
      */
     Double getExplicitFactor();
     
-    RaceLog getRaceLog(Fleet fleet);
+    RaceLog getRaceLog(String leaderboardName, Fleet fleet);
     
 }
