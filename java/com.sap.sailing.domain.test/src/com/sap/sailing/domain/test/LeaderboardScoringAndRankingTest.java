@@ -856,7 +856,7 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
                 qualifyingRaceColumnNames.add("Q" + i);
             }
             Series qualifyingSeries = new SeriesImpl("Qualifying", /* isMedal */false, qualifyingFleets,
-                    qualifyingRaceColumnNames, /* trackedRegattaRegistry */null);
+                    qualifyingRaceColumnNames, /* trackedRegattaRegistry */null, EmptyRaceLogStore.INSTANCE);
             series.add(qualifyingSeries);
         }
         
@@ -871,7 +871,8 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
             for (int i = 1; i <= numberOfFinalRaces; i++) {
                 finalRaceColumnNames.add("F" + i);
             }
-            Series finalSeries = new SeriesImpl("Final", /* isMedal */false, finalFleets, finalRaceColumnNames, /* trackedRegattaRegistry */ null);
+            Series finalSeries = new SeriesImpl("Final", /* isMedal */false, finalFleets, finalRaceColumnNames, /* trackedRegattaRegistry */ null,
+            		EmptyRaceLogStore.INSTANCE);
             series.add(finalSeries);
         }
 
@@ -881,7 +882,8 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
             medalFleets.add(new FleetImpl("Medal"));
             List<String> medalRaceColumnNames = new ArrayList<String>();
             medalRaceColumnNames.add("M");
-            Series medalSeries = new SeriesImpl("Medal", /* isMedal */true, medalFleets, medalRaceColumnNames, /* trackedRegattaRegistry */ null);
+            Series medalSeries = new SeriesImpl("Medal", /* isMedal */true, medalFleets, medalRaceColumnNames, /* trackedRegattaRegistry */ null,
+            		EmptyRaceLogStore.INSTANCE);
             series.add(medalSeries);
         }
 

@@ -17,6 +17,7 @@ import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.common.impl.NamedImpl;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
+import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
@@ -42,7 +43,7 @@ public class SeriesImpl extends NamedImpl implements Series, RaceColumnListener 
      *            carried out.
      */
     public SeriesImpl(String name, boolean isMedal, Iterable<? extends Fleet> fleets, Iterable<String> raceColumnNames,
-            TrackedRegattaRegistry trackedRegattaRegistry) {
+            TrackedRegattaRegistry trackedRegattaRegistry, RaceLogStore raceLogStore) {
         super(name);
         if (fleets == null || Util.isEmpty(fleets)) {
             throw new IllegalArgumentException("Series must have at least one fleet");
@@ -58,7 +59,7 @@ public class SeriesImpl extends NamedImpl implements Series, RaceColumnListener 
         this.isMedal = isMedal;
         this.raceColumnListeners = new RaceColumnListeners();
         for (String raceColumnName : raceColumnNames) {
-            addRaceColumn(raceColumnName, trackedRegattaRegistry);
+            addRaceColumn(raceColumnName, trackedRegattaRegistry, raceLogStore);
         }
     }
 
@@ -105,8 +106,9 @@ public class SeriesImpl extends NamedImpl implements Series, RaceColumnListener 
      *            carried out.
      */
     @Override
-    public RaceColumnInSeries addRaceColumn(String raceColumnName, TrackedRegattaRegistry trackedRegattaRegistry) {
-        RaceColumnInSeriesImpl result = createRaceColumn(raceColumnName, trackedRegattaRegistry);
+    public RaceColumnInSeries addRaceColumn(String raceColumnName, TrackedRegattaRegistry trackedRegattaRegistry,
+    		RaceLogStore raceLogStore) {
+        RaceColumnInSeriesImpl result = createRaceColumn(raceColumnName, trackedRegattaRegistry, raceLogStore);
         if (raceColumnListeners.canAddRaceColumnToContainer(result)) {
             result.addRaceColumnListener(this);
             raceColumns.add(result);
@@ -125,8 +127,9 @@ public class SeriesImpl extends NamedImpl implements Series, RaceColumnListener 
      *            this column's series {@link Regatta}, respectively. If <code>null</code>, the re-association won't be
      *            carried out.
      */
-    private RaceColumnInSeriesImpl createRaceColumn(String raceColumnName, TrackedRegattaRegistry trackedRegattaRegistry) {
-        RaceColumnInSeriesImpl result = new RaceColumnInSeriesImpl(raceColumnName, this, trackedRegattaRegistry);
+    private RaceColumnInSeriesImpl createRaceColumn(String raceColumnName, TrackedRegattaRegistry trackedRegattaRegistry, 
+    		RaceLogStore raceLogStore) {
+        RaceColumnInSeriesImpl result = new RaceColumnInSeriesImpl(raceColumnName, this, trackedRegattaRegistry, raceLogStore);
         return result;
     }
 

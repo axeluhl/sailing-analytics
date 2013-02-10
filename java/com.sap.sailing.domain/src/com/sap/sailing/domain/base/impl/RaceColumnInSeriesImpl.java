@@ -5,7 +5,10 @@ import com.sap.sailing.domain.base.RaceColumnInSeries;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
+import com.sap.sailing.domain.racelog.RaceColumnIdentifier;
 import com.sap.sailing.domain.racelog.RaceLog;
+import com.sap.sailing.domain.racelog.RaceLogStore;
+import com.sap.sailing.domain.racelog.impl.RaceColumnIdentifierImpl;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
@@ -35,7 +38,8 @@ public class RaceColumnInSeriesImpl extends AbstractRaceColumn implements RaceCo
      *            this column's series {@link Regatta}, respectively. If <code>null</code>, the re-association won't be
      *            carried out.
      */
-    public RaceColumnInSeriesImpl(String name, Series series, TrackedRegattaRegistry trackedRegattaRegistry) {
+    public RaceColumnInSeriesImpl(String name, Series series, TrackedRegattaRegistry trackedRegattaRegistry, RaceLogStore raceLogStore) {
+    	super(raceLogStore);
         this.name = name;
         this.series = series;
         this.trackedRegattaRegistry = trackedRegattaRegistry;
@@ -91,8 +95,12 @@ public class RaceColumnInSeriesImpl extends AbstractRaceColumn implements RaceCo
 
 	@Override
 	public RaceLog getRaceLog(Fleet fleet) {
-		// TODO Auto-generated method stub
-		return null;
+		return raceLogStore.getRaceLog(getRaceColumnIdentifier(), fleet);
+	}
+
+	@Override
+	public RaceColumnIdentifier getRaceColumnIdentifier() {
+		return new RaceColumnIdentifierImpl(getRegatta(), getName());
 	}
 
 }

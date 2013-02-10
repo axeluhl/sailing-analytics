@@ -13,7 +13,6 @@ import com.sap.sailing.domain.racelog.RaceLogStore;
 public class RaceColumnImpl extends AbstractRaceColumn implements FlexibleRaceColumn {
     private static final long serialVersionUID = -7801617988982540470L;
     private String name;
-    private RaceLogStore raceLogStore;
 
     /**
      * All fleets for which this column can contain a race. This is the maximum set of keys possible for
@@ -23,10 +22,9 @@ public class RaceColumnImpl extends AbstractRaceColumn implements FlexibleRaceCo
     private boolean medalRace;
     
     public RaceColumnImpl(String name, boolean medalRace, RaceLogStore raceLogStore, Iterable<Fleet> fleets) {
-        super();
+        super(raceLogStore);
         this.name = name;
         this.medalRace = medalRace;
-        this.raceLogStore = raceLogStore;
         List<Fleet> myFleets = new ArrayList<Fleet>();
         for (Fleet fleet : fleets) {
             myFleets.add(fleet);

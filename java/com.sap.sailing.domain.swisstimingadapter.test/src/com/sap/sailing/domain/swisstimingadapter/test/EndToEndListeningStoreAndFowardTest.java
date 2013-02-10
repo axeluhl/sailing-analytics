@@ -28,6 +28,7 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.impl.Util;
+import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.swisstimingadapter.MessageType;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterConnector;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterTransceiver;
@@ -336,7 +337,7 @@ public class EndToEndListeningStoreAndFowardTest {
         for (String raceToTrack : racesToTrack) {
             RacesHandle raceHandle = racingEventService.addSwissTimingRace(/* regattaToAddTo */ null /* use a default regatta */,
                     raceToTrack, "localhost", /* canSendRequests */
-                    CLIENT_PORT, false, emptyWindStore, -1);
+                    CLIENT_PORT, false, emptyWindStore, -1, EmptyRaceLogStore.INSTANCE);
             raceHandles.add(raceHandle);
             if (connector == null) {
                 connector = racingEventService.getSwissTimingFactory().getOrCreateSailMasterConnector("localhost",

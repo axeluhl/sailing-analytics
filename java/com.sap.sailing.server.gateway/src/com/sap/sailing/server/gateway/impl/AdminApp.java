@@ -38,7 +38,10 @@ import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.persistence.MongoFactory;
+import com.sap.sailing.domain.persistence.MongoRaceLogStoreFactory;
 import com.sap.sailing.domain.persistence.MongoWindStoreFactory;
+import com.sap.sailing.domain.racelog.RaceLogStore;
+import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
@@ -114,6 +117,8 @@ public class AdminApp extends SailingServerHttpServlet {
     private static final String PARAM_NAME_CORRECT_EXPEDITION_WIND_BEARING_BY_DECLINATION = "correctexpeditionwindbearingbydeclination";
 
     private static final String PARAM_NAME_WINDSTORE = "windstore";
+    
+    private static final String PARAM_NAME_RACELOGSTORE = "racelogstore";
 
     private static final String STORE_EMPTY = "empty";
 
@@ -466,7 +471,7 @@ public class AdminApp extends SailingServerHttpServlet {
         URL jsonURL = new URL(req.getParameter(PARAM_NAME_EVENT_JSON_URL));
         URI liveURI = new URI(req.getParameter(PARAM_NAME_LIVE_URI));
         URI storedURI = new URI(req.getParameter(PARAM_NAME_STORED_URI));
-        getService().addRegatta(jsonURL, liveURI, storedURI, getWindStore(req), /* timeoutInMilliseconds */ 60000);
+        getService().addRegatta(jsonURL, liveURI, storedURI, getWindStore(req), /* timeoutInMilliseconds */ 60000, getRaceLogStore(req));
     }
     
     private WindStore getWindStore(HttpServletRequest req) throws UnknownHostException, MongoException {
@@ -485,12 +490,29 @@ public class AdminApp extends SailingServerHttpServlet {
         }
         return EmptyWindStore.INSTANCE;
     }
+    
+    private RaceLogStore getRaceLogStore(HttpServletRequest req) throws UnknownHostException, MongoException {
+        String raceLogStore = req.getParameter(PARAM_NAME_RACELOGSTORE);
+        if (raceLogStore != null) {
+            if (raceLogStore.equals(STORE_EMPTY)) {
+                return EmptyRaceLogStore.INSTANCE;
+            } else if (raceLogStore.equals(STORE_MONGO)) {
+                return MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(
+                        MongoFactory.INSTANCE.getDefaultMongoObjectFactory(),
+                        MongoFactory.INSTANCE.getDefaultDomainObjectFactory());
+            } else {
+                log("Couldn't find wind store "+raceLogStore+". Using EmptyWindStore instead.");
+                return EmptyRaceLogStore.INSTANCE;
+            }
+        }
+        return EmptyRaceLogStore.INSTANCE;
+    }
 
     private void addRace(HttpServletRequest req, HttpServletResponse resp) throws MongoException, Exception {
         URL paramURL = new URL(req.getParameter(PARAM_NAME_PARAM_URL));
         URI liveURI = new URI(req.getParameter(PARAM_NAME_LIVE_URI));
         URI storedURI = new URI(req.getParameter(PARAM_NAME_STORED_URI));
-        getService().addTracTracRace(paramURL, liveURI, storedURI, getWindStore(req), /* timeoutInMilliseconds */ 60000);
+        getService().addTracTracRace(paramURL, liveURI, storedURI, getWindStore(req), /* timeoutInMilliseconds */ 60000, getRaceLogStore(req));
     }
 
     private void stopRace(HttpServletRequest req, HttpServletResponse resp) throws MalformedURLException, IOException, InterruptedException {

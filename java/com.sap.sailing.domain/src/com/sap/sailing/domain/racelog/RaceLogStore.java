@@ -8,4 +8,6 @@ import com.sap.sailing.domain.base.Fleet;
  */
 public interface RaceLogStore {
 	RaceLog getRaceLog(Fleet fleet);
+
+	RaceLog getRaceLog(RaceColumnIdentifier identifier, Fleet fleet);
 }

@@ -28,6 +28,7 @@ import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
+import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.test.AbstractTracTracLiveTest;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
@@ -80,7 +81,7 @@ public class TrackRaceReplicationTest extends AbstractServerReplicationTest {
         });
         trackingParams = com.sap.sailing.domain.tractracadapter.DomainFactory.INSTANCE.createTrackingConnectivityParameters(paramURL,
                 liveURI, storedURI, startOfTracking, endOfTracking, /* delayToLiveInMillis */
-                        0l, /* simulateWithStartTimeNow */false, EmptyWindStore.INSTANCE);
+                        0l, /* simulateWithStartTimeNow */false, EmptyWindStore.INSTANCE, EmptyRaceLogStore.INSTANCE);
     }
 
     private void startTracking() throws Exception, InterruptedException {

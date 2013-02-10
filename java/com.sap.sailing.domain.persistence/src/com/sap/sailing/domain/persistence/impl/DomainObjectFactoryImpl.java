@@ -826,7 +826,9 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         Map<String, Fleet> fleetsByName = loadFleets(dbFleets);
         BasicDBList dbRaceColumns = (BasicDBList) dbSeries.get(FieldNames.SERIES_RACE_COLUMNS.name());
         Iterable<String> raceColumnNames = loadRaceColumnNames(dbRaceColumns, fleetsByName);
-        Series series = new SeriesImpl(name, isMedal, fleetsByName.values(), raceColumnNames, trackedRegattaRegistry);
+        Series series = new SeriesImpl(name, isMedal, fleetsByName.values(), raceColumnNames, trackedRegattaRegistry,
+        		MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(
+        			MongoFactory.INSTANCE.getDefaultMongoObjectFactory(), this));
         loadRaceColumnRaceLinks(dbRaceColumns, series);
         return series;
     }

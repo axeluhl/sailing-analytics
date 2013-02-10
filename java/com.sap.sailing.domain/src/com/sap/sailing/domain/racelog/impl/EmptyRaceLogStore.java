@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.racelog.impl;
 
 import com.sap.sailing.domain.base.Fleet;
+import com.sap.sailing.domain.racelog.RaceColumnIdentifier;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 
@@ -15,5 +16,10 @@ public class EmptyRaceLogStore implements RaceLogStore {
 	@Override
 	public RaceLog getRaceLog(Fleet fleet) {
 		return new RaceLogImpl("Lock for " + fleet.toString());
+	}
+
+	@Override
+	public RaceLog getRaceLog(RaceColumnIdentifier identifier, Fleet fleet) {
+		return new RaceLogImpl("Lock for " + identifier.getIdentifier()  + "-" + fleet.toString());
 	}
 }

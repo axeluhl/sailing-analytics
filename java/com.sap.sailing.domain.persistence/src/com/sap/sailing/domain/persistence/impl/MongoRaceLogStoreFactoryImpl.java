@@ -16,8 +16,13 @@ public class MongoRaceLogStoreFactoryImpl implements MongoRaceLogStoreFactory {
 
 	@Override
 	public MongoRaceLogStore getMongoRaceLogStore(MongoObjectFactory mongoObjectFactory,DomainObjectFactory domainObjectFactory,
-			RaceColumnIdentifier identifier) {
-		return new MongoRaceLogStoreImpl(db, mongoObjectFactory, domainObjectFactory, identifier);
+			RaceColumnIdentifier raceColumnIdentifier) {
+		return new MongoRaceLogStoreImpl(db, mongoObjectFactory, domainObjectFactory, raceColumnIdentifier);
+	}
+
+	@Override
+	public MongoRaceLogStore getMongoRaceLogStore(MongoObjectFactory mongoObjectFactory, DomainObjectFactory domainObjectFactory) {
+		return new MongoRaceLogStoreImpl(db, mongoObjectFactory, domainObjectFactory, null);
 	}
 
 }

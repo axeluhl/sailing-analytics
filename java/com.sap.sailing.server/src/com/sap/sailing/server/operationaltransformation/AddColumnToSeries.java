@@ -3,14 +3,18 @@ package com.sap.sailing.server.operationaltransformation;
 import com.sap.sailing.domain.base.RaceColumnInSeries;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.common.RegattaIdentifier;
+import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
 
 public class AddColumnToSeries extends AbstractColumnInSeriesOperation<RaceColumnInSeries> {
     private static final long serialVersionUID = 8987540636040301063L;
     
-    public AddColumnToSeries(RegattaIdentifier regattaIdentifier, String seriesName, String columnName) {
+    private RaceLogStore raceLogStore;
+    
+    public AddColumnToSeries(RegattaIdentifier regattaIdentifier, String seriesName, String columnName, RaceLogStore raceLogStore) {
         super(regattaIdentifier, seriesName, columnName);
+        this.raceLogStore = raceLogStore;
     }
 
     @Override
@@ -18,7 +22,7 @@ public class AddColumnToSeries extends AbstractColumnInSeriesOperation<RaceColum
         RaceColumnInSeries result = null;
         Series series = getSeries(toState);
         if (series != null) {
-            result = series.addRaceColumn(getColumnName(), toState);
+            result = series.addRaceColumn(getColumnName(), toState, raceLogStore);
             if(result != null && series.getRegatta().isPersistent()) {
                 toState.updateStoredRegatta(series.getRegatta());
             }

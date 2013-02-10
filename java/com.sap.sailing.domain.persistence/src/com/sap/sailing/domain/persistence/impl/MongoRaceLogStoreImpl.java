@@ -27,9 +27,16 @@ public class MongoRaceLogStoreImpl extends EmptyRaceLogStore implements MongoRac
         this.identifier = identifier;
         this.raceLogCache = new HashMap<Fleet, RaceLog>();
     }
+    
+    @Override
+	public RaceLog getRaceLog(Fleet fleet) {
+    	return getRaceLog(identifier, fleet);
+    }
 
 	@Override
-	public RaceLog getRaceLog(Fleet fleet) {
+	public RaceLog getRaceLog(RaceColumnIdentifier identifier, Fleet fleet) {
+		if (identifier == null)
+			return null;
 		RaceLog log;
 		if (!raceLogCache.containsKey(fleet)) {
 			log = domainObjectFactory.loadRaceLog(identifier, fleet);

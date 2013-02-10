@@ -12,5 +12,7 @@ public interface MongoRaceLogStoreFactory {
      * and mongo.dbName[=&lt;contents of constant {@link #DEFAULT_DB_NAME}&gt;] specified in the bundle context
      */
 	MongoRaceLogStore getMongoRaceLogStore(MongoObjectFactory mongoObjectFactory, DomainObjectFactory domainObjectFactory,
-			RaceColumnIdentifier identifier);
+			RaceColumnIdentifier raceColumnIdentifier);
+	
+	MongoRaceLogStore getMongoRaceLogStore(MongoObjectFactory mongoObjectFactory, DomainObjectFactory domainObjectFactory);
 }
