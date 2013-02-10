@@ -39,6 +39,7 @@ import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.LeaderboardRegistry;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
+import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
 import com.sap.sailing.domain.tracking.RaceListener;
@@ -495,5 +496,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     com.sap.sailing.domain.swisstimingadapter.DomainFactory getSwissTimingDomainFactory();
     
     CourseArea getCourseArea(Serializable courseAreaId);
+    
+    void recordRaceLogEvent(String leaderboardName, String raceColumnName, String fleetName, RaceLogEvent event);
 
 }

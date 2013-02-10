@@ -13,8 +13,14 @@ import org.json.simple.parser.ParseException;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
+import com.sap.sailing.server.gateway.deserialization.impl.RaceLogCourseAreaChangedEventDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.RaceLogEventDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.RaceLogFlagEventDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.RaceLogStartTimeEventDeserializer;
 import com.sap.sailing.server.gateway.impl.JsonExportServlet;
 
 public class AddToRaceLogJsonExportServlet extends JsonExportServlet {
@@ -65,13 +71,23 @@ public class AddToRaceLogJsonExportServlet extends JsonExportServlet {
 			response.sendError(HttpServletResponse.SC_NOT_FOUND, "No such fleet found.");
 			return;
 		}
-		
 		/// TODO: get RaceLog of RaceColumn by Fleet
+		//service.apply(new RecordRaceLogEvent(leaderboardName, raceColumnName, fleetName, event));
+		JsonDeserializer<RaceLogEvent> deserializer = 
+			     new RaceLogEventDeserializer(
+			       new RaceLogFlagEventDeserializer(), 
+			       new RaceLogStartTimeEventDeserializer(), 
+			       new RaceLogCourseAreaChangedEventDeserializer());
 		
 		try {
 			Object requestBody = JSONValue.parseWithException(request.getReader());
 			JSONObject requestObject = Helpers.toJSONObjectSafe(requestBody);
 			System.out.println(requestObject);
+			
+			RaceLogEvent logEvent = deserializer.deserialize(requestObject);
+			
+			service.recordRaceLogEvent(leaderboardName, raceColumnName, fleetName, logEvent);
+			
 		} catch (ParseException pe) {
 			response.sendError(HttpServletResponse.SC_BAD_REQUEST, String.format("Invalid JSON in request body:\n%s", pe));
 			return;

@@ -73,6 +73,7 @@ import com.sap.sailing.domain.persistence.MongoFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.MongoRaceLogStoreFactory;
 import com.sap.sailing.domain.racelog.RaceColumnIdentifier;
+import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.racelog.impl.RaceColumnIdentifierImpl;
 import com.sap.sailing.domain.swisstimingadapter.Race;
@@ -117,6 +118,7 @@ import com.sap.sailing.server.operationaltransformation.CreateEvent;
 import com.sap.sailing.server.operationaltransformation.CreateTrackedRace;
 import com.sap.sailing.server.operationaltransformation.RecordCompetitorGPSFix;
 import com.sap.sailing.server.operationaltransformation.RecordMarkGPSFix;
+import com.sap.sailing.server.operationaltransformation.RecordRaceLogEvent;
 import com.sap.sailing.server.operationaltransformation.RecordWindFix;
 import com.sap.sailing.server.operationaltransformation.RemoveEvent;
 import com.sap.sailing.server.operationaltransformation.RemoveWindFix;
@@ -1649,6 +1651,12 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
             mongoObjectFactory.storeEvent(event);
         }
 		return courseArea;
+	}
+
+	@Override
+	public void recordRaceLogEvent(String leaderboardName, String raceColumnName, String fleetName, RaceLogEvent event) {
+		RecordRaceLogEvent command = new RecordRaceLogEvent(leaderboardName, raceColumnName, fleetName, event);
+		apply(command);
 	}
 
 }

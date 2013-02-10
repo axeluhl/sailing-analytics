@@ -7,6 +7,7 @@ import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.racelog.RaceColumnIdentifier;
 import com.sap.sailing.domain.racelog.RaceLog;
+import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.racelog.impl.RaceColumnIdentifierImpl;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -102,5 +103,11 @@ public class RaceColumnInSeriesImpl extends AbstractRaceColumn implements RaceCo
 	public RaceColumnIdentifier getRaceColumnIdentifier(String leaderboardName) {
 		return new RaceColumnIdentifierImpl(leaderboardName, getName());
 	}
+	
+	@Override
+	public void recordRaceLogEvent(String leaderboardName, Fleet fleet, RaceLogEvent event) {
+    	
+    	raceLogStore.getRaceLog(getRaceColumnIdentifier(leaderboardName), fleet).add(event);
+    }
 
 }

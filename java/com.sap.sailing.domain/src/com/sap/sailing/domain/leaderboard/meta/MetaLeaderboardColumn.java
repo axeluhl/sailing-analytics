@@ -11,6 +11,7 @@ import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.racelog.RaceLog;
+import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
 /**
@@ -152,5 +153,11 @@ public class MetaLeaderboardColumn extends SimpleAbstractRaceColumn implements R
 	@Override
 	public RaceLog getRaceLog(String leaderboardName, Fleet fleet) {
 		return null;
+	}
+
+	@Override
+	public void recordRaceLogEvent(String leaderboardName, Fleet fleet,
+			RaceLogEvent event) {
+		
 	}
 }
