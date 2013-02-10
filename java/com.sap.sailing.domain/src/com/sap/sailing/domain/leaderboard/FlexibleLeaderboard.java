@@ -5,6 +5,7 @@ import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.common.Renamable;
+import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
 /**
@@ -48,7 +49,7 @@ public interface FlexibleLeaderboard extends Leaderboard, Renamable {
      * 
      * @return the race column in the leaderboard used to represent the tracked <code>race</code>
      */
-    RaceColumn addRaceColumn(String name, boolean medalRace, Fleet... fleets);
+    RaceColumn addRaceColumn(String name, boolean medalRace, RaceLogStore raceLogStore, Fleet... fleets);
     
     /**
      * Adds a tracked race to this leaderboard. If a {@link RaceColumn} with name <code>columnName</code> already exists
@@ -66,7 +67,7 @@ public interface FlexibleLeaderboard extends Leaderboard, Renamable {
      * 
      * @return the race column in the leaderboard used to represent the tracked <code>race</code>
      */
-    RaceColumn addRace(TrackedRace race, String columnName, boolean medalRace, Fleet fleet);
+    RaceColumn addRace(TrackedRace race, String columnName, boolean medalRace, RaceLogStore raceLogStore, Fleet fleet);
 
     void removeRaceColumn(String columnName);
 

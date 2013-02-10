@@ -48,6 +48,7 @@ import com.sap.sailing.domain.leaderboard.impl.RegattaLeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.ResultDiscardingRuleImpl;
 import com.sap.sailing.domain.leaderboard.impl.ScoreCorrectionImpl;
 import com.sap.sailing.domain.leaderboard.meta.LeaderboardGroupMetaLeaderboard;
+import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.test.mock.MockedTrackedRaceWithStartTimeAndRanks;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -759,25 +760,25 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
         FlexibleLeaderboard leaderboard1 = new FlexibleLeaderboardImpl("Leaderboard 1", new ScoreCorrectionImpl(),
                 new ResultDiscardingRuleImpl(/* discarding thresholds */ new int[0]), new HighPoint(), null);
         leaderboard1.addRace(new MockedTrackedRaceWithStartTimeAndRanks(now, Arrays.asList(f1)), "R1", /* medalRace */ false,
-                leaderboard1.getFleet(null));
+        		EmptyRaceLogStore.INSTANCE, leaderboard1.getFleet(null));
         leaderboard1.addRace(new MockedTrackedRaceWithStartTimeAndRanks(now, Arrays.asList(f2)), "R2", /* medalRace */ false,
-                leaderboard1.getFleet(null));
+        		EmptyRaceLogStore.INSTANCE, leaderboard1.getFleet(null));
         assertTrue(leaderboard1.getScoringScheme().getScoreComparator(/* nullScoresAreBetter */ false).compare(
                 leaderboard1.getTotalPoints(c[0], later), leaderboard1.getTotalPoints(c[3], later)) < 0); // c0 better than c3
         FlexibleLeaderboard leaderboard2 = new FlexibleLeaderboardImpl("Leaderboard 3", new ScoreCorrectionImpl(),
                 new ResultDiscardingRuleImpl(/* discarding thresholds */ new int[0]), new HighPoint(), null);
         leaderboard2.addRace(new MockedTrackedRaceWithStartTimeAndRanks(now, Arrays.asList(f3)), "R1", /* medalRace */ false,
-                leaderboard1.getFleet(null));
+        		EmptyRaceLogStore.INSTANCE, leaderboard1.getFleet(null));
         leaderboard2.addRace(new MockedTrackedRaceWithStartTimeAndRanks(now, Arrays.asList(f4)), "R2", /* medalRace */ false,
-                leaderboard1.getFleet(null));
+        		EmptyRaceLogStore.INSTANCE, leaderboard1.getFleet(null));
         assertTrue(leaderboard2.getScoringScheme().getScoreComparator(/* nullScoresAreBetter */ false).compare(
                 leaderboard2.getTotalPoints(c[3], later), leaderboard2.getTotalPoints(c[0], later)) < 0); // c3 better than c0
         FlexibleLeaderboard leaderboard3 = new FlexibleLeaderboardImpl("Leaderboard 3", new ScoreCorrectionImpl(),
                 new ResultDiscardingRuleImpl(/* discarding thresholds */ new int[0]), new HighPoint(), null);
         leaderboard3.addRace(new MockedTrackedRaceWithStartTimeAndRanks(now, Arrays.asList(f5)), "R1", /* medalRace */ false,
-                leaderboard1.getFleet(null));
+        		EmptyRaceLogStore.INSTANCE, leaderboard1.getFleet(null));
         leaderboard3.addRace(new MockedTrackedRaceWithStartTimeAndRanks(now, Arrays.asList(f6)), "R2", /* medalRace */ false,
-                leaderboard1.getFleet(null));
+        		EmptyRaceLogStore.INSTANCE, leaderboard1.getFleet(null));
         assertTrue(leaderboard3.getCompetitorsFromBestToWorst(later).indexOf(c[3]) <
                 leaderboard3.getCompetitorsFromBestToWorst(later).indexOf(c[0])); // c3 better than c0; won last race
         LeaderboardGroup leaderboardGroup = new LeaderboardGroupImpl("Leaderboard Group", "Leaderboard Group", false, Arrays.asList(leaderboard1,

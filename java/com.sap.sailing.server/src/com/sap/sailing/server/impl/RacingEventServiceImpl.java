@@ -71,7 +71,10 @@ import com.sap.sailing.domain.leaderboard.meta.LeaderboardGroupMetaLeaderboard;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
+import com.sap.sailing.domain.persistence.MongoRaceLogStoreFactory;
+import com.sap.sailing.domain.racelog.RaceColumnIdentifier;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
+import com.sap.sailing.domain.racelog.impl.RaceColumnIdentifierImpl;
 import com.sap.sailing.domain.swisstimingadapter.Race;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterConnector;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterMessage;
@@ -360,7 +363,9 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         if (leaderboard != null) {
             if (leaderboard instanceof FlexibleLeaderboard) {
                 // uses the default fleet as the single fleet for the new column
+            	RaceColumnIdentifier columnIdentifier = new RaceColumnIdentifierImpl(leaderboard, columnName);
                 RaceColumn result = ((FlexibleLeaderboard) leaderboard).addRaceColumn(columnName, medalRace,
+                		MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(mongoObjectFactory, domainObjectFactory, columnIdentifier),
                         leaderboard.getFleet(null));
                 updateStoredLeaderboard((FlexibleLeaderboard) leaderboard);
                 return result;
@@ -880,7 +885,10 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
             linkRaceToConfiguredLeaderboardColumns(trackedRace);
             final FlexibleLeaderboard defaultLeaderboard = (FlexibleLeaderboard) leaderboardsByName.get(LeaderboardNameConstants.DEFAULT_LEADERBOARD_NAME);
             if (defaultLeaderboard != null) {
-                defaultLeaderboard.addRace(trackedRace, trackedRace.getRace().getName(), /* medalRace */false,
+            	String columnName = trackedRace.getRace().getName();
+            	RaceColumnIdentifier columnIdentifier = new RaceColumnIdentifierImpl(defaultLeaderboard, columnName);
+                defaultLeaderboard.addRace(trackedRace, columnName, /* medalRace */false,
+                		MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(mongoObjectFactory, domainObjectFactory, columnIdentifier),
                         defaultLeaderboard.getFleet(null));
             }
             TrackedRaceReplicator trackedRaceReplicator = new TrackedRaceReplicator(trackedRace);

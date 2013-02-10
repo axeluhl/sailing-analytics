@@ -482,20 +482,25 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         return result;
     }
 
-	public DBObject storeRaceLogEntry(RaceColumnIdentifier raceColumnIdentifier, RaceLogFlagEvent flagEvent) {
+	public DBObject storeRaceLogEntry(RaceColumnIdentifier raceColumnIdentifier, Fleet fleet, RaceLogFlagEvent flagEvent) {
 		BasicDBObject result = new BasicDBObject();
-		result.put(FieldNames.RACE_COLUMN_IDENTIFIER.name(), raceColumnIdentifier.getIdentifier());
+		storeRaceColumnIdentifierAndFleetName(raceColumnIdentifier, fleet, result);
         
         result.put(FieldNames.RACE_LOG_EVENT.name(), storeRaceLogFlagEvent(flagEvent));
         return result;
 	}
 	
-	public DBObject storeRaceLogEntry(RaceColumnIdentifier raceColumnIdentifier, RaceLogStartTimeEvent startTimeEvent) {
+	public DBObject storeRaceLogEntry(RaceColumnIdentifier raceColumnIdentifier, Fleet fleet, RaceLogStartTimeEvent startTimeEvent) {
 		BasicDBObject result = new BasicDBObject();
-		result.put(FieldNames.RACE_COLUMN_IDENTIFIER.name(), raceColumnIdentifier.getIdentifier());
+		storeRaceColumnIdentifierAndFleetName(raceColumnIdentifier, fleet, result);
         
         result.put(FieldNames.RACE_LOG_EVENT.name(), storeRaceLogStartTimeEvent(startTimeEvent));
         return result;
+	}
+
+	private void storeRaceColumnIdentifierAndFleetName(RaceColumnIdentifier raceColumnIdentifier, Fleet fleet, BasicDBObject result) {
+		result.put(FieldNames.RACE_COLUMN_IDENTIFIER.name(), raceColumnIdentifier.getIdentifier());
+		result.put(FieldNames.FLEET_NAME.name(), fleet.getName());
 	}
 
 	private Object storeRaceLogStartTimeEvent(RaceLogStartTimeEvent startTimeEvent) {
