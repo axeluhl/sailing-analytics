@@ -15,7 +15,7 @@
             android:layout_width="fill_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:text="@string/race_finished"
+            android:text="@string/race_finished_template"
             android:textSize="16pt"
             android:textStyle="bold"
             android:gravity="center_vertical|center_horizontal"
@@ -33,7 +33,7 @@
             android:layout_width="fill_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:text="@string/race_finished"
+            android:text="@string/blank"
             android:textSize="14pt"
             android:gravity="center_vertical|center_horizontal"
             android:ems="10" />
@@ -50,7 +50,7 @@
             android:layout_width="fill_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:text="@string/race_finished"
+            android:text="@string/blank"
             android:textSize="14pt"
             android:gravity="center_vertical|center_horizontal"
             android:ems="10" />
@@ -67,7 +67,7 @@
             android:layout_width="fill_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:text="@string/race_finished"
+            android:text="@string/blank"
             android:textSize="14pt"
             android:gravity="center_vertical|center_horizontal"
             android:ems="10" />
@@ -84,7 +84,7 @@
             android:layout_width="fill_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:text="@string/race_finished"
+            android:text="@string/blank"
             android:textSize="14pt"
             android:gravity="center_vertical|center_horizontal"
             android:ems="10" />
@@ -101,7 +101,7 @@
             android:layout_width="fill_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:text="@string/protest_start_time"
+            android:text="@string/blank"
             android:textSize="14pt"
             android:gravity="center_vertical|center_horizontal"
             android:ems="10"

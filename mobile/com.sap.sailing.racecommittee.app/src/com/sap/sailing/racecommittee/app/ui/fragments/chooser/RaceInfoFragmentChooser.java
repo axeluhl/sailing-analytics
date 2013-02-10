@@ -4,6 +4,7 @@ import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.DummyInfoFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.FinishedRaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.SetTimeRaceFragment;
 
 public class RaceInfoFragmentChooser {
@@ -19,7 +20,7 @@ public class RaceInfoFragmentChooser {
 		case RUNNING:
 			return createInfoFragment(DummyInfoFragment.class, managedRace);
 		case FINISHED:
-			return createInfoFragment(DummyInfoFragment.class, managedRace);
+			return createInfoFragment(FinishedRaceFragment.class, managedRace);
 		default:
 			throw new IllegalStateException(
 					"Couldn't choose fragment for unknown race status " + managedRace.getStatus());
