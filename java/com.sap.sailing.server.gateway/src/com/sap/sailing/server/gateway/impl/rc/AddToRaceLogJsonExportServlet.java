@@ -66,7 +66,7 @@ public class AddToRaceLogJsonExportServlet extends JsonExportServlet {
 			return;
 		}
 		
-		/// TODO: get RaceLog of RaceColumn by Fleet and add event!
+		/// TODO: get RaceLog of RaceColumn by Fleet
 		
 		try {
 			Object requestBody = JSONValue.parseWithException(request.getReader());

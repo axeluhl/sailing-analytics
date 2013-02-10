@@ -11,7 +11,7 @@
     <string name="reset_time">Reset start time</string>
     <string name="choose">Choose</string>
     <string name="current_time">Current time</string>
-    <string name="race_finished">%s is finished</string>
+    <string name="race_finished_template">%s is finished</string>
     <string name="race_first_boat_finished">First boat finished at:</string>
     <string name="race_time_limit">Race time limit at:</string>
     <string name="choose_startmode">Choose the start mode for this race</string>
@@ -137,5 +137,6 @@
 	<string name="buoyImage">Buoy image</string>
 	<string name="yes">Yes</string>
 	<string name="no">No</string>
+	<string name="blank"></string>
 	
 </resources>
