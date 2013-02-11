@@ -6,7 +6,7 @@ import java.util.List;
 
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.simulator.test.util.TracTracReader;
+import com.sap.sailing.simulator.test.util.TracTracReaderFromFiles;
 
 public class TestTracTracReader {
 
@@ -18,7 +18,7 @@ public class TestTracTracReader {
              { return filename.endsWith(".data"); }} );
 		
 		//System.out.println(flist[1]);
-		TracTracReader ttreader = new TracTracReader(flist);
+		TracTracReaderFromFiles ttreader = new TracTracReaderFromFiles(flist);
 		
 		List<TrackedRace> lst = ttreader.read();
 		
