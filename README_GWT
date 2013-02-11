@@ -40,4 +40,3 @@ and displays the web app. I can set breakpoints in the client part as well as in
 When you want to compile mulitple GWT modules in one project in one go, the GWT library
 has to be on the project's build path and has to be the first in the Order and Exports tab.
 See also http://arrogantprogrammer.blogspot.com/2010/04/projects-using-gwt-15-or-lower-may-only.html.
-
