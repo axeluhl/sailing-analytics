@@ -28,7 +28,7 @@ public class PathImpl implements Path, Serializable {
     List<TimedPositionWithSpeed> pathPoints;
     WindField windField;
 
-    public PathImpl(final List<TimedPositionWithSpeed> pointsList, final WindField wf) {
+    public PathImpl(List<TimedPositionWithSpeed> pointsList, WindField wf) {
 
         this.pathPoints = pointsList;
         this.windField = wf;
@@ -41,21 +41,21 @@ public class PathImpl implements Path, Serializable {
     }
 
     @Override
-    public void setPathPoints(final List<TimedPositionWithSpeed> pointsList) {
+    public void setPathPoints(List<TimedPositionWithSpeed> pointsList) {
         this.pathPoints = pointsList;
     }
 
     @Override
-    public Path getEvenTimedPath(final long timestep) {
+    public Path getEvenTimedPath(long timestep) {
         return new PathImpl(this.getEvenTimedPathAsList(timestep), this.windField);
     }
 
-    private List<TimedPositionWithSpeed> getEvenTimedPathAsList(final long timeStep) {
+    private List<TimedPositionWithSpeed> getEvenTimedPathAsList(long timeStep) {
 
-        final TimePoint startTime = this.pathPoints.get(0).getTimePoint();
-        final TimePoint endTime = this.pathPoints.get(this.pathPoints.size() - 1).getTimePoint();
+        TimePoint startTime = this.pathPoints.get(0).getTimePoint();
+        TimePoint endTime = this.pathPoints.get(this.pathPoints.size() - 1).getTimePoint();
 
-        final List<TimedPositionWithSpeed> path = new ArrayList<TimedPositionWithSpeed>();
+        List<TimedPositionWithSpeed> path = new ArrayList<TimedPositionWithSpeed>();
 
         TimedPositionWithSpeed startPoint = this.pathPoints.get(0);
         SpeedWithBearing startWind = null;
@@ -74,46 +74,46 @@ public class PathImpl implements Path, Serializable {
             if (this.pathPoints.get(idx).getTimePoint().asMillis() >= nextTimePoint.asMillis()) {
 
                 // reached point after next timestep
-                final TimedPositionWithSpeed p1 = this.pathPoints.get(idx - 1);
-                final TimedPositionWithSpeed p2 = this.pathPoints.get(idx);
-                final Distance dist = p1.getPosition().getDistance(p2.getPosition());
+                TimedPositionWithSpeed p1 = this.pathPoints.get(idx - 1);
+                TimedPositionWithSpeed p2 = this.pathPoints.get(idx);
+                Distance dist = p1.getPosition().getDistance(p2.getPosition());
                 // long nextTime = (double)nextTimePoint.asMillis();
                 // System.out.println(""+(nextTimePoint.asMillis() -
                 // p1.getTimePoint().asMillis())+" - "+(p2.getTimePoint().asMillis() - p1.getTimePoint().asMillis()));
-                final double scale1 = nextTimePoint.asMillis() - p1.getTimePoint().asMillis();
-                final double scale2 = p2.getTimePoint().asMillis() - p1.getTimePoint().asMillis();
-                final Position nextPosition = p1.getPosition().translateGreatCircle(
+                double scale1 = nextTimePoint.asMillis() - p1.getTimePoint().asMillis();
+                double scale2 = p2.getTimePoint().asMillis() - p1.getTimePoint().asMillis();
+                Position nextPosition = p1.getPosition().translateGreatCircle(
                         p1.getPosition().getBearingGreatCircle(p2.getPosition()), dist.scale(scale1 / scale2));
                 SpeedWithBearing nextWind = null;
                 if (this.windField != null) {
                     nextWind = this.windField.getWind(new TimedPositionImpl(nextTimePoint, nextPosition));
                 } else {
-                    final double nextWindSpeed = p1.getSpeed().getKnots()
+                    double nextWindSpeed = p1.getSpeed().getKnots()
                             + (p2.getSpeed().getKnots() - p1.getSpeed().getKnots()) * scale1 / scale2;
-                    final double nextWindAngle = p1.getSpeed().getBearing().getDegrees()
+                    double nextWindAngle = p1.getSpeed().getBearing().getDegrees()
                             + (p2.getSpeed().getBearing().getDegrees() - p1.getSpeed().getBearing().getDegrees())
                             * scale1 / scale2;
-                    final SpeedWithBearing nextWindSpeedWithBearing = new KnotSpeedWithBearingImpl(nextWindSpeed,
+                    SpeedWithBearing nextWindSpeedWithBearing = new KnotSpeedWithBearingImpl(nextWindSpeed,
                             new DegreeBearingImpl(nextWindAngle));
                     nextWind = new WindImpl(nextPosition, nextTimePoint, nextWindSpeedWithBearing);
                 }
-                final TimedPositionWithSpeed nextPoint = new TimedPositionWithSpeedImpl(nextTimePoint, nextPosition,
+                TimedPositionWithSpeed nextPoint = new TimedPositionWithSpeedImpl(nextTimePoint, nextPosition,
                         nextWind);
 
                 // distance scale: percentage of distance between previous point and next point
-                final TimedPositionWithSpeed prevPoint = path.get(path.size() - 1);
-                final double scaleDist = 0.01 * nextPoint.getPosition().getDistance(prevPoint.getPosition())
+                TimedPositionWithSpeed prevPoint = path.get(path.size() - 1);
+                double scaleDist = 0.01 * nextPoint.getPosition().getDistance(prevPoint.getPosition())
                         .getMeters();
 
                 // evaluate collected points to potentially find turn/corner
                 double maxDist = 0;
                 TimedPositionWithSpeed maxPoint = null;
-                final Bearing nextBear = prevPoint.getPosition().getBearingGreatCircle(nextPoint.getPosition());
+                Bearing nextBear = prevPoint.getPosition().getBearingGreatCircle(nextPoint.getPosition());
                 for (int jdx = 0; jdx < points.size(); jdx++) {
 
-                    final Position pcur = points.get(jdx).getPosition();
-                    final Position ptmp = pcur.projectToLineThrough(prevPoint.getPosition(), nextBear);
-                    final double lineDist = ptmp.getDistance(pcur).getMeters();
+                    Position pcur = points.get(jdx).getPosition();
+                    Position ptmp = pcur.projectToLineThrough(prevPoint.getPosition(), nextBear);
+                    double lineDist = ptmp.getDistance(pcur).getMeters();
                     if (lineDist > maxDist) {
                         maxPoint = points.get(jdx);
                         maxDist = lineDist;
@@ -167,14 +167,14 @@ public class PathImpl implements Path, Serializable {
     }
 
     @Override
-    public void setWindField(final WindField wf) {
+    public void setWindField(WindField wf) {
 
         this.windField = wf;
 
     }
 
     // @Override
-    public TimedPositionWithSpeed getPositionAtTime(final TimePoint t) {
+    public TimedPositionWithSpeed getPositionAtTime(TimePoint t) {
 
         if (t.compareTo(this.pathPoints.get(0).getTimePoint()) == 0) {
             return this.pathPoints.get(0);
@@ -185,7 +185,7 @@ public class PathImpl implements Path, Serializable {
 
         TimedPositionWithSpeed p1 = null;
         TimedPositionWithSpeed p2 = null;
-        for (final TimedPositionWithSpeed p : this.pathPoints) {
+        for (TimedPositionWithSpeed p : this.pathPoints) {
             if (p.getTimePoint().compareTo(t) >= 0) {
                 p2 = p;
                 p1 = this.pathPoints.get(this.pathPoints.indexOf(p) - 1);
@@ -193,28 +193,28 @@ public class PathImpl implements Path, Serializable {
             }
         }
 
-        final double t1 = 1000.0 * p1.getTimePoint().asMillis();
-        final double t2 = 1000.0 * p2.getTimePoint().asMillis();
-        final double t0 = 1000.0 * t.asMillis();
+        double t1 = 1000.0 * p1.getTimePoint().asMillis();
+        double t2 = 1000.0 * p2.getTimePoint().asMillis();
+        double t0 = 1000.0 * t.asMillis();
 
-        final Distance dist = p1.getPosition().getDistance(p2.getPosition());
-        final Position p0 = p1.getPosition().translateGreatCircle(
+        Distance dist = p1.getPosition().getDistance(p2.getPosition());
+        Position p0 = p1.getPosition().translateGreatCircle(
                 p1.getPosition().getBearingGreatCircle(p2.getPosition()), dist.scale((t0 - t1) / (t2 - t1)));
-        final SpeedWithBearing windAtPoint = this.windField.getWind(new TimedPositionImpl(t, p0));
+        SpeedWithBearing windAtPoint = this.windField.getWind(new TimedPositionImpl(t, p0));
 
         return new TimedPositionWithSpeedImpl(t, p0, windAtPoint);
     }
 
     // @Override
-    public List<TimedPositionWithSpeed> getEvenTimedPoints(final long milliseconds) {
+    public List<TimedPositionWithSpeed> getEvenTimedPoints(long milliseconds) {
 
         if (milliseconds == 0) {
             return null;
         }
 
-        final List<TimedPositionWithSpeed> lst = new ArrayList<TimedPositionWithSpeed>();
+        List<TimedPositionWithSpeed> lst = new ArrayList<TimedPositionWithSpeed>();
         TimePoint t = this.pathPoints.get(0).getTimePoint();
-        final TimePoint lastPoint = this.pathPoints.get(this.pathPoints.size() - 1).getTimePoint();
+        TimePoint lastPoint = this.pathPoints.get(this.pathPoints.size() - 1).getTimePoint();
 
         while ((t.compareTo(lastPoint) <= 0) && (lst.size() < 200)) { // paths with more than 200 points lead to
             // performance issues
@@ -232,7 +232,7 @@ public class PathImpl implements Path, Serializable {
 
     // not implemented yet!
     // @Override
-    public List<TimedPositionWithSpeed> getEvenDistancedPoints(final Distance dist) {
+    public List<TimedPositionWithSpeed> getEvenDistancedPoints(Distance dist) {
         return null;
     }
 
@@ -242,13 +242,13 @@ public class PathImpl implements Path, Serializable {
             return null;
         }
 
-        final List<TimedPositionWithSpeed> list = new ArrayList<TimedPositionWithSpeed>();
+        List<TimedPositionWithSpeed> list = new ArrayList<TimedPositionWithSpeed>();
 
         if (this.pathPoints.isEmpty()) {
             return list;
         }
 
-        final int noOfPoints = this.pathPoints.size();
+        int noOfPoints = this.pathPoints.size();
         TimedPositionWithSpeed previousPoint = null;
         TimedPositionWithSpeed currentPoint = null;
         TimedPositionWithSpeed nextPoint = null;
@@ -270,25 +270,57 @@ public class PathImpl implements Path, Serializable {
             }
         }
 
-        return list;
+        return eliminateVeryCloseTurns(list, 15.0);
     }
 
-    public static boolean saveToGpxFile(final Path path, final String fileName) {
+    public static List<TimedPositionWithSpeed> eliminateVeryCloseTurns(List<TimedPositionWithSpeed> turns, double tresholdDistanceMeters) {
+
+        List<TimedPositionWithSpeed> goodTurns = new ArrayList<TimedPositionWithSpeed>();
+
+        int noOfTurnsMinus1 = turns.size() - 1;
+
+        boolean clusterFound = false;
+        int clusterStart = -1;
+        int clusterEnd = -1;
+
+        for (int index = 0; index < noOfTurnsMinus1; index++) {
+            if (turns.get(index).getPosition().getDistance(turns.get(index + 1).getPosition()).getMeters() < tresholdDistanceMeters) {
+                if (clusterFound == false) {
+                    clusterFound = true;
+                    clusterStart = index;
+                }
+                clusterEnd = index + 1;
+            } else {
+                if (clusterFound) {
+                    clusterFound = false;
+                    goodTurns.add(turns.get(clusterStart + clusterEnd / 2));
+                } else {
+                    goodTurns.add(turns.get(index));
+                }
+            }
+        }
+
+        goodTurns.add(turns.get(turns.size() - 1));
+
+        return goodTurns;
+    }
+
+    public static boolean saveToGpxFile(Path path, String fileName) {
 
         if (path == null) {
             return false;
         }
 
-        final List<TimedPositionWithSpeed> pathPoints = path.getPathPoints();
+        List<TimedPositionWithSpeed> pathPoints = path.getPathPoints();
         if (pathPoints == null || pathPoints.isEmpty()) {
             return false;
         }
 
         TimedPositionWithSpeed timedPoint = null;
         Position point = null;
-        final int noOfPoints = pathPoints.size();
-        final Format formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        final StringBuffer buffer = new StringBuffer();
+        int noOfPoints = pathPoints.size();
+        Format formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        StringBuffer buffer = new StringBuffer();
 
         buffer.append("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\" ?>\r\n<gpx xmlns=\"http://www.topografix.com/GPX/1/1\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd\">\r\n\t<trk>\r\n\t\t<name>GPSPolyPath</name>\r\n\t\t<trkseg>");
 
@@ -302,12 +334,12 @@ public class PathImpl implements Path, Serializable {
 
         buffer.append("\r\n\t\t</trkseg>\r\n\t</trk>\r\n</gpx>\r\n");
 
-        final String content = buffer.toString();
+        String content = buffer.toString();
 
         try {
 
-            final FileWriter writer = new FileWriter(fileName);
-            final BufferedWriter output = new BufferedWriter(writer, 32768);
+            FileWriter writer = new FileWriter(fileName);
+            BufferedWriter output = new BufferedWriter(writer, 32768);
 
             try {
                 output.write(content);
@@ -316,7 +348,7 @@ public class PathImpl implements Path, Serializable {
                 writer.close();
             }
 
-        } catch (final IOException e) {
+        } catch (IOException e) {
             return false;
         }
 
