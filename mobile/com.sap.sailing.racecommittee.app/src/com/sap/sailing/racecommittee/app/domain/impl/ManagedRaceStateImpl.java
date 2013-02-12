@@ -1,8 +1,8 @@
 package com.sap.sailing.racecommittee.app.domain.impl;
 
 import com.sap.sailing.domain.racelog.RaceLog;
+import com.sap.sailing.domain.racelog.RaceLogRaceStatus;
 import com.sap.sailing.racecommittee.app.domain.ManagedRaceState;
-import com.sap.sailing.racecommittee.app.domain.RaceStatus;
 
 public class ManagedRaceStateImpl implements ManagedRaceState {
 
@@ -16,12 +16,12 @@ public class ManagedRaceStateImpl implements ManagedRaceState {
 		return raceLog;
 	}
 
-	public RaceStatus getStatus() {
-		return RaceStatus.UNKNOWN;
+	public RaceLogRaceStatus getStatus() {
+		return RaceLogRaceStatus.UNKNOWN;
 	}
 
-	public RaceStatus updateStatus() {
-		
+	public RaceLogRaceStatus updateStatus() {
+		/// TODO: implement
 		return getStatus();
 	}
 

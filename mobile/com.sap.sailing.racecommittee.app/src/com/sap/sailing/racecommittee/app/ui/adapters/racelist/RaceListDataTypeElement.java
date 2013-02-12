@@ -2,16 +2,16 @@ package com.sap.sailing.racecommittee.app.ui.adapters.racelist;
 
 import android.app.Fragment;
 
+import com.sap.sailing.domain.racelog.RaceLogRaceStatus;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
-import com.sap.sailing.racecommittee.app.domain.RaceStatus;
 
 public class RaceListDataTypeElement extends RaceListDataType {
 	
 	private boolean updateIndicatorVisible = false;
 	
 	private ManagedRace race;
-	private RaceStatus currentRaceStatus;
+	private RaceLogRaceStatus currentRaceStatus;
 	
 	private static String unscheduledTemplate;
 	private static String scheduldedTemplate;
@@ -68,15 +68,15 @@ public class RaceListDataTypeElement extends RaceListDataType {
 		return getStatusString(race.getStatus());
 	}
 	
-	public RaceStatus getPreviousRaceStatus() {
+	public RaceLogRaceStatus getPreviousRaceStatus() {
 		return currentRaceStatus;
 	}
 	
-	public void setPreviousRaceStatus(RaceStatus status) {
+	public void setPreviousRaceStatus(RaceLogRaceStatus status) {
 		this.currentRaceStatus = status;
 	}
 	
-	private String getStatusString(RaceStatus status) {
+	private String getStatusString(RaceLogRaceStatus status) {
 		switch (status) {
 		case UNSCHEDULED:
 			return unscheduledTemplate;

@@ -3,6 +3,7 @@ package com.sap.sailing.racecommittee.app.domain;
 import com.sap.sailing.domain.common.Named;
 import com.sap.sailing.domain.common.WithID;
 import com.sap.sailing.domain.racelog.RaceLog;
+import com.sap.sailing.domain.racelog.RaceLogRaceStatus;
 
 public interface ManagedRace extends ManagedRaceIdentifier, Named, WithID {
 	
@@ -27,6 +28,6 @@ public interface ManagedRace extends ManagedRaceIdentifier, Named, WithID {
 	 * Shortcut to {@link ManagedRaceState#getStatus()} of {@link ManagedRace#getState()}.
 	 * @return the status of the race's state.
 	 */
-	public RaceStatus getStatus();
+	public RaceLogRaceStatus getStatus();
 	
 }

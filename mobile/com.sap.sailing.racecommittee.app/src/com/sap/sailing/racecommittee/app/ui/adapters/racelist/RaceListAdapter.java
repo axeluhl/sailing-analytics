@@ -17,8 +17,8 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.sap.sailing.domain.racelog.RaceLogRaceStatus;
 import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.domain.RaceStatus;
 import com.sap.sailing.racecommittee.app.ui.comparators.RaceListDataTypeElementComparator;
 import com.sap.sailing.racecommittee.app.ui.comparators.RaceListDataTypeTitleComparator;
 
@@ -191,17 +191,17 @@ public class RaceListAdapter extends ArrayAdapter<RaceListDataType> {
             		int numberOfUnscheduledRaces = 0;
             		
             		for (RaceListDataTypeElement dataElement : elementList) {
-            			if (dataElement.getRace().getStatus().equals(RaceStatus.FINISHED)) {
+            			if (dataElement.getRace().getStatus().equals(RaceLogRaceStatus.FINISHED)) {
             				lastFinishedRace = dataElement;
             			}
             		}
             		
             		for (RaceListDataTypeElement dataElement : elementList) {
-            			if (dataElement.getRace().getStatus().equals(RaceStatus.UNSCHEDULED)) {
+            			if (dataElement.getRace().getStatus().equals(RaceLogRaceStatus.UNSCHEDULED)) {
             				numberOfUnscheduledRaces++;
             				if (numberOfUnscheduledRaces > 1)
     							continue;
-            			} else if (dataElement.getRace().getStatus().equals(RaceStatus.FINISHED)) {
+            			} else if (dataElement.getRace().getStatus().equals(RaceLogRaceStatus.FINISHED)) {
             				if (!dataElement.equals(lastFinishedRace)) {
             					continue;
             				}

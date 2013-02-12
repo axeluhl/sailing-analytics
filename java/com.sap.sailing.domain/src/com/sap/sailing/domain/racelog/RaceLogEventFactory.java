@@ -13,7 +13,10 @@ public interface RaceLogEventFactory {
 	RaceLogFlagEvent createFlagEvent(TimePoint timePoint, Serializable id, List<Competitor> involvedBoats, int passId, Flags upperFlag, Flags lowerFlag, boolean isDisplayed);
 	RaceLogFlagEvent createFlagEvent(TimePoint timePoint, int passId, Flags upperFlag, Flags lowerFlag, boolean isDisplayed);
 	
-	RaceLogStartTimeEvent createStartTimeEvent(TimePoint timePoint, Serializable id, List<Competitor> involvedBoats, int passId, TimePoint startTime);
-	RaceLogStartTimeEvent createStartTimeEvent(TimePoint timePoint, int passId, TimePoint startTime);
+	RaceLogStartTimeEvent createStartTimeEvent(TimePoint timePoint, Serializable id, List<Competitor> involvedBoats, int passId, RaceLogRaceStatus nextStatus, TimePoint startTime);
+	RaceLogStartTimeEvent createStartTimeEvent(TimePoint timePoint, int passId, RaceLogRaceStatus nextStatus, TimePoint startTime);
+	
+	RaceLogEvent createRaceStatusEvent(TimePoint timePoint, Serializable id, List<Competitor> competitors, int passId, RaceLogRaceStatus nextStatus);
+	RaceLogEvent createRaceStatusEvent(TimePoint timePoint, int passId, RaceLogRaceStatus nextStatus);
 
 }

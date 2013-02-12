@@ -5,11 +5,11 @@ import java.io.Serializable;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.SeriesData;
 import com.sap.sailing.domain.racelog.RaceLog;
+import com.sap.sailing.domain.racelog.RaceLogRaceStatus;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.ManagedRaceIdentifier;
 import com.sap.sailing.racecommittee.app.domain.ManagedRaceState;
 import com.sap.sailing.racecommittee.app.domain.RaceGroup;
-import com.sap.sailing.racecommittee.app.domain.RaceStatus;
 
 public class ManagedRaceImpl implements ManagedRace {
 	private static final long serialVersionUID = -4936566684992524001L;
@@ -66,7 +66,7 @@ public class ManagedRaceImpl implements ManagedRace {
 		return state.getRaceLog();
 	}
 	
-	public RaceStatus getStatus() {
+	public RaceLogRaceStatus getStatus() {
 		return state.getStatus();
 	}
 

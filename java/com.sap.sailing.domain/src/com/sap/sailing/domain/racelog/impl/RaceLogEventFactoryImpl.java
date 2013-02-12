@@ -8,8 +8,10 @@ import java.util.UUID;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.racelog.Flags;
+import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogEventFactory;
 import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
+import com.sap.sailing.domain.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
 
 public class RaceLogEventFactoryImpl implements RaceLogEventFactory {
@@ -30,14 +32,28 @@ public class RaceLogEventFactoryImpl implements RaceLogEventFactory {
 	@Override
 	public RaceLogStartTimeEvent createStartTimeEvent(
 			TimePoint timePoint, Serializable id,
-			List<Competitor> involvedBoats, int passId, TimePoint startTime) {
-		return new RaceLogStartTimeEventImpl(timePoint, id, involvedBoats, passId, startTime);
+			List<Competitor> involvedBoats, int passId, 
+			RaceLogRaceStatus nextStatus, TimePoint startTime) {
+		return new RaceLogStartTimeEventImpl(timePoint, id, involvedBoats, passId, nextStatus, startTime);
 	}
 
 	@Override
-	public RaceLogStartTimeEvent createStartTimeEvent(
-			TimePoint timePoint, int passId, TimePoint startTime) {
-		return createStartTimeEvent(timePoint, UUID.randomUUID(), new ArrayList<Competitor>(), passId, startTime);
+	public RaceLogStartTimeEvent createStartTimeEvent(TimePoint timePoint, int passId, RaceLogRaceStatus nextStatus, TimePoint startTime) {
+		return createStartTimeEvent(timePoint, UUID.randomUUID(), new ArrayList<Competitor>(), passId, nextStatus, startTime);
+	}
+
+	@Override
+	public RaceLogEvent createRaceStatusEvent(TimePoint timePoint,
+			Serializable id, List<Competitor> competitors, int passId,
+			RaceLogRaceStatus nextStatus) {
+		// TODO Auto-generated method stub
+		return new RaceLogRaceStatusEventImpl(timePoint, id, competitors, passId, nextStatus);
+	}
+
+	@Override
+	public RaceLogEvent createRaceStatusEvent(TimePoint timePoint,
+			int passId, RaceLogRaceStatus nextStatus) {
+		return createRaceStatusEvent(timePoint, UUID.randomUUID(), new ArrayList<Competitor>(), passId, nextStatus);
 	}
 
 }

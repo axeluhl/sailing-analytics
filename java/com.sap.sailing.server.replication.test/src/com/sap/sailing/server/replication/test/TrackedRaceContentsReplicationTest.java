@@ -44,6 +44,7 @@ import com.sap.sailing.domain.persistence.MongoWindStoreFactory;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogEventFactory;
+import com.sap.sailing.domain.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
@@ -225,7 +226,7 @@ public class TrackedRaceContentsReplicationTest extends AbstractServerReplicatio
     public void testRaceLogEventAdditionReplication() throws InterruptedException {
     	TimePoint time = MillisecondsTimePoint.now();
         final RaceLogStartTimeEvent startTimeEvent = 
-        		RaceLogEventFactory.INSTANCE.createStartTimeEvent(time, 0, new MillisecondsTimePoint(time.asMillis() + 500000));
+        		RaceLogEventFactory.INSTANCE.createStartTimeEvent(time, 0, RaceLogRaceStatus.SCHEDULED, new MillisecondsTimePoint(time.asMillis() + 500000));
         //trackedRace.recordRaceLogEvent(startTimeEvent);
         Thread.sleep(1000);
         TrackedRace replicaTrackedRace = replica.getTrackedRace(raceIdentifier);
@@ -245,7 +246,7 @@ public class TrackedRaceContentsReplicationTest extends AbstractServerReplicatio
     public void testReplicationOfLoadingOfStoredRaceLogTrack() throws UnknownHostException, MongoException, InterruptedException {
     	TimePoint time = MillisecondsTimePoint.now();
         final RaceLogStartTimeEvent startTimeEvent = 
-        		RaceLogEventFactory.INSTANCE.createStartTimeEvent(time, 0, new MillisecondsTimePoint(time.asMillis() + 500000));
+        		RaceLogEventFactory.INSTANCE.createStartTimeEvent(time, 0, RaceLogRaceStatus.SCHEDULED, new MillisecondsTimePoint(time.asMillis() + 500000));
         //trackedRace.recordRaceLogEvent(startTimeEvent);
         RaceLog trackedRaceRaceLog= trackedRace.getRaceLog();
         trackedRaceRaceLog.lockForRead();

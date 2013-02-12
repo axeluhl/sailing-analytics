@@ -17,6 +17,7 @@ import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogEventFactory;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
+import com.sap.sailing.domain.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.racelog.impl.RaceLogImpl;
 
@@ -68,7 +69,7 @@ public class RaceLogTest {
 		RaceLogFlagEvent rcEvent2 = RaceLogEventFactory.INSTANCE.createFlagEvent(t2, passId, Flags.PAPA, Flags.NONE, false);
 		RaceLogFlagEvent rcEvent3 = RaceLogEventFactory.INSTANCE.createFlagEvent(t3, passId, Flags.PAPA, Flags.NONE, true);
 		RaceLogFlagEvent rcEvent4 = RaceLogEventFactory.INSTANCE.createFlagEvent(t4, passId, Flags.CLASS, Flags.NONE, true);
-		RaceLogStartTimeEvent rcEvent5 = RaceLogEventFactory.INSTANCE.createStartTimeEvent(t5, passId, t1);
+		RaceLogStartTimeEvent rcEvent5 = RaceLogEventFactory.INSTANCE.createStartTimeEvent(t5, passId, RaceLogRaceStatus.SCHEDULED, t1);
 		
 		rcEventTrack.add(rcEvent5);
 		rcEventTrack.add(rcEvent3);

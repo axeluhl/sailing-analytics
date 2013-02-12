@@ -17,9 +17,9 @@ import android.widget.ListView;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
+import com.sap.sailing.domain.racelog.RaceLogRaceStatus;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
-import com.sap.sailing.racecommittee.app.domain.RaceStatus;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.ui.activities.RacingActivity;
 import com.sap.sailing.racecommittee.app.ui.adapters.racelist.BoatClassSeriesDataFleet;
@@ -98,7 +98,7 @@ public class ManagedRaceListFragment extends ListFragment implements JuryFlagCli
 	
 	private void initListElements(boolean clearFirst) {
 	
-		HashMap<Serializable, RaceStatus> savedStates = new HashMap<Serializable, RaceStatus>();
+		HashMap<Serializable, RaceLogRaceStatus> savedStates = new HashMap<Serializable, RaceLogRaceStatus>();
 		if (clearFirst) {
 			// we have to save the previous states of the elements
 			for (RaceListDataType r : raceDataTypeList) {

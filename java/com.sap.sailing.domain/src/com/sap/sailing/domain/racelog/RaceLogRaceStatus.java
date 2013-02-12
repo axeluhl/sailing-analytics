@@ -1,9 +1,9 @@
-package com.sap.sailing.racecommittee.app.domain;
+package com.sap.sailing.domain.racelog;
 
 /**
 * @author D053502
 *
 */
-public enum RaceStatus {
+public enum RaceLogRaceStatus {
 	UNKNOWN, UNSCHEDULED, SCHEDULED, STARTPHASE, RUNNING, FINISHED
 }

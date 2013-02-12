@@ -18,6 +18,7 @@ import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEventFactory;
+import com.sap.sailing.domain.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.test.AbstractTracTracLiveTest;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
@@ -89,7 +90,7 @@ public class TestStoringAndRetrievingRaceLogsTest extends AbstractTracTracLiveTe
         TimePoint timePointStartTime = new MillisecondsTimePoint(timePoint.asMillis() + 60000);
         TimePoint initialTimePointStartTime = timePointStartTime;
         for (int passId = 0; passId < 100; passId++) {
-        	raceLog.add(RaceLogEventFactory.INSTANCE.createStartTimeEvent(timePoint, passId, timePointStartTime));
+        	raceLog.add(RaceLogEventFactory.INSTANCE.createStartTimeEvent(timePoint, passId, RaceLogRaceStatus.SCHEDULED, timePointStartTime));
             timePoint = new MillisecondsTimePoint(timePoint.asMillis() + 100);
             timePointStartTime = new MillisecondsTimePoint(timePointStartTime.asMillis() + 100);
         }
