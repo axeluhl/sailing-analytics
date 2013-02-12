@@ -10,6 +10,8 @@ import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 
 public class PolarDiagram49STG extends PolarDiagramBase {
 
+    private static final long serialVersionUID = 4446552127317400136L;
+
     // this constructor creates an instance with a hard-coded set of values
     public PolarDiagram49STG() {
 
@@ -28,7 +30,7 @@ public class PolarDiagram49STG extends PolarDiagramBase {
         beatAngles.put(new KnotSpeedImpl(16), new DegreeBearingImpl(45.6));
         beatAngles.put(new KnotSpeedImpl(20), new DegreeBearingImpl(47.0));
 
-        
+
         tableRow = new TreeMap<Bearing, Speed>(PolarDiagramBase.bearingComparator);
         tableRow.put(new DegreeBearingImpl(0), Speed.NULL);
         tableRow.put(new DegreeBearingImpl(cutAngle), Speed.NULL);
@@ -118,11 +120,13 @@ public class PolarDiagram49STG extends PolarDiagramBase {
 
         for (Speed s : speedTable.keySet()) {
 
-            if (beatAngles.containsKey(s) && !speedTable.get(s).containsKey(beatAngles.get(s)))
+            if (beatAngles.containsKey(s) && !speedTable.get(s).containsKey(beatAngles.get(s))) {
                 speedTable.get(s).put(beatAngles.get(s), beatSOG.get(s));
+            }
 
-            if (gybeAngles.containsKey(s) && !speedTable.get(s).containsKey(gybeAngles.get(s)))
+            if (gybeAngles.containsKey(s) && !speedTable.get(s).containsKey(gybeAngles.get(s))) {
                 speedTable.get(s).put(gybeAngles.get(s), gybeSOG.get(s));
+            }
 
         }
     }

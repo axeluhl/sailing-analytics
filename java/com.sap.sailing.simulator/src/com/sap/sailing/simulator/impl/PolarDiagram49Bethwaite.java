@@ -10,6 +10,8 @@ import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 
 public class PolarDiagram49Bethwaite extends PolarDiagramBase {
 
+    private static final long serialVersionUID = 7725011817087318654L;
+
     // this constructor creates an instance with a hard-coded set of values
     public PolarDiagram49Bethwaite() {
 
@@ -48,7 +50,7 @@ public class PolarDiagram49Bethwaite extends PolarDiagramBase {
         double cutAngle = 30.0;
         //double factor90 = 1.5;
         //double factor180 = 0.6;
-        
+
         tableRow = new TreeMap<Bearing, Speed>(PolarDiagramBase.bearingComparator);
         tableRow.put(new DegreeBearingImpl(0), Speed.NULL);
         tableRow.put(new DegreeBearingImpl(cutAngle), Speed.NULL);
@@ -68,7 +70,7 @@ public class PolarDiagram49Bethwaite extends PolarDiagramBase {
         tableRow.put(new DegreeBearingImpl(117.54), new KnotSpeedImpl(9.71));
         tableRow.put(new DegreeBearingImpl(136.10), new KnotSpeedImpl(12.21));
         tableRow.put(new DegreeBearingImpl(141.70), new KnotSpeedImpl(12.63));
-        tableRow.put(new DegreeBearingImpl(145.85), new KnotSpeedImpl(11.13));        
+        tableRow.put(new DegreeBearingImpl(145.85), new KnotSpeedImpl(11.13));
         tableRow.put(new DegreeBearingImpl(147.91), new KnotSpeedImpl(6.88));
         tableRow.put(new DegreeBearingImpl(180), new KnotSpeedImpl(5.56));
         //tableRow.put(new DegreeBearingImpl(90), new KnotSpeedImpl(factor90*beatSOG.get(new KnotSpeedImpl(6)).getKnots()));
@@ -155,11 +157,13 @@ public class PolarDiagram49Bethwaite extends PolarDiagramBase {
 
         for (Speed s : speedTable.keySet()) {
 
-            if (beatAngles.containsKey(s) && !speedTable.get(s).containsKey(beatAngles.get(s)))
+            if (beatAngles.containsKey(s) && !speedTable.get(s).containsKey(beatAngles.get(s))) {
                 speedTable.get(s).put(beatAngles.get(s), beatSOG.get(s));
+            }
 
-            if (gybeAngles.containsKey(s) && !speedTable.get(s).containsKey(gybeAngles.get(s)))
+            if (gybeAngles.containsKey(s) && !speedTable.get(s).containsKey(gybeAngles.get(s))) {
                 speedTable.get(s).put(gybeAngles.get(s), gybeSOG.get(s));
+            }
 
         }
 

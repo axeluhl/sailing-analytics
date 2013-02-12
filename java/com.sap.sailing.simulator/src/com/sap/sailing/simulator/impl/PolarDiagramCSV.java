@@ -19,6 +19,8 @@ import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 
 public class PolarDiagramCSV extends PolarDiagramBase {
 
+    private static final long serialVersionUID = -9219705955440602679L;
+
     public PolarDiagramCSV(String inputFile) throws IOException {
 
         ClassLoader cl = this.getClass().getClassLoader();
@@ -38,32 +40,38 @@ public class PolarDiagramCSV extends PolarDiagramBase {
         while (true) {
 
             line = bfr.readLine();
-            if (line == null)
+            if (line == null) {
                 break;
+            }
             elements = line.split(",");
             elements[0] = elements[0].replace(" ", "");
             elements[0] = elements[0].toLowerCase();
 
             switch (elements[0]) {
             case "windvelocity":
-                for (int i = 1; i < elements.length; i++)
+                for (int i = 1; i < elements.length; i++) {
                     velocities.add(new KnotSpeedImpl(new Double(elements[i])));
+                }
                 break;
             case "beatangles":
-                for (int i = 1; i < elements.length; i++)
+                for (int i = 1; i < elements.length; i++) {
                     beatAngles.add(new DegreeBearingImpl(new Double(elements[i])));
+                }
                 break;
             case "beatsog":
-                for (int i = 1; i < elements.length; i++)
+                for (int i = 1; i < elements.length; i++) {
                     beatVMG.add(new KnotSpeedImpl(new Double(elements[i])));
+                }
                 break;
             case "runsog":
-                for (int i = 1; i < elements.length; i++)
+                for (int i = 1; i < elements.length; i++) {
                     runVMG.add(new KnotSpeedImpl(new Double(elements[i])));
+                }
                 break;
             case "gybeangles":
-                for (int i = 1; i < elements.length; i++)
+                for (int i = 1; i < elements.length; i++) {
                     gybeAngles.add(new DegreeBearingImpl(new Double(elements[i])));
+                }
                 break;
             default:
                 List<Speed> sp = new ArrayList<Speed>();
@@ -98,8 +106,9 @@ public class PolarDiagramCSV extends PolarDiagramBase {
             speedTableLine = new TreeMap<Bearing, Speed>(bearingComparator);
 
             for (Entry<Bearing, List<Speed>> entry : speeds.entrySet()) {
-                if (index >= entry.getValue().size())
+                if (index >= entry.getValue().size()) {
                     continue;
+                }
 
                 speed = entry.getValue().get(index);
 
@@ -125,11 +134,13 @@ public class PolarDiagramCSV extends PolarDiagramBase {
 
         for (Speed s : super.speedTable.keySet()) {
 
-            if (super.beatAngles.containsKey(s) && !super.speedTable.get(s).containsKey(super.beatAngles.get(s)))
+            if (super.beatAngles.containsKey(s) && !super.speedTable.get(s).containsKey(super.beatAngles.get(s))) {
                 super.speedTable.get(s).put(super.beatAngles.get(s), super.beatSOG.get(s));
+            }
 
-            if (super.gybeAngles.containsKey(s) && !super.speedTable.get(s).containsKey(super.gybeAngles.get(s)))
+            if (super.gybeAngles.containsKey(s) && !super.speedTable.get(s).containsKey(super.gybeAngles.get(s))) {
                 super.speedTable.get(s).put(super.gybeAngles.get(s), super.gybeSOG.get(s));
+            }
 
         }
 
