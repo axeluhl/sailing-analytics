@@ -6,10 +6,27 @@ import com.sap.sailing.domain.racelog.RaceLog;
 
 public interface ManagedRace extends ManagedRaceIdentifier, Named, WithID {
 	
+	/**
+	 * @return the identifier of the race.
+	 */
 	public ManagedRaceIdentifier getIdentifier();
-
-	public RaceStatus getStatus();
 	
+
+	/**
+	 * @return the state of the race.
+	 */
+	public ManagedRaceState getState();
+
+	/**
+	 * Shortcut to {@link ManagedRaceState#getRaceLog()} of {@link ManagedRace#getState()}.
+	 * @return the log of the race.
+	 */
 	public RaceLog getRaceLog();
+	
+	/**
+	 * Shortcut to {@link ManagedRaceState#getStatus()} of {@link ManagedRace#getState()}.
+	 * @return the status of the race's state.
+	 */
+	public RaceStatus getStatus();
 	
 }

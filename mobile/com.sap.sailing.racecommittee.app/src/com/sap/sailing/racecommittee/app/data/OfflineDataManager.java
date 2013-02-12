@@ -10,6 +10,7 @@ import com.sap.sailing.domain.base.impl.BoatClassImpl;
 import com.sap.sailing.domain.base.impl.CourseAreaImpl;
 import com.sap.sailing.domain.base.impl.EventImpl;
 import com.sap.sailing.domain.base.impl.FleetImpl;
+import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.RaceGroup;
@@ -49,27 +50,29 @@ public class OfflineDataManager extends DataManager {
 				null,
 				Arrays.asList(qualifying, medal));
 		
+		RaceLog log = null;
+		
 		ManagedRace q1 = new ManagedRaceImpl(
 				new ManagedRaceIdentifierImpl(
 						"Q1", 
 						new FleetImpl("Default"), 
 						qualifying, 
 						raceGroup), 
-				null);
+					log);
 		ManagedRace q2 = new ManagedRaceImpl(
 				new ManagedRaceIdentifierImpl(
 						"Q2", 
 						new FleetImpl("Default"), 
 						qualifying, 
 						raceGroup), 
-				null);
+					log);
 		ManagedRace q3 = new ManagedRaceImpl(
 				new ManagedRaceIdentifierImpl(
 						"Q3", 
 						new FleetImpl("Default"), 
 						qualifying, 
 						raceGroup), 
-				null);
+					log);
 		/*ManagedRace m1 = new ManagedRaceImpl(
 				new ManagedRaceIdentifierImpl(
 						"M1", 

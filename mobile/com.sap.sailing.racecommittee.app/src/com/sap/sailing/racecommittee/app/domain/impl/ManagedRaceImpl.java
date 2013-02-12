@@ -7,6 +7,7 @@ import com.sap.sailing.domain.base.SeriesData;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.ManagedRaceIdentifier;
+import com.sap.sailing.racecommittee.app.domain.ManagedRaceState;
 import com.sap.sailing.racecommittee.app.domain.RaceGroup;
 import com.sap.sailing.racecommittee.app.domain.RaceStatus;
 
@@ -14,21 +15,23 @@ public class ManagedRaceImpl implements ManagedRace {
 	private static final long serialVersionUID = -4936566684992524001L;
 	
 	//private static final String TAG = ManagedRace.class.getName();
-
-	private ManagedRaceIdentifier identifier;
-	private RaceLog raceLog;
+	
+	private ManagedRaceIdentifier identifier;	
+	private ManagedRaceState state;
 	
 	public ManagedRaceImpl(ManagedRaceIdentifier identifier, RaceLog raceLog) {
+		this(identifier, new ManagedRaceStateImpl(raceLog));
+	}
+	
+	public ManagedRaceImpl(
+			ManagedRaceIdentifier identifier,
+			ManagedRaceState state) {
 		this.identifier = identifier;
-		this.raceLog = raceLog;
+		this.state = state;
 	}
 
 	public Serializable getId() {
 		return identifier.getId();
-	}
-
-	public RaceLog getRaceLog() {
-		return raceLog;
 	}
 
 	public String getName() {
@@ -55,8 +58,16 @@ public class ManagedRaceImpl implements ManagedRace {
 		return identifier;
 	}
 
+	public ManagedRaceState getState() {
+		return state;
+	}
+
+	public RaceLog getRaceLog() {
+		return state.getRaceLog();
+	}
+	
 	public RaceStatus getStatus() {
-		return RaceStatus.UNKNOWN;
+		return state.getStatus();
 	}
 
 }
