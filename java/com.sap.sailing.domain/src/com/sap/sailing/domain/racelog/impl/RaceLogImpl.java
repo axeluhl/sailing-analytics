@@ -28,14 +28,18 @@ public class RaceLogImpl extends TrackImpl<RaceLogEvent> implements RaceLog {
 	}
 
 	@Override
-	public void add(RaceLogEvent event) {
+	public boolean add(RaceLogEvent event) {
+		boolean isAdded = false;
 		lockForWrite();
         try {
-            getInternalRawFixes().add(event);
+            isAdded = getInternalRawFixes().add(event);
         } finally {
             unlockAfterWrite();
         }
-        notifyListenersAboutReceive(event);
+        if (isAdded) {
+        	notifyListenersAboutReceive(event);
+        }
+        return isAdded;
 	}
 	
 	private void notifyListenersAboutReceive(RaceLogEvent event) {

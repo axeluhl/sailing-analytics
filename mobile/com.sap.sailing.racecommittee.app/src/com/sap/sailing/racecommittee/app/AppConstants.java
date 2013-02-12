@@ -9,7 +9,7 @@ import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.SetTimeRaceFragme
 
 public class AppConstants {
 	
-	public static final boolean IS_DATA_OFFLINE = false;
+	public static final boolean IS_DATA_OFFLINE = true;
 	
 	public final static String ApplicationVersion = "2.0 Beta 1 - Jumbotron";
 	

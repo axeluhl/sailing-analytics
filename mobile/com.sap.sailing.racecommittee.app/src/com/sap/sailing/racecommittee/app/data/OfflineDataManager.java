@@ -3,6 +3,7 @@ package com.sap.sailing.racecommittee.app.data;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Date;
 
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Event;
@@ -10,7 +11,11 @@ import com.sap.sailing.domain.base.impl.BoatClassImpl;
 import com.sap.sailing.domain.base.impl.CourseAreaImpl;
 import com.sap.sailing.domain.base.impl.EventImpl;
 import com.sap.sailing.domain.base.impl.FleetImpl;
+import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.racelog.RaceLog;
+import com.sap.sailing.domain.racelog.RaceLogEventFactory;
+import com.sap.sailing.domain.racelog.RaceLogRaceStatus;
+import com.sap.sailing.domain.racelog.impl.RaceLogEventFactoryImpl;
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.RaceGroup;
@@ -19,6 +24,7 @@ import com.sap.sailing.racecommittee.app.domain.impl.ManagedRaceIdentifierImpl;
 import com.sap.sailing.racecommittee.app.domain.impl.ManagedRaceImpl;
 import com.sap.sailing.racecommittee.app.domain.impl.RaceGroupImpl;
 import com.sap.sailing.racecommittee.app.domain.impl.SeriesWithRowsImpl;
+import com.sap.sailing.racecommittee.app.domain.racelog.impl.PassAwareRaceLog;
 
 public class OfflineDataManager extends DataManager {
 	
@@ -50,7 +56,13 @@ public class OfflineDataManager extends DataManager {
 				null,
 				Arrays.asList(qualifying, medal));
 		
-		RaceLog log = null;
+		RaceLogEventFactory factory = new RaceLogEventFactoryImpl();
+		RaceLog log = new PassAwareRaceLog();
+		log.add(factory.createStartTimeEvent(
+				new MillisecondsTimePoint(new Date()), 
+				1,
+				RaceLogRaceStatus.SCHEDULED, 
+				new MillisecondsTimePoint(new Date().getTime() + 100000)));
 		
 		ManagedRace q1 = new ManagedRaceImpl(
 				new ManagedRaceIdentifierImpl(
@@ -59,6 +71,18 @@ public class OfflineDataManager extends DataManager {
 						qualifying, 
 						raceGroup), 
 					log);
+		
+		log = new PassAwareRaceLog();
+		log.add(factory.createStartTimeEvent(
+				new MillisecondsTimePoint(new Date()), 
+				1,
+				RaceLogRaceStatus.SCHEDULED, 
+				new MillisecondsTimePoint(new Date().getTime() + 100000)));
+		log.add(factory.createRaceStatusEvent(
+				new MillisecondsTimePoint(new Date()), 
+				2,
+				RaceLogRaceStatus.RUNNING));
+		
 		ManagedRace q2 = new ManagedRaceImpl(
 				new ManagedRaceIdentifierImpl(
 						"Q2", 
@@ -66,6 +90,12 @@ public class OfflineDataManager extends DataManager {
 						qualifying, 
 						raceGroup), 
 					log);
+		
+		log = new PassAwareRaceLog();
+		log.add(factory.createRaceStatusEvent(
+				new MillisecondsTimePoint(new Date()), 
+				5,
+				RaceLogRaceStatus.FINISHED));
 		ManagedRace q3 = new ManagedRaceImpl(
 				new ManagedRaceIdentifierImpl(
 						"Q3", 
