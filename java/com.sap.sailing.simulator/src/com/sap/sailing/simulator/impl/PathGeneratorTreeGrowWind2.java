@@ -274,26 +274,22 @@ public class PathGeneratorTreeGrowWind2 extends PathGeneratorBase {
     List<PathCand> rightPaths = new ArrayList<PathCand>();
     for(PathCand curPath : oldPaths) {
 
-        if ((curPath.vrt > tgtHeight)) {
-            continue;
-        } else {
-            newPathCands = this.getPathCandsBeatWind(curPath, timeStep, turnLoss, posStart, posEnd, tgtHeight);
-            for(PathCand curNewPath : newPathCands) {
-                // check whether path is *outside* regatta-area
-                double distFromMiddleMeters = posMiddle.getDistance(curPath.pos.getPosition()).getMeters();
-                if (distFromMiddleMeters > oobFact*tgtHeight) {
-                    continue; // ignore curPath
-                }
-
-                if (curNewPath.sid == 'L') {
-                    leftPaths.add(curNewPath);
-                } else if (curNewPath.sid == 'R') {
-                    rightPaths.add(curNewPath);
-                }
-                
+        newPathCands = this.getPathCandsBeatWind(curPath, timeStep, turnLoss, posStart, posEnd, tgtHeight);
+        for (PathCand curNewPath : newPathCands) {
+            // check whether path is *outside* regatta-area
+            double distFromMiddleMeters = posMiddle.getDistance(curPath.pos.getPosition()).getMeters();
+            if (distFromMiddleMeters > oobFact * tgtHeight) {
+                continue; // ignore curPath
             }
+
+            if (curNewPath.sid == 'L') {
+                leftPaths.add(curNewPath);
+            } else if (curNewPath.sid == 'R') {
+                rightPaths.add(curNewPath);
+            }
+
         }
-        
+
     }
     
     Pair<List<PathCand>,List<PathCand>> newPaths = new Pair<List<PathCand>,List<PathCand>>(leftPaths, rightPaths);
