@@ -2,17 +2,13 @@ package com.sap.sailing.racecommittee.app.domain.racelog.impl;
 
 import java.util.NavigableSet;
 
-import com.sap.sailing.domain.base.Timed;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
-import com.sap.sailing.domain.racelog.RaceLogListener;
-import com.sap.sailing.domain.racelog.impl.RaceLogEventComparator;
+import com.sap.sailing.domain.racelog.impl.RaceLogImpl;
 import com.sap.sailing.domain.tracking.impl.PartialNavigableSetView;
-import com.sap.sailing.domain.tracking.impl.TrackImpl;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
-import com.sap.sailing.util.impl.ArrayListNavigableSet;
 
-public class PassAwareRaceLog extends TrackImpl<RaceLogEvent> implements RaceLog {
+public class PassAwareRaceLog extends RaceLogImpl implements RaceLog {
 	private static final String TAG = PassAwareRaceLog.class.getName();
 	private static final long serialVersionUID = -1252381252528365834L;
 	private static final String ReadWriteLockName =  PassAwareRaceLog.class.getName() + ".lock";
@@ -26,12 +22,8 @@ public class PassAwareRaceLog extends TrackImpl<RaceLogEvent> implements RaceLog
 	}
 
 	public PassAwareRaceLog(int currentPassId) {
-		super(new ArrayListNavigableSet<Timed>(RaceLogEventComparator.INSTANCE), ReadWriteLockName);
+		super(ReadWriteLockName);
 		this.currentPassId = currentPassId;
-	}
-	
-	protected PassAwareRaceLog(NavigableSet<Timed> fixes) {
-		super(fixes, ReadWriteLockName);
 	}
 	
 	public int getCurrentPassId() {
@@ -63,21 +55,12 @@ public class PassAwareRaceLog extends TrackImpl<RaceLogEvent> implements RaceLog
         };
 	}
 	
+	@Override
 	public boolean add(RaceLogEvent event) {
-		lockForWrite();
-		try {
-			if (getInternalRawFixes().add(event)) {
-				setCurrentPassId(Math.max(event.getPassId(), this.currentPassId));
-				return true;
-			}
-			return false;
-		} finally {
-			unlockAfterWrite();
+		if (super.add(event)) {
+			setCurrentPassId(Math.max(event.getPassId(), this.currentPassId));
+			return true;
 		}
+		return false;
 	}
-
-	public void addListener(RaceLogListener newListener) {
-		/// TODO: do we need this?
-	}
-
 }

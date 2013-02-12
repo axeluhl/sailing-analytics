@@ -2,12 +2,15 @@ package com.sap.sailing.racecommittee.app.domain.state.impl;
 
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
+import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
+import com.sap.sailing.domain.racelog.RaceLogListener;
 import com.sap.sailing.domain.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.racelog.RaceLogRaceStatusEvent;
+import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
 import com.sap.sailing.racecommittee.app.domain.state.ManagedRaceState;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 
-public class ManagedRaceStateImpl implements ManagedRaceState {
+public class ManagedRaceStateImpl implements ManagedRaceState, RaceLogListener {
 private static final String TAG = ManagedRaceStateImpl.class.getName();
 	
 	protected RaceLogRaceStatus status;
@@ -15,6 +18,7 @@ private static final String TAG = ManagedRaceStateImpl.class.getName();
 	
 	public ManagedRaceStateImpl(RaceLog raceLog) {
 		this.raceLog = raceLog;
+		this.raceLog.addListener(this);
 		this.status = RaceLogRaceStatus.UNKNOWN;
 		
 		updateStatus();
@@ -49,6 +53,18 @@ private static final String TAG = ManagedRaceStateImpl.class.getName();
 		setStatus(newStatus);
 		
 		return getStatus();
+	}
+
+	public void eventReceived(RaceLogEvent event) {
+		updateStatus();
+	}
+
+	public void flagEventReceived(RaceLogFlagEvent flagEvent) {
+		// we're just interested in the generic function
+	}
+
+	public void startTimeEventReceived(RaceLogStartTimeEvent startTimeEvent) {
+		// we're just interested in the generic function
 	}
 
 }
