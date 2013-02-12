@@ -15,7 +15,7 @@ import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
-import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.DialogFragmentHost;
+import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.DialogFragmentButtonListener;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.LoginDialog;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.CourseAreaListFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.EventListFragment;
@@ -24,7 +24,7 @@ import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.EventSelec
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.ItemSelectedListener;
 
 public class LoginActivity extends TwoPaneActivity 
-	implements EventSelectedListenerHost, CourseAreaSelectedListenerHost, DialogFragmentHost  {
+	implements EventSelectedListenerHost, CourseAreaSelectedListenerHost, DialogFragmentButtonListener  {
 	private final static String TAG = LoginActivity.class.getName();
 	
 	private LoginDialog loginDialog;
@@ -106,7 +106,7 @@ public class LoginActivity extends TwoPaneActivity
 	
 	private void selectCourseArea(CourseArea courseArea) {
 		selectedCourse = courseArea;
-		loginDialog.show(getFragmentManager(), null);
+		loginDialog.show(getFragmentManager(), "LoginDialog");
 	}
 
 	public void onDialogNegativeButton() { /* nothing here... */ }

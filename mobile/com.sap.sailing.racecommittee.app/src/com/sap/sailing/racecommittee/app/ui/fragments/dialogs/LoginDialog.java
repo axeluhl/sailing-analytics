@@ -8,7 +8,7 @@ import android.os.Bundle;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 
-public class LoginDialog extends BaseDialogFragment {
+public class LoginDialog extends ActivityDialogFragment {
 
 	private static final LoginType DefaultLoginType = LoginType.OFFICER;
 	public enum LoginType {

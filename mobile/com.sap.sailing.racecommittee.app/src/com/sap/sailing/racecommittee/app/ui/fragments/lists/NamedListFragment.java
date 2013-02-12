@@ -5,10 +5,8 @@ import java.util.Collection;
 import java.util.Collections;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.ListFragment;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,9 +21,13 @@ import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 import com.sap.sailing.racecommittee.app.ui.adapters.NamedArrayAdapter;
 import com.sap.sailing.racecommittee.app.ui.comparators.NamedComparator;
+import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.DialogFragmentButtonListener;
+import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.FragmentDialogFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.LoadFailedDialog;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.ItemSelectedListener;
 
-public abstract class NamedListFragment<T extends Named> extends ListFragment implements LoadClient<Collection<T>> {
+public abstract class NamedListFragment<T extends Named> extends ListFragment implements 
+	LoadClient<Collection<T>>, DialogFragmentButtonListener {
 	private ItemSelectedListener<T> listener;
 	private NamedArrayAdapter<T> listAdapter;
 	private ReadonlyDataManager dataManager;
@@ -112,22 +114,14 @@ public abstract class NamedListFragment<T extends Named> extends ListFragment im
 	}
 	
 	private void showLoadFailedDialog(String message) {
-		AlertDialog.Builder builder = new AlertDialog.Builder(getActivity()); 
-		builder.setMessage(String.format("There was an error loading the requested data:\n%s\nDo you want to retry?", message))
-			   .setTitle("Load failure")
-			   .setIcon(R.drawable.ic_dialog_alert_holo_light)
-		       .setCancelable(true) 
-		       .setPositiveButton("Retry", new DialogInterface.OnClickListener() { 
-		           public void onClick(DialogInterface dialog, int id) { 
-		        	   loadItems();
-		           } 
-		       }) 
-		       .setNegativeButton("Cancel", new DialogInterface.OnClickListener() { 
-		           public void onClick(DialogInterface dialog, int id) { 
-		        	   dialog.cancel(); 
-		           } 
-		       }); 
-		AlertDialog alert = builder.create(); 
-		alert.show(); 
+		FragmentDialogFragment dialog = LoadFailedDialog.create(message);
+		dialog.setTargetFragment(this, 0);
+		dialog.show(getFragmentManager(), "failedDialog");
+	}
+	
+	public void onDialogNegativeButton() { }
+	
+	public void onDialogPositiveButton() {
+		loadItems();
 	}
 }

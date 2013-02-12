@@ -44,6 +44,9 @@ public abstract class HttpRequest {
 				"Executing HTTP request %s on %s",
 				connection.getRequestMethod(),
 				connection.getURL()));
+		
+		connection.setConnectTimeout(2000);
+		
 		try {
 			InputStream stream =  execute(connection);
 			validateHttpResponse(connection);

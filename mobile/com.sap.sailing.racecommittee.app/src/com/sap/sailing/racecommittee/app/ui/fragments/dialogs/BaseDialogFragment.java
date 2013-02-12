@@ -1,6 +1,7 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.dialogs;
 
-import android.app.Activity;
+import com.sap.sailing.racecommittee.app.logging.ExLog;
+
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.app.Dialog;
@@ -9,8 +10,6 @@ import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.os.Bundle;
 
-import com.sap.sailing.racecommittee.app.logging.ExLog;
-
 public abstract class BaseDialogFragment extends DialogFragment {
 	private final static String TAG = BaseDialogFragment.class.getName();
 	
@@ -18,17 +17,7 @@ public abstract class BaseDialogFragment extends DialogFragment {
 	protected abstract CharSequence getPositiveButtonLabel();
 	protected abstract Builder createDialog(AlertDialog.Builder builder);
 	
-	private DialogFragmentHost host;
-	
-	@Override
-	public void onAttach(Activity activity) {
-		super.onAttach(activity);
-		if (activity instanceof DialogFragmentHost) {
-			this.host = (DialogFragmentHost) activity;
-		} else {
-			ExLog.e(TAG, "Tried to attach tialog fragment to a non-host activity.");
-		}
-	}
+	protected abstract DialogFragmentButtonListener getHost();
 	
 	@Override
 	public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -47,14 +36,18 @@ public abstract class BaseDialogFragment extends DialogFragment {
 	}
 	
 	protected void onNegativeButton() {
-		if (host != null) {
-			host.onDialogNegativeButton();
+		if (getHost() != null) {
+			getHost().onDialogNegativeButton();
+		} else {
+			ExLog.w(TAG, "Dialog host was null.");
 		}
 	}
 
 	protected void onPositiveButton() {
-		if (this.host != null) {
-			host.onDialogPositiveButton();
+		if (getHost() != null) {
+			getHost().onDialogPositiveButton();
+		} else {
+			ExLog.w(TAG, "Dialog host was null.");
 		}
 	}
 
