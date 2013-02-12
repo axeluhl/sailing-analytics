@@ -2,4 +2,4 @@
 
 Project Candidates
 [[Trim Database|wiki/planning/TrimDatabase]]
-[[wiki/planning/ORC]]
+[[ORC|wiki/planning/ORC]]
