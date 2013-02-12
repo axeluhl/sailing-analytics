@@ -71,7 +71,7 @@ public class SailingSimulatorImpl implements SailingSimulator {
     public void setSimulationParameters(final SimulationParameters params) {
         this.simulationParameters = params;
     }
- 
+
     @Override
     public SimulationParameters getSimulationParameters() {
         return this.simulationParameters;
@@ -282,7 +282,7 @@ public class SailingSimulatorImpl implements SailingSimulator {
         return result;
     }
 
-    private static String getPathPrefix() throws ClassNotFoundException {
+    public static String getPathPrefix() throws ClassNotFoundException {
         if (SailingSimulatorImpl.PATH_PREFIX == null || SailingSimulatorImpl.PATH_PREFIX.length() == 0
                 || SailingSimulatorImpl.PATH_PREFIX.equals("")) {
             SailingSimulatorImpl.PATH_PREFIX = SailingSimulatorImpl.computePathPrefix();
