@@ -20,6 +20,7 @@ import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
 import com.sap.sailing.server.gateway.deserialization.impl.RaceLogCourseAreaChangedEventDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.RaceLogEventDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.RaceLogFlagEventDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.RaceLogRaceStatusEventDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.RaceLogStartTimeEventDeserializer;
 import com.sap.sailing.server.gateway.impl.JsonExportServlet;
 
@@ -76,7 +77,8 @@ public class AddToRaceLogJsonExportServlet extends JsonExportServlet {
 		JsonDeserializer<RaceLogEvent> deserializer = 
 			     new RaceLogEventDeserializer(
 			       new RaceLogFlagEventDeserializer(), 
-			       new RaceLogStartTimeEventDeserializer(), 
+			       new RaceLogStartTimeEventDeserializer(),
+			       new RaceLogRaceStatusEventDeserializer(),
 			       new RaceLogCourseAreaChangedEventDeserializer());
 		
 		try {
