@@ -19,6 +19,7 @@ public interface DataStore {
 	public boolean hasCourseArea(Serializable id);
 	public void addCourseArea(Event event, CourseArea courseArea);
 	
+	public Collection<ManagedRace> getRaces();
 	public void addRace(ManagedRace race);
 	public ManagedRace getRace(Serializable id);
 	public boolean hasRace(Serializable id);

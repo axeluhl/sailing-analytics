@@ -9,6 +9,8 @@ import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.SetTimeRaceFragme
 
 public class AppConstants {
 	
+	public static final boolean IS_DATA_OFFLINE = false;
+	
 	public final static String ApplicationVersion = "2.0 Beta 1 - Jumbotron";
 	
 	// Communication between the Connectivity watcher and the event sender
@@ -31,8 +33,6 @@ public class AppConstants {
 	// Login activity
 	public final static String EventIdTag = "EventId";
 	
-	public static int CONNECTION_TIMEOUT = 10000;
-	
 	private final static String PREFERENCE_SERVICE_URL = "webserviceUrlPref";
 	private final static String PREFERENCE_SENDING_ACTIVE = "sendingActivePref";
 	private final static String PREFERENCE_RACE_FINISHING_TIME_FRAME = "edittextRaceTimeFrameAfterFinish";
@@ -40,6 +40,8 @@ public class AppConstants {
 	public static final String RESET_TIME_FRAGMENT_IS_RESET = SetTimeRaceFragment.class.getName() + ".isReset";
 	
 	public static final int DefaultStartTimeMinuteOffset = 10;
+
+	
 	
 	
 	public static String getURL(Context context) {

@@ -54,7 +54,6 @@ StartModeSelectionListener, PathfinderSelectionListener, GateLineOpeningTimeSele
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		
 		dataManager = DataManager.create(this);
 
 		getWindow().requestFeature(Window.FEATURE_INDETERMINATE_PROGRESS);

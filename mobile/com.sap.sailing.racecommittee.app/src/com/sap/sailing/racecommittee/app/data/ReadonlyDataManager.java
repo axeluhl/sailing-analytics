@@ -9,6 +9,7 @@ import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 
 public interface ReadonlyDataManager {
+	
 	public DataStore getDataStore();
 	
 	public void loadEvents(LoadClient<Collection<Event>> client);

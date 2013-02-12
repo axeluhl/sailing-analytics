@@ -99,6 +99,10 @@ public enum InMemoryDataStore implements DataStore {
 	 * * * * * * *  *
 	 */
 
+	public Collection<ManagedRace> getRaces() {
+		return managedRaceById.values();
+	}
+
 	public void addRace(ManagedRace race) {
 		managedRaceById.put(race.getId(), race);
 	}

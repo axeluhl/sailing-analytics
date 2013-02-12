@@ -2,12 +2,8 @@ package com.sap.sailing.racecommittee.app.ui.activities;
 
 import java.io.Serializable;
 
-import android.app.AlertDialog;
-import android.app.Dialog;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
-import android.content.DialogInterface;
-import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -19,27 +15,25 @@ import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
+import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.DialogFragmentHost;
+import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.LoginDialog;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.CourseAreaListFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.EventListFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.CourseAreaSelectedListenerHost;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.EventSelectedListenerHost;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.ItemSelectedListener;
 
-public class LoginActivity extends TwoPaneActivity implements EventSelectedListenerHost, CourseAreaSelectedListenerHost  {
-	
+public class LoginActivity extends TwoPaneActivity 
+	implements EventSelectedListenerHost, CourseAreaSelectedListenerHost, DialogFragmentHost  {
 	private final static String TAG = LoginActivity.class.getName();
 	
-	private enum LoginType {
-		OFFICER, VIEWER;
+	private LoginDialog loginDialog;
+	private CourseArea selectedCourse;
+	
+	public LoginActivity() {
+		this.loginDialog = new LoginDialog();
+		this.selectedCourse = null;
 	}
-	
-	private static final LoginType defaultLoginType = LoginType.OFFICER;
-	
-	private static final int DIALOG_LOGIN_TYPE = 1;
-	
-	private CharSequence[] loginTypeDescriptions;
-	private LoginType selectedLoginType = defaultLoginType;
-	private CourseArea selectedCourse = null;
 	
     /** Called when the activity is first created. */
     @Override
@@ -48,69 +42,15 @@ public class LoginActivity extends TwoPaneActivity implements EventSelectedListe
 				
 		getWindow().requestFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
         setContentView(R.layout.login_view);
-        setProgressBarIndeterminateVisibility(false);      
-        
-        loginTypeDescriptions = new CharSequence[2];
-		loginTypeDescriptions[0] = getString(R.string.login_type_officer);
-		loginTypeDescriptions[1] = getString(R.string.login_type_viewer);
+        setProgressBarIndeterminateVisibility(false);
         
         // on first create add event list fragment
         if (savedInstanceState == null) {
         	addEventListFragment();
         }
     }
-    
-    @Override
-    protected void onPause() {
-    	super.onPause();
-    	try {
-    		this.dismissDialog(DIALOG_LOGIN_TYPE);
-    	} catch (IllegalArgumentException e) {
-    		// occurs when dialog was never shown
-    	}
-    }
-
-    protected Dialog onCreateDialog(int id) {
-		switch (id) {
-		case DIALOG_LOGIN_TYPE:
-			return createLoginTypeDialog();
-		default:
-			return null;
-		}
-	};
 	
-	private Dialog createLoginTypeDialog() {
-		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setTitle("Choose view mode");
-		builder.setIcon(R.drawable.ic_menu_login);
-		builder.setSingleChoiceItems(loginTypeDescriptions, 0, new OnClickListener() {
-			public void onClick(DialogInterface dialog, int which) {
-				switch (which) {
-				case 0:
-					selectedLoginType = LoginType.OFFICER;
-					break;
-				case 1:
-					selectedLoginType = LoginType.VIEWER;
-					break;
-				default:
-					throw new IllegalStateException("Unknown login type selected.");
-				}
-			}
-		});
-		builder.setNegativeButton("Cancel", new OnClickListener() {
-			public void onClick(DialogInterface dialog, int which) {
-				selectedLoginType = defaultLoginType;
-				ExLog.i(ExLog.LOGIN_BUTTON_NEGATIVE, String.valueOf(selectedLoginType), getBaseContext());
-			}
-		});
-		builder.setPositiveButton("Login", new OnClickListener() {
-			public void onClick(DialogInterface dialog, int which) {
-				ExLog.i(ExLog.LOGIN_BUTTON_POSITIVE, String.valueOf(selectedLoginType), getBaseContext());
-				startRaceActivity(selectedCourse);
-			}
-		});
-		return builder.create();
-	}
+	//Login -> startRaceActivity(selectedCourse);
 
 	private void addEventListFragment() {	
 		FragmentTransaction transaction = getFragmentManager().beginTransaction();
@@ -166,12 +106,13 @@ public class LoginActivity extends TwoPaneActivity implements EventSelectedListe
 	
 	private void selectCourseArea(CourseArea courseArea) {
 		selectedCourse = courseArea;
-		showDialog(DIALOG_LOGIN_TYPE);
+		loginDialog.show(getFragmentManager(), null);
 	}
-	
-	private void startRaceActivity(CourseArea courseArea) {
-		
-		switch (selectedLoginType) {
+
+	public void onDialogNegativeButton() { /* nothing here... */ }
+
+	public void onDialogPositiveButton() {
+		switch (loginDialog.getSelectedLoginType()) {
 		case OFFICER:
 			ExLog.i(TAG, "Communication with backend is active.");
 			AppConstants.setSendingActive(this, true);
@@ -185,15 +126,15 @@ public class LoginActivity extends TwoPaneActivity implements EventSelectedListe
 			return;
 		}
 		
-		if (courseArea == null) {
+		if (selectedCourse == null) {
 			Toast.makeText(this, "The selected course was lost.", Toast.LENGTH_LONG).show();
 			ExLog.e(TAG, "Course reference was not set - cannot start racing activity.");
 			return;
 		}
 		
-		Toast.makeText(this, courseArea.getId().toString(), Toast.LENGTH_LONG).show();
+		Toast.makeText(this, selectedCourse.getId().toString(), Toast.LENGTH_LONG).show();
 		Intent message = new Intent(this, RacingActivity.class);
-		message.putExtra(AppConstants.COURSE_AREA_UUID_KEY, courseArea.getId());
+		message.putExtra(AppConstants.COURSE_AREA_UUID_KEY, selectedCourse.getId());
 		fadeActivity(message);
 	}
 

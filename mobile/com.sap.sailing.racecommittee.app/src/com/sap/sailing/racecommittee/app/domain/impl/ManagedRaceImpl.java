@@ -56,7 +56,7 @@ public class ManagedRaceImpl implements ManagedRace {
 	}
 
 	public RaceStatus getStatus() {
-		return RaceStatus.FINISHED;
+		return RaceStatus.UNKNOWN;
 	}
 
 }

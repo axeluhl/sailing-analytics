@@ -18,7 +18,7 @@ import android.widget.TextView;
 
 import com.sap.sailing.domain.common.Named;
 import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.data.DataManager;
+import com.sap.sailing.racecommittee.app.data.OnlineDataManager;
 import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 import com.sap.sailing.racecommittee.app.ui.adapters.NamedArrayAdapter;
@@ -65,7 +65,7 @@ public abstract class NamedListFragment<T extends Named> extends ListFragment im
 		this.setListAdapter(listAdapter);
 		
 		showProgressBar(true);
-		dataManager = DataManager.create(getActivity());
+		dataManager = OnlineDataManager.create(getActivity());
 	}
 	
 	@Override

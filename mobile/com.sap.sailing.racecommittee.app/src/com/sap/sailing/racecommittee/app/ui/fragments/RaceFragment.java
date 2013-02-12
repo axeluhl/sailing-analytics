@@ -3,7 +3,7 @@ package com.sap.sailing.racecommittee.app.ui.fragments;
 import java.io.Serializable;
 
 import com.sap.sailing.racecommittee.app.AppConstants;
-import com.sap.sailing.racecommittee.app.data.DataManager;
+import com.sap.sailing.racecommittee.app.data.OnlineDataManager;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 
 import android.app.Fragment;
@@ -24,7 +24,7 @@ public class RaceFragment extends Fragment {
 		super.onActivityCreated(savedInstanceState);
 		
 		Serializable raceId = getArguments().getSerializable(AppConstants.RACE_ID_KEY);
-		managedRace = DataManager.create(getActivity()).getDataStore().getRace(raceId);
+		managedRace = OnlineDataManager.create(getActivity()).getDataStore().getRace(raceId);
 		if (managedRace == null) {
 			throw new IllegalStateException(String.format("Unable to obtain ManagedRace from datastore on start of race fragment."));
 		}

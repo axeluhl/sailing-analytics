@@ -6,19 +6,20 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="213dp"
-        android:layout_weight="0.28"
+        android:layout_height="80dp"
+        android:layout_weight="0.2"
         android:orientation="vertical">
 
         <TextView
             android:id="@+id/textFinishedRace"
-            android:layout_width="fill_parent"
-            android:layout_height="0dp"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:ems="10"
+            android:gravity="center_vertical|center_horizontal"
             android:text="@string/race_finished_template"
             android:textSize="16pt"
-            android:textStyle="bold"
-            android:gravity="center_vertical|center_horizontal"
-            android:ems="10" />
+            android:textStyle="bold" />
+
     </LinearLayout>
     
     <LinearLayout
@@ -29,8 +30,8 @@
 
         <TextView
             android:id="@+id/textFinishedRaceStarted"
-            android:layout_width="fill_parent"
-            android:layout_height="0dp"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:text="@string/blank"
             android:textSize="14pt"
             android:gravity="center_vertical|center_horizontal"
@@ -45,8 +46,8 @@
 
         <TextView
             android:id="@+id/textFirstBoatFinished"
-            android:layout_width="fill_parent"
-            android:layout_height="0dp"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:text="@string/blank"
             android:textSize="14pt"
             android:gravity="center_vertical|center_horizontal"
@@ -61,8 +62,8 @@
 
         <TextView
             android:id="@+id/textFinishedRaceEnded"
-            android:layout_width="fill_parent"
-            android:layout_height="0dp"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:text="@string/blank"
             android:textSize="14pt"
             android:gravity="center_vertical|center_horizontal"
@@ -77,8 +78,8 @@
 
         <TextView
             android:id="@+id/textTimeLimit"
-            android:layout_width="fill_parent"
-            android:layout_height="0dp"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:text="@string/blank"
             android:textSize="14pt"
             android:gravity="center_vertical|center_horizontal"
@@ -93,21 +94,13 @@
 
         <TextView
             android:id="@+id/textProtestStartTime"
-            android:layout_width="fill_parent"
-            android:layout_height="0dp"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:text="@string/blank"
             android:textSize="14pt"
             android:gravity="center_vertical|center_horizontal"
             android:ems="10"
             android:visibility="invisible" />
     </LinearLayout>
-    
-    <FrameLayout
-        android:id="@+id/flagLayout"
-        android:layout_width="match_parent"
-        android:layout_height="213dp"
-        android:layout_weight="0.28"
-        android:orientation="horizontal" >
-    </FrameLayout>
 
 </LinearLayout>
