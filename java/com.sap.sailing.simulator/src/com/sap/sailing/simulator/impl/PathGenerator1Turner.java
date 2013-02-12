@@ -37,7 +37,7 @@ public class PathGenerator1Turner extends PathGeneratorBase {
     private long evalTimeStep;
     private int evalStepMax;
     private double evalTolerance;
-    
+
     public PathGenerator1Turner(SimulationParameters params) {
         simulationParameters = params;
     }
@@ -55,17 +55,150 @@ public class PathGenerator1Turner extends PathGeneratorBase {
         return this.result.middle;
     }
 
+    public TimedPositionWithSpeed get1Turner(WindFieldGenerator windField, PolarDiagram polarDiagram, Position start, Position end, TimePoint startTime,
+            boolean leftSide) {
+
+        long turnloss = polarDiagram.getTurnLoss(); // 4000;
+
+        Distance courseLength = start.getDistance(end);
+        Bearing bearStart2End = start.getBearingGreatCircle(end);
+        Position currentPosition = start;
+        TimePoint currentTime = startTime;
+        TimePoint nextTime;
+
+        double reachingTolerance;
+        if (this.evalTolerance == 0) {
+            reachingTolerance = 0.03;
+        } else {
+            reachingTolerance = this.evalTolerance;
+        }
+        int stepMax;
+        if (this.evalStepMax == 0) {
+            stepMax = 800;
+        } else {
+            stepMax = this.evalStepMax;
+        }
+        double[] reachTime = new double[stepMax];
+        boolean targetFound;
+        long timeStep;
+        if (this.evalTimeStep == 0) {
+            timeStep = 20000 / 3;
+        } else {
+            timeStep = this.evalTimeStep;
+        }
+        Bearing direction;
+
+        double newDistance;
+        double minimumDistance = courseLength.getMeters();
+        double overallMinimumDistance = courseLength.getMeters();
+        int stepOfOverallMinimumDistance = stepMax;
+        LinkedList<TimedPositionWithSpeed> path = null;
+
+        LinkedList<TimedPositionWithSpeed> allminpath = null;
+
+        for (int step = 0; step < stepMax; step++) {
+
+            currentPosition = start;
+            currentTime = startTime;
+            reachTime[step] = courseLength.getMeters();
+            targetFound = false;
+            minimumDistance = courseLength.getMeters();
+            path = new LinkedList<TimedPositionWithSpeed>();
+            path.addLast(new TimedPositionWithSpeedImpl(currentTime, currentPosition, null));
+
+            int stepLeft = 0;
+            while ((stepLeft < step) && (!targetFound)) {
+
+                SpeedWithBearing currentWind = windField.getWind(new TimedPositionImpl(currentTime, currentPosition));
+
+                polarDiagram.setWind(currentWind);
+                if (leftSide) {
+                    direction = polarDiagram.optimalDirectionsUpwind()[0];
+                } else {
+                    direction = polarDiagram.optimalDirectionsUpwind()[1];
+                }
+                SpeedWithBearing currSpeed = polarDiagram.getSpeedAtBearing(direction);
+
+                nextTime = new MillisecondsTimePoint(currentTime.asMillis() + timeStep);
+                Position nextPosition = currSpeed.travelTo(currentPosition, currentTime, nextTime);
+                newDistance = nextPosition.getDistance(end).getMeters();
+                if (newDistance < minimumDistance) {
+                    minimumDistance = newDistance;
+                }
+                currentPosition = nextPosition;
+                currentTime = nextTime;
+                path.addLast(new TimedPositionWithSpeedImpl(currentTime, currentPosition, null));
+
+                if (currentPosition.getDistance(end).getMeters() < reachingTolerance * courseLength.getMeters()) {
+                    reachTime[step] = minimumDistance;
+                    targetFound = true;
+                    if (minimumDistance < overallMinimumDistance) {
+                        overallMinimumDistance = minimumDistance;
+                        stepOfOverallMinimumDistance = step;
+                        allminpath = path;
+                    }
+                }
+                stepLeft++;
+            }
+
+            currentTime = new MillisecondsTimePoint(currentTime.asMillis() + turnloss);
+
+            int stepRight = 0;
+            while ((stepRight < (stepMax - step)) && (!targetFound)) {
+
+                SpeedWithBearing currentWind = windField.getWind(new TimedPositionImpl(currentTime, currentPosition));
+                polarDiagram.setWind(currentWind);
+                if (leftSide) {
+                    direction = polarDiagram.optimalDirectionsUpwind()[1];
+                } else {
+                    direction = polarDiagram.optimalDirectionsUpwind()[0];
+                }
+                SpeedWithBearing currSpeed = polarDiagram.getSpeedAtBearing(direction);
+                nextTime = new MillisecondsTimePoint(currentTime.asMillis() + timeStep);
+                Position nextPosition = currSpeed.travelTo(currentPosition, currentTime, nextTime);
+                newDistance = nextPosition.getDistance(end).getMeters();
+
+                if (newDistance < minimumDistance) {
+                    minimumDistance = newDistance;
+                }
+                currentPosition = nextPosition;
+                currentTime = nextTime;
+                path.addLast(new TimedPositionWithSpeedImpl(currentTime, currentPosition, null)); // currSpeed));
+
+                if (currentPosition.getDistance(end).getMeters() < reachingTolerance * courseLength.getMeters()) {
+
+                    Bearing bearPath2End = currentPosition.getBearingGreatCircle(end);
+                    double bearDiff = bearPath2End.getDegrees() - bearStart2End.getDegrees();
+
+                    reachTime[step] = minimumDistance * Math.signum(bearDiff);
+
+                    if (start.getDistance(currentPosition).getMeters() > start.getDistance(end).getMeters()) {
+                        targetFound = true;
+                    }
+                    if (minimumDistance < overallMinimumDistance) {
+                        overallMinimumDistance = minimumDistance;
+                        stepOfOverallMinimumDistance = step;
+                        allminpath = new LinkedList<TimedPositionWithSpeed>(path);
+                    }
+                }
+                stepRight++;
+            }
+        }
+
+        return allminpath.get(stepOfOverallMinimumDistance);
+    }
+
     @Override
     public Path getPath() {
 
         WindFieldGenerator windField = simulationParameters.getWindField();
         PolarDiagram polarDiagram = simulationParameters.getBoatPolarDiagram();
-        
+
         Position start;
         if (this.evalStartPoint == null) {
             start = simulationParameters.getCourse().get(0);
         } else {
-            start = this.evalStartPoint;            
+            start = this.evalStartPoint;
         }
         Position end = simulationParameters.getCourse().get(1);
         TimePoint startTime;

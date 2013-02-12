@@ -6,41 +6,28 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.FilenameFilter;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.NavigableMap;
-import java.util.NavigableSet;
-
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
-import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.DegreePosition;
-import com.sap.sailing.domain.common.impl.Util.Quadruple;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.MarkPassing;
-import com.sap.sailing.domain.tracking.TrackedLeg;
-import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.gwt.ui.server.SimulatorServiceImpl;
 import com.sap.sailing.gwt.ui.shared.ConfigurationException;
-import com.sap.sailing.gwt.ui.shared.PathDTO;
 import com.sap.sailing.gwt.ui.shared.PositionDTO;
 import com.sap.sailing.gwt.ui.shared.RequestTotalTimeDTO;
 import com.sap.sailing.gwt.ui.shared.ResponseTotalTimeDTO;
@@ -49,6 +36,7 @@ import com.sap.sailing.simulator.TimedPositionWithSpeed;
 import com.sap.sailing.simulator.impl.PathImpl;
 import com.sap.sailing.simulator.impl.TimedPositionWithSpeedImpl;
 import com.sap.sailing.simulator.test.util.TracTracReader;
+import com.sap.sailing.simulator.test.util.TracTracReaderFromFiles;
 
 public class TestTimeComparison {
 
@@ -56,8 +44,9 @@ public class TestTimeComparison {
     private List<SimulatorWindDTO> allPoints = null;
 
     private Map<Integer, String> boatClassesIndexes = null;
-    private Map<Integer, String> averageWindFlags = null;
-    private List<Integer> timeStepMillisecondsSizes = null;
+    //private Map<Integer, String> averageWindFlags = null;
+    //private List<Integer> timeStepMillisecondsSizes = null;
+    private Integer timeStepMilliseconds = 1000;
     
     @Before
     public void initialize() {
@@ -69,20 +58,20 @@ public class TestTimeComparison {
         this.boatClassesIndexes.put(3, "49er STG");
         this.boatClassesIndexes.put(4, "505 STG");
 
-        this.averageWindFlags = new HashMap<Integer, String>();
+        /*this.averageWindFlags = new HashMap<Integer, String>();
         this.averageWindFlags.put(0, "default average wind");
-        this.averageWindFlags.put(1, "real average wind");
+        this.averageWindFlags.put(1, "real average wind");*/
 
-        this.timeStepMillisecondsSizes = new ArrayList<Integer>();
+        /*this.timeStepMillisecondsSizes = new ArrayList<Integer>();
         this.timeStepMillisecondsSizes.add(1000);
         this.timeStepMillisecondsSizes.add(1250);
         this.timeStepMillisecondsSizes.add(1500);
         this.timeStepMillisecondsSizes.add(1750);
-        this.timeStepMillisecondsSizes.add(2000);
+        this.timeStepMillisecondsSizes.add(2000);*/
     }
 
 	@Test
-	public void runSimulation() throws ConfigurationException, ClassNotFoundException, IOException {
+	public void runSimulation() throws Exception {
 		
 		File dir = new File("C:\\Users\\i059829\\workspace\\sapsailingcapture\\java\\com.sap.sailing.simulator.test");
 		String[] flist = dir.list(new FilenameFilter() { 
@@ -90,14 +79,14 @@ public class TestTimeComparison {
              { return filename.endsWith(".data"); }
 	         } );
 		
-		TracTracReader ttreader = new TracTracReader(flist);
+		TracTracReader ttreader = new TracTracReaderFromFiles(flist);
 		
 		List<TrackedRace> lst = ttreader.read();
 		
 		//List<String> csvRows = new ArrayList<String>();
 		
-		BufferedWriter outputCSV = new BufferedWriter(new FileWriter("test.csv"));
-		String header = "Event, Race, Competitor, Leg, GPS time";
+		BufferedWriter outputCSV = new BufferedWriter(new FileWriter("src\\com\\sap\\sailing\\simulator\\test\\analysis\\Resources\\test.csv"));
+		String header = "Event, Race, Competitor, Leg#, Leg, GPS time";
 		
 		for(String pd : boatClassesIndexes.values()) 
 			header += ", " + pd;
@@ -121,7 +110,9 @@ public class TestTimeComparison {
 				track.lockForRead();
 				Iterator<GPSFixMoving> it = track.getFixes().iterator();
 				
+				int legIndex = 0;
 				for ( Leg leg : legs ) {
+					legIndex++;
 					List<TimedPositionWithSpeed> polylinePoints = new ArrayList<TimedPositionWithSpeed>();
 					MarkPassing mp = tr.getMarkPassing(competitor, leg.getTo());
 					GPSFixMoving current;
@@ -163,7 +154,7 @@ public class TestTimeComparison {
 				    
 				    //getTotalTime(0, 0, 1000);
 			        //System.out.println(getSummary(id, competitor, leg));
-				    outputCSV.write(getSummary(id, competitor, leg));
+				    outputCSV.write(getSummary(id, competitor, leg, legIndex));
 				    outputCSV.newLine();
 				    
 				//end legs loop
@@ -179,7 +170,7 @@ public class TestTimeComparison {
 	//end method	
 	}
 	
-    private void getTotalTime(final int boatClassIndex, final int useRealAverageWindSpeed, final int stepDurationMilliseconds) throws ConfigurationException {
+    /*private void getTotalTime(final int boatClassIndex, final int useRealAverageWindSpeed, final int stepDurationMilliseconds) throws ConfigurationException {
 
         final SimulatorServiceImpl simulatorService = new SimulatorServiceImpl();
         final RequestTotalTimeDTO requestData = new RequestTotalTimeDTO(boatClassIndex, this.allPoints, this.turnPoints, useRealAverageWindSpeed == 1,
@@ -205,14 +196,14 @@ public class TestTimeComparison {
                 + stepDurationMilliseconds + "milliseconds timestep, total time: " + receiveData.totalTimeSeconds
                 + " seconds");
         System.err.println("==================================================");
-    }
+    }*/
     
-    private String getSummary(final RegattaAndRaceIdentifier id, final Competitor competitor, final Leg leg) throws ConfigurationException {
+    private String getSummary(final RegattaAndRaceIdentifier id, final Competitor competitor, final Leg leg, final int legIndex) throws ConfigurationException {
 		
     	int noPoints = this.allPoints.size();
     	long finishTime = this.allPoints.get(noPoints-1).timepoint;
     	long startTime = this.allPoints.get(0).timepoint;
-    	double gpsTime = (finishTime - startTime) / 1000;
+    	double gpsTime = (finishTime - startTime) / 1000.0;
     	long totalDistanceMeters = 0;
     	Iterator<SimulatorWindDTO> it = this.allPoints.iterator();
     	SimulatorWindDTO prec = it.next();
@@ -230,13 +221,13 @@ public class TestTimeComparison {
     	double speedKnots = speedMetersPerSecond * 1.94;
     	String result = "";
     	result = id.getRegattaName() + ", " + id.getRaceName();
-        result += ", " + competitor.getName() + ", " + leg.toString() + ", " + gpsTime;
+        result += ", " + competitor.getName() + ", " + legIndex + ", " + leg.toString() + ", " + gpsTime;
     	
         SpeedWithBearing averageWind = null;
         
         for (Integer boatClassIndex : boatClassesIndexes.keySet()) {
             final SimulatorServiceImpl simulatorService = new SimulatorServiceImpl();
-        	final RequestTotalTimeDTO requestData = new RequestTotalTimeDTO(boatClassIndex, this.allPoints, this.turnPoints, false, 1000, true);
+        	final RequestTotalTimeDTO requestData = new RequestTotalTimeDTO(boatClassIndex, this.allPoints, this.turnPoints, false, timeStepMilliseconds, true);
         	final ResponseTotalTimeDTO receiveData = simulatorService.getTotalTime_new(requestData);
         	averageWind = simulatorService.getAverageWind();
         	result += ", " + receiveData.totalTimeSeconds;      	
