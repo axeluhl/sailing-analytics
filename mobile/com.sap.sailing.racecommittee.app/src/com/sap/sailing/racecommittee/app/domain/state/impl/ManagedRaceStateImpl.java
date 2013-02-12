@@ -1,10 +1,10 @@
-package com.sap.sailing.racecommittee.app.domain.impl;
+package com.sap.sailing.racecommittee.app.domain.state.impl;
 
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.racelog.RaceLogRaceStatusEvent;
-import com.sap.sailing.racecommittee.app.domain.ManagedRaceState;
+import com.sap.sailing.racecommittee.app.domain.state.ManagedRaceState;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 
 public class ManagedRaceStateImpl implements ManagedRaceState {

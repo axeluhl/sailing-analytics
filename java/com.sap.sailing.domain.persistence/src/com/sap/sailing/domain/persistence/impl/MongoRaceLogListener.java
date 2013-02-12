@@ -6,6 +6,7 @@ import com.mongodb.DBObject;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.racelog.RaceColumnIdentifier;
+import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
 import com.sap.sailing.domain.racelog.RaceLogListener;
 import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
@@ -38,6 +39,11 @@ public class MongoRaceLogListener implements RaceLogListener {
 		DBObject startTimeEventTrackEntry = mongoObjectFactory.storeRaceLogEntry(raceColumnIdentifier, fleet, startTimeEvent);
 		raceLogsCollection.insert(startTimeEventTrackEntry);
 
+	}
+
+	@Override
+	public void eventReceived(RaceLogEvent event) {
+		// do nothing, we are interested in the typed events.
 	}
 
 }

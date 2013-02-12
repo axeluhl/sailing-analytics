@@ -6,9 +6,11 @@ import com.sap.sailing.domain.base.Timed;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogListener;
+import com.sap.sailing.domain.racelog.impl.RaceLogEventComparator;
 import com.sap.sailing.domain.tracking.impl.PartialNavigableSetView;
 import com.sap.sailing.domain.tracking.impl.TrackImpl;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
+import com.sap.sailing.util.impl.ArrayListNavigableSet;
 
 public class PassAwareRaceLog extends TrackImpl<RaceLogEvent> implements RaceLog {
 	private static final String TAG = PassAwareRaceLog.class.getName();
@@ -24,7 +26,7 @@ public class PassAwareRaceLog extends TrackImpl<RaceLogEvent> implements RaceLog
 	}
 
 	public PassAwareRaceLog(int currentPassId) {
-		super(ReadWriteLockName);
+		super(new ArrayListNavigableSet<Timed>(RaceLogEventComparator.INSTANCE), ReadWriteLockName);
 		this.currentPassId = currentPassId;
 	}
 	
@@ -64,8 +66,11 @@ public class PassAwareRaceLog extends TrackImpl<RaceLogEvent> implements RaceLog
 	public boolean add(RaceLogEvent event) {
 		lockForWrite();
 		try {
-			setCurrentPassId(Math.max(event.getPassId(), this.currentPassId));
-			return getInternalRawFixes().add(event);
+			if (getInternalRawFixes().add(event)) {
+				setCurrentPassId(Math.max(event.getPassId(), this.currentPassId));
+				return true;
+			}
+			return false;
 		} finally {
 			unlockAfterWrite();
 		}

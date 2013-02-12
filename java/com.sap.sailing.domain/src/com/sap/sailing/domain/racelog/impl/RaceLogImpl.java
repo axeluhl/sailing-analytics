@@ -43,12 +43,26 @@ public class RaceLogImpl extends TrackImpl<RaceLogEvent> implements RaceLog {
 	}
 	
 	private void notifyListenersAboutReceive(RaceLogEvent event) {
+		notifiyListenersAboutReceivedEvent(event);
 		if (event instanceof RaceLogFlagEvent) {
 			notifiyListenersAboutReceivedFlagEvent((RaceLogFlagEvent) event);
 		} else if (event instanceof RaceLogStartTimeEvent) {
 			notifiyListenersAboutReceivedStartTimeEvent((RaceLogStartTimeEvent) event);
 		}
     }
+	
+	private void notifiyListenersAboutReceivedEvent(RaceLogEvent event) {
+		synchronized (listeners) {
+            for (RaceLogListener listener : listeners) {
+                try {
+                    listener.eventReceived(event);
+                } catch (Throwable t) {
+                    logger.log(Level.SEVERE, "RaceLogListener " + listener + " threw exception " + t.getMessage());
+                    logger.throwing(RaceLogImpl.class.getName(), "notifiyListenersAboutReceivedEvent(RaceLogEvent)", t);
+                }
+            }
+        }
+	}
 	
 	private void notifiyListenersAboutReceivedStartTimeEvent(RaceLogStartTimeEvent event) {
 		synchronized (listeners) {

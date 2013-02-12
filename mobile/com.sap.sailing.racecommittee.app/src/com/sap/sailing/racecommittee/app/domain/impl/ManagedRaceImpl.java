@@ -8,8 +8,9 @@ import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogRaceStatus;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.ManagedRaceIdentifier;
-import com.sap.sailing.racecommittee.app.domain.ManagedRaceState;
 import com.sap.sailing.racecommittee.app.domain.RaceGroup;
+import com.sap.sailing.racecommittee.app.domain.state.ManagedRaceState;
+import com.sap.sailing.racecommittee.app.domain.state.impl.ManagedRaceStateImpl;
 
 public class ManagedRaceImpl implements ManagedRace {
 	private static final long serialVersionUID = -4936566684992524001L;

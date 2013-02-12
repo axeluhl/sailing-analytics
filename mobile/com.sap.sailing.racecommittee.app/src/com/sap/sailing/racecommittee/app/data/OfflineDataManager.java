@@ -79,7 +79,7 @@ public class OfflineDataManager extends DataManager {
 				RaceLogRaceStatus.SCHEDULED, 
 				new MillisecondsTimePoint(new Date().getTime() + 100000)));
 		log.add(factory.createRaceStatusEvent(
-				new MillisecondsTimePoint(new Date()), 
+				new MillisecondsTimePoint(new Date().getTime() + 1), 
 				2,
 				RaceLogRaceStatus.RUNNING));
 		

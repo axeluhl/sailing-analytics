@@ -190,6 +190,7 @@ public class RaceListAdapter extends ArrayAdapter<RaceListDataType> {
             		RaceListDataTypeElement lastFinishedRace = null;
             		int numberOfUnscheduledRaces = 0;
             		
+            		/// TODO: new status FINISHING?!?!?!
             		for (RaceListDataTypeElement dataElement : elementList) {
             			if (dataElement.getRace().getStatus().equals(RaceLogRaceStatus.FINISHED)) {
             				lastFinishedRace = dataElement;

@@ -85,6 +85,7 @@ public class RaceListDataTypeElement extends RaceListDataType {
 		case STARTPHASE:
 			return String.format(startPhaseTemplate, formatStartTime());
 		case RUNNING:
+		case FINISHING:
 			return String.format(runningTemplate, formatStartTime());
 		case FINISHED:
 			return finishedTemplate;

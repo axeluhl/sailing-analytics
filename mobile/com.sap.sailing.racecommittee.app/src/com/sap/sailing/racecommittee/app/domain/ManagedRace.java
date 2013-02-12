@@ -4,6 +4,7 @@ import com.sap.sailing.domain.common.Named;
 import com.sap.sailing.domain.common.WithID;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogRaceStatus;
+import com.sap.sailing.racecommittee.app.domain.state.ManagedRaceState;
 
 public interface ManagedRace extends ManagedRaceIdentifier, Named, WithID {
 	
