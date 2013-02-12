@@ -27,9 +27,9 @@ import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.simulator.Boundary;
 import com.sap.sailing.simulator.Path;
-import com.sap.sailing.simulator.PathGenerator;
 import com.sap.sailing.simulator.SailingSimulator;
 import com.sap.sailing.simulator.SimulationParameters;
+import com.sap.sailing.simulator.impl.PathGeneratorTreeGrowWind2.PathCand;
 import com.sap.sailing.simulator.util.SailingSimulatorUtil;
 import com.sap.sailing.simulator.windfield.WindFieldGenerator;
 import com.sap.sailing.simulator.windfield.impl.WindFieldGeneratorMeasured;
@@ -71,7 +71,7 @@ public class SailingSimulatorImpl implements SailingSimulator {
     public void setSimulationParameters(final SimulationParameters params) {
         this.simulationParameters = params;
     }
- 
+
     @Override
     public SimulationParameters getSimulationParameters() {
         return this.simulationParameters;
@@ -127,8 +127,10 @@ public class SailingSimulatorImpl implements SailingSimulator {
             //System.out.println("baseWindBearing: " + wf.getWindParameters().baseWindBearing);
             logger.info("base wind: "+this.simulationParameters.getBoatPolarDiagram().getWind().getKnots()+" kn, "+((wf.getWindParameters().baseWindBearing)%360.0)+"°");
 
+            // initialize interpolation table for getSpeedAtBearingOverGround, e.g. for what-if or for optimization on overground-grids
+            //this.simulationParameters.getBoatPolarDiagram().setCurrent(null); // initialize
+
             // set water current
-            this.simulationParameters.getBoatPolarDiagram().setCurrent(null); // initialize
             //this.simulationParameters.getBoatPolarDiagram().setCurrent(new KnotSpeedWithBearingImpl(0.0,new DegreeBearingImpl((wf.getWindParameters().baseWindBearing+90.0)%360.0)));
             this.simulationParameters.getBoatPolarDiagram().setCurrent(new KnotSpeedWithBearingImpl(wf.getWindParameters().curSpeed, new DegreeBearingImpl(wf.getWindParameters().curBearing)));
             //this.simulationParameters.getBoatPolarDiagram().setCurrent(new KnotSpeedWithBearingImpl(2.0,new DegreeBearingImpl((270.0)%360.0)));
@@ -146,29 +148,45 @@ public class SailingSimulatorImpl implements SailingSimulator {
         // Start Simulation
         //
 
-        // get 1-turners
-        final PathGenerator1Turner gen1Turner = new PathGenerator1Turner(this.simulationParameters);
-        gen1Turner.setEvaluationParameters(true, null, null, 0, 0, 0);
-        final Path leftPath = gen1Turner.getPath();
-        final int left1TurnMiddle = gen1Turner.getMiddle();
-        gen1Turner.setEvaluationParameters(false, null, null, 0, 0, 0);
-        final Path rightPath = gen1Turner.getPath();
-        final int right1TurnMiddle = gen1Turner.getMiddle();
+        // get instance of heuristic searcher
+        PathGeneratorTreeGrowWind2 genTreeGrow = new PathGeneratorTreeGrowWind2(this.simulationParameters);
+        
+        // search best left-starting 1-turner
+        genTreeGrow.setEvaluationParameters("L", 1);
+        Path leftPath = genTreeGrow.getPath();
+        PathCand leftBestCand = genTreeGrow.getBestCand();
+        int left1TurnMiddle = 1000;
+        if (leftBestCand != null) {
+            left1TurnMiddle = leftBestCand.path.indexOf("LR");
+        }
 
-        // get left- and right-going heuristic based on 1-turner
-        final PathGeneratorOpportunistEuclidian genOpportunistic = new PathGeneratorOpportunistEuclidian(
-                this.simulationParameters);
+        // search best right-starting 1-turner
+        genTreeGrow.setEvaluationParameters("R", 1);
+        Path rightPath = genTreeGrow.getPath();
+        PathCand rightBestCand = genTreeGrow.getBestCand();
+        int right1TurnMiddle = 1000;
+        if (rightBestCand != null) {
+            right1TurnMiddle = rightBestCand.path.indexOf("RL");
+        }
+
+        // search best multi-turn course
+        genTreeGrow.setEvaluationParameters(null, 0);
+        Path optPath = genTreeGrow.getPath();
+        
+
+        // evaluate opportunistic heuristic
+        PathGeneratorOpportunistEuclidian genOpportunistic = new PathGeneratorOpportunistEuclidian(this.simulationParameters);
         // PathGeneratorOpportunistVMG genOpportunistic = new PathGeneratorOpportunistVMG(simulationParameters);
+        
+        // left-starting opportunist
         genOpportunistic.setEvaluationParameters(left1TurnMiddle, right1TurnMiddle, true);
-        final Path oppPathL = genOpportunistic.getPath();
+        Path oppPathL = genOpportunistic.getPath();
+        // right-starting opportunist
         genOpportunistic.setEvaluationParameters(left1TurnMiddle, right1TurnMiddle, false);
-        final Path oppPathR = genOpportunistic.getPath();
+        Path oppPathR = genOpportunistic.getPath();
 
+        // compare left- & right-starting opportunists         
         Path oppPath = null;
-        // System.out.println("left -going: "+oppPathL.getPathPoints().get(oppPathL.getPathPoints().size() -
-        // 1).getTimePoint().asMillis());
-        // System.out.println("right-going: "+oppPathR.getPathPoints().get(oppPathR.getPathPoints().size() -
-        // 1).getTimePoint().asMillis());
         if (oppPathL.getPathPoints().get(oppPathL.getPathPoints().size() - 1).getTimePoint().asMillis() <= oppPathR
                 .getPathPoints().get(oppPathR.getPathPoints().size() - 1).getTimePoint().asMillis()) {
             oppPath = oppPathL;
@@ -176,41 +194,39 @@ public class SailingSimulatorImpl implements SailingSimulator {
             oppPath = oppPathR;
         }
 
-        // get optimal path from dynamic programming with forward iteration
-        final PathGenerator genDynProgForward = new PathGeneratorDynProgForward(this.simulationParameters);
-        Path optPath = genDynProgForward.getPath();
-
         //
         // NOTE: pathName convention is: sort-digit + "#" + path-name
         // The sort-digit defines the sorting of paths in webbrowser
         //
 
-        // compare paths to avoid misleading display due to artifactual results from optimization (caused by finite
-        // resolution of optimization grid)
-        if (leftPath.getPathPoints() != null) {
-            if (leftPath.getPathPoints().get(leftPath.getPathPoints().size() - 1).getTimePoint().asMillis() <= optPath
-                    .getPathPoints().get(optPath.getPathPoints().size() - 1).getTimePoint().asMillis()) {
-                optPath = leftPath;
+        boolean plausCheck = false;
+        // ensure omniscient is best avoiding artifactual results due to coarse-grainedness (finite timesteps) of course generation
+        if (plausCheck) {
+            if (leftPath.getPathPoints() != null) {
+                if (leftPath.getPathPoints().get(leftPath.getPathPoints().size() - 1).getTimePoint().asMillis() <= optPath.getPathPoints().get(optPath.getPathPoints().size() - 1).getTimePoint()
+                        .asMillis()) {
+                    optPath = leftPath;
+                }
             }
-            allPaths.put("3#1-Turner Left", leftPath);
-        }
 
-        if (rightPath.getPathPoints() != null) {
-            if (rightPath.getPathPoints().get(rightPath.getPathPoints().size() - 1).getTimePoint().asMillis() <= optPath
-                    .getPathPoints().get(optPath.getPathPoints().size() - 1).getTimePoint().asMillis()) {
-                optPath = rightPath;
+            if (rightPath.getPathPoints() != null) {
+                if (rightPath.getPathPoints().get(rightPath.getPathPoints().size() - 1).getTimePoint().asMillis() <= optPath.getPathPoints().get(optPath.getPathPoints().size() - 1).getTimePoint()
+                        .asMillis()) {
+                    optPath = rightPath;
+                }
             }
-            allPaths.put("4#1-Turner Right", rightPath);
-        }
 
-        if (oppPath != null) {
-            if (oppPath.getPathPoints().get(oppPath.getPathPoints().size() - 1).getTimePoint().asMillis() <= optPath
-                    .getPathPoints().get(optPath.getPathPoints().size() - 1).getTimePoint().asMillis()) {
-                optPath = oppPath;
+            if (oppPath != null) {
+                if (oppPath.getPathPoints().get(oppPath.getPathPoints().size() - 1).getTimePoint().asMillis() <= optPath.getPathPoints().get(optPath.getPathPoints().size() - 1).getTimePoint()
+                        .asMillis()) {
+                    optPath = oppPath;
+                }
             }
-            allPaths.put("2#Opportunistic", oppPath);
         }
-
+        
+        allPaths.put("4#1-Turner Right", rightPath);
+        allPaths.put("3#1-Turner Left", leftPath);
+        allPaths.put("2#Opportunistic", oppPath);
         allPaths.put("1#Omniscient", optPath);
 
         if (this.simulationParameters.getMode() == SailingSimulatorUtil.measured) {
