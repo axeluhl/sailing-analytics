@@ -1,37 +1,41 @@
 package com.sap.sailing.racecommittee.app.data.http;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URI;
-
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.message.BasicHeader;
-import org.apache.http.protocol.HTTP;
+import java.nio.charset.Charset;
 
 public class HttpJsonPostRequest extends HttpRequest {
-	public final static String JsonUTF8 = "application/json;charset=UTF-8";
+	public final static String ContentType = "application/json;charset=UTF-8";
+	
+	private String requestBody;
 
-	public HttpJsonPostRequest(URI requestUri, String body) throws UnsupportedEncodingException {
-		super(createPostRequest(requestUri, body));
+	public HttpJsonPostRequest(URI requestUri, String body) throws MalformedURLException, IOException {
+		super(requestUri.toURL());
+		this.requestBody = body;
 	}
 	
-	private static HttpPost createPostRequest(URI requestUri, String body) throws UnsupportedEncodingException {
-		StringEntity entity = new StringEntity(body);
-		entity.setContentType(JsonUTF8);
-		entity.setContentEncoding(new BasicHeader(HTTP.CONTENT_TYPE, JsonUTF8));
-
-		HttpPost post = new HttpPost(requestUri);
-		post.setEntity(entity);
-		return post;
+	@Override
+	protected InputStream execute(HttpURLConnection connection)
+			throws IOException {
+		connection.setDoInput(true);
+		connection.setChunkedStreamingMode(0);
+		
+		connection.setRequestProperty("Content-Type", ContentType);
+		connection.setRequestProperty("Accept", ContentType);
+		
+		OutputStream outputStream  = new BufferedOutputStream(connection.getOutputStream());
+		sendBody(outputStream);
+		
+		return new BufferedInputStream(connection.getInputStream());
 	}
 
-	@Override
-	protected InputStream processResponse(HttpResponse response) throws IllegalStateException, IOException {
-		HttpEntity entity = response.getEntity();
-		return entity.getContent();
+	private void sendBody(OutputStream outputStream) throws IOException {
+		outputStream.write(requestBody.getBytes(Charset.forName("UTF-8")));
 	}
 }

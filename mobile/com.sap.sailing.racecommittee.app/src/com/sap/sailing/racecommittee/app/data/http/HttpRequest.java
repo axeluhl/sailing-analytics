@@ -2,13 +2,10 @@ package com.sap.sailing.racecommittee.app.data.http;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 
-import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
-import org.apache.http.StatusLine;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.impl.client.DefaultHttpClient;
 
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 
@@ -19,10 +16,9 @@ public abstract class HttpRequest {
 	private final static int lowestOkCode = HttpStatus.SC_OK;
 	private final static int lowestRedirectCode = HttpStatus.SC_MULTIPLE_CHOICES; 
 	
-	private static void validateHttpResponse(HttpResponse response) throws IOException {
-		StatusLine status = response.getStatusLine();
-		if (status != null) {
-			int statusCode = status.getStatusCode();
+	private static void validateHttpResponse(HttpURLConnection connection) throws IOException {
+		int statusCode = connection.getResponseCode();
+		if (statusCode != -1) {
 			if (statusCode >= lowestOkCode && statusCode < lowestRedirectCode) {
 				return;
 			}
@@ -31,21 +27,31 @@ public abstract class HttpRequest {
 		throw new IOException(String.format("Request response had no valid status."));
 	}
 	
-	private HttpClient client;
-	private HttpRequestBase httpRequestBase;
+	private HttpURLConnection connection;
 	
-	public HttpRequest(HttpRequestBase request) {
-		this.httpRequestBase = request;
-		this.client = new DefaultHttpClient();
+	public HttpRequest(URL url) throws IOException {
+		this((HttpURLConnection) url.openConnection());
 	}
-	protected abstract InputStream processResponse(HttpResponse response) throws Exception;
+	
+	public HttpRequest(HttpURLConnection connection) {
+		this.connection = connection;
+	}
+	
+	protected abstract InputStream execute(HttpURLConnection connection) throws IOException;
 
 	public InputStream execute() throws Exception {
-		ExLog.i(TAG, "Executing request " + httpRequestBase.getMethod() +  " on " + httpRequestBase.getURI());
-		HttpResponse response = client.execute(httpRequestBase);
-		validateHttpResponse(response);
-		ExLog.i(TAG, "Received reseponse " + response.getStatusLine());
-		return processResponse(response);
+		ExLog.i(TAG, String.format(
+				"Executing HTTP request %s on %s",
+				connection.getRequestMethod(),
+				connection.getURL()));
+		try {
+			InputStream stream =  execute(connection);
+			validateHttpResponse(connection);
+			return stream;
+		} finally {
+			connection.disconnect();
+		}
+		
 	}
 
 	

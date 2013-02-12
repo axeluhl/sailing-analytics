@@ -1,6 +1,8 @@
 package com.sap.sailing.racecommittee.app.data;
 
+import java.io.IOException;
 import java.io.Serializable;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.Collection;
 
@@ -70,12 +72,17 @@ public class OnlineDataManager extends DataManager {
 							new CourseAreaJsonDeserializer())));
 		DataHandler<Collection<Event>> handler = new EventsDataHandler(this, client);
 		
-		DataLoader<Collection<Event>> loader = new DataLoader<Collection<Event>>(
-				context, 
-				URI.create(TargetHost + "/sailingserver/rc/events"), 
-				parser, 
-				handler);
-		loader.forceLoad();
+		try {
+			new DataLoader<Collection<Event>>(
+					context, 
+					URI.create(TargetHost + "/sailingserver/rc/events"), 
+					parser, 
+					handler).forceLoad();
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	public void loadCourseAreas(
@@ -130,12 +137,17 @@ public class OnlineDataManager extends DataManager {
 												new RaceLogDeserializer())))));
 		DataHandler<Collection<ManagedRace>> handler = new ManagedRacesDataHandler(this, client);
 		
-		DataLoader<Collection<ManagedRace>> loader = new DataLoader<Collection<ManagedRace>>(
-				context, 
-				URI.create(TargetHost + "/sailingserver/rc/leaderboards?courseArea=" + courseAreaId.toString()), 
-				parser, 
-				handler);
-		loader.forceLoad();
+		try {
+			new DataLoader<Collection<ManagedRace>>(
+					context, 
+					URI.create(TargetHost + "/sailingserver/rc/leaderboards?courseArea=" + courseAreaId.toString()), 
+					parser, 
+					handler).forceLoad();
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		
 	}
 	
