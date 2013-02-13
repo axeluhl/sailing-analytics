@@ -497,4 +497,6 @@ public interface StringMessages extends Messages {
     String overallRankTooltip();
     String noDataFound();
     String displayName();
+    String buoyZone();
+    String radiusInMeters();
 }
