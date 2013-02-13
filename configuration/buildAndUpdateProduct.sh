@@ -3,41 +3,45 @@
 # this holds for default installation
 USER_HOME=~
 PROJECT_HOME=$USER_HOME/git
+SERVERS_HOME=$USER_HOME/servers
 
 # x86 or x86_64 should work for most cases
 ARCH=x86_64
 
-ACDIR=`pwd`
-
-if [[ "$ACDIR" == "$PROJECT_HOME/configuration" ]] || [[ "$ACDIR" == "$PROJECT_HOME" ]]; then
-    echo "Please DO NOT run this script from $PROJECT_HOME/configuration or $PROJECT_HOME. Your directory should differ from the GIT repo."
-    exit 2
-fi
-
 # needed for maven to work correctly
 source $USER_HOME/.bash_profile
+
+cd $PROJECT_HOME
+active_branch=$(git symbolic-ref -q HEAD)
+active_branch=`basename $active_branch`
+
+ACDIR=$SERVERS_HOME/$active_branch
 
 gwtcompile=1
 testing=1
 clean="clean"
 offline=0
+proxy=0
 extra=''
 
 if [ $# -eq 0 ]; then
     echo "buildAndUpdateProduct [-g -t -o -c] [build|install|all]"
     echo ""
+    echo "Active branch is $active_branch"
+    echo ""
     echo "-g Disable GWT compile, no gwt files will be generated, old ones will be preserved."
     echo "-t Disable tests"
     echo "-o Enable offline mode (does not work for tycho surefire plugin)"
     echo "-c Disable cleaning (use only if you are sure that no java file has changed)"
+    echo "-p Enable proxy mode"
     echo ""
     echo "build: builds the server code using Maven to $PROJECT_HOME"
-    echo "install: installs product and configuration to $ACDIR. Overwrites any configuration by using config from branch."
+    echo "install: installs product and configuration to $SERVERS_HOME/$active_branch. Overwrites any configuration by using config from branch."
     echo "all: calls build and then install"
     exit 2
 fi
 
-options=':gtoc'
+options=':gtocp'
 while getopts $options option
 do
     case $option in
@@ -45,23 +49,23 @@ do
         t) testing=0;;
         o) offline=1;;
         c) clean="";;
+        p) proxy=1;;
         \?) echo "Invalid option"
             exit 2;;
     esac
 done
 
-cd $PROJECT_HOME
-active_branch=$(git symbolic-ref -q HEAD)
-active_branch=`basename $active_branch`
-cd $ACDIR
-active_server=`basename $ACDIR`
-
-if [[ "$active_branch" == "$active_server" ]]; then
-    echo "INFO: GIT branch and server branch matching ($active_server)"
-else
-    echo "ERROR: The current branch ($active_branch) does not match the current server ($active_server)."
-    exit
+if [ ! -d $ACDIR ]; then
+	echo "Could not find directory $ACDIR - perhaps you are on a wrong branch?"
+	exit
 fi
+
+read -s -n1 -p "Currently branch $active_branch is active. Do you want to proceed (y/N): " answer
+case $answer in
+"Y" | "y") echo "Continuing";;
+*) echo "Aborting..."
+   exit;;
+esac
 
 shift $((OPTIND-1))
 
@@ -105,15 +109,22 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
 	    extra="$extra -o"
 	fi
 
+	if [ $proxy -eq 1 ]; then
+	    echo "INFO: Activating proxy profile"
+	    extra="$extra -P no-debug.with-proxy"
+	else
+	    extra="$extra -P no-debug.without-proxy"
+	fi
+
 	echo "Using following command: mvn $extra -P no-debug.without-proxy -fae -s $MAVEN_SETTINGS $clean install"
-	mvn $extra -P no-debug.without-proxy -fae -s $MAVEN_SETTINGS $clean install 2>&1 | tee $ACDIR/build.log
+	mvn $extra -fae -s $MAVEN_SETTINGS $clean install 2>&1 | tee $ACDIR/build.log
 
 	echo "Build complete. Do not forget to install product..."
 fi
 
 if [[ "$@" == "install" ]] || [[ "$@" == "all" ]]; then
 
-	cd $ACDIR
+    cd $ACDIR
 
     rm -rf $ACDIR/plugins/*.*
     rm -rf $ACDIR/org.eclipse.*
@@ -136,5 +147,5 @@ if [[ "$@" == "install" ]] || [[ "$@" == "all" ]]; then
     # Make sure this script is up2date at least for the next run
     cp -v $PROJECT_HOME/configuration/buildAndUpdateProduct.sh $ACDIR/
 
-	echo "Installation complete. You may now start the server using ./start"
+    echo "Installation complete. You may now start the server using ./start"
 fi

@@ -5,12 +5,6 @@
 ## Linux, Java, OSGi/Equinox
 By and large, the SAP Sailing Analytics are a web application implemented using Java technology. The application's components are OSGi bundles running in an Equinox OSGi container. Some bundles offer static web content or dynamic content in the form of servlets. Those bundles are implemented as OSGi Web Bundles which we consider a simple and elegant way to meet web standards using an OSGi-based implementation. A Web Bundle's main extension compared to a regular OSGi bundle is the presence of a web.xml descriptor in the WEB-INF top-level folder where servlets and static content can be declared and mapped to URLs.
 
-Our current server deployment uses a 64bit Java7 Hotspot virtual machine and runs on a 64bit Linux CentOS distribution. We have a single host (sapsailing.com) which runs a number of Java VMs, some to offer the application in different development stages (dev, test, prod, ...), some to perform specific tasks such as replicating UDP wind data to the various server processes, or a process to store data received from the SwissTiming connector durably while forwarding that data to a server VM requesting it.
-
-The various processes run in "screen" sessions to which, once connected to sapsailing.com with an ssh client, users can gain access using the "screen -rd" command. We consider replacing "screen" by "tmux" which is much more flexible and powerful and reported to be less buggy. This will allow us to launch the processes required in tmux sessions automatically after an operating system reboot.
-
-For the OSGi containers by convention we have one directory under /home/trac/servers/ per deployable branch (dev, test, prod1, prod2). In those directories we have copies of the "install" script from the git's java/target folder. Running it after a successful product build on the branch corresponding to the current directory will copy the compiled product to the server directory. Running the start script will then launch the respective server instance. A safety check in the install script avoids accidentally overwriting a server directory with a non-matching product version by comparing the directory name with the branch name checked out under /home/trac/git.
-
 ## Database
 By and large, we use a database to recover from a server restart. Once started, most data managed by the application is kept in main memory. We currently use MongoDB as our database. Different DB instances belong to different server instances. This allows us to cleanly separate development and test data from production data.
 
