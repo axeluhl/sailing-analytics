@@ -304,7 +304,7 @@ public interface StringMessages extends Messages {
     String simulator();
     String optionsBar();
     String update();
-    
+
     String setup();
     String pattern();
     String strength();
@@ -313,7 +313,7 @@ public interface StringMessages extends Messages {
     String amplitude();
     String frequency();
     String noise();
-    
+
     String sailing();
     String optimality();
     String maximumTurns();
@@ -411,4 +411,6 @@ public interface StringMessages extends Messages {
     String strategyOption1();
     String strategyOption2();
     String strategyOption3();
+
+    String legLabel();
 }
