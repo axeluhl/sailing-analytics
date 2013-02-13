@@ -150,7 +150,7 @@ public class SailingSimulatorImpl implements SailingSimulator {
 
         // get instance of heuristic searcher
         PathGeneratorTreeGrowWind2 genTreeGrow = new PathGeneratorTreeGrowWind2(this.simulationParameters);
-        
+
         // search best left-starting 1-turner
         genTreeGrow.setEvaluationParameters("L", 1);
         Path leftPath = genTreeGrow.getPath();
@@ -172,12 +172,12 @@ public class SailingSimulatorImpl implements SailingSimulator {
         // search best multi-turn course
         genTreeGrow.setEvaluationParameters(null, 0);
         Path optPath = genTreeGrow.getPath();
-        
+
 
         // evaluate opportunistic heuristic
         PathGeneratorOpportunistEuclidian genOpportunistic = new PathGeneratorOpportunistEuclidian(this.simulationParameters);
         // PathGeneratorOpportunistVMG genOpportunistic = new PathGeneratorOpportunistVMG(simulationParameters);
-        
+
         // left-starting opportunist
         genOpportunistic.setEvaluationParameters(left1TurnMiddle, right1TurnMiddle, true);
         Path oppPathL = genOpportunistic.getPath();
@@ -185,7 +185,7 @@ public class SailingSimulatorImpl implements SailingSimulator {
         genOpportunistic.setEvaluationParameters(left1TurnMiddle, right1TurnMiddle, false);
         Path oppPathR = genOpportunistic.getPath();
 
-        // compare left- & right-starting opportunists         
+        // compare left- & right-starting opportunists
         Path oppPath = null;
         if (oppPathL.getPathPoints().get(oppPathL.getPathPoints().size() - 1).getTimePoint().asMillis() <= oppPathR
                 .getPathPoints().get(oppPathR.getPathPoints().size() - 1).getTimePoint().asMillis()) {
@@ -223,7 +223,7 @@ public class SailingSimulatorImpl implements SailingSimulator {
                 }
             }
         }
-        
+
         allPaths.put("4#1-Turner Right", rightPath);
         allPaths.put("3#1-Turner Left", leftPath);
         allPaths.put("2#Opportunistic", oppPath);
@@ -438,5 +438,15 @@ public class SailingSimulatorImpl implements SailingSimulator {
         }
 
         return path;
+    }
+
+    @Override
+    public List<String> getLegsNames(int boatClassIndex) {
+
+        List<String> result = new ArrayList<String>();
+        result.add("Bogdan boatClassIndex=" + boatClassIndex);
+        result.add("Andu boatClassIndex=" + boatClassIndex);
+        result.add("Mircea boatClassIndex=" + boatClassIndex);
+        return result;
     }
 }

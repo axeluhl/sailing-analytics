@@ -1,5 +1,6 @@
 package com.sap.sailing.simulator;
 
+import java.util.List;
 import java.util.Map;
 
 public interface SailingSimulator {
@@ -15,4 +16,6 @@ public interface SailingSimulator {
     Map<String, Path> getAllPathsEvenTimed(long millisecondsStep);
 
     Path getRaceCourse();
+
+    List<String> getLegsNames(int boatClassIndex);
 }
