@@ -17,7 +17,7 @@ public class FlexibleLeaderboardEditDialog extends FlexibleLeaderboardDialog {
                 stringConstants, otherExistingLeaderboards), callback);
         
         nameTextBox = createTextBox(leaderboard.getName());
-
+        displayNameTextBox = createTextBox(leaderboard.getDisplayName()); 
         scoringSchemeListBox = createListBox(false);
         int j = 0;
         for (ScoringSchemeType scoringSchemeType: ScoringSchemeType.values()) {

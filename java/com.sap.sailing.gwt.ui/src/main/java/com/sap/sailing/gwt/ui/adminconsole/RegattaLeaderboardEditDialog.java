@@ -16,6 +16,7 @@ public class RegattaLeaderboardEditDialog extends RegattaLeaderboardDialog {
                 stringConstants, otherExistingLeaderboards), callback);
         
         nameTextBox = createTextBox(leaderboard.getName());
+        displayNameTextBox = createTextBox(leaderboard.getDisplayName());
 
         regattaListBox = createListBox(false);
         regattaListBox.addItem(stringConstants.pleaseSelectARegatta());

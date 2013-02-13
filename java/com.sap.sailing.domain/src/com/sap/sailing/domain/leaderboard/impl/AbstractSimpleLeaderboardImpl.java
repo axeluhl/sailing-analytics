@@ -57,7 +57,10 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
      * competitor names for display in a leaderboard.
      */
     private final Map<Competitor, String> displayNames;
-    
+
+    /** the display name of the leaderboard */
+    private String displayName;
+
     /**
      * Backs the {@link #getCarriedPoints(Competitor)} API with data. Can be used to prime this leaderboard
      * with aggregated results of races not tracked / displayed by this leaderboard in detail. The points
@@ -151,7 +154,17 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     public String getDisplayName(Competitor competitor) {
         return displayNames.get(competitor);
     }
-    
+
+    @Override
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    @Override
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
+    }
+
     @Override
     public ThresholdBasedResultDiscardingRule getResultDiscardingRule() {
         return resultDiscardingRule;

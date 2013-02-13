@@ -2066,6 +2066,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         TimePoint now = MillisecondsTimePoint.now();
         Long delayToLiveInMillisForLatestRace = null;
         leaderboardDTO.name = leaderboard.getName();
+        leaderboardDTO.displayName = leaderboard.getDisplayName();
         leaderboardDTO.competitorDisplayNames = new HashMap<CompetitorDTO, String>();
         leaderboardDTO.isMetaLeaderboard = leaderboard instanceof MetaLeaderboard ? true : false;
         if (leaderboard instanceof RegattaLeaderboard) {
@@ -2200,8 +2201,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
     
     @Override
-    public void updateLeaderboard(String leaderboardName, String newLeaderboardName, int[] newDiscardingThresholds) {
-        getService().apply(new UpdateLeaderboard(leaderboardName, newLeaderboardName, newDiscardingThresholds));
+    public void updateLeaderboard(String leaderboardName, String newLeaderboardName, String newLeaderboardDisplayName, int[] newDiscardingThresholds) {
+        getService().apply(new UpdateLeaderboard(leaderboardName, newLeaderboardName, newLeaderboardDisplayName, newDiscardingThresholds));
     }
 
     @Override

@@ -21,6 +21,7 @@ gwtcompile=1
 testing=1
 clean="clean"
 offline=0
+proxy=0
 extra=''
 
 if [ $# -eq 0 ]; then
@@ -32,6 +33,7 @@ if [ $# -eq 0 ]; then
     echo "-t Disable tests"
     echo "-o Enable offline mode (does not work for tycho surefire plugin)"
     echo "-c Disable cleaning (use only if you are sure that no java file has changed)"
+    echo "-p Enable proxy mode"
     echo ""
     echo "build: builds the server code using Maven to $PROJECT_HOME"
     echo "install: installs product and configuration to $SERVERS_HOME/$active_branch. Overwrites any configuration by using config from branch."
@@ -39,7 +41,7 @@ if [ $# -eq 0 ]; then
     exit 2
 fi
 
-options=':gtoc'
+options=':gtocp'
 while getopts $options option
 do
     case $option in
@@ -47,6 +49,7 @@ do
         t) testing=0;;
         o) offline=1;;
         c) clean="";;
+        p) proxy=1;;
         \?) echo "Invalid option"
             exit 2;;
     esac
@@ -106,8 +109,15 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
 	    extra="$extra -o"
 	fi
 
+	if [ $proxy -eq 1 ]; then
+	    echo "INFO: Activating proxy profile"
+	    extra="$extra -P no-debug.with-proxy"
+	else
+	    extra="$extra -P no-debug.without-proxy"
+	fi
+
 	echo "Using following command: mvn $extra -P no-debug.without-proxy -fae -s $MAVEN_SETTINGS $clean install"
-	mvn $extra -P no-debug.without-proxy -fae -s $MAVEN_SETTINGS $clean install 2>&1 | tee $ACDIR/build.log
+	mvn $extra -fae -s $MAVEN_SETTINGS $clean install 2>&1 | tee $ACDIR/build.log
 
 	echo "Build complete. Do not forget to install product..."
 fi

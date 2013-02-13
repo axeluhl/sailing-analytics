@@ -89,6 +89,7 @@ public abstract class DataEntryDialog<T> {
         okButton = new Button(okButtonName);
         okButton.getElement().getStyle().setMargin(3, Unit.PX);
         FlowPanel dialogFPanel = new FlowPanel();
+        dialogFPanel.setWidth("100%");
         statusLabel = new Label();
         dialogFPanel.add(statusLabel);
         if (message != null) {
@@ -98,6 +99,7 @@ public abstract class DataEntryDialog<T> {
         }
         
         panelForAdditionalWidget = new FlowPanel();
+        panelForAdditionalWidget.setWidth("100%");
         dialogFPanel.add(panelForAdditionalWidget);
         FlowPanel buttonPanel = new FlowPanel();
         dialogFPanel.add(buttonPanel);
@@ -139,7 +141,7 @@ public abstract class DataEntryDialog<T> {
     }
     
     protected abstract T getResult();
-    
+
     /**
      * Creates a text box with a key-up listener attached which ensures the value is updated after each
      * key-up event and the entire dialog is {@link #validate() validated} in this case.
@@ -333,6 +335,18 @@ public abstract class DataEntryDialog<T> {
         });
         AbstractEntryPoint.linkEnterToButton(getOkButton(), result);
         AbstractEntryPoint.linkEscapeToButton(getCancelButton(), result);
+        return result;
+    }
+
+    /**
+     * Creates a standard label for input fields.
+     * The label has some default formatting like "no wrap" and a colon right after the label text 
+     * @param name
+     * @return
+     */
+    public Label createLabel(String name) {
+        Label result = new Label(name + ":");
+        result.setWordWrap(false);
         return result;
     }
     
