@@ -1,8 +1,13 @@
 package com.sap.sailing.server.gateway.ess40;
 
+import java.io.BufferedWriter;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -124,6 +129,33 @@ public class ESS40ResultsAsCSVServlet extends AbstractCSVHttpServlet {
         } else {
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error during leaderboard export");
         }
+    }
+    
+    @Override
+    protected <T> void writeCsv (List<List<T>> csv, char separator, boolean quoteStrings, OutputStream output) throws IOException {
+        DecimalFormat df = new DecimalFormat("0.##");
+        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(output, "UTF-8"));
+        for (List<T> row : csv) {
+            StringBuilder line = new StringBuilder();
+            int column = 1;
+            for (Iterator<T> iter = row.iterator(); iter.hasNext();) {
+                T fieldObject = iter.next();
+                String field = String.valueOf(fieldObject).replace("\"", "\"\"");
+                if(fieldObject instanceof String && column == 1) {
+                    field = '"' + field + '"';
+                } else if(fieldObject instanceof Double) {
+                    field = df.format(fieldObject);
+                }
+                line.append(field);
+                if (iter.hasNext()) {
+                    line.append(separator);
+                }
+                column++;
+            }
+            writer.write(line.toString());
+            writer.newLine();
+        }
+        writer.flush();
     }
 
 }

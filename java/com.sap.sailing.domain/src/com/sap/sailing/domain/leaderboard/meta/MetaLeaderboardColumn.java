@@ -37,7 +37,7 @@ public class MetaLeaderboardColumn extends SimpleAbstractRaceColumn implements R
     
     @Override
     public String getName() {
-        return leaderboard.getName();
+        return leaderboard.getDisplayName() != null ? leaderboard.getDisplayName() : leaderboard.getName();
     }
 
     @Override

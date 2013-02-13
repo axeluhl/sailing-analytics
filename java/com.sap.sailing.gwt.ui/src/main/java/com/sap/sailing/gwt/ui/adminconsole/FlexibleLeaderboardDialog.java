@@ -2,11 +2,12 @@ package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.Collection;
 
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Grid;
+import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
-import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -76,13 +77,15 @@ public abstract class FlexibleLeaderboardDialog extends AbstractLeaderboardDialo
 
     @Override
     protected Widget getAdditionalWidget() {
-        VerticalPanel mainPanel = new VerticalPanel();
-        Grid formGrid = new Grid(3,2);
+        FlowPanel mainPanel = new FlowPanel();
+        Grid formGrid = new Grid(3,3);
         formGrid.setCellSpacing(3);
-        formGrid.setWidget(0,  0, new Label(stringMessages.name() + ":"));
+        formGrid.setWidget(0,  0, createLabel(stringMessages.name()));
         formGrid.setWidget(0, 1, nameTextBox);
-        formGrid.setWidget(1, 0, new Label(stringMessages.scoringSystem() + ":"));
-        formGrid.setWidget(1, 1, scoringSchemeListBox);
+        formGrid.setWidget(1,  0, createLabel(stringMessages.displayName()));
+        formGrid.setWidget(1, 1, displayNameTextBox);
+        formGrid.setWidget(2, 0, createLabel(stringMessages.scoringSystem()));
+        formGrid.setWidget(2, 1, scoringSchemeListBox);
         mainPanel.add(formGrid);
         mainPanel.add(new Label(stringMessages.discardRacesFromHowManyStartedRacesOn()));
         HorizontalPanel hp = new HorizontalPanel();
@@ -91,7 +94,9 @@ public abstract class FlexibleLeaderboardDialog extends AbstractLeaderboardDialo
             hp.add(new Label("" + (i + 1) + "."));
             hp.add(discardThresholdBoxes[i]);
         }
+        alignAllPanelWidgetsVertically(hp, HasVerticalAlignment.ALIGN_MIDDLE);
         mainPanel.add(hp);
+        
         return mainPanel;
     }
 }

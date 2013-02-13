@@ -10,11 +10,13 @@ import com.sap.sailing.server.RacingEventServiceOperation;
 public class UpdateLeaderboard extends AbstractLeaderboardOperation<Void> {
     private static final long serialVersionUID = -8040361040050151768L;
     private final String newLeaderboardName;
+    private final String newLeaderboardDisplayName;
     private final int[] newDiscardingThresholds;
     
-    public UpdateLeaderboard(String leaderboardName, String newLeaderboardName, int[] newDiscardingThresholds) {
+    public UpdateLeaderboard(String leaderboardName, String newLeaderboardName, String newLeaderboardDisplayName, int[] newDiscardingThresholds) {
         super(leaderboardName);
         this.newLeaderboardName = newLeaderboardName;
+        this.newLeaderboardDisplayName = newLeaderboardDisplayName;
         this.newDiscardingThresholds = newDiscardingThresholds;
     }
 
@@ -39,6 +41,7 @@ public class UpdateLeaderboard extends AbstractLeaderboardOperation<Void> {
         if (!Arrays.equals(leaderboard.getResultDiscardingRule().getDiscardIndexResultsStartingWithHowManyRaces(), newDiscardingThresholds)) {
             leaderboard.setResultDiscardingRule(new ResultDiscardingRuleImpl(newDiscardingThresholds));
         }
+        leaderboard.setDisplayName(newLeaderboardDisplayName);
         updateStoredLeaderboard(toState, leaderboard);
         return null;
     }
