@@ -177,8 +177,9 @@ public class PathPolyline {
                         SimulatorWindDTO firstPoint = toSimulatorWindDTO(originalOriginLng);
                         PositionDTO secondPoint = toPositionDTO(newOriginLng);
 
-                        Request1TurnerDTO requestData = new Request1TurnerDTO(boatClassID, firstPoint, secondPoint,
-                                !projectionOnBeforeLine);
+                        Request1TurnerDTO requestData = new Request1TurnerDTO(boatClassID, firstPoint.position, firstPoint.timepoint, secondPoint, !projectionOnBeforeLine);
+
+
 
                         simulatorService.get1Turner(requestData, new AsyncCallback<Response1TurnerDTO>() {
 
