@@ -17,6 +17,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -26,19 +27,27 @@ import java.util.logging.Logger;
 
 import org.osgi.framework.FrameworkUtil;
 
+import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MeterDistance;
 import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
+import com.sap.sailing.domain.tracking.GPSFixMoving;
+import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.RacesHandle;
+import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
 import com.sap.sailing.simulator.Boundary;
 import com.sap.sailing.simulator.Path;
 import com.sap.sailing.simulator.SailingSimulator;
 import com.sap.sailing.simulator.SimulationParameters;
+import com.sap.sailing.simulator.TimedPositionWithSpeed;
 import com.sap.sailing.simulator.impl.PathGeneratorTreeGrowWind2.PathCand;
 import com.sap.sailing.simulator.util.SailingSimulatorUtil;
 import com.sap.sailing.simulator.windfield.WindFieldGenerator;
@@ -450,8 +459,74 @@ public class SailingSimulatorImpl implements SailingSimulator {
         return path;
     }
 
-    public Path getLeg(int index, int boatClassIndex) {
-        return null;
+    public Path getLeg(int legIndex, int competitorIndex, int boatClassIndex) {
+        
+    	URI liveURIr = null;
+        URI storedURIr = null;
+        URL paramURLr = null;
+        RacesHandle raceHandle = null; 
+
+        RacingEventServiceImpl service = new RacingEventServiceImpl();
+        try {
+            liveURIr = new URI(liveURI);
+        } catch (URISyntaxException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        try {
+            storedURIr = new URI(storedURI);
+        } catch (URISyntaxException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        try {
+            paramURLr = new URL(raceURL);
+        } catch (MalformedURLException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        try {
+            raceHandle = service.addTracTracRace(paramURLr, liveURIr, storedURIr, EmptyWindStore.INSTANCE, 60000, this);
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        synchronized (this) {
+            try {
+                this.wait();
+            } catch (InterruptedException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
+
+    	RaceDefinition race = raceHandle.getRaces().iterator().next();
+    	Regatta regatta = raceHandle.getRegatta();
+    	TrackedRace trackedRace = service.getTrackedRace(regatta, race);
+    	Iterator<Competitor> competitors = race.getCompetitors().iterator();
+    	Competitor competitor = null;
+    	for(int i = 0; i <= competitorIndex; i++) competitor = competitors.next();
+    	Leg leg = race.getCourse().getLegs().get(legIndex);
+    	
+    	TimePoint startTime = trackedRace.getMarkPassing(competitor, leg.getFrom()).getTimePoint();
+    	TimePoint endTime = trackedRace.getMarkPassing(competitor, leg.getTo()).getTimePoint();
+    	
+    	GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(competitor);
+    	track.lockForRead();
+    	Iterator<GPSFixMoving> it = track.getFixesIterator(startTime, true);
+    	
+    	List<TimedPositionWithSpeed> list = new ArrayList<TimedPositionWithSpeed>();
+    	
+    	while( it.hasNext() ) {
+    		GPSFixMoving current = it.next();
+    		if (current.getTimePoint().after(endTime)) break;
+    		TimedPositionWithSpeed currentTimedPositionWithSpeed = 
+    				new TimedPositionWithSpeedImpl(current.getTimePoint(),current.getPosition(),current.getSpeed());
+    		list.add(currentTimedPositionWithSpeed);
+    	}
+    	
+    	//what should we do for the windfield?
+    	return new PathImpl(list, null);
     }
 
     @Override

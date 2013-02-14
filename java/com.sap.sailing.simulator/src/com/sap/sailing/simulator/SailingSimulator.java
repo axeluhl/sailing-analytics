@@ -19,5 +19,5 @@ public interface SailingSimulator {
 
     List<String> getLegsNames(int boatClassIndex);
 
-    Path getLeg(int index, int boatClassIndex);
+    Path getLeg(int legIndex, int competitorIndex, int boatClassIndex);
 }
