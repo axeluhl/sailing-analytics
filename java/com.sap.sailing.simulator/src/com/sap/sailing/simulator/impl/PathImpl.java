@@ -270,7 +270,8 @@ public class PathImpl implements Path, Serializable {
             }
         }
 
-        return eliminateVeryCloseTurns(list, 15.0);
+        //return eliminateVeryCloseTurns(list, 15.0);
+        return list;
     }
 
     public static List<TimedPositionWithSpeed> eliminateVeryCloseTurns(List<TimedPositionWithSpeed> turns, double tresholdDistanceMeters) {
