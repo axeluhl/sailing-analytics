@@ -44,6 +44,5 @@ public interface SimulatorServiceAsync {
 
     void get1Turner(final Request1TurnerDTO requestData, AsyncCallback<Response1TurnerDTO> asyncCallback);
 
-    void getLegs(char mode, WindFieldGenParamsDTO params, WindPatternDisplay pattern, boolean withWindField, int boatClassIndex,
-            AsyncCallback<LegsNamesDTO> asyncCallback);
+    void getLegs(int boatClassIndex, AsyncCallback<LegsNamesDTO> asyncCallback);
 }

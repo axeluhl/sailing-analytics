@@ -28,6 +28,8 @@ public class PathImpl implements Path, Serializable {
     List<TimedPositionWithSpeed> pathPoints;
     WindField windField;
 
+    private static final double THRESHOLD_DISTANCE_METERS = 15.0;
+
     public PathImpl(List<TimedPositionWithSpeed> pointsList, WindField wf) {
 
         this.pathPoints = pointsList;

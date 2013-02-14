@@ -61,6 +61,10 @@ public class PathGenerator1Turner extends PathGeneratorBase {
     public TimedPositionWithSpeed get1Turner(WindFieldGenerator windField, PolarDiagram polarDiagram, Position start, Position end, TimePoint startTime,
             boolean leftSide, double reachingTolerance, int stepMax, long timeStep) {
 
+        // System.out.println("Computing one turner for the segment between (" + start.getLatDeg() + "," +
+        // start.getLngDeg() + ") and (" + end.getLatDeg() + "," + end.getLngDeg() + ") starting at " +
+        // startTime.asMillis() + " milliseconds");
+
         long turnloss = polarDiagram.getTurnLoss(); // 4000;
 
         final Distance courseLength = start.getDistance(end);
@@ -93,7 +97,7 @@ public class PathGenerator1Turner extends PathGeneratorBase {
             targetFound = false;
             minimumDistance = courseLength.getMeters();
             path = new LinkedList<TimedPositionWithSpeed>();
-            path.addLast(new TimedPositionWithSpeedImpl(currentTime, currentPosition, null));
+            path.addLast(new TimedPositionWithSpeedImpl(currentTime, currentPosition, currSpeed));
 
             int stepLeft = 0;
             while ((stepLeft < step) && (!targetFound)) {
