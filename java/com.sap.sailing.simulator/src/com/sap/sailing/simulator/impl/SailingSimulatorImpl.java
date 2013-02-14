@@ -450,59 +450,63 @@ public class SailingSimulatorImpl implements SailingSimulator {
         return path;
     }
 
+    public Path getLeg(int index, int boatClassIndex) {
+        return null;
+    }
+
     @Override
     public List<String> getLegsNames(int boatClassIndex) {
 
         List<String> result = new ArrayList<String>();
-        
+
         URI liveURIr = null;
         URI storedURIr = null;
         URL paramURLr = null;
         RacesHandle raceHandle = null;
-        
-        RacingEventServiceImpl service = new RacingEventServiceImpl(); 
+
+        RacingEventServiceImpl service = new RacingEventServiceImpl();
         try {
-			liveURIr = new URI(liveURI);
-		} catch (URISyntaxException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	    try {
-			storedURIr = new URI(storedURI);
-		} catch (URISyntaxException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	    try {
-			paramURLr = new URL(raceURL);
-		} catch (MalformedURLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	    try {
-			raceHandle = service.addTracTracRace(paramURLr, liveURIr, storedURIr, EmptyWindStore.INSTANCE, 60000, this);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		synchronized (this) {
-			try {
-				this.wait();
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-	    }
-		
-		if( raceHandle != null) {
-			Set<RaceDefinition> races = raceHandle.getRaces();
-			for( RaceDefinition race : races) {
-				List<Leg> legs = race.getCourse().getLegs();
-				for( Leg leg : legs) {
-					result.add(leg.toString());
-				}
-			}
-		}
+            liveURIr = new URI(liveURI);
+        } catch (URISyntaxException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        try {
+            storedURIr = new URI(storedURI);
+        } catch (URISyntaxException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        try {
+            paramURLr = new URL(raceURL);
+        } catch (MalformedURLException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        try {
+            raceHandle = service.addTracTracRace(paramURLr, liveURIr, storedURIr, EmptyWindStore.INSTANCE, 60000, this);
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        synchronized (this) {
+            try {
+                this.wait();
+            } catch (InterruptedException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
+
+        if( raceHandle != null) {
+            Set<RaceDefinition> races = raceHandle.getRaces();
+            for( RaceDefinition race : races) {
+                List<Leg> legs = race.getCourse().getLegs();
+                for( Leg leg : legs) {
+                    result.add(leg.toString());
+                }
+            }
+        }
 
         return result;
     }
