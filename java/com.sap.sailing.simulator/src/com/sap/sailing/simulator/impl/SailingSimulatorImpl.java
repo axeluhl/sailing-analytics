@@ -11,20 +11,30 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.logging.Logger;
 
 import org.osgi.framework.FrameworkUtil;
 
+import com.sap.sailing.domain.base.Leg;
+import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MeterDistance;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
+import com.sap.sailing.domain.tracking.RacesHandle;
+import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
+import com.sap.sailing.server.impl.RacingEventServiceImpl;
 import com.sap.sailing.simulator.Boundary;
 import com.sap.sailing.simulator.Path;
 import com.sap.sailing.simulator.SailingSimulator;
@@ -444,11 +454,56 @@ public class SailingSimulatorImpl implements SailingSimulator {
     public List<String> getLegsNames(int boatClassIndex) {
 
         List<String> result = new ArrayList<String>();
-        result.add("First Leg");
-        result.add("Second Leg");
-        result.add("Third Leg");
-        result.add("Fourth Leg");
-        result.add("Last Leg");
+        
+        URI liveURIr = null;
+        URI storedURIr = null;
+        URL paramURLr = null;
+        RacesHandle raceHandle = null;
+        
+        RacingEventServiceImpl service = new RacingEventServiceImpl(); 
+        try {
+			liveURIr = new URI(liveURI);
+		} catch (URISyntaxException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	    try {
+			storedURIr = new URI(storedURI);
+		} catch (URISyntaxException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	    try {
+			paramURLr = new URL(raceURL);
+		} catch (MalformedURLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	    try {
+			raceHandle = service.addTracTracRace(paramURLr, liveURIr, storedURIr, EmptyWindStore.INSTANCE, 60000, this);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		synchronized (this) {
+			try {
+				this.wait();
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+	    }
+		
+		if( raceHandle != null) {
+			Set<RaceDefinition> races = raceHandle.getRaces();
+			for( RaceDefinition race : races) {
+				List<Leg> legs = race.getCourse().getLegs();
+				for( Leg leg : legs) {
+					result.add(leg.toString());
+				}
+			}
+		}
+
         return result;
     }
 }
