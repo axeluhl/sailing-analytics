@@ -461,6 +461,10 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
             polarDiagram.setWind(windAtTimePoint);
             boatSpeedMetersPerSecond = polarDiagram.getSpeedAtBearing(new DegreeBearingImpl(boatBearingDeg)).getMetersPerSecond();
             stepTimeMilliseconds = (long) ((distanceMeters / boatSpeedMetersPerSecond) * 1000);
+            //problem right here
+            //boatSpeed might be 0 for very small distances
+            //this is a rough fix
+            if(boatSpeedMetersPerSecond == 0.0) stepTimeMilliseconds = 1000;
 
             if (requestData.debugMode) {
 
@@ -479,6 +483,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
             }
 
             timepointAsMillis += stepTimeMilliseconds;
+        
         }
 
         double totalTimeSeconds = (timepointAsMillis - requestData.allPoints.get(0).timepoint) / 1000;
