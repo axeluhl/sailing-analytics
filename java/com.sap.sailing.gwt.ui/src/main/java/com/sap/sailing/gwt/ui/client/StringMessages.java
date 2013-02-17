@@ -499,4 +499,7 @@ public interface StringMessages extends Messages {
     String overallRankTooltip();
     String noDataFound();
     String displayName();
+    String histogram();
+    String numberOfDataPoints();
+    String angleAndTotalNumberOfDataPoints(int angle, int numberOfDataPoints);
 }

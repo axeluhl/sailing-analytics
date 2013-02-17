@@ -30,17 +30,18 @@ public class PolarSheetsHistogramPanel extends SimplePanel implements RequiresRe
 
     private Chart createHistogramChart() {
         Chart histogramChart = new Chart().setType(Type.COLUMN).setZoomType(Chart.ZoomType.X).setWidth(800);
-        //TODO string messages
-        histogramChart.setChartTitleText("Histogram:");
-        histogramChart.getYAxis().setMin(0).setAxisTitle(new AxisTitle().setText("Number of data-points"));
-        histogramChart.getXAxis().setLabels(new XAxisLabels().setRotation(-90f).setY(10)).setAxisTitle(new AxisTitle().setText("Speed in knots"));
+        histogramChart.setChartTitleText(stringMessages.histogram());
+        histogramChart.getYAxis().setMin(0).setAxisTitle(new AxisTitle().setText(stringMessages.numberOfDataPoints()));
+        histogramChart.getXAxis().setLabels(new XAxisLabels().setRotation(-90f).setY(10)).setAxisTitle(new AxisTitle().setText(
+                stringMessages.speedInKnots()));
         histogramChart.setLegend(new Legend().setEnabled(false));
         return histogramChart;
     }
 
     public void setData(PolarSheetsHistogramData data) {
         chart.removeAllSeries();
-        chart.setTitle(new ChartTitle().setText("Histogram"), new ChartSubtitle().setText("Angle: " + data.getAngle() + "; Total number of data-points: " + data.getDataCount()));
+        chart.setTitle(new ChartTitle().setText(stringMessages.histogram()),
+                new ChartSubtitle().setText(stringMessages.angleAndTotalNumberOfDataPoints(data.getAngle(), data.getDataCount())));
         Point[] points = toPoints(data);
         Series series = chart.createSeries();
         series.setPoints(points);
