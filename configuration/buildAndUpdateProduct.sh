@@ -90,6 +90,10 @@ MAVEN_SETTINGS=$ACDIR/maven-settings.xml
 
 if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
 	# yield build so that we get updated product
+
+	# preserve old build log
+	cp $ACDIR/build.log $ACDIR/build.log.old
+
 	cd $PROJECT_HOME/java
 	if [ $gwtcompile -eq 1 ]; then
 	    echo "INFO: Compiling GWT (rm -rf com.sap.sailing.gwt.ui/com.sap.sailing.*)"
@@ -116,7 +120,7 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
 	    extra="$extra -P no-debug.without-proxy"
 	fi
 
-	echo "Using following command: mvn $extra -P no-debug.without-proxy -fae -s $MAVEN_SETTINGS $clean install"
+	echo "Using following command: mvn $extra -fae -s $MAVEN_SETTINGS $clean install"
 	mvn $extra -fae -s $MAVEN_SETTINGS $clean install 2>&1 | tee $ACDIR/build.log
 
 	echo "Build complete. Do not forget to install product..."
