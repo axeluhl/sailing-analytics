@@ -72,6 +72,7 @@ public class AddToRaceLogJsonExportServlet extends JsonExportServlet {
 			response.sendError(HttpServletResponse.SC_NOT_FOUND, "No such fleet found.");
 			return;
 		}
+	
 		/// TODO: get RaceLog of RaceColumn by Fleet
 		//service.apply(new RecordRaceLogEvent(leaderboardName, raceColumnName, fleetName, event));
 		JsonDeserializer<RaceLogEvent> deserializer = 
