@@ -6,6 +6,7 @@ import java.util.List;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.racelog.Flags;
+import com.sap.sailing.domain.racelog.RaceLogEventVisitor;
 import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
 
 public class RaceLogFlagEventImpl extends RaceLogEventImpl implements RaceLogFlagEvent {
@@ -35,6 +36,11 @@ public class RaceLogFlagEventImpl extends RaceLogEventImpl implements RaceLogFla
 	@Override
 	public boolean isDisplayed() {
 		return isDisplayed;
+	}
+	
+	@Override
+	public void accept(RaceLogEventVisitor visitor) {
+		visitor.visit(this);
 	}
 	
 	@Override

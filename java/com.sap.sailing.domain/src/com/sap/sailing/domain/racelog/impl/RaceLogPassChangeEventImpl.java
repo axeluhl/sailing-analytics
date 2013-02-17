@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.racelog.RaceLogEventVisitor;
 import com.sap.sailing.domain.racelog.RaceLogPassChangeEvent;
 
 public class RaceLogPassChangeEventImpl extends RaceLogEventImpl implements RaceLogPassChangeEvent {
@@ -21,6 +22,11 @@ public class RaceLogPassChangeEventImpl extends RaceLogEventImpl implements Race
 	@Override
 	public int getNewPassId() {
 		return newPassId;
+	}
+	
+	@Override
+	public void accept(RaceLogEventVisitor visitor) {
+		visitor.visit(this);
 	}
 
 }

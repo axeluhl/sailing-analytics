@@ -22,6 +22,7 @@ import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CompetitorIdJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.racelog.RaceLogCourseAreaChangedEventSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.racelog.RaceLogEventSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.racelog.RaceLogEventSerializerChooser;
 import com.sap.sailing.server.gateway.serialization.impl.racelog.RaceLogFlagEventSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.racelog.RaceLogRaceStatusEventSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.racelog.RaceLogStartTimeEventSerializer;
@@ -66,10 +67,11 @@ public class QueryRaceLogJsonExportServlet extends JsonExportServlet {
 	private static JsonSerializer<RaceLogEvent> createSerializer() {
 		JsonSerializer<Competitor> competitorSerializer = new CompetitorIdJsonSerializer();
 		return new RaceLogEventSerializer(
-				new RaceLogFlagEventSerializer(competitorSerializer),
-				new RaceLogStartTimeEventSerializer(competitorSerializer),
-				new RaceLogRaceStatusEventSerializer(competitorSerializer),
-				new RaceLogCourseAreaChangedEventSerializer(competitorSerializer));
+				new RaceLogEventSerializerChooser(
+					new RaceLogFlagEventSerializer(competitorSerializer),
+					new RaceLogStartTimeEventSerializer(competitorSerializer),
+					new RaceLogRaceStatusEventSerializer(competitorSerializer),
+					new RaceLogCourseAreaChangedEventSerializer(competitorSerializer)));
 	}
 
 }

@@ -6,6 +6,7 @@ import java.util.List;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.racelog.RaceLogCourseAreaChangedEvent;
+import com.sap.sailing.domain.racelog.RaceLogEventVisitor;
 
 public class RaceLogCourseAreaChangeEventImpl extends RaceLogEventImpl implements
 		RaceLogCourseAreaChangedEvent {
@@ -22,6 +23,11 @@ public class RaceLogCourseAreaChangeEventImpl extends RaceLogEventImpl implement
 	@Override
 	public Serializable getCourseAreaId() {
 		return courseAreaId;
+	}
+	
+	@Override
+	public void accept(RaceLogEventVisitor visitor) {
+		visitor.visit(this);
 	}
 
 }

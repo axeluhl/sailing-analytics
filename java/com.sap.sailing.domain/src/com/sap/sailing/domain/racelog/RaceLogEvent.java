@@ -16,4 +16,6 @@ public interface RaceLogEvent extends Timed, WithID {
 	List<Competitor> getInvolvedBoats();
 	
 	int getPassId();
+	
+	void accept(RaceLogEventVisitor visitor);
 }

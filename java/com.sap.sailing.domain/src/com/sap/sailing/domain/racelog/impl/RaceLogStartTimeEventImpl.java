@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.racelog.RaceLogEventVisitor;
 import com.sap.sailing.domain.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
 
@@ -28,6 +29,11 @@ public class RaceLogStartTimeEventImpl extends RaceLogRaceStatusEventImpl
 	@Override
 	public TimePoint getStartTime() {
 		return startTime;
+	}
+	
+	@Override
+	public void accept(RaceLogEventVisitor visitor) {
+		visitor.visit(this);
 	}
 	
 	@Override

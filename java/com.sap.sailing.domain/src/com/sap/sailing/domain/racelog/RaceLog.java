@@ -7,6 +7,6 @@ public interface RaceLog extends Track<RaceLogEvent> {
 	
 	boolean add(RaceLogEvent event);
 	
-	void addListener(RaceLogListener newListener);
+	void addListener(RaceLogEventVisitor listener);
 
 }
