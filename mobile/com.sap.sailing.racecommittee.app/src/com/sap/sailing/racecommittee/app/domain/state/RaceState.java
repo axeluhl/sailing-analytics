@@ -3,11 +3,14 @@ package com.sap.sailing.racecommittee.app.domain.state;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogRaceStatus;
 
-public interface ManagedRaceState {
+public interface RaceState {
 
+	void registerListener(RaceStateChangedListener listener);
+	void unregisterListener(RaceStateChangedListener listener);
+	
 	/**
 	 * Updates the race's status.
-	 * @return the new status, as returned by {@link ManagedRaceState#getStatus()}.
+	 * @return the new status, as returned by {@link RaceState#getStatus()}.
 	 */
 	RaceLogRaceStatus updateStatus();
 	

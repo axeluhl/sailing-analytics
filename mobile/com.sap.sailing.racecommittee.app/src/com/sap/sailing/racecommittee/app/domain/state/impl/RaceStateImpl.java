@@ -1,26 +1,32 @@
 package com.sap.sailing.racecommittee.app.domain.state.impl;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.racelog.RaceLogRaceStatusEvent;
-import com.sap.sailing.racecommittee.app.domain.state.ManagedRaceState;
+import com.sap.sailing.racecommittee.app.domain.state.RaceState;
 import com.sap.sailing.racecommittee.app.domain.state.RaceLogChangedListener;
+import com.sap.sailing.racecommittee.app.domain.state.RaceStateChangedListener;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 
-public class ManagedRaceStateImpl implements ManagedRaceState, RaceLogChangedListener {
-private static final String TAG = ManagedRaceStateImpl.class.getName();
+public class RaceStateImpl implements RaceState, RaceLogChangedListener {
+private static final String TAG = RaceStateImpl.class.getName();
 	
 	protected RaceLogRaceStatus status;
 	protected RaceLog raceLog;
+	protected Set<RaceStateChangedListener> changedListeners;
 	
 	private RaceLogChangedVisitor raceLogListener;
 	
-	public ManagedRaceStateImpl(RaceLog raceLog) {
-		this.raceLogListener = new RaceLogChangedVisitor(this);
+	public RaceStateImpl(RaceLog raceLog) {
 		this.raceLog = raceLog;
 		this.status = RaceLogRaceStatus.UNKNOWN;
+		this.changedListeners = new HashSet<RaceStateChangedListener>();
 		
+		this.raceLogListener = new RaceLogChangedVisitor(this);
 		this.raceLog.addListener(raceLogListener);
 		
 		updateStatus();
@@ -34,8 +40,26 @@ private static final String TAG = ManagedRaceStateImpl.class.getName();
 		return status;
 	}
 	
-	private void setStatus(RaceLogRaceStatus status) {
-		this.status = status;
+	private void setStatus(RaceLogRaceStatus newStatus) {
+		RaceLogRaceStatus oldStatus = this.status;
+		this.status = newStatus;
+		if (oldStatus != newStatus) {
+			notifyListeners();
+		}
+	}
+
+	private void notifyListeners() {
+		for (RaceStateChangedListener listener : changedListeners) {
+			listener.onRaceStateChanged(this);
+		}
+	}
+
+	public void registerListener(RaceStateChangedListener listener) {
+		changedListeners.add(listener);
+	}
+
+	public void unregisterListener(RaceStateChangedListener listener) {
+		changedListeners.remove(listener);
 	}
 
 	public RaceLogRaceStatus updateStatus() {

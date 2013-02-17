@@ -9,8 +9,8 @@ import com.sap.sailing.domain.racelog.RaceLogRaceStatus;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.ManagedRaceIdentifier;
 import com.sap.sailing.racecommittee.app.domain.RaceGroup;
-import com.sap.sailing.racecommittee.app.domain.state.ManagedRaceState;
-import com.sap.sailing.racecommittee.app.domain.state.impl.ManagedRaceStateImpl;
+import com.sap.sailing.racecommittee.app.domain.state.RaceState;
+import com.sap.sailing.racecommittee.app.domain.state.impl.RaceStateImpl;
 
 public class ManagedRaceImpl implements ManagedRace {
 	private static final long serialVersionUID = -4936566684992524001L;
@@ -18,15 +18,15 @@ public class ManagedRaceImpl implements ManagedRace {
 	//private static final String TAG = ManagedRace.class.getName();
 	
 	private ManagedRaceIdentifier identifier;	
-	private ManagedRaceState state;
+	private RaceState state;
 	
 	public ManagedRaceImpl(ManagedRaceIdentifier identifier, RaceLog raceLog) {
-		this(identifier, new ManagedRaceStateImpl(raceLog));
+		this(identifier, new RaceStateImpl(raceLog));
 	}
 	
 	public ManagedRaceImpl(
 			ManagedRaceIdentifier identifier,
-			ManagedRaceState state) {
+			RaceState state) {
 		this.identifier = identifier;
 		this.state = state;
 	}
@@ -59,7 +59,7 @@ public class ManagedRaceImpl implements ManagedRace {
 		return identifier;
 	}
 
-	public ManagedRaceState getState() {
+	public RaceState getState() {
 		return state;
 	}
 

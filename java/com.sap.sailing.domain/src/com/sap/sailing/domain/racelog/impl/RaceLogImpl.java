@@ -40,7 +40,7 @@ public class RaceLogImpl extends TrackImpl<RaceLogEvent> implements RaceLog {
         return isAdded;
 	}
 	
-	private void notifyListenersAboutReceive(RaceLogEvent event) {
+	protected void notifyListenersAboutReceive(RaceLogEvent event) {
 		synchronized (listeners) {
 			for (RaceLogEventVisitor listener : listeners) {
 				try {

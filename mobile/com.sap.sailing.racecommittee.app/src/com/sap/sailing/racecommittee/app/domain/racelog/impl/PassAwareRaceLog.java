@@ -57,10 +57,17 @@ public class PassAwareRaceLog extends RaceLogImpl implements RaceLog {
 	
 	@Override
 	public boolean add(RaceLogEvent event) {
-		if (super.add(event)) {
-			setCurrentPassId(Math.max(event.getPassId(), this.currentPassId));
-			return true;
-		}
-		return false;
+		boolean isAdded = false;
+		lockForWrite();
+        try {
+            isAdded = getInternalRawFixes().add(event);
+        } finally {
+            unlockAfterWrite();
+        }
+        if (isAdded) {
+        	setCurrentPassId(Math.max(event.getPassId(), this.currentPassId));
+        	notifyListenersAboutReceive(event);
+        }
+        return isAdded;
 	}
 }

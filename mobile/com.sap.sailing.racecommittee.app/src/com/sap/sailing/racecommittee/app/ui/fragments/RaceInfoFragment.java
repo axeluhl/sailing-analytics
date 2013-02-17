@@ -1,19 +1,28 @@
 package com.sap.sailing.racecommittee.app.ui.fragments;
 
+import java.util.Date;
+import java.util.UUID;
+
 import android.app.FragmentTransaction;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.racelog.RaceLogRaceStatus;
+import com.sap.sailing.domain.racelog.impl.RaceLogRaceStatusEventImpl;
 import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.domain.state.RaceState;
+import com.sap.sailing.racecommittee.app.domain.state.RaceStateChangedListener;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.ui.fragments.chooser.RaceInfoFragmentChooser;
 
 
-public class RaceInfoFragment extends RaceFragment {
+public class RaceInfoFragment extends RaceFragment implements RaceStateChangedListener {
 	private final static String TAG = RaceInfoFragment.class.getName();
 
 	private RaceInfoFragmentChooser infoFragmentChooser;
@@ -52,10 +61,32 @@ public class RaceInfoFragment extends RaceFragment {
 		/// TODO: implement reset button
 		Button resetButton = ((Button) getView().findViewById(R.id.btnResetRace));
 		resetButton.setText("No yet");
-		resetButton.setActivated(false);
+		resetButton.setOnClickListener(new OnClickListener() {
+			public void onClick(View arg0) {
+				getRace().getRaceLog().add(
+						new RaceLogRaceStatusEventImpl(
+								new MillisecondsTimePoint(new Date()), 
+								UUID.randomUUID(), 
+								null,
+								42,
+								RaceLogRaceStatus.UNSCHEDULED));
+			}
+		});
 		
 		// Initial fragment selection...
 		switchToInfoFragment();
+	}
+	
+	@Override
+	public void onStart() {
+		super.onStart();
+		getRace().getState().registerListener(this);
+	}
+	
+	@Override
+	public void onStop() {
+		getRace().getState().unregisterListener(this);
+		super.onStop();
 	}
 
 	public RaceFragment getInfoFragment() {
@@ -84,6 +115,10 @@ public class RaceInfoFragment extends RaceFragment {
 		transaction.replace(R.id.infoContainer, infoFragment);
 		transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
 		transaction.commit();
+	}
+
+	public void onRaceStateChanged(RaceState state) {
+		switchToInfoFragment();
 	}
 	
 }
