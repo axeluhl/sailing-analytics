@@ -5,8 +5,6 @@ import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
-import com.sap.sailing.domain.racelog.RaceLog;
-import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.util.impl.RaceColumnListeners;
 
@@ -144,10 +142,5 @@ public interface RaceColumn extends Named {
      * If <code>null</code>, the {@link #getFactor() factor} defaults to 1 for non-medal and {@link #DEFAULT_MEDAL_RACE_FACTOR} for
      * medal races. Otherwise, the explicit factor is used.
      */
-    Double getExplicitFactor();
-    
-    RaceLog getRaceLog(String leaderboardName, Fleet fleet);
-    
-    void recordRaceLogEvent(String leaderboardName, Fleet fleet, RaceLogEvent event);
-    
+    Double getExplicitFactor();    
 }

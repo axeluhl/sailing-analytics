@@ -5,11 +5,6 @@ import com.sap.sailing.domain.base.RaceColumnInSeries;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
-import com.sap.sailing.domain.racelog.RaceColumnIdentifier;
-import com.sap.sailing.domain.racelog.RaceLog;
-import com.sap.sailing.domain.racelog.RaceLogEvent;
-import com.sap.sailing.domain.racelog.RaceLogStore;
-import com.sap.sailing.domain.racelog.impl.RaceColumnIdentifierImpl;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
@@ -39,8 +34,8 @@ public class RaceColumnInSeriesImpl extends AbstractRaceColumn implements RaceCo
      *            this column's series {@link Regatta}, respectively. If <code>null</code>, the re-association won't be
      *            carried out.
      */
-    public RaceColumnInSeriesImpl(String name, Series series, TrackedRegattaRegistry trackedRegattaRegistry, RaceLogStore raceLogStore) {
-    	super(raceLogStore);
+    public RaceColumnInSeriesImpl(String name, Series series, TrackedRegattaRegistry trackedRegattaRegistry) {
+    	super();
         this.name = name;
         this.series = series;
         this.trackedRegattaRegistry = trackedRegattaRegistry;
@@ -92,22 +87,6 @@ public class RaceColumnInSeriesImpl extends AbstractRaceColumn implements RaceCo
         }
         // re-associating the TrackedRace needs to happen before the super call because the RaceIdentifier may have changed
         super.setTrackedRace(fleet, trackedRace);
-    }
-
-	@Override
-	public RaceLog getRaceLog(String leaderboardName, Fleet fleet) {
-		return raceLogStore.getRaceLog(getRaceColumnIdentifier(leaderboardName), fleet);
-	}
-
-	@Override
-	public RaceColumnIdentifier getRaceColumnIdentifier(String leaderboardName) {
-		return new RaceColumnIdentifierImpl(leaderboardName, getName());
-	}
-	
-	@Override
-	public void recordRaceLogEvent(String leaderboardName, Fleet fleet, RaceLogEvent event) {
-    	
-    	raceLogStore.getRaceLog(getRaceColumnIdentifier(leaderboardName), fleet).add(event);
     }
 
 }

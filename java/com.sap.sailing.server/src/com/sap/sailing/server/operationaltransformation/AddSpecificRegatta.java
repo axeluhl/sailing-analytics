@@ -15,7 +15,6 @@ import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
-import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
@@ -25,22 +24,20 @@ public class AddSpecificRegatta extends AbstractAddRegattaOperation {
     private final Map<String, Pair<List<Triple<String, Integer, Color>>, Boolean>> seriesNamesWithFleetNamesAndFleetOrderingAndMedal;
     private final boolean persistent;
     private final ScoringScheme scoringScheme;
-    private final RaceLogStore raceLogStore;
     
     public AddSpecificRegatta(String regattaName, String boatClassName, Serializable id,
             Map<String, Pair<List<Triple<String, Integer, Color>>, Boolean>> seriesNamesWithFleetNamesAndFleetOrdering,
-            boolean persistent, ScoringScheme scoringScheme, RaceLogStore raceLogStore) {
+            boolean persistent, ScoringScheme scoringScheme) {
         super(regattaName, boatClassName, id);
         this.seriesNamesWithFleetNamesAndFleetOrderingAndMedal = seriesNamesWithFleetNamesAndFleetOrdering;
         this.persistent = persistent;
         this.scoringScheme = scoringScheme;
-        this.raceLogStore = raceLogStore;
     }
 
     @Override
     public Regatta internalApplyTo(RacingEventService toState) throws Exception {
         return toState.createRegatta(getBaseEventName(), getBoatClassName(), getId(), createSeries(toState),
-                persistent, scoringScheme, raceLogStore);
+                persistent, scoringScheme);
     }
 
     private Iterable<? extends Series> createSeries(TrackedRegattaRegistry trackedRegattaRegistry) {
@@ -48,7 +45,7 @@ public class AddSpecificRegatta extends AbstractAddRegattaOperation {
         for (Map.Entry<String, Pair<List<Triple<String, Integer, Color>>, Boolean>> e : seriesNamesWithFleetNamesAndFleetOrderingAndMedal.entrySet()) {
             final List<String> emptyRaceColumnNamesList = Collections.emptyList();
             Series s = new SeriesImpl(e.getKey(), /* isMedal */e.getValue().getB(), createFleets(e.getValue().getA()),
-                    emptyRaceColumnNamesList, trackedRegattaRegistry, raceLogStore);
+                    emptyRaceColumnNamesList, trackedRegattaRegistry);
             result.add(s);
         }
         return result;

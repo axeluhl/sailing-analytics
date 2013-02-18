@@ -71,11 +71,8 @@ import com.sap.sailing.domain.leaderboard.meta.LeaderboardGroupMetaLeaderboard;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
-import com.sap.sailing.domain.persistence.MongoRaceLogStoreFactory;
-import com.sap.sailing.domain.racelog.RaceColumnIdentifier;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
-import com.sap.sailing.domain.racelog.RaceLogStore;
-import com.sap.sailing.domain.racelog.impl.RaceColumnIdentifierImpl;
+import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.swisstimingadapter.Race;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterConnector;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterMessage;
@@ -118,7 +115,6 @@ import com.sap.sailing.server.operationaltransformation.CreateEvent;
 import com.sap.sailing.server.operationaltransformation.CreateTrackedRace;
 import com.sap.sailing.server.operationaltransformation.RecordCompetitorGPSFix;
 import com.sap.sailing.server.operationaltransformation.RecordMarkGPSFix;
-import com.sap.sailing.server.operationaltransformation.RecordRaceLogEvent;
 import com.sap.sailing.server.operationaltransformation.RecordWindFix;
 import com.sap.sailing.server.operationaltransformation.RemoveEvent;
 import com.sap.sailing.server.operationaltransformation.RemoveWindFix;
@@ -364,10 +360,8 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         if (leaderboard != null) {
             if (leaderboard instanceof FlexibleLeaderboard) {
                 // uses the default fleet as the single fleet for the new column
-            	RaceColumnIdentifier columnIdentifier = new RaceColumnIdentifierImpl(leaderboardName, columnName);
                 RaceColumn result = ((FlexibleLeaderboard) leaderboard).addRaceColumn(columnName, medalRace,
-                		MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(mongoObjectFactory, domainObjectFactory, columnIdentifier),
-                        leaderboard.getFleet(null));
+                		leaderboard.getFleet(null));
                 updateStoredLeaderboard((FlexibleLeaderboard) leaderboard);
                 return result;
             } else {
@@ -605,13 +599,12 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     }
 
     @Override
-    public Regatta addRegatta(URL jsonURL, URI liveURI, URI storedURI, WindStore windStore, long timeoutInMilliseconds,
-    		RaceLogStore raceLogStore) throws Exception {
+    public Regatta addRegatta(URL jsonURL, URI liveURI, URI storedURI, WindStore windStore, long timeoutInMilliseconds) throws Exception {
         JSONService jsonService = getTracTracDomainFactory().parseJSONURL(jsonURL);
         Regatta regatta = null;
         for (RaceRecord rr : jsonService.getRaceRecords()) {
             URL paramURL = rr.getParamURL();
-            regatta = addTracTracRace(paramURL, liveURI, storedURI, windStore, timeoutInMilliseconds, raceLogStore).getRegatta();
+            regatta = addTracTracRace(paramURL, liveURI, storedURI, windStore, timeoutInMilliseconds).getRegatta();
         }
         return regatta;
     }
@@ -620,8 +613,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     public Regatta getOrCreateRegatta(String baseEventName, String boatClassName, Serializable id) {
         Regatta regatta = new RegattaImpl(baseEventName, getBaseDomainFactory().getOrCreateBoatClass(
                 boatClassName), this, com.sap.sailing.domain.base.DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT),
-                RegattaImpl.getFullName(baseEventName, boatClassName), 
-                MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(mongoObjectFactory, domainObjectFactory));
+                RegattaImpl.getFullName(baseEventName, boatClassName));
         Regatta result = regattasByName.get(regatta.getName());
         if (result == null) {
             result = regatta;
@@ -633,11 +625,11 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
 
     @Override
     public Regatta createRegatta(String baseEventName, String boatClassName,
-            Serializable id, Iterable<? extends Series> series, boolean persistent, ScoringScheme scoringScheme, RaceLogStore raceLogStore) {
+            Serializable id, Iterable<? extends Series> series, boolean persistent, ScoringScheme scoringScheme) {
         Regatta regatta = new RegattaImpl(baseEventName,
                 getBaseDomainFactory().getOrCreateBoatClass(boatClassName), series, persistent, scoringScheme, id);
         logger.info("Created regatta " + regatta.getName() + " (" + hashCode() + ") on "+this);
-        cacheAndReplicateSpecificRegattaWithoutRaceColumns(regatta, raceLogStore);
+        cacheAndReplicateSpecificRegattaWithoutRaceColumns(regatta);
         if (persistent) {
             updateStoredRegatta(regatta);
         }
@@ -667,20 +659,20 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
 
     @Override
     public RacesHandle addSwissTimingRace(RegattaIdentifier regattaToAddTo, String raceID, String hostname,
-            int port, boolean canSendRequests, WindStore windStore, long timeoutInMilliseconds, RaceLogStore raceLogStore) throws Exception {
+            int port, boolean canSendRequests, WindStore windStore, long timeoutInMilliseconds) throws Exception {
         return addRace(
                 regattaToAddTo,
                 swissTimingDomainFactory.createTrackingConnectivityParameters(hostname, port, raceID, canSendRequests, delayToLiveInMillis,
-                        swissTimingFactory, swissTimingDomainFactory, windStore, swissTimingAdapterPersistence, raceLogStore), windStore, timeoutInMilliseconds);
+                        swissTimingFactory, swissTimingDomainFactory, windStore, swissTimingAdapterPersistence), windStore, timeoutInMilliseconds);
     }
 
     @Override
     public RacesHandle addTracTracRace(URL paramURL, URI liveURI, URI storedURI, WindStore windStore,
-            long timeoutInMilliseconds, RaceLogStore raceLogStore) throws Exception {
+            long timeoutInMilliseconds) throws Exception {
         return addRace(
         /* regattaToAddTo */null, getTracTracDomainFactory().createTrackingConnectivityParameters(paramURL, liveURI, storedURI,
         /* startOfTracking */null,
-        /* endOfTracking */null, delayToLiveInMillis, /* simulateWithStartTimeNow */false, windStore, raceLogStore), windStore,
+        /* endOfTracking */null, delayToLiveInMillis, /* simulateWithStartTimeNow */false, windStore), windStore,
                 timeoutInMilliseconds);
     }
     
@@ -771,14 +763,14 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
      *            the series of this regatta must not have any {@link Series#getRaceColumns() race columns associated
      *            (yet)}.
      */
-    private void cacheAndReplicateSpecificRegattaWithoutRaceColumns(Regatta regatta, RaceLogStore raceLogStore) {
+    private void cacheAndReplicateSpecificRegattaWithoutRaceColumns(Regatta regatta) {
         if (!regattasByName.containsKey(regatta.getName())) {
             logger.info("putting regatta "+regatta.getName()+" ("+regatta.hashCode()+") into regattasByName of "+this);
             regattasByName.put(regatta.getName(), regatta);
             regatta.addRegattaListener(this);
             replicate(new AddSpecificRegatta(regatta.getBaseName(), regatta.getBoatClass() == null ? null : regatta
                     .getBoatClass().getName(), regatta.getId(), getSeriesWithoutRaceColumnsConstructionParametersAsMap(regatta),
-                    regatta.isPersistent(), regatta.getScoringScheme(), raceLogStore));
+                    regatta.isPersistent(), regatta.getScoringScheme()));
             RegattaIdentifier regattaIdentifier = regatta.getRegattaIdentifier();
             for (RaceDefinition race : regatta.getAllRaces()) {
                 replicate(new AddRaceDefinition(regattaIdentifier, race));
@@ -831,9 +823,9 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     @Override
     public RacesHandle addTracTracRace(RegattaIdentifier regattaToAddTo, URL paramURL, URI liveURI,
             URI storedURI, TimePoint startOfTracking, TimePoint endOfTracking,
-            WindStore windStore, long timeoutInMilliseconds, boolean simulateWithStartTimeNow, RaceLogStore raceLogStore) throws Exception {
+            WindStore windStore, long timeoutInMilliseconds, boolean simulateWithStartTimeNow) throws Exception {
         return addRace(regattaToAddTo, getTracTracDomainFactory().createTrackingConnectivityParameters(paramURL, liveURI, storedURI, startOfTracking,
-                        endOfTracking, delayToLiveInMillis, simulateWithStartTimeNow, windStore, raceLogStore), windStore, timeoutInMilliseconds);
+                        endOfTracking, delayToLiveInMillis, simulateWithStartTimeNow, windStore), windStore, timeoutInMilliseconds);
     }
 
     private void ensureRegattaIsObservedForDefaultLeaderboardAndAutoLeaderboardLinking(DynamicTrackedRegatta trackedRegatta) {
@@ -889,10 +881,8 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
             final FlexibleLeaderboard defaultLeaderboard = (FlexibleLeaderboard) leaderboardsByName.get(LeaderboardNameConstants.DEFAULT_LEADERBOARD_NAME);
             if (defaultLeaderboard != null) {
             	String columnName = trackedRace.getRace().getName();
-            	RaceColumnIdentifier columnIdentifier = new RaceColumnIdentifierImpl(defaultLeaderboard.getName(), columnName);
                 defaultLeaderboard.addRace(trackedRace, columnName, /* medalRace */false,
-                		MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(mongoObjectFactory, domainObjectFactory, columnIdentifier),
-                        defaultLeaderboard.getFleet(null));
+                		defaultLeaderboard.getFleet(null));
             }
             TrackedRaceReplicator trackedRaceReplicator = new TrackedRaceReplicator(trackedRace);
             trackedRaceReplicators.put(trackedRace, trackedRaceReplicator);
@@ -1654,9 +1644,9 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
 	}
 
 	@Override
-	public void recordRaceLogEvent(String leaderboardName, String raceColumnName, String fleetName, RaceLogEvent event) {
-		RecordRaceLogEvent command = new RecordRaceLogEvent(leaderboardName, raceColumnName, fleetName, event);
-		apply(command);
+	public void recordRaceLogEvent(RaceLogIdentifier identifier, RaceLogEvent event) {
+		//RaceLog raceLog = getRaceLog(identifier);
+		//raceLog.add(event);
 	}
 
 }

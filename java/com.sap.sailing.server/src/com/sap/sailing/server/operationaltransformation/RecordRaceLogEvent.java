@@ -28,7 +28,6 @@ public class RecordRaceLogEvent extends AbstractRacingEventServiceOperation<Void
 		Leaderboard leaderboard = toState.getLeaderboardByName(leaderboardName);
 		RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
 		Fleet fleet = raceColumn.getFleetByName(fleetName);
-		raceColumn.recordRaceLogEvent(leaderboardName, fleet, event);
 		return null;
 	}
 

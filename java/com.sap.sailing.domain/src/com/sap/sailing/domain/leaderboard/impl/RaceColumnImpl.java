@@ -6,11 +6,7 @@ import java.util.List;
 
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.impl.AbstractRaceColumn;
-import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.leaderboard.FlexibleRaceColumn;
-import com.sap.sailing.domain.racelog.RaceLog;
-import com.sap.sailing.domain.racelog.RaceLogEvent;
-import com.sap.sailing.domain.racelog.RaceLogStore;
 
 public class RaceColumnImpl extends AbstractRaceColumn implements FlexibleRaceColumn {
     private static final long serialVersionUID = -7801617988982540470L;
@@ -23,8 +19,8 @@ public class RaceColumnImpl extends AbstractRaceColumn implements FlexibleRaceCo
     private final Iterable<Fleet> fleets;
     private boolean medalRace;
     
-    public RaceColumnImpl(String name, boolean medalRace, RaceLogStore raceLogStore, Iterable<Fleet> fleets) {
-        super(raceLogStore);
+    public RaceColumnImpl(String name, boolean medalRace, Iterable<Fleet> fleets) {
+        super();
         this.name = name;
         this.medalRace = medalRace;
         List<Fleet> myFleets = new ArrayList<Fleet>();
@@ -60,25 +56,4 @@ public class RaceColumnImpl extends AbstractRaceColumn implements FlexibleRaceCo
     public Iterable<Fleet> getFleets() {
         return fleets;
     }
-    
-    @Override
-	public RaceLog getRaceLog(String leaderboardName, Fleet fleet) {
-		return raceLogStore.getRaceLog(fleet);
-	}
-
-    public RaceLog getRaceLog(Fleet fleet) {
-		return getRaceLog("", fleet);
-	}
-    
-    @Override
-    public void recordRaceLogEvent(Fleet fleet, RaceLogEvent event) {
-    	if (!Util.contains(fleets, fleet))
-    		return;
-    	raceLogStore.getRaceLog(fleet).add(event);
-    }
-
-	@Override
-	public void recordRaceLogEvent(String leaderboardName, Fleet fleet, RaceLogEvent event) {
-		recordRaceLogEvent(fleet, event);		
-	}
 }
