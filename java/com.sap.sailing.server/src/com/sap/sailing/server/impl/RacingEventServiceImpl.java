@@ -118,6 +118,7 @@ import com.sap.sailing.server.operationaltransformation.CreateEvent;
 import com.sap.sailing.server.operationaltransformation.CreateTrackedRace;
 import com.sap.sailing.server.operationaltransformation.RecordCompetitorGPSFix;
 import com.sap.sailing.server.operationaltransformation.RecordMarkGPSFix;
+import com.sap.sailing.server.operationaltransformation.RecordRaceLogEvent;
 import com.sap.sailing.server.operationaltransformation.RecordWindFix;
 import com.sap.sailing.server.operationaltransformation.RemoveEvent;
 import com.sap.sailing.server.operationaltransformation.RemoveWindFix;
@@ -1664,6 +1665,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
 	public void recordRaceLogEvent(RaceLogIdentifier identifier, RaceLogEvent event) {
 		RaceLog raceLog = getRaceLog(identifier);
 		raceLog.add(event);
+		replicate(new RecordRaceLogEvent(identifier, event));
 	}
 
 }

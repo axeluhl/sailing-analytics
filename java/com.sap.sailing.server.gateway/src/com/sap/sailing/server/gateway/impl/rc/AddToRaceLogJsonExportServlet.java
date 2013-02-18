@@ -14,6 +14,8 @@ import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
+import com.sap.sailing.domain.racelog.RaceLogIdentifier;
+import com.sap.sailing.domain.racelog.impl.RaceLogIdentifierImpl;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
@@ -72,8 +74,8 @@ public class AddToRaceLogJsonExportServlet extends JsonExportServlet {
 			response.sendError(HttpServletResponse.SC_NOT_FOUND, "No such fleet found.");
 			return;
 		}
-		/// TODO: get RaceLog of RaceColumn by Fleet
-		//service.apply(new RecordRaceLogEvent(leaderboardName, raceColumnName, fleetName, event));
+		
+		RaceLogIdentifier identifier = new RaceLogIdentifierImpl(leaderboard, raceColumn, fleet);
 		JsonDeserializer<RaceLogEvent> deserializer = 
 			     new RaceLogEventDeserializer(
 			       new RaceLogFlagEventDeserializer(), 
@@ -88,7 +90,7 @@ public class AddToRaceLogJsonExportServlet extends JsonExportServlet {
 			
 			RaceLogEvent logEvent = deserializer.deserialize(requestObject);
 			
-			service.recordRaceLogEvent(leaderboardName, raceColumnName, fleetName, logEvent);
+			service.recordRaceLogEvent(identifier, logEvent);
 			
 		} catch (ParseException pe) {
 			response.sendError(HttpServletResponse.SC_BAD_REQUEST, String.format("Invalid JSON in request body:\n%s", pe));
