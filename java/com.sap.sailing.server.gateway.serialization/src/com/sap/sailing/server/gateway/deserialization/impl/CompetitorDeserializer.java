@@ -3,16 +3,16 @@ package com.sap.sailing.server.gateway.deserialization.impl;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.DomainFactory;
+import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 
 public class CompetitorDeserializer implements JsonDeserializer<Competitor> {
 	
 	@SuppressWarnings("unused")
-	private DomainFactory factory;
+	private SharedDomainFactory factory;
 	
-	public CompetitorDeserializer(DomainFactory factory) {
+	public CompetitorDeserializer(SharedDomainFactory factory) {
 		this.factory = factory;
 	}
 

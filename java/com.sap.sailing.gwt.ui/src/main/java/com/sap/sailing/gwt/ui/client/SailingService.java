@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.ui.client;
 
 import java.io.Serializable;
-import java.net.UnknownHostException;
 import java.util.Collection;
 import java.util.Date;
 import java.util.LinkedHashMap;
@@ -11,7 +10,6 @@ import java.util.Set;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
-import com.mongodb.MongoException;
 import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.MaxPointsReason;
@@ -273,7 +271,7 @@ public interface SailingService extends RemoteService {
 
     void updateRaceCourse(RegattaAndRaceIdentifier raceIdentifier, List<ControlPointDTO> controlPoints);
 
-    void addColumnsToLeaderboard(String leaderboardName, List<Pair<String, Boolean>> columnsToAdd) throws UnknownHostException, MongoException;
+    void addColumnsToLeaderboard(String leaderboardName, List<Pair<String, Boolean>> columnsToAdd);
 
     void removeLeaderboardColumns(String leaderboardName, List<String> columnsToRemove);
 

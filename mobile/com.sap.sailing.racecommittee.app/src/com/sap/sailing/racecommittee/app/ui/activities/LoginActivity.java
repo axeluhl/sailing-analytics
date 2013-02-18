@@ -11,7 +11,7 @@ import android.view.Window;
 import android.widget.Toast;
 
 import com.sap.sailing.domain.base.CourseArea;
-import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.domain.base.EventData;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
@@ -72,16 +72,16 @@ public class LoginActivity extends TwoPaneActivity
 		ExLog.i("LoginActivity", "CourseFragment created.");
 	}
     
-	private ItemSelectedListener<Event> eventSelectionListener = new ItemSelectedListener<Event>() {
+	private ItemSelectedListener<EventData> eventSelectionListener = new ItemSelectedListener<EventData>() {
 	
-		public void itemSelected(Fragment sender, Event event) {
+		public void itemSelected(Fragment sender, EventData event) {
 			Serializable eventId = event.getId();
 			ExLog.i(ExLog.EVENT_SELECTED, eventId.toString(), getBaseContext());
 			showCourseAreaListFragment(eventId);
 		}
 	};
 
-	public ItemSelectedListener<Event> getEventSelectionListener() {
+	public ItemSelectedListener<EventData> getEventSelectionListener() {
 		return eventSelectionListener;
 	}
 	

@@ -8,22 +8,22 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
-import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.domain.base.EventData;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
 
-public class EventsDataParser implements DataParser<Collection<Event>> {
+public class EventsDataParser implements DataParser<Collection<EventData>> {
 
-	private JsonDeserializer<Event> deserializer;
+	private JsonDeserializer<EventData> deserializer;
 	
-	public EventsDataParser(JsonDeserializer<Event> deserializer) {
+	public EventsDataParser(JsonDeserializer<EventData> deserializer) {
 		this.deserializer = deserializer;
 	}
 
-	public Collection<Event> parse(Reader reader) throws Exception {
+	public Collection<EventData> parse(Reader reader) throws Exception {
 		Object parsedResult = JSONValue.parse(reader);
 		JSONArray jsonArray = Helpers.toJSONArraySafe(parsedResult);
-		Collection<Event> events = new ArrayList<Event>();
+		Collection<EventData> events = new ArrayList<EventData>();
 		
 		for (Object element : jsonArray) {
 			JSONObject json = Helpers.toJSONObjectSafe(element);

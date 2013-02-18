@@ -6,23 +6,23 @@ import java.util.Collection;
 import java.util.Date;
 
 import com.sap.sailing.domain.base.CourseArea;
-import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.domain.base.EventData;
+import com.sap.sailing.domain.base.RaceGroup;
+import com.sap.sailing.domain.base.SeriesWithRows;
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
 import com.sap.sailing.domain.base.impl.CourseAreaImpl;
-import com.sap.sailing.domain.base.impl.EventImpl;
+import com.sap.sailing.domain.base.impl.EventDataImpl;
 import com.sap.sailing.domain.base.impl.FleetImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.base.impl.RaceGroupImpl;
+import com.sap.sailing.domain.base.impl.SeriesWithRowsImpl;
 import com.sap.sailing.domain.racelog.RaceLogEventFactory;
 import com.sap.sailing.domain.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.racelog.impl.RaceLogEventFactoryImpl;
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
-import com.sap.sailing.racecommittee.app.domain.RaceGroup;
-import com.sap.sailing.racecommittee.app.domain.SeriesWithRows;
 import com.sap.sailing.racecommittee.app.domain.impl.ManagedRaceIdentifierImpl;
 import com.sap.sailing.racecommittee.app.domain.impl.ManagedRaceImpl;
-import com.sap.sailing.racecommittee.app.domain.impl.RaceGroupImpl;
-import com.sap.sailing.racecommittee.app.domain.impl.SeriesWithRowsImpl;
 import com.sap.sailing.racecommittee.app.domain.racelog.PassAwareRaceLog;
 import com.sap.sailing.racecommittee.app.domain.racelog.impl.PassAwareRaceLogImpl;
 
@@ -40,10 +40,10 @@ public class OfflineDataManager extends DataManager {
 	}
 
 	private void fillDataStore(DataStore dataStore) {
-		dataStore.addEvent(new EventImpl("Extreme Sailing Series 2012 (Cardiff)", "Cardiff", "", true, "DUMBUUIDA"));
-		dataStore.addEvent(new EventImpl("Extreme Sailing Series 2012 (Nice)", "Nice", "", true, "DUMBUUIDB"));
-		dataStore.addEvent(new EventImpl("Extreme Sailing Series 2012 (Rio)", "Rio", "", true, "DUMBUUIDC"));
-		Event newEvent = new EventImpl("Extreme Sailing Series 2013 (Muscat)", "Muscat", "", true, "FIXUUID");
+		dataStore.addEvent(new EventDataImpl("Extreme Sailing Series 2012 (Cardiff)", "Cardiff", "", true, "DUMBUUIDA"));
+		dataStore.addEvent(new EventDataImpl("Extreme Sailing Series 2012 (Nice)", "Nice", "", true, "DUMBUUIDB"));
+		dataStore.addEvent(new EventDataImpl("Extreme Sailing Series 2012 (Rio)", "Rio", "", true, "DUMBUUIDC"));
+		EventData newEvent = new EventDataImpl("Extreme Sailing Series 2013 (Muscat)", "Muscat", "", true, "FIXUUID");
 		newEvent.getVenue().addCourseArea(new CourseAreaImpl("Offshore", "FIXCAUUID1"));
 		newEvent.getVenue().addCourseArea(new CourseAreaImpl("Stadium", "FIXCAUUID2"));
 		dataStore.addEvent(newEvent);
@@ -112,7 +112,7 @@ public class OfflineDataManager extends DataManager {
 		//dataStore.addRace(m1);
 	}
 
-	public void loadEvents(LoadClient<Collection<Event>> client) {
+	public void loadEvents(LoadClient<Collection<EventData>> client) {
 		client.onLoadSucceded(dataStore.getEvents());
 	}
 

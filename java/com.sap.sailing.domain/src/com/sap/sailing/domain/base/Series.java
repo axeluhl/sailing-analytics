@@ -20,6 +20,14 @@ import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
  */
 public interface Series extends SeriesData {
     
+    /**
+     * A series consists of one or more "race columns." Some people would just say "race," but we use the term "race" for
+     * something that has a single start time and start line; so if each fleet in a series gets their own start for
+     * something called "R2", those are as many "races" as we have fleets; therefore, we use "race column" instead to
+     * describe all "races" named, e.g., "R3" in a series.
+     */
+    Iterable<? extends RaceColumnInSeries> getRaceColumns();
+    
     RaceColumnInSeries getRaceColumnByName(String columnName);
     
     void setIsMedal(boolean isMedal);

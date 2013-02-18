@@ -6,12 +6,12 @@ import java.util.Collection;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.RaceRow;
-import com.sap.sailing.racecommittee.app.domain.SeriesWithRows;
-import com.sap.sailing.racecommittee.app.domain.impl.SeriesWithRowsImpl;
+import com.sap.sailing.domain.base.SeriesWithRows;
+import com.sap.sailing.domain.base.impl.SeriesWithRowsImpl;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
-import com.sap.sailing.server.gateway.serialization.impl.leaderboard.RaceRowsOfSeriesDataExtensionSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.racegroup.RaceRowsOfSeriesWithRowsSerializer;
 
 public class SeriesWithRowsDeserializer implements JsonDeserializer<SeriesWithRows> {
 
@@ -29,7 +29,7 @@ public class SeriesWithRowsDeserializer implements JsonDeserializer<SeriesWithRo
 		Collection<RaceRow> rows = new ArrayList<RaceRow>();
 		for (Object fleetObject : Helpers.getNestedArraySafe(
 				object, 
-				RaceRowsOfSeriesDataExtensionSerializer.FIELD_FLEETS)) {
+				RaceRowsOfSeriesWithRowsSerializer.FIELD_FLEETS)) {
 			JSONObject fleetJson = Helpers.toJSONObjectSafe(fleetObject);
 			rows.add(raceRowDeserializer.deserialize(fleetJson));
 		}

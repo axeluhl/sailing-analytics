@@ -25,49 +25,16 @@ import difflib.PatchFailedException;
  * @author Axel Uhl (d043530)
  * 
  */
-public interface Course extends Named {
-    void lockForRead();
+public interface Course extends Named, CourseData {
+	void lockForRead();
     
     void unlockAfterRead();
     
-    /**
-     * Clients can safely iterate over the resulting list because it's a copy which therefore won't reflect
-     * waypoint additions and removals. 
-     */
-    List<Leg> getLegs();
-
-    /**
-     * @return a non-live copy of the waypoints of this course; the creation of the copy is thread safe
-     */
-    Iterable<Waypoint> getWaypoints();
-    
-    /**
-     * Starts searching at position <code>start</code> in {@link #getWaypoints()} for a waypoint
-     * whose {@link Waypoint#getControlPoint() control point} is identical to <code>controlPoint</code>.
-     * If no such waypoint is found, <code>null</code> is returned.
-     * 
-     * @param start 0-based
-     */
-    Waypoint getWaypointForControlPoint(ControlPoint controlPoint, int start);
-
-    /**
-     * Position of the waypoint in {@link #getWaypoints()}, 0-based, or -1
-     * if waypoint doesn't exist in {@link #getWaypoints()}.
-     */
-    int getIndexOfWaypoint(Waypoint waypoint);
-
-    Waypoint getFirstWaypoint();
-    
-    Waypoint getLastWaypoint();
     
     void addCourseListener(CourseListener listener);
     
     void removeCourseListener(CourseListener listener);
-
-    void addWaypoint(int zeroBasedPosition, Waypoint waypointToAdd);
-
-    void removeWaypoint(int zeroBasedPosition);
-
+	
     /**
      * Carefully merges the new list of control points into this course by constructing a minimal difference between the
      * control point list and the control points referenced by this course's waypoints. Change events are propagated
@@ -75,9 +42,5 @@ public interface Course extends Named {
      * had been used.
      */
     void update(List<? extends ControlPoint> newControlPoints, DomainFactory baseDomainFactory) throws PatchFailedException;
-
-    Iterable<Leg> getLegsAdjacentTo(Mark mark);
-
-    Leg getFirstLeg();
 
 }
