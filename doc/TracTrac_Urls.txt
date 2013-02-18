@@ -26,6 +26,9 @@ http://germanmaster.traclive.dk/events/event_20100725_OWorlds/jsonservice.php
 Live-URI: tcp://germanmaster.traclive.dk:1520
 Stored-URI: tcp://germanmaster.traclive.dk:1521
 
+505 World Championship 2012:
+http://germanmaster.traclive.dk/events/event_20120714_SAPWorldCh/jsonservice.php
+
 Kieler Woche 2012:
 http://germanmaster.traclive.dk/events/event_20120615_KielerWoch/jsonservice.php
 http://germanmaster.traclive.dk/events/event_20120621_KielerWoch/jsonservice.php
@@ -33,3 +36,27 @@ http://germanmaster.traclive.dk/events/event_20120615_KielerWoch1/jsonservice.ph
 
 Extreme Sailing Series 2012:
 http://germanmaster.traclive.dk/events/event_20120101_ExtremeSai/jsonservice.php
+
+OBMR 2012:
+http://germanmaster.traclive.dk/events/event_20121031_OBMR/jsonservice.php
+
+Academy Tracking 2011:
+http://germanmaster.traclive.dk/events/event_20110505_SailingTea/jsonservice.php
+
+Academy Tracking 2012:
+http://germanmaster.traclive.dk/events/event_20120501_SailingTea/jsonservice.php
+
+BMW Cup:
+http://kml.skitrac.traclive.dk/events/event_20120803_BMWCup/jsonservice.php
+
+YES 2012:
+http://germanmaster.traclive.dk/events/event_20120525_YES/jsonservice.php
+
+IDM Drachen 2012:
+http://kml.skitrac.traclive.dk/events/event_20120730_IDMDrachen/jsonservice.php
+
+49er European Championship:
+http://traclive.dk/events/event_20120905_erEuropean/jsonservice.php
+
+RC44 Sweden Cup:
+http://germanmaster.traclive.dk/events/event_20110815_RCSwedenCu/jsonservice.php

@@ -106,7 +106,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
 
     private static final int CARRY_COLUMN_INDEX = 3;
 
-    protected static final NumberFormat scoreFormat = NumberFormat.getFormat("0.00");
+    protected static final NumberFormat scoreFormat = NumberFormat.getFormat("0.##");
 
     private final SailingServiceAsync sailingService;
 

@@ -145,6 +145,9 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         BasicDBObject query = new BasicDBObject(FieldNames.LEADERBOARD_NAME.name(), leaderboard.getName());
         BasicDBObject dbLeaderboard = new BasicDBObject();
         dbLeaderboard.put(FieldNames.LEADERBOARD_NAME.name(), leaderboard.getName());
+        if(leaderboard.getDisplayName() != null) {
+            dbLeaderboard.put(FieldNames.LEADERBOARD_DISPLAY_NAME.name(), leaderboard.getDisplayName());
+        }
         BasicDBList dbSuppressedCompetitorIds = new BasicDBList();
         for (Competitor suppressedCompetitor : leaderboard.getSuppressedCompetitors()) {
             dbSuppressedCompetitorIds.add(suppressedCompetitor.getId());
@@ -463,5 +466,12 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         DBObject entry = new BasicDBObject(FieldNames.RACE_ID_AS_STRING.name(), raceIDAsString);
         entry.put(FieldNames.REGATTA_NAME.name(), regatta.getName());
         regattaForRaceIDCollection.update(query, entry, /* upsrt */ true, /* multi */ false);
+    }
+    
+    @Override
+    public void removeRegattaForRaceID(String raceIDAsString, Regatta regatta) {
+        DBCollection regattaForRaceIDCollection = database.getCollection(CollectionNames.REGATTA_FOR_RACE_ID.name());
+        DBObject query = new BasicDBObject(FieldNames.RACE_ID_AS_STRING.name(), raceIDAsString);
+        regattaForRaceIDCollection.remove(query);
     }
 }

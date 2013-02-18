@@ -38,6 +38,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
@@ -75,6 +77,9 @@ import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindError;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Placemark;
+import com.sap.sailing.domain.common.PolarSheetGenerationTriggerResponse;
+import com.sap.sailing.domain.common.PolarSheetsData;
+import com.sap.sailing.domain.common.PolarSheetsHistogramData;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RaceFetcher;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -96,6 +101,8 @@ import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KilometersPerHourSpeedImpl;
 import com.sap.sailing.domain.common.impl.MeterDistance;
+import com.sap.sailing.domain.common.impl.PolarSheetGenerationTriggerResponseImpl;
+import com.sap.sailing.domain.common.impl.PolarSheetsHistogramDataImpl;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
@@ -109,6 +116,8 @@ import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.MongoWindStoreFactory;
+import com.sap.sailing.domain.polarsheets.BoatAndWindSpeed;
+import com.sap.sailing.domain.polarsheets.PolarSheetGenerationWorker;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingArchiveConfiguration;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingConfiguration;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
@@ -304,6 +313,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     private final DomainFactory tractracDomainFactory;
     
     private final com.sap.sailing.domain.base.DomainFactory baseDomainFactory;
+    
+    private final Map<String,PolarSheetGenerationWorker> polarSheetGenerationWorkers = new HashMap<String, PolarSheetGenerationWorker>();
 
     public SailingServiceImpl() {
         BundleContext context = Activator.getDefault();
@@ -353,7 +364,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     /**
      * Asks the OSGi system for registered score correction provider services
      */
-    private ServiceTracker<ScoreCorrectionProvider, ScoreCorrectionProvider> createAndOpenScoreCorrectionProviderServiceTracker(
+    protected ServiceTracker<ScoreCorrectionProvider, ScoreCorrectionProvider> createAndOpenScoreCorrectionProviderServiceTracker(
             BundleContext bundleContext) {
         ServiceTracker<ScoreCorrectionProvider, ScoreCorrectionProvider> tracker = new ServiceTracker<ScoreCorrectionProvider, ScoreCorrectionProvider>(bundleContext,
                 ScoreCorrectionProvider.class.getName(),
@@ -2055,6 +2066,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         TimePoint now = MillisecondsTimePoint.now();
         Long delayToLiveInMillisForLatestRace = null;
         leaderboardDTO.name = leaderboard.getName();
+        leaderboardDTO.displayName = leaderboard.getDisplayName();
         leaderboardDTO.competitorDisplayNames = new HashMap<CompetitorDTO, String>();
         leaderboardDTO.isMetaLeaderboard = leaderboard instanceof MetaLeaderboard ? true : false;
         if (leaderboard instanceof RegattaLeaderboard) {
@@ -2189,8 +2201,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
     
     @Override
-    public void updateLeaderboard(String leaderboardName, String newLeaderboardName, int[] newDiscardingThresholds) {
-        getService().apply(new UpdateLeaderboard(leaderboardName, newLeaderboardName, newDiscardingThresholds));
+    public void updateLeaderboard(String leaderboardName, String newLeaderboardName, String newLeaderboardDisplayName, int[] newDiscardingThresholds) {
+        getService().apply(new UpdateLeaderboard(leaderboardName, newLeaderboardName, newLeaderboardDisplayName, newDiscardingThresholds));
     }
 
     @Override
@@ -3094,4 +3106,113 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         swissTimingAdapterPersistence.storeSwissTimingArchiveConfiguration(swissTimingFactory.createSwissTimingArchiveConfiguration(
                 swissTimingJsonUrl));
     }
+    
+    @Override
+    public PolarSheetGenerationTriggerResponse generatePolarSheetForRaces(List<RegattaAndRaceIdentifier> selectedRaces) {
+        String id = UUID.randomUUID().toString();
+        RacingEventService service = getService();
+        Set<TrackedRace> trackedRaces = new HashSet<TrackedRace>();
+        for (RegattaAndRaceIdentifier race : selectedRaces) {
+            trackedRaces.add(service.getTrackedRace(race));
+        }
+        PolarSheetGenerationWorker genWorker = new PolarSheetGenerationWorker(trackedRaces, executor);
+        polarSheetGenerationWorkers.put(id, genWorker);
+        genWorker.startPolarSheetGeneration();
+        String name = getCommonBoatClass(trackedRaces);
+        return new PolarSheetGenerationTriggerResponseImpl(id, name);
+    }
+
+    private String getCommonBoatClass(Set<TrackedRace> trackedRaces) {
+        BoatClass boatClass = null;
+        for (TrackedRace race : trackedRaces) {
+            if (boatClass == null) {
+                boatClass = race.getRace().getBoatClass();
+            }
+            if (!boatClass.getName().matches(race.getRace().getBoatClass().getName())) {
+                return "Mixed";
+            }
+        }
+        
+        return boatClass.getName();
+    }
+
+    @Override
+    public PolarSheetsData getPolarSheetsGenerationResults(String id) {
+        PolarSheetsData data = null;
+        if (polarSheetGenerationWorkers.containsKey(id)) {
+            PolarSheetGenerationWorker worker = polarSheetGenerationWorkers.get(id);
+            data = worker.getPolarData();
+            if (data.isComplete()) {
+                polarSheetGenerationWorkers.remove(id);
+                HttpServletRequest httpServletRequest = this.getThreadLocalRequest();
+                if (httpServletRequest != null) {
+                    HttpSession session = httpServletRequest.getSession();
+                    session.setAttribute(id, worker.getCompleteData());
+                }       
+            }
+        } else {
+            //TODO Exception handling
+        }
+        
+        return data;      
+    }
+
+    @Override
+    public PolarSheetsHistogramData getPolarSheetData(String polarSheetId, int angle, int windSpeed) {
+        HttpServletRequest httpServletRequest = this.getThreadLocalRequest();
+        HttpSession session = httpServletRequest.getSession();
+        @SuppressWarnings("unchecked")
+        List<List<BoatAndWindSpeed>> data = (List<List<BoatAndWindSpeed>>) session.getAttribute(polarSheetId);
+        if (data == null) {
+          //TODO exception handling
+            return null;
+        }
+        List<BoatAndWindSpeed> dataForAngle = data.get(angle);
+        if (dataForAngle.size() < 1) {
+            //TODO exception handling
+            return null;
+        }
+        
+        List<Double> dataForAngleAndWindSpeed = new ArrayList<Double>();
+        
+        for (BoatAndWindSpeed dataPoint: dataForAngle) {
+            if (((int) dataPoint.getWindSpeed().getBeaufort()) == windSpeed) {
+                dataForAngleAndWindSpeed.add(dataPoint.getBoatSpeed().getKnots());
+            }
+        }
+        
+        if (dataForAngleAndWindSpeed.size() < 1) {
+            //TODO exception handling
+            return null;
+        }
+        
+        Double min = Collections.min(dataForAngleAndWindSpeed);
+        Double max = Collections.max(dataForAngleAndWindSpeed);
+        //TODO make number of columns dynamic to chart size
+        int numberOfColumns = 20;
+        double range = (max - min) / numberOfColumns;
+        Double[] xValues = new Double[numberOfColumns];
+        for (int i = 0; i < numberOfColumns; i++) {
+            xValues[i] = min + i * range + ( 0.5 * range);
+        }
+        
+        Integer[] yValues = new Integer[numberOfColumns];
+        for (Double dataPoint : dataForAngleAndWindSpeed) {
+            int i = (int) (((dataPoint - min) / range));
+            if (i == numberOfColumns) {
+                //For max value
+                i = 19;
+            }
+            if (yValues[i] == null) {
+                yValues[i] = 0;
+            }
+            yValues[i]++;
+        }
+        
+        PolarSheetsHistogramData histogramData = new PolarSheetsHistogramDataImpl(angle, xValues, yValues, dataForAngleAndWindSpeed.size());
+
+        
+        return histogramData;
+    }
+
 }

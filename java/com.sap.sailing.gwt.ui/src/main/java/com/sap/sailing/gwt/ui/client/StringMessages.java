@@ -482,6 +482,8 @@ public interface StringMessages extends Messages {
     String gapChangeSinceLegStartInSecondsTooltip();
     String velocityMadeGoodInKnotsTooltip();
     String sideToWhichMarkAtLegStartWasRoundedTooltip();
+    String generatePolarSheet();
+    String polarSheetChart();
     String numberOfManeuversInRaceTooltip();
     String competitorColumnTooltip();
     String sailIdColumnTooltip();
@@ -496,4 +498,8 @@ public interface StringMessages extends Messages {
     String overallRank();
     String overallRankTooltip();
     String noDataFound();
+    String displayName();
+    String histogram();
+    String numberOfDataPoints();
+    String angleAndTotalNumberOfDataPoints(int angle, int numberOfDataPoints);
 }

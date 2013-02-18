@@ -14,6 +14,9 @@ import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindException;
+import com.sap.sailing.domain.common.PolarSheetGenerationTriggerResponse;
+import com.sap.sailing.domain.common.PolarSheetsData;
+import com.sap.sailing.domain.common.PolarSheetsHistogramData;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.ScoringSchemeType;
@@ -122,7 +125,7 @@ public interface SailingService extends RemoteService {
     
     List<StrippedLeaderboardDTO> getLeaderboardsByEvent(RegattaDTO regatta);
     
-    void updateLeaderboard(String leaderboardName, String newLeaderboardName, int[] newDiscardingThreasholds);
+    void updateLeaderboard(String leaderboardName, String newLeaderboardName, String newLeaderboardDisplayName, int[] newDiscardingThreasholds);
 
     StrippedLeaderboardDTO createFlexibleLeaderboard(String leaderboardName, int[] discardThresholds, ScoringSchemeType scoringSchemeType);
 
@@ -283,4 +286,10 @@ public interface SailingService extends RemoteService {
     List<SwissTimingArchiveConfigurationDTO> getPreviousSwissTimingArchiveConfigurations();
 
     void storeSwissTimingArchiveConfiguration(String swissTimingUrl);
+
+    PolarSheetGenerationTriggerResponse generatePolarSheetForRaces(List<RegattaAndRaceIdentifier> selectedRaces);
+    
+    PolarSheetsData getPolarSheetsGenerationResults(String id);
+    
+    PolarSheetsHistogramData getPolarSheetData(String polarSheetId, int angle, int windSpeed);
 }

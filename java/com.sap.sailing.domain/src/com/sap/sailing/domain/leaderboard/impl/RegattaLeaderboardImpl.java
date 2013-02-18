@@ -29,12 +29,6 @@ public class RegattaLeaderboardImpl extends AbstractLeaderboardImpl implements R
     private static final long serialVersionUID = 2370461218294770084L;
     private final Regatta regatta;
     
-    /**
-     * If this member is <code>null</code>, {@link #getName()} will use the regatta name as the default name for this
-     * leaderboard. Otherwise, the {@link #displayName} is used.
-     */
-    private String displayName;
-
     public RegattaLeaderboardImpl(Regatta regatta, SettableScoreCorrection scoreCorrection,
             ThresholdBasedResultDiscardingRule resultDiscardingRule) {
         super(scoreCorrection, resultDiscardingRule);
@@ -47,7 +41,7 @@ public class RegattaLeaderboardImpl extends AbstractLeaderboardImpl implements R
      */
     @Override
     public void setName(String newName) {
-        displayName = newName;
+        setDisplayName(newName);
     }
 
     @Override
@@ -58,8 +52,8 @@ public class RegattaLeaderboardImpl extends AbstractLeaderboardImpl implements R
     @Override
     public String getName() {
         String result;
-        if (displayName != null) {
-            result = displayName;
+        if (getDisplayName() != null) {
+            result = getDisplayName();
         } else {
             result = getRegatta().getName();
         }

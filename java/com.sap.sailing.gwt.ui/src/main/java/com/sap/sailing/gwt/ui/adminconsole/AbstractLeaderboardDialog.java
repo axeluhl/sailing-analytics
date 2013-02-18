@@ -14,6 +14,7 @@ import com.sap.sailing.gwt.ui.leaderboard.ScoringSchemeTypeFormatter;
 public abstract class AbstractLeaderboardDialog extends DataEntryDialog<LeaderboardDescriptor> {
     protected final StringMessages stringMessages;
     protected TextBox nameTextBox;
+    protected TextBox displayNameTextBox;
     protected LeaderboardDescriptor leaderboard;
     
     protected LongBox[] discardThresholdBoxes;
@@ -30,6 +31,7 @@ public abstract class AbstractLeaderboardDialog extends DataEntryDialog<Leaderbo
     protected LeaderboardDescriptor getResult() {
         int[] discardThresholdsBoxContents = getDiscardThresholds(discardThresholdBoxes);
         leaderboard.setName(nameTextBox.getValue());
+        leaderboard.setDisplayName(displayNameTextBox.getValue());
         leaderboard.setDiscardThresholds(discardThresholdsBoxContents);
         return leaderboard;
     }
