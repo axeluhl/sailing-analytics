@@ -357,9 +357,6 @@ public interface SailingService extends RemoteService {
 	void updateRaceCourse(RegattaAndRaceIdentifier raceIdentifier,
 			List<ControlPointDTO> controlPoints);
 
-	void addColumnsToLeaderboard(String leaderboardName,
-			List<Pair<String, Boolean>> columnsToAdd);
-
 	void removeLeaderboardColumns(String leaderboardName,
 			List<String> columnsToRemove);
 
@@ -384,4 +381,6 @@ public interface SailingService extends RemoteService {
 	List<SwissTimingArchiveConfigurationDTO> getPreviousSwissTimingArchiveConfigurations();
 
 	void storeSwissTimingArchiveConfiguration(String swissTimingUrl);
+
+	void renameLeaderboardGroup(String oldName, String newName);
 }
