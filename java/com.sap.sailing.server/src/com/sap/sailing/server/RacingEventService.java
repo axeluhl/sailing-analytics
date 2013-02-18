@@ -39,8 +39,10 @@ import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.LeaderboardRegistry;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
+import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
+import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
 import com.sap.sailing.domain.tracking.RaceListener;
 import com.sap.sailing.domain.tracking.RaceTracker;
@@ -496,6 +498,10 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     
     CourseArea getCourseArea(Serializable courseAreaId);
     
+    RaceLogStore getGlobalRaceLogStore();
+    
+    RaceLog getRaceLog(RaceLogIdentifier identifier);
+    
     void recordRaceLogEvent(RaceLogIdentifier identifier, RaceLogEvent event);
-
+    
 }

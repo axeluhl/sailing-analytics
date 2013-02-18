@@ -71,8 +71,11 @@ import com.sap.sailing.domain.leaderboard.meta.LeaderboardGroupMetaLeaderboard;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
+import com.sap.sailing.domain.persistence.MongoRaceLogStoreFactory;
+import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
+import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.swisstimingadapter.Race;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterConnector;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterMessage;
@@ -196,6 +199,8 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
      */
     private long delayToLiveInMillis;
     
+    private RaceLogStore raceLogStore;
+    
     public RacingEventServiceImpl() {
         this(MongoFactory.INSTANCE.getDefaultDomainObjectFactory(), MongoFactory.INSTANCE.getDefaultMongoObjectFactory());
     }
@@ -240,6 +245,8 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         loadRaceIDToRegattaAssociations();
         loadStoredLeaderboardsAndGroups();
         loadStoredEvents();
+        
+        this.raceLogStore = MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(this.mongoObjectFactory, this.domainObjectFactory);
     }
     
     public RacingEventServiceImpl(MongoDBService mongoDBService) {
@@ -1644,9 +1651,19 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
 	}
 
 	@Override
+	public RaceLogStore getGlobalRaceLogStore() {
+		return raceLogStore;
+	}
+
+	@Override
+	public RaceLog getRaceLog(RaceLogIdentifier identifier) {
+		return raceLogStore.getRaceLog(identifier);
+	}
+	
+	@Override
 	public void recordRaceLogEvent(RaceLogIdentifier identifier, RaceLogEvent event) {
-		//RaceLog raceLog = getRaceLog(identifier);
-		//raceLog.add(event);
+		RaceLog raceLog = getRaceLog(identifier);
+		raceLog.add(event);
 	}
 
 }
