@@ -27,8 +27,14 @@ public class MongoRaceLogStoreImpl extends EmptyRaceLogStore implements MongoRac
 	@Override
 	public RaceLog getRaceLog(RaceLogIdentifier identifier) {
 		RaceLog log;
-		log = domainObjectFactory.loadRaceLog(identifier);
-		log.addListener(new MongoRaceLogListener(identifier, mongoObjectFactory, db));
+		if (raceLogCache.containsKey(identifier)) {
+			log = raceLogCache.get(identifier);
+		} else {
+			log = domainObjectFactory.loadRaceLog(identifier);
+			log.addListener(new MongoRaceLogListener(identifier, mongoObjectFactory, db));
+			raceLogCache.put(identifier, log);
+		}
+		
 		return log;
 	}
 
