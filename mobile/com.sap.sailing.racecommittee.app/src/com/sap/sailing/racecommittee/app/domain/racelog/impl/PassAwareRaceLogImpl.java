@@ -6,22 +6,30 @@ import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.impl.RaceLogImpl;
 import com.sap.sailing.domain.tracking.impl.PartialNavigableSetView;
+import com.sap.sailing.racecommittee.app.domain.racelog.PassAwareRaceLog;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 
-public class PassAwareRaceLog extends RaceLogImpl implements RaceLog {
-	private static final String TAG = PassAwareRaceLog.class.getName();
+public class PassAwareRaceLogImpl extends RaceLogImpl implements PassAwareRaceLog {
+	private static final String TAG = PassAwareRaceLogImpl.class.getName();
 	private static final long serialVersionUID = -1252381252528365834L;
-	private static final String ReadWriteLockName =  PassAwareRaceLog.class.getName() + ".lock";
+	private static final String ReadWriteLockName =  PassAwareRaceLogImpl.class.getName() + ".lock";
 	
-	public static final int InvalidPassId = -1;
+	public static final int DefaultPassId = 0;
 	
 	private int currentPassId;
 	
-	public PassAwareRaceLog() {
-		this(InvalidPassId);
+	public PassAwareRaceLogImpl(RaceLog raceLog) {
+		this();
+		for (RaceLogEvent event : raceLog.getRawFixes()) {
+			this.add(event);
+		}
+	}
+	
+	public PassAwareRaceLogImpl() {
+		this(DefaultPassId);
 	}
 
-	public PassAwareRaceLog(int currentPassId) {
+	public PassAwareRaceLogImpl(int currentPassId) {
 		super(ReadWriteLockName);
 		this.currentPassId = currentPassId;
 	}
@@ -30,9 +38,11 @@ public class PassAwareRaceLog extends RaceLogImpl implements RaceLog {
 		return currentPassId;
 	}
 	
-	public void setCurrentPassId(int currentPass) {
-		ExLog.i(TAG, String.format("Incrementing pass id to %d", currentPass));
-		this.currentPassId = currentPass;
+	public void setCurrentPassId(int newPassId) {
+		if (newPassId != this.currentPassId) {
+			ExLog.i(TAG, String.format("Changing pass id to %d", newPassId));
+			this.currentPassId = newPassId;
+		}
 	}
 	
 	@Override
@@ -65,8 +75,11 @@ public class PassAwareRaceLog extends RaceLogImpl implements RaceLog {
             unlockAfterWrite();
         }
         if (isAdded) {
+        	ExLog.i(TAG, String.format("%s (%s) was added to log.", event, event.getClass().getName()));
         	setCurrentPassId(Math.max(event.getPassId(), this.currentPassId));
         	notifyListenersAboutReceive(event);
+        } else {
+        	ExLog.w(TAG, String.format("%s (%s) was not added to log. Ignoring", event, event.getClass().getName()));
         }
         return isAdded;
 	}

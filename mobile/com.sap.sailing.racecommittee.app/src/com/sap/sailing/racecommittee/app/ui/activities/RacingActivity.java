@@ -25,8 +25,9 @@ import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceInfoFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.ManagedRaceListFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceInfoListener;
 
-public class RacingActivity extends TwoPaneActivity /*implements ResetTimeListener, 
+public class RacingActivity extends TwoPaneActivity implements RaceInfoListener /*implements ResetTimeListener, 
 StartModeSelectionListener, PathfinderSelectionListener, GateLineOpeningTimeSelectionListener, CourseDesignSelectionListener*/ {
 	// private final static String TAG = RacingActivity.class.getName();
 	
@@ -190,6 +191,11 @@ StartModeSelectionListener, PathfinderSelectionListener, GateLineOpeningTimeSele
 		transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
 		transaction.commit();
 		getRightLayout().setVisibility(View.VISIBLE);
+	}
+
+
+	public void onResetTime() {
+		infoFragment.onResetTime();
 	}
 
 	/*public void onResetTimeClick() {

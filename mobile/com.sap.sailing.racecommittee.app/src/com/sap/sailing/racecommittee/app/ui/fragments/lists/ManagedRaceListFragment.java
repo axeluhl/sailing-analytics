@@ -63,17 +63,19 @@ public class ManagedRaceListFragment extends ListFragment implements JuryFlagCli
 	}
 	
 	@Override
+	public void onStop() {
+		unregisterAllRaces();
+		super.onStop();
+	}
+	
+	@Override
 	public void onDestroy() {
-		super.onDestroy();
-		
-		// unregister update listener!
-		unregisterAll();
-		// be sure to free all references to managed races...
 		managedRacesById.clear();
+		super.onDestroy();
 	}
 
 	public void setupOn(Collection<ManagedRace> listOfManagedRaces) {
-		unregisterAll();
+		unregisterAllRaces();
 		
 		// save races
 		for (ManagedRace managedRace : listOfManagedRaces) {
@@ -90,7 +92,7 @@ public class ManagedRaceListFragment extends ListFragment implements JuryFlagCli
 		}
 	}
 
-	private void unregisterAll() {
+	private void unregisterAllRaces() {
 		for (ManagedRace managedRace : managedRacesById.values()) {
 			managedRace.getState().unregisterListener(this);
 		}

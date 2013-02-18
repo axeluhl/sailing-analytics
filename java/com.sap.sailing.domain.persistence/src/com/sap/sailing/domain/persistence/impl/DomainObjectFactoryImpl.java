@@ -73,18 +73,15 @@ import com.sap.sailing.domain.leaderboard.impl.ResultDiscardingRuleImpl;
 import com.sap.sailing.domain.leaderboard.impl.ScoreCorrectionImpl;
 import com.sap.sailing.domain.leaderboard.meta.LeaderboardGroupMetaLeaderboard;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
-import com.sap.sailing.domain.persistence.MongoFactory;
-import com.sap.sailing.domain.persistence.MongoRaceLogStoreFactory;
 import com.sap.sailing.domain.racelog.Flags;
-import com.sap.sailing.domain.racelog.RaceColumnIdentifier;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogEventFactory;
 import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
+import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.racelog.RaceLogRaceStatusEvent;
 import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
-import com.sap.sailing.domain.racelog.impl.RaceColumnIdentifierImpl;
 import com.sap.sailing.domain.racelog.impl.RaceLogImpl;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.Wind;
@@ -364,12 +361,9 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 fleets.add(result.getFleet(null));
             }
             String columnName = (String) dbRaceColumn.get(FieldNames.LEADERBOARD_COLUMN_NAME.name());
-            RaceColumnIdentifier columnIdentifier = new RaceColumnIdentifierImpl(result.getName(), columnName);
             
             RaceColumn raceColumn = result.addRaceColumn(columnName,
             		(Boolean) dbRaceColumn.get(FieldNames.LEADERBOARD_IS_MEDAL_RACE_COLUMN.name()), 
-            		MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(MongoFactory.INSTANCE.getDefaultMongoObjectFactory(), 
-            				MongoFactory.INSTANCE.getDefaultDomainObjectFactory(), columnIdentifier),
             		fleets.toArray(new Fleet[0]));
             for (Map.Entry<String, RaceIdentifier> e : raceIdentifiers.entrySet()) {
             	raceColumn.setRaceIdentifier(fleetsByName.get(e.getKey()), e.getValue());
@@ -828,9 +822,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         Map<String, Fleet> fleetsByName = loadFleets(dbFleets);
         BasicDBList dbRaceColumns = (BasicDBList) dbSeries.get(FieldNames.SERIES_RACE_COLUMNS.name());
         Iterable<String> raceColumnNames = loadRaceColumnNames(dbRaceColumns, fleetsByName);
-        Series series = new SeriesImpl(name, isMedal, fleetsByName.values(), raceColumnNames, trackedRegattaRegistry,
-        		MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(
-        			MongoFactory.INSTANCE.getDefaultMongoObjectFactory(), this));
+        Series series = new SeriesImpl(name, isMedal, fleetsByName.values(), raceColumnNames, trackedRegattaRegistry);
         loadRaceColumnRaceLinks(dbRaceColumns, series);
         return series;
     }
@@ -910,12 +902,11 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
 
 	@Override
-	public RaceLog loadRaceLog(RaceColumnIdentifier identifier, Fleet fleet) {
+	public RaceLog loadRaceLog(RaceLogIdentifier identifier) {
 		RaceLog result = new RaceLogImpl(RaceLogImpl.class.getSimpleName());
         try {
             BasicDBObject query = new BasicDBObject();
-            query.put(FieldNames.RACE_COLUMN_IDENTIFIER.name(), identifier.getIdentifier());
-            query.put(FieldNames.FLEET_NAME.name(), fleet.getName());
+            query.put(FieldNames.RACE_LOG_IDENTIFIER.name(), identifier.getIdentifier());
             DBCollection raceLog = database.getCollection(CollectionNames.RACE_LOGS.name());
             for (DBObject o : raceLog.find(query)) {
                 RaceLogEvent raceLogEvent = loadRaceLogEvent((DBObject) o.get(FieldNames.RACE_LOG_EVENT.name()));

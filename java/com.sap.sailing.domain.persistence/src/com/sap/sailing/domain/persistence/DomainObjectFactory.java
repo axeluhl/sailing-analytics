@@ -4,7 +4,6 @@ import java.util.Map;
 
 import com.mongodb.DBObject;
 import com.sap.sailing.domain.base.Event;
-import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RegattaRegistry;
@@ -13,8 +12,8 @@ import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.LeaderboardRegistry;
-import com.sap.sailing.domain.racelog.RaceColumnIdentifier;
 import com.sap.sailing.domain.racelog.RaceLog;
+import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.WindTrack;
 
@@ -86,5 +85,5 @@ public interface DomainObjectFactory {
 
     Map<String, Regatta> loadRaceIDToRegattaAssociations(RegattaRegistry regattaRegistry);
 
-	RaceLog loadRaceLog(RaceColumnIdentifier identifier, Fleet fleet);
+	RaceLog loadRaceLog(RaceLogIdentifier identifier);
 }

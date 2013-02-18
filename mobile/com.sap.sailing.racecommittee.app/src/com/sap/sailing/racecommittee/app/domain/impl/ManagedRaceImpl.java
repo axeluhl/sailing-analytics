@@ -9,6 +9,7 @@ import com.sap.sailing.domain.racelog.RaceLogRaceStatus;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.ManagedRaceIdentifier;
 import com.sap.sailing.racecommittee.app.domain.RaceGroup;
+import com.sap.sailing.racecommittee.app.domain.racelog.PassAwareRaceLog;
 import com.sap.sailing.racecommittee.app.domain.state.RaceState;
 import com.sap.sailing.racecommittee.app.domain.state.impl.RaceStateImpl;
 
@@ -20,7 +21,7 @@ public class ManagedRaceImpl implements ManagedRace {
 	private ManagedRaceIdentifier identifier;	
 	private RaceState state;
 	
-	public ManagedRaceImpl(ManagedRaceIdentifier identifier, RaceLog raceLog) {
+	public ManagedRaceImpl(ManagedRaceIdentifier identifier, PassAwareRaceLog raceLog) {
 		this(identifier, new RaceStateImpl(raceLog));
 	}
 	

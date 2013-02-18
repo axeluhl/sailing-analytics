@@ -1,6 +1,5 @@
 package com.sap.sailing.domain.base;
 
-import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 
@@ -27,7 +26,7 @@ public interface Series extends SeriesData {
 
     Fleet getFleetByName(String fleetName);
 
-    RaceColumnInSeries addRaceColumn(String raceColumnName, TrackedRegattaRegistry trackedRegattaRegistry, RaceLogStore raceLogStore);
+    RaceColumnInSeries addRaceColumn(String raceColumnName, TrackedRegattaRegistry trackedRegattaRegistry);
     
     void moveRaceColumnUp(String raceColumnName);
     

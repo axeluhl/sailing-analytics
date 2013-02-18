@@ -3,35 +3,31 @@ package com.sap.sailing.domain.persistence.impl;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
-import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
-import com.sap.sailing.domain.racelog.RaceColumnIdentifier;
 import com.sap.sailing.domain.racelog.RaceLogCourseAreaChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogEventVisitor;
 import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
+import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.racelog.RaceLogPassChangeEvent;
 import com.sap.sailing.domain.racelog.RaceLogRaceStatusEvent;
 import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
 
 public class MongoRaceLogListener implements RaceLogEventVisitor {
 	
-	private final RaceColumnIdentifier raceColumnIdentifier;
-	private final Fleet fleet;
+	private final RaceLogIdentifier raceLogIdentifier;
     private final MongoObjectFactoryImpl mongoObjectFactory;
     private final DBCollection raceLogsCollection;
     
-    public MongoRaceLogListener(RaceColumnIdentifier identifier, Fleet fleet,
-    		MongoObjectFactory mongoObjectFactory, DB database) {
+    public MongoRaceLogListener(RaceLogIdentifier identifier, MongoObjectFactory mongoObjectFactory, DB database) {
         super();
-        this.raceColumnIdentifier = identifier;
+        this.raceLogIdentifier = identifier;
         this.mongoObjectFactory = (MongoObjectFactoryImpl) mongoObjectFactory;
         this.raceLogsCollection = this.mongoObjectFactory.getRaceLogCollection();
-        this.fleet = fleet;
     }
 
 	@Override
 	public void visit(RaceLogFlagEvent event) {
-		DBObject flagEventTrackEntry = mongoObjectFactory.storeRaceLogEntry(raceColumnIdentifier, fleet, event);
+		DBObject flagEventTrackEntry = mongoObjectFactory.storeRaceLogEntry(raceLogIdentifier, event);
 		raceLogsCollection.insert(flagEventTrackEntry);
 	}
 
@@ -47,7 +43,7 @@ public class MongoRaceLogListener implements RaceLogEventVisitor {
 
 	@Override
 	public void visit(RaceLogStartTimeEvent event) {
-		DBObject startTimeEventTrackEntry = mongoObjectFactory.storeRaceLogEntry(raceColumnIdentifier, fleet, event);
+		DBObject startTimeEventTrackEntry = mongoObjectFactory.storeRaceLogEntry(raceLogIdentifier, event);
 		raceLogsCollection.insert(startTimeEventTrackEntry);
 	}
 

@@ -37,9 +37,9 @@ import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
-import com.sap.sailing.domain.racelog.RaceColumnIdentifier;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
+import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.tracking.Positioned;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -478,29 +478,24 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     
     public DBCollection getRaceLogCollection() {
         DBCollection result = database.getCollection(CollectionNames.RACE_LOGS.name());
-        result.ensureIndex(new BasicDBObject(FieldNames.RACE_COLUMN_IDENTIFIER.name(), null));
+        result.ensureIndex(new BasicDBObject(FieldNames.RACE_LOG_IDENTIFIER.name(), null));
         return result;
     }
 
-	public DBObject storeRaceLogEntry(RaceColumnIdentifier raceColumnIdentifier, Fleet fleet, RaceLogFlagEvent flagEvent) {
+	public DBObject storeRaceLogEntry(RaceLogIdentifier raceLogIdentifier, RaceLogFlagEvent flagEvent) {
 		BasicDBObject result = new BasicDBObject();
-		storeRaceColumnIdentifierAndFleetName(raceColumnIdentifier, fleet, result);
+		result.put(FieldNames.RACE_LOG_IDENTIFIER.name(), raceLogIdentifier.getIdentifier());
         
         result.put(FieldNames.RACE_LOG_EVENT.name(), storeRaceLogFlagEvent(flagEvent));
         return result;
 	}
 	
-	public DBObject storeRaceLogEntry(RaceColumnIdentifier raceColumnIdentifier, Fleet fleet, RaceLogStartTimeEvent startTimeEvent) {
+	public DBObject storeRaceLogEntry(RaceLogIdentifier raceLogIdentifier, RaceLogStartTimeEvent startTimeEvent) {
 		BasicDBObject result = new BasicDBObject();
-		storeRaceColumnIdentifierAndFleetName(raceColumnIdentifier, fleet, result);
+		result.put(FieldNames.RACE_LOG_IDENTIFIER.name(), raceLogIdentifier.getIdentifier());
         
         result.put(FieldNames.RACE_LOG_EVENT.name(), storeRaceLogStartTimeEvent(startTimeEvent));
         return result;
-	}
-
-	private void storeRaceColumnIdentifierAndFleetName(RaceColumnIdentifier raceColumnIdentifier, Fleet fleet, BasicDBObject result) {
-		result.put(FieldNames.RACE_COLUMN_IDENTIFIER.name(), raceColumnIdentifier.getIdentifier());
-		result.put(FieldNames.FLEET_NAME.name(), fleet.getName());
 	}
 
 	private Object storeRaceLogStartTimeEvent(RaceLogStartTimeEvent startTimeEvent) {

@@ -6,22 +6,30 @@ import java.util.Date;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.TimePicker;
-import android.widget.Toast;
 
+import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sailing.racecommittee.app.utils.TickListener;
 import com.sap.sailing.racecommittee.app.utils.TickSingleton;
 
 public class SetTimeRaceFragment extends RaceFragment implements TickListener {
+	
+	public static SetTimeRaceFragment create(ManagedRace race) {
+		SetTimeRaceFragment fragment = new SetTimeRaceFragment();
+		fragment.setArguments(createArguments(race));
+		return fragment;
+	}
+	
 	protected boolean isReset;
 
 	protected TimePicker startTimePicker;
@@ -74,8 +82,8 @@ public class SetTimeRaceFragment extends RaceFragment implements TickListener {
 
 	@Override
 	public void onStop() {
-		super.onStop();
 		TickSingleton.INSTANCE.unregisterListener(this);
+		super.onStop();
 	}
 
 	public void notifyTick() {
@@ -140,109 +148,22 @@ public class SetTimeRaceFragment extends RaceFragment implements TickListener {
 			ExLog.i(ExLog.RACE_SET_TIME, getRace().getId().toString(), getActivity());
 		}
 		
-		/// TODO: need to open course designer?
+		Calendar newStartTime = Calendar.getInstance();
+		newStartTime.set(Calendar.HOUR_OF_DAY, startTimePicker.getCurrentHour());
+		newStartTime.set(Calendar.MINUTE, startTimePicker.getCurrentMinute());
+		newStartTime.set(Calendar.SECOND, 0);
+		newStartTime.set(Calendar.MILLISECOND, 0);
 		
-		Calendar newTime = Calendar.getInstance();
-		newTime.set(Calendar.HOUR_OF_DAY, startTimePicker.getCurrentHour());
-		newTime.set(Calendar.MINUTE, startTimePicker.getCurrentMinute());
-		newTime.set(Calendar.SECOND, 0);
-		newTime.set(Calendar.MILLISECOND, 0);
-
-		Date currentTime = new Date();
+		setStartTime(newStartTime.getTime());
 		
-		if (hasStartphaseAlreadyBegun(newTime.getTime(), currentTime)) {
-			scheduledTime = newTime.getTime();
-			/// TODO: do whatever is needed for already ongoing start phase
-		}
-		setStartTime(newTime.getTime());
-	}
-	
-	protected boolean hasStartphaseAlreadyBegun(Date newStartTime, Date currentTime) {
-		/// TODO: decicde whether start phase has already begun
-		return false;
+		// TODO: start course designer activity!
 	}
 
 	
 	private void setStartTime(Date newStartTime) {
-		/// TODO: set new start time on race
-		//boolean success = getRace().setStartTime(newStartTime);
-		boolean success = false;
-		if (!success) {
-			Toast.makeText(getActivity(), getString(R.string.race_settime_overlap), Toast.LENGTH_LONG).show();
-		}
+		getRace().getState().setStartTime(
+				new MillisecondsTimePoint(new Date()), 
+				new MillisecondsTimePoint(newStartTime));
 	}
-
-	/*
-
-	private boolean shouldStartModeAlreadyBeenSet(Date newTime, Date currentTime) {
-		if (!race.usesRRS26Startprocedure()) {
-			return false;
-		}
-		Calendar cal = Calendar.getInstance();
-		cal.setTime(newTime);
-		// cal.add(Calendar.MINUTE, 0 -
-		// AppConstants.STARTPHASE_DURATION_MINUTES);
-		cal.add(Calendar.MINUTE,
-				0 - AppConstants.STARTPHASE_STARTMODE_DISPLAYED_MINUTES_BEFORE_START);
-		Date startModeDate = cal.getTime();
-
-		return startModeDate.before(currentTime);
-	}
-	
-	protected void showChooseCourseDesignDialog() {
-		FragmentManager fragmentManager = getFragmentManager();
-
-		RaceDialogFragment fragment = new RaceChooseCourseDesignDialog();
-
-		Bundle args = getParameterBundle();
-		fragment.setArguments(args);
-
-		fragment.show(fragmentManager, "dialogCourseDesign");
-	}
-
-	protected void showChooseRunningCourceDialog() {
-		FragmentManager fragmentManager = getFragmentManager();
-
-		RaceDialogFragment fragment = new RaceChooseRunningCourseDialogExtended();
-
-		Bundle args = getParameterBundle();
-		fragment.setArguments(args);
-
-		fragment.show(fragmentManager, "dialogRunningCourse");
-	}
-
-	private class RaceChooseRunningCourseDialogExtended extends
-			RaceChooseRunningCourse {
-
-		@Override
-		protected OnClickListener getOnChooseClickListener() {
-			return new OnClickListener() {
-
-				public void onClick(View v) {
-					try {
-						int nmbrRounds = Integer.parseInt(numberOfRoundsEdit
-								.getText().toString());
-						Routes selectedRoutes = (Routes) routesSpinner
-								.getAdapter()
-								.getItem(
-										routesSpinner.getSelectedItemPosition());
-						sendChangedRunningCourse(nmbrRounds, selectedRoutes);
-						ExLog.i(ExLog.RACE_SET_RACE_RUNNING_COURSE_REMINDER,
-								String.valueOf(nmbrRounds) + ":"
-										+ selectedRoutes.toString(),
-								getActivity());
-						resetStartTime();
-						dismiss();
-					} catch (NumberFormatException e) {
-						ExLog.i(ExLog.RACE_SET_RACE_RUNNING_COURSE_REMINDER_FAIL,
-								null, getActivity());
-						Toast.makeText(getActivity(),
-								"Please fill in the required fields.", Toast.LENGTH_LONG)
-								.show();
-					}
-				}
-			};
-		}
-	}*/
 
 }

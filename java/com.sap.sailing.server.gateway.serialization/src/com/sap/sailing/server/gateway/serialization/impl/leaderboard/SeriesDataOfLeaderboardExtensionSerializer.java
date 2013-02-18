@@ -16,7 +16,6 @@ import com.sap.sailing.domain.base.SeriesData;
 import com.sap.sailing.domain.base.impl.FleetImpl;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
-import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.server.gateway.serialization.ExtensionJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 
@@ -49,7 +48,7 @@ public class SeriesDataOfLeaderboardExtensionSerializer extends ExtensionJsonSer
 							false, 
 							Collections.<Fleet>singleton(new FleetImpl("Default Fleet")), 
 							Collections.<String>emptyList(), 
-							null, EmptyRaceLogStore.INSTANCE);
+							null);
 					insertSeriesIfNew(seriesToRaceColumns, defaultSeries);
 				}
 				seriesToRaceColumns.get(defaultSeries).add(raceColumn);
