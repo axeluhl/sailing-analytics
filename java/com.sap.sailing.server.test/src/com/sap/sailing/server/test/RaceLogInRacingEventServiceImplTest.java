@@ -39,7 +39,7 @@ import com.sap.sailing.server.operationaltransformation.CreateRegattaLeaderboard
 import com.sap.sailing.server.operationaltransformation.OperationalTransformer;
 import com.sap.sailing.server.operationaltransformation.RecordRaceLogEvent;
 
-public class RaceLogInRacingServiceImplTest {
+public class RaceLogInRacingEventServiceImplTest {
 
 	private static final String LEADERBOARDNAME = "TESTBOARD";
 	
