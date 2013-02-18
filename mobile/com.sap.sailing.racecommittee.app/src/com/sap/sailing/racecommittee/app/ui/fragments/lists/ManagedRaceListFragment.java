@@ -63,6 +63,13 @@ public class ManagedRaceListFragment extends ListFragment implements JuryFlagCli
 	}
 	
 	@Override
+	public void onStart() {
+		super.onStart();
+		unregisterAllRaces();
+		registerAllRaces();
+	}
+	
+	@Override
 	public void onStop() {
 		unregisterAllRaces();
 		super.onStop();
@@ -74,14 +81,25 @@ public class ManagedRaceListFragment extends ListFragment implements JuryFlagCli
 		super.onDestroy();
 	}
 
-	public void setupOn(Collection<ManagedRace> listOfManagedRaces) {
-		unregisterAllRaces();
-		
-		// save races
-		for (ManagedRace managedRace : listOfManagedRaces) {
-			managedRacesById.put(managedRace.getId(), managedRace);
+	private void registerAllRaces() {
+		for (ManagedRace managedRace : managedRacesById.values()) {
 			managedRace.getState().registerListener(this);
 		}
+	}
+
+	private void unregisterAllRaces() {
+		for (ManagedRace managedRace : managedRacesById.values()) {
+			managedRace.getState().unregisterListener(this);
+		}
+	}
+
+	public void setupOn(Collection<ManagedRace> listOfManagedRaces) {
+		unregisterAllRaces();
+		managedRacesById.clear();
+		for (ManagedRace managedRace : listOfManagedRaces) {
+			managedRacesById.put(managedRace.getId(), managedRace);
+		}
+		registerAllRaces();
 
 		// initialize view
 		initListElements(false);
@@ -92,13 +110,8 @@ public class ManagedRaceListFragment extends ListFragment implements JuryFlagCli
 		}
 	}
 
-	private void unregisterAllRaces() {
-		for (ManagedRace managedRace : managedRacesById.values()) {
-			managedRace.getState().unregisterListener(this);
-		}
-	}
-
 	public void onRaceStateChanged(RaceState state) {
+		ExLog.i("!!!!!!!!!", "State changed");
 		notifyDataChanged();
 	}
 	
