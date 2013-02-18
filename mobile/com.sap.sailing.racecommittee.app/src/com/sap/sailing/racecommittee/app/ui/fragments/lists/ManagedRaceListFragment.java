@@ -74,12 +74,6 @@ public class ManagedRaceListFragment extends ListFragment implements JuryFlagCli
 		unregisterAllRaces();
 		super.onStop();
 	}
-	
-	@Override
-	public void onDestroy() {
-		managedRacesById.clear();
-		super.onDestroy();
-	}
 
 	private void registerAllRaces() {
 		for (ManagedRace managedRace : managedRacesById.values()) {
@@ -111,7 +105,6 @@ public class ManagedRaceListFragment extends ListFragment implements JuryFlagCli
 	}
 
 	public void onRaceStateChanged(RaceState state) {
-		ExLog.i("!!!!!!!!!", "State changed");
 		notifyDataChanged();
 	}
 	
