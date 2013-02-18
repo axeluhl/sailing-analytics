@@ -2,4 +2,5 @@
 /.gwt
 /.generated
 /gwt-unitCache
+/extras
 /com.sap.sailing.gwt.ui.*
