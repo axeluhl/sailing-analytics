@@ -16,6 +16,7 @@ import java.util.ConcurrentModificationException;
 import java.util.List;
 import java.util.Map;
 
+
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Fleet;
@@ -39,9 +40,6 @@ import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.LeaderboardRegistry;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
-import com.sap.sailing.domain.racelog.RaceLog;
-import com.sap.sailing.domain.racelog.RaceLogEvent;
-import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
 import com.sap.sailing.domain.tracking.RaceListener;
@@ -154,7 +152,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      *            to add the races to. Otherwise, a default regatta as described above will be created and used.
      */
     RacesHandle addTracTracRace(RegattaIdentifier regattaToAddTo, URL paramURL, URI liveURI, URI storedURI,
-            TimePoint trackingStartTime, TimePoint trackingEndTime, WindStore windStore,
+            TimePoint trackingStartTime, TimePoint trackingEndTime, RaceLogStore raceLogStore, WindStore windStore,
             long timeoutForReceivingRaceDefinitionInMilliseconds, boolean simulateWithStartTimeNow)
             throws MalformedURLException, FileNotFoundException, URISyntaxException, Exception;
 
@@ -290,7 +288,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      *            to add the races to. Otherwise, a default regatta as described above will be created and used.
      */
     RacesHandle addSwissTimingRace(RegattaIdentifier regattaToAddTo, String raceID, String hostname, int port,
-            boolean canSendRequests, WindStore windStore, long timeoutInMilliseconds) 
+            boolean canSendRequests, WindStore windStore, RaceLogStore logStore, long timeoutInMilliseconds) 
             		throws InterruptedException, UnknownHostException,
             IOException, ParseException, Exception;
 
@@ -497,11 +495,5 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     com.sap.sailing.domain.swisstimingadapter.DomainFactory getSwissTimingDomainFactory();
     
     CourseArea getCourseArea(Serializable courseAreaId);
-    
-    RaceLogStore getGlobalRaceLogStore();
-    
-    RaceLog getRaceLog(RaceLogIdentifier identifier);
-    
-    void recordRaceLogEvent(RaceLogIdentifier identifier, RaceLogEvent event);
     
 }

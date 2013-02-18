@@ -85,5 +85,5 @@ public interface DomainObjectFactory {
 
     Map<String, Regatta> loadRaceIDToRegattaAssociations(RegattaRegistry regattaRegistry);
 
-	RaceLog loadRaceLog(RaceLogIdentifier identifier);
+    RaceLog loadRaceLog(RaceLogIdentifier identifier);
 }

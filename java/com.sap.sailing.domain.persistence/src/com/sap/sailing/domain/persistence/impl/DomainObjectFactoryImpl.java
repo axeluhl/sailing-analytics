@@ -12,6 +12,7 @@ import java.util.logging.Logger;
 
 import org.bson.types.ObjectId;
 
+
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.BasicDBObjectBuilder;
@@ -73,6 +74,7 @@ import com.sap.sailing.domain.leaderboard.impl.ResultDiscardingRuleImpl;
 import com.sap.sailing.domain.leaderboard.impl.ScoreCorrectionImpl;
 import com.sap.sailing.domain.leaderboard.meta.LeaderboardGroupMetaLeaderboard;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
+import com.sap.sailing.domain.persistence.MongoRaceLogStoreFactory;
 import com.sap.sailing.domain.racelog.Flags;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
@@ -82,6 +84,7 @@ import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.racelog.RaceLogRaceStatusEvent;
 import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
+import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.racelog.impl.RaceLogImpl;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.Wind;
@@ -329,9 +332,16 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             SettableScoreCorrection scoreCorrection, ThresholdBasedResultDiscardingRule resultDiscardingRule, CourseArea courseArea) {
         final ScoringScheme scoringScheme = loadScoringScheme(dbLeaderboard);
         
+        RaceLogStore raceLogStore = MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(
+                new MongoObjectFactoryImpl(database), 
+                this);
         FlexibleLeaderboardImpl result = new FlexibleLeaderboardImpl(
-                (String) dbLeaderboard.get(FieldNames.LEADERBOARD_NAME.name()), scoreCorrection, resultDiscardingRule,
-                scoringScheme, courseArea);
+                raceLogStore,
+                (String) dbLeaderboard.get(FieldNames.LEADERBOARD_NAME.name()), 
+                scoreCorrection, 
+                resultDiscardingRule,
+                scoringScheme, 
+                courseArea);
         BasicDBList dbRaceColumns = (BasicDBList) dbLeaderboard.get(FieldNames.LEADERBOARD_COLUMNS.name());
         // For a FlexibleLeaderboard, fleets are owned by the leaderboard's RaceColumn objects. We need to manage them here:
         Map<String, Fleet> fleetsByName = new HashMap<String, Fleet>();
@@ -824,7 +834,14 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         Map<String, Fleet> fleetsByName = loadFleets(dbFleets);
         BasicDBList dbRaceColumns = (BasicDBList) dbSeries.get(FieldNames.SERIES_RACE_COLUMNS.name());
         Iterable<String> raceColumnNames = loadRaceColumnNames(dbRaceColumns, fleetsByName);
-        Series series = new SeriesImpl(name, isMedal, fleetsByName.values(), raceColumnNames, trackedRegattaRegistry);
+        Series series = new SeriesImpl(
+                MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(
+                        new MongoObjectFactoryImpl(database), this),
+                name, 
+                isMedal, 
+                fleetsByName.values(), 
+                raceColumnNames, 
+                trackedRegattaRegistry);
         loadRaceColumnRaceLinks(dbRaceColumns, series);
         return series;
     }
@@ -903,66 +920,68 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return result;
     }
 
-	@Override
-	public RaceLog loadRaceLog(RaceLogIdentifier identifier) {
-		RaceLog result = new RaceLogImpl(RaceLogImpl.class.getSimpleName());
+    @Override
+    public RaceLog loadRaceLog(RaceLogIdentifier identifier) {
+        RaceLog result = new RaceLogImpl(RaceLogImpl.class.getSimpleName());
         try {
-            BasicDBObject query = new BasicDBObject();
-            query.put(FieldNames.RACE_LOG_IDENTIFIER.name(), identifier.getIdentifier());
-            DBCollection raceLog = database.getCollection(CollectionNames.RACE_LOGS.name());
-            for (DBObject o : raceLog.find(query)) {
-                RaceLogEvent raceLogEvent = loadRaceLogEvent((DBObject) o.get(FieldNames.RACE_LOG_EVENT.name()));
-                
-                if (raceLogEvent != null)
-                	result.add(raceLogEvent);
-            }
+                BasicDBObject query = new BasicDBObject();
+                query.put(FieldNames.RACE_LOG_IDENTIFIER.name(), identifier.getIdentifier());
+                DBCollection raceLog = database.getCollection(CollectionNames.RACE_LOGS.name());
+                for (DBObject o : raceLog.find(query)) {
+                        RaceLogEvent raceLogEvent = loadRaceLogEvent((DBObject) o.get(FieldNames.RACE_LOG_EVENT.name()));
+                        
+                        if (raceLogEvent != null)
+                                result.add(raceLogEvent);
+                }
         } catch (Throwable t) {
-             // something went wrong during DB access; report, then use empty new race log
-            logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load recorded race log data. Check MongoDB settings.");
-            logger.throwing(DomainObjectFactoryImpl.class.getName(), "loadRaceLog", t);
+                 // something went wrong during DB access; report, then use empty new race log
+        logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load recorded race log data. Check MongoDB settings.");
+        logger.throwing(DomainObjectFactoryImpl.class.getName(), "loadRaceLog", t);
         }
         return result;
-	}
+    }
 
-	public RaceLogEvent loadRaceLogEvent(DBObject dbObject) {
-		TimePoint timePoint = loadTimePoint(dbObject);
-		Serializable id = (Serializable) dbObject.get(FieldNames.RACE_LOG_EVENT_ID.name());
-		Integer passId = (Integer) dbObject.get(FieldNames.RACE_LOG_EVENT_PASS_ID.name());
-		//BasicDBList dbList = (BasicDBList) dbObject.get(FieldNames.RC_EVENT_INVOLVED_BOATS.name());
-		List<Competitor> competitors = new ArrayList<Competitor>();
-		
-		String eventClass = (String) dbObject.get(FieldNames.RACE_LOG_EVENT_CLASS.name());
-		if (eventClass.equals(RaceLogStartTimeEvent.class.getSimpleName()) || eventClass.equals(RaceLogRaceStatusEvent.class.getSimpleName())) {
-			RaceLogRaceStatus nextStatus = RaceLogRaceStatus.valueOf(dbObject.get(FieldNames.RACE_LOG_EVENT_NEXT_STATUS.name()).toString());
-			if (eventClass.equals(RaceLogStartTimeEvent.class.getSimpleName())) {
-				return loadRaceLogStartTimeEvent(timePoint, id, passId, competitors, nextStatus, dbObject);
-			}
-			return RaceLogEventFactory.INSTANCE.createRaceStatusEvent(timePoint, id, competitors, passId, nextStatus);
-		} else if (eventClass.equals(RaceLogFlagEvent.class.getSimpleName())) {
-			return loadRaceLogFlagEvent(timePoint, id, passId, competitors, dbObject);
-		}
-		
-		return null;
-	}
+    public RaceLogEvent loadRaceLogEvent(DBObject dbObject) {
+        TimePoint timePoint = loadTimePoint(dbObject);
+        Serializable id = (Serializable) dbObject.get(FieldNames.RACE_LOG_EVENT_ID.name());
+        Integer passId = (Integer) dbObject.get(FieldNames.RACE_LOG_EVENT_PASS_ID.name());
+        //BasicDBList dbList = (BasicDBList) dbObject.get(FieldNames.RC_EVENT_INVOLVED_BOATS.name());
+        List<Competitor> competitors = new ArrayList<Competitor>();
+        
+        String eventClass = (String) dbObject.get(FieldNames.RACE_LOG_EVENT_CLASS.name());
+        if (eventClass.equals(RaceLogStartTimeEvent.class.getSimpleName()) || eventClass.equals(RaceLogRaceStatusEvent.class.getSimpleName())) {
+                RaceLogRaceStatus nextStatus = RaceLogRaceStatus.valueOf(dbObject.get(FieldNames.RACE_LOG_EVENT_NEXT_STATUS.name()).toString());
+                if (eventClass.equals(RaceLogStartTimeEvent.class.getSimpleName())) {
+                        return loadRaceLogStartTimeEvent(timePoint, id, passId, competitors, nextStatus, dbObject);
+                }
+                return RaceLogEventFactory.INSTANCE.createRaceStatusEvent(timePoint, id, competitors, passId, nextStatus);
+        } else if (eventClass.equals(RaceLogFlagEvent.class.getSimpleName())) {
+                return loadRaceLogFlagEvent(timePoint, id, passId, competitors, dbObject);
+        }
+        
+        return null;
+    }
 
-	private RaceLogEvent loadRaceLogFlagEvent(TimePoint timePoint, Serializable id, Integer passId, List<Competitor> competitors, DBObject dbObject) {
-		Flags upperFlag = Flags.valueOf((String) dbObject.get(FieldNames.RACE_LOG_EVENT_FLAG_UPPER.name()));
-		Flags lowerFlag = Flags.valueOf((String) dbObject.get(FieldNames.RACE_LOG_EVENT_FLAG_LOWER.name()));
-		Boolean displayed = Boolean.valueOf((String) dbObject.get(FieldNames.RACE_LOG_EVENT_FLAG_DISPLAYED.name()));
-		
-		if (upperFlag == null || lowerFlag == null || displayed == null) {
-			return null;
-		}
-		
-		return RaceLogEventFactory.INSTANCE.createFlagEvent(timePoint, id, competitors, passId, upperFlag, lowerFlag, displayed);
-	}
+    private RaceLogEvent loadRaceLogFlagEvent(TimePoint timePoint, Serializable id, Integer passId, List<Competitor> competitors, DBObject dbObject) {
+        Flags upperFlag = Flags.valueOf((String) dbObject.get(FieldNames.RACE_LOG_EVENT_FLAG_UPPER.name()));
+        Flags lowerFlag = Flags.valueOf((String) dbObject.get(FieldNames.RACE_LOG_EVENT_FLAG_LOWER.name()));
+        Boolean displayed = Boolean.valueOf((String) dbObject.get(FieldNames.RACE_LOG_EVENT_FLAG_DISPLAYED.name()));
+        
+        if (upperFlag == null || lowerFlag == null || displayed == null) {
+                return null;
+        }
+        
+        return RaceLogEventFactory.INSTANCE.createFlagEvent(timePoint, id, competitors, 
+                passId, upperFlag, lowerFlag, displayed);
+    }
 
-	private RaceLogStartTimeEvent loadRaceLogStartTimeEvent(TimePoint timePoint, Serializable id, Integer passId, List<Competitor> competitors, RaceLogRaceStatus nextStatus, DBObject dbObject) {
-		Long startTimeInMillis = (Long) dbObject.get(FieldNames.RACE_LOG_EVENT_START_TIME.name());
-		if (startTimeInMillis == null) {
-			return null;
-		}
-		TimePoint startTime = new MillisecondsTimePoint(startTimeInMillis);
-		return RaceLogEventFactory.INSTANCE.createStartTimeEvent(timePoint, id, competitors, passId, nextStatus, startTime);
-	}
+    private RaceLogStartTimeEvent loadRaceLogStartTimeEvent(TimePoint timePoint, Serializable id, Integer passId, List<Competitor> competitors, RaceLogRaceStatus nextStatus, DBObject dbObject) {
+        Long startTimeInMillis = (Long) dbObject.get(FieldNames.RACE_LOG_EVENT_START_TIME.name());
+        if (startTimeInMillis == null) {
+                return null;
+        }
+        TimePoint startTime = new MillisecondsTimePoint(startTimeInMillis);
+        return RaceLogEventFactory.INSTANCE.createStartTimeEvent(timePoint, id, competitors, 
+                passId, nextStatus, startTime);
+    }
 }

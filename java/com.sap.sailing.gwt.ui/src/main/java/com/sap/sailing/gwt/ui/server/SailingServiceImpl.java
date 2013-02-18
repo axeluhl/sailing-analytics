@@ -116,6 +116,7 @@ import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
+import com.sap.sailing.domain.persistence.MongoRaceLogStoreFactory;
 import com.sap.sailing.domain.persistence.MongoWindStoreFactory;
 import com.sap.sailing.domain.polarsheets.BoatAndWindSpeed;
 import com.sap.sailing.domain.polarsheets.PolarSheetGenerationWorker;
@@ -1154,6 +1155,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             final RacesHandle raceHandle = getService().addTracTracRace(regattaToAddTo, new URL(rr.paramURL),
                     new URI(liveURI), new URI(storedURI), new MillisecondsTimePoint(rr.trackingStartTime),
                     new MillisecondsTimePoint(rr.trackingEndTime),
+                    MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(mongoObjectFactory, domainObjectFactory),
                     MongoWindStoreFactory.INSTANCE.getMongoWindStore(mongoObjectFactory, domainObjectFactory),
                     RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS, simulateWithStartTimeNow);
             if (trackWind) {
@@ -2406,9 +2408,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public void trackWithSwissTiming(RegattaIdentifier regattaToAddTo, Iterable<SwissTimingRaceRecordDTO> rrs, String hostname, int port,
             boolean canSendRequests, boolean trackWind, final boolean correctWindByDeclination) throws Exception {
         for (SwissTimingRaceRecordDTO rr : rrs) {
+            
             final RacesHandle raceHandle = getService().addSwissTimingRace(regattaToAddTo, rr.ID, hostname, port,
                     canSendRequests,
                     MongoWindStoreFactory.INSTANCE.getMongoWindStore(mongoObjectFactory, domainObjectFactory),
+                    MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(mongoObjectFactory, domainObjectFactory),
                     RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS);
             if (trackWind) {
                 new Thread("Wind tracking starter for race " + rr.ID + "/" + rr.description) {
@@ -2460,9 +2464,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                         replayRaceDTO.rsc,
                         boatClass.trim(),
                         RegattaImpl.getFullName(replayRaceDTO.rsc, replayRaceDTO.boat_class),
-                        Collections.singletonList(new SeriesImpl("Default", /* isMedal */false, Collections
-                                .singletonList(new FleetImpl("Default")), /* race column names */
-                                new ArrayList<String>(), getService())), false,
+                        Collections.singletonList(new SeriesImpl(
+                            MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(mongoObjectFactory, domainObjectFactory),
+                            "Default", 
+                            /* isMedal */false, 
+                            Collections.singletonList(new FleetImpl("Default")), 
+                            /* race column names */ new ArrayList<String>(), getService())), 
+                        false,
                         baseDomainFactory.createScoringScheme(ScoringSchemeType.LOW_POINT));
             } else {
                 regatta = getService().getRegatta(regattaIdentifier);
@@ -3020,7 +3028,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             LinkedHashMap<String, Pair<List<Triple<String, Integer, Color>>, Boolean>> seriesNamesWithFleetNamesAndFleetOrderingAndMedal,
             boolean persistent, ScoringSchemeType scoringSchemeType) {
         Regatta regatta = getService().apply(
-                new AddSpecificRegatta(regattaName, boatClassName, UUID.randomUUID(),
+                new AddSpecificRegatta(
+                        MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(mongoObjectFactory, domainObjectFactory),
+                        regattaName, boatClassName, UUID.randomUUID(),
                         seriesNamesWithFleetNamesAndFleetOrderingAndMedal,
                         persistent, baseDomainFactory.createScoringScheme(scoringSchemeType)));
         return convertToRegattaDTO(regatta);

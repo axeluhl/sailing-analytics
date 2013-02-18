@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.logging.Logger;
 
+
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
@@ -16,6 +17,9 @@ import com.sap.sailing.domain.leaderboard.FlexibleRaceColumn;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
+import com.sap.sailing.domain.racelog.RaceLogStore;
+import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
+import com.sap.sailing.domain.racelog.impl.RaceLogInformationImpl;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
 /**
@@ -36,8 +40,14 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
     private final List<FlexibleRaceColumn> races;
     private final ScoringScheme scoringScheme;
     private String name;
-
+    private final RaceLogStore raceLogStore;
+    
     public FlexibleLeaderboardImpl(String name, SettableScoreCorrection scoreCorrection,
+            ThresholdBasedResultDiscardingRule resultDiscardingRule, ScoringScheme scoringScheme, CourseArea courseArea) {
+        this(EmptyRaceLogStore.INSTANCE, name, scoreCorrection, resultDiscardingRule, scoringScheme, courseArea);
+    }
+
+    public FlexibleLeaderboardImpl(RaceLogStore raceLogStore, String name, SettableScoreCorrection scoreCorrection,
             ThresholdBasedResultDiscardingRule resultDiscardingRule, ScoringScheme scoringScheme, CourseArea courseArea) {
         super(scoreCorrection, resultDiscardingRule, courseArea);
         this.scoringScheme = scoringScheme;
@@ -46,6 +56,7 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
         }
         this.name = name;
         this.races = new ArrayList<FlexibleRaceColumn>();
+        this.raceLogStore = raceLogStore;
     }
     
     @Override
@@ -119,8 +130,12 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
         return column;
     }
 
-    protected RaceColumnImpl createRaceColumn(String columnName, boolean medalRace, Fleet... fleets) {
-        return new RaceColumnImpl(columnName, medalRace, turnNullOrEmptyFleetsIntoDefaultFleet(fleets));
+    protected RaceColumnImpl createRaceColumn(String column, boolean medalRace, Fleet... fleets) {
+        return new RaceColumnImpl(
+                RaceLogInformationImpl.create(this, raceLogStore),
+                column, 
+                medalRace, 
+                turnNullOrEmptyFleetsIntoDefaultFleet(fleets));
     }
 
     protected Iterable<Fleet> turnNullOrEmptyFleetsIntoDefaultFleet(Fleet... fleets) {

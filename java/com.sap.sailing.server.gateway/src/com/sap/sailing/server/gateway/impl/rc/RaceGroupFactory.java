@@ -25,17 +25,9 @@ import com.sap.sailing.domain.base.impl.SeriesImpl;
 import com.sap.sailing.domain.base.impl.SeriesWithRowsImpl;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
-import com.sap.sailing.domain.racelog.RaceLogIdentifier;
-import com.sap.sailing.domain.racelog.impl.RaceLogIdentifierImpl;
-import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 
 public class RaceGroupFactory {
-	
-	private RacingEventService service;
-
-	public RaceGroupFactory(RacingEventService service) {
-		this.service = service;
-	}
 
 	public RaceGroup convert(Leaderboard leaderboard) {
 		String name = leaderboard.getName();
@@ -62,8 +54,7 @@ public class RaceGroupFactory {
 			for (Fleet fleet : series.getFleets()) {
 				Collection<RaceCell> cells = new ArrayList<>();
 				for (RaceColumn raceColumn : seriesToRaceColumns.get(series)) {
-					RaceLogIdentifier identifier = new RaceLogIdentifierImpl(leaderboard, raceColumn, fleet);
-					cells.add(new RaceCellImpl(raceColumn.getName(), service.getRaceLog(identifier)));
+					cells.add(new RaceCellImpl(raceColumn.getName(), raceColumn.getRaceLog(fleet)));
 				}
 				rows.add(new RaceRowImpl(fleet, cells));
 			}
@@ -95,11 +86,12 @@ public class RaceGroupFactory {
 	private Series createDefaultSeries() {
 		Series defaultSeries;
 		defaultSeries = new SeriesImpl(
-				"Default Series", 
-				false, 
-				Collections.<Fleet>singleton(new FleetImpl("Default Fleet")), 
-				Collections.<String>emptyList(), 
-				null);
+		        EmptyRaceLogStore.INSTANCE,
+			"Default Series", 
+			false, 
+			Collections.<Fleet>singleton(new FleetImpl("Default Fleet")), 
+			Collections.<String>emptyList(), 
+			null);
 		return defaultSeries;
 	}
 

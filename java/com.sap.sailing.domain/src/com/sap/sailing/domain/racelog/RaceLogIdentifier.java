@@ -1,7 +1,9 @@
 package com.sap.sailing.domain.racelog;
 
-public interface RaceLogIdentifier {
-	
-	String getIdentifier();
+import java.io.Serializable;
 
+public interface RaceLogIdentifier {
+
+    Serializable getIdentifier();
+    
 }

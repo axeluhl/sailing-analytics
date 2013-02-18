@@ -4,6 +4,7 @@ import com.sap.sailing.domain.common.Named;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.util.impl.RaceColumnListeners;
 
@@ -25,6 +26,15 @@ import com.sap.sailing.util.impl.RaceColumnListeners;
  * 
  */
 public interface RaceColumn extends Named {
+    
+    /**
+     * Gets the race column's race log of passed fleet.
+     * 
+     * @param fleet
+     * @return the race log.
+     */
+    RaceLog getRaceLog(Fleet fleet);
+    
     /**
      * @return the fleets for each of which this column has a single race and therefore optionally a {@link TrackedRace}, in
      * ascending order; best fleets first

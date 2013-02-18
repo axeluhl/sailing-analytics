@@ -10,6 +10,7 @@ import com.sap.sailing.domain.base.impl.SimpleAbstractRaceColumn;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
+import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
 /**
@@ -29,6 +30,11 @@ public class MetaLeaderboardColumn extends SimpleAbstractRaceColumn implements R
         this.leaderboard = leaderboard;
         this.metaFleet = metaFleet;
         leaderboard.addRaceColumnListener(this);
+    }
+
+    @Override
+    public RaceLog getRaceLog(Fleet fleet) {
+        return null;
     }
 
     Leaderboard getLeaderboard() {

@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
@@ -17,6 +18,9 @@ import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.common.impl.NamedImpl;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
+import com.sap.sailing.domain.racelog.RaceLogStore;
+import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
+import com.sap.sailing.domain.racelog.impl.RaceLogInformationImpl;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
@@ -30,6 +34,7 @@ public class SeriesImpl extends NamedImpl implements Series, RaceColumnListener 
     private boolean isMedal;
     private Regatta regatta;
     private final RaceColumnListeners raceColumnListeners;
+    private final RaceLogStore raceLogStore;
     
     /**
      * @param fleets
@@ -41,7 +46,7 @@ public class SeriesImpl extends NamedImpl implements Series, RaceColumnListener 
      *            this column's series {@link Regatta}, respectively. If <code>null</code>, the re-association won't be
      *            carried out.
      */
-    public SeriesImpl(String name, boolean isMedal, Iterable<? extends Fleet> fleets, Iterable<String> raceColumnNames,
+    public SeriesImpl(RaceLogStore raceLogStore, String name, boolean isMedal, Iterable<? extends Fleet> fleets, Iterable<String> raceColumnNames,
             TrackedRegattaRegistry trackedRegattaRegistry) {
         super(name);
         if (fleets == null || Util.isEmpty(fleets)) {
@@ -60,6 +65,12 @@ public class SeriesImpl extends NamedImpl implements Series, RaceColumnListener 
         for (String raceColumnName : raceColumnNames) {
             addRaceColumn(raceColumnName, trackedRegattaRegistry);
         }
+        this.raceLogStore = raceLogStore;
+    }
+    
+    public SeriesImpl(String name, boolean isMedal, Iterable<? extends Fleet> fleets, Iterable<String> raceColumnNames,
+            TrackedRegattaRegistry trackedRegattaRegistry) {
+        this(EmptyRaceLogStore.INSTANCE, name, isMedal, fleets, raceColumnNames, trackedRegattaRegistry);
     }
 
     @Override
@@ -126,8 +137,11 @@ public class SeriesImpl extends NamedImpl implements Series, RaceColumnListener 
      *            carried out.
      */
     private RaceColumnInSeriesImpl createRaceColumn(String raceColumnName, TrackedRegattaRegistry trackedRegattaRegistry) {
-        RaceColumnInSeriesImpl result = new RaceColumnInSeriesImpl(raceColumnName, this, trackedRegattaRegistry);
-        return result;
+        return new RaceColumnInSeriesImpl(
+                RaceLogInformationImpl.create(regatta, raceLogStore), 
+                raceColumnName, 
+                this, 
+                trackedRegattaRegistry);
     }
 
     @Override

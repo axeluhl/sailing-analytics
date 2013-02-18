@@ -19,6 +19,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
@@ -28,6 +29,7 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.impl.Util;
+import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.swisstimingadapter.MessageType;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterConnector;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterTransceiver;
@@ -64,6 +66,7 @@ public class EndToEndListeningStoreAndFowardTest {
     private SwissTimingFactory swissTimingFactory;
 
     private EmptyWindStore emptyWindStore;
+    private EmptyRaceLogStore emptyRaceLogStore;
     private RacingEventService racingEventService;
 
     private List<RacesHandle> raceHandles;
@@ -83,6 +86,7 @@ public class EndToEndListeningStoreAndFowardTest {
         sendingStream = sendingSocket.getOutputStream();
         swissTimingFactory = SwissTimingFactory.INSTANCE;
         emptyWindStore = EmptyWindStore.INSTANCE;
+        emptyRaceLogStore = EmptyRaceLogStore.INSTANCE;
         transceiver = swissTimingFactory.createSailMasterTransceiver();
         DBCollection lastMessageCountCollection = db.getCollection(CollectionNames.LAST_MESSAGE_COUNT.name());
         lastMessageCountCollection.update(new BasicDBObject(),
@@ -336,7 +340,7 @@ public class EndToEndListeningStoreAndFowardTest {
         for (String raceToTrack : racesToTrack) {
             RacesHandle raceHandle = racingEventService.addSwissTimingRace(/* regattaToAddTo */ null /* use a default regatta */,
                     raceToTrack, "localhost", /* canSendRequests */
-                    CLIENT_PORT, false, emptyWindStore, -1);
+                    CLIENT_PORT, false, emptyWindStore, emptyRaceLogStore, -1);
             raceHandles.add(raceHandle);
             if (connector == null) {
                 connector = racingEventService.getSwissTimingFactory().getOrCreateSailMasterConnector("localhost",

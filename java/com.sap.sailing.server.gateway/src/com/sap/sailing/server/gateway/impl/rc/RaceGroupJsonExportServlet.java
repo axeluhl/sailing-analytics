@@ -53,7 +53,7 @@ public class RaceGroupJsonExportServlet extends AbstractJsonHttpServlet {
 		JsonSerializer<RaceGroup> serializer = createSerializer();
 		JSONArray result = new JSONArray();
 		
-		RaceGroupFactory raceGroupFactory = new RaceGroupFactory(getService());
+		RaceGroupFactory raceGroupFactory = new RaceGroupFactory();
 		for (Leaderboard leaderboard : getService().getLeaderboards().values()) {
 			if (filterCourseArea.equals(leaderboard.getDefaultCourseArea())) {
 				RaceGroup raceGroup = raceGroupFactory.convert(leaderboard);
