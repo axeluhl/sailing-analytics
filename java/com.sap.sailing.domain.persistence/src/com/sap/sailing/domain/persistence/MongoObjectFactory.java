@@ -84,4 +84,6 @@ public interface MongoObjectFactory {
 
     void storeRegattaForRaceID(String id, Regatta regatta);
 
+    void removeRegattaForRaceID(String raceIDAsString, Regatta regatta);
+
 }
