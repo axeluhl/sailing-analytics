@@ -65,7 +65,7 @@ public class RaceLogInRacingServiceImplTest {
         server.apply(addLeaderboardColumn);
         
         RacingEventServiceOperation<RaceColumn> addLeaderboardColumn2 = new AddColumnToLeaderboard(
-                "arminColumn", LEADERBOARDNAME, /* medalRace */ false);
+                "ColumnMy", LEADERBOARDNAME, /* medalRace */ false);
         server.apply(addLeaderboardColumn2);
         
         TimePoint t1 = MillisecondsTimePoint.now();
@@ -86,47 +86,47 @@ public class RaceLogInRacingServiceImplTest {
         
         Thread.sleep(1000);
         
-        RaceLog raceLog2 = racingEventServiceServer.getRaceLog(identifier);
+        RaceLog raceLogAfterAdd = racingEventServiceServer.getRaceLog(identifier);
         raceLog.lockForRead();
         try {
-        	raceLog2.lockForRead();
+        	raceLogAfterAdd.lockForRead();
         	try {
-        		assertEquals(Util.size(raceLog.getFixes()), Util.size(raceLog2.getFixes()));
+        		assertEquals(Util.size(raceLog.getFixes()), Util.size(raceLogAfterAdd.getFixes()));
         	} finally {
-        		raceLog2.unlockAfterRead();
+        		raceLogAfterAdd.unlockAfterRead();
         	}
         } finally {
         	raceLog.unlockAfterRead();
         }
         
-        RaceColumn arminColumn = leaderboard.getRaceColumnByName("arminColumn");
-        Fleet fleetarmin = arminColumn.getFleetByName("Default");
-        RaceLogIdentifier identifierArmin = new RaceLogIdentifierImpl(leaderboard, arminColumn, fleetarmin);
+        RaceColumn raceColumnMy = leaderboard.getRaceColumnByName("ColumnMy");
+        Fleet fleetMy = raceColumnMy.getFleetByName("Default");
+        RaceLogIdentifier identifierMy = new RaceLogIdentifierImpl(leaderboard, raceColumnMy, fleetMy);
         
-        RaceLog raceLogArmin = racingEventServiceServer.getRaceLog(identifierArmin);
-        raceLogArmin.add(rcEvent);
-        raceLogArmin.add(rcEvent2);
+        RaceLog raceLogMy = racingEventServiceServer.getRaceLog(identifierMy);
+        raceLogMy.add(rcEvent);
+        raceLogMy.add(rcEvent2);
         
         Thread.sleep(1000);
         
-        RaceLog raceLogArmin2 = racingEventServiceServer.getRaceLog(identifierArmin);
-        raceLogArmin.lockForRead();
+        RaceLog raceLogMyAfterAdd = racingEventServiceServer.getRaceLog(identifierMy);
+        raceLogMy.lockForRead();
         try {
-        	raceLogArmin2.lockForRead();
+        	raceLogMyAfterAdd.lockForRead();
         	try {
-        		assertEquals(Util.size(raceLogArmin.getFixes()), Util.size(raceLogArmin2.getFixes()));
+        		assertEquals(Util.size(raceLogMy.getFixes()), Util.size(raceLogMyAfterAdd.getFixes()));
         	} finally {
-        		raceLogArmin2.unlockAfterRead();
+        		raceLogMyAfterAdd.unlockAfterRead();
         	}
         	raceLog.lockForRead();
         	try {
-        		assertEquals(2, Util.size(raceLogArmin.getFixes()));
+        		assertEquals(2, Util.size(raceLogMy.getFixes()));
         		assertEquals(1, Util.size(raceLog.getFixes()));
         	} finally {
         		raceLog.unlockAfterRead();
         	}
         } finally {
-        	raceLogArmin.unlockAfterRead();
+        	raceLogMy.unlockAfterRead();
         }
 	}
 	
@@ -178,34 +178,34 @@ public class RaceLogInRacingServiceImplTest {
         	raceLog.unlockAfterRead();
         }
         
-        RaceColumn arminColumn = leaderboard.getRaceColumnByName("R2");
-        Fleet fleetarmin = arminColumn.getFleetByName("Default");
-        RaceLogIdentifier identifierR2 = new RaceLogIdentifierImpl(leaderboard, arminColumn, fleetarmin);
+        RaceColumn raceColumnR2 = leaderboard.getRaceColumnByName("R2");
+        Fleet fleetR2 = raceColumnR2.getFleetByName("Default");
+        RaceLogIdentifier identifierR2 = new RaceLogIdentifierImpl(leaderboard, raceColumnR2, fleetR2);
         
-        RaceLog raceLogArmin = racingEventServiceServer.getRaceLog(identifierR2);
-        raceLogArmin.add(rcEvent);
-        raceLogArmin.add(rcEvent2);
+        RaceLog raceLogR2BeforeAdd = racingEventServiceServer.getRaceLog(identifierR2);
+        raceLogR2BeforeAdd.add(rcEvent);
+        raceLogR2BeforeAdd.add(rcEvent2);
         
         Thread.sleep(1000);
         
-        RaceLog raceLogArmin2 = racingEventServiceServer.getRaceLog(identifierR2);
-        raceLogArmin.lockForRead();
+        RaceLog raceLogR2AfterAdd = racingEventServiceServer.getRaceLog(identifierR2);
+        raceLogR2BeforeAdd.lockForRead();
         try {
-        	raceLogArmin2.lockForRead();
+        	raceLogR2AfterAdd.lockForRead();
         	try {
-        		assertEquals(Util.size(raceLogArmin.getFixes()), Util.size(raceLogArmin2.getFixes()));
+        		assertEquals(Util.size(raceLogR2BeforeAdd.getFixes()), Util.size(raceLogR2AfterAdd.getFixes()));
         	} finally {
-        		raceLogArmin2.unlockAfterRead();
+        		raceLogR2AfterAdd.unlockAfterRead();
         	}
         	raceLog.lockForRead();
         	try {
-        		assertEquals(2, Util.size(raceLogArmin.getFixes()));
+        		assertEquals(2, Util.size(raceLogR2BeforeAdd.getFixes()));
         		assertEquals(1, Util.size(raceLog.getFixes()));
         	} finally {
         		raceLog.unlockAfterRead();
         	}
         } finally {
-        	raceLogArmin.unlockAfterRead();
+        	raceLogR2BeforeAdd.unlockAfterRead();
         }
 	}
 	
@@ -239,56 +239,56 @@ public class RaceLogInRacingServiceImplTest {
         
         RaceLogIdentifier identifierR1 = new RaceLogIdentifierImpl(leaderboard, raceColumn, fleet);
         
-        RaceLog raceLog = racingEventServiceServer.getRaceLog(identifierR1);
+        RaceLog raceLogR1 = racingEventServiceServer.getRaceLog(identifierR1);
         
         server.apply(new RecordRaceLogEvent(identifierR1, rcEvent));
         
         Thread.sleep(1000);
-        RaceLog raceLog2 = racingEventServiceServer.getRaceLog(identifierR1);
-        raceLog.lockForRead();
+        RaceLog raceLogR1_2 = racingEventServiceServer.getRaceLog(identifierR1);
+        raceLogR1.lockForRead();
         try {
-        	raceLog2.lockForRead();
+        	raceLogR1_2.lockForRead();
         	try {
-        		assertEquals(0, Util.size(raceLog.getFixes()));
-        		assertEquals(1, Util.size(raceLog2.getFixes()));
+        		assertEquals(1, Util.size(raceLogR1.getFixes()));
+        		assertEquals(1, Util.size(raceLogR1_2.getFixes()));
         	} finally {
-        		raceLog2.unlockAfterRead();
+        		raceLogR1_2.unlockAfterRead();
         	}
         } finally {
-        	raceLog.unlockAfterRead();
+        	raceLogR1.unlockAfterRead();
         }
         
-        RaceColumn arminColumn = leaderboard.getRaceColumnByName("R2");
-        Fleet fleetarmin = arminColumn.getFleetByName("Default");
+        RaceColumn raceColumnR2 = leaderboard.getRaceColumnByName("R2");
+        Fleet fleetR2 = raceColumnR2.getFleetByName("Default");
         
-        RaceLogIdentifier identifierR2 = new RaceLogIdentifierImpl(leaderboard, arminColumn, fleetarmin);
+        RaceLogIdentifier identifierR2 = new RaceLogIdentifierImpl(leaderboard, raceColumnR2, fleetR2);
         
-        RaceLog raceLogArmin = racingEventServiceServer.getRaceLog(identifierR2);
+        RaceLog raceLogR2 = racingEventServiceServer.getRaceLog(identifierR2);
         
         server.apply(new RecordRaceLogEvent(identifierR2, rcEvent));
         server.apply(new RecordRaceLogEvent(identifierR2, rcEvent2));
         
         Thread.sleep(1000);
         
-        RaceLog raceLogArmin2 = racingEventServiceServer.getRaceLog(identifierR2);
-        raceLogArmin2.lockForRead();
+        RaceLog raceLogR2AfterAdd = racingEventServiceServer.getRaceLog(identifierR2);
+        raceLogR2AfterAdd.lockForRead();
         try {
-        	raceLogArmin.lockForRead();
+        	raceLogR2.lockForRead();
         	try {
-        		assertEquals(0, Util.size(raceLogArmin.getFixes()));
-        		assertEquals(2, Util.size(raceLogArmin2.getFixes()));
+        		assertEquals(2, Util.size(raceLogR2.getFixes()));
+        		assertEquals(2, Util.size(raceLogR2AfterAdd.getFixes()));
         	} finally {
-        		raceLogArmin.unlockAfterRead();
+        		raceLogR2.unlockAfterRead();
         	}
-        	raceLog2.lockForRead();
+        	raceLogR1_2.lockForRead();
         	try {
-        		assertEquals(2, Util.size(raceLogArmin2.getFixes()));
-        		assertEquals(1, Util.size(raceLog2.getFixes()));
+        		assertEquals(2, Util.size(raceLogR2AfterAdd.getFixes()));
+        		assertEquals(1, Util.size(raceLogR1_2.getFixes()));
         	} finally {
-        		raceLog2.unlockAfterRead();
+        		raceLogR1_2.unlockAfterRead();
         	}
         } finally {
-        	raceLogArmin2.unlockAfterRead();
+        	raceLogR2AfterAdd.unlockAfterRead();
         }
 	}
 }
