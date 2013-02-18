@@ -219,6 +219,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             }
             if (result != null) {
                 final Leaderboard finalResult = result;
+                finalResult.setDisplayName((String) dbLeaderboard.get(FieldNames.LEADERBOARD_DISPLAY_NAME.name()));
+
                 DelayedLeaderboardCorrections loadedLeaderboardCorrections = new DelayedLeaderboardCorrectionsImpl(result);
                 final boolean[] needsMigration = new boolean[1];
                 loadedLeaderboardCorrections.addLeaderboardCorrectionsResolvedListener(new LeaderboardCorrectionsResolvedListener() {

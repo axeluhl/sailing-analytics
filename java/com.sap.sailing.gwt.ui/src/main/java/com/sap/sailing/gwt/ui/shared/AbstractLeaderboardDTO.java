@@ -22,6 +22,7 @@ public abstract class AbstractLeaderboardDTO implements IsSerializable {
     public boolean hasCarriedPoints;
     public int[] discardThresholds;
     public String regattaName;
+    public String displayName;
     public String courseAreaId;
     public ScoringSchemeType scoringScheme;
     public boolean isMetaLeaderboard;
@@ -41,6 +42,10 @@ public abstract class AbstractLeaderboardDTO implements IsSerializable {
         return result;
     }
 
+    public String getDisplayName() {
+        return displayName;
+    }
+    
     public String getDisplayName(CompetitorDTO competitor) {
         if (competitorDisplayNames == null || competitorDisplayNames.get(competitor) == null) {
             return competitor.name;

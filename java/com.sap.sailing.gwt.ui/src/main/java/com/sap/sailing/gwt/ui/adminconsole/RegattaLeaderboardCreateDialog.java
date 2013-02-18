@@ -15,6 +15,7 @@ public class RegattaLeaderboardCreateDialog extends RegattaLeaderboardDialog {
         super(stringConstants.createRegattaLeaderboard(), new LeaderboardDescriptor(), existingRegattas, stringConstants, existingEvents, errorReporter, new RegattaLeaderboardDialog.LeaderboardParameterValidator(stringConstants, existingLeaderboards), callback);
 
         nameTextBox = createTextBox(null);
+        displayNameTextBox = createTextBox(null);
 
         regattaListBox = createListBox(false);
         regattaListBox.addItem(stringConstants.pleaseSelectARegatta());

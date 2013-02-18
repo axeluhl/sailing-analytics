@@ -213,6 +213,15 @@ public interface Leaderboard extends Named {
      * @throws NoWindException 
      */
     List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint) throws NoWindException;
+    
+    /**
+     * Returns the total rank of the given competitor.
+     * @param competitor
+     * @param timePoint
+     * @return
+     * @throws NoWindException
+     */
+    int getTotalRankOfCompetitor(Competitor competitor, TimePoint timePoint) throws NoWindException;
 
     /**
      * Fetches all entries for all competitors of all races tracked by this leaderboard in one sweep. This saves some
@@ -269,11 +278,19 @@ public interface Leaderboard extends Named {
     void setDisplayName(Competitor competitor, String displayName);
 
     /**
+     * If a display name for the leaderboard has been defined,
+     * this method returns it; otherwise, <code>null</code> is returned.
+     */
+    String getDisplayName();
+
+    void setDisplayName(String displayName);
+
+    /**
      * If a display name different from the competitor's {@link Competitor#getName() name} has been defined,
      * this method returns it; otherwise, <code>null</code> is returned.
      */
     String getDisplayName(Competitor competitor);
-    
+
     /**
      * Tells if the column represented by <code>raceColumn</code> shall be considered when counting the number of "races
      * so far" for discarding. Although medal races are never discarded themselves, they still count in determining the

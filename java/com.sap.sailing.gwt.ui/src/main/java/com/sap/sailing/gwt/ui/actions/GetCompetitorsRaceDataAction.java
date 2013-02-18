@@ -18,9 +18,12 @@ public class GetCompetitorsRaceDataAction extends DefaultAsyncAction<Competitors
     private final Date toDate;
     private final long stepSizeInMs;
     private final DetailType detailType;
+    private final String leaderboarGroupName;
+    private final String leaderboardName;
     
-    public GetCompetitorsRaceDataAction(SailingServiceAsync sailingService, RegattaAndRaceIdentifier raceIdentifier, List<CompetitorDTO> competitors,
-            Date fromDate, Date toDate, long stepSizeInMs, DetailType detailType, AsyncCallback<CompetitorsRaceDataDTO> callback) {
+    public GetCompetitorsRaceDataAction(SailingServiceAsync sailingService, RegattaAndRaceIdentifier raceIdentifier,
+            List<CompetitorDTO> competitors, Date fromDate, Date toDate, long stepSizeInMs, DetailType detailType,
+            String leaderboardGroupName, String leaderboardName, AsyncCallback<CompetitorsRaceDataDTO> callback) {
         super(callback);
         this.sailingService = sailingService;
         this.raceIdentifier = raceIdentifier;
@@ -29,11 +32,13 @@ public class GetCompetitorsRaceDataAction extends DefaultAsyncAction<Competitors
         this.toDate = toDate;
         this.stepSizeInMs = stepSizeInMs;
         this.detailType = detailType;
+        this.leaderboarGroupName = leaderboardGroupName;
+        this.leaderboardName = leaderboardName;
     }
 
     @Override
     public void execute(AsyncActionsExecutor asyncActionsExecutor) {
-        sailingService.getCompetitorsRaceData(raceIdentifier, competitors, fromDate, toDate, stepSizeInMs, detailType,
+        sailingService.getCompetitorsRaceData(raceIdentifier, competitors, fromDate, toDate, stepSizeInMs, detailType, leaderboarGroupName, leaderboardName,
                     (AsyncCallback<CompetitorsRaceDataDTO>) getWrapperCallback(asyncActionsExecutor));
     }
 }

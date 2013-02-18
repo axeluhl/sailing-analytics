@@ -14,6 +14,9 @@ import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindException;
+import com.sap.sailing.domain.common.PolarSheetGenerationTriggerResponse;
+import com.sap.sailing.domain.common.PolarSheetsData;
+import com.sap.sailing.domain.common.PolarSheetsHistogramData;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.ScoringSchemeType;
@@ -54,333 +57,247 @@ import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 
 /**
- * The client side stub for the RPC service. Usually, when a <code>null</code>
- * date is passed to the time-dependent service methods, an empty (non-
- * <code>null</code>) result is returned.
+ * The client side stub for the RPC service. Usually, when a <code>null</code> date is passed to
+ * the time-dependent service methods, an empty (non-<code>null</code>) result is returned.
  */
 @RemoteServiceRelativePath("sailing")
 public interface SailingService extends RemoteService {
-	List<TracTracConfigurationDTO> getPreviousTracTracConfigurations()
-			throws Exception;
+    List<TracTracConfigurationDTO> getPreviousTracTracConfigurations() throws Exception;
+    
+    List<RegattaDTO> getRegattas();
 
-	List<RegattaDTO> getRegattas();
+    List<EventDTO> getEvents();
 
-	List<EventDTO> getEvents();
+    Pair<String, List<TracTracRaceRecordDTO>> listTracTracRacesInEvent(String eventJsonURL) throws Exception;
 
-	Pair<String, List<TracTracRaceRecordDTO>> listTracTracRacesInEvent(
-			String eventJsonURL) throws Exception;
+    void trackWithTracTrac(RegattaIdentifier regattaToAddTo, Iterable<TracTracRaceRecordDTO> rrs, String liveURI,
+            String storedURI, boolean trackWind, boolean correctWindByDeclination, boolean simulateWithStartTimeNow) throws Exception;
 
-	void trackWithTracTrac(RegattaIdentifier regattaToAddTo,
-			Iterable<TracTracRaceRecordDTO> rrs, String liveURI,
-			String storedURI, boolean trackWind,
-			boolean correctWindByDeclination, boolean simulateWithStartTimeNow)
-			throws Exception;
+    void trackWithSwissTiming(RegattaIdentifier regattaToAddTo, Iterable<SwissTimingRaceRecordDTO> rrs, String hostname, int port,
+            boolean canSendRequests, boolean trackWind, boolean correctWindByDeclination) throws Exception;
+    
+    void replaySwissTimingRace(RegattaIdentifier regattaIdentifier, Iterable<SwissTimingReplayRaceDTO> replayRaces,
+            boolean trackWind, boolean correctWindByDeclination, boolean simulateWithStartTimeNow);
 
-	void trackWithSwissTiming(RegattaIdentifier regattaToAddTo,
-			Iterable<SwissTimingRaceRecordDTO> rrs, String hostname, int port,
-			boolean canSendRequests, boolean trackWind,
-			boolean correctWindByDeclination) throws Exception;
+    void storeTracTracConfiguration(String name, String jsonURL, String liveDataURI, String storedDataURI) throws Exception;
 
-	void replaySwissTimingRace(RegattaIdentifier regattaIdentifier,
-			Iterable<SwissTimingReplayRaceDTO> replayRaces, boolean trackWind,
-			boolean correctWindByDeclination, boolean simulateWithStartTimeNow);
+    void stopTrackingEvent(RegattaIdentifier eventIdentifier) throws Exception;
 
-	void storeTracTracConfiguration(String name, String jsonURL,
-			String liveDataURI, String storedDataURI) throws Exception;
+    void stopTrackingRaces(Iterable<RegattaAndRaceIdentifier> racesToStopTracking) throws Exception;
+    
+    void removeAndUntrackRaces(Iterable<RegattaAndRaceIdentifier> regattaNamesAndRaceNames);
 
-	void stopTrackingEvent(RegattaIdentifier eventIdentifier) throws Exception;
+    WindInfoForRaceDTO getRawWindFixes(RegattaAndRaceIdentifier raceIdentifier, Collection<WindSource> windSources);
 
-	void stopTrackingRaces(
-			Iterable<RegattaAndRaceIdentifier> racesToStopTracking)
-			throws Exception;
+    void setWind(RegattaAndRaceIdentifier raceIdentifier, WindDTO wind);
 
-	void removeAndUntrackRaces(
-			Iterable<RegattaAndRaceIdentifier> regattaNamesAndRaceNames);
+    WindInfoForRaceDTO getAveragedWindInfo(RegattaAndRaceIdentifier raceIdentifier, Date from, long millisecondsStepWidth,
+            int numberOfFixes, Collection<String> windSourceTypeNames) throws NoWindException;
 
-	WindInfoForRaceDTO getRawWindFixes(RegattaAndRaceIdentifier raceIdentifier,
-			Collection<WindSource> windSources);
+    WindInfoForRaceDTO getAveragedWindInfo(RegattaAndRaceIdentifier raceIdentifier, Date from, Date to, long resolutionInMilliseconds,
+            Collection<String> windSourceTypeNames);
 
-	void setWind(RegattaAndRaceIdentifier raceIdentifier, WindDTO wind);
+    WindInfoForRaceDTO getAveragedWindInfo(RegattaAndRaceIdentifier raceIdentifier, Date from, long millisecondsStepWidth,
+            int numberOfFixes, double latDeg, double lngDeg, Collection<String> windSources) throws NoWindException;
 
-	WindInfoForRaceDTO getAveragedWindInfo(
-			RegattaAndRaceIdentifier raceIdentifier, Date from,
-			long millisecondsStepWidth, int numberOfFixes,
-			Collection<String> windSourceTypeNames) throws NoWindException;
+    RaceMapDataDTO getRaceMapData(RegattaAndRaceIdentifier raceIdentifier, Date date, Map<CompetitorDTO, Date> from, Map<CompetitorDTO, Date> to,
+            boolean extrapolate) throws NoWindException;
+    
+    Map<CompetitorDTO, List<GPSFixDTO>> getBoatPositions(RegattaAndRaceIdentifier raceIdentifier, Map<CompetitorDTO, Date> from,
+            Map<CompetitorDTO, Date> to, boolean extrapolate) throws NoWindException;
 
-	WindInfoForRaceDTO getAveragedWindInfo(
-			RegattaAndRaceIdentifier raceIdentifier, Date from, Date to,
-			long resolutionInMilliseconds,
-			Collection<String> windSourceTypeNames);
+    RaceTimesInfoDTO getRaceTimesInfo(RegattaAndRaceIdentifier raceIdentifier);
+    
+    List<RaceTimesInfoDTO> getRaceTimesInfos(Collection<RegattaAndRaceIdentifier> raceIdentifiers);
+    
+    CourseDTO getCoursePositions(RegattaAndRaceIdentifier raceIdentifier, Date date);
 
-	WindInfoForRaceDTO getAveragedWindInfo(
-			RegattaAndRaceIdentifier raceIdentifier, Date from,
-			long millisecondsStepWidth, int numberOfFixes, double latDeg,
-			double lngDeg, Collection<String> windSources)
-			throws NoWindException;
+    List<ControlPointDTO> getRaceCourse(RegattaAndRaceIdentifier raceIdentifier, Date date);
 
-	RaceMapDataDTO getRaceMapData(RegattaAndRaceIdentifier raceIdentifier,
-			Date date, Map<CompetitorDTO, Date> from,
-			Map<CompetitorDTO, Date> to, boolean extrapolate)
-			throws NoWindException;
+    List<QuickRankDTO> getQuickRanks(RegattaAndRaceIdentifier raceIdentifier, Date date) throws NoWindException;
 
-	Map<CompetitorDTO, List<GPSFixDTO>> getBoatPositions(
-			RegattaAndRaceIdentifier raceIdentifier,
-			Map<CompetitorDTO, Date> from, Map<CompetitorDTO, Date> to,
-			boolean extrapolate) throws NoWindException;
+    void removeWind(RegattaAndRaceIdentifier raceIdentifier, WindDTO windDTO);
 
-	RaceTimesInfoDTO getRaceTimesInfo(RegattaAndRaceIdentifier raceIdentifier);
+    public List<String> getLeaderboardNames() throws Exception;
+    
+    LeaderboardDTO getLeaderboardByName(String leaderboardName, Date date,
+            Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails) throws Exception;
 
-	List<RaceTimesInfoDTO> getRaceTimesInfos(
-			Collection<RegattaAndRaceIdentifier> raceIdentifiers);
+    List<StrippedLeaderboardDTO> getLeaderboards();
+    
+    List<StrippedLeaderboardDTO> getLeaderboardsByEvent(RegattaDTO regatta);
+    
+    void updateLeaderboard(String leaderboardName, String newLeaderboardName, String newLeaderboardDisplayName, int[] newDiscardingThreasholds);
 
-	CourseDTO getCoursePositions(RegattaAndRaceIdentifier raceIdentifier,
-			Date date);
+    StrippedLeaderboardDTO createFlexibleLeaderboard(String leaderboardName, int[] discardThresholds, ScoringSchemeType scoringSchemeType, Serializable courseAreaId);
 
-	List<ControlPointDTO> getRaceCourse(
-			RegattaAndRaceIdentifier raceIdentifier, Date date);
+    StrippedLeaderboardDTO createRegattaLeaderboard(RegattaIdentifier regattaIdentifier, int[] discardThresholds, Serializable courseAreaId);
 
-	List<QuickRankDTO> getQuickRanks(RegattaAndRaceIdentifier raceIdentifier,
-			Date date) throws NoWindException;
+    void removeLeaderboard(String leaderboardName);
 
-	void removeWind(RegattaAndRaceIdentifier raceIdentifier, WindDTO windDTO);
+    void renameLeaderboard(String leaderboardName, String newLeaderboardName);
 
-	public List<String> getLeaderboardNames() throws Exception;
+    void renameLeaderboardColumn(String leaderboardName, String oldColumnName, String newColumnName);
 
-	LeaderboardDTO getLeaderboardByName(String leaderboardName, Date date,
-			Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails)
-			throws Exception;
+    void removeLeaderboardColumn(String leaderboardName, String columnName);
+    
+    void addColumnToLeaderboard(String columnName, String leaderboardName, boolean medalRace);
+    
+    void moveLeaderboardColumnUp(String leaderboardName, String columnName);
+    
+    void moveLeaderboardColumnDown(String leaderboardName, String columnName);
+    
+    RegattaDTO createRegatta(String regattaName, String boatClassName, 
+            LinkedHashMap<String, Pair<List<Triple<String, Integer, Color>>, Boolean>> seriesNamesWithFleetNamesAndFleetOrderingAndMedal,
+            boolean persistent, ScoringSchemeType scoringSchemeType);
+    
+    void removeRegatta(RegattaIdentifier regattaIdentifier);
+    
+    List<RaceColumnInSeriesDTO> addRaceColumnsToSeries(RegattaIdentifier regattaIdentifier, String seriesName, List<String> columnNames);
 
-	List<StrippedLeaderboardDTO> getLeaderboards();
+    RaceColumnInSeriesDTO addRaceColumnToSeries(RegattaIdentifier regattaIdentifier, String seriesName, String columnName);
 
-	List<StrippedLeaderboardDTO> getLeaderboardsByEvent(RegattaDTO regatta);
+    void removeRaceColumnsFromSeries(RegattaIdentifier regattaIdentifier, String seriesName, List<String> columnNames);
 
-	void updateLeaderboard(String leaderboardName, String newLeaderboardName,
-			int[] newDiscardingThreasholds);
+    void removeRaceColumnFromSeries(RegattaIdentifier regattaIdentifier, String seriesName, String columnName);
 
-	StrippedLeaderboardDTO createFlexibleLeaderboard(String leaderboardName,
-			int[] discardThresholds, ScoringSchemeType scoringSchemeType,
-			Serializable courseAreaId);
+    void moveRaceColumnInSeriesUp(RegattaIdentifier regattaIdentifier, String seriesName, String columnName);
 
-	StrippedLeaderboardDTO createRegattaLeaderboard(
-			RegattaIdentifier regattaIdentifier, int[] discardThresholds,
-			Serializable courseAreaId);
+    void moveRaceColumnInSeriesDown(RegattaIdentifier regattaIdentifier, String seriesName, String columnName);
 
-	void removeLeaderboard(String leaderboardName);
+    boolean connectTrackedRaceToLeaderboardColumn(String leaderboardName, String raceColumnName,
+            String fleetName, RegattaAndRaceIdentifier raceIdentifier);
+    
+    void disconnectLeaderboardColumnFromTrackedRace(String leaderboardName, String raceColumnName, String fleetName);
+    
+    Map<String, RegattaAndRaceIdentifier> getRegattaAndRaceNameOfTrackedRaceConnectedToLeaderboardColumn(String leaderboardName, String raceColumnName);
 
-	void renameLeaderboard(String leaderboardName, String newLeaderboardName);
+    void updateLeaderboardCarryValue(String leaderboardName, String competitorIdAsString, Double carriedPoints);
 
-	void renameLeaderboardColumn(String leaderboardName, String oldColumnName,
-			String newColumnName);
+    /**
+     * @return the new net points in {@link Pair#getA()} and the new total points in {@link Pair#getB()} for time point
+     * <code>date</code> after the max points reason has been updated to <code>maxPointsReasonAsString</code>.
+     */
+    Triple<Double, Double, Boolean> updateLeaderboardMaxPointsReason(String leaderboardName, String competitorIdAsString,
+            String raceColumnName, MaxPointsReason maxPointsReason, Date date) throws NoWindException;
 
-	void removeLeaderboardColumn(String leaderboardName, String columnName);
+    Triple<Double, Double, Boolean> updateLeaderboardScoreCorrection(String leaderboardName, String competitorIdAsString,
+            String columnName, Double correctedScore, Date date) throws NoWindException;
 
-	void addColumnToLeaderboard(String columnName, String leaderboardName,
-			boolean medalRace);
+    void updateCompetitorDisplayNameInLeaderboard(String leaderboardName, String competitorIdAsString, String displayName);
+    
+    void updateIsMedalRace(String leaderboardName, String columnName, boolean isMedalRace);
 
-	void moveLeaderboardColumnUp(String leaderboardName, String columnName);
+    List<SwissTimingConfigurationDTO> getPreviousSwissTimingConfigurations();
 
-	void moveLeaderboardColumnDown(String leaderboardName, String columnName);
+    List<SwissTimingRaceRecordDTO> listSwissTimingRaces(String hostname, int port, boolean canSendRequests) throws Exception;
 
-	RegattaDTO createRegatta(
-			String regattaName,
-			String boatClassName,
-			LinkedHashMap<String, Pair<List<Triple<String, Integer, Color>>, Boolean>> seriesNamesWithFleetNamesAndFleetOrderingAndMedal,
-			boolean persistent, ScoringSchemeType scoringSchemeType);
+    void storeSwissTimingConfiguration(String configName, String hostname, int port, boolean canSendRequests);
 
-	void removeRegatta(RegattaIdentifier regattaIdentifier);
+    void sendSwissTimingDummyRace(String racMessage, String stlMesssage, String ccgMessage) throws IllegalArgumentException;
 
-	List<RaceColumnInSeriesDTO> addRaceColumnsToSeries(
-			RegattaIdentifier regattaIdentifier, String seriesName,
-			List<String> columnNames);
+    String[] getCountryCodes();
+    
+    Map<CompetitorDTO, List<GPSFixDTO>> getDouglasPoints(RegattaAndRaceIdentifier raceIdentifier,
+            Map<CompetitorDTO, Date> from, Map<CompetitorDTO, Date> to, double meters) throws NoWindException;
 
-	RaceColumnInSeriesDTO addRaceColumnToSeries(
-			RegattaIdentifier regattaIdentifier, String seriesName,
-			String columnName);
+    Map<CompetitorDTO, List<ManeuverDTO>> getManeuvers(RegattaAndRaceIdentifier raceIdentifier,
+            Map<CompetitorDTO, Date> from, Map<CompetitorDTO, Date> to) throws NoWindException;
 
-	void removeRaceColumnsFromSeries(RegattaIdentifier regattaIdentifier,
-			String seriesName, List<String> columnNames);
+    List<StrippedLeaderboardDTO> getLeaderboardsByRace(RaceDTO race);
+    
+    List<LeaderboardGroupDTO> getLeaderboardGroups(boolean withGeoLocationData);
+    
+    LeaderboardGroupDTO getLeaderboardGroupByName(String groupName, boolean withGeoLocationData);
+    
+    void renameLeaderboardGroup(String oldName, String newName);
+    
+    void removeLeaderboardGroup(String groupName);
+    
+    LeaderboardGroupDTO createLeaderboardGroup(String groupName, String description,
+            boolean displayGroupsInReverseOrder, int[] overallLeaderboardDiscardThresholds,
+            ScoringSchemeType overallLeaderboardScoringSchemeType);
+    
+    void updateLeaderboardGroup(String oldName, String newName, String description, List<String> leaderboardNames,
+            int[] overallLeaderboardDiscardThresholds, ScoringSchemeType overallLeaderboardScoringSchemeType);
 
-	void removeRaceColumnFromSeries(RegattaIdentifier regattaIdentifier,
-			String seriesName, String columnName);
+    CompetitorsRaceDataDTO getCompetitorsRaceData(RegattaAndRaceIdentifier race, List<CompetitorDTO> competitors, Date from, Date to,
+            long stepSizeInMs, DetailType detailType, String leaderboardGroupName, String leaderboardName) throws NoWindException;
 
-	void moveRaceColumnInSeriesUp(RegattaIdentifier regattaIdentifier,
-			String seriesName, String columnName);
+    void setRaceIsKnownToStartUpwind(RegattaAndRaceIdentifier raceIdentifier, boolean raceIsKnownToStartUpwind);
 
-	void moveRaceColumnInSeriesDown(RegattaIdentifier regattaIdentifier,
-			String seriesName, String columnName);
+    void setWindSourcesToExclude(RegattaAndRaceIdentifier raceIdentifier, Iterable<WindSource> windSourcesToExclude);
+    
+    ReplicationStateDTO getReplicaInfo();
 
-	boolean connectTrackedRaceToLeaderboardColumn(String leaderboardName,
-			String raceColumnName, String fleetName,
-			RegattaAndRaceIdentifier raceIdentifier);
+    void startReplicatingFromMaster(String masterName, String exchangeName, int servletPort, int messagingPort) throws Exception;
 
-	void disconnectLeaderboardColumnFromTrackedRace(String leaderboardName,
-			String raceColumnName, String fleetName);
+    void updateRaceDelayToLive(RegattaAndRaceIdentifier regattaAndRaceIdentifier, long delayToLiveInMs);
 
-	Map<String, RegattaAndRaceIdentifier> getRegattaAndRaceNameOfTrackedRaceConnectedToLeaderboardColumn(
-			String leaderboardName, String raceColumnName);
+    void updateRacesDelayToLive(List<RegattaAndRaceIdentifier> regattaAndRaceIdentifiers, long delayToLiveInMs);
 
-	void updateLeaderboardCarryValue(String leaderboardName,
-			String competitorIdAsString, Double carriedPoints);
+    void updateEvent(String eventName, Serializable id, VenueDTO venue, String publicationUrl, boolean isPublic,
+            List<String> regattaNames);
 
-	/**
-	 * @return the new net points in {@link Pair#getA()} and the new total
-	 *         points in {@link Pair#getB()} for time point <code>date</code>
-	 *         after the max points reason has been updated to
-	 *         <code>maxPointsReasonAsString</code>.
-	 */
-	Triple<Double, Double, Boolean> updateLeaderboardMaxPointsReason(
-			String leaderboardName, String competitorIdAsString,
-			String raceColumnName, MaxPointsReason maxPointsReason, Date date)
-			throws NoWindException;
+    EventDTO createEvent(String eventName, String venueName, String publicationUrl, boolean isPublic, List<String> courseAreaNames);
 
-	Triple<Double, Double, Boolean> updateLeaderboardScoreCorrection(
-			String leaderboardName, String competitorIdAsString,
-			String columnName, Double correctedScore, Date date)
-			throws NoWindException;
+    void removeEvent(Serializable id);
 
-	void updateCompetitorDisplayNameInLeaderboard(String leaderboardName,
-			String competitorIdAsString, String displayName);
+    void renameEvent(Serializable id, String newName);
 
-	void updateIsMedalRace(String leaderboardName, String columnName,
-			boolean isMedalRace);
+    EventDTO getEventByName(String eventName);
 
-	List<SwissTimingConfigurationDTO> getPreviousSwissTimingConfigurations();
+    Iterable<ScoreCorrectionProviderDTO> getScoreCorrectionProviderDTOs() throws Exception;
 
-	List<SwissTimingRaceRecordDTO> listSwissTimingRaces(String hostname,
-			int port, boolean canSendRequests) throws Exception;
+    RegattaScoreCorrectionDTO getScoreCorrections(String scoreCorrectionProviderName, String eventName, String boatClassName,
+            Date timePointWhenResultPublished) throws Exception;
 
-	void storeSwissTimingConfiguration(String configName, String hostname,
-			int port, boolean canSendRequests);
+    void updateLeaderboardScoreCorrectionsAndMaxPointsReasons(BulkScoreCorrectionDTO updates) throws NoWindException;
 
-	void sendSwissTimingDummyRace(String racMessage, String stlMesssage,
-			String ccgMessage) throws IllegalArgumentException;
+    WindInfoForRaceDTO getWindSourcesInfo(RegattaAndRaceIdentifier raceIdentifier);
 
-	String[] getCountryCodes();
+    List<String> getFregResultUrls();
 
-	Map<CompetitorDTO, List<GPSFixDTO>> getDouglasPoints(
-			RegattaAndRaceIdentifier raceIdentifier,
-			Map<CompetitorDTO, Date> from, Map<CompetitorDTO, Date> to,
-			double meters) throws NoWindException;
+    void removeFregURLs(Set<String> toRemove) throws Exception;
 
-	Map<CompetitorDTO, List<ManeuverDTO>> getManeuvers(
-			RegattaAndRaceIdentifier raceIdentifier,
-			Map<CompetitorDTO, Date> from, Map<CompetitorDTO, Date> to)
-			throws NoWindException;
+    void addFragUrl(String result) throws Exception;
 
-	List<StrippedLeaderboardDTO> getLeaderboardsByRace(RaceDTO race);
+    Void updateLeaderboardScoreCorrectionMetadata(String leaderboardName, Date timePointOfLastCorrectionValidity,
+            String comment);
 
-	List<LeaderboardGroupDTO> getLeaderboardGroups(boolean withGeoLocationData);
+    RaceCourseMarksDTO getRaceCourseMarks(RegattaAndRaceIdentifier raceIdentifier, Date date);
 
-	LeaderboardGroupDTO getLeaderboardGroupByName(String groupName,
-			boolean withGeoLocationData);
+    void updateRaceCourse(RegattaAndRaceIdentifier raceIdentifier, List<ControlPointDTO> controlPoints);
 
     void addColumnsToLeaderboard(String leaderboardName, List<Pair<String, Boolean>> columnsToAdd);
 
-	void removeLeaderboardGroup(String groupName);
+    void removeLeaderboardColumns(String leaderboardName, List<String> columnsToRemove);
 
-	LeaderboardGroupDTO createLeaderboardGroup(String groupName,
-			String description, boolean displayGroupsInReverseOrder,
-			int[] overallLeaderboardDiscardThresholds,
-			ScoringSchemeType overallLeaderboardScoringSchemeType);
+    StrippedLeaderboardDTO getLeaderboard(String leaderboardName);
 
-	void updateLeaderboardGroup(String oldName, String newName,
-			String description, List<String> leaderboardNames,
-			int[] overallLeaderboardDiscardThresholds,
-			ScoringSchemeType overallLeaderboardScoringSchemeType);
+    void suppressCompetitorInLeaderboard(String leaderboardName, String competitorIdAsString, boolean suppressed);
 
-	CompetitorsRaceDataDTO getCompetitorsRaceData(
-			RegattaAndRaceIdentifier race, List<CompetitorDTO> competitors,
-			Date from, Date to, long stepSizeInMs, DetailType detailType)
-			throws NoWindException;
+    void updateLeaderboardColumnFactor(String leaderboardName, String columnName, Double newFactor);
 
-	void setRaceIsKnownToStartUpwind(RegattaAndRaceIdentifier raceIdentifier,
-			boolean raceIsKnownToStartUpwind);
+    List<SwissTimingReplayRaceDTO> listSwissTiminigReplayRaces(String swissTimingUrl);
 
-	void setWindSourcesToExclude(RegattaAndRaceIdentifier raceIdentifier,
-			Iterable<WindSource> windSourcesToExclude);
+    List<Pair<String, List<CompetitorDTO>>> getRankedCompetitorsFromBestToWorstAfterEachRaceColumn(String leaderboardName, Date date) throws NoWindException;
 
-	ReplicationStateDTO getReplicaInfo();
+    List<String> getOverallLeaderboardNamesContaining(String leaderboardName);
 
-	void startReplicatingFromMaster(String masterName, String exchangeName,
-			int servletPort, int messagingPort) throws Exception;
+    List<SwissTimingArchiveConfigurationDTO> getPreviousSwissTimingArchiveConfigurations();
 
-	void updateRaceDelayToLive(
-			RegattaAndRaceIdentifier regattaAndRaceIdentifier,
-			long delayToLiveInMs);
+    void storeSwissTimingArchiveConfiguration(String swissTimingUrl);
 
-	void updateRacesDelayToLive(
-			List<RegattaAndRaceIdentifier> regattaAndRaceIdentifiers,
-			long delayToLiveInMs);
-
-	void updateEvent(String eventName, Serializable id, VenueDTO venue,
-			String publicationUrl, boolean isPublic, List<String> regattaNames);
-
-	EventDTO createEvent(String eventName, String venueName,
-			String publicationUrl, boolean isPublic, List<String> courseAreas);
-
-	void removeEvent(Serializable id);
-
-	void renameEvent(Serializable id, String newName);
-
-	EventDTO getEventByName(String eventName);
-
-	CourseAreaDTO createCourseArea(Serializable id, String courseAreaName);
-
-	EventDTO getEventById(Serializable id);
-
-	Iterable<ScoreCorrectionProviderDTO> getScoreCorrectionProviderDTOs()
-			throws Exception;
-
-	RegattaScoreCorrectionDTO getScoreCorrections(
-			String scoreCorrectionProviderName, String eventName,
-			String boatClassName, Date timePointWhenResultPublished)
-			throws Exception;
-
-	void updateLeaderboardScoreCorrectionsAndMaxPointsReasons(
-			BulkScoreCorrectionDTO updates) throws NoWindException;
-
-	WindInfoForRaceDTO getWindSourcesInfo(
-			RegattaAndRaceIdentifier raceIdentifier);
-
-	List<String> getFregResultUrls();
-
-	void removeFregURLs(Set<String> toRemove) throws Exception;
-
-	void addFragUrl(String result) throws Exception;
-
-	Void updateLeaderboardScoreCorrectionMetadata(String leaderboardName,
-			Date timePointOfLastCorrectionValidity, String comment);
-
-	RaceCourseMarksDTO getRaceCourseMarks(
-			RegattaAndRaceIdentifier raceIdentifier, Date date);
-
-	void updateRaceCourse(RegattaAndRaceIdentifier raceIdentifier,
-			List<ControlPointDTO> controlPoints);
-
-	void removeLeaderboardColumns(String leaderboardName,
-			List<String> columnsToRemove);
-
-	StrippedLeaderboardDTO getLeaderboard(String leaderboardName);
-
-	void suppressCompetitorInLeaderboard(String leaderboardName,
-			String competitorIdAsString, boolean suppressed);
-
-	RaceEventLogDTO getRaceEventLog();
-
-	void updateLeaderboardColumnFactor(String leaderboardName,
-			String columnName, Double newFactor);
-
-	List<SwissTimingReplayRaceDTO> listSwissTiminigReplayRaces(
-			String swissTimingUrl);
-
-	List<Pair<String, List<CompetitorDTO>>> getRankedCompetitorsFromBestToWorstAfterEachRaceColumn(
-			String leaderboardName, Date date) throws NoWindException;
-
-	List<String> getOverallLeaderboardNamesContaining(String leaderboardName);
-
-	List<SwissTimingArchiveConfigurationDTO> getPreviousSwissTimingArchiveConfigurations();
-
-	void storeSwissTimingArchiveConfiguration(String swissTimingUrl);
-
-	void renameLeaderboardGroup(String oldName, String newName);
+    PolarSheetGenerationTriggerResponse generatePolarSheetForRaces(List<RegattaAndRaceIdentifier> selectedRaces);
+    
+    PolarSheetsData getPolarSheetsGenerationResults(String id);
+    
+    PolarSheetsHistogramData getPolarSheetData(String polarSheetId, int angle, int windSpeed);
+    
+    RaceEventLogDTO getRaceEventLog();
+    
+    EventDTO getEventById(Serializable id);
+    
+    CourseAreaDTO createCourseArea(Serializable id, String courseAreaName);
 }

@@ -68,7 +68,6 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
             windSourcesToExclude.add(new WindSourceImpl(WindSourceType.COURSE_BASED));
             setWindSourcesToExclude(windSourcesToExclude);
         }
-        
         for (Competitor competitor : getRace().getCompetitors()) {
             DynamicGPSFixTrack<Competitor, GPSFixMoving> track = getTrack(competitor);
             track.addListener(this);
@@ -90,7 +89,11 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
      * {@link #raceIsKnownToStartUpwind} (see also {@link #raceIsKnownToStartUpwind()}) is initialized based on the <code>race</code>'s
      * {@link RaceDefinition#getBoatClass()} boat class's {@link BoatClass#typicallyStartsUpwind()} result. It can be changed
      * using {@link #setRaceIsKnownToStartUpwind(boolean)}. Uses <code>millisecondsOverWhichToAverageWind/2</code> for the
-     * <code>delayForCacheInvalidationOfWindEstimation</code> argument of the constructor.
+     * <code>delayForCacheInvalidationOfWindEstimation</code> argument of the constructor.<p>
+     * 
+     * Loading wind tracks from the <code>windStore</code> happens asynchronously which means that when the constructor returns,
+     * the caller cannot assume that all wind tracks have yet been loaded completely. The caller may call {@link #waitUntilWindLoadingComplete()}
+     * to wait until all persistent wind sources have been successfully and completely loaded.
      */
     public DynamicTrackedRaceImpl(TrackedRegatta trackedRegatta, RaceDefinition race,
             WindStore windStore, long delayToLiveInMillis,
@@ -542,8 +545,8 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
 
     /**
      * In addition to calling the super class implementation, notifies all race listeners registered with this tracked
-     * race which in particular replicates all wind fixes that may have been loaded from the wind store for the new
-     * track.
+     * race using their {@link RaceChangeListener#windDataReceived(Wind, WindSource)} method. In particular this
+     * replicates all wind fixes that may have been loaded from the wind store for the new track.
      */
     @Override
     protected WindTrack createWindTrack(WindSource windSource, long delayForWindEstimationCacheInvalidation) {
@@ -553,8 +556,8 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
             result.lockForRead();
             try {
                 for (Wind wind : result.getRawFixes()) {
-                    notifyListeners(wind, windSource);
-                }
+                    notifyListeners(wind, windSource); // Note that this doesn't notify the track's listeners but the tracked race's listeners.
+                } // In particular, the wind store won't receive events (again) for the wind fixes it already has.
             } finally {
                 result.unlockAfterRead();
             }

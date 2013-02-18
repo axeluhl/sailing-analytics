@@ -58,7 +58,10 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
      * competitor names for display in a leaderboard.
      */
     private final Map<Competitor, String> displayNames;
-    
+
+    /** the display name of the leaderboard */
+    private String displayName;
+
     /**
      * Backs the {@link #getCarriedPoints(Competitor)} API with data. Can be used to prime this leaderboard
      * with aggregated results of races not tracked / displayed by this leaderboard in detail. The points
@@ -155,7 +158,17 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     public String getDisplayName(Competitor competitor) {
         return displayNames.get(competitor);
     }
-    
+
+    @Override
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    @Override
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
+    }
+
     @Override
     public ThresholdBasedResultDiscardingRule getResultDiscardingRule() {
         return resultDiscardingRule;
@@ -326,6 +339,12 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
         Collections.sort(result, getTotalRankComparator(raceColumnsToConsider, timePoint));
         return result;
     }
+    
+    @Override
+    public int getTotalRankOfCompetitor(Competitor competitor, TimePoint timePoint) throws NoWindException {
+        List<Competitor> competitorsFromBestToWorst = getCompetitorsFromBestToWorst(timePoint);
+        return competitorsFromBestToWorst.indexOf(competitor) + 1;
+    }
 
     protected Comparator<? super Competitor> getTotalRankComparator(Iterable<RaceColumn> raceColumnsToConsider, TimePoint timePoint) throws NoWindException {
         return new LeaderboardTotalRankComparator(this, timePoint, getScoringScheme(), /* nullScoresAreBetter */ false, raceColumnsToConsider);
@@ -391,8 +410,8 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
 
     @Override
     public Map<RaceColumn, List<Competitor>> getRankedCompetitorsFromBestToWorstAfterEachRaceColumn(TimePoint timePoint) throws NoWindException {
-        Map<RaceColumn, List<Competitor>> result = new HashMap<RaceColumn, List<Competitor>>();
-        List<RaceColumn> raceColumnsToConsider = new ArrayList<RaceColumn>();
+        Map<RaceColumn, List<Competitor>> result = new HashMap<>();
+        List<RaceColumn> raceColumnsToConsider = new ArrayList<>();
         for (RaceColumn raceColumn : getRaceColumns()) {
             raceColumnsToConsider.add(raceColumn);
             result.put(raceColumn, getCompetitorsFromBestToWorst(raceColumnsToConsider, timePoint));
@@ -652,7 +671,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     
     @Override
     public Iterable<Competitor> getCompetitors() {
-        Set<Competitor> result = new HashSet<Competitor>();
+        Set<Competitor> result = new HashSet<>();
         for (Competitor competitor : getAllCompetitors()) {
             if (!isSuppressed(competitor)) {
                 result.add(competitor);
@@ -695,11 +714,8 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
         return timePoint;
     }
     
-
-    
     @Override
     public CourseArea getDefaultCourseArea() {
-    	// TODO Implement leaderboard <-> CourseArea relationship
     	return courseArea;
     }
 }

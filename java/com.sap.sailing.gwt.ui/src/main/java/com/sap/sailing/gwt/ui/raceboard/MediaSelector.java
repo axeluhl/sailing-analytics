@@ -1,9 +1,9 @@
 package com.sap.sailing.gwt.ui.raceboard;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -36,6 +36,8 @@ import com.sap.sailing.gwt.ui.raceboard.MediaSelectionDialog.MediaSelectionListe
 import com.sap.sailing.gwt.ui.raceboard.PopupWindowPlayer.PopupCloseListener;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.media.MediaTrack;
+import com.sap.sailing.gwt.ui.shared.media.MediaTrack.MediaType;
+import com.sap.sailing.gwt.ui.shared.media.MediaTrack.Status;
 
 public class MediaSelector implements RaceTimesInfoProviderListener, PlayStateListener, TimeListener,
         AsyncCallback<Collection<MediaTrack>>, MediaSelectionListener, CloseHandler<Window>, ClosingHandler {
@@ -44,12 +46,10 @@ public class MediaSelector implements RaceTimesInfoProviderListener, PlayStateLi
     private final Button manageMediaButton;
     
     private final MediaSelectionDialog mediaSelectionDialog;
-    private final AudioElement mediaCanPlayTester; 
 
     private MediaPlayer activeAudioPlayer;
     private final Map<MediaTrack, MediaPlayer> videoPlayers = new HashMap<MediaTrack, MediaPlayer>();
-    private final Set<MediaTrack> audioTracks = new HashSet<MediaTrack>();
-    private final Set<MediaTrack> videoTracks = new HashSet<MediaTrack>();
+    private final Collection<MediaTrack> mediaTracks = new ArrayList<MediaTrack>();
     private final ErrorReporter errorReporter;
 
     private Date currentRaceTime;
@@ -74,7 +74,21 @@ public class MediaSelector implements RaceTimesInfoProviderListener, PlayStateLi
                 } else {
                     MediaTrack playingAudioTrack = activeAudioPlayer != null ? activeAudioPlayer.getMediaTrack() : null;
                     Set<MediaTrack> playingVideoTracks = videoPlayers.keySet();
-                    mediaSelectionDialog.show(videoTracks, playingVideoTracks, audioTracks, playingAudioTrack, toggleMediaButton);
+
+                    Collection<MediaTrack> reachableVideoTracks = new ArrayList<MediaTrack>();
+                    Collection<MediaTrack> reachableAudioTracks = new ArrayList<MediaTrack>();
+                    for (MediaTrack mediaTrack : mediaTracks) {
+                        if (MediaTrack.Status.REACHABLE.equals(mediaTrack.status)) {
+                            switch (mediaTrack.mimeType.mediaType) {
+                            case video:
+                                reachableVideoTracks.add(mediaTrack);
+                            case audio: //intentionall fall through
+                                reachableAudioTracks.add(mediaTrack);
+                            } 
+                        }                        
+                    }
+                    
+                    mediaSelectionDialog.show(reachableVideoTracks , playingVideoTracks, reachableAudioTracks, playingAudioTrack, toggleMediaButton);
                 }
             }
         });
@@ -103,31 +117,40 @@ public class MediaSelector implements RaceTimesInfoProviderListener, PlayStateLi
         
         setWidgetsVisible(false);
 
-        Audio audio = Audio.createIfSupported();
-        if (audio != null) {            
-            mediaCanPlayTester = audio.getAudioElement();
-        } else {
-            mediaCanPlayTester = null;
-        }
     }
     
-    private boolean canPlay(MediaTrack mediaTrack) {
-        if (mediaCanPlayTester != null) {
-            if (mediaTrack.isYoutube()) {
-                return true;
-            } else {
-                String canPlay = mediaCanPlayTester.canPlayType(mediaTrack.typeToString());
-                if (mediaCanPlayTester != null) {
-                    return MediaElement.CAN_PLAY_PROBABLY.equals(canPlay) || MediaElement.CAN_PLAY_MAYBE.equals(canPlay);
+    private void setStatus(final MediaTrack mediaTrack) {
+        if (!mediaTrack.isYoutube()) {
+            Audio audio = Audio.createIfSupported();
+            if (audio != null) {            
+                AudioElement mediaReachableTester = audio.getAudioElement();
+                String canPlay = mediaReachableTester.canPlayType(mediaTrack.typeToString());
+                if (MediaElement.CAN_PLAY_PROBABLY.equals(canPlay) || MediaElement.CAN_PLAY_MAYBE.equals(canPlay)) {
+                    addLoadMetadataHandler(mediaReachableTester, mediaTrack);
+                    mediaReachableTester.setPreload(MediaElement.PRELOAD_METADATA);
+                    mediaReachableTester.setSrc(mediaTrack.url);
+                    mediaReachableTester.load();
                 } else {
-                    return false;
+                    mediaTrack.status = Status.CANNOT_PLAY;
                 }
+            } else {
+                mediaTrack.status = Status.CANNOT_PLAY;
             }
         } else {
-            return false;
+            mediaTrack.status = Status.REACHABLE;
         }
     }
 
+    native void addLoadMetadataHandler(MediaElement mediaElement, MediaTrack mediaTrack) /*-{ 
+        var that = this;
+        mediaElement.addEventListener('loadedmetadata', function() {
+            that.@com.sap.sailing.gwt.ui.raceboard.MediaSelector::loadedmetadata(Lcom/sap/sailing/gwt/ui/shared/media/MediaTrack;)(mediaTrack);
+        });
+    }-*/;
+    
+    public void loadedmetadata(MediaTrack mediaTrack) {
+        mediaTrack.status = Status.REACHABLE;
+    }
 
     private void playDefault() {
             MediaTrack defaultVideo = getDefaultVideo();
@@ -141,19 +164,22 @@ public class MediaSelector implements RaceTimesInfoProviderListener, PlayStateLi
     }
 
     private MediaTrack getDefaultAudio() {
-        if (!audioTracks.isEmpty()) {
-            return audioTracks.iterator().next();
-        } else {
-            return getDefaultVideo();
+        //TODO: implement a better heuristic than just taking the first to come
+        for (MediaTrack mediaTrack : mediaTracks) {
+            if (MediaType.audio.equals(mediaTrack.mimeType.mediaType)) {
+                return mediaTrack;
+            }
         }
+        return getDefaultVideo();
     }
 
     private MediaTrack getDefaultVideo() {
-        if (!videoTracks.isEmpty()) {
-            return videoTracks.iterator().next();
-        } else {
-            return null;
+        for (MediaTrack mediaTrack : mediaTracks) {
+            if (MediaType.video.equals(mediaTrack.mimeType.mediaType)) {
+                return mediaTrack;
+            }
         }
+        return null;
     }
 
     private void stopAll() {
@@ -235,18 +261,12 @@ public class MediaSelector implements RaceTimesInfoProviderListener, PlayStateLi
 
     @Override
     public void onSuccess(Collection<MediaTrack> mediaTracks) {
-        for (MediaTrack mediaTrack : mediaTracks) {
-            if (canPlay(mediaTrack)) {
-                switch (mediaTrack.mimeType.mediaType) {
-                case video:
-                    videoTracks.add(mediaTrack);
-                case audio: //Intentional fall through. Video tracks are also considered audio tracks!
-                    audioTracks.add(mediaTrack); 
-                    break;
-                }
-            }
+        this.mediaTracks.clear();
+        this.mediaTracks.addAll(mediaTracks);
+        for (MediaTrack mediaTrack : this.mediaTracks) {
+            setStatus(mediaTrack);
         }
-        setWidgetsVisible(mediaTracks.size() > 0);
+        setWidgetsVisible(this.mediaTracks.size() > 0);
     }
 
     private void setWidgetsVisible(boolean isVisible) {

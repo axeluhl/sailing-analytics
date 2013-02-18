@@ -9,13 +9,13 @@ import javax.servlet.http.HttpServletResponse;
 import org.json.simple.JSONArray;
 
 import com.sap.sailing.domain.base.EventData;
-import com.sap.sailing.server.gateway.impl.JsonExportServlet;
+import com.sap.sailing.server.gateway.AbstractJsonHttpServlet;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CourseAreaJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.EventDataJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.VenueJsonSerializer;
 
-public class EventDataJsonExportServlet extends JsonExportServlet {
+public class EventDataJsonExportServlet extends AbstractJsonHttpServlet {
 	private static final long serialVersionUID = 4515246650108245796L;
 	
 	@Override

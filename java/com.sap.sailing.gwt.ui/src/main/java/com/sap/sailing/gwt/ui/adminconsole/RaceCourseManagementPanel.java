@@ -126,7 +126,7 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
                 MarkDTO left;
                 MarkDTO right;
                 String gateName;
-                if (first.name.toLowerCase().contains("left")) {
+                if (first.name.matches("^.*"+REGEX_FOR_LEFT+".*$")) {
                     left = first;
                     right = second;
                 } else {
@@ -134,7 +134,7 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
                     right = first;
                 }
                 gateName = left.name.replaceFirst(REGEX_FOR_LEFT, "");
-                result = new GateDTO(gateName, left, right);
+                result = new GateDTO(/* generate UUID on the server */ null, gateName, left, right);
             }
             return result;
         }
@@ -145,7 +145,7 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
         }
     }
     
-    private static final String REGEX_FOR_LEFT = "( \\()?[lL][eE][fF][tT]\\)?";
+    private static final String REGEX_FOR_LEFT = "( \\()?(([lL][eE][fF][tT])|(1))\\)?";
 
     /**
      * A table that lists the marks for which events have been received for the race selected. Note that this list may
@@ -375,7 +375,8 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
             }
         }
         assert newLeft != null && newRight != null;
-        return new GateDTO(oldGate.name, newLeft, newRight);
+        // if old gate had null ID, the new gate will have a null ID too, causing the server to generate one
+        return new GateDTO(oldGate.getIdAsString(), oldGate.name, newLeft, newRight);
     }
 
     private CellTable<MarkDTO> createAvailableMarksTable(final StringMessages stringMessages, AdminConsoleTableResources tableRes,

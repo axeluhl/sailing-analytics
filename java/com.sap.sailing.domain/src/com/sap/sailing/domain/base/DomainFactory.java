@@ -12,7 +12,6 @@ import com.sap.sailing.domain.tracking.MarkPassing;
 public interface DomainFactory extends SharedDomainFactory {
     static DomainFactory INSTANCE = new DomainFactoryImpl();
 
-
     MarkPassing createMarkPassing(TimePoint timePoint, Waypoint waypoint, Competitor competitor);
     
     /**

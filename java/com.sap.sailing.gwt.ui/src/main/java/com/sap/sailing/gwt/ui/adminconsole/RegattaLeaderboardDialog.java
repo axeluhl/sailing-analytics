@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.ui.adminconsole;
 import java.util.Collection;
 
 import com.google.gwt.user.client.ui.Grid;
+import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
@@ -86,16 +87,18 @@ public abstract class RegattaLeaderboardDialog extends AbstractLeaderboardDialog
     protected Widget getAdditionalWidget() {
         VerticalPanel mainPanel = new VerticalPanel();
         
-        Grid formGrid = new Grid(5,2);
+        Grid formGrid = new Grid(5,3);
         formGrid.setCellSpacing(3);
-        formGrid.setWidget(0,  0, new Label(stringMessages.name() + ":"));
+        formGrid.setWidget(0,  0, createLabel(stringMessages.name()));
         formGrid.setWidget(0, 1, nameTextBox);
-        formGrid.setWidget(1, 0, new Label(stringMessages.regatta() + ":"));
-        formGrid.setWidget(1, 1, regattaListBox);
-        formGrid.setWidget(2, 0, new Label(stringMessages.event() + ":"));
-        formGrid.setWidget(2, 1, sailingEventsListBox);
-        formGrid.setWidget(3, 0, new Label(stringMessages.courseArea() + ":"));
-        formGrid.setWidget(3, 1, courseAreaListBox);
+        formGrid.setWidget(1,  0, createLabel(stringMessages.displayName()));
+        formGrid.setWidget(1, 1, displayNameTextBox);
+        formGrid.setWidget(2, 0, createLabel(stringMessages.regatta()));
+        formGrid.setWidget(2, 1, regattaListBox);
+        formGrid.setWidget(3, 0, new Label(stringMessages.event() + ":"));
+        formGrid.setWidget(3, 1, sailingEventsListBox);
+        formGrid.setWidget(4, 0, new Label(stringMessages.courseArea() + ":"));
+        formGrid.setWidget(4, 1, courseAreaListBox);
                 
         mainPanel.add(formGrid);
         
@@ -106,6 +109,7 @@ public abstract class RegattaLeaderboardDialog extends AbstractLeaderboardDialog
             hp.add(new Label("" + (i + 1) + "."));
             hp.add(discardThresholdBoxes[i]);
         }
+        alignAllPanelWidgetsVertically(hp, HasVerticalAlignment.ALIGN_MIDDLE);
         mainPanel.add(hp);
         return mainPanel;
     }

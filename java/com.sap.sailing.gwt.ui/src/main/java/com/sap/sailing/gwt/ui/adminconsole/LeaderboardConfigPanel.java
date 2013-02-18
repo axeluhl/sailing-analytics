@@ -199,6 +199,14 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
                 return sortList.size() > 0 & sortList.get(0).isAscending();
             }
         });
+        
+        TextColumn<StrippedLeaderboardDTO> leaderboardDisplayNameColumn = new TextColumn<StrippedLeaderboardDTO>() {
+            @Override
+            public String getValue(StrippedLeaderboardDTO leaderboard) {
+                return leaderboard.getDisplayName() !=null ? leaderboard.getDisplayName() : "";
+            }
+        };
+        
         TextColumn<StrippedLeaderboardDTO> discardingOptionsColumn = new TextColumn<StrippedLeaderboardDTO>() {
             @Override
             public String getValue(StrippedLeaderboardDTO leaderboard) {
@@ -266,6 +274,7 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
             }
         });
         leaderboardTable.addColumn(linkColumn, stringMessages.name());
+        leaderboardTable.addColumn(leaderboardDisplayNameColumn, stringMessages.displayName());
         leaderboardTable.addColumn(discardingOptionsColumn, stringMessages.discarding());
         leaderboardTable.addColumn(leaderboardTypeColumn, stringMessages.type());
         leaderboardTable.addColumn(scoringSystemColumn, stringMessages.scoringSystem());
@@ -1022,7 +1031,7 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
     }
     
     private void updateLeaderboard(final String oldLeaderboardName, final LeaderboardDescriptor leaderboardToUdate) {
-        sailingService.updateLeaderboard(oldLeaderboardName, leaderboardToUdate.getName(),
+        sailingService.updateLeaderboard(oldLeaderboardName, leaderboardToUdate.getName(), leaderboardToUdate.getDisplayName(),
                 leaderboardToUdate.getDiscardThresholds(), new AsyncCallback<Void>() {
                     @Override
                     public void onFailure(Throwable t) {
@@ -1036,6 +1045,7 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
                             StrippedLeaderboardDTO dao = leaderboardList.getList().get(i);
                             if (dao.name.equals(oldLeaderboardName)) {
                                 dao.name = leaderboardToUdate.getName();
+                                dao.displayName = leaderboardToUdate.getDisplayName();
                                 dao.discardThresholds = leaderboardToUdate.getDiscardThresholds();
                                 break;
                             }

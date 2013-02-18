@@ -15,20 +15,20 @@ import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceGroup;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.racelog.RaceLog;
-import com.sap.sailing.server.gateway.impl.JsonExportServlet;
+import com.sap.sailing.server.gateway.AbstractJsonHttpServlet;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.BoatClassJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.ColorJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CourseAreaJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.racegroup.FleetJsonSerializer;
-import com.sap.sailing.server.gateway.serialization.impl.racegroup.RaceGroupJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.racegroup.RaceCellJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.racegroup.RaceGroupJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.racegroup.RaceRowJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.racegroup.RaceRowsOfSeriesWithRowsSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.racegroup.SeriesWithRowsJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.racegroup.SeriesWithRowsOfRaceGroupSerializer;
 
-public class RaceGroupJsonExportServlet extends JsonExportServlet {
+public class RaceGroupJsonExportServlet extends AbstractJsonHttpServlet {
 	private static final long serialVersionUID = 4510175441769759252L;
 	
 	private static final String PARAM_COURSE_AREA_FILTER = "courseArea";

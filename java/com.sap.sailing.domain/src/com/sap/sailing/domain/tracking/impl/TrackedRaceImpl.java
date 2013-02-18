@@ -305,7 +305,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                     MarkPassingByTimeComparator.INSTANCE));
         }
         markPassingsTimes = new ArrayList<Pair<Waypoint, Pair<TimePoint, TimePoint>>>();
-        windTracks = new HashMap<WindSource, WindTrack>();
+        windTracks = new ConcurrentHashMap<WindSource, WindTrack>();
         new Thread("Wind loader for tracked race "+getRace().getName()) {
             @Override
             public void run() {
@@ -316,20 +316,20 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                 try {
                     final Map<? extends WindSource, ? extends WindTrack> loadedWindTracks = windStore.loadWindTracks(
                             trackedRegatta, TrackedRaceImpl.this, millisecondsOverWhichToAverageWind);
-                    windTracks.putAll(loadedWindTracks);
+                    synchronized (windTracks) {
+                        windTracks.putAll(loadedWindTracks);
+                    }
                 } finally {
                     LockUtil.unlockAfterRead(serializationLock);
-                }
-                synchronized (TrackedRaceImpl.this) {
-                    windLoadingCompleted = true;
-                    TrackedRaceImpl.this.notifyAll();
+                    synchronized (TrackedRaceImpl.this) {
+                        windLoadingCompleted = true;
+                        TrackedRaceImpl.this.notifyAll();
+                    }
                 }
             }
         }.start();
-        
-        // by default, a tracked race offers one course-based wind estimation, one track-based wind estimation track and
-        // one "WEB" track for manual or REST-based wind reception; other wind tracks may be added as fixes are received
-        // for them.
+        // by default, a tracked race offers one course-based wind estimation and one track-based wind estimation track;
+        // other wind tracks may be added as fixes are received for them and as they are loaded from the persistent store
         WindSource courseBasedWindSource = new WindSourceImpl(WindSourceType.COURSE_BASED);
         windTracks.put(courseBasedWindSource, getOrCreateWindTrack(courseBasedWindSource, delayForWindEstimationCacheInvalidation));
         WindSource trackBasedWindSource = new WindSourceImpl(WindSourceType.TRACK_BASED_ESTIMATION);

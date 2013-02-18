@@ -19,6 +19,7 @@ import com.sap.sailing.gwt.ui.shared.EventDTO;
 public abstract class AbstractLeaderboardDialog extends DataEntryDialog<LeaderboardDescriptor> {
     protected final StringMessages stringMessages;
     protected TextBox nameTextBox;
+    protected TextBox displayNameTextBox;
     protected LeaderboardDescriptor leaderboard;
     protected ListBox sailingEventsListBox;
     protected Collection<EventDTO> existingEvents;
@@ -41,6 +42,7 @@ public abstract class AbstractLeaderboardDialog extends DataEntryDialog<Leaderbo
     protected LeaderboardDescriptor getResult() {
         int[] discardThresholdsBoxContents = getDiscardThresholds(discardThresholdBoxes);
         leaderboard.setName(nameTextBox.getValue());
+        leaderboard.setDisplayName(displayNameTextBox.getValue());
         leaderboard.setDiscardThresholds(discardThresholdsBoxContents);
         CourseAreaDTO courseArea = getSelectedCourseArea();
         if (courseArea == null) {

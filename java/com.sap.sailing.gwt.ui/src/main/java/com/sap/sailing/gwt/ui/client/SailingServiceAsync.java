@@ -12,6 +12,9 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.MaxPointsReason;
+import com.sap.sailing.domain.common.PolarSheetGenerationTriggerResponse;
+import com.sap.sailing.domain.common.PolarSheetsData;
+import com.sap.sailing.domain.common.PolarSheetsHistogramData;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaIdentifier;
@@ -206,8 +209,8 @@ public interface SailingServiceAsync {
     
     void getLeaderboardsByRace(RaceDTO race, AsyncCallback<List<StrippedLeaderboardDTO>> callback);
     
-    void updateLeaderboard(String leaderboardName, String newLeaderboardName, int[] newDiscardingThreasholds,
-            AsyncCallback<Void> callback);
+    void updateLeaderboard(String leaderboardName, String newLeaderboardName, String newLeaderboardDisplayName,
+            int[] newDiscardingThreasholds, AsyncCallback<Void> callback);
 
     void createFlexibleLeaderboard(String leaderboardName, int[] discardThresholds, ScoringSchemeType scoringSchemeType, Serializable courseAreaId,
             AsyncCallback<StrippedLeaderboardDTO> asyncCallback);
@@ -429,7 +432,7 @@ public interface SailingServiceAsync {
             AsyncCallback<List<Pair<String, List<CompetitorDTO>>>> callback);
 
     void getCompetitorsRaceData(RegattaAndRaceIdentifier race, List<CompetitorDTO> competitors, Date from, Date to,
-            long stepSize, DetailType detailType, AsyncCallback<CompetitorsRaceDataDTO> callback);
+            long stepSize, DetailType detailType, String leaderboarGroupName, String leaderboardName, AsyncCallback<CompetitorsRaceDataDTO> callback);
 
     /**
      * Finds out the names of all {@link com.sap.sailing.domain.leaderboard.MetaLeaderboard}s managed by this server that
@@ -443,4 +446,10 @@ public interface SailingServiceAsync {
             AsyncCallback<List<SwissTimingArchiveConfigurationDTO>> asyncCallback);
 
     void storeSwissTimingArchiveConfiguration(String swissTimingUrl, AsyncCallback<Void> asyncCallback);
+
+    void generatePolarSheetForRaces(List<RegattaAndRaceIdentifier> selectedRaces, AsyncCallback<PolarSheetGenerationTriggerResponse> asyncCallback);
+
+    void getPolarSheetsGenerationResults(String id, AsyncCallback<PolarSheetsData> asyncCallback);
+
+    void getPolarSheetData(String polarSheetId, int angle, int windSpeed, AsyncCallback<PolarSheetsHistogramData> wrapperCallback);
 }

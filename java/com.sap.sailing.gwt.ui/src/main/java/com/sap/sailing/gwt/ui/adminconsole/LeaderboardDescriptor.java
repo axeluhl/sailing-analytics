@@ -9,6 +9,15 @@ import com.sap.sailing.domain.common.ScoringSchemeType;
  */
 public class LeaderboardDescriptor {
     private String name;
+    private String displayName;
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
+    }
+
     private ScoringSchemeType scoringScheme; 
     private int[] discardThresholds;
     private String regattaName;

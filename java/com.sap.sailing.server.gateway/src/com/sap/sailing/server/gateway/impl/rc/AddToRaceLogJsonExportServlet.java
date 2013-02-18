@@ -17,6 +17,7 @@ import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.racelog.impl.RaceLogIdentifierImpl;
 import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.server.gateway.AbstractJsonHttpServlet;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
 import com.sap.sailing.server.gateway.deserialization.impl.RaceLogCourseAreaChangedEventDeserializer;
@@ -24,9 +25,8 @@ import com.sap.sailing.server.gateway.deserialization.impl.RaceLogEventDeseriali
 import com.sap.sailing.server.gateway.deserialization.impl.RaceLogFlagEventDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.RaceLogRaceStatusEventDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.RaceLogStartTimeEventDeserializer;
-import com.sap.sailing.server.gateway.impl.JsonExportServlet;
 
-public class AddToRaceLogJsonExportServlet extends JsonExportServlet {
+public class AddToRaceLogJsonExportServlet extends AbstractJsonHttpServlet {
 	private static final long serialVersionUID = 7704668926551060433L;
 	
 	public static final String PARAMS_LEADERBOARD_NAME = "leaderboard";

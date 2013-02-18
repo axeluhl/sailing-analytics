@@ -97,7 +97,6 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
     
     private VerticalPanel mainPanel;
     private Widget welcomeWidget = null;
-    private boolean allLeaderboardNamesStartWithGroupName = false;
     private final boolean isEmbedded;
     private final boolean showRaceDetails;
     
@@ -124,16 +123,6 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
             public void onSuccess(final LeaderboardGroupDTO leaderboardGroupDTO) {
                 if (leaderboardGroupDTO != null) {
                     LeaderboardGroupPanel.this.leaderboardGroup = leaderboardGroupDTO;
-                    if(leaderboardGroupDTO.leaderboards.size() > 1) {
-                        allLeaderboardNamesStartWithGroupName = true;
-                        String groupName = leaderboardGroupDTO.name; 
-                        for(StrippedLeaderboardDTO leaderboard: leaderboardGroupDTO.leaderboards) {
-                            if(!leaderboard.name.startsWith(groupName)) {
-                                allLeaderboardNamesStartWithGroupName = false;
-                                break;
-                            }
-                        }
-                    }
                     // in case there is a regatta leaderboard in the leaderboard group 
                     // we need to know the corresponding regatta structure
                     if(leaderboardGroup.containsRegattaLeaderboard()) {
@@ -143,7 +132,7 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
                                 for(RegattaDTO regattaDTO: regattaDTOs) {
                                     regattasByName.put(regattaDTO.name, regattaDTO);
                                 }
-                                createdPageContent();
+                                createPageContent();
                             }
                             
                             @Override
@@ -152,7 +141,7 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
                             }
                         });
                     } else {
-                        createdPageContent();
+                        createPageContent();
                     }
                 } else {
                     errorReporter.reportError(stringMessages.noLeaderboardGroupWithNameFound(leaderboardGroupName));
@@ -165,7 +154,7 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
         });
     }
 
-    private void createdPageContent() {
+    private void createPageContent() {
         if (!isEmbedded) {
             Label groupNameLabel = new Label(leaderboardGroup.name + ":");
             groupNameLabel.setStyleName(STYLE_NAME_PREFIX + "GroupName");
@@ -207,12 +196,7 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
                 leaderboardNameCell) {
             @Override
             public SafeHtml getValue(StrippedLeaderboardDTO strippedLeaderboardDTO) {
-                String text = "";
-                if (allLeaderboardNamesStartWithGroupName) {
-                    text = shortenLeaderboardName(leaderboardGroup.name, strippedLeaderboardDTO.name);
-                } else {
-                    text = strippedLeaderboardDTO.name;
-                }
+                String text = strippedLeaderboardDTO.displayName != null ? strippedLeaderboardDTO.displayName : strippedLeaderboardDTO.name; 
                 SafeHtmlBuilder b = new SafeHtmlBuilder();
                 b.append(TEXTTEMPLATE.textWithClass(text, STYLE_BOATCLASS));
                 return b.toSafeHtml();
@@ -282,15 +266,6 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
         liveRace.setStyleName(STYLE_LEGEND_LIVE);
         legendPanel.add(liveRace);
         return legendPanel;
-    }
-
-    private String shortenLeaderboardName(String prefixToCut, String leaderboardName) {
-        String result = leaderboardName.substring(prefixToCut.length(), leaderboardName.length());
-        result = result.trim();
-        if(result.startsWith("(") && result.endsWith(")")) {
-            result = result.substring(1, result.length()-1);
-        }
-        return result.trim();
     }
 
     private SafeHtml leaderboardRacesToHtml(StrippedLeaderboardDTO leaderboard) {
