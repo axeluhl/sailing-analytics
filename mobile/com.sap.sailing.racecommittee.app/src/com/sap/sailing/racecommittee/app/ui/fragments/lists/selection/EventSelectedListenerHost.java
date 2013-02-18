@@ -1,7 +1,7 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.lists.selection;
 
-import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.domain.base.EventData;
 
 public interface EventSelectedListenerHost {
-	public ItemSelectedListener<Event> getEventSelectionListener();
+	public ItemSelectedListener<EventData> getEventSelectionListener();
 }

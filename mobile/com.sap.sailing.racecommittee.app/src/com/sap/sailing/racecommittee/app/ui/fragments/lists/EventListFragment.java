@@ -2,13 +2,13 @@ package com.sap.sailing.racecommittee.app.ui.fragments.lists;
 
 import android.app.Activity;
 
-import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.domain.base.EventData;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.EventSelectedListenerHost;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.ItemSelectedListener;
 
-public class EventListFragment extends NamedListFragment<Event> {
+public class EventListFragment extends NamedListFragment<EventData> {
 
 	@Override
 	public void onResume() {
@@ -17,7 +17,7 @@ public class EventListFragment extends NamedListFragment<Event> {
 	}
 	
 	@Override
-	protected ItemSelectedListener<Event> attachListener(Activity activity) {
+	protected ItemSelectedListener<EventData> attachListener(Activity activity) {
 		if (activity instanceof EventSelectedListenerHost) { 
 			EventSelectedListenerHost listener = (EventSelectedListenerHost) activity;
 			return listener.getEventSelectionListener();

@@ -10,14 +10,15 @@ import org.json.simple.JSONValue;
 
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceCell;
+import com.sap.sailing.domain.base.RaceGroup;
 import com.sap.sailing.domain.base.RaceRow;
-import com.sap.sailing.domain.racelog.RaceLog;
+import com.sap.sailing.domain.base.SeriesWithRows;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
-import com.sap.sailing.racecommittee.app.domain.RaceGroup;
-import com.sap.sailing.racecommittee.app.domain.SeriesWithRows;
 import com.sap.sailing.racecommittee.app.domain.impl.FleetIdentifierImpl;
 import com.sap.sailing.racecommittee.app.domain.impl.ManagedRaceIdentifierImpl;
 import com.sap.sailing.racecommittee.app.domain.impl.ManagedRaceImpl;
+import com.sap.sailing.racecommittee.app.domain.racelog.PassAwareRaceLog;
+import com.sap.sailing.racecommittee.app.domain.racelog.impl.PassAwareRaceLogImpl;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
 
@@ -50,7 +51,15 @@ public class ManagedRacesDataParser implements DataParser<Collection<ManagedRace
 			for (RaceRow raceRow : series.getRaceRows()) {
 				Fleet fleet = raceRow.getFleet();
 				for (RaceCell cell : raceRow.getCells()) {
-					ManagedRace race = createManagedRace(raceGroup, series, fleet, cell.getName(), cell.getRaceLog());
+					PassAwareRaceLog log = cell.getRaceLog() instanceof PassAwareRaceLog ? 
+							(PassAwareRaceLog) cell.getRaceLog() : 
+								new PassAwareRaceLogImpl(cell.getRaceLog());
+					ManagedRace race = createManagedRace(
+							raceGroup, 
+							series, 
+							fleet, 
+							cell.getName(), 
+							log);
 					target.add(race);
 				}
 			}
@@ -58,7 +67,7 @@ public class ManagedRacesDataParser implements DataParser<Collection<ManagedRace
 	}
 
 	private ManagedRace createManagedRace(RaceGroup raceGroup, SeriesWithRows series,
-			Fleet fleet, String name, RaceLog raceLog) {
+			Fleet fleet, String name, PassAwareRaceLog raceLog) {
 		return new ManagedRaceImpl(
 				new ManagedRaceIdentifierImpl(name, 
 						new FleetIdentifierImpl(fleet, series, raceGroup)),

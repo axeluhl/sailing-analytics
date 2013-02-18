@@ -20,6 +20,8 @@ import com.sap.sailing.domain.base.impl.BoatClassImpl;
 import com.sap.sailing.domain.racelog.RaceLogRaceStatus;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
+import com.sap.sailing.racecommittee.app.domain.state.RaceState;
+import com.sap.sailing.racecommittee.app.domain.state.RaceStateChangedListener;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.ui.activities.RacingActivity;
 import com.sap.sailing.racecommittee.app.ui.adapters.racelist.BoatClassSeriesDataFleet;
@@ -31,7 +33,7 @@ import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataTypeTi
 import com.sap.sailing.racecommittee.app.ui.comparators.NamedRaceComparator;
 import com.sap.sailing.racecommittee.app.ui.comparators.SeriesComparator;
 
-public class ManagedRaceListFragment extends ListFragment implements JuryFlagClickedListener {
+public class ManagedRaceListFragment extends ListFragment implements JuryFlagClickedListener, RaceStateChangedListener {
 
 	private Serializable selectedRaceId;
 	private HashMap<Serializable, ManagedRace> managedRacesById;
@@ -58,26 +60,27 @@ public class ManagedRaceListFragment extends ListFragment implements JuryFlagCli
 		getListView().setChoiceMode(ListView.CHOICE_MODE_SINGLE);
 		setListAdapter(adapter);
 		adapter.getFilter().filter("");
-
+	}
+	
+	@Override
+	public void onStop() {
+		unregisterAllRaces();
+		super.onStop();
 	}
 	
 	@Override
 	public void onDestroy() {
-		super.onDestroy();
-		
-		// unregister update listener!
-		//updateListener.unregister();
-		// be sure to free all references to managed races...
 		managedRacesById.clear();
+		super.onDestroy();
 	}
 
 	public void setupOn(Collection<ManagedRace> listOfManagedRaces) {
-		// register update listener
-		// updateListener.register(listOfManagedRaces);
+		unregisterAllRaces();
 		
 		// save races
 		for (ManagedRace managedRace : listOfManagedRaces) {
 			managedRacesById.put(managedRace.getId(), managedRace);
+			managedRace.getState().registerListener(this);
 		}
 
 		// initialize view
@@ -87,6 +90,16 @@ public class ManagedRaceListFragment extends ListFragment implements JuryFlagCli
 			adapter.getFilter().filter("");
 			adapter.notifyDataSetChanged();
 		}
+	}
+
+	private void unregisterAllRaces() {
+		for (ManagedRace managedRace : managedRacesById.values()) {
+			managedRace.getState().unregisterListener(this);
+		}
+	}
+
+	public void onRaceStateChanged(RaceState state) {
+		notifyDataChanged();
 	}
 	
 	private BoatClass getBoatClassForRace(ManagedRace managedRace) {

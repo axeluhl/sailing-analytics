@@ -274,7 +274,7 @@ public interface SailingService extends RemoteService {
 	LeaderboardGroupDTO getLeaderboardGroupByName(String groupName,
 			boolean withGeoLocationData);
 
-	void renameLeaderboardGroup(String oldName, String newName);
+    void addColumnsToLeaderboard(String leaderboardName, List<Pair<String, Boolean>> columnsToAdd);
 
 	void removeLeaderboardGroup(String groupName);
 

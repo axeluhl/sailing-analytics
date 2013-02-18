@@ -3,9 +3,9 @@ package com.sap.sailing.racecommittee.app.domain.impl;
 import java.io.Serializable;
 
 import com.sap.sailing.domain.base.Fleet;
+import com.sap.sailing.domain.base.RaceGroup;
 import com.sap.sailing.domain.base.SeriesData;
 import com.sap.sailing.racecommittee.app.domain.FleetIdentifier;
-import com.sap.sailing.racecommittee.app.domain.RaceGroup;
 
 public class FleetIdentifierImpl implements FleetIdentifier {
 

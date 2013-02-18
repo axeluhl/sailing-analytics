@@ -10,10 +10,10 @@ import org.json.simple.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.domain.base.EventData;
 import com.sap.sailing.domain.base.Venue;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
-import com.sap.sailing.server.gateway.serialization.impl.EventJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.EventDataJsonSerializer;
 
 public class EventJsonSerializerTest {
 	
@@ -22,22 +22,22 @@ public class EventJsonSerializerTest {
 	protected final String expectedPublicationUrl = "cd";
 	
 	protected JsonSerializer<Venue> venueSerializer;
-	protected EventJsonSerializer serializer;
-	protected Event event;
+	protected EventDataJsonSerializer serializer;
+	protected EventData event;
 	
 	// see https://groups.google.com/forum/?fromgroups=#!topic/mockito/iMumB0_bpdo
 	@SuppressWarnings("unchecked")
 	@Before
 	public void setUp() {
 		// Event and its basic attributes ...
-		event = mock(Event.class);
+		event = mock(EventData.class);
 		when(event.getId()).thenReturn(expectedId);
 		when(event.getName()).thenReturn(expectedName);
 		when(event.getPublicationUrl()).thenReturn(expectedPublicationUrl);
 		
 		// ... and the serializer itself.		
 		venueSerializer = mock(JsonSerializer.class);
-		serializer = new EventJsonSerializer(venueSerializer);
+		serializer = new EventDataJsonSerializer(venueSerializer);
 	}
 	
 	@Test
@@ -46,13 +46,13 @@ public class EventJsonSerializerTest {
 		
 		assertEquals(
 				expectedId,
-				UUID.fromString(result.get(EventJsonSerializer.FIELD_ID).toString()));
+				UUID.fromString(result.get(EventDataJsonSerializer.FIELD_ID).toString()));
 		assertEquals(
 				expectedName,
-				result.get(EventJsonSerializer.FIELD_NAME));
+				result.get(EventDataJsonSerializer.FIELD_NAME));
 		assertEquals(
 				expectedPublicationUrl,
-				result.get(EventJsonSerializer.FIELD_PUBLICATION_URL));
+				result.get(EventDataJsonSerializer.FIELD_PUBLICATION_URL));
 	}
 	
 	@Test
@@ -68,7 +68,7 @@ public class EventJsonSerializerTest {
 		
 		assertEquals(
 				expectedVenue,
-				result.get(EventJsonSerializer.FIELD_VENUE));
+				result.get(EventDataJsonSerializer.FIELD_VENUE));
 	}
 
 }

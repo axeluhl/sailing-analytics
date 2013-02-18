@@ -2,7 +2,6 @@ package com.sap.sailing.server.gateway.deserialization.impl;
 
 import java.io.Serializable;
 import java.util.Collections;
-import java.util.UUID;
 
 import org.json.simple.JSONObject;
 
@@ -21,16 +20,13 @@ public class RaceLogCourseAreaChangedEventDeserializer extends
 			TimePoint timePoint, int passId) throws JsonDeserializationException {
 		
 		String courseAreaId = object.get(RaceLogCourseAreaChangedEventSerializer.FIELD_COURSE_AREA_ID).toString(); 
-		UUID courseAreaUuid = null;
-		try {
-			courseAreaUuid = UUID.fromString(courseAreaId);
-		} catch (IllegalArgumentException iae) {
-			throw new JsonDeserializationException(
-					String.format("Field %s with %s couldn't be parsed as UUID.", RaceLogCourseAreaChangedEventSerializer.FIELD_COURSE_AREA_ID, id), 
-					iae);
-		}
 		
-		return new RaceLogCourseAreaChangeEventImpl(timePoint, id, Collections.<Competitor>emptyList(), passId, courseAreaUuid);
+		return new RaceLogCourseAreaChangeEventImpl(
+				timePoint, 
+				id, 
+				Collections.<Competitor>emptyList(), 
+				passId, 
+				Helpers.tryUuidConversion(courseAreaId));
 	}
 
 }

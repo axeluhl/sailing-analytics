@@ -1,7 +1,12 @@
 package com.sap.sailing.racecommittee.app.ui.adapters.racelist;
 
+import java.text.Format;
+import java.text.SimpleDateFormat;
+import java.util.Locale;
+
 import android.app.Fragment;
 
+import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.racelog.RaceLogRaceStatus;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
@@ -20,7 +25,7 @@ public class RaceListDataTypeElement extends RaceListDataType {
 	private static String finishedTemplate;
 	private static String unknownTemplate;
 	
-	//private Format scheduleFormatter = new SimpleDateFormat("HH:mm", Locale.US);
+	private Format scheduleFormatter = new SimpleDateFormat("HH:mm", Locale.US);
 	
 	public static void initializeTemplates(Fragment fragment) {
 		unscheduledTemplate = fragment.getString(R.string.racelist_unscheduled);
@@ -95,11 +100,12 @@ public class RaceListDataTypeElement extends RaceListDataType {
 	}
 
 	private String formatStartTime() {
-		//if (race.getStartTime() == null) 
+		TimePoint startTime = race.getState().getStartTime(); 
+		if (startTime == null) 
 		{
 			return unknownTemplate;
 		}
-		//return scheduleFormatter.format(race.getStartTime());
+		return scheduleFormatter.format(startTime.asDate());
 	}
 
 }

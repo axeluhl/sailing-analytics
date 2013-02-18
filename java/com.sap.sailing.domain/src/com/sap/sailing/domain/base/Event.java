@@ -12,7 +12,7 @@ import com.sap.sailing.domain.common.WithID;
  * @author Axel Uhl (D043530)
  * 
  */
-public interface Event extends Named, Renamable, WithID {
+public interface Event extends Named, Renamable, WithID, EventData {
     /**
      * @return a non-<code>null</code> venue for this event
      */

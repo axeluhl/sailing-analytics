@@ -10,7 +10,7 @@ import android.content.Context;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.CourseArea;
-import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.domain.base.EventData;
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 import com.sap.sailing.racecommittee.app.data.handlers.DataHandler;
 import com.sap.sailing.racecommittee.app.data.handlers.EventsDataHandler;
@@ -22,7 +22,7 @@ import com.sap.sailing.racecommittee.app.data.parsers.ManagedRacesDataParser;
 import com.sap.sailing.racecommittee.app.deserialization.impl.BoatClassJsonDeserializer;
 import com.sap.sailing.racecommittee.app.deserialization.impl.ColorDeserializer;
 import com.sap.sailing.racecommittee.app.deserialization.impl.CourseAreaJsonDeserializer;
-import com.sap.sailing.racecommittee.app.deserialization.impl.EventJsonDeserializer;
+import com.sap.sailing.racecommittee.app.deserialization.impl.EventDataJsonDeserializer;
 import com.sap.sailing.racecommittee.app.deserialization.impl.FleetDeserializer;
 import com.sap.sailing.racecommittee.app.deserialization.impl.RaceCellDeserializer;
 import com.sap.sailing.racecommittee.app.deserialization.impl.RaceGroupDeserializer;
@@ -51,7 +51,7 @@ public class OnlineDataManager extends DataManager {
 		return context;
 	}
 	
-	public void loadEvents(LoadClient<Collection<Event>> client) {
+	public void loadEvents(LoadClient<Collection<EventData>> client) {
 		if (dataStore.getEvents().isEmpty()) {
 			reloadEvents(client);
 		} else {
@@ -59,21 +59,21 @@ public class OnlineDataManager extends DataManager {
 		}
 	}
 
-	public void addEvents(Collection<Event> events) {
-		for (Event event : events) {
+	public void addEvents(Collection<EventData> events) {
+		for (EventData event : events) {
 			dataStore.addEvent(event);
 		}
 	}
 
-	protected void reloadEvents(LoadClient<Collection<Event>> client) {
-		DataParser<Collection<Event>> parser = new EventsDataParser(
-				new EventJsonDeserializer(
+	protected void reloadEvents(LoadClient<Collection<EventData>> client) {
+		DataParser<Collection<EventData>> parser = new EventsDataParser(
+				new EventDataJsonDeserializer(
 					new VenueJsonDeserializer(
 							new CourseAreaJsonDeserializer())));
-		DataHandler<Collection<Event>> handler = new EventsDataHandler(this, client);
+		DataHandler<Collection<EventData>> handler = new EventsDataHandler(this, client);
 		
 		try {
-			new DataLoader<Collection<Event>>(
+			new DataLoader<Collection<EventData>>(
 					context, 
 					URI.create(TargetHost + "/sailingserver/rc/events"), 
 					parser, 
@@ -90,13 +90,13 @@ public class OnlineDataManager extends DataManager {
 			final LoadClient<Collection<CourseArea>> client) {
 		
 		if (dataStore.hasEvent(parentEventId)) {
-			Event event = dataStore.getEvent(parentEventId);
+			EventData event = dataStore.getEvent(parentEventId);
 			client.onLoadSucceded(dataStore.getCourseAreas(event));
 		} else {
-			reloadEvents(new LoadClient<Collection<Event>>() {
-				public void onLoadSucceded(Collection<Event> data) {
+			reloadEvents(new LoadClient<Collection<EventData>>() {
+				public void onLoadSucceded(Collection<EventData> data) {
 					if (dataStore.hasEvent(parentEventId)) {
-						Event event = dataStore.getEvent(parentEventId);
+						EventData event = dataStore.getEvent(parentEventId);
 						client.onLoadSucceded(dataStore.getCourseAreas(event));
 					} else {
 						client.onLoadFailed(new DataLoadingException(
@@ -125,7 +125,8 @@ public class OnlineDataManager extends DataManager {
 			return;
 		}
 		
-		JsonDeserializer<BoatClass> boatClassDeserializer = new BoatClassJsonDeserializer();
+		/// TODO insert domain factory
+		JsonDeserializer<BoatClass> boatClassDeserializer = new BoatClassJsonDeserializer(null);
 		DataParser<Collection<ManagedRace>> parser =  new ManagedRacesDataParser(
 				new RaceGroupDeserializer(
 						boatClassDeserializer,
