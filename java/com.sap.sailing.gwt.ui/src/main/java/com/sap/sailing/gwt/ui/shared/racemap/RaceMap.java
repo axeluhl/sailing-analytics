@@ -19,6 +19,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.maps.client.InfoWindowContent;
+import com.google.gwt.maps.client.MapPaneType;
 import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.Maps;
 import com.google.gwt.maps.client.control.ControlAnchor;
@@ -278,6 +279,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 RaceMap.this.add(combinedWindPanel, 10, 10);
                 RaceMap.this.raceMapImageManager.loadMapIcons(map);
                 map.setSize("100%", "100%");
+                map.getPane(MapPaneType.FLOAT_PANE).getElement().getStyle().setZIndex(RaceMapOverlaysZIndexes.INFO_WINDOW_ZINDEX);
                 map.addMapZoomEndHandler(new MapZoomEndHandler() {
                     @Override
                     public void onZoomEnd(MapZoomEndEvent event) {
@@ -546,31 +548,6 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             }
         }
     }
-
-//    protected void showCourseMarksOnMap(CourseDTO courseDTO) {
-//        if (map != null && courseDTO != null) {
-//            Map<String, MarkDTO> toRemove = new HashMap<String, MarkDTO>(markDTOs);
-//            if (courseDTO.marks != null) {
-//                for (MarkDTO markDTO : courseDTO.marks) {
-//                    Marker markMarker = courseMarkMarkers.get(markDTO.name);
-//                    if (markMarker == null) {
-//                        markMarker = createCourseMarkMarker(markDTO);
-//                        courseMarkMarkers.put(markDTO.name, markMarker);
-//                        markDTOs.put(markDTO.name, markDTO);
-//                        map.addOverlay(markMarker);
-//                    } else {
-//                        markMarker.setLatLng(LatLng.newInstance(markDTO.position.latDeg, markDTO.position.lngDeg));
-//                        toRemove.remove(markDTO.name);
-//                    }
-//                }
-//                for (String toRemoveMarkName : toRemove.keySet()) {
-//                    Marker marker = courseMarkMarkers.remove(toRemoveMarkName);
-//                    map.removeOverlay(marker);
-//                    markDTOs.remove(toRemoveMarkName);
-//                }
-//            }
-//        }
-//    }
 
     protected void showCourseMarksOnMap(CourseDTO courseDTO) {
         if (map != null && courseDTO != null) {
@@ -1010,25 +987,6 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         return courseMarkOverlay;
     }
 
-//    protected Marker createCourseMarkMarker(final MarkDTO markDTO) {
-//        MarkerOptions options = MarkerOptions.newInstance();
-//        final Icon markIcon = raceMapImageManager.resolveMarkIcon(markDTO.type, markDTO.color, markDTO.shape, markDTO.pattern);
-//        if (markIcon != null) {
-//            options.setIcon(markIcon);
-//        }
-//        options.setTitle(markDTO.name);
-//        final Marker courseMarkMarker = new Marker(LatLng.newInstance(markDTO.position.latDeg, markDTO.position.lngDeg),
-//                options);
-//        courseMarkMarker.addMarkerClickHandler(new MarkerClickHandler() {
-//            @Override
-//            public void onClick(MarkerClickEvent event) {
-//                LatLng latlng = courseMarkMarker.getLatLng();
-//                showMarkInfoWindow(markDTO, latlng);
-//            }
-//        });
-//        return courseMarkMarker;
-//    }
-
     private CompetitorInfoOverlay createCompetitorInfoOverlay(final CompetitorDTO competitorDTO) {
         return new CompetitorInfoOverlay(competitorDTO, raceMapImageManager);
     }
@@ -1041,8 +999,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             public void onClick(ClickEvent event) {
                 GPSFixDTO latestFixForCompetitor = getBoatFix(competitorDTO, timer.getTime());
                 LatLng where = LatLng.newInstance(latestFixForCompetitor.position.latDeg, latestFixForCompetitor.position.lngDeg);
-                map.getInfoWindow().open(where,
-                        new InfoWindowContent(getInfoWindowContent(competitorDTO, latestFixForCompetitor)));
+                InfoWindowContent infoWindowContent = new InfoWindowContent(getInfoWindowContent(competitorDTO, latestFixForCompetitor));
+                map.getInfoWindow().open(where, infoWindowContent);
             }
         });
         return boatCanvas;

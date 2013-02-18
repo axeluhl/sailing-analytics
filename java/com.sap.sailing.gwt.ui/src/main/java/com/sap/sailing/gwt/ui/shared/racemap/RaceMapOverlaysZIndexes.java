@@ -14,4 +14,7 @@ public interface RaceMapOverlaysZIndexes {
     public static int WINDSENSOR_ZINDEX = BASE_ZINDEX + 3;
     public static int BOATS_ZINDEX = BASE_ZINDEX + 4;
     public static int COMPETITOR_INFO_ZINDEX = BASE_ZINDEX + 5;
+
+    /** the z-index of the info window should always be higher than the rest */
+    public static int INFO_WINDOW_ZINDEX = BASE_ZINDEX + 11;
 }
