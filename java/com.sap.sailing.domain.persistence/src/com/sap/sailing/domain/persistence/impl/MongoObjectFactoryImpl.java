@@ -467,4 +467,11 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         entry.put(FieldNames.REGATTA_NAME.name(), regatta.getName());
         regattaForRaceIDCollection.update(query, entry, /* upsrt */ true, /* multi */ false);
     }
+    
+    @Override
+    public void removeRegattaForRaceID(String raceIDAsString, Regatta regatta) {
+        DBCollection regattaForRaceIDCollection = database.getCollection(CollectionNames.REGATTA_FOR_RACE_ID.name());
+        DBObject query = new BasicDBObject(FieldNames.RACE_ID_AS_STRING.name(), raceIDAsString);
+        regattaForRaceIDCollection.remove(query);
+    }
 }

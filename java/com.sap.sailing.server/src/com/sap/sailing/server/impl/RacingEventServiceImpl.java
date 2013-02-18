@@ -1080,6 +1080,8 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     public void removeRegatta(Regatta regatta) throws MalformedURLException, IOException, InterruptedException {
         for (RaceDefinition race : regatta.getAllRaces()) {
             removeRace(regatta, race);
+            mongoObjectFactory.removeRegattaForRaceID(race.getName(), regatta);
+            persistentRegattasForRaceIDs.remove(race.getId().toString());
         }
         if (regatta.isPersistent()) {
             mongoObjectFactory.removeRegatta(regatta);
