@@ -612,11 +612,14 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
 
     @Override
     public Regatta addRegatta(URL jsonURL, URI liveURI, URI storedURI, WindStore windStore, long timeoutInMilliseconds) throws Exception {
+    	RaceLogStore raceLogStore = MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(
+                mongoObjectFactory, 
+                domainObjectFactory);
         JSONService jsonService = getTracTracDomainFactory().parseJSONURL(jsonURL);
         Regatta regatta = null;
         for (RaceRecord rr : jsonService.getRaceRecords()) {
             URL paramURL = rr.getParamURL();
-            regatta = addTracTracRace(paramURL, liveURI, storedURI, windStore, timeoutInMilliseconds).getRegatta();
+            regatta = addTracTracRace(paramURL, liveURI, storedURI, raceLogStore, windStore, timeoutInMilliseconds).getRegatta();
         }
         return regatta;
     }
@@ -682,12 +685,12 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     }
 
     @Override
-    public RacesHandle addTracTracRace(URL paramURL, URI liveURI, URI storedURI, WindStore windStore,
+    public RacesHandle addTracTracRace(URL paramURL, URI liveURI, URI storedURI, RaceLogStore raceLogStore, WindStore windStore,
             long timeoutInMilliseconds) throws Exception {
         return addRace(
         /* regattaToAddTo */null, getTracTracDomainFactory().createTrackingConnectivityParameters(paramURL, liveURI, storedURI,
         /* startOfTracking */null,
-        /* endOfTracking */null, delayToLiveInMillis, /* simulateWithStartTimeNow */false, null, windStore), windStore,
+        /* endOfTracking */null, delayToLiveInMillis, /* simulateWithStartTimeNow */false, raceLogStore, windStore), windStore,
                 timeoutInMilliseconds);
     }
     

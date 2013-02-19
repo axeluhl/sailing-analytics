@@ -136,7 +136,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      *            if the race definition is not received for the race within this time, the race tracker for
      *            that race is stopped; use -1 to wait forever
      */
-    RacesHandle addTracTracRace(URL paramURL, URI liveURI, URI storedURI, WindStore windStore, long timeoutInMilliseconds)
+    RacesHandle addTracTracRace(URL paramURL, URI liveURI, URI storedURI, RaceLogStore raceLogStore, WindStore windStore, long timeoutInMilliseconds)
             throws MalformedURLException, FileNotFoundException, URISyntaxException, Exception;
 
     /**
