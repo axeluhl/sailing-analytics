@@ -117,7 +117,7 @@ public class PathGeneratorTreeGrowWind2 extends PathGeneratorBase {
     // extended: M - wide left, S - wide right
     Pair<TimedPosition,Wind> getStep(TimedPosition pos, long timeStep, long turnLoss, boolean sameBaseDirection, char nextDirection) {
         
-        double offDeg = 5.0;
+        double offDeg = 3.0;
         WindFieldGenerator wf = simulationParameters.getWindField();
         TimePoint curTime = pos.getTimePoint();
         Position curPosition = pos.getPosition();
@@ -136,10 +136,10 @@ public class PathGeneratorTreeGrowWind2 extends PathGeneratorBase {
             travelBearing = pd.optimalDirectionsUpwind()[1];
         } else if (nextDirection == 'M') {
             tmpBearing = pd.optimalDirectionsUpwind()[0];
-            travelBearing = tmpBearing.add(new DegreeBearingImpl(+offDeg));
+            travelBearing = tmpBearing.add(new DegreeBearingImpl(-offDeg));
         } else if (nextDirection == 'S') {
             tmpBearing = pd.optimalDirectionsUpwind()[1];
-            travelBearing = tmpBearing.add(new DegreeBearingImpl(-offDeg));
+            travelBearing = tmpBearing.add(new DegreeBearingImpl(+offDeg));
         }
         
         // determine beat-speed left and right
@@ -202,7 +202,7 @@ public class PathGeneratorTreeGrowWind2 extends PathGeneratorBase {
         //Position posHeightWind = pathPos.getPosition().projectToLineThrough(posRef, posWind.getBearing());
         
         // calculate vertical distance as distance of height-position to start
-        //double vrtDist = tgtHeight - Math.round(posHeight.getDistance(posEnd).getMeters()*100.0)/100.0;
+        //double vrtDist = Math.round(posHeightTrgt.getDistance(posStart).getMeters()*100.0)/100.0;
         double vrtDist = Math.round(posHeight.getDistance(posStart).getMeters()*100.0)/100.0;
         
         /*if (vrtDist > tgtHeight) {
