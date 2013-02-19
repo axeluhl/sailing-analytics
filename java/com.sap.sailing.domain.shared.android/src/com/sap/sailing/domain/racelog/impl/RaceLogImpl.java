@@ -12,46 +12,46 @@ import com.sap.sailing.domain.tracking.impl.TrackImpl;
 
 public class RaceLogImpl extends TrackImpl<RaceLogEvent> implements RaceLog {
 
-	private static final long serialVersionUID = -176745401321893502L;
-	
-	private transient Set<RaceLogEventVisitor> listeners;
-	
-	private final static Logger logger = Logger.getLogger(RaceLogImpl.class.getName());
+    private static final long serialVersionUID = -176745401321893502L;
 
-	public RaceLogImpl(String nameForReadWriteLock) {
-		super(nameForReadWriteLock);
-		listeners = new HashSet<RaceLogEventVisitor>();
-	}
+    private transient Set<RaceLogEventVisitor> listeners;
 
-	@Override
-	public boolean add(RaceLogEvent event) {
-		boolean isAdded = false;
-		lockForWrite();
+    private final static Logger logger = Logger.getLogger(RaceLogImpl.class.getName());
+
+    public RaceLogImpl(String nameForReadWriteLock) {
+        super(nameForReadWriteLock);
+        listeners = new HashSet<RaceLogEventVisitor>();
+    }
+
+    @Override
+    public boolean add(RaceLogEvent event) {
+        boolean isAdded = false;
+        lockForWrite();
         try {
             isAdded = getInternalRawFixes().add(event);
         } finally {
             unlockAfterWrite();
         }
         if (isAdded) {
-        	notifyListenersAboutReceive(event);
+            notifyListenersAboutReceive(event);
         }
         return isAdded;
-	}
-	
-	protected void notifyListenersAboutReceive(RaceLogEvent event) {
-		synchronized (listeners) {
-			for (RaceLogEventVisitor listener : listeners) {
-				try {
-					event.accept(listener);
-				} catch (Throwable t) {
+    }
+
+    protected void notifyListenersAboutReceive(RaceLogEvent event) {
+        synchronized (listeners) {
+            for (RaceLogEventVisitor listener : listeners) {
+                try {
+                    event.accept(listener);
+                } catch (Throwable t) {
                     logger.log(Level.SEVERE, "RaceLogEventVisitor " + listener + " threw exception " + t.getMessage());
                     logger.throwing(RaceLogImpl.class.getName(), "notifyListenersAboutReceive(RaceLogEvent)", t);
                 }
-			}
-		}
+            }
+        }
     }
 
-	@Override
+    @Override
     public void addListener(RaceLogEventVisitor listener) {
         synchronized (listeners) {
             listeners.add(listener);

@@ -40,7 +40,7 @@ public class CourseAreaJsonSerializerTest {
 				result.get(CourseAreaJsonSerializer.FIELD_NAME));
 		assertEquals(
 				expectedId, 
-				result.get(CourseAreaJsonSerializer.FIELD_ID));
+				UUID.fromString(result.get(CourseAreaJsonSerializer.FIELD_ID).toString()));
 	}
 	
 	@Ignore

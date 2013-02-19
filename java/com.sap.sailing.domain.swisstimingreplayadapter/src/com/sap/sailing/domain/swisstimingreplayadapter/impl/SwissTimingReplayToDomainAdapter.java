@@ -303,7 +303,10 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter {
 
     private void createRace() {
         /// TODO: is this correct here to use empty race log store?
-        final Regatta myRegatta = regatta != null ? regatta : domainFactory.getOrCreateDefaultRegatta(EmptyRaceLogStore.INSTANCE, currentRaceID, trackedRegattaRegistry);
+        final Regatta myRegatta = regatta != null ? regatta : domainFactory.getOrCreateDefaultRegatta(
+                EmptyRaceLogStore.INSTANCE, 
+                currentRaceID, 
+                trackedRegattaRegistry);
         RaceDefinition race = domainFactory.createRaceDefinition(myRegatta,
                 currentRaceID, competitorsPerRaceID.get(currentRaceID), currentCourseDefinition);
         racePerRaceID.put(currentRaceID, race);

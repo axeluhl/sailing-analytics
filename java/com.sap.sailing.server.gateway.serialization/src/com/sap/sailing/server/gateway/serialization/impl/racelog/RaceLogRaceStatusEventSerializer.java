@@ -25,7 +25,7 @@ public class RaceLogRaceStatusEventSerializer extends BaseRaceLogEventSerializer
 	public JSONObject serialize(RaceLogEvent object) {
 		RaceLogRaceStatusEvent event = (RaceLogRaceStatusEvent) object;
 		JSONObject result = super.serialize(event);
-		result.put(FIELD_NEXT_STATUS, event.getNextStatus().toString());
+		result.put(FIELD_NEXT_STATUS, event.getNextStatus());
 		return result;
 	}
 	
