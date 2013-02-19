@@ -1,5 +1,6 @@
 package com.sap.sailing.simulator;
 
+import java.io.Serializable;
 import java.util.NavigableMap;
 import java.util.Set;
 
@@ -7,7 +8,7 @@ import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Speed;
 
-public interface PolarDiagram {
+public interface PolarDiagram extends Serializable {
 
     // TO BE REVIEWED
     // not sure whether I use the right terms
@@ -20,7 +21,7 @@ public interface PolarDiagram {
     void setWind(SpeedWithBearing newWind);
 
     void setCurrent(SpeedWithBearing newCurrent);
-    
+
     SpeedWithBearing getCurrent();
 
     Bearing getTargetDirection();

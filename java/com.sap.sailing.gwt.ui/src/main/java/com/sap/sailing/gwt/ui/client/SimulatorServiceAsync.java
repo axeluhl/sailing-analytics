@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.gwt.ui.shared.BoatClassDTOsAndNotificationMessage;
+import com.sap.sailing.gwt.ui.shared.LegsNamesDTO;
 import com.sap.sailing.gwt.ui.shared.PolarDiagramDTOAndNotificationMessage;
 import com.sap.sailing.gwt.ui.shared.PositionDTO;
 import com.sap.sailing.gwt.ui.shared.Request1TurnerDTO;
@@ -42,4 +43,6 @@ public interface SimulatorServiceAsync {
     void getTotalTime_new(RequestTotalTimeDTO requestData, AsyncCallback<ResponseTotalTimeDTO> asyncCallback);
 
     void get1Turner(final Request1TurnerDTO requestData, AsyncCallback<Response1TurnerDTO> asyncCallback);
+
+    void getLegs(int boatClassIndex, AsyncCallback<LegsNamesDTO> asyncCallback);
 }

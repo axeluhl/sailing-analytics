@@ -32,6 +32,7 @@ import com.sap.sailing.gwt.ui.shared.BoatClassDTO;
 import com.sap.sailing.gwt.ui.shared.BoatClassDTOsAndNotificationMessage;
 import com.sap.sailing.gwt.ui.shared.ConfigurationException;
 import com.sap.sailing.gwt.ui.shared.CourseDTO;
+import com.sap.sailing.gwt.ui.shared.LegsNamesDTO;
 import com.sap.sailing.gwt.ui.shared.PathDTO;
 import com.sap.sailing.gwt.ui.shared.PolarDiagramDTO;
 import com.sap.sailing.gwt.ui.shared.PolarDiagramDTOAndNotificationMessage;
@@ -76,17 +77,18 @@ import com.sap.sailing.simulator.windfield.WindControlParameters;
 import com.sap.sailing.simulator.windfield.WindFieldGenerator;
 import com.sap.sailing.simulator.windfield.WindFieldGeneratorFactory;
 import com.sap.sailing.simulator.windfield.impl.WindFieldGeneratorMeasured;
-
 public class SimulatorServiceImpl extends RemoteServiceServlet implements SimulatorService {
 
-    private final static long serialVersionUID = 4445427185387524086L;
+    private static final long serialVersionUID = 4445427185387524086L;
 
     private static final Logger LOGGER = Logger.getLogger("com.sap.sailing");
     private static final WindFieldGeneratorFactory wfGenFactory = WindFieldGeneratorFactory.INSTANCE;
     private static final WindPatternDisplayManager wpDisplayManager = WindPatternDisplayManager.INSTANCE;
     private static final String POLYLINE_PATH_NAME = "Polyline";
-    // private static final double REACHING_TOLERANCE_FACTOR = 0.03;
-    // private static final int MAX_NO_OF_STEPS = 800;
+
+    private static final double DEFAULT_REACHING_TOLERANCE = 0.3;
+    private static final int DEFAULT_STEP_MAX = 300;
+    private static final long DEFAULT_TIMESTEP = 1000;
 
     private WindControlParameters controlParameters = new WindControlParameters(0, 0);
 
@@ -459,6 +461,10 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
             polarDiagram.setWind(windAtTimePoint);
             boatSpeedMetersPerSecond = polarDiagram.getSpeedAtBearing(new DegreeBearingImpl(boatBearingDeg)).getMetersPerSecond();
             stepTimeMilliseconds = (long) ((distanceMeters / boatSpeedMetersPerSecond) * 1000);
+            //problem right here
+            //boatSpeed might be 0 for very small distances
+            //this is a rough fix
+            if(boatSpeedMetersPerSecond == 0.0) stepTimeMilliseconds = 1000;
 
             if (requestData.debugMode) {
 
@@ -477,6 +483,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
             }
 
             timepointAsMillis += stepTimeMilliseconds;
+        
         }
 
         double totalTimeSeconds = (timepointAsMillis - requestData.allPoints.get(0).timepoint) / 1000;
@@ -491,7 +498,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         PolarDiagram polarDiagram = polarDiagramAndNotificationMessage.getA();
         String notificationMessage = polarDiagramAndNotificationMessage.getB();
 
-        Position startPosition = toPosition(requestData.firstPoint.position);
+        Position startPosition = toPosition(requestData.firstPoint);
         Position endPosition = toPosition(requestData.secondPoint);
         RectangularBoundary rectangularBoundry = new RectangularBoundary(startPosition, endPosition, 0.1);
 
@@ -503,14 +510,26 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         WindFieldGeneratorMeasured windFieldGenerator = new WindFieldGeneratorMeasured(rectangularBoundry, this.controlParameters);
         windFieldGenerator.setGPSWind(gpsWind);
 
-        TimePoint startTime = new MillisecondsTimePoint(requestData.firstPoint.timepoint);
+        TimePoint startTime = new MillisecondsTimePoint(requestData.firstPointTimepoint);
 
         PathGenerator1Turner pathGenerator = new PathGenerator1Turner(null);
-        TimedPositionWithSpeed oneTurner = pathGenerator.get1Turner(windFieldGenerator, polarDiagram, startPosition, endPosition, startTime,
-                requestData.leftSide);
 
-        return new Response1TurnerDTO(new SimulatorWindDTO(oneTurner.getPosition().getLatDeg(), oneTurner.getPosition().getLngDeg(), oneTurner.getSpeed()
-                .getKnots(), oneTurner.getSpeed().getBearing().getDegrees(), oneTurner.getTimePoint().asMillis()), notificationMessage);
+        TimedPositionWithSpeed oneTurner = null;
+        try {
+            oneTurner = pathGenerator.get1Turner(windFieldGenerator, polarDiagram, startPosition, endPosition, startTime,
+                    requestData.leftSide,
+                    DEFAULT_REACHING_TOLERANCE, DEFAULT_STEP_MAX, DEFAULT_TIMESTEP);
+        } catch (Exception e) {
+            oneTurner = pathGenerator.get1Turner(windFieldGenerator, polarDiagram, endPosition, startPosition, startTime, requestData.leftSide,
+                    DEFAULT_REACHING_TOLERANCE, DEFAULT_STEP_MAX, DEFAULT_TIMESTEP);
+        }
+
+        Position oneTurnerPosition = oneTurner.getPosition();
+        SpeedWithBearing oneTurnerWindSpeed = oneTurner.getSpeed();
+        TimePoint oneTurnerTimePoint = oneTurner.getTimePoint();
+
+        return new Response1TurnerDTO(new SimulatorWindDTO(oneTurnerPosition.getLatDeg(), oneTurnerPosition.getLngDeg(), oneTurnerWindSpeed.getKnots(),
+                oneTurnerWindSpeed.getBearing().getDegrees(), oneTurnerTimePoint.asMillis()), notificationMessage);
     }
 
     private void retreiveWindControlParameters(WindPatternDisplay pattern) {
@@ -528,17 +547,14 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
                     // f.setDouble(controlParameters, (Double) s.getValue());
 
                 } catch (IllegalArgumentException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+                    LOGGER.warning("SimulatorServiceImpl => IllegalArgumentException with message " + e.getMessage());
                 } catch (IllegalAccessException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+                    LOGGER.warning("SimulatorServiceImpl => IllegalAccessException with message " + e.getMessage());
                 }
             } catch (SecurityException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                LOGGER.warning("SimulatorServiceImpl => SecurityException with message " + e.getMessage());
             } catch (NoSuchFieldException e) {
-                LOGGER.info(e.getMessage());
+                LOGGER.warning("SimulatorServiceImpl => NoSuchFieldException with message " + e.getMessage());
             }
 
         }
@@ -963,5 +979,15 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
 
     public static boolean equals(Position position, PositionDTO positonDTO) {
         return (position.getLatDeg() == positonDTO.latDeg && position.getLngDeg() == positonDTO.lngDeg);
+    }
+
+    @Override
+    public LegsNamesDTO getLegs(int boatClassIndex) {
+
+        SailingSimulator simulator = new SailingSimulatorImpl(null);
+
+        List<String> legsNames = simulator.getLegsNames(boatClassIndex);
+
+        return new LegsNamesDTO("", legsNames);
     }
 }

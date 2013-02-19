@@ -611,7 +611,8 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         }
     }
 
-    public void refreshView(ViewName name, WindPatternDisplay windPatternDisplay, int boatClassIndex, boolean force) {
+    public void refreshView(ViewName name, WindPatternDisplay windPatternDisplay, int boatClassIndex, int selectedLegIndex, boolean force) {
+
         if (!this.overlaysInitialized) {
             this.initializeOverlays();
         }

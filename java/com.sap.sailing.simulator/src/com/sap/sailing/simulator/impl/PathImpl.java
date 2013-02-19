@@ -28,6 +28,8 @@ public class PathImpl implements Path, Serializable {
     List<TimedPositionWithSpeed> pathPoints;
     WindField windField;
 
+    private static final double THRESHOLD_DISTANCE_METERS = 15.0;
+
     public PathImpl(List<TimedPositionWithSpeed> pointsList, WindField wf) {
 
         this.pathPoints = pointsList;
@@ -270,7 +272,8 @@ public class PathImpl implements Path, Serializable {
             }
         }
 
-        return eliminateVeryCloseTurns(list, 15.0);
+        //return eliminateVeryCloseTurns(list, 15.0);
+        return list;
     }
 
     public static List<TimedPositionWithSpeed> eliminateVeryCloseTurns(List<TimedPositionWithSpeed> turns, double tresholdDistanceMeters) {
