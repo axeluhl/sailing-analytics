@@ -17,5 +17,27 @@ Velum software is fully-compatible with ISAF and ORC scoring rules and can impor
 
 [Velumn](http://www.velumng.com/index.html)
 
+**Scoring:**
+***
+**Time on distance:**
+***
+Corrected time is calculated as follows:
+
+Corrected time = Elapsed time – (ToD * Distance)
+
+With Time-on-Distance (ToD) scoring, the coefficient of time allowance of one boat will not change with wind velocity, but will change with the length of the course. One boat will always give to another the same handicap in sec/mi, and it is easy to calculate the difference in elapsed time between two boats needed to determine a winner in corrected time.
+
+A special ToD coefficient calculated with an average crew weight of 170 kg is available for double handed racing as well as one calculated for non-spinnaker racing.
+
+Where is it shown on the certificate?
+  	 
+  		
+![certificate](http://www.orc.org/images/certificates/2013/time%20on%20distance.png)ber 
+		
+  	
+
+Time on Distance scoring coefficients on simple scoring options on
+ORC International and ORC Club certificates
+	
 
 
