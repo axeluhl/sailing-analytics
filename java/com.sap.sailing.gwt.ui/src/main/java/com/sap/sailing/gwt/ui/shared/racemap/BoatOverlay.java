@@ -13,7 +13,7 @@ import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
  * A google map overlay based on a HTML5 canvas for drawing boats (images)
  * The boats will be zoomed/scaled according to the current map state and rotated according to the bearing of the boat.
  */
-public class BoatCanvasOverlay extends CanvasOverlay {
+public class BoatOverlay extends CanvasOverlay {
 
     /**
      * The competitor the boat belongs too.
@@ -37,7 +37,7 @@ public class BoatCanvasOverlay extends CanvasOverlay {
 
     private final BoatClassImageData boatClassImageData;    
 
-    public BoatCanvasOverlay(CompetitorDTO competitorDTO) {
+    public BoatOverlay(CompetitorDTO competitorDTO) {
         super();
         this.competitorDTO = competitorDTO;
         this.boatClass = competitorDTO.boatClass;
@@ -46,12 +46,14 @@ public class BoatCanvasOverlay extends CanvasOverlay {
 
     @Override
     protected Overlay copy() {
-        return new BoatCanvasOverlay(competitorDTO);
+        return new BoatOverlay(competitorDTO);
     }
 
     @Override
     protected void redraw(boolean force) {
         if (boatFix != null) {
+            getCanvas().setTitle(getTitle());
+
             ImageTransformer boatImageTransformer;
             if (boatFix.legType != null) {
                 boatImageTransformer = boatClassImageData.getBoatImageTransformerByLegTypeAndTack(boatFix.legType,
@@ -71,6 +73,10 @@ public class BoatCanvasOverlay extends CanvasOverlay {
                     boatPositionInPx.getX() - getCanvas().getCoordinateSpaceWidth() / 2,
                     boatPositionInPx.getY() - getCanvas().getCoordinateSpaceHeight() / 2);
         }
+    }
+
+    private String getTitle() {
+        return competitorDTO.sailID + ", " + competitorDTO.name;
     }
     
     public GPSFixDTO getBoatFix() {
