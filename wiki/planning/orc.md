@@ -32,7 +32,7 @@ A special ToD coefficient calculated with an average crew weight of 170 kg is av
 Where is it shown on the certificate?
   	 
   		
-![certificate](http://www.orc.org/images/certificates/2013/time%20on%20distance.png)ber 
+![certificate](http://www.orc.org/images/certificates/2013/time%20on%20distance.png)
 		
   	
 
