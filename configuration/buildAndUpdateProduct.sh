@@ -16,6 +16,7 @@ active_branch=$(git symbolic-ref -q HEAD)
 active_branch=`basename $active_branch`
 
 ACDIR=$SERVERS_HOME/$active_branch
+MAVEN_SETTINGS=$PROJECT_HOME/configuration/maven-settings.xml
 
 gwtcompile=1
 testing=1
@@ -55,11 +56,6 @@ do
     esac
 done
 
-if [ ! -d $ACDIR ]; then
-	echo "Could not find directory $ACDIR - perhaps you are on a wrong branch?"
-	exit
-fi
-
 read -s -n1 -p "Currently branch $active_branch is active. Do you want to proceed (y/N): " answer
 case $answer in
 "Y" | "y") echo "Continuing";;
@@ -70,29 +66,14 @@ esac
 shift $((OPTIND-1))
 
 if [[ $@ == "" ]]; then
-	echo "You need to specify an action [build|install]"
+	echo "You need to specify an action [build|install|all]"
 	exit 2
 fi
 
 echo "Starting $@ of server..."
 
-if [ ! -d "$ACDIR/plugins" ]; then
-    mkdir $ACDIR/plugins
-fi
-
-if [ ! -d "$ACDIR/configuration" ]; then
-    mkdir $ACDIR/configuration
-fi
-
-# make sure to have maven configuration here
-cp -v $PROJECT_HOME/configuration/maven-settings.xml $ACDIR/
-MAVEN_SETTINGS=$ACDIR/maven-settings.xml
-
 if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
 	# yield build so that we get updated product
-
-	# preserve old build log
-	cp $ACDIR/build.log $ACDIR/build.log.old
 
 	cd $PROJECT_HOME/java
 	if [ $gwtcompile -eq 1 ]; then
@@ -121,12 +102,25 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
 	fi
 
 	echo "Using following command: mvn $extra -fae -s $MAVEN_SETTINGS $clean install"
-	mvn $extra -fae -s $MAVEN_SETTINGS $clean install 2>&1 | tee $ACDIR/build.log
+	mvn $extra -fae -s $MAVEN_SETTINGS $clean install 2>&1 | tee $PROJECT_HOME/build.log
 
 	echo "Build complete. Do not forget to install product..."
 fi
 
 if [[ "$@" == "install" ]] || [[ "$@" == "all" ]]; then
+
+    if [ ! -d "$ACDIR/plugins" ]; then
+        mkdir $ACDIR/plugins
+    fi
+
+    if [ ! -d "$ACDIR/configuration" ]; then
+        mkdir $ACDIR/configuration
+    fi
+
+    if [ ! -d $ACDIR ]; then
+	echo "Could not find directory $ACDIR - perhaps you are on a wrong branch?"
+	exit
+    fi
 
     cd $ACDIR
 
