@@ -1,5 +1,8 @@
 package com.sap.sailing.simulator.impl;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -32,18 +35,29 @@ public class PathGeneratorTreeGrowWind2 extends PathGeneratorBase {
     int maxTurns = 0;
     String initPathStr = "0";
     PathCand bestCand = null;
+    boolean gridStore = false;
+    ArrayList<List<PathCand>> gridPositions = null;
+    String gridFile = null;
 
     public PathGeneratorTreeGrowWind2(SimulationParameters params) {
         simulationParameters = params;
     }
 
-    public void setEvaluationParameters(String startDirection, int maxTurns) {
+    public void setEvaluationParameters(String startDirection, int maxTurns, String gridFile) {
         if (startDirection != null) {
             this.initPathStr = "0" + startDirection;
         } else {
             this.initPathStr = "0";
         }
         this.maxTurns = maxTurns;
+        this.gridFile = gridFile;
+        if (this.gridFile != null) {
+            this.gridStore = true;
+            this.gridPositions = new ArrayList<List<PathCand>>();
+        } else {
+            this.gridStore = false;
+            this.gridPositions = null;
+        }
     }
 
     class SortPathCandsHorizontally implements Comparator<PathCand> {
@@ -424,7 +438,7 @@ public class PathGeneratorTreeGrowWind2 extends PathGeneratorBase {
         tstPosition = this.getStep(new TimedPositionImpl(startTime, startPos), timeStep, turnLoss, true, 'R').getA();
         double tstDist2 = startPos.getDistance(tstPosition.getPosition()).getMeters();
         
-        double hrzBinSize = (tstDist1 + tstDist2)/4; // horizontal bin size in meters
+        double hrzBinSize = (tstDist1 + tstDist2)/2.0; // horizontal bin size in meters
         if (debugMsgOn) {
             System.out.println("Horizontal Bin Size: "+hrzBinSize);
         }
@@ -454,6 +468,18 @@ public class PathGeneratorTreeGrowWind2 extends PathGeneratorBase {
                         
             allPaths = nextPaths;
             
+            if (this.gridStore) {
+                
+                /*ArrayList<TimedPosition> isoChrone = new ArrayList<TimedPosition>();
+                for(PathCand curCand : allPaths) {
+                    isoChrone.add(curCand.pos);
+                }
+                this.gridPositions.add(isoChrone);*/
+                
+                this.gridPositions.add(allPaths);
+                
+            }
+            
             // check if there are still paths in the regatta-area
             if (allPaths.size() > 0) {
 
@@ -461,7 +487,7 @@ public class PathGeneratorTreeGrowWind2 extends PathGeneratorBase {
                     // terminate path-search if paths are found that are close enough to target
                     if ((curPath.vrt > distStartEndMeters)) {
                         int curBin = (int)Math.round(Math.floor( (curPath.hrz + hrzBinSize/2.0) / hrzBinSize ));
-                        if ((Math.abs(curBin) <= 3)) {
+                        if ((Math.abs(curBin) <= 2)) {
                             reachedEnd = true;
                             trgPaths.add(curPath); // add path to list of target-paths
                         }
@@ -475,7 +501,30 @@ public class PathGeneratorTreeGrowWind2 extends PathGeneratorBase {
             
         }
         
-
+        if (this.gridStore) {
+            
+            BufferedWriter outputCSV;
+            try {
+                outputCSV = new BufferedWriter(new FileWriter(this.gridFile));
+                outputCSV.write("step; lat; lng; time; side\n");
+                int stepCount = 0;
+                for(List<PathCand> isoChrone : this.gridPositions) {
+                    stepCount++;
+                    for(PathCand isoPos : isoChrone) {
+                
+                        outputCSV.write(""+stepCount+"; "+isoPos.pos.getPosition().getLatDeg()+"; "+isoPos.pos.getPosition().getLngDeg()+"; "+(isoPos.pos.getTimePoint().asMillis()/1000)+"; "+isoPos.sid+"\n");
+                    
+                    }
+                }
+                outputCSV.close();
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+            
+        }
+        
+        
         // if no target-paths were found, return empty path
         if (trgPaths.size() == 0) {
             //trgPaths = allPaths; // TODO: only for testing; remove lateron
