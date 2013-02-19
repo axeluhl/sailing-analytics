@@ -1,8 +1,5 @@
 package com.sap.sailing.server.operationaltransformation;
 
-import com.sap.sailing.domain.base.Fleet;
-import com.sap.sailing.domain.base.RaceColumn;
-import com.sap.sailing.domain.common.Named;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
@@ -10,14 +7,14 @@ import com.sap.sailing.server.RacingEventServiceOperation;
 public class RecordRaceLogEvent extends AbstractRacingEventServiceOperation<RaceLogEvent> {
 
 	private static final long serialVersionUID = 1539017717057956058L;
-	private final Named named;
-	private final RaceColumn raceColumn;
-	private final Fleet fleet;
+	private final String namedName;
+	private final String raceColumnName;
+	private final String fleetName;
 	
-	public RecordRaceLogEvent(Named named, RaceColumn raceColumn, Fleet fleet) {
-		this.named = named;
-		this.raceColumn = raceColumn;
-		this.fleet = fleet;
+	public RecordRaceLogEvent(String namedName, String raceColumnName, String fleetName) {
+		this.namedName = namedName;
+		this.raceColumnName = raceColumnName;
+		this.fleetName = fleetName;
 	}
 
 	@Override
