@@ -2,7 +2,7 @@ package com.sap.sailing.server.gateway.serialization.impl.racegroup;
 
 import org.json.simple.JSONObject;
 
-import com.sap.sailing.domain.base.SeriesWithRows;
+import com.sap.sailing.domain.base.racegroup.SeriesWithRows;
 import com.sap.sailing.server.gateway.serialization.ExtendableJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.ExtensionJsonSerializer;
 

@@ -1,11 +1,11 @@
-package com.sap.sailing.domain.base.impl;
+package com.sap.sailing.domain.base.racegroup.impl;
 
 import java.util.ArrayList;
 import java.util.Collection;
 
 import com.sap.sailing.domain.base.Fleet;
-import com.sap.sailing.domain.base.RaceRow;
-import com.sap.sailing.domain.base.SeriesWithRows;
+import com.sap.sailing.domain.base.racegroup.RaceRow;
+import com.sap.sailing.domain.base.racegroup.SeriesWithRows;
 
 public class SeriesWithRowsImpl implements SeriesWithRows {
 	private static final long serialVersionUID = 8825402393444809944L;
@@ -14,7 +14,7 @@ public class SeriesWithRowsImpl implements SeriesWithRows {
 	private Iterable<RaceRow> raceRows;
 	private boolean isMedal;
 
-	public SeriesWithRowsImpl(String name, Iterable<RaceRow> raceRows, boolean isMedal) {
+	public SeriesWithRowsImpl(String name, boolean isMedal, Iterable<RaceRow> raceRows) {
 		this.name = name;
 		this.raceRows = raceRows;
 		this.isMedal = isMedal;

@@ -4,8 +4,8 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.Fleet;
-import com.sap.sailing.domain.base.RaceCell;
-import com.sap.sailing.domain.base.RaceRow;
+import com.sap.sailing.domain.base.racegroup.RaceCell;
+import com.sap.sailing.domain.base.racegroup.RaceRow;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 
 public class RaceRowJsonSerializer implements JsonSerializer<RaceRow> {

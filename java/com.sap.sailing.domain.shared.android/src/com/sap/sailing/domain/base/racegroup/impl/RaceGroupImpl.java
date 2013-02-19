@@ -1,9 +1,9 @@
-package com.sap.sailing.domain.base.impl;
+package com.sap.sailing.domain.base.racegroup.impl;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.CourseArea;
-import com.sap.sailing.domain.base.RaceGroup;
-import com.sap.sailing.domain.base.SeriesWithRows;
+import com.sap.sailing.domain.base.racegroup.RaceGroup;
+import com.sap.sailing.domain.base.racegroup.SeriesWithRows;
 import com.sap.sailing.domain.common.impl.NamedImpl;
 
 

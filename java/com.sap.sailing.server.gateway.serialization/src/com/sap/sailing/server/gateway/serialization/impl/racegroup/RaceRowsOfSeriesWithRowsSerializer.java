@@ -2,8 +2,8 @@ package com.sap.sailing.server.gateway.serialization.impl.racegroup;
 
 import org.json.simple.JSONArray;
 
-import com.sap.sailing.domain.base.RaceRow;
-import com.sap.sailing.domain.base.SeriesWithRows;
+import com.sap.sailing.domain.base.racegroup.RaceRow;
+import com.sap.sailing.domain.base.racegroup.SeriesWithRows;
 import com.sap.sailing.server.gateway.serialization.ExtensionJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 

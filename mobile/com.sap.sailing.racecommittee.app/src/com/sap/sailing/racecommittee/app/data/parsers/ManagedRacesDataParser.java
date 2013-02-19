@@ -9,10 +9,10 @@ import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
 import com.sap.sailing.domain.base.Fleet;
-import com.sap.sailing.domain.base.RaceCell;
-import com.sap.sailing.domain.base.RaceGroup;
-import com.sap.sailing.domain.base.RaceRow;
-import com.sap.sailing.domain.base.SeriesWithRows;
+import com.sap.sailing.domain.base.racegroup.RaceCell;
+import com.sap.sailing.domain.base.racegroup.RaceGroup;
+import com.sap.sailing.domain.base.racegroup.RaceRow;
+import com.sap.sailing.domain.base.racegroup.SeriesWithRows;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.impl.FleetIdentifierImpl;
 import com.sap.sailing.racecommittee.app.domain.impl.ManagedRaceIdentifierImpl;

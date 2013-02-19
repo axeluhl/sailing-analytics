@@ -4,7 +4,7 @@ import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.CourseArea;
-import com.sap.sailing.domain.base.RaceGroup;
+import com.sap.sailing.domain.base.racegroup.RaceGroup;
 import com.sap.sailing.server.gateway.serialization.ExtendableJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.ExtensionJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;

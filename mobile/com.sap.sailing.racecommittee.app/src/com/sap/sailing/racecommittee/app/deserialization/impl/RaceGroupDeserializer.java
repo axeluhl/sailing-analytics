@@ -7,9 +7,9 @@ import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.CourseArea;
-import com.sap.sailing.domain.base.RaceGroup;
-import com.sap.sailing.domain.base.SeriesWithRows;
-import com.sap.sailing.domain.base.impl.RaceGroupImpl;
+import com.sap.sailing.domain.base.racegroup.RaceGroup;
+import com.sap.sailing.domain.base.racegroup.SeriesWithRows;
+import com.sap.sailing.domain.base.racegroup.impl.RaceGroupImpl;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.Helpers;

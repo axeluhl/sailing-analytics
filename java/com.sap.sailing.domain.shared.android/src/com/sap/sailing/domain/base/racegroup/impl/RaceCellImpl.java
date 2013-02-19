@@ -1,6 +1,6 @@
-package com.sap.sailing.domain.base.impl;
+package com.sap.sailing.domain.base.racegroup.impl;
 
-import com.sap.sailing.domain.base.RaceCell;
+import com.sap.sailing.domain.base.racegroup.RaceCell;
 import com.sap.sailing.domain.common.impl.NamedImpl;
 import com.sap.sailing.domain.racelog.RaceLog;
 

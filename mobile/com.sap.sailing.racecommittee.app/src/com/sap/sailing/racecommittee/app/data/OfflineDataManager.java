@@ -7,15 +7,15 @@ import java.util.Date;
 
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.EventData;
-import com.sap.sailing.domain.base.RaceGroup;
-import com.sap.sailing.domain.base.SeriesWithRows;
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
 import com.sap.sailing.domain.base.impl.CourseAreaImpl;
 import com.sap.sailing.domain.base.impl.EventDataImpl;
 import com.sap.sailing.domain.base.impl.FleetImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.base.impl.RaceGroupImpl;
-import com.sap.sailing.domain.base.impl.SeriesWithRowsImpl;
+import com.sap.sailing.domain.base.racegroup.RaceGroup;
+import com.sap.sailing.domain.base.racegroup.SeriesWithRows;
+import com.sap.sailing.domain.base.racegroup.impl.RaceGroupImpl;
+import com.sap.sailing.domain.base.racegroup.impl.SeriesWithRowsImpl;
 import com.sap.sailing.domain.racelog.RaceLogEventFactory;
 import com.sap.sailing.domain.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.racelog.impl.RaceLogEventFactoryImpl;
@@ -48,8 +48,8 @@ public class OfflineDataManager extends DataManager {
 		newEvent.getVenue().addCourseArea(new CourseAreaImpl("Stadium", "FIXCAUUID2"));
 		dataStore.addEvent(newEvent);
 		
-		SeriesWithRows qualifying = new SeriesWithRowsImpl("Qualifying", null, false);
-		SeriesWithRows medal = new SeriesWithRowsImpl("Medal", null, true);
+		SeriesWithRows qualifying = new SeriesWithRowsImpl("Qualifying", false, null);
+		SeriesWithRows medal = new SeriesWithRowsImpl("Medal", true, null);
 		RaceGroup raceGroup = new RaceGroupImpl(
 				"ESS", 
 				new BoatClassImpl("X40", false), 

@@ -5,9 +5,9 @@ import java.util.Collection;
 
 import org.json.simple.JSONObject;
 
-import com.sap.sailing.domain.base.RaceRow;
-import com.sap.sailing.domain.base.SeriesWithRows;
-import com.sap.sailing.domain.base.impl.SeriesWithRowsImpl;
+import com.sap.sailing.domain.base.racegroup.RaceRow;
+import com.sap.sailing.domain.base.racegroup.SeriesWithRows;
+import com.sap.sailing.domain.base.racegroup.impl.SeriesWithRowsImpl;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
@@ -34,7 +34,7 @@ public class SeriesWithRowsDeserializer implements JsonDeserializer<SeriesWithRo
 			rows.add(raceRowDeserializer.deserialize(fleetJson));
 		}
 		
-		return new SeriesWithRowsImpl(name, rows, isMedal);
+		return new SeriesWithRowsImpl(name, isMedal, rows);
 	}
 	
 }
