@@ -7,6 +7,7 @@ SERVERS_HOME=$USER_HOME/servers
 
 # x86 or x86_64 should work for most cases
 ARCH=x86_64
+START_DIR=`pwd`
 
 # needed for maven to work correctly
 source $USER_HOME/.bash_profile
@@ -36,7 +37,7 @@ if [ $# -eq 0 ]; then
     echo "-c Disable cleaning (use only if you are sure that no java file has changed)"
     echo "-p Enable proxy mode"
     echo ""
-    echo "build: builds the server code using Maven to $PROJECT_HOME"
+    echo "build: builds the server code using Maven to $PROJECT_HOME (log to $START_DIR/build.log)"
     echo "install: installs product and configuration to $SERVERS_HOME/$active_branch. Overwrites any configuration by using config from branch."
     echo "all: calls build and then install"
     exit 2
@@ -102,7 +103,7 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
 	fi
 
 	echo "Using following command: mvn $extra -fae -s $MAVEN_SETTINGS $clean install"
-	mvn $extra -fae -s $MAVEN_SETTINGS $clean install 2>&1 | tee $PROJECT_HOME/build.log
+	mvn $extra -fae -s $MAVEN_SETTINGS $clean install 2>&1 | tee $START_DIR/build.log
 
 	echo "Build complete. Do not forget to install product..."
 fi
