@@ -21,6 +21,7 @@ import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.racelog.impl.RaceLogInformationImpl;
+import com.sap.sailing.domain.racelog.impl.RaceLogOnRegattaIdentifier;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
@@ -138,7 +139,9 @@ public class SeriesImpl extends NamedImpl implements Series, RaceColumnListener 
      */
     private RaceColumnInSeriesImpl createRaceColumn(String raceColumnName, TrackedRegattaRegistry trackedRegattaRegistry) {
         return new RaceColumnInSeriesImpl(
-                RaceLogInformationImpl.create(regatta, raceLogStore), 
+                new RaceLogInformationImpl(
+                        raceLogStore,
+                        new RaceLogOnRegattaIdentifier(regatta)),
                 raceColumnName, 
                 this, 
                 trackedRegattaRegistry);

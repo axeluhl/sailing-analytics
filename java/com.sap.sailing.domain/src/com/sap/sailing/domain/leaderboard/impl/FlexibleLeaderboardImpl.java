@@ -20,6 +20,7 @@ import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.racelog.impl.RaceLogInformationImpl;
+import com.sap.sailing.domain.racelog.impl.RaceLogOnLeaderboardIdentifier;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
 /**
@@ -132,7 +133,9 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
 
     protected RaceColumnImpl createRaceColumn(String column, boolean medalRace, Fleet... fleets) {
         return new RaceColumnImpl(
-                RaceLogInformationImpl.create(this, raceLogStore),
+                new RaceLogInformationImpl(
+                        raceLogStore, 
+                        new RaceLogOnLeaderboardIdentifier(this)),
                 column, 
                 medalRace, 
                 turnNullOrEmptyFleetsIntoDefaultFleet(fleets));

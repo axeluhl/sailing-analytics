@@ -244,7 +244,6 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         loadRaceIDToRegattaAssociations();
         loadStoredLeaderboardsAndGroups();
         loadStoredEvents();
-        //this.raceLogStore = MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(this.mongoObjectFactory, this.domainObjectFactory);
     }
     
     public RacingEventServiceImpl(MongoDBService mongoDBService) {
