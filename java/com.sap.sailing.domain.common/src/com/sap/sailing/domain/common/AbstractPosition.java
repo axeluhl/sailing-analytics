@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.common;
 
 import com.sap.sailing.domain.common.impl.CentralAngleDistance;
+import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.RadianBearingImpl;
 import com.sap.sailing.domain.common.impl.RadianPosition;
 
@@ -73,7 +74,22 @@ public class AbstractPosition implements Position {
 
     @Override
     public Position translateRhumb(Bearing bearing, Distance distance) {
-        throw new UnsupportedOperationException("Not yet implemented");
+        /*
+         * This algorithm is limited to distances such that dlon < pi/2, i.e those that extend around less than one quarter of the circumference 
+         * of the earth in longitude. A completely general, but more complicated algorithm is necessary if greater distances are allowed. 
+         */
+        double distanceRad = distance.getKilometers() / 6371.0;  // r = 6371 means earth's radius in km 
+        double lat1 = getLatRad();
+        double lon1 = getLngRad();
+        double bearingRad = bearing.getRadians();
+
+        double lat2 = Math.asin(Math.sin(lat1) * Math.cos(distanceRad) + 
+                        Math.cos(lat1) * Math.sin(distanceRad) * Math.cos(bearingRad));
+        double lon2 = lon1 + Math.atan2(Math.sin(bearingRad)*Math.sin(distanceRad)*Math.cos(lat1), 
+                       Math.cos(distanceRad)-Math.sin(lat1)*Math.sin(lat2));
+        lon2 = (lon2+3*Math.PI) % (2*Math.PI) - Math.PI;  // normalize to -180..+180
+        
+        return new DegreePosition(lat2 / Math.PI * 180., lon2  / Math.PI * 180.);
     }
 
     @Override
