@@ -37,9 +37,12 @@ import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
+import com.sap.sailing.domain.racelog.RaceLogCourseAreaChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
+import com.sap.sailing.domain.racelog.RaceLogPassChangeEvent;
+import com.sap.sailing.domain.racelog.RaceLogRaceStatusEvent;
 import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.tracking.Positioned;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -540,10 +543,41 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
 	
 	
 	private BasicDBList storeInvolvedBoatsForRaceLogEvent(List<Competitor> competitors) {
-		BasicDBList dbInvolvedCompetitorNames = new BasicDBList();
+		BasicDBList dbInvolvedCompetitorIds = new BasicDBList();
         for (Competitor competitor : competitors) {
-        	dbInvolvedCompetitorNames.add(MongoUtils.escapeDollarAndDot(competitor.getName()));
+        	dbInvolvedCompetitorIds.add(competitor.getId());
         }
-        return dbInvolvedCompetitorNames;
+        return dbInvolvedCompetitorIds;
+	}
+
+	public DBObject storeRaceLogEntry(RaceLogIdentifier raceLogIdentifier, RaceLogPassChangeEvent passChangeEvent) {
+		DBObject result = new BasicDBObject();
+        storeTimed(passChangeEvent, result);
+        storeRaceLogEventProperties(passChangeEvent, result);
+        
+        result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogPassChangeEvent.class.getSimpleName());
+        return result;
+	}
+
+	public DBObject storeRaceLogEntry(RaceLogIdentifier raceLogIdentifier, RaceLogRaceStatusEvent raceStatusEvent) {
+		DBObject result = new BasicDBObject();
+        storeTimed(raceStatusEvent, result);
+        storeRaceLogEventProperties(raceStatusEvent, result);
+        
+        result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogRaceStatusEvent.class.getSimpleName());
+        
+        result.put(FieldNames.RACE_LOG_EVENT_NEXT_STATUS.name(), raceStatusEvent.getNextStatus().name());
+        return result;
+	}
+
+	public DBObject storeRaceLogEntry(RaceLogIdentifier raceLogIdentifier, RaceLogCourseAreaChangedEvent courseAreaChangedEvent) {
+		DBObject result = new BasicDBObject();
+        storeTimed(courseAreaChangedEvent, result);
+        storeRaceLogEventProperties(courseAreaChangedEvent, result);
+        
+        result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogCourseAreaChangedEvent.class.getSimpleName());
+        
+        result.put(FieldNames.COURSE_AREA_ID.name(), courseAreaChangedEvent.getCourseAreaId());
+        return result;
 	}
 }

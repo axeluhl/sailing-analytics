@@ -33,12 +33,14 @@ public class MongoRaceLogListener implements RaceLogEventVisitor {
 
 	@Override
 	public void visit(RaceLogPassChangeEvent event) {
-		// TODO Implement persistence for event
+		DBObject passChangeEventTrackEntry = mongoObjectFactory.storeRaceLogEntry(raceLogIdentifier, event);
+		raceLogsCollection.insert(passChangeEventTrackEntry);
 	}
 
 	@Override
 	public void visit(RaceLogRaceStatusEvent event) {
-		// TODO Implement persistence for event
+		DBObject raceStatusEventTrackEntry = mongoObjectFactory.storeRaceLogEntry(raceLogIdentifier, event);
+		raceLogsCollection.insert(raceStatusEventTrackEntry);
 	}
 
 	@Override
@@ -49,7 +51,8 @@ public class MongoRaceLogListener implements RaceLogEventVisitor {
 
 	@Override
 	public void visit(RaceLogCourseAreaChangedEvent event) {
-		// TODO Implement persistence for event
+		DBObject courseAreaChangedEventTrackEntry = mongoObjectFactory.storeRaceLogEntry(raceLogIdentifier, event);
+		raceLogsCollection.insert(courseAreaChangedEventTrackEntry);
 	}
 
 }
