@@ -68,7 +68,7 @@ public class OSGiRestartingPortMonitor extends AbstractPortMonitor {
             if (sysinfo_available) {
                 info_before_restart = info.toString();
             }
-            if (bundle.getState() == BundleEvent.STARTED || bundle.getState() == BundleEvent.STOPPED) {
+            if (bundle.getState() == BundleEvent.STARTED || bundle.getState() == BundleEvent.STOPPED || bundle.getState() == 32l) {
                 try {
                     bundle.stop();
                 } catch (BundleException e) {
@@ -77,13 +77,17 @@ public class OSGiRestartingPortMonitor extends AbstractPortMonitor {
                 try {
                     bundle.start();
                 } catch (BundleException e) {
+                    e.printStackTrace();
                     log.severe("Could not start " + endpoint.getBundleName() + "! Handler will try again next time");
                 }
+            } else {
+                log.severe("Bundle " + endpoint.getBundleName() + " not in state STARTED or ACTIVE (State: +"+bundle.getState()+")! Restart not performed.");
             }
             final String subject = "Bundle " + endpoint.getBundleName() + " restarted";
             log.info(subject);
-            /* only send mail if service has not failed before */
-            if (!endpoint.hasFailed() /* before */) {
+            
+            /* only send mail if service has not failed before and mailing is enabled */
+            if (!endpoint.hasFailed() /* before */ && this.properties.getProperty("mail.enabled", "true").equalsIgnoreCase("true")) {
                 log.info("Sending mail to " + this.properties.getProperty("mail.to") + " saying that bundle "
                         + endpoint.getBundleName() + " was restarted");
                 try {

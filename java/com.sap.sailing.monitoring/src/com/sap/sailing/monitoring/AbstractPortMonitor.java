@@ -90,46 +90,50 @@ public abstract class AbstractPortMonitor extends Thread {
                         if (currentmillis >= (lastmillis + interval + (100*endpoints.length))) {
                             for (int i = 0; i < endpoints.length; i++) {
                                 currentendpoint = endpoints[i];
-                                if (!currentendpoint.isURL()) {
-                                    Socket sn = new Socket();
-                                    sn.connect(currentendpoint.getAddress(), timeout);
-                                    sn.close();
-                                } else {
-                                    /* despite its name this does NOT open a real TCP connection */
-                                    HttpURLConnection conn = (HttpURLConnection)currentendpoint.getURL().openConnection();
-                                    conn.setConnectTimeout(timeout);
-                                    conn.setRequestMethod("GET");
-                                    conn.connect();
-                                    int code = conn.getResponseCode();
-                                    conn.disconnect();
-                                    if (code != 200) {
-                                        throw new ConnectException("Could not successfully connect to endpoint " + currentendpoint.toString());
+                                try {
+                                    if (!currentendpoint.isURL()) {
+                                        Socket sn = new Socket();
+                                        sn.connect(currentendpoint.getAddress(), timeout);
+                                        sn.close();
+                                    } else {
+                                        /* despite its name this does NOT open a real TCP connection */
+                                        HttpURLConnection conn = (HttpURLConnection)currentendpoint.getURL().openConnection();
+                                        conn.setConnectTimeout(timeout);
+                                        conn.setRequestMethod("GET");
+                                        conn.connect();
+                                        int code = conn.getResponseCode();
+                                        conn.disconnect();
+                                        if (code != 200) {
+                                            throw new ConnectException("Could not successfully connect to endpoint " + currentendpoint.toString());
+                                        }
+                                    }
+
+                                    log.finest("Connection succeeded to " + currentendpoint.toString());
+                                    handleConnection(currentendpoint);
+                                    
+                                    lastmillis = System.currentTimeMillis();
+                                    currentendpoint.setSuccess(System.currentTimeMillis());
+                                    
+                                } catch (SocketTimeoutException|ConnectException ex) {
+                                    /* if service has failed before then wait at least some time before checking it again */
+                                    boolean handle = true;
+                                    if (currentendpoint.hasFailed() /* failed before */) {
+                                        if ( (currentendpoint.lastFailed()+Integer.parseInt(properties.getProperty("monitor.wait_after_failure", "60000"))) > System.currentTimeMillis()) {                
+                                            handle = false;
+                                        } else {
+                                            log.info("Service has failed (" + currentendpoint.toString() + ") before and gracetime is over. Calling failure handler again.");
+                                        }
+                                    } else {
+                                        log.info("Connection FAILED to " + currentendpoint.toString());                            
+                                    }
+                                    
+                                    if (handle) {
+                                        handleFailure(currentendpoint);
+                                        lastmillis = System.currentTimeMillis();
+                                        currentendpoint.setFailure(System.currentTimeMillis());
                                     }
                                 }
-                                log.finest("Connection succeeded to " + currentendpoint.toString());
-                                handleConnection(currentendpoint);
-                                
-                                lastmillis = System.currentTimeMillis();
-                                currentendpoint.setSuccess(System.currentTimeMillis());
                             }
-                        }
-                    } catch (SocketTimeoutException|ConnectException ex) {
-                        /* if service has failed before then wait at least some time before checking it again */
-                        boolean handle = true;
-                        if (currentendpoint.hasFailed() /* failed before */) {
-                            if ( (currentendpoint.lastFailed()+Integer.parseInt(properties.getProperty("monitor.wait_after_failure", "60000"))) > System.currentTimeMillis()) {                
-                                handle = false;
-                            } else {
-                                log.info("Service has failed (" + currentendpoint.toString() + ") before and gracetime is over. Calling failure handler again.");
-                            }
-                        } else {
-                            log.info("Connection FAILED to " + currentendpoint.toString());                            
-                        }
-                        
-                        if (handle) {
-                            handleFailure(currentendpoint);
-                            lastmillis = System.currentTimeMillis();
-                            currentendpoint.setFailure(System.currentTimeMillis());
                         }
                     } catch (IOException ex) {
                         ex.printStackTrace();
