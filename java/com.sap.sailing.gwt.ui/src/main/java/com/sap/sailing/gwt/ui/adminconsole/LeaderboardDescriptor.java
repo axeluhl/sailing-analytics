@@ -25,15 +25,17 @@ public class LeaderboardDescriptor {
     public LeaderboardDescriptor() {
     }
 
-    public LeaderboardDescriptor(String name, ScoringSchemeType scoringScheme, int[] discardThresholds, String regattaName) {
+    public LeaderboardDescriptor(String name, String displayName, ScoringSchemeType scoringScheme, int[] discardThresholds, String regattaName) {
         this.name = name;
+        this.displayName = displayName;
         this.scoringScheme = scoringScheme;
         this.discardThresholds = discardThresholds;
         this.regattaName = regattaName;
     }
 
-    public LeaderboardDescriptor(String name, ScoringSchemeType scoringScheme, int[] discardThresholds) {
+    public LeaderboardDescriptor(String name, String displayName, ScoringSchemeType scoringScheme, int[] discardThresholds) {
         this.name = name;
+        this.displayName = displayName;
         this.scoringScheme = scoringScheme;
         this.discardThresholds = discardThresholds;
     }
