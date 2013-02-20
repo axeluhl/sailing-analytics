@@ -79,6 +79,30 @@ Where is it shown in the certificate ?
   
           675 / Inshore ToD 
 
+**Performance Line:**
+**Corrected time is calculated as follows:**
+
+**Corrected time = (PLT * Elapsed time) – (PLD * Distance)**
+
+With the time coefficient PLT and distance coefficient PLD, two boats may be rated differently in light or heavy wind conditions, and it is possible that one boat is giving a handicap to another in light wind conditions, while the opposite may be true in heavy wind conditions.
+ 
+**Where is it shown in the certificate?**
+
+![Certificate](http://www.orc.org/images/certificates/2013/performance%20line.png)
+
+**How is it calculated?**
+Performance Line Scoring is a simplified variation of Performance Curve Scoring, where the curve of time allowances as a function of seven wind speeds is simplified by a straight line intercepting the performance points at 8 and 16 knots of wind for a given course. This is shown as follows:
+
+![Certficate](http://www.orc.org/images/certificates/2013/perfline.JPG)
+
+Offshore Performance Line coefficients are calculated using time allowances for the Ocean type of pre-selected course. 
+  
+Inshore Performance Line coefficients are calculated using time allowances for the Windward/leeward type of pre-selected course. 
+
+
+
+
+
 
 
 
