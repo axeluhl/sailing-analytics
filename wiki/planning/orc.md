@@ -132,7 +132,10 @@ The use of PCS is not as complicated as it may appear. It requires the Race Comm
 - course bearing 
 - wind direction  
 
-![Course](http://www.orc.org/images/certificates/2013/course.JPG)          ![Scoring](http://www.orc.org/scoring/pcs.htm)
+![Course](http://www.orc.org/images/certificates/2013/course.JPG)          
+
+
+![Scoring](http://www.orc.org/scoring/pcs.htm)
 
 
 
