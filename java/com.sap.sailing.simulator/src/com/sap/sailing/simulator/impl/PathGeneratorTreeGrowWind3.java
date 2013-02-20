@@ -173,8 +173,11 @@ public class PathGeneratorTreeGrowWind3 extends PathGeneratorBase {
         
         Bearing bearHeight = posEnd.getBearingGreatCircle(posHeight);
         double bearHeightSide = posWind.getBearing().getDifferenceTo(bearHeight).getDegrees();
+        /*if (Math.abs(bearHeightSide) > 5.0) {
+            System.out.println("bearHeightSide: "+bearHeightSide);
+        }*/
         double vrtSide = -1.0;
-        if ((bearHeightSide > 90.0)&&(bearHeightSide < 180.0)) {
+        if (Math.abs(bearHeightSide) > 170.0) {
             vrtSide = 1.0;
         }
         double vrtDist = vrtSide*Math.round(posHeight.getDistance(posEnd).getMeters()*100.0)/100.0;
@@ -375,7 +378,7 @@ public class PathGeneratorTreeGrowWind3 extends PathGeneratorBase {
         Distance distStartEnd = startPos.getDistance(endPos);
         double distStartEndMeters = distStartEnd.getMeters();
         
-        long timeStep = wf.getTimeStep().asMillis()/4;
+        long timeStep = wf.getTimeStep().asMillis()/3;
         logger.info("Time step :" + timeStep);
         long turnLoss = pd.getTurnLoss(); // 4000; // time lost when doing a turn
 
@@ -461,8 +464,9 @@ public class PathGeneratorTreeGrowWind3 extends PathGeneratorBase {
                     // terminate path-search if paths are found that are close enough to target
                     //if ((curPath.vrt > distStartEndMeters)) {
                     if ((curPath.vrt > 0.0)) {
+                        //logger.info("\ntPath: " + curPath.path + "\n      Time: " + (Math.round((curPath.pos.getTimePoint().asMillis()-startTime.asMillis())/1000.0/60.0*10.0)/10.0)+", Height: "+curPath.vrt+" of "+(Math.round(startPos.getDistance(endPos).getMeters()*100.0)/100.0)+", Dist: "+curPath.hrz+"m ~ "+(Math.round(curPath.pos.getPosition().getDistance(endPos).getMeters()*100.0)/100.0)+"m");
                         int curBin = (int)Math.round(Math.floor( (curPath.hrz + hrzBinSize/2.0) / hrzBinSize ));
-                        if ((Math.abs(curBin) <= 1)) {
+                        if ((Math.abs(curBin) <= 2)) {
                             reachedEnd = true;
                             trgPaths.add(curPath); // add path to list of target-paths
                         }

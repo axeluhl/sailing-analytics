@@ -24,14 +24,14 @@ public class PathCandidate implements Comparable<PathCandidate> {
     // sort descending by length, width, height
     public int compareTo(PathCandidate other) {
         if (this.path.length() == other.path.length()) {
-            if (Math.abs(this.hrz) == Math.abs(other.hrz)) {
-                if (this.vrt == other.vrt) {
+            if (this.vrt == other.vrt) {
+                if (Math.abs(this.hrz) == Math.abs(other.hrz)) {
                     return 0;
                 } else {
-                    return (this.vrt > other.vrt ? -1 : +1);
+                    return (Math.abs(this.hrz) < Math.abs(other.hrz) ? -1 : +1);
                 }
             } else {
-                return (Math.abs(this.hrz) < Math.abs(other.hrz) ? -1 : +1);
+                return (this.vrt > other.vrt ? -1 : +1);
             }
         } else {
             return (this.path.length() < other.path.length() ? -1 : +1);            
