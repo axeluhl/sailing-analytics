@@ -64,10 +64,20 @@ Corrected time is calculated as follows:
 
 With Time-On-Time (ToT) scoring, the time allowance will increase progressively as the wind velocity increases. Course distance has no effect on the results and need not be measured. Corrected time will depend only on the elapsed time, and the difference between boats may be seen in seconds depending of the duration of the races. The longer the race in time, the larger the handicap.
 
-Special ToT coefficients are calculated with an average crew weight of 170 kg for double handed racing, as well as one calculated for non-spinnaker racing.
-
 Where is it shown in the certificate ?
+
 ![Certificate](http://www.orc.org/images/certificates/2013/time%20on%20time.png)
+
+ **How is it calculated?**
+ 
+    
+  Offshore Time on Time scoring coefficient is calculated as: 
+  
+          600 / Offshore ToD 
+    
+  Inshore Time on Time scoring coefficient is calculated as: 
+  
+          675 / Inshore ToD 
 
 
 
