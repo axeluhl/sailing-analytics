@@ -26,7 +26,7 @@ import com.sap.sailing.simulator.TimedPosition;
 import com.sap.sailing.simulator.TimedPositionWithSpeed;
 import com.sap.sailing.simulator.windfield.WindFieldGenerator;
 
-public class PathGeneratorTreeGrowWind2 extends PathGeneratorBase {
+public class PathGeneratorTreeGrowWind3 extends PathGeneratorBase {
 
     private static Logger logger = Logger.getLogger("com.sap.sailing");
     private boolean debugMsgOn = false;
@@ -39,7 +39,7 @@ public class PathGeneratorTreeGrowWind2 extends PathGeneratorBase {
     ArrayList<List<PathCandidate>> gridPositions = null;
     String gridFile = null;
 
-    public PathGeneratorTreeGrowWind2(SimulationParameters params) {
+    public PathGeneratorTreeGrowWind3(SimulationParameters params) {
         simulationParameters = params;
     }
 
@@ -170,7 +170,14 @@ public class PathGeneratorTreeGrowWind2 extends PathGeneratorBase {
         
         // calculate vertical distance as distance of height-position to start
         //double vrtDist = Math.round(posHeightTrgt.getDistance(posStart).getMeters()*100.0)/100.0;
-        double vrtDist = Math.round(posHeight.getDistance(posStart).getMeters()*100.0)/100.0;
+        
+        Bearing bearHeight = posEnd.getBearingGreatCircle(posHeight);
+        double bearHeightSide = posWind.getBearing().getDifferenceTo(bearHeight).getDegrees();
+        double vrtSide = -1.0;
+        if ((bearHeightSide > 90.0)&&(bearHeightSide < 180.0)) {
+            vrtSide = 1.0;
+        }
+        double vrtDist = vrtSide*Math.round(posHeight.getDistance(posEnd).getMeters()*100.0)/100.0;
         
         /*if (vrtDist > tgtHeight) {
         // scale last step so that vrtDist ~ tgtHeight
@@ -368,7 +375,7 @@ public class PathGeneratorTreeGrowWind2 extends PathGeneratorBase {
         Distance distStartEnd = startPos.getDistance(endPos);
         double distStartEndMeters = distStartEnd.getMeters();
         
-        long timeStep = wf.getTimeStep().asMillis()/3;
+        long timeStep = wf.getTimeStep().asMillis()/4;
         logger.info("Time step :" + timeStep);
         long turnLoss = pd.getTurnLoss(); // 4000; // time lost when doing a turn
 
@@ -452,9 +459,10 @@ public class PathGeneratorTreeGrowWind2 extends PathGeneratorBase {
 
                 for(PathCandidate curPath : allPaths) {
                     // terminate path-search if paths are found that are close enough to target
-                    if ((curPath.vrt > distStartEndMeters)) {
+                    //if ((curPath.vrt > distStartEndMeters)) {
+                    if ((curPath.vrt > 0.0)) {
                         int curBin = (int)Math.round(Math.floor( (curPath.hrz + hrzBinSize/2.0) / hrzBinSize ));
-                        if ((Math.abs(curBin) <= 2)) {
+                        if ((Math.abs(curBin) <= 1)) {
                             reachedEnd = true;
                             trgPaths.add(curPath); // add path to list of target-paths
                         }

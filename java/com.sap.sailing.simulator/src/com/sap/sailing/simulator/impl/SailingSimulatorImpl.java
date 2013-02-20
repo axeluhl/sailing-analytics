@@ -31,7 +31,6 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
-import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MeterDistance;
 import com.sap.sailing.domain.common.Position;
@@ -48,7 +47,6 @@ import com.sap.sailing.simulator.Path;
 import com.sap.sailing.simulator.SailingSimulator;
 import com.sap.sailing.simulator.SimulationParameters;
 import com.sap.sailing.simulator.TimedPositionWithSpeed;
-import com.sap.sailing.simulator.impl.PathGeneratorTreeGrowWind2.PathCand;
 import com.sap.sailing.simulator.util.SailingSimulatorUtil;
 import com.sap.sailing.simulator.windfield.WindFieldGenerator;
 import com.sap.sailing.simulator.windfield.impl.WindFieldGeneratorMeasured;
@@ -168,12 +166,12 @@ public class SailingSimulatorImpl implements SailingSimulator {
         //
 
         // get instance of heuristic searcher
-        PathGeneratorTreeGrowWind2 genTreeGrow = new PathGeneratorTreeGrowWind2(this.simulationParameters);
+        PathGeneratorTreeGrowWind3 genTreeGrow = new PathGeneratorTreeGrowWind3(this.simulationParameters);
 
         // search best left-starting 1-turner
         genTreeGrow.setEvaluationParameters("L", 1, null);
         Path leftPath = genTreeGrow.getPath();
-        PathCand leftBestCand = genTreeGrow.getBestCand();
+        PathCandidate leftBestCand = genTreeGrow.getBestCand();
         int left1TurnMiddle = 1000;
         if (leftBestCand != null) {
             left1TurnMiddle = leftBestCand.path.indexOf("LR");
@@ -182,7 +180,7 @@ public class SailingSimulatorImpl implements SailingSimulator {
         // search best right-starting 1-turner
         genTreeGrow.setEvaluationParameters("R", 1, null);
         Path rightPath = genTreeGrow.getPath();
-        PathCand rightBestCand = genTreeGrow.getBestCand();
+        PathCandidate rightBestCand = genTreeGrow.getBestCand();
         int right1TurnMiddle = 1000;
         if (rightBestCand != null) {
             right1TurnMiddle = rightBestCand.path.indexOf("RL");
