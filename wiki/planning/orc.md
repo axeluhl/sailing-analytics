@@ -109,6 +109,7 @@ This means that yachts of different designs will have different time allowances 
 **Where is it shown in the certificate**?
 
 ![Certificate](http://www.orc.org/images/certificates/2013/Performance%20Curve%20Scoring.png)
+
 An ORCi certificate provides a range of ratings (time allowances expressed in s/NM) for wind conditions in the range of 6 – 20 knots of true wind speed, and at angles varying from an optimum VMG beat to 52, 60, 75, 90, 110, 120, 135, 150 degrees of true wind angle, as well as the optimum VMG run angle.
  
   
@@ -126,11 +127,12 @@ The use of PCS is not as complicated as it may appear. It requires the Race Comm
 
 **Step 1: Define the curse**
  Course may be selected from one of 4 Pre-defined types above or simply constructed with following parameters for each leg: 
-*distance 
-*course bearing 
-*wind direction  
 
-![Course](http://www.orc.org/images/certificates/2013/course.JPG)
+- distance 
+- course bearing 
+- wind direction  
+
+![Course](http://www.orc.org/images/certificates/2013/course.JPG)          ![Scoring](http://www.orc.org/scoring/pcs.htm)
 
 
 
