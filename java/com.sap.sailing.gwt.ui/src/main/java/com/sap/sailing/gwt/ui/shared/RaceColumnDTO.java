@@ -21,6 +21,7 @@ public class RaceColumnDTO extends NamedDTO implements IsSerializable {
     private Map<FleetDTO, RaceDTO> racesPerFleet;
     private Boolean isValidInTotalScore;
     private Double explicitFactor;
+    private double effectiveFactor;
     
     /**
      * If the column has tracked races attached, this field tells the latest time point when one of those races was
@@ -233,5 +234,13 @@ public class RaceColumnDTO extends NamedDTO implements IsSerializable {
         } else if (!racesPerFleet.equals(other.racesPerFleet))
             return false;
         return true;
+    }
+
+    public void setEffectiveFactor(double effectiveFactor) {
+        this.effectiveFactor = effectiveFactor;
+    }
+
+    public double getEffectiveFactor() {
+        return effectiveFactor;
     }
 }
