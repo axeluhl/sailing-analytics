@@ -57,4 +57,18 @@ Double handed coefficient is calculated using the same OSN method with crew weig
        - 40 % of Windward/Leeward at 12 knots 
        - 35 % of Windward/Leeward at 16 knots 
 
+**Time on time:**
+Corrected time is calculated as follows:
+
+**Corrected time = ToT * Elapsed time**
+
+With Time-On-Time (ToT) scoring, the time allowance will increase progressively as the wind velocity increases. Course distance has no effect on the results and need not be measured. Corrected time will depend only on the elapsed time, and the difference between boats may be seen in seconds depending of the duration of the races. The longer the race in time, the larger the handicap.
+
+Special ToT coefficients are calculated with an average crew weight of 170 kg for double handed racing, as well as one calculated for non-spinnaker racing.
+
+Where is it shown in the certificate ?
+![Certificate](http://www.orc.org/images/certificates/2013/time%20on%20time.png)
+
+
+
 
