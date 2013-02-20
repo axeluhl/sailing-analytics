@@ -119,6 +119,34 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
             assertEquals(10-(i-1), leaderboard.getTotalPoints(competitors.get(i), f1Column, now), 0.000000001);
         }
     }
+    
+    @Test
+    public void testColumnFactorInRegattaLeaderboard() throws NoWindException {
+        List<Competitor> competitors = createCompetitors(10);
+        Regatta regatta = createRegatta(/* qualifying */ 2, new String[] { "Default" }, /* final */0,
+                new String[] { "Default" },
+                /* medal */false, "testColumnFactorInRegattaLeaderboard",
+                DomainFactory.INSTANCE.getOrCreateBoatClass("49er", /* typicallyStartsUpwind */true),
+                DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.HIGH_POINT));
+        Leaderboard leaderboard = createLeaderboard(regatta, /* discarding thresholds */ new int[0]);
+        Series qualificationSeries;
+        Iterator<? extends Series> seriesIter = regatta.getSeries().iterator();
+        qualificationSeries = seriesIter.next();
+        RaceColumn q1Column = qualificationSeries.getRaceColumnByName("Q1");
+        RaceColumn q2Column = qualificationSeries.getRaceColumnByName("Q2");
+        final double factor = 2.0;
+        q2Column.setFactor(factor);
+        TimePoint now = MillisecondsTimePoint.now();
+        TimePoint later = new MillisecondsTimePoint(now.asMillis()+1000);
+        TrackedRace q1Default = new MockedTrackedRaceWithStartTimeAndRanks(now, competitors);
+        ArrayList<Competitor> reverseCompetitors = new ArrayList<Competitor>(competitors);
+        Collections.reverse(reverseCompetitors);
+        TrackedRace q2Default = new MockedTrackedRaceWithStartTimeAndRanks(now, reverseCompetitors);
+        q1Column.setTrackedRace(q1Column.getFleetByName("Default"), q1Default);
+        q2Column.setTrackedRace(q2Column.getFleetByName("Default"), q2Default);
+        assertEquals(Double.valueOf(competitors.size()), leaderboard.getTotalPoints(competitors.get(0), q1Column, later));
+        assertEquals(factor * Double.valueOf(1), leaderboard.getTotalPoints(competitors.get(0), q2Column, later), 0.000000001);
+    }
 
     /**
      * Regarding bug 961, test scoring in a leaderboard that has a qualification series with two unordered groups where for one
