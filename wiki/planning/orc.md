@@ -134,9 +134,32 @@ The use of PCS is not as complicated as it may appear. It requires the Race Comm
 
 ![Course](http://www.orc.org/images/certificates/2013/course.JPG)          
 
+Typical course definition. Distance and bearings of each leg are entered, as is the approximate wind direction. Note wind speed is not entered. 
+ 
+Current velocity and direction can also be entered for each leg, if it is known 
 
-![Scoring](http://www.orc.org/scoring/pcs.htm)
+**Step 2: Prepare the scratch sheet**
 
+For any of the selected courses described above, the true wind angle is calculated as being the difference between the wind direction and compass bearing of each leg. With this information, a table is made for each boat that describes the theoretical speed of the boat over that course for a variety of wind conditions. With this data a curve can be plotted which represents the predicted optimum performance along a scale of wind speeds. This curve is called the Performance Curve, and for each yacht this curve is different for any different course sailed.
+
+
+**Step 3: Calculate implied Wind**
+
+Performance curve for each boat:
+![Curve](http://www.orc.org/images/certificates/2013/pcs1.JPG)
+
+
+![Curve](http://www.orc.org/images/certificates/2013/pcs2.JPG)
+
+In a typical Performance Curve plot, the vertical axis represents the speed achieved in the race, expressed in seconds per mile. The horizontal axis represents the wind speed in knots. When the finishing time of Yacht A is known, its elapsed time is divided by the distance of the course to determine the average speed in seconds per mile. This number is represented by point A on the vertical axis. The computer then finds the point on the horizontal axis that corresponds for that course to the average speed obtained.
+
+This results in point Aw, the so-called “Implied Wind.” This means that the yacht has completed the course “as if” it has encountered that wind speed. The faster the boat has sailed, the higher the Implied Wind, which is the primary index used for scoring: the yacht with the highest Implied Wind wins the race. The Implied Wind can then be transformed into a corrected time.
+
+The Implied Wind is intended as an interpolation between time allowances, not an extrapolation. This means that when the Implied Wind drops below 6 knots or raises above 20 knots, the time allowances used for calculating the corrected times will be those of 6 knots and 20 knots respectively. This does not mean that ORC races need to be stopped (or not started) with wind below 6 knots or above 20. When the “implied wind” results calculate to be lass than 6 knots or more than 20, the corrected time values at these wind speeds are then used.
+
+In order to present the result of the race in a comprehensive format we use a “Scratch Boat” (Figure 2). In most cases this is the potentially fastest boat of the fleet, shown in the example as yacht B. Being the fastest, her Performance Curve is the lowest in the figure. From the point where the vertical line yacht A intersects with the curve of the Scratch Boat, a horizontal line is drawn to the left towards the vertical axis. This point, Ac, produces the corrected time when the seconds per mile are multiplied by the distance of the course in miles. The corrected time of the Scratch Boat is, by definition, the same as its elapsed time. This exercise produces corrected times, expressed in hours, minutes and seconds, a familiar format for most sailors.
+
+“Implied Wind” for the winning boat is thus normally in the range of the actual average wind strength for the race. However, in cases where the “Implied Wind” does not fairly represent the real wind strength during a race, the Fixed Wind method may be used to enter the performance curve with the predominant wind speed at the horizontal axis, thus obtaining the appropriate Time allowance at the vertical axis. Such a time allowance can then be used as a single number Time-on-Distance coefficient.
 
 
 
