@@ -623,51 +623,56 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
 
         Label legLabel = new Label(this.stringMessages.legLabel());
         legLabel.getElement().setClassName("boatClassLabel");
-        HorizontalPanel hp2 = new HorizontalPanel();
-        hp2.getElement().setClassName("boatClassPanel");
-        hp2.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
-        hp2.add(legLabel);
-
-        this.simulatorSvc.getLegs(3, new AsyncCallback<LegsNamesDTO>() {
-
-            @Override
-            public void onFailure(Throwable error) {
-                errorReporter.reportError("Failed to read legs information!\r\n" + error.getMessage());
-            }
-
-            @Override
-            public void onSuccess(LegsNamesDTO response) {
-
-                String notificationMessage = response.notificationMessage;
-                if (notificationMessage != "" && notificationMessage.length() != 0 && warningAlreadyShown == false) {
-                    errorReporter.reportNotification(notificationMessage);
-                    warningAlreadyShown = true;
-                }
-
-                for (String legName : response.legsNames) {
-                    legSelector.addItem(legName);
-                }
-
-                legSelector.setItemSelected(0, true); // first leg
-                loadLegData(0);
-            }
-        });
-
-        this.legSelector.addChangeHandler(new ChangeHandler() {
-
-            @Override
-            public void onChange(ChangeEvent arg0) {
-                loadLegData(legSelector.getSelectedIndex());
-            }
-        });
-
-
-        hp2.add(this.legSelector);
 
         sailingPanel.add(hp);
-        sailingPanel.add(hp2);
         // hp.setSize("80%", "10%");
         // hp.setWidth("80%");
+        
+        if (this.mode == SailingSimulatorUtil.measured) {
+            
+            HorizontalPanel hp2 = new HorizontalPanel();
+            hp2.getElement().setClassName("boatClassPanel");
+            hp2.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
+            hp2.add(legLabel);
+
+            this.simulatorSvc.getLegs(3, new AsyncCallback<LegsNamesDTO>() {
+
+                @Override
+                public void onFailure(Throwable error) {
+                    errorReporter.reportError("Failed to read legs information!\r\n" + error.getMessage());
+                }
+
+                @Override
+                public void onSuccess(LegsNamesDTO response) {
+
+                    String notificationMessage = response.notificationMessage;
+                    if (notificationMessage != "" && notificationMessage.length() != 0 && warningAlreadyShown == false) {
+                        errorReporter.reportNotification(notificationMessage);
+                        warningAlreadyShown = true;
+                    }
+
+                    for (String legName : response.legsNames) {
+                        legSelector.addItem(legName);
+                    }
+
+                    legSelector.setItemSelected(0, true); // first leg
+                    loadLegData(0);
+                }
+            });
+
+            this.legSelector.addChangeHandler(new ChangeHandler() {
+
+                @Override
+                public void onChange(ChangeEvent arg0) {
+                    loadLegData(legSelector.getSelectedIndex());
+                }
+            });
+
+            hp2.add(this.legSelector);
+            sailingPanel.add(hp2);
+
+        } // endif in "measured mode"
+
         Panel raceDirection = createRaceDirectionSelector();
         sailingPanel.add(raceDirection);
         // raceDirection.setWidth("80%");

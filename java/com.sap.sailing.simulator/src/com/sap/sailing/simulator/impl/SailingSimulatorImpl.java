@@ -171,7 +171,7 @@ public class SailingSimulatorImpl implements SailingSimulator {
         PathGeneratorTreeGrowWind2 genTreeGrow = new PathGeneratorTreeGrowWind2(this.simulationParameters);
 
         // search best left-starting 1-turner
-        genTreeGrow.setEvaluationParameters("L", 1);
+        genTreeGrow.setEvaluationParameters("L", 1, null);
         Path leftPath = genTreeGrow.getPath();
         PathCand leftBestCand = genTreeGrow.getBestCand();
         int left1TurnMiddle = 1000;
@@ -180,7 +180,7 @@ public class SailingSimulatorImpl implements SailingSimulator {
         }
 
         // search best right-starting 1-turner
-        genTreeGrow.setEvaluationParameters("R", 1);
+        genTreeGrow.setEvaluationParameters("R", 1, null);
         Path rightPath = genTreeGrow.getPath();
         PathCand rightBestCand = genTreeGrow.getBestCand();
         int right1TurnMiddle = 1000;
@@ -189,7 +189,7 @@ public class SailingSimulatorImpl implements SailingSimulator {
         }
 
         // search best multi-turn course
-        genTreeGrow.setEvaluationParameters(null, 0);
+        genTreeGrow.setEvaluationParameters(null, 0, null);
         Path optPath = genTreeGrow.getPath();
 
 
