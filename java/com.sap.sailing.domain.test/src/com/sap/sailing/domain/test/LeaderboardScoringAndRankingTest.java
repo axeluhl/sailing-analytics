@@ -146,6 +146,7 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
         q2Column.setTrackedRace(q2Column.getFleetByName("Default"), q2Default);
         assertEquals(Double.valueOf(competitors.size()), leaderboard.getTotalPoints(competitors.get(0), q1Column, later));
         assertEquals(factor * Double.valueOf(1), leaderboard.getTotalPoints(competitors.get(0), q2Column, later), 0.000000001);
+        assertEquals(Double.valueOf(factor*1.0+competitors.size()), leaderboard.getTotalPoints(competitors.get(0), later), 0.000000001);
     }
 
     /**
