@@ -16,7 +16,12 @@ public interface RaceLogEventFactory {
 	RaceLogStartTimeEvent createStartTimeEvent(TimePoint timePoint, Serializable id, List<Competitor> involvedBoats, int passId, RaceLogRaceStatus nextStatus, TimePoint startTime);
 	RaceLogStartTimeEvent createStartTimeEvent(TimePoint timePoint, int passId, RaceLogRaceStatus nextStatus, TimePoint startTime);
 	
-	RaceLogEvent createRaceStatusEvent(TimePoint timePoint, Serializable id, List<Competitor> competitors, int passId, RaceLogRaceStatus nextStatus);
-	RaceLogEvent createRaceStatusEvent(TimePoint timePoint, int passId, RaceLogRaceStatus nextStatus);
-
+	RaceLogRaceStatusEvent createRaceStatusEvent(TimePoint timePoint, Serializable id, List<Competitor> competitors, int passId, RaceLogRaceStatus nextStatus);
+	RaceLogRaceStatusEvent createRaceStatusEvent(TimePoint timePoint, int passId, RaceLogRaceStatus nextStatus);
+	
+	RaceLogPassChangeEvent createRaceLogPassChangeEvent(TimePoint timePoint, Serializable id, List<Competitor> competitors, int passId);
+	RaceLogPassChangeEvent createRaceLogPassChangeEvent(TimePoint timePoint, int passId);
+	
+	RaceLogCourseAreaChangedEvent createRaceLogCourseAreaChangedEvent(TimePoint timePoint, Serializable id, List<Competitor> competitors, int passId, Serializable courseAreaId);
+	RaceLogCourseAreaChangedEvent createRaceLogCourseAreaChangedEvent(TimePoint timePoint, int passId, Serializable courseAreaId);
 }
