@@ -42,23 +42,7 @@ ORC International and ORC Club certificates
 
 **How is it calculated?**
 ***
-
-
 Offshore Time on Distance scoring coefficient also known as OSN (offshore single number) is calculated as a weighted average of the predicted boat speeds in following conditions:
-  	 
- The resulting time allowances at wind of 8 kn will be accounted with 25%, the one
-The above scheme takes into account more windward/leeward directions in the light 
-	              	40 % 	25 % 	10 % 	                    12 kn with 50% and that at 16 kn with 25%.
-60 	  	5 % 	10 % 	20 %       winds, which is gradually reduced to have more reaching as the wind increases.
-	 
- 	 
-  	 
-  	
 
-  	 
-__Inshore Time on Distance__ scoring coefficients is calculated as the average of windward/leeward course (50 - 50 %) time allowances in three conditions multiplied by their respective weights:
-
-  - 25 % of Windward/Leeward at 8 knots
-  - 40 % of Windward/Leeward at 12 knots
-  - 35 % of Windward/Leeward at 16 knots
+![table](C:\Users\D052427\Desktop\ORC Wiki)
 
