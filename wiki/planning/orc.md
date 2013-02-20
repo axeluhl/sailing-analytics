@@ -100,6 +100,42 @@ Offshore Performance Line coefficients are calculated using time allowances for 
 Inshore Performance Line coefficients are calculated using time allowances for the Windward/leeward type of pre-selected course. 
 
 
+**Performance Curve Scoring:**
+***
+**Performance Curve Scoring:**is the most powerful engine of the ORC International (ORCi) rating system. It is this unique feature which makes this rule fundamentally different from any other handicap system, as it recognizes that yachts of varied design perform differently when conditions change. 
+
+This means that yachts of different designs will have different time allowances in each race depending on the weather conditions and the course configuration for that particular race. For example, heavy under-canvassed boats are slow in light airs but fast in strong winds, boats with deep keels go well to windward, and light boats with small keels will go fast downwind.
+
+**Where is it shown in the certificate**?
+
+![Certificate](http://www.orc.org/images/certificates/2013/Performance%20Curve%20Scoring.png)
+An ORCi certificate provides a range of ratings (time allowances expressed in s/NM) for wind conditions in the range of 6 – 20 knots of true wind speed, and at angles varying from an optimum VMG beat to 52, 60, 75, 90, 110, 120, 135, 150 degrees of true wind angle, as well as the optimum VMG run angle.
+ 
+  
+Windward/Leeward (up and down) is a conventional course around windward and leeward marks where the race course consists of 50% upwind and 50% downwind legs. 
+  
+Circular Random is a hypothetical course type in which the boat circumnavigates a circular island with the true wind direction held constant.   
+  
+Ocean for PCS is a composite course, the content of which varies progressively with true wind velocity from 30% Windward/Leeward, 70% Circular Random at 6 knots to 100% Circular Random at 12 knots and 20% Circular Random, 80% reach at 20 knots.  
+ 
+
+**How is it calculated**?
+
+The use of PCS is not as complicated as it may appear. It requires the Race Committee provide only a little more data in addition to their usual work of setting up the course, following the wind changes, making starts and taking finishing times. There are different varieties of Scoring software that will do all calculations, which enables results to be ready as soon as the elapsed times of the race are entered.
+
+
+**Step 1: Define the curse**
+ Course may be selected from one of 4 Pre-defined types above or simply constructed with following parameters for each leg: 
+*distance 
+*course bearing 
+*wind direction  
+
+![Course](http://www.orc.org/images/certificates/2013/course.JPG)
+
+
+
+
+
 
 
 
