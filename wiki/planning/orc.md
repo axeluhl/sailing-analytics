@@ -51,7 +51,7 @@ The above scheme takes into account more windward/leeward directions in light wi
 Double handed coefficient is calculated using the same OSN method with crew weight of 170 kg, while non-spinnaker rating is calculated for boat's performance without spinnaker.
 
  
-Inshore Time on Distance scoring coefficients is calculated as the average of windward/leeward course (50 - 50 %) time allowances in three conditions multiplied by their respective weights: 
+**Inshore Time on Distance** scoring coefficients is calculated as the average of windward/leeward course (50 - 50 %) time allowances in three conditions multiplied by their respective weights: 
   
        - 25 % of Windward/Leeward at 8 knots 
        - 40 % of Windward/Leeward at 12 knots 
