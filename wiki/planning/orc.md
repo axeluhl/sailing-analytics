@@ -146,10 +146,12 @@ For any of the selected courses described above, the true wind angle is calculat
 **Step 3: Calculate implied Wind**
 
 Performance curve for each boat:
+
 ![Curve](http://www.orc.org/images/certificates/2013/pcs1.JPG)
 
 
 ![Curve](http://www.orc.org/images/certificates/2013/pcs2.JPG)
+
 
 In a typical Performance Curve plot, the vertical axis represents the speed achieved in the race, expressed in seconds per mile. The horizontal axis represents the wind speed in knots. When the finishing time of Yacht A is known, its elapsed time is divided by the distance of the course to determine the average speed in seconds per mile. This number is represented by point A on the vertical axis. The computer then finds the point on the horizontal axis that corresponds for that course to the average speed obtained.
 
