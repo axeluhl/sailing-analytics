@@ -50,9 +50,9 @@ public class WindSensorOverlay extends CanvasOverlay {
             getCanvas().setCoordinateSpaceWidth(canvasWidth);
             getCanvas().setCoordinateSpaceHeight(canvasHeight);
         }
-        transformer = raceMapImageManager.getExpeditionWindIconTransformer();
+        transformer = raceMapImageManager.getWindSensorIconTransformer();
     }
-    
+
     @Override
     protected Overlay copy() {
       return new WindSensorOverlay(raceMapImageManager, stringMessages);
@@ -64,6 +64,9 @@ public class WindSensorOverlay extends CanvasOverlay {
         if (windTrackInfoDTO != null && windTrackInfoDTO.windFixes.size() > 0) {
             WindDTO windDTO = windTrackInfoDTO.windFixes.get(0);
             PositionDTO position = windDTO.position;
+
+            getCanvas().setTitle(getTitle(windDTO));
+
             // Attention: sometimes there is no valid position for the wind source available -> ignore the wind in this case
             if (position != null) {
                 double rotationDegOfWindSymbol = windDTO.dampenedTrueWindBearingDeg;
@@ -71,11 +74,7 @@ public class WindSensorOverlay extends CanvasOverlay {
                 setLatLngPosition(LatLng.newInstance(windDTO.position.latDeg, windDTO.position.lngDeg));
                 Point sensorPositionInPx = getMap().convertLatLngToDivPixel(getLatLngPosition());
                 getPane().setWidgetPosition(getCanvas(), sensorPositionInPx.getX() - canvasWidth / 2, sensorPositionInPx.getY() - canvasHeight / 2);
-                String title = stringMessages.wind() + " ("+ WindSourceTypeFormatter.format(windSource, stringMessages) + "): "; 
-                title += Math.round(windDTO.dampenedTrueWindFromDeg) + " " + stringMessages.degreesShort()+ ",  ";
-                title += numberFormat.format(windDTO.dampenedTrueWindSpeedInKnots) + " " + stringMessages.knotsUnit();
                 
-                getCanvas().setTitle(title);
                 hasValidWind = true;
             }
         }
@@ -85,6 +84,13 @@ public class WindSensorOverlay extends CanvasOverlay {
         getCanvas().setVisible(hasValidWind);
     }
 
+    private String getTitle(WindDTO windDTO) {
+        String title = stringMessages.wind() + " ("+ WindSourceTypeFormatter.format(windSource, stringMessages) + "): "; 
+        title += Math.round(windDTO.dampenedTrueWindFromDeg) + " " + stringMessages.degreesShort()+ ",  ";
+        title += numberFormat.format(windDTO.dampenedTrueWindSpeedInKnots) + " " + stringMessages.knotsUnit();
+        return title;
+    }
+    
     public WindTrackInfoDTO getWindTrackInfoDTO() {
         return windTrackInfoDTO;
     }
