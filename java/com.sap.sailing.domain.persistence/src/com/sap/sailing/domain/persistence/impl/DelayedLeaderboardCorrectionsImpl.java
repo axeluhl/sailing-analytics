@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.persistence.impl;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -52,7 +54,7 @@ public class DelayedLeaderboardCorrectionsImpl implements DelayedLeaderboardCorr
     private final Set<Serializable> suppressedCompetitorIDs;
     
     private final Leaderboard leaderboard;
-    private transient final Set<LeaderboardCorrectionsResolvedListener> listeners;
+    private transient Set<LeaderboardCorrectionsResolvedListener> listeners;
     
     public DelayedLeaderboardCorrectionsImpl(Leaderboard leaderboard) {
         listeners = new HashSet<>();
@@ -68,6 +70,11 @@ public class DelayedLeaderboardCorrectionsImpl implements DelayedLeaderboardCorr
         suppressedCompetitorIDs = new HashSet<Serializable>();
         this.leaderboard = leaderboard;
         leaderboard.addRaceColumnListener(this);
+    }
+    
+    private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
+        ois.defaultReadObject();
+        listeners = new HashSet<>();
     }
     
     @Override
