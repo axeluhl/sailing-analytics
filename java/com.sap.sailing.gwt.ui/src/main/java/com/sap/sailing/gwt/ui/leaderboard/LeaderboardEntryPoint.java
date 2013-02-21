@@ -274,8 +274,9 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
     /**
      * Assembles a URL for a leaderboard that displays with the <code>settings</code> and <code>embedded</code> mode
      * as specified by the parameters.
+     * @param leaderboardDisplayName TODO
      */
-    public static String getUrl(String leaderboardName, LeaderboardUrlSettings settings) {
+    public static String getUrl(String leaderboardName, String leaderboardDisplayName, LeaderboardUrlSettings settings) {
         StringBuilder overallDetails = new StringBuilder();
         for (DetailType overallDetail : settings.getLeaderboardSettings().getOverallDetailsToShow()) {
             overallDetails.append('&');
@@ -307,6 +308,7 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
         String debugParam = Window.Location.getParameter("gwt.codesvr");
         String link = URLEncoder.encode("/gwt/Leaderboard.html?name=" + leaderboardName
                 + (settings.isShowRaceDetails() ? "&"+PARAM_SHOW_RACE_DETAILS+"=true" : "")
+                + (leaderboardDisplayName != null ? "&displayName="+leaderboardDisplayName : "")
                 + (settings.isEmbedded() ? "&"+PARAM_EMBEDDED+"=true" : "")
                 + (settings.getLeaderboardSettings().isShowOverallLeaderboardsOnSamePage() ? "&"+PARAM_SHOW_OVERALL_LEADERBOARDS_ON_SAME_PAGE+"=true" : "")
                 + (settings.getLeaderboardSettings().getDelayInMilliseconds() == null &&
