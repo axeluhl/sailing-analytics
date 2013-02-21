@@ -37,6 +37,7 @@ public class PathGeneratorTreeGrowWind3 extends PathGeneratorBase {
     PathCandidate bestCand = null;
     boolean gridStore = false;
     ArrayList<List<PathCandidate>> gridPositions = null;
+    ArrayList<List<PathCandidate>> isocPositions = null;
     String gridFile = null;
 
     public PathGeneratorTreeGrowWind3(SimulationParameters params) {
@@ -54,9 +55,11 @@ public class PathGeneratorTreeGrowWind3 extends PathGeneratorBase {
         if (this.gridFile != null) {
             this.gridStore = true;
             this.gridPositions = new ArrayList<List<PathCandidate>>();
+            this.isocPositions = new ArrayList<List<PathCandidate>>();
         } else {
             this.gridStore = false;
             this.gridPositions = null;
+            this.isocPositions = null;
         }
     }
 
@@ -301,7 +304,7 @@ public class PathGeneratorTreeGrowWind3 extends PathGeneratorBase {
         int idxL = 0;
         int idxR = 0;
         
-        // for each candidate, check the neighborhoos and identify bad candidates
+        // for each candidate, check the neighborhoods and identify bad candidates
         for(int idx = 0; idx < allCands.size(); idx++) {
             
             // current horizontal distance
@@ -363,6 +366,85 @@ public class PathGeneratorTreeGrowWind3 extends PathGeneratorBase {
     }
     
     
+    List<PathCandidate> filterIsochrone(List<PathCandidate> allCands, double hrzBinWidth) {
+        
+        boolean[] filterMap = new boolean[allCands.size()];
+        for(int idx = 0; idx < allCands.size(); idx++) {
+            filterMap[idx] = true;
+        }        
+        
+        // sort candidates by horizontal distance
+        Comparator<PathCandidate> sortHorizontal = new SortPathCandsHorizontally();
+        Collections.sort(allCands, sortHorizontal);
+        
+        // start scan with index 0
+        int idxL = 0;
+        int idxR = 0;
+        
+        // for each candidate, check the neighborhoods and identify bad candidates
+        for(int idx = 0; idx < allCands.size(); idx++) {
+            
+            // current horizontal distance
+            double hrzDist = allCands.get(idx).hrz;
+            
+            // align left index
+            while(Math.abs(hrzDist - allCands.get(idxL).hrz) > hrzBinWidth) {
+                idxL++;
+            }
+
+            // align right index
+            boolean finished = false;
+            while(!finished && (idxR < (allCands.size()-1))) {
+                if (Math.abs(hrzDist - allCands.get(idxR+1).hrz) <= hrzBinWidth) {
+                    idxR++;
+                } else {
+                    finished = true;
+                }
+            }
+
+            // search maximum height
+            // in neighborhood idxL, ..., idxR
+            
+            // init max for search
+            ArrayList<Integer> vrtIdx = new ArrayList<Integer>(); 
+            vrtIdx.add(idxL);
+            double vrtMax = allCands.get(idxL).vrt;
+            
+            // evaluate remainder of neighborhood
+            if (idxL < idxR) {
+                for(int jdx = (idxL+1); jdx <= idxR; jdx++) {
+                    if (allCands.get(jdx).vrt > vrtMax) {
+                        // keep max height
+                        vrtMax = allCands.get(jdx).vrt;
+                        // keep max index
+                        vrtIdx = new ArrayList<Integer>();
+                        vrtIdx.add(jdx);
+                    } else if (allCands.get(jdx).vrt == vrtMax) {
+                        // add further max indexes
+                        vrtIdx.add(jdx);
+                    }
+                }
+            }
+            
+            for(Integer jdx : vrtIdx) {
+                filterMap[jdx] = false;
+            }
+            
+        } // endfor each candidate
+        
+        // collect all good candidates (i.e. filterMap == false)
+        List<PathCandidate> filterCands = new ArrayList<PathCandidate>();
+        for(int idx=0; idx < allCands.size(); idx++) {
+            if (!filterMap[idx]) {
+                filterCands.add(allCands.get(idx));
+            }
+        }
+        
+        // return remaining good candidates
+        return filterCands;
+    }
+    
+
     @Override
     public Path getPath() {
 
@@ -456,6 +538,9 @@ public class PathGeneratorTreeGrowWind3 extends PathGeneratorBase {
                 
                 this.gridPositions.add(allPaths);
                 
+                List<PathCandidate> isocPaths = this.filterIsochrone(allPaths, hrzBinSize);
+                this.isocPositions.add(isocPaths);
+                
             }
             
             // check if there are still paths in the regatta-area
@@ -485,14 +570,41 @@ public class PathGeneratorTreeGrowWind3 extends PathGeneratorBase {
             
             BufferedWriter outputCSV;
             try {
-                outputCSV = new BufferedWriter(new FileWriter(this.gridFile));
-                outputCSV.write("step; lat; lng; time; side\n");
+                outputCSV = new BufferedWriter(new FileWriter(this.gridFile+"-grid.csv"));
+                outputCSV.write("step; lat; lng; time; side; path; vrt\n");
+                outputCSV.write("0; "+startPos.getLatDeg()+"; "+startPos.getLngDeg()+"; "+(startTime.asMillis()/1000)+"; 0; 0; "+(-distStartEndMeters)+"\n");
+                outputCSV.write("0; "+endPos.getLatDeg()+"; "+endPos.getLngDeg()+"; "+(startTime.asMillis()/1000)+"; 0; 0; 0\n");
                 int stepCount = 0;
                 for(List<PathCandidate> isoChrone : this.gridPositions) {
                     stepCount++;
                     for(PathCandidate isoPos : isoChrone) {
                 
-                        outputCSV.write(""+stepCount+"; "+isoPos.pos.getPosition().getLatDeg()+"; "+isoPos.pos.getPosition().getLngDeg()+"; "+(isoPos.pos.getTimePoint().asMillis()/1000)+"; "+isoPos.sid+"\n");
+                        String outStr = ""+stepCount+"; "+isoPos.pos.getPosition().getLatDeg()+"; "+isoPos.pos.getPosition().getLngDeg()+"; "+(isoPos.pos.getTimePoint().asMillis()/1000)+"; "+isoPos.sid;
+                        outStr += "; "+isoPos.path+"; "+isoPos.vrt;
+                        outStr += "\n";
+                        outputCSV.write(outStr);
+                    
+                    }
+                }
+                outputCSV.close();
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+            try {
+                outputCSV = new BufferedWriter(new FileWriter(this.gridFile+"-isoc.csv"));
+                outputCSV.write("step; lat; lng; time; side; path; vrt\n");
+                outputCSV.write("0; "+startPos.getLatDeg()+"; "+startPos.getLngDeg()+"; "+(startTime.asMillis()/1000)+"; 0; 0; "+(-distStartEndMeters)+"\n");
+                outputCSV.write("0; "+endPos.getLatDeg()+"; "+endPos.getLngDeg()+"; "+(startTime.asMillis()/1000)+"; 0; 0; 0\n");
+                int stepCount = 0;
+                for(List<PathCandidate> isoChrone : this.isocPositions) {
+                    stepCount++;
+                    for(PathCandidate isoPos : isoChrone) {
+                
+                        String outStr = ""+stepCount+"; "+isoPos.pos.getPosition().getLatDeg()+"; "+isoPos.pos.getPosition().getLngDeg()+"; "+(isoPos.pos.getTimePoint().asMillis()/1000)+"; "+isoPos.sid;
+                        outStr += "; "+isoPos.path+"; "+isoPos.vrt;
+                        outStr += "\n";
+                        outputCSV.write(outStr);
                     
                     }
                 }
