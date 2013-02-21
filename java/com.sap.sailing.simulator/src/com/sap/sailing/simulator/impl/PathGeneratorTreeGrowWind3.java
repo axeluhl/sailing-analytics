@@ -196,10 +196,11 @@ public class PathGeneratorTreeGrowWind3 extends PathGeneratorBase {
         // calculate horizontal side: left or right in reference to race course
         double posSide = 1;
         //double posBear = posWind.getBearing().getDegrees() - posEnd.getBearingGreatCircle(pathPos.getPosition()).getDegrees();
-        double posBear = posStart.getBearingGreatCircle(pathPos.getPosition()).getDegrees();
-        if ((posBear < 0.0)||(posBear > 180.0)) {
+        Bearing posBear = posStart.getBearingGreatCircle(pathPos.getPosition());
+        double posBearDiff = bearVrt.getDifferenceTo(posBear).getDegrees();
+        if ((posBearDiff < 0.0)||(posBearDiff > 180.0)) {
             posSide = -1;
-        } else if ((posBear == 0.0)||(posBear == 180.0)) {
+        } else if ((posBearDiff == 0.0)||(posBearDiff == 180.0)) {
             posSide = 0;
         }
         // calculate horizontal distance as distance of height-position to current position
