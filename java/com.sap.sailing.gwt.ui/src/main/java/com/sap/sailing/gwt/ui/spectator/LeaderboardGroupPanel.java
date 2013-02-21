@@ -309,11 +309,9 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
                 b.append(TEXTTEMPLATE.textWithClass(fleet.name, 50, STYLE_TABLE_TEXT));
             } else {
                 String displayName = fleet.name;
-                if ("Default".equals(fleet.name)) {
-                    b.append(TEXTTEMPLATE.textWithClass("", 70, STYLE_TABLE_TEXT));
-                } else {
+                if (! "Default".equals(fleet.name)) {
                     b.append(TEXTTEMPLATE.textWithClass(displayName, 50, STYLE_TABLE_TEXT));
-                }
+                } 
             }
             
             renderRacesToHTml(leaderboard.name, raceColumns, fleet, b);
