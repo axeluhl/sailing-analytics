@@ -173,6 +173,7 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
                 String debugParam = Window.Location.getParameter("gwt.codesvr");
                 String link = URLEncoder.encode("/gwt/Leaderboard.html?name=" + object.name
                         + (showRaceDetails ? "&showRaceDetails=true" : "")
+                        + (object.displayName != null ? "&displayName="+object.displayName : "")
                         + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""));
                 return ANCHORTEMPLATE.cell(link, object.name);
             }
