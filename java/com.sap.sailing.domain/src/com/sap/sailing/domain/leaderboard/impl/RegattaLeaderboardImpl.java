@@ -51,13 +51,7 @@ public class RegattaLeaderboardImpl extends AbstractLeaderboardImpl implements R
 
     @Override
     public String getName() {
-        String result;
-        if (getDisplayName() != null) {
-            result = getDisplayName();
-        } else {
-            result = getRegatta().getName();
-        }
-        return result;
+        return getRegatta().getName();
     }
 
     @Override
