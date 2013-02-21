@@ -44,8 +44,6 @@ import com.sap.sailing.gwt.ui.shared.RegattaScoreCorrectionDTO.ScoreCorrectionEn
 public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<BulkScoreCorrectionDTO> {
     private static final RegExp p = RegExp.compile("^([A-Z][A-Z][A-Z])\\s*[^0-9]*([0-9]*)$");
     
-    private static final double MEDAL_RACE_FACTOR = 2;
-
     private final LeaderboardDTO leaderboard;
     private final Map<CompetitorDTO, String> defaultOfficialSailIDsForCompetitors;
     private final Set<String> allOfficialSailIDs;
@@ -257,7 +255,7 @@ public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<BulkSco
                                 officialCorrectionEntry.getMaxPointsReason());
                         if (officialCorrectionEntry.getScore() != null) {
                             double officialTotalPoints = officialCorrectionEntry.getScore().doubleValue();
-                            double officialNetPoints = raceColumn.isMedalRace() ? officialTotalPoints / MEDAL_RACE_FACTOR : officialTotalPoints;
+                            double officialNetPoints = officialTotalPoints / raceColumn.getEffectiveFactor();
                             result.addScoreUpdate(competitor, raceColumn, officialNetPoints);
                         }
                     }
@@ -312,7 +310,7 @@ public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<BulkSco
                         .get(raceNameOrNumber).get(officialSailID);
                     final Double officialTotalPoints = officialCorrectionEntry.isDiscarded() ? new Double(0) : officialCorrectionEntry.getScore();
                     final Double officialNetPoints = officialCorrectionEntry.getScore() == null ? null :
-                        raceColumn.isMedalRace() ? officialCorrectionEntry.getScore() / MEDAL_RACE_FACTOR : officialCorrectionEntry.getScore();
+                        officialCorrectionEntry.getScore() / raceColumn.getEffectiveFactor();
                     SafeHtmlBuilder sb = new SafeHtmlBuilder();
                     boolean entriesDiffer =
                             ((officialNetPoints == null && entry.netPoints != null) || (officialNetPoints != null && entry.netPoints != null && !new Double(entry.netPoints).equals(officialNetPoints))) ||

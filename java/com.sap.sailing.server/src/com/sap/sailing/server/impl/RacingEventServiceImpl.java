@@ -1474,7 +1474,13 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
 
     <T> void replicate(RacingEventServiceOperation<T> operation) {
         for (OperationExecutionListener listener : operationExecutionListeners.keySet()) {
-            listener.executed(operation); // TODO consider exception handling
+            try {
+                listener.executed(operation);
+            } catch (Exception e) {
+                // don't risk the master's operation only because replication to a listener/replica doesn't work
+                logger.severe("Error replicating operation "+operation+" to replication listener "+listener);
+                logger.throwing(RacingEventServiceImpl.class.getName(), "replicate", e);
+            }
         }
     }
 

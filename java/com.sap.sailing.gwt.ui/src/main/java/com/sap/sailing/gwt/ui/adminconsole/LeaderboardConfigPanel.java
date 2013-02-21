@@ -173,6 +173,7 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
                 String debugParam = Window.Location.getParameter("gwt.codesvr");
                 String link = URLEncoder.encode("/gwt/Leaderboard.html?name=" + object.name
                         + (showRaceDetails ? "&showRaceDetails=true" : "")
+                        + (object.displayName != null ? "&displayName="+object.displayName : "")
                         + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""));
                 return ANCHORTEMPLATE.cell(link, object.name);
             }
@@ -256,7 +257,7 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
                     } else {
                         if (leaderboardDTO.isRegattaLeaderboard) {
                             LeaderboardDescriptor descriptor = new LeaderboardDescriptor(leaderboardDTO.name, 
-                                    null, leaderboardDTO.discardThresholds, leaderboardDTO.regattaName);
+                                    leaderboardDTO.displayName, null, leaderboardDTO.discardThresholds, leaderboardDTO.regattaName);
                             AbstractLeaderboardDialog dialog = new RegattaLeaderboardEditDialog(Collections
                                     .unmodifiableCollection(otherExistingLeaderboard), Collections.unmodifiableCollection(allRegattas),
                                     descriptor, stringMessages, errorReporter,
@@ -272,7 +273,7 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
                                     });
                             dialog.show();
                         } else {
-                            LeaderboardDescriptor descriptor = new LeaderboardDescriptor(leaderboardDTO.name, leaderboardDTO.scoringScheme, leaderboardDTO.discardThresholds);
+                            LeaderboardDescriptor descriptor = new LeaderboardDescriptor(leaderboardDTO.name, leaderboardDTO.displayName, leaderboardDTO.scoringScheme, leaderboardDTO.discardThresholds);
                             FlexibleLeaderboardEditDialog dialog = new FlexibleLeaderboardEditDialog(Collections
                                     .unmodifiableCollection(otherExistingLeaderboard),
                                     descriptor, stringMessages, errorReporter,
@@ -954,9 +955,9 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
         leaderboardSelectionChanged();
     }
     
-    private void updateLeaderboard(final String oldLeaderboardName, final LeaderboardDescriptor leaderboardToUdate) {
-        sailingService.updateLeaderboard(oldLeaderboardName, leaderboardToUdate.getName(), leaderboardToUdate.getDisplayName(),
-                leaderboardToUdate.getDiscardThresholds(), new AsyncCallback<Void>() {
+    private void updateLeaderboard(final String oldLeaderboardName, final LeaderboardDescriptor leaderboardToUpdate) {
+        sailingService.updateLeaderboard(oldLeaderboardName, leaderboardToUpdate.getName(), leaderboardToUpdate.getDisplayName(),
+                leaderboardToUpdate.getDiscardThresholds(), new AsyncCallback<Void>() {
                     @Override
                     public void onFailure(Throwable t) {
                         errorReporter.reportError("Error trying to update leaderboard " + oldLeaderboardName + ": "
@@ -968,9 +969,9 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
                         for (int i = 0; i < leaderboardList.getList().size(); i++) {
                             StrippedLeaderboardDTO dao = leaderboardList.getList().get(i);
                             if (dao.name.equals(oldLeaderboardName)) {
-                                dao.name = leaderboardToUdate.getName();
-                                dao.displayName = leaderboardToUdate.getDisplayName();
-                                dao.discardThresholds = leaderboardToUdate.getDiscardThresholds();
+                                dao.name = leaderboardToUpdate.getName();
+                                dao.displayName = leaderboardToUpdate.getDisplayName();
+                                dao.discardThresholds = leaderboardToUpdate.getDiscardThresholds();
                                 break;
                             }
                         }
