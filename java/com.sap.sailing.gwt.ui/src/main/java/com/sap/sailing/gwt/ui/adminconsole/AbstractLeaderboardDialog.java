@@ -42,7 +42,7 @@ public abstract class AbstractLeaderboardDialog extends DataEntryDialog<Leaderbo
     protected LeaderboardDescriptor getResult() {
         int[] discardThresholdsBoxContents = getDiscardThresholds(discardThresholdBoxes);
         leaderboard.setName(nameTextBox.getValue());
-        leaderboard.setDisplayName(displayNameTextBox.getValue());
+        leaderboard.setDisplayName(displayNameTextBox.getValue().trim().isEmpty() ? null : displayNameTextBox.getValue());
         leaderboard.setDiscardThresholds(discardThresholdsBoxContents);
         CourseAreaDTO courseArea = getSelectedCourseArea();
         if (courseArea == null) {

@@ -1,4 +1,5 @@
 /target
+build.log
 .metadata
 *.class
 *.swp

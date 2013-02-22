@@ -524,8 +524,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     
                     // Note: the RaceColumnDTO won't be created by the following addRace call because it has been created
                     // above by the result.createEmptyRaceColumn call
-                    result.addRace(raceColumn.getName(), raceColumn.getExplicitFactor(), fleetDTO,
-                            raceColumn.isMedalRace(), raceIdentifier, race);
+                    result.addRace(raceColumn.getName(), raceColumn.getExplicitFactor(), raceColumn.getFactor(),
+                            fleetDTO, raceColumn.isMedalRace(), raceIdentifier, race);
                     if (latestTimePointAfterQueryTimePointWhenATrackedRaceWasLive != null) {
                         raceColumnDTO.setWhenLastTrackedRaceWasLive(fleetDTO, latestTimePointAfterQueryTimePointWhenATrackedRaceWasLive.asDate());
                     }
@@ -2120,8 +2120,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     }
                 }    
                 final FleetDTO fleetDTO = convertToFleetDTO(fleet);
-                RaceColumnDTO raceColumnDTO = leaderboardDTO.addRace(raceColumn.getName(), raceColumn.getExplicitFactor(), fleetDTO,
-                        raceColumn.isMedalRace(), raceIdentifier, raceDTO);
+                RaceColumnDTO raceColumnDTO = leaderboardDTO.addRace(raceColumn.getName(), raceColumn.getExplicitFactor(), raceColumn.getFactor(),
+                        fleetDTO, raceColumn.isMedalRace(), raceIdentifier, raceDTO);
                 if (latestTimePointAfterQueryTimePointWhenATrackedRaceWasLive != null) {
                     raceColumnDTO.setWhenLastTrackedRaceWasLive(fleetDTO, latestTimePointAfterQueryTimePointWhenATrackedRaceWasLive.asDate());
                 }

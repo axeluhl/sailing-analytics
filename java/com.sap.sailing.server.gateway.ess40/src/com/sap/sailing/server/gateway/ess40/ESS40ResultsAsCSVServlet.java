@@ -82,6 +82,7 @@ public class ESS40ResultsAsCSVServlet extends AbstractCSVHttpServlet {
                         csvLine.add(competitor.getName());
                         csv.add(csvLine);
 
+                        // TODO: we should only export complete races where all competitors have valid totalPoints for a race
                         for (RaceColumn raceColumn : raceColumns) {
                             List<Competitor> rankedCompetitorsForColumn = rankedCompetitorsPerColumn.get(raceColumn);
                             if (rankedCompetitorsForColumn == null) {
@@ -89,34 +90,18 @@ public class ESS40ResultsAsCSVServlet extends AbstractCSVHttpServlet {
                                         timePoint);
                                 rankedCompetitorsPerColumn.put(raceColumn, rankedCompetitorsForColumn);
                             }
-                            Double netRacePoints = leaderboard.getNetPoints(competitor, raceColumn, timePoint);
+                            // Double netRacePoints = leaderboard.getNetPoints(competitor, raceColumn, timePoint);
                             Double totalRacePoints = leaderboard.getTotalPoints(competitor, raceColumn, timePoint);
-                            MaxPointsReason maxPointsReason = leaderboard.getMaxPointsReason(competitor, raceColumn,
-                                    timePoint);
-                            // int rank = rankedCompetitorsForColumn.indexOf(competitor)+1;
-                            // TrackedRace trackedRace = raceColumn.getTrackedRace(competitor);
-                            // if (trackedRace != null) {
-                            // int raceRank = trackedRace.getRank(competitor, timePoint);
-                            // }
-                            // boolean isCorrected = leaderboard.getScoreCorrection().isScoreCorrected(competitor,
-                            // raceColumn);
-                            boolean isDiscarded = leaderboard.isDiscarded(competitor, raceColumn, timePoint);
+                            MaxPointsReason maxPointsReason = leaderboard.getMaxPointsReason(competitor, raceColumn, timePoint);
+                            int rank = rankedCompetitorsForColumn.indexOf(competitor)+1;
+                            if(totalRacePoints != null) {
+                                if (maxPointsReason == null || maxPointsReason == MaxPointsReason.NONE) {
+                                    csvLine.add(rank);
+                                    csvLine.add(totalRacePoints);
 
-                            if (maxPointsReason == null || maxPointsReason == MaxPointsReason.NONE) {
-                                if (!isDiscarded) {
-                                    if (totalRacePoints != null) {
-                                        csvLine.add(totalRacePoints);
-                                    }
-                                } else {
-                                    if (netRacePoints != null) {
-                                        csvLine.add(netRacePoints);
-                                    }
-                                }
-                            } else {
-                                if (!isDiscarded) {
-                                    csvLine.add(maxPointsReason.name());
                                 } else {
                                     csvLine.add(maxPointsReason.name());
+                                    csvLine.add(totalRacePoints);
                                 }
                             }
                         }

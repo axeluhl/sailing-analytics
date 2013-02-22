@@ -80,10 +80,12 @@ public class LeaderboardUrlConfigurationDialog extends SettingsDialog<Leaderboar
         private CheckBox autoRefreshCheckbox;
         private Anchor resultingUrl;
         private final String leaderboardName;
+        private final String leaderboardDisplayName;
         
         public LeaderboardUrlConfigurationDialogComponent(AbstractLeaderboardDTO leaderboard, StringMessages stringMessages) {
             this.stringMessages = stringMessages;
             this.leaderboardName = leaderboard.name;
+            this.leaderboardDisplayName = leaderboard.displayName;
             List<RaceColumnDTO> raceList = leaderboard.getRaceList();
             List<String> namesOfRaceColumnsToShow = new ArrayList<String>();
             for (RaceColumnDTO raceColumn : raceList) {
@@ -101,8 +103,8 @@ public class LeaderboardUrlConfigurationDialog extends SettingsDialog<Leaderboar
                 /* delayBetweenAutoAdvancesInMilliseconds */ 3000l, /* delayInMilliseconds */ 3000l, stringMessages);
         }
 
-        private void updateURL(LeaderboardUrlSettings settings, String leaderboardName) {
-            resultingUrl.setHref(LeaderboardEntryPoint.getUrl(leaderboardName, settings));
+        private void updateURL(LeaderboardUrlSettings settings, String leaderboardName, String leaderboardDisplayName) {
+            resultingUrl.setHref(LeaderboardEntryPoint.getUrl(leaderboardName, leaderboardDisplayName, settings));
         }
 
         /**
@@ -123,7 +125,7 @@ public class LeaderboardUrlConfigurationDialog extends SettingsDialog<Leaderboar
                 public String getErrorMessage(LeaderboardUrlSettings settings) {
                     String errorMessage = superValidator.getErrorMessage(settings.getLeaderboardSettings());
                     if (errorMessage == null) {
-                        updateURL(settings, leaderboardName);
+                        updateURL(settings, leaderboardName, leaderboardDisplayName);
                     }
                     return errorMessage;
                 }

@@ -211,6 +211,7 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
                 String debugParam = Window.Location.getParameter("gwt.codesvr");
                 String link = URLEncoder.encode("/gwt/Leaderboard.html?name=" + leaderboard.name
                         + (showRaceDetails ? "&showRaceDetails=true" : "")
+                        + (leaderboard.displayName != null ? "&displayName="+leaderboard.displayName : "")
                         + (isEmbedded ? "&embedded=true" : "")
                         + "&leaderboardGroupName=" + leaderboardGroup.name + "&root=" + root
                         + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""));
@@ -308,11 +309,9 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
                 b.append(TEXTTEMPLATE.textWithClass(fleet.name, 50, STYLE_TABLE_TEXT));
             } else {
                 String displayName = fleet.name;
-                if ("Default".equals(fleet.name)) {
-                    b.append(TEXTTEMPLATE.textWithClass("", 70, STYLE_TABLE_TEXT));
-                } else {
+                if (! "Default".equals(fleet.name)) {
                     b.append(TEXTTEMPLATE.textWithClass(displayName, 50, STYLE_TABLE_TEXT));
-                }
+                } 
             }
             
             renderRacesToHTml(leaderboard.name, raceColumns, fleet, b);

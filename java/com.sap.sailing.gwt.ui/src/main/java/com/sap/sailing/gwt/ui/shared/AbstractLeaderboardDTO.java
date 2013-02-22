@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.impl.Util.Pair;
@@ -148,13 +149,17 @@ public abstract class AbstractLeaderboardDTO implements IsSerializable {
      * @param explicitFactor
      *            factor by which to multiply the race column's points for the overall score; if <code>null</code>, the
      *            default will be determined by whether or not the column is marked as medal race
+     * @param effectiveFactor
+     *            is what you get when you call {@link RaceColumn#getFactor()} on the race column that the resulting
+     *            {@link RaceColumnDTO} represents
      * @param fleetDTO
      *            must not be null
      */
-    public RaceColumnDTO addRace(String raceColumnName, Double explicitFactor, FleetDTO fleetDTO,
-            boolean medalRace, RegattaAndRaceIdentifier trackedRaceIdentifier, RaceDTO race) {
+    public RaceColumnDTO addRace(String raceColumnName, Double explicitFactor, double effectiveFactor,
+            FleetDTO fleetDTO, boolean medalRace, RegattaAndRaceIdentifier trackedRaceIdentifier, RaceDTO race) {
         assert fleetDTO != null;
         RaceColumnDTO raceColumnDTO = getOrCreateRaceColumn(raceColumnName);
+        raceColumnDTO.setEffectiveFactor(effectiveFactor);
         raceColumnDTO.setExplicitFactor(explicitFactor);
         boolean contains = false;
         for (FleetDTO fleet : raceColumnDTO.getFleets()) {
