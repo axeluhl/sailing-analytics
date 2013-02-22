@@ -41,7 +41,7 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
     private final List<FlexibleRaceColumn> races;
     private final ScoringScheme scoringScheme;
     private String name;
-    private final RaceLogStore raceLogStore;
+    private transient final RaceLogStore raceLogStore;
     
     public FlexibleLeaderboardImpl(String name, SettableScoreCorrection scoreCorrection,
             ThresholdBasedResultDiscardingRule resultDiscardingRule, ScoringScheme scoringScheme, CourseArea courseArea) {
