@@ -261,7 +261,7 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
                                     leaderboardDTO.displayName, null, leaderboardDTO.discardThresholds, leaderboardDTO.regattaName, leaderboardDTO.courseAreaId);
                             AbstractLeaderboardDialog dialog = new RegattaLeaderboardEditDialog(Collections
                                     .unmodifiableCollection(otherExistingLeaderboard), Collections.unmodifiableCollection(allRegattas),
-                                    descriptor, stringMessages, errorReporter,
+                                    descriptor, stringMessages, Collections.<EventDTO>emptySet(), errorReporter,
                                     new DialogCallback<LeaderboardDescriptor>() {
                                         @Override
                                         public void cancel() {
@@ -277,7 +277,7 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
                             LeaderboardDescriptor descriptor = new LeaderboardDescriptor(leaderboardDTO.name, leaderboardDTO.displayName, leaderboardDTO.scoringScheme, leaderboardDTO.discardThresholds, leaderboardDTO.courseAreaId);
                             FlexibleLeaderboardEditDialog dialog = new FlexibleLeaderboardEditDialog(Collections
                                     .unmodifiableCollection(otherExistingLeaderboard),
-                                    descriptor, stringMessages, errorReporter,
+                                    descriptor, stringMessages, Collections.<EventDTO>emptySet(), errorReporter,
                                     new DialogCallback<LeaderboardDescriptor>() {
                                         @Override
                                         public void cancel() {
@@ -519,7 +519,7 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
     
     protected void openUpdateRegattaLeaderboardDialog(StrippedLeaderboardDTO leaderboardDTO, List<StrippedLeaderboardDTO> otherExistingLeaderboard, 
     		final String oldLeaderboardName, List<EventDTO> existingEvents) {
-    	LeaderboardDescriptor descriptor = new LeaderboardDescriptor(leaderboardDTO.name, 
+    	LeaderboardDescriptor descriptor = new LeaderboardDescriptor(leaderboardDTO.name, leaderboardDTO.displayName,
                 null, leaderboardDTO.discardThresholds, leaderboardDTO.regattaName, leaderboardDTO.courseAreaId);
         AbstractLeaderboardDialog dialog = new RegattaLeaderboardEditDialog(Collections
                 .unmodifiableCollection(otherExistingLeaderboard), Collections.unmodifiableCollection(allRegattas),
