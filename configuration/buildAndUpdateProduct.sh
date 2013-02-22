@@ -2,7 +2,10 @@
 
 # this holds for default installation
 USER_HOME=~
-PROJECT_HOME=$USER_HOME/git
+echo PROJECT_HOME is $PROJECT_HOME
+if [ "$PROJECT_HOME" = "" ]; then
+  PROJECT_HOME=$USER_HOME/git
+fi
 SERVERS_HOME=$USER_HOME/servers
 
 # x86 or x86_64 should work for most cases
