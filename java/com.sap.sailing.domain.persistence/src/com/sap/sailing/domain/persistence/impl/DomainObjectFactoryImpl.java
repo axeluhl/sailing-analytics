@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -302,10 +303,12 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     	if (courseAreaId == null)
     		return null;
     	
+    	UUID courseAreaUuid = UUID.fromString(courseAreaId.toString());
+    	
     	Iterable<Event> allEvents = loadAllEvents();
     	for (Event event : allEvents) {
     		for (CourseArea courseArea : event.getVenue().getCourseAreas()) {
-    			if (courseArea.getId().equals(courseAreaId)) {
+    			if (courseArea.getId().equals(courseAreaUuid)) {
     				return courseArea;
     			}
     		}

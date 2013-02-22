@@ -19,4 +19,16 @@ public class CourseAreaImpl extends NamedImpl implements CourseArea {
 	public Serializable getId() {
 		return id;
 	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if (obj instanceof CourseArea) {
+			CourseArea courseArea = (CourseArea) obj;
+			if (this.id.equals(courseArea.getId())) {
+				return true;
+			}
+			return false;
+		}
+		return super.equals(obj);
+	}
 }
