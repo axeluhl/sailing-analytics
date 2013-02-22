@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.base.impl;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -35,7 +37,7 @@ public class SeriesImpl extends NamedImpl implements Series, RaceColumnListener 
     private boolean isMedal;
     private Regatta regatta;
     private final RaceColumnListeners raceColumnListeners;
-    private transient final RaceLogStore raceLogStore;
+    private transient RaceLogStore raceLogStore;
     
     /**
      * @param fleets
@@ -72,6 +74,16 @@ public class SeriesImpl extends NamedImpl implements Series, RaceColumnListener 
     public SeriesImpl(String name, boolean isMedal, Iterable<? extends Fleet> fleets, Iterable<String> raceColumnNames,
             TrackedRegattaRegistry trackedRegattaRegistry) {
         this(EmptyRaceLogStore.INSTANCE, name, isMedal, fleets, raceColumnNames, trackedRegattaRegistry);
+    }
+    
+    /**
+     * Deserialization has to be maintained in lock-step with {@link #writeObject(ObjectOutputStream) serialization}.
+     * When de-serializing, a possibly remote {@link #raceLogStore} is ignored because it is transient. Instead, an
+     * {@link EmptyRaceLogStore} is used for the de-serialized instance.
+     */
+    private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
+        ois.defaultReadObject();
+        raceLogStore = EmptyRaceLogStore.INSTANCE;
     }
 
     @Override
@@ -141,7 +153,7 @@ public class SeriesImpl extends NamedImpl implements Series, RaceColumnListener 
         return new RaceColumnInSeriesImpl(
                 new RaceLogInformationImpl(
                         raceLogStore,
-                        new RaceLogOnRegattaIdentifier(regatta)),
+                        new RaceLogOnRegattaIdentifier(regatta, raceColumnName)),
                 raceColumnName, 
                 this, 
                 trackedRegattaRegistry);

@@ -22,7 +22,7 @@ public class RaceColumnImpl extends AbstractRaceColumn implements FlexibleRaceCo
     private boolean medalRace;
     
     public RaceColumnImpl(RaceLogInformation raceLogInformation, String name, boolean medalRace, Iterable<Fleet> fleets) {
-        super(raceLogInformation);
+    	super(raceLogInformation.getStore().getRaceLogs(raceLogInformation.getIdentifierTemplate(), fleets));
         this.name = name;
         this.medalRace = medalRace;
         List<Fleet> myFleets = new ArrayList<Fleet>();

@@ -1,11 +1,13 @@
 package com.sap.sailing.domain.leaderboard.impl;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.logging.Logger;
-
 
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Fleet;
@@ -41,7 +43,7 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
     private final List<FlexibleRaceColumn> races;
     private final ScoringScheme scoringScheme;
     private String name;
-    private transient final RaceLogStore raceLogStore;
+    private transient RaceLogStore raceLogStore;
     
     public FlexibleLeaderboardImpl(String name, SettableScoreCorrection scoreCorrection,
             ThresholdBasedResultDiscardingRule resultDiscardingRule, ScoringScheme scoringScheme, CourseArea courseArea) {
@@ -58,6 +60,16 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
         this.name = name;
         this.races = new ArrayList<FlexibleRaceColumn>();
         this.raceLogStore = raceLogStore;
+    }
+    
+    /**
+     * Deserialization has to be maintained in lock-step with {@link #writeObject(ObjectOutputStream) serialization}.
+     * When de-serializing, a possibly remote {@link #raceLogStore} is ignored because it is transient. Instead, an
+     * {@link EmptyRaceLogStore} is used for the de-serialized instance.
+     */
+    private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
+        ois.defaultReadObject();
+        raceLogStore = EmptyRaceLogStore.INSTANCE;
     }
     
     @Override
@@ -133,9 +145,9 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
 
     protected RaceColumnImpl createRaceColumn(String column, boolean medalRace, Fleet... fleets) {
         return new RaceColumnImpl(
-                new RaceLogInformationImpl(
-                        raceLogStore, 
-                        new RaceLogOnLeaderboardIdentifier(this)),
+        		new RaceLogInformationImpl(
+                        raceLogStore,
+                        new RaceLogOnLeaderboardIdentifier(this, column)),
                 column, 
                 medalRace, 
                 turnNullOrEmptyFleetsIntoDefaultFleet(fleets));

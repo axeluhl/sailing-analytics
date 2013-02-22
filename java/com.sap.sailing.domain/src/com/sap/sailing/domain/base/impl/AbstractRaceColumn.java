@@ -9,7 +9,6 @@ import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.racelog.RaceLog;
-import com.sap.sailing.domain.racelog.RaceLogInformation;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
 public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implements RaceColumn {
@@ -17,18 +16,17 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
     
     private final Map<Fleet, TrackedRace> trackedRaces;
     private final Map<Fleet, RaceIdentifier> raceIdentifiers;
-    private final RaceLogInformation raceLogInformation;
+    private final Map<Fleet, RaceLog> raceLogs;
     
-    public AbstractRaceColumn(RaceLogInformation raceLogInfo) {
+    public AbstractRaceColumn(Map<Fleet, RaceLog> raceLogs) {
         this.trackedRaces = new HashMap<Fleet, TrackedRace>();
         this.raceIdentifiers = new HashMap<Fleet, RaceIdentifier>();
-        this.raceLogInformation = raceLogInfo;
+        this.raceLogs = raceLogs;
     }
     
     @Override
     public RaceLog getRaceLog(Fleet fleet) {
-        return raceLogInformation.getStore().getRaceLog(
-                raceLogInformation.getIdentifierTemplate().compile(this, fleet));
+    	return raceLogs.get(fleet);
     }
     
     @Override

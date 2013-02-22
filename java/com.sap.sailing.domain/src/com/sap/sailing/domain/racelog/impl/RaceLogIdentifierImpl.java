@@ -3,7 +3,6 @@ package com.sap.sailing.domain.racelog.impl;
 import java.io.Serializable;
 
 import com.sap.sailing.domain.base.Fleet;
-import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.racelog.RaceLogIdentifierTemplate;
 
@@ -14,9 +13,9 @@ public class RaceLogIdentifierImpl implements RaceLogIdentifier {
     
     private final RaceLogIdentifierTemplate template;
     
-    public RaceLogIdentifierImpl(RaceLogIdentifierTemplate template, RaceColumn raceColumn, Fleet fleet) {
+    public RaceLogIdentifierImpl(RaceLogIdentifierTemplate template, String raceColumnName, Fleet fleet) {
         this.template = template;
-        this.raceColumnName = raceColumn.getName();
+        this.raceColumnName = raceColumnName;
         this.fleetName = fleet.getName();
     }
 

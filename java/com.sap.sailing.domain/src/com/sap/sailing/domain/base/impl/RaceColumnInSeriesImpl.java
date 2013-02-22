@@ -37,7 +37,7 @@ public class RaceColumnInSeriesImpl extends AbstractRaceColumn implements RaceCo
      *            carried out.
      */
     public RaceColumnInSeriesImpl(RaceLogInformation raceLogInformation, String name, Series series, TrackedRegattaRegistry trackedRegattaRegistry) {
-    	super(raceLogInformation);
+    	super(raceLogInformation.getStore().getRaceLogs(raceLogInformation.getIdentifierTemplate(), series.getFleets()));
         this.name = name;
         this.series = series;
         this.trackedRegattaRegistry = trackedRegattaRegistry;

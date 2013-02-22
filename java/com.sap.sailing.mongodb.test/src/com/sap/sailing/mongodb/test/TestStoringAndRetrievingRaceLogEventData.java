@@ -66,7 +66,7 @@ public class TestStoringAndRetrievingRaceLogEventData extends AbstractMongoDBTes
     }
 	
 	@Test
-    public void storeRaceLogObject() throws UnknownHostException, MongoException, InterruptedException {
+    public void storeRaceLogFlagEvent() throws UnknownHostException, MongoException, InterruptedException {
         TimePoint now = MillisecondsTimePoint.now();
         RaceLogFlagEvent rcEvent = RaceLogEventFactory.INSTANCE.createFlagEvent(now, 0, Flags.AP, Flags.ALPHA, true);
         {
