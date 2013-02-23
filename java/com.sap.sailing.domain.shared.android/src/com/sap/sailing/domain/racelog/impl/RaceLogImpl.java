@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.racelog.impl;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Level;
@@ -20,6 +22,14 @@ public class RaceLogImpl extends TrackImpl<RaceLogEvent> implements RaceLog {
 
     public RaceLogImpl(String nameForReadWriteLock) {
         super(nameForReadWriteLock);
+        listeners = new HashSet<RaceLogEventVisitor>();
+    }
+    
+    /**
+     * When deserializing, needs to initialize empty set of listeners.
+     */
+    private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
+        ois.defaultReadObject();
         listeners = new HashSet<RaceLogEventVisitor>();
     }
 
