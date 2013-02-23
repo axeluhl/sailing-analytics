@@ -1518,14 +1518,18 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
             regattaTrackingCache.clear();
             leaderboardGroupsByName.clear();
             leaderboardsByName.clear();
+            logger.info("receiving regattasByName");
             regattasByName.putAll((Map<String, Regatta>) ois.readObject());
             // it is important that the leaderboards and tracked regattas are cleared before auto-linking to
             // old leaderboards takes place which then don't match the new ones
             for (DynamicTrackedRegatta trackedRegattaToObserve : (Set<DynamicTrackedRegatta>) ois.readObject()) {
                 ensureRegattaIsObservedForDefaultLeaderboardAndAutoLeaderboardLinking(trackedRegattaToObserve);
             }
+            logger.info("receiving regattaTrackingCache");
             regattaTrackingCache.putAll((Map<Regatta, DynamicTrackedRegatta>) ois.readObject());
+            logger.info("receiving leaderboardGroupsByName");
             leaderboardGroupsByName.putAll((Map<String, LeaderboardGroup>) ois.readObject());
+            logger.info("receiving leaderboardsByName");
             leaderboardsByName.putAll((Map<String, Leaderboard>) ois.readObject());
             // now fix ScoreCorrectionListener setup for LeaderboardGroupMetaLeaderboard instances:
             for (Leaderboard leaderboard : leaderboardsByName.values()) {
