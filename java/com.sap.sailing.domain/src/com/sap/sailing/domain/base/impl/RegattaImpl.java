@@ -132,6 +132,10 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
         return persistent;
     }
     
+    /**
+     * When de-serializing, a possibly remote {@link #raceLogStore} is ignored because it is transient. Instead, an
+     * {@link EmptyRaceLogStore} is used for the de-serialized instance.
+     */
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
         ois.defaultReadObject();
         raceLogStore = EmptyRaceLogStore.INSTANCE;

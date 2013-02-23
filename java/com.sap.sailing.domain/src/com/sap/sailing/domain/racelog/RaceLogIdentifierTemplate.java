@@ -1,8 +1,10 @@
 package com.sap.sailing.domain.racelog;
 
+import java.io.Serializable;
+
 import com.sap.sailing.domain.base.Fleet;
 
-public interface RaceLogIdentifierTemplate {
+public interface RaceLogIdentifierTemplate extends Serializable {
     
     String getHostName();
     
