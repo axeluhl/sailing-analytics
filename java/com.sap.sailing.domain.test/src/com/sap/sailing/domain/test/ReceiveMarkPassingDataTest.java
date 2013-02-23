@@ -10,6 +10,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 
@@ -31,6 +32,7 @@ import com.tractrac.clientmodule.RaceCompetitor;
 import com.tractrac.clientmodule.data.ICallbackData;
 import com.tractrac.clientmodule.data.MarkPassingsData;
 
+@Ignore
 public class ReceiveMarkPassingDataTest extends AbstractTracTracLiveTest {
     final private Object semaphor = new Object();
     final private MarkPassingsData[] firstData = new MarkPassingsData[1];

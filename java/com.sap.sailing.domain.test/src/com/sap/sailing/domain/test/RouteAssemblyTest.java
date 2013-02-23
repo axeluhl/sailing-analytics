@@ -7,6 +7,7 @@ import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.util.Collections;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.maptrack.client.io.TypeController;
@@ -18,6 +19,7 @@ import com.tractrac.clientmodule.Route;
 import com.tractrac.clientmodule.data.ICallbackData;
 import com.tractrac.clientmodule.data.RouteData;
 
+@Ignore
 public class RouteAssemblyTest extends AbstractTracTracLiveTest {
 
     public RouteAssemblyTest() throws URISyntaxException,

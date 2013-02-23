@@ -14,6 +14,7 @@ import java.util.NavigableSet;
 import java.util.TimeZone;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.Mark;
@@ -36,6 +37,7 @@ import com.sap.sailing.domain.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
 
+@Ignore
 public class ManeuverDetectionOnMdM2011SemifinalTest extends OnlineTracTracBasedTest {
 
     public ManeuverDetectionOnMdM2011SemifinalTest() throws MalformedURLException, URISyntaxException {

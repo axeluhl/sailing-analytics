@@ -12,6 +12,7 @@ import java.util.concurrent.Executors;
 import java.util.logging.Logger;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.Competitor;
@@ -28,6 +29,7 @@ import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
 
+@Ignore
 public class ConcurrencyTest extends OnlineTracTracBasedTest {
     private static final Logger logger = Logger.getLogger(ConcurrencyTest.class.getName());
     

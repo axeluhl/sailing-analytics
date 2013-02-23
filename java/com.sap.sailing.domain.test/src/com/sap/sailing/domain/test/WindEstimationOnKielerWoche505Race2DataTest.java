@@ -10,6 +10,7 @@ import java.net.URISyntaxException;
 import java.util.GregorianCalendar;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.Competitor;
@@ -30,6 +31,7 @@ import com.sap.sailing.domain.tracking.impl.TrackBasedEstimationWindTrackImpl;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
 
+@Ignore
 public class WindEstimationOnKielerWoche505Race2DataTest extends OnlineTracTracBasedTest {
 
     public WindEstimationOnKielerWoche505Race2DataTest() throws MalformedURLException, URISyntaxException {
