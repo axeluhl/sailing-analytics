@@ -7,7 +7,8 @@ import com.sap.sailing.domain.racelog.RaceLogIdentifierTemplate;
 import com.sap.sailing.domain.racelog.RaceLogIdentifierTemplateResolver;
 
 public class RaceLogOnLeaderboardIdentifier implements RaceLogIdentifierTemplate {
-
+    private static final long serialVersionUID = -3117585697963420247L;
+    
     private final String leaderboardName;
     private final String raceColumnName;
     

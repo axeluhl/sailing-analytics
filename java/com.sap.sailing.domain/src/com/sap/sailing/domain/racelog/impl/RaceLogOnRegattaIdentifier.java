@@ -7,7 +7,8 @@ import com.sap.sailing.domain.racelog.RaceLogIdentifierTemplate;
 import com.sap.sailing.domain.racelog.RaceLogIdentifierTemplateResolver;
 
 public class RaceLogOnRegattaIdentifier implements RaceLogIdentifierTemplate {
-
+    private static final long serialVersionUID = 516941514546654375L;
+    
     private final String regattaName;
     private final String raceColumnName;
     
