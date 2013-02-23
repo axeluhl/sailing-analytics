@@ -147,10 +147,9 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
 
     protected RaceColumnImpl createRaceColumn(String column, boolean medalRace, Fleet... fleets) {
         return new RaceColumnImpl(
-//        		new RaceLogInformationImpl(
-//                        raceLogStore,
-//                        new RaceLogOnLeaderboardIdentifier(this, column)),
-                null,
+        		new RaceLogInformationImpl(
+                        raceLogStore,
+                        new RaceLogOnLeaderboardIdentifier(this, column)),
                 column, 
                 medalRace, 
                 turnNullOrEmptyFleetsIntoDefaultFleet(fleets));
