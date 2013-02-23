@@ -641,7 +641,10 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     @Override
     public Regatta createRegatta(String baseEventName, String boatClassName,
             Serializable id, Iterable<? extends Series> series, boolean persistent, ScoringScheme scoringScheme) {
-        Regatta regatta = new RegattaImpl(baseEventName,
+        RaceLogStore raceLogStore = MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(
+                mongoObjectFactory, 
+                domainObjectFactory);
+        Regatta regatta = new RegattaImpl(raceLogStore, baseEventName,
                 getBaseDomainFactory().getOrCreateBoatClass(boatClassName), series, persistent, scoringScheme, id);
         logger.info("Created regatta " + regatta.getName() + " (" + hashCode() + ") on "+this);
         cacheAndReplicateSpecificRegattaWithoutRaceColumns(regatta);
@@ -784,7 +787,6 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
             regattasByName.put(regatta.getName(), regatta);
             regatta.addRegattaListener(this);
             replicate(new AddSpecificRegatta(
-                    MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(mongoObjectFactory, domainObjectFactory), 
                     regatta.getBaseName(), regatta.getBoatClass() == null ? null : regatta
                     .getBoatClass().getName(), regatta.getId(), getSeriesWithoutRaceColumnsConstructionParametersAsMap(regatta),
                     regatta.isPersistent(), regatta.getScoringScheme()));

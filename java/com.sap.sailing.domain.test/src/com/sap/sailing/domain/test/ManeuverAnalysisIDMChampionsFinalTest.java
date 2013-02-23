@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.Mark;
@@ -37,6 +38,7 @@ import com.sap.sailing.domain.tracking.impl.TrackedLegImpl;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
 
+@Ignore
 public class ManeuverAnalysisIDMChampionsFinalTest extends AbstractManeuverDetectionTestCase {
 
     public ManeuverAnalysisIDMChampionsFinalTest() throws MalformedURLException, URISyntaxException {

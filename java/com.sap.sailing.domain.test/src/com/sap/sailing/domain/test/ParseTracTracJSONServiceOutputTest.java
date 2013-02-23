@@ -18,6 +18,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
@@ -25,6 +26,7 @@ import com.sap.sailing.domain.tractracadapter.JSONService;
 import com.sap.sailing.domain.tractracadapter.RaceRecord;
 import com.sap.sailing.domain.tractracadapter.TracTracConnectionConstants;
 
+@Ignore
 public class ParseTracTracJSONServiceOutputTest {
     @Test
     public void testWaymouth() throws IOException, ParseException {

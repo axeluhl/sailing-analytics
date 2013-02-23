@@ -805,7 +805,10 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             }
             BasicDBList dbSeries = (BasicDBList) dbRegatta.get(FieldNames.REGATTA_SERIES.name());
             Iterable<Series> series = loadSeries(dbSeries, trackedRegattaRegistry);
-            result = new RegattaImpl(baseName, boatClass, series, /* persistent */ true, loadScoringScheme(dbRegatta), id);
+            RaceLogStore raceLogStore = MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(
+                    new MongoObjectFactoryImpl(database), 
+                    this);
+            result = new RegattaImpl(raceLogStore, baseName, boatClass, series, /* persistent */ true, loadScoringScheme(dbRegatta), id);
         }
         return result;
     }
@@ -839,8 +842,6 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         BasicDBList dbRaceColumns = (BasicDBList) dbSeries.get(FieldNames.SERIES_RACE_COLUMNS.name());
         Iterable<String> raceColumnNames = loadRaceColumnNames(dbRaceColumns, fleetsByName);
         Series series = new SeriesImpl(
-                MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(
-                        new MongoObjectFactoryImpl(database), this),
                 name, 
                 isMedal, 
                 fleetsByName.values(), 

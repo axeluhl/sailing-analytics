@@ -16,6 +16,7 @@ import java.util.UUID;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 
@@ -55,6 +56,7 @@ import difflib.DiffUtils;
 import difflib.Patch;
 import difflib.PatchFailedException;
 
+@Ignore
 public class CourseUpdateTest extends AbstractTracTracLiveTest {
     private RaceDefinition race;
     private Course course;

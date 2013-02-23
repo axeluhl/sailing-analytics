@@ -147,9 +147,6 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
 
     protected RaceColumnImpl createRaceColumn(String column, boolean medalRace, Fleet... fleets) {
         return new RaceColumnImpl(
-        		new RaceLogInformationImpl(
-                        raceLogStore,
-                        new RaceLogOnLeaderboardIdentifier(this, column)),
                 column, 
                 medalRace, 
                 turnNullOrEmptyFleetsIntoDefaultFleet(fleets));
@@ -227,6 +224,15 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
     @Override
     public CourseArea getDefaultCourseArea() {
     	return courseArea;
+    }
+    
+    @Override
+    public void raceColumnAddedToContainer(RaceColumn raceColumn) {
+        raceColumn.setRaceLogInformation(
+                new RaceLogInformationImpl(
+                    raceLogStore,
+                    new RaceLogOnLeaderboardIdentifier(this, raceColumn.getName())));
+        super.raceColumnAddedToContainer(raceColumn);
     }
 
 }

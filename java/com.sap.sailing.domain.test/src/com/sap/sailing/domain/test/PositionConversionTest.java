@@ -7,6 +7,7 @@ import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.util.Collections;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.maptrack.client.io.TypeController;
@@ -17,6 +18,7 @@ import com.tractrac.clientmodule.ControlPoint;
 import com.tractrac.clientmodule.data.ControlPointPositionData;
 import com.tractrac.clientmodule.data.ICallbackData;
 
+@Ignore
 public class PositionConversionTest extends AbstractTracTracLiveTest {
 
     public PositionConversionTest() throws URISyntaxException,

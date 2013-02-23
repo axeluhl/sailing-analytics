@@ -4,11 +4,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.impl.AbstractRaceColumn;
 import com.sap.sailing.domain.leaderboard.FlexibleRaceColumn;
-import com.sap.sailing.domain.racelog.RaceLogInformation;
 
 public class RaceColumnImpl extends AbstractRaceColumn implements FlexibleRaceColumn {
     private static final long serialVersionUID = -7801617988982540470L;
@@ -21,8 +19,8 @@ public class RaceColumnImpl extends AbstractRaceColumn implements FlexibleRaceCo
     private final Iterable<Fleet> fleets;
     private boolean medalRace;
     
-    public RaceColumnImpl(RaceLogInformation raceLogInformation, String name, boolean medalRace, Iterable<Fleet> fleets) {
-    	super(raceLogInformation.getStore().getRaceLogs(raceLogInformation.getIdentifierTemplate(), fleets));
+    public RaceColumnImpl(String name, boolean medalRace, Iterable<Fleet> fleets) {
+    	super();
         this.name = name;
         this.medalRace = medalRace;
         List<Fleet> myFleets = new ArrayList<Fleet>();

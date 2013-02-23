@@ -2464,8 +2464,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                         boatClass.trim(),
                         RegattaImpl.getFullName(replayRaceDTO.rsc, replayRaceDTO.boat_class),
                         Collections.singletonList(new SeriesImpl(
-                            MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(mongoObjectFactory, domainObjectFactory),
-                            "Default", 
+                           "Default", 
                             /* isMedal */false, 
                             Collections.singletonList(new FleetImpl("Default")), 
                             /* race column names */ new ArrayList<String>(), getService())), 
@@ -3028,7 +3027,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             boolean persistent, ScoringSchemeType scoringSchemeType) {
         Regatta regatta = getService().apply(
                 new AddSpecificRegatta(
-                        MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(mongoObjectFactory, domainObjectFactory),
                         regattaName, boatClassName, UUID.randomUUID(),
                         seriesNamesWithFleetNamesAndFleetOrderingAndMedal,
                         persistent, baseDomainFactory.createScoringScheme(scoringSchemeType)));

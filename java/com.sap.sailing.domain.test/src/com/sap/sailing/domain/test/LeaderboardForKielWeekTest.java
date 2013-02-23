@@ -7,6 +7,7 @@ import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.util.GregorianCalendar;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.Competitor;
@@ -26,6 +27,7 @@ import com.sap.sailing.domain.leaderboard.impl.ScoreCorrectionImpl;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
 
+@Ignore
 public class LeaderboardForKielWeekTest extends OnlineTracTracBasedTest {
 
     private FlexibleLeaderboardImpl leaderboard;
