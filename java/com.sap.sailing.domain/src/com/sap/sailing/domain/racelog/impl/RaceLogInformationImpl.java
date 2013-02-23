@@ -1,5 +1,8 @@
 package com.sap.sailing.domain.racelog.impl;
 
+import com.sap.sailing.domain.base.Fleet;
+import com.sap.sailing.domain.base.RaceColumn;
+import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogIdentifierTemplate;
 import com.sap.sailing.domain.racelog.RaceLogInformation;
 import com.sap.sailing.domain.racelog.RaceLogStore;
@@ -23,6 +26,11 @@ public class RaceLogInformationImpl implements RaceLogInformation {
     @Override
     public RaceLogIdentifierTemplate getIdentifierTemplate() {
         return identifierTemplate;
+    }
+
+    @Override
+    public RaceLog getRaceLog(RaceColumn raceColumn, Fleet fleet) {
+        return store.getRaceLog(identifierTemplate.compile(fleet));
     }
 
 }

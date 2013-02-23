@@ -25,6 +25,9 @@ import com.sap.sailing.domain.common.impl.NamedImpl;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.racelog.RaceLogStore;
+import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
+import com.sap.sailing.domain.racelog.impl.RaceLogInformationImpl;
+import com.sap.sailing.domain.racelog.impl.RaceLogOnRegattaIdentifier;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
@@ -40,6 +43,7 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     private final RaceColumnListeners raceColumnListeners;
     private final ScoringScheme scoringScheme;
     private final Serializable id;
+    private transient RaceLogStore raceLogStore;
 
     /**
      * Regattas may be constructed as implicit default regattas in which case they won't need to be stored
@@ -52,6 +56,20 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     private final boolean persistent;
     
     /**
+     * Constructs a regatta with an empty {@link RaceLogStore}.
+     */
+    public RegattaImpl(String baseName, BoatClass boatClass, TrackedRegattaRegistry trackedRegattaRegistry, ScoringScheme scoringScheme, Serializable id) {
+        this(EmptyRaceLogStore.INSTANCE, baseName, boatClass, trackedRegattaRegistry, scoringScheme, id);
+    }
+    
+    /**
+     * Constructs a regatta with an empty {@link RaceLogStore}.
+     */
+    public RegattaImpl(String baseName, BoatClass boatClass, Iterable<? extends Series> series, boolean persistent, ScoringScheme scoringScheme, Serializable id) {
+        this(EmptyRaceLogStore.INSTANCE, baseName, boatClass, series, persistent, scoringScheme, id);
+    }
+    
+    /**
      * Constructs a regatta with a single default series with empty race column list, and a single default fleet which
      * is not {@link #isPersistent() marked for persistence}.
      * @param trackedRegattaRegistry
@@ -62,7 +80,7 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
      *            carried out.
      */
     public RegattaImpl(RaceLogStore raceLogStore, String baseName, BoatClass boatClass, TrackedRegattaRegistry trackedRegattaRegistry, ScoringScheme scoringScheme, Serializable id) {
-        this(baseName, boatClass, Collections.singletonList(new SeriesImpl(raceLogStore, "Default", /* isMedal */false, Collections
+        this(raceLogStore, baseName, boatClass, Collections.singletonList(new SeriesImpl("Default", /* isMedal */false, Collections
                 .singletonList(new FleetImpl("Default")), /* race column names */new ArrayList<String>(),
                 trackedRegattaRegistry)), /* persistent */false, scoringScheme, id);
     }
@@ -72,9 +90,10 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
      *            all {@link Series} in this iterable will have their {@link Series#setRegatta(Regatta) regatta set} to
      *            this new regatta.
      */
-    public RegattaImpl(String baseName, BoatClass boatClass, Iterable<? extends Series> series, boolean persistent, ScoringScheme scoringScheme, Serializable id) {
+    public RegattaImpl(RaceLogStore raceLogStore, String baseName, BoatClass boatClass, Iterable<? extends Series> series, boolean persistent, ScoringScheme scoringScheme, Serializable id) {
         super(getFullName(baseName, boatClass==null?null:boatClass.getName()));
         this.id = id;
+        this.raceLogStore = raceLogStore;
         races = new HashSet<RaceDefinition>();
         regattaListeners = new HashSet<RegattaListener>();
         raceColumnListeners = new RaceColumnListeners();
@@ -115,6 +134,7 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
         ois.defaultReadObject();
+        raceLogStore = EmptyRaceLogStore.INSTANCE;
         regattaListeners = new HashSet<RegattaListener>();
     }
 
@@ -236,6 +256,11 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
 
     @Override
     public void raceColumnAddedToContainer(RaceColumn raceColumn) {
+        raceColumn.setRaceLogInformation(
+                new RaceLogInformationImpl(
+                    raceLogStore,
+                    new RaceLogOnRegattaIdentifier(this, raceColumn.getName())));
+        
         raceColumnListeners.notifyListenersAboutRaceColumnAddedToContainer(raceColumn);
     }
 

@@ -6,7 +6,6 @@ import com.sap.sailing.domain.base.RaceColumnInSeries;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
-import com.sap.sailing.domain.racelog.RaceLogInformation;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
@@ -36,8 +35,8 @@ public class RaceColumnInSeriesImpl extends AbstractRaceColumn implements RaceCo
      *            this column's series {@link Regatta}, respectively. If <code>null</code>, the re-association won't be
      *            carried out.
      */
-    public RaceColumnInSeriesImpl(RaceLogInformation raceLogInformation, String name, Series series, TrackedRegattaRegistry trackedRegattaRegistry) {
-    	super(raceLogInformation.getStore().getRaceLogs(raceLogInformation.getIdentifierTemplate(), series.getFleets()));
+    public RaceColumnInSeriesImpl(String name, Series series, TrackedRegattaRegistry trackedRegattaRegistry) {
+    	super();
         this.name = name;
         this.series = series;
         this.trackedRegattaRegistry = trackedRegattaRegistry;

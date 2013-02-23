@@ -25,7 +25,6 @@ import com.sap.sailing.domain.base.racegroup.impl.RaceRowImpl;
 import com.sap.sailing.domain.base.racegroup.impl.SeriesWithRowsImpl;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
-import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 
 public class RaceGroupFactory {
 
@@ -93,7 +92,7 @@ public class RaceGroupFactory {
 
     private Series createDefaultSeries() {
         Series defaultSeries;
-        defaultSeries = new SeriesImpl(EmptyRaceLogStore.INSTANCE, "Default", false,
+        defaultSeries = new SeriesImpl("Default", false,
                 Collections.<Fleet> singleton(new FleetImpl("Default")), Collections.<String> emptyList(), null);
         return defaultSeries;
     }

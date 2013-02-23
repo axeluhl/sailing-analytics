@@ -4,7 +4,9 @@ import com.sap.sailing.domain.common.Named;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.racelog.RaceLog;
+import com.sap.sailing.domain.racelog.RaceLogInformation;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.util.impl.RaceColumnListeners;
 
@@ -27,8 +29,15 @@ import com.sap.sailing.util.impl.RaceColumnListeners;
  */
 public interface RaceColumn extends Named {
     
+
     /**
-     * Gets the race column's race log of passed fleet.
+     * Sets the information object used to access the race column's race logs.
+     * @param information
+     */
+    void setRaceLogInformation(RaceLogInformation information);
+    
+    /**
+     * Gets the race column's race log associated to the passed fleet.
      * 
      * @param fleet
      * @return the race log.
