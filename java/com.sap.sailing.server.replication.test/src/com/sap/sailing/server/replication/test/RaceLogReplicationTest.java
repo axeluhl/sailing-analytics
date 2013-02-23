@@ -14,8 +14,6 @@ import org.junit.Test;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Regatta;
-import com.sap.sailing.domain.base.Series;
-import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.racelog.RaceLog;
@@ -117,11 +115,12 @@ public class RaceLogReplicationTest extends AbstractServerReplicationTest {
             replicaLog.unlockAfterRead();
         }
         
+        // Now that we add an event to the master...
         masterLog.add(raceLogEvent);
         Thread.sleep(3000);     // give replication some time to deliver messages...
         
         
-        // Now the event should be replicated.
+        // ... we expect it to be replicated on the slave.
         replicaLog.lockForRead();
         try {
             assertFalse(Util.isEmpty(replicaLog.getRawFixes()));
