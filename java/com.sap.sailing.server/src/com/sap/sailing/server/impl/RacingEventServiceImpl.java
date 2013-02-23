@@ -1496,10 +1496,15 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
 
     @Override
     public void serializeForInitialReplication(ObjectOutputStream oos) throws IOException {
+        logger.info("serializing regattasByName");
         oos.writeObject(regattasByName);
+        logger.info("serializing regattasObservedForDefaultLeaderboard");
         oos.writeObject(regattasObservedForDefaultLeaderboard);
+        logger.info("serializing regattaTrackingCache");
         oos.writeObject(regattaTrackingCache);
+        logger.info("serializing leaderboardGroupsByName");
         oos.writeObject(leaderboardGroupsByName);
+        logger.info("serializing leaderboardsByName");
         oos.writeObject(leaderboardsByName);
     }
 
