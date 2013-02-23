@@ -4,16 +4,15 @@ import java.util.Collection;
 
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 
 public class RegattaLeaderboardEditDialog extends RegattaLeaderboardDialog {
     
     public RegattaLeaderboardEditDialog(Collection<StrippedLeaderboardDTO> otherExistingLeaderboards, Collection<RegattaDTO> existingRegattas,
-            LeaderboardDescriptor leaderboard, StringMessages stringConstants, Collection<EventDTO> existingEvents, ErrorReporter errorReporter,
+            LeaderboardDescriptor leaderboard, StringMessages stringConstants, ErrorReporter errorReporter,
             DialogCallback<LeaderboardDescriptor> callback) {
-        super(stringConstants.editRegattaLeaderboard(), leaderboard, existingRegattas, stringConstants, existingEvents, errorReporter, new RegattaLeaderboardDialog.LeaderboardParameterValidator(
+        super(stringConstants.editRegattaLeaderboard(), leaderboard, existingRegattas, stringConstants, errorReporter, new RegattaLeaderboardDialog.LeaderboardParameterValidator(
                 stringConstants, otherExistingLeaderboards), callback);
         
         nameTextBox = createTextBox(leaderboard.getName());
@@ -30,7 +29,6 @@ public class RegattaLeaderboardEditDialog extends RegattaLeaderboardDialog {
             i++;
         }
         regattaListBox.setEnabled(false);
-        sailingEventsListBox = createSailingEventListBox(this, stringConstants);
         //TODO Preselect selected event and course area
         discardThresholdBoxes = initPrefilledDiscardThresholdBoxes(leaderboard.getDiscardThresholds(), this);
     }

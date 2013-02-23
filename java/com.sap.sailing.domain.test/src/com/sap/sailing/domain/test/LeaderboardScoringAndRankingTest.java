@@ -61,7 +61,7 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
     private Leaderboard createLeaderboard(Regatta regatta, int[] discardingThresholds) {
         ScoreCorrectionImpl scoreCorrections = new ScoreCorrectionImpl();
         ResultDiscardingRuleImpl discardingRules = new ResultDiscardingRuleImpl(discardingThresholds);
-        return new RegattaLeaderboardImpl(regatta, scoreCorrections, discardingRules, null);
+        return new RegattaLeaderboardImpl(regatta, scoreCorrections, discardingRules);
     }
 
     @Test

@@ -2,6 +2,8 @@ package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.Collection;
 
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
@@ -9,13 +11,18 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.ui.client.DataEntryDialog;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 
 public abstract class FlexibleLeaderboardDialog extends AbstractLeaderboardDialog {
     protected ListBox scoringSchemeListBox;
+    protected ListBox sailingEventsListBox;
+    protected Collection<EventDTO> existingEvents;
+    protected ListBox courseAreaListBox;
 
     protected static class LeaderboardParameterValidator implements Validator<LeaderboardDescriptor> {
         protected final StringMessages stringConstants;
@@ -66,7 +73,10 @@ public abstract class FlexibleLeaderboardDialog extends AbstractLeaderboardDialo
     public FlexibleLeaderboardDialog(String title, LeaderboardDescriptor leaderboardDTO, StringMessages stringMessages, 
     		Collection<EventDTO> existingEvents,
             ErrorReporter errorReporter, LeaderboardParameterValidator validator,  DialogCallback<LeaderboardDescriptor> callback) {
-        super(title, leaderboardDTO, stringMessages, existingEvents, validator, callback);
+        super(title, leaderboardDTO, stringMessages, validator, callback);
+        this.existingEvents = existingEvents;
+        courseAreaListBox = createListBox(false);
+        courseAreaListBox.setEnabled(false);
     }
     
     @Override
@@ -74,6 +84,12 @@ public abstract class FlexibleLeaderboardDialog extends AbstractLeaderboardDialo
         LeaderboardDescriptor leaderboard = super.getResult();
         leaderboard.setRegattaName(null);
         leaderboard.setScoringScheme(getSelectedScoringSchemeType(scoringSchemeListBox, stringMessages));
+        CourseAreaDTO courseArea = getSelectedCourseArea();
+        if (courseArea == null) {
+            leaderboard.setCourseAreaId(null);
+        } else {
+            leaderboard.setCourseAreaId(getSelectedCourseArea().id);
+        }
         return leaderboard;
     }
 
@@ -104,5 +120,61 @@ public abstract class FlexibleLeaderboardDialog extends AbstractLeaderboardDialo
         mainPanel.add(hp);
         
         return mainPanel;
+    }
+    
+    protected ListBox createSailingEventListBox(DataEntryDialog<?> dialog, StringMessages stringMessages) {
+        ListBox eventListBox = dialog.createListBox(false);
+        eventListBox.addItem("Please select a sailing event...");
+        for (EventDTO event: existingEvents) {
+                eventListBox.addItem(event.name);
+        }
+        eventListBox.addChangeHandler(new ChangeHandler() {
+            @Override
+            public void onChange(ChangeEvent event) {
+                onEventSelectionChanged();
+            }
+        });
+        return eventListBox;
+    }
+    
+    protected void onEventSelectionChanged() {
+        EventDTO selectedEvent = getSelectedEvent();
+        courseAreaListBox.clear();
+        courseAreaListBox.addItem("Please select a course area...");
+        for (CourseAreaDTO courseArea : selectedEvent.venue.getCourseAreas()) {
+            courseAreaListBox.addItem(courseArea.name);
+        }
+        courseAreaListBox.setEnabled(true);
+    }
+    
+    public EventDTO getSelectedEvent() {
+        EventDTO result = null;
+        int selIndex = sailingEventsListBox.getSelectedIndex();
+        if(selIndex > 0) { // the zero index represents the 'no selection' text
+            String itemText = sailingEventsListBox.getItemText(selIndex);
+            for(EventDTO eventDTO: existingEvents) {
+                if(eventDTO.name.equals(itemText)) {
+                    result = eventDTO;
+                    break;
+                }
+            }
+        }
+        return result;
+    }
+    
+    public CourseAreaDTO getSelectedCourseArea() {
+        CourseAreaDTO result = null;
+        EventDTO event = getSelectedEvent();
+        int selIndex = courseAreaListBox.getSelectedIndex();
+        if(selIndex > 0) { // the zero index represents the 'no selection' text
+            String itemText = courseAreaListBox.getItemText(selIndex);
+            for(CourseAreaDTO courseAreaDTO: event.venue.getCourseAreas()) {
+                if(courseAreaDTO.name.equals(itemText)) {
+                    result = courseAreaDTO;
+                    break;
+                }
+            }
+        }
+        return result;
     }
 }

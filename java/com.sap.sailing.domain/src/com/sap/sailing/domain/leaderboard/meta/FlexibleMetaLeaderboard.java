@@ -3,6 +3,7 @@ package com.sap.sailing.domain.leaderboard.meta;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
@@ -55,4 +56,9 @@ public class FlexibleMetaLeaderboard extends AbstractMetaLeaderboard {
             LockUtil.unlockAfterWrite(leaderboardsLock);
         }
     }
+
+	@Override
+	public CourseArea getDefaultCourseArea() {
+		return null;
+	}
 }

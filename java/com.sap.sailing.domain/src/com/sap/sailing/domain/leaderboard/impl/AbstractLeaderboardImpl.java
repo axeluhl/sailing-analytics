@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Set;
 
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnListener;
@@ -44,8 +43,8 @@ public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardI
      * @param name must not be <code>null</code>
      */
     public AbstractLeaderboardImpl(SettableScoreCorrection scoreCorrection,
-            ThresholdBasedResultDiscardingRule resultDiscardingRule, CourseArea courseArea) {
-        super(scoreCorrection, resultDiscardingRule, courseArea);
+            ThresholdBasedResultDiscardingRule resultDiscardingRule) {
+        super(scoreCorrection, resultDiscardingRule);
         assert scoreCorrection != null;
     }
     

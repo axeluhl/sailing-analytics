@@ -44,6 +44,7 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
     private final ScoringScheme scoringScheme;
     private String name;
     private transient RaceLogStore raceLogStore;
+    private final CourseArea courseArea;
     
     public FlexibleLeaderboardImpl(String name, SettableScoreCorrection scoreCorrection,
             ThresholdBasedResultDiscardingRule resultDiscardingRule, ScoringScheme scoringScheme, CourseArea courseArea) {
@@ -52,7 +53,7 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
 
     public FlexibleLeaderboardImpl(RaceLogStore raceLogStore, String name, SettableScoreCorrection scoreCorrection,
             ThresholdBasedResultDiscardingRule resultDiscardingRule, ScoringScheme scoringScheme, CourseArea courseArea) {
-        super(scoreCorrection, resultDiscardingRule, courseArea);
+        super(scoreCorrection, resultDiscardingRule);
         this.scoringScheme = scoringScheme;
         if (name == null) {
             throw new IllegalArgumentException("A leaderboard's name must not be null");
@@ -60,6 +61,7 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
         this.name = name;
         this.races = new ArrayList<FlexibleRaceColumn>();
         this.raceLogStore = raceLogStore;
+        this.courseArea = courseArea;
     }
     
     /**
@@ -145,9 +147,10 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
 
     protected RaceColumnImpl createRaceColumn(String column, boolean medalRace, Fleet... fleets) {
         return new RaceColumnImpl(
-        		new RaceLogInformationImpl(
-                        raceLogStore,
-                        new RaceLogOnLeaderboardIdentifier(this, column)),
+//        		new RaceLogInformationImpl(
+//                        raceLogStore,
+//                        new RaceLogOnLeaderboardIdentifier(this, column)),
+                null,
                 column, 
                 medalRace, 
                 turnNullOrEmptyFleetsIntoDefaultFleet(fleets));
@@ -220,6 +223,11 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
     @Override
     public ScoringScheme getScoringScheme() {
         return scoringScheme;
+    }
+    
+    @Override
+    public CourseArea getDefaultCourseArea() {
+    	return courseArea;
     }
 
 }

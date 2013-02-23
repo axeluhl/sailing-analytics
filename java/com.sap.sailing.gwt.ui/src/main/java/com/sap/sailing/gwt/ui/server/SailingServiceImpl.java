@@ -2000,12 +2000,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public StrippedLeaderboardDTO createRegattaLeaderboard(RegattaIdentifier regattaIdentifier, int[] discardThresholds, Serializable courseAreaId) {
-    	UUID courseAreaUuid = null;
-    	if (courseAreaId != null) {
-    		courseAreaUuid = UUID.fromString(courseAreaId.toString());
-    	}
-        return createStrippedLeaderboardDTO(getService().apply(new CreateRegattaLeaderboard(regattaIdentifier, discardThresholds, courseAreaUuid)), false);
+    public StrippedLeaderboardDTO createRegattaLeaderboard(RegattaIdentifier regattaIdentifier, int[] discardThresholds) {
+        return createStrippedLeaderboardDTO(getService().apply(new CreateRegattaLeaderboard(regattaIdentifier, discardThresholds)), false);
     }
 
     @Override
@@ -2094,6 +2090,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         } else {
             leaderboardDTO.isRegattaLeaderboard = false;
             leaderboardDTO.scoringScheme = leaderboard.getScoringScheme().getType();
+            if (leaderboard.getDefaultCourseArea() != null) {
+                leaderboardDTO.courseAreaId = leaderboard.getDefaultCourseArea().getId().toString();
+            }
         }
         leaderboardDTO.setDelayToLiveInMillisForLatestRace(delayToLiveInMillisForLatestRace);
         leaderboardDTO.hasCarriedPoints = leaderboard.hasCarriedPoints();

@@ -258,10 +258,10 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
                     } else {
                         if (leaderboardDTO.isRegattaLeaderboard) {
                             LeaderboardDescriptor descriptor = new LeaderboardDescriptor(leaderboardDTO.name, 
-                                    leaderboardDTO.displayName, null, leaderboardDTO.discardThresholds, leaderboardDTO.regattaName, leaderboardDTO.courseAreaId);
+                                    leaderboardDTO.displayName, null, leaderboardDTO.discardThresholds, leaderboardDTO.regattaName, null);
                             AbstractLeaderboardDialog dialog = new RegattaLeaderboardEditDialog(Collections
                                     .unmodifiableCollection(otherExistingLeaderboard), Collections.unmodifiableCollection(allRegattas),
-                                    descriptor, stringMessages, Collections.<EventDTO>emptySet(), errorReporter,
+                                    descriptor, stringMessages, errorReporter,
                                     new DialogCallback<LeaderboardDescriptor>() {
                                         @Override
                                         public void cancel() {
@@ -275,20 +275,8 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
                             dialog.show();
                         } else {
                             LeaderboardDescriptor descriptor = new LeaderboardDescriptor(leaderboardDTO.name, leaderboardDTO.displayName, leaderboardDTO.scoringScheme, leaderboardDTO.discardThresholds, leaderboardDTO.courseAreaId);
-                            FlexibleLeaderboardEditDialog dialog = new FlexibleLeaderboardEditDialog(Collections
-                                    .unmodifiableCollection(otherExistingLeaderboard),
-                                    descriptor, stringMessages, Collections.<EventDTO>emptySet(), errorReporter,
-                                    new DialogCallback<LeaderboardDescriptor>() {
-                                        @Override
-                                        public void cancel() {
-                                        }
 
-                                        @Override
-                                        public void ok(LeaderboardDescriptor result) {
-                                            updateLeaderboard(oldLeaderboardName, result);
-                                        }
-                                    });
-                            dialog.show();
+                            openUpdateFlexibleLeaderboardDialog(leaderboardDTO, otherExistingLeaderboard, leaderboardDTO.name, descriptor);
                         }
                     }
                 } else if (LeaderboardConfigImagesBarCell.ACTION_EDIT_SCORES.equals(value)) {
@@ -501,42 +489,6 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
         loadAndRefreshLeaderboards();
     }
     
-    protected void openUpdateRegattaLeaderboardDialog(final StrippedLeaderboardDTO leaderboardDTO, final List<StrippedLeaderboardDTO> otherExistingLeaderboard, 
-    		final String oldLeaderboardName) {
-    	sailingService.getEvents(new AsyncCallback<List<EventDTO>>() {
-			
-			@Override
-			public void onSuccess(List<EventDTO> result) {
-				openUpdateRegattaLeaderboardDialog(leaderboardDTO, otherExistingLeaderboard, oldLeaderboardName, result);
-			}
-			
-			@Override
-			public void onFailure(Throwable caught) {
-				openUpdateRegattaLeaderboardDialog(leaderboardDTO, otherExistingLeaderboard, oldLeaderboardName, new ArrayList<EventDTO>());
-			}
-		});
-    }
-    
-    protected void openUpdateRegattaLeaderboardDialog(StrippedLeaderboardDTO leaderboardDTO, List<StrippedLeaderboardDTO> otherExistingLeaderboard, 
-    		final String oldLeaderboardName, List<EventDTO> existingEvents) {
-    	LeaderboardDescriptor descriptor = new LeaderboardDescriptor(leaderboardDTO.name, leaderboardDTO.displayName,
-                null, leaderboardDTO.discardThresholds, leaderboardDTO.regattaName, leaderboardDTO.courseAreaId);
-        AbstractLeaderboardDialog dialog = new RegattaLeaderboardEditDialog(Collections
-                .unmodifiableCollection(otherExistingLeaderboard), Collections.unmodifiableCollection(allRegattas),
-                descriptor, stringMessages, Collections.unmodifiableCollection(existingEvents), errorReporter,
-                new DialogCallback<LeaderboardDescriptor>() {
-                    @Override
-                    public void cancel() {
-                    }
-
-                    @Override
-                    public void ok(LeaderboardDescriptor result) {
-                        updateLeaderboard(oldLeaderboardName, result);
-                    }
-                });
-        dialog.show();
-    }
-    
     protected void openUpdateFlexibleLeaderboardDialog(final StrippedLeaderboardDTO leaderboardDTO, final List<StrippedLeaderboardDTO> otherExistingLeaderboard, 
     		final String oldLeaderboardName, final LeaderboardDescriptor descriptor) {
     	sailingService.getEvents(new AsyncCallback<List<EventDTO>>() {
@@ -557,7 +509,7 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
     		final String oldLeaderboardName, LeaderboardDescriptor descriptor, List<EventDTO> existingEvents) {
     	FlexibleLeaderboardEditDialog dialog = new FlexibleLeaderboardEditDialog(Collections
     			.unmodifiableCollection(otherExistingLeaderboard),
-    			descriptor, stringMessages, Collections.unmodifiableCollection(existingEvents), errorReporter,
+    			descriptor, stringMessages, Collections.unmodifiableList(existingEvents), errorReporter,
     			new DialogCallback<LeaderboardDescriptor>() {
     		@Override
     		public void cancel() {
@@ -1006,25 +958,10 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
         });
         dialog.show();
     }
-
-    private void createRegattaLeaderboard() {
-    	sailingService.getEvents(new AsyncCallback<List<EventDTO>>() {
-			
-			@Override
-			public void onSuccess(List<EventDTO> result) {
-				createRegattaLeaderboard(result);
-			}
-			
-			@Override
-			public void onFailure(Throwable caught) {
-				createRegattaLeaderboard(new ArrayList<EventDTO>());
-			}
-		});
-    }
     
-    private void createRegattaLeaderboard(List<EventDTO> existingEvents) {
+    private void createRegattaLeaderboard() {
         RegattaLeaderboardCreateDialog dialog = new RegattaLeaderboardCreateDialog(Collections.unmodifiableCollection(availableLeaderboardList),
-                Collections.unmodifiableCollection(allRegattas), stringMessages, Collections.unmodifiableCollection(existingEvents), errorReporter, new DialogCallback<LeaderboardDescriptor>() {
+                Collections.unmodifiableCollection(allRegattas), stringMessages, errorReporter, new DialogCallback<LeaderboardDescriptor>() {
             @Override
             public void cancel() {
             }
@@ -1032,7 +969,7 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
             @Override
             public void ok(final LeaderboardDescriptor newLeaderboard) {
                 RegattaIdentifier regattaIdentifier = new RegattaName(newLeaderboard.getRegattaName()); 
-                sailingService.createRegattaLeaderboard(regattaIdentifier, newLeaderboard.getDiscardThresholds(), newLeaderboard.getCourseAreaId(),
+                sailingService.createRegattaLeaderboard(regattaIdentifier, newLeaderboard.getDiscardThresholds(),
                         new AsyncCallback<StrippedLeaderboardDTO>() {
                             @Override
                             public void onFailure(Throwable t) {

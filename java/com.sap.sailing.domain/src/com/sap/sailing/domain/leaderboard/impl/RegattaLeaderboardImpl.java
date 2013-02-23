@@ -31,8 +31,8 @@ public class RegattaLeaderboardImpl extends AbstractLeaderboardImpl implements R
     private final Regatta regatta;
     
     public RegattaLeaderboardImpl(Regatta regatta, SettableScoreCorrection scoreCorrection,
-            ThresholdBasedResultDiscardingRule resultDiscardingRule, CourseArea courseArea) {
-        super(scoreCorrection, resultDiscardingRule, courseArea);
+            ThresholdBasedResultDiscardingRule resultDiscardingRule) {
+        super(scoreCorrection, resultDiscardingRule);
         this.regatta = regatta;
         regatta.addRaceColumnListener(this);
     }
@@ -75,5 +75,11 @@ public class RegattaLeaderboardImpl extends AbstractLeaderboardImpl implements R
     public ScoringScheme getScoringScheme() {
         return regatta.getScoringScheme();
     }
+
+	@Override
+	public CourseArea getDefaultCourseArea() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
 }

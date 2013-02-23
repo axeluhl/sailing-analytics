@@ -12,7 +12,6 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.RaceColumn;
@@ -76,8 +75,6 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
      */
     private final Set<Competitor> suppressedCompetitors;
     
-    private final CourseArea courseArea;
-
     /**
      * A leaderboard entry representing a snapshot of a cell at a given time point for a single race/competitor.
      * 
@@ -139,13 +136,12 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     }
 
     public AbstractSimpleLeaderboardImpl(SettableScoreCorrection scoreCorrection,
-            ThresholdBasedResultDiscardingRule resultDiscardingRule, CourseArea courseArea) {
+            ThresholdBasedResultDiscardingRule resultDiscardingRule) {
         this.carriedPoints = new HashMap<Competitor, Double>();
         this.scoreCorrection = scoreCorrection;
         this.displayNames = new HashMap<Competitor, String>();
         this.resultDiscardingRule = resultDiscardingRule;
         this.suppressedCompetitors = Collections.synchronizedSet(new HashSet<Competitor>());
-        this.courseArea = courseArea;
         raceColumnListeners = new RaceColumnListeners();
     }
 
@@ -712,10 +708,5 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
         final Long delayToLiveInMillis = getDelayToLiveInMillis();
         TimePoint timePoint = delayToLiveInMillis == null ? now : now.minus(delayToLiveInMillis);
         return timePoint;
-    }
-    
-    @Override
-    public CourseArea getDefaultCourseArea() {
-    	return courseArea;
     }
 }

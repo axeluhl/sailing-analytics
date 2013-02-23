@@ -214,14 +214,13 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             SettableScoreCorrection scoreCorrection = new ScoreCorrectionImpl();
             ThresholdBasedResultDiscardingRule resultDiscardingRule = loadResultDiscardingRule(dbLeaderboard);
             String regattaName = (String) dbLeaderboard.get(FieldNames.REGATTA_NAME.name());
-            CourseArea courseArea = loadCourseAreaFromEvents(dbLeaderboard);
             if (groupForMetaLeaderboard != null) {
                 result = new LeaderboardGroupMetaLeaderboard(groupForMetaLeaderboard, loadScoringScheme(dbLeaderboard), resultDiscardingRule);
                 groupForMetaLeaderboard.setOverallLeaderboard(result);
             } else if (regattaName == null) {
-                result = loadFlexibleLeaderboard(dbLeaderboard, scoreCorrection, resultDiscardingRule, courseArea);
+                result = loadFlexibleLeaderboard(dbLeaderboard, scoreCorrection, resultDiscardingRule);
             } else {
-                result = loadRegattaLeaderboard(leaderboardName, regattaName, dbLeaderboard, scoreCorrection, resultDiscardingRule, regattaRegistry, courseArea);
+                result = loadRegattaLeaderboard(leaderboardName, regattaName, dbLeaderboard, scoreCorrection, resultDiscardingRule, regattaRegistry);
             }
             if (result != null) {
                 final Leaderboard finalResult = result;
@@ -320,26 +319,26 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
      * @return <code>null</code> if the regatta cannot be resolved; otherwise the leaderboard for the regatta specified
      */
     private RegattaLeaderboard loadRegattaLeaderboard(String leaderboardName, String regattaName, DBObject dbLeaderboard,
-            SettableScoreCorrection scoreCorrection, ThresholdBasedResultDiscardingRule resultDiscardingRule, RegattaRegistry regattaRegistry,
-            CourseArea courseArea) {
+            SettableScoreCorrection scoreCorrection, ThresholdBasedResultDiscardingRule resultDiscardingRule, RegattaRegistry regattaRegistry) {
         RegattaLeaderboard result = null;
         Regatta regatta = regattaRegistry.getRegatta(new RegattaName(regattaName));
         if (regatta == null) {
             logger.info("Couldn't find regatta "+regattaName+" for corresponding regatta leaderboard. Not loading regatta leaderboard.");
         } else {
-            result = new RegattaLeaderboardImpl(regatta, scoreCorrection, resultDiscardingRule, courseArea);
+            result = new RegattaLeaderboardImpl(regatta, scoreCorrection, resultDiscardingRule);
             result.setName(leaderboardName);
         }
         return result;
     }
 
     private FlexibleLeaderboard loadFlexibleLeaderboard(DBObject dbLeaderboard,
-            SettableScoreCorrection scoreCorrection, ThresholdBasedResultDiscardingRule resultDiscardingRule, CourseArea courseArea) {
+            SettableScoreCorrection scoreCorrection, ThresholdBasedResultDiscardingRule resultDiscardingRule) {
         final ScoringScheme scoringScheme = loadScoringScheme(dbLeaderboard);
         
         RaceLogStore raceLogStore = MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(
                 new MongoObjectFactoryImpl(database), 
                 this);
+        CourseArea courseArea = loadCourseAreaFromEvents(dbLeaderboard);
         FlexibleLeaderboardImpl result = new FlexibleLeaderboardImpl(
                 raceLogStore,
                 (String) dbLeaderboard.get(FieldNames.LEADERBOARD_NAME.name()), 

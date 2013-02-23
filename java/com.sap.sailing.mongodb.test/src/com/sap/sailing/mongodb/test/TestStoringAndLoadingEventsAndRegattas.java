@@ -116,7 +116,7 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
         Regatta regatta = res.createRegatta(regattaProxy.getBaseName(), regattaProxy.getBoatClass().getName(),
                 "123", regattaProxy.getSeries(), regattaProxy.isPersistent(), DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT));
         addRaceColumns(numberOfQualifyingRaces, numberOfFinalRaces, regatta);
-        res.addRegattaLeaderboard(regatta.getRegattaIdentifier(), new int[] { 3, 5 }, null);
+        res.addRegattaLeaderboard(regatta.getRegattaIdentifier(), new int[] { 3, 5 });
         DomainObjectFactory dof = MongoFactory.INSTANCE.getDomainObjectFactory(getMongoService());
         Regatta loadedRegatta = dof.loadRegatta(regatta.getName(), /* trackedRegattaRegistry */ null);
         assertNotNull(loadedRegatta);
@@ -159,7 +159,7 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
         trackedRegatta[0] = new DynamicTrackedRegattaImpl(regatta);
         addRaceColumns(numberOfQualifyingRaces, numberOfFinalRaces, regatta);
         logColumnsInRegatta(regatta);
-        RegattaLeaderboard regattaLeaderboard = res.addRegattaLeaderboard(regatta.getRegattaIdentifier(), new int[] { 3, 5 }, null);
+        RegattaLeaderboard regattaLeaderboard = res.addRegattaLeaderboard(regatta.getRegattaIdentifier(), new int[] { 3, 5 });
         assertSame(regatta, regattaLeaderboard.getRegatta());
         final RaceColumnInSeries q2 = regatta.getSeriesByName("Qualifying").getRaceColumnByName("Q2");
         final Fleet yellow = q2.getFleetByName("Yellow");
