@@ -733,9 +733,21 @@ public class MockedTrackedRace implements DynamicTrackedRace {
         // TODO Auto-generated method stub
     }
 
-	@Override
-	public RaceLog getRaceLog() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    @Override
+    public void detachRaceLog() {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void attachRaceLog(RaceLog raceLog) {
+        // TODO Auto-generated method stub
+        
+    }   
+    
+    @Override
+    public RaceLog getRaceLog() {
+        // TODO Auto-generated method stub
+        return null;
+}
 }

@@ -454,12 +454,6 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
         return false;
     }
 
-	@Override
-	public RaceLog getRaceLog() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
     @Override
     public void lockForRead(Iterable<MarkPassing> markPassings) {
         // TODO Auto-generated method stub
@@ -479,5 +473,23 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     @Override
     public void waitUntilNotLoading() {
         // TODO Auto-generated method stub
+    }
+
+    @Override
+    public void detachRaceLog() {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void attachRaceLog(RaceLog raceLog) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public RaceLog getRaceLog() {
+        // TODO Auto-generated method stub
+        return null;
     }
 }
