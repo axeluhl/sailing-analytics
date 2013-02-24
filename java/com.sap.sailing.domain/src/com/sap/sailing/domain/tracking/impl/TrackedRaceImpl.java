@@ -2263,8 +2263,21 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         }
     }
     
+    private transient RaceLog attachedRaceLog;
+    
+    @Override
+    public void attachRaceLog(RaceLog raceLog) {
+        this.attachedRaceLog = raceLog;
+    }
+    
+    @Override
+    public void detachRaceLog() {
+        // Currently doing not much, be may notify some listeners in the future.
+        this.attachedRaceLog = null;
+    }
+    
     @Override
     public RaceLog getRaceLog() {
-    	return null;
+    	return attachedRaceLog;
     }
 }

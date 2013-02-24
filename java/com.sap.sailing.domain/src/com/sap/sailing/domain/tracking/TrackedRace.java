@@ -457,11 +457,6 @@ public interface TrackedRace extends Serializable {
      */
     void waitUntilWindLoadingComplete() throws InterruptedException;
     
-    /**
-     * Returns the race log event track for this race
-     */
-    RaceLog getRaceLog();
-    
     TrackedRaceStatus getStatus();
 
     /**
@@ -469,4 +464,21 @@ public interface TrackedRace extends Serializable {
      * other status.
      */
     void waitUntilNotLoading();
+
+    /**
+     * Detaches the race log associated with this {@link TrackedRace}.
+     */
+    void detachRaceLog();
+    
+    /**
+     * Attaches the passed race log with this {@link TrackedRace}.
+     * @param raceLog to be attached.
+     */
+    void attachRaceLog(RaceLog raceLog);
+    
+    /**
+     * Returns the attached race log event track for this race if any.
+     * Otherwise <code>null</code>.
+     */
+    RaceLog getRaceLog();
 }
