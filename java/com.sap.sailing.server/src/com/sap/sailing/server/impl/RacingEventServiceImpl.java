@@ -108,6 +108,7 @@ import com.sap.sailing.operationaltransformation.Operation;
 import com.sap.sailing.server.OperationExecutionListener;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
+import com.sap.sailing.server.Replicator;
 import com.sap.sailing.server.operationaltransformation.AddCourseArea;
 import com.sap.sailing.server.operationaltransformation.AddDefaultRegatta;
 import com.sap.sailing.server.operationaltransformation.AddRaceDefinition;
@@ -130,7 +131,7 @@ import com.sap.sailing.server.operationaltransformation.UpdateTrackedRaceStatus;
 import com.sap.sailing.server.operationaltransformation.UpdateWindAveragingTime;
 import com.sap.sailing.server.operationaltransformation.UpdateWindSourcesToExclude;
 
-public class RacingEventServiceImpl implements RacingEventService, RegattaListener, LeaderboardRegistry {
+public class RacingEventServiceImpl implements RacingEventService, RegattaListener, LeaderboardRegistry, Replicator {
     private static final Logger logger = Logger.getLogger(RacingEventServiceImpl.class.getName());
 
     /**
@@ -198,7 +199,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
      */
     private long delayToLiveInMillis;
     
-    //private RaceLogStore raceLogStore;
+    private final RaceLogReplicator raceLogReplicator;
     
     public RacingEventServiceImpl() {
         this(MongoFactory.INSTANCE.getDefaultDomainObjectFactory(), MongoFactory.INSTANCE.getDefaultMongoObjectFactory());
@@ -236,6 +237,8 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         courseListeners = new ConcurrentHashMap<RaceDefinition, CourseChangeReplicator>();
         persistentRegattasForRaceIDs = new ConcurrentHashMap<String, Regatta>();
         delayToLiveInMillis = TrackedRace.DEFAULT_LIVE_DELAY_IN_MILLISECONDS;
+        this.raceLogReplicator = new RaceLogReplicator(this);
+        
         // Add one default leaderboard that aggregates all races currently tracked by this service.
         // This is more for debugging purposes than for anything else.
         addFlexibleLeaderboard(LeaderboardNameConstants.DEFAULT_LEADERBOARD_NAME, new int[] { 5, 8 },
@@ -292,6 +295,11 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     public void addLeaderboard(Leaderboard leaderboard) {
         synchronized (leaderboardsByName) {
             leaderboardsByName.put(leaderboard.getName(), leaderboard);
+
+            // RaceColumns of RegattaLeaderboards are tracked via its Regatta!
+            if (leaderboard instanceof FlexibleLeaderboard) {
+                leaderboard.addRaceColumnListener(raceLogReplicator);
+            }
         }
     }
 
@@ -514,14 +522,15 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     
     @Override
     public void removeLeaderboard(String leaderboardName) {
-        removeLeaderboardFromLeaderboardsByName(leaderboardName);
+        Leaderboard leaderboard = removeLeaderboardFromLeaderboardsByName(leaderboardName);
+        leaderboard.removeRaceColumnListener(raceLogReplicator);
         mongoObjectFactory.removeLeaderboard(leaderboardName);
         syncGroupsAfterLeaderboardRemove(leaderboardName, true);
     }
 
-    protected void removeLeaderboardFromLeaderboardsByName(String leaderboardName) {
+    protected Leaderboard removeLeaderboardFromLeaderboardsByName(String leaderboardName) {
         synchronized (leaderboardsByName) {
-            leaderboardsByName.remove(leaderboardName);
+            return leaderboardsByName.remove(leaderboardName);
         }
     }
     
@@ -1519,7 +1528,8 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         }
     }
 
-    <T> void replicate(RacingEventServiceOperation<T> operation) {
+    @Override
+    public <T> void replicate(RacingEventServiceOperation<T> operation) {
         for (OperationExecutionListener listener : operationExecutionListeners.keySet()) {
             try {
                 listener.executed(operation);
@@ -1672,26 +1682,19 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         mongoObjectFactory.storeRegattaForRaceID(race.getId().toString(), regatta);
     }
 
-	@Override
-	public CourseArea addCourseArea(Serializable eventId, String courseAreaName, Serializable courseAreaId) {
-		CourseArea courseArea = new CourseAreaImpl(courseAreaName, courseAreaId);
-		synchronized (eventsById) {
+    @Override
+    public CourseArea addCourseArea(Serializable eventId, String courseAreaName, Serializable courseAreaId) {
+        CourseArea courseArea = new CourseAreaImpl(courseAreaName, courseAreaId);
+        synchronized (eventsById) {
             if (!eventsById.containsKey(eventId)) {
                 throw new IllegalArgumentException("No sailing event with ID " + eventId + " found.");
             }
             Event event = eventsById.get(eventId);
             event.getVenue().addCourseArea(courseArea);
-    		replicate(new AddCourseArea(eventId, courseAreaName, courseAreaId));
+            replicate(new AddCourseArea(eventId, courseAreaName, courseAreaId));
             mongoObjectFactory.storeEvent(event);
         }
-		return courseArea;
-	}
-	
-	/*@Override
-	public void recordRaceLogEvent(RaceLogIdentifier identifier, RaceLogEvent event) {
-		RaceLog raceLog = getRaceLog(identifier);
-		raceLog.add(event);
-		replicate(new RecordRaceLogEvent(identifier, event));
-	}*/
+        return courseArea;
+    }
 
 }

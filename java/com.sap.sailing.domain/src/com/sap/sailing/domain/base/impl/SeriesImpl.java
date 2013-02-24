@@ -17,6 +17,8 @@ import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.common.impl.NamedImpl;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
+import com.sap.sailing.domain.racelog.RaceLogEvent;
+import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
@@ -246,6 +248,11 @@ public class SeriesImpl extends NamedImpl implements Series, RaceColumnListener 
     public void resultDiscardingRuleChanged(ThresholdBasedResultDiscardingRule oldDiscardingRule,
             ThresholdBasedResultDiscardingRule newDiscardingRule) {
         raceColumnListeners.notifyListenersAboutResultDiscardingRuleChanged(oldDiscardingRule, newDiscardingRule);
+    }
+
+    @Override
+    public void raceLogEventAdded(RaceColumn raceColumn, RaceLogIdentifier raceLogIdentifier, RaceLogEvent event) {
+        raceColumnListeners.notifyListenersAboutRaceLogEventAdded(raceColumn, raceLogIdentifier, event);
     }
 
     @Override

@@ -28,7 +28,7 @@ public class RaceLogOnLeaderboardIdentifier implements RaceLogIdentifierTemplate
     }
 
     @Override
-    public String getHostName() {
+    public String getParentObjectName() {
         return leaderboardName;
     }
 

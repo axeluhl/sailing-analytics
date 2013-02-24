@@ -7,7 +7,8 @@ import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.racelog.RaceLogIdentifierTemplate;
 
 public class RaceLogIdentifierImpl implements RaceLogIdentifier {
-
+    private static final long serialVersionUID = -1933109112840405951L;
+    
     private final String raceColumnName;
     private final String fleetName;
     
@@ -21,7 +22,7 @@ public class RaceLogIdentifierImpl implements RaceLogIdentifier {
 
     @Override
     public Serializable getIdentifier() {
-        return String.format("%s.%s.%s", template.getHostName(), raceColumnName, fleetName);
+        return String.format("%s.%s.%s", template.getParentObjectName(), raceColumnName, fleetName);
     }
 
     @Override

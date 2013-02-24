@@ -135,7 +135,8 @@ public class RaceColumnListeners implements Serializable {
 
     public void notifyListenersAboutRaceLogEventAdded(RaceColumn raceColumn, RaceLogIdentifier raceLogIdentifier,
             RaceLogEvent event) {
-        // TODO Auto-generated method stub
-        
+        for (RaceColumnListener listener : getRaceColumnListeners()) {
+            listener.raceLogEventAdded(raceColumn, raceLogIdentifier, event);
+        }
     }
 }
