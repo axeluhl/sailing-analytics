@@ -59,7 +59,6 @@ public class RaceLogReplicationTest extends AbstractServerReplicationTest {
         Regatta regatta = setupRegatta(regattaName);
         RaceLog masterLog = setupRaceColumn(regatta, seriesName, raceColumnName, fleetName);
         
-        // 2. ... and start to replicate!
         replicationDescriptorPair.getA().startToReplicateFrom(replicationDescriptorPair.getB());
         
         RaceLog replicaLog = getReplicaLog(seriesName, fleetName, raceColumnName, regatta);
