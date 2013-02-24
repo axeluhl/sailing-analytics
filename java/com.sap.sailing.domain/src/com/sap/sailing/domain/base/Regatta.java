@@ -26,6 +26,8 @@ public interface Regatta extends Named, WithID {
 	
     ScoringScheme getScoringScheme();
     
+    CourseArea getDefaultCourseArea();
+    
     /**
      * A regatta consists of one or more series.
      * 

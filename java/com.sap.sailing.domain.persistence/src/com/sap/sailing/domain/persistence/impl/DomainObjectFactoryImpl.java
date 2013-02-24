@@ -297,8 +297,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return resultDiscardingRule;
     }
     
-    private CourseArea loadCourseAreaFromEvents(DBObject dbLeaderboard) {
-    	Serializable courseAreaId = (Serializable) dbLeaderboard.get(FieldNames.COURSE_AREA_ID.name());
+    private CourseArea loadCourseAreaFromEvents(DBObject dbObject) {
+    	Serializable courseAreaId = (Serializable) dbObject.get(FieldNames.COURSE_AREA_ID.name());
     	if (courseAreaId == null)
     		return null;
     	
@@ -808,7 +808,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             RaceLogStore raceLogStore = MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(
                     new MongoObjectFactoryImpl(database), 
                     this);
-            result = new RegattaImpl(raceLogStore, baseName, boatClass, series, /* persistent */ true, loadScoringScheme(dbRegatta), id);
+            CourseArea courseArea = loadCourseAreaFromEvents(dbRegatta);
+            result = new RegattaImpl(raceLogStore, baseName, boatClass, series, /* persistent */ true, loadScoringScheme(dbRegatta), id, courseArea);
         }
         return result;
     }

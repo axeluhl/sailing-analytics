@@ -408,14 +408,30 @@ public class RegattaStructureManagementPanel extends SimplePanel implements Rega
     }
 
     private void openCreateRegattaDialog() {
-        Collection<RegattaDTO> existingRegattas = null;
+        Collection<RegattaDTO> regattas = null;
         if(supportEvents) {
-            existingRegattas = Collections.unmodifiableCollection(selectedEvent.regattas);
+            regattas = Collections.unmodifiableCollection(selectedEvent.regattas);
         } else {
-            existingRegattas = Collections.unmodifiableCollection(regattaProvider.getList());
+            regattas = Collections.unmodifiableCollection(regattaProvider.getList());
         }
+        final Collection<RegattaDTO> existingRegattas = regattas;
         
-        RegattaWithSeriesAndFleetsCreateDialog dialog = new RegattaWithSeriesAndFleetsCreateDialog(existingRegattas, stringMessages,
+        sailingService.getEvents(new AsyncCallback<List<EventDTO>>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                openCreateRegattaDialog(existingRegattas, Collections.<EventDTO>emptyList());
+            }
+
+            @Override
+            public void onSuccess(List<EventDTO> result) {
+                openCreateRegattaDialog(existingRegattas, Collections.unmodifiableList(result));
+            }
+        });
+    }
+    
+    private void openCreateRegattaDialog(Collection<RegattaDTO> existingRegattas, List<EventDTO> existingEvents) {
+        
+        RegattaWithSeriesAndFleetsCreateDialog dialog = new RegattaWithSeriesAndFleetsCreateDialog(existingRegattas, existingEvents, stringMessages,
                 new DialogCallback<RegattaDTO>() {
                     @Override
                     public void cancel() {
@@ -484,7 +500,7 @@ public class RegattaStructureManagementPanel extends SimplePanel implements Rega
             seriesStructure.put(seriesDTO.name, seriesPair);
         }
         sailingService.createRegatta(newRegatta.name, newRegatta.boatClass.name, seriesStructure, true,
-                newRegatta.scoringScheme, new AsyncCallback<RegattaDTO>() {
+                newRegatta.scoringScheme, newRegatta.defaultCourseAreaId, new AsyncCallback<RegattaDTO>() {
             @Override
             public void onFailure(Throwable t) {
                 errorReporter.reportError("Error trying to create new regatta" + newRegatta.name + ": " + t.getMessage());

@@ -76,10 +76,9 @@ public class RegattaLeaderboardImpl extends AbstractLeaderboardImpl implements R
         return regatta.getScoringScheme();
     }
 
-	@Override
-	public CourseArea getDefaultCourseArea() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    @Override
+    public CourseArea getDefaultCourseArea() {
+        return regatta.getDefaultCourseArea();
+    }
 
 }

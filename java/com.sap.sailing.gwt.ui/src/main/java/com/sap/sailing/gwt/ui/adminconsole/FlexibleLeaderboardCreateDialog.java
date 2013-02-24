@@ -15,7 +15,7 @@ public class FlexibleLeaderboardCreateDialog extends FlexibleLeaderboardDialog {
         nameTextBox = createTextBox(null);
         displayNameTextBox = createTextBox(null);
         scoringSchemeListBox = createScoringSchemeListBox(this, stringMessages);
-        sailingEventsListBox = createSailingEventListBox(this, stringMessages);
+        sailingEventsListBox = createSailingEventListBox();
         discardThresholdBoxes = initEmptyDiscardThresholdBoxes(this);
     }
 }

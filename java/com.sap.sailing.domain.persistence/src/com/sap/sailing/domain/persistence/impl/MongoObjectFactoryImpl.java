@@ -170,9 +170,9 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
             dbLeaderboard.put(FieldNames.SCORING_SCHEME_TYPE.name(), leaderboard.getScoringScheme().getType().name());
         }
         if (leaderboard.getDefaultCourseArea() != null) {
-        	dbLeaderboard.put(FieldNames.COURSE_AREA_ID.name(), leaderboard.getDefaultCourseArea().getId().toString());
+            dbLeaderboard.put(FieldNames.COURSE_AREA_ID.name(), leaderboard.getDefaultCourseArea().getId().toString());
         } else {
-        	dbLeaderboard.put(FieldNames.COURSE_AREA_ID.name(), null);
+            dbLeaderboard.put(FieldNames.COURSE_AREA_ID.name(), null);
         }
         storeColumnFactors(leaderboard, dbLeaderboard);
         storeLeaderboardCorrectionsAndDiscards(leaderboard, dbLeaderboard);
@@ -422,6 +422,13 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
             dbRegatta.put(FieldNames.BOAT_CLASS_TYPICALLY_STARTS_UPWIND.name(), regatta.getBoatClass().typicallyStartsUpwind());
         }
         dbRegatta.put(FieldNames.REGATTA_SERIES.name(), storeSeries(regatta.getSeries()));
+        
+        if (regatta.getDefaultCourseArea() != null) {
+            dbRegatta.put(FieldNames.COURSE_AREA_ID.name(), regatta.getDefaultCourseArea().getId().toString());
+        } else {
+            dbRegatta.put(FieldNames.COURSE_AREA_ID.name(), null);
+        }
+        
         regattasCollection.update(query, dbRegatta, /* upsrt */ true, /* multi */ false);
     }
 

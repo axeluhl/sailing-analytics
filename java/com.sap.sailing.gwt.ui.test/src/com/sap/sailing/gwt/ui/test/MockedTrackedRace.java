@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.NavigableSet;
 
 import com.sap.sailing.domain.base.BoatClass;
+import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.RaceColumnListener;
@@ -388,6 +389,12 @@ public class MockedTrackedRace implements DynamicTrackedRace {
 
                     @Override
                     public ScoringScheme getScoringScheme() {
+                        // TODO Auto-generated method stub
+                        return null;
+                    }
+
+                    @Override
+                    public CourseArea getDefaultCourseArea() {
                         // TODO Auto-generated method stub
                         return null;
                     }

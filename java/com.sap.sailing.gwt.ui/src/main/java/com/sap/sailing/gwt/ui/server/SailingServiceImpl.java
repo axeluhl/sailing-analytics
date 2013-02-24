@@ -1040,6 +1040,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         if (boatClass != null) {
             regattaDTO.boatClass = new BoatClassDTO(boatClass.getName(), boatClass.getHullLength().getMeters());
         }
+        if (regatta.getDefaultCourseArea() != null) {
+            regattaDTO.defaultCourseAreaId = regatta.getDefaultCourseArea().getId().toString();
+        }
         return regattaDTO;
     }
 
@@ -1991,13 +1994,20 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public StrippedLeaderboardDTO createFlexibleLeaderboard(String leaderboardName, int[] discardThresholds, ScoringSchemeType scoringSchemeType,
     		Serializable courseAreaId) {
-    	UUID courseAreaUuid = null;
-    	if (courseAreaId != null) {
-    		courseAreaUuid = UUID.fromString(courseAreaId.toString());
-    	}
+    	UUID courseAreaUuid = convertSerializableToUuid(courseAreaId);
         return createStrippedLeaderboardDTO(getService().apply(new CreateFlexibleLeaderboard(leaderboardName, discardThresholds,
                 baseDomainFactory.createScoringScheme(scoringSchemeType), courseAreaUuid)), false);
     }
+
+    private UUID convertSerializableToUuid(Serializable serializable) {
+        UUID convertedUuid = null;
+        if (serializable != null) {
+            convertedUuid = UUID.fromString(serializable.toString());
+        }
+        return convertedUuid;
+    }
+
+
 
     @Override
     public StrippedLeaderboardDTO createRegattaLeaderboard(RegattaIdentifier regattaIdentifier, int[] discardThresholds) {
@@ -2469,7 +2479,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                             Collections.singletonList(new FleetImpl("Default")), 
                             /* race column names */ new ArrayList<String>(), getService())), 
                         false,
-                        baseDomainFactory.createScoringScheme(ScoringSchemeType.LOW_POINT));
+                        baseDomainFactory.createScoringScheme(ScoringSchemeType.LOW_POINT), null);
+                //TODO: is course area relevant for swiss timing replay?
             } else {
                 regatta = getService().getRegatta(regattaIdentifier);
             }
@@ -3024,12 +3035,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public RegattaDTO createRegatta(String regattaName, String boatClassName,
             LinkedHashMap<String, Pair<List<Triple<String, Integer, Color>>, Boolean>> seriesNamesWithFleetNamesAndFleetOrderingAndMedal,
-            boolean persistent, ScoringSchemeType scoringSchemeType) {
+            boolean persistent, ScoringSchemeType scoringSchemeType, Serializable defaultCourseAreaId) {
+        UUID courseAreaUuid = convertSerializableToUuid(defaultCourseAreaId);
         Regatta regatta = getService().apply(
                 new AddSpecificRegatta(
                         regattaName, boatClassName, UUID.randomUUID(),
                         seriesNamesWithFleetNamesAndFleetOrderingAndMedal,
-                        persistent, baseDomainFactory.createScoringScheme(scoringSchemeType)));
+                        persistent, baseDomainFactory.createScoringScheme(scoringSchemeType), courseAreaUuid));
         return convertToRegattaDTO(regatta);
     }
 

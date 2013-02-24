@@ -913,7 +913,7 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
             series.add(medalSeries);
         }
 
-        Regatta regatta = new RegattaImpl(regattaBaseName, boatClass, series, /* persistent */ false, scoringScheme, "123");
+        Regatta regatta = new RegattaImpl(regattaBaseName, boatClass, series, /* persistent */ false, scoringScheme, "123", null);
         return regatta;
     }
 }

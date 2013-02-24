@@ -11,7 +11,6 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.ui.client.DataEntryDialog;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
@@ -84,13 +83,17 @@ public abstract class FlexibleLeaderboardDialog extends AbstractLeaderboardDialo
         LeaderboardDescriptor leaderboard = super.getResult();
         leaderboard.setRegattaName(null);
         leaderboard.setScoringScheme(getSelectedScoringSchemeType(scoringSchemeListBox, stringMessages));
+        setCourseAreaInDescriptor(leaderboard);
+        return leaderboard;
+    }
+
+    private void setCourseAreaInDescriptor(LeaderboardDescriptor leaderboard) {
         CourseAreaDTO courseArea = getSelectedCourseArea();
         if (courseArea == null) {
             leaderboard.setCourseAreaId(null);
         } else {
             leaderboard.setCourseAreaId(getSelectedCourseArea().id);
         }
-        return leaderboard;
     }
 
     @Override
@@ -122,8 +125,8 @@ public abstract class FlexibleLeaderboardDialog extends AbstractLeaderboardDialo
         return mainPanel;
     }
     
-    protected ListBox createSailingEventListBox(DataEntryDialog<?> dialog, StringMessages stringMessages) {
-        ListBox eventListBox = dialog.createListBox(false);
+    protected ListBox createSailingEventListBox() {
+        ListBox eventListBox = createListBox(false);
         eventListBox.addItem("Please select a sailing event...");
         for (EventDTO event: existingEvents) {
                 eventListBox.addItem(event.name);

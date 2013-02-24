@@ -7,6 +7,8 @@ import java.util.HashSet;
 import java.util.List;
 
 import com.google.gwt.dom.client.Style.FontWeight;
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Button;
@@ -21,6 +23,8 @@ import com.sap.sailing.gwt.ui.client.DataEntryDialog;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.ScoringSchemeTypeFormatter;
 import com.sap.sailing.gwt.ui.shared.BoatClassDTO;
+import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
+import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
 
@@ -32,10 +36,14 @@ public class RegattaWithSeriesAndFleetsCreateDialog extends DataEntryDialog<Rega
     private TextBox nameEntryField;
     private TextBox boatClassEntryField;
     private ListBox scoringSchemeListBox;
+    private ListBox courseAreaListBox;
+    private ListBox sailingEventsListBox;
 
     private List<SeriesDTO> createdSeries;
 
     private Grid seriesGrid;
+    
+    private List<EventDTO> existingEvents;
 
     protected static class RegattaParameterValidator implements Validator<RegattaDTO> {
 
@@ -110,12 +118,13 @@ public class RegattaWithSeriesAndFleetsCreateDialog extends DataEntryDialog<Rega
 
     }
 
-    public RegattaWithSeriesAndFleetsCreateDialog(Collection<RegattaDTO> existingRegattas,
+    public RegattaWithSeriesAndFleetsCreateDialog(Collection<RegattaDTO> existingRegattas, List<EventDTO> existingEvents,
             StringMessages stringConstants, DialogCallback<RegattaDTO> callback) {
         super(stringConstants.regatta(), null, stringConstants.ok(), stringConstants.cancel(),
                 new RegattaParameterValidator(stringConstants, existingRegattas), callback);
         this.stringConstants = stringConstants;
         this.regatta = new RegattaDTO();
+        this.existingEvents = existingEvents;
 
         nameEntryField = createTextBox(null);
         nameEntryField.setVisibleLength(40);
@@ -125,6 +134,10 @@ public class RegattaWithSeriesAndFleetsCreateDialog extends DataEntryDialog<Rega
         for (ScoringSchemeType scoringSchemeType: ScoringSchemeType.values()) {
             scoringSchemeListBox.addItem(ScoringSchemeTypeFormatter.format(scoringSchemeType, stringConstants));
         }
+        
+        sailingEventsListBox = createSailingEventListBox();
+        this.courseAreaListBox = createListBox(false);
+        this.courseAreaListBox.setEnabled(false);
 
         createdSeries = new ArrayList<SeriesDTO>();
         seriesGrid = new Grid(0, 0);
@@ -137,7 +150,17 @@ public class RegattaWithSeriesAndFleetsCreateDialog extends DataEntryDialog<Rega
         regatta.scoringScheme = getSelectedScoringSchemeType();
         regatta.series = new ArrayList<SeriesDTO>();
         regatta.series.addAll(createdSeries);
+        setCourseAreaInRegatta(regatta);
         return regatta;
+    }
+    
+    private void setCourseAreaInRegatta(RegattaDTO regatta) {
+        CourseAreaDTO courseArea = getSelectedCourseArea();
+        if (courseArea == null) {
+            regatta.defaultCourseAreaId = null;
+        } else {
+            regatta.defaultCourseAreaId = getSelectedCourseArea().id;
+        }
     }
     
     public ScoringSchemeType getSelectedScoringSchemeType() {
@@ -162,7 +185,7 @@ public class RegattaWithSeriesAndFleetsCreateDialog extends DataEntryDialog<Rega
         if (additionalWidget != null) {
             panel.add(additionalWidget);
         }
-        Grid formGrid = new Grid(3, 2);
+        Grid formGrid = new Grid(5, 2);
         panel.add(formGrid);
         formGrid.setWidget(0, 0, new Label(stringConstants.name() + ":"));
         formGrid.setWidget(0, 1, nameEntryField);
@@ -170,6 +193,10 @@ public class RegattaWithSeriesAndFleetsCreateDialog extends DataEntryDialog<Rega
         formGrid.setWidget(1, 1, boatClassEntryField);
         formGrid.setWidget(2, 0, new Label(stringConstants.scoringSystem() + ":"));
         formGrid.setWidget(2, 1, scoringSchemeListBox);
+        formGrid.setWidget(3, 0, new Label(stringConstants.event() + ":"));
+        formGrid.setWidget(3, 1, sailingEventsListBox);
+        formGrid.setWidget(4, 0, new Label(stringConstants.courseArea() + ":"));
+        formGrid.setWidget(4, 1, courseAreaListBox);
         
         panel.add(createHeadlineLabel(stringConstants.series()));
         panel.add(seriesGrid);
@@ -227,6 +254,62 @@ public class RegattaWithSeriesAndFleetsCreateDialog extends DataEntryDialog<Rega
     public void show() {
         super.show();
         nameEntryField.setFocus(true);
+    }
+    
+    protected ListBox createSailingEventListBox() {
+        ListBox eventListBox = createListBox(false);
+        eventListBox.addItem("Please select a sailing event...");
+        for (EventDTO event: existingEvents) {
+                eventListBox.addItem(event.name);
+        }
+        eventListBox.addChangeHandler(new ChangeHandler() {
+            @Override
+            public void onChange(ChangeEvent event) {
+                onEventSelectionChanged();
+            }
+        });
+        return eventListBox;
+    }
+    
+    protected void onEventSelectionChanged() {
+        EventDTO selectedEvent = getSelectedEvent();
+        courseAreaListBox.clear();
+        courseAreaListBox.addItem("Please select a course area...");
+        for (CourseAreaDTO courseArea : selectedEvent.venue.getCourseAreas()) {
+            courseAreaListBox.addItem(courseArea.name);
+        }
+        courseAreaListBox.setEnabled(true);
+    }
+    
+    public EventDTO getSelectedEvent() {
+        EventDTO result = null;
+        int selIndex = sailingEventsListBox.getSelectedIndex();
+        if(selIndex > 0) { // the zero index represents the 'no selection' text
+            String itemText = sailingEventsListBox.getItemText(selIndex);
+            for(EventDTO eventDTO: existingEvents) {
+                if(eventDTO.name.equals(itemText)) {
+                    result = eventDTO;
+                    break;
+                }
+            }
+        }
+        return result;
+    }
+    
+    public CourseAreaDTO getSelectedCourseArea() {
+        CourseAreaDTO result = null;
+        EventDTO event = getSelectedEvent();
+        int selIndex = courseAreaListBox.getSelectedIndex();
+        if(selIndex > 0) { // the zero index represents the 'no selection' text
+            String itemText = courseAreaListBox.getItemText(selIndex);
+            for(CourseAreaDTO courseAreaDTO: event.venue.getCourseAreas()) {
+                if(courseAreaDTO.name.equals(itemText)) {
+                    result = courseAreaDTO;
+                    break;
+                }
+            }
+        }
+        return result;
     }
 
 }

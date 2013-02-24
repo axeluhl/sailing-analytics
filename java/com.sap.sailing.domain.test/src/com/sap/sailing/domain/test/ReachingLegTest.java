@@ -84,7 +84,7 @@ public class ReachingLegTest extends TrackBasedTest {
             Iterable<Competitor> competitors, TimePoint timePointForFixes) {
         BoatClassImpl boatClass = new BoatClassImpl(boatClassName, /* typicallyStartsUpwind */ true);
         Regatta regatta = new RegattaImpl(EmptyRaceLogStore.INSTANCE, regattaName, boatClass, /* trackedRegattaRegistry */ null,
-                DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), "123");
+                DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), "123", null);
         TrackedRegatta trackedRegatta = new TrackedRegattaImpl(regatta);
         List<Waypoint> waypoints = new ArrayList<Waypoint>();
         // create a two-lap upwind/downwind course:

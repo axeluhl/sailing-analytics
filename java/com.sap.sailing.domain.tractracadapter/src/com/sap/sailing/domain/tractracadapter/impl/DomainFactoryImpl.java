@@ -340,7 +340,7 @@ public class DomainFactoryImpl implements DomainFactory {
                 if (result == null) {
                     result = new RegattaImpl(raceLogStore, event.getName(), boatClass, trackedRegattaRegistry,
                             // use the low-point system as the default scoring scheme
-                            com.sap.sailing.domain.base.DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), event.getId());
+                            com.sap.sailing.domain.base.DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), event.getId(), null);
                     regattaCache.put(key, result);
                     weakRegattaCache.put(event, result);
                     logger.info("Created regatta "+result.getName()+" ("+result.hashCode()+") because none found for key "+key);

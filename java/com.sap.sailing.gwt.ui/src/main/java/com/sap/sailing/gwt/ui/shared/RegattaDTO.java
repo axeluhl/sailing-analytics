@@ -14,6 +14,7 @@ public class RegattaDTO extends NamedDTO implements IsSerializable {
     public List<RaceWithCompetitorsDTO> races;
     public List<SeriesDTO> series;
     public ScoringSchemeType scoringScheme;
+    public String defaultCourseAreaId;
 
     public RegattaDTO() {}
 

@@ -339,17 +339,17 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     
     @Override
     public CourseArea getCourseArea(Serializable courseAreaId) {
-		for (Event event : getAllEvents()) {
-			for (CourseArea courseArea : event.getVenue().getCourseAreas()) {
-				if (courseArea.getId().equals(courseAreaId)) {
-					return courseArea;
-				}
-			}
-		}
-		return null;
-	}
+        for (Event event : getAllEvents()) {
+            for (CourseArea courseArea : event.getVenue().getCourseAreas()) {
+                if (courseArea.getId().equals(courseAreaId)) {
+                    return courseArea;
+                }
+            }
+        }
+        return null;
+    }
 
-	@Override
+    @Override
     public RegattaLeaderboard addRegattaLeaderboard(RegattaIdentifier regattaIdentifier, int[] discardThresholds) {
         Regatta regatta = getRegatta(regattaIdentifier);
         logger.info("adding regatta leaderboard for regatta "
@@ -637,7 +637,8 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
                 domainObjectFactory);
         Regatta regatta = new RegattaImpl(raceLogStore, baseEventName, getBaseDomainFactory().getOrCreateBoatClass(
                 boatClassName), this, com.sap.sailing.domain.base.DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT),
-                RegattaImpl.getFullName(baseEventName, boatClassName));
+                RegattaImpl.getFullName(baseEventName, boatClassName), null);
+        //TODO: shall a default regatta have a default course area?
         Regatta result = regattasByName.get(regatta.getName());
         if (result == null) {
             result = regatta;
@@ -649,12 +650,13 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
 
     @Override
     public Regatta createRegatta(String baseEventName, String boatClassName,
-            Serializable id, Iterable<? extends Series> series, boolean persistent, ScoringScheme scoringScheme) {
+            Serializable id, Iterable<? extends Series> series, boolean persistent, ScoringScheme scoringScheme, Serializable defaultCourseAreaId) {
         RaceLogStore raceLogStore = MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(
                 mongoObjectFactory, 
                 domainObjectFactory);
+        CourseArea courseArea = getCourseArea(defaultCourseAreaId);
         Regatta regatta = new RegattaImpl(raceLogStore, baseEventName,
-                getBaseDomainFactory().getOrCreateBoatClass(boatClassName), series, persistent, scoringScheme, id);
+                getBaseDomainFactory().getOrCreateBoatClass(boatClassName), series, persistent, scoringScheme, id, courseArea);
         logger.info("Created regatta " + regatta.getName() + " (" + hashCode() + ") on "+this);
         cacheAndReplicateSpecificRegattaWithoutRaceColumns(regatta);
         if (persistent) {
@@ -795,10 +797,16 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
             logger.info("putting regatta "+regatta.getName()+" ("+regatta.hashCode()+") into regattasByName of "+this);
             regattasByName.put(regatta.getName(), regatta);
             regatta.addRegattaListener(this);
+            
+            Serializable courseAreaId = null;
+            if (regatta.getDefaultCourseArea() != null) {
+                courseAreaId = regatta.getDefaultCourseArea().getId();
+            }
+            
             replicate(new AddSpecificRegatta(
                     regatta.getBaseName(), regatta.getBoatClass() == null ? null : regatta
                     .getBoatClass().getName(), regatta.getId(), getSeriesWithoutRaceColumnsConstructionParametersAsMap(regatta),
-                    regatta.isPersistent(), regatta.getScoringScheme()));
+                    regatta.isPersistent(), regatta.getScoringScheme(), courseAreaId));
             RegattaIdentifier regattaIdentifier = regatta.getRegattaIdentifier();
             for (RaceDefinition race : regatta.getAllRaces()) {
                 replicate(new AddRaceDefinition(regattaIdentifier, race));

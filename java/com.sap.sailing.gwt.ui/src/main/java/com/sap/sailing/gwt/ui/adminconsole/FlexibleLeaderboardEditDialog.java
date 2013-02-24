@@ -32,7 +32,7 @@ public class FlexibleLeaderboardEditDialog extends FlexibleLeaderboardDialog {
         }
         scoringSchemeListBox.setEnabled(false);
         
-        sailingEventsListBox = createSailingEventListBox(this, stringConstants);
+        sailingEventsListBox = createSailingEventListBox();
         for (EventDTO event : existingEvents) {
             for (CourseAreaDTO courseArea : event.venue.getCourseAreas()) {
                 if (courseArea.id.equals(leaderboard.getCourseAreaId())) {

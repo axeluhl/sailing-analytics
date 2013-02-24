@@ -108,7 +108,7 @@ public class DomainFactoryImpl implements DomainFactory {
         }
         if (result == null) {
             result = new RegattaImpl(raceLogStore, raceID, getOrCreateBoatClassFromRaceID(raceID), trackedRegattaRegistry,
-                    getBaseDomainFactory().createScoringScheme(ScoringSchemeType.LOW_POINT), raceID);
+                    getBaseDomainFactory().createScoringScheme(ScoringSchemeType.LOW_POINT), raceID, null);
             logger.info("Created regatta "+result.getName()+" ("+result.hashCode()+")");
             raceIDToRegattaCache.put(raceID, result);
         }
