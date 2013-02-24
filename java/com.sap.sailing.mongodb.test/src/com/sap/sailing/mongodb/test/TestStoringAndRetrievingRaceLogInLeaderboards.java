@@ -8,7 +8,9 @@ import java.util.UUID;
 import org.junit.Test;
 
 import com.mongodb.MongoException;
+import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
+import com.sap.sailing.domain.base.impl.FleetImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util;
@@ -53,17 +55,17 @@ public class TestStoringAndRetrievingRaceLogInLeaderboards extends AbstractMongo
                 new ResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces), new LowPoint(), null);
         
         
-        //Fleet[] fleets = {new FleetImpl("Gold"), new FleetImpl("Silver") };
+        Fleet[] fleets = {new FleetImpl("Gold"), new FleetImpl("Silver") };
         
-        RaceColumn r1 = leaderboard.addRaceColumn("R1", /* medalRace */ false, leaderboard.getFleet(null));
+        RaceColumn r1 = leaderboard.addRaceColumn("R1", /* medalRace */ false, fleets);
         
         RaceLogPassChangeEvent event = RaceLogEventFactory.INSTANCE.createRaceLogPassChangeEvent(now, 0);
         
-        r1.getRaceLog(leaderboard.getFleet(null)).add(event);
+        r1.getRaceLog(fleets[0]).add(event);
         new MongoObjectFactoryImpl(db).storeLeaderboard(leaderboard);
         Leaderboard loadedLeaderboard = new DomainObjectFactoryImpl(db).loadLeaderboard(leaderboardName, /* regattaRegistry */ null);
         
-        RaceLog loadedRaceLog = loadedLeaderboard.getRaceColumnByName("R1").getRaceLog(loadedLeaderboard.getFleet(null));
+        RaceLog loadedRaceLog = loadedLeaderboard.getRaceColumnByName("R1").getRaceLog(loadedLeaderboard.getFleet("Gold"));
         loadedRaceLog.lockForRead();
         try {
         	RaceLogEvent loadedEvent = loadedRaceLog.getFirstRawFix();
