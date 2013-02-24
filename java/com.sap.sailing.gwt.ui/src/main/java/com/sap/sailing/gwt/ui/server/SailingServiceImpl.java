@@ -1042,6 +1042,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         }
         if (regatta.getDefaultCourseArea() != null) {
             regattaDTO.defaultCourseAreaId = regatta.getDefaultCourseArea().getId().toString();
+            regattaDTO.defaultCourseAreaName = regatta.getDefaultCourseArea().getName();
         }
         return regattaDTO;
     }

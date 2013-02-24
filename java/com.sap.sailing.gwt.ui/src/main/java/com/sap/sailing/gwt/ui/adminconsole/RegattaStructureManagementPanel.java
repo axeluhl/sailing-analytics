@@ -66,6 +66,7 @@ public class RegattaStructureManagementPanel extends SimplePanel implements Rega
     private final StringMessages stringMessages;
 
     private final List<EventDTO> events;
+    private final List<EventDTO> existingEvents;
     private ListBox eventsComboBox;
     private EventDTO selectedEvent;
 
@@ -89,6 +90,8 @@ public class RegattaStructureManagementPanel extends SimplePanel implements Rega
 
         events = new ArrayList<EventDTO>();
         selectedEvent = null;
+        
+        this.existingEvents = new ArrayList<EventDTO>();
 
         VerticalPanel mainPanel = new VerticalPanel();
         this.setWidget(mainPanel);
@@ -178,6 +181,14 @@ public class RegattaStructureManagementPanel extends SimplePanel implements Rega
                 ScoringSchemeType scoringScheme = regatta.scoringScheme;
                 String scoringSystem = scoringScheme == null ? "" : ScoringSchemeTypeFormatter.format(scoringScheme, stringMessages);               
                 return scoringSystem;
+            }
+        };
+        
+        TextColumn<RegattaDTO> regattaCourseAreaColumn = new TextColumn<RegattaDTO>() {
+            @Override
+            public String getValue(RegattaDTO regatta) {
+                String courseAreaName = regatta.defaultCourseAreaId == null ? "" : regatta.defaultCourseAreaName;
+                return courseAreaName;
             }
         };
         
@@ -280,6 +291,7 @@ public class RegattaStructureManagementPanel extends SimplePanel implements Rega
         regattaTable.addColumn(regattaNameColumn, stringMessages.regattaName());
         regattaTable.addColumn(regattaBoatClassColumn, stringMessages.boatClass());
         regattaTable.addColumn(regattaScoringSystemColumn, stringMessages.scoringSystem());
+        regattaTable.addColumn(regattaCourseAreaColumn, stringMessages.courseArea());
         regattaTable.addColumn(regattaSeriesColumn, stringMessages.series());
         regattaTable.addColumn(regattaRacesColumn, stringMessages.races());
         regattaTable.addColumn(regattaFleetsColumn, stringMessages.fleets());
@@ -298,6 +310,20 @@ public class RegattaStructureManagementPanel extends SimplePanel implements Rega
         parentPanel.add(regattaTable);
     }
     
+    protected String getCourseAreaName(String defaultCourseAreaId) {
+        if (defaultCourseAreaId == null)
+            return "";
+        
+        for (EventDTO event : existingEvents) {
+            for (CourseAreaDTO courseArea : event.venue.getCourseAreas()) {
+                if (courseArea.id.equals(defaultCourseAreaId)) {
+                    return courseArea.name;
+                }
+            }
+        }
+        return "";
+    }
+
     private void editRacesOfRegattaSeries(final RegattaDTO regatta) {
         RaceColumnInRegattaSeriesDialog raceDialog = new RaceColumnInRegattaSeriesDialog(regatta, stringMessages, 
                 new DialogCallback<Pair<SeriesDTO, List<RaceColumnDTO>>>() {

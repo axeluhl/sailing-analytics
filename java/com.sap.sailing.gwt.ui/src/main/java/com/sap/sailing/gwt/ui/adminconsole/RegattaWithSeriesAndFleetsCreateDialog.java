@@ -159,7 +159,8 @@ public class RegattaWithSeriesAndFleetsCreateDialog extends DataEntryDialog<Rega
         if (courseArea == null) {
             regatta.defaultCourseAreaId = null;
         } else {
-            regatta.defaultCourseAreaId = getSelectedCourseArea().id;
+            regatta.defaultCourseAreaId = courseArea.id;
+            regatta.defaultCourseAreaName = courseArea.name;
         }
     }
     
