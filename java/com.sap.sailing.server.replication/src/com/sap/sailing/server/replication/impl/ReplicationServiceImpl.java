@@ -9,6 +9,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import org.osgi.util.tracker.ServiceTracker;
 
@@ -39,6 +40,8 @@ import com.sap.sailing.server.replication.ReplicationService;
  * 
  */
 public class ReplicationServiceImpl implements ReplicationService, OperationExecutionListener, HasRacingEventService {
+    private static final Logger logger = Logger.getLogger(ReplicationServiceImpl.class.getName());
+    
     private final ReplicationInstancesManager replicationInstancesManager;
     
     private ServiceTracker<RacingEventService, RacingEventService> racingEventServiceTracker;
@@ -165,17 +168,22 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
 
     @Override
     public void startToReplicateFrom(ReplicationMasterDescriptor master) throws IOException, ClassNotFoundException {
+        logger.info("Starting to replicate from "+master);
         replicatingFromMaster = master;
         registerReplicaWithMaster(master);
         QueueingConsumer consumer = master.getConsumer();
         URL initialLoadURL = master.getInitialLoadURL();
+        logger.info("Initial load URL is "+initialLoadURL);
         final Replicator replicator = new Replicator(master, this, /* startSuspended */ true, consumer);
         // start receiving messages already now, but start in suspended mode
         new Thread(replicator, "Replicator receiving from "+master.getHostname()+"/"+master.getExchangeName()).start();
+        logger.info("Started replicator thread");
         InputStream is = initialLoadURL.openStream();
         final RacingEventService racingEventService = getRacingEventService();
         ObjectInputStream ois = racingEventService.getBaseDomainFactory().createObjectInputStreamResolvingAgainstThisFactory(is);
+        logger.info("Starting to receive initial load");
         racingEventService.initiallyFillFrom(ois);
+        logger.info("Done receiving initial load");
         replicator.setSuspended(false); // apply queued operations
     }
 
