@@ -28,6 +28,7 @@ import com.sap.sailing.server.operationaltransformation.AddColumnToLeaderboard;
 import com.sap.sailing.server.operationaltransformation.AddColumnToSeries;
 import com.sap.sailing.server.operationaltransformation.AddDefaultRegatta;
 import com.sap.sailing.server.operationaltransformation.CreateFlexibleLeaderboard;
+import com.sap.sailing.server.operationaltransformation.RenameLeaderboard;
 import com.sap.sailing.server.replication.ReplicationMasterDescriptor;
 
 public class RaceLogReplicationTest extends AbstractServerReplicationTest {
@@ -141,6 +142,27 @@ public class RaceLogReplicationTest extends AbstractServerReplicationTest {
         masterLog.add(raceLogEvent);
         
         replicationDescriptorPair.getA().startToReplicateFrom(replicationDescriptorPair.getB());
+        
+        RaceLog replicaLog = getReplicaLog(fleetName, raceColumnName, masterLeaderboard);
+        addAndValidate(masterLog, replicaLog, anotherRaceLogEvent);
+    }
+    
+    @Test
+    public void testRaceEventReplicationOnRenamingFlexibleLeaderboard() throws ClassNotFoundException, IOException, InterruptedException {
+        final String leaderboardName = "Test";
+        final String fleetName = "Default";
+        final String raceColumnName = "R1";
+        
+        FlexibleLeaderboard masterLeaderboard = setupFlexibleLeaderboard(leaderboardName);
+        RaceLog masterLog = setupRaceColumn(leaderboardName, fleetName, raceColumnName);
+        
+        replicationDescriptorPair.getA().startToReplicateFrom(replicationDescriptorPair.getB());
+        
+        masterLog.add(raceLogEvent);
+        
+        RenameLeaderboard renameOperation = new RenameLeaderboard(leaderboardName, leaderboardName + "new");
+        master.apply(renameOperation);
+        Thread.sleep(3000);
         
         RaceLog replicaLog = getReplicaLog(fleetName, raceColumnName, masterLeaderboard);
         addAndValidate(masterLog, replicaLog, anotherRaceLogEvent);
