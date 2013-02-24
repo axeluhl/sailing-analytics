@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.base.impl;
 
+import java.io.Serializable;
+
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.racelog.RaceLogCourseAreaChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
@@ -10,7 +12,8 @@ import com.sap.sailing.domain.racelog.RaceLogPassChangeEvent;
 import com.sap.sailing.domain.racelog.RaceLogRaceStatusEvent;
 import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
 
-public class RaceColumnRaceLogReplicator implements RaceLogEventVisitor {
+public class RaceColumnRaceLogReplicator implements RaceLogEventVisitor, Serializable {
+    private static final long serialVersionUID = 4752330236765192592L;
     
     private final RaceColumn raceColumn;
     private final RaceLogIdentifier identifier;

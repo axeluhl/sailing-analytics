@@ -6,7 +6,7 @@ import com.sap.sailing.domain.base.Fleet;
 
 public interface RaceLogIdentifierTemplate extends Serializable {
     
-    String getHostName();
+    String getParentObjectName();
     
     RaceLogIdentifier compile(Fleet fleet);
     

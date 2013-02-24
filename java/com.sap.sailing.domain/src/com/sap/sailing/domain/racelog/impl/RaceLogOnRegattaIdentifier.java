@@ -28,7 +28,7 @@ public class RaceLogOnRegattaIdentifier implements RaceLogIdentifierTemplate {
     }
 
     @Override
-    public String getHostName() {
+    public String getParentObjectName() {
         return regattaName;
     }
 
