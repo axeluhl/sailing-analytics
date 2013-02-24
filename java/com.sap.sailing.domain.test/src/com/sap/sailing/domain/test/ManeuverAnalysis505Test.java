@@ -13,7 +13,6 @@ import java.util.GregorianCalendar;
 import java.util.List;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.Competitor;
@@ -28,7 +27,6 @@ import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
 
-@Ignore
 public class ManeuverAnalysis505Test extends AbstractManeuverDetectionTestCase {
 
     public ManeuverAnalysis505Test() throws MalformedURLException, URISyntaxException {

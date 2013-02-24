@@ -11,9 +11,7 @@ import java.net.URL;
 import java.nio.charset.Charset;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
-
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
@@ -23,7 +21,6 @@ import com.sap.sailing.domain.tractracadapter.TracTracConnectionConstants;
 import com.sap.sailing.domain.tractracadapter.TracTracRaceTracker;
 import com.sap.sailing.domain.tractracadapter.impl.DomainFactoryImpl;
 
-@Ignore
 public class UnicodeCharactersInCompetitorNamesTest {
     protected static final boolean tractracTunnel = Boolean.valueOf(System.getProperty("tractrac.tunnel", "false"));
     protected static final String tractracTunnelHost = System.getProperty("tractrac.tunnel.host", "localhost");

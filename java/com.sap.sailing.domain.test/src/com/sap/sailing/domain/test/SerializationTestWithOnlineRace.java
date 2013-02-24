@@ -12,7 +12,6 @@ import java.net.URISyntaxException;
 import java.util.GregorianCalendar;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.Competitor;
@@ -29,7 +28,6 @@ import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
 
-@Ignore
 public class SerializationTestWithOnlineRace extends OnlineTracTracBasedTest {
     public SerializationTestWithOnlineRace() throws MalformedURLException, URISyntaxException {
         super();

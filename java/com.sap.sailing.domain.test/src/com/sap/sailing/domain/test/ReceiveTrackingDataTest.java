@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.maptrack.client.io.TypeController;
@@ -31,7 +30,6 @@ import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.Receiver;
 
-@Ignore
 public class ReceiveTrackingDataTest extends AbstractTracTracLiveTest {
     final private Object semaphor = new Object();
     final private Competitor[] firstTracked = new Competitor[1];
