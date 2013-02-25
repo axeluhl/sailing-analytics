@@ -36,7 +36,7 @@ public abstract class AbstractEventManagementPanel extends AbstractRegattaPanel 
         RegattaDTO selectedRegatta = getSelectedRegatta();
         this.availableRegattas.clear();
         this.availableRegattasListBox.clear();
-        this.availableRegattasListBox.addItem(this.stringMessages.noRegatta());
+        this.availableRegattasListBox.addItem(this.stringMessages.defaultRegatta());
         List<RegattaDTO> regattasSortedByName = new ArrayList<RegattaDTO>(regattas);
         Collections.sort(regattasSortedByName, new Comparator<RegattaDTO>() {
             @Override

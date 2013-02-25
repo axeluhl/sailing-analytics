@@ -372,7 +372,7 @@ public interface StringMessages extends Messages {
     String createRegattaLeaderboard();
     String editFlexibleLeaderboard();
     String editRegattaLeaderboard();
-    String noRegatta();
+    String defaultRegatta();
     String useOverallLeaderboard();
     String overallStandings();
     String scoringSchemeHighPointEssOverall();
@@ -502,4 +502,6 @@ public interface StringMessages extends Messages {
     String histogram();
     String numberOfDataPoints();
     String angleAndTotalNumberOfDataPoints(int angle, int numberOfDataPoints);
+    String buoyZone();
+    String radiusInMeters();
 }
