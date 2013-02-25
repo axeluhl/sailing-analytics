@@ -6,7 +6,6 @@ import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import com.sap.sailing.gwt.ui.shared.BoatClassDTOsAndNotificationMessage;
 import com.sap.sailing.gwt.ui.shared.ConfigurationException;
-import com.sap.sailing.gwt.ui.shared.LegsNamesDTO;
 import com.sap.sailing.gwt.ui.shared.PolarDiagramDTOAndNotificationMessage;
 import com.sap.sailing.gwt.ui.shared.PositionDTO;
 import com.sap.sailing.gwt.ui.shared.Request1TurnerDTO;
@@ -48,5 +47,5 @@ public interface SimulatorService extends RemoteService {
 
     Response1TurnerDTO get1Turner(final Request1TurnerDTO requestData) throws ConfigurationException;
 
-    LegsNamesDTO getLegs(int boatClassIndex);
+    List<String> getLegs();
 }
