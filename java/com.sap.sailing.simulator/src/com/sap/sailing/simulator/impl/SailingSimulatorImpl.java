@@ -11,82 +11,90 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.TreeMap;
 import java.util.logging.Logger;
 
 import org.osgi.framework.FrameworkUtil;
 
-import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.Leg;
-import com.sap.sailing.domain.base.RaceDefinition;
-import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MeterDistance;
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
-import com.sap.sailing.domain.tracking.GPSFixMoving;
-import com.sap.sailing.domain.tracking.GPSFixTrack;
-import com.sap.sailing.domain.tracking.RacesHandle;
-import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
-import com.sap.sailing.server.impl.RacingEventServiceImpl;
 import com.sap.sailing.simulator.Boundary;
 import com.sap.sailing.simulator.Path;
 import com.sap.sailing.simulator.SailingSimulator;
 import com.sap.sailing.simulator.SimulationParameters;
-import com.sap.sailing.simulator.TimedPositionWithSpeed;
 import com.sap.sailing.simulator.util.SailingSimulatorUtil;
 import com.sap.sailing.simulator.windfield.WindFieldGenerator;
 import com.sap.sailing.simulator.windfield.impl.WindFieldGeneratorMeasured;
 
 public class SailingSimulatorImpl implements SailingSimulator {
 
-    private SimulationParameters simulationParameters;
-    private Path racecourse;
+    private static final Logger LOGGER = Logger.getLogger("com.sap.sailing.simulator.impl.SailingSimulatorImpl");
 
-    private static double windScale = 4.5;
+    private SimulationParameters simulationParameters = null;
+    private Path racecourse = null;
+    private PathGeneratorTracTrac pathGenerator = null;
 
-    // proxy configuration
-    private static String liveURI = "tcp://10.18.22.156:1520";
-
-    // no-proxy configuration
-    // private static String liveURI = "tcp://germanmaster.traclive.dk:4400";
+    private static final double WIND_SCALE = 4.5;
 
     // proxy configuration
-    private static String storedURI = "tcp://10.18.22.156:1521";
+    private static final String LIVE_URI = "tcp://10.18.22.156:1520";
 
     // no-proxy configuration
-    // private static String storedURI = "tcp://germanmaster.traclive.dk:4401";
+    // private static final String LIVE_URI = "tcp://germanmaster.traclive.dk:4400";
 
-    private static String raceURL = "http://germanmaster.traclive.dk/events/event_20110929_Internatio/clientparams.php?event=event_20110929_Internatio&race=d1f521fa-ec52-11e0-a523-406186cbf87c";
-    // private static String raceURL =
+    // proxy configuration
+    private static final String STORED_URI = "tcp://10.18.22.156:1521";
+
+    // no-proxy configuration
+    // private static final String STORED_URI = "tcp://germanmaster.traclive.dk:4401";
+
+    /**
+     * Internationale Deutche Meisterschaft, 49er Race4
+     */
+    private static final String RACE_URL = "http://germanmaster.traclive.dk/events/event_20110929_Internatio/clientparams.php?event=event_20110929_Internatio&race=d1f521fa-ec52-11e0-a523-406186cbf87c";
+
+    /**
+     * Internationale Deutche Meisterschaft, 49er Race5
+     */
+    // private static final String RACE_URL =
     // "http://germanmaster.traclive.dk/events/event_20110929_Internatio/clientparams.php?event=event_20110929_Internatio&race=eb06795a-ec52-11e0-a523-406186cbf87c";
-    // private static String raceURL =
-    // "http://germanmaster.traclive.dk/events/event_20120615_KielerWoch/clientparams.php?event=event_20120615_KielerWoch&race=0b5969cc-b789-11e1-a845-406186cbf87c";
-    // private static String raceURL =
+
+    /**
+     * Internationale Deutche Meisterschaft, Star Race4
+     */
+    // private static final String RACE_URL =
     // "http://germanmaster.traclive.dk/events/event_20110929_Internatio/clientparams.php?event=event_20110929_Internatio&race=6bb0829e-ec44-11e0-a523-406186cbf87c";
 
-    private static Logger logger = Logger.getLogger("com.sap.sailing");
+    /**
+     * Kieler Woche 2012, 49er Yellow - Race 1
+     */
+    // private static final String RACE_URL =
+    // "http://germanmaster.traclive.dk/events/event_20120615_KielerWoch/clientparams.php?event=event_20120615_KielerWoch&race=0b5969cc-b789-11e1-a845-406186cbf87c";
 
-    public SailingSimulatorImpl(SimulationParameters params) {
-        this.simulationParameters = params;
+
+
+    public SailingSimulatorImpl(SimulationParameters parameters) {
+        this.simulationParameters = parameters;
+
+        this.initializePathGenerator(parameters);
+    }
+
+    private void initializePathGenerator(SimulationParameters parameters) {
+        this.pathGenerator = new PathGeneratorTracTrac(parameters);
+        this.pathGenerator.setEvaluationParameters(RACE_URL, LIVE_URI, STORED_URI, WIND_SCALE);
     }
 
     @Override
-    public void setSimulationParameters(SimulationParameters params) {
-        this.simulationParameters = params;
+    public void setSimulationParameters(SimulationParameters parameters) {
+        this.simulationParameters = parameters;
+        this.initializePathGenerator(parameters);
     }
 
     @Override
@@ -108,14 +116,14 @@ public class SailingSimulatorImpl implements SailingSimulator {
                 return allPaths;
             }
 
-            PathGeneratorTracTrac genTrac = new PathGeneratorTracTrac(this.simulationParameters);
-            genTrac.setEvaluationParameters(raceURL, liveURI, storedURI, windScale);
+            // PathGeneratorTracTrac genTrac = new PathGeneratorTracTrac(this.simulationParameters);
+            // genTrac.setEvaluationParameters(RACE_URL, LIVE_URI, STORED_URI, WIND_SCALE);
 
-            gpsPath = genTrac.getPath();
-            gpsPathPoly = genTrac.getPathPolyline(new MeterDistance(4.88));
+            gpsPath = this.pathGenerator.getPath();
+            gpsPathPoly = this.pathGenerator.getPathPolyline(new MeterDistance(4.88));
             allPaths.put("6#GPS Poly", gpsPathPoly);
             allPaths.put("7#GPS Track", gpsPath);
-            this.racecourse = genTrac.getRaceCourse();
+            this.racecourse = this.pathGenerator.getRaceCourse();
 
         }
 
@@ -142,7 +150,8 @@ public class SailingSimulatorImpl implements SailingSimulator {
             // set base wind bearing
             wf.getWindParameters().baseWindBearing += bd.getSouth().getDegrees();
             //System.out.println("baseWindBearing: " + wf.getWindParameters().baseWindBearing);
-            logger.info("base wind: "+this.simulationParameters.getBoatPolarDiagram().getWind().getKnots()+" kn, "+((wf.getWindParameters().baseWindBearing)%360.0)+"°");
+            LOGGER.info("base wind: " + this.simulationParameters.getBoatPolarDiagram().getWind().getKnots() + " kn, "
+                    + ((wf.getWindParameters().baseWindBearing) % 360.0) + "°");
 
             // initialize interpolation table for getSpeedAtBearingOverGround, e.g. for what-if or for optimization on overground-grids
             //this.simulationParameters.getBoatPolarDiagram().setCurrent(null); // initialize
@@ -152,7 +161,8 @@ public class SailingSimulatorImpl implements SailingSimulator {
             this.simulationParameters.getBoatPolarDiagram().setCurrent(new KnotSpeedWithBearingImpl(wf.getWindParameters().curSpeed, new DegreeBearingImpl(wf.getWindParameters().curBearing)));
             //this.simulationParameters.getBoatPolarDiagram().setCurrent(new KnotSpeedWithBearingImpl(2.0,new DegreeBearingImpl((270.0)%360.0)));
             if (this.simulationParameters.getBoatPolarDiagram().getCurrent() != null) {
-                logger.info("water current: "+this.simulationParameters.getBoatPolarDiagram().getCurrent().getKnots()+" kn, "+this.simulationParameters.getBoatPolarDiagram().getCurrent().getBearing().getDegrees()+"°");
+                LOGGER.info("water current: " + this.simulationParameters.getBoatPolarDiagram().getCurrent().getKnots() + " kn, "
+                        + this.simulationParameters.getBoatPolarDiagram().getCurrent().getBearing().getDegrees() + "°");
             }
 
             wf.setBoundary(bd);
@@ -296,7 +306,7 @@ public class SailingSimulatorImpl implements SailingSimulator {
 
         try {
             pathPrefix = SailingSimulatorImpl.getPathPrefix();
-            logger.info("pathPrefix=" + pathPrefix);
+            LOGGER.info("pathPrefix=" + pathPrefix);
         } catch (ClassNotFoundException exception) {
             return false;
         }
@@ -448,139 +458,25 @@ public class SailingSimulatorImpl implements SailingSimulator {
         Path path = readFromResourcesFile("resources/7#GPS Track.dat");
         if (path == null) {
             System.err.println("[ERROR][SailingSimulatorImpl][readPathsFromResources] Cannot de-serialize path from resources/7#GPS Track.dat");
+            LOGGER.warning("[ERROR][SailingSimulatorImpl][readPathsFromResources] Cannot de-serialize path from resources/7#GPS Track.dat");
 
-            PathGeneratorTracTrac genTrac = new PathGeneratorTracTrac(this.simulationParameters);
-            genTrac.setEvaluationParameters(raceURL, liveURI, storedURI, windScale);
-            path = genTrac.getPath();
+            // PathGeneratorTracTrac genTrac = new PathGeneratorTracTrac(this.simulationParameters);
+            // genTrac.setEvaluationParameters(RACE_URL, LIVE_URI, STORED_URI, WIND_SCALE);
+            path = this.pathGenerator.getPath();
         }
 
         return path;
     }
 
-    public Path getLeg(int legIndex, int competitorIndex, int boatClassIndex) {
-        
-    	URI liveURIr = null;
-        URI storedURIr = null;
-        URL paramURLr = null;
-        RacesHandle raceHandle = null; 
+    @Override
+    public List<String> getLegsNames() {
 
-        RacingEventServiceImpl service = new RacingEventServiceImpl();
-        try {
-            liveURIr = new URI(liveURI);
-        } catch (URISyntaxException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        try {
-            storedURIr = new URI(storedURI);
-        } catch (URISyntaxException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        try {
-            paramURLr = new URL(raceURL);
-        } catch (MalformedURLException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        try {
-            raceHandle = service.addTracTracRace(paramURLr, liveURIr, storedURIr, EmptyWindStore.INSTANCE, 60000, this);
-        } catch (Exception e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        synchronized (this) {
-            try {
-                this.wait();
-            } catch (InterruptedException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-        }
-
-    	RaceDefinition race = raceHandle.getRaces().iterator().next();
-    	Regatta regatta = raceHandle.getRegatta();
-    	TrackedRace trackedRace = service.getTrackedRace(regatta, race);
-    	Iterator<Competitor> competitors = race.getCompetitors().iterator();
-    	Competitor competitor = null;
-    	for(int i = 0; i <= competitorIndex; i++) competitor = competitors.next();
-    	Leg leg = race.getCourse().getLegs().get(legIndex);
-    	
-    	TimePoint startTime = trackedRace.getMarkPassing(competitor, leg.getFrom()).getTimePoint();
-    	TimePoint endTime = trackedRace.getMarkPassing(competitor, leg.getTo()).getTimePoint();
-    	
-    	GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(competitor);
-    	track.lockForRead();
-    	Iterator<GPSFixMoving> it = track.getFixesIterator(startTime, true);
-    	
-    	List<TimedPositionWithSpeed> list = new ArrayList<TimedPositionWithSpeed>();
-    	
-    	while( it.hasNext() ) {
-    		GPSFixMoving current = it.next();
-    		if (current.getTimePoint().after(endTime)) break;
-    		TimedPositionWithSpeed currentTimedPositionWithSpeed = 
-    				new TimedPositionWithSpeedImpl(current.getTimePoint(),current.getPosition(),current.getSpeed());
-    		list.add(currentTimedPositionWithSpeed);
-    	}
-    	
-    	//what should we do for the windfield?
-    	return new PathImpl(list, null);
+        return this.pathGenerator.getLegsNames("");
     }
 
     @Override
-    public List<String> getLegsNames(int boatClassIndex) {
+    public Path getLeg(int legIndex, int competitorIndex) {
 
-        List<String> result = new ArrayList<String>();
-
-        URI liveURIr = null;
-        URI storedURIr = null;
-        URL paramURLr = null;
-        RacesHandle raceHandle = null;
-
-        RacingEventServiceImpl service = new RacingEventServiceImpl();
-        try {
-            liveURIr = new URI(liveURI);
-        } catch (URISyntaxException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        try {
-            storedURIr = new URI(storedURI);
-        } catch (URISyntaxException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        try {
-            paramURLr = new URL(raceURL);
-        } catch (MalformedURLException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        try {
-            raceHandle = service.addTracTracRace(paramURLr, liveURIr, storedURIr, EmptyWindStore.INSTANCE, 60000, this);
-        } catch (Exception e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        synchronized (this) {
-            try {
-                this.wait();
-            } catch (InterruptedException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-        }
-
-        if( raceHandle != null) {
-            Set<RaceDefinition> races = raceHandle.getRaces();
-            for( RaceDefinition race : races) {
-                List<Leg> legs = race.getCourse().getLegs();
-                for( Leg leg : legs) {
-                    result.add(leg.toString());
-                }
-            }
-        }
-
-        return result;
+        return this.pathGenerator.getLeg(legIndex, competitorIndex);
     }
 }
