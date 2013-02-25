@@ -16,7 +16,7 @@ public class CompactWindImpl extends AbstractSpeedWithAbstractBearingImpl implem
     private final boolean positionIsNull;
     private final boolean bearingIsNull;
     private final boolean timePointIsNull;
-    private final double speedInKnots;
+    private double speedInKnots;
     private final double degBearing;
     private final long timePointAsMillis;
 
@@ -56,7 +56,7 @@ public class CompactWindImpl extends AbstractSpeedWithAbstractBearingImpl implem
             return timePointAsMillis;
         }
     }
-    
+
     public CompactWindImpl(Wind wind) {
         if (wind.getBearing() == null) {
             bearingIsNull = true;
@@ -123,6 +123,12 @@ public class CompactWindImpl extends AbstractSpeedWithAbstractBearingImpl implem
         } else {
             return getBearing().reverse();
         }
+    }
+
+    @Override
+    public void scale(double multiplier) {
+        this.speedInKnots *= multiplier;
+
     }
 
 }

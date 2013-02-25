@@ -6,12 +6,12 @@ import com.sap.sailing.domain.common.Speed;
 
 public class KilometersPerHourSpeedImpl extends AbstractSpeedImpl implements Speed {
     private static final long serialVersionUID = -524654796500981303L;
-    private final double speedInKilometersPerHour;
-    
+    private double speedInKilometersPerHour;
+
     public KilometersPerHourSpeedImpl(double speedInKilometersPerHour) {
         this.speedInKilometersPerHour = speedInKilometersPerHour;
     }
-    
+
     @Override
     public double getKnots() {
         return getKilometersPerHour() * 1000. / Mile.METERS_PER_NAUTICAL_MILE;
@@ -25,5 +25,11 @@ public class KilometersPerHourSpeedImpl extends AbstractSpeedImpl implements Spe
     @Override
     public double getKilometersPerHour() {
         return speedInKilometersPerHour;
+    }
+
+    @Override
+    public void scale(double multiplier) {
+        this.speedInKilometersPerHour *= multiplier;
+
     }
 }

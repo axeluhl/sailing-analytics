@@ -41,15 +41,20 @@ public interface Speed extends Comparable<Speed>, Serializable {
         public Distance travel(TimePoint from, TimePoint to) {
             return Distance.NULL;
         }
-        
+
+        @Override
+        public void scale(double multiplier) {
+
+        }
+
     };
-    
+
     double getKnots();
 
     double getMetersPerSecond();
 
     double getKilometersPerHour();
-    
+
     double getBeaufort();
 
     /**
@@ -58,5 +63,7 @@ public interface Speed extends Comparable<Speed>, Serializable {
      * amount then so will the resulting distance.
      */
     Distance travel(TimePoint from, TimePoint to);
+
+    void scale(double multiplier);
 
 }

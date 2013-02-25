@@ -2,7 +2,7 @@ package com.sap.sailing.domain.tracking.impl;
 
 import com.sap.sailing.domain.base.CourseChange;
 import com.sap.sailing.domain.base.SpeedWithBearing;
-import com.sap.sailing.domain.base.impl.AbstractSpeedWithBearingImpl;
+import com.sap.sailing.domain.base.impl.AbstractSpeedWithAbstractBearingImpl;
 import com.sap.sailing.domain.common.AbstractBearing;
 import com.sap.sailing.domain.common.AbstractSpeedImpl;
 import com.sap.sailing.domain.common.Bearing;
@@ -21,9 +21,9 @@ import com.sap.sailing.domain.tracking.GPSFixMoving;
  */
 public class CompactGPSFixMovingImpl extends CompactGPSFixImpl implements GPSFixMoving {
     private static final long serialVersionUID = 761582024504236533L;
-    private final double knotSpeed;
+    private double knotSpeed;
     private final double degBearing;
-    
+
     private class CompactSpeedWithBearing extends AbstractSpeedImpl implements SpeedWithBearing {
         private static final long serialVersionUID = 1802065090733146728L;
 
@@ -41,15 +41,15 @@ public class CompactGPSFixMovingImpl extends CompactGPSFixImpl implements GPSFix
         public Position travelTo(Position pos, TimePoint from, TimePoint to) {
             return pos.translateGreatCircle(getBearing(), this.travel(from, to));
         }
-        
+
         @Override
         public SpeedWithBearing applyCourseChange(CourseChange courseChange) {
-            return AbstractSpeedWithBearingImpl.applyCourseChange(this, courseChange);
+            return AbstractSpeedWithAbstractBearingImpl.applyCourseChange(this, courseChange);
         }
 
         @Override
         public CourseChange getCourseChangeRequiredToReach(SpeedWithBearing targetSpeedWithBearing) {
-            return AbstractSpeedWithBearingImpl.getCourseChangeRequiredToReach(getSpeed(), targetSpeedWithBearing);
+            return AbstractSpeedWithAbstractBearingImpl.getCourseChangeRequiredToReach(getSpeed(), targetSpeedWithBearing);
         }
 
         @Override
@@ -60,14 +60,19 @@ public class CompactGPSFixMovingImpl extends CompactGPSFixImpl implements GPSFix
         public int hashCode() {
             return super.hashCode() ^ getBearing().hashCode();
         }
-        
+
         @Override
         public boolean equals(Object object) {
             return super.equals(object) && object instanceof SpeedWithBearing
                     && getBearing().equals(((SpeedWithBearing) object).getBearing());
         }
+
+        @Override
+        public void scale(double multiplier) {
+            knotSpeed *= multiplier;
+        }
     }
-    
+
     private class CompactBearing extends AbstractBearing {
         private static final long serialVersionUID = -6474909210513108635L;
 
@@ -81,13 +86,13 @@ public class CompactGPSFixMovingImpl extends CompactGPSFixImpl implements GPSFix
             return degBearing / 180. * Math.PI;
         }
     }
-    
+
     public CompactGPSFixMovingImpl(Position position, TimePoint timePoint, SpeedWithBearing speed) {
         super(position, timePoint);
         knotSpeed = speed.getKnots();
         degBearing = speed.getBearing().getDegrees();
     }
-    
+
     public CompactGPSFixMovingImpl(GPSFixMoving gpsFixMoving) {
         this(gpsFixMoving.getPosition(), gpsFixMoving.getTimePoint(), gpsFixMoving.getSpeed());
     }
@@ -106,7 +111,7 @@ public class CompactGPSFixMovingImpl extends CompactGPSFixImpl implements GPSFix
     public int hashCode() {
         return super.hashCode() ^ getSpeed().hashCode();
     }
-    
+
     @Override
     public boolean equals(Object other) {
         return super.equals(other) && other instanceof GPSFixMoving && getSpeed().equals(((GPSFixMoving) other).getSpeed());
