@@ -202,7 +202,8 @@ public class RaceLogReplicationTest extends AbstractServerReplicationTest {
         Collection<RaceLogEvent> actualCollection = new ArrayList<>();
         Util.addAll(actualEvents, actualCollection);
         
-        assertEquals(expectedCollection.size(), actualCollection.size());
+        //assertEquals(expectedCollection.size(), actualCollection.size());
+        assertEquals(Util.size(expectedEvents), Util.size(actualEvents));
         for (RaceLogEvent event : expectedEvents) {
             assertTrue(actualCollection.contains(event));
         }
