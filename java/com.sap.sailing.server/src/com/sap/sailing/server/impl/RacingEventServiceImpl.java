@@ -1066,6 +1066,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
                 regattasByName.remove(regatta.getName());
                 regattaTrackingCache.remove(regatta);
                 regatta.removeRegattaListener(this);
+                regatta.removeRaceColumnListener(raceLogReplicator);
             }
             for (RaceDefinition race : regatta.getAllRaces()) {
                 stopTrackingWind(regatta, race);
@@ -1156,6 +1157,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         }
         regattasByName.remove(regatta.getName());
         regatta.removeRegattaListener(this);
+        regatta.removeRaceColumnListener(raceLogReplicator);
     }
     
     @Override
@@ -1211,6 +1213,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
             logger.info("Removing regatta "+regatta.getName()+" ("+regatta.hashCode()+") from service "+this);
             regattasByName.remove(regatta.getName());
             regatta.removeRegattaListener(this);
+            regatta.removeRaceColumnListener(raceLogReplicator);
         }
     }
 
