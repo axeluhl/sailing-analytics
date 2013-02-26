@@ -6,25 +6,24 @@ import com.sap.sailing.simulator.SimulationParameters;
 
 public class PathGeneratorBase implements PathGenerator {
 
-    // private static Logger logger = Logger.getLogger("com.sap.sailing");
-    private SimulationParameters simulationParameters;
+    protected SimulationParameters parameters;
 
     public PathGeneratorBase() {
-        simulationParameters = null;
+        this.parameters = null;
     }
 
-    public PathGeneratorBase(final SimulationParameters params) {
-        simulationParameters = params;
+    public PathGeneratorBase(SimulationParameters params) {
+        this.parameters = params;
     }
 
     @Override
     public void setSimulationParameters(final SimulationParameters params) {
-        simulationParameters = params;
+        this.parameters = params;
     }
 
     @Override
     public SimulationParameters getSimulationParameters() {
-        return simulationParameters;
+        return this.parameters;
     }
 
     @Override
@@ -33,9 +32,10 @@ public class PathGeneratorBase implements PathGenerator {
     }
 
     @Override
-    public Path getPathEvenTimed(final long millisecondsStep) {
+    public Path getPathEvenTimed(long millisecondsStep) {
 
-        final Path path = this.getPath();
-        return path.getEvenTimedPath(millisecondsStep);
+        Path path = this.getPath();
+
+        return path == null ? null : path.getEvenTimedPath(millisecondsStep);
     }
 }

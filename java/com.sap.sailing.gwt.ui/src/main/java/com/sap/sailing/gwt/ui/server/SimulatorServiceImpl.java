@@ -32,7 +32,6 @@ import com.sap.sailing.gwt.ui.shared.BoatClassDTO;
 import com.sap.sailing.gwt.ui.shared.BoatClassDTOsAndNotificationMessage;
 import com.sap.sailing.gwt.ui.shared.ConfigurationException;
 import com.sap.sailing.gwt.ui.shared.CourseDTO;
-import com.sap.sailing.gwt.ui.shared.LegsNamesDTO;
 import com.sap.sailing.gwt.ui.shared.PathDTO;
 import com.sap.sailing.gwt.ui.shared.PolarDiagramDTO;
 import com.sap.sailing.gwt.ui.shared.PolarDiagramDTOAndNotificationMessage;
@@ -464,7 +463,9 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
             //problem right here
             //boatSpeed might be 0 for very small distances
             //this is a rough fix
-            if(boatSpeedMetersPerSecond == 0.0) stepTimeMilliseconds = 1000;
+            if(boatSpeedMetersPerSecond == 0.0) {
+                stepTimeMilliseconds = 1000;
+            }
 
             if (requestData.debugMode) {
 
@@ -483,7 +484,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
             }
 
             timepointAsMillis += stepTimeMilliseconds;
-        
+
         }
 
         double totalTimeSeconds = (timepointAsMillis - requestData.allPoints.get(0).timepoint) / 1000;
@@ -982,12 +983,10 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
     }
 
     @Override
-    public LegsNamesDTO getLegs(int boatClassIndex) {
+    public List<String> getLegsNames() {
 
-        SailingSimulator simulator = new SailingSimulatorImpl(null);
+        SailingSimulator simulator = new SailingSimulatorImpl(new SimulationParametersImpl(null, null, null, SailingSimulatorUtil.measured));
 
-        List<String> legsNames = simulator.getLegsNames(boatClassIndex);
-
-        return new LegsNamesDTO("", legsNames);
+        return simulator.getLegsNames();
     }
 }

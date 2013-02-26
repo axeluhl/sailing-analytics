@@ -46,7 +46,6 @@ import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.shared.BoatClassDTO;
 import com.sap.sailing.gwt.ui.shared.BoatClassDTOsAndNotificationMessage;
-import com.sap.sailing.gwt.ui.shared.LegsNamesDTO;
 import com.sap.sailing.gwt.ui.shared.PolarDiagramDTOAndNotificationMessage;
 import com.sap.sailing.gwt.ui.shared.WindFieldGenParamsDTO;
 import com.sap.sailing.gwt.ui.shared.WindPatternDTO;
@@ -627,15 +626,15 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
         sailingPanel.add(hp);
         // hp.setSize("80%", "10%");
         // hp.setWidth("80%");
-        
+
         if (this.mode == SailingSimulatorUtil.measured) {
-            
+
             HorizontalPanel hp2 = new HorizontalPanel();
             hp2.getElement().setClassName("boatClassPanel");
             hp2.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
             hp2.add(legLabel);
 
-            this.simulatorSvc.getLegs(3, new AsyncCallback<LegsNamesDTO>() {
+            this.simulatorSvc.getLegs(new AsyncCallback<List<String>>() {
 
                 @Override
                 public void onFailure(Throwable error) {
@@ -643,15 +642,9 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
                 }
 
                 @Override
-                public void onSuccess(LegsNamesDTO response) {
+                public void onSuccess(List<String> response) {
 
-                    String notificationMessage = response.notificationMessage;
-                    if (notificationMessage != "" && notificationMessage.length() != 0 && warningAlreadyShown == false) {
-                        errorReporter.reportNotification(notificationMessage);
-                        warningAlreadyShown = true;
-                    }
-
-                    for (String legName : response.legsNames) {
+                    for (String legName : response) {
                         legSelector.addItem(legName);
                     }
 

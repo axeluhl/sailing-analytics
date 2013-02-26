@@ -40,15 +40,15 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
     private static final long serialVersionUID = 6882509533928049084L;
 
     private final static Logger logger = Logger.getLogger(WindTrackImpl.class.getName());
-    
+
     private final static double DEFAULT_BASE_CONFIDENCE = 0.9;
-    
+
     private final double baseConfidence;
-    
+
     private long millisecondsOverWhichToAverage;
-    
+
     private final boolean useSpeed;
-    
+
     /**
      * Listeners won't be serialized.
      */
@@ -57,7 +57,7 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
     public WindTrackImpl(long millisecondsOverWhichToAverage, boolean useSpeed, String nameForReadWriteLock) {
         this(millisecondsOverWhichToAverage, DEFAULT_BASE_CONFIDENCE, useSpeed, nameForReadWriteLock);
     }
-    
+
     /**
      * @param baseConfidence
      *            the confidence to attribute to the raw wind fixes in this track
@@ -74,12 +74,12 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
         listeners = new HashSet<WindListener>();
         this.useSpeed = useSpeed;
     }
-    
+
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
         ois.defaultReadObject();
         listeners = new HashSet<WindListener>();
     }
-    
+
     @Override
     protected Wind getDummyFix(TimePoint timePoint) {
         return new DummyWind(timePoint);
@@ -91,7 +91,7 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
         this.millisecondsOverWhichToAverage = millisecondsOverWhichToAverage;
         notifyListenersAboutAveragingChange(oldMillis, millisecondsOverWhichToAverage);
     }
-    
+
     @Override
     public long getMillisecondsOverWhichToAverageWind() {
         return millisecondsOverWhichToAverage;
@@ -162,7 +162,7 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
         final WindWithConfidence<Pair<Position, TimePoint>> estimatedWindUnsynchronized = getAveragedWindUnsynchronized(p, at);
         return estimatedWindUnsynchronized == null ? null : estimatedWindUnsynchronized.getObject();
     }
-    
+
     @Override
     public WindWithConfidence<Pair<Position, TimePoint>> getAveragedWindWithConfidence(Position p, TimePoint at) {
         return getAveragedWindUnsynchronized(p, at);
@@ -185,7 +185,7 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
             // don't measure speed with separate confidence; return confidence obtained from averaging bearings
             ConfidenceBasedWindAverager<Pair<Position, TimePoint>> windAverager = ConfidenceFactory.INSTANCE
                     .createWindAverager(new PositionAndTimePointWeigher(
-                    /* halfConfidenceAfterMilliseconds */getMillisecondsOverWhichToAverageWind() / 10));
+                            /* halfConfidenceAfterMilliseconds */getMillisecondsOverWhichToAverageWind() / 10));
             DummyWind atTimed = new DummyWind(at);
             Pair<Position, TimePoint> relativeTo = new Pair<Position, TimePoint>(p, at);
             NavigableSet<Wind> beforeSet = getInternalFixes().headSet(atTimed, /* inclusive */false);
@@ -259,7 +259,7 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
     private double getBaseConfidence() {
         return baseConfidence;
     }
-    
+
     @Override
     public String toString() {
         lockForRead();
@@ -284,7 +284,7 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
             unlockAfterRead();
         }
     }
-    
+
     public String toCSV() {
         lockForRead();
         try {
@@ -364,6 +364,11 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
         @Override
         public CourseChange getCourseChangeRequiredToReach(SpeedWithBearing targetSpeedWithBearing) {
             return null;
+        }
+
+        @Override
+        public void scale(double multiplier) {
+
         }
     }
 
