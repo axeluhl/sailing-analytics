@@ -63,11 +63,24 @@ public class PathGeneratorTreeGrowWind3 extends PathGeneratorBase {
         }
     }
 
-    class SortPathCandsHorizontally implements Comparator<PathCandidate> {
+    class SortPathCandsAbsHorizontally implements Comparator<PathCandidate> {
 
         @Override
         public int compare(PathCandidate p1, PathCandidate p2) {
             if (Math.abs(p1.hrz) == Math.abs(p2.hrz)) { 
+                return 0;
+            } else {
+                return (Math.abs(p1.hrz) < Math.abs(p2.hrz) ? -1 : +1);
+            }
+        }
+
+     }
+
+    class SortPathCandsHorizontally implements Comparator<PathCandidate> {
+
+        @Override
+        public int compare(PathCandidate p1, PathCandidate p2) {
+            if (p1.hrz == p2.hrz) { 
                 return 0;
             } else {
                 return (p1.hrz < p2.hrz ? -1 : +1);
@@ -568,6 +581,7 @@ public class PathGeneratorTreeGrowWind3 extends PathGeneratorBase {
         
         if (this.gridStore) {
             
+            double distResolution = distStartEndMeters*0.01;
             BufferedWriter outputCSV;
             try {
                 outputCSV = new BufferedWriter(new FileWriter(this.gridFile+"-grid.csv"));
@@ -577,13 +591,21 @@ public class PathGeneratorTreeGrowWind3 extends PathGeneratorBase {
                 int stepCount = 0;
                 for(List<PathCandidate> isoChrone : this.gridPositions) {
                     stepCount++;
+                    PathCandidate prevPos = null;
                     for(PathCandidate isoPos : isoChrone) {
-                
+
+                        if (prevPos != null) {
+                            if (prevPos.pos.getPosition().getDistance(isoPos.pos.getPosition()).getMeters() < distResolution) {
+                                continue;
+                            }
+                        }
+                        
                         String outStr = ""+stepCount+"; "+isoPos.pos.getPosition().getLatDeg()+"; "+isoPos.pos.getPosition().getLngDeg()+"; "+(isoPos.pos.getTimePoint().asMillis()/1000)+"; "+isoPos.sid;
                         outStr += "; "+isoPos.path+"; "+isoPos.vrt;
                         outStr += "\n";
                         outputCSV.write(outStr);
-                    
+                        
+                        prevPos = isoPos;
                     }
                 }
                 outputCSV.close();
@@ -599,13 +621,21 @@ public class PathGeneratorTreeGrowWind3 extends PathGeneratorBase {
                 int stepCount = 0;
                 for(List<PathCandidate> isoChrone : this.isocPositions) {
                     stepCount++;
+                    PathCandidate prevPos = null;
                     for(PathCandidate isoPos : isoChrone) {
-                
+
+                        if (prevPos != null) {
+                            if (prevPos.pos.getPosition().getDistance(isoPos.pos.getPosition()).getMeters() < distResolution) {
+                                continue;
+                            }
+                        }
+                                        
                         String outStr = ""+stepCount+"; "+isoPos.pos.getPosition().getLatDeg()+"; "+isoPos.pos.getPosition().getLngDeg()+"; "+(isoPos.pos.getTimePoint().asMillis()/1000)+"; "+isoPos.sid;
                         outStr += "; "+isoPos.path+"; "+isoPos.vrt;
                         outStr += "\n";
                         outputCSV.write(outStr);
                     
+                        prevPos = isoPos;
                     }
                 }
                 outputCSV.close();

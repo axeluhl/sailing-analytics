@@ -60,11 +60,24 @@ public class PathGeneratorTreeGrowWind2 extends PathGeneratorBase {
         }
     }
 
-    class SortPathCandsHorizontally implements Comparator<PathCandidate> {
+    class SortPathCandsAbsHorizontally implements Comparator<PathCandidate> {
 
         @Override
         public int compare(PathCandidate p1, PathCandidate p2) {
             if (Math.abs(p1.hrz) == Math.abs(p2.hrz)) { 
+                return 0;
+            } else {
+                return (Math.abs(p1.hrz) < Math.abs(p2.hrz) ? -1 : +1);
+            }
+        }
+
+     }
+
+    class SortPathCandsHorizontally implements Comparator<PathCandidate> {
+
+        @Override
+        public int compare(PathCandidate p1, PathCandidate p2) {
+            if (p1.hrz == p2.hrz) { 
                 return 0;
             } else {
                 return (p1.hrz < p2.hrz ? -1 : +1);
