@@ -279,6 +279,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
             logger.info("putting regatta "+regatta.getName()+" ("+regatta.hashCode()+") into regattasByName");
             regattasByName.put(regatta.getName(), regatta);
             regatta.addRegattaListener(this);
+            regatta.addRaceColumnListener(raceLogReplicator);
         }
     }
 
@@ -797,6 +798,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
             logger.info("putting regatta "+regatta.getName()+" ("+regatta.hashCode()+") into regattasByName of "+this);
             regattasByName.put(regatta.getName(), regatta);
             regatta.addRegattaListener(this);
+            regatta.addRaceColumnListener(raceLogReplicator);
             
             Serializable courseAreaId = null;
             if (regatta.getDefaultCourseArea() != null) {
@@ -837,6 +839,8 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
             logger.info("putting regatta "+regatta.getName()+" ("+regatta.hashCode()+") into regattasByName of "+this);
             regattasByName.put(regatta.getName(), regatta);
             regatta.addRegattaListener(this);
+            regatta.addRaceColumnListener(raceLogReplicator);
+            
             replicate(new AddDefaultRegatta(regatta.getBaseName(), regatta.getBoatClass() == null ? null : regatta.getBoatClass().getName(),
                     regatta.getId()));
             RegattaIdentifier regattaIdentifier = regatta.getRegattaIdentifier();
