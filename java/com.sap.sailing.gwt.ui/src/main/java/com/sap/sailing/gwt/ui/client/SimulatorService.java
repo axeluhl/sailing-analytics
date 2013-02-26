@@ -47,5 +47,5 @@ public interface SimulatorService extends RemoteService {
 
     Response1TurnerDTO get1Turner(final Request1TurnerDTO requestData) throws ConfigurationException;
 
-    List<String> getLegs();
+    List<String> getLegsNames();
 }

@@ -43,5 +43,5 @@ public interface SimulatorServiceAsync {
 
     void get1Turner(final Request1TurnerDTO requestData, AsyncCallback<Response1TurnerDTO> asyncCallback);
 
-    void getLegs(AsyncCallback<List<String>> asyncCallback);
+    void getLegsNames(AsyncCallback<List<String>> asyncCallback);
 }
