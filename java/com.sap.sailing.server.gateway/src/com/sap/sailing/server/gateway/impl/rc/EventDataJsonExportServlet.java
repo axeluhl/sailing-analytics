@@ -20,7 +20,6 @@ public class EventDataJsonExportServlet extends AbstractJsonHttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-
         JsonSerializer<EventData> eventSerializer = createSerializer();
         JSONArray result = new JSONArray();
         for (EventData event : getService().getAllEvents()) {

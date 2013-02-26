@@ -11,7 +11,6 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.CourseArea;
-import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.racegroup.RaceGroup;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.racelog.RaceLog;
@@ -47,7 +46,11 @@ public class RaceGroupJsonExportServlet extends AbstractJsonHttpServlet {
             return;
         }
 
-        CourseArea filterCourseArea = getCourseArea(courseAreaId);
+        CourseArea filterCourseArea = getService().getCourseArea(courseAreaId);
+        if (filterCourseArea == null) {
+            response.sendError(HttpServletResponse.SC_NOT_FOUND, "No course area found with given UUID.");
+            return;
+        }
 
         JsonSerializer<RaceGroup> serializer = createSerializer();
         JSONArray result = new JSONArray();
@@ -63,20 +66,6 @@ public class RaceGroupJsonExportServlet extends AbstractJsonHttpServlet {
         result.writeJSONString(response.getWriter());
     }
 
-    private CourseArea getCourseArea(UUID courseAreaId) {
-        for (Event event : getService().getAllEvents()) {
-            if (event.getVenue() == null) {
-                continue;
-            }
-            for (CourseArea courseArea : event.getVenue().getCourseAreas()) {
-                if (courseArea.getId().equals(courseAreaId)) {
-                    return courseArea;
-                }
-            }
-        }
-        return null;
-    }
-
     private UUID toUUID(String value) {
         try {
             return UUID.fromString(value);
@@ -86,10 +75,17 @@ public class RaceGroupJsonExportServlet extends AbstractJsonHttpServlet {
     }
 
     private static JsonSerializer<RaceGroup> createSerializer() {
-        return new RaceGroupJsonSerializer(new BoatClassJsonSerializer(), new CourseAreaJsonSerializer(),
-                new SeriesWithRowsOfRaceGroupSerializer(new SeriesWithRowsJsonSerializer(
-                        new RaceRowsOfSeriesWithRowsSerializer(new RaceRowJsonSerializer(new FleetJsonSerializer(
-                                new ColorJsonSerializer()), new RaceCellJsonSerializer(createRaceLogSerializer()))))));
+        return new RaceGroupJsonSerializer(
+                new BoatClassJsonSerializer(), 
+                new CourseAreaJsonSerializer(),
+                new SeriesWithRowsOfRaceGroupSerializer(
+                    new SeriesWithRowsJsonSerializer(
+                        new RaceRowsOfSeriesWithRowsSerializer(
+                            new RaceRowJsonSerializer(
+                                new FleetJsonSerializer(
+                                        new ColorJsonSerializer()), 
+                                new RaceCellJsonSerializer(
+                                        createRaceLogSerializer()))))));
 
     }
 

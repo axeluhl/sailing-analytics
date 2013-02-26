@@ -26,8 +26,16 @@ import com.sap.sailing.domain.base.racegroup.impl.SeriesWithRowsImpl;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 
+/**
+ * Used to convert {@link Leaderboard}s to {@link RaceGroup}s.
+ */
 public class RaceGroupFactory {
 
+    /**
+     * Convert given {@link Leaderboard} to a {@link RaceGroup}.
+     * @param leaderboard to be converted.
+     * @return the {@link RaceGroup}.
+     */
     public RaceGroup convert(Leaderboard leaderboard) {
         String name = leaderboard.getName();
 
@@ -71,6 +79,10 @@ public class RaceGroupFactory {
         return cells;
     }
 
+    /**
+     * Returns a series to race column mapping. If there are no series all race columns will
+     * be mapped from a default series.
+     */
     private Map<Series, List<RaceColumn>> getSeriesToRaceColumns(Leaderboard leaderboard) {
         Map<Series, List<RaceColumn>> seriesToRaceColumns = new HashMap<>();
 
