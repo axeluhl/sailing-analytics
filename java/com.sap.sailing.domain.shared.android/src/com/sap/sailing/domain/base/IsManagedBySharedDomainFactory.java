@@ -2,7 +2,7 @@ package com.sap.sailing.domain.base;
 
 
 /**
- * Classes implementing this interface have their instance life cycle managed by a {@link DomainFactory}. This is important
+ * Classes implementing this interface have their instance life cycle managed by a {@link SharedDomainFactory}. This is important
  * particularly during de-serialization when the de-serialized instance needs to be replaced by an instance managed by
  * the domain factory.<p>
  * 

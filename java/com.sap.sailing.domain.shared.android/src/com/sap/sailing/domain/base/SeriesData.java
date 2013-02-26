@@ -2,6 +2,9 @@ package com.sap.sailing.domain.base;
 
 import com.sap.sailing.domain.common.Named;
 
+/**
+ * Base interface for series consisting of static information describing the Series.
+ */
 public interface SeriesData extends Named {
 	
     /**
