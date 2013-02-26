@@ -11,9 +11,15 @@ public interface SailingSimulator {
 
     Path getGPSTrack();
 
+    Path getLegGPSTrack(int legIndex, int competitorIndex);
+
     Map<String, Path> getAllPaths();
 
+    Map<String, Path> getAllPathsForLeg(int legIndex, int competitorIndex);
+
     Map<String, Path> getAllPathsEvenTimed(long millisecondsStep);
+
+    Map<String, Path> getAllLegPathsEvenTimed(long millisecondsStep, int legIndex, int competitorIndex);
 
     Path getRaceCourse();
 

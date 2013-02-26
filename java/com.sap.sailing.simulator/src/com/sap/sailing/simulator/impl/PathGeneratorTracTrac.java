@@ -236,34 +236,16 @@ public class PathGeneratorTracTrac extends PathGeneratorBase {
         return this.raceCourse == null ? null : new PathImpl(this.raceCourse, null);
     }
 
-    public List<String> getLegsNames(String raceName) {
+    public List<String> getLegsNames() {
 
         this.intializeRaceHandle();
 
         List<String> result = new ArrayList<String>();
 
-        if (raceName == null) {
-            for (RaceDefinition race : this.raceHandle.getRaces()) {
-                for (Leg leg : race.getCourse().getLegs()) {
-                    result.add(leg.toString());
-                }
-            }
-        } else {
-
-            Set<RaceDefinition> races = this.raceHandle.getRaces();
-            Iterator<RaceDefinition> iterator = races.iterator();
-            RaceDefinition currentRace = null;
-            while (iterator.hasNext()) {
-                currentRace = iterator.next();
-                if (currentRace.equals(raceName)) {
-                    break;
-                }
-            }
-
-            for (Leg leg : currentRace.getCourse().getLegs()) {
+        for (RaceDefinition race : this.raceHandle.getRaces()) {
+            for (Leg leg : race.getCourse().getLegs()) {
                 result.add(leg.toString());
             }
-
         }
 
         return result;
@@ -273,6 +255,7 @@ public class PathGeneratorTracTrac extends PathGeneratorBase {
 
         this.intializeRaceHandle();
 
+        // getting the first race
         RaceDefinition raceDef = this.raceHandle.getRaces().iterator().next();
         Regatta regatta = this.raceHandle.getRegatta();
 
@@ -315,6 +298,62 @@ public class PathGeneratorTracTrac extends PathGeneratorBase {
         }
 
         track.unlockAfterRead();
+
+        return new PathImpl(path, null);
+    }
+
+    public Path getLegPolyline(int legIndex, int competitorIndex, Distance maxDistance) {
+
+        this.intializeRaceHandle();
+
+        // getting the first race
+        RaceDefinition raceDef = this.raceHandle.getRaces().iterator().next();
+        Regatta regatta = this.raceHandle.getRegatta();
+
+        TrackedRace trackedRace = this.service.getTrackedRace(regatta, raceDef);
+
+        Iterator<Competitor> competitors = raceDef.getCompetitors().iterator();
+        Competitor competitor = null;
+
+        for (int index = 0; index <= competitorIndex; index++) {
+            competitor = competitors.next();
+        }
+
+        LinkedList<TimedPositionWithSpeed> path = new LinkedList<TimedPositionWithSpeed>();
+        this.raceCourse = new LinkedList<TimedPositionWithSpeed>();
+
+        Leg leg = raceDef.getCourse().getLegs().get(legIndex);
+
+        TimePoint startTime = trackedRace.getMarkPassing(competitor, leg.getFrom()).getTimePoint();
+        Position startPosition = trackedRace.getApproximatePosition(leg.getFrom(), startTime);
+        Wind startWind = trackedRace.getWind(startPosition, startTime);
+        this.raceCourse.addLast(new TimedPositionWithSpeedImpl(startTime, startPosition, startWind));
+
+        TimePoint endTime = trackedRace.getMarkPassing(competitor, leg.getTo()).getTimePoint();
+        Position endPosition = trackedRace.getApproximatePosition(leg.getTo(), endTime);
+        Wind endWind = trackedRace.getWind(endPosition, endTime);
+        this.raceCourse.addLast(new TimedPositionWithSpeedImpl(endTime, endPosition, endWind));
+
+        Iterable<GPSFixMoving> gpsFixes = trackedRace.approximate(competitor, maxDistance, startTime, endTime);
+        Iterator<GPSFixMoving> gpsIter = gpsFixes.iterator();
+
+        while (gpsIter.hasNext()) {
+            GPSFixMoving gpsFix = gpsIter.next();
+            if (gpsFix.getTimePoint().after(endTime)) {
+                break;
+            }
+
+            Position position = gpsFix.getPosition();
+            TimePoint timePoint = gpsFix.getTimePoint();
+
+            Wind gpsWind = trackedRace.getWind(position, timePoint);
+
+            if (gpsWind.getKnots() == 1.0) {
+                gpsWind.scale(this.windScale);
+            }
+
+            path.addLast(new TimedPositionWithSpeedImpl(timePoint, position, gpsWind));
+        }
 
         return new PathImpl(path, null);
     }
