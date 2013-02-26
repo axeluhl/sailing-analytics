@@ -8,7 +8,6 @@ import java.util.UUID;
 
 import org.json.simple.JSONObject;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.CourseArea;
@@ -41,10 +40,5 @@ public class CourseAreaJsonSerializerTest {
 		assertEquals(
 				expectedId, 
 				UUID.fromString(result.get(CourseAreaJsonSerializer.FIELD_ID).toString()));
-	}
-	
-	@Ignore
-	public void testRaces() {
-		/// TODO: Implement a test for checking if races are correctly serialized on course areas
 	}
 }

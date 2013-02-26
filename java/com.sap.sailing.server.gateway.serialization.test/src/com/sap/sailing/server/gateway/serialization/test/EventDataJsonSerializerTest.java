@@ -15,7 +15,7 @@ import com.sap.sailing.domain.base.Venue;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.EventDataJsonSerializer;
 
-public class EventJsonSerializerTest {
+public class EventDataJsonSerializerTest {
 	
 	protected final UUID expectedId = UUID.randomUUID();
 	protected final String expectedName = "ab";
