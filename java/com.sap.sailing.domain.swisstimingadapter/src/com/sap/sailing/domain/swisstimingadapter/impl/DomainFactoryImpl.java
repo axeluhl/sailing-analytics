@@ -26,6 +26,8 @@ import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
+import com.sap.sailing.domain.common.Named;
+import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WithID;
@@ -150,7 +152,7 @@ public class DomainFactoryImpl implements DomainFactory {
             List<ControlPoint> courseDefinition) {
         List<Waypoint> waypoints = new ArrayList<>();
         for (ControlPoint controlPoint : courseDefinition) {
-            Waypoint waypoint = baseDomainFactory.createWaypoint(controlPoint);
+            Waypoint waypoint = baseDomainFactory.createWaypoint(controlPoint, /* passingSide */ null);
             waypoints.add(waypoint);
         }
         com.sap.sailing.domain.base.Course domainCourse = new CourseImpl("Course", waypoints);
@@ -214,7 +216,7 @@ public class DomainFactoryImpl implements DomainFactory {
         List<Waypoint> waypoints = new ArrayList<Waypoint>();
         for (Mark mark : course.getMarks()) {
             ControlPoint controlPoint = getOrCreateControlPoint(mark.getDevices());
-            Waypoint waypoint = baseDomainFactory.createWaypoint(controlPoint);
+            Waypoint waypoint = baseDomainFactory.createWaypoint(controlPoint, /* passingSide */ null);
             waypoints.add(waypoint);
         }
         com.sap.sailing.domain.base.Course result = new CourseImpl(courseName, waypoints);
@@ -267,11 +269,11 @@ public class DomainFactoryImpl implements DomainFactory {
     
     @Override
     public void updateCourseWaypoints(com.sap.sailing.domain.base.Course courseToUpdate, Iterable<Mark> marks) throws PatchFailedException {
-        List<com.sap.sailing.domain.base.ControlPoint> newDomainControlPoints = new ArrayList<ControlPoint>();
+        List<Pair<com.sap.sailing.domain.base.ControlPoint, NauticalSide>> newDomainControlPoints = new ArrayList<Pair<com.sap.sailing.domain.base.ControlPoint, NauticalSide>>();
         for (Mark mark : marks) {
             // TODO bug 1043: propagate the mark names to the waypoint names
             com.sap.sailing.domain.base.ControlPoint domainControlPoint = getOrCreateControlPoint(mark.getDevices());
-            newDomainControlPoints.add(domainControlPoint);
+            newDomainControlPoints.add(new Pair<com.sap.sailing.domain.base.ControlPoint, NauticalSide>(domainControlPoint, null));
         }
         courseToUpdate.update(newDomainControlPoints, baseDomainFactory);
     }

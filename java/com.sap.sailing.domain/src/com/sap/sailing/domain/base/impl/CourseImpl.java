@@ -21,7 +21,9 @@ import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.impl.NamedImpl;
+import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.util.CourseAsWaypointList;
 import com.sap.sailing.util.impl.LockUtil;
 import com.sap.sailing.util.impl.NamedReentrantReadWriteLock;
@@ -364,7 +366,7 @@ public class CourseImpl extends NamedImpl implements Course {
     }
 
     @Override
-    public void update(List<? extends ControlPoint> newControlPoints, DomainFactory baseDomainFactory) throws PatchFailedException {
+    public void update(List<Pair<ControlPoint, NauticalSide>> newControlPoints, DomainFactory baseDomainFactory) throws PatchFailedException {
         LockUtil.lockForWrite(lock);
         try {
             Iterable<Waypoint> courseWaypoints = getWaypoints();
@@ -383,12 +385,12 @@ public class CourseImpl extends NamedImpl implements Course {
                 }
                 wpl.add(waypoint);
             }
-            for (com.sap.sailing.domain.base.ControlPoint newDomainControlPoint : newControlPoints) {
-                List<Waypoint> waypoints = existingWaypointsByControlPoint.get(newDomainControlPoint);
+            for (Pair<ControlPoint, NauticalSide> newDomainControlPoint : newControlPoints) {
+                List<Waypoint> waypoints = existingWaypointsByControlPoint.get(newDomainControlPoint.getA());
                 Waypoint waypoint;
                 if (waypoints == null || waypoints.isEmpty()) {
                     // must be a new control point for which we don't have a waypoint yet
-                    waypoint = baseDomainFactory.createWaypoint(newDomainControlPoint);
+                    waypoint = baseDomainFactory.createWaypoint(newDomainControlPoint.getA(), newDomainControlPoint.getB());
                 } else {
                     waypoint = waypoints.remove(0); // take the first from the list
                 }

@@ -74,6 +74,7 @@ import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.MaxPointsReason;
+import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.NoWindError;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Placemark;
@@ -1806,7 +1807,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         if (trackedRace != null) {
             Course course = trackedRace.getRace().getCourse();
             Iterable<Waypoint> waypoints = course.getWaypoints();
-            List<ControlPoint> newControlPoints = new ArrayList<ControlPoint>();
+            List<Pair<ControlPoint, NauticalSide>> newControlPoints = new ArrayList<Pair<ControlPoint, NauticalSide>>();
             int lastMatchPosition = -1;
             for (ControlPointDTO controlPointDTO : controlPoints) {
                 ControlPoint matchFromOldCourse = null;
@@ -1815,7 +1816,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     ControlPoint controlPointAtI = waypointAtI.getControlPoint();
                     if (controlPointAtI.getId().toString().equals(controlPointDTO.getIdAsString()) && markIDsMatch(controlPointAtI.getMarks(), controlPointDTO.getMarks())) {
                         matchFromOldCourse = controlPointAtI;
-                        newControlPoints.add(matchFromOldCourse);
+                        newControlPoints.add(new Pair<ControlPoint, NauticalSide>(matchFromOldCourse, null));
                         lastMatchPosition = i;
                     }
                 }
@@ -1833,10 +1834,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                         Mark left = baseDomainFactory.getOrCreateMark(gateDTO.getLeft().getIdAsString(), gateDTO.getLeft().name);
                         Mark right = baseDomainFactory.getOrCreateMark(gateDTO.getRight().getIdAsString(), gateDTO.getRight().name);
                         newControlPoint = baseDomainFactory.createGate(id, left, right, gateDTO.name);
+                        newControlPoints.add(new Pair<ControlPoint, NauticalSide>(newControlPoint, null));
                     } else {
                         newControlPoint = baseDomainFactory.getOrCreateMark(controlPointDTO.getIdAsString(), controlPointDTO.name);
+                        // TODO: value for the passing side must be added to ControlPointDTO
+                        NauticalSide nauticalSide = null;
+                        newControlPoints.add(new Pair<ControlPoint, NauticalSide>(newControlPoint, nauticalSide));
                     }
-                    newControlPoints.add(newControlPoint);
                 }
             }
             try {

@@ -25,8 +25,10 @@ import com.sap.sailing.domain.base.ObjectInputStreamResolvingAgainstDomainFactor
 import com.sap.sailing.domain.base.Team;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.MarkType;
+import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.WithID;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.leaderboard.impl.HighPoint;
 import com.sap.sailing.domain.leaderboard.impl.HighPointExtremeSailingSeriesOverall;
@@ -169,7 +171,7 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public Waypoint createWaypoint(ControlPoint controlPoint) {
+    public Waypoint createWaypoint(ControlPoint controlPoint, NauticalSide passingSide) {
         synchronized (waypointCache) {
             expungeStaleWaypointCacheEntries();
             Waypoint result = new WaypointImpl(controlPoint);
