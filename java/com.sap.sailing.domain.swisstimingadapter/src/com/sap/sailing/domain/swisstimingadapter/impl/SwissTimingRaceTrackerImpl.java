@@ -298,7 +298,7 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
                 /* time over which to average speed */ race.getBoatClass().getApproximateManeuverDurationInMilliseconds(),
                 new DynamicRaceDefinitionSet() {
                     @Override
-                    public void addRaceDefinition(RaceDefinition race) {
+                    public void addRaceDefinition(RaceDefinition race, DynamicTrackedRace trackedRace) {
                         // we already know our single RaceDefinition
                         assert SwissTimingRaceTrackerImpl.this.race == race;
                     }

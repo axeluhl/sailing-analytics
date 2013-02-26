@@ -2,10 +2,16 @@
 
 # this holds for default installation
 USER_HOME=~
-echo PROJECT_HOME is $PROJECT_HOME
 if [ "$PROJECT_HOME" = "" ]; then
   PROJECT_HOME=$USER_HOME/git
 fi
+
+if [ ! -d $PROJECT_HOME/.git ]; then
+  echo "Could not identify $PROJECT_HOME as git repository. Please make sure to set PROJECT_HOME to the right one."
+  exit
+fi
+
+echo PROJECT_HOME is $PROJECT_HOME
 SERVERS_HOME=$USER_HOME/servers
 
 # x86 or x86_64 should work for most cases
@@ -20,7 +26,9 @@ active_branch=$(git symbolic-ref -q HEAD)
 active_branch=`basename $active_branch`
 
 ACDIR=$SERVERS_HOME/$active_branch
+
 MAVEN_SETTINGS=$PROJECT_HOME/configuration/maven-settings.xml
+MAVEN_SETTINGS_PROXY=$PROJECT_HOME/configuration/maven-settings-proxy.xml
 
 gwtcompile=1
 testing=1
@@ -101,6 +109,7 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
 	if [ $proxy -eq 1 ]; then
 	    echo "INFO: Activating proxy profile"
 	    extra="$extra -P no-debug.with-proxy"
+	    MAVEN_SETTINGS=$MAVEN_SETTINGS_PROXY
 	else
 	    extra="$extra -P no-debug.without-proxy"
 	fi

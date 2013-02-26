@@ -509,4 +509,8 @@ public interface StringMessages extends Messages {
     String courseArea();
     String pleaseEnterNonEmptyCourseArea();
     String pleaseSelectACourseArea();
+    String totalDistanceTraveled();
+    String totalDistanceTraveledTooltip();
+    String totalAverageSpeedOverGround();
+    String totalAverageSpeedOverGroundTooltip();
 }

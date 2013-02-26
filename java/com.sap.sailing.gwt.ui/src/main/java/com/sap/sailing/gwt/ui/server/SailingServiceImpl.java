@@ -626,6 +626,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         row.totalTimeSailedReachingInSeconds = totalTimeSailedReachingInMilliseconds==null?null:1./1000.*totalTimeSailedReachingInMilliseconds;
         final Long totalTimeSailedInMilliseconds = leaderboard.getTotalTimeSailedInMilliseconds(competitor, timePoint);
         row.totalTimeSailedInSeconds = totalTimeSailedInMilliseconds==null?null:1./1000.*totalTimeSailedInMilliseconds;
+        final Distance totalDistanceTraveledInMeters = leaderboard.getTotalDistanceTraveled(competitor, timePoint);
+        row.totalDistanceTraveledInMeters = totalDistanceTraveledInMeters==null?null:totalDistanceTraveledInMeters.getMeters();
     }
     
     private List<CompetitorDTO> getCompetitorDTOList(List<Competitor> competitors) {

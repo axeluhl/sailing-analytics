@@ -184,7 +184,7 @@ public interface DomainFactory {
      * 
      * @param raceDefinitionSetToUpdate
      *            if not <code>null</code>, after creating the {@link TrackedRace}, the {@link RaceDefinition} is
-     *            {@link DynamicRaceDefinitionSet#addRaceDefinition(RaceDefinition) added} to that object.
+     *            {@link DynamicRaceDefinitionSet#addRaceDefinition(RaceDefinition, DynamicTrackedRace) added} to that object.
      */
     DynamicTrackedRace getOrCreateRaceDefinitionAndTrackedRace(TrackedRegatta trackedRegatta, Race race,
             Course course, WindStore windStore, long delayToLiveInMillis, long millisecondsOverWhichToAverageWind,

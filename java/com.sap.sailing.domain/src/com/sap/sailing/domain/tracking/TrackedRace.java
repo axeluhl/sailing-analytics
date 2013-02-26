@@ -389,6 +389,9 @@ public interface TrackedRace extends Serializable {
 
     void removeListener(RaceChangeListener listener);
 
+    /**
+     * @return <code>null</code> if there are no mark passings for the <code>competitor</code> in this race
+     */
     Distance getDistanceTraveled(Competitor competitor, TimePoint timePoint);
 
     Distance getWindwardDistanceToOverallLeader(Competitor competitor, TimePoint timePoint) throws NoWindException;

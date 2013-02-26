@@ -132,7 +132,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
     private TracTracRaceTrackerImpl(Event tractracEvent, DomainFactory domainFactory, URL paramURL, URI liveURI, URI storedURI,
             TimePoint startOfTracking, TimePoint endOfTracking, long delayToLiveInMillis, boolean simulateWithStartTimeNow,
             RaceLogStore raceLogStore, WindStore windStore, TrackedRegattaRegistry trackedRegattaRegistry) 
-            		throws URISyntaxException, MalformedURLException, FileNotFoundException {
+                throws URISyntaxException, MalformedURLException, FileNotFoundException {
         this(tractracEvent, null, domainFactory, paramURL, liveURI, storedURI,
                 startOfTracking, endOfTracking, delayToLiveInMillis, simulateWithStartTimeNow, raceLogStore, windStore, trackedRegattaRegistry);
     }
@@ -146,7 +146,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
     protected TracTracRaceTrackerImpl(Regatta regatta, DomainFactory domainFactory, URL paramURL, URI liveURI, URI storedURI,
             TimePoint startOfTracking, TimePoint endOfTracking, long delayToLiveInMillis, boolean simulateWithStartTimeNow,
             RaceLogStore raceLogStore, WindStore windStore, TrackedRegattaRegistry trackedRegattaRegistry) 
-            		throws URISyntaxException, MalformedURLException, FileNotFoundException {
+                throws URISyntaxException, MalformedURLException, FileNotFoundException {
         this(KeyValue.setup(paramURL), regatta, domainFactory, paramURL, liveURI, storedURI, startOfTracking,
                 endOfTracking, delayToLiveInMillis, simulateWithStartTimeNow, raceLogStore, windStore, trackedRegattaRegistry);
     }
@@ -419,15 +419,15 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
 
     private void updateStatusOfTrackedRaces() {
         for (RaceDefinition race : getRaces()) {
-            updateStatusOfTrackedRace(race);
+            DynamicTrackedRace trackedRace = getTrackedRegatta().getExistingTrackedRace(race);
+            if (trackedRace != null) {
+                updateStatusOfTrackedRace(trackedRace);
+            }
         }
     }
 
-    private void updateStatusOfTrackedRace(RaceDefinition race) {
-        DynamicTrackedRace trackedRace = getTrackedRegatta().getExistingTrackedRace(race);
-        if (trackedRace != null) {
-            trackedRace.setStatus(lastStatus);
-        }
+    private void updateStatusOfTrackedRace(DynamicTrackedRace trackedRace) {
+        trackedRace.setStatus(lastStatus);
     }
 
     @Override
@@ -462,9 +462,9 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
     }
 
     @Override
-    public void addRaceDefinition(RaceDefinition race) {
+    public void addRaceDefinition(RaceDefinition race, DynamicTrackedRace trackedRace) {
         races.add(race);
-        updateStatusOfTrackedRace(race);
+        updateStatusOfTrackedRace(trackedRace);
     }
 
 }

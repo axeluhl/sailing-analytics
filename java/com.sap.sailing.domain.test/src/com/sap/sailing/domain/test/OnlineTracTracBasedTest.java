@@ -95,7 +95,7 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest {
         /* startOfTracking */null, /* endOfTracking */null, /* delayToLiveInMillis */0l, /* simulator */ null,
                 new DynamicRaceDefinitionSet() {
                     @Override
-                    public void addRaceDefinition(RaceDefinition race) {
+                    public void addRaceDefinition(RaceDefinition race, DynamicTrackedRace trackedRace) {
                     }
                 }, /* trackedRegattaRegistry */ null, receiverTypes)) {
             receivers.add(r);
