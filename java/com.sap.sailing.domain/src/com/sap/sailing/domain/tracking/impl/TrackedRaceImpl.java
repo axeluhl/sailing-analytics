@@ -218,6 +218,8 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     private transient Object cacheInvalidationTimerLock;
 
     private transient CombinedWindTrackImpl combinedWindTrack;
+    
+    private transient RaceLog attachedRaceLog;
 
     /**
      * The time delay to the current point in time in milliseconds.  
@@ -2262,8 +2264,6 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
             }
         }
     }
-    
-    private transient RaceLog attachedRaceLog;
     
     @Override
     public void attachRaceLog(RaceLog raceLog) {
