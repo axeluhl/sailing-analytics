@@ -21,6 +21,7 @@ public class LeaderboardRowDTO implements IsSerializable {
     public Date whenMaximumSpeedOverGroundWasAchieved;
     public Double totalTimeSailedUpwindInSeconds;
     public Double totalTimeSailedReachingInSeconds;
+    public Double totalDistanceTraveledInMeters;
     
     @Override
     public int hashCode() {

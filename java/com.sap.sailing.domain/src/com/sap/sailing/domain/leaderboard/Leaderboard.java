@@ -8,6 +8,7 @@ import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnListener;
 import com.sap.sailing.domain.base.Series;
+import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.Named;
@@ -354,7 +355,17 @@ public interface Leaderboard extends Named {
      * races attached to this leaderboard
      */
     Long getTotalTimeSailedInMilliseconds(Competitor competitor, TimePoint timePoint);
-
+    
+    /**
+     * Computes the distance the <code>competitor</code> has sailed in the tracked races in this leaderboard, starting
+     * to count in each race when the competitor passes the start line, aggregating up to <code>timePoint</code> or the
+     * end of the last race, whichever is first.
+     * 
+     * @return <code>null</code> if the <code>competitor</code> hasn't sailed any distance in any tracked race in this
+     *         leaderboard
+     */
+    Distance getTotalDistanceTraveled(Competitor competitor, TimePoint timePoint);
+    
     /**
      * Same as {@link #getTotalPoints(Competitor, RaceColumn, TimePoint)}, only that for determining the discarded
      * results only <code>raceColumnsToConsider</code> are considered.

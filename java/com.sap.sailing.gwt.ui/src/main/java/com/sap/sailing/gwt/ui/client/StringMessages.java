@@ -504,4 +504,8 @@ public interface StringMessages extends Messages {
     String angleAndTotalNumberOfDataPoints(int angle, int numberOfDataPoints);
     String buoyZone();
     String radiusInMeters();
+    String totalDistanceTraveled();
+    String totalDistanceTraveledTooltip();
+    String totalAverageSpeedOverGround();
+    String totalAverageSpeedOverGroundTooltip();
 }

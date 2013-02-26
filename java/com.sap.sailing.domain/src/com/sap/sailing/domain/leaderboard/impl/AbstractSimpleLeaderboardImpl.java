@@ -17,6 +17,7 @@ import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnListener;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindException;
@@ -654,6 +655,24 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                         } else {
                             result += timeSpent;
                         }
+                    }
+                }
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public Distance getTotalDistanceTraveled(Competitor competitor, TimePoint timePoint) {
+        Distance result = null;
+        for (TrackedRace trackedRace : getTrackedRaces()) {
+            if (Util.contains(trackedRace.getRace().getCompetitors(), competitor)) {
+                Distance distanceSailedInRace = trackedRace.getDistanceTraveled(competitor, timePoint);
+                if (distanceSailedInRace != null) {
+                    if (result == null) {
+                        result = distanceSailedInRace;
+                    } else {
+                        result = result.add(distanceSailedInRace);
                     }
                 }
             }
