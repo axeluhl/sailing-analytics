@@ -16,5 +16,5 @@ import com.sap.sailing.domain.base.RaceDefinition;
  *
  */
 public interface DynamicRaceDefinitionSet {
-    void addRaceDefinition(RaceDefinition race);
+    void addRaceDefinition(RaceDefinition race, DynamicTrackedRace trackedRace);
 }

@@ -76,7 +76,7 @@ public class TestStoringAndRetrievingWindTracksTest extends AbstractTracTracLive
                 EmptyWindStore.INSTANCE, /* startOfTracking */null, /* endOfTracking */null, /* delayToLiveInMillis */
                 0l, /* simulator */ null, new DynamicRaceDefinitionSet() {
                     @Override
-                    public void addRaceDefinition(RaceDefinition race) {
+                    public void addRaceDefinition(RaceDefinition race, DynamicTrackedRace trackedRace) {
                     }
                 }, /* trackedRegattaRegistry */ null, ReceiverType.RACECOURSE);
         addListenersForStoredDataAndStartController(typeControllers);
@@ -84,7 +84,7 @@ public class TestStoringAndRetrievingWindTracksTest extends AbstractTracTracLive
         DynamicTrackedRace trackedRace = trackedRegatta.createTrackedRace(race, EmptyWindStore.INSTANCE, 
                     /* delayToLiveInMillis */ 0l, /* millisecondsOverWhichToAverageWind */ 30000, /* millisecondsOverWhichToAverageSpeed */ 10000, new DynamicRaceDefinitionSet() {
                     @Override
-                    public void addRaceDefinition(RaceDefinition race) {
+                    public void addRaceDefinition(RaceDefinition race, DynamicTrackedRace trackedRace) {
                     }
                 });
         WindSource windSource = new WindSourceImpl(WindSourceType.WEB);
