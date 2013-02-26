@@ -3,8 +3,7 @@ package com.sap.sailing.server.gateway.serialization;
 import org.json.simple.JSONObject;
 
 /**
- * Interface for serializer to Json. 
- * All implementations must be thread-safe.
+ * Interface for serializer to Json.
  *
  * @param <T> Object class to serialize.
  */

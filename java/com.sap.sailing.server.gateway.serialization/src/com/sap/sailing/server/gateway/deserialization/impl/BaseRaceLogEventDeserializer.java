@@ -14,18 +14,17 @@ import com.sap.sailing.server.gateway.serialization.impl.racelog.BaseRaceLogEven
 /// TODO deserialize involved boats
 public abstract class BaseRaceLogEventDeserializer implements JsonDeserializer<RaceLogEvent> {
 
-	protected abstract RaceLogEvent deserialize(JSONObject object, Serializable id, TimePoint timePoint, int passId)
-			throws JsonDeserializationException;
-	
-	@Override
-	public RaceLogEvent deserialize(JSONObject object)
-			throws JsonDeserializationException {
-		// Factory handles class field and subclassing...
-		String id = object.get(BaseRaceLogEventSerializer.FIELD_ID).toString();
-		long timeStamp = (Long) object.get(BaseRaceLogEventSerializer.FIELD_TIMESTAMP);
-		int passId = (Integer) object.get(BaseRaceLogEventSerializer.FIELD_PASS_ID);
-		
-		return deserialize(object, Helpers.tryUuidConversion(id), new MillisecondsTimePoint(timeStamp), passId);
-	}
+    protected abstract RaceLogEvent deserialize(JSONObject object, Serializable id, TimePoint timePoint, int passId)
+            throws JsonDeserializationException;
+
+    @Override
+    public RaceLogEvent deserialize(JSONObject object) throws JsonDeserializationException {
+        // Factory handles class field and subclassing...
+        String id = object.get(BaseRaceLogEventSerializer.FIELD_ID).toString();
+        long timeStamp = (Long) object.get(BaseRaceLogEventSerializer.FIELD_TIMESTAMP);
+        int passId = (Integer) object.get(BaseRaceLogEventSerializer.FIELD_PASS_ID);
+
+        return deserialize(object, Helpers.tryUuidConversion(id), new MillisecondsTimePoint(timeStamp), passId);
+    }
 
 }
