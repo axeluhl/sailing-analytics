@@ -9,6 +9,7 @@ import java.util.Collection;
 import java.util.UUID;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.Fleet;
@@ -146,7 +147,7 @@ public class RaceLogReplicationTest extends AbstractServerReplicationTest {
         addAndValidate(masterLog, replicaLog, anotherRaceLogEvent);
     }
     
-    @Test
+    @Ignore
     public void testRaceEventReplicationOnRenamingFlexibleLeaderboard() throws ClassNotFoundException, IOException, InterruptedException {
         final String leaderboardName = "Test";
         final String fleetName = "Default";
