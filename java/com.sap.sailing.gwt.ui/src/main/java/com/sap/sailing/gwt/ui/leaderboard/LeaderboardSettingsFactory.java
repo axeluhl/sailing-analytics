@@ -6,6 +6,7 @@ import java.util.List;
 
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
+import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings.RaceColumnSelectionStrategies;
 
 /*
  * A factory class creating leaderboard settings for different contexts (user role, live or replay mode, etc.
@@ -33,9 +34,12 @@ public class LeaderboardSettingsFactory {
      *            no change to the selected race columns will happen while updating the leaderboard settings. It is an error
      *            to pass non-<code>null</code> values for both, <code>nameOfRaceColumnToShow</code> <em>and</em>
      *            <code>nameOfRaceToShow</code>, and an {@link IllegalArgumentException} will be thrown in this case.
+     * @param raceColumnSelection 
+     *            the settings will be constructed such that the new settings will have the same race columns selected as those selected by
+     *            this argument
      */
     public LeaderboardSettings createNewSettingsForPlayMode(PlayModes playMode, String nameOfRaceToSort, String nameOfRaceColumnToShow,
-            String nameOfRaceToShow) {
+            String nameOfRaceToShow, RaceColumnSelection raceColumnSelection, boolean showOverallLeaderboardsOnSamePage) {
         if (nameOfRaceColumnToShow != null && nameOfRaceToShow != null) {
             throw new IllegalArgumentException("Can identify only one race to show, either by race name or by its column name, but not both");
         }
@@ -62,13 +66,15 @@ public class LeaderboardSettingsFactory {
                 List<DetailType> overallDetails = null; // lead overall details unchanged
                 settings = new LeaderboardSettings(maneuverDetails, legDetails, raceDetails, overallDetails,
                         namesOfRaceColumnsToShow,
-                        namesOfRacesToShow, /* set autoExpandPreSelectedRace to true if we look at a single race */ nameOfRaceColumnToShow != null || nameOfRaceToShow != null,
-                        /* refresh interval */ null, /* delay to live */ null, /* name of race to sort */ nameOfRaceToSort,
-                        /* ascending */ true, /* updateUponPlayStateChange */ true);
+                        namesOfRacesToShow, raceColumnSelection.getNumberOfLastRaceColumnsToShow(),
+                        /* set autoExpandPreSelectedRace to true if we look at a single race */ nameOfRaceColumnToShow != null || nameOfRaceToShow != null,
+                        /* refresh interval */ null, /* delay to live */ null,
+                        /* name of race to sort */ nameOfRaceToSort, /* ascending */ true, /* updateUponPlayStateChange */ true,
+                        raceColumnSelection.getType(), showOverallLeaderboardsOnSamePage);
                 break;
             case Replay:
             settings = createNewDefaultSettings(namesOfRaceColumnsToShow, namesOfRacesToShow, nameOfRaceToSort, /* autoExpandFirstRace */
-                    nameOfRaceColumnToShow != null);
+                    nameOfRaceColumnToShow != null, showOverallLeaderboardsOnSamePage);
             break;
         }
         return settings;
@@ -82,21 +88,34 @@ public class LeaderboardSettingsFactory {
      *            columns to be shown
      * @param namesOfRacesToShow
      *            alternatively, races to show can also be specified by their race names; if not <code>null</code>,
-     *            <code>namesOfRaceColumnsToShow</code> must be <code>null
+     *            <code>namesOfRaceColumnsToShow</code> must be <code>null</code>
+     * @param showOverallLeaderboardsOnSamePage
+     *            tells whether a meta leaderboard should be shown beneath the actual leaderboard on the same page, if
+     *            such a meta leaderboard exists; if multiple such meta leaderboards exist, they are all shown
      */
     public LeaderboardSettings createNewDefaultSettings(List<String> namesOfRaceColumnsToShow,
-            List<String> namesOfRacesToShow, String nameOfRaceToSort, boolean autoExpandPreSelectedRace) {
+            List<String> namesOfRacesToShow, String nameOfRaceToSort, boolean autoExpandPreSelectedRace, boolean showOverallLeaderboardsOnSamePage) {
         return createNewDefaultSettings(namesOfRaceColumnsToShow, namesOfRacesToShow, /* leave overallDetailsToShow unchanged */ null,
-                nameOfRaceToSort, autoExpandPreSelectedRace, /* refreshIntervalMillis */ null);
+                nameOfRaceToSort, autoExpandPreSelectedRace, /* refreshIntervalMillis */ null, showOverallLeaderboardsOnSamePage);
     }
     
     /**
-     * Like {@link #createNewDefaultSettings(List, List, String, boolean)}, only that an additional refresh interval for auto-refresh
+     * Like {@link #createNewDefaultSettings(List, List, String, boolean, boolean)}, only that an additional refresh interval for auto-refresh
      * may be specified; if <code>null</code>, no auto-refresh shall be performed
      */
     public LeaderboardSettings createNewDefaultSettings(List<String> namesOfRaceColumnsToShow,
             List<String> namesOfRacesToShow, List<DetailType> overallDetailsToShow, String nameOfRaceToSort,
-            boolean autoExpandPreSelectedRace, Long refreshIntervalMillis) {
+            boolean autoExpandPreSelectedRace, Long refreshIntervalMillis, boolean showOverallLeaderboardsOnSamePage) {
+        return createNewDefaultSettings(namesOfRaceColumnsToShow, namesOfRacesToShow, overallDetailsToShow,
+                nameOfRaceToSort, autoExpandPreSelectedRace, refreshIntervalMillis,
+                /* numberOfLastRacesToShow */null, /* raceColumnSelectionStrategy */ RaceColumnSelectionStrategies.EXPLICIT,
+                showOverallLeaderboardsOnSamePage);
+    }
+    
+    public LeaderboardSettings createNewDefaultSettings(List<String> namesOfRaceColumnsToShow,
+            List<String> namesOfRacesToShow, List<DetailType> overallDetailsToShow, String nameOfRaceToSort,
+            boolean autoExpandPreSelectedRace, Long refreshIntervalMillis, Integer numberOfLastRacesToShow,
+            RaceColumnSelectionStrategies raceColumnSelectionStrategy, boolean showOverallLeaderboardsOnSamePage) {
         if (namesOfRaceColumnsToShow != null && namesOfRacesToShow != null) {
             throw new IllegalArgumentException("Can specify race columns either by column or by race name, not both");
         }
@@ -112,8 +131,9 @@ public class LeaderboardSettingsFactory {
         raceDetails.add(DetailType.DISPLAY_LEGS);
         return new LeaderboardSettings(maneuverDetails, legDetails, raceDetails, overallDetailsToShow,
                 namesOfRaceColumnsToShow,
-                namesOfRacesToShow, autoExpandPreSelectedRace,
-                refreshIntervalMillis, /* delay to live */ null, /* sort by column */ nameOfRaceToSort,
-                /* ascending */ true, /* updateUponPlayStateChange */ true);
+                namesOfRacesToShow, numberOfLastRacesToShow,
+                autoExpandPreSelectedRace, refreshIntervalMillis, /* delay to live */ null,
+                /* sort by column */ nameOfRaceToSort, /* ascending */ true, /* updateUponPlayStateChange */ true,
+                raceColumnSelectionStrategy, showOverallLeaderboardsOnSamePage);
     }
 }

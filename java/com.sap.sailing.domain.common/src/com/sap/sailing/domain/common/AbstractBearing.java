@@ -47,7 +47,7 @@ public abstract class AbstractBearing implements Bearing {
 
     @Override
     public String toString() {
-        return ""+getDegrees()+"°";
+        return ""+getDegrees()+"Â°";
     }
     
     @Override

@@ -13,6 +13,7 @@ import org.moxieapps.gwt.highcharts.client.Chart;
 import org.moxieapps.gwt.highcharts.client.ChartSubtitle;
 import org.moxieapps.gwt.highcharts.client.ChartTitle;
 import org.moxieapps.gwt.highcharts.client.Color;
+import org.moxieapps.gwt.highcharts.client.Credits;
 import org.moxieapps.gwt.highcharts.client.PlotLine;
 import org.moxieapps.gwt.highcharts.client.Point;
 import org.moxieapps.gwt.highcharts.client.Series;
@@ -39,6 +40,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.impl.Util;
+import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
 import com.sap.sailing.gwt.ui.actions.GetWindInfoAction;
 import com.sap.sailing.gwt.ui.client.ColorMap;
@@ -58,6 +60,8 @@ import com.sap.sailing.gwt.ui.shared.components.SettingsDialogComponent;
 
 public class WindChart extends RaceChart implements Component<WindChartSettings>, RequiresResize {
     private static final int LINE_WIDTH = 1;
+    private static final int MAX_SERIES_POINTS = 10000;
+
     private final WindChartSettings settings;
     
     /**
@@ -65,11 +69,15 @@ public class WindChart extends RaceChart implements Component<WindChartSettings>
      */
     private final Map<WindSource, Series> windSourceDirectionSeries;
     private final Map<WindSource, Series> windSourceSpeedSeries;
+    private final Map<WindSource, Point[]> windSourceDirectionPoints;
+    private final Map<WindSource, Point[]> windSourceSpeedPoints;
+    private Pair<Double, Double> overallDirectionMinMax;
     
     private Long timeOfEarliestRequestInMillis;
     private Long timeOfLatestRequestInMillis;
 
     private final ColorMap<WindSource> colorMap;
+
 
     /**
      * @param raceSelectionProvider
@@ -81,11 +89,13 @@ public class WindChart extends RaceChart implements Component<WindChartSettings>
             TimeRangeWithZoomProvider timeRangeWithZoomProvider, WindChartSettings settings, final StringMessages stringMessages, 
             AsyncActionsExecutor asyncActionsExecutor, ErrorReporter errorReporter, boolean compactChart) {
         super(sailingService, timer, timeRangeWithZoomProvider, stringMessages, asyncActionsExecutor, errorReporter);
-        this.windSourceDirectionSeries = new HashMap<WindSource, Series>();
-        this.windSourceSpeedSeries = new HashMap<WindSource, Series>();
-        this.colorMap = new ColorMap<WindSource>();
         this.settings = settings;
-        
+        windSourceDirectionSeries = new HashMap<WindSource, Series>();
+        windSourceSpeedSeries = new HashMap<WindSource, Series>();
+        windSourceDirectionPoints = new HashMap<WindSource, Point[]>();
+        windSourceSpeedPoints = new HashMap<WindSource, Point[]>();
+        overallDirectionMinMax = new Pair<Double, Double>(null, null);
+        colorMap = new ColorMap<WindSource>();
         chart = new Chart()
                 .setPersistent(true)
                 .setZoomType(Chart.ZoomType.X)
@@ -93,16 +103,19 @@ public class WindChart extends RaceChart implements Component<WindChartSettings>
                 .setMarginRight(65)
                 .setWidth100()
                 .setHeight100()
-                .setBorderColor(new Color("#A6A6A6"))
-                .setBorderWidth(1)
-//                .setBackgroundColor(new Color("#C6C6C6"))
+                .setBorderColor(new Color("#CACACA"))
+                .setBorderWidth(0)
+                .setBorderRadius(0)
+                .setBackgroundColor(new Color("#EBEBEB"))
+                .setPlotBorderWidth(0)
+                .setCredits(new Credits().setEnabled(false))
                 .setChartTitle(new ChartTitle().setText(stringMessages.wind()))
                 .setChartSubtitle(new ChartSubtitle().setText(stringMessages.clickAndDragToZoomIn()))
                 .setLinePlotOptions(new LinePlotOptions().setLineWidth(LINE_WIDTH).setMarker(
                         new Marker().setEnabled(false).setHoverState(
                                 new Marker().setEnabled(true).setRadius(4))).setShadow(false)
                                     .setHoverStateLineWidth(LINE_WIDTH));
-        useCheckboxesToShowAndHide(chart);
+        ChartUtil.useCheckboxesToShowAndHide(chart);
         final NumberFormat numberFormat = NumberFormat.getFormat("0");
         chart.setToolTip(new ToolTip().setEnabled(true).setFormatter(new ToolTipFormatter() {
             @Override
@@ -121,7 +134,7 @@ public class WindChart extends RaceChart implements Component<WindChartSettings>
                     return "<b>" + seriesName + (toolTipData.getPointName() != null ? " "+toolTipData.getPointName() : "")
                             + "</b><br/>" +  
                             dateFormat.format(new Date(toolTipData.getXAsLong())) + ": " +
-                            numberFormat.format(toolTipData.getYAsDouble()) + stringMessages.averageSpeedInKnotsUnit();
+                            numberFormat.format(toolTipData.getYAsDouble()) + stringMessages.knotsUnit();
                 }
             }
         }));
@@ -159,7 +172,7 @@ public class WindChart extends RaceChart implements Component<WindChartSettings>
                     }
                 }));
         
-        chart.getYAxis(1).setOpposite(true).setAxisTitleText(stringMessages.speed()+" ("+stringMessages.averageSpeedInKnotsUnit()+")")
+        chart.getYAxis(1).setOpposite(true).setAxisTitleText(stringMessages.speed()+" ("+stringMessages.knotsUnit()+")")
             .setStartOnTick(false).setShowFirstLabel(false).setGridLineWidth(0).setMinorGridLineWidth(0);
         
         if (compactChart) {
@@ -169,9 +182,7 @@ public class WindChart extends RaceChart implements Component<WindChartSettings>
                  .setChartSubtitle(null)
                  .getXAxis().setAxisTitle(null);
         }
-        
         setSize("100%", "100%");
-        
         raceSelectionProvider.addRaceSelectionChangeListener(this);
     }
 
@@ -212,7 +223,7 @@ public class WindChart extends RaceChart implements Component<WindChartSettings>
             }
         }
 
-        if(settings.isShowWindSpeedSeries()) {
+        if (settings.isShowWindSpeedSeries()) {
             for (Map.Entry<WindSource, Series> e : windSourceSpeedSeries.entrySet()) {
                 Series series = e.getValue();
                 if (settings.getWindSpeedSourcesToDisplay().contains(e.getKey().getType())) {
@@ -274,6 +285,7 @@ public class WindChart extends RaceChart implements Component<WindChartSettings>
                 .setType(Series.Type.LINE)
                 .setName(stringMessages.fromDeg()+" "+WindSourceTypeFormatter.format(windSource, stringMessages))
                 .setYAxis(0)
+                .setOption("turboThreshold", MAX_SERIES_POINTS)
                 .setPlotOptions(new LinePlotOptions().setColor(colorMap.getColorByID(windSource)).setSelected(true));
         return newSeries;
     }
@@ -288,6 +300,7 @@ public class WindChart extends RaceChart implements Component<WindChartSettings>
                 .setType(Series.Type.LINE)
                 .setName(stringMessages.windSpeed()+" "+WindSourceTypeFormatter.format(windSource, stringMessages))
                 .setYAxis(1) // use the second Y-axis
+                .setOption("turboThreshold", MAX_SERIES_POINTS)
                 .setPlotOptions(new LinePlotOptions().setDashStyle(PlotLine.DashStyle.SHORT_DOT)
                         .setLineWidth(3).setHoverStateLineWidth(3)
                         .setColor(colorMap.getColorByID(windSource)).setSelected(true)); // show only the markers, not the connecting lines
@@ -298,21 +311,20 @@ public class WindChart extends RaceChart implements Component<WindChartSettings>
      * Updates the wind charts with the wind data from <code>result</code>. If <code>append</code> is <code>true</code>, previously
      * existing points in the chart are left unchanged. Otherwise, the existing wind series are replaced.
      */
-    public void updateStripChartSeries(WindInfoForRaceDTO result, boolean append) {
+    public void updateChartSeries(WindInfoForRaceDTO result, boolean append) {
         final NumberFormat numberFormat = NumberFormat.getFormat("0");
         Long newMinTimepoint = timeOfEarliestRequestInMillis;
         Long newMaxTimepoint = timeOfLatestRequestInMillis;
         
-        for (Map.Entry<WindSource, WindTrackInfoDTO> e : result.windTrackInfoByWindSource.entrySet()) {
-            WindSource windSource = e.getKey();
+        for (WindSource windSource: result.windTrackInfoByWindSource.keySet()) {
+            WindTrackInfoDTO windTrackInfo = result.windTrackInfoByWindSource.get(windSource);
             Series directionSeries = getOrCreateDirectionSeries(windSource);
             Series speedSeries = null;
             if (windSource.getType().useSpeed()) {
                 speedSeries = getOrCreateSpeedSeries(windSource);
             }
-            WindTrackInfoDTO windTrackInfo = e.getValue();
-            Double directionMin = null;
-            Double directionMax = null;
+            Double directionMin = overallDirectionMinMax.getA();
+            Double directionMax = overallDirectionMinMax.getB();
             Point[] directionPoints = new Point[windTrackInfo.windFixes.size()];
             Point[] speedPoints = new Point[windTrackInfo.windFixes.size()];
             int currentPointIndex = 0;
@@ -329,11 +341,12 @@ public class WindChart extends RaceChart implements Component<WindChartSettings>
                     timeOfLatestRequestInMillis == null || wind.requestTimepoint > timeOfLatestRequestInMillis) {
                     Point newDirectionPoint = new Point(wind.requestTimepoint, wind.dampenedTrueWindFromDeg);
                     if (wind.dampenedTrueWindSpeedInKnots != null) {
-                        String name = numberFormat.format(wind.dampenedTrueWindSpeedInKnots)+ stringMessages.averageSpeedInKnotsUnit();
+                        String name = numberFormat.format(wind.dampenedTrueWindSpeedInKnots)+ stringMessages.knotsUnit();
                         // name += " Confidence:" + wind.confidence;
                         newDirectionPoint.setName(name);
                     }
-                    newDirectionPoint = recalculateDirectionPoint(directionMax, directionMin, newDirectionPoint);
+                    
+                    newDirectionPoint = WindChartPointRecalculator.recalculateDirectionPoint(directionMin, directionMax, newDirectionPoint);
                     directionPoints[currentPointIndex] = newDirectionPoint;
 
                     double direction = newDirectionPoint.getY().doubleValue();
@@ -348,15 +361,18 @@ public class WindChart extends RaceChart implements Component<WindChartSettings>
                     speedPoints[currentPointIndex++] = newSpeedPoint;
                 }
             }
+            overallDirectionMinMax = new Pair<Double, Double>(directionMin, directionMax);
+            
             Point[] newDirectionPoints;
             Point[] newSpeedPoints = null;
             if (append) {
-                Point[] oldDirectionPoints = directionSeries.getPoints();
+                Point[] oldDirectionPoints = windSourceDirectionPoints.get(windSource) != null ? windSourceDirectionPoints.get(windSource) : new Point[0];
+                
                 newDirectionPoints = new Point[oldDirectionPoints.length + currentPointIndex];
                 System.arraycopy(oldDirectionPoints, 0, newDirectionPoints, 0, oldDirectionPoints.length);
                 System.arraycopy(directionPoints, 0, newDirectionPoints, oldDirectionPoints.length, currentPointIndex);
                 if (windSource.getType().useSpeed()) {
-                    Point[] oldSpeedPoints = speedSeries.getPoints();
+                    Point[] oldSpeedPoints =  windSourceSpeedPoints.get(windSource) != null ? windSourceSpeedPoints.get(windSource) : new Point[0];
                     newSpeedPoints = new Point[oldSpeedPoints.length + currentPointIndex];
                     System.arraycopy(oldSpeedPoints, 0, newSpeedPoints, 0, oldSpeedPoints.length);
                     System.arraycopy(speedPoints, 0, newSpeedPoints, oldSpeedPoints.length, currentPointIndex);
@@ -365,40 +381,18 @@ public class WindChart extends RaceChart implements Component<WindChartSettings>
                 newDirectionPoints = directionPoints;
                 newSpeedPoints = speedPoints;
             }
- 
-            directionSeries.setPoints(newDirectionPoints);
+            setSeriesPoints(directionSeries, newDirectionPoints);
+            windSourceDirectionPoints.put(windSource, newDirectionPoints);
             if (windSource.getType().useSpeed()) {
-                speedSeries.setPoints(newSpeedPoints);
+                setSeriesPoints(speedSeries, newSpeedPoints);
+                windSourceSpeedPoints.put(windSource, newSpeedPoints);
             }
         }
+        
         timeOfEarliestRequestInMillis = newMinTimepoint;
         timeOfLatestRequestInMillis = newMaxTimepoint;
     }
     
-    private Point recalculateDirectionPoint(Double yMax, Double yMin, Point directionPoint) {
-        double y = directionPoint.getY().doubleValue();
-        boolean recalculated = false;
-
-        if (yMax != null && yMin != null && (y < yMin || yMax < y)) {
-            double deltaMin = Math.abs(yMin - y);
-            double deltaMax = Math.abs(yMax - y);
-
-            double yDown = y - 360;
-            double deltaMinDown = Math.abs(yMin - Math.abs(yDown));
-
-            double yUp = y + 360;
-            double deltaMaxUp = Math.abs(yMax - Math.abs(yUp));
-
-            if (!(deltaMin <= deltaMinDown && deltaMin <= deltaMaxUp)
-                    && !(deltaMax <= deltaMinDown && deltaMax <= deltaMaxUp)) {
-                y = deltaMaxUp <= deltaMinDown ? yUp : yDown;
-                recalculated = true;
-            }
-        }
-        
-        return recalculated ? new Point(directionPoint.getX(), y) : directionPoint;
-    }
-
     @Override
     public boolean hasSettings() {
         return true;
@@ -413,7 +407,7 @@ public class WindChart extends RaceChart implements Component<WindChartSettings>
 
     /**
      * Sets the visibilities of the wind source series based on the new settings. Note that this does not
-     * re-load any wind data. This has to happen by calling {@link #updateStripChartSeries(WindInfoForRaceDTO, boolean)}.
+     * re-load any wind data. This has to happen by calling {@link #updateChartSeries(WindInfoForRaceDTO, boolean)}.
      */
     @Override
     public void updateSettings(WindChartSettings newSettings) {
@@ -432,6 +426,9 @@ public class WindChart extends RaceChart implements Component<WindChartSettings>
     private void clearCacheAndReload() {
         timeOfEarliestRequestInMillis = null;
         timeOfLatestRequestInMillis = null;
+        overallDirectionMinMax = new Pair<Double, Double>(null, null);
+        windSourceDirectionPoints.clear();
+        windSourceSpeedPoints.clear();
         
         loadData(timeRangeWithZoomProvider.getFromTime(), timeRangeWithZoomProvider.getToTime(), /* append */false);
     }
@@ -455,7 +452,7 @@ public class WindChart extends RaceChart implements Component<WindChartSettings>
                         @Override
                         public void onSuccess(WindInfoForRaceDTO result) {
                             if (result != null) {
-                                updateStripChartSeries(result, append);
+                                updateChartSeries(result, append);
                                 updateVisibleSeries();
                             } else {
                                 if (!append) {
@@ -522,9 +519,16 @@ public class WindChart extends RaceChart implements Component<WindChartSettings>
             }
             case Replay:
             {
-                // assuming play mode is replay / non-live
                 if (timeOfLatestRequestInMillis == null) {
-                    loadData(timeRangeWithZoomProvider.getFromTime(), timeRangeWithZoomProvider.getToTime(), /* append */false); // replace old series
+                    // pure replay mode
+                    loadData(timeRangeWithZoomProvider.getFromTime(), timeRangeWithZoomProvider.getToTime(), /* append */false);
+                } else {
+                    // replay mode during live play
+                    if (timeOfEarliestRequestInMillis == null || date.getTime() < timeOfEarliestRequestInMillis) {
+                        loadData(timeRangeWithZoomProvider.getFromTime(), date, /* append */ true);
+                    } else if (date.getTime() > timeOfLatestRequestInMillis) {
+                        loadData(new Date(timeOfLatestRequestInMillis), timeRangeWithZoomProvider.getToTime(), /* append */true);
+                    }                    
                 }
                 break;
             }
@@ -538,19 +542,11 @@ public class WindChart extends RaceChart implements Component<WindChartSettings>
         // in the BaseChart class would not be called 
         chart.redraw();
     }
-    
-    @Override
-    protected void onSeriesSelectionChanged(Series series, boolean selected) {
-        super.onSeriesSelectionChanged(series, selected);
-        if(selected) {
-            clearCacheAndReload();
-        }
-    }
 
     private boolean needsDataLoading() {
         return isVisible();
     }
-   
+    
     /**
      * Prints basic data and points of a WindInfoForRaceDTO object to a formatted string.
      * Can be used for debugging
@@ -590,7 +586,7 @@ public class WindChart extends RaceChart implements Component<WindChartSettings>
      * Can be used for debugging
      */
     @SuppressWarnings("unused")
-    private String printPoints(WindSource windSource, String whatIsIt, Point[] points) {
+    private String printPoints(WindSource windSource, String whatIsIt, Point[] points, boolean printFixDetails) {
         StringBuffer buffer = new StringBuffer();
         DateTimeFormatRenderer timeFormatter = new DateTimeFormatRenderer(DateTimeFormat.getFormat("HH:mm:ss:SSS"));
         buffer.append("\n");
@@ -602,13 +598,14 @@ public class WindChart extends RaceChart implements Component<WindChartSettings>
             buffer.append("Points is null" + "\n");
         } else {
             buffer.append("Point count: " + points.length + "\n");
-            Date xAsDate = new Date();
-            for (int i = 0; i < points.length; i++) {
-                Point point = points[i];
-                xAsDate.setTime(point.getX().longValue());
-                buffer.append("P" + (i + 1) + ": " + timeFormatter.render(xAsDate) + ", V: " + point.getY() + "\n");
+            if(printFixDetails) {
+                Date xAsDate = new Date();
+                for (int i = 0; i < points.length; i++) {
+                    Point point = points[i];
+                    xAsDate.setTime(point.getX().longValue());
+                    buffer.append("P" + (i + 1) + ": " + timeFormatter.render(xAsDate) + ", V: " + point.getY() + "\n");
+                }
             }
-            buffer.append(buffer.toString());
         }
         buffer.append("\n");
         return buffer.toString();

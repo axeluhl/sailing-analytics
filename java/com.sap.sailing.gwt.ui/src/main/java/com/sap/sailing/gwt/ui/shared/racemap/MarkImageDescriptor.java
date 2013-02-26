@@ -1,0 +1,85 @@
+package com.sap.sailing.gwt.ui.shared.racemap;
+
+import com.google.gwt.maps.client.geom.Point;
+import com.google.gwt.resources.client.ImageResource;
+import com.sap.sailing.domain.common.MarkType;
+
+/**
+ * A descriptor class for display properties of a mark image.
+ */
+public class MarkImageDescriptor {
+    private final ImageResource imgageResource;
+    private final String color;
+    private final String shape;
+    private final String pattern;
+    private final MarkType type;
+    private final Point anchorPoint;
+
+    public MarkImageDescriptor(final ImageResource imgageResource, final Point anchorPoint, MarkType type, String color, String shape, String pattern) {
+        this.imgageResource = imgageResource;
+        this.anchorPoint = anchorPoint;
+        this.type = type;
+        this.color = color;
+        this.shape = shape;
+        this.pattern = pattern;
+    }
+
+    public ImageResource getImgageResource() {
+        return imgageResource;
+    }
+
+    public Point getAnchorPoint() {
+        return anchorPoint;
+    }
+
+    public String getColor() {
+        return color;
+    }
+
+    public String getShape() {
+        return shape;
+    }
+
+    public String getPattern() {
+        return pattern;
+    }
+
+    public MarkType getType() {
+        return type;
+    }
+    
+    /**
+     * An utility method to check if the mark icon has compatible display properties.
+     * In case of null values at least one valid display property must exist and fit.  
+     */
+    public boolean isCompatible(MarkType typeToCheck, String colorToCheck, String shapeToCheck, String patternToCheck) {
+        boolean result = false;
+
+        if((typeToCheck != null && type == null) || (typeToCheck == null && type != null)) {
+            result = false;
+        } else if(typeToCheck != null && type != null) {
+            result = type == typeToCheck;
+        }
+        
+        if((colorToCheck != null && color == null) || (colorToCheck == null && color != null)) {
+            result = false;
+        } else if(colorToCheck != null && color != null) {
+            result = color.equalsIgnoreCase(colorToCheck) ? true : false;
+        }
+
+        if((shapeToCheck != null && shape == null) || (shapeToCheck == null && shape != null)) {
+            result = false;
+        } else if(shapeToCheck != null && shape != null) {
+            result = shape.equalsIgnoreCase(shapeToCheck) ? true : false;
+        }
+
+        if((patternToCheck != null && pattern == null) || (patternToCheck == null && pattern != null)) {
+            result = false;
+        } else if(patternToCheck != null && pattern != null) {
+            result = pattern.equalsIgnoreCase(patternToCheck) ? true : false;
+        }   
+        
+        return result;    
+    }
+
+}

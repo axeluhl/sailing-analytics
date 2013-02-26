@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.shared.racemap;
 
 import com.google.gwt.canvas.client.Canvas;
+import com.google.gwt.dom.client.Style.Cursor;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -26,6 +27,8 @@ public class CombinedWindPanel extends FlowPanel {
     
     private Canvas canvas;
 
+    private static String CSS_STYLE_COMBINED_WIND_PANEL = "CombinedWindPanel";
+   
     /**
      */
     public CombinedWindPanel(RaceMapImageManager theRaceMapResources, StringMessages stringMessages) {
@@ -33,8 +36,14 @@ public class CombinedWindPanel extends FlowPanel {
         this.raceMapResources = theRaceMapResources;
         transformer = raceMapResources.getCombinedWindIconTransformer();
         canvas = transformer.getCanvas();
+        int canvasWidth = canvas.getCanvasElement().getWidth();
+        
+        addStyleName(CSS_STYLE_COMBINED_WIND_PANEL);
+        
+        canvas.getElement().getStyle().setCursor(Cursor.POINTER);
+        canvas.setWidth(canvasWidth + LABEL_HEIGHT + "px");
         textLabel = new Label("");
-        textLabel.setSize(""+2*transformer.getRadius()+"px", ""+LABEL_HEIGHT+"px");
+        textLabel.setSize(canvasWidth + LABEL_HEIGHT +"px", ""+LABEL_HEIGHT+"px");
         textLabel.getElement().getStyle().setFontSize(LABEL_HEIGHT, Unit.PX);
         textLabel.setWordWrap(false);
         textLabel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
@@ -54,7 +63,7 @@ public class CombinedWindPanel extends FlowPanel {
                 String title = stringMessages.wind() + ": " +  Math.round(windFromDeg) + " " 
                         + stringMessages.degreesShort() + " (" + WindSourceTypeFormatter.format(windSource, stringMessages) + ")"; 
                 canvas.setTitle(title);
-                textLabel.setText(numberFormat.format(speedInKnots) + " " + stringMessages.averageSpeedInKnotsUnit());
+                textLabel.setText(numberFormat.format(speedInKnots) + " " + stringMessages.knotsUnit());
                 if (!isVisible()) {
                     setVisible(true);
                 }

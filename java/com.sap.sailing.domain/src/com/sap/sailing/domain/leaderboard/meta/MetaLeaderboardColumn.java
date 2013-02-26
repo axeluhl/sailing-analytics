@@ -9,6 +9,7 @@ import com.sap.sailing.domain.base.RaceColumnListener;
 import com.sap.sailing.domain.base.impl.SimpleAbstractRaceColumn;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
 /**
@@ -36,15 +37,7 @@ public class MetaLeaderboardColumn extends SimpleAbstractRaceColumn implements R
     
     @Override
     public String getName() {
-        return leaderboard.getName();
-    }
-
-    @Override
-    public void addRaceColumnListener(RaceColumnListener listener) {
-    }
-
-    @Override
-    public void removeRaceColumnListener(RaceColumnListener listener) {
+        return leaderboard.getDisplayName() != null ? leaderboard.getDisplayName() : leaderboard.getName();
     }
 
     @Override
@@ -127,6 +120,27 @@ public class MetaLeaderboardColumn extends SimpleAbstractRaceColumn implements R
     @Override
     public void raceColumnRemovedFromContainer(RaceColumn raceColumn) {
         getRaceColumnListeners().notifyListenersAboutRaceColumnRemovedFromContainer(raceColumn);
+    }
+
+    @Override
+    public void raceColumnMoved(RaceColumn raceColumn, int newIndex) {
+        getRaceColumnListeners().notifyListenersAboutRaceColumnMoved(raceColumn, newIndex);
+    }
+
+    @Override
+    public void factorChanged(RaceColumn raceColumn, Double oldFactor, Double newFactor) {
+        getRaceColumnListeners().notifyListenersAboutFactorChanged(raceColumn, oldFactor, newFactor);
+    }
+
+    @Override
+    public void competitorDisplayNameChanged(Competitor competitor, String oldDisplayName, String displayName) {
+        getRaceColumnListeners().notifyListenersAboutCompetitorDisplayNameChanged(competitor, oldDisplayName, displayName);
+    }
+
+    @Override
+    public void resultDiscardingRuleChanged(ThresholdBasedResultDiscardingRule oldDiscardingRule,
+            ThresholdBasedResultDiscardingRule newDiscardingRule) {
+        getRaceColumnListeners().notifyListenersAboutResultDiscardingRuleChanged(oldDiscardingRule, newDiscardingRule);
     }
 
     @Override

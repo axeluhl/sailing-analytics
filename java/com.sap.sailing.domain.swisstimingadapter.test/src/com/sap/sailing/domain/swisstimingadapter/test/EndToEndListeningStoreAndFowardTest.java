@@ -22,7 +22,7 @@ import org.junit.Test;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
-import com.sap.sailing.domain.base.Buoy;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
@@ -141,7 +141,19 @@ public class EndToEndListeningStoreAndFowardTest {
         String scriptName1 = "/SailMasterDataInterfaceRACandSTL.txt";
         String scriptName2 = "/SailMasterDataInterface-ExampleAsText.txt";
         setUpUsingScript(racesToTrack, scriptName1, scriptName2);
+        coreOfTestLongRaceLog();
+    }
 
+    @Test
+    public void testLongRaceLogNewVersion() throws Exception {
+        String[] racesToTrack = new String[] { "W4702" };
+        String scriptName1 = "/W4702RACandSTLandCCG.txt";
+        String scriptName2 = "/W4702AsText.txt";
+        setUpUsingScript(racesToTrack, scriptName1, scriptName2);
+        coreOfTestLongRaceLog();
+    }
+
+    private void coreOfTestLongRaceLog() {
         Set<TrackedRace> allTrackedRaces = new HashSet<TrackedRace>();
         Iterable<Regatta> allRegattas = racingEventService.getAllRegattas();
         for (Regatta regatta : allRegattas) {
@@ -164,7 +176,8 @@ public class EndToEndListeningStoreAndFowardTest {
             assertEquals(7, Util.size(race.getCourse().getWaypoints()));
             assertEquals(6, Util.size(race.getCourse().getLegs()));
             for (Competitor competitor : race.getCompetitors()) {
-                if (!competitor.getName().equals("Competitor 35") && !competitor.getName().equals("Competitor 20")) {
+                if (!competitor.getName().equals("Competitor 35") && !competitor.getName().equals("Competitor 20")
+                        && !competitor.getName().equals("GBR 831") && !competitor.getName().equals("NED 24")) {
                     final GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(competitor);
                     track.lockForRead();
                     try {
@@ -174,17 +187,17 @@ public class EndToEndListeningStoreAndFowardTest {
                     }
                 }
             }
-            Set<Buoy> buoys = new HashSet<Buoy>();
+            Set<Mark> marks = new HashSet<Mark>();
             for (Waypoint waypoint : race.getCourse().getWaypoints()) {
-                for (Buoy buoy : waypoint.getBuoys()) {
-                    buoys.add(buoy);
+                for (Mark mark : waypoint.getMarks()) {
+                    marks.add(mark);
                 }
             }
-            for (Buoy buoy : buoys) {
-                final GPSFixTrack<Buoy, GPSFix> track = trackedRace.getOrCreateTrack(buoy);
+            for (Mark mark : marks) {
+                final GPSFixTrack<Mark, GPSFix> track = trackedRace.getOrCreateTrack(mark);
                 track.lockForRead();
                 try {
-                    assertTrue("Track of buoy " + buoy + " empty",
+                    assertTrue("Track of mark " + mark + " empty",
                             !Util.isEmpty(track.getRawFixes()));
                 } finally {
                     track.unlockAfterRead();
@@ -228,7 +241,7 @@ public class EndToEndListeningStoreAndFowardTest {
             assertEquals(2, Util.size(race.getCourse().getLegs()));
             for (Competitor competitor : race.getCompetitors()) {
                 if (!competitor.getName().equals("NED 24") && !competitor.getName().equals("Competitor 35")
-                        && !competitor.getName().equals("Competitor 20")) {
+                        && !competitor.getName().equals("Competitor 20") && !competitor.getName().equals("GBR 831")) {
                     final GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(competitor);
                     track.lockForRead();
                     try {
@@ -238,17 +251,17 @@ public class EndToEndListeningStoreAndFowardTest {
                     }
                 }
             }
-            Set<Buoy> buoys = new HashSet<Buoy>();
+            Set<Mark> marks = new HashSet<Mark>();
             for (Waypoint waypoint : race.getCourse().getWaypoints()) {
-                for (Buoy buoy : waypoint.getBuoys()) {
-                    buoys.add(buoy);
+                for (Mark mark : waypoint.getMarks()) {
+                    marks.add(mark);
                 }
             }
-            for (Buoy buoy : buoys) {
-                final GPSFixTrack<Buoy, GPSFix> track = trackedRace.getOrCreateTrack(buoy);
+            for (Mark mark : marks) {
+                final GPSFixTrack<Mark, GPSFix> track = trackedRace.getOrCreateTrack(mark);
                 track.lockForRead();
                 try {
-                    assertTrue("Track of buoy " + buoy + " empty", !Util.isEmpty(track.getRawFixes()));
+                    assertTrue("Track of mark " + mark + " empty", !Util.isEmpty(track.getRawFixes()));
                 } finally {
                     track.unlockAfterRead();
                 }

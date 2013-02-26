@@ -40,7 +40,7 @@ import com.sap.sailing.gwt.ui.adminconsole.LeaderboardConfigPanel.AnchorCell;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.URLFactory;
+import com.sap.sailing.gwt.ui.client.URLEncoder;
 import com.sap.sailing.gwt.ui.shared.FleetDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.PlacemarkOrderDTO;
@@ -223,7 +223,7 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
             @Override
             public SafeHtml getValue(LeaderboardGroupDTO group) {
                 String debugParam = Window.Location.getParameter("gwt.codesvr");
-                String link = URLFactory.INSTANCE.encode("/gwt/Spectator.html?"+
+                String link = URLEncoder.encode("/gwt/Spectator.html?"+
                         (showRaceDetails ? "showRaceDetails=true&" : "") +
                         "leaderboardGroupName=" + group.name + "&root=overview"
                         + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""));
@@ -352,7 +352,7 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
             public SafeHtml getValue(StrippedLeaderboardDTO leaderboard) {
                 LeaderboardGroupDTO selectedGroup = groupsSelectionModel.getSelectedObject();
                 String debugParam = Window.Location.getParameter("gwt.codesvr");
-                String link = URLFactory.INSTANCE.encode("/gwt/Leaderboard.html?name=" + leaderboard.name
+                String link = URLEncoder.encode("/gwt/Leaderboard.html?name=" + leaderboard.name
                         + (showRaceDetails ? "&showRaceDetails=true" : "")
                         + "&leaderboardGroupName=" + selectedGroup.name + "&root=overview"
                         + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""));
@@ -445,7 +445,7 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
                         StrippedLeaderboardDTO selectedLeaderboard = leaderboardsSelectionModel.getSelectedObject();
                         RegattaNameAndRaceName raceId = (RegattaNameAndRaceName) race.getRaceIdentifier(fleet);
                         String debugParam = Window.Location.getParameter("gwt.codesvr");
-                        String link = URLFactory.INSTANCE.encode("/gwt/RaceBoard.html?leaderboardName="
+                        String link = URLEncoder.encode("/gwt/RaceBoard.html?leaderboardName="
                                 + selectedLeaderboard.name + "&raceName=" + raceId.getRaceName() + "&regattaName="
                                 + raceId.getRegattaName() + "&leaderboardGroupName=" + selectedGroup.name
                                 + "&root=overview"
@@ -611,7 +611,7 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
             result = textContainsStringsToCheck(forGroup.name, name.split("\\s"));
         }
         if (result && onlyLiveCheckBox.getValue()) {
-            result = forGroup.containsLiveRace();
+            result = forGroup.hasLiveRace();
         }else if (result) {
             Date startDate = forGroup.getGroupStartDate();
             if (startDate != null) {

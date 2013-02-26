@@ -21,7 +21,12 @@ Require-Bundle: com.sap.sailing.domain,
  com.mongodb.driver;bundle-version="2.6.2",
  javax.servlet;bundle-version="2.5.0",
  com.sap.sailing.domain.common,
- com.sap.sailing.udpconnector
+ com.sap.sailing.udpconnector,
+ org.jdom;bundle-version="1.0.0",
+ javax.servlet.jsp.jstl;bundle-version="1.2.0",
+ javax.servlet.jsp;bundle-version="2.1.0",
+ javax.el;bundle-version="2.1.0",
+ rome;bundle-version="1.0.0"
 Bundle-ClassPath: .
 Web-ContextPath: /sailingserver
 Export-Package: com.sap.sailing.server.gateway

@@ -1,8 +1,12 @@
 package com.sap.sailing.gwt.ui.shared.charts;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog;
 import com.sap.sailing.gwt.ui.client.DetailTypeFormatter;
@@ -11,44 +15,62 @@ import com.sap.sailing.gwt.ui.shared.components.SettingsDialogComponent;
 
 public class MultiChartSettingsComponent extends AbstractChartSettingsComponent<MultiChartSettings> implements
         SettingsDialogComponent<MultiChartSettings> {
-    private ListBox dataSelection;
-    private final DetailType initialDataToShow;
+    private ListBox chartTypeSelectionListBox;
+    private final DetailType initialDetailType;
+    private final List<DetailType> availableDetailsTypes;    
     
     public MultiChartSettingsComponent(MultiChartSettings settings, StringMessages stringMessages) {
         super(settings, stringMessages);
-        this.initialDataToShow = settings.getDataToShow();
+        this.initialDetailType = settings.getDetailType();
+        
+        availableDetailsTypes = new ArrayList<DetailType>();
+        availableDetailsTypes.add(DetailType.WINDWARD_DISTANCE_TO_OVERALL_LEADER);
+        availableDetailsTypes.add(DetailType.DISTANCE_TRAVELED);
+        availableDetailsTypes.add(DetailType.VELOCITY_MADE_GOOD_IN_KNOTS);
+        availableDetailsTypes.add(DetailType.GAP_TO_LEADER_IN_SECONDS);
+        availableDetailsTypes.add(DetailType.CURRENT_SPEED_OVER_GROUND_IN_KNOTS);
+        availableDetailsTypes.add(DetailType.RACE_RANK);
+        availableDetailsTypes.add(DetailType.REGATTA_RANK);
+        availableDetailsTypes.add(DetailType.OVERALL_RANK);
     }
 
     @Override
-    public VerticalPanel getAdditionalWidget(DataEntryDialog<?> dialog) {
-        VerticalPanel configPanel = super.getAdditionalWidget(dialog);
-        configPanel.setSpacing(5);
-        Label lblChart = new Label(getStringMessages().chooseChart());
-        configPanel.add(lblChart);
-        dataSelection = dialog.createListBox(/* isMultiSelect */ false);
+    public Widget getAdditionalWidget(DataEntryDialog<?> dialog) {
+        VerticalPanel mainPanel = new VerticalPanel();
+        mainPanel.setSpacing(5);
+
+        Label chartSelectionLabel = new Label(stringMessages.chooseChart());
+        mainPanel.add(chartSelectionLabel);
+        chartTypeSelectionListBox = dialog.createListBox(/* isMultiSelect */ false);
         int i=0;
-        for (DetailType detailType : new DetailType[] { DetailType.WINDWARD_DISTANCE_TO_OVERALL_LEADER, DetailType.DISTANCE_TRAVELED,
-                DetailType.VELOCITY_MADE_GOOD_IN_KNOTS, DetailType.GAP_TO_LEADER_IN_SECONDS, DetailType.CURRENT_SPEED_OVER_GROUND_IN_KNOTS,
-                DetailType.RACE_RANK }) {
-            dataSelection.addItem(DetailTypeFormatter.format(detailType, getStringMessages()), detailType.toString());
-            if (detailType == initialDataToShow) {
-                dataSelection.setSelectedIndex(i);
+        for (DetailType detailType : availableDetailsTypes) {
+            chartTypeSelectionListBox.addItem(DetailTypeFormatter.format(detailType), detailType.name());
+            if (detailType == initialDetailType) {
+                chartTypeSelectionListBox.setSelectedIndex(i);
             }
             i++;
         }
-        configPanel.add(dataSelection);
-        return configPanel;
+        mainPanel.add(chartTypeSelectionListBox);
+
+        mainPanel.add(new Label(stringMessages.stepSizeInSeconds()));
+        stepSizeBox = dialog.createDoubleBox(((double) getSettings().getStepSize()) / 1000, 5);
+        mainPanel.add(stepSizeBox);
+        
+        return mainPanel;
     }
 
     @Override
     public MultiChartSettings getResult() {
-        DetailType dataToShow = null;
-        for (DetailType dt : DetailType.values()){
-            if (dt.toString().equals(dataSelection.getValue(dataSelection.getSelectedIndex()))){
-                dataToShow = dt;
+        DetailType newDetailType = null;
+        int selectedIndex = chartTypeSelectionListBox.getSelectedIndex();
+        String selectedDetailType = chartTypeSelectionListBox.getValue(selectedIndex);
+        for (DetailType detailType : availableDetailsTypes){
+            if (detailType.name().equals(selectedDetailType)){
+                newDetailType = detailType;
+                break;
             }
         }
-        return new MultiChartSettings(getAbstractResult(), dataToShow);
+        return new MultiChartSettings(getAbstractResult(), newDetailType);
     }
 
 }

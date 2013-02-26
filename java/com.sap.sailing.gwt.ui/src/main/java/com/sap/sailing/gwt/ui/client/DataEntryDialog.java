@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.ui.client;
 
 import java.util.Date;
 
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.dom.client.Style.FontWeight;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ChangeEvent;
@@ -22,6 +23,7 @@ import com.google.gwt.user.client.ui.IntegerBox;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.LongBox;
+import com.google.gwt.user.client.ui.RadioButton;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
@@ -87,6 +89,7 @@ public abstract class DataEntryDialog<T> {
         okButton = new Button(okButtonName);
         okButton.getElement().getStyle().setMargin(3, Unit.PX);
         FlowPanel dialogFPanel = new FlowPanel();
+        dialogFPanel.setWidth("100%");
         statusLabel = new Label();
         dialogFPanel.add(statusLabel);
         if (message != null) {
@@ -96,6 +99,7 @@ public abstract class DataEntryDialog<T> {
         }
         
         panelForAdditionalWidget = new FlowPanel();
+        panelForAdditionalWidget.setWidth("100%");
         dialogFPanel.add(panelForAdditionalWidget);
         FlowPanel buttonPanel = new FlowPanel();
         dialogFPanel.add(buttonPanel);
@@ -137,7 +141,7 @@ public abstract class DataEntryDialog<T> {
     }
     
     protected abstract T getResult();
-    
+
     /**
      * Creates a text box with a key-up listener attached which ensures the value is updated after each
      * key-up event and the entire dialog is {@link #validate() validated} in this case.
@@ -296,15 +300,12 @@ public abstract class DataEntryDialog<T> {
     
     public FlowPanel createHeadline(String headlineText, boolean regularHeadline) {
     	FlowPanel headlinePanel = new FlowPanel();
-    	
         Label headlineLabel = new Label(headlineText);
-        
         if (regularHeadline) {
-        	headlinePanel.addStyleName("dialogInnerHeadline");
-		} else {
-			headlinePanel.addStyleName("dialogInnerHeadlineOther");
-		}
-        
+            headlinePanel.addStyleName("dialogInnerHeadline");
+        } else {
+            headlinePanel.addStyleName("dialogInnerHeadlineOther");
+        }
         headlinePanel.add(headlineLabel);
         return headlinePanel;
     }
@@ -323,6 +324,32 @@ public abstract class DataEntryDialog<T> {
         return result;
     }
 
+    public RadioButton createRadioButton(String radioButtonGroupName, String radioButtonLabel) {
+        RadioButton result = new RadioButton(radioButtonGroupName, radioButtonLabel);
+        result.setWordWrap(false);
+        result.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<Boolean> event) {
+                validate();
+            }
+        });
+        AbstractEntryPoint.linkEnterToButton(getOkButton(), result);
+        AbstractEntryPoint.linkEscapeToButton(getCancelButton(), result);
+        return result;
+    }
+
+    /**
+     * Creates a standard label for input fields.
+     * The label has some default formatting like "no wrap" and a colon right after the label text 
+     * @param name
+     * @return
+     */
+    public Label createLabel(String name) {
+        Label result = new Label(name + ":");
+        result.setWordWrap(false);
+        return result;
+    }
+    
     public ListBox createListBox(boolean isMultipleSelect) {
         ListBox result = new ListBox(isMultipleSelect);
         result.addChangeHandler(new ChangeHandler() {
@@ -336,12 +363,11 @@ public abstract class DataEntryDialog<T> {
         return result;
     }
 
-    protected void alignAllPanelWidgetsVertically(HorizontalPanel panel, HasVerticalAlignment.VerticalAlignmentConstant alignment) {
+    public void alignAllPanelWidgetsVertically(HorizontalPanel panel, HasVerticalAlignment.VerticalAlignmentConstant alignment) {
         for(int i = 0; i < panel.getWidgetCount(); i++) {
             panel.setCellVerticalAlignment(panel.getWidget(i), alignment);
         }
     }
-
     
     /**
      * Can contribute an additional widget to be displayed underneath the text entry field. If <code>null</code> is
@@ -364,6 +390,10 @@ public abstract class DataEntryDialog<T> {
      */
     protected Label getStatusLabel() {
         return statusLabel;
+    }
+
+    protected void setCursor(Style.Cursor cursor) {
+        dateEntryDialog.getElement().getStyle().setCursor(cursor);
     }
 
     public void show() {

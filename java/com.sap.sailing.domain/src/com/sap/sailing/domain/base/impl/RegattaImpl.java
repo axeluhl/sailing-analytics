@@ -2,6 +2,7 @@ package com.sap.sailing.domain.base.impl;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -21,6 +22,7 @@ import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.impl.NamedImpl;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
+import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
@@ -35,6 +37,7 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     private final Iterable<? extends Series> series;
     private final RaceColumnListeners raceColumnListeners;
     private final ScoringScheme scoringScheme;
+    private final Serializable id;
 
     /**
      * Regattas may be constructed as implicit default regattas in which case they won't need to be stored
@@ -49,7 +52,6 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     /**
      * Constructs a regatta with a single default series with empty race column list, and a single default fleet which
      * is not {@link #isPersistent() marked for persistence}.
-     * 
      * @param trackedRegattaRegistry
      *            used to find the {@link TrackedRegatta} for this column's series' {@link Series#getRegatta() regatta}
      *            in order to re-associate a {@link TrackedRace} passed to {@link #setTrackedRace(Fleet, TrackedRace)}
@@ -57,10 +59,10 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
      *            this column's series {@link Regatta}, respectively. If <code>null</code>, the re-association won't be
      *            carried out.
      */
-    public RegattaImpl(String baseName, BoatClass boatClass, TrackedRegattaRegistry trackedRegattaRegistry, ScoringScheme scoringScheme) {
+    public RegattaImpl(String baseName, BoatClass boatClass, TrackedRegattaRegistry trackedRegattaRegistry, ScoringScheme scoringScheme, Serializable id) {
         this(baseName, boatClass, Collections.singletonList(new SeriesImpl("Default", /* isMedal */false, Collections
                 .singletonList(new FleetImpl("Default")), /* race column names */new ArrayList<String>(),
-                trackedRegattaRegistry)), /* persistent */false, scoringScheme);
+                trackedRegattaRegistry)), /* persistent */false, scoringScheme, id);
     }
 
     /**
@@ -68,8 +70,9 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
      *            all {@link Series} in this iterable will have their {@link Series#setRegatta(Regatta) regatta set} to
      *            this new regatta.
      */
-    public RegattaImpl(String baseName, BoatClass boatClass, Iterable<? extends Series> series, boolean persistent, ScoringScheme scoringScheme) {
-        super(baseName+(boatClass==null?"":" ("+boatClass.getName()+")"));
+    public RegattaImpl(String baseName, BoatClass boatClass, Iterable<? extends Series> series, boolean persistent, ScoringScheme scoringScheme, Serializable id) {
+        super(getFullName(baseName, boatClass==null?null:boatClass.getName()));
+        this.id = id;
         races = new HashSet<RaceDefinition>();
         regattaListeners = new HashSet<RegattaListener>();
         raceColumnListeners = new RaceColumnListeners();
@@ -82,7 +85,16 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
         this.persistent = persistent;
         this.scoringScheme = scoringScheme;
     }
+
+    public static String getFullName(String baseName, String boatClassName) {
+        return baseName+(boatClassName==null?"":" ("+boatClassName+")");
+    }
     
+    @Override
+    public Serializable getId() {
+        return id;
+    }
+
     @Override
     public String getBaseName() {
         String result;
@@ -228,6 +240,27 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     @Override
     public void raceColumnRemovedFromContainer(RaceColumn raceColumn) {
         raceColumnListeners.notifyListenersAboutRaceColumnRemovedFromContainer(raceColumn);
+    }
+
+    @Override
+    public void raceColumnMoved(RaceColumn raceColumn, int newIndex) {
+        raceColumnListeners.notifyListenersAboutRaceColumnMoved(raceColumn, newIndex);
+    }
+
+    @Override
+    public void factorChanged(RaceColumn raceColumn, Double oldFactor, Double newFactor) {
+        raceColumnListeners.notifyListenersAboutFactorChanged(raceColumn, oldFactor, newFactor);
+    }
+
+    @Override
+    public void competitorDisplayNameChanged(Competitor competitor, String oldDisplayName, String displayName) {
+        raceColumnListeners.notifyListenersAboutCompetitorDisplayNameChanged(competitor, oldDisplayName, displayName);
+    }
+
+    @Override
+    public void resultDiscardingRuleChanged(ThresholdBasedResultDiscardingRule oldDiscardingRule,
+            ThresholdBasedResultDiscardingRule newDiscardingRule) {
+        raceColumnListeners.notifyListenersAboutResultDiscardingRuleChanged(oldDiscardingRule, newDiscardingRule);
     }
 
     @Override

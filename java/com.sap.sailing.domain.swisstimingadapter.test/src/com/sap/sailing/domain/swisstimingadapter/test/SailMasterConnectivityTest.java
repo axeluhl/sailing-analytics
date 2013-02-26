@@ -91,6 +91,8 @@ public class SailMasterConnectivityTest {
             public void receivedClockAtMark(String raceID, List<Triple<Integer, TimePoint, String>> markIndicesTimePointsAndBoatIDs) {}
             @Override
             public void receivedAvailableRaces(Iterable<Race> races) {}
+            @Override
+            public void storedDataProgress(String raceID, double progress) {}
             
             @Override
             public void receivedRacePositionData(String raceID, RaceStatus status, TimePoint timePoint, TimePoint startTime,

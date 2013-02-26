@@ -18,7 +18,7 @@ public class CompetitorRaceDataDTO implements IsSerializable {
     private DetailType detailType;
 
     /**
-     * A: Bouy-Name; B: mark passing time; C: data as defined by {@link #detailType} for {@link #competitor} for time point B
+     * A: mark name; B: mark passing time; C: data as defined by {@link #detailType} for {@link #competitor} for time point B
      */
     private List<Triple<String, Date, Double>> markPassingsData;
     /**

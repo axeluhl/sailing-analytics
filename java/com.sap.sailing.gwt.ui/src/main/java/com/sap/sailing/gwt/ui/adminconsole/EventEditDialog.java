@@ -19,5 +19,6 @@ public class EventEditDialog extends EventDialog {
         publicationUrlEntryField.setWidth("200px");
         isPublicCheckBox = createCheckbox("");
         isPublicCheckBox.setValue(event.isPublic);
+        id = event.id;
     }
 }

@@ -85,7 +85,7 @@ public class GPSPerRace extends Action {
                         addRow();
                         addColumn(legId);
                         addColumn(markName);
-                        addColumn(leg.getTo().getBuoys().iterator().next().getName());
+                        addColumn(leg.getTo().getMarks().iterator().next().getName());
                         addColumn(upOrDownwinLeg);
                         addColumn(competitorName);
                         addColumn(sailID == null ? "null" : sailID);

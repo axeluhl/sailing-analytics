@@ -16,7 +16,6 @@ import com.google.gwt.user.client.ui.Image;
  *
  */
 public class ImageTransformer {
-    private final String untransformedImageURL;
     private final Canvas canvas;
     private final int imageWidth;
     private final int imageHeight;
@@ -31,12 +30,11 @@ public class ImageTransformer {
     private Context2d context;
     
     public ImageTransformer(ImageResource imageResource) {
-        this.untransformedImageURL = imageResource.getSafeUri().asString();
         canvas = Canvas.createIfSupported();
         imageWidth = imageResource.getWidth();
         imageHeight = imageResource.getHeight();
         scale(1.0);
-        final Image image = new Image(untransformedImageURL.toString());
+        final Image image = new Image(imageResource.getSafeUri().asString());
         imageElement = (ImageElement) image.getElement().cast();
         if (imageElement == null) {
             image.addLoadHandler(new LoadHandler() {

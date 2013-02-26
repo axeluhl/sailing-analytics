@@ -9,6 +9,15 @@ import com.sap.sailing.domain.common.ScoringSchemeType;
  */
 public class LeaderboardDescriptor {
     private String name;
+    private String displayName;
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
+    }
+
     private ScoringSchemeType scoringScheme; 
     private int[] discardThresholds;
     private String regattaName;
@@ -16,15 +25,17 @@ public class LeaderboardDescriptor {
     public LeaderboardDescriptor() {
     }
 
-    public LeaderboardDescriptor(String name, ScoringSchemeType scoringScheme, int[] discardThresholds, String regattaName) {
+    public LeaderboardDescriptor(String name, String displayName, ScoringSchemeType scoringScheme, int[] discardThresholds, String regattaName) {
         this.name = name;
+        this.displayName = displayName;
         this.scoringScheme = scoringScheme;
         this.discardThresholds = discardThresholds;
         this.regattaName = regattaName;
     }
 
-    public LeaderboardDescriptor(String name, ScoringSchemeType scoringScheme, int[] discardThresholds) {
+    public LeaderboardDescriptor(String name, String displayName, ScoringSchemeType scoringScheme, int[] discardThresholds) {
         this.name = name;
+        this.displayName = displayName;
         this.scoringScheme = scoringScheme;
         this.discardThresholds = discardThresholds;
     }

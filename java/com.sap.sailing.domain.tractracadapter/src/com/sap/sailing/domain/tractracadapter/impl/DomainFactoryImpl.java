@@ -3,6 +3,7 @@ package com.sap.sailing.domain.tractracadapter.impl;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.Serializable;
+import java.io.StringReader;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -10,17 +11,19 @@ import java.net.URL;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
-import com.sap.sailing.domain.base.Buoy;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.Person;
 import com.sap.sailing.domain.base.RaceDefinition;
@@ -35,6 +38,7 @@ import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
+import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.TimePoint;
@@ -59,13 +63,12 @@ import com.sap.sailing.domain.tractracadapter.JSONService;
 import com.sap.sailing.domain.tractracadapter.Receiver;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
 import com.sap.sailing.domain.tractracadapter.TracTracConfiguration;
+import com.sap.sailing.domain.tractracadapter.TracTracControlPoint;
 import com.sap.sailing.domain.tractracadapter.TracTracRaceTracker;
 import com.sap.sailing.util.WeakIdentityHashMap;
 import com.tractrac.clientmodule.CompetitorClass;
-import com.tractrac.clientmodule.ControlPoint;
 import com.tractrac.clientmodule.Race;
 import com.tractrac.clientmodule.RaceCompetitor;
-import com.tractrac.clientmodule.data.ControlPointPositionData;
 
 import difflib.PatchFailedException;
 
@@ -75,8 +78,8 @@ public class DomainFactoryImpl implements DomainFactory {
     private final com.sap.sailing.domain.base.DomainFactory baseDomainFactory;
     
     // TODO consider (re-)introducing WeakHashMaps for cache structures, but such that the cache is maintained as long as our domain objects are strongly referenced
-    private final Map<ControlPoint, com.sap.sailing.domain.base.ControlPoint> controlPointCache =
-        new HashMap<ControlPoint, com.sap.sailing.domain.base.ControlPoint>();
+    private final Map<TracTracControlPoint, com.sap.sailing.domain.base.ControlPoint> controlPointCache =
+        new HashMap<TracTracControlPoint, com.sap.sailing.domain.base.ControlPoint>();
     
     private final Map<String, Person> personCache = new HashMap<String, Person>();
     
@@ -126,56 +129,89 @@ public class DomainFactoryImpl implements DomainFactory {
     }
     
     @Override
-    public void updateCourseWaypoints(Course courseToUpdate, List<ControlPoint> controlPoints) throws PatchFailedException {
+    public void updateCourseWaypoints(Course courseToUpdate, Iterable<? extends TracTracControlPoint> controlPoints) throws PatchFailedException {
         List<com.sap.sailing.domain.base.ControlPoint> newDomainControlPoints = new ArrayList<com.sap.sailing.domain.base.ControlPoint>();
-        for (ControlPoint tractracControlPoint : controlPoints) {
+        for (TracTracControlPoint tractracControlPoint : controlPoints) {
             com.sap.sailing.domain.base.ControlPoint newDomainControlPoint = getOrCreateControlPoint(tractracControlPoint);
             newDomainControlPoints.add(newDomainControlPoint);
         }
         courseToUpdate.update(newDomainControlPoints, baseDomainFactory);
     }
 
-    public com.sap.sailing.domain.base.ControlPoint getOrCreateControlPoint(ControlPoint controlPoint) {
+    public com.sap.sailing.domain.base.ControlPoint getOrCreateControlPoint(TracTracControlPoint controlPoint) {
         synchronized (controlPointCache) {
             com.sap.sailing.domain.base.ControlPoint domainControlPoint = controlPointCache.get(controlPoint);
             if (domainControlPoint == null) {
                 String controlPointName = controlPoint.getName();
-                Pair<String, String> controlPointNameAndColor = getControlPointNameAndColor(controlPointName);
+                final String controlPointMetadataString = controlPoint.getMetadata();
+                Map<String, String> controlPointMetadata;
+                if (controlPointMetadataString == null) {
+                    controlPointMetadata = Collections.emptyMap();
+                } else {
+                    controlPointMetadata = parseControlPointMetadata(controlPointMetadataString);
+                }
                 if (controlPoint.getHasTwoPoints()) {
                     // it's a gate
-                    Buoy leftBuoy = baseDomainFactory.getOrCreateBuoy(controlPointNameAndColor.getA() + " (left)", controlPointNameAndColor.getB());
-                    Buoy rightBuoy = baseDomainFactory.getOrCreateBuoy(controlPointNameAndColor.getA() + " (right)", controlPointNameAndColor.getB());
-                    domainControlPoint = baseDomainFactory.createGate(leftBuoy, rightBuoy, controlPointNameAndColor.getA());
+                    MarkType type1 = resolveMarkTypeFromMetadata(controlPointMetadata, "P1.Type");
+                    MarkType type2 = resolveMarkTypeFromMetadata(controlPointMetadata, "P2.Type");
+                    String color1 = controlPointMetadata.get("P1.Color");
+                    String color2 = controlPointMetadata.get("P2.Color");
+                    String shape1 = controlPointMetadata.get("P1.Shape");
+                    String shape2 = controlPointMetadata.get("P2.Shape");
+                    String pattern1 = controlPointMetadata.get("P1.Pattern");
+                    String pattern2 = controlPointMetadata.get("P2.Pattern");
+                    final String name1 = controlPointName + " (1)";
+                    final Serializable id1 = name1; // TODO bug 1184; need to obtain mark ID through TTCM
+                    Mark mark1 = baseDomainFactory.getOrCreateMark(id1, name1, type1, color1, shape1, pattern1);
+                    final String name2 = controlPointName + " (2)";
+                    final Serializable id2 = name2; // TODO bug 1184; need to obtain mark ID through TTCM
+                    Mark mark2 = baseDomainFactory.getOrCreateMark(id2, name2, type2, color2, shape2, pattern2);
+                    domainControlPoint = baseDomainFactory.createGate(controlPoint.getId(), mark1, mark2, controlPointName);
                 } else {
-                    Buoy buoy = baseDomainFactory.getOrCreateBuoy(controlPointNameAndColor.getA(), controlPointNameAndColor.getB());
-                    domainControlPoint = buoy;
+                    MarkType type = resolveMarkTypeFromMetadata(controlPointMetadata, "Type");
+                    String color = controlPointMetadata.get("Color");
+                    String shape = controlPointMetadata.get("Shape");
+                    String pattern = controlPointMetadata.get("Pattern");
+                    Mark mark = baseDomainFactory.getOrCreateMark(controlPoint.getId(), controlPointName, type, color, shape, pattern);
+                    domainControlPoint = mark;
                 }
                 controlPointCache.put(controlPoint, domainControlPoint);
             }
             return domainControlPoint;
         }
     }
-    
-    // TODO: This is a special hack for the extreme sailing series event where we encoded the buoy color directly into the buoy name
-    // this will be replaced later with the new 'metadata' facility of the TTCM
-    private Pair<String, String> getControlPointNameAndColor(final String controlPointNameWithOptionalColor) {
-        Pair<String, String> result;
-        String colorTag = "_COLOR:";
-        String color = null;
-        String name = controlPointNameWithOptionalColor;
-        int index = controlPointNameWithOptionalColor.indexOf(colorTag);
-        if (index >= 0) {
-            color = controlPointNameWithOptionalColor.substring(index + colorTag.length(), controlPointNameWithOptionalColor.length());
-            name = controlPointNameWithOptionalColor.substring(0, index);
+
+    private MarkType resolveMarkTypeFromMetadata(Map<String, String> controlPointMetadata, String typePropertyName) {
+        MarkType result = MarkType.BUOY;
+        String markType = controlPointMetadata.get(typePropertyName);
+        if(markType != null && !markType.isEmpty()) {
+            for(MarkType m: MarkType.values()) {
+                if(m.name().equalsIgnoreCase(markType)) {
+                    result = m;
+                    break;
+                }
+            }
         }
-        result = new Pair<String, String>(name, color);
         return result;
     }
     
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    private Map<String, String> parseControlPointMetadata(String controlPointMetadata) {
+        Map<String, String> metadataMap = new HashMap<String, String>();
+        try {
+            Properties p = new Properties();
+            p.load(new StringReader(controlPointMetadata));
+            metadataMap = new HashMap<String, String>((Map) p);
+        } catch (IOException e) {
+            // do nothing
+        }
+        return metadataMap;
+    }
+        
     @Override
-    public Course createCourse(String name, Iterable<ControlPoint> controlPoints) {
+    public Course createCourse(String name, Iterable<TracTracControlPoint> controlPoints) {
         List<Waypoint> waypointList = new ArrayList<Waypoint>();
-        for (ControlPoint controlPoint : controlPoints) {
+        for (TracTracControlPoint controlPoint : controlPoints) {
             Waypoint waypoint = baseDomainFactory.createWaypoint(getOrCreateControlPoint(controlPoint));
             waypointList.add(waypoint);
         }
@@ -302,7 +338,7 @@ public class DomainFactoryImpl implements DomainFactory {
                 if (result == null) {
                     result = new RegattaImpl(event.getName(), boatClass, trackedRegattaRegistry,
                             // use the low-point system as the default scoring scheme
-                            com.sap.sailing.domain.base.DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT));
+                            com.sap.sailing.domain.base.DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), event.getId());
                     regattaCache.put(key, result);
                     weakRegattaCache.put(event, result);
                     logger.info("Created regatta "+result.getName()+" ("+result.hashCode()+") because none found for key "+key);
@@ -489,12 +525,12 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public Buoy getBuoy(ControlPoint controlPoint, ControlPointPositionData record) {
+    public Mark getMark(TracTracControlPoint controlPoint, int zeroBasedMarkIndex) {
         com.sap.sailing.domain.base.ControlPoint myControlPoint = getOrCreateControlPoint(controlPoint);
-        Buoy result;
-        Iterator<Buoy> iter = myControlPoint.getBuoys().iterator();
+        Mark result;
+        Iterator<Mark> iter = myControlPoint.getMarks().iterator();
         if (controlPoint.getHasTwoPoints()) {
-            if (record.getIndex() == 0) {
+            if (zeroBasedMarkIndex == 0) {
                 result = iter.next();
             } else {
                 iter.next();

@@ -7,9 +7,11 @@ import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnListener;
+import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
 /**
@@ -69,6 +71,12 @@ public class RaceColumnListeners implements Serializable {
         }
     }
 
+    public void notifyListenersAboutFactorChanged(RaceColumn raceColumn, Double oldFactor, Double newFactor) {
+        for (RaceColumnListener listener : getRaceColumnListeners()) {
+            listener.factorChanged(raceColumn, oldFactor, newFactor);
+        }
+    }
+
     public void notifyListenersAboutIsMedalRaceChanged(RaceColumn raceColumn, boolean newIsMedalRace) {
         for (RaceColumnListener listener : getRaceColumnListeners()) {
             listener.isMedalRaceChanged(raceColumn, newIsMedalRace);
@@ -87,6 +95,12 @@ public class RaceColumnListeners implements Serializable {
         }
     }
 
+    public void notifyListenersAboutRaceColumnMoved(RaceColumn raceColumn, int newIndex) {
+        for (RaceColumnListener listener : getRaceColumnListeners()) {
+            listener.raceColumnMoved(raceColumn, newIndex);
+        }
+    }
+
     private Set<RaceColumnListener> getRaceColumnListeners() {
         synchronized (raceColumnListeners) {
             return new HashSet<RaceColumnListener>(raceColumnListeners);
@@ -102,5 +116,18 @@ public class RaceColumnListeners implements Serializable {
             }
         }
         return result;
+    }
+
+    public void notifyListenersAboutCompetitorDisplayNameChanged(Competitor competitor, String oldDisplayName, String displayName) {
+        for (RaceColumnListener listener : getRaceColumnListeners()) {
+            listener.competitorDisplayNameChanged(competitor, oldDisplayName, displayName);
+        }
+    }
+
+    public void notifyListenersAboutResultDiscardingRuleChanged(ThresholdBasedResultDiscardingRule oldDiscardingRule,
+            ThresholdBasedResultDiscardingRule newDiscardingRule) {
+        for (RaceColumnListener listener : getRaceColumnListeners()) {
+            listener.resultDiscardingRuleChanged(oldDiscardingRule, newDiscardingRule);
+        }
     }
 }

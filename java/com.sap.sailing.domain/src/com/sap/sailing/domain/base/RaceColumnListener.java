@@ -2,6 +2,7 @@ package com.sap.sailing.domain.base;
 
 import java.io.Serializable;
 
+import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
 public interface RaceColumnListener extends Serializable {
@@ -17,6 +18,14 @@ public interface RaceColumnListener extends Serializable {
     
     void raceColumnRemovedFromContainer(RaceColumn raceColumn);
     
+    void raceColumnMoved(RaceColumn raceColumn, int newIndex);
+    
+    void factorChanged(RaceColumn raceColumn, Double oldFactor, Double newFactor);
+
+    void competitorDisplayNameChanged(Competitor competitor, String oldDisplayName, String displayName);
+
+    void resultDiscardingRuleChanged(ThresholdBasedResultDiscardingRule oldDiscardingRule, ThresholdBasedResultDiscardingRule newDiscardingRule);
+
     /**
      * A listener can use this to specify that it must not be serialized together with other listeners.
      * Background: the collections holding race column listeners are usually non-transient. This will cause

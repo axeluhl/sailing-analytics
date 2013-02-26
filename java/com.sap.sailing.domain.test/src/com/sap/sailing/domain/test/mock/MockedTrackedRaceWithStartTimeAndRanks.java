@@ -5,7 +5,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.NavigableSet;
 
-import com.sap.sailing.domain.base.Buoy;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.RaceDefinition;
@@ -30,6 +30,7 @@ import com.sap.sailing.domain.tracking.RaceChangeListener;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.TrackedRaceStatus;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindStore;
@@ -78,8 +79,7 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
 
     @Override
     public TimePoint getStartOfRace() {
-        // TODO Auto-generated method stub
-        return null;
+        return startTime;
     }
 
     @Override
@@ -194,7 +194,7 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     }
 
     @Override
-    public GPSFixTrack<Buoy, GPSFix> getOrCreateTrack(Buoy buoy) {
+    public GPSFixTrack<Mark, GPSFix> getOrCreateTrack(Mark mark) {
         // TODO Auto-generated method stub
         return null;
     }
@@ -436,7 +436,7 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     }
 
 	@Override
-	public Iterable<Buoy> getBuoys() {
+	public Iterable<Mark> getMarks() {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -451,5 +451,26 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     public boolean hasGPSData() {
         // TODO Auto-generated method stub
         return false;
+    }
+
+    @Override
+    public void lockForRead(Iterable<MarkPassing> markPassings) {
+        // TODO Auto-generated method stub
+    }
+
+    @Override
+    public void unlockAfterRead(Iterable<MarkPassing> markPassings) {
+        // TODO Auto-generated method stub
+    }
+
+    @Override
+    public TrackedRaceStatus getStatus() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public void waitUntilNotLoading() {
+        // TODO Auto-generated method stub
     }
 }

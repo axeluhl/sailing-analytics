@@ -4,7 +4,9 @@ import com.sap.sailing.domain.base.CourseChange;
 import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.common.AbstractSpeedImpl;
 import com.sap.sailing.domain.common.Bearing;
+import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 
@@ -18,7 +20,7 @@ public abstract class AbstractSpeedWithAbstractBearingImpl extends AbstractSpeed
     
     @Override
     public String toString() {
-        return super.toString()+" to "+getBearing().getDegrees()+"°";
+        return super.toString()+" to "+getBearing().getDegrees()+"Â°";
     }
 
     @Override
@@ -63,5 +65,20 @@ public abstract class AbstractSpeedWithAbstractBearingImpl extends AbstractSpeed
         Bearing newBearing = new DegreeBearingImpl(newBearingDeg);
         double newSpeedInKnots = from.getKnots()+courseChange.getSpeedChangeInKnots();
         return new KnotSpeedWithBearingImpl(newSpeedInKnots, newBearing);
+    }
+
+    private final static TimePoint start = new MillisecondsTimePoint(0);
+    private final static TimePoint end = start.plus(60000);
+
+    public static Speed projectTo(SpeedWithBearing speedWithBearing, Position position, Bearing projectTo) {
+        Position traveledOneMinute = speedWithBearing.travelTo(position, start, end);
+        Position traveledToProjected = traveledOneMinute.projectToLineThrough(position, projectTo);
+        Distance projectedDistance = position.getDistance(traveledToProjected);
+        return projectedDistance.inTime(end.asMillis() - start.asMillis());
+    }
+
+    @Override
+    public Speed projectTo(Position position, Bearing projectTo) {
+        return projectTo(this, position, projectTo);
     }
 }

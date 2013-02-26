@@ -22,19 +22,14 @@ import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.server.gateway.SailingServerHttpServlet;
+import com.sap.sailing.server.gateway.AbstractJsonHttpServlet;
 
-public class LeaderboardGroupJsonExportServlet extends SailingServerHttpServlet {
+public class LeaderboardGroupJsonExportServlet extends AbstractJsonHttpServlet {
     private static final long serialVersionUID = 1351616646322956825L;
     private static final String PARAM_NAME_LEADERBOARDGROUPNAME = "leaderboardGroupName";
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        // to allow access to the json document directly from a client side javascript
-        resp.setHeader("Access-Control-Allow-Origin", "*");
-        resp.setContentType("application/json");
-        resp.setCharacterEncoding("UTF-8");
-
         String leaderboardGroupName = req.getParameter(PARAM_NAME_LEADERBOARDGROUPNAME);
         if (leaderboardGroupName == null) {
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Need to specify the name of a leaderboard group using the "+
@@ -145,6 +140,7 @@ public class LeaderboardGroupJsonExportServlet extends SailingServerHttpServlet 
                         }
                     }
                 }
+                setJsonResponseHeader(resp);
                 jsonLeaderboardGroup.writeJSONString(resp.getWriter());
             }
         }

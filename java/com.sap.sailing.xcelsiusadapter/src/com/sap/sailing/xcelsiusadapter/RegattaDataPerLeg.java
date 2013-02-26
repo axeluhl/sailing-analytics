@@ -143,10 +143,6 @@ public class RegattaDataPerLeg extends Action {
             int i = 0; // initialize leg index
             TrackedLeg previousLeg = null;
 
-            LinkedHashMap<String, Long> legTimesAlternate = new LinkedHashMap<String, Long>(); // Map for leg times
-                                                                                               // calculated by mark
-                                                                                               // passings
-
             final Element legs_node = addNamedElement(race_node, "legs"); // add element that holds all legs for the
                                                                           // race
 
@@ -171,34 +167,15 @@ public class RegattaDataPerLeg extends Action {
                                                                                                    // each competitor
 
                 for (final Competitor competitor : ranks.keySet()) { // Get competitor data
-
                     TrackedLegOfCompetitor trackedLegOfCompetitor = trackedLeg.getTrackedLeg(competitor); // Get data
-
                     TimePoint compareLegEnd = new MillisecondsTimePoint(0);
-
                     // time elapsed / when did the competitor pass the end mark of the leg
-                    for (MarkPassing mp : trackedRace.getMarkPassings(competitor)) {
-                        if (mp.getWaypoint() == leg.getTo()) {
-                            compareLegEnd = mp.getTimePoint();
-                            break;
-                        }
+                    MarkPassing mp = trackedRace.getMarkPassing(competitor, leg.getTo());
+                    if (mp != null) {
+                        compareLegEnd = mp.getTimePoint();
                     }
-
-                    // leg time / based on elapsed time
-                    if (legTimesAlternate.containsKey(competitor.getName())) {
-                        legTimesAlternate.put(
-                                competitor.getName(),
-                                compareLegEnd.asMillis() - legTimesAlternate.get(competitor.getName())
-                                        - raceStarted.asMillis());
-
-                    } else {
-                        legTimesAlternate.put(competitor.getName(), compareLegEnd.asMillis() - raceStarted.asMillis());
-                    }
-
-                    final TimePoint compLegTimeAlt = new MillisecondsTimePoint(legTimesAlternate.get(competitor
-                            .getName()));
-
-                    final TimePoint compFinishedLeg = new MillisecondsTimePoint(compareLegEnd.asMillis());
+                    final long compLegTimeAlt = trackedLegOfCompetitor.getTimeInMilliSeconds(compareLegEnd);
+                    final TimePoint compFinishedLeg = compareLegEnd;
 
                     // plausibility check
                     // competitor has finished the leg and the leg end time is not the race start time
@@ -238,7 +215,7 @@ public class RegattaDataPerLeg extends Action {
                             }
                             addNamedElementWithValue(competitor_node, "leg_finished_time_ms", compFinishedLeg.asMillis());
                             addNamedElementWithValue(competitor_node, "time_elapsed_ms", compFinishedLeg.asMillis() - raceStarted.asMillis());
-                            addNamedElementWithValue(competitor_node, "leg_time_ms", compLegTimeAlt.asMillis());
+                            addNamedElementWithValue(competitor_node, "leg_time_ms", compLegTimeAlt);
 		            addNamedElementWithValue(competitor_node, "leg_rank", trackedLegOfCompetitor.getRank(compFinishedLeg));	
 		            addNamedElementWithValue(competitor_node, "race_final_rank", trackedRace.getRank(competitor));
                             addNamedElementWithValue(competitor_node, "rank_gain", posGL * -1); // Ranks Gained/Lost

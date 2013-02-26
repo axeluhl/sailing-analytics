@@ -11,14 +11,16 @@ import java.util.WeakHashMap;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
-import com.sap.sailing.domain.base.Buoy;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnListener;
 import com.sap.sailing.domain.base.Waypoint;
@@ -31,11 +33,13 @@ import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.ScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ScoreCorrectionListener;
+import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceChangeListener;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.TrackedRaceStatus;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
 
@@ -101,7 +105,12 @@ public class LeaderboardDTOCache {
         }
 
         @Override
-        public void buoyPositionChanged(GPSFix fix, Buoy buoy) {
+        public void statusChanged(TrackedRaceStatus newStatus) {
+            removeFromCache(leaderboard);
+        }
+
+        @Override
+        public void markPositionChanged(GPSFix fix, Mark mark) {
             removeFromCache(leaderboard);
         }
 
@@ -185,7 +194,11 @@ public class LeaderboardDTOCache {
         this.waitForLatestAnalyses = waitForLatestAnalyses;
         // if the leaderboard becomes weakly referenced and eventually GCed, then so can the cached results for it
         this.leaderboardCache = new WeakHashMap<Leaderboard, Map<Util.Pair<TimePoint, Collection<String>>, FutureTask<LeaderboardDTO>>>();
-        this.computeLeadearboardByNameExecutor = Executors.newFixedThreadPool(10*Runtime.getRuntime().availableProcessors());
+        this.computeLeadearboardByNameExecutor =
+                new ThreadPoolExecutor(/* corePoolSize */ 0,
+                        /* maximumPoolSize */ 10*Runtime.getRuntime().availableProcessors(),
+                        /* keepAliveTime */ 60, TimeUnit.SECONDS,
+                        /* workQueue */ new LinkedBlockingQueue<Runnable>());
         this.invalidationListenersPerLeaderboard = new WeakHashMap<Leaderboard, Map<TrackedRace, Set<CacheInvalidationListener>>>();
         this.raceColumnListeners = new WeakHashMap<Leaderboard, RaceColumnListener>();
         this.scoreCorrectionListeners = new WeakHashMap<Leaderboard, CacheInvalidationUponScoreCorrectionListener>();
@@ -278,6 +291,27 @@ public class LeaderboardDTOCache {
             public void raceColumnRemovedFromContainer(RaceColumn raceColumn) {
                 removeFromCache(leaderboard);
             }
+
+            @Override
+            public void raceColumnMoved(RaceColumn raceColumn, int newIndex) {
+                removeFromCache(leaderboard);
+            }
+
+            @Override
+            public void factorChanged(RaceColumn raceColumn, Double oldFactor, Double newFactor) {
+                removeFromCache(leaderboard);
+            }
+
+            @Override
+            public void resultDiscardingRuleChanged(ThresholdBasedResultDiscardingRule oldDiscardingRule,
+                    ThresholdBasedResultDiscardingRule newDiscardingRule) {
+                removeFromCache(leaderboard);
+            }
+
+            @Override
+            public void competitorDisplayNameChanged(Competitor competitor, String oldDisplayName, String displayName) {
+                removeFromCache(leaderboard);
+            }
         };
         leaderboard.addRaceColumnListener(raceColumnListener);
         synchronized (raceColumnListeners) {
@@ -349,7 +383,7 @@ public class LeaderboardDTOCache {
                 registerAsListener(leaderboard);
             } else {
                 /*
-                 * Waiting for latest analyses results largely regards wind estimation and maneuver cache; see
+                 * Waiting for latest analyzes results largely regards wind estimation and maneuver cache; see
                  * SmartFutureCache. Even if waitForLatestAnalysis is requested, it is OK to cache. The cache would be
                  * invalidated when the race changes, forcing a new re-calculation based on the latest analysis results.
                  * Once the race stabilizes, the latest analysis results for maneuvers and wind estimation will no

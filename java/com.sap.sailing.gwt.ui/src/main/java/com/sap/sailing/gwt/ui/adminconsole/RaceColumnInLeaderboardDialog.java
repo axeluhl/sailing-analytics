@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.ui.adminconsole;
 import java.util.List;
 
 import com.google.gwt.user.client.ui.CheckBox;
+import com.google.gwt.user.client.ui.DoubleBox;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
@@ -18,14 +19,43 @@ import com.sap.sailing.gwt.ui.shared.RaceColumnDTO;
  * @author Axel Uhl (D043530)
  *
  */
-public class RaceColumnInLeaderboardDialog extends DataEntryDialog<RaceColumnDTO> {
+public class RaceColumnInLeaderboardDialog extends DataEntryDialog<RaceColumnInLeaderboardDialog.RaceColumnDescriptor> {
     private final TextBox raceNameBox;
+    private final DoubleBox explicitFactorBox;
     private final CheckBox isMedalRace;
-    private final StringMessages stringConstants;
+    private final StringMessages stringMessages;
 
-    private RaceColumnDTO raceColumnToEdit;
+    public static class RaceColumnDescriptor {
+        private String name;
+        private boolean isMedalRace;
+        private Double explicitFactor;
+        public RaceColumnDescriptor(String name, boolean isMedalRace, Double explicitFactor) {
+            super();
+            this.name = name;
+            this.isMedalRace = isMedalRace;
+            this.explicitFactor = explicitFactor;
+        }
+        public String getName() {
+            return name;
+        }
+        public void setName(String name) {
+            this.name = name;
+        }
+        public boolean isMedalRace() {
+            return isMedalRace;
+        }
+        public void setMedalRace(boolean isMedalRace) {
+            this.isMedalRace = isMedalRace;
+        }
+        public Double getExplicitFactor() {
+            return explicitFactor;
+        }
+        public void setExplicitFactor(Double explicitFactor) {
+            this.explicitFactor = explicitFactor;
+        }
+    }
 
-    private static class RaceDialogValidator implements Validator<RaceColumnDTO> {
+    private static class RaceDialogValidator implements Validator<RaceColumnDescriptor> {
 
         private StringMessages stringConstants;
         private List<RaceColumnDTO> existingRaces;
@@ -36,16 +66,16 @@ public class RaceColumnInLeaderboardDialog extends DataEntryDialog<RaceColumnDTO
         }
 
         @Override
-        public String getErrorMessage(RaceColumnDTO valueToValidate) {
+        public String getErrorMessage(RaceColumnDescriptor valueToValidate) {
             String errorMessage;
-            String racename = valueToValidate.getRaceColumnName();
+            String racename = valueToValidate.getName();
             Boolean isMedalRace = valueToValidate.isMedalRace();
-            boolean isNameNotEmpty = racename != null & racename != "";
+            boolean isNameNotEmpty = racename != null & !racename.isEmpty();
             boolean medalRaceNotNull = isMedalRace != null;
 
             boolean unique = true;
             for (RaceColumnDTO raceColumn : existingRaces) {
-                if (raceColumn.getRaceColumnName().equals(valueToValidate.getRaceColumnName())) {
+                if (raceColumn.getRaceColumnName().equals(valueToValidate.getName())) {
                     unique = false;
                 }
             }
@@ -64,21 +94,21 @@ public class RaceColumnInLeaderboardDialog extends DataEntryDialog<RaceColumnDTO
     }
 
     public RaceColumnInLeaderboardDialog(List<RaceColumnDTO> existingRaces, RaceColumnDTO raceColumnToEdit, 
-            StringMessages stringConstants, DialogCallback<RaceColumnDTO> callback) {
-        super(stringConstants.actionRaceEdit(), null, stringConstants.ok(), stringConstants.cancel(),
-                new RaceDialogValidator(stringConstants, existingRaces), callback);
-        this.raceColumnToEdit = raceColumnToEdit;
-        this.stringConstants = stringConstants;
+            StringMessages stringMessages, DialogCallback<RaceColumnDescriptor> callback) {
+        super(stringMessages.actionRaceEdit(), null, stringMessages.ok(), stringMessages.cancel(),
+                new RaceDialogValidator(stringMessages, existingRaces), callback);
+        this.stringMessages = stringMessages;
         raceNameBox = createTextBox(raceColumnToEdit.getRaceColumnName());
-        isMedalRace = createCheckbox(stringConstants.medalRace());
+        explicitFactorBox = raceColumnToEdit.getExplicitFactor() == null ?
+                createDoubleBox(/* visibleLength */ 4) : createDoubleBox(raceColumnToEdit.getExplicitFactor(), /* visibleLength */ 4);
+        isMedalRace = createCheckbox(stringMessages.medalRace());
         isMedalRace.setValue(raceColumnToEdit.isMedalRace());
     }
 
     @Override
-    protected RaceColumnDTO getResult() {
-        raceColumnToEdit.name = raceNameBox.getValue();
-        raceColumnToEdit.setMedalRace(isMedalRace.getValue());
-        return raceColumnToEdit;
+    protected RaceColumnDescriptor getResult() {
+        return new RaceColumnDescriptor(raceNameBox.getValue(), isMedalRace.getValue(),
+                explicitFactorBox.getText().trim().length() == 0 ? null : explicitFactorBox.getValue());
     }
 
     @Override
@@ -88,10 +118,14 @@ public class RaceColumnInLeaderboardDialog extends DataEntryDialog<RaceColumnDTO
         HorizontalPanel raceNamePanel = new HorizontalPanel();
         raceNamePanel.setSpacing(3);
         mainPanel.add(raceNamePanel);
-        raceNamePanel.add(new Label(stringConstants.name() + ":"));
+        raceNamePanel.add(new Label(stringMessages.name() + ":"));
         raceNamePanel.add(raceNameBox);
+        HorizontalPanel factorPanel = new HorizontalPanel();
+        factorPanel.setSpacing(3);
+        mainPanel.add(factorPanel);
+        factorPanel.add(new Label(stringMessages.factor() + ":"));
+        factorPanel.add(explicitFactorBox);
         alignAllPanelWidgetsVertically(raceNamePanel, HasVerticalAlignment.ALIGN_MIDDLE);
-        
         mainPanel.add(isMedalRace);
         return mainPanel;
     }

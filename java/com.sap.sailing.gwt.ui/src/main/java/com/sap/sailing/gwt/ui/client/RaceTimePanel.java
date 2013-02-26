@@ -13,12 +13,12 @@ import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.components.SettingsDialogComponent;
 
 public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements RaceSelectionChangeListener, RaceTimesInfoProviderListener {
-    private RaceTimesInfoProvider raceTimesInfoProvider;
+    private final RaceTimesInfoProvider raceTimesInfoProvider;
     private RegattaAndRaceIdentifier selectedRace;
     private boolean autoAdjustPlayMode;
     private RaceTimesInfoDTO lastRaceTimesInfo;
     
-    public RaceTimePanel(Timer timer, TimeRangeProvider timeRangeProvider, StringMessages stringMessages, RaceTimesInfoProvider raceTimesInfoProvider) {
+    public RaceTimePanel(Timer timer, TimeRangeWithZoomProvider timeRangeProvider, StringMessages stringMessages, RaceTimesInfoProvider raceTimesInfoProvider) {
         super(timer, timeRangeProvider, stringMessages);
         this.raceTimesInfoProvider = raceTimesInfoProvider;
         selectedRace = null;
@@ -67,7 +67,7 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
                 }
                 
                 boolean timerAlreadyInitialized = getFromTime() != null && getToTime() != null && timeSlider.getCurrentValue() != null;
-                if (!isTimeZoomed) {
+                if (!timeRangeProvider.isZoomed()) {
                     updateMinMax(raceTimesInfo);
                     if (!timerAlreadyInitialized) {
                         initTimerPosition(raceTimesInfo);
@@ -84,9 +84,8 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
     
     @Override
     public void onTimeZoomChanged(Date zoomStartTimepoint, Date zoomEndTimepoint) {
-        isTimeZoomed = true;
+        super.onTimeZoomChanged(zoomStartTimepoint, zoomEndTimepoint);
         timeSlider.setZoomed(true);
-        timer.setAutoAdvance(false);
         setMinMax(zoomStartTimepoint, zoomEndTimepoint, false);
         timeSlider.clearMarkersAndLabelsAndTicks();
         redrawAllMarkers(lastRaceTimesInfo);
@@ -94,10 +93,14 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
 
     @Override
     public void onTimeZoomReset() {
-        isTimeZoomed = false;
+        super.onTimeZoomReset();
         timeSlider.setZoomed(false);
-        timer.setAutoAdvance(true);
-        updateMinMax(this.lastRaceTimesInfo);
+        
+        timeSlider.setMinValue(new Double(timeRangeProvider.getFromTime().getTime()), false);
+        timeSlider.setMaxValue(new Double(timeRangeProvider.getToTime().getTime()), false);
+        timeSlider.setCurrentValue(new Double(timer.getTime().getTime()), true);
+        
+//        updateMinMax(this.lastRaceTimesInfo);
         timeSlider.clearMarkersAndLabelsAndTicks();
         redrawAllMarkers(lastRaceTimesInfo);
     }

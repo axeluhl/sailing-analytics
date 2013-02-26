@@ -1,31 +1,40 @@
 package com.sap.sailing.domain.base.impl;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import com.sap.sailing.domain.base.Buoy;
 import com.sap.sailing.domain.base.Gate;
+import com.sap.sailing.domain.base.Mark;
 
 public class GateImpl implements Gate {
     private static final long serialVersionUID = 2807354812133070574L;
-    private final Buoy left;
-    private final Buoy right;
+    private final Mark left;
+    private final Mark right;
     private final String name;
+    private final Serializable id;
     
-    public GateImpl(Buoy left, Buoy right, String name) {
-        super();
+    /**
+     * @param name also used as ID for the mark; if you have a better ID, use {@link GateImpl(Serializable, Mark, Mark, String)} instead.
+     */
+    public GateImpl(Mark left, Mark right, String name) {
+        this(/* ID */ name, left, right, name);
+    }
+    
+    public GateImpl(Serializable id, Mark left, Mark right, String name) {
+        this.id = id;
         this.left = left;
         this.right = right;
         this.name = name;
     }
 
     @Override
-    public Buoy getLeft() {
+    public Mark getLeft() {
         return left;
     }
 
     @Override
-    public Buoy getRight() {
+    public Mark getRight() {
         return right;
     }
 
@@ -40,10 +49,15 @@ public class GateImpl implements Gate {
     }
 
     @Override
-    public Iterable<Buoy> getBuoys() {
-        Collection<Buoy> result = new ArrayList<Buoy>(2);
+    public Iterable<Mark> getMarks() {
+        Collection<Mark> result = new ArrayList<Mark>(2);
         result.add(getLeft());
         result.add(getRight());
         return result;
+    }
+
+    @Override
+    public Serializable getId() {
+        return id;
     }
 }

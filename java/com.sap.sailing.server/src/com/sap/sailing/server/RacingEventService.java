@@ -4,6 +4,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.SocketException;
 import java.net.URI;
@@ -259,14 +260,17 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     void removeLeaderboardColumn(String leaderboardName, String columnName);
 
     void renameLeaderboardColumn(String leaderboardName, String oldColumnName, String newColumnName);
+    
+    /**
+     * @see RaceColumn#setFactor(Double)
+     */
+    void updateLeaderboardColumnFactor(String leaderboardName, String columnName, Double factor);
 
     /**
      * Updates the leaderboard data in the persistent store
      */
     void updateStoredLeaderboard(Leaderboard leaderboard);
     
-    void updateStoredRegattaLeaderboard(RegattaLeaderboard leaderboard);
-
     void updateStoredRegatta(Regatta regatta);
 
     long getDelayToLiveInMillis();
@@ -314,13 +318,14 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      *            The name of the new group
      * @param description
      *            The description of the new group
+     * @param displayGroupsInReverseOrder TODO
      * @param leaderboardNames
      *            The names of the leaderboards, which should be contained by the new group.<br />
      *            If there isn't a leaderboard with one of these names an {@link IllegalArgumentException} is thrown.
      * @return The new leaderboard group
      */
-    LeaderboardGroup addLeaderboardGroup(String groupName, String description, List<String> leaderboardNames,
-            int[] overallLeaderboardDiscardThresholds, ScoringSchemeType overallLeaderboardScoringSchemeType);
+    LeaderboardGroup addLeaderboardGroup(String groupName, String description, boolean displayGroupsInReverseOrder,
+            List<String> leaderboardNames, int[] overallLeaderboardDiscardThresholds, ScoringSchemeType overallLeaderboardScoringSchemeType);
 
     /**
      * Removes the group with the name <code>groupName</code> from the service and the database.
@@ -365,9 +370,9 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     TrackedRace createTrackedRace(RegattaAndRaceIdentifier raceIdentifier, WindStore windStore,
             long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed);
 
-    Regatta getOrCreateRegatta(String regattaName, String boatClassName);
+    Regatta getOrCreateRegatta(String regattaName, String boatClassName, Serializable id);
 
-    Regatta createRegatta(String baseName, String boatClassName, Iterable<? extends Series> series, boolean persistent, ScoringScheme scoringScheme);
+    Regatta createRegatta(String baseName, String boatClassName, Serializable id, Iterable<? extends Series> series, boolean persistent, ScoringScheme scoringScheme);
 
     /**
      * Adds <code>raceDefinition</code> to the {@link Regatta} such that it will appear in {@link Regatta#getAllRaces()}
@@ -415,8 +420,6 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      */
     void initiallyFillFrom(ObjectInputStream ois) throws IOException, ClassNotFoundException;
 
-    Event getEventByName(String name);
-
     /**
      * @return a thread-safe copy of the events currently known by the service; it's safe for callers to iterate over
      *         the iterable returned, and no risk of a {@link ConcurrentModificationException} exists
@@ -444,7 +447,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     /**
      * Updates a sailing event with the name <code>eventName</code>, the venue<code>venue</code> and the
      * regattas with the names in <code>regattaNames</code> and updates it in the database.
-     * 
+     * @param id TODO
      * @param eventName
      *            The name of the event to update
      * @param venueName
@@ -455,9 +458,10 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      *            Indicates whether the event is public accessible via the publication URL or not
      * @param regattaNames
      *            The names of the regattas contained in the event.<br />
+     * 
      * @return The new event
      */
-    void updateEvent(String eventName, String venueName, String publicationUrl, boolean isPublic, List<String> regattaNames);
+    void updateEvent(Serializable id, String eventName, String venueName, String publicationUrl, boolean isPublic, List<String> regattaNames);
     
     /**
      * Renames a sailing event. If a sailing event by the name <code>oldName</code> does not exist in {@link #getEvents()},
@@ -466,10 +470,12 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * {@link #getEventByName(String) getEventByName(oldName)} can now be obtained by calling
      * {@link #getEventByName(String) getEventByName(newName)}.
      */
-    void renameEvent(String oldEventName, String newEventName);
+    void renameEvent(Serializable id, String newEventName);
     
-    void removeEvent(String eventName);
+    void removeEvent(Serializable id);
 
     com.sap.sailing.domain.base.DomainFactory getBaseDomainFactory();
+
+    com.sap.sailing.domain.swisstimingadapter.DomainFactory getSwissTimingDomainFactory();
 
 }

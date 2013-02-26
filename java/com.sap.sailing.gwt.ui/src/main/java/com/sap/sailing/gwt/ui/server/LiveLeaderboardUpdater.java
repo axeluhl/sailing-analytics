@@ -139,13 +139,6 @@ public class LiveLeaderboardUpdater implements Runnable {
         return result;
     }
 
-    TimePoint getNowMinusDelay() {
-        final MillisecondsTimePoint now = MillisecondsTimePoint.now();
-        final Long delayToLiveInMillis = getLeaderboard().getDelayToLiveInMillis();
-        TimePoint timePoint = delayToLiveInMillis == null ? now : now.minus(delayToLiveInMillis);
-        return timePoint;
-    }
-    
     private synchronized void ensureRunning() {
         if (!running) {
             start();
@@ -260,13 +253,13 @@ public class LiveLeaderboardUpdater implements Runnable {
             }
             logger.info("" + LiveLeaderboardUpdater.class.getSimpleName() + " thread for leaderboard "
                     + leaderboard.getName() + " ending");
-        } catch (Throwable t) {
+        } catch (Exception e) {
             synchronized (this) {
                 running = false;
                 currentLiveLeaderboard = null;
             }
-            logger.info("exception in "+LiveLeaderboardUpdater.class.getName()+".run(): "+t.getMessage());
-            logger.throwing(LiveLeaderboardUpdater.class.getName(), "run", t);
+            logger.info("exception in "+LiveLeaderboardUpdater.class.getName()+".run(): "+e.getMessage());
+            logger.throwing(LiveLeaderboardUpdater.class.getName(), "run", e);
         } finally {
             if (interruptTask != null) {
                 interruptTask.cancel();

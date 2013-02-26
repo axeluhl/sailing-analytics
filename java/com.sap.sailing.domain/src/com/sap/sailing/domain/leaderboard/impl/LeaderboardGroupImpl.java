@@ -15,6 +15,7 @@ public class LeaderboardGroupImpl implements LeaderboardGroup {
     private static final long serialVersionUID = 2035927369446736934L;
     private String name;
     private String description;
+    private boolean displayGroupsInReverseOrder;
     private final List<Leaderboard> leaderboards;
     private final Set<LeaderboardGroupListener> listeners;
     
@@ -25,9 +26,10 @@ public class LeaderboardGroupImpl implements LeaderboardGroup {
      */
     private Leaderboard overallLeaderboard;
 
-    public LeaderboardGroupImpl(String name, String description, List<? extends Leaderboard> leaderboards) {
+    public LeaderboardGroupImpl(String name, String description, boolean displayGroupsInReverseOrder, List<? extends Leaderboard> leaderboards) {
         this.name = name;
         this.description = description;
+        this.displayGroupsInReverseOrder = displayGroupsInReverseOrder;
         this.leaderboards = new ArrayList<Leaderboard>(leaderboards);
         this.listeners = new HashSet<LeaderboardGroupListener>();
     }
@@ -140,4 +142,8 @@ public class LeaderboardGroupImpl implements LeaderboardGroup {
         }
     }
 
+    @Override
+    public boolean isDisplayGroupsInReverseOrder() {
+        return displayGroupsInReverseOrder;
+    }
 }
