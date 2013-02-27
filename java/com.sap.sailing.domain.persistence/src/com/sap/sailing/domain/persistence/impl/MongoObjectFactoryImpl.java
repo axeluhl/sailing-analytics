@@ -128,7 +128,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
             if (raceIdentifier != null) {
                 DBObject raceIdentifierForFleet = new BasicDBObject();
                 storeRaceIdentifier(raceIdentifierForFleet, raceIdentifier);
-                raceIdentifiersPerFleet.put(fleet.getName(), raceIdentifierForFleet);
+                raceIdentifiersPerFleet.put(MongoUtils.escapeDollarAndDot(fleet.getName()), raceIdentifierForFleet);
             }
         }
         dbObject.put(FieldNames.RACE_IDENTIFIERS.name(), raceIdentifiersPerFleet);
@@ -153,7 +153,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         BasicDBObject query = new BasicDBObject(FieldNames.LEADERBOARD_NAME.name(), leaderboard.getName());
         BasicDBObject dbLeaderboard = new BasicDBObject();
         dbLeaderboard.put(FieldNames.LEADERBOARD_NAME.name(), leaderboard.getName());
-        if(leaderboard.getDisplayName() != null) {
+        if (leaderboard.getDisplayName() != null) {
             dbLeaderboard.put(FieldNames.LEADERBOARD_DISPLAY_NAME.name(), leaderboard.getDisplayName());
         }
         BasicDBList dbSuppressedCompetitorIds = new BasicDBList();
@@ -277,7 +277,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
             if (!dbCorrectionForRace.isEmpty()) {
                 // using the column name as the key for the score corrections requires re-writing the score corrections
                 // of a meta-leaderboard if the name of one of its leaderboards changes
-                dbScoreCorrections.put(raceColumn.getName(), dbCorrectionForRace);
+                dbScoreCorrections.put(MongoUtils.escapeDollarAndDot(raceColumn.getName()), dbCorrectionForRace);
             }
         }
         final TimePoint timePointOfLastCorrectionsValidity = scoreCorrection.getTimePointOfLastCorrectionsValidity();
