@@ -1,25 +1,25 @@
 # Welcome to the SAP Sailing Wiki
 
-This is the <img src="http://analysis.sapsailing.com/themes/logo.png" height="58" width="200" /> Wiki where useful information regarding this project can be found. This Wiki is being stored directly into the default GIT repository on branch **master**. You can edit information here freely but do not leave any nonsense here.
+This is the <img src="http://analysis.sapsailing.com/themes/logo.png" height="58" width="200" /> Wiki where useful information regarding this project can be found.
 
-The syntax is relatively easy and is documented here http://daringfireball.net/projects/markdown/dingus. When you create a new Page then make sure to put some thinking into the right tree structure and then just extend the URL above. 
+### The Pitch
 
-**ATTENTION**: 
+Like businesses, sailors need the latest information to make strategic decisions - but they need it even faster. One wrong tack, a false estimation of the current, or the slightest wind shift can cost the skipper the entire race. As premium sponsor of the Kieler Woche 2011, and co-sponsor of Sailing Team Germany (STG), SAP is showing how innovative IT solutions providing real time data analysis can give teams the competitive edge.
 
-* Make sure to always have _wiki/_ as the base path. So if you want to create `server/SystemBoot` then the correct URL is `wiki/server/SystemBoot`. Make sure to add you Page to the Table of Contents below by editing the document.
+### Table of Contents
 
-* Password can be found in the encrypted page [[Passwords|wiki/passwords]]. You can decrypt it by using `gpg -d < passwords.md` after having entered the password. If you want to edit, first decrypt and then encrypt again using `gpg -a --symmetric passwords.md`. Make sure to never save the unencrypted version!
-
-If you have any questions then either contact Axel Uhl, Jens Rommel, Frank Mittag or Simon Pamiés.
-
-### Table of Contents Wiki
-
+* [[How to work with this wiki|wiki/howto]]
+* [[General Project Information|wiki/general-information]]
+* [[OnBoarding Information|wiki/onboarding]]
 * [[Architecture and Infrastructure|wiki/architecture-and-infrastructure]]
+* [[Server Replication|wiki/server-replication]]
 * [[Configure Races on Server|wiki/configure-races-on-server]]
+* [[Planning|wiki/planning]]
 
 ### Internal services (not related to wiki but useful)
 
 * [Bugzilla Issue Tracking System](http://bugzilla.sapsailing.com/bugzilla/)
+* [GIT Repository (SAP)](ssh://git.wdf.sap.corp:29418/SAPSail/sapsailingcapture.git)
 * [Maven Repository Browser](http://maven.sapsailing.com/maven/)
 * [Main Sailing Website](http://www.sapsailing.com)
 * [Visitor Statistics](http://analysis.sapsailing.com/)
