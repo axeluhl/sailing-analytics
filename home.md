@@ -17,6 +17,7 @@ Like businesses, sailors need the latest information to make strategic decisions
 ### Internal services (not related to wiki but useful)
 
 * [Bugzilla Issue Tracking System](http://bugzilla.sapsailing.com/bugzilla/)
+* [GIT Repository (SAP)](ssh://git.wdf.sap.corp:29418/SAPSail/sapsailingcapture.git)
 * [Maven Repository Browser](http://maven.sapsailing.com/maven/)
 * [Main Sailing Website](http://www.sapsailing.com)
 * [Visitor Statistics](http://analysis.sapsailing.com/)
