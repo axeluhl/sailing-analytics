@@ -932,7 +932,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         RaceLog result = new RaceLogImpl(RaceLogImpl.class.getSimpleName());
         try {
                 BasicDBObject query = new BasicDBObject();
-                query.put(FieldNames.RACE_LOG_IDENTIFIER.name(), identifier.getIdentifier());
+                query.put(FieldNames.RACE_LOG_IDENTIFIER.name(), MongoUtils.escapeDollarAndDot(identifier.getIdentifier().toString()));
                 DBCollection raceLog = database.getCollection(CollectionNames.RACE_LOGS.name());
                 for (DBObject o : raceLog.find(query)) {
                         RaceLogEvent raceLogEvent = loadRaceLogEvent((DBObject) o.get(FieldNames.RACE_LOG_EVENT.name()));

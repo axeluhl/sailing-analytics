@@ -504,7 +504,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
 
 	public DBObject storeRaceLogEntry(RaceLogIdentifier raceLogIdentifier, RaceLogFlagEvent flagEvent) {
 		BasicDBObject result = new BasicDBObject();
-		result.put(FieldNames.RACE_LOG_IDENTIFIER.name(), raceLogIdentifier.getIdentifier());
+		result.put(FieldNames.RACE_LOG_IDENTIFIER.name(), MongoUtils.escapeDollarAndDot(raceLogIdentifier.getIdentifier().toString()));
         
         result.put(FieldNames.RACE_LOG_EVENT.name(), storeRaceLogFlagEvent(flagEvent));
         return result;
@@ -512,7 +512,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
 	
 	public DBObject storeRaceLogEntry(RaceLogIdentifier raceLogIdentifier, RaceLogStartTimeEvent startTimeEvent) {
 		BasicDBObject result = new BasicDBObject();
-		result.put(FieldNames.RACE_LOG_IDENTIFIER.name(), raceLogIdentifier.getIdentifier());
+		result.put(FieldNames.RACE_LOG_IDENTIFIER.name(), MongoUtils.escapeDollarAndDot(raceLogIdentifier.getIdentifier().toString()));
         
         result.put(FieldNames.RACE_LOG_EVENT.name(), storeRaceLogStartTimeEvent(startTimeEvent));
         return result;
@@ -520,7 +520,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
 	
 	public DBObject storeRaceLogEntry(RaceLogIdentifier raceLogIdentifier, RaceLogPassChangeEvent passChangeEvent) {
 		BasicDBObject result = new BasicDBObject();
-		result.put(FieldNames.RACE_LOG_IDENTIFIER.name(), raceLogIdentifier.getIdentifier());
+		result.put(FieldNames.RACE_LOG_IDENTIFIER.name(), MongoUtils.escapeDollarAndDot(raceLogIdentifier.getIdentifier().toString()));
         
         result.put(FieldNames.RACE_LOG_EVENT.name(), storeRaceLogPassChangeEvent(passChangeEvent));
         return result;
@@ -528,7 +528,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
 	
 	public DBObject storeRaceLogEntry(RaceLogIdentifier raceLogIdentifier, RaceLogRaceStatusEvent raceStatusEvent) {
 		BasicDBObject result = new BasicDBObject();
-		result.put(FieldNames.RACE_LOG_IDENTIFIER.name(), raceLogIdentifier.getIdentifier());
+		result.put(FieldNames.RACE_LOG_IDENTIFIER.name(), MongoUtils.escapeDollarAndDot(raceLogIdentifier.getIdentifier().toString()));
         
         result.put(FieldNames.RACE_LOG_EVENT.name(), storeRaceLogRaceStatusEvent(raceStatusEvent));
         return result;
@@ -536,8 +536,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
 	
 	public DBObject storeRaceLogEntry(RaceLogIdentifier raceLogIdentifier, RaceLogCourseAreaChangedEvent courseAreaChangedEvent) {
 		BasicDBObject result = new BasicDBObject();
-		result.put(FieldNames.RACE_LOG_IDENTIFIER.name(), raceLogIdentifier.getIdentifier());
-        
+		result.put(FieldNames.RACE_LOG_IDENTIFIER.name(), MongoUtils.escapeDollarAndDot(raceLogIdentifier.getIdentifier().toString()));       
         result.put(FieldNames.RACE_LOG_EVENT.name(), storeRaceLogCourseAreaChangedEvent(courseAreaChangedEvent));
         return result;
 	}
