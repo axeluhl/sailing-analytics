@@ -468,15 +468,15 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
 
     private void updateStatusOfTrackedRaces() {
         for (RaceDefinition race : getRaces()) {
-            updateStatusOfTrackedRace(race);
+            DynamicTrackedRace trackedRace = getTrackedRegatta().getExistingTrackedRace(race);
+            if (trackedRace != null) {
+                updateStatusOfTrackedRace(trackedRace);
+            }
         }
     }
 
-    private void updateStatusOfTrackedRace(RaceDefinition race) {
-        DynamicTrackedRace trackedRace = getTrackedRegatta().getExistingTrackedRace(race);
-        if (trackedRace != null) {
-            trackedRace.setStatus(lastStatus);
-        }
+    private void updateStatusOfTrackedRace(DynamicTrackedRace trackedRace) {
+        trackedRace.setStatus(lastStatus);
     }
 
     @Override
@@ -511,9 +511,9 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
     }
 
     @Override
-    public void addRaceDefinition(RaceDefinition race) {
+    public void addRaceDefinition(RaceDefinition race, DynamicTrackedRace trackedRace) {
         races.add(race);
-        updateStatusOfTrackedRace(race);
+        updateStatusOfTrackedRace(trackedRace);
     }
 
 }

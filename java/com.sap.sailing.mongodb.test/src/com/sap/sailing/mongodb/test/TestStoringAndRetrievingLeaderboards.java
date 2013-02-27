@@ -203,6 +203,32 @@ public class TestStoringAndRetrievingLeaderboards extends AbstractMongoDBTest {
     }
 
     @Test
+    public void testStoreAndRetrieveLeaderboardWithScoreCorrectionsWithRaceColumnsWhoseNamesNeedEscaping() {
+        final String leaderboardName = "TestLeaderboard";
+        final String raceColumnName1 = "My.First.Race$1";
+        final String raceColumnName2 = "My.First$Race$2";
+        final double correctedPoints = 2.75;
+        final int[] discardIndexResultsStartingWithHowManyRaces = new int[] { 5, 8 };
+        FlexibleLeaderboardImpl leaderboard = new FlexibleLeaderboardImpl(leaderboardName, new ScoreCorrectionImpl(),
+                new ResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces), new LowPoint());
+        Competitor competitor = createCompetitor();
+        TrackedRace raceWithOneCompetitor1 = new MockedTrackedRaceWithFixedRank(competitor, /* rank */ 1, /* started */ true);
+        TrackedRace raceWithOneCompetitor2 = new MockedTrackedRaceWithFixedRank(competitor, /* rank */ 2, /* started */ true);
+        leaderboard.addRace(raceWithOneCompetitor1, raceColumnName1, /* medalRace */ false, leaderboard.getFleet(null));
+        leaderboard.addRace(raceWithOneCompetitor2, raceColumnName2, /* medalRace */ true, leaderboard.getFleet(null));
+        leaderboard.getScoreCorrection().correctScore(competitor, leaderboard.getRaceColumnByName(raceColumnName1), correctedPoints);
+        new MongoObjectFactoryImpl(db).storeLeaderboard(leaderboard);
+        FlexibleLeaderboard loadedLeaderboard = (FlexibleLeaderboard) new DomainObjectFactoryImpl(db).loadLeaderboard(leaderboardName, /* regattaRegistry */ null);
+        // attach tracked race to leaderboard to ensure that competitor object is assigned properly
+        RaceColumn loadedColumn1 = loadedLeaderboard.addRace(raceWithOneCompetitor1, raceColumnName1, /* medalRace, ignored */ false, leaderboard.getFleet(null));
+        RaceColumn loadedColumn2 = loadedLeaderboard.addRace(raceWithOneCompetitor2, raceColumnName2, /* medalRace, ignored */ false, leaderboard.getFleet(null));
+        assertEquals(leaderboardName, loadedLeaderboard.getName());
+        assertTrue(loadedLeaderboard.getScoreCorrection().isScoreCorrected(competitor, loadedColumn1));
+        assertEquals(correctedPoints, (double) loadedLeaderboard.getScoreCorrection().getExplicitScoreCorrection(competitor, loadedColumn1), 0.00000001);
+        assertFalse(loadedLeaderboard.getScoreCorrection().isScoreCorrected(competitor, loadedColumn2));
+    }
+
+    @Test
     public void testStoreAndRetrieveLeaderboardWithMaxPointsReason() {
         final String leaderboardName = "TestLeaderboard";
         final String raceColumnName1 = "My First Race 1";
