@@ -45,6 +45,7 @@ This document describes the onboarding process for a new team member (developer)
 2. Check out the 'master' branch from the git repository. The 'master' branch is the main development branch. Please check that you start your work on this branch.
 
 3. Setup and configure Eclipse
+  - Make absolutely sure to import CodeFormatter.xml (from $GIT_HOME/java) into your Eclipse preferences (Preferences->Java->Code Style->Fortmatter)
   - Install the Eclipse GWT-Plugin (now called Google Plugin for Eclipse, you need the Gogle WebToolkit SDK from the same update site, too)
   - Install Eclipse eGit (optional)
   - Check that JDK 1.7 is available and has been set for compilation in Eclipse
@@ -71,4 +72,4 @@ Copy the settings.xml from the top-level git folder to your ~/.m2 directory and 
 
 #### Further hints
 - Configure Eclipse to use Chrome or Firefox as the default browser
-- Install the GWT Browser Plugin (Chrome or Firefox) for the GWT Development mode    
+- Install the GWT Browser Plugin (Chrome or Firefox) for the GWT Development mode
