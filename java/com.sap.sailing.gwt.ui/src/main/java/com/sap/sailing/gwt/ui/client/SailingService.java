@@ -28,7 +28,7 @@ import com.sap.sailing.gwt.ui.shared.BulkScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorsRaceDataDTO;
 import com.sap.sailing.gwt.ui.shared.ControlPointDTO;
-import com.sap.sailing.gwt.ui.shared.CourseDTO;
+import com.sap.sailing.gwt.ui.shared.CoursePositionsDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
@@ -109,7 +109,7 @@ public interface SailingService extends RemoteService {
     
     List<RaceTimesInfoDTO> getRaceTimesInfos(Collection<RegattaAndRaceIdentifier> raceIdentifiers);
     
-    CourseDTO getCoursePositions(RegattaAndRaceIdentifier raceIdentifier, Date date);
+    CoursePositionsDTO getCoursePositions(RegattaAndRaceIdentifier raceIdentifier, Date date);
 
     RaceCourseDTO getRaceCourse(RegattaAndRaceIdentifier raceIdentifier, Date date);
 

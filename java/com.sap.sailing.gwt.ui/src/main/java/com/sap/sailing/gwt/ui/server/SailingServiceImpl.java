@@ -158,7 +158,7 @@ import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorRaceDataDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorsRaceDataDTO;
 import com.sap.sailing.gwt.ui.shared.ControlPointDTO;
-import com.sap.sailing.gwt.ui.shared.CourseDTO;
+import com.sap.sailing.gwt.ui.shared.CoursePositionsDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.FleetDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
@@ -1707,8 +1707,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public CourseDTO getCoursePositions(RegattaAndRaceIdentifier raceIdentifier, Date date) {
-        CourseDTO result = new CourseDTO();
+    public CoursePositionsDTO getCoursePositions(RegattaAndRaceIdentifier raceIdentifier, Date date) {
+        CoursePositionsDTO result = new CoursePositionsDTO();
         if (date != null) {
             TimePoint dateAsTimePoint = new MillisecondsTimePoint(date);
             TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);

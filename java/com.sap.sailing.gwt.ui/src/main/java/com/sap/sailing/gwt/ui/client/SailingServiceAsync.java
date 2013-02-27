@@ -28,7 +28,7 @@ import com.sap.sailing.gwt.ui.shared.BulkScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorsRaceDataDTO;
 import com.sap.sailing.gwt.ui.shared.ControlPointDTO;
-import com.sap.sailing.gwt.ui.shared.CourseDTO;
+import com.sap.sailing.gwt.ui.shared.CoursePositionsDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
@@ -175,7 +175,7 @@ public interface SailingServiceAsync {
     
     void getRaceTimesInfos(Collection<RegattaAndRaceIdentifier> raceIdentifiers, AsyncCallback<List<RaceTimesInfoDTO>> callback);
 
-    void getCoursePositions(RegattaAndRaceIdentifier raceIdentifier, Date date, AsyncCallback<CourseDTO> asyncCallback);
+    void getCoursePositions(RegattaAndRaceIdentifier raceIdentifier, Date date, AsyncCallback<CoursePositionsDTO> asyncCallback);
 
     void getQuickRanks(RegattaAndRaceIdentifier raceIdentifier, Date date, AsyncCallback<List<QuickRankDTO>> callback);
 
