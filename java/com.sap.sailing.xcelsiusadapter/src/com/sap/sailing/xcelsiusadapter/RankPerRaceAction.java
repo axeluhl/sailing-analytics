@@ -21,10 +21,10 @@ import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.RacingEventService;
 
-public class RankPerRace extends Action {
+public class RankPerRaceAction extends HttpAction {
     private final Set<String> competitorNameSet;
 
-    public RankPerRace(HttpServletRequest req, HttpServletResponse res, RacingEventService service, int maxRows) {
+    public RankPerRaceAction(HttpServletRequest req, HttpServletResponse res, RacingEventService service, int maxRows) {
         super(req, res, service, maxRows);
         String[] competitors = req.getParameterValues("competitor");
         if (competitors == null) {

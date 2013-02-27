@@ -26,8 +26,8 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.server.RacingEventService;
 
-public class ListEvents extends Action {
-    public ListEvents(HttpServletRequest req, HttpServletResponse res, RacingEventService service, int maxRows) {
+public class ListEventsAction extends HttpAction {
+    public ListEventsAction(HttpServletRequest req, HttpServletResponse res, RacingEventService service, int maxRows) {
         super(req, res, service, maxRows);
     }
 
