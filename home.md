@@ -1,13 +1,14 @@
 # Welcome to the SAP Sailing Wiki
 
-This is the <img src="http://analysis.sapsailing.com/themes/logo.png" height="58" width="200" /> Wiki where useful information regarding this project can be found. This Wiki is being stored directly into the default GIT repository on branch **master**. You can edit information here freely but do not leave any nonsense here.
+This is the <img src="http://analysis.sapsailing.com/themes/logo.png" height="58" width="200" /> Wiki where useful information regarding this project can be found.
 
 ### The Pitch
 
 Like businesses, sailors need the latest information to make strategic decisions - but they need it even faster. One wrong tack, a false estimation of the current, or the slightest wind shift can cost the skipper the entire race. As premium sponsor of the Kieler Woche 2011, and co-sponsor of Sailing Team Germany (STG), SAP is showing how innovative IT solutions providing real time data analysis can give teams the competitive edge.
 
-### Table of Contents Wiki
+### Table of Contents
 
+* [[How to work with this wiki|wiki/howto]]
 * [[Architecture and Infrastructure|wiki/architecture-and-infrastructure]]
 * [[Configure Races on Server|wiki/configure-races-on-server]]
 * [[Planning|wiki/planning]]
