@@ -138,12 +138,11 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<Route, RouteDa
      */
     private Map<Integer, NauticalSide> parseAdditionalCourseDataFromMetadata(Route route, 
             List<com.tractrac.clientmodule.ControlPoint> controlPoints) {
-        Map<Integer, NauticalSide> result = null;
+        Map<Integer, NauticalSide> result = new HashMap<Integer, NauticalSide>();;
         int controlPointsCount = controlPoints.size();
         String routeMetadataString = route.getMetadata() != null ? route.getMetadata().getText() : null;
         if(routeMetadataString != null) {
             Map<String, String> routeMetadata = parseRouteMetadata(routeMetadataString);
-            result = new HashMap<Integer, NauticalSide>();
             for(int i = 1; i <= controlPointsCount; i++) {
                 String seqValue = routeMetadata.get("Seq." + i);
                 com.tractrac.clientmodule.ControlPoint controlPoint = controlPoints.get(i-1);

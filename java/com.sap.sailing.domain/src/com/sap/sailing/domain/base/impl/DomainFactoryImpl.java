@@ -174,7 +174,7 @@ public class DomainFactoryImpl implements DomainFactory {
     public Waypoint createWaypoint(ControlPoint controlPoint, NauticalSide passingSide) {
         synchronized (waypointCache) {
             expungeStaleWaypointCacheEntries();
-            Waypoint result = new WaypointImpl(controlPoint);
+            Waypoint result = new WaypointImpl(controlPoint, passingSide);
             waypointCache.put(result.getId(), new WeakWaypointReference(result));
             return result;
         }

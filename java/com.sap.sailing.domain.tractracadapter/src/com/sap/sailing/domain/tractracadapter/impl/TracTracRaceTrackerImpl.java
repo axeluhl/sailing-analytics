@@ -322,12 +322,11 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
      * Seq.4=STARBOARD
      */
     private Map<Integer, NauticalSide> parsePassingSideData(ClientParamsPHP.Route route, List<? extends TracTracControlPoint> controlPoints) {
-        Map<Integer, NauticalSide> result = null;
+        Map<Integer, NauticalSide> result = new HashMap<Integer, NauticalSide>();
         int controlPointsCount = controlPoints.size();
         String routeMetadataString = route.getMetadata();
         if(routeMetadataString != null) {
             Map<String, String> routeMetadata = parseRouteMetadata(routeMetadataString);
-            result = new HashMap<Integer, NauticalSide>();
             for(int i = 1; i <= controlPointsCount; i++) {
                 String seqValue = routeMetadata.get("Seq." + i);
                 TracTracControlPoint controlPoint = controlPoints.get(i-1);

@@ -18,6 +18,10 @@ public class MarkDTO extends ControlPointDTO {
         this.position = new PositionDTO(latDeg, lngDeg);
     }
 
+    public MarkDTO(String idAsString, String name) {
+        super(idAsString, name);
+    }
+    
     @Override
     public Iterable<MarkDTO> getMarks() {
         return Collections.singleton(this);
