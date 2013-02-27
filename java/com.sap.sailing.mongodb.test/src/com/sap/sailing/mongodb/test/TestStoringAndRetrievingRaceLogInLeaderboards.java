@@ -38,7 +38,7 @@ import com.sap.sailing.domain.racelog.RaceLogStore;
 
 public class TestStoringAndRetrievingRaceLogInLeaderboards extends AbstractMongoDBTest {
     
-    String raceColumnName = "R1";
+    String raceColumnName = "My.First$Race$1";
     String leaderboardName = "TestLeaderboard";
     final int[] discardIndexResultsStartingWithHowManyRaces = new int[] { 5, 8 };
     TimePoint now = null;
