@@ -30,6 +30,8 @@ import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.RacingEventService;
@@ -86,6 +88,23 @@ public abstract class HttpAction {
             return null;
         }
         return regatta;
+    }
+    
+    public RegattaLeaderboard getRegattaLeaderboard() throws IOException {
+        /*
+         * Leaderboard name is always equal Regatta name
+         */
+        final String leaderboardName = getAttribute("regatta");
+        if (leaderboardName == null) {
+            say("Use the regatta= parameter to specify the regatta");
+            return null;
+        }
+        final Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName); 
+        if (leaderboard == null || !(leaderboard instanceof RegattaLeaderboard)) {
+            say("Regatta " + leaderboardName + " not found.");
+            return null;
+        }
+        return (RegattaLeaderboard)leaderboard;
     }
 
     public Regatta getEvent(String name) {
