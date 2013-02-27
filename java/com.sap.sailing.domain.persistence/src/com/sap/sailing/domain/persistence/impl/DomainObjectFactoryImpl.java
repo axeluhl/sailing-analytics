@@ -353,10 +353,10 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         DBObject carriedPoints = (DBObject) dbLeaderboard.get(FieldNames.LEADERBOARD_CARRIED_POINTS.name());
         if (carriedPoints != null) {
             needsMigration = true;
-            for (String competitorName : carriedPoints.keySet()) {
-                Double carriedPointsForCompetitor = ((Number) carriedPoints.get(competitorName)).doubleValue();
+            for (String escapedCompetitorName : carriedPoints.keySet()) {
+                Double carriedPointsForCompetitor = ((Number) carriedPoints.get(escapedCompetitorName)).doubleValue();
                 if (carriedPointsForCompetitor != null) {
-                    correctionsToUpdate.setCarriedPointsByName(MongoUtils.unescapeDollarAndDot(competitorName), carriedPointsForCompetitor);
+                    correctionsToUpdate.setCarriedPointsByName(MongoUtils.unescapeDollarAndDot(escapedCompetitorName), carriedPointsForCompetitor);
                 }
             }
         }
@@ -382,12 +382,12 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             scoreCorrectionToUpdate.setComment((String) dbScoreCorrection.get(FieldNames.LEADERBOARD_SCORE_CORRECTION_COMMENT.name()));
             dbScoreCorrection.removeField(FieldNames.LEADERBOARD_SCORE_CORRECTION_COMMENT.name());
         }
-        for (String raceName : dbScoreCorrection.keySet()) {
+        for (String escapedRaceColumnName : dbScoreCorrection.keySet()) {
             // deprecated style: a DBObject per race where the keys are the escaped competitor names
             // new style: a BasicDBList per race where each entry is a DBObject with COMPETITOR_ID and
             //            LEADERBOARD_SCORE_CORRECTION_MAX_POINTS_REASON and LEADERBOARD_CORRECTED_SCORE fields each
-            DBObject dbScoreCorrectionForRace = (DBObject) dbScoreCorrection.get(raceName);
-            final RaceColumn raceColumn = correctionsToUpdate.getLeaderboard().getRaceColumnByName(raceName);
+            DBObject dbScoreCorrectionForRace = (DBObject) dbScoreCorrection.get(escapedRaceColumnName);
+            final RaceColumn raceColumn = correctionsToUpdate.getLeaderboard().getRaceColumnByName(MongoUtils.unescapeDollarAndDot(escapedRaceColumnName));
             if (dbScoreCorrectionForRace instanceof BasicDBList) {
                 for (Object o : (BasicDBList) dbScoreCorrectionForRace) {
                     DBObject dbScoreCorrectionForCompetitorInRace = (DBObject) o;
@@ -465,7 +465,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         }
         DBObject raceIdentifiersPerFleet = (DBObject) dbRaceColumn.get(FieldNames.RACE_IDENTIFIERS.name());
         if (raceIdentifiersPerFleet != null) {
-            for (String fleetName : raceIdentifiersPerFleet.keySet()) {
+            for (String escapedFleetName : raceIdentifiersPerFleet.keySet()) {
+                String fleetName = MongoUtils.unescapeDollarAndDot(escapedFleetName);
                 result.put(fleetName, loadRaceIdentifier((DBObject) raceIdentifiersPerFleet.get(fleetName)));
             }
         }
