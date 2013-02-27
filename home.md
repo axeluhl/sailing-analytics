@@ -9,6 +9,7 @@ Like businesses, sailors need the latest information to make strategic decisions
 ### Table of Contents
 
 * [[How to work with this wiki|wiki/howto]]
+* [[General Project Information|wiki/general-information]]
 * [[Architecture and Infrastructure|wiki/architecture-and-infrastructure]]
 * [[Configure Races on Server|wiki/configure-races-on-server]]
 * [[Planning|wiki/planning]]
