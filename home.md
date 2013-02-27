@@ -16,6 +16,7 @@ If you have any questions then either contact Axel Uhl, Jens Rommel, Frank Mitta
 
 * [[Architecture and Infrastructure|wiki/architecture-and-infrastructure]]
 * [[Configure Races on Server|wiki/configure-races-on-server]]
+* [[Planning|wiki/planning]]
 
 ### Internal services (not related to wiki but useful)
 
