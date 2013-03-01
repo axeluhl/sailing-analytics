@@ -1,14 +1,34 @@
 #!/bin/bash
+set -o functrace
+
+find_project_home () 
+{
+    if [[ $1 == '/' ]] || [[ $1 == "" ]]; then
+        echo ""
+        return 0
+    fi
+
+    if [ ! -d "$1/.git" ]; then
+        PARENT_DIR=`cd $1/..;pwd`
+        echo $(find_project_home $PARENT_DIR)
+        return 0
+    fi
+
+    echo $1
+}
 
 # this holds for default installation
 USER_HOME=~
+START_DIR=`pwd`
+
 if [ "$PROJECT_HOME" = "" ]; then
-  PROJECT_HOME=$USER_HOME/git
+    PROJECT_HOME=$(find_project_home $START_DIR)
 fi
 
-if [ ! -d $PROJECT_HOME/.git ]; then
-  echo "Could not identify $PROJECT_HOME as git repository. Please make sure to set PROJECT_HOME to the right one."
-  exit
+# if project_home is still empty we could not determine any suitable directory
+if [[ $PROJECT_HOME == "" ]]; then
+    echo "Could neither determine nor get PROJECT_HOME. Please provide it by setting an environment variable with this name."
+    exit
 fi
 
 if [ "$SERVERS_HOME" = "" ]; then
