@@ -12,6 +12,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.MaxPointsReason;
+import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.PolarSheetGenerationTriggerResponse;
 import com.sap.sailing.domain.common.PolarSheetsData;
 import com.sap.sailing.domain.common.PolarSheetsHistogramData;
@@ -27,7 +28,7 @@ import com.sap.sailing.gwt.ui.shared.BulkScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorsRaceDataDTO;
 import com.sap.sailing.gwt.ui.shared.ControlPointDTO;
-import com.sap.sailing.gwt.ui.shared.CourseDTO;
+import com.sap.sailing.gwt.ui.shared.CoursePositionsDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
@@ -36,7 +37,7 @@ import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.ManeuverDTO;
 import com.sap.sailing.gwt.ui.shared.QuickRankDTO;
 import com.sap.sailing.gwt.ui.shared.RaceColumnInSeriesDTO;
-import com.sap.sailing.gwt.ui.shared.RaceCourseMarksDTO;
+import com.sap.sailing.gwt.ui.shared.RaceCourseDTO;
 import com.sap.sailing.gwt.ui.shared.RaceDTO;
 import com.sap.sailing.gwt.ui.shared.RaceMapDataDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
@@ -174,7 +175,7 @@ public interface SailingServiceAsync {
     
     void getRaceTimesInfos(Collection<RegattaAndRaceIdentifier> raceIdentifiers, AsyncCallback<List<RaceTimesInfoDTO>> callback);
 
-    void getCoursePositions(RegattaAndRaceIdentifier raceIdentifier, Date date, AsyncCallback<CourseDTO> asyncCallback);
+    void getCoursePositions(RegattaAndRaceIdentifier raceIdentifier, Date date, AsyncCallback<CoursePositionsDTO> asyncCallback);
 
     void getQuickRanks(RegattaAndRaceIdentifier raceIdentifier, Date date, AsyncCallback<List<QuickRankDTO>> callback);
 
@@ -394,17 +395,15 @@ public interface SailingServiceAsync {
 
     void getWindSourcesInfo(RegattaAndRaceIdentifier raceIdentifier, AsyncCallback<WindInfoForRaceDTO> callback);
 
-    void getRaceCourse(RegattaAndRaceIdentifier raceIdentifier, Date date, AsyncCallback<List<ControlPointDTO>> callback);
+    void getRaceCourse(RegattaAndRaceIdentifier raceIdentifier, Date date, AsyncCallback<RaceCourseDTO> callback);
 
-    void updateRaceCourse(RegattaAndRaceIdentifier raceIdentifier, List<ControlPointDTO> controlPoints, AsyncCallback<Void> callback);
+    void updateRaceCourse(RegattaAndRaceIdentifier raceIdentifier, List<Pair<ControlPointDTO, NauticalSide>> controlPoints, AsyncCallback<Void> callback);
 
     void getFregResultUrls(AsyncCallback<List<String>> asyncCallback);
 
     void removeFregURLs(Set<String> toRemove, AsyncCallback<Void> asyncCallback);
 
     void addFragUrl(String result, AsyncCallback<Void> asyncCallback);
-
-    void getRaceCourseMarks(RegattaAndRaceIdentifier raceIdentifier, Date date,	AsyncCallback<RaceCourseMarksDTO> callback);
 
     void addColumnsToLeaderboard(String leaderboardName, List<Pair<String, Boolean>> columnsToAdd,
             AsyncCallback<Void> callback);
@@ -444,4 +443,5 @@ public interface SailingServiceAsync {
     void getPolarSheetsGenerationResults(String id, AsyncCallback<PolarSheetsData> asyncCallback);
 
     void getPolarSheetData(String polarSheetId, int angle, int windSpeed, AsyncCallback<PolarSheetsHistogramData> wrapperCallback);
+
 }

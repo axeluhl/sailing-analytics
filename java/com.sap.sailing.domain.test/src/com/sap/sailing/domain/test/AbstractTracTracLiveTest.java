@@ -19,6 +19,8 @@ import org.junit.Assert;
 import org.junit.Before;
 
 import com.maptrack.client.io.TypeController;
+import com.sap.sailing.domain.common.NauticalSide;
+import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.tractracadapter.Receiver;
 import com.sap.sailing.domain.tractracadapter.TracTracConnectionConstants;
 import com.sap.sailing.domain.tractracadapter.TracTracControlPoint;
@@ -179,6 +181,14 @@ public abstract class AbstractTracTracLiveTest extends StoredTrackBasedTest impl
         System.err.println("Error with live data "+arg0);
     }
 
+    public static Iterable<Pair<TracTracControlPoint, NauticalSide>> getTracTracControlPointsWithPassingSide(Iterable<ControlPoint> controlPoints) {
+        List<Pair<TracTracControlPoint, NauticalSide>> ttControlPoints = new ArrayList<Pair<TracTracControlPoint, NauticalSide>>();
+        for (com.tractrac.clientmodule.ControlPoint cp : controlPoints) {
+            ttControlPoints.add(new Pair<TracTracControlPoint, NauticalSide>(new ControlPointAdapter(cp), null));
+        }
+        return ttControlPoints;
+    }
+    
     public static Iterable<TracTracControlPoint> getTracTracControlPoints(Iterable<ControlPoint> controlPoints) {
         List<TracTracControlPoint> ttControlPoints = new ArrayList<>();
         for (com.tractrac.clientmodule.ControlPoint cp : controlPoints) {

@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import com.sap.sailing.domain.common.Named;
+import com.sap.sailing.domain.common.NauticalSide;
+import com.sap.sailing.domain.common.impl.Util.Pair;
 
 import difflib.PatchFailedException;
 
@@ -74,7 +76,7 @@ public interface Course extends Named {
      * to the registered {@link CourseListener}s as if {@link #addWaypoint(int, Waypoint)} and {@link #removeWaypoint(int)}
      * had been used.
      */
-    void update(List<? extends ControlPoint> newControlPoints, DomainFactory baseDomainFactory) throws PatchFailedException;
+    void update(List<Pair<ControlPoint, NauticalSide>> newControlPoints, DomainFactory baseDomainFactory) throws PatchFailedException;
 
     Iterable<Leg> getLegsAdjacentTo(Mark mark);
 
