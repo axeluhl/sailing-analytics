@@ -55,7 +55,7 @@
 	-startupUrl /gwt/Spectator.html com.sap.sailing.gwt.ui.Spectator 
 	-startupUrl /gwt/RaceBoard.html com.sap.sailing.gwt.ui.RaceBoard 
 	-startupUrl /gwt/TvView.html com.sap.sailing.gwt.ui.TvView 
-	-startupUrl /gwt/PolarSheets.html com.sap.sailing.gwt.ui.PolarSheets
+	-startupUrl /gwt/PolarSheets.html com.sap.sailing.gwt.ui.PolarSheets 
 	-startupUrl /gwt/RegattaOverview.html com.sap.sailing.gwt.ui.RegattaOverview"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="com.sap.sailing.gwt.ui"/>
 <stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Xmx2048m -XX:MaxPermSize=512m"/>
