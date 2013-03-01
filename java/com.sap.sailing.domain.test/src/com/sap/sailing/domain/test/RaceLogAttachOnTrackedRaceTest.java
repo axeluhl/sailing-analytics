@@ -13,6 +13,8 @@ import com.sap.sailing.domain.base.impl.FleetImpl;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.impl.FlexibleLeaderboardImpl;
+import com.sap.sailing.domain.leaderboard.impl.LowPoint;
+import com.sap.sailing.domain.leaderboard.impl.ScoreCorrectionImpl;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.test.mock.MockedTrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -44,7 +46,8 @@ public class RaceLogAttachOnTrackedRaceTest {
     
     @Before
     public void setUp() {
-        leaderboard = new FlexibleLeaderboardImpl("", null, null, null, null);
+        ScoreCorrectionImpl scoreCorrection = new ScoreCorrectionImpl();
+        leaderboard = new FlexibleLeaderboardImpl("", scoreCorrection, null, new LowPoint(), null);
     }
     
     @Test
