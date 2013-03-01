@@ -40,6 +40,7 @@ import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
 import com.sap.sailing.domain.common.MarkType;
+import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.TimePoint;
@@ -131,11 +132,11 @@ public class DomainFactoryImpl implements DomainFactory {
     }
     
     @Override
-    public void updateCourseWaypoints(Course courseToUpdate, Iterable<? extends TracTracControlPoint> controlPoints) throws PatchFailedException {
-        List<com.sap.sailing.domain.base.ControlPoint> newDomainControlPoints = new ArrayList<com.sap.sailing.domain.base.ControlPoint>();
-        for (TracTracControlPoint tractracControlPoint : controlPoints) {
-            com.sap.sailing.domain.base.ControlPoint newDomainControlPoint = getOrCreateControlPoint(tractracControlPoint);
-            newDomainControlPoints.add(newDomainControlPoint);
+    public void updateCourseWaypoints(Course courseToUpdate, Iterable<Pair<TracTracControlPoint, NauticalSide>> controlPoints) throws PatchFailedException {
+        List<Pair<com.sap.sailing.domain.base.ControlPoint, NauticalSide>> newDomainControlPoints = new ArrayList<Pair<com.sap.sailing.domain.base.ControlPoint, NauticalSide>>();
+        for (Pair<TracTracControlPoint, NauticalSide> tractracControlPoint : controlPoints) {
+            com.sap.sailing.domain.base.ControlPoint newDomainControlPoint = getOrCreateControlPoint(tractracControlPoint.getA());
+            newDomainControlPoints.add(new Pair<com.sap.sailing.domain.base.ControlPoint, NauticalSide>(newDomainControlPoint, tractracControlPoint.getB()));
         }
         courseToUpdate.update(newDomainControlPoints, baseDomainFactory);
     }
@@ -211,10 +212,10 @@ public class DomainFactoryImpl implements DomainFactory {
     }
         
     @Override
-    public Course createCourse(String name, Iterable<TracTracControlPoint> controlPoints) {
+    public Course createCourse(String name, Iterable<Pair<TracTracControlPoint, NauticalSide>> controlPoints) {
         List<Waypoint> waypointList = new ArrayList<Waypoint>();
-        for (TracTracControlPoint controlPoint : controlPoints) {
-            Waypoint waypoint = baseDomainFactory.createWaypoint(getOrCreateControlPoint(controlPoint));
+        for (Pair<TracTracControlPoint, NauticalSide> controlPoint: controlPoints) {
+            Waypoint waypoint = baseDomainFactory.createWaypoint(getOrCreateControlPoint(controlPoint.getA()), controlPoint.getB());
             waypointList.add(waypoint);
         }
         return new CourseImpl(name, waypointList);

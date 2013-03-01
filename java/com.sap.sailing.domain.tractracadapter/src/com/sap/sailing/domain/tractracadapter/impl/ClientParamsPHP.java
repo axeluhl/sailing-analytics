@@ -136,7 +136,11 @@ public class ClientParamsPHP {
             return getProperty("Description");
         }
         
-        public Iterable<ControlPoint> getControlPoints() {
+        public String getMetadata() {
+            return getProperty("DataSheet");
+        }
+        
+        public List<ControlPoint> getControlPoints() {
             List<ControlPoint> result = new ArrayList<>();
             int i=1;
             String controlPointUUID;

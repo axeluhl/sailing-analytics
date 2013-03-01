@@ -4,14 +4,18 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Serializable;
+import java.io.StringReader;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -29,9 +33,11 @@ import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
+import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.tracking.AbstractRaceTrackerImpl;
@@ -259,10 +265,15 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
             final ClientParamsPHP clientParams;
             try {
                 clientParams = new ClientParamsPHP(new InputStreamReader(paramURL.openStream()));
-                List<com.sap.sailing.domain.base.ControlPoint> newCourseControlPoints = new ArrayList<>();
-                final Iterable<? extends TracTracControlPoint> newTracTracControlPoints = clientParams.getRaceDefaultRoute().getControlPoints();
+                List<Pair<com.sap.sailing.domain.base.ControlPoint, NauticalSide>> newCourseControlPoints = new ArrayList<>();
+                final List<? extends TracTracControlPoint> newTracTracControlPoints = clientParams.getRaceDefaultRoute().getControlPoints();
+                Map<Integer, NauticalSide> passingSideData = parsePassingSideData(clientParams.getRaceDefaultRoute(), newTracTracControlPoints);
+                int i = 1;
                 for (TracTracControlPoint newTracTracControlPoint : newTracTracControlPoints) {
-                    newCourseControlPoints.add(domainFactory.getOrCreateControlPoint(newTracTracControlPoint));
+                    NauticalSide nauticalSide = passingSideData.containsKey(i) ? passingSideData.get(i) : null;
+                    newCourseControlPoints.add(new Pair<com.sap.sailing.domain.base.ControlPoint, 
+                            NauticalSide>(domainFactory.getOrCreateControlPoint(newTracTracControlPoint), nauticalSide));
+                    i++;
                 }
                 List<com.sap.sailing.domain.base.ControlPoint> currentCourseControlPoints = new ArrayList<>();
                 final Course course = getRaces().iterator().next().getCourse();
@@ -305,6 +316,47 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         }
     }
 
+    /**
+     * Parses the route metadata for additional course information
+     * The 'passing side' for each course waypoint is encoded like this...
+     * Seq.1=GATE
+     * Seq.2=PORT
+     * Seq.3=GATE
+     * Seq.4=STARBOARD
+     */
+    private Map<Integer, NauticalSide> parsePassingSideData(ClientParamsPHP.Route route, List<? extends TracTracControlPoint> controlPoints) {
+        Map<Integer, NauticalSide> result = new HashMap<Integer, NauticalSide>();
+        int controlPointsCount = controlPoints.size();
+        String routeMetadataString = route.getMetadata();
+        if(routeMetadataString != null) {
+            Map<String, String> routeMetadata = parseRouteMetadata(routeMetadataString);
+            for(int i = 1; i <= controlPointsCount; i++) {
+                String seqValue = routeMetadata.get("Seq." + i);
+                TracTracControlPoint controlPoint = controlPoints.get(i-1);
+                if(!controlPoint.getHasTwoPoints() && seqValue != null) {
+                    if("PORT".equalsIgnoreCase(seqValue)) {
+                        result.put(i, NauticalSide.PORT);
+                    } else if("STARBOARD".equalsIgnoreCase(seqValue)) {
+                        result.put(i, NauticalSide.STARBOARD);
+                    }
+                }
+            }
+        }
+        return result;
+    }
+
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    private Map<String, String> parseRouteMetadata(String routeMetadata) {
+        Map<String, String> metadataMap = new HashMap<String, String>();
+        try {
+            Properties p = new Properties();
+            p.load(new StringReader(routeMetadata));
+            metadataMap = new HashMap<String, String>((Map) p);
+        } catch (IOException e) {
+            // do nothing
+        }
+        return metadataMap;
+    }
     private void updateStartStopTimesAndLiveDelay(ClientParamsPHP clientParams, Simulator simulator) {
         RaceDefinition currentRace = null;
         long delayInMillis = clientParams.getLiveDelayInMillis();

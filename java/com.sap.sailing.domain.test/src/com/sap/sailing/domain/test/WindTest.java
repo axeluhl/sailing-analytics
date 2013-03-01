@@ -15,10 +15,10 @@ import java.util.Set;
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.BoatClass;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.DomainFactory;
-import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
 import com.sap.sailing.domain.base.impl.BoatImpl;
@@ -251,9 +251,9 @@ public class WindTest {
         Mark startFinishRight = domainFactory.getOrCreateMark("Start/Finish right");
         ControlPoint startFinish = domainFactory.createGate(startFinishLeft, startFinishRight, "Start/Finish");
         ControlPoint top = domainFactory.getOrCreateMark("Top");
-        Waypoint w1 = domainFactory.createWaypoint(startFinish);
-        Waypoint w2 = domainFactory.createWaypoint(top);
-        Waypoint w3 = domainFactory.createWaypoint(startFinish);
+        Waypoint w1 = domainFactory.createWaypoint(startFinish, /*passingSide*/ null);
+        Waypoint w2 = domainFactory.createWaypoint(top, /*passingSide*/ null);
+        Waypoint w3 = domainFactory.createWaypoint(startFinish, /*passingSide*/ null);
         Competitor competitor = new CompetitorImpl(123, "Test Competitor", new TeamImpl("STG", Collections.singleton(
                 new PersonImpl("Test Competitor", new NationalityImpl("GER"),
                 /* dateOfBirth */null, "This is famous " + "Test Competitor")), new PersonImpl("Rigo van Maas",

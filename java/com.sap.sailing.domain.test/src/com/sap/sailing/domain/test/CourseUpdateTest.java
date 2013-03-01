@@ -178,7 +178,7 @@ public class CourseUpdateTest extends AbstractTracTracLiveTest {
                 result[0] = zeroBasedIndex == controlPoints.size() && waypointThatGotRemoved.getControlPoint() == cp;
             }
         });
-        domainFactory.updateCourseWaypoints(course, getTracTracControlPoints(controlPoints));
+        domainFactory.updateCourseWaypoints(course, getTracTracControlPointsWithPassingSide(controlPoints));
         assertTrue(result[0]);
         testLegStructure(1);
     }
@@ -203,7 +203,7 @@ public class CourseUpdateTest extends AbstractTracTracLiveTest {
                 result[0] = zeroBasedIndex == 1 && waypointThatGotRemoved.getControlPoint() == cp;
             }
         });
-        domainFactory.updateCourseWaypoints(course, getTracTracControlPoints(controlPoints));
+        domainFactory.updateCourseWaypoints(course, getTracTracControlPointsWithPassingSide(controlPoints));
         assertTrue(result[0]);
         testLegStructure(1);
     }
@@ -240,7 +240,7 @@ public class CourseUpdateTest extends AbstractTracTracLiveTest {
         });
         ((CourseImpl) course).lockForWrite(); // without the lock it's possible that another race course update removes the additional waypoint again
         try {
-            domainFactory.updateCourseWaypoints(course, getTracTracControlPoints(controlPoints));
+            domainFactory.updateCourseWaypoints(course, getTracTracControlPointsWithPassingSide(controlPoints));
             assertTrue(result[0]);
             testLegStructure(3);
         } finally {
@@ -270,7 +270,7 @@ public class CourseUpdateTest extends AbstractTracTracLiveTest {
                 System.out.println("waypointRemoved " + zeroBasedIndex + " / " + waypointThatGotRemoved);
             }
         });
-        domainFactory.updateCourseWaypoints(course, getTracTracControlPoints(controlPoints));
+        domainFactory.updateCourseWaypoints(course, getTracTracControlPointsWithPassingSide(controlPoints));
         assertTrue(result[0]);
         testLegStructure(3);
     }

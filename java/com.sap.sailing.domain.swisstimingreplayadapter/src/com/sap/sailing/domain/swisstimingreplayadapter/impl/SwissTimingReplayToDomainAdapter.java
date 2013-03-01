@@ -27,6 +27,7 @@ import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.Bearing;
+import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
@@ -34,6 +35,7 @@ import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.Util;
+import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.WindSourceWithAdditionalID;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.swisstimingadapter.DomainFactory;
@@ -290,7 +292,12 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter {
             } else {
                 Course course = race.getCourse();
                 try {
-                    course.update(currentCourseDefinition, domainFactory.getBaseDomainFactory());
+                    // TODO: Does SwissTiming also deliver the passing side for course marks?
+                    List<Pair<ControlPoint, NauticalSide>> courseToUpdate = new ArrayList<Pair<ControlPoint, NauticalSide>>();
+                    for(ControlPoint cp: currentCourseDefinition) {
+                        courseToUpdate.add(new Pair<ControlPoint, NauticalSide>(cp, null));
+                    }
+                    course.update(courseToUpdate, domainFactory.getBaseDomainFactory());
                 } catch (PatchFailedException e) {
                     throw new RuntimeException(e);
                 }

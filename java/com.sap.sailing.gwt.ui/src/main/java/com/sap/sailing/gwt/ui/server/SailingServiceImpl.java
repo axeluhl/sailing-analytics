@@ -75,6 +75,7 @@ import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.MaxPointsReason;
+import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.NoWindError;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Placemark;
@@ -161,6 +162,7 @@ import com.sap.sailing.gwt.ui.shared.CompetitorsRaceDataDTO;
 import com.sap.sailing.gwt.ui.shared.ControlPointDTO;
 import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.shared.CourseDTO;
+import com.sap.sailing.gwt.ui.shared.CoursePositionsDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.FleetDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
@@ -181,7 +183,7 @@ import com.sap.sailing.gwt.ui.shared.PositionDTO;
 import com.sap.sailing.gwt.ui.shared.QuickRankDTO;
 import com.sap.sailing.gwt.ui.shared.RaceColumnDTO;
 import com.sap.sailing.gwt.ui.shared.RaceColumnInSeriesDTO;
-import com.sap.sailing.gwt.ui.shared.RaceCourseMarksDTO;
+import com.sap.sailing.gwt.ui.shared.RaceCourseDTO;
 import com.sap.sailing.gwt.ui.shared.RaceDTO;
 import com.sap.sailing.gwt.ui.shared.RaceEventDTO;
 import com.sap.sailing.gwt.ui.shared.RaceEventLogDTO;
@@ -207,6 +209,7 @@ import com.sap.sailing.gwt.ui.shared.TracTracConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracRaceRecordDTO;
 import com.sap.sailing.gwt.ui.shared.TrackedRaceDTO;
 import com.sap.sailing.gwt.ui.shared.VenueDTO;
+import com.sap.sailing.gwt.ui.shared.WaypointDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
@@ -1025,7 +1028,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return result;
     }
 
-    private MarkDTO convertToMarkDTO(Mark mark, Position position) {
+        MarkDTO markDTO;
+        if(position != null) {
+            markDTO = new MarkDTO(mark.getId().toString(), mark.getName(), position.getLatDeg(), position.getLngDeg());
+        } else {
+            markDTO = new MarkDTO(mark.getId().toString(), mark.getName());
+        }
         MarkDTO markDTO = new MarkDTO(mark.getId().toString(), mark.getName(), position.getLatDeg(), position.getLngDeg());
         markDTO.color = mark.getColor();
         markDTO.shape = mark.getShape();
@@ -1710,8 +1718,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return raceTimesInfos;
     }
 
-    @Override
-    public CourseDTO getCoursePositions(RegattaAndRaceIdentifier raceIdentifier, Date date) {
+    public CoursePositionsDTO getCoursePositions(RegattaAndRaceIdentifier raceIdentifier, Date date) {
+        CoursePositionsDTO result = new CoursePositionsDTO();
         CourseDTO result = new CourseDTO();
         if (date != null) {
             TimePoint dateAsTimePoint = new MillisecondsTimePoint(date);
@@ -1750,43 +1758,33 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             }
         }
         return result;
-    }
+      
 
-    @Override
-    public RaceCourseMarksDTO getRaceCourseMarks(RegattaAndRaceIdentifier raceIdentifier, Date date) {
-        RaceCourseMarksDTO raceMarksDTO = new RaceCourseMarksDTO();
-        TimePoint dateAsTimePoint = new MillisecondsTimePoint(date);
-        TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
-        if (trackedRace != null) {
-            raceMarksDTO.marks = new HashSet<MarkDTO>();
-            Iterable<Mark> marks = trackedRace.getMarks();
-            for (Mark mark : marks) {
-                GPSFixTrack<Mark, GPSFix> track = trackedRace.getOrCreateTrack(mark);
-                Position positionAtDate = track.getEstimatedPosition(dateAsTimePoint, /* extrapolate */false);
-                if (positionAtDate != null) {
-                    raceMarksDTO.marks.add(convertToMarkDTO(mark, positionAtDate));
-                }
-            }
-        }
-        return raceMarksDTO;
-    }
-
-    @Override
-    public List<ControlPointDTO> getRaceCourse(RegattaAndRaceIdentifier raceIdentifier, Date date) {
+    public RaceCourseDTO getRaceCourse(RegattaAndRaceIdentifier raceIdentifier, Date date) {
+        List<WaypointDTO> waypointDTOs = new ArrayList<WaypointDTO>();
+        RaceCourseDTO result = new RaceCourseDTO(waypointDTOs);
         List<ControlPointDTO> result = new ArrayList<ControlPointDTO>();
         if (date != null) {
             TimePoint dateAsTimePoint = new MillisecondsTimePoint(date);
             TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
             if (trackedRace != null) {
                 Course course = trackedRace.getRace().getCourse();
-                for (Waypoint waypoint : course.getWaypoints()) {
+                    List<MarkDTO> markDTOs = new ArrayList<MarkDTO>();
+                    for (Mark mark : trackedRace.getMarks()) {
+                        GPSFixTrack<Mark, GPSFix> track = trackedRace.getOrCreateTrack(mark);
+                        Position positionAtDate = track.getEstimatedPosition(dateAsTimePoint, /* extrapolate */false);
+                        markDTOs.add(convertToMarkDTO(mark, positionAtDate));
+                    }
+                    ControlPointDTO controlPointDTO = convertToControlPointDTO(waypoint.getControlPoint(), trackedRace, dateAsTimePoint);
+                    WaypointDTO waypointDTO = new WaypointDTO(waypoint.getName(), controlPointDTO, markDTOs, waypoint.getPassingSide());
+                    waypointDTOs.add(waypointDTO);
                     result.add(createControlPointDTO(waypoint.getControlPoint(), trackedRace, dateAsTimePoint));
                 }
             }
         }
         return result;
     }
-
+    private ControlPointDTO convertToControlPointDTO(ControlPoint controlPoint, TrackedRace trackedRace, TimePoint timePoint) {
     private ControlPointDTO createControlPointDTO(ControlPoint controlPoint, TrackedRace trackedRace, TimePoint timePoint) {
         ControlPointDTO result;
         if (controlPoint instanceof Gate) {
@@ -1811,21 +1809,22 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
      * list of control points is then passed to {@link Course#update(List, com.sap.sailing.domain.base.DomainFactory)} for
      * the course of the race identified by <code>raceIdentifier</code>.
      */
-    @Override
+    public void updateRaceCourse(RegattaAndRaceIdentifier raceIdentifier, List<Pair<ControlPointDTO, NauticalSide>> controlPoints) {
     public void updateRaceCourse(RegattaAndRaceIdentifier raceIdentifier, List<ControlPointDTO> controlPoints) {
         TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
         if (trackedRace != null) {
             Course course = trackedRace.getRace().getCourse();
-            Iterable<Waypoint> waypoints = course.getWaypoints();
+            List<Pair<ControlPoint, NauticalSide>> newControlPoints = new ArrayList<Pair<ControlPoint, NauticalSide>>();
             List<ControlPoint> newControlPoints = new ArrayList<ControlPoint>();
-            int lastMatchPosition = -1;
+            for (Pair<ControlPointDTO, NauticalSide> controlPointAndPassingSide : controlPoints) {
+                ControlPointDTO controlPointDTO = controlPointAndPassingSide.getA();
             for (ControlPointDTO controlPointDTO : controlPoints) {
                 ControlPoint matchFromOldCourse = null;
                 for (int i=lastMatchPosition+1; matchFromOldCourse == null && i<Util.size(waypoints); i++) {
                     Waypoint waypointAtI = Util.get(waypoints, i);
                     ControlPoint controlPointAtI = waypointAtI.getControlPoint();
                     if (controlPointAtI.getId().toString().equals(controlPointDTO.getIdAsString()) && markIDsMatch(controlPointAtI.getMarks(), controlPointDTO.getMarks())) {
-                        matchFromOldCourse = controlPointAtI;
+                        newControlPoints.add(new Pair<ControlPoint, NauticalSide>(matchFromOldCourse, null));
                         newControlPoints.add(matchFromOldCourse);
                         lastMatchPosition = i;
                     }
@@ -1843,10 +1842,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                         }
                         Mark left = baseDomainFactory.getOrCreateMark(gateDTO.getLeft().getIdAsString(), gateDTO.getLeft().name);
                         Mark right = baseDomainFactory.getOrCreateMark(gateDTO.getRight().getIdAsString(), gateDTO.getRight().name);
+                        newControlPoints.add(new Pair<ControlPoint, NauticalSide>(newControlPoint, null));
                         newControlPoint = baseDomainFactory.createGate(id, left, right, gateDTO.name);
                     } else {
+                        NauticalSide nauticalSide = controlPointAndPassingSide.getB();
+                        newControlPoints.add(new Pair<ControlPoint, NauticalSide>(newControlPoint, nauticalSide));
                         newControlPoint = baseDomainFactory.getOrCreateMark(controlPointDTO.getIdAsString(), controlPointDTO.name);
-                    }
                     newControlPoints.add(newControlPoint);
                 }
             }
@@ -3298,5 +3299,3 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
         return histogramData;
     }
-
-}
