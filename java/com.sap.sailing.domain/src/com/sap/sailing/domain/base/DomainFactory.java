@@ -2,8 +2,10 @@ package com.sap.sailing.domain.base;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Serializable;
 
 import com.sap.sailing.domain.base.impl.DomainFactoryImpl;
+import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.TimePoint;
