@@ -10,31 +10,28 @@ import com.sap.sailing.domain.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.racelog.RaceLogRaceStatusEvent;
 
 public class RaceLogRaceStatusEventImpl extends RaceLogEventImpl implements
-		RaceLogRaceStatusEvent {
-	private static final long serialVersionUID = -8809758843066724482L;
-	
-	protected RaceLogRaceStatus nextStatus;
+RaceLogRaceStatusEvent {
+    private static final long serialVersionUID = -8809758843066724482L;
 
-	public RaceLogRaceStatusEventImpl(
-			TimePoint pTimePoint, 
-			Serializable pId,
-			List<Competitor> pInvolvedBoats, 
-			int pPassId,
-			RaceLogRaceStatus nextStatus) {
-		super(pTimePoint, pId, pInvolvedBoats, pPassId);
-		this.nextStatus = nextStatus;
-	}
+    protected RaceLogRaceStatus nextStatus;
 
-	@Override
-	public RaceLogRaceStatus getNextStatus() {
-		return nextStatus;
-	}
-	
-	@Override
-	public void accept(RaceLogEventVisitor visitor) {
-		visitor.visit(this);
-	}
-	
-	
+    public RaceLogRaceStatusEventImpl(
+            TimePoint pTimePoint, 
+            Serializable pId,
+            List<Competitor> pInvolvedBoats, 
+            int pPassId,
+            RaceLogRaceStatus nextStatus) {
+        super(pTimePoint, pId, pInvolvedBoats, pPassId);
+        this.nextStatus = nextStatus;
+    }
 
+    @Override
+    public RaceLogRaceStatus getNextStatus() {
+        return nextStatus;
+    }
+
+    @Override
+    public void accept(RaceLogEventVisitor visitor) {
+        visitor.visit(this);
+    }
 }

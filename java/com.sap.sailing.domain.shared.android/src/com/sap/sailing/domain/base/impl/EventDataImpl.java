@@ -6,9 +6,9 @@ import com.sap.sailing.domain.base.EventData;
 import com.sap.sailing.domain.base.Venue;
 
 public class EventDataImpl implements EventData {
-	private static final long serialVersionUID = -5749964088848611074L;
-	
-	private String name;
+    private static final long serialVersionUID = -5749964088848611074L;
+
+    private String name;
     private String publicationUrl;
     private final Venue venue;
     private boolean isPublic;
@@ -17,7 +17,7 @@ public class EventDataImpl implements EventData {
     public EventDataImpl(String name, String venueName, String publicationUrl, boolean isPublic, Serializable id) {
         this(name, new VenueImpl(venueName), publicationUrl, isPublic, id);
     }
-    
+
     /**
      * @param venue must not be <code>null</code>
      */
@@ -30,7 +30,7 @@ public class EventDataImpl implements EventData {
         this.isPublic = isPublic;
     }
 
-	@Override
+    @Override
     public Serializable getId() {
         return id;
     }

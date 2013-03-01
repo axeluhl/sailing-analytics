@@ -28,7 +28,7 @@ import com.sap.sailing.domain.tracking.WindStore;
 
 public class SwissTimingFactoryImpl implements SwissTimingFactory {
     private final Map<Triple<String, Integer, RaceSpecificMessageLoader>, SailMasterConnector> connectors;
-    
+
     public SwissTimingFactoryImpl() {
         connectors = new HashMap<Triple<String, Integer, RaceSpecificMessageLoader>, SailMasterConnector>();
     }
@@ -106,10 +106,10 @@ public class SwissTimingFactoryImpl implements SwissTimingFactory {
     public SailMasterMessage createMessage(String message, Long sequenceNumber) {
         return new SailMasterMessageImpl(message, sequenceNumber);
     }
-    
+
     @Override
     public Race createRace(String raceId, String description, TimePoint startTime) {
-    	return new RaceImpl(raceId, description, startTime);
+        return new RaceImpl(raceId, description, startTime);
     }
 
     @Override

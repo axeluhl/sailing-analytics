@@ -20,19 +20,19 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 
 public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implements RaceColumn {
     private static final long serialVersionUID = -7801617988982540470L;
-    
+
     private final Map<Fleet, TrackedRace> trackedRaces;
     private final Map<Fleet, RaceIdentifier> raceIdentifiers;
-    
+
     private final Map<Fleet, RaceLog> raceLogs;
     private RaceLogIdentifierTemplate raceLogsIdentifier;
-    
+
     public AbstractRaceColumn() {
         this.trackedRaces = new HashMap<Fleet, TrackedRace>();
         this.raceIdentifiers = new HashMap<Fleet, RaceIdentifier>();
         this.raceLogs = new HashMap<Fleet, RaceLog>();
     }
-    
+
     @Override
     public synchronized void setRaceLogInformation(final RaceLogInformation information) {
         raceLogs.clear();
@@ -45,12 +45,12 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
             raceLogs.put(fleet, raceLog);
         }
     }
-    
+
     @Override
     public RaceLog getRaceLog(Fleet fleet) {
-    	return raceLogs.get(fleet);
+        return raceLogs.get(fleet);
     }
-    
+
     @Override
     public TrackedRace getTrackedRace(Fleet fleet) {
         return trackedRaces.get(fleet);
@@ -133,18 +133,18 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
         }
         return null;
     }
-    
+
     @Override
     public String toString() {
         return getName();
     }
-    
+
     /**
      * When deserializing, replication listeners are registered on all race logs.
      */
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
         ois.defaultReadObject();
-        
+
         for (Entry<Fleet, RaceLog> entry : raceLogs.entrySet()) {
             Fleet fleet = entry.getKey();
             RaceLog raceLog = entry.getValue();

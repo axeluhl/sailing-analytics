@@ -53,29 +53,29 @@ import com.sap.sailing.util.InvalidDateException;
 
 public class AdminApp extends SailingServerHttpServlet {
     private static final long serialVersionUID = -6849138354941569249L;
-    
+
     private static final String ACTION_NAME_ADD_WIND_TO_MARKS = "addwindtomarksforonehour";
 
     private static final String ACTION_NAME_ADD_EVENT = "addevent";
 
     private static final String ACTION_NAME_ADD_RACE = "addrace";
-    
+
     private static final String ACTION_NAME_LIST_RACES_IN_REGATTA = "listracesinregatta";
 
     private static final String ACTION_NAME_STOP_REGATTA = "stopregatta";
-    
+
     private static final String ACTION_NAME_STOP_RACE = "stoprace";
-    
+
     private static final String ACTION_NAME_SET_WIND = "setwind";
-    
+
     private static final String ACTION_NAME_REMOVE_WIND = "removewind";
-    
+
     private static final String ACTION_NAME_SHOW_WIND = "showwind";
-    
+
     private static final String ACTION_NAME_SET_AVERAGING = "setaveraging";
-    
+
     private static final String PARAM_NAME_WIND_AVERAGING_INTERVAL_MILLIS = "windaveragingintervalmillis";
-    
+
     private static final String PARAM_NAME_SPEED_AVERAGING_INTERVAL_MILLIS = "speedaveragingintervalmillis";
 
     private static final String PARAM_NAME_EVENT_JSON_URL = "eventJSONURL";
@@ -95,17 +95,17 @@ public class AdminApp extends SailingServerHttpServlet {
     private static final String PARAM_NAME_TO_TIME_MILLIS = "totimeasmillis";
 
     private static final String PARAM_NAME_WINDSOURCE_NAME = "sourcename";
-    
+
     private static final String PARAM_NAME_BEARING = "truebearingdegrees";
-    
+
     private static final String PARAM_NAME_SPEED = "knotspeed";
-    
+
     private static final String PARAM_NAME_LATDEG = "latdeg";
-    
+
     private static final String PARAM_NAME_LNGDEG = "lngdeg";
-    
+
     private static final String ACTION_NAME_LIST_WINDTRACKERS = "listwindtrackers";
-    
+
     private static final String ACTION_NAME_SUBSCRIBE_RACE_FOR_EXPEDITION_WIND = "receiveexpeditionwind";
 
     private static final String ACTION_NAME_UNSUBSCRIBE_RACE_FOR_EXPEDITION_WIND = "stopreceivingexpeditionwind";
@@ -115,14 +115,14 @@ public class AdminApp extends SailingServerHttpServlet {
     private static final String PARAM_NAME_CORRECT_EXPEDITION_WIND_BEARING_BY_DECLINATION = "correctexpeditionwindbearingbydeclination";
 
     private static final String PARAM_NAME_WINDSTORE = "windstore";
-    
+
     private static final String STORE_EMPTY = "empty";
 
     private static final String STORE_MONGO = "mongo";
-    
+
     public AdminApp() {
     }
-    
+
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         try {
@@ -165,7 +165,7 @@ public class AdminApp extends SailingServerHttpServlet {
             e.printStackTrace(resp.getWriter());
         }
     }
-    
+
     private void setAveraging(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         Regatta regatta = getRegatta(req);
         if (regatta == null) {
@@ -189,7 +189,7 @@ public class AdminApp extends SailingServerHttpServlet {
     }
 
     private void listRacesInEvent(HttpServletRequest req, HttpServletResponse resp) throws IOException, ParseException,
-            org.json.simple.parser.ParseException, URISyntaxException {
+    org.json.simple.parser.ParseException, URISyntaxException {
         URL jsonURL = new URL(req.getParameter(PARAM_NAME_EVENT_JSON_URL));
         List<RaceRecord> raceRecords = getService().getTracTracRaceRecords(jsonURL).getB();
         JSONArray result = new JSONArray();
@@ -205,7 +205,7 @@ public class AdminApp extends SailingServerHttpServlet {
     }
 
     private void addWindToMarks(HttpServletRequest req, HttpServletResponse resp) throws IOException,
-            InvalidDateException, NoWindException {
+    InvalidDateException, NoWindException {
         Regatta regatta = getRegatta(req);
         if (regatta == null) {
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Event not found");
@@ -289,12 +289,12 @@ public class AdminApp extends SailingServerHttpServlet {
                                 jsonWind.put("timepoint", wind.getTimePoint().asMillis());
                                 jsonWind.put("dampenedtruebearingdeg",
                                         windTrack.getAveragedWind(wind.getPosition(), wind.getTimePoint())
-                                                .getBearing().getDegrees());
+                                        .getBearing().getDegrees());
                                 jsonWind.put("dampenedknotspeed",
                                         windTrack.getAveragedWind(wind.getPosition(), wind.getTimePoint()).getKnots());
                                 jsonWind.put("dampenedmeterspersecondspeed",
                                         windTrack.getAveragedWind(wind.getPosition(), wind.getTimePoint())
-                                                .getMetersPerSecond());
+                                        .getMetersPerSecond());
                             }
                             if (wind.getPosition() != null) {
                                 jsonWind.put("latdeg", wind.getPosition().getLatDeg());
@@ -395,7 +395,7 @@ public class AdminApp extends SailingServerHttpServlet {
                             } else {
                                 resp.getWriter().println(
                                         "No wind recorded for regatta " + regatta.getName() + " and race " + race.getName()
-                                                + " at " + timePoint.asDate()+". No error, just no effect :-)");
+                                        + " at " + timePoint.asDate()+". No error, just no effect :-)");
                             }
                         } catch (InvalidDateException e) {
                             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Couldn't parse time specification " + e.getMessage());
@@ -454,7 +454,7 @@ public class AdminApp extends SailingServerHttpServlet {
     }
 
     private void stopRegatta(HttpServletRequest req, HttpServletResponse resp) throws MalformedURLException, IOException,
-            InterruptedException {
+    InterruptedException {
         Regatta regatta = getRegatta(req);
         if (regatta != null) {
             getService().stopTracking(regatta);
@@ -469,7 +469,7 @@ public class AdminApp extends SailingServerHttpServlet {
         URI storedURI = new URI(req.getParameter(PARAM_NAME_STORED_URI));
         getService().addRegatta(jsonURL, liveURI, storedURI, getWindStore(req), /* timeoutInMilliseconds */ 60000);
     }
-    
+
     private WindStore getWindStore(HttpServletRequest req) throws UnknownHostException, MongoException {
         String windStore = req.getParameter(PARAM_NAME_WINDSTORE);
         if (windStore != null) {
@@ -492,9 +492,9 @@ public class AdminApp extends SailingServerHttpServlet {
         URI liveURI = new URI(req.getParameter(PARAM_NAME_LIVE_URI));
         URI storedURI = new URI(req.getParameter(PARAM_NAME_STORED_URI));
         getService().addTracTracRace(paramURL, liveURI, storedURI, 
-        		MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(MongoFactory.INSTANCE.getDefaultMongoObjectFactory(),
+                MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(MongoFactory.INSTANCE.getDefaultMongoObjectFactory(),
                         MongoFactory.INSTANCE.getDefaultDomainObjectFactory()),
-        		getWindStore(req), /* timeoutInMilliseconds */ 60000);
+                        getWindStore(req), /* timeoutInMilliseconds */ 60000);
     }
 
     private void stopRace(HttpServletRequest req, HttpServletResponse resp) throws MalformedURLException, IOException, InterruptedException {

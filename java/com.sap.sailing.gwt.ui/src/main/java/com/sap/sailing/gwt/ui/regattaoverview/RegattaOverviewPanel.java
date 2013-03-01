@@ -13,15 +13,15 @@ import com.sap.sailing.gwt.ui.shared.RaceEventLogDTO;
 public class RegattaOverviewPanel extends FlowPanel {
     private final SailingServiceAsync sailingService;
     @SuppressWarnings("unused")
-	private final ErrorReporter errorReporter;
+    private final ErrorReporter errorReporter;
     @SuppressWarnings("unused")
-	private final StringMessages stringMessages;
+    private final StringMessages stringMessages;
 
     private final Label label;
-    
+
     private final VerticalPanel mainPanel;
-    
-	public RegattaOverviewPanel(final SailingServiceAsync sailingService, 
+
+    public RegattaOverviewPanel(final SailingServiceAsync sailingService, 
             ErrorReporter errorReporter, final StringMessages stringMessages) {
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
@@ -29,28 +29,28 @@ public class RegattaOverviewPanel extends FlowPanel {
 
         mainPanel = new VerticalPanel();
         this.add(mainPanel);
-        
+
         label = new Label("Hallo world");
         mainPanel.add(label);
-        
+
         loadEventLog();
-	}
-	
-	private void loadEventLog() {
-		sailingService.getRaceEventLog(new AsyncCallback<RaceEventLogDTO>() {
-			
-			@Override
-			public void onSuccess(RaceEventLogDTO result) {
-				label.setText(result.raceName);
-				int i = 0;
-				for(RaceEventDTO raceEvent: result.raceEvents) {
-					mainPanel.add(new Label(i++ + ".) " + raceEvent.eventName));
-				}
-			}
-			
-			@Override
-			public void onFailure(Throwable arg0) {
-			}
-		});
-	}
+    }
+
+    private void loadEventLog() {
+        sailingService.getRaceEventLog(new AsyncCallback<RaceEventLogDTO>() {
+
+            @Override
+            public void onSuccess(RaceEventLogDTO result) {
+                label.setText(result.raceName);
+                int i = 0;
+                for(RaceEventDTO raceEvent: result.raceEvents) {
+                    mainPanel.add(new Label(i++ + ".) " + raceEvent.eventName));
+                }
+            }
+
+            @Override
+            public void onFailure(Throwable arg0) {
+            }
+        });
+    }
 }

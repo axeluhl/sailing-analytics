@@ -15,7 +15,7 @@ import com.sap.sailing.domain.common.WithID;
  *
  */
 public interface RaceLogEvent extends Timed, WithID {
-	
+
     /**
      * Gets the event's pass identifier.
      * 
@@ -25,7 +25,7 @@ public interface RaceLogEvent extends Timed, WithID {
      * 
      */
     int getPassId();
-    
+
     /**
      * Gets the list of associated {@link Competitor}s.
      * 
@@ -34,7 +34,7 @@ public interface RaceLogEvent extends Timed, WithID {
      * of competitors who are marked for an individual recall.
      */
     List<Competitor> getInvolvedBoats();
-	
+
     /**
      * Visitor pattern to implement certain {@link RaceLogEvent} subclass specific
      * behavior.

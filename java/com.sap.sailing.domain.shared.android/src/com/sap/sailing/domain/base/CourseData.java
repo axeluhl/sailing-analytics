@@ -9,7 +9,7 @@ import com.sap.sailing.domain.common.Named;
  * by the server and an Android application.
  */
 public interface CourseData extends Named {
-	/**
+    /**
      * Clients can safely iterate over the resulting list because it's a copy which therefore won't reflect
      * waypoint additions and removals. 
      */
@@ -19,7 +19,7 @@ public interface CourseData extends Named {
      * @return a non-live copy of the waypoints of this course; the creation of the copy is thread safe
      */
     Iterable<Waypoint> getWaypoints();
-    
+
     /**
      * Starts searching at position <code>start</code> in {@link #getWaypoints()} for a waypoint
      * whose {@link Waypoint#getControlPoint() control point} is identical to <code>controlPoint</code>.
@@ -36,7 +36,7 @@ public interface CourseData extends Named {
     int getIndexOfWaypoint(Waypoint waypoint);
 
     Waypoint getFirstWaypoint();
-    
+
     Waypoint getLastWaypoint();
 
     void addWaypoint(int zeroBasedPosition, Waypoint waypointToAdd);

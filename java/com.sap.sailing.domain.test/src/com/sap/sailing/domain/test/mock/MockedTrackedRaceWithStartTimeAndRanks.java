@@ -51,7 +51,7 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     private final TimePoint startTime;
     private final List<Competitor> competitorsFromBestToWorst;
     private RaceDefinition race;
-    
+
     /**
      * @param competitorsFromBestToWorst
      *            copied, so not live; the list passed may change afterwards without effects on the rankings in this
@@ -433,14 +433,14 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     @Override
     public void waitUntilWindLoadingComplete() {
         // TODO Auto-generated method stub
-        
+
     }
 
-	@Override
-	public Iterable<Mark> getMarks() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    @Override
+    public Iterable<Mark> getMarks() {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
     @Override
     public boolean hasWindData() {
@@ -478,13 +478,13 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     @Override
     public void detachRaceLog() {
         // TODO Auto-generated method stub
-        
+
     }
 
     @Override
     public void attachRaceLog(RaceLog raceLog) {
         // TODO Auto-generated method stub
-        
+
     }
 
     @Override

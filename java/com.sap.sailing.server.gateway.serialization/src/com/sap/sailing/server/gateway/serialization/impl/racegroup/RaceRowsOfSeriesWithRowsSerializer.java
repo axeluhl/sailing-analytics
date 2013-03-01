@@ -8,24 +8,24 @@ import com.sap.sailing.server.gateway.serialization.ExtensionJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 
 public class RaceRowsOfSeriesWithRowsSerializer extends ExtensionJsonSerializer<SeriesWithRows, RaceRow> {
-	public static final String FIELD_FLEETS = "fleets";
-	
-	public RaceRowsOfSeriesWithRowsSerializer(JsonSerializer<RaceRow> extensionSerializer) {
-		super(extensionSerializer);
-	}
+    public static final String FIELD_FLEETS = "fleets";
 
-	@Override
-	public String getExtensionFieldName() {
-		return FIELD_FLEETS;
-	}
+    public RaceRowsOfSeriesWithRowsSerializer(JsonSerializer<RaceRow> extensionSerializer) {
+        super(extensionSerializer);
+    }
 
-	@Override
-	public Object serializeExtension(SeriesWithRows parent) {
-		JSONArray result = new JSONArray();
-		for (RaceRow row : parent.getRaceRows()) {
-			result.add(serialize(row));
-		}
-		return result;
-	}
+    @Override
+    public String getExtensionFieldName() {
+        return FIELD_FLEETS;
+    }
+
+    @Override
+    public Object serializeExtension(SeriesWithRows parent) {
+        JSONArray result = new JSONArray();
+        for (RaceRow row : parent.getRaceRows()) {
+            result.add(serialize(row));
+        }
+        return result;
+    }
 
 }

@@ -9,11 +9,11 @@ import org.json.simple.JSONObject;
  */
 public interface JsonSerializer<T>
 {
-	/**
-	 * Serializes given object to a Json object.
-	 * 
-	 * @param object to be serialized.
-	 * @return serialized Json object.
-	 */
-	JSONObject serialize(T object);
+    /**
+     * Serializes given object to a Json object.
+     * 
+     * @param object to be serialized.
+     * @return serialized Json object.
+     */
+    JSONObject serialize(T object);
 }

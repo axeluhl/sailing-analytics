@@ -5,7 +5,7 @@ package com.sap.sailing.domain.racelog;
  * arriving after this event (on the same pass).
  */
 public interface RaceLogRaceStatusEvent extends RaceLogEvent {
-	
-	RaceLogRaceStatus getNextStatus();
+
+    RaceLogRaceStatus getNextStatus();
 
 }

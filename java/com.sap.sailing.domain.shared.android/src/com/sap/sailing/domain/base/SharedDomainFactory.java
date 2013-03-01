@@ -6,8 +6,8 @@ import java.util.UUID;
 import com.sap.sailing.domain.common.MarkType;
 
 public interface SharedDomainFactory {
-	
-	/**
+
+    /**
      * Looks up or, if not found, creates a {@link Nationality} object and re-uses <code>threeLetterIOCCode</code> also as the
      * nationality's name.
      */
@@ -17,7 +17,7 @@ public interface SharedDomainFactory {
      * The name will also be used as the mark's ID. If you have a unique ID, use {@link #getOrCreateMark(Serializable, String)} instead.
      */
     Mark getOrCreateMark(String name);
-    
+
     /**
      * Since some ID types, such as {@link UUID}, cannot be serialized as objects to a GWT client, only the
      * {@link Object#toString()} representations of those IDs are serialized to the clients. When a client then requests
@@ -32,9 +32,9 @@ public interface SharedDomainFactory {
      * representation of the ID is not known. So in the latter case, the string is used as the ID for the new mark.
      */
     Mark getOrCreateMark(String toStringRepresentationOfID, String name);
-    
+
     Mark getOrCreateMark(Serializable id, String name);
-    
+
     /**
      * If the single mark with ID <code>id</code> already exists, it is returned. Its color may differ from <code>color</code>
      * in that case. Otherwise, a new {@link Mark} is created with <code>color</code> as its {@link Mark#getColor()} 
@@ -46,7 +46,7 @@ public interface SharedDomainFactory {
      * @param name also uses the name as the gate's ID; if you have a real ID, use {@link #createGate(Serializable, Mark, Mark, String)} instead
      */
     Gate createGate(Mark left, Mark right, String name);
-    
+
     Gate createGate(Serializable id, Mark left, Mark right, String name);
 
     /**
@@ -54,7 +54,7 @@ public interface SharedDomainFactory {
      * {@link #getExistingWaypointById(Waypoint)} it is found.
      */
     Waypoint createWaypoint(ControlPoint controlPoint);
-    
+
     Waypoint getExistingWaypointById(Waypoint waypointPrototype);
 
     /**
@@ -62,20 +62,20 @@ public interface SharedDomainFactory {
      * waypoint cache. If so, the cached waypoint is returned. Otherwise, <code>waypoint</code> is added to the cache and returned.
      */
     Waypoint getExistingWaypointByIdOrCache(Waypoint waypoint);
-    
+
     BoatClass getOrCreateBoatClass(String name, boolean typicallyStartsUpwind);
-    
+
     /**
      * Like {@link #getOrCreateBoatClass(String, boolean)}, only that a default for <code>typicallyStartsUpwind</code> based
      * on the boat class name is calculated.
      */
     BoatClass getOrCreateBoatClass(String name);
-    
+
     Competitor getExistingCompetitorById(Serializable competitorId);
-    
+
     Competitor createCompetitor(Serializable id, String name, Team team, Boat boat);
-    
+
     Competitor getOrCreateCompetitor(Serializable competitorId, String name, Team team, Boat boat);
-    
-    
+
+
 }

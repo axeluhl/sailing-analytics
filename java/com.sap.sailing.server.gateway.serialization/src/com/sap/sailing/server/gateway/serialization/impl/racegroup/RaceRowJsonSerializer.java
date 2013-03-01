@@ -9,31 +9,31 @@ import com.sap.sailing.domain.base.racegroup.RaceRow;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 
 public class RaceRowJsonSerializer implements JsonSerializer<RaceRow> {
-	public static final String FIELD_FLEET = "fleet";
-	public static final String FIELD_RACE_CELLS = "races";
-	
-	private JsonSerializer<Fleet> fleetSerializer;
-	private JsonSerializer<RaceCell> cellSerializer;
-	
-	public RaceRowJsonSerializer(
-			JsonSerializer<Fleet> fleetSerializer,
-			JsonSerializer<RaceCell> cellSerializer) {
-		this.fleetSerializer = fleetSerializer;
-		this.cellSerializer = cellSerializer;
-	}
+    public static final String FIELD_FLEET = "fleet";
+    public static final String FIELD_RACE_CELLS = "races";
 
-	@Override
-	public JSONObject serialize(RaceRow object) {
-		JSONObject result = new JSONObject();
-		
-		result.put(FIELD_FLEET, fleetSerializer.serialize(object.getFleet()));
-		JSONArray cells = new JSONArray(); 
-		for (RaceCell cell : object.getCells()) {
-			cells.add(cellSerializer.serialize(cell));
-		}
-		result.put(FIELD_RACE_CELLS, cells);
-		
-		return result;
-	}
+    private JsonSerializer<Fleet> fleetSerializer;
+    private JsonSerializer<RaceCell> cellSerializer;
+
+    public RaceRowJsonSerializer(
+            JsonSerializer<Fleet> fleetSerializer,
+            JsonSerializer<RaceCell> cellSerializer) {
+        this.fleetSerializer = fleetSerializer;
+        this.cellSerializer = cellSerializer;
+    }
+
+    @Override
+    public JSONObject serialize(RaceRow object) {
+        JSONObject result = new JSONObject();
+
+        result.put(FIELD_FLEET, fleetSerializer.serialize(object.getFleet()));
+        JSONArray cells = new JSONArray(); 
+        for (RaceCell cell : object.getCells()) {
+            cells.add(cellSerializer.serialize(cell));
+        }
+        result.put(FIELD_RACE_CELLS, cells);
+
+        return result;
+    }
 
 }

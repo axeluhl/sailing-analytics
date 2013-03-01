@@ -12,26 +12,26 @@ import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.server.gateway.serialization.impl.BoatClassJsonSerializer;
 
 public class BoatClassJsonSerializerTest {
-	
-	protected BoatClass boatClass;
-	protected BoatClassJsonSerializer serializer;
-	
-	@Before
-	public void setUp() {
-		boatClass = mock(BoatClass.class);
-		serializer = new BoatClassJsonSerializer();
-	}
-	
-	@Test
-	public void testName() {
-		String expectedName = "Cruiser";
-		when(boatClass.getName()).thenReturn(expectedName);
-		
-		JSONObject result = serializer.serialize(boatClass);
-		
-		assertEquals(
-				expectedName, 
-				result.get(BoatClassJsonSerializer.FIELD_NAME));
-	}
+
+    protected BoatClass boatClass;
+    protected BoatClassJsonSerializer serializer;
+
+    @Before
+    public void setUp() {
+        boatClass = mock(BoatClass.class);
+        serializer = new BoatClassJsonSerializer();
+    }
+
+    @Test
+    public void testName() {
+        String expectedName = "Cruiser";
+        when(boatClass.getName()).thenReturn(expectedName);
+
+        JSONObject result = serializer.serialize(boatClass);
+
+        assertEquals(
+                expectedName, 
+                result.get(BoatClassJsonSerializer.FIELD_NAME));
+    }
 
 }

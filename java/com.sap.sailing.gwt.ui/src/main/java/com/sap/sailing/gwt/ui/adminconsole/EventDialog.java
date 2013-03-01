@@ -27,9 +27,9 @@ public class EventDialog extends DataEntryDialog<EventDTO> {
     protected CheckBox isPublicCheckBox;
     protected String id;
     protected List<TextBox> courseAreaNameEntryFields;
-    
+
     private EventDTO event;
-    
+
     private Grid courseAreasGrid;
 
     protected static class EventParameterValidator implements Validator<EventDTO> {
@@ -48,13 +48,13 @@ public class EventDialog extends DataEntryDialog<EventDTO> {
             boolean nameNotEmpty = eventToValidate.name != null && eventToValidate.name.length() > 0;
             boolean venueNotEmpty = eventToValidate.venue.name != null && eventToValidate.venue.name.length() > 0;
             boolean courseAreaNotEmpty = eventToValidate.venue.getCourseAreas() != null && eventToValidate.venue.getCourseAreas().size() > 0;
-            
+
             if (courseAreaNotEmpty) {
-            	for (CourseAreaDTO courseArea : eventToValidate.venue.getCourseAreas()) {
-            		courseAreaNotEmpty = courseArea.name != null && courseArea.name.length() > 0;
-            		if (!courseAreaNotEmpty)
-            			break;
-            	}
+                for (CourseAreaDTO courseArea : eventToValidate.venue.getCourseAreas()) {
+                    courseAreaNotEmpty = courseArea.name != null && courseArea.name.length() > 0;
+                    if (!courseAreaNotEmpty)
+                        break;
+                }
             }
 
             boolean unique = true;
@@ -89,11 +89,11 @@ public class EventDialog extends DataEntryDialog<EventDTO> {
         courseAreaNameEntryFields = new ArrayList<TextBox>();
         courseAreasGrid = new Grid(0, 0);
     }
-    
+
     protected void addCourseAreaWidget(String courseAreaName, boolean isEnabled) {
         createCourseAreaNameWidget(courseAreaName, isEnabled);
     }
-    
+
     private Widget createCourseAreaNameWidget(String defaultName, boolean isEnabled) {
         TextBox textBox = createTextBox(defaultName); 
         textBox.setVisibleLength(40);
@@ -105,21 +105,21 @@ public class EventDialog extends DataEntryDialog<EventDTO> {
 
     @Override
     protected EventDTO getResult() {
-    	this.event.name = nameEntryField.getText();
-    	this.event.publicationUrl = publicationUrlEntryField.getText();
-    	this.event.isPublic = isPublicCheckBox.getValue();
-    	this.event.id = id;
-    	
-    	List<CourseAreaDTO> courseAreas = new ArrayList<CourseAreaDTO>();
-    	int count = courseAreaNameEntryFields.size();
-    	for(int i = 0; i < count; i++) {
-    		CourseAreaDTO courseAreaDTO = new CourseAreaDTO();
-    		courseAreaDTO.name = courseAreaNameEntryFields.get(i).getValue();
-    		courseAreas.add(courseAreaDTO);
-    	}
-    	
-    	this.event.venue = new VenueDTO(venueEntryField.getText(), courseAreas);
-    	
+        this.event.name = nameEntryField.getText();
+        this.event.publicationUrl = publicationUrlEntryField.getText();
+        this.event.isPublic = isPublicCheckBox.getValue();
+        this.event.id = id;
+
+        List<CourseAreaDTO> courseAreas = new ArrayList<CourseAreaDTO>();
+        int count = courseAreaNameEntryFields.size();
+        for(int i = 0; i < count; i++) {
+            CourseAreaDTO courseAreaDTO = new CourseAreaDTO();
+            courseAreaDTO.name = courseAreaNameEntryFields.get(i).getValue();
+            courseAreas.add(courseAreaDTO);
+        }
+
+        this.event.venue = new VenueDTO(venueEntryField.getText(), courseAreas);
+
         return this.event;
     }
 
@@ -130,10 +130,10 @@ public class EventDialog extends DataEntryDialog<EventDTO> {
         if (additionalWidget != null) {
             panel.add(additionalWidget);
         }
-        
+
         Grid formGrid = new Grid(4, 2);
         panel.add(formGrid);
-        
+
         formGrid.setWidget(0,  0, new Label(stringConstants.name() + ":"));
         formGrid.setWidget(0, 1, nameEntryField);
         formGrid.setWidget(1, 0, new Label(stringConstants.venue() + ":"));
@@ -142,11 +142,11 @@ public class EventDialog extends DataEntryDialog<EventDTO> {
         formGrid.setWidget(2, 1, publicationUrlEntryField);
         formGrid.setWidget(3, 0, new Label(stringConstants.isPublic() + ":"));
         formGrid.setWidget(3, 1, isPublicCheckBox);
-        
+
         panel.add(createHeadlineLabel(stringConstants.courseAreas()));
         panel.add(courseAreasGrid);
         updateCourseAreasGrid(panel);
-        
+
         Button addCourseAreaButton = new Button(stringConstants.addCourseArea());
         addCourseAreaButton.addClickHandler(new ClickHandler() {
             @Override
@@ -158,7 +158,7 @@ public class EventDialog extends DataEntryDialog<EventDTO> {
         panel.add(addCourseAreaButton);
         return panel;
     }
-    
+
     protected void updateCourseAreasGrid(VerticalPanel parentPanel) {
         int widgetIndex = parentPanel.getWidgetIndex(courseAreasGrid);
         parentPanel.remove(courseAreasGrid);
@@ -167,7 +167,7 @@ public class EventDialog extends DataEntryDialog<EventDTO> {
         courseAreasGrid.setCellSpacing(4);
         courseAreasGrid.setHTML(0, 0, stringConstants.name());
         for(int i = 0; i < courseAreasCount; i++) {
-        	courseAreasGrid.setWidget(i+1, 0, courseAreaNameEntryFields.get(i));
+            courseAreasGrid.setWidget(i+1, 0, courseAreaNameEntryFields.get(i));
         }
         parentPanel.insert(courseAreasGrid, widgetIndex);
     }

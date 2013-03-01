@@ -6,22 +6,22 @@ import com.sap.sailing.domain.base.racegroup.RaceRow;
 
 public class RaceRowImpl implements RaceRow {
 
-	private Fleet fleet;
-	private Iterable<RaceCell> races;
-	
-	public RaceRowImpl(Fleet fleet, Iterable<RaceCell> races) {
-		this.fleet = fleet;
-		this.races = races;
-	}
+    private Fleet fleet;
+    private Iterable<RaceCell> races;
 
-	@Override
-	public Fleet getFleet() {
-		return fleet;
-	}
+    public RaceRowImpl(Fleet fleet, Iterable<RaceCell> races) {
+        this.fleet = fleet;
+        this.races = races;
+    }
 
-	@Override
-	public Iterable<RaceCell> getCells() {
-		return races;
-	}
+    @Override
+    public Fleet getFleet() {
+        return fleet;
+    }
+
+    @Override
+    public Iterable<RaceCell> getCells() {
+        return races;
+    }
 
 }

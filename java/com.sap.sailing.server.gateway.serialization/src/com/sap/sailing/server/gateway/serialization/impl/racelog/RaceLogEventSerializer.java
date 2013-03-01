@@ -7,19 +7,19 @@ import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 
 public class RaceLogEventSerializer implements JsonSerializer<RaceLogEvent> {
 
-	private RaceLogEventSerializerChooser serializerChooser;
+    private RaceLogEventSerializerChooser serializerChooser;
 
-	public RaceLogEventSerializer(RaceLogEventSerializerChooser serializerChooser) {
-		this.serializerChooser = serializerChooser;
-	}
+    public RaceLogEventSerializer(RaceLogEventSerializerChooser serializerChooser) {
+        this.serializerChooser = serializerChooser;
+    }
 
-	protected JsonSerializer<RaceLogEvent> getSerializer(RaceLogEvent event) {
-		return serializerChooser.getSerializer(event);
-	}
+    protected JsonSerializer<RaceLogEvent> getSerializer(RaceLogEvent event) {
+        return serializerChooser.getSerializer(event);
+    }
 
-	@Override
-	public JSONObject serialize(RaceLogEvent object) {
-		return getSerializer(object).serialize(object);
-	}
+    @Override
+    public JSONObject serialize(RaceLogEvent object) {
+        return getSerializer(object).serialize(object);
+    }
 
 }

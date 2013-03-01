@@ -9,25 +9,25 @@ import com.sap.sailing.domain.racelog.RaceLogCourseAreaChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogEventVisitor;
 
 public class RaceLogCourseAreaChangeEventImpl extends RaceLogEventImpl implements
-		RaceLogCourseAreaChangedEvent {
-	private static final long serialVersionUID = -3943108136024977860L;
-	
-	private Serializable courseAreaId;
+RaceLogCourseAreaChangedEvent {
+    private static final long serialVersionUID = -3943108136024977860L;
 
-	public RaceLogCourseAreaChangeEventImpl(TimePoint pTimePoint,
-			Serializable pId, List<Competitor> pInvolvedBoats, int pPassId, Serializable courseAreaId) {
-		super(pTimePoint, pId, pInvolvedBoats, pPassId);
-		this.courseAreaId = courseAreaId;
-	}
+    private Serializable courseAreaId;
 
-	@Override
-	public Serializable getCourseAreaId() {
-		return courseAreaId;
-	}
-	
-	@Override
-	public void accept(RaceLogEventVisitor visitor) {
-		visitor.visit(this);
-	}
+    public RaceLogCourseAreaChangeEventImpl(TimePoint pTimePoint,
+            Serializable pId, List<Competitor> pInvolvedBoats, int pPassId, Serializable courseAreaId) {
+        super(pTimePoint, pId, pInvolvedBoats, pPassId);
+        this.courseAreaId = courseAreaId;
+    }
+
+    @Override
+    public Serializable getCourseAreaId() {
+        return courseAreaId;
+    }
+
+    @Override
+    public void accept(RaceLogEventVisitor visitor) {
+        visitor.visit(this);
+    }
 
 }

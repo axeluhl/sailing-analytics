@@ -5,8 +5,8 @@ import org.junit.Ignore;
 /// TODO write test for RegattaJsonSerializer
 @Ignore
 public class RegattaJsonSerializerTest {
-	
-	public void testRegattaJsonSerializer() {
-		
-	}
+
+    public void testRegattaJsonSerializer() {
+
+    }
 }

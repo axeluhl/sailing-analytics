@@ -37,7 +37,7 @@ import com.sap.sailing.domain.tracking.TrackedRace;
  */
 public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements FlexibleLeaderboard {
     private static Logger logger = Logger.getLogger(FlexibleLeaderboardImpl.class.getName());
-    
+
     protected static final Fleet defaultFleet = new FleetImpl("Default");
     private static final long serialVersionUID = -5708971849158747846L;
     private final List<FlexibleRaceColumn> races;
@@ -45,7 +45,7 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
     private String name;
     private transient RaceLogStore raceLogStore;
     private final CourseArea courseArea;
-    
+
     public FlexibleLeaderboardImpl(String name, SettableScoreCorrection scoreCorrection,
             ThresholdBasedResultDiscardingRule resultDiscardingRule, ScoringScheme scoringScheme, CourseArea courseArea) {
         this(EmptyRaceLogStore.INSTANCE, name, scoreCorrection, resultDiscardingRule, scoringScheme, courseArea);
@@ -63,7 +63,7 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
         this.raceLogStore = raceLogStore;
         this.courseArea = courseArea;
     }
-    
+
     /**
      * Deserialization has to be maintained in lock-step with {@link #writeObject(ObjectOutputStream) serialization}.
      * When de-serializing, a possibly remote {@link #raceLogStore} is ignored because it is transient. Instead, an
@@ -73,7 +73,7 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
         ois.defaultReadObject();
         raceLogStore = EmptyRaceLogStore.INSTANCE;
     }
-    
+
     @Override
     public String getName() {
         return name;
@@ -88,7 +88,7 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
         }
         this.name = newName;
     }
-    
+
     @Override
     public RaceColumn addRaceColumn(String name, boolean medalRace, Fleet... fleets) {
         FlexibleRaceColumn column = getRaceColumnByName(name);
@@ -101,18 +101,18 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
             races.add(column);
             column.setRaceLogInformation(
                     new RaceLogInformationImpl(
-                        raceLogStore,
-                        new RaceLogOnLeaderboardIdentifier(this, column.getName())));
+                            raceLogStore,
+                            new RaceLogOnLeaderboardIdentifier(this, column.getName())));
             getRaceColumnListeners().notifyListenersAboutRaceColumnAddedToContainer(column);
         }
         return column;
     }
-    
+
     @Override
     public FlexibleRaceColumn getRaceColumnByName(String columnName) {
         return (FlexibleRaceColumn) super.getRaceColumnByName(columnName);
     }
-    
+
     @Override
     public Fleet getFleet(String fleetName) {
         Fleet result;
@@ -131,12 +131,12 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
         getRaceColumnListeners().notifyListenersAboutRaceColumnRemovedFromContainer(raceColumn);
         raceColumn.removeRaceColumnListener(this);
     }
-    
+
     @Override
     public Iterable<RaceColumn> getRaceColumns() {
         return Collections.unmodifiableCollection(new ArrayList<RaceColumn>(races));
     }
-    
+
     @Override
     public RaceColumn addRace(TrackedRace race, String columnName, boolean medalRace, Fleet fleet) {
         FlexibleRaceColumn column = getRaceColumnByName(columnName);
@@ -224,10 +224,10 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
     public ScoringScheme getScoringScheme() {
         return scoringScheme;
     }
-    
+
     @Override
     public CourseArea getDefaultCourseArea() {
-    	return courseArea;
+        return courseArea;
     }
 
 }

@@ -29,13 +29,13 @@ public interface RaceGroup extends Named {
      * Gets the {@link CourseArea} associated with the {@link RaceGroup}.
      */
     public CourseArea getDefaultCourseArea();
-	
+
     /**
      * Gets the associated {@link BoatClass} if any present, otherwise
      * <code>null</code>.
      */
     public BoatClass getBoatClass();
-	
+
     /**
      * Gets the collection of series.
      */

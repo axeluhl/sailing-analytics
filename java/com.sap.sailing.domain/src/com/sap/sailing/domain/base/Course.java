@@ -25,13 +25,13 @@ import difflib.PatchFailedException;
  */
 public interface Course extends CourseData {
     void lockForRead();
-    
+
     void unlockAfterRead();
-    
+
     void addCourseListener(CourseListener listener);
-    
+
     void removeCourseListener(CourseListener listener);
-	
+
     /**
      * Carefully merges the new list of control points into this course by constructing a minimal difference between the
      * control point list and the control points referenced by this course's waypoints. Change events are propagated

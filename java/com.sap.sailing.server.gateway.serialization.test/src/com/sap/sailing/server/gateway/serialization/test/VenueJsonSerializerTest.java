@@ -6,7 +6,7 @@ import org.junit.Ignore;
 @Ignore
 public class VenueJsonSerializerTest {
 
-	public void testVenueJsonSerializer() {
-		
-	}
+    public void testVenueJsonSerializer() {
+
+    }
 }

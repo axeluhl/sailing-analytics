@@ -17,15 +17,15 @@ import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
 
 public class RaceLogEventTest {
 
-	@Test
-	public void testEqualityOfTwoNotSameEvents() {
-		TimePoint t1 = MillisecondsTimePoint.now();
-		int passId = 0;
-		UUID randomUUID = UUID.randomUUID();
-		RaceLogFlagEvent rcEvent1 = RaceLogEventFactory.INSTANCE.createFlagEvent(t1, randomUUID, new ArrayList<Competitor>(), passId, Flags.CLASS, Flags.NONE, false);
-		RaceLogFlagEvent rcEvent2 = RaceLogEventFactory.INSTANCE.createFlagEvent(t1, randomUUID, new ArrayList<Competitor>(), passId, Flags.CLASS, Flags.NONE, false);
-		assertNotSame(rcEvent1, rcEvent2);
-		assertEquals(rcEvent1, rcEvent2);
-	}
+    @Test
+    public void testEqualityOfTwoNotSameEvents() {
+        TimePoint t1 = MillisecondsTimePoint.now();
+        int passId = 0;
+        UUID randomUUID = UUID.randomUUID();
+        RaceLogFlagEvent rcEvent1 = RaceLogEventFactory.INSTANCE.createFlagEvent(t1, randomUUID, new ArrayList<Competitor>(), passId, Flags.CLASS, Flags.NONE, false);
+        RaceLogFlagEvent rcEvent2 = RaceLogEventFactory.INSTANCE.createFlagEvent(t1, randomUUID, new ArrayList<Competitor>(), passId, Flags.CLASS, Flags.NONE, false);
+        assertNotSame(rcEvent1, rcEvent2);
+        assertEquals(rcEvent1, rcEvent2);
+    }
 
 }

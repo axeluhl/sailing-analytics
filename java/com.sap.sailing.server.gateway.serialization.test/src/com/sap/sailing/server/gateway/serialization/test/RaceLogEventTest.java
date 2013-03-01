@@ -13,37 +13,37 @@ import com.sap.sailing.server.gateway.serialization.impl.racelog.RaceLogFlagEven
 
 public class RaceLogEventTest extends BaseRaceLogEventTest<RaceLogEvent> {
 
-	protected final String expectedClassValue = "AllYourBaseAreBelongToUs";
-	
-	private class TestRaceCommitteeEventSerializer extends BaseRaceLogEventSerializer {
-		@SuppressWarnings("unchecked")
-		public TestRaceCommitteeEventSerializer() {
-			super(mock(JsonSerializer.class));
-		}
+    protected final String expectedClassValue = "AllYourBaseAreBelongToUs";
 
-		@Override
-		protected String getClassFieldValue() {
-			return expectedClassValue;
-		}
-	}
-	
-	@Override
-	protected RaceLogEvent createMockEvent() {
-		return mock(RaceLogEvent.class);
-	}
+    private class TestRaceCommitteeEventSerializer extends BaseRaceLogEventSerializer {
+        @SuppressWarnings("unchecked")
+        public TestRaceCommitteeEventSerializer() {
+            super(mock(JsonSerializer.class));
+        }
 
-	@Override
-	protected JsonSerializer<RaceLogEvent> createSerializer() {
-		return new TestRaceCommitteeEventSerializer();
-	}
-	
-	@Test
-	public void testClassAttribute() {
-		JSONObject json = serializer.serialize(event);
-		
-		assertEquals(
-				expectedClassValue,
-				json.get(RaceLogFlagEventSerializer.FIELD_CLASS));
-	}
+        @Override
+        protected String getClassFieldValue() {
+            return expectedClassValue;
+        }
+    }
+
+    @Override
+    protected RaceLogEvent createMockEvent() {
+        return mock(RaceLogEvent.class);
+    }
+
+    @Override
+    protected JsonSerializer<RaceLogEvent> createSerializer() {
+        return new TestRaceCommitteeEventSerializer();
+    }
+
+    @Test
+    public void testClassAttribute() {
+        JSONObject json = serializer.serialize(event);
+
+        assertEquals(
+                expectedClassValue,
+                json.get(RaceLogFlagEventSerializer.FIELD_CLASS));
+    }
 
 }

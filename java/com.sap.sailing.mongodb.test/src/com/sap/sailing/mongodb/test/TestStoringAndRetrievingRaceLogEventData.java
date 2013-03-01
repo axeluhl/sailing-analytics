@@ -22,20 +22,20 @@ import com.sap.sailing.domain.racelog.RaceLogEventFactory;
 import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
 
 public class TestStoringAndRetrievingRaceLogEventData extends AbstractMongoDBTest {
-	private static final String RACELOG_TEST_COLLECTION = "racelog_test_collection";
+    private static final String RACELOG_TEST_COLLECTION = "racelog_test_collection";
 
-	public TestStoringAndRetrievingRaceLogEventData() throws UnknownHostException, MongoException {
-		super();
-	}
-	
-	@Before
-	@Override
-	public void dropTestDB() throws UnknownHostException, MongoException, InterruptedException {
-		super.dropTestDB();
-		db.getCollection(RACELOG_TEST_COLLECTION).drop();
-	}
-	
-	@Test
+    public TestStoringAndRetrievingRaceLogEventData() throws UnknownHostException, MongoException {
+        super();
+    }
+
+    @Before
+    @Override
+    public void dropTestDB() throws UnknownHostException, MongoException, InterruptedException {
+        super.dropTestDB();
+        db.getCollection(RACELOG_TEST_COLLECTION).drop();
+    }
+
+    @Test
     public void testDBConnection() throws UnknownHostException, MongoException {
         DBCollection coll = db.getCollection(RACELOG_TEST_COLLECTION);
         assertNotNull(coll);
@@ -44,8 +44,8 @@ public class TestStoringAndRetrievingRaceLogEventData extends AbstractMongoDBTes
         doc.put("lowerflag", "ALPHA");
         coll.insert(doc);
     }
-	
-	@Test
+
+    @Test
     public void testDBRead() throws UnknownHostException, MongoException, InterruptedException {
         {
             DBCollection coll = db.getCollection(RACELOG_TEST_COLLECTION);
@@ -64,18 +64,18 @@ public class TestStoringAndRetrievingRaceLogEventData extends AbstractMongoDBTes
             assertEquals("ALPHA", object.get("lowerflag"));
         }
     }
-	
-	@Test
+
+    @Test
     public void storeRaceLogFlagEvent() throws UnknownHostException, MongoException, InterruptedException {
         TimePoint now = MillisecondsTimePoint.now();
         RaceLogFlagEvent rcEvent = RaceLogEventFactory.INSTANCE.createFlagEvent(now, 0, Flags.AP, Flags.ALPHA, true);
         {
             DBObject rcEventForMongo = ((MongoObjectFactoryImpl) MongoFactory.INSTANCE.getDefaultMongoObjectFactory())
-            		.storeRaceLogFlagEvent(rcEvent);
+                    .storeRaceLogFlagEvent(rcEvent);
             DBCollection coll = db.getCollection(RACELOG_TEST_COLLECTION);
             coll.insert(rcEventForMongo);
         }
-        
+
         {
             DBCollection coll = db.getCollection(RACELOG_TEST_COLLECTION);
             assertNotNull(coll);

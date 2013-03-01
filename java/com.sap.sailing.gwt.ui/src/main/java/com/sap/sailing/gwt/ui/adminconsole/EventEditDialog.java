@@ -21,12 +21,12 @@ public class EventEditDialog extends EventDialog {
         isPublicCheckBox = createCheckbox("");
         isPublicCheckBox.setValue(event.isPublic);
         id = event.id;
-        
+
         if (event.venue.getCourseAreas() != null && event.venue.getCourseAreas().size() > 0) {
-        	for (CourseAreaDTO courseArea : event.venue.getCourseAreas()) {
-        		addCourseAreaWidget(courseArea.name, false);
-        	}
-        	
+            for (CourseAreaDTO courseArea : event.venue.getCourseAreas()) {
+                addCourseAreaWidget(courseArea.name, false);
+            }
+
         }
     }
 }

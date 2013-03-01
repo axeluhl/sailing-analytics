@@ -8,36 +8,36 @@ import com.sap.sailing.domain.base.racegroup.RaceRow;
 import com.sap.sailing.domain.base.racegroup.SeriesWithRows;
 
 public class SeriesWithRowsImpl implements SeriesWithRows {
-	private static final long serialVersionUID = 8825402393444809944L;
-	
-	private String name;
-	private Iterable<RaceRow> raceRows;
-	private boolean isMedal;
+    private static final long serialVersionUID = 8825402393444809944L;
 
-	public SeriesWithRowsImpl(String name, boolean isMedal, Iterable<RaceRow> raceRows) {
-		this.name = name;
-		this.raceRows = raceRows;
-		this.isMedal = isMedal;
-	}
+    private String name;
+    private Iterable<RaceRow> raceRows;
+    private boolean isMedal;
 
-	public String getName() {
-		return name;
-	}
+    public SeriesWithRowsImpl(String name, boolean isMedal, Iterable<RaceRow> raceRows) {
+        this.name = name;
+        this.raceRows = raceRows;
+        this.isMedal = isMedal;
+    }
 
-	public boolean isMedal() {
-		return isMedal;
-	}
+    public String getName() {
+        return name;
+    }
 
-	public Iterable<RaceRow> getRaceRows() {
-		return raceRows;
-	}
+    public boolean isMedal() {
+        return isMedal;
+    }
 
-	public Iterable<? extends Fleet> getFleets() {
-		Collection<Fleet> fleets = new ArrayList<Fleet>();
-		for (RaceRow row : raceRows) {
-			fleets.add(row.getFleet());
-		}
-		return fleets;
-	}
+    public Iterable<RaceRow> getRaceRows() {
+        return raceRows;
+    }
+
+    public Iterable<? extends Fleet> getFleets() {
+        Collection<Fleet> fleets = new ArrayList<Fleet>();
+        for (RaceRow row : raceRows) {
+            fleets.add(row.getFleet());
+        }
+        return fleets;
+    }
 
 }

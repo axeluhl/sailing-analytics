@@ -26,7 +26,7 @@ public abstract class FlexibleLeaderboardDialog extends AbstractLeaderboardDialo
     protected static class LeaderboardParameterValidator implements Validator<LeaderboardDescriptor> {
         protected final StringMessages stringConstants;
         protected final Collection<StrippedLeaderboardDTO> existingLeaderboards;
-        
+
         public LeaderboardParameterValidator(StringMessages stringConstants, Collection<StrippedLeaderboardDTO> existingLeaderboards){
             super();
             this.stringConstants = stringConstants;
@@ -44,18 +44,18 @@ public abstract class FlexibleLeaderboardDialog extends AbstractLeaderboardDialo
                 if (0 < leaderboardToValidate.getDiscardThresholds().length){ 
                     discardThresholdsAscending = discardThresholdsAscending
                             && leaderboardToValidate.getDiscardThresholds()[i - 1] < leaderboardToValidate.getDiscardThresholds()[i]
-                    // and if one box is empty, all subsequent boxes need to be empty too
-                    && (leaderboardToValidate.getDiscardThresholds()[i] == 0 || leaderboardToValidate.getDiscardThresholds()[i-1] > 0);
+                                    // and if one box is empty, all subsequent boxes need to be empty too
+                                    && (leaderboardToValidate.getDiscardThresholds()[i] == 0 || leaderboardToValidate.getDiscardThresholds()[i-1] > 0);
                 }
             }
-            
+
             boolean unique = true;
             for (StrippedLeaderboardDTO dao : existingLeaderboards) {
                 if(dao.name.equals(leaderboardToValidate.getName())){
                     unique = false;
                 }
             }
-            
+
             if (!nonEmpty) {
                 errorMessage = stringConstants.pleaseEnterAName();
             } else if(!unique){
@@ -68,16 +68,16 @@ public abstract class FlexibleLeaderboardDialog extends AbstractLeaderboardDialo
             return errorMessage;
         }
     }
-    
+
     public FlexibleLeaderboardDialog(String title, LeaderboardDescriptor leaderboardDTO, StringMessages stringMessages, 
-    		Collection<EventDTO> existingEvents,
+            Collection<EventDTO> existingEvents,
             ErrorReporter errorReporter, LeaderboardParameterValidator validator,  DialogCallback<LeaderboardDescriptor> callback) {
         super(title, leaderboardDTO, stringMessages, validator, callback);
         this.existingEvents = existingEvents;
         courseAreaListBox = createListBox(false);
         courseAreaListBox.setEnabled(false);
     }
-    
+
     @Override
     protected LeaderboardDescriptor getResult() {
         LeaderboardDescriptor leaderboard = super.getResult();
@@ -121,15 +121,15 @@ public abstract class FlexibleLeaderboardDialog extends AbstractLeaderboardDialo
         }
         alignAllPanelWidgetsVertically(hp, HasVerticalAlignment.ALIGN_MIDDLE);
         mainPanel.add(hp);
-        
+
         return mainPanel;
     }
-    
+
     protected ListBox createSailingEventListBox() {
         ListBox eventListBox = createListBox(false);
         eventListBox.addItem("Please select a sailing event...");
         for (EventDTO event: existingEvents) {
-                eventListBox.addItem(event.name);
+            eventListBox.addItem(event.name);
         }
         eventListBox.addChangeHandler(new ChangeHandler() {
             @Override
@@ -139,7 +139,7 @@ public abstract class FlexibleLeaderboardDialog extends AbstractLeaderboardDialo
         });
         return eventListBox;
     }
-    
+
     protected void onEventSelectionChanged() {
         EventDTO selectedEvent = getSelectedEvent();
         courseAreaListBox.clear();
@@ -149,7 +149,7 @@ public abstract class FlexibleLeaderboardDialog extends AbstractLeaderboardDialo
         }
         courseAreaListBox.setEnabled(true);
     }
-    
+
     public EventDTO getSelectedEvent() {
         EventDTO result = null;
         int selIndex = sailingEventsListBox.getSelectedIndex();
@@ -164,7 +164,7 @@ public abstract class FlexibleLeaderboardDialog extends AbstractLeaderboardDialo
         }
         return result;
     }
-    
+
     public CourseAreaDTO getSelectedCourseArea() {
         CourseAreaDTO result = null;
         EventDTO event = getSelectedEvent();

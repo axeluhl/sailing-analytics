@@ -99,7 +99,7 @@ public class SailingEventManagementPanel extends SimplePanel {
                 return event.isPublic ? stringMessages.yes() : stringMessages.no();
             }
         };
-        
+
         final SafeHtmlCell courseAreasCell = new SafeHtmlCell();
         Column<EventDTO, SafeHtml> courseAreasColumn = new Column<EventDTO, SafeHtml>(courseAreasCell) {
             @Override
@@ -132,7 +132,7 @@ public class SailingEventManagementPanel extends SimplePanel {
                 }
             }
         });
-        
+
         eventTable = new CellTable<EventDTO>(10000, tableRes);
         eventTable.addColumn(eventNameColumn, stringMessages.event());
         eventTable.addColumn(venueNameColumn, stringMessages.venue());
@@ -140,7 +140,7 @@ public class SailingEventManagementPanel extends SimplePanel {
         eventTable.addColumn(isPublicColumn, stringMessages.isPublic());
         eventTable.addColumn(courseAreasColumn, stringMessages.courseAreas());
         eventTable.addColumn(eventActionColumn, stringMessages.actions());
-        
+
         eventSelectionModel = new SingleSelectionModel<EventDTO>();
         eventSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
             @Override
@@ -152,10 +152,10 @@ public class SailingEventManagementPanel extends SimplePanel {
         eventProvider = new ListDataProvider<EventDTO>();
         eventProvider.addDataDisplay(eventTable);
         mainPanel.add(eventTable);
-        
+
         fillEvents();
     }
-    
+
     private void removeEvent(final EventDTO event) {
         sailingService.removeEvent(event.id, new AsyncCallback<Void>() {
             @Override
@@ -174,15 +174,15 @@ public class SailingEventManagementPanel extends SimplePanel {
         List<EventDTO> existingEvents = new ArrayList<EventDTO>(eventProvider.getList());
         EventCreateDialog dialog = new EventCreateDialog(Collections.unmodifiableCollection(existingEvents), stringMessages,
                 new DialogCallback<EventDTO>() {
-                    @Override
-                    public void cancel() {
-                    }
+            @Override
+            public void cancel() {
+            }
 
-                    @Override
-                    public void ok(EventDTO newEvent) {
-                        createNewEvent(newEvent);
-                    }
-                });
+            @Override
+            public void ok(EventDTO newEvent) {
+                createNewEvent(newEvent);
+            }
+        });
         dialog.show();
     }
 
@@ -191,25 +191,25 @@ public class SailingEventManagementPanel extends SimplePanel {
         existingEvents.remove(selectedEvent);
         EventEditDialog dialog = new EventEditDialog(selectedEvent, Collections.unmodifiableCollection(existingEvents), stringMessages,
                 new DialogCallback<EventDTO>() {
-                    @Override
-                    public void cancel() {
-                    }
+            @Override
+            public void cancel() {
+            }
 
-                    @Override
-                    public void ok(EventDTO updatedEvent) {
-                        updateEvent(selectedEvent, updatedEvent);
-                    }
-                });
+            @Override
+            public void ok(EventDTO updatedEvent) {
+                updateEvent(selectedEvent, updatedEvent);
+            }
+        });
         dialog.show();
     }
 
     private void updateEvent(final EventDTO oldEvent, final EventDTO updatedEvent) {
         List<String> regattaNames = new ArrayList<String>();
-//        for(RegattaDTO regatta: updatedEvent.regattas) {
-//            regattaNames.add(regatta.name);
-//        }
+        //        for(RegattaDTO regatta: updatedEvent.regattas) {
+        //            regattaNames.add(regatta.name);
+        //        }
         List<CourseAreaDTO> courseAreasToAdd = getCourseAreasToAdd(oldEvent, updatedEvent);
-        
+
         sailingService.updateEvent(oldEvent.name, oldEvent.id, updatedEvent.venue, updatedEvent.publicationUrl, 
                 updatedEvent.isPublic, regattaNames, new AsyncCallback<Void>() {
             @Override
@@ -234,59 +234,59 @@ public class SailingEventManagementPanel extends SimplePanel {
                 }
             }
         });
-        
+
         if (courseAreasToAdd.size() > 0) {
-        	for (CourseAreaDTO courseArea : courseAreasToAdd) {
-        		sailingService.createCourseArea(oldEvent.id, courseArea.name, new AsyncCallback<CourseAreaDTO>() {
+            for (CourseAreaDTO courseArea : courseAreasToAdd) {
+                sailingService.createCourseArea(oldEvent.id, courseArea.name, new AsyncCallback<CourseAreaDTO>() {
 
-					@Override
-					public void onFailure(Throwable t) {
-						errorReporter.reportError("Error trying to add course area to sailing event " + oldEvent.name + ": " + t.getMessage());
-					}
+                    @Override
+                    public void onFailure(Throwable t) {
+                        errorReporter.reportError("Error trying to add course area to sailing event " + oldEvent.name + ": " + t.getMessage());
+                    }
 
-					@Override
-					public void onSuccess(CourseAreaDTO result) {
-						fillEvents();
-					}
-        			
-        		});
-        	}
+                    @Override
+                    public void onSuccess(CourseAreaDTO result) {
+                        fillEvents();
+                    }
+
+                });
+            }
         }
     }
 
-	private List<CourseAreaDTO> getCourseAreasToAdd(final EventDTO oldEvent, final EventDTO updatedEvent) {
-		List<CourseAreaDTO> courseAreasToAdd = new ArrayList<CourseAreaDTO>();
-		List<String> courseAreaNamesToAdd = new ArrayList<String>();
-        
+    private List<CourseAreaDTO> getCourseAreasToAdd(final EventDTO oldEvent, final EventDTO updatedEvent) {
+        List<CourseAreaDTO> courseAreasToAdd = new ArrayList<CourseAreaDTO>();
+        List<String> courseAreaNamesToAdd = new ArrayList<String>();
+
         List<String> newCourseAreaNames = new ArrayList<String>();
         for(CourseAreaDTO courseArea : updatedEvent.venue.getCourseAreas()) {
-        	newCourseAreaNames.add(courseArea.name);
+            newCourseAreaNames.add(courseArea.name);
         }
-        
+
         List<String> oldCourseAreaNames = new ArrayList<String>();
         for(CourseAreaDTO courseArea : oldEvent.venue.getCourseAreas()) {
-        	oldCourseAreaNames.add(courseArea.name);
+            oldCourseAreaNames.add(courseArea.name);
         }
-        
+
         for (String newCourseAreaName : newCourseAreaNames) {
-        	if (!oldCourseAreaNames.contains(newCourseAreaName))
-        		courseAreaNamesToAdd.add(newCourseAreaName);
+            if (!oldCourseAreaNames.contains(newCourseAreaName))
+                courseAreaNamesToAdd.add(newCourseAreaName);
         }
-        
+
         for(CourseAreaDTO courseArea : updatedEvent.venue.getCourseAreas()) {
-        	if (courseAreaNamesToAdd.contains(courseArea.name)) {
-        		courseAreasToAdd.add(courseArea);
-        	}
+            if (courseAreaNamesToAdd.contains(courseArea.name)) {
+                courseAreasToAdd.add(courseArea);
+            }
         }
-        
+
         return courseAreasToAdd;
-	}
-    
+    }
+
     private void createNewEvent(final EventDTO newEvent) {
-    	List<String> courseAreaNames = new ArrayList<String>();
-    	for (CourseAreaDTO courseAreaDTO : newEvent.venue.getCourseAreas()) {
-    		courseAreaNames.add(courseAreaDTO.name);
-    	}
+        List<String> courseAreaNames = new ArrayList<String>();
+        for (CourseAreaDTO courseAreaDTO : newEvent.venue.getCourseAreas()) {
+            courseAreaNames.add(courseAreaDTO.name);
+        }
         sailingService.createEvent(newEvent.name, newEvent.venue.name, newEvent.publicationUrl, newEvent.isPublic, courseAreaNames, new AsyncCallback<EventDTO>() {
             @Override
             public void onFailure(Throwable t) {

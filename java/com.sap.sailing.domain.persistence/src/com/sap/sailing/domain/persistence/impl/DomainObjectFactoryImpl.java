@@ -99,7 +99,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     private static final Logger logger = Logger.getLogger(DomainObjectFactoryImpl.class.getName());
 
     private final DB database;
-    
+
     public DomainObjectFactoryImpl(DB db) {
         super();
         this.database = db;
@@ -140,7 +140,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         }
         return result;
     }
-    
+
     private void ensureIndicesOnWindTracks(DBCollection windTracks) {
         windTracks.ensureIndex(FieldNames.RACE_ID.name()); // for new programmatic access
         windTracks.ensureIndex(FieldNames.REGATTA_NAME.name()); // for export or human look-up
@@ -159,13 +159,13 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 result = loadLeaderboard(o, regattaRegistry, /* leaderboardRegistry */ null, /* groupForMetaLeaderboard */ null);
             }
         } catch (Exception e) {
-             // something went wrong during DB access; report, then use empty new wind track
+            // something went wrong during DB access; report, then use empty new wind track
             logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load leaderboard "+name+".");
             logger.throwing(DomainObjectFactoryImpl.class.getName(), "loadLeaderboard", e);
         }
         return result;
     }
-    
+
     @Override
     public Iterable<Leaderboard> getAllLeaderboards(RegattaRegistry regattaRegistry, LeaderboardRegistry leaderboardRegistry) {
         DBCollection leaderboardCollection = database.getCollection(CollectionNames.LEADERBOARDS.name());
@@ -178,7 +178,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 }
             }
         } catch (Exception e) {
-             // something went wrong during DB access; report, then use empty new wind track
+            // something went wrong during DB access; report, then use empty new wind track
             logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load leaderboards.");
             logger.throwing(DomainObjectFactoryImpl.class.getName(), "getAllLeaderboards", e);
         }
@@ -296,7 +296,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 discardIndexResultsStartingWithHowManyRaces);
         return resultDiscardingRule;
     }
-    
+
     private CourseArea loadCourseAreaFromEvents(DBObject dbObject) {
         Serializable courseAreaId = (Serializable) dbObject.get(FieldNames.COURSE_AREA_ID.name());
         CourseArea result;
@@ -314,7 +314,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 }
             }
         }
-    	return result;
+        return result;
     }
 
     /**
@@ -336,7 +336,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     private FlexibleLeaderboard loadFlexibleLeaderboard(DBObject dbLeaderboard,
             SettableScoreCorrection scoreCorrection, ThresholdBasedResultDiscardingRule resultDiscardingRule) {
         final ScoringScheme scoringScheme = loadScoringScheme(dbLeaderboard);
-        
+
         RaceLogStore raceLogStore = MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(
                 new MongoObjectFactoryImpl(database), 
                 this);
@@ -379,12 +379,12 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 fleets.add(result.getFleet(null));
             }
             String columnName = (String) dbRaceColumn.get(FieldNames.LEADERBOARD_COLUMN_NAME.name());
-            
+
             RaceColumn raceColumn = result.addRaceColumn(columnName,
-            		(Boolean) dbRaceColumn.get(FieldNames.LEADERBOARD_IS_MEDAL_RACE_COLUMN.name()), 
-            		fleets.toArray(new Fleet[0]));
+                    (Boolean) dbRaceColumn.get(FieldNames.LEADERBOARD_IS_MEDAL_RACE_COLUMN.name()), 
+                    fleets.toArray(new Fleet[0]));
             for (Map.Entry<String, RaceIdentifier> e : raceIdentifiers.entrySet()) {
-            	raceColumn.setRaceIdentifier(fleetsByName.get(e.getKey()), e.getValue());
+                raceColumn.setRaceIdentifier(fleetsByName.get(e.getKey()), e.getValue());
             }
 
         }
@@ -535,7 +535,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load leaderboard group "+name+".");
             logger.throwing(DomainObjectFactoryImpl.class.getName(), "loadLeaderboardGroup", e);
         }
-        
+
         return leaderboardGroup;
     }
 
@@ -551,10 +551,10 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load leaderboard groups.");
             logger.throwing(DomainObjectFactoryImpl.class.getName(), "loadLeaderboardGroup", e);
         }
-        
+
         return leaderboardGroups;
     }
-    
+
     private LeaderboardGroup loadLeaderboardGroup(DBObject o, RegattaRegistry regattaRegistry, LeaderboardRegistry leaderboardRegistry) {
         DBCollection leaderboardCollection = database.getCollection(CollectionNames.LEADERBOARDS.name());
         String name = (String) o.get(FieldNames.LEADERBOARD_GROUP_NAME.name());
@@ -593,7 +593,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         }
         return result;
     }
-    
+
     @Override
     public Iterable<Leaderboard> getLeaderboardsNotInGroup(RegattaRegistry regattaRegistry, LeaderboardRegistry leaderboardRegistry) {
         DBCollection leaderboardCollection = database.getCollection(CollectionNames.LEADERBOARDS.name());
@@ -602,9 +602,9 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             // Don't change the query object, unless you know what you're doing
             BasicDBObject query = new BasicDBObject("$where", "function() { return db." + CollectionNames.LEADERBOARD_GROUPS.name() + ".find({ "
                     + FieldNames.LEADERBOARD_GROUP_LEADERBOARDS.name() + ": this._id }).count() == 0 && "
-                            + "db."+CollectionNames.LEADERBOARD_GROUPS.name()+".find({ "+FieldNames.LEADERBOARD_GROUP_OVERALL_LEADERBOARD.name() + ": this._id }).count() == 0 && "
-                            + "db."+CollectionNames.LEADERBOARD_GROUPS.name()+".find({ "+FieldNames.LEADERBOARD_GROUP_OVERALL_LEADERBOARD.name()+
-                            ": this."+FieldNames.LEADERBOARD_NAME.name()+" }).count() == 0; }}");
+                    + "db."+CollectionNames.LEADERBOARD_GROUPS.name()+".find({ "+FieldNames.LEADERBOARD_GROUP_OVERALL_LEADERBOARD.name() + ": this._id }).count() == 0 && "
+                    + "db."+CollectionNames.LEADERBOARD_GROUPS.name()+".find({ "+FieldNames.LEADERBOARD_GROUP_OVERALL_LEADERBOARD.name()+
+                    ": this."+FieldNames.LEADERBOARD_NAME.name()+" }).count() == 0; }}");
             for (DBObject o : leaderboardCollection.find(query)) {
                 final Leaderboard loadedLeaderboard = loadLeaderboard(o, regattaRegistry, leaderboardRegistry, /* groupForMetaLeaderboard */ null);
                 if (loadedLeaderboard != null) {
@@ -627,8 +627,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         } else {
             // create an empty wind track as result if no fixes were found in store for the wind source requested
             result = new WindTrackImpl(millisecondsOverWhichToAverage, windSource.getType().getBaseConfidence(),
-                windSource.getType().useSpeed(),
-                /* nameForReadWriteLock */ WindTrackImpl.class.getSimpleName()+" for source "+windSource.toString());
+                    windSource.getType().useSpeed(),
+                    /* nameForReadWriteLock */ WindTrackImpl.class.getSimpleName()+" for source "+windSource.toString());
         }
         return result;
     }
@@ -682,7 +682,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 windTracks.remove(queryByName);
             }
         } catch (Exception e) {
-             // something went wrong during DB access; report, then use empty new wind track
+            // something went wrong during DB access; report, then use empty new wind track
             logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load recorded wind data. Check MongoDB settings.");
             logger.throwing(DomainObjectFactoryImpl.class.getName(), "loadWindTrack", e);
         }
@@ -728,7 +728,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     public Iterable<Event> loadAllEvents() {
         ArrayList<Event> result = new ArrayList<Event>();
         DBCollection eventCollection = database.getCollection(CollectionNames.EVENTS.name());
-        
+
         try {
             for (DBObject o : eventCollection.find()) {
                 result.add(loadEvent(o));
@@ -737,10 +737,10 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load events.");
             logger.throwing(DomainObjectFactoryImpl.class.getName(), "loadEvents", e);
         }
-        
+
         return result;
     }
-    
+
     /**
      * An event doesn't store its regattas; it's the regatta that stores a reference to its event; the regatta
      * needs to add itself to the event when loaded or instantiated.
@@ -771,7 +771,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         Serializable id = (Serializable) courseAreaDBObject.get(FieldNames.COURSE_AREA_ID.name());
         return new CourseAreaImpl(name, id);
     }
-    
+
     @Override
     public Iterable<Regatta> loadAllRegattas(TrackedRegattaRegistry trackedRegattaRegistry) {
         List<Regatta> result = new ArrayList<Regatta>();
@@ -912,7 +912,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         result = new FleetImpl(name, ordering, color);
         return result;
     }
-    
+
     @Override
     public Map<String, Regatta> loadRaceIDToRegattaAssociations(RegattaRegistry regattaRegistry) {
         DBCollection raceIDToRegattaCollection = database.getCollection(CollectionNames.REGATTA_FOR_RACE_ID.name());
@@ -933,19 +933,19 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     public RaceLog loadRaceLog(RaceLogIdentifier identifier) {
         RaceLog result = new RaceLogImpl(RaceLogImpl.class.getSimpleName());
         try {
-                BasicDBObject query = new BasicDBObject();
-                query.put(FieldNames.RACE_LOG_IDENTIFIER.name(), MongoUtils.escapeDollarAndDot(identifier.getIdentifier().toString()));
-                DBCollection raceLog = database.getCollection(CollectionNames.RACE_LOGS.name());
-                for (DBObject o : raceLog.find(query)) {
-                        RaceLogEvent raceLogEvent = loadRaceLogEvent((DBObject) o.get(FieldNames.RACE_LOG_EVENT.name()));
-                        
-                        if (raceLogEvent != null)
-                                result.add(raceLogEvent);
-                }
+            BasicDBObject query = new BasicDBObject();
+            query.put(FieldNames.RACE_LOG_IDENTIFIER.name(), MongoUtils.escapeDollarAndDot(identifier.getIdentifier().toString()));
+            DBCollection raceLog = database.getCollection(CollectionNames.RACE_LOGS.name());
+            for (DBObject o : raceLog.find(query)) {
+                RaceLogEvent raceLogEvent = loadRaceLogEvent((DBObject) o.get(FieldNames.RACE_LOG_EVENT.name()));
+
+                if (raceLogEvent != null)
+                    result.add(raceLogEvent);
+            }
         } catch (Throwable t) {
-                 // something went wrong during DB access; report, then use empty new race log
-        logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load recorded race log data. Check MongoDB settings.");
-        logger.throwing(DomainObjectFactoryImpl.class.getName(), "loadRaceLog", t);
+            // something went wrong during DB access; report, then use empty new race log
+            logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load recorded race log data. Check MongoDB settings.");
+            logger.throwing(DomainObjectFactoryImpl.class.getName(), "loadRaceLog", t);
         }
         return result;
     }
@@ -956,71 +956,71 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         Integer passId = (Integer) dbObject.get(FieldNames.RACE_LOG_EVENT_PASS_ID.name());
         BasicDBList dbList = (BasicDBList) dbObject.get(FieldNames.RACE_LOG_EVENT_INVOLVED_BOATS.name());
         List<Competitor> competitors = loadCompetitorsForRaceLogEvent(dbList);
-        
+
         String eventClass = (String) dbObject.get(FieldNames.RACE_LOG_EVENT_CLASS.name());
-        
+
         if (eventClass.equals(RaceLogStartTimeEvent.class.getSimpleName())) {
-        	return loadRaceLogStartTimeEvent(timePoint, id, passId, competitors, dbObject);
-        	
+            return loadRaceLogStartTimeEvent(timePoint, id, passId, competitors, dbObject);
+
         } else if (eventClass.equals(RaceLogRaceStatusEvent.class.getSimpleName())) {
-        	return loadRaceLogRaceStatusEvent(timePoint, id, passId, competitors, dbObject);
-        	
+            return loadRaceLogRaceStatusEvent(timePoint, id, passId, competitors, dbObject);
+
         } else if (eventClass.equals(RaceLogFlagEvent.class.getSimpleName())) {
             return loadRaceLogFlagEvent(timePoint, id, passId, competitors, dbObject);
-            
+
         } else if (eventClass.equals(RaceLogPassChangeEvent.class.getSimpleName())) {
             return RaceLogEventFactory.INSTANCE.createRaceLogPassChangeEvent(timePoint, id, competitors, passId);
-            
+
         } else if (eventClass.equals(RaceLogCourseAreaChangedEvent.class.getSimpleName())) {
             return loadRaceLogCourseAreaChangedEvent(timePoint, id, passId, competitors, dbObject);
-            
+
         }
-        
+
         return null;
     }
-    
-    private RaceLogCourseAreaChangedEvent loadRaceLogCourseAreaChangedEvent(TimePoint timePoint, Serializable id, Integer passId, List<Competitor> competitors, DBObject dbObject) {
-		Serializable courseAreaId = (Serializable) dbObject.get(FieldNames.COURSE_AREA_ID.name());
-		
-    	return RaceLogEventFactory.INSTANCE.createRaceLogCourseAreaChangedEvent(timePoint, id, competitors, passId, courseAreaId);
-	}
 
-	private List<Competitor> loadCompetitorsForRaceLogEvent(BasicDBList dbCompetitorList) {
-    	List<Competitor> competitors = new ArrayList<Competitor>();
-    	for (Object object : dbCompetitorList) {
-    		Serializable competitorId = (Serializable) object;
-    		Competitor competitor = DomainFactory.INSTANCE.getExistingCompetitorById(competitorId);
-    		competitors.add(competitor);
-    	}
-    	return competitors;
+    private RaceLogCourseAreaChangedEvent loadRaceLogCourseAreaChangedEvent(TimePoint timePoint, Serializable id, Integer passId, List<Competitor> competitors, DBObject dbObject) {
+        Serializable courseAreaId = (Serializable) dbObject.get(FieldNames.COURSE_AREA_ID.name());
+
+        return RaceLogEventFactory.INSTANCE.createRaceLogCourseAreaChangedEvent(timePoint, id, competitors, passId, courseAreaId);
+    }
+
+    private List<Competitor> loadCompetitorsForRaceLogEvent(BasicDBList dbCompetitorList) {
+        List<Competitor> competitors = new ArrayList<Competitor>();
+        for (Object object : dbCompetitorList) {
+            Serializable competitorId = (Serializable) object;
+            Competitor competitor = DomainFactory.INSTANCE.getExistingCompetitorById(competitorId);
+            competitors.add(competitor);
+        }
+        return competitors;
     }
 
     private RaceLogFlagEvent loadRaceLogFlagEvent(TimePoint timePoint, Serializable id, Integer passId, List<Competitor> competitors, DBObject dbObject) {
         Flags upperFlag = Flags.valueOf((String) dbObject.get(FieldNames.RACE_LOG_EVENT_FLAG_UPPER.name()));
         Flags lowerFlag = Flags.valueOf((String) dbObject.get(FieldNames.RACE_LOG_EVENT_FLAG_LOWER.name()));
         Boolean displayed = Boolean.valueOf((String) dbObject.get(FieldNames.RACE_LOG_EVENT_FLAG_DISPLAYED.name()));
-        
+
         if (upperFlag == null || lowerFlag == null || displayed == null) {
-                return null;
+            return null;
         }
-        
+
         return RaceLogEventFactory.INSTANCE.createFlagEvent(timePoint, id, competitors, passId, upperFlag, lowerFlag, displayed);
     }
 
     private RaceLogStartTimeEvent loadRaceLogStartTimeEvent(TimePoint timePoint, Serializable id, Integer passId, List<Competitor> competitors, DBObject dbObject) {
         Long startTimeInMillis = (Long) dbObject.get(FieldNames.RACE_LOG_EVENT_START_TIME.name());
         if (startTimeInMillis == null) {
-                return null;
+            return null;
         }
         TimePoint startTime = new MillisecondsTimePoint(startTimeInMillis);
         RaceLogRaceStatus nextStatus = RaceLogRaceStatus.valueOf((String) dbObject.get(FieldNames.RACE_LOG_EVENT_NEXT_STATUS.name()));
-        
+
         return RaceLogEventFactory.INSTANCE.createStartTimeEvent(timePoint, id, competitors, passId, nextStatus, startTime);
     }
-    
+
     private RaceLogRaceStatusEvent loadRaceLogRaceStatusEvent(TimePoint timePoint, Serializable id, Integer passId, List<Competitor> competitors, DBObject dbObject) {
-    	RaceLogRaceStatus nextStatus = RaceLogRaceStatus.valueOf((String) dbObject.get(FieldNames.RACE_LOG_EVENT_NEXT_STATUS.name()));
+        RaceLogRaceStatus nextStatus = RaceLogRaceStatus.valueOf((String) dbObject.get(FieldNames.RACE_LOG_EVENT_NEXT_STATUS.name()));
 
         return RaceLogEventFactory.INSTANCE.createRaceStatusEvent(timePoint, id, competitors, passId, nextStatus);
-	}
+    }
 }

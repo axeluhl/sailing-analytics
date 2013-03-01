@@ -14,43 +14,43 @@ import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.racelog.RaceLogStartTimeEventSerializer;
 
 public class RaceLogStartTimeEventSerializerTest extends BaseRaceLogEventTest<RaceLogStartTimeEvent> {
-	
-	private final long expectedStartTimeTimestamp = 2013;
-	
-	@Override
-	protected RaceLogStartTimeEvent createMockEvent() {
-		
-		TimePoint startTime = mock(TimePoint.class);
-		when(startTime.asMillis()).thenReturn(expectedStartTimeTimestamp);
-		
-		RaceLogStartTimeEvent event = mock(RaceLogStartTimeEvent.class);
-		when(event.getStartTime()).thenReturn(startTime);
-		
-		return event;
-	}
 
-	@SuppressWarnings("unchecked")
-	@Override
-	protected JsonSerializer<RaceLogEvent> createSerializer() {
-		return new RaceLogStartTimeEventSerializer(mock(JsonSerializer.class));
-	}
-	
-	@Test
-	public void testStartTimeAttributes() {
-		JSONObject json = serializer.serialize(event);
-		
-		assertEquals(
-				expectedStartTimeTimestamp,
-				json.get(RaceLogStartTimeEventSerializer.FIELD_START_TIME));
-	}
-	
-	@Test
-	public void testClassAttribute() {
-		JSONObject json = serializer.serialize(event);
-		
-		assertEquals(
-				RaceLogStartTimeEventSerializer.VALUE_CLASS,
-				json.get(RaceLogStartTimeEventSerializer.FIELD_CLASS));
-	}
+    private final long expectedStartTimeTimestamp = 2013;
+
+    @Override
+    protected RaceLogStartTimeEvent createMockEvent() {
+
+        TimePoint startTime = mock(TimePoint.class);
+        when(startTime.asMillis()).thenReturn(expectedStartTimeTimestamp);
+
+        RaceLogStartTimeEvent event = mock(RaceLogStartTimeEvent.class);
+        when(event.getStartTime()).thenReturn(startTime);
+
+        return event;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    protected JsonSerializer<RaceLogEvent> createSerializer() {
+        return new RaceLogStartTimeEventSerializer(mock(JsonSerializer.class));
+    }
+
+    @Test
+    public void testStartTimeAttributes() {
+        JSONObject json = serializer.serialize(event);
+
+        assertEquals(
+                expectedStartTimeTimestamp,
+                json.get(RaceLogStartTimeEventSerializer.FIELD_START_TIME));
+    }
+
+    @Test
+    public void testClassAttribute() {
+        JSONObject json = serializer.serialize(event);
+
+        assertEquals(
+                RaceLogStartTimeEventSerializer.VALUE_CLASS,
+                json.get(RaceLogStartTimeEventSerializer.FIELD_CLASS));
+    }
 
 }

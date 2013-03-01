@@ -61,7 +61,7 @@ import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
  * The async counterpart of {@link SailingService}
  */
 public interface SailingServiceAsync {
-    
+
     void getRegattas(AsyncCallback<List<RegattaDTO>> callback);
 
     /**
@@ -108,7 +108,7 @@ public interface SailingServiceAsync {
     void stopTrackingEvent(RegattaIdentifier eventIdentifier, AsyncCallback<Void> callback);
 
     void stopTrackingRaces(Iterable<RegattaAndRaceIdentifier> racesToStopTracking, AsyncCallback<Void> asyncCallback);
-    
+
     /**
      * Untracks the race and removes it from the regatta. It will also be removed in all leaderboards
      * @param regattaNamesAndRaceNames The identifier for the regatta name, and the race name to remove
@@ -150,7 +150,7 @@ public interface SailingServiceAsync {
             Collection<String> windSourceTypeNames, AsyncCallback<WindInfoForRaceDTO> callback);
 
     void setWind(RegattaAndRaceIdentifier raceIdentifier, WindDTO wind, AsyncCallback<Void> callback);
-    
+
     void removeWind(RegattaAndRaceIdentifier raceIdentifier, WindDTO windDTO, AsyncCallback<Void> callback);
 
     /**
@@ -173,7 +173,7 @@ public interface SailingServiceAsync {
             boolean extrapolate, AsyncCallback<Map<CompetitorDTO, List<GPSFixDTO>>> callback);
 
     void getRaceTimesInfo(RegattaAndRaceIdentifier raceIdentifier, AsyncCallback<RaceTimesInfoDTO> callback);
-    
+
     void getRaceTimesInfos(Collection<RegattaAndRaceIdentifier> raceIdentifiers, AsyncCallback<List<RaceTimesInfoDTO>> callback);
 
     void getCoursePositions(RegattaAndRaceIdentifier raceIdentifier, Date date, AsyncCallback<CourseDTO> asyncCallback);
@@ -204,11 +204,11 @@ public interface SailingServiceAsync {
     void getLeaderboardNames(AsyncCallback<List<String>> callback);
 
     void getLeaderboards(AsyncCallback<List<StrippedLeaderboardDTO>> callback);
-    
+
     void getLeaderboardsByEvent(RegattaDTO regatta, AsyncCallback<List<StrippedLeaderboardDTO>> callback);
-    
+
     void getLeaderboardsByRace(RaceDTO race, AsyncCallback<List<StrippedLeaderboardDTO>> callback);
-    
+
     void updateLeaderboard(String leaderboardName, String newLeaderboardName, String newLeaderboardDisplayName,
             int[] newDiscardingThreasholds, AsyncCallback<Void> callback);
 
@@ -219,7 +219,7 @@ public interface SailingServiceAsync {
             AsyncCallback<StrippedLeaderboardDTO> asyncCallback);
 
     void removeLeaderboard(String leaderboardName, AsyncCallback<Void> asyncCallback);
-    
+
     void renameLeaderboard(String leaderboardName, String newLeaderboardName, AsyncCallback<Void> asyncCallback);
 
     void addColumnToLeaderboard(String columnName, String leaderboardName, boolean medalRace,
@@ -279,9 +279,9 @@ public interface SailingServiceAsync {
     void storeSwissTimingConfiguration(String configName, String hostname, int port, boolean canSendRequests, AsyncCallback<Void> asyncCallback);
 
     void sendSwissTimingDummyRace(String racMessage, String stlMesssage, String ccgMessage, AsyncCallback<Void> callback);
-    
+
     void getCountryCodes(AsyncCallback<String[]> callback);
-    
+
     void getDouglasPoints(RegattaAndRaceIdentifier raceIdentifier, Map<CompetitorDTO, Date> from, Map<CompetitorDTO, Date> to,
             double meters, AsyncCallback<Map<CompetitorDTO, List<GPSFixDTO>>> callback);
 
@@ -292,19 +292,19 @@ public interface SailingServiceAsync {
 
     void getLeaderboardGroupByName(String groupName, boolean withGeoLocationData,
             AsyncCallback<LeaderboardGroupDTO> callback);
-    
+
     /**
-    * Renames the group with the name <code>oldName</code> to the <code>newName</code>.<br />
-    * If there's no group with the name <code>oldName</code> or there's already a group with the name
-    * <code>newName</code> a {@link IllegalArgumentException} is thrown.
-    */
+     * Renames the group with the name <code>oldName</code> to the <code>newName</code>.<br />
+     * If there's no group with the name <code>oldName</code> or there's already a group with the name
+     * <code>newName</code> a {@link IllegalArgumentException} is thrown.
+     */
     void renameLeaderboardGroup(String oldName, String newName, AsyncCallback<Void> callback);
-    
+
     /**
      * Removes the leaderboard group with the name <code>groupName</code> from the service and the persistant store.
      */
     void removeLeaderboardGroup(String groupName, AsyncCallback<Void> callback);
-    
+
     /**
      * Creates a new group with the name <code>groupname</code>, the description <code>description</code> and an empty list of leaderboards.<br/>
      * @param displayGroupsInReverseOrder TODO
@@ -312,7 +312,7 @@ public interface SailingServiceAsync {
     void createLeaderboardGroup(String groupName, String description,
             boolean displayGroupsInReverseOrder, int[] overallLeaderboardDiscardThresholds,
             ScoringSchemeType overallLeaderboardScoringSchemeType, AsyncCallback<LeaderboardGroupDTO> callback);
-    
+
     /**
      * Updates the data of the group with the name <code>oldName</code>.
      * 
@@ -347,26 +347,26 @@ public interface SailingServiceAsync {
      * If no event with the name <code>eventName</code> is known, an {@link IllegalArgumentException} is thrown.
      */
     void getEventByName(String eventName, AsyncCallback<EventDTO> callback);
-    
+
     void getEventById(Serializable id, AsyncCallback<EventDTO> callback);
-    
+
     /**
-    * Renames the event with the name <code>oldName</code> to the <code>newName</code>.<br />
-    * If there's no event with the name <code>oldName</code> or there's already a event with the name
-    * <code>newName</code> a {@link IllegalArgumentException} is thrown.
-    */
+     * Renames the event with the name <code>oldName</code> to the <code>newName</code>.<br />
+     * If there's no event with the name <code>oldName</code> or there's already a event with the name
+     * <code>newName</code> a {@link IllegalArgumentException} is thrown.
+     */
     void renameEvent(Serializable id, String newName, AsyncCallback<Void> callback);
-    
+
     /**
      * Removes the event with the id <code>id</code> from the service and the persistence store.
      */
     void removeEvent(Serializable id, AsyncCallback<Void> callback);
-    
+
     void createEvent(String eventName, String description, String publicationUrl, boolean isPublic, List<String> courseAreaNames, AsyncCallback<EventDTO> callback);
-    
+
     void updateEvent(String eventName, Serializable id, VenueDTO venue, String publicationUrl, boolean isPublic,
             List<String> regattaNames, AsyncCallback<Void> callback);
-    
+
     void createCourseArea(Serializable id, String courseAreaName, AsyncCallback<CourseAreaDTO> callback);
 
     void removeRegatta(RegattaIdentifier regattaIdentifier, AsyncCallback<Void> callback);
@@ -421,7 +421,7 @@ public interface SailingServiceAsync {
 
     void suppressCompetitorInLeaderboard(String leaderboardName, String competitorIdAsString, boolean suppressed, AsyncCallback<Void> asyncCallback);
 
-	void getRaceEventLog(AsyncCallback<RaceEventLogDTO> callback);
+    void getRaceEventLog(AsyncCallback<RaceEventLogDTO> callback);
 
     void updateLeaderboardColumnFactor(String leaderboardName, String columnName, Double newFactor,
             AsyncCallback<Void> callback);

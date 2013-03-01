@@ -18,9 +18,9 @@ public class RaceColumnImpl extends AbstractRaceColumn implements FlexibleRaceCo
      */
     private final Iterable<Fleet> fleets;
     private boolean medalRace;
-    
+
     public RaceColumnImpl(String name, boolean medalRace, Iterable<Fleet> fleets) {
-    	super();
+        super();
         this.name = name;
         this.medalRace = medalRace;
         List<Fleet> myFleets = new ArrayList<Fleet>();
@@ -30,7 +30,7 @@ public class RaceColumnImpl extends AbstractRaceColumn implements FlexibleRaceCo
         Collections.sort(myFleets);
         this.fleets = myFleets;
     }
-    
+
     @Override
     public void setName(String newName) {
         this.name = newName;
@@ -40,7 +40,7 @@ public class RaceColumnImpl extends AbstractRaceColumn implements FlexibleRaceCo
     public String getName() {
         return name;
     }
-    
+
     @Override
     public boolean isMedalRace() {
         return medalRace;

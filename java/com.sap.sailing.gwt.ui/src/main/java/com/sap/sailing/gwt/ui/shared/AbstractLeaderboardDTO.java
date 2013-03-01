@@ -16,7 +16,7 @@ import com.sap.sailing.domain.common.impl.Util.Pair;
 
 public abstract class AbstractLeaderboardDTO implements IsSerializable {
     public String name;
-    
+
     private List<RaceColumnDTO> races;
     public Map<CompetitorDTO, String> competitorDisplayNames;
     public Map<CompetitorDTO, LeaderboardRowDTO> rows;
@@ -30,11 +30,11 @@ public abstract class AbstractLeaderboardDTO implements IsSerializable {
     public boolean isRegattaLeaderboard;
 
     private Long delayToLiveInMillisForLatestRace;
-    
+
     public AbstractLeaderboardDTO() {
         races = new ArrayList<RaceColumnDTO>();
     }
-    
+
     public Set<BoatClassDTO> getBoatClasses() {
         Set<BoatClassDTO> result = new HashSet<BoatClassDTO>();
         for (CompetitorDTO competitor : rows.keySet()) {
@@ -46,7 +46,7 @@ public abstract class AbstractLeaderboardDTO implements IsSerializable {
     public String getDisplayName() {
         return displayName;
     }
-    
+
     public String getDisplayName(CompetitorDTO competitor) {
         if (competitorDisplayNames == null || competitorDisplayNames.get(competitor) == null) {
             return competitor.name;
@@ -138,7 +138,7 @@ public abstract class AbstractLeaderboardDTO implements IsSerializable {
         }
         return result;
     }
-    
+
     /**
      * If the {@link RaceColumnDTO} by the name <code>raceColumnName</code> doesn't exist yet within this leaderboard
      * DTO, it is created, setting is {@link RaceColumnDTO#isValidInTotalScore()} to <code>true</code>. This method
@@ -227,7 +227,7 @@ public abstract class AbstractLeaderboardDTO implements IsSerializable {
     public void setIsMedalRace(String raceColumnName, boolean medalRace) {
         getRaceColumnByName(raceColumnName).setMedalRace(medalRace);
     }
-    
+
     /**
      * @return The earliest start date of the races, or <code>null</code> if no start dates of the races are available.
      */
@@ -269,7 +269,7 @@ public abstract class AbstractLeaderboardDTO implements IsSerializable {
         }
         return leaderboardPlaces;
     }
-    
+
     /**
      * @return <code>true</code> if the leaderboard contains a race which is live
      */
@@ -285,11 +285,11 @@ public abstract class AbstractLeaderboardDTO implements IsSerializable {
     }
 
     public List<Pair<RaceColumnDTO, FleetDTO>> getLiveRaces() {
-    	List<Pair<RaceColumnDTO, FleetDTO>> result = new ArrayList<Pair<RaceColumnDTO, FleetDTO>>();
+        List<Pair<RaceColumnDTO, FleetDTO>> result = new ArrayList<Pair<RaceColumnDTO, FleetDTO>>();
         for (RaceColumnDTO race : getRaceList()) {
             for (FleetDTO fleet : race.getFleets()) {
                 if (race.isLive(fleet)) {
-                	result.add(new Pair<RaceColumnDTO, FleetDTO>(race, fleet));
+                    result.add(new Pair<RaceColumnDTO, FleetDTO>(race, fleet));
                 }
             }
         }
