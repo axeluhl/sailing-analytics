@@ -3,8 +3,6 @@ package com.sap.sailing.domain.base;
 import java.util.List;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import com.sap.sailing.domain.common.Named;
-
 import difflib.PatchFailedException;
 
 /**
@@ -25,7 +23,7 @@ import difflib.PatchFailedException;
  * @author Axel Uhl (d043530)
  * 
  */
-public interface Course extends Named, CourseData {
+public interface Course extends CourseData {
     void lockForRead();
     
     void unlockAfterRead();

@@ -99,12 +99,10 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
             column = createRaceColumn(name, medalRace, fleets);
             column.addRaceColumnListener(this);
             races.add(column);
-
             column.setRaceLogInformation(
                     new RaceLogInformationImpl(
                         raceLogStore,
                         new RaceLogOnLeaderboardIdentifier(this, column.getName())));
-            
             getRaceColumnListeners().notifyListenersAboutRaceColumnAddedToContainer(column);
         }
         return column;

@@ -275,7 +275,6 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
                             dialog.show();
                         } else {
                             LeaderboardDescriptor descriptor = new LeaderboardDescriptor(leaderboardDTO.name, leaderboardDTO.displayName, leaderboardDTO.scoringScheme, leaderboardDTO.discardThresholds, leaderboardDTO.courseAreaId);
-
                             openUpdateFlexibleLeaderboardDialog(leaderboardDTO, otherExistingLeaderboard, leaderboardDTO.name, descriptor);
                         }
                     }
@@ -491,36 +490,37 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
     
     protected void openUpdateFlexibleLeaderboardDialog(final StrippedLeaderboardDTO leaderboardDTO, final List<StrippedLeaderboardDTO> otherExistingLeaderboard, 
     		final String oldLeaderboardName, final LeaderboardDescriptor descriptor) {
-    	sailingService.getEvents(new AsyncCallback<List<EventDTO>>() {
-			
-			@Override
-			public void onSuccess(List<EventDTO> result) {
-				openUpdateFlexibleLeaderboardDialog(leaderboardDTO, otherExistingLeaderboard, oldLeaderboardName, descriptor, result);
-			}
-			
-			@Override
-			public void onFailure(Throwable caught) {
-				openUpdateFlexibleLeaderboardDialog(leaderboardDTO, otherExistingLeaderboard, oldLeaderboardName, descriptor, new ArrayList<EventDTO>());
-			}
-		});
+        sailingService.getEvents(new AsyncCallback<List<EventDTO>>() {
+            @Override
+            public void onSuccess(List<EventDTO> result) {
+                openUpdateFlexibleLeaderboardDialog(leaderboardDTO, otherExistingLeaderboard, oldLeaderboardName,
+                        descriptor, result);
+            }
+
+            @Override
+            public void onFailure(Throwable caught) {
+                openUpdateFlexibleLeaderboardDialog(leaderboardDTO, otherExistingLeaderboard, oldLeaderboardName,
+                        descriptor, new ArrayList<EventDTO>());
+            }
+        });
     }
     
     protected void openUpdateFlexibleLeaderboardDialog(StrippedLeaderboardDTO leaderboardDTO, List<StrippedLeaderboardDTO> otherExistingLeaderboard, 
     		final String oldLeaderboardName, LeaderboardDescriptor descriptor, List<EventDTO> existingEvents) {
-    	FlexibleLeaderboardEditDialog dialog = new FlexibleLeaderboardEditDialog(Collections
-    			.unmodifiableCollection(otherExistingLeaderboard),
-    			descriptor, stringMessages, Collections.unmodifiableList(existingEvents), errorReporter,
-    			new DialogCallback<LeaderboardDescriptor>() {
-    		@Override
-    		public void cancel() {
-    		}
+        FlexibleLeaderboardEditDialog dialog = new FlexibleLeaderboardEditDialog(
+                Collections.unmodifiableCollection(otherExistingLeaderboard), descriptor, stringMessages,
+                Collections.unmodifiableList(existingEvents), errorReporter,
+                new DialogCallback<LeaderboardDescriptor>() {
+                    @Override
+                    public void cancel() {
+                    }
 
-    		@Override
-    		public void ok(LeaderboardDescriptor result) {
-    			updateLeaderboard(oldLeaderboardName, result);
-    		}
-    	});
-    	dialog.show();
+                    @Override
+                    public void ok(LeaderboardDescriptor result) {
+                        updateLeaderboard(oldLeaderboardName, result);
+                    }
+                });
+        dialog.show();
     }
 
     /**

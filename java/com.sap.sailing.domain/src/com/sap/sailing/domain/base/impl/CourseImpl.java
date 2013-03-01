@@ -88,7 +88,7 @@ public class CourseImpl extends NamedImpl implements Course {
 
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
         ois.defaultReadObject();
-        listeners = new HashSet<CourseListener>();
+        listeners = new HashSet<>();
         lock = new NamedReentrantReadWriteLock("lock for CourseImpl "+this.getName(), /* fair */ true);
     }
     

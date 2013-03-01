@@ -57,7 +57,7 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
         private Set<GPSTrackListener<I, F>> listeners;
         
         public GPSTrackListeners() {
-            listeners = new HashSet<GPSTrackListener<I, F>>();
+            listeners = new HashSet<>();
         }
         
         @SuppressWarnings("unchecked") // need typed generic cast
@@ -68,7 +68,7 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
         private void writeObject(ObjectOutputStream oos) throws IOException {
             final Set<GPSTrackListener<I, F>> listenersToSerialize;
             synchronized (listeners) {
-                listenersToSerialize = new HashSet<GPSTrackListener<I, F>>();
+                listenersToSerialize = new HashSet<>();
                 for (GPSTrackListener<I, F> listener : listeners) {
                     if (!listener.isTransient()) {
                         listenersToSerialize.add(listener);

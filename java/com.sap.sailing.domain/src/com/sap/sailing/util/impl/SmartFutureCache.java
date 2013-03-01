@@ -341,10 +341,7 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
             if (future != null) {
                 try {
                     value = future.get();
-                } catch (InterruptedException e) {
-                    logger.throwing(SmartFutureCache.class.getName(), "get", e);
-                    throw new RuntimeException(e);
-                } catch (ExecutionException e) {
+                } catch (InterruptedException | ExecutionException e) {
                     logger.throwing(SmartFutureCache.class.getName(), "get", e);
                     throw new RuntimeException(e);
                 }

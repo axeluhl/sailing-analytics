@@ -254,7 +254,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
             long delayToLiveInMillis, final long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
             long delayForWindEstimationCacheInvalidation) {
         super();
-        locksForMarkPassings = new IdentityHashMap<Iterable<MarkPassing>, NamedReentrantReadWriteLock>();
+        locksForMarkPassings = new IdentityHashMap<>();
         this.status = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.PREPARED, 0.0);
         this.statusNotifier = new Object[0];
         this.serializationLock = new NamedReentrantReadWriteLock("Serialization lock for tracked race "+race.getName(), /* fair */ true);
@@ -744,7 +744,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         NavigableSet<MarkPassing> roundings = getMarkPassings(competitor);
         lockForRead(roundings);
         try {
-            NavigableSet<MarkPassing> localRoundings = new ArrayListNavigableSet<MarkPassing>(roundings.size(), new TimedComparator());
+            NavigableSet<MarkPassing> localRoundings = new ArrayListNavigableSet<>(roundings.size(), new TimedComparator());
             localRoundings.addAll(roundings);
         } finally {
             unlockAfterRead(roundings);
@@ -1233,10 +1233,8 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         }
         try {
             return future.get();
-        } catch (InterruptedException e) {
+        } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException(e);
-        } catch (ExecutionException e) {
-        	throw new RuntimeException(e);
         }
     }
 
@@ -1454,7 +1452,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
             }
             if (toRemove != null) {
                 logger.info("Removing tracked leg at zero-based index "+zeroBasedIndex+" from tracked race "+getRace().getName());
-                LinkedHashMap<Leg, TrackedLeg> newTrackedLegs = new LinkedHashMap<Leg, TrackedLeg>();
+                LinkedHashMap<Leg, TrackedLeg> newTrackedLegs = new LinkedHashMap<>();
                 for (Map.Entry<Leg, TrackedLeg> trackedLegsEntry : trackedLegs.entrySet()) {
                     if (trackedLegsEntry.getKey() == toRemove) {
                         break;

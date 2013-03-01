@@ -298,21 +298,23 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
     
     private CourseArea loadCourseAreaFromEvents(DBObject dbObject) {
-    	Serializable courseAreaId = (Serializable) dbObject.get(FieldNames.COURSE_AREA_ID.name());
-    	if (courseAreaId == null)
-    		return null;
-    	
-    	UUID courseAreaUuid = UUID.fromString(courseAreaId.toString());
-    	
-    	Iterable<Event> allEvents = loadAllEvents();
-    	for (Event event : allEvents) {
-    		for (CourseArea courseArea : event.getVenue().getCourseAreas()) {
-    			if (courseArea.getId().equals(courseAreaUuid)) {
-    				return courseArea;
-    			}
-    		}
-    	}
-    	return null;
+        Serializable courseAreaId = (Serializable) dbObject.get(FieldNames.COURSE_AREA_ID.name());
+        CourseArea result;
+        if (courseAreaId == null) {
+            result = null;
+        } else {
+            UUID courseAreaUuid = UUID.fromString(courseAreaId.toString());
+            Iterable<Event> allEvents = loadAllEvents();
+            result = null;
+            for (Event event : allEvents) {
+                for (CourseArea courseArea : event.getVenue().getCourseAreas()) {
+                    if (courseArea.getId().equals(courseAreaUuid)) {
+                        result = courseArea;
+                    }
+                }
+            }
+        }
+    	return result;
     }
 
     /**

@@ -125,7 +125,7 @@ public class MaxSpeedCache<ItemType, FixType extends GPSFix> implements GPSTrack
             Pair<TimePoint, TimePoint> invalidationInterval) {
         assert lock.writeLock().isHeldByCurrentThread();
         // cannot modify cache here because caller is in an iteration over cache's entry set; request additions by returning them
-        Map<TimePoint, NavigableSet<Pair<TimePoint, Pair<FixType, Speed>>>> result = new HashMap<TimePoint, NavigableSet<Pair<TimePoint, Pair<FixType, Speed>>>>();
+        Map<TimePoint, NavigableSet<Pair<TimePoint, Pair<FixType, Speed>>>> result = new HashMap<>();
         if (!cacheEntry.getKey().after(invalidationInterval.getB())) {
             // invalidation can only become necessary if the cache entry doesn't start after the end of the invalidation interval
             TimePoint croppedFrom; // start of the remaining valid part of the cache entries

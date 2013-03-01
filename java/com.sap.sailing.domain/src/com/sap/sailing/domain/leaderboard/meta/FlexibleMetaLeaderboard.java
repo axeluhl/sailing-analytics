@@ -57,8 +57,8 @@ public class FlexibleMetaLeaderboard extends AbstractMetaLeaderboard {
         }
     }
 
-	@Override
-	public CourseArea getDefaultCourseArea() {
-		return null;
-	}
+    @Override
+    public CourseArea getDefaultCourseArea() {
+        return null;
+    }
 }

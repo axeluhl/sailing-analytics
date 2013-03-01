@@ -84,9 +84,8 @@ public class LeaderboardGroupMetaLeaderboard extends AbstractMetaLeaderboard imp
         getRaceColumnListeners().notifyListenersAboutRaceColumnRemovedFromContainer(getColumnForLeaderboard(leaderboard));
     }
 
-	@Override
-	public CourseArea getDefaultCourseArea() {
-		return null;
-	}
-    
+    @Override
+    public CourseArea getDefaultCourseArea() {
+        return null;
+    }
 }
