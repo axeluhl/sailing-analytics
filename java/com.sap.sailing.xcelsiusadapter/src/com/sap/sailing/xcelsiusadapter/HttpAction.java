@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 
-
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -31,12 +30,14 @@ import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.util.InvalidDateException;
 
-public class Action  {
+public abstract class HttpAction {
     private HttpServletRequest req;
     private HttpServletResponse res;
 
@@ -49,7 +50,7 @@ public class Action  {
     private int rowCount;
     private Element currentRow;
 
-    public Action(HttpServletRequest req, HttpServletResponse res, RacingEventService service, int maxRows) {
+    public HttpAction(HttpServletRequest req, HttpServletResponse res, RacingEventService service, int maxRows) {
         this.req = req;
         this.res = res;
         this.service = service;
@@ -88,6 +89,23 @@ public class Action  {
         }
         return regatta;
     }
+    
+    public RegattaLeaderboard getRegattaLeaderboard() throws IOException {
+        /*
+         * Leaderboard name is always equal Regatta name
+         */
+        final String leaderboardName = getAttribute("regatta");
+        if (leaderboardName == null) {
+            say("Use the regatta= parameter to specify the regatta");
+            return null;
+        }
+        final Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName); 
+        if (leaderboard == null || !(leaderboard instanceof RegattaLeaderboard)) {
+            say("Regatta " + leaderboardName + " not found.");
+            return null;
+        }
+        return (RegattaLeaderboard)leaderboard;
+    }
 
     public Regatta getEvent(String name) {
         for (final Regatta regatta : this.service.getAllRegattas()) {
@@ -100,9 +118,6 @@ public class Action  {
     }
 
     public RaceDefinition getRace(Regatta regatta) throws IOException {
-        /*
-         * Get the race
-         */
         final String raceName = getAttribute("race");
 
         if (raceName == null) {
@@ -111,9 +126,6 @@ public class Action  {
             return null;
         }
 
-        /*
-         * RACE
-         */
         final RaceDefinition race = getRace(regatta, raceName);
 
         if (race == null) {
@@ -163,11 +175,19 @@ public class Action  {
             if (start == null) {
                 return null;
             }
-            final long mTime = start.asMillis() + (StringUtility.StringToInteger(time, 0) * 1000 * 60);
+            final long mTime = start.asMillis() + (stringToInteger(time, 0) * 1000 * 60);
             final TimePoint bTimePoint = new MillisecondsTimePoint(mTime);
             return bTimePoint;
         }
         return null;
+    }
+
+    private int stringToInteger(String strString, int intDefault) {
+        try {
+            return Integer.parseInt(strString);
+        } catch (NumberFormatException e) {
+            return intDefault;
+        }
     }
 
     public Document getTable(String variable) {
@@ -196,7 +216,7 @@ public class Action  {
             this.currentRow.addContent(col);
         }
     }
-    
+
     public void addNamedColumn(String content, String columnName) {
         if (maxRows == -1 || rowCount <= maxRows) {
             final Element col = new Element(columnName);
@@ -217,77 +237,69 @@ public class Action  {
     }
 
     public void say(Document doc) throws IOException {
-    	this.res.setCharacterEncoding("UTF-8");
+        this.res.setCharacterEncoding("UTF-8");
         this.res.getWriter().print(getXMLAsString(doc));
     }
 
     public void say(String msg) throws IOException {
         say(msg, this.res);
     }
-    public void sendDocument(Document doc, String fileName){
-    	ServletOutputStream stream = null;
-    	 BufferedInputStream buf = null;
-		try {
-			ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-			
-			Result outputTarget = new StreamResult(outputStream);
-			DOMOutputter outputter = new DOMOutputter() ;
-			
-				org.w3c.dom.Document w3cDoc = outputter.output(doc);
-				Source xmlSource = new DOMSource(w3cDoc);
-			
-			
-			
-		   
-		    
-		
-				stream = res.getOutputStream();
-			
-		      
-		      res.setContentType("text/xml");
-		      res.addHeader("Content-Disposition", "attachment; filename="
-		          + fileName);
-			TransformerFactory.newInstance().newTransformer().transform(xmlSource, outputTarget);
-			InputStream is = new ByteArrayInputStream(outputStream.toByteArray());
-		   
-			buf = new BufferedInputStream(is);
-		      int readBytes = 0;
-		      while ((readBytes = buf.read()) != -1)
-		        stream.write(readBytes);
-		    
-		} catch(TransformerConfigurationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch(TransformerException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch(TransformerFactoryConfigurationError e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}catch (JDOMException e2) {
-			// TODO Auto-generated catch block
-			e2.printStackTrace();
-		}
-    	catch (IOException e) {
-    		e.printStackTrace();
-	    }finally {
-	      if (stream != null)
-			try {
-				stream.close();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-	      if (buf != null)
-			try {
-				buf.close();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-	    }
-		//
-	}
+
+    public void sendDocument(Document doc, String fileName) {
+        ServletOutputStream stream = null;
+        BufferedInputStream buf = null;
+        try {
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+
+            Result outputTarget = new StreamResult(outputStream);
+            DOMOutputter outputter = new DOMOutputter();
+
+            org.w3c.dom.Document w3cDoc = outputter.output(doc);
+            Source xmlSource = new DOMSource(w3cDoc);
+
+            stream = res.getOutputStream();
+
+            res.setContentType("text/xml");
+            res.addHeader("Content-Disposition", "attachment; filename=" + fileName);
+            TransformerFactory.newInstance().newTransformer().transform(xmlSource, outputTarget);
+            InputStream is = new ByteArrayInputStream(outputStream.toByteArray());
+
+            buf = new BufferedInputStream(is);
+            int readBytes = 0;
+            while ((readBytes = buf.read()) != -1)
+                stream.write(readBytes);
+
+        } catch (TransformerConfigurationException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (TransformerException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (TransformerFactoryConfigurationError e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (JDOMException e2) {
+            // TODO Auto-generated catch block
+            e2.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (stream != null)
+                try {
+                    stream.close();
+                } catch (IOException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+            if (buf != null)
+                try {
+                    buf.close();
+                } catch (IOException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+        }
+    }
 
     public static String getXMLAsString(Object context) {
         return getXMLAsString(context, "UTF-8");
@@ -297,14 +309,15 @@ public class Action  {
         // final XMLOutputter outputter = new XMLOutputter("  ", true, encoding);
         final Format format = Format.getPrettyFormat();
         format.setIndent("  ");
-        // Despite of setting the expand true (result is <column></column> instead of <column/> browsers like firefox dont display the columns correctly
+        // Despite of setting the expand true (result is <column></column> instead of <column/> browsers like firefox
+        // dont display the columns correctly
         format.setExpandEmptyElements(true);
         format.setEncoding(encoding);
-        
+
         final XMLOutputter outputter = new XMLOutputter(format);
 
         if (context instanceof Document) {
-        	String res = outputter.outputString((Document) context);
+            String res = outputter.outputString((Document) context);
             return res;
         }
 
