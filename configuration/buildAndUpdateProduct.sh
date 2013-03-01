@@ -9,7 +9,7 @@ find_project_home ()
     fi
 
     if [ ! -d "$1/.git" ]; then
-        PARENT_DIR=`cd $1/..;pwd`
+        PARENT_DIR=`cd $1/..;pwd | sed -e 's/\/cygdrive\/\([a-zA-Z]\)/\1:/'`
         echo $(find_project_home $PARENT_DIR)
         return 0
     fi
@@ -32,7 +32,7 @@ if [[ $PROJECT_HOME == "" ]]; then
 fi
 
 if [ "$SERVERS_HOME" = "" ]; then
-  SERVERS_HOME=$USER_HOME/servers
+  SERVERS_HOME=`echo "$USER_HOME/servers" | sed -e 's/\/cygdrive\/\([a-zA-Z]\)/\1:/'`
 fi
 
 # x86 or x86_64 should work for most cases
