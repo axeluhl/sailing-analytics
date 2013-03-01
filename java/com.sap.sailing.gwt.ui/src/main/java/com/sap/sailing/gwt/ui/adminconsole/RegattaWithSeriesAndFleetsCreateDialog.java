@@ -301,7 +301,7 @@ public class RegattaWithSeriesAndFleetsCreateDialog extends DataEntryDialog<Rega
         CourseAreaDTO result = null;
         EventDTO event = getSelectedEvent();
         int selIndex = courseAreaListBox.getSelectedIndex();
-        if(selIndex > 0) { // the zero index represents the 'no selection' text
+        if(selIndex > 0 && event != null) { // the zero index represents the 'no selection' text
             String itemText = courseAreaListBox.getItemText(selIndex);
             for(CourseAreaDTO courseAreaDTO: event.venue.getCourseAreas()) {
                 if(courseAreaDTO.name.equals(itemText)) {
