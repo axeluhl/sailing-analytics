@@ -311,17 +311,17 @@ public class RegattaStructureManagementPanel extends SimplePanel implements Rega
     }
     
     protected String getCourseAreaName(String defaultCourseAreaId) {
-        if (defaultCourseAreaId == null)
-            return "";
-        
-        for (EventDTO event : existingEvents) {
-            for (CourseAreaDTO courseArea : event.venue.getCourseAreas()) {
-                if (courseArea.id.equals(defaultCourseAreaId)) {
-                    return courseArea.name;
+        String result = "";
+        if (defaultCourseAreaId != null) {
+            for (EventDTO event : existingEvents) {
+                for (CourseAreaDTO courseArea : event.venue.getCourseAreas()) {
+                    if (courseArea.id.equals(defaultCourseAreaId)) {
+                        result = courseArea.name;
+                    }
                 }
             }
         }
-        return "";
+        return result;
     }
 
     private void editRacesOfRegattaSeries(final RegattaDTO regatta) {
