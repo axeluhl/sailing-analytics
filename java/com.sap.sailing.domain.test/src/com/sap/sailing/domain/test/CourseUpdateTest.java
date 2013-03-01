@@ -32,6 +32,7 @@ import com.sap.sailing.domain.base.impl.WaypointImpl;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
+import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
@@ -75,7 +76,7 @@ public class CourseUpdateTest extends AbstractTracTracLiveTest {
         receivers.add(new RaceCourseReceiver(domainFactory, trackedRegatta, getTracTracEvent(),
                 EmptyWindStore.INSTANCE, new DynamicRaceDefinitionSet() {
                     @Override
-                    public void addRaceDefinition(RaceDefinition race) {}
+                    public void addRaceDefinition(RaceDefinition race, DynamicTrackedRace trackedRace) {}
                 }, /* delayToLiveInMillis */ 0l, 
                 /* millisecondsOverWhichToAverageWind */ 30000, /* simulator */ null) {
             @Override
@@ -176,7 +177,7 @@ public class CourseUpdateTest extends AbstractTracTracLiveTest {
                 result[0] = zeroBasedIndex == controlPoints.size() && waypointThatGotRemoved.getControlPoint() == cp;
             }
         });
-        domainFactory.updateCourseWaypoints(course, getTracTracControlPoints(controlPoints));
+        domainFactory.updateCourseWaypoints(course, getTracTracControlPointsWithPassingSide(controlPoints));
         assertTrue(result[0]);
         testLegStructure(1);
     }
@@ -201,7 +202,7 @@ public class CourseUpdateTest extends AbstractTracTracLiveTest {
                 result[0] = zeroBasedIndex == 1 && waypointThatGotRemoved.getControlPoint() == cp;
             }
         });
-        domainFactory.updateCourseWaypoints(course, getTracTracControlPoints(controlPoints));
+        domainFactory.updateCourseWaypoints(course, getTracTracControlPointsWithPassingSide(controlPoints));
         assertTrue(result[0]);
         testLegStructure(1);
     }
@@ -238,7 +239,7 @@ public class CourseUpdateTest extends AbstractTracTracLiveTest {
         });
         ((CourseImpl) course).lockForWrite(); // without the lock it's possible that another race course update removes the additional waypoint again
         try {
-            domainFactory.updateCourseWaypoints(course, getTracTracControlPoints(controlPoints));
+            domainFactory.updateCourseWaypoints(course, getTracTracControlPointsWithPassingSide(controlPoints));
             assertTrue(result[0]);
             testLegStructure(3);
         } finally {
@@ -268,7 +269,7 @@ public class CourseUpdateTest extends AbstractTracTracLiveTest {
                 System.out.println("waypointRemoved " + zeroBasedIndex + " / " + waypointThatGotRemoved);
             }
         });
-        domainFactory.updateCourseWaypoints(course, getTracTracControlPoints(controlPoints));
+        domainFactory.updateCourseWaypoints(course, getTracTracControlPointsWithPassingSide(controlPoints));
         assertTrue(result[0]);
         testLegStructure(3);
     }

@@ -1416,7 +1416,13 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     private static class TotalAverageSpeedOverGroundField implements LegDetailField<Double> {
         @Override
         public Double get(LeaderboardRowDTO row) {
-            return row.totalDistanceTraveledInMeters / row.totalTimeSailedInSeconds / Mile.METERS_PER_NAUTICAL_MILE * 3600;
+            final Double result;
+            if (row.totalTimeSailedInSeconds != null && row.totalTimeSailedInSeconds != 0.0) {
+                result = row.totalDistanceTraveledInMeters / row.totalTimeSailedInSeconds / Mile.METERS_PER_NAUTICAL_MILE * 3600;
+            } else {
+                result = null;
+            }
+            return result;
         }
     }
     

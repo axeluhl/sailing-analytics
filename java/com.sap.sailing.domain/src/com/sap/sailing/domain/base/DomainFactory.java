@@ -7,6 +7,7 @@ import java.util.UUID;
 
 import com.sap.sailing.domain.base.impl.DomainFactoryImpl;
 import com.sap.sailing.domain.common.MarkType;
+import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
@@ -61,7 +62,7 @@ public interface DomainFactory {
      * The waypoint created is weakly cached so that when requested again by
      * {@link #getExistingWaypointById(Waypoint)} it is found.
      */
-    Waypoint createWaypoint(ControlPoint controlPoint);
+    Waypoint createWaypoint(ControlPoint controlPoint, NauticalSide passingSide);
     
     Waypoint getExistingWaypointById(Waypoint waypointPrototype);
 

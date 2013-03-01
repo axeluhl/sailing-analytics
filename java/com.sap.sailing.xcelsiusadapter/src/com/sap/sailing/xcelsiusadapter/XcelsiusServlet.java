@@ -8,10 +8,10 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.sap.sailing.server.gateway.SailingServerHttpServlet;
 
-public class XcelsiusApp extends SailingServerHttpServlet {
+public class XcelsiusServlet extends SailingServerHttpServlet {
     private static final long serialVersionUID = -6849138354941569249L;
 
-    public XcelsiusApp() {
+    public XcelsiusServlet() {
     }
 
     @Override
@@ -30,38 +30,38 @@ public class XcelsiusApp extends SailingServerHttpServlet {
                     // ignore and leave at -1
                 }
                 if ("getRankPerLeg".equals(action)) {
-                    final RankPerLeg a = new RankPerLeg(req, res, getService(), maxRows);
+                    final RankPerLegAction a = new RankPerLegAction(req, res, getService(), maxRows);
                     a.perform();
                     return;
                 } else if ("getRankPerLeg2".equals(action)) {
-                    new RankPerLeg2(req, res, getService(), maxRows).perform();
+                    new RankPerLeg2Action(req, res, getService(), maxRows).perform();
                     return;
                 } else if ("gpsPerRace".equals(action)) {
-                    final GPSPerRace a = new GPSPerRace(req, res, getService(), maxRows);
+                    final GPSPerRaceAction a = new GPSPerRaceAction(req, res, getService(), maxRows);
                     a.perform();
                     return;
                 } else if ("listEvents".equals(action)) {
-                    final ListEvents a = new ListEvents(req, res, getService(), maxRows);
+                    final ListEventsAction a = new ListEventsAction(req, res, getService(), maxRows);
                     a.perform();
                     return;
                 } else if ("getRankPerRace".equals(action)) {
-                    final RankPerRace a = new RankPerRace(req, res, getService(), maxRows);
+                    final RankPerRaceAction a = new RankPerRaceAction(req, res, getService(), maxRows);
                     a.perform();
                     return;                
                 } else if ("getRegattaDataPerLeg".equals(action)) {
-                    final RegattaDataPerLeg a = new RegattaDataPerLeg(req, res, getService(), maxRows);
+                    final RegattaDataPerLegAction a = new RegattaDataPerLegAction(req, res, getService(), maxRows);
                     a.perform();
                     return;
                 }else if ("getRegattaList".equals(action)) {
-                    final RegattaList a = new RegattaList(req, res, getService(), maxRows);
+                    final RegattaListAction a = new RegattaListAction(req, res, getService(), maxRows);
                     a.perform();
                     return;
                 }else {
                 }
-                Action.say("Unknown action", res);
+                HttpAction.say("Unknown action", res);
                 return;
             }
-            Action.say("Please use the action= parameter to specify an action.", res);
+            HttpAction.say("Please use the action= parameter to specify an action.", res);
             return;
         } catch (Exception e) {
             throw (new ServletException(e));

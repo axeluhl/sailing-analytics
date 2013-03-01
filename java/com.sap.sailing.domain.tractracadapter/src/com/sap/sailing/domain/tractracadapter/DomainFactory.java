@@ -12,14 +12,15 @@ import java.util.List;
 
 import com.maptrack.client.io.TypeController;
 import com.sap.sailing.domain.base.BoatClass;
-import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Course;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.Person;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Team;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
@@ -57,7 +58,7 @@ public interface DomainFactory {
 
     com.sap.sailing.domain.common.TimePoint createTimePoint(long timestamp);
 
-    Course createCourse(String name, Iterable<TracTracControlPoint> controlPoints);
+    Course createCourse(String name, Iterable<Pair<TracTracControlPoint, NauticalSide>> controlPoints);
 
     com.sap.sailing.domain.base.Competitor getOrCreateCompetitor(Competitor competitor);
 
@@ -182,7 +183,7 @@ public interface DomainFactory {
      * 
      * @param raceDefinitionSetToUpdate
      *            if not <code>null</code>, after creating the {@link TrackedRace}, the {@link RaceDefinition} is
-     *            {@link DynamicRaceDefinitionSet#addRaceDefinition(RaceDefinition) added} to that object.
+     *            {@link DynamicRaceDefinitionSet#addRaceDefinition(RaceDefinition, DynamicTrackedRace) added} to that object.
      */
     DynamicTrackedRace getOrCreateRaceDefinitionAndTrackedRace(TrackedRegatta trackedRegatta, Race race,
             Course course, WindStore windStore, long delayToLiveInMillis, long millisecondsOverWhichToAverageWind,
@@ -215,7 +216,7 @@ public interface DomainFactory {
      * of waypoints. The waypoints are created from the control points and represent usages of the control points
      * in a course. A single control point may be used more than once in a course's list of waypoints.
      */
-    void updateCourseWaypoints(Course courseToUpdate, Iterable<? extends TracTracControlPoint> controlPoints) throws PatchFailedException;
+    void updateCourseWaypoints(Course courseToUpdate, Iterable<Pair<TracTracControlPoint, NauticalSide>> controlPoints) throws PatchFailedException;
 
     TracTracConfiguration createTracTracConfiguration(String name, String jsonURL, String liveDataURI, String storedDataURI);
 

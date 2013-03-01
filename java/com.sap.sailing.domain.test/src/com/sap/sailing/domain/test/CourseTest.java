@@ -14,6 +14,7 @@ import java.util.Set;
 
 import org.junit.Test;
 
+import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Leg;
@@ -24,7 +25,9 @@ import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.base.impl.MarkImpl;
 import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
+import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.impl.Util;
+import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
@@ -171,8 +174,11 @@ public class CourseTest {
         assertEquals(3, Util.size(course.getWaypoints()));
         assertEquals(2, Util.size(course.getLegs()));
         assertWaypointIndexes(course);
-        course.update(Arrays.asList(wp2.getMarks().iterator().next(), wp3.getMarks().iterator().next(), wp1.getMarks().iterator().next()),
-                DomainFactory.INSTANCE);
+        List<Pair<ControlPoint, NauticalSide>> courseToUpdate = new ArrayList<Pair<ControlPoint, NauticalSide>>();
+        courseToUpdate.add(new Pair<ControlPoint, NauticalSide>(wp2.getMarks().iterator().next(), wp2.getPassingSide()));
+        courseToUpdate.add(new Pair<ControlPoint, NauticalSide>(wp3.getMarks().iterator().next(), wp3.getPassingSide()));
+        courseToUpdate.add(new Pair<ControlPoint, NauticalSide>(wp1.getMarks().iterator().next(), wp1.getPassingSide()));
+        course.update(courseToUpdate, DomainFactory.INSTANCE);
         assertWaypointIndexes(course);
     }
 

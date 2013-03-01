@@ -15,21 +15,19 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.RaceDefinition;
-import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.common.Distance;
+import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.tracking.GPSFixMoving;
-import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.RacingEventService;
 
-public class GPSPerRace extends Action {
+public class RankPerLegAction extends HttpAction {
     private final Set<String> competitorNameSet;
 
-    public GPSPerRace(HttpServletRequest req, HttpServletResponse res, RacingEventService service, int maxRows) {
+    public RankPerLegAction(HttpServletRequest req, HttpServletResponse res, RacingEventService service, int maxRows) {
         super(req, res, service, maxRows);
         String[] competitors = req.getParameterValues("competitor");
         if (competitors == null) {
@@ -59,7 +57,7 @@ public class GPSPerRace extends Action {
                 final Leg leg = trackedLeg.getLeg();
                 final String legId = numberFormat.format(++i);
                 final String markName = leg.getTo().getName();
-                final String upOrDownwinLeg = trackedLeg.isUpOrDownwindLeg(time) ? "U" : "D";
+                final String upOrDownwindLeg = trackedLeg.getLegType(time) == LegType.UPWIND ? "U" : "D";
                 LinkedHashMap<Competitor, Integer> ranks = trackedLeg.getRanks(time);
                 // Get competitor data
                 for (final Competitor competitor : ranks.keySet()) {
@@ -86,7 +84,7 @@ public class GPSPerRace extends Action {
                         addColumn(legId);
                         addColumn(markName);
                         addColumn(leg.getTo().getMarks().iterator().next().getName());
-                        addColumn(upOrDownwinLeg);
+                        addColumn(upOrDownwindLeg);
                         addColumn(competitorName);
                         addColumn(sailID == null ? "null" : sailID);
                         addColumn(nationality);
@@ -99,18 +97,16 @@ public class GPSPerRace extends Action {
                         addColumn("" + (distanceSailed == null ? "null" : distanceSailed.getMeters()));
 
                         // position and tracking-related columns (see Kersten's mail of 2011-10-07T11:32:00CEST)
-                        GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(competitor);
-                        GPSFixMoving fix = track.getFirstFixAtOrAfter(time);
-                        addColumn("" + (fix == null ? "null" : fix.getPosition().getLngDeg()));
-                        addColumn("" + (fix == null ? "null" : fix.getPosition().getLatDeg()));
-                        SpeedWithBearing speedOverGround = trackedLegOfCompetitor.getSpeedOverGround(time);
-                        addColumn("" + (speedOverGround == null ? "null" : speedOverGround.getKnots()));
-                        Double estimatedTimeToNextMarkInSeconds = trackedLegOfCompetitor
-                                .getEstimatedTimeToNextMarkInSeconds(time);
-                        addColumn(""
-                                + (estimatedTimeToNextMarkInSeconds == null ? "null" : estimatedTimeToNextMarkInSeconds));
-                        Speed velocityMadeGood = trackedLegOfCompetitor.getVelocityMadeGood(time);
-                        addColumn("" + (velocityMadeGood == null ? "null" : velocityMadeGood.getKnots()));
+                        /*
+                         * SpeedWithBearing speedOverGround = trackedLegOfCompetitor.getSpeedOverGround(time);
+                         * addColumn(""+(speedOverGround==null?"null":speedOverGround.getKnots())); Double
+                         * estimatedTimeToNextMarkInSeconds =
+                         * trackedLegOfCompetitor.getEstimatedTimeToNextMarkInSeconds(time);
+                         * addColumn(""+(estimatedTimeToNextMarkInSeconds
+                         * ==null?"null":estimatedTimeToNextMarkInSeconds)); Speed velocityMadeGood =
+                         * trackedLegOfCompetitor.getVelocityMadeGood(time); addColumn(""+(velocityMadeGood==null ?
+                         * "null" : velocityMadeGood.getKnots()));
+                         */
                     }
                 }
                 previousLeg = trackedLeg;

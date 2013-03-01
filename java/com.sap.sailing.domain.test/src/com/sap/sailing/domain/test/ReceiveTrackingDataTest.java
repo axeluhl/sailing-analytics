@@ -81,7 +81,7 @@ public class ReceiveTrackingDataTest extends AbstractTracTracLiveTest {
         /* end of tracking */null, /* delayToLiveInMillis */0l, /* simulator */ null,
                 EmptyWindStore.INSTANCE, new DynamicRaceDefinitionSet() {
                     @Override
-                    public void addRaceDefinition(RaceDefinition race) {
+                    public void addRaceDefinition(RaceDefinition race, DynamicTrackedRace trackedRace) {
                     }
                 }, /* trackedRegattaRegistry */ null)) {
             for (TypeController raceListener : receiver.getTypeControllersAndStart()) {
@@ -92,7 +92,7 @@ public class ReceiveTrackingDataTest extends AbstractTracTracLiveTest {
                 /* start of tracking */null, /* end of tracking */null, /* delayToLiveInMillis */0l, /* simulateWithStartTimeNow */
                 /* simulator */ null, EmptyWindStore.INSTANCE, new DynamicRaceDefinitionSet() {
                     @Override
-                    public void addRaceDefinition(RaceDefinition race) {
+                    public void addRaceDefinition(RaceDefinition race, DynamicTrackedRace trackedRace) {
                     }
                 }, /* trackedRegattaRegistry */ null));
     }
