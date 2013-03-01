@@ -16,14 +16,6 @@ import com.sap.sailing.domain.tracking.TrackedRegatta;
  *
  */
 public interface Regatta extends Named, WithID {
-	BoatClass getBoatClass();
-	
-	/**
-     * A regatta name may be composed, e.g., from an overall regatta name and the boat class name. A factory or constructor
-     * may require the base name to which the boat class name will be appended. This method emits the base name.
-     */
-    String getBaseName();
-	
     ScoringScheme getScoringScheme();
     
     CourseArea getDefaultCourseArea();
@@ -60,6 +52,8 @@ public interface Regatta extends Named, WithID {
      */
     RaceDefinition getRaceByName(String raceName);
     
+    BoatClass getBoatClass();
+    
     Iterable<Competitor> getCompetitors();
 
     void addRace(RaceDefinition race);
@@ -72,6 +66,12 @@ public interface Regatta extends Named, WithID {
 
     RegattaIdentifier getRegattaIdentifier();
 
+    /**
+     * A regatta name may be composed, e.g., from an overall regatta name and the boat class name. A factory or constructor
+     * may require the base name to which the boat class name will be appended. This method emits the base name.
+     */
+    String getBaseName();
+        
     /**
      * Regattas may be constructed as implicit default regattas in which case they won't need to be stored
      * durably and don't contain valuable information worth being preserved; or they are constructed explicitly

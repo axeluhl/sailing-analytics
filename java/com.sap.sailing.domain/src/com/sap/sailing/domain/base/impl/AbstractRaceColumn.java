@@ -36,13 +36,10 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
     @Override
     public synchronized void setRaceLogInformation(final RaceLogInformation information) {
         raceLogs.clear();
-        
         raceLogsIdentifier = information.getIdentifierTemplate();
         RaceLogStore store = information.getStore();
-        
         for (final Fleet fleet : getFleets()) {
             RaceLogIdentifier identifier = raceLogsIdentifier.compile(fleet);
-            
             RaceLog raceLog = store.getRaceLog(identifier);
             raceLog.addListener(new RaceColumnRaceLogReplicator(this, identifier));
             raceLogs.put(fleet, raceLog);

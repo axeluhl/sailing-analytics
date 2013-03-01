@@ -14,5 +14,5 @@ package com.sap.sailing.domain.base;
  *
  */
 public interface IsManagedBySharedDomainFactory {
-	IsManagedBySharedDomainFactory resolve(SharedDomainFactory domainFactory);
+    IsManagedBySharedDomainFactory resolve(SharedDomainFactory domainFactory);
 }

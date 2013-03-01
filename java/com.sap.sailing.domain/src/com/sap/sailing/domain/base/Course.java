@@ -26,10 +26,9 @@ import difflib.PatchFailedException;
  * 
  */
 public interface Course extends Named, CourseData {
-	void lockForRead();
+    void lockForRead();
     
     void unlockAfterRead();
-    
     
     void addCourseListener(CourseListener listener);
     
@@ -42,5 +41,4 @@ public interface Course extends Named, CourseData {
      * had been used.
      */
     void update(List<? extends ControlPoint> newControlPoints, DomainFactory baseDomainFactory) throws PatchFailedException;
-
 }
