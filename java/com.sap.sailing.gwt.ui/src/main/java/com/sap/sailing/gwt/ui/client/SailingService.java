@@ -237,14 +237,14 @@ public interface SailingService extends RemoteService {
 
     void updateRacesDelayToLive(List<RegattaAndRaceIdentifier> regattaAndRaceIdentifiers, long delayToLiveInMs);
 
-    void updateEvent(String eventName, Serializable id, VenueDTO venue, String publicationUrl, boolean isPublic,
+    void updateEvent(String eventName, String eventIdAsString, VenueDTO venue, String publicationUrl, boolean isPublic,
             List<String> regattaNames);
 
     EventDTO createEvent(String eventName, String venueName, String publicationUrl, boolean isPublic, List<String> courseAreaNames);
 
-    void removeEvent(Serializable id);
+    void removeEvent(String eventIdAsString);
 
-    void renameEvent(Serializable id, String newName);
+    void renameEvent(String eventIdAsString, String newName);
 
     EventDTO getEventByName(String eventName);
 
@@ -298,5 +298,5 @@ public interface SailingService extends RemoteService {
     
     EventDTO getEventById(Serializable id);
     
-    CourseAreaDTO createCourseArea(Serializable id, String courseAreaName);
+    CourseAreaDTO createCourseArea(String eventIdAsString, String courseAreaName);
 }

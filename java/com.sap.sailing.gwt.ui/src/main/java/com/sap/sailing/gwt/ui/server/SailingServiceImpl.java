@@ -2893,40 +2893,40 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public void updateEvent(String eventName, Serializable id, VenueDTO venue, String publicationUrl, boolean isPublic, List<String> regattaNames) {
-        UUID uuid = UUID.fromString(id.toString());
-        getService().apply(new UpdateEvent(uuid, eventName, venue.name, publicationUrl, isPublic, regattaNames));
+    public void updateEvent(String eventName, String eventIdAsString, VenueDTO venue, String publicationUrl, boolean isPublic, List<String> regattaNames) {
+        UUID eventUuid = convertIdentifierStringToUuid(eventIdAsString);
+        getService().apply(new UpdateEvent(eventUuid, eventName, venue.name, publicationUrl, isPublic, regattaNames));
     }
 
     @Override
     public EventDTO createEvent(String eventName, String venue, String publicationUrl, boolean isPublic, List<String> courseAreaNames) {
-        UUID uuid = UUID.randomUUID();
-        getService().apply(new CreateEvent(eventName, venue, publicationUrl, isPublic, uuid, courseAreaNames));
+        UUID eventUuid = UUID.randomUUID();
+        getService().apply(new CreateEvent(eventName, venue, publicationUrl, isPublic, eventUuid, courseAreaNames));
 
         for (String courseAreaName : courseAreaNames) {
-            createCourseArea(uuid, courseAreaName);
+            createCourseArea(eventUuid.toString(), courseAreaName);
         }
 
-        return getEventById(uuid);
+        return getEventById(eventUuid);
     }
 
     @Override
-    public CourseAreaDTO createCourseArea(Serializable id, String courseAreaName) {
-        UUID uuid = UUID.fromString(id.toString());
-        CourseArea courseArea = getService().apply(new AddCourseArea(uuid, courseAreaName, UUID.randomUUID()));
+    public CourseAreaDTO createCourseArea(String eventIdAsString, String courseAreaName) {
+        UUID eventUuid = convertIdentifierStringToUuid(eventIdAsString);
+        CourseArea courseArea = getService().apply(new AddCourseArea(eventUuid, courseAreaName, UUID.randomUUID()));
         return convertToCourseAreaDTO(courseArea);
     }
 
     @Override
-    public void removeEvent(Serializable id) {
-        UUID uuid = UUID.fromString(id.toString());
-        getService().apply(new RemoveEvent(uuid));
+    public void removeEvent(String eventIdAsString) {
+        UUID eventUuid = convertIdentifierStringToUuid(eventIdAsString);
+        getService().apply(new RemoveEvent(eventUuid));
     }
 
     @Override
-    public void renameEvent(Serializable id, String newName) {
-        UUID uuid = UUID.fromString(id.toString());
-        getService().apply(new RenameEvent(uuid, newName));
+    public void renameEvent(String eventIdAsString, String newName) {
+        UUID eventUuid = convertIdentifierStringToUuid(eventIdAsString);
+        getService().apply(new RenameEvent(eventUuid, newName));
     }
 
     @Override

@@ -356,19 +356,19 @@ public interface SailingServiceAsync {
      * If there's no event with the name <code>oldName</code> or there's already a event with the name
      * <code>newName</code> a {@link IllegalArgumentException} is thrown.
      */
-    void renameEvent(Serializable id, String newName, AsyncCallback<Void> callback);
+    void renameEvent(String eventIdAsString, String newName, AsyncCallback<Void> callback);
 
     /**
      * Removes the event with the id <code>id</code> from the service and the persistence store.
      */
-    void removeEvent(Serializable id, AsyncCallback<Void> callback);
+    void removeEvent(String eventIdAsString, AsyncCallback<Void> callback);
 
     void createEvent(String eventName, String description, String publicationUrl, boolean isPublic, List<String> courseAreaNames, AsyncCallback<EventDTO> callback);
 
-    void updateEvent(String eventName, Serializable id, VenueDTO venue, String publicationUrl, boolean isPublic,
+    void updateEvent(String eventName, String eventIdAsString, VenueDTO venue, String publicationUrl, boolean isPublic,
             List<String> regattaNames, AsyncCallback<Void> callback);
 
-    void createCourseArea(Serializable id, String courseAreaName, AsyncCallback<CourseAreaDTO> callback);
+    void createCourseArea(String eventIdAsString, String courseAreaName, AsyncCallback<CourseAreaDTO> callback);
 
     void removeRegatta(RegattaIdentifier regattaIdentifier, AsyncCallback<Void> callback);
 
