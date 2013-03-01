@@ -130,7 +130,7 @@ public interface SailingService extends RemoteService {
     
     void updateLeaderboard(String leaderboardName, String newLeaderboardName, String newLeaderboardDisplayName, int[] newDiscardingThreasholds);
 
-    StrippedLeaderboardDTO createFlexibleLeaderboard(String leaderboardName, int[] discardThresholds, ScoringSchemeType scoringSchemeType, Serializable courseAreaId);
+    StrippedLeaderboardDTO createFlexibleLeaderboard(String leaderboardName, int[] discardThresholds, ScoringSchemeType scoringSchemeType, String courseAreaId);
 
     StrippedLeaderboardDTO createRegattaLeaderboard(RegattaIdentifier regattaIdentifier, int[] discardThresholds);
 
@@ -150,7 +150,7 @@ public interface SailingService extends RemoteService {
     
     RegattaDTO createRegatta(String regattaName, String boatClassName, 
             LinkedHashMap<String, Pair<List<Triple<String, Integer, Color>>, Boolean>> seriesNamesWithFleetNamesAndFleetOrderingAndMedal,
-            boolean persistent, ScoringSchemeType scoringSchemeType, Serializable defaultCourseAreaId);
+            boolean persistent, ScoringSchemeType scoringSchemeType, String defaultCourseAreaId);
     
     void removeRegatta(RegattaIdentifier regattaIdentifier);
     

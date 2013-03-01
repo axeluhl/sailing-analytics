@@ -213,7 +213,7 @@ public interface SailingServiceAsync {
     void updateLeaderboard(String leaderboardName, String newLeaderboardName, String newLeaderboardDisplayName,
             int[] newDiscardingThreasholds, AsyncCallback<Void> callback);
 
-    void createFlexibleLeaderboard(String leaderboardName, int[] discardThresholds, ScoringSchemeType scoringSchemeType, Serializable courseAreaId,
+    void createFlexibleLeaderboard(String leaderboardName, int[] discardThresholds, ScoringSchemeType scoringSchemeType, String courseAreaId,
             AsyncCallback<StrippedLeaderboardDTO> asyncCallback);
 
     void createRegattaLeaderboard(RegattaIdentifier regattaIdentifier, int[] discardThresholds,
@@ -386,7 +386,7 @@ public interface SailingServiceAsync {
 
     void createRegatta(String regattaName, String boatClassName,
             LinkedHashMap<String, Pair<List<Triple<String, Integer, Color>>, Boolean>> seriesNamesWithFleetNamesAndFleetOrderingAndMedal,
-            boolean persistent, ScoringSchemeType scoringSchemeType, Serializable defaultCourseAreaId, AsyncCallback<RegattaDTO> callback);
+            boolean persistent, ScoringSchemeType scoringSchemeType, String defaultCourseAreaId, AsyncCallback<RegattaDTO> callback);
 
     void addRaceColumnsToSeries(RegattaIdentifier regattaIdentifier, String seriesName, List<String> columnNames,
             AsyncCallback<List<RaceColumnInSeriesDTO>> callback);
