@@ -157,9 +157,9 @@ public class RegattaWithSeriesAndFleetsCreateDialog extends DataEntryDialog<Rega
     private void setCourseAreaInRegatta(RegattaDTO regatta) {
         CourseAreaDTO courseArea = getSelectedCourseArea();
         if (courseArea == null) {
-            regatta.defaultCourseAreaId = null;
+            regatta.defaultCourseAreaIdAsString = null;
         } else {
-            regatta.defaultCourseAreaId = courseArea.id;
+            regatta.defaultCourseAreaIdAsString = courseArea.id;
             regatta.defaultCourseAreaName = courseArea.name;
         }
     }
@@ -301,7 +301,7 @@ public class RegattaWithSeriesAndFleetsCreateDialog extends DataEntryDialog<Rega
         CourseAreaDTO result = null;
         EventDTO event = getSelectedEvent();
         int selIndex = courseAreaListBox.getSelectedIndex();
-        if(selIndex > 0) { // the zero index represents the 'no selection' text
+        if(selIndex > 0 && event != null) { // the zero index represents the 'no selection' text
             String itemText = courseAreaListBox.getItemText(selIndex);
             for(CourseAreaDTO courseAreaDTO: event.venue.getCourseAreas()) {
                 if(courseAreaDTO.name.equals(itemText)) {

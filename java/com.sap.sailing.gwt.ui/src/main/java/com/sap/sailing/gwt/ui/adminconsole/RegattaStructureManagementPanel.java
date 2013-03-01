@@ -187,7 +187,7 @@ public class RegattaStructureManagementPanel extends SimplePanel implements Rega
         TextColumn<RegattaDTO> regattaCourseAreaColumn = new TextColumn<RegattaDTO>() {
             @Override
             public String getValue(RegattaDTO regatta) {
-                String courseAreaName = regatta.defaultCourseAreaId == null ? "" : regatta.defaultCourseAreaName;
+                String courseAreaName = regatta.defaultCourseAreaIdAsString == null ? "" : regatta.defaultCourseAreaName;
                 return courseAreaName;
             }
         };
@@ -310,12 +310,12 @@ public class RegattaStructureManagementPanel extends SimplePanel implements Rega
         parentPanel.add(regattaTable);
     }
 
-    protected String getCourseAreaName(String defaultCourseAreaId) {
+    protected String getCourseAreaName(String defaultCourseAreaIdAsString) {
         String result = "";
-        if (defaultCourseAreaId != null) {
+        if (defaultCourseAreaIdAsString != null) {
             for (EventDTO event : existingEvents) {
                 for (CourseAreaDTO courseArea : event.venue.getCourseAreas()) {
-                    if (courseArea.id.equals(defaultCourseAreaId)) {
+                    if (courseArea.id.equals(defaultCourseAreaIdAsString)) {
                         result = courseArea.name;
                     }
                 }
@@ -526,7 +526,7 @@ public class RegattaStructureManagementPanel extends SimplePanel implements Rega
             seriesStructure.put(seriesDTO.name, seriesPair);
         }
         sailingService.createRegatta(newRegatta.name, newRegatta.boatClass.name, seriesStructure, true,
-                newRegatta.scoringScheme, newRegatta.defaultCourseAreaId, new AsyncCallback<RegattaDTO>() {
+                newRegatta.scoringScheme, newRegatta.defaultCourseAreaIdAsString, new AsyncCallback<RegattaDTO>() {
             @Override
             public void onFailure(Throwable t) {
                 errorReporter.reportError("Error trying to create new regatta" + newRegatta.name + ": " + t.getMessage());

@@ -1050,7 +1050,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             regattaDTO.boatClass = new BoatClassDTO(boatClass.getName(), boatClass.getHullLength().getMeters());
         }
         if (regatta.getDefaultCourseArea() != null) {
-            regattaDTO.defaultCourseAreaId = regatta.getDefaultCourseArea().getId().toString();
+            regattaDTO.defaultCourseAreaIdAsString = regatta.getDefaultCourseArea().getId().toString();
             regattaDTO.defaultCourseAreaName = regatta.getDefaultCourseArea().getName();
         }
         return regattaDTO;
@@ -1996,16 +1996,18 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public StrippedLeaderboardDTO createFlexibleLeaderboard(String leaderboardName, int[] discardThresholds, ScoringSchemeType scoringSchemeType,
-            Serializable courseAreaId) {
-        UUID courseAreaUuid = convertSerializableToUuid(courseAreaId);
+            String courseAreaId) {
+        UUID courseAreaUuid = convertIdentifierStringToUuid(courseAreaId);
         return createStrippedLeaderboardDTO(getService().apply(new CreateFlexibleLeaderboard(leaderboardName, discardThresholds,
                 baseDomainFactory.createScoringScheme(scoringSchemeType), courseAreaUuid)), false);
     }
 
-    private UUID convertSerializableToUuid(Serializable serializable) {
+    private UUID convertIdentifierStringToUuid(String identifierToConvert) {
         UUID convertedUuid = null;
-        if (serializable != null) {
-            convertedUuid = UUID.fromString(serializable.toString());
+        if (identifierToConvert != null) {
+            try {
+                convertedUuid = UUID.fromString(identifierToConvert);
+            } catch (IllegalArgumentException iae) {}
         }
         return convertedUuid;
     }
@@ -3038,8 +3040,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public RegattaDTO createRegatta(String regattaName, String boatClassName,
             LinkedHashMap<String, Pair<List<Triple<String, Integer, Color>>, Boolean>> seriesNamesWithFleetNamesAndFleetOrderingAndMedal,
-            boolean persistent, ScoringSchemeType scoringSchemeType, Serializable defaultCourseAreaId) {
-        UUID courseAreaUuid = convertSerializableToUuid(defaultCourseAreaId);
+            boolean persistent, ScoringSchemeType scoringSchemeType, String defaultCourseAreaId) {
+        UUID courseAreaUuid = convertIdentifierStringToUuid(defaultCourseAreaId);
         Regatta regatta = getService().apply(
                 new AddSpecificRegatta(
                         regattaName, boatClassName, UUID.randomUUID(),

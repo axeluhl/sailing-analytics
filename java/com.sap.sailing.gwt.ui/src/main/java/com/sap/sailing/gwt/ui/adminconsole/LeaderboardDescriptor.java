@@ -21,26 +21,26 @@ public class LeaderboardDescriptor {
     private ScoringSchemeType scoringScheme; 
     private int[] discardThresholds;
     private String regattaName;
-    private String courseAreaId;
+    private String courseAreaIdAsString;
 
     public LeaderboardDescriptor() {
     }
 
-    public LeaderboardDescriptor(String name, String displayName, ScoringSchemeType scoringScheme, int[] discardThresholds, String regattaName, String courseAreaId) {
+    public LeaderboardDescriptor(String name, String displayName, ScoringSchemeType scoringScheme, int[] discardThresholds, String regattaName, String courseAreaIdAsString) {
         this.name = name;
         this.displayName = displayName;
         this.scoringScheme = scoringScheme;
         this.discardThresholds = discardThresholds;
         this.regattaName = regattaName;
-        this.courseAreaId = courseAreaId;
+        this.courseAreaIdAsString = courseAreaIdAsString;
     }
 
-    public LeaderboardDescriptor(String name, String displayName, ScoringSchemeType scoringScheme, int[] discardThresholds, String courseAreaId) {
+    public LeaderboardDescriptor(String name, String displayName, ScoringSchemeType scoringScheme, int[] discardThresholds, String courseAreaIdAsString) {
         this.name = name;
         this.displayName = displayName;
         this.scoringScheme = scoringScheme;
         this.discardThresholds = discardThresholds;
-        this.courseAreaId = courseAreaId;
+        this.courseAreaIdAsString = courseAreaIdAsString;
     }
 
     public String getName() {
@@ -75,11 +75,11 @@ public class LeaderboardDescriptor {
         this.regattaName = regattaName;
     }
 
-    public String getCourseAreaId() {
-        return courseAreaId;
+    public String getCourseAreaIdAsString() {
+        return courseAreaIdAsString;
     }
 
-    public void setCourseAreaId(String courseAreaId) {
-        this.courseAreaId = courseAreaId;
+    public void setCourseAreaIdAsString(String courseAreaId) {
+        this.courseAreaIdAsString = courseAreaId;
     }
 }
