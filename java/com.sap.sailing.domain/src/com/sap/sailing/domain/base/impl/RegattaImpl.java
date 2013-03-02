@@ -106,10 +106,24 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
         for (Series s : series) {
             s.setRegatta(this);
             s.addRaceColumnListener(this);
+            registerRaceLogsOnRaceColumns(s);
         }
         this.persistent = persistent;
         this.scoringScheme = scoringScheme;
-        this.courseArea = courseArea;
+        this.courseArea = courseArea;       
+    }
+
+    private void registerRaceLogsOnRaceColumns(Series series) {
+        for (RaceColumn raceColumn : series.getRaceColumns()) {
+            setRaceLogInformationOnRaceColumn(raceColumn);
+        }
+    }
+
+    private void setRaceLogInformationOnRaceColumn(RaceColumn raceColumn) {
+        raceColumn.setRaceLogInformation(
+                new RaceLogInformationImpl(
+                    raceLogStore,
+                    new RaceLogOnRegattaIdentifier(this, raceColumn.getName())));
     }
 
     public static String getFullName(String baseName, String boatClassName) {
@@ -265,10 +279,7 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
 
     @Override
     public void raceColumnAddedToContainer(RaceColumn raceColumn) {
-        raceColumn.setRaceLogInformation(
-                new RaceLogInformationImpl(
-                    raceLogStore,
-                    new RaceLogOnRegattaIdentifier(this, raceColumn.getName())));
+        setRaceLogInformationOnRaceColumn(raceColumn);
         
         raceColumnListeners.notifyListenersAboutRaceColumnAddedToContainer(raceColumn);
     }
