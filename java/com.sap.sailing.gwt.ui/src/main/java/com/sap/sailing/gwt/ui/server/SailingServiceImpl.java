@@ -121,6 +121,10 @@ import com.sap.sailing.domain.persistence.MongoRaceLogStoreFactory;
 import com.sap.sailing.domain.persistence.MongoWindStoreFactory;
 import com.sap.sailing.domain.polarsheets.BoatAndWindSpeed;
 import com.sap.sailing.domain.polarsheets.PolarSheetGenerationWorker;
+import com.sap.sailing.domain.racelog.RaceLog;
+import com.sap.sailing.domain.racelog.RaceLogEvent;
+import com.sap.sailing.domain.racelog.RaceLogEventFactory;
+import com.sap.sailing.domain.racelog.impl.RaceLogImpl;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingArchiveConfiguration;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingConfiguration;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
@@ -184,8 +188,8 @@ import com.sap.sailing.gwt.ui.shared.RaceColumnDTO;
 import com.sap.sailing.gwt.ui.shared.RaceColumnInSeriesDTO;
 import com.sap.sailing.gwt.ui.shared.RaceCourseDTO;
 import com.sap.sailing.gwt.ui.shared.RaceDTO;
-import com.sap.sailing.gwt.ui.shared.RaceEventDTO;
-import com.sap.sailing.gwt.ui.shared.RaceEventLogDTO;
+import com.sap.sailing.gwt.ui.shared.RaceLogDTO;
+import com.sap.sailing.gwt.ui.shared.RaceLogEventDTO;
 import com.sap.sailing.gwt.ui.shared.RaceMapDataDTO;
 import com.sap.sailing.gwt.ui.shared.RaceStatusDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
@@ -1080,6 +1084,24 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         }
         SeriesDTO result = new SeriesDTO(series.getName(), fleets, raceColumns, series.isMedal());
         return result;
+    }
+
+    private RaceLogDTO convertToRaceLogDTO(RaceLog raceLog) {
+        RaceLogDTO raceLogDTO = new RaceLogDTO();
+        raceLog.lockForRead();
+        try{
+            for(RaceLogEvent raceLogEvent : raceLog.getFixes()){
+                raceLogDTO.raceEvents.add(convertToRaceLogEventDTO(raceLogEvent));
+            }
+        }finally{
+            raceLog.unlockAfterRead();
+        }
+        return raceLogDTO;
+    }
+
+    private RaceLogEventDTO convertToRaceLogEventDTO(RaceLogEvent raceLogEvent) {
+        RaceLogEventDTO raceLogEventDTO = new RaceLogEventDTO(raceLogEvent.getTimePoint().asMillis(), raceLogEvent.getPassId());
+        return raceLogEventDTO;
     }
 
     private FleetDTO convertToFleetDTO(Fleet fleet) {
@@ -2136,12 +2158,23 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 final FleetDTO fleetDTO = convertToFleetDTO(fleet);
                 RaceColumnDTO raceColumnDTO = leaderboardDTO.addRace(raceColumn.getName(), raceColumn.getExplicitFactor(), raceColumn.getFactor(),
                         fleetDTO, raceColumn.isMedalRace(), raceIdentifier, raceDTO);
+                
+                //workaround because RaceLog is null
+                fillRaceLockMock(raceColumnDTO, fleetDTO);
+               
                 if (latestTimePointAfterQueryTimePointWhenATrackedRaceWasLive != null) {
                     raceColumnDTO.setWhenLastTrackedRaceWasLive(fleetDTO, latestTimePointAfterQueryTimePointWhenATrackedRaceWasLive.asDate());
                 }
             }
         }
         return leaderboardDTO;
+    }
+
+    private void fillRaceLockMock(RaceColumnDTO raceColumnDTO, FleetDTO fleetDTO) {
+        RaceLog raceLog = new RaceLogImpl("lockString");
+        raceLog.add(RaceLogEventFactory.INSTANCE.createRaceLogPassChangeEvent(MillisecondsTimePoint.now(), 42));
+        RaceLogDTO raceLogDTO = convertToRaceLogDTO(raceLog);
+        raceColumnDTO.getRaceLogsPerFleet().put(fleetDTO, raceLogDTO);
     }
 
     private RaceDTO createRaceDTO(boolean withGeoLocationData, RegattaAndRaceIdentifier raceIdentifier, TrackedRace trackedRace) {
@@ -3123,15 +3156,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         if (fregService != null) {
             fregService.registerResultUrl(new URL(result));
         }
-    }
-
-    @Override
-    public RaceEventLogDTO getRaceEventLog() {
-        RaceEventLogDTO result = new RaceEventLogDTO("My race");
-        for(int i = 0; i < 10; i++) {
-            result.raceEvents.add(new RaceEventDTO("Event " + i));
-        }
-        return result;
     }
 
     @Override

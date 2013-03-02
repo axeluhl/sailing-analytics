@@ -39,7 +39,7 @@ import com.sap.sailing.gwt.ui.shared.QuickRankDTO;
 import com.sap.sailing.gwt.ui.shared.RaceColumnInSeriesDTO;
 import com.sap.sailing.gwt.ui.shared.RaceCourseDTO;
 import com.sap.sailing.gwt.ui.shared.RaceDTO;
-import com.sap.sailing.gwt.ui.shared.RaceEventLogDTO;
+import com.sap.sailing.gwt.ui.shared.RaceLogDTO;
 import com.sap.sailing.gwt.ui.shared.RaceMapDataDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
@@ -293,8 +293,6 @@ public interface SailingService extends RemoteService {
     PolarSheetsData getPolarSheetsGenerationResults(String id);
     
     PolarSheetsHistogramData getPolarSheetData(String polarSheetId, int angle, int windSpeed);
-    
-    RaceEventLogDTO getRaceEventLog();
     
     EventDTO getEventById(Serializable id);
     
