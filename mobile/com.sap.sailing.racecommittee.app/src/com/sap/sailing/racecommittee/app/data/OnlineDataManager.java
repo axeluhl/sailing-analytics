@@ -11,6 +11,7 @@ import android.content.Context;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.EventData;
+import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 import com.sap.sailing.racecommittee.app.data.handlers.DataHandler;
 import com.sap.sailing.racecommittee.app.data.handlers.EventsDataHandler;
@@ -75,7 +76,7 @@ public class OnlineDataManager extends DataManager {
 		try {
 			new DataLoader<Collection<EventData>>(
 					context, 
-					URI.create(TargetHost + "/sailingserver/rc/events"), 
+					URI.create(AppConstants.getURL(context) + "/sailingserver/rc/events"), 
 					parser, 
 					handler).forceLoad();
 		} catch (MalformedURLException e) {
@@ -141,7 +142,7 @@ public class OnlineDataManager extends DataManager {
 		try {
 			new DataLoader<Collection<ManagedRace>>(
 					context, 
-					URI.create(TargetHost + "/sailingserver/rc/leaderboards?courseArea=" + courseAreaId.toString()), 
+					URI.create(AppConstants.getURL(context) + "/sailingserver/rc/leaderboards?courseArea=" + courseAreaId.toString()), 
 					parser, 
 					handler).forceLoad();
 		} catch (MalformedURLException e) {
@@ -151,9 +152,4 @@ public class OnlineDataManager extends DataManager {
 		}
 		
 	}
-	
-	private static final String TargetHost = "http://192.168.1.142:8888";
-	
-	
-
 }
