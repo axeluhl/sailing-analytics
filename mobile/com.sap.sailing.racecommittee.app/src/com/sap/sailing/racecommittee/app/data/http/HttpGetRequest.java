@@ -9,14 +9,12 @@ import java.net.URI;
 
 public class HttpGetRequest extends HttpRequest {
 
+    public HttpGetRequest(URI requestUri) throws MalformedURLException, IOException {
+        super(requestUri.toURL());
+    }
 
-	public HttpGetRequest(URI requestUri) throws MalformedURLException, IOException {
-		super(requestUri.toURL());
-	}
-
-	@Override
-	protected InputStream execute(HttpURLConnection connection)
-			throws IOException {
-		return new BufferedInputStream(connection.getInputStream());
-	}
+    @Override
+    protected InputStream execute(HttpURLConnection connection) throws IOException {
+        return new BufferedInputStream(connection.getInputStream());
+    }
 }

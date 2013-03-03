@@ -7,18 +7,18 @@ import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
 
 public class StartTimeFinder extends RaceLogAnalyzer {
 
-	public StartTimeFinder(RaceLog raceLog) {
-		super(raceLog);
-	}
-	
-	public TimePoint getStartTime() {
-		TimePoint startTime = null;
-		for (RaceLogEvent event : getPassEvents()) {
-			if (event instanceof RaceLogStartTimeEvent) {
-				startTime = ((RaceLogStartTimeEvent) event).getStartTime();
-			}
-		}
-		return startTime;
-	}
-	
+    public StartTimeFinder(RaceLog raceLog) {
+        super(raceLog);
+    }
+
+    public TimePoint getStartTime() {
+        TimePoint startTime = null;
+        for (RaceLogEvent event : getPassEvents()) {
+            if (event instanceof RaceLogStartTimeEvent) {
+                startTime = ((RaceLogStartTimeEvent) event).getStartTime();
+            }
+        }
+        return startTime;
+    }
+
 }

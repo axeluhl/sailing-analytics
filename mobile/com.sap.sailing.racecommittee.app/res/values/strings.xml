@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="intentActionRegisterRace">com.sap.sailing.racecommittee.app.action.registerRace</string>
+    <!-- <string name="intentActionSaveIntent">com.sap.sailing.racecommittee.app.action.saveIntent</string> -->
+    <string name="intentActionSendSavedIntents">com.sap.sailing.racecommittee.app.action.sendSavedIntents</string>
+    <string name="intentActionSendEvent">com.sap.sailing.racecommittee.app.action.sendEvent</string>
+	
     <string name="hello">Hello World, RaceCommitteeActivity!</string>
     <string name="running_on_course">(on course %s)</string>
     <string name="course_design_number_waypoints">Course has %s waypoints</string>

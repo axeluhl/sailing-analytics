@@ -9,7 +9,7 @@ import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 
 public class RaceLogRaceStatusEventSerializer extends BaseRaceLogEventSerializer {
 
-    public static final String VALUE_CLASS = RaceLogRaceStatusEventSerializer.class.getSimpleName();
+    public static final String VALUE_CLASS = RaceLogRaceStatusEvent.class.getSimpleName();
     public static final String FIELD_NEXT_STATUS = "nextStatus";
 
     public RaceLogRaceStatusEventSerializer(JsonSerializer<Competitor> competitorSerializer) {
@@ -25,7 +25,7 @@ public class RaceLogRaceStatusEventSerializer extends BaseRaceLogEventSerializer
     public JSONObject serialize(RaceLogEvent object) {
         RaceLogRaceStatusEvent event = (RaceLogRaceStatusEvent) object;
         JSONObject result = super.serialize(event);
-        result.put(FIELD_NEXT_STATUS, event.getNextStatus());
+        result.put(FIELD_NEXT_STATUS, event.getNextStatus().toString());
         return result;
     }
 
