@@ -127,7 +127,7 @@ public class RaceStateService extends Service {
         String action = intent.getAction();
         ExLog.i(TAG, String.format("Command action '%s' received.", action));
         
-        if (AppConstants.REGISTER_RACE_ACTION.equals(action)) {
+        if (getString(R.string.intentActionRegisterRace).equals(action)) {
             handleRegisterRace(intent);
             return;
         }

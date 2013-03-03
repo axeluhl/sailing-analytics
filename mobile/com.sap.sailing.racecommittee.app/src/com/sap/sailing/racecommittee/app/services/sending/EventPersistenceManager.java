@@ -4,6 +4,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,9 +17,10 @@ import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.utils.FileHandlerUtils;
 
 public class EventPersistenceManager {
+    
+    private final static String TAG = EventPersistenceManager.class.getName();
 
     private final static String delayedEventFileName = "delayedEvents.txt";
-    private final static String TAG = "EventPersistanceManager";
 
     private Context context;
     private String fileContent;
@@ -36,13 +38,13 @@ public class EventPersistenceManager {
     public void persistIntent(Intent intent) {
         Bundle extras = intent.getExtras();
 
-        String serializedEvent = extras.getString(AppConstants.EXTRAS_JSON_KEY);
+        Serializable serializedEvent = extras.getSerializable(AppConstants.EXTRAS_JSON_KEY);
         String raceUuid = extras.getSerializable(AppConstants.RACE_ID_KEY).toString();
 
         persistEvent(raceUuid, serializedEvent);
     }
 
-    private void persistEvent(String raceUuid, String serializedEvent) {
+    private void persistEvent(String raceUuid, Serializable serializedEvent) {
         String eventLine = String.format("%s;%s\n", raceUuid, serializedEvent);
         ExLog.i(TAG, "Called to persist following event " + eventLine);
 

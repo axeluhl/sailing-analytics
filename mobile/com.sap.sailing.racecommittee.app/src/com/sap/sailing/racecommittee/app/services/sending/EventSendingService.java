@@ -1,6 +1,7 @@
 package com.sap.sailing.racecommittee.app.services.sending;
 
 import java.io.Serializable;
+import java.net.URLEncoder;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -15,6 +16,7 @@ import android.os.Handler;
 import android.os.IBinder;
 
 import com.sap.sailing.racecommittee.app.AppConstants;
+import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.DataManager;
 import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
@@ -33,7 +35,7 @@ import com.sap.sailing.racecommittee.app.services.sending.EventSenderTask.EventS
  */
 public class EventSendingService extends Service implements EventSendingListener {
 
-    protected final static String TAG = "EventSendingService";
+    protected final static String TAG = EventSendingService.class.getName();
 
     private ConnectivityManager connectivityManager;
     private Handler handler;
@@ -75,13 +77,13 @@ public class EventSendingService extends Service implements EventSendingListener
      */
     public static Intent createEventIntent(Context context, ManagedRace race, Serializable serializedEvent) {
         String url = String.format(
-                "%s/rc/racelog?leaderboard=%s&raceColumn=%s&fleet=%s", 
+                "%s/sailingserver/rc/racelog?leaderboard=%s&raceColumn=%s&fleet=%s", 
                 AppConstants.getServerBaseURL(context),
-                race.getRaceGroup().getName(),
-                race.getName(),
-                race.getFleet().getName());
+                URLEncoder.encode(race.getRaceGroup().getName()),
+                URLEncoder.encode(race.getName()),
+                URLEncoder.encode(race.getFleet().getName()));
         
-        Intent eventIntent = new Intent(AppConstants.SEND_EVENT_ACTION);
+        Intent eventIntent = new Intent(context.getString(R.string.intentActionSendEvent));
         eventIntent.putExtra(AppConstants.RACE_ID_KEY, race.getId());
         eventIntent.putExtra(AppConstants.EXTRAS_JSON_KEY, serializedEvent);
         eventIntent.putExtra(AppConstants.EXTRAS_URL, url);
@@ -133,9 +135,9 @@ public class EventSendingService extends Service implements EventSendingListener
 
     private void handleCommand(Intent intent, int startId) {
         String action = intent.getAction();
-        if (action.equals(AppConstants.SEND_SAVED_INTENTS_ACTION)) {
+        if (action.equals(getString(R.string.intentActionSendSavedIntents))) {
             handleDelayedEvents();
-        } else if (action.equals(AppConstants.SEND_EVENT_ACTION)) {
+        } else if (action.equals(getString(R.string.intentActionSendEvent))) {
             handleSendEvents(intent);
         }
     }

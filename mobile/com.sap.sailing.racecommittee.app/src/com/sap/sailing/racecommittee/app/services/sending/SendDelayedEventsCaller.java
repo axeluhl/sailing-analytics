@@ -1,10 +1,10 @@
 package com.sap.sailing.racecommittee.app.services.sending;
 
-import com.sap.sailing.racecommittee.app.AppConstants;
-import com.sap.sailing.racecommittee.app.logging.ExLog;
-
 import android.content.Context;
 import android.content.Intent;
+
+import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.logging.ExLog;
 
 public class SendDelayedEventsCaller implements Runnable {
 
@@ -17,7 +17,7 @@ public class SendDelayedEventsCaller implements Runnable {
 
     public void run() {
         ExLog.i(TAG, "The Event Sending Service is called to send possibly delayed intents");
-        Intent sendSavedIntent = new Intent(AppConstants.SEND_SAVED_INTENTS_ACTION);
+        Intent sendSavedIntent = new Intent(context.getString(R.string.intentActionSendSavedIntents));
         context.startService(sendSavedIntent);
     }
 }

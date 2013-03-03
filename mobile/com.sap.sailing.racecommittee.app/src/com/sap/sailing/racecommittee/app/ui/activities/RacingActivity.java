@@ -156,7 +156,7 @@ public class RacingActivity extends TwoPaneActivity implements RaceInfoListener 
         // he should decide whether these races are already
         // registered or not.
         for (ManagedRace race : races) {
-            Intent registerIntent = new Intent(AppConstants.REGISTER_RACE_ACTION);
+            Intent registerIntent = new Intent(getString(R.string.intentActionRegisterRace));
             registerIntent.putExtra(AppConstants.RACE_ID_KEY, race.getId());
             this.startService(registerIntent);
         }

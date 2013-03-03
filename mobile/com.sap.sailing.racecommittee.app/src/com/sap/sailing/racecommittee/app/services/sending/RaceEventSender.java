@@ -1,6 +1,6 @@
 package com.sap.sailing.racecommittee.app.services.sending;
 
-import java.io.Serializable;
+import org.json.simple.JSONObject;
 
 import android.app.Service;
 
@@ -22,9 +22,9 @@ public class RaceEventSender implements RaceLogChangedListener {
     }
 
     public void eventAdded(RaceLogEvent event) {
-        Serializable serializedEvent = serializer.serialize(event);
-
-        service.startService(EventSendingService.createEventIntent(service, race, serializedEvent));
+        JSONObject serializedEvent = serializer.serialize(event);
+        service.startService(
+                EventSendingService.createEventIntent(service, race, serializedEvent.toJSONString()));
     }
 
 }

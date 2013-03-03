@@ -40,10 +40,9 @@ public abstract class HttpRequest {
     protected abstract InputStream execute(HttpURLConnection connection) throws IOException;
 
     public InputStream execute() throws Exception {
-        ExLog.i(TAG,
-                String.format("Executing HTTP request %s on %s", connection.getRequestMethod(), connection.getURL()));
+        ExLog.i(TAG, String.format("Executing HTTP request on %s.", connection.getURL()));
 
-        connection.setConnectTimeout(2000);
+        connection.setConnectTimeout(5000);
 
         InputStream stream = execute(connection);
         validateHttpResponse(connection);
