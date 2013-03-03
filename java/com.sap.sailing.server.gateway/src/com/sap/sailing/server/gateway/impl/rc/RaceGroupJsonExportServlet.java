@@ -9,7 +9,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.json.simple.JSONArray;
 
-import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.racegroup.RaceGroup;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
@@ -27,13 +26,8 @@ import com.sap.sailing.server.gateway.serialization.impl.racegroup.RaceRowJsonSe
 import com.sap.sailing.server.gateway.serialization.impl.racegroup.RaceRowsOfSeriesWithRowsSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.racegroup.SeriesWithRowsJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.racegroup.SeriesWithRowsOfRaceGroupSerializer;
-import com.sap.sailing.server.gateway.serialization.impl.racelog.RaceLogCourseAreaChangedEventSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.racelog.RaceLogEventSerializer;
-import com.sap.sailing.server.gateway.serialization.impl.racelog.RaceLogEventSerializerChooser;
-import com.sap.sailing.server.gateway.serialization.impl.racelog.RaceLogFlagEventSerializer;
-import com.sap.sailing.server.gateway.serialization.impl.racelog.RaceLogRaceStatusEventSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.racelog.RaceLogSerializer;
-import com.sap.sailing.server.gateway.serialization.impl.racelog.RaceLogStartTimeEventSerializer;
 
 public class RaceGroupJsonExportServlet extends AbstractJsonHttpServlet {
     private static final long serialVersionUID = 4510175441769759252L;
@@ -91,12 +85,7 @@ public class RaceGroupJsonExportServlet extends AbstractJsonHttpServlet {
     }
 
     private static JsonSerializer<RaceLog> createRaceLogSerializer() {
-        JsonSerializer<Competitor> competitorSerializer = new CompetitorIdJsonSerializer();
-        return new RaceLogSerializer(new RaceLogEventSerializer(new RaceLogEventSerializerChooser(
-                new RaceLogFlagEventSerializer(competitorSerializer), 
-                new RaceLogStartTimeEventSerializer(competitorSerializer), 
-                new RaceLogRaceStatusEventSerializer(competitorSerializer),
-                new RaceLogCourseAreaChangedEventSerializer(competitorSerializer))));
+        return new RaceLogSerializer(RaceLogEventSerializer.create(new CompetitorIdJsonSerializer()));
     }
 
 }

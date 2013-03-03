@@ -1,4 +1,4 @@
-package com.sap.sailing.racecommittee.app.domain.state.impl;
+package com.sap.sailing.racecommittee.app.domain.racelog.impl;
 
 import com.sap.sailing.domain.racelog.RaceLogCourseAreaChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogEventVisitor;
@@ -6,7 +6,7 @@ import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
 import com.sap.sailing.domain.racelog.RaceLogPassChangeEvent;
 import com.sap.sailing.domain.racelog.RaceLogRaceStatusEvent;
 import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
-import com.sap.sailing.racecommittee.app.domain.state.RaceLogChangedListener;
+import com.sap.sailing.racecommittee.app.domain.racelog.RaceLogChangedListener;
 
 public class RaceLogChangedVisitor implements RaceLogEventVisitor {
 

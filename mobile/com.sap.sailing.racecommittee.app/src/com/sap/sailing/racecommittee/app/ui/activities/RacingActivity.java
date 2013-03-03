@@ -128,7 +128,6 @@ public class RacingActivity extends TwoPaneActivity implements RaceInfoListener 
         dataManager.loadRaces(courseArea.getId(), new LoadClient<Collection<ManagedRace>>() {
             public void onLoadSucceded(Collection<ManagedRace> data) {
                 onLoadRacesSucceded(courseArea, data);
-
             }
 
             public void onLoadFailed(Exception reason) {
