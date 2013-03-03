@@ -30,7 +30,7 @@ public class RaceLogReplicator implements RaceColumnListener {
         identifier.getTemplate().resolve(new RaceLogIdentifierTemplateResolver() {
             
             @Override
-            public void resolveOnRegattaIdentifier(RaceLogOnRegattaIdentifier identifierTemplate) {
+            public void resolveOnRegattaIdentifierAndReplicate(RaceLogOnRegattaIdentifier identifierTemplate) {
                 RacingEventServiceOperation<?> operation = new RecordRaceLogEventOnRegatta(
                         identifierTemplate.getParentObjectName(), 
                         raceColumn.getName(), 
@@ -40,7 +40,7 @@ public class RaceLogReplicator implements RaceColumnListener {
             }
             
             @Override
-            public void resolveOnLeaderboardIdentifier(RaceLogOnLeaderboardIdentifier identifierTemplate) {
+            public void resolveOnLeaderboardIdentifierAndReplicate(RaceLogOnLeaderboardIdentifier identifierTemplate) {
                 RacingEventServiceOperation<?> operation = new RecordRaceLogEventOnLeaderboard(
                         identifierTemplate.getParentObjectName(), 
                         raceColumn.getName(), 

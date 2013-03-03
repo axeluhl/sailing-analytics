@@ -18,13 +18,13 @@ public class RaceLogOnLeaderboardIdentifier implements RaceLogIdentifierTemplate
     }
 
     @Override
-    public RaceLogIdentifier compile(Fleet fleet) {
+    public RaceLogIdentifier compileRaceLogIdentifier(Fleet fleet) {
         return new RaceLogIdentifierImpl(this, raceColumnName, fleet);
     }
 
     @Override
     public void resolve(RaceLogIdentifierTemplateResolver resolver) {
-        resolver.resolveOnLeaderboardIdentifier(this);
+        resolver.resolveOnLeaderboardIdentifierAndReplicate(this);
     }
 
     @Override

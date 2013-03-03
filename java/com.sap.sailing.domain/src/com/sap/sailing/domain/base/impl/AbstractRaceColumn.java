@@ -25,7 +25,7 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
     private final Map<Fleet, RaceIdentifier> raceIdentifiers;
 
     private final Map<Fleet, RaceLog> raceLogs;
-    private RaceLogIdentifierTemplate raceLogsIdentifier;
+    private RaceLogIdentifierTemplate raceLogsIdentifierTemplate;
 
     public AbstractRaceColumn() {
         this.trackedRaces = new HashMap<Fleet, TrackedRace>();
@@ -36,10 +36,10 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
     @Override
     public synchronized void setRaceLogInformation(final RaceLogInformation information) {
         raceLogs.clear();
-        raceLogsIdentifier = information.getIdentifierTemplate();
+        raceLogsIdentifierTemplate = information.getIdentifierTemplate();
         RaceLogStore store = information.getStore();
         for (final Fleet fleet : getFleets()) {
-            RaceLogIdentifier identifier = raceLogsIdentifier.compile(fleet);
+            RaceLogIdentifier identifier = raceLogsIdentifierTemplate.compileRaceLogIdentifier(fleet);
             RaceLog raceLog = store.getRaceLog(identifier);
             raceLog.addListener(new RaceColumnRaceLogReplicator(this, identifier));
             raceLogs.put(fleet, raceLog);
@@ -148,7 +148,7 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
         for (Entry<Fleet, RaceLog> entry : raceLogs.entrySet()) {
             Fleet fleet = entry.getKey();
             RaceLog raceLog = entry.getValue();
-            raceLog.addListener(new RaceColumnRaceLogReplicator(this, raceLogsIdentifier.compile(fleet)));
+            raceLog.addListener(new RaceColumnRaceLogReplicator(this, raceLogsIdentifierTemplate.compileRaceLogIdentifier(fleet)));
         }
     }
 }
