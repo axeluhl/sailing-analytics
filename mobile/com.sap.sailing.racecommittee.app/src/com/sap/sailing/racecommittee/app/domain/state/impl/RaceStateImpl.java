@@ -25,7 +25,7 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
 
     protected RaceLogRaceStatus status;
     protected PassAwareRaceLog raceLog;
-    protected Set<RaceStateChangedListener> changedListeners;
+    protected Set<RaceStateChangedListener> stateChangedListeners;
 
     private RaceLogChangedVisitor raceLogListener;
     private RaceStatusAnalyzer statusAnalyzer;
@@ -34,7 +34,7 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
     public RaceStateImpl(PassAwareRaceLog raceLog) {
         this.raceLog = raceLog;
         this.status = RaceLogRaceStatus.UNKNOWN;
-        this.changedListeners = new HashSet<RaceStateChangedListener>();
+        this.stateChangedListeners = new HashSet<RaceStateChangedListener>();
 
         this.raceLogListener = new RaceLogChangedVisitor(this);
         this.raceLog.addListener(raceLogListener);
@@ -61,17 +61,17 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
     }
 
     private void notifyListeners() {
-        for (RaceStateChangedListener listener : changedListeners) {
+        for (RaceStateChangedListener listener : stateChangedListeners) {
             listener.onRaceStateChanged(this);
         }
     }
 
     public void registerListener(RaceStateChangedListener listener) {
-        changedListeners.add(listener);
+        stateChangedListeners.add(listener);
     }
 
     public void unregisterListener(RaceStateChangedListener listener) {
-        changedListeners.remove(listener);
+        stateChangedListeners.remove(listener);
     }
 
     public TimePoint getStartTime() {
