@@ -7,6 +7,7 @@ import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.TextColumn;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.Composite;
@@ -162,7 +163,10 @@ public class RegattaDetailsComposite extends Composite {
             public void update(int index, SeriesDTO series, String value) {
                 if (SeriesConfigImagesBarCell.ACTION_EDIT.equals(value)) {
                     editRacesOfRegattaSeries(regatta, series);
+                } else if (SeriesConfigImagesBarCell.ACTION_REMOVE.equals(value)) {
+                    Window.alert("This function is not implemented yet. To delete a series you have to recreate the regatta!");
                 }
+
             }
         });
         

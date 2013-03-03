@@ -18,6 +18,7 @@ import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
@@ -38,12 +39,13 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 
-public class RegattaListComposite extends SimplePanel implements RegattaDisplayer {
+public class RegattaListComposite extends Composite implements RegattaDisplayer {
 
     private final SelectionModel<RegattaDTO> regattaSelectionModel;
     private final CellTable<RegattaDTO> regattaTable;
     private ListDataProvider<RegattaDTO> regattaListDataProvider;
     private List<RegattaDTO> allRegattas;
+    private final SimplePanel mainPanel;
     private final VerticalPanel panel;
 
     private final Label noRegattasLabel;
@@ -73,12 +75,13 @@ public class RegattaListComposite extends SimplePanel implements RegattaDisplaye
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
         
+        mainPanel = new SimplePanel();
         panel = new VerticalPanel();
-        setWidget(panel);
+        mainPanel.setWidget(panel);
 
         HorizontalPanel filterPanel = new HorizontalPanel();
         panel.add(filterPanel);
-        Label filterRegattasLabel = new Label(stringMessages.filterRacesByName() + ":");
+        Label filterRegattasLabel = new Label(stringMessages.filterRegattasByName() + ":");
         filterRegattasLabel.setWordWrap(false);
         filterPanel.setSpacing(5);
         filterPanel.add(filterRegattasLabel);
@@ -92,7 +95,7 @@ public class RegattaListComposite extends SimplePanel implements RegattaDisplaye
         });
         filterPanel.add(filterRegattasTextbox);
         
-        noRegattasLabel = new Label(stringMessages.noRacesYet());
+        noRegattasLabel = new Label(stringMessages.noRegattasYet());
         noRegattasLabel.setWordWrap(false);
         panel.add(noRegattasLabel);
 
@@ -115,6 +118,8 @@ public class RegattaListComposite extends SimplePanel implements RegattaDisplaye
         regattaTable.setSelectionModel(regattaSelectionModel);
         
         panel.add(regattaTable);
+        
+        initWidget(mainPanel);
     }
 
     private CellTable<RegattaDTO> createRegattaTable() {
