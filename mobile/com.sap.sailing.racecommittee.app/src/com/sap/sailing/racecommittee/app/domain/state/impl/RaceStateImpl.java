@@ -79,7 +79,6 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
     }
 
     public void setStartTime(TimePoint eventTime, TimePoint newStartTime) {
-
         RaceLogRaceStatus status = getStatus();
         if (status != RaceLogRaceStatus.UNSCHEDULED) {
             abortRace(eventTime.minus(1));
