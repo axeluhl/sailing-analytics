@@ -13,6 +13,9 @@ public class FlexibleLeaderboardCreateDialog extends FlexibleLeaderboardDialog {
         super(stringMessages.createFlexibleLeaderboard(), new LeaderboardDescriptor(), stringMessages, errorReporter, new FlexibleLeaderboardDialog.LeaderboardParameterValidator(stringMessages, existingLeaderboards), callback);
         nameTextBox = createTextBox(null);
         displayNameTextBox = createTextBox(null);
+        nameTextBox.setVisibleLength(50);
+        displayNameTextBox.setVisibleLength(50);
+
         scoringSchemeListBox = createScoringSchemeListBox(this, stringMessages);
         discardThresholdBoxes = initEmptyDiscardThresholdBoxes(this);
     }
