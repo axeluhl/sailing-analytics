@@ -4,7 +4,8 @@
     <!-- <string name="intentActionSaveIntent">com.sap.sailing.racecommittee.app.action.saveIntent</string> -->
     <string name="intentActionSendSavedIntents">com.sap.sailing.racecommittee.app.action.sendSavedIntents</string>
     <string name="intentActionSendEvent">com.sap.sailing.racecommittee.app.action.sendEvent</string>
-	
+    <string name="intentActionAlarmAction">com.sap.sailing.racecommittee.app.action.alarmAction</string>
+    
     <string name="hello">Hello World, RaceCommitteeActivity!</string>
     <string name="running_on_course">(on course %s)</string>
     <string name="course_design_number_waypoints">Course has %s waypoints</string>
@@ -94,7 +95,7 @@
 	<string name="settings_time_frame_header">Race time frame after finish</string>
 	<string name="settings_time_frame_description">Set a time in minutes after which no finishing sailor is counted anymore</string>
 	
-	<string name="settings_advanced_service_default">http://dev.sapsailing.com</string>
+	<string name="settings_advanced_service_default">http://192.168.1.141:8888</string>
 	<string name="race_startphase_flagdown">Flag is going down&#8230;</string>
 	<string name="race_startphase_flagup">Flag is going up&#8230;</string>
 	<string name="race_startphase_countdown_mode_remove">%1$s until %2$s flag is removed</string>

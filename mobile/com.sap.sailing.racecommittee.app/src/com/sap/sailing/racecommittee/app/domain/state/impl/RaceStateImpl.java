@@ -101,6 +101,12 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
         this.raceLog.add(passChangeEvent);
     }
 
+    public void onRaceStarted(TimePoint eventTime) {
+        RaceLogEvent startEvent = new RaceLogRaceStatusEventImpl(eventTime, UUID.randomUUID(),
+                Collections.<Competitor> emptyList(), raceLog.getCurrentPassId(), RaceLogRaceStatus.RUNNING);
+        this.raceLog.add(startEvent);
+    }
+
     public RaceLogRaceStatus updateStatus() {
         setStatus(statusAnalyzer.getStatus());
         return getStatus();
