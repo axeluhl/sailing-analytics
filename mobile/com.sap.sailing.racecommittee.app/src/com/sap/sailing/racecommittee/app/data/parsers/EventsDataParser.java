@@ -14,23 +14,23 @@ import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
 
 public class EventsDataParser implements DataParser<Collection<EventData>> {
 
-	private JsonDeserializer<EventData> deserializer;
-	
-	public EventsDataParser(JsonDeserializer<EventData> deserializer) {
-		this.deserializer = deserializer;
-	}
+    private JsonDeserializer<EventData> deserializer;
 
-	public Collection<EventData> parse(Reader reader) throws Exception {
-		Object parsedResult = JSONValue.parse(reader);
-		JSONArray jsonArray = Helpers.toJSONArraySafe(parsedResult);
-		Collection<EventData> events = new ArrayList<EventData>();
-		
-		for (Object element : jsonArray) {
-			JSONObject json = Helpers.toJSONObjectSafe(element);
-			events.add(deserializer.deserialize(json));
-		}
-		
-		return events;
-	}
+    public EventsDataParser(JsonDeserializer<EventData> deserializer) {
+        this.deserializer = deserializer;
+    }
+
+    public Collection<EventData> parse(Reader reader) throws Exception {
+        Object parsedResult = JSONValue.parseWithException(reader);
+        JSONArray jsonArray = Helpers.toJSONArraySafe(parsedResult);
+        Collection<EventData> events = new ArrayList<EventData>();
+
+        for (Object element : jsonArray) {
+            JSONObject json = Helpers.toJSONObjectSafe(element);
+            events.add(deserializer.deserialize(json));
+        }
+
+        return events;
+    }
 
 }

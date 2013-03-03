@@ -9,7 +9,7 @@ import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.SetTimeRaceFragme
 
 public class AppConstants {
 	
-	public static final boolean IS_DATA_OFFLINE = true;
+	public static final boolean IS_DATA_OFFLINE = false;
 	
 	public final static String ApplicationVersion = "2.0 Beta 1 - Jumbotron";
 	
@@ -44,10 +44,9 @@ public class AppConstants {
 	
 	
 	
-	public static String getURL(Context context) {
+	public static String getServerBaseURL(Context context) {
 		SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-		return sp.getString(PREFERENCE_SERVICE_URL, "http://racecommitteedev.sapsailing.com/racecommittee/service");
-		//return sp.getString(PREFERENCE_SERVICE_URL, "http://192.168.1.100:8890/racecommittee/service");
+		return sp.getString(PREFERENCE_SERVICE_URL, "http://192.168.1.141:8888");
 	}
 	
 	public static boolean isSendingActive(Context context) {
