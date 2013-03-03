@@ -8,7 +8,6 @@ import org.json.simple.JSONObject;
 import org.junit.Test;
 
 import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.racelog.Flags;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
