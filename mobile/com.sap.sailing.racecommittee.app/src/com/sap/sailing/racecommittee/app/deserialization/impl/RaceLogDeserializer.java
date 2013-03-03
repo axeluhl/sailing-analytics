@@ -22,6 +22,10 @@ public class RaceLogDeserializer implements JsonDeserializer<RaceLog> {
     public RaceLog deserialize(JSONObject object) throws JsonDeserializationException {
         RaceLog result = new PassAwareRaceLogImpl();
         
+        if (object.get(RaceLogSerializer.FIELD_EVENTS) == null) {
+            return result;
+        }
+        
         JSONArray events = Helpers.getNestedArraySafe(object, RaceLogSerializer.FIELD_EVENTS);
         for (Object eventObject : events) {
             JSONObject eventJson = Helpers.toJSONObjectSafe(eventObject);
