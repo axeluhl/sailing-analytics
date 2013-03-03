@@ -1,6 +1,9 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
@@ -32,7 +35,6 @@ public abstract class RegattaLeaderboardDialog extends AbstractLeaderboardDialog
         @Override
         public String getErrorMessage(LeaderboardDescriptor leaderboardToValidate) {
             String errorMessage;
-            boolean nonEmpty = leaderboardToValidate.getName() != null && leaderboardToValidate.getName().length() > 0;
 
             boolean discardThresholdsAscending = true;
             for (int i = 1; i < leaderboardToValidate.getDiscardThresholds().length; i++) {
@@ -47,16 +49,14 @@ public abstract class RegattaLeaderboardDialog extends AbstractLeaderboardDialog
             
             boolean unique = true;
             for (StrippedLeaderboardDTO dao : existingLeaderboards) {
-                if(dao.name.equals(leaderboardToValidate.getName())){
+                if(dao.name.equals(leaderboardToValidate.getRegattaName())){
                     unique = false;
                 }
             }
             
             boolean regattaSelected = leaderboardToValidate.getRegattaName() != null ? true : false;
             
-            if (!nonEmpty) {
-                errorMessage = stringConstants.pleaseEnterAName();
-            } else if(!regattaSelected){
+            if(!regattaSelected){
                 errorMessage = stringConstants.pleaseSelectARegatta();
             } else if(!unique){
                 errorMessage = stringConstants.leaderboardWithThisNameAlreadyExists();
@@ -74,6 +74,28 @@ public abstract class RegattaLeaderboardDialog extends AbstractLeaderboardDialog
         super(title, leaderboardDTO, stringConstants, validator, callback);
         this.existingRegattas = existingRegattas;
     }
+
+    protected ListBox createSortedRegattaListBox(Collection<RegattaDTO> regattas, String preSelectedRegattaName) {
+        ListBox result = createListBox(false);
+
+        // sort the regatta names
+        List<String> sortedRegattaNames = new ArrayList<String>();
+        for (RegattaDTO regatta : existingRegattas) {
+            sortedRegattaNames.add(regatta.name);
+        }
+        Collections.sort(sortedRegattaNames);
+        
+        result.addItem(stringMessages.pleaseSelectARegatta());
+        int i=1;
+        for (String regattaName : sortedRegattaNames) {
+            result.addItem(regattaName);
+            if (preSelectedRegattaName != null && regattaName.equals(preSelectedRegattaName)) {
+                result.setSelectedIndex(i);
+            }
+            i++;
+        }
+        return result;
+    }
     
     @Override
     protected LeaderboardDescriptor getResult() {
@@ -88,12 +110,12 @@ public abstract class RegattaLeaderboardDialog extends AbstractLeaderboardDialog
         
         Grid formGrid = new Grid(3,3);
         formGrid.setCellSpacing(3);
-        formGrid.setWidget(0,  0, createLabel(stringMessages.name()));
-        formGrid.setWidget(0, 1, nameTextBox);
-        formGrid.setWidget(1,  0, createLabel(stringMessages.displayName()));
-        formGrid.setWidget(1, 1, displayNameTextBox);
-        formGrid.setWidget(2, 0, createLabel(stringMessages.regatta()));
-        formGrid.setWidget(2, 1, regattaListBox);
+        formGrid.setWidget(0, 0, createLabel(stringMessages.regatta()));
+        formGrid.setWidget(0, 1, regattaListBox);
+        formGrid.setWidget(1,  0, createLabel(stringMessages.name()));
+        formGrid.setWidget(1, 1, nameTextBox);
+        formGrid.setWidget(2,  0, createLabel(stringMessages.displayName()));
+        formGrid.setWidget(2, 1, displayNameTextBox);
                 
         mainPanel.add(formGrid);
         
