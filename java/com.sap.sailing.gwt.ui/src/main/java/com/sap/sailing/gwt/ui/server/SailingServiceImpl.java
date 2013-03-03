@@ -2016,7 +2016,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     public StrippedLeaderboardDTO createRegattaLeaderboard(RegattaIdentifier regattaIdentifier, String leaderboardDisplayName, int[] discardThresholds) {
         return createStrippedLeaderboardDTO(getService().apply(new CreateRegattaLeaderboard(regattaIdentifier, leaderboardDisplayName, discardThresholds)), false);
-        return createStrippedLeaderboardDTO(getService().apply(new CreateRegattaLeaderboard(regattaIdentifier, discardThresholds)), false);
     }
 
     @Override
@@ -3299,3 +3298,5 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
 
         return histogramData;
+    }
+}

@@ -213,7 +213,6 @@ public interface SailingServiceAsync {
     void updateLeaderboard(String leaderboardName, String newLeaderboardName, String newLeaderboardDisplayName,
             int[] newDiscardingThreasholds, AsyncCallback<Void> callback);
 
-    void createFlexibleLeaderboard(String leaderboardName, int[] discardThresholds, ScoringSchemeType scoringSchemeType,
     void createFlexibleLeaderboard(String leaderboardName, String leaderboardDisplayName, int[] discardThresholds, ScoringSchemeType scoringSchemeType, String courseAreaId,
             AsyncCallback<StrippedLeaderboardDTO> asyncCallback);
 
@@ -451,5 +450,5 @@ public interface SailingServiceAsync {
 
     void getPolarSheetsGenerationResults(String id, AsyncCallback<PolarSheetsData> asyncCallback);
 
-
     void getPolarSheetData(String polarSheetId, int angle, int windSpeed, AsyncCallback<PolarSheetsHistogramData> wrapperCallback);
+}

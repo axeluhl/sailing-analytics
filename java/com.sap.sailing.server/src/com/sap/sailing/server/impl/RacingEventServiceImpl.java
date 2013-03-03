@@ -319,7 +319,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     @Override
     public FlexibleLeaderboard addFlexibleLeaderboard(String leaderboardName, String leaderboardDisplayName, int[] discardThresholds, ScoringScheme scoringScheme, 
             Serializable courseAreaId) {
-        logger.info("adding flexible leaderboard "+name);
+        logger.info("adding flexible leaderboard " + leaderboardName);
 
 
         RaceLogStore raceLogStore = MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(

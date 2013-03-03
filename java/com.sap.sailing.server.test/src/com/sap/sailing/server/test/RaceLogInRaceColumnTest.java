@@ -49,7 +49,7 @@ public class RaceLogInRaceColumnTest {
 
         RacingEventServiceOperation<FlexibleLeaderboard> addLeaderboardOp =
                 new CreateFlexibleLeaderboard(
-                        LEADERBOARDNAME, new int[] { 5 }, new LowPoint(), null);
+                        LEADERBOARDNAME, LEADERBOARDNAME, new int[] { 5 }, new LowPoint(), null);
         server.apply(addLeaderboardOp);
 
         RacingEventServiceOperation<RaceColumn> addLeaderboardColumn = 
