@@ -275,6 +275,13 @@ public class RegattaWithSeriesAndFleetsCreateDialog extends DataEntryDialog<Rega
     protected void onEventSelectionChanged() {
         EventDTO selectedEvent = getSelectedEvent();
         courseAreaListBox.clear();
+        courseAreaListBox.setEnabled(false);
+        if (selectedEvent != null) {
+            fillCourseAreaListBox(selectedEvent);
+        }
+    }
+
+    private void fillCourseAreaListBox(EventDTO selectedEvent) {
         courseAreaListBox.addItem("Please select a course area...");
         for (CourseAreaDTO courseArea : selectedEvent.venue.getCourseAreas()) {
             courseAreaListBox.addItem(courseArea.name);
