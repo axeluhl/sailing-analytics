@@ -35,6 +35,7 @@ import com.sap.sailing.racecommittee.app.deserialization.impl.VenueJsonDeseriali
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.impl.DomainFactoryImpl;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.RaceLogEventDeserializer;
 
 /**
  * Enables accessing of data.
@@ -126,7 +127,8 @@ public class OnlineDataManager extends DataManager {
         JsonDeserializer<BoatClass> boatClassDeserializer = new BoatClassJsonDeserializer(domainFactory);
         DataParser<Collection<ManagedRace>> parser = new ManagedRacesDataParser(new RaceGroupDeserializer(
                 boatClassDeserializer, new SeriesWithRowsDeserializer(new RaceRowDeserializer(new FleetDeserializer(
-                        new ColorDeserializer()), new RaceCellDeserializer(new RaceLogDeserializer())))));
+                        new ColorDeserializer()), new RaceCellDeserializer(
+                                new RaceLogDeserializer(RaceLogEventDeserializer.create()))))));
         DataHandler<Collection<ManagedRace>> handler = new ManagedRacesDataHandler(this, client);
 
         try {

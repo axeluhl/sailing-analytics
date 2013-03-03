@@ -12,6 +12,14 @@ import com.sap.sailing.server.gateway.serialization.impl.racelog.RaceLogRaceStat
 import com.sap.sailing.server.gateway.serialization.impl.racelog.RaceLogStartTimeEventSerializer;
 
 public class RaceLogEventDeserializer implements JsonDeserializer<RaceLogEvent> {
+    
+    public static RaceLogEventDeserializer create() {
+        return new RaceLogEventDeserializer(
+                new RaceLogFlagEventDeserializer(),
+                new RaceLogStartTimeEventDeserializer(), 
+                new RaceLogRaceStatusEventDeserializer(),
+                new RaceLogCourseAreaChangedEventDeserializer());
+    }
 
     protected JsonDeserializer<RaceLogEvent> flagEventDeserializer;
     protected JsonDeserializer<RaceLogEvent> startTimeEventDeserializer;
