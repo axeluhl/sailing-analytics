@@ -21,104 +21,93 @@ import com.sap.sailing.racecommittee.app.domain.state.impl.analyzers.RaceStatusA
 import com.sap.sailing.racecommittee.app.domain.state.impl.analyzers.StartTimeFinder;
 
 public class RaceStateImpl implements RaceState, RaceLogChangedListener {
-	//private static final String TAG = RaceStateImpl.class.getName();
-	
-	protected RaceLogRaceStatus status;
-	protected PassAwareRaceLog raceLog;
-	protected Set<RaceStateChangedListener> changedListeners;
-	
-	private RaceLogChangedVisitor raceLogListener;
-	private RaceStatusAnalyzer statusAnalyzer;
-	private StartTimeFinder startTimeFinder;
-	
-	public RaceStateImpl(PassAwareRaceLog raceLog) {
-		this.raceLog = raceLog;
-		this.status = RaceLogRaceStatus.UNKNOWN;
-		this.changedListeners = new HashSet<RaceStateChangedListener>();
-		
-		this.raceLogListener = new RaceLogChangedVisitor(this);
-		this.raceLog.addListener(raceLogListener);
-		
-		this.startTimeFinder = new StartTimeFinder(raceLog);
-		this.statusAnalyzer = new RaceStatusAnalyzer(raceLog);
-		updateStatus();
-	}
+    // private static final String TAG = RaceStateImpl.class.getName();
 
-	public RaceLog getRaceLog() {
-		return raceLog;
-	}
+    protected RaceLogRaceStatus status;
+    protected PassAwareRaceLog raceLog;
+    protected Set<RaceStateChangedListener> changedListeners;
 
-	public RaceLogRaceStatus getStatus() {
-		return status;
-	}
-	
-	private void setStatus(RaceLogRaceStatus newStatus) {
-		RaceLogRaceStatus oldStatus = this.status;
-		this.status = newStatus;
-		if (oldStatus != newStatus) {
-			notifyListeners();
-		}
-	}
+    private RaceLogChangedVisitor raceLogListener;
+    private RaceStatusAnalyzer statusAnalyzer;
+    private StartTimeFinder startTimeFinder;
 
-	private void notifyListeners() {
-		for (RaceStateChangedListener listener : changedListeners) {
-			listener.onRaceStateChanged(this);
-		}
-	}
+    public RaceStateImpl(PassAwareRaceLog raceLog) {
+        this.raceLog = raceLog;
+        this.status = RaceLogRaceStatus.UNKNOWN;
+        this.changedListeners = new HashSet<RaceStateChangedListener>();
 
-	public void registerListener(RaceStateChangedListener listener) {
-		changedListeners.add(listener);
-	}
+        this.raceLogListener = new RaceLogChangedVisitor(this);
+        this.raceLog.addListener(raceLogListener);
 
-	public void unregisterListener(RaceStateChangedListener listener) {
-		changedListeners.remove(listener);
-	}
+        this.startTimeFinder = new StartTimeFinder(raceLog);
+        this.statusAnalyzer = new RaceStatusAnalyzer(raceLog);
+        updateStatus();
+    }
 
-	public TimePoint getStartTime() {
-		return startTimeFinder.getStartTime();
-	}
+    public RaceLog getRaceLog() {
+        return raceLog;
+    }
 
-	public void setStartTime(TimePoint eventTime, TimePoint newStartTime) {
-		
-		RaceLogRaceStatus status = getStatus();
-		if (status != RaceLogRaceStatus.UNSCHEDULED) {
-			abortRace(eventTime.minus(1));
-		}
-		
-		RaceLogEvent event = new RaceLogStartTimeEventImpl(
-				eventTime, 
-				UUID.randomUUID(), 
-				Collections.<Competitor>emptyList(), 
-				raceLog.getCurrentPassId(), 
-				RaceLogRaceStatus.SCHEDULED, 
-				newStartTime);
-		this.raceLog.add(event);
-	}
+    public RaceLogRaceStatus getStatus() {
+        return status;
+    }
 
-	public void abortRace(TimePoint eventTime) {
-		RaceLogEvent abortEvent = new RaceLogRaceStatusEventImpl(
-				eventTime.minus(1), 
-				UUID.randomUUID(), 
-				Collections.<Competitor>emptyList(), 
-				raceLog.getCurrentPassId(), 
-				RaceLogRaceStatus.UNSCHEDULED);
-		this.raceLog.add(abortEvent);
-		
-		RaceLogEvent passChangeEvent = new RaceLogPassChangeEventImpl(
-				eventTime, 
-				UUID.randomUUID(), 
-				Collections.<Competitor>emptyList(), 
-				raceLog.getCurrentPassId() + 1);
-		this.raceLog.add(passChangeEvent);
-	}
+    private void setStatus(RaceLogRaceStatus newStatus) {
+        RaceLogRaceStatus oldStatus = this.status;
+        this.status = newStatus;
+        if (oldStatus != newStatus) {
+            notifyListeners();
+        }
+    }
 
-	public RaceLogRaceStatus updateStatus() {
-		setStatus(statusAnalyzer.getStatus());
-		return getStatus();
-	}
+    private void notifyListeners() {
+        for (RaceStateChangedListener listener : changedListeners) {
+            listener.onRaceStateChanged(this);
+        }
+    }
 
-	public void eventAdded(RaceLogEvent event) {
-		updateStatus();
-	}
+    public void registerListener(RaceStateChangedListener listener) {
+        changedListeners.add(listener);
+    }
+
+    public void unregisterListener(RaceStateChangedListener listener) {
+        changedListeners.remove(listener);
+    }
+
+    public TimePoint getStartTime() {
+        return startTimeFinder.getStartTime();
+    }
+
+    public void setStartTime(TimePoint eventTime, TimePoint newStartTime) {
+
+        RaceLogRaceStatus status = getStatus();
+        if (status != RaceLogRaceStatus.UNSCHEDULED) {
+            abortRace(eventTime.minus(1));
+        }
+
+        RaceLogEvent event = new RaceLogStartTimeEventImpl(eventTime, UUID.randomUUID(),
+                Collections.<Competitor> emptyList(), raceLog.getCurrentPassId(), RaceLogRaceStatus.SCHEDULED,
+                newStartTime);
+        this.raceLog.add(event);
+    }
+
+    public void abortRace(TimePoint eventTime) {
+        RaceLogEvent abortEvent = new RaceLogRaceStatusEventImpl(eventTime.minus(1), UUID.randomUUID(),
+                Collections.<Competitor> emptyList(), raceLog.getCurrentPassId(), RaceLogRaceStatus.UNSCHEDULED);
+        this.raceLog.add(abortEvent);
+
+        RaceLogEvent passChangeEvent = new RaceLogPassChangeEventImpl(eventTime, UUID.randomUUID(),
+                Collections.<Competitor> emptyList(), raceLog.getCurrentPassId() + 1);
+        this.raceLog.add(passChangeEvent);
+    }
+
+    public RaceLogRaceStatus updateStatus() {
+        setStatus(statusAnalyzer.getStatus());
+        return getStatus();
+    }
+
+    public void eventAdded(RaceLogEvent event) {
+        updateStatus();
+    }
 
 }
