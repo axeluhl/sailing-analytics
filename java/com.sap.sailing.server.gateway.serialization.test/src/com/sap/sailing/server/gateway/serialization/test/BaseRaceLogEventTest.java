@@ -8,6 +8,8 @@ import java.util.Collections;
 import java.util.UUID;
 
 import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
+import org.json.simple.parser.ParseException;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -57,6 +59,13 @@ public abstract class BaseRaceLogEventTest<FlagType extends RaceLogEvent> {
                 json.get(BaseRaceLogEventSerializer.FIELD_TIMESTAMP));
         assertEquals(expectedPassId,
                 json.get(BaseRaceLogEventSerializer.FIELD_PASS_ID));
+    }
+    
+    @Test
+    public void testIsParseable() throws ParseException {
+        JSONObject json = serializer.serialize(event);
+        String value = json.toJSONString();
+        JSONValue.parseWithException(value);
     }
 
 }

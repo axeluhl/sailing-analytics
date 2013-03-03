@@ -45,7 +45,7 @@
             android:name=".ui.activities.RacingActivity">
         </activity>
         
-        <service
+        <activity android:name=".ui.activities.SettingsActivity"></activity><service
             android:name="com.sap.sailing.racecommittee.app.services.RaceStateService"
             android:enabled="true"
             android:exported="false" >
@@ -61,6 +61,7 @@
                 <action android:name="com.sap.sailing.racecommittee.app.action.sendEvent" />
             </intent-filter>
         </service>
+        
         
         
     </application>

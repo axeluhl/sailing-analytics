@@ -9,6 +9,7 @@ import org.junit.Test;
 
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
+import com.sap.sailing.domain.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.racelog.RaceLogStartTimeEventSerializer;
@@ -16,6 +17,7 @@ import com.sap.sailing.server.gateway.serialization.impl.racelog.RaceLogStartTim
 public class RaceLogStartTimeEventSerializerTest extends BaseRaceLogEventTest<RaceLogStartTimeEvent> {
 
     private final long expectedStartTimeTimestamp = 2013;
+    private final RaceLogRaceStatus expectedNextStatus = RaceLogRaceStatus.SCHEDULED;
 
     @Override
     protected RaceLogStartTimeEvent createMockEvent() {
@@ -24,6 +26,7 @@ public class RaceLogStartTimeEventSerializerTest extends BaseRaceLogEventTest<Ra
         when(startTime.asMillis()).thenReturn(expectedStartTimeTimestamp);
 
         RaceLogStartTimeEvent event = mock(RaceLogStartTimeEvent.class);
+        when(event.getNextStatus()).thenReturn(expectedNextStatus);
         when(event.getStartTime()).thenReturn(startTime);
 
         return event;
@@ -36,12 +39,21 @@ public class RaceLogStartTimeEventSerializerTest extends BaseRaceLogEventTest<Ra
     }
 
     @Test
-    public void testStartTimeAttributes() {
+    public void testStartTimeAttribute() {
         JSONObject json = serializer.serialize(event);
 
         assertEquals(
                 expectedStartTimeTimestamp,
                 json.get(RaceLogStartTimeEventSerializer.FIELD_START_TIME));
+    }
+    
+    @Test
+    public void testNextStatusAttribute() {
+        JSONObject json = serializer.serialize(event);
+
+        assertEquals(
+                expectedNextStatus,
+                RaceLogRaceStatus.valueOf(json.get(RaceLogStartTimeEventSerializer.FIELD_NEXT_STATUS).toString()));
     }
 
     @Test

@@ -49,10 +49,10 @@ public class RaceLogFlagEventSerializerTest extends BaseRaceLogEventTest<RaceLog
 
         assertEquals(
                 expectedUpperFlag,
-                json.get(RaceLogFlagEventSerializer.FIELD_UPPER_FLAG));
+                Flags.valueOf(json.get(RaceLogFlagEventSerializer.FIELD_UPPER_FLAG).toString()));
         assertEquals(
                 expectedLowerFlag,
-                json.get(RaceLogFlagEventSerializer.FIELD_LOWER_FLAG));
+                Flags.valueOf(json.get(RaceLogFlagEventSerializer.FIELD_LOWER_FLAG).toString()));
         assertEquals(
                 expectedDisplayed,
                 json.get(RaceLogFlagEventSerializer.FIELD_DISPLAYED));

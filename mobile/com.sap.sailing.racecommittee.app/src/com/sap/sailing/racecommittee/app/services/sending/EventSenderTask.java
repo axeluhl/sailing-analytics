@@ -29,6 +29,9 @@ public class EventSenderTask extends AsyncTask<Intent, Void, Pair<Intent, Intege
     protected Pair<Intent, Integer> doInBackground(Intent... params) {
 
         Intent intent = params[0];
+        if (intent == null) {
+            return Pair.create(intent, -1);
+        }
 
         Bundle extras = intent.getExtras();
         Serializable serializedEvent = extras.getSerializable(AppConstants.EXTRAS_JSON_KEY);
