@@ -151,7 +151,7 @@ public class TestStoringAndRetrievingRaceLogInLeaderboards extends AbstractMongo
     @Test
     public void testStoreAndRetrieveSimpleLeaderboardWithRaceLogStartTimeEvent() {
 
-        RaceLogStartTimeEvent event = RaceLogEventFactory.INSTANCE.createStartTimeEvent(now, 0, RaceLogRaceStatus.RUNNING, now);
+        RaceLogStartTimeEvent event = RaceLogEventFactory.INSTANCE.createStartTimeEvent(now, 0, now);
 
         addAndStoreRaceLogEvent(leaderboard, raceColumnName, event);
 

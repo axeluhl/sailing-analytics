@@ -32,13 +32,13 @@ public class RaceLogEventFactoryImpl implements RaceLogEventFactory {
 
     @Override
     public RaceLogStartTimeEvent createStartTimeEvent(TimePoint timePoint, Serializable id, List<Competitor> involvedBoats, int passId, 
-            RaceLogRaceStatus nextStatus, TimePoint startTime) {
-        return new RaceLogStartTimeEventImpl(timePoint, id, involvedBoats, passId, nextStatus, startTime);
+             TimePoint startTime) {
+        return new RaceLogStartTimeEventImpl(timePoint, id, involvedBoats, passId, RaceLogRaceStatus.SCHEDULED, startTime);
     }
 
     @Override
-    public RaceLogStartTimeEvent createStartTimeEvent(TimePoint timePoint, int passId, RaceLogRaceStatus nextStatus, TimePoint startTime) {
-        return createStartTimeEvent(timePoint, UUID.randomUUID(), new ArrayList<Competitor>(), passId, nextStatus, startTime);
+    public RaceLogStartTimeEvent createStartTimeEvent(TimePoint timePoint, int passId, TimePoint startTime) {
+        return createStartTimeEvent(timePoint, UUID.randomUUID(), new ArrayList<Competitor>(), passId, startTime);
     }
 
     @Override

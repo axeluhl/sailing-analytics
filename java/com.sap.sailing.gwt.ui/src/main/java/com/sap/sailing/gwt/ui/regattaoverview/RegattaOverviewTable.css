@@ -101,33 +101,11 @@
 	border-bottom: 2px solid #21a0e4 !important;
 }
 
-.cellTableRaceColumnHeader {
+.cellTableRaceNameColumnHeader {
 	background-color: #e0e0e0;
 	padding: 3px 12px;
 }
 
-.cellTableLegColumnHeader {
-	background-color: #efefef;
-	padding: 3px 12px;
-}
-
-.cellTableLegDetailColumnHeader {
-	background-color: #f4f5f6;
-	padding: 3px 12px;
-}
-
-.cellTableRaceColumn {
-	background-color: #e0e0e0 !important;
-}
-
-.cellTableLegColumn {
-	background-color: #efefef !important;
-}
-
-.cellTableLegDetailColumn {
-	background-color: #ffffff !important;
-}
-
-.cellTableTotalColumn {
+.cellTableRaceNameColumn {
 	background-color: #e0e0e0 !important;
 }

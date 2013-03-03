@@ -122,9 +122,7 @@ import com.sap.sailing.domain.persistence.MongoWindStoreFactory;
 import com.sap.sailing.domain.polarsheets.BoatAndWindSpeed;
 import com.sap.sailing.domain.polarsheets.PolarSheetGenerationWorker;
 import com.sap.sailing.domain.racelog.RaceLog;
-import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogEventFactory;
-import com.sap.sailing.domain.racelog.impl.RaceLogImpl;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingArchiveConfiguration;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingConfiguration;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
@@ -188,8 +186,7 @@ import com.sap.sailing.gwt.ui.shared.RaceColumnDTO;
 import com.sap.sailing.gwt.ui.shared.RaceColumnInSeriesDTO;
 import com.sap.sailing.gwt.ui.shared.RaceCourseDTO;
 import com.sap.sailing.gwt.ui.shared.RaceDTO;
-import com.sap.sailing.gwt.ui.shared.RaceLogDTO;
-import com.sap.sailing.gwt.ui.shared.RaceLogEventDTO;
+import com.sap.sailing.gwt.ui.shared.RaceInfoDTO;
 import com.sap.sailing.gwt.ui.shared.RaceMapDataDTO;
 import com.sap.sailing.gwt.ui.shared.RaceStatusDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
@@ -216,6 +213,8 @@ import com.sap.sailing.gwt.ui.shared.WaypointDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
+import com.sap.sailing.racecommittee.domain.racelog.impl.PassAwareRaceLogImpl;
+import com.sap.sailing.racecommittee.domain.state.impl.analyzers.StartTimeFinder;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
 import com.sap.sailing.server.operationaltransformation.AddColumnToLeaderboard;
@@ -1086,22 +1085,19 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return result;
     }
 
-    private RaceLogDTO convertToRaceLogDTO(RaceLog raceLog) {
-        RaceLogDTO raceLogDTO = new RaceLogDTO();
-        raceLog.lockForRead();
-        try{
-            for(RaceLogEvent raceLogEvent : raceLog.getFixes()){
-                raceLogDTO.raceEvents.add(convertToRaceLogEventDTO(raceLogEvent));
-            }
-        }finally{
-            raceLog.unlockAfterRead();
+    private RaceInfoDTO convertToRaceInfoDTO(RaceColumnDTO raceColumnDTO, Fleet fleet, RaceLog raceLog) {
+        RaceInfoDTO raceInfoDTO = new RaceInfoDTO();
+        
+        PassAwareRaceLogImpl passAwareRaceLog = new PassAwareRaceLogImpl(raceLog);
+        StartTimeFinder startTimeFinder = new StartTimeFinder(passAwareRaceLog);
+        if(startTimeFinder.getStartTime()!=null){
+            raceInfoDTO.startTime = startTimeFinder.getStartTime().asDate();
         }
-        return raceLogDTO;
-    }
-
-    private RaceLogEventDTO convertToRaceLogEventDTO(RaceLogEvent raceLogEvent) {
-        RaceLogEventDTO raceLogEventDTO = new RaceLogEventDTO(raceLogEvent.getTimePoint().asMillis(), raceLogEvent.getPassId());
-        return raceLogEventDTO;
+        
+        raceInfoDTO.raceName = raceColumnDTO.name;
+        raceInfoDTO.fleet = fleet.getName();
+        
+        return raceInfoDTO;
     }
 
     private FleetDTO convertToFleetDTO(Fleet fleet) {
@@ -2159,10 +2155,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 RaceColumnDTO raceColumnDTO = leaderboardDTO.addRace(raceColumn.getName(), raceColumn.getExplicitFactor(), raceColumn.getFactor(),
                         fleetDTO, raceColumn.isMedalRace(), raceIdentifier, raceDTO);
                 
-                RaceLog raceLog = raceColumn.getRaceLog(fleet);
-                raceLog.add(RaceLogEventFactory.INSTANCE.createRaceLogPassChangeEvent(MillisecondsTimePoint.now(), 42));
-                RaceLogDTO raceLogDTO = convertToRaceLogDTO(raceLog);
-                raceColumnDTO.getRaceLogsPerFleet().put(fleetDTO, raceLogDTO);
+                addRaceInfoToRace(raceColumn, fleet, fleetDTO, raceColumnDTO);
                
                 if (latestTimePointAfterQueryTimePointWhenATrackedRaceWasLive != null) {
                     raceColumnDTO.setWhenLastTrackedRaceWasLive(fleetDTO, latestTimePointAfterQueryTimePointWhenATrackedRaceWasLive.asDate());
@@ -2170,6 +2163,14 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             }
         }
         return leaderboardDTO;
+    }
+//TODO
+    private void addRaceInfoToRace(RaceColumn raceColumn, Fleet fleet, final FleetDTO fleetDTO,
+            RaceColumnDTO raceColumnDTO) {
+        RaceLog raceLog = raceColumn.getRaceLog(fleet);
+        raceLog.add(RaceLogEventFactory.INSTANCE.createStartTimeEvent(MillisecondsTimePoint.now(), 1, MillisecondsTimePoint.now().plus(1000)));
+        RaceInfoDTO raceLogDTO = convertToRaceInfoDTO(raceColumnDTO, fleet, raceLog);
+        raceColumnDTO.getRaceInfoPerFleet().put(fleetDTO, raceLogDTO);
     }
 
     private RaceDTO createRaceDTO(boolean withGeoLocationData, RegattaAndRaceIdentifier raceIdentifier, TrackedRace trackedRace) {

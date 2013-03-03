@@ -3,7 +3,7 @@ package com.sap.sailing.racecommittee.app.deserialization.impl;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.racelog.RaceLog;
-import com.sap.sailing.racecommittee.app.domain.racelog.impl.PassAwareRaceLogImpl;
+import com.sap.sailing.racecommittee.domain.racelog.impl.PassAwareRaceLogImpl;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 
