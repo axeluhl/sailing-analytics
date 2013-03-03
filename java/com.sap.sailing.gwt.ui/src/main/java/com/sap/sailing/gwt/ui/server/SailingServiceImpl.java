@@ -2159,8 +2159,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 RaceColumnDTO raceColumnDTO = leaderboardDTO.addRace(raceColumn.getName(), raceColumn.getExplicitFactor(), raceColumn.getFactor(),
                         fleetDTO, raceColumn.isMedalRace(), raceIdentifier, raceDTO);
                 
-                //workaround because RaceLog is null
-                fillRaceLockMock(raceColumnDTO, fleetDTO);
+                RaceLog raceLog = raceColumn.getRaceLog(fleet);
+                raceLog.add(RaceLogEventFactory.INSTANCE.createRaceLogPassChangeEvent(MillisecondsTimePoint.now(), 42));
+                RaceLogDTO raceLogDTO = convertToRaceLogDTO(raceLog);
+                raceColumnDTO.getRaceLogsPerFleet().put(fleetDTO, raceLogDTO);
                
                 if (latestTimePointAfterQueryTimePointWhenATrackedRaceWasLive != null) {
                     raceColumnDTO.setWhenLastTrackedRaceWasLive(fleetDTO, latestTimePointAfterQueryTimePointWhenATrackedRaceWasLive.asDate());
@@ -2168,13 +2170,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             }
         }
         return leaderboardDTO;
-    }
-
-    private void fillRaceLockMock(RaceColumnDTO raceColumnDTO, FleetDTO fleetDTO) {
-        RaceLog raceLog = new RaceLogImpl("lockString");
-        raceLog.add(RaceLogEventFactory.INSTANCE.createRaceLogPassChangeEvent(MillisecondsTimePoint.now(), 42));
-        RaceLogDTO raceLogDTO = convertToRaceLogDTO(raceLog);
-        raceColumnDTO.getRaceLogsPerFleet().put(fleetDTO, raceLogDTO);
     }
 
     private RaceDTO createRaceDTO(boolean withGeoLocationData, RegattaAndRaceIdentifier raceIdentifier, TrackedRace trackedRace) {
