@@ -25,6 +25,11 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
     private final Map<Fleet, RaceIdentifier> raceIdentifiers;
 
     private final Map<Fleet, RaceLog> raceLogs;
+    /**
+     * holds the race log identifer template needed to create the appropriate RaceLogIdentifer that is constructed from the 
+     * parent object name, name of this raceColumn and the name of a fleet of this raceColumn to access the RaceLog in the 
+     * RaceLogStore for persistence purposes.
+     */
     private RaceLogIdentifierTemplate raceLogsIdentifierTemplate;
 
     public AbstractRaceColumn() {
