@@ -47,7 +47,7 @@ public class ServerReplicationTest extends AbstractServerReplicationTest {
         final String leaderboardName = "My new leaderboard";
         assertNull(replica.getLeaderboardByName(leaderboardName));
         final int[] discardThresholds = new int[] { 17, 23 };
-        CreateFlexibleLeaderboard createTestLeaderboard = new CreateFlexibleLeaderboard(leaderboardName, discardThresholds, new LowPoint());
+        CreateFlexibleLeaderboard createTestLeaderboard = new CreateFlexibleLeaderboard(leaderboardName, null, discardThresholds, new LowPoint());
         assertNull(master.getLeaderboardByName(leaderboardName));
         master.apply(createTestLeaderboard);
         final Leaderboard masterLeaderboard = master.getLeaderboardByName(leaderboardName);

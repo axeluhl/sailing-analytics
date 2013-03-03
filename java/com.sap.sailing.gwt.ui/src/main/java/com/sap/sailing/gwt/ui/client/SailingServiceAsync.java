@@ -211,10 +211,10 @@ public interface SailingServiceAsync {
     void updateLeaderboard(String leaderboardName, String newLeaderboardName, String newLeaderboardDisplayName,
             int[] newDiscardingThreasholds, AsyncCallback<Void> callback);
 
-    void createFlexibleLeaderboard(String leaderboardName, int[] discardThresholds, ScoringSchemeType scoringSchemeType,
+    void createFlexibleLeaderboard(String leaderboardName, String leaderboardDisplayName, int[] discardThresholds, ScoringSchemeType scoringSchemeType,
             AsyncCallback<StrippedLeaderboardDTO> asyncCallback);
 
-    void createRegattaLeaderboard(RegattaIdentifier regattaIdentifier, int[] discardThresholds,
+    void createRegattaLeaderboard(RegattaIdentifier regattaIdentifier, String leaderboardDisplayName, int[] discardThresholds,
             AsyncCallback<StrippedLeaderboardDTO> asyncCallback);
 
     void removeLeaderboard(String leaderboardName, AsyncCallback<Void> asyncCallback);

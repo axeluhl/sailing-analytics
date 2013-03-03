@@ -227,7 +227,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         delayToLiveInMillis = TrackedRace.DEFAULT_LIVE_DELAY_IN_MILLISECONDS;
         // Add one default leaderboard that aggregates all races currently tracked by this service.
         // This is more for debugging purposes than for anything else.
-        addFlexibleLeaderboard(LeaderboardNameConstants.DEFAULT_LEADERBOARD_NAME, new int[] { 5, 8 },
+        addFlexibleLeaderboard(LeaderboardNameConstants.DEFAULT_LEADERBOARD_NAME, null, new int[] { 5, 8 },
                 tractracDomainFactory.getBaseDomainFactory().createScoringScheme(ScoringSchemeType.LOW_POINT));
         loadStoredRegattas();
         loadRaceIDToRegattaAssociations();
@@ -297,13 +297,14 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     }
     
     @Override
-    public FlexibleLeaderboard addFlexibleLeaderboard(String name, int[] discardThresholds, ScoringScheme scoringScheme) {
-        logger.info("adding flexible leaderboard "+name);
-        FlexibleLeaderboard result = new FlexibleLeaderboardImpl(name, new ScoreCorrectionImpl(), new ResultDiscardingRuleImpl(
+    public FlexibleLeaderboard addFlexibleLeaderboard(String leaderboardName, String leaderboardDisplayName, int[] discardThresholds, ScoringScheme scoringScheme) {
+        logger.info("adding flexible leaderboard "+leaderboardName);
+        FlexibleLeaderboard result = new FlexibleLeaderboardImpl(leaderboardName, new ScoreCorrectionImpl(), new ResultDiscardingRuleImpl(
                 discardThresholds), scoringScheme);
+        result.setDisplayName(leaderboardDisplayName);
         synchronized (leaderboardsByName) {
-            if (getLeaderboardByName(name) != null) {
-                throw new IllegalArgumentException("Leaderboard with name "+name+" already exists");
+            if (getLeaderboardByName(leaderboardName) != null) {
+                throw new IllegalArgumentException("Leaderboard with name "+leaderboardName+" already exists");
             }
             addLeaderboard(result);
         }
@@ -312,7 +313,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     }
     
     @Override
-    public RegattaLeaderboard addRegattaLeaderboard(RegattaIdentifier regattaIdentifier, int[] discardThresholds) {
+    public RegattaLeaderboard addRegattaLeaderboard(RegattaIdentifier regattaIdentifier, String leaderboardDisplayName, int[] discardThresholds) {
         Regatta regatta = getRegatta(regattaIdentifier);
         logger.info("adding regatta leaderboard for regatta "
                 + (regatta == null ? "null" : (regatta.getName() + " (" + regatta.hashCode() + ")")) + " to " + this);
@@ -320,6 +321,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         if (regatta != null) {
             result = new RegattaLeaderboardImpl(regatta, new ScoreCorrectionImpl(), new ResultDiscardingRuleImpl(
                     discardThresholds));
+            result.setDisplayName(leaderboardDisplayName);
             synchronized (leaderboardsByName) {
                 if (getLeaderboardByName(result.getName()) != null) {
                     throw new IllegalArgumentException("Leaderboard with name " + result.getName() + " already exists in "+this);
