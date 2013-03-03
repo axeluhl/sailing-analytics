@@ -2,8 +2,8 @@ package com.sap.sailing.domain.tracking.impl;
 
 import java.util.Map;
 
-import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
@@ -58,5 +58,5 @@ public abstract class AbstractRaceChangeListener implements RaceChangeListener {
     @Override
     public void delayToLiveChanged(long delayToLiveInMillis) {
     }
-
+    
 }

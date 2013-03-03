@@ -25,7 +25,7 @@ public abstract class RegattaLeaderboardDialog extends AbstractLeaderboardDialog
     protected static class LeaderboardParameterValidator implements Validator<LeaderboardDescriptor> {
         protected final StringMessages stringConstants;
         protected final Collection<StrippedLeaderboardDTO> existingLeaderboards;
-        
+
         public LeaderboardParameterValidator(StringMessages stringConstants, Collection<StrippedLeaderboardDTO> existingLeaderboards){
             super();
             this.stringConstants = stringConstants;
@@ -42,20 +42,20 @@ public abstract class RegattaLeaderboardDialog extends AbstractLeaderboardDialog
                 if (0 < leaderboardToValidate.getDiscardThresholds().length){ 
                     discardThresholdsAscending = discardThresholdsAscending
                             && leaderboardToValidate.getDiscardThresholds()[i - 1] < leaderboardToValidate.getDiscardThresholds()[i]
-                    // and if one box is empty, all subsequent boxes need to be empty too
-                    && (leaderboardToValidate.getDiscardThresholds()[i] == 0 || leaderboardToValidate.getDiscardThresholds()[i-1] > 0);
+                                    // and if one box is empty, all subsequent boxes need to be empty too
+                                    && (leaderboardToValidate.getDiscardThresholds()[i] == 0 || leaderboardToValidate.getDiscardThresholds()[i-1] > 0);
                 }
             }
-            
+
             boolean unique = true;
             for (StrippedLeaderboardDTO dao : existingLeaderboards) {
                 if(dao.name.equals(leaderboardToValidate.getRegattaName())){
                     unique = false;
                 }
             }
-            
+
             boolean regattaSelected = leaderboardToValidate.getRegattaName() != null ? true : false;
-            
+
             if(!regattaSelected){
                 errorMessage = stringConstants.pleaseSelectARegatta();
             } else if(!unique){
@@ -68,7 +68,7 @@ public abstract class RegattaLeaderboardDialog extends AbstractLeaderboardDialog
             return errorMessage;
         }
     }
-    
+
     public RegattaLeaderboardDialog(String title, LeaderboardDescriptor leaderboardDTO, Collection<RegattaDTO> existingRegattas, StringMessages stringConstants,
             ErrorReporter errorReporter, LeaderboardParameterValidator validator,  DialogCallback<LeaderboardDescriptor> callback) {
         super(title, leaderboardDTO, stringConstants, validator, callback);
@@ -107,7 +107,7 @@ public abstract class RegattaLeaderboardDialog extends AbstractLeaderboardDialog
     @Override
     protected Widget getAdditionalWidget() {
         VerticalPanel mainPanel = new VerticalPanel();
-        
+
         Grid formGrid = new Grid(3,3);
         formGrid.setCellSpacing(3);
         formGrid.setWidget(0, 0, createLabel(stringMessages.regatta()));
@@ -116,9 +116,9 @@ public abstract class RegattaLeaderboardDialog extends AbstractLeaderboardDialog
         formGrid.setWidget(1, 1, nameTextBox);
         formGrid.setWidget(2,  0, createLabel(stringMessages.displayName()));
         formGrid.setWidget(2, 1, displayNameTextBox);
-                
+
         mainPanel.add(formGrid);
-        
+
         mainPanel.add(new Label(stringMessages.discardRacesFromHowManyStartedRacesOn()));
         HorizontalPanel hp = new HorizontalPanel();
         hp.setSpacing(3);

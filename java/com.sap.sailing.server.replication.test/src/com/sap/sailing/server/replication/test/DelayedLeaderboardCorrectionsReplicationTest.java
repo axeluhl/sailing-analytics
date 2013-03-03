@@ -74,7 +74,7 @@ public class DelayedLeaderboardCorrectionsReplicationTest extends AbstractServer
         master = createRacingEventServiceWithOneMockedTrackedRace(q2YellowTrackedRace);
         final String leaderboardName = "My new leaderboard";
         final int[] discardThresholds = new int[] { 19, 44 };
-        CreateFlexibleLeaderboard createTestLeaderboard = new CreateFlexibleLeaderboard(leaderboardName, null, discardThresholds, new LowPoint());
+        CreateFlexibleLeaderboard createTestLeaderboard = new CreateFlexibleLeaderboard(leaderboardName, null, discardThresholds, new LowPoint(), null);
         assertNull(master.getLeaderboardByName(leaderboardName));
         master.apply(createTestLeaderboard);
         final Leaderboard masterLeaderboard = master.getLeaderboardByName(leaderboardName);

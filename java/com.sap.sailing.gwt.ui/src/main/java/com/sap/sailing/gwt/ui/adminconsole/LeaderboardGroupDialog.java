@@ -109,7 +109,8 @@ public class LeaderboardGroupDialog extends DataEntryDialog<LeaderboardGroupDial
                         emptyStrippedLeaderboardDTOList).getErrorMessage(new LeaderboardDescriptor("Overall",
                                 /* displayName */ null,
                                 groupToValidate.getOverallLeaderboardScoringSchemeType(),
-                                groupToValidate.getOverallLeaderboardDiscardThresholds()));
+                                groupToValidate.getOverallLeaderboardDiscardThresholds(),
+                                null));
             }
             return errorMessage;
         }

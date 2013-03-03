@@ -28,6 +28,7 @@ import com.sap.sailing.gwt.ui.client.RegattaSelectionModel;
 import com.sap.sailing.gwt.ui.client.RegattaSelectionProvider;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.FleetDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
@@ -84,24 +85,38 @@ public class RegattaStructureManagementPanel extends SimplePanel implements Rega
         regattaDetailsComposite.setVisible(false);
         grid.setWidget(0, 1, regattaDetailsComposite);
     }
-    
-    private void openCreateRegattaDialog() {
-        Collection<RegattaDTO> existingRegattas = Collections.unmodifiableCollection(regattaListComposite.getAllRegattas());
-        
-        RegattaWithSeriesAndFleetsCreateDialog dialog = new RegattaWithSeriesAndFleetsCreateDialog(existingRegattas, stringMessages,
-                new DialogCallback<RegattaDTO>() {
-                    @Override
-                    public void cancel() {
-                    }
 
-                    @Override
-                    public void ok(RegattaDTO newRegatta) {
-                        createNewRegatta(newRegatta);
-                    }
-                });
-        dialog.show();
+    private void openCreateRegattaDialog() {
+        final Collection<RegattaDTO> existingRegattas = Collections.unmodifiableCollection(regattaListComposite.getAllRegattas());
+
+        sailingService.getEvents(new AsyncCallback<List<EventDTO>>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                openCreateRegattaDialog(existingRegattas, Collections.<EventDTO>emptyList());
+            }
+
+            @Override
+            public void onSuccess(List<EventDTO> result) {
+                openCreateRegattaDialog(existingRegattas, Collections.unmodifiableList(result));
+            }
+        });
     }
 
+    private void openCreateRegattaDialog(Collection<RegattaDTO> existingRegattas, List<EventDTO> existingEvents) {
+        RegattaWithSeriesAndFleetsCreateDialog dialog = new RegattaWithSeriesAndFleetsCreateDialog(existingRegattas, existingEvents, stringMessages,
+                new DialogCallback<RegattaDTO>() {
+            @Override
+            public void cancel() {
+            }
+
+            @Override
+            public void ok(RegattaDTO newRegatta) {
+                createNewRegatta(newRegatta);
+            }
+        });
+        dialog.show();
+    }
+    
     private void createNewRegatta(final RegattaDTO newRegatta) {
         LinkedHashMap<String, Pair<List<Triple<String, Integer, Color>>, Boolean>> seriesStructure =
                 new LinkedHashMap<String, Pair<List<Triple<String, Integer, Color>>, Boolean>>();
@@ -115,7 +130,7 @@ public class RegattaStructureManagementPanel extends SimplePanel implements Rega
             seriesStructure.put(seriesDTO.name, seriesPair);
         }
         sailingService.createRegatta(newRegatta.name, newRegatta.boatClass.name, seriesStructure, true,
-                newRegatta.scoringScheme, new AsyncCallback<RegattaDTO>() {
+                newRegatta.scoringScheme, newRegatta.defaultCourseAreaIdAsString, new AsyncCallback<RegattaDTO>() {
             @Override
             public void onFailure(Throwable t) {
                 errorReporter.reportError("Error trying to create new regatta" + newRegatta.name + ": " + t.getMessage());

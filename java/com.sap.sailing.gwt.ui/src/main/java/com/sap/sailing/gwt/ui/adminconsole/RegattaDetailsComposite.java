@@ -48,6 +48,7 @@ public class RegattaDetailsComposite extends Composite {
     private final Label regattaName;
     private final Label boatClassName;
     private final Label scoringSystem;
+    private final Label defaultCourseArea;
 
     private final SelectionModel<SeriesDTO> seriesSelectionModel;
     private final CellTable<SeriesDTO> seriesTable;
@@ -68,7 +69,7 @@ public class RegattaDetailsComposite extends Composite {
         VerticalPanel vPanel = new VerticalPanel();
         mainPanel.add(vPanel);
         
-        Grid grid = new Grid(3, 2);
+        Grid grid = new Grid(4, 2);
         vPanel.add(grid);
         
         regattaName = new Label();
@@ -79,9 +80,13 @@ public class RegattaDetailsComposite extends Composite {
         grid.setWidget(1 , 0, new Label(stringMessages.boatClass() + ":"));
         grid.setWidget(1 , 1, boatClassName);
 
+        defaultCourseArea = new Label();
+        grid.setWidget(2 , 0, new Label(stringMessages.courseArea() + ":"));
+        grid.setWidget(2 , 1, defaultCourseArea);
+        
         scoringSystem = new Label();
-        grid.setWidget(2 , 0, new Label(stringMessages.scoringSystem() + ":"));
-        grid.setWidget(2 , 1, scoringSystem);
+        grid.setWidget(3 , 0, new Label(stringMessages.scoringSystem() + ":"));
+        grid.setWidget(3 , 1, scoringSystem);
         
         seriesTable = createRegattaSeriesTable();
         seriesSelectionModel = new SingleSelectionModel<SeriesDTO>();
@@ -260,6 +265,7 @@ public class RegattaDetailsComposite extends Composite {
         if(regatta != null) {
             regattaName.setText(regatta.name);
             boatClassName.setText(regatta.boatClass != null ? regatta.boatClass.name : "");
+            defaultCourseArea.setText(regatta.defaultCourseAreaIdAsString == null ? "" : regatta.defaultCourseAreaName);
 
             ScoringSchemeType scoringScheme = regatta.scoringScheme;
             String scoringSystemText = scoringScheme == null ? "" : ScoringSchemeTypeFormatter.format(scoringScheme, stringMessages);               

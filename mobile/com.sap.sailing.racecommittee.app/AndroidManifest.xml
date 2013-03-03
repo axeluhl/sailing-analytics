@@ -1,0 +1,42 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.sap.sailing.racecommittee.app"
+    android:versionCode="1"
+    android:versionName="1.0">
+
+    <uses-sdk
+        android:minSdkVersion="13"
+        android:targetSdkVersion="17" 
+        android:maxSdkVersion="17" />
+    
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+	<uses-permission android:name="android.permission.VIBRATE"/>
+
+    <application
+		android:icon="@drawable/sap_sailing_app_icon"
+        android:label="@string/app_name"
+        android:theme="@style/Theme.Welter" 
+        android:name="RaceApplication"
+        android:allowBackup="true"
+        android:hardwareAccelerated="true" >
+        
+        <activity 
+            android:name=".ui.activities.LoginActivity" 
+            >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity 
+            android:name=".ui.activities.RacingActivity">
+            
+        </activity>
+        
+        
+        
+    </application>
+
+</manifest>

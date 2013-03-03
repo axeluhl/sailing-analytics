@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.persistence.impl;
 
 import java.io.Serializable;
+import java.util.List;
 import java.util.logging.Logger;
 
 import org.bson.types.ObjectId;
@@ -36,6 +37,13 @@ import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
+import com.sap.sailing.domain.racelog.RaceLogCourseAreaChangedEvent;
+import com.sap.sailing.domain.racelog.RaceLogEvent;
+import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
+import com.sap.sailing.domain.racelog.RaceLogIdentifier;
+import com.sap.sailing.domain.racelog.RaceLogPassChangeEvent;
+import com.sap.sailing.domain.racelog.RaceLogRaceStatusEvent;
+import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.tracking.Positioned;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
@@ -45,12 +53,12 @@ import com.sap.sailing.domain.tracking.WindTrack;
 public class MongoObjectFactoryImpl implements MongoObjectFactory {
     private static Logger logger = Logger.getLogger(MongoObjectFactoryImpl.class.getName());
     private final DB database;
-    
+
     public MongoObjectFactoryImpl(DB database) {
         super();
         this.database = database;
     }
-    
+
     public DBObject storeWind(Wind wind) {
         DBObject result = new BasicDBObject();
         storePositioned(wind, result);
@@ -66,7 +74,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     private void storeSpeedWithBearing(SpeedWithBearing speedWithBearing, DBObject result) {
         storeSpeed(speedWithBearing, result);
         storeBearing(speedWithBearing.getBearing(), result);
-        
+
     }
 
     private void storeBearing(Bearing bearing, DBObject result) {
@@ -112,7 +120,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         result.put(FieldNames.WIND.name(), storeWind(wind));
         return result;
     }
-    
+
     private void storeRaceIdentifiers(RaceColumn raceColumn, DBObject dbObject) {
         BasicDBObject raceIdentifiersPerFleet = new BasicDBObject();
         for (Fleet fleet : raceColumn.getFleets()) {
@@ -160,6 +168,11 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         } else {
             // at least store the scoring scheme
             dbLeaderboard.put(FieldNames.SCORING_SCHEME_TYPE.name(), leaderboard.getScoringScheme().getType().name());
+        }
+        if (leaderboard.getDefaultCourseArea() != null) {
+            dbLeaderboard.put(FieldNames.COURSE_AREA_ID.name(), leaderboard.getDefaultCourseArea().getId().toString());
+        } else {
+            dbLeaderboard.put(FieldNames.COURSE_AREA_ID.name(), null);
         }
         storeColumnFactors(leaderboard, dbLeaderboard);
         storeLeaderboardCorrectionsAndDiscards(leaderboard, dbLeaderboard);
@@ -290,12 +303,12 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         BasicDBObject renameUpdate = new BasicDBObject("$set", new BasicDBObject(FieldNames.LEADERBOARD_NAME.name(), newName));
         leaderboardCollection.update(query, renameUpdate);
     }
-    
+
     @Override
     public void storeLeaderboardGroup(LeaderboardGroup leaderboardGroup) {
         DBCollection leaderboardGroupCollection = database.getCollection(CollectionNames.LEADERBOARD_GROUPS.name());
         DBCollection leaderboardCollection = database.getCollection(CollectionNames.LEADERBOARDS.name());
-        
+
         try {
             leaderboardGroupCollection.ensureIndex(FieldNames.LEADERBOARD_GROUP_NAME.name());
         } catch (NullPointerException npe) {
@@ -371,14 +384,14 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         BasicDBObject renameUpdate = new BasicDBObject("$set", new BasicDBObject(FieldNames.EVENT_NAME.name(), newName));
         eventCollection.update(query, renameUpdate);
     }
-    
+
     @Override
     public void removeEvent(Serializable id) {
         DBCollection eventsCollection = database.getCollection(CollectionNames.EVENTS.name());
         BasicDBObject query = new BasicDBObject(FieldNames.EVENT_ID.name(), id);
         eventsCollection.remove(query);
     }
-    
+
     private DBObject getVenueAsDBObject(Venue venue) {
         DBObject result = new BasicDBObject();
         result.put(FieldNames.VENUE_NAME.name(), venue.getName());
@@ -388,6 +401,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
             DBObject dbCourseArea = new BasicDBObject();
             courseAreaList.add(dbCourseArea);
             dbCourseArea.put(FieldNames.COURSE_AREA_NAME.name(), courseArea.getName());
+            dbCourseArea.put(FieldNames.COURSE_AREA_ID.name(), courseArea.getId());
         }
         return result;
     }
@@ -408,6 +422,13 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
             dbRegatta.put(FieldNames.BOAT_CLASS_TYPICALLY_STARTS_UPWIND.name(), regatta.getBoatClass().typicallyStartsUpwind());
         }
         dbRegatta.put(FieldNames.REGATTA_SERIES.name(), storeSeries(regatta.getSeries()));
+
+        if (regatta.getDefaultCourseArea() != null) {
+            dbRegatta.put(FieldNames.COURSE_AREA_ID.name(), regatta.getDefaultCourseArea().getId().toString());
+        } else {
+            dbRegatta.put(FieldNames.COURSE_AREA_ID.name(), null);
+        }
+
         regattasCollection.update(query, dbRegatta, /* upsrt */ true, /* multi */ false);
     }
 
@@ -467,11 +488,127 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         entry.put(FieldNames.REGATTA_NAME.name(), regatta.getName());
         regattaForRaceIDCollection.update(query, entry, /* upsrt */ true, /* multi */ false);
     }
-    
+
     @Override
     public void removeRegattaForRaceID(String raceIDAsString, Regatta regatta) {
         DBCollection regattaForRaceIDCollection = database.getCollection(CollectionNames.REGATTA_FOR_RACE_ID.name());
         DBObject query = new BasicDBObject(FieldNames.RACE_ID_AS_STRING.name(), raceIDAsString);
         regattaForRaceIDCollection.remove(query);
+    }
+
+    public DBCollection getRaceLogCollection() {
+        DBCollection result = database.getCollection(CollectionNames.RACE_LOGS.name());
+        result.ensureIndex(new BasicDBObject(FieldNames.RACE_LOG_IDENTIFIER.name(), null));
+        return result;
+    }
+
+    public DBObject storeRaceLogEntry(RaceLogIdentifier raceLogIdentifier, RaceLogFlagEvent flagEvent) {
+        BasicDBObject result = new BasicDBObject();
+        result.put(FieldNames.RACE_LOG_IDENTIFIER.name(), MongoUtils.escapeDollarAndDot(raceLogIdentifier.getIdentifier().toString()));
+
+        result.put(FieldNames.RACE_LOG_EVENT.name(), storeRaceLogFlagEvent(flagEvent));
+        return result;
+    }
+
+    public DBObject storeRaceLogEntry(RaceLogIdentifier raceLogIdentifier, RaceLogStartTimeEvent startTimeEvent) {
+        BasicDBObject result = new BasicDBObject();
+        result.put(FieldNames.RACE_LOG_IDENTIFIER.name(), MongoUtils.escapeDollarAndDot(raceLogIdentifier.getIdentifier().toString()));
+
+        result.put(FieldNames.RACE_LOG_EVENT.name(), storeRaceLogStartTimeEvent(startTimeEvent));
+        return result;
+    }
+
+    public DBObject storeRaceLogEntry(RaceLogIdentifier raceLogIdentifier, RaceLogPassChangeEvent passChangeEvent) {
+        BasicDBObject result = new BasicDBObject();
+        result.put(FieldNames.RACE_LOG_IDENTIFIER.name(), MongoUtils.escapeDollarAndDot(raceLogIdentifier.getIdentifier().toString()));
+
+        result.put(FieldNames.RACE_LOG_EVENT.name(), storeRaceLogPassChangeEvent(passChangeEvent));
+        return result;
+    }
+
+    public DBObject storeRaceLogEntry(RaceLogIdentifier raceLogIdentifier, RaceLogRaceStatusEvent raceStatusEvent) {
+        BasicDBObject result = new BasicDBObject();
+        result.put(FieldNames.RACE_LOG_IDENTIFIER.name(), MongoUtils.escapeDollarAndDot(raceLogIdentifier.getIdentifier().toString()));
+
+        result.put(FieldNames.RACE_LOG_EVENT.name(), storeRaceLogRaceStatusEvent(raceStatusEvent));
+        return result;
+    }
+
+    public DBObject storeRaceLogEntry(RaceLogIdentifier raceLogIdentifier, RaceLogCourseAreaChangedEvent courseAreaChangedEvent) {
+        BasicDBObject result = new BasicDBObject();
+        result.put(FieldNames.RACE_LOG_IDENTIFIER.name(), MongoUtils.escapeDollarAndDot(raceLogIdentifier.getIdentifier().toString()));       
+        result.put(FieldNames.RACE_LOG_EVENT.name(), storeRaceLogCourseAreaChangedEvent(courseAreaChangedEvent));
+        return result;
+    }
+
+    private DBObject storeRaceLogStartTimeEvent(RaceLogStartTimeEvent startTimeEvent) {
+        DBObject result = new BasicDBObject();
+        storeTimed(startTimeEvent, result);
+        storeRaceLogEventProperties(startTimeEvent, result);
+
+        result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogStartTimeEvent.class.getSimpleName());
+
+        result.put(FieldNames.RACE_LOG_EVENT_START_TIME.name(), startTimeEvent.getStartTime().asMillis());
+        result.put(FieldNames.RACE_LOG_EVENT_NEXT_STATUS.name(), startTimeEvent.getNextStatus().name());
+        return result;
+    }
+
+    public DBObject storeRaceLogFlagEvent(RaceLogFlagEvent flagEvent) {
+        DBObject result = new BasicDBObject();
+        storeTimed(flagEvent, result);
+        storeRaceLogEventProperties(flagEvent, result);
+
+        result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogFlagEvent.class.getSimpleName());
+
+        result.put(FieldNames.RACE_LOG_EVENT_FLAG_UPPER.name(), flagEvent.getUpperFlag().name());
+        result.put(FieldNames.RACE_LOG_EVENT_FLAG_LOWER.name(), flagEvent.getLowerFlag().name());
+        result.put(FieldNames.RACE_LOG_EVENT_FLAG_DISPLAYED.name(), String.valueOf(flagEvent.isDisplayed()));
+        return result;
+    }
+
+    private void storeRaceLogEventProperties(RaceLogEvent event, DBObject result) {
+        result.put(FieldNames.RACE_LOG_EVENT_ID.name(), event.getId());
+        result.put(FieldNames.RACE_LOG_EVENT_PASS_ID.name(), event.getPassId());
+        result.put(FieldNames.RACE_LOG_EVENT_INVOLVED_BOATS.name(), storeInvolvedBoatsForRaceLogEvent(event.getInvolvedBoats()));
+    }
+
+
+    private BasicDBList storeInvolvedBoatsForRaceLogEvent(List<Competitor> competitors) {
+        BasicDBList dbInvolvedCompetitorIds = new BasicDBList();
+        for (Competitor competitor : competitors) {
+            dbInvolvedCompetitorIds.add(competitor.getId());
+        }
+        return dbInvolvedCompetitorIds;
+    }
+
+    private DBObject storeRaceLogPassChangeEvent(RaceLogPassChangeEvent passChangeEvent) {
+        DBObject result = new BasicDBObject();
+        storeTimed(passChangeEvent, result);
+        storeRaceLogEventProperties(passChangeEvent, result);
+
+        result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogPassChangeEvent.class.getSimpleName());
+        return result;
+    }
+
+    private DBObject storeRaceLogRaceStatusEvent(RaceLogRaceStatusEvent raceStatusEvent) {
+        DBObject result = new BasicDBObject();
+        storeTimed(raceStatusEvent, result);
+        storeRaceLogEventProperties(raceStatusEvent, result);
+
+        result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogRaceStatusEvent.class.getSimpleName());
+
+        result.put(FieldNames.RACE_LOG_EVENT_NEXT_STATUS.name(), raceStatusEvent.getNextStatus().name());
+        return result;
+    }
+
+    private DBObject storeRaceLogCourseAreaChangedEvent(RaceLogCourseAreaChangedEvent courseAreaChangedEvent) {
+        DBObject result = new BasicDBObject();
+        storeTimed(courseAreaChangedEvent, result);
+        storeRaceLogEventProperties(courseAreaChangedEvent, result);
+
+        result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogCourseAreaChangedEvent.class.getSimpleName());
+
+        result.put(FieldNames.COURSE_AREA_ID.name(), courseAreaChangedEvent.getCourseAreaId());
+        return result;
     }
 }

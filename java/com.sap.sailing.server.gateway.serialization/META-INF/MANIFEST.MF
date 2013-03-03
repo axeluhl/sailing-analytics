@@ -1,0 +1,17 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Serialization
+Bundle-SymbolicName: com.sap.sailing.server.gateway.serialization
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: SAP
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: org.json.simple
+Require-Bundle: com.sap.sailing.domain.common;bundle-version="1.0.0",
+ com.sap.sailing.domain.shared.android;bundle-version="1.0.0"
+Export-Package: com.sap.sailing.server.gateway.deserialization,
+ com.sap.sailing.server.gateway.deserialization.impl,
+ com.sap.sailing.server.gateway.serialization,
+ com.sap.sailing.server.gateway.serialization.impl,
+ com.sap.sailing.server.gateway.serialization.impl.coursedata,
+ com.sap.sailing.server.gateway.serialization.impl.racegroup,
+ com.sap.sailing.server.gateway.serialization.impl.racelog

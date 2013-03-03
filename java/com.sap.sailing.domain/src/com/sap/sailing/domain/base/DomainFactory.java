@@ -3,7 +3,6 @@ package com.sap.sailing.domain.base;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
-import java.util.UUID;
 
 import com.sap.sailing.domain.base.impl.DomainFactoryImpl;
 import com.sap.sailing.domain.common.MarkType;
@@ -13,7 +12,7 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.tracking.MarkPassing;
 
-public interface DomainFactory {
+public interface DomainFactory extends SharedDomainFactory {
     static DomainFactory INSTANCE = new DomainFactoryImpl();
 
     /**
@@ -73,20 +72,6 @@ public interface DomainFactory {
     Waypoint getExistingWaypointByIdOrCache(Waypoint waypoint);
 
     MarkPassing createMarkPassing(TimePoint timePoint, Waypoint waypoint, Competitor competitor);
-    
-    BoatClass getOrCreateBoatClass(String name, boolean typicallyStartsUpwind);
-    
-    /**
-     * Like {@link #getOrCreateBoatClass(String, boolean)}, only that a default for <code>typicallyStartsUpwind</code> based
-     * on the boat class name is calculated.
-     */
-    BoatClass getOrCreateBoatClass(String name);
-    
-    Competitor getExistingCompetitorById(Serializable competitorId);
-    
-    Competitor createCompetitor(Serializable id, String name, Team team, Boat boat);
-    
-    Competitor getOrCreateCompetitor(Serializable competitorId, String name, Team team, Boat boat);
     
     /**
      * When de-serializing objects of types whose instances that are managed and cached by this domain factory,

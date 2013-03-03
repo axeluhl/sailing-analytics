@@ -10,7 +10,7 @@ import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 
 public class RegattaLeaderboardCreateDialog extends RegattaLeaderboardDialog {
-    
+
     public RegattaLeaderboardCreateDialog(Collection<StrippedLeaderboardDTO> existingLeaderboards, Collection<RegattaDTO> existingRegattas, StringMessages stringConstants,
             ErrorReporter errorReporter, DialogCallback<LeaderboardDescriptor> callback) {
         super(stringConstants.createRegattaLeaderboard(), new LeaderboardDescriptor(), existingRegattas, stringConstants, errorReporter, new RegattaLeaderboardDialog.LeaderboardParameterValidator(stringConstants, existingLeaderboards), callback);
@@ -33,6 +33,7 @@ public class RegattaLeaderboardCreateDialog extends RegattaLeaderboardDialog {
             }
         });
         
+
         discardThresholdBoxes = initEmptyDiscardThresholdBoxes(this);
     }
 

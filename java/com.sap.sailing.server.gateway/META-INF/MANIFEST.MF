@@ -23,10 +23,12 @@ Require-Bundle: com.sap.sailing.domain,
  com.sap.sailing.domain.common,
  com.sap.sailing.udpconnector,
  org.jdom;bundle-version="1.0.0",
+ com.sap.sailing.server.gateway.serialization;bundle-version="1.0.0",
  javax.servlet.jsp.jstl;bundle-version="1.2.0",
  javax.servlet.jsp;bundle-version="2.1.0",
  javax.el;bundle-version="2.1.0",
- rome;bundle-version="1.0.0"
+ rome;bundle-version="1.0.0",
+ com.sap.sailing.domain.shared.android;bundle-version="1.0.0"
 Bundle-ClassPath: .
 Web-ContextPath: /sailingserver
 Export-Package: com.sap.sailing.server.gateway

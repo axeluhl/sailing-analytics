@@ -16,7 +16,7 @@ public abstract class AbstractLeaderboardDialog extends DataEntryDialog<Leaderbo
     protected TextBox nameTextBox;
     protected TextBox displayNameTextBox;
     protected LeaderboardDescriptor leaderboardDescriptor;
-    
+
     protected LongBox[] discardThresholdBoxes;
     protected static final int MAX_NUMBER_OF_DISCARDED_RESULTS = 4;
 
@@ -26,7 +26,7 @@ public abstract class AbstractLeaderboardDialog extends DataEntryDialog<Leaderbo
         this.stringMessages = stringConstants;
         this.leaderboardDescriptor = leaderboardDescriptor;
     }
-    
+
     @Override
     protected LeaderboardDescriptor getResult() {
         int[] discardThresholdsBoxContents = getDiscardThresholds(discardThresholdBoxes);
@@ -82,7 +82,7 @@ public abstract class AbstractLeaderboardDialog extends DataEntryDialog<Leaderbo
             result[i].setVisibleLength(2);
         }
         return result;
-    }    
+    }
 
     protected static ListBox createScoringSchemeListBox(DataEntryDialog<?> dialog, StringMessages stringMessages) {
         ListBox scoringSchemeListBox2 = dialog.createListBox(false);

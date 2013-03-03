@@ -48,8 +48,8 @@ public abstract class ObjectInputStreamResolvingAgainstDomainFactory extends Obj
     @Override
     protected Object resolveObject(Object o) {
         Object result;
-        if (o instanceof IsManagedByDomainFactory) {
-            result = ((IsManagedByDomainFactory) o).resolve(getDomainFactory());
+        if (o instanceof IsManagedBySharedDomainFactory) {
+            result = ((IsManagedBySharedDomainFactory) o).resolve(getDomainFactory());
         } else {
             result = o;
         }

@@ -23,6 +23,7 @@ import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.domain.racelog.RaceLog;
 
 /**
  * Live tracking data of a single race. The race follows a defined {@link Course} with a sequence of {@link Leg}s. The
@@ -466,4 +467,21 @@ public interface TrackedRace extends Serializable {
      * other status.
      */
     void waitUntilNotLoading();
+
+    /**
+     * Detaches the race log associated with this {@link TrackedRace}.
+     */
+    void detachRaceLog();
+    
+    /**
+     * Attaches the passed race log with this {@link TrackedRace}.
+     * @param raceLog to be attached.
+     */
+    void attachRaceLog(RaceLog raceLog);
+    
+    /**
+     * Returns the attached race log event track for this race if any.
+     * Otherwise <code>null</code>.
+     */
+    RaceLog getRaceLog();
 }
