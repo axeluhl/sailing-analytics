@@ -7,19 +7,12 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 import com.google.gwt.dom.client.Style.Unit;
-import com.google.gwt.event.dom.client.ChangeEvent;
-import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
-import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.ListBox;
-import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.domain.common.Color;
@@ -35,14 +28,13 @@ import com.sap.sailing.gwt.ui.client.RegattaSelectionModel;
 import com.sap.sailing.gwt.ui.client.RegattaSelectionProvider;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.FleetDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
 
 /**
- * Allows administrators to manage the structure of a complete event. Each event consists of several substructures like
- * regattas, races, series and groups (big fleets divided into racing groups).
+ * Allows administrators to manage the structure of a regatta. Each regatta consists of several substructures like
+ * races, series and groups (big fleets divided into racing groups).
  * 
  * @author Frank Mittag (C5163974)
  * 
@@ -52,19 +44,11 @@ public class RegattaStructureManagementPanel extends SimplePanel implements Rega
     private final ErrorReporter errorReporter;
     private final StringMessages stringMessages;
 
-    private final List<EventDTO> events;
-    private ListBox eventsComboBox;
-    private EventDTO selectedEvent;
-    private CaptionPanel eventDetailsCaptionPanel;
-    private Label eventVenueLabel;
-
     private final RegattaRefresher regattaRefresher;
     private RegattaSelectionProvider regattaSelectionProvider;
 
     private RegattaListComposite regattaListComposite;
     private RegattaDetailsComposite regattaDetailsComposite;
-
-    private boolean supportEvents = false;
     
     public RegattaStructureManagementPanel(SailingServiceAsync sailingService, ErrorReporter errorReporter,
             StringMessages stringMessages, RegattaRefresher regattaRefresher) {
@@ -73,68 +57,12 @@ public class RegattaStructureManagementPanel extends SimplePanel implements Rega
         this.errorReporter = errorReporter;
         this.regattaRefresher = regattaRefresher;
 
-        events = new ArrayList<EventDTO>();
-        selectedEvent = null;
-
         VerticalPanel mainPanel = new VerticalPanel();
-        this.setWidget(mainPanel);
+        setWidget(mainPanel);
         mainPanel.setWidth("100%");
 
-        if(supportEvents) {
-            HorizontalPanel eventsPanel = new HorizontalPanel();
-            eventsPanel.setSpacing(5);
-            mainPanel.add(eventsPanel);
-
-            Label managedEventsLabel = new Label(stringMessages.events() + ":");
-            eventsPanel.add(managedEventsLabel);
-
-            eventsComboBox = new ListBox();
-            eventsComboBox.addChangeHandler(new ChangeHandler() {
-                @Override
-                public void onChange(ChangeEvent event) {
-                    onEventSelectionChanged();
-                }
-            });
-            eventsPanel.add(eventsComboBox);
-
-            Button createEventBtn = new Button(stringMessages.add());
-            createEventBtn.addClickHandler(new ClickHandler() {
-
-                @Override
-                public void onClick(ClickEvent event) {
-                    openCreateEventDialog();
-                }
-            });
-            eventsPanel.add(createEventBtn);
-
-            createEventDetailsPanel();
-            mainPanel.add(eventDetailsCaptionPanel);
-            eventDetailsCaptionPanel.setVisible(false);
-
-            fillEvents();
-        } else {
-            createEventDetailsPanel();
-            mainPanel.add(eventDetailsCaptionPanel);
-        }
-    }
-
-    private void createEventDetailsPanel() {
-        eventDetailsCaptionPanel = new CaptionPanel();
-        eventDetailsCaptionPanel.setWidth("95%");
-
-        VerticalPanel eventDetailsPanel = new VerticalPanel();
-        eventDetailsPanel.setSpacing(5);
-        eventDetailsCaptionPanel.add(eventDetailsPanel);
-
-        eventVenueLabel = new Label("");
-        eventDetailsPanel.add(eventVenueLabel);
-
-        createRegattaDetails(eventDetailsPanel);
-    }
-
-    private void createRegattaDetails(Panel parentPanel) {
         Button addRegattaBtn = new Button(stringMessages.addRegatta());
-        parentPanel.add(addRegattaBtn);
+        mainPanel.add(addRegattaBtn);
         addRegattaBtn.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -143,7 +71,7 @@ public class RegattaStructureManagementPanel extends SimplePanel implements Rega
         });
 
         Grid grid = new Grid(1 ,2);
-        parentPanel.add(grid);
+        mainPanel.add(grid);
         
         regattaSelectionProvider = new RegattaSelectionModel(false);
         regattaSelectionProvider.addRegattaSelectionChangeListener(this);
@@ -157,42 +85,8 @@ public class RegattaStructureManagementPanel extends SimplePanel implements Rega
         grid.setWidget(0, 1, regattaDetailsComposite);
     }
     
-    private void onEventSelectionChanged() {
-        int selIndex = eventsComboBox.getSelectedIndex();
-        String selItemText = eventsComboBox.getItemText(selIndex);
-
-        for (EventDTO eventDTO : events) {
-            if (eventDTO.name.equals(selItemText)) {
-                selectedEvent = eventDTO;
-                eventDetailsCaptionPanel.setVisible(true);
-                updateEventDetails();
-                break;
-            }
-        }
-    }
-
-    private void openCreateEventDialog() {
-        EventCreateDialog dialog = new EventCreateDialog(Collections.unmodifiableCollection(events), stringMessages,
-                new DialogCallback<EventDTO>() {
-                    @Override
-                    public void cancel() {
-                    }
-
-                    @Override
-                    public void ok(EventDTO newEvent) {
-                        createNewEvent(newEvent);
-                    }
-                });
-        dialog.show();
-    }
-
     private void openCreateRegattaDialog() {
-        Collection<RegattaDTO> existingRegattas = null;
-        if(supportEvents) {
-            existingRegattas = Collections.unmodifiableCollection(selectedEvent.regattas);
-        } else {
-            existingRegattas = Collections.unmodifiableCollection(regattaListComposite.getAllRegattas());
-        }
+        Collection<RegattaDTO> existingRegattas = Collections.unmodifiableCollection(regattaListComposite.getAllRegattas());
         
         RegattaWithSeriesAndFleetsCreateDialog dialog = new RegattaWithSeriesAndFleetsCreateDialog(existingRegattas, stringMessages,
                 new DialogCallback<RegattaDTO>() {
@@ -206,43 +100,6 @@ public class RegattaStructureManagementPanel extends SimplePanel implements Rega
                     }
                 });
         dialog.show();
-    }
-
-    private void updateEventDetails() {
-        if (selectedEvent != null) {
-            eventDetailsCaptionPanel.setCaptionText(selectedEvent.name);
-            eventVenueLabel.setText(stringMessages.venue() + ": " + selectedEvent.venue.name);
-            
-            // load the regattas for this event
-            sailingService.getRegattas(new AsyncCallback<List<RegattaDTO>>() {
-                @Override
-                public void onFailure(Throwable t) {
-                    errorReporter.reportError("Error trying to read regattas of event " + selectedEvent.name + ": " + t.getMessage());
-                }
-
-                @Override
-                public void onSuccess(List<RegattaDTO> regattas) {
-                    regattaListComposite.fillRegattas(regattas);
-                }
-            });
-        }
-    }
-
-    private void createNewEvent(final EventDTO newEvent) {
-        sailingService.createEvent(newEvent.name, newEvent.venue.name, newEvent.publicationUrl, newEvent.isPublic, new AsyncCallback<EventDTO>() {
-            @Override
-            public void onFailure(Throwable t) {
-                errorReporter.reportError("Error trying to create new event" + newEvent.name + ": " + t.getMessage());
-            }
-
-            @Override
-            public void onSuccess(EventDTO newEvent) {
-                events.add(newEvent);
-                eventsComboBox.addItem(newEvent.name);
-                int index = getEventItemIndex(newEvent.name);
-                eventsComboBox.setSelectedIndex(index);
-            }
-        });
     }
 
     private void createNewRegatta(final RegattaDTO newRegatta) {
@@ -267,36 +124,6 @@ public class RegattaStructureManagementPanel extends SimplePanel implements Rega
             @Override
             public void onSuccess(RegattaDTO regatta) {
                 regattaRefresher.fillRegattas();
-            }
-        });
-    }
-
-    private int getEventItemIndex(String eventName) {
-        for (int i = 0; i < eventsComboBox.getItemCount(); i++) {
-            if (eventName.equals(eventsComboBox.getItemText(i))) {
-                return i;
-            }
-        }
-        return -1;
-    }
-
-    private void fillEvents() {
-        sailingService.getEvents(new AsyncCallback<List<EventDTO>>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                errorReporter.reportError("Remote Procedure Call getEvents() - Failure: " + caught.getMessage());
-            }
-
-            @Override
-            public void onSuccess(List<EventDTO> result) {
-                events.clear();
-                events.addAll(result);
-                eventsComboBox.clear();
-                eventsComboBox.addItem("Please select an event...");
-                eventsComboBox.setSelectedIndex(0);
-                for (EventDTO event : result) {
-                    eventsComboBox.addItem(event.name);
-                }
             }
         });
     }
