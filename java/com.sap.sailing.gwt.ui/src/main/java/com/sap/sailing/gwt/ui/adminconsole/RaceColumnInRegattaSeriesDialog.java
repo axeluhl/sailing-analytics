@@ -37,7 +37,8 @@ public class RaceColumnInRegattaSeriesDialog extends DataEntryDialog<Pair<Series
     private final boolean hasOneSeries;
     private Grid raceColumnsGrid;
     private VerticalPanel additionalWidgetPanel;
-
+    private final SeriesDTO preSelectedSeries;
+    
     private static class RaceDialogValidator implements Validator<Pair<SeriesDTO, List<RaceColumnDTO>>> {
         private StringMessages stringConstants;
         private RegattaDTO regatta;
@@ -54,54 +55,50 @@ public class RaceColumnInRegattaSeriesDialog extends DataEntryDialog<Pair<Series
             List<RaceColumnDTO> raceColumnsToValidate = valueToValidate.getB();
 
             String errorMessage = null;
-            if(seriesToValidate == null) {
-                errorMessage = stringConstants.pleaseSelectASeries();
-            } else {
-                for (SeriesDTO seriesDTO: regatta.series) {
-                    if(!seriesDTO.name.equals(seriesToValidate.name)) {
-                        for(RaceColumnDTO raceColumn: seriesDTO.getRaceColumns()) {
-                            raceColumnNamesOfOtherSeries.add(raceColumn.name);
-                        }
+            for (SeriesDTO seriesDTO: regatta.series) {
+                if(!seriesDTO.name.equals(seriesToValidate.name)) {
+                    for(RaceColumnDTO raceColumn: seriesDTO.getRaceColumns()) {
+                        raceColumnNamesOfOtherSeries.add(raceColumn.name);
                     }
                 }
+            }
 
-                boolean raceColumnNameNotEmpty = true;
-                RaceColumnDTO wrongRaceColumn = null;
+            boolean raceColumnNameNotEmpty = true;
+            RaceColumnDTO wrongRaceColumn = null;
 
-                for (RaceColumnDTO raceColumn : raceColumnsToValidate) {
-                    raceColumnNameNotEmpty = raceColumn.name != null && raceColumn.name.length() > 0;
-                    if (!raceColumnNameNotEmpty) {
-                        wrongRaceColumn = raceColumn;
-                        break;
-                    }
-                }
-
-                boolean raceColumnUniqueInSeries = true;
-                boolean raceColumnUniqueInRegatta = true;
-
-                HashSet<String> setToFindDuplicates = new HashSet<String>();
-                for (RaceColumnDTO raceColumn : raceColumnsToValidate) {
-                    if (!setToFindDuplicates.add(raceColumn.name)) {
-                        raceColumnUniqueInSeries = false;
-                        wrongRaceColumn = raceColumn;
-                        break;
-                    } else if(raceColumnNamesOfOtherSeries.contains(raceColumn.name)) {
-                        raceColumnUniqueInRegatta = false;
-                        wrongRaceColumn = raceColumn;
-                        break;
-                    } 
-                }
-
+            for (RaceColumnDTO raceColumn : raceColumnsToValidate) {
+                raceColumnNameNotEmpty = raceColumn.name != null && raceColumn.name.length() > 0;
                 if (!raceColumnNameNotEmpty) {
-                    errorMessage = stringConstants.race() + " " + wrongRaceColumn.name + ": "
-                            + stringConstants.pleaseEnterAName();
-                } else if (!raceColumnUniqueInSeries) {
-                    errorMessage = stringConstants.race() + " " +  wrongRaceColumn.name + ": "
-                            + stringConstants.raceWithThisNameAlreadyExists();
-                }  else if (!raceColumnUniqueInRegatta) {
-                    errorMessage = stringConstants.race() + " " +  wrongRaceColumn.name + ": "
-                            + stringConstants.raceWithThisNameAlreadyExistsInRegatta();
+                    wrongRaceColumn = raceColumn;
+                    break;
                 }
+            }
+
+            boolean raceColumnUniqueInSeries = true;
+            boolean raceColumnUniqueInRegatta = true;
+
+            HashSet<String> setToFindDuplicates = new HashSet<String>();
+            for (RaceColumnDTO raceColumn : raceColumnsToValidate) {
+                if (!setToFindDuplicates.add(raceColumn.name)) {
+                    raceColumnUniqueInSeries = false;
+                    wrongRaceColumn = raceColumn;
+                    break;
+                } else if(raceColumnNamesOfOtherSeries.contains(raceColumn.name)) {
+                    raceColumnUniqueInRegatta = false;
+                    wrongRaceColumn = raceColumn;
+                    break;
+                } 
+            }
+
+            if (!raceColumnNameNotEmpty) {
+                errorMessage = stringConstants.race() + " " + wrongRaceColumn.name + ": "
+                        + stringConstants.pleaseEnterAName();
+            } else if (!raceColumnUniqueInSeries) {
+                errorMessage = stringConstants.race() + " " +  wrongRaceColumn.name + ": "
+                        + stringConstants.raceWithThisNameAlreadyExists();
+            }  else if (!raceColumnUniqueInRegatta) {
+                errorMessage = stringConstants.race() + " " +  wrongRaceColumn.name + ": "
+                        + stringConstants.raceWithThisNameAlreadyExistsInRegatta();
             }
             
             return errorMessage;
@@ -109,11 +106,12 @@ public class RaceColumnInRegattaSeriesDialog extends DataEntryDialog<Pair<Series
 
     }
 
-    public RaceColumnInRegattaSeriesDialog(RegattaDTO regatta, StringMessages stringConstants,
+    public RaceColumnInRegattaSeriesDialog(RegattaDTO regatta, SeriesDTO preSelectedSeries, StringMessages stringConstants,
             DialogCallback<Pair<SeriesDTO, List<RaceColumnDTO>>> callback) {
         super(stringConstants.actionEditRaces(), null, stringConstants.ok(), stringConstants.cancel(),
                 new RaceDialogValidator(regatta, stringConstants), callback);
         this.regatta = regatta;
+        this.preSelectedSeries = preSelectedSeries;
         this.stringMessages = stringConstants;
         this.hasOneSeries = regatta.series.size() == 1;
         seriesListBox = createListBox(false);
@@ -206,9 +204,13 @@ public class RaceColumnInRegattaSeriesDialog extends DataEntryDialog<Pair<Series
                 raceNamePrefixTextBox.setText(seriesName.substring(0, 1).toUpperCase());
             }
         } else {
-            seriesListBox.addItem(stringMessages.pleaseSelectASeries());
+            int i = 0;
             for (SeriesDTO series : regatta.series) {
                 seriesListBox.addItem(series.name);
+                if(series.name.equals(preSelectedSeries.name)) {
+                    seriesListBox.setSelectedIndex(i);    
+                }
+                i++;
             }
         }
         
@@ -233,7 +235,7 @@ public class RaceColumnInRegattaSeriesDialog extends DataEntryDialog<Pair<Series
         addRacesPanel.setSpacing(3);
         addRacesPanel.add(new Label(stringMessages.add()));
         addRacesPanel.add(addRacesListBox);
-        for(int i = 1; i <= 10; i++) {
+        for(int i = 1; i <= 50; i++) {
             addRacesListBox.addItem("" + i);
         }
         addRacesListBox.setSelectedIndex(0);
@@ -270,9 +272,7 @@ public class RaceColumnInRegattaSeriesDialog extends DataEntryDialog<Pair<Series
         additionalWidgetPanel.add(createHeadlineLabel(stringMessages.races()));
         additionalWidgetPanel.add(raceColumnsGrid);
 
-        if(hasOneSeries) {
-            fillExistingRacesOfSeries();
-        }
+        fillExistingRacesOfSeries();
 
         return additionalWidgetPanel;
     }

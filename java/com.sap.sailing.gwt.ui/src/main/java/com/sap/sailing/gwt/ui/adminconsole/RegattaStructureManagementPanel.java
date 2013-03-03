@@ -6,49 +6,37 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 
-import com.google.gwt.cell.client.FieldUpdater;
-import com.google.gwt.cell.client.SafeHtmlCell;
-import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.safehtml.shared.SafeHtml;
-import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
-import com.google.gwt.user.cellview.client.CellTable;
-import com.google.gwt.user.cellview.client.Column;
-import com.google.gwt.user.cellview.client.TextColumn;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CaptionPanel;
+import com.google.gwt.user.client.ui.Grid;
+import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.view.client.ListDataProvider;
-import com.google.gwt.view.client.SelectionChangeEvent;
-import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.RegattaIdentifier;
-import com.sap.sailing.domain.common.RegattaName;
-import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog.DialogCallback;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.RegattaDisplayer;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
+import com.sap.sailing.gwt.ui.client.RegattaSelectionChangeListener;
+import com.sap.sailing.gwt.ui.client.RegattaSelectionModel;
+import com.sap.sailing.gwt.ui.client.RegattaSelectionProvider;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.leaderboard.ScoringSchemeTypeFormatter;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.FleetDTO;
-import com.sap.sailing.gwt.ui.shared.NamedDTO;
-import com.sap.sailing.gwt.ui.shared.RaceColumnDTO;
-import com.sap.sailing.gwt.ui.shared.RaceColumnInSeriesDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
 
@@ -59,7 +47,7 @@ import com.sap.sailing.gwt.ui.shared.SeriesDTO;
  * @author Frank Mittag (C5163974)
  * 
  */
-public class RegattaStructureManagementPanel extends SimplePanel implements RegattaDisplayer {
+public class RegattaStructureManagementPanel extends SimplePanel implements RegattaDisplayer, RegattaSelectionChangeListener {
     private final SailingServiceAsync sailingService;
     private final ErrorReporter errorReporter;
     private final StringMessages stringMessages;
@@ -67,18 +55,17 @@ public class RegattaStructureManagementPanel extends SimplePanel implements Rega
     private final List<EventDTO> events;
     private ListBox eventsComboBox;
     private EventDTO selectedEvent;
-
     private CaptionPanel eventDetailsCaptionPanel;
-
     private Label eventVenueLabel;
-    private CellTable<RegattaDTO> regattaTable;
-    private SingleSelectionModel<RegattaDTO> regattaSelectionModel;
-    private ListDataProvider<RegattaDTO> regattaProvider;
+
     private final RegattaRefresher regattaRefresher;
+    private RegattaSelectionProvider regattaSelectionProvider;
 
-    private final AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
+    private RegattaListComposite regattaListComposite;
+    private RegattaDetailsComposite regattaDetailsComposite;
+
     private boolean supportEvents = false;
-
+    
     public RegattaStructureManagementPanel(SailingServiceAsync sailingService, ErrorReporter errorReporter,
             StringMessages stringMessages, RegattaRefresher regattaRefresher) {
         this.sailingService = sailingService;
@@ -155,226 +142,19 @@ public class RegattaStructureManagementPanel extends SimplePanel implements Rega
             }
         });
 
-        // regatta table
-        TextColumn<RegattaDTO> regattaNameColumn = new TextColumn<RegattaDTO>() {
-            @Override
-            public String getValue(RegattaDTO regatta) {
-                return regatta.name;
-            }
-        };
-
-        TextColumn<RegattaDTO> regattaBoatClassColumn = new TextColumn<RegattaDTO>() {
-            @Override
-            public String getValue(RegattaDTO regatta) {
-                final NamedDTO boatClass = regatta.boatClass;
-                return boatClass==null?"(null)":boatClass.name;
-            }
-        };
-
-        TextColumn<RegattaDTO> regattaScoringSystemColumn = new TextColumn<RegattaDTO>() {
-            @Override
-            public String getValue(RegattaDTO regatta) {
-                ScoringSchemeType scoringScheme = regatta.scoringScheme;
-                String scoringSystem = scoringScheme == null ? "" : ScoringSchemeTypeFormatter.format(scoringScheme, stringMessages);               
-                return scoringSystem;
-            }
-        };
+        Grid grid = new Grid(1 ,2);
+        parentPanel.add(grid);
         
-        final SafeHtmlCell seriesCell = new SafeHtmlCell();
-        Column<RegattaDTO, SafeHtml> regattaSeriesColumn = new Column<RegattaDTO, SafeHtml>(seriesCell) {
-            @Override
-            public SafeHtml getValue(RegattaDTO regatta) {
-                SafeHtmlBuilder builder = new SafeHtmlBuilder();
-                int seriesCount = regatta.series.size();
-                int i = 1;
-                for (SeriesDTO serie : regatta.series) {
-                    builder.appendEscaped(i + ". " + serie.name);
-                    if (serie.isMedal()) {
-                        builder.appendEscaped(" (" + stringMessages.medalSeries() + ")");
-                    }
-                    if (i < seriesCount) {
-                        builder.appendHtmlConstant("<br>");
-                    }
-                    i++;
-                }
-                return builder.toSafeHtml();
-            }
-        };
-
-        final SafeHtmlCell regattaRacesCell = new SafeHtmlCell();
-        Column<RegattaDTO, SafeHtml> regattaRacesColumn = new Column<RegattaDTO, SafeHtml>(regattaRacesCell) {
-            @Override
-            public SafeHtml getValue(RegattaDTO regatta) {
-                SafeHtmlBuilder builder = new SafeHtmlBuilder();
-
-                int seriesCount = regatta.series.size();
-                int i = 1;
-                for (SeriesDTO serie : regatta.series) {
-                    int raceColumnsCount = serie.getRaceColumns().size();
-                    int j = 1;
-                    if(!serie.getRaceColumns().isEmpty()) {
-                        for(RaceColumnDTO raceColumn: serie.getRaceColumns()) {
-                            builder.appendEscaped(j + ". " + raceColumn.getRaceColumnName());
-                            if(j < raceColumnsCount) {
-                                builder.appendEscaped(", ");
-                            }
-                            j++;
-                        }
-                    } else {
-                        builder.appendEscaped(stringMessages.noRacesYet());
-                    }
-                    if(i < seriesCount) {
-                        builder.appendHtmlConstant("<br>");
-                    }
-                    i++;
-                }
-                return builder.toSafeHtml();
-            }
-        };
-
-        final SafeHtmlCell fleetsCell = new SafeHtmlCell();
-        Column<RegattaDTO, SafeHtml> regattaFleetsColumn = new Column<RegattaDTO, SafeHtml>(fleetsCell) {
-            @Override
-            public SafeHtml getValue(RegattaDTO regatta) {
-                SafeHtmlBuilder builder = new SafeHtmlBuilder();
-                int seriesCount = regatta.series.size();
-                int i = 1;
-                for (SeriesDTO serie : regatta.series) {
-                    int fleetsCount = serie.getFleets().size();
-                    int j = 1;
-                    for(FleetDTO fleet: serie.getFleets()) {
-                        builder.appendEscaped(j + ". " + fleet.name);
-                        builder.appendEscaped(" (" + fleet.getOrderNo() + ") ");
-                        if (j < fleetsCount) {
-                            builder.appendEscaped(", ");
-                        }
-                        j++;
-                    }
-                    if(i < seriesCount) {
-                        builder.appendHtmlConstant("<br>");
-                    }
-                    i++;
-                }
-                return builder.toSafeHtml();
-            }
-        };
-
-        ImagesBarColumn<RegattaDTO, RegattaConfigImagesBarCell> regattaActionColumn = new ImagesBarColumn<RegattaDTO, RegattaConfigImagesBarCell>(
-                new RegattaConfigImagesBarCell(stringMessages));
-        regattaActionColumn.setFieldUpdater(new FieldUpdater<RegattaDTO, String>() {
-            @Override
-            public void update(int index, RegattaDTO regatta, String value) {
-                if (RegattaConfigImagesBarCell.ACTION_REMOVE.equals(value)) {
-                    if (Window.confirm(stringMessages.doYouReallyWantToRemoveRegatta(regatta.name))) {
-                        removeRegatta(regatta);
-                    }
-                } else if (RegattaConfigImagesBarCell.ACTION_EDIT.equals(value)) {
-                    editRacesOfRegattaSeries(regatta);
-                }
-            }
-        });
+        regattaSelectionProvider = new RegattaSelectionModel(false);
+        regattaSelectionProvider.addRegattaSelectionChangeListener(this);
         
-        regattaTable = new CellTable<RegattaDTO>(10000, tableRes);
-        regattaTable.setWidth("100%");
-        regattaTable.addColumn(regattaNameColumn, stringMessages.regattaName());
-        regattaTable.addColumn(regattaBoatClassColumn, stringMessages.boatClass());
-        regattaTable.addColumn(regattaScoringSystemColumn, stringMessages.scoringSystem());
-        regattaTable.addColumn(regattaSeriesColumn, stringMessages.series());
-        regattaTable.addColumn(regattaRacesColumn, stringMessages.races());
-        regattaTable.addColumn(regattaFleetsColumn, stringMessages.fleets());
-        regattaTable.addColumn(regattaActionColumn, stringMessages.actions());
-        
-        regattaSelectionModel = new SingleSelectionModel<RegattaDTO>();
-        regattaSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
-            @Override
-            public void onSelectionChange(SelectionChangeEvent event) {
-            }
-        });
-        regattaTable.setSelectionModel(regattaSelectionModel);
-
-        regattaProvider = new ListDataProvider<RegattaDTO>();
-        regattaProvider.addDataDisplay(regattaTable);
-        parentPanel.add(regattaTable);
-    }
-    
-    private void editRacesOfRegattaSeries(final RegattaDTO regatta) {
-        RaceColumnInRegattaSeriesDialog raceDialog = new RaceColumnInRegattaSeriesDialog(regatta, stringMessages, 
-                new DialogCallback<Pair<SeriesDTO, List<RaceColumnDTO>>>() {
-                    @Override
-                    public void cancel() {
-                    }
-
-                    @Override
-                    public void ok(final Pair<SeriesDTO, List<RaceColumnDTO>> result) {
-                        updateRacesOfRegattaSeries(regatta, result.getA(), result.getB());
-                    }
-                });
-        raceDialog.show();
-    }
-
-    private void updateRacesOfRegattaSeries(final RegattaDTO regatta, final SeriesDTO series, List<RaceColumnDTO> newRaceColumns) {
-        final RegattaIdentifier regattaIdentifier = new RegattaName(regatta.name);
-        
-        List<RaceColumnDTO> existingRaceColumns = series.getRaceColumns();
-        final List<String> raceColumnsToAdd = new ArrayList<String>();
-        final List<String> raceColumnsToRemove = new ArrayList<String>();
-        
-        for(RaceColumnDTO newRaceColumn: newRaceColumns) {
-            if(!existingRaceColumns.contains(newRaceColumn)) {
-                raceColumnsToAdd.add(newRaceColumn.name);
-            }
-        }
-
-        for(RaceColumnDTO existingRaceColumn: existingRaceColumns) {
-            if(!newRaceColumns.contains(existingRaceColumn)) {
-                raceColumnsToRemove.add(existingRaceColumn.name);
-            }
-        }
-
-        sailingService.addRaceColumnsToSeries(regattaIdentifier, series.name, raceColumnsToAdd, new AsyncCallback<List<RaceColumnInSeriesDTO>>() {
-                @Override
-                public void onFailure(Throwable caught) {
-                    errorReporter.reportError("Error trying to add race columns "
-                            + raceColumnsToAdd + " to series " + series.name
-                            + ": " + caught.getMessage());
-
-                }
-
-                @Override
-                public void onSuccess(List<RaceColumnInSeriesDTO> raceColumns) {
-                    regattaRefresher.fillRegattas();
-                }
-            });
-        
-        sailingService.removeRaceColumnsFromSeries(regattaIdentifier, series.name, raceColumnsToRemove, new AsyncCallback<Void>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                errorReporter.reportError("Error trying to remove race columns "
-                        + raceColumnsToAdd + " from series " + series.name
-                        + ": " + caught.getMessage());
-
-            }
-
-            @Override
-            public void onSuccess(Void v) {
-                regattaRefresher.fillRegattas();
-            }
-        });
-    }
-    
-    private void removeRegatta(final RegattaDTO regatta) {
-        final RegattaIdentifier regattaIdentifier = new RegattaName(regatta.name);
-        sailingService.removeRegatta(regattaIdentifier, new AsyncCallback<Void>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                errorReporter.reportError("Error trying to remove regatta " + regatta.name + ": " + caught.getMessage());
-            }
-
-            @Override
-            public void onSuccess(Void result) {
-                regattaRefresher.fillRegattas();
-            }
-        });
+        regattaListComposite = new RegattaListComposite(sailingService, regattaSelectionProvider, regattaRefresher, errorReporter, stringMessages);
+        grid.setWidget(0, 0, regattaListComposite);
+        grid.getRowFormatter().setVerticalAlign(0, HasVerticalAlignment.ALIGN_TOP);
+        grid.getColumnFormatter().getElement(1).getStyle().setPaddingTop(2.0, Unit.EM);
+        regattaDetailsComposite = new RegattaDetailsComposite(sailingService, regattaRefresher, errorReporter, stringMessages);
+        regattaDetailsComposite.setVisible(false);
+        grid.setWidget(0, 1, regattaDetailsComposite);
     }
     
     private void onEventSelectionChanged() {
@@ -411,7 +191,7 @@ public class RegattaStructureManagementPanel extends SimplePanel implements Rega
         if(supportEvents) {
             existingRegattas = Collections.unmodifiableCollection(selectedEvent.regattas);
         } else {
-            existingRegattas = Collections.unmodifiableCollection(regattaProvider.getList());
+            existingRegattas = Collections.unmodifiableCollection(regattaListComposite.getAllRegattas());
         }
         
         RegattaWithSeriesAndFleetsCreateDialog dialog = new RegattaWithSeriesAndFleetsCreateDialog(existingRegattas, stringMessages,
@@ -442,8 +222,7 @@ public class RegattaStructureManagementPanel extends SimplePanel implements Rega
 
                 @Override
                 public void onSuccess(List<RegattaDTO> regattas) {
-                    regattaProvider.getList().clear();
-                    regattaProvider.getList().addAll(regattas);
+                    regattaListComposite.fillRegattas(regattas);
                 }
             });
         }
@@ -524,7 +303,23 @@ public class RegattaStructureManagementPanel extends SimplePanel implements Rega
 
     @Override
     public void fillRegattas(List<RegattaDTO> regattas) {
-        regattaProvider.getList().clear();
-        regattaProvider.getList().addAll(regattas);
+        regattaListComposite.fillRegattas(regattas);
+    }
+
+    @Override
+    public void onRegattaSelectionChange(List<RegattaIdentifier> selectedRegattas) {
+        RegattaIdentifier selectedRegatta = selectedRegattas.iterator().next();
+        if(selectedRegatta != null && regattaListComposite.getAllRegattas() != null) {
+            for(RegattaDTO regattaDTO: regattaListComposite.getAllRegattas()) {
+                if(regattaDTO.getRegattaIdentifier().equals(selectedRegatta)) {
+                    regattaDetailsComposite.setRegatta(regattaDTO);
+                    regattaDetailsComposite.setVisible(true);
+                    break;
+                }
+            }
+        } else {
+            regattaDetailsComposite.setRegatta(null);
+            regattaDetailsComposite.setVisible(false);
+        }
     }
 }
