@@ -45,7 +45,6 @@ public interface FlexibleLeaderboard extends Leaderboard, Renamable {
      * @param fleets
      *            the fleets to add to the {@link RaceColumn} created. If no fleets are specified, a single default
      *            fleet will be assigned to the race column created.
-     * 
      * @return the race column in the leaderboard used to represent the tracked <code>race</code>
      */
     RaceColumn addRaceColumn(String name, boolean medalRace, Fleet... fleets);
@@ -55,11 +54,9 @@ public interface FlexibleLeaderboard extends Leaderboard, Renamable {
      * in this leaderboard, <code>race</code> is {@link RaceColumn#setTrackedRace(Fleet, TrackedRace) set as its tracked
      * race} and <code>medalRace</code> is ignored. Otherwise, a new {@link RaceColumn} column, with <code>race</code>
      * as its tracked race, is created and added to this leaderboard.
-     * 
      * @param medalRace
      *            tells if the column to add represents a medal race which has double score and cannot be discarded;
      *            ignored if the column named <code>columnName</code> already exists
-     * 
      * @param fleets
      *            the fleets to add to the {@link RaceColumn} created. If no fleets are specified, a single default
      *            fleet will be assigned to the race column created.

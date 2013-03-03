@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="Welter.PaddingLeft">7dip</dimen>
+    <dimen name="Welter.TitleBarSize">27dip</dimen>
+    <dimen name="Welter.DividerHeight">1dip</dimen>
+    
+    <dimen name="Welter.TitleTextSize">15dip</dimen>
+    <dimen name="Welter.RegularTextSize">16dip</dimen>
+    <dimen name="Welter.BigTitleTextSize">23dip</dimen>
+    <dimen name="Welter.VeryBigTitleTextSize">32dip</dimen>
+    <dimen name="Welter.ExtraBigTitleTextSize">50dip</dimen>
+    <dimen name="Welter.LabelTextSize">19dip</dimen>
+    <dimen name="Welter.MenuButtonTextSize">13dip</dimen>
+    <dimen name="Welter.DefaultTextSize">11dip</dimen>
+    <dimen name="Welter.ProgressTextSize">14dip</dimen>
+    
+    <dimen name="Welter.LabelWidth">87dip</dimen>
+    
+    <dimen name="tab_space_top">4dp</dimen>
+    <dimen name="tab_space">0dp</dimen>
+    <dimen name="tab_space_plus1">3dp</dimen>
+    <dimen name="tab_space_bottom_line">36sp</dimen>
+    <dimen name="tab_space_unselected_top">6sp</dimen> 
+    
+</resources>

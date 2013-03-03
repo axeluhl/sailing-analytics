@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.ui.shared;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,12 +10,12 @@ public class EventDTO extends NamedDTO implements IsSerializable {
     public VenueDTO venue;
     public String publicationUrl;
     public boolean isPublic;
-    public Serializable id;
+    public String id;
 
     // maybe temporary: as long it's not clear how a leaderboard group relates to a sailing event
     public LeaderboardGroupDTO leaderboardGroup;
     
-    EventDTO() {}
+    public EventDTO() {}
 
     public EventDTO(String name) {
         super(name);

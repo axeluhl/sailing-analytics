@@ -44,6 +44,7 @@ import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.ScoringSchemeTypeFormatter;
+import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.FleetDTO;
 import com.sap.sailing.gwt.ui.shared.NamedDTO;
@@ -65,6 +66,7 @@ public class RegattaStructureManagementPanel extends SimplePanel implements Rega
     private final StringMessages stringMessages;
 
     private final List<EventDTO> events;
+    private final List<EventDTO> existingEvents;
     private ListBox eventsComboBox;
     private EventDTO selectedEvent;
 
@@ -88,6 +90,8 @@ public class RegattaStructureManagementPanel extends SimplePanel implements Rega
 
         events = new ArrayList<EventDTO>();
         selectedEvent = null;
+
+        this.existingEvents = new ArrayList<EventDTO>();
 
         VerticalPanel mainPanel = new VerticalPanel();
         this.setWidget(mainPanel);
@@ -179,7 +183,15 @@ public class RegattaStructureManagementPanel extends SimplePanel implements Rega
                 return scoringSystem;
             }
         };
-        
+
+        TextColumn<RegattaDTO> regattaCourseAreaColumn = new TextColumn<RegattaDTO>() {
+            @Override
+            public String getValue(RegattaDTO regatta) {
+                String courseAreaName = regatta.defaultCourseAreaIdAsString == null ? "" : regatta.defaultCourseAreaName;
+                return courseAreaName;
+            }
+        };
+
         final SafeHtmlCell seriesCell = new SafeHtmlCell();
         Column<RegattaDTO, SafeHtml> regattaSeriesColumn = new Column<RegattaDTO, SafeHtml>(seriesCell) {
             @Override
@@ -273,17 +285,18 @@ public class RegattaStructureManagementPanel extends SimplePanel implements Rega
                 }
             }
         });
-        
+
         regattaTable = new CellTable<RegattaDTO>(10000, tableRes);
         regattaTable.setWidth("100%");
         regattaTable.addColumn(regattaNameColumn, stringMessages.regattaName());
         regattaTable.addColumn(regattaBoatClassColumn, stringMessages.boatClass());
         regattaTable.addColumn(regattaScoringSystemColumn, stringMessages.scoringSystem());
+        regattaTable.addColumn(regattaCourseAreaColumn, stringMessages.courseArea());
         regattaTable.addColumn(regattaSeriesColumn, stringMessages.series());
         regattaTable.addColumn(regattaRacesColumn, stringMessages.races());
         regattaTable.addColumn(regattaFleetsColumn, stringMessages.fleets());
         regattaTable.addColumn(regattaActionColumn, stringMessages.actions());
-        
+
         regattaSelectionModel = new SingleSelectionModel<RegattaDTO>();
         regattaSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
             @Override
@@ -296,29 +309,43 @@ public class RegattaStructureManagementPanel extends SimplePanel implements Rega
         regattaProvider.addDataDisplay(regattaTable);
         parentPanel.add(regattaTable);
     }
-    
+
+    protected String getCourseAreaName(String defaultCourseAreaIdAsString) {
+        String result = "";
+        if (defaultCourseAreaIdAsString != null) {
+            for (EventDTO event : existingEvents) {
+                for (CourseAreaDTO courseArea : event.venue.getCourseAreas()) {
+                    if (courseArea.id.equals(defaultCourseAreaIdAsString)) {
+                        result = courseArea.name;
+                    }
+                }
+            }
+        }
+        return result;
+    }
+
     private void editRacesOfRegattaSeries(final RegattaDTO regatta) {
         RaceColumnInRegattaSeriesDialog raceDialog = new RaceColumnInRegattaSeriesDialog(regatta, stringMessages, 
                 new DialogCallback<Pair<SeriesDTO, List<RaceColumnDTO>>>() {
-                    @Override
-                    public void cancel() {
-                    }
+            @Override
+            public void cancel() {
+            }
 
-                    @Override
-                    public void ok(final Pair<SeriesDTO, List<RaceColumnDTO>> result) {
-                        updateRacesOfRegattaSeries(regatta, result.getA(), result.getB());
-                    }
-                });
+            @Override
+            public void ok(final Pair<SeriesDTO, List<RaceColumnDTO>> result) {
+                updateRacesOfRegattaSeries(regatta, result.getA(), result.getB());
+            }
+        });
         raceDialog.show();
     }
 
     private void updateRacesOfRegattaSeries(final RegattaDTO regatta, final SeriesDTO series, List<RaceColumnDTO> newRaceColumns) {
         final RegattaIdentifier regattaIdentifier = new RegattaName(regatta.name);
-        
+
         List<RaceColumnDTO> existingRaceColumns = series.getRaceColumns();
         final List<String> raceColumnsToAdd = new ArrayList<String>();
         final List<String> raceColumnsToRemove = new ArrayList<String>();
-        
+
         for(RaceColumnDTO newRaceColumn: newRaceColumns) {
             if(!existingRaceColumns.contains(newRaceColumn)) {
                 raceColumnsToAdd.add(newRaceColumn.name);
@@ -332,20 +359,20 @@ public class RegattaStructureManagementPanel extends SimplePanel implements Rega
         }
 
         sailingService.addRaceColumnsToSeries(regattaIdentifier, series.name, raceColumnsToAdd, new AsyncCallback<List<RaceColumnInSeriesDTO>>() {
-                @Override
-                public void onFailure(Throwable caught) {
-                    errorReporter.reportError("Error trying to add race columns "
-                            + raceColumnsToAdd + " to series " + series.name
-                            + ": " + caught.getMessage());
+            @Override
+            public void onFailure(Throwable caught) {
+                errorReporter.reportError("Error trying to add race columns "
+                        + raceColumnsToAdd + " to series " + series.name
+                        + ": " + caught.getMessage());
 
-                }
+            }
 
-                @Override
-                public void onSuccess(List<RaceColumnInSeriesDTO> raceColumns) {
-                    regattaRefresher.fillRegattas();
-                }
-            });
-        
+            @Override
+            public void onSuccess(List<RaceColumnInSeriesDTO> raceColumns) {
+                regattaRefresher.fillRegattas();
+            }
+        });
+
         sailingService.removeRaceColumnsFromSeries(regattaIdentifier, series.name, raceColumnsToRemove, new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable caught) {
@@ -361,7 +388,7 @@ public class RegattaStructureManagementPanel extends SimplePanel implements Rega
             }
         });
     }
-    
+
     private void removeRegatta(final RegattaDTO regatta) {
         final RegattaIdentifier regattaIdentifier = new RegattaName(regatta.name);
         sailingService.removeRegatta(regattaIdentifier, new AsyncCallback<Void>() {
@@ -376,7 +403,7 @@ public class RegattaStructureManagementPanel extends SimplePanel implements Rega
             }
         });
     }
-    
+
     private void onEventSelectionChanged() {
         int selIndex = eventsComboBox.getSelectedIndex();
         String selItemText = eventsComboBox.getItemText(selIndex);
@@ -394,37 +421,53 @@ public class RegattaStructureManagementPanel extends SimplePanel implements Rega
     private void openCreateEventDialog() {
         EventCreateDialog dialog = new EventCreateDialog(Collections.unmodifiableCollection(events), stringMessages,
                 new DialogCallback<EventDTO>() {
-                    @Override
-                    public void cancel() {
-                    }
+            @Override
+            public void cancel() {
+            }
 
-                    @Override
-                    public void ok(EventDTO newEvent) {
-                        createNewEvent(newEvent);
-                    }
-                });
+            @Override
+            public void ok(EventDTO newEvent) {
+                createNewEvent(newEvent);
+            }
+        });
         dialog.show();
     }
 
     private void openCreateRegattaDialog() {
-        Collection<RegattaDTO> existingRegattas = null;
+        Collection<RegattaDTO> regattas = null;
         if(supportEvents) {
-            existingRegattas = Collections.unmodifiableCollection(selectedEvent.regattas);
+            regattas = Collections.unmodifiableCollection(selectedEvent.regattas);
         } else {
-            existingRegattas = Collections.unmodifiableCollection(regattaProvider.getList());
+            regattas = Collections.unmodifiableCollection(regattaProvider.getList());
         }
-        
-        RegattaWithSeriesAndFleetsCreateDialog dialog = new RegattaWithSeriesAndFleetsCreateDialog(existingRegattas, stringMessages,
-                new DialogCallback<RegattaDTO>() {
-                    @Override
-                    public void cancel() {
-                    }
+        final Collection<RegattaDTO> existingRegattas = regattas;
 
-                    @Override
-                    public void ok(RegattaDTO newRegatta) {
-                        createNewRegatta(newRegatta);
-                    }
-                });
+        sailingService.getEvents(new AsyncCallback<List<EventDTO>>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                openCreateRegattaDialog(existingRegattas, Collections.<EventDTO>emptyList());
+            }
+
+            @Override
+            public void onSuccess(List<EventDTO> result) {
+                openCreateRegattaDialog(existingRegattas, Collections.unmodifiableList(result));
+            }
+        });
+    }
+
+    private void openCreateRegattaDialog(Collection<RegattaDTO> existingRegattas, List<EventDTO> existingEvents) {
+
+        RegattaWithSeriesAndFleetsCreateDialog dialog = new RegattaWithSeriesAndFleetsCreateDialog(existingRegattas, existingEvents, stringMessages,
+                new DialogCallback<RegattaDTO>() {
+            @Override
+            public void cancel() {
+            }
+
+            @Override
+            public void ok(RegattaDTO newRegatta) {
+                createNewRegatta(newRegatta);
+            }
+        });
         dialog.show();
     }
 
@@ -432,7 +475,7 @@ public class RegattaStructureManagementPanel extends SimplePanel implements Rega
         if (selectedEvent != null) {
             eventDetailsCaptionPanel.setCaptionText(selectedEvent.name);
             eventVenueLabel.setText(stringMessages.venue() + ": " + selectedEvent.venue.name);
-            
+
             // load the regattas for this event
             sailingService.getRegattas(new AsyncCallback<List<RegattaDTO>>() {
                 @Override
@@ -450,7 +493,11 @@ public class RegattaStructureManagementPanel extends SimplePanel implements Rega
     }
 
     private void createNewEvent(final EventDTO newEvent) {
-        sailingService.createEvent(newEvent.name, newEvent.venue.name, newEvent.publicationUrl, newEvent.isPublic, new AsyncCallback<EventDTO>() {
+        List<String> courseAreaNames = new ArrayList<String>();
+        for (CourseAreaDTO courseAreaDTO : newEvent.venue.getCourseAreas()) {
+            courseAreaNames.add(courseAreaDTO.name);
+        }
+        sailingService.createEvent(newEvent.name, newEvent.venue.name, newEvent.publicationUrl, newEvent.isPublic, courseAreaNames, new AsyncCallback<EventDTO>() {
             @Override
             public void onFailure(Throwable t) {
                 errorReporter.reportError("Error trying to create new event" + newEvent.name + ": " + t.getMessage());
@@ -479,7 +526,7 @@ public class RegattaStructureManagementPanel extends SimplePanel implements Rega
             seriesStructure.put(seriesDTO.name, seriesPair);
         }
         sailingService.createRegatta(newRegatta.name, newRegatta.boatClass.name, seriesStructure, true,
-                newRegatta.scoringScheme, new AsyncCallback<RegattaDTO>() {
+                newRegatta.scoringScheme, newRegatta.defaultCourseAreaIdAsString, new AsyncCallback<RegattaDTO>() {
             @Override
             public void onFailure(Throwable t) {
                 errorReporter.reportError("Error trying to create new regatta" + newRegatta.name + ": " + t.getMessage());

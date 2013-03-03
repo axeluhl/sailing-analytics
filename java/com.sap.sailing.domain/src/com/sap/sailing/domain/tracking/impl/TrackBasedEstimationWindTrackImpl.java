@@ -13,8 +13,8 @@ import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.AbstractTimePoint;

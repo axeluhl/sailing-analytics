@@ -12,6 +12,8 @@ import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.LeaderboardRegistry;
+import com.sap.sailing.domain.racelog.RaceLog;
+import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.WindTrack;
 
@@ -82,4 +84,6 @@ public interface DomainObjectFactory {
     Iterable<Regatta> loadAllRegattas(TrackedRegattaRegistry trackedRegattaRegistry);
 
     Map<String, Regatta> loadRaceIDToRegattaAssociations(RegattaRegistry regattaRegistry);
+
+    RaceLog loadRaceLog(RaceLogIdentifier identifier);
 }

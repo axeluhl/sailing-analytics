@@ -80,13 +80,13 @@ public abstract class AbstractMetaLeaderboard extends AbstractSimpleLeaderboardI
         this.scoringScheme = scoringScheme;
         this.name = name;
         columnsForLeaderboards = new WeakHashMap<>();
-        scoreCorrectionChangeForwardersByLeaderboard = new WeakHashMap<>();
+        scoreCorrectionChangeForwardersByLeaderboard = new WeakHashMap<Leaderboard, ScoreCorrectionListener>();
     }
     
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
         ois.defaultReadObject();
         columnsForLeaderboards = new WeakHashMap<>();
-        scoreCorrectionChangeForwardersByLeaderboard = new WeakHashMap<>();
+        scoreCorrectionChangeForwardersByLeaderboard = new WeakHashMap<Leaderboard, ScoreCorrectionListener>();
     }
 
     public abstract Iterable<Leaderboard> getLeaderboards();
