@@ -71,17 +71,15 @@ public class RegattaSelectionModel implements RegattaSelectionProvider {
         for (RegattaIdentifier r : newAllRegattas) {
             allRegattas.add(r);
         }
-        boolean notify = false;
         for (Iterator<RegattaIdentifier> i=selection.iterator(); i.hasNext(); ) {
             RegattaIdentifier selectedRegatta = i.next();
             if (!allRegattas.contains(selectedRegatta)) {
-                notify = true;
                 i.remove();
             }
         }
-        if (notify) {
-            notifyListeners(listenersNotToNotify);
-        }
+        // when setting all regattas, the actual RegattaDTOs will usually have changed their identity and maybe also their state;
+        // so notifying the selection listeners is necessary anyhow
+        notifyListeners(listenersNotToNotify);
     }
 
     @Override
