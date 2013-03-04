@@ -10,7 +10,8 @@ import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogEventFactory;
 import com.sap.sailing.domain.racelog.RaceLogRaceStatus;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
-import com.sap.sailing.server.gateway.serialization.impl.racelog.RaceLogEventSerializerChooser;
+import com.sap.sailing.server.gateway.serialization.racelog.RaceLogEventSerializerChooser;
+import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogEventSerializerChooserImpl;
 
 public class RaceLogEventSerializerChooserTest {
     
@@ -31,11 +32,12 @@ public class RaceLogEventSerializerChooserTest {
         courseAreaChangedEventSerializer = mock(JsonSerializer.class);
         passChangedSerializer = mock(JsonSerializer.class);
         
-        chooser = new RaceLogEventSerializerChooser(
+        chooser = new RaceLogEventSerializerChooserImpl(
                 flagEventSerializer, 
                 startTimeSerializer, 
                 raceStatusSerializer, 
-                courseAreaChangedEventSerializer);
+                courseAreaChangedEventSerializer,
+                passChangedSerializer);
     }
     
     @Test

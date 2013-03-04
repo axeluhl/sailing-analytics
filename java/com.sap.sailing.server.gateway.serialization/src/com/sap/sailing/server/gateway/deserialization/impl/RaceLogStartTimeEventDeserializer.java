@@ -10,7 +10,7 @@ import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogRaceStatusEvent;
 import com.sap.sailing.domain.racelog.impl.RaceLogStartTimeEventImpl;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
-import com.sap.sailing.server.gateway.serialization.impl.racelog.RaceLogStartTimeEventSerializer;
+import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogStartTimeEventSerializer;
 
 public class RaceLogStartTimeEventDeserializer extends RaceLogRaceStatusEventDeserializer {
 

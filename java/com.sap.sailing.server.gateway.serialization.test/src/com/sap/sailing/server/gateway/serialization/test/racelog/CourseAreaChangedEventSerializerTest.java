@@ -15,7 +15,7 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.racelog.RaceLogCourseAreaChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
-import com.sap.sailing.server.gateway.serialization.impl.racelog.RaceLogCourseAreaChangedEventSerializer;
+import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogCourseAreaChangedEventSerializer;
 
 public class CourseAreaChangedEventSerializerTest extends AbstractEventSerializerTest<RaceLogCourseAreaChangedEvent> {
 

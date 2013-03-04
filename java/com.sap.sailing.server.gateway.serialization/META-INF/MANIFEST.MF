@@ -11,7 +11,8 @@ Require-Bundle: com.sap.sailing.domain.common;bundle-version="1.0.0",
 Export-Package: com.sap.sailing.server.gateway.deserialization,
  com.sap.sailing.server.gateway.deserialization.impl,
  com.sap.sailing.server.gateway.serialization,
+ com.sap.sailing.server.gateway.serialization.racelog,
  com.sap.sailing.server.gateway.serialization.impl,
- com.sap.sailing.server.gateway.serialization.impl.coursedata,
- com.sap.sailing.server.gateway.serialization.impl.racegroup,
- com.sap.sailing.server.gateway.serialization.impl.racelog
+ com.sap.sailing.server.gateway.serialization.coursedata.impl,
+ com.sap.sailing.server.gateway.serialization.racegroup.impl,
+ com.sap.sailing.server.gateway.serialization.racelog.impl

@@ -9,7 +9,7 @@ import com.sap.sailing.racecommittee.domain.racelog.impl.PassAwareRaceLogImpl;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
-import com.sap.sailing.server.gateway.serialization.impl.racelog.RaceLogSerializer;
+import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogSerializer;
 
 public class RaceLogDeserializer implements JsonDeserializer<RaceLog> {
 

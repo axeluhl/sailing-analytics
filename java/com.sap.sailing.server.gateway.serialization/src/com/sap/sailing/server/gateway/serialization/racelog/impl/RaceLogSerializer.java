@@ -1,4 +1,4 @@
-package com.sap.sailing.server.gateway.serialization.impl.racelog;
+package com.sap.sailing.server.gateway.serialization.racelog.impl;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;

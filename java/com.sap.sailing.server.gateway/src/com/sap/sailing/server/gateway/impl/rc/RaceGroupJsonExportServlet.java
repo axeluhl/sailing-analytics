@@ -19,15 +19,15 @@ import com.sap.sailing.server.gateway.serialization.impl.BoatClassJsonSerializer
 import com.sap.sailing.server.gateway.serialization.impl.ColorJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CompetitorIdJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CourseAreaJsonSerializer;
-import com.sap.sailing.server.gateway.serialization.impl.racegroup.FleetJsonSerializer;
-import com.sap.sailing.server.gateway.serialization.impl.racegroup.RaceCellJsonSerializer;
-import com.sap.sailing.server.gateway.serialization.impl.racegroup.RaceGroupJsonSerializer;
-import com.sap.sailing.server.gateway.serialization.impl.racegroup.RaceRowJsonSerializer;
-import com.sap.sailing.server.gateway.serialization.impl.racegroup.RaceRowsOfSeriesWithRowsSerializer;
-import com.sap.sailing.server.gateway.serialization.impl.racegroup.SeriesWithRowsJsonSerializer;
-import com.sap.sailing.server.gateway.serialization.impl.racegroup.SeriesWithRowsOfRaceGroupSerializer;
-import com.sap.sailing.server.gateway.serialization.impl.racelog.RaceLogEventSerializer;
-import com.sap.sailing.server.gateway.serialization.impl.racelog.RaceLogSerializer;
+import com.sap.sailing.server.gateway.serialization.racegroup.impl.FleetJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.racegroup.impl.RaceCellJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.racegroup.impl.RaceGroupJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.racegroup.impl.RaceRowJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.racegroup.impl.RaceRowsOfSeriesWithRowsSerializer;
+import com.sap.sailing.server.gateway.serialization.racegroup.impl.SeriesWithRowsJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.racegroup.impl.SeriesWithRowsOfRaceGroupSerializer;
+import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogEventSerializer;
+import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogSerializer;
 
 public class RaceGroupJsonExportServlet extends AbstractJsonHttpServlet {
     private static final long serialVersionUID = 4510175441769759252L;

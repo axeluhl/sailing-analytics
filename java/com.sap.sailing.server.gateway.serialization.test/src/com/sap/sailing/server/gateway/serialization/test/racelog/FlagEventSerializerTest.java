@@ -12,7 +12,7 @@ import com.sap.sailing.domain.racelog.Flags;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
-import com.sap.sailing.server.gateway.serialization.impl.racelog.RaceLogFlagEventSerializer;
+import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogFlagEventSerializer;
 
 public class FlagEventSerializerTest extends AbstractEventSerializerTest<RaceLogFlagEvent> {
 
