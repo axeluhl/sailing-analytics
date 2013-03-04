@@ -82,7 +82,7 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
     public void setStartTime(TimePoint eventTime, TimePoint newStartTime) {
         RaceLogRaceStatus status = getStatus();
         if (status != RaceLogRaceStatus.UNSCHEDULED) {
-            abortRace(eventTime.minus(1));
+            onRaceAborted(eventTime.minus(1));
         }
 
         RaceLogEvent event = new RaceLogStartTimeEventImpl(eventTime, UUID.randomUUID(),
@@ -91,7 +91,7 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
         this.raceLog.add(event);
     }
 
-    public void abortRace(TimePoint eventTime) {
+    public void onRaceAborted(TimePoint eventTime) {
         RaceLogEvent abortEvent = new RaceLogRaceStatusEventImpl(eventTime.minus(1), UUID.randomUUID(),
                 Collections.<Competitor> emptyList(), raceLog.getCurrentPassId(), RaceLogRaceStatus.UNSCHEDULED);
         this.raceLog.add(abortEvent);
@@ -104,6 +104,18 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
     public void onRaceStarted(TimePoint eventTime) {
         RaceLogEvent startEvent = new RaceLogRaceStatusEventImpl(eventTime, UUID.randomUUID(),
                 Collections.<Competitor> emptyList(), raceLog.getCurrentPassId(), RaceLogRaceStatus.RUNNING);
+        this.raceLog.add(startEvent);
+    }
+
+    public void onRaceFinishing(TimePoint eventTime) {
+        RaceLogEvent startEvent = new RaceLogRaceStatusEventImpl(eventTime, UUID.randomUUID(),
+                Collections.<Competitor> emptyList(), raceLog.getCurrentPassId(), RaceLogRaceStatus.FINISHING);
+        this.raceLog.add(startEvent);
+    }
+
+    public void onRaceFinished(TimePoint eventTime) {
+        RaceLogEvent startEvent = new RaceLogRaceStatusEventImpl(eventTime, UUID.randomUUID(),
+                Collections.<Competitor> emptyList(), raceLog.getCurrentPassId(), RaceLogRaceStatus.FINISHED);
         this.raceLog.add(startEvent);
     }
 

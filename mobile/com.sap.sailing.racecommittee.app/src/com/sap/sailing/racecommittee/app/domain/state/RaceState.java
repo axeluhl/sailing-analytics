@@ -55,10 +55,25 @@ public interface RaceState {
      * @return the status of the race.
      */
     RaceLogRaceStatus getStatus();
+    
+    /**
+     * TODO: remove when start procedures are ready
+     */
+    void onRaceAborted(TimePoint eventTime);
 
     /**
      * TODO: remove when start procedures are ready
      */
     void onRaceStarted(TimePoint eventTime);
+
+    /**
+     * TODO: remove when start procedures are ready
+     */
+    void onRaceFinishing(TimePoint now);
+    
+    /**
+     * TODO: remove when start procedures are ready
+     */
+    void onRaceFinished(TimePoint now);
 
 }

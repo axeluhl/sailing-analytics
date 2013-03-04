@@ -3,8 +3,10 @@ package com.sap.sailing.racecommittee.app.ui.fragments.chooser;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
-import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.ErrorInfoFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.ErrorRaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.FinishedRaceFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.FinishingRaceFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RunningRaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.SetTimeRaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.StartphaseRaceFragment;
 
@@ -19,13 +21,13 @@ public class RaceInfoFragmentChooser {
         case STARTPHASE:
             return createInfoFragment(StartphaseRaceFragment.class, managedRace);
         case RUNNING:
-            return createInfoFragment(ErrorInfoFragment.class, managedRace);        
+            return createInfoFragment(RunningRaceFragment.class, managedRace);
         case FINISHING:
-                return createInfoFragment(ErrorInfoFragment.class, managedRace);
+            return createInfoFragment(FinishingRaceFragment.class, managedRace);
         case FINISHED:
             return createInfoFragment(FinishedRaceFragment.class, managedRace);
         default:
-            return createInfoFragment(ErrorInfoFragment.class, managedRace);
+            return createInfoFragment(ErrorRaceFragment.class, managedRace);
         }
     }
 
@@ -36,7 +38,7 @@ public class RaceInfoFragmentChooser {
             return fragment;
         } catch (Exception e) {
             ExLog.e(TAG, String.format("Exception while instantiating race info fragment:\n%s", e.toString()));
-            return new ErrorInfoFragment();
+            return new ErrorRaceFragment();
         }
     }
 

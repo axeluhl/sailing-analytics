@@ -82,7 +82,7 @@
 
             <!-- END DISPLAY SECTION -->
 
-            <com.sap.sailing.racecommittee.app.utils.views.MyVerticalTextView
+            <com.sap.sailing.racecommittee.app.ui.views.VerticalTextView
                 android:id="@+id/flagsUpLable"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -92,7 +92,7 @@
                 android:text="@string/flags_up"
                 android:textAppearance="@style/TextAppearance.Welter.VeryBigTitleLabel" />
 
-            <com.sap.sailing.racecommittee.app.utils.views.MyVerticalTextView
+            <com.sap.sailing.racecommittee.app.ui.views.VerticalTextView
                 android:id="@+id/flagsDownLabel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -102,7 +102,8 @@
                 android:text="@string/flags_down"
                 android:textAppearance="@style/TextAppearance.Welter.VeryBigTitleLabel" />
         </RelativeLayout>
-
+
+
         <TextView
             android:layout_width="1dp"
             android:layout_height="match_parent"
@@ -119,7 +120,7 @@
             android:gravity="center_horizontal"
             android:orientation="vertical" >
 
-                    <ImageButton
+                    <!-- <ImageButton
                         android:id="@+id/xrayButton"
                         android:layout_width="140dp"
                 		android:layout_height="80dp"
@@ -172,7 +173,7 @@
                         android:layout_marginBottom="5dp"
                         android:layout_marginTop="2dp"
                         android:text="@string/choose_first_substitute_flag"
-                        android:textAppearance="@style/TextAppearance.Welter.TitleLabel" />
+                        android:textAppearance="@style/TextAppearance.Welter.TitleLabel" />  -->
 
                     <ImageButton
                         android:id="@+id/blueFlagButton"
@@ -191,7 +192,7 @@
                         android:text="@string/choose_blue_flag"
                         android:textAppearance="@style/TextAppearance.Welter.TitleLabel" />
 
-                    <ImageButton
+                    <!-- <ImageButton
                         android:id="@+id/novemberButton"
                         android:layout_width="140dp"
                 		android:layout_height="80dp"
@@ -206,7 +207,7 @@
                         android:layout_marginBottom="5dp"
                         android:layout_marginTop="2dp"
                         android:text="@string/abort_running_race"
-                        android:textAppearance="@style/TextAppearance.Welter.TitleLabel" />
+                        android:textAppearance="@style/TextAppearance.Welter.TitleLabel" /> -->
         </LinearLayout>
         
         <!-- END SELECTION SECTION -->
