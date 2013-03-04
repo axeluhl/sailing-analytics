@@ -5,7 +5,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import org.json.simple.JSONObject;
-import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sailing.domain.racelog.Flags;
@@ -36,11 +35,6 @@ public class RaceLogFlagEventSerializerTest extends BaseRaceLogEventTest<RaceLog
     @Override
     protected JsonSerializer<RaceLogEvent> createSerializer() {
         return new RaceLogFlagEventSerializer(mock(JsonSerializer.class));
-    }
-
-    @Before
-    public void setUp() {
-        super.setUp();
     }
 
     @Test
