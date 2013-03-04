@@ -190,7 +190,6 @@ public class RegattaDetailsComposite extends Composite {
 
     public void setRegatta(RegattaDTO regatta) {
         this.regatta = regatta;
-        
         updateRegattaDetails();
     }
 
@@ -211,19 +210,17 @@ public class RegattaDetailsComposite extends Composite {
 
     private void updateRacesOfRegattaSeries(final RegattaDTO regatta, final SeriesDTO series, List<RaceColumnDTO> newRaceColumns) {
         final RegattaIdentifier regattaIdentifier = new RegattaName(regatta.name);
-        
         List<RaceColumnDTO> existingRaceColumns = series.getRaceColumns();
         final List<String> raceColumnsToAdd = new ArrayList<String>();
         final List<String> raceColumnsToRemove = new ArrayList<String>();
         
-        for(RaceColumnDTO newRaceColumn: newRaceColumns) {
-            if(!existingRaceColumns.contains(newRaceColumn)) {
+        for (RaceColumnDTO newRaceColumn : newRaceColumns) {
+            if (!existingRaceColumns.contains(newRaceColumn)) {
                 raceColumnsToAdd.add(newRaceColumn.name);
             }
         }
-
-        for(RaceColumnDTO existingRaceColumn: existingRaceColumns) {
-            if(!newRaceColumns.contains(existingRaceColumn)) {
+        for (RaceColumnDTO existingRaceColumn : existingRaceColumns) {
+            if (!newRaceColumns.contains(existingRaceColumn)) {
                 raceColumnsToRemove.add(existingRaceColumn.name);
             }
         }
@@ -240,7 +237,6 @@ public class RegattaDetailsComposite extends Composite {
                 @Override
                 public void onSuccess(List<RaceColumnInSeriesDTO> raceColumns) {
                     regattaRefresher.fillRegattas();
-                    updateRegattaDetails();
                 }
             });
         
@@ -256,21 +252,18 @@ public class RegattaDetailsComposite extends Composite {
             @Override
             public void onSuccess(Void v) {
                 regattaRefresher.fillRegattas();
-                updateRegattaDetails();
             }
         });
     }
 
     private void updateRegattaDetails() {
-        if(regatta != null) {
+        if (regatta != null) {
             regattaName.setText(regatta.name);
             boatClassName.setText(regatta.boatClass != null ? regatta.boatClass.name : "");
             defaultCourseArea.setText(regatta.defaultCourseAreaIdAsString == null ? "" : regatta.defaultCourseAreaName);
-
             ScoringSchemeType scoringScheme = regatta.scoringScheme;
             String scoringSystemText = scoringScheme == null ? "" : ScoringSchemeTypeFormatter.format(scoringScheme, stringMessages);               
             scoringSystem.setText(scoringSystemText);
-            
             seriesListDataProvider.getList().clear();
             seriesListDataProvider.getList().addAll(regatta.series);
         } 

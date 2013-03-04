@@ -52,10 +52,10 @@ public class RegattaSelectionModel implements RegattaSelectionProvider {
     }
 
     private void notifyListeners(RegattaSelectionChangeListener[] listenersNotToNotify) {
-        List<RegattaIdentifier> selectedRaces = getSelectedRegattas();
+        List<RegattaIdentifier> selectedRegattas = getSelectedRegattas();
         for (RegattaSelectionChangeListener listener : listeners) {
             if (listenersNotToNotify == null || !Arrays.asList(listenersNotToNotify).contains(listener)) {
-                listener.onRegattaSelectionChange(selectedRaces);
+                listener.onRegattaSelectionChange(selectedRegattas);
             }
         }
     }
@@ -66,9 +66,9 @@ public class RegattaSelectionModel implements RegattaSelectionProvider {
      * <code>newAllRegattas</code> are removed from the selection. If this happens, the selection listeners are notified.
      */
     @Override
-    public void setAllRegattas(List<RegattaIdentifier> newAllRaces, RegattaSelectionChangeListener... listenersNotToNotify) {
+    public void setAllRegattas(List<RegattaIdentifier> newAllRegattas, RegattaSelectionChangeListener... listenersNotToNotify) {
         allRegattas.clear();
-        for (RegattaIdentifier r : newAllRaces) {
+        for (RegattaIdentifier r : newAllRegattas) {
             allRegattas.add(r);
         }
         boolean notify = false;

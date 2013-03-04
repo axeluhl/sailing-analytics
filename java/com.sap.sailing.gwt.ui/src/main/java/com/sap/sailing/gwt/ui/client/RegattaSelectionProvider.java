@@ -23,5 +23,5 @@ public interface RegattaSelectionProvider {
      */
     List<RegattaIdentifier> getAllRegattas();
     
-    void setAllRegattas(List<RegattaIdentifier> newAllRaces, RegattaSelectionChangeListener... listenersNotToNotify);
+    void setAllRegattas(List<RegattaIdentifier> newAllRegattas, RegattaSelectionChangeListener... listenersNotToNotify);
 }

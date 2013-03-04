@@ -244,14 +244,13 @@ public class RegattaListComposite extends Composite implements RegattaDisplayer 
             noRegattasLabel.setVisible(false);
         }
         List<RegattaDTO> newAllRegattas = new ArrayList<RegattaDTO>(regattas);
-        List<RegattaIdentifier> newAllRaceIdentifiers = new ArrayList<RegattaIdentifier>();
+        List<RegattaIdentifier> newAllRegattaIdentifiers = new ArrayList<RegattaIdentifier>();
         for (RegattaDTO regatta : regattas) {
-            newAllRaceIdentifiers.add(regatta.getRegattaIdentifier());
+            newAllRegattaIdentifiers.add(regatta.getRegattaIdentifier());
         }
         allRegattas = newAllRegattas;
         updateFilteredRegattasList();
-
-        regattaSelectionProvider.setAllRegattas(newAllRaceIdentifiers); 
+        regattaSelectionProvider.setAllRegattas(newAllRegattaIdentifiers); 
     }
 
     public List<RegattaDTO> getAllRegattas() {
