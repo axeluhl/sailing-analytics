@@ -15,9 +15,11 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.RaceColumnDTO;
 
 /**
- * Fills a {@link RaceColumnDTO} object by setting its {@link RaceColumnDTO#setMedalRace(boolean) medal race} property and its name.
+ * Fills a {@link RaceColumnDTO} object by setting its {@link RaceColumnDTO#setMedalRace(boolean) medal race} property,
+ * the column factor and its name.
+ * 
  * @author Axel Uhl (D043530)
- *
+ * 
  */
 public class RaceColumnInLeaderboardDialog extends DataEntryDialog<RaceColumnInLeaderboardDialog.RaceColumnDescriptor> {
     private final TextBox raceNameBox;

@@ -460,8 +460,8 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
         addRaceColumnsButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                if(selectedLeaderboard.isRegattaLeaderboard) {
-                    Window.alert("This is a regatta leaderboard. You can only add races to this leaderboard directly in the regatta definition.");
+                if (selectedLeaderboard.isRegattaLeaderboard) {
+                    Window.alert(stringMessages.cannotAddRacesToRegattaLeaderboardButOnlyToRegatta());
                 } else {
                     addRaceColumnsToLeaderboard();
                 }
@@ -741,7 +741,7 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
         final String oldRaceColumnName = raceColumnWithFleet.getA().getRaceColumnName();
         final Double oldExplicitFactor = raceColumnWithFleet.getA().getExplicitFactor();
         List<RaceColumnDTO> existingRacesWithoutThisRace = new ArrayList<RaceColumnDTO>();
-        for(Pair<RaceColumnDTO, FleetDTO> pair: raceColumnAndFleetList.getList()) {
+        for (Pair<RaceColumnDTO, FleetDTO> pair : raceColumnAndFleetList.getList()) {
             existingRacesWithoutThisRace.add(pair.getA());
         }
         existingRacesWithoutThisRace.remove(raceColumnWithFleet.getA());
