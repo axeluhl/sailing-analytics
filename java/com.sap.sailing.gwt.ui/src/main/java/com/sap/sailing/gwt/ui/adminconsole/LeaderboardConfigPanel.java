@@ -68,7 +68,7 @@ import com.sap.sailing.gwt.ui.shared.RaceColumnDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 
-public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplayer, RaceSelectionChangeListener,
+public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderboardProvider, RegattaDisplayer, RaceSelectionChangeListener,
     TrackedRaceChangedListener {
 
     private final TrackedRacesListComposite trackedRacesListComposite;
@@ -299,7 +299,7 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
         leaderboardTable.setSelectionModel(leaderboardSelectionModel);
         leaderboardSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
             public void onSelectionChange(SelectionChangeEvent event) {
-                selectedLeaderboard = leaderboardSelectionModel.getSelectedObject();
+                setSelectedLeaderboard(leaderboardSelectionModel.getSelectedObject());
                 leaderboardSelectionChanged();
             }
         });
@@ -370,7 +370,7 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
                             .getA().getRaceIdentifier(raceInLeaderboardDTOAndFleetName.getB());
                     String debugParam = Window.Location.getParameter("gwt.codesvr");
                     String link = URLEncoder.encode("/gwt/RaceBoard.html?leaderboardName="
-                            + selectedLeaderboard.name + "&raceName=" + raceIdentifier.getRaceName() + "&regattaName="
+                            + getSelectedLeaderboard().name + "&raceName=" + raceIdentifier.getRaceName() + "&regattaName="
                             + raceIdentifier.getRegattaName()
                             + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""));
                     return ANCHORTEMPLATE.cell(link, raceInLeaderboardDTOAndFleetName.getA().getRaceColumnName());
@@ -402,7 +402,7 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
         isMedalRaceCheckboxColumn.setFieldUpdater(new FieldUpdater<Pair<RaceColumnDTO, FleetDTO>, Boolean>() {
             @Override
             public void update(int index, Pair<RaceColumnDTO, FleetDTO> object, Boolean value) {
-                setIsMedalRace(selectedLeaderboard.name, object.getA(), value);
+                setIsMedalRace(getSelectedLeaderboard().name, object.getA(), value);
             }
         });
         isMedalRaceCheckboxColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
@@ -416,7 +416,7 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
         };
         ImagesBarColumn<Pair<RaceColumnDTO, FleetDTO>, LeaderboardRaceConfigImagesBarCell> raceActionColumn =
                 new ImagesBarColumn<Pair<RaceColumnDTO, FleetDTO>, LeaderboardRaceConfigImagesBarCell>(
-                        new LeaderboardRaceConfigImagesBarCell(stringMessages));
+                        new LeaderboardRaceConfigImagesBarCell(this, stringMessages));
         raceActionColumn.setFieldUpdater(new FieldUpdater<Pair<RaceColumnDTO, FleetDTO>, String>() {
             @Override
             public void update(int index, Pair<RaceColumnDTO, FleetDTO> object, String value) {
@@ -460,7 +460,7 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
         addRaceColumnsButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                if (selectedLeaderboard.isRegattaLeaderboard) {
+                if (getSelectedLeaderboard().isRegattaLeaderboard) {
                     Window.alert(stringMessages.cannotAddRacesToRegattaLeaderboardButOnlyToRegatta());
                 } else {
                     addRaceColumnsToLeaderboard();
@@ -809,7 +809,7 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
             }
             @Override
             public void onSuccess(Void result) {
-                selectedLeaderboard.setIsMedalRace(raceInLeaderboard.getRaceColumnName(), isMedalRace);
+                getSelectedLeaderboard().setIsMedalRace(raceInLeaderboard.getRaceColumnName(), isMedalRace);
             }
         });
     }
@@ -859,7 +859,7 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
     }
 
     private String getSelectedLeaderboardName() {
-        return selectedLeaderboard != null ? selectedLeaderboard.name : null;
+        return getSelectedLeaderboard() != null ? getSelectedLeaderboard().name : null;
     }
 
     private void leaderboardSelectionChanged() {
@@ -874,22 +874,22 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
                 raceSelectionProvider.addRaceSelectionChangeListener(LeaderboardConfigPanel.this);
             }
         });
-        if (selectedLeaderboard != null) {
+        if (getSelectedLeaderboard() != null) {
             raceColumnAndFleetList.getList().clear();
-            for (RaceColumnDTO raceColumn : selectedLeaderboard.getRaceList()) {
+            for (RaceColumnDTO raceColumn : getSelectedLeaderboard().getRaceList()) {
                 for (FleetDTO fleet : raceColumn.getFleets()) {
                     raceColumnAndFleetList.getList().add(new Pair<RaceColumnDTO, FleetDTO>(raceColumn, fleet));
                 }
             }
             selectedLeaderBoardPanel.setVisible(true);
-            selectedLeaderBoardPanel.setCaptionText("Details of leaderboard '" + selectedLeaderboard.name + "'");
-            if (!selectedLeaderboard.isMetaLeaderboard) {
+            selectedLeaderBoardPanel.setCaptionText("Details of leaderboard '" + getSelectedLeaderboard().name + "'");
+            if (!getSelectedLeaderboard().isMetaLeaderboard) {
                 trackedRacesCaptionPanel.setVisible(true);
             }
         } else {
             selectedLeaderBoardPanel.setVisible(false);
             trackedRacesCaptionPanel.setVisible(false);
-            selectedLeaderboard = null;
+            setSelectedLeaderboard(null);
             selectedRaceInLeaderboard = null;
         }
     }
@@ -990,7 +990,7 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
     private void addLeaderboard(StrippedLeaderboardDTO result) {
         leaderboardList.getList().add(result);
         availableLeaderboardList.add(result);
-        selectedLeaderboard = result;
+        setSelectedLeaderboard(result);
         leaderboardSelectionChanged();
     }
 
@@ -1033,8 +1033,8 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
                 leaderboardList.getList().remove(leaderBoard);
                 availableLeaderboardList.remove(leaderBoard);
 
-                if (selectedLeaderboard != null && selectedLeaderboard.name.equals(leaderBoard.name)) {
-                    selectedLeaderboard = null;
+                if (getSelectedLeaderboard() != null && getSelectedLeaderboard().name.equals(leaderBoard.name)) {
+                    setSelectedLeaderboard(null);
                     leaderboardSelectionChanged();
                 }
             }
@@ -1102,5 +1102,14 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
         }
         // now sort again according to selected criterion
         ColumnSortEvent.fire(leaderboardTable, leaderboardTable.getColumnSortList());
+    }
+
+    @Override
+    public StrippedLeaderboardDTO getSelectedLeaderboard() {
+        return selectedLeaderboard;
+    }
+
+    private void setSelectedLeaderboard(StrippedLeaderboardDTO selectedLeaderboard) {
+        this.selectedLeaderboard = selectedLeaderboard;
     }
 }
