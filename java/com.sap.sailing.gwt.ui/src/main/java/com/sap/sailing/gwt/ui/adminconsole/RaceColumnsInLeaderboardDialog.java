@@ -69,7 +69,6 @@ public class RaceColumnsInLeaderboardDialog extends DataEntryDialog<List<RaceCol
                             + stringConstants.raceWithThisNameAlreadyExists();
                 }
             }
-            
             return errorMessage;
         }
 

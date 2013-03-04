@@ -25,7 +25,8 @@ public class LeaderboardRaceConfigImagesBarCell extends ImagesBarCell {
         List<ImageSpec> result = new ArrayList<ImageSpec>();
         result.add(new ImageSpec(ACTION_EDIT, stringMessages.actionEdit(), makeImagePrototype(resources.editIcon())));
         result.add(new ImageSpec(ACTION_UNLINK, stringMessages.actionRaceUnlink(), makeImagePrototype(resources.unlinkIcon())));
-        if (!selectedLeaderboardProvider.getSelectedLeaderboard().isRegattaLeaderboard) {
+        if (selectedLeaderboardProvider.getSelectedLeaderboard() != null &&
+                !selectedLeaderboardProvider.getSelectedLeaderboard().isRegattaLeaderboard) {
             // race columns cannot be removed from a regatta leaderboard; they need to be removed from the regatta instead
             result.add(new ImageSpec(ACTION_REMOVE, stringMessages.actionRaceRemove(), makeImagePrototype(resources.removeIcon())));
         }

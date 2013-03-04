@@ -398,7 +398,7 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
                 new DisablableCheckboxCell(new IsEnabled() {
                     @Override
                     public boolean isEnabled() {
-                        return !getSelectedLeaderboard().isRegattaLeaderboard;
+                        return getSelectedLeaderboard() != null && !getSelectedLeaderboard().isRegattaLeaderboard;
                     }
                 })) {
             @Override
@@ -561,16 +561,22 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
         });
     }
 
-    public void loadAndRefreshLeaderboard(final String leaderboardName) {
+    /**
+     * @param nameOfRaceColumnToSelect
+     *            if not <code>null</code>, selects the first race column name with this name found in the leaderboard
+     *            after the refresh has successfully completed. See {@link #selectRaceColumn(String)}.
+     */
+    public void loadAndRefreshLeaderboard(final String leaderboardName, final String nameOfRaceColumnToSelect) {
         leaderboardSelectionModel.setSelected(null, true);
-
         sailingService.getLeaderboard(leaderboardName, new AsyncCallback<StrippedLeaderboardDTO>() {
             @Override
             public void onSuccess(StrippedLeaderboardDTO leaderboard) {
                 replaceLeaderboardInList(leaderboardList.getList(), leaderboardName, leaderboard);
                 replaceLeaderboardInList(availableLeaderboardList, leaderboardName, leaderboard);
-
                 leaderboardSelectionModel.setSelected(leaderboard, true);
+                if (nameOfRaceColumnToSelect != null) {
+                    selectRaceColumn(nameOfRaceColumnToSelect);
+                }
             }
 
             @Override
@@ -583,13 +589,13 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
 
     private void replaceLeaderboardInList(List<StrippedLeaderboardDTO> leaderboardList, String leaderboardToReplace, StrippedLeaderboardDTO newLeaderboard) {
         int index = -1;
-        for(StrippedLeaderboardDTO existingLeaderboard: leaderboardList) {
+        for (StrippedLeaderboardDTO existingLeaderboard : leaderboardList) {
             index++;
-            if(existingLeaderboard.name.equals(leaderboardToReplace)) {
+            if (existingLeaderboard.name.equals(leaderboardToReplace)) {
                 break;
             }
         }
-        if(index >= 0) {
+        if (index >= 0) {
             leaderboardList.set(index, newLeaderboard);
         }
     }
@@ -626,7 +632,7 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
 
             @Override
             public void onSuccess(Void arg0) {
-                loadAndRefreshLeaderboard(selectedLeaderboardName);
+                loadAndRefreshLeaderboard(selectedLeaderboardName, /* raceColumnNameToSelect */ null);
             }
         });
     }
@@ -649,8 +655,7 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
 
             @Override
             public void onSuccess(Void result) {
-                loadAndRefreshLeaderboard(selectedLeaderboardName);
-                selectRaceColumn(selectedRaceColumnName);
+                loadAndRefreshLeaderboard(selectedLeaderboardName, selectedRaceColumnName);
             }
         });
     }
@@ -673,8 +678,7 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
 
             @Override
             public void onSuccess(Void result) {
-                loadAndRefreshLeaderboard(selectedLeaderboardName);
-                selectRaceColumn(selectedRaceColumnName);
+                loadAndRefreshLeaderboard(selectedLeaderboardName, selectedRaceColumnName);
             }
         });
     }
@@ -695,7 +699,7 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
     private void selectRaceColumn(String raceCoumnName) {
         List<Pair<RaceColumnDTO, FleetDTO>> list = raceColumnAndFleetList.getList();
         for (Pair<RaceColumnDTO, FleetDTO> pair : list) {
-            if(pair.getA().name.equals(raceCoumnName)) {
+            if (pair.getA().name.equals(raceCoumnName)) {
                 raceColumnTableSelectionModel.setSelected(pair, true);
                 break;
             }
@@ -780,8 +784,7 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
                 new ParallelExecutionHolder(callbacks.toArray(new ParallelExecutionCallback<?>[0])) {
                     @Override
                     public void handleSuccess() {
-                        loadAndRefreshLeaderboard(selectedLeaderboardName);
-                        selectRaceColumn(result.getName());
+                        loadAndRefreshLeaderboard(selectedLeaderboardName, result.getName());
                     }
                     @Override
                     public void handleFailure(Throwable t) {
@@ -860,7 +863,7 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
 
             @Override
             public void onSuccess(Void v) {
-                loadAndRefreshLeaderboard(leaderboardName);
+                loadAndRefreshLeaderboard(leaderboardName, /* nameOfRaceColumnToSelect */ null);
             }
         });
     }

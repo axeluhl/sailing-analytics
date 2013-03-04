@@ -24,6 +24,7 @@ public class RaceColumnInLeaderboardDialog extends DataEntryDialog<RaceColumnInL
     private final DoubleBox explicitFactorBox;
     private final CheckBox isMedalRace;
     private final StringMessages stringMessages;
+    private final boolean isRegattaLeaderboard;
 
     public static class RaceColumnDescriptor {
         private String name;
@@ -96,6 +97,7 @@ public class RaceColumnInLeaderboardDialog extends DataEntryDialog<RaceColumnInL
             boolean isRegattaLeaderboard, StringMessages stringMessages, DialogCallback<RaceColumnDescriptor> callback) {
         super(stringMessages.actionRaceEdit(), null, stringMessages.ok(), stringMessages.cancel(),
                 new RaceDialogValidator(stringMessages, existingRaces), callback);
+        this.isRegattaLeaderboard = isRegattaLeaderboard;
         this.stringMessages = stringMessages;
         raceNameBox = createTextBox(raceColumnToEdit.getRaceColumnName());
         raceNameBox.setEnabled(!isRegattaLeaderboard);
@@ -134,6 +136,11 @@ public class RaceColumnInLeaderboardDialog extends DataEntryDialog<RaceColumnInL
     @Override
     public void show() {
         super.show();
-        raceNameBox.setFocus(true);
+        if (isRegattaLeaderboard) {
+            explicitFactorBox.setFocus(true);
+            explicitFactorBox.setSelectionRange(0, explicitFactorBox.getText().length());
+        } else {
+            raceNameBox.setFocus(true);
+        }
     }
 }
