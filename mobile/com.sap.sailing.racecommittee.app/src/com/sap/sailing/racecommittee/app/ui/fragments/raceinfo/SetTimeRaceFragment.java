@@ -97,7 +97,6 @@ public class SetTimeRaceFragment extends RaceFragment implements TickListener {
         startTimePicker.setCurrentHour(hour);
         startTimePicker.setCurrentMinute(minute);
         refreshDifferenceTime();
-        ;
     }
 
     private void refreshDifferenceTime() {
@@ -159,7 +158,8 @@ public class SetTimeRaceFragment extends RaceFragment implements TickListener {
     }
 
     private void setStartTime(Date newStartTime) {
-        getRace().getState().setStartTime(new MillisecondsTimePoint(new Date()),
+        getRace().getState().setStartTime(
+                new MillisecondsTimePoint(newStartTime),
                 new MillisecondsTimePoint(newStartTime));
     }
 

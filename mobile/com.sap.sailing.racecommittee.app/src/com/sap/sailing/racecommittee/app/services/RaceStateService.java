@@ -33,7 +33,7 @@ import com.sap.sailing.racecommittee.app.services.sending.RaceEventSender;
 import com.sap.sailing.racecommittee.app.ui.activities.LoginActivity;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CompetitorIdJsonSerializer;
-import com.sap.sailing.server.gateway.serialization.impl.racelog.RaceLogEventSerializer;
+import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogEventSerializer;
 
 public class RaceStateService extends Service {
     private final static String TAG = RaceStateService.class.getName();
@@ -219,7 +219,7 @@ public class RaceStateService extends Service {
         
         switch (state.getStatus()) {
         case SCHEDULED:
-            TimePoint startTime = state.getStartTime();
+            TimePoint startTime = state.getStartTime().plus(1);
             Intent intent = new Intent(getString(R.string.intentActionAlarmAction));
             intent.putExtra(EXTRAS_SERVICE_ID, serviceId);
             intent.putExtra(AppConstants.RACE_ID_KEY, race.getId());
