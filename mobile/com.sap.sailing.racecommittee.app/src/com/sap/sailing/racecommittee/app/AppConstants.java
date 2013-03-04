@@ -36,7 +36,7 @@ public class AppConstants {
 
     public static String getServerBaseURL(Context context) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        return sp.getString(PREFERENCE_SERVICE_URL, "http://192.168.1.141:8888");
+        return sp.getString(PREFERENCE_SERVICE_URL, "http://localhost:8888");
     }
 
     public static boolean isSendingActive(Context context) {
