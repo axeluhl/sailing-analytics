@@ -4,7 +4,10 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.View.OnClickListener;
+import android.widget.ImageButton;
 
+import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 
@@ -19,7 +22,12 @@ public class FinishingRaceFragment extends RaceFragment {
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         
-        
+        ImageButton blueFlagButton = (ImageButton) getView().findViewById(R.id.blueFlagButton);
+        blueFlagButton.setOnClickListener(new OnClickListener() {
+            public void onClick(View v) {
+                getRace().getState().onRaceFinished(MillisecondsTimePoint.now());
+            }
+        });
     }
 
 }
