@@ -5,6 +5,7 @@ import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.racelog.RaceLogRaceStatusEvent;
+import com.sap.sailing.racecommittee.domain.state.impl.analyzers.RaceLogAnalyzer;
 
 public class FinishedTimeFinder extends RaceLogAnalyzer {
 

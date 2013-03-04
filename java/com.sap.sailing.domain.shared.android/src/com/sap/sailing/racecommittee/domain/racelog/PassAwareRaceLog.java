@@ -1,4 +1,4 @@
-package com.sap.sailing.racecommittee.app.domain.racelog;
+package com.sap.sailing.racecommittee.domain.racelog;
 
 import com.sap.sailing.domain.racelog.RaceLog;
 

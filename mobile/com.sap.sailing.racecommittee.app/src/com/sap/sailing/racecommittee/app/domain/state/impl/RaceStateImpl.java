@@ -13,14 +13,14 @@ import com.sap.sailing.domain.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.racelog.impl.RaceLogPassChangeEventImpl;
 import com.sap.sailing.domain.racelog.impl.RaceLogRaceStatusEventImpl;
 import com.sap.sailing.domain.racelog.impl.RaceLogStartTimeEventImpl;
-import com.sap.sailing.racecommittee.app.domain.racelog.PassAwareRaceLog;
 import com.sap.sailing.racecommittee.app.domain.racelog.RaceLogChangedListener;
 import com.sap.sailing.racecommittee.app.domain.racelog.impl.RaceLogChangedVisitor;
 import com.sap.sailing.racecommittee.app.domain.state.RaceState;
 import com.sap.sailing.racecommittee.app.domain.state.RaceStateChangedListener;
 import com.sap.sailing.racecommittee.app.domain.state.impl.analyzers.FinishedTimeFinder;
-import com.sap.sailing.racecommittee.app.domain.state.impl.analyzers.RaceStatusAnalyzer;
-import com.sap.sailing.racecommittee.app.domain.state.impl.analyzers.StartTimeFinder;
+import com.sap.sailing.racecommittee.domain.racelog.PassAwareRaceLog;
+import com.sap.sailing.racecommittee.domain.state.impl.analyzers.RaceStatusAnalyzer;
+import com.sap.sailing.racecommittee.domain.state.impl.analyzers.StartTimeFinder;
 
 public class RaceStateImpl implements RaceState, RaceLogChangedListener {
     // private static final String TAG = RaceStateImpl.class.getName();

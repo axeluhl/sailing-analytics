@@ -48,7 +48,7 @@ public class RaceLogEventSerializerChooserTest {
     @Test
     public void testChoosesStartTimeSerializer() {
         // we use the real event type here because we do not want to re-implement the dispatching.
-        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createStartTimeEvent(null, 0, RaceLogRaceStatus.SCHEDULED, null);
+        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createStartTimeEvent(null, 0, null);
         assertEquals(startTimeSerializer, chooser.getSerializer(event));
     }
     
@@ -62,14 +62,14 @@ public class RaceLogEventSerializerChooserTest {
     @Test
     public void testChoosesCourseAreaChangedSerializer() {
         // we use the real event type here because we do not want to re-implement the dispatching.
-        RaceLogEvent event = null;
+        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createRaceLogCourseAreaChangedEvent(null, 0, null);
         assertEquals(courseAreaChangedEventSerializer, chooser.getSerializer(event));
     }
     
     @Test
     public void testChoosesPassChangedSerializer() {
         // we use the real event type here because we do not want to re-implement the dispatching.
-        RaceLogEvent event = null;
+        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createRaceLogPassChangeEvent(null, 0);
         assertEquals(passChangedSerializer, chooser.getSerializer(event));
     }
 

@@ -1013,9 +1013,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             return null;
         }
         TimePoint startTime = new MillisecondsTimePoint(startTimeInMillis);
-        RaceLogRaceStatus nextStatus = RaceLogRaceStatus.valueOf((String) dbObject.get(FieldNames.RACE_LOG_EVENT_NEXT_STATUS.name()));
 
-        return RaceLogEventFactory.INSTANCE.createStartTimeEvent(timePoint, id, competitors, passId, nextStatus, startTime);
+        return RaceLogEventFactory.INSTANCE.createStartTimeEvent(timePoint, id, competitors, passId, startTime);
     }
 
     private RaceLogRaceStatusEvent loadRaceLogRaceStatusEvent(TimePoint timePoint, Serializable id, Integer passId, List<Competitor> competitors, DBObject dbObject) {

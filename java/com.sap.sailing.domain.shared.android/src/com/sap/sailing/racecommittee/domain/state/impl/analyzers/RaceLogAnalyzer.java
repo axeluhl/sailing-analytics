@@ -1,4 +1,4 @@
-package com.sap.sailing.racecommittee.app.domain.state.impl.analyzers;
+package com.sap.sailing.racecommittee.domain.state.impl.analyzers;
 
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
