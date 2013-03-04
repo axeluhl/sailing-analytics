@@ -4,6 +4,8 @@ import java.util.Date;
 import java.util.List;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import com.sap.sailing.domain.common.RegattaIdentifier;
+import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 
 public class RegattaDTO extends NamedDTO implements IsSerializable {
@@ -21,10 +23,13 @@ public class RegattaDTO extends NamedDTO implements IsSerializable {
 
     public RegattaDTO(String name, ScoringSchemeType scoringScheme /*, List<CompetitorDTO> competitors*/) {
         super(name);
-        this.name = name;
         this.scoringScheme = scoringScheme;
     }
 
+    public RegattaIdentifier getRegattaIdentifier() {
+        return new RegattaName(name);
+    }
+    
     /**
      * @return The start date of the first {@link #races Race}, or <code>null</code> if the start date isn't set
      */

@@ -513,4 +513,7 @@ public interface StringMessages extends Messages {
     String totalDistanceTraveledTooltip();
     String totalAverageSpeedOverGround();
     String totalAverageSpeedOverGroundTooltip();
+    String filterRegattasByName();
+    String noRegattasYet();
+    String cannotAddRacesToRegattaLeaderboardButOnlyToRegatta();
 }

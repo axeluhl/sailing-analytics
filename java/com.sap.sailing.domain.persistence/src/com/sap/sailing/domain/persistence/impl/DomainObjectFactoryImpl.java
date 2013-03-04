@@ -255,7 +255,13 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             for (String encodedRaceColumnName : dbColumnFactors.keySet()) {
                 double factor = ((Number) dbColumnFactors.get(encodedRaceColumnName)).doubleValue();
                 String raceColumnName = MongoUtils.unescapeDollarAndDot(encodedRaceColumnName);
-                result.getRaceColumnByName(raceColumnName).setFactor(factor);
+                final RaceColumn raceColumn = result.getRaceColumnByName(raceColumnName);
+                if (raceColumn != null) {
+                    raceColumn.setFactor(factor);
+                } else {
+                    logger.warning("Expected to find race column named "+raceColumnName+" in leaderboard "+result.getName()+
+                            " to apply column factor "+factor+", but the race column wasn't found. Ignoring factor.");
+                }
             }
         }
     }
