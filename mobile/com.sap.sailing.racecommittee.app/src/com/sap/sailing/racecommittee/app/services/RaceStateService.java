@@ -164,6 +164,7 @@ public class RaceStateService extends Service {
         
         if (getString(R.string.intentActionAlarmAction).equals(action)) {
             // TODO: replace with generic action according to startprocedure
+            managedIntents.get(race).remove(intent);
             race.getState().onRaceStarted(eventTime);
             return;
         }
