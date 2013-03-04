@@ -5,8 +5,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import com.google.gwt.event.dom.client.ChangeEvent;
-import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
@@ -26,18 +24,15 @@ import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
 
 public class RaceColumnInRegattaSeriesDialog extends DataEntryDialog<Pair<SeriesDTO, List<RaceColumnDTO>>> {
-    private final RegattaDTO regatta;
-    private final ListBox seriesListBox;
     private final ListBox addRacesListBox;
     private Button addRacesBtn;
     private final List<TextBox> raceNameEntryFields;
     private final List<Button> raceNameDeleteButtons;
     private final StringMessages stringMessages;
     private final TextBox raceNamePrefixTextBox;
-    private final boolean hasOneSeries;
     private Grid raceColumnsGrid;
     private VerticalPanel additionalWidgetPanel;
-    private final SeriesDTO preSelectedSeries;
+    private final SeriesDTO selectedSeries;
     
     private static class RaceDialogValidator implements Validator<Pair<SeriesDTO, List<RaceColumnDTO>>> {
         private StringMessages stringConstants;
@@ -56,8 +51,8 @@ public class RaceColumnInRegattaSeriesDialog extends DataEntryDialog<Pair<Series
 
             String errorMessage = null;
             for (SeriesDTO seriesDTO: regatta.series) {
-                if(!seriesDTO.name.equals(seriesToValidate.name)) {
-                    for(RaceColumnDTO raceColumn: seriesDTO.getRaceColumns()) {
+                if (!seriesDTO.name.equals(seriesToValidate.name)) {
+                    for (RaceColumnDTO raceColumn : seriesDTO.getRaceColumns()) {
                         raceColumnNamesOfOtherSeries.add(raceColumn.name);
                     }
                 }
@@ -106,15 +101,12 @@ public class RaceColumnInRegattaSeriesDialog extends DataEntryDialog<Pair<Series
 
     }
 
-    public RaceColumnInRegattaSeriesDialog(RegattaDTO regatta, SeriesDTO preSelectedSeries, StringMessages stringConstants,
+    public RaceColumnInRegattaSeriesDialog(RegattaDTO regatta, SeriesDTO selectedSeries, StringMessages stringConstants,
             DialogCallback<Pair<SeriesDTO, List<RaceColumnDTO>>> callback) {
         super(stringConstants.actionEditRaces(), null, stringConstants.ok(), stringConstants.cancel(),
                 new RaceDialogValidator(regatta, stringConstants), callback);
-        this.regatta = regatta;
-        this.preSelectedSeries = preSelectedSeries;
+        this.selectedSeries = selectedSeries;
         this.stringMessages = stringConstants;
-        this.hasOneSeries = regatta.series.size() == 1;
-        seriesListBox = createListBox(false);
         addRacesListBox = createListBox(false);
         raceNamePrefixTextBox = createTextBox(null);
         raceNameEntryFields = new ArrayList<TextBox>();
@@ -158,10 +150,10 @@ public class RaceColumnInRegattaSeriesDialog extends DataEntryDialog<Pair<Series
         SeriesDTO selectedSeries = getSelectedSeries();
         List<RaceColumnDTO> races = new ArrayList<RaceColumnDTO>();
         int racesCount = raceNameEntryFields.size();
-        for(int i = 0; i < racesCount; i++) {
+        for (int i = 0; i < racesCount; i++) {
             String raceColumnName = raceNameEntryFields.get(i).getValue();
             RaceColumnDTO raceColumnDTO = findRaceColumnInSeriesByName(selectedSeries, raceColumnName);
-            if(raceColumnDTO == null) {
+            if (raceColumnDTO == null) {
                 raceColumnDTO = new RaceColumnDTO(/* isValidInTotalScore not relevant here; not in scope of a leaderboard */ null);
                 raceColumnDTO.name = raceColumnName;
             }
@@ -193,41 +185,13 @@ public class RaceColumnInRegattaSeriesDialog extends DataEntryDialog<Pair<Series
 
         HorizontalPanel seriesPanel = new HorizontalPanel();
         seriesPanel.setSpacing(3);
-        seriesPanel.add(new Label(stringMessages.series() + ":"));
-        if(hasOneSeries) {
-            String seriesName = regatta.series.get(0).name;
-            seriesListBox.addItem(seriesName);
-            seriesListBox.setSelectedIndex(0);
-            if("Default".equals(seriesName)) {
-                raceNamePrefixTextBox.setText("R");
-            } else {
-                raceNamePrefixTextBox.setText(seriesName.substring(0, 1).toUpperCase());
-            }
+        String seriesName = getSelectedSeries().name;
+        seriesPanel.add(new Label(stringMessages.series() + ": " + seriesName));
+        if ("Default".equals(seriesName)) {
+            raceNamePrefixTextBox.setText("R");
         } else {
-            int i = 0;
-            for (SeriesDTO series : regatta.series) {
-                seriesListBox.addItem(series.name);
-                if(series.name.equals(preSelectedSeries.name)) {
-                    seriesListBox.setSelectedIndex(i);    
-                }
-                i++;
-            }
+            raceNamePrefixTextBox.setText(seriesName.substring(0, 1).toUpperCase());
         }
-        
-        seriesListBox.addChangeHandler(new ChangeHandler() {
-            @Override
-            public void onChange(ChangeEvent event) {
-                SeriesDTO selectedSeries = getSelectedSeries();
-                if(selectedSeries == null) {
-                    raceNamePrefixTextBox.setText("");
-                } else {
-                    raceNamePrefixTextBox.setText(selectedSeries.name.substring(0, 1).toUpperCase());
-                }
-                fillExistingRacesOfSeries();
-            }
-        });
-        
-        seriesPanel.add(seriesListBox);
         additionalWidgetPanel.add(seriesPanel);
         
         // add races controls
@@ -310,18 +274,7 @@ public class RaceColumnInRegattaSeriesDialog extends DataEntryDialog<Pair<Series
     }
 
     private SeriesDTO getSelectedSeries() {
-        SeriesDTO result = null;
-        int selIndex = seriesListBox.getSelectedIndex();
-        if(selIndex > 0 || hasOneSeries) { // the zero index represents the 'no selection' text
-            String itemText = seriesListBox.getItemText(selIndex);
-            for(SeriesDTO seriesDTO: regatta.series) {
-                if(seriesDTO.name.equals(itemText)) {
-                    result = seriesDTO;
-                    break;
-                }
-            }
-        }
-        return result;
+        return selectedSeries;
     }
 
     @Override
