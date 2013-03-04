@@ -96,15 +96,17 @@ public class RaceColumnInLeaderboardDialog extends DataEntryDialog<RaceColumnInL
     }
 
     public RaceColumnInLeaderboardDialog(List<RaceColumnDTO> existingRaces, RaceColumnDTO raceColumnToEdit, 
-            StringMessages stringMessages, DialogCallback<RaceColumnDescriptor> callback) {
+            boolean isRegattaLeaderboard, StringMessages stringMessages, DialogCallback<RaceColumnDescriptor> callback) {
         super(stringMessages.actionRaceEdit(), null, stringMessages.ok(), stringMessages.cancel(),
                 new RaceDialogValidator(stringMessages, existingRaces), callback);
         this.stringMessages = stringMessages;
         raceNameBox = createTextBox(raceColumnToEdit.getRaceColumnName());
+        raceNameBox.setEnabled(!isRegattaLeaderboard);
         explicitFactorBox = raceColumnToEdit.getExplicitFactor() == null ?
                 createDoubleBox(/* visibleLength */ 4) : createDoubleBox(raceColumnToEdit.getExplicitFactor(), /* visibleLength */ 4);
         isMedalRace = createCheckbox(stringMessages.medalRace());
         isMedalRace.setValue(raceColumnToEdit.isMedalRace());
+        isMedalRace.setEnabled(!isRegattaLeaderboard);
     }
 
     @Override

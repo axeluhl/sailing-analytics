@@ -47,6 +47,7 @@ import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.gwt.ui.adminconsole.DisablableCheckboxCell.IsEnabled;
 import com.sap.sailing.gwt.ui.adminconsole.RaceColumnInLeaderboardDialog.RaceColumnDescriptor;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog.DialogCallback;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
@@ -393,7 +394,12 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
         };
 
         Column<Pair<RaceColumnDTO, FleetDTO>, Boolean> isMedalRaceCheckboxColumn = new Column<Pair<RaceColumnDTO, FleetDTO>, Boolean>(
-                new CheckboxCell()) {
+                new DisablableCheckboxCell(new IsEnabled() {
+                    @Override
+                    public boolean isEnabled() {
+                        return !getSelectedLeaderboard().isRegattaLeaderboard;
+                    }
+                })) {
             @Override
             public Boolean getValue(Pair<RaceColumnDTO, FleetDTO> race) {
                 return race.getA().isMedalRace();
@@ -746,7 +752,7 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
         }
         existingRacesWithoutThisRace.remove(raceColumnWithFleet.getA());
         final RaceColumnInLeaderboardDialog raceDialog = new RaceColumnInLeaderboardDialog(existingRacesWithoutThisRace,
-                raceColumnWithFleet.getA(), stringMessages, new DialogCallback<RaceColumnDescriptor>() {
+                raceColumnWithFleet.getA(), getSelectedLeaderboard().isRegattaLeaderboard, stringMessages, new DialogCallback<RaceColumnDescriptor>() {
             @Override
             public void cancel() {
             }
