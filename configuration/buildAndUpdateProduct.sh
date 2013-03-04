@@ -9,12 +9,12 @@ find_project_home ()
     fi
 
     if [ ! -d "$1/.git" ]; then
-        PARENT_DIR=`cd $1/..;pwd | sed -e 's/\/cygdrive\/\([a-zA-Z]\)/\1:/'`
+        PARENT_DIR=`cd $1/..;pwd`
         echo $(find_project_home $PARENT_DIR)
         return 0
     fi
 
-    echo $1
+    echo $1 | sed -e 's/\/cygdrive\/\([a-zA-Z]\)/\1:/'
 }
 
 # this holds for default installation

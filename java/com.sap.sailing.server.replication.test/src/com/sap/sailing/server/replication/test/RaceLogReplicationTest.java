@@ -240,7 +240,7 @@ public class RaceLogReplicationTest extends AbstractServerReplicationTest {
     }
 
     private FlexibleLeaderboard setupFlexibleLeaderboard(final String leaderboardName) {
-        CreateFlexibleLeaderboard createTestLeaderboard = new CreateFlexibleLeaderboard(leaderboardName, new int[] { 19, 44 }, new LowPoint(), null);
+        CreateFlexibleLeaderboard createTestLeaderboard = new CreateFlexibleLeaderboard(leaderboardName, leaderboardName, new int[] { 19, 44 }, new LowPoint(), null);
         FlexibleLeaderboard masterLeaderboard = master.apply(createTestLeaderboard);
         return masterLeaderboard;
     }

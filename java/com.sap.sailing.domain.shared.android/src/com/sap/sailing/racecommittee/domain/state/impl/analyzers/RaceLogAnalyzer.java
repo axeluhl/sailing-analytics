@@ -5,17 +5,17 @@ import com.sap.sailing.domain.racelog.RaceLogEvent;
 
 public abstract class RaceLogAnalyzer {
 
-	private RaceLog raceLog;
-	
-	public RaceLogAnalyzer(RaceLog raceLog) {
-		this.raceLog = raceLog;
-	}
-	
-	protected Iterable<RaceLogEvent> getPassEvents() {
-		return raceLog.getFixes();
-	}
-	
-	protected Iterable<RaceLogEvent> getAllEvents() {
-		return raceLog.getRawFixes();
-	}
+    private RaceLog raceLog;
+
+    public RaceLogAnalyzer(RaceLog raceLog) {
+        this.raceLog = raceLog;
+    }
+
+    protected Iterable<RaceLogEvent> getPassEvents() {
+        return raceLog.getFixes();
+    }
+
+    protected Iterable<RaceLogEvent> getAllEvents() {
+        return raceLog.getRawFixes();
+    }
 }

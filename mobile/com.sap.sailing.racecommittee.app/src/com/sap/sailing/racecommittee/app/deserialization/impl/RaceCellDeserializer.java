@@ -8,7 +8,7 @@ import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
-import com.sap.sailing.server.gateway.serialization.impl.racegroup.RaceCellJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.racegroup.impl.RaceCellJsonSerializer;
 
 public class RaceCellDeserializer implements JsonDeserializer<RaceCell> {
 

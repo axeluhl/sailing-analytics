@@ -5,13 +5,21 @@ import org.json.simple.JSONObject;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
-import com.sap.sailing.server.gateway.serialization.impl.racelog.BaseRaceLogEventSerializer;
-import com.sap.sailing.server.gateway.serialization.impl.racelog.RaceLogCourseAreaChangedEventSerializer;
-import com.sap.sailing.server.gateway.serialization.impl.racelog.RaceLogFlagEventSerializer;
-import com.sap.sailing.server.gateway.serialization.impl.racelog.RaceLogRaceStatusEventSerializer;
-import com.sap.sailing.server.gateway.serialization.impl.racelog.RaceLogStartTimeEventSerializer;
+import com.sap.sailing.server.gateway.serialization.racelog.impl.BaseRaceLogEventSerializer;
+import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogCourseAreaChangedEventSerializer;
+import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogFlagEventSerializer;
+import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogRaceStatusEventSerializer;
+import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogStartTimeEventSerializer;
 
 public class RaceLogEventDeserializer implements JsonDeserializer<RaceLogEvent> {
+    
+    public static RaceLogEventDeserializer create() {
+        return new RaceLogEventDeserializer(
+                new RaceLogFlagEventDeserializer(),
+                new RaceLogStartTimeEventDeserializer(), 
+                new RaceLogRaceStatusEventDeserializer(),
+                new RaceLogCourseAreaChangedEventDeserializer());
+    }
 
     protected JsonDeserializer<RaceLogEvent> flagEventDeserializer;
     protected JsonDeserializer<RaceLogEvent> startTimeEventDeserializer;

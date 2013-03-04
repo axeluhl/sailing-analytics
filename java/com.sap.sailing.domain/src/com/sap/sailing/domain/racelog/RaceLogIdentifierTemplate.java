@@ -23,11 +23,15 @@ public interface RaceLogIdentifierTemplate extends Serializable {
     
     /**
      * Compiles the template with giving the last component, the {@link Fleet}, to a RaceLogIdentifier that is used to retrieve the 
-     * RaceLogEvents from a RaceLogStore
+     * {@link RaceLogEvent}s from a RaceLogStore
      * @param fleet the fleet of the race
      * @return the RaceLogIdentifier
      */
-    RaceLogIdentifier compile(Fleet fleet);
+    RaceLogIdentifier compileRaceLogIdentifier(Fleet fleet);
     
+    /**
+     * Resolves this RaceLogIdentifier template for replication with the help of the given resolver.
+     * @param resolver the resolver that resolves this template, either for {@link Leaderboard} or for {@link Regatta}.
+     */
     void resolve(RaceLogIdentifierTemplateResolver resolver);
 }

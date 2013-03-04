@@ -68,4 +68,11 @@ public class RaceLogImpl extends TrackImpl<RaceLogEvent> implements RaceLog {
         }
     }
 
+    @Override
+    public void removeListener(RaceLogEventVisitor listener) {
+        synchronized (listeners) {
+            listeners.remove(listener);
+        }
+    }
+
 }
