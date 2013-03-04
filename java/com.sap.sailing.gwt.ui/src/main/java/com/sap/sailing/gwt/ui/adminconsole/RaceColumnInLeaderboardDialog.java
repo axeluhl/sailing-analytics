@@ -1,7 +1,5 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
-import java.util.List;
-
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.DoubleBox;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
@@ -58,12 +56,11 @@ public class RaceColumnInLeaderboardDialog extends DataEntryDialog<RaceColumnInL
     }
 
     private static class RaceDialogValidator implements Validator<RaceColumnDescriptor> {
+        private final StringMessages stringMessages;
+        private final Iterable<RaceColumnDTO> existingRaces;
 
-        private StringMessages stringConstants;
-        private List<RaceColumnDTO> existingRaces;
-
-        public RaceDialogValidator(StringMessages stringConstants, List<RaceColumnDTO> existingRaceColumnsAndFleetNames) {
-            this.stringConstants = stringConstants;
+        public RaceDialogValidator(StringMessages stringConstants, Iterable<RaceColumnDTO> existingRaceColumnsAndFleetNames) {
+            this.stringMessages = stringConstants;
             this.existingRaces = existingRaceColumnsAndFleetNames;
         }
 
@@ -83,11 +80,11 @@ public class RaceColumnInLeaderboardDialog extends DataEntryDialog<RaceColumnInL
             }
 
             if (!isNameNotEmpty) {
-                errorMessage = stringConstants.pleaseEnterAName();
+                errorMessage = stringMessages.pleaseEnterAName();
             } else if (!medalRaceNotNull) {
-                errorMessage = stringConstants.medalRaceIsNull();
+                errorMessage = stringMessages.medalRaceIsNull();
             } else if (!unique) {
-                errorMessage = stringConstants.raceWithThisNameAlreadyExists();
+                errorMessage = stringMessages.raceWithThisNameAlreadyExists();
             } else {
                 return errorMessage = null;
             }
@@ -95,7 +92,7 @@ public class RaceColumnInLeaderboardDialog extends DataEntryDialog<RaceColumnInL
         }
     }
 
-    public RaceColumnInLeaderboardDialog(List<RaceColumnDTO> existingRaces, RaceColumnDTO raceColumnToEdit, 
+    public RaceColumnInLeaderboardDialog(Iterable<RaceColumnDTO> existingRaces, RaceColumnDTO raceColumnToEdit, 
             boolean isRegattaLeaderboard, StringMessages stringMessages, DialogCallback<RaceColumnDescriptor> callback) {
         super(stringMessages.actionRaceEdit(), null, stringMessages.ok(), stringMessages.cancel(),
                 new RaceDialogValidator(stringMessages, existingRaces), callback);

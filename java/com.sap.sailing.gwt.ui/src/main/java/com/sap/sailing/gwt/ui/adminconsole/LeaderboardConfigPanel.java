@@ -4,8 +4,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.FieldUpdater;
@@ -745,7 +747,8 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
         final boolean oldIsMedalRace = raceColumnWithFleet.getA().isMedalRace();
         final String oldRaceColumnName = raceColumnWithFleet.getA().getRaceColumnName();
         final Double oldExplicitFactor = raceColumnWithFleet.getA().getExplicitFactor();
-        List<RaceColumnDTO> existingRacesWithoutThisRace = new ArrayList<RaceColumnDTO>();
+        // use a set to avoid duplicates in the case of regatta leaderboards with multiple fleets per column
+        Set<RaceColumnDTO> existingRacesWithoutThisRace = new HashSet<RaceColumnDTO>();
         for (Pair<RaceColumnDTO, FleetDTO> pair : raceColumnAndFleetList.getList()) {
             existingRacesWithoutThisRace.add(pair.getA());
         }
@@ -822,10 +825,9 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
     private void addRaceColumnsToLeaderboard() {
         final String leaderboardName = getSelectedLeaderboardName();
         final List<RaceColumnDTO> existingRaceColumns = new ArrayList<RaceColumnDTO>();
-        for(Pair<RaceColumnDTO, FleetDTO> pair: raceColumnAndFleetList.getList()) {
+        for (Pair<RaceColumnDTO, FleetDTO> pair : raceColumnAndFleetList.getList()) {
             existingRaceColumns.add(pair.getA());
         }
-
         final RaceColumnsInLeaderboardDialog raceDialog = new RaceColumnsInLeaderboardDialog(existingRaceColumns,
                 stringMessages, new DialogCallback<List<RaceColumnDTO>>() {
             @Override
