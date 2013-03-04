@@ -82,8 +82,7 @@
 	<string name="race_reset_confirmation_warning">Resetting the race removes all its saved data permanently. On the server the data is removed immediately. There is no way to recover the recorded flags and events. We strongly recommend to not reset the race.</string>
 	<string name="race_reset_confirmation_title">Reset race</string><string name="race_settime_overlap">The given time overlaps with a previous aborted race. Please select a later time.</string>
 	<string name="race_finished_start_time">Race started at:</string>
-	<!-- <string name="race_finished_end_time">Race finished at:</string> -->
-	<string name="race_finished_end_time">Last boat finished at:</string>
+	<string name="race_finished_end_time">Race finished at:</string>
 	<string name="settings_category_advanced">Advanced Settings</string>
 	<string name="settings_category_general">General Settings</string>
 	<string name="settings_category_race">Race Settings</string>

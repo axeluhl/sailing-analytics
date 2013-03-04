@@ -33,6 +33,13 @@ public interface RaceState {
      * @return the start time or <code>null</code>.
      */
     TimePoint getStartTime();
+    
+    /**
+     * Gets the current race's finished time.
+     * 
+     * @return the finished time or <code>null</code>.
+     */
+    TimePoint getFinishedTime();
 
     /**
      * Sets the current race's start time

@@ -18,6 +18,7 @@ import com.sap.sailing.racecommittee.app.domain.racelog.RaceLogChangedListener;
 import com.sap.sailing.racecommittee.app.domain.racelog.impl.RaceLogChangedVisitor;
 import com.sap.sailing.racecommittee.app.domain.state.RaceState;
 import com.sap.sailing.racecommittee.app.domain.state.RaceStateChangedListener;
+import com.sap.sailing.racecommittee.app.domain.state.impl.analyzers.FinishedTimeFinder;
 import com.sap.sailing.racecommittee.app.domain.state.impl.analyzers.RaceStatusAnalyzer;
 import com.sap.sailing.racecommittee.app.domain.state.impl.analyzers.StartTimeFinder;
 
@@ -31,6 +32,7 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
     private RaceLogChangedVisitor raceLogListener;
     private RaceStatusAnalyzer statusAnalyzer;
     private StartTimeFinder startTimeFinder;
+    private FinishedTimeFinder finishedTimeFinder;
 
     public RaceStateImpl(PassAwareRaceLog raceLog) {
         this.raceLog = raceLog;
@@ -41,6 +43,7 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
         this.raceLog.addListener(raceLogListener);
 
         this.startTimeFinder = new StartTimeFinder(raceLog);
+        this.finishedTimeFinder = new FinishedTimeFinder(raceLog);
         this.statusAnalyzer = new RaceStatusAnalyzer(raceLog);
         updateStatus();
     }
@@ -89,6 +92,10 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
                 Collections.<Competitor> emptyList(), raceLog.getCurrentPassId(), RaceLogRaceStatus.SCHEDULED,
                 newStartTime);
         this.raceLog.add(event);
+    }
+
+    public TimePoint getFinishedTime() {
+        return finishedTimeFinder.getFinishedTime();
     }
 
     public void onRaceAborted(TimePoint eventTime) {

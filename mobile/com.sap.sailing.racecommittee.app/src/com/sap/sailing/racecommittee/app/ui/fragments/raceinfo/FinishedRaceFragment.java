@@ -49,18 +49,19 @@ public class FinishedRaceFragment extends RaceFragment {
 
         headerView.setText(raceFinishedText);
 
-        Date startTime = new Date(); // / TODO: get real start time
+        Date startTime = getRace().getState().getStartTime().asDate();
         if (startTime != null) {
             startTimeView.setText(getString(R.string.race_finished_start_time) + " " + getFormattedTime(startTime));
         }
 
         Date firstBoatFinishedViewTime = new Date();// / TODO: get real first boat finished time
         if (firstBoatFinishedViewTime != null) {
-            firstBoatFinishedView.setText(getString(R.string.race_first_boat_finished) + " "
-                    + getFormattedTime(firstBoatFinishedViewTime));
+            /*firstBoatFinishedView.setText(getString(R.string.race_first_boat_finished) + " "
+                    + getFormattedTime(firstBoatFinishedViewTime));*/
+            firstBoatFinishedView.setText("-");
         }
 
-        Date finishTime = new Date();// / TODO: get real finish time
+        Date finishTime = getRace().getState().getFinishedTime().asDate();
         if (finishTime != null) {
             finishTimeView.setText(getString(R.string.race_finished_end_time) + " " + getFormattedTime(finishTime));
         }
@@ -70,7 +71,7 @@ public class FinishedRaceFragment extends RaceFragment {
             String raceProtestStartTimeText = String.format(String.valueOf(getText(R.string.protest_start_time)),
                     getFormattedTime(protestStartTime));
             protestStartTimeView.setText(raceProtestStartTimeText);
-            protestStartTimeView.setVisibility(View.VISIBLE);
+            protestStartTimeView.setVisibility(View.GONE);      // TODO: show it
         }
     }
 

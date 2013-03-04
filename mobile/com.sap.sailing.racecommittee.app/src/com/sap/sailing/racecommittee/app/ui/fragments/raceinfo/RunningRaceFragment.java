@@ -6,6 +6,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
+import android.widget.TextView;
 
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.racecommittee.app.R;
@@ -21,6 +22,9 @@ public class RunningRaceFragment extends RaceFragment {
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+        
+        TextView countUp = (TextView) getView().findViewById(R.id.raceCountUp);
+        countUp.setText("Running");
         
         ImageButton blueFlagButton = (ImageButton) getView().findViewById(R.id.blueFlagButton);
         blueFlagButton.setOnClickListener(new OnClickListener() {
