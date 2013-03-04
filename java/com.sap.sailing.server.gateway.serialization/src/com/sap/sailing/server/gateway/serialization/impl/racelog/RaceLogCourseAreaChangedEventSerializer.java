@@ -27,7 +27,7 @@ public class RaceLogCourseAreaChangedEventSerializer extends BaseRaceLogEventSer
         RaceLogCourseAreaChangedEvent caChangedEvent = (RaceLogCourseAreaChangedEvent) object;
 
         JSONObject result = super.serialize(caChangedEvent);
-        result.put(FIELD_COURSE_AREA_ID, caChangedEvent.getCourseAreaId());
+        result.put(FIELD_COURSE_AREA_ID, caChangedEvent.getCourseAreaId().toString());
 
         return result;
     }
