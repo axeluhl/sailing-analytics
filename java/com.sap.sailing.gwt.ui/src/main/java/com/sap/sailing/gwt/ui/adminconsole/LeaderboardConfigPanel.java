@@ -892,6 +892,9 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
             if (!getSelectedLeaderboard().isMetaLeaderboard) {
                 trackedRacesCaptionPanel.setVisible(true);
             }
+            addRaceColumnsButton.setVisible(!getSelectedLeaderboard().isRegattaLeaderboard);
+            columnMoveUpButton.setVisible(!getSelectedLeaderboard().isRegattaLeaderboard);
+            columnMoveDownButton.setVisible(!getSelectedLeaderboard().isRegattaLeaderboard);
         } else {
             selectedLeaderBoardPanel.setVisible(false);
             trackedRacesCaptionPanel.setVisible(false);
