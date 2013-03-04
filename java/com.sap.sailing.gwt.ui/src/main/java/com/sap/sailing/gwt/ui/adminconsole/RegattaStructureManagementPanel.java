@@ -150,8 +150,10 @@ public class RegattaStructureManagementPanel extends SimplePanel implements Rega
 
     @Override
     public void onRegattaSelectionChange(List<RegattaIdentifier> selectedRegattas) {
-        RegattaIdentifier selectedRegatta = selectedRegattas.iterator().next();
-        if(selectedRegatta != null && regattaListComposite.getAllRegattas() != null) {
+        final RegattaIdentifier selectedRegatta;
+        if (selectedRegattas.iterator().hasNext()) {
+            selectedRegatta = selectedRegattas.iterator().next();
+        if (selectedRegatta != null && regattaListComposite.getAllRegattas() != null) {
             for(RegattaDTO regattaDTO: regattaListComposite.getAllRegattas()) {
                 if(regattaDTO.getRegattaIdentifier().equals(selectedRegatta)) {
                     regattaDetailsComposite.setRegatta(regattaDTO);
@@ -159,6 +161,7 @@ public class RegattaStructureManagementPanel extends SimplePanel implements Rega
                     break;
                 }
             }
+        }
         } else {
             regattaDetailsComposite.setRegatta(null);
             regattaDetailsComposite.setVisible(false);
