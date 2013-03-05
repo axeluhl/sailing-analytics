@@ -122,7 +122,9 @@ import com.sap.sailing.domain.persistence.MongoWindStoreFactory;
 import com.sap.sailing.domain.polarsheets.BoatAndWindSpeed;
 import com.sap.sailing.domain.polarsheets.PolarSheetGenerationWorker;
 import com.sap.sailing.domain.racelog.RaceLog;
+import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogEventFactory;
+import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
 import com.sap.sailing.domain.racelog.impl.PassAwareRaceLogImpl;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingArchiveConfiguration;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingConfiguration;
@@ -1100,6 +1102,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         
         RaceStatusAnalyzer raceStatusAnalyzer = new RaceStatusAnalyzer(passAwareRaceLog); 
         raceInfoDTO.lastStatus = raceStatusAnalyzer.getStatus();
+        
+        for(RaceLogEvent event : passAwareRaceLog.getFixes()){
+            if(event instanceof RaceLogFlagEvent){
+                raceInfoDTO.lastFlag = ((RaceLogFlagEvent) event).getUpperFlag();
+                raceInfoDTO.displayed = ((RaceLogFlagEvent) event).isDisplayed();
+            }
+        }
         
         
         

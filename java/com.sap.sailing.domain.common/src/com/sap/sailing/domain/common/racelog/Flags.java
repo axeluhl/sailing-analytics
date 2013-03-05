@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.racelog;
+package com.sap.sailing.domain.common.racelog;
 
 public enum Flags {
     NONE,

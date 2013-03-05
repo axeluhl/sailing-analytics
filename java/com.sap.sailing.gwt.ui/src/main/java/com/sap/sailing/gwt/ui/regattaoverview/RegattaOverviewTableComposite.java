@@ -41,7 +41,6 @@ public class RegattaOverviewTableComposite extends Composite {
     private final DateTimeFormat timeFormatter = DateTimeFormat.getFormat("HH:mm:ss");
 
     private final SailingServiceAsync sailingService;
-    private final ErrorReporter errorReporter;
     private final StringMessages stringMessages;
     private final String leaderboardName;
 
@@ -52,7 +51,6 @@ public class RegattaOverviewTableComposite extends Composite {
     public RegattaOverviewTableComposite(final SailingServiceAsync sailingService, ErrorReporter errorReporter,
             final StringMessages stringMessages, final String leaderboardName) {
         this.sailingService = sailingService;
-        this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
         this.leaderboardName = leaderboardName;
 
@@ -151,13 +149,15 @@ public class RegattaOverviewTableComposite extends Composite {
         TextColumn<RaceInfoDTO> raceStatusColumn = new TextColumn<RaceInfoDTO>() {
             @Override
             public String getValue(RaceInfoDTO raceInfo) {
+                if(raceInfo.lastStatus!=null)
                    return raceInfo.lastStatus.toString();
+                return "";
             }
         };
 
         Column<RaceInfoDTO, ImageResource> lastFlagColumn = new Column<RaceInfoDTO, ImageResource>(new ImageResourceCell()) {
             @Override
-            public ImageResource getValue(RaceInfoDTO object) {
+            public ImageResource getValue(RaceInfoDTO raceInfo) {
                 return resources.flagAP();
             }
         };

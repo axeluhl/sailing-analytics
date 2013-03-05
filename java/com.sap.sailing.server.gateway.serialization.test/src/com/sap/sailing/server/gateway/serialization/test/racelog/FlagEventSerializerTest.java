@@ -8,7 +8,7 @@ import org.json.simple.JSONObject;
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.racelog.Flags;
+import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;

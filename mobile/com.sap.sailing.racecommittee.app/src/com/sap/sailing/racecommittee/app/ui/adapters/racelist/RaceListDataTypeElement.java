@@ -7,7 +7,7 @@ import java.util.Locale;
 import android.app.Fragment;
 
 import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.racelog.RaceLogRaceStatus;
+import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 

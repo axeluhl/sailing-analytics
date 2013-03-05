@@ -7,10 +7,10 @@ import java.util.UUID;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.racelog.PassAwareRaceLog;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
-import com.sap.sailing.domain.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.racelog.impl.RaceLogPassChangeEventImpl;
 import com.sap.sailing.domain.racelog.impl.RaceLogRaceStatusEventImpl;
 import com.sap.sailing.domain.racelog.impl.RaceLogStartTimeEventImpl;

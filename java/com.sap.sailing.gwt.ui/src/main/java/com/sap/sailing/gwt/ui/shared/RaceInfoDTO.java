@@ -2,10 +2,10 @@ package com.sap.sailing.gwt.ui.shared;
 
 import java.util.Date;
 
-import com.sap.sailing.domain.racelog.Flags;
+import com.sap.sailing.domain.common.racelog.Flags;
+import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
-import com.sap.sailing.domain.racelog.RaceLogRaceStatus;
 
 public class RaceInfoDTO implements IsSerializable {
     public String raceName;
