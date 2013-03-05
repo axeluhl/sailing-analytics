@@ -60,3 +60,13 @@ http://traclive.dk/events/event_20120905_erEuropean/jsonservice.php
 
 RC44 Sweden Cup:
 http://germanmaster.traclive.dk/events/event_20110815_RCSwedenCu/jsonservice.php
+
+Extreme Sailing Series 2013:
+Traclive
+http://traclive.dk/events/event_20130302_ESSMuscat/jsonservice.php
+Live: tcp://traclive.dk:44005
+Stored: tcp://traclive.dk:44015
+LocalServer
+http://192.168.1.46/events/event_20130302_ESSMuscat/jsonservice.php
+Live: tcp://192.168.1.46:4400
+Stored: tcp://192.168.1.46:4401

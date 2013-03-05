@@ -1,0 +1,63 @@
+package com.sap.sailing.gwt.ui.leaderboardedit;
+
+import java.util.Arrays;
+
+import com.google.gwt.user.client.ui.DoubleBox;
+import com.google.gwt.user.client.ui.Grid;
+import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.MaxPointsReason;
+import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.gwt.ui.client.DataEntryDialog;
+import com.sap.sailing.gwt.ui.client.StringMessages;
+
+public class EditScoreDialog extends DataEntryDialog<Pair<MaxPointsReason, Double>> {
+    private final ListBox maxPointsBox;
+    private final DoubleBox netPointsBox;
+    private final StringMessages stringMessages;
+    
+    public EditScoreDialog(StringMessages stringMessages, String competitorName, String raceColumnName,
+            MaxPointsReason oldMaxPointsReason, Double oldNetPoints, DialogCallback<Pair<MaxPointsReason, Double>> callback) {
+        super(stringMessages.correctScore(), stringMessages.correctScoreFor(competitorName, raceColumnName),
+                stringMessages.ok(), stringMessages.cancel(), /* validator */ null, /* animationEnabled */ true,
+                callback);
+        this.stringMessages = stringMessages;
+        maxPointsBox = createListBox(/* isMultipleSelect */ false);
+        maxPointsBox.addItem("");
+        for (MaxPointsReason maxPointsReason : MaxPointsReason.values()) {
+            maxPointsBox.addItem(maxPointsReason.name());
+        }
+        if (oldMaxPointsReason == null) {
+            maxPointsBox.setSelectedIndex(0);
+        } else {
+            maxPointsBox.setSelectedIndex(1+Arrays.asList(MaxPointsReason.values()).indexOf(oldMaxPointsReason));
+        }
+        netPointsBox = createDoubleBox(/* visibleLength */ 5);
+        if (oldNetPoints != null) {
+            netPointsBox.setValue(oldNetPoints);
+        }
+    }
+
+    @Override
+    protected Pair<MaxPointsReason, Double> getResult() {
+        final MaxPointsReason maxPointsReason;
+        if ("".equals(maxPointsBox.getItemText(maxPointsBox.getSelectedIndex()))) {
+            maxPointsReason = null;
+        } else {
+            maxPointsReason = MaxPointsReason.valueOf(maxPointsBox.getItemText(maxPointsBox.getSelectedIndex()));
+        }
+        final Double netScore = netPointsBox.getValue();
+        return new Pair<MaxPointsReason, Double>(maxPointsReason, netScore);
+    }
+
+    @Override
+    protected Widget getAdditionalWidget() {
+        Grid grid = new Grid(2, 2);
+        grid.setWidget(0, 0, new Label(stringMessages.penaltyOrRedress()));
+        grid.setWidget(0, 1, maxPointsBox);
+        grid.setWidget(1, 0, new Label(stringMessages.netScore()));
+        grid.setWidget(1, 1, netPointsBox);
+        return grid;
+    }
+}
