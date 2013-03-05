@@ -100,7 +100,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
 
     public DBCollection getWindTrackCollection() {
         DBCollection result = database.getCollection(CollectionNames.WIND_TRACKS.name());
-        result.ensureIndex(new BasicDBObject(FieldNames.EVENT_NAME.name(), null));
+        result.ensureIndex(new BasicDBObject(FieldNames.REGATTA_NAME.name(), null));
         return result;
     }
 
