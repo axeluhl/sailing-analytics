@@ -4,18 +4,18 @@ import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.user.client.Window;
 import com.sap.sailing.gwt.ui.shared.media.MediaTrack;
 
-public abstract class PopupWindowPlayer extends AbstractMediaPlayer {
+public abstract class PopupWindowPlayer extends AbstractMediaPlayer implements VideoPlayer {
 
     interface PopupCloseListener {
         void popupClosed();
     }
 
     private final JavaScriptObject playerWindow;
-    private final PopupCloseListener popupCloseListener;
+    private final PopupCloseListener popupCloseHandler;
 
-    protected PopupWindowPlayer(MediaTrack mediaTrack, PopupCloseListener popupCloseListener) {
-        super(mediaTrack);
-        this.popupCloseListener = popupCloseListener;
+    protected PopupWindowPlayer(MediaTrack mediaTrack, MediaEventHandler videoEventHandler, PopupCloseListener popupCloseListener) {
+        super(mediaTrack, videoEventHandler);
+        this.popupCloseHandler = popupCloseListener;
         
         String playerWindowUrl = getPlayerWindowUrl();  
         
@@ -48,6 +48,9 @@ public abstract class PopupWindowPlayer extends AbstractMediaPlayer {
                 window.onbeforeunload = function() {
                         that.@com.sap.sailing.gwt.ui.raceboard.PopupWindowPlayer::onClosingPopup()();
                 }
+                window.onbeforeunload = function() {
+                        that.@com.sap.sailing.gwt.ui.raceboard.AbstractMediaPlayer::onMediaTimeUpdate()();
+                }
                 window.parent.deferredPlayState = {
                     isDeferredPlaying: false,
                     isDeferredMuted: true,
@@ -58,9 +61,7 @@ public abstract class PopupWindowPlayer extends AbstractMediaPlayer {
 
     private void onClosingPopup() {
         pause();
-        if (popupCloseListener != null) {
-            popupCloseListener.popupClosed();
-        }
+        popupCloseHandler.popupClosed();
     }
 
     @Override
@@ -86,7 +87,7 @@ public abstract class PopupWindowPlayer extends AbstractMediaPlayer {
     }-*/;
 
     @Override
-    public native void setTime(double mediaTime) /*-{
+    public native void setCurrentMediaTime(double mediaTime) /*-{
                 var window = this.@com.sap.sailing.gwt.ui.raceboard.PopupWindowPlayer::playerWindow; 
                 if (!window.parent.videoPlayer) {
                         window.parent.deferredPlayState.deferredMediaTime = mediaTime;
@@ -127,7 +128,7 @@ public abstract class PopupWindowPlayer extends AbstractMediaPlayer {
     }-*/;
 
     @Override
-    public native double getTime() /*-{
+    public native double getCurrentMediaTime() /*-{
                 var window = this.@com.sap.sailing.gwt.ui.raceboard.PopupWindowPlayer::playerWindow;
                 if (!window.parent.videoPlayer) {
                         return window.parent.deferredPlayState.deferredMediaTime;

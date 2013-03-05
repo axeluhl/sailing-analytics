@@ -55,6 +55,9 @@ public class VideoPopupWindow extends AbstractPopupWindow implements ContextMenu
 		videoElement.addEventListener('loadedmetadata', function() {
 			that.@com.sap.sailing.gwt.ui.video.VideoPopupWindow::loadedmetadata()();
 		});
+                videoElement.addEventListener('timeupdate', function() {
+                    that.@com.sap.sailing.gwt.ui.raceboard.AbstractMediaPlayer::onMediaTimeUpdate()();
+                });
                 videoElement.addEventListener('canplay', function() { //see http://www.w3schools.com/tags/av_event_canplay.asp
                         var deferredPlayState = $wnd.deferredPlayState
                         if (deferredPlayState && !$wnd.videoPlayer) {

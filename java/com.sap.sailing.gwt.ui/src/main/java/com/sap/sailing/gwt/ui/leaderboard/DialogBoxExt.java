@@ -26,7 +26,11 @@ public class DialogBoxExt extends DialogBox {
      * @param closeDialogBox
      */
     public DialogBoxExt(Widget closeDialogBox) {
-        super();
+        this(closeDialogBox, true);
+    }
+    
+    public DialogBoxExt(Widget closeDialogBox, boolean isModal) {
+        super(false, isModal);
         assert closeDialogBox != null;
         captionPanel = new HorizontalPanel();
         closeWidget = closeDialogBox;

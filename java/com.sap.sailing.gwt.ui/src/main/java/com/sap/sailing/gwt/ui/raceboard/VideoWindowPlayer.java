@@ -5,8 +5,8 @@ import com.sap.sailing.gwt.ui.shared.media.MediaTrack;
 
 public class VideoWindowPlayer extends PopupWindowPlayer {
     
-    public VideoWindowPlayer(MediaTrack mediaTrack, PopupCloseListener popCloseListener) {
-        super(mediaTrack, popCloseListener);
+    public VideoWindowPlayer(MediaTrack mediaTrack, MediaEventHandler videoEventHandler , PopupCloseListener popCloseListener) {
+        super(mediaTrack, videoEventHandler, popCloseListener);
     }
 
     @Override

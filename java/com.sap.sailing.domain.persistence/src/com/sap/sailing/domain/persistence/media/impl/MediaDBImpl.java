@@ -153,6 +153,22 @@ public class MediaDBImpl implements MediaDB {
     }
 
     @Override
+    public void saveChanges(String dbId, String title, String url, Date startTime, int durationInMillis) {
+        BasicDBObject updateQuery = new BasicDBObject();
+        updateQuery.append(DbNames.Fields._id.name(), new ObjectId(dbId));
+
+        BasicDBObject updateObject = new BasicDBObject();
+        updateObject.append(DbNames.Fields.MEDIA_TITLE.name(), title);
+        updateObject.append(DbNames.Fields.MEDIA_URL.name(), url);
+        updateObject.append(DbNames.Fields.STARTTIME.name(), startTime);
+        updateObject.append(DbNames.Fields.DURATION_IN_MILLIS.name(), durationInMillis);
+        
+        BasicDBObject updateCommand = new BasicDBObject("$set", updateObject);
+
+        getVideoCollection().update(updateQuery, updateCommand);
+    }
+    
+    @Override
     public Collection<DBMediaTrack> queryOverlappingMediaTracks(Date rangeStart, Date rangeEnd) {
         if ((rangeStart != null) && (rangeEnd != null)) {
             BasicDBObject startTimeCondition = new BasicDBObject();
@@ -181,5 +197,5 @@ public class MediaDBImpl implements MediaDB {
             return Collections.emptyList();
         }
     }
-    
+
 }

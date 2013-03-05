@@ -102,6 +102,8 @@ public class RaceBoardPanel extends FormPanel implements RegattaDisplayer, RaceS
     private final AsyncActionsExecutor asyncActionsExecutor;
     
     private final RaceTimesInfoProvider raceTimesInfoProvider;
+    
+    private final  UserDTO user;
 
     public RaceBoardPanel(SailingServiceAsync sailingService, MediaServiceAsync mediaService, UserDTO theUser, Timer timer,
             RaceSelectionProvider theRaceSelectionProvider, String leaderboardName, String leaderboardGroupName,
@@ -109,6 +111,7 @@ public class RaceBoardPanel extends FormPanel implements RegattaDisplayer, RaceS
             RaceBoardViewModes viewMode, RaceTimesInfoProvider raceTimesInfoProvider) {
         this.sailingService = sailingService;
         this.mediaService = mediaService;
+        this.user = theUser; 
         this.stringMessages = stringMessages;
         this.raceSelectionProvider = theRaceSelectionProvider;
         this.raceTimesInfoProvider = raceTimesInfoProvider;
@@ -178,8 +181,8 @@ public class RaceBoardPanel extends FormPanel implements RegattaDisplayer, RaceS
     }
 
     private void addMediaSelectorToNavigationMenu() {
-        MediaSelector mediaSelector = new MediaSelector(errorReporter);
-        raceTimesInfoProvider.addRaceTimesInfoProviderListener(mediaSelector);
+        MediaSelector mediaSelector = new MediaSelector(selectedRaceIdentifier, raceTimesInfoProvider, mediaService, errorReporter, this.user);
+//        raceTimesInfoProvider.addRaceTimesInfoProviderListener(mediaSelector);
         timer.addPlayStateListener(mediaSelector);
         timer.addTimeListener(mediaSelector);
         mediaService.getMediaTracksForRace(selectedRaceIdentifier, mediaSelector);

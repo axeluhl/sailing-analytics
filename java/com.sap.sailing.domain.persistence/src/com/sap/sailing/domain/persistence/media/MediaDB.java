@@ -28,6 +28,8 @@ public interface MediaDB {
 
     void updateDuration(String dbId, int durationInMillis);
 
+    void saveChanges(String dbId, String title, String url, Date startTime, int durationInMillis);
+    
     Collection<DBMediaTrack> queryOverlappingMediaTracks(Date rangeStart, Date rangeEnd);
 
 }

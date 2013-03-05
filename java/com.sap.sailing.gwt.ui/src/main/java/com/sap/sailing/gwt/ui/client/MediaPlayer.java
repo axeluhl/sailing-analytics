@@ -18,9 +18,9 @@ public interface MediaPlayer {
     
     double getDuration();
     
-    void setTime(double mediaTime);
+    void setCurrentMediaTime(double mediaTime);
     
-    double getTime();
+    double getCurrentMediaTime();
     
     void setPlaybackSpeed(double newPlaySpeedFactor);
 

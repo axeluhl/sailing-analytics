@@ -119,4 +119,9 @@ public class MediaServiceImpl extends RemoteServiceServlet implements MediaServi
     public void updateDuration(MediaTrack mediaTrack) {
         mediaDB().updateDuration(mediaTrack.dbId, mediaTrack.durationInMillis);
     }
+
+    @Override
+    public void saveChanges(MediaTrack mediaTrack) {
+        mediaDB().saveChanges(mediaTrack.dbId, mediaTrack.title, mediaTrack.url, mediaTrack.startTime, mediaTrack.durationInMillis);
+    }
 }
