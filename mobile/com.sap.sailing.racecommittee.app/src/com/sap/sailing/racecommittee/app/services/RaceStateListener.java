@@ -5,6 +5,7 @@ import com.sap.sailing.racecommittee.app.domain.state.RaceState;
 import com.sap.sailing.racecommittee.app.domain.state.RaceStateChangedListener;
 
 public class RaceStateListener implements RaceStateChangedListener {
+    @SuppressWarnings("unused")
     private final static String TAG = RaceStateListener.class.getName();
     
     private final RaceStateService service;

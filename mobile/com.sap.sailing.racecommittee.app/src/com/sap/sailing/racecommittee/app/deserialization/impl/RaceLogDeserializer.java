@@ -5,7 +5,7 @@ import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
-import com.sap.sailing.racecommittee.domain.racelog.impl.PassAwareRaceLogImpl;
+import com.sap.sailing.domain.racelog.impl.PassAwareRaceLogImpl;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.Helpers;

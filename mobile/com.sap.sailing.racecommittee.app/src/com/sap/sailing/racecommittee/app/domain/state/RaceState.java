@@ -1,8 +1,8 @@
 package com.sap.sailing.racecommittee.app.domain.state;
 
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.racelog.RaceLog;
-import com.sap.sailing.domain.racelog.RaceLogRaceStatus;
 
 public interface RaceState {
 

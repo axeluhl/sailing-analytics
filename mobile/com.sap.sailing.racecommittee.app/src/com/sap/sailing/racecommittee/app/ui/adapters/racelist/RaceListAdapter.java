@@ -17,7 +17,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.sap.sailing.domain.racelog.RaceLogRaceStatus;
+import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.comparators.RaceListDataTypeElementComparator;
 import com.sap.sailing.racecommittee.app.ui.comparators.RaceListDataTypeTitleComparator;

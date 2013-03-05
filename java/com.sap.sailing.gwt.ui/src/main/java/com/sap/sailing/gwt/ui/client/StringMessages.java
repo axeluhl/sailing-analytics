@@ -513,4 +513,6 @@ public interface StringMessages extends Messages {
     String totalDistanceTraveledTooltip();
     String totalAverageSpeedOverGround();
     String totalAverageSpeedOverGroundTooltip();
+    String noStarttimeAnnouncedYet();
+    String lastFlag();
 }

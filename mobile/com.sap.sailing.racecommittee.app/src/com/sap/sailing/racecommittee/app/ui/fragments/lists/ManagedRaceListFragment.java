@@ -17,7 +17,7 @@ import android.widget.ListView;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
-import com.sap.sailing.domain.racelog.RaceLogRaceStatus;
+import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.state.RaceState;

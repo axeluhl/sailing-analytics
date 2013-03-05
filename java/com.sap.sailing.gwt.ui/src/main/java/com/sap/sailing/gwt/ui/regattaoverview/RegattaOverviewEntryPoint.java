@@ -24,7 +24,7 @@ public class RegattaOverviewEntryPoint extends AbstractEntryPoint  {
             RootPanel.getBodyElement().getStyle().setPaddingTop(20, Unit.PX);
         }
         String leaderBoardName = Window.Location.getParameter("leaderboardName");
-        RegattaOverviewPanel regattaOverviewPanel = new RegattaOverviewPanel(sailingService, this, stringMessages, leaderBoardName);
+        RegattaOverviewTableComposite regattaOverviewPanel = new RegattaOverviewTableComposite(sailingService, this, stringMessages, leaderBoardName);
         rootPanel.add(regattaOverviewPanel);
     }
     

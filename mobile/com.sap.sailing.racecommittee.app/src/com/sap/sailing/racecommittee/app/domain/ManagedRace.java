@@ -2,8 +2,8 @@ package com.sap.sailing.racecommittee.app.domain;
 
 import com.sap.sailing.domain.common.Named;
 import com.sap.sailing.domain.common.WithID;
+import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.racelog.RaceLog;
-import com.sap.sailing.domain.racelog.RaceLogRaceStatus;
 import com.sap.sailing.racecommittee.app.domain.state.RaceState;
 
 public interface ManagedRace extends ManagedRaceIdentifier, Named, WithID {
