@@ -85,7 +85,8 @@ public class ESS40ResultsAsCSVServlet extends AbstractCSVHttpServlet {
                             }
     
                             List<Object> csvLine = new ArrayList<Object>();
-                            csvLine.add(competitor.getName());
+                            String competitorDisplayName = leaderboard.getDisplayName(competitor);
+                            csvLine.add(competitorDisplayName != null ? competitorDisplayName : competitor.getName());
                             csv.add(csvLine);
     
                             // TODO: we should only export complete races where all competitors have valid totalPoints for a race
@@ -117,7 +118,8 @@ public class ESS40ResultsAsCSVServlet extends AbstractCSVHttpServlet {
                     for (Competitor competitor : competitorsFromBestToWorst) {
                         if (!suppressedCompetitors.contains(competitor)) {
                             List<Object> csvLine = new ArrayList<Object>();
-                            csvLine.add(competitor.getName());
+                            String competitorDisplayName = leaderboard.getDisplayName(competitor);
+                            csvLine.add(competitorDisplayName != null ? competitorDisplayName : competitor.getName());
                             csv.add(csvLine);
                         }
                     }
