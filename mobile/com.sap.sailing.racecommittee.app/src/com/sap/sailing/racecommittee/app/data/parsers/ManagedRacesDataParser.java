@@ -13,12 +13,12 @@ import com.sap.sailing.domain.base.racegroup.RaceCell;
 import com.sap.sailing.domain.base.racegroup.RaceGroup;
 import com.sap.sailing.domain.base.racegroup.RaceRow;
 import com.sap.sailing.domain.base.racegroup.SeriesWithRows;
+import com.sap.sailing.domain.racelog.PassAwareRaceLog;
+import com.sap.sailing.domain.racelog.impl.PassAwareRaceLogImpl;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.impl.FleetIdentifierImpl;
 import com.sap.sailing.racecommittee.app.domain.impl.ManagedRaceIdentifierImpl;
 import com.sap.sailing.racecommittee.app.domain.impl.ManagedRaceImpl;
-import com.sap.sailing.racecommittee.domain.racelog.PassAwareRaceLog;
-import com.sap.sailing.racecommittee.domain.racelog.impl.PassAwareRaceLogImpl;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
 

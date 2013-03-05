@@ -69,7 +69,7 @@ public class RaceColumnDTO extends NamedDTO implements IsSerializable {
         return explicitFactor;
     }
     
-    public RaceInfoDTO getRaceLog(FleetDTO fleet){
+    public RaceInfoDTO getRaceInfo(FleetDTO fleet){
         //TODO handle non-existence
         return raceInfoPerFleet.get(fleet);
     }

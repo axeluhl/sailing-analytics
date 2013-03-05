@@ -16,15 +16,15 @@ import com.sap.sailing.domain.base.racegroup.RaceGroup;
 import com.sap.sailing.domain.base.racegroup.SeriesWithRows;
 import com.sap.sailing.domain.base.racegroup.impl.RaceGroupImpl;
 import com.sap.sailing.domain.base.racegroup.impl.SeriesWithRowsImpl;
+import com.sap.sailing.domain.racelog.PassAwareRaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEventFactory;
 import com.sap.sailing.domain.racelog.RaceLogRaceStatus;
+import com.sap.sailing.domain.racelog.impl.PassAwareRaceLogImpl;
 import com.sap.sailing.domain.racelog.impl.RaceLogEventFactoryImpl;
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.impl.ManagedRaceIdentifierImpl;
 import com.sap.sailing.racecommittee.app.domain.impl.ManagedRaceImpl;
-import com.sap.sailing.racecommittee.domain.racelog.PassAwareRaceLog;
-import com.sap.sailing.racecommittee.domain.racelog.impl.PassAwareRaceLogImpl;
 
 public class OfflineDataManager extends DataManager {
 	

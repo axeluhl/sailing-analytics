@@ -7,6 +7,7 @@ import java.util.UUID;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.racelog.PassAwareRaceLog;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogRaceStatus;
@@ -19,7 +20,6 @@ import com.sap.sailing.racecommittee.app.domain.state.RaceState;
 import com.sap.sailing.racecommittee.app.domain.state.RaceStateChangedListener;
 import com.sap.sailing.racecommittee.app.domain.state.StartProcedure;
 import com.sap.sailing.racecommittee.app.domain.state.impl.analyzers.FinishedTimeFinder;
-import com.sap.sailing.racecommittee.domain.racelog.PassAwareRaceLog;
 import com.sap.sailing.racecommittee.domain.state.impl.analyzers.RaceStatusAnalyzer;
 import com.sap.sailing.racecommittee.domain.state.impl.analyzers.StartTimeFinder;
 

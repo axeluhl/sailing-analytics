@@ -1,12 +1,11 @@
-package com.sap.sailing.racecommittee.domain.racelog.impl;
+package com.sap.sailing.domain.racelog.impl;
 
 import java.util.NavigableSet;
 
+import com.sap.sailing.domain.racelog.PassAwareRaceLog;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
-import com.sap.sailing.domain.racelog.impl.RaceLogImpl;
 import com.sap.sailing.domain.tracking.impl.PartialNavigableSetView;
-import com.sap.sailing.racecommittee.domain.racelog.PassAwareRaceLog;
 
 public class PassAwareRaceLogImpl extends RaceLogImpl implements PassAwareRaceLog {
     // private static final String TAG = PassAwareRaceLogImpl.class.getName();
