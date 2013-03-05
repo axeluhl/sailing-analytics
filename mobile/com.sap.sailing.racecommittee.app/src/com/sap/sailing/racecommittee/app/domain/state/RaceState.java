@@ -44,12 +44,10 @@ public interface RaceState {
     /**
      * Sets the current race's start time
      * 
-     * @param eventTime
-     *            time of this event.
      * @param newStartTime
      *            to be set.
      */
-    void setStartTime(TimePoint evenTime, TimePoint newStartTime);
+    void setStartTime(TimePoint newStartTime);
 
     /**
      * Updates the race's status.

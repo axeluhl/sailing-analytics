@@ -22,7 +22,7 @@ public class ManagedRaceImpl implements ManagedRace {
 	private RaceState state;
 	
 	public ManagedRaceImpl(ManagedRaceIdentifier identifier, PassAwareRaceLog raceLog) {
-		this(identifier, new RaceStateImpl(raceLog));
+		this(identifier, new RaceStateImpl(raceLog, null));
 	}
 	
 	public ManagedRaceImpl(

@@ -7,10 +7,12 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.sap.sailing.domain.base.Timed;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogEventVisitor;
 import com.sap.sailing.domain.tracking.impl.TrackImpl;
+import com.sap.sailing.util.impl.ArrayListNavigableSet;
 
 public class RaceLogImpl extends TrackImpl<RaceLogEvent> implements RaceLog {
 
@@ -21,7 +23,7 @@ public class RaceLogImpl extends TrackImpl<RaceLogEvent> implements RaceLog {
     private final static Logger logger = Logger.getLogger(RaceLogImpl.class.getName());
 
     public RaceLogImpl(String nameForReadWriteLock) {
-        super(nameForReadWriteLock);
+        super(new ArrayListNavigableSet<Timed>(RaceLogEventComparator.INSTANCE), nameForReadWriteLock);
         listeners = new HashSet<RaceLogEventVisitor>();
     }
     

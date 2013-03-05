@@ -4,7 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
-import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.SetTimeRaceFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.SetStartTimeRaceFragment;
 
 public class AppConstants {
 
@@ -30,7 +30,7 @@ public class AppConstants {
     private final static String PREFERENCE_SENDING_ACTIVE = "sendingActivePref";
     private final static String PREFERENCE_RACE_FINISHING_TIME_FRAME = "edittextRaceTimeFrameAfterFinish";
 
-    public static final String RESET_TIME_FRAGMENT_IS_RESET = SetTimeRaceFragment.class.getName() + ".isReset";
+    public static final String RESET_TIME_FRAGMENT_IS_RESET = SetStartTimeRaceFragment.class.getName() + ".isReset";
 
     public static final int DefaultStartTimeMinuteOffset = 10;
 
