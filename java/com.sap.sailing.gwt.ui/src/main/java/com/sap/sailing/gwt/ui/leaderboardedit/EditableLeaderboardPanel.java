@@ -55,6 +55,7 @@ import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
 import com.sap.sailing.gwt.ui.adminconsole.AdminConsoleTableResources;
 import com.sap.sailing.gwt.ui.client.Collator;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
+import com.sap.sailing.gwt.ui.client.DataEntryDialog.DialogCallback;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -364,10 +365,10 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
 
     private class NetPointsEditCellProvider extends AbstractRowUpdateWhiteboardProducerThatHasCell<LeaderboardRowDTO, String> {
         private final EditTextCell netPointsEditCell;
-        private final String raceName;
+        private final String raceColumnName;
 
-        protected NetPointsEditCellProvider(String raceName) {
-            this.raceName = raceName;
+        protected NetPointsEditCellProvider(String raceColumnName) {
+            this.raceColumnName = raceColumnName;
             netPointsEditCell = new EditTextCell(new SafeHtmlRenderer<String>() {
                 @Override
                 public void render(String netPointsAsString, SafeHtmlBuilder html) {
@@ -401,7 +402,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
         }
 
         private boolean isNetPointsCorrected() {
-            LeaderboardEntryDTO leaderboardEntryDTO = getCurrentlyRendering().fieldsByRaceColumnName.get(raceName);
+            LeaderboardEntryDTO leaderboardEntryDTO = getCurrentlyRendering().fieldsByRaceColumnName.get(raceColumnName);
             return leaderboardEntryDTO != null && leaderboardEntryDTO.netPointsCorrected;
         }
 
@@ -419,7 +420,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                             EditableLeaderboardPanel.this.getData());
                     getWhiteboardOwner().whiteboardProduced(whiteboard);
                     getBusyIndicator().setBusy(true);
-                    getSailingService().updateLeaderboardScoreCorrection(getLeaderboardName(), row.competitor.id, raceName,
+                    getSailingService().updateLeaderboardScoreCorrection(getLeaderboardName(), row.competitor.id, raceColumnName,
                             value == null || value.trim().length() == 0 ? null : Double.valueOf(value.trim()), getLeaderboardDisplayDate(),
                                     new AsyncCallback<Triple<Double, Double, Boolean>>() {
                         @Override
@@ -427,20 +428,20 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                             getBusyIndicator().setBusy(false);
                             getErrorReporter().reportError("Error trying to update score correction for competitor "+
                                     row.competitor.name+" in leaderboard "+getLeaderboardName()+
-                                    " for race "+raceName+": "+t.getMessage()+
+                                    " for race "+raceColumnName+": "+t.getMessage()+
                                     "\nYou may have to refresh your view.");
                         }
 
                         @Override
                         public void onSuccess(Triple<Double, Double, Boolean> newNetAndTotalPointsAndIsCorrected) {
                             getBusyIndicator().setBusy(false);
-                            final LeaderboardEntryDTO leaderboardEntryDTO = row.fieldsByRaceColumnName.get(raceName);
+                            final LeaderboardEntryDTO leaderboardEntryDTO = row.fieldsByRaceColumnName.get(raceColumnName);
                             leaderboardEntryDTO.netPoints = value == null || value.length() == 0 ? newNetAndTotalPointsAndIsCorrected
                                     .getA() : Double.valueOf(value.trim());
-                                    leaderboardEntryDTO.totalPoints = newNetAndTotalPointsAndIsCorrected.getB();
-                                    leaderboardEntryDTO.netPointsCorrected = newNetAndTotalPointsAndIsCorrected.getC();
-                                    getCell().setViewData(row, null); // ensure that getValue() is called again
-                                    whiteboard.setObjectWithWhichToUpdateRow(row);
+                            leaderboardEntryDTO.totalPoints = newNetAndTotalPointsAndIsCorrected.getB();
+                            leaderboardEntryDTO.netPointsCorrected = newNetAndTotalPointsAndIsCorrected.getC();
+                            getCell().setViewData(row, null); // ensure that getValue() is called again
+                            whiteboard.setObjectWithWhichToUpdateRow(row);
                         }
                     });
                 }
@@ -449,12 +450,107 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
 
         @Override
         public String getValue(LeaderboardRowDTO object) {
-            LeaderboardEntryDTO leaderboardEntryDTO = object.fieldsByRaceColumnName.get(raceName);
+            LeaderboardEntryDTO leaderboardEntryDTO = object.fieldsByRaceColumnName.get(raceColumnName);
             String result = "n/a";
             if (leaderboardEntryDTO != null && leaderboardEntryDTO.netPoints != null) {
                 result = scoreFormat.format(leaderboardEntryDTO.netPoints);
             }
             return result;
+        }
+    }
+    
+    private class MaxPointsReasonAndNetPointsEditButtonCell extends AbstractRowUpdateWhiteboardProducerThatHasCell<LeaderboardRowDTO, String> {
+        private final ButtonCell cell = new ButtonCell();
+        private final String raceColumnName;
+        private final StringMessages stringMessages;
+        private final MaxPointsDropDownCellProvider maxPointsDropDownCellProvider;
+        private final NetPointsEditCellProvider netPointsEditCellProvider;
+        
+        /**
+         * @param maxPointsDropDownCellProvider will have its cell's view data reset after a successful update to force call to getValue
+         * @param netPointsEditCellProvider will have its cell's view data reset after a successful update to force call to getValue
+         */
+        public MaxPointsReasonAndNetPointsEditButtonCell(StringMessages stringMessages, String raceColumnName,
+                MaxPointsDropDownCellProvider maxPointsDropDownCellProvider,
+                NetPointsEditCellProvider netPointsEditCellProvider) {
+            this.stringMessages = stringMessages;
+            this.raceColumnName = raceColumnName;
+            this.maxPointsDropDownCellProvider = maxPointsDropDownCellProvider;
+            this.netPointsEditCellProvider = netPointsEditCellProvider;
+        }
+
+        @Override
+        public ButtonCell getCell() {
+            return cell;
+        }
+
+        @Override
+        public FieldUpdater<LeaderboardRowDTO, String> getFieldUpdater() {
+            return new FieldUpdater<LeaderboardRowDTO, String>() {
+                @Override
+                public void update(int index, final LeaderboardRowDTO row, final String value) {
+                    final RowUpdateWhiteboard<LeaderboardRowDTO> whiteboard = new RowUpdateWhiteboard<LeaderboardRowDTO>(
+                            EditableLeaderboardPanel.this.getData());
+                    getWhiteboardOwner().whiteboardProduced(whiteboard);
+                    new EditScoreDialog(stringMessages, row.competitor.name, raceColumnName,
+                            row.fieldsByRaceColumnName.get(raceColumnName).reasonForMaxPoints,
+                            row.fieldsByRaceColumnName.get(raceColumnName).netPoints, new DialogCallback<Pair<MaxPointsReason, Double>>() {
+                        @Override
+                        public void ok(final Pair<MaxPointsReason, Double> editedObject) {
+                            getBusyIndicator().setBusy(true);
+                            getSailingService().updateLeaderboardScoreCorrection(getLeaderboardName(), row.competitor.id, raceColumnName,
+                                    editedObject.getB(), getLeaderboardDisplayDate(),
+                                            new AsyncCallback<Triple<Double, Double, Boolean>>() {
+                                @Override
+                                public void onFailure(Throwable t) {
+                                    getBusyIndicator().setBusy(false);
+                                    getErrorReporter().reportError("Error trying to update score correction for competitor "+
+                                            row.competitor.name+" in leaderboard "+getLeaderboardName()+
+                                            " for race "+raceColumnName+": "+t.getMessage()+
+                                            "\nYou may have to refresh your view.");
+                                }
+
+                                @Override
+                                public void onSuccess(Triple<Double, Double, Boolean> newNetAndTotalPointsAndIsCorrected) {
+                                    getSailingService().updateLeaderboardMaxPointsReason(getLeaderboardName(), row.competitor.id, raceColumnName,
+                                            editedObject.getA(), getLeaderboardDisplayDate(),
+                                                    new AsyncCallback<Triple<Double, Double, Boolean>>() {
+                                        @Override
+                                        public void onFailure(Throwable t) {
+                                            getBusyIndicator().setBusy(false);
+                                            getErrorReporter().reportError("Error trying to update score correction for competitor "+
+                                                    row.competitor.name+" in leaderboard "+getLeaderboardName()+
+                                                    " for race "+raceColumnName+": "+t.getMessage()+
+                                                    "\nYou may have to refresh your view.");
+                                        }
+
+                                        @Override
+                                        public void onSuccess(Triple<Double, Double, Boolean> newNetAndTotalPointsAndIsCorrected) {
+                                            getBusyIndicator().setBusy(false);
+                                            final LeaderboardEntryDTO leaderboardEntryDTO = row.fieldsByRaceColumnName.get(raceColumnName);
+                                            leaderboardEntryDTO.reasonForMaxPoints = editedObject.getA();
+                                            leaderboardEntryDTO.netPoints = newNetAndTotalPointsAndIsCorrected.getA();
+                                            leaderboardEntryDTO.totalPoints = newNetAndTotalPointsAndIsCorrected.getB();
+                                            leaderboardEntryDTO.netPointsCorrected = newNetAndTotalPointsAndIsCorrected.getC();
+                                            maxPointsDropDownCellProvider.getCell().setViewData(row, null);
+                                            netPointsEditCellProvider.getCell().setViewData(row, null);
+                                            whiteboard.setObjectWithWhichToUpdateRow(row);
+                                        }
+                                    });
+                                }
+                            });
+                        }
+
+                        @Override
+                        public void cancel() {}
+                    }).show();
+                }
+            };
+        }
+
+        @Override
+        public String getValue(LeaderboardRowDTO object) {
+            return getStringMessages().edit();
         }
     }
 
@@ -776,8 +872,12 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
     private List<RowUpdateWhiteboardProducerThatAlsoHasCell<LeaderboardRowDTO, ?>> getRaceColumnCellList(RaceColumnDTO race) {
         List<RowUpdateWhiteboardProducerThatAlsoHasCell<LeaderboardRowDTO, ?>> list =
                 new ArrayList<RowUpdateWhiteboardProducerThatAlsoHasCell<LeaderboardRowDTO, ?>>();
-        list.add(new MaxPointsDropDownCellProvider(race.getRaceColumnName()));
-        list.add(new NetPointsEditCellProvider(race.getRaceColumnName()));
+        final MaxPointsDropDownCellProvider maxPointsDropDownCellProvider = new MaxPointsDropDownCellProvider(race.getRaceColumnName());
+        list.add(maxPointsDropDownCellProvider);
+        final NetPointsEditCellProvider netPointsEditCellProvider = new NetPointsEditCellProvider(race.getRaceColumnName());
+        list.add(netPointsEditCellProvider);
+        list.add(new MaxPointsReasonAndNetPointsEditButtonCell(getStringMessages(), race.getRaceColumnName(),
+                maxPointsDropDownCellProvider, netPointsEditCellProvider));
         return list;
     }
 
