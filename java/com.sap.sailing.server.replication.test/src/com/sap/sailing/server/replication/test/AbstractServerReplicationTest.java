@@ -194,8 +194,9 @@ public abstract class AbstractServerReplicationTest {
          * Clones the {@link #master}'s state to the {@link #replica} using
          * {@link RacingEventServiceImpl#serializeForInitialReplication(ObjectOutputStream)} and
          * {@link RacingEventServiceImpl#initiallyFillFrom(ObjectInputStream)} through a piped input/output stream.
+         * @throws InterruptedException 
          */
-        protected void initialLoad() throws IOException, ClassNotFoundException {
+        protected void initialLoad() throws IOException, ClassNotFoundException, InterruptedException {
             PipedOutputStream pos = new PipedOutputStream();
             PipedInputStream pis = new PipedInputStream(pos);
             final ObjectOutputStream oos = new ObjectOutputStream(pos);
