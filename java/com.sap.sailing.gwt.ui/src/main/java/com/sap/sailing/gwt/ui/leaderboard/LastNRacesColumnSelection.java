@@ -102,7 +102,7 @@ public class LastNRacesColumnSelection extends AbstractRaceColumnSelection imple
         Comparator<RaceColumnDTO> comparator = new Comparator<RaceColumnDTO>() {
             @Override
             public int compare(RaceColumnDTO o1, RaceColumnDTO o2) {
-                return leaderboard.getRaceList().indexOf(o1) - leaderboard.getRaceList().indexOf(o2);
+                return leaderboard.getRaceList().indexOf(o2) - leaderboard.getRaceList().indexOf(o1);
             }
         };
         Collections.sort(columns, comparator);

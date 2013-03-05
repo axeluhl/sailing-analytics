@@ -24,10 +24,13 @@ public abstract class AbstractRaceColumnSelection implements RaceColumnSelection
 
     @Override
     public Iterable<RaceColumnDTO> getSelectedRaceColumnsOrderedAsInLeaderboard(LeaderboardDTO leaderboard) {
-        Iterable<RaceColumnDTO> selectedColumns = getSelectedRaceColumns();
+        List<String> namesOfSelectedRaceColumns = new ArrayList<String>();
+        for (RaceColumnDTO selectedColumn : getSelectedRaceColumns()) {
+            namesOfSelectedRaceColumns.add(selectedColumn.name);
+        }
         List<RaceColumnDTO> result = new ArrayList<RaceColumnDTO>();
         for (RaceColumnDTO column : leaderboard.getRaceList()) {
-            if (Util.contains(selectedColumns, column)) {
+            if (Util.contains(namesOfSelectedRaceColumns, column.name)) {
                 result.add(column);
             }
         }
