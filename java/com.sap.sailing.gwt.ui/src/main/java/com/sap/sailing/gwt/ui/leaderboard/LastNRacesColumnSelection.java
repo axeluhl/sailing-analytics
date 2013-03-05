@@ -25,10 +25,11 @@ import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 /**
  * Doesn't respect requests to explicitly turn on or off certain columns. Instead, up to the last <code>n</code> (with
  * <code>n</code> being an integer number to configure through the constructor) race columns will be selected. "Last" is
- * decided based on the race start times which are obtained through a {@link RaceTimesInfoProvider}.
+ * decided based on the column ordering in the leaderboard, considering races with a valid start time which are obtained
+ * through a {@link RaceTimesInfoProvider} or a score correction.
  * 
  * @author Axel Uhl (D043530)
- *
+ * 
  */
 public class LastNRacesColumnSelection extends AbstractRaceColumnSelection implements RaceTimesInfoProviderListener {
     private final int numberOfLastRacesToShow;
