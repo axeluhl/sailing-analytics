@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -15,8 +14,11 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProviderListener;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings.RaceColumnSelectionStrategies;
+import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 import com.sap.sailing.gwt.ui.shared.FleetDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
+import com.sap.sailing.gwt.ui.shared.LeaderboardEntryDTO;
+import com.sap.sailing.gwt.ui.shared.LeaderboardRowDTO;
 import com.sap.sailing.gwt.ui.shared.RaceColumnDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 
@@ -87,31 +89,33 @@ public class LastNRacesColumnSelection extends AbstractRaceColumnSelection imple
         this.raceTimesInfo = raceTimesInfo;
     }
 
-    private Iterable<RaceColumnDTO> getRaceColumnsFromNewestToOldest(LeaderboardDTO leaderboard,
+    private Iterable<RaceColumnDTO> getRaceColumnsFromNewestToOldest(final LeaderboardDTO leaderboard,
             Map<RegattaAndRaceIdentifier, RaceTimesInfoDTO> raceTimesInfo) {
-        final Map<RaceColumnDTO, Date> latestStarts = new HashMap<RaceColumnDTO, Date>();
         List<RaceColumnDTO> columns = new ArrayList<RaceColumnDTO>(leaderboard.getRaceList());
         for (Iterator<RaceColumnDTO> i=columns.iterator(); i.hasNext(); ) {
             RaceColumnDTO column = i.next();
-            Date latestStart = getLatestStart(column);
-            if (latestStart == null) {
+            if (getLatestStart(column) == null && !hasScoreCorrections(leaderboard, column)) {
                 i.remove();
-            } else {
-                latestStarts.put(column, latestStart);
             }
         }
         Comparator<RaceColumnDTO> comparator = new Comparator<RaceColumnDTO>() {
             @Override
             public int compare(RaceColumnDTO o1, RaceColumnDTO o2) {
-                int result;
-                Date latestStartO1 = latestStarts.get(o1);
-                Date latestStartO2 = latestStarts.get(o2);
-                result = latestStartO2.compareTo(latestStartO1);
-                return result;
+                return leaderboard.getRaceList().indexOf(o1) - leaderboard.getRaceList().indexOf(o2);
             }
         };
         Collections.sort(columns, comparator);
         return columns;
+    }
+
+    private boolean hasScoreCorrections(LeaderboardDTO leaderboard, RaceColumnDTO column) {
+        for (Map.Entry<CompetitorDTO, LeaderboardRowDTO> e : leaderboard.rows.entrySet()) {
+            LeaderboardEntryDTO entry = e.getValue().fieldsByRaceColumnName.get(column.name);
+            if (entry != null && entry.hasScoreCorrection()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private Date getLatestStart(RaceColumnDTO column) {
