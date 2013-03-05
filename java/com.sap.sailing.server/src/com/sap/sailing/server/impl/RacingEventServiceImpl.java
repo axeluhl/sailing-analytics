@@ -1183,7 +1183,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
                 for (RaceColumnInSeries raceColumn : series.getRaceColumns()) {
                     for (Fleet fleet : series.getFleets()) {
                         if (raceColumn.getTrackedRace(fleet) == trackedRace) {
-                            raceColumn.setTrackedRace(fleet, null);
+                            raceColumn.releaseTrackedRace(fleet);
                             regattaChanged = true;
                         }
                     }
