@@ -5,8 +5,8 @@ import com.sap.sailing.gwt.ui.shared.media.MediaTrack;
 
 public class YoutubeWindowPlayer extends PopupWindowPlayer {
     
-    public YoutubeWindowPlayer(MediaTrack mediaTrack, PopupCloseListener popupCloseListener) {
-        super(mediaTrack, popupCloseListener);
+    public YoutubeWindowPlayer(MediaTrack mediaTrack, MediaEventHandler mediaEventHandler, PopupCloseListener popupCloseListener) {
+        super(mediaTrack, mediaEventHandler, popupCloseListener);
     }
 
     @Override

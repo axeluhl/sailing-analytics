@@ -6,8 +6,8 @@ import com.sap.sailing.gwt.ui.shared.media.MediaTrack;
 
 public class AudioPlayer extends AbstractEmbeddedMediaPlayer {
     
-    public AudioPlayer(MediaTrack mediaTrack) {
-        super(mediaTrack);
+    public AudioPlayer(MediaTrack mediaTrack, MediaEventHandler mediaEventHandler) {
+        super(mediaTrack, mediaEventHandler);
     }
 
     @Override

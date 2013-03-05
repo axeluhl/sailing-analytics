@@ -13,8 +13,8 @@ public abstract class PopupWindowPlayer extends AbstractMediaPlayer implements V
     private final JavaScriptObject playerWindow;
     private final PopupCloseListener popupCloseHandler;
 
-    protected PopupWindowPlayer(MediaTrack mediaTrack, MediaEventHandler videoEventHandler, PopupCloseListener popupCloseListener) {
-        super(mediaTrack, videoEventHandler);
+    protected PopupWindowPlayer(MediaTrack mediaTrack, MediaEventHandler mediaEventHandler, PopupCloseListener popupCloseListener) {
+        super(mediaTrack, mediaEventHandler);
         this.popupCloseHandler = popupCloseListener;
         
         String playerWindowUrl = getPlayerWindowUrl();  

@@ -42,7 +42,7 @@ import com.sap.sailing.gwt.ui.shared.media.MediaTrack.MediaType;
 import com.sap.sailing.gwt.ui.shared.media.MediaTrack.Status;
 
 public class MediaSelector implements /*RaceTimesInfoProviderListener,*/ PlayStateListener, TimeListener,
-        AsyncCallback<Collection<MediaTrack>>, MediaSelectionListener, CloseHandler<Window>, ClosingHandler {
+        AsyncCallback<Collection<MediaTrack>>, MediaSelectionListener, CloseHandler<Window>, ClosingHandler, MediaEventHandler {
 
     private final CheckBox toggleMediaButton;
     private final Button manageMediaButton;
@@ -333,11 +333,11 @@ public class MediaSelector implements /*RaceTimesInfoProviderListener,*/ PlaySta
             };
             final VideoPlayer popupPlayer;
             if (videoTrack.isYoutube()) {
-                popupPlayer = new YoutubeWindowPlayer(videoTrack, popCloseListener);
+                popupPlayer = new YoutubeWindowPlayer(videoTrack, this, popCloseListener);
             } else {
 //                popupPlayer = new VideoWindowPlayer(videoTrack, popCloseListener);
                 boolean showVideoSynch = this.user != null;
-                popupPlayer = new VideoEmbeddedPlayer(videoTrack, raceTimesInfoProvider.getRaceTimesInfo(raceIdentifier).startOfRace.getTime(), showVideoSynch, mediaService, errorReporter, popCloseListener);
+                popupPlayer = new VideoEmbeddedPlayer(videoTrack, raceTimesInfoProvider.getRaceTimesInfo(raceIdentifier).startOfRace.getTime(), showVideoSynch, mediaService, this, errorReporter, popCloseListener);
             }
             videoPlayers.put(videoTrack, popupPlayer);
             if ((activeAudioPlayer != null) && (activeAudioPlayer.getMediaTrack() == videoTrack)) { //selected video track has been playing as audio-only
@@ -381,7 +381,7 @@ public class MediaSelector implements /*RaceTimesInfoProviderListener,*/ PlaySta
 
     private void assignNewAudioPlayer(MediaTrack audioTrack) {
         if (audioTrack != null) {
-            activeAudioPlayer = new AudioPlayer(audioTrack);
+            activeAudioPlayer = new AudioPlayer(audioTrack, this);
             
             synchPlayState(activeAudioPlayer);
         } else {
@@ -430,6 +430,10 @@ public class MediaSelector implements /*RaceTimesInfoProviderListener,*/ PlaySta
         }
         videoPlayers.clear();
         updateToggleButton();
+    }
+
+    @Override
+    public void timeUpdate() {
     }
 
 }

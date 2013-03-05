@@ -18,8 +18,8 @@ abstract public class AbstractEmbeddedMediaPlayer extends AbstractMediaPlayer {
     
     protected final MediaBase mediaControl;
 
-    public AbstractEmbeddedMediaPlayer(MediaTrack mediaTrack, MediaEventHandler videoEventHandler) {
-        super(mediaTrack, videoEventHandler);
+    public AbstractEmbeddedMediaPlayer(MediaTrack mediaTrack, MediaEventHandler mediaEventHandler) {
+        super(mediaTrack, mediaEventHandler);
         mediaControl = createMediaControl();
         if (mediaControl != null) {
             mediaControl.setControls(false);
