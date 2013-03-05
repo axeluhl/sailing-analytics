@@ -4,11 +4,11 @@
 	xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
 	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" version="2.5">
 	<servlet>
-		<servlet-name>XcelsiusApp</servlet-name>
-		<servlet-class>com.sap.sailing.xcelsiusadapter.XcelsiusApp</servlet-class>
+		<servlet-name>XcelsiusServlet</servlet-name>
+		<servlet-class>com.sap.sailing.xcelsiusadapter.XcelsiusServlet</servlet-class>
 	</servlet>
 	<servlet-mapping>
-		<servlet-name>XcelsiusApp</servlet-name>
+		<servlet-name>XcelsiusServlet</servlet-name>
 		<url-pattern>/xcelsius</url-pattern>
 	</servlet-mapping>
 </web-app>

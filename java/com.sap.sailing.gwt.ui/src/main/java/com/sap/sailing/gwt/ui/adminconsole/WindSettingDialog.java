@@ -8,7 +8,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.datepicker.client.DateBox;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.CourseDTO;
+import com.sap.sailing.gwt.ui.shared.CoursePositionsDTO;
 import com.sap.sailing.gwt.ui.shared.PositionDTO;
 import com.sap.sailing.gwt.ui.shared.RaceDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
@@ -54,7 +54,7 @@ public class WindSettingDialog extends DataEntryDialog<WindDTO> {
         }
     }
 
-    public WindSettingDialog(RaceDTO race, CourseDTO courseDTO, StringMessages stringMessages, DialogCallback<WindDTO> callback) {
+    public WindSettingDialog(RaceDTO race, CoursePositionsDTO courseDTO, StringMessages stringMessages, DialogCallback<WindDTO> callback) {
         super(stringMessages.actionAddWindData(), null, stringMessages.ok(), stringMessages.cancel(), new WindDataValidator(stringMessages), callback);
         this.stringMessages = stringMessages;        
         speedInKnotsBox = createDoubleBox(5);

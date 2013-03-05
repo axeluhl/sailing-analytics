@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.base.impl;
 
+
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumnInSeries;
 import com.sap.sailing.domain.base.RaceDefinition;
@@ -19,7 +20,7 @@ public class RaceColumnInSeriesImpl extends AbstractRaceColumn implements RaceCo
     private static final long serialVersionUID = -2199678838624406645L;
     private final Series series;
     private final String name;
-    
+
     /**
      * Making this transient will leave it <code>null</code> on a replica. This, however, is OK because
      * no check for matching regatta is required, assuming replication happens on a consistent, correct state.
@@ -35,6 +36,7 @@ public class RaceColumnInSeriesImpl extends AbstractRaceColumn implements RaceCo
      *            carried out.
      */
     public RaceColumnInSeriesImpl(String name, Series series, TrackedRegattaRegistry trackedRegattaRegistry) {
+        super();
         this.name = name;
         this.series = series;
         this.trackedRegattaRegistry = trackedRegattaRegistry;

@@ -29,6 +29,8 @@ import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.ScoreCorrection.Result;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
+import com.sap.sailing.domain.racelog.RaceLogEvent;
+import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
@@ -75,7 +77,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
      * A synchronized set that manages the difference between {@link #getCompetitors()} and {@link #getAllCompetitors()}.
      */
     private final Set<Competitor> suppressedCompetitors;
-
+    
     /**
      * A leaderboard entry representing a snapshot of a cell at a given time point for a single race/competitor.
      * 
@@ -727,5 +729,10 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
         final Long delayToLiveInMillis = getDelayToLiveInMillis();
         TimePoint timePoint = delayToLiveInMillis == null ? now : now.minus(delayToLiveInMillis);
         return timePoint;
+    }
+    
+    @Override
+    public void raceLogEventAdded(RaceColumn raceColumn, RaceLogIdentifier raceLogIdentifier, RaceLogEvent event) {
+        getRaceColumnListeners().notifyListenersAboutRaceLogEventAdded(raceColumn, raceLogIdentifier, event);
     }
 }

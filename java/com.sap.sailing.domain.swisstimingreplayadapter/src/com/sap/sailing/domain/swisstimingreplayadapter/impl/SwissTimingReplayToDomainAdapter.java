@@ -27,6 +27,7 @@ import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.Bearing;
+import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
@@ -34,7 +35,9 @@ import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.Util;
+import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.WindSourceWithAdditionalID;
+import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.swisstimingadapter.DomainFactory;
 import com.sap.sailing.domain.swisstimingreplayadapter.CompetitorStatus;
 import com.sap.sailing.domain.swisstimingreplayadapter.SwissTimingReplayListener;
@@ -68,36 +71,36 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter {
     private static final int THRESHOLD_FOR_EARLIEST_MARK_PASSING_BEFORE_START_IN_MILLIS = 30000;
 
     private static final Logger logger = Logger.getLogger(SwissTimingReplayToDomainAdapter.class.getName());
-    
+
     private final DomainFactory domainFactory;
-    
+
     private final Map<String, RaceDefinition> racePerRaceID;
     private final Map<String, DynamicTrackedRace> trackedRacePerRaceID;
-    
+
     /**
      * The last race ID received from {@link #raceID(String)}. Used as key into {@link #racePerRaceID} and
      * {@link #trackedRacePerRaceID} for storing data from subsequent messages.
      */
     private String currentRaceID;
-    
+
     /**
      * Reference time point for time specifications
      */
     private TimePoint referenceTimePoint;
-    
+
     /**
      * feference location for location / lat/lng specifications
      */
     private Position referenceLocation;
-    
+
     private final Map<String, Set<Competitor>> competitorsPerRaceID;
-    
+
     private final Map<String, Map<String, Mark>> marksPerRaceIDPerMarkID;
-    
+
     private final Map<String, TimePoint> bestStartTimePerRaceID;
-    
+
     private final Map<String, TimePoint> raceTimePerRaceID;
-    
+
     /**
      * When the first mark definition of a course sequence is received, this member holds <code>null</code> and is then
      * initialized with a valid list. The list then accumulates the marks until the tracker count is received which marks
@@ -109,11 +112,11 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter {
     private List<ControlPoint> currentCourseDefinition;
 
     private final Regatta regatta;
-    
+
     private final TrackedRegattaRegistry trackedRegattaRegistry;
 
     private final Map<Integer, Mark> markByHashValue;
-    
+
     private final Map<Integer, Competitor> competitorByHashValue;
 
     /**
@@ -127,9 +130,9 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter {
      * Records the next mark for each competitor numerically
      */
     private final Map<Competitor, Short> lastNextMark;
-    
+
     private RaceStatus lastRaceStatus;
-    
+
     /**
      * @param regatta
      *            the regatta to associate the race(s) received by the listener with, or <code>null</code> to force the
@@ -150,7 +153,7 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter {
         lastNextMark = new HashMap<>();
         this.domainFactory = domainFactory;
     }
-    
+
     public Iterable<DynamicTrackedRace> getTrackedRaces() {
         return trackedRacePerRaceID.values();
     }
@@ -158,7 +161,7 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter {
     private BoatClass getCurrentBoatClass() {
         return domainFactory.getOrCreateBoatClassFromRaceID(currentRaceID);
     }
-    
+
     @Override
     public void referenceTimestamp(long referenceTimestampMillis) {
         referenceTimePoint = new MillisecondsTimePoint(referenceTimestampMillis);
@@ -173,7 +176,7 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter {
     public void raceID(String raceID) {
         currentRaceID = raceID;
     }
-    
+
     private boolean isValid(int threeByteValue) {
         return threeByteValue != (1<<24) - 1;
     }
@@ -254,7 +257,7 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter {
         }
     }
 
-    
+
     @Override
     public void mark(MarkType markType, String name, byte index, String id1, String id2, short windSpeedInKnots,
             short trueWindDirectionInDegrees) {
@@ -289,7 +292,12 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter {
             } else {
                 Course course = race.getCourse();
                 try {
-                    course.update(currentCourseDefinition, domainFactory.getBaseDomainFactory());
+                    // TODO: Does SwissTiming also deliver the passing side for course marks?
+                    List<Pair<ControlPoint, NauticalSide>> courseToUpdate = new ArrayList<Pair<ControlPoint, NauticalSide>>();
+                    for(ControlPoint cp: currentCourseDefinition) {
+                        courseToUpdate.add(new Pair<ControlPoint, NauticalSide>(cp, null));
+                    }
+                    course.update(courseToUpdate, domainFactory.getBaseDomainFactory());
                 } catch (PatchFailedException e) {
                     throw new RuntimeException(e);
                 }
@@ -300,7 +308,8 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter {
     }
 
     private void createRace() {
-        final Regatta myRegatta = regatta != null ? regatta : domainFactory.getOrCreateDefaultRegatta(currentRaceID, trackedRegattaRegistry);
+        final Regatta myRegatta = regatta != null ? regatta : domainFactory.getOrCreateDefaultRegatta(EmptyRaceLogStore.INSTANCE,
+                currentRaceID, trackedRegattaRegistry);
         RaceDefinition race = domainFactory.createRaceDefinition(myRegatta,
                 currentRaceID, competitorsPerRaceID.get(currentRaceID), currentCourseDefinition);
         racePerRaceID.put(currentRaceID, race);
@@ -349,7 +358,7 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter {
                 if (bestStartTimePerRaceID.get(currentRaceID) != null &&
                         !bestStartTimePerRaceID.get(currentRaceID).after(
                                 raceTimePoint.plus(THRESHOLD_FOR_EARLIEST_MARK_PASSING_BEFORE_START_IN_MILLIS)) &&
-                        (!lastNextMark.containsKey(competitor) || lastNextMark.get(competitor) != nextMark) && nextMark > 0) {
+                                (!lastNextMark.containsKey(competitor) || lastNextMark.get(competitor) != nextMark) && nextMark > 0) {
                     Waypoint waypointPassed = nextMark == 255 ? course.getLastWaypoint() : Util.get(course.getWaypoints(), nextMark - 1);
                     List<MarkPassing> newMarkPassings = new ArrayList<>();
                     final NavigableSet<MarkPassing> markPassings = trackedRace.getMarkPassings(competitor);

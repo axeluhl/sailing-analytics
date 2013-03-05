@@ -34,6 +34,9 @@ import com.sap.sailing.server.gateway.AbstractCSVHttpServlet;
 public class ESS40ResultsAsCSVServlet extends AbstractCSVHttpServlet {
     private static final long serialVersionUID = -3975664653148197608L;
     private static final String PARAM_NAME_LEADERBOARDNAME = "leaderboardName";
+    private static final String PARAM_NAME_RESULTSTATE = "resultState";
+    private enum ResultStates { Live, Preliminary, Final };
+    private final ResultStates DEFAULT_RESULT_STATE = ResultStates.Final;  
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -56,54 +59,68 @@ public class ESS40ResultsAsCSVServlet extends AbstractCSVHttpServlet {
 
                 setCSVResponseHeader(response, fileName);
 
-                TimePoint timePoint = MillisecondsTimePoint.now();
+                ResultStates resultState = resolveRequestedResultState(request.getParameter(PARAM_NAME_RESULTSTATE));
+                TimePoint requestTimePoint = MillisecondsTimePoint.now();
+                TimePoint resultTimePoint = calculateTimePointForResultState(leaderboard, resultState);
 
                 // competitors are ordered according to total rank
                 List<Competitor> suppressedCompetitors = new ArrayList<Competitor>();
                 for (Competitor c : leaderboard.getSuppressedCompetitors()) {
                     suppressedCompetitors.add(c);
                 }
-                List<Competitor> competitorsFromBestToWorst = leaderboard.getCompetitorsFromBestToWorst(timePoint);
+                List<Competitor> competitorsFromBestToWorst = leaderboard.getCompetitorsFromBestToWorst(resultTimePoint != null ? resultTimePoint : requestTimePoint);
                 Map<RaceColumn, List<Competitor>> rankedCompetitorsPerColumn = new HashMap<RaceColumn, List<Competitor>>();
                 Iterable<RaceColumn> raceColumns = leaderboard.getRaceColumns();
 
-                for (Competitor competitor : competitorsFromBestToWorst) {
-                    if (!suppressedCompetitors.contains(competitor)) {
-                        // int totalRank = competitorsFromBestToWorst.indexOf(competitor) + 1;
-                        Double totalPoints = leaderboard.getTotalPoints(competitor, timePoint);
-                        if (leaderboard.hasCarriedPoints(competitor)) {
-                            Double carriedPoints = leaderboard.getCarriedPoints(competitor);
-                            if (carriedPoints != null) {
-                                totalPoints = totalPoints != null ? totalPoints += carriedPoints : carriedPoints;
-                            }
-                        }
-
-                        List<Object> csvLine = new ArrayList<Object>();
-                        csvLine.add(competitor.getName());
-                        csv.add(csvLine);
-
-                        // TODO: we should only export complete races where all competitors have valid totalPoints for a race
-                        for (RaceColumn raceColumn : raceColumns) {
-                            List<Competitor> rankedCompetitorsForColumn = rankedCompetitorsPerColumn.get(raceColumn);
-                            if (rankedCompetitorsForColumn == null) {
-                                rankedCompetitorsForColumn = leaderboard.getCompetitorsFromBestToWorst(raceColumn,
-                                        timePoint);
-                                rankedCompetitorsPerColumn.put(raceColumn, rankedCompetitorsForColumn);
-                            }
-                            // Double netRacePoints = leaderboard.getNetPoints(competitor, raceColumn, timePoint);
-                            Double totalRacePoints = leaderboard.getTotalPoints(competitor, raceColumn, timePoint);
-                            MaxPointsReason maxPointsReason = leaderboard.getMaxPointsReason(competitor, raceColumn, timePoint);
-                            int rank = rankedCompetitorsForColumn.indexOf(competitor)+1;
-                            if(totalRacePoints != null) {
-                                if (maxPointsReason == null || maxPointsReason == MaxPointsReason.NONE) {
-                                    csvLine.add(rank);
-                                    csvLine.add(totalRacePoints);
-
-                                } else {
-                                    csvLine.add(maxPointsReason.name());
-                                    csvLine.add(totalRacePoints);
+                if(resultTimePoint != null) {
+                    for (Competitor competitor : competitorsFromBestToWorst) {
+                        if (!suppressedCompetitors.contains(competitor)) {
+                            // int totalRank = competitorsFromBestToWorst.indexOf(competitor) + 1;
+                            Double totalPoints = leaderboard.getTotalPoints(competitor, resultTimePoint);
+                            if (leaderboard.hasCarriedPoints(competitor)) {
+                                Double carriedPoints = leaderboard.getCarriedPoints(competitor);
+                                if (carriedPoints != null) {
+                                    totalPoints = totalPoints != null ? totalPoints += carriedPoints : carriedPoints;
                                 }
                             }
+    
+                            List<Object> csvLine = new ArrayList<Object>();
+                            String competitorDisplayName = leaderboard.getDisplayName(competitor);
+                            csvLine.add(competitorDisplayName != null ? competitorDisplayName : competitor.getName());
+                            csv.add(csvLine);
+    
+                            // TODO: we should only export complete races where all competitors have valid totalPoints for a race
+                            for (RaceColumn raceColumn : raceColumns) {
+                                List<Competitor> rankedCompetitorsForColumn = rankedCompetitorsPerColumn.get(raceColumn);
+                                if (rankedCompetitorsForColumn == null) {
+                                    rankedCompetitorsForColumn = leaderboard.getCompetitorsFromBestToWorst(raceColumn,
+                                            resultTimePoint);
+                                    rankedCompetitorsPerColumn.put(raceColumn, rankedCompetitorsForColumn);
+                                }
+                                // Double netRacePoints = leaderboard.getNetPoints(competitor, raceColumn, timePoint);
+                                Double totalRacePoints = leaderboard.getTotalPoints(competitor, raceColumn, resultTimePoint);
+                                MaxPointsReason maxPointsReason = leaderboard.getMaxPointsReason(competitor, raceColumn, resultTimePoint);
+                                int rank = rankedCompetitorsForColumn.indexOf(competitor)+1;
+                                if(totalRacePoints != null) {
+                                    if (maxPointsReason == null || maxPointsReason == MaxPointsReason.NONE) {
+                                        csvLine.add(rank);
+                                        csvLine.add(totalRacePoints);
+    
+                                    } else {
+                                        csvLine.add(maxPointsReason.name());
+                                        csvLine.add(totalRacePoints);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    for (Competitor competitor : competitorsFromBestToWorst) {
+                        if (!suppressedCompetitors.contains(competitor)) {
+                            List<Object> csvLine = new ArrayList<Object>();
+                            String competitorDisplayName = leaderboard.getDisplayName(competitor);
+                            csvLine.add(competitorDisplayName != null ? competitorDisplayName : competitor.getName());
+                            csv.add(csvLine);
                         }
                     }
                 }
@@ -143,4 +160,33 @@ public class ESS40ResultsAsCSVServlet extends AbstractCSVHttpServlet {
         writer.flush();
     }
 
+    private ResultStates resolveRequestedResultState(String resultStateParam) {
+        ResultStates result = DEFAULT_RESULT_STATE;
+        if(resultStateParam != null) {
+            for(ResultStates state: ResultStates.values()) {
+                if(state.name().equalsIgnoreCase(resultStateParam)) {
+                    result = state;
+                    break;
+                }
+            }
+        }
+        return result;
+    }
+
+    private TimePoint calculateTimePointForResultState(Leaderboard leaderboard, ResultStates resultState) {
+        TimePoint result = null;
+        switch (resultState) {
+        case Live:
+            result = MillisecondsTimePoint.now();
+            break;
+        case Preliminary:
+        case Final:
+            if(leaderboard.getScoreCorrection() != null) {
+                result = leaderboard.getScoreCorrection().getTimePointOfLastCorrectionsValidity();
+            }
+            break;
+        }
+        
+        return result;
+    }
 }

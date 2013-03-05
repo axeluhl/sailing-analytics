@@ -41,36 +41,26 @@ public class RaceColumnsInLeaderboardDialog extends DataEntryDialog<List<RaceCol
         @Override
         public String getErrorMessage(List<RaceColumnDTO> raceColumnsWithFleetToValidate) {
             String errorMessage = null;
-
-            List<RaceColumnDTO> raceColumnsToValidate = new ArrayList<RaceColumnDTO>();
-            for (RaceColumnDTO raceColumnDTO : raceColumnsToValidate) {
-                raceColumnsToValidate.add(raceColumnDTO);
-            }
-            
-            if(errorMessage == null) {
+            if (errorMessage == null) {
                 int index = 0;
                 boolean raceColumnNameNotEmpty = true;
-
-                for (RaceColumnDTO raceColumn : raceColumnsToValidate) {
+                for (RaceColumnDTO raceColumn : raceColumnsWithFleetToValidate) {
                     raceColumnNameNotEmpty = raceColumn.name != null && raceColumn.name.length() > 0;
                     if (!raceColumnNameNotEmpty) {
                         break;
                     }
                     index++;
                 }
-
                 int index2 = 0;
                 boolean raceColumnUnique = true;
-
                 HashSet<String> setToFindDuplicates = new HashSet<String>();
-                for (RaceColumnDTO raceColumn : raceColumnsToValidate) {
+                for (RaceColumnDTO raceColumn : raceColumnsWithFleetToValidate) {
                     if (!setToFindDuplicates.add(raceColumn.name)) {
                         raceColumnUnique = false;
                         break;
                     }
                     index2++;
                 }
-
                 if (!raceColumnNameNotEmpty) {
                     errorMessage = stringConstants.race() + " " + (index + 1) + ": "
                             + stringConstants.pleaseEnterAName();
@@ -79,18 +69,17 @@ public class RaceColumnsInLeaderboardDialog extends DataEntryDialog<List<RaceCol
                             + stringConstants.raceWithThisNameAlreadyExists();
                 }
             }
-            
             return errorMessage;
         }
 
     }
 
-    public RaceColumnsInLeaderboardDialog(List<RaceColumnDTO> existingRaces, StringMessages stringConstants,
+    public RaceColumnsInLeaderboardDialog(List<RaceColumnDTO> existingRaces, StringMessages stringMessages,
             DialogCallback<List<RaceColumnDTO>> callback) {
-        super(stringConstants.actionAddRaces(), null, stringConstants.ok(), stringConstants.cancel(),
-                new RaceDialogValidator(stringConstants), callback);
+        super(stringMessages.actionAddRaces(), null, stringMessages.ok(), stringMessages.cancel(),
+                new RaceDialogValidator(stringMessages), callback);
         this.existingRaces = existingRaces;
-        this.stringMessages = stringConstants;
+        this.stringMessages = stringMessages;
         addRacesListBox = createListBox(false);
         raceNamePrefixTextBox = createTextBox(null);
         raceNameEntryFields = new ArrayList<TextBox>();
@@ -195,7 +184,6 @@ public class RaceColumnsInLeaderboardDialog extends DataEntryDialog<List<RaceCol
         } else {
             raceColumnsGrid = new Grid(0, 0);
         }
-
         parentPanel.insert(raceColumnsGrid, widgetIndex);
     }
 

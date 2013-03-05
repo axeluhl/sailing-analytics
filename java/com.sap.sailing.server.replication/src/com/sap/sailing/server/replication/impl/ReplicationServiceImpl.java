@@ -167,7 +167,7 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
     }
 
     @Override
-    public void startToReplicateFrom(ReplicationMasterDescriptor master) throws IOException, ClassNotFoundException {
+    public void startToReplicateFrom(ReplicationMasterDescriptor master) throws IOException, ClassNotFoundException, InterruptedException {
         logger.info("Starting to replicate from "+master);
         replicatingFromMaster = master;
         registerReplicaWithMaster(master);

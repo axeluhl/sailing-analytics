@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/LiveIcon"
+          android:icon="@drawable/ic_menu_share_local"
+          android:title="Server"
+          android:showAsAction="always" />
+    <item android:id="@+id/WindLog"
+          android:icon="@drawable/ic_menu_btn_wind"
+          android:title="Add Wind Data"
+          android:showAsAction="ifRoom" />
+    <item android:id="@+id/SystemInfo"
+          android:icon="@drawable/ic_menu_info_details"
+          android:title="System Information"
+          android:showAsAction="" />
+    <item android:id="@+id/OptionsSettings"
+          android:icon="@drawable/settings_grey"
+          android:title="Settings"
+          android:showAsAction="" />
+</menu>

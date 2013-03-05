@@ -10,18 +10,21 @@ import java.net.URL;
 import java.text.ParseException;
 import java.util.List;
 
+
 import com.maptrack.client.io.TypeController;
 import com.sap.sailing.domain.base.BoatClass;
-import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Course;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.Person;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Team;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
@@ -57,7 +60,7 @@ public interface DomainFactory {
 
     com.sap.sailing.domain.common.TimePoint createTimePoint(long timestamp);
 
-    Course createCourse(String name, Iterable<TracTracControlPoint> controlPoints);
+    Course createCourse(String name, Iterable<Pair<TracTracControlPoint, NauticalSide>> controlPoints);
 
     com.sap.sailing.domain.base.Competitor getOrCreateCompetitor(Competitor competitor);
 
@@ -92,7 +95,7 @@ public interface DomainFactory {
      * boat class exists yet.
      * @param trackedRegattaRegistry TODO
      */
-    com.sap.sailing.domain.base.Regatta getOrCreateDefaultRegatta(Event event, TrackedRegattaRegistry trackedRegattaRegistry);
+    com.sap.sailing.domain.base.Regatta getOrCreateDefaultRegatta(RaceLogStore raceLogStore, Event event, TrackedRegattaRegistry trackedRegattaRegistry);
     
     /**
      * Creates a race tracked for the specified URL/URIs and starts receiving all available existing and future push
@@ -124,8 +127,8 @@ public interface DomainFactory {
      *            available but loses track of the wind, e.g., during server restarts.
      */
     TracTracRaceTracker createRaceTracker(URL paramURL, URI liveURI, URI storedURI, TimePoint startOfTracking,
-            TimePoint endOfTracking, long delayToLiveInMillis, boolean simulateWithStartTimeNow, WindStore windStore,
-            TrackedRegattaRegistry trackedRegattaRegistry) throws MalformedURLException, FileNotFoundException,
+            TimePoint endOfTracking, long delayToLiveInMillis, boolean simulateWithStartTimeNow, RaceLogStore raceLogStore, 
+            WindStore windStore, TrackedRegattaRegistry trackedRegattaRegistry) throws MalformedURLException, FileNotFoundException,
             URISyntaxException;
 
     /**
@@ -133,8 +136,8 @@ public interface DomainFactory {
      * a predefined {@link Regatta} is used to hold the resulting races.
      */
     RaceTracker createRaceTracker(Regatta regatta, URL paramURL, URI liveURI, URI storedURI, TimePoint startOfTracking,
-            TimePoint endOfTracking, long delayToLiveInMillis, boolean simulateWithStartTimeNow, WindStore windStore,
-            TrackedRegattaRegistry trackedRegattaRegistry) throws MalformedURLException, FileNotFoundException,
+            TimePoint endOfTracking, long delayToLiveInMillis, boolean simulateWithStartTimeNow, RaceLogStore raceLogStore, 
+            WindStore windStore, TrackedRegattaRegistry trackedRegattaRegistry) throws MalformedURLException, FileNotFoundException,
             URISyntaxException;
 
     BoatClass getOrCreateBoatClass(CompetitorClass competitorClass);
@@ -215,7 +218,7 @@ public interface DomainFactory {
      * of waypoints. The waypoints are created from the control points and represent usages of the control points
      * in a course. A single control point may be used more than once in a course's list of waypoints.
      */
-    void updateCourseWaypoints(Course courseToUpdate, Iterable<? extends TracTracControlPoint> controlPoints) throws PatchFailedException;
+    void updateCourseWaypoints(Course courseToUpdate, Iterable<Pair<TracTracControlPoint, NauticalSide>> controlPoints) throws PatchFailedException;
 
     TracTracConfiguration createTracTracConfiguration(String name, String jsonURL, String liveDataURI, String storedDataURI);
 
@@ -235,7 +238,7 @@ public interface DomainFactory {
     Pair<List<com.sap.sailing.domain.base.Competitor>, BoatClass> getCompetitorsAndDominantBoatClass(Race race);
     
     RaceTrackingConnectivityParameters createTrackingConnectivityParameters(URL paramURL, URI liveURI, URI storedURI,
-            TimePoint startOfTracking, TimePoint endOfTracking, long delayToLiveInMillis, boolean simulateWithStartTimeNow, WindStore windStore);
+            TimePoint startOfTracking, TimePoint endOfTracking, long delayToLiveInMillis, boolean simulateWithStartTimeNow, RaceLogStore raceLogStore, WindStore windStore);
     /**
      * Removes all knowledge about <code>tractracRace</code> which includes removing it from the race cache, from the
      * {@link com.sap.sailing.domain.base.Regatta} and, if a {@link TrackedRace} for the corresponding

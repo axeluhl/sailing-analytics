@@ -1,9 +1,13 @@
 package com.sap.sailing.server.replication.test;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 
-import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 
 import org.junit.Before;
@@ -14,15 +18,22 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.common.RegattaName;
+import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.domain.leaderboard.impl.LowPoint;
 import com.sap.sailing.domain.test.TrackBasedTest;
+import com.sap.sailing.mongodb.MongoDBService;
+import com.sap.sailing.server.impl.RacingEventServiceImpl;
 import com.sap.sailing.server.operationaltransformation.AddDefaultRegatta;
 import com.sap.sailing.server.operationaltransformation.AddRaceDefinition;
+import com.sap.sailing.server.operationaltransformation.CreateFlexibleLeaderboard;
 import com.sap.sailing.server.replication.ReplicationMasterDescriptor;
+import com.sap.sailing.server.replication.impl.Replicator;
 
 public class InitialLoadReplicationObjectIdentityTest extends AbstractServerReplicationTest {
     private Pair<ReplicationServiceTestImpl, ReplicationMasterDescriptor> replicationDescriptorPair;
@@ -32,20 +43,86 @@ public class InitialLoadReplicationObjectIdentityTest extends AbstractServerRepl
      */
     @Before
     public void setUp() throws Exception {
+        final MongoDBService mongoDBService = MongoDBService.INSTANCE;
+        this.master = new RacingEventServiceImpl(mongoDBService);
+        this.replica = new RacingEventServiceImpl(mongoDBService);
+        mongoDBService.getDB().dropDatabase();
+    }
+    
+    public void performReplicationSetup() throws Exception {
         try {
-            replicationDescriptorPair = basicSetUp(true, /* master=null means create a new one */ null,
-            /* replica=null means create a new one */null);
+            replicationDescriptorPair = basicSetUp(false, this.master, this.replica);
         } catch (Exception e) {
             e.printStackTrace();
             tearDown();
         }
     }
+    
+    @Test
+    public void testInitialLoad() throws Exception {
+        
+        /* Event */
+        String eventName = "Monster Event";
+        String venue = "Default Venue";
+        List<String> courseAreaNames = new ArrayList<String>();
+        courseAreaNames.add("Default");
+        master.addEvent(eventName, venue, "", false, "monsterevent", courseAreaNames);
+        assertNotNull(master.getEvent("monsterevent"));
+        assertNull(replica.getEvent("monsterevent"));
+        
+        /* Regatta */
+        final String baseEventName = "Kiel Week 2012";
+        final String boatClassName = "49er";
+        final Iterable<Series> series = Collections.emptyList();
+        Regatta masterRegatta = master.createRegatta(baseEventName, boatClassName, UUID.randomUUID(), series,
+                /* persistent */ true, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), null);
+        assertNotNull(master.getRegatta(masterRegatta.getRegattaIdentifier()));
+        assertTrue(master.getAllRegattas().iterator().hasNext());
+        assertNull(replica.getRegatta(masterRegatta.getRegattaIdentifier()));
+        
+        /* Leaderboard */
+        final String leaderboardName = "Great Leaderboard";
+        final int[] discardThresholds = new int[] { 17, 23 };
+        CreateFlexibleLeaderboard createTestLeaderboard = new CreateFlexibleLeaderboard(leaderboardName, null, discardThresholds, new LowPoint(), null);
+        assertNull(master.getLeaderboardByName(leaderboardName));
+        master.apply(createTestLeaderboard);
+        assertNotNull(master.getLeaderboardByName(leaderboardName));
+        assertNull(replica.getLeaderboardByName(leaderboardName));
+
+        /* LeaderboardGroup */
+        final String leaderBoardGroupName = "Great Leaderboard Group";
+        List<String> leaderboardNames = new ArrayList<String>();
+        leaderboardNames.add(leaderboardName);
+        int[] overallLeaderboardDiscardThresholds = new int[] {};
+        ScoringSchemeType overallLeaderboardScoringSchemeType = ScoringSchemeType.HIGH_POINT;
+        master.addLeaderboardGroup(leaderBoardGroupName, "Some descriptive Description", false, leaderboardNames, overallLeaderboardDiscardThresholds, overallLeaderboardScoringSchemeType);
+        assertNotNull(master.getLeaderboardGroupByName(leaderBoardGroupName));
+        assertNull(replica.getLeaderboardGroupByName(leaderBoardGroupName));
+        
+        /* fire up replication */
+        performReplicationSetup();
+        ReplicationMasterDescriptor the_master = replicationDescriptorPair.getB(); /* master descriptor */
+        Replicator replicator = replicationDescriptorPair.getA().startToReplicateFromButDontYetFetchInitialLoad(the_master, /* startReplicatorSuspended */ true);
+        replicationDescriptorPair.getA().initialLoad();
+        replicator.setSuspended(false);
+        synchronized (replicator) {
+            while (!replicator.isQueueEmpty()) {
+                replicator.wait();
+            }
+        }
+
+        assertNotNull(replica.getEvent("monsterevent"));
+        assertNotNull(replica.getRegatta(masterRegatta.getRegattaIdentifier()));
+        assertNotNull(replica.getLeaderboardGroupByName(leaderBoardGroupName));
+        assertNotNull(replica.getLeaderboardByName(leaderboardName));
+        assertTrue(replica.getAllRegattas().iterator().hasNext());
+    }
 
     @Test
-    public void testSameCompetitorInTwoRacesReplication() throws InterruptedException, ClassNotFoundException, IOException {
+    public void testSameCompetitorInTwoRacesReplication() throws Exception {
+        performReplicationSetup();
         final String boatClassName = "49er";
-        // FIXME use master DomainFactory; see bug 592
-        final DomainFactory masterDomainFactory = DomainFactory.INSTANCE;
+        final DomainFactory masterDomainFactory = master.getBaseDomainFactory();
         BoatClass boatClass = masterDomainFactory.getOrCreateBoatClass(boatClassName);
         final String baseEventName = "Test Event";
         AddDefaultRegatta addEventOperation = new AddDefaultRegatta(baseEventName, boatClassName, UUID.randomUUID());
