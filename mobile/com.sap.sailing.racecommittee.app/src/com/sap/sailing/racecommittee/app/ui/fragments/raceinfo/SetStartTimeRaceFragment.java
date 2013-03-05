@@ -22,10 +22,10 @@ import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sailing.racecommittee.app.utils.TickListener;
 import com.sap.sailing.racecommittee.app.utils.TickSingleton;
 
-public class SetTimeRaceFragment extends RaceFragment implements TickListener {
+public class SetStartTimeRaceFragment extends RaceFragment implements TickListener {
 
-    public static SetTimeRaceFragment create(ManagedRace race) {
-        SetTimeRaceFragment fragment = new SetTimeRaceFragment();
+    public static SetStartTimeRaceFragment create(ManagedRace race) {
+        SetStartTimeRaceFragment fragment = new SetStartTimeRaceFragment();
         fragment.setArguments(createArguments(race));
         return fragment;
     }
@@ -158,9 +158,7 @@ public class SetTimeRaceFragment extends RaceFragment implements TickListener {
     }
 
     private void setStartTime(Date newStartTime) {
-        getRace().getState().setStartTime(
-                new MillisecondsTimePoint(newStartTime),
-                new MillisecondsTimePoint(newStartTime));
+        getRace().getState().setStartTime(new MillisecondsTimePoint(newStartTime));
     }
 
 }

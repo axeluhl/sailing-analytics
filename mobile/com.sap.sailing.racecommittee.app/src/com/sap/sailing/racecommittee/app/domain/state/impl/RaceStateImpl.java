@@ -17,6 +17,7 @@ import com.sap.sailing.racecommittee.app.domain.racelog.RaceLogChangedListener;
 import com.sap.sailing.racecommittee.app.domain.racelog.impl.RaceLogChangedVisitor;
 import com.sap.sailing.racecommittee.app.domain.state.RaceState;
 import com.sap.sailing.racecommittee.app.domain.state.RaceStateChangedListener;
+import com.sap.sailing.racecommittee.app.domain.state.StartProcedure;
 import com.sap.sailing.racecommittee.app.domain.state.impl.analyzers.FinishedTimeFinder;
 import com.sap.sailing.racecommittee.domain.racelog.PassAwareRaceLog;
 import com.sap.sailing.racecommittee.domain.state.impl.analyzers.RaceStatusAnalyzer;
@@ -25,8 +26,10 @@ import com.sap.sailing.racecommittee.domain.state.impl.analyzers.StartTimeFinder
 public class RaceStateImpl implements RaceState, RaceLogChangedListener {
     // private static final String TAG = RaceStateImpl.class.getName();
 
-    protected RaceLogRaceStatus status;
     protected PassAwareRaceLog raceLog;
+    protected StartProcedure startProcedure;
+    
+    protected RaceLogRaceStatus status;
     protected Set<RaceStateChangedListener> stateChangedListeners;
 
     private RaceLogChangedVisitor raceLogListener;
@@ -34,8 +37,10 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
     private StartTimeFinder startTimeFinder;
     private FinishedTimeFinder finishedTimeFinder;
 
-    public RaceStateImpl(PassAwareRaceLog raceLog) {
+    public RaceStateImpl(PassAwareRaceLog raceLog, StartProcedure procedure) {
         this.raceLog = raceLog;
+        this.startProcedure = procedure;
+        
         this.status = RaceLogRaceStatus.UNKNOWN;
         this.stateChangedListeners = new HashSet<RaceStateChangedListener>();
 
@@ -82,7 +87,9 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
         return startTimeFinder.getStartTime();
     }
 
-    public void setStartTime(TimePoint eventTime, TimePoint newStartTime) {
+    public void setStartTime(TimePoint newStartTime) {
+        TimePoint eventTime = startProcedure.getStartTimeEventTime();
+        
         RaceLogRaceStatus status = getStatus();
         if (status != RaceLogRaceStatus.UNSCHEDULED) {
             onRaceAborted(eventTime.minus(1));
@@ -99,7 +106,7 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
     }
 
     public void onRaceAborted(TimePoint eventTime) {
-        RaceLogEvent abortEvent = new RaceLogRaceStatusEventImpl(eventTime.minus(1), UUID.randomUUID(),
+        RaceLogEvent abortEvent = new RaceLogRaceStatusEventImpl(eventTime, UUID.randomUUID(),
                 Collections.<Competitor> emptyList(), raceLog.getCurrentPassId(), RaceLogRaceStatus.UNSCHEDULED);
         this.raceLog.add(abortEvent);
 

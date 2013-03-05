@@ -1,7 +1,5 @@
 package com.sap.sailing.racecommittee.app.ui.fragments;
 
-import java.util.Date;
-
 import android.app.FragmentTransaction;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -11,15 +9,13 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
-import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.state.RaceState;
 import com.sap.sailing.racecommittee.app.domain.state.RaceStateChangedListener;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.ui.fragments.chooser.RaceInfoFragmentChooser;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceInfoListener;
-import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.SetTimeRaceFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.SetStartTimeRaceFragment;
 
 
 public class RaceInfoFragment extends RaceFragment implements RaceStateChangedListener, RaceInfoListener {
@@ -69,9 +65,9 @@ public class RaceInfoFragment extends RaceFragment implements RaceStateChangedLi
 								UUID.randomUUID(), 
 								null,
 								42,
-								RaceLogRaceStatus.UNSCHEDULED));*/
+								RaceLogRaceStatus.UNSCHEDULED));
 				TimePoint time = new MillisecondsTimePoint(new Date());
-				getRace().getState().setStartTime(time, time.plus(360000));
+				getRace().getState().setStartTime(time.plus(360000));*/
 			}
 		});
 		
@@ -124,7 +120,7 @@ public class RaceInfoFragment extends RaceFragment implements RaceStateChangedLi
 	}
 
 	public void onResetTime() {
-		switchToInfoFragment(SetTimeRaceFragment.create(getRace()));
+		switchToInfoFragment(SetStartTimeRaceFragment.create(getRace()));
 	}
 	
 }

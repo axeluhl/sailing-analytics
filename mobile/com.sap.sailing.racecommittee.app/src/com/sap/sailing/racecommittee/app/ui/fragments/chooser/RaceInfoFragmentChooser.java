@@ -7,7 +7,7 @@ import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.ErrorRaceFragment
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.FinishedRaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.FinishingRaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RunningRaceFragment;
-import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.SetTimeRaceFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.SetStartTimeRaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.StartphaseRaceFragment;
 
 public class RaceInfoFragmentChooser {
@@ -16,7 +16,7 @@ public class RaceInfoFragmentChooser {
     public RaceFragment choose(ManagedRace managedRace) {
         switch (managedRace.getStatus()) {
         case UNSCHEDULED:
-            return createInfoFragment(SetTimeRaceFragment.class, managedRace);
+            return createInfoFragment(SetStartTimeRaceFragment.class, managedRace);
         case SCHEDULED:
         case STARTPHASE:
             return createInfoFragment(StartphaseRaceFragment.class, managedRace);
