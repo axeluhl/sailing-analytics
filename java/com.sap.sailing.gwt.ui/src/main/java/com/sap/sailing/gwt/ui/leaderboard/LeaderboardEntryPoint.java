@@ -47,6 +47,7 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
     private static final String PARAM_REFRESH_INTERVAL_MILLIS = "refreshIntervalMillis";
     private static final String PARAM_SHOW_OVERALL_LEADERBOARDS_ON_SAME_PAGE = "showOverallLeaderboardsOnSamePage";
     private static final String PARAM_DELAY_TO_LIVE_MILLIS = "delayToLiveMillis";
+    private static final String PARAM_ZOOM_TO = "zoomTo";
     
     /**
      * Lets the client choose a different race column selection which displays only up to the last N races with N being the integer
@@ -75,6 +76,11 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
                     createUI(showRaceDetails, embedded, delayToLiveMillis);
                 } else {
                     RootPanel.get().add(new Label(stringMessages.noSuchLeaderboard()));
+                }
+                
+                final String zoomTo = Window.Location.getParameter(PARAM_ZOOM_TO);
+                if (zoomTo != null) {
+                    RootPanel.getBodyElement().setAttribute("style", "zoom:"+zoomTo);
                 }
             }
 
