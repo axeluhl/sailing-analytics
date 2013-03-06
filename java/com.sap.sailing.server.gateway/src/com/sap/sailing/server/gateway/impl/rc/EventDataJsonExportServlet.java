@@ -26,6 +26,7 @@ public class EventDataJsonExportServlet extends AbstractJsonHttpServlet {
             result.add(eventSerializer.serialize(event));
         }
         result.writeJSONString(response.getWriter());
+        response.setContentType("application/json");
     }
 
     private static JsonSerializer<EventData> createSerializer() {
