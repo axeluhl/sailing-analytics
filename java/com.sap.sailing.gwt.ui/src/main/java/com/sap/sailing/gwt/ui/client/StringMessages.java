@@ -413,4 +413,8 @@ public interface StringMessages extends Messages {
     String strategyOption3();
 
     String legLabel();
+
+    String raceLabel();
+
+    String competitorLabel();
 }
