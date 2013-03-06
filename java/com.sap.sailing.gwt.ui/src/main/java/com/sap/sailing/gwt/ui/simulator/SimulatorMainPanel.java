@@ -78,8 +78,11 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
     private ListBox patternSelector;
     private PatternSelectorHandler patternSelectorHandler;
     private Map<String, WindPatternDTO> patternNameDTOMap;
-    private ListBox boatSelector;
+
+    private ListBox raceSelector;
     private ListBox legSelector;
+    private ListBox competitorSelector;
+    private ListBox boatClassSelector;
     private ListBox directionSelector;
 
     private WindFieldGenParamsDTO windParams;
@@ -121,11 +124,12 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
 
         @Override
         public void onValueChange(ValueChangeEvent<Double> arg0) {
+
             sliderBar.setTitle(SimulatorMainPanel.formatSliderValue(sliderBar.getCurrentValue()));
             logger.info("Slider value : " + arg0.getValue());
             setting.setValue(arg0.getValue());
             if (autoUpdate) {
-                update(boatSelector.getSelectedIndex(), legSelector.getSelectedIndex());
+                update();
             }
         }
     }
@@ -220,11 +224,17 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
         currentWPDisplay = null;
         currentWPPanel = null;
 
-        boatSelector = new ListBox();
-        boatSelector.getElement().getStyle().setProperty("width", "215px");
+        this.raceSelector = new ListBox();
+        this.raceSelector.getElement().getStyle().setProperty("width", "215px");
 
         this.legSelector = new ListBox();
         this.legSelector.getElement().getStyle().setProperty("width", "215px");
+
+        this.competitorSelector = new ListBox();
+        this.competitorSelector.getElement().getStyle().setProperty("width", "215px");
+
+        this.boatClassSelector = new ListBox();
+        this.boatClassSelector.getElement().getStyle().setProperty("width", "215px");
 
         directionSelector = new ListBox();
         directionSelector.getElement().getStyle().setProperty("width", "215px");
@@ -580,100 +590,21 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
 
         sailingPanel.add(sailingSetupLabel);
 
-        Label boatClassLabel = new Label(stringMessages.boatClass());
-        boatClassLabel.getElement().setClassName("boatClassLabel");
-        HorizontalPanel hp = new HorizontalPanel();
-        hp.getElement().setClassName("boatClassPanel");
-        hp.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
-        hp.add(boatClassLabel);
-
-        this.simulatorSvc.getBoatClasses(new AsyncCallback<BoatClassDTOsAndNotificationMessage>() {
-            @Override
-            public void onFailure(Throwable error) {
-                errorReporter.reportError("Failed to initialize boat classes!\r\n" + error.getMessage());
-            }
-
-            @Override
-            public void onSuccess(BoatClassDTOsAndNotificationMessage response) {
-                String notificationMessage = response.getNotificationMessage();
-                if(notificationMessage != "" && notificationMessage.length() != 0 && warningAlreadyShown == false) {
-                    errorReporter.reportNotification(response.getNotificationMessage());
-                    warningAlreadyShown = true;
-                }
-
-                boatClasses = response.getBoatClassDTOs();
-                for (int i = 0; i < boatClasses.length; ++i) {
-                    boatSelector.addItem(boatClasses[i].name);
-                }
-                boatSelector.setItemSelected(3, true); // polar diagram 49er STG
-                loadPolarDiagramData(3);
-            }
-        });
-
-        this.boatSelector.addChangeHandler(new ChangeHandler() {
-            @Override
-            public void onChange(ChangeEvent evnet) {
-                int selectedIndex = boatSelector.getSelectedIndex();
-                loadPolarDiagramData(selectedIndex);
-            }
-        });
-
-        hp.add(boatSelector);
-
-        Label legLabel = new Label(this.stringMessages.legLabel());
-        legLabel.getElement().setClassName("boatClassLabel");
-
-        sailingPanel.add(hp);
-        // hp.setSize("80%", "10%");
-        // hp.setWidth("80%");
+        sailingPanel.add(this.getBoatClassesSelector());
 
         if (this.mode == SailingSimulatorUtil.measured) {
 
-            HorizontalPanel hp2 = new HorizontalPanel();
-            hp2.getElement().setClassName("boatClassPanel");
-            hp2.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
-            hp2.add(legLabel);
-
-            this.simulatorSvc.getLegs(new AsyncCallback<List<String>>() {
-
-                @Override
-                public void onFailure(Throwable error) {
-                    errorReporter.reportError("Failed to read legs information!\r\n" + error.getMessage());
-                }
-
-                @Override
-                public void onSuccess(List<String> response) {
-
-                    for (String legName : response) {
-                        legSelector.addItem(legName);
-                    }
-
-                    legSelector.setItemSelected(0, true); // first leg
-                    loadLegData(0);
-                }
-            });
-
-            this.legSelector.addChangeHandler(new ChangeHandler() {
-
-                @Override
-                public void onChange(ChangeEvent arg0) {
-                    loadLegData(legSelector.getSelectedIndex());
-                }
-            });
-
-            hp2.add(this.legSelector);
-            sailingPanel.add(hp2);
-
-        } // endif in "measured mode"
+            sailingPanel.add(this.getRacesSelector());
+            sailingPanel.add(this.getCompetitorsSelector());
+            sailingPanel.add(this.getLegsSelector());
+        }
 
         Panel raceDirection = createRaceDirectionSelector();
         sailingPanel.add(raceDirection);
-        // raceDirection.setWidth("80%");
 
         Panel strategySelector = createStrategySelector();
         sailingPanel.add(strategySelector);
-        // strategySelector.setWidth("80%");
-        // I077721
+
         String polarString = stringMessages.simulatorPolarHeader();
         Label polarSetup = new Label(polarString);
         polarSetup.getElement().setClassName("innerHeadline");
@@ -689,13 +620,7 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
         this.polarDiv.getElement().setClassName("polarDiv");
         this.polarDiv.setVisible(false);
 
-        //this.loadPolarDiagramData(0);
-
-        sailingPanel.add(polarDiv);
-    }
-
-    private void loadLegData(int selectedLegIndex) {
-
+        sailingPanel.add(this.polarDiv);
     }
 
     private void loadPolarDiagramData(final int selectedBoatClass) {
@@ -735,7 +660,7 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
         .setOption("plotOptions/line/marker/enabled", false)
         .setMarginRight(2);
 
-        this.simulatorSvc.getPolarDiagramDTO(5.0, selectedBoatClass, new AsyncCallback<PolarDiagramDTOAndNotificationMessage>() {
+        this.simulatorSvc.getPolarDiagram(5.0, selectedBoatClass, new AsyncCallback<PolarDiagramDTOAndNotificationMessage>() {
             @Override
             public void onFailure(Throwable error) {
 
@@ -784,35 +709,50 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
     }
 
     private void initUpdateButton() {
+
         this.updateButton = new Button(stringMessages.update());
         this.updateButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent arg0) {
-                update(boatSelector.getSelectedIndex(), legSelector.getSelectedIndex());
+                update();
             }
         });
     }
 
-    private void update(int boatClassIndex, int legIndex) {
+    private void update() {
+
+        int selectedBoatClassIndex = boatClassSelector.getSelectedIndex();
+        int selectedRaceIndex = raceSelector.getSelectedIndex();
+        int selectedCompetitorIndex = competitorSelector.getSelectedIndex();
+        int selectedLegIndex = legSelector.getSelectedIndex();
 
         if (this.windDisplayButton.getValue()) {
             this.timePanel.setActive(true);
-            this.simulatorMap.refreshView(SimulatorMap.ViewName.WINDDISPLAY, this.currentWPDisplay, boatClassIndex, legIndex, true);
+            this.simulatorMap.refreshView(SimulatorMap.ViewName.WINDDISPLAY, this.currentWPDisplay, selectedBoatClassIndex, selectedRaceIndex,
+                    selectedCompetitorIndex, selectedLegIndex, true);
         } else if (this.summaryButton.getValue()) {
             this.timePanel.setActive(false);
-            this.simulatorMap.refreshView(SimulatorMap.ViewName.SUMMARY, this.currentWPDisplay, boatClassIndex, legIndex, true);
+            this.simulatorMap.refreshView(SimulatorMap.ViewName.SUMMARY, this.currentWPDisplay, selectedBoatClassIndex, selectedRaceIndex,
+                    selectedCompetitorIndex, selectedLegIndex, true);
         } else if (this.replayButton.getValue()) {
             this.timePanel.setActive(true);
-            this.simulatorMap.refreshView(SimulatorMap.ViewName.REPLAY, this.currentWPDisplay, boatClassIndex, legIndex, true);
+            this.simulatorMap.refreshView(SimulatorMap.ViewName.REPLAY, this.currentWPDisplay, selectedBoatClassIndex, selectedRaceIndex,
+                    selectedCompetitorIndex, selectedLegIndex, true);
         } else {
             if (this.mode == SailingSimulatorUtil.measured) {
                 this.timePanel.setActive(false);
-                this.simulatorMap.refreshView(SimulatorMap.ViewName.SUMMARY, this.currentWPDisplay, boatClassIndex, legIndex, true);
+                this.simulatorMap.refreshView(SimulatorMap.ViewName.SUMMARY, this.currentWPDisplay, selectedBoatClassIndex,
+                        selectedRaceIndex, selectedCompetitorIndex, selectedLegIndex, true);
             }
         }
     }
 
     private void initDisplayOptions(Panel mapOptions) {
+
+        final int selectedBoatClassIndex = boatClassSelector.getSelectedIndex();
+        final int selectedRaceIndex = raceSelector.getSelectedIndex();
+        final int selectedCompetitorIndex = competitorSelector.getSelectedIndex();
+        final int selectedLegIndex = legSelector.getSelectedIndex();
 
         this.summaryButton = new RadioButton("Map Display Options", stringMessages.summary());
         this.summaryButton.getElement().setClassName("MapDisplayOptions");
@@ -821,7 +761,8 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
             public void onClick(ClickEvent arg0) {
                 // timePanel.setVisible(false);
                 timePanel.setActive(false);
-                simulatorMap.refreshView(SimulatorMap.ViewName.SUMMARY, currentWPDisplay, boatSelector.getSelectedIndex(), legSelector.getSelectedIndex(),
+                simulatorMap.refreshView(SimulatorMap.ViewName.SUMMARY, currentWPDisplay, selectedBoatClassIndex, selectedRaceIndex, selectedCompetitorIndex,
+                        selectedLegIndex,
                         false);
             }
         });
@@ -831,7 +772,9 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
         this.replayButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent arg0) {
-                simulatorMap.refreshView(SimulatorMap.ViewName.REPLAY, currentWPDisplay, boatSelector.getSelectedIndex(), legSelector.getSelectedIndex(), false);
+                simulatorMap.refreshView(SimulatorMap.ViewName.REPLAY, currentWPDisplay, selectedBoatClassIndex, selectedRaceIndex, selectedCompetitorIndex,
+                        selectedLegIndex,
+                        false);
                 timePanel.setActive(true);
             }
         });
@@ -840,7 +783,8 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
         this.windDisplayButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent arg0) {
-                simulatorMap.refreshView(SimulatorMap.ViewName.WINDDISPLAY, currentWPDisplay, boatSelector.getSelectedIndex(), legSelector.getSelectedIndex(),
+                simulatorMap.refreshView(SimulatorMap.ViewName.WINDDISPLAY, currentWPDisplay, selectedBoatClassIndex, selectedRaceIndex,
+                        selectedCompetitorIndex, selectedLegIndex,
                         false);
                 timePanel.setActive(true);
             }
@@ -879,12 +823,223 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
         return dialogBox;
     }
 
-    public int getBoatClassID() {
-        return boatSelector.getSelectedIndex();
+    public int getSelectedBoatClassIndex() {
+        return this.boatClassSelector.getSelectedIndex();
     }
 
-    public int getLegIndex() {
+    public int getSelectedRaceIndex() {
+        return this.raceSelector.getSelectedIndex();
+    }
+
+    public int getSelectedLegIndex() {
         return this.legSelector.getSelectedIndex();
     }
 
+    public int getSelectedCompetitorIndex() {
+        return this.competitorSelector.getSelectedIndex();
+    }
+
+    private void loadRaceData(int selectedRaceIndex) {
+
+        if (selectedRaceIndex < 0) {
+            selectedRaceIndex = 0;
+        }
+
+        this.competitorSelector.clear();
+        this.loadCompetitors(selectedRaceIndex);
+
+        this.legSelector.clear();
+        this.loadLegs(selectedRaceIndex);
+
+    }
+
+    private void loadLegData(int selectedLegIndex) {
+
+    }
+
+    private void loadCompetitorData(int selectedCompetitorIndex) {
+
+    }
+
+    private Panel getRacesSelector() {
+        Label raceLabel = new Label(this.stringMessages.raceLabel());
+        raceLabel.getElement().setClassName("boatClassLabel");
+
+        HorizontalPanel panel = new HorizontalPanel();
+        panel.getElement().setClassName("boatClassPanel");
+        panel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
+        panel.add(raceLabel);
+
+        this.simulatorSvc.getRacesNames(new AsyncCallback<List<String>>() {
+
+            @Override
+            public void onFailure(Throwable error) {
+                errorReporter.reportError("Failed to read races information!\r\n" + error.getMessage());
+            }
+
+            @Override
+            public void onSuccess(List<String> response) {
+
+                for (String raceName : response) {
+                    raceSelector.addItem(raceName);
+                }
+
+                raceSelector.setItemSelected(0, true); // first race
+                loadRaceData(0);
+            }
+
+        });
+
+        this.raceSelector.addChangeHandler(new ChangeHandler() {
+
+            @Override
+            public void onChange(ChangeEvent arg0) {
+                loadRaceData(raceSelector.getSelectedIndex());
+            }
+        });
+
+        panel.add(this.raceSelector);
+
+        return panel;
+    }
+
+    private Panel getLegsSelector() {
+
+        Label legLabel = new Label(this.stringMessages.legLabel());
+        legLabel.getElement().setClassName("boatClassLabel");
+
+        HorizontalPanel panel = new HorizontalPanel();
+        panel.getElement().setClassName("boatClassPanel");
+        panel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
+        panel.add(legLabel);
+
+        this.loadLegs(this.raceSelector.getSelectedIndex());
+
+        this.legSelector.addChangeHandler(new ChangeHandler() {
+
+            @Override
+            public void onChange(ChangeEvent arg0) {
+                loadLegData(legSelector.getSelectedIndex());
+            }
+        });
+
+        panel.add(this.legSelector);
+
+        return panel;
+    }
+
+    private Panel getCompetitorsSelector() {
+
+        Label competitorLabel = new Label(this.stringMessages.competitorLabel());
+        competitorLabel.getElement().setClassName("boatClassLabel");
+
+        HorizontalPanel panel = new HorizontalPanel();
+        panel.getElement().setClassName("boatClassPanel");
+        panel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
+        panel.add(competitorLabel);
+
+        this.loadCompetitors(this.raceSelector.getSelectedIndex());
+
+        this.competitorSelector.addChangeHandler(new ChangeHandler() {
+
+            @Override
+            public void onChange(ChangeEvent arg0) {
+                loadCompetitorData(competitorSelector.getSelectedIndex());
+            }
+        });
+
+        panel.add(this.competitorSelector);
+
+        return panel;
+    }
+
+    private Panel getBoatClassesSelector() {
+
+        Label boatClassLabel = new Label(this.stringMessages.boatClass());
+        boatClassLabel.getElement().setClassName("boatClassLabel");
+
+        HorizontalPanel panel = new HorizontalPanel();
+        panel.getElement().setClassName("boatClassPanel");
+        panel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
+        panel.add(boatClassLabel);
+
+        this.simulatorSvc.getBoatClasses(new AsyncCallback<BoatClassDTOsAndNotificationMessage>() {
+            @Override
+            public void onFailure(Throwable error) {
+                errorReporter.reportError("Failed to initialize boat classes!\r\n" + error.getMessage());
+            }
+
+            @Override
+            public void onSuccess(BoatClassDTOsAndNotificationMessage response) {
+                String notificationMessage = response.getNotificationMessage();
+                if (notificationMessage != "" && notificationMessage.length() != 0 && warningAlreadyShown == false) {
+                    errorReporter.reportNotification(response.getNotificationMessage());
+                    warningAlreadyShown = true;
+                }
+
+                boatClasses = response.getBoatClassDTOs();
+                for (int i = 0; i < boatClasses.length; ++i) {
+                    boatClassSelector.addItem(boatClasses[i].name);
+                }
+                boatClassSelector.setItemSelected(3, true); // polar diagram 49er STG
+                loadPolarDiagramData(3);
+            }
+        });
+
+        this.boatClassSelector.addChangeHandler(new ChangeHandler() {
+            @Override
+            public void onChange(ChangeEvent evnet) {
+                int selectedIndex = boatClassSelector.getSelectedIndex();
+                loadPolarDiagramData(selectedIndex);
+            }
+        });
+
+        panel.add(boatClassSelector);
+
+        return panel;
+    }
+
+    private void loadLegs(int selectedRaceIndex) {
+
+        this.simulatorSvc.getLegsNames(selectedRaceIndex, new AsyncCallback<List<String>>() {
+
+            @Override
+            public void onFailure(Throwable error) {
+                errorReporter.reportError("Failed to read legs information!\r\n" + error.getMessage());
+            }
+
+            @Override
+            public void onSuccess(List<String> response) {
+
+                for (String legName : response) {
+                    legSelector.addItem(legName);
+                }
+
+                legSelector.setItemSelected(0, true); // first leg
+                loadLegData(0);
+            }
+        });
+    }
+
+    private void loadCompetitors(int selectedRaceIndex) {
+
+        this.simulatorSvc.getCompetitorsNames(selectedRaceIndex, new AsyncCallback<List<String>>() {
+
+            @Override
+            public void onFailure(Throwable error) {
+                errorReporter.reportError("Failed to read legs information!\r\n" + error.getMessage());
+            }
+
+            @Override
+            public void onSuccess(List<String> response) {
+
+                for (String competitorName : response) {
+                    competitorSelector.addItem(competitorName);
+                }
+
+                competitorSelector.setItemSelected(0, true); // first competitor
+                loadCompetitorData(0);
+            }
+        });
+    }
 }
