@@ -30,8 +30,9 @@ public interface SimulatorServiceAsync {
 
     void getWindPatternDisplay(WindPatternDTO pattern, AsyncCallback<WindPatternDisplay> callback);
 
-    void getSimulatorResults(char mode, WindFieldGenParamsDTO params, WindPatternDisplay display, boolean withWindField, int boatClassIndex,
-            AsyncCallback<SimulatorResultsDTO> callback);
+    // void getSimulatorResults(char mode, WindFieldGenParamsDTO params, WindPatternDisplay display, boolean
+    // withWindField, int boatClassIndex,
+    // AsyncCallback<SimulatorResultsDTO> callback);
 
     void getBoatClasses(AsyncCallback<BoatClassDTOsAndNotificationMessage> callback);
 
@@ -43,10 +44,12 @@ public interface SimulatorServiceAsync {
 
     void get1Turner(final Request1TurnerDTO requestData, AsyncCallback<Response1TurnerDTO> asyncCallback);
 
-    void getLegsNames(AsyncCallback<List<String>> asyncCallback);
+    void getLegsNames(int selectedRaceIndex, AsyncCallback<List<String>> asyncCallback);
 
     void getRacesNames(AsyncCallback<List<String>> asyncCallback);
 
-    void getSimulatorResults(char mode, WindFieldGenParamsDTO params, WindPatternDisplay pattern, boolean withWindField, int boatClassIndex, int legIndex,
-            int competitorIndex, AsyncCallback<SimulatorResultsDTO> callback);
+    void getSimulatorResults(char mode, WindFieldGenParamsDTO params, WindPatternDisplay pattern, boolean withWindField, int selectedBoatClassIndex,
+            int selectedRaceIndex, int selectedCompetitorIndex, int selectedLegIndex, AsyncCallback<SimulatorResultsDTO> callback);
+
+    void getCompetitorsNames(int selectedRaceIndex, AsyncCallback<List<String>> asyncCallback);
 }
