@@ -196,10 +196,10 @@ public class PathGeneratorOpportunistVMG extends PathGeneratorBase {
             rightGoingTime = currentTime;
         }
 
-        gen1Turner.setEvaluationParameters(true, currentPosition, leftGoingTime, wf.getTimeStep().asMillis() / (5 * 3), 100, 0.1);
+        gen1Turner.setEvaluationParameters(true, currentPosition, leftGoingTime, wf.getTimeStep().asMillis() / (5 * 3), 100);
         Path leftPath = gen1Turner.getPath();
 
-        gen1Turner.setEvaluationParameters(false, currentPosition, rightGoingTime, wf.getTimeStep().asMillis() / (5 * 3), 100, 0.1);
+        gen1Turner.setEvaluationParameters(false, currentPosition, rightGoingTime, wf.getTimeStep().asMillis() / (5 * 3), 100);
         Path rightPath = gen1Turner.getPath();
 
         if ((leftPath.getPathPoints() != null) && (rightPath.getPathPoints() != null)) {
@@ -218,4 +218,4 @@ public class PathGeneratorOpportunistVMG extends PathGeneratorBase {
         return new PathImpl(lst, wf);
     }
 
- }
+}

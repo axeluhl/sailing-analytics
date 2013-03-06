@@ -35,23 +35,22 @@ public class PathGenerator1Turner extends PathGeneratorBase {
     private TimePoint evalStartTime;
     private long evalTimeStep;
     private int evalStepMax;
-    private double evalTolerance;
 
-    private static final double DEFAULT_REACHING_TOLERANCE = 0.03;
     private static final int DEFAULT_STEP_MAX = 800;
     private static final long DEFAULT_TIMESTEP = 6666;
+
+    private static final double TRESHOLD_MINIMUM_DISTANCE_METERS = 10.0;
 
     public PathGenerator1Turner(SimulationParameters params) {
         this.simulationParameters = params;
     }
 
-    public void setEvaluationParameters(boolean leftSideVal, Position startPoint, TimePoint startTime, long timeStep, int stepMax, double tolerance) {
+    public void setEvaluationParameters(boolean leftSideVal, Position startPoint, TimePoint startTime, long timeStep, int stepMax) {
         this.leftSide = leftSideVal;
         this.evalStartPoint = startPoint;
         this.evalStartTime = startTime;
         this.evalTimeStep = timeStep;
         this.evalStepMax = stepMax;
-        this.evalTolerance = tolerance;
     }
 
     public int getMiddle() {
@@ -59,11 +58,13 @@ public class PathGenerator1Turner extends PathGeneratorBase {
     }
 
     public TimedPositionWithSpeed get1Turner(WindFieldGenerator windField, PolarDiagram polarDiagram, Position start, Position end, TimePoint startTime,
-            boolean leftSide, double reachingTolerance, int stepMax, long timeStep) {
+            boolean leftSide, int stepMax, long timeStep) {
 
-        // System.out.println("Computing one turner for the segment between (" + start.getLatDeg() + "," +
-        // start.getLngDeg() + ") and (" + end.getLatDeg() + "," + end.getLngDeg() + ") starting at " +
-        // startTime.asMillis() + " milliseconds");
+        // System.out.println("inside get1Turner");
+        // System.out.println("segment: (" + start.getLatDeg() + "," + start.getLngDeg() + ") and (" + end.getLatDeg() +
+        // "," + end.getLngDeg() + ")");
+        // System.out.println("segment length: " + start.getDistance(end).getMeters() + " meters");
+        // System.out.println("starting at " + startTime.asMillis() + " milliseconds");
 
         long turnloss = polarDiagram.getTurnLoss(); // 4000;
 
@@ -77,12 +78,12 @@ public class PathGenerator1Turner extends PathGeneratorBase {
         boolean targetFound;
         Bearing direction;
 
-        double newDistance;
+        double distanceToEnd = 0.0;
+        double newDistance = 0.0;
         double minimumDistance = courseLength.getMeters();
         double overallMinimumDistance = courseLength.getMeters();
         int stepOfOverallMinimumDistance = stepMax;
         LinkedList<TimedPositionWithSpeed> path = null;
-
 
         LinkedList<TimedPositionWithSpeed> allminpath = null;
         SpeedWithBearing currentWind = null;
@@ -90,6 +91,9 @@ public class PathGenerator1Turner extends PathGeneratorBase {
         Position nextPosition = null;
 
         for (int step = 0; step < stepMax; step++) {
+
+            // System.out.println("------------------------------");
+            // System.out.println("step = " + step);
 
             currentPosition = start;
             currentTime = startTime;
@@ -101,6 +105,8 @@ public class PathGenerator1Turner extends PathGeneratorBase {
 
             int stepLeft = 0;
             while ((stepLeft < step) && (!targetFound)) {
+
+                // System.out.println("stepLeft = " + stepLeft + " targetFound = " + targetFound);
 
                 currentWind = windField.getWind(new TimedPositionImpl(currentTime, currentPosition));
                 polarDiagram.setWind(currentWind);
@@ -119,7 +125,12 @@ public class PathGenerator1Turner extends PathGeneratorBase {
                 currentTime = nextTime;
                 path.addLast(new TimedPositionWithSpeedImpl(currentTime, currentPosition, currSpeed));
 
-                if (currentPosition.getDistance(end).getMeters() < reachingTolerance * courseLength.getMeters()) {
+                // if (currentPosition.getDistance(end).getMeters() < reachingTolerance * courseLength.getMeters()) {
+                distanceToEnd = currentPosition.getDistance(end).getMeters();
+
+                // System.out.println("distanceToEnd = " + distanceToEnd + " meters");
+
+                if (distanceToEnd < TRESHOLD_MINIMUM_DISTANCE_METERS) {
                     reachTime[step] = minimumDistance;
                     targetFound = true;
                     if (minimumDistance < overallMinimumDistance) {
@@ -135,6 +146,8 @@ public class PathGenerator1Turner extends PathGeneratorBase {
 
             int stepRight = 0;
             while ((stepRight < (stepMax - step)) && (!targetFound)) {
+
+                // System.out.println("stepRight = " + stepLeft + " targetFound = " + targetFound);
 
                 currentWind = windField.getWind(new TimedPositionImpl(currentTime, currentPosition));
                 polarDiagram.setWind(currentWind);
@@ -153,7 +166,12 @@ public class PathGenerator1Turner extends PathGeneratorBase {
                 currentTime = nextTime;
                 path.addLast(new TimedPositionWithSpeedImpl(currentTime, currentPosition, currSpeed));
 
-                if (currentPosition.getDistance(end).getMeters() < reachingTolerance * courseLength.getMeters()) {
+                // if (currentPosition.getDistance(end).getMeters() < reachingTolerance * courseLength.getMeters()) {
+                distanceToEnd = currentPosition.getDistance(end).getMeters();
+
+                // System.out.println("distanceToEnd = " + distanceToEnd + " meters");
+
+                if (distanceToEnd < TRESHOLD_MINIMUM_DISTANCE_METERS) {
 
                     Bearing bearPath2End = currentPosition.getBearingGreatCircle(end);
                     double bearDiff = bearPath2End.getDegrees() - bearStart2End.getDegrees();
@@ -194,14 +212,14 @@ public class PathGenerator1Turner extends PathGeneratorBase {
 
         TimePoint startTime = (this.evalStartTime == null) ? windField.getStartTime() : this.evalStartTime;
 
-        double reachingTolerance = (this.evalTolerance == 0) ? DEFAULT_REACHING_TOLERANCE : this.evalTolerance;
+        // double reachingTolerance = (this.evalTolerance == 0) ? DEFAULT_REACHING_TOLERANCE : this.evalTolerance;
 
         int stepMax = (this.evalStepMax == 0) ? DEFAULT_STEP_MAX : this.evalStepMax;
 
         long timeStep = (this.evalTimeStep == 0) ? (windField.getTimeStep() == null ? DEFAULT_TIMESTEP : windField.getTimeStep().asMillis() / 3)
                 : this.evalTimeStep;
 
-        this.get1Turner(windField, polarDiagram, start, end, startTime, leftSide, reachingTolerance, stepMax, timeStep);
+        this.get1Turner(windField, polarDiagram, start, end, startTime, leftSide, stepMax, timeStep);
 
         return this.result.paths[0];
     }

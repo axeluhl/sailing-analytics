@@ -253,10 +253,10 @@ public class PathGeneratorOpportunistEuclidian extends PathGeneratorBase {
 
             long oneTurnerTimeStep = wf.getTimeStep().asMillis() / 15;
 
-            gen1Turner.setEvaluationParameters(true, currentPosition, leftGoingTime, oneTurnerTimeStep, 300, 0.3);
+            gen1Turner.setEvaluationParameters(true, currentPosition, leftGoingTime, oneTurnerTimeStep, 300);
             Path leftPath = gen1Turner.getPath();
 
-            gen1Turner.setEvaluationParameters(false, currentPosition, rightGoingTime, oneTurnerTimeStep, 300, 0.3);
+            gen1Turner.setEvaluationParameters(false, currentPosition, rightGoingTime, oneTurnerTimeStep, 300);
             Path rightPath = gen1Turner.getPath();
 
             if ((leftPath.getPathPoints() != null) && (rightPath.getPathPoints() != null)) {

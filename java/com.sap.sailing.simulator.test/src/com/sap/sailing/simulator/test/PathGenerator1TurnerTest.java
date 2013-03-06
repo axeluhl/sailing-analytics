@@ -55,12 +55,10 @@ public class PathGenerator1TurnerTest {
         Position end = new DegreePosition(53.967186999999996, 10.891352);
         TimePoint startTime = new MillisecondsTimePoint(1360533600140L);
         boolean leftSide = true;
-        double reachingTolerance = 0.03;
         int stepMax = 300;
         long timeStep = 6666;
 
         TimedPositionWithSpeed result = this._pathGenerator.get1Turner(this._windField, this._polarDiagram, start, end, startTime, leftSide,
-                reachingTolerance,
                 stepMax, timeStep);
 
         Assert.assertNotNull(result);
@@ -83,12 +81,10 @@ public class PathGenerator1TurnerTest {
         Position end = new DegreePosition(53.969066999999995, 10.893665);
         TimePoint startTime = new MillisecondsTimePoint(1317552751000L);
         boolean leftSide = true;
-        double reachingTolerance = 0.3;
         int stepMax = 300;
         long timeStep = 1000;
 
         TimedPositionWithSpeed result = this._pathGenerator.get1Turner(this._windField, this._polarDiagram, start, end, startTime, leftSide,
-                reachingTolerance,
                 stepMax, timeStep);
 
         Assert.assertNotNull(result);
@@ -113,12 +109,10 @@ public class PathGenerator1TurnerTest {
 
         TimePoint startTime = new MillisecondsTimePoint(1317552751000L);
         boolean leftSide = true;
-        double reachingTolerance = 0.3;
         int stepMax = 300;
         long timeStep = 1000;
 
-        TimedPositionWithSpeed result = this._pathGenerator.get1Turner(this._windField, this._polarDiagram, end, start, startTime, leftSide, reachingTolerance,
-                stepMax, timeStep);
+        TimedPositionWithSpeed result = this._pathGenerator.get1Turner(this._windField, this._polarDiagram, end, start, startTime, leftSide, stepMax, timeStep);
 
         Assert.assertNotNull(result);
         Assert.assertNotNull(result.getPosition());
