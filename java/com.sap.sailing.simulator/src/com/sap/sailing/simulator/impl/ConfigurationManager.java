@@ -15,31 +15,42 @@ public enum ConfigurationManager {
 
     INSTANCE;
 
-    private final String _environmentVariableName = "STG_CONFIG";
-    private final String _defaultConfigFileLocation = "resources/STG_configuration.csv";
+    private static final String ENVIRONMENT_VARIABLE_NAME = "STG_CONFIG";
+    private static final String ENVIRONMENT_RACES_VARIABLE_NAME = "STG_CONFIG";
+
+    private static final String CONFIG_FILE_LOCATION = "resources/STG_configuration.csv";
+    private static final String RACES_FILE_LOCATION = "resources/races.csv";
+
     private final List<Quadruple<String, Double, String, Integer>> _boatClassesInfo = new ArrayList<Quadruple<String, Double, String, Integer>>();
+    private final List<Quadruple<String, String, String, Integer>> _racesInfo = new ArrayList<Quadruple<String, String, String, Integer>>();
 
     private ReadingConfigurationFileStatus status = ReadingConfigurationFileStatus.SUCCESS;
     private String errorMessage = "";
 
     private ConfigurationManager() {
-        String configFileLocation = System.getenv(this._environmentVariableName);
+
+        this.initFromResources(ConfigurationManager.ENVIRONMENT_VARIABLE_NAME, ConfigurationManager.CONFIG_FILE_LOCATION, true);
+
+        this.initFromResources(ConfigurationManager.ENVIRONMENT_RACES_VARIABLE_NAME, ConfigurationManager.RACES_FILE_LOCATION, false);
+    }
+
+    private void initFromResources(String envKeyName, String fileLocation, boolean polarDiagramConfig) {
+        String configFileLocation = System.getenv(envKeyName);
+
         InputStream inputStream = null;
         try {
             if (configFileLocation == null || configFileLocation == "") {
-                configFileLocation = this._defaultConfigFileLocation;
+                configFileLocation = fileLocation;
                 inputStream = this.getClass().getClassLoader().getResourceAsStream(configFileLocation);
                 this.status = ReadingConfigurationFileStatus.SUCCESS;
                 this.errorMessage = "";
-            }
-            else if (new File(configFileLocation).exists()) {
+            } else if (new File(configFileLocation).exists()) {
                 final URL csvFileURL = new URL("file:///" + configFileLocation);
                 inputStream = csvFileURL.openStream();
                 this.status = ReadingConfigurationFileStatus.SUCCESS;
                 this.errorMessage = "";
-            }
-            else {
-                configFileLocation = this._defaultConfigFileLocation;
+            } else {
+                configFileLocation = fileLocation;
                 inputStream = this.getClass().getClassLoader().getResourceAsStream(configFileLocation);
                 this.status = ReadingConfigurationFileStatus.ERROR_FINDING_CONFIG_FILE;
                 this.errorMessage = "Invalid configuration file path ( " + configFileLocation + ")! Using default configuration values!";
@@ -59,21 +70,34 @@ public enum ConfigurationManager {
 
                 elements = line.split(",");
 
-                this._boatClassesInfo.add(new Quadruple<String, Double, String, Integer>(elements[0], Double.parseDouble(elements[1]), elements[2], index++));
+                if (polarDiagramConfig) {
+                    this._boatClassesInfo
+                    .add(new Quadruple<String, Double, String, Integer>(elements[0], Double.parseDouble(elements[1]), elements[2], index++));
+                } else {
+                    this._racesInfo.add(new Quadruple<String, String, String, Integer>(elements[0], elements[1], elements[2], index++));
+                }
             }
 
             buffer.close();
             reader.close();
             inputStream.close();
-        }
-        catch (final IOException exception) {
+        } catch (final IOException exception) {
             this.status = ReadingConfigurationFileStatus.IO_ERROR;
-            this.errorMessage = "An IO error occured when parsing the configuration file ( " + this._defaultConfigFileLocation + ")! The original error message is " + exception.getMessage();
+            this.errorMessage = "An IO error occured when parsing the configuration file ( " + fileLocation
+                    + ")! The original error message is " + exception.getMessage();
         }
     }
 
     public List<Quadruple<String, Double, String, Integer>> getBoatClassesInfo() {
         return this._boatClassesInfo;
+    }
+
+    public List<Quadruple<String, String, String, Integer>> getRacesInfo() {
+        return this._racesInfo;
+    }
+
+    public int getRacesInfoCount() {
+        return this._racesInfo.size();
     }
 
     public int getBoatClassesInfoCount() {
