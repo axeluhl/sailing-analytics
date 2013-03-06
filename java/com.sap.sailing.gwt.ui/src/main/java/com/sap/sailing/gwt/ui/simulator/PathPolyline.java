@@ -51,7 +51,10 @@ public class PathPolyline {
     private int weight = 0;
     private double opacity = 0.0;
     private Map<TwoDPoint, List<TwoDPoint>> originAndHeads = null;
-    private int boatClassID = 0;
+    private int selectedBoatClassIndex = 0;
+    private int selectedRaceIndex = 0;
+    private int selectedCompetitorIndex = 0;
+    private int selectedLegIndex = 0;
     private List<SimulatorWindDTO> allPoints = null;
     private SimulatorServiceAsync simulatorService = null;
     private MapWidget map = null;
@@ -64,14 +67,14 @@ public class PathPolyline {
 
     private static boolean FIX_CUT_SPIKES = true;
     private static boolean FIX_CUT_TRIANGLES = true;
-    private static boolean ADD_1_TURNER = true;
+    private static boolean ADD_1_TURNER = false;
     private static double SMOOTHNESS_MAX_DEG = 20.0;
 
-    private int movedPointIndex = 0;
-    private int alsoMovedPointIndex = 0;
+    // private int movedPointIndex = 0;
+    // private int alsoMovedPointIndex = 0;
 
     public static PathPolyline createPathPolyline(List<SimulatorWindDTO> pathPoints, ErrorReporter errorReporter, SimulatorServiceAsync simulatorService,
-            MapWidget map, SimulatorMap simulatorMap, int boatClassID) {
+            MapWidget map, SimulatorMap simulatorMap, int selectedBoatClassIndex, int selectedRaceIndex, int selectedCompetitorIndex, int selectedLegIndex) {
 
         List<LatLng> points = new ArrayList<LatLng>();
 
@@ -81,18 +84,22 @@ public class PathPolyline {
             }
         }
 
-        return new PathPolyline(points.toArray(new LatLng[0]), boatClassID, errorReporter, pathPoints, simulatorService, map, simulatorMap);
+        return new PathPolyline(points.toArray(new LatLng[0]), selectedBoatClassIndex, selectedRaceIndex, selectedCompetitorIndex, selectedLegIndex,
+                errorReporter, pathPoints, simulatorService, map, simulatorMap);
     }
 
     private PathPolyline() {
     }
 
-    private PathPolyline(LatLng[] points, int boatClassID, ErrorReporter errorReporter, List<SimulatorWindDTO> pathPoints,
+    private PathPolyline(LatLng[] points, int selectedBoatClassIndex, int selectedRaceIndex, int selectedCompetitorIndex, int selectedLegIndex,
+            ErrorReporter errorReporter, List<SimulatorWindDTO> pathPoints,
             SimulatorServiceAsync simulatorService, MapWidget map, SimulatorMap simulatorMap) {
-        this(points, DEFAULT_COLOR, DEFAULT_WEIGHT, DEFAULT_OPACITY, boatClassID, errorReporter, pathPoints, simulatorService, map, simulatorMap);
+        this(points, DEFAULT_COLOR, DEFAULT_WEIGHT, DEFAULT_OPACITY, selectedBoatClassIndex, selectedRaceIndex, selectedCompetitorIndex,
+                selectedLegIndex, errorReporter, pathPoints, simulatorService, map, simulatorMap);
     }
 
-    private PathPolyline(LatLng[] points, String color, int weight, double opacity, int boatClassID, ErrorReporter errorReporter,
+    private PathPolyline(LatLng[] points, String color, int weight, double opacity, int selectedBoatClassIndex, int selectedRaceIndex,
+            int selectedCompetitorIndex, int selectedLegIndex, ErrorReporter errorReporter,
             List<SimulatorWindDTO> pathPoints, SimulatorServiceAsync simulatorService, MapWidget map, SimulatorMap simulatorMap) {
         this.turnPoints = points;
         this.color = color;
@@ -105,7 +112,10 @@ public class PathPolyline {
         this.allPoints = pathPoints;
         this.simulatorService = simulatorService;
         this.map = map;
-        this.boatClassID = boatClassID;
+        this.selectedBoatClassIndex = selectedBoatClassIndex;
+        this.selectedRaceIndex = selectedRaceIndex;
+        this.selectedCompetitorIndex = selectedCompetitorIndex;
+        this.selectedLegIndex = selectedLegIndex;
         this.errorReporter = errorReporter;
 
         this.simulatorMap = simulatorMap;
@@ -251,7 +261,8 @@ public class PathPolyline {
             }
         }
 
-        Request1TurnerDTO requestData = new Request1TurnerDTO(boatClassID, firstPoint, timepoint, secondPoint, !leftSide);
+        Request1TurnerDTO requestData = new Request1TurnerDTO(this.selectedBoatClassIndex, this.selectedRaceIndex, this.selectedCompetitorIndex, this.selectedLegIndex,
+                firstPoint, timepoint, secondPoint, !leftSide);
 
         this.simulatorService.get1Turner(requestData, new AsyncCallback<Response1TurnerDTO>() {
 
@@ -577,8 +588,8 @@ public class PathPolyline {
             turnPointsAsPositionDTO.add(toPositionDTO(point));
         }
 
-        RequestTotalTimeDTO requestData = new RequestTotalTimeDTO(this.boatClassID, this.allPoints, turnPointsAsPositionDTO, USE_REAL_AVERAGE_WIND,
-                STEP_DURATION_MILLISECONDS, false);
+        RequestTotalTimeDTO requestData = new RequestTotalTimeDTO(this.selectedBoatClassIndex, this.selectedRaceIndex, this.selectedCompetitorIndex,
+                this.selectedLegIndex, STEP_DURATION_MILLISECONDS, allPoints, turnPointsAsPositionDTO, USE_REAL_AVERAGE_WIND, false);
 
         this.simulatorService.getTotalTime_old(requestData, new AsyncCallback<ResponseTotalTimeDTO>() {
 
@@ -614,8 +625,8 @@ public class PathPolyline {
             turnPointsAsPositionDTO.add(toPositionDTO(point));
         }
 
-        RequestTotalTimeDTO requestData = new RequestTotalTimeDTO(this.boatClassID, this.allPoints, turnPointsAsPositionDTO, USE_REAL_AVERAGE_WIND,
-                STEP_DURATION_MILLISECONDS, false);
+        RequestTotalTimeDTO requestData = new RequestTotalTimeDTO(this.selectedBoatClassIndex, this.selectedRaceIndex, this.selectedCompetitorIndex,
+                this.selectedLegIndex, STEP_DURATION_MILLISECONDS, this.allPoints, turnPointsAsPositionDTO, USE_REAL_AVERAGE_WIND, false);
 
         this.simulatorService.getTotalTime_new(requestData, new AsyncCallback<ResponseTotalTimeDTO>() {
 
@@ -678,6 +689,6 @@ public class PathPolyline {
     }
 
     public void setBoatClassID(int boatClassIndex) {
-        this.boatClassID = boatClassIndex;
+        this.selectedBoatClassIndex = boatClassIndex;
     }
 }
