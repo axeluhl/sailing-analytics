@@ -1,16 +1,5 @@
 package com.sap.sailing.simulator.impl;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.ObjectInput;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutput;
-import java.io.ObjectOutputStream;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -19,26 +8,28 @@ import java.util.Map.Entry;
 import java.util.TreeMap;
 import java.util.logging.Logger;
 
-import org.osgi.framework.FrameworkUtil;
-
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MeterDistance;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
+import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.domain.common.impl.Util.Quadruple;
 import com.sap.sailing.simulator.Boundary;
 import com.sap.sailing.simulator.Path;
 import com.sap.sailing.simulator.SailingSimulator;
 import com.sap.sailing.simulator.SimulationParameters;
+import com.sap.sailing.simulator.TimedPositionWithSpeed;
 import com.sap.sailing.simulator.util.SailingSimulatorUtil;
+import com.sap.sailing.simulator.util.SerializationUtils;
 import com.sap.sailing.simulator.windfield.WindFieldGenerator;
 import com.sap.sailing.simulator.windfield.impl.WindFieldGeneratorMeasured;
 
 public class SailingSimulatorImpl implements SailingSimulator {
 
-    private static final Logger LOGGER = Logger.getLogger("com.sap.sailing.simulator.impl.SailingSimulatorImpl");
+    private static final Logger LOGGER = Logger.getLogger("com.sap.sailing.simulator");
 
     private SimulationParameters simulationParameters = null;
-    private Path racecourse = null;
+    private Path raceCourse = null;
     private PathGeneratorTracTrac pathGenerator = null;
 
     private static final double WIND_SCALE = 4.5;
@@ -87,6 +78,9 @@ public class SailingSimulatorImpl implements SailingSimulator {
     }
 
     private void initializePathGenerator(SimulationParameters parameters) {
+
+        System.out.println("initializing PathGeneratorTracTrac");
+
         this.pathGenerator = new PathGeneratorTracTrac(parameters);
         this.pathGenerator.setEvaluationParameters(RACE_URL, LIVE_URI, STORED_URI, WIND_SCALE);
     }
@@ -102,6 +96,26 @@ public class SailingSimulatorImpl implements SailingSimulator {
         return this.simulationParameters;
     }
 
+    private Path getFromResourcesOrDownload(int legIndex, int competitorIndex, String pathName) throws Exception {
+
+        Path path = (Path) SerializationUtils.readObjectFromResources("resources/" + pathName + "_" + competitorIndex + "_" + legIndex + ".dat");
+        if (path == null) {
+            if (pathName.equals("6#GPS Poly")) {
+                path = this.pathGenerator.getLegPolyline(legIndex, competitorIndex, new MeterDistance(4.88));
+            } else if (pathName.equals("7#GPS Track")) {
+                path = this.pathGenerator.getLeg(legIndex, competitorIndex);
+            } else if (pathName.equals("raceCourse")) {
+                path = this.pathGenerator.getRaceCourse();
+            } else {
+                throw new Exception("Unknown path name!");
+            }
+            SerializationUtils.saveToFile(path, SerializationUtils.getPathPrefix() + "\\src\\resources\\" + pathName + "_" + competitorIndex + "_" + legIndex
+                    + ".dat");
+        }
+
+        return path;
+    }
+
     @Override
     public Map<String, Path> getAllPathsForLeg(int legIndex, int competitorIndex) {
 
@@ -111,17 +125,24 @@ public class SailingSimulatorImpl implements SailingSimulator {
 
         if (this.simulationParameters.getMode() == SailingSimulatorUtil.measured) {
 
-            allPaths = this.readLegPathsFromResources(legIndex, competitorIndex);
+            Pair<Map<String, Path>, Path> result = SerializationUtils.readLegPathsFromResources(legIndex, competitorIndex);
+            allPaths = result.getA();
+            this.raceCourse = result.getB();
+
             if (allPaths != null && allPaths.isEmpty() == false && allPaths.size() == 6) {
                 return allPaths;
             }
 
-            gpsPath = this.pathGenerator.getLeg(legIndex, competitorIndex);
-            gpsPathPoly = this.pathGenerator.getLegPolyline(legIndex, competitorIndex, new MeterDistance(4.88));
+            try {
+                gpsPath = this.getFromResourcesOrDownload(legIndex, competitorIndex, "7#GPS Track");
+                gpsPathPoly = this.getFromResourcesOrDownload(legIndex, competitorIndex, "6#GPS Poly");
+                this.raceCourse = this.getFromResourcesOrDownload(legIndex, competitorIndex, "raceCourse");
+            } catch (Exception e) {
+                LOGGER.severe(e.getMessage());
+            }
+
             allPaths.put("6#GPS Poly", gpsPathPoly);
             allPaths.put("7#GPS Track", gpsPath);
-            this.racecourse = this.pathGenerator.getRaceCourse();
-
         }
 
         //
@@ -133,8 +154,11 @@ public class SailingSimulatorImpl implements SailingSimulator {
         if (this.simulationParameters.getMode() == SailingSimulatorUtil.measured) {
             ((WindFieldGeneratorMeasured) wf).setGPSWind(gpsPath);
             gridArea = new Position[2];
-            gridArea[0] = this.racecourse.getPathPoints().get(0).getPosition();
-            gridArea[1] = this.racecourse.getPathPoints().get(1).getPosition();
+
+            List<TimedPositionWithSpeed> pathPoints = this.raceCourse.getPathPoints();
+
+            gridArea[0] = pathPoints.get(0).getPosition();
+            gridArea[1] = pathPoints.get(1).getPosition();
             List<Position> course = new ArrayList<Position>();
             course.add(gridArea[0]);
             course.add(gridArea[1]);
@@ -254,7 +278,7 @@ public class SailingSimulatorImpl implements SailingSimulator {
         allPaths.put("1#Omniscient", optPath);
 
         if (this.simulationParameters.getMode() == SailingSimulatorUtil.measured) {
-            this.saveLegPathsToFiles(allPaths, legIndex, competitorIndex);
+            SerializationUtils.saveLegPathsToFiles(allPaths, this.raceCourse, legIndex, competitorIndex);
         }
 
         return allPaths;
@@ -269,19 +293,19 @@ public class SailingSimulatorImpl implements SailingSimulator {
 
         if (this.simulationParameters.getMode() == SailingSimulatorUtil.measured) {
 
-            allPaths = this.readPathsFromResources();
+            Pair<Map<String, Path>, Path> result = SerializationUtils.readPathsFromResources();
+            allPaths = result.getA();
+            this.raceCourse = result.getB();
+
             if (allPaths != null && allPaths.isEmpty() == false && allPaths.size() == 6) {
                 return allPaths;
             }
-
-            // PathGeneratorTracTrac genTrac = new PathGeneratorTracTrac(this.simulationParameters);
-            // genTrac.setEvaluationParameters(RACE_URL, LIVE_URI, STORED_URI, WIND_SCALE);
 
             gpsPath = this.pathGenerator.getPath();
             gpsPathPoly = this.pathGenerator.getPathPolyline(new MeterDistance(4.88));
             allPaths.put("6#GPS Poly", gpsPathPoly);
             allPaths.put("7#GPS Track", gpsPath);
-            this.racecourse = this.pathGenerator.getRaceCourse();
+            this.raceCourse = this.pathGenerator.getRaceCourse();
 
         }
 
@@ -294,8 +318,8 @@ public class SailingSimulatorImpl implements SailingSimulator {
         if (this.simulationParameters.getMode() == SailingSimulatorUtil.measured) {
             ((WindFieldGeneratorMeasured) wf).setGPSWind(gpsPath);
             gridArea = new Position[2];
-            gridArea[0] = this.racecourse.getPathPoints().get(0).getPosition();
-            gridArea[1] = this.racecourse.getPathPoints().get(1).getPosition();
+            gridArea[0] = this.raceCourse.getPathPoints().get(0).getPosition();
+            gridArea[1] = this.raceCourse.getPathPoints().get(1).getPosition();
             List<Position> course = new ArrayList<Position>();
             course.add(gridArea[0]);
             course.add(gridArea[1]);
@@ -415,7 +439,7 @@ public class SailingSimulatorImpl implements SailingSimulator {
         allPaths.put("1#Omniscient", optPath);
 
         if (this.simulationParameters.getMode() == SailingSimulatorUtil.measured) {
-            this.savePathsToFiles(allPaths);
+            SerializationUtils.savePathsToFiles(allPaths, this.raceCourse);
         }
 
         return allPaths;
@@ -423,7 +447,7 @@ public class SailingSimulatorImpl implements SailingSimulator {
 
     @Override
     public Path getRaceCourse() {
-        return this.racecourse;
+        return this.raceCourse;
     }
 
     @Override
@@ -468,225 +492,10 @@ public class SailingSimulatorImpl implements SailingSimulator {
         return allTimedPaths;
     }
 
-    private static String[] PATH_NAMES = new String[] { "1#Omniscient", "2#Opportunistic", "3#1-Turner Left",
-        "4#1-Turner Right", "6#GPS Poly", "7#GPS Track" };
-    private static String PATH_PREFIX = "";
-
-    private boolean saveLegPathsToFiles(Map<String, Path> paths, int legIndex, int competitorIndex) {
-        if (paths == null) {
-            return false;
-        }
-
-        if (paths.isEmpty()) {
-            return true;
-        }
-
-        String pathPrefix = "";
-
-        try {
-            pathPrefix = SailingSimulatorImpl.getPathPrefix();
-            LOGGER.info("pathPrefix=" + pathPrefix);
-        } catch (ClassNotFoundException exception) {
-            return false;
-        }
-
-        String filePath = "";
-        boolean result = true;
-
-        for (String name : SailingSimulatorImpl.PATH_NAMES) {
-            filePath = pathPrefix + "\\src\\resources\\" + name + "_" + competitorIndex + "_" + legIndex + ".dat";
-            result &= SailingSimulatorImpl.saveToFile(paths.get(name), filePath);
-        }
-
-        filePath = pathPrefix + "\\src\\resources\\racecourse_" + competitorIndex + "_" + legIndex + ".dat";
-        result &= SailingSimulatorImpl.saveToFile(this.racecourse, filePath);
-
-        return result;
-    }
-
-    private boolean savePathsToFiles(Map<String, Path> paths) {
-        if (paths == null) {
-            return false;
-        }
-
-        if (paths.isEmpty()) {
-            return true;
-        }
-
-        String pathPrefix = "";
-
-        try {
-            pathPrefix = SailingSimulatorImpl.getPathPrefix();
-            LOGGER.info("pathPrefix=" + pathPrefix);
-        } catch (ClassNotFoundException exception) {
-            return false;
-        }
-
-        String filePath = "";
-        boolean result = true;
-
-        for (String name : SailingSimulatorImpl.PATH_NAMES) {
-            filePath = pathPrefix + "\\src\\resources\\" + name + ".dat";
-            result &= SailingSimulatorImpl.saveToFile(paths.get(name), filePath);
-        }
-
-        filePath = pathPrefix + "\\src\\resources\\racecourse.dat";
-        result &= SailingSimulatorImpl.saveToFile(this.racecourse, filePath);
-
-        return result;
-    }
-
-    public static String getPathPrefix() throws ClassNotFoundException {
-        if (SailingSimulatorImpl.PATH_PREFIX == null || SailingSimulatorImpl.PATH_PREFIX.length() == 0
-                || SailingSimulatorImpl.PATH_PREFIX.equals("")) {
-            SailingSimulatorImpl.PATH_PREFIX = SailingSimulatorImpl.computePathPrefix();
-        }
-
-        return SailingSimulatorImpl.PATH_PREFIX;
-    }
-
-    private static String computePathPrefix() throws ClassNotFoundException {
-        String bundleName = FrameworkUtil.getBundle(
-                Class.forName("com.sap.sailing.simulator.impl.SailingSimulatorImpl")).getSymbolicName();
-        String bundlesProperty = System.getProperty("osgi.bundles");
-
-        int bundleNameStart = bundlesProperty.indexOf(bundleName);
-        int bundleNameEnd = bundleNameStart + bundleName.length();
-
-        String prependedBundlePath = bundlesProperty.substring(0, bundleNameEnd);
-
-        int prefixPos = prependedBundlePath.lastIndexOf("reference:file:");
-
-        if (prefixPos >= 0) {
-            prependedBundlePath = prependedBundlePath.substring(prefixPos + 15, prependedBundlePath.length());
-        }
-
-        return prependedBundlePath;
-    }
-
-    private Map<String, Path> readLegPathsFromResources(int legIndex, int competitorIndex) {
-        HashMap<String, Path> paths = new HashMap<String, Path>();
-        Path path = null;
-        String filePath = "";
-
-        for (String pathName : PATH_NAMES) {
-            filePath = "resources/" + pathName + "_" + competitorIndex + "_" + legIndex + ".dat";
-            path = readFromResourcesFile(filePath);
-            if (path == null) {
-                System.err.println("[ERROR][SailingSimulatorImpl][readPathsFromResources] Cannot de-serialize path from" + pathName);
-            } else {
-                paths.put(pathName, path);
-            }
-        }
-
-        this.racecourse = readFromResourcesFile("resources/racecourse_" + competitorIndex + "_" + legIndex + ".dat");
-
-        return paths;
-    }
-
-    private Map<String, Path> readPathsFromResources() {
-        HashMap<String, Path> paths = new HashMap<String, Path>();
-        Path path = null;
-        String filePath = "";
-
-        for (String pathName : PATH_NAMES) {
-            filePath = "resources/" + pathName + ".dat";
-            path = readFromResourcesFile(filePath);
-            if (path == null) {
-                System.err
-                .println("[ERROR][SailingSimulatorImpl][readPathsFromResources] Cannot de-serialize path from"
-                        + pathName);
-            } else {
-                paths.put(pathName, path);
-            }
-        }
-
-        this.racecourse = readFromResourcesFile("resources/racecourse.dat");
-
-        return paths;
-    }
-
-    @SuppressWarnings("unused")
-    private static Path readFromExternalFile(String fileName) {
-        Path result = null;
-        try {
-            InputStream file = new FileInputStream(fileName);
-            InputStream buffer = new BufferedInputStream(file);
-            ObjectInput input = new ObjectInputStream(buffer);
-
-            try {
-                result = (Path) input.readObject();
-            } finally {
-                input.close();
-                buffer.close();
-                file.close();
-            }
-        } catch (ClassNotFoundException ex) {
-            System.err.println("[ERROR][SailingSimulatorImpl][readFromExternalFile][ClassNotFoundException] "
-                    + ex.getMessage());
-            result = null;
-        } catch (IOException ex) {
-            System.err.println("[ERROR][SailingSimulatorImpl][readFromExternalFile][IOException]  " + ex.getMessage());
-            result = null;
-        }
-
-        return result;
-    }
-
-    private static Path readFromResourcesFile(String fileName) {
-        Path result = null;
-        try {
-            ClassLoader classLoader = Class.forName("com.sap.sailing.simulator.impl.SailingSimulatorImpl")
-                    .getClassLoader();
-            InputStream file = classLoader.getResourceAsStream(fileName);
-            InputStream buffer = new BufferedInputStream(file);
-            ObjectInput input = new ObjectInputStream(buffer);
-
-            try {
-                result = (Path) input.readObject();
-            } finally {
-                input.close();
-                buffer.close();
-                file.close();
-            }
-        } catch (ClassNotFoundException ex) {
-            System.err.println("[ERROR][SailingSimulatorImpl][readFromResourcesFile][ClassNotFoundException] "
-                    + ex.getMessage());
-            result = null;
-        } catch (IOException ex) {
-            System.err.println("[ERROR][SailingSimulatorImpl][readFromResourcesFile][IOException]  " + ex.getMessage());
-            result = null;
-        }
-
-        return result;
-    }
-
-    private static boolean saveToFile(Path path, String fileName) {
-        boolean result = true;
-        try {
-            OutputStream file = new FileOutputStream(fileName);
-            OutputStream buffer = new BufferedOutputStream(file);
-            ObjectOutput output = new ObjectOutputStream(buffer);
-
-            try {
-                output.writeObject(path);
-            } finally {
-                output.close();
-                buffer.close();
-                file.close();
-            }
-        } catch (IOException ex) {
-            System.err.println("[ERROR][SailingSimulatorImpl][saveToFile][IOException]  " + ex.getMessage());
-            result = false;
-        }
-
-        return result;
-    }
-
     @Override
     public Path getGPSTrack() {
 
-        Path path = readFromResourcesFile("resources/7#GPS Track.dat");
+        Path path = (Path) SerializationUtils.readObjectFromResources("resources/7#GPS Track.dat");
         if (path == null) {
             System.err.println("[ERROR][SailingSimulatorImpl][readPathsFromResources] Cannot de-serialize path from resources/7#GPS Track.dat");
             LOGGER.warning("[ERROR][SailingSimulatorImpl][readPathsFromResources] Cannot de-serialize path from resources/7#GPS Track.dat");
@@ -700,7 +509,7 @@ public class SailingSimulatorImpl implements SailingSimulator {
     @Override
     public Path getLegGPSTrack(int legIndex, int competitorIndex) {
 
-        Path path = readFromResourcesFile("resources/7#GPS Track_" + competitorIndex + "_" + legIndex + ".dat");
+        Path path = (Path) SerializationUtils.readObjectFromResources("resources/7#GPS Track_" + competitorIndex + "_" + legIndex + ".dat");
         if (path == null) {
             System.err.println("[ERROR][SailingSimulatorImpl][readPathsFromResources] Cannot de-serialize path from resources/7#GPS Track.dat");
             LOGGER.warning("[ERROR][SailingSimulatorImpl][readPathsFromResources] Cannot de-serialize path from resources/7#GPS Track.dat");
@@ -711,10 +520,34 @@ public class SailingSimulatorImpl implements SailingSimulator {
         return path;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public List<String> getLegsNames() {
 
-        return this.pathGenerator.getLegsNames();
+        List<String> legsNames = null;
+
+        legsNames = (List<String>) SerializationUtils.readObjectFromResources("resources/" + SerializationUtils.LEGSNAMES_DAT);
+        if (legsNames != null && legsNames.isEmpty() == false && legsNames.size() == 4) {
+            return legsNames;
+        }
+
+        legsNames = this.pathGenerator.getLegsNames();
+
+        SerializationUtils.saveLegsNamesToFiles(legsNames);
+
+        return legsNames;
+    }
+
+    @Override
+    public List<String> getRacesNames() {
+
+        List<String> racesNames = new ArrayList<String>();
+
+        for (Quadruple<String, String, String, Integer> raceInfo : ConfigurationManager.INSTANCE.getRacesInfo()) {
+            racesNames.add(raceInfo.getA());
+        }
+
+        return racesNames;
     }
 
     @Override
