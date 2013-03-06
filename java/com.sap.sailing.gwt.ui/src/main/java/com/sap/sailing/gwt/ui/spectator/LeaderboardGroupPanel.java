@@ -1,8 +1,6 @@
 package com.sap.sailing.gwt.ui.spectator;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -289,7 +287,7 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
 
     private void renderSeriesToHtml(StrippedLeaderboardDTO leaderboard, SeriesDTO series, boolean renderSeriesName, SafeHtmlBuilder b) {
         boolean hasMultipleFleets = series.getFleets().size() > 1;
-        Map<String, List<RaceColumnDTO>> racesOrderedByFleets = getRacesOrderedByFleets(leaderboard);
+        //Map<String, List<RaceColumnDTO>> racesOrderedByFleets = getRacesOfSeriesOrderedByFleets(leaderboard, series);
         b.appendHtmlConstant("<div style=\"float:left;\">");
         if(renderSeriesName) {
             b.append(TEXTTEMPLATE.textWithClass(series.name, 50, STYLE_TABLE_TEXT));
@@ -298,7 +296,7 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
         b.appendHtmlConstant("<div style=\"float:left;\">");
         for(FleetDTO fleet: series.getFleets()) {
             Color color = fleet.getColor();
-            List<RaceColumnDTO> raceColumns = racesOrderedByFleets.get(fleet.name);
+            //List<RaceColumnDTO> raceColumns = racesOrderedByFleets.get(fleet.name);
             // show the "fleet" and the color only if there are more than one fleet in this fleet group and a color has been set
             b.appendHtmlConstant("<div style=\"\">");
 
@@ -314,7 +312,7 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
                 } 
             }
             
-            renderRacesToHTml(leaderboard.name, raceColumns, fleet, b);
+            renderRacesToHTml(leaderboard.name, series.getRaceColumns(), fleet, b);
             
             b.appendHtmlConstant("</div>");
         }
@@ -353,24 +351,6 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
         } else {
             b.append(TEXTTEMPLATE.textWithClass(raceColumnName, STYLE_INACTIVE_RACE));
         }
-    }
-    
-    
-    private Map<String, List<RaceColumnDTO>> getRacesOrderedByFleets(StrippedLeaderboardDTO leaderboard) {
-        Map<String, List<RaceColumnDTO>> racesOrderedByFleets = new LinkedHashMap<String, List<RaceColumnDTO>>();
-        for (RaceColumnDTO raceColumn : leaderboard.getRaceList()) {
-            for (FleetDTO fleet : raceColumn.getFleets()) {
-                List<RaceColumnDTO> raceList = racesOrderedByFleets.get(fleet.name);
-                if (raceList == null) {
-                    raceList = new ArrayList<RaceColumnDTO>();
-                    raceList.add(raceColumn);
-                    racesOrderedByFleets.put(fleet.name, raceList);
-                } else {
-                    raceList.add(raceColumn);
-                }
-            }
-        }
-        return racesOrderedByFleets;
     }
     
     private SafeHtml getAnchor(String link, String linkText, String style) {
