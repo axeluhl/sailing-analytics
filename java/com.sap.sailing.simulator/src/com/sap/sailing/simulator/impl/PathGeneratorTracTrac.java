@@ -36,7 +36,7 @@ import com.sap.sailing.simulator.TimedPositionWithSpeed;
 
 public class PathGeneratorTracTrac extends PathGeneratorBase {
 
-    private static final Logger LOGGER = Logger.getLogger("com.sap.sailing.simulator.impl.PathGeneratorTracTrac");
+    private static final Logger LOGGER = Logger.getLogger("com.sap.sailing.simulator");
     private static final long DEFAULT_TIMEOUT_MILLISECONDS = 60000;
     private static final WindStore DEFAULT_WINDSTORE = EmptyWindStore.INSTANCE;
 
