@@ -11,9 +11,7 @@ import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.racelog.PassAwareRaceLog;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
-import com.sap.sailing.domain.racelog.impl.RaceLogPassChangeEventImpl;
-import com.sap.sailing.domain.racelog.impl.RaceLogRaceStatusEventImpl;
-import com.sap.sailing.domain.racelog.impl.RaceLogStartTimeEventImpl;
+import com.sap.sailing.domain.racelog.RaceLogEventFactory;
 import com.sap.sailing.racecommittee.app.domain.racelog.RaceLogChangedListener;
 import com.sap.sailing.racecommittee.app.domain.racelog.impl.RaceLogChangedVisitor;
 import com.sap.sailing.racecommittee.app.domain.state.RaceState;
@@ -95,9 +93,8 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
             onRaceAborted(eventTime.minus(1));
         }
 
-        RaceLogEvent event = new RaceLogStartTimeEventImpl(eventTime, UUID.randomUUID(),
-                Collections.<Competitor> emptyList(), raceLog.getCurrentPassId(), RaceLogRaceStatus.SCHEDULED,
-                newStartTime);
+        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createStartTimeEvent(eventTime, UUID.randomUUID(), 
+                Collections.<Competitor> emptyList(), raceLog.getCurrentPassId(), newStartTime);
         this.raceLog.add(event);
     }
 
@@ -106,31 +103,26 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
     }
 
     public void onRaceAborted(TimePoint eventTime) {
-        RaceLogEvent abortEvent = new RaceLogRaceStatusEventImpl(eventTime, UUID.randomUUID(),
-                Collections.<Competitor> emptyList(), raceLog.getCurrentPassId(), RaceLogRaceStatus.UNSCHEDULED);
+        RaceLogEvent abortEvent = RaceLogEventFactory.INSTANCE.createRaceStatusEvent(eventTime, raceLog.getCurrentPassId(), RaceLogRaceStatus.UNSCHEDULED);
         this.raceLog.add(abortEvent);
 
-        RaceLogEvent passChangeEvent = new RaceLogPassChangeEventImpl(eventTime, UUID.randomUUID(),
-                Collections.<Competitor> emptyList(), raceLog.getCurrentPassId() + 1);
+        RaceLogEvent passChangeEvent = RaceLogEventFactory.INSTANCE.createRaceLogPassChangeEvent(eventTime, raceLog.getCurrentPassId() + 1);
         this.raceLog.add(passChangeEvent);
     }
 
     public void onRaceStarted(TimePoint eventTime) {
-        RaceLogEvent startEvent = new RaceLogRaceStatusEventImpl(eventTime, UUID.randomUUID(),
-                Collections.<Competitor> emptyList(), raceLog.getCurrentPassId(), RaceLogRaceStatus.RUNNING);
-        this.raceLog.add(startEvent);
+        RaceLogEvent statusEvent = RaceLogEventFactory.INSTANCE.createRaceStatusEvent(eventTime, raceLog.getCurrentPassId(), RaceLogRaceStatus.RUNNING);
+        this.raceLog.add(statusEvent);
     }
 
     public void onRaceFinishing(TimePoint eventTime) {
-        RaceLogEvent startEvent = new RaceLogRaceStatusEventImpl(eventTime, UUID.randomUUID(),
-                Collections.<Competitor> emptyList(), raceLog.getCurrentPassId(), RaceLogRaceStatus.FINISHING);
-        this.raceLog.add(startEvent);
+        RaceLogEvent statusEvent = RaceLogEventFactory.INSTANCE.createRaceStatusEvent(eventTime, raceLog.getCurrentPassId(), RaceLogRaceStatus.FINISHING);
+        this.raceLog.add(statusEvent);
     }
 
     public void onRaceFinished(TimePoint eventTime) {
-        RaceLogEvent startEvent = new RaceLogRaceStatusEventImpl(eventTime, UUID.randomUUID(),
-                Collections.<Competitor> emptyList(), raceLog.getCurrentPassId(), RaceLogRaceStatus.FINISHED);
-        this.raceLog.add(startEvent);
+        RaceLogEvent statusEvent = RaceLogEventFactory.INSTANCE.createRaceStatusEvent(eventTime, raceLog.getCurrentPassId(), RaceLogRaceStatus.FINISHED);
+        this.raceLog.add(statusEvent);
     }
 
     public RaceLogRaceStatus updateStatus() {

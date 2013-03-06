@@ -8,7 +8,7 @@ import org.json.simple.JSONObject;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
-import com.sap.sailing.domain.racelog.impl.RaceLogCourseAreaChangeEventImpl;
+import com.sap.sailing.domain.racelog.RaceLogEventFactory;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogCourseAreaChangedEventSerializer;
 
@@ -20,7 +20,7 @@ public class RaceLogCourseAreaChangedEventDeserializer extends BaseRaceLogEventD
 
         String courseAreaId = object.get(RaceLogCourseAreaChangedEventSerializer.FIELD_COURSE_AREA_ID).toString();
 
-        return new RaceLogCourseAreaChangeEventImpl(timePoint, id, Collections.<Competitor> emptyList(), passId,
+        return RaceLogEventFactory.INSTANCE.createRaceLogCourseAreaChangedEvent(timePoint, id, Collections.<Competitor> emptyList(), passId, 
                 Helpers.tryUuidConversion(courseAreaId));
     }
 

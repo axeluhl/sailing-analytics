@@ -9,7 +9,7 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
-import com.sap.sailing.domain.racelog.impl.RaceLogRaceStatusEventImpl;
+import com.sap.sailing.domain.racelog.RaceLogEventFactory;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogRaceStatusEventSerializer;
 
@@ -22,7 +22,7 @@ public class RaceLogRaceStatusEventDeserializer extends BaseRaceLogEventDeserial
         String statusValue = object.get(RaceLogRaceStatusEventSerializer.FIELD_NEXT_STATUS).toString();
         RaceLogRaceStatus nextStatus = RaceLogRaceStatus.valueOf(statusValue);
 
-        return new RaceLogRaceStatusEventImpl(timePoint, id, Collections.<Competitor> emptyList(), passId, nextStatus);
+        return RaceLogEventFactory.INSTANCE.createRaceStatusEvent(timePoint, id, Collections.<Competitor> emptyList(), passId, nextStatus);
     }
 
 }

@@ -9,7 +9,7 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
-import com.sap.sailing.domain.racelog.impl.RaceLogFlagEventImpl;
+import com.sap.sailing.domain.racelog.RaceLogEventFactory;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogFlagEventSerializer;
 
 public class RaceLogFlagEventDeserializer extends BaseRaceLogEventDeserializer {
@@ -21,7 +21,7 @@ public class RaceLogFlagEventDeserializer extends BaseRaceLogEventDeserializer {
         Flags lowerFlag = Flags.valueOf(object.get(RaceLogFlagEventSerializer.FIELD_LOWER_FLAG).toString());
         boolean isDisplayed = (Boolean) object.get(RaceLogFlagEventSerializer.FIELD_DISPLAYED);
 
-        return new RaceLogFlagEventImpl(timePoint, id, Collections.<Competitor> emptyList(), passId, upperFlag,
+        return RaceLogEventFactory.INSTANCE.createFlagEvent(timePoint, id, Collections.<Competitor> emptyList(), passId, upperFlag,
                 lowerFlag, isDisplayed);
     }
 
