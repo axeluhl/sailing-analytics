@@ -568,10 +568,10 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
 
     @Override
     public void recordWind(Wind wind, WindSource windSource) {
-        TimePoint endOfRace = getEndOfRace();
-        // record wind fix only if it's still within reasonable time after the race has ended or the race hasn't ended yet
-        if (endOfRace == null
-                || endOfRace.plus(TimingConstants.IS_LIVE_GRACE_PERIOD_IN_MILLIS).before(wind.getTimePoint())) {
+        TimePoint endOfTracking = getEndOfTracking();
+        // record wind fix only if it's still within reasonable time after the tracking for the race has ended or the race tracking hasn't ended yet
+        if (endOfTracking == null
+                || endOfTracking.plus(TimingConstants.IS_LIVE_GRACE_PERIOD_IN_MILLIS).before(wind.getTimePoint())) {
             getOrCreateWindTrack(windSource).add(wind);
             updated(/* time point */null); // wind events shouldn't advance race time
             triggerManeuverCacheRecalculationForAllCompetitors();

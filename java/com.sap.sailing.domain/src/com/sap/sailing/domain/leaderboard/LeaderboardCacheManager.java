@@ -1,0 +1,294 @@
+package com.sap.sailing.domain.leaderboard;
+
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.WeakHashMap;
+
+import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.Fleet;
+import com.sap.sailing.domain.base.Mark;
+import com.sap.sailing.domain.base.RaceColumn;
+import com.sap.sailing.domain.base.RaceColumnListener;
+import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.common.MaxPointsReason;
+import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.WindSource;
+import com.sap.sailing.domain.racelog.RaceLogEvent;
+import com.sap.sailing.domain.racelog.RaceLogIdentifier;
+import com.sap.sailing.domain.tracking.GPSFix;
+import com.sap.sailing.domain.tracking.GPSFixMoving;
+import com.sap.sailing.domain.tracking.MarkPassing;
+import com.sap.sailing.domain.tracking.RaceChangeListener;
+import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.TrackedRaceStatus;
+import com.sap.sailing.domain.tracking.Wind;
+
+/**
+ * Manages a {@link LeaderboardCache}. When a {@link Leaderboard} is {@link LeaderboardCache#add added} to the cache, it
+ * start observing the leaderboard for changes through the linked {@link TrackedRace}s as a {@link RaceChangeListener}
+ * and through the race columns as a {@link RaceColumnListener}. When changes affecting a leaderboard occur, the
+ * {@link LeaderboardCache#removeFromCache(Leaderboard)} method is called on the leaderboard cache.
+ * 
+ * @author Axel Uhl (D043530)
+ * 
+ */
+public class LeaderboardCacheManager {
+    private final WeakHashMap<Leaderboard, CacheInvalidationUponScoreCorrectionListener> scoreCorrectionListeners;
+    private final WeakHashMap<Leaderboard, Map<TrackedRace, Set<CacheInvalidationListener>>> invalidationListenersPerLeaderboard;
+    private final WeakHashMap<Leaderboard, RaceColumnListener> raceColumnListeners;
+    
+    private class CacheInvalidationListener implements RaceChangeListener {
+        private final Leaderboard leaderboard;
+        private final TrackedRace trackedRace;
+        
+        public CacheInvalidationListener(Leaderboard leaderboard, TrackedRace trackedRace) {
+            this.leaderboard = leaderboard;
+            this.trackedRace = trackedRace;
+        }
+        
+        @Override
+        public void competitorPositionChanged(GPSFixMoving fix, Competitor competitor) {
+            removeFromCache(leaderboard);
+        }
+
+        @Override
+        public void statusChanged(TrackedRaceStatus newStatus) {
+            removeFromCache(leaderboard);
+        }
+
+        @Override
+        public void markPositionChanged(GPSFix fix, Mark mark) {
+            removeFromCache(leaderboard);
+        }
+
+        @Override
+        public void markPassingReceived(Competitor competitor, Map<Waypoint, MarkPassing> oldMarkPassings,
+                Iterable<MarkPassing> markPassings) {
+            removeFromCache(leaderboard);
+        }
+
+        @Override
+        public void speedAveragingChanged(long oldMillisecondsOverWhichToAverage, long newMillisecondsOverWhichToAverage) {
+            removeFromCache(leaderboard);
+        }
+
+        @Override
+        public void windDataReceived(Wind wind, WindSource windSource) {
+            removeFromCache(leaderboard);
+        }
+
+        @Override
+        public void windDataRemoved(Wind wind, WindSource windSource) {
+            removeFromCache(leaderboard);
+        }
+
+        @Override
+        public void windAveragingChanged(long oldMillisecondsOverWhichToAverage, long newMillisecondsOverWhichToAverage) {
+            removeFromCache(leaderboard);
+        }
+
+        @Override
+        public void raceTimesChanged(TimePoint startOfTracking, TimePoint endOfTracking, TimePoint startTimeReceived) {
+            removeFromCache(leaderboard);
+        }
+
+        @Override
+        public void delayToLiveChanged(long delayToLiveInMillis) {
+            removeFromCache(leaderboard);
+        }
+
+        @Override
+        public void windSourcesToExcludeChanged(Iterable<? extends WindSource> windSourcesToExclude) {
+            removeFromCache(leaderboard);
+        }
+
+        private void removeFromTrackedRace() {
+            trackedRace.removeListener(this);
+        }
+    }
+    
+    private class CacheInvalidationUponScoreCorrectionListener implements ScoreCorrectionListener {
+        private final Leaderboard leaderboard;
+        
+        public CacheInvalidationUponScoreCorrectionListener(Leaderboard leaderboard) {
+            this.leaderboard = leaderboard;
+        }
+
+        @Override
+        public void correctedScoreChanced(Competitor competitor, RaceColumn raceColumn, Double oldCorrectedScore, Double newCorrectedScore) {
+            removeFromCache(leaderboard);
+        }
+
+        @Override
+        public void maxPointsReasonChanced(Competitor competitor, MaxPointsReason oldMaxPointsReason,
+                MaxPointsReason newMaxPointsReason) {
+            removeFromCache(leaderboard);
+        }
+
+        @Override
+        public void carriedPointsChanged(Competitor competitor, Double oldCarriedPoints, Double newCarriedPoints) {
+            removeFromCache(leaderboard);
+        }
+
+        @Override
+        public void isSuppressedChanged(Competitor competitor, boolean newIsSuppressed) {
+            removeFromCache(leaderboard);
+        }
+    }
+
+    private final LeaderboardCache leaderboardCache;
+    
+    public LeaderboardCacheManager(LeaderboardCache leaderboardCache) {
+        this.leaderboardCache = leaderboardCache;
+        this.invalidationListenersPerLeaderboard = new WeakHashMap<Leaderboard, Map<TrackedRace, Set<CacheInvalidationListener>>>();
+        this.raceColumnListeners = new WeakHashMap<Leaderboard, RaceColumnListener>();
+        this.scoreCorrectionListeners = new WeakHashMap<Leaderboard, CacheInvalidationUponScoreCorrectionListener>();
+    }
+    
+    private void removeFromCache(Leaderboard leaderboard) {
+        leaderboardCache.removeFromCache(leaderboard);
+        synchronized (invalidationListenersPerLeaderboard) {
+            Map<TrackedRace, Set<CacheInvalidationListener>> listenersMap = invalidationListenersPerLeaderboard
+                    .remove(leaderboard);
+            if (listenersMap != null) {
+                for (Map.Entry<TrackedRace, Set<CacheInvalidationListener>> e : listenersMap.entrySet()) {
+                    for (CacheInvalidationListener listener : e.getValue()) {
+                        listener.removeFromTrackedRace();
+                    }
+                }
+            }
+        }
+        synchronized (raceColumnListeners) {
+            leaderboard.removeRaceColumnListener(raceColumnListeners.remove(leaderboard));
+        }
+        synchronized (scoreCorrectionListeners) {
+            leaderboard.getScoreCorrection().removeScoreCorrectionListener(scoreCorrectionListeners.remove(leaderboard));
+        }
+    }
+    
+    public void add(Leaderboard leaderboard) {
+        leaderboardCache.add(leaderboard);
+        registerAsListener(leaderboard);
+    }
+    
+    /**
+     * Listens at the leaderboard for {@link TrackedRace}s being connected to / disconnected from race columns. Whenever this
+     * happens, the listener structure that uses {@link CacheInvalidationListener}s to observe the individual tracked races
+     * is updated accordingly.
+     */
+    private void registerAsListener(final Leaderboard leaderboard) {
+        for (TrackedRace trackedRace : leaderboard.getTrackedRaces()) {
+            registerListener(leaderboard, trackedRace);
+        }
+        final CacheInvalidationUponScoreCorrectionListener scoreCorrectionListener = new CacheInvalidationUponScoreCorrectionListener(leaderboard);
+        leaderboard.getScoreCorrection().addScoreCorrectionListener(scoreCorrectionListener);
+        synchronized (scoreCorrectionListeners) {
+            scoreCorrectionListeners.put(leaderboard, scoreCorrectionListener);
+        }
+        final RaceColumnListener raceColumnListener = new RaceColumnListener() {
+            private static final long serialVersionUID = 8165124797028386317L;
+
+            @Override
+            public void trackedRaceLinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
+                removeFromCache(leaderboard);
+                registerListener(leaderboard, trackedRace);
+            }
+
+            /**
+             * This listener must not be serialized. See also bug 952. 
+             */
+            @Override
+            public boolean isTransient() {
+                return true;
+            }
+            
+            @Override
+            public void trackedRaceUnlinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
+                removeFromCache(leaderboard);
+                Map<TrackedRace, Set<CacheInvalidationListener>> listenersMap = invalidationListenersPerLeaderboard.get(leaderboard);
+                if (listenersMap != null) {
+                    Set<CacheInvalidationListener> listeners = listenersMap.get(trackedRace);
+                    if (listeners != null) {
+                        for (CacheInvalidationListener listener : listeners) {
+                            listener.removeFromTrackedRace();
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void isMedalRaceChanged(RaceColumn raceColumn, boolean newIsMedalRace) {
+                removeFromCache(leaderboard);
+            }
+
+            @Override
+            public boolean canAddRaceColumnToContainer(RaceColumn raceColumn) {
+                return true;
+            }
+
+            @Override
+            public void raceColumnAddedToContainer(RaceColumn raceColumn) {
+                removeFromCache(leaderboard);
+            }
+
+            @Override
+            public void raceColumnRemovedFromContainer(RaceColumn raceColumn) {
+                removeFromCache(leaderboard);
+            }
+
+            @Override
+            public void raceColumnMoved(RaceColumn raceColumn, int newIndex) {
+                removeFromCache(leaderboard);
+            }
+
+            @Override
+            public void factorChanged(RaceColumn raceColumn, Double oldFactor, Double newFactor) {
+                removeFromCache(leaderboard);
+            }
+
+            @Override
+            public void resultDiscardingRuleChanged(ThresholdBasedResultDiscardingRule oldDiscardingRule,
+                    ThresholdBasedResultDiscardingRule newDiscardingRule) {
+                removeFromCache(leaderboard);
+            }
+
+            @Override
+            public void competitorDisplayNameChanged(Competitor competitor, String oldDisplayName, String displayName) {
+                removeFromCache(leaderboard);
+            }
+            
+            @Override
+            public void raceLogEventAdded(RaceColumn raceColumn, RaceLogIdentifier raceLogIdentifier, RaceLogEvent event) {
+                removeFromCache(leaderboard);
+            }
+        };
+        leaderboard.addRaceColumnListener(raceColumnListener);
+        synchronized (raceColumnListeners) {
+            raceColumnListeners.put(leaderboard, raceColumnListener);
+        }
+    }
+
+    private void registerListener(final Leaderboard leaderboard, TrackedRace trackedRace) {
+        Map<TrackedRace, Set<CacheInvalidationListener>> invalidationListeners;
+        final CacheInvalidationListener listener;
+        synchronized (invalidationListenersPerLeaderboard) {
+            listener = new CacheInvalidationListener(leaderboard, trackedRace);
+            trackedRace.addListener(listener);
+            invalidationListeners = invalidationListenersPerLeaderboard.get(leaderboard);
+            if (invalidationListeners == null) {
+                invalidationListeners = new HashMap<TrackedRace, Set<CacheInvalidationListener>>();
+                invalidationListenersPerLeaderboard.put(leaderboard, invalidationListeners);
+            }
+        }
+        Set<CacheInvalidationListener> listeners = invalidationListeners.get(trackedRace);
+        if (listeners == null) {
+            listeners = new HashSet<CacheInvalidationListener>();
+            invalidationListeners.put(trackedRace, listeners);
+        }
+        listeners.add(listener);
+    }
+    
+
+}
