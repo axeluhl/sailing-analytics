@@ -20,8 +20,6 @@ public class LockUtil {
      * dangerous, particularly if it happens in a <code>LiveLeaderboardUpdater</code> thread. Even though the bug is reported to
      * have been fixed in JDK 7(b79) we should be careful. This method tries to acquire a lock, allowing for five seconds to pass.
      * After five seconds and not having retrieved the lock, tries again until the lock has been acquired.
-     * @param lockParent TODO
-     * @throws InterruptedException 
      */
     private static void lock(Lock lock, String lockDescriptionForTimeoutLogMessage, NamedReentrantReadWriteLock lockParent) {
         boolean locked = false;
