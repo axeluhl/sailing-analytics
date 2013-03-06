@@ -297,7 +297,6 @@ public class LeaderboardGroupPanel extends SimplePanel implements HasWelcomeWidg
 
     private void renderSeriesToHtml(StrippedLeaderboardDTO leaderboard, SeriesDTO series, boolean renderSeriesName, SafeHtmlBuilder b) {
         boolean hasMultipleFleets = series.getFleets().size() > 1;
-        //Map<String, List<RaceColumnDTO>> racesOrderedByFleets = getRacesOfSeriesOrderedByFleets(leaderboard, series);
         b.appendHtmlConstant("<div style=\"float:left;\">");
         if(renderSeriesName) {
             b.append(TEXTTEMPLATE.textWithClass(series.name, 50, STYLE_TABLE_TEXT));
@@ -306,7 +305,6 @@ public class LeaderboardGroupPanel extends SimplePanel implements HasWelcomeWidg
         b.appendHtmlConstant("<div style=\"float:left;\">");
         for(FleetDTO fleet: series.getFleets()) {
             Color color = fleet.getColor();
-            //List<RaceColumnDTO> raceColumns = racesOrderedByFleets.get(fleet.name);
             // show the "fleet" and the color only if there are more than one fleet in this fleet group and a color has been set
             b.appendHtmlConstant("<div style=\"\">");
 
