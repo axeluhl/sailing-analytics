@@ -7,15 +7,18 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 
 public class RequestTotalTimeDTO implements IsSerializable {
 
-    public int boatClassID = 0;
+    public int selectedBoatClassIndex = 0;
     public List<SimulatorWindDTO> allPoints = null;
     public List<PositionDTO> turnPoints = null;
     public boolean useRealAverageWindSpeed = false;
     public int stepDurationMilliseconds = 0;
     public boolean debugMode = false;
+    public int selectedRaceIndex;
+    public int selectedCompetitorIndex;
+    public int selectedLegIndex;
 
     public RequestTotalTimeDTO() {
-        this.boatClassID = 0;
+        this.selectedBoatClassIndex = 0;
         this.allPoints = new ArrayList<SimulatorWindDTO>();
         this.turnPoints = new ArrayList<PositionDTO>();
         this.useRealAverageWindSpeed = true;
@@ -23,13 +26,19 @@ public class RequestTotalTimeDTO implements IsSerializable {
         this.debugMode = false;
     }
 
-    public RequestTotalTimeDTO(final int boatClassID, final List<SimulatorWindDTO> allPoints, final List<PositionDTO> turnPoints,
-            final boolean useRealAverageWindSpeed, final int stepDurationMilliseconds, final boolean debugMode) {
-        this.boatClassID = boatClassID;
+    public RequestTotalTimeDTO(int selectedBoatClassIndex, int selectedRaceIndex, int selectedCompetitorIndex, int selectedLegIndex,
+            int stepDurationMilliseconds,
+            List<SimulatorWindDTO> allPoints, List<PositionDTO> turnPoints, boolean useRealAverageWindSpeed, boolean debugMode) {
+        this.selectedBoatClassIndex = selectedBoatClassIndex;
         this.allPoints = allPoints;
         this.turnPoints = turnPoints;
         this.useRealAverageWindSpeed = useRealAverageWindSpeed;
         this.stepDurationMilliseconds = stepDurationMilliseconds;
+
+        this.selectedRaceIndex = selectedRaceIndex;
+        this.selectedCompetitorIndex = selectedCompetitorIndex;
+        this.selectedLegIndex = selectedLegIndex;
+
         this.debugMode = debugMode;
     }
 }
