@@ -118,7 +118,11 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
                 color = colorPalette.getColor(noOfPaths - 1 - index);
 
                 if (currentPath.name.equals("Polyline")) {
+
                     pathPolyline = createPathPolyline(currentPath);
+
+                    // return PathPolyline.createPathPolyline(pathDTO.getPoints(), this.errorReporter,
+                    // this.simulatorSvc, this.mapw, this, this.parent.getBoatClassID());
                 }
                 else {
 
@@ -441,7 +445,8 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         }
     }
 
-    private void generatePath(WindPatternDisplay windPatternDisplay, boolean summaryView, int boatClassIndex) {
+    private void generatePath(WindPatternDisplay windPatternDisplay, boolean summaryView, int selectedBoatClassIndex, int selectedRaceIndex,
+            int selectedCompetitorIndex, int selectedLegIndex) {
         LOGGER.info("In generatePath");
 
         if (windPatternDisplay == null) {
@@ -464,7 +469,9 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
 
         this.busyIndicator.setBusy(true);
 
-        this.simulatorSvc.getSimulatorResults(this.mode, this.windParams, windPatternDisplay, true, boatClassIndex, new ResultManager(summaryView));
+        this.simulatorSvc.getSimulatorResults(this.mode, this.windParams, windPatternDisplay, true, selectedBoatClassIndex, selectedRaceIndex,
+                selectedCompetitorIndex, selectedLegIndex, new ResultManager(summaryView));
+
     }
 
     private boolean isCourseSet() {
@@ -513,10 +520,11 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         }
     }
 
-    private void refreshSummaryView(WindPatternDisplay windPatternDisplay, int boatClassIndex, boolean force) {
+    private void refreshSummaryView(WindPatternDisplay windPatternDisplay, int selectedBoatClassIndex, int selectedRaceIndex, int selectedCompetitorIndex,
+            int selectedLegIndex, boolean force) {
         // removeOverlays();
         if (force) {
-            this.generatePath(windPatternDisplay, true, boatClassIndex);
+            this.generatePath(windPatternDisplay, true, selectedBoatClassIndex, selectedRaceIndex, selectedCompetitorIndex, selectedLegIndex);
         } else {
             if (this.replayPathCanvasOverlays != null && !this.replayPathCanvasOverlays.isEmpty()) {
                 System.out.println("Soft refresh");
@@ -539,15 +547,16 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
                     this.windLineCanvasOverlay.setVisible(false);
                 }
             } else {
-                this.generatePath(windPatternDisplay, true, boatClassIndex);
+                this.generatePath(windPatternDisplay, true, selectedBoatClassIndex, selectedRaceIndex, selectedCompetitorIndex, selectedLegIndex);
             }
         }
     }
 
-    private void refreshReplayView(WindPatternDisplay windPatternDisplay, int boatClassIndex, boolean force) {
+    private void refreshReplayView(WindPatternDisplay windPatternDisplay, int selectedBoatClassIndex, int selectedRaceIndex, int selectedCompetitorIndex,
+            int selectedLegIndex, boolean force) {
         // removeOverlays();
         if (force) {
-            this.generatePath(windPatternDisplay, false, boatClassIndex);
+            this.generatePath(windPatternDisplay, false, selectedBoatClassIndex, selectedRaceIndex, selectedCompetitorIndex, selectedLegIndex);
         } else {
 
             if (this.replayPathCanvasOverlays != null && !this.replayPathCanvasOverlays.isEmpty()) {
@@ -571,7 +580,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
                     this.windLineCanvasOverlay.setVisible(true);
                 }
             } else {
-                this.generatePath(windPatternDisplay, false, boatClassIndex);
+                this.generatePath(windPatternDisplay, false, selectedBoatClassIndex, selectedRaceIndex, selectedCompetitorIndex, selectedLegIndex);
             }
         }
     }
@@ -611,7 +620,8 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         }
     }
 
-    public void refreshView(ViewName name, WindPatternDisplay windPatternDisplay, int boatClassIndex, int selectedLegIndex, boolean force) {
+    public void refreshView(ViewName name, WindPatternDisplay windPatternDisplay, int selectedBoatClassIndex, int selectedRaceIndex,
+            int selectedCompetitorIndex, int selectedLegIndex, boolean force) {
 
         if (!this.overlaysInitialized) {
             this.initializeOverlays();
@@ -629,10 +639,10 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
             }
             switch (name) {
             case SUMMARY:
-                this.refreshSummaryView(windPatternDisplay, boatClassIndex, force);
+                this.refreshSummaryView(windPatternDisplay, selectedBoatClassIndex, selectedRaceIndex, selectedCompetitorIndex, selectedLegIndex, force);
                 break;
             case REPLAY:
-                this.refreshReplayView(windPatternDisplay, boatClassIndex, force);
+                this.refreshReplayView(windPatternDisplay, selectedBoatClassIndex, selectedRaceIndex, selectedCompetitorIndex, selectedLegIndex, force);
                 break;
             case WINDDISPLAY:
                 this.refreshWindDisplayView(windPatternDisplay, force);
@@ -642,7 +652,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
             }
 
             if (this.mode == SailingSimulatorUtil.measured && this.pathPolyline != null) {
-                this.pathPolyline.setBoatClassID(boatClassIndex);
+                this.pathPolyline.setBoatClassID(selectedBoatClassIndex);
             }
 
         } else {
@@ -679,20 +689,9 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
 
     private PathPolyline createPathPolyline(PathDTO pathDTO) {
 
-        int boatClassID = parent.getBoatClassID();
-
-        // List<SimulatorWindDTO> path = new ArrayList<SimulatorWindDTO>();
-        // path.add(new SimulatorWindDTO(4.166666, 1.5, 4, 350, 1000, true));
-        // path.add(new SimulatorWindDTO(3.166666, 0.666666, 4, 350, 1000, true));
-        // path.add(new SimulatorWindDTO(2.666666, 3.666666, 4, 350, 1000, true));
-        // path.add(new SimulatorWindDTO(1, 3, 4, 350, 1000, true));
-        // path.add(new SimulatorWindDTO(0.333333, 3.333333, 4, 350, 1000, true));
-        // path.add(new SimulatorWindDTO(0.5, 4, 4, 350, 1000, true));
-
-        return PathPolyline.createPathPolyline(
-                // path,
-                pathDTO.getPoints(),
-                this.errorReporter, this.simulatorSvc, this.mapw, this, boatClassID);
+        return PathPolyline.createPathPolyline(pathDTO.getPoints(), this.errorReporter, this.simulatorSvc, this.mapw, this,
+                this.parent.getSelectedBoatClassIndex(), this.parent.getSelectedRaceIndex(), this.parent.getSelectedCompetitorIndex(),
+                this.parent.getSelectedLegIndex());
     }
 
     public void addLegendOverlayForPathPolyline(long totalTimeMilliseconds) {
