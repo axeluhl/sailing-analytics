@@ -246,12 +246,13 @@ public class PathGeneratorTracTrac extends PathGeneratorBase {
             for (Leg leg : race.getCourse().getLegs()) {
                 result.add(leg.toString());
             }
+            break;
         }
 
         return result;
     }
 
-    public Path getLeg(int legIndex, int competitorIndex) {
+    public Path getLeg(int selectedRaceIndex, int selectedCompetitorIndex, int selectedLegIndex) {
 
         this.intializeRaceHandle();
 
@@ -264,11 +265,11 @@ public class PathGeneratorTracTrac extends PathGeneratorBase {
         Iterator<Competitor> competitors = raceDef.getCompetitors().iterator();
         Competitor competitor = null;
 
-        for (int index = 0; index <= competitorIndex; index++) {
+        for (int index = 0; index <= selectedCompetitorIndex; index++) {
             competitor = competitors.next();
         }
 
-        Leg leg = raceDef.getCourse().getLegs().get(legIndex);
+        Leg leg = raceDef.getCourse().getLegs().get(selectedLegIndex);
 
         TimePoint startTime = trackedRace.getMarkPassing(competitor, leg.getFrom()).getTimePoint();
         TimePoint endTime = trackedRace.getMarkPassing(competitor, leg.getTo()).getTimePoint();
@@ -302,7 +303,7 @@ public class PathGeneratorTracTrac extends PathGeneratorBase {
         return new PathImpl(path, null);
     }
 
-    public Path getLegPolyline(int legIndex, int competitorIndex, Distance maxDistance) {
+    public Path getLegPolyline(int selectedRaceIndex, int selectedCompetitorIndex, int selectedLegIndex, Distance maxDistance) {
 
         this.intializeRaceHandle();
 
@@ -315,14 +316,14 @@ public class PathGeneratorTracTrac extends PathGeneratorBase {
         Iterator<Competitor> competitors = raceDef.getCompetitors().iterator();
         Competitor competitor = null;
 
-        for (int index = 0; index <= competitorIndex; index++) {
+        for (int index = 0; index <= selectedCompetitorIndex; index++) {
             competitor = competitors.next();
         }
 
         LinkedList<TimedPositionWithSpeed> path = new LinkedList<TimedPositionWithSpeed>();
         this.raceCourse = new LinkedList<TimedPositionWithSpeed>();
 
-        Leg leg = raceDef.getCourse().getLegs().get(legIndex);
+        Leg leg = raceDef.getCourse().getLegs().get(selectedLegIndex);
 
         TimePoint startTime = trackedRace.getMarkPassing(competitor, leg.getFrom()).getTimePoint();
         Position startPosition = trackedRace.getApproximatePosition(leg.getFrom(), startTime);
@@ -356,5 +357,23 @@ public class PathGeneratorTracTrac extends PathGeneratorBase {
         }
 
         return new PathImpl(path, null);
+    }
+
+    public List<String> getComeptitorsNames() {
+
+        this.intializeRaceHandle();
+
+        List<String> result = new ArrayList<String>();
+
+        for (RaceDefinition race : this.raceHandle.getRaces()) {
+            for (Competitor competitor : race.getCompetitors()) {
+                result.add(competitor.getName() + ", " + competitor.getBoat().getName());
+            }
+
+            break;
+        }
+
+        return result;
+
     }
 }

@@ -5,27 +5,29 @@ import java.util.Map;
 
 public interface SailingSimulator {
 
-    void setSimulationParameters(SimulationParameters params);
+    void setSimulationParameters(SimulationParameters params, int selectedRaceIndex);
 
     SimulationParameters getSimulationParameters();
 
-    Path getGPSTrack();
+    // Path getGPSTrack();
 
-    Path getLegGPSTrack(int legIndex, int competitorIndex);
+    Path getLegGPSTrack(int selectedRaceIndex, int selectedCompetitorIndex, int selectedLegIndex);
 
-    Map<String, Path> getAllPaths();
+    // Map<String, Path> getAllPaths();
 
-    Map<String, Path> getAllPathsForLeg(int legIndex, int competitorIndex);
+    Map<String, Path> getAllPathsForLeg(int selectedRaceIndex, int selectedCompetitorIndex, int selectedLegIndex);
 
-    Map<String, Path> getAllPathsEvenTimed(long millisecondsStep);
+    // Map<String, Path> getAllPathsEvenTimed(long millisecondsStep);
 
-    Map<String, Path> getAllLegPathsEvenTimed(long millisecondsStep, int legIndex, int competitorIndex);
+    Map<String, Path> getAllLegPathsEvenTimed(long millisecondsStep, int selectedRaceIndex, int selectedCompetitorIndex, int selectedLegIndex);
 
     Path getRaceCourse();
 
-    List<String> getLegsNames();
+    List<String> getLegsNames(int selectedRaceIndex);
 
     List<String> getRacesNames();
 
-    Path getLeg(int legIndex, int competitorIndex);
+    Path getLeg(int selectedRaceIndex, int selectedCompetitorIndex, int selectedLegIndex);
+
+    List<String> getComeptitorsNames(int selectedRaceIndex);
 }
