@@ -272,8 +272,7 @@ public class PathImpl implements Path, Serializable {
             }
         }
 
-        return eliminateVeryCloseTurns(list, 15.0);
-        // return list;
+        return eliminateVeryCloseTurns(list, THRESHOLD_DISTANCE_METERS);
     }
 
     public static List<TimedPositionWithSpeed> eliminateVeryCloseTurns(List<TimedPositionWithSpeed> turns, double tresholdDistanceMeters) {
@@ -296,7 +295,7 @@ public class PathImpl implements Path, Serializable {
             } else {
                 if (clusterFound) {
                     clusterFound = false;
-                    goodTurns.add(turns.get(clusterStart + clusterEnd / 2));
+                    goodTurns.add(turns.get((clusterStart + clusterEnd) / 2));
                 } else {
                     goodTurns.add(turns.get(index));
                 }
