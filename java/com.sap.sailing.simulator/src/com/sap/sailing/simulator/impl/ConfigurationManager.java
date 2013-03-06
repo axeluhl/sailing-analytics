@@ -21,8 +21,8 @@ public enum ConfigurationManager {
     private static final String CONFIG_FILE_LOCATION = "resources/STG_configuration.csv";
     private static final String RACES_FILE_LOCATION = "resources/races.csv";
 
-    private final List<Quadruple<String, Double, String, Integer>> _boatClassesInfo = new ArrayList<Quadruple<String, Double, String, Integer>>();
-    private final List<Quadruple<String, String, String, Integer>> _racesInfo = new ArrayList<Quadruple<String, String, String, Integer>>();
+    private List<Quadruple<String, Double, String, Integer>> _boatClassesInfo = new ArrayList<Quadruple<String, Double, String, Integer>>();
+    private List<Quadruple<String, String, String, Integer>> _racesInfo = new ArrayList<Quadruple<String, String, String, Integer>>();
 
     private ReadingConfigurationFileStatus status = ReadingConfigurationFileStatus.SUCCESS;
     private String errorMessage = "";
@@ -104,7 +104,11 @@ public enum ConfigurationManager {
         return this._boatClassesInfo.size();
     }
 
-    public String getPolarDiagramFileLocation(final int index) {
+    public String getRaceURL(int index) {
+        return this._racesInfo.get(index).getC();
+    }
+
+    public String getPolarDiagramFileLocation(int index) {
         return this._boatClassesInfo.get(index).getC();
     }
 

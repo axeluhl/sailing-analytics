@@ -20,6 +20,7 @@ import org.osgi.framework.FrameworkUtil;
 
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.simulator.Path;
+import com.sap.sailing.simulator.impl.ConfigurationManager;
 
 public class SerializationUtils {
 
@@ -27,6 +28,7 @@ public class SerializationUtils {
 
     public static final String LEGSNAMES_DAT = "legsNames.dat";
     public static final String RACECOURSE_DAT = "racecourse.dat";
+    public static final String COMPETITORSNAMES_DAT = "competitorsNames.dat";
 
     public static final String[] PATH_NAMES = new String[] { "1#Omniscient", "2#Opportunistic", "3#1-Turner Left", "4#1-Turner Right", "6#GPS Poly",
     "7#GPS Track" };
@@ -85,7 +87,7 @@ public class SerializationUtils {
         return result;
     }
 
-    public static boolean saveLegPathsToFiles(Map<String, Path> paths, Path raceCourse, int legIndex, int competitorIndex) {
+    public static boolean saveLegPathsToFiles(Map<String, Path> paths, Path raceCourse, int selectedRaceIndex, int selectedCompetitorIndex, int selectedLegIndex) {
         if (paths == null) {
             return false;
         }
@@ -99,14 +101,18 @@ public class SerializationUtils {
         }
 
         String filePath = "";
+        String fileName = "";
         boolean result = true;
 
         for (String name : PATH_NAMES) {
-            filePath = pathPrefix + "\\src\\resources\\" + name + "_" + competitorIndex + "_" + legIndex + ".dat";
+
+            fileName = SerializationUtils.getFileName(selectedRaceIndex, selectedCompetitorIndex, selectedLegIndex, name);
+            filePath = pathPrefix + "\\src\\resources\\" + fileName;
             result &= saveToFile(paths.get(name), filePath);
         }
 
-        filePath = pathPrefix + "\\src\\resources\\racecourse_" + competitorIndex + "_" + legIndex + ".dat";
+        fileName = SerializationUtils.getFileName(selectedRaceIndex, selectedCompetitorIndex, selectedLegIndex, "racecourse");
+        filePath = pathPrefix + "\\src\\resources\\" + fileName;
         result &= saveToFile(raceCourse, filePath);
 
         return result;
@@ -135,14 +141,17 @@ public class SerializationUtils {
         return result;
     }
 
-    public static Pair<Map<String, Path>, Path> readLegPathsFromResources(int legIndex, int competitorIndex) {
+    public static Pair<Map<String, Path>, Path> readLegPathsFromResources(int selectedRaceIndex, int selectedCompetitorIndex, int selectedLegIndex) {
         HashMap<String, Path> paths = new HashMap<String, Path>();
 
         Path path = null;
         String filePath = "";
-
+        String fileName = "";
         for (String pathName : PATH_NAMES) {
-            filePath = "resources/" + pathName + "_" + competitorIndex + "_" + legIndex + ".dat";
+
+            fileName = SerializationUtils.getFileName(selectedRaceIndex, selectedCompetitorIndex, selectedLegIndex, pathName);
+            filePath = "resources/" + fileName;
+
             path = (Path) readObjectFromResources(filePath);
             if (path == null) {
                 System.err.println("[ERROR][SerializationUtils][readPathsFromResources] Cannot de-serialize path from" + pathName);
@@ -152,7 +161,8 @@ public class SerializationUtils {
             }
         }
 
-        Path raceCourse = (Path) readObjectFromResources("resources/racecourse_" + competitorIndex + "_" + legIndex + ".dat");
+        Path raceCourse = (Path) readObjectFromResources("resources/"
+                + SerializationUtils.getFileName(selectedRaceIndex, selectedCompetitorIndex, selectedLegIndex, "racecourse"));
 
         return new Pair<Map<String, Path>, Path>(paths, raceCourse);
     }
@@ -234,7 +244,7 @@ public class SerializationUtils {
         return result;
     }
 
-    public static boolean saveLegsNamesToFiles(List<String> legsNames) {
+    public static boolean saveStringListToFiles(List<String> legsNames, String fileName) {
         if (legsNames == null) {
             return false;
         }
@@ -247,7 +257,7 @@ public class SerializationUtils {
             pathPrefix = getPathPrefix();
         }
 
-        String filePath = pathPrefix + "\\src\\resources\\" + LEGSNAMES_DAT;
+        String filePath = pathPrefix + "\\src\\resources\\" + fileName;
 
         boolean result = true;
 
@@ -272,4 +282,31 @@ public class SerializationUtils {
         return result;
     }
 
+    public static String getRaceID(String raceURL) {
+
+        String result = null;
+
+        if (raceURL.contains("&race=")) {
+            String[] parts = raceURL.split("&");
+            for (String part : parts) {
+                if (part.startsWith("race=")) {
+                    result = part.replace("race=", "");
+                }
+            }
+        } else if (raceURL.contains("?race=")) {
+            String[] parts = raceURL.split("?");
+            for (String part : parts) {
+                if (part.startsWith("race=")) {
+                    result = part.replace("race=", "");
+                }
+            }
+        }
+
+        return result;
+    }
+
+    public static String getFileName(int selectedRaceIndex, int selectedCompetitorIndex, int selectedLegIndex, String pathName) {
+        return SerializationUtils.getRaceID(ConfigurationManager.INSTANCE.getRaceURL(selectedRaceIndex)) + "_" + selectedCompetitorIndex + "_"
+                + selectedLegIndex + "_" + pathName + ".dat";
+    }
 }
