@@ -20,6 +20,7 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RegattaListener;
 import com.sap.sailing.domain.base.Series;
+import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.impl.NamedImpl;
@@ -84,8 +85,9 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
      *            carried out.
      */
     public RegattaImpl(RaceLogStore raceLogStore, String baseName, BoatClass boatClass, TrackedRegattaRegistry trackedRegattaRegistry, ScoringScheme scoringScheme, Serializable id, CourseArea courseArea) {
-        this(raceLogStore, baseName, boatClass, Collections.singletonList(new SeriesImpl("Default", /* isMedal */false, Collections
-                .singletonList(new FleetImpl("Default")), /* race column names */new ArrayList<String>(),
+        this(raceLogStore, baseName, boatClass, Collections.singletonList(new SeriesImpl(LeaderboardNameConstants.DEFAULT_SERIES_NAME,
+                /* isMedal */false, Collections
+                .singletonList(new FleetImpl(LeaderboardNameConstants.DEFAULT_FLEET_NAME)), /* race column names */new ArrayList<String>(),
                 trackedRegattaRegistry)), /* persistent */false, scoringScheme, id, courseArea);
     }
 

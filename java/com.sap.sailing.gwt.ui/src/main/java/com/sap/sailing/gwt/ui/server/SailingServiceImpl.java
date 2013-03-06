@@ -72,6 +72,7 @@ import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.CountryCode;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.Distance;
+import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.MaxPointsReason;
@@ -1090,7 +1091,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     private FleetDTO convertToFleetDTO(RaceColumn raceColumn, Fleet fleet) {
         String seriesNameOfFleet = null;
-        if(raceColumn instanceof RaceColumnInSeries) {
+        if (raceColumn instanceof RaceColumnInSeries) {
             seriesNameOfFleet = ((RaceColumnInSeries) raceColumn).getSeries().getName();
         }            
         return new FleetDTO(fleet.getName(), seriesNameOfFleet, fleet.getOrdering(), fleet.getColor());
@@ -2488,9 +2489,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                         boatClass.trim(),
                         RegattaImpl.getFullName(replayRaceDTO.rsc, replayRaceDTO.boat_class),
                         Collections.singletonList(new SeriesImpl(
-                                "Default", 
+                                LeaderboardNameConstants.DEFAULT_SERIES_NAME, 
                                 /* isMedal */false, 
-                                Collections.singletonList(new FleetImpl("Default")), 
+                                Collections.singletonList(new FleetImpl(LeaderboardNameConstants.DEFAULT_FLEET_NAME)), 
                                 /* race column names */ new ArrayList<String>(), getService())), 
                                 false,
                                 baseDomainFactory.createScoringScheme(ScoringSchemeType.LOW_POINT), null);
