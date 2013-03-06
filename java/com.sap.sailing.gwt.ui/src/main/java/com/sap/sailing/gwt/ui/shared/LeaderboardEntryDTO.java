@@ -56,6 +56,10 @@ public class LeaderboardEntryDTO implements IsSerializable {
     public FleetDTO fleet;
 
     public LeaderboardEntryDTO() { }
+    
+    public boolean hasScoreCorrection() {
+        return netPointsCorrected || (reasonForMaxPoints != null && reasonForMaxPoints != MaxPointsReason.NONE);
+    }
 
     @Override
     public int hashCode() {

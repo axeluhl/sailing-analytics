@@ -1183,7 +1183,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
                 for (RaceColumnInSeries raceColumn : series.getRaceColumns()) {
                     for (Fleet fleet : series.getFleets()) {
                         if (raceColumn.getTrackedRace(fleet) == trackedRace) {
-                            raceColumn.setTrackedRace(fleet, null);
+                            raceColumn.releaseTrackedRace(fleet);
                             regattaChanged = true;
                         }
                     }
@@ -1570,6 +1570,8 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
 
     @Override
     public void serializeForInitialReplication(ObjectOutputStream oos) throws IOException {
+        logger.info("serializing eventsById");
+        oos.writeObject(eventsById);
         logger.info("serializing regattasByName");
         oos.writeObject(regattasByName);
         logger.info("serializing regattasObservedForDefaultLeaderboard");
@@ -1584,7 +1586,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
 
     @SuppressWarnings("unchecked") // the type-parameters in the casts of the de-serialized collection objects can't be checked
     @Override
-    public void initiallyFillFrom(ObjectInputStream ois) throws IOException, ClassNotFoundException {
+    public void initiallyFillFrom(ObjectInputStream ois) throws IOException, ClassNotFoundException, InterruptedException {
         logger.info("Performing initial replication load on "+this);
         ClassLoader oldContextClassloader = Thread.currentThread().getContextClassLoader();
         try {
@@ -1594,9 +1596,19 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
             Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
             regattasByName.clear();
             regattasObservedForDefaultLeaderboard.clear();
+            
+            for (DynamicTrackedRegatta regatta: regattaTrackingCache.values()) {
+                for (RaceTracker tracker : raceTrackersByRegatta.get(regatta)) {
+                    tracker.stop();
+                }
+            }
+            
             regattaTrackingCache.clear();
             leaderboardGroupsByName.clear();
             leaderboardsByName.clear();
+            eventsById.clear();
+            logger.info("receiving eventsById");
+            eventsById.putAll((Map<Serializable, Event>) ois.readObject());
             logger.info("receiving regattasByName");
             regattasByName.putAll((Map<String, Regatta>) ois.readObject());
             // it is important that the leaderboards and tracked regattas are cleared before auto-linking to

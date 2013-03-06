@@ -118,16 +118,16 @@ public class SailingEventManagementPanel extends SimplePanel {
             }
         };
 
-        ImagesBarColumn<EventDTO, RegattaConfigImagesBarCell> eventActionColumn = new ImagesBarColumn<EventDTO, RegattaConfigImagesBarCell>(
-                new RegattaConfigImagesBarCell(stringMessages));
+        ImagesBarColumn<EventDTO, EventConfigImagesBarCell> eventActionColumn = new ImagesBarColumn<EventDTO, EventConfigImagesBarCell>(
+                new EventConfigImagesBarCell(stringMessages));
         eventActionColumn.setFieldUpdater(new FieldUpdater<EventDTO, String>() {
             @Override
             public void update(int index, EventDTO event, String value) {
-                if (RegattaConfigImagesBarCell.ACTION_REMOVE.equals(value)) {
+                if (EventConfigImagesBarCell.ACTION_REMOVE.equals(value)) {
                     if (Window.confirm(stringMessages.doYouReallyWantToRemoveRegatta(event.name))) {
                         removeEvent(event);
                     }
-                } else if (RegattaConfigImagesBarCell.ACTION_EDIT.equals(value)) {
+                } else if (EventConfigImagesBarCell.ACTION_EDIT.equals(value)) {
                     openEditEventDialog(event);
                 }
             }

@@ -49,6 +49,15 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
     private static final String PARAM_DELAY_TO_LIVE_MILLIS = "delayToLiveMillis";
     
     /**
+     * Parameter to support scaling the complete page by a given factor. This works by either using the
+     * CSS3 zoom property or by applying scale operation to the body element. This comes in handy
+     * when having to deal with screens that have high resolutions and that can't be controlled manually.
+     * It is also a very simple method of adapting the viewport to a tv resolution. This parameter works
+     * with value from 0.0 to 10.0 where 1.0 denotes the unchanged level (100%).
+     */
+    private static final String PARAM_ZOOM_TO = "zoomTo";
+    
+    /**
      * Lets the client choose a different race column selection which displays only up to the last N races with N being the integer
      * number specified by the parameter.
      */
@@ -75,6 +84,11 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
                     createUI(showRaceDetails, embedded, delayToLiveMillis);
                 } else {
                     RootPanel.get().add(new Label(stringMessages.noSuchLeaderboard()));
+                }
+                
+                final String zoomTo = Window.Location.getParameter(PARAM_ZOOM_TO);
+                if (zoomTo != null) {
+                    RootPanel.getBodyElement().setAttribute("style", "zoom: "+zoomTo+";-moz-transform: scale("+zoomTo+");-moz-transform-origin: 0 0;-o-transform: scale("+zoomTo+");-o-transform-origin: 0 0;-webkit-transform: scale("+zoomTo+");-webkit-transform-origin: 0 0;");
                 }
             }
 

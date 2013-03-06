@@ -214,13 +214,6 @@ if [[ "$@" == "hot-deploy" ]]; then
     exit
 fi
 
-read -s -n1 -p "Currently branch $active_branch is active. Do you want to proceed with $@ (y/N): " answer
-case $answer in
-"Y" | "y") echo "Continuing";;
-*) echo "Aborting..."
-   exit;;
-esac
-
 echo "Starting $@ of server (maven configuration set to $MAVEN_SETTINGS)..."
 
 if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
@@ -260,6 +253,13 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
 fi
 
 if [[ "$@" == "install" ]] || [[ "$@" == "all" ]]; then
+
+    read -s -n1 -p "Currently branch $active_branch is active and I will deploy to $ACDIR. Do you want to proceed with $@ (y/N): " answer
+    case $answer in
+    "Y" | "y") echo "Continuing";;
+    *) echo "Aborting..."
+       exit;;
+    esac
 
     if [ ! -d $ACDIR ]; then
         echo "Could not find directory $ACDIR - perhaps you are on a wrong branch?"

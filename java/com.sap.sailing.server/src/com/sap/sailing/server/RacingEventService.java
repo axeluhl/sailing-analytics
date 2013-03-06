@@ -420,8 +420,9 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * replication of these operations will happen based on the changes performed on the replication master.<p>
      * 
      * <b>Caution:</b> All relevant contents of this service instance will be replaced by the stream contents.
+     * @throws InterruptedException 
      */
-    void initiallyFillFrom(ObjectInputStream ois) throws IOException, ClassNotFoundException;
+    void initiallyFillFrom(ObjectInputStream ois) throws IOException, ClassNotFoundException, InterruptedException;
 
     /**
      * @return a thread-safe copy of the events currently known by the service; it's safe for callers to iterate over

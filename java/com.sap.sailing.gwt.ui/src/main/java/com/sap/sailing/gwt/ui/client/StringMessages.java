@@ -515,4 +515,11 @@ public interface StringMessages extends Messages {
     String totalAverageSpeedOverGroundTooltip();
     String noStarttimeAnnouncedYet();
     String lastFlag();
+    String filterRegattasByName();
+    String noRegattasYet();
+    String cannotAddRacesToRegattaLeaderboardButOnlyToRegatta();
+    String correctScore();
+    String correctScoreFor(String competitorName, String raceColumnName);
+    String penaltyOrRedress();
+    String netScore();
 }
