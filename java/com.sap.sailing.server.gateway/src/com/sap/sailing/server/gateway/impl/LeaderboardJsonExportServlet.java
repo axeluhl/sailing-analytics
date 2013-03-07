@@ -94,9 +94,14 @@ public class LeaderboardJsonExportServlet extends AbstractJsonHttpServlet implem
         @Override
         public Map<Pair<TimePoint, ResultStates>, JSONObject> computeCacheUpdate(Leaderboard key,
                 LeaderboardJsonCacheUpdateInterval updateInterval) throws Exception {
-            Map<Pair<TimePoint, ResultStates>, JSONObject> result = new HashMap<>();
-            for (Pair<TimePoint, ResultStates> timePointAndResultState : updateInterval.getTimePointsAndResultStates()) {
-                result.put(timePointAndResultState, computeLeaderboardJson(key, timePointAndResultState));
+            final Map<Pair<TimePoint, ResultStates>, JSONObject> result;
+            if (updateInterval == null) {
+                result = null;
+            } else {
+                result = new HashMap<>();
+                for (Pair<TimePoint, ResultStates> timePointAndResultState : updateInterval.getTimePointsAndResultStates()) {
+                    result.put(timePointAndResultState, computeLeaderboardJson(key, timePointAndResultState));
+                }
             }
             return result;
         }
@@ -105,29 +110,37 @@ public class LeaderboardJsonExportServlet extends AbstractJsonHttpServlet implem
         public Map<Pair<TimePoint, ResultStates>, JSONObject> provideNewCacheValue(Leaderboard leaderboard,
                 Map<Pair<TimePoint, ResultStates>, JSONObject> oldCacheValue, Map<Pair<TimePoint, ResultStates>, JSONObject> computedCacheUpdate,
                 LeaderboardJsonCacheUpdateInterval updateInterval) {
-            Map<Pair<TimePoint, ResultStates>, JSONObject> result = new LinkedHashMap<Pair<TimePoint, ResultStates>, JSONObject>() {
-                private static final long serialVersionUID = -6197983565575024084L;
-                @Override
-                protected boolean removeEldestEntry(Entry<Pair<TimePoint, ResultStates>, JSONObject> eldest) {
-                    final boolean result;
-                    if (totalNumberOfCacheEntries > MAX_TOTAL_NUMBER_OF_CACHE_ENTRIES) {
-                        totalNumberOfCacheEntries--;
-                        result = true;
-                    } else {
-                        result = false;
-                    }
-                    return result;
+            final Map<Pair<TimePoint, ResultStates>, JSONObject> result;
+            if (computedCacheUpdate == null) {
+                result = null;
+                if (oldCacheValue != null) {
+                    totalNumberOfCacheEntries -= oldCacheValue.size();
                 }
-            };
-            if (oldCacheValue != null) {
-                result.putAll(oldCacheValue);
-                totalNumberOfCacheEntries -= oldCacheValue.size();
             } else {
-                // first time we cache something for that leaderboard; ensure we get update triggers:
-                cacheManager.add(leaderboard);
+                result = new LinkedHashMap<Pair<TimePoint, ResultStates>, JSONObject>() {
+                    private static final long serialVersionUID = -6197983565575024084L;
+                    @Override
+                    protected boolean removeEldestEntry(Entry<Pair<TimePoint, ResultStates>, JSONObject> eldest) {
+                        final boolean result;
+                        if (totalNumberOfCacheEntries > MAX_TOTAL_NUMBER_OF_CACHE_ENTRIES) {
+                            totalNumberOfCacheEntries--;
+                            result = true;
+                        } else {
+                            result = false;
+                        }
+                        return result;
+                    }
+                };
+                if (oldCacheValue != null) {
+                    result.putAll(oldCacheValue);
+                    totalNumberOfCacheEntries -= oldCacheValue.size();
+                } else {
+                    // first time we cache something for that leaderboard; ensure we get update triggers:
+                    cacheManager.add(leaderboard);
+                }
+                result.putAll(computedCacheUpdate);
+                totalNumberOfCacheEntries += result.size();
             }
-            result.putAll(computedCacheUpdate);
-            totalNumberOfCacheEntries += result.size();
             return result;
         }
     }
