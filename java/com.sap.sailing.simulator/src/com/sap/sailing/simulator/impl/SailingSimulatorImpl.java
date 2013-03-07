@@ -104,9 +104,9 @@ public class SailingSimulatorImpl implements SailingSimulator {
         Path path = (Path) SerializationUtils.readObjectFromResources(fileName);
         if (path == null) {
             if (pathName.equals("6#GPS Poly")) {
-                path = this.pathGenerator.getLegPolyline(selectedRaceIndex, selectedCompetitorIndex, selectedLegIndex, new MeterDistance(4.88));
+                path = this.pathGenerator.getPathPolyline(selectedRaceIndex, selectedCompetitorIndex, selectedLegIndex, new MeterDistance(4.88));
             } else if (pathName.equals("7#GPS Track")) {
-                path = this.pathGenerator.getLeg(selectedRaceIndex, selectedCompetitorIndex, selectedLegIndex);
+                path = this.pathGenerator.getPath(selectedRaceIndex, selectedCompetitorIndex, selectedLegIndex);
             } else if (pathName.equals("raceCourse")) {
                 path = this.pathGenerator.getRaceCourse();
             } else {
@@ -205,7 +205,7 @@ public class SailingSimulatorImpl implements SailingSimulator {
 
         // search best left-starting 1-turner
         genTreeGrow.setEvaluationParameters("L", 1, null);
-        Path leftPath = genTreeGrow.getPath();
+        Path leftPath = genTreeGrow.getPath(selectedRaceIndex, selectedCompetitorIndex, selectedLegIndex);
         PathCandidate leftBestCand = genTreeGrow.getBestCand();
         int left1TurnMiddle = 1000;
         if (leftBestCand != null) {
@@ -214,7 +214,7 @@ public class SailingSimulatorImpl implements SailingSimulator {
 
         // search best right-starting 1-turner
         genTreeGrow.setEvaluationParameters("R", 1, null);
-        Path rightPath = genTreeGrow.getPath();
+        Path rightPath = genTreeGrow.getPath(selectedRaceIndex, selectedCompetitorIndex, selectedLegIndex);
         PathCandidate rightBestCand = genTreeGrow.getBestCand();
         int right1TurnMiddle = 1000;
         if (rightBestCand != null) {
@@ -223,7 +223,7 @@ public class SailingSimulatorImpl implements SailingSimulator {
 
         // search best multi-turn course
         genTreeGrow.setEvaluationParameters(null, 0, null);
-        Path optPath = genTreeGrow.getPath();
+        Path optPath = genTreeGrow.getPath(selectedRaceIndex, selectedCompetitorIndex, selectedLegIndex);
 
 
         // evaluate opportunistic heuristic
@@ -232,10 +232,10 @@ public class SailingSimulatorImpl implements SailingSimulator {
 
         // left-starting opportunist
         genOpportunistic.setEvaluationParameters(left1TurnMiddle, right1TurnMiddle, true);
-        Path oppPathL = genOpportunistic.getPath();
+        Path oppPathL = genOpportunistic.getPath(selectedRaceIndex, selectedCompetitorIndex, selectedLegIndex);
         // right-starting opportunist
         genOpportunistic.setEvaluationParameters(left1TurnMiddle, right1TurnMiddle, false);
-        Path oppPathR = genOpportunistic.getPath();
+        Path oppPathR = genOpportunistic.getPath(selectedRaceIndex, selectedCompetitorIndex, selectedLegIndex);
 
         // compare left- & right-starting opportunists
         Path oppPath = null;
@@ -530,7 +530,7 @@ public class SailingSimulatorImpl implements SailingSimulator {
             System.err.println("[ERROR][SailingSimulatorImpl][readPathsFromResources] Cannot de-serialize path from resources/7#GPS Track.dat");
             LOGGER.warning("[ERROR][SailingSimulatorImpl][readPathsFromResources] Cannot de-serialize path from resources/7#GPS Track.dat");
 
-            path = this.pathGenerator.getPath();
+            path = this.pathGenerator.getPath(selectedRaceIndex, selectedCompetitorIndex, selectedLegIndex);
         }
 
         return path;
@@ -572,7 +572,7 @@ public class SailingSimulatorImpl implements SailingSimulator {
     @Override
     public Path getLeg(int selectedRaceIndex, int selectedCompetitorIndex, int selectedLegIndex) {
 
-        return this.pathGenerator.getLeg(selectedRaceIndex, selectedCompetitorIndex, selectedLegIndex);
+        return this.pathGenerator.getPath(selectedRaceIndex, selectedCompetitorIndex, selectedLegIndex);
     }
 
     @SuppressWarnings("unchecked")
