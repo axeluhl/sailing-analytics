@@ -49,11 +49,16 @@ public class RaceMapImageManager {
 
     public MarkImageDescriptor resolveMarkImage(MarkType type, String color, String shape, String pattern) {
         MarkImageDescriptor result = defaultCourseMarkDescriptor;
+        int highestCompatibilityLevel = -1;
         
         for (MarkImageDescriptor imageDescriptor: markImageDescriptors) {
-            if(imageDescriptor.isCompatible(type, color, shape, pattern)) {
-                result = imageDescriptor;
-                break;
+            int compatibilityLevel = imageDescriptor.getCompatibilityLevel(type, color, shape, pattern);
+            if(compatibilityLevel > highestCompatibilityLevel) {
+               result = imageDescriptor;
+               highestCompatibilityLevel = compatibilityLevel;
+               if(highestCompatibilityLevel == 3) {
+                   break;
+               }
             }
         }
         

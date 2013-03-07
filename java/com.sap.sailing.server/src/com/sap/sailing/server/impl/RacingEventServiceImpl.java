@@ -1609,6 +1609,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
             eventsById.clear();
             logger.info("receiving eventsById");
             eventsById.putAll((Map<Serializable, Event>) ois.readObject());
+            logger.info("Recieved " + eventsById.size() + " NEW events");
             logger.info("receiving regattasByName");
             regattasByName.putAll((Map<String, Regatta>) ois.readObject());
             // it is important that the leaderboards and tracked regattas are cleared before auto-linking to
