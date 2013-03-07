@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.ui.spectator;
 
-import com.google.gwt.dom.client.Style;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.Window;
@@ -78,7 +77,6 @@ public class SpectatorEntryPoint extends AbstractEntryPoint implements RegattaRe
         } else {
             LeaderboardGroupPanel groupPanel = new LeaderboardGroupPanel(sailingService, stringMessages, this,
                     groupName, root, viewModeParamValue, embedded, showRaceDetails);
-            groupPanel.getElement().getStyle().setFloat(Style.Float.LEFT);
             groupAndFeedbackPanel.add(groupPanel);
             if (!embedded) {
                 groupPanel.setWelcomeWidget(new SimpleWelcomeWidget(stringMessages.welcomeToSailingAnalytics(),

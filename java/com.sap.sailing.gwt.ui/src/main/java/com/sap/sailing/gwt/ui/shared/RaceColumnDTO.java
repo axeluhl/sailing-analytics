@@ -11,10 +11,9 @@ import java.util.Set;
 import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.domain.common.TimingConstants;
 
 public class RaceColumnDTO extends NamedDTO implements IsSerializable {
-    private static final long IS_LIVE_GRACE_PERIOD_IN_MILLIS = 3 * 60 * 1000; // three minutes
-    
     private boolean medalRace;
     private List<FleetDTO> fleets;
     private Map<FleetDTO, RegattaAndRaceIdentifier> trackedRaceIdentifiersPerFleet;
@@ -150,7 +149,7 @@ public class RaceColumnDTO extends NamedDTO implements IsSerializable {
         boolean result = false;
         final long now = System.currentTimeMillis();
         Date whenLastTrackedRaceWasLive = getWhenLastTrackedRaceWasLive(fleet);
-        if (whenLastTrackedRaceWasLive != null && whenLastTrackedRaceWasLive.getTime() > now - IS_LIVE_GRACE_PERIOD_IN_MILLIS) {
+        if (whenLastTrackedRaceWasLive != null && whenLastTrackedRaceWasLive.getTime() > now - TimingConstants.IS_LIVE_GRACE_PERIOD_IN_MILLIS) {
             result = true;
         }
         return result;
