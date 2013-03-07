@@ -172,13 +172,13 @@ public class PathPolyline {
 
                         temp = toLatLng(computeBeforeNewOrigin(indexOfMovedPoint, newOrigin));
                         if (PathPolyline.equals(temp, turnPoints[indexOfMovedPoint - 1], 0.0001) == false) {
-                            System.out.println("aici1");
+                            // System.out.println("aici1");
                             turnPoints[indexOfMovedPoint - 1] = temp;
                         }
 
                         temp = toLatLng(computeAfterNewOrigin(indexOfMovedPoint, newOrigin));
                         if (PathPolyline.equals(temp, turnPoints[indexOfMovedPoint + 1], 0.0001) == false) {
-                            System.out.println("aici2");
+                            // System.out.println("aici2");
                             turnPoints[indexOfMovedPoint + 1] = temp;
                         }
                     }
@@ -206,6 +206,7 @@ public class PathPolyline {
         });
 
         this.map.addOverlay(this.polyline);
+        this.simulatorMap.setPolyline(this.polyline);
         this.polyline.setEditingEnabled(PolyEditingOptions.newInstance(this.turnPoints.length - 1));
 
         // this.getTotalTime_old();

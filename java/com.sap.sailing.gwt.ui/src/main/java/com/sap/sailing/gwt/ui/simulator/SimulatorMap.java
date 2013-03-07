@@ -14,6 +14,7 @@ import com.google.gwt.maps.client.control.LargeMapControl3D;
 import com.google.gwt.maps.client.control.MenuMapTypeControl;
 import com.google.gwt.maps.client.control.ScaleControl;
 import com.google.gwt.maps.client.geom.LatLng;
+import com.google.gwt.maps.client.overlay.Polyline;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AbsolutePanel;
@@ -706,6 +707,19 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         this.legendCanvasOverlay.setVisible(true);
         if (SHOW_ONLY_PATH_POLYLINE == false) {
             this.legendCanvasOverlay.redraw(true);
+        }
+    }
+
+    private Polyline polyline = null;
+
+    public void setPolyline(Polyline polyline) {
+        this.polyline = polyline;
+    }
+
+    public void removePolyline() {
+        if (this.pathPolyline != null) {
+
+            this.mapw.removeOverlay(this.polyline);
         }
     }
 

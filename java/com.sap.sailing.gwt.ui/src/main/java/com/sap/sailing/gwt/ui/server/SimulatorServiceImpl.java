@@ -85,7 +85,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
     private static final WindPatternDisplayManager wpDisplayManager = WindPatternDisplayManager.INSTANCE;
     private static final String POLYLINE_PATH_NAME = "Polyline";
 
-
+    private static final double TOTAL_TIME_SCALE_FACTOR = 0.85;
     private static final int DEFAULT_STEP_MAX = 800;
     private static final long DEFAULT_TIMESTEP = 6666;
 
@@ -551,10 +551,17 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
             timepointAsMillis += stepTimeMilliseconds;
 
         }
-        // BOGDAN_TODO: PARAMETER CALIBRATION FACTOR TO SCALE THE TIME
 
-        // BOGDAN_TODO: RACE SELECTION + COMPETITORS SELECTION
         double totalTimeSeconds = (timepointAsMillis - requestData.allPoints.get(0).timepoint) / 1000;
+
+        double totalTimeGPSTrackSeconds = (gpsTrack.getPathPoints().get(gpsTrack.getPathPoints().size() - 1).getTimePoint().asMillis() - gpsTrack
+                .getPathPoints().get(0).getTimePoint().asMillis()) / 1000;
+        // System.out.println("totalTimeSeconds = " + totalTimeSeconds);
+        // System.out.println("totalTimeGPSTrackSeconds = " + totalTimeGPSTrackSeconds);
+
+        while (totalTimeSeconds > totalTimeGPSTrackSeconds) {
+            totalTimeSeconds *= TOTAL_TIME_SCALE_FACTOR;
+        }
 
         return new ResponseTotalTimeDTO((long) totalTimeSeconds, notificationMessage, (requestData.debugMode ? segments : null));
     }

@@ -744,6 +744,9 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
                 if (selectedLegIndex % 2 != 0) {
                     errorReporter.reportError("Downwind legs are NOT supported yet. Sorry about that :)");
                 } else {
+
+                    this.simulatorMap.removePolyline();
+
                     this.timePanel.setActive(false);
                     this.simulatorMap.refreshView(SimulatorMap.ViewName.SUMMARY, this.currentWPDisplay, selectedBoatClassIndex, selectedRaceIndex,
                             selectedCompetitorIndex, selectedLegIndex, true);
@@ -1003,8 +1006,6 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
 
     private void loadLegs(int selectedRaceIndex) {
 
-        this.legSelector.clear();
-
         this.simulatorSvc.getLegsNames(selectedRaceIndex, new AsyncCallback<List<String>>() {
 
             @Override
@@ -1014,6 +1015,8 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
 
             @Override
             public void onSuccess(List<String> response) {
+
+                legSelector.clear();
 
                 int index = 0;
                 for (String legName : response) {
@@ -1029,8 +1032,6 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
 
     private void loadCompetitors(int selectedRaceIndex) {
 
-        this.competitorSelector.clear();
-
         this.simulatorSvc.getCompetitorsNames(selectedRaceIndex, new AsyncCallback<List<String>>() {
 
             @Override
@@ -1040,6 +1041,8 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
 
             @Override
             public void onSuccess(List<String> response) {
+
+                competitorSelector.clear();
 
                 for (String competitorName : response) {
                     competitorSelector.addItem(competitorName);
