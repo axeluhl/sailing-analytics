@@ -24,10 +24,10 @@ import com.sap.sailing.simulator.windfield.WindFieldGenerator;
 import com.sap.sailing.simulator.windfield.impl.WindFieldGeneratorBlastImpl;
 
 public class SimulatorTest {
-    
+
     @Test
     public void testSailingSimulatorALL() {
-    	Position start = new DegreePosition(48.401856, -140.001526);
+        Position start = new DegreePosition(48.401856, -140.001526);
         Position end = new DegreePosition(49.143987, -139.987783);
         //System.out.println(start.getDistance(end).getKilometers());
 
@@ -54,12 +54,12 @@ public class SimulatorTest {
 
 
         SailingSimulatorImpl sailingSim = new SailingSimulatorImpl(param);
-        
-        Map <String, Path> paths = sailingSim.getAllPaths();
+
+        Map<String, Path> paths = sailingSim.getAllPathsForLeg(0, 0, 0);
         System.out.println(paths.get("2#Opportunistic").getPathPoints().size());
         System.out.println(paths.get("1#Omniscient").getPathPoints().size());
-        
-        	
+
+
     }
-    
+
 }

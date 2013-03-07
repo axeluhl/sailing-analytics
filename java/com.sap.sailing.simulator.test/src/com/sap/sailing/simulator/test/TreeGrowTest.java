@@ -27,10 +27,10 @@ import com.sap.sailing.simulator.windfield.WindFieldGenerator;
 import com.sap.sailing.simulator.windfield.impl.WindFieldGeneratorOscillationImpl;
 
 public class TreeGrowTest {
-    
+
     @Test
     public void testSailingSimulatorALL() {
-        
+
         Position start = new DegreePosition(54.001917,10.82222);
         //Position end = new DegreePosition(54.023806,10.822048);
         SpeedWithBearing bearNorth =  new KnotSpeedWithBearingImpl(6.0, new DegreeBearingImpl(33.0));
@@ -52,21 +52,21 @@ public class TreeGrowTest {
         TimePoint startTime = new MillisecondsTimePoint(startDate.getTime());
         TimePoint timeStep = new MillisecondsTimePoint(20000);
         wf.generate(startTime, null, timeStep);
-        SimulationParameters param = new SimulationParametersImpl(course, pd, wf, SailingSimulatorUtil.freestyle);        
-        
+        SimulationParameters param = new SimulationParametersImpl(course, pd, wf, SailingSimulatorUtil.freestyle);
+
         /*param.setProperty("Heuristic.targetTolerance[double]", 0.05);
         param.setProperty("Heuristic.timeResolution[long]", 30000.0);
         param.setProperty("Djikstra.gridv[int]", 10.0);
         param.setProperty("Djikstra.gridh[int]", 100.0);*/
 
-        PathGeneratorTreeGrowTarget treeGrow = new PathGeneratorTreeGrowTarget(param);        
-        Path path = treeGrow.getPath();
-        	
+        PathGeneratorTreeGrowTarget treeGrow = new PathGeneratorTreeGrowTarget(param);
+        Path path = treeGrow.getPath(0, 0, 0);
+
         for(TimedPositionWithSpeed pos : path.getPathPoints()) {
-            
+
             System.out.println(""+pos.getPosition().getLatDeg()+", "+pos.getPosition().getLngDeg());
-            
+
         }
     }
-    
+
 }
