@@ -740,9 +740,14 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
                     selectedCompetitorIndex, selectedLegIndex, true);
         } else {
             if (this.mode == SailingSimulatorUtil.measured) {
-                this.timePanel.setActive(false);
-                this.simulatorMap.refreshView(SimulatorMap.ViewName.SUMMARY, this.currentWPDisplay, selectedBoatClassIndex,
-                        selectedRaceIndex, selectedCompetitorIndex, selectedLegIndex, true);
+
+                if (selectedLegIndex % 2 != 0) {
+                    errorReporter.reportError("Downwind legs are NOT supported yet. Sorry about that :)");
+                } else {
+                    this.timePanel.setActive(false);
+                    this.simulatorMap.refreshView(SimulatorMap.ViewName.SUMMARY, this.currentWPDisplay, selectedBoatClassIndex, selectedRaceIndex,
+                            selectedCompetitorIndex, selectedLegIndex, true);
+                }
             }
         }
     }
@@ -845,12 +850,9 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
             selectedRaceIndex = 0;
         }
 
-        this.competitorSelector.clear();
         this.loadCompetitors(selectedRaceIndex);
 
-        this.legSelector.clear();
         this.loadLegs(selectedRaceIndex);
-
     }
 
     private void loadLegData(int selectedLegIndex) {
@@ -1001,6 +1003,8 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
 
     private void loadLegs(int selectedRaceIndex) {
 
+        this.legSelector.clear();
+
         this.simulatorSvc.getLegsNames(selectedRaceIndex, new AsyncCallback<List<String>>() {
 
             @Override
@@ -1011,8 +1015,10 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
             @Override
             public void onSuccess(List<String> response) {
 
+                int index = 0;
                 for (String legName : response) {
-                    legSelector.addItem(legName);
+                    legSelector.addItem(legName + ((index % 2 == 0) ? " (upwind)" : " (downwind)"));
+                    index++;
                 }
 
                 legSelector.setItemSelected(0, true); // first leg
@@ -1022,6 +1028,8 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
     }
 
     private void loadCompetitors(int selectedRaceIndex) {
+
+        this.competitorSelector.clear();
 
         this.simulatorSvc.getCompetitorsNames(selectedRaceIndex, new AsyncCallback<List<String>>() {
 

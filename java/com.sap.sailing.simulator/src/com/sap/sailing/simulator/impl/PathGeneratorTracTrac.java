@@ -237,13 +237,9 @@ public class PathGeneratorTracTrac extends PathGeneratorBase {
 
         List<String> result = new ArrayList<String>();
 
-        int index = 0;
         for (RaceDefinition race : this.raceHandle.getRaces()) {
             for (Leg leg : race.getCourse().getLegs()) {
-
-                result.add(leg.toString() + ((index % 2 == 0) ? " (upwind)" : " (downwind)"));
-
-                index++;
+                result.add(leg.toString());
             }
             break;
         }
