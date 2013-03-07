@@ -43,6 +43,15 @@
 		<url-pattern>/rc/racelog</url-pattern>
 	</servlet-mapping>
 	
+	<servlet>
+		<servlet-name>RCMarks</servlet-name>
+		<servlet-class>com.sap.sailing.server.gateway.impl.rc.MarksJsonExportServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>RCMarks</servlet-name>
+		<url-pattern>/rc/marks</url-pattern>
+	</servlet-mapping>
+	
 	<!-- RACE COMMITTEE END -->
 
 	<servlet>
