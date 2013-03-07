@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -21,11 +22,14 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.RaceColumn;
+import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.leaderboard.LeaderboardCache;
+import com.sap.sailing.domain.leaderboard.LeaderboardCacheManager;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.gateway.AbstractJsonHttpServlet;
@@ -34,12 +38,16 @@ import com.sap.sailing.util.SmartFutureCache.CacheUpdater;
 import com.sap.sailing.util.SmartFutureCache.UpdateInterval;
 
 /**
- * Exports a leaderboard to the JSON format
- * @author Frank
- *
+ * Exports a leaderboard to the JSON format. Uses a {@link SmartFutureCache}.
+ * 
+ * TODO Need to wire a {@link LeaderboardCacheManager} to this
+ * 
+ * @author Frank, Axel Uhl
+ * 
  */
-public class LeaderboardJsonExportServlet extends AbstractJsonHttpServlet {
+public class LeaderboardJsonExportServlet extends AbstractJsonHttpServlet implements LeaderboardCache {
     private static final long serialVersionUID = -2460691283231361152L;
+    private static final Logger logger = Logger.getLogger(LeaderboardJsonExportServlet.class.getName());
     private static final String PARAM_NAME_LEADERBOARDNAME = "leaderboardName";
     private static final String PARAM_NAME_RESULTSTATE = "resultState";
     private enum ResultStates { Live, Preliminary, Final };
@@ -51,7 +59,15 @@ public class LeaderboardJsonExportServlet extends AbstractJsonHttpServlet {
     
     private int totalNumberOfCacheEntries;
     
+    private int cacheHits;
+    private int cacheMisses;
+    
     private final SmartFutureCache<Leaderboard, Map<Pair<TimePoint, ResultStates>, JSONObject>, LeaderboardJsonCacheUpdateInterval> cache;
+    
+    /**
+     * Used to observe the leaderboards cached so far and triggering {@link #cache} updates.
+     */
+    private final LeaderboardCacheManager cacheManager;
     
     private static class LeaderboardJsonCacheUpdateInterval implements UpdateInterval<LeaderboardJsonCacheUpdateInterval> {
         private final Set<Pair<TimePoint, ResultStates>> timePointsAndResultStates;
@@ -86,12 +102,11 @@ public class LeaderboardJsonExportServlet extends AbstractJsonHttpServlet {
         }
 
         @Override
-        public Map<Pair<TimePoint, ResultStates>, JSONObject> provideNewCacheValue(Leaderboard key,
+        public Map<Pair<TimePoint, ResultStates>, JSONObject> provideNewCacheValue(Leaderboard leaderboard,
                 Map<Pair<TimePoint, ResultStates>, JSONObject> oldCacheValue, Map<Pair<TimePoint, ResultStates>, JSONObject> computedCacheUpdate,
                 LeaderboardJsonCacheUpdateInterval updateInterval) {
             Map<Pair<TimePoint, ResultStates>, JSONObject> result = new LinkedHashMap<Pair<TimePoint, ResultStates>, JSONObject>() {
                 private static final long serialVersionUID = -6197983565575024084L;
-
                 @Override
                 protected boolean removeEldestEntry(Entry<Pair<TimePoint, ResultStates>, JSONObject> eldest) {
                     final boolean result;
@@ -107,6 +122,9 @@ public class LeaderboardJsonExportServlet extends AbstractJsonHttpServlet {
             if (oldCacheValue != null) {
                 result.putAll(oldCacheValue);
                 totalNumberOfCacheEntries -= oldCacheValue.size();
+            } else {
+                // first time we cache something for that leaderboard; ensure we get update triggers:
+                cacheManager.add(leaderboard);
             }
             result.putAll(computedCacheUpdate);
             totalNumberOfCacheEntries += result.size();
@@ -116,6 +134,7 @@ public class LeaderboardJsonExportServlet extends AbstractJsonHttpServlet {
     
     public LeaderboardJsonExportServlet() {
         cache = new SmartFutureCache<>(new LeaderboardJsonCacheUpdater(), "LeaderboardJsonExporServlet SmartFutureCache for "+this);
+        cacheManager = new LeaderboardCacheManager(this);
     }
 
     @Override
@@ -148,10 +167,14 @@ public class LeaderboardJsonExportServlet extends AbstractJsonHttpServlet {
             Pair<TimePoint, ResultStates> timePointAndResultState) throws NoWindException {
         Map<Pair<TimePoint, ResultStates>, JSONObject> cacheEntry = cache.get(leaderboard, /* waitForLatest */ false);
         if (cacheEntry == null || !cacheEntry.containsKey(timePointAndResultState)) {
+            cacheMisses++;
             cache.triggerUpdate(leaderboard, new LeaderboardJsonCacheUpdateInterval(Collections.singleton(timePointAndResultState)));
             // now wait for this entry to be computed
             cacheEntry = cache.get(leaderboard, /* waitForLatest */ true);
+        } else {
+            cacheHits++;
         }
+        logger.finest(this+" cache hits/misses: "+cacheHits+"/"+cacheMisses);
         return cacheEntry.get(timePointAndResultState);
     }
 
@@ -283,6 +306,20 @@ public class LeaderboardJsonExportServlet extends AbstractJsonHttpServlet {
             }
             break;
         }
+        if (result == null) {
+            result = MillisecondsTimePoint.now();
+        }
         return result;
+    }
+
+    @Override
+    public void add(Leaderboard leaderboard) {
+        // nothing to do; the triggerUpdate call on the SmartFutureCache in doGet ensures that a record for the leaderboard
+        // will be created in the SmartFutureCache
+    }
+
+    @Override
+    public void invalidate(Leaderboard leaderboard) {
+        cache.triggerUpdate(leaderboard, null);
     }
 }
