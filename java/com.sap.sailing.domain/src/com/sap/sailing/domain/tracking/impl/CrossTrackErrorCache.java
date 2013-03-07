@@ -25,9 +25,9 @@ import com.sap.sailing.domain.tracking.RaceChangeListener;
 import com.sap.sailing.domain.tracking.Track;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.util.impl.SmartFutureCache;
-import com.sap.sailing.util.impl.SmartFutureCache.CacheUpdater;
-import com.sap.sailing.util.impl.SmartFutureCache.UpdateInterval;
+import com.sap.sailing.util.SmartFutureCache;
+import com.sap.sailing.util.SmartFutureCache.CacheUpdater;
+import com.sap.sailing.util.SmartFutureCache.UpdateInterval;
 
 /**
  * (Re-)computing the cross track error for a competitor causes significant amounts of CPU cycles. The cross track error

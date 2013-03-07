@@ -8,5 +8,5 @@ package com.sap.sailing.domain.leaderboard;
  */
 public interface LeaderboardCache {
     void add(Leaderboard leaderboard);
-    void removeFromCache(Leaderboard leaderboard);
+    void invalidate(Leaderboard leaderboard);
 }

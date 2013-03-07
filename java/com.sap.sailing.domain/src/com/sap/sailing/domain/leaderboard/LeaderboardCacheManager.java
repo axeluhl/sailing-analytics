@@ -148,7 +148,7 @@ public class LeaderboardCacheManager {
     }
     
     private void removeFromCache(Leaderboard leaderboard) {
-        leaderboardCache.removeFromCache(leaderboard);
+        leaderboardCache.invalidate(leaderboard);
         synchronized (invalidationListenersPerLeaderboard) {
             Map<TrackedRace, Set<CacheInvalidationListener>> listenersMap = invalidationListenersPerLeaderboard
                     .remove(leaderboard);

@@ -85,7 +85,7 @@ public class LeaderboardDTOCache implements LeaderboardCache {
     }
     
     @Override
-    public void removeFromCache(Leaderboard leaderboard) {
+    public void invalidate(Leaderboard leaderboard) {
         synchronized (leaderboardCache) {
             leaderboardCache.remove(leaderboard);
         }
@@ -100,7 +100,9 @@ public class LeaderboardDTOCache implements LeaderboardCache {
                 return size() > 10; // remember 10 LeaderboardDTOs per leaderborad
             }
         };
-        leaderboardCache.put(leaderboard, map);
+        synchronized (leaderboardCache) {
+            leaderboardCache.put(leaderboard, map);
+        }
     }
     
     /**
