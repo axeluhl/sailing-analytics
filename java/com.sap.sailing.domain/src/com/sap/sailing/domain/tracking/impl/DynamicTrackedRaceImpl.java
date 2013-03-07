@@ -571,7 +571,6 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         // TODO check what a good filter is; remember that start/end of tracking may change over time; what if we have discarded valuable wind fixes?
         TimePoint startOfTracking = getStartOfTracking();
         TimePoint endOfTracking = getEndOfTracking();
-                || endOfTracking.plus(TimingConstants.IS_LIVE_GRACE_PERIOD_IN_MILLIS).before(wind.getTimePoint())) {
         if (startOfTracking == null || endOfTracking == null
                 || (startOfTracking.before(wind.getTimePoint()) &&
                         endOfTracking.plus(TimingConstants.IS_LIVE_GRACE_PERIOD_IN_MILLIS).before(wind.getTimePoint()))) {
