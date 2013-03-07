@@ -8,8 +8,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.NavigableSet;
-import java.util.Set;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.Competitor;
@@ -18,12 +16,9 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.common.RaceIdentifier;
-import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
-import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RacesHandle;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
@@ -96,141 +91,141 @@ public class PathGeneratorTracTrac extends PathGeneratorBase {
         this.windScale = windScale;
     }
 
-    @Override
-    public Path getPath() {
 
-        LinkedList<TimedPositionWithSpeed> path = new LinkedList<TimedPositionWithSpeed>();
+    // private Path getPath() {
+    //
+    // LinkedList<TimedPositionWithSpeed> path = new LinkedList<TimedPositionWithSpeed>();
+    //
+    // this.intializeRaceHandle();
+    //
+    // LOGGER.info("Calling raceHandle.getRaces(): " + this.raceHandle);
+    //
+    // // wait for RaceDefinition to be completely wired in Regatta
+    // Set<RaceDefinition> races = this.raceHandle.getRaces();
+    //
+    // String regattaName = this.raceHandle.getRegatta().getName();
+    //
+    // Iterator<RaceDefinition> racIter = races.iterator();
+    //
+    // if (racIter.hasNext()) {
+    // RaceDefinition race = racIter.next();
+    //
+    // String raceName = race.getName();
+    // LOGGER.info("Race: \"" + raceName + "\", \"" + regattaName + "\"");
+    //
+    // RaceIdentifier raceIdentifier = new RegattaNameAndRaceName(regattaName, raceName);
+    // TrackedRace tr = this.service.getExistingTrackedRace(raceIdentifier);
+    //
+    // Iterable<Competitor> competitors = tr.getRace().getCompetitors();
+    // Iterator<Competitor> comIter = competitors.iterator();
+    //
+    // if (comIter.hasNext()) {
+    //
+    // Competitor competitor = comIter.next();
+    // GPSFixTrack<Competitor, GPSFixMoving> track = tr.getTrack(competitor);
+    //
+    // track.lockForRead();
+    // Iterable<GPSFixMoving> gpsFixes = track.getFixes();
+    // Iterator<GPSFixMoving> gpsIter = gpsFixes.iterator();
+    //
+    // int idx = 0;
+    // while ((gpsIter.hasNext()) && (idx < 1000)) {
+    //
+    // GPSFixMoving gpsFix = gpsIter.next();
+    // Position position = gpsFix.getPosition();
+    // TimePoint timePoint = gpsFix.getTimePoint();
+    //
+    // Wind gpsWind = tr.getWind(position, timePoint);
+    //
+    // if (gpsWind.getKnots() == 1.0) {
+    // gpsWind.scale(this.windScale);
+    // }
+    //
+    // path.addLast(new TimedPositionWithSpeedImpl(timePoint, position, gpsWind));
+    //
+    // idx++;
+    // }
+    // track.unlockAfterRead();
+    // }
+    // }
+    //
+    // return new PathImpl(path, null);
+    // }
 
-        this.intializeRaceHandle();
-
-        LOGGER.info("Calling raceHandle.getRaces(): " + this.raceHandle);
-
-        // wait for RaceDefinition to be completely wired in Regatta
-        Set<RaceDefinition> races = this.raceHandle.getRaces();
-
-        String regattaName = this.raceHandle.getRegatta().getName();
-
-        Iterator<RaceDefinition> racIter = races.iterator();
-
-        if (racIter.hasNext()) {
-            RaceDefinition race = racIter.next();
-
-            String raceName = race.getName();
-            LOGGER.info("Race: \"" + raceName + "\", \"" + regattaName + "\"");
-
-            RaceIdentifier raceIdentifier = new RegattaNameAndRaceName(regattaName, raceName);
-            TrackedRace tr = this.service.getExistingTrackedRace(raceIdentifier);
-
-            Iterable<Competitor> competitors = tr.getRace().getCompetitors();
-            Iterator<Competitor> comIter = competitors.iterator();
-
-            if (comIter.hasNext()) {
-
-                Competitor competitor = comIter.next();
-                GPSFixTrack<Competitor, GPSFixMoving> track = tr.getTrack(competitor);
-
-                track.lockForRead();
-                Iterable<GPSFixMoving> gpsFixes = track.getFixes();
-                Iterator<GPSFixMoving> gpsIter = gpsFixes.iterator();
-
-                int idx = 0;
-                while ((gpsIter.hasNext()) && (idx < 1000)) {
-
-                    GPSFixMoving gpsFix = gpsIter.next();
-                    Position position = gpsFix.getPosition();
-                    TimePoint timePoint = gpsFix.getTimePoint();
-
-                    Wind gpsWind = tr.getWind(position, timePoint);
-
-                    if (gpsWind.getKnots() == 1.0) {
-                        gpsWind.scale(this.windScale);
-                    }
-
-                    path.addLast(new TimedPositionWithSpeedImpl(timePoint, position, gpsWind));
-
-                    idx++;
-                }
-                track.unlockAfterRead();
-            }
-        }
-
-        return new PathImpl(path, null);
-    }
-
-    public Path getPathPolyline(Distance maxDistance) {
-
-        LinkedList<TimedPositionWithSpeed> path = new LinkedList<TimedPositionWithSpeed>();
-
-        this.intializeRaceHandle();
-
-        LOGGER.info("Calling raceHandle.getRaces(): " + this.raceHandle);
-
-        // wait for RaceDefinition to be completely wired in Regatta
-        Set<RaceDefinition> races = this.raceHandle.getRaces();
-
-        String regattaName = this.raceHandle.getRegatta().getName();
-
-        Iterator<RaceDefinition> racIter = races.iterator();
-
-        if (racIter.hasNext()) {
-            RaceDefinition race = racIter.next();
-
-            String raceName = race.getName();
-            LOGGER.info("Race: \"" + raceName + "\", \"" + regattaName + "\"");
-
-            RaceIdentifier raceIdentifier = new RegattaNameAndRaceName(regattaName, raceName);
-            TrackedRace tr = this.service.getExistingTrackedRace(raceIdentifier);
-
-            Iterable<Competitor> competitors = tr.getRace().getCompetitors();
-            Iterator<Competitor> comIter = competitors.iterator();
-
-            if (comIter.hasNext()) {
-
-                Competitor competitor = comIter.next();
-
-                // TODO: following selection of marks is just for testing
-                // final implementation should do selection of marks based on user input
-                NavigableSet<MarkPassing> mps = tr.getMarkPassings(competitor);
-                MarkPassing mp = mps.first(); // upwind 1
-                mp = mps.higher(mp); // downwind 1
-                mp = mps.higher(mp); // upwind 2
-                TimePoint mpStart = mp.getTimePoint();
-                Position wpStart = tr.getApproximatePosition(mp.getWaypoint(), mpStart);
-                mp = mps.higher(mp);
-                TimePoint mpEnd = mp.getTimePoint();
-                Position wpEnd = tr.getApproximatePosition(mp.getWaypoint(), mpEnd);
-
-                this.raceCourse = new LinkedList<TimedPositionWithSpeed>();
-                Wind gpsWind = tr.getWind(wpStart, mpStart);
-                this.raceCourse.addLast(new TimedPositionWithSpeedImpl(mpStart, wpStart, gpsWind));
-                gpsWind = tr.getWind(wpEnd, mpEnd);
-                this.raceCourse.addLast(new TimedPositionWithSpeedImpl(mpEnd, wpEnd, gpsWind));
-
-                Iterable<GPSFixMoving> gpsFixes = tr.approximate(competitor, maxDistance, mpStart, mpEnd);
-                Iterator<GPSFixMoving> gpsIter = gpsFixes.iterator();
-
-                int idx = 0;
-                while ((gpsIter.hasNext()) && (idx < 1000)) {
-
-                    GPSFixMoving gpsFix = gpsIter.next();
-                    Position position = gpsFix.getPosition();
-                    TimePoint timePoint = gpsFix.getTimePoint();
-
-                    gpsWind = tr.getWind(position, timePoint);
-
-                    if (gpsWind.getKnots() == 1.0) {
-                        gpsWind.scale(this.windScale);
-                    }
-
-                    path.addLast(new TimedPositionWithSpeedImpl(gpsFix.getTimePoint(), gpsFix.getPosition(), gpsWind));
-
-                    idx++;
-                }
-            }
-        }
-
-        return new PathImpl(path, null);
-    }
+    // private Path getPathPolyline(Distance maxDistance) {
+    //
+    // LinkedList<TimedPositionWithSpeed> path = new LinkedList<TimedPositionWithSpeed>();
+    //
+    // this.intializeRaceHandle();
+    //
+    // LOGGER.info("Calling raceHandle.getRaces(): " + this.raceHandle);
+    //
+    // // wait for RaceDefinition to be completely wired in Regatta
+    // Set<RaceDefinition> races = this.raceHandle.getRaces();
+    //
+    // String regattaName = this.raceHandle.getRegatta().getName();
+    //
+    // Iterator<RaceDefinition> racIter = races.iterator();
+    //
+    // if (racIter.hasNext()) {
+    // RaceDefinition race = racIter.next();
+    //
+    // String raceName = race.getName();
+    // LOGGER.info("Race: \"" + raceName + "\", \"" + regattaName + "\"");
+    //
+    // RaceIdentifier raceIdentifier = new RegattaNameAndRaceName(regattaName, raceName);
+    // TrackedRace tr = this.service.getExistingTrackedRace(raceIdentifier);
+    //
+    // Iterable<Competitor> competitors = tr.getRace().getCompetitors();
+    // Iterator<Competitor> comIter = competitors.iterator();
+    //
+    // if (comIter.hasNext()) {
+    //
+    // Competitor competitor = comIter.next();
+    //
+    // // TODO: following selection of marks is just for testing
+    // // final implementation should do selection of marks based on user input
+    // NavigableSet<MarkPassing> mps = tr.getMarkPassings(competitor);
+    // MarkPassing mp = mps.first(); // upwind 1
+    // mp = mps.higher(mp); // downwind 1
+    // mp = mps.higher(mp); // upwind 2
+    // TimePoint mpStart = mp.getTimePoint();
+    // Position wpStart = tr.getApproximatePosition(mp.getWaypoint(), mpStart);
+    // mp = mps.higher(mp);
+    // TimePoint mpEnd = mp.getTimePoint();
+    // Position wpEnd = tr.getApproximatePosition(mp.getWaypoint(), mpEnd);
+    //
+    // this.raceCourse = new LinkedList<TimedPositionWithSpeed>();
+    // Wind gpsWind = tr.getWind(wpStart, mpStart);
+    // this.raceCourse.addLast(new TimedPositionWithSpeedImpl(mpStart, wpStart, gpsWind));
+    // gpsWind = tr.getWind(wpEnd, mpEnd);
+    // this.raceCourse.addLast(new TimedPositionWithSpeedImpl(mpEnd, wpEnd, gpsWind));
+    //
+    // Iterable<GPSFixMoving> gpsFixes = tr.approximate(competitor, maxDistance, mpStart, mpEnd);
+    // Iterator<GPSFixMoving> gpsIter = gpsFixes.iterator();
+    //
+    // int idx = 0;
+    // while ((gpsIter.hasNext()) && (idx < 1000)) {
+    //
+    // GPSFixMoving gpsFix = gpsIter.next();
+    // Position position = gpsFix.getPosition();
+    // TimePoint timePoint = gpsFix.getTimePoint();
+    //
+    // gpsWind = tr.getWind(position, timePoint);
+    //
+    // if (gpsWind.getKnots() == 1.0) {
+    // gpsWind.scale(this.windScale);
+    // }
+    //
+    // path.addLast(new TimedPositionWithSpeedImpl(gpsFix.getTimePoint(), gpsFix.getPosition(), gpsWind));
+    //
+    // idx++;
+    // }
+    // }
+    // }
+    //
+    // return new PathImpl(path, null);
+    // }
 
     public Path getRaceCourse() {
         return this.raceCourse == null ? null : new PathImpl(this.raceCourse, null);
@@ -242,9 +237,13 @@ public class PathGeneratorTracTrac extends PathGeneratorBase {
 
         List<String> result = new ArrayList<String>();
 
+        int index = 0;
         for (RaceDefinition race : this.raceHandle.getRaces()) {
             for (Leg leg : race.getCourse().getLegs()) {
-                result.add(leg.toString());
+
+                result.add(leg.toString() + ((index % 2 == 0) ? " (upwind)" : " (downwind)"));
+
+                index++;
             }
             break;
         }
@@ -252,7 +251,8 @@ public class PathGeneratorTracTrac extends PathGeneratorBase {
         return result;
     }
 
-    public Path getLeg(int selectedRaceIndex, int selectedCompetitorIndex, int selectedLegIndex) {
+    @Override
+    public Path getPath(int selectedRaceIndex, int selectedCompetitorIndex, int selectedLegIndex) {
 
         this.intializeRaceHandle();
 
@@ -303,7 +303,7 @@ public class PathGeneratorTracTrac extends PathGeneratorBase {
         return new PathImpl(path, null);
     }
 
-    public Path getLegPolyline(int selectedRaceIndex, int selectedCompetitorIndex, int selectedLegIndex, Distance maxDistance) {
+    public Path getPathPolyline(int selectedRaceIndex, int selectedCompetitorIndex, int selectedLegIndex, Distance maxDistance) {
 
         this.intializeRaceHandle();
 

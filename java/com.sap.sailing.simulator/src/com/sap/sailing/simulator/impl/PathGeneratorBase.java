@@ -17,7 +17,7 @@ public class PathGeneratorBase implements PathGenerator {
     }
 
     @Override
-    public void setSimulationParameters(final SimulationParameters params) {
+    public void setSimulationParameters(SimulationParameters params) {
         this.parameters = params;
     }
 
@@ -27,15 +27,15 @@ public class PathGeneratorBase implements PathGenerator {
     }
 
     @Override
-    public Path getPath() {
+    public Path getPath(int selectedRaceIndex, int selectedCompetitorIndex, int selectedLegIndex) {
         return null;
     }
 
     @Override
-    public Path getPathEvenTimed(long millisecondsStep) {
+    public Path getPathEvenTimed(long stepMilliseconds, int selectedRaceIndex, int selectedCompetitorIndex, int selectedLegIndex) {
 
-        Path path = this.getPath();
+        Path path = this.getPath(selectedRaceIndex, selectedCompetitorIndex, selectedLegIndex);
 
-        return path == null ? null : path.getEvenTimedPath(millisecondsStep);
+        return path == null ? null : path.getEvenTimedPath(stepMilliseconds);
     }
 }

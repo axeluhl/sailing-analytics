@@ -28,7 +28,7 @@ public class PathGenerator1Turner extends PathGeneratorBase {
         int middle;
     }
 
-    private SimulationParameters simulationParameters;
+    // private SimulationParameters simulationParameters;
     private boolean leftSide;
     private result1Turn result;
     private Position evalStartPoint;
@@ -42,7 +42,7 @@ public class PathGenerator1Turner extends PathGeneratorBase {
     private static final double TRESHOLD_MINIMUM_DISTANCE_METERS = 10.0;
 
     public PathGenerator1Turner(SimulationParameters params) {
-        this.simulationParameters = params;
+        this.parameters = params;
     }
 
     public void setEvaluationParameters(boolean leftSideVal, Position startPoint, TimePoint startTime, long timeStep, int stepMax) {
@@ -200,15 +200,15 @@ public class PathGenerator1Turner extends PathGeneratorBase {
     }
 
     @Override
-    public Path getPath() {
+    public Path getPath(int selectedRaceIndex, int selectedCompetitorIndex, int selectedLegIndex) {
 
-        WindFieldGenerator windField = this.simulationParameters.getWindField();
+        WindFieldGenerator windField = this.parameters.getWindField();
 
-        PolarDiagram polarDiagram = this.simulationParameters.getBoatPolarDiagram();
+        PolarDiagram polarDiagram = this.parameters.getBoatPolarDiagram();
 
-        Position start = (this.evalStartPoint == null) ? this.simulationParameters.getCourse().get(0) : this.evalStartPoint;
+        Position start = (this.evalStartPoint == null) ? this.parameters.getCourse().get(0) : this.evalStartPoint;
 
-        Position end = this.simulationParameters.getCourse().get(1);
+        Position end = this.parameters.getCourse().get(1);
 
         TimePoint startTime = (this.evalStartTime == null) ? windField.getStartTime() : this.evalStartTime;
 

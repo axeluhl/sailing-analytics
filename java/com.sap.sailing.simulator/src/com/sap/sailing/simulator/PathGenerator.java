@@ -6,8 +6,7 @@ public interface PathGenerator {
 
     SimulationParameters getSimulationParameters();
 
-    Path getPath();
+    Path getPath(int selectedRaceIndex, int selectedCompetitorIndex, int selectedLegIndex);
 
-    Path getPathEvenTimed(long millisecondsStep);
-
+    Path getPathEvenTimed(long stepMilliseconds, int selectedRaceIndex, int selectedCompetitorIndex, int selectedLegIndex);
 }

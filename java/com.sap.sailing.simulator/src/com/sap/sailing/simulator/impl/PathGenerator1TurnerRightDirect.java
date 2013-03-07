@@ -19,22 +19,22 @@ import com.sap.sailing.simulator.windfield.WindFieldGenerator;
 public class PathGenerator1TurnerRightDirect extends PathGeneratorBase {
 
     // private static Logger logger = Logger.getLogger("com.sap.sailing");
-    SimulationParameters simulationParameters;
+    // SimulationParameters simulationParameters;
 
     public PathGenerator1TurnerRightDirect(SimulationParameters params) {
-        simulationParameters = params;
+        this.parameters = params;
     }
 
     @Override
-    public Path getPath() {
+    public Path getPath(int selectedRaceIndex, int selectedCompetitorIndex, int selectedLegIndex) {
 
         // retrieve simulation parameters
-        Boundary boundary = new RectangularBoundary(simulationParameters.getCourse().get(0), simulationParameters
+        Boundary boundary = new RectangularBoundary(this.parameters.getCourse().get(0), this.parameters
                 .getCourse().get(1));// simulationParameters.getBoundaries();
-        WindFieldGenerator windField = simulationParameters.getWindField();
-        PolarDiagram polarDiagram = simulationParameters.getBoatPolarDiagram();
-        Position start = simulationParameters.getCourse().get(0);
-        Position end = simulationParameters.getCourse().get(1);
+        WindFieldGenerator windField = this.parameters.getWindField();
+        PolarDiagram polarDiagram = this.parameters.getBoatPolarDiagram();
+        Position start = this.parameters.getCourse().get(0);
+        Position end = this.parameters.getCourse().get(1);
         TimePoint startTime = windField.getStartTime();// new MillisecondsTimePoint(0);
 
         Distance courseLength = start.getDistance(end);
@@ -90,10 +90,11 @@ public class PathGenerator1TurnerRightDirect extends PathGeneratorBase {
                     Position nextPosition2 = currSpeed2.travelTo(currentPosition, currentTime, nextTime);
                     // nextPosition2.
                     if (nextPosition1.getDistance(end).compareTo(nextPosition2.getDistance(end)) < 0
-                            && Math.abs(direction1.getDifferenceTo(direction2).getDegrees()) < 45.0)
+                            && Math.abs(direction1.getDifferenceTo(direction2).getDegrees()) < 45.0) {
                         currentPosition = nextPosition1;
-                    else
+                    } else {
                         currentPosition = nextPosition2;
+                    }
                 }
 
                 currentStep++;
@@ -133,8 +134,9 @@ public class PathGenerator1TurnerRightDirect extends PathGeneratorBase {
             // MillisecondsTimePoint(lst.getLast().getTimePoint().asMillis() + timeResolution), end,
             // lst.getLast().getSpeed()));
             return new PathImpl(lst, windField);
-        } else
+        } else {
             return null;
+        }
 
     }
 

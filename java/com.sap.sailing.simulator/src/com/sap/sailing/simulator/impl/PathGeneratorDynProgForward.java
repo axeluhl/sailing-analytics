@@ -23,10 +23,10 @@ import com.sap.sailing.simulator.windfield.WindFieldGenerator;
 public class PathGeneratorDynProgForward extends PathGeneratorBase {
 
     // private static Logger logger = Logger.getLogger("com.sap.sailing");
-    SimulationParameters simulationParameters;
+    // SimulationParameters simulationParameters;
 
     public PathGeneratorDynProgForward(SimulationParameters params) {
-        simulationParameters = params;
+        this.parameters = params;
     }
 
     //
@@ -128,14 +128,14 @@ public class PathGeneratorDynProgForward extends PathGeneratorBase {
         long dur;
     }
 
-    @Override
+    // @Override
     public Path getPath() {
 
         // retrieve simulation parameters
-        Boundary boundary = new RectangularBoundary(simulationParameters.getCourse().get(0), simulationParameters
+        Boundary boundary = new RectangularBoundary(this.parameters.getCourse().get(0), this.parameters
                 .getCourse().get(1));// simulationParameters.getBoundaries();
-        WindFieldGenerator windField = simulationParameters.getWindField();
-        PolarDiagram polarDiagram = simulationParameters.getBoatPolarDiagram();
+        WindFieldGenerator windField = this.parameters.getWindField();
+        PolarDiagram polarDiagram = this.parameters.getBoatPolarDiagram();
         // Position start = simulationParameters.getCourse().get(0);
         // Position end = simulationParameters.getCourse().get(1);
         TimePoint startTime = windField.getStartTime();
@@ -179,7 +179,7 @@ public class PathGeneratorDynProgForward extends PathGeneratorBase {
         // in each vertical step, paths having the same minimum duration are kept
         double mintol = 1.0; // threshold of closeness to realy minimum duration for keeping paths
         int maxeqpaths = 2; // maximum nmber of equal paths to keep [currently set to low values, to save Java heap
-                            // memory]
+        // memory]
 
         // loop over vertical steps
         for (int idxv = 0; idxv < (optimizationGridsizeVertical - 1); idxv++) {
@@ -219,7 +219,7 @@ public class PathGeneratorDynProgForward extends PathGeneratorBase {
                         DPDuration durationh1h2 = calcDuration(new MillisecondsTimePoint(
                                 duras.get(idxh1 + range1).duration), duras.get(idxh1 + range1).side,
                                 sailGrid[idxv][idxh1 + optimizationGridsizeHorizontal], sailGrid[idxv + 1][idxh2
-                                        + optimizationGridsizeHorizontal], windField, polarDiagram);
+                                                                                                           + optimizationGridsizeHorizontal], windField, polarDiagram);
 
                         // *forbidden* angles
                         if (durationh1h2.duration < 0) {
@@ -259,7 +259,7 @@ public class PathGeneratorDynProgForward extends PathGeneratorBase {
                                 for (int i = 0; i < tpaths.size(); i++) {
                                     Vector<DPLocation> tpath;
                                     tpath = new Vector<DPLocation>(tpaths.get(i)); // (Vector<DPLocation>)
-                                                                                   // (tpaths.get(i)).clone();
+                                    // (tpaths.get(i)).clone();
                                     tpath.add(new DPLocation(idxh2, mindur.duration));
                                     npaths.add(tpath);
                                 }
@@ -293,7 +293,7 @@ public class PathGeneratorDynProgForward extends PathGeneratorBase {
                                 for (int i = 0; i < tpaths.size(); i++) {
                                     Vector<DPLocation> tpath;
                                     tpath = new Vector<DPLocation>(tpaths.get(i)); // (Vector<DPLocation>)
-                                                                                   // (tpaths.get(i)).clone();
+                                    // (tpaths.get(i)).clone();
                                     tpath.add(new DPLocation(0, mindur.duration));
                                     npaths.add(tpath);
                                 }

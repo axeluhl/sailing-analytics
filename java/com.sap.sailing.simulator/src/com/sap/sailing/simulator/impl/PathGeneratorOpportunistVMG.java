@@ -19,13 +19,13 @@ import com.sap.sailing.simulator.windfield.WindFieldGenerator;
 public class PathGeneratorOpportunistVMG extends PathGeneratorBase {
 
     private static Logger logger = Logger.getLogger("com.sap.sailing");
-    SimulationParameters simulationParameters;
+    // SimulationParameters simulationParameters;
     int maxLeft;
     int maxRight;
     boolean startLeft;
 
     public PathGeneratorOpportunistVMG(SimulationParameters params) {
-        simulationParameters = params;
+        this.parameters = params;
     }
 
     public void setEvaluationParameters(int maxLeftVal, int maxRightVal, boolean startLeftVal) {
@@ -35,12 +35,12 @@ public class PathGeneratorOpportunistVMG extends PathGeneratorBase {
     }
 
     @Override
-    public Path getPath() {
+    public Path getPath(int selectedRaceIndex, int selectedCompetitorIndex, int selectedLegIndex) {
 
-        WindFieldGenerator wf = simulationParameters.getWindField();
-        PolarDiagram pd = simulationParameters.getBoatPolarDiagram();
-        Position start = simulationParameters.getCourse().get(0);
-        Position end = simulationParameters.getCourse().get(1);
+        WindFieldGenerator wf = this.parameters.getWindField();
+        PolarDiagram pd = this.parameters.getBoatPolarDiagram();
+        Position start = this.parameters.getCourse().get(0);
+        Position end = this.parameters.getCourse().get(1);
 
         TimePoint startTime = wf.getStartTime();// new MillisecondsTimePoint(0);
         List<TimedPositionWithSpeed> lst = new ArrayList<TimedPositionWithSpeed>();
@@ -185,7 +185,7 @@ public class PathGeneratorOpportunistVMG extends PathGeneratorBase {
         //
         // FinishPhase: get 1-turners to finalize course
         //
-        PathGenerator1Turner gen1Turner = new PathGenerator1Turner(simulationParameters);
+        PathGenerator1Turner gen1Turner = new PathGenerator1Turner(this.parameters);
         TimePoint leftGoingTime;
         TimePoint rightGoingTime;
         if (prevDirection == 1) {
@@ -197,10 +197,10 @@ public class PathGeneratorOpportunistVMG extends PathGeneratorBase {
         }
 
         gen1Turner.setEvaluationParameters(true, currentPosition, leftGoingTime, wf.getTimeStep().asMillis() / (5 * 3), 100);
-        Path leftPath = gen1Turner.getPath();
+        Path leftPath = gen1Turner.getPath(selectedRaceIndex, selectedCompetitorIndex, selectedLegIndex);
 
         gen1Turner.setEvaluationParameters(false, currentPosition, rightGoingTime, wf.getTimeStep().asMillis() / (5 * 3), 100);
-        Path rightPath = gen1Turner.getPath();
+        Path rightPath = gen1Turner.getPath(selectedRaceIndex, selectedCompetitorIndex, selectedLegIndex);
 
         if ((leftPath.getPathPoints() != null) && (rightPath.getPathPoints() != null)) {
             if (leftPath.getPathPoints().get(leftPath.getPathPoints().size() - 1).getTimePoint().asMillis() <= rightPath.getPathPoints()

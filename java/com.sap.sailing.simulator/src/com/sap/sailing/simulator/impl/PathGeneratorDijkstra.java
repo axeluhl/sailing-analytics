@@ -26,31 +26,31 @@ import com.sap.sailing.simulator.windfield.WindFieldGenerator;
 public class PathGeneratorDijkstra extends PathGeneratorBase {
 
     // private static Logger logger = Logger.getLogger("com.sap.sailing");
-    SimulationParameters simulationParameters;
+    // SimulationParameters simulationParameters;
 
     public PathGeneratorDijkstra(SimulationParameters params) {
-        simulationParameters = params;
+        this.parameters = params;
     }
 
-    @Override
+    // @Override
     public Path getPath() {
 
         // retrieve simulation parameters
-        Boundary boundary = new RectangularBoundary(simulationParameters.getCourse().get(0), simulationParameters
+        Boundary boundary = new RectangularBoundary(this.parameters.getCourse().get(0), this.parameters
                 .getCourse().get(1));// simulationParameters.getBoundaries();
-        WindFieldGenerator windField = simulationParameters.getWindField();
-        PolarDiagram polarDiagram = simulationParameters.getBoatPolarDiagram();
-        Position start = simulationParameters.getCourse().get(0);
-        Position end = simulationParameters.getCourse().get(1);
+        WindFieldGenerator windField = this.parameters.getWindField();
+        PolarDiagram polarDiagram = this.parameters.getBoatPolarDiagram();
+        Position start = this.parameters.getCourse().get(0);
+        Position end = this.parameters.getCourse().get(1);
         TimePoint startTime = windField.getStartTime();// new MillisecondsTimePoint(0);
 
         // the solution path
         LinkedList<TimedPositionWithSpeed> lst = new LinkedList<TimedPositionWithSpeed>();
 
         // initiate grid
-        int gridv = simulationParameters.getProperty("Djikstra.gridv[int]").intValue(); // number of vertical grid steps
-        int gridh = simulationParameters.getProperty("Djikstra.gridh[int]").intValue(); // number of horizontal grid
-                                                                                        // steps
+        int gridv = this.parameters.getProperty("Djikstra.gridv[int]").intValue(); // number of vertical grid steps
+        int gridh = this.parameters.getProperty("Djikstra.gridh[int]").intValue(); // number of horizontal grid
+        // steps
         Position[][] sailGrid = boundary.extractGrid(gridh, gridv);
 
         // create adjacency graph including start and end
