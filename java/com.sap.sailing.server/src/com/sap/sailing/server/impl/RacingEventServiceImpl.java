@@ -1612,6 +1612,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
             logger.info("Recieved " + eventsById.size() + " NEW events");
             logger.info("receiving regattasByName");
             regattasByName.putAll((Map<String, Regatta>) ois.readObject());
+            logger.info("Recieved " + regattasByName.size() + " NEW regattas");
             // it is important that the leaderboards and tracked regattas are cleared before auto-linking to
             // old leaderboards takes place which then don't match the new ones
             for (DynamicTrackedRegatta trackedRegattaToObserve : (Set<DynamicTrackedRegatta>) ois.readObject()) {
@@ -1619,10 +1620,13 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
             }
             logger.info("receiving regattaTrackingCache");
             regattaTrackingCache.putAll((Map<Regatta, DynamicTrackedRegatta>) ois.readObject());
+            logger.info("Recieved " + regattaTrackingCache.size() + " NEW regatta tracking cache entries");
             logger.info("receiving leaderboardGroupsByName");
             leaderboardGroupsByName.putAll((Map<String, LeaderboardGroup>) ois.readObject());
+            logger.info("Received " + leaderboardGroupsByName.size() + " NEW leaderboard groups");
             logger.info("receiving leaderboardsByName");
             leaderboardsByName.putAll((Map<String, Leaderboard>) ois.readObject());
+            logger.info("Recieved " + leaderboardsByName.size() + " NEW leaderboards");
             // now fix ScoreCorrectionListener setup for LeaderboardGroupMetaLeaderboard instances:
             for (Leaderboard leaderboard : leaderboardsByName.values()) {
                 if (leaderboard instanceof LeaderboardGroupMetaLeaderboard) {
