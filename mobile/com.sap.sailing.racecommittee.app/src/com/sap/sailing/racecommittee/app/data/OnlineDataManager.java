@@ -11,16 +11,19 @@ import android.content.Context;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.EventData;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 import com.sap.sailing.racecommittee.app.data.handlers.DataHandler;
 import com.sap.sailing.racecommittee.app.data.handlers.EventsDataHandler;
 import com.sap.sailing.racecommittee.app.data.handlers.ManagedRacesDataHandler;
+import com.sap.sailing.racecommittee.app.data.handlers.MarksDataHandler;
 import com.sap.sailing.racecommittee.app.data.loaders.DataLoader;
 import com.sap.sailing.racecommittee.app.data.parsers.DataParser;
 import com.sap.sailing.racecommittee.app.data.parsers.EventsDataParser;
 import com.sap.sailing.racecommittee.app.data.parsers.ManagedRacesDataParser;
+import com.sap.sailing.racecommittee.app.data.parsers.MarksDataParser;
 import com.sap.sailing.racecommittee.app.deserialization.impl.BoatClassJsonDeserializer;
 import com.sap.sailing.racecommittee.app.deserialization.impl.ColorDeserializer;
 import com.sap.sailing.racecommittee.app.deserialization.impl.CourseAreaJsonDeserializer;
@@ -33,8 +36,10 @@ import com.sap.sailing.racecommittee.app.deserialization.impl.RaceRowDeserialize
 import com.sap.sailing.racecommittee.app.deserialization.impl.SeriesWithRowsDeserializer;
 import com.sap.sailing.racecommittee.app.deserialization.impl.VenueJsonDeserializer;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
+import com.sap.sailing.racecommittee.app.domain.ManagedRaceIdentifier;
 import com.sap.sailing.racecommittee.app.domain.impl.DomainFactoryImpl;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.MarkDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.RaceLogEventDeserializer;
 
 /**
@@ -140,6 +145,31 @@ public class OnlineDataManager extends DataManager {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
+    }
+    
+    public void addMarks(Collection<Mark> marks) {
+        for (Mark mark : marks) {
+            dataStore.addMark(mark);
+        }
+    }
+    
+    public void loadMarks(ManagedRace managedRace, LoadClient<Collection<Mark>> client) {
+        SharedDomainFactory domainFactory = DomainFactoryImpl.INSTANCE;
+        JsonDeserializer<Mark> markDeserializer = new MarkDeserializer(domainFactory);
+        DataParser<Collection<Mark>> parser = new MarksDataParser(markDeserializer);
+        DataHandler<Collection<Mark>> handler = new MarksDataHandler(this, client);
+        
+        ManagedRaceIdentifier identifier = managedRace.getIdentifier();
+        
+        try {
+            new DataLoader<Collection<Mark>>(context, URI.create(AppConstants.getServerBaseURL(context)
+                    + "/sailingserver/rc/marks?leaderboard=" + identifier.getRaceGroup().getName() + "&raceColumn=" + identifier.getRaceName() 
+                    + "&fleet=" + identifier.getFleet().getName()), parser, handler)
+                    .forceLoad();
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

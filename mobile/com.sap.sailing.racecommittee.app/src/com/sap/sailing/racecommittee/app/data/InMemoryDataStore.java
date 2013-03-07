@@ -6,6 +6,7 @@ import java.util.HashMap;
 
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.EventData;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.utils.CollectionUtils;
 
@@ -14,10 +15,12 @@ public enum InMemoryDataStore implements DataStore {
 	
 	private HashMap<Serializable, EventData> eventsById;
 	private HashMap<Serializable, ManagedRace> managedRaceById;
+	private HashMap<Serializable, Mark> marksById;
 	
 	private InMemoryDataStore() {
 		this.eventsById = new HashMap<Serializable, EventData>();
 		this.managedRaceById = new HashMap<Serializable, ManagedRace>();
+		this.marksById = new HashMap<Serializable, Mark>();
 	}
 	
 	/*
@@ -114,4 +117,30 @@ public enum InMemoryDataStore implements DataStore {
 	public boolean hasRace(Serializable id) {
 		return managedRaceById.containsKey(id);
 	}
+	
+	/*
+         * * * * * *
+         *  MARKS  *
+         * * * * * *
+         */
+
+	@Override
+	public Collection<Mark> getMarks() {
+            return marksById.values();
+    }
+
+	@Override
+    public Mark getMark(Serializable id) {
+            return marksById.get(id);
+    }
+
+	@Override
+    public boolean hasMark(Serializable id) {
+            return marksById.containsKey(id);
+    }
+    
+    @Override
+    public void addMark(Mark mark) {
+        marksById.put(mark.getId(), mark);
+    }
 }
