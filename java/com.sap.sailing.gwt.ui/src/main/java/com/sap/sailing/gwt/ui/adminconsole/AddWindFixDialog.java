@@ -60,9 +60,9 @@ public class AddWindFixDialog extends DataEntryDialog<WindDTO> {
                     errorMessage = stringMessages.pleaseEnterAValue();
                 } else {
                     if(minTimepoint != null && windDTO.measureTimepoint < minTimepoint.getTime()) {
-                        errorMessage = "Timepoint must be before start of tracking";
+                        errorMessage = stringMessages.timePointMustBeAfterStartOfTracking();
                     } else if(maxTimepoint != null && windDTO.measureTimepoint > maxTimepoint.getTime()) {
-                        errorMessage = "Timepoint must be before end of tracking";
+                        errorMessage = stringMessages.timePointMustBeBeforeEndOfTracking();
                     }
                 }
             }
