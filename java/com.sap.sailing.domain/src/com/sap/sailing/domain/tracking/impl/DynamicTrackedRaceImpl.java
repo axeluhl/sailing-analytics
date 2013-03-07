@@ -574,8 +574,8 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         TimePoint endOfRace = getEndOfRace();
         TimePoint endOfTracking = getEndOfTracking();
         // record wind fix only if it's still within reasonable time after the race has ended or the race hasn't ended yet
-        if ((startOfTracking == null || startOfTracking.before(wind.getTimePoint()) ||
-                (startOfRace != null && startOfRace.before(wind.getTimePoint())))
+        if ((startOfTracking == null || !startOfTracking.after(wind.getTimePoint()) ||
+                (startOfRace != null && !startOfRace.after(wind.getTimePoint())))
             &&
         (endOfTracking == null || endOfTracking.plus(TimingConstants.IS_LIVE_GRACE_PERIOD_IN_MILLIS).after(wind.getTimePoint()) ||
         (endOfRace != null && endOfRace.plus(TimingConstants.IS_LIVE_GRACE_PERIOD_IN_MILLIS).after(wind.getTimePoint())))) {
