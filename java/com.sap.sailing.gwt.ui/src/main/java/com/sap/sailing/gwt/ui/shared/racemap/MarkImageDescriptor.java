@@ -50,34 +50,37 @@ public class MarkImageDescriptor {
     
     /**
      * An utility method to check if the mark icon has compatible display properties.
-     * In case of null values at least one valid display property must exist and fit.  
+     * In case of null values at least the mark type and the color must exist and fit.  
      */
-    public boolean isCompatible(MarkType typeToCheck, String colorToCheck, String shapeToCheck, String patternToCheck) {
-        boolean result = false;
-
-        if((typeToCheck != null && type == null) || (typeToCheck == null && type != null)) {
-            result = false;
-        } else if(typeToCheck != null && type != null) {
-            result = type == typeToCheck;
-        }
+    public int getCompatibilityLevel(MarkType typeToCheck, String colorToCheck, String shapeToCheck, String patternToCheck) {
+        boolean isSameType = false;
+        boolean isSameColor = false;
+        boolean isSameShape = false;
+        boolean isSamePattern = false;
+        int result = -1;
         
-        if((colorToCheck != null && color == null) || (colorToCheck == null && color != null)) {
-            result = false;
-        } else if(colorToCheck != null && color != null) {
-            result = color.equalsIgnoreCase(colorToCheck) ? true : false;
+        if(typeToCheck != null && type != null) {
+            isSameType = type == typeToCheck;
         }
-
-        if((shapeToCheck != null && shape == null) || (shapeToCheck == null && shape != null)) {
-            result = false;
-        } else if(shapeToCheck != null && shape != null) {
-            result = shape.equalsIgnoreCase(shapeToCheck) ? true : false;
+        if(colorToCheck != null && color != null) {
+            isSameColor = color.equalsIgnoreCase(colorToCheck) ? true : false;
         }
-
-        if((patternToCheck != null && pattern == null) || (patternToCheck == null && pattern != null)) {
-            result = false;
-        } else if(patternToCheck != null && pattern != null) {
-            result = pattern.equalsIgnoreCase(patternToCheck) ? true : false;
+        if(shapeToCheck != null && shape != null) {
+            isSameShape = shape.equalsIgnoreCase(shapeToCheck) ? true : false;
+        }
+        if(patternToCheck != null && pattern != null) {
+            isSamePattern = pattern.equalsIgnoreCase(patternToCheck) ? true : false;
         }   
+        
+        if(isSameType && isSameColor) {
+            result = 1;
+            if(isSameShape) {
+                result += 1;
+            }
+            if(isSamePattern) {
+                result += 1;
+            }
+        }
         
         return result;    
     }

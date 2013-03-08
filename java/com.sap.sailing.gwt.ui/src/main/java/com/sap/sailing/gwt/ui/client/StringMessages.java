@@ -520,4 +520,6 @@ public interface StringMessages extends Messages {
     String correctScoreFor(String competitorName, String raceColumnName);
     String penaltyOrRedress();
     String netScore();
+    String timePointMustBeAfterStartOfTracking();
+    String timePointMustBeBeforeEndOfTracking();
 }
