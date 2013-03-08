@@ -124,22 +124,23 @@ public abstract class AbstractScoringSchemeImpl implements ScoringScheme {
     public int compareByBetterScore(List<Pair<RaceColumn, Double>> o1Scores, List<Pair<RaceColumn, Double>> o2Scores, boolean nullScoresAreBetter) {
         assert o1Scores.size() == o2Scores.size();
         final Comparator<Double> pureScoreComparator = getScoreComparator(nullScoresAreBetter);
-        Comparator<Pair<RaceColumn, Double>> scoreComparator = new Comparator<Pair<RaceColumn, Double>>() {
-            @Override
-            public int compare(Pair<RaceColumn, Double> o1, Pair<RaceColumn, Double> o2) {
-                return pureScoreComparator.compare(o1.getB(), o2.getB());
-            }
-        };
-        List<Pair<RaceColumn, Double>> o1ScoresCopy = new ArrayList<Pair<RaceColumn, Double>>(o1Scores);
-        List<Pair<RaceColumn, Double>> o2ScoresCopy = new ArrayList<Pair<RaceColumn, Double>>(o2Scores);
-        Collections.sort(o1ScoresCopy, scoreComparator);
-        Collections.sort(o2ScoresCopy, scoreComparator);
+        // needs to compare net points; therefore, divide the total points by the column factor for comparison:
+        List<Double> o1NetScores = new ArrayList<>();
+        for (Pair<RaceColumn, Double> o1ColumnAndScore : o1Scores) {
+            o1NetScores.add(o1ColumnAndScore.getB()/o1ColumnAndScore.getA().getFactor());
+        }
+        List<Double> o2NetScores = new ArrayList<>();
+        for (Pair<RaceColumn, Double> o2ColumnAndScore : o2Scores) {
+            o2NetScores.add(o2ColumnAndScore.getB()/o2ColumnAndScore.getA().getFactor());
+        }
+        Collections.sort(o1NetScores, pureScoreComparator);
+        Collections.sort(o2NetScores, pureScoreComparator);
         // now both lists are sorted from best to worst score
-        Iterator<Pair<RaceColumn, Double>> o1Iter = o1ScoresCopy.iterator();
-        Iterator<Pair<RaceColumn, Double>> o2Iter = o2ScoresCopy.iterator();
+        Iterator<Double> o1Iter = o1NetScores.iterator();
+        Iterator<Double> o2Iter = o2NetScores.iterator();
         int result = 0;
         while (result == 0 && o1Iter.hasNext() && o2Iter.hasNext()) {
-            result = scoreComparator.compare(o1Iter.next(), o2Iter.next());
+            result = pureScoreComparator.compare(o1Iter.next(), o2Iter.next());
         }
         return result;
     }

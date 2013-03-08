@@ -60,4 +60,11 @@ public class EditScoreDialog extends DataEntryDialog<Pair<MaxPointsReason, Doubl
         grid.setWidget(1, 1, netPointsBox);
         return grid;
     }
+
+    @Override
+    public void show() {
+        super.show();
+        netPointsBox.setFocus(true);
+        netPointsBox.selectAll();
+    }
 }

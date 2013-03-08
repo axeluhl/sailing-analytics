@@ -26,14 +26,10 @@ public class AddWindFixDialog extends DataEntryDialog<WindDTO> {
 
     protected static class WindDataValidator implements Validator<WindDTO> {
         private final StringMessages stringMessages;
-        private final Date minTimepoint;
-        private final Date maxTimepoint;
         
-        public WindDataValidator(RaceDTO race, StringMessages stringMessages){
+        public WindDataValidator(StringMessages stringMessages){
             super();
             this.stringMessages = stringMessages;
-            this.minTimepoint = race.trackedRace.startOfTracking != null ? race.trackedRace.startOfTracking : null;
-            this.maxTimepoint = race.trackedRace.endOfTracking != null ? race.trackedRace.endOfTracking : null;
         }
 
         @Override
@@ -48,6 +44,8 @@ public class AddWindFixDialog extends DataEntryDialog<WindDTO> {
                 errorMessage = stringMessages.pleaseEnterAValue();
             } else if(windDTO.trueWindFromDeg != null && (windDTO.trueWindFromDeg < 0.0 || windDTO.trueWindFromDeg > 360.0)){
                 errorMessage = stringMessages.valueMustBeBetweenMinMax(stringMessages.fromDeg(), "0", "360");
+            } else if(windDTO.measureTimepoint == null) {
+                errorMessage = stringMessages.pleaseEnterAValue();
             } else if(windDTO.position != null) {
                 if(windDTO.position.latDeg < -90.0 || windDTO.position.latDeg > 90.0){
                     errorMessage = stringMessages.valueMustBeBetweenMinMax(stringMessages.latitude(), "-90", "90");
@@ -55,24 +53,13 @@ public class AddWindFixDialog extends DataEntryDialog<WindDTO> {
                     errorMessage = stringMessages.valueMustBeBetweenMinMax(stringMessages.longitude(), "-180", "180");
                 }
             } 
-            if(errorMessage == null) {
-                if(windDTO.measureTimepoint == null) {
-                    errorMessage = stringMessages.pleaseEnterAValue();
-                } else {
-                    if(minTimepoint != null && windDTO.measureTimepoint < minTimepoint.getTime()) {
-                        errorMessage = stringMessages.timePointMustBeAfterStartOfTracking();
-                    } else if(maxTimepoint != null && windDTO.measureTimepoint > maxTimepoint.getTime()) {
-                        errorMessage = stringMessages.timePointMustBeBeforeEndOfTracking();
-                    }
-                }
-            }
             
             return errorMessage;
         }
     }
 
     public AddWindFixDialog(RaceDTO race, CoursePositionsDTO courseDTO, StringMessages stringMessages, DialogCallback<WindDTO> callback) {
-        super(stringMessages.actionAddWindData(), null, stringMessages.ok(), stringMessages.cancel(), new WindDataValidator(race, stringMessages), callback);
+        super(stringMessages.actionAddWindData(), null, stringMessages.ok(), stringMessages.cancel(), new WindDataValidator(stringMessages), callback);
         this.stringMessages = stringMessages;        
         speedInKnotsBox = createDoubleBox(5);
         fromInDegBox = createDoubleBox(5);
@@ -87,7 +74,8 @@ public class AddWindFixDialog extends DataEntryDialog<WindDTO> {
         if(race.trackedRace != null && race.trackedRace.startOfTracking != null) {
             timeBox = createDateBox(race.trackedRace.startOfTracking.getTime(), 20);
         } else {
-            timeBox = createDateBox(20);
+            Date now = new Date();
+            timeBox = createDateBox(now.getTime(), 20);
         }
     }
     
