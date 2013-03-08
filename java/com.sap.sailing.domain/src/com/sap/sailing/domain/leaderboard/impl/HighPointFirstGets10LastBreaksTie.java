@@ -1,16 +1,25 @@
 package com.sap.sailing.domain.leaderboard.impl;
 
-import com.sap.sailing.domain.common.ScoringSchemeType;
+import java.util.List;
 
-public class HighPointFirstGets10 extends HighPointFirstGetsFixedScore {
+import com.sap.sailing.domain.base.RaceColumn;
+import com.sap.sailing.domain.common.ScoringSchemeType;
+import com.sap.sailing.domain.common.impl.Util.Pair;
+
+public class HighPointFirstGets10LastBreaksTie extends HighPointFirstGetsFixedScore {
     private static final long serialVersionUID = 1L;
 
-    public HighPointFirstGets10() {
+    public HighPointFirstGets10LastBreaksTie() {
         super(10.0);
     }
 
     @Override
     public ScoringSchemeType getType() {
         return ScoringSchemeType.HIGH_POINT_FIRST_GETS_TEN;
+    }
+
+    @Override
+    public int compareByBetterScore(List<Pair<RaceColumn, Double>> o1Scores, List<Pair<RaceColumn, Double>> o2Scores, boolean nullScoresAreBetter) {
+        return 0;
     }
 }
