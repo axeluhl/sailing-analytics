@@ -85,7 +85,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
     private static final WindPatternDisplayManager wpDisplayManager = WindPatternDisplayManager.INSTANCE;
     private static final String POLYLINE_PATH_NAME = "Polyline";
 
-    private static final double TOTAL_TIME_SCALE_FACTOR = 0.85;
+    private static final double TOTAL_TIME_SCALE_FACTOR = 0.9;
     private static final int DEFAULT_STEP_MAX = 800;
     private static final long DEFAULT_TIMESTEP = 6666;
 
