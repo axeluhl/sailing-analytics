@@ -1,14 +1,12 @@
 package com.sap.sailing.server.gateway.impl;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
@@ -26,6 +24,7 @@ import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardCache;
@@ -62,7 +61,14 @@ public class LeaderboardJsonExportServlet extends AbstractJsonHttpServlet implem
     private int cacheHits;
     private int cacheMisses;
     
-    private final SmartFutureCache<Leaderboard, Map<Pair<TimePoint, ResultStates>, JSONObject>, LeaderboardJsonCacheUpdateInterval> cache;
+    /**
+     * The cache values are linked hash maps keeping the rendered JSON objects per time point/result state pair. The cache uses
+     * a <em>linked</em> hash map because this way old values can be evicted easily, keeping the cache below a maximum size.
+     * Also, typing the {@link SmartFutureCache} with {@link LinkedHashMap} instead of only {@link Map} ensures that also when
+     * computing cache updates, new values are appended "at the end" and therefore tend to survive longer than any value appended
+     * earlier.
+     */
+    private final SmartFutureCache<Leaderboard, LinkedHashMap<Pair<TimePoint, ResultStates>, JSONObject>, LeaderboardJsonCacheUpdateInterval> cache;
     
     /**
      * Used to observe the leaderboards cached so far and triggering {@link #cache} updates.
@@ -70,35 +76,43 @@ public class LeaderboardJsonExportServlet extends AbstractJsonHttpServlet implem
     private final LeaderboardCacheManager cacheManager;
     
     private static class LeaderboardJsonCacheUpdateInterval implements UpdateInterval<LeaderboardJsonCacheUpdateInterval> {
-        private final Set<Pair<TimePoint, ResultStates>> timePointsAndResultStates;
+        private final LinkedHashSet<Pair<TimePoint, ResultStates>> timePointsAndResultStates;
         
-        public LeaderboardJsonCacheUpdateInterval(Set<Pair<TimePoint, ResultStates>> timePointAndResultStates) {
+        public LeaderboardJsonCacheUpdateInterval(Iterable<Pair<TimePoint, ResultStates>> timePointAndResultStates) {
             assert timePointAndResultStates != null;
-            this.timePointsAndResultStates = timePointAndResultStates;
+            this.timePointsAndResultStates = new LinkedHashSet<>();
+            Util.addAll(timePointsAndResultStates, this.timePointsAndResultStates);
         }
 
-        public Set<Pair<TimePoint, ResultStates>> getTimePointsAndResultStates() {
+        public LinkedHashSet<Pair<TimePoint, ResultStates>> getTimePointsAndResultStates() {
             return timePointsAndResultStates;
         }
 
+        /**
+         * Appends the <code>otherUpdateInterval</code> to this interval and returns the new interval. Using a
+         * {@link LinkedHashSet} internally, the ordering of time point and result state pairs is preserved, and
+         * in conjunction with the cache eviction strategy, the newest additions are the most likely to survive in
+         * the cache.
+         */
         @Override
         public LeaderboardJsonCacheUpdateInterval join(LeaderboardJsonCacheUpdateInterval otherUpdateInterval) {
-            Set<Pair<TimePoint, ResultStates>> newTimePointsAndResultStates = new HashSet<>();
+            LinkedHashSet<Pair<TimePoint, ResultStates>> newTimePointsAndResultStates = new LinkedHashSet<>();
             newTimePointsAndResultStates.addAll(getTimePointsAndResultStates());
+            newTimePointsAndResultStates.addAll(otherUpdateInterval.getTimePointsAndResultStates());
             return new LeaderboardJsonCacheUpdateInterval(newTimePointsAndResultStates);
         }
         
     }
     
-    private class LeaderboardJsonCacheUpdater implements CacheUpdater<Leaderboard, Map<Pair<TimePoint, ResultStates>, JSONObject>, LeaderboardJsonCacheUpdateInterval> {
+    private class LeaderboardJsonCacheUpdater implements CacheUpdater<Leaderboard, LinkedHashMap<Pair<TimePoint, ResultStates>, JSONObject>, LeaderboardJsonCacheUpdateInterval> {
         @Override
-        public Map<Pair<TimePoint, ResultStates>, JSONObject> computeCacheUpdate(Leaderboard key,
+        public LinkedHashMap<Pair<TimePoint, ResultStates>, JSONObject> computeCacheUpdate(Leaderboard key,
                 LeaderboardJsonCacheUpdateInterval updateInterval) throws Exception {
-            final Map<Pair<TimePoint, ResultStates>, JSONObject> result;
+            final LinkedHashMap<Pair<TimePoint, ResultStates>, JSONObject> result;
             if (updateInterval == null) {
                 result = null;
             } else {
-                result = new HashMap<>();
+                result = new LinkedHashMap<>();
                 for (Pair<TimePoint, ResultStates> timePointAndResultState : updateInterval.getTimePointsAndResultStates()) {
                     result.put(timePointAndResultState, computeLeaderboardJson(key, timePointAndResultState));
                 }
@@ -107,10 +121,11 @@ public class LeaderboardJsonExportServlet extends AbstractJsonHttpServlet implem
         }
 
         @Override
-        public Map<Pair<TimePoint, ResultStates>, JSONObject> provideNewCacheValue(Leaderboard leaderboard,
-                Map<Pair<TimePoint, ResultStates>, JSONObject> oldCacheValue, Map<Pair<TimePoint, ResultStates>, JSONObject> computedCacheUpdate,
+        public LinkedHashMap<Pair<TimePoint, ResultStates>, JSONObject> provideNewCacheValue(Leaderboard leaderboard,
+                LinkedHashMap<Pair<TimePoint, ResultStates>, JSONObject> oldCacheValue,
+                LinkedHashMap<Pair<TimePoint, ResultStates>, JSONObject> computedCacheUpdate,
                 LeaderboardJsonCacheUpdateInterval updateInterval) {
-            final Map<Pair<TimePoint, ResultStates>, JSONObject> result;
+            final LinkedHashMap<Pair<TimePoint, ResultStates>, JSONObject> result;
             if (computedCacheUpdate == null) {
                 result = null;
                 if (oldCacheValue != null) {
@@ -181,7 +196,9 @@ public class LeaderboardJsonExportServlet extends AbstractJsonHttpServlet implem
         Map<Pair<TimePoint, ResultStates>, JSONObject> cacheEntry = cache.get(leaderboard, /* waitForLatest */ false);
         if (cacheEntry == null || !cacheEntry.containsKey(timePointAndResultState)) {
             cacheMisses++;
-            cache.triggerUpdate(leaderboard, new LeaderboardJsonCacheUpdateInterval(Collections.singleton(timePointAndResultState)));
+            LinkedHashSet<Pair<TimePoint, ResultStates>> timePointsAndResultStates = new LinkedHashSet<>();
+            timePointsAndResultStates.add(timePointAndResultState);
+            cache.triggerUpdate(leaderboard, new LeaderboardJsonCacheUpdateInterval(timePointsAndResultStates));
             // now wait for this entry to be computed
             cacheEntry = cache.get(leaderboard, /* waitForLatest */ true);
         } else {
@@ -331,8 +348,22 @@ public class LeaderboardJsonExportServlet extends AbstractJsonHttpServlet implem
         // will be created in the SmartFutureCache
     }
 
+    /**
+     * Invalidation triggers the recalculation for all time point / result state pairs for which the cache currently
+     * holds values for <code>leaderboard</code>. It preserves the order in which they were inserted, so values requested
+     * later (not necessarily having a later time point!) will be re-calculated and re-added later and therefore have a higher
+     * chance of surviving cache eviction. Still, the cache won't grow beyond its limits because it uses a {@link LinkedHashMap}
+     * with total size (aggregated size of all these maps)-based eviction.<p>
+     * 
+     * At the same time, existing cache entries won't simply be removed by the invalidation but remain in place for clients
+     * asking with <code>waitForLatest==false</code> and will only be replaced once the re-calculation has completed. It will be
+     * the cache size set by {@link #MAX_TOTAL_NUMBER_OF_CACHE_ENTRIES} that roughly decides how long a recalculation can last.
+     * The higher this number, the more entries a map for a single leaderboard may have which all will be re-calculated when
+     * this method is called.
+     */
     @Override
     public void invalidate(Leaderboard leaderboard) {
-        cache.triggerUpdate(leaderboard, null);
+        final LinkedHashMap<Pair<TimePoint, ResultStates>, JSONObject> currentCachedValueForLeaderboard = cache.get(leaderboard, /* waitForLatest */ false);
+        cache.triggerUpdate(leaderboard, new LeaderboardJsonCacheUpdateInterval(currentCachedValueForLeaderboard.keySet()));
     }
 }
