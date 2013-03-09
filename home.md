@@ -8,7 +8,7 @@ Like businesses, sailors need the latest information to make strategic decisions
 
 ### Table of Contents
 
-* [[How to work with this wiki|wiki/howto]]
+* [[Information about this Wiki and HowTo|wiki/howto]]
 * [[General Project Information|wiki/general-information]]
 * [[OnBoarding Information|wiki/onboarding]]
 * [[Architecture and Infrastructure|wiki/architecture-and-infrastructure]]
