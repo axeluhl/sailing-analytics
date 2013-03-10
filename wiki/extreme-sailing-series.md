@@ -32,6 +32,7 @@ The setup for such an event usually consists of the following departments:
 * Visualization
   * Provider for GPS fixes, course layout and competitor names (TracTrac)
   * 3D Visualization provider (BeTomorrow)
+  * Wind information (SAP)
   * Live and official result provider (SAP Sailing Analytics)
 
 ## Technical Architecture
