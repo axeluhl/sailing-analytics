@@ -55,3 +55,4 @@ The following image depicts the setup that is desirable for the next events but 
 * [Extreme Sailing Series Offical Website](http://www.extremesailingseries.com/)
 * [Official Results](http://www.extremesailingseries.com/results)
 * [Analytics Homepage](http://ess40-2013.sapsailing.com/)
+* [Youtube Channel](http://www.youtube.com/user/ExtremeSailingSeries)
