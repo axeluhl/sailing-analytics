@@ -5,6 +5,9 @@ This Wiki is being stored into a GIT repository on branch master that is trackin
 
 The script `/home/gollum/wiki/serve.sh` can be executed to either start or restart the process being responsible for this wiki. The process is a Ruby webserver (Rack) that uses the handler defined in `/home/gollum/wiki/app.rb`. This handler embeds Gollum wiki software into Rack and also makes sure that only authenticated access is possible (see `/home/gollum/wiki/users.yml`).
 
+### Making websites public
+Accessing this wiki is normally only allowed for authenticated users. If you want to share your work with others not having an account here then you can just request making a given url publicly available. On the server this is done by simply putting a new line to `/home/gollum/wiki/public.txt`.
+
 ### Creating a New Account
 A new account can be created by adding a new entry to `/home/gollum/wiki/users.yml`. The password there is encrypted using sha1sum.
 
