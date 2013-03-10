@@ -33,3 +33,8 @@ The setup for such an event usually consists of the following departments:
   * Provider for GPS fixes, course layout and competitor names (TracTrac)
   * 3D Visualization provider (BeTomorrow)
   * Live and official result provider (SAP Sailing Analytics)
+
+## Technical Architecture
+For the department of Visualization the technical infrastructure is depicted in the following image. It is clear that the data flow heavily relies on a good and stable internet connection being available on premise.
+
+The following image depicts the setup that is desirable for the next events but not yet implemented. It features a local setup where the dependency on a reliable internet connection is minimized as much as possible.
