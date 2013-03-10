@@ -8,6 +8,13 @@ Each race has a course that is set that way that spectators can see as much as p
 
 Usually not more than 8 competitors race against each other. One of the competitors is always an invitational team from the local spot that is allowed to race.
 
+## Links
+
+* [Extreme Sailing Series Offical Website](http://www.extremesailingseries.com/)
+* [Official Results](http://www.extremesailingseries.com/results)
+* [Analytics Homepage](http://ess40-2013.sapsailing.com/)
+* [Youtube Channel](http://www.youtube.com/user/ExtremeSailingSeries)
+
 ## Boats
 To achieve the goal of providing invitees an exciting event a new type of boats have been designed. Capable of reaching speeds usually reserved to motorboats even in medium wind conditions, the Extreme 40 has been designed by Olympic champions Yves Loday and Mitch Booth, with the aim to provide the international sailing arena with a visually stunning and 100% performance-focused multihull. Flying a hull in as little as 8 knots of breeze (15 kph), the 40-foot (12m) long carbon speed machine requires coordination, finesse but also sheer muscular power from the crews who battle it out.
 
@@ -49,10 +56,3 @@ For the department of Visualization the technical infrastructure is depicted in 
 <img src="/wiki/images/ESSSetupIST.jpg"/>
 
 The following image depicts the setup that is desirable for the next events but not yet implemented. It features a local setup where the dependency on a reliable internet connection is minimized as much as possible.
-
-## Links
-
-* [Extreme Sailing Series Offical Website](http://www.extremesailingseries.com/)
-* [Official Results](http://www.extremesailingseries.com/results)
-* [Analytics Homepage](http://ess40-2013.sapsailing.com/)
-* [Youtube Channel](http://www.youtube.com/user/ExtremeSailingSeries)
