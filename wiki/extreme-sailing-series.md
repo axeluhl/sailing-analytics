@@ -8,7 +8,7 @@ Each race has a course that is set that way that spectators can see as much as p
 
 Usually not more than 8 competitors race against each other. One of the competitors is always an invitational team from the local spot that is allowed to race.
 
-## Links
+## External Links
 
 * [Extreme Sailing Series Offical Website](http://www.extremesailingseries.com/)
 * [Official Results](http://www.extremesailingseries.com/results)
