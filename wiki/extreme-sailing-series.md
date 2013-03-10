@@ -1,5 +1,7 @@
 # Specifica for the Extreme Sailing Series
 
+[[_TOC_]]
+
 The Extreme Sailing Series is a hospitality event that aims to make invitees participate as close as possible at a sailing race. To achieve this goal the races take place in front of a tribune placed directly at the water (called Stadium Racing). Invitees can be assigned to a boat crew and that way be part of a race like it is not possible in any other series. 
 
 Each race has a course that is set that way that spectators can see as much as possible regardless of the wind direction (upwind start not to be implied). The event is set to span a week, racing happens on 4 or 5 days. Every day up to 10 races take place depending on the wind conditions. Race course is defined such that a race lasts (under normal conditions) not longer than 20 minutes.
@@ -47,3 +49,9 @@ For the department of Visualization the technical infrastructure is depicted in 
 <img src="/wiki/images/ESSSetupIST.jpg"/>
 
 The following image depicts the setup that is desirable for the next events but not yet implemented. It features a local setup where the dependency on a reliable internet connection is minimized as much as possible.
+
+## Links
+
+* [Extreme Sailing Series Offical Website](http://www.extremesailingseries.com/)
+* [Official Results](http://www.extremesailingseries.com/results)
+* [Analytics Homepage](http://ess40-2013.sapsailing.com/)
