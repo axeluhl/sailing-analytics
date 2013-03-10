@@ -6,9 +6,9 @@ This document describes the onboarding process for a new team member (developer)
 
 #### Installations
 
-1. Eclipse (e.g. Eclipse Classic 3.7.2), http://www.eclipse.org
+1. Eclipse (e.g. Eclipse Classic 4.2.1 (Juno)), http://www.eclipse.org
 2. Eclipse Extensions
-  * Install Eclipse GWT should be version 2.4
+  * Install Eclipse GWT should be version 2.5
 3. Git (e.g. msysGit for Windows v1.7.10), http://git-scm.com
 4. MongoDB (e.g. Production Release 2.0.4), download: http://www.mongodb.org/
 5. RabbitMQ, download from http://www.rabbitmq.com/. Requires Erlang to be installed. RabbitMQ installer will assist in installing Erlang.
