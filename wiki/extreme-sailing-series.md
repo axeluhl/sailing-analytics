@@ -62,12 +62,12 @@ For the department of Visualization the technical infrastructure can be divided 
 
 3. The third part (ON PREMISE PUBLIC) describes all components analytical data are distributed on during an event. This includes private mobile phones, iPads being available for guests, flatscreens displaying leaderboards and tv streaming.
 
-### Actual
+### Actual (Muscat 2013)
 The actual setup is depicted in the following image. It is easy to see that all of the components in the ON PREMISE PUBLIC area are heavily dependent on a reliable internet connection. This becomes also problematic when the connection is slow because display of analytics requires some bandwidth.
 
 <img src="/wiki/images/ESSSetupIST.jpg"/>
 
-### Target
+### Target (Singapore 2013?)
 The following image depicts the setup that is desirable for the next events but not yet implemented. It features a local setup where the dependency on a reliable and fast internet connection is minimized as much as possible.
 
 The core of this setup is a server that not only hosts a SAP Sailing Analytics but also the TracTrac server. This way the distribution of analytical information is not dependent on the speed and bandwidth of the local internet connection. By adding a DNS server in front of this analytics server local requests can be directed to the local server even when guests use a public internet address (e.g. www.sapsailing.com). 
