@@ -36,6 +36,14 @@ The setup for such an event usually consists of the following departments:
   * Live and official result provider (SAP Sailing Analytics)
 
 ## Technical Architecture
-For the department of Visualization the technical infrastructure is depicted in the following image. It is clear that the data flow heavily relies on a good and stable internet connection being available on premise.
+For the department of Visualization the technical infrastructure is depicted in the following image. It is clear that the data flow heavily relies on a good and stable internet connection being available on premise. The architecture is divided into three parts. 
+
+1. The first parts (CLOUD) contains external servers accessible over the internet. Currently there are two of these, one for TracTrac analytics and the other providing SAP Sailing Analytics.
+
+2. The second part (ON PREMISE INTERNAL) shows all components that are needed to provide analytics. It is easy to notice that only 3D visualization is provided locally. All other services need an internet connection to either send or receive valuable data.
+
+3. The third part (ON PREMISE PUBLIC) describes all components analytical data are distributed on during an event. Most of them also rely on a stable internet connection to access data.
+
+<img src="/wiki/images/ESSSetupIST.jpg"/>
 
 The following image depicts the setup that is desirable for the next events but not yet implemented. It features a local setup where the dependency on a reliable internet connection is minimized as much as possible.
