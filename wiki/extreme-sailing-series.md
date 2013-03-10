@@ -45,14 +45,23 @@ The setup for such an event usually consists of the following departments:
   * Live and official result provider (SAP Sailing Analytics)
 
 ## Technical Architecture
-For the department of Visualization the technical infrastructure is depicted in the following image. It is clear that the data flow heavily relies on a good and stable internet connection being available on premise. The architecture is divided into three parts. 
+For the department of Visualization the technical infrastructure can be divided into three major parts.
 
-1. The first parts (CLOUD) contains external servers accessible over the internet. Currently there are two of these, one for TracTrac analytics and the other providing SAP Sailing Analytics.
+1. The first parts (CLOUD) contains external servers accessible over the internet. The main purpose of these servers is to serve as the endpoint for data sent by various tracking systems. The setup of tracking systems consists of the following three trackers:
+  * A wind tracking system that can transfer information about direction and strength. The transfer is only possible using a publicly accessible IP address.
+  * A system transferring buoy positions (GPS fixes) over TCP. This system also can only be configured to transfer data over a TCP channel identified by an IP address.
+  * A tracker that is attached to each boat and that transfers GPS fixes in an regular interval. For this tracker the same limitation as above regarding the addressable endpoint holds
 
-2. The second part (ON PREMISE INTERNAL) shows all components that are needed to provide analytics. It is easy to notice that only 3D visualization is provided locally. All other services need an internet connection to either send or receive valuable data.
+2. The second part (ON PREMISE INTERNAL) contains all components that are needed to provide analytics. Data sent by trackers to the cloud is retrieved in this section and being analyzed. The connections to TV streaming and other visualization providers takes place here.
 
-3. The third part (ON PREMISE PUBLIC) describes all components analytical data are distributed on during an event. Most of them also rely on a stable internet connection to access data.
+3. The third part (ON PREMISE PUBLIC) describes all components analytical data are distributed on during an event. This includes private mobile phones, iPads being available for guests, flatscreens displaying leaderboards and tv streaming.
+
+### Actual
+The actual setup is depicted in the following image. It is easy to see that all of the components in the ON PREMISE PUBLIC area are heavily dependent on a reliable internet connection. This becomes also problematic when the connection is slow because display of analytics requires some bandwidth.
 
 <img src="/wiki/images/ESSSetupIST.jpg"/>
 
-The following image depicts the setup that is desirable for the next events but not yet implemented. It features a local setup where the dependency on a reliable internet connection is minimized as much as possible.
+### Target
+The following image depicts the setup that is desirable for the next events but not yet implemented. It features a local setup where the dependency on a reliable and fast internet connection is minimized as much as possible.
+
+<img src="/wiki/images/ESSSetupSOLL.jpg"/>
