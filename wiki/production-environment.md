@@ -11,7 +11,7 @@ The various processes run in "tmux" sessions to which, once connected to sapsail
 For the OSGi containers by convention we have one directory under _/home/trac/servers/_ per deployable branch (dev, test, prod1, prod2). In those directories we have copies of the "install" script from the git's java/target folder. Running it after a successful product build on the branch corresponding to the current directory will copy the compiled product to the server directory. Running the start script will then launch the respective server instance. A safety check in the install script avoids accidentally overwriting a server directory with a non-matching product version by comparing the directory name with the branch name checked out under _/home/trac/git_.
 
 ## Firewall
-The current firewall configuration is described in the following table
+The current firewall configuration is described in the following table. Firewall is maintained by PIRONET NDH. In order to change the configuration you have to sign a form ([[Click here to open it|wiki/uploads/Firewall-Freischaltungformular-v33-de.doc]]).
 
 <table>
 <tr>
