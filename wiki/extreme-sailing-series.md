@@ -15,6 +15,11 @@ Usually not more than 8 competitors race against each other. One of the competit
 * [Analytics Homepage](http://ess40-2013.sapsailing.com/)
 * [Youtube Channel](http://www.youtube.com/user/ExtremeSailingSeries)
 
+## Notice of Race
+The current notice of race can be downloaded by using the link below. It is worth to mention that the NOR lacks the information about the fact that the last race breaks tie break.
+
+Download [[Notice of Race 2013 Final|wiki/uploads/NOR2013_ESS_final.pdf]]
+
 ## Boats
 To achieve the goal of providing invitees an exciting event a new type of boats have been designed. Capable of reaching speeds usually reserved to motorboats even in medium wind conditions, the Extreme 40 has been designed by Olympic champions Yves Loday and Mitch Booth, with the aim to provide the international sailing arena with a visually stunning and 100% performance-focused multihull. 
 
