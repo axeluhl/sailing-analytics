@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.HashMap;
 
 import com.sap.sailing.domain.base.CourseArea;
+import com.sap.sailing.domain.base.CourseData;
 import com.sap.sailing.domain.base.EventData;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
@@ -142,5 +143,10 @@ public enum InMemoryDataStore implements DataStore {
     @Override
     public void addMark(Mark mark) {
         marksById.put(mark.getId(), mark);
+    }
+
+    public CourseData getLastPublishedCourseDesign() {
+        // TODO Auto-generated method stub
+        return null;
     }
 }

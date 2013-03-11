@@ -2,6 +2,7 @@ package com.sap.sailing.racecommittee.app.domain.impl;
 
 import java.io.Serializable;
 
+import com.sap.sailing.domain.base.CourseData;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.SeriesData;
 import com.sap.sailing.domain.base.racegroup.RaceGroup;
@@ -14,62 +15,67 @@ import com.sap.sailing.racecommittee.app.domain.state.RaceState;
 import com.sap.sailing.racecommittee.app.domain.state.impl.RaceStateImpl;
 
 public class ManagedRaceImpl implements ManagedRace {
-	private static final long serialVersionUID = -4936566684992524001L;
-	
-	//private static final String TAG = ManagedRace.class.getName();
-	
-	private ManagedRaceIdentifier identifier;	
-	private RaceState state;
-	
-	public ManagedRaceImpl(ManagedRaceIdentifier identifier, PassAwareRaceLog raceLog) {
-		this(identifier, new RaceStateImpl(raceLog, null));
-	}
-	
-	public ManagedRaceImpl(
-			ManagedRaceIdentifier identifier,
-			RaceState state) {
-		this.identifier = identifier;
-		this.state = state;
-	}
+    private static final long serialVersionUID = -4936566684992524001L;
 
-	public Serializable getId() {
-		return identifier.getId();
-	}
+    //private static final String TAG = ManagedRace.class.getName();
 
-	public String getName() {
-		return identifier.getRaceName();
-	}
+    private ManagedRaceIdentifier identifier;	
+    private RaceState state;
 
-	public String getRaceName() {
-		return getName();
-	}
+    public ManagedRaceImpl(ManagedRaceIdentifier identifier, PassAwareRaceLog raceLog) {
+        this(identifier, new RaceStateImpl(raceLog, null));
+    }
 
-	public Fleet getFleet() {
-		return identifier.getFleet();
-	}
+    public ManagedRaceImpl(
+            ManagedRaceIdentifier identifier,
+            RaceState state) {
+        this.identifier = identifier;
+        this.state = state;
+    }
 
-	public SeriesData getSeries() {
-		return identifier.getSeries();
-	}
+    public Serializable getId() {
+        return identifier.getId();
+    }
 
-	public RaceGroup getRaceGroup() {
-		return identifier.getRaceGroup();
-	}
+    public String getName() {
+        return identifier.getRaceName();
+    }
 
-	public ManagedRaceIdentifier getIdentifier() {
-		return identifier;
-	}
+    public String getRaceName() {
+        return getName();
+    }
 
-	public RaceState getState() {
-		return state;
-	}
+    public Fleet getFleet() {
+        return identifier.getFleet();
+    }
 
-	public RaceLog getRaceLog() {
-		return state.getRaceLog();
-	}
-	
-	public RaceLogRaceStatus getStatus() {
-		return state.getStatus();
-	}
+    public SeriesData getSeries() {
+        return identifier.getSeries();
+    }
+
+    public RaceGroup getRaceGroup() {
+        return identifier.getRaceGroup();
+    }
+
+    public ManagedRaceIdentifier getIdentifier() {
+        return identifier;
+    }
+
+    public RaceState getState() {
+        return state;
+    }
+
+    public RaceLog getRaceLog() {
+        return state.getRaceLog();
+    }
+
+    public RaceLogRaceStatus getStatus() {
+        return state.getStatus();
+    }
+
+    @Override
+    public CourseData getCourseDesign() {
+        return null;
+    }
 
 }
