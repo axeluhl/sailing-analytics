@@ -74,4 +74,18 @@ The core of this setup is a server that not only hosts a SAP Sailing Analytics b
 
 In case of a problem with the local server requests can be redirected to the external analytics server. This server is constantly fed with data by a replication channel that gets information bits from the local analytics server.
 
+The main changes to the actual setup are as follows:
+
+* The SAP Sailing Analytics server that is authoritative for computing the results is no longer in the cloud but installed on premise. That way it is no longer dependent on a replicated TracTrac server but gets data directly from local TracTrac server.
+* TracTrac Server is integrated with SAP Sailing Analytics on one physical appliance. That eases maintenance and data exchange between SAP and TracTrac services.
+* Every leaderboard related information is gathered by accessing the local server. That way the dependency from the internet is drastically mitigated. Everyone on site always gets the right information without delay.
+* A routing server manages the DNS resolution and in case of a local failure is able to transparently redirect data to the cloud.
+* Score corrections also are not longer dependent on the internet connection but get fed directly into the local server.
+* Wind information for BeTomorrow can be provided without internet connection.
+
+Two weak points still remain (highlighted by red dotted lines):
+
+1. Wind data must be sent to a server that is reachable by a public ip address. This problem could be solved by extending the main router with 3G/4G functionality and putting the SAP Sailing Analytics server into DMZ.
+2. The same holds for buoy positions.
+
 <img src="/wiki/images/ESSSetupSOLL.jpg"/>
