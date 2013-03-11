@@ -94,3 +94,7 @@ Two weak points still remain (highlighted by red dotted lines):
 2. The same holds for buoy positions.
 
 <img src="/wiki/images/ESSSetupSOLL.jpg"/>
+
+To not be dependent on a shaky power source that can be restored by "wiggling pieces a little to fix the generator" it has been decided to introduce UPS that can fed important hardware with power up to half an hour. The following picture depicts a quick shot on how this could look like.
+
+<img src="/wiki/images/ESSSetupUPS.jpg"/>
