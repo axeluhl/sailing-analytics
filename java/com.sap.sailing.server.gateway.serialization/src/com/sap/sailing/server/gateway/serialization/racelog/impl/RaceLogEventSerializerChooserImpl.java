@@ -1,6 +1,7 @@
 package com.sap.sailing.server.gateway.serialization.racelog.impl;
 
 import com.sap.sailing.domain.racelog.RaceLogCourseAreaChangedEvent;
+import com.sap.sailing.domain.racelog.RaceLogCourseDesignChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogEventVisitor;
 import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
@@ -70,6 +71,12 @@ public class RaceLogEventSerializerChooserImpl implements RaceLogEventSerializer
     @Override
     public void visit(RaceLogCourseAreaChangedEvent event) {
         chosenSerializer = courseAreaChangedEventSerializer;
+    }
+
+    @Override
+    public void visit(RaceLogCourseDesignChangedEvent event) {
+        // TODO Auto-generated method stub
+        
     }
 
 }

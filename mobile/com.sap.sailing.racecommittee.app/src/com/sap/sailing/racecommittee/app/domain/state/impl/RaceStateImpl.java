@@ -6,6 +6,8 @@ import java.util.Set;
 import java.util.UUID;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.CourseData;
+import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.racelog.PassAwareRaceLog;
@@ -100,6 +102,14 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
 
     public TimePoint getFinishedTime() {
         return finishedTimeFinder.getFinishedTime();
+    }
+    
+    public void setCourseDesign(CourseData courseData) {
+        TimePoint eventTime = MillisecondsTimePoint.now();
+        
+        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createCourseDesignChangedEvent(eventTime, UUID.randomUUID(),
+                Collections.<Competitor> emptyList(), raceLog.getCurrentPassId(), courseData);
+        this.raceLog.add(event);
     }
 
     public void onRaceAborted(TimePoint eventTime) {

@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.racelog.RaceLogCourseAreaChangedEvent;
+import com.sap.sailing.domain.racelog.RaceLogCourseDesignChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogEventVisitor;
 import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
@@ -52,6 +53,11 @@ public class RaceColumnRaceLogReplicator implements RaceLogEventVisitor, Seriali
     
     @Override
     public void visit(RaceLogFlagEvent event) {
+        notifyOnAdd(event);
+    }
+
+    @Override
+    public void visit(RaceLogCourseDesignChangedEvent event) {
         notifyOnAdd(event);
     }
 }

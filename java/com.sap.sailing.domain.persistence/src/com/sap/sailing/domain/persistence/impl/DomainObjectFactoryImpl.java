@@ -23,10 +23,14 @@ import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.CourseArea;
+import com.sap.sailing.domain.base.CourseData;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Fleet;
+import com.sap.sailing.domain.base.Gate;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
@@ -34,7 +38,9 @@ import com.sap.sailing.domain.base.RegattaRegistry;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.Venue;
+import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.CourseAreaImpl;
+import com.sap.sailing.domain.base.impl.CourseDataImpl;
 import com.sap.sailing.domain.base.impl.EventImpl;
 import com.sap.sailing.domain.base.impl.FleetImpl;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
@@ -42,8 +48,11 @@ import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
 import com.sap.sailing.domain.base.impl.VenueImpl;
+import com.sap.sailing.domain.base.impl.WaypointImpl;
 import com.sap.sailing.domain.common.Color;
+import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.MaxPointsReason;
+import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
@@ -80,6 +89,7 @@ import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoRaceLogStoreFactory;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogCourseAreaChangedEvent;
+import com.sap.sailing.domain.racelog.RaceLogCourseDesignChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogEventFactory;
 import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
@@ -979,10 +989,18 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
 
         } else if (eventClass.equals(RaceLogCourseAreaChangedEvent.class.getSimpleName())) {
             return loadRaceLogCourseAreaChangedEvent(timePoint, id, passId, competitors, dbObject);
-
+            
+        } else if (eventClass.equals(RaceLogCourseDesignChangedEvent.class.getSimpleName())) {
+            return loadRaceLogCourseDesignChangedEvent(timePoint, id, passId, competitors, dbObject);
         }
 
         return null;
+    }
+
+    private RaceLogCourseDesignChangedEvent loadRaceLogCourseDesignChangedEvent(TimePoint timePoint, Serializable id, Integer passId, List<Competitor> competitors, DBObject dbObject) {
+        CourseData courseData = loadCourseData((BasicDBList) dbObject.get(FieldNames.RACE_LOG_COURSE_DESIGN.name()));
+        
+        return RaceLogEventFactory.INSTANCE.createCourseDesignChangedEvent(timePoint, id, competitors, passId, courseData);
     }
 
     private RaceLogCourseAreaChangedEvent loadRaceLogCourseAreaChangedEvent(TimePoint timePoint, Serializable id, Integer passId, List<Competitor> competitors, DBObject dbObject) {
@@ -1027,5 +1045,60 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         RaceLogRaceStatus nextStatus = RaceLogRaceStatus.valueOf((String) dbObject.get(FieldNames.RACE_LOG_EVENT_NEXT_STATUS.name()));
 
         return RaceLogEventFactory.INSTANCE.createRaceStatusEvent(timePoint, id, competitors, passId, nextStatus);
+    }
+    
+    private CourseData loadCourseData(BasicDBList dbCourseList) {
+        CourseData courseData = new CourseDataImpl("TemplateCourse");
+        int i = 0;
+        for (Object object : dbCourseList) {
+            DBObject dbObject  = (DBObject) object;
+            Waypoint waypoint = null;
+            NauticalSide passingSide = (NauticalSide) dbObject.get(FieldNames.WAYPOINT_PASSINGSIDE.name());
+            ControlPoint controlPoint = loadControlPoint((DBObject) dbObject.get(FieldNames.CONTROLPOINT.name()));
+            if (passingSide == null) {
+                waypoint = new WaypointImpl(controlPoint);
+            } else {
+                waypoint = new WaypointImpl(controlPoint, passingSide);
+            }
+            courseData.addWaypoint(i++, waypoint);
+        }
+        return courseData;
+    }
+
+    private ControlPoint loadControlPoint(DBObject dbObject) {
+        String controlPointClass = (String) dbObject.get(FieldNames.CONTROLPOINT_CLASS.name());
+        ControlPoint controlPoint = null;
+        if (controlPointClass != null) {
+            if (controlPointClass.equals(Mark.class.getSimpleName())) {
+                Mark mark = loadMark((DBObject) dbObject.get(FieldNames.CONTROLPOINT_VALUE.name()));
+                controlPoint = mark;
+            } else if (controlPointClass.equals(Gate.class.getSimpleName())) {
+                Gate gate = loadGate((DBObject) dbObject.get(FieldNames.CONTROLPOINT_VALUE.name()));
+                controlPoint = gate;
+            }
+        }
+        return controlPoint;
+    }
+
+    private Gate loadGate(DBObject dbObject) {
+        Serializable gateId = (Serializable) dbObject.get(FieldNames.GATE_ID.name());
+        String gateName = (String) dbObject.get(FieldNames.GATE_NAME.name());
+        Mark leftMark = loadMark((DBObject) dbObject.get(FieldNames.GATE_LEFT.name()));
+        Mark rightMark = loadMark((DBObject) dbObject.get(FieldNames.GATE_RIGHT.name()));
+        
+        Gate gate = DomainFactory.INSTANCE.createGate(gateId, leftMark, rightMark, gateName);
+        return gate;
+    }
+
+    private Mark loadMark(DBObject dbObject) {
+        Serializable markId = (Serializable) dbObject.get(FieldNames.MARK_ID.name());
+        String markColor = (String) dbObject.get(FieldNames.MARK_COLOR.name());
+        String markName = (String) dbObject.get(FieldNames.MARK_NAME.name());
+        String markPattern = (String) dbObject.get(FieldNames.MARK_PATTERN.name());
+        String markShape = (String) dbObject.get(FieldNames.MARK_SHAPE.name());
+        MarkType markType = MarkType.valueOf((String) dbObject.get(FieldNames.MARK_TYPE.name()));
+        
+        Mark mark = DomainFactory.INSTANCE.getOrCreateMark(markId, markName, markType, markColor, markShape, markPattern);
+        return mark;
     }
 }

@@ -10,4 +10,6 @@ public interface RaceLogEventVisitor {
     public void visit(RaceLogStartTimeEvent event);
 
     public void visit(RaceLogCourseAreaChangedEvent event);
+    
+    public void visit(RaceLogCourseDesignChangedEvent event);
 }

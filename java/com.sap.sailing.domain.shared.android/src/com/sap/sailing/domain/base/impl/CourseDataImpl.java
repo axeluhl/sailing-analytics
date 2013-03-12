@@ -1,4 +1,4 @@
-package com.sap.sailing.racecommittee.app.domain.impl;
+package com.sap.sailing.domain.base.impl;
 
 import java.util.ArrayList;
 import java.util.List;

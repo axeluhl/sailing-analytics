@@ -5,6 +5,7 @@ import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.racelog.RaceLogCourseAreaChangedEvent;
+import com.sap.sailing.domain.racelog.RaceLogCourseDesignChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogEventVisitor;
 import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
@@ -53,6 +54,12 @@ public class MongoRaceLogListener implements RaceLogEventVisitor {
     public void visit(RaceLogCourseAreaChangedEvent event) {
         DBObject courseAreaChangedEventTrackEntry = mongoObjectFactory.storeRaceLogEntry(raceLogIdentifier, event);
         raceLogsCollection.insert(courseAreaChangedEventTrackEntry);
+    }
+
+    @Override
+    public void visit(RaceLogCourseDesignChangedEvent event) {
+        DBObject courseDesignChangedEventTrackEntry = mongoObjectFactory.storeRaceLogEntry(raceLogIdentifier, event);
+        raceLogsCollection.insert(courseDesignChangedEventTrackEntry);
     }
 
 }

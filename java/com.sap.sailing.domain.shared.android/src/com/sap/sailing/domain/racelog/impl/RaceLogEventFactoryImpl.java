@@ -6,10 +6,12 @@ import java.util.List;
 import java.util.UUID;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.CourseData;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.racelog.RaceLogCourseAreaChangedEvent;
+import com.sap.sailing.domain.racelog.RaceLogCourseDesignChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogEventFactory;
 import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
 import com.sap.sailing.domain.racelog.RaceLogPassChangeEvent;
@@ -74,6 +76,18 @@ public class RaceLogEventFactoryImpl implements RaceLogEventFactory {
     public RaceLogCourseAreaChangedEvent createRaceLogCourseAreaChangedEvent(
             TimePoint timePoint, int passId, Serializable courseAreaId) {
         return createRaceLogCourseAreaChangedEvent(timePoint, UUID.randomUUID(), new ArrayList<Competitor>(), passId, courseAreaId);
+    }
+
+    @Override
+    public RaceLogCourseDesignChangedEvent createCourseDesignChangedEvent(TimePoint timePoint, Serializable id,
+            List<Competitor> competitors, int passId, CourseData courseData) {
+        return new RaceLogCourseDesignChangedEventImpl(timePoint, id, competitors, passId, courseData);
+    }
+
+    @Override
+    public RaceLogCourseDesignChangedEvent createCourseDesignChangedEvent(TimePoint timePoint, int passId,
+            CourseData courseData) {
+        return createCourseDesignChangedEvent(timePoint, UUID.randomUUID(), new ArrayList<Competitor>(), passId, courseData);
     }
 
 }
