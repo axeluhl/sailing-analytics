@@ -14,6 +14,7 @@ import org.junit.Test;
 import com.mongodb.MongoException;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.CourseArea;
+import com.sap.sailing.domain.base.CourseData;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
@@ -24,7 +25,6 @@ import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
 import com.sap.sailing.domain.common.ScoringSchemeType;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
@@ -35,6 +35,7 @@ import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.MongoRaceLogStoreFactory;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogCourseAreaChangedEvent;
+import com.sap.sailing.domain.racelog.RaceLogCourseDesignChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogEventFactory;
 import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
@@ -43,13 +44,12 @@ import com.sap.sailing.domain.racelog.RaceLogRaceStatusEvent;
 import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 
-public class TestStoringAndRetrievingRaceLogInRegatta extends AbstractMongoDBTest {
+public class TestStoringAndRetrievingRaceLogInRegatta extends RaceLogMongoDBTest {
 
     String raceColumnName = "My.First$Race$1";
     String regattaName = "TestRegatta";
     final String yellowFleetName = "Yellow";
     final String seriesName = "Qualifying";
-    TimePoint now = null;
     MongoObjectFactory mongoObjectFactory = null;
     DomainObjectFactory domainObjectFactory = null;
     Regatta regatta = null;
@@ -223,7 +223,29 @@ public class TestStoringAndRetrievingRaceLogInRegatta extends AbstractMongoDBTes
         } finally {
             loadedRaceLog.unlockAfterRead();
         }
+    }
+    
+    @Test
+    public void testStoreAndRetrieveSimpleLeaderboardWithRaceLogCourseDesignChangedEvent() {
+        CourseData course = createCourseData();
+        RaceLogCourseDesignChangedEvent event = RaceLogEventFactory.INSTANCE.createCourseDesignChangedEvent(now, 0, course);
 
+        addAndStoreRaceLogEvent(regatta, raceColumnName, event);
+
+        RaceLog loadedRaceLog = retrieveRaceLog();
+
+        loadedRaceLog.lockForRead();
+        try {
+            RaceLogEvent loadedEvent = loadedRaceLog.getFirstRawFix();
+            RaceLogCourseDesignChangedEvent courseDesignEvent = (RaceLogCourseDesignChangedEvent) loadedEvent;
+            assertEquals(event.getTimePoint(), courseDesignEvent.getTimePoint());
+            assertEquals(event.getPassId(), courseDesignEvent.getPassId());
+            assertEquals(event.getId(), courseDesignEvent.getId());
+            compareCourseData(event.getCourseDesign(), courseDesignEvent.getCourseDesign());
+            assertEquals(1, Util.size(loadedRaceLog.getFixes()));
+        } finally {
+            loadedRaceLog.unlockAfterRead();
+        }
     }
 
 }

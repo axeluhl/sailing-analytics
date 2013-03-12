@@ -9,10 +9,10 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.mongodb.MongoException;
+import com.sap.sailing.domain.base.CourseData;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
@@ -22,12 +22,11 @@ import com.sap.sailing.domain.leaderboard.impl.FlexibleLeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
 import com.sap.sailing.domain.leaderboard.impl.ResultDiscardingRuleImpl;
 import com.sap.sailing.domain.leaderboard.impl.ScoreCorrectionImpl;
-import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoFactory;
-import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.MongoRaceLogStoreFactory;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogCourseAreaChangedEvent;
+import com.sap.sailing.domain.racelog.RaceLogCourseDesignChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogEventFactory;
 import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
@@ -36,14 +35,10 @@ import com.sap.sailing.domain.racelog.RaceLogRaceStatusEvent;
 import com.sap.sailing.domain.racelog.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 
-public class TestStoringAndRetrievingRaceLogInLeaderboards extends AbstractMongoDBTest {
+public class TestStoringAndRetrievingRaceLogInLeaderboards extends RaceLogMongoDBTest {
 
-    String raceColumnName = "My.First$Race$1";
     String leaderboardName = "TestLeaderboard";
     final int[] discardIndexResultsStartingWithHowManyRaces = new int[] { 5, 8 };
-    TimePoint now = null;
-    MongoObjectFactory mongoObjectFactory = null;
-    DomainObjectFactory domainObjectFactory = null;
     FlexibleLeaderboardImpl leaderboard = null;
 
     public TestStoringAndRetrievingRaceLogInLeaderboards() throws UnknownHostException, MongoException {
@@ -194,7 +189,29 @@ public class TestStoringAndRetrievingRaceLogInLeaderboards extends AbstractMongo
         } finally {
             loadedRaceLog.unlockAfterRead();
         }
+    }
+    
+    @Test
+    public void testStoreAndRetrieveSimpleLeaderboardWithRaceLogCourseDesignChangedEvent() {
+        CourseData course = createCourseData();
+        RaceLogCourseDesignChangedEvent event = RaceLogEventFactory.INSTANCE.createCourseDesignChangedEvent(now, 0, course);
 
+        addAndStoreRaceLogEvent(leaderboard, raceColumnName, event);
+
+        RaceLog loadedRaceLog = retrieveRaceLog();
+
+        loadedRaceLog.lockForRead();
+        try {
+            RaceLogEvent loadedEvent = loadedRaceLog.getFirstRawFix();
+            RaceLogCourseDesignChangedEvent courseDesignEvent = (RaceLogCourseDesignChangedEvent) loadedEvent;
+            assertEquals(event.getTimePoint(), courseDesignEvent.getTimePoint());
+            assertEquals(event.getPassId(), courseDesignEvent.getPassId());
+            assertEquals(event.getId(), courseDesignEvent.getId());
+            compareCourseData(event.getCourseDesign(), courseDesignEvent.getCourseDesign());
+            assertEquals(1, Util.size(loadedRaceLog.getFixes()));
+        } finally {
+            loadedRaceLog.unlockAfterRead();
+        }
     }
 
 }

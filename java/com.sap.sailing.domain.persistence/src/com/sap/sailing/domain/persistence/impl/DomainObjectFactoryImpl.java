@@ -1053,7 +1053,11 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         for (Object object : dbCourseList) {
             DBObject dbObject  = (DBObject) object;
             Waypoint waypoint = null;
-            NauticalSide passingSide = (NauticalSide) dbObject.get(FieldNames.WAYPOINT_PASSINGSIDE.name());
+            NauticalSide passingSide = null;
+            String waypointPassingSide = (String) dbObject.get(FieldNames.WAYPOINT_PASSINGSIDE.name());
+            if (waypointPassingSide != null) {
+                passingSide = NauticalSide.valueOf(waypointPassingSide);
+            }
             ControlPoint controlPoint = loadControlPoint((DBObject) dbObject.get(FieldNames.CONTROLPOINT.name()));
             if (passingSide == null) {
                 waypoint = new WaypointImpl(controlPoint);
