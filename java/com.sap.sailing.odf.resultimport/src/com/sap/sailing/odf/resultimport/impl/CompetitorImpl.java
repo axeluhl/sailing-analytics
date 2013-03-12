@@ -26,6 +26,11 @@ public class CompetitorImpl extends AbstractNodeWrapper implements Competitor {
     public CompetitorType getCompetitorType() {
         return CompetitorType.valueOf(((Element) getNode()).getAttribute("Type"));
     }
+    
+    @Override
+    public String getCode() {
+        return ((Element) getNode()).getAttribute("Code");
+    }
 
     @Override
     public CountryCode getCountryCode() {

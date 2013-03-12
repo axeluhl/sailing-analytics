@@ -47,6 +47,11 @@ public class CumulativeResultImpl extends AbstractNodeWrapper implements Cumulat
     public CompetitorType getCompetitorType() {
         return competitor.getCompetitorType();
     }
+    
+    @Override
+    public String getCode() {
+        return competitor.getCode();
+    }
 
     @Override
     public CountryCode getCountryCode() {
@@ -82,7 +87,7 @@ public class CumulativeResultImpl extends AbstractNodeWrapper implements Cumulat
 
     @Override
     public String toString() {
-        return "Cumulative Results for "+getAthletes()+" ("+getCountryCode()+"): Rank: "+getRank()+", Result: "+getResult()+", sort order "+getSortOrder()
+        return "Cumulative Results for competitor "+getCode()+" ("+getCountryCode()+") "+getAthletes()+": Rank: "+getRank()+", Result: "+getResult()+", sort order "+getSortOrder()
                 +", race results: "+getPointsAndRanksAfterEachRace()+", medal race results: "+getPointsInMedalRace();
     }
 
