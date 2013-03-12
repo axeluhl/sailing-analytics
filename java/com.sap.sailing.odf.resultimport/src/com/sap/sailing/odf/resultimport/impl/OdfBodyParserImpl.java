@@ -9,19 +9,19 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
-import com.sap.sailing.odf.resultimport.StartReport;
-import com.sap.sailing.odf.resultimport.StartReportParser;
+import com.sap.sailing.odf.resultimport.OdfBodyParser;
+import com.sap.sailing.odf.resultimport.OdfBody;
 
-public class StartReportParserImpl implements StartReportParser {
+public class OdfBodyParserImpl implements OdfBodyParser {
 
     private Document parseDocument(InputStream inputStream) throws SAXException, IOException, ParserConfigurationException {
         return DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(inputStream);
     }
 
     @Override
-    public StartReport parse(InputStream inputStream, String sourceName) throws SAXException, IOException, ParserConfigurationException {
+    public OdfBody parse(InputStream inputStream, String sourceName) throws SAXException, IOException, ParserConfigurationException {
         Document doc = parseDocument(inputStream);
-        StartReport result = new StartReportImpl(doc.getElementsByTagName("star:startbericht").item(0), sourceName);
+        OdfBody result = new OdfBodyImpl(doc.getElementsByTagName("OdfBody").item(0));
         return result;
     }
 

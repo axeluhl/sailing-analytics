@@ -1,15 +1,10 @@
 package com.sap.sailing.odf.resultimport.impl;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.io.InputStream;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.zip.ZipFile;
 
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -19,29 +14,24 @@ import com.sap.sailing.domain.common.RegattaScoreCorrections;
 import com.sap.sailing.domain.common.ScoreCorrectionProvider;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util.Pair;
-import com.sap.sailing.odf.resultimport.ParserFactory;
+import com.sap.sailing.odf.resultimport.CumulativeResultDocumentProvider;
+import com.sap.sailing.odf.resultimport.OdfBody;
+import com.sap.sailing.odf.resultimport.OdfBodyParser;
 import com.sap.sailing.odf.resultimport.RegattaSummary;
 
 public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider {
     private static final long serialVersionUID = -4596215011753860781L;
 
-    private static final String name = "Kieler Woche Official Results by b+m";
+    private static final String name = "SwissTiming On Venue Result System";
     
     /**
      * The directory that will be scanned for <code>.zip</code> files which will then be passed to
      * {@link ZipFileParser} for analysis.
      */
-    private final File scanDir;
+    private final CumulativeResultDocumentProvider documentProvider;
     
-    public ScoreCorrectionProviderImpl(File scanDir) {
-        super();
-        if (!scanDir.exists()) {
-            scanDir.mkdirs();
-        }
-        if (!scanDir.isDirectory()) {
-            throw new IllegalArgumentException("scanDir "+scanDir+" must be a directory");
-        }
-        this.scanDir = scanDir;
+    public ScoreCorrectionProviderImpl(CumulativeResultDocumentProvider documentProvider) {
+        this.documentProvider = documentProvider;
     }
 
     @Override
@@ -67,6 +57,15 @@ public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider {
                 return new RegattaSummaryAsScoreCorrections(regattaSummary, this);
             }
         }
+        return null;
+    }
+
+    private Iterable<RegattaSummary> getAllRegattaSummaries() throws SAXException, IOException, ParserConfigurationException {
+        for (InputStream is : documentProvider.getAllAvailableCumulativeResultDocuments()) {
+            OdfBodyParser parser = new OdfBodyParserImpl();
+            OdfBody body = parser.parse(is, getName());
+        }
+        // TODO Auto-generated method stub
         return null;
     }
 

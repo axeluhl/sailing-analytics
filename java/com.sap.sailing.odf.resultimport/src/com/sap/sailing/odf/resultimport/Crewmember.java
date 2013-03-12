@@ -1,5 +1,5 @@
 package com.sap.sailing.odf.resultimport;
 
-public interface Crewmember extends Named {
+public interface Crewmember extends Person {
 
 }
