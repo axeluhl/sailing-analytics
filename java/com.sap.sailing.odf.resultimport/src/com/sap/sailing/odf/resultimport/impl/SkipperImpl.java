@@ -4,8 +4,13 @@ import org.w3c.dom.Node;
 
 import com.sap.sailing.odf.resultimport.Skipper;
 
-public class SkipperImpl extends PersonImpl implements Skipper {
+public class SkipperImpl extends AthleteImpl implements Skipper {
     public SkipperImpl(Node node) {
         super(node);
+    }
+
+    @Override
+    public String toString() {
+        return super.toString()+" (Skipper)";
     }
 }

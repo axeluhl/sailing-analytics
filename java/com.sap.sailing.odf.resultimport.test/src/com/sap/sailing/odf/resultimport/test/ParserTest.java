@@ -16,6 +16,8 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
 
+import com.sap.sailing.odf.resultimport.Competition;
+import com.sap.sailing.odf.resultimport.CumulativeResult;
 import com.sap.sailing.odf.resultimport.OdfBody;
 import com.sap.sailing.odf.resultimport.OdfBodyParser;
 import com.sap.sailing.odf.resultimport.ParserFactory;
@@ -50,6 +52,12 @@ public class ParserTest {
         OdfBodyParser parser = ParserFactory.INSTANCE.createOdfBodyParser();
         OdfBody body = parser.parse(getSampleInputStream(), SAMPLE_INPUT_NAME);
         assertNotNull(body);
+        Iterable<Competition> competitions = body.getCompetitions();
+        for (Competition competition : competitions) {
+            for (CumulativeResult cumulativeResult : competition.getCumulativeResults()) {
+                System.out.println(cumulativeResult);
+            }
+        }
     }
     
 }
