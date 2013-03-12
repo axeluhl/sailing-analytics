@@ -1,5 +1,7 @@
 # Development Environment
 
+[[_TOC_]]
+
 ## Git and Our Branches
 Our main Git repository lives at ssh://<user>@sapsailing.com/home/trac/git. For those working in the SAP corporate network and therefore unable to access the external sapsailing.com server using SSH, the repository contents are replicated on an hourly basis into ssh://dxxxxxx@git.wdf.sap.corp:29418/SAPSail/sapsailingcapture.git where dxxxxxx obviously is to be replaced by your D- or I- or C-user. You need to have an account at https://git.wdf.sap.corp:8080/ to be able to access this Git repository.
 

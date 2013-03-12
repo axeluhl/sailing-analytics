@@ -390,7 +390,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                     String prefix;
                     String suffix;
                     if (netPointsCorrected) {
-                        prefix = "<b>";
+                        prefix = "<b class='bold'>";
                         suffix = "</b>";
                     } else {
                         prefix = "";
