@@ -1,6 +1,8 @@
 package com.sap.sailing.domain.swisstimingadapter.impl;
 
+
 import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.swisstimingadapter.DomainFactory;
 import com.sap.sailing.domain.swisstimingadapter.RaceSpecificMessageLoader;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
@@ -16,12 +18,13 @@ public class SwissTimingTrackingConnectivityParameters implements RaceTrackingCo
     private final boolean canSendRequests;
     private final SwissTimingFactory swissTimingFactory;
     private final DomainFactory domainFactory;
+    private final RaceLogStore raceLogStore;
     private final WindStore windStore;
     private final RaceSpecificMessageLoader messageLoader; 
     private final long delayToLiveInMillis;
     
     public SwissTimingTrackingConnectivityParameters(String hostname, int port, String raceID, boolean canSendRequests, long delayToLiveInMillis,
-            SwissTimingFactory swissTimingFactory, DomainFactory domainFactory, WindStore windStore,
+            SwissTimingFactory swissTimingFactory, DomainFactory domainFactory, RaceLogStore raceLogStore, WindStore windStore,
             RaceSpecificMessageLoader messageLoader) {
         super();
         this.hostname = hostname;
@@ -31,13 +34,14 @@ public class SwissTimingTrackingConnectivityParameters implements RaceTrackingCo
         this.delayToLiveInMillis = delayToLiveInMillis;
         this.swissTimingFactory = swissTimingFactory;
         this.domainFactory = domainFactory;
+        this.raceLogStore = raceLogStore;
         this.windStore = windStore;
         this.messageLoader = messageLoader;
     }
 
     @Override
     public RaceTracker createRaceTracker(TrackedRegattaRegistry trackedRegattaRegistry) throws Exception {
-        return swissTimingFactory.createRaceTracker(raceID, hostname, port, canSendRequests, delayToLiveInMillis, windStore, messageLoader,
+        return swissTimingFactory.createRaceTracker(raceID, hostname, port, canSendRequests, delayToLiveInMillis, raceLogStore, windStore, messageLoader,
                 domainFactory, trackedRegattaRegistry);
     }
 

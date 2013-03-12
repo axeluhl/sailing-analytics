@@ -238,19 +238,20 @@ public abstract class DataEntryDialog<T> {
     }
     
     private DateBox createDateBoxInternal(Date initialDate, int visibleLength) {
-        DateBox textBox = new DateBox();
-        textBox.getTextBox().setVisibleLength(visibleLength);
-        textBox.setValue(initialDate);
-        AbstractEntryPoint.addFocusUponKeyUpToggler(textBox.getTextBox());
-        textBox.getTextBox().addChangeHandler(new ChangeHandler() {
+        DateBox dateBox = new DateBox();
+        dateBox.getTextBox().setVisibleLength(visibleLength);
+        dateBox.setFireNullValues(true);
+        dateBox.setValue(initialDate);
+        AbstractEntryPoint.addFocusUponKeyUpToggler(dateBox.getTextBox());
+        dateBox.addValueChangeHandler(new ValueChangeHandler<Date>() {
             @Override
-            public void onChange(ChangeEvent event) {
+            public void onValueChange(ValueChangeEvent<Date> event) {
                 validate();
             }
         });
-        AbstractEntryPoint.linkEnterToButton(getOkButton(), textBox.getTextBox());
-        AbstractEntryPoint.linkEscapeToButton(getCancelButton(), textBox.getTextBox());
-        return textBox;
+        AbstractEntryPoint.linkEnterToButton(getOkButton(), dateBox.getTextBox());
+        AbstractEntryPoint.linkEscapeToButton(getCancelButton(), dateBox.getTextBox());
+        return dateBox;
     }
 
     /**

@@ -21,7 +21,8 @@ Require-Bundle: com.sap.sailing.domain,
  com.sap.sailing.domain.swisstimingadapter.persistence,
  com.sap.sailing.domain.common,
  com.sap.sailing.udpconnector,
- com.sap.sailing.operationaltransformation
+ com.sap.sailing.operationaltransformation,
+ com.sap.sailing.domain.shared.android;bundle-version="1.0.0"
 Bundle-ClassPath: .
 Export-Package: com.sap.sailing.server,
  com.sap.sailing.server.impl;

@@ -12,20 +12,7 @@ import com.sap.sailing.domain.common.WithID;
  * @author Axel Uhl (D043530)
  * 
  */
-public interface Event extends Named, Renamable, WithID {
-    /**
-     * @return a non-<code>null</code> venue for this event
-     */
-    Venue getVenue();
-    
-    String getPublicationUrl();
-
-    void setPublicationUrl(String publicationUrl);
-
-    boolean isPublic();
-
-    void setPublic(boolean isPublic);
-
+public interface Event extends Named, Renamable, WithID, EventData {
     Iterable<Regatta> getRegattas();
     
     void addRegatta(Regatta regatta);

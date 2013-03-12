@@ -24,8 +24,9 @@ public interface ReplicationService {
      * Performs a servlet request to the server's {@link ReplicationServlet}, first registering this replica, ensuring
      * the JMS replication topic is created, then subscribing for the master's JMS replication topic and asking the servlet
      * for the stream containing the initial load. 
+     * @throws InterruptedException 
      */
-    void startToReplicateFrom(ReplicationMasterDescriptor master) throws IOException, ClassNotFoundException;
+    void startToReplicateFrom(ReplicationMasterDescriptor master) throws IOException, ClassNotFoundException, InterruptedException;
 
     /**
      * Registers a replica with this master instance. The <code>replica</code> will be considered in the result of

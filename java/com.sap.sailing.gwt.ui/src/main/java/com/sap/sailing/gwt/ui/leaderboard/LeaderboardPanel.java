@@ -51,6 +51,7 @@ import com.google.gwt.view.client.SelectionModel;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.InvertibleComparator;
 import com.sap.sailing.domain.common.MaxPointsReason;
+import com.sap.sailing.domain.common.Mile;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.SortingOrder;
@@ -241,7 +242,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     private final Label liveRaceLabel; 
     
     private final DateTimeFormat dateFormatter = DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.DATE_LONG);
-    private final DateTimeFormat timeFormatter = DateTimeFormat.getFormat("HH:mm:ss");
+    private final DateTimeFormat timeFormatter = DateTimeFormat.getFormat("HH:mm:ss zzz");
 
     private boolean isEmbedded = false;
 
@@ -781,7 +782,9 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     }
 
     public static DetailType[] getAvailableOverallDetailColumnTypes() {
-        return new DetailType[] { DetailType.TOTAL_TIME_SAILED_DOWNWIND_IN_SECONDS,
+        return new DetailType[] { DetailType.TOTAL_DISTANCE_TRAVELED,
+                DetailType.TOTAL_AVERAGE_SPEED_OVER_GROUND,
+                DetailType.TOTAL_TIME_SAILED_DOWNWIND_IN_SECONDS,
                 DetailType.TOTAL_TIME_SAILED_UPWIND_IN_SECONDS,
                 DetailType.TOTAL_TIME_SAILED_REACHING_IN_SECONDS,
                 DetailType.TOTAL_TIME_SAILED_IN_SECONDS, DetailType.MAXIMUM_SPEED_OVER_GROUND_IN_KNOTS };
@@ -1403,6 +1406,26 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         raceNameForDefaultSorting = settings.getNameOfRaceToSort();
     }
     
+    private static class TotalDistanceTraveledInMetersField implements LegDetailField<Double> {
+        @Override
+        public Double get(LeaderboardRowDTO row) {
+            return row.totalDistanceTraveledInMeters;
+        }
+    }
+    
+    private static class TotalAverageSpeedOverGroundField implements LegDetailField<Double> {
+        @Override
+        public Double get(LeaderboardRowDTO row) {
+            final Double result;
+            if (row.totalTimeSailedInSeconds != null && row.totalTimeSailedInSeconds != 0.0) {
+                result = row.totalDistanceTraveledInMeters / row.totalTimeSailedInSeconds / Mile.METERS_PER_NAUTICAL_MILE * 3600;
+            } else {
+                result = null;
+            }
+            return result;
+        }
+    }
+    
     private static class KingOfTheDownwindField implements LegDetailField<Double> {
         @Override
         public Double get(LeaderboardRowDTO row) {
@@ -1433,6 +1456,14 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
 
     private Map<DetailType, SortableColumn<LeaderboardRowDTO, ?>> createOverallDetailColumnMap() {
         Map<DetailType, SortableColumn<LeaderboardRowDTO, ?>> result = new HashMap<DetailType, SortableColumn<LeaderboardRowDTO, ?>>();
+        result.put(DetailType.TOTAL_DISTANCE_TRAVELED,
+                new FormattedDoubleDetailTypeColumn(DetailType.TOTAL_DISTANCE_TRAVELED,
+                        new TotalDistanceTraveledInMetersField(), RACE_COLUMN_HEADER_STYLE, RACE_COLUMN_STYLE));
+        
+        result.put(DetailType.TOTAL_AVERAGE_SPEED_OVER_GROUND,
+                new FormattedDoubleDetailTypeColumn(DetailType.TOTAL_AVERAGE_SPEED_OVER_GROUND,
+                        new TotalAverageSpeedOverGroundField(), RACE_COLUMN_HEADER_STYLE, RACE_COLUMN_STYLE));
+
         result.put(DetailType.MAXIMUM_SPEED_OVER_GROUND_IN_KNOTS, new MaxSpeedOverallColumn(RACE_COLUMN_HEADER_STYLE,
                 RACE_COLUMN_STYLE));
         

@@ -25,12 +25,14 @@ import com.sap.sailing.domain.base.ObjectInputStreamResolvingAgainstDomainFactor
 import com.sap.sailing.domain.base.Team;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.MarkType;
+import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.WithID;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.leaderboard.impl.HighPoint;
 import com.sap.sailing.domain.leaderboard.impl.HighPointExtremeSailingSeriesOverall;
-import com.sap.sailing.domain.leaderboard.impl.HighPointFirstGets10;
+import com.sap.sailing.domain.leaderboard.impl.HighPointFirstGets10LastBreaksTie;
 import com.sap.sailing.domain.leaderboard.impl.HighPointLastBreaksTie;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
 import com.sap.sailing.domain.tracking.MarkPassing;
@@ -169,10 +171,10 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public Waypoint createWaypoint(ControlPoint controlPoint) {
+    public Waypoint createWaypoint(ControlPoint controlPoint, NauticalSide passingSide) {
         synchronized (waypointCache) {
             expungeStaleWaypointCacheEntries();
-            Waypoint result = new WaypointImpl(controlPoint);
+            Waypoint result = new WaypointImpl(controlPoint, passingSide);
             waypointCache.put(result.getId(), new WeakWaypointReference(result));
             return result;
         }
@@ -285,7 +287,7 @@ public class DomainFactoryImpl implements DomainFactory {
         case HIGH_POINT_LAST_BREAKS_TIE:
             return new HighPointLastBreaksTie();
         case HIGH_POINT_FIRST_GETS_TEN:
-            return new HighPointFirstGets10();
+            return new HighPointFirstGets10LastBreaksTie();
         default:
             throw new RuntimeException("Unknown scoring scheme type "+scoringSchemeType.name());
         }

@@ -17,6 +17,7 @@ import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnListener;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindException;
@@ -28,6 +29,8 @@ import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.ScoreCorrection.Result;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
+import com.sap.sailing.domain.racelog.RaceLogEvent;
+import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
@@ -74,7 +77,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
      * A synchronized set that manages the difference between {@link #getCompetitors()} and {@link #getAllCompetitors()}.
      */
     private final Set<Competitor> suppressedCompetitors;
-
+    
     /**
      * A leaderboard entry representing a snapshot of a cell at a given time point for a single race/competitor.
      * 
@@ -661,6 +664,24 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
         return result;
     }
 
+    @Override
+    public Distance getTotalDistanceTraveled(Competitor competitor, TimePoint timePoint) {
+        Distance result = null;
+        for (TrackedRace trackedRace : getTrackedRaces()) {
+            if (Util.contains(trackedRace.getRace().getCompetitors(), competitor)) {
+                Distance distanceSailedInRace = trackedRace.getDistanceTraveled(competitor, timePoint);
+                if (distanceSailedInRace != null) {
+                    if (result == null) {
+                        result = distanceSailedInRace;
+                    } else {
+                        result = result.add(distanceSailedInRace);
+                    }
+                }
+            }
+        }
+        return result;
+    }
+
     protected RaceColumnListeners getRaceColumnListeners() {
         return raceColumnListeners;
     }
@@ -708,5 +729,10 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
         final Long delayToLiveInMillis = getDelayToLiveInMillis();
         TimePoint timePoint = delayToLiveInMillis == null ? now : now.minus(delayToLiveInMillis);
         return timePoint;
+    }
+    
+    @Override
+    public void raceLogEventAdded(RaceColumn raceColumn, RaceLogIdentifier raceLogIdentifier, RaceLogEvent event) {
+        getRaceColumnListeners().notifyListenersAboutRaceLogEventAdded(raceColumn, raceLogIdentifier, event);
     }
 }

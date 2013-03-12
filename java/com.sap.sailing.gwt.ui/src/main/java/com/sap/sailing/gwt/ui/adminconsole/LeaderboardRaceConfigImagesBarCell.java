@@ -1,9 +1,9 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.text.shared.SafeHtmlRenderer;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
 public class LeaderboardRaceConfigImagesBarCell extends ImagesBarCell {
@@ -11,22 +11,25 @@ public class LeaderboardRaceConfigImagesBarCell extends ImagesBarCell {
     public static final String ACTION_UNLINK = "ACTION_UNLINK";
     public static final String ACTION_EDIT = "ACTION_EDIT";
     private final StringMessages stringMessages;
+    private final SelectedLeaderboardProvider selectedLeaderboardProvider;
     private static AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
 
-    public LeaderboardRaceConfigImagesBarCell(StringMessages stringConstants) {
+    public LeaderboardRaceConfigImagesBarCell(SelectedLeaderboardProvider selectedLeaderboardProvider, StringMessages stringConstants) {
         super();
+        this.selectedLeaderboardProvider = selectedLeaderboardProvider;
         this.stringMessages = stringConstants;
-    }
-
-    public LeaderboardRaceConfigImagesBarCell(SafeHtmlRenderer<String> renderer, StringMessages stringMessages) {
-        super();
-        this.stringMessages = stringMessages;
     }
 
     @Override
     protected Iterable<ImageSpec> getImageSpecs() {
-        return Arrays.asList(new ImageSpec(ACTION_EDIT, stringMessages.actionEdit(), makeImagePrototype(resources.editIcon())),
-                new ImageSpec(ACTION_UNLINK, stringMessages.actionRaceUnlink(), makeImagePrototype(resources.unlinkIcon())),
-                new ImageSpec(ACTION_REMOVE, stringMessages.actionRaceRemove(), makeImagePrototype(resources.removeIcon())));
+        List<ImageSpec> result = new ArrayList<ImageSpec>();
+        result.add(new ImageSpec(ACTION_EDIT, stringMessages.actionEdit(), makeImagePrototype(resources.editIcon())));
+        result.add(new ImageSpec(ACTION_UNLINK, stringMessages.actionRaceUnlink(), makeImagePrototype(resources.unlinkIcon())));
+        if (selectedLeaderboardProvider.getSelectedLeaderboard() != null &&
+                !selectedLeaderboardProvider.getSelectedLeaderboard().isRegattaLeaderboard) {
+            // race columns cannot be removed from a regatta leaderboard; they need to be removed from the regatta instead
+            result.add(new ImageSpec(ACTION_REMOVE, stringMessages.actionRaceRemove(), makeImagePrototype(resources.removeIcon())));
+        }
+        return result;
     }
 }

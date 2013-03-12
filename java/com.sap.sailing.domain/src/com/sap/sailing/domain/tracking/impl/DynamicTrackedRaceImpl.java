@@ -21,6 +21,7 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.TimingConstants;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.Util;
@@ -43,17 +44,17 @@ import com.sap.sailing.util.impl.LockUtil;
 import com.sap.sailing.util.impl.NamedReentrantReadWriteLock;
 
 public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
-        DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
+DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     private static final long serialVersionUID = 1092726918239676958L;
 
     private static final Logger logger = Logger.getLogger(DynamicTrackedRaceImpl.class.getName());
-    
+
     private transient Set<RaceChangeListener> listeners;
-    
+
     private boolean raceIsKnownToStartUpwind;
 
     private boolean delayToLiveInMillisFixed;
-    
+
     public DynamicTrackedRaceImpl(TrackedRegatta trackedRegatta, RaceDefinition race,
             WindStore windStore, long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
             long delayForCacheInvalidationOfWindEstimation) {
@@ -75,7 +76,7 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
         // default wind tracks are observed because they are created by the superclass constructor using
         // createWindTrack which adds this object as a listener
     }
-    
+
     /**
      * After de-serialization sets a valid {@link #listeners} collection which is transient and therefore
      * hasn't been serialized.
@@ -84,7 +85,7 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
         ois.defaultReadObject();
         listeners = new HashSet<RaceChangeListener>();
     }
-    
+
     /**
      * {@link #raceIsKnownToStartUpwind} (see also {@link #raceIsKnownToStartUpwind()}) is initialized based on the <code>race</code>'s
      * {@link RaceDefinition#getBoatClass()} boat class's {@link BoatClass#typicallyStartsUpwind()} result. It can be changed
@@ -107,7 +108,7 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
         DynamicGPSFixTrack<Competitor, GPSFixMoving> track = getTrack(competitor);
         track.addGPSFix(fix); // the track notifies this tracked race which in turn notifies its listeners
     }
-    
+
     @Override
     public void setStatus(TrackedRaceStatus newStatus) {
         super.setStatus(newStatus);
@@ -146,7 +147,7 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
         notifyListenersWindAveragingChanged(oldMillisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageWind);
     }
 
-    
+
     @Override
     public void setAndFixDelayToLiveInMillis(long delayToLiveInMillis) {
         super.setDelayToLiveInMillis(delayToLiveInMillis);
@@ -160,17 +161,17 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
             notifyListenersDelayToLiveChanged(delayToLiveInMillis);
         }
     }
-    
+
     @Override
     public DynamicGPSFixTrack<Competitor, GPSFixMoving> getTrack(Competitor competitor) {
         return (DynamicGPSFixTrack<Competitor, GPSFixMoving>) super.getTrack(competitor);
     }
-    
+
     @Override
     public DynamicGPSFixTrack<Mark, GPSFix> getOrCreateTrack(Mark mark) {
         return (DynamicGPSFixTrack<Mark, GPSFix>) super.getOrCreateTrack(mark);
     }
-    
+
     @Override
     protected DynamicGPSFixTrackImpl<Mark> createMarkTrack(Mark mark) {
         DynamicGPSFixTrackImpl<Mark> result = super.createMarkTrack(mark);
@@ -196,7 +197,7 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
         });
         return result;
     }
-    
+
     /**
      * Callers iterating over the result need to synchronize on the resulting collection while iterating
      * to avoid {@link ConcurrentModificationException}s.
@@ -210,18 +211,18 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
 
     @Override
     public void addListener(RaceChangeListener listener) {
-    	synchronized (getListeners()) {
-    	    getListeners().add(listener);
-    	}
+        synchronized (getListeners()) {
+            getListeners().add(listener);
+        }
     }
-    
+
     @Override
     public void removeListener(RaceChangeListener listener) {
         synchronized (getListeners()) {
             getListeners().remove(listener);
         }
     }
-    
+
     @Override
     public void setWindSourcesToExclude(Iterable<? extends WindSource> windSourcesToExclude) {
         super.setWindSourcesToExclude(windSourcesToExclude);
@@ -474,11 +475,11 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
         }
         invalidateMarkPassingTimes();
         invalidateEndTime();
-        
+
         // notify *after* all mark passings have been re-established; should avoid flicker
         notifyListeners(competitor, oldMarkPassings, markPassings);
     }
-    
+
     @Override
     public Iterable<MarkPassing> getMarkPassingsInOrder(Waypoint waypoint) {
         return (NavigableSet<MarkPassing>) super.getMarkPassingsInOrder(waypoint);
@@ -524,7 +525,7 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
             notifyListenersRaceTimesChanged(getStartOfTracking(), getEndOfTracking(), getStartTimeReceived());
         }
     }
-    
+
     @Override
     public void setStartOfTrackingReceived(TimePoint startOfTrackingReceived) {
         if ((getStartOfTracking() == null) != (startOfTrackingReceived == null)
@@ -567,12 +568,24 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
 
     @Override
     public void recordWind(Wind wind, WindSource windSource) {
-        getOrCreateWindTrack(windSource).add(wind);
-        updated(/* time point */null); // wind events shouldn't advance race time
-        triggerManeuverCacheRecalculationForAllCompetitors();
-        notifyListeners(wind, windSource);
+        // TODO check what a good filter is; remember that start/end of tracking may change over time; what if we have discarded valuable wind fixes?
+        TimePoint startOfRace = getStartOfRace();
+        TimePoint startOfTracking = getStartOfTracking();
+        TimePoint endOfRace = getEndOfRace();
+        TimePoint endOfTracking = getEndOfTracking();
+        // record wind fix only if it's still within reasonable time after the race has ended or the race hasn't ended yet
+        if ((startOfTracking == null || !startOfTracking.after(wind.getTimePoint()) ||
+                (startOfRace != null && !startOfRace.after(wind.getTimePoint())))
+            &&
+        (endOfTracking == null || endOfTracking.plus(TimingConstants.IS_LIVE_GRACE_PERIOD_IN_MILLIS).after(wind.getTimePoint()) ||
+        (endOfRace != null && endOfRace.plus(TimingConstants.IS_LIVE_GRACE_PERIOD_IN_MILLIS).after(wind.getTimePoint())))) {
+            getOrCreateWindTrack(windSource).add(wind);
+            updated(/* time point */null); // wind events shouldn't advance race time
+            triggerManeuverCacheRecalculationForAllCompetitors();
+            notifyListeners(wind, windSource);
+        }
     }
-    
+
     @Override
     public void removeWind(Wind wind, WindSource windSource) {
         getOrCreateWindTrack(windSource).remove(wind);
@@ -602,7 +615,7 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
     protected TrackedLeg createTrackedLeg(Leg leg) {
         return new TrackedLegImpl(this, leg, getRace().getCompetitors());
     }
-    
+
     @Override
     public long getMillisecondsOverWhichToAverageSpeed() {
         long result = 0; // default in case there is no competitor

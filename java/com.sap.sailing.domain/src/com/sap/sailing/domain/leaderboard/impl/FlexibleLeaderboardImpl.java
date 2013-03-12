@@ -1,20 +1,29 @@
 package com.sap.sailing.domain.leaderboard.impl;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.logging.Logger;
 
+import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnListener;
 import com.sap.sailing.domain.base.impl.FleetImpl;
+import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.FlexibleRaceColumn;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
+import com.sap.sailing.domain.racelog.RaceLogStore;
+import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
+import com.sap.sailing.domain.racelog.impl.RaceLogInformationImpl;
+import com.sap.sailing.domain.racelog.impl.RaceLogOnLeaderboardIdentifier;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
 /**
@@ -29,15 +38,22 @@ import com.sap.sailing.domain.tracking.TrackedRace;
  */
 public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements FlexibleLeaderboard {
     private static Logger logger = Logger.getLogger(FlexibleLeaderboardImpl.class.getName());
-    
-    protected static final Fleet defaultFleet = new FleetImpl("Default");
+
+    protected static final Fleet defaultFleet = new FleetImpl(LeaderboardNameConstants.DEFAULT_FLEET_NAME);
     private static final long serialVersionUID = -5708971849158747846L;
     private final List<FlexibleRaceColumn> races;
     private final ScoringScheme scoringScheme;
     private String name;
+    private transient RaceLogStore raceLogStore;
+    private final CourseArea courseArea;
 
     public FlexibleLeaderboardImpl(String name, SettableScoreCorrection scoreCorrection,
-            ThresholdBasedResultDiscardingRule resultDiscardingRule, ScoringScheme scoringScheme) {
+            ThresholdBasedResultDiscardingRule resultDiscardingRule, ScoringScheme scoringScheme, CourseArea courseArea) {
+        this(EmptyRaceLogStore.INSTANCE, name, scoreCorrection, resultDiscardingRule, scoringScheme, courseArea);
+    }
+
+    public FlexibleLeaderboardImpl(RaceLogStore raceLogStore, String name, SettableScoreCorrection scoreCorrection,
+            ThresholdBasedResultDiscardingRule resultDiscardingRule, ScoringScheme scoringScheme, CourseArea courseArea) {
         super(scoreCorrection, resultDiscardingRule);
         this.scoringScheme = scoringScheme;
         if (name == null) {
@@ -45,8 +61,20 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
         }
         this.name = name;
         this.races = new ArrayList<FlexibleRaceColumn>();
+        this.raceLogStore = raceLogStore;
+        this.courseArea = courseArea;
     }
-    
+
+    /**
+     * Deserialization has to be maintained in lock-step with {@link #writeObject(ObjectOutputStream) serialization}.
+     * When de-serializing, a possibly remote {@link #raceLogStore} is ignored because it is transient. Instead, an
+     * {@link EmptyRaceLogStore} is used for the de-serialized instance.
+     */
+    private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
+        ois.defaultReadObject();
+        raceLogStore = EmptyRaceLogStore.INSTANCE;
+    }
+
     @Override
     public String getName() {
         return name;
@@ -61,7 +89,7 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
         }
         this.name = newName;
     }
-    
+
     @Override
     public RaceColumn addRaceColumn(String name, boolean medalRace, Fleet... fleets) {
         FlexibleRaceColumn column = getRaceColumnByName(name);
@@ -72,16 +100,20 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
             column = createRaceColumn(name, medalRace, fleets);
             column.addRaceColumnListener(this);
             races.add(column);
+            column.setRaceLogInformation(
+                    new RaceLogInformationImpl(
+                            raceLogStore,
+                            new RaceLogOnLeaderboardIdentifier(this, column.getName())));
             getRaceColumnListeners().notifyListenersAboutRaceColumnAddedToContainer(column);
         }
         return column;
     }
-    
+
     @Override
     public FlexibleRaceColumn getRaceColumnByName(String columnName) {
         return (FlexibleRaceColumn) super.getRaceColumnByName(columnName);
     }
-    
+
     @Override
     public Fleet getFleet(String fleetName) {
         Fleet result;
@@ -100,12 +132,12 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
         getRaceColumnListeners().notifyListenersAboutRaceColumnRemovedFromContainer(raceColumn);
         raceColumn.removeRaceColumnListener(this);
     }
-    
+
     @Override
     public Iterable<RaceColumn> getRaceColumns() {
         return Collections.unmodifiableCollection(new ArrayList<RaceColumn>(races));
     }
-    
+
     @Override
     public RaceColumn addRace(TrackedRace race, String columnName, boolean medalRace, Fleet fleet) {
         FlexibleRaceColumn column = getRaceColumnByName(columnName);
@@ -118,8 +150,11 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
         return column;
     }
 
-    protected RaceColumnImpl createRaceColumn(String columnName, boolean medalRace, Fleet... fleets) {
-        return new RaceColumnImpl(columnName, medalRace, turnNullOrEmptyFleetsIntoDefaultFleet(fleets));
+    protected RaceColumnImpl createRaceColumn(String column, boolean medalRace, Fleet... fleets) {
+        return new RaceColumnImpl(
+                column, 
+                medalRace, 
+                turnNullOrEmptyFleetsIntoDefaultFleet(fleets));
     }
 
     protected Iterable<Fleet> turnNullOrEmptyFleetsIntoDefaultFleet(Fleet... fleets) {
@@ -189,6 +224,11 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
     @Override
     public ScoringScheme getScoringScheme() {
         return scoringScheme;
+    }
+
+    @Override
+    public CourseArea getDefaultCourseArea() {
+        return courseArea;
     }
 
 }

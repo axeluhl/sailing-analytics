@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/Welter.Cell.OneRowNoImage"
+    android:layout_width="wrap_content"
+    android:layout_height="75dp"
+    android:background="@drawable/list_selector"
+    android:gravity="center_vertical"  >
+
+    <RelativeLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="fill_parent"
+        android:layout_height="75dp"
+        android:gravity="center_vertical"
+        android:paddingLeft="12dp"
+         >
+
+        <TextView
+            android:id="@+id/Welter.Cell.TwoRowNoImage.lineOne"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:text="Title of the first line"
+            android:textColor="@drawable/text_selector"
+            android:textSize="9pt" >
+        </TextView>
+
+        <TextView
+            android:id="@+id/Welter.Cell.TwoRowNoImage.lineTwo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@drawable/text_selector"
+            android:paddingLeft="6pt"
+            android:layout_below="@+id/Welter.Cell.TwoRowNoImage.lineOne"
+            android:layout_centerVertical="true"
+            android:text="Title of the second line"
+            android:textSize="8pt" >
+        </TextView>
+
+    </RelativeLayout>
+    
+    <ImageView
+        	android:id="@+id/Welter.Cell.UpdateLabel"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentRight="true"
+            android:contentDescription="@string/updateIndicator"
+            android:src="@drawable/updatelabel"
+            android:visibility="gone" />
+
+</RelativeLayout>

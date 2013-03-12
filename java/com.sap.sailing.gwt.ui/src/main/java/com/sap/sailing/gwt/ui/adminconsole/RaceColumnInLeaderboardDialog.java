@@ -1,7 +1,5 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
-import java.util.List;
-
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.DoubleBox;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
@@ -15,15 +13,18 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.RaceColumnDTO;
 
 /**
- * Fills a {@link RaceColumnDTO} object by setting its {@link RaceColumnDTO#setMedalRace(boolean) medal race} property and its name.
+ * Fills a {@link RaceColumnDTO} object by setting its {@link RaceColumnDTO#setMedalRace(boolean) medal race} property,
+ * the column factor and its name.
+ * 
  * @author Axel Uhl (D043530)
- *
+ * 
  */
 public class RaceColumnInLeaderboardDialog extends DataEntryDialog<RaceColumnInLeaderboardDialog.RaceColumnDescriptor> {
     private final TextBox raceNameBox;
     private final DoubleBox explicitFactorBox;
     private final CheckBox isMedalRace;
     private final StringMessages stringMessages;
+    private final boolean isRegattaLeaderboard;
 
     public static class RaceColumnDescriptor {
         private String name;
@@ -56,12 +57,11 @@ public class RaceColumnInLeaderboardDialog extends DataEntryDialog<RaceColumnInL
     }
 
     private static class RaceDialogValidator implements Validator<RaceColumnDescriptor> {
+        private final StringMessages stringMessages;
+        private final Iterable<RaceColumnDTO> existingRaces;
 
-        private StringMessages stringConstants;
-        private List<RaceColumnDTO> existingRaces;
-
-        public RaceDialogValidator(StringMessages stringConstants, List<RaceColumnDTO> existingRaceColumnsAndFleetNames) {
-            this.stringConstants = stringConstants;
+        public RaceDialogValidator(StringMessages stringConstants, Iterable<RaceColumnDTO> existingRaceColumnsAndFleetNames) {
+            this.stringMessages = stringConstants;
             this.existingRaces = existingRaceColumnsAndFleetNames;
         }
 
@@ -81,11 +81,11 @@ public class RaceColumnInLeaderboardDialog extends DataEntryDialog<RaceColumnInL
             }
 
             if (!isNameNotEmpty) {
-                errorMessage = stringConstants.pleaseEnterAName();
+                errorMessage = stringMessages.pleaseEnterAName();
             } else if (!medalRaceNotNull) {
-                errorMessage = stringConstants.medalRaceIsNull();
+                errorMessage = stringMessages.medalRaceIsNull();
             } else if (!unique) {
-                errorMessage = stringConstants.raceWithThisNameAlreadyExists();
+                errorMessage = stringMessages.raceWithThisNameAlreadyExists();
             } else {
                 return errorMessage = null;
             }
@@ -93,16 +93,19 @@ public class RaceColumnInLeaderboardDialog extends DataEntryDialog<RaceColumnInL
         }
     }
 
-    public RaceColumnInLeaderboardDialog(List<RaceColumnDTO> existingRaces, RaceColumnDTO raceColumnToEdit, 
-            StringMessages stringMessages, DialogCallback<RaceColumnDescriptor> callback) {
+    public RaceColumnInLeaderboardDialog(Iterable<RaceColumnDTO> existingRaces, RaceColumnDTO raceColumnToEdit, 
+            boolean isRegattaLeaderboard, StringMessages stringMessages, DialogCallback<RaceColumnDescriptor> callback) {
         super(stringMessages.actionRaceEdit(), null, stringMessages.ok(), stringMessages.cancel(),
                 new RaceDialogValidator(stringMessages, existingRaces), callback);
+        this.isRegattaLeaderboard = isRegattaLeaderboard;
         this.stringMessages = stringMessages;
         raceNameBox = createTextBox(raceColumnToEdit.getRaceColumnName());
+        raceNameBox.setEnabled(!isRegattaLeaderboard);
         explicitFactorBox = raceColumnToEdit.getExplicitFactor() == null ?
                 createDoubleBox(/* visibleLength */ 4) : createDoubleBox(raceColumnToEdit.getExplicitFactor(), /* visibleLength */ 4);
         isMedalRace = createCheckbox(stringMessages.medalRace());
         isMedalRace.setValue(raceColumnToEdit.isMedalRace());
+        isMedalRace.setEnabled(!isRegattaLeaderboard);
     }
 
     @Override
@@ -133,6 +136,11 @@ public class RaceColumnInLeaderboardDialog extends DataEntryDialog<RaceColumnInL
     @Override
     public void show() {
         super.show();
-        raceNameBox.setFocus(true);
+        if (isRegattaLeaderboard) {
+            explicitFactorBox.setFocus(true);
+            explicitFactorBox.selectAll();
+        } else {
+            raceNameBox.setFocus(true);
+        }
     }
 }

@@ -10,25 +10,19 @@ import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 public class RegattaLeaderboardEditDialog extends RegattaLeaderboardDialog {
     
     public RegattaLeaderboardEditDialog(Collection<StrippedLeaderboardDTO> otherExistingLeaderboards, Collection<RegattaDTO> existingRegattas,
-            LeaderboardDescriptor leaderboard, StringMessages stringConstants, ErrorReporter errorReporter,
+            LeaderboardDescriptor leaderboardDescriptor, StringMessages stringConstants, ErrorReporter errorReporter,
             DialogCallback<LeaderboardDescriptor> callback) {
-        super(stringConstants.editRegattaLeaderboard(), leaderboard, existingRegattas, stringConstants, errorReporter, new RegattaLeaderboardDialog.LeaderboardParameterValidator(
+        super(stringConstants.editRegattaLeaderboard(), leaderboardDescriptor, existingRegattas, stringConstants, errorReporter, new RegattaLeaderboardDialog.LeaderboardParameterValidator(
                 stringConstants, otherExistingLeaderboards), callback);
         
-        nameTextBox = createTextBox(leaderboard.getName());
-        displayNameTextBox = createTextBox(leaderboard.getDisplayName());
+        nameTextBox = createTextBox(leaderboardDescriptor.getName());
+        displayNameTextBox = createTextBox(leaderboardDescriptor.getDisplayName());
+        nameTextBox.setEnabled(false);
+        nameTextBox.setVisibleLength(50);
+        displayNameTextBox.setVisibleLength(50);
 
-        regattaListBox = createListBox(false);
-        regattaListBox.addItem(stringConstants.pleaseSelectARegatta());
-        int i=1;
-        for (RegattaDTO regatta : existingRegattas) {
-            regattaListBox.addItem(regatta.name);
-            if (regatta.name.equals(leaderboard.getRegattaName())) {
-                regattaListBox.setSelectedIndex(i);
-            }
-            i++;
-        }
+        regattaListBox = createSortedRegattaListBox(existingRegattas, leaderboardDescriptor.getRegattaName());
         regattaListBox.setEnabled(false);
-        discardThresholdBoxes = initPrefilledDiscardThresholdBoxes(leaderboard.getDiscardThresholds(), this);
+        discardThresholdBoxes = initPrefilledDiscardThresholdBoxes(leaderboardDescriptor.getDiscardThresholds(), this);
     }
 }

@@ -504,4 +504,22 @@ public interface StringMessages extends Messages {
     String angleAndTotalNumberOfDataPoints(int angle, int numberOfDataPoints);
     String buoyZone();
     String radiusInMeters();
+    String addCourseArea();
+    String courseAreas();
+    String courseArea();
+    String pleaseEnterNonEmptyCourseArea();
+    String pleaseSelectACourseArea();
+    String totalDistanceTraveled();
+    String totalDistanceTraveledTooltip();
+    String totalAverageSpeedOverGround();
+    String totalAverageSpeedOverGroundTooltip();
+    String filterRegattasByName();
+    String noRegattasYet();
+    String cannotAddRacesToRegattaLeaderboardButOnlyToRegatta();
+    String correctScore();
+    String correctScoreFor(String competitorName, String raceColumnName);
+    String penaltyOrRedress();
+    String netScore();
+    String timePointMustBeAfterStartOfTracking();
+    String timePointMustBeBeforeEndOfTracking();
 }

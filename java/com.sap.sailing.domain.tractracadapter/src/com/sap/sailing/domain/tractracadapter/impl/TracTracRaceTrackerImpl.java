@@ -4,20 +4,25 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Serializable;
+import java.io.StringReader;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
+
 
 import com.maptrack.client.io.TypeController;
 import com.sap.sailing.domain.base.Course;
@@ -28,10 +33,13 @@ import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
+import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
+import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.tracking.AbstractRaceTrackerImpl;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
@@ -121,18 +129,18 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
      */
     protected TracTracRaceTrackerImpl(DomainFactory domainFactory, URL paramURL, URI liveURI, URI storedURI,
             TimePoint startOfTracking, TimePoint endOfTracking, long delayToLiveInMillis,
-            boolean simulateWithStartTimeNow, WindStore windStore, TrackedRegattaRegistry trackedRegattaRegistry)
+            boolean simulateWithStartTimeNow, RaceLogStore raceLogStore, WindStore windStore, TrackedRegattaRegistry trackedRegattaRegistry)
             throws URISyntaxException, MalformedURLException, FileNotFoundException {
         this(KeyValue.setup(paramURL), domainFactory, paramURL, liveURI, storedURI, startOfTracking, endOfTracking,
-                delayToLiveInMillis, simulateWithStartTimeNow, windStore, trackedRegattaRegistry);
+                delayToLiveInMillis, simulateWithStartTimeNow, raceLogStore, windStore, trackedRegattaRegistry);
     }
     
     private TracTracRaceTrackerImpl(Event tractracEvent, DomainFactory domainFactory, URL paramURL, URI liveURI, URI storedURI,
             TimePoint startOfTracking, TimePoint endOfTracking, long delayToLiveInMillis, boolean simulateWithStartTimeNow,
-            WindStore windStore, TrackedRegattaRegistry trackedRegattaRegistry) throws URISyntaxException, MalformedURLException,
-            FileNotFoundException {
+            RaceLogStore raceLogStore, WindStore windStore, TrackedRegattaRegistry trackedRegattaRegistry) 
+                throws URISyntaxException, MalformedURLException, FileNotFoundException {
         this(tractracEvent, null, domainFactory, paramURL, liveURI, storedURI,
-                startOfTracking, endOfTracking, delayToLiveInMillis, simulateWithStartTimeNow, windStore, trackedRegattaRegistry);
+                startOfTracking, endOfTracking, delayToLiveInMillis, simulateWithStartTimeNow, raceLogStore, windStore, trackedRegattaRegistry);
     }
     
     /**
@@ -143,10 +151,10 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
      */
     protected TracTracRaceTrackerImpl(Regatta regatta, DomainFactory domainFactory, URL paramURL, URI liveURI, URI storedURI,
             TimePoint startOfTracking, TimePoint endOfTracking, long delayToLiveInMillis, boolean simulateWithStartTimeNow,
-            WindStore windStore, TrackedRegattaRegistry trackedRegattaRegistry) throws URISyntaxException, MalformedURLException,
-            FileNotFoundException {
+            RaceLogStore raceLogStore, WindStore windStore, TrackedRegattaRegistry trackedRegattaRegistry) 
+                throws URISyntaxException, MalformedURLException, FileNotFoundException {
         this(KeyValue.setup(paramURL), regatta, domainFactory, paramURL, liveURI, storedURI, startOfTracking,
-                endOfTracking, delayToLiveInMillis, simulateWithStartTimeNow, windStore, trackedRegattaRegistry);
+                endOfTracking, delayToLiveInMillis, simulateWithStartTimeNow, raceLogStore, windStore, trackedRegattaRegistry);
     }
     
     /**
@@ -162,7 +170,8 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
      */
     private TracTracRaceTrackerImpl(Event tractracEvent, final Regatta regatta, DomainFactory domainFactory,
             URL paramURL, URI liveURI, URI storedURI, TimePoint startOfTracking, TimePoint endOfTracking,
-            long delayToLiveInMillis, boolean simulateWithStartTimeNow, WindStore windStore, TrackedRegattaRegistry trackedRegattaRegistry)
+            long delayToLiveInMillis, boolean simulateWithStartTimeNow, RaceLogStore raceLogStore, 
+            WindStore windStore, TrackedRegattaRegistry trackedRegattaRegistry)
             throws URISyntaxException, MalformedURLException, FileNotFoundException {
         super();
         this.tractracEvent = tractracEvent;
@@ -202,7 +211,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         }
         // if regatta is still null, no previous assignment of any of the races in this TracTrac event to a Regatta was found;
         // in this case, create a default regatta based on the TracTrac event data
-        this.regatta = effectiveRegatta == null ? domainFactory.getOrCreateDefaultRegatta(tractracEvent, trackedRegattaRegistry) : effectiveRegatta;
+        this.regatta = effectiveRegatta == null ? domainFactory.getOrCreateDefaultRegatta(raceLogStore, tractracEvent, trackedRegattaRegistry) : effectiveRegatta;
         trackedRegatta = trackedRegattaRegistry.getOrCreateTrackedRegatta(this.regatta);
         receivers = new HashSet<Receiver>();
         Set<TypeController> typeControllers = new HashSet<TypeController>();
@@ -257,9 +266,17 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
             try {
                 clientParams = new ClientParamsPHP(new InputStreamReader(paramURL.openStream()));
                 List<com.sap.sailing.domain.base.ControlPoint> newCourseControlPoints = new ArrayList<>();
-                final Iterable<? extends TracTracControlPoint> newTracTracControlPoints = clientParams.getRaceDefaultRoute().getControlPoints();
+                List<Pair<com.sap.sailing.domain.base.ControlPoint, NauticalSide>> newCourseControlPointsWithPassingSide = new ArrayList<>();
+                final List<? extends TracTracControlPoint> newTracTracControlPoints = clientParams.getRaceDefaultRoute().getControlPoints();
+                Map<Integer, NauticalSide> passingSideData = parsePassingSideData(clientParams.getRaceDefaultRoute(), newTracTracControlPoints);
+                int i = 1;
                 for (TracTracControlPoint newTracTracControlPoint : newTracTracControlPoints) {
-                    newCourseControlPoints.add(domainFactory.getOrCreateControlPoint(newTracTracControlPoint));
+                    NauticalSide nauticalSide = passingSideData.containsKey(i) ? passingSideData.get(i) : null;
+                    final com.sap.sailing.domain.base.ControlPoint newControlPoint = domainFactory.getOrCreateControlPoint(newTracTracControlPoint);
+                    newCourseControlPoints.add(newControlPoint);
+                    newCourseControlPointsWithPassingSide.add(new Pair<com.sap.sailing.domain.base.ControlPoint, 
+                            NauticalSide>(newControlPoint, nauticalSide));
+                    i++;
                 }
                 List<com.sap.sailing.domain.base.ControlPoint> currentCourseControlPoints = new ArrayList<>();
                 final Course course = getRaces().iterator().next().getCourse();
@@ -269,7 +286,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
                 if (!newCourseControlPoints.equals(currentCourseControlPoints)) {
                     logger.info("Detected course change based on clientparams.php contents for races "+getRaces());
                     try {
-                        course.update(newCourseControlPoints, domainFactory.getBaseDomainFactory());
+                        course.update(newCourseControlPointsWithPassingSide, domainFactory.getBaseDomainFactory());
                     } catch (PatchFailedException pfe) {
                         logger.severe("Failed to apply course update "+newTracTracControlPoints+" to course "+course);
                         logger.throwing(TracTracRaceTrackerImpl.class.getName(), "scheduleClientParamsPHPPoller.run", pfe);
@@ -302,6 +319,47 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         }
     }
 
+    /**
+     * Parses the route metadata for additional course information
+     * The 'passing side' for each course waypoint is encoded like this...
+     * Seq.1=GATE
+     * Seq.2=PORT
+     * Seq.3=GATE
+     * Seq.4=STARBOARD
+     */
+    private Map<Integer, NauticalSide> parsePassingSideData(ClientParamsPHP.Route route, List<? extends TracTracControlPoint> controlPoints) {
+        Map<Integer, NauticalSide> result = new HashMap<Integer, NauticalSide>();
+        int controlPointsCount = controlPoints.size();
+        String routeMetadataString = route.getMetadata();
+        if(routeMetadataString != null) {
+            Map<String, String> routeMetadata = parseRouteMetadata(routeMetadataString);
+            for(int i = 1; i <= controlPointsCount; i++) {
+                String seqValue = routeMetadata.get("Seq." + i);
+                TracTracControlPoint controlPoint = controlPoints.get(i-1);
+                if(!controlPoint.getHasTwoPoints() && seqValue != null) {
+                    if("PORT".equalsIgnoreCase(seqValue)) {
+                        result.put(i, NauticalSide.PORT);
+                    } else if("STARBOARD".equalsIgnoreCase(seqValue)) {
+                        result.put(i, NauticalSide.STARBOARD);
+                    }
+                }
+            }
+        }
+        return result;
+    }
+
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    private Map<String, String> parseRouteMetadata(String routeMetadata) {
+        Map<String, String> metadataMap = new HashMap<String, String>();
+        try {
+            Properties p = new Properties();
+            p.load(new StringReader(routeMetadata));
+            metadataMap = new HashMap<String, String>((Map) p);
+        } catch (IOException e) {
+            // do nothing
+        }
+        return metadataMap;
+    }
     private void updateStartStopTimesAndLiveDelay(ClientParamsPHP clientParams, Simulator simulator) {
         RaceDefinition currentRace = null;
         long delayInMillis = clientParams.getLiveDelayInMillis();
@@ -416,15 +474,15 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
 
     private void updateStatusOfTrackedRaces() {
         for (RaceDefinition race : getRaces()) {
-            updateStatusOfTrackedRace(race);
+            DynamicTrackedRace trackedRace = getTrackedRegatta().getExistingTrackedRace(race);
+            if (trackedRace != null) {
+                updateStatusOfTrackedRace(trackedRace);
+            }
         }
     }
 
-    private void updateStatusOfTrackedRace(RaceDefinition race) {
-        DynamicTrackedRace trackedRace = getTrackedRegatta().getExistingTrackedRace(race);
-        if (trackedRace != null) {
-            trackedRace.setStatus(lastStatus);
-        }
+    private void updateStatusOfTrackedRace(DynamicTrackedRace trackedRace) {
+        trackedRace.setStatus(lastStatus);
     }
 
     @Override
@@ -459,9 +517,9 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
     }
 
     @Override
-    public void addRaceDefinition(RaceDefinition race) {
+    public void addRaceDefinition(RaceDefinition race, DynamicTrackedRace trackedRace) {
         races.add(race);
-        updateStatusOfTrackedRace(race);
+        updateStatusOfTrackedRace(trackedRace);
     }
 
 }

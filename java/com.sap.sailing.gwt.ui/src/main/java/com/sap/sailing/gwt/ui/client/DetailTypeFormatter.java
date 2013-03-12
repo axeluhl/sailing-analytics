@@ -69,6 +69,8 @@ public class DetailTypeFormatter {
             return stringMessages.averageCrossTrackErrorInMeters();
         case MAXIMUM_SPEED_OVER_GROUND_IN_KNOTS:
             return stringMessages.maximumSpeedOverGroundInKnots();
+        case TOTAL_DISTANCE_TRAVELED:
+            return stringMessages.totalDistanceTraveled();
         case TOTAL_TIME_SAILED_DOWNWIND_IN_SECONDS:
             return stringMessages.totalTimeSailedDownwindInSeconds();
         case TOTAL_TIME_SAILED_UPWIND_IN_SECONDS:
@@ -77,6 +79,8 @@ public class DetailTypeFormatter {
             return stringMessages.totalTimeSailedReachingInSeconds();
         case TOTAL_TIME_SAILED_IN_SECONDS:
             return stringMessages.totalTimeSailedInSeconds();
+        case TOTAL_AVERAGE_SPEED_OVER_GROUND:
+            return stringMessages.totalAverageSpeedOverGround();
         case AVERAGE_MANEUVER_LOSS_IN_METERS:
             return stringMessages.averageManeuverLossInMeters();
         case AVERAGE_TACK_LOSS_IN_METERS:
@@ -103,6 +107,7 @@ public class DetailTypeFormatter {
         case RACE_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS:
         case VELOCITY_MADE_GOOD_IN_KNOTS:
         case AVERAGE_SPEED_OVER_GROUND_IN_KNOTS:
+        case TOTAL_AVERAGE_SPEED_OVER_GROUND:
             return stringMessages.knotsUnit();
 
         case WINDWARD_DISTANCE_TO_OVERALL_LEADER:
@@ -115,6 +120,7 @@ public class DetailTypeFormatter {
         case AVERAGE_MANEUVER_LOSS_IN_METERS:
         case AVERAGE_CROSS_TRACK_ERROR_IN_METERS:
         case RACE_AVERAGE_CROSS_TRACK_ERROR_IN_METERS:
+        case TOTAL_DISTANCE_TRAVELED:
             return stringMessages.metersUnit();
 
         case GAP_TO_LEADER_IN_SECONDS:
@@ -229,6 +235,10 @@ public class DetailTypeFormatter {
             return stringMessages.totalTimeSailedReachingInSecondsTooltip();
         case TOTAL_TIME_SAILED_UPWIND_IN_SECONDS:
             return stringMessages.totalTimeSailedUpwindInSecondsTooltip();
+        case TOTAL_DISTANCE_TRAVELED:
+            return stringMessages.totalDistanceTraveledTooltip();
+        case TOTAL_AVERAGE_SPEED_OVER_GROUND:
+            return stringMessages.totalAverageSpeedOverGroundTooltip();
         case WINDWARD_DISTANCE_TO_GO_IN_METERS:
             return stringMessages.windwardDistanceToGoInMetersTooltip();
         }

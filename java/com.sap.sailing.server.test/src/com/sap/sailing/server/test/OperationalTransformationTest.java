@@ -51,8 +51,8 @@ public class OperationalTransformationTest {
 
     @Test
     public void testAddLeaderboard() {
-        RacingEventServiceOperation<FlexibleLeaderboard> addLeaderboardOp = new CreateFlexibleLeaderboard(LEADERBOARDNAME, new int[] { 5 },
-                new LowPoint());
+        RacingEventServiceOperation<FlexibleLeaderboard> addLeaderboardOp = new CreateFlexibleLeaderboard(LEADERBOARDNAME,null, new int[] { 5 },
+                new LowPoint(), null);
         server.apply(addLeaderboardOp);
         server.waitForNotRunning();
         replica.waitForNotRunning();
