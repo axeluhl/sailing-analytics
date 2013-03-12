@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.Collection;
 
 import com.sap.sailing.domain.base.CourseArea;
+import com.sap.sailing.domain.base.CourseData;
 import com.sap.sailing.domain.base.EventData;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
@@ -29,5 +30,7 @@ public interface DataStore {
     public Mark getMark(Serializable id);
     public boolean hasMark(Serializable id);
     public void addMark(Mark mark);
-
+    
+    public CourseData getLastPublishedCourseDesign();
+    public void setLastPublishedCourseDesign(CourseData courseData);
 }

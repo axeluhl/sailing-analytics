@@ -4,22 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import com.sap.sailing.domain.base.CourseData;
-import com.sap.sailing.domain.base.Gate;
-import com.sap.sailing.domain.base.Mark;
-import com.sap.sailing.domain.base.Waypoint;
-import com.sap.sailing.domain.base.impl.GateImpl;
-import com.sap.sailing.domain.base.impl.WaypointImpl;
-import com.sap.sailing.domain.common.NauticalSide;
-import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.data.InMemoryDataStore;
-import com.sap.sailing.racecommittee.app.domain.RoundingDirection;
-import com.sap.sailing.racecommittee.app.domain.impl.CourseDataImpl;
-import com.sap.sailing.racecommittee.app.logging.ExLog;
-import com.sap.sailing.racecommittee.app.ui.adapters.coursedesign.CourseElementListAdapter;
-import com.sap.sailing.racecommittee.app.ui.adapters.coursedesign.CourseListDataElement;
-import com.sap.sailing.racecommittee.app.ui.adapters.coursedesign.MarkGridAdapter;
-
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
@@ -35,6 +19,24 @@ import android.widget.Button;
 import android.widget.GridView;
 import android.widget.ListView;
 import android.widget.Toast;
+
+import com.sap.sailing.domain.base.ControlPoint;
+import com.sap.sailing.domain.base.CourseData;
+import com.sap.sailing.domain.base.Gate;
+import com.sap.sailing.domain.base.Mark;
+import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.base.impl.GateImpl;
+import com.sap.sailing.domain.base.impl.WaypointImpl;
+import com.sap.sailing.domain.common.NauticalSide;
+import com.sap.sailing.domain.common.impl.Util;
+import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.data.InMemoryDataStore;
+import com.sap.sailing.racecommittee.app.domain.RoundingDirection;
+import com.sap.sailing.racecommittee.app.domain.impl.CourseDataImpl;
+import com.sap.sailing.racecommittee.app.logging.ExLog;
+import com.sap.sailing.racecommittee.app.ui.adapters.coursedesign.CourseElementListAdapter;
+import com.sap.sailing.racecommittee.app.ui.adapters.coursedesign.CourseListDataElement;
+import com.sap.sailing.racecommittee.app.ui.adapters.coursedesign.MarkGridAdapter;
 
 public class CourseDesignDialogFragment extends RaceDialogFragment {
     private final static String TAG = CourseDesignDialogFragment.class.getName();
@@ -120,14 +122,14 @@ public class CourseDesignDialogFragment extends RaceDialogFragment {
         });
 
         if (getRace().getCourseDesign() != null) {
-            //fillCourseElementsInList();
+            fillCourseElementsInList();
         }
 
         previousCourseListView = (ListView) getView().findViewById(R.id.listViewPreviousCourse);
         previousCourseListView.setAdapter(previousCourseElementAdapter);
 
         if(InMemoryDataStore.INSTANCE.getLastPublishedCourseDesign() != null){
-            //fillPreviousCourseElementsInList();
+            fillPreviousCourseElementsInList();
         }
 
         takePreviousButton = (Button) getView().findViewById(R.id.takePreviousCourseDesignButton);
@@ -175,7 +177,45 @@ public class CourseDesignDialogFragment extends RaceDialogFragment {
         });
 
     }
-    
+
+    private void fillPreviousCourseElementsInList() {
+        CourseData previousCourseData = InMemoryDataStore.INSTANCE.getLastPublishedCourseDesign();
+        if (previousCourseData != null) {
+            previousCourseElements.clear();
+            previousCourseElements.addAll(convertCourseDesignToCourseElements(previousCourseData));
+            previousCourseElementAdapter.notifyDataSetChanged();
+        }
+    }
+
+    private void fillCourseElementsInList() {
+        courseElements.clear();
+        courseElements.addAll(convertCourseDesignToCourseElements(getRace().getCourseDesign()));
+        courseElementAdapter.notifyDataSetChanged();
+    }
+
+    protected List<CourseListDataElement> convertCourseDesignToCourseElements(CourseData courseData) {
+        List<CourseListDataElement> elementList = new ArrayList<CourseListDataElement>();
+
+        for (Waypoint waypoint : courseData.getWaypoints()) {
+            ControlPoint controlPoint = waypoint.getControlPoint();
+            
+            if (controlPoint instanceof Mark) {
+                CourseListDataElement element = new CourseListDataElement();
+                element.setLeftMark((Mark)controlPoint);
+                element.setRoundingDirection(getRoundingDirection(waypoint.getPassingSide()));
+                elementList.add(element);
+            } else if (controlPoint instanceof Gate) {
+                Gate gate = (Gate) controlPoint;
+                CourseListDataElement element = new CourseListDataElement();
+                element.setLeftMark(gate.getLeft());
+                element.setRightMark(gate.getRight());
+                elementList.add(element);
+            }
+        }
+
+        return elementList;
+    }
+
     protected void sendCourseDataAndDismiss(CourseData courseDesign) {
         sendCourseData(courseDesign);
         dismiss();
@@ -187,9 +227,9 @@ public class CourseDesignDialogFragment extends RaceDialogFragment {
     }
 
     private void saveChangedCourseDesignInCache(CourseData courseDesign) {
-//        if (!courseDesign.getWaypoints().isEmpty()) {
-//            this.resourceManager.setLastPublishedCourseDesign(courseDesign);
-//        }
+        if (!Util.isEmpty(courseDesign.getWaypoints())) {
+            InMemoryDataStore.INSTANCE.setLastPublishedCourseDesign(courseDesign);
+        }
     }
 
     protected CourseData convertCourseElementsToACourseData() throws IllegalStateException, IllegalArgumentException {
@@ -232,6 +272,18 @@ public class CourseDesignDialogFragment extends RaceDialogFragment {
             side = NauticalSide.STARBOARD;
         }
         return side;
+    }
+    
+    private RoundingDirection getRoundingDirection(NauticalSide passingSide) {
+        RoundingDirection direction = null;
+        if (passingSide.name().equalsIgnoreCase(RoundingDirection.Port.name())) {
+            direction = RoundingDirection.Port;
+        } else if (passingSide.name().equalsIgnoreCase(RoundingDirection.Starboard.name())){
+            direction = RoundingDirection.Starboard;
+        } else {
+            direction = RoundingDirection.Gate;
+        }
+        return direction;
     }
 
     private void createUsePreviousCourseDialog() {

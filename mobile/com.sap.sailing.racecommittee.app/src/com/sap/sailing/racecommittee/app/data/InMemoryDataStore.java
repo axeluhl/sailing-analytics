@@ -17,11 +17,13 @@ public enum InMemoryDataStore implements DataStore {
     private HashMap<Serializable, EventData> eventsById;
     private HashMap<Serializable, ManagedRace> managedRaceById;
     private HashMap<Serializable, Mark> marksById;
+    private CourseData courseData;
 
     private InMemoryDataStore() {
         this.eventsById = new HashMap<Serializable, EventData>();
         this.managedRaceById = new HashMap<Serializable, ManagedRace>();
         this.marksById = new HashMap<Serializable, Mark>();
+        this.courseData = null;
     }
 
     /*
@@ -145,8 +147,13 @@ public enum InMemoryDataStore implements DataStore {
         marksById.put(mark.getId(), mark);
     }
 
+    @Override
     public CourseData getLastPublishedCourseDesign() {
-        // TODO Auto-generated method stub
-        return null;
+        return courseData;
+    }
+    
+    @Override
+    public void setLastPublishedCourseDesign(CourseData courseData) {
+        this.courseData = courseData;
     }
 }
