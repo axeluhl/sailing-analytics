@@ -19,7 +19,7 @@ public interface CumulativeResult {
      * Somewhat like the sail number, however prefixed by the competition ID, e.g., "SAM007CRO01" meaning
      * "Sailing, boat class 007 (Star), country code CRO, boat 01"
      */
-    String getCode();
+    String getCompetitorCode();
     
     CountryCode getCountryCode();
     

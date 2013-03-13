@@ -2,7 +2,10 @@ package com.sap.sailing.odf.resultimport.impl;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -17,7 +20,7 @@ import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.odf.resultimport.CumulativeResultDocumentProvider;
 import com.sap.sailing.odf.resultimport.OdfBody;
 import com.sap.sailing.odf.resultimport.OdfBodyParser;
-import com.sap.sailing.odf.resultimport.RegattaSummary;
+import com.sap.sailing.odf.resultimport.ParserFactory;
 
 public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider {
     private static final long serialVersionUID = -4596215011753860781L;
@@ -29,9 +32,12 @@ public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider {
      * {@link ZipFileParser} for analysis.
      */
     private final CumulativeResultDocumentProvider documentProvider;
+
+    private final ParserFactory parserFactory;
     
-    public ScoreCorrectionProviderImpl(CumulativeResultDocumentProvider documentProvider) {
+    public ScoreCorrectionProviderImpl(CumulativeResultDocumentProvider documentProvider, ParserFactory parserFactory) {
         this.documentProvider = documentProvider;
+        this.parserFactory = parserFactory;
     }
 
     @Override
@@ -43,7 +49,15 @@ public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider {
     public Map<String, Set<Pair<String, TimePoint>>> getHasResultsForBoatClassFromDateByEventName()
             throws IOException, SAXException, ParserConfigurationException {
         Map<String, Set<Pair<String, TimePoint>>> result = new HashMap<String, Set<Pair<String, TimePoint>>>();
-        // TODO find out how we can tell "all" available ODF results
+        for (OdfBody body : getAllOdfBodies()) {
+            String boatClassName = body.getBoatClassName();
+            Set<Pair<String, TimePoint>> set = result.get(boatClassName);
+            if (set == null) {
+                set = new HashSet<>();
+                result.put(boatClassName, set);
+            }
+            set.add(new Pair<String, TimePoint>(body.getEventName(), body.getTimePoint()));
+        }
         return result;
     }
 
@@ -51,22 +65,23 @@ public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider {
     public RegattaScoreCorrections getScoreCorrections(String eventName, String boatClassName,
             TimePoint timePointPublished) throws IOException, SAXException, ParserConfigurationException {
         // TODO find out 
-        for (RegattaSummary regattaSummary : getAllRegattaSummaries()) {
-            if (regattaSummary.getEventName().equals(eventName) && regattaSummary.getBoatClassName().equals(boatClassName) &&
-                    regattaSummary.getTimePointPublished().equals(timePointPublished)) {
-                return new RegattaSummaryAsScoreCorrections(regattaSummary, this);
+        for (OdfBody body : getAllOdfBodies()) {
+            if (body.getEventName().equals(eventName) && body.getBoatClassName().equals(boatClassName) &&
+                    body.getTimePoint().equals(timePointPublished)) {
+                return new OdfBodyAsScoreCorrections(body, this);
             }
         }
         return null;
     }
 
-    private Iterable<RegattaSummary> getAllRegattaSummaries() throws SAXException, IOException, ParserConfigurationException {
+    private Iterable<OdfBody> getAllOdfBodies() throws SAXException, IOException, ParserConfigurationException {
+        List<OdfBody> result = new ArrayList<>();
         for (InputStream is : documentProvider.getAllAvailableCumulativeResultDocuments()) {
-            OdfBodyParser parser = new OdfBodyParserImpl();
+            OdfBodyParser parser = parserFactory.createOdfBodyParser();
             OdfBody body = parser.parse(is, getName());
+            result.add(body);
         }
-        // TODO Auto-generated method stub
-        return null;
+        return result;
     }
 
 }

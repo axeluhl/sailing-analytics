@@ -8,6 +8,7 @@ import org.osgi.framework.BundleContext;
 
 import com.sap.sailing.domain.common.ScoreCorrectionProvider;
 import com.sap.sailing.odf.resultimport.CumulativeResultDocumentProvider;
+import com.sap.sailing.odf.resultimport.ParserFactory;
 
 public class Activator implements BundleActivator {
     private static final Logger logger = Logger.getLogger(Activator.class.getName());
@@ -27,7 +28,7 @@ public class Activator implements BundleActivator {
                 // TODO Auto-generated method stub
                 return null;
             }
-        });
+        }, ParserFactory.INSTANCE);
         context.registerService(ScoreCorrectionProvider.class,
                 service, /* properties */ null);
         logger.info("Scanning "+scanDirPath+" for official result lists of "+service.getName());

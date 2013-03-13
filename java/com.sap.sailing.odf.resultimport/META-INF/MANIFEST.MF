@@ -8,5 +8,6 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: org.osgi.framework;version="1.6.0",
  org.w3c.dom
 Require-Bundle: com.sap.sailing.domain.common,
- com.sap.sailing.domain
+ com.sap.sailing.domain,
+ com.sap.sailing.domain.swisstimingadapter
 Bundle-Activator: com.sap.sailing.odf.resultimport.impl.Activator

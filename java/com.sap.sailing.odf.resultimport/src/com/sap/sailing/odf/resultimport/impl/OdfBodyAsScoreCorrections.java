@@ -1,32 +1,29 @@
 package com.sap.sailing.odf.resultimport.impl;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.RegattaScoreCorrections;
 import com.sap.sailing.domain.common.ScoreCorrectionProvider;
-import com.sap.sailing.odf.resultimport.Boat;
 import com.sap.sailing.odf.resultimport.BoatResultInRace;
-import com.sap.sailing.odf.resultimport.Crewmember;
-import com.sap.sailing.odf.resultimport.RaceSummary;
-import com.sap.sailing.odf.resultimport.RegattaSummary;
+import com.sap.sailing.odf.resultimport.Competition;
+import com.sap.sailing.odf.resultimport.OdfBody;
 
-public class RegattaSummaryAsScoreCorrections implements RegattaScoreCorrections {
-    private final RegattaSummary regattaSummary;
+public class OdfBodyAsScoreCorrections implements RegattaScoreCorrections {
+    private final OdfBody body;
     private final ScoreCorrectionProvider provider;
     
-    public RegattaSummaryAsScoreCorrections(RegattaSummary regattaSummary, ScoreCorrectionProvider provider) {
+    public OdfBodyAsScoreCorrections(OdfBody body, ScoreCorrectionProvider provider) {
         super();
-        this.regattaSummary = regattaSummary;
+        this.body = body;
         this.provider = provider;
     }
 
     @Override
     public String getRegattaName() {
-        return regattaSummary.getEventName()+" ("+regattaSummary.getBoatClassName()+")";
+        return body.getEventName()+" ("+body.getBoatClassName()+")";
     }
 
     @Override
@@ -37,56 +34,32 @@ public class RegattaSummaryAsScoreCorrections implements RegattaScoreCorrections
     @Override
     public Iterable<ScoreCorrectionsForRace> getScoreCorrectionsForRaces() {
         List<ScoreCorrectionsForRace> result = new ArrayList<ScoreCorrectionsForRace>();
-        for (RaceSummary raceSummary : regattaSummary.getRaces()) {
-            result.add(new ZipFileScoreCorrectionsForRace(raceSummary));
+        for (Competition competition : body.getCompetitions()) {
+            result.add(new ZipFileScoreCorrectionsForRace(competition));
         }
         return result;
     }
     
     private class ZipFileScoreCorrectionsForRace implements ScoreCorrectionsForRace {
-        private final RaceSummary raceSummary;
+        private final Competition competition;
         
-        public ZipFileScoreCorrectionsForRace(RaceSummary raceSummary) {
-            this.raceSummary = raceSummary;
+        public ZipFileScoreCorrectionsForRace(Competition competition) {
+            this.competition = competition;
         }
 
         @Override
         public String getRaceNameOrNumber() {
-            return ""+raceSummary.getRaceNumber();
+            return null; // TODO
         }
 
         @Override
         public Set<String> getSailIDs() {
-            Set<String> result = new HashSet<String>();
-            for (Boat boat : raceSummary.getBoats()) {
-                result.add(boat.getSailingNumber());
-            }
-            return result;
+            return null; // TODO
         }
 
         @Override
         public ScoreCorrectionForCompetitorInRace getScoreCorrectionForCompetitor(String sailID) {
-            ScoreCorrectionForCompetitorInRace result = null;
-            final Boat boat = raceSummary.getBoat(sailID);
-            if (boat != null) {
-                String boatName = getNameForBoat(boat);
-                result = new ZipFileScoreCorrectionForCompetitorInRace(raceSummary.getBoatResults(boat), sailID, boatName);
-            }
-            return result;
-        }
-
-        private String getNameForBoat(Boat boat) {
-            String result = boat.getName(); // often empty
-            if (result == null || result.trim().length() == 0) {
-                StringBuilder sb = new StringBuilder();
-                sb.append(boat.getCrew().getSkipper().getName());
-                for (Crewmember crewmember : boat.getCrew().getCrewmembers()) {
-                    sb.append(" + ");
-                    sb.append(crewmember.getName());
-                }
-                result = sb.toString();
-            }
-            return result;
+            return null; // TODO
         }
     }
     
