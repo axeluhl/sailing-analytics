@@ -8,6 +8,8 @@ import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.DegreePosition;
+import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.simulator.Path;
 import com.sap.sailing.simulator.PolarDiagram;
 import com.sap.sailing.simulator.SimulationParameters;
@@ -195,7 +197,16 @@ public class PathGenerator1Turner extends PathGeneratorBase {
         paths[0] = new PathImpl(allminpath, windField);
         this.result = new result1Turn(paths, (leftSide ? 'L' : 'R'), stepOfOverallMinimumDistance);
 
-        return allminpath.get(stepOfOverallMinimumDistance);
+        TimedPositionWithSpeed oneTurnerPoint = allminpath.get(stepOfOverallMinimumDistance);
+        if (oneTurnerPoint.getSpeed() == null) {
+            System.out.println("wind data is null for the one turner point");
+
+            currentWind = windField.getWind(new TimedPositionImpl(currentTime, currentPosition));
+
+            oneTurnerPoint = new TimedPositionWithSpeedImpl(oneTurnerPoint.getTimePoint(), oneTurnerPoint.getPosition(), currentWind);
+        }
+
+        return oneTurnerPoint;
 
     }
 
@@ -212,8 +223,6 @@ public class PathGenerator1Turner extends PathGeneratorBase {
 
         TimePoint startTime = (this.evalStartTime == null) ? windField.getStartTime() : this.evalStartTime;
 
-        // double reachingTolerance = (this.evalTolerance == 0) ? DEFAULT_REACHING_TOLERANCE : this.evalTolerance;
-
         int stepMax = (this.evalStepMax == 0) ? DEFAULT_STEP_MAX : this.evalStepMax;
 
         long timeStep = (this.evalTimeStep == 0) ? (windField.getTimeStep() == null ? DEFAULT_TIMESTEP : windField.getTimeStep().asMillis() / 3)
@@ -224,197 +233,51 @@ public class PathGenerator1Turner extends PathGeneratorBase {
         return this.result.paths[0];
     }
 
-    // @Override
-    // public Path getPath() {
-    //
-    // WindFieldGenerator windField = simulationParameters.getWindField();
-    // PolarDiagram polarDiagram = simulationParameters.getBoatPolarDiagram();
-    //
-    // Position start;
-    // if (this.evalStartPoint == null) {
-    // start = simulationParameters.getCourse().get(0);
-    // } else {
-    // start = this.evalStartPoint;
-    // }
-    // Position end = simulationParameters.getCourse().get(1);
-    // TimePoint startTime;
-    // if (this.evalStartTime == null) {
-    // startTime = windField.getStartTime();// new MillisecondsTimePoint(0);
-    // } else {
-    // startTime = this.evalStartTime;
-    // }
-    //
-    // long turnloss = polarDiagram.getTurnLoss(); // 4000;
-    //
-    // final Distance courseLength = start.getDistance(end);
-    // Bearing bearStart2End = start.getBearingGreatCircle(end);
-    // Position currentPosition = start;
-    // TimePoint currentTime = startTime;
-    // TimePoint nextTime;
-    //
-    // double reachingTolerance;
-    // if (this.evalTolerance == 0) {
-    // reachingTolerance = DEFAULT_REACHING_TOLERANCE;
-    // } else {
-    // reachingTolerance = this.evalTolerance;
-    // }
-    // int stepMax;
-    // if (this.evalStepMax == 0) {
-    // stepMax = DEFAULT_STEP_MAX;
-    // } else {
-    // stepMax = this.evalStepMax;
-    // }
-    // double[] reachTime = new double[stepMax];
-    // boolean targetFound;
-    // long timeStep;
-    // if (this.evalTimeStep == 0) {
-    // timeStep = windField.getTimeStep().asMillis() / 3;
-    // } else {
-    // timeStep = this.evalTimeStep;
-    // }
-    // Bearing direction;
-    //
-    // double newDistance;
-    // double minimumDistance = courseLength.getMeters();
-    // double overallMinimumDistance = courseLength.getMeters();
-    // int stepOfOverallMinimumDistance = stepMax;
-    // LinkedList<TimedPositionWithSpeed> path = null;
-    // // LinkedList<TimedPositionWithSpeed> prevpath = null;
-    // // LinkedList<TimedPositionWithSpeed> xpath1 = null;
-    // // LinkedList<TimedPositionWithSpeed> xpath2 = null;
-    //
-    // LinkedList<TimedPositionWithSpeed> allminpath = null;
-    //
-    // System.out.println("ANDU startPosition at " + start.toString());
-    // System.out.println("ANDU endPosition at " + end.toString());
-    // System.out.println("ANDU startTime =" + startTime.asMillis());
-    //
-    // for (int step = 0; step < stepMax; step++) {
-    //
-    // currentPosition = start;
-    // currentTime = startTime;
-    // reachTime[step] = courseLength.getMeters();
-    // targetFound = false;
-    // minimumDistance = courseLength.getMeters();
-    // path = new LinkedList<TimedPositionWithSpeed>();
-    // path.addLast(new TimedPositionWithSpeedImpl(currentTime, currentPosition, null));
-    //
-    // int stepLeft = 0;
-    // while ((stepLeft < step) && (!targetFound)) {
-    //
-    // SpeedWithBearing currentWind = windField.getWind(new TimedPositionImpl(currentTime, currentPosition));
-    // //System.out.println("Wind: " + currentWind.getKnots() + "kn, " + currentWind.getBearing().getDegrees() + "deg");
-    // polarDiagram.setWind(currentWind);
-    // if (leftSide) {
-    // direction = polarDiagram.optimalDirectionsUpwind()[0];
-    // } else {
-    // direction = polarDiagram.optimalDirectionsUpwind()[1];
-    // }
-    // SpeedWithBearing currSpeed = polarDiagram.getSpeedAtBearing(direction);
-    // //System.out.println("Boat: " + currSpeed.getKnots() + "kn, " + currSpeed.getBearing().getDegrees() + "deg");
-    // nextTime = new MillisecondsTimePoint(currentTime.asMillis() + timeStep);
-    // Position nextPosition = currSpeed.travelTo(currentPosition, currentTime, nextTime);
-    // //System.out.println("Dist: " + currentPosition.getDistance(nextPosition).getMeters() + "m");
-    // newDistance = nextPosition.getDistance(end).getMeters();
-    // if (newDistance < minimumDistance) {
-    // minimumDistance = newDistance;
-    // }
-    // currentPosition = nextPosition;
-    // currentTime = nextTime;
-    // path.addLast(new TimedPositionWithSpeedImpl(currentTime, currentPosition, null));
-    //
-    // if (currentPosition.getDistance(end).getMeters() < reachingTolerance * courseLength.getMeters()) {
-    // reachTime[step] = minimumDistance;
-    // targetFound = true;
-    // if (minimumDistance < overallMinimumDistance) {
-    // overallMinimumDistance = minimumDistance;
-    // stepOfOverallMinimumDistance = step;
-    // allminpath = path;
-    // }
-    // }
-    // stepLeft++;
-    // }
-    //
-    // currentTime = new MillisecondsTimePoint(currentTime.asMillis() + turnloss);
-    //
-    // int stepRight = 0;
-    // while ((stepRight < (stepMax - step)) && (!targetFound)) {
-    //
-    // SpeedWithBearing currentWind = windField.getWind(new TimedPositionImpl(currentTime, currentPosition));
-    // polarDiagram.setWind(currentWind);
-    // if (leftSide) {
-    // direction = polarDiagram.optimalDirectionsUpwind()[1];
-    // } else {
-    // direction = polarDiagram.optimalDirectionsUpwind()[0];
-    // }
-    // SpeedWithBearing currSpeed = polarDiagram.getSpeedAtBearing(direction);
-    // nextTime = new MillisecondsTimePoint(currentTime.asMillis() + timeStep);
-    // Position nextPosition = currSpeed.travelTo(currentPosition, currentTime, nextTime);
-    // newDistance = nextPosition.getDistance(end).getMeters();
-    // /*if (this.evalStartPoint != null) {
-    // System.out.println("newDistance: "+newDistance);
-    // }*/
-    // if (newDistance < minimumDistance) {
-    // minimumDistance = newDistance;
-    // }
-    // currentPosition = nextPosition;
-    // currentTime = nextTime;
-    // path.addLast(new TimedPositionWithSpeedImpl(currentTime, currentPosition, null)); // currSpeed));
-    // /*if (this.evalStartPoint != null) {
-    // System.out.println("s: "+step+" dist: "+currentPosition.getDistance(end).getMeters()+" ?<? "+reachingTolerance *
-    // courseLength.getMeters());
-    // }*/
-    // if (currentPosition.getDistance(end).getMeters() < reachingTolerance * courseLength.getMeters()) {
-    // // System.out.println(""+s+":"+path.size()+" dist:"+mindist);
-    // Bearing bearPath2End = currentPosition.getBearingGreatCircle(end);
-    // double bearDiff = bearPath2End.getDegrees() - bearStart2End.getDegrees();
-    // // System.out.println(""+s+": "+mindist+" bearDiff: "+bearDiff);
-    // reachTime[step] = minimumDistance * Math.signum(bearDiff);
-    // /*if ((prevpath != null) && (Math.signum(reachTime[step]) != Math.signum(reachTime[step - 1]))) {
-    // xpath1 = path;
-    // xpath2 = prevpath;
-    // }
-    // prevpath = path;*/
-    // if (start.getDistance(currentPosition).getMeters() > start.getDistance(end).getMeters()) {
-    // targetFound = true;
-    // }
-    // if (minimumDistance < overallMinimumDistance) {
-    // overallMinimumDistance = minimumDistance;
-    // stepOfOverallMinimumDistance = step;
-    // allminpath = new LinkedList<TimedPositionWithSpeed>(path);
-    // }
-    // }
-    // stepRight++;
-    // }
-    // }
-    //
-    // System.out.println("ANDU stepOfOverallMinimumDistance = " + stepOfOverallMinimumDistance);
-    // System.out.println("ANDU allminpath is " + (allminpath == null ? "" : "not") + "null");
-    // if (allminpath != null) {
-    // System.out.println("ANDU allMinPath.size() =" + allminpath.size());
-    // }
-    // System.out.println("ANDU path is " + (path == null ? "" : "not") + "null");
-    // if (allminpath != null) {
-    // System.out.println("ANDU path.size() =" + path.size());
-    // }
-    // /*
-    // * for (int i=0; i<reachTime.length; i++) { System.out.println(""+i+": "+reachTime[i]); }
-    // */
-    //
-    // // PathImpl[] paths = new PathImpl[2];
-    // // paths[0] = new PathImpl(xpath1,windField);
-    // // paths[1] = new PathImpl(xpath2, windField);
-    // PathImpl[] paths = new PathImpl[1];
-    // paths[0] = new PathImpl(allminpath, windField);
-    // char side;
-    // if (leftSide) {
-    // side = 'L';
-    // } else {
-    // side = 'R';
-    // }
-    // this.result = new result1Turn(paths, side, stepOfOverallMinimumDistance);
-    //
-    // return result.paths[0];
-    //
-    // }
+    public TimedPositionWithSpeed getIntersectionOptimalTowardWind(WindFieldGenerator windField, PolarDiagram polarDiagram, Position edgeStart,
+            Position edgeEnd, TimedPositionWithSpeed from, boolean leftSide) {
+
+        TimePoint currentTime = from.getTimePoint();
+        Position currentPosition = from.getPosition();
+
+        Wind currentWind = windField.getWind(new TimedPositionImpl(currentTime, currentPosition));
+        polarDiagram.setWind(currentWind);
+        Bearing direction = polarDiagram.optimalDirectionsUpwind()[leftSide ? 0 : 1];
+
+        SpeedWithBearing currSpeed = polarDiagram.getSpeedAtBearing(direction);
+        TimePoint nextTime = new MillisecondsTimePoint(currentTime.asMillis() + 1000);
+        Position nextPosition = currSpeed.travelTo(currentPosition, currentTime, nextTime);
+
+        Position intersectionPosition = this.getIntersection(currentPosition, nextPosition, edgeStart, edgeEnd);
+
+        double distanceMeters = currentPosition.getDistance(nextPosition).getMeters();
+        long timeMilliseconds = (long) ((distanceMeters / currSpeed.getMetersPerSecond()) * 1000);
+
+        TimePoint intersectionTimePoint = new MillisecondsTimePoint(currentTime.asMillis() + timeMilliseconds);
+        Wind intersectionWind = windField.getWind(new TimedPositionImpl(intersectionTimePoint, intersectionPosition));
+
+        return new TimedPositionWithSpeedImpl(intersectionTimePoint, intersectionPosition, intersectionWind);
+    }
+
+    private Position getIntersection(Position segment1Start, Position segment1End, Position segment2Start, Position segment2End) {
+
+        double xA = segment1Start.getLatDeg();
+        double yA = segment1Start.getLngDeg();
+
+        double xB = segment1End.getLatDeg();
+        double yB = segment1End.getLngDeg();
+
+        double xC = segment2Start.getLatDeg();
+        double yC = segment2Start.getLngDeg();
+
+        double xD = segment2End.getLatDeg();
+        double yD = segment2End.getLngDeg();
+
+        double m1 = (yB - yA) / (xB - xA);
+        double m2 = (yD - yC) / (xD - xC);
+
+        double x = (yC - yA + m1 * xA - m2 * xC) / (m1 - m2);
+        double y = (yC - yA + m2 * (xA - xC)) * m1 / (m1 - m2) + yA;
+
+        return new DegreePosition(x, y);
+    }
 }

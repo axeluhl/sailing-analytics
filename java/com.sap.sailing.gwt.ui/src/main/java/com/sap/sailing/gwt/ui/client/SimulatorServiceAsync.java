@@ -30,17 +30,11 @@ public interface SimulatorServiceAsync {
 
     void getWindPatternDisplay(WindPatternDTO pattern, AsyncCallback<WindPatternDisplay> callback);
 
-    // void getSimulatorResults(char mode, WindFieldGenParamsDTO params, WindPatternDisplay display, boolean
-    // withWindField, int boatClassIndex,
-    // AsyncCallback<SimulatorResultsDTO> callback);
-
     void getBoatClasses(AsyncCallback<BoatClassDTOsAndNotificationMessage> callback);
 
     void getPolarDiagram(Double bearingStep, int boatClassIndex, AsyncCallback<PolarDiagramDTOAndNotificationMessage> callback);
 
-    void getTotalTime_old(RequestTotalTimeDTO requestData, AsyncCallback<ResponseTotalTimeDTO> asyncCallback);
-
-    void getTotalTime_new(RequestTotalTimeDTO requestData, AsyncCallback<ResponseTotalTimeDTO> asyncCallback);
+    void getTotalTime(RequestTotalTimeDTO requestData, AsyncCallback<ResponseTotalTimeDTO> asyncCallback);
 
     void get1Turner(final Request1TurnerDTO requestData, AsyncCallback<Response1TurnerDTO> asyncCallback);
 
