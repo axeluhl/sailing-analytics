@@ -22,6 +22,7 @@ public class RaceLogEventSerializerChooserTest {
     private JsonSerializer<RaceLogEvent> raceStatusSerializer;
     private JsonSerializer<RaceLogEvent> courseAreaChangedEventSerializer;
     private JsonSerializer<RaceLogEvent> passChangedSerializer;
+    private JsonSerializer<RaceLogEvent> courseDesignChangedEventSerializer;
     
     @SuppressWarnings("unchecked")
     @Before
@@ -31,13 +32,15 @@ public class RaceLogEventSerializerChooserTest {
         raceStatusSerializer = mock(JsonSerializer.class);
         courseAreaChangedEventSerializer = mock(JsonSerializer.class);
         passChangedSerializer = mock(JsonSerializer.class);
+        courseDesignChangedEventSerializer = mock(JsonSerializer.class);
         
         chooser = new RaceLogEventSerializerChooserImpl(
                 flagEventSerializer, 
                 startTimeSerializer, 
                 raceStatusSerializer, 
                 courseAreaChangedEventSerializer,
-                passChangedSerializer);
+                passChangedSerializer,
+                courseDesignChangedEventSerializer);
     }
     
     @Test
@@ -73,6 +76,13 @@ public class RaceLogEventSerializerChooserTest {
         // we use the real event type here because we do not want to re-implement the dispatching.
         RaceLogEvent event = RaceLogEventFactory.INSTANCE.createRaceLogPassChangeEvent(null, 0);
         assertEquals(passChangedSerializer, chooser.getSerializer(event));
+    }
+    
+    @Test
+    public void testChoosesCourseDesignChangedSerializer() {
+        // we use the real event type here because we do not want to re-implement the dispatching.
+        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createCourseDesignChangedEvent(null, 0, null);
+        assertEquals(courseDesignChangedEventSerializer, chooser.getSerializer(event));
     }
 
 }

@@ -5,6 +5,11 @@ import org.json.simple.JSONObject;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
+import com.sap.sailing.server.gateway.serialization.coursedata.impl.ControlPointJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.coursedata.impl.CourseDataJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.coursedata.impl.GateJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.coursedata.impl.MarkJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.coursedata.impl.WaypointJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.RaceLogEventSerializerChooser;
 
 public class RaceLogEventSerializer implements JsonSerializer<RaceLogEvent> {
@@ -15,7 +20,13 @@ public class RaceLogEventSerializer implements JsonSerializer<RaceLogEvent> {
                 new RaceLogStartTimeEventSerializer(competitorSerializer), 
                 new RaceLogRaceStatusEventSerializer(competitorSerializer),
                 new RaceLogCourseAreaChangedEventSerializer(competitorSerializer),
-                new RaceLogPassChangeEventSerializer(competitorSerializer)));
+                new RaceLogPassChangeEventSerializer(competitorSerializer),
+                new RaceLogCourseDesignChangedEventSerializer(competitorSerializer,
+                        new CourseDataJsonSerializer(
+                                new WaypointJsonSerializer(
+                                        new ControlPointJsonSerializer(
+                                                new MarkJsonSerializer(),
+                                                new GateJsonSerializer(new MarkJsonSerializer())))))));
     }
 
     private RaceLogEventSerializerChooser serializerChooser;

@@ -18,6 +18,7 @@ public class RaceLogEventSerializerChooserImpl implements RaceLogEventSerializer
     private final JsonSerializer<RaceLogEvent> raceStatusSerializer;
     private final JsonSerializer<RaceLogEvent> courseAreaChangedEventSerializer;
     private final JsonSerializer<RaceLogEvent> passChangedEventSerializer;
+    private final JsonSerializer<RaceLogEvent> courseDesignChangedEventSerializer;
 
     private JsonSerializer<RaceLogEvent> chosenSerializer;
 
@@ -26,12 +27,14 @@ public class RaceLogEventSerializerChooserImpl implements RaceLogEventSerializer
             JsonSerializer<RaceLogEvent> startTimeSerializer,
             JsonSerializer<RaceLogEvent> raceStatusSerializer,
             JsonSerializer<RaceLogEvent> courseAreaChangedEventSerializer,
-            JsonSerializer<RaceLogEvent> passChangedEventSerializer) {
+            JsonSerializer<RaceLogEvent> passChangedEventSerializer,
+            JsonSerializer<RaceLogEvent> courseDesignChangedEventSerializer) {
         this.flagEventSerializer = flagEventSerializer;
         this.startTimeSerializer = startTimeSerializer;
         this.raceStatusSerializer = raceStatusSerializer;
         this.courseAreaChangedEventSerializer = courseAreaChangedEventSerializer;
         this.passChangedEventSerializer = passChangedEventSerializer;
+        this.courseDesignChangedEventSerializer = courseDesignChangedEventSerializer;
 
         this.chosenSerializer = null;
     }
@@ -75,8 +78,7 @@ public class RaceLogEventSerializerChooserImpl implements RaceLogEventSerializer
 
     @Override
     public void visit(RaceLogCourseDesignChangedEvent event) {
-        // TODO Auto-generated method stub
-        
+        chosenSerializer = courseDesignChangedEventSerializer;
     }
 
 }
