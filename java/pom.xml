@@ -46,8 +46,8 @@
 		<module>com.sap.sailing.www</module>
 		<module>com.sap.sailing.www.events</module>
 		<module>com.sap.sailing.xcelsiusadapter</module>
-        <module>com.sap.sailing.gwt.ui</module>
-        <module>com.sap.sailing.gwt.ui.test</module>
+	        <module>com.sap.sailing.gwt.ui</module>
+       		<module>com.sap.sailing.gwt.ui.test</module>
 		<module>com.google.gwt.osgi</module>
 		<module>com.sap.sailing.server.test</module>
 		<module>com.sap.sailing.mongodb</module>
@@ -65,6 +65,8 @@
 		<module>com.sap.sailing.kiworesultimport.test</module>
 		<module>com.sap.sailing.ess40.resultimport</module>
 		<module>com.sap.sailing.ess40.resultimport.test</module>
+		<module>com.sap.sailing.odf.resultimport</module>
+		<module>com.sap.sailing.odf.resultimport.test</module>
 		<module>com.sap.sailing.freg.resultimport</module>
 		<module>com.sap.sailing.freg.resultimport.test</module>
 		<module>com.sap.sailing.selenium.test</module>
