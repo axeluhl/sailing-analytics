@@ -41,8 +41,8 @@ import com.sap.sailing.odf.resultimport.Skipper;
 import com.sap.sailing.odf.resultimport.impl.ScoreCorrectionProviderImpl;
 
 public class ParserTest {
-    private static final String SAMPLE_INPUT_NAME = "SAM004000_DT_CUMULATIVE_RESULT_SAM004000_1.0.xml";
-    private static final String SAMPLE_INPUT_NAME2 = "SAM007000_DT_CUMULATIVE_RESULT_SAM007000_1.0.xml";
+    private static final String SAMPLE_INPUT_NAME_LASER = "SAM004000_DT_CUMULATIVE_RESULT_SAM004000_1.0.xml";
+    private static final String SAMPLE_INPUT_NAME_STAR = "SAM007000_DT_CUMULATIVE_RESULT_SAM007000_1.0.xml";
     private static final String RESOURCES = "resources/";
 
     private InputStream getInputStream(String filename) throws FileNotFoundException, IOException {
@@ -58,7 +58,7 @@ public class ParserTest {
             @Override
             public Iterable<InputStream> getAllAvailableCumulativeResultDocuments() {
                 try {
-                    return Arrays.asList(new InputStream[] { getInputStream(SAMPLE_INPUT_NAME), getInputStream(SAMPLE_INPUT_NAME2) });
+                    return Arrays.asList(new InputStream[] { getInputStream(SAMPLE_INPUT_NAME_LASER), getInputStream(SAMPLE_INPUT_NAME_STAR) });
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
@@ -76,19 +76,18 @@ public class ParserTest {
     }
 
     private InputStream getSampleInputStream() throws FileNotFoundException, IOException {
-        return getInputStream(SAMPLE_INPUT_NAME);
+        return getInputStream(SAMPLE_INPUT_NAME_LASER);
     }
     
     @Test
     public void testParserForLaserRegatta() throws FileNotFoundException, SAXException, IOException, ParserConfigurationException {
         OdfBodyParser parser = ParserFactory.INSTANCE.createOdfBodyParser();
-        OdfBody body = parser.parse(getSampleInputStream(), SAMPLE_INPUT_NAME);
+        OdfBody body = parser.parse(getInputStream(SAMPLE_INPUT_NAME_LASER), SAMPLE_INPUT_NAME_LASER);
         assertNotNull(body);
         Iterable<Competition> competitions = body.getCompetitions();
         final Map<String, CumulativeResult> results = new HashMap<>();
         for (Competition competition : competitions) {
             for (CumulativeResult cumulativeResult : competition.getCumulativeResults()) {
-                System.out.println(cumulativeResult);
                 results.put(cumulativeResult.getCompetitorCode(), cumulativeResult);
             }
         }
@@ -121,6 +120,50 @@ public class ParserTest {
             assertSame(MaxPointsReason.DSQ, Util.get(resultsFor1060133.getPointsAndRanksAfterEachRace(), 6).getC());
             assertEquals(50, Util.get(resultsFor1060133.getPointsAndRanksAfterEachRace(), 6).getA(), 0.0000001);
             assertEquals(Integer.valueOf(48), Util.get(resultsFor1060133.getPointsAndRanksAfterEachRace(), 6).getB());
+        }
+    }
+    
+    @Test
+    public void testParserForStarRegatta() throws FileNotFoundException, SAXException, IOException, ParserConfigurationException {
+        OdfBodyParser parser = ParserFactory.INSTANCE.createOdfBodyParser();
+        OdfBody body = parser.parse(getInputStream(SAMPLE_INPUT_NAME_STAR), SAMPLE_INPUT_NAME_STAR);
+        assertNotNull(body);
+        Iterable<Competition> competitions = body.getCompetitions();
+        final Map<String, CumulativeResult> results = new HashMap<>();
+        for (Competition competition : competitions) {
+            for (CumulativeResult cumulativeResult : competition.getCumulativeResults()) {
+                results.put(cumulativeResult.getCompetitorCode(), cumulativeResult);
+            }
+        }
+        {
+            assertTrue(results.containsKey("SAM007SWE01"));
+            CumulativeResult resultsForSAM007SWE01 = results.get("SAM007SWE01");
+            assertEquals(2, Util.size(resultsForSAM007SWE01.getAthletes()));
+            assertEquals("LOOF Fredrik", resultsForSAM007SWE01.getAthletes().iterator().next().getName());
+            assertEquals(Gender.M, resultsForSAM007SWE01.getAthletes().iterator().next().getGender());
+            assertTrue(resultsForSAM007SWE01.getAthletes().iterator().next() instanceof Skipper);
+            assertEquals(2, resultsForSAM007SWE01.getPointsInMedalRace(), 0.00000001);
+            assertSame(CountryCodeFactory.INSTANCE.getFromThreeLetterIOCName("SWE"), resultsForSAM007SWE01.getCountryCode());
+            assertEquals(42, resultsForSAM007SWE01.getTotalPoints(), 0.00000001);
+            assertEquals(32, ((PointsResult) resultsForSAM007SWE01.getResult()).getPoints(), 0.00000001);
+        }
+        {
+            assertTrue(results.containsKey("SAM007CRO01"));
+            CumulativeResult resultsForSAM007CRO01 = results.get("SAM007CRO01");
+            assertEquals(2, Util.size(resultsForSAM007CRO01.getAthletes()));
+            assertEquals("LOVROVIC Marin", resultsForSAM007CRO01.getAthletes().iterator().next().getName());
+            assertEquals(Gender.M, resultsForSAM007CRO01.getAthletes().iterator().next().getGender());
+            assertNull(resultsForSAM007CRO01.getPointsInMedalRace());
+            assertSame(CountryCodeFactory.INSTANCE.getFromThreeLetterIOCName("CRO"), resultsForSAM007CRO01.getCountryCode());
+            assertEquals(132, resultsForSAM007CRO01.getTotalPoints(), 0.00000001);
+            assertEquals(116, ((PointsResult) resultsForSAM007CRO01.getResult()).getPoints(), 0.00000001);
+        }
+        {
+            assertTrue(results.containsKey("SAM007GRE01"));
+            CumulativeResult resultsFor1060133 = results.get("SAM007GRE01");
+            assertSame(MaxPointsReason.OCS, Util.get(resultsFor1060133.getPointsAndRanksAfterEachRace(), 8).getC());
+            assertEquals(17, Util.get(resultsFor1060133.getPointsAndRanksAfterEachRace(), 8).getA(), 0.0000001);
+            assertEquals(Integer.valueOf(14), Util.get(resultsFor1060133.getPointsAndRanksAfterEachRace(), 8).getB());
         }
     }
     
