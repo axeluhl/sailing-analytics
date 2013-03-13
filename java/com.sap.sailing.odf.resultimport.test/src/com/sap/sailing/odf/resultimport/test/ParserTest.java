@@ -198,9 +198,21 @@ public class ParserTest {
             assertEquals("MELLEBY Eivind + PEDERSEN Petter Morland",
                     resultsForR6.getScoreCorrectionForCompetitor("SAM007NOR01").getCompetitorName());
         }
-        final ScoreCorrectionsForRace resultsForM1 = Util.get(scoreCorrectionsForRaces, 10);
-        assertEquals(10, resultsForM1.getScoreCorrectionForCompetitor("SAM007NOR01").getPoints(), 0.00000001);
-        assertSame(MaxPointsReason.NONE, resultsForM1.getScoreCorrectionForCompetitor("SAM007NOR01").getMaxPointsReason());
-        assertEquals("MELLEBY Eivind + PEDERSEN Petter Morland", resultsForM1.getScoreCorrectionForCompetitor("SAM007NOR01").getCompetitorName());
+        {
+            final ScoreCorrectionsForRace resultsForM1 = Util.get(scoreCorrectionsForRaces, 10);
+            assertEquals(10, resultsForM1.getScoreCorrectionForCompetitor("SAM007NOR01").getPoints(), 0.00000001);
+            assertSame(MaxPointsReason.NONE, resultsForM1.getScoreCorrectionForCompetitor("SAM007NOR01")
+                    .getMaxPointsReason());
+            assertEquals("MELLEBY Eivind + PEDERSEN Petter Morland",
+                    resultsForM1.getScoreCorrectionForCompetitor("SAM007NOR01").getCompetitorName());
+        }
+        {
+            final ScoreCorrectionsForRace resultsForR7 = Util.get(scoreCorrectionsForRaces, 6);
+            assertEquals(17, resultsForR7.getScoreCorrectionForCompetitor("SAM007IRL01").getPoints(), 0.00000001);
+            assertSame(MaxPointsReason.DSQ, resultsForR7.getScoreCorrectionForCompetitor("SAM007IRL01")
+                    .getMaxPointsReason());
+            assertEquals("O'LEARY Peter + BURROWS David",
+                    resultsForR7.getScoreCorrectionForCompetitor("SAM007IRL01").getCompetitorName());
+        }
     }
 }
