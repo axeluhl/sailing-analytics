@@ -1,5 +1,6 @@
 package com.sap.sailing.odf.resultimport.test;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -22,13 +23,16 @@ import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
 
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.odf.resultimport.Athlete.Gender;
 import com.sap.sailing.odf.resultimport.Competition;
 import com.sap.sailing.odf.resultimport.CumulativeResult;
 import com.sap.sailing.odf.resultimport.CumulativeResultDocumentProvider;
 import com.sap.sailing.odf.resultimport.OdfBody;
 import com.sap.sailing.odf.resultimport.OdfBodyParser;
 import com.sap.sailing.odf.resultimport.ParserFactory;
+import com.sap.sailing.odf.resultimport.Skipper;
 import com.sap.sailing.odf.resultimport.impl.ScoreCorrectionProviderImpl;
 
 public class ParserTest {
@@ -84,7 +88,16 @@ public class ParserTest {
             }
         }
         assertTrue(results.containsKey("1094919"));
+        CumulativeResult resultsFor1094919 = results.get("1094919");
+        assertEquals(1, Util.size(resultsFor1094919.getAthletes()));
+        assertEquals("SLINGSBY Tom", resultsFor1094919.getAthletes().iterator().next().getName());
+        assertEquals(Gender.M, resultsFor1094919.getAthletes().iterator().next().getGender());
+        assertTrue(resultsFor1094919.getAthletes().iterator().next() instanceof Skipper);
         assertTrue(results.containsKey("262797"));
+        CumulativeResult resultsFor262797 = results.get("262797");
+        assertEquals(1, Util.size(resultsFor262797.getAthletes()));
+        assertEquals("IGNATEV Ilia", resultsFor262797.getAthletes().iterator().next().getName());
+        assertEquals(Gender.M, resultsFor262797.getAthletes().iterator().next().getGender());
     }
     
     @Test

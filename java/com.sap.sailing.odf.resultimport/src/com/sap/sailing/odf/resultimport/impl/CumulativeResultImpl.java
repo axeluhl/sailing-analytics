@@ -76,7 +76,7 @@ public class CumulativeResultImpl extends AbstractNodeWrapper implements Cumulat
         for (int i=0; i<athletes.getLength(); i++) {
             final Node athleteNode = athletes.item(i);
             AthleteImpl athlete = new AthleteImpl(athleteNode);
-            if ("Skipper".equals(athlete.getExtendedResults("ER_SA").get("SA_POSITION"))) {
+            if ("Skipper".equals(athlete.getExtendedResults("ER_SA").get("SA_POSITION").firstEntry().getValue())) {
                 result.add(new SkipperImpl(athleteNode));
             } else {
                 result.add(new CrewmemberImpl(athleteNode));

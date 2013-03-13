@@ -64,7 +64,6 @@ public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider {
     @Override
     public RegattaScoreCorrections getScoreCorrections(String eventName, String boatClassName,
             TimePoint timePointPublished) throws IOException, SAXException, ParserConfigurationException {
-        // TODO find out 
         for (OdfBody body : getAllOdfBodies()) {
             if (body.getEventName().equals(eventName) && body.getBoatClassName().equals(boatClassName) &&
                     body.getTimePoint().equals(timePointPublished)) {
