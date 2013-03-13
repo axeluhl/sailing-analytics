@@ -2,6 +2,7 @@ package com.sap.sailing.odf.resultimport.impl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.TreeMap;
 
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -89,6 +90,18 @@ public class CumulativeResultImpl extends AbstractNodeWrapper implements Cumulat
     public String toString() {
         return "Cumulative Results for competitor "+getCompetitorCode()+" ("+getCountryCode()+") "+getAthletes()+": Rank: "+getRank()+", Result: "+getResult()+", sort order "+getSortOrder()
                 +", race results: "+getPointsAndRanksAfterEachRace()+", medal race results: "+getPointsInMedalRace();
+    }
+
+    @Override
+    public Double getTotalPoints() {
+        TreeMap<Integer, String> totalPoints = getExtendedResults("ER_SA").get("SA_TOTAL_POINTS");
+        final Double result;
+        if (totalPoints == null) {
+            result = null;
+        } else {
+            result = Double.valueOf(totalPoints.firstEntry().getValue());
+        }
+        return result;
     }
 
     

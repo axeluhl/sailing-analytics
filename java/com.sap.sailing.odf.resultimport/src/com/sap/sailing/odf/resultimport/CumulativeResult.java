@@ -9,6 +9,9 @@ public interface CumulativeResult {
     
     int getRank();
     
+    /**
+     * Net result, after applying discards
+     */
     Result getResult();
     
     int getSortOrder();
@@ -32,4 +35,9 @@ public interface CumulativeResult {
      * with a {@link Skipper} and {@link Crewmember}s otherwise.
      */
     Iterable<Athlete> getAthletes();
+
+    /**
+     * Total points, before applying discards
+     */
+    Double getTotalPoints();
 }
