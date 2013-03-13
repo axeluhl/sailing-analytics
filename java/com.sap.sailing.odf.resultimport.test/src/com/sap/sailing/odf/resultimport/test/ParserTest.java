@@ -26,6 +26,8 @@ import org.xml.sax.SAXException;
 
 import com.sap.sailing.domain.common.CountryCodeFactory;
 import com.sap.sailing.domain.common.MaxPointsReason;
+import com.sap.sailing.domain.common.RegattaScoreCorrections;
+import com.sap.sailing.domain.common.RegattaScoreCorrections.ScoreCorrectionsForRace;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
@@ -168,7 +170,8 @@ public class ParserTest {
     }
     
     @Test
-    public void testScoreCorrectionProviderFeeding() throws IOException, SAXException, ParserConfigurationException {
+    public void testScoreCorrectionProviderFeedingAndHasResults() throws IOException, SAXException,
+            ParserConfigurationException {
         ScoreCorrectionProviderImpl scoreCorrectionProvider = new ScoreCorrectionProviderImpl(getTestDocumentProvider(),
                 ParserFactory.INSTANCE);
         Map<String, Set<Pair<String, TimePoint>>> hasResultsFor = scoreCorrectionProvider.getHasResultsForBoatClassFromDateByEventName();
@@ -176,4 +179,28 @@ public class ParserTest {
         assertTrue(hasResultsFor.containsKey("Laser"));
     }
     
+    @Test
+    public void testScoreCorrectionProvider() throws IOException, SAXException,
+            ParserConfigurationException {
+        ScoreCorrectionProviderImpl scoreCorrectionProvider = new ScoreCorrectionProviderImpl(getTestDocumentProvider(),
+                ParserFactory.INSTANCE);
+        Map<String, Set<Pair<String, TimePoint>>> hasResultsFor = scoreCorrectionProvider.getHasResultsForBoatClassFromDateByEventName();
+        RegattaScoreCorrections starResult = scoreCorrectionProvider.getScoreCorrections("SAM007000@WAP", "Star", hasResultsFor.get("Star").iterator().next().getB());
+        assertNotNull(starResult);
+        Iterable<ScoreCorrectionsForRace> scoreCorrectionsForRaces = starResult.getScoreCorrectionsForRaces();
+        assertNotNull(scoreCorrectionsForRaces);
+        assertEquals(11, Util.size(scoreCorrectionsForRaces)); // 10 regular races, one medal race
+        {
+            final ScoreCorrectionsForRace resultsForR6 = Util.get(scoreCorrectionsForRaces, 5);
+            assertEquals(11, resultsForR6.getScoreCorrectionForCompetitor("SAM007NOR01").getPoints(), 0.00000001);
+            assertSame(MaxPointsReason.NONE, resultsForR6.getScoreCorrectionForCompetitor("SAM007NOR01")
+                    .getMaxPointsReason());
+            assertEquals("MELLEBY Eivind + PEDERSEN Petter Morland",
+                    resultsForR6.getScoreCorrectionForCompetitor("SAM007NOR01").getCompetitorName());
+        }
+        final ScoreCorrectionsForRace resultsForM1 = Util.get(scoreCorrectionsForRaces, 10);
+        assertEquals(10, resultsForM1.getScoreCorrectionForCompetitor("SAM007NOR01").getPoints(), 0.00000001);
+        assertSame(MaxPointsReason.NONE, resultsForM1.getScoreCorrectionForCompetitor("SAM007NOR01").getMaxPointsReason());
+        assertEquals("MELLEBY Eivind + PEDERSEN Petter Morland", resultsForM1.getScoreCorrectionForCompetitor("SAM007NOR01").getCompetitorName());
+    }
 }
