@@ -17,6 +17,8 @@ Like businesses, sailors need the latest information to make strategic decisions
 * [[Server Replication|wiki/server-replication]]
 * [[Configure Races on Server|wiki/configure-races-on-server]]
 * [[Planning|wiki/planning]]
+* Event Specifica
+  * [[Extreme Sailing Series|wiki/extreme-sailing-series]]
 
 ### Internal services (not related to wiki but useful)
 
