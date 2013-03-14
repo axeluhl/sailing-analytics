@@ -54,7 +54,7 @@ public class SailingSimulatorImpl implements SailingSimulator {
 
     private void initializePathGenerator(SimulationParameters parameters, int selectedRaceIndex) {
 
-        System.out.println("initializing PathGeneratorTracTrac");
+        // System.out.println("initializing PathGeneratorTracTrac");
 
         this.pathGenerator = new PathGeneratorTracTrac(parameters);
         this.pathGenerator.setEvaluationParameters(ConfigurationManager.INSTANCE.getRaceURL(selectedRaceIndex), LIVE_URI, STORED_URI, WIND_SCALE);

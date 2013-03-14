@@ -199,7 +199,7 @@ public class PathGenerator1Turner extends PathGeneratorBase {
 
         TimedPositionWithSpeed oneTurnerPoint = allminpath.get(stepOfOverallMinimumDistance);
         if (oneTurnerPoint.getSpeed() == null) {
-            System.out.println("wind data is null for the one turner point");
+            // System.out.println("wind data is null for the one turner point");
 
             currentWind = windField.getWind(new TimedPositionImpl(currentTime, currentPosition));
 
