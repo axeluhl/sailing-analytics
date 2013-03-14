@@ -12,7 +12,7 @@ import javax.xml.bind.JAXBException;
 
 import org.junit.Test;
 
-import com.sap.sailing.xrr.resultimport.ParserImpl;
+import com.sap.sailing.xrr.resultimport.impl.ParserImpl;
 import com.sap.sailing.xrr.resultimport.schema.RegattaResults;
 
 public class ParserTest {
@@ -30,13 +30,13 @@ public class ParserTest {
 
     @Test
     public void testSimpleParsingSomeLaserDocument() throws JAXBException, IOException {
-        RegattaResults o = new ParserImpl().parse(getInputStream(SAMPLE_INPUT_NAME_LASER));
+        RegattaResults o = new ParserImpl().parse();
         assertNotNull(o);
     }
 
     @Test
     public void testSimpleParsingSomeStarDocument() throws JAXBException, IOException {
-        RegattaResults o = new ParserImpl().parse(getInputStream(SAMPLE_INPUT_NAME_STAR));
+        RegattaResults o = new ParserImpl().parse();
         assertNotNull(o);
     }
 }
