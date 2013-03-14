@@ -2,38 +2,53 @@ package com.sap.sailing.server.gateway.deserialization.impl;
 
 import org.json.simple.JSONObject;
 
+import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.coursedata.impl.ControlPointDeserializer;
+import com.sap.sailing.server.gateway.deserialization.coursedata.impl.CourseDataDeserializer;
+import com.sap.sailing.server.gateway.deserialization.coursedata.impl.GateDeserializer;
+import com.sap.sailing.server.gateway.deserialization.coursedata.impl.MarkDeserializer;
+import com.sap.sailing.server.gateway.deserialization.coursedata.impl.WaypointDeserializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.BaseRaceLogEventSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogCourseAreaChangedEventSerializer;
+import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogCourseDesignChangedEventSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogFlagEventSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogRaceStatusEventSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogStartTimeEventSerializer;
 
 public class RaceLogEventDeserializer implements JsonDeserializer<RaceLogEvent> {
     
-    public static RaceLogEventDeserializer create() {
+    public static RaceLogEventDeserializer create(SharedDomainFactory domainFactory) {
         return new RaceLogEventDeserializer(
                 new RaceLogFlagEventDeserializer(),
                 new RaceLogStartTimeEventDeserializer(), 
                 new RaceLogRaceStatusEventDeserializer(),
-                new RaceLogCourseAreaChangedEventDeserializer());
+                new RaceLogCourseAreaChangedEventDeserializer(),
+                new RaceLogCourseDesignChangedEventDeserializer(
+                        new CourseDataDeserializer(
+                                new WaypointDeserializer(
+                                        new ControlPointDeserializer(
+                                                new MarkDeserializer(domainFactory), new GateDeserializer(domainFactory, new MarkDeserializer(domainFactory)))))));
     }
 
     protected JsonDeserializer<RaceLogEvent> flagEventDeserializer;
     protected JsonDeserializer<RaceLogEvent> startTimeEventDeserializer;
     protected JsonDeserializer<RaceLogEvent> raceStatusEventDeserializer;
     protected JsonDeserializer<RaceLogEvent> courseAreaChangedEventDeserializer;
+    protected JsonDeserializer<RaceLogEvent> courseDesignChangedEventDeserializer;
 
     public RaceLogEventDeserializer(JsonDeserializer<RaceLogEvent> flagEventDeserializer,
             JsonDeserializer<RaceLogEvent> startTimeEventDeserializer,
             JsonDeserializer<RaceLogEvent> raceStatusEventDeserializer,
-            JsonDeserializer<RaceLogEvent> courseAreaChangedEventDeserializer) {
+            JsonDeserializer<RaceLogEvent> courseAreaChangedEventDeserializer,
+            JsonDeserializer<RaceLogEvent> courseDesignChangedEventDeserializer) {
         this.flagEventDeserializer = flagEventDeserializer;
         this.startTimeEventDeserializer = startTimeEventDeserializer;
         this.raceStatusEventDeserializer = raceStatusEventDeserializer;
         this.courseAreaChangedEventDeserializer = courseAreaChangedEventDeserializer;
+        this.courseDesignChangedEventDeserializer = courseDesignChangedEventDeserializer;
     }
 
     protected JsonDeserializer<RaceLogEvent> getDeserializer(JSONObject object) throws JsonDeserializationException {
@@ -47,6 +62,8 @@ public class RaceLogEventDeserializer implements JsonDeserializer<RaceLogEvent> 
             return raceStatusEventDeserializer;
         } else if (type.equals(RaceLogCourseAreaChangedEventSerializer.VALUE_CLASS)) {
             return courseAreaChangedEventDeserializer;
+        } else if (type.equals(RaceLogCourseDesignChangedEventSerializer.VALUE_CLASS)) {
+            return courseDesignChangedEventDeserializer;
         }
 
         throw new JsonDeserializationException(String.format("There is no deserializer defined for event type %s.",

@@ -133,7 +133,7 @@ public class OnlineDataManager extends DataManager {
         DataParser<Collection<ManagedRace>> parser = new ManagedRacesDataParser(new RaceGroupDeserializer(
                 boatClassDeserializer, new SeriesWithRowsDeserializer(new RaceRowDeserializer(new FleetDeserializer(
                         new ColorDeserializer()), new RaceCellDeserializer(
-                                new RaceLogDeserializer(RaceLogEventDeserializer.create()))))));
+                                new RaceLogDeserializer(RaceLogEventDeserializer.create(domainFactory)))))));
         DataHandler<Collection<ManagedRace>> handler = new ManagedRacesDataHandler(this, client);
 
         try {

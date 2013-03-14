@@ -10,6 +10,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 import org.json.simple.parser.ParseException;
 
+import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
@@ -72,7 +73,7 @@ public class AddToRaceLogJsonExportServlet extends AbstractJsonHttpServlet {
             return;
         }
 
-        JsonDeserializer<RaceLogEvent> deserializer = RaceLogEventDeserializer.create();
+        JsonDeserializer<RaceLogEvent> deserializer = RaceLogEventDeserializer.create(DomainFactory.INSTANCE);
 
         try {
             Object requestBody = JSONValue.parseWithException(request.getReader());
