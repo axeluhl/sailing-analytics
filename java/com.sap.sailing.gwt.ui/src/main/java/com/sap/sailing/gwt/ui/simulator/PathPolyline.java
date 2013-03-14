@@ -12,6 +12,7 @@ import com.google.gwt.maps.client.event.PolylineLineUpdatedHandler;
 import com.google.gwt.maps.client.geom.LatLng;
 import com.google.gwt.maps.client.geom.Point;
 import com.google.gwt.maps.client.overlay.Marker;
+import com.google.gwt.maps.client.overlay.MarkerOptions;
 import com.google.gwt.maps.client.overlay.PolyEditingOptions;
 import com.google.gwt.maps.client.overlay.Polyline;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -67,7 +68,7 @@ public class PathPolyline {
 
     private static boolean FIX_CUT_SPIKES = true;
     private static boolean FIX_CUT_TRIANGLES = true;
-    private static boolean ADD_1_TURNER = false;
+    private static boolean ADD_1_TURNER = true;
     private static double SMOOTHNESS_MAX_DEG = 20.0;
 
     // private int movedPointIndex = 0;
@@ -142,6 +143,16 @@ public class PathPolyline {
         System.out.println("-----------------------------");
     }
 
+    private void addMarker(LatLng point, String title) {
+
+        MarkerOptions options = MarkerOptions.newInstance();
+        options.setDraggable(false);
+        options.setTitle(title);
+
+        Marker marker = new Marker(point, options);
+        this.map.addOverlay(marker);
+    }
+
     private void drawPolylineOnMap() {
         if (this.polyline != null) {
             this.map.removeOverlay(this.polyline);
@@ -153,15 +164,26 @@ public class PathPolyline {
             @Override
             public void onUpdate(PolylineLineUpdatedEvent event) {
                 final int indexOfMovedPoint = getIndexOfMovedPoint();
+
+                // System.out.println("indexOfMovedPoint = " + indexOfMovedPoint);
+
                 final int noOfPoints = turnPoints.length;
 
-                final LatLng originalOriginLng = turnPoints[indexOfMovedPoint];
+                final LatLng originalOriginLatLng = turnPoints[indexOfMovedPoint];
+
+                // addMarker(originalOriginLatLng, "original position of moved point");
+
+                // addMarker(polyline.getVertex(indexOfMovedPoint), "proposed position of moved point");
 
                 if (indexOfMovedPoint == 0 || indexOfMovedPoint == noOfPoints - 1) {
                     // start and end points cannot be moved!
                 } else {
                     TwoDPoint newOrigin = computeNewOrigin(indexOfMovedPoint);
                     final boolean projectionOnBeforeLine = projectedToBeforeLine(indexOfMovedPoint);
+                    System.out.println("projectionOnBeforeLine = " + projectionOnBeforeLine);
+
+                    LatLng edgeStart = null;
+                    LatLng edgeEnd = null;
 
                     if (indexOfMovedPoint == 1) {
                         turnPoints[indexOfMovedPoint + 1] = toLatLng(computeAfterNewOrigin(indexOfMovedPoint, newOrigin));
@@ -174,29 +196,40 @@ public class PathPolyline {
                         if (PathPolyline.equals(temp, turnPoints[indexOfMovedPoint - 1], 0.0001) == false) {
                             // System.out.println("aici1");
                             turnPoints[indexOfMovedPoint - 1] = temp;
+
+                            edgeStart = turnPoints[indexOfMovedPoint - 1];
+                            edgeEnd = turnPoints[indexOfMovedPoint - 2];
                         }
 
                         temp = toLatLng(computeAfterNewOrigin(indexOfMovedPoint, newOrigin));
                         if (PathPolyline.equals(temp, turnPoints[indexOfMovedPoint + 1], 0.0001) == false) {
                             // System.out.println("aici2");
                             turnPoints[indexOfMovedPoint + 1] = temp;
+
+                            edgeStart = turnPoints[indexOfMovedPoint + 1];
+                            edgeEnd = turnPoints[indexOfMovedPoint + 2];
                         }
                     }
 
+                    // addMarker(edgeStart, "edge start");
+                    // addMarker(edgeEnd, "edge end");
+
                     turnPoints[indexOfMovedPoint] = toLatLng(newOrigin);
 
-                    LatLng newOriginLng = turnPoints[indexOfMovedPoint];
+                    // addMarker(toLatLng(newOrigin), "new position of moved point");
+
+                    LatLng newOriginLatLng = turnPoints[indexOfMovedPoint];
 
                     if (FIX_CUT_SPIKES) {
-                        turnPoints = fix_cutSpikes(turnPoints);
+                        turnPoints = fixCutSpikes(turnPoints);
                     }
 
                     if (FIX_CUT_TRIANGLES) {
-                        fix_cutTriangles();
+                        fixCutTriangles();
                     }
 
                     if(ADD_1_TURNER) {
-                        add_1_turner(originalOriginLng, newOriginLng, !projectionOnBeforeLine);
+                        add1Turner(originalOriginLatLng, newOriginLatLng, edgeStart, edgeEnd, !projectionOnBeforeLine, turnPoints);
                     }
                 }
 
@@ -209,8 +242,7 @@ public class PathPolyline {
         this.simulatorMap.setPolyline(this.polyline);
         this.polyline.setEditingEnabled(PolyEditingOptions.newInstance(this.turnPoints.length - 1));
 
-        // this.getTotalTime_old();
-        this.getTotalTime_new();
+        this.getTotalTime();
     }
 
     private double getAngleDegreesBetween(LatLng previous, LatLng current, LatLng next) {
@@ -234,79 +266,115 @@ public class PathPolyline {
         return angle;
     }
 
-    private void add_1_turner(LatLng originalOriginLng, LatLng newOriginLng, boolean leftSide) {
+    private long getTimePointOf(LatLng point) {
 
-        // final int noOfPoints = turnPoints.length;
-
-        // Marker origin = new Marker(originalOriginLng);
-        // this.map.addOverlay(origin);
-
-        // Marker newOrigin = new Marker(newOriginLng);
-        // this.map.addOverlay(newOrigin);
-
-        LatLng[] points = new LatLng[2];
-        points[0] = originalOriginLng;
-        points[1] = newOriginLng;
-
-        Polyline polyline = new Polyline(points, "Cyan");
-        this.map.addOverlay(polyline);
-
-        PositionDTO firstPoint = toPositionDTO(originalOriginLng);
-        PositionDTO secondPoint = toPositionDTO(newOriginLng);
         long timepoint = 0L;
-
-        for (SimulatorWindDTO item : allPoints) {
-            if (item.position.latDeg == firstPoint.latDeg && item.position.lngDeg == firstPoint.lngDeg) {
+        for (SimulatorWindDTO item : this.allPoints) {
+            if (item.position.latDeg == point.getLatitude() && item.position.lngDeg == point.getLongitude()) {
                 timepoint = item.timepoint;
                 break;
             }
         }
+        return timepoint;
+    }
+
+    private static int getIndexOf(LatLng item, LatLng[] array) {
+        int index = 0;
+        for (LatLng element : array) {
+            if (element.getLatitude() == item.getLatitude() && element.getLongitude() == item.getLongitude()) {
+                break;
+            }
+            index++;
+        }
+
+        return index;
+    }
+
+    private void add1Turner(final LatLng originalOriginLng, final LatLng newOriginLng, LatLng edgeStart, LatLng edgeEnd, boolean leftSide, final LatLng[] turnPoints) {
+
+        final int indexOfEdgeStart = getIndexOf(edgeStart, turnPoints);
+        // System.out.println("indexOfEdgeStart = " + indexOfEdgeStart);
+
+        // int indexOfEdgeEnd = getIndexOf(edgeEnd, turnPoints);
+        // System.out.println("indexOfEdgeEnd = " + indexOfEdgeEnd);
+
+        final int indexOfMovedPoint = getIndexOf(newOriginLng, turnPoints);
+        // System.out.println("indexOfMovedPoint = " + indexOfMovedPoint);
+
+        final int noOfTurnPoints = turnPoints.length;
+
+        PositionDTO firstPoint = toPositionDTO(originalOriginLng);
+        PositionDTO secondPoint = toPositionDTO(newOriginLng);
+
+        PositionDTO edgeStartPoint = toPositionDTO(edgeStart);
+        PositionDTO edgeEndPoint = toPositionDTO(edgeEnd);
+
+        long timepoint = this.getTimePointOf(originalOriginLng);
 
         Request1TurnerDTO requestData = new Request1TurnerDTO(this.selectedBoatClassIndex, this.selectedRaceIndex, this.selectedCompetitorIndex, this.selectedLegIndex,
-                firstPoint, timepoint, secondPoint, !leftSide);
+                firstPoint, timepoint, secondPoint, !leftSide, edgeStartPoint, edgeEndPoint);
 
         this.simulatorService.get1Turner(requestData, new AsyncCallback<Response1TurnerDTO>() {
 
             @Override
             public void onFailure(Throwable error) {
                 System.err.println("Failed to compute the 1-turner!\r\n" + error.getMessage());
-                // errorReporter.reportError("Failed to compute the 1-turner!\r\n" + error.getMessage());
+                //errorReporter.reportError("Failed to compute the 1-turner!\r\n" + error.getMessage());
             }
 
             @Override
             public void onSuccess(Response1TurnerDTO receiveData) {
-                System.out.println("succes");
+
+                // System.out.println("succes");
 
                 SimulatorWindDTO oneTurner = receiveData.oneTurner;
-                System.out.println("One turner at (" + oneTurner.position.latDeg + ", " + oneTurner.position.lngDeg + ")");
+                // System.out.println("One turner at (" + oneTurner.position.latDeg + ", " + oneTurner.position.lngDeg +
+                // ")");
+                addMarker(LatLng.newInstance(oneTurner.position.latDeg, oneTurner.position.lngDeg), "One turner");
 
-                map.addOverlay(new Marker(LatLng.newInstance(oneTurner.position.latDeg, oneTurner.position.lngDeg)));
+                SimulatorWindDTO intersection = receiveData.intersection;
+                // System.out.println("Intersection at (" + intersection.position.latDeg + ", " +
+                // intersection.position.lngDeg + ")");
+                addMarker(LatLng.newInstance(intersection.position.latDeg, intersection.position.lngDeg), "Intersection");
 
-                // List<LatLng> newTurnPoints = new ArrayList<LatLng>();
-                //
-                // for (int index2 = 0; index2 < noOfPoints; index2++) {
-                // if (index2 == indexOfMovedPoint) {
-                // if (projectionOnBeforeLine) {
-                // newTurnPoints.add(originalOriginLng);
-                // newTurnPoints.add(LatLng.newInstance(oneTurner.position.latDeg, oneTurner.position.lngDeg));
-                // newTurnPoints.add(turnPoints[index2]);
-                // } else {
-                // newTurnPoints.add(turnPoints[index2]);
-                // newTurnPoints.add(LatLng.newInstance(oneTurner.position.latDeg, oneTurner.position.lngDeg));
-                // newTurnPoints.add(originalOriginLng);
-                // }
-                // } else {
-                // newTurnPoints.add(turnPoints[index2]);
-                // }
-                // }
-                //
-                // turnPoints = null;
-                // turnPoints = newTurnPoints.toArray(new LatLng[0]);
+                List<LatLng> newTurnPoints = new ArrayList<LatLng>();
+
+                if (indexOfEdgeStart < indexOfMovedPoint) {
+
+                    for (int index = 0; index < noOfTurnPoints; index++) {
+                        if (index == indexOfEdgeStart) {
+                            newTurnPoints.add(LatLng.newInstance(intersection.position.latDeg, intersection.position.lngDeg));
+                        } else if (index == indexOfMovedPoint) {
+                            newTurnPoints.add(newOriginLng);
+                            newTurnPoints.add(LatLng.newInstance(oneTurner.position.latDeg, oneTurner.position.lngDeg));
+                            newTurnPoints.add(originalOriginLng);
+                        } else {
+                            newTurnPoints.add(turnPoints[index]);
+                        }
+                    }
+
+                } else {
+
+                    for (int index = 0; index < noOfTurnPoints; index++) {
+                        if (index == indexOfEdgeStart) {
+                            newTurnPoints.add(LatLng.newInstance(intersection.position.latDeg, intersection.position.lngDeg));
+                        } else if (index == indexOfMovedPoint) {
+                            newTurnPoints.add(originalOriginLng);
+                            newTurnPoints.add(LatLng.newInstance(oneTurner.position.latDeg, oneTurner.position.lngDeg));
+                            newTurnPoints.add(newOriginLng);
+                        } else {
+                            newTurnPoints.add(turnPoints[index]);
+                        }
+                    }
+                }
+
+                PathPolyline.this.turnPoints = newTurnPoints.toArray(new LatLng[0]);
+                drawPolylineOnMap();
             }
         });
     }
 
-    private LatLng[] fix_cutSpikes(LatLng[] turnPoints) {
+    private LatLng[] fixCutSpikes(LatLng[] turnPoints) {
 
         if (turnPoints.length < 4) {
             return turnPoints;
@@ -345,7 +413,7 @@ public class PathPolyline {
         return points.toArray(new LatLng[0]);
     }
 
-    private void fix_cutTriangles() {
+    private void fixCutTriangles() {
         int noOfPoints = this.turnPoints.length;
         if (noOfPoints > 3) {
             LatLng first = null;
@@ -581,45 +649,7 @@ public class PathPolyline {
         return latDiff <= delta && lngDiff <= delta;
     }
 
-    @SuppressWarnings("unused")
-    private void getTotalTime_old() {
-        List<PositionDTO> turnPointsAsPositionDTO = new ArrayList<PositionDTO>();
-
-        for (LatLng point : this.turnPoints) {
-            turnPointsAsPositionDTO.add(toPositionDTO(point));
-        }
-
-        RequestTotalTimeDTO requestData = new RequestTotalTimeDTO(this.selectedBoatClassIndex, this.selectedRaceIndex, this.selectedCompetitorIndex,
-                this.selectedLegIndex, STEP_DURATION_MILLISECONDS, allPoints, turnPointsAsPositionDTO, USE_REAL_AVERAGE_WIND, false);
-
-        this.simulatorService.getTotalTime_old(requestData, new AsyncCallback<ResponseTotalTimeDTO>() {
-
-            @Override
-            public void onFailure(Throwable error) {
-                errorReporter.reportError("Failed to initialize boat classes!\r\n" + error.getMessage());
-            }
-
-            @Override
-            public void onSuccess(ResponseTotalTimeDTO receiveData) {
-                String notificationMessage = receiveData.notificationMessage;
-                if (notificationMessage != "" && notificationMessage.length() != 0 && warningAlreadyShown == false) {
-                    errorReporter.reportNotification(notificationMessage);
-                    warningAlreadyShown = true;
-                }
-
-                long totalTime = receiveData.totalTimeSeconds;
-
-                // System.err.println("==================================================");
-                // System.err.println("total time (old way) = " + totalTime + " seconds!");
-                // System.err.println("==================================================");
-
-                simulatorMap.addLegendOverlayForPathPolyline(totalTime * 1000);
-                simulatorMap.redrawLegendCanvasOverlay();
-            }
-        });
-    }
-
-    private void getTotalTime_new() {
+    private void getTotalTime() {
         List<PositionDTO> turnPointsAsPositionDTO = new ArrayList<PositionDTO>();
 
         for (LatLng point : this.turnPoints) {
@@ -629,7 +659,7 @@ public class PathPolyline {
         RequestTotalTimeDTO requestData = new RequestTotalTimeDTO(this.selectedBoatClassIndex, this.selectedRaceIndex, this.selectedCompetitorIndex,
                 this.selectedLegIndex, STEP_DURATION_MILLISECONDS, this.allPoints, turnPointsAsPositionDTO, USE_REAL_AVERAGE_WIND, false);
 
-        this.simulatorService.getTotalTime_new(requestData, new AsyncCallback<ResponseTotalTimeDTO>() {
+        this.simulatorService.getTotalTime(requestData, new AsyncCallback<ResponseTotalTimeDTO>() {
 
             @Override
             public void onFailure(Throwable error) {

@@ -477,13 +477,13 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
                     requestData.leftSide,
                     DEFAULT_STEP_MAX, DEFAULT_TIMESTEP);
 
-            System.out.println("start and end are in correct order");
+            // System.out.println("start and end are in correct order");
 
         } catch (Exception e) {
             oneTurner = pathGenerator.get1Turner(windFieldGenerator, polarDiagram, endPosition, startPosition, startTime, requestData.leftSide,
                     DEFAULT_STEP_MAX, DEFAULT_TIMESTEP);
 
-            System.out.println("start and end are in reversed order");
+            // System.out.println("start and end are in reversed order");
         }
 
         TimedPositionWithSpeed intersection = pathGenerator.getIntersectionOptimalTowardWind(windFieldGenerator, polarDiagram, edgeStart, edgeEnd, oneTurner,
