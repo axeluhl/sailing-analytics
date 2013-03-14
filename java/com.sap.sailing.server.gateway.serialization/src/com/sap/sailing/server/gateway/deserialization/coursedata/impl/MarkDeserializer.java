@@ -1,4 +1,4 @@
-package com.sap.sailing.server.gateway.deserialization.impl;
+package com.sap.sailing.server.gateway.deserialization.coursedata.impl;
 
 import java.io.Serializable;
 
