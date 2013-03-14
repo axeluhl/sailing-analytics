@@ -4,20 +4,20 @@ import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
 public class ScoringSchemeTypeFormatter {
-    public static String format(ScoringSchemeType scoringSchemeType, StringMessages stringConstants) {
+    public static String format(ScoringSchemeType scoringSchemeType, StringMessages stringMessages) {
         switch (scoringSchemeType) {
         case LOW_POINT:
-            return stringConstants.scoringSchemeLowPointSystem();
+            return stringMessages.scoringSchemeLowPointSystem();
         case HIGH_POINT:
-            return stringConstants.scoringSchemeHighPointSystem();
+            return stringMessages.scoringSchemeHighPointSystem();
         case HIGH_POINT_ESS_OVERALL:
-            return stringConstants.scoringSchemeHighPointEssOverall();
+            return stringMessages.scoringSchemeHighPointEssOverall();
         case HIGH_POINT_LAST_BREAKS_TIE:
-            return stringConstants.scoringSchemeHighPointLastBreaksTie();
+            return stringMessages.scoringSchemeHighPointLastBreaksTie();
         case HIGH_POINT_FIRST_GETS_TEN:
-            return stringConstants.scoringSchemeHighPointFirstGetsTen();
+            return stringMessages.scoringSchemeHighPointFirstGetsTen();
         case LOW_POINT_WINNER_GETS_ZERO:
-            return stringConstants.scoringSchemeLowPointWinnerGetsZero();
+            return stringMessages.scoringSchemeLowPointWinnerGetsZero();
         }
         return null;
     }
