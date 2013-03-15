@@ -88,9 +88,11 @@ public abstract class DataEntryDialog<T> {
         this.validator = validator;
         okButton = new Button(okButtonName);
         okButton.getElement().getStyle().setMargin(3, Unit.PX);
+        okButton.ensureDebugId("OkButton");
         FlowPanel dialogFPanel = new FlowPanel();
         dialogFPanel.setWidth("100%");
         statusLabel = new Label();
+        statusLabel.ensureDebugId("StatusLabel");
         dialogFPanel.add(statusLabel);
         if (message != null) {
             Label messageLabel = new Label(message);
@@ -107,6 +109,7 @@ public abstract class DataEntryDialog<T> {
         buttonPanel.add(okButton);
         cancelButton = new Button(cancelButtonName);
         cancelButton.getElement().getStyle().setMargin(3, Unit.PX);
+        cancelButton.ensureDebugId("CancelButton");
         buttonPanel.add(cancelButton);
         cancelButton.addClickHandler(new ClickHandler() {
             @Override
@@ -406,4 +409,7 @@ public abstract class DataEntryDialog<T> {
         dateEntryDialog.center();
     }
 
+    public void ensureDebugId(String debugId) {
+        dateEntryDialog.ensureDebugId(debugId);
+    }
 }

@@ -257,7 +257,7 @@
     <Race RaceID="SAM004909" RaceName="Race 9" RaceNumber="9" RaceStartDate="04082012" RaceStartTime="120700" RaceStatus="Official" />
     <Race RaceID="SAM004910" RaceName="Race 10" RaceNumber="10" RaceStartDate="04082012" RaceStartTime="133700" RaceStatus="Official" />
     <Race RaceID="SAM004101" RaceName="Medal Race" RaceNumber="1" RaceStartDate="06082012" RaceStartTime="140500" RaceStatus="Official" />
-    <Division DivisionID="SAM004000" Gender="M" IFDivisionID="" Title="Laser" IFClassID=".25T">
+    <Division DivisionID="SAM004000" Gender="M" IFDivisionID="" Title="Laser">
       <RaceResult TeamID="1107624" Discard="false" RaceID="SAM004901" RacePoints="20" ScoreCode="" />
       <RaceResult TeamID="1107624" Discard="false" RaceID="SAM004902" RacePoints="7" ScoreCode="" />
       <RaceResult TeamID="1107624" Discard="false" RaceID="SAM004903" RacePoints="5" ScoreCode="" />
