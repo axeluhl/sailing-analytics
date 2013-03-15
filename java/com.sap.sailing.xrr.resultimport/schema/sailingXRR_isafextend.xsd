@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?xml version="1.0"?>
 <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
   <xsd:simpleType name="IFClassCode">
     <xsd:restriction base="xsd:string">
@@ -1338,7 +1338,7 @@
       </xsd:enumeration>
       <xsd:enumeration value="EUA">
         <xsd:annotation>
-          <xsd:documentation>EQUIPE UNIFIÉE ALLEMANDE</xsd:documentation>
+          <xsd:documentation>EQUIPE UNIFI&#xC9;E ALLEMANDE</xsd:documentation>
         </xsd:annotation>
       </xsd:enumeration>
       <xsd:enumeration value="EUN">
@@ -1878,7 +1878,7 @@
       </xsd:enumeration>
       <xsd:enumeration value="RHO">
         <xsd:annotation>
-          <xsd:documentation>RHODÉSIE</xsd:documentation>
+          <xsd:documentation>RHOD&#xC9;SIE</xsd:documentation>
         </xsd:annotation>
       </xsd:enumeration>
       <xsd:enumeration value="ROM">

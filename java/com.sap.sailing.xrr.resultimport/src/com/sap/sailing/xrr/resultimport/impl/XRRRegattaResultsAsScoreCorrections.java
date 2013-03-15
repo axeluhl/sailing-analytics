@@ -41,7 +41,7 @@ public class XRRRegattaResultsAsScoreCorrections implements RegattaScoreCorrecti
     public Iterable<ScoreCorrectionsForRace> getScoreCorrectionsForRaces() {
         List<ScoreCorrectionsForRace> result = new ArrayList<ScoreCorrectionsForRace>();
         Set<String> raceIDs = new LinkedHashSet<>();
-        for (Object o : division.getSeriesResultOrRaceResultOrTRRaceResult()) {
+        for (Object o : division.getSeriesResultOrRaceResultOrTRResult()) {
             // TODO what about TRRaceResult and TRSeriesResult
             if (o instanceof RaceResult) {
                 final String raceID = ((RaceResult) o).getRaceID();

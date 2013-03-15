@@ -1,10 +1,17 @@
 package com.sap.sailing.xrr.resultimport.impl;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.RegattaScoreCorrections.ScoreCorrectionForCompetitorInRace;
 import com.sap.sailing.xrr.resultimport.Parser;
 import com.sap.sailing.xrr.resultimport.schema.Crew;
+import com.sap.sailing.xrr.resultimport.schema.CrewPosition;
 import com.sap.sailing.xrr.resultimport.schema.Division;
+import com.sap.sailing.xrr.resultimport.schema.IFBoatStatus;
 import com.sap.sailing.xrr.resultimport.schema.Person;
 import com.sap.sailing.xrr.resultimport.schema.RaceResult;
 
@@ -26,8 +33,8 @@ public class RaceResultAsScoreCorrectionForCompetitorInRace implements ScoreCorr
 
     private RaceResult determineRaceResult(Division division, String raceID, String sailID, Parser parser) {
         RaceResult result = null;
-        for (Object o : division.getSeriesResultOrRaceResultOrTRRaceResult()) {
-            // TODO what about TRRaceResult
+        for (Object o : division.getSeriesResultOrRaceResultOrTRResult()) {
+            // TODO what about TRResult
             if (o instanceof RaceResult) {
                 RaceResult raceResult = (RaceResult) o;
                 if (raceID.equals(raceResult.getRaceID())) {
@@ -46,7 +53,21 @@ public class RaceResultAsScoreCorrectionForCompetitorInRace implements ScoreCorr
     public String getCompetitorName() {
         StringBuilder result = new StringBuilder();
         boolean first = true;
-        for (Crew crew : parser.getTeam(raceResult.getTeamID()).getCrew()) {
+        // sort skipper to front of list
+        final List<Crew> sortedCrew = new ArrayList<>(parser.getTeam(raceResult.getTeamID()).getCrew());
+        Collections.sort(sortedCrew, new Comparator<Crew>() {
+            @Override
+            public int compare(Crew o1, Crew o2) {
+                if (o1.getPosition() == CrewPosition.S) {
+                    return -1;
+                } else if (o2.getPosition() == CrewPosition.S) {
+                    return 1;
+                } else {
+                    return 0;
+                }
+            }
+        });
+        for (Crew crew : sortedCrew) {
             if (first) {
                 first = false;
             } else {
@@ -67,7 +88,14 @@ public class RaceResultAsScoreCorrectionForCompetitorInRace implements ScoreCorr
 
     @Override
     public MaxPointsReason getMaxPointsReason() {
-        return MaxPointsReason.valueOf(raceResult.getScoreCode().name());
+        final IFBoatStatus scoreCode = raceResult.getScoreCode();
+        final MaxPointsReason result;
+        if (scoreCode == null) {
+            result = MaxPointsReason.NONE;
+        } else {
+            result = MaxPointsReason.valueOf(scoreCode.name());
+        }
+        return result;
     }
 
     @Override

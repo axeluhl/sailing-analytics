@@ -28,7 +28,7 @@ public class ScoreCorrectionForRaceResult implements ScoreCorrectionsForRace {
     @Override
     public Set<String> getSailIDs() {
         Set<String> result = new HashSet<>();
-        for (Object o : division.getSeriesResultOrRaceResultOrTRRaceResult()) {
+        for (Object o : division.getSeriesResultOrRaceResultOrTRResult()) {
             // TODO what about TRRaceResult?
             if (o instanceof RaceResult) {
                 RaceResult raceResult = (RaceResult) o;
