@@ -52,6 +52,7 @@ import com.sap.sailing.gwt.ui.adminconsole.DisablableCheckboxCell.IsEnabled;
 import com.sap.sailing.gwt.ui.adminconsole.RaceColumnInLeaderboardDialog.RaceColumnDescriptor;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog.DialogCallback;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
+import com.sap.sailing.gwt.ui.client.MarkedAsyncCallback;
 import com.sap.sailing.gwt.ui.client.ParallelExecutionCallback;
 import com.sap.sailing.gwt.ui.client.ParallelExecutionHolder;
 import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
@@ -321,7 +322,7 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
         });
 
         Button createRegattaLeaderboardBtn = new Button(stringMessages.createRegattaLeaderboard() + "...");
-        createFlexibleLeaderboardBtn.ensureDebugId("CreateRegattaLeaderboardButton");
+        createRegattaLeaderboardBtn.ensureDebugId("CreateRegattaLeaderboardButton");
         leaderboardButtonPanel.add(createRegattaLeaderboardBtn);
         createRegattaLeaderboardBtn.addClickHandler(new ClickHandler() {
             @Override
@@ -931,15 +932,15 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
     }
 
     private void createFlexibleLeaderboard() {
-        sailingService.getEvents(new AsyncCallback<List<EventDTO>>() {
+        sailingService.getEvents(new MarkedAsyncCallback<List<EventDTO>>() {
 
             @Override
-            public void onSuccess(List<EventDTO> result) {
+            public void handleSuccess(List<EventDTO> result) {
                 createFlexibleLeaderboard(result);
             }
 
             @Override
-            public void onFailure(Throwable caught) {
+            public void handleFailure(Throwable caught) {
                 createFlexibleLeaderboard(new ArrayList<EventDTO>());
             }
         });
@@ -957,15 +958,15 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
             public void ok(final LeaderboardDescriptor newLeaderboard) {
                 sailingService.createFlexibleLeaderboard(newLeaderboard.getName(), newLeaderboard.getDisplayName(), newLeaderboard.getDiscardThresholds(),
                         newLeaderboard.getScoringScheme(), newLeaderboard.getCourseAreaIdAsString(),
-                        new AsyncCallback<StrippedLeaderboardDTO>() {
+                        new MarkedAsyncCallback<StrippedLeaderboardDTO>() {
                     @Override
-                    public void onFailure(Throwable t) {
+                    public void handleFailure(Throwable t) {
                         errorReporter.reportError("Error trying to create the new flexible leaderboard " + newLeaderboard.getName()
                                 + ": " + t.getMessage());
                     }
 
                     @Override
-                    public void onSuccess(StrippedLeaderboardDTO result) {
+                    public void handleSuccess(StrippedLeaderboardDTO result) {
                         addLeaderboard(result);
                     }
                 });
