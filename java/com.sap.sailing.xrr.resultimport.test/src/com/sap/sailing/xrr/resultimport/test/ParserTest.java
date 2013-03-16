@@ -11,8 +11,11 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.Map;
 import java.util.Set;
+import java.util.TimeZone;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.parsers.ParserConfigurationException;
@@ -20,6 +23,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
+import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.RegattaScoreCorrections;
 import com.sap.sailing.domain.common.RegattaScoreCorrections.ScoreCorrectionsForRace;
@@ -79,6 +83,10 @@ public class ParserTest {
                 ParserFactory.INSTANCE);
         Map<String, Set<Pair<String, TimePoint>>> hasResultsFor = scoreCorrectionProvider.getHasResultsForBoatClassFromDateByEventName();
         assertTrue(hasResultsFor.containsKey("Star"));
+        Calendar cal = new GregorianCalendar(2013, /* 2 means March; zero-based */ 2, 15, 18, 51, 15);
+        cal.setTimeZone(TimeZone.getTimeZone("UTC"));
+        TimePoint expectedTimePoint = new MillisecondsTimePoint(cal.getTime());
+        assertEquals(expectedTimePoint, hasResultsFor.get("Star").iterator().next().getB());
         assertTrue(hasResultsFor.containsKey("Laser"));
     }
     
