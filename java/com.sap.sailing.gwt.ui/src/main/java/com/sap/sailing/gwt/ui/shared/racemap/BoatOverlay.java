@@ -41,7 +41,7 @@ public class BoatOverlay extends CanvasOverlay {
         super();
         this.competitorDTO = competitorDTO;
         this.boatClass = competitorDTO.boatClass;
-        this.boatClassImageData = BoatClassImageDataResolver.getBoatClassImages(boatClass.name);
+        this.boatClassImageData = BoatClassImageDataResolver.resolveBoatClassImages(boatClass.name);
     }
 
     @Override

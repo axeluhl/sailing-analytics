@@ -4,283 +4,311 @@ import com.google.gwt.resources.client.ImageResource;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.Tack;
 
+/**
+ * Boat classes are displayed with different images (e.g. on a map) depending on the wind direction
+ * and the course (upwind, downwind). This class holds all required images for the different situations.   
+ * @author C5163874
+ *
+ */
 public class BoatClassImageData {
-	private String mainBoatClassName;
-	private String[] aliasBoatClassNames;
-	private double boatClassLengthInMeter;
-	private int boatClassImageLengthInPx;
-	private int imageWidthInPx;
-	private int imageHeightInPx;
-	
-	private ImageResource upWindPortIcon;
-	private ImageResource upWindPortIconSelected;
-	private ImageResource upWindStarboardIcon;
-	private ImageResource upWindStarboardIconSelected;
-	
-	/**
-	 * Boat image for wind from port and sails on starboard (downwind) 
-	 */
-	private ImageResource downWindPortIcon;
-	private ImageResource downWindPortIconSelected;
-	
-	/**
-	 * Boat image with wind from starboard and sails on port (downwind)
-	 */
-	private ImageResource downWindStarboardIcon;
-	private ImageResource downWindStarboardIconSelected;
+    private String mainBoatClassName;
+    private String[] compatibleBoatClassNames;
+    private double boatClassLengthInMeter;
+    private int boatClassImageLengthInPx;
+    private int imageWidthInPx;
+    private int imageHeightInPx;
 
-	private ImageResource reachingPortIcon;
-	private ImageResource reachingPortIconSelected;
-	private ImageResource reachingStarboardIcon;
-	private ImageResource reachingStarboardIconSelected;
+    private ImageResource upWindPortIcon;
+    private ImageResource upWindPortIconSelected;
+    private ImageResource upWindStarboardIcon;
+    private ImageResource upWindStarboardIconSelected;
 
-	private ImageTransformer upWindPortImageTransformer;
-	private ImageTransformer upWindPortImageTransformerSelected;
-	private ImageTransformer upWindStarboardImageTransformer;
-	private ImageTransformer upWindStarboardImageTransformerSelected;
-	
-	private ImageTransformer downWindPortImageTransformer;
-	private ImageTransformer downWindPortImageTransformerSelected;
-	private ImageTransformer downWindStarboardImageTransformer;
-	private ImageTransformer downWindStarboardImageTransformerSelected;
+    /**
+     * Boat image for wind from port and sails on starboard (downwind)
+     */
+    private ImageResource downWindPortIcon;
+    private ImageResource downWindPortIconSelected;
 
-	private ImageTransformer reachingPortImageTransformer;
-	private ImageTransformer reachingPortImageTransformerSelected;
-	private ImageTransformer reachingStarboardImageTransformer;
-	private ImageTransformer reachingStarboardImageTransformerSelected;
+    /**
+     * Boat image with wind from starboard and sails on port (downwind)
+     */
+    private ImageResource downWindStarboardIcon;
+    private ImageResource downWindStarboardIconSelected;
 
-	public BoatClassImageData(String mainBoatClassName, double boatClassLengthInMeter, int boatClassImageLengthInPx, int imageWidthInPx, int imageHeightInPx) {
-		this.mainBoatClassName = mainBoatClassName;		
-		this.boatClassLengthInMeter = boatClassLengthInMeter;
-		this.boatClassImageLengthInPx = boatClassImageLengthInPx;
-		this.imageWidthInPx = imageWidthInPx;
-		this.imageHeightInPx = imageHeightInPx;
-	}
+    private ImageResource reachingPortIcon;
+    private ImageResource reachingPortIconSelected;
+    private ImageResource reachingStarboardIcon;
+    private ImageResource reachingStarboardIconSelected;
 
-	public BoatClassImageData(String mainBoatClassName, double boatClassLengthInMeter, int boatClassImageLengthInPx, int imageWidthInPx, int imageHeightInPx, String... aliasBoatClassNames ) {
-		this(mainBoatClassName, boatClassLengthInMeter, boatClassImageLengthInPx, imageWidthInPx, imageHeightInPx);
-		this.aliasBoatClassNames = aliasBoatClassNames;
-	}
-	
-	public ImageTransformer getBoatImageTransformerByLegTypeAndTack(LegType legType, Tack tack, boolean isSelected) {
-		ImageTransformer result = null;
-		switch(tack) {
-			case STARBOARD:
-				switch (legType) {
-					case DOWNWIND:
-						if(isSelected) {
-							result = downWindPortImageTransformerSelected;
-						} else {
-							result = downWindPortImageTransformer;
-						}
-						break;
-					case REACHING:
-						if(isSelected) {
-							result = reachingPortImageTransformerSelected;
-						} else {
-							result = reachingPortImageTransformer;
-						}
-						break;
-					case UPWIND:
-						if(isSelected) {
-							result = upWindPortImageTransformerSelected;
-						} else {
-							result = upWindPortImageTransformer;
-						}
-						break;
-				}
-				break;
-			case PORT:
-				switch (legType) {
-				case DOWNWIND:
-					if(isSelected) {
-						result = downWindStarboardImageTransformerSelected;
-					} else {
-						result = downWindStarboardImageTransformer;
-					}
-					break;
-				case REACHING:
-					if(isSelected) {
-						result = reachingStarboardImageTransformerSelected;
-					} else {
-						result = reachingStarboardImageTransformer;
-					}
-					break;
-				case UPWIND:
-					if(isSelected) {
-						result = upWindStarboardImageTransformerSelected;
-					} else {
-						result = upWindStarboardImageTransformer;
-					}
-					break;
-			}
-			break;
-	    }
-		return result;
-	}
+    private ImageTransformer upWindPortImageTransformer;
+    private ImageTransformer upWindPortImageTransformerSelected;
+    private ImageTransformer upWindStarboardImageTransformer;
+    private ImageTransformer upWindStarboardImageTransformerSelected;
 
-	public ImageTransformer getBoatImageTransformerByTack(Tack tack, boolean isSelected) {
-		ImageTransformer result = null;
-		switch(tack) {
-			case STARBOARD:
-					if(isSelected) {
-						result = reachingPortImageTransformerSelected;
-					} else {
-						result = reachingPortImageTransformer;
-					}
-					break;
-			case PORT:
-				if(isSelected) {
-					result = reachingStarboardImageTransformerSelected;
-				} else {
-					result = reachingStarboardImageTransformer;
-				}
-	    }
-		return result;
-	}
+    private ImageTransformer downWindPortImageTransformer;
+    private ImageTransformer downWindPortImageTransformerSelected;
+    private ImageTransformer downWindStarboardImageTransformer;
+    private ImageTransformer downWindStarboardImageTransformerSelected;
 
-	public void setUpWindPortIcons(ImageResource upWindPortIcon, ImageResource upWindPortIconSelected) {
-		this.upWindPortIcon = upWindPortIcon;
-		this.upWindPortIconSelected = upWindPortIconSelected;
+    private ImageTransformer reachingPortImageTransformer;
+    private ImageTransformer reachingPortImageTransformerSelected;
+    private ImageTransformer reachingStarboardImageTransformer;
+    private ImageTransformer reachingStarboardImageTransformerSelected;
 
-		if(upWindPortIcon != null) {
-			upWindPortImageTransformer = new ImageTransformer(upWindPortIcon);
-		}
-		if(upWindPortIconSelected != null) {
-			upWindPortImageTransformerSelected = new ImageTransformer(upWindPortIconSelected);
-		}
-	}
+    public BoatClassImageData(String mainBoatClassName, double boatClassLengthInMeter, int boatClassImageLengthInPx,
+            int imageWidthInPx, int imageHeightInPx) {
+        this.mainBoatClassName = mainBoatClassName;
+        this.boatClassLengthInMeter = boatClassLengthInMeter;
+        this.boatClassImageLengthInPx = boatClassImageLengthInPx;
+        this.imageWidthInPx = imageWidthInPx;
+        this.imageHeightInPx = imageHeightInPx;
+    }
 
-	public void setUpWindStarboardIcons(ImageResource upWindStarboardIcon, ImageResource upWindStarboardIconSelected) {
-		this.upWindStarboardIcon = upWindStarboardIcon;
-		this.upWindStarboardIconSelected = upWindStarboardIconSelected;
+    public BoatClassImageData(String mainBoatClassName, double boatClassLengthInMeter, int boatClassImageLengthInPx,
+            int imageWidthInPx, int imageHeightInPx, String... aliasBoatClassNames) {
+        this(mainBoatClassName, boatClassLengthInMeter, boatClassImageLengthInPx, imageWidthInPx, imageHeightInPx);
+        this.compatibleBoatClassNames = aliasBoatClassNames;
+    }
 
-		if(upWindStarboardIcon != null) {
-			upWindStarboardImageTransformer = new ImageTransformer(upWindStarboardIcon);
-		}
-		if(upWindStarboardIconSelected != null) {
-			upWindStarboardImageTransformerSelected = new ImageTransformer(upWindStarboardIconSelected);
-		}
-	}
+    public ImageTransformer getBoatImageTransformerByLegTypeAndTack(LegType legType, Tack tack, boolean isSelected) {
+        ImageTransformer result = null;
+        switch (tack) {
+        case STARBOARD:
+            switch (legType) {
+            case DOWNWIND:
+                if (isSelected) {
+                    result = downWindPortImageTransformerSelected;
+                } else {
+                    result = downWindPortImageTransformer;
+                }
+                break;
+            case REACHING:
+                if (isSelected) {
+                    result = reachingPortImageTransformerSelected;
+                } else {
+                    result = reachingPortImageTransformer;
+                }
+                break;
+            case UPWIND:
+                if (isSelected) {
+                    result = upWindPortImageTransformerSelected;
+                } else {
+                    result = upWindPortImageTransformer;
+                }
+                break;
+            }
+            break;
+        case PORT:
+            switch (legType) {
+            case DOWNWIND:
+                if (isSelected) {
+                    result = downWindStarboardImageTransformerSelected;
+                } else {
+                    result = downWindStarboardImageTransformer;
+                }
+                break;
+            case REACHING:
+                if (isSelected) {
+                    result = reachingStarboardImageTransformerSelected;
+                } else {
+                    result = reachingStarboardImageTransformer;
+                }
+                break;
+            case UPWIND:
+                if (isSelected) {
+                    result = upWindStarboardImageTransformerSelected;
+                } else {
+                    result = upWindStarboardImageTransformer;
+                }
+                break;
+            }
+            break;
+        }
+        return result;
+    }
 
-	public void setDownWindPortIcons(ImageResource downWindPortIcon, ImageResource downWindPortIconSelected) {
-		this.downWindPortIcon = downWindPortIcon;
-		this.downWindPortIconSelected = downWindPortIconSelected;
+    public ImageTransformer getBoatImageTransformerByTack(Tack tack, boolean isSelected) {
+        ImageTransformer result = null;
+        switch (tack) {
+        case STARBOARD:
+            if (isSelected) {
+                result = reachingPortImageTransformerSelected;
+            } else {
+                result = reachingPortImageTransformer;
+            }
+            break;
+        case PORT:
+            if (isSelected) {
+                result = reachingStarboardImageTransformerSelected;
+            } else {
+                result = reachingStarboardImageTransformer;
+            }
+        }
+        return result;
+    }
 
-		if(downWindPortIcon != null) {
-			downWindPortImageTransformer = new ImageTransformer(downWindPortIcon);
-		}
-		if(downWindPortIconSelected != null) {
-			downWindPortImageTransformerSelected = new ImageTransformer(downWindPortIconSelected);
-		}
-	}
+    public void setUpWindPortIcons(ImageResource upWindPortIcon, ImageResource upWindPortIconSelected) {
+        this.upWindPortIcon = upWindPortIcon;
+        this.upWindPortIconSelected = upWindPortIconSelected;
 
-	public void setDownWindStarboardIcons(ImageResource downWindStarboardIcon, ImageResource downWindStarboardIconSelected) {
-		this.downWindStarboardIcon = downWindStarboardIcon;
-		this.downWindStarboardIconSelected = downWindStarboardIconSelected;
+        if (upWindPortIcon != null) {
+            upWindPortImageTransformer = new ImageTransformer(upWindPortIcon);
+        }
+        if (upWindPortIconSelected != null) {
+            upWindPortImageTransformerSelected = new ImageTransformer(upWindPortIconSelected);
+        }
+    }
 
-		if(downWindStarboardIcon != null) {
-			downWindStarboardImageTransformer = new ImageTransformer(downWindStarboardIcon);
-		}
-		if(downWindStarboardIconSelected != null) {
-			downWindStarboardImageTransformerSelected = new ImageTransformer(downWindStarboardIconSelected);
-		}
-	}
+    public void setUpWindStarboardIcons(ImageResource upWindStarboardIcon, ImageResource upWindStarboardIconSelected) {
+        this.upWindStarboardIcon = upWindStarboardIcon;
+        this.upWindStarboardIconSelected = upWindStarboardIconSelected;
 
-	public void setReachingPortIcons(ImageResource reachingPortIcon, ImageResource reachingPortIconSelected) {
-		this.reachingPortIcon = reachingPortIcon;
-		this.reachingPortIconSelected = reachingPortIconSelected;
+        if (upWindStarboardIcon != null) {
+            upWindStarboardImageTransformer = new ImageTransformer(upWindStarboardIcon);
+        }
+        if (upWindStarboardIconSelected != null) {
+            upWindStarboardImageTransformerSelected = new ImageTransformer(upWindStarboardIconSelected);
+        }
+    }
 
-		if(reachingPortIcon != null) {
-			reachingPortImageTransformer = new ImageTransformer(reachingPortIcon);
-		}
-		if(reachingPortIconSelected != null) {
-			reachingPortImageTransformerSelected = new ImageTransformer(reachingPortIconSelected);
-		}
-	}
+    public void setDownWindPortIcons(ImageResource downWindPortIcon, ImageResource downWindPortIconSelected) {
+        this.downWindPortIcon = downWindPortIcon;
+        this.downWindPortIconSelected = downWindPortIconSelected;
 
-	public void setReachingStarboardIcons(ImageResource reachingStarboardIcon, ImageResource reachingStarboardIconSelected) {
-		this.reachingStarboardIcon = reachingStarboardIcon;
-		this.reachingStarboardIconSelected = reachingStarboardIconSelected;
+        if (downWindPortIcon != null) {
+            downWindPortImageTransformer = new ImageTransformer(downWindPortIcon);
+        }
+        if (downWindPortIconSelected != null) {
+            downWindPortImageTransformerSelected = new ImageTransformer(downWindPortIconSelected);
+        }
+    }
 
-		if(reachingStarboardIcon != null) {
-			reachingStarboardImageTransformer = new ImageTransformer(reachingStarboardIcon);
-		}
-		if(reachingStarboardIconSelected != null) {
-			reachingStarboardImageTransformerSelected = new ImageTransformer(reachingStarboardIconSelected);
-		}
-	}
-	
-	public String getMainBoatClassName() {
-		return mainBoatClassName;
-	}
+    public void setDownWindStarboardIcons(ImageResource downWindStarboardIcon, ImageResource downWindStarboardIconSelected) {
+        this.downWindStarboardIcon = downWindStarboardIcon;
+        this.downWindStarboardIconSelected = downWindStarboardIconSelected;
 
-	public String[] getAliasBoatClassNames() {
-		return aliasBoatClassNames;
-	}
+        if (downWindStarboardIcon != null) {
+            downWindStarboardImageTransformer = new ImageTransformer(downWindStarboardIcon);
+        }
+        if (downWindStarboardIconSelected != null) {
+            downWindStarboardImageTransformerSelected = new ImageTransformer(downWindStarboardIconSelected);
+        }
+    }
 
-	public ImageResource getUpWindPortIcon() {
-		return upWindPortIcon;
-	}
+    public void setReachingPortIcons(ImageResource reachingPortIcon, ImageResource reachingPortIconSelected) {
+        this.reachingPortIcon = reachingPortIcon;
+        this.reachingPortIconSelected = reachingPortIconSelected;
 
-	public ImageResource getUpWindPortIconSelected() {
-		return upWindPortIconSelected;
-	}
+        if (reachingPortIcon != null) {
+            reachingPortImageTransformer = new ImageTransformer(reachingPortIcon);
+        }
+        if (reachingPortIconSelected != null) {
+            reachingPortImageTransformerSelected = new ImageTransformer(reachingPortIconSelected);
+        }
+    }
 
-	public ImageResource getUpWindStarboardIcon() {
-		return upWindStarboardIcon;
-	}
+    public void setReachingStarboardIcons(ImageResource reachingStarboardIcon,
+            ImageResource reachingStarboardIconSelected) {
+        this.reachingStarboardIcon = reachingStarboardIcon;
+        this.reachingStarboardIconSelected = reachingStarboardIconSelected;
 
-	public ImageResource getUpWindStarboardIconSelected() {
-		return upWindStarboardIconSelected;
-	}
+        if (reachingStarboardIcon != null) {
+            reachingStarboardImageTransformer = new ImageTransformer(reachingStarboardIcon);
+        }
+        if (reachingStarboardIconSelected != null) {
+            reachingStarboardImageTransformerSelected = new ImageTransformer(reachingStarboardIconSelected);
+        }
+    }
 
-	public ImageResource getDownWindPortIcon() {
-		return downWindPortIcon;
-	}
+    public boolean isBoatClassNameCompatible(String boatClass) {
+        boolean result = false;
+        // remove all white space characters
+        String boatClassToCheck = boatClass.replaceAll("\\s","");
+        // remove all '-' characters
+        boatClassToCheck = boatClass.replaceAll("-","");
+        
+        if(mainBoatClassName.equalsIgnoreCase(boatClassToCheck)) {
+            result = true;
+        } else {
+            for(String compatibleName: compatibleBoatClassNames) {
+                if(compatibleName.equalsIgnoreCase(boatClassToCheck)) {
+                    result = true;
+                    break;
+                }
+            }
+        }
+        return result;
+    }
+    
+    public String getMainBoatClassName() {
+        return mainBoatClassName;
+    }
 
-	public ImageResource getDownWindPortIconSelected() {
-		return downWindPortIconSelected;
-	}
+    public String[] getCompatibleBoatClassNames() {
+        return compatibleBoatClassNames;
+    }
 
-	public ImageResource getDownWindStarboardIcon() {
-		return downWindStarboardIcon;
-	}
+    public ImageResource getUpWindPortIcon() {
+        return upWindPortIcon;
+    }
 
-	public ImageResource getDownWindStarboardIconSelected() {
-		return downWindStarboardIconSelected;
-	}
+    public ImageResource getUpWindPortIconSelected() {
+        return upWindPortIconSelected;
+    }
 
-	public double getBoatClassLengthInMeter() {
-		return boatClassLengthInMeter;
-	}
+    public ImageResource getUpWindStarboardIcon() {
+        return upWindStarboardIcon;
+    }
 
-	public int getBoatClassImageLengthInPx() {
-		return boatClassImageLengthInPx;
-	}
+    public ImageResource getUpWindStarboardIconSelected() {
+        return upWindStarboardIconSelected;
+    }
 
-	public int getImageWidthInPx() {
-		return imageWidthInPx;
-	}
+    public ImageResource getDownWindPortIcon() {
+        return downWindPortIcon;
+    }
 
-	public int getImageHeightInPx() {
-		return imageHeightInPx;
-	}
+    public ImageResource getDownWindPortIconSelected() {
+        return downWindPortIconSelected;
+    }
 
-	public ImageResource getReachingPortIcon() {
-		return reachingPortIcon;
-	}
+    public ImageResource getDownWindStarboardIcon() {
+        return downWindStarboardIcon;
+    }
 
-	public ImageResource getReachingPortIconSelected() {
-		return reachingPortIconSelected;
-	}
+    public ImageResource getDownWindStarboardIconSelected() {
+        return downWindStarboardIconSelected;
+    }
 
-	public ImageResource getReachingStarboardIcon() {
-		return reachingStarboardIcon;
-	}
+    public double getBoatClassLengthInMeter() {
+        return boatClassLengthInMeter;
+    }
 
-	public ImageResource getReachingStarboardIconSelected() {
-		return reachingStarboardIconSelected;
-	}
+    public int getBoatClassImageLengthInPx() {
+        return boatClassImageLengthInPx;
+    }
+
+    public int getImageWidthInPx() {
+        return imageWidthInPx;
+    }
+
+    public int getImageHeightInPx() {
+        return imageHeightInPx;
+    }
+
+    public ImageResource getReachingPortIcon() {
+        return reachingPortIcon;
+    }
+
+    public ImageResource getReachingPortIconSelected() {
+        return reachingPortIconSelected;
+    }
+
+    public ImageResource getReachingStarboardIcon() {
+        return reachingStarboardIcon;
+    }
+
+    public ImageResource getReachingStarboardIconSelected() {
+        return reachingStarboardIconSelected;
+    }
 }
-
