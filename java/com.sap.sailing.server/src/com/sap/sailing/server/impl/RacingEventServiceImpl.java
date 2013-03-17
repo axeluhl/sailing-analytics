@@ -925,7 +925,6 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
                 String columnName = trackedRace.getRace().getName();
                 defaultLeaderboard.addRace(trackedRace, columnName, /* medalRace */false,
                         defaultLeaderboard.getFleet(null));
-                // TODO: listen to race column race log events!
             }
             TrackedRaceReplicator trackedRaceReplicator = new TrackedRaceReplicator(trackedRace);
             trackedRaceReplicators.put(trackedRace, trackedRaceReplicator);
