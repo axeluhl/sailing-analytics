@@ -18,8 +18,8 @@ public class PassAwareRaceLogImpl extends RaceLogImpl implements PassAwareRaceLo
 
     public PassAwareRaceLogImpl(RaceLog raceLog) {
         this();
+        raceLog.lockForRead();
         try {
-            raceLog.lockForRead();
             for (RaceLogEvent event : raceLog.getRawFixes()) {
                 this.add(event);
             }
