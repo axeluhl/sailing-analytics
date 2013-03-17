@@ -1,6 +1,7 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.dialogs;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -32,16 +33,18 @@ import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.InMemoryDataStore;
+import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 import com.sap.sailing.racecommittee.app.domain.RoundingDirection;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.ui.adapters.coursedesign.CourseElementListAdapter;
 import com.sap.sailing.racecommittee.app.ui.adapters.coursedesign.CourseListDataElement;
 import com.sap.sailing.racecommittee.app.ui.adapters.coursedesign.MarkGridAdapter;
+import com.sap.sailing.racecommittee.app.ui.comparators.NamedComparator;
 
 public class CourseDesignDialogFragment extends RaceDialogFragment {
     private final static String TAG = CourseDesignDialogFragment.class.getName();
 
-    protected DialogFragmentButtonListener hostActivity;
+    protected CourseDesignListener hostActivity;
     private List<Mark> aMarkList;
     private MarkGridAdapter gridAdapter;
     private List<CourseListDataElement> courseElements;
@@ -59,19 +62,19 @@ public class CourseDesignDialogFragment extends RaceDialogFragment {
     public void onAttach(android.app.Activity activity) {
         super.onAttach(activity);
 
-        if (activity instanceof DialogFragmentButtonListener) {
-            this.hostActivity = (DialogFragmentButtonListener) activity;
+        if (activity instanceof CourseDesignListener) {
+            this.hostActivity = (CourseDesignListener) activity;
         } else {
             throw new IllegalStateException(
                     String.format(
                             "Instance of %s must be attached to instances of %s. Tried to attach to %s.",
                             ActivityDialogFragment.class.getName(),
-                            DialogFragmentButtonListener.class.getName(),
+                            CourseDesignListener.class.getName(),
                             activity.getClass().getName()));
         }
     };
 
-    protected DialogFragmentButtonListener getHost() {
+    protected CourseDesignListener getHost() {
         return this.hostActivity;
     }
 
@@ -96,6 +99,8 @@ public class CourseDesignDialogFragment extends RaceDialogFragment {
         gridAdapter = new MarkGridAdapter(getActivity(), R.layout.welter_one_row_no_image, aMarkList);
         courseElementAdapter = new CourseElementListAdapter(getActivity(), R.layout.welter_one_row_three_columns, courseElements);
         previousCourseElementAdapter = new CourseElementListAdapter(getActivity(), R.layout.welter_one_row_three_columns, previousCourseElements);
+        
+        loadMarks();
 
         GridView gridView = (GridView) getView().findViewById(R.id.gridViewAssets);
         gridView.setAdapter(gridAdapter);
@@ -177,6 +182,34 @@ public class CourseDesignDialogFragment extends RaceDialogFragment {
         });
 
     }
+    
+    @Override
+    public void onResume() {
+        super.onResume();
+        onLoadMarksSucceeded(hostActivity.getDataManager().getDataStore().getMarks());
+    }
+
+    private void loadMarks() {
+        hostActivity.getDataManager().loadMarks(getRace(), new LoadClient<Collection<Mark>>() {
+
+            @Override
+            public void onLoadFailed(Exception reason) {
+            }
+
+            @Override
+            public void onLoadSucceded(Collection<Mark> data) {
+                onLoadMarksSucceeded(data);
+            }
+            
+        });
+    }
+
+    protected void onLoadMarksSucceeded(Collection<Mark> data) {
+        aMarkList.clear();
+        aMarkList.addAll(data);
+        Collections.sort(aMarkList, new NamedComparator());
+        gridAdapter.notifyDataSetChanged();
+    }
 
     private void fillPreviousCourseElementsInList() {
         CourseData previousCourseData = InMemoryDataStore.INSTANCE.getLastPublishedCourseDesign();
@@ -218,6 +251,7 @@ public class CourseDesignDialogFragment extends RaceDialogFragment {
 
     protected void sendCourseDataAndDismiss(CourseData courseDesign) {
         sendCourseData(courseDesign);
+        onPublish();
         dismiss();
     }
 
@@ -397,17 +431,9 @@ public class CourseDesignDialogFragment extends RaceDialogFragment {
         }
     }
 
-    protected void onNegativeButton() {
+    protected void onPublish() {
         if (getHost() != null) {
-            getHost().onDialogNegativeButton();
-        } else {
-            ExLog.w(TAG, "Dialog host was null.");
-        }
-    }
-
-    protected void onPositiveButton() {
-        if (getHost() != null) {
-            getHost().onDialogPositiveButton();
+            getHost().onCourseDesignPublish();
         } else {
             ExLog.w(TAG, "Dialog host was null.");
         }

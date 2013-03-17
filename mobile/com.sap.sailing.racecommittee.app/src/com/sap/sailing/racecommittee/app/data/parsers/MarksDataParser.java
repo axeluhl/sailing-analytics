@@ -27,7 +27,8 @@ public class MarksDataParser implements DataParser<Collection<Mark>> {
 
         for (Object element : jsonArray) {
             JSONObject json = Helpers.toJSONObjectSafe(element);
-            marks.add(deserializer.deserialize(json));
+            Mark mark = deserializer.deserialize(json);
+            marks.add(mark);
         }
 
         return marks;

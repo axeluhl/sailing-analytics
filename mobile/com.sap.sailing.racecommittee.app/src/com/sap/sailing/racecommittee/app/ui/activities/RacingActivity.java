@@ -24,10 +24,11 @@ import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceInfoFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.CourseDesignListener;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.ManagedRaceListFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceInfoListener;
 
-public class RacingActivity extends TwoPaneActivity implements RaceInfoListener /*
+public class RacingActivity extends TwoPaneActivity implements RaceInfoListener, CourseDesignListener /*
                                                                                  * implements ResetTimeListener,
                                                                                  * StartModeSelectionListener,
                                                                                  * PathfinderSelectionListener,
@@ -194,6 +195,21 @@ public class RacingActivity extends TwoPaneActivity implements RaceInfoListener 
 
     public void onResetTime() {
         infoFragment.onResetTime();
+    }
+
+    @Override
+    public ReadonlyDataManager getDataManager() {
+        return dataManager;
+    }
+
+    @Override
+    public void onCourseDesignPublish() {
+        onChangeCourseDesign();
+    }
+
+    @Override
+    public void onChangeCourseDesign() {
+        infoFragment.onChangeCourseDesign();
     }
 
     /*

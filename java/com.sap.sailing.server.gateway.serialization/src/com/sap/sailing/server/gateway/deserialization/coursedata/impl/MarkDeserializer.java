@@ -25,12 +25,12 @@ public class MarkDeserializer implements JsonDeserializer<Mark> {
 
     @Override
     public Mark deserialize(JSONObject object) throws JsonDeserializationException {
-        Serializable id = Helpers.tryUuidConversion(object.get(MarkJsonSerializer.FIELD_ID).toString());
-        String color = object.get(MarkJsonSerializer.FIELD_COLOR).toString();
-        String pattern = object.get(MarkJsonSerializer.FIELD_PATTERN).toString();
-        String shape = object.get(MarkJsonSerializer.FIELD_SHAPE).toString();
-        MarkType type = MarkType.valueOf(object.get(MarkJsonSerializer.FIELD_TYPE).toString());
-        String name = object.get(MarkJsonSerializer.FIELD_NAME).toString();
+        Serializable id = Helpers.tryUuidConversion((String) object.get(MarkJsonSerializer.FIELD_ID));
+        String color = (String) object.get(MarkJsonSerializer.FIELD_COLOR);
+        String pattern = (String) object.get(MarkJsonSerializer.FIELD_PATTERN);
+        String shape = (String) object.get(MarkJsonSerializer.FIELD_SHAPE);
+        MarkType type = MarkType.valueOf((String) object.get(MarkJsonSerializer.FIELD_TYPE));
+        String name = (String) object.get(MarkJsonSerializer.FIELD_NAME);
         
         Mark mark = factory.getOrCreateMark(id, name, type, color, shape, pattern);
         return mark;

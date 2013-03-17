@@ -7,10 +7,12 @@ import java.util.Date;
 
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.EventData;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
 import com.sap.sailing.domain.base.impl.CourseAreaImpl;
 import com.sap.sailing.domain.base.impl.EventDataImpl;
 import com.sap.sailing.domain.base.impl.FleetImpl;
+import com.sap.sailing.domain.base.impl.MarkImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.base.racegroup.RaceGroup;
 import com.sap.sailing.domain.base.racegroup.SeriesWithRows;
@@ -27,103 +29,116 @@ import com.sap.sailing.racecommittee.app.domain.impl.ManagedRaceIdentifierImpl;
 import com.sap.sailing.racecommittee.app.domain.impl.ManagedRaceImpl;
 
 public class OfflineDataManager extends DataManager {
-	
-	private static boolean isInitialized = false;
 
-	public OfflineDataManager(DataStore dataStore) {
-		super(dataStore);
-		
-		if (!isInitialized) {
-			isInitialized = true;
-			fillDataStore(dataStore);
-		}
-	}
+    private static boolean isInitialized = false;
 
-	private void fillDataStore(DataStore dataStore) {
-		dataStore.addEvent(new EventDataImpl("Extreme Sailing Series 2012 (Cardiff)", "Cardiff", "", true, "DUMBUUIDA"));
-		dataStore.addEvent(new EventDataImpl("Extreme Sailing Series 2012 (Nice)", "Nice", "", true, "DUMBUUIDB"));
-		dataStore.addEvent(new EventDataImpl("Extreme Sailing Series 2012 (Rio)", "Rio", "", true, "DUMBUUIDC"));
-		EventData newEvent = new EventDataImpl("Extreme Sailing Series 2013 (Muscat)", "Muscat", "", true, "FIXUUID");
-		newEvent.getVenue().addCourseArea(new CourseAreaImpl("Offshore", "FIXCAUUID1"));
-		newEvent.getVenue().addCourseArea(new CourseAreaImpl("Stadium", "FIXCAUUID2"));
-		dataStore.addEvent(newEvent);
-		
-		SeriesWithRows qualifying = new SeriesWithRowsImpl("Qualifying", false, null);
-		SeriesWithRows medal = new SeriesWithRowsImpl("Medal", true, null);
-		RaceGroup raceGroup = new RaceGroupImpl(
-				"ESS", 
-				new BoatClassImpl("X40", false), 
-				null,
-				Arrays.asList(qualifying, medal));
-		
-		RaceLogEventFactory factory = new RaceLogEventFactoryImpl();
-		PassAwareRaceLog log = new PassAwareRaceLogImpl();
-		log.add(factory.createRaceStatusEvent(
-				new MillisecondsTimePoint(new Date().getTime() + 1), 
-				2,
-				RaceLogRaceStatus.SCHEDULED));
-		
-		ManagedRace q1 = new ManagedRaceImpl(
-				new ManagedRaceIdentifierImpl(
-						"Q1", 
-						new FleetImpl("Default"), 
-						qualifying, 
-						raceGroup), 
-					log);
-		
-		log = new PassAwareRaceLogImpl();
-		/*log.add(factory.createStartTimeEvent(
+    public OfflineDataManager(DataStore dataStore) {
+        super(dataStore);
+
+        if (!isInitialized) {
+            isInitialized = true;
+            fillDataStore(dataStore);
+        }
+    }
+
+    private void fillDataStore(DataStore dataStore) {
+        dataStore.addEvent(new EventDataImpl("Extreme Sailing Series 2012 (Cardiff)", "Cardiff", "", true, "DUMBUUIDA"));
+        dataStore.addEvent(new EventDataImpl("Extreme Sailing Series 2012 (Nice)", "Nice", "", true, "DUMBUUIDB"));
+        dataStore.addEvent(new EventDataImpl("Extreme Sailing Series 2012 (Rio)", "Rio", "", true, "DUMBUUIDC"));
+        EventData newEvent = new EventDataImpl("Extreme Sailing Series 2013 (Muscat)", "Muscat", "", true, "FIXUUID");
+        newEvent.getVenue().addCourseArea(new CourseAreaImpl("Offshore", "FIXCAUUID1"));
+        newEvent.getVenue().addCourseArea(new CourseAreaImpl("Stadium", "FIXCAUUID2"));
+        dataStore.addEvent(newEvent);
+
+        SeriesWithRows qualifying = new SeriesWithRowsImpl("Qualifying", false, null);
+        SeriesWithRows medal = new SeriesWithRowsImpl("Medal", true, null);
+        RaceGroup raceGroup = new RaceGroupImpl(
+                "ESS", 
+                new BoatClassImpl("X40", false), 
+                null,
+                Arrays.asList(qualifying, medal));
+
+        RaceLogEventFactory factory = new RaceLogEventFactoryImpl();
+        PassAwareRaceLog log = new PassAwareRaceLogImpl();
+        log.add(factory.createRaceStatusEvent(
+                new MillisecondsTimePoint(new Date().getTime() + 1), 
+                2,
+                RaceLogRaceStatus.SCHEDULED));
+
+        ManagedRace q1 = new ManagedRaceImpl(
+                new ManagedRaceIdentifierImpl(
+                        "Q1", 
+                        new FleetImpl("Default"), 
+                        qualifying, 
+                        raceGroup), 
+                        log);
+
+        log = new PassAwareRaceLogImpl();
+        /*log.add(factory.createStartTimeEvent(
 				new MillisecondsTimePoint(new Date()), 
 				1,
 				RaceLogRaceStatus.SCHEDULED, 
 				new MillisecondsTimePoint(new Date().getTime() + 100000)));
-		*/
-		
-		ManagedRace q2 = new ManagedRaceImpl(
-				new ManagedRaceIdentifierImpl(
-						"Q2", 
-						new FleetImpl("Default"), 
-						qualifying, 
-						raceGroup), 
-					log);
-		
-		log = new PassAwareRaceLogImpl();
-		/*log.add(factory.createRaceStatusEvent(
+         */
+
+        ManagedRace q2 = new ManagedRaceImpl(
+                new ManagedRaceIdentifierImpl(
+                        "Q2", 
+                        new FleetImpl("Default"), 
+                        qualifying, 
+                        raceGroup), 
+                        log);
+
+        log = new PassAwareRaceLogImpl();
+        /*log.add(factory.createRaceStatusEvent(
 				new MillisecondsTimePoint(new Date()), 
 				5,
 				RaceLogRaceStatus.FINISHED));*/
-		ManagedRace q3 = new ManagedRaceImpl(
-				new ManagedRaceIdentifierImpl(
-						"Q3", 
-						new FleetImpl("Default"), 
-						qualifying, 
-						raceGroup), 
-					log);
-		/*ManagedRace m1 = new ManagedRaceImpl(
+        ManagedRace q3 = new ManagedRaceImpl(
+                new ManagedRaceIdentifierImpl(
+                        "Q3", 
+                        new FleetImpl("Default"), 
+                        qualifying, 
+                        raceGroup), 
+                        log);
+        /*ManagedRace m1 = new ManagedRaceImpl(
 				new ManagedRaceIdentifierImpl(
 						"M1", 
 						new FleetImpl("Default"), 
 						medal, 
 						raceGroup), 
 				null);*/
-		dataStore.addRace(q1);
-		dataStore.addRace(q2);
-		dataStore.addRace(q3);
-		//dataStore.addRace(m1);
-	}
+        dataStore.addRace(q1);
+        dataStore.addRace(q2);
+        dataStore.addRace(q3);
+        //dataStore.addRace(m1);
+        
+        Mark m1 = new MarkImpl("Red");
+        Mark m2 = new MarkImpl("Green");
+        Mark m3 = new MarkImpl("White");
+        
+        dataStore.addMark(m1);
+        dataStore.addMark(m2);
+        dataStore.addMark(m3);
+    }
 
-	public void loadEvents(LoadClient<Collection<EventData>> client) {
-		client.onLoadSucceded(dataStore.getEvents());
-	}
+    public void loadEvents(LoadClient<Collection<EventData>> client) {
+        client.onLoadSucceded(dataStore.getEvents());
+    }
 
-	public void loadCourseAreas(Serializable parentEventId,
-			LoadClient<Collection<CourseArea>> client) {
-		client.onLoadSucceded(dataStore.getCourseAreas(dataStore.getEvent(parentEventId)));
-	}
+    public void loadCourseAreas(Serializable parentEventId,
+            LoadClient<Collection<CourseArea>> client) {
+        client.onLoadSucceded(dataStore.getCourseAreas(dataStore.getEvent(parentEventId)));
+    }
 
-	public void loadRaces(Serializable courseAreaId,
-			LoadClient<Collection<ManagedRace>> client) {
-		client.onLoadSucceded(dataStore.getRaces());
-	}
+    public void loadRaces(Serializable courseAreaId,
+            LoadClient<Collection<ManagedRace>> client) {
+        client.onLoadSucceded(dataStore.getRaces());
+    }
+
+    @Override
+    public void loadMarks(ManagedRace managedRace, LoadClient<Collection<Mark>> client) {
+        client.onLoadSucceded(dataStore.getMarks());
+    }
 
 }
