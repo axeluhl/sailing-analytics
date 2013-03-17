@@ -27,7 +27,7 @@ public class GateJsonSerializer extends BaseControlPointJsonSerializer implement
     public JSONObject serialize(ControlPoint object) {
         Gate gate = (Gate) object;
         JSONObject result =  super.serialize(gate);
-
+        
         result.put(FIELD_LEFT, markSerializer.serialize(gate.getLeft()));
         result.put(FIELD_RIGHT, markSerializer.serialize(gate.getRight()));
 
