@@ -175,7 +175,7 @@ public class CourseDesignDialogFragment extends RaceDialogFragment {
 
             @Override
             public void onClick(View arg0) {
-                CourseData emptyCourse = null;
+                CourseData emptyCourse = new CourseDataImpl("Unpublished course design");
                 sendCourseDataAndDismiss(emptyCourse);
             }
 
@@ -256,7 +256,7 @@ public class CourseDesignDialogFragment extends RaceDialogFragment {
     }
 
     protected void sendCourseData(CourseData courseDesign) {
-//        this.race.changeCourseDesign(courseDesign);
+        getRace().getState().setCourseDesign(courseDesign);
         saveChangedCourseDesignInCache(courseDesign);
     }
 

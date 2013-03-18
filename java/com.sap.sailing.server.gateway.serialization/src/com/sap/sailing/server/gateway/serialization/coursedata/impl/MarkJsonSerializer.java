@@ -36,7 +36,7 @@ public class MarkJsonSerializer extends BaseControlPointJsonSerializer implement
             result.put(FIELD_SHAPE, mark.getShape());
         }
         if (mark.getType() != null) {
-            result.put(FIELD_TYPE, mark.getType());
+            result.put(FIELD_TYPE, mark.getType().name());
         }
 
         return result;

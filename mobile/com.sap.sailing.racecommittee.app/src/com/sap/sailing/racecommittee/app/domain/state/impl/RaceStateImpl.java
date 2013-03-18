@@ -104,11 +104,11 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
         return finishedTimeFinder.getFinishedTime();
     }
     
-    public void setCourseDesign(CourseData courseData) {
+    public void setCourseDesign(CourseData newCourseData) {
         TimePoint eventTime = MillisecondsTimePoint.now();
         
         RaceLogEvent event = RaceLogEventFactory.INSTANCE.createCourseDesignChangedEvent(eventTime, UUID.randomUUID(),
-                Collections.<Competitor> emptyList(), raceLog.getCurrentPassId(), courseData);
+                Collections.<Competitor> emptyList(), raceLog.getCurrentPassId(), newCourseData);
         this.raceLog.add(event);
     }
 

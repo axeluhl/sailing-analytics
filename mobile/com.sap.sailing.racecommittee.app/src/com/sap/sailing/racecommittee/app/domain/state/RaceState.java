@@ -1,5 +1,6 @@
 package com.sap.sailing.racecommittee.app.domain.state;
 
+import com.sap.sailing.domain.base.CourseData;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.racelog.RaceLog;
@@ -48,6 +49,14 @@ public interface RaceState {
      *            to be set.
      */
     void setStartTime(TimePoint newStartTime);
+    
+    /**
+     * Sets the current race's course design
+     * 
+     * @param new course data
+     *            to be set.
+     */
+    void setCourseDesign(CourseData newCourseData);
 
     /**
      * Updates the race's status.
