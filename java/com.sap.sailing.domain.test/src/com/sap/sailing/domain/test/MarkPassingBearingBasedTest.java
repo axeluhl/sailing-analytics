@@ -17,7 +17,7 @@ import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
-import com.sap.sailing.domain.common.NauticSide;
+import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
@@ -179,8 +179,8 @@ public class MarkPassingBearingBasedTest extends AbstractMarkPassingTest {
 			}
 			
 			// depending on passing side, set the bearing difference
-			NauticSide passingSide = getPassingSideOfMark(waypoint, mark, fix.getTimePoint());
-			if (passingSide != null && passingSide.equals(NauticSide.STARBOARD)) {	
+			NauticalSide passingSide = getPassingSideOfMark(waypoint, mark, fix.getTimePoint());
+			if (passingSide != null && passingSide.equals(NauticalSide.STARBOARD)) {	
 				bearingDiff = new DegreeBearingImpl(-90);
 			} else {	
 				bearingDiff = new DegreeBearingImpl(90);
@@ -267,16 +267,16 @@ public class MarkPassingBearingBasedTest extends AbstractMarkPassingTest {
 		Bearing boatToMark2Bearing = fix.getPosition().getBearingGreatCircle(mark2Pos);
 		Bearing mark2ToMark1Bearing = mark2Pos.getBearingGreatCircle(mark1Pos);
 		
-		NauticSide passingSideOfMark1OfGate = getPassingSideForMark1OfGate(waypoint, fix.getTimePoint());
+		NauticalSide passingSideOfMark1OfGate = getPassingSideForMark1OfGate(waypoint, fix.getTimePoint());
 		double mark1PassingBearingDelta = boatToMark1Bearing.getDifferenceTo(mark2ToMark1Bearing).getDegrees();
 		double mark2PassingBearingDelta = boatToMark2Bearing.getDifferenceTo(mark1ToMark2Bearing).getDegrees();
 		
-		if (	passingSideOfMark1OfGate.equals(NauticSide.STARBOARD) &&
+		if (	passingSideOfMark1OfGate.equals(NauticalSide.STARBOARD) &&
 				mark1PassingBearingDelta < 0 &&				
 				mark2PassingBearingDelta > 0) {
 			// gate passed if mark1 had to be passed on stb
 			return getDomainFactory().createMarkPassing(fix.getTimePoint(), waypoint, competitor);
-		} else if (	passingSideOfMark1OfGate.equals(NauticSide.PORT) &&
+		} else if (	passingSideOfMark1OfGate.equals(NauticalSide.PORT) &&
 				mark1PassingBearingDelta > 0 &&				
 				mark2PassingBearingDelta < 0) {
 			// gate passed if mark1 had to be passed on port
