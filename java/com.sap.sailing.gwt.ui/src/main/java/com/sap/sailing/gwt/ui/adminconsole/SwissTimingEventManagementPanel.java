@@ -35,11 +35,10 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
-import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.RaceSelectionModel;
+import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingRaceRecordDTO;
 
@@ -340,24 +339,27 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
     private void trackSelectedRaces(boolean trackWind, boolean correctWindByDeclination) {
         String hostname = hostnameTextbox.getValue();
         int port = portIntegerbox.getValue();
-        for (final SwissTimingRaceRecordDTO rr : raceList.getList()) {
-            if (raceTable.getSelectionModel().isSelected(rr)) {
-                sailingService.trackWithSwissTiming(/* regattaToAddTo */ null, // TODO allow user to select a pre-defined regatta
-                        rr, hostname, port, /* canSendRequests */false, 
-                        trackWind, correctWindByDeclination, new AsyncCallback<Void>() {
+        final List<SwissTimingRaceRecordDTO> selectedRaces = new ArrayList<SwissTimingRaceRecordDTO>();
+        for (final SwissTimingRaceRecordDTO race : this.raceList.getList()) {
+            if (raceTable.getSelectionModel().isSelected(race)) {
+                selectedRaces.add(race);
+            }
+        }
+        sailingService.trackWithSwissTiming(
+                /* regattaToAddTo */null, // TODO allow user to select a pre-defined regatta
+                selectedRaces, hostname, port, /* canSendRequests */false, trackWind, correctWindByDeclination,
+                new AsyncCallback<Void>() {
                     @Override
                     public void onFailure(Throwable caught) {
-                        errorReporter.reportError("Error trying to register race " + rr.ID + " for tracking: "
+                        errorReporter.reportError("Error trying to register races " + selectedRaces + " for tracking: "
                                 + caught.getMessage());
                     }
 
-                    @Override 
+                    @Override
                     public void onSuccess(Void result) {
                         regattaRefresher.fillRegattas();
                     }
                 });
-            }
-        }
     }
 
     private void updatePanelFromSelectedStoredConfiguration() {
@@ -372,18 +374,13 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
         }
     }
 
-    @Override
-    public void fillRegattas(List<RegattaDTO> result) {
-        trackedRacesListComposite.fillRegattas(result);
-    }
-    
     private void fillRaceListFromAvailableRacesApplyingFilter(String text) {
         List<String> wordsToFilter = Arrays.asList(text.split(" "));
         raceList.getList().clear();
         if (text != null && !text.isEmpty()) {
             for (SwissTimingRaceRecordDTO triple : availableSwissTimingRaces) {
-                boolean failed = textContainingStringsToCheck(wordsToFilter, triple.ID);
-                if (!failed) {
+                boolean found = textContainsStringsToCheck(wordsToFilter, triple.ID);
+                if (found) {
                     raceList.getList().add(triple);
                 }
             }

@@ -15,6 +15,7 @@ import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util;
+import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -120,19 +121,26 @@ public abstract class AbstractScoringSchemeImpl implements ScoringScheme {
      * Assuming both competitors scored in the same number of races, compares the sorted scores.
      */
     @Override
-    public int compareByBetterScore(List<Double> o1Scores, List<Double> o2Scores, boolean nullScoresAreBetter) {
+    public int compareByBetterScore(List<Pair<RaceColumn, Double>> o1Scores, List<Pair<RaceColumn, Double>> o2Scores, boolean nullScoresAreBetter) {
         assert o1Scores.size() == o2Scores.size();
-        Comparator<Double> scoreComparator = getScoreComparator(nullScoresAreBetter);
-        List<Double> o1ScoresCopy = new ArrayList<Double>(o1Scores);
-        List<Double> o2ScoresCopy = new ArrayList<Double>(o2Scores);
-        Collections.sort(o1ScoresCopy, scoreComparator);
-        Collections.sort(o2ScoresCopy, scoreComparator);
+        final Comparator<Double> pureScoreComparator = getScoreComparator(nullScoresAreBetter);
+        // needs to compare net points; therefore, divide the total points by the column factor for comparison:
+        List<Double> o1NetScores = new ArrayList<>();
+        for (Pair<RaceColumn, Double> o1ColumnAndScore : o1Scores) {
+            o1NetScores.add(o1ColumnAndScore.getB()/o1ColumnAndScore.getA().getFactor());
+        }
+        List<Double> o2NetScores = new ArrayList<>();
+        for (Pair<RaceColumn, Double> o2ColumnAndScore : o2Scores) {
+            o2NetScores.add(o2ColumnAndScore.getB()/o2ColumnAndScore.getA().getFactor());
+        }
+        Collections.sort(o1NetScores, pureScoreComparator);
+        Collections.sort(o2NetScores, pureScoreComparator);
         // now both lists are sorted from best to worst score
-        Iterator<Double> o1Iter = o1ScoresCopy.iterator();
-        Iterator<Double> o2Iter = o2ScoresCopy.iterator();
+        Iterator<Double> o1Iter = o1NetScores.iterator();
+        Iterator<Double> o2Iter = o2NetScores.iterator();
         int result = 0;
         while (result == 0 && o1Iter.hasNext() && o2Iter.hasNext()) {
-            result = scoreComparator.compare(o1Iter.next(), o2Iter.next());
+            result = pureScoreComparator.compare(o1Iter.next(), o2Iter.next());
         }
         return result;
     }
@@ -147,10 +155,11 @@ public abstract class AbstractScoringSchemeImpl implements ScoringScheme {
     }
 
     @Override
-    public int compareByLastRace(List<Double> o1Scores, List<Double> o2Scores, boolean nullScoresAreBetter) {
+    public int compareByLastRace(List<Pair<RaceColumn, Double>> o1Scores, List<Pair<RaceColumn, Double>> o2Scores, boolean nullScoresAreBetter) {
         int result = 0;
         if (!o1Scores.isEmpty() && !o2Scores.isEmpty()) {
-            result = getScoreComparator(nullScoresAreBetter).compare(o1Scores.get(o1Scores.size()-1), o2Scores.get(o2Scores.size()-1));
+            result = getScoreComparator(nullScoresAreBetter).compare(o1Scores.get(o1Scores.size()-1).getB(),
+                    o2Scores.get(o2Scores.size()-1).getB());
         }
         return result;
     }

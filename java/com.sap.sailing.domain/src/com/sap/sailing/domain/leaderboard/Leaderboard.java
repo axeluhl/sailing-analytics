@@ -4,10 +4,12 @@ import java.util.List;
 import java.util.Map;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnListener;
 import com.sap.sailing.domain.base.Series;
+import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.Named;
@@ -212,6 +214,15 @@ public interface Leaderboard extends Named {
      * @throws NoWindException 
      */
     List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint) throws NoWindException;
+    
+    /**
+     * Returns the total rank of the given competitor.
+     * @param competitor
+     * @param timePoint
+     * @return
+     * @throws NoWindException
+     */
+    int getTotalRankOfCompetitor(Competitor competitor, TimePoint timePoint) throws NoWindException;
 
     /**
      * Fetches all entries for all competitors of all races tracked by this leaderboard in one sweep. This saves some
@@ -268,11 +279,19 @@ public interface Leaderboard extends Named {
     void setDisplayName(Competitor competitor, String displayName);
 
     /**
+     * If a display name for the leaderboard has been defined,
+     * this method returns it; otherwise, <code>null</code> is returned.
+     */
+    String getDisplayName();
+
+    void setDisplayName(String displayName);
+
+    /**
      * If a display name different from the competitor's {@link Competitor#getName() name} has been defined,
      * this method returns it; otherwise, <code>null</code> is returned.
      */
     String getDisplayName(Competitor competitor);
-    
+
     /**
      * Tells if the column represented by <code>raceColumn</code> shall be considered when counting the number of "races
      * so far" for discarding. Although medal races are never discarded themselves, they still count in determining the
@@ -337,7 +356,17 @@ public interface Leaderboard extends Named {
      * races attached to this leaderboard
      */
     Long getTotalTimeSailedInMilliseconds(Competitor competitor, TimePoint timePoint);
-
+    
+    /**
+     * Computes the distance the <code>competitor</code> has sailed in the tracked races in this leaderboard, starting
+     * to count in each race when the competitor passes the start line, aggregating up to <code>timePoint</code> or the
+     * end of the last race, whichever is first.
+     * 
+     * @return <code>null</code> if the <code>competitor</code> hasn't sailed any distance in any tracked race in this
+     *         leaderboard
+     */
+    Distance getTotalDistanceTraveled(Competitor competitor, TimePoint timePoint);
+    
     /**
      * Same as {@link #getTotalPoints(Competitor, RaceColumn, TimePoint)}, only that for determining the discarded
      * results only <code>raceColumnsToConsider</code> are considered.
@@ -347,4 +376,9 @@ public interface Leaderboard extends Named {
 
     TimePoint getNowMinusDelay();
     
+    /**
+     * Get the default {@link CourseArea} of this leaderboard.
+     * @return the default {@link CourseArea} for all races of this leaderboard.
+     */
+    CourseArea getDefaultCourseArea();
 }

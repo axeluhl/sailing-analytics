@@ -16,6 +16,8 @@
 
 package org.moxieapps.gwt.highcharts.client;
 
+import org.moxieapps.gwt.highcharts.client.plotOptions.OHLCPlotOptions;
+
 /**
  * BETA!  The main GWT widget that can be constructed and then configured in order to add a Highstock
  * chart into a GWT layout container.  Note that for more basic chart types just make use of the
@@ -59,6 +61,8 @@ package org.moxieapps.gwt.highcharts.client;
  * @since 1.0.0
  */
 public class StockChart extends BaseChart<StockChart> {
+    
+    private final Navigator navigator;
 
     /**
      * Create a new Highstock chart instance as a GWT Widget that can then be added to
@@ -75,11 +79,23 @@ public class StockChart extends BaseChart<StockChart> {
      */
     public StockChart() {
         super();
+        Series navigatorSeries = createSeries();
+        this.navigator = new Navigator(this, navigatorSeries);
+        this.setOption("/navigator", this.navigator);
     }
 
     @Override
     protected String getChartTypeName() {
         return "StockChart";
+    }
+    
+    /**
+     * Access the StockChart's {@link Navigator}, for customization.
+     * @return A reference to the stock chart's {@link Navigator}
+     * @since 1.5.0
+     */
+    public Navigator getNavigator() {
+        return navigator;
     }
 
     /**
@@ -95,6 +111,28 @@ public class StockChart extends BaseChart<StockChart> {
      */
     public StockChart setRangeSelector(RangeSelector rangeSelector) {
         return this.setOption("/rangeSelector", rangeSelector != null ? rangeSelector.getOptions() : null);
+    }
+
+
+    /**
+     * Updates the options that all OHLC type series within the chart will use by default.  The settings can then
+     * be overridden for each individual series via the {@link Series#setPlotOptions(org.moxieapps.gwt.highcharts.client.plotOptions.PlotOptions)} method.
+     * <p/>
+     * Note that changing the plot options on a chart that has already been rendered will only affect
+     * series that are subsequently added to the chart (and will not impact any of the series that are already
+     * rendered in the chart.)
+     *
+     * @param ohlcPlotOptions The options to set on the chart as the default settings for all OHLC type series
+     *                        that are part of this chart.
+     * @return A reference to this {@link StockChart} instance for convenient method chaining.
+     * @since 1.4.0
+     */
+    public StockChart setOHLCPlotOptions(OHLCPlotOptions ohlcPlotOptions) {
+        this.ohlcPlotOptions = ohlcPlotOptions;
+        if (ohlcPlotOptions != null) {
+            this.setOption("/plotOptions/ohlc", ohlcPlotOptions.getOptions());
+        }
+        return this;
     }
 
 

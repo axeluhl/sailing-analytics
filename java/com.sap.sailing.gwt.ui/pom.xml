@@ -21,7 +21,7 @@
 	<dependency>
 		<groupId>org.moxieapps.gwt</groupId>
 		<artifactId>org.moxieapps.gwt.highcharts</artifactId>
-		<version>1.3.0-SNAPSHOT</version>
+		<version>1.5.0-SNAPSHOT</version>
     	<classifier>sources</classifier>
 	</dependency>
 	<dependency>
@@ -37,20 +37,24 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>gwt-maven-plugin</artifactId>
-        <version>2.4.0</version>
+        <version>2.5.0</version>
         <executions>
           <!-- GWT version detected from dependencyManagement -->
           <execution>
 	        <configuration>
 		   <extraJvmArgs>-Dgwt.persistentunitcache=false</extraJvmArgs>
 	          <modules>
-		        <module>com.sap.sailing.gwt.ui.RaceBoard</module>
-		        <module>com.sap.sailing.gwt.ui.Spectator</module>
-		        <module>com.sap.sailing.gwt.ui.LeaderboardEditing</module>
 		        <module>com.sap.sailing.gwt.ui.AdminConsole</module>
 		        <module>com.sap.sailing.gwt.ui.Leaderboard</module>
-		        <module>com.sap.sailing.gwt.ui.UserManagement</module>
+		        <module>com.sap.sailing.gwt.ui.LeaderboardEditing</module>
+		        <module>com.sap.sailing.gwt.ui.RaceBoard</module>
+		        <module>com.sap.sailing.gwt.ui.Spectator</module>
 		        <module>com.sap.sailing.gwt.ui.TvView</module>
+		        <module>com.sap.sailing.gwt.ui.UserManagement</module>
+		        <module>com.sap.sailing.gwt.ui.VideoPopup</module>
+		        <module>com.sap.sailing.gwt.ui.YoutubePopup</module>
+		        <module>com.sap.sailing.gwt.ui.RegattaOverview</module>
+		        <module>com.sap.sailing.gwt.ui.PolarSheets</module>
 		      </modules>
 		      <gen>${basedir}/.generated</gen>
 		      <localWorkers>3</localWorkers>
@@ -65,5 +69,31 @@
       </plugin>
     </plugins>
   </build>
+
+  <profiles>
+        <profile>
+            <id>debug.no-gwt-compile</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>gwt-maven-plugin</artifactId>
+                        <version>2.4.0</version>
+                        <executions>
+                          <execution>
+                              <configuration combine.self="override">
+                                  <modules>
+                                  </modules>
+                              </configuration>
+                              <goals>
+                                <goal>help</goal>
+                              </goals>
+                          </execution>
+                      </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
 </project>

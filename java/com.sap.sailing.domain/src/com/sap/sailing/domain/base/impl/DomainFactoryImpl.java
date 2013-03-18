@@ -1,6 +1,5 @@
 package com.sap.sailing.domain.base.impl;
 
-import java.awt.TrayIcon.MessageType;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
@@ -26,11 +25,14 @@ import com.sap.sailing.domain.base.ObjectInputStreamResolvingAgainstDomainFactor
 import com.sap.sailing.domain.base.Team;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.MarkType;
+import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.WithID;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.leaderboard.impl.HighPoint;
 import com.sap.sailing.domain.leaderboard.impl.HighPointExtremeSailingSeriesOverall;
+import com.sap.sailing.domain.leaderboard.impl.HighPointFirstGets10LastBreaksTie;
 import com.sap.sailing.domain.leaderboard.impl.HighPointLastBreaksTie;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
 import com.sap.sailing.domain.tracking.MarkPassing;
@@ -43,7 +45,14 @@ public class DomainFactoryImpl implements DomainFactory {
      */
     private final Map<String, Nationality> nationalityCache;
     
-    private final Map<String, Mark> markCache;
+    private final Map<Serializable, Mark> markCache;
+    
+    /**
+     * For all marks ever created by this factory, the mark {@link WithID#getId() ID}'s string representation
+     * is mapped here to the actual ID. This allows clients to send only the string representation to the server
+     * and still be able to identify a mark uniquely this way.
+     */
+    private final Map<String, Serializable> markIdCache;
     
     private final Map<String, BoatClass> boatClassCache;
     
@@ -86,7 +95,8 @@ public class DomainFactoryImpl implements DomainFactory {
     public DomainFactoryImpl() {
         waypointCacheReferenceQueue = new ReferenceQueue<Waypoint>();
         nationalityCache = new HashMap<String, Nationality>();
-        markCache = new HashMap<String, Mark>();
+        markCache = new HashMap<Serializable, Mark>();
+        markIdCache = new HashMap<>();
         boatClassCache = new HashMap<String, BoatClass>();
         competitorCache = new HashMap<Serializable, Competitor>();
         waypointCache = new ConcurrentHashMap<Serializable, WeakWaypointReference>();
@@ -105,27 +115,47 @@ public class DomainFactoryImpl implements DomainFactory {
         }
     }
     
-    /**
-     * @param id
-     * the ID which is probably also used as the "device name" and the "sail number" in case of an
-     * {@link MessageType#RPD RPD} message
-     */
     @Override
-    public Mark getOrCreateMark(String id) {
-        Mark result = markCache.get(id);
-        if (result == null) {
-            result = new MarkImpl(id);
-            markCache.put(id, result);
-        }
-        return result;
+    public Mark getOrCreateMark(String name) {
+        return getOrCreateMark(name, name);
     }
     
     @Override
-    public Mark getOrCreateMark(String id, MarkType type, String color, String shape, String pattern) {
+    public Mark getOrCreateMark(Serializable id, String name) {
         Mark result = markCache.get(id);
         if (result == null) {
-            result = new MarkImpl(id, type, color, shape, pattern);
-            markCache.put(id, result);
+            result = new MarkImpl(id, name);
+            cacheMark(id, result);
+        }
+        return result;
+    }
+
+    @Override
+    public Mark getOrCreateMark(String toStringRepresentationOfID, String name) {
+        final Mark result;
+        if (markIdCache.containsKey(toStringRepresentationOfID)) {
+            Serializable id = markIdCache.get(toStringRepresentationOfID);
+            result = getOrCreateMark(id, name);
+        } else {
+            result = new MarkImpl(toStringRepresentationOfID, name);
+            cacheMark(toStringRepresentationOfID, result);
+        }
+        return result;
+    }
+
+    private void cacheMark(Serializable id, Mark result) {
+        markCache.put(id, result);
+        markIdCache.put(id.toString(), id);
+    }
+    
+    
+    
+    @Override
+    public Mark getOrCreateMark(Serializable id, String name, MarkType type, String color, String shape, String pattern) {
+        Mark result = markCache.get(id);
+        if (result == null) {
+            result = new MarkImpl(id, name, type, color, shape, pattern);
+            cacheMark(id, result);
         }
         return result;
     }
@@ -136,10 +166,15 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public Waypoint createWaypoint(ControlPoint controlPoint) {
+    public Gate createGate(Serializable id, Mark left, Mark right, String name) {
+       return new GateImpl(id, left, right, name);
+    }
+
+    @Override
+    public Waypoint createWaypoint(ControlPoint controlPoint, NauticalSide passingSide) {
         synchronized (waypointCache) {
             expungeStaleWaypointCacheEntries();
-            Waypoint result = new WaypointImpl(controlPoint);
+            Waypoint result = new WaypointImpl(controlPoint, passingSide);
             waypointCache.put(result.getId(), new WeakWaypointReference(result));
             return result;
         }
@@ -251,6 +286,8 @@ public class DomainFactoryImpl implements DomainFactory {
             return new HighPointExtremeSailingSeriesOverall();
         case HIGH_POINT_LAST_BREAKS_TIE:
             return new HighPointLastBreaksTie();
+        case HIGH_POINT_FIRST_GETS_TEN:
+            return new HighPointFirstGets10LastBreaksTie();
         default:
             throw new RuntimeException("Unknown scoring scheme type "+scoringSchemeType.name());
         }

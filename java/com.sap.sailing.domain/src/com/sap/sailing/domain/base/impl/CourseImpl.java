@@ -14,14 +14,16 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.CourseListener;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Leg;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.impl.NamedImpl;
+import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.util.CourseAsWaypointList;
 import com.sap.sailing.util.impl.LockUtil;
 import com.sap.sailing.util.impl.NamedReentrantReadWriteLock;
@@ -65,6 +67,7 @@ public class CourseImpl extends NamedImpl implements Course {
                 previous = current;
             }
         }
+        assert this.waypoints.size() == waypointIndexes.size();
     }
     
     @Override
@@ -107,18 +110,14 @@ public class CourseImpl extends NamedImpl implements Course {
      * For access by {@link LegImpl}
      */
     Waypoint getWaypoint(int i) {
-        lockForRead();
-        try {
-            return waypoints.get(i);
-        } finally {
-            unlockAfterRead();
-        }
+        return waypoints.get(i);
     }
     
     @Override
     public void addWaypoint(int zeroBasedPosition, Waypoint waypointToAdd) {
         LockUtil.lockForWrite(lock);
         try {
+            assert !waypoints.contains(waypointToAdd); // no duplicate waypoints allowed
             logger.info("Adding waypoint " + waypointToAdd + " to course '" + getName() + "'");
             waypoints.add(zeroBasedPosition, waypointToAdd);
             Map<Waypoint, Integer> updatesToWaypointIndexes = new HashMap<Waypoint, Integer>();
@@ -129,18 +128,15 @@ public class CourseImpl extends NamedImpl implements Course {
                 }
             }
             waypointIndexes.putAll(updatesToWaypointIndexes);
-            int legStartWaypointIndex;
-            if (zeroBasedPosition == waypoints.size() - 1) { // added to end
-                legStartWaypointIndex = zeroBasedPosition - 1;
-            } else {
-                legStartWaypointIndex = zeroBasedPosition;
-            }
+            // legs are "virtual" in that they only contain a waypoint index; adding happens most conveniently by
+            // appending a leg with its start waypoint index pointing to the last but one waypoint, leaving all others unchanged
             if (waypoints.size() > 1) {
-                legs.add(new LegImpl(this, legStartWaypointIndex));
+                legs.add(new LegImpl(this, waypoints.size()-2));
             }
             logger.info("Waypoint " + waypointToAdd + " added to course '" + getName() + "', before notifying listeners");
             notifyListenersWaypointAdded(zeroBasedPosition, waypointToAdd);
             logger.info("Waypoint " + waypointToAdd + " added to course '" + getName() + "', after notifying listeners");
+            assert waypoints.size() == waypointIndexes.size();
         } finally {
             LockUtil.unlockAfterWrite(lock);
         }
@@ -152,7 +148,6 @@ public class CourseImpl extends NamedImpl implements Course {
             Waypoint removedWaypoint;
             LockUtil.lockForWrite(lock);
             try {
-                boolean isLast = zeroBasedPosition == waypoints.size() - 1;
                 removedWaypoint = waypoints.remove(zeroBasedPosition);
                 logger.info("Removing waypoint " + removedWaypoint + " from course '" + getName() + "'");
                 waypointIndexes.remove(removedWaypoint);
@@ -163,17 +158,16 @@ public class CourseImpl extends NamedImpl implements Course {
                     }
                 }
                 waypointIndexes.putAll(updatesToWaypointIndexes);
-                if (isLast) {
-                    if (waypoints.size() > 0) { // if we had only one waypoint, we didn't have any legs
-                        // last waypoint was removed; remove last leg
-                        legs.remove(legs.size() - 1);
-                    }
-                } else {
-                    legs.remove(zeroBasedPosition);
+                // the legs are "virtual" only in that they contain a waypoint index; when removing, removing the last is most
+                // convenient because all other legs' indices will still be contiguous
+                if (!legs.isEmpty()) { // if we had only one waypoint, we didn't have any legs
+                    // last waypoint was removed; remove last leg
+                    legs.remove(legs.size() - 1);
                 }
                 logger.info("Waypoint " + removedWaypoint + " removed from course '" + getName() + "', before notifying listeners");
                 notifyListenersWaypointRemoved(zeroBasedPosition, removedWaypoint);
                 logger.info("Waypoint " + removedWaypoint + " removed from course '" + getName() + "', after notifying listeners");
+                assert waypoints.size() == waypointIndexes.size();
             } finally {
                 LockUtil.unlockAfterWrite(lock);
             }
@@ -184,10 +178,10 @@ public class CourseImpl extends NamedImpl implements Course {
         for (CourseListener listener : listeners) {
             try {
                 listener.waypointRemoved(index, waypointToRemove);
-            } catch (Throwable t) {
+            } catch (Exception e) {
                 logger.log(Level.SEVERE, "Exception while notifying listener about waypoint " + waypointToRemove
-                        + " that got removed from course " + this + ": " + t.getMessage());
-                logger.throwing(CourseImpl.class.getName(), "notifyListenersWaypointRemoved", t);
+                        + " that got removed from course " + this + ": " + e.getMessage());
+                logger.throwing(CourseImpl.class.getName(), "notifyListenersWaypointRemoved", e);
             }
         }
     }
@@ -196,12 +190,17 @@ public class CourseImpl extends NamedImpl implements Course {
         for (CourseListener listener : listeners) {
             try {
                 listener.waypointAdded(zeroBasedPosition, waypointToAdd);
-            } catch (Throwable t) {
+            } catch (Exception e) {
                 logger.log(Level.SEVERE, "Exception while notifying listener about waypoint " + waypointToAdd
-                        + " that got added to course " + this + ": " + t.getMessage());
-                logger.throwing(CourseImpl.class.getName(), "notifyListenersWaypointAdded", t);
+                        + " that got added to course " + this + ": " + e.getMessage());
+                logger.throwing(CourseImpl.class.getName(), "notifyListenersWaypointAdded", e);
             }
         }
+    }
+
+    @Override
+    public Leg getFirstLeg() {
+        return legs.get(0);
     }
 
     @Override
@@ -367,7 +366,7 @@ public class CourseImpl extends NamedImpl implements Course {
     }
 
     @Override
-    public void update(List<ControlPoint> newControlPoints, DomainFactory baseDomainFactory) throws PatchFailedException {
+    public void update(List<Pair<ControlPoint, NauticalSide>> newControlPoints, DomainFactory baseDomainFactory) throws PatchFailedException {
         LockUtil.lockForWrite(lock);
         try {
             Iterable<Waypoint> courseWaypoints = getWaypoints();
@@ -386,20 +385,23 @@ public class CourseImpl extends NamedImpl implements Course {
                 }
                 wpl.add(waypoint);
             }
-            for (com.sap.sailing.domain.base.ControlPoint newDomainControlPoint : newControlPoints) {
-                List<Waypoint> waypoints = existingWaypointsByControlPoint.get(newDomainControlPoint);
+            for (Pair<ControlPoint, NauticalSide> newDomainControlPoint : newControlPoints) {
+                List<Waypoint> waypoints = existingWaypointsByControlPoint.get(newDomainControlPoint.getA());
                 Waypoint waypoint;
                 if (waypoints == null || waypoints.isEmpty()) {
                     // must be a new control point for which we don't have a waypoint yet
-                    waypoint = baseDomainFactory.createWaypoint(newDomainControlPoint);
+                    waypoint = baseDomainFactory.createWaypoint(newDomainControlPoint.getA(), newDomainControlPoint.getB());
                 } else {
                     waypoint = waypoints.remove(0); // take the first from the list
                 }
                 newWaypointList.add(waypoint);
             }
             Patch<Waypoint> patch = DiffUtils.diff(courseWaypoints, newWaypointList);
-            CourseAsWaypointList courseAsWaypointList = new CourseAsWaypointList(this);
-            patch.applyToInPlace(courseAsWaypointList);
+            if (!patch.isEmpty()) {
+                logger.info("applying course update " + patch + " to course " + this);
+                CourseAsWaypointList courseAsWaypointList = new CourseAsWaypointList(this);
+                patch.applyToInPlace(courseAsWaypointList);
+            }
         } finally {
             LockUtil.unlockAfterWrite(lock);
         }

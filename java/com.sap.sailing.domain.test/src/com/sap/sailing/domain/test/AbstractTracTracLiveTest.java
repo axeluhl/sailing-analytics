@@ -8,17 +8,24 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 
 import com.maptrack.client.io.TypeController;
+import com.sap.sailing.domain.common.NauticalSide;
+import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.tractracadapter.Receiver;
 import com.sap.sailing.domain.tractracadapter.TracTracConnectionConstants;
+import com.sap.sailing.domain.tractracadapter.TracTracControlPoint;
+import com.sap.sailing.domain.tractracadapter.impl.ControlPointAdapter;
+import com.tractrac.clientmodule.ControlPoint;
 import com.tractrac.clientmodule.Event;
 import com.tractrac.clientmodule.data.DataController;
 import com.tractrac.clientmodule.data.DataController.Listener;
@@ -176,4 +183,19 @@ public abstract class AbstractTracTracLiveTest extends StoredTrackBasedTest impl
         System.err.println("Error with live data "+arg0);
     }
 
+    public static Iterable<Pair<TracTracControlPoint, NauticalSide>> getTracTracControlPointsWithPassingSide(Iterable<ControlPoint> controlPoints) {
+        List<Pair<TracTracControlPoint, NauticalSide>> ttControlPoints = new ArrayList<Pair<TracTracControlPoint, NauticalSide>>();
+        for (com.tractrac.clientmodule.ControlPoint cp : controlPoints) {
+            ttControlPoints.add(new Pair<TracTracControlPoint, NauticalSide>(new ControlPointAdapter(cp), null));
+        }
+        return ttControlPoints;
+    }
+    
+    public static Iterable<TracTracControlPoint> getTracTracControlPoints(Iterable<ControlPoint> controlPoints) {
+        List<TracTracControlPoint> ttControlPoints = new ArrayList<>();
+        for (com.tractrac.clientmodule.ControlPoint cp : controlPoints) {
+            ttControlPoints.add(new ControlPointAdapter(cp));
+        }
+        return ttControlPoints;
+    }
 }

@@ -80,10 +80,12 @@ public class LeaderboardUrlConfigurationDialog extends SettingsDialog<Leaderboar
         private CheckBox autoRefreshCheckbox;
         private Anchor resultingUrl;
         private final String leaderboardName;
+        private final String leaderboardDisplayName;
         
         public LeaderboardUrlConfigurationDialogComponent(AbstractLeaderboardDTO leaderboard, StringMessages stringMessages) {
             this.stringMessages = stringMessages;
             this.leaderboardName = leaderboard.name;
+            this.leaderboardDisplayName = leaderboard.displayName;
             List<RaceColumnDTO> raceList = leaderboard.getRaceList();
             List<String> namesOfRaceColumnsToShow = new ArrayList<String>();
             for (RaceColumnDTO raceColumn : raceList) {
@@ -91,18 +93,18 @@ public class LeaderboardUrlConfigurationDialog extends SettingsDialog<Leaderboar
             }
             LeaderboardSettings settings = LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(
                     namesOfRaceColumnsToShow, /* namesOfRacesToShow */null, /* nameOfRaceToSort */null, /* autoExpandPreSelectedRace */
-                    false);
+                    false, /* showMetaLeaderboardsOnSamePage */ false);
             List<DetailType> overallDetailsToShow = Collections.emptyList();
             leaderboardSettingsDialogComponent = new LeaderboardSettingsDialogComponent(settings.getManeuverDetailsToShow(),
                 settings.getLegDetailsToShow(), settings.getRaceDetailsToShow(), overallDetailsToShow, raceList, 
                 /* select all races by default */ raceList, new ExplicitRaceColumnSelection(),
                 /* autoExpandPreSelectedRace */ false,
-                /* delayBetweenAutoAdvancesInMilliseconds */ 3000l,
-                /* delayInMilliseconds */ 3000l, stringMessages);
+                /* showOverallLeaderboardOnSamePage */ false,
+                /* delayBetweenAutoAdvancesInMilliseconds */ 3000l, /* delayInMilliseconds */ 3000l, stringMessages);
         }
 
-        private void updateURL(LeaderboardUrlSettings settings, String leaderboardName) {
-            resultingUrl.setHref(LeaderboardEntryPoint.getUrl(leaderboardName, settings));
+        private void updateURL(LeaderboardUrlSettings settings, String leaderboardName, String leaderboardDisplayName) {
+            resultingUrl.setHref(LeaderboardEntryPoint.getUrl(leaderboardName, leaderboardDisplayName, settings));
         }
 
         /**
@@ -123,7 +125,7 @@ public class LeaderboardUrlConfigurationDialog extends SettingsDialog<Leaderboar
                 public String getErrorMessage(LeaderboardUrlSettings settings) {
                     String errorMessage = superValidator.getErrorMessage(settings.getLeaderboardSettings());
                     if (errorMessage == null) {
-                        updateURL(settings, leaderboardName);
+                        updateURL(settings, leaderboardName, leaderboardDisplayName);
                     }
                     return errorMessage;
                 }

@@ -7,6 +7,7 @@ import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.text.SimpleDateFormat;
 import java.util.List;
+import java.util.TimeZone;
 
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.ManeuverType;
@@ -24,6 +25,7 @@ public abstract class AbstractManeuverDetectionTestCase extends OnlineTracTracBa
     public AbstractManeuverDetectionTestCase() throws MalformedURLException, URISyntaxException {
         super();
         dateFormat = new SimpleDateFormat("MM/dd/yyyy-HH:mm:ss");
+        dateFormat.setTimeZone(TimeZone.getTimeZone("GMT+2")); // will result in CEST
     }
 
     /**

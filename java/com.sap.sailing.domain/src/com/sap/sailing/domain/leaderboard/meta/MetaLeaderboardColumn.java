@@ -9,6 +9,11 @@ import com.sap.sailing.domain.base.RaceColumnListener;
 import com.sap.sailing.domain.base.impl.SimpleAbstractRaceColumn;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
+import com.sap.sailing.domain.racelog.RaceLog;
+import com.sap.sailing.domain.racelog.RaceLogEvent;
+import com.sap.sailing.domain.racelog.RaceLogIdentifier;
+import com.sap.sailing.domain.racelog.RaceLogInformation;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
 /**
@@ -30,13 +35,23 @@ public class MetaLeaderboardColumn extends SimpleAbstractRaceColumn implements R
         leaderboard.addRaceColumnListener(this);
     }
 
+    @Override
+    public void setRaceLogInformation(RaceLogInformation information) {
+        return;
+    }
+
+    @Override
+    public RaceLog getRaceLog(Fleet fleet) {
+        return null;
+    }
+
     Leaderboard getLeaderboard() {
         return leaderboard;
     }
     
     @Override
     public String getName() {
-        return leaderboard.getName();
+        return leaderboard.getDisplayName() != null ? leaderboard.getDisplayName() : leaderboard.getName();
     }
 
     @Override
@@ -134,6 +149,17 @@ public class MetaLeaderboardColumn extends SimpleAbstractRaceColumn implements R
     @Override
     public void competitorDisplayNameChanged(Competitor competitor, String oldDisplayName, String displayName) {
         getRaceColumnListeners().notifyListenersAboutCompetitorDisplayNameChanged(competitor, oldDisplayName, displayName);
+    }
+
+    @Override
+    public void resultDiscardingRuleChanged(ThresholdBasedResultDiscardingRule oldDiscardingRule,
+            ThresholdBasedResultDiscardingRule newDiscardingRule) {
+        getRaceColumnListeners().notifyListenersAboutResultDiscardingRuleChanged(oldDiscardingRule, newDiscardingRule);
+    }
+
+    @Override
+    public void raceLogEventAdded(RaceColumn raceColumn, RaceLogIdentifier raceLogIdentifier, RaceLogEvent event) {
+        getRaceColumnListeners().notifyListenersAboutRaceLogEventAdded(raceColumn, raceLogIdentifier, event);
     }
 
     @Override

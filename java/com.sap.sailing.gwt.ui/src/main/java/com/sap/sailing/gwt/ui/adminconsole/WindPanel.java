@@ -41,7 +41,7 @@ import com.sap.sailing.gwt.ui.client.RegattaDisplayer;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.CourseDTO;
+import com.sap.sailing.gwt.ui.shared.CoursePositionsDTO;
 import com.sap.sailing.gwt.ui.shared.RaceDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
@@ -109,14 +109,14 @@ public class WindPanel extends FormPanel implements RegattaDisplayer, WindShower
                 RegattaAndRaceIdentifier selectedRace = getSelectedRace(); 
                 if(selectedRace != null) {
                     final RaceDTO race = trackedRacesListComposite.getRaceByIdentifier(selectedRace);
-                    sailingService.getCoursePositions(selectedRace, race.startOfRace, new AsyncCallback<CourseDTO>() {
+                    sailingService.getCoursePositions(selectedRace, race.trackedRace.startOfTracking, new AsyncCallback<CoursePositionsDTO>() {
                         @Override
                         public void onFailure(Throwable caught) {
                             showWindSettingDialog(race, null);
                         }
 
                         @Override
-                        public void onSuccess(final CourseDTO result) {
+                        public void onSuccess(final CoursePositionsDTO result) {
                             showWindSettingDialog(race, result);
                         }
                     });
@@ -214,8 +214,8 @@ public class WindPanel extends FormPanel implements RegattaDisplayer, WindShower
         windFixesDisplayPanel.add(rawWindFixesTable);
     }
 
-    private void showWindSettingDialog(RaceDTO race, CourseDTO course) {
-        WindSettingDialog windSettingDialog = new WindSettingDialog(race, course, stringMessages, 
+    private void showWindSettingDialog(RaceDTO race, CoursePositionsDTO course) {
+        AddWindFixDialog windSettingDialog = new AddWindFixDialog(race, course, stringMessages, 
                 new DialogCallback<WindDTO>() {
                     @Override
                     public void cancel() {
@@ -372,7 +372,7 @@ public class WindPanel extends FormPanel implements RegattaDisplayer, WindShower
         RegattaAndRaceIdentifier selectedRace = getSelectedRace();
         RaceDTO raceDTO = selectedRace != null ? trackedRacesListComposite.getRaceByIdentifier(selectedRace) : null;
 
-        if (selectedRace != null && raceDTO != null && raceDTO.isTracked) {
+        if (selectedRace != null && raceDTO != null && raceDTO.trackedRace != null) {
             windCaptionPanel.setVisible(true);
             windCaptionPanel.setCaptionText(stringMessages.wind() + ": " + selectedRace.getRaceName());
 

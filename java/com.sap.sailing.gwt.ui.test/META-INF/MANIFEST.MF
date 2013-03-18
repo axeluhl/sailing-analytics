@@ -5,12 +5,10 @@ Bundle-SymbolicName: com.sap.sailing.gwt.ui.test
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Require-Bundle: com.sap.sailing.gwt.ui,
- com.sap.sailing.domain,
- com.sap.sailing.server,
- com.google.gwt.osgi;bundle-version="2.4.0",
- com.sap.sailing.domain.common,
- com.sap.sailing.domain.tractracadapter
+Fragment-Host: com.sap.sailing.gwt.ui
+Require-Bundle: com.sap.sailing.server,
+ org.hamcrest.core;bundle-version="1.1.0",
+ com.sap.sailing.expeditionconnector
 Bundle-ClassPath: .
 Import-Package: javax.jms;version="1.1.0",
  javax.servlet;version="2.5.0",

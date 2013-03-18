@@ -14,24 +14,26 @@ import com.sap.sailing.gwt.ui.leaderboard.ScoringSchemeTypeFormatter;
 public abstract class AbstractLeaderboardDialog extends DataEntryDialog<LeaderboardDescriptor> {
     protected final StringMessages stringMessages;
     protected TextBox nameTextBox;
-    protected LeaderboardDescriptor leaderboard;
-    
+    protected TextBox displayNameTextBox;
+    protected LeaderboardDescriptor leaderboardDescriptor;
+
     protected LongBox[] discardThresholdBoxes;
     protected static final int MAX_NUMBER_OF_DISCARDED_RESULTS = 4;
 
-    public AbstractLeaderboardDialog(String title, LeaderboardDescriptor leaderboardDTO, StringMessages stringConstants,
+    public AbstractLeaderboardDialog(String title, LeaderboardDescriptor leaderboardDescriptor, StringMessages stringConstants,
             Validator<LeaderboardDescriptor> validator,  DialogCallback<LeaderboardDescriptor> callback) {
         super(title, null, stringConstants.ok(), stringConstants.cancel(), validator, callback);
         this.stringMessages = stringConstants;
-        this.leaderboard = leaderboardDTO;
+        this.leaderboardDescriptor = leaderboardDescriptor;
     }
-    
+
     @Override
     protected LeaderboardDescriptor getResult() {
         int[] discardThresholdsBoxContents = getDiscardThresholds(discardThresholdBoxes);
-        leaderboard.setName(nameTextBox.getValue());
-        leaderboard.setDiscardThresholds(discardThresholdsBoxContents);
-        return leaderboard;
+        leaderboardDescriptor.setName(nameTextBox.getValue());
+        leaderboardDescriptor.setDisplayName(displayNameTextBox.getValue().trim().isEmpty() ? null : displayNameTextBox.getValue());
+        leaderboardDescriptor.setDiscardThresholds(discardThresholdsBoxContents);
+        return leaderboardDescriptor;
     }
 
     protected static int[] getDiscardThresholds(LongBox[] discardThresholdBoxes) {
@@ -80,7 +82,7 @@ public abstract class AbstractLeaderboardDialog extends DataEntryDialog<Leaderbo
             result[i].setVisibleLength(2);
         }
         return result;
-    }    
+    }
 
     protected static ListBox createScoringSchemeListBox(DataEntryDialog<?> dialog, StringMessages stringMessages) {
         ListBox scoringSchemeListBox2 = dialog.createListBox(false);

@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal"
+    android:descendantFocusability="beforeDescendants"
+	android:focusableInTouchMode="true"
+    android:background="@drawable/background" >
+    
+    <LinearLayout
+	    android:layout_width="wrap_content"
+	    android:layout_height="match_parent"
+	    android:orientation="horizontal"
+        android:layout_margin="18dp"
+        android:background="@color/welter_extralight_gray_transparent">
+    
+	    <LinearLayout 
+	        android:orientation="vertical"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_margin="18dp">
+	        
+	      	<TextView
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+		        android:text="1. Enter the wind direction"
+		        android:textAppearance="@style/TextAppearance.Welter.BigTitleLabel" />
+	        
+		    <com.sap.sailing.racecommittee.app.utils.views.CompassView
+		        android:id="@+id/compassView1"
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content" >
+		    </com.sap.sailing.racecommittee.app.utils.views.CompassView>
+		    
+	       	<TextView
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+		        android:text="2. Enter the wind speed"
+		        android:textAppearance="@style/TextAppearance.Welter.BigTitleLabel" />
+	    
+		    <SeekBar 
+		        android:id="@+id/sb_wind_speed"
+		        android:layout_width="match_parent"
+		        android:layout_height="wrap_content"
+		        android:progress="100"
+		        android:max="400"
+		        android:padding="18dp" />
+		        
+	       	<TextView
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+		        android:text="3. Obtain your position"
+		        android:textAppearance="@style/TextAppearance.Welter.BigTitleLabel" />
+	       	
+	       	<Button 
+	       	    android:id="@+id/btn_wind_query_gps"
+	    	    android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+		        android:text="Query GPS"
+		        android:layout_gravity="center"
+		        android:padding="18dp" />
+	       	
+	    </LinearLayout>
+	    
+		<LinearLayout
+		    android:layout_width="2dp"
+		    android:layout_height="match_parent"
+		    android:orientation="vertical"
+		    android:layout_margin="18dp"
+		    android:background="@color/welter_deep_gray">
+		</LinearLayout>
+	    
+	    <LinearLayout 
+	        android:orientation="vertical"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+		    android:layout_margin="18dp"
+		    android:layout_marginRight="26dp">
+	       	
+	       	<TextView
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+		        android:layout_marginBottom="9dp"
+		        android:text="4. Check all data"
+		        android:textAppearance="@style/TextAppearance.Welter.BigTitleLabel" />
+	        
+		    <TextView
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+		        android:text="Wind direction (degrees)" />
+		    
+		    <EditText
+		        android:id="@+id/et_wind_direction" 
+	        	android:layout_width="wrap_content"
+	        	android:layout_height="wrap_content"
+	        	android:inputType="numberDecimal"
+	        	android:hint="in degrees"
+	        	android:minWidth="200dp"/>
+		    
+		    <TextView
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+		        android:text="Wind speed (knots)" />
+		    
+		    <EditText
+		        android:id="@+id/et_wind_speed"
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+		        android:inputType="numberDecimal"
+		        android:hint="in knots" 
+		        android:minWidth="200dp">
+		    </EditText>
+		    
+		    <TextView
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+		        android:text="Your position" />
+		    
+		    <EditText
+		        android:id="@+id/et_position_lat"
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+		        android:hint="latitude" 
+		        android:minWidth="200dp">
+		    </EditText>
+		    
+		    <EditText
+		        android:id="@+id/et_position_lon"
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+		        android:hint="longitude" 
+		        android:minWidth="200dp">
+		    </EditText>
+		    
+	       	<TextView
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+		        android:layout_marginTop="18dp"
+		        android:layout_marginBottom="9dp"
+		        android:text="5. Send data to server"
+		        android:textAppearance="@style/TextAppearance.Welter.BigTitleLabel" />
+	       	
+		    <Button 
+		        android:id="@+id/btn_wind_send"
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+		        android:text="Send"
+		        android:layout_gravity="center"/>
+	        
+	    </LinearLayout>
+	
+	</LinearLayout>
+
+</LinearLayout>

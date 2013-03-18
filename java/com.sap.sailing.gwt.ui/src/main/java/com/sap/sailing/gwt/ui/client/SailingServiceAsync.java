@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.client;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
 import java.util.LinkedHashMap;
@@ -10,38 +11,47 @@ import java.util.Set;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.DetailType;
+import com.sap.sailing.domain.common.MaxPointsReason;
+import com.sap.sailing.domain.common.NauticalSide;
+import com.sap.sailing.domain.common.PolarSheetGenerationTriggerResponse;
+import com.sap.sailing.domain.common.PolarSheetsData;
+import com.sap.sailing.domain.common.PolarSheetsHistogramData;
+import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaIdentifier;
-import com.sap.sailing.domain.common.MaxPointsReason;
-import com.sap.sailing.domain.common.RaceIdentifier;
+import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.gwt.ui.shared.BulkScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
+import com.sap.sailing.gwt.ui.shared.CompetitorsRaceDataDTO;
 import com.sap.sailing.gwt.ui.shared.ControlPointDTO;
-import com.sap.sailing.gwt.ui.shared.CourseDTO;
+import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
+import com.sap.sailing.gwt.ui.shared.CoursePositionsDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
-import com.sap.sailing.gwt.ui.shared.RaceCourseMarksDTO;
-import com.sap.sailing.gwt.ui.shared.RaceColumnInSeriesDTO;
-import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardEntryDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.ManeuverDTO;
-import com.sap.sailing.gwt.ui.shared.MultiCompetitorRaceDataDTO;
 import com.sap.sailing.gwt.ui.shared.QuickRankDTO;
+import com.sap.sailing.gwt.ui.shared.RaceColumnInSeriesDTO;
+import com.sap.sailing.gwt.ui.shared.RaceCourseDTO;
 import com.sap.sailing.gwt.ui.shared.RaceDTO;
+import com.sap.sailing.gwt.ui.shared.RaceEventLogDTO;
 import com.sap.sailing.gwt.ui.shared.RaceMapDataDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
-import com.sap.sailing.gwt.ui.shared.ReplicationStateDTO;
+import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaScoreCorrectionDTO;
+import com.sap.sailing.gwt.ui.shared.ReplicationStateDTO;
 import com.sap.sailing.gwt.ui.shared.ScoreCorrectionProviderDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
+import com.sap.sailing.gwt.ui.shared.SwissTimingArchiveConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingRaceRecordDTO;
+import com.sap.sailing.gwt.ui.shared.SwissTimingReplayRaceDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracRaceRecordDTO;
 import com.sap.sailing.gwt.ui.shared.VenueDTO;
@@ -52,7 +62,7 @@ import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
  * The async counterpart of {@link SailingService}
  */
 public interface SailingServiceAsync {
-    
+
     void getRegattas(AsyncCallback<List<RegattaDTO>> callback);
 
     /**
@@ -80,8 +90,16 @@ public interface SailingServiceAsync {
      *            {@link TracTracRaceRecordDTO#storedURI} from the <code>rr</code> race record.
      */
     void trackWithTracTrac(RegattaIdentifier regattaToAddTo,
-            TracTracRaceRecordDTO rr, String liveURI, String storedURI, boolean trackWind, boolean correctWindByDeclination,
+            Iterable<TracTracRaceRecordDTO> rrs, String liveURI, String storedURI, boolean trackWind, boolean correctWindByDeclination,
             boolean simulateWithStartTimeNow, AsyncCallback<Void> callback);
+
+    void trackWithSwissTiming(RegattaIdentifier regattaToAddTo, Iterable<SwissTimingRaceRecordDTO> rrs,
+            String hostname, int port, boolean canSendRequests, boolean trackWind, boolean correctWindByDeclination,
+            AsyncCallback<Void> asyncCallback);
+
+    void replaySwissTimingRace(RegattaIdentifier regattaIdentifier, Iterable<SwissTimingReplayRaceDTO> replayRaces,
+            boolean trackWind, boolean correctWindByDeclination, boolean simulateWithStartTimeNow,
+            AsyncCallback<Void> asyncCallback);
 
     void getPreviousTracTracConfigurations(AsyncCallback<List<TracTracConfigurationDTO>> callback);
 
@@ -90,13 +108,13 @@ public interface SailingServiceAsync {
 
     void stopTrackingEvent(RegattaIdentifier eventIdentifier, AsyncCallback<Void> callback);
 
-    void stopTrackingRace(RegattaAndRaceIdentifier raceIdentifier, AsyncCallback<Void> asyncCallback);
-    
+    void stopTrackingRaces(Iterable<RegattaAndRaceIdentifier> racesToStopTracking, AsyncCallback<Void> asyncCallback);
+
     /**
      * Untracks the race and removes it from the regatta. It will also be removed in all leaderboards
-     * @param regattaAndRaceidentifier The identifier for the regatta name, and the race name to remove
+     * @param regattaNamesAndRaceNames The identifier for the regatta name, and the race name to remove
      */
-    void removeAndUntrackRace(RegattaAndRaceIdentifier regattaAndRaceidentifier, AsyncCallback<Void> callback);
+    void removeAndUntrackRaces(Iterable<RegattaNameAndRaceName> regattaNamesAndRaceNames, AsyncCallback<Void> callback);
 
     void getRawWindFixes(RegattaAndRaceIdentifier raceIdentifier, Collection<WindSource> windSources, AsyncCallback<WindInfoForRaceDTO> callback);
 
@@ -133,7 +151,7 @@ public interface SailingServiceAsync {
             Collection<String> windSourceTypeNames, AsyncCallback<WindInfoForRaceDTO> callback);
 
     void setWind(RegattaAndRaceIdentifier raceIdentifier, WindDTO wind, AsyncCallback<Void> callback);
-    
+
     void removeWind(RegattaAndRaceIdentifier raceIdentifier, WindDTO windDTO, AsyncCallback<Void> callback);
 
     /**
@@ -156,10 +174,10 @@ public interface SailingServiceAsync {
             boolean extrapolate, AsyncCallback<Map<CompetitorDTO, List<GPSFixDTO>>> callback);
 
     void getRaceTimesInfo(RegattaAndRaceIdentifier raceIdentifier, AsyncCallback<RaceTimesInfoDTO> callback);
-    
+
     void getRaceTimesInfos(Collection<RegattaAndRaceIdentifier> raceIdentifiers, AsyncCallback<List<RaceTimesInfoDTO>> callback);
 
-    void getCoursePositions(RegattaAndRaceIdentifier raceIdentifier, Date date, AsyncCallback<CourseDTO> asyncCallback);
+    void getCoursePositions(RegattaAndRaceIdentifier raceIdentifier, Date date, AsyncCallback<CoursePositionsDTO> asyncCallback);
 
     void getQuickRanks(RegattaAndRaceIdentifier raceIdentifier, Date date, AsyncCallback<List<QuickRankDTO>> callback);
 
@@ -176,8 +194,8 @@ public interface SailingServiceAsync {
      *            if <code>null</code>, no {@link LeaderboardEntryDTO#legDetails leg details} will be present in the
      *            result ({@link LeaderboardEntryDTO#legDetails} will be <code>null</code> for all
      *            {@link LeaderboardEntryDTO} objects contained). Otherwise, the {@link LeaderboardEntryDTO#legDetails}
-     *            list will contain one entry per leg of the race {@link Course} for those race columns whose
-     *            {@link RaceColumn#getType() name} is contained in <code>namesOfRacesForWhichToLoadLegDetails</code>.
+     *            list will contain one entry per leg of the race {@link com.sap.sailing.domain.base.Course} for those race columns whose
+     *            {@link com.sap.sailing.domain.base.RaceColumn#getType() name} is contained in <code>namesOfRacesForWhichToLoadLegDetails</code>.
      *            For all other columns, {@link LeaderboardEntryDTO#legDetails} is <code>null</code>.
      */
     void getLeaderboardByName(String leaderboardName, Date date,
@@ -187,22 +205,22 @@ public interface SailingServiceAsync {
     void getLeaderboardNames(AsyncCallback<List<String>> callback);
 
     void getLeaderboards(AsyncCallback<List<StrippedLeaderboardDTO>> callback);
-    
-    void getLeaderboardsByEvent(RegattaDTO regatta, AsyncCallback<List<StrippedLeaderboardDTO>> callback);
-    
-    void getLeaderboardsByRace(RaceDTO race, AsyncCallback<List<StrippedLeaderboardDTO>> callback);
-    
-    void updateLeaderboard(String leaderboardName, String newLeaderboardName, int[] newDiscardingThreasholds,
-            AsyncCallback<Void> callback);
 
-    void createFlexibleLeaderboard(String leaderboardName, int[] discardThresholds, ScoringSchemeType scoringSchemeType,
+    void getLeaderboardsByEvent(RegattaDTO regatta, AsyncCallback<List<StrippedLeaderboardDTO>> callback);
+
+    void getLeaderboardsByRace(RaceDTO race, AsyncCallback<List<StrippedLeaderboardDTO>> callback);
+
+    void updateLeaderboard(String leaderboardName, String newLeaderboardName, String newLeaderboardDisplayName,
+            int[] newDiscardingThreasholds, AsyncCallback<Void> callback);
+
+    void createFlexibleLeaderboard(String leaderboardName, String leaderboardDisplayName, int[] discardThresholds, ScoringSchemeType scoringSchemeType, String courseAreaId,
             AsyncCallback<StrippedLeaderboardDTO> asyncCallback);
 
-    void createRegattaLeaderboard(RegattaIdentifier regattaIdentifier, int[] discardThresholds,
+    void createRegattaLeaderboard(RegattaIdentifier regattaIdentifier, String leaderboardDisplayName, int[] discardThresholds,
             AsyncCallback<StrippedLeaderboardDTO> asyncCallback);
 
     void removeLeaderboard(String leaderboardName, AsyncCallback<Void> asyncCallback);
-    
+
     void renameLeaderboard(String leaderboardName, String newLeaderboardName, AsyncCallback<Void> asyncCallback);
 
     void addColumnToLeaderboard(String columnName, String leaderboardName, boolean medalRace,
@@ -261,22 +279,10 @@ public interface SailingServiceAsync {
 
     void storeSwissTimingConfiguration(String configName, String hostname, int port, boolean canSendRequests, AsyncCallback<Void> asyncCallback);
 
-    /**
-     * @param regattaToAddTo
-     *            if <code>null</code>, an existing regatta by the name of the TracTrac event with the boat class name
-     *            appended in parentheses will be looked up; if not found, a default regatta with that name will be
-     *            created, with a single default series and a single default fleet. If a valid {@link RegattaIdentifier}
-     *            is specified, a regatta lookup is performed with that identifier; if the regatta is found, it is used
-     *            to add the races to. Otherwise, a default regatta as described above will be created and used.
-     */
-    void trackWithSwissTiming(RegattaIdentifier regattaToAddTo, SwissTimingRaceRecordDTO rr, String hostname, int port,
-            boolean canSendRequests, boolean trackWind, boolean correctWindByDeclination,
-            AsyncCallback<Void> asyncCallback);
-
     void sendSwissTimingDummyRace(String racMessage, String stlMesssage, String ccgMessage, AsyncCallback<Void> callback);
-    
+
     void getCountryCodes(AsyncCallback<String[]> callback);
-    
+
     void getDouglasPoints(RegattaAndRaceIdentifier raceIdentifier, Map<CompetitorDTO, Date> from, Map<CompetitorDTO, Date> to,
             double meters, AsyncCallback<Map<CompetitorDTO, List<GPSFixDTO>>> callback);
 
@@ -287,19 +293,19 @@ public interface SailingServiceAsync {
 
     void getLeaderboardGroupByName(String groupName, boolean withGeoLocationData,
             AsyncCallback<LeaderboardGroupDTO> callback);
-    
+
     /**
-    * Renames the group with the name <code>oldName</code> to the <code>newName</code>.<br />
-    * If there's no group with the name <code>oldName</code> or there's already a group with the name
-    * <code>newName</code> a {@link IllegalArgumentException} is thrown.
-    */
+     * Renames the group with the name <code>oldName</code> to the <code>newName</code>.<br />
+     * If there's no group with the name <code>oldName</code> or there's already a group with the name
+     * <code>newName</code> a {@link IllegalArgumentException} is thrown.
+     */
     void renameLeaderboardGroup(String oldName, String newName, AsyncCallback<Void> callback);
-    
+
     /**
      * Removes the leaderboard group with the name <code>groupName</code> from the service and the persistant store.
      */
     void removeLeaderboardGroup(String groupName, AsyncCallback<Void> callback);
-    
+
     /**
      * Creates a new group with the name <code>groupname</code>, the description <code>description</code> and an empty list of leaderboards.<br/>
      * @param displayGroupsInReverseOrder TODO
@@ -307,7 +313,7 @@ public interface SailingServiceAsync {
     void createLeaderboardGroup(String groupName, String description,
             boolean displayGroupsInReverseOrder, int[] overallLeaderboardDiscardThresholds,
             ScoringSchemeType overallLeaderboardScoringSchemeType, AsyncCallback<LeaderboardGroupDTO> callback);
-    
+
     /**
      * Updates the data of the group with the name <code>oldName</code>.
      * 
@@ -319,16 +325,6 @@ public interface SailingServiceAsync {
     void updateLeaderboardGroup(String oldName, String newName, String description,
             List<String> leaderboardNames, int[] overallLeaderboardDiscardThresholds, ScoringSchemeType overallLeaderboardScoringSchemeType, AsyncCallback<Void> callback);
 
-    /**
-     * Returns the mark passings and the data for the given {@link DetailType} of all competitors in
-     * <code>competitorsQuery</code> in the <code>race</code>, including the first dates in the query.<br />
-     * The Long part in the <code>competitorsQuery</code> defines the time point, from which on the data should be
-     * returned. If this time point is lesser than the start of race, all available data for this competitor is
-     * returned.<br />
-     * Returns <code>null</code>, if <code>race</code> isn't tracked. 
-     */
-    void getCompetitorsRaceData(RegattaAndRaceIdentifier race, List<Pair<Date,CompetitorDTO>> competitorsToLoad, Date toDate, long stepSize,
-            DetailType detailType, AsyncCallback<MultiCompetitorRaceDataDTO> callback);
 
     void setRaceIsKnownToStartUpwind(RegattaAndRaceIdentifier raceIdentifier, boolean raceIsKnownToStartUpwind,
             AsyncCallback<Void> callback);
@@ -347,28 +343,32 @@ public interface SailingServiceAsync {
     void getEvents(AsyncCallback<List<EventDTO>> callback);
 
     /**
-     * Creates a {@link EventDTO} for the {@link Event} with the name <code>eventName</code>, which contains the
+     * Creates a {@link EventDTO} for the {@link com.sap.sailing.domain.base.Event} with the name <code>eventName</code>, which contains the
      * name, the description and a list with {@link RegattaDTO RegattaDTOs} contained in the event.<br />
      * If no event with the name <code>eventName</code> is known, an {@link IllegalArgumentException} is thrown.
      */
     void getEventByName(String eventName, AsyncCallback<EventDTO> callback);
-    
+
+    void getEventById(Serializable id, AsyncCallback<EventDTO> callback);
+
     /**
-    * Renames the event with the name <code>oldName</code> to the <code>newName</code>.<br />
-    * If there's no event with the name <code>oldName</code> or there's already a event with the name
-    * <code>newName</code> a {@link IllegalArgumentException} is thrown.
-    */
-    void renameEvent(String oldName, String newName, AsyncCallback<Void> callback);
-    
-    /**
-     * Removes the event with the name <code>eventName</code> from the service and the persistence store.
+     * Renames the event with the name <code>oldName</code> to the <code>newName</code>.<br />
+     * If there's no event with the name <code>oldName</code> or there's already a event with the name
+     * <code>newName</code> a {@link IllegalArgumentException} is thrown.
      */
-    void removeEvent(String eventName, AsyncCallback<Void> callback);
-    
-    void createEvent(String eventName, String description, String publicationUrl, boolean isPublic, AsyncCallback<EventDTO> callback);
-    
-    void updateEvent(String eventName, VenueDTO venue, String publicationUrl, boolean isPublic, List<String> regattaNames,
-            AsyncCallback<Void> callback);
+    void renameEvent(String eventIdAsString, String newName, AsyncCallback<Void> callback);
+
+    /**
+     * Removes the event with the id <code>id</code> from the service and the persistence store.
+     */
+    void removeEvent(String eventIdAsString, AsyncCallback<Void> callback);
+
+    void createEvent(String eventName, String description, String publicationUrl, boolean isPublic, List<String> courseAreaNames, AsyncCallback<EventDTO> callback);
+
+    void updateEvent(String eventName, String eventIdAsString, VenueDTO venue, String publicationUrl, boolean isPublic,
+            List<String> regattaNames, AsyncCallback<Void> callback);
+
+    void createCourseArea(String eventIdAsString, String courseAreaName, AsyncCallback<CourseAreaDTO> callback);
 
     void removeRegatta(RegattaIdentifier regattaIdentifier, AsyncCallback<Void> callback);
 
@@ -386,7 +386,7 @@ public interface SailingServiceAsync {
 
     void createRegatta(String regattaName, String boatClassName,
             LinkedHashMap<String, Pair<List<Triple<String, Integer, Color>>, Boolean>> seriesNamesWithFleetNamesAndFleetOrderingAndMedal,
-            boolean persistent, ScoringSchemeType scoringSchemeType, AsyncCallback<RegattaDTO> callback);
+            boolean persistent, ScoringSchemeType scoringSchemeType, String defaultCourseAreaId, AsyncCallback<RegattaDTO> callback);
 
     void addRaceColumnsToSeries(RegattaIdentifier regattaIdentifier, String seriesName, List<String> columnNames,
             AsyncCallback<List<RaceColumnInSeriesDTO>> callback);
@@ -401,17 +401,15 @@ public interface SailingServiceAsync {
 
     void getWindSourcesInfo(RegattaAndRaceIdentifier raceIdentifier, AsyncCallback<WindInfoForRaceDTO> callback);
 
-    void getRaceCourse(RegattaAndRaceIdentifier raceIdentifier, Date date, AsyncCallback<List<ControlPointDTO>> callback);
+    void getRaceCourse(RegattaAndRaceIdentifier raceIdentifier, Date date, AsyncCallback<RaceCourseDTO> callback);
 
-    void updateRaceCourse(RegattaAndRaceIdentifier raceIdentifier, List<ControlPointDTO> controlPoints, AsyncCallback<Void> callback);
+    void updateRaceCourse(RegattaAndRaceIdentifier raceIdentifier, List<Pair<ControlPointDTO, NauticalSide>> controlPoints, AsyncCallback<Void> callback);
 
     void getFregResultUrls(AsyncCallback<List<String>> asyncCallback);
 
     void removeFregURLs(Set<String> toRemove, AsyncCallback<Void> asyncCallback);
 
     void addFragUrl(String result, AsyncCallback<Void> asyncCallback);
-
-    void getRaceCourseMarks(RegattaAndRaceIdentifier raceIdentifier, Date date,	AsyncCallback<RaceCourseMarksDTO> callback);
 
     void addColumnsToLeaderboard(String leaderboardName, List<Pair<String, Boolean>> columnsToAdd,
             AsyncCallback<Void> callback);
@@ -422,9 +420,35 @@ public interface SailingServiceAsync {
 
     void suppressCompetitorInLeaderboard(String leaderboardName, String competitorIdAsString, boolean suppressed, AsyncCallback<Void> asyncCallback);
 
+    void getRaceEventLog(AsyncCallback<RaceEventLogDTO> callback);
+
     void updateLeaderboardColumnFactor(String leaderboardName, String columnName, Double newFactor,
             AsyncCallback<Void> callback);
 
+    void listSwissTiminigReplayRaces(String swissTimingUrl, AsyncCallback<List<SwissTimingReplayRaceDTO>> asyncCallback);
+
     void getRankedCompetitorsFromBestToWorstAfterEachRaceColumn(String leaderboardName, Date date,
             AsyncCallback<List<Pair<String, List<CompetitorDTO>>>> callback);
+
+    void getCompetitorsRaceData(RegattaAndRaceIdentifier race, List<CompetitorDTO> competitors, Date from, Date to,
+            long stepSize, DetailType detailType, String leaderboarGroupName, String leaderboardName, AsyncCallback<CompetitorsRaceDataDTO> callback);
+
+    /**
+     * Finds out the names of all {@link com.sap.sailing.domain.leaderboard.MetaLeaderboard}s managed by this server that
+     * {@link com.sap.sailing.domain.leaderboard.MetaLeaderboard#getLeaderboards() contain} the leaderboard identified by <code>leaderboardName</code>. The
+     * names of those meta-leaderboards are returned. The list returned is never <code>null</code> but may be empty if no such
+     * leaderboard is found.
+     */
+    void getOverallLeaderboardNamesContaining(String leaderboardName, AsyncCallback<List<String>> asyncCallback);
+
+    void getPreviousSwissTimingArchiveConfigurations(
+            AsyncCallback<List<SwissTimingArchiveConfigurationDTO>> asyncCallback);
+
+    void storeSwissTimingArchiveConfiguration(String swissTimingUrl, AsyncCallback<Void> asyncCallback);
+
+    void generatePolarSheetForRaces(List<RegattaAndRaceIdentifier> selectedRaces, AsyncCallback<PolarSheetGenerationTriggerResponse> asyncCallback);
+
+    void getPolarSheetsGenerationResults(String id, AsyncCallback<PolarSheetsData> asyncCallback);
+
+    void getPolarSheetData(String polarSheetId, int angle, int windSpeed, AsyncCallback<PolarSheetsHistogramData> wrapperCallback);
 }

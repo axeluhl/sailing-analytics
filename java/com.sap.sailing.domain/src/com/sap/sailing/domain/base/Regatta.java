@@ -2,6 +2,7 @@ package com.sap.sailing.domain.base;
 
 import com.sap.sailing.domain.common.Named;
 import com.sap.sailing.domain.common.RegattaIdentifier;
+import com.sap.sailing.domain.common.WithID;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
@@ -14,8 +15,10 @@ import com.sap.sailing.domain.tracking.TrackedRegatta;
  * @author Axel Uhl (d043530)
  *
  */
-public interface Regatta extends Named {
+public interface Regatta extends Named, WithID {
     ScoringScheme getScoringScheme();
+    
+    CourseArea getDefaultCourseArea();
     
     /**
      * A regatta consists of one or more series.
@@ -68,7 +71,7 @@ public interface Regatta extends Named {
      * may require the base name to which the boat class name will be appended. This method emits the base name.
      */
     String getBaseName();
-
+        
     /**
      * Regattas may be constructed as implicit default regattas in which case they won't need to be stored
      * durably and don't contain valuable information worth being preserved; or they are constructed explicitly

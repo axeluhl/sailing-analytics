@@ -34,9 +34,10 @@ import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
+import com.sap.sailing.server.gateway.AbstractJsonHttpServlet;
 import com.sap.sailing.util.InvalidDateException;
 
-public class RegattaAndRaceDataJsonExportServlet extends JsonExportServlet {
+public class RegattaAndRaceDataJsonExportServlet extends AbstractJsonHttpServlet {
     private static final Logger logger = Logger.getLogger(RegattaAndRaceDataJsonExportServlet.class.getName());
     
     private static final long serialVersionUID = 1333207389294903999L;
@@ -78,7 +79,7 @@ public class RegattaAndRaceDataJsonExportServlet extends JsonExportServlet {
             } else {
                 resp.getWriter().println("No action specified!");
             }
-        } catch (Throwable e) {
+        } catch (Exception e) {
             resp.getWriter().println("Error processing request:");
             e.printStackTrace(resp.getWriter());
         }

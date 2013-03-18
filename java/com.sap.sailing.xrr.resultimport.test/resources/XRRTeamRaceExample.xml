@@ -1,0 +1,164 @@
+<!--?xml version="1.0" encoding="utf-8" ?-->
+<html><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8"></head><body><sailingxrr date="2010-02-16" time="19:59:23" type="SailingXRR" version="1.3.1" xsi:nonamespaceschemalocation="http://www.sailing.org/uploads/xml/sailingXRR_v1.3.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<team gender="Open" teamid="A" teamname="CANADA 1" noc="CAN">
+	<team gender="Open" teamid="B" teamname="USA 1" noc="USA">
+	<team gender="Open" teamid="C" teamname="BRAZIL 1" noc="BRA">
+	<boat boatid="1" boatname="Boat 1" sailnumber="B 1">
+	<boat boatid="2" boatname="Boat 2" sailnumber="B 2">
+	<boat boatid="3" boatname="Boat 3" sailnumber="B 3">
+	<boat boatid="4" boatname="Boat 4" sailnumber="B 4">
+	<boat boatid="5" boatname="Boat 5" sailnumber="B 5">
+	<boat boatid="6" boatname="Boat 6" sailnumber="B 6">
+	<boat boatid="7" boatname="Boat 7" sailnumber="B 7">
+	<boat boatid="8" boatname="Boat 8" sailnumber="B 8">
+	<boat boatid="9" boatname="Boat 9" sailnumber="B 9">
+	<person familyname="SCHMID" givenname="Matthias" ifpersonid="AUTMS3" noc="AUT" personid="1">
+	<person familyname="REICHSTAEDTER" givenname="Florian" ifpersonid="AUTFR1" noc="AUT" personid="2">
+	<person familyname="CHAPLIN-SAUNDERS" givenname="Jacob" ifpersonid="CANJC33" noc="CAN" personid="3">
+	<person familyname="SAUNDERS" givenname="Graeme" ifpersonid="CANGC15" noc="CAN" personid="4">
+	<person familyname="MEDLEY" givenname="Nikki" ifpersonid="USANM28" noc="USA" personid="5">
+	<person familyname="DALLMAN-WEISS" givenname="Lara" ifpersonid="USALD21" noc="USA" personid="6">
+	<person familyname="WADDELL" givenname="Wade" ifpersonid="USAWW66" noc="USA" personid="7">
+	<person familyname="FERNBERGER" givenname="Henry" ifpersonid="USAHF16" noc="USA" personid="8">
+	<person familyname="BOLGER" givenname="Sydney" ifpersonid="USASB77" noc="USA" personid="9">
+	<person familyname="SHEVITZ" givenname="Carly" ifpersonid="USASC46" noc="USA" personid="10">
+	<person familyname="RATLIFF" givenname="Hunter" ifpersonid="USAHR9" noc="USA" personid="11">
+	<person familyname="ROBINSON" givenname="Ian" ifpersonid="USAIR2" noc="USA" personid="12">
+	<person familyname="OLIVEIRA" givenname="Fernanda" ifpersonid="BRAFO1" noc="BRA" personid="13">
+	<person familyname="BARBACHAN" givenname="Ana Luiza" ifpersonid="BRAAB12" noc="BRA" personid="14">
+	<person familyname="DECNOP" givenname="Renata" ifpersonid="BRARD24" noc="BRA" personid="15">
+	<person familyname="SWAN" givenname="Isabel" ifpersonid="BRAIS1" noc="BRA" personid="16">
+	<person familyname="VADLAU" givenname="Lara" ifpersonid="AUTVL1" noc="AUT" personid="17">
+	<person familyname="OGAR" givenname="Jolanta" ifpersonid="POLJO3" noc="POL" personid="18">
+
+	<event eventid="1" ifeventid="IFRGT-15984" title="Example Event 123">
+		<race raceid="1" racenumber="1" stage="1" racename="1">
+		<race raceid="2" racenumber="2" stage="1" racename="2">
+		<race raceid="3" racenumber="3" stage="1" racename="3">
+		<division gender="Open" divisionid="123" ifclassid="14F" title="Example Division 123" type="TeamRace">
+			<raceresult teamid="A" boatid="1" raceid="1" racerank="6" racepoints="6">
+				<crew personid="1" position="S">
+				<crew personid="4" position="C">
+			</crew></crew></raceresult>
+			<raceresult teamid="A" boatid="1" raceid="2" racerank="7" racepoints="7">
+				<crew personid="1" position="S">
+				<crew personid="2" position="C">
+			</crew></crew></raceresult>
+			<raceresult teamid="A" boatid="1" raceid="3" racerank="1" racepoints="1">
+				<crew personid="1" position="S">
+				<crew personid="4" position="C">
+			</crew></crew></raceresult>
+			<raceresult teamid="A" boatid="2" raceid="1" racerank="9" racepoints="10" scorecode="BFD">
+				<crew personid="3" position="S">
+				<crew personid="2" position="C">
+			</crew></crew></raceresult>
+			<raceresult teamid="A" boatid="2" raceid="2" racerank="6" racepoints="6">
+				<crew personid="3" position="S">
+				<crew personid="4" position="C">
+			</crew></crew></raceresult>
+			<raceresult teamid="A" boatid="2" raceid="3" racerank="6" racepoints="6">
+				<crew personid="3" position="S">
+				<crew personid="2" position="C">
+			</crew></crew></raceresult>
+			<raceresult teamid="A" boatid="3" raceid="1" racerank="7" racepoints="7">
+				<crew personid="5" position="S">
+				<crew personid="6" position="C">
+			</crew></crew></raceresult>
+			<raceresult teamid="A" boatid="3" raceid="2" racerank="1" racepoints="1">
+				<crew personid="5" position="S">
+				<crew personid="6" position="C">
+			</crew></crew></raceresult>
+			<raceresult teamid="A" boatid="3" raceid="3" racerank="2" racepoints="2">
+				<crew personid="5" position="S">
+				<crew personid="6" position="C">
+			</crew></crew></raceresult>
+			<raceresult teamid="B" boatid="4" raceid="1" racerank="1" racepoints="1">
+				<crew personid="7" position="S">
+				<crew personid="8" position="C">
+			</crew></crew></raceresult>
+			<raceresult teamid="B" boatid="4" raceid="2" racerank="5" racepoints="5">
+				<crew personid="7" position="S">
+				<crew personid="10" position="C">
+			</crew></crew></raceresult>
+			<raceresult teamid="B" boatid="4" raceid="3" racerank="7" racepoints="7">
+				<crew personid="7" position="S">
+				<crew personid="8" position="C">
+			</crew></crew></raceresult>
+			<raceresult teamid="B" boatid="5" raceid="1" racerank="5" racepoints="5">
+				<crew personid="9" position="S">
+				<crew personid="10" position="C">
+			</crew></crew></raceresult>
+			<raceresult teamid="B" boatid="5" raceid="2" racerank="2" racepoints="2">
+				<crew personid="9" position="S">
+				<crew personid="8" position="C">
+			</crew></crew></raceresult>
+			<raceresult teamid="B" boatid="5" raceid="3" racerank="3" racepoints="3">
+				<crew personid="9" position="S">
+				<crew personid="10" position="C">
+			</crew></crew></raceresult>
+			<raceresult teamid="B" boatid="6" raceid="1" racerank="8" racepoints="8">
+				<crew personid="11" position="S">
+				<crew personid="12" position="C">
+			</crew></crew></raceresult>
+			<raceresult teamid="B" boatid="6" raceid="2" racerank="4" racepoints="4">
+				<crew personid="11" position="S">
+				<crew personid="12" position="C">
+			</crew></crew></raceresult>
+			<raceresult teamid="B" boatid="6" raceid="3" racerank="8" racepoints="8">
+				<crew personid="11" position="S">
+				<crew personid="12" position="C">
+			</crew></crew></raceresult>
+			<raceresult teamid="C" boatid="7" raceid="1" racerank="2" racepoints="2">
+				<crew personid="13" position="S">
+				<crew personid="14" position="C">
+			</crew></crew></raceresult>
+			<raceresult teamid="C" boatid="7" raceid="2" racerank="8" racepoints="8">
+				<crew personid="13" position="S">
+				<crew personid="14" position="C">
+			</crew></crew></raceresult>
+			<raceresult teamid="C" boatid="7" raceid="3" racerank="4" racepoints="4">
+				<crew personid="13" position="S">
+				<crew personid="14" position="C">
+			</crew></crew></raceresult>
+			<raceresult teamid="C" boatid="8" raceid="1" racerank="4" racepoints="4">
+				<crew personid="15" position="S">
+				<crew personid="16" position="C">
+			</crew></crew></raceresult>
+			<raceresult teamid="C" boatid="8" raceid="2" racerank="3" racepoints="3">
+				<crew personid="15" position="S">
+				<crew personid="16" position="C">
+			</crew></crew></raceresult>
+			<raceresult teamid="C" boatid="8" raceid="3" racerank="9" racepoints="10" scorecode="DSQ">
+				<crew personid="15" position="S">
+				<crew personid="18" position="C">
+			</crew></crew></raceresult>
+			<raceresult teamid="C" boatid="9" raceid="1" racerank="3" racepoints="3">
+				<crew personid="17" position="S">
+				<crew personid="18" position="C">
+			</crew></crew></raceresult>
+			<raceresult teamid="C" boatid="9" raceid="2" racerank="9" racepoints="9">
+				<crew personid="17" position="S">
+				<crew personid="18" position="C">
+			</crew></crew></raceresult>
+			<raceresult teamid="C" boatid="9" raceid="3" racerank="5" racepoints="5">
+				<crew personid="17" position="S">
+				<crew personid="16" position="C">
+			</crew></crew></raceresult>
+
+			<trresult teamid="A" raceid="1" teampoints="23" netpoints="23" rank="3">
+			<trresult teamid="A" raceid="2" teampoints="14" netpoints="14" rank="2">
+			<trresult teamid="A" raceid="3" teampoints="9" netpoints="9" rank="1">
+			<trresult teamid="B" raceid="1" teampoints="14" netpoints="14" rank="2">
+			<trresult teamid="B" raceid="2" teampoints="11" netpoints="11" rank="1">
+			<trresult teamid="B" raceid="3" teampoints="18" netpoints="18" rank="2">
+			<trresult teamid="C" raceid="1" teampoints="9" netpoints="9" rank="1">
+			<trresult teamid="C" raceid="2" teampoints="20" netpoints="20" rank="3">
+			<trresult teamid="C" raceid="3" teampoints="19" netpoints="19" rank="3">
+
+			<seriesresult teamid="A" netpoints="46" totalpoints="46" rank="2" tied="false">
+			<seriesresult teamid="B" netpoints="43" totalpoints="43" rank="1" tied="false">
+			<seriesresult teamid="C" netpoints="48" totalpoints="48" rank="3" tied="false">
+		</seriesresult></seriesresult></seriesresult></trresult></trresult></trresult></trresult></trresult></trresult></trresult></trresult></trresult></division>
+	</race></race></race></event>
+</person></person></person></person></person></person></person></person></person></person></person></person></person></person></person></person></person></person></boat></boat></boat></boat></boat></boat></boat></boat></boat></team></team></team></sailingxrr></body></html>

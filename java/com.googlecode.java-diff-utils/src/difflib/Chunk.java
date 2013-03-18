@@ -34,7 +34,7 @@ import java.util.List;
 public class Chunk<T> {
 
     private final int position;
-    private List<T> lines;
+    private final List<T> lines;
     
     /**
      * Creates a chunk and saves a copy of affected lines
@@ -86,10 +86,6 @@ public class Chunk<T> {
      */
     public int getPosition() {
         return position;
-    }
-
-    public void setLines(List<T> lines) {
-        this.lines = lines;
     }
 
     /**

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<OdfBody DocumentCode="SA0000000" DocumentType="DT_SCHEDULE_UPDATE" Version="0" FeedFlag="P" Date="20130205" Time="162041012" LogicalDate="20130205" Venue="WAP">
+  <Competition Code="PG2012">
+    <Discipline Code="SA">
+      <Gender Code="M">
+        <Event Code="007">
+          <Phase Code="9" Type="3">
+            <Unit Code="10" StartDate="2012-08-03T14:50:00+02:00" EstimatedStartDate="true" EndDate="2012-08-03T16:05:00+02:00" EstimatedEndDate="false" Status="7" Medal="0" Venue="WAP" Location="SA4" ModificationIndicator="U">
+              <EstimatedStartText Language="ENG" Value="Followed by" />
+            </Unit>
+          </Phase>
+        </Event>
+      </Gender>
+    </Discipline>
+  </Competition>
+</OdfBody>

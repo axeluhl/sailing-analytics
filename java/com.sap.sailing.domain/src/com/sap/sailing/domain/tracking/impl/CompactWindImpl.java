@@ -125,4 +125,8 @@ public class CompactWindImpl extends AbstractSpeedWithAbstractBearingImpl implem
         }
     }
 
+    @Override
+    public String toString() {
+        return ""+getTimePoint()+"@"+getPosition()+": "+getKnots()+"kn from "+getFrom();
+    }
 }

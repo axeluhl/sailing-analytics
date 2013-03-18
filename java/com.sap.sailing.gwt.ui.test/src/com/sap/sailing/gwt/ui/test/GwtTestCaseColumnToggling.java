@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.test;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -82,7 +83,7 @@ public class GwtTestCaseColumnToggling extends GWTTestCase {
     }
     
     private void trackRace(){
-        service.trackWithTracTrac(/* regattaToAddTo */null, rrDao, tractracTunnel ? "tcp://" + tractracTunnelHost + ":"
+        service.trackWithTracTrac(/* regattaToAddTo */null, Collections.singleton(rrDao), tractracTunnel ? "tcp://" + tractracTunnelHost + ":"
                 + TracTracConnectionConstants.PORT_TUNNEL_LIVE : "tcp://" + TracTracConnectionConstants.HOST_NAME + ":"
                 + TracTracConnectionConstants.PORT_LIVE, tractracTunnel ? "tcp://" + tractracTunnelHost + ":"
                 + TracTracConnectionConstants.PORT_TUNNEL_STORED : "tcp://" + TracTracConnectionConstants.HOST_NAME
@@ -102,7 +103,7 @@ public class GwtTestCaseColumnToggling extends GWTTestCase {
     }
     
     private void createLeaderboard(){
-        service.createFlexibleLeaderboard(LEADERBOARD_NAME, new int[] { 1, 2 }, ScoringSchemeType.LOW_POINT,
+        service.createFlexibleLeaderboard(LEADERBOARD_NAME, null, new int[] { 1, 2 }, ScoringSchemeType.LOW_POINT, null,
                 new AsyncCallback<StrippedLeaderboardDTO>() {
                     @Override
                     public void onSuccess(StrippedLeaderboardDTO result) {

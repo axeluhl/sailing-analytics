@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.ui.client;
 
 import java.util.Date;
 
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.dom.client.Style.FontWeight;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ChangeEvent;
@@ -87,8 +88,11 @@ public abstract class DataEntryDialog<T> {
         this.validator = validator;
         okButton = new Button(okButtonName);
         okButton.getElement().getStyle().setMargin(3, Unit.PX);
+        okButton.ensureDebugId("OkButton");
         FlowPanel dialogFPanel = new FlowPanel();
+        dialogFPanel.setWidth("100%");
         statusLabel = new Label();
+        statusLabel.ensureDebugId("StatusLabel");
         dialogFPanel.add(statusLabel);
         if (message != null) {
             Label messageLabel = new Label(message);
@@ -97,6 +101,7 @@ public abstract class DataEntryDialog<T> {
         }
         
         panelForAdditionalWidget = new FlowPanel();
+        panelForAdditionalWidget.setWidth("100%");
         dialogFPanel.add(panelForAdditionalWidget);
         FlowPanel buttonPanel = new FlowPanel();
         dialogFPanel.add(buttonPanel);
@@ -104,6 +109,7 @@ public abstract class DataEntryDialog<T> {
         buttonPanel.add(okButton);
         cancelButton = new Button(cancelButtonName);
         cancelButton.getElement().getStyle().setMargin(3, Unit.PX);
+        cancelButton.ensureDebugId("CancelButton");
         buttonPanel.add(cancelButton);
         cancelButton.addClickHandler(new ClickHandler() {
             @Override
@@ -138,7 +144,7 @@ public abstract class DataEntryDialog<T> {
     }
     
     protected abstract T getResult();
-    
+
     /**
      * Creates a text box with a key-up listener attached which ensures the value is updated after each
      * key-up event and the entire dialog is {@link #validate() validated} in this case.
@@ -235,19 +241,20 @@ public abstract class DataEntryDialog<T> {
     }
     
     private DateBox createDateBoxInternal(Date initialDate, int visibleLength) {
-        DateBox textBox = new DateBox();
-        textBox.getTextBox().setVisibleLength(visibleLength);
-        textBox.setValue(initialDate);
-        AbstractEntryPoint.addFocusUponKeyUpToggler(textBox.getTextBox());
-        textBox.getTextBox().addChangeHandler(new ChangeHandler() {
+        DateBox dateBox = new DateBox();
+        dateBox.getTextBox().setVisibleLength(visibleLength);
+        dateBox.setFireNullValues(true);
+        dateBox.setValue(initialDate);
+        AbstractEntryPoint.addFocusUponKeyUpToggler(dateBox.getTextBox());
+        dateBox.addValueChangeHandler(new ValueChangeHandler<Date>() {
             @Override
-            public void onChange(ChangeEvent event) {
+            public void onValueChange(ValueChangeEvent<Date> event) {
                 validate();
             }
         });
-        AbstractEntryPoint.linkEnterToButton(getOkButton(), textBox.getTextBox());
-        AbstractEntryPoint.linkEscapeToButton(getCancelButton(), textBox.getTextBox());
-        return textBox;
+        AbstractEntryPoint.linkEnterToButton(getOkButton(), dateBox.getTextBox());
+        AbstractEntryPoint.linkEscapeToButton(getCancelButton(), dateBox.getTextBox());
+        return dateBox;
     }
 
     /**
@@ -334,6 +341,18 @@ public abstract class DataEntryDialog<T> {
         AbstractEntryPoint.linkEscapeToButton(getCancelButton(), result);
         return result;
     }
+
+    /**
+     * Creates a standard label for input fields.
+     * The label has some default formatting like "no wrap" and a colon right after the label text 
+     * @param name
+     * @return
+     */
+    public Label createLabel(String name) {
+        Label result = new Label(name + ":");
+        result.setWordWrap(false);
+        return result;
+    }
     
     public ListBox createListBox(boolean isMultipleSelect) {
         ListBox result = new ListBox(isMultipleSelect);
@@ -377,6 +396,10 @@ public abstract class DataEntryDialog<T> {
         return statusLabel;
     }
 
+    protected void setCursor(Style.Cursor cursor) {
+        dateEntryDialog.getElement().getStyle().setCursor(cursor);
+    }
+
     public void show() {
         Widget additionalWidget = getAdditionalWidget();
         if (additionalWidget != null) {
@@ -386,4 +409,7 @@ public abstract class DataEntryDialog<T> {
         dateEntryDialog.center();
     }
 
+    public void ensureDebugId(String debugId) {
+        dateEntryDialog.ensureDebugId(debugId);
+    }
 }

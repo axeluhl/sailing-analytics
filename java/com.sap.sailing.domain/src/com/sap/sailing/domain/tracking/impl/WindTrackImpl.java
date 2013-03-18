@@ -65,7 +65,6 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
      *            whether the wind speed described by the fixes in this track are usable at all; example for an unusable
      *            wind speed would be that of an estimation that only estimates the wind direction and uses some default
      *            value for the speed
-     * @param nameForReadWriteLock TODO
      */
     public WindTrackImpl(long millisecondsOverWhichToAverage, double baseConfidence, boolean useSpeed, String nameForReadWriteLock) {
         super(new ArrayListNavigableSet<Timed>(WindComparator.INSTANCE), nameForReadWriteLock);
@@ -114,9 +113,9 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
             for (WindListener listener : listeners) {
                 try {
                     listener.windDataReceived(wind);
-                } catch (Throwable t) {
-                    logger.log(Level.SEVERE, "WindListener " + listener + " threw exception " + t.getMessage());
-                    logger.throwing(WindTrackImpl.class.getName(), "notifyListenersAboutReceive(Wind)", t);
+                } catch (Exception e) {
+                    logger.log(Level.SEVERE, "WindListener " + listener + " threw exception " + e.getMessage());
+                    logger.throwing(WindTrackImpl.class.getName(), "notifyListenersAboutReceive(Wind)", e);
                 }
             }
         }
@@ -127,9 +126,9 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
             for (WindListener listener : listeners) {
                 try {
                     listener.windAveragingChanged(oldMillisecondsOverWhichToAverage, newMillisecondsOverWhichToAverage);
-                } catch (Throwable t) {
-                    logger.log(Level.SEVERE, "WindListener " + listener + " threw exception " + t.getMessage());
-                    logger.throwing(WindTrackImpl.class.getName(), "notifyListenersAboutAveragingChange(long, long)", t);
+                } catch (Exception e) {
+                    logger.log(Level.SEVERE, "WindListener " + listener + " threw exception " + e.getMessage());
+                    logger.throwing(WindTrackImpl.class.getName(), "notifyListenersAboutAveragingChange(long, long)", e);
                 }
             }
         }
@@ -140,9 +139,9 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
             for (WindListener listener : listeners) {
                 try {
                     listener.windDataRemoved(wind);
-                } catch (Throwable t) {
-                    logger.log(Level.SEVERE, "WindListener " + listener + " threw exception " + t.getMessage());
-                    logger.throwing(WindTrackImpl.class.getName(), "notifyListenersAboutRemoval(Wind)", t);
+                } catch (Exception e) {
+                    logger.log(Level.SEVERE, "WindListener " + listener + " threw exception " + e.getMessage());
+                    logger.throwing(WindTrackImpl.class.getName(), "notifyListenersAboutRemoval(Wind)", e);
                 }
             }
         }

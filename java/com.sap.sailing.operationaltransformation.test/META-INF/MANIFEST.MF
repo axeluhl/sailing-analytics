@@ -5,5 +5,5 @@ Bundle-SymbolicName: com.sap.sailing.operationaltransformation.test
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Fragment-Host: com.sap.sailing.operationaltransformation
 Import-Package: org.junit;version="4.8.2"
-Require-Bundle: com.sap.sailing.operationaltransformation;bundle-version="1.0.0"

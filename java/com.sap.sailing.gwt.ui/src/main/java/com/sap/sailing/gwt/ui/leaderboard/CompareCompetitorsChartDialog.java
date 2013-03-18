@@ -55,14 +55,14 @@ public class CompareCompetitorsChartDialog extends DialogBoxExt implements RaceT
     
     public CompareCompetitorsChartDialog(SailingServiceAsync sailingService,
             List<RegattaAndRaceIdentifier> races, final RaceTimesInfoProvider raceTimesInfoProvider, final CompetitorSelectionProvider competitorSelectionProvider,
-            Timer timer, StringMessages stringMessages, ErrorReporter errorReporter) {
+            Timer timer, StringMessages stringMessages, ErrorReporter errorReporter, String leaderboardGroupName, String leaderboardName) {
         super(new Label(stringMessages.close()));
         this.sailingService = sailingService;
         this.timer = timer;
         this.errorReporter = errorReporter;
         this.timeRangeWithZoomProvider = new TimeRangeWithZoomModel(); 
         this.setPopupPosition(15, 15);
-        this.setHTML(stringMessages.compareCompetitors());
+        this.setHTML(stringMessages.competitorCharts());
         this.setWidth(Window.getClientWidth() - 250 + "px");
         this.setAnimationEnabled(true);
 
@@ -71,7 +71,7 @@ public class CompareCompetitorsChartDialog extends DialogBoxExt implements RaceT
         raceSelectionProvider.setAllRaces(races);
         
         multiChartPanel = new MultiChartPanel(sailingService, new AsyncActionsExecutor(), competitorSelectionProvider, raceSelectionProvider,
-                timer, timeRangeWithZoomProvider, stringMessages, errorReporter, false, false);
+                timer, timeRangeWithZoomProvider, stringMessages, errorReporter, false, false, leaderboardGroupName, leaderboardName);
         multiChartPanel.setSize("100%", "100%");
         
         VerticalPanel contentPanel = new VerticalPanel();

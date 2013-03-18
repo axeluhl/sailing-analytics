@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/loginLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal"
+    android:baselineAligned="false"
+    android:background="@drawable/background" >
+	
+	<LinearLayout
+	    android:layout_width="match_parent"
+	    android:layout_height="match_parent"
+	    android:orientation="vertical"
+	    android:layout_weight="0.5"
+	    android:background="@color/welter_extralight_gray_transparent"
+	    >
+	    
+	    <FrameLayout
+	        android:id="@+id/leftContainer"
+	        android:layout_width="fill_parent"
+	        android:layout_height="fill_parent">
+	    </FrameLayout>
+	    
+	</LinearLayout>
+
+	<LinearLayout
+	    android:layout_width="match_parent"
+	    android:layout_height="match_parent"
+	    android:orientation="vertical"
+	    android:layout_weight="0.99"
+	    android:background="@color/welter_deep_gray">
+	</LinearLayout>
+	
+	<LinearLayout
+	    android:id="@+id/rightLayout"
+	    android:visibility="invisible"
+	    android:layout_width="match_parent"
+	    android:layout_height="match_parent"
+	    android:orientation="vertical"
+	    android:layout_weight="0.5"
+	    android:background="@color/welter_extralight_gray_transparent"
+	    >
+	    	        
+	    <FrameLayout
+	        android:id="@+id/rightContainer"
+	        android:layout_width="fill_parent"
+	        android:layout_height="fill_parent">
+	    </FrameLayout>
+	    
+	</LinearLayout>
+
+</LinearLayout>

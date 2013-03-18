@@ -11,6 +11,8 @@ public interface IsEmbeddableComponent {
 
     Widget getToolbarWidget();
     
+    Widget getLegendWidget();
+    
     BusyIndicator getBusyIndicator();
     
     boolean isEmbedded();

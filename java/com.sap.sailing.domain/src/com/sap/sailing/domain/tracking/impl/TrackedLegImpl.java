@@ -8,9 +8,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
-import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
@@ -28,6 +28,7 @@ import com.sap.sailing.domain.tracking.RaceChangeListener;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.TrackedRaceStatus;
 import com.sap.sailing.domain.tracking.Wind;
 
 public class TrackedLegImpl implements TrackedLeg, RaceChangeListener {
@@ -197,6 +198,11 @@ public class TrackedLegImpl implements TrackedLeg, RaceChangeListener {
     }
 
     @Override
+    public void statusChanged(TrackedRaceStatus newStatus) {
+        // no-op; the leg doesn't mind the tracked race's status being updated
+    }
+
+    @Override
     public void windSourcesToExcludeChanged(Iterable<? extends WindSource> windSourcesToExclude) {
         clearCaches();
     }
@@ -239,6 +245,11 @@ public class TrackedLegImpl implements TrackedLeg, RaceChangeListener {
     public void delayToLiveChanged(long delayToLiveInMillis) {
     }
 
+    @Override
+    public void waypointsMayHaveChanges() {
+        clearCaches();
+    }
+
     private void clearCaches() {
         synchronized (competitorTracksOrderedByRank) {
             competitorTracksOrderedByRank.clear();
@@ -250,6 +261,19 @@ public class TrackedLegImpl implements TrackedLeg, RaceChangeListener {
         final Position approximatePosition = getTrackedRace().getApproximatePosition(getLeg().getFrom(), timePoint);
         final Bearing legBearing = getLegBearing(timePoint);
         return approximatePosition==null || legBearing==null ? null : p.crossTrackError(approximatePosition, legBearing);
+    }
+
+    @Override
+    public Distance getGreatCircleDistance(TimePoint timePoint) {
+        final Distance result;
+        final Position approximatePositionOfFrom = getTrackedRace().getApproximatePosition(getLeg().getFrom(), timePoint);
+        final Position approximatePositionOfTo = getTrackedRace().getApproximatePosition(getLeg().getTo(), timePoint);
+        if (approximatePositionOfFrom != null && approximatePositionOfTo != null) {
+            result = approximatePositionOfFrom.getDistance(approximatePositionOfTo);
+        } else {
+            result = null;
+        }
+        return result;
     }
 
 }

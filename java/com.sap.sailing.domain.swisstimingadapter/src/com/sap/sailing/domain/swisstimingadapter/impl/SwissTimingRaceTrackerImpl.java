@@ -12,6 +12,8 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.logging.Logger;
 
+
+import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceDefinition;
@@ -20,8 +22,10 @@ import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Triple;
+import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.swisstimingadapter.Course;
 import com.sap.sailing.domain.swisstimingadapter.DomainFactory;
 import com.sap.sailing.domain.swisstimingadapter.Fix;
@@ -46,6 +50,7 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
+import com.sap.sailing.domain.tracking.impl.TrackedRaceStatusImpl;
 
 import difflib.PatchFailedException;
 
@@ -69,11 +74,11 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
     private boolean loggedIgnore;
     private final long delayToLiveInMillis;
     
-    protected SwissTimingRaceTrackerImpl(String raceID, String hostname, int port, WindStore windStore,
+    protected SwissTimingRaceTrackerImpl(String raceID, String hostname, int port, RaceLogStore raceLogStore, WindStore windStore,
             DomainFactory domainFactory, SwissTimingFactory factory, RaceSpecificMessageLoader messageLoader,
             TrackedRegattaRegistry trackedRegattaRegistry, boolean canSendRequests, long delayToLiveInMillis) throws InterruptedException,
             UnknownHostException, IOException, ParseException {
-        this(domainFactory.getOrCreateRegatta(raceID, trackedRegattaRegistry), raceID, hostname, port, windStore, domainFactory, factory,
+        this(domainFactory.getOrCreateDefaultRegatta(raceLogStore, raceID, trackedRegattaRegistry), raceID, hostname, port, windStore, domainFactory, factory,
                 messageLoader, trackedRegattaRegistry, canSendRequests, delayToLiveInMillis);
     }
     
@@ -183,7 +188,8 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
                         trackedRace.recordFix(mark, gpsFix);
                         break;
                     case COMPETITOR:
-                        Competitor competitor = domainFactory.getCompetitorByBoatID(fix.getBoatID());
+                        Competitor competitor = domainFactory.getCompetitorByBoatIDAndBoatClass(
+                                fix.getBoatID(), domainFactory.getOrCreateBoatClassFromRaceID(raceID));
                         DynamicGPSFixTrack<Competitor, GPSFixMoving> competitorTrack = trackedRace.getTrack(competitor);
                         competitorTrack.addGPSFix(gpsFix);
                         break;
@@ -208,18 +214,23 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
             List<Triple<Integer, Integer, Long>> markIndicesRanksAndTimesSinceStartInMilliseconds) {
         assert this.raceID.equals(raceID);
         if (isTrackedRaceStillReachable()) {
-            Competitor competitor = domainFactory.getCompetitorByBoatID(boatID);
+            final BoatClass boatClass = domainFactory.getOrCreateBoatClassFromRaceID(raceID);
+            Competitor competitor = domainFactory.getCompetitorByBoatIDAndBoatClass(boatID,
+                    boatClass);
             // the list of mark indices and time stamps is partial and usually only shows the last mark passing;
             // we need to use this to *update* the competitor's mark passings list, not *replace* it
             TreeMap<Integer, MarkPassing> markPassingsByMarkIndex = new TreeMap<Integer, MarkPassing>();
             // now fill with the already existing mark passings for the competitor identified by boatID...
             NavigableSet<MarkPassing> markPassings = trackedRace.getMarkPassings(competitor);
-            synchronized (markPassings) {
+            trackedRace.lockForRead(markPassings);
+            try {
                 for (MarkPassing markPassing : markPassings) {
                     markPassingsByMarkIndex.put(
                             trackedRace.getRace().getCourse().getIndexOfWaypoint(markPassing.getWaypoint()),
                             markPassing);
                 }
+            } finally {
+                trackedRace.unlockAfterRead(markPassings);
             }
             // ...and then overwrite those for which we received "new evidence"
             for (Triple<Integer, Integer, Long> markIndexRankAndTimeSinceStartInMilliseconds : markIndicesRanksAndTimesSinceStartInMilliseconds) {
@@ -228,7 +239,7 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
                 MillisecondsTimePoint timePoint = trackedRace.getStartOfRace() == null ? null : new MillisecondsTimePoint(
                         trackedRace.getStartOfRace().asMillis() + markIndexRankAndTimeSinceStartInMilliseconds.getC());
                 MarkPassing markPassing = domainFactory.createMarkPassing(timePoint, waypoint,
-                        domainFactory.getCompetitorByBoatID(boatID));
+                        domainFactory.getCompetitorByBoatIDAndBoatClass(boatID, boatClass));
                 markPassingsByMarkIndex.put(markIndexRankAndTimeSinceStartInMilliseconds.getA(), markPassing);
             }
             trackedRace.updateMarkPassings(competitor, markPassingsByMarkIndex.values());
@@ -241,6 +252,22 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
             }
         }
 
+    }
+
+    @Override
+    public void storedDataProgress(String raceID, double progress) {
+        assert this.raceID.equals(raceID);
+        if (isTrackedRaceStillReachable()) {
+            final TrackedRaceStatusImpl newStatus;
+            if (progress == 0.0) {
+                newStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.PREPARED, 0.0);
+            } else if (progress == 1.0) {
+                newStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.TRACKING, progress);
+            } else {
+                newStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.LOADING, progress);
+            }
+            trackedRace.setStatus(newStatus);
+        }
     }
 
     @Override
@@ -271,7 +298,7 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
                 /* time over which to average speed */ race.getBoatClass().getApproximateManeuverDurationInMilliseconds(),
                 new DynamicRaceDefinitionSet() {
                     @Override
-                    public void addRaceDefinition(RaceDefinition race) {
+                    public void addRaceDefinition(RaceDefinition race, DynamicTrackedRace trackedRace) {
                         // we already know our single RaceDefinition
                         assert SwissTimingRaceTrackerImpl.this.race == race;
                     }

@@ -2,8 +2,8 @@ package com.sap.sailing.domain.tracking;
 
 import java.util.Map;
 
-import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
@@ -35,4 +35,6 @@ public interface RaceChangeListener {
     void delayToLiveChanged(long delayToLiveInMillis);
 
     void windSourcesToExcludeChanged(Iterable<? extends WindSource> windSourcesToExclude);
+
+    void statusChanged(TrackedRaceStatus newStatus);
 }

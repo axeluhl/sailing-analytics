@@ -25,6 +25,9 @@ public interface LeaderboardGroup extends Renamable {
     void removeLeaderboard(Leaderboard leaderboard);
     void removeAllLeaderboards(Collection<Leaderboard> leaderboards);
     void clearLeaderboards();
+    /**
+     * @return The overall leaderboard of this group or null if there is none.
+     */
     Leaderboard getOverallLeaderboard();
     void setOverallLeaderboard(Leaderboard leaderboard);
 }

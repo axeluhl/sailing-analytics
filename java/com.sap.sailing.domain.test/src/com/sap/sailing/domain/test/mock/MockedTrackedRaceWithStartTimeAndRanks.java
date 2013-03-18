@@ -5,9 +5,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.NavigableSet;
 
-import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.CourseImpl;
@@ -21,6 +21,7 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
@@ -30,6 +31,7 @@ import com.sap.sailing.domain.tracking.RaceChangeListener;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.TrackedRaceStatus;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindStore;
@@ -49,7 +51,7 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     private final TimePoint startTime;
     private final List<Competitor> competitorsFromBestToWorst;
     private RaceDefinition race;
-    
+
     /**
      * @param competitorsFromBestToWorst
      *            copied, so not live; the list passed may change afterwards without effects on the rankings in this
@@ -431,14 +433,14 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     @Override
     public void waitUntilWindLoadingComplete() {
         // TODO Auto-generated method stub
-        
+
     }
 
-	@Override
-	public Iterable<Mark> getMarks() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    @Override
+    public Iterable<Mark> getMarks() {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
     @Override
     public boolean hasWindData() {
@@ -450,5 +452,44 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     public boolean hasGPSData() {
         // TODO Auto-generated method stub
         return false;
+    }
+
+    @Override
+    public void lockForRead(Iterable<MarkPassing> markPassings) {
+        // TODO Auto-generated method stub
+    }
+
+    @Override
+    public void unlockAfterRead(Iterable<MarkPassing> markPassings) {
+        // TODO Auto-generated method stub
+    }
+
+    @Override
+    public TrackedRaceStatus getStatus() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public void waitUntilNotLoading() {
+        // TODO Auto-generated method stub
+    }
+
+    @Override
+    public void detachRaceLog() {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void attachRaceLog(RaceLog raceLog) {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public RaceLog getRaceLog() {
+        // TODO Auto-generated method stub
+        return null;
     }
 }

@@ -33,6 +33,8 @@ import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.google.gwt.view.client.SelectionModel;
 import com.google.gwt.view.client.SingleSelectionModel;
+import com.sap.sailing.domain.common.NauticalSide;
+import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog.DialogCallback;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
@@ -42,7 +44,8 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.ControlPointDTO;
 import com.sap.sailing.gwt.ui.shared.GateDTO;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
-import com.sap.sailing.gwt.ui.shared.RaceCourseMarksDTO;
+import com.sap.sailing.gwt.ui.shared.RaceCourseDTO;
+import com.sap.sailing.gwt.ui.shared.WaypointDTO;
 
 /**
  * A panel that has a race selection (inherited from {@link AbstractRaceManagementPanel}) and which adds a table
@@ -62,11 +65,16 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
         private final ControlPointDTO controlPoint;
         private final MarkDTO oldMark;
         private MarkDTO newMark;
-        public ControlPointAndOldAndNewMark(ControlPointDTO controlPoint, MarkDTO oldMark) {
+        private NauticalSide passingSide;
+        public ControlPointAndOldAndNewMark(ControlPointDTO controlPoint, NauticalSide passingSide, MarkDTO oldMark) {
             super();
             this.controlPoint = controlPoint;
+            this.passingSide = passingSide;
             this.oldMark = oldMark;
             this.newMark = oldMark;
+        }
+        public NauticalSide getPassingSide() {
+            return passingSide;
         }
         public MarkDTO getNewMark() {
             return newMark;
@@ -126,7 +134,7 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
                 MarkDTO left;
                 MarkDTO right;
                 String gateName;
-                if (first.name.toLowerCase().contains("left")) {
+                if (first.name.matches("^.*"+REGEX_FOR_LEFT+".*$")) {
                     left = first;
                     right = second;
                 } else {
@@ -134,7 +142,7 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
                     right = first;
                 }
                 gateName = left.name.replaceFirst(REGEX_FOR_LEFT, "");
-                result = new GateDTO(gateName, left, right);
+                result = new GateDTO(/* generate UUID on the server */ null, gateName, left, right);
             }
             return result;
         }
@@ -145,7 +153,7 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
         }
     }
     
-    private static final String REGEX_FOR_LEFT = "( \\()?[lL][eE][fF][tT]\\)?";
+    private static final String REGEX_FOR_LEFT = "( \\()?(([lL][eE][fF][tT])|(1))\\)?";
 
     /**
      * A table that lists the marks for which events have been received for the race selected. Note that this list may
@@ -215,8 +223,19 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
             public String getValue(ControlPointAndOldAndNewMark cpaoanb) {
                 return cpaoanb.getControlPoint().name;
             }
-        }; 
+        };
         controlPointsTable.addColumn(nameColumn, stringMessages.controlPoint());
+        TextColumn<ControlPointAndOldAndNewMark> passingSideColumn = new TextColumn<ControlPointAndOldAndNewMark>() {
+            @Override
+            public String getValue(ControlPointAndOldAndNewMark cpaoanb) {
+                String result = "";
+                if(cpaoanb.getPassingSide() != null) {
+                    result = cpaoanb.getPassingSide().name();
+                }
+                return result;
+            }
+        };        
+        controlPointsTable.addColumn(passingSideColumn, "Passing side");
         TextColumn<ControlPointAndOldAndNewMark> oldMarkColumn = new TextColumn<ControlPointAndOldAndNewMark>() {
             @Override
             public String getValue(ControlPointAndOldAndNewMark cpaoanb) {
@@ -326,7 +345,7 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
 
     private void saveCourse(SailingServiceAsync sailingService, final StringMessages stringMessages) {
         Set<ControlPointDTO> oldControlPointsFromTableAlreadyHandled = new HashSet<ControlPointDTO>();
-        List<ControlPointDTO> controlPoints = new ArrayList<ControlPointDTO>();
+        List<Pair<ControlPointDTO, NauticalSide>> controlPoints = new ArrayList<Pair<ControlPointDTO, NauticalSide>>();
         for (ControlPointAndOldAndNewMark cpaoanb : controlPointDataProvider.getList()) {
             if (!oldControlPointsFromTableAlreadyHandled.contains(cpaoanb.getControlPoint())) {
                 oldControlPointsFromTableAlreadyHandled.add(cpaoanb.getControlPoint());
@@ -340,7 +359,7 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
                 } else {
                     controlPointToAdd = cpaoanb.getControlPoint();
                 }
-                controlPoints.add(controlPointToAdd);
+                controlPoints.add(new Pair<ControlPointDTO, NauticalSide>(controlPointToAdd, cpaoanb.passingSide));
             }
         }
         sailingService.updateRaceCourse(singleSelectedRace, controlPoints, new AsyncCallback<Void>() {
@@ -375,7 +394,8 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
             }
         }
         assert newLeft != null && newRight != null;
-        return new GateDTO(oldGate.name, newLeft, newRight);
+        // if old gate had null ID, the new gate will have a null ID too, causing the server to generate one
+        return new GateDTO(oldGate.getIdAsString(), oldGate.name, newLeft, newRight);
     }
 
     private CellTable<MarkDTO> createAvailableMarksTable(final StringMessages stringMessages, AdminConsoleTableResources tableRes,
@@ -395,7 +415,9 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
             @Override
             public SafeHtml getValue(MarkDTO mark) {
                 SafeHtmlBuilder builder = new SafeHtmlBuilder();
-                builder.appendEscaped(mark.position.toFormattedString());
+                if(mark.position != null) {
+                    builder.appendEscaped(mark.position.toFormattedString());
+                }
                 return builder.toSafeHtml();
             }
         };
@@ -479,7 +501,7 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
                     ControlPointAndOldAndNewMark selectedElement = selectedElements.iterator().next();
                     int insertPos = controlPointDataProvider.getList().indexOf(selectedElement) + (beforeSelection?0:1);
                     for (MarkDTO markDTO : result.getMarks()) {
-                        controlPointDataProvider.getList().add(insertPos++, new ControlPointAndOldAndNewMark(result, markDTO));
+                        controlPointDataProvider.getList().add(insertPos++, new ControlPointAndOldAndNewMark(result, null, markDTO));
                     }
                 }
             }
@@ -490,27 +512,17 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
     void refreshSelectedRaceData() {
         if (singleSelectedRace != null && selectedRaceDTO != null) {
             courseActionsPanel.setVisible(true);
-            sailingService.getRaceCourse(singleSelectedRace, new Date(),  new AsyncCallback<List<ControlPointDTO>>() {
+            sailingService.getRaceCourse(singleSelectedRace, new Date(),  new AsyncCallback<RaceCourseDTO>() {
                 @Override
-                public void onSuccess(final List<ControlPointDTO> controlPoints) {
-                    sailingService.getRaceCourseMarks(singleSelectedRace, new Date(),  new AsyncCallback<RaceCourseMarksDTO>() {
-                        @Override
-                        public void onSuccess(RaceCourseMarksDTO raceCourseMarksDTO) {
-                            updateCourseAndMarksInfo(controlPoints, raceCourseMarksDTO);
-                        }
-
-                        @Override
-                        public void onFailure(Throwable caught) {
-                            RaceCourseManagementPanel.this.errorReporter.reportError(
-                                    RaceCourseManagementPanel.this.stringMessages.errorTryingToObtainTheMarksOfTheRace(
-                                    caught.getMessage()));
-                        }
-                    });
+                public void onSuccess(RaceCourseDTO raceCourseDTO) {
+                    updateCourseAndMarksInfo(raceCourseDTO);
                 }
-
+    
                 @Override
                 public void onFailure(Throwable caught) {
-                    RaceCourseManagementPanel.this.errorReporter.reportError(stringMessages.errorTryingToObtainRaceCourse(caught.getMessage()));
+                    RaceCourseManagementPanel.this.errorReporter.reportError(
+                            RaceCourseManagementPanel.this.stringMessages.errorTryingToObtainTheMarksOfTheRace(
+                            caught.getMessage()));
                 }
             });
         } else {
@@ -518,11 +530,12 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
         }
     }
 
-    private void updateCourseAndMarksInfo(List<ControlPointDTO> controlPoints, RaceCourseMarksDTO marksDTO) {
+    private void updateCourseAndMarksInfo(RaceCourseDTO raceCourseDTO) {
         List<ControlPointAndOldAndNewMark> waypointsAndOldAndNewMarks = new ArrayList<ControlPointAndOldAndNewMark>();
-        for (ControlPointDTO controlPointDTO : controlPoints) {
+        for (WaypointDTO waypointDTO : raceCourseDTO.waypoints) {
+            ControlPointDTO controlPointDTO = waypointDTO.controlPoint;
             for (MarkDTO mark : controlPointDTO.getMarks()) {
-                ControlPointAndOldAndNewMark waypointAndOldAndNewMark = new ControlPointAndOldAndNewMark(controlPointDTO, mark);
+                ControlPointAndOldAndNewMark waypointAndOldAndNewMark = new ControlPointAndOldAndNewMark(controlPointDTO, waypointDTO.passingSide, mark);
                 waypointsAndOldAndNewMarks.add(waypointAndOldAndNewMark);
             }
         }
@@ -530,7 +543,7 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
         controlPointDataProvider.getList().addAll(waypointsAndOldAndNewMarks);
         controlPointsNeedingReplacement.clear();
         markDataProvider.getList().clear();
-        markDataProvider.getList().addAll(marksDTO.marks);
+        markDataProvider.getList().addAll(raceCourseDTO.getMarks());
         Collections.sort(markDataProvider.getList(), new Comparator<MarkDTO>() {
             @Override
             public int compare(MarkDTO o1, MarkDTO o2) {

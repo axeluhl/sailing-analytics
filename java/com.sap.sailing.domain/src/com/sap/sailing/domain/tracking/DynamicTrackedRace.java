@@ -1,7 +1,7 @@
 package com.sap.sailing.domain.tracking;
 
-import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
 
@@ -76,4 +76,6 @@ public interface DynamicTrackedRace extends TrackedRace {
      * the start leg's direction as a fallback for estimating the wind direction.
      */
     void setRaceIsKnownToStartUpwind(boolean raceIsKnownToStartUpwind);
+    
+    void setStatus(TrackedRaceStatus newStatus);
 }

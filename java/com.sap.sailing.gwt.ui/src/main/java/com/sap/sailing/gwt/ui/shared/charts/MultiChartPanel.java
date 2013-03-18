@@ -25,12 +25,22 @@ import com.sap.sailing.gwt.ui.shared.components.SettingsDialogComponent;
  * 
  */
 public class MultiChartPanel extends AbstractChartPanel<MultiChartSettings> implements Component<MultiChartSettings> {
+    
     public MultiChartPanel(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
             CompetitorSelectionProvider competitorSelectionProvider, RaceSelectionProvider raceSelectionProvider,
-            Timer timer, TimeRangeWithZoomProvider timeRangeWithZoomProvider, final StringMessages stringMessages, ErrorReporter errorReporter, boolean compactChart,
-            boolean allowTimeAdjust) {
+            Timer timer, TimeRangeWithZoomProvider timeRangeWithZoomProvider, final StringMessages stringMessages,
+            ErrorReporter errorReporter, boolean compactChart, boolean allowTimeAdjust) {
+        this(sailingService, asyncActionsExecutor, competitorSelectionProvider, raceSelectionProvider, timer,
+                timeRangeWithZoomProvider, stringMessages, errorReporter, compactChart, allowTimeAdjust, null, null);
+    }
+    
+    public MultiChartPanel(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
+            CompetitorSelectionProvider competitorSelectionProvider, RaceSelectionProvider raceSelectionProvider,
+            Timer timer, TimeRangeWithZoomProvider timeRangeWithZoomProvider, final StringMessages stringMessages,
+            ErrorReporter errorReporter, boolean compactChart, boolean allowTimeAdjust,
+            String leaderboardGroupName, String leaderboardName) {
         super(sailingService, asyncActionsExecutor, competitorSelectionProvider, raceSelectionProvider, timer, timeRangeWithZoomProvider, stringMessages, errorReporter,
-                /*show initially*/ DetailType.WINDWARD_DISTANCE_TO_OVERALL_LEADER, compactChart, allowTimeAdjust);
+                /*show initially*/ DetailType.WINDWARD_DISTANCE_TO_OVERALL_LEADER, compactChart, allowTimeAdjust, leaderboardGroupName, leaderboardName);
     }
 
     @Override
@@ -43,6 +53,7 @@ public class MultiChartPanel extends AbstractChartPanel<MultiChartSettings> impl
         boolean settingsChanged = updateSettingsOnly(newSettings);
         boolean selectedDetailTypeChanged = setSelectedDetailType(newSettings.getDetailType());
         if (selectedDetailTypeChanged || settingsChanged) {
+            clearChart();
             timeChanged(timer.getTime());
         }
     }
@@ -56,4 +67,5 @@ public class MultiChartPanel extends AbstractChartPanel<MultiChartSettings> impl
     public String getLocalizedShortName() {
         return stringMessages.competitorCharts();
     }
+
 }

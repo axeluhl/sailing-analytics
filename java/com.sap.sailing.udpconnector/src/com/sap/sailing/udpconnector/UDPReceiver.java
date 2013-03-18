@@ -86,7 +86,11 @@ public abstract class UDPReceiver<MessageType extends UDPMessage, ListenerType e
         stopped = true;
         byte[] buf = new byte[0];
         DatagramPacket stopPacket = new DatagramPacket(buf, 0, InetAddress.getLocalHost(), listeningOnPort);
-        new DatagramSocket().send(stopPacket);
+        
+        DatagramSocket stopper = new DatagramSocket();
+        stopper.send(stopPacket);
+        stopper.close();
+        
         if (!udpSocket.isConnected()) {
             udpSocket.close();
         }
@@ -124,8 +128,8 @@ public abstract class UDPReceiver<MessageType extends UDPMessage, ListenerType e
                                 try {
                                     ToListenerDispatcher dispatcher = listenerThreads.get(listener);
                                     dispatcher.dispatch(msg);
-                                } catch (Throwable t) {
-                                    logger.info("Exception while dispatching UDP packet received to "+listener+": "+t.getMessage());
+                                } catch (Exception e) {
+                                    logger.info("Exception while dispatching UDP packet received to "+listener+": "+e.getMessage());
                                 }
                             }
                         }

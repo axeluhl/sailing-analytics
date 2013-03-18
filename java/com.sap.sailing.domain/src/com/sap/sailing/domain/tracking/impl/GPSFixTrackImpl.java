@@ -168,9 +168,9 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
         this.trackedItem = trackedItem;
         this.millisecondsOverWhichToAverage = millisecondsOverWhichToAverage;
         this.maxSpeedForSmoothing = maxSpeedForSmoothening;
-        this.listeners = new GPSTrackListeners<>();
+        this.listeners = new GPSTrackListeners<ItemType, FixType>();
         this.distanceCache = new DistanceCache(trackedItem==null?"null":trackedItem.toString());
-        this.maxSpeedCache = new MaxSpeedCache<>(this);
+        this.maxSpeedCache = new MaxSpeedCache<ItemType, FixType>(this);
     }
     
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
@@ -518,7 +518,7 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
             SpeedWithBearingWithConfidence<TimePoint> estimatedSpeed = getEstimatedSpeed(at, getInternalFixes(),
                     ConfidenceFactory.INSTANCE.createExponentialTimeDifferenceWeigher(
                     // use a minimum confidence to avoid the bearing to flip to 270deg in case all is zero
-                            getMillisecondsOverWhichToAverageSpeed()));
+                            getMillisecondsOverWhichToAverageSpeed()/2)); // half confidence if half averaging interval apart
             return estimatedSpeed == null ? null : estimatedSpeed.getObject();
         } finally {
             unlockAfterRead();

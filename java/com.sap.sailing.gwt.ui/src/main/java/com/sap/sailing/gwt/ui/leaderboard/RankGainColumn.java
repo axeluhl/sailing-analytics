@@ -9,11 +9,11 @@ import com.google.gwt.user.client.ui.ImageResourceRenderer;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.gwt.ui.shared.LeaderboardRowDTO;
 
-public class RankGainColumn extends LegDetailColumn<Integer, Integer> {
+public class RankGainColumn extends DetailTypeColumn<Integer, Integer> {
     private static final LeaderboardResources leaderboardResources = GWT.create(LeaderboardResources.class);
 	
     public RankGainColumn(String title, LegDetailField<Integer> field, String headerStyle, String columnStyle) {
-        super(title, null, field, new RankGainCell(), DetailType.RANK_GAIN.getDefaultSortingOrder(), headerStyle, columnStyle);
+        super(DetailType.RANK_GAIN, field, new RankGainCell(), headerStyle, columnStyle);
     }
 
     @Override

@@ -60,6 +60,8 @@ import com.sap.sailing.gwt.ui.shared.components.SettingsDialogComponent;
 
 public class WindChart extends RaceChart implements Component<WindChartSettings>, RequiresResize {
     private static final int LINE_WIDTH = 1;
+    private static final int MAX_SERIES_POINTS = 10000;
+
     private final WindChartSettings settings;
     
     /**
@@ -102,7 +104,7 @@ public class WindChart extends RaceChart implements Component<WindChartSettings>
                 .setWidth100()
                 .setHeight100()
                 .setBorderColor(new Color("#CACACA"))
-                .setBorderWidth(1)
+                .setBorderWidth(0)
                 .setBorderRadius(0)
                 .setBackgroundColor(new Color("#EBEBEB"))
                 .setPlotBorderWidth(0)
@@ -132,7 +134,7 @@ public class WindChart extends RaceChart implements Component<WindChartSettings>
                     return "<b>" + seriesName + (toolTipData.getPointName() != null ? " "+toolTipData.getPointName() : "")
                             + "</b><br/>" +  
                             dateFormat.format(new Date(toolTipData.getXAsLong())) + ": " +
-                            numberFormat.format(toolTipData.getYAsDouble()) + stringMessages.averageSpeedInKnotsUnit();
+                            numberFormat.format(toolTipData.getYAsDouble()) + stringMessages.knotsUnit();
                 }
             }
         }));
@@ -170,7 +172,7 @@ public class WindChart extends RaceChart implements Component<WindChartSettings>
                     }
                 }));
         
-        chart.getYAxis(1).setOpposite(true).setAxisTitleText(stringMessages.speed()+" ("+stringMessages.averageSpeedInKnotsUnit()+")")
+        chart.getYAxis(1).setOpposite(true).setAxisTitleText(stringMessages.speed()+" ("+stringMessages.knotsUnit()+")")
             .setStartOnTick(false).setShowFirstLabel(false).setGridLineWidth(0).setMinorGridLineWidth(0);
         
         if (compactChart) {
@@ -283,6 +285,7 @@ public class WindChart extends RaceChart implements Component<WindChartSettings>
                 .setType(Series.Type.LINE)
                 .setName(stringMessages.fromDeg()+" "+WindSourceTypeFormatter.format(windSource, stringMessages))
                 .setYAxis(0)
+                .setOption("turboThreshold", MAX_SERIES_POINTS)
                 .setPlotOptions(new LinePlotOptions().setColor(colorMap.getColorByID(windSource)).setSelected(true));
         return newSeries;
     }
@@ -297,6 +300,7 @@ public class WindChart extends RaceChart implements Component<WindChartSettings>
                 .setType(Series.Type.LINE)
                 .setName(stringMessages.windSpeed()+" "+WindSourceTypeFormatter.format(windSource, stringMessages))
                 .setYAxis(1) // use the second Y-axis
+                .setOption("turboThreshold", MAX_SERIES_POINTS)
                 .setPlotOptions(new LinePlotOptions().setDashStyle(PlotLine.DashStyle.SHORT_DOT)
                         .setLineWidth(3).setHoverStateLineWidth(3)
                         .setColor(colorMap.getColorByID(windSource)).setSelected(true)); // show only the markers, not the connecting lines
@@ -307,7 +311,7 @@ public class WindChart extends RaceChart implements Component<WindChartSettings>
      * Updates the wind charts with the wind data from <code>result</code>. If <code>append</code> is <code>true</code>, previously
      * existing points in the chart are left unchanged. Otherwise, the existing wind series are replaced.
      */
-    public void updateStripChartSeries(WindInfoForRaceDTO result, boolean append) {
+    public void updateChartSeries(WindInfoForRaceDTO result, boolean append) {
         final NumberFormat numberFormat = NumberFormat.getFormat("0");
         Long newMinTimepoint = timeOfEarliestRequestInMillis;
         Long newMaxTimepoint = timeOfLatestRequestInMillis;
@@ -337,12 +341,12 @@ public class WindChart extends RaceChart implements Component<WindChartSettings>
                     timeOfLatestRequestInMillis == null || wind.requestTimepoint > timeOfLatestRequestInMillis) {
                     Point newDirectionPoint = new Point(wind.requestTimepoint, wind.dampenedTrueWindFromDeg);
                     if (wind.dampenedTrueWindSpeedInKnots != null) {
-                        String name = numberFormat.format(wind.dampenedTrueWindSpeedInKnots)+ stringMessages.averageSpeedInKnotsUnit();
+                        String name = numberFormat.format(wind.dampenedTrueWindSpeedInKnots)+ stringMessages.knotsUnit();
                         // name += " Confidence:" + wind.confidence;
                         newDirectionPoint.setName(name);
                     }
                     
-                    newDirectionPoint = recalculateDirectionPoint(directionMin, directionMax, newDirectionPoint);
+                    newDirectionPoint = WindChartPointRecalculator.recalculateDirectionPoint(directionMin, directionMax, newDirectionPoint);
                     directionPoints[currentPointIndex] = newDirectionPoint;
 
                     double direction = newDirectionPoint.getY().doubleValue();
@@ -377,11 +381,10 @@ public class WindChart extends RaceChart implements Component<WindChartSettings>
                 newDirectionPoints = directionPoints;
                 newSpeedPoints = speedPoints;
             }
- 
-            directionSeries.setPoints(newDirectionPoints);
+            setSeriesPoints(directionSeries, newDirectionPoints);
             windSourceDirectionPoints.put(windSource, newDirectionPoints);
             if (windSource.getType().useSpeed()) {
-                speedSeries.setPoints(newSpeedPoints);
+                setSeriesPoints(speedSeries, newSpeedPoints);
                 windSourceSpeedPoints.put(windSource, newSpeedPoints);
             }
         }
@@ -390,30 +393,6 @@ public class WindChart extends RaceChart implements Component<WindChartSettings>
         timeOfLatestRequestInMillis = newMaxTimepoint;
     }
     
-    private Point recalculateDirectionPoint(Double yMin, Double yMax, Point directionPoint) {
-        double y = directionPoint.getY().doubleValue();
-        boolean recalculated = false;
-
-        if (yMax != null && yMin != null && (y < yMin || y > yMax)) {
-            double deltaMin = Math.abs(yMin - y);
-            double deltaMax = Math.abs(yMax - y);
-
-            double yDown = y - 360;
-            double deltaMinDown = Math.abs(yMin - Math.abs(yDown));
-
-            double yUp = y + 360;
-            double deltaMaxUp = Math.abs(yMax - Math.abs(yUp));
-
-            if (!(deltaMin <= deltaMinDown && deltaMin <= deltaMaxUp)
-                    && !(deltaMax <= deltaMinDown && deltaMax <= deltaMaxUp)) {
-                y = deltaMaxUp <= deltaMinDown ? yUp : yDown;
-                recalculated = true;
-            }
-        }
-        
-        return recalculated ? new Point(directionPoint.getX(), y) : directionPoint;
-    }
-
     @Override
     public boolean hasSettings() {
         return true;
@@ -428,7 +407,7 @@ public class WindChart extends RaceChart implements Component<WindChartSettings>
 
     /**
      * Sets the visibilities of the wind source series based on the new settings. Note that this does not
-     * re-load any wind data. This has to happen by calling {@link #updateStripChartSeries(WindInfoForRaceDTO, boolean)}.
+     * re-load any wind data. This has to happen by calling {@link #updateChartSeries(WindInfoForRaceDTO, boolean)}.
      */
     @Override
     public void updateSettings(WindChartSettings newSettings) {
@@ -473,7 +452,7 @@ public class WindChart extends RaceChart implements Component<WindChartSettings>
                         @Override
                         public void onSuccess(WindInfoForRaceDTO result) {
                             if (result != null) {
-                                updateStripChartSeries(result, append);
+                                updateChartSeries(result, append);
                                 updateVisibleSeries();
                             } else {
                                 if (!append) {

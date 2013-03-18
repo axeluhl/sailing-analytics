@@ -30,6 +30,8 @@ public class MultiChartSettingsComponent extends AbstractChartSettingsComponent<
         availableDetailsTypes.add(DetailType.GAP_TO_LEADER_IN_SECONDS);
         availableDetailsTypes.add(DetailType.CURRENT_SPEED_OVER_GROUND_IN_KNOTS);
         availableDetailsTypes.add(DetailType.RACE_RANK);
+        availableDetailsTypes.add(DetailType.REGATTA_RANK);
+        availableDetailsTypes.add(DetailType.OVERALL_RANK);
     }
 
     @Override
@@ -42,7 +44,7 @@ public class MultiChartSettingsComponent extends AbstractChartSettingsComponent<
         chartTypeSelectionListBox = dialog.createListBox(/* isMultiSelect */ false);
         int i=0;
         for (DetailType detailType : availableDetailsTypes) {
-            chartTypeSelectionListBox.addItem(DetailTypeFormatter.format(detailType, stringMessages), detailType.name());
+            chartTypeSelectionListBox.addItem(DetailTypeFormatter.format(detailType), detailType.name());
             if (detailType == initialDetailType) {
                 chartTypeSelectionListBox.setSelectedIndex(i);
             }

@@ -11,6 +11,7 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Timed;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NoWindException;
@@ -139,13 +140,20 @@ public class CrossTrackErrorCache extends AbstractRaceChangeListener {
     
     private final TrackedRace owner;
     
-    public CrossTrackErrorCache(TrackedRace owner) {
+    public CrossTrackErrorCache(final TrackedRace owner) {
         cachePerCompetitor = new SmartFutureCache<Competitor, CrossTrackErrorSumAndNumberOfFixesTrack, FromTimePointToEndUpdateInterval>(
                 new CacheUpdater<Competitor, CrossTrackErrorSumAndNumberOfFixesTrack, FromTimePointToEndUpdateInterval>() {
                     @Override
                     public CrossTrackErrorSumAndNumberOfFixesTrack computeCacheUpdate(Competitor competitor,
                             FromTimePointToEndUpdateInterval updateInterval) throws Exception {
-                        return computeFixesForCacheUpdate(competitor, updateInterval.getFrom());
+                        final TimePoint from;
+                        if (updateInterval == null) {
+                            final GPSFixMoving firstRawFix = owner.getTrack(competitor).getFirstRawFix();
+                            from = firstRawFix == null ? new MillisecondsTimePoint(0) : firstRawFix.getTimePoint();
+                        } else {
+                            from = updateInterval.getFrom();
+                        }
+                        return computeFixesForCacheUpdate(competitor, from);
                     }
 
                     @Override
@@ -375,5 +383,13 @@ public class CrossTrackErrorCache extends AbstractRaceChangeListener {
     @Override
     public String toString() {
         return "CrossTrackErrorCache for competitors "+cachePerCompetitor.keySet();
+    }
+
+    public void suspend() {
+        cachePerCompetitor.suspend();
+    }
+    
+    public void resume() {
+        cachePerCompetitor.resume();
     }
 }

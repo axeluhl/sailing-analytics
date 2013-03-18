@@ -107,9 +107,10 @@ public class LeaderboardGroupDialog extends DataEntryDialog<LeaderboardGroupDial
                 final List<StrippedLeaderboardDTO> emptyStrippedLeaderboardDTOList = Collections.emptyList();
                 errorMessage = new FlexibleLeaderboardDialog.LeaderboardParameterValidator(stringMessages,
                         emptyStrippedLeaderboardDTOList).getErrorMessage(new LeaderboardDescriptor("Overall",
+                                /* displayName */ null,
                                 groupToValidate.getOverallLeaderboardScoringSchemeType(),
-                                groupToValidate.getOverallLeaderboardDiscardThresholds()));
-                ;
+                                groupToValidate.getOverallLeaderboardDiscardThresholds(),
+                                null));
             }
             return errorMessage;
         }

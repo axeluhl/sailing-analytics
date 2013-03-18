@@ -36,6 +36,7 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.Util;
+import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.Wind;
@@ -250,9 +251,9 @@ public class WindTest {
         Mark startFinishRight = domainFactory.getOrCreateMark("Start/Finish right");
         ControlPoint startFinish = domainFactory.createGate(startFinishLeft, startFinishRight, "Start/Finish");
         ControlPoint top = domainFactory.getOrCreateMark("Top");
-        Waypoint w1 = domainFactory.createWaypoint(startFinish);
-        Waypoint w2 = domainFactory.createWaypoint(top);
-        Waypoint w3 = domainFactory.createWaypoint(startFinish);
+        Waypoint w1 = domainFactory.createWaypoint(startFinish, /*passingSide*/ null);
+        Waypoint w2 = domainFactory.createWaypoint(top, /*passingSide*/ null);
+        Waypoint w3 = domainFactory.createWaypoint(startFinish, /*passingSide*/ null);
         Competitor competitor = new CompetitorImpl(123, "Test Competitor", new TeamImpl("STG", Collections.singleton(
                 new PersonImpl("Test Competitor", new NationalityImpl("GER"),
                 /* dateOfBirth */null, "This is famous " + "Test Competitor")), new PersonImpl("Rigo van Maas",
@@ -261,8 +262,8 @@ public class WindTest {
                 new BoatClassImpl("505", /* typicallyStartsUpwind */true), null));
         final BoatClass boatClass = domainFactory.getOrCreateBoatClass("ESS40");
         DynamicTrackedRace trackedRace = new DynamicTrackedRaceImpl(new DynamicTrackedRegattaImpl(
-                new RegattaImpl("Test Regatta", boatClass,
-                /* trackedRegattaRegistry */ null, domainFactory.createScoringScheme(ScoringSchemeType.LOW_POINT))),
+                new RegattaImpl(EmptyRaceLogStore.INSTANCE, "Test Regatta", boatClass,
+                /* trackedRegattaRegistry */ null, domainFactory.createScoringScheme(ScoringSchemeType.LOW_POINT), "123", null)),
                 new RaceDefinitionImpl("Test Race",
                         new CourseImpl("Test Course", Arrays.asList(new Waypoint[] { w1, w2, w3 })),
                         boatClass, Collections.singleton(competitor)),

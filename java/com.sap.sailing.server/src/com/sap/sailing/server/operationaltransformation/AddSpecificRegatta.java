@@ -1,5 +1,6 @@
 package com.sap.sailing.server.operationaltransformation;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -23,25 +24,30 @@ public class AddSpecificRegatta extends AbstractAddRegattaOperation {
     private final Map<String, Pair<List<Triple<String, Integer, Color>>, Boolean>> seriesNamesWithFleetNamesAndFleetOrderingAndMedal;
     private final boolean persistent;
     private final ScoringScheme scoringScheme;
+    private final Serializable defaultCourseAreaId;
     
-    public AddSpecificRegatta(String regattaName, String boatClassName, Map<String, Pair<List<Triple<String, Integer, Color>>, Boolean>> seriesNamesWithFleetNamesAndFleetOrdering, boolean persistent, ScoringScheme scoringScheme) {
-        super(regattaName, boatClassName);
+    public AddSpecificRegatta(String regattaName, String boatClassName, Serializable id,
+            Map<String, Pair<List<Triple<String, Integer, Color>>, Boolean>> seriesNamesWithFleetNamesAndFleetOrdering,
+            boolean persistent, ScoringScheme scoringScheme, Serializable defaultCourseAreaId) {
+        super(regattaName, boatClassName, id);
         this.seriesNamesWithFleetNamesAndFleetOrderingAndMedal = seriesNamesWithFleetNamesAndFleetOrdering;
         this.persistent = persistent;
         this.scoringScheme = scoringScheme;
+        this.defaultCourseAreaId = defaultCourseAreaId;
     }
 
     @Override
     public Regatta internalApplyTo(RacingEventService toState) throws Exception {
-        return toState.createRegatta(getBaseEventName(), getBoatClassName(), createSeries(toState), persistent,
-                scoringScheme);
+        return toState.createRegatta(getBaseEventName(), getBoatClassName(), getId(), createSeries(toState),
+                persistent, scoringScheme, defaultCourseAreaId);
     }
 
     private Iterable<? extends Series> createSeries(TrackedRegattaRegistry trackedRegattaRegistry) {
         List<Series> result = new ArrayList<Series>();
         for (Map.Entry<String, Pair<List<Triple<String, Integer, Color>>, Boolean>> e : seriesNamesWithFleetNamesAndFleetOrderingAndMedal.entrySet()) {
             final List<String> emptyRaceColumnNamesList = Collections.emptyList();
-            Series s = new SeriesImpl(e.getKey(), /* isMedal */ e.getValue().getB(), createFleets(e.getValue().getA()), emptyRaceColumnNamesList, trackedRegattaRegistry);
+            Series s = new SeriesImpl(e.getKey(), /* isMedal */e.getValue().getB(), createFleets(e.getValue().getA()),
+                    emptyRaceColumnNamesList, trackedRegattaRegistry);
             result.add(s);
         }
         return result;

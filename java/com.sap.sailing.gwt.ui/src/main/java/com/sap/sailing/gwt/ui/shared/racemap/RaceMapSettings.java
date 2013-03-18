@@ -4,16 +4,15 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.sap.sailing.domain.common.ManeuverType;
+import com.sap.sailing.gwt.ui.shared.racemap.RaceMapHelpLinesSettings.HelpLineTypes;
 
 public class RaceMapSettings {
-    
+
     private boolean showDouglasPeuckerPoints = false;
-    
+
     private final Set<ManeuverType> maneuverTypesToShow;
 
     private boolean showOnlySelectedCompetitors = false;
-
-    private boolean showTails = true;
 
     private boolean showAllCompetitors = false;
 
@@ -23,22 +22,24 @@ public class RaceMapSettings {
 
     private long tailLengthInMilliseconds = 100000l;
 
+    private double buoyZoneRadiusInMeters = 0.0;
+
     private int maxVisibleCompetitorsCount = 50;
-    
+
     private boolean showSelectedCompetitorsInfo = true;
-    
+
     public RaceMapSettings() {
         // empty default settings; don't show maneuvers by default
         maneuverTypesToShow = new HashSet<ManeuverType>();
         this.zoomSettings = new RaceMapZoomSettings();
         this.helpLinesSettings = new RaceMapHelpLinesSettings();
     }
-    
+
     /**
-     * @return 0 if {@link #isShowTails()} returns <code>false</code>; {@link #getTailLengthInMilliseconds()} otherwise
+     * @return 0 if the tails are not visible {@link #getTailLengthInMilliseconds()} otherwise
      */
     public long getEffectiveTailLengthInMilliseconds() {
-        return isShowTails() ? getTailLengthInMilliseconds() : 0;
+        return helpLinesSettings.isVisible(HelpLineTypes.BOATTAILS) ? getTailLengthInMilliseconds() : 0;
     }
 
     /**
@@ -68,7 +69,7 @@ public class RaceMapSettings {
             maneuverTypesToShow.remove(maneuverType);
         }
     }
-    
+
     public boolean isShowManeuverType(ManeuverType maneuverType) {
         return maneuverTypesToShow.contains(maneuverType);
     }
@@ -84,7 +85,7 @@ public class RaceMapSettings {
     public RaceMapZoomSettings getZoomSettings() {
         return zoomSettings;
     }
-    
+
     public void setZoomSettings(RaceMapZoomSettings zoomSettings) {
         this.zoomSettings = zoomSettings;
     }
@@ -105,14 +106,6 @@ public class RaceMapSettings {
         this.maxVisibleCompetitorsCount = maxVisibleCompetitorsCount;
     }
 
-    public boolean isShowTails() {
-        return showTails;
-    }
-
-    public void setShowTails(boolean showTails) {
-        this.showTails = showTails;
-    }
-
     public boolean isShowAllCompetitors() {
         return showAllCompetitors;
     }
@@ -121,12 +114,19 @@ public class RaceMapSettings {
         this.showAllCompetitors = showAllCompetitors;
     }
 
-	public boolean isShowSelectedCompetitorsInfo() {
-		return showSelectedCompetitorsInfo;
-	}
+    public boolean isShowSelectedCompetitorsInfo() {
+        return showSelectedCompetitorsInfo;
+    }
 
-	public void setShowSelectedCompetitorsInfo(boolean showSelectedCompetitorsInfo) {
-		this.showSelectedCompetitorsInfo = showSelectedCompetitorsInfo;
-	}
+    public void setShowSelectedCompetitorsInfo(boolean showSelectedCompetitorsInfo) {
+        this.showSelectedCompetitorsInfo = showSelectedCompetitorsInfo;
+    }
 
+    public double getBuoyZoneRadiusInMeters() {
+        return buoyZoneRadiusInMeters;
+    }
+
+    public void setBuoyZoneRadiusInMeters(double buoyZoneRadiusInMeters) {
+        this.buoyZoneRadiusInMeters = buoyZoneRadiusInMeters;
+    }
 }
