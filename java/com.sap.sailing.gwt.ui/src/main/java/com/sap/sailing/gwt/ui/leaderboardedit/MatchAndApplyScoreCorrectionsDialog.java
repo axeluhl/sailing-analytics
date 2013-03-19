@@ -308,15 +308,19 @@ public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<BulkSco
                     ScoreCorrectionEntryDTO officialCorrectionEntry =
                         regattaScoreCorrection.getScoreCorrectionsByRaceNameOrNumber()
                         .get(raceNameOrNumber).get(officialSailID);
-                    final Double officialTotalPoints = officialCorrectionEntry.isDiscarded() ? new Double(0) : officialCorrectionEntry.getScore();
-                    final Double officialNetPoints = officialCorrectionEntry.getScore() == null ? null :
+                    final Double officialTotalPoints = officialCorrectionEntry == null ? null :
+                        officialCorrectionEntry.isDiscarded() ? new Double(0) : officialCorrectionEntry.getScore();
+                    final Double officialNetPoints = officialCorrectionEntry == null ? null :
+                        officialCorrectionEntry.getScore() == null ? null :
                         officialCorrectionEntry.getScore() / raceColumn.getEffectiveFactor();
+                    final MaxPointsReason officialMaxPointsReason = officialCorrectionEntry == null ? null :
+                        officialCorrectionEntry.getMaxPointsReason();
                     SafeHtmlBuilder sb = new SafeHtmlBuilder();
                     boolean entriesDiffer =
-                            ((officialNetPoints == null && entry.netPoints != null) || (officialNetPoints != null && entry.netPoints != null && !new Double(entry.netPoints).equals(officialNetPoints))) ||
-                            ((officialTotalPoints == null && entry.totalPoints != null) || (officialTotalPoints != null &&  entry.totalPoints != null && !new Double(entry.totalPoints).equals(officialTotalPoints))) ||
-                            ((officialCorrectionEntry.getMaxPointsReason() == null && entry.reasonForMaxPoints != MaxPointsReason.NONE) ||
-                                    officialCorrectionEntry.getMaxPointsReason() != null && officialCorrectionEntry.getMaxPointsReason() != entry.reasonForMaxPoints);
+                            ((officialNetPoints == null && entry.netPoints != null) || (officialNetPoints != null && (entry.netPoints == null || !new Double(entry.netPoints).equals(officialNetPoints)))) ||
+                            ((officialTotalPoints == null && entry.totalPoints != null) || (officialTotalPoints != null && (entry.totalPoints == null || !new Double(entry.totalPoints).equals(officialTotalPoints)))) ||
+                            ((officialMaxPointsReason == null && entry.reasonForMaxPoints != MaxPointsReason.NONE) ||
+                                    officialMaxPointsReason != null && officialMaxPointsReason != entry.reasonForMaxPoints);
                     if (entriesDiffer) {
                         sb.appendHtmlConstant("<span style=\"color: #0000FF;\"><b>");
                     }
@@ -332,12 +336,12 @@ public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<BulkSco
                         sb.append(officialTotalPoints);
                     }
                     sb.appendEscaped("/");
-                    if (officialCorrectionEntry.getMaxPointsReason() != null) {
-                        sb.appendEscaped(officialCorrectionEntry.getMaxPointsReason().name());
+                    if (officialMaxPointsReason != null) {
+                        sb.appendEscaped(officialMaxPointsReason.name());
                     } else {
                         sb.appendEscaped(MaxPointsReason.NONE.name());
                     }
-                    if (officialCorrectionEntry.isDiscarded()) {
+                    if (officialCorrectionEntry != null && officialCorrectionEntry.isDiscarded()) {
                         sb.appendEscaped("/discarded");
                     }
                     if (entriesDiffer) {
