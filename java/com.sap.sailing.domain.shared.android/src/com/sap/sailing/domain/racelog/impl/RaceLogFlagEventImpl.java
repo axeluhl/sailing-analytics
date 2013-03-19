@@ -16,8 +16,8 @@ public class RaceLogFlagEventImpl extends RaceLogEventImpl implements RaceLogFla
     private Flags lowerFlag;
     private boolean isDisplayed;
 
-    public RaceLogFlagEventImpl(TimePoint pTimePoint, Serializable pId, List<Competitor> pInvolvedBoats, int pPassId, Flags pUpperFlag, Flags pLowerFlag, boolean pIsDisplayed) {
-        super(pTimePoint, pId, pInvolvedBoats, pPassId);
+    public RaceLogFlagEventImpl(TimePoint createdAt, TimePoint pTimePoint, Serializable pId, List<Competitor> pInvolvedBoats, int pPassId, Flags pUpperFlag, Flags pLowerFlag, boolean pIsDisplayed) {
+        super(createdAt, pTimePoint, pId, pInvolvedBoats, pPassId);
         this.upperFlag = pUpperFlag;
         this.lowerFlag = pLowerFlag;
         this.isDisplayed = pIsDisplayed;

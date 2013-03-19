@@ -9,19 +9,14 @@ import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.racelog.RaceLogEventVisitor;
 import com.sap.sailing.domain.racelog.RaceLogRaceStatusEvent;
 
-public class RaceLogRaceStatusEventImpl extends RaceLogEventImpl implements
-RaceLogRaceStatusEvent {
+public class RaceLogRaceStatusEventImpl extends RaceLogEventImpl implements RaceLogRaceStatusEvent {
     private static final long serialVersionUID = -8809758843066724482L;
 
     protected RaceLogRaceStatus nextStatus;
 
-    public RaceLogRaceStatusEventImpl(
-            TimePoint pTimePoint, 
-            Serializable pId,
-            List<Competitor> pInvolvedBoats, 
-            int pPassId,
-            RaceLogRaceStatus nextStatus) {
-        super(pTimePoint, pId, pInvolvedBoats, pPassId);
+    public RaceLogRaceStatusEventImpl(TimePoint createdAt, TimePoint pTimePoint, Serializable pId,
+            List<Competitor> pInvolvedBoats, int pPassId, RaceLogRaceStatus nextStatus) {
+        super(createdAt, pTimePoint, pId, pInvolvedBoats, pPassId);
         this.nextStatus = nextStatus;
     }
 

@@ -7,6 +7,7 @@ import java.util.UUID;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseData;
+import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
@@ -23,7 +24,7 @@ public class RaceLogEventFactoryImpl implements RaceLogEventFactory {
     @Override
     public RaceLogFlagEvent createFlagEvent(TimePoint timePoint, Serializable id, List<Competitor> involvedBoats, int passId,
             Flags upperFlag, Flags lowerFlag, boolean isDisplayed) {
-        return new RaceLogFlagEventImpl(timePoint, id, involvedBoats, passId, upperFlag, lowerFlag, isDisplayed);
+        return new RaceLogFlagEventImpl(MillisecondsTimePoint.now(), timePoint, id, involvedBoats, passId, upperFlag, lowerFlag, isDisplayed);
     }
 
     @Override
@@ -35,7 +36,7 @@ public class RaceLogEventFactoryImpl implements RaceLogEventFactory {
     @Override
     public RaceLogStartTimeEvent createStartTimeEvent(TimePoint timePoint, Serializable id, List<Competitor> involvedBoats, int passId, 
              TimePoint startTime) {
-        return new RaceLogStartTimeEventImpl(timePoint, id, involvedBoats, passId, RaceLogRaceStatus.SCHEDULED, startTime);
+        return new RaceLogStartTimeEventImpl(MillisecondsTimePoint.now(), timePoint, id, involvedBoats, passId, RaceLogRaceStatus.SCHEDULED, startTime);
     }
 
     @Override
@@ -46,7 +47,7 @@ public class RaceLogEventFactoryImpl implements RaceLogEventFactory {
     @Override
     public RaceLogRaceStatusEvent createRaceStatusEvent(TimePoint timePoint,Serializable id, List<Competitor> competitors, int passId,
             RaceLogRaceStatus nextStatus) {
-        return new RaceLogRaceStatusEventImpl(timePoint, id, competitors, passId, nextStatus);
+        return new RaceLogRaceStatusEventImpl(MillisecondsTimePoint.now(), timePoint, id, competitors, passId, nextStatus);
     }
 
     @Override
@@ -58,7 +59,7 @@ public class RaceLogEventFactoryImpl implements RaceLogEventFactory {
     @Override
     public RaceLogPassChangeEvent createRaceLogPassChangeEvent(TimePoint timePoint, Serializable id, List<Competitor> competitors,
             int passId) {
-        return new RaceLogPassChangeEventImpl(timePoint, id, competitors, passId);
+        return new RaceLogPassChangeEventImpl(MillisecondsTimePoint.now(), timePoint, id, competitors, passId);
     }
 
     @Override
@@ -69,7 +70,7 @@ public class RaceLogEventFactoryImpl implements RaceLogEventFactory {
     @Override
     public RaceLogCourseAreaChangedEvent createRaceLogCourseAreaChangedEvent(TimePoint timePoint, Serializable id, List<Competitor> competitors,
             int passId, Serializable courseAreaId) {
-        return new RaceLogCourseAreaChangeEventImpl(timePoint, id, competitors, passId, courseAreaId);
+        return new RaceLogCourseAreaChangeEventImpl(MillisecondsTimePoint.now(), timePoint, id, competitors, passId, courseAreaId);
     }
 
     @Override
@@ -81,7 +82,7 @@ public class RaceLogEventFactoryImpl implements RaceLogEventFactory {
     @Override
     public RaceLogCourseDesignChangedEvent createCourseDesignChangedEvent(TimePoint timePoint, Serializable id,
             List<Competitor> competitors, int passId, CourseData courseData) {
-        return new RaceLogCourseDesignChangedEventImpl(timePoint, id, competitors, passId, courseData);
+        return new RaceLogCourseDesignChangedEventImpl(MillisecondsTimePoint.now(), timePoint, id, competitors, passId, courseData);
     }
 
     @Override
