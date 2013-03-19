@@ -10,6 +10,7 @@ import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 public abstract class BaseRaceLogEventSerializer implements JsonSerializer<RaceLogEvent> {
     public static final String FIELD_CLASS = "@class";
     public static final String FIELD_ID = "id";
+    public static final Object FIELD_CREATED_AT = "createdAt";
     public static final String FIELD_TIMESTAMP = "timestamp";
     public static final String FIELD_PASS_ID = "passId";
     public static final String FIELD_COMPETITORS = "competitors";
