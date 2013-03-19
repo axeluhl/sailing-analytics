@@ -28,6 +28,7 @@ public abstract class BaseRaceLogEventSerializer implements JsonSerializer<RaceL
         JSONObject result = new JSONObject();
         result.put(FIELD_CLASS, getClassFieldValue());
         result.put(FIELD_ID, object.getId().toString());
+        result.put(FIELD_CREATED_AT, object.getCreatedAt().asMillis());
         result.put(FIELD_TIMESTAMP, object.getTimePoint().asMillis());
         result.put(FIELD_PASS_ID, object.getPassId());
 
