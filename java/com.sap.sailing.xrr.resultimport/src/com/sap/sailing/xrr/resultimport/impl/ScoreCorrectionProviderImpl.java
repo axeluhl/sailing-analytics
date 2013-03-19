@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.datatype.XMLGregorianCalendar;
@@ -28,6 +29,7 @@ import com.sap.sailing.xrr.resultimport.schema.Event;
 import com.sap.sailing.xrr.resultimport.schema.RegattaResults;
 
 public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider {
+    private static final Logger logger = Logger.getLogger(ScoreCorrectionProviderImpl.class.getName());
     private static final long serialVersionUID = -4596215011753860781L;
 
     private static final String name = "SwissTiming On Venue Result System";
@@ -52,34 +54,39 @@ public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider {
 
     @Override
     public Map<String, Set<Pair<String, TimePoint>>> getHasResultsForBoatClassFromDateByEventName()
-            throws IOException, SAXException, ParserConfigurationException, JAXBException {
+            throws IOException, SAXException, ParserConfigurationException {
         Map<String, Set<Pair<String, TimePoint>>> result = new HashMap<String, Set<Pair<String, TimePoint>>>();
         for (Parser parser : getAllRegattaResults()) {
-            RegattaResults regattaResult = parser.parse();
-            XMLGregorianCalendar date = regattaResult.getDate();
-            XMLGregorianCalendar time = regattaResult.getTime();
-            date.setHour(time.getHour());
-            date.setMinute(time.getMinute());
-            date.setSecond(time.getSecond());
-            date.setMillisecond(time.getMillisecond());
-            date.setTimezone(0);
-            TimePoint timePoint = new MillisecondsTimePoint(date.toGregorianCalendar().getTime());
-            for (Object o : regattaResult.getPersonOrBoatOrTeam()) {
-                if (o instanceof Event) {
-                    Event event = (Event) o;
-                    for (Object eventO : event.getRaceOrDivisionOrRegattaSeriesResult()) {
-                        if (eventO instanceof Division) {
-                            Division division = (Division) eventO;
-                            String boatClassName = parser.getBoatClassName(division);
-                            Set<Pair<String, TimePoint>> set = result.get(boatClassName);
-                            if (set == null) {
-                                set = new HashSet<>();
-                                result.put(boatClassName, set);
+            try {
+                RegattaResults regattaResult = parser.parse();
+                XMLGregorianCalendar date = regattaResult.getDate();
+                XMLGregorianCalendar time = regattaResult.getTime();
+                date.setHour(time.getHour());
+                date.setMinute(time.getMinute());
+                date.setSecond(time.getSecond());
+                date.setMillisecond(time.getMillisecond());
+                date.setTimezone(0);
+                TimePoint timePoint = new MillisecondsTimePoint(date.toGregorianCalendar().getTime());
+                for (Object o : regattaResult.getPersonOrBoatOrTeam()) {
+                    if (o instanceof Event) {
+                        Event event = (Event) o;
+                        for (Object eventO : event.getRaceOrDivisionOrRegattaSeriesResult()) {
+                            if (eventO instanceof Division) {
+                                Division division = (Division) eventO;
+                                String boatClassName = parser.getBoatClassName(division);
+                                Set<Pair<String, TimePoint>> set = result.get(boatClassName);
+                                if (set == null) {
+                                    set = new HashSet<>();
+                                    result.put(boatClassName, set);
+                                }
+                                set.add(new Pair<String, TimePoint>(event.getTitle(), timePoint));
                             }
-                            set.add(new Pair<String, TimePoint>(event.getTitle(), timePoint));
                         }
                     }
                 }
+            } catch (JAXBException e) {
+                logger.info("Parse error during XRR import. Ignoring document "+parser.toString());
+                logger.throwing(ScoreCorrectionProviderImpl.class.getName(), "getHasResultsForBoatClassFromDateByEventName", e);
             }
         }
         return result;
@@ -87,33 +94,38 @@ public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider {
 
     @Override
     public RegattaScoreCorrections getScoreCorrections(String eventName, String boatClassName,
-            TimePoint timePointPublished) throws IOException, SAXException, ParserConfigurationException, JAXBException {
+            TimePoint timePointPublished) throws IOException, SAXException, ParserConfigurationException {
         for (Parser parser : getAllRegattaResults()) {
-            RegattaResults regattaResults = parser.parse();
-            for (Object o : regattaResults.getPersonOrBoatOrTeam()) {
-                if (o instanceof Event) {
-                    Event event = (Event) o;
-                    if (event.getTitle().equals(eventName)) {
-                        for (Object eventO : event.getRaceOrDivisionOrRegattaSeriesResult()) {
-                            if (eventO instanceof Division) {
-                                Division division = (Division) eventO;
-                                if (boatClassName.equals(parser.getBoatClassName(division))) {
-                                    return new XRRRegattaResultsAsScoreCorrections(event, division, this, parser);
+            try {
+                RegattaResults regattaResults = parser.parse();
+                for (Object o : regattaResults.getPersonOrBoatOrTeam()) {
+                    if (o instanceof Event) {
+                        Event event = (Event) o;
+                        if (event.getTitle().equals(eventName)) {
+                            for (Object eventO : event.getRaceOrDivisionOrRegattaSeriesResult()) {
+                                if (eventO instanceof Division) {
+                                    Division division = (Division) eventO;
+                                    if (boatClassName.equals(parser.getBoatClassName(division))) {
+                                        return new XRRRegattaResultsAsScoreCorrections(event, division, this, parser);
+                                    }
                                 }
                             }
                         }
                     }
                 }
+            } catch (JAXBException e) {
+                logger.info("Parse error during XRR import. Ignoring document " + parser.toString());
+                logger.throwing(ScoreCorrectionProviderImpl.class.getName(), "getHasResultsForBoatClassFromDateByEventName", e);
             }
         }
         return null;
     }
 
     private Iterable<Parser> getAllRegattaResults() throws SAXException, IOException,
-            ParserConfigurationException, JAXBException {
+            ParserConfigurationException {
         List<Parser> result = new ArrayList<>();
-        for (InputStream is : documentProvider.getDocuments()) {
-            Parser parser = parserFactory.createParser(is);
+        for (Pair<InputStream, String> is : documentProvider.getDocumentsAndNames()) {
+            Parser parser = parserFactory.createParser(is.getA(), is.getB());
             result.add(parser);
         }
         return result;

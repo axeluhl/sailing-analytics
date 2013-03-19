@@ -10,9 +10,10 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
@@ -52,11 +53,13 @@ public class ParserTest {
     private XRRDocumentProvider getTestDocumentProvider() {
         return new XRRDocumentProvider() {
             @Override
-            public Iterable<InputStream> getDocuments() throws FileNotFoundException {
+            public Iterable<Pair<InputStream, String>> getDocumentsAndNames() throws FileNotFoundException {
                 try {
-                    return Arrays.asList(new InputStream[] { getInputStream(SAMPLE_INPUT_NAME_LASER),
-                            getInputStream(SAMPLE_INPUT_NAME_STAR),
-                            getInputStream(SAMPLE_INPUT_NAME_MELBOURNE)});
+                    List<Pair<InputStream, String>> result = new ArrayList<>();
+                    result.add(new Pair<InputStream, String>(getInputStream(SAMPLE_INPUT_NAME_LASER), SAMPLE_INPUT_NAME_LASER));
+                    result.add(new Pair<InputStream, String>(getInputStream(SAMPLE_INPUT_NAME_STAR), SAMPLE_INPUT_NAME_STAR));
+                    result.add(new Pair<InputStream, String>(getInputStream(SAMPLE_INPUT_NAME_MELBOURNE), SAMPLE_INPUT_NAME_MELBOURNE));
+                    return result;
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
@@ -66,13 +69,13 @@ public class ParserTest {
 
     @Test
     public void testSimpleParsingSomeLaserDocument() throws JAXBException, IOException {
-        RegattaResults o = ParserFactory.INSTANCE.createParser(getInputStream(SAMPLE_INPUT_NAME_LASER)).parse();
+        RegattaResults o = ParserFactory.INSTANCE.createParser(getInputStream(SAMPLE_INPUT_NAME_LASER), SAMPLE_INPUT_NAME_LASER).parse();
         assertNotNull(o);
     }
 
     @Test
     public void testSimpleParsingSomeStarDocument() throws JAXBException, IOException {
-        RegattaResults o = ParserFactory.INSTANCE.createParser(getInputStream(SAMPLE_INPUT_NAME_STAR)).parse();
+        RegattaResults o = ParserFactory.INSTANCE.createParser(getInputStream(SAMPLE_INPUT_NAME_STAR), SAMPLE_INPUT_NAME_STAR).parse();
         assertNotNull(o);
     }
 

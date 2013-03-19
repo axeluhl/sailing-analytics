@@ -7,7 +7,7 @@ import com.sap.sailing.xrr.resultimport.ParserFactory;
 
 public class ParserFactoryImpl implements ParserFactory {
     @Override
-    public Parser createParser(InputStream is) {
-        return new ParserImpl(is);
+    public Parser createParser(InputStream is, String name) {
+        return new ParserImpl(is, name);
     }
 }

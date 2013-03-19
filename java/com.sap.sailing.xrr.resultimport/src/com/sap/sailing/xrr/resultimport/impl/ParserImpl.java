@@ -21,13 +21,15 @@ public class ParserImpl implements Parser {
     private final Map<String, Team> teamByID;
     private final Map<String, Boat> boatByID;
     private final InputStream inputStream;
+    private final String name;
     
-    public ParserImpl(InputStream inputStream) {
+    public ParserImpl(InputStream inputStream, String name) {
         super();
         this.personByID = new HashMap<>();
         this.teamByID = new HashMap<>();
         this.boatByID = new HashMap<>();
         this.inputStream = inputStream;
+        this.name = name;
     }
 
     @Override
@@ -73,5 +75,10 @@ public class ParserImpl implements Parser {
     @Override
     public Person getPerson(String personID) {
         return personByID.get(personID);
+    }
+    
+    @Override
+    public String toString() {
+        return name==null?"":name;
     }
 }

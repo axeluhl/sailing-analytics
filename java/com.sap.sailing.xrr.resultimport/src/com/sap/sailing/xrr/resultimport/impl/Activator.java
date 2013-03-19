@@ -12,6 +12,7 @@ import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 
 import com.sap.sailing.domain.common.ScoreCorrectionProvider;
+import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.xrr.resultimport.ParserFactory;
 import com.sap.sailing.xrr.resultimport.XRRDocumentProvider;
 
@@ -31,12 +32,12 @@ public class Activator implements BundleActivator {
         }
         final ScoreCorrectionProviderImpl service = new ScoreCorrectionProviderImpl(new XRRDocumentProvider() {
             @Override
-            public Iterable<InputStream> getDocuments() throws FileNotFoundException {
-                List<InputStream> result = new ArrayList<InputStream>();
+            public Iterable<Pair<InputStream, String>> getDocumentsAndNames() throws FileNotFoundException {
+                List<Pair<InputStream, String>> result = new ArrayList<>();
                 for (File file : new File(scanDirPath).listFiles()) {
                     if (file.isFile()) {
                         logger.fine("adding " + file + " to XRR import list");
-                        result.add(new FileInputStream(file));
+                        result.add(new Pair<InputStream, String>(new FileInputStream(file), file.toString()));
                     }
                 }
                 return result;
