@@ -344,6 +344,9 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         final FlexibleLeaderboardImpl result;
         BasicDBList dbRaceColumns = (BasicDBList) dbLeaderboard.get(FieldNames.LEADERBOARD_COLUMNS.name());
         if (dbRaceColumns == null) {
+            // this was probably an orphaned overall leaderboard
+            logger.warning("Probably found orphan overall leaderboard named "
+                    + dbLeaderboard.get(FieldNames.LEADERBOARD_NAME.name())+". Ignoring.");
             result = null;
         } else {
             final ScoringScheme scoringScheme = loadScoringScheme(dbLeaderboard);
