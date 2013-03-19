@@ -34,6 +34,7 @@ public class Activator implements BundleActivator {
             public Iterable<InputStream> getDocuments() throws FileNotFoundException {
                 List<InputStream> result = new ArrayList<InputStream>();
                 for (File file : new File(scanDirPath).listFiles()) {
+                    logger.fine("adding "+file+" to XRR import list");
                     result.add(new FileInputStream(file));
                 }
                 return result;
