@@ -18,6 +18,21 @@ public class RaceStatusAnalyzer extends RaceLogAnalyzer {
         // ExLog.i(TAG, String.format("Updating status..."));
 
         RaceLogRaceStatus newStatus = RaceLogRaceStatus.UNSCHEDULED;
+        
+        this.raceLog.lockForRead();
+        try {
+            newStatus = searchForRaceStatus();
+        } finally {
+            this.raceLog.unlockAfterRead();
+        }
+        
+        // ExLog.i(TAG, String.format("Status will be set to %s.", newStatus));
+        return newStatus;
+    }
+
+    private RaceLogRaceStatus searchForRaceStatus() {
+        RaceLogRaceStatus newStatus = RaceLogRaceStatus.UNSCHEDULED;
+        
         for (RaceLogEvent event : getPassEvents()) {
             // ExLog.i(TAG, String.format("Deciding on event of type %s.", event.getClass().getSimpleName()));
             if (event instanceof RaceLogRaceStatusEvent) {
@@ -26,8 +41,7 @@ public class RaceStatusAnalyzer extends RaceLogAnalyzer {
                 newStatus = statusEvent.getNextStatus();
             }
         }
-
-        // ExLog.i(TAG, String.format("Status will be set to %s.", newStatus));
+        
         return newStatus;
     }
 

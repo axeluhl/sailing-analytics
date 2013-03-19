@@ -5,7 +5,7 @@ import com.sap.sailing.domain.racelog.RaceLogEvent;
 
 public abstract class RaceLogAnalyzer {
 
-    private RaceLog raceLog;
+    protected RaceLog raceLog;
 
     public RaceLogAnalyzer(RaceLog raceLog) {
         this.raceLog = raceLog;

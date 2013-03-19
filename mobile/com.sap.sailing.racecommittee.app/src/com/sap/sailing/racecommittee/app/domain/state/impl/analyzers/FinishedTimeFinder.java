@@ -15,6 +15,20 @@ public class FinishedTimeFinder extends RaceLogAnalyzer {
 
     public TimePoint getFinishedTime() {
         TimePoint finishedTime = null;
+        
+        this.raceLog.lockForRead();
+        try {
+            finishedTime = searchForFinishedTime();
+        } finally {
+            this.raceLog.unlockAfterRead();
+        }
+
+        return finishedTime;
+    }
+    
+    private TimePoint searchForFinishedTime() {
+        TimePoint finishedTime = null;
+        
         for (RaceLogEvent event : getPassEvents()) {
             if (event instanceof RaceLogRaceStatusEvent) {
                 RaceLogRaceStatusEvent statusEvent = (RaceLogRaceStatusEvent) event;
@@ -23,6 +37,7 @@ public class FinishedTimeFinder extends RaceLogAnalyzer {
                 }
             }
         }
+        
         return finishedTime;
     }
 

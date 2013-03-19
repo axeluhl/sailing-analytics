@@ -75,7 +75,7 @@ public class ManagedRaceImpl implements ManagedRace {
 
     @Override
     public CourseData getCourseDesign() {
-        return null;
+        return state.getCourseDesign();
     }
 
 }

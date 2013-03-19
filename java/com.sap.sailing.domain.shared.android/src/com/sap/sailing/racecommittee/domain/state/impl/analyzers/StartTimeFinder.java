@@ -13,11 +13,26 @@ public class StartTimeFinder extends RaceLogAnalyzer {
 
     public TimePoint getStartTime() {
         TimePoint startTime = null;
+        
+        this.raceLog.lockForRead();
+        try {
+            startTime = searchForStartTime();
+        } finally {
+            this.raceLog.unlockAfterRead();
+        }
+
+        return startTime;
+    }
+
+    private TimePoint searchForStartTime() {
+        TimePoint startTime = null;
+        
         for (RaceLogEvent event : getPassEvents()) {
             if (event instanceof RaceLogStartTimeEvent) {
                 startTime = ((RaceLogStartTimeEvent) event).getStartTime();
             }
         }
+        
         return startTime;
     }
 
