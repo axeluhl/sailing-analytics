@@ -34,10 +34,13 @@ public class Activator implements BundleActivator {
             @Override
             public Iterable<Pair<InputStream, String>> getDocumentsAndNames() throws FileNotFoundException {
                 List<Pair<InputStream, String>> result = new ArrayList<>();
-                for (File file : new File(scanDirPath).listFiles()) {
-                    if (file.isFile()) {
-                        logger.fine("adding " + file + " to XRR import list");
-                        result.add(new Pair<InputStream, String>(new FileInputStream(file), file.toString()));
+                final File[] fileList = new File(scanDirPath).listFiles();
+                if (fileList != null) {
+                    for (File file : fileList) {
+                        if (file.isFile()) {
+                            logger.fine("adding " + file + " to XRR import list");
+                            result.add(new Pair<InputStream, String>(new FileInputStream(file), file.toString()));
+                        }
                     }
                 }
                 return result;
