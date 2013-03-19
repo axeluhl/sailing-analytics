@@ -320,8 +320,6 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     public FlexibleLeaderboard addFlexibleLeaderboard(String leaderboardName, String leaderboardDisplayName, int[] discardThresholds, ScoringScheme scoringScheme, 
             Serializable courseAreaId) {
         logger.info("adding flexible leaderboard " + leaderboardName);
-
-
         RaceLogStore raceLogStore = MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(
                 mongoObjectFactory, 
                 domainObjectFactory);
@@ -1432,10 +1430,14 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
 
     @Override
     public void removeLeaderboardGroup(String groupName) {
+        final LeaderboardGroup leaderboardGroup;
         synchronized (leaderboardGroupsByName) {
-            leaderboardGroupsByName.remove(groupName);
+            leaderboardGroup = leaderboardGroupsByName.remove(groupName);
         }
         mongoObjectFactory.removeLeaderboardGroup(groupName);
+        if (leaderboardGroup != null && leaderboardGroup.getOverallLeaderboard() != null) {
+            removeLeaderboard(leaderboardGroup.getOverallLeaderboard().getName());
+        }
     }
 
     @Override
