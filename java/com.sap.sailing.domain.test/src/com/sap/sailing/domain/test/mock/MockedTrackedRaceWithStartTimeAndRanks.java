@@ -23,6 +23,7 @@ import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.racelog.RaceLog;
+import com.sap.sailing.domain.tracking.CourseDesignChangedListener;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
@@ -496,6 +497,12 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
 
     @Override
     public void onCourseDesignChangedByRaceCommittee(CourseData courseDesign) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void setCourseDesignChangedListener(CourseDesignChangedListener listener) {
         // TODO Auto-generated method stub
         
     }

@@ -122,6 +122,9 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<Route, RouteDa
             DynamicTrackedRace trackedRace = getDomainFactory().getOrCreateRaceDefinitionAndTrackedRace(
                     getTrackedRegatta(), event.getC(), course, windStore, delayToLiveInMillis,
                     millisecondsOverWhichToAverageWind, raceDefinitionSetToUpdate);
+            CourseDesignChangedByRaceCommitteeHandler courseDesignHandler = new CourseDesignChangedByRaceCommitteeHandler();
+            trackedRace.setCourseDesignChangedListener(courseDesignHandler);
+            
             if (getSimulator() != null) {
                 getSimulator().setTrackedRace(trackedRace);
             }

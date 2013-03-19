@@ -486,5 +486,16 @@ public interface TrackedRace extends Serializable {
      */
     RaceLog getRaceLog();
 
+    /**
+     * whenever a new course design is published by the race committee and the appropriate event occures in the race log, this method is 
+     * called to propagate the course design to the tracking provider.
+     * @param courseDesign the new course design to be published
+     */
     void onCourseDesignChangedByRaceCommittee(CourseData courseDesign);
+    
+    /**
+     * a setter for the listener on course design changes. The listener is mostly part of the tracking provider adapter.
+     * @param listener the listener to operate with.
+     */
+    void setCourseDesignChangedListener(CourseDesignChangedListener listener); 
 }

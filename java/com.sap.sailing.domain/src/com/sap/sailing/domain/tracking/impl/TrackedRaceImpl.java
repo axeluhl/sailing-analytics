@@ -70,6 +70,7 @@ import com.sap.sailing.domain.confidence.Weigher;
 import com.sap.sailing.domain.confidence.impl.HyperbolicTimeDifferenceWeigher;
 import com.sap.sailing.domain.confidence.impl.PositionAndTimePointWeigher;
 import com.sap.sailing.domain.racelog.RaceLog;
+import com.sap.sailing.domain.tracking.CourseDesignChangedListener;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
@@ -79,7 +80,6 @@ import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.domain.tracking.TrackedRaceLogListener;
 import com.sap.sailing.domain.tracking.TrackedRaceStatus;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.Wind;
@@ -223,6 +223,8 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     private transient RaceLog attachedRaceLog;
     
     private transient TrackedRaceLogListener raceLogListener;
+    
+    protected transient CourseDesignChangedListener courseDesignChangedListener;
 
     /**
      * The time delay to the current point in time in milliseconds.  
@@ -2291,5 +2293,10 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     @Override
     public RaceLog getRaceLog() {
         return attachedRaceLog;
+    }
+    
+    @Override
+    public void setCourseDesignChangedListener(CourseDesignChangedListener listener) {
+        this.courseDesignChangedListener = listener;
     }
 }
