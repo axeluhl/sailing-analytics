@@ -186,9 +186,8 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         layoutTable.setWidget(2, 0, hostnameLabel);
         layoutTable.setWidget(2, 1, this.hostnameTextBox);
 
-        // Regatta name
+        // Event name
         Label eventNameLabel = new Label(this.stringMessages.eventName() + ":");
-
         this.eventNameTextBox = new TextBox();
         this.eventNameTextBox.ensureDebugId("RegattaName");
         this.eventNameTextBox.setText("event_2011...");
@@ -198,7 +197,6 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
                 synchURIs();
             }
         });
-
         layoutTable.setWidget(3, 0, eventNameLabel);
         layoutTable.setWidget(3, 1, this.eventNameTextBox);
 
@@ -338,9 +336,8 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         //columnFormatter.setWidth(1, "80%");
 
         // Regatta
-        Label regattaForTrackingLabel = new Label("Regatta used for the tracked race:");
+        Label regattaForTrackingLabel = new Label(stringMessages.regattaUsedForTheTrackedRace());
         regattaForTrackingLabel.setWordWrap(false);
-        
         layoutTable.setWidget(0, 0, regattaForTrackingLabel);
         layoutTable.setWidget(0, 1, getAvailableRegattasListBox());
 
@@ -619,11 +616,9 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         String storedURI = this.storedURITextBox.getValue();
         RegattaDTO selectedRegatta = getSelectedRegatta();
         RegattaIdentifier regattaIdentifier = null;
-        
         if (selectedRegatta != null) {
             regattaIdentifier = new RegattaName(selectedRegatta.name);
         }
-        
         // Check if the assigned regatta makes sense
         List<TracTracRaceRecordDTO> allRaces = this.raceList.getList();
         List<TracTracRaceRecordDTO> racesWithNotMatchingBoatClasses = new ArrayList<TracTracRaceRecordDTO>();
@@ -631,33 +626,27 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         
         for (TracTracRaceRecordDTO race : allRaces) {
             if (selectionModel.isSelected(race)) {
-                if(!checkBoatClassMatch(race, selectedRegatta))
+                if (!checkBoatClassMatch(race, selectedRegatta))
                     racesWithNotMatchingBoatClasses.add(race);
             }
         }
-
-        if(racesWithNotMatchingBoatClasses.size() > 0) {
+        if (racesWithNotMatchingBoatClasses.size() > 0) {
             StringBuilder builder = new StringBuilder(100 + racesWithNotMatchingBoatClasses.size() * 30);
-            
             builder.append("WARNING\n");
-            
-            if(selectedRegatta != null) {
+            if (selectedRegatta != null) {
                 builder.append(this.stringMessages.boatClassDoesNotMatchSelectedRegatta(selectedRegatta.boatClass.name,
                         selectedRegatta.name));
             } else {
                 builder.append(this.stringMessages.regattaExistForSelectedBoatClass());
             }
-            
             builder.append("\n\n");
             builder.append(this.stringMessages.races());
             builder.append("\n");
-            
-            for(TracTracRaceRecordDTO record: racesWithNotMatchingBoatClasses) {
+            for (TracTracRaceRecordDTO record: racesWithNotMatchingBoatClasses) {
                 builder.append(record.name);
                 builder.append("\n");
             }
-            
-            if(!Window.confirm(builder.toString())) {
+            if (!Window.confirm(builder.toString())) {
                 return;
             }
         }
