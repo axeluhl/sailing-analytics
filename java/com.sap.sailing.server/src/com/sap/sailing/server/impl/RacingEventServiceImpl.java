@@ -1437,7 +1437,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         }
         mongoObjectFactory.removeLeaderboardGroup(groupName);
         if (leaderboardGroup != null && leaderboardGroup.getOverallLeaderboard() != null) {
-            mongoObjectFactory.removeLeaderboard(leaderboardGroup.getOverallLeaderboard().getName());
+            removeLeaderboard(leaderboardGroup.getOverallLeaderboard().getName());
         }
     }
 
