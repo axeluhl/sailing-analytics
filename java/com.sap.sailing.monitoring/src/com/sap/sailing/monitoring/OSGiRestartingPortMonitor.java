@@ -112,7 +112,7 @@ public class OSGiRestartingPortMonitor extends AbstractPortMonitor {
 
     private void sendMail(Endpoint endpoint, final String subject, String content) throws MessagingException, AddressException,
             NoSuchProviderException {
-        Session session = Session.getDefaultInstance(this.properties, new SMTPAuthenticator());
+        Session session = Session.getInstance(this.properties, new SMTPAuthenticator());
         MimeMessage msg = new MimeMessage(session);
         msg.setFrom(new InternetAddress("root@sapsailing.com"));
         msg.setSubject(subject);        

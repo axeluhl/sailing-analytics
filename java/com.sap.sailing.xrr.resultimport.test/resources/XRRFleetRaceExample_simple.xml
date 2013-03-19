@@ -1,0 +1,19 @@
+<!--?xml version="1.0" encoding="utf-8"?-->
+<html><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8"></head><body><sailingxrr xsi:nonamespaceschemalocation="http://www.sailing.org/uploads/xml/sailingXRR_v1.3.xsd" type="SailingXRR" version="1.3" date="2008-08-21" time="14:56:12" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<person personid="aaabb1" familyname="Bergmans" givenname="Patrick" noc="BEL" ifpersonid="aaabb1">
+	<boat boatid="b001" sailnumber="XXXX" boatname="XXXX">
+	<team teamid="t001" boatid="b001" noc="GBR" teamname="xxx" gender="Men">
+		<crew personid="aaabb1" position="S">
+	</crew></team>
+	<event eventid="e01" title="Sail Sydney 2008" ifeventid="IFRGT-12345">
+		<race raceid="r001" racenumber="1" racename="xxxx" racestartdate="2000-01-01" racestarttime="12:00:00">
+		<race raceid="r002" racenumber="2" racename="xxxx" racestartdate="2000-01-01" racestarttime="14:00:00" racestatus="final">
+		<division divisionid="d01" title="470 Men" ifclassid="470" gender="Men">
+			<raceresult raceid="r001" teamid="t001" racepoints="2">
+			<raceresult raceid="r002" teamid="t001" racepoints="8" discard="true" scorecode="DNF">
+			<seriesresult teamid="t001" totalpoints="58" netpoints="45" rank="1">
+		</seriesresult></raceresult></raceresult></division>
+	</race></race></event>
+</boat></person></sailingxrr>
+</body></html>

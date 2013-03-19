@@ -242,7 +242,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     private final Label liveRaceLabel; 
     
     private final DateTimeFormat dateFormatter = DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.DATE_LONG);
-    private final DateTimeFormat timeFormatter = DateTimeFormat.getFormat("HH:mm:ss");
+    private final DateTimeFormat timeFormatter = DateTimeFormat.getFormat("HH:mm:ss zzz");
 
     private boolean isEmbedded = false;
 

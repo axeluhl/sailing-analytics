@@ -31,6 +31,10 @@ public class AdminConsolePage extends HostPage {
     
     private static final String TRACTRAC_TAB_LABEL = "TracTrac Events"; //$NON-NLS-1$
     private static final String TRACTRAC_TAB_IDENTIFIER = "TracTracEventManagement"; //$NON-NLS-1$
+
+    private static final String LEADERBOARD_CONFIGURATION_LABEL = "Leaderboard Configuration";
+    private static final String LEADERBOARD_CONFIGURATION_TAB_IDENTIFIER = "LeaderboardConfiguration";
+
     
     /**
      * <p>Goes to the administration console and returns the representing page object.</p>
@@ -43,7 +47,7 @@ public class AdminConsolePage extends HostPage {
      *   The page object for the administration console.
      */
     public static AdminConsolePage goToPage(WebDriver driver, String root) {
-        driver.get(root + "gwt/AdminConsole.html"); //$NON-NLS-1$
+        driver.get(root + "gwt/AdminConsole.html?" + System.getProperty("gwt.codesvr", "")); //$NON-NLS-1$
         
         // TODO: As soon as the security API is available in Selenium we should use it to login into the admin console.
 //        FluentWait<WebDriver> wait = new FluentWait<>(driver);
@@ -78,9 +82,13 @@ public class AdminConsolePage extends HostPage {
      *   The page object for the TracTracEvents tab.
      */
     public TracTracEventManagementPanel goToTracTracEvents() {
-        return new TracTracEventManagementPanel(this.driver, gotToTab(TRACTRAC_TAB_LABEL, TRACTRAC_TAB_IDENTIFIER));
+        return new TracTracEventManagementPanel(this.driver, goToTab(TRACTRAC_TAB_LABEL, TRACTRAC_TAB_IDENTIFIER));
     }
     
+    public LeaderboardConfigurationPanel goToLeaderboardConfiguration() {
+        return new LeaderboardConfigurationPanel(this.driver, goToTab(LEADERBOARD_CONFIGURATION_LABEL, LEADERBOARD_CONFIGURATION_TAB_IDENTIFIER));
+    }
+
     /**
      * <p>Verifies that the current page is the administration console by checking the title of the page.</p>
      */
@@ -91,7 +99,7 @@ public class AdminConsolePage extends HostPage {
         }
     }
     
-    private WebElement gotToTab(String label, final String id) {
+    private WebElement goToTab(String label, final String id) {
         String expression = TAB_EXPRESSION.format(new Object[] {label});
         WebElement tab = this.tabPanel.findElement(By.xpath(expression));
         

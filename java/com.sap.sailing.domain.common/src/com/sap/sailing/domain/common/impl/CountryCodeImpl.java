@@ -64,4 +64,9 @@ public class CountryCodeImpl implements CountryCode {
     public String getITUCallPrefix() {
         return ituCallPrefix;
     }
+    
+    @Override
+    public String toString() {
+        return getThreeLetterIOCCode();
+    }
 }

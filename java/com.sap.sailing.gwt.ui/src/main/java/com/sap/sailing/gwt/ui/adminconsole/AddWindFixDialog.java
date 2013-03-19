@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
+import java.util.Date;
+
 import com.google.gwt.user.client.ui.DoubleBox;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
@@ -13,7 +15,7 @@ import com.sap.sailing.gwt.ui.shared.PositionDTO;
 import com.sap.sailing.gwt.ui.shared.RaceDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 
-public class WindSettingDialog extends DataEntryDialog<WindDTO> {
+public class AddWindFixDialog extends DataEntryDialog<WindDTO> {
     private final StringMessages stringMessages;
     
     private final DoubleBox speedInKnotsBox;
@@ -23,7 +25,7 @@ public class WindSettingDialog extends DataEntryDialog<WindDTO> {
     private final DateBox timeBox;
 
     protected static class WindDataValidator implements Validator<WindDTO> {
-        protected final StringMessages stringMessages;
+        private final StringMessages stringMessages;
         
         public WindDataValidator(StringMessages stringMessages){
             super();
@@ -42,24 +44,26 @@ public class WindSettingDialog extends DataEntryDialog<WindDTO> {
                 errorMessage = stringMessages.pleaseEnterAValue();
             } else if(windDTO.trueWindFromDeg != null && (windDTO.trueWindFromDeg < 0.0 || windDTO.trueWindFromDeg > 360.0)){
                 errorMessage = stringMessages.valueMustBeBetweenMinMax(stringMessages.fromDeg(), "0", "360");
+            } else if(windDTO.measureTimepoint == null) {
+                errorMessage = stringMessages.pleaseEnterAValue();
             } else if(windDTO.position != null) {
                 if(windDTO.position.latDeg < -90.0 || windDTO.position.latDeg > 90.0){
                     errorMessage = stringMessages.valueMustBeBetweenMinMax(stringMessages.latitude(), "-90", "90");
                 } else if(windDTO.position.lngDeg < -180.0 || windDTO.position.lngDeg > 180.0){
                     errorMessage = stringMessages.valueMustBeBetweenMinMax(stringMessages.longitude(), "-180", "180");
                 }
-            }
+            } 
             
             return errorMessage;
         }
     }
 
-    public WindSettingDialog(RaceDTO race, CoursePositionsDTO courseDTO, StringMessages stringMessages, DialogCallback<WindDTO> callback) {
+    public AddWindFixDialog(RaceDTO race, CoursePositionsDTO courseDTO, StringMessages stringMessages, DialogCallback<WindDTO> callback) {
         super(stringMessages.actionAddWindData(), null, stringMessages.ok(), stringMessages.cancel(), new WindDataValidator(stringMessages), callback);
         this.stringMessages = stringMessages;        
         speedInKnotsBox = createDoubleBox(5);
         fromInDegBox = createDoubleBox(5);
-        if(courseDTO != null && courseDTO.waypointPositions.get(0) != null) {
+        if(courseDTO != null && courseDTO.waypointPositions != null && courseDTO.waypointPositions.get(0) != null) {
             PositionDTO positionDTO = courseDTO.waypointPositions.get(0);
             latDegBox = createDoubleBox(positionDTO.latDeg, 10);
             lngDegBox = createDoubleBox(positionDTO.lngDeg, 10);
@@ -67,10 +71,11 @@ public class WindSettingDialog extends DataEntryDialog<WindDTO> {
             latDegBox = createDoubleBox(10);
             lngDegBox = createDoubleBox(10);
         }
-        if(race.startOfRace != null) {
-            timeBox = createDateBox(race.startOfRace.getTime(), 20);
+        if(race.trackedRace != null && race.trackedRace.startOfTracking != null) {
+            timeBox = createDateBox(race.trackedRace.startOfTracking.getTime(), 20);
         } else {
-            timeBox = createDateBox(20);
+            Date now = new Date();
+            timeBox = createDateBox(now.getTime(), 20);
         }
     }
     
@@ -84,12 +89,12 @@ public class WindSettingDialog extends DataEntryDialog<WindDTO> {
         grid.setWidget(0, 1, speedInKnotsBox);
         grid.setWidget(1, 0, new Label(stringMessages.fromDeg() + ":"));
         grid.setWidget(1, 1, fromInDegBox);
-        grid.setWidget(2, 0, new Label(stringMessages.latitude() + " (" + stringMessages.optional() + "):"));
-        grid.setWidget(2, 1, latDegBox);
-        grid.setWidget(3, 0, new Label(stringMessages.longitude() + " (" + stringMessages.optional() + "):"));
-        grid.setWidget(3, 1, lngDegBox);
-        grid.setWidget(4, 0, new Label(stringMessages.time() + " (" + stringMessages.optional() + "):"));
-        grid.setWidget(4, 1, timeBox);
+        grid.setWidget(2, 0, new Label(stringMessages.time() + ":"));
+        grid.setWidget(2, 1, timeBox);
+        grid.setWidget(3, 0, new Label(stringMessages.latitude() + " (" + stringMessages.optional() + "):"));
+        grid.setWidget(3, 1, latDegBox);
+        grid.setWidget(4, 0, new Label(stringMessages.longitude() + " (" + stringMessages.optional() + "):"));
+        grid.setWidget(4, 1, lngDegBox);
         
         return mainPanel;
     }
@@ -100,7 +105,7 @@ public class WindSettingDialog extends DataEntryDialog<WindDTO> {
 
         result.trueWindSpeedInKnots = speedInKnotsBox.getValue();
         result.trueWindFromDeg = fromInDegBox.getValue();
-        result.measureTimepoint = timeBox.getValue() != null ? timeBox.getValue().getTime() : System.currentTimeMillis();
+        result.measureTimepoint = timeBox.getValue() != null ? timeBox.getValue().getTime() : null;
         if (latDegBox.getValue() != null && lngDegBox.getValue() != null) {
             result.position = new PositionDTO(latDegBox.getValue(), lngDegBox.getValue());
         }

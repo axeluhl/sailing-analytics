@@ -63,7 +63,7 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
         tabPanel.add(swisstimingEventManagementPanel, stringMessages.swissTimingEvents(), false);
         regattaDisplayers.add(swisstimingEventManagementPanel);
         
-        CreateSwissTimingRacePanel createSwissTimingRacePanel = new CreateSwissTimingRacePanel(sailingService,this,stringMessages);
+        CreateSwissTimingRacePanel createSwissTimingRacePanel = new CreateSwissTimingRacePanel(sailingService, this, stringMessages);
         //createSwissTimingRacePanel.ensureDebugId("CreateSwissTimingRace");
         createSwissTimingRacePanel.setSize("90%", "90%");
         tabPanel.add(createSwissTimingRacePanel,"Create SwissTiming race",false);
@@ -96,7 +96,7 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
         
         final LeaderboardConfigPanel leaderboardConfigPanel = new LeaderboardConfigPanel(sailingService, this, this, stringMessages,
                 /* showRaceDetails */ true);
-        //leaderboardConfigPanel.ensureDebugId("LeaderboardConfiguration");
+        leaderboardConfigPanel.ensureDebugId("LeaderboardConfiguration");
         leaderboardConfigPanel.setSize("90%", "90%");
         tabPanel.add(leaderboardConfigPanel, stringMessages.leaderboardConfiguration(), /* asHTML */ false);
         regattaDisplayers.add(leaderboardConfigPanel);

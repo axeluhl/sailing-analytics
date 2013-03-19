@@ -72,6 +72,7 @@ import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.CountryCode;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.Distance;
+import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.MaxPointsReason;
@@ -514,7 +515,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     RegattaAndRaceIdentifier raceIdentifier = null;
                     RaceDTO race = null;
                     TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
-                    final FleetDTO fleetDTO = convertToFleetDTO(fleet);
+                    
+                    final FleetDTO fleetDTO = convertToFleetDTO(raceColumn, fleet);
                     if (trackedRace != null) {
                         raceIdentifier = new RegattaNameAndRaceName(trackedRace.getTrackedRegatta().getRegatta()
                                 .getName(), trackedRace.getRace().getName());
@@ -582,7 +584,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                         public LeaderboardEntryDTO call() {
                             try {
                                 Entry entry = leaderboard.getEntry(competitor, raceColumn, timePoint);
-                                return getLeaderboardEntryDTO(entry, raceColumn.getTrackedRace(competitor), competitor, timePoint,
+                                return getLeaderboardEntryDTO(entry, raceColumn, competitor, timePoint,
                                         namesOfRaceColumnsForWhichToLoadLegDetails != null
                                         && namesOfRaceColumnsForWhichToLoadLegDetails.contains(raceColumn.getName()),
                                         waitForLatestAnalyses, legRanksCache);
@@ -651,10 +653,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
      *            may not reflect all data already received; otherwise, the method will always block for the latest
      *            cache updates to have happened before returning.
      */
-    private LeaderboardEntryDTO getLeaderboardEntryDTO(Entry entry, TrackedRace trackedRace, Competitor competitor,
+    private LeaderboardEntryDTO getLeaderboardEntryDTO(Entry entry, RaceColumn raceColumn, Competitor competitor,
             TimePoint timePoint, boolean addLegDetails, boolean waitForLatestAnalyses,
             Map<Leg, LinkedHashMap<Competitor, Integer>> legRanksCache) throws NoWindException {
         LeaderboardEntryDTO entryDTO = new LeaderboardEntryDTO();
+        TrackedRace trackedRace = raceColumn.getTrackedRace(competitor);
         entryDTO.race = trackedRace == null ? null : trackedRace.getRaceIdentifier();
         entryDTO.netPoints = entry.getNetPoints();
         entryDTO.netPointsCorrected = entry.isNetPointsCorrected();
@@ -676,7 +679,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             }
         }
         final Fleet fleet = entry.getFleet();
-        entryDTO.fleet = fleet == null ? null : convertToFleetDTO(fleet);
+        entryDTO.fleet = fleet == null ? null : convertToFleetDTO(raceColumn, fleet);
         return entryDTO;
     }
 
@@ -1073,7 +1076,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     private SeriesDTO convertToSeriesDTO(Series series) {
         List<FleetDTO> fleets = new ArrayList<FleetDTO>();
         for (Fleet fleet : series.getFleets()) {
-            fleets.add(convertToFleetDTO(fleet));
+            fleets.add(convertToFleetDTO(series, fleet));
         }
         List<RaceColumnDTO> raceColumns = new ArrayList<RaceColumnDTO>();
         for (RaceColumnInSeries raceColumn : series.getRaceColumns()) {
@@ -1109,13 +1112,19 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             }
         }
         
-        
-        
         return raceInfoDTO;
     }
 
-    private FleetDTO convertToFleetDTO(Fleet fleet) {
-        return new FleetDTO(fleet.getName(), fleet.getOrdering(), fleet.getColor());
+    private FleetDTO convertToFleetDTO(Series series, Fleet fleet) {
+        return new FleetDTO(fleet.getName(), series.getName(), fleet.getOrdering(), fleet.getColor());
+    }
+
+    private FleetDTO convertToFleetDTO(RaceColumn raceColumn, Fleet fleet) {
+        String seriesNameOfFleet = null;
+        if (raceColumn instanceof RaceColumnInSeries) {
+            seriesNameOfFleet = ((RaceColumnInSeries) raceColumn).getSeries().getName();
+        }            
+        return new FleetDTO(fleet.getName(), seriesNameOfFleet, fleet.getOrdering(), fleet.getColor());
     }
 
     private List<RaceWithCompetitorsDTO> convertToRaceDTOs(Regatta regatta) {
@@ -2164,7 +2173,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                         latestTimePointAfterQueryTimePointWhenATrackedRaceWasLive = liveTimePointForTrackedRace;
                     }
                 }    
-                final FleetDTO fleetDTO = convertToFleetDTO(fleet);
+                final FleetDTO fleetDTO = convertToFleetDTO(raceColumn, fleet);
                 RaceColumnDTO raceColumnDTO = leaderboardDTO.addRace(raceColumn.getName(), raceColumn.getExplicitFactor(), raceColumn.getFactor(),
                         fleetDTO, raceColumn.isMedalRace(), raceIdentifier, raceDTO);
                 
@@ -2463,7 +2472,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public void trackWithSwissTiming(RegattaIdentifier regattaToAddTo, Iterable<SwissTimingRaceRecordDTO> rrs, String hostname, int port,
             boolean canSendRequests, boolean trackWind, final boolean correctWindByDeclination) throws Exception {
         for (SwissTimingRaceRecordDTO rr : rrs) {
-
             final RacesHandle raceHandle = getService().addSwissTimingRace(regattaToAddTo, rr.ID, hostname, port,
                     canSendRequests,
                     MongoWindStoreFactory.INSTANCE.getMongoWindStore(mongoObjectFactory, domainObjectFactory),
@@ -2520,9 +2528,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                         boatClass.trim(),
                         RegattaImpl.getFullName(replayRaceDTO.rsc, replayRaceDTO.boat_class),
                         Collections.singletonList(new SeriesImpl(
-                                "Default", 
+                                LeaderboardNameConstants.DEFAULT_SERIES_NAME, 
                                 /* isMedal */false, 
-                                Collections.singletonList(new FleetImpl("Default")), 
+                                Collections.singletonList(new FleetImpl(LeaderboardNameConstants.DEFAULT_FLEET_NAME)), 
                                 /* race column names */ new ArrayList<String>(), getService())), 
                                 false,
                                 baseDomainFactory.createScoringScheme(ScoringSchemeType.LOW_POINT), null);

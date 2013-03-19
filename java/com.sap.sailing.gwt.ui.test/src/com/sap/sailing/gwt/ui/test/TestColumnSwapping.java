@@ -24,7 +24,8 @@ public class TestColumnSwapping {
     private LeaderboardDTO lb = null;
     private static final String LEADERBOARDNAME = "test";
     private static final String DEFAULT_FLEET_NAME = "Default";
-    private static final FleetDTO DEFAULT_FLEET = new FleetDTO(DEFAULT_FLEET_NAME, /* ordering */ 0, /* color */ null);
+    private static final String DEFAULT_SERIES_NAME = "Default";
+    private static final FleetDTO DEFAULT_FLEET = new FleetDTO(DEFAULT_FLEET_NAME, DEFAULT_SERIES_NAME, /* ordering */ 0, /* color */ null);
     private SailingServiceImpl service;
     private LeaderboardDTO leaderboardOriginalDTO;
     private LeaderboardDTO leaderboardDTO;

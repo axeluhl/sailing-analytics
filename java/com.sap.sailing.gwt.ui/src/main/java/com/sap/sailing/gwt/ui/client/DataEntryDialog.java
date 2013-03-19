@@ -88,9 +88,11 @@ public abstract class DataEntryDialog<T> {
         this.validator = validator;
         okButton = new Button(okButtonName);
         okButton.getElement().getStyle().setMargin(3, Unit.PX);
+        okButton.ensureDebugId("OkButton");
         FlowPanel dialogFPanel = new FlowPanel();
         dialogFPanel.setWidth("100%");
         statusLabel = new Label();
+        statusLabel.ensureDebugId("StatusLabel");
         dialogFPanel.add(statusLabel);
         if (message != null) {
             Label messageLabel = new Label(message);
@@ -107,6 +109,7 @@ public abstract class DataEntryDialog<T> {
         buttonPanel.add(okButton);
         cancelButton = new Button(cancelButtonName);
         cancelButton.getElement().getStyle().setMargin(3, Unit.PX);
+        cancelButton.ensureDebugId("CancelButton");
         buttonPanel.add(cancelButton);
         cancelButton.addClickHandler(new ClickHandler() {
             @Override
@@ -238,19 +241,20 @@ public abstract class DataEntryDialog<T> {
     }
     
     private DateBox createDateBoxInternal(Date initialDate, int visibleLength) {
-        DateBox textBox = new DateBox();
-        textBox.getTextBox().setVisibleLength(visibleLength);
-        textBox.setValue(initialDate);
-        AbstractEntryPoint.addFocusUponKeyUpToggler(textBox.getTextBox());
-        textBox.getTextBox().addChangeHandler(new ChangeHandler() {
+        DateBox dateBox = new DateBox();
+        dateBox.getTextBox().setVisibleLength(visibleLength);
+        dateBox.setFireNullValues(true);
+        dateBox.setValue(initialDate);
+        AbstractEntryPoint.addFocusUponKeyUpToggler(dateBox.getTextBox());
+        dateBox.addValueChangeHandler(new ValueChangeHandler<Date>() {
             @Override
-            public void onChange(ChangeEvent event) {
+            public void onValueChange(ValueChangeEvent<Date> event) {
                 validate();
             }
         });
-        AbstractEntryPoint.linkEnterToButton(getOkButton(), textBox.getTextBox());
-        AbstractEntryPoint.linkEscapeToButton(getCancelButton(), textBox.getTextBox());
-        return textBox;
+        AbstractEntryPoint.linkEnterToButton(getOkButton(), dateBox.getTextBox());
+        AbstractEntryPoint.linkEscapeToButton(getCancelButton(), dateBox.getTextBox());
+        return dateBox;
     }
 
     /**
@@ -405,4 +409,7 @@ public abstract class DataEntryDialog<T> {
         dateEntryDialog.center();
     }
 
+    public void ensureDebugId(String debugId) {
+        dateEntryDialog.ensureDebugId(debugId);
+    }
 }

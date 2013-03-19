@@ -21,6 +21,7 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.TimingConstants;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.Util;
@@ -567,10 +568,22 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
 
     @Override
     public void recordWind(Wind wind, WindSource windSource) {
-        getOrCreateWindTrack(windSource).add(wind);
-        updated(/* time point */null); // wind events shouldn't advance race time
-        triggerManeuverCacheRecalculationForAllCompetitors();
-        notifyListeners(wind, windSource);
+        // TODO check what a good filter is; remember that start/end of tracking may change over time; what if we have discarded valuable wind fixes?
+        TimePoint startOfRace = getStartOfRace();
+        TimePoint startOfTracking = getStartOfTracking();
+        TimePoint endOfRace = getEndOfRace();
+        TimePoint endOfTracking = getEndOfTracking();
+        // record wind fix only if it's still within reasonable time after the race has ended or the race hasn't ended yet
+        if ((startOfTracking == null || !startOfTracking.after(wind.getTimePoint()) ||
+                (startOfRace != null && !startOfRace.after(wind.getTimePoint())))
+            &&
+        (endOfTracking == null || endOfTracking.plus(TimingConstants.IS_LIVE_GRACE_PERIOD_IN_MILLIS).after(wind.getTimePoint()) ||
+        (endOfRace != null && endOfRace.plus(TimingConstants.IS_LIVE_GRACE_PERIOD_IN_MILLIS).after(wind.getTimePoint())))) {
+            getOrCreateWindTrack(windSource).add(wind);
+            updated(/* time point */null); // wind events shouldn't advance race time
+            triggerManeuverCacheRecalculationForAllCompetitors();
+            notifyListeners(wind, windSource);
+        }
     }
 
     @Override
