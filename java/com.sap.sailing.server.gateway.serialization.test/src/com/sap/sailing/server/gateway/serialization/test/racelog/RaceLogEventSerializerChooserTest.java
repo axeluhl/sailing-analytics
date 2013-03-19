@@ -24,6 +24,8 @@ public class RaceLogEventSerializerChooserTest {
     private JsonSerializer<RaceLogEvent> passChangedSerializer;
     private JsonSerializer<RaceLogEvent> courseDesignChangedEventSerializer;
     
+    private RaceLogEventFactory factory;
+    
     @SuppressWarnings("unchecked")
     @Before
     public void setUp() {
@@ -41,47 +43,49 @@ public class RaceLogEventSerializerChooserTest {
                 courseAreaChangedEventSerializer,
                 passChangedSerializer,
                 courseDesignChangedEventSerializer);
+        
+        factory = RaceLogEventFactory.INSTANCE;
     }
     
     @Test
     public void testChoosesFlagEventSerializer() {
         // we use the real event type here because we do not want to re-implement the dispatching.
-        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(null, 0, null, null, false);
+        RaceLogEvent event = factory.createFlagEvent(null, 0, null, null, false);
         assertEquals(flagEventSerializer, chooser.getSerializer(event));
     }
     
     @Test
     public void testChoosesStartTimeSerializer() {
         // we use the real event type here because we do not want to re-implement the dispatching.
-        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createStartTimeEvent(null, 0, null);
+        RaceLogEvent event = factory.createStartTimeEvent(null, 0, null);
         assertEquals(startTimeSerializer, chooser.getSerializer(event));
     }
     
     @Test
     public void testChoosesRaceStatusSerializer() {
         // we use the real event type here because we do not want to re-implement the dispatching.
-        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createRaceStatusEvent(null, 0, RaceLogRaceStatus.SCHEDULED);
+        RaceLogEvent event = factory.createRaceStatusEvent(null, 0, RaceLogRaceStatus.SCHEDULED);
         assertEquals(raceStatusSerializer, chooser.getSerializer(event));
     }
     
     @Test
     public void testChoosesCourseAreaChangedSerializer() {
         // we use the real event type here because we do not want to re-implement the dispatching.
-        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createRaceLogCourseAreaChangedEvent(null, 0, null);
+        RaceLogEvent event = factory.createRaceLogCourseAreaChangedEvent(null, 0, null);
         assertEquals(courseAreaChangedEventSerializer, chooser.getSerializer(event));
     }
     
     @Test
     public void testChoosesPassChangedSerializer() {
         // we use the real event type here because we do not want to re-implement the dispatching.
-        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createRaceLogPassChangeEvent(null, 0);
+        RaceLogEvent event = factory.createRaceLogPassChangeEvent(null, 0);
         assertEquals(passChangedSerializer, chooser.getSerializer(event));
     }
     
     @Test
     public void testChoosesCourseDesignChangedSerializer() {
         // we use the real event type here because we do not want to re-implement the dispatching.
-        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createCourseDesignChangedEvent(null, 0, null);
+        RaceLogEvent event = factory.createCourseDesignChangedEvent(null, 0, null);
         assertEquals(courseDesignChangedEventSerializer, chooser.getSerializer(event));
     }
 

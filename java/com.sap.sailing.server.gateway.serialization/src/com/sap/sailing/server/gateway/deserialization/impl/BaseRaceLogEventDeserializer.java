@@ -7,6 +7,7 @@ import org.json.simple.JSONObject;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
+import com.sap.sailing.domain.racelog.RaceLogEventFactory;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.BaseRaceLogEventSerializer;
@@ -14,6 +15,12 @@ import com.sap.sailing.server.gateway.serialization.racelog.impl.BaseRaceLogEven
 /// TODO deserialize involved boats
 public abstract class BaseRaceLogEventDeserializer implements JsonDeserializer<RaceLogEvent> {
 
+    protected RaceLogEventFactory factory;
+    
+    public BaseRaceLogEventDeserializer() {
+        this.factory = RaceLogEventFactory.INSTANCE;
+    }
+    
     protected abstract RaceLogEvent deserialize(JSONObject object, Serializable id, TimePoint timePoint, int passId)
             throws JsonDeserializationException;
 
