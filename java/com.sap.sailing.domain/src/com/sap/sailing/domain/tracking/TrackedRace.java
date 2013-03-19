@@ -7,6 +7,7 @@ import java.util.SortedSet;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
+import com.sap.sailing.domain.base.CourseData;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceDefinition;
@@ -484,4 +485,6 @@ public interface TrackedRace extends Serializable {
      * Otherwise <code>null</code>.
      */
     RaceLog getRaceLog();
+
+    void onCourseDesignChangedByRaceCommittee(CourseData courseDesign);
 }

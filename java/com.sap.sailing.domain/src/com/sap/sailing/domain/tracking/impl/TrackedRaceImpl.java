@@ -79,6 +79,7 @@ import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.TrackedRaceLogListener;
 import com.sap.sailing.domain.tracking.TrackedRaceStatus;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.Wind;
@@ -220,6 +221,8 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     private transient CombinedWindTrackImpl combinedWindTrack;
 
     private transient RaceLog attachedRaceLog;
+    
+    private transient TrackedRaceLogListener raceLogListener;
 
     /**
      * The time delay to the current point in time in milliseconds.  
@@ -270,6 +273,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         this.startToNextMarkCacheInvalidationListeners = new ConcurrentHashMap<Mark, TrackedRaceImpl.StartToNextMarkCacheInvalidationListener>();
         this.maneuverCache = createManeuverCache();
         this.markTracks = new ConcurrentHashMap<Mark, GPSFixTrack<Mark, GPSFix>>();
+        this.raceLogListener = new TrackedRaceLogListener(this);
         this.crossTrackErrorCache = new CrossTrackErrorCache(this);
         int i = 0;
         for (Waypoint waypoint : race.getCourse().getWaypoints()) {
@@ -2274,11 +2278,13 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     @Override
     public void attachRaceLog(RaceLog raceLog) {
         this.attachedRaceLog = raceLog;
+        attachedRaceLog.addListener(raceLogListener);
     }
 
     @Override
     public void detachRaceLog() {
         // Currently doing not much, be may notify some listeners in the future.
+        this.attachedRaceLog.removeListener(raceLogListener);
         this.attachedRaceLog = null;
     }
 

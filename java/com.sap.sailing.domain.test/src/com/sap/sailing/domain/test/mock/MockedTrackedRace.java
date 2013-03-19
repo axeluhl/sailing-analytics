@@ -7,6 +7,7 @@ import java.util.NavigableSet;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
+import com.sap.sailing.domain.base.CourseData;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceColumnListener;
@@ -749,5 +750,11 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     public RaceLog getRaceLog() {
         // TODO Auto-generated method stub
         return null;
+    }
+
+    @Override
+    public void onCourseDesignChangedByRaceCommittee(CourseData courseDesign) {
+        // TODO Auto-generated method stub
+        
     }
 }
