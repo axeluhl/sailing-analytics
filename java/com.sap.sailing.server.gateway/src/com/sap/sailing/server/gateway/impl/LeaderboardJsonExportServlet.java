@@ -40,7 +40,7 @@ public class LeaderboardJsonExportServlet extends AbstractJsonHttpServlet {
     private final ResultStates DEFAULT_RESULT_STATE = ResultStates.Live;  
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    public void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String leaderboardName = req.getParameter(PARAM_NAME_LEADERBOARDNAME);
         if (leaderboardName == null) {
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Need to specify a leaderboard name using the "+

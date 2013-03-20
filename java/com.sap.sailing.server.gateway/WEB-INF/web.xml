@@ -62,6 +62,15 @@
 		<servlet-name>ExpeditionThroughHttpPostServlet</servlet-name>
 		<url-pattern>/expedition</url-pattern>
 	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>RegattasJsonExportServlet</servlet-name>
+		<servlet-class>com.sap.sailing.server.gateway.impl.RegattasJsonExportServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>RegattasJsonExportServlet</servlet-name>
+		<url-pattern>/regattas</url-pattern>
+	</servlet-mapping>
 	
 	<servlet>
 		<servlet-name>LeaderboardsJsonExportServlet</servlet-name>
@@ -71,7 +80,6 @@
 		<servlet-name>LeaderboardsJsonExportServlet</servlet-name>
 		<url-pattern>/leaderboards</url-pattern>
 	</servlet-mapping>
-
 
 	<servlet>
 		<servlet-name>LeaderboardJsonExportServlet</servlet-name>
@@ -89,6 +97,15 @@
 	<servlet-mapping>
 		<servlet-name>LeaderboardGroupJsonExportServlet</servlet-name>
 		<url-pattern>/leaderboardgroup</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>LeaderboardGroupsJsonExportServlet</servlet-name>
+		<servlet-class>com.sap.sailing.server.gateway.impl.LeaderboardGroupsJsonExportServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>LeaderboardGroupsJsonExportServlet</servlet-name>
+		<url-pattern>/leaderboardgroups</url-pattern>
 	</servlet-mapping>
 
 	<servlet>
