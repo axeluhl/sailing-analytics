@@ -523,4 +523,5 @@ public interface StringMessages extends Messages {
     String netScore();
     String timePointMustBeAfterStartOfTracking();
     String timePointMustBeBeforeEndOfTracking();
+    String regattaUsedForTheTrackedRace();
 }

@@ -2432,7 +2432,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public void trackWithSwissTiming(RegattaIdentifier regattaToAddTo, Iterable<SwissTimingRaceRecordDTO> rrs, String hostname, int port,
             boolean canSendRequests, boolean trackWind, final boolean correctWindByDeclination) throws Exception {
         for (SwissTimingRaceRecordDTO rr : rrs) {
-
             final RacesHandle raceHandle = getService().addSwissTimingRace(regattaToAddTo, rr.ID, hostname, port,
                     canSendRequests,
                     MongoWindStoreFactory.INSTANCE.getMongoWindStore(mongoObjectFactory, domainObjectFactory),

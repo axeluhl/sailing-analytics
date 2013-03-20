@@ -10,9 +10,10 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
@@ -52,11 +53,13 @@ public class ParserTest {
     private XRRDocumentProvider getTestDocumentProvider() {
         return new XRRDocumentProvider() {
             @Override
-            public Iterable<InputStream> getDocuments() throws FileNotFoundException {
+            public Iterable<Pair<InputStream, String>> getDocumentsAndNames() throws FileNotFoundException {
                 try {
-                    return Arrays.asList(new InputStream[] { getInputStream(SAMPLE_INPUT_NAME_LASER),
-                            getInputStream(SAMPLE_INPUT_NAME_STAR),
-                            getInputStream(SAMPLE_INPUT_NAME_MELBOURNE)});
+                    List<Pair<InputStream, String>> result = new ArrayList<>();
+                    result.add(new Pair<InputStream, String>(getInputStream(SAMPLE_INPUT_NAME_LASER), SAMPLE_INPUT_NAME_LASER));
+                    result.add(new Pair<InputStream, String>(getInputStream(SAMPLE_INPUT_NAME_STAR), SAMPLE_INPUT_NAME_STAR));
+                    result.add(new Pair<InputStream, String>(getInputStream(SAMPLE_INPUT_NAME_MELBOURNE), SAMPLE_INPUT_NAME_MELBOURNE));
+                    return result;
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
@@ -66,13 +69,13 @@ public class ParserTest {
 
     @Test
     public void testSimpleParsingSomeLaserDocument() throws JAXBException, IOException {
-        RegattaResults o = ParserFactory.INSTANCE.createParser(getInputStream(SAMPLE_INPUT_NAME_LASER)).parse();
+        RegattaResults o = ParserFactory.INSTANCE.createParser(getInputStream(SAMPLE_INPUT_NAME_LASER), SAMPLE_INPUT_NAME_LASER).parse();
         assertNotNull(o);
     }
 
     @Test
     public void testSimpleParsingSomeStarDocument() throws JAXBException, IOException {
-        RegattaResults o = ParserFactory.INSTANCE.createParser(getInputStream(SAMPLE_INPUT_NAME_STAR)).parse();
+        RegattaResults o = ParserFactory.INSTANCE.createParser(getInputStream(SAMPLE_INPUT_NAME_STAR), SAMPLE_INPUT_NAME_STAR).parse();
         assertNotNull(o);
     }
 
@@ -82,12 +85,12 @@ public class ParserTest {
         ScoreCorrectionProviderImpl scoreCorrectionProvider = new ScoreCorrectionProviderImpl(getTestDocumentProvider(),
                 ParserFactory.INSTANCE);
         Map<String, Set<Pair<String, TimePoint>>> hasResultsFor = scoreCorrectionProvider.getHasResultsForBoatClassFromDateByEventName();
-        assertTrue(hasResultsFor.containsKey("Star"));
+        assertTrue(hasResultsFor.containsKey("Star Men"));
         Calendar cal = new GregorianCalendar(2013, /* 2 means March; zero-based */ 2, 15, 18, 51, 15);
         cal.setTimeZone(TimeZone.getTimeZone("UTC"));
         TimePoint expectedTimePoint = new MillisecondsTimePoint(cal.getTime());
-        assertEquals(expectedTimePoint, hasResultsFor.get("Star").iterator().next().getB());
-        assertTrue(hasResultsFor.containsKey("Laser"));
+        assertEquals(expectedTimePoint, hasResultsFor.get("Star Men").iterator().next().getB());
+        assertTrue(hasResultsFor.containsKey("Laser Men"));
     }
     
     @Test
@@ -96,7 +99,7 @@ public class ParserTest {
         ScoreCorrectionProviderImpl scoreCorrectionProvider = new ScoreCorrectionProviderImpl(getTestDocumentProvider(),
                 ParserFactory.INSTANCE);
         Map<String, Set<Pair<String, TimePoint>>> hasResultsFor = scoreCorrectionProvider.getHasResultsForBoatClassFromDateByEventName();
-        RegattaScoreCorrections starResult = scoreCorrectionProvider.getScoreCorrections("Star Men", "Star", hasResultsFor.get("Star").iterator().next().getB());
+        RegattaScoreCorrections starResult = scoreCorrectionProvider.getScoreCorrections("Star Men", "Star", hasResultsFor.get("Star Men").iterator().next().getB());
         assertNotNull(starResult);
         Iterable<ScoreCorrectionsForRace> scoreCorrectionsForRaces = starResult.getScoreCorrectionsForRaces();
         assertNotNull(scoreCorrectionsForRaces);
