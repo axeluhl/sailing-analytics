@@ -14,9 +14,9 @@ public class RaceLogCourseDesignChangedEventImpl extends RaceLogEventImpl implem
    
     private CourseData courseDesign;
 
-    public RaceLogCourseDesignChangedEventImpl(TimePoint pTimePoint,
-            Serializable pId, List<Competitor> pInvolvedBoats, int pPassId, CourseData courseDesign) {
-        super(pTimePoint, pId, pInvolvedBoats, pPassId);
+    public RaceLogCourseDesignChangedEventImpl(TimePoint createdAt,
+            TimePoint pTimePoint, Serializable pId, List<Competitor> pInvolvedBoats, int pPassId, CourseData courseDesign) {
+        super(createdAt, pTimePoint, pId, pInvolvedBoats, pPassId);
         this.courseDesign = courseDesign;
     }
 

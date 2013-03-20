@@ -22,7 +22,8 @@ import com.sap.sailing.server.gateway.serialization.racelog.impl.BaseRaceLogEven
 public abstract class AbstractEventSerializerTest<EventType extends RaceLogEvent> {
 
     protected final UUID expectedId = UUID.randomUUID();
-    protected final long expectedTimestamp = 1337l;
+    protected final long expectedCreatedAtTimestamp = 42l;
+    protected final long expectedLogicalTimestamp = 1337l;
     protected final int expectedPassId = 42;
 
     private JsonSerializer<Competitor> competitorSerializer;
@@ -41,30 +42,28 @@ public abstract class AbstractEventSerializerTest<EventType extends RaceLogEvent
         serializer = createSerializer(competitorSerializer);
         event = createMockEvent();
 
-        TimePoint timePoint = mock(TimePoint.class);
-        when(timePoint.asMillis()).thenReturn(expectedTimestamp);
+        TimePoint createdAtTimePoint = mock(TimePoint.class);
+        when(createdAtTimePoint.asMillis()).thenReturn(expectedCreatedAtTimestamp);
+        TimePoint logicalTimePoint = mock(TimePoint.class);
+        when(logicalTimePoint.asMillis()).thenReturn(expectedLogicalTimestamp);
 
         when(event.getId()).thenReturn(expectedId);
-        when(event.getTimePoint()).thenReturn(timePoint);
+        when(event.getCreatedAt()).thenReturn(createdAtTimePoint);
+        when(event.getTimePoint()).thenReturn(logicalTimePoint);
         when(event.getPassId()).thenReturn(expectedPassId);
-        when(event.getInvolvedBoats()).thenReturn(
-                Collections.<Competitor> emptyList());
+        when(event.getInvolvedBoats()).thenReturn(Collections.<Competitor> emptyList());
     }
 
     @Test
     public void testSerializeBaseAttributes() {
         JSONObject json = serializer.serialize(event);
 
-        assertEquals(
-                expectedId,
-                UUID.fromString(json.get(
-                        BaseRaceLogEventSerializer.FIELD_ID).toString()));
-        assertEquals(expectedTimestamp,
-                json.get(BaseRaceLogEventSerializer.FIELD_TIMESTAMP));
-        assertEquals(expectedPassId,
-                json.get(BaseRaceLogEventSerializer.FIELD_PASS_ID));
+        assertEquals(expectedId, UUID.fromString(json.get(BaseRaceLogEventSerializer.FIELD_ID).toString()));
+        assertEquals(expectedCreatedAtTimestamp, json.get(BaseRaceLogEventSerializer.FIELD_CREATED_AT));
+        assertEquals(expectedLogicalTimestamp, json.get(BaseRaceLogEventSerializer.FIELD_TIMESTAMP));
+        assertEquals(expectedPassId, json.get(BaseRaceLogEventSerializer.FIELD_PASS_ID));
     }
-    
+
     @Test
     public void testIsParseable() throws ParseException {
         JSONObject json = serializer.serialize(event);

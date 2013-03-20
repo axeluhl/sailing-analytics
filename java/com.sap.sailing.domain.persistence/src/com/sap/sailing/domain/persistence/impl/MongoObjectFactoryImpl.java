@@ -73,9 +73,13 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         storeSpeedWithBearing(wind, result);
         return result;
     }
+    
+    private void storeTimePoint(TimePoint timePoint, DBObject result, FieldNames field) {
+        result.put(field.name(), timePoint.asMillis());
+    }
 
     private void storeTimed(Timed timed, DBObject result) {
-        result.put(FieldNames.TIME_AS_MILLIS.name(), timed.getTimePoint().asMillis());
+        storeTimePoint(timed.getTimePoint(), result, FieldNames.TIME_AS_MILLIS);
     }
 
     private void storeSpeedWithBearing(SpeedWithBearing speedWithBearing, DBObject result) {
@@ -557,19 +561,17 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
 
     private DBObject storeRaceLogStartTimeEvent(RaceLogStartTimeEvent startTimeEvent) {
         DBObject result = new BasicDBObject();
-        storeTimed(startTimeEvent, result);
         storeRaceLogEventProperties(startTimeEvent, result);
 
         result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogStartTimeEvent.class.getSimpleName());
-
-        result.put(FieldNames.RACE_LOG_EVENT_START_TIME.name(), startTimeEvent.getStartTime().asMillis());
+        
+        storeTimePoint(startTimeEvent.getStartTime(), result, FieldNames.RACE_LOG_EVENT_START_TIME);
         result.put(FieldNames.RACE_LOG_EVENT_NEXT_STATUS.name(), startTimeEvent.getNextStatus().name());
         return result;
     }
 
     public DBObject storeRaceLogFlagEvent(RaceLogFlagEvent flagEvent) {
         DBObject result = new BasicDBObject();
-        storeTimed(flagEvent, result);
         storeRaceLogEventProperties(flagEvent, result);
 
         result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogFlagEvent.class.getSimpleName());
@@ -581,6 +583,8 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     }
 
     private void storeRaceLogEventProperties(RaceLogEvent event, DBObject result) {
+        storeTimed(event, result);
+        storeTimePoint(event.getCreatedAt(), result, FieldNames.RACE_LOG_EVENT_CREATED_AT);
         result.put(FieldNames.RACE_LOG_EVENT_ID.name(), event.getId());
         result.put(FieldNames.RACE_LOG_EVENT_PASS_ID.name(), event.getPassId());
         result.put(FieldNames.RACE_LOG_EVENT_INVOLVED_BOATS.name(), storeInvolvedBoatsForRaceLogEvent(event.getInvolvedBoats()));
@@ -597,7 +601,6 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
 
     private DBObject storeRaceLogPassChangeEvent(RaceLogPassChangeEvent passChangeEvent) {
         DBObject result = new BasicDBObject();
-        storeTimed(passChangeEvent, result);
         storeRaceLogEventProperties(passChangeEvent, result);
 
         result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogPassChangeEvent.class.getSimpleName());
@@ -606,7 +609,6 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
 
     private DBObject storeRaceLogRaceStatusEvent(RaceLogRaceStatusEvent raceStatusEvent) {
         DBObject result = new BasicDBObject();
-        storeTimed(raceStatusEvent, result);
         storeRaceLogEventProperties(raceStatusEvent, result);
 
         result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogRaceStatusEvent.class.getSimpleName());
@@ -617,7 +619,6 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
 
     private DBObject storeRaceLogCourseAreaChangedEvent(RaceLogCourseAreaChangedEvent courseAreaChangedEvent) {
         DBObject result = new BasicDBObject();
-        storeTimed(courseAreaChangedEvent, result);
         storeRaceLogEventProperties(courseAreaChangedEvent, result);
 
         result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogCourseAreaChangedEvent.class.getSimpleName());
@@ -628,7 +629,6 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
 
     private DBObject storeRaceLogCourseDesignChangedEvent(RaceLogCourseDesignChangedEvent courseDesignChangedEvent) {
         DBObject result = new BasicDBObject();
-        storeTimed(courseDesignChangedEvent, result);
         storeRaceLogEventProperties(courseDesignChangedEvent, result);
 
         result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogCourseDesignChangedEvent.class.getSimpleName());

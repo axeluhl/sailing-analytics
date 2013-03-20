@@ -78,7 +78,7 @@ public class TestStoringAndRetrievingRaceLogInLeaderboards extends RaceLogMongoD
 
     @Test
     public void testStoreAndRetrieveSimpleLeaderboardWithRaceLogPassChangeEvent() {        
-        RaceLogPassChangeEvent event = RaceLogEventFactory.INSTANCE.createRaceLogPassChangeEvent(now, 0);
+        RaceLogPassChangeEvent event = RaceLogEventFactory.INSTANCE.createPassChangeEvent(now, 0);
 
         addAndStoreRaceLogEvent(leaderboard, raceColumnName, event);
 
@@ -100,7 +100,7 @@ public class TestStoringAndRetrievingRaceLogInLeaderboards extends RaceLogMongoD
     @Test
     public void testStoreAndRetrieveSimpleLeaderboardWithRaceLogCourseAreaChangeEvent() {
         final UUID uuid = UUID.randomUUID();
-        RaceLogCourseAreaChangedEvent event = RaceLogEventFactory.INSTANCE.createRaceLogCourseAreaChangedEvent(now, 0, uuid);
+        RaceLogCourseAreaChangedEvent event = RaceLogEventFactory.INSTANCE.createCourseAreaChangedEvent(now, 0, uuid);
 
         addAndStoreRaceLogEvent(leaderboard, raceColumnName, event);
 

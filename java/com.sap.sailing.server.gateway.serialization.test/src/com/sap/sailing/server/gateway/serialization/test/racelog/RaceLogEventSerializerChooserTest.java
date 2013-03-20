@@ -71,14 +71,14 @@ public class RaceLogEventSerializerChooserTest {
     @Test
     public void testChoosesCourseAreaChangedSerializer() {
         // we use the real event type here because we do not want to re-implement the dispatching.
-        RaceLogEvent event = factory.createRaceLogCourseAreaChangedEvent(null, 0, null);
+        RaceLogEvent event = factory.createCourseAreaChangedEvent(null, 0, null);
         assertEquals(courseAreaChangedEventSerializer, chooser.getSerializer(event));
     }
     
     @Test
     public void testChoosesPassChangedSerializer() {
         // we use the real event type here because we do not want to re-implement the dispatching.
-        RaceLogEvent event = factory.createRaceLogPassChangeEvent(null, 0);
+        RaceLogEvent event = factory.createPassChangeEvent(null, 0);
         assertEquals(passChangedSerializer, chooser.getSerializer(event));
     }
     

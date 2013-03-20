@@ -22,11 +22,11 @@ public interface RaceLogEventFactory {
     RaceLogRaceStatusEvent createRaceStatusEvent(TimePoint timePoint, Serializable id, List<Competitor> competitors, int passId, RaceLogRaceStatus nextStatus);
     RaceLogRaceStatusEvent createRaceStatusEvent(TimePoint timePoint, int passId, RaceLogRaceStatus nextStatus);
 
-    RaceLogPassChangeEvent createRaceLogPassChangeEvent(TimePoint timePoint, Serializable id, List<Competitor> competitors, int passId);
-    RaceLogPassChangeEvent createRaceLogPassChangeEvent(TimePoint timePoint, int passId);
+    RaceLogPassChangeEvent createPassChangeEvent(TimePoint timePoint, Serializable id, List<Competitor> competitors, int passId);
+    RaceLogPassChangeEvent createPassChangeEvent(TimePoint timePoint, int passId);
 
-    RaceLogCourseAreaChangedEvent createRaceLogCourseAreaChangedEvent(TimePoint timePoint, Serializable id, List<Competitor> competitors, int passId, Serializable courseAreaId);
-    RaceLogCourseAreaChangedEvent createRaceLogCourseAreaChangedEvent(TimePoint timePoint, int passId, Serializable courseAreaId);
+    RaceLogCourseAreaChangedEvent createCourseAreaChangedEvent(TimePoint timePoint, Serializable id, List<Competitor> competitors, int passId, Serializable courseAreaId);
+    RaceLogCourseAreaChangedEvent createCourseAreaChangedEvent(TimePoint timePoint, int passId, Serializable courseAreaId);
     
     RaceLogCourseDesignChangedEvent createCourseDesignChangedEvent(TimePoint timePoint, Serializable id, List<Competitor> competitors, int passId, CourseData courseData);
     RaceLogCourseDesignChangedEvent createCourseDesignChangedEvent(TimePoint timePoint, int passId, CourseData courseData);
