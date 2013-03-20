@@ -15,4 +15,10 @@ public interface TracTracConfiguration {
     String getLiveDataURI();
     
     String getStoredDataURI();
+    
+    /**
+     * holds the path of Trac Trac to receive course updates triggered by the race committee
+     * @return the TracTrac server path for course updates
+     */
+    String getCourseDesignUpdateURI();
 }

@@ -579,8 +579,8 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public TracTracConfiguration createTracTracConfiguration(String name, String jsonURL, String liveDataURI, String storedDataURI) {
-        return new TracTracConfigurationImpl(name, jsonURL, liveDataURI, storedDataURI);
+    public TracTracConfiguration createTracTracConfiguration(String name, String jsonURL, String liveDataURI, String storedDataURI, String courseDesignUpdateURI) {
+        return new TracTracConfigurationImpl(name, jsonURL, liveDataURI, storedDataURI, courseDesignUpdateURI);
     }
 
     @Override

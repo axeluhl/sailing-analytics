@@ -45,7 +45,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return DomainFactory.INSTANCE.createTracTracConfiguration((String) object.get(FieldNames.TT_CONFIG_NAME.name()),
                 (String) object.get(FieldNames.TT_CONFIG_JSON_URL.name()),
                 (String) object.get(FieldNames.TT_CONFIG_LIVE_DATA_URI.name()),
-                (String) object.get(FieldNames.TT_CONFIG_STORED_DATA_URI.name()));
+                (String) object.get(FieldNames.TT_CONFIG_STORED_DATA_URI.name()),
+                (String) object.get(FieldNames.TT_CONFIG_COURSE_DESIGN_UPDATE_URI.name()));
     }
 
 }

@@ -87,6 +87,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
     private TextBox storedURITextBox;
     private TextBox liveURITextBox;
     private TextBox jsonURLTextBox;
+    private TextBox courseDesignUpdateURITextBox;
 
     private TextBox racesFilterTextBox;
     private CellTable<TracTracRaceRecordDTO> racesTable;
@@ -285,6 +286,16 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
 
         layoutTable.setWidget(10, 0, jsonURLLabel);
         layoutTable.setWidget(10, 1, this.jsonURLTextBox);
+        
+        // Course design Update URL
+        Label courseDesignUpdateURLLabel = new Label(this.stringMessages.courseDesignUpdateUrl() + ":");
+        
+        this.courseDesignUpdateURITextBox = new TextBox();
+        this.courseDesignUpdateURITextBox.ensureDebugId("COURSEDESIGNUPDATEURI");
+        this.courseDesignUpdateURITextBox.setVisibleLength(40);
+        
+        layoutTable.setWidget(11, 0, courseDesignUpdateURLLabel);
+        layoutTable.setWidget(11, 1, this.courseDesignUpdateURITextBox);
 
         // List Races
         Button listRacesButton = new Button(this.stringMessages.listRaces());
@@ -542,6 +553,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         final String jsonURL = this.jsonURLTextBox.getValue();
         final String liveDataURI = this.liveURITextBox.getValue();
         final String storedDataURI = this.storedURITextBox.getValue();
+        final String courseDesignUpdateURI = this.courseDesignUpdateURITextBox.getValue();
 
         sailingService.listTracTracRacesInEvent(jsonURL, new MarkedAsyncCallback<Pair<String, List<TracTracRaceRecordDTO>>>() {
             @Override
@@ -569,7 +581,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
                 TracTracEventManagementPanel.this.racesTable.setPageSize(races.size());
                 
                 // store a successful configuration in the database for later retrieval
-                sailingService.storeTracTracConfiguration(eventName, jsonURL, liveDataURI, storedDataURI,
+                sailingService.storeTracTracConfiguration(eventName, jsonURL, liveDataURI, storedDataURI, courseDesignUpdateURI, 
                         new MarkedAsyncCallback<Void>() {
                             @Override
                             public void handleFailure(Throwable caught) {
@@ -580,7 +592,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
                             public void handleSuccess(Void voidResult) {
                                 // refresh list of previous configurations
                                 TracTracConfigurationDTO config = new TracTracConfigurationDTO(eventName, jsonURL,
-                                        liveDataURI, storedDataURI);
+                                        liveDataURI, storedDataURI, courseDesignUpdateURI);
                                 
                                 if (TracTracEventManagementPanel.this.previousConfigurations.put(config.name, config) == null) {
                                     TracTracEventManagementPanel.this.connectionsHistoryListBox.addItem(config.name);
@@ -688,6 +700,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         this.jsonURLTextBox.setValue(config.jsonURL);
         this.liveURITextBox.setValue(config.liveDataURI);
         this.storedURITextBox.setValue(config.storedDataURI);
+        this.courseDesignUpdateURITextBox.setValue(config.courseDesignUpdateURI);
     }
 
     private void fillRaceListFromAvailableRacesApplyingFilter(String text) {
