@@ -126,16 +126,16 @@ public interface DomainFactory {
      *            implementation is {@link EmptyWindStore} which simply provides new, empty tracks. This is always
      *            available but loses track of the wind, e.g., during server restarts.
      */
-    TracTracRaceTracker createRaceTracker(URL paramURL, URI liveURI, URI storedURI, TimePoint startOfTracking,
+    TracTracRaceTracker createRaceTracker(URL paramURL, URI liveURI, URI storedURI, URI courseDesignUpdateURI, TimePoint startOfTracking,
             TimePoint endOfTracking, long delayToLiveInMillis, boolean simulateWithStartTimeNow, RaceLogStore raceLogStore, 
             WindStore windStore, TrackedRegattaRegistry trackedRegattaRegistry) throws MalformedURLException, FileNotFoundException,
             URISyntaxException;
 
     /**
-     * Same as {@link #createRaceTracker(URL, URI, URI, TimePoint, TimePoint, WindStore, TrackedRegattaRegistry)}, only that
+     * Same as {@link #createRaceTracker(URL, URI, URI, URI, TimePoint, TimePoint, WindStore, TrackedRegattaRegistry)}, only that
      * a predefined {@link Regatta} is used to hold the resulting races.
      */
-    RaceTracker createRaceTracker(Regatta regatta, URL paramURL, URI liveURI, URI storedURI, TimePoint startOfTracking,
+    RaceTracker createRaceTracker(Regatta regatta, URL paramURL, URI liveURI, URI storedURI, URI courseDesignUpdateURI, TimePoint startOfTracking,
             TimePoint endOfTracking, long delayToLiveInMillis, boolean simulateWithStartTimeNow, RaceLogStore raceLogStore, 
             WindStore windStore, TrackedRegattaRegistry trackedRegattaRegistry) throws MalformedURLException, FileNotFoundException,
             URISyntaxException;
@@ -237,7 +237,7 @@ public interface DomainFactory {
 
     Pair<List<com.sap.sailing.domain.base.Competitor>, BoatClass> getCompetitorsAndDominantBoatClass(Race race);
     
-    RaceTrackingConnectivityParameters createTrackingConnectivityParameters(URL paramURL, URI liveURI, URI storedURI,
+    RaceTrackingConnectivityParameters createTrackingConnectivityParameters(URL paramURL, URI liveURI, URI storedURI, URI courseDesignUpdateURI,
             TimePoint startOfTracking, TimePoint endOfTracking, long delayToLiveInMillis, boolean simulateWithStartTimeNow, RaceLogStore raceLogStore, WindStore windStore);
     /**
      * Removes all knowledge about <code>tractracRace</code> which includes removing it from the race cache, from the

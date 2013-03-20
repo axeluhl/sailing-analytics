@@ -467,7 +467,9 @@ public class AdminApp extends SailingServerHttpServlet {
         URL jsonURL = new URL(req.getParameter(PARAM_NAME_EVENT_JSON_URL));
         URI liveURI = new URI(req.getParameter(PARAM_NAME_LIVE_URI));
         URI storedURI = new URI(req.getParameter(PARAM_NAME_STORED_URI));
-        getService().addRegatta(jsonURL, liveURI, storedURI, getWindStore(req), /* timeoutInMilliseconds */ 60000);
+        
+        //The course design update URI is not available at this place
+        getService().addRegatta(jsonURL, liveURI, storedURI, /* courseDesignUpdateURI */ null, getWindStore(req), /* timeoutInMilliseconds */ 60000);
     }
 
     private WindStore getWindStore(HttpServletRequest req) throws UnknownHostException, MongoException {
@@ -491,7 +493,8 @@ public class AdminApp extends SailingServerHttpServlet {
         URL paramURL = new URL(req.getParameter(PARAM_NAME_PARAM_URL));
         URI liveURI = new URI(req.getParameter(PARAM_NAME_LIVE_URI));
         URI storedURI = new URI(req.getParameter(PARAM_NAME_STORED_URI));
-        getService().addTracTracRace(paramURL, liveURI, storedURI, 
+        //The course design update URI is not available at this place
+        getService().addTracTracRace(paramURL, liveURI, storedURI, /*courseDesignUpdateURI*/ null,
                 MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(MongoFactory.INSTANCE.getDefaultMongoObjectFactory(),
                         MongoFactory.INSTANCE.getDefaultDomainObjectFactory()),
                         getWindStore(req), /* timeoutInMilliseconds */ 60000);

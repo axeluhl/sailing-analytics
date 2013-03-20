@@ -555,21 +555,21 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public TracTracRaceTracker createRaceTracker(URL paramURL, URI liveURI, URI storedURI, TimePoint startOfTracking,
+    public TracTracRaceTracker createRaceTracker(URL paramURL, URI liveURI, URI storedURI, URI courseDesignUpdateURI, TimePoint startOfTracking,
             TimePoint endOfTracking, long delayToLiveInMillis, boolean simulateWithStartTimeNow, 
             RaceLogStore raceLogStore, WindStore windStore,
             TrackedRegattaRegistry trackedRegattaRegistry) throws MalformedURLException, FileNotFoundException,
             URISyntaxException {
-        return new TracTracRaceTrackerImpl(this, paramURL, liveURI, storedURI, startOfTracking, endOfTracking, delayToLiveInMillis,
+        return new TracTracRaceTrackerImpl(this, paramURL, liveURI, storedURI, courseDesignUpdateURI, startOfTracking, endOfTracking, delayToLiveInMillis,
                 simulateWithStartTimeNow, raceLogStore, windStore, trackedRegattaRegistry);
     }
 
     @Override
-    public RaceTracker createRaceTracker(Regatta regatta, URL paramURL, URI liveURI, URI storedURI,
+    public RaceTracker createRaceTracker(Regatta regatta, URL paramURL, URI liveURI, URI storedURI, URI courseDesignUpdateURI,
             TimePoint startOfTracking, TimePoint endOfTracking, long delayToLiveInMillis,
             boolean simulateWithStartTimeNow, RaceLogStore raceLogStore, WindStore windStore, TrackedRegattaRegistry trackedRegattaRegistry)
             throws MalformedURLException, FileNotFoundException, URISyntaxException {
-        return new TracTracRaceTrackerImpl(regatta, this, paramURL, liveURI, storedURI, startOfTracking, endOfTracking, delayToLiveInMillis,
+        return new TracTracRaceTrackerImpl(regatta, this, paramURL, liveURI, storedURI, courseDesignUpdateURI, startOfTracking, endOfTracking, delayToLiveInMillis,
                 simulateWithStartTimeNow, raceLogStore, windStore, trackedRegattaRegistry);
     }
 
@@ -585,9 +585,9 @@ public class DomainFactoryImpl implements DomainFactory {
 
     @Override
     public RaceTrackingConnectivityParameters createTrackingConnectivityParameters(URL paramURL, URI liveURI,
-            URI storedURI, TimePoint startOfTracking, TimePoint endOfTracking, long delayToLiveInMillis,
+            URI storedURI, URI courseDesignUpdateURI, TimePoint startOfTracking, TimePoint endOfTracking, long delayToLiveInMillis,
             boolean simulateWithStartTimeNow, RaceLogStore raceLogStore, WindStore windStore) {
-        return new RaceTrackingConnectivityParametersImpl(paramURL, liveURI, storedURI, startOfTracking, endOfTracking,
+        return new RaceTrackingConnectivityParametersImpl(paramURL, liveURI, storedURI, courseDesignUpdateURI, startOfTracking, endOfTracking,
                 delayToLiveInMillis, simulateWithStartTimeNow, raceLogStore, windStore, this);
     }
 

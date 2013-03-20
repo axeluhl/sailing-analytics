@@ -618,7 +618,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     }
 
     @Override
-    public Regatta addRegatta(URL jsonURL, URI liveURI, URI storedURI, WindStore windStore, long timeoutInMilliseconds) throws Exception {
+    public Regatta addRegatta(URL jsonURL, URI liveURI, URI storedURI, URI courseDesignUpdateURI, WindStore windStore, long timeoutInMilliseconds) throws Exception {
         RaceLogStore raceLogStore = MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(
                 mongoObjectFactory, 
                 domainObjectFactory);
@@ -626,7 +626,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         Regatta regatta = null;
         for (RaceRecord rr : jsonService.getRaceRecords()) {
             URL paramURL = rr.getParamURL();
-            regatta = addTracTracRace(paramURL, liveURI, storedURI, raceLogStore, windStore, timeoutInMilliseconds).getRegatta();
+            regatta = addTracTracRace(paramURL, liveURI, storedURI, courseDesignUpdateURI, raceLogStore, windStore, timeoutInMilliseconds).getRegatta();
         }
         return regatta;
     }
@@ -697,10 +697,10 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     }
 
     @Override
-    public RacesHandle addTracTracRace(URL paramURL, URI liveURI, URI storedURI, RaceLogStore raceLogStore, WindStore windStore,
+    public RacesHandle addTracTracRace(URL paramURL, URI liveURI, URI storedURI, URI courseDesignUpdateURI, RaceLogStore raceLogStore, WindStore windStore,
             long timeoutInMilliseconds) throws Exception {
         return addRace(
-                /* regattaToAddTo */null, getTracTracDomainFactory().createTrackingConnectivityParameters(paramURL, liveURI, storedURI,
+                /* regattaToAddTo */null, getTracTracDomainFactory().createTrackingConnectivityParameters(paramURL, liveURI, storedURI, courseDesignUpdateURI,
                         /* startOfTracking */null,
                         /* endOfTracking */null, delayToLiveInMillis, /* simulateWithStartTimeNow */false, raceLogStore, windStore), windStore,
                         timeoutInMilliseconds);
@@ -862,9 +862,9 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
 
     @Override
     public RacesHandle addTracTracRace(RegattaIdentifier regattaToAddTo, URL paramURL, URI liveURI,
-            URI storedURI, TimePoint startOfTracking, TimePoint endOfTracking,
+            URI storedURI, URI courseDesignUpdateURI, TimePoint startOfTracking, TimePoint endOfTracking,
             RaceLogStore raceLogStore, WindStore windStore, long timeoutInMilliseconds, boolean simulateWithStartTimeNow) throws Exception {
-        return addRace(regattaToAddTo, getTracTracDomainFactory().createTrackingConnectivityParameters(paramURL, liveURI, storedURI, startOfTracking,
+        return addRace(regattaToAddTo, getTracTracDomainFactory().createTrackingConnectivityParameters(paramURL, liveURI, storedURI, courseDesignUpdateURI, startOfTracking,
                 endOfTracking, delayToLiveInMillis, simulateWithStartTimeNow, raceLogStore, windStore), windStore, timeoutInMilliseconds);
     }
 

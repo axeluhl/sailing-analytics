@@ -71,7 +71,7 @@ public interface SailingService extends RemoteService {
     Pair<String, List<TracTracRaceRecordDTO>> listTracTracRacesInEvent(String eventJsonURL) throws Exception;
 
     void trackWithTracTrac(RegattaIdentifier regattaToAddTo, Iterable<TracTracRaceRecordDTO> rrs, String liveURI,
-            String storedURI, boolean trackWind, boolean correctWindByDeclination, boolean simulateWithStartTimeNow) throws Exception;
+            String storedURI, String courseDesignUpdateURI, boolean trackWind, boolean correctWindByDeclination, boolean simulateWithStartTimeNow) throws Exception;
 
     void trackWithSwissTiming(RegattaIdentifier regattaToAddTo, Iterable<SwissTimingRaceRecordDTO> rrs, String hostname, int port,
             boolean canSendRequests, boolean trackWind, boolean correctWindByDeclination) throws Exception;

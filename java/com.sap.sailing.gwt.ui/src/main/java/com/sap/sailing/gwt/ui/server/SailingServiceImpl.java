@@ -1197,8 +1197,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public void trackWithTracTrac(RegattaIdentifier regattaToAddTo, Iterable<TracTracRaceRecordDTO> rrs, String liveURI, String storedURI,
-            boolean trackWind, final boolean correctWindByDeclination, final boolean simulateWithStartTimeNow) throws Exception {
+    public void trackWithTracTrac(RegattaIdentifier regattaToAddTo, Iterable<TracTracRaceRecordDTO> rrs, String liveURI, String storedURI, 
+            String courseDesignUpdateURI, boolean trackWind, final boolean correctWindByDeclination, final boolean simulateWithStartTimeNow) throws Exception {
         for (TracTracRaceRecordDTO rr : rrs) {
             if (liveURI == null || liveURI.trim().length() == 0) {
                 liveURI = rr.liveURI;
@@ -1207,7 +1207,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 storedURI = rr.storedURI;
             }
             final RacesHandle raceHandle = getService().addTracTracRace(regattaToAddTo, new URL(rr.paramURL),
-                    new URI(liveURI), new URI(storedURI), new MillisecondsTimePoint(rr.trackingStartTime),
+                    new URI(liveURI), new URI(storedURI), new URI(courseDesignUpdateURI), new MillisecondsTimePoint(rr.trackingStartTime),
                     new MillisecondsTimePoint(rr.trackingEndTime),
                     MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(mongoObjectFactory, domainObjectFactory),
                     MongoWindStoreFactory.INSTANCE.getMongoWindStore(mongoObjectFactory, domainObjectFactory),

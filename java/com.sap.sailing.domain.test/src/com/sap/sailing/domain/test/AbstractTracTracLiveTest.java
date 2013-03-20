@@ -196,4 +196,8 @@ public abstract class AbstractTracTracLiveTest extends StoredTrackBasedTest impl
         }
         return ttControlPoints;
     }
+
+    public static URI getCourseDesignUpdateURI() throws URISyntaxException {
+        return new URI("http://tracms.traclive.dk/update_course");
+    }
 }

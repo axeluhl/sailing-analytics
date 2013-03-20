@@ -626,6 +626,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
     private void trackSelectedRaces(boolean trackWind, boolean correctWind, final boolean simulateWithStartTimeNow) {
         String liveURI = this.liveURITextBox.getValue();
         String storedURI = this.storedURITextBox.getValue();
+        String courseDesignUpdateURI = this.courseDesignUpdateURITextBox.getValue();
         RegattaDTO selectedRegatta = getSelectedRegatta();
         RegattaIdentifier regattaIdentifier = null;
         if (selectedRegatta != null) {
@@ -669,7 +670,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
                 selectedRaces.add(race);
             }
         }
-        this.sailingService.trackWithTracTrac(regattaIdentifier, selectedRaces, liveURI, storedURI, trackWind, correctWind,
+        this.sailingService.trackWithTracTrac(regattaIdentifier, selectedRaces, liveURI, storedURI, courseDesignUpdateURI, trackWind, correctWind,
                 simulateWithStartTimeNow, new MarkedAsyncCallback<Void>() {
                     @Override
                     public void handleFailure(Throwable caught) {

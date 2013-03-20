@@ -89,7 +89,7 @@ public interface SailingServiceAsync {
      *            {@link TracTracRaceRecordDTO#storedURI} from the <code>rr</code> race record.
      */
     void trackWithTracTrac(RegattaIdentifier regattaToAddTo,
-            Iterable<TracTracRaceRecordDTO> rrs, String liveURI, String storedURI, boolean trackWind, boolean correctWindByDeclination,
+            Iterable<TracTracRaceRecordDTO> rrs, String liveURI, String storedURI, String courseDesignUpdateURI, boolean trackWind, boolean correctWindByDeclination,
             boolean simulateWithStartTimeNow, AsyncCallback<Void> callback);
 
     void trackWithSwissTiming(RegattaIdentifier regattaToAddTo, Iterable<SwissTimingRaceRecordDTO> rrs,
