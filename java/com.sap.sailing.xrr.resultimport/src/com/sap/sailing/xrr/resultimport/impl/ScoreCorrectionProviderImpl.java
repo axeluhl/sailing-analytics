@@ -32,7 +32,7 @@ public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider {
     private static final Logger logger = Logger.getLogger(ScoreCorrectionProviderImpl.class.getName());
     private static final long serialVersionUID = -4596215011753860781L;
 
-    private static final String name = "SwissTiming On Venue Result System";
+    private static final String name = "ISAF XML Regatta Result (XRR) Importer";
     
     /**
      * The directory that will be scanned for <code>.zip</code> files which will then be passed to
@@ -74,12 +74,12 @@ public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider {
                             if (eventO instanceof Division) {
                                 Division division = (Division) eventO;
                                 String boatClassName = parser.getBoatClassName(division);
-                                Set<Pair<String, TimePoint>> set = result.get(boatClassName);
+                                Set<Pair<String, TimePoint>> set = result.get(event.getTitle());
                                 if (set == null) {
                                     set = new HashSet<>();
-                                    result.put(boatClassName, set);
+                                    result.put(event.getTitle(), set);
                                 }
-                                set.add(new Pair<String, TimePoint>(event.getTitle(), timePoint));
+                                set.add(new Pair<String, TimePoint>(boatClassName, timePoint));
                             }
                         }
                     }

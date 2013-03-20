@@ -6,6 +6,7 @@ import java.util.NavigableSet;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.CourseArea;
+import com.sap.sailing.domain.base.CourseData;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.RaceColumnListener;
@@ -27,6 +28,7 @@ import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.racelog.RaceLog;
+import com.sap.sailing.domain.tracking.CourseDesignChangedListener;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
@@ -749,5 +751,17 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     public RaceLog getRaceLog() {
         // TODO Auto-generated method stub
         return null;
+    }
+
+    @Override
+    public void onCourseDesignChangedByRaceCommittee(CourseData courseDesign) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void setCourseDesignChangedListener(CourseDesignChangedListener listener) {
+        // TODO Auto-generated method stub
+        
     }
 }

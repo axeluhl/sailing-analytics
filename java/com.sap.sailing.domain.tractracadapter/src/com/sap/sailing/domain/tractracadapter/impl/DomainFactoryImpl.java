@@ -466,6 +466,10 @@ public class DomainFactoryImpl implements DomainFactory {
                     DynamicTrackedRace trackedRace = createTrackedRace(trackedRegatta, raceDefinition, windStore,
                             delayToLiveInMillis, millisecondsOverWhichToAverageWind, raceDefinitionSetToUpdate);
                     logger.info("Added race "+raceDefinition+" to regatta "+trackedRegatta.getRegatta());
+                    
+                    CourseDesignChangedByRaceCommitteeHandler courseDesignHandler = new CourseDesignChangedByRaceCommitteeHandler();
+                    trackedRace.setCourseDesignChangedListener(courseDesignHandler);
+                    
                     synchronized (raceCache) {
                         raceCache.put(race, raceDefinition);
                         raceCache.notifyAll();
