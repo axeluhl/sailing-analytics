@@ -484,38 +484,7 @@
 						height     	58
 						annotation 	8
 						autoResize 	TRUE)
-					    (object ClassView "Class" "Logical View::domain::tracking::Bearing" @8
-						ShowCompartmentStereotypes 	TRUE
-						IncludeAttribute 	TRUE
-						IncludeOperation 	TRUE
-						location   	(2136, 194)
-						font       	(object Font
-						    size       	10
-						    face       	"Arial"
-						    bold       	FALSE
-						    italics    	FALSE
-						    underline  	FALSE
-						    strike     	FALSE
-						    color      	0
-						    default_color 	TRUE)
-						label      	(object ItemLabel
-						    Parent_View 	@8
-						    location   	(2135, 302)
-						    anchor_loc 	1
-						    nlines     	2
-						    max_width  	371
-						    justify    	0
-						    label      	"Bearing")
-						icon       	"Interface"
-						icon_style 	"Icon"
-						line_color 	3342489
-						fill_color 	13434879
-						quidu      	"514A0C900229"
-						width      	58
-						height     	58
-						annotation 	8
-						autoResize 	TRUE)
-					    (object ClassView "Class" "Logical View::domain::tracking::SpeedWithBearing" @9
+					    (object ClassView "Class" "Logical View::domain::tracking::SpeedWithBearing" @8
 						ShowCompartmentStereotypes 	TRUE
 						IncludeAttribute 	TRUE
 						IncludeOperation 	TRUE
@@ -530,7 +499,7 @@
 						    color      	0
 						    default_color 	TRUE)
 						label      	(object ItemLabel
-						    Parent_View 	@9
+						    Parent_View 	@8
 						    location   	(1613, 298)
 						    anchor_loc 	1
 						    nlines     	2
@@ -542,6 +511,37 @@
 						line_color 	3342489
 						fill_color 	13434879
 						quidu      	"514A0C5301C6"
+						width      	58
+						height     	58
+						annotation 	8
+						autoResize 	TRUE)
+					    (object ClassView "Class" "Logical View::domain::tracking::Bearing" @9
+						ShowCompartmentStereotypes 	TRUE
+						IncludeAttribute 	TRUE
+						IncludeOperation 	TRUE
+						location   	(2136, 194)
+						font       	(object Font
+						    size       	10
+						    face       	"Arial"
+						    bold       	FALSE
+						    italics    	FALSE
+						    underline  	FALSE
+						    strike     	FALSE
+						    color      	0
+						    default_color 	TRUE)
+						label      	(object ItemLabel
+						    Parent_View 	@9
+						    location   	(2135, 302)
+						    anchor_loc 	1
+						    nlines     	2
+						    max_width  	371
+						    justify    	0
+						    label      	"Bearing")
+						icon       	"Interface"
+						icon_style 	"Icon"
+						line_color 	3342489
+						fill_color 	13434879
+						quidu      	"514A0C900229"
 						width      	58
 						height     	58
 						annotation 	8
@@ -590,10 +590,10 @@
 							line_color 	3342489
 							quidu      	"514A0D3F02AD"
 							client     	@10
-							supplier   	@9
+							supplier   	@8
 							vertices   	(list Points
 							    (1874, 189)
-							    (1640, 189))
+							    (1640, 188))
 							line_style 	0)
 						    (object RoleView "bearing" @13
 							Parent_View 	@10
@@ -632,10 +632,10 @@
 							line_color 	3342489
 							quidu      	"514A0D3F02AB"
 							client     	@10
-							supplier   	@8
+							supplier   	@9
 							vertices   	(list Points
 							    (1874, 189)
-							    (2108, 189))
+							    (2106, 189))
 							line_style 	0
 							label      	(object SegLabel @15
 							    Parent_View 	@13
@@ -697,7 +697,7 @@
 						supplier   	@6
 						vertices   	(list Points
 						    (491, 492)
-						    (472, 355))
+						    (467, 311))
 						line_style 	0)
 					    (object RealizeView "" @18
 						stereotype 	TRUE
@@ -707,27 +707,27 @@
 						supplier   	@7
 						vertices   	(list Points
 						    (1079, 505)
-						    (1059, 365))
+						    (1053, 321))
 						line_style 	0)
 					    (object RealizeView "" @19
 						stereotype 	TRUE
 						line_color 	3342489
 						quidu      	"514A0EE400A2"
 						client     	@3
-						supplier   	@9
+						supplier   	@8
 						vertices   	(list Points
 						    (1632, 501)
-						    (1622, 367))
+						    (1620, 323))
 						line_style 	0)
 					    (object RealizeView "" @20
 						stereotype 	TRUE
 						line_color 	3342489
 						quidu      	"514A0EE501A5"
 						client     	@4
-						supplier   	@8
+						supplier   	@9
 						vertices   	(list Points
 						    (2163, 501)
-						    (2149, 371))
+						    (2144, 327))
 						line_style 	0)
 					    (object RealizeView "" @21
 						stereotype 	TRUE
@@ -737,7 +737,7 @@
 						supplier   	@16
 						vertices   	(list Points
 						    (2665, 498)
-						    (2650, 386))
+						    (2646, 342))
 						line_style 	0)))
 				    (object ClassDiagram "Compact GPS Fix"
 					quid       	"514A102802E2"
@@ -774,23 +774,6 @@
 						line_color 	3342489
 						fill_color 	13434879
 						quidu      	"514A103000C1"
-						compartment 	(object Compartment
-						    Parent_View 	@22
-						    location   	(340, 595)
-						    font       	(object Font
-							size       	10
-							face       	"Arial"
-							bold       	FALSE
-							italics    	FALSE
-							underline  	FALSE
-							strike     	FALSE
-							color      	0
-							default_color 	TRUE)
-						    icon_style 	"Icon"
-						    fill_color 	13434879
-						    anchor     	2
-						    nlines     	6
-						    max_width  	437)
 						width      	1332
 						height     	1381
 						annotation 	8)
@@ -1280,38 +1263,7 @@
 					height     	58
 					annotation 	8
 					autoResize 	TRUE)
-				    (object ClassView "Class" "Logical View::domain::tracking::Timed" @41
-					ShowCompartmentStereotypes 	TRUE
-					IncludeAttribute 	TRUE
-					IncludeOperation 	TRUE
-					location   	(1339, 324)
-					font       	(object Font
-					    size       	10
-					    face       	"Arial"
-					    bold       	FALSE
-					    italics    	FALSE
-					    underline  	FALSE
-					    strike     	FALSE
-					    color      	0
-					    default_color 	TRUE)
-					label      	(object ItemLabel
-					    Parent_View 	@41
-					    location   	(1338, 432)
-					    anchor_loc 	1
-					    nlines     	1
-					    max_width  	231
-					    justify    	0
-					    label      	"Timed")
-					icon       	"Interface"
-					icon_style 	"Icon"
-					line_color 	3342489
-					fill_color 	13434879
-					quidu      	"514A0C5101DF"
-					width      	58
-					height     	58
-					annotation 	8
-					autoResize 	TRUE)
-				    (object ClassView "Class" "Logical View::domain::tracking::TimePoint" @42
+				    (object ClassView "Class" "Logical View::domain::tracking::TimePoint" @41
 					ShowCompartmentStereotypes 	TRUE
 					IncludeAttribute 	TRUE
 					IncludeOperation 	TRUE
@@ -1326,7 +1278,7 @@
 					    color      	0
 					    default_color 	TRUE)
 					label      	(object ItemLabel
-					    Parent_View 	@42
+					    Parent_View 	@41
 					    location   	(1658, 432)
 					    anchor_loc 	1
 					    nlines     	1
@@ -1338,6 +1290,37 @@
 					line_color 	3342489
 					fill_color 	13434879
 					quidu      	"514A0C5103D7"
+					width      	58
+					height     	58
+					annotation 	8
+					autoResize 	TRUE)
+				    (object ClassView "Class" "Logical View::domain::tracking::Timed" @42
+					ShowCompartmentStereotypes 	TRUE
+					IncludeAttribute 	TRUE
+					IncludeOperation 	TRUE
+					location   	(1339, 324)
+					font       	(object Font
+					    size       	10
+					    face       	"Arial"
+					    bold       	FALSE
+					    italics    	FALSE
+					    underline  	FALSE
+					    strike     	FALSE
+					    color      	0
+					    default_color 	TRUE)
+					label      	(object ItemLabel
+					    Parent_View 	@42
+					    location   	(1338, 432)
+					    anchor_loc 	1
+					    nlines     	1
+					    max_width  	231
+					    justify    	0
+					    label      	"Timed")
+					icon       	"Interface"
+					icon_style 	"Icon"
+					line_color 	3342489
+					fill_color 	13434879
+					quidu      	"514A0C5101DF"
 					width      	58
 					height     	58
 					annotation 	8
@@ -1394,10 +1377,10 @@
 						line_color 	3342489
 						quidu      	"514A0CAC016B"
 						client     	@43
-						supplier   	@42
+						supplier   	@41
 						vertices   	(list Points
 						    (1497, 324)
-						    (1630, 324))
+						    (1631, 324))
 						line_style 	0
 						label      	(object SegLabel @46
 						    Parent_View 	@44
@@ -1427,43 +1410,12 @@
 						line_color 	3342489
 						quidu      	"514A0CAC01B7"
 						client     	@43
-						supplier   	@41
+						supplier   	@42
 						vertices   	(list Points
 						    (1497, 324)
 						    (1365, 324))
 						line_style 	0)))
-				    (object ClassView "Class" "Logical View::domain::tracking::Positioned" @48
-					ShowCompartmentStereotypes 	TRUE
-					IncludeAttribute 	TRUE
-					IncludeOperation 	TRUE
-					location   	(1086, 321)
-					font       	(object Font
-					    size       	10
-					    face       	"Arial"
-					    bold       	FALSE
-					    italics    	FALSE
-					    underline  	FALSE
-					    strike     	FALSE
-					    color      	0
-					    default_color 	TRUE)
-					label      	(object ItemLabel
-					    Parent_View 	@48
-					    location   	(1085, 429)
-					    anchor_loc 	1
-					    nlines     	1
-					    max_width  	228
-					    justify    	0
-					    label      	"Positioned")
-					icon       	"Interface"
-					icon_style 	"Icon"
-					line_color 	3342489
-					fill_color 	13434879
-					quidu      	"514A0C4601E1"
-					width      	58
-					height     	58
-					annotation 	8
-					autoResize 	TRUE)
-				    (object ClassView "Class" "Logical View::domain::tracking::Position" @49
+				    (object ClassView "Class" "Logical View::domain::tracking::Position" @48
 					ShowCompartmentStereotypes 	TRUE
 					IncludeAttribute 	TRUE
 					IncludeOperation 	TRUE
@@ -1478,7 +1430,7 @@
 					    color      	0
 					    default_color 	TRUE)
 					label      	(object ItemLabel
-					    Parent_View 	@49
+					    Parent_View 	@48
 					    location   	(608, 425)
 					    anchor_loc 	1
 					    nlines     	2
@@ -1490,6 +1442,37 @@
 					line_color 	3342489
 					fill_color 	13434879
 					quidu      	"514A0CB300B4"
+					width      	58
+					height     	58
+					annotation 	8
+					autoResize 	TRUE)
+				    (object ClassView "Class" "Logical View::domain::tracking::Positioned" @49
+					ShowCompartmentStereotypes 	TRUE
+					IncludeAttribute 	TRUE
+					IncludeOperation 	TRUE
+					location   	(1086, 321)
+					font       	(object Font
+					    size       	10
+					    face       	"Arial"
+					    bold       	FALSE
+					    italics    	FALSE
+					    underline  	FALSE
+					    strike     	FALSE
+					    color      	0
+					    default_color 	TRUE)
+					label      	(object ItemLabel
+					    Parent_View 	@49
+					    location   	(1085, 429)
+					    anchor_loc 	1
+					    nlines     	1
+					    max_width  	228
+					    justify    	0
+					    label      	"Positioned")
+					icon       	"Interface"
+					icon_style 	"Icon"
+					line_color 	3342489
+					fill_color 	13434879
+					quidu      	"514A0C4601E1"
 					width      	58
 					height     	58
 					annotation 	8
@@ -1546,10 +1529,10 @@
 						line_color 	3342489
 						quidu      	"514A0CBC022F"
 						client     	@50
-						supplier   	@49
+						supplier   	@48
 						vertices   	(list Points
 						    (846, 316)
-						    (635, 316))
+						    (635, 315))
 						line_style 	0
 						label      	(object SegLabel @53
 						    Parent_View 	@51
@@ -1579,10 +1562,10 @@
 						line_color 	3342489
 						quidu      	"514A0CBC0231"
 						client     	@50
-						supplier   	@48
+						supplier   	@49
 						vertices   	(list Points
 						    (846, 316)
-						    (1058, 316))
+						    (1057, 316))
 						line_style 	0)))
 				    (object ClassView "Class" "Logical View::domain::tracking::Moving" @55
 					ShowCompartmentStereotypes 	TRUE
@@ -1615,7 +1598,38 @@
 					height     	58
 					annotation 	8
 					autoResize 	TRUE)
-				    (object ClassView "Class" "Logical View::domain::tracking::SpeedWithBearing" @56
+				    (object ClassView "Class" "Logical View::domain::tracking::Bearing" @56
+					ShowCompartmentStereotypes 	TRUE
+					IncludeAttribute 	TRUE
+					IncludeOperation 	TRUE
+					location   	(2326, 734)
+					font       	(object Font
+					    size       	10
+					    face       	"Arial"
+					    bold       	FALSE
+					    italics    	FALSE
+					    underline  	FALSE
+					    strike     	FALSE
+					    color      	0
+					    default_color 	TRUE)
+					label      	(object ItemLabel
+					    Parent_View 	@56
+					    location   	(2325, 842)
+					    anchor_loc 	1
+					    nlines     	1
+					    max_width  	355
+					    justify    	0
+					    label      	"Bearing")
+					icon       	"Interface"
+					icon_style 	"Icon"
+					line_color 	3342489
+					fill_color 	13434879
+					quidu      	"514A0C900229"
+					width      	58
+					height     	58
+					annotation 	8
+					autoResize 	TRUE)
+				    (object ClassView "Class" "Logical View::domain::tracking::SpeedWithBearing" @57
 					ShowCompartmentStereotypes 	TRUE
 					IncludeAttribute 	TRUE
 					IncludeOperation 	TRUE
@@ -1630,7 +1644,7 @@
 					    color      	0
 					    default_color 	TRUE)
 					label      	(object ItemLabel
-					    Parent_View 	@56
+					    Parent_View 	@57
 					    location   	(1989, 839)
 					    anchor_loc 	1
 					    nlines     	1
@@ -1646,7 +1660,7 @@
 					height     	58
 					annotation 	8
 					autoResize 	TRUE)
-				    (object AssociationViewNew "$UNNAMED$4" @57
+				    (object AssociationViewNew "$UNNAMED$4" @58
 					location   	(1802, 727)
 					font       	(object Font
 					    size       	10
@@ -1661,8 +1675,8 @@
 					line_color 	3342489
 					quidu      	"514A0CFC00C8"
 					roleview_list 	(list RoleViews
-					    (object RoleView "speed" @58
-						Parent_View 	@57
+					    (object RoleView "speed" @59
+						Parent_View 	@58
 						location   	(185, 60)
 						font       	(object Font
 						    size       	10
@@ -1673,8 +1687,8 @@
 						    strike     	FALSE
 						    color      	0
 						    default_color 	TRUE)
-						label      	(object SegLabel @59
-						    Parent_View 	@58
+						label      	(object SegLabel @60
+						    Parent_View 	@59
 						    location   	(1881, 764)
 						    font       	(object Font
 							size       	10
@@ -1697,16 +1711,16 @@
 						stereotype 	TRUE
 						line_color 	3342489
 						quidu      	"514A0CFC03D5"
-						client     	@57
-						supplier   	@56
+						client     	@58
+						supplier   	@57
 						vertices   	(list Points
 						    (1802, 727)
 						    (1961, 727))
 						line_style 	3
 						origin_attachment 	(1802, 727)
 						terminal_attachment 	(1961, 727)
-						label      	(object SegLabel @60
-						    Parent_View 	@58
+						label      	(object SegLabel @61
+						    Parent_View 	@59
 						    location   	(1912, 673)
 						    font       	(object Font
 							size       	10
@@ -1726,13 +1740,13 @@
 						    pctDist    	0.691824
 						    height     	55
 						    orientation 	0))
-					    (object RoleView "$UNNAMED$5" @61
-						Parent_View 	@57
+					    (object RoleView "$UNNAMED$5" @62
+						Parent_View 	@58
 						location   	(185, 60)
 						stereotype 	TRUE
 						line_color 	3342489
 						quidu      	"514A0CFC03D7"
-						client     	@57
+						client     	@58
 						supplier   	@55
 						vertices   	(list Points
 						    (1802, 727)
@@ -1740,11 +1754,11 @@
 						line_style 	3
 						origin_attachment 	(1802, 727)
 						terminal_attachment 	(1643, 727))))
-				    (object InheritView "" @62
+				    (object InheritView "" @63
 					stereotype 	TRUE
 					line_color 	3342489
 					quidu      	"514A0D33019B"
-					client     	@56
+					client     	@57
 					supplier   	@40
 					vertices   	(list Points
 					    (1989, 702)
@@ -1752,37 +1766,6 @@
 					line_style 	3
 					origin_attachment 	(1989, 702)
 					terminal_attachment 	(1989, 457))
-				    (object ClassView "Class" "Logical View::domain::tracking::Bearing" @63
-					ShowCompartmentStereotypes 	TRUE
-					IncludeAttribute 	TRUE
-					IncludeOperation 	TRUE
-					location   	(2326, 734)
-					font       	(object Font
-					    size       	10
-					    face       	"Arial"
-					    bold       	FALSE
-					    italics    	FALSE
-					    underline  	FALSE
-					    strike     	FALSE
-					    color      	0
-					    default_color 	TRUE)
-					label      	(object ItemLabel
-					    Parent_View 	@63
-					    location   	(2325, 842)
-					    anchor_loc 	1
-					    nlines     	1
-					    max_width  	355
-					    justify    	0
-					    label      	"Bearing")
-					icon       	"Interface"
-					icon_style 	"Icon"
-					line_color 	3342489
-					fill_color 	13434879
-					quidu      	"514A0C900229"
-					width      	58
-					height     	58
-					annotation 	8
-					autoResize 	TRUE)
 				    (object AssociationViewNew "$UNNAMED$6" @64
 					location   	(2156, 733)
 					font       	(object Font
@@ -1835,7 +1818,7 @@
 						line_color 	3342489
 						quidu      	"514A0D3F02AB"
 						client     	@64
-						supplier   	@63
+						supplier   	@56
 						vertices   	(list Points
 						    (2156, 733)
 						    (2297, 733))
@@ -1870,7 +1853,7 @@
 						line_color 	3342489
 						quidu      	"514A0D3F02AD"
 						client     	@64
-						supplier   	@56
+						supplier   	@57
 						vertices   	(list Points
 						    (2156, 733)
 						    (2016, 733))
@@ -1884,12 +1867,12 @@
 					client     	@39
 					supplier   	@38
 					vertices   	(list Points
-					    (1427, 1062)
-					    (1427, 963)
+					    (1425, 1062)
+					    (1425, 963)
 					    (1250, 963)
 					    (1250, 859))
 					line_style 	3
-					origin_attachment 	(1427, 1062)
+					origin_attachment 	(1425, 1062)
 					terminal_attachment 	(1250, 859))
 				    (object InheritView "" @70
 					stereotype 	TRUE
@@ -1898,41 +1881,41 @@
 					client     	@39
 					supplier   	@55
 					vertices   	(list Points
-					    (1448, 1064)
-					    (1448, 959)
+					    (1440, 1064)
+					    (1440, 959)
 					    (1584, 959)
 					    (1584, 858))
 					line_style 	3
-					origin_attachment 	(1448, 1064)
+					origin_attachment 	(1440, 1064)
 					terminal_attachment 	(1584, 858))
 				    (object InheritView "" @71
 					stereotype 	TRUE
 					line_color 	3342489
 					quidu      	"514A0CC2026D"
 					client     	@38
-					supplier   	@48
+					supplier   	@49
 					vertices   	(list Points
-					    (1233, 696)
-					    (1233, 606)
-					    (1080, 606)
-					    (1080, 454))
+					    (1231, 696)
+					    (1231, 606)
+					    (1078, 606)
+					    (1078, 454))
 					line_style 	3
-					origin_attachment 	(1233, 696)
-					terminal_attachment 	(1080, 454))
+					origin_attachment 	(1231, 696)
+					terminal_attachment 	(1078, 454))
 				    (object InheritView "" @72
 					stereotype 	TRUE
 					line_color 	3342489
 					quidu      	"514A0CC40087"
 					client     	@38
-					supplier   	@41
+					supplier   	@42
 					vertices   	(list Points
-					    (1246, 698)
-					    (1246, 603)
-					    (1337, 603)
-					    (1337, 457))
+					    (1240, 698)
+					    (1240, 603)
+					    (1334, 603)
+					    (1334, 457))
 					line_style 	3
-					origin_attachment 	(1246, 698)
-					terminal_attachment 	(1337, 457))))
+					origin_attachment 	(1240, 698)
+					terminal_attachment 	(1334, 457))))
 			    (object ObjectDiagram "Instances"
 				mechanism_ref 	@37
 				quid       	"514A0E040348"
@@ -2151,7 +2134,16 @@
 					origin_attachment 	(1966, 294)
 					terminal_attachment 	(2147, 294)))))))
 		logical_presentations 	(list unit_reference_list)))
-	logical_presentations 	(list unit_reference_list))
+	logical_presentations 	(list unit_reference_list
+	    (object ClassDiagram "Main"
+		quid       	"514A48B50110"
+		title      	"Main"
+		zoom       	100
+		max_height 	28350
+		max_width  	21600
+		origin_x   	0
+		origin_y   	0
+		items      	(list diagram_item_list))))
     root_subsystem 	(object SubSystem "Component View"
 	quid       	"5148E44F03B1"
 	physical_models 	(list unit_reference_list
@@ -2178,6 +2170,11 @@
 			quid       	"5149779C0098"
 			supplier   	"Component View::org.json.simple"
 			quidu      	"514975D801D6"
+			supplier_is_spec 	TRUE)
+		    (object Module_Visibility_Relationship
+			quid       	"514A48BE0230"
+			supplier   	"Component View::c.s.s.domain.tractracadapter"
+			quidu      	"514975B9019E"
 			supplier_is_spec 	TRUE))
 		language   	"")
 	    (object module "c.s.s.expeditionconnector" "NotAModuleType" "NotAModulePart"
@@ -2315,7 +2312,7 @@
 		origin_y   	0
 		items      	(list diagram_item_list
 		    (object ModView "Component View::c.s.s.server" "NotAModuleType" "NotAModulePart" @82
-			location   	(1398, 240)
+			location   	(1428, 237)
 			font       	(object Font
 			    size       	10
 			    face       	"Arial"
@@ -2327,14 +2324,14 @@
 			    default_color 	TRUE)
 			label      	(object ItemLabel
 			    Parent_View 	@82
-			    location   	(1351, 265)
+			    location   	(1371, 262)
 			    anchor_loc 	3
 			    nlines     	2
-			    max_width  	176
+			    max_width  	212
 			    label      	"c.s.s.server")
 			stereotype 	(object ItemLabel
 			    Parent_View 	@82
-			    location   	(1351, 190)
+			    location   	(1371, 187)
 			    anchor     	10
 			    anchor_loc 	3
 			    nlines     	1
@@ -2345,10 +2342,11 @@
 			line_color 	3342489
 			fill_color 	16777215
 			quidu      	"514975B100F2"
-			width      	316
+			width      	381
+			height     	163
 			autoResize 	TRUE
-			width      	316
-			height     	162)
+			width      	381
+			height     	163)
 		    (object ModView "Component View::c.s.s.expeditionconnector" "NotAModuleType" "NotAModulePart" @83
 			location   	(989, 542)
 			font       	(object Font
@@ -2792,7 +2790,7 @@
 			supplier   	@82
 			vertices   	(list Points
 			    (1814, 167)
-			    (1551, 211))
+			    (1612, 201))
 			line_style 	0)
 		    (object AttachView "" @104
 			stereotype 	TRUE
@@ -2854,56 +2852,6 @@
 		    (object ModVisView "" @109
 			stereotype 	TRUE
 			line_color 	3342489
-			quidu      	"51497734012F"
-			client     	@82
-			supplier   	@83
-			vertices   	(list Points
-			    (1355, 318)
-			    (1355, 455))
-			line_style 	3
-			origin_attachment 	(1355, 318)
-			terminal_attachment 	(1355, 455))
-		    (object ModVisView "" @110
-			stereotype 	TRUE
-			line_color 	3342489
-			quidu      	"5149773701CF"
-			client     	@82
-			supplier   	@85
-			vertices   	(list Points
-			    (1241, 212)
-			    (303, 212)
-			    (303, 758))
-			line_style 	3
-			origin_attachment 	(1241, 212)
-			terminal_attachment 	(303, 758))
-		    (object ModVisView "" @111
-			stereotype 	TRUE
-			line_color 	3342489
-			quidu      	"51497743033F"
-			client     	@82
-			supplier   	@91
-			vertices   	(list Points
-			    (1450, 318)
-			    (1450, 1484))
-			line_style 	3
-			origin_attachment 	(1450, 318)
-			terminal_attachment 	(1450, 1484))
-		    (object ModVisView "" @112
-			stereotype 	TRUE
-			line_color 	3342489
-			quidu      	"5149779C0098"
-			client     	@82
-			supplier   	@92
-			vertices   	(list Points
-			    (1551, 240)
-			    (2300, 240)
-			    (2300, 670))
-			line_style 	3
-			origin_attachment 	(1551, 240)
-			terminal_attachment 	(2300, 670))
-		    (object ModVisView "" @113
-			stereotype 	TRUE
-			line_color 	3342489
 			quidu      	"514977380138"
 			client     	@85
 			supplier   	@86
@@ -2913,20 +2861,20 @@
 			line_style 	3
 			origin_attachment 	(266, 924)
 			terminal_attachment 	(266, 1048))
-		    (object ModVisView "" @114
+		    (object ModVisView "" @110
 			stereotype 	TRUE
 			line_color 	3342489
 			quidu      	"5149773D01B6"
 			client     	@85
 			supplier   	@91
 			vertices   	(list Points
-			    (512, 924)
-			    (512, 1549)
-			    (1058, 1549))
+			    (495, 924)
+			    (495, 1548)
+			    (1058, 1548))
 			line_style 	3
-			origin_attachment 	(512, 924)
-			terminal_attachment 	(1058, 1549))
-		    (object ModVisView "" @115
+			origin_attachment 	(495, 924)
+			terminal_attachment 	(1058, 1548))
+		    (object ModVisView "" @111
 			stereotype 	TRUE
 			line_color 	3342489
 			quidu      	"514977350260"
@@ -2938,7 +2886,7 @@
 			line_style 	3
 			origin_attachment 	(904, 627)
 			terminal_attachment 	(904, 711))
-		    (object ModVisView "" @116
+		    (object ModVisView "" @112
 			stereotype 	TRUE
 			line_color 	3342489
 			quidu      	"51497740028E"
@@ -2950,7 +2898,7 @@
 			line_style 	3
 			origin_attachment 	(1341, 627)
 			terminal_attachment 	(1341, 1484))
-		    (object ModVisView "" @117
+		    (object ModVisView "" @113
 			stereotype 	TRUE
 			line_color 	3342489
 			quidu      	"5149776F03C7"
@@ -2961,7 +2909,69 @@
 			    (1247, 1151))
 			line_style 	3
 			origin_attachment 	(1247, 627)
-			terminal_attachment 	(1247, 1151))))
+			terminal_attachment 	(1247, 1151))
+		    (object ModVisView "" @114
+			stereotype 	TRUE
+			line_color 	3342489
+			quidu      	"51497734012F"
+			client     	@82
+			supplier   	@83
+			vertices   	(list Points
+			    (1355, 316)
+			    (1355, 455))
+			line_style 	3
+			origin_attachment 	(1355, 316)
+			terminal_attachment 	(1355, 455))
+		    (object ModVisView "" @115
+			stereotype 	TRUE
+			line_color 	3342489
+			quidu      	"5149773701CF"
+			client     	@82
+			supplier   	@85
+			vertices   	(list Points
+			    (1241, 210)
+			    (303, 210)
+			    (303, 758))
+			line_style 	3
+			origin_attachment 	(1241, 210)
+			terminal_attachment 	(303, 758))
+		    (object ModVisView "" @116
+			stereotype 	TRUE
+			line_color 	3342489
+			quidu      	"51497743033F"
+			client     	@82
+			supplier   	@91
+			vertices   	(list Points
+			    (1450, 316)
+			    (1450, 1484))
+			line_style 	3
+			origin_attachment 	(1450, 316)
+			terminal_attachment 	(1450, 1484))
+		    (object ModVisView "" @117
+			stereotype 	TRUE
+			line_color 	3342489
+			quidu      	"5149779C0098"
+			client     	@82
+			supplier   	@92
+			vertices   	(list Points
+			    (1612, 238)
+			    (2295, 238)
+			    (2295, 670))
+			line_style 	3
+			origin_attachment 	(1612, 238)
+			terminal_attachment 	(2295, 670))
+		    (object ModVisView "" @118
+			stereotype 	TRUE
+			line_color 	3342489
+			quidu      	"514A48BE0230"
+			client     	@82
+			supplier   	@88
+			vertices   	(list Points
+			    (1566, 316)
+			    (1566, 673))
+			line_style 	3
+			origin_attachment 	(1566, 316)
+			terminal_attachment 	(1566, 673))))
 	    (object Module_Diagram "Adding GWT"
 		quid       	"5149B4360176"
 		title      	"Adding GWT"
@@ -2971,7 +2981,7 @@
 		origin_x   	0
 		origin_y   	0
 		items      	(list diagram_item_list
-		    (object ModView "Component View::c.s.s.server" "NotAModuleType" "NotAModulePart" @118
+		    (object ModView "Component View::c.s.s.server" "NotAModuleType" "NotAModulePart" @119
 			location   	(1431, 691)
 			font       	(object Font
 			    size       	10
@@ -2983,7 +2993,7 @@
 			    color      	0
 			    default_color 	TRUE)
 			label      	(object ItemLabel
-			    Parent_View 	@118
+			    Parent_View 	@119
 			    location   	(1369, 666)
 			    anchor_loc 	3
 			    nlines     	2
@@ -2998,7 +3008,7 @@
 			autoResize 	TRUE
 			width      	419
 			height     	162)
-		    (object ModView "Component View::c.s.s.expeditionconnector" "NotAModuleType" "NotAModulePart" @119
+		    (object ModView "Component View::c.s.s.expeditionconnector" "NotAModuleType" "NotAModulePart" @120
 			location   	(1053, 1023)
 			font       	(object Font
 			    size       	10
@@ -3010,7 +3020,7 @@
 			    color      	0
 			    default_color 	TRUE)
 			label      	(object ItemLabel
-			    Parent_View 	@119
+			    Parent_View 	@120
 			    location   	(926, 996)
 			    anchor_loc 	3
 			    nlines     	2
@@ -3025,7 +3035,7 @@
 			autoResize 	TRUE
 			width      	869
 			height     	175)
-		    (object ModView "Component View::c.s.s.udpconnector" "NotAModuleType" "NotAModulePart" @120
+		    (object ModView "Component View::c.s.s.udpconnector" "NotAModuleType" "NotAModulePart" @121
 			location   	(968, 1273)
 			font       	(object Font
 			    size       	10
@@ -3037,7 +3047,7 @@
 			    color      	0
 			    default_color 	TRUE)
 			label      	(object ItemLabel
-			    Parent_View 	@120
+			    Parent_View 	@121
 			    location   	(872, 1248)
 			    anchor_loc 	3
 			    nlines     	2
@@ -3052,7 +3062,7 @@
 			autoResize 	TRUE
 			width      	657
 			height     	163)
-		    (object ModView "Component View::c.s.s.domain.persistence" "NotAModuleType" "NotAModulePart" @121
+		    (object ModView "Component View::c.s.s.domain.persistence" "NotAModuleType" "NotAModulePart" @122
 			location   	(367, 1323)
 			font       	(object Font
 			    size       	10
@@ -3064,7 +3074,7 @@
 			    color      	0
 			    default_color 	TRUE)
 			label      	(object ItemLabel
-			    Parent_View 	@121
+			    Parent_View 	@122
 			    location   	(299, 1297)
 			    anchor_loc 	3
 			    nlines     	2
@@ -3079,7 +3089,7 @@
 			autoResize 	TRUE
 			width      	462
 			height     	169)
-		    (object ModView "Component View::c.s.s.mongodb" "NotAModuleType" "NotAModulePart" @122
+		    (object ModView "Component View::c.s.s.mongodb" "NotAModuleType" "NotAModulePart" @123
 			location   	(297, 1605)
 			font       	(object Font
 			    size       	10
@@ -3091,7 +3101,7 @@
 			    color      	0
 			    default_color 	TRUE)
 			label      	(object ItemLabel
-			    Parent_View 	@122
+			    Parent_View 	@123
 			    location   	(223, 1580)
 			    anchor_loc 	3
 			    nlines     	2
@@ -3105,7 +3115,7 @@
 			autoResize 	TRUE
 			width      	500
 			height     	162)
-		    (object ModView "Component View::com.mongodb.driver" "NotAModuleType" "NotAModulePart" @123
+		    (object ModView "Component View::com.mongodb.driver" "NotAModuleType" "NotAModulePart" @124
 			location   	(303, 1855)
 			font       	(object Font
 			    size       	10
@@ -3117,7 +3127,7 @@
 			    color      	0
 			    default_color 	TRUE)
 			label      	(object ItemLabel
-			    Parent_View 	@123
+			    Parent_View 	@124
 			    location   	(230, 1828)
 			    anchor_loc 	3
 			    nlines     	2
@@ -3132,7 +3142,7 @@
 			autoResize 	TRUE
 			width      	494
 			height     	181)
-		    (object ModView "Component View::c.s.s.domain.tractracadapter" "NotAModuleType" "NotAModulePart" @124
+		    (object ModView "Component View::c.s.s.domain.tractracadapter" "NotAModuleType" "NotAModulePart" @125
 			location   	(1816, 1234)
 			font       	(object Font
 			    size       	10
@@ -3144,7 +3154,7 @@
 			    color      	0
 			    default_color 	TRUE)
 			label      	(object ItemLabel
-			    Parent_View 	@124
+			    Parent_View 	@125
 			    location   	(1730, 1209)
 			    anchor_loc 	3
 			    nlines     	2
@@ -3158,7 +3168,7 @@
 			autoResize 	TRUE
 			width      	581
 			height     	162)
-		    (object ModView "Component View::com.tractrac.clientmodule" "NotAModuleType" "NotAModulePart" @125
+		    (object ModView "Component View::com.tractrac.clientmodule" "NotAModuleType" "NotAModulePart" @126
 			location   	(1938, 1481)
 			font       	(object Font
 			    size       	10
@@ -3170,7 +3180,7 @@
 			    color      	0
 			    default_color 	TRUE)
 			label      	(object ItemLabel
-			    Parent_View 	@125
+			    Parent_View 	@126
 			    location   	(1869, 1456)
 			    anchor_loc 	3
 			    nlines     	2
@@ -3184,7 +3194,7 @@
 			autoResize 	TRUE
 			width      	466
 			height     	162)
-		    (object ModView "Component View::c.s.s.declination" "NotAModuleType" "NotAModulePart" @126
+		    (object ModView "Component View::c.s.s.declination" "NotAModuleType" "NotAModulePart" @127
 			location   	(1076, 1712)
 			font       	(object Font
 			    size       	10
@@ -3196,7 +3206,7 @@
 			    color      	0
 			    default_color 	TRUE)
 			label      	(object ItemLabel
-			    Parent_View 	@126
+			    Parent_View 	@127
 			    location   	(992, 1687)
 			    anchor_loc 	3
 			    nlines     	2
@@ -3210,7 +3220,7 @@
 			autoResize 	TRUE
 			width      	568
 			height     	162)
-		    (object ModView "Component View::c.s.s.domain" "NotAModuleType" "NotAModulePart" @127
+		    (object ModView "Component View::c.s.s.domain" "NotAModuleType" "NotAModulePart" @128
 			location   	(1392, 2046)
 			font       	(object Font
 			    size       	10
@@ -3222,7 +3232,7 @@
 			    color      	0
 			    default_color 	TRUE)
 			label      	(object ItemLabel
-			    Parent_View 	@127
+			    Parent_View 	@128
 			    location   	(1310, 2021)
 			    anchor_loc 	3
 			    nlines     	2
@@ -3237,7 +3247,7 @@
 			autoResize 	TRUE
 			width      	556
 			height     	163)
-		    (object ModView "Component View::org.json.simple" "NotAModuleType" "NotAModulePart" @128
+		    (object ModView "Component View::org.json.simple" "NotAModuleType" "NotAModulePart" @129
 			location   	(2377, 1233)
 			font       	(object Font
 			    size       	10
@@ -3249,7 +3259,7 @@
 			    color      	0
 			    default_color 	TRUE)
 			label      	(object ItemLabel
-			    Parent_View 	@128
+			    Parent_View 	@129
 			    location   	(2299, 1208)
 			    anchor_loc 	3
 			    nlines     	2
@@ -3264,7 +3274,7 @@
 			autoResize 	TRUE
 			width      	531
 			height     	163)
-		    (object NoteView @129
+		    (object NoteView @130
 			location   	(1985, 986)
 			font       	(object Font
 			    size       	10
@@ -3276,7 +3286,7 @@
 			    color      	0
 			    default_color 	TRUE)
 			label      	(object ItemLabel
-			    Parent_View 	@129
+			    Parent_View 	@130
 			    location   	(1688, 905)
 			    nlines     	3
 			    max_width  	559
@@ -3285,7 +3295,7 @@
 			fill_color 	16777215
 			width      	619
 			height     	175)
-		    (object NoteView @130
+		    (object NoteView @131
 			location   	(707, 809)
 			font       	(object Font
 			    size       	10
@@ -3297,7 +3307,7 @@
 			    color      	0
 			    default_color 	TRUE)
 			label      	(object ItemLabel
-			    Parent_View 	@130
+			    Parent_View 	@131
 			    location   	(497, 724)
 			    nlines     	3
 			    max_width  	384
@@ -3306,7 +3316,7 @@
 			fill_color 	16777215
 			width      	444
 			height     	182)
-		    (object NoteView @131
+		    (object NoteView @132
 			location   	(948, 1481)
 			font       	(object Font
 			    size       	10
@@ -3318,7 +3328,7 @@
 			    color      	0
 			    default_color 	TRUE)
 			label      	(object ItemLabel
-			    Parent_View 	@131
+			    Parent_View 	@132
 			    location   	(644, 1412)
 			    nlines     	2
 			    max_width  	572
@@ -3327,7 +3337,7 @@
 			fill_color 	16777215
 			width      	632
 			height     	150)
-		    (object NoteView @132
+		    (object NoteView @133
 			location   	(881, 1906)
 			font       	(object Font
 			    size       	10
@@ -3339,7 +3349,7 @@
 			    color      	0
 			    default_color 	TRUE)
 			label      	(object ItemLabel
-			    Parent_View 	@132
+			    Parent_View 	@133
 			    location   	(662, 1828)
 			    nlines     	3
 			    max_width  	403
@@ -3348,7 +3358,7 @@
 			fill_color 	16777215
 			width      	463
 			height     	168)
-		    (object NoteView @133
+		    (object NoteView @134
 			location   	(2004, 2001)
 			font       	(object Font
 			    size       	10
@@ -3360,7 +3370,7 @@
 			    color      	0
 			    default_color 	TRUE)
 			label      	(object ItemLabel
-			    Parent_View 	@133
+			    Parent_View 	@134
 			    location   	(1782, 1886)
 			    nlines     	4
 			    max_width  	409
@@ -3369,157 +3379,148 @@
 			fill_color 	16777215
 			width      	469
 			height     	243)
-		    (object ModVisView "" @134
+		    (object ModVisView "" @135
 			stereotype 	TRUE
 			line_color 	3342489
 			quidu      	"51497734012F"
-			client     	@118
-			supplier   	@119
+			client     	@119
+			supplier   	@120
 			vertices   	(list Points
 			    (1416, 769)
 			    (1416, 936))
 			line_style 	3
 			origin_attachment 	(1416, 769)
 			terminal_attachment 	(1416, 936))
-		    (object ModVisView "" @135
+		    (object ModVisView "" @136
 			stereotype 	TRUE
 			line_color 	3342489
 			quidu      	"514977350260"
-			client     	@119
-			supplier   	@120
+			client     	@120
+			supplier   	@121
 			vertices   	(list Points
 			    (968, 1108)
 			    (968, 1192))
 			line_style 	3
 			origin_attachment 	(968, 1108)
 			terminal_attachment 	(968, 1192))
-		    (object ModVisView "" @136
-			stereotype 	TRUE
-			line_color 	3342489
-			quidu      	"5149773701CF"
-			client     	@118
-			supplier   	@121
-			vertices   	(list Points
-			    (1226, 671)
-			    (345, 671)
-			    (345, 1239))
-			line_style 	3
-			origin_attachment 	(1226, 671)
-			terminal_attachment 	(345, 1239))
 		    (object ModVisView "" @137
 			stereotype 	TRUE
 			line_color 	3342489
+			quidu      	"5149773701CF"
+			client     	@119
+			supplier   	@122
+			vertices   	(list Points
+			    (1224, 670)
+			    (343, 670)
+			    (343, 1239))
+			line_style 	3
+			origin_attachment 	(1224, 670)
+			terminal_attachment 	(343, 1239))
+		    (object ModVisView "" @138
+			stereotype 	TRUE
+			line_color 	3342489
 			quidu      	"514977390066"
-			client     	@122
-			supplier   	@123
+			client     	@123
+			supplier   	@124
 			vertices   	(list Points
 			    (247, 1683)
 			    (247, 1765))
 			line_style 	3
 			origin_attachment 	(247, 1683)
 			terminal_attachment 	(247, 1765))
-		    (object ModVisView "" @138
+		    (object ModVisView "" @139
 			stereotype 	TRUE
 			line_color 	3342489
 			quidu      	"514977460277"
-			client     	@124
-			supplier   	@125
+			client     	@125
+			supplier   	@126
 			vertices   	(list Points
 			    (1964, 1312)
 			    (1964, 1401))
 			line_style 	3
 			origin_attachment 	(1964, 1312)
 			terminal_attachment 	(1964, 1401))
-		    (object ModVisView "" @139
+		    (object ModVisView "" @140
 			stereotype 	TRUE
 			line_color 	3342489
 			quidu      	"5149776F03C7"
-			client     	@119
-			supplier   	@126
+			client     	@120
+			supplier   	@127
 			vertices   	(list Points
 			    (1311, 1108)
 			    (1311, 1632))
 			line_style 	3
 			origin_attachment 	(1311, 1108)
 			terminal_attachment 	(1311, 1632))
-		    (object ModVisView "" @140
+		    (object ModVisView "" @141
 			stereotype 	TRUE
 			line_color 	3342489
 			quidu      	"51497740028E"
-			client     	@119
-			supplier   	@127
+			client     	@120
+			supplier   	@128
 			vertices   	(list Points
 			    (1405, 1108)
 			    (1405, 1965))
 			line_style 	3
 			origin_attachment 	(1405, 1108)
 			terminal_attachment 	(1405, 1965))
-		    (object ModVisView "" @141
+		    (object ModVisView "" @142
 			stereotype 	TRUE
 			line_color 	3342489
 			quidu      	"51497743033F"
-			client     	@118
-			supplier   	@127
+			client     	@119
+			supplier   	@128
 			vertices   	(list Points
 			    (1509, 769)
 			    (1509, 1965))
 			line_style 	3
 			origin_attachment 	(1509, 769)
 			terminal_attachment 	(1509, 1965))
-		    (object ModVisView "" @142
+		    (object ModVisView "" @143
 			stereotype 	TRUE
 			line_color 	3342489
 			quidu      	"51497745011F"
-			client     	@124
-			supplier   	@127
+			client     	@125
+			supplier   	@128
 			vertices   	(list Points
 			    (1611, 1312)
 			    (1611, 1965))
 			line_style 	3
 			origin_attachment 	(1611, 1312)
 			terminal_attachment 	(1611, 1965))
-		    (object ModVisView "" @143
+		    (object ModVisView "" @144
 			stereotype 	TRUE
 			line_color 	3342489
 			quidu      	"514977480391"
-			client     	@126
-			supplier   	@127
+			client     	@127
+			supplier   	@128
 			vertices   	(list Points
 			    (1242, 1790)
 			    (1242, 1965))
 			line_style 	3
 			origin_attachment 	(1242, 1790)
 			terminal_attachment 	(1242, 1965))
-		    (object ModVisView "" @144
+		    (object ModVisView "" @145
 			stereotype 	TRUE
 			line_color 	3342489
 			quidu      	"5149779C0098"
-			client     	@118
-			supplier   	@128
+			client     	@119
+			supplier   	@129
 			vertices   	(list Points
-			    (1633, 703)
-			    (2340, 703)
+			    (1633, 701)
+			    (2340, 701)
 			    (2340, 1152))
 			line_style 	3
-			origin_attachment 	(1633, 703)
+			origin_attachment 	(1633, 701)
 			terminal_attachment 	(2340, 1152))
-		    (object AttachView "" @145
-			stereotype 	TRUE
-			line_color 	3342489
-			client     	@129
-			supplier   	@124
-			vertices   	(list Points
-			    (1924, 1073)
-			    (1866, 1152))
-			line_style 	0)
 		    (object AttachView "" @146
 			stereotype 	TRUE
 			line_color 	3342489
 			client     	@130
-			supplier   	@119
+			supplier   	@125
 			vertices   	(list Points
-			    (855, 900)
-			    (902, 934))
+			    (1924, 1073)
+			    (1866, 1152))
 			line_style 	0)
 		    (object AttachView "" @147
 			stereotype 	TRUE
@@ -3527,17 +3528,17 @@
 			client     	@131
 			supplier   	@120
 			vertices   	(list Points
-			    (954, 1405)
-			    (956, 1352))
+			    (855, 900)
+			    (902, 934))
 			line_style 	0)
 		    (object AttachView "" @148
 			stereotype 	TRUE
 			line_color 	3342489
 			client     	@132
-			supplier   	@126
+			supplier   	@121
 			vertices   	(list Points
-			    (964, 1821)
-			    (990, 1790))
+			    (954, 1405)
+			    (956, 1352))
 			line_style 	0)
 		    (object AttachView "" @149
 			stereotype 	TRUE
@@ -3545,10 +3546,19 @@
 			client     	@133
 			supplier   	@127
 			vertices   	(list Points
+			    (964, 1821)
+			    (990, 1790))
+			line_style 	0)
+		    (object AttachView "" @150
+			stereotype 	TRUE
+			line_color 	3342489
+			client     	@134
+			supplier   	@128
+			vertices   	(list Points
 			    (1769, 2017)
 			    (1658, 2022))
 			line_style 	0)
-		    (object ModView "Component View::c.s.s.gwt.ui" "NotAModuleType" "NotAModulePart" @150
+		    (object ModView "Component View::c.s.s.gwt.ui" "NotAModuleType" "NotAModulePart" @151
 			location   	(1466, 406)
 			font       	(object Font
 			    size       	10
@@ -3560,7 +3570,7 @@
 			    color      	0
 			    default_color 	TRUE)
 			label      	(object ItemLabel
-			    Parent_View 	@150
+			    Parent_View 	@151
 			    location   	(1408, 429)
 			    fill_color 	13434879
 			    anchor_loc 	3
@@ -3568,7 +3578,7 @@
 			    max_width  	219
 			    label      	"c.s.s.gwt.ui")
 			stereotype 	(object ItemLabel
-			    Parent_View 	@150
+			    Parent_View 	@151
 			    location   	(1408, 354)
 			    fill_color 	13434879
 			    anchor     	10
@@ -3586,7 +3596,7 @@
 			autoResize 	TRUE
 			width      	394
 			height     	181)
-		    (object ModView "Component View::com.google.gwt.osgi" "NotAModuleType" "NotAModulePart" @151
+		    (object ModView "Component View::com.google.gwt.osgi" "NotAModuleType" "NotAModulePart" @152
 			location   	(764, 572)
 			font       	(object Font
 			    size       	10
@@ -3598,7 +3608,7 @@
 			    color      	0
 			    default_color 	TRUE)
 			label      	(object ItemLabel
-			    Parent_View 	@151
+			    Parent_View 	@152
 			    location   	(663, 547)
 			    fill_color 	13434879
 			    anchor_loc 	3
@@ -3613,7 +3623,7 @@
 			autoResize 	TRUE
 			width      	687
 			height     	162)
-		    (object NoteView @152
+		    (object NoteView @153
 			location   	(253, 378)
 			font       	(object Font
 			    size       	10
@@ -3625,7 +3635,7 @@
 			    color      	0
 			    default_color 	TRUE)
 			label      	(object ItemLabel
-			    Parent_View 	@152
+			    Parent_View 	@153
 			    location   	(62, 319)
 			    fill_color 	13434879
 			    nlines     	2
@@ -3635,16 +3645,16 @@
 			fill_color 	13434879
 			width      	406
 			height     	131)
-		    (object AttachView "" @153
+		    (object AttachView "" @154
 			stereotype 	TRUE
 			line_color 	3342489
-			client     	@152
-			supplier   	@151
+			client     	@153
+			supplier   	@152
 			vertices   	(list Points
 			    (426, 443)
 			    (550, 491))
 			line_style 	0)
-		    (object NoteView @154
+		    (object NoteView @155
 			location   	(2150, 272)
 			font       	(object Font
 			    size       	10
@@ -3656,7 +3666,7 @@
 			    color      	0
 			    default_color 	TRUE)
 			label      	(object ItemLabel
-			    Parent_View 	@154
+			    Parent_View 	@155
 			    location   	(1828, 184)
 			    fill_color 	13434879
 			    nlines     	3
@@ -3666,41 +3676,41 @@
 			fill_color 	13434879
 			width      	668
 			height     	188)
-		    (object AttachView "" @155
+		    (object AttachView "" @156
 			stereotype 	TRUE
 			line_color 	3342489
-			client     	@154
-			supplier   	@150
+			client     	@155
+			supplier   	@151
 			vertices   	(list Points
 			    (1815, 336)
 			    (1656, 366))
 			line_style 	0)
-		    (object ModVisView "" @156
+		    (object ModVisView "" @157
 			stereotype 	TRUE
 			line_color 	3342489
 			quidu      	"514977380138"
-			client     	@121
-			supplier   	@122
+			client     	@122
+			supplier   	@123
 			vertices   	(list Points
 			    (309, 1405)
 			    (309, 1525))
 			line_style 	3
 			origin_attachment 	(309, 1405)
 			terminal_attachment 	(309, 1525))
-		    (object ModVisView "" @157
+		    (object ModVisView "" @158
 			stereotype 	TRUE
 			line_color 	3342489
 			quidu      	"5149773D01B6"
-			client     	@121
-			supplier   	@127
+			client     	@122
+			supplier   	@128
 			vertices   	(list Points
-			    (561, 1405)
-			    (561, 2022)
-			    (1122, 2022))
+			    (546, 1405)
+			    (546, 2021)
+			    (1122, 2021))
 			line_style 	3
-			origin_attachment 	(561, 1405)
-			terminal_attachment 	(1122, 2022))
-		    (object ModView "Component View::c.s.s.server.gateway" "NotAModuleType" "NotAModulePart" @158
+			origin_attachment 	(546, 1405)
+			terminal_attachment 	(1122, 2021))
+		    (object ModView "Component View::c.s.s.server.gateway" "NotAModuleType" "NotAModulePart" @159
 			location   	(2094, 583)
 			font       	(object Font
 			    size       	10
@@ -3712,7 +3722,7 @@
 			    color      	0
 			    default_color 	TRUE)
 			label      	(object ItemLabel
-			    Parent_View 	@158
+			    Parent_View 	@159
 			    location   	(1991, 607)
 			    fill_color 	13434879
 			    anchor_loc 	3
@@ -3720,7 +3730,7 @@
 			    max_width  	388
 			    label      	"c.s.s.server.gateway")
 			stereotype 	(object ItemLabel
-			    Parent_View 	@158
+			    Parent_View 	@159
 			    location   	(1991, 532)
 			    fill_color 	13434879
 			    anchor     	10
@@ -3738,50 +3748,50 @@
 			autoResize 	TRUE
 			width      	700
 			height     	169)
-		    (object ModVisView "" @159
-			stereotype 	TRUE
-			line_color 	3342489
-			quidu      	"5149B4E50247"
-			client     	@150
-			supplier   	@151
-			vertices   	(list Points
-			    (1272, 395)
-			    (767, 395)
-			    (767, 490))
-			line_style 	3
-			origin_attachment 	(1272, 395)
-			terminal_attachment 	(767, 490))
 		    (object ModVisView "" @160
 			stereotype 	TRUE
 			line_color 	3342489
+			quidu      	"5149B4E50247"
+			client     	@151
+			supplier   	@152
+			vertices   	(list Points
+			    (1274, 394)
+			    (764, 394)
+			    (764, 492))
+			line_style 	3
+			origin_attachment 	(1274, 394)
+			terminal_attachment 	(764, 492))
+		    (object ModVisView "" @161
+			stereotype 	TRUE
+			line_color 	3342489
 			quidu      	"5149B51202D0"
-			client     	@150
-			supplier   	@118
+			client     	@151
+			supplier   	@119
 			vertices   	(list Points
 			    (1434, 493)
 			    (1434, 611))
 			line_style 	3
 			origin_attachment 	(1434, 493)
 			terminal_attachment 	(1434, 611))
-		    (object ModVisView "" @161
-			stereotype 	TRUE
-			line_color 	3342489
-			quidu      	"5149B724000F"
-			client     	@150
-			supplier   	@158
-			vertices   	(list Points
-			    (1656, 395)
-			    (2087, 395)
-			    (2087, 498))
-			line_style 	3
-			origin_attachment 	(1656, 395)
-			terminal_attachment 	(2087, 498))
 		    (object ModVisView "" @162
 			stereotype 	TRUE
 			line_color 	3342489
+			quidu      	"5149B724000F"
+			client     	@151
+			supplier   	@159
+			vertices   	(list Points
+			    (1656, 394)
+			    (2084, 394)
+			    (2084, 498))
+			line_style 	3
+			origin_attachment 	(1656, 394)
+			terminal_attachment 	(2084, 498))
+		    (object ModVisView "" @163
+			stereotype 	TRUE
+			line_color 	3342489
 			quidu      	"5149B7DA0168"
-			client     	@158
-			supplier   	@118
+			client     	@159
+			supplier   	@119
 			vertices   	(list Points
 			    (1749, 628)
 			    (1633, 628))
