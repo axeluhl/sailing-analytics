@@ -15,8 +15,8 @@ public class RaceLogStartTimeEventImpl extends RaceLogRaceStatusEventImpl implem
     private TimePoint startTime;
 
     public RaceLogStartTimeEventImpl(TimePoint createdAt, TimePoint pTimePoint, Serializable pId,
-            List<Competitor> pInvolvedBoats, int pPassId, RaceLogRaceStatus nextStatus, TimePoint pStartTime) {
-        super(createdAt, pTimePoint, pId, pInvolvedBoats, pPassId, nextStatus);
+            List<Competitor> pInvolvedBoats, int pPassId, TimePoint pStartTime) {
+        super(createdAt, pTimePoint, pId, pInvolvedBoats, pPassId, RaceLogRaceStatus.SCHEDULED);
         this.startTime = pStartTime;
     }
 

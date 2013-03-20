@@ -36,7 +36,7 @@ public class RaceLogEventFactoryImpl implements RaceLogEventFactory {
     @Override
     public RaceLogStartTimeEvent createStartTimeEvent(TimePoint timePoint, Serializable id, List<Competitor> involvedBoats, int passId, 
              TimePoint startTime) {
-        return new RaceLogStartTimeEventImpl(MillisecondsTimePoint.now(), timePoint, id, involvedBoats, passId, RaceLogRaceStatus.SCHEDULED, startTime);
+        return new RaceLogStartTimeEventImpl(MillisecondsTimePoint.now(), timePoint, id, involvedBoats, passId, startTime);
     }
 
     @Override
@@ -57,26 +57,26 @@ public class RaceLogEventFactoryImpl implements RaceLogEventFactory {
     }
 
     @Override
-    public RaceLogPassChangeEvent createRaceLogPassChangeEvent(TimePoint timePoint, Serializable id, List<Competitor> competitors,
+    public RaceLogPassChangeEvent createPassChangeEvent(TimePoint timePoint, Serializable id, List<Competitor> competitors,
             int passId) {
         return new RaceLogPassChangeEventImpl(MillisecondsTimePoint.now(), timePoint, id, competitors, passId);
     }
 
     @Override
-    public RaceLogPassChangeEvent createRaceLogPassChangeEvent(TimePoint timePoint, int passId) {
-        return createRaceLogPassChangeEvent(timePoint, UUID.randomUUID(), new ArrayList<Competitor>(), passId);
+    public RaceLogPassChangeEvent createPassChangeEvent(TimePoint timePoint, int passId) {
+        return createPassChangeEvent(timePoint, UUID.randomUUID(), new ArrayList<Competitor>(), passId);
     }
 
     @Override
-    public RaceLogCourseAreaChangedEvent createRaceLogCourseAreaChangedEvent(TimePoint timePoint, Serializable id, List<Competitor> competitors,
+    public RaceLogCourseAreaChangedEvent createCourseAreaChangedEvent(TimePoint timePoint, Serializable id, List<Competitor> competitors,
             int passId, Serializable courseAreaId) {
         return new RaceLogCourseAreaChangeEventImpl(MillisecondsTimePoint.now(), timePoint, id, competitors, passId, courseAreaId);
     }
 
     @Override
-    public RaceLogCourseAreaChangedEvent createRaceLogCourseAreaChangedEvent(
+    public RaceLogCourseAreaChangedEvent createCourseAreaChangedEvent(
             TimePoint timePoint, int passId, Serializable courseAreaId) {
-        return createRaceLogCourseAreaChangedEvent(timePoint, UUID.randomUUID(), new ArrayList<Competitor>(), passId, courseAreaId);
+        return createCourseAreaChangedEvent(timePoint, UUID.randomUUID(), new ArrayList<Competitor>(), passId, courseAreaId);
     }
 
     @Override

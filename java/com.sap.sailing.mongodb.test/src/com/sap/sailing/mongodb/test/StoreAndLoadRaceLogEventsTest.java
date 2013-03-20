@@ -1,7 +1,6 @@
 package com.sap.sailing.mongodb.test;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
@@ -93,7 +92,7 @@ public class StoreAndLoadRaceLogEventsTest extends AbstractMongoDBTest {
     public void testStoreAndLoadCourseAreaChangedEvent() {
         Serializable courseAreaId = UUID.randomUUID();
 
-        RaceLogCourseAreaChangedEvent expectedEvent = eventFactory.createRaceLogCourseAreaChangedEvent(
+        RaceLogCourseAreaChangedEvent expectedEvent = eventFactory.createCourseAreaChangedEvent(
                 expectedEventTime, expectedId, expectedInvolvedBoats, expectedPassId, courseAreaId);
 
         DBObject dbObject = mongoFactory.storeRaceLogEntry(logIdentifier, expectedEvent);
@@ -105,7 +104,7 @@ public class StoreAndLoadRaceLogEventsTest extends AbstractMongoDBTest {
 
     @Test
     public void testStoreAndLoadPassChangeEvent() {
-        RaceLogPassChangeEvent expectedEvent = eventFactory.createRaceLogPassChangeEvent(expectedEventTime, expectedId,
+        RaceLogPassChangeEvent expectedEvent = eventFactory.createPassChangeEvent(expectedEventTime, expectedId,
                 expectedInvolvedBoats, expectedPassId);
 
         DBObject dbObject = mongoFactory.storeRaceLogEntry(logIdentifier, expectedEvent);
