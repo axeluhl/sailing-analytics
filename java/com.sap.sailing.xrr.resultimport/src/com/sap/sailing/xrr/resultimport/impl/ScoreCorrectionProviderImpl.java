@@ -59,14 +59,7 @@ public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider {
         for (Parser parser : getAllRegattaResults()) {
             try {
                 RegattaResults regattaResult = parser.parse();
-                XMLGregorianCalendar date = regattaResult.getDate();
-                XMLGregorianCalendar time = regattaResult.getTime();
-                date.setHour(time.getHour());
-                date.setMinute(time.getMinute());
-                date.setSecond(time.getSecond());
-                date.setMillisecond(time.getMillisecond());
-                date.setTimezone(0);
-                TimePoint timePoint = new MillisecondsTimePoint(date.toGregorianCalendar().getTime());
+                TimePoint timePoint = getTimePointForRegattaResults(regattaResult);
                 for (Object o : regattaResult.getPersonOrBoatOrTeam()) {
                     if (o instanceof Event) {
                         Event event = (Event) o;
@@ -92,21 +85,38 @@ public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider {
         return result;
     }
 
+    private TimePoint getTimePointForRegattaResults(RegattaResults regattaResult) {
+        XMLGregorianCalendar date = regattaResult.getDate();
+        XMLGregorianCalendar time = regattaResult.getTime();
+        date.setHour(time.getHour());
+        date.setMinute(time.getMinute());
+        date.setSecond(time.getSecond());
+        date.setMillisecond(time.getMillisecond());
+        date.setTimezone(0);
+        TimePoint timePoint = new MillisecondsTimePoint(date.toGregorianCalendar().getTime());
+        return timePoint;
+    }
+
     @Override
     public RegattaScoreCorrections getScoreCorrections(String eventName, String boatClassName,
             TimePoint timePointPublished) throws IOException, SAXException, ParserConfigurationException {
         for (Parser parser : getAllRegattaResults()) {
             try {
                 RegattaResults regattaResults = parser.parse();
-                for (Object o : regattaResults.getPersonOrBoatOrTeam()) {
-                    if (o instanceof Event) {
-                        Event event = (Event) o;
-                        if (event.getTitle().equals(eventName)) {
-                            for (Object eventO : event.getRaceOrDivisionOrRegattaSeriesResult()) {
-                                if (eventO instanceof Division) {
-                                    Division division = (Division) eventO;
-                                    if (boatClassName.equals(parser.getBoatClassName(division))) {
-                                        return new XRRRegattaResultsAsScoreCorrections(event, division, this, parser);
+                TimePoint timePoint = getTimePointForRegattaResults(regattaResults);
+                if ((timePoint == null && timePointPublished == null)
+                        || (timePoint != null && timePoint.equals(timePointPublished))) {
+                    for (Object o : regattaResults.getPersonOrBoatOrTeam()) {
+                        if (o instanceof Event) {
+                            Event event = (Event) o;
+                            if (event.getTitle().equals(eventName)) {
+                                for (Object eventO : event.getRaceOrDivisionOrRegattaSeriesResult()) {
+                                    if (eventO instanceof Division) {
+                                        Division division = (Division) eventO;
+                                        if (boatClassName.equals(parser.getBoatClassName(division))) {
+                                            return new XRRRegattaResultsAsScoreCorrections(event, division, this,
+                                                    parser);
+                                        }
                                     }
                                 }
                             }

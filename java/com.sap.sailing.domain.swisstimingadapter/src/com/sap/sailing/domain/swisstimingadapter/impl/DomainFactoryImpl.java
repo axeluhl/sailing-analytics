@@ -121,8 +121,8 @@ public class DomainFactoryImpl implements DomainFactory {
         return baseDomainFactory.getExistingCompetitorById(getCompetitorID(boatID, boatClass));
     }
 
-    private Pair<String, BoatClass> getCompetitorID(String boatID, BoatClass boatClass) {
-        return new Util.Pair<String, BoatClass>(boatID, boatClass);
+    private String getCompetitorID(String boatID, BoatClass boatClass) {
+        return boatID + "/" + boatClass.getName();
     }
     
     @Override

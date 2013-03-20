@@ -33,16 +33,30 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
         final String baseEventName = "Kiel Week 2012";
         final String boatClassName = "49er";
         final Iterable<Series> series = Collections.emptyList();
-        Regatta masterRegatta = master.createRegatta(baseEventName, boatClassName, UUID.randomUUID(), series,
+        final UUID regattaId = UUID.randomUUID();
+        Regatta masterRegatta = master.createRegatta(baseEventName, boatClassName, regattaId, series,
                 /* persistent */ true, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), null);
         Thread.sleep(1000);
         Regatta replicatedRegatta = replica.getRegatta(new RegattaName(masterRegatta.getName()));
         assertNotNull(replicatedRegatta);
         assertTrue(replicatedRegatta.isPersistent());
         assertTrue(Util.isEmpty((replicatedRegatta.getSeries())));
-        assertNull(replicatedRegatta.getDefaultCourseArea());
+        assertNull(replicatedRegatta.getDefaultCourseArea());        
+        assertTrue(regattaId.equals(replicatedRegatta.getId()));
     }
 
+    @Test
+    public void testDefaultRegattaReplication() throws InterruptedException {
+        final String baseEventName = "Kiel Week 2012";
+        final String boatClassName = "49er";
+        final UUID regattaId = UUID.randomUUID();
+        Regatta masterRegatta = master.getOrCreateDefaultRegatta(baseEventName, boatClassName, regattaId);
+        Thread.sleep(1000);
+        Regatta replicatedRegatta = replica.getRegatta(new RegattaName(masterRegatta.getName()));
+        assertNotNull(replicatedRegatta);
+        assertTrue(regattaId.equals(replicatedRegatta.getId()));
+    }
+    
     @Test
     public void testSpecificRegattaReplicationWithTwoEmptySeries() throws InterruptedException {
         final String baseEventName = "Kiel Week 2012";
