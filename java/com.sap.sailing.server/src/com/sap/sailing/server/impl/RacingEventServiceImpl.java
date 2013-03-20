@@ -634,13 +634,13 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     }
 
     @Override
-    public Regatta getOrCreateRegatta(String baseEventName, String boatClassName, Serializable id) {
+    public Regatta getOrCreateRegatta(String baseRegattaName, String boatClassName, Serializable id) {
         RaceLogStore raceLogStore = MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(
                 mongoObjectFactory, 
                 domainObjectFactory);
-        Regatta regatta = new RegattaImpl(raceLogStore, baseEventName, getBaseDomainFactory().getOrCreateBoatClass(
+        Regatta regatta = new RegattaImpl(raceLogStore, baseRegattaName, getBaseDomainFactory().getOrCreateBoatClass(
                 boatClassName), this, com.sap.sailing.domain.base.DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT),
-                RegattaImpl.getFullName(baseEventName, boatClassName), null);
+                RegattaImpl.getFullName(baseRegattaName, boatClassName), null);
         //TODO: shall a default regatta have a default course area?
         Regatta result = regattasByName.get(regatta.getName());
         if (result == null) {
@@ -652,13 +652,13 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     }
 
     @Override
-    public Regatta createRegatta(String baseEventName, String boatClassName,
+    public Regatta createRegatta(String baseRegattaName, String boatClassName,
             Serializable id, Iterable<? extends Series> series, boolean persistent, ScoringScheme scoringScheme, Serializable defaultCourseAreaId) {
         RaceLogStore raceLogStore = MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(
                 mongoObjectFactory, 
                 domainObjectFactory);
         CourseArea courseArea = getCourseArea(defaultCourseAreaId);
-        Regatta regatta = new RegattaImpl(raceLogStore, baseEventName,
+        Regatta regatta = new RegattaImpl(raceLogStore, baseRegattaName,
                 getBaseDomainFactory().getOrCreateBoatClass(boatClassName), series, persistent, scoringScheme, id, courseArea);
         logger.info("Created regatta " + regatta.getName() + " (" + hashCode() + ") on "+this);
         cacheAndReplicateSpecificRegattaWithoutRaceColumns(regatta);
