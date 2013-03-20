@@ -5,15 +5,21 @@ import java.util.Map;
 
 import com.google.gwt.core.client.GWT;
 
+/**
+ * A resolver utility for finding a boat image for a given boat class
+ * @author C5163874
+ */
 public class BoatClassImageDataResolver {
-	private static Map<String, BoatClassImageData> boatImagesMap;
-	
-	private static BoatClassImageData defaultBoatImages;
+    private static Map<String, BoatClassImageData> boatImagesMap;
+    private static Map<String, BoatClassImageData> compatibleBoatImagesMap;
+    private static BoatClassImageData defaultBoatImages;
 	
     private static BoatImageResources boatImageResources = GWT.create(BoatImageResources.class);
 
     static {
     	boatImagesMap = new HashMap<String, BoatClassImageData>();
+    	compatibleBoatImagesMap = new HashMap<String, BoatClassImageData>();
+    	
     	BoatClassImageData _470er = new BoatClassImageData("470er", 4.70, 44, 72, 42, "470");
     	_470er.setDownWindPortIcons(boatImageResources.class470er_DownWindPortIcon(), boatImageResources.class470er_DownWindPortIconSelected());
     	_470er.setDownWindStarboardIcons(boatImageResources.class470er_DownWindStarboardIcon(), boatImageResources.class470er_DownWindStarboardIconSelected());
@@ -22,7 +28,7 @@ public class BoatClassImageDataResolver {
     	_470er.setReachingPortIcons(boatImageResources.class470er_ReachingPortIcon(), boatImageResources.class470er_ReachingPortIconSelected());
     	_470er.setReachingStarboardIcons(boatImageResources.class470er_ReachingStarboardIcon(), boatImageResources.class470er_ReachingStarboardIconSelected());
 
-    	BoatClassImageData _49er = new BoatClassImageData("49er", 4.90, 42, 67, 31, "49");
+    	BoatClassImageData _49er = new BoatClassImageData("49er", 4.90, 42, 67, 31, "49er FX");
     	_49er.setDownWindPortIcons(boatImageResources.class49er_DownWindPortIcon(), boatImageResources.class49er_DownWindPortIconSelected());
     	_49er.setDownWindStarboardIcons(boatImageResources.class49er_DownWindStarboardIcon(), boatImageResources.class49er_DownWindStarboardIconSelected());
     	_49er.setUpWindPortIcons(boatImageResources.class49er_UpWindPortIcon(), boatImageResources.class49er_UpWindPortIconSelected());
@@ -42,13 +48,24 @@ public class BoatClassImageDataResolver {
     	boatImagesMap.put(_470er.getMainBoatClassName(), _470er);
     	boatImagesMap.put(_49er.getMainBoatClassName(), _49er);
     	boatImagesMap.put(extreme40.getMainBoatClassName(), extreme40);
-	}
+    }
 	
-	public static BoatClassImageData getBoatClassImages(String boatClassName) {
-		BoatClassImageData result = boatImagesMap.get(boatClassName);
-		if( result == null) {
-			result = defaultBoatImages;
-		}
-		return result;
-	}
+    public static BoatClassImageData resolveBoatClassImages(String boatClassName) {
+        BoatClassImageData result = defaultBoatImages;
+        if(boatImagesMap.containsKey(boatClassName)) {
+            result = boatImagesMap.get(boatClassName);
+        } else if (compatibleBoatImagesMap.containsKey(boatClassName)) {
+            result = compatibleBoatImagesMap.get(boatClassName);
+        } else {
+            // now try to find compatible boat class images
+            for(BoatClassImageData boatClassImageData: boatImagesMap.values()) {
+                if(boatClassImageData.isBoatClassNameCompatible(boatClassName)) {
+                    result = boatClassImageData;
+                    compatibleBoatImagesMap.put(boatClassName, boatClassImageData);
+                    break;
+                }
+            }
+        }
+        return result;
+    }
 }
