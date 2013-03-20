@@ -170,11 +170,16 @@
 		quid       	"5148ECA600B7"
 		exportControl 	"Public"
 		logical_models 	(list unit_reference_list)
+		logical_presentations 	(list unit_reference_list))
+	    (object Class_Category "NewPackage"
+		quid       	"514975760194"
+		exportControl 	"Public"
+		logical_models 	(list unit_reference_list)
 		logical_presentations 	(list unit_reference_list)))
 	logical_presentations 	(list unit_reference_list
-	    (object ClassDiagram "Main"
+	    (object ClassDiagram "The Early Basics"
 		quid       	"5148E452025E"
-		title      	"Main"
+		title      	"The Early Basics"
 		zoom       	100
 		max_height 	28350
 		max_width  	21600
@@ -805,20 +810,808 @@
 			    (660, 927))
 			line_style 	3
 			origin_attachment 	(1640, 259)
-			terminal_attachment 	(660, 927))))))
-    root_subsystem 	(object SubSystem "Component View"
-	quid       	"5148E44F03B1"
-	physical_models 	(list unit_reference_list)
-	physical_presentations 	(list unit_reference_list
-	    (object Module_Diagram "Main"
-		quid       	"5148E4520241"
-		title      	"Main"
+			terminal_attachment 	(660, 927))))
+	    (object ClassDiagram "Adding GWT"
+		quid       	"51497562007A"
+		title      	"Adding GWT"
 		zoom       	100
 		max_height 	28350
 		max_width  	21600
 		origin_x   	0
 		origin_y   	0
-		items      	(list diagram_item_list)))
+		items      	(list diagram_item_list
+		    (object CategoryView "Logical View::NewPackage" @38
+			location   	(1322, 875)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object ItemLabel
+			    Parent_View 	@38
+			    location   	(1178, 791)
+			    fill_color 	13434879
+			    nlines     	2
+			    max_width  	288
+			    justify    	0
+			    label      	"NewPackage")
+			icon_style 	"Icon"
+			line_color 	3342489
+			fill_color 	13434879
+			quidu      	"514975760194"
+			width      	300
+			height     	180)))))
+    root_subsystem 	(object SubSystem "Component View"
+	quid       	"5148E44F03B1"
+	physical_models 	(list unit_reference_list
+	    (object module "c.s.s.server" "NotAModuleType" "NotAModulePart"
+		quid       	"514975B100F2"
+		stereotype 	""
+		visible_modules 	(list dependency_list
+		    (object Module_Visibility_Relationship
+			quid       	"51497734012F"
+			supplier   	"Component View::c.s.s.expeditionconnector"
+			quidu      	"514975B300E5"
+			supplier_is_spec 	TRUE)
+		    (object Module_Visibility_Relationship
+			quid       	"5149773701CF"
+			supplier   	"Component View::c.s.s.domain.persistence"
+			quidu      	"514975B6001E"
+			supplier_is_spec 	TRUE)
+		    (object Module_Visibility_Relationship
+			quid       	"51497743033F"
+			supplier   	"Component View::c.s.s.domain"
+			quidu      	"514975D40357"
+			supplier_is_spec 	TRUE)
+		    (object Module_Visibility_Relationship
+			quid       	"5149779C0098"
+			supplier   	"Component View::org.json.simple"
+			quidu      	"514975D801D6"
+			supplier_is_spec 	TRUE))
+		language   	"")
+	    (object module "c.s.s.expeditionconnector" "NotAModuleType" "NotAModulePart"
+		quid       	"514975B300E5"
+		stereotype 	""
+		visible_modules 	(list dependency_list
+		    (object Module_Visibility_Relationship
+			quid       	"514977350260"
+			supplier   	"Component View::c.s.s.udpconnector"
+			quidu      	"514975B40106"
+			supplier_is_spec 	TRUE)
+		    (object Module_Visibility_Relationship
+			quid       	"51497740028E"
+			supplier   	"Component View::c.s.s.domain"
+			quidu      	"514975D40357"
+			supplier_is_spec 	TRUE)
+		    (object Module_Visibility_Relationship
+			quid       	"5149776F03C7"
+			supplier   	"Component View::c.s.s.declination"
+			quidu      	"514975D303AE"
+			supplier_is_spec 	TRUE))
+		language   	"")
+	    (object module "c.s.s.udpconnector" "NotAModuleType" "NotAModulePart"
+		quid       	"514975B40106"
+		stereotype 	""
+		language   	"")
+	    (object module "c.s.s.domain.persistence" "NotAModuleType" "NotAModulePart"
+		quid       	"514975B6001E"
+		stereotype 	""
+		visible_modules 	(list dependency_list
+		    (object Module_Visibility_Relationship
+			quid       	"514977380138"
+			supplier   	"Component View::c.s.s.mongodb"
+			quidu      	"514975B6027E"
+			supplier_is_spec 	TRUE)
+		    (object Module_Visibility_Relationship
+			quid       	"5149773D01B6"
+			supplier   	"Component View::c.s.s.domain"
+			quidu      	"514975D40357"
+			supplier_is_spec 	TRUE))
+		language   	"")
+	    (object module "c.s.s.mongodb" "NotAModuleType" "NotAModulePart"
+		quid       	"514975B6027E"
+		stereotype 	""
+		visible_modules 	(list dependency_list
+		    (object Module_Visibility_Relationship
+			quid       	"514977390066"
+			supplier   	"Component View::com.mongodb.driver"
+			quidu      	"514975B700CD"
+			supplier_is_spec 	TRUE))
+		language   	"")
+	    (object module "com.mongodb.driver" "NotAModuleType" "NotAModulePart"
+		quid       	"514975B700CD"
+		stereotype 	""
+		language   	"")
+	    (object module "c.s.s.domain.tractracadapter" "NotAModuleType" "NotAModulePart"
+		quid       	"514975B9019E"
+		stereotype 	""
+		visible_modules 	(list dependency_list
+		    (object Module_Visibility_Relationship
+			quid       	"51497745011F"
+			supplier   	"Component View::c.s.s.domain"
+			quidu      	"514975D40357"
+			supplier_is_spec 	TRUE)
+		    (object Module_Visibility_Relationship
+			quid       	"514977460277"
+			supplier   	"Component View::com.tractrac.clientmodule"
+			quidu      	"514975D200CA"
+			supplier_is_spec 	TRUE))
+		language   	"")
+	    (object module "com.tractrac.clientmodule" "NotAModuleType" "NotAModulePart"
+		quid       	"514975D200CA"
+		stereotype 	""
+		language   	"")
+	    (object module "c.s.s.declination" "NotAModuleType" "NotAModulePart"
+		quid       	"514975D303AE"
+		stereotype 	""
+		visible_modules 	(list dependency_list
+		    (object Module_Visibility_Relationship
+			quid       	"514977480391"
+			supplier   	"Component View::c.s.s.domain"
+			quidu      	"514975D40357"
+			supplier_is_spec 	TRUE))
+		language   	"")
+	    (object module "c.s.s.domain" "NotAModuleType" "NotAModulePart"
+		quid       	"514975D40357"
+		stereotype 	""
+		language   	"")
+	    (object module "org.json.simple" "NotAModuleType" "NotAModulePart"
+		quid       	"514975D801D6"
+		stereotype 	""
+		language   	""))
+	physical_presentations 	(list unit_reference_list
+	    (object Module_Diagram "The Early Basics"
+		quid       	"5148E4520241"
+		title      	"The Early Basics"
+		zoom       	100
+		max_height 	28350
+		max_width  	21600
+		origin_x   	0
+		origin_y   	0
+		items      	(list diagram_item_list
+		    (object ModView "Component View::c.s.s.server" "NotAModuleType" "NotAModulePart" @39
+			location   	(1398, 240)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object ItemLabel
+			    Parent_View 	@39
+			    location   	(1306, 215)
+			    anchor_loc 	3
+			    nlines     	2
+			    max_width  	347
+			    label      	"c.s.s.server")
+			icon_style 	"Icon"
+			line_color 	3342489
+			fill_color 	16777215
+			quidu      	"514975B100F2"
+			width      	625
+			autoResize 	TRUE
+			width      	625
+			height     	162)
+		    (object ModView "Component View::c.s.s.expeditionconnector" "NotAModuleType" "NotAModulePart" @40
+			location   	(989, 542)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object ItemLabel
+			    Parent_View 	@40
+			    location   	(862, 515)
+			    anchor_loc 	3
+			    nlines     	2
+			    max_width  	482
+			    label      	"c.s.s.expeditionconnector")
+			icon_style 	"Icon"
+			line_color 	3342489
+			fill_color 	16777215
+			quidu      	"514975B300E5"
+			width      	869
+			height     	175
+			autoResize 	TRUE
+			width      	869
+			height     	175)
+		    (object ModView "Component View::c.s.s.udpconnector" "NotAModuleType" "NotAModulePart" @41
+			location   	(904, 792)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object ItemLabel
+			    Parent_View 	@41
+			    location   	(808, 767)
+			    anchor_loc 	3
+			    nlines     	2
+			    max_width  	365
+			    label      	"c.s.s.udpconnector")
+			icon_style 	"Icon"
+			line_color 	3342489
+			fill_color 	16777215
+			quidu      	"514975B40106"
+			width      	657
+			height     	163
+			autoResize 	TRUE
+			width      	657
+			height     	163)
+		    (object ModView "Component View::c.s.s.domain.persistence" "NotAModuleType" "NotAModulePart" @42
+			location   	(303, 842)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object ItemLabel
+			    Parent_View 	@42
+			    location   	(235, 816)
+			    anchor_loc 	3
+			    nlines     	2
+			    max_width  	256
+			    label      	"c.s.s.domain.persistence")
+			icon_style 	"Icon"
+			line_color 	3342489
+			fill_color 	16777215
+			quidu      	"514975B6001E"
+			width      	462
+			height     	169
+			autoResize 	TRUE
+			width      	462
+			height     	169)
+		    (object ModView "Component View::c.s.s.mongodb" "NotAModuleType" "NotAModulePart" @43
+			location   	(253, 1128)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object ItemLabel
+			    Parent_View 	@43
+			    location   	(179, 1103)
+			    anchor_loc 	3
+			    nlines     	2
+			    max_width  	278
+			    label      	"c.s.s.mongodb")
+			icon_style 	"Icon"
+			line_color 	3342489
+			fill_color 	16777215
+			quidu      	"514975B6027E"
+			width      	500
+			autoResize 	TRUE
+			width      	500
+			height     	162)
+		    (object ModView "Component View::com.mongodb.driver" "NotAModuleType" "NotAModulePart" @44
+			location   	(250, 1375)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object ItemLabel
+			    Parent_View 	@44
+			    location   	(177, 1348)
+			    anchor_loc 	3
+			    nlines     	2
+			    max_width  	274
+			    label      	"com.mongodb.driver")
+			icon_style 	"Icon"
+			line_color 	3342489
+			fill_color 	16777215
+			quidu      	"514975B700CD"
+			width      	494
+			height     	181
+			autoResize 	TRUE
+			width      	494
+			height     	181)
+		    (object ModView "Component View::c.s.s.domain.tractracadapter" "NotAModuleType" "NotAModulePart" @45
+			location   	(1752, 753)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object ItemLabel
+			    Parent_View 	@45
+			    location   	(1666, 728)
+			    anchor_loc 	3
+			    nlines     	2
+			    max_width  	322
+			    label      	"c.s.s.domain.tractracadapter")
+			icon_style 	"Icon"
+			line_color 	3342489
+			fill_color 	16777215
+			quidu      	"514975B9019E"
+			width      	581
+			autoResize 	TRUE
+			width      	581
+			height     	162)
+		    (object ModView "Component View::com.tractrac.clientmodule" "NotAModuleType" "NotAModulePart" @46
+			location   	(1874, 1000)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object ItemLabel
+			    Parent_View 	@46
+			    location   	(1805, 975)
+			    anchor_loc 	3
+			    nlines     	2
+			    max_width  	259
+			    label      	"com.tractrac.clientmodule")
+			icon_style 	"Icon"
+			line_color 	3342489
+			fill_color 	16777215
+			quidu      	"514975D200CA"
+			width      	466
+			autoResize 	TRUE
+			width      	466
+			height     	162)
+		    (object ModView "Component View::c.s.s.declination" "NotAModuleType" "NotAModulePart" @47
+			location   	(1012, 1231)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object ItemLabel
+			    Parent_View 	@47
+			    location   	(928, 1206)
+			    anchor_loc 	3
+			    nlines     	2
+			    max_width  	315
+			    label      	"c.s.s.declination")
+			icon_style 	"Icon"
+			line_color 	3342489
+			fill_color 	16777215
+			quidu      	"514975D303AE"
+			width      	568
+			autoResize 	TRUE
+			width      	568
+			height     	162)
+		    (object ModView "Component View::c.s.s.domain" "NotAModuleType" "NotAModulePart" @48
+			location   	(1328, 1565)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object ItemLabel
+			    Parent_View 	@48
+			    location   	(1246, 1540)
+			    anchor_loc 	3
+			    nlines     	2
+			    max_width  	309
+			    label      	"c.s.s.domain")
+			icon_style 	"Icon"
+			line_color 	3342489
+			fill_color 	16777215
+			quidu      	"514975D40357"
+			width      	556
+			height     	163
+			autoResize 	TRUE
+			width      	556
+			height     	163)
+		    (object ModView "Component View::org.json.simple" "NotAModuleType" "NotAModulePart" @49
+			location   	(2313, 752)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object ItemLabel
+			    Parent_View 	@49
+			    location   	(2235, 727)
+			    anchor_loc 	3
+			    nlines     	2
+			    max_width  	295
+			    label      	"org.json.simple")
+			icon_style 	"Icon"
+			line_color 	3342489
+			fill_color 	16777215
+			quidu      	"514975D801D6"
+			width      	531
+			height     	163
+			autoResize 	TRUE
+			width      	531
+			height     	163)
+		    (object NoteView @50
+			location   	(2087, 122)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object ItemLabel
+			    Parent_View 	@50
+			    location   	(1827, 37)
+			    fill_color 	13434879
+			    nlines     	3
+			    max_width  	484
+			    label      	
+|Roots the server "state", serves RESTlets
+			    )
+			line_color 	3342489
+			fill_color 	13434879
+			width      	544
+			height     	182)
+		    (object NoteView @51
+			location   	(1921, 505)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object ItemLabel
+			    Parent_View 	@51
+			    location   	(1624, 424)
+			    fill_color 	13434879
+			    nlines     	3
+			    max_width  	559
+			    label      	"Adapter receiving stored and live GPS tracking and master data from boats")
+			line_color 	3342489
+			fill_color 	13434879
+			width      	619
+			height     	175)
+		    (object NoteView @52
+			location   	(643, 328)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object ItemLabel
+			    Parent_View 	@52
+			    location   	(433, 243)
+			    fill_color 	13434879
+			    nlines     	3
+			    max_width  	384
+			    label      	"Adapter receiving UDP wind feed from Expedition software")
+			line_color 	3342489
+			fill_color 	13434879
+			width      	444
+			height     	182)
+		    (object NoteView @53
+			location   	(884, 1000)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object ItemLabel
+			    Parent_View 	@53
+			    location   	(580, 931)
+			    fill_color 	13434879
+			    nlines     	2
+			    max_width  	572
+			    label      	"Micro-Framework for UDP message handling and parsing")
+			line_color 	3342489
+			fill_color 	13434879
+			width      	632
+			height     	150)
+		    (object NoteView @54
+			location   	(817, 1425)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object ItemLabel
+			    Parent_View 	@54
+			    location   	(598, 1347)
+			    fill_color 	13434879
+			    nlines     	3
+			    max_width  	403
+			    label      	"Wrapper for NOAA Web Services for Magnetic Declination")
+			line_color 	3342489
+			fill_color 	13434879
+			width      	463
+			height     	168)
+		    (object NoteView @55
+			location   	(1940, 1520)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object ItemLabel
+			    Parent_View 	@55
+			    location   	(1718, 1405)
+			    fill_color 	13434879
+			    nlines     	4
+			    max_width  	409
+			    label      	"Spheric Geometry, Sailing Domain (Boat, Event, Regatta, Race, Team, ...)")
+			line_color 	3342489
+			fill_color 	13434879
+			width      	469
+			height     	243)
+		    (object AttachView "" @56
+			stereotype 	TRUE
+			line_color 	3342489
+			client     	@52
+			supplier   	@40
+			vertices   	(list Points
+			    (791, 419)
+			    (838, 453))
+			line_style 	0)
+		    (object AttachView "" @57
+			stereotype 	TRUE
+			line_color 	3342489
+			client     	@51
+			supplier   	@45
+			vertices   	(list Points
+			    (1860, 592)
+			    (1802, 671))
+			line_style 	0)
+		    (object AttachView "" @58
+			stereotype 	TRUE
+			line_color 	3342489
+			client     	@54
+			supplier   	@47
+			vertices   	(list Points
+			    (900, 1340)
+			    (926, 1309))
+			line_style 	0)
+		    (object AttachView "" @59
+			stereotype 	TRUE
+			line_color 	3342489
+			client     	@55
+			supplier   	@48
+			vertices   	(list Points
+			    (1705, 1536)
+			    (1594, 1541))
+			line_style 	0)
+		    (object AttachView "" @60
+			stereotype 	TRUE
+			line_color 	3342489
+			client     	@50
+			supplier   	@39
+			vertices   	(list Points
+			    (1814, 167)
+			    (1697, 185))
+			line_style 	0)
+		    (object AttachView "" @61
+			stereotype 	TRUE
+			line_color 	3342489
+			client     	@53
+			supplier   	@41
+			vertices   	(list Points
+			    (890, 924)
+			    (892, 871))
+			line_style 	0)
+		    (object ModVisView "" @62
+			stereotype 	TRUE
+			line_color 	3342489
+			quidu      	"51497745011F"
+			client     	@45
+			supplier   	@48
+			vertices   	(list Points
+			    (1547, 831)
+			    (1547, 1484))
+			line_style 	3
+			origin_attachment 	(1547, 831)
+			terminal_attachment 	(1547, 1484))
+		    (object ModVisView "" @63
+			stereotype 	TRUE
+			line_color 	3342489
+			quidu      	"514977460277"
+			client     	@45
+			supplier   	@46
+			vertices   	(list Points
+			    (1900, 831)
+			    (1900, 920))
+			line_style 	3
+			origin_attachment 	(1900, 831)
+			terminal_attachment 	(1900, 920))
+		    (object ModVisView "" @64
+			stereotype 	TRUE
+			line_color 	3342489
+			quidu      	"514977390066"
+			client     	@43
+			supplier   	@44
+			vertices   	(list Points
+			    (216, 1206)
+			    (216, 1285))
+			line_style 	3
+			origin_attachment 	(216, 1206)
+			terminal_attachment 	(216, 1285))
+		    (object ModVisView "" @65
+			stereotype 	TRUE
+			line_color 	3342489
+			quidu      	"514977480391"
+			client     	@47
+			supplier   	@48
+			vertices   	(list Points
+			    (1178, 1309)
+			    (1178, 1484))
+			line_style 	3
+			origin_attachment 	(1178, 1309)
+			terminal_attachment 	(1178, 1484))
+		    (object ModVisView "" @66
+			stereotype 	TRUE
+			line_color 	3342489
+			quidu      	"51497734012F"
+			client     	@39
+			supplier   	@40
+			vertices   	(list Points
+			    (1228, 318)
+			    (1228, 455))
+			line_style 	3
+			origin_attachment 	(1228, 318)
+			terminal_attachment 	(1228, 455))
+		    (object ModVisView "" @67
+			stereotype 	TRUE
+			line_color 	3342489
+			quidu      	"5149773701CF"
+			client     	@39
+			supplier   	@42
+			vertices   	(list Points
+			    (1092, 214)
+			    (303, 214)
+			    (303, 756))
+			line_style 	3
+			origin_attachment 	(1092, 214)
+			terminal_attachment 	(303, 756))
+		    (object ModVisView "" @68
+			stereotype 	TRUE
+			line_color 	3342489
+			quidu      	"51497743033F"
+			client     	@39
+			supplier   	@48
+			vertices   	(list Points
+			    (1450, 318)
+			    (1450, 1484))
+			line_style 	3
+			origin_attachment 	(1450, 318)
+			terminal_attachment 	(1450, 1484))
+		    (object ModVisView "" @69
+			stereotype 	TRUE
+			line_color 	3342489
+			quidu      	"5149779C0098"
+			client     	@39
+			supplier   	@49
+			vertices   	(list Points
+			    (1697, 240)
+			    (2305, 240)
+			    (2305, 670))
+			line_style 	3
+			origin_attachment 	(1697, 240)
+			terminal_attachment 	(2305, 670))
+		    (object ModVisView "" @70
+			stereotype 	TRUE
+			line_color 	3342489
+			quidu      	"514977380138"
+			client     	@42
+			supplier   	@43
+			vertices   	(list Points
+			    (266, 924)
+			    (266, 1048))
+			line_style 	3
+			origin_attachment 	(266, 924)
+			terminal_attachment 	(266, 1048))
+		    (object ModVisView "" @71
+			stereotype 	TRUE
+			line_color 	3342489
+			quidu      	"5149773D01B6"
+			client     	@42
+			supplier   	@48
+			vertices   	(list Points
+			    (512, 924)
+			    (512, 1549)
+			    (1058, 1549))
+			line_style 	3
+			origin_attachment 	(512, 924)
+			terminal_attachment 	(1058, 1549))
+		    (object ModVisView "" @72
+			stereotype 	TRUE
+			line_color 	3342489
+			quidu      	"514977350260"
+			client     	@40
+			supplier   	@41
+			vertices   	(list Points
+			    (904, 627)
+			    (904, 711))
+			line_style 	3
+			origin_attachment 	(904, 627)
+			terminal_attachment 	(904, 711))
+		    (object ModVisView "" @73
+			stereotype 	TRUE
+			line_color 	3342489
+			quidu      	"51497740028E"
+			client     	@40
+			supplier   	@48
+			vertices   	(list Points
+			    (1341, 627)
+			    (1341, 1484))
+			line_style 	3
+			origin_attachment 	(1341, 627)
+			terminal_attachment 	(1341, 1484))
+		    (object ModVisView "" @74
+			stereotype 	TRUE
+			line_color 	3342489
+			quidu      	"5149776F03C7"
+			client     	@40
+			supplier   	@47
+			vertices   	(list Points
+			    (1247, 627)
+			    (1247, 1151))
+			line_style 	3
+			origin_attachment 	(1247, 627)
+			terminal_attachment 	(1247, 1151)))))
 	category   	"Logical View"
 	quidu      	"5148E44F03AF")
     process_structure 	(object Processes
