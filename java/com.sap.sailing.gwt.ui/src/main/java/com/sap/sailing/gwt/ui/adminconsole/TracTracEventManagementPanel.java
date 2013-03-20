@@ -307,7 +307,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
             }
         });
 
-        layoutTable.setWidget(11, 1, listRacesButton);
+        layoutTable.setWidget(12, 1, listRacesButton);
 
         connectionsPanel.setContentWidget(layoutTable);
 
