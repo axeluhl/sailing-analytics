@@ -242,6 +242,7 @@ public class CourseDesignDialogFragment extends RaceDialogFragment {
                 CourseListDataElement element = new CourseListDataElement();
                 element.setLeftMark(gate.getLeft());
                 element.setRightMark(gate.getRight());
+                element.setRoundingDirection(RoundingDirection.Gate);
                 elementList.add(element);
             }
         }

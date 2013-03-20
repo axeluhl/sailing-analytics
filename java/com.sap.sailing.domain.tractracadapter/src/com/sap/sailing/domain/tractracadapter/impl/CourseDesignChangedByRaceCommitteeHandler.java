@@ -28,6 +28,7 @@ public class CourseDesignChangedByRaceCommitteeHandler implements CourseDesignCh
         JSONObject serializedCourseDesign = courseDataSerializer.serialize(newCourseDesign);
         serializedCourseDesign.toJSONString();
         //TODO send serialized course Design to trac Trac
+        
     }
 
 }
