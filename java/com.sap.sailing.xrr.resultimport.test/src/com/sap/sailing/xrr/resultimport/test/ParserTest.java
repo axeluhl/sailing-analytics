@@ -85,12 +85,12 @@ public class ParserTest {
         ScoreCorrectionProviderImpl scoreCorrectionProvider = new ScoreCorrectionProviderImpl(getTestDocumentProvider(),
                 ParserFactory.INSTANCE);
         Map<String, Set<Pair<String, TimePoint>>> hasResultsFor = scoreCorrectionProvider.getHasResultsForBoatClassFromDateByEventName();
-        assertTrue(hasResultsFor.containsKey("Star"));
+        assertTrue(hasResultsFor.containsKey("Star Men"));
         Calendar cal = new GregorianCalendar(2013, /* 2 means March; zero-based */ 2, 15, 18, 51, 15);
         cal.setTimeZone(TimeZone.getTimeZone("UTC"));
         TimePoint expectedTimePoint = new MillisecondsTimePoint(cal.getTime());
-        assertEquals(expectedTimePoint, hasResultsFor.get("Star").iterator().next().getB());
-        assertTrue(hasResultsFor.containsKey("Laser"));
+        assertEquals(expectedTimePoint, hasResultsFor.get("Star Men").iterator().next().getB());
+        assertTrue(hasResultsFor.containsKey("Laser Men"));
     }
     
     @Test
@@ -99,7 +99,7 @@ public class ParserTest {
         ScoreCorrectionProviderImpl scoreCorrectionProvider = new ScoreCorrectionProviderImpl(getTestDocumentProvider(),
                 ParserFactory.INSTANCE);
         Map<String, Set<Pair<String, TimePoint>>> hasResultsFor = scoreCorrectionProvider.getHasResultsForBoatClassFromDateByEventName();
-        RegattaScoreCorrections starResult = scoreCorrectionProvider.getScoreCorrections("Star Men", "Star", hasResultsFor.get("Star").iterator().next().getB());
+        RegattaScoreCorrections starResult = scoreCorrectionProvider.getScoreCorrections("Star Men", "Star", hasResultsFor.get("Star Men").iterator().next().getB());
         assertNotNull(starResult);
         Iterable<ScoreCorrectionsForRace> scoreCorrectionsForRaces = starResult.getScoreCorrectionsForRaces();
         assertNotNull(scoreCorrectionsForRaces);
