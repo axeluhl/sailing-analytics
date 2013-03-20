@@ -168,7 +168,7 @@ public interface DomainFactory {
     Iterable<Receiver> getUpdateReceivers(DynamicTrackedRegatta trackedRegatta, Event tractracEvent,
             TimePoint startOfTracking, TimePoint endOfTracking, long delayToLiveInMillis, Simulator simulator,
             WindStore windStore, DynamicRaceDefinitionSet raceDefinitionSetToUpdate,
-            TrackedRegattaRegistry trackedRegattaRegistry);
+            TrackedRegattaRegistry trackedRegattaRegistry, URI courseDesignUpdateURI);
 
     /**
      * Creates a {@link RaceDefinition} from a TracTrac {@link Race} and a domain {@link Course} definition. The
@@ -189,7 +189,7 @@ public interface DomainFactory {
      */
     DynamicTrackedRace getOrCreateRaceDefinitionAndTrackedRace(TrackedRegatta trackedRegatta, Race race,
             Course course, WindStore windStore, long delayToLiveInMillis, long millisecondsOverWhichToAverageWind,
-            DynamicRaceDefinitionSet raceDefinitionSetToUpdate);
+            DynamicRaceDefinitionSet raceDefinitionSetToUpdate, URI courseDesignUpdateURI);
 
     /**
      * The record may be for a single mark or a gate. If for a gate, the
@@ -203,7 +203,9 @@ public interface DomainFactory {
     MarkPassing createMarkPassing(TimePoint timePoint, Waypoint passed, com.sap.sailing.domain.base.Competitor competitor);
 
     Iterable<Receiver> getUpdateReceivers(DynamicTrackedRegatta trackedRegatta, Event tractracEvent, WindStore windStore,
-            TimePoint startOfTracking, TimePoint endOfTracking, long delayToLiveInMillis, Simulator simulator, DynamicRaceDefinitionSet raceDefinitionSetToUpdate, TrackedRegattaRegistry trackedRegattaRegistry, ReceiverType... types);
+            TimePoint startOfTracking, TimePoint endOfTracking, long delayToLiveInMillis, Simulator simulator, 
+            DynamicRaceDefinitionSet raceDefinitionSetToUpdate, TrackedRegattaRegistry trackedRegattaRegistry, 
+            URI courseDesignUpdateURI, ReceiverType... types);
 
     JSONService parseJSONURL(URL jsonURL) throws IOException, ParseException, org.json.simple.parser.ParseException, URISyntaxException;
 

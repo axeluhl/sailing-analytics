@@ -356,7 +356,7 @@ public class DomainFactoryImpl implements DomainFactory {
             com.tractrac.clientmodule.Event tractracEvent, WindStore windStore, TimePoint startOfTracking,
             TimePoint endOfTracking, long delayToLiveInMillis, Simulator simulator,
             DynamicRaceDefinitionSet raceDefinitionSetToUpdate, TrackedRegattaRegistry trackedRegattaRegistry,
-            ReceiverType... types) {
+            URI courseDesignUpdateURI, ReceiverType... types) {
         Collection<Receiver> result = new ArrayList<Receiver>();
         for (ReceiverType type : types) {
             switch (type) {
@@ -364,7 +364,7 @@ public class DomainFactoryImpl implements DomainFactory {
                 result.add(new RaceCourseReceiver(
                         this, trackedRegatta, tractracEvent, windStore,
                         raceDefinitionSetToUpdate, delayToLiveInMillis, 
-                        WindTrack.DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_WIND, simulator));
+                        WindTrack.DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_WIND, simulator, courseDesignUpdateURI));
                 break;
             case MARKPOSITIONS:
                 result.add(new MarkPositionReceiver(
@@ -391,9 +391,9 @@ public class DomainFactoryImpl implements DomainFactory {
     public Iterable<Receiver> getUpdateReceivers(DynamicTrackedRegatta trackedRegatta,
             com.tractrac.clientmodule.Event tractracEvent, TimePoint startOfTracking, TimePoint endOfTracking,
             long delayToLiveInMillis, Simulator simulator, WindStore windStore,
-            DynamicRaceDefinitionSet raceDefinitionSetToUpdate, TrackedRegattaRegistry trackedRegattaRegistry) {
+            DynamicRaceDefinitionSet raceDefinitionSetToUpdate, TrackedRegattaRegistry trackedRegattaRegistry, URI courseDesignUpdateURI) {
         return getUpdateReceivers(trackedRegatta, tractracEvent, windStore, startOfTracking, endOfTracking,
-                delayToLiveInMillis, simulator, raceDefinitionSetToUpdate, trackedRegattaRegistry,
+                delayToLiveInMillis, simulator, raceDefinitionSetToUpdate, trackedRegattaRegistry, courseDesignUpdateURI, 
                 ReceiverType.RACECOURSE, ReceiverType.MARKPASSINGS, ReceiverType.MARKPOSITIONS,
                 ReceiverType.RACESTARTFINISH, ReceiverType.RAWPOSITIONS);
     }
@@ -452,7 +452,7 @@ public class DomainFactoryImpl implements DomainFactory {
     @Override
     public DynamicTrackedRace getOrCreateRaceDefinitionAndTrackedRace(TrackedRegatta trackedRegatta,
             Race race, Course course, WindStore windStore, long delayToLiveInMillis, long millisecondsOverWhichToAverageWind,
-            DynamicRaceDefinitionSet raceDefinitionSetToUpdate) {
+            DynamicRaceDefinitionSet raceDefinitionSetToUpdate, URI courseDesignUpdateURI) {
         synchronized (raceCache) {
             RaceDefinition raceDefinition = raceCache.get(race);
             if (raceDefinition == null) {
@@ -467,7 +467,7 @@ public class DomainFactoryImpl implements DomainFactory {
                             delayToLiveInMillis, millisecondsOverWhichToAverageWind, raceDefinitionSetToUpdate);
                     logger.info("Added race "+raceDefinition+" to regatta "+trackedRegatta.getRegatta());
                     
-                    CourseDesignChangedByRaceCommitteeHandler courseDesignHandler = new CourseDesignChangedByRaceCommitteeHandler();
+                    CourseDesignChangedByRaceCommitteeHandler courseDesignHandler = new CourseDesignChangedByRaceCommitteeHandler(courseDesignUpdateURI);
                     trackedRace.setCourseDesignChangedListener(courseDesignHandler);
                     
                     synchronized (raceCache) {

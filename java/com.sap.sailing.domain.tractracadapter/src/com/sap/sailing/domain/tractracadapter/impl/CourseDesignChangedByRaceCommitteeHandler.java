@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.tractracadapter.impl;
 
+import java.net.URI;
+
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.CourseData;
@@ -14,8 +16,10 @@ import com.sap.sailing.server.gateway.serialization.coursedata.impl.WaypointJson
 public class CourseDesignChangedByRaceCommitteeHandler implements CourseDesignChangedListener {
     
     private JsonSerializer<CourseData> courseDataSerializer;
+    private final URI courseDesignUpdateURI;
     
-    public CourseDesignChangedByRaceCommitteeHandler() {
+    public CourseDesignChangedByRaceCommitteeHandler(URI courseDesignUpdateURI) {
+        this.courseDesignUpdateURI = courseDesignUpdateURI;
         courseDataSerializer = new CourseDataJsonSerializer(
                 new WaypointJsonSerializer(
                         new ControlPointJsonSerializer(

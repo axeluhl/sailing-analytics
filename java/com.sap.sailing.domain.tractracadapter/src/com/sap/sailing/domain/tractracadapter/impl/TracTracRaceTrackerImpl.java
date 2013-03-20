@@ -93,7 +93,6 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
      * paramURL, liveURI and storedURI for TracTrac connection
      */
     private final Triple<URL, URI, URI> urls;
-    private final URI courseDesignUpdateURI;
     private final ScheduledFuture<?> controlPointPositionPoller;
 
     /**
@@ -177,7 +176,6 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         super();
         this.tractracEvent = tractracEvent;
         urls = createID(paramURL, liveURI, storedURI);
-        this.courseDesignUpdateURI = courseDesignUpdateURI;
         this.races = new HashSet<RaceDefinition>();
         this.windStore = windStore;
         this.domainFactory = domainFactory;
@@ -218,7 +216,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         receivers = new HashSet<Receiver>();
         Set<TypeController> typeControllers = new HashSet<TypeController>();
         for (Receiver receiver : domainFactory.getUpdateReceivers(getTrackedRegatta(), tractracEvent, startOfTracking,
-                endOfTracking, delayToLiveInMillis, simulator, windStore, this, trackedRegattaRegistry)) {
+                endOfTracking, delayToLiveInMillis, simulator, windStore, this, trackedRegattaRegistry, courseDesignUpdateURI)) {
             receivers.add(receiver);
             for (TypeController typeController : receiver.getTypeControllersAndStart()) {
                 typeControllers.add(typeController);
