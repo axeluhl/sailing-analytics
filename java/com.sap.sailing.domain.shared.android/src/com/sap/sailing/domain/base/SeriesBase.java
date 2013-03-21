@@ -5,7 +5,7 @@ import com.sap.sailing.domain.common.Named;
 /**
  * Base interface for series consisting of static information describing the Series.
  */
-public interface SeriesData extends Named {
+public interface SeriesBase extends Named {
 
     /**
      * Returns the fleets of this series, in ascending order, better fleets first.

@@ -2,15 +2,15 @@ package com.sap.sailing.racecommittee.app.ui.adapters.racelist;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Fleet;
-import com.sap.sailing.domain.base.SeriesData;
+import com.sap.sailing.domain.base.SeriesBase;
 
 public class BoatClassSeriesDataFleet {
 	
 	private BoatClass boatClass;
-	private SeriesData series;
+	private SeriesBase series;
 	private Fleet fleet;
 	
-	public BoatClassSeriesDataFleet(BoatClass boatClass, SeriesData series, Fleet fleet) {
+	public BoatClassSeriesDataFleet(BoatClass boatClass, SeriesBase series, Fleet fleet) {
 		this.boatClass = boatClass;
 		this.series = series;
 		this.fleet = fleet;
@@ -32,7 +32,7 @@ public class BoatClassSeriesDataFleet {
 		return boatClass;
 	}
 	
-	public SeriesData getSeries() {
+	public SeriesBase getSeries() {
 		return series;
 	}
 	
