@@ -10,7 +10,7 @@ import org.json.simple.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sap.sailing.domain.base.EventData;
+import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.Venue;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.EventDataJsonSerializer;
@@ -23,14 +23,14 @@ public class EventDataJsonSerializerTest {
 
     protected JsonSerializer<Venue> venueSerializer;
     protected EventDataJsonSerializer serializer;
-    protected EventData event;
+    protected EventBase event;
 
     // see https://groups.google.com/forum/?fromgroups=#!topic/mockito/iMumB0_bpdo
     @SuppressWarnings("unchecked")
     @Before
     public void setUp() {
         // Event and its basic attributes ...
-        event = mock(EventData.class);
+        event = mock(EventBase.class);
         when(event.getId()).thenReturn(expectedId);
         when(event.getName()).thenReturn(expectedName);
         when(event.getPublicationUrl()).thenReturn(expectedPublicationUrl);

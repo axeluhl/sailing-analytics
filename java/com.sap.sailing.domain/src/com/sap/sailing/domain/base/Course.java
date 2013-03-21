@@ -27,7 +27,7 @@ import difflib.PatchFailedException;
  * @author Axel Uhl (d043530)
  * 
  */
-public interface Course extends CourseData {
+public interface Course extends CourseBase {
     void lockForRead();
 
     void unlockAfterRead();
