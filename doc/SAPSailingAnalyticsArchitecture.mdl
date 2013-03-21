@@ -1957,7 +1957,7 @@
 					x_offset   	0.000000
 					y_offset   	0.000000)
 				    (object ObjectView "$UNNAMED$9" @74
-					location   	(397, 219)
+					location   	(398, 219)
 					font       	(object Font
 					    size       	10
 					    face       	"Arial"
@@ -1969,25 +1969,25 @@
 					    default_color 	TRUE)
 					label      	(object ItemLabel
 					    Parent_View 	@74
-					    location   	(190, 168)
+					    location   	(179, 181)
 					    fill_color 	13434879
 					    nlines     	2
-					    max_width  	414
+					    max_width  	438
 					    justify    	0
 					    label      	"")
 					icon_style 	"Icon"
 					line_color 	3342489
 					fill_color 	13434879
 					quidu      	"514A0E1701B4"
-					width      	432
-					height     	126
+					width      	456
+					height     	100
 					annotation 	4
 					autoResize 	TRUE
 					subobjects 	0
 					x_offset   	0.000000
 					y_offset   	0.000000)
 				    (object ObjectView "$UNNAMED$10" @75
-					location   	(402, 381)
+					location   	(408, 381)
 					font       	(object Font
 					    size       	10
 					    face       	"Arial"
@@ -1999,18 +1999,18 @@
 					    default_color 	TRUE)
 					label      	(object ItemLabel
 					    Parent_View 	@75
-					    location   	(207, 330)
+					    location   	(211, 334)
 					    fill_color 	13434879
 					    nlines     	2
-					    max_width  	390
+					    max_width  	395
 					    justify    	0
 					    label      	"")
 					icon_style 	"Icon"
 					line_color 	3342489
 					fill_color 	13434879
 					quidu      	"514A0E19030B"
-					width      	408
-					height     	126
+					width      	413
+					height     	119
 					annotation 	4
 					autoResize 	TRUE
 					subobjects 	0
@@ -2092,11 +2092,11 @@
 					client     	@73
 					supplier   	@74
 					vertices   	(list Points
-					    (860, 260)
-					    (613, 260))
+					    (860, 250)
+					    (626, 250))
 					line_style 	3
-					origin_attachment 	(860, 260)
-					terminal_attachment 	(613, 260))
+					origin_attachment 	(860, 250)
+					terminal_attachment 	(626, 250))
 				    (object LinkView "" @79
 					stereotype 	TRUE
 					line_color 	3342489
@@ -2105,10 +2105,10 @@
 					supplier   	@75
 					vertices   	(list Points
 					    (860, 353)
-					    (606, 353))
+					    (614, 353))
 					line_style 	3
 					origin_attachment 	(860, 353)
-					terminal_attachment 	(606, 353))
+					terminal_attachment 	(614, 353))
 				    (object LinkView "" @80
 					stereotype 	TRUE
 					line_color 	3342489
