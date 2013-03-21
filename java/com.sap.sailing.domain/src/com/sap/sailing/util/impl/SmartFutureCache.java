@@ -14,6 +14,7 @@ import java.util.concurrent.FutureTask;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.logging.Logger;
 
 import com.sap.sailing.util.impl.SmartFutureCache.UpdateInterval;
@@ -279,34 +280,48 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
             if (suspended) {
                 triggeredWhileSuspended.put(key, joinedUpdateInterval);
             } else {
-                createAndExecuteRecalculation(key, joinedUpdateInterval);
+                createAndExecuteRecalculation(key, joinedUpdateInterval, /* callerWaitsSynchronouslyForResult */ false);
             }
         }
     }
 
     /**
-     * Creates a {@link FutureTask} for the (re-)calculation of the cache entry for <code>key</code> across update interval
-     * <code>joinedUpdateInterval</code>, enters it into {@link #ongoingRecalculations} and schedules its execution with
-     * {@link #recalculator}. The method synchronizes on {@link #ongoingRecalculations}.
+     * Creates a {@link FutureTask} for the (re-)calculation of the cache entry for <code>key</code> across update
+     * interval <code>joinedUpdateInterval</code>, enters it into {@link #ongoingRecalculations} and schedules its
+     * execution with {@link #recalculator}. The method synchronizes on {@link #ongoingRecalculations}.
+     * 
+     * @param callerWaitsSynchronouslyForResult
+     *            if <code>true</code>, this allows the future to assume the caller's locks. See also
+     *            {@link LockUtil#propagateLockSetFrom(Thread)}. This can be helpful to avoid read-read deadlocks
+     *            in conjunction with fair {@link ReentrantReadWriteLock}s.
      */
-    private void createAndExecuteRecalculation(final K key, final U joinedUpdateInterval) {
+    private void createAndExecuteRecalculation(final K key, final U joinedUpdateInterval,
+            final boolean callerWaitsSynchronouslyForResult) {
+        final Thread callerThread = Thread.currentThread();
         synchronized (ongoingRecalculations) {
             final FutureTaskWithCancelBlocking<V, U> future;
             future = new FutureTaskWithCancelBlocking<V, U>(new Callable<V>() {
                 @Override
                 public V call() {
                     try {
-                        V preResult = cacheUpdateComputer.computeCacheUpdate(key, joinedUpdateInterval);
-                        final NamedReentrantReadWriteLock lock = getOrCreateLockForKey(key);
-                        LockUtil.lockForWrite(lock);
+                        if (callerWaitsSynchronouslyForResult) {
+                            LockUtil.propagateLockSetFrom(callerThread);
+                        }
                         try {
-                            V result = cacheUpdateComputer.provideNewCacheValue(key, cache.get(key), preResult,
-                                    joinedUpdateInterval);
-                            cache(key, result);
-                            return result;
+                            V preResult = cacheUpdateComputer.computeCacheUpdate(key, joinedUpdateInterval);
+                            final NamedReentrantReadWriteLock lock = getOrCreateLockForKey(key);
+                            LockUtil.lockForWrite(lock);
+                            try {
+                                V result = cacheUpdateComputer.provideNewCacheValue(key, cache.get(key), preResult,
+                                        joinedUpdateInterval);
+                                cache(key, result);
+                                return result;
+                            } finally {
+                                LockUtil.unlockAfterWrite(lock);
+                                ongoingRecalculations.remove(key);
+                            }
                         } finally {
-                            LockUtil.unlockAfterWrite(lock);
-                            ongoingRecalculations.remove(key);
+                            LockUtil.unpropagateLockSetFrom(callerThread);
                         }
                     } catch (Exception e) {
                         // cache won't be updated
@@ -338,7 +353,13 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
                         // triggered, and execute them now.
                         // This will enter the new future into ongoingRecalculations, and therefore this method
                         // will wait for its completion below.
-                        createAndExecuteRecalculation(key, triggeredWhileSuspended.remove(key));
+                        // It is OK to assert that this method will synchronously wait for the results before
+                        // releasing any locks held by the current thread because
+                        // createAndExecuteRecalculation adds key to ongoingRecalculations, and
+                        // further down this method, the future will be fetched from ongoingRecalculations
+                        // with that same key, and a get will be performed on that future.
+                        createAndExecuteRecalculation(key, triggeredWhileSuspended.remove(key),
+                                /* callerWaitsSynchronouslyForResult */ true);
                     }
                 }
                 // as long as we hold the lock on ongoingManeuverCacheRecalculations, the Futures contained in it are not cancelled
