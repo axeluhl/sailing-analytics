@@ -126,29 +126,41 @@ public class LockUtil {
     }
     
     public static void lockForWrite(NamedReentrantReadWriteLock lock) {
-        lock(lock.writeLock(), lock.getWriteLockName(), lock);
-        synchronized (lastTimeWriteLockWasObtained) {
-            lastTimeWriteLockWasObtained.put(lock, MillisecondsTimePoint.now());
+        if (isInCurrentThreadsLockSet(lock.writeLock())) {
+            incrementLockCountForCurrentThread(lock.writeLock());
+        } else {
+            lock(lock.writeLock(), lock.getWriteLockName(), lock);
+            addToCurrentThreadsLockSet(lock.writeLock());
+            synchronized (lastTimeWriteLockWasObtained) {
+                lastTimeWriteLockWasObtained.put(lock, MillisecondsTimePoint.now());
+            }
         }
     }
     
     public static void unlockAfterWrite(NamedReentrantReadWriteLock lock) {
-        lock.writeLock().unlock();
-        final TimePoint timePointWriteLockWasObtained;
-        synchronized (lastTimeWriteLockWasObtained) {
-            timePointWriteLockWasObtained = lastTimeWriteLockWasObtained.get(lock);
-        }
-        if (timePointWriteLockWasObtained == null) {
-            logger.info("Internal error: write lock "+lock.getName()+" to be unlocked but no time recorded for when it was last obtained.\n"+
-                    "This is where the lock interaction happened:\n"+getCurrentStackTrace());
-        } else {
-            TimePoint now = MillisecondsTimePoint.now();
-            if (now.asMillis()-timePointWriteLockWasObtained.asMillis() > 10000l) {
-                String stackTrace = getCurrentStackTrace();
-                logger.info("write lock "+lock.getName()+" was held for more than 10s. It got unlocked here: "+
-                        stackTrace);
+        assert isInCurrentThreadsLockSet(lock.writeLock());
+        if (getCurrentThreadsLockCounts().get(lock.writeLock()) == 1) {
+            lock.writeLock().unlock();
+            removeFromCurrentThreadsLockSet(lock.writeLock());
+            final TimePoint timePointWriteLockWasObtained;
+            synchronized (lastTimeWriteLockWasObtained) {
+                timePointWriteLockWasObtained = lastTimeWriteLockWasObtained.get(lock);
             }
+            if (timePointWriteLockWasObtained == null) {
+                logger.info("Internal error: write lock "+lock.getName()+" to be unlocked but no time recorded for when it was last obtained.\n"+
+                        "This is where the lock interaction happened:\n"+getCurrentStackTrace());
+            } else {
+                TimePoint now = MillisecondsTimePoint.now();
+                if (now.asMillis()-timePointWriteLockWasObtained.asMillis() > 10000l) {
+                    String stackTrace = getCurrentStackTrace();
+                    logger.info("write lock "+lock.getName()+" was held for more than 10s. It got unlocked here: "+
+                            stackTrace);
+                }
+            }
+        } else {
+            decrementLockCountForCurrentThread(lock.writeLock());
         }
+
     }
     
     private static String getStackTrace(Thread thread) {
