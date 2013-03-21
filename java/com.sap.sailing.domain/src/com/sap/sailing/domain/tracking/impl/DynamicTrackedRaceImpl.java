@@ -655,8 +655,12 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
 
     @Override
     public void onCourseDesignChangedByRaceCommittee(CourseData newCourseDesign) {
-        if (courseDesignChangedListener != null) {
-            courseDesignChangedListener.courseDesignChanged(newCourseDesign);
+        try {
+            if (courseDesignChangedListener != null) {
+                courseDesignChangedListener.courseDesignChanged(newCourseDesign);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
