@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.UUID;
 
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.CourseData;
+import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.racelog.Flags;
@@ -81,13 +81,12 @@ public class RaceLogEventFactoryImpl implements RaceLogEventFactory {
 
     @Override
     public RaceLogCourseDesignChangedEvent createCourseDesignChangedEvent(TimePoint timePoint, Serializable id,
-            List<Competitor> competitors, int passId, CourseData courseData) {
+            List<Competitor> competitors, int passId, CourseBase courseData) {
         return new RaceLogCourseDesignChangedEventImpl(MillisecondsTimePoint.now(), timePoint, id, competitors, passId, courseData);
     }
 
     @Override
-    public RaceLogCourseDesignChangedEvent createCourseDesignChangedEvent(TimePoint timePoint, int passId,
-            CourseData courseData) {
+    public RaceLogCourseDesignChangedEvent createCourseDesignChangedEvent(TimePoint timePoint, int passId, CourseBase courseData) {
         return createCourseDesignChangedEvent(timePoint, UUID.randomUUID(), new ArrayList<Competitor>(), passId, courseData);
     }
 

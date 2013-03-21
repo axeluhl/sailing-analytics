@@ -4,13 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.sap.sailing.domain.base.ControlPoint;
-import com.sap.sailing.domain.base.CourseData;
+import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.impl.NamedImpl;
 
-public class CourseDataImpl extends NamedImpl implements CourseData {
+public class CourseDataImpl extends NamedImpl implements CourseBase {
 
     private static final long serialVersionUID = 1389216430392253253L;
     

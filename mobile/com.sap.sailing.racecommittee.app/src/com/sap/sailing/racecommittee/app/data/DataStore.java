@@ -31,6 +31,6 @@ public interface DataStore {
     public boolean hasMark(Serializable id);
     public void addMark(Mark mark);
     
-    public CourseData getLastPublishedCourseDesign();
-    public void setLastPublishedCourseDesign(CourseData courseData);
+    public CourseBase getLastPublishedCourseDesign();
+    public void setLastPublishedCourseDesign(CourseBase courseData);
 }

@@ -1,6 +1,6 @@
 package com.sap.sailing.racecommittee.app.domain.state.impl.analyzers;
 
-import com.sap.sailing.domain.base.CourseData;
+import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogCourseDesignChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
@@ -12,8 +12,8 @@ public class LastPublishedCourseDesignFinder extends RaceLogAnalyzer {
         super(raceLog);
     }
 
-    public CourseData getLastCourseDesign() {
-        CourseData lastCourseData = null;
+    public CourseBase getLastCourseDesign() {
+        CourseBase lastCourseData = null;
         
         this.raceLog.lockForRead();
         try {
@@ -25,8 +25,8 @@ public class LastPublishedCourseDesignFinder extends RaceLogAnalyzer {
         return lastCourseData;
     }
     
-    private CourseData searchForLastCourseData() {
-        CourseData lastCourseData = null;
+    private CourseBase searchForLastCourseData() {
+        CourseBase lastCourseData = null;
         
         for (RaceLogEvent event : getAllEvents()) {
             if (event instanceof RaceLogCourseDesignChangedEvent) {

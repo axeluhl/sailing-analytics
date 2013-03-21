@@ -6,7 +6,7 @@ import java.util.Collections;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.CourseData;
+import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
@@ -26,7 +26,7 @@ public class RaceLogCourseDesignChangedEventDeserializer extends BaseRaceLogEven
             throws JsonDeserializationException {
 
         JSONObject jsonCourseDesign = (JSONObject) object.get(RaceLogCourseDesignChangedEventSerializer.FIELD_COURSE_DESIGN);
-        CourseData courseData = courseDataDeserializer.deserialize(jsonCourseDesign);
+        CourseBase courseData = courseDataDeserializer.deserialize(jsonCourseDesign);
 
         return factory.createCourseDesignChangedEvent(timePoint, id, Collections.<Competitor> emptyList(), passId, courseData);
     }

@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.List;
 
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.CourseData;
+import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
@@ -28,6 +28,6 @@ public interface RaceLogEventFactory {
     RaceLogCourseAreaChangedEvent createCourseAreaChangedEvent(TimePoint timePoint, Serializable id, List<Competitor> competitors, int passId, Serializable courseAreaId);
     RaceLogCourseAreaChangedEvent createCourseAreaChangedEvent(TimePoint timePoint, int passId, Serializable courseAreaId);
     
-    RaceLogCourseDesignChangedEvent createCourseDesignChangedEvent(TimePoint timePoint, Serializable id, List<Competitor> competitors, int passId, CourseData courseData);
-    RaceLogCourseDesignChangedEvent createCourseDesignChangedEvent(TimePoint timePoint, int passId, CourseData courseData);
+    RaceLogCourseDesignChangedEvent createCourseDesignChangedEvent(TimePoint timePoint, Serializable id, List<Competitor> competitors, int passId, CourseBase courseData);
+    RaceLogCourseDesignChangedEvent createCourseDesignChangedEvent(TimePoint timePoint, int passId, CourseBase courseData);
 }

@@ -32,40 +32,6 @@ public class OfflineDataManager extends DataManager {
 
     private static boolean isInitialized = false;
 
-	private void fillDataStore(DataStore dataStore) {
-		dataStore.addEvent(new EventBaseImpl("Extreme Sailing Series 2012 (Cardiff)", "Cardiff", "", true, "DUMBUUIDA"));
-		dataStore.addEvent(new EventBaseImpl("Extreme Sailing Series 2012 (Nice)", "Nice", "", true, "DUMBUUIDB"));
-		dataStore.addEvent(new EventBaseImpl("Extreme Sailing Series 2012 (Rio)", "Rio", "", true, "DUMBUUIDC"));
-		EventBase newEvent = new EventBaseImpl("Extreme Sailing Series 2013 (Muscat)", "Muscat", "", true, "FIXUUID");
-		newEvent.getVenue().addCourseArea(new CourseAreaImpl("Offshore", "FIXCAUUID1"));
-		newEvent.getVenue().addCourseArea(new CourseAreaImpl("Stadium", "FIXCAUUID2"));
-		dataStore.addEvent(newEvent);
-		
-		SeriesWithRows qualifying = new SeriesWithRowsImpl("Qualifying", false, null);
-		SeriesWithRows medal = new SeriesWithRowsImpl("Medal", true, null);
-		RaceGroup raceGroup = new RaceGroupImpl(
-				"ESS", 
-				new BoatClassImpl("X40", false), 
-				null,
-				Arrays.asList(qualifying, medal));
-		
-		RaceLogEventFactory factory = new RaceLogEventFactoryImpl();
-		PassAwareRaceLog log = new PassAwareRaceLogImpl();
-		log.add(factory.createRaceStatusEvent(
-				new MillisecondsTimePoint(new Date().getTime() + 1), 
-				2,
-				RaceLogRaceStatus.SCHEDULED));
-		
-		ManagedRace q1 = new ManagedRaceImpl(
-				new ManagedRaceIdentifierImpl(
-						"Q1", 
-						new FleetImpl("Default"), 
-						qualifying, 
-						raceGroup), 
-					log);
-		
-		log = new PassAwareRaceLogImpl();
-		/*log.add(factory.createStartTimeEvent(
     public OfflineDataManager(DataStore dataStore) {
         super(dataStore);
 
@@ -76,10 +42,10 @@ public class OfflineDataManager extends DataManager {
     }
 
     private void fillDataStore(DataStore dataStore) {
-        dataStore.addEvent(new EventDataImpl("Extreme Sailing Series 2012 (Cardiff)", "Cardiff", "", true, "DUMBUUIDA"));
-        dataStore.addEvent(new EventDataImpl("Extreme Sailing Series 2012 (Nice)", "Nice", "", true, "DUMBUUIDB"));
-        dataStore.addEvent(new EventDataImpl("Extreme Sailing Series 2012 (Rio)", "Rio", "", true, "DUMBUUIDC"));
-        EventData newEvent = new EventDataImpl("Extreme Sailing Series 2013 (Muscat)", "Muscat", "", true, "FIXUUID");
+        dataStore.addEvent(new EventBaseImpl("Extreme Sailing Series 2012 (Cardiff)", "Cardiff", "", true, "DUMBUUIDA"));
+        dataStore.addEvent(new EventBaseImpl("Extreme Sailing Series 2012 (Nice)", "Nice", "", true, "DUMBUUIDB"));
+        dataStore.addEvent(new EventBaseImpl("Extreme Sailing Series 2012 (Rio)", "Rio", "", true, "DUMBUUIDC"));
+        EventBase newEvent = new EventBaseImpl("Extreme Sailing Series 2013 (Muscat)", "Muscat", "", true, "FIXUUID");
         newEvent.getVenue().addCourseArea(new CourseAreaImpl("Offshore", "FIXCAUUID1"));
         newEvent.getVenue().addCourseArea(new CourseAreaImpl("Stadium", "FIXCAUUID2"));
         dataStore.addEvent(newEvent);

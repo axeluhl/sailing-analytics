@@ -18,14 +18,14 @@ import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 import org.json.simple.parser.ParseException;
 
-import com.sap.sailing.domain.base.CourseData;
+import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.tracking.CourseDesignChangedListener;
 import com.sap.sailing.domain.tractracadapter.CourseUpdateResponse;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.ControlPointJsonSerializer;
-import com.sap.sailing.server.gateway.serialization.coursedata.impl.CourseDataJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.coursedata.impl.CourseBaseJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.CourseJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.GateJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.MarkJsonSerializer;
@@ -33,7 +33,7 @@ import com.sap.sailing.server.gateway.serialization.coursedata.impl.WaypointJson
 
 public class CourseDesignChangedByRaceCommitteeHandler implements CourseDesignChangedListener {
     
-    private JsonSerializer<CourseData> courseSerializer;
+    private JsonSerializer<CourseBase> courseSerializer;
     private JsonDeserializer<CourseUpdateResponse> courseUpdateDeserializer;
     private final URI courseDesignUpdateURI;
     private final Serializable regattaId;
@@ -44,7 +44,7 @@ public class CourseDesignChangedByRaceCommitteeHandler implements CourseDesignCh
         this.regattaId = regattaId;
         this.raceId = raceId;
         this.courseSerializer = new CourseJsonSerializer(
-                new CourseDataJsonSerializer(
+                new CourseBaseJsonSerializer(
                         new WaypointJsonSerializer(
                                 new ControlPointJsonSerializer(
                                         new MarkJsonSerializer(), 
@@ -53,7 +53,7 @@ public class CourseDesignChangedByRaceCommitteeHandler implements CourseDesignCh
     }
 
     @Override
-    public void courseDesignChanged(CourseData newCourseDesign) throws MalformedURLException, IOException {
+    public void courseDesignChanged(CourseBase newCourseDesign) throws MalformedURLException, IOException {
         JSONObject serializedCourseDesign = courseSerializer.serialize(newCourseDesign);
         String payload = serializedCourseDesign.toJSONString();
 

@@ -14,7 +14,7 @@ import com.mongodb.DBObject;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.CourseArea;
-import com.sap.sailing.domain.base.CourseData;
+import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Gate;
@@ -633,11 +633,11 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
 
         result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogCourseDesignChangedEvent.class.getSimpleName());
 
-        result.put(FieldNames.RACE_LOG_COURSE_DESIGN.name(), storeCourseData(courseDesignChangedEvent.getCourseDesign()));
+        result.put(FieldNames.RACE_LOG_COURSE_DESIGN.name(), storeCourseBase(courseDesignChangedEvent.getCourseDesign()));
         return result;
     }
     
-    private BasicDBList storeCourseData(CourseData courseData) {
+    private BasicDBList storeCourseBase(CourseBase courseData) {
         BasicDBList dbList = new BasicDBList();
         
         for (Waypoint waypoint : courseData.getWaypoints()) {

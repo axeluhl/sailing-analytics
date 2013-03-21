@@ -6,17 +6,17 @@ import java.util.List;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
-import com.sap.sailing.domain.base.CourseData;
+import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.CourseDataImpl;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
-import com.sap.sailing.server.gateway.serialization.coursedata.impl.CourseDataJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.coursedata.impl.CourseBaseJsonSerializer;
 
 /**
  * Deserializer for CourseData.
  */
-public class CourseDataDeserializer implements JsonDeserializer<CourseData> {
+public class CourseDataDeserializer implements JsonDeserializer<CourseBase> {
 
     private final WaypointDeserializer waypointDeserializer;
 
@@ -25,9 +25,9 @@ public class CourseDataDeserializer implements JsonDeserializer<CourseData> {
     }
 
     @Override
-    public CourseData deserialize(JSONObject object) throws JsonDeserializationException {
-        String courseName = object.get(CourseDataJsonSerializer.FIELD_NAME).toString();
-        JSONArray jsonWaypoints = (JSONArray) object.get(CourseDataJsonSerializer.FIELD_WAYPOINTS);
+    public CourseBase deserialize(JSONObject object) throws JsonDeserializationException {
+        String courseName = object.get(CourseBaseJsonSerializer.FIELD_NAME).toString();
+        JSONArray jsonWaypoints = (JSONArray) object.get(CourseBaseJsonSerializer.FIELD_WAYPOINTS);
         List<Waypoint> waypoints = new ArrayList<Waypoint>();
         
         for (Object waypointObject : jsonWaypoints) {
@@ -36,12 +36,12 @@ public class CourseDataDeserializer implements JsonDeserializer<CourseData> {
             waypoints.add(waypoint);
         }
         
-        CourseData courseData = new CourseDataImpl(courseName);
+        CourseBase courseBase = new CourseDataImpl(courseName);
         for (int i = 0; i < waypoints.size(); i++) {
-            courseData.addWaypoint(i, waypoints.get(i));
+            courseBase.addWaypoint(i, waypoints.get(i));
         }
         
-        return courseData;
+        return courseBase;
     }
 
 }

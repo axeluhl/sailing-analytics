@@ -24,7 +24,7 @@ import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.CourseArea;
-import com.sap.sailing.domain.base.CourseData;
+import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Fleet;
@@ -1016,7 +1016,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
 
     private RaceLogCourseDesignChangedEvent loadRaceLogCourseDesignChangedEvent(TimePoint createdAt, TimePoint timePoint, Serializable id, Integer passId, List<Competitor> competitors, DBObject dbObject) {
-        CourseData courseData = loadCourseData((BasicDBList) dbObject.get(FieldNames.RACE_LOG_COURSE_DESIGN.name()));
+        CourseBase courseData = loadCourseData((BasicDBList) dbObject.get(FieldNames.RACE_LOG_COURSE_DESIGN.name()));
         return raceLogEventFactory.createCourseDesignChangedEvent(createdAt, timePoint, id, competitors, passId, courseData);
     }
 
@@ -1057,8 +1057,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return raceLogEventFactory.createRaceStatusEvent(createdAt, timePoint, id, competitors, passId, nextStatus);
     }
     
-    private CourseData loadCourseData(BasicDBList dbCourseList) {
-        CourseData courseData = new CourseDataImpl("TemplateCourse");
+    private CourseBase loadCourseData(BasicDBList dbCourseList) {
+        CourseBase courseData = new CourseDataImpl("TemplateCourse");
         int i = 0;
         for (Object object : dbCourseList) {
             DBObject dbObject  = (DBObject) object;

@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.List;
 
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.CourseData;
+import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
@@ -50,7 +50,7 @@ public class RaceLogEventRestoreFactoryImpl extends RaceLogEventFactoryImpl impl
 
     @Override
     public RaceLogCourseDesignChangedEvent createCourseDesignChangedEvent(TimePoint createdAt,
-            TimePoint logicalTimePoint, Serializable id, List<Competitor> competitors, int passId, CourseData courseData) {
+            TimePoint logicalTimePoint, Serializable id, List<Competitor> competitors, int passId, CourseBase courseData) {
         return new RaceLogCourseDesignChangedEventImpl(createdAt, logicalTimePoint, id, competitors, passId, courseData);
     }
 

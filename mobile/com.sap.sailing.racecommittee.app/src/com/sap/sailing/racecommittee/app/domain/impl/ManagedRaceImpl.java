@@ -2,7 +2,7 @@ package com.sap.sailing.racecommittee.app.domain.impl;
 
 import java.io.Serializable;
 
-import com.sap.sailing.domain.base.CourseData;
+import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.SeriesBase;
 import com.sap.sailing.domain.base.racegroup.RaceGroup;
@@ -33,9 +33,6 @@ public class ManagedRaceImpl implements ManagedRace {
         this.state = state;
     }
 
-	public SeriesBase getSeries() {
-		return identifier.getSeries();
-	}
     public Serializable getId() {
         return identifier.getId();
     }
@@ -52,7 +49,7 @@ public class ManagedRaceImpl implements ManagedRace {
         return identifier.getFleet();
     }
 
-    public SeriesData getSeries() {
+    public SeriesBase getSeries() {
         return identifier.getSeries();
     }
 
@@ -77,7 +74,7 @@ public class ManagedRaceImpl implements ManagedRace {
     }
 
     @Override
-    public CourseData getCourseDesign() {
+    public CourseBase getCourseDesign() {
         return state.getCourseDesign();
     }
 

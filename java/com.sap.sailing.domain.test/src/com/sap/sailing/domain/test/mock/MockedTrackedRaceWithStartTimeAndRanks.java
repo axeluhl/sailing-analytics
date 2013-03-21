@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.NavigableSet;
 
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.CourseData;
+import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceDefinition;
@@ -496,7 +496,7 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     }
 
     @Override
-    public void onCourseDesignChangedByRaceCommittee(CourseData courseDesign) {
+    public void onCourseDesignChangedByRaceCommittee(CourseBase courseDesign) {
         // TODO Auto-generated method stub
         
     }

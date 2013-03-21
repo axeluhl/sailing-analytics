@@ -14,17 +14,11 @@ import com.sap.sailing.racecommittee.app.utils.CollectionUtils;
 public enum InMemoryDataStore implements DataStore {
     INSTANCE;
 
-	public Collection<EventBase> getEvents() {
-		return eventsById.values();
-	}
     private HashMap<Serializable, EventBase> eventsById;
     private HashMap<Serializable, ManagedRace> managedRaceById;
     private HashMap<Serializable, Mark> marksById;
     private CourseBase courseData;
 
-	public EventBase getEvent(Serializable id) {
-		return eventsById.get(id);
-	}
     private InMemoryDataStore() {
         this.eventsById = new HashMap<Serializable, EventBase>();
         this.managedRaceById = new HashMap<Serializable, ManagedRace>();
@@ -41,71 +35,34 @@ public enum InMemoryDataStore implements DataStore {
     public Collection<EventBase> getEvents() {
         return eventsById.values();
     }
-	public void addEvent(EventBase event) {
-		eventsById.put(event.getId(), event);
-	}
-	
-	/*
-	 * * * * * * * *
-	 * COURSE AREA *
-	 * * * * * * * *
-	 */
+    public void addEvent(EventBase event) {
+        eventsById.put(event.getId(), event);
+    }
 
-	public Collection<CourseArea> getCourseAreas(EventBase event) {
-		if (event.getVenue() != null) {
-			return CollectionUtils.newArrayList(event.getVenue().getCourseAreas());
-		}
-		return null;
-	}
+
+    public EventBase getEvent(Serializable id) {
+        return eventsById.get(id);
+    }
 
     public boolean hasEvent(Serializable id) {
         return eventsById.containsKey(id);
     }
-	public CourseArea getCourseArea(EventBase event, String name) {
-		Collection<CourseArea> courseAreas = getCourseAreas(event);
-		if (courseAreas != null) {
-			for (CourseArea courseArea : courseAreas) {
-				if (courseArea.getName().equals(name)) {
-					return courseArea;
-				}
-			}
-		}
-		return null;
-	}
 
-	public CourseArea getCourseArea(Serializable id) {
-		for (EventBase event : eventsById.values()) {
-			for (CourseArea courseArea : getCourseAreas(event)) {
-				if (courseArea.getId().equals(id))
-					return courseArea;
-			}
-		}
-		return null;
-	}
+    /*
+     * * * * * * * *
+     * COURSE AREA *
+     * * * * * * * *
+     */
 
-	public boolean hasCourseArea(Serializable id) {
-		for (EventBase event : eventsById.values()) {
-			for (CourseArea courseArea : getCourseAreas(event)) {
-				if (courseArea.getId().equals(id))
-					return true;
-			}
-		}
-		return false;
-	}
+    public Collection<CourseArea> getCourseAreas(EventBase event) {
+        if (event.getVenue() != null) {
+            return CollectionUtils.newArrayList(event.getVenue().getCourseAreas());
+        }
+        return null;
+    }
 
-	public void addCourseArea(EventBase event, CourseArea courseArea) {
-		if (event.getVenue() != null) {
-			event.getVenue().addCourseArea(courseArea);
-		}
-	}
-	
-	/*
-	 * * * * * * *  *
-	 * MANAGED RACE *
-	 * * * * * * *  *
-	 */
 
-    public CourseArea getCourseArea(EventData event, String name) {
+    public CourseArea getCourseArea(EventBase event, String name) {
         Collection<CourseArea> courseAreas = getCourseAreas(event);
         if (courseAreas != null) {
             for (CourseArea courseArea : courseAreas) {
@@ -118,7 +75,7 @@ public enum InMemoryDataStore implements DataStore {
     }
 
     public CourseArea getCourseArea(Serializable id) {
-        for (EventData event : eventsById.values()) {
+        for (EventBase event : eventsById.values()) {
             for (CourseArea courseArea : getCourseAreas(event)) {
                 if (courseArea.getId().equals(id))
                     return courseArea;
@@ -128,7 +85,7 @@ public enum InMemoryDataStore implements DataStore {
     }
 
     public boolean hasCourseArea(Serializable id) {
-        for (EventData event : eventsById.values()) {
+        for (EventBase event : eventsById.values()) {
             for (CourseArea courseArea : getCourseAreas(event)) {
                 if (courseArea.getId().equals(id))
                     return true;
@@ -137,7 +94,7 @@ public enum InMemoryDataStore implements DataStore {
         return false;
     }
 
-    public void addCourseArea(EventData event, CourseArea courseArea) {
+    public void addCourseArea(EventBase event, CourseArea courseArea) {
         if (event.getVenue() != null) {
             event.getVenue().addCourseArea(courseArea);
         }
@@ -192,12 +149,12 @@ public enum InMemoryDataStore implements DataStore {
     }
 
     @Override
-    public CourseData getLastPublishedCourseDesign() {
+    public CourseBase getLastPublishedCourseDesign() {
         return courseData;
     }
-    
+
     @Override
-    public void setLastPublishedCourseDesign(CourseData courseData) {
+    public void setLastPublishedCourseDesign(CourseBase courseData) {
         this.courseData = courseData;
     }
 }

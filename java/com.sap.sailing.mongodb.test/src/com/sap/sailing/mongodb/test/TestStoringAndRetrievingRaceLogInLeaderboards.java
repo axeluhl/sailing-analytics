@@ -9,7 +9,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.mongodb.MongoException;
-import com.sap.sailing.domain.base.CourseData;
+import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
@@ -193,7 +193,7 @@ public class TestStoringAndRetrievingRaceLogInLeaderboards extends RaceLogMongoD
     
     @Test
     public void testStoreAndRetrieveSimpleLeaderboardWithRaceLogCourseDesignChangedEvent() {
-        CourseData course = createCourseData();
+        CourseBase course = createCourseBase();
         RaceLogCourseDesignChangedEvent event = RaceLogEventFactory.INSTANCE.createCourseDesignChangedEvent(now, 0, course);
 
         addAndStoreRaceLogEvent(leaderboard, raceColumnName, event);

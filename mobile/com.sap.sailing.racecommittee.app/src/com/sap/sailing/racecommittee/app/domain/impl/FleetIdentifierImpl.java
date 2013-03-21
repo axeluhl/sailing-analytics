@@ -9,33 +9,21 @@ import com.sap.sailing.racecommittee.app.domain.FleetIdentifier;
 
 public class FleetIdentifierImpl implements FleetIdentifier {
 
-	private Fleet fleet;
-	private SeriesBase series;
-	private RaceGroup raceGroup;
-	
-	public FleetIdentifierImpl(
-			Fleet fleet,
-			SeriesBase series, 
-			RaceGroup raceGroup) {
-		this.fleet = fleet;
-		this.series = series;
-		this.raceGroup = raceGroup;
-	}
+    private Fleet fleet;
+    private SeriesBase series;
+    private RaceGroup raceGroup;
 
-    public FleetIdentifierImpl(Fleet fleet, SeriesData series, RaceGroup raceGroup) {
+    public FleetIdentifierImpl(Fleet fleet, SeriesBase series, RaceGroup raceGroup) {
         this.fleet = fleet;
         this.series = series;
         this.raceGroup = raceGroup;
     }
 
-	public SeriesBase getSeries() {
-		return series;
-	}
     public Fleet getFleet() {
         return fleet;
     }
 
-    public SeriesData getSeries() {
+    public SeriesBase getSeries() {
         return series;
     }
 

@@ -8,7 +8,7 @@ import java.util.UUID;
 import junit.framework.Assert;
 
 import com.mongodb.MongoException;
-import com.sap.sailing.domain.base.CourseData;
+import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.Gate;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.impl.CourseDataImpl;
@@ -33,7 +33,7 @@ public abstract class RaceLogMongoDBTest extends AbstractMongoDBTest {
         super();
     }
     
-    protected void compareCourseData(CourseData storedCourse, CourseData loadedCourse) {
+    protected void compareCourseData(CourseBase storedCourse, CourseBase loadedCourse) {
         assertEquals(storedCourse.getFirstWaypoint().getPassingSide(), null);
         assertEquals(loadedCourse.getFirstWaypoint().getPassingSide(), null);
         Assert.assertTrue(storedCourse.getFirstWaypoint().getControlPoint() instanceof Gate);
@@ -67,8 +67,8 @@ public abstract class RaceLogMongoDBTest extends AbstractMongoDBTest {
         assertEquals(storedMark.getType(), loadedMark.getType());
     }
 
-    protected CourseData createCourseData() {
-        CourseData course = new CourseDataImpl("Test Course");
+    protected CourseBase createCourseBase() {
+        CourseBase course = new CourseDataImpl("Test Course");
         
         course.addWaypoint(0, new WaypointImpl(new GateImpl(UUID.randomUUID(), 
                 new MarkImpl(UUID.randomUUID(), "Black", MarkType.BUOY, "black", "round", "circle"),

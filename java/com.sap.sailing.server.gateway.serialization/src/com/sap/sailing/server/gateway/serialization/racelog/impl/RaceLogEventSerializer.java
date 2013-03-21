@@ -6,7 +6,7 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.ControlPointJsonSerializer;
-import com.sap.sailing.server.gateway.serialization.coursedata.impl.CourseDataJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.coursedata.impl.CourseBaseJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.GateJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.MarkJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.WaypointJsonSerializer;
@@ -22,7 +22,7 @@ public class RaceLogEventSerializer implements JsonSerializer<RaceLogEvent> {
                 new RaceLogCourseAreaChangedEventSerializer(competitorSerializer),
                 new RaceLogPassChangeEventSerializer(competitorSerializer),
                 new RaceLogCourseDesignChangedEventSerializer(competitorSerializer,
-                        new CourseDataJsonSerializer(
+                        new CourseBaseJsonSerializer(
                                 new WaypointJsonSerializer(
                                         new ControlPointJsonSerializer(
                                                 new MarkJsonSerializer(),

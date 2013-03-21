@@ -3,10 +3,11 @@ package com.sap.sailing.domain.tracking;
 import java.io.IOException;
 import java.net.MalformedURLException;
 
-import com.sap.sailing.domain.base.CourseData;
+import com.sap.sailing.domain.base.CourseBase;
+
 
 public interface CourseDesignChangedListener {
 
-    void courseDesignChanged(CourseData newCourseDesign) throws MalformedURLException, IOException;
+    void courseDesignChanged(CourseBase newCourseDesign) throws MalformedURLException, IOException;
 
 }

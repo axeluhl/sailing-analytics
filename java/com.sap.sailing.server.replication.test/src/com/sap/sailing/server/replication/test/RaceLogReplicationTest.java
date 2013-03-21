@@ -14,7 +14,7 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import com.sap.sailing.domain.base.CourseData;
+import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Gate;
 import com.sap.sailing.domain.base.Mark;
@@ -210,7 +210,7 @@ public class RaceLogReplicationTest extends AbstractServerReplicationTest {
             assertEquals(courseDesignChangedEvent.getPassId(), replicatedEvent.getPassId());
             assertEquals(courseDesignChangedEvent.getTimePoint(), replicatedEvent.getTimePoint());
             assertEquals(Util.size(courseDesignChangedEvent.getInvolvedBoats()), Util.size(replicatedEvent.getInvolvedBoats()));
-            compareCourseData(courseDesignChangedEvent.getCourseDesign(), replicatedEvent.getCourseDesign());
+            compareCourseBase(courseDesignChangedEvent.getCourseDesign(), replicatedEvent.getCourseDesign());
         } finally {
             replicaLog.unlockAfterRead();
         }
@@ -322,8 +322,8 @@ public class RaceLogReplicationTest extends AbstractServerReplicationTest {
         return masterLog;
     }
     
-    protected CourseData createCourseData() {
-        CourseData course = new CourseDataImpl("Test Course");
+    protected CourseBase createCourseData() {
+        CourseBase course = new CourseDataImpl("Test Course");
         
         course.addWaypoint(0, new WaypointImpl(new GateImpl(UUID.randomUUID(), 
                 new MarkImpl(UUID.randomUUID(), "Black", MarkType.BUOY, "black", "round", "circle"),
@@ -334,7 +334,7 @@ public class RaceLogReplicationTest extends AbstractServerReplicationTest {
         return course;
     }
     
-    protected void compareCourseData(CourseData masterCourse, CourseData replicatedCourse) {
+    protected void compareCourseBase(CourseBase masterCourse, CourseBase replicatedCourse) {
         assertEquals(masterCourse.getFirstWaypoint().getPassingSide(), null);
         assertEquals(replicatedCourse.getFirstWaypoint().getPassingSide(), null);
         Assert.assertTrue(masterCourse.getFirstWaypoint().getControlPoint() instanceof Gate);

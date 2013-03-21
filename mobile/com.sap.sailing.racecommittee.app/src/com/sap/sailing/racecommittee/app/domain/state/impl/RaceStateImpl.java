@@ -6,7 +6,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.CourseData;
+import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
@@ -108,12 +108,12 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
     }
     
     @Override
-    public CourseData getCourseDesign() {
+    public CourseBase getCourseDesign() {
         return lastCourseDesignFinder.getLastCourseDesign();
     }
 
     
-    public void setCourseDesign(CourseData newCourseData) {
+    public void setCourseDesign(CourseBase newCourseData) {
         TimePoint eventTime = MillisecondsTimePoint.now();
         
         RaceLogEvent event = RaceLogEventFactory.INSTANCE.createCourseDesignChangedEvent(eventTime, UUID.randomUUID(),

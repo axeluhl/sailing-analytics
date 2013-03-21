@@ -50,48 +50,16 @@ public class OnlineDataManager extends DataManager {
 
     private Context context;
 
-	public Context getContext() {
-		return context;
-	}
-	
-	public void loadEvents(LoadClient<Collection<EventBase>> client) {
-		if (dataStore.getEvents().isEmpty()) {
-			reloadEvents(client);
-		} else {
-			client.onLoadSucceded(dataStore.getEvents());
-		}
-	}
     OnlineDataManager(Context context, DataStore dataStore) {
         super(dataStore);
         this.context = context;
     }
 
-	public void addEvents(Collection<EventBase> events) {
-		for (EventBase event : events) {
-			dataStore.addEvent(event);
-		}
-	}
+    public Context getContext() {
+        return context;
+    }
 
-	protected void reloadEvents(LoadClient<Collection<EventBase>> client) {
-		DataParser<Collection<EventBase>> parser = new EventsDataParser(
-				new EventDataJsonDeserializer(
-					new VenueJsonDeserializer(
-							new CourseAreaJsonDeserializer())));
-		DataHandler<Collection<EventBase>> handler = new EventsDataHandler(this, client);
-		
-		try {
-			new DataLoader<Collection<EventBase>>(
-					context, 
-					URI.create(AppConstants.getURL(context) + "/sailingserver/rc/events"), 
-					parser, 
-					handler).forceLoad();
-		} catch (MalformedURLException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-    public void loadEvents(LoadClient<Collection<EventData>> client) {
+    public void loadEvents(LoadClient<Collection<EventBase>> client) {
         if (dataStore.getEvents().isEmpty()) {
             reloadEvents(client);
         } else {
@@ -99,45 +67,19 @@ public class OnlineDataManager extends DataManager {
         }
     }
 
-	public void loadCourseAreas(
-			final Serializable parentEventId,
-			final LoadClient<Collection<CourseArea>> client) {
-		
-		if (dataStore.hasEvent(parentEventId)) {
-			EventBase event = dataStore.getEvent(parentEventId);
-			client.onLoadSucceded(dataStore.getCourseAreas(event));
-		} else {
-			reloadEvents(new LoadClient<Collection<EventBase>>() {
-				public void onLoadSucceded(Collection<EventBase> data) {
-					if (dataStore.hasEvent(parentEventId)) {
-						EventBase event = dataStore.getEvent(parentEventId);
-						client.onLoadSucceded(dataStore.getCourseAreas(event));
-					} else {
-						client.onLoadFailed(new DataLoadingException(
-								String.format("There was no event object found for id %s.", parentEventId)));
-					}
-				}
-				
-				public void onLoadFailed(Exception reason) {
-					client.onLoadFailed(new DataLoadingException(
-							String.format("There was no event object found for id %s. While reloading the events an error occured: %s", parentEventId, reason), reason));
-				}
-			});
-		}
-	}
     public void addEvents(Collection<EventBase> events) {
         for (EventBase event : events) {
             dataStore.addEvent(event);
         }
     }
 
-    protected void reloadEvents(LoadClient<Collection<EventData>> client) {
-        DataParser<Collection<EventData>> parser = new EventsDataParser(new EventDataJsonDeserializer(
+    protected void reloadEvents(LoadClient<Collection<EventBase>> client) {
+        DataParser<Collection<EventBase>> parser = new EventsDataParser(new EventDataJsonDeserializer(
                 new VenueJsonDeserializer(new CourseAreaJsonDeserializer())));
-        DataHandler<Collection<EventData>> handler = new EventsDataHandler(this, client);
+        DataHandler<Collection<EventBase>> handler = new EventsDataHandler(this, client);
 
         try {
-            new DataLoader<Collection<EventData>>(context, URI.create(AppConstants.getServerBaseURL(context)
+            new DataLoader<Collection<EventBase>>(context, URI.create(AppConstants.getServerBaseURL(context)
                     + "/sailingserver/rc/events"), parser, handler).forceLoad();
         } catch (MalformedURLException e) {
             e.printStackTrace();
@@ -149,13 +91,13 @@ public class OnlineDataManager extends DataManager {
     public void loadCourseAreas(final Serializable parentEventId, final LoadClient<Collection<CourseArea>> client) {
 
         if (dataStore.hasEvent(parentEventId)) {
-            EventData event = dataStore.getEvent(parentEventId);
+            EventBase event = dataStore.getEvent(parentEventId);
             client.onLoadSucceded(dataStore.getCourseAreas(event));
         } else {
-            reloadEvents(new LoadClient<Collection<EventData>>() {
-                public void onLoadSucceded(Collection<EventData> data) {
+            reloadEvents(new LoadClient<Collection<EventBase>>() {
+                public void onLoadSucceded(Collection<EventBase> data) {
                     if (dataStore.hasEvent(parentEventId)) {
-                        EventData event = dataStore.getEvent(parentEventId);
+                        EventBase event = dataStore.getEvent(parentEventId);
                         client.onLoadSucceded(dataStore.getCourseAreas(event));
                     } else {
                         client.onLoadFailed(new DataLoadingException(String.format(

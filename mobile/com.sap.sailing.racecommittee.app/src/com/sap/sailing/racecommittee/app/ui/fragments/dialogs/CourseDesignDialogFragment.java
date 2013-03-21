@@ -22,7 +22,7 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import com.sap.sailing.domain.base.ControlPoint;
-import com.sap.sailing.domain.base.CourseData;
+import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.Gate;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Waypoint;
@@ -159,7 +159,7 @@ public class CourseDesignDialogFragment extends RaceDialogFragment {
 
             public void onClick(View arg0) {
                 try {
-                    CourseData courseData = convertCourseElementsToACourseData();
+                    CourseBase courseData = convertCourseElementsToACourseData();
                     sendCourseDataAndDismiss(courseData);
                 } catch (IllegalStateException ex) {
                     Toast.makeText(getActivity(), "A right buoy is missing for a gate. Please select the right buoy.", Toast.LENGTH_LONG).show();
@@ -175,7 +175,7 @@ public class CourseDesignDialogFragment extends RaceDialogFragment {
 
             @Override
             public void onClick(View arg0) {
-                CourseData emptyCourse = new CourseDataImpl("Unpublished course design");
+                CourseBase emptyCourse = new CourseDataImpl("Unpublished course design");
                 sendCourseDataAndDismiss(emptyCourse);
             }
 
@@ -212,7 +212,7 @@ public class CourseDesignDialogFragment extends RaceDialogFragment {
     }
 
     private void fillPreviousCourseElementsInList() {
-        CourseData previousCourseData = InMemoryDataStore.INSTANCE.getLastPublishedCourseDesign();
+        CourseBase previousCourseData = InMemoryDataStore.INSTANCE.getLastPublishedCourseDesign();
         if (previousCourseData != null) {
             previousCourseElements.clear();
             previousCourseElements.addAll(convertCourseDesignToCourseElements(previousCourseData));
@@ -226,7 +226,7 @@ public class CourseDesignDialogFragment extends RaceDialogFragment {
         courseElementAdapter.notifyDataSetChanged();
     }
 
-    protected List<CourseListDataElement> convertCourseDesignToCourseElements(CourseData courseData) {
+    protected List<CourseListDataElement> convertCourseDesignToCourseElements(CourseBase courseData) {
         List<CourseListDataElement> elementList = new ArrayList<CourseListDataElement>();
 
         for (Waypoint waypoint : courseData.getWaypoints()) {
@@ -250,25 +250,25 @@ public class CourseDesignDialogFragment extends RaceDialogFragment {
         return elementList;
     }
 
-    protected void sendCourseDataAndDismiss(CourseData courseDesign) {
+    protected void sendCourseDataAndDismiss(CourseBase courseDesign) {
         sendCourseData(courseDesign);
         onPublish();
         dismiss();
     }
 
-    protected void sendCourseData(CourseData courseDesign) {
+    protected void sendCourseData(CourseBase courseDesign) {
         getRace().getState().setCourseDesign(courseDesign);
         saveChangedCourseDesignInCache(courseDesign);
     }
 
-    private void saveChangedCourseDesignInCache(CourseData courseDesign) {
+    private void saveChangedCourseDesignInCache(CourseBase courseDesign) {
         if (!Util.isEmpty(courseDesign.getWaypoints())) {
             InMemoryDataStore.INSTANCE.setLastPublishedCourseDesign(courseDesign);
         }
     }
 
-    protected CourseData convertCourseElementsToACourseData() throws IllegalStateException, IllegalArgumentException {
-        CourseData design = new CourseDataImpl("CourseTemplate");
+    protected CourseBase convertCourseElementsToACourseData() throws IllegalStateException, IllegalArgumentException {
+        CourseBase design = new CourseDataImpl("CourseTemplate");
         List<Waypoint> waypoints = new ArrayList<Waypoint>();
 
         for (CourseListDataElement courseElement : courseElements) {
