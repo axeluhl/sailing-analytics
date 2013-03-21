@@ -172,7 +172,10 @@ public class LockUtil {
      * will not actually acquire that lock again. This, in particular, has the effect that a read lock
      * already held by <code>thread</code> will not have to be acquired again, which in turn avoids a
      * read-read deadlock on a fair lock in case another thread is attempting to acquire the corresponding
-     * write lock before the current thread tries to re-acquire the read lock.
+     * write lock before the current thread tries to re-acquire the read lock.<p>
+     * 
+     * Always use this in a <code>try/finally</code> combination where in the <code>finally</code> you call
+     * {@link #unpropagateLockSetFrom(Thread)}.
      */
     public static void propagateLockSetFrom(Thread thread) {
         Map<Lock, Integer> otherMap = lockCounts.get(thread);
