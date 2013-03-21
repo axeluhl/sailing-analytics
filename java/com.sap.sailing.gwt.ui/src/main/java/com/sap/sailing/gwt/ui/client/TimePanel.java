@@ -31,28 +31,14 @@ import com.sap.sailing.gwt.ui.shared.controls.slider.SliderBar;
 import com.sap.sailing.gwt.ui.shared.controls.slider.TimeSlider;
 
 public class TimePanel<T extends TimePanelSettings> extends FormPanel implements Component<T>, TimeListener, TimeZoomChangeListener,
-    PlayStateListener, RequiresResize {
+    TimeRangeChangeListener, PlayStateListener, RequiresResize {
     protected final Timer timer;
-    protected boolean isTimeZoomed;
+    protected final TimeRangeWithZoomProvider timeRangeProvider;
     
-    /**
-     * The start time point of the time interval visualized by this time panel. May be <code>null</code> if not yet initialized.
-     * 
-     * @see #setMinMax(Date, Date, boolean)
-     */
-    protected Date min;
-    
-    /**
-     * The end time point of the time interval visualized by this time panel. May be <code>null</code> if not yet initialized.
-     * 
-     * @see #setMinMax(Date, Date, boolean)
-     */
-    protected Date max;
-    
-    protected final IntegerBox playSpeedBox;
+    private final IntegerBox playSpeedBox;
     private final Label timeDelayLabel;
-    protected final Label timeLabel;
-    protected final Label dateLabel;
+    private final Label timeLabel;
+    private final Label dateLabel;
     private final Label playModeLabel;
     protected final TimeSlider timeSlider;
     private final Button backToLivePlayButton;
@@ -63,11 +49,11 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
     private final ImageResource playModeLiveActiveImg;
     private final ImageResource playModeReplayActiveImg;
     private final ImageResource playModeInactiveImg;
-    protected final Button playPauseButton;
+    private final Button playPauseButton;
     private final Image playModeImage;
     protected Date lastReceivedDataTimepoint;
     private final Button slowDownButton;
-	private final Button speedUpButton;
+    private final Button speedUpButton;
 
     /**
      * The live delay may be adjusted automatically if the server decides so. However, if the user explicitly sets a live delay,
@@ -96,12 +82,13 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
         }
     }
 
-    public TimePanel(Timer timer, StringMessages stringMessages) {
+    public TimePanel(Timer timer, TimeRangeWithZoomProvider timeRangeProvider, StringMessages stringMessages) {
         this.timer = timer;
+        this.timeRangeProvider = timeRangeProvider;
         this.stringMessages = stringMessages;
-        isTimeZoomed = false;
         timer.addTimeListener(this);
         timer.addPlayStateListener(this);
+        timeRangeProvider.addTimeRangeChangeListener(this);
         userExplicitlyChangedLivePlayDelay = false;
         FlowPanel timePanelInnerWrapper = new FlowPanel();
         timePanelInnerWrapper.setStyleName("timePanelInnerWrapper");
@@ -157,7 +144,22 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
         playControlPanel.setStyleName("timePanel-controls-play");
         controlsPanel.add(playControlPanel);
         
-        this.addPlayPauseButtonClickHandler();
+        playPauseButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                switch(TimePanel.this.timer.getPlayState()) {
+                    case Stopped:
+                        TimePanel.this.timer.play();
+                        break;
+                    case Playing:
+                        TimePanel.this.timer.pause();
+                        break;
+                    case Paused:
+                    TimePanel.this.timer.play();
+                        break;
+                }
+            }
+        });
         playPauseButton.setTitle(stringMessages.startStopPlaying());
         playPauseButton.getElement().addClassName("playPauseButton");
         playControlPanel.add(playPauseButton);
@@ -279,59 +281,43 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
         controlsPanel.add(timeControlPanel);
     }
 
-    
-    protected void addPlayPauseButtonClickHandler() {
-
-        playPauseButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                switch (TimePanel.this.timer.getPlayState()) {
-                case Stopped:
-                    TimePanel.this.timer.play();
-                    break;
-                case Playing:
-                    TimePanel.this.timer.pause();
-                    break;
-                case Paused:
-                    TimePanel.this.timer.play();
-                    break;
-                }
-            }
-        });
-
-    }
-    
-    
     @Override
     public void timeChanged(Date time) {
-        if (getMin() != null && getMax() != null) {
-            // Handle also the case where time advances beyond slider's end.
-            // Handle it equally for replay and live mode for robustness reasons. This at least allows a user
-            // to watch on even if the time panel was off in its assumptions about race end and end of tracking.
-            if (time.after(getMax())) {
-                Date newMaxTime = new Date(time.getTime());
-                if (newMaxTime.getTime() - getMax().getTime() < MINIMUM_AUTO_ADVANCE_TIME_IN_MS) {
-                    newMaxTime.setTime(getMax().getTime() + MINIMUM_AUTO_ADVANCE_TIME_IN_MS); 
+        if(timeRangeProvider.isZoomed()) {
+        } else {
+            if (getFromTime() != null && getToTime() != null) {
+                // handle the case where time advances beyond slider's end.
+                if (time.after(getToTime())) {
+                    switch (timer.getPlayMode()) {
+                    case Live:
+                        Date newMaxTime = new Date(time.getTime());
+                        if (newMaxTime.getTime() - getToTime().getTime() < MINIMUM_AUTO_ADVANCE_TIME_IN_MS) {
+                            newMaxTime.setTime(getToTime().getTime() + MINIMUM_AUTO_ADVANCE_TIME_IN_MS); 
+                        }
+                        setMinMax(getFromTime(), newMaxTime, /* fireEvent */ false); // no event because we guarantee that time is between min/max
+                        break;
+                    case Replay:
+                        timer.stop();
+                        break;
+                    }
                 }
-                setMinMax(getMin(), newMaxTime, /* fireEvent */ false); // no event because we guarantee that time is between min/max
+                timeSlider.setCurrentValue(new Double(time.getTime()), false);
             }
-            long t = time.getTime();
-            timeSlider.setCurrentValue(new Double(t), false);
-            dateLabel.setText(dateFormatter.format(time));
-            if (lastReceivedDataTimepoint == null) {
-                timeLabel.setText(timeFormatter.format(time));
-            } else {
-                timeLabel.setText(timeFormatter.format(time) + " (" + timeFormatter.format(lastReceivedDataTimepoint) + ")");
-            }
+        }
+        dateLabel.setText(dateFormatter.format(time));
+        if (lastReceivedDataTimepoint == null) {
+            timeLabel.setText(timeFormatter.format(time));
+        } else {
+            timeLabel.setText(timeFormatter.format(time) + " (" + timeFormatter.format(lastReceivedDataTimepoint) + ")");
         }
     }
 
-    protected Date getMin() {
-        return min;
+    protected Date getFromTime() {
+        return timeRangeProvider.getFromTime();
     }
     
-    protected Date getMax() {
-        return max;
+    protected Date getToTime() {
+        return timeRangeProvider.getToTime();
     }
     
     /**
@@ -342,20 +328,22 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
         assert min != null && max != null;
                 
         boolean changed = false;
-        if (!max.equals(this.max)) {
+        if (!max.equals(timeRangeProvider.getToTime())) {
             changed = true;
-            this.max = max;
             timeSlider.setMaxValue(new Double(max.getTime()), fireEvent);
         }
-        if (!min.equals(this.min)) {
+        if (!min.equals(timeRangeProvider.getFromTime())) {
             changed = true;
-            this.min = min;
             timeSlider.setMinValue(new Double(min.getTime()), fireEvent);
             if (timeSlider.getCurrentValue() == null) {
                 timeSlider.setCurrentValue(new Double(min.getTime()), fireEvent);
             }
         }
         if (changed) {
+            if(!timeRangeProvider.isZoomed()) {
+                timeRangeProvider.setTimeRange(min, max, this);
+            }
+            
             int numSteps = timeSlider.getElement().getClientWidth();
             if (numSteps > 0) {
                 timeSlider.setStepSize(numSteps, fireEvent);
@@ -387,6 +375,7 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
         case Paused:
         	playPauseButton.getElement().removeClassName("playPauseButtonPause");
         case Stopped:
+            playPauseButton.getElement().removeClassName("playPauseButtonPause");
             playModeImage.setResource(playModeInactiveImg);
             break;
         }
@@ -414,13 +403,22 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
     }
     
     @Override
-    public void onTimeZoom(Date zoomStartTimepoint, Date zoomEndTimepoint) {
+    public void playSpeedFactorChanged(double newPlaySpeedFactor) {
+        // nothing to do
+    }
+    
+    @Override
+    public void onTimeZoomChanged(Date zoomStartTimepoint, Date zoomEndTimepoint) {
     }
 
     @Override
     public void onTimeZoomReset() {
     }
-    
+
+    @Override
+    public void onTimeRangeChanged(Date fromTime, Date toTime) {
+    }
+
     protected boolean isLiveModeToBeMadePossible() {
         return false;
     }

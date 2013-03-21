@@ -19,13 +19,57 @@ import com.sap.sailing.domain.tracking.TrackedRace;
  *
  */
 public interface DelayedLeaderboardCorrections extends RaceColumnListener, Serializable {
-    void correctScore(String competitorName, RaceColumn raceColumn, double correctedScore);
-    
-    void setCarriedPoints(String competitorName, double carriedPoints);
-
-    void setMaxPointsReason(String competitorName, RaceColumn raceColumn, MaxPointsReason maxPointsReason);
-
-    void setDisplayName(String competitorName, String displayName);
+    /**
+     * Callback interface that can be used to receive a notification when this leaderboard corrections object has
+     * successfully resolved all competitors for which it holds corrections.
+     * 
+     * @author Axel Uhl (D043530)
+     * 
+     */
+    public interface LeaderboardCorrectionsResolvedListener {
+        void correctionsResolved(DelayedLeaderboardCorrections delayedLeaderboardCorrections);
+    }
 
     Leaderboard getLeaderboard();
+
+    void correctScoreByID(Serializable competitorId, RaceColumn raceColumn, double correctedScore);
+    
+    /**
+     * Deprecated. Use {@link #correctScoreByID(Serializable, RaceColumn, double)} instead. Remains available until all
+     * databases have been migrated to the use of competitor IDs instead of competitor names.
+     */
+    void correctScoreByName(String competitorName, RaceColumn raceColumn, double correctedScore);
+    
+    void setCarriedPointsByID(Serializable competitorId, double carriedPoints);
+
+    /**
+     * Deprecated. Use {@link #setCarriedPointsByID(Serializable, double)} instead. Remains available until all databases have been
+     * migrated to the use of competitor IDs instead of competitor names.
+     */
+    void setCarriedPointsByName(String competitorName, double carriedPoints);
+
+    void setMaxPointsReasonByID(Serializable competitorId, RaceColumn raceColumn, MaxPointsReason maxPointsReason);
+
+    /**
+     * Deprecated. Use {@link #setMaxPointsReasonByID(Serializable, RaceColumn, MaxPointsReason)} instead. Remains
+     * available until all databases have been migrated to the use of competitor IDs instead of competitor names.
+     */
+    void setMaxPointsReasonByName(String competitorName, RaceColumn raceColumn, MaxPointsReason maxPointsReason);
+
+    void setDisplayNameByID(Serializable competitorId, String displayName);
+
+    void setDisplayNameByName(String competitorName, String displayName);
+
+    void suppressCompetitorById(Serializable escapedCompetitorId);
+
+    /**
+     * Deprecated. Use {@link #suppressCompetitorById(Serializable)} instead. Remains available until all databases have been
+     * migrated to the use of competitor IDs instead of competitor names.
+     */
+    void suppressCompetitorByName(String competitorName);
+
+    void addLeaderboardCorrectionsResolvedListener(LeaderboardCorrectionsResolvedListener listener);
+
+    void removeLeaderboardCorrectionsResolvedListener(LeaderboardCorrectionsResolvedListener listener);
+
 }

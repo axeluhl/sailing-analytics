@@ -4,6 +4,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.SocketException;
 import java.net.URI;
@@ -15,6 +16,8 @@ import java.util.ConcurrentModificationException;
 import java.util.List;
 import java.util.Map;
 
+
+import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
@@ -23,11 +26,11 @@ import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RegattaRegistry;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.common.RaceFetcher;
-import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaFetcher;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
+import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
@@ -36,6 +39,8 @@ import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.LeaderboardRegistry;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
+import com.sap.sailing.domain.leaderboard.ScoringScheme;
+import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
 import com.sap.sailing.domain.tracking.RaceListener;
 import com.sap.sailing.domain.tracking.RaceTracker;
@@ -72,12 +77,12 @@ import com.sap.sailing.expeditionconnector.ExpeditionListener;
 public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetcher, RegattaRegistry, RaceFetcher, LeaderboardRegistry {
     @Override
     Regatta getRegatta(RegattaName regattaName);
-    
+
     @Override
     RaceDefinition getRace(RegattaAndRaceIdentifier raceIdentifier);
 
     TrackedRace getTrackedRace(Regatta regatta, RaceDefinition race);
-    
+
     TrackedRace getTrackedRace(RegattaAndRaceIdentifier raceIdentifier);
 
     /**
@@ -127,12 +132,11 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * already being tracked, then regardless of the <code>windStore</code> selection the existing tracker will be used
      * and its race handle will be returned. A log message will indicate a potential wind store mismatch (based on
      * {@link WindStore#equals(Object)}).
-     * 
      * @param timeoutInMilliseconds
      *            if the race definition is not received for the race within this time, the race tracker for
      *            that race is stopped; use -1 to wait forever
      */
-    RacesHandle addTracTracRace(URL paramURL, URI liveURI, URI storedURI, WindStore windStore, long timeoutInMilliseconds)
+    RacesHandle addTracTracRace(URL paramURL, URI liveURI, URI storedURI, RaceLogStore raceLogStore, WindStore windStore, long timeoutInMilliseconds)
             throws MalformedURLException, FileNotFoundException, URISyntaxException, Exception;
 
     /**
@@ -148,9 +152,9 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      *            to add the races to. Otherwise, a default regatta as described above will be created and used.
      */
     RacesHandle addTracTracRace(RegattaIdentifier regattaToAddTo, URL paramURL, URI liveURI, URI storedURI,
-            TimePoint trackingStartTime, TimePoint trackingEndTime, WindStore windStore,
+            TimePoint trackingStartTime, TimePoint trackingEndTime, RaceLogStore raceLogStore, WindStore windStore,
             long timeoutForReceivingRaceDefinitionInMilliseconds, boolean simulateWithStartTimeNow)
-            throws MalformedURLException, FileNotFoundException, URISyntaxException, Exception;
+                    throws MalformedURLException, FileNotFoundException, URISyntaxException, Exception;
 
     /**
      * Stops tracking all races of the regatta specified. This will also stop tracking wind for all races of this regatta.
@@ -160,7 +164,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * were made that ensured they were tracking.
      */
     void stopTracking(Regatta regatta) throws MalformedURLException, IOException, InterruptedException;
-    
+
     /**
      * Removes <code>race</code> and any corresponding {@link #getTrackedRace(Regatta, RaceDefinition) tracked race}
      * from this service. If it was the last {@link RaceDefinition} in its {@link Regatta} and the regatta
@@ -181,7 +185,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      *            the race to remove
      */
     void removeRace(Regatta regatta, RaceDefinition race) throws MalformedURLException, IOException,InterruptedException;
-    
+
     /**
      * Stops all {@link RaceTracker}s currently tracking <code>race</code>. Note that if the same tracker also may have
      * been tracking other races. Other races of the same event that are currently tracked will continue to be tracked.
@@ -218,16 +222,15 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * is hardly ever useful. The returned pair's first component is the event name.
      */
     Pair<String, List<RaceRecord>> getTracTracRaceRecords(URL jsonURL) throws IOException, ParseException,
-            org.json.simple.parser.ParseException, URISyntaxException;
-    
+    org.json.simple.parser.ParseException, URISyntaxException;
+
     List<com.sap.sailing.domain.swisstimingadapter.RaceRecord> getSwissTimingRaceRecords(String hostname, int port, boolean canSendRequests)
             throws InterruptedException, UnknownHostException, IOException, ParseException;
 
     boolean isRaceBeingTracked(RaceDefinition r);
-    
+
     /**
      * Creates a new leaderboard with the <code>name</code> specified.
-     * 
      * @param discardThresholds
      *            Tells the thresholds from which on a next higher number of worst races will be discarded per
      *            competitor. Example: <code>[3, 6]</code> means that starting from three races the single worst race
@@ -235,12 +238,12 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * 
      * @return the leaderboard created
      */
-    FlexibleLeaderboard addFlexibleLeaderboard(String name, int[] discardThresholds);
-    
-    RegattaLeaderboard addRegattaLeaderboard(RegattaIdentifier regattaIdentifier, int[] discardThresholds);
+    FlexibleLeaderboard addFlexibleLeaderboard(String leaderboardName, String leaderboardDisplayName, int[] discardThresholds, ScoringScheme scoringScheme, Serializable courseAreaId);
+
+    RegattaLeaderboard addRegattaLeaderboard(RegattaIdentifier regattaIdentifier, String leaderboardDisplayName, int[] discardThresholds);
 
     void removeLeaderboard(String leaderboardName);
-    
+
     /**
      * Renames a leaderboard. If a leaderboard by the name <code>oldName</code> does not exist in {@link #getLeaderboards()},
      * or if a leaderboard with the name <code>newName</code> already exists, an {@link IllegalArgumentException} is thrown.
@@ -261,11 +264,14 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     void renameLeaderboardColumn(String leaderboardName, String oldColumnName, String newColumnName);
 
     /**
+     * @see RaceColumn#setFactor(Double)
+     */
+    void updateLeaderboardColumnFactor(String leaderboardName, String columnName, Double factor);
+
+    /**
      * Updates the leaderboard data in the persistent store
      */
-    void updateStoredFlexibleLeaderboard(FlexibleLeaderboard leaderboard);
-    
-    void updateStoredRegattaLeaderboard(RegattaLeaderboard leaderboard);
+    void updateStoredLeaderboard(Leaderboard leaderboard);
 
     void updateStoredRegatta(Regatta regatta);
 
@@ -282,30 +288,31 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      *            to add the races to. Otherwise, a default regatta as described above will be created and used.
      */
     RacesHandle addSwissTimingRace(RegattaIdentifier regattaToAddTo, String raceID, String hostname, int port,
-            boolean canSendRequests, WindStore windStore, long timeoutInMilliseconds) throws InterruptedException, UnknownHostException,
-            IOException, ParseException, Exception;
+            boolean canSendRequests, WindStore windStore, RaceLogStore logStore, long timeoutInMilliseconds) 
+                    throws InterruptedException, UnknownHostException,
+                    IOException, ParseException, Exception;
 
     SwissTimingFactory getSwissTimingFactory();
-    
+
     void storeSwissTimingDummyRace(String racMessage, String stlMesssage, String ccgMessage) throws IllegalArgumentException;
 
     void stopTrackingAndRemove(Regatta regatta) throws MalformedURLException, IOException, InterruptedException;
 
     void removeRegatta(Regatta regatta) throws MalformedURLException, IOException, InterruptedException;
 
-    TrackedRace getExistingTrackedRace(RaceIdentifier raceIdentifier);
-    
+    TrackedRace getExistingTrackedRace(RegattaAndRaceIdentifier raceIdentifier);
+
     /**
      * Obtains an unmodifiable map of the leaderboard groups configured in this service keyed by their names.
      */
     Map<String, LeaderboardGroup> getLeaderboardGroups();
-    
+
     /**
      * @param groupName The name of the requested leaderboard group
      * @return The leaderboard group with the name <code>groupName</code>, or <code>null</code> if theres no such group
      */
     LeaderboardGroup getLeaderboardGroupByName(String groupName);
-    
+
     /**
      * Creates a new group with the name <code>groupName</code>, the description <code>desciption</code> and the
      * leaderboards with the names in <code>leaderboardNames</code> and saves it in the database.
@@ -314,19 +321,21 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      *            The name of the new group
      * @param description
      *            The description of the new group
+     * @param displayGroupsInReverseOrder TODO
      * @param leaderboardNames
      *            The names of the leaderboards, which should be contained by the new group.<br />
      *            If there isn't a leaderboard with one of these names an {@link IllegalArgumentException} is thrown.
      * @return The new leaderboard group
      */
-    LeaderboardGroup addLeaderboardGroup(String groupName, String description, List<String> leaderboardNames);
-    
+    LeaderboardGroup addLeaderboardGroup(String groupName, String description, boolean displayGroupsInReverseOrder,
+            List<String> leaderboardNames, int[] overallLeaderboardDiscardThresholds, ScoringSchemeType overallLeaderboardScoringSchemeType);
+
     /**
      * Removes the group with the name <code>groupName</code> from the service and the database.
      * @param groupName The name of the group which shall be removed.
      */
     void removeLeaderboardGroup(String groupName);
-    
+
     /**
      * Renames the group with the name <code>oldName</code> to the <code>newName</code>.<br />
      * If there's no group with the name <code>oldName</code> or there's already a group with the name
@@ -336,7 +345,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * @param newName The new name of the group
      */
     void renameLeaderboardGroup(String oldName, String newName);
-    
+
     /**
      * Updates the group data in the persistant store.
      */
@@ -364,9 +373,9 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     TrackedRace createTrackedRace(RegattaAndRaceIdentifier raceIdentifier, WindStore windStore,
             long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed);
 
-    Regatta getOrCreateRegatta(String regattaName, String boatClassName);
+    Regatta getOrCreateRegatta(String regattaName, String boatClassName, Serializable id);
 
-    Regatta createRegatta(String baseName, String boatClassName, Iterable<? extends Series> series, boolean persistent);
+    Regatta createRegatta(String baseName, String boatClassName, Serializable id, Iterable<? extends Series> series, boolean persistent, ScoringScheme scoringScheme, Serializable defaultCourseAreaId);
 
     /**
      * Adds <code>raceDefinition</code> to the {@link Regatta} such that it will appear in {@link Regatta#getAllRaces()}
@@ -376,8 +385,9 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      */
     void addRace(RegattaIdentifier addToRegatta, RaceDefinition raceDefinition);
 
-    void updateLeaderboardGroup(String oldName, String newName, String description, List<String> leaderboardNames);
-    
+    void updateLeaderboardGroup(String oldName, String newName, String description, List<String> leaderboardNames,
+            int[] overallLeaderboardDiscardThresholds, ScoringSchemeType overallLeaderboardScoringSchemeType);
+
     /**
      * Executes an operation whose effects need to be replicated to any replica of this service known and
      * {@link OperationExecutionListener#executed(RacingEventServiceOperation) notifies} all registered
@@ -386,16 +396,16 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     <T> T apply(RacingEventServiceOperation<T> operation);
 
     void addOperationExecutionListener(OperationExecutionListener listener);
-    
+
     void removeOperationExecutionListener(OperationExecutionListener listener);
-    
+
     /**
      * Produces a one-shot serializable copy of those elements required for replication into <code>oos</code> so that
      * afterwards the {@link RacingEventServiceOperation}s can be {@link #apply(RacingEventServiceOperation) applied} to
      * maintain consistency with the master copy of the service. The dual operation is {@link #initiallyFillFrom}.
      */
     void serializeForInitialReplication(ObjectOutputStream oos) throws IOException;
-    
+
     /**
      * Dual, reading operation for {@link #serializeForInitialReplication(ObjectOutputStream)}. In other words, when
      * this operation returns, this service instance is in a state "equivalent" to that of the service instance that
@@ -410,9 +420,9 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * replication of these operations will happen based on the changes performed on the replication master.<p>
      * 
      * <b>Caution:</b> All relevant contents of this service instance will be replaced by the stream contents.
+     * @throws InterruptedException 
      */
-    void initiallyFillFrom(ObjectInputStream ois) throws IOException, ClassNotFoundException;
-
+    void initiallyFillFrom(ObjectInputStream ois) throws IOException, ClassNotFoundException, InterruptedException;
 
     /**
      * @return a thread-safe copy of the events currently known by the service; it's safe for callers to iterate over
@@ -421,19 +431,70 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     Iterable<Event> getAllEvents();
 
     /**
-     * Creates a new event with the name <code>eventName</code>, the description <code>desciption</code> and the
+     * Returns the event with given id. When no event is found, <b>null</b> is returned.
+     * 
+     * @param id
+     * 			The id of the event.
+     * @return The event with given id.
+     */
+    Event getEvent(Serializable id);
+
+    /**
+     * Creates a new event with the name <code>eventName</code>, the venue<code>venue</code> and the
      * regattas with the names in <code>regattaNames</code> and saves it in the database.
      * 
      * @param eventName
      *            The name of the new event
      * @param venue
-     *            The venue of the new event
+     *            The name of the venue of the new event
+     * @param publicationUrl
+     *            The publication URL of the new event
+     * @param isPublic
+     *            Indicates whether the event is public accessible via the publication URL or not
+     * @param id
+     *            The id of the new event
      * @param regattaNames
      *            The names of the regattas contained in the new event.<br />
      * @return The new event
      */
-    Event addEvent(String eventName, String venue, List<String> regattaNames);
+    Event addEvent(String eventName, String venueName, String publicationUrl, boolean isPublic, Serializable id, List<String> regattaNames);
+
+    /**
+     * Updates a sailing event with the name <code>eventName</code>, the venue<code>venue</code> and the
+     * regattas with the names in <code>regattaNames</code> and updates it in the database.
+     * @param id TODO
+     * @param eventName
+     *            The name of the event to update
+     * @param venueName
+     *            The name of the venue of the event
+     * @param publicationUrl
+     *            The publication URL of the event
+     * @param isPublic
+     *            Indicates whether the event is public accessible via the publication URL or not
+     * @param regattaNames
+     *            The names of the regattas contained in the event.<br />
+     * 
+     * @return The new event
+     */
+    void updateEvent(Serializable id, String eventName, String venueName, String publicationUrl, boolean isPublic, List<String> regattaNames);
+
+    /**
+     * Renames a sailing event. If a sailing event by the name <code>oldName</code> does not exist in {@link #getEvents()},
+     * or if a event with the name <code>newName</code> already exists, an {@link IllegalArgumentException} is thrown.
+     * If the method completes normally, the rename has been successful, and the event previously obtained by calling
+     * {@link #getEventByName(String) getEventByName(oldName)} can now be obtained by calling
+     * {@link #getEventByName(String) getEventByName(newName)}.
+     */
+    void renameEvent(Serializable id, String newEventName);
+
+    void removeEvent(Serializable id);
+
+    CourseArea addCourseArea(Serializable eventId, String courseAreaName, Serializable courseAreaId);
 
     com.sap.sailing.domain.base.DomainFactory getBaseDomainFactory();
+
+    com.sap.sailing.domain.swisstimingadapter.DomainFactory getSwissTimingDomainFactory();
+
+    CourseArea getCourseArea(Serializable courseAreaId);
 
 }

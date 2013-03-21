@@ -68,6 +68,4 @@ public interface RaceTracker {
      */
     Object getID();
     
-    void setWakeup(Object pointer);
-    
 }

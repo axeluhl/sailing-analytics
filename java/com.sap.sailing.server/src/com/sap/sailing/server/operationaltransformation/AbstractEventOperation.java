@@ -1,20 +1,22 @@
 package com.sap.sailing.server.operationaltransformation;
 
+import java.io.Serializable;
+
 public abstract class AbstractEventOperation<ResultType> extends AbstractRacingEventServiceOperation<ResultType> {
     private static final long serialVersionUID = 1200611694004927369L;
-    private final String eventName;
-    
-    public AbstractEventOperation(String eventName) {
-        super();
-        this.eventName = eventName;
-    }
+    private final Serializable id;
 
-    protected String getEventName() {
-        return eventName;
+    public AbstractEventOperation(Serializable id) {
+        super();
+        this.id = id;
     }
 
     protected boolean affectsSameEvent(AbstractEventOperation<?> other) {
-        return getEventName().equals(other.getEventName());
+        return getId().equals(other.getId());
     }
-
+    
+    protected Serializable getId() {
+        return id;
+    }
+    
 }

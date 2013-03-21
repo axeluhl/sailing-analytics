@@ -11,9 +11,7 @@ public abstract class ParallelExecutionHolder {
         if (callbacks == null || callbacks.length == 0) {
             throw new RuntimeException("No callbacks passed to execution holder");
         }
-
         this.asyncCallbacks = callbacks;
-
         for (ParallelExecutionCallback<?> callback : callbacks) {
             callback.setExecutionHolder(this);
         }
@@ -25,7 +23,6 @@ public abstract class ParallelExecutionHolder {
      */
     protected synchronized void done() {
         doneCount++;
-
         if (doneCount == asyncCallbacks.length) {
             handleSuccess();
         }

@@ -5,6 +5,7 @@ import java.util.List;
 import com.sap.sailing.domain.swisstimingadapter.Race;
 import com.sap.sailing.domain.swisstimingadapter.RaceSpecificMessageLoader;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterMessage;
+import com.sap.sailing.domain.swisstimingadapter.SwissTimingArchiveConfiguration;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingConfiguration;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
 import com.sap.sailing.domain.swisstimingadapter.persistence.impl.SwissTimingAdapterPersistenceImpl;
@@ -15,6 +16,8 @@ public interface SwissTimingAdapterPersistence extends RaceSpecificMessageLoader
     SwissTimingAdapterPersistence INSTANCE = new SwissTimingAdapterPersistenceImpl(MongoDBService.INSTANCE, SwissTimingFactory.INSTANCE);
 
     Iterable<SwissTimingConfiguration> getSwissTimingConfigurations();
+
+    Iterable<SwissTimingArchiveConfiguration> getSwissTimingArchiveConfigurations();
     
     /**
      * Loads all messages received and stored to the DB starting with sequence number <code>firstSequenceNumber</code>.
@@ -38,6 +41,8 @@ public interface SwissTimingAdapterPersistence extends RaceSpecificMessageLoader
     
     void storeSwissTimingConfiguration(SwissTimingConfiguration swissTimingConfiguration);
     
+    void storeSwissTimingArchiveConfiguration(SwissTimingArchiveConfiguration createSwissTimingArchiveConfiguration);
+
     void storeSailMasterMessage(SailMasterMessage message);
 
     void storeRace(Race race);

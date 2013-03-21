@@ -23,4 +23,14 @@ public interface SpeedWithBearing extends Speed {
     CourseChange getCourseChangeRequiredToReach(SpeedWithBearing targetSpeedWithBearing);
 
     SpeedWithBearing applyCourseChange(CourseChange courseChange);
+
+    /**
+     * Projects this speed onto <code>bearing</code>. The speed will keep its sign, regardless of whether the <code>bearing</code> points in
+     * the opposite direction or not. The resulting speed can never be greater than this speed. If this speed's bearing is orthogonal to
+     * <code>bearing</code>, a zero speed will result.
+     * 
+     * @param position the position at which to perform the projection; the angle between the bearings depends on the position
+     */
+    Speed projectTo(Position position, Bearing bearing);
+
 }

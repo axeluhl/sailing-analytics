@@ -6,8 +6,11 @@ import com.sap.sailing.gwt.ui.client.UserAgentDetails.AgentTypes;
 
 public class UserAgentCheckerImpl implements UserAgentChecker {
     
+    /**
+     * Version numbers indicate minimum required browser (20 = at least this version)
+     */
     @SuppressWarnings("serial")
-	private static final HashMap<AgentTypes, Integer> UNSUPPORTED_AGENTS = new HashMap<AgentTypes, Integer>() {{
+	private static final HashMap<AgentTypes, Integer> MINIMUM_SUPPORTED_AGENTS = new HashMap<AgentTypes, Integer>() {{
     	put(AgentTypes.MSIE, 9);
     	put(AgentTypes.SAFARI, 5);
     	put(AgentTypes.OPERA, 10);
@@ -18,8 +21,8 @@ public class UserAgentCheckerImpl implements UserAgentChecker {
 
 	@Override
 	public boolean isUserAgentSupported(UserAgentDetails details) {
-		if (UNSUPPORTED_AGENTS.containsKey(details.getType())) {
-			if (details.getVersion()[0] < UNSUPPORTED_AGENTS.get(details.getType())) {
+		if (MINIMUM_SUPPORTED_AGENTS.containsKey(details.getType())) {
+			if (details.getVersion()[0] < MINIMUM_SUPPORTED_AGENTS.get(details.getType())) {
 				return false;
 			}
 		}

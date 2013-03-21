@@ -12,6 +12,8 @@ import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.domain.tracking.impl.TrackedLegImpl;
 
 public interface TrackedLegOfCompetitor extends Serializable {
     Leg getLeg();
@@ -22,7 +24,8 @@ public interface TrackedLegOfCompetitor extends Serializable {
      * How much time did the {@link #getCompetitor competitor} spend in this {@link #getLeg() leg} at
      * <code>timePoint</code>? If the competitor hasn't started the leg yet at <code>timePoint</code>, <code>null</code>
      * is returned. If the competitor has finished the leg already at <code>timePoint</code>, the time it took the
-     * competitor to complete the leg is returned.
+     * competitor to complete the leg is returned. If the competitor didn't finish the leg before the end of tracking,
+     * <code>null</code> is returned because this indicates that the tracker stopped sending valid data.
      */
     Long getTimeInMilliSeconds(TimePoint timePoint);
 
@@ -68,17 +71,21 @@ public interface TrackedLegOfCompetitor extends Serializable {
     Speed getAverageSpeedOverGround(TimePoint timePoint);
 
     /**
-     * @return <code>null</code> if the competitor hasn't started this leg yet
+     * @return <code>null</code> if the competitor hasn't started this leg yet, otherwise the fix where the maximum speed was
+     * achieved and the speed value
      */
-    Speed getMaximumSpeedOverGround(TimePoint timePoint);
+    Pair<GPSFixMoving, Speed> getMaximumSpeedOverGround(TimePoint timePoint);
 
     /**
      * Infers the maneuvers of the competitor up to <code>timePoint</code> on this leg. If the competitor hasn't started
-     * the leg at the time point specified, <code>null</code> is returned. Otherwise, the list will be valid. If the
-     * time point is after the competitor has finished this leg, all of the competitor's maneuvers during this leg will
-     * be reported in chronological order. The list may be empty if no maneuvers happened between the point in time when
-     * the competitor started the leg and <code>timePoint</code>.
-     * @param waitForLatest TODO
+     * the leg at the time point specified, an empty list is returned. If the time point is after the competitor has
+     * finished this leg, all of the competitor's maneuvers during this leg will be reported in chronological order. The
+     * list may be empty if no maneuvers happened between the point in time when the competitor started the leg and
+     * <code>timePoint</code>.<p>
+     * 
+     * Note that the mark passing maneuver at leg start and finish are not guaranteed to be part of this leg's maneuvers. They
+     * may be part of the respective adjacent leg, depending on the maneuver's time point which may be slightly before, at, or
+     * after the corresponding mark passing event.
      */
     List<Maneuver> getManeuvers(TimePoint timePoint, boolean waitForLatest) throws NoWindException;
     
@@ -125,6 +132,10 @@ public interface TrackedLegOfCompetitor extends Serializable {
     boolean hasStartedLeg(TimePoint timePoint);
     
     boolean hasFinishedLeg(TimePoint timePoint);
+    
+    TimePoint getStartTime();
+    
+    TimePoint getFinishTime();
 
     /**
      * Returns <code>null</code> in case this leg's competitor hasn't started the leg yet. If in the leg at
@@ -162,6 +173,28 @@ public interface TrackedLegOfCompetitor extends Serializable {
 
     Distance getAverageCrossTrackError(TimePoint timePoint, boolean waitForLatestAnalysis) throws NoWindException;
 
+    /**
+     * If the current {@link #getLeg() leg} is +/- {@link TrackedLegImpl#UPWIND_DOWNWIND_TOLERANCE_IN_DEG} degrees
+     * co-linear with the wind's bearing, the competitor's position is projected onto the line crossing
+     * <code>mark</code> in the wind's bearing, and the distance from the projection to the <code>mark</code> is
+     * returned. Otherwise, it is assumed that the leg is neither an upwind nor a downwind leg, and hence the along-track
+     * distance to <code>mark</code> is returned.
+     * 
+     * @param at
+     *            the wind estimation is performed for this point in time
+     */
     Distance getWindwardDistance(Position pos1, Position pos2, TimePoint at) throws NoWindException;
 
+    /**
+     * Computes the maneuver loss as the "windward distance" that the boat lost compared to not having maneuvered.
+     * As defined by {@link TrackedLegOfCompetitor#getWindwardDistance(Position, Position, TimePoint)}, distances for
+     * reaching legs are computed as the along-track distance. For upwind/downwind legs it's taken to be the
+     * along-wind projection. With this distance measure, the competitors speed and bearing before the maneuver,
+     * as defined by <code>timePointBeforeManeuver</code> is extrapolated until <code>timePointAfterManeuver</code>,
+     * and the resulting extrapolated position's "windward distance" is computed to the competitor's actual position
+     * at that time. This distance is returned as the result of this method. 
+     */
+    Distance getManeuverLoss(TimePoint timePointBeforeManeuver, TimePoint maneuverTimePoint, TimePoint timePointAfterManeuver) throws NoWindException;
+
+    TrackedLeg getTrackedLeg();
 }

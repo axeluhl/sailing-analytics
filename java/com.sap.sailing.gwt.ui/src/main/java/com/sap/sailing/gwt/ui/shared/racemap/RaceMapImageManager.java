@@ -1,59 +1,21 @@
 package com.sap.sailing.gwt.ui.shared.racemap;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.geom.Point;
-import com.google.gwt.maps.client.geom.Size;
 import com.google.gwt.maps.client.overlay.Icon;
-import com.sap.sailing.domain.common.LegType;
+import com.google.gwt.resources.client.ImageResource;
 import com.sap.sailing.domain.common.ManeuverType;
+import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.impl.Util.Pair;
-import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 
 public class RaceMapImageManager {
-    /**
-     * Two sails on downwind leg, wind from port (sails on starboard); no highlighting
-     */
-    protected ImageTransformer boatIconDownwindPortTransformer;
-
-    /**
-     * Two sails on downwind leg, wind from port (sails on starboard); with highlighting
-     */
-    protected ImageTransformer boatIconHighlightedDownwindPortTransformer;
-
-    /**
-     * Two sails on downwind leg, wind from starboard (sails on port); no highlighting
-     */
-    protected ImageTransformer boatIconDownwindStarboardTransformer;
-
-    /**
-     * Two sails on downwind leg, wind from starboard (sails on port); with highlighting
-     */
-    protected ImageTransformer boatIconHighlightedDownwindStarboardTransformer;
-
-    /**
-     * One sail, wind from port (sails on starboard); no highlighting
-     */
-    protected ImageTransformer boatIconPortTransformer;
-
-    /**
-     * One sail, wind from port (sails on starboard); with highlighting
-     */
-    protected ImageTransformer boatIconHighlightedPortTransformer;
-
-    /**
-     * One sail, wind from starboard (sails on port); no highlighting
-     */
-    protected ImageTransformer boatIconStarboardTransformer;
-
-    /**
-     * One sail, wind from starboard (sails on port); with highlighting
-     */
-    protected ImageTransformer boatIconHighlightedStarboardTransformer;
 
     /**
      * An arrow showing the combined wind depending on the wind direction 
@@ -63,39 +25,71 @@ public class RaceMapImageManager {
     /**
      * An arrow showing the wind provided by a wind sensor on a boat 
      */
-    protected ImageTransformer expeditionWindIconTransformer;
+    protected ImageTransformer windSensorIconTransformer;
 
-    protected Icon buoyIcon;
-
+    /**
+     * The default image for a course mark
+     */
+    private MarkImageDescriptor defaultCourseMarkDescriptor;
+ 
+    private final List<MarkImageDescriptor> markImageDescriptors;
+    
     protected Map<Pair<ManeuverType, Tack>, Icon> maneuverIconsForTypeAndTargetTack;
 
     private static RaceMapResources resources = GWT.create(RaceMapResources.class);
 
     public RaceMapImageManager() {
+        markImageDescriptors = new ArrayList<MarkImageDescriptor>();
+        
         maneuverIconsForTypeAndTargetTack = new HashMap<Pair<ManeuverType, Tack>, Icon>();
         
-        boatIconDownwindPortTransformer = new ImageTransformer(resources.lowlightedBoatIconDW_Port());
-        boatIconHighlightedDownwindPortTransformer = new ImageTransformer(resources.highlightedBoatIconDW_Port());
-        boatIconDownwindStarboardTransformer = new ImageTransformer(resources.lowlightedBoatIconDW_Starboard());
-        boatIconHighlightedDownwindStarboardTransformer = new ImageTransformer(resources.highlightedBoatIconDW_Starboard());
-        boatIconPortTransformer = new ImageTransformer(resources.lowlightedBoatIcon_Port());
-        boatIconHighlightedPortTransformer = new ImageTransformer(resources.highlightedBoatIcon_Port());
-        boatIconStarboardTransformer = new ImageTransformer(resources.lowlightedBoatIcon_Starboard());
-        boatIconHighlightedStarboardTransformer = new ImageTransformer(resources.highlightedBoatIcon_Starboard());
         combinedWindIconTransformer = new ImageTransformer(resources.combinedWindIcon());
-        expeditionWindIconTransformer = new ImageTransformer(resources.expeditionWindIcon());
+        windSensorIconTransformer = new ImageTransformer(resources.expeditionWindIcon());
     }
-    
-    /*
+
+    public MarkImageDescriptor resolveMarkImage(MarkType type, String color, String shape, String pattern) {
+        MarkImageDescriptor result = defaultCourseMarkDescriptor;
+        int highestCompatibilityLevel = -1;
+        
+        for (MarkImageDescriptor imageDescriptor: markImageDescriptors) {
+            int compatibilityLevel = imageDescriptor.getCompatibilityLevel(type, color, shape, pattern);
+            if(compatibilityLevel > highestCompatibilityLevel) {
+               result = imageDescriptor;
+               highestCompatibilityLevel = compatibilityLevel;
+               if(highestCompatibilityLevel == 3) {
+                   break;
+               }
+            }
+        }
+        
+        return result;
+    }
+
+    /**
      * Loads the map overlay icons
      * The method can only be called after the map is loaded  
      */
     public void loadMapIcons(MapWidget map) {
         if(map != null) {
-            buoyIcon = Icon.newInstance(resources.buoyIcon().getSafeUri().asString());
-            buoyIcon.setIconSize(Size.newInstance(19, 28));
-            buoyIcon.setIconAnchor(Point.newInstance(6, 15));
+            defaultCourseMarkDescriptor = createMarkImageDescriptor(resources.buoyIcon(), MarkType.BUOY, "undefined", null, null, 6, 20);
 
+            createMarkImageDescriptor(resources.buoyRedIcon(), MarkType.BUOY, "red", null, null, 6, 20); 
+            createMarkImageDescriptor(resources.buoyGreenIcon(), MarkType.BUOY, "green", null, null, 6, 20); 
+            createMarkImageDescriptor(resources.buoyYellowIcon(), MarkType.BUOY, "yellow", null, null, 6, 20); 
+            createMarkImageDescriptor(resources.buoyGreyIcon(), MarkType.BUOY, "grey", null, null, 6, 20);
+            createMarkImageDescriptor(resources.buoyWhiteIcon(), MarkType.BUOY, "white", null, null, 6, 20);
+            createMarkImageDescriptor(resources.buoyWhiteConeIcon(), MarkType.BUOY, "white", "conical", null, 6, 20); 
+            createMarkImageDescriptor(resources.buoyBlackIcon(), MarkType.BUOY, "black", null, null, 6, 20);
+            createMarkImageDescriptor(resources.buoyBlackConeIcon(), MarkType.BUOY, "black", "conical", null, 6, 20); 
+            createMarkImageDescriptor(resources.buoyDarkOrangeIcon(), MarkType.BUOY, "orange", null, null, 6, 20);
+            createMarkImageDescriptor(resources.buoyBlackFinishIcon(), MarkType.BUOY, "black", "cylinder", "checkered", 6, 20); 
+            
+            createMarkImageDescriptor(resources.cameraBoatIcon(), MarkType.CAMERABOAT, null, null, null, 35, 20);
+            createMarkImageDescriptor(resources.umpireBoatIcon(), MarkType.UMPIREBOAT, null, null, null, 35, 20);
+            createMarkImageDescriptor(resources.startBoatIcon(), MarkType.STARTBOAT, null, null, null, 35, 20);
+
+            createMarkImageDescriptor(resources.landmarkIcon(), MarkType.LANDMARK, null, null, null, 6, 15);
+            
             Icon tackToStarboardIcon = Icon
                     .newInstance("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=T|00FF00|000000");
             tackToStarboardIcon.setIconAnchor(Point.newInstance(10, 33));
@@ -152,43 +146,20 @@ public class RaceMapImageManager {
         }
     }
     
-    public ImageTransformer getBoatImageTransformer(GPSFixDTO boatFix, boolean highlighted) {
-        if (boatFix.tack == Tack.PORT) {
-            if (LegType.DOWNWIND == boatFix.legType) {
-                if (highlighted) {
-                    return boatIconHighlightedDownwindStarboardTransformer;
-                } else {
-                    return boatIconDownwindStarboardTransformer;
-                }
-            } else {
-                if (highlighted) {
-                    return boatIconHighlightedStarboardTransformer;
-                } else {
-                    return boatIconStarboardTransformer;
-                }
-            }
-        } else {
-            if (LegType.DOWNWIND == boatFix.legType) {
-                if (highlighted) {
-                    return boatIconHighlightedDownwindPortTransformer;
-                } else {
-                    return boatIconDownwindPortTransformer;
-                }
-            } else {
-                if (highlighted) {
-                    return boatIconHighlightedPortTransformer;
-                } else {
-                    return boatIconPortTransformer;
-                }
-            }
-        }
+    private MarkImageDescriptor createMarkImageDescriptor(ImageResource imgResource, MarkType type, String color, String shape, String pattern,
+            int anchorPointX, int anchorPointY) {
+        MarkImageDescriptor markIconDescriptor = new MarkImageDescriptor(imgResource, Point.newInstance(anchorPointX, anchorPointY),
+                type, color, shape, pattern);
+        markImageDescriptors.add(markIconDescriptor);
+        
+        return markIconDescriptor;
     }
-
+    
     public ImageTransformer getCombinedWindIconTransformer() {
         return combinedWindIconTransformer;
     }
 
-    public ImageTransformer getExpeditionWindIconTransformer() {
-        return expeditionWindIconTransformer;
+    public ImageTransformer getWindSensorIconTransformer() {
+        return windSensorIconTransformer;
     }
 }

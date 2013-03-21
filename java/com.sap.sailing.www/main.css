@@ -1,92 +1,210 @@
-@import url(fontface.css);
-
-body {
-  font-family: 'UbuntuRegular';
+/* line 2, _reset.sass */
+html, body, div, span, applet, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+a, abbr, acronym, address, big, cite, code,
+del, dfn, em, img, ins, kbd, q, s, samp,
+small, strike, strong, sub, sup, tt, var,
+b, u, i, center,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td,
+article, aside, canvas, details, embed,
+figure, figcaption, footer, header, hgroup,
+menu, nav, output, ruby, section, summary,
+time, mark, audio, video {
   margin: 0;
-  padding: 0 0 50px 0;
-  background: url(images/splash-screen-compressed-03.png) center top no-repeat #ebebec;
-  }
-  
+  padding: 0;
+  border: 0;
+  font-size: 100%;
+  font: inherit;
+  vertical-align: baseline; }
 
-.LogoAndTitlePanel {
-	height: 68px;
-	font-family: Arial, Verdana, sans-serif;
-	position: fixed;
-	width: 100%;
-	top: 0;
-	background-image: url(images/white_gradient_header.png), url(images/header_bg_modern.png);
-	background-position: center top, 0 0;
-	background-repeat: no-repeat, repeat-x;
-	box-shadow: 0 0 20px #858585;
-	-moz-box-shadow: 0 0 20px #858585;
-	-webkit-box-shadow: 0 0 20px #858585;
-}
+/* HTML5 display-role reset for older browsers */
+/* line 23, _reset.sass */
+article, aside, details, figcaption, figure,
+footer, header, hgroup, menu, nav, section {
+  display: block; }
 
-.LogoAndTitlePanel:after {
-	content: " ";
-	display: block;
-	height: 0;
-	clear: both;
-	visibility: hidden;
-}
+/* line 27, _reset.sass */
+body {
+  line-height: 1; }
 
-.RaceBoardHeaderPanel {
-	margin: 0 12px 14px 12px;
-}
+/* line 30, _reset.sass */
+ol, ul {
+  list-style: none; }
 
-.sapLogo {
-	float: left;
-	margin: 13px 0 0 12px;
-}
+/* line 33, _reset.sass */
+blockquote, q {
+  quotes: none; }
 
-.sailingAnalyticsLabelPanel {
-	margin: 10px 0 0 0;
-}
+/* line 36, _reset.sass */
+blockquote:before, blockquote:after,
+q:before, q:after {
+  content: "";
+  content: none; }
 
-.sailingAnalyticsLabel {
-	float: left;
-	color: #fff;
-	font-size: 14px;
-	font-weight: bold;
-	margin: 15px 0 0 0;
-}
+/* line 41, _reset.sass */
+table {
+  border-collapse: collapse;
+  border-spacing: 0; }
 
-.chooseModule, .table {
-  margin: 0 auto;
-  display: table;
-  margin-top: 600px;
-}
+/* line 7, site.css.sass */
+html {
+  height: 100%; }
 
-.chooseModule ul {
-  list-style: none;
-	min-width: 545px;
-}
+/* line 10, site.css.sass */
+body {
+  height: 100%;
+  color: #222222;
+  font-size: 14px;
+  font-family: OpenSansRegular, Arial, Verdana, sans-serif;
+  font-weight: normal;
+  background-image: url(../images/bg-image.jpg);
+  background-attachment: fixed;
+  background-color: #222222;
+  background-position: 50% 0%;
+  background-repeat: no-repeat no-repeat;
+  margin: 0px;
+  padding: 0px;
+  line-height: 18px; }
 
-.chooseModule ul li {
-  /*float: left;*/
-  display: inline;
-  margin: 0 10px 0 0;
-}
+/* line 27, site.css.sass */
+ul {
+  font-size: 12px;
+  padding-left: 0px;
+  margin-bottom: 25px;
+  margin-left: 30px; }
 
-.chooseModule a {
-  background: url(images/btn-cta-orangeleft.png) center top repeat-x;
-  padding: 5px;
-  color: #fff;
-  -webkit-border-radius: 4px;
--moz-border-radius: 4px;
-border-radius: 4px;
-}
-
-.chooseModule a:hover {
-  background: url(images/btn-cta-orangeleft.png) center -30px repeat-x;
-  color: #fff;
-}
-
+/* line 34, site.css.sass */
 a {
-  color:#A1A1A1;
   text-decoration: none;
-}
+  color: #0066b3; }
+  /* line 38, site.css.sass */
+  a:hover {
+    text-decoration: underline; }
 
-a:hover {
-  text-decoration: none;
-}
+/* line 42, site.css.sass */
+#yield_content {
+  width: 950px;
+  margin: 0 auto;
+  min-height: 100%; }
+  /* line 47, site.css.sass */
+  #yield_content #pageHeadline {
+    color: white;
+    margin: 0 0 10px 0;
+    font-size: 18px; }
+  /* line 53, site.css.sass */
+  #yield_content #keyVisual {
+    height: 240px;
+    position: relative;
+    background: white; }
+    /* line 58, site.css.sass */
+    #yield_content #keyVisual #infoBox {
+      width: 502px;
+      height: 80px;
+      background: #999999;
+      position: absolute;
+      right: 0;
+      bottom: 0;
+      padding: 10px; }
+      /* line 67, site.css.sass */
+      #yield_content #keyVisual #infoBox p {
+        color: white;
+        font-size: 12px; }
+  /* line 72, site.css.sass */
+  #yield_content #mainContent {
+    padding: 0 10px 10px 10px;
+    background: white; }
+    /* line 79, site.css.sass */
+    #yield_content #mainContent .innerContent .timeBar {
+      background: url(../images/timeBar-bg.png) 0 0 repeat-y; }
+      /* line 82, site.css.sass */
+      #yield_content #mainContent .innerContent .timeBar .raceSection {
+        margin: 0 0 20px 0;
+        *display: inline-block; }
+        /* line 3, _helpers.sass */
+        #yield_content #mainContent .innerContent .timeBar .raceSection:after {
+          content: " ";
+          display: block;
+          height: 0;
+          clear: both;
+          visibility: hidden; }
+        /* line 85, site.css.sass */
+        #yield_content #mainContent .innerContent .timeBar .raceSection .date {
+          font-family: OpenSansRegular, Arial, Verdana, sans-serif;
+          font-size: 12px;
+          margin-left: 35px; }
+        /* line 91, site.css.sass */
+        #yield_content #mainContent .innerContent .timeBar .raceSection .raceTimepoint {
+          background: url(../images/raceTimepoint-bg.png) left top no-repeat;
+          width: 29px;
+          height: 54px;
+          float: left;
+          margin: -16px 0 0 -5px; }
+        /* line 97, site.css.sass */
+        #yield_content #mainContent .innerContent .timeBar .raceSection .racePanel {
+          background: url(../images/racePanel-bg.png) left bottom repeat-x #fcb913;
+          width: 169px;
+          min-height: 36px;
+          margin: 2px 10px 0 -5px;
+          float: left;
+          padding: 6px 0 6px 13px; }
+          /* line 104, site.css.sass */
+          #yield_content #mainContent .innerContent .timeBar .raceSection .racePanel .raceName {
+            font-size: 12px;
+            font-family: OpenSansBold, Arial, Verdana, sans-serif;
+            color: white; }
+          /* line 109, site.css.sass */
+          #yield_content #mainContent .innerContent .timeBar .raceSection .racePanel .raceLocation {
+            font-size: 12px;
+            font-family: OpenSansRegular, Arial, Verdana, sans-serif;
+            color: white; }
+      /* line 114, site.css.sass */
+      #yield_content #mainContent .innerContent .timeBar .raceDescription {
+        padding: 4px;
+        font-family: OpenSansRegular, Arial, Verdana, sans-serif;
+        font-size: 12px;
+        font-color: #222222; }
+    /* line 121, site.css.sass */
+    #yield_content #mainContent .articleHeadline {
+      font-size: 18px;
+      font-family: OpenSansBold, Arial, Verdana, sans-serif;
+      color: #222222;
+      border-bottom: 2px solid #222222;
+      clear: both;
+      padding: 0 0 5px;
+      margin: 0 0 15px; }
+    /* line 131, site.css.sass */
+    #yield_content #mainContent .articleSubheadline {
+      font-size: 14px;
+      font-family: OpenSansBold, Arial, Verdana, sans-serif;
+      color: #222222;
+      margin: 0 0 6px 0; }
+    /* line 138, site.css.sass */
+    #yield_content #mainContent h4 {
+      margin: 0 0 10px;
+      font-size: 12px;
+      font-family: OpenSansBold, Arial, Verdana, sans-serif; }
+  /* line 144, site.css.sass */
+  #yield_content #spaceBar {
+    height: 80px; }
+
+/* line 148, site.css.sass */
+#footer {
+  color: white;
+  width: 940px;
+  height: 20px;
+  margin: -40px auto 0 auto;
+  background: url(../images/bkg-footer1.png);
+  padding: 10px;
+  font-size: 11px; }
+  /* line 157, site.css.sass */
+  #footer a {
+    color: white;
+    font-size: 11px; }
+  /* line 162, site.css.sass */
+  #footer .regularNav {
+    margin: 0; }
+    /* line 164, site.css.sass */
+    #footer .regularNav li {
+      display: inline; }

@@ -16,6 +16,7 @@ import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.swisstimingadapter.MessageType;
 import com.sap.sailing.domain.swisstimingadapter.Race;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterMessage;
+import com.sap.sailing.domain.swisstimingadapter.SwissTimingArchiveConfiguration;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingConfiguration;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
 import com.sap.sailing.domain.swisstimingadapter.persistence.SwissTimingAdapterPersistence;
@@ -43,17 +44,12 @@ public class SwissTimingAdapterPersistenceImpl implements SwissTimingAdapterPers
         super();
         this.database = mongoDBService.getDB();
         this.swissTimingFactory = swissTimingFactory;
-        if (this.database != null) {
-            lastMessageCountCollection = database.getCollection(CollectionNames.LAST_MESSAGE_COUNT.name());
-            init();
-        } else {
-            lastMessageCountCollection = null;
-        }
+        lastMessageCountCollection = database.getCollection(CollectionNames.LAST_MESSAGE_COUNT.name());
+        init();
     }
 
     private void init() {
         // ensure the required indexes for the collection of race specific messages
-        
         DBCollection racesMessageCollection = database.getCollection(CollectionNames.RACES_MESSAGES.name());
 
         BasicDBObject indexKeysRaceMsgs = new BasicDBObject();
@@ -87,11 +83,11 @@ public class SwissTimingAdapterPersistenceImpl implements SwissTimingAdapterPers
                 result.add(stConfig);
             }
             Collections.reverse(result);
-        } catch (Throwable t) {
+        } catch (Exception e) {
             // something went wrong during DB access; report, then use empty new wind track
             logger.log(Level.SEVERE,
-                    "Error connecting to MongoDB, unable to load recorded TracTrac configurations. Check MongoDB settings.");
-            logger.throwing(SwissTimingAdapterPersistenceImpl.class.getName(), "getTracTracConfigurations", t);
+                    "Error connecting to MongoDB, unable to load recorded SwissTiming configurations. Check MongoDB settings.");
+            logger.throwing(SwissTimingAdapterPersistenceImpl.class.getName(), "getSwissTimingConfigurations", e);
         }
         return result;
     }
@@ -101,6 +97,29 @@ public class SwissTimingAdapterPersistenceImpl implements SwissTimingAdapterPers
         return swissTimingFactory.createSwissTimingConfiguration((String) object.get(FieldNames.ST_CONFIG_NAME.name()),
                 (String) object.get(FieldNames.ST_CONFIG_HOSTNAME.name()), (Integer) object
                         .get(FieldNames.ST_CONFIG_PORT.name()), canSendRequests == null ? false : canSendRequests);
+    }
+
+    @Override
+    public Iterable<SwissTimingArchiveConfiguration> getSwissTimingArchiveConfigurations() {
+        List<SwissTimingArchiveConfiguration> result = new ArrayList<SwissTimingArchiveConfiguration>();
+        try {
+            DBCollection stConfigs = database.getCollection(CollectionNames.SWISSTIMING_ARCHIVE_CONFIGURATIONS.name());
+            for (DBObject o : stConfigs.find()) {
+                SwissTimingArchiveConfiguration stConfig = loadSwissTimingArchiveConfiguration(o);
+                result.add(stConfig);
+            }
+            Collections.reverse(result);
+        } catch (Exception e) {
+            // something went wrong during DB access; report, then use empty new wind track
+            logger.log(Level.SEVERE,
+                    "Error connecting to MongoDB, unable to load recorded SwissTiming archive configurations. Check MongoDB settings.");
+            logger.throwing(SwissTimingAdapterPersistenceImpl.class.getName(), "getSwissTimingArchiveConfigurations", e);
+        }
+        return result;
+    }
+
+    private SwissTimingArchiveConfiguration loadSwissTimingArchiveConfiguration(DBObject object) {
+        return swissTimingFactory.createSwissTimingArchiveConfiguration((String) object.get(FieldNames.ST_ARCHIVE_JSON_URL.name()));
     }
 
     @Override
@@ -122,7 +141,7 @@ public class SwissTimingAdapterPersistenceImpl implements SwissTimingAdapterPers
     @Override
     public List<SailMasterMessage> loadRaceMessages(String raceID) {
         DBCollection racesMessagesCollection = database.getCollection(CollectionNames.RACES_MESSAGES.name());
-        racesMessagesCollection.ensureIndex(new BasicDBObject(FieldNames.MESSAGE_SEQUENCE_NUMBER.name(), null)); // no sort without index
+        racesMessagesCollection.ensureIndex(new BasicDBObject(FieldNames.MESSAGE_SEQUENCE_NUMBER.name(), 1)); // no sort without index
         BasicDBObject query = new BasicDBObject();
         query.append(FieldNames.RACE_ID.name(), raceID);
         DBCursor results = racesMessagesCollection.find(query).sort(
@@ -130,7 +149,7 @@ public class SwissTimingAdapterPersistenceImpl implements SwissTimingAdapterPers
         List<SailMasterMessage> result = new ArrayList<SailMasterMessage>();
         for (DBObject o : results) {
             SailMasterMessage msg = swissTimingFactory.createMessage((String) o.get(FieldNames.MESSAGE_CONTENT.name()),
-                    (Long) o.get(FieldNames.MESSAGE_SEQUENCE_NUMBER.name()));
+                    ((Number) o.get(FieldNames.MESSAGE_SEQUENCE_NUMBER.name())).longValue());
             result.add(msg);
         }
         return result;
@@ -195,6 +214,19 @@ public class SwissTimingAdapterPersistenceImpl implements SwissTimingAdapterPers
         result.put(FieldNames.ST_CONFIG_CAN_SEND_REQUESTS.name(), swissTimingConfiguration.canSendRequests());
 
         stConfigCollection.insert(result);
+    }
+
+    @Override
+    public void storeSwissTimingArchiveConfiguration(
+            SwissTimingArchiveConfiguration createSwissTimingArchiveConfiguration) {
+        DBCollection stArchiveConfigCollection = database.getCollection(CollectionNames.SWISSTIMING_ARCHIVE_CONFIGURATIONS.name());
+        stArchiveConfigCollection.ensureIndex(CollectionNames.SWISSTIMING_ARCHIVE_CONFIGURATIONS.name());
+        BasicDBObject result = new BasicDBObject();
+        result.put(FieldNames.ST_ARCHIVE_JSON_URL.name(), createSwissTimingArchiveConfiguration.getJsonUrl());
+        for (DBObject equallyNamedConfig : stArchiveConfigCollection.find(result)) {
+            stArchiveConfigCollection.remove(equallyNamedConfig);
+        }
+        stArchiveConfigCollection.insert(result);
     }
 
     @Override

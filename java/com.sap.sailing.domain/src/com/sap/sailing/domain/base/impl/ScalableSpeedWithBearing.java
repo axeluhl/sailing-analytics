@@ -6,7 +6,6 @@ import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.impl.RadianBearingImpl;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.confidence.ScalableValue;
-import com.sap.sailing.domain.tracking.Wind;
 
 /**
  * Separately scales speed and bearing. Instead of considering speed and bearing a single vector that can be scaled, the
@@ -19,7 +18,6 @@ import com.sap.sailing.domain.tracking.Wind;
  * 
  */
 public class ScalableSpeedWithBearing implements ScalableValue<Triple<Speed, Double, Double>, SpeedWithBearing> {
-    private static final long serialVersionUID = 7827573211776750231L;
     private final Speed speed;
     private final double sin;
     private final double cos;

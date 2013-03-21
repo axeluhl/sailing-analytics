@@ -100,7 +100,7 @@ public class TrackedRegattaImpl implements TrackedRegatta {
             if (trbbc != null) {
                 trbbc.remove(trackedRace);
                 if (trbbc.isEmpty()) {
-                    trbbc.remove(trackedRace.getRace().getBoatClass());
+                    trackedRacesByBoatClass.remove(trackedRace.getRace().getBoatClass());
                 }
             }
             for (RaceListener listener : raceListeners) {
@@ -173,9 +173,12 @@ public class TrackedRegattaImpl implements TrackedRegatta {
         logger.log(Level.INFO, "Creating DynamicTrackedRaceImpl for RaceDefinition " + raceDefinition.getName());
         DynamicTrackedRaceImpl result = new DynamicTrackedRaceImpl(this, raceDefinition,
                 windStore, delayToLiveInMillis, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed);
+        // adding the raceDefinition to the raceDefinitionSetToUpdate BEFORE calling addTrackedRace helps those who
+        // are called back by RaceListener.raceAdded(TrackedRace) and who then expect the update to have happened
         if (raceDefinitionSetToUpdate != null) {
-            raceDefinitionSetToUpdate.addRaceDefinition(raceDefinition);
+            raceDefinitionSetToUpdate.addRaceDefinition(raceDefinition, result);
         }
+        addTrackedRace(result);
         return result;
     }
 

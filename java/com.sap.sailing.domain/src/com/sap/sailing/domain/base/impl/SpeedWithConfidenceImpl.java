@@ -17,7 +17,6 @@ public class SpeedWithConfidenceImpl<RelativeTo> extends HasConfidenceImpl<Doubl
     }
     
     private static class ScalableSpeed implements ScalableValue<Double, Speed> {
-        private static final long serialVersionUID = -6087492490947560930L;
         private final double knots;
         
         public ScalableSpeed(Speed speed) {

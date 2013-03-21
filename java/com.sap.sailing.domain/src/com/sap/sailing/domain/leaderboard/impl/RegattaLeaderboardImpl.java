@@ -1,9 +1,9 @@
 package com.sap.sailing.domain.leaderboard.impl;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
+import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnInSeries;
@@ -12,8 +12,10 @@ import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.impl.RaceColumnInSeriesImpl;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
+import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
+import com.sap.sailing.domain.tracking.TrackedRace;
 
 /**
  * A leaderboard that is based on the definition of a {@link Regatta} with its {@link Series} and {@link Fleet}. The regatta
@@ -27,14 +29,22 @@ import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 public class RegattaLeaderboardImpl extends AbstractLeaderboardImpl implements RegattaLeaderboard {
     private static final long serialVersionUID = 2370461218294770084L;
     private final Regatta regatta;
-
+    
     public RegattaLeaderboardImpl(Regatta regatta, SettableScoreCorrection scoreCorrection,
-            ThresholdBasedResultDiscardingRule resultDiscardingRule, Comparator<Double> scoreComparator) {
-        super(scoreCorrection, resultDiscardingRule, scoreComparator);
+            ThresholdBasedResultDiscardingRule resultDiscardingRule) {
+        super(scoreCorrection, resultDiscardingRule);
         this.regatta = regatta;
         regatta.addRaceColumnListener(this);
     }
-    
+
+    /**
+     * Updates the display name of this regatta leaderboard so that the regatta's name is no longer used as the default name.
+     */
+    @Override
+    public void setName(String newName) {
+        setDisplayName(newName);
+    }
+
     @Override
     public Regatta getRegatta() {
         return regatta;
@@ -59,6 +69,16 @@ public class RegattaLeaderboardImpl extends AbstractLeaderboardImpl implements R
     @Override
     public RaceColumnInSeries getRaceColumnByName(String columnName) {
         return (RaceColumnInSeriesImpl) super.getRaceColumnByName(columnName);
+    }
+
+    @Override
+    public ScoringScheme getScoringScheme() {
+        return regatta.getScoringScheme();
+    }
+
+    @Override
+    public CourseArea getDefaultCourseArea() {
+        return regatta.getDefaultCourseArea();
     }
 
 }

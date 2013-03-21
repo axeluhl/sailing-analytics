@@ -5,9 +5,8 @@ Bundle-SymbolicName: com.sap.sailing.domain.swisstimingadapter.test
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Require-Bundle: com.sap.sailing.domain.swisstimingadapter.persistence,
- com.sap.sailing.domain.swisstimingadapter,
- com.sap.sailing.domain,
+Fragment-Host: com.sap.sailing.domain.swisstimingadapter
+Require-Bundle: com.sap.sailing.domain,
  com.sap.sailing.udpconnector,
  com.mongodb.driver;bundle-version="2.6.2",
  com.sap.sailing.mongodb,
@@ -15,7 +14,8 @@ Require-Bundle: com.sap.sailing.domain.swisstimingadapter.persistence,
  com.sap.sailing.server,
  com.sap.sailing.domain.common,
  com.sap.sailing.domain.persistence,
- com.sap.sailing.domain.tractracadapter
+ com.sap.sailing.domain.tractracadapter,
+ com.sap.sailing.domain.swisstimingadapter.persistence;bundle-version="1.0.0"
 Bundle-ClassPath: resources/,
  .
 Import-Package: com.sap.sailing.server,

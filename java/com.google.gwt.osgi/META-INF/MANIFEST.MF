@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Osgi
 Bundle-SymbolicName: com.google.gwt.osgi
-Bundle-Version: 2.4.0.qualifier
+Bundle-Version: 2.5.0.qualifier
 Bundle-Vendor: GOOGLE
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ClassPath: lib/gwt-dev.jar,
@@ -30,7 +30,6 @@ Export-Package: com.gargoylesoftware.htmlunit,
  com.gargoylesoftware.htmlunit.protocol.about,
  com.gargoylesoftware.htmlunit.protocol.data,
  com.gargoylesoftware.htmlunit.protocol.javascript,
- com.gargoylesoftware.htmlunit.ssl,
  com.gargoylesoftware.htmlunit.util,
  com.gargoylesoftware.htmlunit.xml,
  com.google.gwt.activity.shared,
@@ -70,7 +69,6 @@ Export-Package: com.gargoylesoftware.htmlunit,
  com.google.gwt.dev.generator.ast,
  com.google.gwt.dev.javac,
  com.google.gwt.dev.javac.asm,
- com.google.gwt.dev.javac.rebind,
  com.google.gwt.dev.javac.testing,
  com.google.gwt.dev.javac.testing.impl,
  com.google.gwt.dev.javac.typemodel,

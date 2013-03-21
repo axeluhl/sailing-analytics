@@ -54,12 +54,12 @@ public enum MessageType {
     /**
      * Weather Information
      */
-    WEA(/* isRaceSpecific */ false),
+    WEA(/* isRaceSpecific */ true),
     
     /**
      * Wind Data
      */
-    WND(/* isRaceSpecific */ false),
+    WND(/* isRaceSpecific */ true),
     
     /**
      * Version

@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -15,6 +14,7 @@ import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.leaderboard.ScoringScheme;
 
 /**
  * Compares two competitors that occur in a {@link Leaderboard#getCompetitors()} set in the context of the
@@ -47,18 +47,42 @@ import com.sap.sailing.domain.leaderboard.Leaderboard;
  */
 public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
     private final Leaderboard leaderboard;
-    private final Comparator<Double> scoreComparator;
+    private final ScoringScheme scoringScheme;
     private final Map<Pair<Competitor, RaceColumn>, Double> totalPointsCache;
+    private final boolean nullScoresAreBetter;
+    private final TimePoint timePoint;
     
-    public LeaderboardTotalRankComparator(Leaderboard leaderboard, TimePoint timePoint, Comparator<Double> scoreComparator) throws NoWindException {
+    /**
+     * Considers all of the leaderboard's columns in their state at <code>timePoint</code> for calculating the score and rank.
+     */
+    public LeaderboardTotalRankComparator(Leaderboard leaderboard, TimePoint timePoint,
+            ScoringScheme scoringScheme, boolean nullScoresAreBetter) throws NoWindException {
+        this(leaderboard, timePoint, scoringScheme, nullScoresAreBetter, leaderboard.getRaceColumns());
+    }
+    
+    /**
+     * Considers only the race columns specified in <code>raceColumnsToConsider</code> and behaves as if the other columns
+     * were filled with <code>null</code> values. Those columns not considered do not count for determining the discards either.
+     * For example, if the first race may be discarded when five races have been completed, and only four {@link RaceColumn}s are
+     * considered, no race's score will be discarded for this call. This allows clients to tell what the ranking would have been
+     * with only the race columns specified in <code>raceColumnsToConsider</code> having completed for all fleets.<p>
+     * 
+     * Note, that <code>timePoint</code> is considered in addition to <code>raceColumnsToConsider</code> such that the scores in
+     * those columns considered is computed for the <code>timePoint</code> specified. In particular, if a time point is chosen that
+     * is before a race in a column that is considered has started, <code>null</code> values may result in that column.
+     */
+    public LeaderboardTotalRankComparator(Leaderboard leaderboard, TimePoint timePoint,
+            ScoringScheme scoringScheme, boolean nullScoresAreBetter, Iterable<RaceColumn> raceColumnsToConsider) throws NoWindException {
         super();
         this.leaderboard = leaderboard;
-        this.scoreComparator = scoreComparator;
+        this.timePoint = timePoint;
+        this.scoringScheme = scoringScheme;
+        this.nullScoresAreBetter = nullScoresAreBetter;
         totalPointsCache = new HashMap<Pair<Competitor, RaceColumn>, Double>();
         for (Competitor competitor : leaderboard.getCompetitors()) {
-            for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
+            for (RaceColumn raceColumn : raceColumnsToConsider) {
                 totalPointsCache.put(new Pair<Competitor, RaceColumn>(competitor, raceColumn),
-                        leaderboard.getTotalPoints(competitor, raceColumn, timePoint));
+                        leaderboard.getTotalPoints(competitor, raceColumn, raceColumnsToConsider, timePoint));
             }
         }
     }
@@ -69,36 +93,38 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
     
     @Override
     public int compare(Competitor o1, Competitor o2) {
-        List<Double> o1Scores = new ArrayList<Double>();
-        List<Double> o2Scores = new ArrayList<Double>();
-        int o1ScoreSum = 0;
-        int o2ScoreSum = 0;
-        double o1MedalRaceScore = 0;
-        double o2MedalRaceScore = 0;
+        List<Pair<RaceColumn, Double>> o1Scores = new ArrayList<Pair<RaceColumn, Double>>();
+        List<Pair<RaceColumn, Double>> o2Scores = new ArrayList<Pair<RaceColumn, Double>>();
+        double o1ScoreSum = getLeaderboard().getCarriedPoints(o1);
+        double o2ScoreSum = getLeaderboard().getCarriedPoints(o2);
+        Double o1MedalRaceScore = 0.0;
+        Double o2MedalRaceScore = 0.0;
         for (RaceColumn raceColumn : getLeaderboard().getRaceColumns()) {
-            int preemptiveColumnResult = 0;
-            final double o1Score = totalPointsCache.get(new Pair<Competitor, RaceColumn>(o1, raceColumn));
-            if (o1Score != 0) {
-                o1Scores.add(o1Score);
-                o1ScoreSum += o1Score;
-            }
-            final double o2Score = totalPointsCache.get(new Pair<Competitor, RaceColumn>(o2, raceColumn));
-            if (o2Score != 0) {
-                o2Scores.add(o2Score);
-                o2ScoreSum += o2Score;
-            }
-            if (raceColumn.isMedalRace()) {
-                o1MedalRaceScore = o1Score;
-                o2MedalRaceScore = o2Score;
-                // similar to compareByFleet, however, tracking is not required; having medal race column points
-                // (tracked or manual) is sufficient
-                preemptiveColumnResult = compareByMedalRaceParticipation(o1Score, o2Score);
-            }
-            if (preemptiveColumnResult == 0) {
-                preemptiveColumnResult = compareByFleet(raceColumn, o1, o2);
-            }
-            if (preemptiveColumnResult != 0) {
-                return preemptiveColumnResult;
+            if (getLeaderboard().getScoringScheme().isValidInTotalScore(getLeaderboard(), raceColumn, timePoint)) {
+                int preemptiveColumnResult = 0;
+                final Double o1Score = totalPointsCache.get(new Pair<Competitor, RaceColumn>(o1, raceColumn));
+                if (o1Score != null) {
+                    o1Scores.add(new Pair<RaceColumn, Double>(raceColumn, o1Score));
+                    o1ScoreSum += o1Score;
+                }
+                final Double o2Score = totalPointsCache.get(new Pair<Competitor, RaceColumn>(o2, raceColumn));
+                if (o2Score != null) {
+                    o2Scores.add(new Pair<RaceColumn, Double>(raceColumn, o2Score));
+                    o2ScoreSum += o2Score;
+                }
+                if (raceColumn.isMedalRace()) {
+                    o1MedalRaceScore = o1Score;
+                    o2MedalRaceScore = o2Score;
+                    // similar to compareByFleet, however, tracking is not required; having medal race column points
+                    // (tracked or manual) is sufficient
+                    preemptiveColumnResult = compareByMedalRaceParticipation(o1Score, o2Score);
+                }
+                if (preemptiveColumnResult == 0) {
+                    preemptiveColumnResult = compareByFleet(raceColumn, o1, o2);
+                }
+                if (preemptiveColumnResult != 0) {
+                    return preemptiveColumnResult;
+                }
             }
         }
         // now count the races in which they scored; if they scored in a different number of races, prefer the
@@ -112,7 +138,11 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
             if (result == 0) {
                 result = compareByMedalRaceScore(o1MedalRaceScore, o2MedalRaceScore);
                 if (result == 0) {
-                    result = compareByBetterScore(o1Scores, o2Scores);
+                    result = compareByBetterScore(Collections.unmodifiableList(o1Scores), Collections.unmodifiableList(o2Scores));
+                    if (result == 0) {
+                        // compare by last race:
+                        result = scoringScheme.compareByLastRace(o1Scores, o2Scores, nullScoresAreBetter);
+                    }
                 }
             }
         }
@@ -123,9 +153,9 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
      * Precondition: either both scored in medal race or both didn't. If both scored, the better score wins.
      * This is to be applied only if the total score of both competitors are equal to each other.
      */
-    private int compareByMedalRaceScore(double o1MedalRaceScore, double o2MedalRaceScore) {
-        assert o1MedalRaceScore != 0 || o2MedalRaceScore == 0;
-        if (o1MedalRaceScore != 0) {
+    private int compareByMedalRaceScore(Double o1MedalRaceScore, Double o2MedalRaceScore) {
+        assert o1MedalRaceScore != null || o2MedalRaceScore == null;
+        if (o1MedalRaceScore != null) {
             return getScoreComparator().compare(o1MedalRaceScore, o2MedalRaceScore);
         } else {
             return 0;
@@ -185,14 +215,14 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
         return result;
     }
 
-    private int compareByMedalRaceParticipation(double o1Score, double o2Score) {
+    private int compareByMedalRaceParticipation(Double o1Score, Double o2Score) {
         // if only one scored in medal race, this decides the order and returns immediately
-        if (o1Score == 0) {
-            if (o2Score != 0) {
+        if (o1Score == null) {
+            if (o2Score != null) {
                 return 1;
             }
         } else {
-            if (o2Score == 0) {
+            if (o2Score == null) {
                 return -1;
             } else {
                 return 0;
@@ -202,24 +232,13 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
     }
 
     /**
-     * Assuming both competitors scored in the same number of races, compares the sorted scores.
-     * @param o1Scores
-     * @param o2Scores
-     * @return
+     * Assuming both competitors scored in the same number of races, and assuming they scored the same total score,
+     * break the tie according to the {@link #scoringScheme scoring scheme} set for this comparator.
+     * 
+     * @see ScoringScheme#compareByBetterScore(List, List, boolean)
      */
-    protected int compareByBetterScore(List<Double> o1Scores, List<Double> o2Scores) {
-        assert o1Scores.size() == o2Scores.size();
-        Comparator<Double> scoreComparator = getScoreComparator();
-        Collections.sort(o1Scores, scoreComparator);
-        Collections.sort(o2Scores, scoreComparator);
-        // now both lists are sorted from best to worst score
-        Iterator<Double> o1Iter = o1Scores.iterator();
-        Iterator<Double> o2Iter = o2Scores.iterator();
-        int result = 0;
-        while (result == 0 && o1Iter.hasNext() && o2Iter.hasNext()) {
-            result = scoreComparator.compare(o1Iter.next(), o2Iter.next());
-        }
-        return result;
+    protected int compareByBetterScore(List<Pair<RaceColumn, Double>> o1Scores, List<Pair<RaceColumn, Double>> o2Scores) {
+        return scoringScheme.compareByBetterScore(o1Scores, o2Scores, nullScoresAreBetter);
     }
     
     /**
@@ -228,7 +247,7 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
      * the integer numbers by their natural ordering.
      */
     protected Comparator<Double> getScoreComparator() {
-        return scoreComparator;
+        return scoringScheme.getScoreComparator(nullScoresAreBetter);
     }
 
     /**

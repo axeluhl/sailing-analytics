@@ -10,6 +10,7 @@
 <location includeAllPlatforms="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="com.sap.sailing.target.base.feature.group" version="1.0.0"/>
 <unit id="com.sap.sailing.target.test.feature.group" version="1.0.0"/>
+<unit id="com.sap.sailing.target.jsp.feature.group" version="1.0.0"/>
 <unit id="com.sap.sailing.target.jms.feature.group" version="1.0.0"/>
 <unit id="com.sap.sailing.target.restlet.feature.group" version="1.0.0"/>
 <repository location="http://sapcoe-app01.pironet-ndh.com/p2/sailing/"/>
@@ -17,6 +18,15 @@
 <location includeAllPlatforms="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="org.eclipse.equinox.core.sdk.feature.group" version="3.7.1.R37x_v20110907-7uF9LFpFFSuN6-tKJIXPMYaq7NTP"/>
 <repository location="http://download.eclipse.org/releases/indigo"/>
+</location>
+<location includeAllPlatforms="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
+<unit id="org.apache.commons.fileupload" version="1.2.2.v20111214-1400"/>
+<unit id="org.apache.commons.fileupload.source" version="1.2.2.v20111214-1400"/>
+<unit id="org.apache.commons.io" version="1.3.2.v20080604-1500"/>
+<unit id="org.apache.commons.io.source" version="1.3.2.v20080604-1500"/>
+<unit id="org.jdom" version="1.0.0.v201005080400"/>
+<unit id="org.jdom.source" version="1.0.0.v201005080400"/>
+<repository location="http://download.eclipse.org/tools/orbit/downloads/drops/R20120526062928/repository/"/>
 </location>
 </locations>
 </target>

@@ -37,4 +37,8 @@ public abstract class SailMasterAdapter implements SailMasterListener {
     public void receivedAvailableRaces(Iterable<Race> races) {
     }
 
+    @Override
+    public void storedDataProgress(String raceID, double progress) {
+    }
+
 }

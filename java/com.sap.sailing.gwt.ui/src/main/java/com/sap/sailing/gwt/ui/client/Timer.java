@@ -109,7 +109,7 @@ public class Timer {
         timeListeners = new HashSet<TimeListener>();
         playStateListeners = new HashSet<PlayStateListener>();
         playState = PlayStates.Stopped;
-        playSpeedFactor = 1.0;
+        setPlaySpeedFactor(1.0);
         livePlayDelayInMillis = 0l;
         autoAdvance = true;
         setPlayMode(playMode);
@@ -143,6 +143,9 @@ public class Timer {
 
     public void setPlaySpeedFactor(double playSpeedFactor) {
         this.playSpeedFactor = playSpeedFactor;
+        for (PlayStateListener playStateListener : playStateListeners) {
+            playStateListener.playSpeedFactorChanged(this.playSpeedFactor);
+        }
     }
     
     public double getPlaySpeedFactor() {

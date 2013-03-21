@@ -1,11 +1,17 @@
 package com.sap.sailing.gwt.ui.shared.racemap;
 
 import com.google.gwt.canvas.client.Canvas;
+import com.google.gwt.dom.client.Style.Cursor;
 import com.google.gwt.maps.client.MapPane;
 import com.google.gwt.maps.client.MapPaneType;
 import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.geom.LatLng;
+import com.google.gwt.maps.client.geom.Point;
 import com.google.gwt.maps.client.overlay.Overlay;
+import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
+import com.sap.sailing.domain.common.impl.DegreePosition;
+import com.sap.sailing.domain.common.impl.MeterDistance;
 
 /**
  * This class provides an google map overlay based on a HTML5 canvas.
@@ -40,6 +46,46 @@ public abstract class CanvasOverlay extends Overlay {
 
     public CanvasOverlay() {
         canvas = Canvas.createIfSupported();
+        if(canvas != null) {
+            canvas.getElement().getStyle().setCursor(Cursor.POINTER);
+        }
+    }
+
+    /** 
+     * Sets the z-Index of the map pane
+     */
+    protected void setPaneZIndex(int zIndex) {
+        MapPane pane = getPane();
+        if(pane != null) {
+            pane.getElement().getStyle().setZIndex(zIndex);
+        }
+    }
+
+    protected void setCanvasSize(int newWidthInPx, int newHeightInPx) {
+        if (getCanvas() != null) {
+            getCanvas().setWidth(newWidthInPx + "px");
+            getCanvas().setHeight(newHeightInPx + "px");
+            getCanvas().setCoordinateSpaceWidth(newWidthInPx);
+            getCanvas().setCoordinateSpaceHeight(newHeightInPx);
+        }
+    }
+
+    protected int calculateRadiusOfBoundingBox(LatLng centerPosition, double lengthInMeter) {
+        Position centerPos = new DegreePosition(centerPosition.getLatitude(), centerPosition.getLongitude());
+        Position translateRhumbX = centerPos.translateRhumb(new DegreeBearingImpl(90), new MeterDistance(lengthInMeter));
+        Position translateRhumbY = centerPos.translateRhumb(new DegreeBearingImpl(0), new MeterDistance(lengthInMeter));
+
+        LatLng posWithDistanceX = LatLng.newInstance(translateRhumbX.getLatDeg(), translateRhumbX.getLngDeg());
+        LatLng posWithDistanceY = LatLng.newInstance(translateRhumbY.getLatDeg(), translateRhumbY.getLngDeg());
+
+        Point pointCenter = map.convertLatLngToDivPixel(centerPosition);
+        Point pointX = map.convertLatLngToDivPixel(posWithDistanceX);
+        Point pointY = map.convertLatLngToDivPixel(posWithDistanceY);
+        
+        int diffX = Math.abs(pointX.getX() - pointCenter.getX());
+        int diffY = Math.abs(pointY.getY() - pointCenter.getY());
+        
+        return Math.min(diffX, diffY);  
     }
 
     @Override

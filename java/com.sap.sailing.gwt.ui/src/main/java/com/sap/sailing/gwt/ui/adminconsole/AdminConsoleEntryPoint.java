@@ -20,65 +20,106 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
     private Set<RegattaDisplayer> regattaDisplayers;
     
     @Override
-    public void onModuleLoad() {
-        super.onModuleLoad();
+    protected void doOnModuleLoad() {
+        super.doOnModuleLoad();
+        
         RootPanel rootPanel = RootPanel.get();
         rootPanel.setSize("100%", "100%");
         
-        rootPanel.add(new UserStatusPanel(userManagementService, this));
+        UserStatusPanel userStatusPanel = new UserStatusPanel(userManagementService, this);
+        userStatusPanel.ensureDebugId("UserStatus");
+        rootPanel.add(userStatusPanel);
+        
         TabPanel tabPanel = new TabPanel();
+        tabPanel.ensureDebugId("AdministrationTabs");
         tabPanel.setAnimationEnabled(true);
-        rootPanel.add(tabPanel); //, 10, 10);
         tabPanel.setSize("95%", "95%");
+        rootPanel.add(tabPanel); //, 10, 10);
 
         regattaDisplayers = new HashSet<RegattaDisplayer>();
-        
+
+        SailingEventManagementPanel sailingEventManagementPanel = new SailingEventManagementPanel(sailingService, this, stringMessages);
+        tabPanel.add(sailingEventManagementPanel, stringMessages.events(), false);
+
         RegattaStructureManagementPanel eventStructureManagementPanel = new RegattaStructureManagementPanel(sailingService, this, stringMessages, this);
+        //eventStructureManagementPanel.ensureDebugId("RegattaStructureManagement");
         tabPanel.add(eventStructureManagementPanel, stringMessages.regattas());
         regattaDisplayers.add(eventStructureManagementPanel);
+        
         TracTracEventManagementPanel tractracEventManagementPanel = new TracTracEventManagementPanel(sailingService, this, this, stringMessages);
-        regattaDisplayers.add(tractracEventManagementPanel);
+        tractracEventManagementPanel.ensureDebugId("TracTracEventManagement");
         tractracEventManagementPanel.setSize("90%", "90%");
         tabPanel.add(tractracEventManagementPanel, stringMessages.tracTracEvents(), false);
+        regattaDisplayers.add(tractracEventManagementPanel);
+        
+        SwissTimingReplayConnectorPanel swissTimingReplayConnectorPanel = new SwissTimingReplayConnectorPanel(sailingService, this, this, stringMessages);
+        swissTimingReplayConnectorPanel.setSize("90%", "90%");
+        tabPanel.add(swissTimingReplayConnectorPanel, stringMessages.swissTimingArchiveConnector(), false);
+        regattaDisplayers.add(swissTimingReplayConnectorPanel);
+        
         SwissTimingEventManagementPanel swisstimingEventManagementPanel = new SwissTimingEventManagementPanel(sailingService, this, this, stringMessages);
-        regattaDisplayers.add(swisstimingEventManagementPanel);
+        //swisstimingEventManagementPanel.ensureDebugId("SwissTimingEventManagement");
         swisstimingEventManagementPanel.setSize("90%", "90%");
         tabPanel.add(swisstimingEventManagementPanel, stringMessages.swissTimingEvents(), false);
-        CreateSwissTimingRacePanel createSwissTimingRacePanel = new CreateSwissTimingRacePanel(sailingService,this,stringMessages);
+        regattaDisplayers.add(swisstimingEventManagementPanel);
+        
+        CreateSwissTimingRacePanel createSwissTimingRacePanel = new CreateSwissTimingRacePanel(sailingService, this, stringMessages);
+        //createSwissTimingRacePanel.ensureDebugId("CreateSwissTimingRace");
         createSwissTimingRacePanel.setSize("90%", "90%");
         tabPanel.add(createSwissTimingRacePanel,"Create SwissTiming race",false);
+        
         TrackedRacesManagementPanel trackedRacesManagementPanel = new TrackedRacesManagementPanel(sailingService, this, this, stringMessages);
-        regattaDisplayers.add(trackedRacesManagementPanel);
+        //trackedRacesManagementPanel.ensureDebugId("TrackedRacesManagement");
         trackedRacesManagementPanel.setSize("90%", "90%");
         tabPanel.add(trackedRacesManagementPanel, stringMessages.trackedRaces(),false);
+        regattaDisplayers.add(trackedRacesManagementPanel);
+        
         RaceCourseManagementPanel raceCourseManagementPanel = new RaceCourseManagementPanel(sailingService, this, this, stringMessages);
-        regattaDisplayers.add(raceCourseManagementPanel);
+        //raceCourseManagementPanel.ensureDebugId("RaceCourseManagement");
         raceCourseManagementPanel.setSize("90%", "90%");
         tabPanel.add(raceCourseManagementPanel, stringMessages.courseLayout(),false);
+        regattaDisplayers.add(raceCourseManagementPanel);
 
         final AsyncActionsExecutor asyncActionsExecutor = new AsyncActionsExecutor();
+        
         WindPanel windPanel = new WindPanel(sailingService, asyncActionsExecutor, this, this, stringMessages);
+        //windPanel.ensureDebugId("WindManagement");
         regattaDisplayers.add(windPanel);
         windPanel.setSize("90%", "90%");
         tabPanel.add(windPanel, stringMessages.wind(), /* asHTML */ false);
+        
         final LeaderboardGroupConfigPanel leaderboardGroupConfigPanel = new LeaderboardGroupConfigPanel(sailingService, this, this, stringMessages);
+        //leaderboardGroupConfigPanel.ensureDebugId("LeaderboardGroupConfiguration");
         leaderboardGroupConfigPanel.setSize("90%", "90%");
         tabPanel.add(leaderboardGroupConfigPanel, stringMessages.leaderboardGroupConfiguration(), /*asHTML*/ false);
         regattaDisplayers.add(leaderboardGroupConfigPanel);
+        
         final LeaderboardConfigPanel leaderboardConfigPanel = new LeaderboardConfigPanel(sailingService, this, this, stringMessages,
                 /* showRaceDetails */ true);
+        leaderboardConfigPanel.ensureDebugId("LeaderboardConfiguration");
         leaderboardConfigPanel.setSize("90%", "90%");
         tabPanel.add(leaderboardConfigPanel, stringMessages.leaderboardConfiguration(), /* asHTML */ false);
         regattaDisplayers.add(leaderboardConfigPanel);
-        tabPanel.add(new FregResultImportUrlPanel(sailingService, this, stringMessages), stringMessages.fregResultImportUrls(), /* asHTML */ false);
-        tabPanel.add(new ReplicationPanel(sailingService, this, stringMessages), stringMessages.replication(), /* asHTML */ false);
+        
+        FregResultImportUrlPanel resultImportPanel = new FregResultImportUrlPanel(sailingService, this, stringMessages);
+        //resultImportPanel.ensureDebugId("FregResultImport");
+        tabPanel.add(resultImportPanel, stringMessages.fregResultImportUrls(), /* asHTML */ false);
+        
+        ReplicationPanel replicationPanel = new ReplicationPanel(sailingService, this, stringMessages);
+        //replicationPanel.ensureDebugId("ReplicationManagement");
+        tabPanel.add(replicationPanel, stringMessages.replication(), /* asHTML */ false);
+        final MediaPanel mediaPanel = new MediaPanel(mediaService, this, stringMessages);
+        tabPanel.add(mediaPanel, stringMessages.mediaPanel(), /* asHTML */ false);
         
         tabPanel.selectTab(0);
         tabPanel.addSelectionHandler(new SelectionHandler<Integer>() {
             @Override
             public void onSelection(SelectionEvent<Integer> event) {
                 if (leaderboardConfigPanel.isVisible()) {
-                    leaderboardConfigPanel.loadAndRefreshAllData();
+                    leaderboardConfigPanel.loadAndRefreshLeaderboards();
+                }
+                if (mediaPanel.isVisible()) {
+                    mediaPanel.onShow();
                 }
             }
         });

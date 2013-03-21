@@ -7,7 +7,6 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
-import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.sap.sailing.gwt.ui.client.UserManagementService;
 import com.sap.sailing.gwt.ui.shared.UserDTO;
 import com.sap.sailing.gwt.ui.usermanagement.UserRoles;
@@ -15,7 +14,7 @@ import com.sap.sailing.gwt.ui.usermanagement.UserRoles;
 /*
  * This is a extremly simple implementation of a user management service. 
  */
-public class UserManagementServiceImpl  extends RemoteServiceServlet implements UserManagementService {
+public class UserManagementServiceImpl  extends ProxiedRemoteServiceServlet implements UserManagementService {
     private static final long serialVersionUID = -6360444730702283475L;
 //    private static final Logger logger = Logger.getLogger(UserManagementServiceImpl.class.getName());
 

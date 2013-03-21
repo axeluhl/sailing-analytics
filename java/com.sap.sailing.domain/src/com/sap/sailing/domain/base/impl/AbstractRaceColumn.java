@@ -1,54 +1,59 @@
 package com.sap.sailing.domain.base.impl;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
+import java.util.Map.Entry;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
-import com.sap.sailing.domain.base.RaceColumnListener;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.impl.Util;
-import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.domain.racelog.RaceLog;
+import com.sap.sailing.domain.racelog.RaceLogIdentifier;
+import com.sap.sailing.domain.racelog.RaceLogIdentifierTemplate;
+import com.sap.sailing.domain.racelog.RaceLogInformation;
+import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
-public abstract class AbstractRaceColumn implements RaceColumn {
+public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implements RaceColumn {
     private static final long serialVersionUID = -7801617988982540470L;
-    
+
     private final Map<Fleet, TrackedRace> trackedRaces;
-    private String name;
     private final Map<Fleet, RaceIdentifier> raceIdentifiers;
-    private Set<RaceColumnListener> raceColumnListeners;
-    
-    public AbstractRaceColumn(String name) {
-        this.name = name;
+
+    private final Map<Fleet, RaceLog> raceLogs;
+    /**
+     * holds the race log identifer template needed to create the appropriate RaceLogIdentifer that is constructed from the 
+     * parent object name, name of this raceColumn and the name of a fleet of this raceColumn to access the RaceLog in the 
+     * RaceLogStore for persistence purposes.
+     */
+    private RaceLogIdentifierTemplate raceLogsIdentifierTemplate;
+
+    public AbstractRaceColumn() {
         this.trackedRaces = new HashMap<Fleet, TrackedRace>();
         this.raceIdentifiers = new HashMap<Fleet, RaceIdentifier>();
-        this.raceColumnListeners = new HashSet<RaceColumnListener>();
-    }
-    
-    @Override
-    public void addRaceColumnListener(RaceColumnListener listener) {
-        raceColumnListeners.add(listener);
+        this.raceLogs = new HashMap<Fleet, RaceLog>();
     }
 
     @Override
-    public void removeRaceColumnListener(RaceColumnListener listener) {
-        raceColumnListeners.remove(listener);
-    }
-    
-    private void notifyListenersAboutTrackedRaceLinked(Fleet fleet, TrackedRace trackedRace) {
-        for (RaceColumnListener listener : raceColumnListeners) {
-            listener.trackedRaceLinked(this, fleet, trackedRace);
+    public synchronized void setRaceLogInformation(final RaceLogInformation information) {
+        raceLogs.clear();
+        raceLogsIdentifierTemplate = information.getIdentifierTemplate();
+        RaceLogStore store = information.getStore();
+        for (final Fleet fleet : getFleets()) {
+            RaceLogIdentifier identifier = raceLogsIdentifierTemplate.compileRaceLogIdentifier(fleet);
+            RaceLog raceLog = store.getRaceLog(identifier);
+            raceLog.addListener(new RaceColumnRaceLogReplicator(this, identifier));
+            raceLogs.put(fleet, raceLog);
         }
     }
 
-    private void notifyListenersAboutTrackedRaceUnlinked(Fleet fleet, TrackedRace trackedRace) {
-        for (RaceColumnListener listener : raceColumnListeners) {
-            listener.trackedRaceUnlinked(this, fleet, trackedRace);
-        }
+    @Override
+    public RaceLog getRaceLog(Fleet fleet) {
+        return raceLogs.get(fleet);
     }
 
     @Override
@@ -70,27 +75,14 @@ public abstract class AbstractRaceColumn implements RaceColumn {
                 }
             }
             if (previouslyLinkedRace != null) {
-                notifyListenersAboutTrackedRaceUnlinked(fleet, previouslyLinkedRace);
+                previouslyLinkedRace.detachRaceLog();
+                getRaceColumnListeners().notifyListenersAboutTrackedRaceUnlinked(this, fleet, previouslyLinkedRace);
             }
             if (trackedRace != null) {
-                notifyListenersAboutTrackedRaceLinked(fleet, trackedRace);
+                trackedRace.attachRaceLog(getRaceLog(fleet));
+                getRaceColumnListeners().notifyListenersAboutTrackedRaceLinked(this, fleet, trackedRace);
             }
         }
-    }
-
-    @Override
-    public String getName() {
-        return name;
-    }
-
-    @Override
-    public void setName(String newName) {
-        this.name = newName;
-    }
-
-    @Override
-    public Pair<Competitor, RaceColumn> getKey(Competitor competitor) {
-        return new Pair<Competitor, RaceColumn>(competitor, this);
     }
 
     @Override
@@ -146,9 +138,22 @@ public abstract class AbstractRaceColumn implements RaceColumn {
         }
         return null;
     }
-    
+
     @Override
     public String toString() {
         return getName();
+    }
+
+    /**
+     * When deserializing, replication listeners are registered on all race logs.
+     */
+    private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
+        ois.defaultReadObject();
+
+        for (Entry<Fleet, RaceLog> entry : raceLogs.entrySet()) {
+            Fleet fleet = entry.getKey();
+            RaceLog raceLog = entry.getValue();
+            raceLog.addListener(new RaceColumnRaceLogReplicator(this, raceLogsIdentifierTemplate.compileRaceLogIdentifier(fleet)));
+        }
     }
 }

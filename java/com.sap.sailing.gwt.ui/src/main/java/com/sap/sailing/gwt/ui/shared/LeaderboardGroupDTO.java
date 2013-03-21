@@ -1,17 +1,23 @@
 package com.sap.sailing.gwt.ui.shared;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.domain.common.ScoringSchemeType;
 
 public class LeaderboardGroupDTO extends NamedDTO implements IsSerializable {
 
     public String description;
     public List<StrippedLeaderboardDTO> leaderboards;
+    public boolean displayLeaderboardsInReverseOrder;
+    
+    private int[] overallLeaderboardDiscardThresholds;
+    private ScoringSchemeType overallLeaderboardScoringSchemeType;
     
     /**
      * Creates a new LeaderboardGroupDTO with empty but non-null name, description and an empty but non-null list for the leaderboards.<br />
@@ -32,6 +38,43 @@ public class LeaderboardGroupDTO extends NamedDTO implements IsSerializable {
         this.leaderboards = leaderboards;
     }
     
+    public boolean hasOverallLeaderboard() {
+        return getOverallLeaderboardScoringSchemeType() != null;
+    }
+    
+    public int[] getOverallLeaderboardDiscardThresholds() {
+        return overallLeaderboardDiscardThresholds;
+    }
+
+    public void setOverallLeaderboardDiscardThresholds(int[] overallLeaderboardDiscardThresholds) {
+        this.overallLeaderboardDiscardThresholds = overallLeaderboardDiscardThresholds;
+    }
+
+    public ScoringSchemeType getOverallLeaderboardScoringSchemeType() {
+        return overallLeaderboardScoringSchemeType;
+    }
+
+    public void setOverallLeaderboardScoringSchemeType(ScoringSchemeType overallLeaderboardScoringSchemeType) {
+        this.overallLeaderboardScoringSchemeType = overallLeaderboardScoringSchemeType;
+    }
+    
+    public List<StrippedLeaderboardDTO> getLeaderboardsInReverseOrder() {
+        List<StrippedLeaderboardDTO> leaderboardsInReverseOrder = new ArrayList<StrippedLeaderboardDTO>(leaderboards);
+        Collections.reverse(leaderboardsInReverseOrder);
+        return Collections.unmodifiableList(leaderboardsInReverseOrder);
+    }
+    
+    public boolean containsRegattaLeaderboard() {
+        boolean result = false;
+        for (StrippedLeaderboardDTO leaderboard : leaderboards) {
+            if(leaderboard.isRegattaLeaderboard) {
+                result = true;
+                break;
+            }
+        }
+        return result;
+    }
+
     public boolean containsRace(RaceIdentifier race) {
         boolean containsRace = false;
         leaderboardsLoop:
@@ -87,9 +130,9 @@ public class LeaderboardGroupDTO extends NamedDTO implements IsSerializable {
     /**
      * @return <code>true</code> if the group contains a race which is live.
      */
-    public boolean containsLiveRace() {
+    public boolean hasLiveRace() {
         for (StrippedLeaderboardDTO leaderboard : leaderboards) {
-            if (leaderboard.containsLiveRace()) {
+            if (leaderboard.hasLiveRace()) {
                 return true;
             }
         }
@@ -125,6 +168,10 @@ public class LeaderboardGroupDTO extends NamedDTO implements IsSerializable {
         } else if (!leaderboards.equals(other.leaderboards))
             return false;
         return true;
+    }
+
+    public List<StrippedLeaderboardDTO> getLeaderboards() {
+        return leaderboards;
     }
     
 }

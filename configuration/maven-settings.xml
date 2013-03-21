@@ -1,0 +1,39 @@
+<settings>
+  <servers>
+    <server>
+      <id>ssh-repository</id>
+        <filePermissions>664</filePermissions>
+      <directoryPermissions>775</directoryPermissions>
+    </server>
+  </servers>
+  
+  <proxies>
+    <proxy>
+      <active>false</active>
+      <protocol>http</protocol>
+      <host>proxy.wdf.sap.corp</host>
+      <port>8080</port>
+      <nonProxyHosts>localhost|*.sap.corp</nonProxyHosts>
+    </proxy>
+  </proxies>
+  
+  <profiles>
+    <profile>
+      <id>sailing.analytics</id>
+	  <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
+      <properties>
+        <!-- Leave empty, if no proxy is needed in your environment! -->
+        <parameters.proxy>
+	</parameters.proxy>
+	<!-- Change the configuration file to the one you like to use for the tests. -->
+        <parameters.integration-tests>
+	  -Dselenium.test.environment.configuration=ci-test-environment.xml
+	</parameters.integration-tests>
+      </properties>
+    </profile>
+  </profiles>
+</settings>
+
+

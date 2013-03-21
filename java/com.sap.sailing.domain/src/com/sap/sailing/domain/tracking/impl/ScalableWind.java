@@ -16,7 +16,6 @@ import com.sap.sailing.domain.tracking.Wind;
  * 
  */
 public class ScalableWind implements ScalableValue<ScalableWind, Wind> {
-    private static final long serialVersionUID = -7073721444133660385L;
     private final ScalablePosition scalablePosition;
     private final double scaledTimePointSumInMilliseconds;
     private final ScalableSpeedWithBearing scalableSpeedWithBearing;

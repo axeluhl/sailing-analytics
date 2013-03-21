@@ -50,8 +50,9 @@ public class ResultDiscardingRuleImpl implements ThresholdBasedResultDiscardingR
     }
 
     @Override
-    public Set<RaceColumn> getDiscardedRaceColumns(final Competitor competitor, final Leaderboard leaderboard, final TimePoint timePoint) {
-        int resultsToDiscard = getNumberOfResultsToDiscard(leaderboard.getRaceColumns(), leaderboard, timePoint);
+    public Set<RaceColumn> getDiscardedRaceColumns(final Competitor competitor, final Leaderboard leaderboard,
+            Iterable<RaceColumn> raceColumnsToConsider, final TimePoint timePoint) {
+        int resultsToDiscard = getNumberOfResultsToDiscard(competitor, raceColumnsToConsider, leaderboard, timePoint);
         Set<RaceColumn> result;
         if (resultsToDiscard > 0) {
             result = new HashSet<RaceColumn>();
@@ -60,15 +61,19 @@ public class ResultDiscardingRuleImpl implements ThresholdBasedResultDiscardingR
                 @Override
                 public int compare(RaceColumn o1, RaceColumn o2) {
                     try {
-                        // invert to get bad races first
-                        return -leaderboard.getScoreComparator().compare(leaderboard.getNetPoints(competitor, o1, timePoint),
-                                leaderboard.getNetPoints(competitor, o2, timePoint));
+                        // invert to get bad races first; have the score comparator sort null scores as "better" so they end
+                        // up at the end of the list
+                        return -leaderboard
+                                .getScoringScheme()
+                                .getScoreComparator(/* nullScoresAreBetter */true)
+                                .compare(leaderboard.getNetPoints(competitor, o1, timePoint),
+                                        leaderboard.getNetPoints(competitor, o2, timePoint));
                     } catch (NoWindException e) {
                         throw new NoWindError(e);
                     }
                 }
             };
-            for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
+            for (RaceColumn raceColumn : raceColumnsToConsider) {
                 if (!raceColumn.isMedalRace()) {
                     sortedRaces.add(raceColumn);
                 }
@@ -90,11 +95,12 @@ public class ResultDiscardingRuleImpl implements ThresholdBasedResultDiscardingR
         return result;
     }
 
-    private int getNumberOfResultsToDiscard(Iterable<RaceColumn> raceColumns, Leaderboard leaderboard, TimePoint timePoint) {
+    private int getNumberOfResultsToDiscard(Competitor competitor, Iterable<RaceColumn> raceColumnsToConsider,
+            Leaderboard leaderboard, TimePoint timePoint) {
         int numberOfResultsToDiscard;
         int numberOfStartedRaces = 0;
-        for (RaceColumn raceInLeaderboard : raceColumns) {
-            if (leaderboard.considerForDiscarding(raceInLeaderboard, timePoint)) {
+        for (RaceColumn raceInLeaderboard : raceColumnsToConsider) {
+            if (leaderboard.countRaceForComparisonWithDiscardingThresholds(competitor, raceInLeaderboard, timePoint)) {
                 numberOfStartedRaces++;
             }
         }

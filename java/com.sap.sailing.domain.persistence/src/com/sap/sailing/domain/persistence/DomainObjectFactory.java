@@ -12,6 +12,8 @@ import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.LeaderboardRegistry;
+import com.sap.sailing.domain.racelog.RaceLog;
+import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.WindTrack;
 
@@ -22,6 +24,9 @@ import com.sap.sailing.domain.tracking.WindTrack;
  *
  */
 public interface DomainObjectFactory {
+    /**
+     * @param regatta only needed for backward compatibility because old wind tracks used the regatta name as part of the key
+     */
     WindTrack loadWindTrack(Regatta regatta, RaceDefinition race, WindSource windSource, long millisecondsOverWhichToAverage);
 
     /**
@@ -79,4 +84,6 @@ public interface DomainObjectFactory {
     Iterable<Regatta> loadAllRegattas(TrackedRegattaRegistry trackedRegattaRegistry);
 
     Map<String, Regatta> loadRaceIDToRegattaAssociations(RegattaRegistry regattaRegistry);
+
+    RaceLog loadRaceLog(RaceLogIdentifier identifier);
 }

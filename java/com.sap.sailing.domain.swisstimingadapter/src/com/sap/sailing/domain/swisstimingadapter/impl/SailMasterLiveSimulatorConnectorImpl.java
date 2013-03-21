@@ -15,9 +15,7 @@ public class SailMasterLiveSimulatorConnectorImpl extends SailMasterConnectorImp
     
     public SailMasterLiveSimulatorConnectorImpl(String host, int port, RaceSpecificMessageLoader messageLoader, boolean canSendRequests) throws InterruptedException {
         super(host, port, messageLoader, canSendRequests);
-        
         bufferedMessageList = Collections.synchronizedList(new ArrayList<SailMasterMessage>());
-        
         Thread messageDeliveryThread = new Thread("SailMasterLiveSimulatorConnector") {
             public void run() {
                 while(true) {

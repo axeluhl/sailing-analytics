@@ -1,14 +1,19 @@
 package com.sap.sailing.util.impl;
 
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 import com.sap.sailing.util.impl.SmartFutureCache.UpdateInterval;
@@ -17,9 +22,43 @@ import com.sap.sailing.util.impl.SmartFutureCache.UpdateInterval;
  * A cache for which a background update can be triggered. Readers can decide whether they want to wait for any ongoing
  * background update or read the latest cached value for a key. An update trigger can provide an optional parameter for
  * the update which may, e.g., control the interval of the cached value to update. When an update is triggered and
- * another update is already running, the update is queued. If there already is an update queued for the same key,
- * the optional update parameters are "joined" (for example, the two update intervals are joined to form one interval
- * which incorporates both original update intervals).
+ * another update is already running, the update is queued. If there already is an update queued for the same key, the
+ * optional update parameters are {@link UpdateInterval#join(UpdateInterval) "joined"} (for example, the two update
+ * intervals are joined to form one interval which incorporates both original update intervals).
+ * <p>
+ * 
+ * A {@link CacheUpdater} needs to be passed to the constructor which carries out the actual calculation whose values
+ * are to be cached. The {@link CacheUpdater} interface assumes that a cache update may be computed in two steps: first,
+ * a value is computed for a key and an update interval which may be computationally expensive. Then, in a second step,
+ * the new value is combined with the previous cache value for the same key and update interval. The default
+ * implementation of {@link CacheUpdater#provideNewCacheValue(Object, Object, Object, UpdateInterval)} simply returns
+ * the <code>computedCacheUpdate</code> parameter which is the result computed by
+ * {@link CacheUpdater#computeCacheUpdate(Object, UpdateInterval)} before.
+ * <p>
+ * 
+ * The cache only knows about results computed based on a {@link #triggerUpdate(Object, UpdateInterval)} call. The
+ * {@link #get(Object, boolean)} method itself will not trigger a computation if no cache value exists for the request.
+ * Therefore, the {@link #triggerUpdate(Object, UpdateInterval)} calls need to ensure that all data expected to be
+ * managed by this cache---specifically the area spanned by the update interval---is covered.
+ * <p>
+ * 
+ * There may be situations, such as during a start-up phase, where the automatic and immediate re-calculation is not
+ * desirable, particularly because during such a phase the number of re-calculations scheduled perhaps by far outweighs
+ * the number of {@link #get(Object, boolean)} requests. In such a phase it is smarter to suspend the automatic
+ * re-calculation and defer it until a {@link #get(Object, boolean)} request actually happens. For this purpose,
+ * the {@link #suspend} and {@link #resume} methods can be used. No matter the suspend/resume state, the {@link #get(Object, boolean)}
+ * method will always respond in line with the {@link #triggerUpdate(Object, UpdateInterval)} calls, only that re-calculations
+ * are not immediately started when in suspended mode, and {@link #get(Object, boolean) get(key, false)} will no trigger a
+ * re-calculation at all. When resuming, any pending recalculations triggered so far are scheduled for immediate execution such
+ * that subsequent {@link #get(Object, boolean) get(key, true)} calls will wait for their completion.
+ * 
+ * @param <K>
+ *            the key type for which values of type <code>V</code> are cached
+ * @param <V>
+ *            the value type of which instances are cached for particular keys of type <code>K</code>
+ * @param <U>
+ *            a parameter type for the cache update method for a single key, such that the parameters of multiple queued
+ *            requests for the same key can be joined into one for a faster update
  * 
  * @author Axel Uhl (D043530)
  * 
@@ -46,6 +85,13 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
     private final Map<K, NamedReentrantReadWriteLock> locksForKeys;
     
     private final String nameForLocks;
+    
+    /**
+     * See {@link #suspend} and {@link #resume}.
+     */
+    private boolean suspended;
+    
+    private final Map<K, U> triggeredWhileSuspended;
     
     /**
      * An immutable "interval" description for a cache update
@@ -78,14 +124,18 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
      */
     public static interface CacheUpdater<K, V, U extends UpdateInterval<U>> {
         /**
-         * Called by a background task to perform the potentially expensive update computations. The cache is
-         * not updated with the results immediately. Instead, the result of this operation is later passed to
+         * Called by a background task to perform the potentially expensive update computations. The cache is not
+         * updated with the results immediately. Instead, the result of this operation is later passed to
          * {@link #provideNewCacheValue(Object, Object)} with the cache entry for <code>key</code> locked for writing.
+         * 
+         * @param updateInterval
+         *            if <code>null</code>, the result must reflect the entire current data on which the cache is based,
+         *            like the "infinite" interval
          */
         V computeCacheUpdate(K key, U updateInterval) throws Exception;
         
         /**
-         * Expected to deliver an updated cache value quick (compared to the potentially much more expensive
+         * Expected to deliver an updated cache value quickly (compared to the potentially much more expensive
          * {@link #computeCacheUpdate(Object, UpdateInterval)} method which is run in a background task and doesn't lock
          * the cache for readers).
          * 
@@ -154,10 +204,13 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
     public SmartFutureCache(CacheUpdater<K, V, U> cacheUpdateComputer, String nameForLocks) {
         this.ongoingRecalculations = new ConcurrentHashMap<K, FutureTaskWithCancelBlocking<V, U>>();
         this.cache = new ConcurrentHashMap<K, V>();
-        this.recalculator = Executors.newSingleThreadExecutor();
+        this.recalculator = new ThreadPoolExecutor(/* corePoolSize */ 0,
+                /* maximumPoolSize */ 1, /* keepAliveTime */ 60, TimeUnit.SECONDS,
+                /* workQueue */ new LinkedBlockingQueue<Runnable>());
         this.cacheUpdateComputer = cacheUpdateComputer;
         this.locksForKeys = new ConcurrentHashMap<K, NamedReentrantReadWriteLock>();
         this.nameForLocks = nameForLocks;
+        this.triggeredWhileSuspended = new HashMap<K, U>();
     }
     
     private NamedReentrantReadWriteLock getOrCreateLockForKey(K key) {
@@ -171,60 +224,112 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
         }
     }
     
+    public void suspend() {
+        synchronized (ongoingRecalculations) {
+            suspended = true;
+        }
+    }
+    
+    public void resume() {
+        synchronized (ongoingRecalculations) {
+            suspended = false;
+            for (Iterator<Map.Entry<K, U>> i=triggeredWhileSuspended.entrySet().iterator(); i.hasNext(); ) {
+                Entry<K, U> e = i.next();
+                triggerUpdate(e.getKey(), e.getValue());
+                i.remove();
+            }
+        }
+    }
+    
     public void triggerUpdate(final K key, U updateInterval) {
         // establish and maintain the following invariant: after lock on ongoingManeuverCacheRecalculations is released,
         // no Future contained in it is in cancelled state
-        final FutureTaskWithCancelBlocking<V, U> future;
         synchronized (ongoingRecalculations) {
-            FutureTaskWithCancelBlocking<V, U> oldFuture = ongoingRecalculations.get(key);
+            final U oldUpdateInterval;
             final U joinedUpdateInterval;
-            if (oldFuture == null) {
+            if (suspended) {
+                oldUpdateInterval = triggeredWhileSuspended.get(key);
+            } else {
+                FutureTaskWithCancelBlocking<V, U> oldFuture = ongoingRecalculations.get(key);
+                if (oldFuture != null) {
+                    oldFuture.cancel(/* mayInterruptIfRunning */false);
+                }
+                oldUpdateInterval = oldFuture == null ? null : oldFuture.getUpdateInterval();
+            }
+            if (oldUpdateInterval == null) {
                 joinedUpdateInterval = updateInterval;
             } else {
-                oldFuture.cancel(/* mayInterruptIfRunning */false);
                 if (updateInterval == null) {
-                    joinedUpdateInterval = oldFuture.getUpdateInterval();
+                    joinedUpdateInterval = oldUpdateInterval;
                 } else {
-                    joinedUpdateInterval = updateInterval.join(oldFuture.getUpdateInterval());
+                    joinedUpdateInterval = updateInterval.join(oldUpdateInterval);
                 }
             }
-            future = new FutureTaskWithCancelBlocking<V, U>(
-                    new Callable<V>() {
-                        @Override
-                        public V call() {
-                            try {
-                                V preResult = cacheUpdateComputer.computeCacheUpdate(key, joinedUpdateInterval);
-                                final NamedReentrantReadWriteLock lock = getOrCreateLockForKey(key);
-                                LockUtil.lockForWrite(lock);
-                                try {
-                                    V result = cacheUpdateComputer.provideNewCacheValue(key, cache.get(key), preResult, joinedUpdateInterval);
-                                    if (result == null) {
-                                        cache.remove(key);
-                                    } else {
-                                        cache.put(key, result);
-                                    }
-                                    return result;
-                                } finally {
-                                    LockUtil.unlockAfterWrite(lock);
-                                    ongoingRecalculations.remove(key);
-                                }
-                            } catch (Throwable e) {
-                                // cache won't be updated
-                                logger.throwing(SmartFutureCache.class.getName(), "triggerUpdate", e);
-                                throw new RuntimeException(e);
-                            }
-                        }
-                    }, joinedUpdateInterval);
-            ongoingRecalculations.put(key, future);
+            if (suspended) {
+                triggeredWhileSuspended.put(key, joinedUpdateInterval);
+            } else {
+                createAndExecuteRecalculation(key, joinedUpdateInterval);
+            }
         }
-        recalculator.execute(future);
+    }
+
+    /**
+     * Creates a {@link FutureTask} for the (re-)calculation of the cache entry for <code>key</code> across update interval
+     * <code>joinedUpdateInterval</code>, enters it into {@link #ongoingRecalculations} and schedules its execution with
+     * {@link #recalculator}. The method synchronizes on {@link #ongoingRecalculations}.
+     */
+    private void createAndExecuteRecalculation(final K key, final U joinedUpdateInterval) {
+        synchronized (ongoingRecalculations) {
+            final FutureTaskWithCancelBlocking<V, U> future;
+            future = new FutureTaskWithCancelBlocking<V, U>(new Callable<V>() {
+                @Override
+                public V call() {
+                    try {
+                        V preResult = cacheUpdateComputer.computeCacheUpdate(key, joinedUpdateInterval);
+                        final NamedReentrantReadWriteLock lock = getOrCreateLockForKey(key);
+                        LockUtil.lockForWrite(lock);
+                        try {
+                            V result = cacheUpdateComputer.provideNewCacheValue(key, cache.get(key), preResult,
+                                    joinedUpdateInterval);
+                            cache(key, result);
+                            return result;
+                        } finally {
+                            LockUtil.unlockAfterWrite(lock);
+                            ongoingRecalculations.remove(key);
+                        }
+                    } catch (Exception e) {
+                        // cache won't be updated
+                        logger.throwing(SmartFutureCache.class.getName(), "triggerUpdate", e);
+                        throw new RuntimeException(e);
+                    }
+                }
+            }, joinedUpdateInterval);
+            ongoingRecalculations.put(key, future);
+            recalculator.execute(future);
+        }
     }
     
+    /**
+     * Fetches a value for <code>key</code> from the cache. If no {@link #triggerUpdate(Object, UpdateInterval)} for the <code>key</code>
+     * has ever happened, <code>null</code> will be returned. Otherwise, depending on <code>waitForLatest</code> the result is taken
+     * from the cache straight away (<code>waitForLatest==false</code>) or, if a re-calculation for the <code>key</code> is still
+     * ongoing, the result of that ongoing re-calculation is returned.
+     */
     public V get(K key, boolean waitForLatest) {
         V value = null;
         if (waitForLatest) {
             FutureTaskWithCancelBlocking<V, U> future;
             synchronized (ongoingRecalculations) {
+                if (suspended && waitForLatest) {
+                    final boolean wasTriggeredWhileSuspended = triggeredWhileSuspended.containsKey(key); // update interval may have deliberately been null
+                    if (wasTriggeredWhileSuspended) {
+                        // If suspended and the caller wants to get the latest results, and during suspend recalculations were
+                        // triggered, and execute them now.
+                        // This will enter the new future into ongoingRecalculations, and therefore this method
+                        // will wait for its completion below.
+                        createAndExecuteRecalculation(key, triggeredWhileSuspended.remove(key));
+                    }
+                }
                 // as long as we hold the lock on ongoingManeuverCacheRecalculations, the Futures contained in it are not cancelled
                 future = ongoingRecalculations.get(key);
                 if (future != null) {
@@ -237,6 +342,7 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
                 try {
                     value = future.get();
                 } catch (InterruptedException | ExecutionException e) {
+                    logger.throwing(SmartFutureCache.class.getName(), "get", e);
                     throw new RuntimeException(e);
                 }
             } // else no calculation currently going on; value has been fetched from latest cache entry
@@ -253,5 +359,13 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
 
     public Set<K> keySet() {
         return cache.keySet();
+    }
+
+    protected void cache(final K key, V value) {
+        if (value == null) {
+            cache.remove(key);
+        } else {
+            cache.put(key, value);
+        }
     }
 }

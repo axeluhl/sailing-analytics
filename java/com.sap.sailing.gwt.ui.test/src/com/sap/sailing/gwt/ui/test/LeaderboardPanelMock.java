@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.ui.test;
 
-import com.google.gwt.user.cellview.client.CellTable;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -8,6 +7,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettingsFactory;
 import com.sap.sailing.gwt.ui.leaderboard.SortableColumn;
+import com.sap.sailing.gwt.ui.leaderboard.SortedCellTable;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardRowDTO;
 import com.sap.sailing.gwt.ui.shared.RaceColumnDTO;
@@ -18,8 +18,9 @@ public class LeaderboardPanelMock extends LeaderboardPanel {
             String leaderboardName, ErrorReporter errorReporter,
             StringMessages stringConstants) {
         super(sailingService, null, LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(
-        /* racesToShow */null, /* namesOfRacesToShow */ null, null, /* autoExpandFirstRace */false), new CompetitorSelectionModel(
-                /* hasMultiSelection */true), leaderboardName, null, errorReporter, stringConstants, null, /* showRaceDetails */ true);
+        /* racesToShow */null, /* namesOfRacesToShow */ null, null, /* autoExpandFirstRace */ false,
+        /* showMetaLeaderboardsOnSamePage */ false), new CompetitorSelectionModel(
+                /* hasMultiSelection */true), leaderboardName, errorReporter, stringConstants, null, /* showRaceDetails */ true);
     }
 
     @Override
@@ -47,7 +48,7 @@ public class LeaderboardPanelMock extends LeaderboardPanel {
     }
 
     @Override
-    public CellTable<LeaderboardRowDTO> getLeaderboardTable() {
+    public SortedCellTable<LeaderboardRowDTO> getLeaderboardTable() {
         // TODO Auto-generated method stub
         return super.getLeaderboardTable();
     }

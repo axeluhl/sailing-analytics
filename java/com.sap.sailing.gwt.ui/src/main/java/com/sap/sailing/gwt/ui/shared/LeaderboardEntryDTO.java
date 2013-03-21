@@ -26,14 +26,14 @@ public class LeaderboardEntryDTO implements IsSerializable {
      */
     public MaxPointsReason reasonForMaxPoints;
     
-    public double netPoints;
+    public Double netPoints;
     
     /**
      * Tells if the net points have been overridden by a score correction. Can be used to render differently in editing environment.
      */
     public boolean netPointsCorrected;
     
-    public double totalPoints;
+    public Double totalPoints;
     
     public boolean discarded;
     
@@ -57,17 +57,25 @@ public class LeaderboardEntryDTO implements IsSerializable {
 
     public LeaderboardEntryDTO() { }
     
+    public boolean hasScoreCorrection() {
+        return netPointsCorrected || (reasonForMaxPoints != null && reasonForMaxPoints != MaxPointsReason.NONE);
+    }
+
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
+        result = prime * result
+                + ((averageCrossTrackErrorInMeters == null) ? 0 : averageCrossTrackErrorInMeters.hashCode());
         result = prime * result + (discarded ? 1231 : 1237);
         result = prime * result + ((legDetails == null) ? 0 : legDetails.hashCode());
-        result = prime * result + (int) netPoints;
-        result = prime * result + ((averageCrossTrackErrorInMeters == null) ? 0 : averageCrossTrackErrorInMeters.hashCode());
+        result = prime * result + ((netPoints == null) ? 0 : netPoints.hashCode());
         result = prime * result + ((reasonForMaxPoints == null) ? 0 : reasonForMaxPoints.hashCode());
-        result = prime * result + ((windwardDistanceToOverallLeaderInMeters == null) ? 0 : windwardDistanceToOverallLeaderInMeters.hashCode());
-        result = prime * result + (int) totalPoints;
+        result = prime * result + ((totalPoints == null) ? 0 : totalPoints.hashCode());
+        result = prime
+                * result
+                + ((windwardDistanceToOverallLeaderInMeters == null) ? 0 : windwardDistanceToOverallLeaderInMeters
+                        .hashCode());
         return result;
     }
 
@@ -80,6 +88,11 @@ public class LeaderboardEntryDTO implements IsSerializable {
         if (getClass() != obj.getClass())
             return false;
         LeaderboardEntryDTO other = (LeaderboardEntryDTO) obj;
+        if (averageCrossTrackErrorInMeters == null) {
+            if (other.averageCrossTrackErrorInMeters != null)
+                return false;
+        } else if (!averageCrossTrackErrorInMeters.equals(other.averageCrossTrackErrorInMeters))
+            return false;
         if (discarded != other.discarded)
             return false;
         if (legDetails == null) {
@@ -87,24 +100,22 @@ public class LeaderboardEntryDTO implements IsSerializable {
                 return false;
         } else if (!legDetails.equals(other.legDetails))
             return false;
-        if (netPoints != other.netPoints)
-            return false;
-        if (reasonForMaxPoints == null) {
-            if (other.reasonForMaxPoints != null)
+        if (netPoints == null) {
+            if (other.netPoints != null)
                 return false;
-        } else if (!reasonForMaxPoints.equals(other.reasonForMaxPoints))
+        } else if (!netPoints.equals(other.netPoints))
+            return false;
+        if (reasonForMaxPoints != other.reasonForMaxPoints)
+            return false;
+        if (totalPoints == null) {
+            if (other.totalPoints != null)
+                return false;
+        } else if (!totalPoints.equals(other.totalPoints))
             return false;
         if (windwardDistanceToOverallLeaderInMeters == null) {
             if (other.windwardDistanceToOverallLeaderInMeters != null)
                 return false;
         } else if (!windwardDistanceToOverallLeaderInMeters.equals(other.windwardDistanceToOverallLeaderInMeters))
-            return false;
-        if (averageCrossTrackErrorInMeters == null) {
-            if (other.averageCrossTrackErrorInMeters != null)
-                return false;
-        } else if (!averageCrossTrackErrorInMeters.equals(other.averageCrossTrackErrorInMeters))
-            return false;
-        if (totalPoints != other.totalPoints)
             return false;
         return true;
     }

@@ -5,13 +5,10 @@ Bundle-SymbolicName: com.sap.sailing.expeditionconnector.test
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Fragment-Host: com.sap.sailing.expeditionconnector
 Require-Bundle: com.sap.sailing.server,
- com.sap.sailing.expeditionconnector,
- com.sap.sailing.domain,
- com.sap.sailing.declination,
  com.sap.sailing.domain.test,
- com.sap.sailing.udpconnector,
- com.sap.sailing.domain.common
+ com.sap.sailing.udpconnector
 Import-Package: junit.framework;version="4.8.1",
  org.junit;version="4.8.1",
  org.osgi.framework;version="1.6.0"

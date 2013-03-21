@@ -1,7 +1,7 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
-import com.sap.sailing.domain.common.RegattaNameAndRaceName;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 
 public interface TrackedRaceChangedListener {
-    void changeTrackingRace(RegattaNameAndRaceName regattaNameAndRaceName, boolean isTracked);
+    void changeTrackingRace(Iterable<? extends RegattaAndRaceIdentifier> regattaAndRaceIdentifiers, boolean isTracked);
 }

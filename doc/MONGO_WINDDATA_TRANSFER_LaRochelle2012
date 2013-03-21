@@ -1,7 +1,7 @@
 505 WM La Rochelle 
 
 Move wind data from prod to test/dev
-  /opt/mongodb/bin/mongoexport --port 10202 -d winddb -c WIND_TRACKS -q "{ EVENT_NAME: 'SAP 505 World Championship 2012 (505)'}" > /tmp/windtracks-505.json
+  /opt/mongodb/bin/mongoexport --port 10202 -d winddb -c WIND_TRACKS -q "{ REGATTA_NAME: 'SAP 505 World Championship 2012 (505)'}" > /tmp/windtracks-505.json
 
 to test
   /opt/mongodb/bin/mongoimport --port 10201 -d winddb -c WIND_TRACKS /tmp/windtracks-505.json

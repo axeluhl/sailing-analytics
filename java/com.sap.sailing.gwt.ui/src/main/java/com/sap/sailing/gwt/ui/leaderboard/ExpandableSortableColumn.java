@@ -13,6 +13,7 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Header;
 import com.sap.sailing.domain.common.DetailType;
+import com.sap.sailing.domain.common.SortingOrder;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.LeaderboardRowDTO;
 
@@ -46,9 +47,9 @@ public abstract class ExpandableSortableColumn<C> extends SortableColumn<Leaderb
     private boolean expanded;
 
     public ExpandableSortableColumn(LeaderboardPanel leaderboardPanel, boolean enableExpansion, Cell<C> cell,
-            StringMessages stringConstants, String detailHeaderStyle, String detailColumnStyle,
+            SortingOrder preferredSortingOrder, StringMessages stringConstants, String detailHeaderStyle, String detailColumnStyle,
             List<DetailType> detailSelection) {
-        super(cell);
+        super(cell, preferredSortingOrder);
         this.enableExpansion = enableExpansion;
         this.leaderboardPanel = leaderboardPanel;
         this.detailSelection = detailSelection;

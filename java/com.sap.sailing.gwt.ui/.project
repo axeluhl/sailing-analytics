@@ -36,15 +36,4 @@
 		<nature>org.eclipse.jdt.core.javanature</nature>
 		<nature>com.google.gwt.eclipse.core.gwtNature</nature>
 	</natures>
-	<filteredResources>
-		<filter>
-			<id>1350536426855</id>
-			<name></name>
-			<type>10</type>
-			<matcher>
-				<id>org.eclipse.ui.ide.multiFilter</id>
-				<arguments>1.0-projectRelativePath-matches-true-false-war</arguments>
-			</matcher>
-		</filter>
-	</filteredResources>
 </projectDescription>

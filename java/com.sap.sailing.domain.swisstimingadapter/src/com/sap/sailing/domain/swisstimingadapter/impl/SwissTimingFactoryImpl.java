@@ -6,15 +6,18 @@ import java.text.ParseException;
 import java.util.HashMap;
 import java.util.Map;
 
+
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util.Triple;
+import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.swisstimingadapter.DomainFactory;
 import com.sap.sailing.domain.swisstimingadapter.Race;
 import com.sap.sailing.domain.swisstimingadapter.RaceSpecificMessageLoader;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterConnector;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterMessage;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterTransceiver;
+import com.sap.sailing.domain.swisstimingadapter.SwissTimingArchiveConfiguration;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingConfiguration;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingMessageParser;
@@ -25,7 +28,7 @@ import com.sap.sailing.domain.tracking.WindStore;
 
 public class SwissTimingFactoryImpl implements SwissTimingFactory {
     private final Map<Triple<String, Integer, RaceSpecificMessageLoader>, SailMasterConnector> connectors;
-    
+
     public SwissTimingFactoryImpl() {
         connectors = new HashMap<Triple<String, Integer, RaceSpecificMessageLoader>, SailMasterConnector>();
     }
@@ -78,10 +81,10 @@ public class SwissTimingFactoryImpl implements SwissTimingFactory {
 
     @Override
     public SwissTimingRaceTracker createRaceTracker(String raceID, String hostname, int port, boolean canSendRequests, long delayToLiveInMillis,
-            WindStore windStore, RaceSpecificMessageLoader messageLoader, DomainFactory domainFactory,
+            RaceLogStore raceLogStore, WindStore windStore, RaceSpecificMessageLoader messageLoader, DomainFactory domainFactory,
             TrackedRegattaRegistry trackedRegattaRegistry) throws InterruptedException, UnknownHostException, IOException,
             ParseException {
-        return new SwissTimingRaceTrackerImpl(raceID, hostname, port, windStore, domainFactory, this, messageLoader,
+        return new SwissTimingRaceTrackerImpl(raceID, hostname, port, raceLogStore, windStore, domainFactory, this, messageLoader,
                 trackedRegattaRegistry, canSendRequests, delayToLiveInMillis);
     }
 
@@ -103,11 +106,14 @@ public class SwissTimingFactoryImpl implements SwissTimingFactory {
     public SailMasterMessage createMessage(String message, Long sequenceNumber) {
         return new SailMasterMessageImpl(message, sequenceNumber);
     }
-    
+
     @Override
     public Race createRace(String raceId, String description, TimePoint startTime) {
-    	return new RaceImpl(raceId, description, startTime);
+        return new RaceImpl(raceId, description, startTime);
     }
 
-    
+    @Override
+    public SwissTimingArchiveConfiguration createSwissTimingArchiveConfiguration(String jsonUrl) {
+        return new SwissTimingArchiveConfigurationImpl(jsonUrl);
+    }
 }

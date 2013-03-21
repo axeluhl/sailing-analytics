@@ -1,0 +1,12 @@
+package com.sap.sailing.odf.resultimport;
+
+import java.io.IOException;
+import java.io.InputStream;
+
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.xml.sax.SAXException;
+
+public interface OdfBodyParser {
+    OdfBody parse(InputStream inputStream, String sourceName) throws SAXException, IOException, ParserConfigurationException;
+}

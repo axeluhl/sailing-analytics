@@ -46,5 +46,10 @@ public enum CollectionNames {
      * Stores the mapping of {@link RaceDefinition#getId race IDs} to regatta names for automatic re-association
      * when tracking races again without explicitly specifying a regatta.
      */
-    REGATTA_FOR_RACE_ID;
+    REGATTA_FOR_RACE_ID, 
+    
+    /**
+     * Stores the race log events for a tracked race.
+     */
+    RACE_LOGS;
 }

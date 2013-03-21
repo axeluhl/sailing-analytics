@@ -17,14 +17,14 @@ import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnListener;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.MaxPointsReason;
-import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.DelayedLeaderboardCorrections;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.leaderboard.impl.LowPoint;
 import com.sap.sailing.domain.test.AbstractLeaderboardTest;
-import com.sap.sailing.domain.test.MockedTrackedRaceWithFixedRank;
+import com.sap.sailing.domain.test.mock.MockedTrackedRaceWithFixedRank;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.mongodb.MongoDBService;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
@@ -74,7 +74,7 @@ public class DelayedLeaderboardCorrectionsReplicationTest extends AbstractServer
         master = createRacingEventServiceWithOneMockedTrackedRace(q2YellowTrackedRace);
         final String leaderboardName = "My new leaderboard";
         final int[] discardThresholds = new int[] { 19, 44 };
-        CreateFlexibleLeaderboard createTestLeaderboard = new CreateFlexibleLeaderboard(leaderboardName, discardThresholds);
+        CreateFlexibleLeaderboard createTestLeaderboard = new CreateFlexibleLeaderboard(leaderboardName, null, discardThresholds, new LowPoint(), null);
         assertNull(master.getLeaderboardByName(leaderboardName));
         master.apply(createTestLeaderboard);
         final Leaderboard masterLeaderboard = master.getLeaderboardByName(leaderboardName);
@@ -125,7 +125,7 @@ public class DelayedLeaderboardCorrectionsReplicationTest extends AbstractServer
     private RacingEventServiceImpl createRacingEventServiceWithOneMockedTrackedRace(final TrackedRace q2YellowTrackedRace) {
         return new RacingEventServiceImpl(MongoDBService.INSTANCE) {
             @Override
-            public TrackedRace getExistingTrackedRace(RaceIdentifier raceIdentifier) {
+            public TrackedRace getExistingTrackedRace(RegattaAndRaceIdentifier raceIdentifier) {
                 return q2YellowTrackedRace;
             }
         };

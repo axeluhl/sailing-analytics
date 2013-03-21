@@ -1,9 +1,6 @@
 package com.sap.sailing.server.operationaltransformation;
 
-import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
-import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
-import com.sap.sailing.domain.leaderboard.impl.RegattaLeaderboardImpl;
 import com.sap.sailing.server.RacingEventService;
 
 
@@ -26,10 +23,6 @@ public abstract class AbstractLeaderboardOperation<ResultType> extends AbstractR
     }
 
     protected void updateStoredLeaderboard(RacingEventService toState, Leaderboard leaderboard) {
-        if (leaderboard instanceof FlexibleLeaderboard) {
-            toState.updateStoredFlexibleLeaderboard((FlexibleLeaderboard) leaderboard);
-        } else if (leaderboard instanceof RegattaLeaderboardImpl) {
-            toState.updateStoredRegattaLeaderboard((RegattaLeaderboard) leaderboard);
-        }
+        toState.updateStoredLeaderboard(leaderboard);
     }
 }

@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.base;
 
 import com.sap.sailing.domain.common.Named;
+import com.sap.sailing.domain.common.WithID;
 
 /**
  * Tells the {@link BoatClass boat class} and the {@link Course course} for a single race that is usually part of a
