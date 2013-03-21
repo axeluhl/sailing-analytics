@@ -33,7 +33,7 @@ public class LockUtil {
                     message.append(lockDescriptionForTimeoutLogMessage);
                     message.append(" in ");
                     message.append(NUMBER_OF_SECONDS_TO_WAIT_FOR_LOCK);
-                    message.append("s at ");
+                    message.append("s in thread "+Thread.currentThread().getName()+" at ");
                     message.append(getCurrentStackTrace());
                     Thread writer = lockParent.getWriter();
                     if (writer != null) {

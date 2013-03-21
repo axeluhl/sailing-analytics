@@ -55,7 +55,7 @@ import com.sap.sailing.domain.swisstimingadapter.TrackerType;
 
 /**
  * Implements the connector to the SwissTiming Sail Master system. It uses a host name and port number to establish the
- * connecting via TCP. The connector offers a number of explicit service request methods. Additionally, the connector
+ * connection via TCP. The connector offers a number of explicit service request methods. Additionally, the connector
  * can receive "spontaneous" events sent by the sail master system. Clients can register for those spontaneous events
  * (see {@link #addSailMasterListener}).
  * <p>
