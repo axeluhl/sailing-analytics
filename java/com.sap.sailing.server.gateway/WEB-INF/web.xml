@@ -64,6 +64,15 @@
 	</servlet-mapping>
 
 	<servlet>
+		<servlet-name>EventsJsonExportServlet</servlet-name>
+		<servlet-class>com.sap.sailing.server.gateway.impl.EventsJsonExportServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>EventsJsonExportServlet</servlet-name>
+		<url-pattern>/events</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
 		<servlet-name>RegattasJsonExportServlet</servlet-name>
 		<servlet-class>com.sap.sailing.server.gateway.impl.RegattasJsonExportServlet</servlet-class>
 	</servlet>
