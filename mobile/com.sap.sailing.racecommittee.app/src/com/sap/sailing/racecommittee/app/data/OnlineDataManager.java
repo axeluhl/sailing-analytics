@@ -138,7 +138,7 @@ public class OnlineDataManager extends DataManager {
 
         try {
             new DataLoader<Collection<ManagedRace>>(context, URI.create(AppConstants.getServerBaseURL(context)
-                    + "/sailingserver/rc/leaderboards?courseArea=" + courseAreaId.toString()), parser, handler)
+                    + "/sailingserver/rc/racegroups?courseArea=" + courseAreaId.toString()), parser, handler)
                     .forceLoad();
         } catch (MalformedURLException e) {
             e.printStackTrace();
