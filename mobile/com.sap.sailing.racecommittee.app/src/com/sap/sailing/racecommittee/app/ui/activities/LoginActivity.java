@@ -11,7 +11,7 @@ import android.view.Window;
 import android.widget.Toast;
 
 import com.sap.sailing.domain.base.CourseArea;
-import com.sap.sailing.domain.base.EventData;
+import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
@@ -50,6 +50,34 @@ public class LoginActivity extends TwoPaneActivity implements EventSelectedListe
         }
     }
 
+	private void addEventListFragment() {	
+		FragmentTransaction transaction = getFragmentManager().beginTransaction();
+		transaction.add(R.id.leftContainer, new EventListFragment());
+		transaction.setTransition(FragmentTransaction.TRANSIT_NONE);
+		transaction.commit();
+	}
+	
+	private void addCourseAreaListFragment(Serializable eventId) {
+		Bundle args = new Bundle();
+		args.putSerializable(AppConstants.EventIdTag, eventId);
+		
+		Fragment fragment = new CourseAreaListFragment();
+		fragment.setArguments(args);
+		FragmentTransaction transaction = getFragmentManager().beginTransaction();
+		transaction.setCustomAnimations(R.animator.slide_in, R.animator.slide_out);
+		transaction.replace(R.id.rightContainer, fragment);
+		transaction.commit();
+		ExLog.i("LoginActivity", "CourseFragment created.");
+	}
+    
+	private ItemSelectedListener<EventBase> eventSelectionListener = new ItemSelectedListener<EventBase>() {
+	
+		public void itemSelected(Fragment sender, EventBase event) {
+			Serializable eventId = event.getId();
+			ExLog.i(ExLog.EVENT_SELECTED, eventId.toString(), getBaseContext());
+			showCourseAreaListFragment(eventId);
+		}
+	};
     // Login -> startRaceActivity(selectedCourse);
 
     private void addEventListFragment() {
@@ -58,6 +86,17 @@ public class LoginActivity extends TwoPaneActivity implements EventSelectedListe
         transaction.setTransition(FragmentTransaction.TRANSIT_NONE);
         transaction.commit();
     }
+	public ItemSelectedListener<EventBase> getEventSelectionListener() {
+		return eventSelectionListener;
+	}
+	
+	private void showCourseAreaListFragment(Serializable eventId) {
+		Toast.makeText(LoginActivity.this, eventId.toString(), Toast.LENGTH_LONG).show();
+		getRightLayout().setVisibility(View.VISIBLE);
+		addCourseAreaListFragment(eventId);
+	}
+	
+	private ItemSelectedListener<CourseArea> courseAreaSelectionListener = new ItemSelectedListener<CourseArea>() {
 
     private void addCourseAreaListFragment(Serializable eventId) {
         Bundle args = new Bundle();

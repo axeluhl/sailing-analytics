@@ -6,11 +6,11 @@ import java.util.Collection;
 import java.util.Date;
 
 import com.sap.sailing.domain.base.CourseArea;
-import com.sap.sailing.domain.base.EventData;
+import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
 import com.sap.sailing.domain.base.impl.CourseAreaImpl;
-import com.sap.sailing.domain.base.impl.EventDataImpl;
+import com.sap.sailing.domain.base.impl.EventBaseImpl;
 import com.sap.sailing.domain.base.impl.FleetImpl;
 import com.sap.sailing.domain.base.impl.MarkImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
@@ -32,6 +32,40 @@ public class OfflineDataManager extends DataManager {
 
     private static boolean isInitialized = false;
 
+	private void fillDataStore(DataStore dataStore) {
+		dataStore.addEvent(new EventBaseImpl("Extreme Sailing Series 2012 (Cardiff)", "Cardiff", "", true, "DUMBUUIDA"));
+		dataStore.addEvent(new EventBaseImpl("Extreme Sailing Series 2012 (Nice)", "Nice", "", true, "DUMBUUIDB"));
+		dataStore.addEvent(new EventBaseImpl("Extreme Sailing Series 2012 (Rio)", "Rio", "", true, "DUMBUUIDC"));
+		EventBase newEvent = new EventBaseImpl("Extreme Sailing Series 2013 (Muscat)", "Muscat", "", true, "FIXUUID");
+		newEvent.getVenue().addCourseArea(new CourseAreaImpl("Offshore", "FIXCAUUID1"));
+		newEvent.getVenue().addCourseArea(new CourseAreaImpl("Stadium", "FIXCAUUID2"));
+		dataStore.addEvent(newEvent);
+		
+		SeriesWithRows qualifying = new SeriesWithRowsImpl("Qualifying", false, null);
+		SeriesWithRows medal = new SeriesWithRowsImpl("Medal", true, null);
+		RaceGroup raceGroup = new RaceGroupImpl(
+				"ESS", 
+				new BoatClassImpl("X40", false), 
+				null,
+				Arrays.asList(qualifying, medal));
+		
+		RaceLogEventFactory factory = new RaceLogEventFactoryImpl();
+		PassAwareRaceLog log = new PassAwareRaceLogImpl();
+		log.add(factory.createRaceStatusEvent(
+				new MillisecondsTimePoint(new Date().getTime() + 1), 
+				2,
+				RaceLogRaceStatus.SCHEDULED));
+		
+		ManagedRace q1 = new ManagedRaceImpl(
+				new ManagedRaceIdentifierImpl(
+						"Q1", 
+						new FleetImpl("Default"), 
+						qualifying, 
+						raceGroup), 
+					log);
+		
+		log = new PassAwareRaceLogImpl();
+		/*log.add(factory.createStartTimeEvent(
     public OfflineDataManager(DataStore dataStore) {
         super(dataStore);
 
@@ -122,7 +156,7 @@ public class OfflineDataManager extends DataManager {
         dataStore.addMark(m3);
     }
 
-    public void loadEvents(LoadClient<Collection<EventData>> client) {
+    public void loadEvents(LoadClient<Collection<EventBase>> client) {
         client.onLoadSucceded(dataStore.getEvents());
     }
 

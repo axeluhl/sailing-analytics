@@ -8,7 +8,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.json.simple.JSONArray;
 
-import com.sap.sailing.domain.base.EventData;
+import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.server.gateway.AbstractJsonHttpServlet;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CourseAreaJsonSerializer;
@@ -20,16 +20,16 @@ public class EventDataJsonExportServlet extends AbstractJsonHttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        JsonSerializer<EventData> eventSerializer = createSerializer();
+        JsonSerializer<EventBase> eventSerializer = createSerializer();
         JSONArray result = new JSONArray();
-        for (EventData event : getService().getAllEvents()) {
+        for (EventBase event : getService().getAllEvents()) {
             result.add(eventSerializer.serialize(event));
         }
         result.writeJSONString(response.getWriter());
         response.setContentType("application/json");
     }
 
-    private static JsonSerializer<EventData> createSerializer() {
+    private static JsonSerializer<EventBase> createSerializer() {
         return new EventDataJsonSerializer(new VenueJsonSerializer(new CourseAreaJsonSerializer()));
     }
 
