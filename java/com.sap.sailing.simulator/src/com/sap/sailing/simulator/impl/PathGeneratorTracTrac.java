@@ -57,7 +57,8 @@ public class PathGeneratorTracTrac extends PathGeneratorBase {
 
         LOGGER.info("Calling service.addTracTracRace");
 
-        try {
+        //TODO: Fix raceHandle
+        /*try {
             this.raceHandle = this.service.addTracTracRace(this.raceURL, this.liveURI, this.storedURI, DEFAULT_WINDSTORE, DEFAULT_TIMEOUT_MILLISECONDS,
                     this);
             synchronized (this) {
@@ -65,7 +66,7 @@ public class PathGeneratorTracTrac extends PathGeneratorBase {
             }
         } catch (Exception error) {
             LOGGER.severe(error.getMessage());
-        }
+        }*/
     }
 
     public void setEvaluationParameters(String raceURLString, String liveURIString, String storedURIString, double windScale) {
@@ -288,7 +289,8 @@ public class PathGeneratorTracTrac extends PathGeneratorBase {
             Wind gpsWind = trackedRace.getWind(position, timePoint);
 
             if (gpsWind.getKnots() == 1.0) {
-                gpsWind.scale(this.windScale);
+                //TODO: Fix scale
+                //gpsWind.scale(this.windScale);
             }
 
             path.addLast(new TimedPositionWithSpeedImpl(timePoint, position, gpsWind));
@@ -346,7 +348,8 @@ public class PathGeneratorTracTrac extends PathGeneratorBase {
             Wind gpsWind = trackedRace.getWind(position, timePoint);
 
             if (gpsWind.getKnots() == 1.0) {
-                gpsWind.scale(this.windScale);
+                //TODO: Fix scale
+                //gpsWind.scale(this.windScale);
             }
 
             path.addLast(new TimedPositionWithSpeedImpl(timePoint, position, gpsWind));

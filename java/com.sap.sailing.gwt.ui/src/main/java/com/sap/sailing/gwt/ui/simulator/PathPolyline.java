@@ -670,7 +670,7 @@ public class PathPolyline {
             public void onSuccess(ResponseTotalTimeDTO receiveData) {
                 String notificationMessage = receiveData.notificationMessage;
                 if (notificationMessage != "" && notificationMessage.length() != 0 && warningAlreadyShown == false) {
-                    errorReporter.reportNotification(notificationMessage);
+                    //TODO: Fix errorReporter errorReporter.reportNotification(notificationMessage);
                     warningAlreadyShown = true;
                 }
 

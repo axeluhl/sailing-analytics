@@ -7,8 +7,8 @@ import junit.framework.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.sap.sailing.domain.base.impl.MeterDistance;
 import com.sap.sailing.domain.common.Distance;
+import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.simulator.Path;
 import com.sap.sailing.simulator.impl.PathGeneratorTracTrac;
 

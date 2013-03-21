@@ -235,7 +235,7 @@ public class TestTimeComparison {
                     this.turnPoints, true, false);
 
 
-            final ResponseTotalTimeDTO receiveData = simulatorService.getTotalTime_new(requestData);
+            final ResponseTotalTimeDTO receiveData = simulatorService.getTotalTime(requestData);
             averageWind = simulatorService.getAverageWind();
             result += ", " + receiveData.totalTimeSeconds;
         }

@@ -1,4 +1,4 @@
-package com.sap.sailing.simulator.util;
+package com.sap.sailing.simulator.impl;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -20,7 +20,6 @@ import org.osgi.framework.FrameworkUtil;
 
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.simulator.Path;
-import com.sap.sailing.simulator.impl.ConfigurationManager;
 
 public class SerializationUtils {
 

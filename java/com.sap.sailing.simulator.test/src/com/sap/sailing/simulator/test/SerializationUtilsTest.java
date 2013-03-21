@@ -4,7 +4,7 @@ import junit.framework.Assert;
 
 import org.junit.Test;
 
-import com.sap.sailing.simulator.util.SerializationUtils;
+import com.sap.sailing.simulator.impl.SerializationUtils;
 
 public class SerializationUtilsTest {
 

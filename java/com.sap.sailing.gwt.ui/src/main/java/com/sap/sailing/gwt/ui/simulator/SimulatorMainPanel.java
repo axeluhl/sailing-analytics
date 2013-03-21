@@ -42,6 +42,10 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SimulatorServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.TimePanel;
+import com.sap.sailing.gwt.ui.client.TimePanelSettings;
+import com.sap.sailing.gwt.ui.client.TimeRangeWithZoomModel;
+import com.sap.sailing.gwt.ui.client.TimeRangeWithZoomProvider;
 import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.shared.BoatClassDTO;
@@ -99,7 +103,7 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
     private boolean autoUpdate;
     private char mode;
 
-    private SimulatorTimePanel timePanel;
+    private TimePanel<TimePanelSettings> timePanel;
 
     private CheckBox isOmniscient;
     private CheckBox isOpportunistic;
@@ -258,10 +262,12 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
          * timeSliderWrapperPanel.getElement().setClassName("timeSliderWrapperPanel" );
          * timeSliderWrapperPanel.add(timePanel); timePanel.setVisible(false);
          */
-        timePanel = new SimulatorTimePanel(timer, stringMessages, windParams);
+        //timePanel = new SimulatorTimePanel(timer, stringMessages, windParams);
+        TimeRangeWithZoomProvider timeRangeProvider = new TimeRangeWithZoomModel();
+        timePanel = new TimePanel<TimePanelSettings>(timer, timeRangeProvider, stringMessages);
         initTimer();
         timer.setTime(windParams.getStartTime().getTime());
-        timePanel.setActive(false);
+        //timePanel.setActive(false);
 
         busyIndicator = new SimpleBusyIndicator(false, 0.8f);
         // LogoAndTitlePanel logoAndTitlePanel = new
@@ -634,7 +640,7 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
             public void onSuccess(BoatClassDTOsAndNotificationMessage boatClassesAndMsg) {
                 String notificationMessage = boatClassesAndMsg.getNotificationMessage();
                 if(notificationMessage != "" && notificationMessage.length() != 0 && warningAlreadyShown == false) {
-                    errorReporter.reportNotification(boatClassesAndMsg.getNotificationMessage());
+                  //TODO: Fix errorReporter errorReporter.reportNotification(boatClassesAndMsg.getNotificationMessage());
                     warningAlreadyShown = true;
                 }
 
@@ -670,7 +676,7 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
             public void onSuccess(PolarDiagramDTOAndNotificationMessage polar) {
                 String notificationMessage = polar.getNotificationMessage();
                 if(notificationMessage != "" && notificationMessage.length() != 0 && warningAlreadyShown == false) {
-                    errorReporter.reportNotification(polar.getNotificationMessage());
+                  //TODO: Fix errorReporter errorReporter.reportNotification(polar.getNotificationMessage());
                     warningAlreadyShown = true;
                 }
 
@@ -727,15 +733,15 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
         int selectedLegIndex = legSelector.getSelectedIndex();
 
         if (this.windDisplayButton.getValue()) {
-            this.timePanel.setActive(true);
+            //TODO: Activate TimePanel this.timePanel.setActive(true);
             this.simulatorMap.refreshView(SimulatorMap.ViewName.WINDDISPLAY, this.currentWPDisplay, selectedBoatClassIndex, selectedRaceIndex,
                     selectedCompetitorIndex, selectedLegIndex, true);
         } else if (this.summaryButton.getValue()) {
-            this.timePanel.setActive(false);
+            //TODO: Activate TimePanel this.timePanel.setActive(false);
             this.simulatorMap.refreshView(SimulatorMap.ViewName.SUMMARY, this.currentWPDisplay, selectedBoatClassIndex, selectedRaceIndex,
                     selectedCompetitorIndex, selectedLegIndex, true);
         } else if (this.replayButton.getValue()) {
-            this.timePanel.setActive(true);
+            //TODO: Activate TimePanel this.timePanel.setActive(true);
             this.simulatorMap.refreshView(SimulatorMap.ViewName.REPLAY, this.currentWPDisplay, selectedBoatClassIndex, selectedRaceIndex,
                     selectedCompetitorIndex, selectedLegIndex, true);
         } else {
@@ -747,7 +753,7 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
 
                     this.simulatorMap.removePolyline();
 
-                    this.timePanel.setActive(false);
+                    //TODO: Activate TimePanel this.timePanel.setActive(false);
                     this.simulatorMap.refreshView(SimulatorMap.ViewName.SUMMARY, this.currentWPDisplay, selectedBoatClassIndex, selectedRaceIndex,
                             selectedCompetitorIndex, selectedLegIndex, true);
                 }
@@ -768,7 +774,7 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
             @Override
             public void onClick(ClickEvent arg0) {
                 // timePanel.setVisible(false);
-                timePanel.setActive(false);
+                //TODO: Activate TimePanel timePanel.setActive(false);
                 simulatorMap.refreshView(SimulatorMap.ViewName.SUMMARY, currentWPDisplay, selectedBoatClassIndex, selectedRaceIndex, selectedCompetitorIndex,
                         selectedLegIndex,
                         false);
@@ -783,7 +789,7 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
                 simulatorMap.refreshView(SimulatorMap.ViewName.REPLAY, currentWPDisplay, selectedBoatClassIndex, selectedRaceIndex, selectedCompetitorIndex,
                         selectedLegIndex,
                         false);
-                timePanel.setActive(true);
+                //TODO: Activate TimePanel timePanel.setActive(true);
             }
         });
 
@@ -794,7 +800,7 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
                 simulatorMap.refreshView(SimulatorMap.ViewName.WINDDISPLAY, currentWPDisplay, selectedBoatClassIndex, selectedRaceIndex,
                         selectedCompetitorIndex, selectedLegIndex,
                         false);
-                timePanel.setActive(true);
+              //TODO: Activate TimePanel timePanel.setActive(true);
             }
         });
 
@@ -978,7 +984,7 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
             public void onSuccess(BoatClassDTOsAndNotificationMessage response) {
                 String notificationMessage = response.getNotificationMessage();
                 if (notificationMessage != "" && notificationMessage.length() != 0 && warningAlreadyShown == false) {
-                    errorReporter.reportNotification(response.getNotificationMessage());
+                    //TODO: Fix errorReporter errorReporter.reportNotification(response.getNotificationMessage());
                     warningAlreadyShown = true;
                 }
 

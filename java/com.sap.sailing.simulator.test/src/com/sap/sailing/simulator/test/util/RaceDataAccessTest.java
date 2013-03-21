@@ -94,13 +94,16 @@ public class RaceDataAccessTest {
         service = new RacingEventServiceImpl();
         logger.info("Calling service.addTracTracRace");
         Object obj = new Object();
-        raceHandle = service.addTracTracRace(paramUrl, liveUri, storedUri, EmptyWindStore.INSTANCE, /* timeoutInMilliseconds */60000, obj);
+        //TODO: Fix raceHandle
+        /*
+        raceHandle = service.addTracTracRace(paramUrl, liveUri, storedUri, EmptyWindStore.INSTANCE, 60000, obj);
         logger.info("Calling raceHandle.getRaces(): " + raceHandle);
 
         synchronized (obj) {
             obj.wait();
         }
-
+        */
+        
         Set<RaceDefinition> races = raceHandle.getRaces(); // wait for RaceDefinition to be completely wired in Regatta
         logger.info("Obtained races: " + races.size());
 
@@ -112,7 +115,8 @@ public class RaceDataAccessTest {
             System.out.println("Race: \"" + race.getName() + "\", \"" + regatta + "\"");
 
             RaceIdentifier raceIdentifier = new RegattaNameAndRaceName(regatta, race.getName());
-            TrackedRace tr = service.getExistingTrackedRace(raceIdentifier);
+            //TODO: fix getTrackedRace
+            TrackedRace tr = null; //service.getExistingTrackedRace(raceIdentifier);
 
             System.out.println("Competitors:");
             Iterable<Competitor> competitors = tr.getRace().getCompetitors();

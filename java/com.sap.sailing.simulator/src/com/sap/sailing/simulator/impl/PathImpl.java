@@ -266,9 +266,10 @@ public class PathImpl implements Path, Serializable {
                 previousPoint = this.pathPoints.get(index - 1);
                 nextPoint = this.pathPoints.get(index + 1);
 
-                if (currentPoint.getPosition().isTurn(previousPoint.getPosition(), nextPoint.getPosition())) {
+                //TODO: Fix isTurn
+                /*if (currentPoint.getPosition().isTurn(previousPoint.getPosition(), nextPoint.getPosition())) {
                     list.add(currentPoint);
-                }
+                }*/
             }
         }
 

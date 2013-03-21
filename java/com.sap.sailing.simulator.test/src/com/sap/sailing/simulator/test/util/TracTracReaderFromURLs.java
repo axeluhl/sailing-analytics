@@ -63,7 +63,8 @@ public class TracTracReaderFromURLs implements TracTracReader {
 	    
 	    for( String paramURLStr : tracTracParamURLs ) {
 	    	URL paramURL = new URL(paramURLStr);
-	    	RacesHandle raceHandle = service.addTracTracRace(paramURL, liveURI, storedURI, EmptyWindStore.INSTANCE, 60000, this);
+	    	//TODO: fix getTrackedRace
+	    	RacesHandle raceHandle = null; //service.addTracTracRace(paramURL, liveURI, storedURI, EmptyWindStore.INSTANCE, 60000, this);
 			synchronized (this) {
 				this.wait();
 		    }
@@ -72,7 +73,8 @@ public class TracTracReaderFromURLs implements TracTracReader {
 			
 			for (RaceDefinition r : races) {
 		        RaceIdentifier raceIdentifier = new RegattaNameAndRaceName(regatta, r.getName());
-	            TrackedRace tr = service.getExistingTrackedRace(raceIdentifier);	
+		    //TODO: fix getTrackedRace
+	            TrackedRace tr = null; //service.getExistingTrackedRace(raceIdentifier);	
 	            racesList.add(tr);
 			}
 	    }

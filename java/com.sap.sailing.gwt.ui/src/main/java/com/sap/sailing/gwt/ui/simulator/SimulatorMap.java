@@ -23,6 +23,8 @@ import com.sap.sailing.gwt.ui.client.RequiresDataInitialization;
 import com.sap.sailing.gwt.ui.client.SimulatorServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.TimeListenerWithStoppingCriteria;
+import com.sap.sailing.gwt.ui.client.TimePanel;
+import com.sap.sailing.gwt.ui.client.TimePanelSettings;
 import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.shared.PathDTO;
 import com.sap.sailing.gwt.ui.shared.PositionDTO;
@@ -53,7 +55,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
     private StringMessages stringMessages;
     private ErrorReporter errorReporter;
     private Timer timer;
-    private SimulatorTimePanel timePanel;
+    private TimePanel<TimePanelSettings> timePanel;
     private SimpleBusyIndicator busyIndicator;
     private char mode;
     private ColorPalette colorPalette;
@@ -87,7 +89,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
 
             String notificationMessage = result.getNotificationMessage();
             if (notificationMessage != "" && notificationMessage.length() != 0 && warningAlreadyShown == false) {
-                errorReporter.reportNotification(notificationMessage);
+                //TODO: Fix errorReporter errorReporter.reportNotification(notificationMessage);
                 warningAlreadyShown = true;
             }
 
@@ -258,7 +260,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
     }
 
     public SimulatorMap(SimulatorServiceAsync simulatorSvc, StringMessages stringMessages, ErrorReporter errorReporter, int xRes, int yRes, Timer timer,
-            SimulatorTimePanel timePanel, WindFieldGenParamsDTO windParams, SimpleBusyIndicator busyIndicator, char mode, SimulatorMainPanel parent) {
+            TimePanel<TimePanelSettings> timePanel, WindFieldGenParamsDTO windParams, SimpleBusyIndicator busyIndicator, char mode, SimulatorMainPanel parent) {
         this.simulatorSvc = simulatorSvc;
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
