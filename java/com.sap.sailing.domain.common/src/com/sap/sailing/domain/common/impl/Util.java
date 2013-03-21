@@ -231,4 +231,83 @@ public class Util {
         }
     }
 
+    public static class Quadruple<A, B, C, D> implements Serializable {
+
+        private static final long serialVersionUID = 2120209172266608653L;
+
+        private A a;
+
+        private B b;
+
+        private C c;
+
+        private D d;
+
+        private transient int hashCode;
+
+        @SuppressWarnings("unused")
+        // required for some serialization frameworks such as GWT RPC
+        private Quadruple() {
+        }
+
+        public Quadruple(final A a, final B b, final C c, final D d) {
+            this.a = a;
+            this.b = b;
+            this.c = c;
+            this.d = d;
+            this.hashCode = 0;
+        }
+
+        public A getA() {
+            return this.a;
+        }
+
+        public B getB() {
+            return this.b;
+        }
+
+        public C getC() {
+            return this.c;
+        }
+
+        public D getD() {
+            return this.d;
+        }
+
+        @Override
+        public int hashCode() {
+            if (this.hashCode == 0) {
+                this.hashCode = 17;
+                this.hashCode = 37 * this.hashCode + (this.a != null ? a.hashCode() : 0);
+                this.hashCode = 37 * this.hashCode + (this.b != null ? b.hashCode() : 0);
+                this.hashCode = 37 * this.hashCode + (this.c != null ? c.hashCode() : 0);
+                this.hashCode = 37 * this.hashCode + (this.d != null ? d.hashCode() : 0);
+            }
+            return this.hashCode;
+        }
+
+        @Override
+        public boolean equals(final Object obj) {
+
+            boolean result;
+            if (this == obj) {
+                result = true;
+            } else if (obj instanceof Triple<?, ?, ?>) {
+                final Quadruple<?, ?, ?, ?> thrice = (Quadruple<?, ?, ?, ?>) obj;
+                result = (this.a != null && this.a.equals(thrice.a) || this.a == null && thrice.a == null)
+                        && (this.b != null && this.b.equals(thrice.b) || this.b == null && thrice.b == null)
+                        && (this.c != null && this.c.equals(thrice.c) || this.c == null && thrice.c == null)
+                        && (this.d != null && this.d.equals(thrice.d) || this.d == null && thrice.d == null);
+            } else {
+                result = false;
+            }
+            return result;
+        }
+
+        @Override
+        public String toString() {
+
+            return "[" + this.a + ", " + this.b + ", " + this.c + ", " + this.d + "]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+        }
+    }
 }

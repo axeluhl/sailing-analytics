@@ -299,7 +299,6 @@ public interface StringMessages extends Messages {
     String update();
 
     String setup();
-    String pattern();
     String strength();
     String oscillation();
     String oscillating();

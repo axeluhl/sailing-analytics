@@ -61,7 +61,7 @@ public abstract class AbstractEntryPoint implements EntryPoint, ErrorReporter, W
             + "attempting to contact the server. Please check your network " + "connection and try again."; //$NON-NLS-1$ //$NON-NLS-2$
 
     @Override
-    public final void onModuleLoad() {
+    public void onModuleLoad() {
         if(DebugInfo.isDebugIdEnabled()) {
             PendingAjaxCallBundle bundle = GWT.create(PendingAjaxCallBundle.class);
             TextResource script = bundle.ajaxSemaphoreJS();

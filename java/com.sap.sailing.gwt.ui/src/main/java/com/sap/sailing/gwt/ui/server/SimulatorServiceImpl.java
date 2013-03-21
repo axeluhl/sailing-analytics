@@ -32,6 +32,7 @@ import com.sap.sailing.gwt.ui.shared.BoatClassDTO;
 import com.sap.sailing.gwt.ui.shared.BoatClassDTOsAndNotificationMessage;
 import com.sap.sailing.gwt.ui.shared.ConfigurationException;
 import com.sap.sailing.gwt.ui.shared.CourseDTO;
+import com.sap.sailing.gwt.ui.shared.CoursePositionsDTO;
 import com.sap.sailing.gwt.ui.shared.PathDTO;
 import com.sap.sailing.gwt.ui.shared.PolarDiagramDTO;
 import com.sap.sailing.gwt.ui.shared.PolarDiagramDTOAndNotificationMessage;
@@ -781,7 +782,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         RaceMapDataDTO rcDTO;
         if (mode == SailingSimulatorUtil.measured) {
             rcDTO = new RaceMapDataDTO();
-            rcDTO.coursePositions = new CourseDTO();
+            rcDTO.coursePositions = new CoursePositionsDTO();
             rcDTO.coursePositions.waypointPositions = new ArrayList<PositionDTO>();
 
             Path rc = simulator.getRaceCourse();
