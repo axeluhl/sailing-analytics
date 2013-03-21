@@ -451,45 +451,94 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         PolarDiagram polarDiagram = polarDiagramAndNotificationMessage.getA();
         String notificationMessage = polarDiagramAndNotificationMessage.getB();
 
-        Position startPosition = toPosition(requestData.firstPoint);
-        Position endPosition = toPosition(requestData.secondPoint);
-
         Position edgeStart = toPosition(requestData.edgeStart);
         Position edgeEnd = toPosition(requestData.edgeEnd);
 
-        RectangularBoundary rectangularBoundry = new RectangularBoundary(startPosition, endPosition, 0.1);
+        Position oldMovedPosition = toPosition(requestData.oldMovedPoint);
+        Position newMovedPosition = toPosition(requestData.newMovedPoint);
+        Bearing oldMovedToNewMovedBearing = oldMovedPosition.getBearingGreatCircle(newMovedPosition);
+        boolean areTowardsSameDirection = areTowardsSameDirection(oldMovedToNewMovedBearing, new DegreeBearingImpl(requestData.startToEndBearingDegrees));
+
+        System.out.println("oldMovedToNewMovedBearing = " + oldMovedToNewMovedBearing.getDegrees() + " degrees");
+        System.out.println("requestData.startToEndBearingDegrees = " + requestData.startToEndBearingDegrees + " degrees");
+        System.out.println("areTowardsSameDirection = " + areTowardsSameDirection);
 
         SimulationParameters simulationParameters = new SimulationParametersImpl(null, polarDiagram, null, SailingSimulatorUtil.measured);
         SailingSimulator sailingSimulator = new SailingSimulatorImpl(simulationParameters);
         Path gpsWind = sailingSimulator.getLegGPSTrack(requestData.selectedRaceIndex, requestData.selectedCompetitorIndex, requestData.selectedLegIndex);
 
+        RectangularBoundary rectangularBoundry = new RectangularBoundary(oldMovedPosition, newMovedPosition, 0.1);
         this.controlParameters.baseWindBearing += rectangularBoundry.getSouth().getDegrees();
         WindFieldGeneratorMeasured windFieldGenerator = new WindFieldGeneratorMeasured(rectangularBoundry, this.controlParameters);
         windFieldGenerator.setGPSWind(gpsWind);
 
-        TimePoint startTime = new MillisecondsTimePoint(requestData.firstPointTimepoint);
+        TimePoint startTime = new MillisecondsTimePoint(requestData.oldMovedPointTimePoint);
 
         PathGenerator1Turner pathGenerator = new PathGenerator1Turner(null);
 
-        TimedPositionWithSpeed oneTurner = null;
-        try {
-            oneTurner = pathGenerator.get1Turner(windFieldGenerator, polarDiagram, startPosition, endPosition, startTime,
-                    requestData.leftSide,
-                    DEFAULT_STEP_MAX, DEFAULT_TIMESTEP);
+        TimedPositionWithSpeed leftSide1Turner = null;
+        TimedPositionWithSpeed rightSide1Turner = null;
 
-            // System.out.println("start and end are in correct order");
+        Position realStart = areTowardsSameDirection ? oldMovedPosition : newMovedPosition;
+        Position realEnd = areTowardsSameDirection ? newMovedPosition : oldMovedPosition;
 
-        } catch (Exception e) {
-            oneTurner = pathGenerator.get1Turner(windFieldGenerator, polarDiagram, endPosition, startPosition, startTime, requestData.leftSide,
-                    DEFAULT_STEP_MAX, DEFAULT_TIMESTEP);
+        leftSide1Turner = pathGenerator.get1Turner(windFieldGenerator, polarDiagram, realStart, realEnd, startTime, true, DEFAULT_STEP_MAX, DEFAULT_TIMESTEP);
+        rightSide1Turner = pathGenerator.get1Turner(windFieldGenerator, polarDiagram, realStart, realEnd, startTime, false, DEFAULT_STEP_MAX, DEFAULT_TIMESTEP);
 
-            // System.out.println("start and end are in reversed order");
+        boolean isLeftSide1TurnerOnTheInside = isPointInsideTriangle(toPositionDTO(leftSide1Turner.getPosition()), requestData.beforeMovedPoint,
+                requestData.newMovedPoint, requestData.edgeStart);
+        System.out.println("isLeftSide1TurnerOnTheInside = " + isLeftSide1TurnerOnTheInside);
+
+        boolean isRightSide1TurnerOnTheInside = isPointInsideTriangle(toPositionDTO(rightSide1Turner.getPosition()), requestData.beforeMovedPoint,
+                requestData.newMovedPoint, requestData.edgeStart);
+        System.out.println("isRightSide1TurnerOnTheInside = " + isRightSide1TurnerOnTheInside);
+
+        TimedPositionWithSpeed correct1Turner = null;
+
+        if (isLeftSide1TurnerOnTheInside && isRightSide1TurnerOnTheInside == false) {
+            correct1Turner = rightSide1Turner;
+            System.out.println("voi folosi right side 1 turner");
+        } else if (isRightSide1TurnerOnTheInside && isLeftSide1TurnerOnTheInside == false) {
+            correct1Turner = leftSide1Turner;
+            System.out.println("voi folosi left side 1 turner");
+        } else {
+            System.out.println("voi folosi endPosition");
+
+            if (equals(leftSide1Turner.getPosition(), newMovedPosition, 0.0001)) {
+                System.out.println("voi folosi endPosition = leftSide1Turner!");
+                correct1Turner = leftSide1Turner;
+            } else if (equals(rightSide1Turner.getPosition(), newMovedPosition, 0.0001)) {
+                System.out.println("voi folosi endPosition = rightSide1Turner!");
+                correct1Turner = rightSide1Turner;
+            }
+            else {
+                System.out.println("nu ar trebui sa ajunga aici NICIODATA!");
+            }
         }
 
-        TimedPositionWithSpeed intersection = pathGenerator.getIntersectionOptimalTowardWind(windFieldGenerator, polarDiagram, edgeStart, edgeEnd, oneTurner,
-                requestData.leftSide);
+        long timeStepMilliseconds = 2000;
+        double minimumDistanceMeters = 4.0;
 
-        return new Response1TurnerDTO(toSimulatorWindDTO(intersection), toSimulatorWindDTO(oneTurner), notificationMessage);
+        List<TimedPositionWithSpeed> path = pathGenerator.getIntersectionOptimalTowardWind(windFieldGenerator, polarDiagram, edgeStart, edgeEnd,
+                correct1Turner,
+                true,
+                timeStepMilliseconds, minimumDistanceMeters);
+
+
+        return new Response1TurnerDTO(toSimulatorWindDTOList(path), toSimulatorWindDTO(leftSide1Turner), toSimulatorWindDTO(rightSide1Turner),
+                toPositionDTO(oldMovedPosition), toPositionDTO(newMovedPosition),
+                notificationMessage);
+    }
+
+    private static List<SimulatorWindDTO> toSimulatorWindDTOList(List<TimedPositionWithSpeed> points) {
+
+        List<SimulatorWindDTO> result = new ArrayList<SimulatorWindDTO>();
+
+        for (TimedPositionWithSpeed point : points) {
+            result.add(toSimulatorWindDTO(point));
+        }
+
+        return result;
     }
 
     private static SimulatorWindDTO toSimulatorWindDTO(TimedPositionWithSpeed point) {
@@ -996,5 +1045,34 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         SailingSimulator simulator = new SailingSimulatorImpl(new SimulationParametersImpl(null, null, null, SailingSimulatorUtil.measured));
 
         return simulator.getComeptitorsNames(selectedRaceIndex);
+    }
+
+    public static double getSign(PositionDTO p1, PositionDTO p2, PositionDTO p3) {
+        return (p1.latDeg - p3.latDeg) * (p2.lngDeg - p3.lngDeg) - (p2.latDeg - p3.latDeg) * (p1.lngDeg - p3.lngDeg);
+    }
+
+    public static boolean isPointInsideTriangle(PositionDTO point, PositionDTO corner1, PositionDTO corner2, PositionDTO corner3) {
+
+        boolean b1, b2, b3;
+
+        b1 = getSign(point, corner1, corner2) < 0.0d;
+        b2 = getSign(point, corner2, corner3) < 0.0d;
+        b3 = getSign(point, corner3, corner1) < 0.0d;
+
+        return (b1 == b2) && (b2 == b3);
+    }
+
+    public static boolean areTowardsSameDirection(Bearing b1, Bearing b2) {
+        boolean isB1TowardsNorth = (b1.getDegrees() < 90.0 || b1.getDegrees() > 270.0);
+        boolean isB2TowardsNorth = (b2.getDegrees() < 90.0 || b2.getDegrees() > 270.0);
+
+        return !(isB1TowardsNorth ^ isB2TowardsNorth);
+    }
+
+    private static boolean equals(Position first, Position second, double delta) {
+        double latDiff = Math.abs(first.getLatDeg() - second.getLatDeg());
+        double lngDiff = Math.abs(first.getLngDeg() - second.getLngDeg());
+
+        return latDiff <= delta && lngDiff <= delta;
     }
 }
