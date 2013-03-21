@@ -18,7 +18,7 @@ import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
  * @author Axel Uhl (D043530)
  * 
  */
-public interface Series extends SeriesData {
+public interface Series extends SeriesBase {
     
     /**
      * A series consists of one or more "race columns." Some people would just say "race," but we use the term "race" for

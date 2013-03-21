@@ -21,7 +21,7 @@ import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
 import com.sap.sailing.server.gateway.deserialization.impl.RaceLogEventDeserializer;
 
-public class AddToRaceLogJsonExportServlet extends AbstractJsonHttpServlet {
+public class AddEntryToRaceLogJsonPostServlet extends AbstractJsonHttpServlet {
     private static final long serialVersionUID = 7704668926551060433L;
 
     public static final String PARAMS_LEADERBOARD_NAME = "leaderboard";

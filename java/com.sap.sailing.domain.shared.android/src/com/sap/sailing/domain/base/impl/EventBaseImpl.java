@@ -2,10 +2,10 @@ package com.sap.sailing.domain.base.impl;
 
 import java.io.Serializable;
 
-import com.sap.sailing.domain.base.EventData;
+import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.Venue;
 
-public class EventDataImpl implements EventData {
+public class EventBaseImpl implements EventBase {
     private static final long serialVersionUID = -5749964088848611074L;
 
     private String name;
@@ -14,14 +14,14 @@ public class EventDataImpl implements EventData {
     private boolean isPublic;
     private final Serializable id;
 
-    public EventDataImpl(String name, String venueName, String publicationUrl, boolean isPublic, Serializable id) {
+    public EventBaseImpl(String name, String venueName, String publicationUrl, boolean isPublic, Serializable id) {
         this(name, new VenueImpl(venueName), publicationUrl, isPublic, id);
     }
 
     /**
      * @param venue must not be <code>null</code>
      */
-    public EventDataImpl(String name, Venue venue, String publicationUrl, boolean isPublic, Serializable id) {
+    public EventBaseImpl(String name, Venue venue, String publicationUrl, boolean isPublic, Serializable id) {
         assert venue != null;
         this.id = id;
         this.name = name;
