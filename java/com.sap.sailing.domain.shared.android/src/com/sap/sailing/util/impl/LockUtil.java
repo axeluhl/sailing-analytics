@@ -3,6 +3,7 @@ package com.sap.sailing.util.impl;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.WeakHashMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.logging.Logger;
@@ -15,7 +16,7 @@ public class LockUtil {
     private static final int NUMBER_OF_SECONDS_TO_WAIT_FOR_LOCK = 5;
     private static final Logger logger = Logger.getLogger(Util.class.getName());
     private static final Map<NamedReentrantReadWriteLock, TimePoint> lastTimeWriteLockWasObtained = new WeakHashMap<NamedReentrantReadWriteLock, TimePoint>();
-    private static final Map<Thread, Map<Lock, Integer>> lockCounts = new HashMap<Thread, Map<Lock,Integer>>();
+    private static final Map<Thread, Map<Lock, Integer>> lockCounts = new ConcurrentHashMap<Thread, Map<Lock,Integer>>();
     
     /**
      * Bug <a href="http://bugs.sun.com/view_bug.do?bug_id=6822370">http://bugs.sun.com/view_bug.do?bug_id=6822370</a> seems
