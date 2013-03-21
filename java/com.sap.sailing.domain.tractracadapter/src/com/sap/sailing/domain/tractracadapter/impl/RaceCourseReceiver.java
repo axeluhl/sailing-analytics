@@ -181,7 +181,8 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<Route, RouteDa
                 /* time over which to average speed: */ race.getBoatClass().getApproximateManeuverDurationInMilliseconds(),
                 raceDefinitionSetToUpdate);
         
-        CourseDesignChangedByRaceCommitteeHandler courseDesignHandler = new CourseDesignChangedByRaceCommitteeHandler(courseDesignUpdateURI);
+        CourseDesignChangedByRaceCommitteeHandler courseDesignHandler = new CourseDesignChangedByRaceCommitteeHandler(courseDesignUpdateURI,
+                getTrackedRegatta().getRegatta().getId(), race.getId());
         trackedRace.setCourseDesignChangedListener(courseDesignHandler);
     }
 
