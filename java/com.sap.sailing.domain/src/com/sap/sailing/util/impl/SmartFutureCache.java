@@ -78,7 +78,10 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
     
     private final Map<K, V> cache;
     
-    private final Executor recalculator;
+    private final static Executor recalculator = new ThreadPoolExecutor(/* corePoolSize */ 0,
+            /* maximumPoolSize */ 3*Runtime.getRuntime().availableProcessors(),
+            /* keepAliveTime */ 60, TimeUnit.SECONDS,
+            /* workQueue */ new LinkedBlockingQueue<Runnable>());
 
     private final CacheUpdater<K, V, U> cacheUpdateComputer;
     
@@ -204,9 +207,6 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
     public SmartFutureCache(CacheUpdater<K, V, U> cacheUpdateComputer, String nameForLocks) {
         this.ongoingRecalculations = new ConcurrentHashMap<K, FutureTaskWithCancelBlocking<V, U>>();
         this.cache = new ConcurrentHashMap<K, V>();
-        this.recalculator = new ThreadPoolExecutor(/* corePoolSize */ 0,
-                /* maximumPoolSize */ 1, /* keepAliveTime */ 60, TimeUnit.SECONDS,
-                /* workQueue */ new LinkedBlockingQueue<Runnable>());
         this.cacheUpdateComputer = cacheUpdateComputer;
         this.locksForKeys = new ConcurrentHashMap<K, NamedReentrantReadWriteLock>();
         this.nameForLocks = nameForLocks;
