@@ -8,7 +8,7 @@ import com.sap.sailing.domain.common.Named;
  * Base interface for courses consisting of all static information, which might be shared
  * by the server and an Android application.
  */
-public interface CourseData extends Named {
+public interface CourseBase extends Named {
     /**
      * Clients can safely iterate over the resulting list because it's a copy which therefore won't reflect
      * waypoint additions and removals. 
