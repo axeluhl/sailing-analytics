@@ -15,11 +15,4 @@ public class KnotSpeedWithBearingImpl extends AbstractSpeedWithBearingImpl {
     public double getKnots() {
         return speedInKnots;
     }
-
-    @Override
-    public void scale(double multiplier) {
-        this.speedInKnots *= multiplier;
-
-    }
-
 }

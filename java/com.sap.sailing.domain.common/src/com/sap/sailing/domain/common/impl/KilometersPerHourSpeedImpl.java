@@ -26,10 +26,4 @@ public class KilometersPerHourSpeedImpl extends AbstractSpeedImpl implements Spe
     public double getKilometersPerHour() {
         return speedInKilometersPerHour;
     }
-
-    @Override
-    public void scale(double multiplier) {
-        this.speedInKilometersPerHour *= multiplier;
-
-    }
 }

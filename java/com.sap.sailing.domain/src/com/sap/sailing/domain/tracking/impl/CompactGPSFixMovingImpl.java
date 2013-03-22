@@ -66,11 +66,6 @@ public class CompactGPSFixMovingImpl extends CompactGPSFixImpl implements GPSFix
             return super.equals(object) && object instanceof SpeedWithBearing
                     && getBearing().equals(((SpeedWithBearing) object).getBearing());
         }
-
-        @Override
-        public void scale(double multiplier) {
-            knotSpeed *= multiplier;
-        }
     }
 
     private class CompactBearing extends AbstractBearing {

@@ -15,10 +15,4 @@ public class KnotSpeedImpl extends AbstractSpeedImpl implements Speed {
     public double getKnots() {
         return knots;
     }
-
-    @Override
-    public void scale(double multiplier) {
-        this.knots *= multiplier;
-    }
-
 }

@@ -124,11 +124,4 @@ public class CompactWindImpl extends AbstractSpeedWithAbstractBearingImpl implem
             return getBearing().reverse();
         }
     }
-
-    @Override
-    public void scale(double multiplier) {
-        this.speedInKnots *= multiplier;
-
-    }
-
 }
