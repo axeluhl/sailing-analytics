@@ -70,6 +70,13 @@ public abstract class AbstractScoringSchemeImpl implements ScoringScheme {
         return new ScoreComparator(nullScoresAreBetter);
     }
     
+    /**
+     * This default implementation handles the somewhat tricky case where a score is considered valid for the total score only
+     * if for multiple unordered fleets in the race all fleets have raced or are currently racing. There have been controversial
+     * discussions whether this is desired. Usually, subclasses will override such that a result is generally valid for the
+     * total scores, and the {@link #compareByNumberOfRacesScored(int, int)} method has to just rank those better who ran
+     * more races.
+     */
     @Override
     public boolean isValidInTotalScore(Leaderboard leaderboard, RaceColumn raceColumn, TimePoint at) {
         boolean result;

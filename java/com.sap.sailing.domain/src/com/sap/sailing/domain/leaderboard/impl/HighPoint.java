@@ -4,6 +4,8 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.ScoringSchemeType;
+import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.leaderboard.Leaderboard;
 
 
 /**
@@ -44,4 +46,10 @@ public class HighPoint extends AbstractScoringSchemeImpl {
     public ScoringSchemeType getType() {
         return ScoringSchemeType.HIGH_POINT;
     }
+
+    @Override
+    public boolean isValidInTotalScore(Leaderboard leaderboard, RaceColumn raceColumn, TimePoint at) {
+        return true;
+    }
+    
 }

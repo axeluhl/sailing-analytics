@@ -1542,6 +1542,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
             replicate(operation);
             return result;
         } catch (Exception e) {
+            logger.throwing(RacingEventServiceImpl.class.getName(), "apply", e);
             throw new RuntimeException(e);
         }
     }
