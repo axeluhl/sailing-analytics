@@ -24,15 +24,6 @@
 	</servlet-mapping>
 	
 	<servlet>
-		<servlet-name>RCEvents</servlet-name>
-		<servlet-class>com.sap.sailing.server.gateway.impl.rc.EventDataJsonExportServlet</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>RCEvents</servlet-name>
-		<url-pattern>/rc/events</url-pattern>
-	</servlet-mapping>
-	
-	<servlet>
 		<servlet-name>RCAddToRaceLog</servlet-name>
 		<servlet-class>com.sap.sailing.server.gateway.impl.rc.AddEntryToRaceLogJsonPostServlet</servlet-class>
 	</servlet>
