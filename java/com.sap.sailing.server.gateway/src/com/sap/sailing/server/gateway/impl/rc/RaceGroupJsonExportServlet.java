@@ -42,7 +42,7 @@ public class RaceGroupJsonExportServlet extends AbstractJsonHttpServlet {
         }
         UUID courseAreaId = toUUID(courseAreaFilter);
         if (courseAreaId == null) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Course are filter must be valid UUID.");
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Course area filter must be valid UUID.");
             return;
         }
 

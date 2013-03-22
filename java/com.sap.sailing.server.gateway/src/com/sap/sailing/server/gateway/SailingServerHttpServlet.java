@@ -55,7 +55,7 @@ public abstract class SailingServerHttpServlet extends HttpServlet {
         }
     }
     
-    protected RacingEventService getService() {
+    public RacingEventService getService() {
         return racingEventServiceTracker.getService();
     }
 

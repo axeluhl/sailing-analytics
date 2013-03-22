@@ -27,7 +27,7 @@ public class AddDefaultRegatta extends AbstractAddRegattaOperation {
 
     @Override
     public Regatta internalApplyTo(RacingEventService toState) {
-        return toState.getOrCreateDefaultRegatta(getBaseEventName(), getBoatClassName(), getId());
+        return toState.getOrCreateDefaultRegatta(getBaseRegattaName(), getBoatClassName(), getId());
     }
 
 }
