@@ -43,16 +43,16 @@ public class PathGeneratorTracTracTest {
 
         int competitorIndex = 0;
 
-        Path leg0 = PathGeneratorTracTracTest.pathGenerator.getPath(0, competitorIndex, 0);
+        Path leg0 = PathGeneratorTracTracTest.pathGenerator.getPathLeg(0, competitorIndex, 0);
         Assert.assertEquals(99, leg0.getPathPoints().size());
 
-        Path leg1 = PathGeneratorTracTracTest.pathGenerator.getPath(0, competitorIndex, 1);
+        Path leg1 = PathGeneratorTracTracTest.pathGenerator.getPathLeg(0, competitorIndex, 1);
         Assert.assertEquals(110, leg1.getPathPoints().size());
 
-        Path leg2 = PathGeneratorTracTracTest.pathGenerator.getPath(0, competitorIndex, 2);
+        Path leg2 = PathGeneratorTracTracTest.pathGenerator.getPathLeg(0, competitorIndex, 2);
         Assert.assertEquals(151, leg2.getPathPoints().size());
 
-        Path leg3 = PathGeneratorTracTracTest.pathGenerator.getPath(0, competitorIndex, 3);
+        Path leg3 = PathGeneratorTracTracTest.pathGenerator.getPathLeg(0, competitorIndex, 3);
         Assert.assertEquals(98, leg3.getPathPoints().size());
     }
 

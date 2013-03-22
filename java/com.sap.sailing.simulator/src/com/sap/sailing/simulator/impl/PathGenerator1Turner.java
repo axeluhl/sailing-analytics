@@ -211,7 +211,12 @@ public class PathGenerator1Turner extends PathGeneratorBase {
     }
 
     @Override
-    public Path getPath(int selectedRaceIndex, int selectedCompetitorIndex, int selectedLegIndex) {
+    public Path getPathLeg(int selectedRaceIndex, int selectedCompetitorIndex, int selectedLegIndex) {
+        return null;
+    }
+
+    @Override
+    public Path getPath() {
 
         WindFieldGenerator windField = this.parameters.getWindField();
 

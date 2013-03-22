@@ -38,7 +38,12 @@ public class PathGeneratorOpportunistEuclidian extends PathGeneratorBase {
     }
 
     @Override
-    public Path getPath(int selectedRaceIndex, int selectedCompetitorIndex, int selectedLegIndex) {
+    public Path getPathLeg(int selectedRaceIndex, int selectedCompetitorIndex, int selectedLegIndex) {
+        return null;
+    }
+    
+    @Override
+    public Path getPath() {
 
         WindFieldGenerator wf = this.parameters.getWindField();
         PolarDiagram pd = this.parameters.getBoatPolarDiagram();
@@ -254,10 +259,10 @@ public class PathGeneratorOpportunistEuclidian extends PathGeneratorBase {
             long oneTurnerTimeStep = wf.getTimeStep().asMillis() / 15;
 
             gen1Turner.setEvaluationParameters(true, currentPosition, leftGoingTime, oneTurnerTimeStep, 300);
-            Path leftPath = gen1Turner.getPath(selectedRaceIndex, selectedCompetitorIndex, selectedLegIndex);
+            Path leftPath = gen1Turner.getPath();
 
             gen1Turner.setEvaluationParameters(false, currentPosition, rightGoingTime, oneTurnerTimeStep, 300);
-            Path rightPath = gen1Turner.getPath(selectedRaceIndex, selectedCompetitorIndex, selectedLegIndex);
+            Path rightPath = gen1Turner.getPath();
 
             if ((leftPath.getPathPoints() != null) && (rightPath.getPathPoints() != null)) {
                 if (leftPath.getPathPoints().get(leftPath.getPathPoints().size() - 1).getTimePoint().asMillis() <= rightPath.getPathPoints()

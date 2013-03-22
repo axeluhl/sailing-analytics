@@ -26,7 +26,12 @@ public class PathGenerator1TurnerLeftDirect extends PathGeneratorBase {
     }
 
     @Override
-    public Path getPath(int selectedRaceIndex, int selectedCompetitorIndex, int selectedLegIndex) {
+    public Path getPathLeg(int selectedRaceIndex, int selectedCompetitorIndex, int selectedLegIndex) {
+        return null;
+    }
+
+    @Override
+    public Path getPath() {
 
         // retrieve simulation parameters
         Boundary boundary = new RectangularBoundary(this.parameters.getCourse().get(0), this.parameters

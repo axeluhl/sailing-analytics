@@ -763,10 +763,10 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
 
     private void initDisplayOptions(Panel mapOptions) {
 
-        final int selectedBoatClassIndex = boatClassSelector.getSelectedIndex();
+        /*final int selectedBoatClassIndex = boatClassSelector.getSelectedIndex();
         final int selectedRaceIndex = raceSelector.getSelectedIndex();
         final int selectedCompetitorIndex = competitorSelector.getSelectedIndex();
-        final int selectedLegIndex = legSelector.getSelectedIndex();
+        final int selectedLegIndex = legSelector.getSelectedIndex();*/
 
         this.summaryButton = new RadioButton("Map Display Options", stringMessages.summary());
         this.summaryButton.getElement().setClassName("MapDisplayOptions");
@@ -775,6 +775,10 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
             public void onClick(ClickEvent arg0) {
                 // timePanel.setVisible(false);
                 //TODO: Activate TimePanel timePanel.setActive(false);
+                int selectedBoatClassIndex = boatClassSelector.getSelectedIndex();
+                int selectedRaceIndex = raceSelector.getSelectedIndex();
+                int selectedCompetitorIndex = competitorSelector.getSelectedIndex();
+                int selectedLegIndex = legSelector.getSelectedIndex();
                 simulatorMap.refreshView(SimulatorMap.ViewName.SUMMARY, currentWPDisplay, selectedBoatClassIndex, selectedRaceIndex, selectedCompetitorIndex,
                         selectedLegIndex,
                         false);
@@ -786,10 +790,14 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
         this.replayButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent arg0) {
+                //TODO: Activate TimePanel timePanel.setActive(true);
+                int selectedBoatClassIndex = boatClassSelector.getSelectedIndex();
+                int selectedRaceIndex = raceSelector.getSelectedIndex();
+                int selectedCompetitorIndex = competitorSelector.getSelectedIndex();
+                int selectedLegIndex = legSelector.getSelectedIndex();
                 simulatorMap.refreshView(SimulatorMap.ViewName.REPLAY, currentWPDisplay, selectedBoatClassIndex, selectedRaceIndex, selectedCompetitorIndex,
                         selectedLegIndex,
                         false);
-                //TODO: Activate TimePanel timePanel.setActive(true);
             }
         });
 
@@ -797,10 +805,14 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
         this.windDisplayButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent arg0) {
+                //TODO: Activate TimePanel timePanel.setActive(true);
+                int selectedBoatClassIndex = boatClassSelector.getSelectedIndex();
+                int selectedRaceIndex = raceSelector.getSelectedIndex();
+                int selectedCompetitorIndex = competitorSelector.getSelectedIndex();
+                int selectedLegIndex = legSelector.getSelectedIndex();
                 simulatorMap.refreshView(SimulatorMap.ViewName.WINDDISPLAY, currentWPDisplay, selectedBoatClassIndex, selectedRaceIndex,
                         selectedCompetitorIndex, selectedLegIndex,
                         false);
-              //TODO: Activate TimePanel timePanel.setActive(true);
             }
         });
 

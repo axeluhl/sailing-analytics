@@ -27,14 +27,19 @@ public class PathGeneratorBase implements PathGenerator {
     }
 
     @Override
-    public Path getPath(int selectedRaceIndex, int selectedCompetitorIndex, int selectedLegIndex) {
+    public Path getPathLeg(int selectedRaceIndex, int selectedCompetitorIndex, int selectedLegIndex) {
         return null;
     }
 
     @Override
-    public Path getPathEvenTimed(long stepMilliseconds, int selectedRaceIndex, int selectedCompetitorIndex, int selectedLegIndex) {
+    public Path getPath() {
+        return null;
+    }
 
-        Path path = this.getPath(selectedRaceIndex, selectedCompetitorIndex, selectedLegIndex);
+    @Override
+    public Path getPathEvenTimed(long stepMilliseconds) {
+
+        Path path = this.getPath();
 
         return path == null ? null : path.getEvenTimedPath(stepMilliseconds);
     }

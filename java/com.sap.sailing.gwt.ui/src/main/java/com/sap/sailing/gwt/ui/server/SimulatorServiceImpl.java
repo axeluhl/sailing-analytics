@@ -746,8 +746,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
 
         SimulationParameters sp = new SimulationParametersImpl(course, pd, wf, mode);
         SailingSimulator simulator = new SailingSimulatorImpl(sp);
-        Map<String, Path> pathsAndNames = simulator.getAllLegPathsEvenTimed(wf.getTimeStep().asMillis(), selectedRaceIndex, selectedCompetitorIndex,
-                selectedLegIndex);
+        Map<String, Path> pathsAndNames = simulator.getAllPathsEvenTimed(wf.getTimeStep().asMillis());
 
         int noOfPaths = pathsAndNames.size();
         if (mode == SailingSimulatorUtil.measured) {
@@ -811,6 +810,9 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
             notificationMessage = config.getErrorMessage();
         }
 
+        if (boatClassIndex < 0) {
+            boatClassIndex = 0;
+        }
         String csvFilePath = config.getPolarDiagramFileLocation(boatClassIndex);
 
         try {

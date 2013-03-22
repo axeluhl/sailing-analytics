@@ -249,7 +249,7 @@ public class PathGeneratorTracTrac extends PathGeneratorBase {
     }
 
     @Override
-    public Path getPath(int selectedRaceIndex, int selectedCompetitorIndex, int selectedLegIndex) {
+    public Path getPathLeg(int selectedRaceIndex, int selectedCompetitorIndex, int selectedLegIndex) {
 
         this.intializeRaceHandle();
 
@@ -301,6 +301,11 @@ public class PathGeneratorTracTrac extends PathGeneratorBase {
         return new PathImpl(path, null);
     }
 
+    @Override
+    public Path getPath() {
+        return null;
+    }
+        
     public Path getPathPolyline(int selectedRaceIndex, int selectedCompetitorIndex, int selectedLegIndex, Distance maxDistance) {
 
         this.intializeRaceHandle();

@@ -368,7 +368,12 @@ public class PathGeneratorTreeGrowWind2 extends PathGeneratorBase {
 
 
     @Override
-    public Path getPath(int selectedRaceIndex, int selectedCompetitorIndex, int selectedLegIndex) {
+    public Path getPathLeg(int selectedRaceIndex, int selectedCompetitorIndex, int selectedLegIndex) {
+        return null;
+    }
+
+    @Override
+    public Path getPath() {
 
         WindFieldGenerator wf = this.parameters.getWindField();
         PolarDiagram pd = this.parameters.getBoatPolarDiagram();
