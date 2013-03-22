@@ -12,7 +12,7 @@ import org.json.simple.JSONArray;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.server.gateway.AbstractJsonHttpServlet;
 
-public class LeaderboardGroupsJsonExportServlet extends AbstractJsonHttpServlet {
+public class LeaderboardGroupsJsonGetServlet extends AbstractJsonHttpServlet {
     private static final long serialVersionUID = -2193421590275280102L;
 
     @Override

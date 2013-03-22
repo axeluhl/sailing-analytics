@@ -19,7 +19,7 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.gateway.AbstractJsonHttpServlet;
 
-public class RegattasJsonExportServlet extends AbstractJsonHttpServlet {
+public class RegattasJsonGetServlet extends AbstractJsonHttpServlet {
     private static final long serialVersionUID = 1333207389294903999L;
 
     @Override

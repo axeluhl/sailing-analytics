@@ -24,7 +24,7 @@ import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.gateway.AbstractJsonHttpServlet;
 
-public class LeaderboardGroupJsonExportServlet extends AbstractJsonHttpServlet {
+public class LeaderboardGroupJsonGetServlet extends AbstractJsonHttpServlet {
     private static final long serialVersionUID = 1351616646322956825L;
     private static final String PARAM_NAME_LEADERBOARDGROUPNAME = "leaderboardGroupName";
 

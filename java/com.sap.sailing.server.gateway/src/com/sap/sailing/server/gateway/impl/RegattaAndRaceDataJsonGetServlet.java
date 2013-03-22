@@ -37,8 +37,8 @@ import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.server.gateway.AbstractJsonHttpServlet;
 import com.sap.sailing.util.InvalidDateException;
 
-public class RegattaAndRaceDataJsonExportServlet extends AbstractJsonHttpServlet {
-    private static final Logger logger = Logger.getLogger(RegattaAndRaceDataJsonExportServlet.class.getName());
+public class RegattaAndRaceDataJsonGetServlet extends AbstractJsonHttpServlet {
+    private static final Logger logger = Logger.getLogger(RegattaAndRaceDataJsonGetServlet.class.getName());
     
     private static final long serialVersionUID = 1333207389294903999L;
 
@@ -91,8 +91,8 @@ public class RegattaAndRaceDataJsonExportServlet extends AbstractJsonHttpServlet
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Race not found");
         } else {
             try {
-                TimePoint sinceTimePoint = getTimePoint(req, PARAM_NAME_SINCE, PARAM_NAME_SINCE_MILLIS, null);
-                TimePoint toTimePoint = getTimePoint(req, PARAM_NAME_TO, PARAM_NAME_TO_MILLIS, null);
+                TimePoint sinceTimePoint = readTimePointParam(req, PARAM_NAME_SINCE, PARAM_NAME_SINCE_MILLIS, null);
+                TimePoint toTimePoint = readTimePointParam(req, PARAM_NAME_TO, PARAM_NAME_TO_MILLIS, null);
                 JSONObject jsonRace = new JSONObject();
                 jsonRace.put("name", trackedRace.getRace().getName());
                 JSONArray jsonCompetitors = new JSONArray();
@@ -154,7 +154,7 @@ public class RegattaAndRaceDataJsonExportServlet extends AbstractJsonHttpServlet
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Race not found");
         } else {
             try {
-                TimePoint timePoint = getTimePoint(req, PARAM_NAME_TIME, PARAM_NAME_TIME_MILLIS,
+                TimePoint timePoint = readTimePointParam(req, PARAM_NAME_TIME, PARAM_NAME_TIME_MILLIS,
                         trackedRace.getStartOfRace() != null ? trackedRace.getStartOfRace()
                                 : trackedRace.getStartOfTracking() != null ? trackedRace.getStartOfTracking()
                                         : trackedRace.getTimePointOfNewestEvent() == null ? MillisecondsTimePoint.now()
@@ -196,7 +196,7 @@ public class RegattaAndRaceDataJsonExportServlet extends AbstractJsonHttpServlet
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Race not found");
         } else {
             try {
-                TimePoint timePoint = getTimePoint(req, PARAM_NAME_TIME, PARAM_NAME_TIME_MILLIS,
+                TimePoint timePoint = readTimePointParam(req, PARAM_NAME_TIME, PARAM_NAME_TIME_MILLIS,
                         trackedRace.getTimePointOfNewestEvent()==null?MillisecondsTimePoint.now():trackedRace.getTimePointOfNewestEvent());
                 String sinceUpdateString = req.getParameter(PARAM_NAME_SINCE_UPDATE);
                 if (sinceUpdateString != null) {
