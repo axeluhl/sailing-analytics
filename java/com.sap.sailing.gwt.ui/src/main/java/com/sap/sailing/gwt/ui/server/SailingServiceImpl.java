@@ -348,7 +348,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 /* workQueue */ new LinkedBlockingQueue<Runnable>());
         raceDetailsExecutor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
         leaderboardByNameLiveUpdaters = new HashMap<String, LiveLeaderboardUpdater>();
-        leaderboardDTOCacheWaitingForLatestAnalysis = new LeaderboardDTOCache(this, /* waitForLatestAnalyses */ true);
+        // The leaderboard cache is invalidated upon all competitor and mark position changes; some analyses
+        // are pretty expensive, such as the maneuver re-calculation. Waiting for the latest analysis after only a
+        // single fix was updated is too expensive if users use the replay feature while a race is still running.
+        // Therefore, using waitForLatestAnalyses==false seems appropriate here.
+        leaderboardDTOCacheWaitingForLatestAnalysis = new LeaderboardDTOCache(this, /* waitForLatestAnalyses */ false);
     }
 
     private void writeObject(ObjectOutputStream oos) throws IOException {
