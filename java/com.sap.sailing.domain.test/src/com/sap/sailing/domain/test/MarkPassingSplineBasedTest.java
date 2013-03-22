@@ -3,7 +3,7 @@ package com.sap.sailing.domain.test;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,17 +25,17 @@ public class MarkPassingSplineBasedTest extends AbstractMarkPassingTest {
 	 * @author Martin Hanysz
 	 *
 	 */
-	private class DoubleMartix {
+	private class DoubleMatrix {
 		// values of the matrix row by row
 		private List<List<Double>> matrix = new ArrayList<List<Double>>();
 		
 		/**
-		 * Construct and initialize an {@link DoubleMartix} of dimensionX to dimensionY values.
+		 * Construct and initialize an {@link DoubleMatrix} of dimensionX to dimensionY values.
 		 * @param dimensionX - how many values in x dimension (length of one row)
 		 * @param dimensionY - how many values in y direction (length of one column)
 		 * @param values - initial values of the matrix ordered row by row
 		 */
-		public DoubleMartix(int dimensionX, int dimensionY, double ... values) {
+		public DoubleMatrix(int dimensionX, int dimensionY, double ... values) {
 			if (values.length != dimensionX * dimensionY) {
 				throw new IllegalArgumentException("Given dimensions of matrix does not match the number of given initial values.");
 			}
@@ -49,6 +49,20 @@ public class MarkPassingSplineBasedTest extends AbstractMarkPassingTest {
 			}
 		}
 		
+		public DoubleMatrix(int dimensionX, int dimensionY, List<Double> values) {
+			if (values.size() != dimensionX * dimensionY) {
+				throw new IllegalArgumentException("Given dimensions of matrix does not match the number of given initial values.");
+			}
+			for (int y = 0; y < dimensionY; y++) {
+				// add one row
+				matrix.add(new ArrayList<Double>());
+				// fill the row
+				for (int x = 0; x < dimensionX; x++) {
+					matrix.get(y).add(values.get(y * dimensionX + x));
+				}
+			}
+		}
+
 		public double get(int x, int y) {
 			return matrix.get(y).get(x);
 		}
@@ -85,6 +99,34 @@ public class MarkPassingSplineBasedTest extends AbstractMarkPassingTest {
 				throw new IllegalArgumentException("The matrix does not contain the given amount of rows");
 			}
 			return matrix.get(i);
+		}
+
+		public DoubleMatrix multiply(DoubleMatrix matrix) {
+			if (this.getColumnCount() != matrix.getRowCount()) {
+				throw new IllegalArgumentException("Matrices can NOT be multiplied. Row count of the given matrix ( " + matrix.toString() + " ) does NOT equal column count of this matrix (" + this.toString() + ").");
+			}
+			ArrayList<Double> resultValues = new ArrayList<Double>();
+			for (int row = 0; row < this.getRowCount(); row++) {
+				for (int col = 0; col < matrix.getColumnCount(); col++) {
+					double value = 0.0;
+					for (int i = 0; i < this.getColumnCount(); i++) {
+						value += this.get(i, row) * matrix.get(col, i);
+					}
+					resultValues.add(value);
+				}
+			}
+			
+			return new DoubleMatrix(matrix.getColumnCount(), this.getRowCount(), resultValues);
+		}
+		
+		public DoubleMatrix multiply(double scalar) {
+			ArrayList<Double> resultValues = new ArrayList<Double>();
+			for (int x = 0; x < getColumnCount(); x++) {
+				for (int y = 0; y < getRowCount(); y++) {
+					resultValues.add(get(x,y) * scalar);
+				}
+			}
+			return new DoubleMatrix(getColumnCount(), getRowCount(), resultValues);
 		}
 	}
 	
@@ -154,7 +196,7 @@ public class MarkPassingSplineBasedTest extends AbstractMarkPassingTest {
 		}
 		
 		public String toString() {
-			return "GeometricalVector: " + components.toString();
+			return "Vector2D: " + components.toString();
 		}
 
 		public Vector2D normalize() {
@@ -196,50 +238,74 @@ public class MarkPassingSplineBasedTest extends AbstractMarkPassingTest {
 	
 	private class HermiteCurve {
 		
-		private final DoubleMartix hermiteBaseMatrix = new DoubleMartix(4, 4, 2, -3, 0, 1, -2, 3, 0, 0, 1, -2, 1, 0, 1, -1, 0, 0);
-		private final DoubleMartix exponentMatrix = new DoubleMartix(4, 1, 3, 2, 1, 0);
-		private final DoubleMartix geometryMatrix;
+		private final DoubleMatrix hermiteBaseMatrix = new DoubleMatrix(4, 4, 2, -2, 1, 1, -3, 3, -2, -1, 0, 0, 1, 0, 1, 0, 0, 0);
+		private final List<Double> exponents = Arrays.asList(3.0, 2.0, 1.0, 0.0);
+		private final DoubleMatrix geometryMatrix;
 		
 		public HermiteCurve(Vector2D point1, Vector2D point2, Vector2D tangent1, Vector2D tangent2) {
-			geometryMatrix = new DoubleMartix(	/* dimensions */ 4, 2,
-												/* 1st row */ point1.get(0), point2.get(0), tangent1.get(0), tangent2.get(0),
-												/* 2nd row */ point1.get(1), point2.get(1), tangent1.get(1), tangent2.get(1));
+			geometryMatrix = new DoubleMatrix(	/* dimensions */ 2, 4,
+												point1.x(), point1.y(),
+												point2.x(), point2.y(),
+												tangent1.x(), tangent1.y(),
+												tangent2.x(), tangent2.y());
 		}
 		
-		public List<Vector2D> intersectWith(StraightLine line) {
-			// If it doesn't they do not intersect and we can save the effort to calculate it by solving cubic polynomials
-			if (!isIntersectingLine(line)) {
-				return Collections.emptyList();
-			}
-			Vector2D l = line.getLocationVector();
-			Vector2D n = line.getDirectionVector();
-			Vector2D p1 = getFirstPoint();
-			Vector2D p2 = getSecondPoint();
-			Vector2D t1 = getTangentAtFirstPoint();
-			Vector2D t2 = getTangentAtSecondPoint();
+		public List<Vector2D> intersectWith(StraightLine line) {			
+			/*
+			 * We start with the hermite spline as a parametric form h(x(t), y(t)) and the straight line in implicit form g(x,y) = 0 with
+			 * x(t) being the result of the matrix multiplication of the exponent matrix (T), the hermite base matrix (Mh) and the first column
+			 * (which contains the x components of the points and tangents) of the geometry matrix (C) and
+			 * y(t) being the result of the same matrix multiplication but using the second row of C instead of the first.
+			 * This results in:
+			 * x(t) = (2*p0x - 2*p1x + m0x + m1x)*t^3 + (-3*p0x + 3*p1x - 2*m0x - m1x)*t^2 + m0x*t + p0x
+			 * y(t) = (2*p0y - 2*p1y + m0y + m1y)*t^3 + (-3*p0y + 3*p1y - 2*m0y - m1y)*t^2 + m0y*t + p0y
+			 * We form the implicit line formula by using this definition m(x - a) + n(y - b) = 0 where (m,n) is the perpendicular vector of the line and (a,b) is a known point of the line.
+			 * By using (a,b) = (p2x, p2y) and (m,n) = (-dy, dx) (which is a vector perpendicular to d) we get:
+			 * g(x, y) = -dy*(x - p2x) + dx*(y - p2y) with p2 being the location vector and d being the direction vector of the straight line
+			 * 
+			 * To find intersection points, we insert the parametric hermite spline formulas into g(x,y) = 0 -> f(t) = g(x(t), y(t)) = 0
+			 * and find the roots of this equation using the approach known as "Cardanische Formeln".
+			 * We assume that the numerical error caused by using double as a data type is negligible concerning the mark rounding times calculated from the intersection points.
+			 * 
+			 */
+			// TODO find a quick & efficient way to estimate if the line intersects with the spline to safe the effort if it doesn't.
+			// if (!isIntersectingLine(line)) {
+			//	 return Collections.emptyList();
+			// }
 			
-			// use a numerical method to find the values for t, where the hermite curve and the line intersect
-			// cubic polynomial of the form: m3 * t^3 + m2 * t^2 + m1 * t + mo = 0
-			double m3 = 2.0*p1.x()*n.x() - 2.0*p2.x()*n.x() + t1.x()*n.x() + t2.x()*n.x() + 2.0*p1.y()*n.y() - 2.0*p2.y()*n.y() + t1.y()*n.y() + t2.y()*n.y();
-			double m2 = -3.0*p1.x()*n.x() + 3.0*p2.x()*n.x() - 2*t1.x()*n.x() - t2.x()*n.x() - 3.0*p1.y()*n.y() + 3.0*p2.y()*n.y() - 2*t1.y()*n.y() - t2.y()*n.y();
-			double m1 = t1.x()*n.x() + t1.y()*n.y();
-			double m0 = p1.x()*n.x() + p1.y()*n.y() - l.x()*n.x() + l.y()*n.y();
+			Vector2D p0 = getFirstPoint();
+			Vector2D p1 = getSecondPoint();
+			Vector2D m0 = getTangentAtFirstPoint();
+			Vector2D m1 = getTangentAtSecondPoint();
+			Vector2D p2 = line.getLocationVector();
+			Vector2D d = line.getDirectionVector();
+			// cubic polynomial of the form: s3 * t^3 + s2 * t^2 + s1 * t + s0 = 0
+			// sX is the substitution of all factors of t^X (calculated on the blackboard)
+			double s3 = -d.y()*(2*p0.x() - 2*p1.x() + m0.x() + m1.x()) + d.x()*(2*p0.y() - 2*p1.y() + m0.y() + m1.y());
+			double s2 = -d.y()*(-3*p0.x() + 3*p1.x() - 2*m0.x() - m1.x()) + d.x()*(-3*p0.y() + 3*p1.y() - 2*m0.y() - m1.y());
+			double s1 = -d.y()*m0.x() + d.x()*m0.y();
+			double s0 = -d.y()*p0.x() + d.x()*p0.y() + d.y()*p2.x() - d.x()*p2.y();
 			
 			// normalized cubic polynomial of the form: t^3 + a * t^2 + b * t + c = 0
-			double a = m2 / m3;
-			double b = m1 / m3;
-			double c = m0 / m3;
+			double a = s2 / s3;
+			double b = s1 / s3;
+			double c = s0 / s3;
 			
 			// reduced cubic polynomial of the form: z^3 + p * z + q = 0 with substitution x = z - a/3 in place
 			double p = b - Math.pow(a, 2)/3;
 			double q = 2.0 * Math.pow(a, 3)/27.0 - a*b/3.0 + c;
-			// discriminant = 18abcd - 4b^3d + b^2c^2 - 4ac^3 - 27a^2d^2
-			// double discriminant = 18 * a * b * c * d - 4 * Math.pow(b, 3) * d + Math.pow(b, 2) * Math.pow(c, 2) - 4 * a * Math.pow(c, 3) - 27 * Math.pow(a, 2) * Math.pow(d, 2);
+			// discriminant = (q/2)^2 + (p/3)^3
 			double discriminant = Math.pow(q/2.0, 2) + Math.pow(p/3.0, 3);
 
+			// use the "Cardanische Formeln" to find the roots of this polynomial
 			List<Double> zResults = new ArrayList<Double>();
 			if (discriminant > 0.0) {
-				zResults.add(0.0);
+				// According to Vieta's formulas u^3 and v^3 are solutions of t^2 + qt - (p^3 / 27) = 0.
+				// u = ((-q / 2) + sqrt(discriminant))^(1/3)
+				double u = Math.pow(-q/2 + Math.sqrt(discriminant), 1/3);
+				// v = ((-q / 2) - sqrt(discriminant))^(1/3)
+				double v = Math.pow(-q/2 - Math.sqrt(discriminant), 1/3);
+				zResults.add(u + v);
 			} else if (discriminant < 0.0) {
 				// z2 = -sqrt(-4/3 * p) * cos(1/3 * arccos(-q/2 * sqrt(-27/p^3)) + pi/3)
 				zResults.add(-Math.sqrt(-4.0/3.0*p) * Math.cos(1.0/3.0*Math.acos(-q/2.0*Math.sqrt(-27.0/Math.pow(p, 3))) + Math.PI/3.0));
@@ -248,12 +314,14 @@ public class MarkPassingSplineBasedTest extends AbstractMarkPassingTest {
 				// z3 = -sqrt(-4/3 * p) * cos(1/3 * arccos(-q/2 * sqrt(-27/p^3)) - pi/3)
 				zResults.add(-Math.sqrt(-4.0/3.0*p) * Math.cos(1.0/3.0*Math.acos(-q/2.0*Math.sqrt(-27.0/Math.pow(p, 3))) - Math.PI/3.0));
 			} else if (discriminant == 0.0) {
-				// TODO does this ever happen? -> are doubles precise enough to allow this case?
 				System.out.println("Discriminant is exactly zero!");
 				if (p == 0.0 && q == 0.0) {
+					// z is always 0 in this case
 					zResults.add(0.0);
 				} else {
+					// z1 = 3q / p
 					zResults.add(3.0*q/p);
+					// z2 = -3q / 2p
 					zResults.add((-3.0*q)/(2.0*p));
 				}
 			}
@@ -261,59 +329,54 @@ public class MarkPassingSplineBasedTest extends AbstractMarkPassingTest {
 			// perform back substitution from z to x
 			List<Vector2D> results = new ArrayList<Vector2D>();
 			for (Double z : zResults) {
-				Vector2D intersectionPoint = interpolateCurvePoint(z - a/3);
-				results.add(intersectionPoint);
+				double t = z - a/3;
+				if (t >= 0.0 && t <= 1.0) {
+					Vector2D intersectionPoint = interpolateCurvePoint(t);
+					results.add(intersectionPoint);
+				} else {
+					System.out.println("Calculated interpolation parameter is out of bounds (" + t + ")");
+				}
 			}
 			return results;
 		}
 
 		public Vector2D getTangentAtSecondPoint() {
-			return new Vector2D(geometryMatrix.getColumn(3));
+			return new Vector2D(geometryMatrix.getRow(3));
 		}
 
 		public Vector2D getTangentAtFirstPoint() {
-			return new Vector2D(geometryMatrix.getColumn(2));
+			return new Vector2D(geometryMatrix.getRow(2));
 		}
 
 		public Vector2D getSecondPoint() {
-			return new Vector2D(geometryMatrix.getColumn(1));
+			return new Vector2D(geometryMatrix.getRow(1));
 		}
 
 		public Vector2D getFirstPoint() {
-			return new Vector2D(geometryMatrix.getColumn(0));
-		}
-
-		public boolean isIntersectingLine(StraightLine line) {
-			if (	line.getDistanceToPoint(getFirstPoint()) == line.getDistanceToPoint(getSecondPoint()) + getFirstPoint().getDistanceToPoint(getSecondPoint()) ||
-					line.getDistanceToPoint(getSecondPoint()) == line.getDistanceToPoint(getFirstPoint()) + getFirstPoint().getDistanceToPoint(getSecondPoint())) {
-				// line passes both points at the same side -> no intersection
-				return false;
-			}
-			return true;
+			return new Vector2D(geometryMatrix.getRow(0));
 		}
 
 		public Vector2D interpolateCurvePoint(double t) {
 			if (t < 0.0 || t > 1.0) {
-				throw new IllegalArgumentException("Value of t is not in the interval of 0.0 to 1.0");
-			}
-			// calculate the hermite base functions 1 to 4
-			List<Double> hermiteFunctionResults = new ArrayList<Double>();
-			for (int i = 0; i < hermiteBaseMatrix.getRowCount(); i++) {
-				double hermiteFunctionResult = 	(hermiteBaseMatrix.get(0,i) * Math.pow(t, exponentMatrix.get(0,0))) + 
-												(hermiteBaseMatrix.get(1,i) * Math.pow(t, exponentMatrix.get(1,0))) +
-												(hermiteBaseMatrix.get(2,i) * Math.pow(t, exponentMatrix.get(2,0))) +
-												(hermiteBaseMatrix.get(3,i) * Math.pow(t, exponentMatrix.get(3,0)));
-				hermiteFunctionResults.add(hermiteFunctionResult);
+				throw new IllegalArgumentException("Value of t (" + t + ") is not in the interval of 0.0 to 1.0");
 			}
 			
-			// multiply columns of geometry matrix (point and tangent vectors) with hermite base function results and add them
-			Vector2D point = new Vector2D(0.0, 0.0);
-			
-			for (int j = 0; j < geometryMatrix.getColumnCount(); j++) {
-				point.set(0, point.get(0) + (geometryMatrix.get(j, 0) * hermiteFunctionResults.get(j)));
-				point.set(1, point.get(1) + (geometryMatrix.get(j, 1) * hermiteFunctionResults.get(j)));
+			/* 
+			 * Points on the hermite spline are described by the matrix multiplication of the exponent matrix (T) multiplied with t,
+			 * the hermite base matrix (Mh) and the geometry matrix (C).
+			 * p(t) = T * Mh * C 
+			 */
+			DoubleMatrix exponentMatrix = getExponentMatrix(t);
+			DoubleMatrix result = exponentMatrix.multiply(hermiteBaseMatrix.multiply(geometryMatrix));
+			return new Vector2D(result.getRow(0));
+		}
+
+		private DoubleMatrix getExponentMatrix(double t) {
+			ArrayList<Double> exponentMatrixValues = new ArrayList<Double>();
+			for (double e : exponents) {
+				exponentMatrixValues.add(Math.pow(t, e));
 			}
-			return point;
+			return new DoubleMatrix(4, 1, exponentMatrixValues);
 		}
 		
 		public String toString() {
@@ -336,11 +399,11 @@ public class MarkPassingSplineBasedTest extends AbstractMarkPassingTest {
 	Map<Competitor, Map<Waypoint, List<List<MarkPassing>>>> computeMarkPassings() {
 		Map<Competitor, Map<Waypoint, List<List<MarkPassing>>>> markPassings = new HashMap<>();
 		
-		Vector2D point1 = new Vector2D(0.0, 0.0);
-		Vector2D point2 = new Vector2D(1.0, 1.0);
-		Vector2D tangent1 = new Vector2D(1.0, 0.0);
-		Vector2D tangent2 = new Vector2D(0.0, 1.0);
-		StraightLine line = new StraightLine(new Vector2D(0.0, 1.0), new Vector2D(1.0, -1.0));
+		Vector2D point1 = new Vector2D(1.0, 0.0);
+		Vector2D point2 = new Vector2D(0.0, 1.0);
+		Vector2D tangent1 = new Vector2D(10.0, 0.0);
+		Vector2D tangent2 = new Vector2D(-10.0, -10.0);
+		StraightLine line = new StraightLine(new Vector2D(10.0, 10.0), new Vector2D(-1.0, -1.0));
 		HermiteCurve curve = new HermiteCurve(point1, point2, tangent1, tangent2);
 		List<Vector2D> intersections = curve.intersectWith(line);
 		
