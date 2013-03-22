@@ -208,7 +208,7 @@ public class LockUtil {
      * the argument.
      */
     public static void unpropagateLockSetFrom(Thread thread) {
-        Map<Lock, Integer> otherMap = lockCounts.get(thread);
+        Map<Lock, Integer> otherMap = getLockCounts(thread);
         Map<Lock, Integer> currentMap = getCurrentThreadsLockCounts();
         for (Map.Entry<Lock, Integer> otherEntry : otherMap.entrySet()) {
             assert currentMap.containsKey(otherEntry.getKey());
