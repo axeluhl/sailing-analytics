@@ -80,7 +80,7 @@ public class OnlineDataManager extends DataManager {
 
         try {
             new DataLoader<Collection<EventBase>>(context, URI.create(AppConstants.getServerBaseURL(context)
-                    + "/sailingserver/rc/events"), parser, handler).forceLoad();
+                    + "/sailingserver/events"), parser, handler).forceLoad();
         } catch (MalformedURLException e) {
             e.printStackTrace();
         } catch (IOException e) {
