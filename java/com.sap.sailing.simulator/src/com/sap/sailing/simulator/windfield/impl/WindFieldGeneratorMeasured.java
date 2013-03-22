@@ -1,6 +1,7 @@
 package com.sap.sailing.simulator.windfield.impl;
 
 import java.util.List;
+import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
@@ -17,15 +18,17 @@ import com.sap.sailing.simulator.windfield.WindControlParameters;
 import com.sap.sailing.simulator.windfield.WindFieldGenerator;
 
 public class WindFieldGeneratorMeasured extends WindFieldGeneratorImpl implements WindFieldGenerator {
-    
+
+    private static final Logger LOGGER = Logger.getLogger("com.sap.sailing.simulator");
+
     private static final long serialVersionUID = -7436152672809530764L;
-    
+
     protected Path gpsWind;
 
-//    public WindFieldGeneratorMeasured() {
-//        super();
-//    }
-    
+    //    public WindFieldGeneratorMeasured() {
+    //        super();
+    //    }
+
     public WindFieldGeneratorMeasured(Boundary boundary, WindControlParameters windParameters) {
         super(boundary, windParameters);
     }
@@ -49,18 +52,60 @@ public class WindFieldGeneratorMeasured extends WindFieldGeneratorImpl implement
         for(TimedPositionWithSpeed p : pathPoints) {
             p2 = p;
             if (p.getTimePoint().after(timePoint)) {
-                
+
                 break;
             }
             p1 = p;
         }
-        
+
+        String errorMessage = null;
+        if (p1 == null) {
+            errorMessage = "ERROR: couldn't find the before time point, interpolation will now fail!";
+            System.out.println(errorMessage);
+            LOGGER.severe(errorMessage);
+        }
+
+        if (p2 == null) {
+            errorMessage = "ERROR: couldn't find the after time point, interpolation will now fail!";
+            System.out.println(errorMessage);
+            LOGGER.severe(errorMessage);
+        }
+
         // TODO: interpolate between p1 and p2
         // TODO: check for race with true wind measurement; current test race has everyone 1kn wind speed
         //System.out.println("bear p1: "+p1.getSpeed().getBearing().getDegrees()+"  p2: "+p2.getSpeed().getBearing().getDegrees());
-        Bearing midBear = new DegreeBearingImpl((p1.getSpeed().getBearing().getDegrees()+p2.getSpeed().getBearing().getDegrees())/2.);
+
+        SpeedWithBearing s1 = p1.getSpeed();
+        if (s1 == null) {
+            errorMessage = "ERROR: p1.getSpeed() is null!";
+            System.out.println(errorMessage);
+            LOGGER.severe(errorMessage);
+        }
+
+        Bearing b1 = s1.getBearing();
+        if (b1 == null) {
+            errorMessage = "ERROR: p1.getSpeed().getBearing(); is null!";
+            System.out.println(errorMessage);
+            LOGGER.severe(errorMessage);
+        }
+
+        SpeedWithBearing s2 = p2.getSpeed();
+        if (s2 == null) {
+            errorMessage = "ERROR: p2.getSpeed() is null!";
+            System.out.println(errorMessage);
+            LOGGER.severe(errorMessage);
+        }
+
+        Bearing b2 = s2.getBearing();
+        if (b2 == null) {
+            errorMessage = "ERROR: p2.getSpeed().getBearing(); is null!";
+            System.out.println(errorMessage);
+            LOGGER.severe(errorMessage);
+        }
+
+        Bearing midBear = new DegreeBearingImpl((b1.getDegrees() + b2.getDegrees()) / 2.);
         SpeedWithBearing speedWithBearing = new KnotSpeedWithBearingImpl((p1.getSpeed().getKnots()+p2.getSpeed().getKnots())/2., midBear);
-        
+
         return new WindImpl(timedPosition.getPosition(), timedPosition.getTimePoint(), speedWithBearing);
 
     }

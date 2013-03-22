@@ -1,5 +1,15 @@
 package com.sap.sailing.simulator.impl;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInput;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutput;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -7,6 +17,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 import java.util.logging.Logger;
+
+import org.osgi.framework.FrameworkUtil;
 
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.Position;
@@ -73,9 +85,9 @@ public class SailingSimulatorImpl implements SailingSimulator {
 
     private Path getFromResourcesOrDownload(String pathName, int selectedRaceIndex, int selectedCompetitorIndex, int selectedLegIndex) throws Exception {
 
-        String fileName = SerializationUtils.getFileName(selectedRaceIndex, selectedCompetitorIndex, selectedLegIndex, pathName);
+        String fileName = getFileName(selectedRaceIndex, selectedCompetitorIndex, selectedLegIndex, pathName);
 
-        Path path = (Path) SerializationUtils.readObjectFromResources(fileName);
+        Path path = (Path) readObjectFromResources(fileName);
         if (path == null) {
             if (pathName.equals("6#GPS Poly")) {
                 path = this.pathGenerator.getPathPolyline(selectedRaceIndex, selectedCompetitorIndex, selectedLegIndex, new MeterDistance(4.88));
@@ -86,7 +98,7 @@ public class SailingSimulatorImpl implements SailingSimulator {
             } else {
                 throw new Exception("Unknown path name!");
             }
-            SerializationUtils.saveToFile(path, SerializationUtils.getPathPrefix() + "\\src\\resources\\" + fileName);
+            saveToFile(path, getPathPrefix() + "\\src\\resources\\" + fileName);
         }
 
         return path;
@@ -263,7 +275,7 @@ public class SailingSimulatorImpl implements SailingSimulator {
 
         if (this.simulationParameters.getMode() == SailingSimulatorUtil.measured) {
 
-            Pair<Map<String, Path>, Path> result = SerializationUtils.readLegPathsFromResources(selectedRaceIndex, selectedCompetitorIndex, selectedLegIndex);
+            Pair<Map<String, Path>, Path> result = readLegPathsFromResources(selectedRaceIndex, selectedCompetitorIndex, selectedLegIndex);
             allPaths = result.getA();
             this.raceCourse = result.getB();
 
@@ -416,7 +428,7 @@ public class SailingSimulatorImpl implements SailingSimulator {
         allPaths.put("1#Omniscient", optPath);
 
         if (this.simulationParameters.getMode() == SailingSimulatorUtil.measured) {
-            SerializationUtils.saveLegPathsToFiles(allPaths, this.raceCourse, selectedRaceIndex, selectedCompetitorIndex, selectedLegIndex);
+            saveLegPathsToFiles(allPaths, this.raceCourse, selectedRaceIndex, selectedCompetitorIndex, selectedLegIndex);
         }
 
         return allPaths;
@@ -473,9 +485,9 @@ public class SailingSimulatorImpl implements SailingSimulator {
     @Override
     public Path getLegGPSTrack(int selectedRaceIndex, int selectedCompetitorIndex, int selectedLegIndex) {
 
-        String fileName = SerializationUtils.getFileName(selectedRaceIndex, selectedCompetitorIndex, selectedLegIndex, "7#GPS Track");
+        String fileName = getFileName(selectedRaceIndex, selectedCompetitorIndex, selectedLegIndex, "7#GPS Track");
 
-        Path path = (Path) SerializationUtils.readObjectFromResources("resources/" + fileName);
+        Path path = (Path) readObjectFromResources("resources/" + fileName);
         if (path == null) {
             System.err.println("[ERROR][SailingSimulatorImpl][readPathsFromResources] Cannot de-serialize path from resources/7#GPS Track.dat");
             LOGGER.warning("[ERROR][SailingSimulatorImpl][readPathsFromResources] Cannot de-serialize path from resources/7#GPS Track.dat");
@@ -493,16 +505,16 @@ public class SailingSimulatorImpl implements SailingSimulator {
         this.setSimulationParameters(this.simulationParameters, selectedRaceIndex);
 
         List<String> legsNames = null;
-        String fileName = SerializationUtils.getRaceID(ConfigurationManager.INSTANCE.getRaceURL(selectedRaceIndex)) + "_" + SerializationUtils.LEGSNAMES_DAT;
+        String fileName = getRaceID(ConfigurationManager.INSTANCE.getRaceURL(selectedRaceIndex)) + "_" + LEGSNAMES_DAT;
 
-        legsNames = (List<String>) SerializationUtils.readObjectFromResources("resources/" + fileName);
+        legsNames = (List<String>) readObjectFromResources("resources/" + fileName);
         if (legsNames != null && legsNames.isEmpty() == false) {
             return legsNames;
         }
 
         legsNames = this.pathGenerator.getLegsNames();
 
-        SerializationUtils.saveStringListToFiles(legsNames, fileName);
+        saveStringListToFiles(legsNames, fileName);
 
         return legsNames;
     }
@@ -532,18 +544,305 @@ public class SailingSimulatorImpl implements SailingSimulator {
         this.setSimulationParameters(this.simulationParameters, selectedRaceIndex);
 
         List<String> competitorsNames = null;
-        String fileName = SerializationUtils.getRaceID(ConfigurationManager.INSTANCE.getRaceURL(selectedRaceIndex)) + "_"
-                + SerializationUtils.COMPETITORSNAMES_DAT;
+        String fileName = getRaceID(ConfigurationManager.INSTANCE.getRaceURL(selectedRaceIndex)) + "_" + COMPETITORSNAMES_DAT;
 
-        competitorsNames = (List<String>) SerializationUtils.readObjectFromResources("resources/" + fileName);
+        competitorsNames = (List<String>) readObjectFromResources("resources/" + fileName);
         if (competitorsNames != null && competitorsNames.isEmpty() == false) {
             return competitorsNames;
         }
 
         competitorsNames = this.pathGenerator.getComeptitorsNames();
 
-        SerializationUtils.saveStringListToFiles(competitorsNames, fileName);
+        saveStringListToFiles(competitorsNames, fileName);
 
         return competitorsNames;
+    }
+
+    // private static final Logger LOGGER = Logger.getLogger("com.sap.sailing.simulator");
+
+    public static final String LEGSNAMES_DAT = "legsNames.dat";
+    public static final String RACECOURSE_DAT = "racecourse.dat";
+    public static final String COMPETITORSNAMES_DAT = "competitorsNames.dat";
+
+    private static final String[] PATH_NAMES = new String[] { "1#Omniscient", "2#Opportunistic", "3#1-Turner Left", "4#1-Turner Right", "6#GPS Poly",
+    "7#GPS Track" };
+
+    private static String pathPrefix = null;
+
+    private static String getPathPrefix() {
+        String bundleName = null;
+        try {
+            bundleName = FrameworkUtil.getBundle(Class.forName("com.sap.sailing.simulator.impl.SailingSimulatorImpl")).getSymbolicName();
+        } catch (ClassNotFoundException e) {
+            System.err.println("[ERROR][SailingSimulatorImpl][getPathPrefix][ClassNotFoundException]  " + e.getMessage());
+            LOGGER.severe("[ERROR][SailingSimulatorImpl][getPathPrefix][ClassNotFoundException]  " + e.getMessage());
+            return null;
+        }
+        String bundlesProperty = System.getProperty("osgi.bundles");
+
+        int bundleNameStart = bundlesProperty.indexOf(bundleName);
+        int bundleNameEnd = bundleNameStart + bundleName.length();
+
+        String prependedBundlePath = bundlesProperty.substring(0, bundleNameEnd);
+
+        int prefixPos = prependedBundlePath.lastIndexOf("reference:file:");
+
+        if (prefixPos >= 0) {
+            prependedBundlePath = prependedBundlePath.substring(prefixPos + 15, prependedBundlePath.length());
+        }
+
+        return prependedBundlePath;
+    }
+
+    // private static boolean savePathsToFiles(Map<String, Path> paths, Path raceCourse) {
+    // if (paths == null) {
+    // return false;
+    // }
+    //
+    // if (paths.isEmpty()) {
+    // return true;
+    // }
+    //
+    // if (pathPrefix == null) {
+    // pathPrefix = getPathPrefix();
+    // }
+    //
+    // String filePath = "";
+    // boolean result = true;
+    //
+    // for (String name : PATH_NAMES) {
+    // filePath = pathPrefix + "\\src\\resources\\" + name + ".dat";
+    // result &= saveToFile(paths.get(name), filePath);
+    // }
+    //
+    // filePath = pathPrefix + "\\src\\resources\\" + RACECOURSE_DAT;
+    // result &= saveToFile(raceCourse, filePath);
+    //
+    // return result;
+    // }
+
+    private static boolean saveLegPathsToFiles(Map<String, Path> paths, Path raceCourse, int selectedRaceIndex, int selectedCompetitorIndex,
+            int selectedLegIndex) {
+        if (paths == null) {
+            return false;
+        }
+
+        if (paths.isEmpty()) {
+            return true;
+        }
+
+        if (pathPrefix == null) {
+            pathPrefix = getPathPrefix();
+        }
+
+        String filePath = "";
+        String fileName = "";
+        boolean result = true;
+
+        for (String name : PATH_NAMES) {
+
+            fileName = getFileName(selectedRaceIndex, selectedCompetitorIndex, selectedLegIndex, name);
+            filePath = pathPrefix + "\\src\\resources\\" + fileName;
+            result &= saveToFile(paths.get(name), filePath);
+        }
+
+        fileName = getFileName(selectedRaceIndex, selectedCompetitorIndex, selectedLegIndex, "racecourse");
+        filePath = pathPrefix + "\\src\\resources\\" + fileName;
+        result &= saveToFile(raceCourse, filePath);
+
+        return result;
+    }
+
+    private static boolean saveToFile(Path path, String fileName) {
+        boolean result = true;
+        try {
+            OutputStream file = new FileOutputStream(fileName);
+            OutputStream buffer = new BufferedOutputStream(file);
+            ObjectOutput output = new ObjectOutputStream(buffer);
+
+            try {
+                output.writeObject(path);
+            } finally {
+                output.close();
+                buffer.close();
+                file.close();
+            }
+        } catch (IOException ex) {
+            System.err.println("[ERROR][SailingSimulatorImpl][saveToFile][IOException]  " + ex.getMessage());
+            LOGGER.severe("[ERROR][SailingSimulatorImpl][saveToFile][IOException]  " + ex.getMessage());
+            result = false;
+        }
+
+        return result;
+    }
+
+    private static Pair<Map<String, Path>, Path> readLegPathsFromResources(int selectedRaceIndex, int selectedCompetitorIndex, int selectedLegIndex) {
+        HashMap<String, Path> paths = new HashMap<String, Path>();
+
+        Path path = null;
+        String filePath = "";
+        String fileName = "";
+        for (String pathName : PATH_NAMES) {
+
+            fileName = getFileName(selectedRaceIndex, selectedCompetitorIndex, selectedLegIndex, pathName);
+            filePath = "resources/" + fileName;
+
+            path = (Path) readObjectFromResources(filePath);
+            if (path == null) {
+                System.err.println("[ERROR][SailingSimulatorImpl][readPathsFromResources] Cannot de-serialize path from" + pathName);
+                LOGGER.severe("[ERROR][SailingSimulatorImpl][readPathsFromResources] Cannot de-serialize path from" + pathName);
+            } else {
+                paths.put(pathName, path);
+            }
+        }
+
+        Path raceCourse = (Path) readObjectFromResources("resources/" + getFileName(selectedRaceIndex, selectedCompetitorIndex, selectedLegIndex, "racecourse"));
+
+        return new Pair<Map<String, Path>, Path>(paths, raceCourse);
+    }
+
+    // private static Pair<Map<String, Path>, Path> readPathsFromResources() {
+    // HashMap<String, Path> paths = new HashMap<String, Path>();
+    // Path path = null;
+    // String filePath = "";
+    //
+    // for (String pathName : PATH_NAMES) {
+    // filePath = "resources/" + pathName + ".dat";
+    // path = (Path) readObjectFromResources(filePath);
+    // if (path == null) {
+    // System.err.println("[ERROR][SailingSimulatorImpl][readPathsFromResources] Cannot de-serialize path from" +
+    // pathName);
+    // LOGGER.severe("[ERROR][SailingSimulatorImpl][readPathsFromResources] Cannot de-serialize path from" + pathName);
+    // } else {
+    // paths.put(pathName, path);
+    // }
+    // }
+    //
+    // Path raceCourse = (Path) readObjectFromResources("resources/" + RACECOURSE_DAT);
+    //
+    // return new Pair<Map<String, Path>, Path>(paths, raceCourse);
+    // }
+
+    // private static Object readObjectExternalFile(String fileName) {
+    // Object result = null;
+    // try {
+    // InputStream file = new FileInputStream(fileName);
+    // InputStream buffer = new BufferedInputStream(file);
+    // ObjectInput input = new ObjectInputStream(buffer);
+    //
+    // try {
+    // result = input.readObject();
+    // } finally {
+    // input.close();
+    // buffer.close();
+    // file.close();
+    // }
+    // } catch (ClassNotFoundException ex) {
+    // System.err.println("[ERROR][SailingSimulatorImpl][readFromExternalFile][ClassNotFoundException] " +
+    // ex.getMessage());
+    // LOGGER.severe("[ERROR][SailingSimulatorImpl][readFromExternalFile][ClassNotFoundException] " + ex.getMessage());
+    // result = null;
+    // } catch (IOException ex) {
+    // System.err.println("[ERROR][SailingSimulatorImpl][readFromExternalFile][IOException]  " + ex.getMessage());
+    // LOGGER.severe("[ERROR][SailingSimulatorImpl][readFromExternalFile][IOException]  " + ex.getMessage());
+    // result = null;
+    // }
+    //
+    // return result;
+    // }
+
+    private static Object readObjectFromResources(String fileName) {
+        Object result = null;
+
+        try {
+            ClassLoader classLoader = Class.forName("com.sap.sailing.simulator.impl.SailingSimulatorImpl").getClassLoader();
+            InputStream file = classLoader.getResourceAsStream(fileName);
+            InputStream buffer = new BufferedInputStream(file);
+            ObjectInput input = new ObjectInputStream(buffer);
+
+            try {
+                result = input.readObject();
+            } finally {
+                input.close();
+                buffer.close();
+                file.close();
+            }
+        } catch (ClassNotFoundException ex) {
+            System.err.println("[ERROR][SailingSimulatorImpl][readFromResourcesFile][ClassNotFoundException] " + ex.getMessage());
+            LOGGER.severe("[ERROR][SailingSimulatorImpl][readFromResourcesFile][ClassNotFoundException] " + ex.getMessage());
+            result = null;
+        } catch (IOException ex) {
+            System.err.println("[ERROR][SailingSimulatorImpl][readFromResourcesFile][IOException]  " + ex.getMessage());
+            LOGGER.severe("[ERROR][SailingSimulatorImpl][readFromResourcesFile][IOException]  " + ex.getMessage());
+            result = null;
+        }
+
+        return result;
+    }
+
+    private static boolean saveStringListToFiles(List<String> legsNames, String fileName) {
+        if (legsNames == null) {
+            return false;
+        }
+
+        if (legsNames.isEmpty()) {
+            return true;
+        }
+
+        if (pathPrefix == null) {
+            pathPrefix = getPathPrefix();
+        }
+
+        String filePath = pathPrefix + "\\src\\resources\\" + fileName;
+
+        boolean result = true;
+
+        try {
+            OutputStream file = new FileOutputStream(filePath);
+            OutputStream buffer = new BufferedOutputStream(file);
+            ObjectOutput output = new ObjectOutputStream(buffer);
+
+            try {
+                output.writeObject(legsNames);
+            } finally {
+                output.close();
+                buffer.close();
+                file.close();
+            }
+        } catch (IOException ex) {
+            System.err.println("[ERROR][SailingSimulatorImpl][saveLegsNamesToFiles][IOException]  " + ex.getMessage());
+            LOGGER.severe("[ERROR][SailingSimulatorImpl][saveLegsNamesToFiles][IOException]  " + ex.getMessage());
+            result = false;
+        }
+
+        return result;
+    }
+
+    private static String getRaceID(String raceURL) {
+
+        String result = null;
+
+        if (raceURL.contains("&race=")) {
+            String[] parts = raceURL.split("&");
+            for (String part : parts) {
+                if (part.startsWith("race=")) {
+                    result = part.replace("race=", "");
+                }
+            }
+        } else if (raceURL.contains("?race=")) {
+            String[] parts = raceURL.split("?");
+            for (String part : parts) {
+                if (part.startsWith("race=")) {
+                    result = part.replace("race=", "");
+                }
+            }
+        }
+
+        return result;
+    }
+
+    private static String getFileName(int selectedRaceIndex, int selectedCompetitorIndex, int selectedLegIndex, String pathName) {
+        return getRaceID(ConfigurationManager.INSTANCE.getRaceURL(selectedRaceIndex)) + "_" + selectedCompetitorIndex + "_" + selectedLegIndex + "_" + pathName
+                + ".dat";
     }
 }

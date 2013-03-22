@@ -16,6 +16,9 @@ import com.google.gwt.maps.client.overlay.MarkerOptions;
 import com.google.gwt.maps.client.overlay.PolyEditingOptions;
 import com.google.gwt.maps.client.overlay.Polyline;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.sap.sailing.domain.common.Bearing;
+import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SimulatorServiceAsync;
 import com.sap.sailing.gwt.ui.shared.PositionDTO;
@@ -62,17 +65,16 @@ public class PathPolyline {
     private ErrorReporter errorReporter = null;
     private boolean warningAlreadyShown = false;
     private SimulatorMap simulatorMap = null;
+    private Bearing startToEndBearing = null;
 
     private static int STEP_DURATION_MILLISECONDS = 2000;
     private static boolean USE_REAL_AVERAGE_WIND = true;
 
     private static boolean FIX_CUT_SPIKES = true;
     private static boolean FIX_CUT_TRIANGLES = true;
-    private static boolean ADD_1_TURNER = true;
+    private static boolean ADD_1_TURNER = false;
     private static double SMOOTHNESS_MAX_DEG = 20.0;
 
-    // private int movedPointIndex = 0;
-    // private int alsoMovedPointIndex = 0;
 
     public static PathPolyline createPathPolyline(List<SimulatorWindDTO> pathPoints, ErrorReporter errorReporter, SimulatorServiceAsync simulatorService,
             MapWidget map, SimulatorMap simulatorMap, int selectedBoatClassIndex, int selectedRaceIndex, int selectedCompetitorIndex, int selectedLegIndex) {
@@ -103,6 +105,9 @@ public class PathPolyline {
             int selectedCompetitorIndex, int selectedLegIndex, ErrorReporter errorReporter,
             List<SimulatorWindDTO> pathPoints, SimulatorServiceAsync simulatorService, MapWidget map, SimulatorMap simulatorMap) {
         this.turnPoints = points;
+
+
+
         this.color = color;
         this.weight = weight;
         this.opacity = opacity;
@@ -120,6 +125,7 @@ public class PathPolyline {
         this.errorReporter = errorReporter;
 
         this.simulatorMap = simulatorMap;
+        this.startToEndBearing = getStartToEndBearing(pathPoints);
 
         this.drawPolylineOnMap();
         this.drawDashLinesOnMap(this.map.getZoomLevel());
@@ -132,15 +138,12 @@ public class PathPolyline {
         });
     }
 
-    @SuppressWarnings("unused")
-    private void printTurnPoints() {
-        System.out.println("-----------------------------");
+    private static Bearing getStartToEndBearing(List<SimulatorWindDTO> points) {
 
-        for (int index = 0; index < this.turnPoints.length; index++) {
-            System.out.println("Point no. " + index + " at " + this.turnPoints[index].toString());
-        }
-
-        System.out.println("-----------------------------");
+        Position start = toPosition(points.get(0).position);
+        Position end = toPosition(points.get(points.size() - 1).position);
+        Bearing bearing = start.getBearingGreatCircle(end);
+        return bearing;
     }
 
     private void addMarker(LatLng point, String title) {
@@ -165,60 +168,53 @@ public class PathPolyline {
             public void onUpdate(PolylineLineUpdatedEvent event) {
                 final int indexOfMovedPoint = getIndexOfMovedPoint();
 
-                // System.out.println("indexOfMovedPoint = " + indexOfMovedPoint);
-
                 final int noOfPoints = turnPoints.length;
 
-                final LatLng originalOriginLatLng = turnPoints[indexOfMovedPoint];
-
-                // addMarker(originalOriginLatLng, "original position of moved point");
-
-                // addMarker(polyline.getVertex(indexOfMovedPoint), "proposed position of moved point");
+                LatLng oldPositionMovedPoint = turnPoints[indexOfMovedPoint];
 
                 if (indexOfMovedPoint == 0 || indexOfMovedPoint == noOfPoints - 1) {
                     // start and end points cannot be moved!
                 } else {
-                    TwoDPoint newOrigin = computeNewOrigin(indexOfMovedPoint);
-                    final boolean projectionOnBeforeLine = projectedToBeforeLine(indexOfMovedPoint);
-                    System.out.println("projectionOnBeforeLine = " + projectionOnBeforeLine);
 
+                    TwoDPoint newOrigin = computeNewOrigin(indexOfMovedPoint);
                     LatLng edgeStart = null;
                     LatLng edgeEnd = null;
+                    LatLng beforeMovedPoint = null;
 
                     if (indexOfMovedPoint == 1) {
-                        turnPoints[indexOfMovedPoint + 1] = toLatLng(computeAfterNewOrigin(indexOfMovedPoint, newOrigin));
+                        turnPoints[indexOfMovedPoint + 1] = toLatLng(computeAfterNewOrigin(indexOfMovedPoint, newOrigin), map);
                     } else if (indexOfMovedPoint == noOfPoints - 2) {
-                        turnPoints[indexOfMovedPoint - 1] = toLatLng(computeBeforeNewOrigin(indexOfMovedPoint, newOrigin));
+                        turnPoints[indexOfMovedPoint - 1] = toLatLng(computeBeforeNewOrigin(indexOfMovedPoint, newOrigin), map);
                     } else {
                         LatLng temp = null;
 
-                        temp = toLatLng(computeBeforeNewOrigin(indexOfMovedPoint, newOrigin));
+                        temp = toLatLng(computeBeforeNewOrigin(indexOfMovedPoint, newOrigin), map);
                         if (PathPolyline.equals(temp, turnPoints[indexOfMovedPoint - 1], 0.0001) == false) {
-                            // System.out.println("aici1");
+
                             turnPoints[indexOfMovedPoint - 1] = temp;
 
+                            beforeMovedPoint = turnPoints[indexOfMovedPoint + 1];
                             edgeStart = turnPoints[indexOfMovedPoint - 1];
                             edgeEnd = turnPoints[indexOfMovedPoint - 2];
                         }
 
-                        temp = toLatLng(computeAfterNewOrigin(indexOfMovedPoint, newOrigin));
+                        temp = toLatLng(computeAfterNewOrigin(indexOfMovedPoint, newOrigin), map);
                         if (PathPolyline.equals(temp, turnPoints[indexOfMovedPoint + 1], 0.0001) == false) {
-                            // System.out.println("aici2");
+
                             turnPoints[indexOfMovedPoint + 1] = temp;
 
+                            beforeMovedPoint = turnPoints[indexOfMovedPoint - 1];
                             edgeStart = turnPoints[indexOfMovedPoint + 1];
                             edgeEnd = turnPoints[indexOfMovedPoint + 2];
                         }
                     }
 
-                    // addMarker(edgeStart, "edge start");
-                    // addMarker(edgeEnd, "edge end");
+                    turnPoints[indexOfMovedPoint] = toLatLng(newOrigin, map);
 
-                    turnPoints[indexOfMovedPoint] = toLatLng(newOrigin);
+                    LatLng newPositionMovedPoint = turnPoints[indexOfMovedPoint];
 
-                    // addMarker(toLatLng(newOrigin), "new position of moved point");
-
-                    LatLng newOriginLatLng = turnPoints[indexOfMovedPoint];
+                    long oldMovedPointTimePoint = getTimePointOf(oldPositionMovedPoint);
+                    oldPositionMovedPoint = fixOldPositionMovedPoint(beforeMovedPoint, oldPositionMovedPoint, newPositionMovedPoint);
 
                     if (FIX_CUT_SPIKES) {
                         turnPoints = fixCutSpikes(turnPoints);
@@ -229,13 +225,22 @@ public class PathPolyline {
                     }
 
                     if(ADD_1_TURNER) {
-                        add1Turner(originalOriginLatLng, newOriginLatLng, edgeStart, edgeEnd, !projectionOnBeforeLine, turnPoints);
+
+                        // addMarker(newPositionMovedPoint, "newPositionMovedPoint");
+                        // addMarker(oldPositionMovedPoint, "oldPositionMovedPoint");
+
+                        // addMarker(edgeStart, "edgeStart");
+                        // addMarker(edgeEnd, "edgeEnd");
+                        // addMarker(beforeMovedPoint, "beforeMovedPoint");
+
+                        add1Turner(oldPositionMovedPoint, newPositionMovedPoint, beforeMovedPoint, edgeStart, edgeEnd, turnPoints, oldMovedPointTimePoint);
                     }
                 }
 
                 drawPolylineOnMap();
                 drawDashLinesOnMap(map.getZoomLevel());
             }
+
         });
 
         this.map.addOverlay(this.polyline);
@@ -245,10 +250,23 @@ public class PathPolyline {
         this.getTotalTime();
     }
 
+
+    private LatLng fixOldPositionMovedPoint(LatLng beforeMovedPoint, LatLng oldPositionMovedPoint, LatLng newPositionMovedPoint) {
+
+        TwoDPoint beforePoint = toTwoDPoint(beforeMovedPoint, this.map);
+        TwoDPoint point = toTwoDPoint(oldPositionMovedPoint, this.map);
+        TwoDPoint afterPoint = toTwoDPoint(newPositionMovedPoint, this.map);
+
+        TwoDSegment line = new TwoDSegment(beforePoint, afterPoint);
+        TwoDPoint projection = line.projectionOfPointOnLine(point);
+
+        return toLatLng(projection, this.map);
+    }
+
     private double getAngleDegreesBetween(LatLng previous, LatLng current, LatLng next) {
 
-        TwoDVector first = new TwoDVector(this.toTwoDPoint(current), this.toTwoDPoint(previous));
-        TwoDVector second = new TwoDVector(this.toTwoDPoint(current), this.toTwoDPoint(next));
+        TwoDVector first = new TwoDVector(PathPolyline.toTwoDPoint(current, this.map), PathPolyline.toTwoDPoint(previous, this.map));
+        TwoDVector second = new TwoDVector(PathPolyline.toTwoDPoint(current, this.map), PathPolyline.toTwoDPoint(next, this.map));
 
         double dotProduct = first.dotProduct(second);
 
@@ -278,6 +296,7 @@ public class PathPolyline {
         return timepoint;
     }
 
+    @SuppressWarnings("unused")
     private static int getIndexOf(LatLng item, LatLng[] array) {
         int index = 0;
         for (LatLng element : array) {
@@ -290,36 +309,25 @@ public class PathPolyline {
         return index;
     }
 
-    private void add1Turner(final LatLng originalOriginLng, final LatLng newOriginLng, LatLng edgeStart, LatLng edgeEnd, boolean leftSide, final LatLng[] turnPoints) {
+    private void add1Turner(LatLng oldPositionMovedPoint, LatLng newPositionMovedPoint, LatLng beforeMovedPoint, LatLng edgeStart, LatLng edgeEnd,
+            LatLng[] turnPoints, long oldMovedPointTimePoint) {
 
-        final int indexOfEdgeStart = getIndexOf(edgeStart, turnPoints);
-        // System.out.println("indexOfEdgeStart = " + indexOfEdgeStart);
-
-        // int indexOfEdgeEnd = getIndexOf(edgeEnd, turnPoints);
-        // System.out.println("indexOfEdgeEnd = " + indexOfEdgeEnd);
-
-        final int indexOfMovedPoint = getIndexOf(newOriginLng, turnPoints);
-        // System.out.println("indexOfMovedPoint = " + indexOfMovedPoint);
-
-        final int noOfTurnPoints = turnPoints.length;
-
-        PositionDTO firstPoint = toPositionDTO(originalOriginLng);
-        PositionDTO secondPoint = toPositionDTO(newOriginLng);
-
-        PositionDTO edgeStartPoint = toPositionDTO(edgeStart);
-        PositionDTO edgeEndPoint = toPositionDTO(edgeEnd);
-
-        long timepoint = this.getTimePointOf(originalOriginLng);
+        PositionDTO oldMovedPositionDTO = toPositionDTO(oldPositionMovedPoint);
+        PositionDTO newMovedPositionDTO = toPositionDTO(newPositionMovedPoint);
+        PositionDTO beforeMovedPositionDTO = toPositionDTO(beforeMovedPoint);
+        PositionDTO edgeStartPositionDTO = toPositionDTO(edgeStart);
+        PositionDTO edgeEndPositionDTO = toPositionDTO(edgeEnd);
 
         Request1TurnerDTO requestData = new Request1TurnerDTO(this.selectedBoatClassIndex, this.selectedRaceIndex, this.selectedCompetitorIndex, this.selectedLegIndex,
-                firstPoint, timepoint, secondPoint, !leftSide, edgeStartPoint, edgeEndPoint);
+                oldMovedPositionDTO, newMovedPositionDTO, beforeMovedPositionDTO, edgeStartPositionDTO, edgeEndPositionDTO,
+                oldMovedPointTimePoint, this.startToEndBearing.getDegrees());
 
         this.simulatorService.get1Turner(requestData, new AsyncCallback<Response1TurnerDTO>() {
 
             @Override
             public void onFailure(Throwable error) {
                 System.err.println("Failed to compute the 1-turner!\r\n" + error.getMessage());
-                //errorReporter.reportError("Failed to compute the 1-turner!\r\n" + error.getMessage());
+                errorReporter.reportError("Failed to compute the 1-turner!\r\n" + error.getMessage());
             }
 
             @Override
@@ -327,49 +335,81 @@ public class PathPolyline {
 
                 // System.out.println("succes");
 
-                SimulatorWindDTO oneTurner = receiveData.oneTurner;
-                // System.out.println("One turner at (" + oneTurner.position.latDeg + ", " + oneTurner.position.lngDeg +
-                // ")");
-                addMarker(LatLng.newInstance(oneTurner.position.latDeg, oneTurner.position.lngDeg), "One turner");
+                LatLng leftSide1Turner = LatLng.newInstance(receiveData.leftSide1Turner.position.latDeg, receiveData.leftSide1Turner.position.lngDeg);
+                addMarker(leftSide1Turner, "leftSide1Turner");
+                System.out.println("leftSide1Turner = " + leftSide1Turner);
 
-                SimulatorWindDTO intersection = receiveData.intersection;
-                // System.out.println("Intersection at (" + intersection.position.latDeg + ", " +
-                // intersection.position.lngDeg + ")");
-                addMarker(LatLng.newInstance(intersection.position.latDeg, intersection.position.lngDeg), "Intersection");
+                LatLng rightSide1Turner = LatLng.newInstance(receiveData.rightSide1Turner.position.latDeg, receiveData.rightSide1Turner.position.lngDeg);
+                addMarker(rightSide1Turner, "rightSide1Turner");
+                System.out.println("rightSide1Turner = " + rightSide1Turner);
 
-                List<LatLng> newTurnPoints = new ArrayList<LatLng>();
+                LatLng startPosition = LatLng.newInstance(receiveData.startPosition.latDeg, receiveData.startPosition.lngDeg);
+                // addMarker(startPosition, "startPosition");
+                System.out.println("startPosition = " + startPosition);
 
-                if (indexOfEdgeStart < indexOfMovedPoint) {
+                LatLng endPosition = LatLng.newInstance(receiveData.endPosition.latDeg, receiveData.endPosition.lngDeg);
+                // addMarker(endPosition, "endPosition");
+                System.out.println("endPosition = " + endPosition);
 
-                    for (int index = 0; index < noOfTurnPoints; index++) {
-                        if (index == indexOfEdgeStart) {
-                            newTurnPoints.add(LatLng.newInstance(intersection.position.latDeg, intersection.position.lngDeg));
-                        } else if (index == indexOfMovedPoint) {
-                            newTurnPoints.add(newOriginLng);
-                            newTurnPoints.add(LatLng.newInstance(oneTurner.position.latDeg, oneTurner.position.lngDeg));
-                            newTurnPoints.add(originalOriginLng);
-                        } else {
-                            newTurnPoints.add(turnPoints[index]);
-                        }
-                    }
-
-                } else {
-
-                    for (int index = 0; index < noOfTurnPoints; index++) {
-                        if (index == indexOfEdgeStart) {
-                            newTurnPoints.add(LatLng.newInstance(intersection.position.latDeg, intersection.position.lngDeg));
-                        } else if (index == indexOfMovedPoint) {
-                            newTurnPoints.add(originalOriginLng);
-                            newTurnPoints.add(LatLng.newInstance(oneTurner.position.latDeg, oneTurner.position.lngDeg));
-                            newTurnPoints.add(newOriginLng);
-                        } else {
-                            newTurnPoints.add(turnPoints[index]);
-                        }
-                    }
+                if (PathPolyline.equals(leftSide1Turner, startPosition)) {
+                    System.out.println("leftSide1Turner is the same as startPosition");
+                } else if (PathPolyline.equals(leftSide1Turner, endPosition)) {
+                    System.out.println("leftSide1Turner is the same as endPosition");
+                } else if (PathPolyline.equals(rightSide1Turner, startPosition)) {
+                    System.out.println("rightSide1Turner is the same as startPosition");
+                } else if (PathPolyline.equals(rightSide1Turner, endPosition)) {
+                    System.out.println("rightSide1Turner is the same as endPosition");
                 }
 
-                PathPolyline.this.turnPoints = newTurnPoints.toArray(new LatLng[0]);
-                drawPolylineOnMap();
+
+                List<SimulatorWindDTO> path = receiveData.path;
+
+                List<LatLng> polylinePoints = new ArrayList<LatLng>();
+                for (SimulatorWindDTO point : path) {
+                    polylinePoints.add(LatLng.newInstance(point.position.latDeg, point.position.lngDeg));
+                }
+                Polyline secondPolyline = new Polyline(polylinePoints.toArray(new LatLng[0]), "cyan", 3);
+
+                map.addOverlay(secondPolyline);
+
+                //                SimulatorWindDTO intersection = receiveData.intersection;
+                //                // System.out.println("Intersection at (" + intersection.position.latDeg + ", " +
+                //                // intersection.position.lngDeg + ")");
+                //                addMarker(LatLng.newInstance(intersection.position.latDeg, intersection.position.lngDeg), "Intersection");
+
+                //                List<LatLng> newTurnPoints = new ArrayList<LatLng>();
+                //
+                //                if (indexOfEdgeStart < indexOfMovedPoint) {
+                //
+                //                    for (int index = 0; index < noOfTurnPoints; index++) {
+                //                        if (index == indexOfEdgeStart) {
+                //                            newTurnPoints.add(LatLng.newInstance(intersection.position.latDeg, intersection.position.lngDeg));
+                //                        } else if (index == indexOfMovedPoint) {
+                //                            newTurnPoints.add(newOriginLng);
+                //                            newTurnPoints.add(LatLng.newInstance(oneTurner.position.latDeg, oneTurner.position.lngDeg));
+                //                            newTurnPoints.add(originalOriginLng);
+                //                        } else {
+                //                            newTurnPoints.add(turnPoints[index]);
+                //                        }
+                //                    }
+                //
+                //                } else {
+                //
+                //                    for (int index = 0; index < noOfTurnPoints; index++) {
+                //                        if (index == indexOfEdgeStart) {
+                //                            newTurnPoints.add(LatLng.newInstance(intersection.position.latDeg, intersection.position.lngDeg));
+                //                        } else if (index == indexOfMovedPoint) {
+                //                            newTurnPoints.add(originalOriginLng);
+                //                            newTurnPoints.add(LatLng.newInstance(oneTurner.position.latDeg, oneTurner.position.lngDeg));
+                //                            newTurnPoints.add(newOriginLng);
+                //                        } else {
+                //                            newTurnPoints.add(turnPoints[index]);
+                //                        }
+                //                    }
+                //                }
+                //
+                //                PathPolyline.this.turnPoints = newTurnPoints.toArray(new LatLng[0]);
+                //                drawPolylineOnMap();
             }
         });
     }
@@ -393,8 +433,8 @@ public class PathPolyline {
         for (int index = 2; index < noOfPointsMinus1; index++) {
 
             if (getAngleDegreesBetween(turnPoints[index - 1], turnPoints[index], turnPoints[index + 1]) < SMOOTHNESS_MAX_DEG) {
-                before = new TwoDSegment(toTwoDPoint(turnPoints[index - 2]), toTwoDPoint(turnPoints[index - 1]));
-                after = new TwoDSegment(toTwoDPoint(turnPoints[index]), toTwoDPoint(turnPoints[index + 1]));
+                before = new TwoDSegment(toTwoDPoint(turnPoints[index - 2], this.map), toTwoDPoint(turnPoints[index - 1], this.map));
+                after = new TwoDSegment(toTwoDPoint(turnPoints[index], this.map), toTwoDPoint(turnPoints[index + 1], this.map));
                 newAtIndex = after.intersectionPointWith(before);
                 newIndex = index;
             }
@@ -404,7 +444,7 @@ public class PathPolyline {
             if (index == newIndex - 1) {
                 continue;
             } else if (index == newIndex) {
-                points.add(toLatLng(newAtIndex));
+                points.add(toLatLng(newAtIndex, this.map));
             } else {
                 points.add(turnPoints[index]);
             }
@@ -427,17 +467,18 @@ public class PathPolyline {
                 third = this.turnPoints[index + 2];
                 fourth = this.turnPoints[index + 3];
 
-                if (TwoDPoint.areIntersecting(toTwoDPoint(first), toTwoDPoint(second), toTwoDPoint(third), toTwoDPoint(fourth))) {
+                if (TwoDPoint.areIntersecting(toTwoDPoint(first, this.map), toTwoDPoint(second, this.map), toTwoDPoint(third, this.map),
+                        toTwoDPoint(fourth, this.map))) {
 
-                    TwoDSegment firstSegment = new TwoDSegment(toTwoDPoint(first), toTwoDPoint(second));
-                    TwoDSegment secondSegment = new TwoDSegment(toTwoDPoint(third), toTwoDPoint(fourth));
+                    TwoDSegment firstSegment = new TwoDSegment(toTwoDPoint(first, this.map), toTwoDPoint(second, this.map));
+                    TwoDSegment secondSegment = new TwoDSegment(toTwoDPoint(third, this.map), toTwoDPoint(fourth, this.map));
                     List<LatLng> newTurnPoints = new ArrayList<LatLng>();
 
                     for (int index2 = 0; index2 < noOfPoints; index2++) {
                         if (index2 == index + 1) {
                             continue;
                         } else if (index2 == index + 2) {
-                            newTurnPoints.add(toLatLng(firstSegment.intersectionPointWith(secondSegment)));
+                            newTurnPoints.add(toLatLng(firstSegment.intersectionPointWith(secondSegment), this.map));
                         } else {
                             newTurnPoints.add(LatLng.newInstance(this.turnPoints[index2].getLatitude(), this.turnPoints[index2].getLongitude()));
                         }
@@ -454,44 +495,23 @@ public class PathPolyline {
 
     private TwoDPoint computeNewOrigin(int indexOfMovedPoint) {
 
-        double distance = (map.getZoomLevel() - 11) * DEFAULT_DISTANCE_PX;
+        double distance = (this.map.getZoomLevel() - 11) * DEFAULT_DISTANCE_PX;
 
-        TwoDPoint beforeOrigin = toTwoDPoint(this.turnPoints[indexOfMovedPoint - 1]);
-        TwoDPoint origin = toTwoDPoint(this.turnPoints[indexOfMovedPoint]);
-        TwoDPoint afterOrigin = toTwoDPoint(this.turnPoints[indexOfMovedPoint + 1]);
+        TwoDPoint beforeOrigin = toTwoDPoint(this.turnPoints[indexOfMovedPoint - 1], this.map);
+        TwoDPoint origin = toTwoDPoint(this.turnPoints[indexOfMovedPoint], this.map);
+        TwoDPoint afterOrigin = toTwoDPoint(this.turnPoints[indexOfMovedPoint + 1], this.map);
 
         TwoDPoint head1 = TwoDPoint.getDistancedPoint(origin, distance, beforeOrigin);
         TwoDPoint head2 = TwoDPoint.getDistancedPoint(origin, distance, afterOrigin);
 
-        return TwoDPoint.getCorrectProjection(origin, head1, head2, toTwoDPoint(this.polyline.getVertex(indexOfMovedPoint)));
-    }
-
-    private boolean projectedToBeforeLine(int indexOfMovedPoint) {
-        double distance = (map.getZoomLevel() - 11) * DEFAULT_DISTANCE_PX;
-
-        TwoDPoint origin = toTwoDPoint(this.turnPoints[indexOfMovedPoint]);
-        TwoDPoint newOrigin = toTwoDPoint(this.polyline.getVertex(indexOfMovedPoint));
-
-        TwoDPoint beforeOrigin = toTwoDPoint(this.turnPoints[indexOfMovedPoint - 1]);
-        TwoDPoint head1 = TwoDPoint.getDistancedPoint(origin, distance, beforeOrigin);
-        TwoDSegment oh1 = new TwoDSegment(origin, head1);
-        TwoDPoint p1 = oh1.projectionOfPointOnLine(newOrigin);
-        double d1 = newOrigin.distanceBetween(p1);
-
-        TwoDPoint afterOrigin = toTwoDPoint(this.turnPoints[indexOfMovedPoint + 1]);
-        TwoDPoint head2 = TwoDPoint.getDistancedPoint(origin, distance, afterOrigin);
-        TwoDSegment oh2 = new TwoDSegment(origin, head2);
-        TwoDPoint p2 = oh2.projectionOfPointOnLine(newOrigin);
-        double d2 = newOrigin.distanceBetween(p2);
-
-        return (d1 > d2);
+        return TwoDPoint.getCorrectProjection(origin, head1, head2, toTwoDPoint(this.polyline.getVertex(indexOfMovedPoint), this.map));
     }
 
     private TwoDPoint computeAfterNewOrigin(int indexOfMovedPoint, TwoDPoint newOrigin) {
 
-        TwoDPoint origin = toTwoDPoint(this.turnPoints[indexOfMovedPoint]);
-        TwoDPoint afterOrigin = toTwoDPoint(this.turnPoints[indexOfMovedPoint + 1]);
-        TwoDPoint afterAfterOrigin = toTwoDPoint(this.turnPoints[indexOfMovedPoint + 2]);
+        TwoDPoint origin = toTwoDPoint(this.turnPoints[indexOfMovedPoint], this.map);
+        TwoDPoint afterOrigin = toTwoDPoint(this.turnPoints[indexOfMovedPoint + 1], this.map);
+        TwoDPoint afterAfterOrigin = toTwoDPoint(this.turnPoints[indexOfMovedPoint + 2], this.map);
 
         TwoDSegment afterLine = new TwoDSegment(afterOrigin, afterAfterOrigin);
         TwoDVector afterVector = new TwoDVector(origin, afterOrigin);
@@ -500,9 +520,9 @@ public class PathPolyline {
 
     private TwoDPoint computeBeforeNewOrigin(int indexOfMovedPoint, TwoDPoint newOrigin) {
 
-        TwoDPoint beforeOrigin = toTwoDPoint(this.turnPoints[indexOfMovedPoint - 1]);
-        TwoDPoint beforeBeforeOrigin = toTwoDPoint(this.turnPoints[indexOfMovedPoint - 2]);
-        TwoDPoint origin = toTwoDPoint(this.turnPoints[indexOfMovedPoint]);
+        TwoDPoint beforeOrigin = toTwoDPoint(this.turnPoints[indexOfMovedPoint - 1], this.map);
+        TwoDPoint beforeBeforeOrigin = toTwoDPoint(this.turnPoints[indexOfMovedPoint - 2], this.map);
+        TwoDPoint origin = toTwoDPoint(this.turnPoints[indexOfMovedPoint], this.map);
 
         TwoDSegment beforeLine = new TwoDSegment(beforeBeforeOrigin, beforeOrigin);
         TwoDVector beforeVector = new TwoDVector(beforeOrigin, origin);
@@ -616,17 +636,21 @@ public class PathPolyline {
         return index;
     }
 
-    private TwoDPoint toTwoDPoint(LatLng latLng) {
-        Point point = this.map.convertLatLngToContainerPixel(latLng);
+    private static TwoDPoint toTwoDPoint(LatLng latLng, MapWidget map) {
+        Point point = map.convertLatLngToContainerPixel(latLng);
         return new TwoDPoint(point.getX(), point.getY());
     }
 
-    private LatLng toLatLng(TwoDPoint point) {
-        return this.map.convertContainerPixelToLatLng(Point.newInstance((int) point.getX(), (int) point.getY()));
+    private static LatLng toLatLng(TwoDPoint point, MapWidget map) {
+        return map.convertContainerPixelToLatLng(Point.newInstance((int) point.getX(), (int) point.getY()));
     }
 
     private static PositionDTO toPositionDTO(LatLng position) {
         return new PositionDTO(position.getLatitude(), position.getLongitude());
+    }
+
+    private static Position toPosition(PositionDTO position) {
+        return new DegreePosition(position.latDeg, position.lngDeg);
     }
 
     private Polyline createPolyline(TwoDPoint first, TwoDPoint second, String color, int weight) {
@@ -722,4 +746,21 @@ public class PathPolyline {
     public void setBoatClassID(int boatClassIndex) {
         this.selectedBoatClassIndex = boatClassIndex;
     }
+
+    // public static double getSign(LatLng p1, LatLng p2, LatLng p3) {
+    // return (p1.getLatitude() - p3.getLatitude()) * (p2.getLongitude() - p3.getLongitude()) - (p2.getLatitude() -
+    // p3.getLatitude())
+    // * (p1.getLongitude() - p3.getLongitude());
+    // }
+    //
+    // public static boolean isPointInsideTriangle(LatLng point, LatLng corner1, LatLng corner2, LatLng corner3) {
+    //
+    // boolean b1, b2, b3;
+    //
+    // b1 = getSign(point, corner1, corner2) < 0.0d;
+    // b2 = getSign(point, corner2, corner3) < 0.0d;
+    // b3 = getSign(point, corner3, corner1) < 0.0d;
+    //
+    // return (b1 == b2) && (b2 == b3);
+    // }
 }
