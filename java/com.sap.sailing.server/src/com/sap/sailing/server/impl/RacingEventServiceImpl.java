@@ -632,18 +632,18 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     }
 
     @Override
-    public Regatta getOrCreateRegatta(String baseRegattaName, String boatClassName, Serializable id) {
-        RaceLogStore raceLogStore = MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(
-                mongoObjectFactory, 
-                domainObjectFactory);
-        Regatta regatta = new RegattaImpl(raceLogStore, baseRegattaName, getBaseDomainFactory().getOrCreateBoatClass(
-                boatClassName), this, com.sap.sailing.domain.base.DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT),
-                RegattaImpl.getFullName(baseRegattaName, boatClassName), null);
-        //TODO: shall a default regatta have a default course area?
-        Regatta result = regattasByName.get(regatta.getName());
+    public Regatta getOrCreateDefaultRegatta(String baseRegattaName, String boatClassName, Serializable id) {
+        String defaultRegattaName = RegattaImpl.getDefaultName(baseRegattaName, boatClassName);
+        
+        Regatta result = regattasByName.get(defaultRegattaName);
         if (result == null) {
-            result = regatta;
-            logger.info("Created regatta "+result.getName()+" ("+hashCode()+") on "+this);
+            RaceLogStore raceLogStore = MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(
+                    mongoObjectFactory, 
+                    domainObjectFactory);
+            result = new RegattaImpl(raceLogStore, baseRegattaName, getBaseDomainFactory().getOrCreateBoatClass(
+                    boatClassName), this, com.sap.sailing.domain.base.DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT),
+                    id, null);
+            logger.info("Created default regatta " + result.getName() + " (" + hashCode() + ") on " + this);
             cacheAndReplicateDefaultRegatta(result);
         }
         return result;

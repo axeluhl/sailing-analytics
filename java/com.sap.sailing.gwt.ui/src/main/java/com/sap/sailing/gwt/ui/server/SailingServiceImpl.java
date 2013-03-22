@@ -610,7 +610,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 }
             }
         }
-        logger.fine("computeLeaderboardByName("+leaderboard.getName()+", "+timePoint+", "+namesOfRaceColumnsForWhichToLoadLegDetails+") took "+
+        logger.info("computeLeaderboardByName("+leaderboard.getName()+", "+timePoint+", "+namesOfRaceColumnsForWhichToLoadLegDetails+") took "+
                 (System.currentTimeMillis()-startOfRequestHandling)+"ms");
         return result;
     }
@@ -2486,7 +2486,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 regatta = getService().createRegatta(
                         replayRaceDTO.rsc,
                         boatClass.trim(),
-                        RegattaImpl.getFullName(replayRaceDTO.rsc, replayRaceDTO.boat_class),
+                        RegattaImpl.getDefaultName(replayRaceDTO.rsc, replayRaceDTO.boat_class),
                         Collections.singletonList(new SeriesImpl(
                                 LeaderboardNameConstants.DEFAULT_SERIES_NAME, 
                                 /* isMedal */false, 
