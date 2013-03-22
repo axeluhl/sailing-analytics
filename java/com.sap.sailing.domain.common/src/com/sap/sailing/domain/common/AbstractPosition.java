@@ -6,7 +6,6 @@ import com.sap.sailing.domain.common.impl.RadianPosition;
 
 public class AbstractPosition implements Position {
 
-    private static final double TRESHOLD_DEGREES = 25.0;
     private static final long serialVersionUID = -3057027562787541064L;
 
     @Override
@@ -122,18 +121,5 @@ public class AbstractPosition implements Position {
     @Override
     public String toString() {
         return "("+getLatDeg()+","+getLngDeg()+")";
-    }
-
-    @Override
-    public boolean isTurn(final Position previousPoint, final Position nextPoint) {
-        final Bearing b1 = previousPoint.getBearingGreatCircle(this);
-        final Bearing b2 = this.getBearingGreatCircle(nextPoint);
-        double diff = b1.getDifferenceTo(b2).getDegrees();
-
-        if (diff < 0) {
-            diff = 360 + diff;
-        }
-
-        return !((diff >= 0 && diff <= TRESHOLD_DEGREES) || (diff >= (180 - TRESHOLD_DEGREES) && diff <= (180 + TRESHOLD_DEGREES)) || (diff >= (360 - TRESHOLD_DEGREES) && diff <= 360));
     }
 }
