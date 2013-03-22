@@ -127,7 +127,7 @@ public class JsonExportTests {
         String jsonName = (String) firstElement.get("name");
         String jsonBoatClass = (String) firstElement.get("boatclass");
         
-        assertTrue(RegattaImpl.getFullName(regattaName, boatClassName).equals(jsonName));
+        assertTrue(RegattaImpl.getDefaultName(regattaName, boatClassName).equals(jsonName));
         assertTrue(boatClassName.equals(jsonBoatClass));
     }
 
