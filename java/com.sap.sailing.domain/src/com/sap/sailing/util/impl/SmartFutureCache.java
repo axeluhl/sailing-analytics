@@ -327,7 +327,9 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
                                 ongoingRecalculations.remove(key);
                             }
                         } finally {
-                            LockUtil.unpropagateLockSetFrom(callerThread);
+                            if (callerWaitsSynchronouslyForResult) {
+                                LockUtil.unpropagateLockSetFrom(callerThread);
+                            }
                         }
                     } catch (Exception e) {
                         // cache won't be updated
