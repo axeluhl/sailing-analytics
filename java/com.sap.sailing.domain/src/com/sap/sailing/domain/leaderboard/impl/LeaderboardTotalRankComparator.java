@@ -261,6 +261,6 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
      * Compares a competitor better (lesser) if it has the greater number of races scored
      */
     protected int compareByNumberOfRacesScored(int o1NumberOfRacesScored, int o2NumberOfRacesScored) {
-        return o2NumberOfRacesScored - o1NumberOfRacesScored;
+        return scoringScheme.compareByNumberOfRacesScored(o1NumberOfRacesScored, o2NumberOfRacesScored);
     }
 }

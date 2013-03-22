@@ -191,12 +191,14 @@ public class LockUtil {
      */
     public static void propagateLockSetFrom(Thread thread) {
         Map<Lock, Integer> otherMap = lockCounts.get(thread);
-        Map<Lock, Integer> currentMap = getCurrentThreadsLockCounts();
-        for (Map.Entry<Lock, Integer> otherEntry : otherMap.entrySet()) {
-            if (currentMap.containsKey(otherEntry.getKey())) {
-                currentMap.put(otherEntry.getKey(), currentMap.get(otherEntry.getKey()) + otherEntry.getValue());
-            } else {
-                currentMap.put(otherEntry.getKey(), otherEntry.getValue());
+        if (otherMap != null) {
+            Map<Lock, Integer> currentMap = getCurrentThreadsLockCounts();
+            for (Map.Entry<Lock, Integer> otherEntry : otherMap.entrySet()) {
+                if (currentMap.containsKey(otherEntry.getKey())) {
+                    currentMap.put(otherEntry.getKey(), currentMap.get(otherEntry.getKey()) + otherEntry.getValue());
+                } else {
+                    currentMap.put(otherEntry.getKey(), otherEntry.getValue());
+                }
             }
         }
     }
@@ -208,11 +210,13 @@ public class LockUtil {
      * the argument.
      */
     public static void unpropagateLockSetFrom(Thread thread) {
-        Map<Lock, Integer> otherMap = getLockCounts(thread);
-        Map<Lock, Integer> currentMap = getCurrentThreadsLockCounts();
-        for (Map.Entry<Lock, Integer> otherEntry : otherMap.entrySet()) {
-            assert currentMap.containsKey(otherEntry.getKey());
-            currentMap.put(otherEntry.getKey(), currentMap.get(otherEntry.getKey()) - otherEntry.getValue());
+        Map<Lock, Integer> otherMap = lockCounts.get(thread);
+        if (otherMap != null) {
+            Map<Lock, Integer> currentMap = getCurrentThreadsLockCounts();
+            for (Map.Entry<Lock, Integer> otherEntry : otherMap.entrySet()) {
+                assert currentMap.containsKey(otherEntry.getKey());
+                currentMap.put(otherEntry.getKey(), currentMap.get(otherEntry.getKey()) - otherEntry.getValue());
+            }
         }
     }
 }
