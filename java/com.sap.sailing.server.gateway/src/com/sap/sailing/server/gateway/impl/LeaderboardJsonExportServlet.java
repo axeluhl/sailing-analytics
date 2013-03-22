@@ -34,13 +34,14 @@ public class LeaderboardJsonExportServlet extends AbstractJsonHttpServlet {
     private static final long serialVersionUID = -2460691283231361152L;
     private static final String PARAM_NAME_LEADERBOARDNAME = "leaderboardName";
     private static final String PARAM_NAME_RESULTSTATE = "resultState";
-    private enum ResultStates { Live, Preliminary, Final };
+    
+    public static enum ResultStates { Live, Preliminary, Final };
     
     // for backward compatibility the default result state is live
     private final ResultStates DEFAULT_RESULT_STATE = ResultStates.Live;  
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    public void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String leaderboardName = req.getParameter(PARAM_NAME_LEADERBOARDNAME);
         if (leaderboardName == null) {
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Need to specify a leaderboard name using the "+

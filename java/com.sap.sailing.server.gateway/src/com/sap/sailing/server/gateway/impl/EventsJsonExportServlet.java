@@ -1,4 +1,4 @@
-package com.sap.sailing.server.gateway.impl.rc;
+package com.sap.sailing.server.gateway.impl;
 
 import java.io.IOException;
 
@@ -15,22 +15,18 @@ import com.sap.sailing.server.gateway.serialization.impl.CourseAreaJsonSerialize
 import com.sap.sailing.server.gateway.serialization.impl.EventDataJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.VenueJsonSerializer;
 
-public class EventDataJsonExportServlet extends AbstractJsonHttpServlet {
-    private static final long serialVersionUID = 4515246650108245796L;
+public class EventsJsonExportServlet extends AbstractJsonHttpServlet {
+    private static final long serialVersionUID = -7313766879733880267L;
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        JsonSerializer<EventBase> eventSerializer = createSerializer();
+        JsonSerializer<EventBase> eventSerializer = new EventDataJsonSerializer(new VenueJsonSerializer(new CourseAreaJsonSerializer()));
         JSONArray result = new JSONArray();
         for (EventBase event : getService().getAllEvents()) {
             result.add(eventSerializer.serialize(event));
         }
+        setJsonResponseHeader(response);
         result.writeJSONString(response.getWriter());
         response.setContentType("application/json");
     }
-
-    private static JsonSerializer<EventBase> createSerializer() {
-        return new EventDataJsonSerializer(new VenueJsonSerializer(new CourseAreaJsonSerializer()));
-    }
-
 }
