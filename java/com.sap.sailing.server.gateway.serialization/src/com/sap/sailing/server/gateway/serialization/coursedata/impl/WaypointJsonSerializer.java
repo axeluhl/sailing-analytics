@@ -7,6 +7,7 @@ import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 
 public class WaypointJsonSerializer implements JsonSerializer<Waypoint> {
+    public static final String FIELD_NAME = "name";
     public static final String FIELD_PASSING_SIDE = "passingSide";
     public static final String FIELD_CONTROL_POINT = "controlPoint";
 
@@ -19,6 +20,10 @@ public class WaypointJsonSerializer implements JsonSerializer<Waypoint> {
     @Override
     public JSONObject serialize(Waypoint object) {
         JSONObject result = new JSONObject();
+        
+        if (object.getName() != null) {
+            result.put(FIELD_NAME, object.getName());
+        }
 
         if (object.getPassingSide() != null) {
             result.put(FIELD_PASSING_SIDE, object.getPassingSide().name());
