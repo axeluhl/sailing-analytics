@@ -20,8 +20,8 @@ public class SimulatorEntryPoint extends AbstractEntryPoint {
     private SimulatorViewModes viewMode;
 
     private final SimulatorServiceAsync simulatorSvc = GWT.create(SimulatorService.class);
-    private int xRes = 60;
-    private int yRes = 30;
+    private int xRes = 40;
+    private int yRes = 20;
     private boolean autoUpdate = false;
     private char mode = 'f';
 

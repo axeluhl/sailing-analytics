@@ -43,8 +43,8 @@ public class TestTimeComparison {
     private List<SimulatorWindDTO> allPoints = null;
 
     private Map<Integer, String> boatClassesIndexes = null;
-    //private Map<Integer, String> averageWindFlags = null;
-    //private List<Integer> timeStepMillisecondsSizes = null;
+    // private Map<Integer, String> averageWindFlags = null;
+    // private List<Integer> timeStepMillisecondsSizes = null;
     private Integer timeStepMilliseconds = 1000;
 
     @Before
@@ -57,16 +57,16 @@ public class TestTimeComparison {
         this.boatClassesIndexes.put(3, "49er STG");
         this.boatClassesIndexes.put(4, "505 STG");
 
-        /*this.averageWindFlags = new HashMap<Integer, String>();
-        this.averageWindFlags.put(0, "default average wind");
-        this.averageWindFlags.put(1, "real average wind");*/
+        /*
+         * this.averageWindFlags = new HashMap<Integer, String>(); this.averageWindFlags.put(0, "default average wind");
+         * this.averageWindFlags.put(1, "real average wind");
+         */
 
-        /*this.timeStepMillisecondsSizes = new ArrayList<Integer>();
-        this.timeStepMillisecondsSizes.add(1000);
-        this.timeStepMillisecondsSizes.add(1250);
-        this.timeStepMillisecondsSizes.add(1500);
-        this.timeStepMillisecondsSizes.add(1750);
-        this.timeStepMillisecondsSizes.add(2000);*/
+        /*
+         * this.timeStepMillisecondsSizes = new ArrayList<Integer>(); this.timeStepMillisecondsSizes.add(1000);
+         * this.timeStepMillisecondsSizes.add(1250); this.timeStepMillisecondsSizes.add(1500);
+         * this.timeStepMillisecondsSizes.add(1750); this.timeStepMillisecondsSizes.add(2000);
+         */
     }
 
     @Test
@@ -75,20 +75,22 @@ public class TestTimeComparison {
         File dir = new File("C:\\Users\\i059829\\workspace\\sapsailingcapture\\java\\com.sap.sailing.simulator.test");
         String[] flist = dir.list(new FilenameFilter() {
             @Override
-            public boolean accept(File dir, String filename)
-            { return filename.endsWith(".data"); }
-        } );
+            public boolean accept(File dir, String filename) {
+                return filename.endsWith(".data");
+            }
+        });
 
         TracTracReader ttreader = new TracTracReaderFromFiles(flist);
 
         List<TrackedRace> lst = ttreader.read();
 
-        //List<String> csvRows = new ArrayList<String>();
+        // List<String> csvRows = new ArrayList<String>();
 
-        BufferedWriter outputCSV = new BufferedWriter(new FileWriter("src\\com\\sap\\sailing\\simulator\\test\\analysis\\Resources\\test.csv"));
+        BufferedWriter outputCSV = new BufferedWriter(new FileWriter(
+                "src\\com\\sap\\sailing\\simulator\\test\\analysis\\Resources\\test.csv"));
         String header = "Event, Race, Competitor, Leg#, Leg, GPS time";
 
-        for(String pd : boatClassesIndexes.values()) {
+        for (String pd : boatClassesIndexes.values()) {
             header += ", " + pd;
         }
         header += ", Avg Wind Speed, Avg Wind Bearing, Avg Boat Speed, Avg Boat Bearing";
@@ -96,15 +98,15 @@ public class TestTimeComparison {
         outputCSV.write(header);
         outputCSV.newLine();
 
-        for( TrackedRace tr : lst ) {
+        for (TrackedRace tr : lst) {
 
-            //String csvLine = "";
-            //System.out.println(tr.getRace().getBoatClass());;
+            // String csvLine = "";
+            // System.out.println(tr.getRace().getBoatClass());;
             RegattaAndRaceIdentifier id = tr.getRaceIdentifier();
             Iterable<Competitor> competitors = tr.getRace().getCompetitors();
             List<Leg> legs = tr.getRace().getCourse().getLegs();
-            //System.out.println(legs);
-            //System.out.println(id.getRaceName() + "/" + id.getRegattaName());
+            // System.out.println(legs);
+            // System.out.println(id.getRaceName() + "/" + id.getRegattaName());
 
             int competitorIndex = -1;
             for (Competitor competitor : competitors) {
@@ -114,17 +116,18 @@ public class TestTimeComparison {
                 Iterator<GPSFixMoving> it = track.getFixes().iterator();
 
                 int legIndex = -1;
-                for ( Leg leg : legs ) {
+                for (Leg leg : legs) {
                     legIndex++;
                     List<TimedPositionWithSpeed> polylinePoints = new ArrayList<TimedPositionWithSpeed>();
                     MarkPassing mp = tr.getMarkPassing(competitor, leg.getTo());
                     GPSFixMoving current;
-                    while( mp.getTimePoint().after((current = it.next()).getTimePoint()) ) {
+                    while (mp.getTimePoint().after((current = it.next()).getTimePoint())) {
 
                         Position currentPosition = current.getPosition();
                         TimePoint currentTime = current.getTimePoint();
                         SpeedWithBearing currentSpeed = current.getSpeed();
-                        TimedPositionWithSpeed currentTPWS = new TimedPositionWithSpeedImpl(currentTime, currentPosition, currentSpeed);
+                        TimedPositionWithSpeed currentTPWS = new TimedPositionWithSpeedImpl(currentTime,
+                                currentPosition, currentSpeed);
                         polylinePoints.add(currentTPWS);
 
                     }
@@ -142,9 +145,12 @@ public class TestTimeComparison {
                         timePoint = point.getTimePoint();
                         wind = tr.getWind(position, timePoint);
                         for (TimedPositionWithSpeed turn : turns) {
-                            if (turn.getPosition().getLatDeg() == point.getPosition().getLatDeg() && turn.getPosition().getLngDeg() == point.getPosition().getLngDeg()
-                                    && turn.getTimePoint().asMillis() == point.getTimePoint().asMillis() && turn.getSpeed().getKnots() == point.getSpeed().getKnots()
-                                    && turn.getSpeed().getBearing().getDegrees() == point.getSpeed().getBearing().getDegrees()) {
+                            if (turn.getPosition().getLatDeg() == point.getPosition().getLatDeg()
+                                    && turn.getPosition().getLngDeg() == point.getPosition().getLngDeg()
+                                    && turn.getTimePoint().asMillis() == point.getTimePoint().asMillis()
+                                    && turn.getSpeed().getKnots() == point.getSpeed().getKnots()
+                                    && turn.getSpeed().getBearing().getDegrees() == point.getSpeed().getBearing()
+                                            .getDegrees()) {
                                 isTurn = true;
                                 turnPoints.add(new PositionDTO(position.getLatDeg(), position.getLngDeg()));
                                 break;
@@ -152,60 +158,57 @@ public class TestTimeComparison {
                         }
                         allPoints.add(new SimulatorWindDTO(position.getLatDeg(), position.getLngDeg(), wind.getKnots(),
                                 wind.getBearing().getDegrees(), timePoint.asMillis(), isTurn));
-                        //end polylinePoints loop
+                        // end polylinePoints loop
                     }
 
-                    //getTotalTime(0, 0, 1000);
-                    //System.out.println(getSummary(id, competitor, leg));
+                    // getTotalTime(0, 0, 1000);
+                    // System.out.println(getSummary(id, competitor, leg));
                     outputCSV.write(getSummary(id, competitor, leg, competitorIndex, legIndex));
                     outputCSV.newLine();
 
-                    //end legs loop
+                    // end legs loop
                 }
 
-                //end competitors loop
+                // end competitors loop
             }
 
-            //end tracked races loop
+            // end tracked races loop
         }
 
         outputCSV.close();
-        //end method
+        // end method
     }
 
-    /*private void getTotalTime(final int boatClassIndex, final int useRealAverageWindSpeed, final int stepDurationMilliseconds) throws ConfigurationException {
+    /*
+     * private void getTotalTime(final int boatClassIndex, final int useRealAverageWindSpeed, final int
+     * stepDurationMilliseconds) throws ConfigurationException {
+     * 
+     * final SimulatorServiceImpl simulatorService = new SimulatorServiceImpl(); final RequestTotalTimeDTO requestData =
+     * new RequestTotalTimeDTO(boatClassIndex, this.allPoints, this.turnPoints, useRealAverageWindSpeed == 1,
+     * stepDurationMilliseconds, true); final ResponseTotalTimeDTO receiveData =
+     * simulatorService.getTotalTime_new(requestData);
+     * 
+     * final SpeedWithBearing averageWind = simulatorService.getAverageWind(); final double stepSizeMeters =
+     * simulatorService.getStepSizeMeters(); int stepIndex = 0;
+     * 
+     * System.err.println("==================================================");
+     * System.err.println(this.boatClassesIndexes.get(boatClassIndex)); System.err.println("average wind speed = " +
+     * averageWind.getKnots() + " knots, bearing = " + averageWind.getBearing().getDegrees() + " degrees");
+     * System.err.println("step size = " + stepSizeMeters + " meters"); stepIndex = 0; for (final Quadruple<PositionDTO,
+     * PositionDTO, Double, Double> segment : receiveData.segments) { System.err.println("segment " + stepIndex +
+     * " from [" + segment.getA().latDeg + "," + segment.getA().lngDeg + "] to [" + segment.getB().latDeg + "," +
+     * segment.getB().lngDeg + "], length = " + segment.getC() + " meters, time = " + segment.getD() / 1000. +
+     * " seconds"); stepIndex++; } System.err.println(this.boatClassesIndexes.get(boatClassIndex) + ", " +
+     * this.averageWindFlags.get(useRealAverageWindSpeed) + ", " + stepDurationMilliseconds +
+     * "milliseconds timestep, total time: " + receiveData.totalTimeSeconds + " seconds");
+     * System.err.println("=================================================="); }
+     */
 
-        final SimulatorServiceImpl simulatorService = new SimulatorServiceImpl();
-        final RequestTotalTimeDTO requestData = new RequestTotalTimeDTO(boatClassIndex, this.allPoints, this.turnPoints, useRealAverageWindSpeed == 1,
-                stepDurationMilliseconds, true);
-        final ResponseTotalTimeDTO receiveData = simulatorService.getTotalTime_new(requestData);
-
-        final SpeedWithBearing averageWind = simulatorService.getAverageWind();
-        final double stepSizeMeters = simulatorService.getStepSizeMeters();
-        int stepIndex = 0;
-
-        System.err.println("==================================================");
-        System.err.println(this.boatClassesIndexes.get(boatClassIndex));
-        System.err.println("average wind speed = " + averageWind.getKnots() + " knots, bearing = " + averageWind.getBearing().getDegrees() + " degrees");
-        System.err.println("step size = " + stepSizeMeters + " meters");
-        stepIndex = 0;
-        for (final Quadruple<PositionDTO, PositionDTO, Double, Double> segment : receiveData.segments) {
-            System.err.println("segment " + stepIndex + " from [" + segment.getA().latDeg + "," + segment.getA().lngDeg + "] to ["
-                    + segment.getB().latDeg + "," + segment.getB().lngDeg + "], length = " + segment.getC() + " meters, time = " + segment.getD() / 1000.
-                    + " seconds");
-            stepIndex++;
-        }
-        System.err.println(this.boatClassesIndexes.get(boatClassIndex) + ", " + this.averageWindFlags.get(useRealAverageWindSpeed) + ", "
-                + stepDurationMilliseconds + "milliseconds timestep, total time: " + receiveData.totalTimeSeconds
-                + " seconds");
-        System.err.println("==================================================");
-    }*/
-
-    private String getSummary(final RegattaAndRaceIdentifier id, final Competitor competitor, final Leg leg, int competitorIndex, final int legIndex)
-            throws ConfigurationException {
+    private String getSummary(final RegattaAndRaceIdentifier id, final Competitor competitor, final Leg leg,
+            int competitorIndex, final int legIndex) throws ConfigurationException {
 
         int noPoints = this.allPoints.size();
-        long finishTime = this.allPoints.get(noPoints-1).timepoint;
+        long finishTime = this.allPoints.get(noPoints - 1).timepoint;
         long startTime = this.allPoints.get(0).timepoint;
         double gpsTime = (finishTime - startTime) / 1000.0;
         long totalDistanceMeters = 0;
@@ -213,12 +216,12 @@ public class TestTimeComparison {
         SimulatorWindDTO prec = it.next();
         SimulatorWindDTO succ = null;
         double avgBearing = 0.0;
-        while( it.hasNext() ) {
+        while (it.hasNext()) {
             succ = it.next();
             Position p1 = new DegreePosition(prec.position.latDeg, prec.position.lngDeg);
             Position p2 = new DegreePosition(succ.position.latDeg, succ.position.lngDeg);
             totalDistanceMeters += p2.getDistance(p1).getMeters();
-            avgBearing += 1.0/noPoints * p1.getBearingGreatCircle(p2).getDegrees();
+            avgBearing += 1.0 / noPoints * p1.getBearingGreatCircle(p2).getDegrees();
             prec = succ;
         }
         double speedMetersPerSecond = totalDistanceMeters / gpsTime;
@@ -231,9 +234,8 @@ public class TestTimeComparison {
 
         for (Integer boatClassIndex : boatClassesIndexes.keySet()) {
             final SimulatorServiceImpl simulatorService = new SimulatorServiceImpl();
-            final RequestTotalTimeDTO requestData = new RequestTotalTimeDTO(boatClassIndex, 0, competitorIndex, legIndex, timeStepMilliseconds, this.allPoints,
-                    this.turnPoints, true, false);
-
+            final RequestTotalTimeDTO requestData = new RequestTotalTimeDTO(boatClassIndex, 0, competitorIndex,
+                    legIndex, timeStepMilliseconds, this.allPoints, this.turnPoints, true, false);
 
             final ResponseTotalTimeDTO receiveData = simulatorService.getTotalTime(requestData);
             averageWind = simulatorService.getAverageWind();
