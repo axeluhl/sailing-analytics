@@ -1,14 +1,17 @@
 package com.sap.sailing.domain.tracking.impl;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
-import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Timed;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
@@ -334,7 +337,9 @@ public class CrossTrackErrorCache extends AbstractRaceChangeListener {
     @Override
     public void markPositionChanged(GPSFix fix, Mark mark) {
         TimePoint from = owner.getOrCreateTrack(mark).getEstimatedPositionTimePeriodAffectedBy(fix).getA();
-        for (Competitor competitor : cachePerCompetitor.keySet()) {
+        final List<Competitor> shuffledCompetitors = new ArrayList<>(cachePerCompetitor.keySet());
+        Collections.shuffle(shuffledCompetitors);
+        for (Competitor competitor : shuffledCompetitors) {
             invalidate(competitor, from);
         }
     }

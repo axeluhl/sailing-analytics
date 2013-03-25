@@ -3,7 +3,7 @@ package com.sap.sailing.racecommittee.app.domain.impl;
 import java.io.Serializable;
 
 import com.sap.sailing.domain.base.Fleet;
-import com.sap.sailing.domain.base.SeriesData;
+import com.sap.sailing.domain.base.SeriesBase;
 import com.sap.sailing.domain.base.racegroup.RaceGroup;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogRaceStatus;
@@ -48,7 +48,7 @@ public class ManagedRaceImpl implements ManagedRace {
 		return identifier.getFleet();
 	}
 
-	public SeriesData getSeries() {
+	public SeriesBase getSeries() {
 		return identifier.getSeries();
 	}
 

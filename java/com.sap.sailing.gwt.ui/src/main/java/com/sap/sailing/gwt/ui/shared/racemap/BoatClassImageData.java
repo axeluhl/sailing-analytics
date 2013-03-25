@@ -1,5 +1,8 @@
 package com.sap.sailing.gwt.ui.shared.racemap;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.google.gwt.resources.client.ImageResource;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.Tack;
@@ -11,12 +14,12 @@ import com.sap.sailing.domain.common.Tack;
  *
  */
 public class BoatClassImageData {
-    private String mainBoatClassName;
-    private String[] compatibleBoatClassNames;
-    private double boatClassLengthInMeter;
-    private int boatClassImageLengthInPx;
-    private int imageWidthInPx;
-    private int imageHeightInPx;
+    private final String mainBoatClassName;
+    private final List<String> compatibleBoatClassNames;
+    private final double boatClassLengthInMeter;
+    private final int boatClassImageLengthInPx;
+    private final int imageWidthInPx;
+    private final int imageHeightInPx;
 
     private ImageResource upWindPortIcon;
     private ImageResource upWindPortIconSelected;
@@ -62,12 +65,15 @@ public class BoatClassImageData {
         this.boatClassImageLengthInPx = boatClassImageLengthInPx;
         this.imageWidthInPx = imageWidthInPx;
         this.imageHeightInPx = imageHeightInPx;
+        this.compatibleBoatClassNames = new ArrayList<String>();
     }
 
     public BoatClassImageData(String mainBoatClassName, double boatClassLengthInMeter, int boatClassImageLengthInPx,
-            int imageWidthInPx, int imageHeightInPx, String... aliasBoatClassNames) {
+            int imageWidthInPx, int imageHeightInPx, String... compatibleBoatClasses) {
         this(mainBoatClassName, boatClassLengthInMeter, boatClassImageLengthInPx, imageWidthInPx, imageHeightInPx);
-        this.compatibleBoatClassNames = aliasBoatClassNames;
+        for(String compatibleBoatClass: compatibleBoatClasses) {
+            this.compatibleBoatClassNames.add(compatibleBoatClass);
+        }
     }
 
     public ImageTransformer getBoatImageTransformerByLegTypeAndTack(LegType legType, Tack tack, boolean isSelected) {
@@ -244,7 +250,7 @@ public class BoatClassImageData {
         return mainBoatClassName;
     }
 
-    public String[] getCompatibleBoatClassNames() {
+    public List<String> getCompatibleBoatClassNames() {
         return compatibleBoatClassNames;
     }
 

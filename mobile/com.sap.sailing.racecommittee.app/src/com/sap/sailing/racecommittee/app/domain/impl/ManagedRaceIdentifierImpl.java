@@ -3,7 +3,7 @@ package com.sap.sailing.racecommittee.app.domain.impl;
 import java.io.Serializable;
 
 import com.sap.sailing.domain.base.Fleet;
-import com.sap.sailing.domain.base.SeriesData;
+import com.sap.sailing.domain.base.SeriesBase;
 import com.sap.sailing.domain.base.racegroup.RaceGroup;
 import com.sap.sailing.racecommittee.app.domain.FleetIdentifier;
 import com.sap.sailing.racecommittee.app.domain.ManagedRaceIdentifier;
@@ -15,7 +15,7 @@ public class ManagedRaceIdentifierImpl extends FleetIdentifierImpl implements Ma
 	public ManagedRaceIdentifierImpl(
 			String raceName,
 			Fleet fleetWithRaceNames, 
-			SeriesData series,
+			SeriesBase series,
 			RaceGroup raceGroup) {
 		super(fleetWithRaceNames, series, raceGroup);
 		this.raceName = raceName;

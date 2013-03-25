@@ -90,7 +90,6 @@ public interface ScoringScheme extends Serializable {
      * for the leaderboard's total scores. This may, e.g., be the case if a column is split into more than one fleet and
      * those fleets are unordered. In that case, scores need to be available for all fleets before the column counts
      * for the total scores.
-     * @param at TODO
      */
     boolean isValidInTotalScore(Leaderboard leaderboard, RaceColumn raceColumn, TimePoint at);
 }

@@ -4,20 +4,20 @@ import java.io.Serializable;
 import java.util.Collection;
 
 import com.sap.sailing.domain.base.CourseArea;
-import com.sap.sailing.domain.base.EventData;
+import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 
 public interface DataStore {
 
-	public Collection<EventData> getEvents();
-	public EventData getEvent(Serializable id);
+	public Collection<EventBase> getEvents();
+	public EventBase getEvent(Serializable id);
 	public boolean hasEvent(Serializable id);
-	public void addEvent(EventData event);
+	public void addEvent(EventBase event);
 	
-	public Collection<CourseArea> getCourseAreas(EventData event);
+	public Collection<CourseArea> getCourseAreas(EventBase event);
 	public CourseArea getCourseArea(Serializable id);
 	public boolean hasCourseArea(Serializable id);
-	public void addCourseArea(EventData event, CourseArea courseArea);
+	public void addCourseArea(EventBase event, CourseArea courseArea);
 	
 	public Collection<ManagedRace> getRaces();
 	public void addRace(ManagedRace race);

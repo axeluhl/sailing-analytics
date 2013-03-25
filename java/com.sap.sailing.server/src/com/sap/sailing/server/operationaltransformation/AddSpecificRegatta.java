@@ -38,7 +38,7 @@ public class AddSpecificRegatta extends AbstractAddRegattaOperation {
 
     @Override
     public Regatta internalApplyTo(RacingEventService toState) throws Exception {
-        return toState.createRegatta(getBaseEventName(), getBoatClassName(), getId(), createSeries(toState),
+        return toState.createRegatta(getBaseRegattaName(), getBoatClassName(), getId(), createSeries(toState),
                 persistent, scoringScheme, defaultCourseAreaId);
     }
 
