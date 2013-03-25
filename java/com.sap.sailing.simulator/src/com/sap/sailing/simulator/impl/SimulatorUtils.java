@@ -11,6 +11,8 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
+import java.net.URI;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,9 +21,14 @@ import java.util.logging.Logger;
 import org.osgi.framework.FrameworkUtil;
 
 import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.domain.racelog.RaceLogStore;
+import com.sap.sailing.domain.tracking.RacesHandle;
+import com.sap.sailing.domain.tracking.WindStore;
+import com.sap.sailing.server.impl.RacingEventServiceImpl;
 import com.sap.sailing.simulator.Path;
 
-public class SerializationUtils {
+@SuppressWarnings("restriction")
+public class SimulatorUtils {
 
     private static final Logger LOGGER = Logger.getLogger("com.sap.sailing.simulator");
 
@@ -29,15 +36,16 @@ public class SerializationUtils {
     public static final String RACECOURSE_DAT = "racecourse.dat";
     public static final String COMPETITORSNAMES_DAT = "competitorsNames.dat";
 
-    public static final String[] PATH_NAMES = new String[] { "1#Omniscient", "2#Opportunistic", "3#1-Turner Left", "4#1-Turner Right", "6#GPS Poly",
-    "7#GPS Track" };
+    public static final String[] PATH_NAMES = new String[] { "1#Omniscient", "2#Opportunistic", "3#1-Turner Left",
+            "4#1-Turner Right", "6#GPS Poly", "7#GPS Track" };
 
     public static String pathPrefix = null;
 
     public static String getPathPrefix() {
         String bundleName = null;
         try {
-            bundleName = FrameworkUtil.getBundle(Class.forName("com.sap.sailing.simulator.impl.SailingSimulatorImpl")).getSymbolicName();
+            bundleName = FrameworkUtil.getBundle(Class.forName("com.sap.sailing.simulator.impl.SailingSimulatorImpl"))
+                    .getSymbolicName();
         } catch (ClassNotFoundException e) {
             System.err.println("[ERROR][SerializationUtils][getPathPrefix][ClassNotFoundException]  " + e.getMessage());
             LOGGER.severe("[ERROR][SerializationUtils][getPathPrefix][ClassNotFoundException]  " + e.getMessage());
@@ -57,6 +65,16 @@ public class SerializationUtils {
         }
 
         return prependedBundlePath;
+    }
+
+    public static RacesHandle loadRace(RacingEventServiceImpl service, URL paramURL, URI liveURI, URI storedURI,
+            RaceLogStore raceLogStore, WindStore windStore, long timeoutInMilliseconds) throws Exception {
+        RacesHandle raceHandle = service.addTracTracRace(paramURL, liveURI, storedURI, raceLogStore, windStore,
+                timeoutInMilliseconds);
+        // synchronized (this) {
+        // this.wait();
+        // }
+        return raceHandle;
     }
 
     public static boolean savePathsToFiles(Map<String, Path> paths, Path raceCourse) {
@@ -86,7 +104,8 @@ public class SerializationUtils {
         return result;
     }
 
-    public static boolean saveLegPathsToFiles(Map<String, Path> paths, Path raceCourse, int selectedRaceIndex, int selectedCompetitorIndex, int selectedLegIndex) {
+    public static boolean saveLegPathsToFiles(Map<String, Path> paths, Path raceCourse, int selectedRaceIndex,
+            int selectedCompetitorIndex, int selectedLegIndex) {
         if (paths == null) {
             return false;
         }
@@ -105,12 +124,14 @@ public class SerializationUtils {
 
         for (String name : PATH_NAMES) {
 
-            fileName = SerializationUtils.getFileName(selectedRaceIndex, selectedCompetitorIndex, selectedLegIndex, name);
+            fileName = SimulatorUtils.getFileName(selectedRaceIndex, selectedCompetitorIndex, selectedLegIndex,
+                    name);
             filePath = pathPrefix + "\\src\\resources\\" + fileName;
             result &= saveToFile(paths.get(name), filePath);
         }
 
-        fileName = SerializationUtils.getFileName(selectedRaceIndex, selectedCompetitorIndex, selectedLegIndex, "racecourse");
+        fileName = SimulatorUtils.getFileName(selectedRaceIndex, selectedCompetitorIndex, selectedLegIndex,
+                "racecourse");
         filePath = pathPrefix + "\\src\\resources\\" + fileName;
         result &= saveToFile(raceCourse, filePath);
 
@@ -140,7 +161,8 @@ public class SerializationUtils {
         return result;
     }
 
-    public static Pair<Map<String, Path>, Path> readLegPathsFromResources(int selectedRaceIndex, int selectedCompetitorIndex, int selectedLegIndex) {
+    public static Pair<Map<String, Path>, Path> readLegPathsFromResources(int selectedRaceIndex,
+            int selectedCompetitorIndex, int selectedLegIndex) {
         HashMap<String, Path> paths = new HashMap<String, Path>();
 
         Path path = null;
@@ -148,20 +170,24 @@ public class SerializationUtils {
         String fileName = "";
         for (String pathName : PATH_NAMES) {
 
-            fileName = SerializationUtils.getFileName(selectedRaceIndex, selectedCompetitorIndex, selectedLegIndex, pathName);
+            fileName = SimulatorUtils.getFileName(selectedRaceIndex, selectedCompetitorIndex, selectedLegIndex,
+                    pathName);
             filePath = "resources/" + fileName;
 
             path = (Path) readObjectFromResources(filePath);
             if (path == null) {
-                System.err.println("[ERROR][SerializationUtils][readPathsFromResources] Cannot de-serialize path from" + pathName);
-                LOGGER.severe("[ERROR][SerializationUtils][readPathsFromResources] Cannot de-serialize path from" + pathName);
+                System.err.println("[ERROR][SerializationUtils][readPathsFromResources] Cannot de-serialize path from"
+                        + pathName);
+                LOGGER.severe("[ERROR][SerializationUtils][readPathsFromResources] Cannot de-serialize path from"
+                        + pathName);
             } else {
                 paths.put(pathName, path);
             }
         }
 
         Path raceCourse = (Path) readObjectFromResources("resources/"
-                + SerializationUtils.getFileName(selectedRaceIndex, selectedCompetitorIndex, selectedLegIndex, "racecourse"));
+                + SimulatorUtils.getFileName(selectedRaceIndex, selectedCompetitorIndex, selectedLegIndex,
+                        "racecourse"));
 
         return new Pair<Map<String, Path>, Path>(paths, raceCourse);
     }
@@ -175,8 +201,10 @@ public class SerializationUtils {
             filePath = "resources/" + pathName + ".dat";
             path = (Path) readObjectFromResources(filePath);
             if (path == null) {
-                System.err.println("[ERROR][SerializationUtils][readPathsFromResources] Cannot de-serialize path from" + pathName);
-                LOGGER.severe("[ERROR][SerializationUtils][readPathsFromResources] Cannot de-serialize path from" + pathName);
+                System.err.println("[ERROR][SerializationUtils][readPathsFromResources] Cannot de-serialize path from"
+                        + pathName);
+                LOGGER.severe("[ERROR][SerializationUtils][readPathsFromResources] Cannot de-serialize path from"
+                        + pathName);
             } else {
                 paths.put(pathName, path);
             }
@@ -202,8 +230,10 @@ public class SerializationUtils {
                 file.close();
             }
         } catch (ClassNotFoundException ex) {
-            System.err.println("[ERROR][SerializationUtils][readFromExternalFile][ClassNotFoundException] " + ex.getMessage());
-            LOGGER.severe("[ERROR][SerializationUtils][readFromExternalFile][ClassNotFoundException] " + ex.getMessage());
+            System.err.println("[ERROR][SerializationUtils][readFromExternalFile][ClassNotFoundException] "
+                    + ex.getMessage());
+            LOGGER.severe("[ERROR][SerializationUtils][readFromExternalFile][ClassNotFoundException] "
+                    + ex.getMessage());
             result = null;
         } catch (IOException ex) {
             System.err.println("[ERROR][SerializationUtils][readFromExternalFile][IOException]  " + ex.getMessage());
@@ -218,7 +248,8 @@ public class SerializationUtils {
         Object result = null;
 
         try {
-            ClassLoader classLoader = Class.forName("com.sap.sailing.simulator.impl.SailingSimulatorImpl").getClassLoader();
+            ClassLoader classLoader = Class.forName("com.sap.sailing.simulator.impl.SailingSimulatorImpl")
+                    .getClassLoader();
             InputStream file = classLoader.getResourceAsStream(fileName);
             InputStream buffer = new BufferedInputStream(file);
             ObjectInput input = new ObjectInputStream(buffer);
@@ -231,8 +262,10 @@ public class SerializationUtils {
                 file.close();
             }
         } catch (ClassNotFoundException ex) {
-            System.err.println("[ERROR][SerializationUtils][readFromResourcesFile][ClassNotFoundException] " + ex.getMessage());
-            LOGGER.severe("[ERROR][SerializationUtils][readFromResourcesFile][ClassNotFoundException] " + ex.getMessage());
+            System.err.println("[ERROR][SerializationUtils][readFromResourcesFile][ClassNotFoundException] "
+                    + ex.getMessage());
+            LOGGER.severe("[ERROR][SerializationUtils][readFromResourcesFile][ClassNotFoundException] "
+                    + ex.getMessage());
             result = null;
         } catch (IOException ex) {
             System.err.println("[ERROR][SerializationUtils][readFromResourcesFile][IOException]  " + ex.getMessage());
@@ -304,8 +337,9 @@ public class SerializationUtils {
         return result;
     }
 
-    public static String getFileName(int selectedRaceIndex, int selectedCompetitorIndex, int selectedLegIndex, String pathName) {
-        return SerializationUtils.getRaceID(ConfigurationManager.INSTANCE.getRaceURL(selectedRaceIndex)) + "_" + selectedCompetitorIndex + "_"
-                + selectedLegIndex + "_" + pathName + ".dat";
+    public static String getFileName(int selectedRaceIndex, int selectedCompetitorIndex, int selectedLegIndex,
+            String pathName) {
+        return SimulatorUtils.getRaceID(ConfigurationManager.INSTANCE.getRaceURL(selectedRaceIndex)) + "_"
+                + selectedCompetitorIndex + "_" + selectedLegIndex + "_" + pathName + ".dat";
     }
 }

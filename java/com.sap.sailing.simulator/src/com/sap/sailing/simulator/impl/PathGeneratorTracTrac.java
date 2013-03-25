@@ -29,6 +29,7 @@ import com.sap.sailing.simulator.Path;
 import com.sap.sailing.simulator.SimulationParameters;
 import com.sap.sailing.simulator.TimedPositionWithSpeed;
 
+@SuppressWarnings("restriction")
 public class PathGeneratorTracTrac extends PathGeneratorBase {
 
     private static final Logger LOGGER = Logger.getLogger("com.sap.sailing.simulator");
@@ -57,19 +58,17 @@ public class PathGeneratorTracTrac extends PathGeneratorBase {
 
         LOGGER.info("Calling service.addTracTracRace");
 
-        //TODO: Fix raceHandle
-        /*try {
-            this.raceHandle = this.service.addTracTracRace(this.raceURL, this.liveURI, this.storedURI, DEFAULT_WINDSTORE, DEFAULT_TIMEOUT_MILLISECONDS,
-                    this);
-            synchronized (this) {
-                this.wait();
-            }
+        try {
+            this.raceHandle = SimulatorUtils.loadRace(service, raceURL, liveURI, storedURI, null,
+                    EmptyWindStore.INSTANCE, 60000);
+
         } catch (Exception error) {
             LOGGER.severe(error.getMessage());
-        }*/
+        }
     }
 
-    public void setEvaluationParameters(String raceURLString, String liveURIString, String storedURIString, double windScale) {
+    public void setEvaluationParameters(String raceURLString, String liveURIString, String storedURIString,
+            double windScale) {
 
         try {
             this.raceURL = new URL(raceURLString);
@@ -91,7 +90,6 @@ public class PathGeneratorTracTrac extends PathGeneratorBase {
 
         this.windScale = windScale;
     }
-
 
     // private Path getPath() {
     //
@@ -289,8 +287,8 @@ public class PathGeneratorTracTrac extends PathGeneratorBase {
             Wind gpsWind = trackedRace.getWind(position, timePoint);
 
             if (gpsWind.getKnots() == 1.0) {
-                //TODO: Fix scale
-                //gpsWind.scale(this.windScale);
+                // TODO: Fix scale
+                // gpsWind.scale(this.windScale);
             }
 
             path.addLast(new TimedPositionWithSpeedImpl(timePoint, position, gpsWind));
@@ -305,8 +303,9 @@ public class PathGeneratorTracTrac extends PathGeneratorBase {
     public Path getPath() {
         return null;
     }
-        
-    public Path getPathPolyline(int selectedRaceIndex, int selectedCompetitorIndex, int selectedLegIndex, Distance maxDistance) {
+
+    public Path getPathPolyline(int selectedRaceIndex, int selectedCompetitorIndex, int selectedLegIndex,
+            Distance maxDistance) {
 
         this.intializeRaceHandle();
 
@@ -353,8 +352,8 @@ public class PathGeneratorTracTrac extends PathGeneratorBase {
             Wind gpsWind = trackedRace.getWind(position, timePoint);
 
             if (gpsWind.getKnots() == 1.0) {
-                //TODO: Fix scale
-                //gpsWind.scale(this.windScale);
+                // TODO: Fix scale
+                // gpsWind.scale(this.windScale);
             }
 
             path.addLast(new TimedPositionWithSpeedImpl(timePoint, position, gpsWind));

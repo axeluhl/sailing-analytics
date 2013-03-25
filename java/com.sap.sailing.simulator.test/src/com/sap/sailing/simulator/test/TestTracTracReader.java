@@ -13,29 +13,31 @@ import com.sap.sailing.simulator.test.util.TracTracReaderFromFiles;
 
 public class TestTracTracReader {
 
-	public static void main(String[] args) throws Exception {
-		
-		File dir = new File("C:\\Users\\i059829\\workspace\\sapsailingcapture\\java\\com.sap.sailing.simulator.test");
-		String[] flist = dir.list(new FilenameFilter() { 
-	         public boolean accept(File dir, String filename)
-             { return filename.endsWith(".data"); }} );
-		
-		//System.out.println(flist[1]);
-		TracTracReader ttreader = new TracTracReaderFromFiles(flist);
-		
-		List<TrackedRace> lst = ttreader.read();
-		
-		for( TrackedRace r : lst ) {
-			RegattaAndRaceIdentifier id = r.getRaceIdentifier();
-			System.out.println(id.getRegattaName() + " / " + id.getRaceName());
-			for(Competitor c : r.getRace().getCompetitors()) {
-				r.getTrack(c).lockForRead();
-				for( GPSFixMoving gpsFix : r.getTrack(c).getFixes() ) {
-					System.out.println(gpsFix.getTimePoint().asMillis());
-				}
-			}
-		}
-		
-	}
-	
+    public static void main(String[] args) throws Exception {
+
+        File dir = new File("C:\\Users\\i059829\\workspace\\sapsailingcapture\\java\\com.sap.sailing.simulator.test");
+        String[] flist = dir.list(new FilenameFilter() {
+            public boolean accept(File dir, String filename) {
+                return filename.endsWith(".data");
+            }
+        });
+
+        // System.out.println(flist[1]);
+        TracTracReader ttreader = new TracTracReaderFromFiles(flist);
+
+        List<TrackedRace> lst = ttreader.read();
+
+        for (TrackedRace r : lst) {
+            RegattaAndRaceIdentifier id = r.getRaceIdentifier();
+            System.out.println(id.getRegattaName() + " / " + id.getRaceName());
+            for (Competitor c : r.getRace().getCompetitors()) {
+                r.getTrack(c).lockForRead();
+                for (GPSFixMoving gpsFix : r.getTrack(c).getFixes()) {
+                    System.out.println(gpsFix.getTimePoint().asMillis());
+                }
+            }
+        }
+
+    }
+
 }
