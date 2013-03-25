@@ -311,6 +311,7 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
         leaderboardButtonPanel.setSpacing(5);
         leaderboardsPanel.add(leaderboardButtonPanel);
         Button createFlexibleLeaderboardBtn = new Button(stringMessages.createFlexibleLeaderboard() + "...");
+        createFlexibleLeaderboardBtn.ensureDebugId("CreateFlexibleLeaderboardButton");
         leaderboardButtonPanel.add(createFlexibleLeaderboardBtn);
         createFlexibleLeaderboardBtn.addClickHandler(new ClickHandler() {
             @Override
@@ -320,6 +321,7 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
         });
 
         Button createRegattaLeaderboardBtn = new Button(stringMessages.createRegattaLeaderboard() + "...");
+        createFlexibleLeaderboardBtn.ensureDebugId("CreateRegattaLeaderboardButton");
         leaderboardButtonPanel.add(createRegattaLeaderboardBtn);
         createRegattaLeaderboardBtn.addClickHandler(new ClickHandler() {
             @Override
@@ -969,6 +971,7 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
                 });
             }
         });
+        dialog.ensureDebugId("CreateFlexibleLeaderboardDialog");
         dialog.show();
     }
 

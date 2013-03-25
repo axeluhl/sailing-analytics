@@ -348,7 +348,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 /* workQueue */ new LinkedBlockingQueue<Runnable>());
         raceDetailsExecutor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
         leaderboardByNameLiveUpdaters = new HashMap<String, LiveLeaderboardUpdater>();
-        leaderboardDTOCacheWaitingForLatestAnalysis = new LeaderboardDTOCache(this, /* waitForLatestAnalyses */ true);
+        // The leaderboard cache is invalidated upon all competitor and mark position changes; some analyses
+        // are pretty expensive, such as the maneuver re-calculation. Waiting for the latest analysis after only a
+        // single fix was updated is too expensive if users use the replay feature while a race is still running.
+        // Therefore, using waitForLatestAnalyses==false seems appropriate here.
+        leaderboardDTOCacheWaitingForLatestAnalysis = new LeaderboardDTOCache(this, /* waitForLatestAnalyses */ false);
     }
 
     private void writeObject(ObjectOutputStream oos) throws IOException {
@@ -610,7 +614,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 }
             }
         }
-        logger.fine("computeLeaderboardByName("+leaderboard.getName()+", "+timePoint+", "+namesOfRaceColumnsForWhichToLoadLegDetails+") took "+
+        logger.info("computeLeaderboardByName("+leaderboard.getName()+", "+timePoint+", "+namesOfRaceColumnsForWhichToLoadLegDetails+") took "+
                 (System.currentTimeMillis()-startOfRequestHandling)+"ms");
         return result;
     }
@@ -2432,7 +2436,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public void trackWithSwissTiming(RegattaIdentifier regattaToAddTo, Iterable<SwissTimingRaceRecordDTO> rrs, String hostname, int port,
             boolean canSendRequests, boolean trackWind, final boolean correctWindByDeclination) throws Exception {
         for (SwissTimingRaceRecordDTO rr : rrs) {
-
             final RacesHandle raceHandle = getService().addSwissTimingRace(regattaToAddTo, rr.ID, hostname, port,
                     canSendRequests,
                     MongoWindStoreFactory.INSTANCE.getMongoWindStore(mongoObjectFactory, domainObjectFactory),
@@ -2487,7 +2490,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 regatta = getService().createRegatta(
                         replayRaceDTO.rsc,
                         boatClass.trim(),
-                        RegattaImpl.getFullName(replayRaceDTO.rsc, replayRaceDTO.boat_class),
+                        RegattaImpl.getDefaultName(replayRaceDTO.rsc, replayRaceDTO.boat_class),
                         Collections.singletonList(new SeriesImpl(
                                 LeaderboardNameConstants.DEFAULT_SERIES_NAME, 
                                 /* isMedal */false, 

@@ -27,6 +27,7 @@ import com.sap.sailing.domain.leaderboard.ScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ScoreCorrectionListener;
 import com.sap.sailing.domain.tracking.RaceChangeListener;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
+import com.sap.sailing.util.impl.LockUtil;
 
 /**
  * Caches the expensive to compute {@link LeaderboardDTO} results of a
@@ -154,12 +155,21 @@ public class LeaderboardDTOCache implements LeaderboardCache {
                 future = map.get(key);
             }
             if (future == null) {
+                final Thread callerThread = Thread.currentThread();
                 future = new FutureTask<LeaderboardDTO>(new Callable<LeaderboardDTO>() {
                     @Override
                     public LeaderboardDTO call() throws Exception {
-                        LeaderboardDTO result = sailingService.computeLeaderboardByName(leaderboard, adjustedTimePoint,
-                                namesOfRaceColumnsForWhichToLoadLegDetails, waitForLatestAnalyses);
-                        return result;
+                        // The outer getLeaderboardByName(...) method will always wait for this future's completion.
+                        // Therefore, it's safe to propagate the calling thread's locks to this one:
+                        LockUtil.propagateLockSetFrom(callerThread);
+                        try {
+                            LeaderboardDTO result = sailingService.computeLeaderboardByName(leaderboard,
+                                    adjustedTimePoint, namesOfRaceColumnsForWhichToLoadLegDetails,
+                                    waitForLatestAnalyses);
+                            return result;
+                        } finally {
+                            LockUtil.unpropagateLockSetFrom(callerThread);
+                        }
                     }
                 });
                 computeLeadearboardByNameExecutor.execute(future);

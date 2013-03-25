@@ -367,6 +367,7 @@ public interface StringMessages extends Messages {
     String insertWaypointAfterSelected();
     String scoringSchemeLowPointSystem();
     String scoringSchemeHighPointSystem();
+    String scoringSchemeLowPointWinnerGetsZero();
     String scoringSystem();
     String createFlexibleLeaderboard();
     String createRegattaLeaderboard();
@@ -522,4 +523,5 @@ public interface StringMessages extends Messages {
     String netScore();
     String timePointMustBeAfterStartOfTracking();
     String timePointMustBeBeforeEndOfTracking();
+    String regattaUsedForTheTrackedRace();
 }

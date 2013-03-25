@@ -14,6 +14,53 @@ For the OSGi containers by convention we have one directory under _/home/trac/se
 
 Services are vital for the infrastructure. The following sections describe location of configuration and special behaviour.
 
+### Java Servers
+
+To ensure availability and to be able to separate servers holding historical data and live data there are a bunch of preconfigured java servers.
+
+<table>
+<tr>
+<th>Name</th>
+<th>HTTP</th>
+<th>MongoDB Port</th>
+<th>MongoDB Path</th>
+<th>Replication Channel</th>
+<th>Expedition UDP Port</th>
+</tr>
+<tr>
+<td>DEV</td>
+<td>8886</td>
+<td>10200</td>
+<td>/opt/mongodb/data/mongodb-dev</td>
+<td>sapsailinganalytics-dev</td>
+<td>2010</td>
+</tr>
+<tr>
+<td>TEST</td>
+<td>8887</td>
+<td>10201</td>
+<td>/opt/mongodb/data/mongodb-test</td>
+<td>sapsailinganalytics-test</td>
+<td>2011</td>
+</tr>
+<tr>
+<td>PROD1</td>
+<td>8888</td>
+<td>10202</td>
+<td>/opt/mongodb/data/mongodb-prod</td>
+<td>sapsailinganalytics-prod1</td>
+<td>2013</td>
+</tr>
+<tr>
+<td>PROD2</td>
+<td>8889</td>
+<td>10202</td>
+<td>/opt/mongodb/data/mongodb-prod</td>
+<td>sapsailinganalytics-prod2</td>
+<td>2014</td>
+</tr>
+</table>
+
 ### Apache
 
 Apache is listening to port 80 and is answering all HTTP requests. There are two configuration files that control the behaviour. 
