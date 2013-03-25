@@ -8,7 +8,7 @@ This document describes the onboarding process for a new team member (developer)
 
 1. Eclipse (e.g. Eclipse Classic 4.2.1 (Juno)), http://www.eclipse.org
 2. Eclipse Extensions
-  * Install Eclipse GWT should be version 2.5
+  * Install Eclipse GWT should be version 2.5 (https://developers.google.com/eclipse/docs/download)
 3. Git (e.g. msysGit for Windows v1.7.10), http://git-scm.com
 4. MongoDB (e.g. Production Release 2.0.4), download: http://www.mongodb.org/
 5. RabbitMQ, download from http://www.rabbitmq.com/. Requires Erlang to be installed. RabbitMQ installer will assist in installing Erlang.
@@ -40,7 +40,7 @@ This document describes the onboarding process for a new team member (developer)
 #### Steps to build and run the Race Analysis Suite 
  
 1. Get the content of the git repository
-- Clone the repository to your local file system from ssh://[SAP-User]@git.wdf.sap.corp:29418/SAPSail/sapsailingcapture.git  or ssh://[user]@sapsailing.com/home/trac/git
+- Clone the repository to your local file system from {ssh://[SAP-User]@git.wdf.sap.corp:29418/SAPSail/sapsailingcapture.git}  or {ssh://[user]@sapsailing.com/home/trac/git}
  
 2. Check out the 'master' branch from the git repository. The 'master' branch is the main development branch. Please check that you start your work on this branch.
 
