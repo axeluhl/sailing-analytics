@@ -212,14 +212,14 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
                 if (windFieldCanvasOverlay != null) {
                     windFieldCanvasOverlay.setVisible(false);
                 }
+                if (windStreamletsCanvasOverlay != null) {
+                    windStreamletsCanvasOverlay.setVisible(false);
+                }
                 if (windGridCanvasOverlay != null) {
                     windGridCanvasOverlay.setVisible(false);
                 }
                 if (windLineCanvasOverlay != null) {
                     windLineCanvasOverlay.setVisible(false);
-                }
-                if (windStreamletsCanvasOverlay != null) {
-                    windStreamletsCanvasOverlay.setVisible(false);
                 }
             }
 
@@ -250,6 +250,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         this.dataInitialized = false;
         this.overlaysInitialized = false;
         this.windFieldCanvasOverlay = null;
+        this.windStreamletsCanvasOverlay = null;
         this.windGridCanvasOverlay = null;
         this.windLineCanvasOverlay = null;
         this.replayPathCanvasOverlays = null;
@@ -276,6 +277,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         this.dataInitialized = false;
         this.overlaysInitialized = false;
         this.windFieldCanvasOverlay = null;
+        this.windStreamletsCanvasOverlay = null;
         this.windGridCanvasOverlay = null;
         this.windLineCanvasOverlay = null;
         this.replayPathCanvasOverlays = null;
@@ -543,6 +545,9 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
                 if (this.windFieldCanvasOverlay != null) {
                     this.windFieldCanvasOverlay.setVisible(false);
                 }
+                if (this.windStreamletsCanvasOverlay != null) {
+                    this.windStreamletsCanvasOverlay.setVisible(false);
+                }
                 if (this.windGridCanvasOverlay != null) {
                     this.windGridCanvasOverlay.setVisible(false);
                 }
@@ -576,6 +581,9 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
                 if (this.windFieldCanvasOverlay != null) {
                     this.windFieldCanvasOverlay.setVisible(true);
                 }
+                if (this.windStreamletsCanvasOverlay != null) {
+                    this.windStreamletsCanvasOverlay.setVisible(true);
+                }
                 if (this.windGridCanvasOverlay != null) {
                     this.windGridCanvasOverlay.setVisible(true);
                 }
@@ -607,6 +615,10 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
                 if (this.windFieldCanvasOverlay != null) {
                     this.windFieldCanvasOverlay.setVisible(true);
                     this.windFieldCanvasOverlay.redraw(true);
+                }
+                if (this.windStreamletsCanvasOverlay != null) {
+                    this.windStreamletsCanvasOverlay.setVisible(true);
+                    this.windStreamletsCanvasOverlay.redraw(true);
                 }
                 if (this.windGridCanvasOverlay != null) {
                     this.windGridCanvasOverlay.setVisible(true);
