@@ -1,8 +1,8 @@
 package com.sap.sailing.server.gateway.test;
 
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -10,8 +10,10 @@ import static org.mockito.Mockito.when;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,6 +35,7 @@ import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
+import com.sap.sailing.domain.base.impl.AbstractTimePoint;
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
 import com.sap.sailing.domain.base.impl.BoatImpl;
 import com.sap.sailing.domain.base.impl.CompetitorImpl;
@@ -160,10 +163,10 @@ public class JsonExportTests {
         String jsonResultState = (String) jsonObject.get("resultState");
         
         assertTrue(regattaLeaderboard.getName().equals(jsonLeaderboardName));
-        assertTrue(jsonResultState.equals(LeaderboardJsonGetServlet.ResultStates.Final.name()));
+        assertTrue(LeaderboardJsonGetServlet.ResultStates.Final.name().equals(jsonResultState));
 
-        String jsonResultTimePoint = (String) jsonObject.get("resultTimepoint");
-        assertNull(jsonResultTimePoint);
+        TimePoint resultTimePoint = parseTimepointFromJsonString((String) jsonObject.get("resultTimepoint"));
+        assertNull(resultTimePoint);
         
         regattaLeaderboard.getScoreCorrection().setTimePointOfLastCorrectionsValidity(MillisecondsTimePoint.now());    
         jsonString = callJsonHttpServlet(new LeaderboardJsonGetServlet(), "GET", requestParameters);
@@ -171,15 +174,15 @@ public class JsonExportTests {
         obj= JSONValue.parse(jsonString);
         jsonObject = (JSONObject) obj;
 
-        jsonResultTimePoint = (String) jsonObject.get("resultTimepoint");
-        assertNotNull(jsonResultTimePoint);
+        resultTimePoint = parseTimepointFromJsonString((String) jsonObject.get("resultTimepoint"));
+        assertNotNull(resultTimePoint);
      }
 
     @Test
     public void testExportLeaderboardWithLiveResultStateAsJson() throws Exception {
         Map<String, String> requestParameters = new HashMap<>();
         requestParameters.put("leaderboardName", regatta.getName());      
-        requestParameters.put("resultState", LeaderboardJsonGetServlet.ResultStates.Live.name());      
+        requestParameters.put("resultState", LeaderboardJsonGetServlet.ResultStates.Final.name());      
         
         String jsonString = callJsonHttpServlet(new LeaderboardJsonGetServlet(), "GET", requestParameters);
         
@@ -190,12 +193,57 @@ public class JsonExportTests {
         String jsonResultState = (String) jsonObject.get("resultState");
         
         assertTrue(regattaLeaderboard.getName().equals(jsonLeaderboardName));
-        assertTrue(jsonResultState.equals(LeaderboardJsonGetServlet.ResultStates.Live.name()));
+        assertTrue(LeaderboardJsonGetServlet.ResultStates.Live.name().equals(jsonResultState));
 
-        String jsonResultTimePoint = (String) jsonObject.get("resultTimepoint");
-        assertNotNull(jsonResultTimePoint);
-     }
+        TimePoint resultTimePoint = parseTimepointFromJsonString((String) jsonObject.get("resultTimepoint"));
+        assertNotNull(resultTimePoint);
+    }
 
+    @Test
+    public void testSmartFutureCacheInExportLeaderboardAsJson() throws Exception {
+        Map<String, String> requestParameters = new HashMap<>();
+        requestParameters.put("leaderboardName", regatta.getName());      
+        requestParameters.put("resultState", LeaderboardJsonGetServlet.ResultStates.Final.name());
+        
+        // call the servlet for the first time
+        String jsonString = callJsonHttpServlet(new LeaderboardJsonGetServlet(), "GET", requestParameters);
+        
+        Object obj= JSONValue.parse(jsonString);
+        JSONObject jsonObject = (JSONObject) obj;
+        
+        String jsonLeaderboardName = (String) jsonObject.get("name");
+        String jsonResultState = (String) jsonObject.get("resultState");
+        
+        assertTrue(regattaLeaderboard.getName().equals(jsonLeaderboardName));
+        assertTrue(LeaderboardJsonGetServlet.ResultStates.Final.name().equals(jsonResultState));
+
+        TimePoint now = MillisecondsTimePoint.now();
+        regattaLeaderboard.getScoreCorrection().setTimePointOfLastCorrectionsValidity(now);    
+
+        TimePoint resultTimePoint = parseTimepointFromJsonString((String) jsonObject.get("resultTimepoint"));
+        TimePoint requestTimepoint = parseTimepointFromJsonString((String) jsonObject.get("requestTimepoint"));
+        assertNotNull(resultTimePoint);
+        
+        // second call - it's expected to get the same result from the cache
+        String jsonString2 = callJsonHttpServlet(new LeaderboardJsonGetServlet(), "GET", requestParameters);
+        
+        Object obj2= JSONValue.parse(jsonString2);
+        JSONObject jsonObject2 = (JSONObject) obj2;
+        
+        String jsonLeaderboardName2 = (String) jsonObject2.get("name");
+        String jsonResultState2 = (String) jsonObject2.get("resultState");
+        
+        assertTrue(jsonLeaderboardName.equals(jsonLeaderboardName2));
+        assertTrue(jsonResultState.equals(jsonResultState2));
+
+        TimePoint resultTimePoint2 = parseTimepointFromJsonString((String) jsonObject2.get("resultTimepoint"));
+        TimePoint requestTimepoint2 = parseTimepointFromJsonString((String) jsonObject2.get("requestTimepoint"));
+        assertNotNull(resultTimePoint2);
+        assertTrue(resultTimePoint.equals(resultTimePoint2));
+        assertTrue(requestTimepoint.equals(requestTimepoint2));
+        
+    }
+    
     private String callJsonHttpServlet(AbstractJsonHttpServlet jsonServlet, String GetOrPostMethod, Map<String, String> parameters) throws Exception {
         HttpServletRequest request = mock(HttpServletRequest.class);       
         HttpServletResponse response = mock(HttpServletResponse.class);    
@@ -222,6 +270,15 @@ public class JsonExportTests {
         return stringWriter.toString();
     }
 
+    private TimePoint parseTimepointFromJsonString(String timePointAsJsonString) throws ParseException {
+        TimePoint result = null;
+        if(timePointAsJsonString != null && !timePointAsJsonString.isEmpty()) {
+            Date date = AbstractTimePoint.TIMEPOINT_FORMATTER.parse(timePointAsJsonString);
+            result = new MillisecondsTimePoint(date);
+        }
+        return result;
+    }
+     
     private List<Competitor> createCompetitors(int numberOfCompetitorsToCreate) {
         List<Competitor> result = new ArrayList<Competitor>();
         BoatClass boatClass = new BoatClassImpl("505", /* typicallyStartsUpwind */ true);

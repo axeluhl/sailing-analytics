@@ -76,8 +76,8 @@ public class LeaderboardJsonGetServlet extends AbstractJsonHttpServlet implement
     private static class LeaderboardJsonCacheUpdateInterval implements UpdateInterval<LeaderboardJsonCacheUpdateInterval> {
         private final LinkedHashSet<Pair<TimePoint, ResultStates>> timePointsAndResultStates;
         
-        public LeaderboardJsonCacheUpdateInterval(Iterable<Pair<TimePoint, ResultStates>> timePointAndResultStates) {
-            assert timePointAndResultStates != null;
+        public LeaderboardJsonCacheUpdateInterval(Iterable<Pair<TimePoint, ResultStates>> timePointsAndResultStates) {
+            assert timePointsAndResultStates != null;
             this.timePointsAndResultStates = new LinkedHashSet<>();
             Util.addAll(timePointsAndResultStates, this.timePointsAndResultStates);
         }
@@ -179,7 +179,8 @@ public class LeaderboardJsonGetServlet extends AbstractJsonHttpServlet implement
                     Pair<TimePoint, ResultStates> resultStateAndTimePoint = new Pair<>(
                             calculateTimePointForResultState(leaderboard, resState),
                             resolveRequestedResultState(req.getParameter(PARAM_NAME_RESULTSTATE)));
-                    JSONObject jsonLeaderboard = getFromCacheOrCompute(leaderboard, resultStateAndTimePoint);
+                    TimePoint requestTimePoint = MillisecondsTimePoint.now();
+                    JSONObject jsonLeaderboard = getFromCacheOrCompute(leaderboard, resultStateAndTimePoint, requestTimePoint);
                     setJsonResponseHeader(resp);
                     jsonLeaderboard.writeJSONString(resp.getWriter());
                 } catch (NoWindException e) {
@@ -190,7 +191,7 @@ public class LeaderboardJsonGetServlet extends AbstractJsonHttpServlet implement
     }
 
     private JSONObject getFromCacheOrCompute(Leaderboard leaderboard,
-            Pair<TimePoint, ResultStates> timePointAndResultState) throws NoWindException {
+            Pair<TimePoint, ResultStates> timePointAndResultState, final TimePoint requestTimePoint) throws NoWindException {
         Map<Pair<TimePoint, ResultStates>, JSONObject> cacheEntry = cache.get(leaderboard, /* waitForLatest */ false);
         if (cacheEntry == null || !cacheEntry.containsKey(timePointAndResultState)) {
             cacheMisses++;
@@ -199,6 +200,9 @@ public class LeaderboardJsonGetServlet extends AbstractJsonHttpServlet implement
             cache.triggerUpdate(leaderboard, new LeaderboardJsonCacheUpdateInterval(timePointsAndResultStates));
             // now wait for this entry to be computed
             cacheEntry = cache.get(leaderboard, /* waitForLatest */ true);
+            JSONObject jsonObject = cacheEntry.get(timePointAndResultState);
+            jsonObject.put("requestTimepoint", requestTimePoint.toString());
+            return jsonObject;
         } else {
             cacheHits++;
         }
@@ -220,7 +224,6 @@ public class LeaderboardJsonGetServlet extends AbstractJsonHttpServlet implement
         jsonLeaderboard.put("timepoint", resultTimePoint.toString());
 
         jsonLeaderboard.put("resultTimepoint", resultTimePoint.toString());
-        jsonLeaderboard.put("requestTimepoint", resultTimePoint.toString());
         jsonLeaderboard.put("resultState", resultState.name());
         
         SettableScoreCorrection scoreCorrection = leaderboard.getScoreCorrection();
