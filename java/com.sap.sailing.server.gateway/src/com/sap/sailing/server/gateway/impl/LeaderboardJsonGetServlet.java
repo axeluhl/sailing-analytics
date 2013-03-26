@@ -165,6 +165,7 @@ public class LeaderboardJsonGetServlet extends AbstractJsonHttpServlet implement
 
     @Override
     public void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        TimePoint requestTimePoint = MillisecondsTimePoint.now();
         String leaderboardName = req.getParameter(PARAM_NAME_LEADERBOARDNAME);
         if (leaderboardName == null) {
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Need to specify a leaderboard name using the "+
@@ -175,12 +176,17 @@ public class LeaderboardJsonGetServlet extends AbstractJsonHttpServlet implement
                 resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Leaderboard "+leaderboardName+" not found");
             } else {
                 try {
-                    ResultStates resState = resolveRequestedResultState(req.getParameter(PARAM_NAME_RESULTSTATE));
-                    Pair<TimePoint, ResultStates> resultStateAndTimePoint = new Pair<>(
-                            calculateTimePointForResultState(leaderboard, resState),
-                            resolveRequestedResultState(req.getParameter(PARAM_NAME_RESULTSTATE)));
-                    TimePoint requestTimePoint = MillisecondsTimePoint.now();
-                    JSONObject jsonLeaderboard = getFromCacheOrCompute(leaderboard, resultStateAndTimePoint, requestTimePoint);
+                    ResultStates resultState = resolveRequestedResultState(req.getParameter(PARAM_NAME_RESULTSTATE));
+                    TimePoint resultTimePoint = calculateTimePointForResultState(leaderboard, resultState);
+                    JSONObject jsonLeaderboard;
+                    if(resultTimePoint != null) {
+                        Pair<TimePoint, ResultStates> resultStateAndTimePoint = new Pair<>(resultTimePoint, resultState);
+                        jsonLeaderboard = getLeaderboardJsonFromCacheOrCompute(leaderboard, resultStateAndTimePoint, requestTimePoint);
+                    } else {
+                        jsonLeaderboard = createEmptyLeaderboardJson(leaderboard, resultState, requestTimePoint);
+                        jsonLeaderboard.put("requestTimepoint", requestTimePoint.toString());
+                    }
+                    
                     setJsonResponseHeader(resp);
                     jsonLeaderboard.writeJSONString(resp.getWriter());
                 } catch (NoWindException e) {
@@ -190,7 +196,7 @@ public class LeaderboardJsonGetServlet extends AbstractJsonHttpServlet implement
         }
     }
 
-    private JSONObject getFromCacheOrCompute(Leaderboard leaderboard,
+    private JSONObject getLeaderboardJsonFromCacheOrCompute(Leaderboard leaderboard,
             Pair<TimePoint, ResultStates> timePointAndResultState, final TimePoint requestTimePoint) throws NoWindException {
         Map<Pair<TimePoint, ResultStates>, JSONObject> cacheEntry = cache.get(leaderboard, /* waitForLatest */ false);
         if (cacheEntry == null || !cacheEntry.containsKey(timePointAndResultState)) {
@@ -214,16 +220,106 @@ public class LeaderboardJsonGetServlet extends AbstractJsonHttpServlet implement
             Pair<TimePoint, ResultStates> resultStateAndTimePoint) throws NoWindException {
         TimePoint resultTimePoint = resultStateAndTimePoint.getA();
         ResultStates resultState = resultStateAndTimePoint.getB();
-        List<Competitor> competitorsFromBestToWorstAccordingToTotalRank = leaderboard
-                .getCompetitorsFromBestToWorst(resultTimePoint);
+        List<Competitor> competitorsFromBestToWorstAccordingToTotalRank = leaderboard.getCompetitorsFromBestToWorst(resultTimePoint);
         Map<RaceColumn, List<Competitor>> rankedCompetitorsPerColumn = new HashMap<RaceColumn, List<Competitor>>();
         JSONObject jsonLeaderboard = new JSONObject();
+        
+        writeCommonLeaderboardData(jsonLeaderboard, leaderboard, resultState, resultTimePoint);
+
+        JSONArray jsonCompetitorEntries = new JSONArray();
+        jsonLeaderboard.put("competitors", jsonCompetitorEntries);
+        for (Competitor competitor : competitorsFromBestToWorstAccordingToTotalRank) {
+            JSONObject jsonCompetitor = new JSONObject();
+            jsonCompetitor.put("name", competitor.getName());
+            final String displayName = leaderboard.getDisplayName(competitor);
+            jsonCompetitor.put("displayName", displayName==null?competitor.getName():displayName);
+            jsonCompetitor.put("id", competitor.getId().toString());
+            jsonCompetitor.put("sailID", competitor.getBoat().getSailID());
+            Nationality nationality = competitor.getTeam().getNationality();
+            jsonCompetitor.put("nationality", nationality != null ? nationality.getThreeLetterIOCAcronym(): null);
+            jsonCompetitor.put("countryCode", nationality != null ? nationality.getCountryCode().getTwoLetterISOCode(): null);
+            
+            jsonCompetitor.put("rank", competitorsFromBestToWorstAccordingToTotalRank.indexOf(competitor) + 1);
+            jsonCompetitor.put("carriedPoints", leaderboard.getCarriedPoints(competitor));
+            jsonCompetitor.put("totalPoints", leaderboard.getTotalPoints(competitor, resultTimePoint));
+            jsonCompetitorEntries.add(jsonCompetitor);
+            JSONObject jsonRaceColumns = new JSONObject();
+            jsonCompetitor.put("raceScores", jsonRaceColumns);
+            for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
+                List<Competitor> rankedCompetitorsForColumn = rankedCompetitorsPerColumn.get(raceColumn);
+                if (rankedCompetitorsForColumn == null) {
+                    rankedCompetitorsForColumn = leaderboard.getCompetitorsFromBestToWorst(raceColumn, resultTimePoint);
+                    rankedCompetitorsPerColumn.put(raceColumn, rankedCompetitorsForColumn);
+                }
+                JSONObject jsonEntry = new JSONObject();
+                jsonRaceColumns.put(raceColumn.getName(), jsonEntry);
+                final Fleet fleetOfCompetitor = raceColumn.getFleetOfCompetitor(competitor);
+                jsonEntry.put("fleet", fleetOfCompetitor==null?"":fleetOfCompetitor.getName());
+                jsonEntry.put("netPoints", leaderboard.getNetPoints(competitor, raceColumn, resultTimePoint));
+                jsonEntry.put("totalPoints", leaderboard.getTotalPoints(competitor, raceColumn, resultTimePoint));
+                MaxPointsReason maxPointsReason = leaderboard.getMaxPointsReason(competitor, raceColumn, resultTimePoint);
+                jsonEntry.put("maxPointsReason", maxPointsReason != null ? maxPointsReason.toString(): null);
+                jsonEntry.put("rank", rankedCompetitorsForColumn.indexOf(competitor)+1);
+                final TrackedRace trackedRace = raceColumn.getTrackedRace(competitor);
+                if (trackedRace != null) {
+                    jsonEntry.put("raceRank", trackedRace.getRank(competitor, resultTimePoint));
+                }
+                jsonEntry.put("isDiscarded", leaderboard.isDiscarded(competitor, raceColumn, resultTimePoint));
+                jsonEntry.put("isCorrected", leaderboard.getScoreCorrection().isScoreCorrected(competitor, raceColumn));
+            }
+        }
+        return jsonLeaderboard;
+    }
+
+    private JSONObject createEmptyLeaderboardJson(Leaderboard leaderboard,
+            ResultStates resultState, TimePoint requestTimePoint) throws NoWindException {
+        JSONObject jsonLeaderboard = new JSONObject();
+        
+        writeCommonLeaderboardData(jsonLeaderboard, leaderboard, resultState, null);
+
+        JSONArray jsonCompetitorEntries = new JSONArray();
+        jsonLeaderboard.put("competitors", jsonCompetitorEntries);
+        for (Competitor competitor : leaderboard.getCompetitors()) {
+            JSONObject jsonCompetitor = new JSONObject();
+            jsonCompetitor.put("name", competitor.getName());
+            final String displayName = leaderboard.getDisplayName(competitor);
+            jsonCompetitor.put("displayName", displayName==null?competitor.getName():displayName);
+            jsonCompetitor.put("id", competitor.getId().toString());
+            jsonCompetitor.put("sailID", competitor.getBoat().getSailID());
+            Nationality nationality = competitor.getTeam().getNationality();
+            jsonCompetitor.put("nationality", nationality != null ? nationality.getThreeLetterIOCAcronym(): null);
+            jsonCompetitor.put("countryCode", nationality != null ? nationality.getCountryCode().getTwoLetterISOCode(): null);
+            
+            jsonCompetitor.put("rank", 0);
+            jsonCompetitor.put("carriedPoints", null);
+            jsonCompetitor.put("totalPoints", null);
+            jsonCompetitorEntries.add(jsonCompetitor);
+            JSONObject jsonRaceColumns = new JSONObject();
+            jsonCompetitor.put("raceScores", jsonRaceColumns);
+            for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
+                JSONObject jsonEntry = new JSONObject();
+                jsonRaceColumns.put(raceColumn.getName(), jsonEntry);
+                final Fleet fleetOfCompetitor = raceColumn.getFleetOfCompetitor(competitor);
+                jsonEntry.put("fleet", fleetOfCompetitor==null?"":fleetOfCompetitor.getName());
+                jsonEntry.put("netPoints", null);
+                jsonEntry.put("totalPoints", null);
+                jsonEntry.put("maxPointsReason", "");
+                jsonEntry.put("rank", 0);
+                jsonEntry.put("isDiscarded", false);
+                jsonEntry.put("isCorrected", false);
+            }
+        }
+        return jsonLeaderboard;
+    }
+
+    private void writeCommonLeaderboardData(JSONObject jsonLeaderboard, Leaderboard leaderboard, ResultStates resultState, 
+            TimePoint resultTimePoint) {
         jsonLeaderboard.put("name", leaderboard.getName());
         
         // for backward compatibility 
-        jsonLeaderboard.put("timepoint", resultTimePoint.toString());
+        jsonLeaderboard.put("timepoint", resultTimePoint != null ? resultTimePoint.toString() : null);
 
-        jsonLeaderboard.put("resultTimepoint", resultTimePoint.toString());
+        jsonLeaderboard.put("resultTimepoint", resultTimePoint != null ? resultTimePoint.toString() : null);
         jsonLeaderboard.put("resultState", resultState.name());
         
         SettableScoreCorrection scoreCorrection = leaderboard.getScoreCorrection();
@@ -241,73 +337,8 @@ public class LeaderboardJsonGetServlet extends AbstractJsonHttpServlet implement
         for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
             jsonColumnNames.add(raceColumn.getName());
         }
-        JSONArray jsonCompetitorEntries = new JSONArray();
-        jsonLeaderboard.put("competitors", jsonCompetitorEntries);
-        for (Competitor competitor : competitorsFromBestToWorstAccordingToTotalRank) {
-            JSONObject jsonCompetitor = new JSONObject();
-            jsonCompetitor.put("name", competitor.getName());
-            final String displayName = leaderboard.getDisplayName(competitor);
-            jsonCompetitor.put("displayName", displayName==null?competitor.getName():displayName);
-            jsonCompetitor.put("id", competitor.getId().toString());
-            jsonCompetitor.put("sailID", competitor.getBoat().getSailID());
-            Nationality nationality = competitor.getTeam().getNationality();
-            jsonCompetitor.put("nationality", nationality != null ? nationality.getThreeLetterIOCAcronym(): null);
-            jsonCompetitor.put("countryCode", nationality != null ? nationality.getCountryCode().getTwoLetterISOCode(): null);
-            
-            // only add results if we have a valid resultTimePoint
-            if(resultTimePoint != null) {
-                jsonCompetitor.put("rank", competitorsFromBestToWorstAccordingToTotalRank.indexOf(competitor) + 1);
-                jsonCompetitor.put("carriedPoints", leaderboard.getCarriedPoints(competitor));
-                jsonCompetitor.put("totalPoints", leaderboard.getTotalPoints(competitor, resultTimePoint));
-                jsonCompetitorEntries.add(jsonCompetitor);
-                JSONObject jsonRaceColumns = new JSONObject();
-                jsonCompetitor.put("raceScores", jsonRaceColumns);
-                for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
-                    List<Competitor> rankedCompetitorsForColumn = rankedCompetitorsPerColumn.get(raceColumn);
-                    if (rankedCompetitorsForColumn == null) {
-                        rankedCompetitorsForColumn = leaderboard.getCompetitorsFromBestToWorst(raceColumn, resultTimePoint);
-                        rankedCompetitorsPerColumn.put(raceColumn, rankedCompetitorsForColumn);
-                    }
-                    JSONObject jsonEntry = new JSONObject();
-                    jsonRaceColumns.put(raceColumn.getName(), jsonEntry);
-                    final Fleet fleetOfCompetitor = raceColumn.getFleetOfCompetitor(competitor);
-                    jsonEntry.put("fleet", fleetOfCompetitor==null?"":fleetOfCompetitor.getName());
-                    jsonEntry.put("netPoints", leaderboard.getNetPoints(competitor, raceColumn, resultTimePoint));
-                    jsonEntry.put("totalPoints", leaderboard.getTotalPoints(competitor, raceColumn, resultTimePoint));
-                    MaxPointsReason maxPointsReason = leaderboard.getMaxPointsReason(competitor, raceColumn, resultTimePoint);
-                    jsonEntry.put("maxPointsReason", maxPointsReason != null ? maxPointsReason.toString(): null);
-                    jsonEntry.put("rank", rankedCompetitorsForColumn.indexOf(competitor)+1);
-                    final TrackedRace trackedRace = raceColumn.getTrackedRace(competitor);
-                    if (trackedRace != null) {
-                        jsonEntry.put("raceRank", trackedRace.getRank(competitor, resultTimePoint));
-                    }
-                    jsonEntry.put("isDiscarded", leaderboard.isDiscarded(competitor, raceColumn, resultTimePoint));
-                    jsonEntry.put("isCorrected", leaderboard.getScoreCorrection().isScoreCorrected(competitor, raceColumn));
-                }
-            } else {
-                jsonCompetitor.put("rank", 0);
-                jsonCompetitor.put("carriedPoints", null);
-                jsonCompetitor.put("totalPoints", null);
-                jsonCompetitorEntries.add(jsonCompetitor);
-                JSONObject jsonRaceColumns = new JSONObject();
-                jsonCompetitor.put("raceScores", jsonRaceColumns);
-                for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
-                    JSONObject jsonEntry = new JSONObject();
-                    jsonRaceColumns.put(raceColumn.getName(), jsonEntry);
-                    final Fleet fleetOfCompetitor = raceColumn.getFleetOfCompetitor(competitor);
-                    jsonEntry.put("fleet", fleetOfCompetitor==null?"":fleetOfCompetitor.getName());
-                    jsonEntry.put("netPoints", null);
-                    jsonEntry.put("totalPoints", null);
-                    jsonEntry.put("maxPointsReason", "");
-                    jsonEntry.put("rank", 0);
-                    jsonEntry.put("isDiscarded", false);
-                    jsonEntry.put("isCorrected", false);
-                }
-            }
-        }
-        return jsonLeaderboard;
     }
-
+    
     private ResultStates resolveRequestedResultState(String resultStateParam) {
         ResultStates result = DEFAULT_RESULT_STATE;
         if(resultStateParam != null) {
@@ -326,19 +357,16 @@ public class LeaderboardJsonGetServlet extends AbstractJsonHttpServlet implement
         switch (resultState) {
         case Live:
             result = leaderboard.getTimePointOfLatestModification();
+            if (result == null) {
+                result = MillisecondsTimePoint.now();
+            }
             break;
         case Preliminary:
         case Final:
             if (leaderboard.getScoreCorrection() != null) {
                 result = leaderboard.getScoreCorrection().getTimePointOfLastCorrectionsValidity();
-                if (result == null) {
-                    result = leaderboard.getTimePointOfLatestModification();
-                }
             }
             break;
-        }
-        if (result == null) {
-            result = MillisecondsTimePoint.now();
         }
         return result;
     }
