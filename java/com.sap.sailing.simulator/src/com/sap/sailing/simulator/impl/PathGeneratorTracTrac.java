@@ -256,13 +256,7 @@ public class PathGeneratorTracTrac extends PathGeneratorBase {
         Regatta regatta = this.raceHandle.getRegatta();
 
         TrackedRace trackedRace = this.service.getTrackedRace(regatta, raceDef);
-        try {
-            while (trackedRace.getStatus().getLoadingProgress() < 1.0)
-                Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+        trackedRace.waitUntilNotLoading();
 
         Iterator<Competitor> competitors = raceDef.getCompetitors().iterator();
         Competitor competitor = null;

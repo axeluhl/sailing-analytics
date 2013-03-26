@@ -117,9 +117,8 @@ public class RaceDataAccessTest {
 
             RegattaAndRaceIdentifier raceIdentifier = new RegattaNameAndRaceName(regatta, race.getName());
             TrackedRace tr = service.getExistingTrackedRace(raceIdentifier);
-            while (tr.getStatus().getLoadingProgress() < 1.0)
-                Thread.sleep(1000);
-            
+            tr.waitUntilNotLoading();
+
             System.out.println("Competitors:");
             Iterable<Competitor> competitors = tr.getRace().getCompetitors();
             System.out.println("" + competitors);

@@ -65,13 +65,7 @@ public class TestRacingEventPersistence {
         for (RaceDefinition r : races) {
             RegattaAndRaceIdentifier raceIdentifier = new RegattaNameAndRaceName(regatta, r.getName());
             TrackedRace tr = service.getExistingTrackedRace(raceIdentifier);
-            try {
-                while (tr.getStatus().getLoadingProgress() < 1.0)
-                    Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
+            tr.waitUntilNotLoading();
 
             racesList.add(tr);
         }
