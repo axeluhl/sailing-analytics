@@ -39,6 +39,14 @@ public class CourseDesignChangedByRaceCommitteeHandler implements CourseDesignCh
     private final Serializable regattaId;
     private final Serializable raceId;
     
+    private final static String HttpPostRequestMethod = "POST";
+    private final static String ContentType = "Content-Type";
+    private final static String ContentLength = "Content-Length";
+    private final static String ContentTypeApplicationJson = "application/json";
+    private final static String EncodingUtf8 = "UTF-8";
+    private final static String CourseUpdateUrlTemplate = "%s?eventid=%s&raceid=%s";
+    private final static String ResponseCodeForFailure = "FAILURE";
+    
     public CourseDesignChangedByRaceCommitteeHandler(URI courseDesignUpdateURI, Serializable regattaId, Serializable raceId) {
         this.courseDesignUpdateURI = courseDesignUpdateURI;
         this.regattaId = regattaId;
@@ -72,7 +80,7 @@ public class CourseDesignChangedByRaceCommitteeHandler implements CourseDesignCh
                 JSONObject responseObject = Helpers.toJSONObjectSafe(responseBody);
 
                 CourseUpdateResponse courseUpdateResponse = courseUpdateDeserializer.deserialize(responseObject);
-                if (courseUpdateResponse.getStatus().equals("FAILURE")) {
+                if (courseUpdateResponse.getStatus().equals(ResponseCodeForFailure)) {
                     System.out.println(courseUpdateResponse.getMessage());
                 }
             } catch (ParseException pe) {
@@ -94,18 +102,18 @@ public class CourseDesignChangedByRaceCommitteeHandler implements CourseDesignCh
     }
 
     private void setConnectionProperties(HttpURLConnection connection, String payload) throws ProtocolException {
-        connection.setRequestMethod("POST");
+        connection.setRequestMethod(HttpPostRequestMethod);
         connection.setDoOutput(true);
         connection.setUseCaches(false);
-        connection.setRequestProperty("Content-Type", "application/json");
-        connection.addRequestProperty("Content-Length", String.valueOf(payload.getBytes().length));
+        connection.setRequestProperty(ContentType, ContentTypeApplicationJson);
+        connection.addRequestProperty(ContentLength, String.valueOf(payload.getBytes().length));
     }
     
     private URL buildCourseUpdateURL() throws MalformedURLException, UnsupportedEncodingException {
-        String url = String.format("%s?eventid=%s&raceid=%s", 
+        String url = String.format(CourseUpdateUrlTemplate, 
                 this.courseDesignUpdateURI.toString(), 
-                URLEncoder.encode(this.regattaId.toString(), "UTF-8"), 
-                URLEncoder.encode(this.raceId.toString(), "UTF-8"));
+                URLEncoder.encode(this.regattaId.toString(), EncodingUtf8), 
+                URLEncoder.encode(this.raceId.toString(), EncodingUtf8));
         return new URL(url);
     }
 
