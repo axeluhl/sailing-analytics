@@ -71,9 +71,6 @@ public class SimulatorUtils {
             RaceLogStore raceLogStore, WindStore windStore, long timeoutInMilliseconds) throws Exception {
         RacesHandle raceHandle = service.addTracTracRace(paramURL, liveURI, storedURI, raceLogStore, windStore,
                 timeoutInMilliseconds);
-        // synchronized (this) {
-        // this.wait();
-        // }
         return raceHandle;
     }
 
