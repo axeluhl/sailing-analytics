@@ -147,8 +147,10 @@ public class RegattaOverviewTableComposite extends Composite {
 
             @Override
             protected void handleSuccess(EventDTO result) {
-                eventNameLabel.setText(result.name);
-                venueNameLabel.setText(result.venue.name);
+                if (result != null) {
+                    eventNameLabel.setText(result.name);
+                    venueNameLabel.setText(result.venue.name);
+                }
             }
         });
     }

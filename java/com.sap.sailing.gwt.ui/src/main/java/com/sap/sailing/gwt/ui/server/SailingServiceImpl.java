@@ -2149,9 +2149,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         } else {
             leaderboardDTO.isRegattaLeaderboard = false;
             leaderboardDTO.scoringScheme = leaderboard.getScoringScheme().getType();
-            if (leaderboard.getDefaultCourseArea() != null) {
-                leaderboardDTO.courseAreaId = leaderboard.getDefaultCourseArea().getId().toString();
-            }
+        }
+        if (leaderboard.getDefaultCourseArea() != null) {
+            leaderboardDTO.courseAreaId = leaderboard.getDefaultCourseArea().getId().toString();
         }
         leaderboardDTO.setDelayToLiveInMillisForLatestRace(delayToLiveInMillisForLatestRace);
         leaderboardDTO.hasCarriedPoints = leaderboard.hasCarriedPoints();
