@@ -81,7 +81,13 @@ public class SystemInformationImpl implements SystemInformation {
         try {
              sockstat = readProc("/proc/" + getPid() + "/net/sockstat");
         } catch (Exception e) {
-            /* ignore */
+            /* seems that there are no local socket counts, try to use
+             * global ones */
+            try {
+                sockstat = readProc("/proc/" + getPid() + "/net/sockstat");
+            } catch (Exception ex) {
+                /* ok ignore */
+            }
         }
         
         for (String line : sockstat) {
@@ -255,6 +261,25 @@ public class SystemInformationImpl implements SystemInformation {
             int flags = NetFlags.CONN_TCP | NetFlags.CONN_UDP | NetFlags.CONN_SERVER;
             NetConnection[] connections = getOpenNetworkConnections(flags);
 
+            result.append("\nCalling Process Statistics:\n");
+            result.append(getProcessInformation(getPid()));
+
+            result.append("\nOpen Local Ports:\n");
+            for (NetConnection ns : connections) {
+                if (ns.getRemoteAddress().equalsIgnoreCase("0.0.0.0") ||
+                        ns.getRemoteAddress().equalsIgnoreCase("127.0.0.1") ||
+                        ns.getRemoteAddress().equalsIgnoreCase("::"))
+                result.append(ns.getLocalAddress() + ":" + ns.getLocalPort()).append("\n");
+            }
+
+            flags = NetFlags.CONN_TCP | NetFlags.CONN_UDP | NetFlags.CONN_CLIENT;
+            connections = getOpenNetworkConnections(flags);
+
+            result.append("\nOutbound Connections:\n");
+            for (NetConnection ns : connections) {
+                result.append(ns.getLocalAddress() + ":" + ns.getLocalPort() + " -> " + ns.getRemoteAddress() + ":" + ns.getRemotePort()).append("\n");
+            }
+
             result.append("\nInbound Connections:\n");
             for (NetConnection ns : connections) {
                 /* ignore connections to self */
@@ -264,27 +289,6 @@ public class SystemInformationImpl implements SystemInformation {
                    )
                 result.append(ns.toString()).append("\n");
             }
-            
-            result.append("\nOpen Local Ports:\n");
-            for (NetConnection ns : connections) {
-                if (ns.getRemoteAddress().equalsIgnoreCase("0.0.0.0") ||
-                        ns.getRemoteAddress().equalsIgnoreCase("127.0.0.1") ||
-                        ns.getRemoteAddress().equalsIgnoreCase("::"))
-                result.append(ns.toString()).append("\n");
-            }
-
-            flags = NetFlags.CONN_TCP | NetFlags.CONN_UDP | NetFlags.CONN_CLIENT;
-            connections = getOpenNetworkConnections(flags);
-
-            result.append("\nOutbound Connections:\n");
-            for (NetConnection ns : connections) {
-                result.append(ns.toString()).append("\n");
-            }
-            
-            result.append("\nCalling Process Statistics:\n");
-            result.append(getProcessInformation(getPid()));
-            
-
         } catch (Exception ex) {
             ex.printStackTrace();
         }
