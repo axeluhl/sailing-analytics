@@ -84,7 +84,7 @@ public class SystemInformationImpl implements SystemInformation {
             /* seems that there are no local socket counts, try to use
              * global ones */
             try {
-                sockstat = readProc("/proc/" + getPid() + "/net/sockstat");
+                sockstat = readProc("/proc/net/sockstat");
             } catch (Exception ex) {
                 /* ok ignore */
             }
