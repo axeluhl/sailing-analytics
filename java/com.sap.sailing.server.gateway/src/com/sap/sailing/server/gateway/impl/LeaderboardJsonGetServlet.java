@@ -30,7 +30,7 @@ import com.sap.sailing.server.gateway.AbstractJsonHttpServlet;
  * @author Frank
  *
  */
-public class LeaderboardJsonExportServlet extends AbstractJsonHttpServlet {
+public class LeaderboardJsonGetServlet extends AbstractJsonHttpServlet {
     private static final long serialVersionUID = -2460691283231361152L;
     private static final String PARAM_NAME_LEADERBOARDNAME = "leaderboardName";
     private static final String PARAM_NAME_RESULTSTATE = "resultState";

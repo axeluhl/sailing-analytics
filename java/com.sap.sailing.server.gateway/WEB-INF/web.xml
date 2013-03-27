@@ -44,11 +44,11 @@
 	<!-- RACE COMMITTEE END -->
 
 	<servlet>
-		<servlet-name>RegattaAndRaceDataJsonExportServlet</servlet-name>
-		<servlet-class>com.sap.sailing.server.gateway.impl.RegattaAndRaceDataJsonExportServlet</servlet-class>
+		<servlet-name>RegattaAndRaceDataJsonGetServlet</servlet-name>
+		<servlet-class>com.sap.sailing.server.gateway.impl.RegattaAndRaceDataJsonGetServlet</servlet-class>
 	</servlet>
 	<servlet-mapping>
-		<servlet-name>RegattaAndRaceDataJsonExportServlet</servlet-name>
+		<servlet-name>RegattaAndRaceDataJsonGetServlet</servlet-name>
 		<url-pattern>/moderator</url-pattern>
 	</servlet-mapping>
 
@@ -62,65 +62,74 @@
 	</servlet-mapping>
 
 	<servlet>
-		<servlet-name>EventsJsonExportServlet</servlet-name>
-		<servlet-class>com.sap.sailing.server.gateway.impl.EventsJsonExportServlet</servlet-class>
+		<servlet-name>EventsJsonGetServlet</servlet-name>
+		<servlet-class>com.sap.sailing.server.gateway.impl.EventsJsonGetServlet</servlet-class>
 	</servlet>
 	<servlet-mapping>
-		<servlet-name>EventsJsonExportServlet</servlet-name>
+		<servlet-name>EventsJsonGetServlet</servlet-name>
 		<url-pattern>/events</url-pattern>
 	</servlet-mapping>
 	
 	<servlet>
-		<servlet-name>RegattasJsonExportServlet</servlet-name>
-		<servlet-class>com.sap.sailing.server.gateway.impl.RegattasJsonExportServlet</servlet-class>
+		<servlet-name>RegattasJsonGetServlet</servlet-name>
+		<servlet-class>com.sap.sailing.server.gateway.impl.RegattasJsonGetServlet</servlet-class>
 	</servlet>
 	<servlet-mapping>
-		<servlet-name>RegattasJsonExportServlet</servlet-name>
+		<servlet-name>RegattasJsonGetServlet</servlet-name>
 		<url-pattern>/regattas</url-pattern>
 	</servlet-mapping>
 	
 	<servlet>
-		<servlet-name>LeaderboardsJsonExportServlet</servlet-name>
-		<servlet-class>com.sap.sailing.server.gateway.impl.LeaderboardsJsonExportServlet</servlet-class>
+		<servlet-name>LeaderboardsJsonGetServlet</servlet-name>
+		<servlet-class>com.sap.sailing.server.gateway.impl.LeaderboardsJsonGetServlet</servlet-class>
 	</servlet>
 	<servlet-mapping>
-		<servlet-name>LeaderboardsJsonExportServlet</servlet-name>
+		<servlet-name>LeaderboardsJsonGetServlet</servlet-name>
 		<url-pattern>/leaderboards</url-pattern>
 	</servlet-mapping>
 
 	<servlet>
-		<servlet-name>LeaderboardJsonExportServlet</servlet-name>
-		<servlet-class> com.sap.sailing.server.gateway.impl.LeaderboardJsonExportServlet</servlet-class>
+		<servlet-name>LeaderboardJsonGetServlet</servlet-name>
+		<servlet-class> com.sap.sailing.server.gateway.impl.LeaderboardJsonGetServlet</servlet-class>
 	</servlet>
 	<servlet-mapping>
-		<servlet-name>LeaderboardJsonExportServlet</servlet-name>
+		<servlet-name>LeaderboardJsonGetServlet</servlet-name>
 		<url-pattern>/leaderboard</url-pattern>
 	</servlet-mapping>
 
 	<servlet>
-		<servlet-name>LeaderboardGroupJsonExportServlet</servlet-name>
-		<servlet-class>com.sap.sailing.server.gateway.impl.LeaderboardGroupJsonExportServlet</servlet-class>
+		<servlet-name>LeaderboardGroupJsonGetServlet</servlet-name>
+		<servlet-class>com.sap.sailing.server.gateway.impl.LeaderboardGroupJsonGetServlet</servlet-class>
 	</servlet>
 	<servlet-mapping>
-		<servlet-name>LeaderboardGroupJsonExportServlet</servlet-name>
+		<servlet-name>LeaderboardGroupJsonGetServlet</servlet-name>
 		<url-pattern>/leaderboardgroup</url-pattern>
 	</servlet-mapping>
 
 	<servlet>
-		<servlet-name>LeaderboardGroupsJsonExportServlet</servlet-name>
-		<servlet-class>com.sap.sailing.server.gateway.impl.LeaderboardGroupsJsonExportServlet</servlet-class>
+		<servlet-name>LeaderboardGroupsJsonGetServlet</servlet-name>
+		<servlet-class>com.sap.sailing.server.gateway.impl.LeaderboardGroupsJsonGetServlet</servlet-class>
 	</servlet>
 	<servlet-mapping>
-		<servlet-name>LeaderboardGroupsJsonExportServlet</servlet-name>
+		<servlet-name>LeaderboardGroupsJsonGetServlet</servlet-name>
 		<url-pattern>/leaderboardgroups</url-pattern>
 	</servlet-mapping>
 
 	<servlet>
-		<servlet-name>LiveRaceRankingAsRssFeedServlet</servlet-name>
-		<servlet-class>com.sap.sailing.server.gateway.impl.LiveRaceRankingAsRssFeedServlet</servlet-class>
+		<servlet-name>WindJsonGetServlet</servlet-name>
+		<servlet-class>com.sap.sailing.server.gateway.impl.WindJsonGetServlet</servlet-class>
 	</servlet>
 	<servlet-mapping>
-		<servlet-name>LiveRaceRankingAsRssFeedServlet</servlet-name>
+		<servlet-name>WindJsonGetServlet</servlet-name>
+		<url-pattern>/wind</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>LiveRaceRankingRssGetServlet</servlet-name>
+		<servlet-class>com.sap.sailing.server.gateway.impl.LiveRaceRankingRssGetServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>LiveRaceRankingRssGetServlet</servlet-name>
 		<url-pattern>/rss/liveRaceRanking</url-pattern>
 	</servlet-mapping>
  
