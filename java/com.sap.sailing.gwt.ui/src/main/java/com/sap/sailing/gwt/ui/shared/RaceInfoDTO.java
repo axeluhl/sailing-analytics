@@ -14,6 +14,7 @@ public class RaceInfoDTO implements IsSerializable {
     public RaceLogRaceStatus lastStatus;
     public Flags lastFlag;
     public boolean displayed;
+    public RaceCourseDTO lastCourseDesign;
     
     // for GWT serialization
     public RaceInfoDTO() { }

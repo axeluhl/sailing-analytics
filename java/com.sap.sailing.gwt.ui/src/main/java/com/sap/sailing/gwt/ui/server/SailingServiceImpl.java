@@ -49,6 +49,7 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.CourseArea;
+import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Gate;
@@ -217,6 +218,7 @@ import com.sap.sailing.gwt.ui.shared.WaypointDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
+import com.sap.sailing.racecommittee.domain.state.impl.analyzers.LastPublishedCourseDesignFinder;
 import com.sap.sailing.racecommittee.domain.state.impl.analyzers.RaceStatusAnalyzer;
 import com.sap.sailing.racecommittee.domain.state.impl.analyzers.StartTimeFinder;
 import com.sap.sailing.server.RacingEventService;
@@ -1110,6 +1112,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         RaceStatusAnalyzer raceStatusAnalyzer = new RaceStatusAnalyzer(passAwareRaceLog); 
         raceInfoDTO.lastStatus = raceStatusAnalyzer.getStatus();
         
+        LastPublishedCourseDesignFinder courseDesignFinder = new LastPublishedCourseDesignFinder(raceLog);
+        raceInfoDTO.lastCourseDesign = convertCourseDesignToRaceCourseDTO(courseDesignFinder.getLastCourseDesign());
+        
         for(RaceLogEvent event : passAwareRaceLog.getFixes()){
             if(event instanceof RaceLogFlagEvent){
                 raceInfoDTO.lastFlag = ((RaceLogFlagEvent) event).getUpperFlag();
@@ -1118,6 +1123,25 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         }
         
         return raceInfoDTO;
+    }
+
+    private RaceCourseDTO convertCourseDesignToRaceCourseDTO(CourseBase lastCourseDesign) {
+        RaceCourseDTO result = new RaceCourseDTO(Collections.<WaypointDTO> emptyList());
+        
+        if (lastCourseDesign != null) {
+            List<WaypointDTO> waypointDTOs = new ArrayList<WaypointDTO>();
+            for (Waypoint waypoint : lastCourseDesign.getWaypoints()) {
+                ControlPointDTO controlPointDTO = convertToControlPointDTO(waypoint.getControlPoint());
+                List<MarkDTO> marks = new ArrayList<MarkDTO>();
+                for (MarkDTO markDTO : controlPointDTO.getMarks()) {
+                    marks.add(markDTO);
+                }
+                WaypointDTO waypointDTO = new WaypointDTO(waypoint.getName(), controlPointDTO, marks, waypoint.getPassingSide());
+                waypointDTOs.add(waypointDTO);
+            }
+            result = new RaceCourseDTO(waypointDTOs);
+        }
+        return result;
     }
 
     private FleetDTO convertToFleetDTO(Series series, Fleet fleet) {
@@ -1843,6 +1867,18 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             final Position posOfFirst = trackedRace.getOrCreateTrack(controlPoint.getMarks().iterator().next()).
                     getEstimatedPosition(timePoint, /* extrapolate */ false);
             result = new MarkDTO(controlPoint.getId().toString(), controlPoint.getName(), posOfFirst.getLatDeg(), posOfFirst.getLngDeg());
+        }
+        return result;
+    }
+    
+    private ControlPointDTO convertToControlPointDTO(ControlPoint controlPoint) {
+        ControlPointDTO result;
+        if (controlPoint instanceof Gate) {
+            final Mark left = ((Gate) controlPoint).getLeft();
+            final Mark right = ((Gate) controlPoint).getRight();
+            result = new GateDTO(controlPoint.getId().toString(), controlPoint.getName(), convertToMarkDTO(left, null), convertToMarkDTO(right, null)); 
+        } else {
+            result = new MarkDTO(controlPoint.getId().toString(), controlPoint.getName());
         }
         return result;
     }

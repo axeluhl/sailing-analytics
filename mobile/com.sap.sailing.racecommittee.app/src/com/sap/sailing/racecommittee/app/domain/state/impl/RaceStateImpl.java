@@ -20,7 +20,7 @@ import com.sap.sailing.racecommittee.app.domain.state.RaceState;
 import com.sap.sailing.racecommittee.app.domain.state.RaceStateChangedListener;
 import com.sap.sailing.racecommittee.app.domain.state.StartProcedure;
 import com.sap.sailing.racecommittee.app.domain.state.impl.analyzers.FinishedTimeFinder;
-import com.sap.sailing.racecommittee.app.domain.state.impl.analyzers.LastPublishedCourseDesignFinder;
+import com.sap.sailing.racecommittee.domain.state.impl.analyzers.LastPublishedCourseDesignFinder;
 import com.sap.sailing.racecommittee.domain.state.impl.analyzers.RaceStatusAnalyzer;
 import com.sap.sailing.racecommittee.domain.state.impl.analyzers.StartTimeFinder;
 
