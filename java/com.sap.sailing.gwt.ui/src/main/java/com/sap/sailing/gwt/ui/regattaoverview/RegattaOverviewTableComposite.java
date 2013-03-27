@@ -27,6 +27,7 @@ import com.sap.sailing.gwt.ui.client.TimeListener;
 import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.client.Timer.PlayStates;
+import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaOverviewEntryDTO;
 
 public class RegattaOverviewTableComposite extends Composite {
@@ -41,6 +42,8 @@ public class RegattaOverviewTableComposite extends Composite {
     private final Timer serverUpdateTimer;
     private final Timer uiUpdateTimer;
     private final Label timeLabel;
+    private final Label eventNameLabel;
+    private final Label venueNameLabel;
     private final Button startStopUpdatingButton;
     private final DateTimeFormat timeFormatter = DateTimeFormat.getFormat("HH:mm:ss");
 
@@ -84,6 +87,9 @@ public class RegattaOverviewTableComposite extends Composite {
 
         regattaOverviewDataProvider = new ListDataProvider<RegattaOverviewEntryDTO>();
         regattaOverviewTable = createRegattaTable();
+        
+        eventNameLabel = new Label();
+        venueNameLabel = new Label();
 
         timeLabel = new Label();
         
@@ -119,13 +125,32 @@ public class RegattaOverviewTableComposite extends Composite {
         gridTimeRefreshStop.setWidget(0, 2, refreshNowButton);
         gridTimeRefreshStop.setWidget(0, 3, startStopUpdatingButton);
 
+        panel.add(eventNameLabel);
+        panel.add(venueNameLabel);
         panel.add(gridTimeRefreshStop);
         panel.add(regattaOverviewTable);
 
         initWidget(mainPanel);
         
+        fillEventAndVenueName();
         loadAndUpdateEventLog();
         onUpdateUI(new Date());
+    }
+
+    private void fillEventAndVenueName() {
+        sailingService.getEventByIdAsString(eventIdAsString, new MarkedAsyncCallback<EventDTO>() {
+
+            @Override
+            protected void handleFailure(Throwable cause) {
+                
+            }
+
+            @Override
+            protected void handleSuccess(EventDTO result) {
+                eventNameLabel.setText(result.name);
+                venueNameLabel.setText(result.venue.name);
+            }
+        });
     }
 
     public void onUpdateServer(Date time) {

@@ -452,4 +452,6 @@ public interface SailingServiceAsync {
     
     void getRegattaOverviewEntriesForEvent(String eventIdAsString, AsyncCallback<List<RegattaOverviewEntryDTO>> asyncCallback);
     
+    void getEventByIdAsString(String eventIdAsString, AsyncCallback<EventDTO> asyncCallback);
+    
 }

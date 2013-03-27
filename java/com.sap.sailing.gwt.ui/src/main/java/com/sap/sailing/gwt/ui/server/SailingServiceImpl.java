@@ -2993,7 +2993,15 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         }
         return result;
     }
+    
+    @Override
+    public EventDTO getEventByIdAsString(String eventIdAsString) {
+        UUID eventUuid = convertIdentifierStringToUuid(eventIdAsString);
+        return getEventById(eventUuid);
 
+    }
+
+    @Override
     public EventDTO getEventById(Serializable id) {
         EventDTO result = null;
         for (Event event : getService().getAllEvents()) {
@@ -3047,8 +3055,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public List<RegattaOverviewEntryDTO> getRegattaOverviewEntriesForEvent(String eventIdAsString) {
         List<RegattaOverviewEntryDTO> result = new ArrayList<RegattaOverviewEntryDTO>();
         
-        UUID eventUuid = convertIdentifierStringToUuid(eventIdAsString);
-        EventDTO eventDTO = getEventById(eventUuid);
+        EventDTO eventDTO = getEventByIdAsString(eventIdAsString);
         
         if (eventDTO != null) {
             for (CourseAreaDTO courseAreaDTO : eventDTO.venue.getCourseAreas()) {

@@ -299,4 +299,6 @@ public interface SailingService extends RemoteService {
     CourseAreaDTO createCourseArea(String eventIdAsString, String courseAreaName);
     
     List<RegattaOverviewEntryDTO> getRegattaOverviewEntriesForEvent(String eventIdAsString);
+    
+    EventDTO getEventByIdAsString(String eventIdAsString);
 }
