@@ -1,10 +1,12 @@
 package com.sap.sailing.monitoring.sysinfo;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.lang.management.OperatingSystemMXBean;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -241,6 +243,9 @@ public class SystemInformationImpl implements SystemInformation {
             result.append(getTotalStoppedProcesses()).append(" (total processes stopped)").append("\n");
             result.append(getTotalZombieProcesses()).append(" (total processes zombie)").append("\n");
             result.append(getTotalProcesses()).append(" (total)").append("\n");
+            
+            result.append("Contents of TMP directory (java.io.tmpdir)").append("\n");
+            result.append(Arrays.toString(new File(System.getProperty("java.io.tmpdir")).listFiles()));
             
             result.append("\nMemory:\n");
             result.append(getFreeMemoryGlobal()/1000 + "kb (free, not cached, not inactive)\n");
