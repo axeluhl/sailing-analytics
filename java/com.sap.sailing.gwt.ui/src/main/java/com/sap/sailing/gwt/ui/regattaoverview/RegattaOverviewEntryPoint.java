@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.ui.regattaoverview;
 
+import java.util.UUID;
+
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.RootPanel;
@@ -23,9 +25,25 @@ public class RegattaOverviewEntryPoint extends AbstractEntryPoint  {
             RootPanel.getBodyElement().getStyle().setPadding(0, Unit.PX);
             RootPanel.getBodyElement().getStyle().setPaddingTop(20, Unit.PX);
         }
-        String leaderBoardName = Window.Location.getParameter("leaderboardName");
-        RegattaOverviewTableComposite regattaOverviewPanel = new RegattaOverviewTableComposite(sailingService, this, stringMessages, leaderBoardName);
+        String eventIdAsString = Window.Location.getParameter("event");
+        UUID eventId = convertIdentifierStringToUuid(eventIdAsString);
+        if (eventId == null) {
+            createErrorPage("This page requires a valid event id.");
+            return;
+        }
+        RegattaOverviewTableComposite regattaOverviewPanel = new RegattaOverviewTableComposite(sailingService, this, stringMessages, eventIdAsString);
         rootPanel.add(regattaOverviewPanel);
+    }
+    
+    private UUID convertIdentifierStringToUuid(String identifierToConvert) {
+        UUID convertedUuid = null;
+        if (identifierToConvert != null) {
+            try {
+                convertedUuid = UUID.fromString(identifierToConvert);
+            } catch (IllegalArgumentException iae) {
+            }
+        }
+        return convertedUuid;
     }
     
 }

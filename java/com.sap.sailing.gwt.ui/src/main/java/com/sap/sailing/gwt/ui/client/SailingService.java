@@ -42,6 +42,7 @@ import com.sap.sailing.gwt.ui.shared.RaceDTO;
 import com.sap.sailing.gwt.ui.shared.RaceMapDataDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
+import com.sap.sailing.gwt.ui.shared.RegattaOverviewEntryDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.ReplicationStateDTO;
 import com.sap.sailing.gwt.ui.shared.ScoreCorrectionProviderDTO;
@@ -296,4 +297,6 @@ public interface SailingService extends RemoteService {
     EventDTO getEventById(Serializable id);
     
     CourseAreaDTO createCourseArea(String eventIdAsString, String courseAreaName);
+    
+    List<RegattaOverviewEntryDTO> getRegattaOverviewEntriesForEvent(String eventIdAsString);
 }

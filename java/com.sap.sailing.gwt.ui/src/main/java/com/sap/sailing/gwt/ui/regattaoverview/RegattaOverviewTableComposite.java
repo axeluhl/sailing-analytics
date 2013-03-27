@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.regattaoverview;
 
 import java.util.Date;
+import java.util.List;
 
 import com.google.gwt.cell.client.ImageResourceCell;
 import com.google.gwt.core.client.GWT;
@@ -11,7 +12,6 @@ import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Grid;
@@ -20,24 +20,22 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
+import com.sap.sailing.gwt.ui.client.MarkedAsyncCallback;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.TimeListener;
 import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.client.Timer.PlayStates;
-import com.sap.sailing.gwt.ui.shared.FleetDTO;
-import com.sap.sailing.gwt.ui.shared.RaceColumnDTO;
-import com.sap.sailing.gwt.ui.shared.RaceInfoDTO;
-import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
+import com.sap.sailing.gwt.ui.shared.RegattaOverviewEntryDTO;
 
 public class RegattaOverviewTableComposite extends Composite {
 
-    private final long serverUpdateRate = 5000;
+    private final long serverUpdateRate = 10000;
     private final long uiUpdateRate = 1000;
 
-    private final CellTable<RaceInfoDTO> regattaOverviewTable;
-    private ListDataProvider<RaceInfoDTO> raceListDataProvider;
+    private final CellTable<RegattaOverviewEntryDTO> regattaOverviewTable;
+    private ListDataProvider<RegattaOverviewEntryDTO> regattaOverviewDataProvider;
     private final SimplePanel mainPanel;
     private final VerticalPanel panel;
     private final Timer serverUpdateTimer;
@@ -48,17 +46,17 @@ public class RegattaOverviewTableComposite extends Composite {
 
     private final SailingServiceAsync sailingService;
     private final StringMessages stringMessages;
-    private final String leaderboardName;
+    private final String eventIdAsString;
 
     private static RegattaOverviewResources resources = GWT.create(RegattaOverviewResources.class);
 
     private static RegattaOverviewTableResources tableRes = GWT.create(RegattaOverviewTableResources.class);
 
     public RegattaOverviewTableComposite(final SailingServiceAsync sailingService, ErrorReporter errorReporter,
-            final StringMessages stringMessages, final String leaderboardName) {
+            final StringMessages stringMessages, final String eventIdAsString) {
         this.sailingService = sailingService;
         this.stringMessages = stringMessages;
-        this.leaderboardName = leaderboardName;
+        this.eventIdAsString = eventIdAsString;
 
         this.serverUpdateTimer = new Timer(PlayModes.Live, serverUpdateRate);
         this.serverUpdateTimer.addTimeListener(new TimeListener() {
@@ -84,7 +82,7 @@ public class RegattaOverviewTableComposite extends Composite {
         panel = new VerticalPanel();
         mainPanel.setWidget(panel);
 
-        raceListDataProvider = new ListDataProvider<RaceInfoDTO>();
+        regattaOverviewDataProvider = new ListDataProvider<RegattaOverviewEntryDTO>();
         regattaOverviewTable = createRegattaTable();
 
         timeLabel = new Label();
@@ -139,83 +137,93 @@ public class RegattaOverviewTableComposite extends Composite {
     }
 
     private void loadAndUpdateEventLog() {
-        sailingService.getLeaderboard(this.leaderboardName, new AsyncCallback<StrippedLeaderboardDTO>() {
+        sailingService.getRegattaOverviewEntriesForEvent(eventIdAsString, new MarkedAsyncCallback<List<RegattaOverviewEntryDTO>>() {
 
             @Override
-            public void onSuccess(StrippedLeaderboardDTO leaderboard) {
-                raceListDataProvider.getList().clear();
-                if (leaderboard != null) {
-                    for (RaceColumnDTO race : leaderboard.getRaceList()) {
-                        for (FleetDTO fleet : race.getFleets()) {
-                            raceListDataProvider.getList().add(race.getRaceInfo(fleet));
-                        }
-                    }
-
-                }
-            }
-
-            @Override
-            public void onFailure(Throwable caught) {
+            protected void handleFailure(Throwable cause) {
                 // TODO Auto-generated method stub
-
+                
             }
+
+            @Override
+            protected void handleSuccess(List<RegattaOverviewEntryDTO> result) {
+                regattaOverviewDataProvider.getList().clear();
+                regattaOverviewDataProvider.getList().addAll(result);
+            }
+            
         });
     }
 
-    private CellTable<RaceInfoDTO> createRegattaTable() {
-        CellTable<RaceInfoDTO> table = new CellTable<RaceInfoDTO>(/* pageSize */10000, tableRes);
-        raceListDataProvider.addDataDisplay(table);
+    private CellTable<RegattaOverviewEntryDTO> createRegattaTable() {
+        CellTable<RegattaOverviewEntryDTO> table = new CellTable<RegattaOverviewEntryDTO>(/* pageSize */10000, tableRes);
+        regattaOverviewDataProvider.addDataDisplay(table);
         table.setWidth("100%");
         
-        TextColumn<RaceInfoDTO> fleetNameColumn = new TextColumn<RaceInfoDTO>() {
+        TextColumn<RegattaOverviewEntryDTO> courseAreaColumn = new TextColumn<RegattaOverviewEntryDTO>() {
             @Override
-            public String getValue(RaceInfoDTO raceInfo) {
-                return raceInfo.fleet;
+            public String getValue(RegattaOverviewEntryDTO entryDTO) {
+                return entryDTO.courseAreaName;
+            }
+        };
+        
+        TextColumn<RegattaOverviewEntryDTO> regattaNameColumn = new TextColumn<RegattaOverviewEntryDTO>() {
+            @Override
+            public String getValue(RegattaOverviewEntryDTO entryDTO) {
+                return entryDTO.regattaName;
+            }
+        };
+        
+        TextColumn<RegattaOverviewEntryDTO> fleetNameColumn = new TextColumn<RegattaOverviewEntryDTO>() {
+            @Override
+            public String getValue(RegattaOverviewEntryDTO entryDTO) {
+                return entryDTO.raceInfo.fleet;
             }
         };
 
-        TextColumn<RaceInfoDTO> raceNameColumn = new TextColumn<RaceInfoDTO>() {
+        TextColumn<RegattaOverviewEntryDTO> raceNameColumn = new TextColumn<RegattaOverviewEntryDTO>() {
             @Override
-            public String getValue(RaceInfoDTO raceInfo) {
-                return raceInfo.raceName;
+            public String getValue(RegattaOverviewEntryDTO entryDTO) {
+                return entryDTO.raceInfo.raceName;
             }
         };
 
-        TextColumn<RaceInfoDTO> raceStartTimeColumn = new TextColumn<RaceInfoDTO>() {
+        TextColumn<RegattaOverviewEntryDTO> raceStartTimeColumn = new TextColumn<RegattaOverviewEntryDTO>() {
             @Override
-            public String getValue(RaceInfoDTO raceInfo) {
+            public String getValue(RegattaOverviewEntryDTO entryDTO) {
                 String result = stringMessages.noStarttimeAnnouncedYet();
-                if (raceInfo.startTime != null) {
-                    result = timeFormatter.format(raceInfo.startTime);
+                if (entryDTO.raceInfo.startTime != null) {
+                    result = timeFormatter.format(entryDTO.raceInfo.startTime);
                 }
                 return result;
             }
         };
         
-        TextColumn<RaceInfoDTO> raceStatusColumn = new TextColumn<RaceInfoDTO>() {
+        TextColumn<RegattaOverviewEntryDTO> raceStatusColumn = new TextColumn<RegattaOverviewEntryDTO>() {
             @Override
-            public String getValue(RaceInfoDTO raceInfo) {
+            public String getValue(RegattaOverviewEntryDTO entryDTO) {
                 String result = "";
-                if(raceInfo.lastStatus!=null)
-                    result =  raceInfo.lastStatus.toString();
+                if(entryDTO.raceInfo.lastStatus != null)
+                    result = entryDTO.raceInfo.lastStatus.toString();
                 return result;
             }
         };
 
-        Column<RaceInfoDTO, ImageResource> lastFlagColumn = new Column<RaceInfoDTO, ImageResource>(new ImageResourceCell()) {
+        Column<RegattaOverviewEntryDTO, ImageResource> lastFlagColumn = new Column<RegattaOverviewEntryDTO, ImageResource>(new ImageResourceCell()) {
             @Override
-            public ImageResource getValue(RaceInfoDTO raceInfo) {
+            public ImageResource getValue(RegattaOverviewEntryDTO entryDTO) {
                 return resources.flagAP();
             }
         };
         
-        Column<RaceInfoDTO, ImageResource> lastFlagDirectionColumn = new Column<RaceInfoDTO, ImageResource>(new ImageResourceCell()) {
+        Column<RegattaOverviewEntryDTO, ImageResource> lastFlagDirectionColumn = new Column<RegattaOverviewEntryDTO, ImageResource>(new ImageResourceCell()) {
             @Override
-            public ImageResource getValue(RaceInfoDTO object) {
+            public ImageResource getValue(RegattaOverviewEntryDTO entryDTO) {
                 return resources.arrowUp();
             }
         };
 
+        table.addColumn(courseAreaColumn, stringMessages.courseArea());
+        table.addColumn(regattaNameColumn, stringMessages.boatClass()); // For sailors the boat class also contains additional infos such as woman/man, e.g. Laser Radial Woman or Laser Radial Men
         table.addColumn(fleetNameColumn, stringMessages.fleet());
         table.addColumn(raceNameColumn, stringMessages.race());
         table.addColumn(raceStartTimeColumn, stringMessages.startTime());

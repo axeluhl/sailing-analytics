@@ -195,6 +195,7 @@ import com.sap.sailing.gwt.ui.shared.RaceStatusDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.RaceWithCompetitorsDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
+import com.sap.sailing.gwt.ui.shared.RegattaOverviewEntryDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaScoreCorrectionDTO.ScoreCorrectionEntryDTO;
 import com.sap.sailing.gwt.ui.shared.ReplicaDTO;
@@ -2058,8 +2059,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return convertedUuid;
     }
 
-
-
     public StrippedLeaderboardDTO createRegattaLeaderboard(RegattaIdentifier regattaIdentifier, String leaderboardDisplayName, int[] discardThresholds) {
         return createStrippedLeaderboardDTO(getService().apply(new CreateRegattaLeaderboard(regattaIdentifier, leaderboardDisplayName, discardThresholds)), false);
     }
@@ -2192,8 +2191,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return leaderboardDTO;
     }
 
-    private void addRaceInfoToRace(RaceColumn raceColumn, Fleet fleet, final FleetDTO fleetDTO,
-            RaceColumnDTO raceColumnDTO) {
+    private void addRaceInfoToRace(RaceColumn raceColumn, Fleet fleet, final FleetDTO fleetDTO, RaceColumnDTO raceColumnDTO) {
         RaceLog raceLog = raceColumn.getRaceLog(fleet);
         RaceInfoDTO raceInfoDTO = convertToRaceInfoDTO(raceColumnDTO, fleet, raceLog);
         raceColumnDTO.getRaceInfoPerFleet().put(fleetDTO, raceInfoDTO);
@@ -3033,7 +3031,56 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         courseAreaDTO.id = courseArea.getId().toString();
         return courseAreaDTO;
     }
+    
+    private List<StrippedLeaderboardDTO> getLeaderboardsByCourseArea(CourseAreaDTO courseAreaDTO) {
+        List<StrippedLeaderboardDTO> result = new ArrayList<StrippedLeaderboardDTO>();
 
+        for (StrippedLeaderboardDTO leaderboardDTO : getLeaderboards()) {
+            if (leaderboardDTO.courseAreaId != null && leaderboardDTO.courseAreaId.equals(courseAreaDTO.id)) {
+                result.add(leaderboardDTO);
+            }
+        }
+        return result;
+    }
+    
+    @Override
+    public List<RegattaOverviewEntryDTO> getRegattaOverviewEntriesForEvent(String eventIdAsString) {
+        List<RegattaOverviewEntryDTO> result = new ArrayList<RegattaOverviewEntryDTO>();
+        
+        UUID eventUuid = convertIdentifierStringToUuid(eventIdAsString);
+        EventDTO eventDTO = getEventById(eventUuid);
+        
+        if (eventDTO != null) {
+            for (CourseAreaDTO courseAreaDTO : eventDTO.venue.getCourseAreas()) {
+                List<StrippedLeaderboardDTO> leaderboards = getLeaderboardsByCourseArea(courseAreaDTO);
+                for (StrippedLeaderboardDTO leaderboard : leaderboards) {
+                    String regattaName = getRegattaNameFromLeaderboard(leaderboard);
+
+                    for (RaceColumnDTO raceColumnDTO : leaderboard.getRaceList()) {
+                        for (RaceInfoDTO raceInfo : raceColumnDTO.getRaceInfoPerFleet().values()) {
+                            RegattaOverviewEntryDTO entry = new RegattaOverviewEntryDTO();
+                            entry.courseAreaName = courseAreaDTO.name;
+                            entry.regattaName = regattaName;
+                            entry.raceInfo = raceInfo;
+                            result.add(entry);
+                        }
+                    }
+                }
+            }
+        }
+        return result;
+    }
+
+    private String getRegattaNameFromLeaderboard(StrippedLeaderboardDTO leaderboard) {
+        String regattaName;
+        if (leaderboard.isRegattaLeaderboard) {
+            regattaName = leaderboard.regattaName;
+        } else {
+            regattaName = leaderboard.displayName;
+        }
+        return regattaName;
+    }
+    
     @Override
     public void removeRegatta(RegattaIdentifier regattaIdentifier) {
         getService().apply(new RemoveRegatta(regattaIdentifier));

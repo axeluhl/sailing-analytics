@@ -43,6 +43,7 @@ import com.sap.sailing.gwt.ui.shared.RaceDTO;
 import com.sap.sailing.gwt.ui.shared.RaceMapDataDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
+import com.sap.sailing.gwt.ui.shared.RegattaOverviewEntryDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.ReplicationStateDTO;
 import com.sap.sailing.gwt.ui.shared.ScoreCorrectionProviderDTO;
@@ -448,4 +449,7 @@ public interface SailingServiceAsync {
     void getPolarSheetsGenerationResults(String id, AsyncCallback<PolarSheetsData> asyncCallback);
 
     void getPolarSheetData(String polarSheetId, int angle, int windSpeed, AsyncCallback<PolarSheetsHistogramData> wrapperCallback);
+    
+    void getRegattaOverviewEntriesForEvent(String eventIdAsString, AsyncCallback<List<RegattaOverviewEntryDTO>> asyncCallback);
+    
 }
