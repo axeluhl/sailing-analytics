@@ -10,10 +10,14 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.GregorianCalendar;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.NavigableSet;
 
 import org.junit.Before;
@@ -26,6 +30,7 @@ import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.Bearing;
+import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.TimePoint;
@@ -35,6 +40,7 @@ import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFix;
+import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
@@ -47,7 +53,11 @@ import com.sap.sailing.domain.tractracadapter.ReceiverType;
  *
  */
 public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
-
+	/**
+	 * How many milliseconds may the given and computed mark passings drift apart before being counted as a miss.
+	 */
+	private static final int TIMEDELTA_TOLERANCE = 10000000;
+	
 	/**
 	 * Reload the test data from the web?
 	 */
@@ -178,20 +188,101 @@ public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
 
 	@Test
 	public void testMarkPassings() {
-		Map<Competitor, Map<Waypoint, List<List<MarkPassing>>>> markPassings = computeMarkPassings();
+		List<MarkPassing> markPassings = computeAllMarkPassings();
 		// compare computed mark passings to given ones
-		int overallMisses = compareCalculatedAndGivenPassings(markPassings);
+		int overallMisses = compareCalculatedAndGivenPassings(markPassings, true);
 		assertTrue("Calculation returned less mark passings than the test data contains", overallMisses == 0);
 	}
 
 	/**
-	 * This method starts the actual mark passing detection algorithm.
+	 * This method starts the actual mark passing detection algorithm by handing a sequence of {@link GPSFix}es of each {@link Competitor}
+	 * into the {@link AbstractMarkPassingTest#computeMarkPassings(Competitor, GPSFixMoving)} method.
 	 * For every competitor, sequences of mark passings for each waypoint of the course can be calculated.
 	 * One sequence may contain multiple possible mark passings for the same waypoint that may represent the same passing of that specific waypoint.
 	 * The list of sequences returned in the result should contain one sequence for each time the waypoint has to be passed to complete the course.
 	 * @return a {@link Map} from each {@link Competitor} to a {@link Map} from each {@link Waypoint} to a {@link List} of mark passing sequences  
 	 */
-	abstract Map<Competitor, Map<Waypoint, List<List<MarkPassing>>>> computeMarkPassings();
+	protected List<MarkPassing> computeAllMarkPassings() {
+		ArrayList<MarkPassing> markPassings = new ArrayList<MarkPassing>();
+		
+		// To imitate GPSFixes that are received over time, we hand the GPSFixes to the detection algorithm in chronological order
+		HashMap<Competitor, Iterator<GPSFixMoving>> fixesIterators = new HashMap<Competitor, Iterator<GPSFixMoving>>();
+		HashMap<Competitor, GPSFixMoving> nextFixes = new HashMap<Competitor, GPSFixMoving>();
+		
+		// get all the GPSFix iterators
+		for (Competitor competitor : getRace().getCompetitors()) {
+			try {
+				getTrackedRace().getTrack(competitor).lockForRead();
+				// from the start of tracking or "the dawn of time"
+				TimePoint start = getTrackedRace().getStartOfTracking() != null ? getTrackedRace().getStartOfTracking() : new MillisecondsTimePoint(0);
+				fixesIterators.put(competitor, getTrackedRace().getTrack(competitor).getRawFixesIterator(start, true));
+			} finally {
+				getTrackedRace().getTrack(competitor).unlockAfterRead();
+			}
+		}
+		
+		// initially fill the next fix of each competitor to hand into the mark passing algorithm
+		for (Entry<Competitor, Iterator<GPSFixMoving>> entry : fixesIterators.entrySet()) {
+			if (entry.getValue().hasNext())
+				nextFixes.put(entry.getKey(), entry.getValue().next());
+		}
+		
+		while (!nextFixes.isEmpty()) {
+			// Find the chronologically first unhandled fix.
+			Entry<Competitor, GPSFixMoving> firstUnhandledFix = null;
+			for (Entry<Competitor, GPSFixMoving> entry : nextFixes.entrySet()) {
+				if (firstUnhandledFix == null || entry.getValue().getTimePoint().compareTo(firstUnhandledFix.getValue().getTimePoint()) < 0) {
+					firstUnhandledFix = entry;
+				}
+			}
+			if (firstUnhandledFix != null) {
+				// compute a possible mark passing
+				MarkPassing computedPassing = computeMarkPassings(firstUnhandledFix.getKey(), firstUnhandledFix.getValue());
+				// replace the fix we just handled by the next fix of the competitor's track
+				if (fixesIterators.get(firstUnhandledFix.getKey()).hasNext()) {
+					nextFixes.put(firstUnhandledFix.getKey(), fixesIterators.get(firstUnhandledFix.getKey()).next());
+				} else {
+					// If no further fixes can be obtained from the iterator, remove the competitor from the nextFixes map.
+					// This ensures the while loop eventually terminates after all fixes have been analyzed.
+					nextFixes.remove(firstUnhandledFix.getKey());
+				}
+				firstUnhandledFix = null;
+				if (computedPassing != null) {
+					// A new mark passing has been detected.
+					// Find out if it overwrites a previous mark passing or is a new one.
+					MarkPassing latestPassingOfCompetitor = null;
+					int index = -1;
+					for (int i = 0; i < markPassings.size(); i++) {
+						MarkPassing p = markPassings.get(i);
+						if (p.getCompetitor().equals(computedPassing.getCompetitor())) {
+							latestPassingOfCompetitor = p;
+							index = i;
+						}
+					}
+					
+					if (latestPassingOfCompetitor != null && latestPassingOfCompetitor.getWaypoint().equals(computedPassing.getWaypoint())) {
+						// Latest passing of the competitor was at the same waypoint -> replace it with the new one
+						markPassings.set(index, computedPassing);
+					} else {
+						markPassings.add(computedPassing);
+					}
+				}
+			}
+		}
+		
+		return markPassings;
+	}
+
+	/**
+	 * This method starts the actual mark passing detection algorithm.
+	 * It is supposed to analyze if the given {@link Competitor} passed a {@link Mark} at or before the given {@link GPSFixMoving}.
+	 * If a {@link MarkPassing} for a previously passed {@link Waypoint} is detected, it must only return a non-null result,
+	 * if the returned {@link MarkPassing} should overwrite the previously returned one.
+	 * @param competitor - the {@link Competitor} the given {@link GPSFixMoving} belongs to
+	 * @param fix - the {@link GPSFixMoving} representing the latest known position of the given {@link Competitor}
+	 * @return a {@link List} of mark passings  
+	 */
+	abstract MarkPassing computeMarkPassings(Competitor competitor, GPSFixMoving fix);
 
 	/**
 	 * Compares the computed mark passings to the given ones.
@@ -199,67 +290,82 @@ public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
 	 * @param markPassings - a {@link Map} from each {@link Competitor} to a {@link Map} from each {@link Waypoint} to a {@link List} of mark passing sequences
 	 * @return how many mark passings were missed or detected way too early or too late
 	 */
-	private int compareCalculatedAndGivenPassings(Map<Competitor, Map<Waypoint, List<List<MarkPassing>>>> markPassings) {
+	protected int compareCalculatedAndGivenPassings(List<MarkPassing> markPassings, boolean printDebug) {
 		int overallMisses = 0;
 		Iterable<Competitor> competitors = getRace().getCompetitors();
 		for (Competitor c : competitors) {
 			int misses = 0;
-			NavigableSet<MarkPassing> givenPassings = getTrackedRace().getMarkPassings(c);
-			Map<Waypoint, List<List<MarkPassing>>> calculatedPassings = markPassings.get(c);
-			System.out.println("Competitor is " + c.getName());
-			// for all given mark passings, find the corresponding detected passing sequences
-			for (MarkPassing givenPassing : givenPassings) {			
+			NavigableSet<MarkPassing> givenPassingsForCompetitor = getTrackedRace().getMarkPassings(c);
+			List<MarkPassing> calculatedPassingsForCompetitor = new ArrayList<MarkPassing>();
+			for (MarkPassing p : markPassings) {
+				if (p.getCompetitor().equals(c)) {
+					calculatedPassingsForCompetitor.add(p);
+				}
+			}
+			if (printDebug)
+				System.out.println("Competitor is " + c.getName());
+			// Simultaneously iterate over given and computed mark passings and calculate the timedelta
+			ListIterator<MarkPassing> calculatedPassingsIt = calculatedPassingsForCompetitor.listIterator();
+			for (MarkPassing givenPassing : givenPassingsForCompetitor) {	
 				Waypoint passedWaypoint = givenPassing.getWaypoint();
-				if (calculatedPassings.containsKey(passedWaypoint)) {
-					// waypoint passings were detected, find the mark passing with the timePoint closest to the given passing
-					List<List<MarkPassing>> waypointSequences = calculatedPassings.get(passedWaypoint);
-					MarkPassing closestPassing = null;
-					for (List<MarkPassing> sequence : waypointSequences) {
-						for (MarkPassing passing : sequence) {
-							if (	closestPassing == null ||
-									Math.abs(givenPassing.getTimePoint().asMillis() - closestPassing.getTimePoint().asMillis()) >
-									Math.abs(givenPassing.getTimePoint().asMillis() - passing.getTimePoint().asMillis())) {
-								// new closest passing
-								closestPassing = passing;								
-							}
-						}
-					}
-					long timedelta = closestPassing.getTimePoint().asMillis() - givenPassing.getTimePoint().asMillis();
+				MarkPassing calculatedPassing;
+				if (calculatedPassingsIt.hasNext()) {
+					calculatedPassing = calculatedPassingsIt.next();
+				} else {
+					calculatedPassing = null;
+				}
+				
+				if (calculatedPassing != null && calculatedPassing.getWaypoint().equals(passedWaypoint)) {
+					long timedelta = calculatedPassing.getTimePoint().asMillis() - givenPassing.getTimePoint().asMillis();
 					String waypointType = isGate(passedWaypoint) ? "Gate" : "Buoy";
-					if (Math.abs(timedelta) < 10000) {
+					if (Math.abs(timedelta) < TIMEDELTA_TOLERANCE) {
 						// counts as detected
-						System.out.println("\tTimedelta for closest detected passing for Mark " + passedWaypoint.getName() + " (" + waypointType + "): " + timedelta + "ms, " + closestPassing.getTimePoint().asDate() + "(computed) vs. " + givenPassing.getTimePoint().asDate() + "(given)");
+						if (printDebug)
+							System.out.println("\tTimedelta of calculated mark passing for waypoint " + passedWaypoint.getName() + " (" + waypointType + "): " + timedelta + "ms, " + calculatedPassing.getTimePoint().asDate() + "(computed) vs. " + givenPassing.getTimePoint().asDate() + "(given)");
 					} else {
 						// timedelta too huge, counts as missed
 						misses++;
 						overallMisses++;
-						System.out.println("\tPassings of waypoint " + passedWaypoint.getName() + " (" + waypointType + ") are detected way off (" + timedelta + "ms, " + closestPassing.getTimePoint().asDate() + ")");
+						if (printDebug)
+							System.out.println("\tPassings of waypoint " + passedWaypoint.getName() + " (" + waypointType + ") are detected way off (" + timedelta + "ms, " + calculatedPassing.getTimePoint().asDate() + ")");
 					}
 				} else {
-					// no sequences for given waypoint at all
+					// mark passing for given waypoint
 					misses++;
 					overallMisses++;
-					System.out.println("\tNo passings of waypoint " + passedWaypoint.getName());
+					if (printDebug)
+						System.out.println("\tNo passings of waypoint " + passedWaypoint.getName());
+					if (calculatedPassingsIt.hasPrevious()) {
+						// rewind the iterator to the previous entry
+						calculatedPassingsIt.previous();
+					}
 				}
 			}
-			System.out.println("\t" + misses + " waypoints were missed.");
+			if (printDebug)
+				System.out.println("\t" + misses + " waypoints were missed.");
 		}
-		System.out.println("Overall, " + overallMisses + " mark passings were missed.");
+		if (printDebug)
+			System.out.println("Overall, " + overallMisses + " mark passings were missed.");
 		return overallMisses;
 	}
 
 	/**
 	 * Get the previous {@link Waypoint} of a given {@link Waypoint}. 
 	 * @param waypoint - the {@link Waypoint} to obtain the predecessor of
-	 * @return a {@link Waypoint} that has to be passed before the given {@link Waypoint} of the {@link Course}
+	 * @return a {@link Waypoint} that has to be passed before the given {@link Waypoint} of the {@link Course}, or null if none
 	 */
 	protected Waypoint getPreviousWaypoint(Waypoint waypoint) {
 		Course course = getRace().getCourse();
-		int i = course.getIndexOfWaypoint(waypoint);
-		for (Waypoint w : course.getWaypoints()) {
-			if (course.getIndexOfWaypoint(w) == i-1) {
-				return w;
+		try {
+			course.lockForRead();
+			int i = course.getIndexOfWaypoint(waypoint);
+			for (Waypoint w : course.getWaypoints()) {
+				if (course.getIndexOfWaypoint(w) == i-1) {
+					return w;
+				}
 			}
+		} finally {
+			course.unlockAfterRead();
 		}
 		return null;
 	}
@@ -267,15 +373,20 @@ public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
 	/**
 	 * Get the next {@link Waypoint} after the given {@link Waypoint}.
 	 * @param waypoint - the {@link Waypoint} to obtain the successor of
-	 * @return a {@link Waypoint} that has to be passed after the given {@link Waypoint} of the {@link Course}
+	 * @return a {@link Waypoint} that has to be passed after the given {@link Waypoint} of the {@link Course}, or null if none
 	 */
 	protected Waypoint getNextWaypoint(Waypoint waypoint) {
 		Course course = getRace().getCourse();
-		int i = course.getIndexOfWaypoint(waypoint);
-		for (Waypoint w : course.getWaypoints()) {
-			if (course.getIndexOfWaypoint(w) == i+1) {
-				return w;
+		try {
+			course.lockForRead();
+			int i = course.getIndexOfWaypoint(waypoint);
+			for (Waypoint w : course.getWaypoints()) {
+				if (course.getIndexOfWaypoint(w) == i+1) {
+					return w;
+				}
 			}
+		} finally {
+			course.unlockAfterRead();
 		}
 		return null;
 	}
@@ -377,6 +488,196 @@ public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * Calculates the passing {@link Bearing} of the given {@link Mark} which belongs to the given {@link Waypoint}
+	 * at the given {@link TimePoint}.
+	 * @param waypoint - the {@link Waypoint} the given {@link Mark} belongs to
+	 * @param mark - the {@link Mark} to calculate the passing {@link Bearing} for
+	 * @param time - the {@link TimePoint} at which to calculate the passing {@link Bearing}
+	 * @return a {@link Bearing} that represents the line a boat has to pass in order to round the given {@link Mark}
+	 */
+	protected Bearing getPassingBearing(Waypoint waypoint, Mark mark, TimePoint time) {
+		Course course = getRace().getCourse();
+		Bearing passingBearing = null;					
+		
+		Position markPos = null;
+		DynamicGPSFixTrack<Mark, GPSFix> markTrack = getTrackedRace().getOrCreateTrack(mark);
+		try {
+			markTrack.lockForRead();
+			markPos = markTrack.getFirstRawFixAtOrAfter(time).getPosition();
+		} finally {
+			markTrack.unlockAfterRead();
+		}
+
+		if (waypoint.equals(course.getFirstWaypoint()) || waypoint.equals(course.getLastWaypoint())) {
+			// passing a line
+			Mark otherMark = null;
+			for (Mark m : waypoint.getMarks()) {
+				if (!m.equals(mark)) {
+					otherMark = m;
+				}
+			}
+			Position otherMarkPos = null;
+			DynamicGPSFixTrack<Mark, GPSFix> otherMarkTrack = getTrackedRace().getOrCreateTrack(otherMark);
+			try {
+				otherMarkTrack.lockForRead();
+				otherMarkPos = otherMarkTrack.getFirstRawFixAtOrAfter(time).getPosition();
+			} finally {
+				otherMarkTrack.unlockAfterRead();
+			}
+			passingBearing = markPos.getBearingGreatCircle(otherMarkPos);
+		} else {
+			// passing a single buoy
+			
+			Bearing bearingToNextWp = null;
+			Bearing bearingfromPrevWp = null;
+			Bearing bearingDiff = null;
+			
+			// calculate bearings to next and from previous waypoint
+			if (!course.getLastWaypoint().equals(waypoint)) {
+				// not last waypoint of the race
+				Waypoint nextWp = getNextWaypoint(waypoint);
+				Position nextWaypointPos = getTrackedRace().getApproximatePosition(nextWp, time);
+				
+				bearingToNextWp = markPos.getBearingGreatCircle(nextWaypointPos);
+			}
+			if (!course.getFirstWaypoint().equals(waypoint)) {
+				// not first waypoint of the course
+				Waypoint prevWp = getPreviousWaypoint(waypoint);
+				Position prevWaypointPos = getTrackedRace().getApproximatePosition(prevWp, time);
+				
+				bearingfromPrevWp = prevWaypointPos.getBearingGreatCircle(markPos);
+			}
+			
+			// depending on passing side, set the bearing difference
+			NauticalSide passingSide = getPassingSideOfMark(waypoint, mark, time);
+			if (passingSide != null && passingSide.equals(NauticalSide.STARBOARD)) {	
+				bearingDiff = new DegreeBearingImpl(-90);
+			} else {	
+				bearingDiff = new DegreeBearingImpl(90);
+			}
+			
+			// calculate the passing bearing
+			if (course.getFirstWaypoint().equals(waypoint)) {
+				passingBearing = bearingToNextWp.add(bearingDiff);
+			} else if (course.getLastWaypoint().equals(waypoint)) {
+				passingBearing = bearingfromPrevWp.add(bearingDiff);
+			} else {
+				passingBearing = bearingToNextWp.add(bearingDiff).middle(bearingfromPrevWp.add(bearingDiff));
+			}
+		}
+		return passingBearing;
+	}
+
+	/**
+	 * Finds the {@link Entry} with the best {@link MarkPassing} of the key set.
+	 * A {@link MarkPassing} is better than another if:
+	 * <ol>
+	 * <li>it is on the correct side of the mark and the other one is not</li>
+	 * <li>it is closer to the mark than the other one</li>
+	 * <li>its TimePoint is smaller (it happened earlier) than the other one</li>
+	 * </ol>
+	 * @param possiblePassings
+	 * @return
+	 */
+	protected Entry<MarkPassing, Position> findBestMarkPassing(Map<MarkPassing, Position> passings) {
+		if (passings.size() == 1) {
+			return passings.entrySet().iterator().next();
+		} else if (passings.isEmpty()) {
+			return null;
+		}
+		Map<MarkPassing, Position> possibleResults = new HashMap<MarkPassing, Position>();
+		// check if mark was passed on correct side
+		for (Entry<MarkPassing, Position> entry : passings.entrySet()) {
+			// find out on which side of the mark was passed
+			MarkPassing passing = entry.getKey();
+			Position passPos = entry.getValue();
+			Position markPos = null; 
+			DynamicGPSFixTrack<Mark, GPSFix> markTrack = getTrackedRace().getOrCreateTrack(passing.getMark());
+			try {
+				markTrack.lockForRead();
+				markPos = markTrack.getLastFixAtOrBefore(passing.getTimePoint()).getPosition();
+			} finally {
+				markTrack.unlockAfterRead();
+			}
+			Bearing bearingDiff = markPos.getBearingGreatCircle(passPos).getDifferenceTo(getPassingBearing(passing.getWaypoint(), passing.getMark(), passing.getTimePoint()));
+			if (Math.abs(bearingDiff.getDegrees()) < 90) {
+				// passed on correct side of mark
+				possibleResults.put(entry.getKey(), entry.getValue());
+			}
+		}
+		if (possibleResults.size() > 0) {
+			// All possible passings are on correct side, pass them to the distance test.
+			// If all passings were on the wrong side, passings is not overwritten and they are still passed to the distance test.
+			passings.putAll(possibleResults);
+		}
+		possibleResults.clear();
+		
+		// find the mark passing with the smallest distance to the mark
+		for (Entry<MarkPassing, Position> entry : passings.entrySet()) {
+			// find out how far away the mark was passed
+			MarkPassing passing = entry.getKey();
+			Position passPos = entry.getValue();
+			Position markPos = null; 
+			DynamicGPSFixTrack<Mark, GPSFix> markTrack = getTrackedRace().getOrCreateTrack(passing.getMark());
+			try {
+				markTrack.lockForRead();
+				markPos = markTrack.getLastFixAtOrBefore(passing.getTimePoint()).getPosition();
+			} finally {
+				markTrack.unlockAfterRead();
+			}
+			if (possibleResults.isEmpty()) {
+				possibleResults.put(passing, passPos);
+			} else {
+				Distance shortestDistance = markPos.getDistance(possibleResults.entrySet().iterator().next().getValue());
+				Distance newDistance = markPos.getDistance(passPos);
+				if (shortestDistance.compareTo(newDistance) == 0) {
+					// same distance, add to possible results
+					possibleResults.put(passing, passPos);
+				} else if (shortestDistance.compareTo(newDistance) > 0){
+					// shorter distance, remove all other possible results and add this one
+					possibleResults.clear();
+					possibleResults.put(passing, passPos);
+				}
+			}
+		}
+		if (possibleResults.size() == 1) {
+			// only one possible result left, we're done
+			return possibleResults.entrySet().iterator().next();
+		} else if (possibleResults.size() > 1) {
+			// all possible passings have the same distance to the mark, pass them to the timing test
+			passings.putAll(possibleResults);
+		}
+		possibleResults.clear();
+		
+		// find the mark passing with the smallest timestamp
+		for (Entry<MarkPassing, Position> entry : passings.entrySet()) {
+			// find out how far away the mark was passed
+			MarkPassing passing = entry.getKey();
+			Position passPos = entry.getValue();
+			if (possibleResults.isEmpty()) {
+				possibleResults.put(passing, passPos);
+			} else {
+				TimePoint smallestTime = possibleResults.entrySet().iterator().next().getKey().getTimePoint();
+				TimePoint newTime = passing.getTimePoint();
+				if (smallestTime.compareTo(newTime) == 0) {
+					// same timestamp, add to possible results
+					possibleResults.put(passing, passPos);
+				} else if (smallestTime.compareTo(newTime) > 0){
+					// smaller timestamp, remove all other possible results and add this one
+					possibleResults.clear();
+					possibleResults.put(passing, passPos);
+				}
+			}
+		}
+		if (possibleResults.size() > 0) {
+			// all possible passings have the same timestamp, just return the first one
+			return possibleResults.entrySet().iterator().next();
+		}
+		
+		return null;
 	}
 
 }
