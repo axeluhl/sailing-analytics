@@ -73,6 +73,7 @@ public interface DomainFactory extends SharedDomainFactory {
 
     MarkPassing createMarkPassing(TimePoint timePoint, Waypoint waypoint, Competitor competitor);
     
+    MarkPassing createMarkPassing(TimePoint timePoint, Waypoint waypoint, Mark mark, Competitor competitor);
     /**
      * When de-serializing objects of types whose instances that are managed and cached by this domain factory,
      * de-serialized instances need to be replaced by / resolved to the counterparts already known by this factory.
@@ -81,5 +82,6 @@ public interface DomainFactory extends SharedDomainFactory {
     ObjectInputStreamResolvingAgainstDomainFactory createObjectInputStreamResolvingAgainstThisFactory(InputStream inputStream) throws IOException;
     
     ScoringScheme createScoringScheme(ScoringSchemeType scoringSchemeType);
+
 
 }

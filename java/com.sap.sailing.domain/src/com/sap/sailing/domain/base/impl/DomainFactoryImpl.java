@@ -232,6 +232,11 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
+    public MarkPassing createMarkPassing(TimePoint timePoint, Waypoint waypoint, Mark mark, Competitor competitor) {
+    	return new MarkPassingImpl(timePoint, waypoint, mark, competitor);
+    }
+
+    @Override
     public BoatClass getOrCreateBoatClass(String name, boolean typicallyStartsUpwind) {
         synchronized (boatClassCache) {
             BoatClass result = boatClassCache.get(name);
@@ -292,4 +297,5 @@ public class DomainFactoryImpl implements DomainFactory {
             throw new RuntimeException("Unknown scoring scheme type "+scoringSchemeType.name());
         }
     }
+
 }
