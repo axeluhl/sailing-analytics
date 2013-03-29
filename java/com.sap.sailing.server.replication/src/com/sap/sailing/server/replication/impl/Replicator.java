@@ -5,6 +5,7 @@ import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.rabbitmq.client.QueueingConsumer;
@@ -86,7 +87,7 @@ public class Replicator implements Runnable {
                 break;
             } catch (Exception e) {
                 logger.info("Exception while processing replica: "+e.getMessage());
-                logger.throwing(Replicator.class.getName(), "run", e);
+                logger.log(Level.SEVERE, "run", e);
             } finally {
                 Thread.currentThread().setContextClassLoader(oldClassLoader);
             }

@@ -1108,7 +1108,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
                             stopTracking(regatta);
                         }
                     } catch (Exception e) {
-                        logger.throwing(RacingEventServiceImpl.class.getName(), "scheduleAbortTrackerAfterInitialTimeout", e);
+                        logger.log(Level.SEVERE, "scheduleAbortTrackerAfterInitialTimeout", e);
                         e.printStackTrace();
                     }
                 }
@@ -1543,7 +1543,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
             replicate(operation);
             return result;
         } catch (Exception e) {
-            logger.throwing(RacingEventServiceImpl.class.getName(), "apply", e);
+            logger.log(Level.SEVERE, "apply", e);
             throw new RuntimeException(e);
         }
     }
@@ -1556,7 +1556,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
             } catch (Exception e) {
                 // don't risk the master's operation only because replication to a listener/replica doesn't work
                 logger.severe("Error replicating operation "+operation+" to replication listener "+listener);
-                logger.throwing(RacingEventServiceImpl.class.getName(), "replicate", e);
+                logger.log(Level.SEVERE, "replicate", e);
             }
         }
     }
