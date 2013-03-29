@@ -26,7 +26,7 @@ public class WindPatternDisplayManagerImpl implements WindPatternDisplayManager 
     @Override
     public WindPatternDisplay getDisplay(WindPattern windPattern) {
         WindPatternDisplay display = new WindPatternDisplayImpl(windPattern);
-      
+
         switch (windPattern) {
         case BLASTS:
             addBlastParameters(display);
@@ -36,6 +36,12 @@ public class WindPatternDisplayManagerImpl implements WindPatternDisplayManager 
             break;
         case OSCILLATION_WITH_BLASTS:
             addOscillationParameters(display);
+            break;
+        case MEASURED:
+            break;
+        case NONE:
+            break;
+        default:
             break;
         }
         return display;
@@ -84,10 +90,10 @@ public class WindPatternDisplayManagerImpl implements WindPatternDisplayManager 
         display.addSetting(amplitude);
         WindPatternSetting<Double> curSpeed = new WindPatternSettingSliderBar("curSpeed",
                 "Current Speed (kn)", 0, 2, 0, 10);
-        display.addSetting(curSpeed);      
+        display.addSetting(curSpeed);
         WindPatternSetting<Double> curBearing = new WindPatternSettingSliderBar("curBearing",
                 "Current Bearing (Degrees)", 0, 360, 180, 36);
-        display.addSetting(curBearing);      
+        display.addSetting(curBearing);
     }
 
 }
