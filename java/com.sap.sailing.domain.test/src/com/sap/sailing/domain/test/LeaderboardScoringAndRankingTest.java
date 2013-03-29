@@ -216,10 +216,13 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
     }
 
     /**
-     * Regarding bug 961, test scoring in a leaderboard that has a qualification series with two unordered groups where for one
-     * column only one group has raced (expressed by a mocked TrackedRace attached to the column). Then add the second tracked
-     * race for the second column but such that it hasn't started yet at the time point of the query. Then add a score correction,
-     * simulating the use of a proxy race (that doesn't ever start) and a manual score entry.
+     * Regarding bug 961 and 1023, test scoring in a leaderboard that has a qualification series with two unordered
+     * groups where for one column only one group has raced (expressed by a mocked TrackedRace attached to the column).
+     * Those competitors are expected to rank better than those who haven't raced because they have a greater number of
+     * races. Then add the second tracked race for the second column but such that it hasn't started yet at the time
+     * point of the query. Still, the competitors of the fleet that did race already shall be scored better. Then add a
+     * score correction, simulating the use of a proxy race (that doesn't ever start) and a manual score entry. Now, the
+     * second fleet shall be ranked according to the score comparison with the competitors from the first fleet.
      */
     @Test
     public void testUnorderedGroupsWithOneGroupNotHavingStartedRacedInAcolumnAndThenCorrectingScore() throws NoWindException {
@@ -251,15 +254,19 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
                         competitors.get(8), competitors.get(9) }));
         q2Column.setTrackedRace(q2Column.getFleetByName("Blue"), q2Blue);
         List<Competitor> rankedCompetitorsWithOneRaceMissingInQ2 = leaderboard.getCompetitorsFromBestToWorst(later);
-        for (int i=0; i<5; i++) {
-            assertTrue(competitors.get(i) == rankedCompetitorsWithOneRaceMissingInQ2.get(2*i) ||
-                    competitors.get(i) == rankedCompetitorsWithOneRaceMissingInQ2.get(2*i+1));
-            assertTrue(competitors.get(i+5) == rankedCompetitorsWithOneRaceMissingInQ2.get(2*i) ||
-                    competitors.get(i+5) == rankedCompetitorsWithOneRaceMissingInQ2.get(2*i+1));
-            assertEquals((double) (i+1), leaderboard.getTotalPoints(competitors.get(i), later), 0.000000001);
-            assertEquals((double) (i+1), leaderboard.getTotalPoints(competitors.get(i+5), later), 0.0000000001);
+        // scores: C1=1, C2=2, C3=3, C4=5, C5=7, C6=4, C7=6, C8=8, C9=4, C10=5
+        // ordered by scores: C1, C2, C3, C6/C9, C4/C10, C7, C5, C8
+        // ordered primarily by number of races: C6, C4, C7, C5, C8, C1, C2, C3, C9, C10
+        assertEquals(Arrays.asList(new Competitor[] { competitors.get(5), competitors.get(3), competitors.get(6),
+                competitors.get(4), competitors.get(7), competitors.get(0), competitors.get(1), competitors.get(2),
+                competitors.get(8), competitors.get(9) }), rankedCompetitorsWithOneRaceMissingInQ2);
+        double[] points = new double[] { 1, 2, 3, 5, 7, 4, 6, 8, 4, 5 };
+        for (int i=0; i<9; i++) {
+            assertEquals(points[i], leaderboard.getTotalPoints(competitors.get(i), later), 0.000000001);
         }
-        assertFalse(leaderboard.getScoringScheme().isValidInTotalScore(leaderboard, q2Column, later));
+        // expect all results to be valid because a fleet will have its score counted even if not all fleets have raced;
+        // see discussion for bug 961, but more importantly later on bug 1023.
+        assertTrue(leaderboard.getScoringScheme().isValidInTotalScore(leaderboard, q2Column, later));
         // now add a score correction for Q2/Blue to make it count:
         leaderboard.getScoreCorrection().correctScore(competitors.get(9), q2Column, 42.);
         assertTrue(leaderboard.getScoringScheme().isValidInTotalScore(leaderboard, q2Column, later));
