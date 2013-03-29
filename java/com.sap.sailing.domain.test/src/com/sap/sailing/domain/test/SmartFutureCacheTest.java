@@ -35,11 +35,21 @@ public class SmartFutureCacheTest {
     public void testUnsuspended() throws InterruptedException {
         final boolean[] updateWasCalled = new boolean[1];
         final boolean[] cacheWasCalled = new boolean[1];
+        final boolean[] mayProceed = new boolean[1];
         
         SmartFutureCache<String, String, SmartFutureCache.EmptyUpdateInterval> sfc = new SmartFutureCache<String, String, SmartFutureCache.EmptyUpdateInterval>(
                 new SmartFutureCache.AbstractCacheUpdater<String, String, SmartFutureCache.EmptyUpdateInterval>() {
                     @Override
                     public String computeCacheUpdate(String key, EmptyUpdateInterval updateInterval) throws Exception {
+                        synchronized (mayProceed) {
+                            while (!mayProceed[0]) {
+                                try {
+                                    mayProceed.wait();
+                                } catch (InterruptedException e) {
+                                    e.printStackTrace();
+                                } // wait until test driver has checked the un-updated cache
+                            }
+                        }
                         updateWasCalled[0] = true;
                         return "Humba";
                     }
@@ -53,8 +63,12 @@ public class SmartFutureCacheTest {
                         }
                     }
         };
+        sfc.triggerUpdate("Trala", /* updateInterval */ null); // will be held up in computeCacheUpdate
         assertNull(sfc.get("Trala", /* waitForLatest */ false));
-        sfc.triggerUpdate("Trala", /* updateInterval */ null);
+        synchronized (mayProceed) {
+            mayProceed[0] = true;
+            mayProceed.notifyAll(); // let cache update proceed
+        }
         synchronized (cacheWasCalled) {
             while (!cacheWasCalled[0]) {
                 cacheWasCalled.wait(); // and wait for update to have updated the cache
