@@ -15,6 +15,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.sap.sailing.util.impl.SmartFutureCache.UpdateInterval;
@@ -333,7 +334,7 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
                         }
                     } catch (Exception e) {
                         // cache won't be updated
-                        logger.throwing(SmartFutureCache.class.getName(), "triggerUpdate", e);
+                        logger.log(Level.SEVERE, "triggerUpdate", e);
                         throw new RuntimeException(e);
                     }
                 }
@@ -382,7 +383,7 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
                 try {
                     value = future.get();
                 } catch (InterruptedException | ExecutionException e) {
-                    logger.throwing(SmartFutureCache.class.getName(), "get", e);
+                    logger.log(Level.SEVERE, "get", e);
                     throw new RuntimeException(e);
                 }
             } // else no calculation currently going on; value has been fetched from latest cache entry

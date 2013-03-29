@@ -1,6 +1,7 @@
 package com.sap.sailing.monitoring;
 
 import java.util.Properties;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.mail.Message.RecipientType;
@@ -61,7 +62,7 @@ public class OSGiRestartingPortMonitor extends AbstractPortMonitor {
                         "Couldn't find bundle "+endpoint.getBundleName()+". Cannot restart. Please check monitoring.properties file");
             } catch (Exception e) {
                 e.printStackTrace();
-                log.throwing(getClass().getName(), "handleFailure", e);
+                log.log(Level.SEVERE, "handleFailure", e);
             }
         } else {
             String info_before_restart = "";

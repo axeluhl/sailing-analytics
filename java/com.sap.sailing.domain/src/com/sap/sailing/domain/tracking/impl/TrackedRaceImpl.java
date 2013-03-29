@@ -1609,7 +1609,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                     leg = getTrackedLeg(competitor, timePoint);
                 } catch (IllegalArgumentException iae) {
                     logger.warning("Caught "+iae+" during wind estimation; ignoring seemingly broken leg");
-                    logger.throwing(TrackedRaceImpl.class.getName(), "clusterBearingsByLegType", iae);
+                    logger.log(Level.SEVERE, "clusterBearingsByLegType", iae);
                     // supposedly, we got a "Waypoint X isn't start of any leg in Y" exception; leg not found
                     leg = null;
                 }
