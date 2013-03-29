@@ -7,23 +7,22 @@ import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.simulator.windfield.WindFieldGenerator;
 
 public interface SimulationParameters {
-	
-        char getMode();
-    
-        public void setCourse(List<Position> course);
 
-	List<Position> getCourse();
-	
-	PolarDiagram getBoatPolarDiagram();
-	
-	WindFieldGenerator getWindField();
-	
-	Boundary getBoundaries();
-	
-	Map<String,Double> getSettings();
-	
-	void setProperty(String name, Double value);
-	
-	Double getProperty(String name);
+    char getMode();
 
+    void setCourse(List<Position> course);
+
+    List<Position> getCourse();
+
+    PolarDiagram getBoatPolarDiagram();
+
+    WindFieldGenerator getWindField();
+
+    Boundary getBoundaries();
+
+    Map<String,Double> getSettings();
+
+    void setProperty(String name, Double value);
+
+    Double getProperty(String name);
 }

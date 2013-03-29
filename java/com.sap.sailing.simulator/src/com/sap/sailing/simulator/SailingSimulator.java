@@ -3,23 +3,20 @@ package com.sap.sailing.simulator;
 import java.util.List;
 import java.util.Map;
 
+
 public interface SailingSimulator {
 
-    void setSimulationParameters(SimulationParameters params, int selectedRaceIndex);
+    void setSimulationParameters(SimulationParameters params, SimulatorUISelection selection);
 
     SimulationParameters getSimulationParameters();
 
-    // Path getGPSTrack();
-
-    Path getLegGPSTrack(int selectedRaceIndex, int selectedCompetitorIndex, int selectedLegIndex);
+    Path getLegGPSTrack(SimulatorUISelection selection);
 
     Map<String, Path> getAllPaths();
 
-    Map<String, Path> getAllPathsForLeg(int selectedRaceIndex, int selectedCompetitorIndex, int selectedLegIndex);
+    Map<String, Path> getAllPathsForLeg(SimulatorUISelection selection);
 
-    Map<String, Path> getAllPathsEvenTimed(long millisecondsStep);
-
-    Map<String, Path> getAllLegPathsEvenTimed(long millisecondsStep, int selectedRaceIndex, int selectedCompetitorIndex, int selectedLegIndex);
+    Map<String, Path> getAllPathsEvenTimed(long millisecondsStep, SimulatorUISelection selection);
 
     Path getRaceCourse();
 
@@ -27,7 +24,7 @@ public interface SailingSimulator {
 
     List<String> getRacesNames();
 
-    Path getLeg(int selectedRaceIndex, int selectedCompetitorIndex, int selectedLegIndex);
+    Path getLeg(int selectedCompetitorIndex, int selectedLegIndex);
 
     List<String> getComeptitorsNames(int selectedRaceIndex);
 }

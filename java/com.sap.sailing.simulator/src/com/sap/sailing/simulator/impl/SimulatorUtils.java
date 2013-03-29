@@ -26,6 +26,8 @@ import com.sap.sailing.domain.tracking.RacesHandle;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
 import com.sap.sailing.simulator.Path;
+import com.sap.sailing.simulator.SimulationParameters;
+import com.sap.sailing.simulator.TimedPositionWithSpeed;
 
 @SuppressWarnings("restriction")
 public class SimulatorUtils {
@@ -37,14 +39,14 @@ public class SimulatorUtils {
     public static final String COMPETITORSNAMES_DAT = "competitorsNames.dat";
 
     public static final String[] PATH_NAMES = new String[] { "1#Omniscient", "2#Opportunistic", "3#1-Turner Left",
-            "4#1-Turner Right", "6#GPS Poly", "7#GPS Track" };
+        "4#1-Turner Right", "6#GPS Poly", "7#GPS Track" };
 
     public static String pathPrefix = null;
 
     public static String getPathPrefix() {
         String bundleName = null;
         try {
-            bundleName = FrameworkUtil.getBundle(Class.forName("com.sap.sailing.simulator.impl.SailingSimulatorImpl"))
+            bundleName = FrameworkUtil.getBundle(Class.forName("com.sap.sailing.simulator.impl.SimulatorUtils"))
                     .getSymbolicName();
         } catch (ClassNotFoundException e) {
             System.err.println("[ERROR][SerializationUtils][getPathPrefix][ClassNotFoundException]  " + e.getMessage());
@@ -245,8 +247,7 @@ public class SimulatorUtils {
         Object result = null;
 
         try {
-            ClassLoader classLoader = Class.forName("com.sap.sailing.simulator.impl.SailingSimulatorImpl")
-                    .getClassLoader();
+            ClassLoader classLoader = Class.forName("com.sap.sailing.simulator.impl.SimulatorUtils").getClassLoader();
             InputStream file = classLoader.getResourceAsStream(fileName);
             InputStream buffer = new BufferedInputStream(file);
             ObjectInput input = new ObjectInputStream(buffer);
@@ -338,5 +339,73 @@ public class SimulatorUtils {
             String pathName) {
         return SimulatorUtils.getRaceID(ConfigurationManager.INSTANCE.getRaceURL(selectedRaceIndex)) + "_"
                 + selectedCompetitorIndex + "_" + selectedLegIndex + "_" + pathName + ".dat";
+    }
+
+    public static Map<String, Path> getSimulationPaths(SimulationParameters parameters) {
+
+        Map<String, Path> paths = new HashMap<String, Path>();
+
+        // get instance of heuristic searcher
+        PathGeneratorTreeGrowWind3 genTreeGrow = new PathGeneratorTreeGrowWind3(parameters);
+
+        // search best left-starting 1-turner
+        genTreeGrow.setEvaluationParameters("L", 1, null);
+
+        Path leftPath = genTreeGrow.getPath();
+        PathCandidate leftBestCand = genTreeGrow.getBestCand();
+        int left1TurnMiddle = 1000;
+        if (leftBestCand != null) {
+            left1TurnMiddle = leftBestCand.path.indexOf("LR");
+        }
+
+        // search best right-starting 1-turner
+        genTreeGrow.setEvaluationParameters("R", 1, null);
+
+        Path rightPath = genTreeGrow.getPath();
+        PathCandidate rightBestCand = genTreeGrow.getBestCand();
+        int right1TurnMiddle = 1000;
+        if (rightBestCand != null) {
+            right1TurnMiddle = rightBestCand.path.indexOf("RL");
+        }
+
+        // search best multi-turn course
+        genTreeGrow.setEvaluationParameters(null, 0, null);
+
+        Path optPath = genTreeGrow.getPath();
+
+        // evaluate opportunistic heuristic
+        PathGeneratorOpportunistEuclidian genOpportunistic = new PathGeneratorOpportunistEuclidian(parameters);
+
+        // left-starting opportunist
+        genOpportunistic.setEvaluationParameters(left1TurnMiddle, right1TurnMiddle, true);
+        Path oppPathL = genOpportunistic.getPath();
+
+        // right-starting opportunist
+        genOpportunistic.setEvaluationParameters(left1TurnMiddle, right1TurnMiddle, false);
+        Path oppPathR = genOpportunistic.getPath();
+
+        // compare left- & right-starting opportunists
+        Path oppPath = null;
+
+        TimedPositionWithSpeed lastPathLPoint = oppPathL.getPathPoints().get(oppPathL.getPathPoints().size() - 1);
+        TimedPositionWithSpeed lastPathRPoint = oppPathR.getPathPoints().get(oppPathR.getPathPoints().size() - 1);
+
+        if (lastPathLPoint.getTimePoint().asMillis() <= lastPathRPoint.getTimePoint().asMillis()) {
+            oppPath = oppPathL;
+        } else {
+            oppPath = oppPathR;
+        }
+
+        //
+        // NOTE: pathName convention is: sort-digit + "#" + path-name
+        // The sort-digit defines the sorting of paths in webbrowser
+        //
+
+        paths.put("4#1-Turner Right", rightPath);
+        paths.put("3#1-Turner Left", leftPath);
+        paths.put("2#Opportunistic", oppPath);
+        paths.put("1#Omniscient", optPath);
+
+        return paths;
     }
 }

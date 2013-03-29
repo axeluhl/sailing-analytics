@@ -25,9 +25,10 @@ import com.sap.sailing.simulator.windfield.WindField;
 public class PathImpl implements Path, Serializable {
 
     private static final long serialVersionUID = -6354445155884413937L;
-    List<TimedPositionWithSpeed> pathPoints;
-    WindField windField;
+    private List<TimedPositionWithSpeed> pathPoints;
+    private WindField windField;
 
+    private static final double TRESHOLD_DEGREES = 25.0;
     private static final double THRESHOLD_DISTANCE_METERS = 15.0;
 
     public PathImpl(List<TimedPositionWithSpeed> pointsList, WindField wf) {
@@ -266,10 +267,9 @@ public class PathImpl implements Path, Serializable {
                 previousPoint = this.pathPoints.get(index - 1);
                 nextPoint = this.pathPoints.get(index + 1);
 
-                //TODO: Fix isTurn
-                /*if (currentPoint.getPosition().isTurn(previousPoint.getPosition(), nextPoint.getPosition())) {
+                if (isTurn(currentPoint.getPosition(), previousPoint.getPosition(), nextPoint.getPosition())) {
                     list.add(currentPoint);
-                }*/
+                }
             }
         }
 
@@ -356,5 +356,17 @@ public class PathImpl implements Path, Serializable {
         }
 
         return true;
+    }
+
+    private static boolean isTurn(Position currentPosition, Position previousPoint, Position nextPoint) {
+        final Bearing b1 = previousPoint.getBearingGreatCircle(currentPosition);
+        final Bearing b2 = currentPosition.getBearingGreatCircle(nextPoint);
+        double diff = b1.getDifferenceTo(b2).getDegrees();
+
+        if (diff < 0) {
+            diff = 360 + diff;
+        }
+
+        return !((diff >= 0 && diff <= TRESHOLD_DEGREES) || (diff >= (180 - TRESHOLD_DEGREES) && diff <= (180 + TRESHOLD_DEGREES)) || (diff >= (360 - TRESHOLD_DEGREES) && diff <= 360));
     }
 }
