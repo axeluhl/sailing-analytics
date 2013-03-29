@@ -16,19 +16,21 @@ import com.sap.sailing.domain.tracking.Wind;
  * 
  */
 public class ScalableWind implements ScalableValue<ScalableWind, Wind> {
+
+    private static final long serialVersionUID = -7073721444133660385L;
     private final ScalablePosition scalablePosition;
     private final double scaledTimePointSumInMilliseconds;
     private final ScalableSpeedWithBearing scalableSpeedWithBearing;
-    
+
     private final boolean useSpeed;
-    
+
     public ScalableWind(Wind wind, boolean useSpeed) {
         this.scalablePosition = wind.getPosition() == null ? null : new ScalablePosition(wind.getPosition());
         this.scaledTimePointSumInMilliseconds = wind.getTimePoint().asMillis();
         this.scalableSpeedWithBearing = new ScalableSpeedWithBearing(wind);
         this.useSpeed = useSpeed;
     }
-    
+
     private ScalableWind(ScalablePosition scalablePosition, double scaledTimePointSumInMilliseconds,
             ScalableSpeedWithBearing scalableSpeedWithBearing, boolean useSpeed) {
         super();
@@ -37,7 +39,7 @@ public class ScalableWind implements ScalableValue<ScalableWind, Wind> {
         this.scalableSpeedWithBearing = scalableSpeedWithBearing;
         this.useSpeed = useSpeed;
     }
-    
+
     public boolean useSpeed() {
         return useSpeed;
     }
@@ -87,7 +89,7 @@ public class ScalableWind implements ScalableValue<ScalableWind, Wind> {
         private final ScalablePosition scalablePosition;
         private final double divisor;
         private Position position;
-        
+
         public LazyDividedScaledPosition(ScalablePosition scalablePosition, double divisor) {
             super();
             this.scalablePosition = scalablePosition;
@@ -110,7 +112,7 @@ public class ScalableWind implements ScalableValue<ScalableWind, Wind> {
             }
             return position.getLngRad();
         }
-        
+
         private synchronized void resolve() {
             position = scalablePosition.divide(divisor);
         }

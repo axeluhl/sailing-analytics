@@ -1,24 +1,28 @@
 package com.sap.sailing.domain.base.impl;
 
+import java.io.Serializable;
+
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.RadianPosition;
 import com.sap.sailing.domain.confidence.ScalableValue;
 
-public class ScalablePosition implements ScalableValue<ScalablePosition, Position> {
+public class ScalablePosition implements ScalableValue<ScalablePosition, Position>, Serializable {
+
+    private static final long serialVersionUID = 6370698840038989405L;
     private final double x, y, z;
-    
+
     public ScalablePosition(Position position) {
         this(Math.cos(position.getLatRad()) * Math.cos(position.getLngRad()),
                 Math.cos(position.getLatRad()) * Math.sin(position.getLngRad()),
                 Math.sin(position.getLatRad()));
     }
-    
+
     public ScalablePosition(double x, double y, double z) {
         this.x = x;
         this.y = y;
         this.z = z;
     }
-    
+
     @Override
     public ScalablePosition multiply(double factor) {
         return new ScalablePosition(factor*x, factor*y, factor*z);
@@ -58,5 +62,5 @@ public class ScalablePosition implements ScalableValue<ScalablePosition, Positio
     public ScalablePosition getValue() {
         return this;
     }
-    
+
 }

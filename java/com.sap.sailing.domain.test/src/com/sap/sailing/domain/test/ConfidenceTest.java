@@ -41,19 +41,21 @@ import com.sap.sailing.domain.tracking.impl.WindWithConfidenceImpl;
 
 public class ConfidenceTest {
     private static class ScalableBearing implements ScalableValue<ScalableBearing, Bearing> {
+
+        private static final long serialVersionUID = -7751631528646051331L;
         private final double sin;
         private final double cos;
-        
+
         public ScalableBearing(Bearing bearing) {
             this.sin = Math.sin(bearing.getRadians());
             this.cos = Math.cos(bearing.getRadians());
         }
-        
+
         private ScalableBearing(double sin, double cos) {
             this.sin = sin;
             this.cos = cos;
         }
-        
+
         @Override
         public ScalableValue<ScalableBearing, Bearing> multiply(double factor) {
             return new ScalableBearing(factor*getValue().sin, factor*getValue().cos);
@@ -83,14 +85,14 @@ public class ConfidenceTest {
             return this;
         }
     }
-    
+
     private static class ScalableBearingWithConfidence<RelativeTo> extends ScalableBearing
     implements HasConfidenceAndIsScalable<ScalableBearing, Bearing, RelativeTo> {
         private static final long serialVersionUID = 6609861367777720855L;
         private final double confidence;
         private final RelativeTo relativeTo;
         private final Bearing bearing;
-        
+
         public ScalableBearingWithConfidence(Bearing bearing, double confidence, RelativeTo relativeTo) {
             super(bearing);
             this.confidence = confidence;
@@ -112,18 +114,18 @@ public class ConfidenceTest {
         public ScalableBearingWithConfidence<RelativeTo> getScalableValue() {
             return this;
         }
-        
+
         @Override
         public RelativeTo getRelativeTo() {
             return relativeTo;
         }
     }
-    
+
     @Test
     public void testBearingClusterSplittingWithDifferentBearingsOrdering() {
         TimePoint timePoint = new MillisecondsTimePoint(1308839544250l);
         BearingWithConfidenceCluster<TimePoint> clusterA = new BearingWithConfidenceCluster<TimePoint>(ConfidenceFactory.INSTANCE.createExponentialTimeDifferenceWeigher(
-        // use a minimum confidence to avoid the bearing to flip to 270deg in case all is zero
+                // use a minimum confidence to avoid the bearing to flip to 270deg in case all is zero
                 /* milliseconds over which to average */ 30000l, /* minimum confidence */ 0.0000000001));
         for (String a : new String[] {
                 "87.0@0.3561978879735175",
@@ -144,7 +146,7 @@ public class ConfidenceTest {
         }
         BearingWithConfidenceCluster<TimePoint>[] splitResultA = clusterA.splitInTwo(45.0, timePoint);
         BearingWithConfidenceCluster<TimePoint> clusterB = new BearingWithConfidenceCluster<TimePoint>(ConfidenceFactory.INSTANCE.createExponentialTimeDifferenceWeigher(
-        // use a minimum confidence to avoid the bearing to flip to 270deg in case all is zero
+                // use a minimum confidence to avoid the bearing to flip to 270deg in case all is zero
                 /* milliseconds over which to average */ 30000l, /* minimum confidence */ 0.0000000001));
         for (String b : new String[] {
                 "282.55627120464703@0.7643492902545556",
@@ -171,7 +173,7 @@ public class ConfidenceTest {
         assertEquals((splitResultA[0].size()<splitResultA[1].size()?splitResultA[0]:splitResultA[1]).getAverage(timePoint).getObject().getDegrees(),
                 (splitResultB[0].size()<splitResultB[1].size()?splitResultB[0]:splitResultB[1]).getAverage(timePoint).getObject().getDegrees(), 0.0000001);
     }
-    
+
     private BearingWithConfidence<TimePoint> parseBearingWithConfidence(String a) {
         String[] bearingAndConfidence = a.split("@");
         double degBearing = Double.valueOf(bearingAndConfidence[0]);
@@ -185,14 +187,14 @@ public class ConfidenceTest {
         double confidence = w.getConfidence(new MillisecondsTimePoint(1000), new MillisecondsTimePoint(0));
         assertEquals(0.5, confidence, 0.00000001);
     }
-    
+
     @Test
     public void testLinearWeigherZeroTimeDifference() {
         Weigher<TimePoint> w = ConfidenceFactory.INSTANCE.createHyperbolicTimeDifferenceWeigher(1000);
         double confidence = w.getConfidence(new MillisecondsTimePoint(1000), new MillisecondsTimePoint(1000));
         assertEquals(1.0, confidence, 0.00000001);
     }
-    
+
     @Test
     public void testAveragingWithEmptyListYieldsNull() {
         ConfidenceBasedAverager<Double, Double, TimePoint> averager = ConfidenceFactory.INSTANCE.createAverager(null);
@@ -307,7 +309,7 @@ public class ConfidenceTest {
         HasConfidence<Double, Double, TimePoint> average = averager.getAverage(list, null);
         assertEquals(2.25, average.getObject(), 0.00000001);
     }
-    
+
     @Test
     public void testAveragingWithTwoBearings() {
         ScalableBearingWithConfidence<TimePoint> d1 = new ScalableBearingWithConfidence<TimePoint>(new DegreeBearingImpl(350.), 1., null);
@@ -317,7 +319,7 @@ public class ConfidenceTest {
         HasConfidence<ScalableBearing, Bearing, TimePoint> average = averager.getAverage(list, null);
         assertEquals(0, average.getObject().getDegrees(), 0.00000001);
     }
-    
+
     @Test
     public void testAveragingWithThreeBearings() {
         ScalableBearingWithConfidence<TimePoint> d1 = new ScalableBearingWithConfidence<TimePoint>(new DegreeBearingImpl(350.), 1., null);
@@ -339,7 +341,7 @@ public class ConfidenceTest {
         assertEquals(0, average.getObject().getLatDeg(), 0.1);
         assertEquals(0, average.getObject().getLngDeg(), 0.1);
     }
-    
+
     @Test
     public void testPositionWithConfidenceScalingByOne() {
         assertScaleAndDownscalePosition(new DegreePosition(0, 45), 1.);

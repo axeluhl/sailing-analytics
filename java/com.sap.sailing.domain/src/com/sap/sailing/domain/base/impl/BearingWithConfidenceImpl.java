@@ -14,26 +14,28 @@ implements BearingWithConfidence<RelativeTo>, IsScalable<DoublePair, Bearing> {
     public BearingWithConfidenceImpl(Bearing bearing, double confidence, RelativeTo relativeTo) {
         super(bearing, confidence, relativeTo);
     }
-    
+
     @Override
     public ScalableValue<DoublePair, Bearing> getScalableValue() {
         return new ScalableBearing(getObject());
     }
 
     private static class ScalableBearing implements ScalableValue<DoublePair, Bearing> {
+
+        private static final long serialVersionUID = -3737187345268157096L;
         private final double sin;
         private final double cos;
-        
+
         public ScalableBearing(Bearing bearing) {
             this.sin = Math.sin(bearing.getRadians());
             this.cos = Math.cos(bearing.getRadians());
         }
-        
+
         private ScalableBearing(double sin, double cos) {
             this.sin = sin;
             this.cos = cos;
         }
-        
+
         @Override
         public ScalableValue<DoublePair, Bearing> multiply(double factor) {
             DoublePair pair = getValue();
