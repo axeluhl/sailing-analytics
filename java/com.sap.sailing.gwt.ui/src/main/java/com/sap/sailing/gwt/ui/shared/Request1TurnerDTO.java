@@ -4,11 +4,7 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 
 public class Request1TurnerDTO implements IsSerializable {
 
-    public Integer selectedBoatClassIndex = 0;
-    public Integer selectedRaceIndex = 0;
-    public Integer selectedCompetitorIndex = 0;
-    public Integer selectedLegIndex = 0;
-
+    public SimulatorUISelectionDTO selection = null;
     public PositionDTO oldMovedPoint = null;
     public PositionDTO newMovedPoint = null;
     public PositionDTO beforeMovedPoint = null;
@@ -19,10 +15,7 @@ public class Request1TurnerDTO implements IsSerializable {
     public Double startToEndBearingDegrees = 0.0;
 
     public Request1TurnerDTO() {
-        this.selectedBoatClassIndex = 0;
-        this.selectedRaceIndex = 0;
-        this.selectedCompetitorIndex = 0;
-        this.selectedLegIndex = 0;
+        this.selection = null;
 
         this.oldMovedPoint = null;
         this.newMovedPoint = null;
@@ -35,14 +28,11 @@ public class Request1TurnerDTO implements IsSerializable {
 
     }
 
-    public Request1TurnerDTO(Integer selectedBoatClassIndex, Integer selectedRaceIndex, Integer selectedCompetitorIndex, Integer selectedLegIndex,
-            PositionDTO oldMovedPoint, PositionDTO newMovedPoint, PositionDTO beforeMovedPoint, PositionDTO edgeStart, PositionDTO edgeEnd,
+    public Request1TurnerDTO(SimulatorUISelectionDTO selection, PositionDTO oldMovedPoint, PositionDTO newMovedPoint, PositionDTO beforeMovedPoint,
+            PositionDTO edgeStart, PositionDTO edgeEnd,
             Long oldMovedPointTimePoint, Double startToEndBearingDegrees) {
 
-        this.selectedBoatClassIndex = selectedBoatClassIndex;
-        this.selectedRaceIndex = selectedRaceIndex;
-        this.selectedCompetitorIndex = selectedCompetitorIndex;
-        this.selectedLegIndex = selectedLegIndex;
+        this.selection = selection;
 
         this.oldMovedPoint = oldMovedPoint;
         this.newMovedPoint = newMovedPoint;
