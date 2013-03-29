@@ -9,40 +9,40 @@ package com.sap.sailing.gwt.ui.simulator.util;
 public class LineSegment {
 
     enum IntersectionType {
-       DONT_INTERSECT,
-       PARALLEL_DONT_INTERSECT,
-       COLINEAR_DONT_INTERSECT,
-       INTERSECT,
-       COLINEAR_INTERSECT 
+        DONT_INTERSECT,
+        PARALLEL_DONT_INTERSECT,
+        COLINEAR_DONT_INTERSECT,
+        INTERSECT,
+        COLINEAR_INTERSECT
     };
-    
+
     private final static double EPSILON = 10e-6;
-    
+
     public class Point {
         private double x;
         private double y;
-       
+
         public Point(double x, double y) {
             this.x = x;
             this.y = y;
         }
-        
+
         public Point add(Point p) {
             return new Point(this.x+p.x, this.y+p.y);
         }
-        
+
         public Point subtract(Point p) {
             return new Point(this.x-p.x, this.y-p.y);
         }
-        
+
         public Point scalarMult(double s) {
             return new Point(s*this.x, s*this.y);
         }
-        
+
         public double cross(Point p) {
             return this.x * p.y - p.x * this.y;
         }
-        
+
         @Override
         public String toString() {
             return "(" + x + "," + y + ")";
@@ -51,15 +51,15 @@ public class LineSegment {
         public double getX() {
             return x;
         }
-        
+
         public double getY() {
             return y;
         }
     }
-   
+
     private Point p1;
     private Point p2;
- 
+
     /**
      * Create a line segment between point p1 and p2
      * @param p1
@@ -69,7 +69,7 @@ public class LineSegment {
         this.setP1(p1);
         this.setP2(p2);
     }
-    
+
     /**
      * Create a line segment between points (x1,y1) and (x2,y2)
      * @param x1
@@ -83,7 +83,7 @@ public class LineSegment {
         this.setP1(p1);
         this.setP2(p2);
     }
-    
+
     public IntersectionType getIntersectionType(final LineSegment ls) {
         /*
         p = seg1.p1;
@@ -104,60 +104,61 @@ public class LineSegment {
         }else{
                 return DONT_INTERSECT;
         }
-        */
+         */
         Point p = this.p1;
         Point r = this.p2.subtract(this.p1);
         Point q = ls.p1;
         Point s = ls.p2.subtract(ls.p1);
-        
+
         double rCrossS = r.cross(s);
         if (rCrossS <= EPSILON && rCrossS >= -1*EPSILON) {
-  
+
             return IntersectionType.PARALLEL_DONT_INTERSECT;
         }
         Point qMinusp = q.subtract(p);
-        
+
         double t = qMinusp.cross(s) / rCrossS;
         double u = qMinusp.cross(r) / rCrossS;
-        
+
         if(0 <= u && u <= 1 && 0 <= t && t <= 1){
+            @SuppressWarnings("unused")
             Point intersectionPoint = p.add(r.scalarMult(t));
-            
+
             return IntersectionType.INTERSECT;
         }
         return IntersectionType.DONT_INTERSECT;
     }
-    
+
     /**
      * Intersect this line with LineSegment s
      * @param s the LineSegment to intersect
      * @return the point of intersection or null if they do not intersect
      */
     public Point intersect(final LineSegment ls) {
-        
-      
+
+
         Point p = this.p1;
         Point r = this.p2.subtract(this.p1);
         Point q = ls.p1;
         Point s = ls.p2.subtract(ls.p1);
-        
+
         double rCrossS = r.cross(s);
         if (rCrossS <= EPSILON && rCrossS >= -1*EPSILON) {
             return null;
         }
         Point qMinusp = q.subtract(p);
-        
+
         double t = qMinusp.cross(s) / rCrossS;
         double u = qMinusp.cross(r) / rCrossS;
-        
+
         if(0 <= u && u <= 1 && 0 <= t && t <= 1){
             Point intersectionPoint = p.add(r.scalarMult(t));
-            
+
             return intersectionPoint;
         }
         return null;
     }
-    
+
     public Point getP1() {
         return p1;
     }
