@@ -22,9 +22,6 @@ import com.sap.sailing.simulator.windfield.WindFieldGenerator;
 
 public class PathGeneratorDynProgForward extends PathGeneratorBase {
 
-    // private static Logger logger = Logger.getLogger("com.sap.sailing");
-    // SimulationParameters simulationParameters;
-
     public PathGeneratorDynProgForward(SimulationParameters params) {
         this.parameters = params;
     }
@@ -129,6 +126,7 @@ public class PathGeneratorDynProgForward extends PathGeneratorBase {
     }
 
     // @Override
+    @Override
     public Path getPath() {
 
         // retrieve simulation parameters

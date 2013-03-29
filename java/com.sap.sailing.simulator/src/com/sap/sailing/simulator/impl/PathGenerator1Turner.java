@@ -32,7 +32,6 @@ public class PathGenerator1Turner extends PathGeneratorBase {
         int middle;
     }
 
-    // private SimulationParameters simulationParameters;
     private boolean leftSide;
     private result1Turn result;
     private Position evalStartPoint;
@@ -215,11 +214,6 @@ public class PathGenerator1Turner extends PathGeneratorBase {
     }
 
     @Override
-    public Path getPathLeg(int selectedRaceIndex, int selectedCompetitorIndex, int selectedLegIndex) {
-        return null;
-    }
-
-    @Override
     public Path getPath() {
 
         WindFieldGenerator windField = this.parameters.getWindField();
@@ -313,30 +307,6 @@ public class PathGenerator1Turner extends PathGeneratorBase {
 
         return end;
     }
-
-    // private static Position getIntersection(Position segment1Start, Position segment1End, Position segment2Start,
-    // Position segment2End) {
-    //
-    // double xA = segment1Start.getLatDeg();
-    // double yA = segment1Start.getLngDeg();
-    //
-    // double xB = segment1End.getLatDeg();
-    // double yB = segment1End.getLngDeg();
-    //
-    // double xC = segment2Start.getLatDeg();
-    // double yC = segment2Start.getLngDeg();
-    //
-    // double xD = segment2End.getLatDeg();
-    // double yD = segment2End.getLngDeg();
-    //
-    // double m1 = (yB - yA) / (xB - xA);
-    // double m2 = (yD - yC) / (xD - xC);
-    //
-    // double x = (yC - yA + m1 * xA - m2 * xC) / (m1 - m2);
-    // double y = (yC - yA + m2 * (xA - xC)) * m1 / (m1 - m2) + yA;
-    //
-    // return new DegreePosition(x, y);
-    // }
 
     public static Position getProjectionOnLine(Position point, Position segment1Start, Position segment1End) {
 

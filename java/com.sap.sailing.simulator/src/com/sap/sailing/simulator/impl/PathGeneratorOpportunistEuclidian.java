@@ -38,11 +38,6 @@ public class PathGeneratorOpportunistEuclidian extends PathGeneratorBase {
     }
 
     @Override
-    public Path getPathLeg(int selectedRaceIndex, int selectedCompetitorIndex, int selectedLegIndex) {
-        return null;
-    }
-    
-    @Override
     public Path getPath() {
 
         WindFieldGenerator wf = this.parameters.getWindField();

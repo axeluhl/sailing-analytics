@@ -30,7 +30,7 @@ public class PathGeneratorTreeGrowWind2 extends PathGeneratorBase {
 
     private static Logger logger = Logger.getLogger("com.sap.sailing");
     private boolean debugMsgOn = false;
-    // SimulationParameters simulationParameters;
+
     double oobFact = 0.75; // out-of-bounds factor
     int maxTurns = 0;
     String initPathStr = "0";
@@ -364,12 +364,6 @@ public class PathGeneratorTreeGrowWind2 extends PathGeneratorBase {
 
         // return remaining good candidates
         return filterCands;
-    }
-
-
-    @Override
-    public Path getPathLeg(int selectedRaceIndex, int selectedCompetitorIndex, int selectedLegIndex) {
-        return null;
     }
 
     @Override

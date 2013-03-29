@@ -19,7 +19,6 @@ import com.sap.sailing.simulator.windfield.WindFieldGenerator;
 public class PathGeneratorOpportunistVMG extends PathGeneratorBase {
 
     private static Logger logger = Logger.getLogger("com.sap.sailing");
-    // SimulationParameters simulationParameters;
     int maxLeft;
     int maxRight;
     boolean startLeft;
@@ -34,11 +33,6 @@ public class PathGeneratorOpportunistVMG extends PathGeneratorBase {
         this.startLeft = startLeftVal;
     }
 
-    @Override
-    public Path getPathLeg(int selectedRaceIndex, int selectedCompetitorIndex, int selectedLegIndex) {
-        return null;
-    }
-        
     @Override
     public Path getPath() {
 

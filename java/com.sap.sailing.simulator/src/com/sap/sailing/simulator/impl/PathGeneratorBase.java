@@ -27,11 +27,6 @@ public class PathGeneratorBase implements PathGenerator {
     }
 
     @Override
-    public Path getPathLeg(int selectedRaceIndex, int selectedCompetitorIndex, int selectedLegIndex) {
-        return null;
-    }
-
-    @Override
     public Path getPath() {
         return null;
     }

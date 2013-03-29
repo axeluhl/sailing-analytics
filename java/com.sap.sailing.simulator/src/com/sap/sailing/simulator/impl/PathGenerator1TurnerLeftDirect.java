@@ -18,16 +18,8 @@ import com.sap.sailing.simulator.windfield.WindFieldGenerator;
 
 public class PathGenerator1TurnerLeftDirect extends PathGeneratorBase {
 
-    // private static Logger logger = Logger.getLogger("com.sap.sailing");
-    // SimulationParameters simulationParameters;
-
     public PathGenerator1TurnerLeftDirect(SimulationParameters params) {
         this.parameters = params;
-    }
-
-    @Override
-    public Path getPathLeg(int selectedRaceIndex, int selectedCompetitorIndex, int selectedLegIndex) {
-        return null;
     }
 
     @Override

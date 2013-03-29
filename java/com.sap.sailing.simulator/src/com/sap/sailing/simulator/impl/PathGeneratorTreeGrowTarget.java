@@ -23,7 +23,7 @@ import com.sap.sailing.simulator.windfield.WindFieldGenerator;
 public class PathGeneratorTreeGrowTarget extends PathGeneratorBase {
 
     private static Logger logger = Logger.getLogger("com.sap.sailing");
-    // SimulationParameters simulationParameters;
+
     int maxLeft;
     int maxRight;
     boolean startLeft;
@@ -195,11 +195,6 @@ public class PathGeneratorTreeGrowTarget extends PathGeneratorBase {
         return result;
     }
 
-    @Override
-    public Path getPathLeg(int selectedRaceIndex, int selectedCompetitorIndex, int selectedLegIndex) {
-        return null;
-    }
-    
     @Override
     public Path getPath() {
 

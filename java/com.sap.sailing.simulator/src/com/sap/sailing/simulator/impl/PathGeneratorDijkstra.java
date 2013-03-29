@@ -25,14 +25,12 @@ import com.sap.sailing.simulator.windfield.WindFieldGenerator;
 
 public class PathGeneratorDijkstra extends PathGeneratorBase {
 
-    // private static Logger logger = Logger.getLogger("com.sap.sailing");
-    // SimulationParameters simulationParameters;
-
     public PathGeneratorDijkstra(SimulationParameters params) {
         this.parameters = params;
     }
 
     // @Override
+    @Override
     public Path getPath() {
 
         // retrieve simulation parameters
