@@ -30,6 +30,7 @@ import com.sap.sailing.gwt.ui.shared.ConfigurationException;
 import com.sap.sailing.gwt.ui.shared.PositionDTO;
 import com.sap.sailing.gwt.ui.shared.RequestTotalTimeDTO;
 import com.sap.sailing.gwt.ui.shared.ResponseTotalTimeDTO;
+import com.sap.sailing.gwt.ui.shared.SimulatorUISelectionDTO;
 import com.sap.sailing.gwt.ui.shared.SimulatorWindDTO;
 import com.sap.sailing.simulator.TimedPositionWithSpeed;
 import com.sap.sailing.simulator.impl.PathImpl;
@@ -150,7 +151,7 @@ public class TestTimeComparison {
                                     && turn.getTimePoint().asMillis() == point.getTimePoint().asMillis()
                                     && turn.getSpeed().getKnots() == point.getSpeed().getKnots()
                                     && turn.getSpeed().getBearing().getDegrees() == point.getSpeed().getBearing()
-                                            .getDegrees()) {
+                                    .getDegrees()) {
                                 isTurn = true;
                                 turnPoints.add(new PositionDTO(position.getLatDeg(), position.getLngDeg()));
                                 break;
@@ -234,8 +235,8 @@ public class TestTimeComparison {
 
         for (Integer boatClassIndex : boatClassesIndexes.keySet()) {
             final SimulatorServiceImpl simulatorService = new SimulatorServiceImpl();
-            final RequestTotalTimeDTO requestData = new RequestTotalTimeDTO(boatClassIndex, 0, competitorIndex,
-                    legIndex, timeStepMilliseconds, this.allPoints, this.turnPoints, true, false);
+            final RequestTotalTimeDTO requestData = new RequestTotalTimeDTO(new SimulatorUISelectionDTO(boatClassIndex, 0, competitorIndex, legIndex),
+                    this.timeStepMilliseconds, this.allPoints, this.turnPoints, true, false);
 
             final ResponseTotalTimeDTO receiveData = simulatorService.getTotalTime(requestData);
             averageWind = simulatorService.getAverageWind();

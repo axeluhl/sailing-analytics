@@ -60,7 +60,8 @@ public class TreeGrowTest {
         param.setProperty("Djikstra.gridh[int]", 100.0);*/
 
         PathGeneratorTreeGrowTarget treeGrow = new PathGeneratorTreeGrowTarget(param);
-        Path path = treeGrow.getPathLeg(0, 0, 0);
+
+        Path path = treeGrow.getPath();
 
         for(TimedPositionWithSpeed pos : path.getPathPoints()) {
 

@@ -41,37 +41,42 @@ public class PathGeneratorTracTracTest {
     @Test
     public void testGetLeg() {
 
-        int competitorIndex = 0;
-
-        Path leg0 = PathGeneratorTracTracTest.pathGenerator.getPathLeg(0, competitorIndex, 0);
+        PathGeneratorTracTracTest.pathGenerator.setSelectionParameters(0, 0);
+        Path leg0 = PathGeneratorTracTracTest.pathGenerator.getPath();
         Assert.assertEquals(99, leg0.getPathPoints().size());
 
-        Path leg1 = PathGeneratorTracTracTest.pathGenerator.getPathLeg(0, competitorIndex, 1);
+        PathGeneratorTracTracTest.pathGenerator.setSelectionParameters(1, 0);
+        Path leg1 = PathGeneratorTracTracTest.pathGenerator.getPath();
         Assert.assertEquals(110, leg1.getPathPoints().size());
 
-        Path leg2 = PathGeneratorTracTracTest.pathGenerator.getPathLeg(0, competitorIndex, 2);
+        PathGeneratorTracTracTest.pathGenerator.setSelectionParameters(2, 0);
+        Path leg2 = PathGeneratorTracTracTest.pathGenerator.getPath();
         Assert.assertEquals(151, leg2.getPathPoints().size());
 
-        Path leg3 = PathGeneratorTracTracTest.pathGenerator.getPathLeg(0, competitorIndex, 3);
+        PathGeneratorTracTracTest.pathGenerator.setSelectionParameters(3, 0);
+        Path leg3 = PathGeneratorTracTracTest.pathGenerator.getPath();
         Assert.assertEquals(98, leg3.getPathPoints().size());
     }
 
     @Test
     public void testGetLegPolyline() {
 
-        int competitorIndex = 0;
         Distance maxDistance = new MeterDistance(4.88);
 
-        Path legPolyline0 = PathGeneratorTracTracTest.pathGenerator.getPathPolyline(0, competitorIndex, 0, maxDistance);
+        PathGeneratorTracTracTest.pathGenerator.setSelectionParameters(0, 0);
+        Path legPolyline0 = PathGeneratorTracTracTest.pathGenerator.getPathPolyline(maxDistance);
         Assert.assertEquals(10, legPolyline0.getPathPoints().size());
 
-        Path legPolyline1 = PathGeneratorTracTracTest.pathGenerator.getPathPolyline(0, competitorIndex, 1, maxDistance);
+        PathGeneratorTracTracTest.pathGenerator.setSelectionParameters(1, 0);
+        Path legPolyline1 = PathGeneratorTracTracTest.pathGenerator.getPathPolyline(maxDistance);
         Assert.assertEquals(7, legPolyline1.getPathPoints().size());
 
-        Path legPolyline2 = PathGeneratorTracTracTest.pathGenerator.getPathPolyline(0, competitorIndex, 2, maxDistance);
+        PathGeneratorTracTracTest.pathGenerator.setSelectionParameters(2, 0);
+        Path legPolyline2 = PathGeneratorTracTracTest.pathGenerator.getPathPolyline(maxDistance);
         Assert.assertEquals(8, legPolyline2.getPathPoints().size());
 
-        Path legPolyline3 = PathGeneratorTracTracTest.pathGenerator.getPathPolyline(0, competitorIndex, 3, maxDistance);
+        PathGeneratorTracTracTest.pathGenerator.setSelectionParameters(3, 0);
+        Path legPolyline3 = PathGeneratorTracTracTest.pathGenerator.getPathPolyline(maxDistance);
         Assert.assertEquals(7, legPolyline3.getPathPoints().size());
     }
 
