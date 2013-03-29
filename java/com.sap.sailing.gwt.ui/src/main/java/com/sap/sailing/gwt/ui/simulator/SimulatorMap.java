@@ -29,6 +29,7 @@ import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.shared.PathDTO;
 import com.sap.sailing.gwt.ui.shared.PositionDTO;
 import com.sap.sailing.gwt.ui.shared.SimulatorResultsDTO;
+import com.sap.sailing.gwt.ui.shared.SimulatorUISelectionDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldGenParamsDTO;
 import com.sap.sailing.gwt.ui.shared.panels.SimpleBusyIndicator;
@@ -89,7 +90,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
 
             String notificationMessage = result.getNotificationMessage();
             if (notificationMessage != "" && notificationMessage.length() != 0 && warningAlreadyShown == false) {
-                //TODO: Fix errorReporter errorReporter.reportNotification(notificationMessage);
+                errorReporter.reportError(notificationMessage, true);
                 warningAlreadyShown = true;
             }
 
@@ -123,9 +124,6 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
                 if (currentPath.name.equals("Polyline")) {
 
                     pathPolyline = createPathPolyline(currentPath);
-
-                    // return PathPolyline.createPathPolyline(pathDTO.getPoints(), this.errorReporter,
-                    // this.simulatorSvc, this.mapw, this, this.parent.getBoatClassID());
                 }
                 else {
 
@@ -450,8 +448,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         }
     }
 
-    private void generatePath(WindPatternDisplay windPatternDisplay, boolean summaryView, int selectedBoatClassIndex, int selectedRaceIndex,
-            int selectedCompetitorIndex, int selectedLegIndex) {
+    private void generatePath(WindPatternDisplay windPatternDisplay, boolean summaryView, SimulatorUISelectionDTO selection) {
         LOGGER.info("In generatePath");
 
         if (windPatternDisplay == null) {
@@ -474,8 +471,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
 
         this.busyIndicator.setBusy(true);
 
-        this.simulatorSvc.getSimulatorResults(this.mode, this.windParams, windPatternDisplay, true, selectedBoatClassIndex, selectedRaceIndex,
-                selectedCompetitorIndex, selectedLegIndex, new ResultManager(summaryView));
+        this.simulatorSvc.getSimulatorResults(this.mode, this.windParams, windPatternDisplay, true, selection, new ResultManager(summaryView));
 
     }
 
@@ -525,11 +521,10 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         }
     }
 
-    private void refreshSummaryView(WindPatternDisplay windPatternDisplay, int selectedBoatClassIndex, int selectedRaceIndex, int selectedCompetitorIndex,
-            int selectedLegIndex, boolean force) {
+    private void refreshSummaryView(WindPatternDisplay windPatternDisplay, SimulatorUISelectionDTO selection, boolean force) {
         // removeOverlays();
         if (force) {
-            this.generatePath(windPatternDisplay, true, selectedBoatClassIndex, selectedRaceIndex, selectedCompetitorIndex, selectedLegIndex);
+            this.generatePath(windPatternDisplay, true, selection);
         } else {
             if (this.replayPathCanvasOverlays != null && !this.replayPathCanvasOverlays.isEmpty()) {
                 System.out.println("Soft refresh");
@@ -555,16 +550,15 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
                     this.windLineCanvasOverlay.setVisible(false);
                 }
             } else {
-                this.generatePath(windPatternDisplay, true, selectedBoatClassIndex, selectedRaceIndex, selectedCompetitorIndex, selectedLegIndex);
+                this.generatePath(windPatternDisplay, true, selection);
             }
         }
     }
 
-    private void refreshReplayView(WindPatternDisplay windPatternDisplay, int selectedBoatClassIndex, int selectedRaceIndex, int selectedCompetitorIndex,
-            int selectedLegIndex, boolean force) {
+    private void refreshReplayView(WindPatternDisplay windPatternDisplay, SimulatorUISelectionDTO selection, boolean force) {
         // removeOverlays();
         if (force) {
-            this.generatePath(windPatternDisplay, false, selectedBoatClassIndex, selectedRaceIndex, selectedCompetitorIndex, selectedLegIndex);
+            this.generatePath(windPatternDisplay, false, selection);
         } else {
 
             if (this.replayPathCanvasOverlays != null && !this.replayPathCanvasOverlays.isEmpty()) {
@@ -591,7 +585,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
                     this.windLineCanvasOverlay.setVisible(true);
                 }
             } else {
-                this.generatePath(windPatternDisplay, false, selectedBoatClassIndex, selectedRaceIndex, selectedCompetitorIndex, selectedLegIndex);
+                this.generatePath(windPatternDisplay, false, selection);
             }
         }
     }
@@ -635,8 +629,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         }
     }
 
-    public void refreshView(ViewName name, WindPatternDisplay windPatternDisplay, int selectedBoatClassIndex, int selectedRaceIndex,
-            int selectedCompetitorIndex, int selectedLegIndex, boolean force) {
+    public void refreshView(ViewName name, WindPatternDisplay windPatternDisplay, SimulatorUISelectionDTO selection, boolean force) {
 
         if (!this.overlaysInitialized) {
             this.initializeOverlays();
@@ -654,10 +647,10 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
             }
             switch (name) {
             case SUMMARY:
-                this.refreshSummaryView(windPatternDisplay, selectedBoatClassIndex, selectedRaceIndex, selectedCompetitorIndex, selectedLegIndex, force);
+                this.refreshSummaryView(windPatternDisplay, selection, force);
                 break;
             case REPLAY:
-                this.refreshReplayView(windPatternDisplay, selectedBoatClassIndex, selectedRaceIndex, selectedCompetitorIndex, selectedLegIndex, force);
+                this.refreshReplayView(windPatternDisplay, selection, force);
                 break;
             case WINDDISPLAY:
                 this.refreshWindDisplayView(windPatternDisplay, force);
@@ -667,7 +660,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
             }
 
             if (this.mode == SailingSimulatorUtil.measured && this.pathPolyline != null) {
-                this.pathPolyline.setBoatClassID(selectedBoatClassIndex);
+                this.pathPolyline.setBoatClassID(selection.boatClassIndex);
             }
 
         } else {
@@ -704,9 +697,10 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
 
     private PathPolyline createPathPolyline(PathDTO pathDTO) {
 
-        return PathPolyline.createPathPolyline(pathDTO.getPoints(), this.errorReporter, this.simulatorSvc, this.mapw, this,
-                this.parent.getSelectedBoatClassIndex(), this.parent.getSelectedRaceIndex(), this.parent.getSelectedCompetitorIndex(),
-                this.parent.getSelectedLegIndex());
+        SimulatorUISelectionDTO selection = new SimulatorUISelectionDTO(this.parent.getSelectedBoatClassIndex(), this.parent.getSelectedRaceIndex(),
+                this.parent.getSelectedCompetitorIndex(), this.parent.getSelectedLegIndex());
+
+        return PathPolyline.createPathPolyline(pathDTO.getPoints(), this.errorReporter, this.simulatorSvc, this.mapw, this, selection);
     }
 
     public void addLegendOverlayForPathPolyline(long totalTimeMilliseconds) {

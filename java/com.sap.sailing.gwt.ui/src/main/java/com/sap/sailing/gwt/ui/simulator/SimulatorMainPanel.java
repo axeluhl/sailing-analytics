@@ -51,6 +51,7 @@ import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.shared.BoatClassDTO;
 import com.sap.sailing.gwt.ui.shared.BoatClassDTOsAndNotificationMessage;
 import com.sap.sailing.gwt.ui.shared.PolarDiagramDTOAndNotificationMessage;
+import com.sap.sailing.gwt.ui.shared.SimulatorUISelectionDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldGenParamsDTO;
 import com.sap.sailing.gwt.ui.shared.WindPatternDTO;
 import com.sap.sailing.gwt.ui.shared.controls.slider.SliderBar;
@@ -640,7 +641,7 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
             public void onSuccess(BoatClassDTOsAndNotificationMessage boatClassesAndMsg) {
                 String notificationMessage = boatClassesAndMsg.getNotificationMessage();
                 if(notificationMessage != "" && notificationMessage.length() != 0 && warningAlreadyShown == false) {
-                  //TODO: Fix errorReporter errorReporter.reportNotification(boatClassesAndMsg.getNotificationMessage());
+                    errorReporter.reportError(boatClassesAndMsg.getNotificationMessage(), true);
                     warningAlreadyShown = true;
                 }
 
@@ -676,7 +677,7 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
             public void onSuccess(PolarDiagramDTOAndNotificationMessage polar) {
                 String notificationMessage = polar.getNotificationMessage();
                 if(notificationMessage != "" && notificationMessage.length() != 0 && warningAlreadyShown == false) {
-                  //TODO: Fix errorReporter errorReporter.reportNotification(polar.getNotificationMessage());
+                    errorReporter.reportError(polar.getNotificationMessage(), true);
                     warningAlreadyShown = true;
                 }
 
@@ -727,23 +728,23 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
 
     private void update() {
 
-        int selectedBoatClassIndex = boatClassSelector.getSelectedIndex();
-        int selectedRaceIndex = raceSelector.getSelectedIndex();
-        int selectedCompetitorIndex = competitorSelector.getSelectedIndex();
+        // int selectedBoatClassIndex = boatClassSelector.getSelectedIndex();
+        // int selectedRaceIndex = raceSelector.getSelectedIndex();
+        // int selectedCompetitorIndex = competitorSelector.getSelectedIndex();
         int selectedLegIndex = legSelector.getSelectedIndex();
+
+        SimulatorUISelectionDTO selection = new SimulatorUISelectionDTO(this.boatClassSelector.getSelectedIndex(), this.raceSelector.getSelectedIndex(),
+                this.competitorSelector.getSelectedIndex(), this.legSelector.getSelectedIndex());
 
         if (this.windDisplayButton.getValue()) {
             //TODO: Activate TimePanel this.timePanel.setActive(true);
-            this.simulatorMap.refreshView(SimulatorMap.ViewName.WINDDISPLAY, this.currentWPDisplay, selectedBoatClassIndex, selectedRaceIndex,
-                    selectedCompetitorIndex, selectedLegIndex, true);
+            this.simulatorMap.refreshView(SimulatorMap.ViewName.WINDDISPLAY, this.currentWPDisplay, selection, true);
         } else if (this.summaryButton.getValue()) {
             //TODO: Activate TimePanel this.timePanel.setActive(false);
-            this.simulatorMap.refreshView(SimulatorMap.ViewName.SUMMARY, this.currentWPDisplay, selectedBoatClassIndex, selectedRaceIndex,
-                    selectedCompetitorIndex, selectedLegIndex, true);
+            this.simulatorMap.refreshView(SimulatorMap.ViewName.SUMMARY, this.currentWPDisplay, selection, true);
         } else if (this.replayButton.getValue()) {
             //TODO: Activate TimePanel this.timePanel.setActive(true);
-            this.simulatorMap.refreshView(SimulatorMap.ViewName.REPLAY, this.currentWPDisplay, selectedBoatClassIndex, selectedRaceIndex,
-                    selectedCompetitorIndex, selectedLegIndex, true);
+            this.simulatorMap.refreshView(SimulatorMap.ViewName.REPLAY, this.currentWPDisplay, selection, true);
         } else {
             if (this.mode == SailingSimulatorUtil.measured) {
 
@@ -754,19 +755,13 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
                     this.simulatorMap.removePolyline();
 
                     //TODO: Activate TimePanel this.timePanel.setActive(false);
-                    this.simulatorMap.refreshView(SimulatorMap.ViewName.SUMMARY, this.currentWPDisplay, selectedBoatClassIndex, selectedRaceIndex,
-                            selectedCompetitorIndex, selectedLegIndex, true);
+                    this.simulatorMap.refreshView(SimulatorMap.ViewName.SUMMARY, this.currentWPDisplay, selection, true);
                 }
             }
         }
     }
 
     private void initDisplayOptions(Panel mapOptions) {
-
-        /*final int selectedBoatClassIndex = boatClassSelector.getSelectedIndex();
-        final int selectedRaceIndex = raceSelector.getSelectedIndex();
-        final int selectedCompetitorIndex = competitorSelector.getSelectedIndex();
-        final int selectedLegIndex = legSelector.getSelectedIndex();*/
 
         this.summaryButton = new RadioButton("Map Display Options", stringMessages.summary());
         this.summaryButton.getElement().setClassName("MapDisplayOptions");
@@ -775,13 +770,11 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
             public void onClick(ClickEvent arg0) {
                 // timePanel.setVisible(false);
                 //TODO: Activate TimePanel timePanel.setActive(false);
-                int selectedBoatClassIndex = boatClassSelector.getSelectedIndex();
-                int selectedRaceIndex = raceSelector.getSelectedIndex();
-                int selectedCompetitorIndex = competitorSelector.getSelectedIndex();
-                int selectedLegIndex = legSelector.getSelectedIndex();
-                simulatorMap.refreshView(SimulatorMap.ViewName.SUMMARY, currentWPDisplay, selectedBoatClassIndex, selectedRaceIndex, selectedCompetitorIndex,
-                        selectedLegIndex,
-                        false);
+
+                SimulatorUISelectionDTO selection = new SimulatorUISelectionDTO(boatClassSelector.getSelectedIndex(), raceSelector.getSelectedIndex(),
+                        competitorSelector.getSelectedIndex(), legSelector.getSelectedIndex());
+
+                simulatorMap.refreshView(SimulatorMap.ViewName.SUMMARY, currentWPDisplay, selection, false);
             }
         });
 
@@ -791,13 +784,11 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
             @Override
             public void onClick(ClickEvent arg0) {
                 //TODO: Activate TimePanel timePanel.setActive(true);
-                int selectedBoatClassIndex = boatClassSelector.getSelectedIndex();
-                int selectedRaceIndex = raceSelector.getSelectedIndex();
-                int selectedCompetitorIndex = competitorSelector.getSelectedIndex();
-                int selectedLegIndex = legSelector.getSelectedIndex();
-                simulatorMap.refreshView(SimulatorMap.ViewName.REPLAY, currentWPDisplay, selectedBoatClassIndex, selectedRaceIndex, selectedCompetitorIndex,
-                        selectedLegIndex,
-                        false);
+
+                SimulatorUISelectionDTO selection = new SimulatorUISelectionDTO(boatClassSelector.getSelectedIndex(), raceSelector.getSelectedIndex(),
+                        competitorSelector.getSelectedIndex(), legSelector.getSelectedIndex());
+
+                simulatorMap.refreshView(SimulatorMap.ViewName.REPLAY, currentWPDisplay, selection, false);
             }
         });
 
@@ -806,13 +797,11 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
             @Override
             public void onClick(ClickEvent arg0) {
                 //TODO: Activate TimePanel timePanel.setActive(true);
-                int selectedBoatClassIndex = boatClassSelector.getSelectedIndex();
-                int selectedRaceIndex = raceSelector.getSelectedIndex();
-                int selectedCompetitorIndex = competitorSelector.getSelectedIndex();
-                int selectedLegIndex = legSelector.getSelectedIndex();
-                simulatorMap.refreshView(SimulatorMap.ViewName.WINDDISPLAY, currentWPDisplay, selectedBoatClassIndex, selectedRaceIndex,
-                        selectedCompetitorIndex, selectedLegIndex,
-                        false);
+
+                SimulatorUISelectionDTO selection = new SimulatorUISelectionDTO(boatClassSelector.getSelectedIndex(), raceSelector.getSelectedIndex(),
+                        competitorSelector.getSelectedIndex(), legSelector.getSelectedIndex());
+
+                simulatorMap.refreshView(SimulatorMap.ViewName.WINDDISPLAY, currentWPDisplay, selection, false);
             }
         });
 
@@ -996,7 +985,7 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
             public void onSuccess(BoatClassDTOsAndNotificationMessage response) {
                 String notificationMessage = response.getNotificationMessage();
                 if (notificationMessage != "" && notificationMessage.length() != 0 && warningAlreadyShown == false) {
-                    //TODO: Fix errorReporter errorReporter.reportNotification(response.getNotificationMessage());
+                    errorReporter.reportError(response.getNotificationMessage(), true);
                     warningAlreadyShown = true;
                 }
 

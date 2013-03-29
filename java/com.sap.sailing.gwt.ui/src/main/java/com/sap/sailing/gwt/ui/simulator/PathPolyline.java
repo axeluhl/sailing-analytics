@@ -15,6 +15,7 @@ import com.sap.sailing.gwt.ui.client.SimulatorServiceAsync;
 import com.sap.sailing.gwt.ui.shared.PositionDTO;
 import com.sap.sailing.gwt.ui.shared.RequestTotalTimeDTO;
 import com.sap.sailing.gwt.ui.shared.ResponseTotalTimeDTO;
+import com.sap.sailing.gwt.ui.shared.SimulatorUISelectionDTO;
 import com.sap.sailing.gwt.ui.shared.SimulatorWindDTO;
 import com.sap.sailing.gwt.ui.shared.racemap.TwoDPoint;
 import com.sap.sailing.gwt.ui.shared.racemap.TwoDSegment;
@@ -51,8 +52,9 @@ public class PathPolyline {
     private boolean warningAlreadyShown = false;
     private SimulatorMap simulatorMap = null;
 
+
     public static PathPolyline createPathPolyline(List<SimulatorWindDTO> pathPoints, ErrorReporter errorReporter, SimulatorServiceAsync simulatorService,
-            MapWidget map, SimulatorMap simulatorMap, int selectedBoatClassIndex, int selectedRaceIndex, int selectedCompetitorIndex, int selectedLegIndex) {
+            MapWidget map, SimulatorMap simulatorMap, SimulatorUISelectionDTO selection) {
 
         List<LatLng> points = new ArrayList<LatLng>();
 
@@ -62,16 +64,14 @@ public class PathPolyline {
             }
         }
 
-        return new PathPolyline(points.toArray(new LatLng[0]), DEFAULT_COLOR, DEFAULT_WEIGHT, DEFAULT_OPACITY, selectedBoatClassIndex, selectedRaceIndex,
-                selectedCompetitorIndex, selectedLegIndex,
+        return new PathPolyline(points.toArray(new LatLng[0]), DEFAULT_COLOR, DEFAULT_WEIGHT, DEFAULT_OPACITY, selection,
                 errorReporter, pathPoints, simulatorService, map, simulatorMap);
     }
 
     private PathPolyline() {
     }
 
-    private PathPolyline(LatLng[] points, String color, int weight, double opacity, int selectedBoatClassIndex, int selectedRaceIndex,
-            int selectedCompetitorIndex, int selectedLegIndex, ErrorReporter errorReporter,
+    private PathPolyline(LatLng[] points, String color, int weight, double opacity, SimulatorUISelectionDTO selection, ErrorReporter errorReporter,
             List<SimulatorWindDTO> pathPoints, SimulatorServiceAsync simulatorService, MapWidget map, SimulatorMap simulatorMap) {
 
         this.turnPoints = points;
@@ -81,10 +81,10 @@ public class PathPolyline {
         this.allPoints = pathPoints;
         this.simulatorService = simulatorService;
         this.map = map;
-        this.selectedBoatClassIndex = selectedBoatClassIndex;
-        this.selectedRaceIndex = selectedRaceIndex;
-        this.selectedCompetitorIndex = selectedCompetitorIndex;
-        this.selectedLegIndex = selectedLegIndex;
+        this.selectedBoatClassIndex = selection.boatClassIndex;
+        this.selectedRaceIndex = selection.raceIndex;
+        this.selectedCompetitorIndex = selection.competitorIndex;
+        this.selectedLegIndex = selection.legIndex;
         this.errorReporter = errorReporter;
         this.simulatorMap = simulatorMap;
 
@@ -427,8 +427,9 @@ public class PathPolyline {
             turnPointsAsPositionDTO.add(toPositionDTO(point));
         }
 
-        RequestTotalTimeDTO requestData = new RequestTotalTimeDTO(this.selectedBoatClassIndex, this.selectedRaceIndex, this.selectedCompetitorIndex,
-                this.selectedLegIndex, STEP_DURATION_MILLISECONDS, this.allPoints, turnPointsAsPositionDTO, USE_REAL_AVERAGE_WIND, false);
+        RequestTotalTimeDTO requestData = new RequestTotalTimeDTO(new SimulatorUISelectionDTO(this.selectedBoatClassIndex, this.selectedRaceIndex,
+                this.selectedCompetitorIndex, this.selectedLegIndex), STEP_DURATION_MILLISECONDS, this.allPoints, turnPointsAsPositionDTO,
+                USE_REAL_AVERAGE_WIND, false);
 
         this.simulatorService.getTotalTime(requestData, new AsyncCallback<ResponseTotalTimeDTO>() {
 
@@ -441,7 +442,7 @@ public class PathPolyline {
             public void onSuccess(ResponseTotalTimeDTO receiveData) {
                 String notificationMessage = receiveData.notificationMessage;
                 if (notificationMessage != "" && notificationMessage.length() != 0 && warningAlreadyShown == false) {
-                    //TODO: Fix errorReporter errorReporter.reportNotification(notificationMessage);
+                    errorReporter.reportError(notificationMessage, true);
                     warningAlreadyShown = true;
                 }
 
@@ -465,4 +466,5 @@ public class PathPolyline {
     public static double knotsToMetersPerSecond(double knots) {
         return knots * FACTOR_KN2MPS;
     }
+
 }

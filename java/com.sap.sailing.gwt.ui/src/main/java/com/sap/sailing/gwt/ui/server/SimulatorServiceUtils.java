@@ -1,16 +1,24 @@
 package com.sap.sailing.gwt.ui.server;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
+import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.RadianPosition;
 import com.sap.sailing.gwt.ui.shared.PositionDTO;
+import com.sap.sailing.gwt.ui.shared.SimulatorUISelectionDTO;
 import com.sap.sailing.gwt.ui.shared.SimulatorWindDTO;
+import com.sap.sailing.simulator.Path;
+import com.sap.sailing.simulator.SimulatorUISelection;
+import com.sap.sailing.simulator.TimedPositionWithSpeed;
+import com.sap.sailing.simulator.impl.SimulatorUISelectionImpl;
 
 public class SimulatorServiceUtils {
 
@@ -19,6 +27,7 @@ public class SimulatorServiceUtils {
     public static final double FACTOR_RAD2DEG = 57.2957795;
     public static final double FACTOR_KN2MPS = 0.514444;
     public static final double FACTOR_MPS2KN = 1.94384;
+    public static final SpeedWithBearing DEFAULT_AVERAGE_WIND = new KnotSpeedWithBearingImpl(4.5, new DegreeBearingImpl(350));
 
     /**
      * Converts degress to radians
@@ -298,4 +307,141 @@ public class SimulatorServiceUtils {
 
         return new RadianPosition(lat2, lon2);
     }
+
+    public static double getSign(PositionDTO p1, PositionDTO p2, PositionDTO p3) {
+        return (p1.latDeg - p3.latDeg) * (p2.lngDeg - p3.lngDeg) - (p2.latDeg - p3.latDeg) * (p1.lngDeg - p3.lngDeg);
+    }
+
+    public static boolean isPointInsideTriangle(PositionDTO point, PositionDTO corner1, PositionDTO corner2, PositionDTO corner3) {
+
+        boolean b1, b2, b3;
+
+        b1 = getSign(point, corner1, corner2) < 0.0d;
+        b2 = getSign(point, corner2, corner3) < 0.0d;
+        b3 = getSign(point, corner3, corner1) < 0.0d;
+
+        return (b1 == b2) && (b2 == b3);
+    }
+
+    public static boolean areTowardsSameDirection(Bearing b1, Bearing b2) {
+        boolean isB1TowardsNorth = (b1.getDegrees() < 90.0 || b1.getDegrees() > 270.0);
+        boolean isB2TowardsNorth = (b2.getDegrees() < 90.0 || b2.getDegrees() > 270.0);
+
+        return !(isB1TowardsNorth ^ isB2TowardsNorth);
+    }
+
+    public static boolean equals(Position first, Position second, double delta) {
+        double latDiff = Math.abs(first.getLatDeg() - second.getLatDeg());
+        double lngDiff = Math.abs(first.getLngDeg() - second.getLngDeg());
+
+        return latDiff <= delta && lngDiff <= delta;
+    }
+
+    public static int getIndexOfClosest(List<TimedPositionWithSpeed> items, TimedPositionWithSpeed item) {
+        int count = items.size();
+
+        List<Double> diff_lat = new ArrayList<Double>();
+        List<Double> diff_lng = new ArrayList<Double>();
+        List<Long> diff_timepoint = new ArrayList<Long>();
+
+        for (int index = 0; index < count; index++) {
+            diff_lat.add(Math.abs(items.get(index).getPosition().getLatDeg() - item.getPosition().getLatDeg()));
+            diff_lng.add(Math.abs(items.get(index).getPosition().getLngDeg() - item.getPosition().getLngDeg()));
+            diff_timepoint.add(Math.abs(items.get(index).getTimePoint().asMillis() - item.getTimePoint().asMillis()));
+        }
+
+        double min_diff_lat = Collections.min(diff_lat);
+        double min_max_diff_lat = min_diff_lat + Collections.max(diff_lat);
+
+        double min_diff_lng = Collections.min(diff_lng);
+        double min_max_diff_lng = min_diff_lng + Collections.max(diff_lng);
+
+        long min_diff_timepoint = Collections.min(diff_timepoint);
+        double min_max_diff_timepoint = min_diff_timepoint + Collections.max(diff_timepoint);
+
+        List<Double> norm_diff_lat = new ArrayList<Double>();
+        List<Double> norm_diff_lng = new ArrayList<Double>();
+        List<Double> norm_diff_timepoint = new ArrayList<Double>();
+
+        for (int index = 0; index < count; index++) {
+            norm_diff_lat.add((diff_lat.get(index) - min_diff_lat) / min_max_diff_lat);
+            norm_diff_lng.add((diff_lng.get(index) - min_diff_lng) / min_max_diff_lng);
+            norm_diff_timepoint.add((diff_timepoint.get(index) - min_diff_timepoint) / min_max_diff_timepoint);
+        }
+
+        List<Double> deltas = new ArrayList<Double>();
+
+        for (int index = 0; index < count; index++) {
+            deltas.add(Math.sqrt(Math.pow(norm_diff_lat.get(index), 2) + Math.pow(norm_diff_lng.get(index), 2) + Math.pow(norm_diff_timepoint.get(index), 2)));
+        }
+
+        int result = 0;
+        double min = deltas.get(0);
+
+        for (int index = 0; index < count; index++) {
+            if (deltas.get(index) < min) {
+                result = index;
+                min = deltas.get(index);
+            }
+        }
+
+        return result;
+    }
+
+    public static SpeedWithBearing getWindAtTimepoint(long timepointAsMillis, Path gpsTrack) {
+        List<TimedPositionWithSpeed> pathPoints = gpsTrack.getPathPoints();
+        int noOfPathPoints = pathPoints.size();
+        List<Double> diffs = new ArrayList<Double>();
+
+        for (int index = 0; index < noOfPathPoints; index++) {
+            diffs.add(new Double(Math.abs(pathPoints.get(index).getTimePoint().asMillis() - timepointAsMillis)));
+        }
+
+        int indexOfMinDiff = diffs.indexOf(Collections.min(diffs));
+
+        return pathPoints.get(indexOfMinDiff).getSpeed();
+    }
+
+    public static List<SimulatorWindDTO> toSimulatorWindDTOList(List<TimedPositionWithSpeed> points) {
+
+        List<SimulatorWindDTO> result = new ArrayList<SimulatorWindDTO>();
+
+        for (TimedPositionWithSpeed point : points) {
+            result.add(toSimulatorWindDTO(point));
+        }
+
+        return result;
+    }
+
+    public static SimulatorWindDTO toSimulatorWindDTO(TimedPositionWithSpeed point) {
+
+        Position position = point.getPosition();
+        SpeedWithBearing windSpeedWithBearing = point.getSpeed();
+        TimePoint timePoint = point.getTimePoint();
+
+        double latDeg = position.getLatDeg();
+        double lngDeg = position.getLngDeg();
+        double windSpeedKn = windSpeedWithBearing.getKnots();
+        double windBearingDeg = windSpeedWithBearing.getBearing().getDegrees();
+        long timepointMsec = timePoint.asMillis();
+
+        return new SimulatorWindDTO(latDeg, lngDeg, windSpeedKn, windBearingDeg, timepointMsec);
+    }
+
+    public static PositionDTO toPositionDTO(Position position) {
+        return new PositionDTO(position.getLatDeg(), position.getLngDeg());
+    }
+
+    public static Position toPosition(PositionDTO positionDTO) {
+        return new DegreePosition(positionDTO.latDeg, positionDTO.lngDeg);
+    }
+
+    public static boolean equals(Position position, PositionDTO positonDTO) {
+        return (position.getLatDeg() == positonDTO.latDeg && position.getLngDeg() == positonDTO.lngDeg);
+    }
+
+    public static SimulatorUISelection toSimulatorUISelection(SimulatorUISelectionDTO selection) {
+        return new SimulatorUISelectionImpl(selection.boatClassIndex, selection.raceIndex, selection.competitorIndex, selection.legIndex);
+    }
+
 }

@@ -13,6 +13,7 @@ import com.sap.sailing.gwt.ui.shared.RequestTotalTimeDTO;
 import com.sap.sailing.gwt.ui.shared.Response1TurnerDTO;
 import com.sap.sailing.gwt.ui.shared.ResponseTotalTimeDTO;
 import com.sap.sailing.gwt.ui.shared.SimulatorResultsDTO;
+import com.sap.sailing.gwt.ui.shared.SimulatorUISelectionDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldGenParamsDTO;
 import com.sap.sailing.gwt.ui.shared.WindLatticeDTO;
@@ -35,8 +36,7 @@ public interface SimulatorService extends RemoteService {
     WindPatternDisplay getWindPatternDisplay(WindPatternDTO pattern);
 
     SimulatorResultsDTO getSimulatorResults(char mode, WindFieldGenParamsDTO params, WindPatternDisplay pattern, boolean withWindField,
-            int selectedBoatClassIndex, int selectedRaceIndex, int selectedCompetitorIndex, int selectedLegIndex) throws WindPatternNotFoundException,
-            ConfigurationException;
+            SimulatorUISelectionDTO selection) throws WindPatternNotFoundException, ConfigurationException;
 
     BoatClassDTOsAndNotificationMessage getBoatClasses() throws ConfigurationException;
 

@@ -11,6 +11,7 @@ import com.sap.sailing.gwt.ui.shared.RequestTotalTimeDTO;
 import com.sap.sailing.gwt.ui.shared.Response1TurnerDTO;
 import com.sap.sailing.gwt.ui.shared.ResponseTotalTimeDTO;
 import com.sap.sailing.gwt.ui.shared.SimulatorResultsDTO;
+import com.sap.sailing.gwt.ui.shared.SimulatorUISelectionDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldGenParamsDTO;
 import com.sap.sailing.gwt.ui.shared.WindLatticeDTO;
@@ -42,8 +43,8 @@ public interface SimulatorServiceAsync {
 
     void getRacesNames(AsyncCallback<List<String>> asyncCallback);
 
-    void getSimulatorResults(char mode, WindFieldGenParamsDTO params, WindPatternDisplay pattern, boolean withWindField, int selectedBoatClassIndex,
-            int selectedRaceIndex, int selectedCompetitorIndex, int selectedLegIndex, AsyncCallback<SimulatorResultsDTO> callback);
+    void getSimulatorResults(char mode, WindFieldGenParamsDTO params, WindPatternDisplay pattern, boolean withWindField, SimulatorUISelectionDTO selection,
+            AsyncCallback<SimulatorResultsDTO> callback);
 
     void getCompetitorsNames(int selectedRaceIndex, AsyncCallback<List<String>> asyncCallback);
 }
