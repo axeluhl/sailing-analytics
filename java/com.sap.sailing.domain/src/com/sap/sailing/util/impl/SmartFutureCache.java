@@ -404,6 +404,7 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
     protected void cache(final K key, V value) {
         if (value == null) {
             cache.remove(key);
+            locksForKeys.remove(key);
         } else {
             cache.put(key, value);
         }
