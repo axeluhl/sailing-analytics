@@ -79,6 +79,12 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
     
     private final Map<K, V> cache;
     
+    /**
+     * Note that this needs to have more than one thread because there may be calculations used for cache updates that
+     * need to wait for other cache updates to finish. If those were all to be handled by a single thread, deadlocks
+     * would occur. Remember that there may still be single-core machines, so the factor with which
+     * <code>availableProcessors</code> is multiplied needs to be greater than one at least.
+     */
     private final static Executor recalculator = new ThreadPoolExecutor(/* corePoolSize */ 0,
             /* maximumPoolSize */ 3*Runtime.getRuntime().availableProcessors(),
             /* keepAliveTime */ 60, TimeUnit.SECONDS,
@@ -321,7 +327,9 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
                                 ongoingRecalculations.remove(key);
                             }
                         } finally {
-                            LockUtil.unpropagateLockSetFrom(callerThread);
+                            if (callerWaitsSynchronouslyForResult) {
+                                LockUtil.unpropagateLockSetFrom(callerThread);
+                            }
                         }
                     } catch (Exception e) {
                         // cache won't be updated

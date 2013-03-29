@@ -274,6 +274,13 @@ if [[ "$@" == "install" ]] || [[ "$@" == "all" ]]; then
         mkdir $ACDIR/configuration
     fi
 
+    # seems that initial scripts not there
+    if [ ! -f "$ACDIR/start" ]; then
+        cp -v $PROJECT_HOME/java/target/start $ACDIR
+        cp -v $PROJECT_HOME/java/target/http2udpmirror $ACDIR
+        cp -v $PROJECT_HOME/java/target/configuration/logging.properties $ACDIR/configuration
+    fi
+
     cd $ACDIR
 
     rm -rf $ACDIR/plugins/*.*
