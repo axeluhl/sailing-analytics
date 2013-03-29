@@ -115,7 +115,7 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
                     listener.windDataReceived(wind);
                 } catch (Exception e) {
                     logger.log(Level.SEVERE, "WindListener " + listener + " threw exception " + e.getMessage());
-                    logger.throwing(WindTrackImpl.class.getName(), "notifyListenersAboutReceive(Wind)", e);
+                    logger.log(Level.SEVERE, "notifyListenersAboutReceive(Wind)", e);
                 }
             }
         }
@@ -128,7 +128,7 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
                     listener.windAveragingChanged(oldMillisecondsOverWhichToAverage, newMillisecondsOverWhichToAverage);
                 } catch (Exception e) {
                     logger.log(Level.SEVERE, "WindListener " + listener + " threw exception " + e.getMessage());
-                    logger.throwing(WindTrackImpl.class.getName(), "notifyListenersAboutAveragingChange(long, long)", e);
+                    logger.log(Level.SEVERE, "notifyListenersAboutAveragingChange(long, long)", e);
                 }
             }
         }
@@ -141,7 +141,7 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
                     listener.windDataRemoved(wind);
                 } catch (Exception e) {
                     logger.log(Level.SEVERE, "WindListener " + listener + " threw exception " + e.getMessage());
-                    logger.throwing(WindTrackImpl.class.getName(), "notifyListenersAboutRemoval(Wind)", e);
+                    logger.log(Level.SEVERE, "notifyListenersAboutRemoval(Wind)", e);
                 }
             }
         }

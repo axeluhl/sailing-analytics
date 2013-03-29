@@ -5,6 +5,7 @@ import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Arrays;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
@@ -67,7 +68,7 @@ public class ReplicationServlet extends SailingServerHttpServlet {
                 getService().serializeForInitialReplication(oos);
             } catch (Exception e) {
                 logger.info("Error trying to serialize initial load for replication: "+e.getMessage());
-                logger.throwing(ReplicationServlet.class.getName(), "doGet", e);
+                logger.log(Level.SEVERE, "doGet", e);
                 resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                 e.printStackTrace(resp.getWriter());
             }

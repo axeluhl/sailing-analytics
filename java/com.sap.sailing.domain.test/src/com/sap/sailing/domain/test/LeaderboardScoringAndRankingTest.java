@@ -281,8 +281,8 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
 
     /**
      * Regarding bug 961, test scoring in a leaderboard that has a qualification series with two unordered groups where for one
-     * column only one group has raced (expressed by a mocked TrackedRace attached to the column). Ensure that the column doesn't
-     * count for computing the number of discards.
+     * column only one group has raced (expressed by a mocked TrackedRace attached to the column). Those who already raced their
+     * second race will have one discard, the others won't. Test this.
      */
     @Test
     public void testDiscardsForUnorderedGroupsWithOneGroupNotHavingRacedInAColumn() throws NoWindException {
@@ -307,9 +307,14 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
         TrackedRace q2Yellow = new MockedTrackedRaceWithStartTimeAndRanks(now, competitors.subList(3, 8));
         RaceColumn q2Column = qualificationSeries.getRaceColumnByName("Q2");
         q2Column.setTrackedRace(q2Column.getFleetByName("Yellow"), q2Yellow);
-        for (Competitor competitor : competitors) {
-            assertFalse("Competitor "+competitor+" has a discard in Q1 but shouldn't", leaderboard.isDiscarded(competitor, q1Column, later));
-            assertFalse("Competitor "+competitor+" has a discard in Q2 but shouldn't", leaderboard.isDiscarded(competitor, q2Column, later));
+        for (Competitor competitor : competitors.subList(3, 8)) {
+            assertTrue("Competitor "+competitor+" has no discard but should have one",
+                    leaderboard.isDiscarded(competitor, q1Column, later) || leaderboard.isDiscarded(competitor, q2Column, later));
+        }
+        for (Competitor competitor : Arrays.asList(new Competitor[] { competitors.get(0), competitors.get(1), competitors.get(2),
+                competitors.get(8), competitors.get(9) })) {
+            assertFalse("Competitor "+competitor+" has a discard but should'nt have one",
+                    leaderboard.isDiscarded(competitor, q1Column, later) || leaderboard.isDiscarded(competitor, q2Column, later));
         }
         // now add a tracked race for the blue fleet for Q2 and assert that all competitors have one discard
         TrackedRace q2Blue = new MockedTrackedRaceWithStartTimeAndRanks(now,

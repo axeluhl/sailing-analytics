@@ -21,6 +21,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 
@@ -289,7 +290,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
                         course.update(newCourseControlPointsWithPassingSide, domainFactory.getBaseDomainFactory());
                     } catch (PatchFailedException pfe) {
                         logger.severe("Failed to apply course update "+newTracTracControlPoints+" to course "+course);
-                        logger.throwing(TracTracRaceTrackerImpl.class.getName(), "scheduleClientParamsPHPPoller.run", pfe);
+                        logger.log(Level.SEVERE, "scheduleClientParamsPHPPoller.run", pfe);
                     }
                 }
                 updateStartStopTimesAndLiveDelay(clientParams, simulator);
