@@ -11,12 +11,21 @@ public class LeaderboardConfigurationPanel extends PageArea {
     @FindBy(how = BySeleniumId.class, using = "CreateFlexibleLeaderboardButton")
     private WebElement createFlexibleLeaderboardButton;
     
-    public LeaderboardConfigurationPanel(WebDriver driver, WebElement element) {
+    @FindBy(how = BySeleniumId.class, using = "CreateRegattaLeaderboardButton")
+    private WebElement createRegattaLeaderboardButton;
+    
+    protected LeaderboardConfigurationPanel(WebDriver driver, WebElement element) {
         super(driver, element);
     }
     
     public FlexibleLeaderboardCreationDialog startCreatingFlexibleLeaderboard() {
-        createFlexibleLeaderboardButton.click();
-        return new FlexibleLeaderboardCreationDialog(this.driver, findElementBySeleniumId(this.context, "CreateFlexibleLeaderboardDialog"));
+        this.createFlexibleLeaderboardButton.click();
+        
+        // Wait, since we trigger an AJAX-request to get the available events
+        waitForAjaxRequests();
+        
+        WebElement dialog = findElementBySeleniumId(this.driver, "CreateFlexibleLeaderboardDialog");
+        
+        return new FlexibleLeaderboardCreationDialog(this.driver, dialog);
     }
 }

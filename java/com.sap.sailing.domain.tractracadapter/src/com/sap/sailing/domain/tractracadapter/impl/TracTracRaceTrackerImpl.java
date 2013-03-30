@@ -262,7 +262,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
     private void pollAndParseClientParamsPHP(final URL paramURL, final Simulator simulator) {
         Set<RaceDefinition> raceDefinitions = getRaces();
         if (raceDefinitions != null && !raceDefinitions.isEmpty()) {
-            logger.info("fetching paramURL "+paramURL+" to check for updates for race(s) "+getRaces());
+            logger.fine("Fetching paramURL "+paramURL+" to check for updates for race(s) "+getRaces());
             final ClientParamsPHP clientParams;
             try {
                 clientParams = new ClientParamsPHP(new InputStreamReader(paramURL.openStream()));
@@ -315,7 +315,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
                 }
             } catch (IOException e) {
                 logger.info("Exception "+e.getMessage()+" while trying to read clientparams.php for races "+getRaces());
-                logger.throwing(TracTracRaceTracker.class.getName(), "scheduleClientParamsPHPPoller.run", e);
+                logger.log(Level.SEVERE, "scheduleClientParamsPHPPoller.run", e);
             }
         }
     }
