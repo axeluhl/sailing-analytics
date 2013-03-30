@@ -88,7 +88,8 @@ public class SystemInformationImpl implements SystemInformation {
             try {
                 sockstat = readProc("/proc/net/sockstat");
             } catch (Exception ex) {
-                /* ok ignore */
+                /* ok something went wrong */
+                ex.printStackTrace();
             }
         }
         
@@ -244,9 +245,6 @@ public class SystemInformationImpl implements SystemInformation {
             result.append(getTotalZombieProcesses()).append(" (total processes zombie)").append("\n");
             result.append(getTotalProcesses()).append(" (total)").append("\n");
             
-            result.append("Contents of TMP directory (java.io.tmpdir)").append("\n");
-            result.append(Arrays.toString(new File(System.getProperty("java.io.tmpdir")).listFiles()));
-            
             result.append("\nMemory:\n");
             result.append(getFreeMemoryGlobal()/1000 + "kb (free, not cached, not inactive)\n");
             result.append(getFreeMemoryJVM()/1000 + "kb (free JVM)\n");
@@ -294,6 +292,10 @@ public class SystemInformationImpl implements SystemInformation {
                    )
                 result.append(ns.toString()).append("\n");
             }
+
+            result.append("\nContents of TMP directory (java.io.tmpdir)").append("\n");
+            result.append(Arrays.toString(new File(System.getProperty("java.io.tmpdir")).listFiles()));
+            
         } catch (Exception ex) {
             ex.printStackTrace();
         }

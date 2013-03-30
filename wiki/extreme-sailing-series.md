@@ -8,12 +8,17 @@ Each race has a course that is set that way that spectators can see as much as p
 
 Usually not more than 8 competitors race against each other. One of the competitors is always an invitational team from the local spot that is allowed to race.
 
-## Links
+## External Links
 
 * [Extreme Sailing Series Offical Website](http://www.extremesailingseries.com/)
 * [Official Results](http://www.extremesailingseries.com/results)
 * [Analytics Homepage](http://ess40-2013.sapsailing.com/)
 * [Youtube Channel](http://www.youtube.com/user/ExtremeSailingSeries)
+
+## Notice of Race
+The current notice of race can be downloaded by using the link below. It is worth to mention that the NOR lacks the information about the fact that the last race breaks tie break.
+
+Download [[Notice of Race 2013 Final|wiki/uploads/NOR2013_ESS_final.pdf]]
 
 ## Boats
 To achieve the goal of providing invitees an exciting event a new type of boats have been designed. Capable of reaching speeds usually reserved to motorboats even in medium wind conditions, the Extreme 40 has been designed by Olympic champions Yves Loday and Mitch Booth, with the aim to provide the international sailing arena with a visually stunning and 100% performance-focused multihull. 
@@ -62,16 +67,34 @@ For the department of Visualization the technical infrastructure can be divided 
 
 3. The third part (ON PREMISE PUBLIC) describes all components analytical data are distributed on during an event. This includes private mobile phones, iPads being available for guests, flatscreens displaying leaderboards and tv streaming.
 
-### Actual
+### Actual (Muscat 2013)
 The actual setup is depicted in the following image. It is easy to see that all of the components in the ON PREMISE PUBLIC area are heavily dependent on a reliable internet connection. This becomes also problematic when the connection is slow because display of analytics requires some bandwidth.
 
 <img src="/wiki/images/ESSSetupIST.jpg"/>
 
-### Target
+### Target (Singapore 2013?)
 The following image depicts the setup that is desirable for the next events but not yet implemented. It features a local setup where the dependency on a reliable and fast internet connection is minimized as much as possible.
 
 The core of this setup is a server that not only hosts a SAP Sailing Analytics but also the TracTrac server. This way the distribution of analytical information is not dependent on the speed and bandwidth of the local internet connection. By adding a DNS server in front of this analytics server local requests can be directed to the local server even when guests use a public internet address (e.g. www.sapsailing.com). 
 
 In case of a problem with the local server requests can be redirected to the external analytics server. This server is constantly fed with data by a replication channel that gets information bits from the local analytics server.
 
+The main changes to the actual setup are as follows:
+
+* The SAP Sailing Analytics server that is authoritative for computing the results is no longer in the cloud but installed on premise. That way it is no longer dependent on a replicated TracTrac server but gets data directly from local TracTrac server.
+* TracTrac Server is integrated with SAP Sailing Analytics on one physical appliance. That eases maintenance and data exchange between SAP and TracTrac services.
+* Every leaderboard related information is gathered by accessing the local server. That way the dependency from the internet is drastically mitigated. Everyone on site always gets the right information without delay.
+* A routing server manages the DNS resolution and in case of a local failure is able to transparently redirect data to the cloud.
+* Score corrections also are not longer dependent on the internet connection but get fed directly into the local server.
+* Wind information for BeTomorrow can be provided without internet connection.
+
+Two weak points still remain (highlighted by red dotted lines):
+
+1. Wind data must be sent to a server that is reachable by a public ip address. This problem could be solved by extending the main router with 3G/4G functionality and putting the SAP Sailing Analytics server into DMZ.
+2. The same holds for buoy positions.
+
 <img src="/wiki/images/ESSSetupSOLL.jpg"/>
+
+To not be dependent on a shaky power source that can be restored by "wiggling pieces a little to fix the generator" it has been decided to introduce UPS that can fed important hardware with power up to half an hour. The following picture depicts a quick shot on how this could look like.
+
+<img src="/wiki/images/ESSSetupUPS.jpg"/>
