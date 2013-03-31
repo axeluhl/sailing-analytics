@@ -25,7 +25,7 @@ public class RegattaOverviewEntryPoint extends AbstractEntryPoint  {
         }
         String eventIdAsString = Window.Location.getParameter("event");
 
-        RegattaOverviewTableComposite regattaOverviewPanel = new RegattaOverviewTableComposite(sailingService, this, stringMessages, eventIdAsString);
+        RegattaOverviewPanel regattaOverviewPanel = new RegattaOverviewPanel(sailingService, this, stringMessages, eventIdAsString);
         rootPanel.add(regattaOverviewPanel);
     }
     

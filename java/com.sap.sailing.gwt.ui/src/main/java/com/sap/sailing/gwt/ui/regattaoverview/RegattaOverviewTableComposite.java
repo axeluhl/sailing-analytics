@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.regattaoverview;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -19,6 +20,10 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
+import com.google.gwt.view.client.SelectionChangeEvent;
+import com.google.gwt.view.client.SelectionModel;
+import com.google.gwt.view.client.SingleSelectionModel;
+import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.MarkedAsyncCallback;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -27,7 +32,6 @@ import com.sap.sailing.gwt.ui.client.TimeListener;
 import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.client.Timer.PlayStates;
-import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaOverviewEntryDTO;
 
 public class RegattaOverviewTableComposite extends Composite {
@@ -35,6 +39,7 @@ public class RegattaOverviewTableComposite extends Composite {
     private final long serverUpdateRate = 10000;
     private final long uiUpdateRate = 1000;
 
+    private final SelectionModel<RegattaOverviewEntryDTO> raceSelectionModel;
     private final CellTable<RegattaOverviewEntryDTO> regattaOverviewTable;
     private ListDataProvider<RegattaOverviewEntryDTO> regattaOverviewDataProvider;
     private final SimplePanel mainPanel;
@@ -42,24 +47,24 @@ public class RegattaOverviewTableComposite extends Composite {
     private final Timer serverUpdateTimer;
     private final Timer uiUpdateTimer;
     private final Label timeLabel;
-    private final Label eventNameLabel;
-    private final Label venueNameLabel;
     private final Button startStopUpdatingButton;
     private final DateTimeFormat timeFormatter = DateTimeFormat.getFormat("HH:mm:ss");
 
     private final SailingServiceAsync sailingService;
     private final StringMessages stringMessages;
     private final String eventIdAsString;
+    private final RegattaOverviewRaceSelectionProvider raceSelectionProvider;
 
     private static RegattaOverviewResources resources = GWT.create(RegattaOverviewResources.class);
 
     private static RegattaOverviewTableResources tableRes = GWT.create(RegattaOverviewTableResources.class);
 
     public RegattaOverviewTableComposite(final SailingServiceAsync sailingService, ErrorReporter errorReporter,
-            final StringMessages stringMessages, final String eventIdAsString) {
+            final StringMessages stringMessages, final String eventIdAsString, final RegattaOverviewRaceSelectionProvider raceSelectionProvider) {
         this.sailingService = sailingService;
         this.stringMessages = stringMessages;
         this.eventIdAsString = eventIdAsString;
+        this.raceSelectionProvider = raceSelectionProvider;
 
         this.serverUpdateTimer = new Timer(PlayModes.Live, serverUpdateRate);
         this.serverUpdateTimer.addTimeListener(new TimeListener() {
@@ -88,12 +93,9 @@ public class RegattaOverviewTableComposite extends Composite {
         regattaOverviewDataProvider = new ListDataProvider<RegattaOverviewEntryDTO>();
         regattaOverviewTable = createRegattaTable();
         
-        eventNameLabel = new Label();
-        venueNameLabel = new Label();
-
         timeLabel = new Label();
         
-        Button refreshNowButton = new Button("Refresh now");
+        Button refreshNowButton = new Button(stringMessages.refreshNow());
         refreshNowButton.addClickHandler(new ClickHandler() {
 
             @Override
@@ -103,56 +105,64 @@ public class RegattaOverviewTableComposite extends Composite {
             
         });
         
-        this.startStopUpdatingButton = new Button("Stop updating");
+        this.startStopUpdatingButton = new Button(stringMessages.stopUpdating());
         this.startStopUpdatingButton.addClickHandler(new ClickHandler() {
 
             @Override
             public void onClick(ClickEvent event) {
                 if (serverUpdateTimer.getPlayState().equals(PlayStates.Playing)) {
                     serverUpdateTimer.pause();
-                    startStopUpdatingButton.setText("Start updating");
+                    startStopUpdatingButton.setText(stringMessages.startUpdating());
                 } else if (serverUpdateTimer.getPlayState().equals(PlayStates.Paused)) {
                     serverUpdateTimer.play();
-                    startStopUpdatingButton.setText("Stop updating");
+                    startStopUpdatingButton.setText(stringMessages.stopUpdating());
                 }
             }
             
         });
         
         Grid gridTimeRefreshStop = new Grid(1, 4);
-        gridTimeRefreshStop.setWidget(0, 0, new Label("Current time: "));
+        gridTimeRefreshStop.setWidget(0, 0, new Label(stringMessages.currentTime()));
         gridTimeRefreshStop.setWidget(0, 1, timeLabel);
         gridTimeRefreshStop.setWidget(0, 2, refreshNowButton);
         gridTimeRefreshStop.setWidget(0, 3, startStopUpdatingButton);
 
-        panel.add(eventNameLabel);
-        panel.add(venueNameLabel);
+        raceSelectionModel = new SingleSelectionModel<RegattaOverviewEntryDTO>();
+        raceSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+
+            @Override
+            public void onSelectionChange(SelectionChangeEvent event) {
+                List<RegattaOverviewEntryDTO> selectedRaces = getSelectedRaces();
+                List<RaceIdentifier> selectedRaceIdentifiers = new ArrayList<RaceIdentifier>();
+                for (RegattaOverviewEntryDTO selectedRace : selectedRaces) {
+                    selectedRaceIdentifiers.add(selectedRace.raceInfo.raceIdentifier);
+                }
+                RegattaOverviewTableComposite.this.raceSelectionProvider.setSelection(selectedRaces);
+            }
+            
+        });
+        
+        regattaOverviewTable.setSelectionModel(raceSelectionModel);
+        
         panel.add(gridTimeRefreshStop);
         panel.add(regattaOverviewTable);
 
         initWidget(mainPanel);
         
-        fillEventAndVenueName();
         loadAndUpdateEventLog();
         onUpdateUI(new Date());
     }
 
-    private void fillEventAndVenueName() {
-        sailingService.getEventByIdAsString(eventIdAsString, new MarkedAsyncCallback<EventDTO>() {
-
-            @Override
-            protected void handleFailure(Throwable cause) {
-                
-            }
-
-            @Override
-            protected void handleSuccess(EventDTO result) {
-                if (result != null) {
-                    eventNameLabel.setText(result.name);
-                    venueNameLabel.setText(result.venue.name);
+    protected List<RegattaOverviewEntryDTO> getSelectedRaces() {
+        List<RegattaOverviewEntryDTO> result = new ArrayList<RegattaOverviewEntryDTO>();
+        if (regattaOverviewDataProvider != null) {
+            for (RegattaOverviewEntryDTO race : regattaOverviewDataProvider.getList()) {
+                if (raceSelectionModel.isSelected(race)) {
+                    result.add(race);
                 }
             }
-        });
+        }
+        return result;
     }
 
     public void onUpdateServer(Date time) {
@@ -168,7 +178,6 @@ public class RegattaOverviewTableComposite extends Composite {
 
             @Override
             protected void handleFailure(Throwable cause) {
-                // TODO Auto-generated method stub
                 
             }
 
@@ -259,5 +268,9 @@ public class RegattaOverviewTableComposite extends Composite {
         table.addColumn(lastFlagDirectionColumn, "");
 
         return table;
+    }
+    
+    public List<RegattaOverviewEntryDTO> getAllRaces() {
+        return regattaOverviewDataProvider.getList();
     }
 }

@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.ui.shared;
 
 import java.util.Date;
 
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 
@@ -15,6 +16,7 @@ public class RaceInfoDTO implements IsSerializable {
     public Flags lastFlag;
     public boolean displayed;
     public RaceCourseDTO lastCourseDesign;
+    public RegattaAndRaceIdentifier raceIdentifier;
     
     // for GWT serialization
     public RaceInfoDTO() { }

@@ -1097,7 +1097,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return result;
     }
 
-    private RaceInfoDTO convertToRaceInfoDTO(RaceColumnDTO raceColumnDTO, Fleet fleet, RaceLog raceLog) {
+    private RaceInfoDTO convertToRaceInfoDTO(RaceColumnDTO raceColumnDTO, FleetDTO fleetDTO, RaceLog raceLog) {
         RaceInfoDTO raceInfoDTO = new RaceInfoDTO();
         
         PassAwareRaceLogImpl passAwareRaceLog = new PassAwareRaceLogImpl(raceLog);
@@ -1107,7 +1107,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         }
         
         raceInfoDTO.raceName = raceColumnDTO.name;
-        raceInfoDTO.fleet = fleet.getName();
+        raceInfoDTO.fleet = fleetDTO.name;
+        raceInfoDTO.raceIdentifier = raceColumnDTO.getRaceIdentifier(fleetDTO);
         
         RaceStatusAnalyzer raceStatusAnalyzer = new RaceStatusAnalyzer(passAwareRaceLog); 
         raceInfoDTO.lastStatus = raceStatusAnalyzer.getStatus();
@@ -2229,7 +2230,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     private void addRaceInfoToRace(RaceColumn raceColumn, Fleet fleet, final FleetDTO fleetDTO, RaceColumnDTO raceColumnDTO) {
         RaceLog raceLog = raceColumn.getRaceLog(fleet);
-        RaceInfoDTO raceInfoDTO = convertToRaceInfoDTO(raceColumnDTO, fleet, raceLog);
+        RaceInfoDTO raceInfoDTO = convertToRaceInfoDTO(raceColumnDTO, fleetDTO, raceLog);
         raceColumnDTO.getRaceInfoPerFleet().put(fleetDTO, raceInfoDTO);
     }
 
