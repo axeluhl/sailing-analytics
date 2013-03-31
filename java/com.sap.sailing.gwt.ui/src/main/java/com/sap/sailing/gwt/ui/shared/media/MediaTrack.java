@@ -43,7 +43,17 @@ public class MediaTrack implements IsSerializable {
     }
     
     public enum Status {
-        UNDEFINED, CANNOT_PLAY, NOT_REACHABLE, REACHABLE; 
+        UNDEFINED('?'), CANNOT_PLAY('-'), NOT_REACHABLE('#'), REACHABLE('+');
+        
+        private final char symbol;
+        
+        private Status(char symbol) {
+            this.symbol = symbol;
+        }
+        
+        public String toString() {
+            return String.valueOf(this.symbol); 
+        }
     }
 
     public class MediaSection implements IsSerializable {
@@ -76,7 +86,7 @@ public class MediaTrack implements IsSerializable {
     }
     
     public String toString() {
-        return title + " - " + url + " [" + typeToString() + ']' + startTime + " [" + durationInMillis + ']';  
+        return title + " - " + url + " [" + typeToString() + ']' + startTime + " [" + durationInMillis + status + ']';  
     }
 
     public String typeToString() {
