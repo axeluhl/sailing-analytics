@@ -678,7 +678,6 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         List<com.sap.sailing.domain.swisstimingadapter.RaceRecord> result = new ArrayList<com.sap.sailing.domain.swisstimingadapter.RaceRecord>();
         SailMasterConnector swissTimingConnector = swissTimingFactory.getOrCreateSailMasterConnector(hostname, port, swissTimingAdapterPersistence,
                 canSendRequests);
-        //
         for (Race race : swissTimingConnector.getRaces()) {
             TimePoint startTime = swissTimingConnector.getStartTime(race.getRaceID());
             result.add(new com.sap.sailing.domain.swisstimingadapter.RaceRecord(race.getRaceID(), race.getDescription(),
@@ -1046,8 +1045,11 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         synchronized (raceTrackersByRegatta) {
             if (raceTrackersByRegatta.containsKey(regatta)) {
                 for (RaceTracker raceTracker : raceTrackersByRegatta.get(regatta)) {
-                    for (RaceDefinition race : raceTracker.getRaces()) {
-                        stopTrackingWind(regatta, race);
+                    final Set<RaceDefinition> races = raceTracker.getRaces();
+                    if (races != null) {
+                        for (RaceDefinition race : races) {
+                            stopTrackingWind(regatta, race);
+                        }
                     }
                     raceTracker.stop(); // this also removes the TrackedRace from trackedRegatta
                     raceTrackersByID.remove(raceTracker.getID());

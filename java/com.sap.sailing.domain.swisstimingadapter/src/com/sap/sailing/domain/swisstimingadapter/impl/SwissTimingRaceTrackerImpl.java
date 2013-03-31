@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.NavigableSet;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 
@@ -65,7 +66,12 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
     private final Regatta regatta;
     private final WindStore windStore;
 
+    /**
+     * Starts out as <code>null</code> and is set when the race definition has been created. When this happens, this object is
+     * {@link Object#notifyAll() notified}.
+     */
     private RaceDefinition race;
+    
     private Course course;
     private StartList startList;
     private DynamicTrackedRace trackedRace;
@@ -130,12 +136,37 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
 
             @Override
             public Set<RaceDefinition> getRaces() {
+                synchronized (this) {
+                    while (race == null) {
+                        try {
+                            this.wait();
+                        } catch (InterruptedException e) {
+                            logger.log(Level.SEVERE, "Interrupted wait", e);
+                        }
+                    }
+                }
                 return Collections.singleton(race);
             }
 
             @Override
             public Set<RaceDefinition> getRaces(long timeoutInMilliseconds) {
-                return Collections.singleton(race);
+                long start = System.currentTimeMillis();
+                synchronized (this) {
+                    RaceDefinition result = race;
+                    boolean interrupted = false;
+                    while ((System.currentTimeMillis()-start < timeoutInMilliseconds) && !interrupted && result == null) {
+                        try {
+                            long timeToWait = timeoutInMilliseconds - (System.currentTimeMillis() - start);
+                            if (timeToWait > 0) {
+                                this.wait(timeToWait);
+                            }
+                            result = race;
+                        } catch (InterruptedException e) {
+                            interrupted = true;
+                        }
+                    }
+                    return result == null ? null : Collections.singleton(result);
+                }
             }
 
             @Override
