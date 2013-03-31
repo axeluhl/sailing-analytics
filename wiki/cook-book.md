@@ -1,5 +1,7 @@
 # Cook Book with useful recipes
 
+[[_TOC_]]
+
 ### Export from MongoDB
 
 To export data from MongoDB you simply have to use the monogexport command. It will export data to human readable JSON format. Make absolutely sure to use fields backed by an index in your query otherwise it can put MongoDB under heavy load and take ages.
