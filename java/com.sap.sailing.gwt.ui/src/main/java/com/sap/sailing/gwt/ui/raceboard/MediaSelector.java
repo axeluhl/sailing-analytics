@@ -78,11 +78,11 @@ public class MediaSelector implements RaceTimesInfoProviderListener, PlayStateLi
                     Collection<MediaTrack> reachableVideoTracks = new ArrayList<MediaTrack>();
                     Collection<MediaTrack> reachableAudioTracks = new ArrayList<MediaTrack>();
                     for (MediaTrack mediaTrack : mediaTracks) {
-                        if (MediaTrack.Status.REACHABLE.equals(mediaTrack.status)) {
+                        if (isPotentiallyPlayable(mediaTrack)) {
                             switch (mediaTrack.mimeType.mediaType) {
                             case video:
                                 reachableVideoTracks.add(mediaTrack);
-                            case audio: //intentionall fall through
+                            case audio: //intentional fall through
                                 reachableAudioTracks.add(mediaTrack);
                             } 
                         }                        
@@ -119,20 +119,19 @@ public class MediaSelector implements RaceTimesInfoProviderListener, PlayStateLi
 
     }
     
+    private boolean isPotentiallyPlayable(MediaTrack mediaTrack) {
+        return MediaTrack.Status.REACHABLE.equals(mediaTrack.status) || MediaTrack.Status.UNDEFINED.equals(mediaTrack.status);
+    }
+
     private void setStatus(final MediaTrack mediaTrack) {
         if (!mediaTrack.isYoutube()) {
             Audio audio = Audio.createIfSupported();
             if (audio != null) {            
                 AudioElement mediaReachableTester = audio.getAudioElement();
-                String canPlay = mediaReachableTester.canPlayType(mediaTrack.typeToString());
-                if (MediaElement.CAN_PLAY_PROBABLY.equals(canPlay) || MediaElement.CAN_PLAY_MAYBE.equals(canPlay)) {
-                    addLoadMetadataHandler(mediaReachableTester, mediaTrack);
-                    mediaReachableTester.setPreload(MediaElement.PRELOAD_METADATA);
-                    mediaReachableTester.setSrc(mediaTrack.url);
-                    mediaReachableTester.load();
-                } else {
-                    mediaTrack.status = Status.CANNOT_PLAY;
-                }
+                addLoadMetadataHandler(mediaReachableTester, mediaTrack);
+                mediaReachableTester.setPreload(MediaElement.PRELOAD_METADATA);
+                mediaReachableTester.setSrc(mediaTrack.url);
+                mediaReachableTester.load();
             } else {
                 mediaTrack.status = Status.CANNOT_PLAY;
             }
@@ -146,10 +145,17 @@ public class MediaSelector implements RaceTimesInfoProviderListener, PlayStateLi
         mediaElement.addEventListener('loadedmetadata', function() {
             that.@com.sap.sailing.gwt.ui.raceboard.MediaSelector::loadedmetadata(Lcom/sap/sailing/gwt/ui/shared/media/MediaTrack;)(mediaTrack);
         });
+        mediaElement.addEventListener('error', function() {
+            that.@com.sap.sailing.gwt.ui.raceboard.MediaSelector::mediaError(Lcom/sap/sailing/gwt/ui/shared/media/MediaTrack;)(mediaTrack);
+        });
     }-*/;
     
     public void loadedmetadata(MediaTrack mediaTrack) {
         mediaTrack.status = Status.REACHABLE;
+    }
+    
+    public void mediaError(MediaTrack mediaTrack) {
+        mediaTrack.status = Status.NOT_REACHABLE;
     }
 
     private void playDefault() {
@@ -166,7 +172,7 @@ public class MediaSelector implements RaceTimesInfoProviderListener, PlayStateLi
     private MediaTrack getDefaultAudio() {
         //TODO: implement a better heuristic than just taking the first to come
         for (MediaTrack mediaTrack : mediaTracks) {
-            if (MediaType.audio.equals(mediaTrack.mimeType.mediaType)) {
+            if (MediaType.audio.equals(mediaTrack.mimeType.mediaType) && isPotentiallyPlayable(mediaTrack)) {
                 return mediaTrack;
             }
         }
@@ -175,7 +181,7 @@ public class MediaSelector implements RaceTimesInfoProviderListener, PlayStateLi
 
     private MediaTrack getDefaultVideo() {
         for (MediaTrack mediaTrack : mediaTracks) {
-            if (MediaType.video.equals(mediaTrack.mimeType.mediaType)) {
+            if (MediaType.video.equals(mediaTrack.mimeType.mediaType) && isPotentiallyPlayable(mediaTrack)) {
                 return mediaTrack;
             }
         }
