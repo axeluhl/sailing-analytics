@@ -8,6 +8,12 @@ To export data from MongoDB you simply have to use the monogexport command. It w
 
 `/opt/mongodb/bin/mongoexport --port 10202 -d winddb -c WIND_TRACKS -q "{'REGATTA_NAME': 'ESS 2013 Muscat (Extreme40)'}" > tmp/ess2013-muscat-wind.json`
 
+### Import to MongoDB
+
+Importing requires data to be in JSON format (as exported by mongoexport). To make sure that old entries just get updated and not overwritten you must use the --upsert parameter.
+
+`/opt/mongodb/bin/mongoimport --port 10202 -d winddb -c WIND_TRACKS --upsert tmp/ess2013-muscat-wind.json`
+
 ### Hot Deploy Java Packages to a running Server
 
 Sometimes you need to deploy code to a running OSGi server without restarting the whole process. To ease this process the script buildAndUpdateProduct.sh provides an action called _hot-deploy_. To deploy a changed package you first need to know the fully qualified name. In most cases (for com.sap* packages) this corresponds to the package name (e.g. com.sap.sailing.gwt.ui). To hot-deploy the package _com.sap.sailing.server.gateway_ one can use the following call:
