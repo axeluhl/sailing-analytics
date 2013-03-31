@@ -48,7 +48,7 @@ This document should depict the infrastructure used for upcoming events. The mai
  <tr>
   <th>ESS Qingdao</th>
   <th>29.04.2013-05.05.2013</th>
-  <th>http://sapcoe-app01.pironet-ndh.com/ (195.227.10.246)</th>
+  <th>http://sapcoe-template01.pironet-ndh.com/ (195.227.44.85)</th>
   <th>PROD1 (8889)</th>
   <th>TEST (8887)</th>
   <th>sailing</th>
