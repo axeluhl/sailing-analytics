@@ -108,14 +108,15 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
     @Override
     protected boolean isLiveModeToBeMadePossible() {
         long livePlayDelayInMillis = timer.getLivePlayDelayInMillis();
-        long eventTimeoutTolerance = 60 * 1000; // 60s 
+        long eventTimeoutTolerance = 60 * 1000; // 60s
+        long timeBeforeRaceStartTolerance = 3 * 60 * 1000; // 3min
         long liveTimePointInMillis = System.currentTimeMillis() - livePlayDelayInMillis;
         RaceTimesInfoDTO lastRaceTimesInfo = raceTimesInfoProvider != null ? raceTimesInfoProvider.getRaceTimesInfo(selectedRace) : null;
         return lastRaceTimesInfo != null &&
                 lastRaceTimesInfo.newestTrackingEvent != null &&
                 liveTimePointInMillis < lastRaceTimesInfo.newestTrackingEvent.getTime() + eventTimeoutTolerance &&
-                lastRaceTimesInfo.startOfTracking != null &&
-                liveTimePointInMillis > lastRaceTimesInfo.startOfTracking.getTime();
+                ((lastRaceTimesInfo.startOfTracking != null && liveTimePointInMillis > lastRaceTimesInfo.startOfTracking.getTime())||
+                 (lastRaceTimesInfo.startOfRace != null && liveTimePointInMillis > lastRaceTimesInfo.startOfRace.getTime() - timeBeforeRaceStartTolerance));
     }
     
     @Override
