@@ -180,7 +180,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         } catch (Exception e) {
             // something went wrong during DB access; report, then use empty new wind track
             logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load leaderboard "+name+".");
-            logger.throwing(DomainObjectFactoryImpl.class.getName(), "loadLeaderboard", e);
+            logger.log(Level.SEVERE, "loadLeaderboard", e);
         }
         return result;
     }
@@ -199,7 +199,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         } catch (Exception e) {
             // something went wrong during DB access; report, then use empty new wind track
             logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load leaderboards.");
-            logger.throwing(DomainObjectFactoryImpl.class.getName(), "getAllLeaderboards", e);
+            logger.log(Level.SEVERE, "getAllLeaderboards", e);
         }
         return result;
     }
@@ -561,7 +561,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             leaderboardGroup = loadLeaderboardGroup(leaderboardGroupCollection.findOne(query), regattaRegistry, leaderboardRegistry);
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load leaderboard group "+name+".");
-            logger.throwing(DomainObjectFactoryImpl.class.getName(), "loadLeaderboardGroup", e);
+            logger.log(Level.SEVERE, "loadLeaderboardGroup", e);
         }
 
         return leaderboardGroup;
@@ -577,7 +577,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             }
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load leaderboard groups.");
-            logger.throwing(DomainObjectFactoryImpl.class.getName(), "loadLeaderboardGroup", e);
+            logger.log(Level.SEVERE, "loadLeaderboardGroup", e);
         }
 
         return leaderboardGroups;
@@ -647,7 +647,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             }
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load leaderboards.");
-            logger.throwing(DomainObjectFactoryImpl.class.getName(), "getAllLeaderboards", e);
+            logger.log(Level.SEVERE, "getAllLeaderboards", e);
         }
         return result;
     }
@@ -718,7 +718,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         } catch (Exception e) {
             // something went wrong during DB access; report, then use empty new wind track
             logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load recorded wind data. Check MongoDB settings.");
-            logger.throwing(DomainObjectFactoryImpl.class.getName(), "loadWindTrack", e);
+            logger.log(Level.SEVERE, "loadWindTrack", e);
         }
         return result;
     }
@@ -769,7 +769,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             }
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load events.");
-            logger.throwing(DomainObjectFactoryImpl.class.getName(), "loadEvents", e);
+            logger.log(Level.SEVERE, "loadEvents", e);
         }
 
         return result;
@@ -979,7 +979,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         } catch (Throwable t) {
             // something went wrong during DB access; report, then use empty new race log
             logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load recorded race log data. Check MongoDB settings.");
-            logger.throwing(DomainObjectFactoryImpl.class.getName(), "loadRaceLog", t);
+            logger.log(Level.SEVERE, "loadRaceLog", t);
         }
         return result;
     }

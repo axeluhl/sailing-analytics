@@ -240,7 +240,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
                 listener.windSourcesToExcludeChanged(windSourcesToExclude);
             } catch (Exception e) {
                 logger.log(Level.SEVERE, "RaceChangeListener " + listener + " threw exception " + e.getMessage());
-                logger.throwing(DynamicTrackedRaceImpl.class.getName(), "notifyListenersWindSourcesToExcludeChanged(Iterable<WindSource>)", e);
+                logger.log(Level.SEVERE, "notifyListenersWindSourcesToExcludeChanged(Iterable<WindSource>)", e);
             }
         }
     }
@@ -256,7 +256,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
                 listener.raceTimesChanged(startOfTracking, endOfTracking, startTimeReceived);
             } catch (Exception e) {
                 logger.log(Level.SEVERE, "RaceChangeListener " + listener + " threw exception " + e.getMessage());
-                logger.throwing(DynamicTrackedRaceImpl.class.getName(), "notifyListenersRaceTimesChanged(TimePoint, TimePoint, TimePoint)", e);
+                logger.log(Level.SEVERE, "notifyListenersRaceTimesChanged(TimePoint, TimePoint, TimePoint)", e);
             }
         }
     }
@@ -271,7 +271,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
                 listener.markPositionChanged(fix, mark);
             } catch (Exception e) {
                 logger.log(Level.SEVERE, "RaceChangeListener " + listener + " threw exception " + e.getMessage());
-                logger.throwing(DynamicTrackedRaceImpl.class.getName(), "notifyListeners(GPSFix, Competitor)", e);
+                logger.log(Level.SEVERE, "notifyListeners(GPSFix, Competitor)", e);
             }
         }
     }
@@ -286,7 +286,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
                 listener.competitorPositionChanged(fix, competitor);
             } catch (Exception e) {
                 logger.log(Level.SEVERE, "RaceChangeListener " + listener + " threw exception " + e.getMessage());
-                logger.throwing(DynamicTrackedRaceImpl.class.getName(), "notifyListeners(GPSFix, Competitor)", e);
+                logger.log(Level.SEVERE, "notifyListeners(GPSFix, Competitor)", e);
             }
         }
     }
@@ -301,7 +301,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
                 listener.statusChanged(status);
             } catch (Exception e) {
                 logger.log(Level.SEVERE, "RaceChangeListener " + listener + " threw exception " + e.getMessage());
-                logger.throwing(DynamicTrackedRaceImpl.class.getName(), "notifyListeners(TrackedRaceStatus)", e);
+                logger.log(Level.SEVERE, "notifyListeners(TrackedRaceStatus)", e);
             }
         }
     }
@@ -316,7 +316,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
                 listener.windDataReceived(wind, windSource);
             } catch (Exception e) {
                 logger.log(Level.SEVERE, "RaceChangeListener " + listener + " threw exception " + e.getMessage());
-                logger.throwing(DynamicTrackedRaceImpl.class.getName(), "notifyListeners(Wind)", e);
+                logger.log(Level.SEVERE, "notifyListeners(Wind)", e);
             }
         }
     }
@@ -332,7 +332,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
                         newMillisecondsOverWhichToAverageSpeed);
             } catch (Exception e) {
                 logger.log(Level.SEVERE, "RaceChangeListener " + listener + " threw exception " + e.getMessage());
-                logger.throwing(DynamicTrackedRaceImpl.class.getName(),
+                logger.log(Level.SEVERE,
                         "notifyListenersSpeedAveragingChanged(long, long)", e);
             }
         }
@@ -349,7 +349,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
                         newMillisecondsOverWhichToAverageWind);
             } catch (Exception e) {
                 logger.log(Level.SEVERE, "RaceChangeListener " + listener + " threw exception " + e.getMessage());
-                logger.throwing(DynamicTrackedRaceImpl.class.getName(),
+                logger.log(Level.SEVERE,
                         "notifyListenersWindAveragingChanged(long, long)", e);
             }
         }
@@ -365,7 +365,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
                 listener.delayToLiveChanged(delayToLiveInMillis);
             } catch (Exception e) {
                 logger.log(Level.SEVERE, "RaceChangeListener " + listener + " threw exception " + e.getMessage());
-                logger.throwing(DynamicTrackedRaceImpl.class.getName(),
+                logger.log(Level.SEVERE,
                         "notifyListenersDelayToLiveChanged(long)", e);
             }
         }
@@ -381,7 +381,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
                 listener.windDataRemoved(wind, windSource);
             } catch (Exception e) {
                 logger.log(Level.SEVERE, "RaceChangeListener " + listener + " threw exception " + e.getMessage());
-                logger.throwing(DynamicTrackedRaceImpl.class.getName(), "notifyListenersWindRemoved(Wind)", e);
+                logger.log(Level.SEVERE, "notifyListenersWindRemoved(Wind)", e);
             }
         }
     }
@@ -396,7 +396,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
                 listener.markPassingReceived(competitor, oldMarkPassings, markPassings);
             } catch (Exception e) {
                 logger.log(Level.SEVERE, "RaceChangeListener " + listener + " threw exception " + e.getMessage());
-                logger.throwing(DynamicTrackedRaceImpl.class.getName(), "notifyListeners(MarkPassing)", e);
+                logger.log(Level.SEVERE, "notifyListeners(MarkPassing)", e);
             }
         }
     }

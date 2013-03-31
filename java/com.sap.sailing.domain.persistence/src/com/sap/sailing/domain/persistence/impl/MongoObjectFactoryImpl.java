@@ -2,6 +2,7 @@ package com.sap.sailing.domain.persistence.impl;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.bson.types.ObjectId;
@@ -159,7 +160,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
             leaderboardCollection.ensureIndex(FieldNames.LEADERBOARD_NAME.name());
         } catch (NullPointerException npe) {
             // sometimes, for reasons yet to be clarified, ensuring an index on the name field causes an NPE
-            logger.throwing(MongoObjectFactoryImpl.class.getName(), "storeLeaderboard", npe);
+            logger.log(Level.SEVERE, "storeLeaderboard", npe);
         }
         BasicDBObject query = new BasicDBObject(FieldNames.LEADERBOARD_NAME.name(), leaderboard.getName());
         BasicDBObject dbLeaderboard = new BasicDBObject();
@@ -324,7 +325,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
             leaderboardGroupCollection.ensureIndex(FieldNames.LEADERBOARD_GROUP_NAME.name());
         } catch (NullPointerException npe) {
             // sometimes, for reasons yet to be clarified, ensuring an index on the name field causes an NPE
-            logger.throwing(MongoObjectFactoryImpl.class.getName(), "storeLeaderboardGroup", npe);
+            logger.log(Level.SEVERE, "storeLeaderboardGroup", npe);
         }
         BasicDBObject query = new BasicDBObject(FieldNames.LEADERBOARD_GROUP_NAME.name(), leaderboardGroup.getName());
         BasicDBObject dbLeaderboardGroup = new BasicDBObject();

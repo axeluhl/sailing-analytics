@@ -117,7 +117,7 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<Route, RouteDa
                 }
             } catch (PatchFailedException e) {
                 logger.log(Level.SEVERE, "Internal error updating race course "+course+": "+e.getMessage());
-                logger.throwing(RaceCourseReceiver.class.getName(), "handleEvent", e);
+                logger.log(Level.SEVERE, "handleEvent", e);
             }
         } else {
             logger.log(Level.INFO, "Received course for non-existing race "+event.getC().getName()+". Creating RaceDefinition.");

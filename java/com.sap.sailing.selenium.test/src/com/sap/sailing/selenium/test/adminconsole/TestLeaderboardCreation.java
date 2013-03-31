@@ -11,14 +11,14 @@ import com.sap.sailing.selenium.test.adminconsole.pages.FlexibleLeaderboardCreat
 import com.sap.sailing.selenium.test.adminconsole.pages.LeaderboardConfigurationPanel;
 
 /**
- * <p>Test for starting and stopping the tracking of TracTrac races.</p>
+ * <p>Tests for creation of leader boards.</p>
  * 
  * @author
  *   D049941
  */
 public class TestLeaderboardCreation extends AbstractSeleniumTest {
     @Test
-    public void testStartAndStopTrackingWithCorrectRegatta() {
+    public void testCreateFlexibleLeaderboardWithDuplicateName() {
         AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
         LeaderboardConfigurationPanel leaderboardConfiguration = adminConsole.goToLeaderboardConfiguration();
         {

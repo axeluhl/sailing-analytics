@@ -181,7 +181,7 @@ public class CourseImpl extends NamedImpl implements Course {
             } catch (Exception e) {
                 logger.log(Level.SEVERE, "Exception while notifying listener about waypoint " + waypointToRemove
                         + " that got removed from course " + this + ": " + e.getMessage());
-                logger.throwing(CourseImpl.class.getName(), "notifyListenersWaypointRemoved", e);
+                logger.log(Level.SEVERE, "notifyListenersWaypointRemoved", e);
             }
         }
     }
@@ -193,7 +193,7 @@ public class CourseImpl extends NamedImpl implements Course {
             } catch (Exception e) {
                 logger.log(Level.SEVERE, "Exception while notifying listener about waypoint " + waypointToAdd
                         + " that got added to course " + this + ": " + e.getMessage());
-                logger.throwing(CourseImpl.class.getName(), "notifyListenersWaypointAdded", e);
+                logger.log(Level.SEVERE, "notifyListenersWaypointAdded", e);
             }
         }
     }

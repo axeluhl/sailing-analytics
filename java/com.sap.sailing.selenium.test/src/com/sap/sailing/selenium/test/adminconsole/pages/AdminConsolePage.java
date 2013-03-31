@@ -29,10 +29,10 @@ public class AdminConsolePage extends HostPage {
     private static final MessageFormat TAB_EXPRESSION = new MessageFormat(
             ".//div[@class=\"gwt-TabBarItem\" and @role=\"tab\"]/div[text()=\"{0}\"]/.."); //$NON-NLS-1$
     
-    private static final String TRACTRAC_TAB_LABEL = "TracTrac Events"; //$NON-NLS-1$
-    private static final String TRACTRAC_TAB_IDENTIFIER = "TracTracEventManagement"; //$NON-NLS-1$
+    private static final String TRACTRAC_EVENTS_TAB_LABEL = "TracTrac Events"; //$NON-NLS-1$
+    private static final String TRACTRAC_EVENTS_TAB_IDENTIFIER = "TracTracEventManagement"; //$NON-NLS-1$
 
-    private static final String LEADERBOARD_CONFIGURATION_LABEL = "Leaderboard Configuration";
+    private static final String LEADERBOARD_CONFIGURATION_TAB_LABEL = "Leaderboard Configuration";
     private static final String LEADERBOARD_CONFIGURATION_TAB_IDENTIFIER = "LeaderboardConfiguration";
 
     
@@ -82,11 +82,13 @@ public class AdminConsolePage extends HostPage {
      *   The page object for the TracTracEvents tab.
      */
     public TracTracEventManagementPanel goToTracTracEvents() {
-        return new TracTracEventManagementPanel(this.driver, goToTab(TRACTRAC_TAB_LABEL, TRACTRAC_TAB_IDENTIFIER));
+        return new TracTracEventManagementPanel(this.driver, goToTab(TRACTRAC_EVENTS_TAB_LABEL,
+                TRACTRAC_EVENTS_TAB_IDENTIFIER));
     }
     
     public LeaderboardConfigurationPanel goToLeaderboardConfiguration() {
-        return new LeaderboardConfigurationPanel(this.driver, goToTab(LEADERBOARD_CONFIGURATION_LABEL, LEADERBOARD_CONFIGURATION_TAB_IDENTIFIER));
+        return new LeaderboardConfigurationPanel(this.driver, goToTab(LEADERBOARD_CONFIGURATION_TAB_LABEL,
+                LEADERBOARD_CONFIGURATION_TAB_IDENTIFIER));
     }
 
     /**

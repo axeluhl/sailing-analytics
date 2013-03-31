@@ -678,7 +678,6 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         List<com.sap.sailing.domain.swisstimingadapter.RaceRecord> result = new ArrayList<com.sap.sailing.domain.swisstimingadapter.RaceRecord>();
         SailMasterConnector swissTimingConnector = swissTimingFactory.getOrCreateSailMasterConnector(hostname, port, swissTimingAdapterPersistence,
                 canSendRequests);
-        //
         for (Race race : swissTimingConnector.getRaces()) {
             TimePoint startTime = swissTimingConnector.getStartTime(race.getRaceID());
             result.add(new com.sap.sailing.domain.swisstimingadapter.RaceRecord(race.getRaceID(), race.getDescription(),
@@ -1045,8 +1044,11 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         synchronized (raceTrackersByRegatta) {
             if (raceTrackersByRegatta.containsKey(regatta)) {
                 for (RaceTracker raceTracker : raceTrackersByRegatta.get(regatta)) {
-                    for (RaceDefinition race : raceTracker.getRaces()) {
-                        stopTrackingWind(regatta, race);
+                    final Set<RaceDefinition> races = raceTracker.getRaces();
+                    if (races != null) {
+                        for (RaceDefinition race : races) {
+                            stopTrackingWind(regatta, race);
+                        }
                     }
                     raceTracker.stop(); // this also removes the TrackedRace from trackedRegatta
                     raceTrackersByID.remove(raceTracker.getID());
@@ -1107,7 +1109,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
                             stopTracking(regatta);
                         }
                     } catch (Exception e) {
-                        logger.throwing(RacingEventServiceImpl.class.getName(), "scheduleAbortTrackerAfterInitialTimeout", e);
+                        logger.log(Level.SEVERE, "scheduleAbortTrackerAfterInitialTimeout", e);
                         e.printStackTrace();
                     }
                 }
@@ -1542,7 +1544,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
             replicate(operation);
             return result;
         } catch (Exception e) {
-            logger.throwing(RacingEventServiceImpl.class.getName(), "apply", e);
+            logger.log(Level.SEVERE, "apply", e);
             throw new RuntimeException(e);
         }
     }
@@ -1555,7 +1557,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
             } catch (Exception e) {
                 // don't risk the master's operation only because replication to a listener/replica doesn't work
                 logger.severe("Error replicating operation "+operation+" to replication listener "+listener);
-                logger.throwing(RacingEventServiceImpl.class.getName(), "replicate", e);
+                logger.log(Level.SEVERE, "replicate", e);
             }
         }
     }
