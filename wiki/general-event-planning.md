@@ -12,7 +12,6 @@ This document should depict the infrastructure used for upcoming events. The mai
   <th>Java Backup Server</th>
   <th>TMUX Session</th>
   <th>Official URL</th>
-  <th>Internal URL</th>
   <th>Provider</th>
   <th>MongoDB Port Port</th>
   <th>Wind Port</th>
@@ -28,11 +27,10 @@ This document should depict the infrastructure used for upcoming events. The mai
   <th>TEST (8887)</th>
   <th>sailing</th>
   <th>http://ess40-2013.sapsailing.com</th>
-  <th>http://prod1.sapsailing.com</th>
   <th>TracTrac</th>
   <th>10202</th>
   <th>2014</th>
-  <th>Axel Uhl</th>
+  <th>Axel</th>
  </tr>
  <tr>
   <th>ESS Singapore</th>
@@ -42,11 +40,10 @@ This document should depict the infrastructure used for upcoming events. The mai
   <th>TEST (8887)</th>
   <th>sailing</th>
   <th>http://ess40-2013.sapsailing.com</th>
-  <th>http://prod1.sapsailing.com</th>
   <th>TracTrac</th>
   <th>10202</th>
   <th>2014</th>
-  <th>Simon Pamies</th>
+  <th>Simon</th>
  </tr>
  <tr>
   <th>ESS Qingdao</th>
@@ -56,11 +53,10 @@ This document should depict the infrastructure used for upcoming events. The mai
   <th>TEST (8887)</th>
   <th>sailing</th>
   <th>http://ess40-2013.sapsailing.com</th>
-  <th>http://prod1.sapsailing.com</th>
   <th>TracTrac</th>
   <th>10202</th>
   <th>2014</th>
-  <th>Simon Pamies</th>
+  <th>Simon</th>
  </tr>
  <tr>
   <th>505 Barbeidos</th>
@@ -73,8 +69,7 @@ This document should depict the infrastructure used for upcoming events. The mai
   <th>??</th>
   <th>??</th>
   <th>??</th>
-  <th>??</th>
-  <th>??</th>
+  <th>Axel</th>
  </tr>
  <tr>
   <th>Star IDM</th>
@@ -87,8 +82,7 @@ This document should depict the infrastructure used for upcoming events. The mai
   <th>??</th>
   <th>??</th>
   <th>??</th>
-  <th>??</th>
-  <th>??</th>
+  <th>Frank</th>
  </tr>
 </tbody>
 </table>
