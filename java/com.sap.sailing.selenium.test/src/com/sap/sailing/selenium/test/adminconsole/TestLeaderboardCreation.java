@@ -18,7 +18,7 @@ import com.sap.sailing.selenium.test.adminconsole.pages.LeaderboardConfiguration
  */
 public class TestLeaderboardCreation extends AbstractSeleniumTest {
     @Test
-    public void testCreateFlexibleLeaderboardWithDublicatedName() {
+    public void testCreateFlexibleLeaderboardWithDuplicateName() {
         AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
         LeaderboardConfigurationPanel leaderboardConfiguration = adminConsole.goToLeaderboardConfiguration();
         {
