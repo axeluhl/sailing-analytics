@@ -59,7 +59,7 @@ This document should depict the infrastructure used for upcoming events. The mai
   <th>Simon</th>
  </tr>
  <tr>
-  <th>505 Barbeidos</th>
+  <th>505 Barbados</th>
   <th>??</th>
   <th>??)</th>
   <th>??</th>
