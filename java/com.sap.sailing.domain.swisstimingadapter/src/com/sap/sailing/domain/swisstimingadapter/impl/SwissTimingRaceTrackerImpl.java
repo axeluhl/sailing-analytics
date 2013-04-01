@@ -313,11 +313,11 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
         StartList oldStartList = this.startList;
         this.startList = startList;
         if (oldStartList == null && course != null) {
-            createRaceDefinition(raceID);
+            createRaceDefinition(raceID, course);
         }
     }
 
-    private void createRaceDefinition(String raceID) {
+    private void createRaceDefinition(String raceID, Course course) {
         assert this.raceID.equals(raceID);
         assert startList != null;
         assert course != null;
@@ -351,15 +351,16 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
     @Override
     public void receivedCourseConfiguration(String raceID, Course course) {
         Course oldCourse = this.course;
-        this.course = course;
         if (trackedRace == null) {
             if (oldCourse == null && startList != null) {
-                createRaceDefinition(raceID);
+                createRaceDefinition(raceID, course);
+                this.course = course;
             }
         } else {
             if (isTrackedRaceStillReachable()) {
                 try {
                     domainFactory.updateCourseWaypoints(trackedRace.getRace().getCourse(), course.getMarks());
+                    this.course = course;
                 } catch (PatchFailedException e) {
                     logger.info("Internal error trying to update course: " + e.getMessage());
                     logger.throwing(SwissTimingRaceTrackerImpl.class.getName(), "receivedCourseConfiguration", e);
