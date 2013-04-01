@@ -25,13 +25,13 @@ public class SystemInformationImpl implements SystemInformation {
 
     private Sigar sigar_manager;
     private OperatingSystemMXBean java_manager;
-    
+
     private static SystemInformation singleton = null;
-    
+
     private long used_sockets = -1;
     private long allocated_tcp_connections = -1;
     private long used_tcp_connections = -1;
-    
+
     /**
      * @return An instance in case SIGAR can be activated. You always have to check
      *          for a null value.
@@ -44,17 +44,17 @@ public class SystemInformationImpl implements SystemInformation {
                 singleton = null;
             }
         }
-        
+
         return singleton;
     }
-    
+
     public SystemInformationImpl() throws SigarException {
         Sigar.load(); /* check if native libraries can be loaded */
 
         this.sigar_manager = new Sigar();
         this.java_manager = ManagementFactory.getOperatingSystemMXBean();
     }
-    
+
     protected String[] readProc(String path) {
         String line = ""; StringBuffer buf = new StringBuffer();
         BufferedReader reader = null;
@@ -76,40 +76,39 @@ public class SystemInformationImpl implements SystemInformation {
             }
         }
         return buf.toString().split("\\n");
-    }    
-    
+    }
+
     protected void parseSockStat() {
         String[] sockstat = new String[]{};
         try {
              sockstat = readProc("/proc/" + getPid() + "/net/sockstat");
         } catch (Exception e) {
-            /* seems that there are no local socket counts, try to use
-             * global ones */
-            try {
-                sockstat = readProc("/proc/net/sockstat");
-            } catch (Exception ex) {
-                /* ok something went wrong */
-                ex.printStackTrace();
-            }
+            /* ignore, something went wrong with PID extraction */
         }
-        
+
+        /* seems that there are no local socket counts,
+         * try to use global ones */
+        if (sockstat.length == 0) {
+            sockstat = readProc("/proc/net/sockstat");
+        }
+
         for (String line : sockstat) {
             String[] parts = line.split(" ");
             if (parts[0].equalsIgnoreCase("sockets:"))
                 this.used_sockets = Long.parseLong(parts[2].trim());
-            
+
             if (parts[0].equalsIgnoreCase("TCP:")) {
                 this.allocated_tcp_connections = Long.parseLong(parts[8].trim());
                 this.used_tcp_connections = Long.parseLong(parts[2].trim());
             }
-        }        
+        }
     }
-    
+
     @Override
     public ProcessInformation getProcessInformation(long pid) {
         return new ProcessInformationImpl(pid, sigar_manager);
     }
-    
+
     @Override
     public long getOutbundOpenConnectionCount() throws Exception {
         int flags = NetFlags.CONN_TCP | NetFlags.CONN_UDP | NetFlags.CONN_CLIENT;
@@ -150,7 +149,7 @@ public class SystemInformationImpl implements SystemInformation {
     @Override
     public long getOpenFiles() {
         String[] val = readProc("/proc/sys/fs/file-nr");
-        
+
         if(val.length > 0)
             return Long.parseLong(val[0].split("\t| ")[0].trim());
         return -1;
@@ -159,7 +158,7 @@ public class SystemInformationImpl implements SystemInformation {
     @Override
     public long getMaxOpenFiles() throws Exception {
         String[] val = readProc("/proc/sys/fs/file-max");
-        
+
         if (val.length > 0)
             return Long.parseLong(val[0].trim());
         return -1;
@@ -168,7 +167,7 @@ public class SystemInformationImpl implements SystemInformation {
     @Override
     public long getMaxInMemoryINodes() throws Exception {
         String[] val = readProc("/proc/sys/fs/inode-max");
-        
+
         if (val.length > 0)
             return Long.parseLong(val[0].trim());
         return -1;
@@ -213,7 +212,7 @@ public class SystemInformationImpl implements SystemInformation {
     public long getFreeMemoryGlobal() throws Exception {
         return sigar_manager.getMem().getFree();
     }
-    
+
     @Override
     public long getFreeMemoryJVM() {
         return Runtime.getRuntime().freeMemory();
@@ -237,30 +236,30 @@ public class SystemInformationImpl implements SystemInformation {
     public String toString() {
         StringBuffer result = new StringBuffer("");
         try {
-            
+
             result.append("General:\n");
             result.append(getLastLoadAverage()).append(" (load avg)").append("\n");
             result.append(getTotalRunningProcesses()).append(" (total processes running)").append("\n");
             result.append(getTotalStoppedProcesses()).append(" (total processes stopped)").append("\n");
             result.append(getTotalZombieProcesses()).append(" (total processes zombie)").append("\n");
             result.append(getTotalProcesses()).append(" (total)").append("\n");
-            
+
             result.append("\nMemory:\n");
             result.append(getFreeMemoryGlobal()/1000 + "kb (free, not cached, not inactive)\n");
             result.append(getFreeMemoryJVM()/1000 + "kb (free JVM)\n");
             result.append((getTotalMemoryJVM()-getFreeMemoryJVM())/1000 + "kb (used JVM)\n");
             result.append(getTotalMemoryJVM()/1000 + "kb (total JVM)\n");
-            
-            result.append("\nOpen files:\n") 
+
+            result.append("\nOpen files:\n")
                     .append(getOpenFiles()).append(" / ").append(getUsedSockets()).append(" (normal / sockets)").append("\n")
                     .append(getMaxOpenFiles()).append(" (max, also socket max)").append("\n")
                     .append(getMaxInMemoryINodes()).append(" (max in-memory inodes)").append("\n");
 
             result.append("\nNet:\n" + getTCPConnectionsInUse() + " (tcp conn in use)\n" + getAllocatedTCPConnections() + " (alloc'd tcp conn)\n" + getUsedSockets() + " (used sockets)").append("\n");
-            
+
             result.append(getOutbundOpenConnectionCount()).append(" (outbound conn count)").append("\n")
                 .append(getInboundOpenConnectionCount()).append(" (inbound conn count)").append("\n");
-            
+
             int flags = NetFlags.CONN_TCP | NetFlags.CONN_UDP | NetFlags.CONN_SERVER;
             NetConnection[] connections = getOpenNetworkConnections(flags);
 
@@ -295,14 +294,14 @@ public class SystemInformationImpl implements SystemInformation {
 
             result.append("\nContents of TMP directory (java.io.tmpdir)").append("\n");
             result.append(Arrays.toString(new File(System.getProperty("java.io.tmpdir")).listFiles()));
-            
+
         } catch (Exception ex) {
             ex.printStackTrace();
         }
 
         return result.toString();
     }
-    
+
     public static void main(String[] args) {
         try {
             System.out.println(SystemInformationImpl.getInstance());
