@@ -58,7 +58,7 @@ import com.sap.sailing.server.gateway.impl.LeaderboardJsonGetServlet;
 import com.sap.sailing.server.gateway.impl.RegattasJsonGetServlet;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
 
-public class JsonExportTests {
+public class JsonExportTest {
     private RacingEventService racingEventService;
     private Regatta regatta;
     private RegattaLeaderboard regattaLeaderboard;
