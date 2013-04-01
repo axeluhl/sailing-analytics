@@ -264,7 +264,7 @@ public class SystemInformationImpl implements SystemInformation {
             NetConnection[] connections = getOpenNetworkConnections(flags);
 
             result.append("\nCalling Process Statistics:\n");
-            result.append(getProcessInformation(getPid()));
+            result.append(getProcessInformation(getPid()) + "\n");
 
             result.append("\nOpen Local Ports:\n");
             for (NetConnection ns : connections) {
