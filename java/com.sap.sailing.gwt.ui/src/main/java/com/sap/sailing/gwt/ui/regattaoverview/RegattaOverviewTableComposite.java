@@ -21,7 +21,6 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionModel;
 import com.google.gwt.view.client.SingleSelectionModel;
-import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.MarkedAsyncCallback;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -65,12 +64,7 @@ public class RegattaOverviewTableComposite extends Composite {
 
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
-                List<RegattaOverviewEntryDTO> selectedRaces = getSelectedRaces();
-                List<RaceIdentifier> selectedRaceIdentifiers = new ArrayList<RaceIdentifier>();
-                for (RegattaOverviewEntryDTO selectedRace : selectedRaces) {
-                    selectedRaceIdentifiers.add(selectedRace.raceInfo.raceIdentifier);
-                }
-                RegattaOverviewTableComposite.this.raceSelectionProvider.setSelection(selectedRaces);
+                showSelectedRaces();
             }
             
         });
@@ -115,7 +109,6 @@ public class RegattaOverviewTableComposite extends Composite {
                 // now sort again according to selected criterion
                 ColumnSortEvent.fire(regattaOverviewTable, regattaOverviewTable.getColumnSortList());
             }
-            
         });
     }
 
@@ -271,5 +264,10 @@ public class RegattaOverviewTableComposite extends Composite {
     
     public List<RegattaOverviewEntryDTO> getAllRaces() {
         return regattaOverviewDataProvider.getList();
+    }
+
+    private void showSelectedRaces() {
+        List<RegattaOverviewEntryDTO> selectedRaces = getSelectedRaces();
+        RegattaOverviewTableComposite.this.raceSelectionProvider.setSelection(selectedRaces);
     }
 }
