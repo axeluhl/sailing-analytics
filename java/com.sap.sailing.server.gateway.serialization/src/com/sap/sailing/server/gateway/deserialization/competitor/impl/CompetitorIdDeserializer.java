@@ -1,4 +1,4 @@
-package com.sap.sailing.server.gateway.deserialization.impl;
+package com.sap.sailing.server.gateway.deserialization.competitor.impl;
 
 import java.io.Serializable;
 
@@ -12,7 +12,7 @@ import com.sap.sailing.server.gateway.serialization.competitor.impl.CompetitorJs
 
 public class CompetitorIdDeserializer implements JsonDeserializer<Competitor> {
 
-    private SharedDomainFactory factory;
+    protected SharedDomainFactory factory;
 
     public CompetitorIdDeserializer(SharedDomainFactory factory) {
         this.factory = factory;
