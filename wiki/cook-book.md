@@ -50,3 +50,7 @@ osgi> start 71
 Sometimes different line endings get mixed. To display all lin endings for each line of a given file use the following command:
 
 `perl -p -e 's[\r\n][WIN\n]; s[(?<!WIN)\n][UNIX\n]; s[\r][MAC\n];' <FILE>`
+
+### Finding Packages for Deployment in Target Platform
+
+Sometimes you want to add libraries to the target platform but you don't have correctly formatted JAR files. In this case you can find some files here: [Eclipse ORBIT](http://download.eclipse.org/tools/orbit/downloads/drops/R20130118183705/)
