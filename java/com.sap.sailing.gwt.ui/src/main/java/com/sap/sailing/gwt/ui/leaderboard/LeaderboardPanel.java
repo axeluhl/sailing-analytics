@@ -430,7 +430,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             timer.setRefreshInterval(newSettings.getDelayBetweenAutoAdvancesInMilliseconds());
         }
         if (newSettings.getDelayInMilliseconds() != null) {
-            setDelayInMilliseconds(newSettings.getDelayInMilliseconds());
+            timer.setLivePlayDelayInMillisExplicitly(newSettings.getDelayInMilliseconds());
         }
         for (ExpandableSortableColumn<?> expandableSortableColumn : columnsToExpandAgain) {
             expandableSortableColumn.toggleExpansion();
@@ -1840,11 +1840,11 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
 
     /**
      * Based on the {@link LeaderboardDTO#getDelayToLiveInMillisForLatestRace()} for the race that has the latest
-     * {@link RaceColumnDTO#getStartDate(FleetDTO) start time}, if no {@link #settingsUpdatedExplicitly explicit setting
-     * changes} were performed, automatically adjusts the delay accordingly.
+     * {@link RaceColumnDTO#getStartDate(FleetDTO) start time}, automatically adjusts the delay accordingly unless it
+     * was manually explicitly updated.
      */
     private void adjustDelayToLive() {
-        if (!settingsUpdatedExplicitly && leaderboard.getDelayToLiveInMillisForLatestRace() != null) {
+        if (leaderboard.getDelayToLiveInMillisForLatestRace() != null) {
             setDelayInMilliseconds(leaderboard.getDelayToLiveInMillisForLatestRace());
         }
     }
