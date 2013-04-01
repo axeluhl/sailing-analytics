@@ -1,0 +1,703 @@
+<?xml version="1.0" encoding="utf-8"?>
+<SailingXRR xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.sailing.org/uploads/xml/sailingXRR_v1.3.xsd" Date="2013-04-01" Time="20:22:07" Type="SailingXRR" Version="1.3.1">
+  <Person PersonID="" IFPersonID="" FamilyName="BELCHER" GivenName="Mat" NOC="AUS" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="RYAN" GivenName="Will" NOC="AUS" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="SCHMID" GivenName="Matthias" NOC="AUT" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="REICHSTAEDTER" GivenName="Florian" NOC="AUT" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="PATIENCE" GivenName="Luke" NOC="GBR" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="GLANFIELD" GivenName="Joe" NOC="GBR" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="WAGNER" GivenName="Jasper" NOC="GER" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="BALDEWEIN" GivenName="Dustin" NOC="GER" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="MANTIS" GivenName="Panagiotis" NOC="GRE" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="KAGIALIS" GivenName="Pavlos" NOC="GRE" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="CINAR" GivenName="Deniz" NOC="TUR" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="CINAR" GivenName="Ates" NOC="TUR" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="CALABRESE" GivenName="Lucas" NOC="ARG" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="de la FUENTE" GivenName="Juan" NOC="ARG" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="BOUVET" GivenName="Sofian" NOC="FRA" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="MION" GivenName="J?R?Mie" NOC="FRA" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="HERNANDEZ JORDI" GivenName="Xammar" NOC="ESP" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="MORELL JOAN" GivenName="Herp" NOC="ESP" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="LEBOUCHER" GivenName="Pierre" NOC="FRA" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="LEBERRE" GivenName="Nicolas" NOC="FRA" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="BARREIROS RODRIGUEZ" GivenName="Onan" NOC="ESP" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="CURBELO CABRERA" GivenName="Juan" NOC="ESP" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="SNOW-HANSEN" GivenName="Paul" NOC="NZL" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="WILLCOX" GivenName="Dan" NOC="NZL" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="ROSA" GivenName="Antonio" NOC="POR" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="SCHEDEL" GivenName="Ricardo" NOC="POR" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="GUILBAUD" GivenName="Vianney" NOC="FRA" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="GUILLARM" GivenName="Vincent" NOC="FRA" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="JIM" GivenName="Asenathi" NOC="RSA" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="HUDSON" GivenName="Roger" NOC="RSA" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="CHAUS" GivenName="Vladimir" NOC="RUS" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="GORETYI" GivenName="Denis" NOC="RUS" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="GERZ" GivenName="Ferdinand" NOC="GER" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="FOLLMANN" GivenName="Patrick" NOC="GER" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="BERROCAL" GivenName="Adolfo" NOC="ESP" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="COLL" GivenName="Ruben" NOC="ESP" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="DOI" GivenName="Kazuto" NOC="JPN" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="IMAMURA" GivenName="Kimihiko" NOC="JPN" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="McNAY" GivenName="Stuart" NOC="USA" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="HUGHES" GivenName="Dave" NOC="USA" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="MARTDNEZ DORESTE" GivenName="Jorge" NOC="ESP" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="SARMIENTO PADILLA" GivenName="Aaron" NOC="ESP" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="SHEREMETYEV" GivenName="Mikhail" NOC="RUS" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="SHEREMETYEV" GivenName="Maxim" NOC="RUS" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="BARGEHR" GivenName="David" NOC="AUT" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="MAEHR" GivenName="Lukas" NOC="AUT" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="LAN" GivenName="Hao" NOC="CHN" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="WANG" GivenName="Chao" NOC="CHN" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="ALEMANY PORCEL" GivenName="Macio" NOC="ESP" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="OLEVER ROSSELLO" GivenName="Gusi" NOC="ESP" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="DEMANET" GivenName="Corentin" NOC="BEL" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="LAUWERS" GivenName="Quinten" NOC="BEL" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="BERTRAND" GivenName="Martin" NOC="FRA" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="LARA" GivenName="Xavier" NOC="FRA" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="MASILGE" GivenName="Magnus" NOC="GER" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="KLINGENBERG" GivenName="Moritz" NOC="GER" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="VILLAS-BOAS" GivenName="Joao" NOC="POR" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="MANSO" GivenName="Paulo" NOC="POR" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="GALLOWAY" GivenName="Angus" NOC="AUS" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="HANNAH" GivenName="Tim" NOC="AUS" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="REBAUDI" GivenName="Francesco" NOC="ITA" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="RAMIAN" GivenName="Matteo" NOC="ITA" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="MOYSAN" GivenName="Louis" NOC="FRA" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="BERTHIER" GivenName="Baptiste" NOC="FRA" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="TABARES" GivenName="Rayco" NOC="ESP" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="GONZALEZ" GivenName="Alfredo" NOC="ESP" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="PEPONNET" GivenName="Kevin" NOC="FRA" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="LEBRUN" GivenName="Julien" NOC="FRA" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="LINDGREN" GivenName="Joonas" NOC="FIN" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="LINDGREN" GivenName="Niklas" NOC="FIN" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="LARDIES" GivenName="Francisco" NOC="NZL" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="STEVENSON" GivenName="Luke" NOC="NZL" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="WOOD" GivenName="Mike" NOC="GBR" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="BRAYSHAW" GivenName="Hugh" NOC="GBR" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="SKOCZEK" GivenName="Gabriel" NOC="FRA" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="NEBOUT" GivenName="Achille" NOC="FRA" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="CAPURRO" GivenName="Matteo" NOC="ITA" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="PUPPO" GivenName="Matteo" NOC="ITA" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="NAUJOCK" GivenName="Denny" NOC="GER" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="KEBEL" GivenName="Paul" NOC="GER" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="DAHLBERG" GivenName="Anton" NOC="SWE" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="BERGSTR M" GivenName="Fredrik" NOC="SWE" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="STCKL" GivenName="Julian" NOC="GER" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="SZYMANSKI" GivenName="Oliver" NOC="GER" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="PIROUELLE" GivenName="Guillaume" NOC="FRA" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="SIPAN" GivenName="Valentin" NOC="FRA" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="BERTOLA" GivenName="Niccolo" NOC="ITA" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="ALCIDI" GivenName="Danilo" NOC="ITA" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="SOZYKIN" GivenName="Pavel" NOC="RUS" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="GRIBANOV" GivenName="Denis" NOC="RUS" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="WINKEL" GivenName="Malte" NOC="GER" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="CIPRA" GivenName="Matti" NOC="GER" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="FALCETELLI" GivenName="Francesco" NOC="ITA" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="CLEMENTI" GivenName="Enrico" NOC="ITA" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="AUTENRIETH" GivenName="Julian" NOC="GER" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="AUTENRIETH" GivenName="Philipp" NOC="GER" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="TUDISCO" GivenName="Tommaso" NOC="ITA" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="PROVINCIALI" GivenName="Giacomo" NOC="ITA" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="SUCARI" GivenName="Francisco" NOC="ARG" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="RENNA" GivenName="Francisco" NOC="ARG" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="SAVOINI" GivenName="Emanuele" NOC="ITA" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="SAVOINI" GivenName="Enzio" NOC="ITA" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="NIKKIL" GivenName="Miikka" NOC="FIN" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="TYKKYL INEN" GivenName="Leo" NOC="FIN" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="CODINACHS GRAU" GivenName="Albert" NOC="ESP" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="PASCUAL RIBAS" GivenName="Ricard" NOC="ESP" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="GULLAN" GivenName="Robert" NOC="GBR" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="CHERRY" GivenName="Nick" NOC="GBR" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="CLAUS" GivenName="Clavin" NOC="AUT" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="KOHLENDORFER" GivenName="Alexander" NOC="AUT" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="CHARLES" GivenName="David" NOC="ESP" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="CHARLES" GivenName="Alex" NOC="ESP" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="PATRUNKY" GivenName="Julian" NOC="GER" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="SCHMANN" GivenName="Max" NOC="GER" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="MARTINEZ ABAD" GivenName="Pablo" NOC="ESP" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="ARCE ARCAY" GivenName="Isaac" NOC="ESP" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="VERTELETSKYI" GivenName="Illya" NOC="UKR" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="BARANNYK" GivenName="Vladislav" NOC="UKR" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="ROBINSON" GivenName="Ricky" NOC="RSA" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="ROBINSON" GivenName="Brennan" NOC="RSA" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="SCHARNAGL" GivenName="Stefan" NOC="AUT" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="HELMUT" GivenName="Schulz" NOC="AUT" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="SPINA" GivenName="Simone" NOC="ITA" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="BERNARD" GivenName="Matteo" NOC="ITA" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="ANTICH VICENS" GivenName="Xavi" NOC="ESP" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="TERRONES GARI" GivenName="Pedro" NOC="ESP" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="IZAROV" GivenName="Oleksandr" NOC="UKR" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="SEVERIANOV" GivenName="Igor" NOC="UKR" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="JIMENEZ FERN NDEZ" GivenName="Andres" NOC="ESP" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="JIMENEZ FERN NDEZ" GivenName="Rafale" NOC="ESP" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="RASSKAZOV" GivenName="Pavel" NOC="RUS" Gender="Male" />
+  <Person PersonID="" IFPersonID="" FamilyName="KHAUZER" GivenName="Stepan" NOC="RUS" Gender="Male" />
+  <Boat BoatID="SA08923" BoatName="" SailNumber="AUS-11" />
+  <Boat BoatID="SA08926" BoatName="" SailNumber="AUT-3" />
+  <Boat BoatID="SA08956" BoatName="" SailNumber="GBR-863" />
+  <Boat BoatID="SA08962" BoatName="" SailNumber="GER-55" />
+  <Boat BoatID="SA08965" BoatName="" SailNumber="GRE-1" />
+  <Boat BoatID="SA08989" BoatName="" SailNumber="TUR-1" />
+  <Boat BoatID="SA08922" BoatName="" SailNumber="ARG-7" />
+  <Boat BoatID="SA08948" BoatName="" SailNumber="FRA-27" />
+  <Boat BoatID="SA08940" BoatName="" SailNumber="ESP-44" />
+  <Boat BoatID="SA08951" BoatName="" SailNumber="FRA-44" />
+  <Boat BoatID="SA08943" BoatName="" SailNumber="ESP-9" />
+  <Boat BoatID="SA08975" BoatName="" SailNumber="NZL-2" />
+  <Boat BoatID="SA08980" BoatName="" SailNumber="POR-7" />
+  <Boat BoatID="SA08950" BoatName="" SailNumber="FRA-4" />
+  <Boat BoatID="SA08981" BoatName="" SailNumber="RSA-10" />
+  <Boat BoatID="SA08987" BoatName="" SailNumber="RUS-7" />
+  <Boat BoatID="SA08957" BoatName="" SailNumber="GER-10" />
+  <Boat BoatID="SA08939" BoatName="" SailNumber="ESP-4" />
+  <Boat BoatID="SA08974" BoatName="" SailNumber="JPN-4421" />
+  <Boat BoatID="SA08992" BoatName="" SailNumber="USA-1713" />
+  <Boat BoatID="SA08941" BoatName="" SailNumber="ESP-769" />
+  <Boat BoatID="SA08984" BoatName="" SailNumber="RUS-2" />
+  <Boat BoatID="SA08927" BoatName="" SailNumber="AUT-437" />
+  <Boat BoatID="SA08930" BoatName="" SailNumber="CHN-1211" />
+  <Boat BoatID="SA08933" BoatName="" SailNumber="ESP-13" />
+  <Boat BoatID="SA08929" BoatName="" SailNumber="BEL-16" />
+  <Boat BoatID="SA08946" BoatName="" SailNumber="FRA-15" />
+  <Boat BoatID="SA08964" BoatName="" SailNumber="GER-84" />
+  <Boat BoatID="SA08979" BoatName="" SailNumber="POR-2" />
+  <Boat BoatID="SA08924" BoatName="" SailNumber="AUS-7" />
+  <Boat BoatID="SA08973" BoatName="" SailNumber="ITA-99" />
+  <Boat BoatID="SA08947" BoatName="" SailNumber="FRA-20" />
+  <Boat BoatID="SA08938" BoatName="" SailNumber="ESP-22" />
+  <Boat BoatID="SA08953" BoatName="" SailNumber="FRA-8" />
+  <Boat BoatID="SA08945" BoatName="" SailNumber="FIN-7" />
+  <Boat BoatID="SA08976" BoatName="" SailNumber="NZL-20" />
+  <Boat BoatID="SA08955" BoatName="" SailNumber="GBR-843" />
+  <Boat BoatID="SA08949" BoatName="" SailNumber="FRA-34" />
+  <Boat BoatID="SA08967" BoatName="" SailNumber="ITA-10" />
+  <Boat BoatID="SA08963" BoatName="" SailNumber="GER-75" />
+  <Boat BoatID="SA08988" BoatName="" SailNumber="SWE-346" />
+  <Boat BoatID="SA08961" BoatName="" SailNumber="GER-5025" />
+  <Boat BoatID="SA08952" BoatName="" SailNumber="FRA-76" />
+  <Boat BoatID="SA08968" BoatName="" SailNumber="ITA-22" />
+  <Boat BoatID="" BoatName="" SailNumber="UKR-67" />
+  <Boat BoatID="SA08986" BoatName="" SailNumber="RUS-5" />
+  <Boat BoatID="SA08958" BoatName="" SailNumber="GER-13" />
+  <Boat BoatID="SA08969" BoatName="" SailNumber="ITA-25" />
+  <Boat BoatID="SA08959" BoatName="" SailNumber="GER-15" />
+  <Boat BoatID="SA08972" BoatName="" SailNumber="ITA-32" />
+  <Boat BoatID="SA08921" BoatName="" SailNumber="ARG-11" />
+  <Boat BoatID="SA08971" BoatName="" SailNumber="ITA-300" />
+  <Boat BoatID="SA08944" BoatName="" SailNumber="FIN-111" />
+  <Boat BoatID="SA08934" BoatName="" SailNumber="ESP-16" />
+  <Boat BoatID="SA08954" BoatName="" SailNumber="GBR-828" />
+  <Boat BoatID="SA08925" BoatName="" SailNumber="AUT-11" />
+  <Boat BoatID="SA08931" BoatName="" SailNumber="ESP-1" />
+  <Boat BoatID="SA08960" BoatName="" SailNumber="GER-48" />
+  <Boat BoatID="SA08932" BoatName="" SailNumber="ESP-11" />
+  <Boat BoatID="SA08991" BoatName="" SailNumber="UKR-23" />
+  <Boat BoatID="SA08982" BoatName="" SailNumber="RSA-8" />
+  <Boat BoatID="SA08928" BoatName="" SailNumber="AUT-477" />
+  <Boat BoatID="SA08970" BoatName="" SailNumber="ITA-28" />
+  <Boat BoatID="SA08937" BoatName="" SailNumber="ESP-1868" />
+  <Boat BoatID="SA08990" BoatName="" SailNumber="UKR-11" />
+  <Boat BoatID="SA08935" BoatName="" SailNumber="ESP-17" />
+  <Boat BoatID="" BoatName="" SailNumber="ESP-18" />
+  <Boat BoatID="SA08985" BoatName="" SailNumber="RUS-100" />
+  <Team Gender="Men" NOC="AUS" TeamID="SA08923" TeamName="" BoatID="SA08923">
+    <Crew PersonID="" Position="S" />
+    <Crew PersonID="" Position="S" />
+  </Team>
+  <Team Gender="Men" NOC="AUT" TeamID="SA08926" TeamName="" BoatID="SA08926">
+    <Crew PersonID="" Position="S" />
+    <Crew PersonID="" Position="S" />
+  </Team>
+  <Team Gender="Men" NOC="GBR" TeamID="SA08956" TeamName="" BoatID="SA08956">
+    <Crew PersonID="" Position="S" />
+    <Crew PersonID="" Position="S" />
+  </Team>
+  <Team Gender="Men" NOC="GER" TeamID="SA08962" TeamName="" BoatID="SA08962">
+    <Crew PersonID="" Position="S" />
+    <Crew PersonID="" Position="S" />
+  </Team>
+  <Team Gender="Men" NOC="GRE" TeamID="SA08965" TeamName="" BoatID="SA08965">
+    <Crew PersonID="" Position="S" />
+    <Crew PersonID="" Position="S" />
+  </Team>
+  <Team Gender="Men" NOC="TUR" TeamID="SA08989" TeamName="" BoatID="SA08989">
+    <Crew PersonID="" Position="S" />
+    <Crew PersonID="" Position="S" />
+  </Team>
+  <Team Gender="Men" NOC="ARG" TeamID="SA08922" TeamName="" BoatID="SA08922">
+    <Crew PersonID="" Position="S" />
+    <Crew PersonID="" Position="S" />
+  </Team>
+  <Team Gender="Men" NOC="FRA" TeamID="SA08948" TeamName="" BoatID="SA08948">
+    <Crew PersonID="" Position="S" />
+    <Crew PersonID="" Position="S" />
+  </Team>
+  <Team Gender="Men" NOC="ESP" TeamID="SA08940" TeamName="" BoatID="SA08940">
+    <Crew PersonID="" Position="S" />
+    <Crew PersonID="" Position="S" />
+  </Team>
+  <Team Gender="Men" NOC="FRA" TeamID="SA08951" TeamName="" BoatID="SA08951">
+    <Crew PersonID="" Position="S" />
+    <Crew PersonID="" Position="S" />
+  </Team>
+  <Team Gender="Men" NOC="ESP" TeamID="SA08943" TeamName="" BoatID="SA08943">
+    <Crew PersonID="" Position="S" />
+    <Crew PersonID="" Position="S" />
+  </Team>
+  <Team Gender="Men" NOC="NZL" TeamID="SA08975" TeamName="" BoatID="SA08975">
+    <Crew PersonID="" Position="S" />
+    <Crew PersonID="" Position="S" />
+  </Team>
+  <Team Gender="Men" NOC="POR" TeamID="SA08980" TeamName="" BoatID="SA08980">
+    <Crew PersonID="" Position="S" />
+    <Crew PersonID="" Position="S" />
+  </Team>
+  <Team Gender="Men" NOC="FRA" TeamID="SA08950" TeamName="" BoatID="SA08950">
+    <Crew PersonID="" Position="S" />
+    <Crew PersonID="" Position="S" />
+  </Team>
+  <Team Gender="Men" NOC="RSA" TeamID="SA08981" TeamName="" BoatID="SA08981">
+    <Crew PersonID="" Position="S" />
+    <Crew PersonID="" Position="S" />
+  </Team>
+  <Team Gender="Men" NOC="RUS" TeamID="SA08987" TeamName="" BoatID="SA08987">
+    <Crew PersonID="" Position="S" />
+    <Crew PersonID="" Position="S" />
+  </Team>
+  <Team Gender="Men" NOC="GER" TeamID="SA08957" TeamName="" BoatID="SA08957">
+    <Crew PersonID="" Position="S" />
+    <Crew PersonID="" Position="S" />
+  </Team>
+  <Team Gender="Men" NOC="ESP" TeamID="SA08939" TeamName="" BoatID="SA08939">
+    <Crew PersonID="" Position="S" />
+    <Crew PersonID="" Position="S" />
+  </Team>
+  <Team Gender="Men" NOC="JPN" TeamID="SA08974" TeamName="" BoatID="SA08974">
+    <Crew PersonID="" Position="S" />
+    <Crew PersonID="" Position="S" />
+  </Team>
+  <Team Gender="Men" NOC="USA" TeamID="SA08992" TeamName="" BoatID="SA08992">
+    <Crew PersonID="" Position="S" />
+    <Crew PersonID="" Position="S" />
+  </Team>
+  <Team Gender="Men" NOC="ESP" TeamID="SA08941" TeamName="" BoatID="SA08941">
+    <Crew PersonID="" Position="S" />
+    <Crew PersonID="" Position="S" />
+  </Team>
+  <Team Gender="Men" NOC="RUS" TeamID="SA08984" TeamName="" BoatID="SA08984">
+    <Crew PersonID="" Position="S" />
+    <Crew PersonID="" Position="S" />
+  </Team>
+  <Team Gender="Men" NOC="AUT" TeamID="SA08927" TeamName="" BoatID="SA08927">
+    <Crew PersonID="" Position="S" />
+    <Crew PersonID="" Position="S" />
+  </Team>
+  <Team Gender="Men" NOC="CHN" TeamID="SA08930" TeamName="" BoatID="SA08930">
+    <Crew PersonID="" Position="S" />
+    <Crew PersonID="" Position="S" />
+  </Team>
+  <Team Gender="Men" NOC="ESP" TeamID="SA08933" TeamName="" BoatID="SA08933">
+    <Crew PersonID="" Position="S" />
+    <Crew PersonID="" Position="S" />
+  </Team>
+  <Team Gender="Men" NOC="BEL" TeamID="SA08929" TeamName="" BoatID="SA08929">
+    <Crew PersonID="" Position="S" />
+    <Crew PersonID="" Position="S" />
+  </Team>
+  <Team Gender="Men" NOC="FRA" TeamID="SA08946" TeamName="" BoatID="SA08946">
+    <Crew PersonID="" Position="S" />
+    <Crew PersonID="" Position="S" />
+  </Team>
+  <Team Gender="Men" NOC="GER" TeamID="SA08964" TeamName="" BoatID="SA08964">
+    <Crew PersonID="" Position="S" />
+    <Crew PersonID="" Position="S" />
+  </Team>
+  <Team Gender="Men" NOC="POR" TeamID="SA08979" TeamName="" BoatID="SA08979">
+    <Crew PersonID="" Position="S" />
+    <Crew PersonID="" Position="S" />
+  </Team>
+  <Team Gender="Men" NOC="AUS" TeamID="SA08924" TeamName="" BoatID="SA08924">
+    <Crew PersonID="" Position="S" />
+    <Crew PersonID="" Position="S" />
+  </Team>
+  <Team Gender="Men" NOC="ITA" TeamID="SA08973" TeamName="" BoatID="SA08973">
+    <Crew PersonID="" Position="S" />
+    <Crew PersonID="" Position="S" />
+  </Team>
+  <Team Gender="Men" NOC="FRA" TeamID="SA08947" TeamName="" BoatID="SA08947">
+    <Crew PersonID="" Position="S" />
+    <Crew PersonID="" Position="S" />
+  </Team>
+  <Team Gender="Men" NOC="ESP" TeamID="SA08938" TeamName="" BoatID="SA08938">
+    <Crew PersonID="" Position="S" />
+    <Crew PersonID="" Position="S" />
+  </Team>
+  <Team Gender="Men" NOC="FRA" TeamID="SA08953" TeamName="" BoatID="SA08953">
+    <Crew PersonID="" Position="S" />
+    <Crew PersonID="" Position="S" />
+  </Team>
+  <Team Gender="Men" NOC="FIN" TeamID="SA08945" TeamName="" BoatID="SA08945">
+    <Crew PersonID="" Position="S" />
+    <Crew PersonID="" Position="S" />
+  </Team>
+  <Team Gender="Men" NOC="NZL" TeamID="SA08976" TeamName="" BoatID="SA08976">
+    <Crew PersonID="" Position="S" />
+    <Crew PersonID="" Position="S" />
+  </Team>
+  <Team Gender="Men" NOC="GBR" TeamID="SA08955" TeamName="" BoatID="SA08955">
+    <Crew PersonID="" Position="S" />
+    <Crew PersonID="" Position="S" />
+  </Team>
+  <Team Gender="Men" NOC="FRA" TeamID="SA08949" TeamName="" BoatID="SA08949">
+    <Crew PersonID="" Position="S" />
+    <Crew PersonID="" Position="S" />
+  </Team>
+  <Team Gender="Men" NOC="ITA" TeamID="SA08967" TeamName="" BoatID="SA08967">
+    <Crew PersonID="" Position="S" />
+    <Crew PersonID="" Position="S" />
+  </Team>
+  <Team Gender="Men" NOC="GER" TeamID="SA08963" TeamName="" BoatID="SA08963">
+    <Crew PersonID="" Position="S" />
+    <Crew PersonID="" Position="S" />
+  </Team>
+  <Team Gender="Men" NOC="SWE" TeamID="SA08988" TeamName="" BoatID="SA08988">
+    <Crew PersonID="" Position="S" />
+    <Crew PersonID="" Position="S" />
+  </Team>
+  <Team Gender="Men" NOC="GER" TeamID="SA08961" TeamName="" BoatID="SA08961">
+    <Crew PersonID="" Position="S" />
+    <Crew PersonID="" Position="S" />
+  </Team>
+  <Team Gender="Men" NOC="FRA" TeamID="SA08952" TeamName="" BoatID="SA08952">
+    <Crew PersonID="" Position="S" />
+    <Crew PersonID="" Position="S" />
+  </Team>
+  <Team Gender="Men" NOC="ITA" TeamID="SA08968" TeamName="" BoatID="SA08968">
+    <Crew PersonID="" Position="S" />
+    <Crew PersonID="" Position="S" />
+  </Team>
+  <Team Gender="Men" NOC="UKR" TeamID="" TeamName="" BoatID="" />
+  <Team Gender="Men" NOC="RUS" TeamID="SA08986" TeamName="" BoatID="SA08986">
+    <Crew PersonID="" Position="S" />
+    <Crew PersonID="" Position="S" />
+  </Team>
+  <Team Gender="Men" NOC="GER" TeamID="SA08958" TeamName="" BoatID="SA08958">
+    <Crew PersonID="" Position="S" />
+    <Crew PersonID="" Position="S" />
+  </Team>
+  <Team Gender="Men" NOC="ITA" TeamID="SA08969" TeamName="" BoatID="SA08969">
+    <Crew PersonID="" Position="S" />
+    <Crew PersonID="" Position="S" />
+  </Team>
+  <Team Gender="Men" NOC="GER" TeamID="SA08959" TeamName="" BoatID="SA08959">
+    <Crew PersonID="" Position="S" />
+    <Crew PersonID="" Position="S" />
+  </Team>
+  <Team Gender="Men" NOC="ITA" TeamID="SA08972" TeamName="" BoatID="SA08972">
+    <Crew PersonID="" Position="S" />
+    <Crew PersonID="" Position="S" />
+  </Team>
+  <Team Gender="Men" NOC="ARG" TeamID="SA08921" TeamName="" BoatID="SA08921">
+    <Crew PersonID="" Position="S" />
+    <Crew PersonID="" Position="S" />
+  </Team>
+  <Team Gender="Men" NOC="ITA" TeamID="SA08971" TeamName="" BoatID="SA08971">
+    <Crew PersonID="" Position="S" />
+    <Crew PersonID="" Position="S" />
+  </Team>
+  <Team Gender="Men" NOC="FIN" TeamID="SA08944" TeamName="" BoatID="SA08944">
+    <Crew PersonID="" Position="S" />
+    <Crew PersonID="" Position="S" />
+  </Team>
+  <Team Gender="Men" NOC="ESP" TeamID="SA08934" TeamName="" BoatID="SA08934">
+    <Crew PersonID="" Position="S" />
+    <Crew PersonID="" Position="S" />
+  </Team>
+  <Team Gender="Men" NOC="GBR" TeamID="SA08954" TeamName="" BoatID="SA08954">
+    <Crew PersonID="" Position="S" />
+    <Crew PersonID="" Position="S" />
+  </Team>
+  <Team Gender="Men" NOC="AUT" TeamID="SA08925" TeamName="" BoatID="SA08925">
+    <Crew PersonID="" Position="S" />
+    <Crew PersonID="" Position="S" />
+  </Team>
+  <Team Gender="Men" NOC="ESP" TeamID="SA08931" TeamName="" BoatID="SA08931">
+    <Crew PersonID="" Position="S" />
+    <Crew PersonID="" Position="S" />
+  </Team>
+  <Team Gender="Men" NOC="GER" TeamID="SA08960" TeamName="" BoatID="SA08960">
+    <Crew PersonID="" Position="S" />
+    <Crew PersonID="" Position="S" />
+  </Team>
+  <Team Gender="Men" NOC="ESP" TeamID="SA08932" TeamName="" BoatID="SA08932">
+    <Crew PersonID="" Position="S" />
+    <Crew PersonID="" Position="S" />
+  </Team>
+  <Team Gender="Men" NOC="UKR" TeamID="SA08991" TeamName="" BoatID="SA08991">
+    <Crew PersonID="" Position="S" />
+    <Crew PersonID="" Position="S" />
+  </Team>
+  <Team Gender="Men" NOC="RSA" TeamID="SA08982" TeamName="" BoatID="SA08982">
+    <Crew PersonID="" Position="S" />
+    <Crew PersonID="" Position="S" />
+  </Team>
+  <Team Gender="Men" NOC="AUT" TeamID="SA08928" TeamName="" BoatID="SA08928">
+    <Crew PersonID="" Position="S" />
+    <Crew PersonID="" Position="S" />
+  </Team>
+  <Team Gender="Men" NOC="ITA" TeamID="SA08970" TeamName="" BoatID="SA08970">
+    <Crew PersonID="" Position="S" />
+    <Crew PersonID="" Position="S" />
+  </Team>
+  <Team Gender="Men" NOC="ESP" TeamID="SA08937" TeamName="" BoatID="SA08937">
+    <Crew PersonID="" Position="S" />
+    <Crew PersonID="" Position="S" />
+  </Team>
+  <Team Gender="Men" NOC="UKR" TeamID="SA08990" TeamName="" BoatID="SA08990">
+    <Crew PersonID="" Position="S" />
+    <Crew PersonID="" Position="S" />
+  </Team>
+  <Team Gender="Men" NOC="ESP" TeamID="SA08935" TeamName="" BoatID="SA08935">
+    <Crew PersonID="" Position="S" />
+    <Crew PersonID="" Position="S" />
+  </Team>
+  <Team Gender="Men" NOC="ESP" TeamID="" TeamName="" BoatID="" />
+  <Team Gender="Men" NOC="RUS" TeamID="SA08985" TeamName="" BoatID="SA08985">
+    <Crew PersonID="" Position="S" />
+    <Crew PersonID="" Position="S" />
+  </Team>
+  <Event EventID="SAM005000" IFEventID="IFRGT-15961" Title="470 Men" Type="Regatta">
+    <Race RaceID="SAM005901" RaceName="Race 1 - Yellow" RaceNumber="1" RaceStartDate="2013-04-01" RaceStartTime="11:06:00" RaceStatus="result" />
+    <Race RaceID="SAM005915" RaceName="Race 1 - Blue" RaceNumber="15" RaceStartDate="2013-04-01" RaceStartTime="11:15:00" RaceStatus="result" />
+    <Race RaceID="SAM005902" RaceName="Race 2 - Yellow" RaceNumber="2" RaceStartDate="2013-04-01" RaceStartTime="12:20:00" RaceStatus="result" />
+    <Race RaceID="SAM005916" RaceName="Race 2 - Blue" RaceNumber="16" RaceStartDate="2013-04-01" RaceStartTime="12:30:00" RaceStatus="result" />
+    <Race RaceID="SAM005903" RaceName="Race 3 - Yellow" RaceNumber="3" RaceStartDate="2013-04-02" RaceStartTime="11:00:00" RaceStatus="scheduled" />
+    <Race RaceID="SAM005917" RaceName="Race 3 - Blue" RaceNumber="17" RaceStartDate="2013-04-02" RaceStartTime="11:00:00" RaceStatus="scheduled" />
+    <Race RaceID="SAM005904" RaceName="Race 4 - Yellow" RaceNumber="4" RaceStartDate="2013-04-02" RaceStartTime="12:30:00" RaceStatus="scheduled" />
+    <Race RaceID="SAM005918" RaceName="Race 4 - Blue" RaceNumber="18" RaceStartDate="2013-04-02" RaceStartTime="12:30:00" RaceStatus="scheduled" />
+    <Race RaceID="SAM005905" RaceName="Race 5 - Yellow" RaceNumber="5" RaceStartDate="2013-04-03" RaceStartTime="11:00:00" RaceStatus="scheduled" />
+    <Race RaceID="SAM005919" RaceName="Race 5 - Blue" RaceNumber="19" RaceStartDate="2013-04-03" RaceStartTime="11:00:00" RaceStatus="scheduled" />
+    <Race RaceID="SAM005906" RaceName="Race 6 - Yellow" RaceNumber="6" RaceStartDate="2013-04-03" RaceStartTime="12:30:00" RaceStatus="scheduled" />
+    <Race RaceID="SAM005920" RaceName="Race 6 - Blue" RaceNumber="20" RaceStartDate="2013-04-03" RaceStartTime="12:30:00" RaceStatus="scheduled" />
+    <Race RaceID="SAM005907" RaceName="Race 7 - Gold Carried Forward Race" RaceNumber="7" RaceStartDate="2013-04-04" RaceStartTime="09:00:00" RaceStatus="scheduled" />
+    <Race RaceID="SAM005921" RaceName="Race 7 - Silver Carried Forward Race" RaceNumber="21" RaceStartDate="2013-04-04" RaceStartTime="09:00:00" RaceStatus="scheduled" />
+    <Race RaceID="SAM005908" RaceName="Race 8 - Gold" RaceNumber="8" RaceStartDate="2013-04-04" RaceStartTime="11:00:00" RaceStatus="scheduled" />
+    <Race RaceID="SAM005922" RaceName="Race 8 - Silver" RaceNumber="22" RaceStartDate="2013-04-04" RaceStartTime="11:00:00" RaceStatus="scheduled" />
+    <Race RaceID="SAM005909" RaceName="Race 9 - Gold" RaceNumber="9" RaceStartDate="2013-04-04" RaceStartTime="12:30:00" RaceStatus="scheduled" />
+    <Race RaceID="SAM005923" RaceName="Race 9 - Silver" RaceNumber="23" RaceStartDate="2013-04-04" RaceStartTime="12:30:00" RaceStatus="scheduled" />
+    <Race RaceID="SAM005910" RaceName="Race 10 - Gold" RaceNumber="10" RaceStartDate="2013-04-04" RaceStartTime="14:00:00" RaceStatus="scheduled" />
+    <Race RaceID="SAM005924" RaceName="Race 10 - Silver" RaceNumber="24" RaceStartDate="2013-04-04" RaceStartTime="14:00:00" RaceStatus="scheduled" />
+    <Race RaceID="SAM005911" RaceName="Race 11 - Gold" RaceNumber="11" RaceStartDate="2013-04-05" RaceStartTime="11:00:00" RaceStatus="scheduled" />
+    <Race RaceID="SAM005925" RaceName="Race 11 - Silver" RaceNumber="25" RaceStartDate="2013-04-05" RaceStartTime="11:00:00" RaceStatus="scheduled" />
+    <Race RaceID="SAM005912" RaceName="Race 12 - Gold" RaceNumber="12" RaceStartDate="2013-04-05" RaceStartTime="12:30:00" RaceStatus="scheduled" />
+    <Race RaceID="SAM005926" RaceName="Race 12 - Silver" RaceNumber="26" RaceStartDate="2013-04-05" RaceStartTime="12:30:00" RaceStatus="scheduled" />
+    <Race RaceID="SAM005913" RaceName="Medal Race 1" RaceNumber="13" RaceStartDate="2013-04-06" RaceStartTime="11:00:00" RaceStatus="scheduled" />
+    <Race RaceID="SAM005914" RaceName="Medal Race 2" RaceNumber="14" RaceStartDate="2013-04-06" RaceStartTime="12:30:00" RaceStatus="scheduled" />
+    <Division DivisionID="SAM005000" Gender="Men" IFClassID="470" Title="470 M">
+      <RaceResult TeamID="SA08923" Discard="false" RaceID="SAM005901" RacePoints="0" RaceRank="1" />
+      <RaceResult TeamID="SA08923" Discard="false" RaceID="SAM005902" RacePoints="0" RaceRank="1" />
+      <RaceResult TeamID="SA08926" Discard="false" RaceID="SAM005915" RacePoints="0" RaceRank="1" />
+      <RaceResult TeamID="SA08926" Discard="false" RaceID="SAM005916" RacePoints="0" RaceRank="1" />
+      <RaceResult TeamID="SA08956" Discard="false" RaceID="SAM005915" RacePoints="3" RaceRank="3" />
+      <RaceResult TeamID="SA08956" Discard="false" RaceID="SAM005916" RacePoints="2" RaceRank="2" />
+      <RaceResult TeamID="SA08962" Discard="false" RaceID="SAM005901" RacePoints="3" RaceRank="3" />
+      <RaceResult TeamID="SA08962" Discard="false" RaceID="SAM005902" RacePoints="2" RaceRank="2" />
+      <RaceResult TeamID="SA08965" Discard="false" RaceID="SAM005901" RacePoints="2" RaceRank="2" />
+      <RaceResult TeamID="SA08965" Discard="false" RaceID="SAM005902" RacePoints="4" RaceRank="4" />
+      <RaceResult TeamID="SA08989" Discard="false" RaceID="SAM005901" RacePoints="6" RaceRank="6" />
+      <RaceResult TeamID="SA08989" Discard="false" RaceID="SAM005902" RacePoints="3" RaceRank="3" />
+      <RaceResult TeamID="SA08922" Discard="false" RaceID="SAM005915" RacePoints="2" RaceRank="2" />
+      <RaceResult TeamID="SA08922" Discard="false" RaceID="SAM005916" RacePoints="8" RaceRank="8" />
+      <RaceResult TeamID="SA08948" Discard="false" RaceID="SAM005915" RacePoints="4" RaceRank="4" />
+      <RaceResult TeamID="SA08948" Discard="false" RaceID="SAM005916" RacePoints="6" RaceRank="6" />
+      <RaceResult TeamID="SA08940" Discard="false" RaceID="SAM005901" RacePoints="5" RaceRank="5" />
+      <RaceResult TeamID="SA08940" Discard="false" RaceID="SAM005902" RacePoints="5" RaceRank="5" />
+      <RaceResult TeamID="SA08951" Discard="false" RaceID="SAM005915" RacePoints="5" RaceRank="5" />
+      <RaceResult TeamID="SA08951" Discard="false" RaceID="SAM005916" RacePoints="5" RaceRank="5" />
+      <RaceResult TeamID="SA08943" Discard="false" RaceID="SAM005915" RacePoints="7" RaceRank="7" />
+      <RaceResult TeamID="SA08943" Discard="false" RaceID="SAM005916" RacePoints="4" RaceRank="4" />
+      <RaceResult TeamID="SA08975" Discard="false" RaceID="SAM005915" RacePoints="11" RaceRank="11" />
+      <RaceResult TeamID="SA08975" Discard="false" RaceID="SAM005916" RacePoints="3" RaceRank="3" />
+      <RaceResult TeamID="SA08980" Discard="false" RaceID="SAM005901" RacePoints="8" RaceRank="8" />
+      <RaceResult TeamID="SA08980" Discard="false" RaceID="SAM005902" RacePoints="6" RaceRank="6" />
+      <RaceResult TeamID="SA08950" Discard="false" RaceID="SAM005915" RacePoints="10" RaceRank="10" />
+      <RaceResult TeamID="SA08950" Discard="false" RaceID="SAM005916" RacePoints="7" RaceRank="7" />
+      <RaceResult TeamID="SA08981" Discard="false" RaceID="SAM005901" RacePoints="10" RaceRank="10" />
+      <RaceResult TeamID="SA08981" Discard="false" RaceID="SAM005902" RacePoints="7" RaceRank="7" />
+      <RaceResult TeamID="SA08987" Discard="false" RaceID="SAM005901" RacePoints="9" RaceRank="9" />
+      <RaceResult TeamID="SA08987" Discard="false" RaceID="SAM005902" RacePoints="8" RaceRank="8" />
+      <RaceResult TeamID="SA08957" Discard="false" RaceID="SAM005901" RacePoints="7" RaceRank="7" />
+      <RaceResult TeamID="SA08957" Discard="false" RaceID="SAM005902" RacePoints="11" RaceRank="11" />
+      <RaceResult TeamID="SA08939" Discard="false" RaceID="SAM005915" RacePoints="8" RaceRank="8" />
+      <RaceResult TeamID="SA08939" Discard="false" RaceID="SAM005916" RacePoints="13" RaceRank="13" />
+      <RaceResult TeamID="SA08974" Discard="false" RaceID="SAM005915" RacePoints="9" RaceRank="9" />
+      <RaceResult TeamID="SA08974" Discard="false" RaceID="SAM005916" RacePoints="15" RaceRank="15" />
+      <RaceResult TeamID="SA08992" Discard="false" RaceID="SAM005915" RacePoints="14" RaceRank="14" />
+      <RaceResult TeamID="SA08992" Discard="false" RaceID="SAM005916" RacePoints="10" RaceRank="10" />
+      <RaceResult TeamID="SA08941" Discard="false" RaceID="SAM005915" RacePoints="17" RaceRank="17" />
+      <RaceResult TeamID="SA08941" Discard="false" RaceID="SAM005916" RacePoints="9" RaceRank="9" />
+      <RaceResult TeamID="SA08984" Discard="false" RaceID="SAM005915" RacePoints="13" RaceRank="13" />
+      <RaceResult TeamID="SA08984" Discard="false" RaceID="SAM005916" RacePoints="14" RaceRank="14" />
+      <RaceResult TeamID="SA08927" Discard="false" RaceID="SAM005901" RacePoints="19" RaceRank="19" />
+      <RaceResult TeamID="SA08927" Discard="false" RaceID="SAM005902" RacePoints="9" RaceRank="9" />
+      <RaceResult TeamID="SA08930" Discard="false" RaceID="SAM005901" RacePoints="18" RaceRank="18" />
+      <RaceResult TeamID="SA08930" Discard="false" RaceID="SAM005902" RacePoints="10" RaceRank="10" />
+      <RaceResult TeamID="SA08933" Discard="false" RaceID="SAM005901" RacePoints="11" RaceRank="11" />
+      <RaceResult TeamID="SA08933" Discard="false" RaceID="SAM005902" RacePoints="17" RaceRank="17" />
+      <RaceResult TeamID="SA08929" Discard="false" RaceID="SAM005901" RacePoints="13" RaceRank="13" />
+      <RaceResult TeamID="SA08929" Discard="false" RaceID="SAM005902" RacePoints="15" RaceRank="15" />
+      <RaceResult TeamID="SA08946" Discard="false" RaceID="SAM005901" RacePoints="14" RaceRank="14" />
+      <RaceResult TeamID="SA08946" Discard="false" RaceID="SAM005902" RacePoints="14" RaceRank="14" />
+      <RaceResult TeamID="SA08964" Discard="false" RaceID="SAM005915" RacePoints="12" RaceRank="12" />
+      <RaceResult TeamID="SA08964" Discard="false" RaceID="SAM005916" RacePoints="19" RaceRank="19" />
+      <RaceResult TeamID="SA08979" Discard="false" RaceID="SAM005901" RacePoints="16" RaceRank="16" />
+      <RaceResult TeamID="SA08979" Discard="false" RaceID="SAM005902" RacePoints="16" RaceRank="16" />
+      <RaceResult TeamID="SA08924" Discard="false" RaceID="SAM005901" RacePoints="12" RaceRank="12" />
+      <RaceResult TeamID="SA08924" Discard="false" RaceID="SAM005902" RacePoints="21" RaceRank="21" />
+      <RaceResult TeamID="SA08973" Discard="false" RaceID="SAM005901" RacePoints="15" RaceRank="15" />
+      <RaceResult TeamID="SA08973" Discard="false" RaceID="SAM005902" RacePoints="19" RaceRank="19" />
+      <RaceResult TeamID="SA08947" Discard="false" RaceID="SAM005901" RacePoints="22" RaceRank="22" />
+      <RaceResult TeamID="SA08947" Discard="false" RaceID="SAM005902" RacePoints="13" RaceRank="13" />
+      <RaceResult TeamID="SA08938" Discard="false" RaceID="SAM005915" RacePoints="18" RaceRank="18" />
+      <RaceResult TeamID="SA08938" Discard="false" RaceID="SAM005916" RacePoints="17" RaceRank="17" />
+      <RaceResult TeamID="SA08953" Discard="false" RaceID="SAM005915" RacePoints="25" RaceRank="25" />
+      <RaceResult TeamID="SA08953" Discard="false" RaceID="SAM005916" RacePoints="11" RaceRank="11" />
+      <RaceResult TeamID="SA08945" Discard="false" RaceID="SAM005901" RacePoints="24" RaceRank="24" />
+      <RaceResult TeamID="SA08945" Discard="false" RaceID="SAM005902" RacePoints="12" RaceRank="12" />
+      <RaceResult TeamID="SA08976" Discard="false" RaceID="SAM005915" RacePoints="20" RaceRank="20" />
+      <RaceResult TeamID="SA08976" Discard="false" RaceID="SAM005916" RacePoints="16" RaceRank="16" />
+      <RaceResult TeamID="SA08955" Discard="false" RaceID="SAM005915" RacePoints="26" RaceRank="26" />
+      <RaceResult TeamID="SA08955" Discard="false" RaceID="SAM005916" RacePoints="12" RaceRank="12" />
+      <RaceResult TeamID="SA08949" Discard="false" RaceID="SAM005901" RacePoints="4" RaceRank="4" />
+      <RaceResult TeamID="SA08949" Discard="false" RaceID="SAM005902" RacePoints="35" ScoreCode="DNF" />
+      <RaceResult TeamID="SA08967" Discard="false" RaceID="SAM005915" RacePoints="15" RaceRank="15" />
+      <RaceResult TeamID="SA08967" Discard="false" RaceID="SAM005916" RacePoints="25" RaceRank="25" />
+      <RaceResult TeamID="SA08963" Discard="false" RaceID="SAM005915" RacePoints="22" RaceRank="22" />
+      <RaceResult TeamID="SA08963" Discard="false" RaceID="SAM005916" RacePoints="18" RaceRank="18" />
+      <RaceResult TeamID="SA08988" Discard="false" RaceID="SAM005915" RacePoints="6" RaceRank="6" />
+      <RaceResult TeamID="SA08988" Discard="false" RaceID="SAM005916" RacePoints="35" ScoreCode="DNF" />
+      <RaceResult TeamID="SA08961" Discard="false" RaceID="SAM005901" RacePoints="23" RaceRank="23" />
+      <RaceResult TeamID="SA08961" Discard="false" RaceID="SAM005902" RacePoints="18" RaceRank="18" />
+      <RaceResult TeamID="SA08952" Discard="false" RaceID="SAM005915" RacePoints="19" RaceRank="19" />
+      <RaceResult TeamID="SA08952" Discard="false" RaceID="SAM005916" RacePoints="22" RaceRank="22" />
+      <RaceResult TeamID="SA08968" Discard="false" RaceID="SAM005915" RacePoints="24" RaceRank="24" />
+      <RaceResult TeamID="SA08968" Discard="false" RaceID="SAM005916" RacePoints="20" RaceRank="20" />
+      <RaceResult TeamID="" Discard="false" RaceID="SAM005901" RacePoints="20" RaceRank="20" />
+      <RaceResult TeamID="" Discard="false" RaceID="SAM005902" RacePoints="24" RaceRank="24" />
+      <RaceResult TeamID="SA08986" Discard="false" RaceID="SAM005915" RacePoints="23" RaceRank="23" />
+      <RaceResult TeamID="SA08986" Discard="false" RaceID="SAM005916" RacePoints="21" RaceRank="21" />
+      <RaceResult TeamID="SA08958" Discard="false" RaceID="SAM005901" RacePoints="26" RaceRank="26" />
+      <RaceResult TeamID="SA08958" Discard="false" RaceID="SAM005902" RacePoints="20" RaceRank="20" />
+      <RaceResult TeamID="SA08969" Discard="false" RaceID="SAM005915" RacePoints="16" RaceRank="16" />
+      <RaceResult TeamID="SA08969" Discard="false" RaceID="SAM005916" RacePoints="31" RaceRank="31" />
+      <RaceResult TeamID="SA08959" Discard="false" RaceID="SAM005915" RacePoints="21" RaceRank="21" />
+      <RaceResult TeamID="SA08959" Discard="false" RaceID="SAM005916" RacePoints="29" RaceRank="29" />
+      <RaceResult TeamID="SA08972" Discard="false" RaceID="SAM005901" RacePoints="29" RaceRank="29" />
+      <RaceResult TeamID="SA08972" Discard="false" RaceID="SAM005902" RacePoints="22" RaceRank="22" />
+      <RaceResult TeamID="SA08921" Discard="false" RaceID="SAM005901" RacePoints="17" RaceRank="17" />
+      <RaceResult TeamID="SA08921" Discard="false" RaceID="SAM005902" RacePoints="35" ScoreCode="DNF" />
+      <RaceResult TeamID="SA08971" Discard="false" RaceID="SAM005915" RacePoints="28" RaceRank="28" />
+      <RaceResult TeamID="SA08971" Discard="false" RaceID="SAM005916" RacePoints="24" RaceRank="24" />
+      <RaceResult TeamID="SA08944" Discard="false" RaceID="SAM005901" RacePoints="25" RaceRank="25" />
+      <RaceResult TeamID="SA08944" Discard="false" RaceID="SAM005902" RacePoints="27" RaceRank="27" />
+      <RaceResult TeamID="SA08934" Discard="false" RaceID="SAM005901" RacePoints="28" RaceRank="28" />
+      <RaceResult TeamID="SA08934" Discard="false" RaceID="SAM005902" RacePoints="25" RaceRank="25" />
+      <RaceResult TeamID="SA08954" Discard="false" RaceID="SAM005901" RacePoints="31" RaceRank="31" />
+      <RaceResult TeamID="SA08954" Discard="false" RaceID="SAM005902" RacePoints="23" RaceRank="23" />
+      <RaceResult TeamID="SA08925" Discard="false" RaceID="SAM005915" RacePoints="27" RaceRank="27" />
+      <RaceResult TeamID="SA08925" Discard="false" RaceID="SAM005916" RacePoints="27" RaceRank="27" />
+      <RaceResult TeamID="SA08931" Discard="false" RaceID="SAM005915" RacePoints="32" RaceRank="32" />
+      <RaceResult TeamID="SA08931" Discard="false" RaceID="SAM005916" RacePoints="23" RaceRank="23" />
+      <RaceResult TeamID="SA08960" Discard="false" RaceID="SAM005915" RacePoints="29" RaceRank="29" />
+      <RaceResult TeamID="SA08960" Discard="false" RaceID="SAM005916" RacePoints="26" RaceRank="26" />
+      <RaceResult TeamID="SA08932" Discard="false" RaceID="SAM005901" RacePoints="21" RaceRank="21" />
+      <RaceResult TeamID="SA08932" Discard="false" RaceID="SAM005902" RacePoints="35" ScoreCode="DNF" />
+      <RaceResult TeamID="SA08991" Discard="false" RaceID="SAM005901" RacePoints="30" RaceRank="30" />
+      <RaceResult TeamID="SA08991" Discard="false" RaceID="SAM005902" RacePoints="26" RaceRank="26" />
+      <RaceResult TeamID="SA08982" Discard="false" RaceID="SAM005901" RacePoints="27" RaceRank="27" />
+      <RaceResult TeamID="SA08982" Discard="false" RaceID="SAM005902" RacePoints="35" ScoreCode="DNC" />
+      <RaceResult TeamID="SA08928" Discard="false" RaceID="SAM005915" RacePoints="35" ScoreCode="DNF" />
+      <RaceResult TeamID="SA08928" Discard="false" RaceID="SAM005916" RacePoints="28" RaceRank="28" />
+      <RaceResult TeamID="SA08970" Discard="false" RaceID="SAM005915" RacePoints="33" RaceRank="33" />
+      <RaceResult TeamID="SA08970" Discard="false" RaceID="SAM005916" RacePoints="30" RaceRank="30" />
+      <RaceResult TeamID="SA08937" Discard="false" RaceID="SAM005915" RacePoints="30" RaceRank="30" />
+      <RaceResult TeamID="SA08937" Discard="false" RaceID="SAM005916" RacePoints="35" ScoreCode="DNF" />
+      <RaceResult TeamID="SA08990" Discard="false" RaceID="SAM005915" RacePoints="31" RaceRank="31" />
+      <RaceResult TeamID="SA08990" Discard="false" RaceID="SAM005916" RacePoints="35" ScoreCode="DNF" />
+      <RaceResult TeamID="SA08935" Discard="false" RaceID="SAM005901" RacePoints="32" RaceRank="32" />
+      <RaceResult TeamID="SA08935" Discard="false" RaceID="SAM005902" RacePoints="35" ScoreCode="DNC" />
+      <RaceResult TeamID="" Discard="false" RaceID="SAM005901" RacePoints="33" RaceRank="33" />
+      <RaceResult TeamID="" Discard="false" RaceID="SAM005902" RacePoints="35" ScoreCode="DNF" />
+      <RaceResult TeamID="SA08985" Discard="false" RaceID="SAM005901" RacePoints="35" ScoreCode="DNF" />
+      <RaceResult TeamID="SA08985" Discard="false" RaceID="SAM005902" RacePoints="35" ScoreCode="DNF" />
+      <SeriesResult TeamID="SA08923" NetPoints="0" Rank="1" Tied="true" TotalPoints="0" />
+      <SeriesResult TeamID="SA08926" NetPoints="0" Rank="1" Tied="true" TotalPoints="0" />
+      <SeriesResult TeamID="SA08956" NetPoints="5" Rank="3" Tied="true" TotalPoints="5" />
+      <SeriesResult TeamID="SA08962" NetPoints="5" Rank="3" Tied="true" TotalPoints="5" />
+      <SeriesResult TeamID="SA08965" NetPoints="6" Rank="5" Tied="false" TotalPoints="6" />
+      <SeriesResult TeamID="SA08989" NetPoints="9" Rank="6" Tied="false" TotalPoints="9" />
+      <SeriesResult TeamID="SA08922" NetPoints="10" Rank="7" Tied="false" TotalPoints="10" />
+      <SeriesResult TeamID="SA08948" NetPoints="10" Rank="8" Tied="false" TotalPoints="10" />
+      <SeriesResult TeamID="SA08940" NetPoints="10" Rank="9" Tied="true" TotalPoints="10" />
+      <SeriesResult TeamID="SA08951" NetPoints="10" Rank="9" Tied="true" TotalPoints="10" />
+      <SeriesResult TeamID="SA08943" NetPoints="11" Rank="11" Tied="false" TotalPoints="11" />
+      <SeriesResult TeamID="SA08975" NetPoints="14" Rank="12" Tied="false" TotalPoints="14" />
+      <SeriesResult TeamID="SA08980" NetPoints="14" Rank="13" Tied="false" TotalPoints="14" />
+      <SeriesResult TeamID="SA08950" NetPoints="17" Rank="14" Tied="true" TotalPoints="17" />
+      <SeriesResult TeamID="SA08981" NetPoints="17" Rank="14" Tied="true" TotalPoints="17" />
+      <SeriesResult TeamID="SA08987" NetPoints="17" Rank="16" Tied="false" TotalPoints="17" />
+      <SeriesResult TeamID="SA08957" NetPoints="18" Rank="17" Tied="false" TotalPoints="18" />
+      <SeriesResult TeamID="SA08939" NetPoints="21" Rank="18" Tied="false" TotalPoints="21" />
+      <SeriesResult TeamID="SA08974" NetPoints="24" Rank="19" Tied="false" TotalPoints="24" />
+      <SeriesResult TeamID="SA08992" NetPoints="24" Rank="20" Tied="false" TotalPoints="24" />
+      <SeriesResult TeamID="SA08941" NetPoints="26" Rank="21" Tied="false" TotalPoints="26" />
+      <SeriesResult TeamID="SA08984" NetPoints="27" Rank="22" Tied="false" TotalPoints="27" />
+      <SeriesResult TeamID="SA08927" NetPoints="28" Rank="23" Tied="false" TotalPoints="28" />
+      <SeriesResult TeamID="SA08930" NetPoints="28" Rank="24" Tied="false" TotalPoints="28" />
+      <SeriesResult TeamID="SA08933" NetPoints="28" Rank="25" Tied="false" TotalPoints="28" />
+      <SeriesResult TeamID="SA08929" NetPoints="28" Rank="26" Tied="false" TotalPoints="28" />
+      <SeriesResult TeamID="SA08946" NetPoints="28" Rank="27" Tied="false" TotalPoints="28" />
+      <SeriesResult TeamID="SA08964" NetPoints="31" Rank="28" Tied="false" TotalPoints="31" />
+      <SeriesResult TeamID="SA08979" NetPoints="32" Rank="29" Tied="false" TotalPoints="32" />
+      <SeriesResult TeamID="SA08924" NetPoints="33" Rank="30" Tied="false" TotalPoints="33" />
+      <SeriesResult TeamID="SA08973" NetPoints="34" Rank="31" Tied="false" TotalPoints="34" />
+      <SeriesResult TeamID="SA08947" NetPoints="35" Rank="32" Tied="false" TotalPoints="35" />
+      <SeriesResult TeamID="SA08938" NetPoints="35" Rank="33" Tied="false" TotalPoints="35" />
+      <SeriesResult TeamID="SA08953" NetPoints="36" Rank="34" Tied="false" TotalPoints="36" />
+      <SeriesResult TeamID="SA08945" NetPoints="36" Rank="35" Tied="false" TotalPoints="36" />
+      <SeriesResult TeamID="SA08976" NetPoints="36" Rank="36" Tied="false" TotalPoints="36" />
+      <SeriesResult TeamID="SA08955" NetPoints="38" Rank="37" Tied="false" TotalPoints="38" />
+      <SeriesResult TeamID="SA08949" NetPoints="39" Rank="38" Tied="false" TotalPoints="39" />
+      <SeriesResult TeamID="SA08967" NetPoints="40" Rank="39" Tied="false" TotalPoints="40" />
+      <SeriesResult TeamID="SA08963" NetPoints="40" Rank="40" Tied="false" TotalPoints="40" />
+      <SeriesResult TeamID="SA08988" NetPoints="41" Rank="41" Tied="false" TotalPoints="41" />
+      <SeriesResult TeamID="SA08961" NetPoints="41" Rank="42" Tied="false" TotalPoints="41" />
+      <SeriesResult TeamID="SA08952" NetPoints="41" Rank="43" Tied="false" TotalPoints="41" />
+      <SeriesResult TeamID="SA08968" NetPoints="44" Rank="44" Tied="false" TotalPoints="44" />
+      <SeriesResult TeamID="" NetPoints="44" Rank="45" Tied="false" TotalPoints="44" />
+      <SeriesResult TeamID="SA08986" NetPoints="44" Rank="46" Tied="false" TotalPoints="44" />
+      <SeriesResult TeamID="SA08958" NetPoints="46" Rank="47" Tied="false" TotalPoints="46" />
+      <SeriesResult TeamID="SA08969" NetPoints="47" Rank="48" Tied="false" TotalPoints="47" />
+      <SeriesResult TeamID="SA08959" NetPoints="50" Rank="49" Tied="false" TotalPoints="50" />
+      <SeriesResult TeamID="SA08972" NetPoints="51" Rank="50" Tied="false" TotalPoints="51" />
+      <SeriesResult TeamID="SA08921" NetPoints="52" Rank="51" Tied="false" TotalPoints="52" />
+      <SeriesResult TeamID="SA08971" NetPoints="52" Rank="52" Tied="false" TotalPoints="52" />
+      <SeriesResult TeamID="SA08944" NetPoints="52" Rank="53" Tied="false" TotalPoints="52" />
+      <SeriesResult TeamID="SA08934" NetPoints="53" Rank="54" Tied="false" TotalPoints="53" />
+      <SeriesResult TeamID="SA08954" NetPoints="54" Rank="55" Tied="false" TotalPoints="54" />
+      <SeriesResult TeamID="SA08925" NetPoints="54" Rank="56" Tied="false" TotalPoints="54" />
+      <SeriesResult TeamID="SA08931" NetPoints="55" Rank="57" Tied="false" TotalPoints="55" />
+      <SeriesResult TeamID="SA08960" NetPoints="55" Rank="58" Tied="false" TotalPoints="55" />
+      <SeriesResult TeamID="SA08932" NetPoints="56" Rank="59" Tied="false" TotalPoints="56" />
+      <SeriesResult TeamID="SA08991" NetPoints="56" Rank="60" Tied="false" TotalPoints="56" />
+      <SeriesResult TeamID="SA08982" NetPoints="62" Rank="61" Tied="false" TotalPoints="62" />
+      <SeriesResult TeamID="SA08928" NetPoints="63" Rank="62" Tied="false" TotalPoints="63" />
+      <SeriesResult TeamID="SA08970" NetPoints="63" Rank="63" Tied="false" TotalPoints="63" />
+      <SeriesResult TeamID="SA08937" NetPoints="65" Rank="64" Tied="false" TotalPoints="65" />
+      <SeriesResult TeamID="SA08990" NetPoints="66" Rank="65" Tied="false" TotalPoints="66" />
+      <SeriesResult TeamID="SA08935" NetPoints="67" Rank="66" Tied="false" TotalPoints="67" />
+      <SeriesResult TeamID="" NetPoints="68" Rank="67" Tied="false" TotalPoints="68" />
+      <SeriesResult TeamID="SA08985" NetPoints="70" Rank="68" Tied="false" TotalPoints="70" />
+    </Division>
+  </Event>
+</SailingXRR>
