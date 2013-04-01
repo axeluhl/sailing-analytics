@@ -44,3 +44,9 @@ osgi> ss com.sap.sailing.monitoring
 71   INSTALLED   com.sap.sailing.monitoring_1.0.0.201303252302
 osgi> start 71
 </pre>
+
+### Display Line Endings for File
+
+Sometimes different line endings get mixed. To display all lin endings for each line of a given file use the following command:
+
+`perl -p -e 's[\r\n][WIN\n]; s[(?<!WIN)\n][UNIX\n]; s[\r][MAC\n];' <FILE>`
