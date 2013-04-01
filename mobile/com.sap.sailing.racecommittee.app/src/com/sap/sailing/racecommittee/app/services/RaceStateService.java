@@ -32,7 +32,7 @@ import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.services.sending.RaceEventSender;
 import com.sap.sailing.racecommittee.app.ui.activities.LoginActivity;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
-import com.sap.sailing.server.gateway.serialization.competitor.impl.CompetitorIdJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.racegroup.impl.CompetitorJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogEventSerializer;
 
 public class RaceStateService extends Service {
@@ -195,7 +195,7 @@ public class RaceStateService extends Service {
         registerAlarms(race, state);
         
         // Register on event additions...
-        JsonSerializer<RaceLogEvent> eventSerializer = RaceLogEventSerializer.create(new CompetitorIdJsonSerializer());
+        JsonSerializer<RaceLogEvent> eventSerializer = RaceLogEventSerializer.create(new CompetitorJsonSerializer());
         RaceEventSender sender = new RaceEventSender(this, eventSerializer, race);
         RaceLogChangedVisitor logListener = new RaceLogChangedVisitor(sender);
         state.getRaceLog().addListener(logListener);

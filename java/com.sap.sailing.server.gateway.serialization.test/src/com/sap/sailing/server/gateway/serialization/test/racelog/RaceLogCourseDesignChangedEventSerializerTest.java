@@ -33,12 +33,12 @@ import com.sap.sailing.server.gateway.deserialization.coursedata.impl.GateDeseri
 import com.sap.sailing.server.gateway.deserialization.coursedata.impl.MarkDeserializer;
 import com.sap.sailing.server.gateway.deserialization.coursedata.impl.WaypointDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.RaceLogCourseDesignChangedEventDeserializer;
-import com.sap.sailing.server.gateway.serialization.competitor.impl.CompetitorIdJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.ControlPointJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.CourseBaseJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.GateJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.MarkJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.WaypointJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.racegroup.impl.CompetitorJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogCourseDesignChangedEventSerializer;
 
 public class RaceLogCourseDesignChangedEventSerializerTest {
@@ -51,7 +51,7 @@ public class RaceLogCourseDesignChangedEventSerializerTest {
     @Before
     public void setUp() {
         SharedDomainFactory factory = DomainFactory.INSTANCE;
-        serializer = new RaceLogCourseDesignChangedEventSerializer(new CompetitorIdJsonSerializer(), 
+        serializer = new RaceLogCourseDesignChangedEventSerializer(new CompetitorJsonSerializer(), 
                 new CourseBaseJsonSerializer(new WaypointJsonSerializer(
                         new ControlPointJsonSerializer(
                                 new MarkJsonSerializer(), 
