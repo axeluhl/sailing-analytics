@@ -107,7 +107,12 @@ public abstract class AbstractPortMonitor extends Thread {
                                         int code = conn.getResponseCode();
                                         
                                         /* Make sure to also close the stream */
-                                        conn.getInputStream().close();
+                                        try {
+                                            conn.getInputStream().close();
+                                        } catch (Exception ex) {
+                                            /* ignore if there is no input stream */
+                                        }
+                                        
                                         conn.disconnect();
                                         if (code != 200) {
                                             throw new ConnectException("Could not successfully connect to endpoint " + currentendpoint.toString());
