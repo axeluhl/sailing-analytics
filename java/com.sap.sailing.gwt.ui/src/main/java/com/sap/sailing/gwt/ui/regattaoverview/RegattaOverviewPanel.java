@@ -1,8 +1,13 @@
 package com.sap.sailing.gwt.ui.regattaoverview;
 
+import java.util.Date;
 import java.util.List;
 
 import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.Label;
@@ -12,15 +17,26 @@ import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.MarkedAsyncCallback;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.TimeListener;
+import com.sap.sailing.gwt.ui.client.Timer;
+import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
+import com.sap.sailing.gwt.ui.client.Timer.PlayStates;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaOverviewEntryDTO;
 
 public class RegattaOverviewPanel extends SimplePanel implements RegattaOverviewRaceSelectionChangeListener {
+    
+    private final long serverUpdateRate = 10000;
+    private final long uiUpdateRate = 1000;
+    
+    private final Timer serverUpdateTimer;
+    private final Timer uiUpdateTimer;
+    
     private final SailingServiceAsync sailingService;
+    protected final StringMessages stringMessages;
     @SuppressWarnings("unused")
     private final ErrorReporter errorReporter;
-    @SuppressWarnings("unused")
-    private final StringMessages stringMessages;
+    
     private final String eventIdAsString;
     
     private RegattaOverviewRaceSelectionModel raceSelectionProvider;
@@ -30,8 +46,12 @@ public class RegattaOverviewPanel extends SimplePanel implements RegattaOverview
     
     private final Label eventNameLabel;
     private final Label venueNameLabel;
+    private final Label timeLabel;
+    private final Button startStopUpdatingButton;
     
-    public RegattaOverviewPanel(SailingServiceAsync sailingService, ErrorReporter errorReporter, StringMessages stringMessages, String eventIdAsString) {
+    private final DateTimeFormat timeFormatter = DateTimeFormat.getFormat("HH:mm:ss");
+    
+    public RegattaOverviewPanel(SailingServiceAsync sailingService, final ErrorReporter errorReporter, final StringMessages stringMessages, String eventIdAsString) {
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
@@ -44,8 +64,9 @@ public class RegattaOverviewPanel extends SimplePanel implements RegattaOverview
         eventNameLabel = new Label();
         venueNameLabel = new Label();
         
-        Grid grid = new Grid(1, 2);
+        timeLabel = new Label();
         
+        Grid grid = new Grid(1, 2);
         
         raceSelectionProvider = new RegattaOverviewRaceSelectionModel(false);
         raceSelectionProvider.addRegattaOverviewRaceSelectionChangeListener(this);
@@ -59,11 +80,69 @@ public class RegattaOverviewPanel extends SimplePanel implements RegattaOverview
         grid.getRowFormatter().setVerticalAlign(0, HasVerticalAlignment.ALIGN_TOP);
         grid.getColumnFormatter().getElement(1).getStyle().setPaddingTop(2.0, Unit.EM);
         
+        Button refreshNowButton = new Button(stringMessages.refreshNow());
+        refreshNowButton.addClickHandler(new ClickHandler() {
+
+            @Override
+            public void onClick(ClickEvent event) {
+                regattaOverviewTableComposite.loadAndUpdateEventLog();
+            }
+            
+        });
+        
+        this.startStopUpdatingButton = new Button(stringMessages.stopUpdating());
+        this.startStopUpdatingButton.addClickHandler(new ClickHandler() {
+
+            @Override
+            public void onClick(ClickEvent event) {
+                if (serverUpdateTimer.getPlayState().equals(PlayStates.Playing)) {
+                    serverUpdateTimer.pause();
+                    startStopUpdatingButton.setText(stringMessages.startUpdating());
+                } else if (serverUpdateTimer.getPlayState().equals(PlayStates.Paused)) {
+                    serverUpdateTimer.play();
+                    startStopUpdatingButton.setText(stringMessages.stopUpdating());
+                }
+            }
+            
+        });
+        
+        this.serverUpdateTimer = new Timer(PlayModes.Live, serverUpdateRate);
+        this.serverUpdateTimer.addTimeListener(new TimeListener() {
+
+            @Override
+            public void timeChanged(Date date) {
+                regattaOverviewTableComposite.onUpdateServer(date);
+            }
+        });
+        this.serverUpdateTimer.play();
+
+        this.uiUpdateTimer = new Timer(PlayModes.Live, uiUpdateRate);
+        this.uiUpdateTimer.addTimeListener(new TimeListener() {
+
+            @Override
+            public void timeChanged(Date date) {
+                onUpdateUI(date);
+            }
+        });
+        this.uiUpdateTimer.play();
+        
+        Grid gridTimeRefreshStop = new Grid(1, 4);
+        gridTimeRefreshStop.setWidget(0, 0, new Label(stringMessages.currentTime()));
+        gridTimeRefreshStop.setWidget(0, 1, timeLabel);
+        gridTimeRefreshStop.setWidget(0, 2, refreshNowButton);
+        gridTimeRefreshStop.setWidget(0, 3, startStopUpdatingButton);
+        
         mainPanel.add(eventNameLabel);
         mainPanel.add(venueNameLabel);
+        mainPanel.add(gridTimeRefreshStop);
         mainPanel.add(grid);
         
         fillEventAndVenueName();
+        onUpdateUI(new Date());
+    }
+    
+    public void onUpdateUI(Date time) {
+        timeLabel.setText(timeFormatter.format(time));
     }
 
     @Override
