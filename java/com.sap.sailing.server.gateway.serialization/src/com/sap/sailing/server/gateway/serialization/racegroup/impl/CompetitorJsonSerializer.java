@@ -12,7 +12,7 @@ public class CompetitorJsonSerializer implements JsonSerializer<Competitor> {
     @Override
     public JSONObject serialize(Competitor object) {
         JSONObject result = new JSONObject();
-        result.put(FIELD_ID, object.getId());
+        result.put(FIELD_ID, object.getId().toString());
         result.put(FIELD_NAME, object.getName());
         return result;
     }
