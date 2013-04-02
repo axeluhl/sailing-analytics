@@ -236,7 +236,7 @@ public class TestTimeComparison {
         for (Integer boatClassIndex : boatClassesIndexes.keySet()) {
             final SimulatorServiceImpl simulatorService = new SimulatorServiceImpl();
             final RequestTotalTimeDTO requestData = new RequestTotalTimeDTO(new SimulatorUISelectionDTO(boatClassIndex, 0, competitorIndex, legIndex),
-                    this.timeStepMilliseconds, this.allPoints, this.turnPoints, true, false);
+                    this.timeStepMilliseconds, this.allPoints, this.turnPoints, true);
 
             final ResponseTotalTimeDTO receiveData = simulatorService.getTotalTime(requestData);
             averageWind = simulatorService.getAverageWind();
