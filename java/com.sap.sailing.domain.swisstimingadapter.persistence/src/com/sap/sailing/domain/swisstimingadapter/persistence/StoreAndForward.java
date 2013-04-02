@@ -277,7 +277,7 @@ public class StoreAndForward implements Runnable {
                             ((Number) newCountRecord.get(FieldNames.LAST_MESSAGE_COUNT.name())).longValue());
                         SailMasterMessage message = swissTimingFactory.createMessage(messageAndOptionalSequenceNumber.getA(), lastMessageCount);
                         swissTimingAdapterPersistence.storeSailMasterMessage(message);
-                        synchronized (this) {
+                        synchronized (StoreAndForward.this) {
                             for (OutputStream os : new ArrayList<OutputStream>(streamsToForwardTo)) {
                                 // write the sequence number of the message into the stream before actually writing the
                                 // SwissTiming message
@@ -308,8 +308,10 @@ public class StoreAndForward implements Runnable {
                     for (OutputStream os : streamsToForwardTo) {
                         os.close();
                     }
-                    for (Socket socketToForwardTo : socketsToForwardTo) {
-                        socketToForwardTo.close();
+                    synchronized (StoreAndForward.this) {
+                        for (Socket socketToForwardTo : socketsToForwardTo) {
+                            socketToForwardTo.close();
+                        }
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
