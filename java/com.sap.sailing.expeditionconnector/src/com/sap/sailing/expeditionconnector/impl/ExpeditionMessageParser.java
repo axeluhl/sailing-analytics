@@ -3,6 +3,7 @@ package com.sap.sailing.expeditionconnector.impl;
 import java.net.DatagramPacket;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -13,6 +14,7 @@ import com.sap.sailing.expeditionconnector.UDPExpeditionReceiver;
 import com.sap.sailing.udpconnector.UDPMessageParser;
 
 public class ExpeditionMessageParser implements UDPMessageParser<ExpeditionMessage> {
+    private static final Logger logger = Logger.getLogger(ExpeditionMessageParser.class.getName());
 
     private UDPExpeditionReceiver receiver;
 
@@ -25,7 +27,7 @@ public class ExpeditionMessageParser implements UDPMessageParser<ExpeditionMessa
         String packetAsString = new String(p.getData(), p.getOffset(), p.getLength()).trim();
         if (packetAsString.length() > 0) {
             Pattern completeLinePattern = Pattern
-                    .compile("#([0-9]*)(( *,([0-9][0-9]*) *, *(-?[0-9]*(\\.[0-9]*)?))*)\\*([0-9a-fA-F][0-9a-fA-F]*)");
+                    .compile("#([0-9]*)(( *,([0-9][0-9]*) *, *(-?[0-9]*(\\.[0-9]*)?))*)\\*X?([0-9a-fA-F][0-9a-fA-F]*)");
             Matcher m = completeLinePattern.matcher(packetAsString);
             boolean valid = m.matches();
             if (valid) {
@@ -62,7 +64,7 @@ public class ExpeditionMessageParser implements UDPMessageParser<ExpeditionMessa
                 }
                 return result;
             } else {
-                System.err.println("Unparsable expedition message: " + packetAsString);
+                logger.warning("Unparsable expedition message: " + packetAsString);
                 return null; // couldn't even parse
             }
         } else {
@@ -72,7 +74,12 @@ public class ExpeditionMessageParser implements UDPMessageParser<ExpeditionMessa
 
     private boolean checksumOk(int checksum, String packetAsString) {
         int b = 0;
-        for (byte stringByte : packetAsString.substring(0, packetAsString.lastIndexOf('*')).getBytes()) {
+        int posOfLastCharToAddToChecksum = packetAsString.lastIndexOf('*');
+        if (packetAsString.length() > posOfLastCharToAddToChecksum && packetAsString.charAt(posOfLastCharToAddToChecksum+1) == 'X') {
+            posOfLastCharToAddToChecksum++;
+        }
+        String checksumString = packetAsString.substring(0, posOfLastCharToAddToChecksum);
+        for (byte stringByte : checksumString.getBytes()) {
             b ^= stringByte;
         }
         return b == checksum;
