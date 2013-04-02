@@ -381,15 +381,6 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
 
         long stepTimeMilliseconds = 0L;
 
-        // start of [used only for debug mode]
-        List<Quadruple<PositionDTO, PositionDTO, Double, Double>> segments = new ArrayList<Quadruple<PositionDTO, PositionDTO, Double, Double>>();
-        Position segmentStart = points.get(0);
-        Position segmentEnd = null;
-        double segmentLength = 0.0;
-        double segmentTime = 0.0;
-        int turnIndex = 1;
-        // end of [used only for debug mode]
-
         for (int index = 0; index < noOfPointsMinus1; index++) {
 
             startPoint = points.get(index);
@@ -410,24 +401,6 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
                 stepTimeMilliseconds = 1000;
             }
 
-            if (requestData.debugMode) {
-
-                segmentTime += stepTimeMilliseconds;
-                if (SimulatorServiceUtils.equals(endPoint, requestData.turnPoints.get(turnIndex))) {
-
-                    segmentEnd = endPoint;
-                    segmentLength = SimulatorServiceUtils.getDistanceBetween(segmentStart, segmentEnd);
-                    segments.add(new Quadruple<PositionDTO, PositionDTO, Double, Double>(SimulatorServiceUtils.toPositionDTO(segmentStart),
-                            SimulatorServiceUtils.toPositionDTO(segmentEnd),
-                            segmentLength,
-                            segmentTime));
-
-                    segmentTime = 0.0;
-                    segmentStart = endPoint;
-                    turnIndex++;
-                }
-            }
-
             timepointAsMillis += stepTimeMilliseconds;
 
         }
@@ -436,14 +409,13 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
 
         double totalTimeGPSTrackSeconds = (gpsTrack.getPathPoints().get(gpsTrack.getPathPoints().size() - 1).getTimePoint().asMillis() - gpsTrack
                 .getPathPoints().get(0).getTimePoint().asMillis()) / 1000;
-        // System.out.println("totalTimeSeconds = " + totalTimeSeconds);
-        // System.out.println("totalTimeGPSTrackSeconds = " + totalTimeGPSTrackSeconds);
+
 
         while (totalTimeSeconds > totalTimeGPSTrackSeconds) {
             totalTimeSeconds *= TOTAL_TIME_SCALE_FACTOR;
         }
 
-        return new ResponseTotalTimeDTO((long) totalTimeSeconds, notificationMessage, (requestData.debugMode ? segments : null));
+        return new ResponseTotalTimeDTO((long) totalTimeSeconds, notificationMessage);
     }
 
     @Override

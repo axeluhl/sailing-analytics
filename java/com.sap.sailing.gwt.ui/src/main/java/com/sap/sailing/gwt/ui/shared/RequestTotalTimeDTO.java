@@ -12,7 +12,6 @@ public class RequestTotalTimeDTO implements IsSerializable {
     public List<PositionDTO> turnPoints = null;
     public boolean useRealAverageWindSpeed = false;
     public int stepDurationMilliseconds = 0;
-    public boolean debugMode = false;
 
     public RequestTotalTimeDTO() {
         this.selection = null;
@@ -20,16 +19,14 @@ public class RequestTotalTimeDTO implements IsSerializable {
         this.turnPoints = new ArrayList<PositionDTO>();
         this.useRealAverageWindSpeed = true;
         this.stepDurationMilliseconds = 2000;
-        this.debugMode = false;
     }
 
     public RequestTotalTimeDTO(SimulatorUISelectionDTO selection, int stepDurationMilliseconds, List<SimulatorWindDTO> allPoints, List<PositionDTO> turnPoints,
-            boolean useRealAverageWindSpeed, boolean debugMode) {
+            boolean useRealAverageWindSpeed) {
         this.selection = selection;
         this.allPoints = allPoints;
         this.turnPoints = turnPoints;
         this.useRealAverageWindSpeed = useRealAverageWindSpeed;
         this.stepDurationMilliseconds = stepDurationMilliseconds;
-        this.debugMode = debugMode;
     }
 }
