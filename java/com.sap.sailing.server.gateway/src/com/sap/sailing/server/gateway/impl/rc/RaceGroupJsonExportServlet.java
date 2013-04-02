@@ -81,7 +81,7 @@ public class RaceGroupJsonExportServlet extends AbstractJsonHttpServlet {
         return new RaceGroupJsonSerializer(new BoatClassJsonSerializer(), new CourseAreaJsonSerializer(),
                 new SeriesWithRowsOfRaceGroupSerializer(new SeriesWithRowsJsonSerializer(
                         new RaceRowsOfSeriesWithRowsSerializer(new RaceRowJsonSerializer(new FleetJsonSerializer(
-                                new ColorJsonSerializer()), new RaceCellJsonSerializer(createRaceLogSerializer()))))));
+                                new ColorJsonSerializer()), new RaceCellJsonSerializer(createRaceLogSerializer(), new CompetitorJsonSerializer()))))));
 
     }
 
