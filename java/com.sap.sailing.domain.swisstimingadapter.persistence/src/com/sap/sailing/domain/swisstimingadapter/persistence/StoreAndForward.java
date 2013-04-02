@@ -7,7 +7,10 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.mongodb.BasicDBObject;
@@ -63,7 +66,7 @@ public class StoreAndForward implements Runnable {
 
     private final Thread storeAndForwardThread;
 
-    private Socket socket;
+    private final Set<ReceivingThread> receivingThreads;
     
     /**
      * Use of this server socket is optional and happens if and only if this object is operated in
@@ -85,6 +88,7 @@ public class StoreAndForward implements Runnable {
      */
     public StoreAndForward(String sailMasterHostname, int sailMasterPort, int portForClients, SwissTimingFactory swissTimingFactory, 
             SwissTimingAdapterPersistence swissTimingAdapterPersistence, MongoDBService mongoDBService) throws InterruptedException, IOException {
+        this.receivingThreads = new HashSet<>();
         this.db = mongoDBService.getDB();
         this.listenPort = -1;
         this.transceiver = swissTimingFactory.createSailMasterTransceiver();
@@ -125,6 +129,7 @@ public class StoreAndForward implements Runnable {
      */
     public StoreAndForward(final int listenPort, final int portForClients, SwissTimingFactory swissTimingFactory, 
             SwissTimingAdapterPersistence swissTimingAdapterPersistence, MongoDBService mongoDBService) throws InterruptedException, IOException {
+        this.receivingThreads = new HashSet<>();
         this.db = mongoDBService.getDB();
         this.listenPort = listenPort;
         this.transceiver = swissTimingFactory.createSailMasterTransceiver();
@@ -201,20 +206,29 @@ public class StoreAndForward implements Runnable {
     }
     
     /**
-     * Depending on the mode of operation, accepts an inbound connect from a SailMaster server / bridge or
-     * actively initiates a TCP connection to the SailMaster address/port configured. When this method
-     * returns, the {@link #socket} holds an open and connected socket.
-     * @throws IOException 
+     * Depending on the mode of operation, accepts an inbound connect from a SailMaster server / bridge or actively
+     * initiates a TCP connection to the SailMaster address/port configured. When a connection has been established, a
+     * new {@link ReceivingThread} is spawned for the new socket. If in listening mode, the
+     * {@link ServerSocket#accept()} call is repeated until the instance is {@link #stop()}ed.
+     * 
+     * @throws IOException
      */
-    private void establishConnection() throws IOException {
+    private ReceivingThread establishConnection() throws IOException {
+        Socket socket;
+        ReceivingThread receivingThread = null;
         if (isInSailMasterListeningMode()) {
-            synchronized (this) {
-                receivingFromSailMaster = true;
-                logger.info("StoreAndForward waiting for inbound SailMaster connections on port "+listenPort);
-                notifyAll();
+            while (!stopped) {
+                synchronized (this) {
+                    receivingFromSailMaster = true;
+                    logger.info("StoreAndForward waiting for inbound SailMaster connections on port " + listenPort);
+                    notifyAll();
+                }
+                socket = serverSocketListeningForSailMasterBridge.accept();
+                logger.info("StoreAndForward received SailMaster connect on port " + listenPort);
+                receivingThread = new ReceivingThread("SwissTiming SailMaster ReceivingThread for "+socket, socket);
+                receivingThreads.add(receivingThread);
+                receivingThread.start();
             }
-            socket = serverSocketListeningForSailMasterBridge.accept();
-            logger.info("StoreAndForward received SailMaster connect on port "+listenPort);
         } else {
             synchronized (this) {
                 receivingFromSailMaster = true;
@@ -223,50 +237,33 @@ public class StoreAndForward implements Runnable {
             }
            socket = new Socket(sailMasterHostname, sailMasterPort);
            logger.info("StoreAndForward connections to SailMaster "+sailMasterHostname+":"+sailMasterPort+" established");
+           receivingThread = new ReceivingThread("SwissTiming SailMaster ReceivingThread for "+socket, socket);
+           receivingThreads.add(receivingThread);
+           receivingThread.start();
         }
+        return receivingThread;
     }
-    
+
     /**
-     * Stops execution after having received the next message
+     * Does the actual receiving. Is initialized with the socket on which to receive.
+     * 
+     * @author Axel Uhl (D043530)
+     *
      */
-    public void stop() throws UnknownHostException, IOException, InterruptedException {
-        logger.entering(getClass().getName(), "stop");
-        stopped = true;
-        Socket closer = new Socket("localhost", portForClients); // this is to stop the client listener thread
-        closer.close();
-        logger.info("joining clientListener thread "+clientListener);
-        clientListener.join();
-        socket.close(); // will let a read terminate abnormally
-        logger.info("joining storeAndForwardThread "+storeAndForwardThread);
-        storeAndForwardThread.join();
-    }
-
-    public static void main(String[] args) throws InterruptedException, IOException {
-        String hostname = null;
-        int i=0;
-        if (args[i].equals("-h")) {
-            hostname = args[++i];
-            i++;
-        }
-        int sailMasterPort = Integer.valueOf(args[i++]);
-        int clientPort = Integer.valueOf(args[i++]);
+    private class ReceivingThread extends Thread {
+        private final Socket socket;
+        private boolean stopped;
         
-        MongoDBService mongoDBService = MongoDBService.INSTANCE;
-        mongoDBService.setConfiguration(MongoDBConfiguration.getDefaultConfiguration());
-        SwissTimingAdapterPersistence swissTimingAdapterPersistence = SwissTimingAdapterPersistence.INSTANCE;
-        if (hostname == null) {
-            new StoreAndForward(sailMasterPort, clientPort, SwissTimingFactory.INSTANCE, swissTimingAdapterPersistence, mongoDBService);
-        } else {
-            new StoreAndForward(hostname, sailMasterPort, clientPort, SwissTimingFactory.INSTANCE, swissTimingAdapterPersistence, mongoDBService);
+        public ReceivingThread(String threadName, Socket socket) {
+            super(threadName);
+            this.socket = socket;
         }
-    }
 
-    public void run() {
-        logger.entering(getClass().getName(), "run");
-        try {
+        @Override
+        public void run() {
+            logger.entering(getClass().getName(), "run");
             while (!stopped) {
                 try {
-                    establishConnection();
                     InputStream is = socket.getInputStream();
                     Pair<String, Long> messageAndOptionalSequenceNumber = transceiver.receiveMessage(is);
                     // ignore any sequence number contained in the message; we'll create our own
@@ -274,7 +271,7 @@ public class StoreAndForward implements Runnable {
                     DBObject incrementLastMessageCountQuery = new BasicDBObject().
                             append("$inc", new BasicDBObject().append(FieldNames.LAST_MESSAGE_COUNT.name(), 1));
                     while (!stopped && messageAndOptionalSequenceNumber != null) {
-                        logger.fine("Received message: "+messageAndOptionalSequenceNumber.getA());
+                        logger.fine("Thread "+this+" received message: "+messageAndOptionalSequenceNumber.getA());
                         DBObject newCountRecord = lastMessageCountCollection.findAndModify(emptyQuery, incrementLastMessageCountQuery);
                         lastMessageCount = ((newCountRecord == null) ? 0l :
                             ((Number) newCountRecord.get(FieldNames.LAST_MESSAGE_COUNT.name())).longValue());
@@ -326,6 +323,76 @@ public class StoreAndForward implements Runnable {
                     } else {
                         logger.info("StoreAndForward socket was closed.");
                     }
+                }
+            }
+            logger.exiting(getClass().getName(), "run");
+            receivingThreads.remove(this);
+        }
+        
+        /**
+         * Stops execution after having received the next message
+         */
+        public void stopReceiver() throws UnknownHostException, IOException, InterruptedException {
+            logger.entering(getClass().getName(), "stop");
+            stopped = true;
+            logger.info("closing socket");
+            socket.close(); // will let a read terminate abnormally
+        }
+    }
+    
+    /**
+     * Stops execution after having received the next message
+     */
+    public void stop() throws UnknownHostException, IOException, InterruptedException {
+        logger.entering(getClass().getName(), "stop");
+        stopped = true;
+        Socket closer = new Socket("localhost", portForClients); // this is to stop the client listener thread
+        closer.close();
+        logger.info("joining clientListener thread "+clientListener);
+        clientListener.join();
+        for (ReceivingThread receivingThread : receivingThreads) {
+            receivingThread.stopReceiver();
+            logger.info("joining storeAndForwardThread "+storeAndForwardThread);
+            receivingThread.join();
+        }
+        logger.info("StoreAndForward is closing receiving server socket");
+        if (serverSocketListeningForSailMasterBridge != null && !serverSocketListeningForSailMasterBridge.isClosed()) {
+            serverSocketListeningForSailMasterBridge.close();
+        }
+        logger.info("Stopping StoreAndForward server.");
+    }
+
+    public static void main(String[] args) throws InterruptedException, IOException {
+        String hostname = null;
+        int i=0;
+        if (args[i].equals("-h")) {
+            hostname = args[++i];
+            i++;
+        }
+        int sailMasterPort = Integer.valueOf(args[i++]);
+        int clientPort = Integer.valueOf(args[i++]);
+        
+        MongoDBService mongoDBService = MongoDBService.INSTANCE;
+        mongoDBService.setConfiguration(MongoDBConfiguration.getDefaultConfiguration());
+        SwissTimingAdapterPersistence swissTimingAdapterPersistence = SwissTimingAdapterPersistence.INSTANCE;
+        if (hostname == null) {
+            new StoreAndForward(sailMasterPort, clientPort, SwissTimingFactory.INSTANCE, swissTimingAdapterPersistence, mongoDBService);
+        } else {
+            new StoreAndForward(hostname, sailMasterPort, clientPort, SwissTimingFactory.INSTANCE, swissTimingAdapterPersistence, mongoDBService);
+        }
+    }
+
+    public void run() {
+        logger.entering(getClass().getName(), "run");
+        try {
+            while (!stopped) {
+                try {
+                    ReceivingThread receivingThread = establishConnection();
+                    if (!isInSailMasterListeningMode()) {
+                        receivingThread.join(); // we're in active connecting mode; wait for thread to die, then trie again
+                    }
+                } catch (Exception e) {
+                    logger.log(Level.SEVERE, "Exception in StoreAndForward", e);
                 }
             }
             logger.info("StoreAndForward is closing receiving server socket");

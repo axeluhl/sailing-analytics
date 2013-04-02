@@ -35,6 +35,7 @@ public class SailMasterTransceiverImpl implements SailMasterTransceiver {
     public synchronized void sendMessage(SailMasterMessage message, OutputStream os) throws IOException {
         os.write(("" + message.getSequenceNumber()).getBytes());
         sendMessage(message.getMessage(), os);
+        os.flush();
     }
 
     /**
