@@ -108,6 +108,7 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
 
     private CheckBox isOmniscient;
     private CheckBox isOpportunistic;
+    private CheckBox isPathPolylineFreeMode;
     private Chart chart;
     // private Timer timer;
 
@@ -216,6 +217,9 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
 
         this.isOpportunistic = new CheckBox(this.stringMessages.opportunistic(), true);
         this.isOpportunistic.setValue(true);
+
+        this.isPathPolylineFreeMode = new CheckBox(this.stringMessages.freemode(), true);
+        this.isPathPolylineFreeMode.setValue(false);
 
         leftPanel = new FlowPanel();
         rightPanel = new FlowPanel();
@@ -537,6 +541,28 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
 
     }
 
+    private Panel createPathPolylineModeSelector() {
+        Label label = new Label(this.stringMessages.whatIfCourse());
+        label.getElement().getStyle().setFloat(Style.Float.LEFT);
+
+        FlowPanel fp = new FlowPanel();
+        fp.add(label);
+
+        VerticalPanel vp = new VerticalPanel();
+        vp.getElement().getStyle().setProperty("width", "215px");
+
+        vp.add(this.isPathPolylineFreeMode);
+
+        vp.getElement().getStyle().setFloat(Style.Float.RIGHT);
+        fp.add(vp);
+
+        return fp;
+    }
+
+    public boolean isPathPolylineFreeMode() {
+        return this.isPathPolylineFreeMode.getValue();
+    }
+
     public Widget getTimeWidget() {
         return timePanel;
     }
@@ -611,6 +637,11 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
 
         Panel strategySelector = createStrategySelector();
         sailingPanel.add(strategySelector);
+
+        if (this.mode == SailingSimulatorUtil.measured) {
+            Panel pathPolylineModeSelector = this.createPathPolylineModeSelector();
+            sailingPanel.add(pathPolylineModeSelector);
+        }
 
         String polarString = stringMessages.simulatorPolarHeader();
         Label polarSetup = new Label(polarString);
