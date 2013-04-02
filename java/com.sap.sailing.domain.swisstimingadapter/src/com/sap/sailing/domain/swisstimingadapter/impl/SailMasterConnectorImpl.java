@@ -304,28 +304,33 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
         blockingQueue.offer(message);
     }
 
-    protected void notifyListeners(SailMasterMessage message) throws ParseException {
-        switch (message.getType()) {
-        case RPD:
-            notifyListenersRPD(message);
-            break;
-        case RAC:
-            notifyListenersRAC(message);
-            break;
-        case CCG:
-            notifyListenersCCG(message);
-            break;
-        case STL:
-            notifyListenersSTL(message);
-            break;
-        case CAM:
-            notifyListenersCAM(message);
-            break;
-        case TMD:
-            notifyListenersTMD(message);
-            break;
-        default:
-            // ignore all other messages because there are no notification patterns for those
+    protected void notifyListeners(SailMasterMessage message) {
+        try {
+            switch (message.getType()) {
+            case RPD:
+                notifyListenersRPD(message);
+                break;
+            case RAC:
+                notifyListenersRAC(message);
+                break;
+            case CCG:
+                notifyListenersCCG(message);
+                break;
+            case STL:
+                notifyListenersSTL(message);
+                break;
+            case CAM:
+                notifyListenersCAM(message);
+                break;
+            case TMD:
+                notifyListenersTMD(message);
+                break;
+            default:
+                // ignore all other messages because there are no notification patterns for those
+            }
+        } catch (Exception e) {
+            // broken messages are ignored
+            logger.warning("Exception caught during parsing of message '" + message.getMessage() + "' : " + e.getMessage());
         }
     }
     

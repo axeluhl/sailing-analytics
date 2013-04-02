@@ -96,12 +96,23 @@ public abstract class AbstractPortMonitor extends Thread {
                                         sn.connect(currentendpoint.getAddress(), timeout);
                                         sn.close();
                                     } else {
+                                        /* Avoid pooling http connections leading to TIME_WAIT */
+                                        System.setProperty("http.keepAlive", "false");
+                                        
                                         /* despite its name this does NOT open a real TCP connection */
                                         HttpURLConnection conn = (HttpURLConnection)currentendpoint.getURL().openConnection();
                                         conn.setConnectTimeout(timeout);
                                         conn.setRequestMethod("GET");
                                         conn.connect();
                                         int code = conn.getResponseCode();
+                                        
+                                        /* Make sure to also close the stream */
+                                        try {
+                                            conn.getInputStream().close();
+                                        } catch (Exception ex) {
+                                            /* ignore if there is no input stream */
+                                        }
+                                        
                                         conn.disconnect();
                                         if (code != 200) {
                                             throw new ConnectException("Could not successfully connect to endpoint " + currentendpoint.toString());

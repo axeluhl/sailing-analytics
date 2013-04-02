@@ -3,8 +3,11 @@
 
 set -u
 
-ECLIPSE_BIN=`which eclipse`
-ECLIPSE_HOME="`dirname $ECLIPSE_BIN`"
+if [ "$ECLIPSE_HOME" = "" ]; then
+    ECLIPSE_BIN=`which eclipse`
+    ECLIPSE_HOME="`dirname $ECLIPSE_BIN`"
+fi
+
 SAILING_GIT_HOME="`pwd`/../../.."
 
 TARGET_PLATFORM_BASE_DIR=${SAILING_GIT_HOME}/java/com.sap.sailing.targetplatform.base

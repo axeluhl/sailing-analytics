@@ -19,6 +19,7 @@ Like businesses, sailors need the latest information to make strategic decisions
 * [[Cook Book|wiki/cook-book]]
 * [[Planning|wiki/planning]]
 * Event Specifica
+  * [[General Planning|wiki/general-event-planning]]
   * [[Extreme Sailing Series|wiki/extreme-sailing-series]]
 
 ### Internal services (not related to wiki but useful)
