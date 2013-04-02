@@ -22,23 +22,26 @@ public class FlexibleLeaderboardCreationDialog extends PageArea {
     }
     
     public void setName(String name) {
-        nameField.clear();
-        nameField.sendKeys(name);
+        this.nameField.clear();
+        this.nameField.sendKeys(name);
     }
     
     public boolean isOkEnabled() {
-        return okButton.isEnabled();
+        return this.okButton.isEnabled();
     }
     
     public String getErrorMessage() {
-        return statusLabel.getText();
+        return this.statusLabel.getText();
     }
     
     public void pressOk() {
-        okButton.click();
+        this.okButton.click();
+        
+        // Wait, since we create the flexible leader board
+        waitForAjaxRequests();
     }
     
     public void pressCancel() {
-        cancelButton.click();
+        this.cancelButton.click();
     }
 }

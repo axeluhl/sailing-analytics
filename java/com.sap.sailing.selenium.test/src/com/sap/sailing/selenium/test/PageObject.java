@@ -110,7 +110,7 @@ public class PageObject {
      *       
      *       // The element is looked up using the tag name and it is
      *       // look up every time it is used
-     *       &#64;FindBy(how = ByTagName, using = "input")
+     *       &#64;FindBy(how = ByTagName.class, using = "input")
      *       private WebElement submitButton;
      *       
      *       public MySearchPage(WebDriver driver) {
