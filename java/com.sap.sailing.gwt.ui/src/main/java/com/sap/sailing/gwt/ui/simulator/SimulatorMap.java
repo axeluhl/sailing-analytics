@@ -700,7 +700,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         SimulatorUISelectionDTO selection = new SimulatorUISelectionDTO(this.parent.getSelectedBoatClassIndex(), this.parent.getSelectedRaceIndex(),
                 this.parent.getSelectedCompetitorIndex(), this.parent.getSelectedLegIndex());
 
-        return PathPolyline.createPathPolyline(pathDTO.getPoints(), this.errorReporter, this.simulatorSvc, this.mapw, this, selection);
+        return PathPolyline.createPathPolyline(pathDTO.getPoints(), this.errorReporter, this.simulatorSvc, this.mapw, this, this.parent, selection);
     }
 
     public void addLegendOverlayForPathPolyline(long totalTimeMilliseconds) {
