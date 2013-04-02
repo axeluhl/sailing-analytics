@@ -11,8 +11,10 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -40,6 +42,7 @@ public class ParserTest {
     private static final String SAMPLE_INPUT_NAME_LASER = "laser.xml";
     private static final String SAMPLE_INPUT_NAME_STAR = "star.xml";
     private static final String SAMPLE_INPUT_NAME_MELBOURNE = "melbourne_results_actual.xml";
+    private static final String SAMPLE_INPUT_NAME_SPLIT_FLEET = "470 M_20130402_144542.xml";
     private static final String RESOURCES = "resources/";
 
     private InputStream getInputStream(String filename) throws FileNotFoundException, IOException {
@@ -59,6 +62,7 @@ public class ParserTest {
                     result.add(new Pair<InputStream, String>(getInputStream(SAMPLE_INPUT_NAME_LASER), SAMPLE_INPUT_NAME_LASER));
                     result.add(new Pair<InputStream, String>(getInputStream(SAMPLE_INPUT_NAME_STAR), SAMPLE_INPUT_NAME_STAR));
                     result.add(new Pair<InputStream, String>(getInputStream(SAMPLE_INPUT_NAME_MELBOURNE), SAMPLE_INPUT_NAME_MELBOURNE));
+                    result.add(new Pair<InputStream, String>(getInputStream(SAMPLE_INPUT_NAME_SPLIT_FLEET), SAMPLE_INPUT_NAME_SPLIT_FLEET));
                     return result;
                 } catch (IOException e) {
                     throw new RuntimeException(e);
@@ -127,6 +131,30 @@ public class ParserTest {
                     .getMaxPointsReason());
             assertEquals("O'leary, Peter + Burrows, David",
                     resultsForR7.getScoreCorrectionForCompetitor("IRL").getCompetitorName());
+        }
+    }
+
+    @Test
+    public void testScoreCorrectionProviderForSplitFleet() throws IOException, SAXException,
+            ParserConfigurationException, JAXBException {
+        ScoreCorrectionProviderImpl scoreCorrectionProvider = new ScoreCorrectionProviderImpl(getTestDocumentProvider(),
+                ParserFactory.INSTANCE);
+        Map<String, Set<Pair<String, TimePoint>>> hasResultsFor = scoreCorrectionProvider.getHasResultsForBoatClassFromDateByEventName();
+        RegattaScoreCorrections _470Result = scoreCorrectionProvider.getScoreCorrections("470 Men", "470", hasResultsFor.get("470 Men").iterator().next().getB());
+        assertNotNull(_470Result);
+        Iterable<ScoreCorrectionsForRace> scoreCorrectionsForRaces = _470Result.getScoreCorrectionsForRaces();
+        assertNotNull(scoreCorrectionsForRaces);
+        assertEquals(4, Util.size(scoreCorrectionsForRaces)); // four split-fleet races (eight races altogether)
+        Set<String> raceNamesOrNumbers = new HashSet<>();
+        for (ScoreCorrectionsForRace scoreCorrectionForRace : scoreCorrectionsForRaces) {
+            raceNamesOrNumbers.add(scoreCorrectionForRace.getRaceNameOrNumber());
+        }
+        assertEquals(new HashSet<String>(Arrays.asList(new String[] { "1", "2", "3", "4" })), raceNamesOrNumbers);
+        {
+            final ScoreCorrectionsForRace resultsForR1 = Util.get(scoreCorrectionsForRaces, 0);
+            assertEquals(0, resultsForR1.getScoreCorrectionForCompetitor("AUT-3").getPoints(), 0.00000001);
+            assertSame(MaxPointsReason.NONE, resultsForR1.getScoreCorrectionForCompetitor("AUT-3")
+                    .getMaxPointsReason());
         }
     }
 }
