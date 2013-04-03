@@ -226,39 +226,43 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
                 try {
                     ensureSocketIsOpen();
                     Pair<String, Long> receivedMessageAndOptionalSequenceNumber = receiveMessage(socket.getInputStream());
-                    SailMasterMessage message = new SailMasterMessageImpl(
-                            receivedMessageAndOptionalSequenceNumber.getA(),
-                            receivedMessageAndOptionalSequenceNumber.getB());
-                    // drop race-specific messages for non-tracked races
-                    if (!message.getType().isRaceSpecific() || idsOfTrackedRaces.contains(message.getRaceID())) {
-                        boolean messageProcessed = false;
-                        synchronized (this) {
-                            if (message.getType().isRaceSpecific() && isCurrentlyBuffering(message.getRaceID())) {
-                                buffer(message);
-                                messageProcessed = true;
+                    if (receivedMessageAndOptionalSequenceNumber != null) {
+                        SailMasterMessage message = new SailMasterMessageImpl(
+                                receivedMessageAndOptionalSequenceNumber.getA(),
+                                receivedMessageAndOptionalSequenceNumber.getB());
+                        // drop race-specific messages for non-tracked races
+                        if (!message.getType().isRaceSpecific() || idsOfTrackedRaces.contains(message.getRaceID())) {
+                            boolean messageProcessed = false;
+                            synchronized (this) {
+                                if (message.getType().isRaceSpecific() && isCurrentlyBuffering(message.getRaceID())) {
+                                    buffer(message);
+                                    messageProcessed = true;
+                                }
                             }
-                        }
-                        if (!messageProcessed) {
-                            if (message.isResponse()) {
-                                // this is a response for an explicit request
-                                rendevouz(message);
-                            } else if (message.isEvent()) {
-                                // only notify if it hasn't been loaded from a store yet
-                                if (!message.getType().isRaceSpecific() || message.getSequenceNumber() == null ||
-                                        (sequenceNumberOfLastMessageForRaceID.containsKey(message.getRaceID()) &&
-                                                message.getSequenceNumber() > sequenceNumberOfLastMessageForRaceID.get(message.getRaceID()))) {
-                                    // a spontaneous event
-                                    logger.fine("notifying message " + message);
-                                    notifyListeners(message);
-                                } else {
-                                    logger.info("discarding already notified message " + message);
+                            if (!messageProcessed) {
+                                if (message.isResponse()) {
+                                    // this is a response for an explicit request
+                                    rendevouz(message);
+                                } else if (message.isEvent()) {
+                                    // only notify if it hasn't been loaded from a store yet
+                                    if (!message.getType().isRaceSpecific()
+                                            || message.getSequenceNumber() == null
+                                            || (sequenceNumberOfLastMessageForRaceID.containsKey(message.getRaceID()) && message
+                                                    .getSequenceNumber() > sequenceNumberOfLastMessageForRaceID
+                                                    .get(message.getRaceID()))) {
+                                        // a spontaneous event
+                                        logger.fine("notifying message " + message);
+                                        notifyListeners(message);
+                                    } else {
+                                        logger.info("discarding already notified message " + message);
+                                    }
                                 }
                             }
                         }
-                    }
-                    if (message.getType() == MessageType._STOPSERVER) {
-                        logger.info("SailMasterConnector received "+MessageType._STOPSERVER.name());
-                        stop();
+                        if (message.getType() == MessageType._STOPSERVER) {
+                            logger.info("SailMasterConnector received " + MessageType._STOPSERVER.name());
+                            stop();
+                        }
                     }
                 } catch (SocketException se) {
                     // This occurs if the socket was closed which may mean the connector was stopped. Check in while
