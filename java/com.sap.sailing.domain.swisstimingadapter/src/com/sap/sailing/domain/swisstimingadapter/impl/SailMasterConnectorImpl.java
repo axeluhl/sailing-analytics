@@ -22,6 +22,7 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.SpeedWithBearing;
@@ -222,8 +223,8 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
     public void run() {
         try {
             while (!stopped) {
-                ensureSocketIsOpen();
                 try {
+                    ensureSocketIsOpen();
                     Pair<String, Long> receivedMessageAndOptionalSequenceNumber = receiveMessage(socket.getInputStream());
                     SailMasterMessage message = new SailMasterMessageImpl(
                             receivedMessageAndOptionalSequenceNumber.getA(),
@@ -263,10 +264,11 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
                     // This occurs if the socket was closed which may mean the connector was stopped. Check in while
                     logger.info("Caught exception "+se+" during socket operation; setting socket to null");
                     socket = null;
+                    Thread.sleep(1000); // try again in 1s
                 }
             }
         } catch (Exception e) {
-            logger.throwing(SailMasterConnectorImpl.class.getName(), "run", e);
+            logger.log(Level.SEVERE, "Exception in sail master connector "+SailMasterConnectorImpl.class.getName()+".run", e);
         }
         logger.info("Stopping Sail Master connector thread");
     }

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.RegattaScoreCorrections.ScoreCorrectionForCompetitorInRace;
@@ -20,10 +21,10 @@ public class RaceResultAsScoreCorrectionForCompetitorInRace implements ScoreCorr
     private final Parser parser;
     private final RaceResult raceResult;
     
-    public RaceResultAsScoreCorrectionForCompetitorInRace(Parser parser, Division division, String raceID, String sailID) {
+    public RaceResultAsScoreCorrectionForCompetitorInRace(Parser parser, Division division, Set<String> raceIDs, String sailID) {
         this.sailID = sailID;
         this.parser = parser;
-        this.raceResult = determineRaceResult(division, raceID, sailID, parser);
+        this.raceResult = determineRaceResult(division, raceIDs, sailID, parser);
     }
 
     @Override
@@ -31,13 +32,13 @@ public class RaceResultAsScoreCorrectionForCompetitorInRace implements ScoreCorr
         return sailID;
     }
 
-    private RaceResult determineRaceResult(Division division, String raceID, String sailID, Parser parser) {
+    private RaceResult determineRaceResult(Division division, Set<String> raceIDs, String sailID, Parser parser) {
         RaceResult result = null;
         for (Object o : division.getSeriesResultOrRaceResultOrTRResult()) {
             // TODO what about TRResult
             if (o instanceof RaceResult) {
                 RaceResult raceResult = (RaceResult) o;
-                if (raceID.equals(raceResult.getRaceID())) {
+                if (raceIDs.contains(raceResult.getRaceID())) {
                     String teamSailID = parser.getBoat(parser.getTeam(raceResult.getTeamID()).getBoatID()).getSailNumber();
                     if (sailID.equals(teamSailID)) {
                         result = raceResult;
