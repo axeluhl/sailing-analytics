@@ -275,6 +275,7 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
             logger.log(Level.SEVERE, "Exception in sail master connector "+SailMasterConnectorImpl.class.getName()+".run", e);
         }
         logger.info("Stopping Sail Master connector thread");
+        stopped = true;
     }
     
     private synchronized void buffer(SailMasterMessage message) {
