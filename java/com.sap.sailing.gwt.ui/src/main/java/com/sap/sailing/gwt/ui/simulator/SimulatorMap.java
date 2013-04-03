@@ -68,6 +68,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
     private static Logger LOGGER = Logger.getLogger(SimulatorMap.class.getName());
     private static boolean SHOW_ONLY_PATH_POLYLINE = false;
 
+
     public enum ViewName {
         SUMMARY, REPLAY, WINDDISPLAY
     }
@@ -95,6 +96,15 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
             }
 
             PathDTO[] paths = result.getPaths();
+
+            // ensure Polyline is last;
+            /*
+             * List<PathDTO> newPaths = new ArrayList<PathDTO>(); int index3 = 0; for (; index3 < paths.length;
+             * index3++) { if (paths[index3].name.equals("Polyline")) { break; } } for (int index2 = 0; index2 <
+             * paths.length; index2++) { if (index2 != index3) { newPaths.add(paths[index2]); } }
+             * newPaths.add(paths[index3]); paths = newPaths.toArray(new PathDTO[0]);
+             */
+
             LOGGER.info("Number of Paths : " + paths.length);
             long startTime = paths[0].getPoints().get(0).timepoint;
             long maxDurationTime = 0;
@@ -114,16 +124,19 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
 
             PathDTO currentPath = null;
             String color = null;
+            String pathName = null;
             int noOfPaths = paths.length;
 
             for (int index = 0; index < noOfPaths; ++index) {
 
                 currentPath = paths[index];
+                pathName = currentPath.name;
                 color = colorPalette.getColor(noOfPaths - 1 - index);
 
-                if (currentPath.name.equals("Polyline")) {
-
+                if (pathName.equals("Polyline")) {
                     pathPolyline = createPathPolyline(currentPath);
+                } else if (pathName.equals("GPS Poly")) {
+                    continue;
                 }
                 else {
 
@@ -131,7 +144,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
                     WindFieldDTO pathWindDTO = new WindFieldDTO();
                     pathWindDTO.setMatrix(currentPath.getPoints());
 
-                    ReplayPathCanvasOverlay replayPathCanvasOverlay = new ReplayPathCanvasOverlay(currentPath.name, timer);
+                    ReplayPathCanvasOverlay replayPathCanvasOverlay = new ReplayPathCanvasOverlay(pathName, timer);
                     replayPathCanvasOverlays.add(replayPathCanvasOverlay);
                     replayPathCanvasOverlay.pathColor = color;
 
@@ -141,9 +154,12 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
                         timer.removeTimeListener(replayPathCanvasOverlay);
                         replayPathCanvasOverlay.setTimer(null);
                     }
+
                     if (SHOW_ONLY_PATH_POLYLINE == false) {
+
                         mapw.addOverlay(replayPathCanvasOverlay);
                     }
+
                     replayPathCanvasOverlay.setWindField(pathWindDTO);
                     replayPathCanvasOverlay.setRaceCourse(raceCourseCanvasOverlay.startPoint, raceCourseCanvasOverlay.endPoint);
                     if (index == 0) {
@@ -705,10 +721,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
 
     public void addLegendOverlayForPathPolyline(long totalTimeMilliseconds) {
 
-        PathCanvasOverlay overlay = new PathCanvasOverlay("Polyline", totalTimeMilliseconds);
-        overlay.pathColor = PathPolyline.DEFAULT_COLOR;
-
-        this.legendCanvasOverlay.addPathOverlay(overlay);
+        this.legendCanvasOverlay.addPathOverlay(new PathCanvasOverlay(PathPolyline.END_USER_NAME, totalTimeMilliseconds, PathPolyline.DEFAULT_COLOR));
     }
 
     public void redrawLegendCanvasOverlay() {
