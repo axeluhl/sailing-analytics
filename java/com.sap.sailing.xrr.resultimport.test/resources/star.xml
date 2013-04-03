@@ -123,7 +123,7 @@
     <Race RaceID="SAM007908" RaceName="Race 8" RaceNumber="8" RaceStartDate="2012-08-02" RaceStartTime="14:00:00" RaceStatus="result" />
     <Race RaceID="SAM007909" RaceName="Race 9" RaceNumber="9" RaceStartDate="2012-08-03" RaceStartTime="12:10:00" RaceStatus="result" />
     <Race RaceID="SAM007910" RaceName="Race 10" RaceNumber="10" RaceStartDate="2012-08-03" RaceStartTime="14:16:00" RaceStatus="result" />
-    <Race RaceID="SAM007101" RaceName="Medal Race" RaceNumber="1" RaceStartDate="2012-08-05" RaceStartTime="13:00:00" RaceStatus="result" />
+    <Race RaceID="SAM007101" RaceName="Medal Race" RaceNumber="11" RaceStartDate="2012-08-05" RaceStartTime="13:00:00" RaceStatus="result" />
     <Division DivisionID="SAM007000" Gender="Men" IFDivisionID="" Title="Star">
       <RaceResult TeamID="SAM007BRA01" Discard="false" RaceID="SAM007901" RacePoints="4" />
       <RaceResult TeamID="SAM007BRA01" Discard="false" RaceID="SAM007902" RacePoints="1" />
