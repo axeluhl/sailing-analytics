@@ -226,7 +226,13 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
                 try {
                     ensureSocketIsOpen();
                     Pair<String, Long> receivedMessageAndOptionalSequenceNumber = receiveMessage(socket.getInputStream());
-                    if (receivedMessageAndOptionalSequenceNumber != null) {
+                    if (receivedMessageAndOptionalSequenceNumber == null) {
+                        // reached EOF; this means the socket is or can be closed
+                        if (socket != null && !socket.isClosed()) {
+                            socket.close();
+                        }
+                        socket = null;
+                    } else {
                         SailMasterMessage message = new SailMasterMessageImpl(
                                 receivedMessageAndOptionalSequenceNumber.getA(),
                                 receivedMessageAndOptionalSequenceNumber.getB());
