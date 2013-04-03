@@ -23,13 +23,26 @@ import com.sap.sailing.gwt.ui.shared.racemap.TwoDPoint;
 import com.sap.sailing.gwt.ui.shared.racemap.TwoDSegment;
 import com.sap.sailing.gwt.ui.shared.racemap.TwoDVector;
 
+/**
+ * This class represents the path polyline overlay on the GWT map. This polyline is constructed with an array of turn
+ * points, saved as the turnPoints property.
+ * 
+ * The GWT polyline offers little to no help in setting programatically a vertices, so I apply every geometry rule onto
+ * the internal array of turn points, and then reconstruct the polyline after every movement.
+ * 
+ * The main method of this class is drawPolylineOnMap, in which a new GWT polyline is created with an update handler
+ * that handles every geometry related issue.
+ * 
+ * @author I077899 Bogdan Mihai
+ * 
+ */
 public class PathPolyline {
 
     public final static String DEFAULT_COLOR = "#8B0000";
     private final static int DEFAULT_WEIGHT = 3;
     private final static double DEFAULT_OPACITY = 1.0;
-    private final static double DEFAULT_DISTANCE_PX = 25;
-    private final static  double SMOOTHNESS_MAX_DEG = 20.0;
+    private final static double SMOOTHNESS_MAX_DEG = 20.0;
+    private final static double DELTA = 0.0001;
     private final static int STEP_DURATION_MILLISECONDS = 2000;
     private final static boolean USE_REAL_AVERAGE_WIND = true;
 
@@ -50,24 +63,34 @@ public class PathPolyline {
     private SimulatorMap simulatorMap = null;
     private SimulatorMainPanel simulatorMainPanel = null;
 
-    public static PathPolyline createPathPolyline(List<SimulatorWindDTO> pathPoints, ErrorReporter errorReporter, SimulatorServiceAsync simulatorService,
+    public static PathPolyline createPathPolyline(List<SimulatorWindDTO> pathPoints, String color, int weight, double opacity, ErrorReporter errorReporter,
+            SimulatorServiceAsync simulatorService,
             MapWidget map, SimulatorMap simulatorMap, SimulatorMainPanel simulatorMainPanel, SimulatorUISelectionDTO selection) {
 
         List<LatLng> points = new ArrayList<LatLng>();
 
+        // int counter = 1;
+        // int max = 5;
         for (SimulatorWindDTO pathPoint : pathPoints) {
             if (pathPoint.isTurn) {
 
+                // counter++;
                 points.add(LatLng.newInstance(pathPoint.position.latDeg, pathPoint.position.lngDeg));
+                // if (counter > max) {
+                // break;
+                // }
             }
         }
 
-        return new PathPolyline(points.toArray(new LatLng[0]), DEFAULT_COLOR, DEFAULT_WEIGHT, DEFAULT_OPACITY, selection,
-                errorReporter, pathPoints,
-                simulatorService, map, simulatorMap, simulatorMainPanel);
+        return new PathPolyline(points.toArray(new LatLng[0]), color, weight, opacity, selection, errorReporter, pathPoints, simulatorService, map,
+                simulatorMap, simulatorMainPanel);
     }
 
-    private PathPolyline() {
+    public static PathPolyline createPathPolyline(List<SimulatorWindDTO> pathPoints, ErrorReporter errorReporter, SimulatorServiceAsync simulatorService,
+            MapWidget map, SimulatorMap simulatorMap, SimulatorMainPanel simulatorMainPanel, SimulatorUISelectionDTO selection) {
+
+        return createPathPolyline(pathPoints, DEFAULT_COLOR, DEFAULT_WEIGHT, DEFAULT_OPACITY, errorReporter, simulatorService, map, simulatorMap,
+                simulatorMainPanel, selection);
     }
 
     private PathPolyline(LatLng[] points, String color, int weight, double opacity, SimulatorUISelectionDTO selection, ErrorReporter errorReporter,
@@ -112,10 +135,9 @@ public class PathPolyline {
                     turnPoints = newTurnPoints.toArray(new LatLng[0]);
 
                 } else {
+
                     final int indexOfMovedPoint = getIndexOfMovedPoint();
                     final int noOfPoints = turnPoints.length;
-
-                    LatLng temp = null;
 
                     boolean secondPart = false;
 
@@ -124,36 +146,51 @@ public class PathPolyline {
                         // nor a 3-turns line.
                     } else {
 
-                        TwoDPoint newOrigin = computeNewOrigin(indexOfMovedPoint);
+                        LatLng newPositionOfMovedPoint = getNewPositionOfMovedPoint(indexOfMovedPoint);
+
+                        LatLng oldPositionOfFirstBeforeMovedPoint = turnPoints[indexOfMovedPoint - 1];
+                        LatLng oldPositionOfMovedPoint = turnPoints[indexOfMovedPoint];
+                        LatLng oldPositionOfAfterBeforeMovedPoint = turnPoints[indexOfMovedPoint + 1];
 
                         if (indexOfMovedPoint == 1) {
-                            turnPoints[indexOfMovedPoint + 1] = toLatLng(computeAfterNewOrigin(indexOfMovedPoint, newOrigin));
+                            // if the indexOfMovedPoint == 1, only the next point will be changed, as the start one
+                            // cannot be moved
+                            turnPoints[indexOfMovedPoint + 1] = getNewPositionOfPointAfterMoved(indexOfMovedPoint, newPositionOfMovedPoint);
                             secondPart = true;
+
                         } else if (indexOfMovedPoint == noOfPoints - 2) {
-                            turnPoints[indexOfMovedPoint - 1] = toLatLng(computeBeforeNewOrigin(indexOfMovedPoint, newOrigin));
+                            // if indexOfMovedPoint == noOfPoints - 2, only the previous point will be changed, as the
+                            // end one cannot be moved.
+                            turnPoints[indexOfMovedPoint - 1] = getNewPositionOfPointBeforeMoved(indexOfMovedPoint, newPositionOfMovedPoint);
                             secondPart = false;
+
                         } else {
 
-                            temp = toLatLng(computeBeforeNewOrigin(indexOfMovedPoint, newOrigin));
-                            if (PathPolyline.equals(temp, turnPoints[indexOfMovedPoint - 1], 0.0001) == false) {
+                            LatLng possibleNewPositionOfPointBeforeMoved = getNewPositionOfPointBeforeMoved(indexOfMovedPoint, newPositionOfMovedPoint);
+                            if (PathPolyline.equals(possibleNewPositionOfPointBeforeMoved, turnPoints[indexOfMovedPoint - 1]) == false) {
+
                                 secondPart = false;
-                                turnPoints[indexOfMovedPoint - 1] = temp;
+                                turnPoints[indexOfMovedPoint - 1] = possibleNewPositionOfPointBeforeMoved;
+
                             }
 
-                            temp = toLatLng(computeAfterNewOrigin(indexOfMovedPoint, newOrigin));
-                            if (PathPolyline.equals(temp, turnPoints[indexOfMovedPoint + 1], 0.0001) == false) {
+                            LatLng possibleNewPositionOfPointAfterMoved = getNewPositionOfPointAfterMoved(indexOfMovedPoint, newPositionOfMovedPoint);
+                            if (PathPolyline.equals(possibleNewPositionOfPointAfterMoved, turnPoints[indexOfMovedPoint + 1]) == false) {
+
                                 secondPart = true;
-                                turnPoints[indexOfMovedPoint + 1] = temp;
+                                turnPoints[indexOfMovedPoint + 1] = possibleNewPositionOfPointAfterMoved;
+
                             }
                         }
 
-                        turnPoints[indexOfMovedPoint] = toLatLng(newOrigin);
+                        turnPoints[indexOfMovedPoint] = newPositionOfMovedPoint;
 
-                        turnPoints = fix_againstTheWindMovement(turnPoints, indexOfMovedPoint, secondPart);
+                        turnPoints = checkIfAnyTurnsMustGo(turnPoints, indexOfMovedPoint, secondPart, oldPositionOfFirstBeforeMovedPoint,
+                                oldPositionOfMovedPoint, oldPositionOfAfterBeforeMovedPoint);
 
-                        turnPoints = fix_spikesOnCourse(turnPoints);
+                        turnPoints = eliminateSpikes(turnPoints);
 
-                        turnPoints = fix_trianglesOnCourse(turnPoints);
+                        turnPoints = eliminateTriangles(turnPoints);
                     }
 
                     drawPolylineOnMap();
@@ -168,6 +205,9 @@ public class PathPolyline {
         this.getTotalTime();
     }
 
+    /**
+     * Adds a GWT marker to the map. Used only for debugging purposes.
+     */
     @SuppressWarnings("unused")
     private void addMarker(LatLng point, String title) {
 
@@ -179,129 +219,49 @@ public class PathPolyline {
         this.map.addOverlay(marker);
     }
 
-    private LatLng[] fix_againstTheWindMovement(LatLng[] turnPoints, int indexOfMovedPoint, boolean secondPart) {
+    /**
+     * This member checks if the point before the moved point must be eliminated or not from the turns array. If so, a
+     * new turn array is returned, if not the old one is returned.
+     * 
+     * @param turnPoints
+     *            - the array of turns as LatLng objects
+     * @param indexOfMovedPoint
+     *            - the index of the moved point
+     * @param secondBefore
+     *            - the second point before the moved one as a TwoDPoint object
+     * @param firstBefore
+     *            - the new position of the point before the moved one as a TwoDPoint object
+     * @param neww
+     *            - the new position of the moved point.
+     * @param firstAfter
+     *            - the new position of the point after the moved one as a TwoDPoint object
+     * @param firstAfterEdge
+     *            - the edge after the moved point, defined by the moved point and the point after it, defined as a
+     *            TwoDSegment.
+     * @returns a LatLng[] array.
+     */
+    private LatLng[] checkIfPreviousMustGo(LatLng[] turnPoints, int indexOfMovedPoint, TwoDPoint secondBefore, TwoDPoint firstBefore, TwoDPoint neww,
+            TwoDPoint firstAfter, TwoDSegment firstAfterEdge) {
 
-        int noOfTurnPoints = turnPoints.length;
         List<LatLng> newTurnPoints = new ArrayList<LatLng>();
-
-        TwoDPoint neww = this.toTwoDPoint(turnPoints[indexOfMovedPoint]);
-        TwoDPoint new_before = this.toTwoDPoint(turnPoints[indexOfMovedPoint - 1]);
-        TwoDPoint new_after = this.toTwoDPoint(turnPoints[indexOfMovedPoint + 1]);
-
         boolean newList = false;
 
-        if (secondPart) {
+        TwoDVector vector = new TwoDVector(neww, firstBefore);
+        TwoDPoint projection = secondBefore.getProjectionByVector(firstAfterEdge, vector);
+        TwoDSegment segment = new TwoDSegment(firstAfter, projection);
 
-            TwoDPoint after_after = this.toTwoDPoint(turnPoints[indexOfMovedPoint + 2]);
+        if (segment.contains(neww, true) == false) {
 
-            if (indexOfMovedPoint + 4 <= noOfTurnPoints) {
+            newList = true;
 
-                TwoDPoint after_after_after = this.toTwoDPoint(turnPoints[indexOfMovedPoint + 3]);
-                TwoDSegment after_edge = new TwoDSegment(after_after, after_after_after);
-                TwoDSegment current_edge_before = new TwoDSegment(new_before, neww);
-                TwoDPoint intersection = after_edge.intersectionPointWith(current_edge_before);
-                TwoDSegment segment = new TwoDSegment(new_before, intersection);
+            // the current moved point must be replaced with projection
+            // the previous point must be eliminated
 
-                neww = segment.projectionOfPointOnLine(neww);
-
-                TwoDSegment current_edge_after = new TwoDSegment(neww, new_after);
-                TwoDPoint intersection2 = after_edge.intersectionPointWith(current_edge_after);
-                TwoDSegment segment2 = new TwoDSegment(after_after, intersection);
-
-                if (segment.contains(neww) == false || segment2.contains(intersection2)) {
-
-                    newList = true;
-
-                    for (int index = 0; index < noOfTurnPoints; index++) {
-                        if (index == indexOfMovedPoint) {
-                            newTurnPoints.add(this.toLatLng(intersection));
-                        } else if (index == indexOfMovedPoint + 1 || index == indexOfMovedPoint + 2) {
-                            // eliminate turnPoints[index + 1] as well as turnPoints[index + 2]
-                        } else {
-                            newTurnPoints.add(turnPoints[index]);
-                        }
-                    }
-                }
-            } else {
-
-                TwoDSegment line = new TwoDSegment(neww, new_before);
-                TwoDVector vector = new TwoDVector(neww, new_after);
-                TwoDPoint projection = TwoDPoint.projectToLineByVector(after_after, line, vector);
-                TwoDSegment segment = new TwoDSegment(new_before, projection);
-
-                neww = segment.projectionOfPointOnLine(neww);
-
-                if (segment.contains(neww) == false) {
-
-                    newList = true;
-
-                    for (int index = 0; index < noOfTurnPoints; index++) {
-                        if (index == indexOfMovedPoint) {
-                            newTurnPoints.add(this.toLatLng(projection));
-                        } else if (index == indexOfMovedPoint + 1) {
-                            // eliminate turnPoints[index + 1]
-                        } else {
-                            newTurnPoints.add(turnPoints[index]);
-                        }
-                    }
-                }
-            }
-
-        } else {
-
-            TwoDPoint before_before = toTwoDPoint(turnPoints[indexOfMovedPoint - 2]);
-
-            if (indexOfMovedPoint >= 3) {
-
-                TwoDPoint before_before_before = this.toTwoDPoint(turnPoints[indexOfMovedPoint - 3]);
-                TwoDSegment before_edge = new TwoDSegment(before_before, before_before_before);
-                TwoDSegment current_edge_after = new TwoDSegment(neww, new_after);
-                TwoDPoint intersection = before_edge.intersectionPointWith(current_edge_after);
-                TwoDSegment segment = new TwoDSegment(new_after, intersection);
-
-                neww = segment.projectionOfPointOnLine(neww);
-
-                TwoDSegment current_edge_before = new TwoDSegment(neww, new_before);
-                TwoDPoint intersection2 = before_edge.intersectionPointWith(current_edge_before);
-                TwoDSegment segment2 = new TwoDSegment(before_before, intersection);
-
-                if (segment.contains(neww) == false || segment2.contains(intersection2)) {
-
-                    newList = true;
-
-                    for (int index = 0; index < noOfTurnPoints; index++) {
-                        if (index == indexOfMovedPoint) {
-                            newTurnPoints.add(this.toLatLng(intersection));
-                        } else if (index == indexOfMovedPoint - 1 || index == indexOfMovedPoint - 2) {
-                            // eliminate turnPoints[index - 1] as well as turnPoints[index - 2]
-                        } else {
-                            newTurnPoints.add(turnPoints[index]);
-                        }
-                    }
-                }
-
-            } else {
-
-                TwoDSegment line = new TwoDSegment(neww, new_after);
-                TwoDVector vector = new TwoDVector(neww, new_before);
-                TwoDPoint projection = TwoDPoint.projectToLineByVector(before_before, line, vector);
-                TwoDSegment segment = new TwoDSegment(new_after, projection);
-
-                neww = segment.projectionOfPointOnLine(neww);
-
-                if (segment.contains(neww) == false) {
-
-                    newList = true;
-
-                    for (int index = 0; index < noOfTurnPoints; index++) {
-                        if (index == indexOfMovedPoint) {
-                            newTurnPoints.add(this.toLatLng(projection));
-                        } else if (index == indexOfMovedPoint - 1) {
-                            // eliminate turnPoints[index - 1]
-                        } else {
-                            newTurnPoints.add(turnPoints[index]);
-                        }
-                    }
+            for (int index = 0; index < turnPoints.length; index++) {
+                if (index == indexOfMovedPoint) {
+                    newTurnPoints.add(this.toLatLng(projection));
+                } else if (index != indexOfMovedPoint - 1) {
+                    newTurnPoints.add(turnPoints[index]);
                 }
             }
         }
@@ -313,10 +273,381 @@ public class PathPolyline {
         }
     }
 
-    private double getAngleDegreesBetween(LatLng previous, LatLng current, LatLng next) {
+    /**
+     * This member checks if the previous two points before the moved point must be eliminated or not from the turns
+     * array. If so, a new turn array is returned, if not the old one is returned.
+     * 
+     * @param turnPoints
+     *            - the array of turns as LatLng objects
+     * @param indexOfMovedPoint
+     *            - the index of the moved point
+     * @param secondBefore
+     *            - the second point before the moved one as a TwoDPoint object
+     * @param newFirstBefore
+     *            - the new position of the point before the moved one as a TwoDPoint object
+     * @param old
+     *            - the old position of the moved point.
+     * @param neww
+     *            - the new position of the moved point.
+     * @param firstAfter
+     *            - the new position of the point after the moved one as a TwoDPoint object
+     * @param firstAfterEdge
+     *            - the edge after the moved point, defined by the moved point and the point after it, defined as a
+     *            TwoDSegment.
+     * @returns a LatLng[] array.
+     */
+    private LatLng[] checkIfPreviousTwoMustGo(LatLng[] turnPoints, int indexOfMovedPoint, TwoDPoint secondBefore, TwoDPoint oldFirstBefore,
+            TwoDPoint newFirstBefore, TwoDPoint old, TwoDPoint neww, TwoDPoint firstAfter, TwoDSegment firstAfterEdge) {
 
-        TwoDVector first = new TwoDVector(this.toTwoDPoint(current), this.toTwoDPoint(previous));
-        TwoDVector second = new TwoDVector(this.toTwoDPoint(current), this.toTwoDPoint(next));
+        List<LatLng> newTurnPoints = new ArrayList<LatLng>();
+        boolean newList = false;
+
+        TwoDPoint thirdBefore = this.toTwoDPoint(turnPoints[indexOfMovedPoint - 3]);
+        TwoDSegment thirdBeforeEdge = new TwoDSegment(secondBefore, thirdBefore);
+        TwoDPoint intersection = thirdBeforeEdge.getIntersection(firstAfterEdge);
+        TwoDSegment segment = new TwoDSegment(firstAfter, intersection);
+
+        TwoDSegment firstBeforeEdge = new TwoDSegment(neww, newFirstBefore);
+        TwoDPoint intersection2 = thirdBeforeEdge.getIntersection(firstBeforeEdge);
+        TwoDSegment segment2 = new TwoDSegment(secondBefore, intersection);
+
+        double distanceToNewFirstAfter = neww.getDistanceTo(firstAfter);
+        double distanceToOld = neww.getDistanceTo(old);
+        TwoDSegment oldFirstAfterEdge = new TwoDSegment(old, firstAfter);
+
+        if (distanceToNewFirstAfter < distanceToOld && oldFirstAfterEdge.contains(neww, true) == false) {
+
+            if (indexOfMovedPoint + 2 < turnPoints.length) {
+
+                TwoDPoint secondAfter = this.toTwoDPoint(turnPoints[indexOfMovedPoint + 2]);
+                TwoDSegment secondAfterEdge = new TwoDSegment(firstAfter, secondAfter);
+                TwoDSegment secondBeforeEdge = new TwoDSegment(newFirstBefore, secondBefore);
+                TwoDPoint intersection3 = secondBeforeEdge.getIntersection(secondAfterEdge);
+
+                newList = true;
+
+                // the moved point and the next one must be eliminated
+                // the previous point must be replaced with intersection3
+
+                for (int index = 0; index < turnPoints.length; index++) {
+
+                    if (index == indexOfMovedPoint - 1) {
+                        newTurnPoints.add(this.toLatLng(intersection3));
+                    } else if (index != indexOfMovedPoint && index != indexOfMovedPoint + 1) {
+                        newTurnPoints.add(turnPoints[index]);
+                    }
+
+                }
+
+            } else {
+
+                TwoDVector vector = new TwoDVector(old, oldFirstBefore);
+                TwoDSegment secondBeforeEdge = new TwoDSegment(newFirstBefore, secondBefore);
+                TwoDPoint intersection3 = firstAfter.getProjectionByVector(secondBeforeEdge, vector);
+
+                newList = true;
+
+                // the moved point must be eliminated
+                // the previous point must be replaced with intersection3
+
+                for (int index = 0; index < turnPoints.length; index++) {
+
+                    if (index == indexOfMovedPoint - 1) {
+                        newTurnPoints.add(this.toLatLng(intersection3));
+                    } else if (index != indexOfMovedPoint) {
+                        newTurnPoints.add(turnPoints[index]);
+                    }
+                }
+            }
+
+        } else {
+            if (segment.contains(neww, true) == false || segment2.contains(intersection2, true)) {
+
+                newList = true;
+
+                // the moved point must be replaced with intersection
+                // the previous two points must be eliminated
+
+                for (int index = 0; index < turnPoints.length; index++) {
+
+                    if (index == indexOfMovedPoint) {
+                        newTurnPoints.add(this.toLatLng(intersection));
+                    } else if (index != indexOfMovedPoint - 1 && index != indexOfMovedPoint - 2) {
+                        newTurnPoints.add(turnPoints[index]);
+                    }
+
+                }
+            }
+        }
+
+        if (newList) {
+            return newTurnPoints.toArray(new LatLng[0]);
+        } else {
+            return turnPoints;
+        }
+    }
+
+    /**
+     * This member checks if the next two points after the moved point must be eliminated or not from the turns array.
+     * If so, a new turn array is returned, if not the old one is returned.
+     * 
+     * @param turnPoints
+     *            - the array of turns as LatLng objects
+     * @param indexOfMovedPoint
+     *            - the index of the moved point
+     * @param firstBefore
+     *            - the new position of the point before the moved one as a TwoDPoint object
+     * @param old
+     *            - the old position of the moved point.
+     * @param neww
+     *            - the new position of the moved point.
+     * @param newFirstAfter
+     *            - the new position of the point after the moved one as a TwoDPoint object
+     * @param secondAfter
+     *            - the second point after the moved one as a TwoDPoint object
+     * @param firstBeforeEdge
+     *            - the edge before the moved point, defined by the moved point and the point before it, defined as a
+     *            TwoDSegment.
+     * @returns a LatLng[] array.
+     */
+    private LatLng[] checkIfNextTwoMustGo(LatLng[] turnPoints, int indexOfMovedPoint, TwoDPoint firstBefore, TwoDPoint old, TwoDPoint neww,
+            TwoDPoint oldFirstAfter, TwoDPoint newFirstAfter, TwoDPoint secondAfter, TwoDSegment firstBeforeEdge) {
+
+        List<LatLng> newTurnPoints = new ArrayList<LatLng>();
+        boolean newList = false;
+
+        TwoDPoint thirdAfter = this.toTwoDPoint(turnPoints[indexOfMovedPoint + 3]);
+        TwoDSegment thirdAfterEdge = new TwoDSegment(secondAfter, thirdAfter);
+        TwoDPoint intersection = thirdAfterEdge.getIntersection(firstBeforeEdge);
+        TwoDSegment segment = new TwoDSegment(firstBefore, intersection);
+
+        TwoDSegment firstAfterEdge = new TwoDSegment(neww, newFirstAfter);
+        TwoDPoint intersection2 = thirdAfterEdge.getIntersection(firstAfterEdge);
+        TwoDSegment segment2 = new TwoDSegment(secondAfter, intersection);
+
+        double distanceToNewFirstBefore = neww.getDistanceTo(firstBefore);
+        double distanceToOld = neww.getDistanceTo(old);
+        TwoDSegment oldFirstBeforeEdge = new TwoDSegment(old, firstBefore);
+
+        if (distanceToNewFirstBefore < distanceToOld && oldFirstBeforeEdge.contains(neww, true) == false) {
+
+            if (indexOfMovedPoint - 2 >= 0) {
+
+                TwoDPoint secondBefore = this.toTwoDPoint(turnPoints[indexOfMovedPoint - 2]);
+                TwoDSegment secondBeforeEdge = new TwoDSegment(secondBefore, firstBefore);
+                TwoDSegment secondAfterEdge = new TwoDSegment(newFirstAfter, secondAfter);
+                TwoDPoint intersection3 = secondAfterEdge.getIntersection(secondBeforeEdge);
+
+                newList = true;
+
+                // the moved point and the previous one must be eliminated
+                // the next point must be replaced with intersection3
+
+                for (int index = 0; index < turnPoints.length; index++) {
+
+                    if (index == indexOfMovedPoint + 1) {
+                        newTurnPoints.add(this.toLatLng(intersection3));
+                    } else if (index != indexOfMovedPoint && index != indexOfMovedPoint - 1) {
+                        newTurnPoints.add(turnPoints[index]);
+                    }
+
+                }
+
+            } else {
+
+                TwoDVector vector = new TwoDVector(old, oldFirstAfter);
+                TwoDSegment secondAfterEdge = new TwoDSegment(newFirstAfter, secondAfter);
+                TwoDPoint intersection3 = firstBefore.getProjectionByVector(secondAfterEdge, vector);
+
+                newList = true;
+
+                // the current moved point must be eliminated
+                // the next point must be replaced with intersection3
+
+                for (int index = 0; index < turnPoints.length; index++) {
+
+                    if (index == indexOfMovedPoint + 1) {
+                        newTurnPoints.add(this.toLatLng(intersection3));
+                    } else if (index != indexOfMovedPoint) {
+                        newTurnPoints.add(turnPoints[index]);
+                    }
+                }
+            }
+
+        } else {
+
+            if (segment.contains(neww, true) == false || segment2.contains(intersection2, true)) {
+
+                newList = true;
+
+                // the current moved point must be replaced with intersection
+                // the next two points must be eliminated
+
+                for (int index = 0; index < turnPoints.length; index++) {
+
+                    if (index == indexOfMovedPoint) {
+                        newTurnPoints.add(this.toLatLng(intersection));
+                    } else if (index != indexOfMovedPoint + 1 && index != indexOfMovedPoint + 2) {
+                        newTurnPoints.add(turnPoints[index]);
+                    }
+
+                }
+            }
+        }
+
+        if (newList) {
+            return newTurnPoints.toArray(new LatLng[0]);
+        } else {
+            return turnPoints;
+        }
+    }
+
+    /**
+     * This member checks if the point after the moved point must be eliminated or not from the turns array. If so, a
+     * new turn array is returned, if not the old one is returned.
+     * 
+     * @param turnPoints
+     *            - the array of turns as LatLng objects
+     * @param indexOfMovedPoint
+     *            - the index of the moved point
+     * @param firstBefore
+     *            - the new position of the point before the moved one as a TwoDPoint object
+     * @param neww
+     *            - the new position of the moved point.
+     * @param firstAfter
+     *            - the new position of the point after the moved one as a TwoDPoint object
+     * @param secondAfter
+     *            - the second after point after the moved one as a TwoDPoint object
+     * @param firstBeforeEdge
+     *            - the edge before the moved point, defined by the moved point and the point before it, defined as a
+     *            TwoDSegment.
+     * @returns a LatLng[] array.
+     */
+    private LatLng[] checkIfNextMustGo(LatLng[] turnPoints, int indexOfMovedPoint, TwoDPoint firstBefore, TwoDPoint neww, TwoDPoint firstAfter,
+            TwoDPoint secondAfter, TwoDSegment firstBeforeEdge) {
+
+        List<LatLng> newTurnPoints = new ArrayList<LatLng>();
+        boolean newList = false;
+
+        TwoDVector vector = new TwoDVector(neww, firstAfter);
+        TwoDPoint projection = secondAfter.getProjectionByVector(firstBeforeEdge, vector);
+        TwoDSegment segment = new TwoDSegment(firstBefore, projection);
+
+        if (segment.contains(neww, true) == false) {
+
+            newList = true;
+
+            // the current moved point must be replaced with projection
+            // the next point must be eliminated
+
+            for (int index = 0; index < turnPoints.length; index++) {
+                if (index == indexOfMovedPoint) {
+                    newTurnPoints.add(this.toLatLng(projection));
+                } else if (index != indexOfMovedPoint + 1) {
+                    newTurnPoints.add(turnPoints[index]);
+                }
+            }
+        }
+
+        if (newList) {
+            return newTurnPoints.toArray(new LatLng[0]);
+        } else {
+            return turnPoints;
+        }
+    }
+
+    /**
+     * This member checks if any of the previous points before the moved point or next points after the moved point must
+     * be eliminated or not. If so, a new array of turn points is returned, if not, the old array is returned.
+     * 
+     * @param turnPoints
+     *            - the array of turn points as LatLng objects
+     * @param indexOfMovedPoint
+     *            - the index of the moved point
+     * @param secondPart
+     *            - this flag shows which part of the turn points array must be checked for changes. If secondPart ==
+     *            false, then this method will check for either previous point or previous two points to be eliminated
+     *            or not. If secondPart == true, then this method will check for either next point or next two points to
+     *            be eliminated or not.
+     * @param old_MP
+     *            - The old position of the moved point as a LatLng object
+     * @returns a LatLng[] array.
+     */
+    private LatLng[] checkIfAnyTurnsMustGo(LatLng[] turnPoints, int indexOfMovedPoint, boolean secondPart, LatLng oldPositionOfFirstBeforeMovedPoint,
+            LatLng oldPositionOfMovedPoint, LatLng oldPositionOfAfterBeforeMovedPoint) {
+
+        LatLng[] result = null;
+
+        TwoDPoint oldFirstBefore = this.toTwoDPoint(oldPositionOfFirstBeforeMovedPoint);
+        TwoDPoint old = this.toTwoDPoint(oldPositionOfMovedPoint);
+        TwoDPoint oldFirstAfter = this.toTwoDPoint(oldPositionOfAfterBeforeMovedPoint);
+
+        TwoDPoint neww = this.toTwoDPoint(turnPoints[indexOfMovedPoint]);
+
+        TwoDPoint newFirstBefore = this.toTwoDPoint(turnPoints[indexOfMovedPoint - 1]);
+        TwoDPoint newFirstAfter = this.toTwoDPoint(turnPoints[indexOfMovedPoint + 1]);
+
+        if (secondPart) {
+
+            // check the points AFTER the moved point
+
+            TwoDPoint secondAfter = this.toTwoDPoint(turnPoints[indexOfMovedPoint + 2]);
+            TwoDSegment firstBeforeEdge = new TwoDSegment(newFirstBefore, neww);
+
+            if (indexOfMovedPoint == turnPoints.length - 3) {
+
+                // check if the next 2 points must be eliminated
+                result = this.checkIfNextMustGo(turnPoints, indexOfMovedPoint, newFirstBefore, neww, newFirstAfter, secondAfter, firstBeforeEdge);
+
+            } else {
+
+                // check if only the next point must be eliminated
+
+                result = this.checkIfNextTwoMustGo(turnPoints, indexOfMovedPoint, newFirstBefore, old, neww, oldFirstAfter, newFirstAfter, secondAfter,
+                        firstBeforeEdge);
+            }
+
+        } else {
+
+            // check the points BEFORE the moved point
+
+            TwoDPoint secondBefore = toTwoDPoint(turnPoints[indexOfMovedPoint - 2]);
+            TwoDSegment firstAfterEdge = new TwoDSegment(neww, newFirstAfter);
+
+            if (indexOfMovedPoint == 2) {
+
+                // check if the previous 2 points must be eliminated
+
+                result = this.checkIfPreviousMustGo(turnPoints, indexOfMovedPoint, secondBefore, newFirstBefore, neww, newFirstAfter, firstAfterEdge);
+
+            } else {
+
+                // check if only the previous point must be eliminated
+
+                result = this.checkIfPreviousTwoMustGo(turnPoints, indexOfMovedPoint, secondBefore, oldFirstBefore, newFirstBefore, old, neww, newFirstAfter,
+                        firstAfterEdge);
+            }
+
+        }
+
+        return result;
+    }
+
+    /**
+     * This member computes the angle between two vectors with the same origin
+     * 
+     * @param head1
+     *            - the head of the first vector
+     * @param origin
+     *            - the common origin of the two vectors
+     * @param head2
+     *            - the head of the second vector
+     * @returns the angle between these two vectors in degrees.
+     */
+    private double getAngleDegreesBetween(LatLng head1, LatLng origin, LatLng head2) {
+
+        TwoDVector first = new TwoDVector(this.toTwoDPoint(origin), this.toTwoDPoint(head1));
+        TwoDVector second = new TwoDVector(this.toTwoDPoint(origin), this.toTwoDPoint(head2));
 
         double dotProduct = first.dotProduct(second);
 
@@ -334,7 +665,16 @@ public class PathPolyline {
         return angle;
     }
 
-    private LatLng[] fix_spikesOnCourse(LatLng[] turnPoints) {
+    /**
+     * Eliminates the spikes from the array of turns. In order to do so, it will compare the "inside" angle defined by
+     * each pair of 3 consecutive turns with a default value. If this angle is smaller, than the top of it will be
+     * removed.
+     * 
+     * @param turnPoints
+     *            - the array of turn points.
+     * @returns a LatLng object - the new array of turn points.
+     */
+    private LatLng[] eliminateSpikes(LatLng[] turnPoints) {
 
         if (turnPoints.length < 4) {
             return turnPoints;
@@ -342,20 +682,21 @@ public class PathPolyline {
 
         List<LatLng> points = new ArrayList<LatLng>();
 
-        int noOfPointsMinus1 = turnPoints.length - 1;
-
-        TwoDSegment before = null;
-        TwoDSegment after = null;
+        TwoDSegment beforeEdge = null;
+        TwoDSegment afterEdge = null;
 
         int newIndex = -1;
         TwoDPoint newAtIndex = null;
 
-        for (int index = 2; index < noOfPointsMinus1; index++) {
+        for (int index = 2; index < turnPoints.length - 1; index++) {
 
             if (this.getAngleDegreesBetween(turnPoints[index - 1], turnPoints[index], turnPoints[index + 1]) < SMOOTHNESS_MAX_DEG) {
-                before = new TwoDSegment(toTwoDPoint(turnPoints[index - 2]), toTwoDPoint(turnPoints[index - 1]));
-                after = new TwoDSegment(toTwoDPoint(turnPoints[index]), toTwoDPoint(turnPoints[index + 1]));
-                newAtIndex = after.intersectionPointWith(before);
+
+                beforeEdge = new TwoDSegment(toTwoDPoint(turnPoints[index - 2]), toTwoDPoint(turnPoints[index - 1]));
+                afterEdge = new TwoDSegment(toTwoDPoint(turnPoints[index]), toTwoDPoint(turnPoints[index + 1]));
+
+                newAtIndex = afterEdge.getIntersection(beforeEdge);
+
                 newIndex = index;
             }
         }
@@ -373,7 +714,15 @@ public class PathPolyline {
         return points.toArray(new LatLng[0]);
     }
 
-    private LatLng[] fix_trianglesOnCourse(LatLng[] turnPoints) {
+    /**
+     * Eliminates the triangles that might appear on the course.
+     * 
+     * @param turnPoints
+     *            - the array of turn points.
+     * @returns a LatLng object - the new array of turn points.
+     */
+    private LatLng[] eliminateTriangles(LatLng[] turnPoints) {
+
         int noOfPoints = turnPoints.length;
 
         if (noOfPoints < 4) {
@@ -401,7 +750,7 @@ public class PathPolyline {
                     if (index2 == index + 1) {
                         continue;
                     } else if (index2 == index + 2) {
-                        newTurnPoints.add(toLatLng(firstSegment.intersectionPointWith(secondSegment)));
+                        newTurnPoints.add(toLatLng(firstSegment.getIntersection(secondSegment)));
                     } else {
                         newTurnPoints.add(turnPoints[index2]);
                     }
@@ -414,69 +763,104 @@ public class PathPolyline {
         return turnPoints;
     }
 
-    private TwoDPoint computeNewOrigin(int indexOfMovedPoint) {
+    /**
+     * This member computes the correct new position of the moved point. In order to do so, it will take into
+     * consideration the "before edge" - the edge defined by the old position of the moved point and the previous point,
+     * and the "after edge" - the edge defined by the old position of the moved point and the next point. After this, it
+     * will compute the projections of the proposed new position of the moved point on both of these edges, and it will
+     * chose the one closer to it.
+     * 
+     * @param indexOfMovedPoint
+     *            - the index of the moved turn point.
+     * @returns a LatLng object - the correct new position of the moved point.
+     */
+    private LatLng getNewPositionOfMovedPoint(int indexOfMovedPoint) {
 
-        double distance = (this.map.getZoomLevel() - 11) * DEFAULT_DISTANCE_PX;
+        TwoDPoint firstBefore = this.toTwoDPoint(this.turnPoints[indexOfMovedPoint - 1]);
+        TwoDPoint oldPositionMovedPoint = this.toTwoDPoint(this.turnPoints[indexOfMovedPoint]);
+        TwoDPoint firstAfter = this.toTwoDPoint(this.turnPoints[indexOfMovedPoint + 1]);
 
-        TwoDPoint beforeMovedPoint = toTwoDPoint(this.turnPoints[indexOfMovedPoint - 1]);
-        TwoDPoint oldPositionMovedPoint = toTwoDPoint(this.turnPoints[indexOfMovedPoint]);
-        TwoDPoint afterMovedPoint = toTwoDPoint(this.turnPoints[indexOfMovedPoint + 1]);
-        TwoDPoint newPositionMovedPoint = toTwoDPoint(this.polyline.getVertex(indexOfMovedPoint));
+        TwoDPoint newPositionMovedPointBeforeFix = this.toTwoDPoint(this.polyline.getVertex(indexOfMovedPoint));
 
-        TwoDPoint head1 = oldPositionMovedPoint.getDistancedPoint(distance, beforeMovedPoint);
-        TwoDSegment oh1 = new TwoDSegment(oldPositionMovedPoint, head1);
-        TwoDPoint p1 = oh1.projectionOfPointOnLine(newPositionMovedPoint);
-        double d1 = newPositionMovedPoint.distanceBetween(p1);
+        TwoDSegment beforeEdge = new TwoDSegment(oldPositionMovedPoint, firstBefore);
+        double distanceToBeforeEdge = newPositionMovedPointBeforeFix.getDistanceTo(beforeEdge);
 
-        TwoDPoint head2 = oldPositionMovedPoint.getDistancedPoint(distance, afterMovedPoint);
-        TwoDSegment oh2 = new TwoDSegment(oldPositionMovedPoint, head2);
-        TwoDPoint p2 = oh2.projectionOfPointOnLine(newPositionMovedPoint);
-        double d2 = newPositionMovedPoint.distanceBetween(p2);
+        TwoDSegment afterEdge = new TwoDSegment(oldPositionMovedPoint, firstAfter);
+        double distanceToAfterEdge = newPositionMovedPointBeforeFix.getDistanceTo(afterEdge);
+
+        LatLng projectionOnBeforeEdge = this.toLatLng(newPositionMovedPointBeforeFix.getProjection(beforeEdge));
+        LatLng projectionOfAfterEdge = this.toLatLng(newPositionMovedPointBeforeFix.getProjection(afterEdge));
 
         if (indexOfMovedPoint == 1) {
-            return p1;
+            return projectionOnBeforeEdge;
         } else if (indexOfMovedPoint == this.turnPoints.length - 2) {
-            return p2;
+            return projectionOfAfterEdge;
         } else {
-            return (d1 < d2) ? p1 : p2;
+            return (distanceToBeforeEdge < distanceToAfterEdge) ? projectionOnBeforeEdge : projectionOfAfterEdge;
         }
     }
 
-    private TwoDPoint computeAfterNewOrigin(int indexOfMovedPoint, TwoDPoint newOrigin) {
+    /**
+     * This member computes the correct new position of the point after the moved one. In order to do so, it will
+     * compute the projection by vector of the new position of the moved point on the line defined by the first after
+     * point and the second after point, considering the vector starting from the old position of the moved point to the
+     * first after point.
+     * 
+     * @param indexOfMovedPoint
+     *            - the index of the moved point.
+     * @param newPositionOfMovedPoint
+     *            - the new position of the moved point
+     * @returns a LatLng object - the correct new position of the point after the moved one.
+     */
+    private LatLng getNewPositionOfPointAfterMoved(int indexOfMovedPoint, LatLng newPositionOfMovedPoint) {
 
-        TwoDPoint origin = toTwoDPoint(this.turnPoints[indexOfMovedPoint]);
-        TwoDPoint afterOrigin = toTwoDPoint(this.turnPoints[indexOfMovedPoint + 1]);
-        TwoDPoint afterAfterOrigin = toTwoDPoint(this.turnPoints[indexOfMovedPoint + 2]);
+        TwoDPoint oldPositionOfMovedPoint = toTwoDPoint(this.turnPoints[indexOfMovedPoint]);
+        TwoDPoint firstAfter = toTwoDPoint(this.turnPoints[indexOfMovedPoint + 1]);
+        TwoDPoint secondAfter = toTwoDPoint(this.turnPoints[indexOfMovedPoint + 2]);
 
-        TwoDSegment afterLine = new TwoDSegment(afterOrigin, afterAfterOrigin);
-        TwoDVector afterVector = new TwoDVector(origin, afterOrigin);
-        return TwoDPoint.projectToLineByVector(newOrigin, afterLine, afterVector);
+        TwoDSegment firstAfterEdge = new TwoDSegment(firstAfter, secondAfter);
+        TwoDVector afterVector = new TwoDVector(oldPositionOfMovedPoint, firstAfter);
+
+        return this.toLatLng(this.toTwoDPoint(newPositionOfMovedPoint).getProjectionByVector(firstAfterEdge, afterVector));
     }
 
-    private TwoDPoint computeBeforeNewOrigin(int indexOfMovedPoint, TwoDPoint newOrigin) {
+    /**
+     * This member computes the correct new position of the point before the moved one. In order to do so, it will
+     * compute the projection by vector of the new position of the moved point on the line defined by the first before
+     * point and the second before point, considering the vector starting from the old position of the moved point to
+     * the first before point.
+     * 
+     * @param indexOfMovedPoint
+     *            - the index of the moved point.
+     * @param newPositionOfMovedPoint
+     *            - the new position of the moved point
+     * @returns a LatLng object - the correct new position of the point before the moved one.
+     */
+    private LatLng getNewPositionOfPointBeforeMoved(int indexOfMovedPoint, LatLng newPositionOfMovedPoint) {
 
-        TwoDPoint beforeOrigin = toTwoDPoint(this.turnPoints[indexOfMovedPoint - 1]);
-        TwoDPoint beforeBeforeOrigin = toTwoDPoint(this.turnPoints[indexOfMovedPoint - 2]);
-        TwoDPoint origin = toTwoDPoint(this.turnPoints[indexOfMovedPoint]);
+        TwoDPoint firstBefore = toTwoDPoint(this.turnPoints[indexOfMovedPoint - 1]);
+        TwoDPoint secondBefore = toTwoDPoint(this.turnPoints[indexOfMovedPoint - 2]);
+        TwoDPoint oldPositionOfMovedPoint = toTwoDPoint(this.turnPoints[indexOfMovedPoint]);
 
-        TwoDSegment beforeLine = new TwoDSegment(beforeBeforeOrigin, beforeOrigin);
-        TwoDVector beforeVector = new TwoDVector(beforeOrigin, origin);
+        TwoDSegment firstBeforeEdge = new TwoDSegment(secondBefore, firstBefore);
+        TwoDVector beforeVector = new TwoDVector(oldPositionOfMovedPoint, firstBefore);
 
-        return TwoDPoint.projectToLineByVector(newOrigin, beforeLine, beforeVector);
+        return this.toLatLng(this.toTwoDPoint(newPositionOfMovedPoint).getProjectionByVector(firstBeforeEdge, beforeVector));
     }
 
+    /**
+     * Returns the index of the moved point by comparing each position of the "saved" array of turn points and the
+     * polyline array of vertices.
+     * 
+     * @returns the index of the moved point.
+     */
     private int getIndexOfMovedPoint() {
 
         int index = 0;
-        int noOfVertexes = this.polyline.getVertexCount();
-        LatLng oldPointPosition = null;
-        LatLng newPointPosition = null;
 
-        for (; index < noOfVertexes; index++) {
-            oldPointPosition = this.turnPoints[index];
-            newPointPosition = this.polyline.getVertex(index);
+        for (; index < this.turnPoints.length; index++) {
 
-            if (equals(oldPointPosition, newPointPosition) == false) {
+            if (equals(this.turnPoints[index], this.polyline.getVertex(index)) == false) {
                 break;
             }
         }
@@ -484,28 +868,59 @@ public class PathPolyline {
         return index;
     }
 
+    /**
+     * Converts a LatLng object to a TwoD object. Considering that a LatLng represent a point on a sphere, and that the
+     * TwoDPoint represent one on a plane, it will use the MapWidget aproximation to a container pixel in order to do
+     * so.
+     * 
+     * @param latLng
+     *            - the LatLng object to be converted to a TwoDPoint
+     * @returns a TwoDPoint object.
+     */
     private TwoDPoint toTwoDPoint(LatLng latLng) {
         Point point = this.map.convertLatLngToContainerPixel(latLng);
         return new TwoDPoint(point.getX(), point.getY());
     }
 
+    /**
+     * Converts a TwoDPoint object to a LatLng object. Considering that a TwoDPoint represent a point on a plane and
+     * that a LatLng object represents one on a sphere, it will use the MapWidget aproximation to a container pixel in
+     * ordr to do so.
+     * 
+     * @param point
+     *            - the TwoDPoint object to be converted to a LatLng
+     * @returns a LatLng object.
+     */
     private LatLng toLatLng(TwoDPoint point) {
         return this.map.convertContainerPixelToLatLng(Point.newInstance((int) point.getX(), (int) point.getY()));
     }
 
+    /**
+     * Converts a LatLng object to a PositionDTO.
+     * 
+     * @param position
+     *            - the LatLng object used
+     * @returns a PositionDTO object.
+     */
     private static PositionDTO toPositionDTO(LatLng position) {
         return new PositionDTO(position.getLatitude(), position.getLongitude());
     }
 
+    /**
+     * Checks if two LatLng points are equal by comparing their latitude and longitude with a certain epsilon (0.0001);
+     * 
+     * @param first
+     *            - the first LatLng object
+     * @param second
+     *            - the second LatLng object
+     * @returns a boolean, true for equality, false otherwise.
+     */
     private static boolean equals(LatLng first, LatLng second) {
-        return (first.getLatitude() == second.getLatitude() && first.getLongitude() == second.getLongitude());
-    }
 
-    private static boolean equals(LatLng first, LatLng second, double delta) {
         double latDiff = Math.abs(first.getLatitude() - second.getLatitude());
         double lngDiff = Math.abs(first.getLongitude() - second.getLongitude());
 
-        return latDiff <= delta && lngDiff <= delta;
+        return latDiff <= DELTA && lngDiff <= DELTA;
     }
 
     private void getTotalTime() {
@@ -542,11 +957,14 @@ public class PathPolyline {
         });
     }
 
+    /**
+     * Setter for the boatClassIndex property.
+     */
     public void setBoatClassID(int boatClassIndex) {
         this.selectedBoatClassIndex = boatClassIndex;
     }
 
-    private static double FACTOR_KN2MPS = 0.514444;
+    private static final double FACTOR_KN2MPS = 0.514444;
 
     /**
      * Converts knots to meters per second
@@ -554,5 +972,4 @@ public class PathPolyline {
     public static double knotsToMetersPerSecond(double knots) {
         return knots * FACTOR_KN2MPS;
     }
-
 }

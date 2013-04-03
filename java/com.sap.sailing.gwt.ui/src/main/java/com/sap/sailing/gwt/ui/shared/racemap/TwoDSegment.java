@@ -1,6 +1,11 @@
 package com.sap.sailing.gwt.ui.shared.racemap;
 
-
+/**
+ * Represents a segment (or line) in the bidimensional space.
+ * 
+ * @author I077899 Bogdan Mihai
+ * 
+ */
 public class TwoDSegment {
     private double lineSlope = 0.0;
     private double lineIntercept = 0.0;
@@ -13,12 +18,13 @@ public class TwoDSegment {
     }
 
     public TwoDSegment(double x1, double y1, double x2, double y2) {
-        if (x1 == x2) {
-            // FIXME:
-        } else {
+
+        if (x1 != x2) {
             this.lineSlope = (y2 - y1) / (x2 - x1);
             this.lineIntercept = (x2 * y1 - x1 * y2) / (x2 - x1);
         }
+
+        // TODO: if x1 == x2 ...
 
         this.firstPoint = new TwoDPoint(x1, y1);
         this.secondPoint = new TwoDPoint(x2, y2);
@@ -32,29 +38,12 @@ public class TwoDSegment {
         return this.lineIntercept;
     }
 
-    public TwoDPoint projectionOfPointOnLine(TwoDPoint p) {
-        double x = (this.lineSlope * p.getY() + p.getX() - this.lineSlope * this.lineIntercept)
-                / (this.lineSlope * this.lineSlope + 1);
-        double y = this.lineSlope * x + this.lineIntercept;
-
-        return new TwoDPoint(x, y);
-    }
-
-    public double distanceToLine(TwoDPoint p) {
-        return TwoDPoint.distanceBetween(p, this.projectionOfPointOnLine(p));
-    }
-
     public TwoDPoint getFirstPoint() {
         return this.firstPoint;
     }
 
     public TwoDPoint getSecondPoint() {
         return this.secondPoint;
-    }
-
-    @Override
-    public String toString() {
-        return "Segment[" + this.firstPoint.toString() + "|" + this.secondPoint.toString() + "]";
     }
 
     public TwoDVector asVector() {
@@ -65,20 +54,16 @@ public class TwoDSegment {
         return TwoDPoint.areIntersecting(s1.firstPoint, s1.secondPoint, s2.firstPoint, s2.secondPoint);
     }
 
-    public TwoDPoint intersectionPointWith(TwoDSegment segment2) {
-        return getIntersection(this, segment2);
-    }
+    public TwoDPoint getIntersection(TwoDSegment segment) {
 
-    public static TwoDPoint getIntersection(TwoDSegment segment1, TwoDSegment segment2) {
+        double xA = this.firstPoint.getX();
+        double yA = this.firstPoint.getY();
 
-        double xA = segment1.firstPoint.getX();
-        double yA = segment1.firstPoint.getY();
+        double xC = segment.firstPoint.getX();
+        double yC = segment.firstPoint.getY();
 
-        double xC = segment2.firstPoint.getX();
-        double yC = segment2.firstPoint.getY();
-
-        double m1 = segment1.lineSlope;
-        double m2 = segment2.lineSlope;
+        double m1 = this.lineSlope;
+        double m2 = segment.lineSlope;
 
         double x = (yC - yA + m1 * xA - m2 * xC) / (m1 - m2);
         double y = (yC - yA + m2 * (xA - xC)) * m1 / (m1 - m2) + yA;
@@ -86,9 +71,11 @@ public class TwoDSegment {
         return new TwoDPoint(x, y);
     }
 
-    public boolean contains(TwoDPoint point) {
+    public boolean contains(TwoDPoint point, boolean firstProjectOnLine) {
 
-        if (Math.abs(point.getY() - (this.lineSlope * point.getX() + this.lineIntercept)) > 0.00001) {
+        if (firstProjectOnLine) {
+            point = point.getProjection(this);
+        } else if (Math.abs(point.getY() - (this.lineSlope * point.getX() + this.lineIntercept)) > 0.00001) {
             return false;
         }
 

@@ -1,8 +1,13 @@
 package com.sap.sailing.gwt.ui.shared.racemap;
 
-//FIXME: vectorul nul?
-
+/**
+ * Represents a vector in the bidimensional space
+ * 
+ * @author I077899 Bogdan Mihai
+ * 
+ */
 public class TwoDVector {
+
     private final double re;
     private final double im;
     private final double norm;
@@ -17,15 +22,18 @@ public class TwoDVector {
         this.norm = Math.sqrt(this.re * this.re + this.im * this.im);
     }
 
-    public TwoDVector normalize() {
+    @SuppressWarnings("unused")
+    private TwoDVector normalize() {
         return new TwoDVector(this.re / this.norm, this.im / this.norm);
     }
 
-    public TwoDVector add(TwoDVector vector) {
+    @SuppressWarnings("unused")
+    private TwoDVector add(TwoDVector vector) {
         return new TwoDVector(this.re + vector.getRe(), this.im + vector.getIm());
     }
 
-    public TwoDVector substract(TwoDVector vector) {
+    @SuppressWarnings("unused")
+    private TwoDVector substract(TwoDVector vector) {
         return new TwoDVector(this.re - vector.getRe(), this.im - vector.getIm());
     }
 
@@ -33,15 +41,17 @@ public class TwoDVector {
         return (this.re * vector.getRe() + this.im * vector.getIm());
     }
 
-    public static double getCos(TwoDVector v1, TwoDVector v2) {
+    @SuppressWarnings("unused")
+    private static double getCos(TwoDVector v1, TwoDVector v2) {
         return (v1.dotProduct(v2) / (v1.getNorm() * v2.getNorm()));
     }
 
-    public TwoDVector multiplyScalar(double scalar) {
+    @SuppressWarnings("unused")
+    private TwoDVector multiplyScalar(double scalar) {
         return new TwoDVector(this.re * scalar, this.im * scalar);
     }
 
-    public TwoDVector rotate(double degrees) {
+    private TwoDVector rotate(double degrees) {
         double temp = degrees * Math.PI / 180;
         double sin = Math.sin(temp);
         double cos = Math.cos(temp);
@@ -49,7 +59,8 @@ public class TwoDVector {
         return new TwoDVector((cos * this.re) + (-1 * sin * this.im), (sin * this.re) + (cos * this.im));
     }
 
-    public static TwoDPoint getRotatedPoint(TwoDPoint origin, TwoDPoint head, double degrees) {
+    @SuppressWarnings("unused")
+    private static TwoDPoint getRotatedPoint(TwoDPoint origin, TwoDPoint head, double degrees) {
         TwoDVector v = new TwoDVector(origin, head);
         v = v.rotate(degrees);
 
