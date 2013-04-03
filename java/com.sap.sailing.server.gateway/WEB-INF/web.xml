@@ -114,7 +114,16 @@
 		<servlet-name>WindJsonGetServlet</servlet-name>
 		<url-pattern>/wind</url-pattern>
 	</servlet-mapping>
-	
+
+	<servlet>
+		<servlet-name>ExpeditionWindMeasureStatusGetServlet</servlet-name>
+		<servlet-class>com.sap.sailing.server.gateway.impl.ExpeditionWindMeasureStatusGetServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>ExpeditionWindMeasureStatusGetServlet</servlet-name>
+		<url-pattern>/expeditionWindStatus</url-pattern>
+	</servlet-mapping>
+		
 	<servlet>
 		<servlet-name>LiveRaceRankingRssGetServlet</servlet-name>
 		<servlet-class>com.sap.sailing.server.gateway.impl.LiveRaceRankingRssGetServlet</servlet-class>
