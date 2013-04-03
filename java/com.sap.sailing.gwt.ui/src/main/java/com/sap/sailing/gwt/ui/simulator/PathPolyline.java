@@ -39,6 +39,8 @@ import com.sap.sailing.gwt.ui.shared.racemap.TwoDVector;
 public class PathPolyline {
 
     public final static String DEFAULT_COLOR = "#8B0000";
+    public final static String END_USER_NAME = "What If Course";
+
     private final static int DEFAULT_WEIGHT = 3;
     private final static double DEFAULT_OPACITY = 1.0;
     private final static double SMOOTHNESS_MAX_DEG = 20.0;
