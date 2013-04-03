@@ -62,10 +62,12 @@ public class SailMasterTransceiverImpl implements SailMasterTransceiver {
             bufferForOptionalSequenceNumber.write(read);
             read = inputStream.read();
         }
+        // now either we've read an STX byte or reached EOF
         String message = null;
         if (read == STX) {
             message = readMessage(inputStream);
         } else {
+            // EOF; indicate by returning null
             logger.info("Received EOF in SailMasterTransceiver. Returning null as message.");
         }
         if (bufferForOptionalSequenceNumber.size() > 0) {
