@@ -2188,7 +2188,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             leaderboardDTO.scoringScheme = leaderboard.getScoringScheme().getType();
         }
         if (leaderboard.getDefaultCourseArea() != null) {
-            leaderboardDTO.courseAreaId = leaderboard.getDefaultCourseArea().getId().toString();
+            leaderboardDTO.defaultCourseAreaIdAsString = leaderboard.getDefaultCourseArea().getId().toString();
+            leaderboardDTO.defaultCourseAreaName = leaderboard.getDefaultCourseArea().getName();
         }
         leaderboardDTO.setDelayToLiveInMillisForLatestRace(delayToLiveInMillisForLatestRace);
         leaderboardDTO.hasCarriedPoints = leaderboard.hasCarriedPoints();
@@ -3085,7 +3086,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         List<StrippedLeaderboardDTO> result = new ArrayList<StrippedLeaderboardDTO>();
 
         for (StrippedLeaderboardDTO leaderboardDTO : getLeaderboards()) {
-            if (leaderboardDTO.courseAreaId != null && leaderboardDTO.courseAreaId.equals(courseAreaDTO.id)) {
+            if (leaderboardDTO.defaultCourseAreaIdAsString != null && leaderboardDTO.defaultCourseAreaIdAsString.equals(courseAreaDTO.id)) {
                 result.add(leaderboardDTO);
             }
         }

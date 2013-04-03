@@ -241,6 +241,13 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
                 return leaderboard.scoringScheme == null ? "" : ScoringSchemeTypeFormatter.format(leaderboard.scoringScheme, stringMessages);               
             }
         };
+        
+        TextColumn<StrippedLeaderboardDTO> courseAreaColumn = new TextColumn<StrippedLeaderboardDTO>() {
+            @Override
+            public String getValue(StrippedLeaderboardDTO leaderboard) {
+                return leaderboard.defaultCourseAreaIdAsString == null ? "" : leaderboard.defaultCourseAreaName;     
+            }
+        };
 
         ImagesBarColumn<StrippedLeaderboardDTO, LeaderboardConfigImagesBarCell> leaderboardActionColumn = new ImagesBarColumn<StrippedLeaderboardDTO, LeaderboardConfigImagesBarCell>(
                 new LeaderboardConfigImagesBarCell(stringMessages));
@@ -261,7 +268,7 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
                     } else {
                         if (leaderboardDTO.isRegattaLeaderboard) {
                             LeaderboardDescriptor descriptor = new LeaderboardDescriptor(leaderboardDTO.name, 
-                                    leaderboardDTO.displayName, null, leaderboardDTO.discardThresholds, leaderboardDTO.regattaName, leaderboardDTO.courseAreaId);
+                                    leaderboardDTO.displayName, null, leaderboardDTO.discardThresholds, leaderboardDTO.regattaName, leaderboardDTO.defaultCourseAreaIdAsString);
                             AbstractLeaderboardDialog dialog = new RegattaLeaderboardEditDialog(Collections
                                     .unmodifiableCollection(otherExistingLeaderboard), Collections.unmodifiableCollection(allRegattas),
                                     descriptor, stringMessages, errorReporter,
@@ -277,7 +284,7 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
                             });
                             dialog.show();
                         } else {
-                            LeaderboardDescriptor descriptor = new LeaderboardDescriptor(leaderboardDTO.name, leaderboardDTO.displayName, leaderboardDTO.scoringScheme, leaderboardDTO.discardThresholds, leaderboardDTO.courseAreaId);
+                            LeaderboardDescriptor descriptor = new LeaderboardDescriptor(leaderboardDTO.name, leaderboardDTO.displayName, leaderboardDTO.scoringScheme, leaderboardDTO.discardThresholds, leaderboardDTO.defaultCourseAreaIdAsString);
                             openUpdateFlexibleLeaderboardDialog(leaderboardDTO, otherExistingLeaderboard, leaderboardDTO.name, descriptor);
                         }
                     }
@@ -295,6 +302,7 @@ public class LeaderboardConfigPanel extends FormPanel implements SelectedLeaderb
         leaderboardTable.addColumn(discardingOptionsColumn, stringMessages.discarding());
         leaderboardTable.addColumn(leaderboardTypeColumn, stringMessages.type());
         leaderboardTable.addColumn(scoringSystemColumn, stringMessages.scoringSystem());
+        leaderboardTable.addColumn(courseAreaColumn, stringMessages.courseArea());
         leaderboardTable.addColumn(leaderboardActionColumn, stringMessages.actions());
         leaderboardTable.addColumnSortHandler(leaderboardColumnListHandler);
         leaderboardTable.setWidth("100%");
