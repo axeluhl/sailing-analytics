@@ -138,16 +138,16 @@ public class BoatClassImageData {
         switch (tack) {
         case STARBOARD:
             if (isSelected) {
-                result = reachingPortImageTransformerSelected;
+                result = upWindPortImageTransformerSelected;
             } else {
-                result = reachingPortImageTransformer;
+                result = upWindPortImageTransformer;
             }
             break;
         case PORT:
             if (isSelected) {
-                result = reachingStarboardImageTransformerSelected;
+                result = upWindStarboardImageTransformerSelected;
             } else {
-                result = reachingStarboardImageTransformer;
+                result = upWindStarboardImageTransformer;
             }
         }
         return result;
