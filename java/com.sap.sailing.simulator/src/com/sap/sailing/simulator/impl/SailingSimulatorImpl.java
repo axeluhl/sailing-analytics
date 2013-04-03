@@ -234,31 +234,28 @@ public class SailingSimulatorImpl implements SailingSimulator {
         Path gpsPath = null;
         Path gpsPathPoly = null;
 
-        if (this.simulationParameters.getMode() == SailingSimulatorUtil.measured) {
+        Pair<Map<String, Path>, Path> result = SimulatorUtils.readLegPathsFromResources(selection.getRaceIndex(), selection.getCompetitorIndex(),
+                selection.getLegIndex());
+        allPaths = result.getA();
+        this.raceCourse = result.getB();
 
-            Pair<Map<String, Path>, Path> result = SimulatorUtils.readLegPathsFromResources(selection.getRaceIndex(), selection.getCompetitorIndex(),
-                    selection.getLegIndex());
-            allPaths = result.getA();
-            this.raceCourse = result.getB();
-
-            if (allPaths != null && allPaths.isEmpty() == false && allPaths.size() == 6) {
-                return allPaths;
-            }
-
-            try {
-                gpsPath = this.getFromResourcesOrDownload("7#GPS Track", selection.getRaceIndex(), selection.getCompetitorIndex(), selection.getLegIndex());
-                gpsPathPoly = this.getFromResourcesOrDownload("6#GPS Poly", selection.getRaceIndex(), selection.getCompetitorIndex(), selection.getLegIndex());
-                this.raceCourse = this.getFromResourcesOrDownload("raceCourse", selection.getRaceIndex(), selection.getCompetitorIndex(),
-                        selection.getLegIndex());
-            } catch (Exception e) {
-                LOGGER.severe(e.getMessage());
-            }
-
-            allPaths.put("6#GPS Poly", gpsPathPoly);
-            allPaths.put("7#GPS Track", gpsPath);
+        if (allPaths != null && allPaths.isEmpty() == false && allPaths.size() == 6) {
+            return allPaths;
         }
 
-        allPaths.putAll(SimulatorUtils.getSimulationPaths(this.simulationParameters));
+        try {
+            gpsPath = this.getFromResourcesOrDownload("7#GPS Track", selection.getRaceIndex(), selection.getCompetitorIndex(), selection.getLegIndex());
+            gpsPathPoly = this.getFromResourcesOrDownload("6#GPS Poly", selection.getRaceIndex(), selection.getCompetitorIndex(), selection.getLegIndex());
+            this.raceCourse = this.getFromResourcesOrDownload("raceCourse", selection.getRaceIndex(), selection.getCompetitorIndex(),
+                    selection.getLegIndex());
+        } catch (Exception e) {
+            LOGGER.severe(e.getMessage());
+        }
+
+        allPaths.put("6#GPS Poly", gpsPathPoly);
+        allPaths.put("7#GPS Track", gpsPath);
+
+        allPaths.putAll(SimulatorUtils.getSimulationPaths(this.simulationParameters, gpsPath, this.raceCourse));
 
         if (this.simulationParameters.getMode() == SailingSimulatorUtil.measured) {
             SimulatorUtils.saveLegPathsToFiles(allPaths, this.raceCourse, selection.getRaceIndex(), selection.getCompetitorIndex(), selection.getLegIndex());

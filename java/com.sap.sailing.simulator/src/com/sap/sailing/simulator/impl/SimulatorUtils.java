@@ -13,6 +13,7 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.net.URI;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,6 +21,7 @@ import java.util.logging.Logger;
 
 import org.osgi.framework.FrameworkUtil;
 
+import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.tracking.RacesHandle;
@@ -28,6 +30,9 @@ import com.sap.sailing.server.impl.RacingEventServiceImpl;
 import com.sap.sailing.simulator.Path;
 import com.sap.sailing.simulator.SimulationParameters;
 import com.sap.sailing.simulator.TimedPositionWithSpeed;
+import com.sap.sailing.simulator.util.SailingSimulatorUtil;
+import com.sap.sailing.simulator.windfield.WindFieldGenerator;
+import com.sap.sailing.simulator.windfield.impl.WindFieldGeneratorMeasured;
 
 @SuppressWarnings("restriction")
 public class SimulatorUtils {
@@ -341,7 +346,24 @@ public class SimulatorUtils {
                 + selectedCompetitorIndex + "_" + selectedLegIndex + "_" + pathName + ".dat";
     }
 
-    public static Map<String, Path> getSimulationPaths(SimulationParameters parameters) {
+    public static Map<String, Path> getSimulationPaths(SimulationParameters parameters, Path gpsPath, Path raceCourse) {
+
+        //
+        // Initialize WindFields boundary
+        //
+        WindFieldGenerator wf = parameters.getWindField();
+        // int[] gridRes = wf.getGridResolution();
+        Position[] gridArea = wf.getGridAreaGps();
+        if (parameters.getMode() == SailingSimulatorUtil.measured) {
+            ((WindFieldGeneratorMeasured) wf).setGPSWind(gpsPath);
+            gridArea = new Position[2];
+            gridArea[0] = raceCourse.getPathPoints().get(0).getPosition();
+            gridArea[1] = raceCourse.getPathPoints().get(1).getPosition();
+            List<Position> course = new ArrayList<Position>();
+            course.add(gridArea[0]);
+            course.add(gridArea[1]);
+            parameters.setCourse(course);
+        }
 
         Map<String, Path> paths = new HashMap<String, Path>();
 
@@ -408,4 +430,5 @@ public class SimulatorUtils {
 
         return paths;
     }
+
 }
