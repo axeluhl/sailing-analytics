@@ -103,6 +103,8 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
     private boolean suspended;
     
     private final Map<K, U> triggeredWhileSuspended;
+
+    private int smartFutureCacheTaskReuseCounter;
     
     /**
      * An immutable "interval" description for a cache update
@@ -379,13 +381,13 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
             } else {
                 boolean reuseExistingFuture = false;
                 if (oldFuture != null) {
-                    // TODO bug 1314: instead of canceling and re-scheduling, ensure that the existing task runs with the new, extended update interval
-                    // can re-use existing task only if it does not have isCallerWaitsSynchronouslyForResult
                     if (!oldFuture.isCallerWaitsSynchronouslyForResult()) {
                         reuseExistingFuture = oldFuture.tryToUpdateUpdateInterval(joinedUpdateInterval);
                     }
                     if (!reuseExistingFuture) {
-                        oldFuture.cancel(/* mayInterruptIfRunning */false);
+                        oldFuture.cancel(/* mayInterruptIfRunning */ false);
+                    } else {
+                        smartFutureCacheTaskReuseCounter++;
                     }
                 }
                 if (!reuseExistingFuture) {
@@ -483,4 +485,13 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
             cache.put(key, value);
         }
     }
+
+    /**
+     * For debugging and testing; tells how many times a task got re-cycled with a new update interval instead of canceling it
+     * and scheduling a new one. See also bug 1314.
+     */
+    public int getSmartFutureCacheTaskReuseCounter() {
+        return smartFutureCacheTaskReuseCounter;
+    }
+
 }

@@ -10,6 +10,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ConcurrentSkipListSet;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.sap.sailing.util.impl.SmartFutureCache;
@@ -170,6 +171,7 @@ public class SmartFutureCacheTest {
         assertEquals(new Integer(91), sfc.get("Trala", /* waitForLatest */ true));
     }
     
+    @Ignore // used only to solve bug 1314; it's hard to test re-cycling of tasks reliably without depending on timing issues
     @Test
     public void testOverloadingCacheWithUpdateRequests() throws InterruptedException {
         final Set<String> updateWasCalled = new ConcurrentSkipListSet<String>();
@@ -213,14 +215,17 @@ public class SmartFutureCacheTest {
         System.out.println(updateWasCalled.size());
         System.out.println(updateWasCalled);
         System.out.println(computeCacheUpdateCount[0]);
-        Thread.sleep(100);
+        System.out.println("Tasks re-used: "+sfc.getSmartFutureCacheTaskReuseCounter());
+        Thread.sleep(500);
         System.out.println(updateWasCalled.size());
         System.out.println(updateWasCalled);
         System.out.println(computeCacheUpdateCount[0]);
-        Thread.sleep(100);
+        System.out.println("Tasks re-used: "+sfc.getSmartFutureCacheTaskReuseCounter());
+        Thread.sleep(500);
         System.out.println(updateWasCalled.size());
         System.out.println(updateWasCalled);
         System.out.println(computeCacheUpdateCount[0]);
+        System.out.println("Tasks re-used: "+sfc.getSmartFutureCacheTaskReuseCounter());
         assertEquals(updatesTriggeredFor.size(), updateWasCalled.size());
     }
 }
