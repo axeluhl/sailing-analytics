@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
+import java.util.logging.Logger;
 
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterMessage;
@@ -17,6 +18,7 @@ import com.sap.sailing.domain.swisstimingadapter.SailMasterTransceiver;
  *
  */
 public class SailMasterTransceiverImpl implements SailMasterTransceiver {
+    private static final Logger logger = Logger.getLogger(SailMasterTransceiverImpl.class.getName());
     private static final byte STX = 0x02;
     private static final byte ETX = 0x03;
 
@@ -63,6 +65,8 @@ public class SailMasterTransceiverImpl implements SailMasterTransceiver {
         String message = null;
         if (read == STX) {
             message = readMessage(inputStream);
+        } else {
+            logger.info("Received EOF in SailMasterTransceiver. Returning null as message.");
         }
         if (bufferForOptionalSequenceNumber.size() > 0) {
             sequenceNumber = getSequenceNumber(bufferForOptionalSequenceNumber);
