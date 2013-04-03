@@ -5,6 +5,10 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import java.util.Random;
+import java.util.Set;
+import java.util.concurrent.ConcurrentSkipListSet;
+
 import org.junit.Test;
 
 import com.sap.sailing.util.impl.SmartFutureCache;
@@ -101,6 +105,11 @@ public class SmartFutureCacheTest {
         public int getB() {
             return b;
         }
+
+        @Override
+        public String toString() {
+            return "["+getA()+", "+getB()+"]";
+        }
     }
 
     @Test
@@ -158,5 +167,50 @@ public class SmartFutureCacheTest {
         }
         assertTrue(updateWasCalled[0]);
         assertEquals(new Integer(91), sfc.get("Trala", /* waitForLatest */ true));
+    }
+    
+    @Test
+    public void testOverloadingCacheWithUpdateRequests() throws InterruptedException {
+        final Set<String> updateWasCalled = new ConcurrentSkipListSet<String>();
+        final boolean[] cacheWasCalled = new boolean[1];
+        final int[] computeCacheUpdateCount = new int[1];
+        SmartFutureCache<String, Integer, FromAToBUpdateInterval> sfc = new SmartFutureCache<String, Integer, FromAToBUpdateInterval>(
+                new SmartFutureCache.AbstractCacheUpdater<String, Integer, FromAToBUpdateInterval>() {
+                    @Override
+                    public Integer computeCacheUpdate(String key, FromAToBUpdateInterval updateInterval)
+                            throws Exception {
+                        updateWasCalled.add(key);
+                        computeCacheUpdateCount[0]++;
+                        Thread.sleep(100); // pretending a long calculation
+                        return updateInterval.getA() + updateInterval.getB();
+                    }
+                }, "SmartFutureCacheTest.testJoiningOfUpdateIntervalsWhenBeingResumed") {
+            @Override
+            protected void cache(String key, Integer value) {
+                super.cache(key, value);
+                synchronized (cacheWasCalled) {
+                    cacheWasCalled[0] = true;
+                    cacheWasCalled.notifyAll();
+                }
+            }
+        };
+        String[] strings = new String[100];
+        for (int i=0; i<strings.length; i++) {
+            strings[i] = Integer.toString(i);
+        }
+        Random random = new Random();
+        // Trigger very many updates shortly after each other, causing many re-calculations to be scheduled.
+        final int numberOfUpdateTriggers = 1000000;
+        for (int i=0; i<numberOfUpdateTriggers; i++) {
+            final int nextInt = random.nextInt(strings.length);
+            sfc.triggerUpdate(strings[nextInt], new FromAToBUpdateInterval(i, nextInt));
+        }
+        System.out.println(updateWasCalled.size());
+        System.out.println(updateWasCalled);
+        System.out.println(computeCacheUpdateCount[0]);
+        Thread.sleep(3000);
+        System.out.println(updateWasCalled.size());
+        System.out.println(updateWasCalled);
+        System.out.println(computeCacheUpdateCount[0]);
     }
 }
