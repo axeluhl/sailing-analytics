@@ -13,10 +13,9 @@ import java.net.ProtocolException;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLEncoder;
-import java.security.AlgorithmParameters;
+import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.InvalidParameterSpecException;
 import java.security.spec.KeySpec;
@@ -58,12 +57,19 @@ public class CourseDesignChangedByRaceCommitteeHandler implements CourseDesignCh
     
     private SecretKey secretKey;
     
+    private final static byte[] SecretSalt = {-56, -34, -21, -81, -102, -88, -110, -106};
+    private final static byte[] SecretIv = {-50, -11, -87, -81, 113, 109, 88, 51, -15, 61, -34, -17, -120, -34, 87, -40};
+    private final static String SharedPassword = "h49km348frk38HHs";
+    private final static String EncryptionAlgorithm = "AES";
+    private final static String SecretKeyGenerationAlgorithm = "PBKDF2WithHmacSHA1";
+    private final static String CipherAlgorithm = "AES/CBC/PKCS5Padding";
+    
     private final static String HttpPostRequestMethod = "POST";
     private final static String ContentType = "Content-Type";
     private final static String ContentLength = "Content-Length";
     private final static String ContentTypeApplicationJson = "application/json";
     private final static String EncodingUtf8 = "UTF-8";
-    private final static String CourseUpdateUrlTemplate = "%s?eventid=%s&raceid=%s&username=%s&password=%s";
+    private final static String CourseUpdateUrlTemplate = "%s?eventid=%s&raceid=%s&username=%s";
     private final static String ResponseCodeForFailure = "FAILURE";
     
     public CourseDesignChangedByRaceCommitteeHandler(URI courseDesignUpdateURI, Serializable regattaId, Serializable raceId) {
@@ -130,30 +136,31 @@ public class CourseDesignChangedByRaceCommitteeHandler implements CourseDesignCh
     }
     
     private URL buildCourseUpdateURL() throws MalformedURLException, UnsupportedEncodingException {
-        String url = String.format(CourseUpdateUrlTemplate, 
-                this.courseDesignUpdateURI.toString(), 
-                URLEncoder.encode(this.regattaId.toString(), EncodingUtf8), 
-                URLEncoder.encode(this.raceId.toString(), EncodingUtf8),
-                URLEncoder.encode("armin.zamani.farahani@sap.com", EncodingUtf8),
-                URLEncoder.encode("4fab9659a", EncodingUtf8));
+        String encryptedRegattaId = "";
+        String encryptedRaceId = "";
+        String encryptedUsername = "";
+        
         try {
-            String encryptedRegattaId = encryptParameter(this.regattaId.toString(), "tractrac");
-            System.out.println(encryptedRegattaId);
+            encryptedRegattaId = encryptParameter(this.regattaId.toString(), SharedPassword);
+            encryptedRaceId = encryptParameter(this.raceId.toString(), SharedPassword);
+            encryptedUsername = encryptParameter("armin.zamani.farahani@sap.com", SharedPassword);
         } catch (InvalidKeyException | NoSuchAlgorithmException | InvalidKeySpecException | NoSuchPaddingException
-                | InvalidParameterSpecException | IllegalBlockSizeException | BadPaddingException e) {
-            // TODO Auto-generated catch block
+                | InvalidParameterSpecException | IllegalBlockSizeException | BadPaddingException | InvalidAlgorithmParameterException e) {
             e.printStackTrace();
         }
+        String url = String.format(CourseUpdateUrlTemplate, 
+                this.courseDesignUpdateURI.toString(), 
+                URLEncoder.encode(encryptedRegattaId, EncodingUtf8), 
+                URLEncoder.encode(encryptedRaceId, EncodingUtf8),
+                URLEncoder.encode(encryptedUsername, EncodingUtf8));
         return new URL(url);
     }
     
-    private String encryptParameter(String plainText, String password) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, InvalidKeyException, InvalidParameterSpecException, IllegalBlockSizeException, BadPaddingException, UnsupportedEncodingException {
+    private String encryptParameter(String plainText, String password) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, InvalidKeyException, InvalidParameterSpecException, IllegalBlockSizeException, BadPaddingException, UnsupportedEncodingException, InvalidAlgorithmParameterException {
         SecretKey secret = getOrCreateSecretKey(password);
         /* Encrypt the message. */
-        Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
-        cipher.init(Cipher.ENCRYPT_MODE, secret);
-        AlgorithmParameters params = cipher.getParameters();
-        byte[] iv = params.getParameterSpec(IvParameterSpec.class).getIV();
+        Cipher cipher = Cipher.getInstance(CipherAlgorithm);
+        cipher.init(Cipher.ENCRYPT_MODE, secret, new IvParameterSpec(SecretIv));
         byte[] ciphertext = cipher.doFinal(plainText.getBytes(EncodingUtf8));
         return printHex(ciphertext);
     }
@@ -165,14 +172,11 @@ public class CourseDesignChangedByRaceCommitteeHandler implements CourseDesignCh
         return secretKey;
     }
     private SecretKey setupEncryptionSecret(String password) throws NoSuchAlgorithmException, InvalidKeySpecException {
-        byte[] salt = new byte[8];
-        SecureRandom rnd = new SecureRandom();
-        rnd.nextBytes(salt);
         /* Derive the key, given password and salt. */
-        SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
-        KeySpec spec = new PBEKeySpec(password.toCharArray(), salt, 65536, 256);
+        SecretKeyFactory factory = SecretKeyFactory.getInstance(SecretKeyGenerationAlgorithm);
+        KeySpec spec = new PBEKeySpec(password.toCharArray(), SecretSalt, 65536, 256);
         SecretKey tmp = factory.generateSecret(spec);
-        SecretKey secret = new SecretKeySpec(tmp.getEncoded(), "AES");
+        SecretKey secret = new SecretKeySpec(tmp.getEncoded(), EncryptionAlgorithm);
         return secret;
     }
     
