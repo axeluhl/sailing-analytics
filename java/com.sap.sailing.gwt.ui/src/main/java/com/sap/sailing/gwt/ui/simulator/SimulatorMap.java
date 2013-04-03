@@ -97,14 +97,6 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
 
             PathDTO[] paths = result.getPaths();
 
-            // ensure Polyline is last;
-            /*
-             * List<PathDTO> newPaths = new ArrayList<PathDTO>(); int index3 = 0; for (; index3 < paths.length;
-             * index3++) { if (paths[index3].name.equals("Polyline")) { break; } } for (int index2 = 0; index2 <
-             * paths.length; index2++) { if (index2 != index3) { newPaths.add(paths[index2]); } }
-             * newPaths.add(paths[index3]); paths = newPaths.toArray(new PathDTO[0]);
-             */
-
             LOGGER.info("Number of Paths : " + paths.length);
             long startTime = paths[0].getPoints().get(0).timepoint;
             long maxDurationTime = 0;
