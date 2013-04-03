@@ -51,11 +51,13 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<Route, RouteDa
     private final WindStore windStore;
     private final DynamicRaceDefinitionSet raceDefinitionSetToUpdate;
     private final URI courseDesignUpdateURI;
+    private final String tracTracUsername;
+    private final String tracTracPassword;
     
     public RaceCourseReceiver(DomainFactory domainFactory, DynamicTrackedRegatta trackedRegatta,
             com.tractrac.clientmodule.Event tractracEvent, WindStore windStore,
             DynamicRaceDefinitionSet raceDefinitionSetToUpdate, long delayToLiveInMillis,
-            long millisecondsOverWhichToAverageWind, Simulator simulator, URI courseDesignUpdateURI) {
+            long millisecondsOverWhichToAverageWind, Simulator simulator, URI courseDesignUpdateURI, String tracTracUsername, String tracTracPassword) {
         super(domainFactory, tractracEvent, trackedRegatta, simulator);
         this.millisecondsOverWhichToAverageWind = millisecondsOverWhichToAverageWind;
         this.delayToLiveInMillis = delayToLiveInMillis;
@@ -66,6 +68,8 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<Route, RouteDa
         }
         this.raceDefinitionSetToUpdate = raceDefinitionSetToUpdate;
         this.courseDesignUpdateURI = courseDesignUpdateURI;
+        this.tracTracUsername = tracTracUsername;
+        this.tracTracPassword = tracTracPassword;
     }
 
     /**
@@ -124,7 +128,7 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<Route, RouteDa
             // create race definition and add to event
             DynamicTrackedRace trackedRace = getDomainFactory().getOrCreateRaceDefinitionAndTrackedRace(
                     getTrackedRegatta(), event.getC(), course, windStore, delayToLiveInMillis,
-                    millisecondsOverWhichToAverageWind, raceDefinitionSetToUpdate, courseDesignUpdateURI);
+                    millisecondsOverWhichToAverageWind, raceDefinitionSetToUpdate, courseDesignUpdateURI, tracTracUsername, tracTracPassword);
             
             if (getSimulator() != null) {
                 getSimulator().setTrackedRace(trackedRace);
@@ -181,7 +185,8 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<Route, RouteDa
                 /* time over which to average speed: */ race.getBoatClass().getApproximateManeuverDurationInMilliseconds(),
                 raceDefinitionSetToUpdate);
         
-        CourseDesignChangedByRaceCommitteeHandler courseDesignHandler = new CourseDesignChangedByRaceCommitteeHandler(courseDesignUpdateURI,
+        CourseDesignChangedByRaceCommitteeHandler courseDesignHandler = new CourseDesignChangedByRaceCommitteeHandler(courseDesignUpdateURI, 
+                tracTracUsername, tracTracPassword,
                 getTrackedRegatta().getRegatta().getId(), race.getId());
         trackedRace.setCourseDesignChangedListener(courseDesignHandler);
     }

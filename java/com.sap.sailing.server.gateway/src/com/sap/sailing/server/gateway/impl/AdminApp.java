@@ -469,7 +469,8 @@ public class AdminApp extends SailingServerHttpServlet {
         URI storedURI = new URI(req.getParameter(PARAM_NAME_STORED_URI));
         
         //The course design update URI is not available at this place
-        getService().addRegatta(jsonURL, liveURI, storedURI, /* courseDesignUpdateURI */ null, getWindStore(req), /* timeoutInMilliseconds */ 60000);
+        getService().addRegatta(jsonURL, liveURI, storedURI, /* courseDesignUpdateURI */ null, getWindStore(req), /* timeoutInMilliseconds */ 60000,
+                /* tracTracUsername */ null, /* tracTracPassword */ null);
     }
 
     private WindStore getWindStore(HttpServletRequest req) throws UnknownHostException, MongoException {
@@ -497,7 +498,8 @@ public class AdminApp extends SailingServerHttpServlet {
         getService().addTracTracRace(paramURL, liveURI, storedURI, /*courseDesignUpdateURI*/ null,
                 MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(MongoFactory.INSTANCE.getDefaultMongoObjectFactory(),
                         MongoFactory.INSTANCE.getDefaultDomainObjectFactory()),
-                        getWindStore(req), /* timeoutInMilliseconds */ 60000);
+                        getWindStore(req), /* timeoutInMilliseconds */ 60000,
+                        /*tracTracUsername*/ null, /*tracTracPassword*/ null);
     }
 
     private void stopRace(HttpServletRequest req, HttpServletResponse resp) throws MalformedURLException, IOException, InterruptedException {

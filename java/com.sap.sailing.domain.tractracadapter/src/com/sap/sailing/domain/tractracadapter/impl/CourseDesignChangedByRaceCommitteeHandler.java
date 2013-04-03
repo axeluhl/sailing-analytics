@@ -36,6 +36,8 @@ public class CourseDesignChangedByRaceCommitteeHandler implements CourseDesignCh
     private JsonSerializer<CourseBase> courseSerializer;
     private JsonDeserializer<CourseUpdateResponse> courseUpdateDeserializer;
     private final URI courseDesignUpdateURI;
+    private final String tracTracUsername;
+    private final String tracTracPassword;
     private final Serializable regattaId;
     private final Serializable raceId;
     
@@ -47,8 +49,10 @@ public class CourseDesignChangedByRaceCommitteeHandler implements CourseDesignCh
     private final static String CourseUpdateUrlTemplate = "%s?eventid=%s&raceid=%s&username=%s&password=%s";
     private final static String ResponseCodeForFailure = "FAILURE";
     
-    public CourseDesignChangedByRaceCommitteeHandler(URI courseDesignUpdateURI, Serializable regattaId, Serializable raceId) {
+    public CourseDesignChangedByRaceCommitteeHandler(URI courseDesignUpdateURI, String tracTracUsername, String tracTracPassword, Serializable regattaId, Serializable raceId) {
         this.courseDesignUpdateURI = courseDesignUpdateURI;
+        this.tracTracUsername = tracTracUsername;
+        this.tracTracPassword = tracTracPassword;
         this.regattaId = regattaId;
         this.raceId = raceId;
         this.courseSerializer = new CourseJsonSerializer(
@@ -114,8 +118,8 @@ public class CourseDesignChangedByRaceCommitteeHandler implements CourseDesignCh
                 this.courseDesignUpdateURI.toString(), 
                 URLEncoder.encode(this.regattaId.toString(), EncodingUtf8), 
                 URLEncoder.encode(this.raceId.toString(), EncodingUtf8),
-                URLEncoder.encode("armin.zamani.farahani@sap.com", EncodingUtf8),
-                URLEncoder.encode("4fab9659a", EncodingUtf8));
+                URLEncoder.encode(tracTracUsername, EncodingUtf8),
+                URLEncoder.encode(tracTracPassword, EncodingUtf8));
         return new URL(url);
     }
 }

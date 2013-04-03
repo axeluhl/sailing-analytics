@@ -128,7 +128,7 @@ public interface DomainFactory {
      */
     TracTracRaceTracker createRaceTracker(URL paramURL, URI liveURI, URI storedURI, URI courseDesignUpdateURI, TimePoint startOfTracking,
             TimePoint endOfTracking, long delayToLiveInMillis, boolean simulateWithStartTimeNow, RaceLogStore raceLogStore, 
-            WindStore windStore, TrackedRegattaRegistry trackedRegattaRegistry) throws MalformedURLException, FileNotFoundException,
+            WindStore windStore, String tracTracUsername, String tracTracPassword, TrackedRegattaRegistry trackedRegattaRegistry) throws MalformedURLException, FileNotFoundException,
             URISyntaxException;
 
     /**
@@ -137,7 +137,7 @@ public interface DomainFactory {
      */
     RaceTracker createRaceTracker(Regatta regatta, URL paramURL, URI liveURI, URI storedURI, URI courseDesignUpdateURI, TimePoint startOfTracking,
             TimePoint endOfTracking, long delayToLiveInMillis, boolean simulateWithStartTimeNow, RaceLogStore raceLogStore, 
-            WindStore windStore, TrackedRegattaRegistry trackedRegattaRegistry) throws MalformedURLException, FileNotFoundException,
+            WindStore windStore, String tracTracUsername, String tracTracPassword, TrackedRegattaRegistry trackedRegattaRegistry) throws MalformedURLException, FileNotFoundException,
             URISyntaxException;
 
     BoatClass getOrCreateBoatClass(CompetitorClass competitorClass);
@@ -168,7 +168,7 @@ public interface DomainFactory {
     Iterable<Receiver> getUpdateReceivers(DynamicTrackedRegatta trackedRegatta, Event tractracEvent,
             TimePoint startOfTracking, TimePoint endOfTracking, long delayToLiveInMillis, Simulator simulator,
             WindStore windStore, DynamicRaceDefinitionSet raceDefinitionSetToUpdate,
-            TrackedRegattaRegistry trackedRegattaRegistry, URI courseDesignUpdateURI);
+            TrackedRegattaRegistry trackedRegattaRegistry, URI courseDesignUpdateURI, String tracTracUsername, String tracTracPassword);
 
     /**
      * Creates a {@link RaceDefinition} from a TracTrac {@link Race} and a domain {@link Course} definition. The
@@ -189,7 +189,7 @@ public interface DomainFactory {
      */
     DynamicTrackedRace getOrCreateRaceDefinitionAndTrackedRace(TrackedRegatta trackedRegatta, Race race,
             Course course, WindStore windStore, long delayToLiveInMillis, long millisecondsOverWhichToAverageWind,
-            DynamicRaceDefinitionSet raceDefinitionSetToUpdate, URI courseDesignUpdateURI);
+            DynamicRaceDefinitionSet raceDefinitionSetToUpdate, URI courseDesignUpdateURI, String tracTracUsername, String tracTracPassword);
 
     /**
      * The record may be for a single mark or a gate. If for a gate, the
@@ -205,7 +205,7 @@ public interface DomainFactory {
     Iterable<Receiver> getUpdateReceivers(DynamicTrackedRegatta trackedRegatta, Event tractracEvent, WindStore windStore,
             TimePoint startOfTracking, TimePoint endOfTracking, long delayToLiveInMillis, Simulator simulator, 
             DynamicRaceDefinitionSet raceDefinitionSetToUpdate, TrackedRegattaRegistry trackedRegattaRegistry, 
-            URI courseDesignUpdateURI, ReceiverType... types);
+            URI courseDesignUpdateURI, String tracTracUsername, String tracTracPassword, ReceiverType... types);
 
     JSONService parseJSONURL(URL jsonURL) throws IOException, ParseException, org.json.simple.parser.ParseException, URISyntaxException;
 
@@ -240,7 +240,8 @@ public interface DomainFactory {
     Pair<List<com.sap.sailing.domain.base.Competitor>, BoatClass> getCompetitorsAndDominantBoatClass(Race race);
     
     RaceTrackingConnectivityParameters createTrackingConnectivityParameters(URL paramURL, URI liveURI, URI storedURI, URI courseDesignUpdateURI,
-            TimePoint startOfTracking, TimePoint endOfTracking, long delayToLiveInMillis, boolean simulateWithStartTimeNow, RaceLogStore raceLogStore, WindStore windStore);
+            TimePoint startOfTracking, TimePoint endOfTracking, long delayToLiveInMillis, boolean simulateWithStartTimeNow, RaceLogStore raceLogStore, WindStore windStore,
+            String tracTracUsername, String tracTracPassword);
     /**
      * Removes all knowledge about <code>tractracRace</code> which includes removing it from the race cache, from the
      * {@link com.sap.sailing.domain.base.Regatta} and, if a {@link TrackedRace} for the corresponding

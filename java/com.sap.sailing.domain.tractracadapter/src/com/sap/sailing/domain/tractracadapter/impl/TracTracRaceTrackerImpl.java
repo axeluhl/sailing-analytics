@@ -130,18 +130,19 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
      */
     protected TracTracRaceTrackerImpl(DomainFactory domainFactory, URL paramURL, URI liveURI, URI storedURI, URI courseDesignUpdateURI,
             TimePoint startOfTracking, TimePoint endOfTracking, long delayToLiveInMillis,
-            boolean simulateWithStartTimeNow, RaceLogStore raceLogStore, WindStore windStore, TrackedRegattaRegistry trackedRegattaRegistry)
+            boolean simulateWithStartTimeNow, RaceLogStore raceLogStore, WindStore windStore, String tracTracUsername, String tracTracPassword, TrackedRegattaRegistry trackedRegattaRegistry)
             throws URISyntaxException, MalformedURLException, FileNotFoundException {
         this(KeyValue.setup(paramURL), domainFactory, paramURL, liveURI, storedURI, courseDesignUpdateURI, startOfTracking, endOfTracking,
-                delayToLiveInMillis, simulateWithStartTimeNow, raceLogStore, windStore, trackedRegattaRegistry);
+                delayToLiveInMillis, simulateWithStartTimeNow, raceLogStore, windStore, tracTracUsername, tracTracPassword, trackedRegattaRegistry);
     }
     
     private TracTracRaceTrackerImpl(Event tractracEvent, DomainFactory domainFactory, URL paramURL, URI liveURI, URI storedURI, URI courseDesignUpdateURI,
             TimePoint startOfTracking, TimePoint endOfTracking, long delayToLiveInMillis, boolean simulateWithStartTimeNow,
-            RaceLogStore raceLogStore, WindStore windStore, TrackedRegattaRegistry trackedRegattaRegistry) 
+            RaceLogStore raceLogStore, WindStore windStore, String tracTracUsername, String tracTracPassword, TrackedRegattaRegistry trackedRegattaRegistry) 
                 throws URISyntaxException, MalformedURLException, FileNotFoundException {
         this(tractracEvent, null, domainFactory, paramURL, liveURI, storedURI, courseDesignUpdateURI,
-                startOfTracking, endOfTracking, delayToLiveInMillis, simulateWithStartTimeNow, raceLogStore, windStore, trackedRegattaRegistry);
+                startOfTracking, endOfTracking, delayToLiveInMillis, simulateWithStartTimeNow, raceLogStore, windStore, 
+                tracTracUsername, tracTracPassword, trackedRegattaRegistry);
     }
     
     /**
@@ -152,10 +153,11 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
      */
     protected TracTracRaceTrackerImpl(Regatta regatta, DomainFactory domainFactory, URL paramURL, URI liveURI, URI storedURI, URI courseDesignUpdateURI,
             TimePoint startOfTracking, TimePoint endOfTracking, long delayToLiveInMillis, boolean simulateWithStartTimeNow,
-            RaceLogStore raceLogStore, WindStore windStore, TrackedRegattaRegistry trackedRegattaRegistry) 
+            RaceLogStore raceLogStore, WindStore windStore, String tracTracUsername, String tracTracPassword, TrackedRegattaRegistry trackedRegattaRegistry) 
                 throws URISyntaxException, MalformedURLException, FileNotFoundException {
         this(KeyValue.setup(paramURL), regatta, domainFactory, paramURL, liveURI, storedURI, courseDesignUpdateURI, startOfTracking,
-                endOfTracking, delayToLiveInMillis, simulateWithStartTimeNow, raceLogStore, windStore, trackedRegattaRegistry);
+                endOfTracking, delayToLiveInMillis, simulateWithStartTimeNow, raceLogStore, windStore, 
+                tracTracUsername, tracTracPassword, trackedRegattaRegistry);
     }
     
     /**
@@ -172,7 +174,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
     private TracTracRaceTrackerImpl(Event tractracEvent, final Regatta regatta, DomainFactory domainFactory,
             URL paramURL, URI liveURI, URI storedURI, URI courseDesignUpdateURI, TimePoint startOfTracking, TimePoint endOfTracking,
             long delayToLiveInMillis, boolean simulateWithStartTimeNow, RaceLogStore raceLogStore, 
-            WindStore windStore, TrackedRegattaRegistry trackedRegattaRegistry)
+            WindStore windStore, String tracTracUsername, String tracTracPassword, TrackedRegattaRegistry trackedRegattaRegistry)
             throws URISyntaxException, MalformedURLException, FileNotFoundException {
         super();
         this.tractracEvent = tractracEvent;
@@ -217,7 +219,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         receivers = new HashSet<Receiver>();
         Set<TypeController> typeControllers = new HashSet<TypeController>();
         for (Receiver receiver : domainFactory.getUpdateReceivers(getTrackedRegatta(), tractracEvent, startOfTracking,
-                endOfTracking, delayToLiveInMillis, simulator, windStore, this, trackedRegattaRegistry, courseDesignUpdateURI)) {
+                endOfTracking, delayToLiveInMillis, simulator, windStore, this, trackedRegattaRegistry, courseDesignUpdateURI, tracTracUsername, tracTracPassword)) {
             receivers.add(receiver);
             for (TypeController typeController : receiver.getTypeControllersAndStart()) {
                 typeControllers.add(typeController);

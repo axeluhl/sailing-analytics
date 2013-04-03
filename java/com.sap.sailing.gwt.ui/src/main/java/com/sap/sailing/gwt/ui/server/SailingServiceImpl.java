@@ -1242,7 +1242,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     new MillisecondsTimePoint(rr.trackingEndTime),
                     MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(mongoObjectFactory, domainObjectFactory),
                     MongoWindStoreFactory.INSTANCE.getMongoWindStore(mongoObjectFactory, domainObjectFactory),
-                    RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS, simulateWithStartTimeNow);
+                    RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS, simulateWithStartTimeNow, tracTracUsername, tracTracPassword);
             if (trackWind) {
                 new Thread("Wind tracking starter for race " + rr.regattaName + "/" + rr.name) {
                     public void run() {

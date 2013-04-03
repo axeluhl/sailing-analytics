@@ -101,7 +101,7 @@ public class ReceiveMarkPassingDataTest extends AbstractTracTracLiveTest {
                     @Override
                     public void addRaceDefinition(RaceDefinition race, DynamicTrackedRace trackedRace) {}
                 },
-                /* trackedRegattaRegistry */ null, /*courseDesignUpdateURI*/ null, ReceiverType.RACECOURSE, ReceiverType.MARKPOSITIONS, ReceiverType.RACESTARTFINISH, ReceiverType.RAWPOSITIONS)) {
+                /* trackedRegattaRegistry */ null, /*courseDesignUpdateURI*/ null, /*tracTracUsername*/ null, /*tracTracPassword*/ null, ReceiverType.RACECOURSE, ReceiverType.MARKPOSITIONS, ReceiverType.RACESTARTFINISH, ReceiverType.RAWPOSITIONS)) {
             receivers.add(r);
         }
         addListenersForStoredDataAndStartController(receivers);
