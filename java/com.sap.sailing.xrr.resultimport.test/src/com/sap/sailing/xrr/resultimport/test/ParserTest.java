@@ -39,8 +39,8 @@ import com.sap.sailing.xrr.resultimport.impl.ScoreCorrectionProviderImpl;
 import com.sap.sailing.xrr.resultimport.schema.RegattaResults;
 
 public class ParserTest {
-    private static final String SAMPLE_INPUT_NAME_LASER = "laser.xml";
-    private static final String SAMPLE_INPUT_NAME_STAR = "star.xml";
+    private static final String SAMPLE_INPUT_NAME_LASER = "Laser_20130403_111958.xml";
+    private static final String SAMPLE_INPUT_NAME_STAR = "Star_20130403_112020.xml";
     private static final String SAMPLE_INPUT_NAME_MELBOURNE = "melbourne_results_actual.xml";
     private static final String SAMPLE_INPUT_NAME_SPLIT_FLEET = "470 M_20130402_144542.xml";
     private static final String RESOURCES = "resources/";
@@ -90,7 +90,8 @@ public class ParserTest {
                 ParserFactory.INSTANCE);
         Map<String, Set<Pair<String, TimePoint>>> hasResultsFor = scoreCorrectionProvider.getHasResultsForBoatClassFromDateByEventName();
         assertTrue(hasResultsFor.containsKey("Star Men"));
-        Calendar cal = new GregorianCalendar(2013, /* 2 means March; zero-based */ 2, 15, 18, 51, 15);
+        // expecting 2013-04-03T13:20:23.000+0200 = 2013-04-03T11:20:23.000Z
+        Calendar cal = new GregorianCalendar(2013, /* 3 means April; zero-based */ 3, 3, 11, 20, 23);
         cal.setTimeZone(TimeZone.getTimeZone("UTC"));
         TimePoint expectedTimePoint = new MillisecondsTimePoint(cal.getTime());
         assertEquals(expectedTimePoint, hasResultsFor.get("Star Men").iterator().next().getB());
@@ -103,7 +104,7 @@ public class ParserTest {
         ScoreCorrectionProviderImpl scoreCorrectionProvider = new ScoreCorrectionProviderImpl(getTestDocumentProvider(),
                 ParserFactory.INSTANCE);
         Map<String, Set<Pair<String, TimePoint>>> hasResultsFor = scoreCorrectionProvider.getHasResultsForBoatClassFromDateByEventName();
-        RegattaScoreCorrections starResult = scoreCorrectionProvider.getScoreCorrections("Star Men", "Star", hasResultsFor.get("Star Men").iterator().next().getB());
+        RegattaScoreCorrections starResult = scoreCorrectionProvider.getScoreCorrections("Star Men", "STR", hasResultsFor.get("Star Men").iterator().next().getB());
         assertNotNull(starResult);
         Iterable<ScoreCorrectionsForRace> scoreCorrectionsForRaces = starResult.getScoreCorrectionsForRaces();
         assertNotNull(scoreCorrectionsForRaces);
