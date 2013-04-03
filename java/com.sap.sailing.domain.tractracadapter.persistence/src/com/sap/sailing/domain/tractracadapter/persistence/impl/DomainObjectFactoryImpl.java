@@ -42,11 +42,21 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
     
     private TracTracConfiguration loadTracTracConfiguration(DBObject object) {
+        Object courseDesignUpdateUriObject = object.get(FieldNames.TT_CONFIG_COURSE_DESIGN_UPDATE_URI.name());
+        Object tracTracUsernameObject = object.get(FieldNames.TT_CONFIG_TRACTRAC_USERNAME.name());
+        Object tracTracPasswordObject = object.get(FieldNames.TT_CONFIG_TRACTRAC_PASSWORD.name());
+        
+        String courseDesignUpdateUri = courseDesignUpdateUriObject == null ? "" : (String) courseDesignUpdateUriObject;
+        String tracTracUsername = tracTracUsernameObject == null ? "" : (String) tracTracUsernameObject;
+        String tracTracPassword = tracTracPasswordObject == null ? "" : (String) tracTracPasswordObject;
+        
         return DomainFactory.INSTANCE.createTracTracConfiguration((String) object.get(FieldNames.TT_CONFIG_NAME.name()),
                 (String) object.get(FieldNames.TT_CONFIG_JSON_URL.name()),
                 (String) object.get(FieldNames.TT_CONFIG_LIVE_DATA_URI.name()),
                 (String) object.get(FieldNames.TT_CONFIG_STORED_DATA_URI.name()),
-                (String) object.get(FieldNames.TT_CONFIG_COURSE_DESIGN_UPDATE_URI.name()));
+                courseDesignUpdateUri,
+                tracTracUsername,
+                tracTracPassword);
     }
 
 }

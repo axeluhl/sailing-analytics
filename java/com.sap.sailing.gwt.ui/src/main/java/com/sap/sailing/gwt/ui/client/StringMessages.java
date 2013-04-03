@@ -532,4 +532,6 @@ public interface StringMessages extends Messages {
     String stopUpdating();
     String startUpdating();
     String currentTime();
+    String tractracUsername();
+    String tractracPassword();
 }

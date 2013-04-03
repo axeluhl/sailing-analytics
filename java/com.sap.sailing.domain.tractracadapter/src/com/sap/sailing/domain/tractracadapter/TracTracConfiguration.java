@@ -21,4 +21,16 @@ public interface TracTracConfiguration {
      * @return the TracTrac server path for course updates
      */
     String getCourseDesignUpdateURI();
+
+    /**
+     * holds the Trac Trac username used to send course updates to TracTrac
+     * @return the TracTrac username
+     */
+    String getTracTracUsername();
+
+    /**
+     * holds the Trac Trac password used to send course updates to TracTrac
+     * @return the TracTrac password
+     */
+    String getTracTracPassword();
 }

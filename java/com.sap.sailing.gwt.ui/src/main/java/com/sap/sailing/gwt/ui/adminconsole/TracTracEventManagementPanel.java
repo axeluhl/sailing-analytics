@@ -88,6 +88,8 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
     private TextBox liveURITextBox;
     private TextBox jsonURLTextBox;
     private TextBox courseDesignUpdateURITextBox;
+    private TextBox tractracUsernameTextBox;
+    private TextBox tractracPasswordTextBox;
 
     private TextBox racesFilterTextBox;
     private CellTable<TracTracRaceRecordDTO> racesTable;
@@ -292,10 +294,30 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         
         this.courseDesignUpdateURITextBox = new TextBox();
         this.courseDesignUpdateURITextBox.ensureDebugId("COURSEDESIGNUPDATEURI");
-        this.courseDesignUpdateURITextBox.setVisibleLength(40);
+        this.courseDesignUpdateURITextBox.setVisibleLength(100);
         
         layoutTable.setWidget(11, 0, courseDesignUpdateURLLabel);
         layoutTable.setWidget(11, 1, this.courseDesignUpdateURITextBox);
+        
+        // TracTrac Username
+        Label tractracUsernameLabel = new Label(this.stringMessages.tractracUsername() + ":");
+        
+        this.tractracUsernameTextBox = new TextBox();
+        this.tractracUsernameTextBox.ensureDebugId("tractracUsername");
+        this.tractracUsernameTextBox.setVisibleLength(40);
+        
+        layoutTable.setWidget(12, 0, tractracUsernameLabel);
+        layoutTable.setWidget(12, 1, this.tractracUsernameTextBox);
+        
+        // TracTrac Password
+        Label tractracPasswordLabel = new Label(this.stringMessages.tractracPassword() + ":");
+        
+        this.tractracPasswordTextBox = new TextBox();
+        this.tractracPasswordTextBox.ensureDebugId("tractracPassword");
+        this.tractracPasswordTextBox.setVisibleLength(40);
+        
+        layoutTable.setWidget(13, 0, tractracPasswordLabel);
+        layoutTable.setWidget(13, 1, this.tractracPasswordTextBox);
 
         // List Races
         Button listRacesButton = new Button(this.stringMessages.listRaces());
@@ -307,7 +329,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
             }
         });
 
-        layoutTable.setWidget(12, 1, listRacesButton);
+        layoutTable.setWidget(14, 1, listRacesButton);
 
         connectionsPanel.setContentWidget(layoutTable);
 
@@ -554,6 +576,8 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         final String liveDataURI = this.liveURITextBox.getValue();
         final String storedDataURI = this.storedURITextBox.getValue();
         final String courseDesignUpdateURI = this.courseDesignUpdateURITextBox.getValue();
+        final String tractracUsername = this.tractracUsernameTextBox.getValue();
+        final String tractracPassword = this.tractracPasswordTextBox.getValue();
 
         sailingService.listTracTracRacesInEvent(jsonURL, new MarkedAsyncCallback<Pair<String, List<TracTracRaceRecordDTO>>>() {
             @Override
@@ -581,7 +605,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
                 TracTracEventManagementPanel.this.racesTable.setPageSize(races.size());
                 
                 // store a successful configuration in the database for later retrieval
-                sailingService.storeTracTracConfiguration(eventName, jsonURL, liveDataURI, storedDataURI, courseDesignUpdateURI, 
+                sailingService.storeTracTracConfiguration(eventName, jsonURL, liveDataURI, storedDataURI, courseDesignUpdateURI, tractracUsername, tractracPassword,
                         new MarkedAsyncCallback<Void>() {
                             @Override
                             public void handleFailure(Throwable caught) {
@@ -592,7 +616,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
                             public void handleSuccess(Void voidResult) {
                                 // refresh list of previous configurations
                                 TracTracConfigurationDTO config = new TracTracConfigurationDTO(eventName, jsonURL,
-                                        liveDataURI, storedDataURI, courseDesignUpdateURI);
+                                        liveDataURI, storedDataURI, courseDesignUpdateURI, tractracUsername, tractracPassword);
                                 
                                 if (TracTracEventManagementPanel.this.previousConfigurations.put(config.name, config) == null) {
                                     TracTracEventManagementPanel.this.connectionsHistoryListBox.addItem(config.name);
@@ -627,6 +651,8 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         String liveURI = this.liveURITextBox.getValue();
         String storedURI = this.storedURITextBox.getValue();
         String courseDesignUpdateURI = this.courseDesignUpdateURITextBox.getValue();
+        String tractracUsername = this.tractracUsernameTextBox.getValue();
+        String tractracPassword = this.tractracPasswordTextBox.getValue();
         RegattaDTO selectedRegatta = getSelectedRegatta();
         RegattaIdentifier regattaIdentifier = null;
         if (selectedRegatta != null) {
@@ -670,8 +696,8 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
                 selectedRaces.add(race);
             }
         }
-        this.sailingService.trackWithTracTrac(regattaIdentifier, selectedRaces, liveURI, storedURI, courseDesignUpdateURI, trackWind, correctWind,
-                simulateWithStartTimeNow, new MarkedAsyncCallback<Void>() {
+        this.sailingService.trackWithTracTrac(regattaIdentifier, selectedRaces, liveURI, storedURI, courseDesignUpdateURI, trackWind, correctWind, 
+                simulateWithStartTimeNow, tractracUsername, tractracPassword, new MarkedAsyncCallback<Void>() {
                     @Override
                     public void handleFailure(Throwable caught) {
                         reportError("Error trying to register races " + selectedRaces + " for tracking: "
@@ -702,6 +728,8 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         this.liveURITextBox.setValue(config.liveDataURI);
         this.storedURITextBox.setValue(config.storedDataURI);
         this.courseDesignUpdateURITextBox.setValue(config.courseDesignUpdateURI);
+        this.tractracUsernameTextBox.setValue(config.tractracUsername);
+        this.tractracPasswordTextBox.setValue(config.tractracPassword);
     }
 
     private void fillRaceListFromAvailableRacesApplyingFilter(String text) {
