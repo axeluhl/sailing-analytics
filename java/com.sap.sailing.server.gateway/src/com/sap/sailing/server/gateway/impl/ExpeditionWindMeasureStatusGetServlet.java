@@ -42,14 +42,13 @@ public class ExpeditionWindMeasureStatusGetServlet extends SailingServerHttpServ
         out.println("</head>");
         out.println("<body>");
         out.println("<h3>Expedition Wind Status</h3>");
-        out.println("<br/>");
         for(ExpeditionMessageInfo info: lastMessageInfosPerBoat.values()) {
             out.println("Boat-No:" + "&nbsp;" + info.boatID);
             out.println("<br/>");
             out.println("Last message received:" + "&nbsp;" + info.messageReceivedAt.toString());
             out.println("<br/>");
             out.println("Last message:" + "&nbsp;" + info.message.getOriginalMessage());
-            out.println("<br/>");
+            out.println("<br/><br/>");
         }
         out.println("</body>");
         out.println("</html>");
