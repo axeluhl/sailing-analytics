@@ -345,14 +345,14 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
     
     /**
      * Triggers a cache update for <code>key</code> for the <code>updateInterval</code> specified. If a re-calculation
-     * for this key is already scheduled, this method will try to cancel it, but that may not work because the
-     * task has already started. In any case, the new task is scheduled. Note, that the {@link #recalculator}'s
-     * queue is most likely an ordered, FIFO-like queue. Therefore, when triggering many updates for many keys,
-     * the corresponding re-calculations will be dispatched to the next available thread from the thread pool
-     * in the order of the {@link #triggerUpdate(Object, UpdateInterval)} calls. If a large sequence of keys
-     * needs frequent updating, but re-calculation doesn't keep up, make sure the keys are passed in randomized
-     * order. Otherwise, the keys towards the end will never have their values re-calculated because their
-     * tasks will keep getting cancelled before started.
+     * for this key is already scheduled, this method will try to update its update interval by
+     * {@link UpdateInterval#join(UpdateInterval) joining} the new with the existing one. If that doesn't work because
+     * the task has already been started and has already read its update interval, this method will schedule a new task
+     * with the extended update interval.
+     * <p>
+     * 
+     * If the running task has a different setting for the caller's waiting for the task, the task will be canceled
+     * (which may or may not work), and a new task with the joined update interval is scheduled.
      */
     public void triggerUpdate(final K key, U updateInterval) {
         // establish and maintain the following invariant: after lock on ongoingRecalculations is released,
