@@ -78,7 +78,7 @@ public class PathLegendCanvasOverlay extends CanvasOverlay {
                 }
             }
 
-            result.add(this.pathOverlays.get(indexOfPolyline));
+            result.add(0, this.pathOverlays.get(indexOfPolyline));
             this.pathOverlays = result;
         }
 
@@ -95,8 +95,6 @@ public class PathLegendCanvasOverlay extends CanvasOverlay {
             txtmaxwidth = Math.max(txtmaxwidth, txtmet.getWidth());
         }
         for (PathCanvasOverlay path : pathOverlays) {
-
-            System.out.println("XXX drawing legend for " + path.name);
 
             drawRectangleWithText(xOffset, yOffset + (pathOverlays.size()-1-index) * rectHeight, path.pathColor,
                     path.name, getFormattedTime(path.getPathTime()),txtmaxwidth,timewidth);
