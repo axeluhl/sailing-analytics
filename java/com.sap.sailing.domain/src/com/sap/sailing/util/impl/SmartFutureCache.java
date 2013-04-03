@@ -76,7 +76,7 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
      * {@link #ongoingManeuverCacheRecalculations}. This will let {@link Future#cancel(boolean)} return <code>false</code>
      * should it be called on that Future.
      */
-    private final Map<K, FutureTaskWithCancelBlocking<V, U>> ongoingRecalculations;
+    private final Map<K, FutureTaskWithCancelBlocking> ongoingRecalculations;
     
     private final Map<K, V> cache;
     
@@ -173,6 +173,20 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
         }
     }
     
+    private static class SettableCallable<V> implements Callable<V> {
+        private Callable<V> callable;
+        
+        public void setCallable(Callable<V> callable) {
+            this.callable = callable;
+        }
+        
+        @Override
+        public V call() throws Exception {
+            return callable.call();
+        }
+        
+    }
+    
     /**
      * Once a client has fetched such a Future from {@link TrackedRaceImpl##ongoingManeuverCacheRecalculations} while
      * holding the object monitor of {@link TrackedRaceImpl##ongoingManeuverCacheRecalculations}, the client knows that
@@ -184,14 +198,88 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
      * @author Axel Uhl (D043530)
      * 
      */
-    private static class FutureTaskWithCancelBlocking<V, U extends UpdateInterval<U>> extends FutureTask<V> {
+    private class FutureTaskWithCancelBlocking extends FutureTask<V> implements Callable<V> {
         private boolean dontCancel;
         
-        private final U updateInterval;
+        private boolean runningAndReadUpdateInterval;
         
-        public FutureTaskWithCancelBlocking(Callable<V> callable, U updateInterval) {
+        private final K key;
+
+        private U updateInterval;
+
+        private final boolean callerWaitsSynchronouslyForResult;
+
+        private final Thread callerThread;
+
+        public FutureTaskWithCancelBlocking(final K key, final U updateInterval,
+                final boolean callerWaitsSynchronouslyForResult, final Thread callerThread) {
+            this(new SettableCallable<V>(), key, updateInterval, callerWaitsSynchronouslyForResult, callerThread);
+        }
+        
+        public FutureTaskWithCancelBlocking(SettableCallable<V> callable, final K key, final U updateInterval,
+                final boolean callerWaitsSynchronouslyForResult, final Thread callerThread) {
             super(callable);
+            callable.setCallable(this);
+            this.key = key;
             this.updateInterval = updateInterval;
+            this.callerWaitsSynchronouslyForResult = callerWaitsSynchronouslyForResult;
+            this.callerThread = callerThread;
+        }
+
+        /**
+         * Tries to update this task's update interval so as to re-used an already scheduled task for a given key.
+         * The update can only be performed if the task hasn't read the update interval after it has been started.
+         * 
+         * @return <code>true</code> if the update was applied successfully before the task read the update interval; this means
+         * that if the task is not cancelled, it will use the new update interval. If <code>false</code> is returned, the task has already
+         * read the update interval, and a change to the update interval for this task is no longer possible. The caller will probably
+         * have to schedule a new task with the new update interval.
+         */
+        public synchronized boolean tryToUpdateUpdateInterval(U newUpdateInterval) {
+            final boolean result;
+            if (runningAndReadUpdateInterval) {
+                result = false;
+            } else {
+                result = true;
+                updateInterval = newUpdateInterval;
+            }
+            return result;
+        }
+        
+        @Override
+        public V call() {
+            try {
+                final U updateInterval;
+                synchronized (this) {
+                    updateInterval = getUpdateInterval();
+                    runningAndReadUpdateInterval = true;
+                }
+                if (callerWaitsSynchronouslyForResult) {
+                    LockUtil.propagateLockSetFrom(callerThread);
+                }
+                try {
+                    V preResult = cacheUpdateComputer.computeCacheUpdate(key, updateInterval);
+                    final NamedReentrantReadWriteLock lock = getOrCreateLockForKey(key);
+                    LockUtil.lockForWrite(lock);
+                    try {
+                        V result = cacheUpdateComputer.provideNewCacheValue(key, cache.get(key), preResult,
+                                updateInterval);
+                        cache(key, result);
+                        return result;
+                    } finally {
+                        LockUtil.unlockAfterWrite(lock);
+                        ongoingRecalculations.remove(key);
+                    }
+                } finally {
+                    if (callerWaitsSynchronouslyForResult) {
+                        LockUtil.unpropagateLockSetFrom(callerThread);
+                    }
+                }
+            } catch (Exception e) {
+                // cache won't be updated
+                logger.log(Level.SEVERE, "triggerUpdate", e);
+                throw new RuntimeException(e);
+            }
         }
 
         public synchronized void dontCancel() {
@@ -207,13 +295,17 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
             }
         }
 
+        public boolean isCallerWaitsSynchronouslyForResult() {
+            return callerWaitsSynchronouslyForResult;
+        }
+
         public U getUpdateInterval() {
             return updateInterval;
         }
     }
     
     public SmartFutureCache(CacheUpdater<K, V, U> cacheUpdateComputer, String nameForLocks) {
-        this.ongoingRecalculations = new ConcurrentHashMap<K, FutureTaskWithCancelBlocking<V, U>>();
+        this.ongoingRecalculations = new ConcurrentHashMap<K, FutureTaskWithCancelBlocking>();
         this.cache = new ConcurrentHashMap<K, V>();
         this.cacheUpdateComputer = cacheUpdateComputer;
         this.locksForKeys = new ConcurrentHashMap<K, NamedReentrantReadWriteLock>();
@@ -261,18 +353,16 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
      * tasks will keep getting cancelled before started.
      */
     public void triggerUpdate(final K key, U updateInterval) {
-        // establish and maintain the following invariant: after lock on ongoingManeuverCacheRecalculations is released,
+        // establish and maintain the following invariant: after lock on ongoingRecalculations is released,
         // no Future contained in it is in cancelled state
         synchronized (ongoingRecalculations) {
             final U oldUpdateInterval;
             final U joinedUpdateInterval;
+            FutureTaskWithCancelBlocking oldFuture = null;
             if (suspended) {
                 oldUpdateInterval = triggeredWhileSuspended.get(key);
             } else {
-                FutureTaskWithCancelBlocking<V, U> oldFuture = ongoingRecalculations.get(key);
-                if (oldFuture != null) {
-                    oldFuture.cancel(/* mayInterruptIfRunning */false);
-                }
+                oldFuture = ongoingRecalculations.get(key);
                 oldUpdateInterval = oldFuture == null ? null : oldFuture.getUpdateInterval();
             }
             if (oldUpdateInterval == null) {
@@ -287,7 +377,21 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
             if (suspended) {
                 triggeredWhileSuspended.put(key, joinedUpdateInterval);
             } else {
-                createAndExecuteRecalculation(key, joinedUpdateInterval, /* callerWaitsSynchronouslyForResult */ false);
+                boolean reuseExistingFuture = false;
+                if (oldFuture != null) {
+                    // TODO bug 1314: instead of canceling and re-scheduling, ensure that the existing task runs with the new, extended update interval
+                    // can re-use existing task only if it does not have isCallerWaitsSynchronouslyForResult
+                    if (!oldFuture.isCallerWaitsSynchronouslyForResult()) {
+                        reuseExistingFuture = oldFuture.tryToUpdateUpdateInterval(joinedUpdateInterval);
+                    }
+                    if (!reuseExistingFuture) {
+                        oldFuture.cancel(/* mayInterruptIfRunning */false);
+                    }
+                }
+                if (!reuseExistingFuture) {
+                    // the following call adds the resulting new Future to ongoingRecalculations
+                    createAndExecuteRecalculation(key, joinedUpdateInterval, /* callerWaitsSynchronouslyForResult */ false);
+                }
             }
         }
     }
@@ -306,39 +410,8 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
             final boolean callerWaitsSynchronouslyForResult) {
         final Thread callerThread = Thread.currentThread();
         synchronized (ongoingRecalculations) {
-            final FutureTaskWithCancelBlocking<V, U> future;
-            future = new FutureTaskWithCancelBlocking<V, U>(new Callable<V>() {
-                @Override
-                public V call() {
-                    try {
-                        if (callerWaitsSynchronouslyForResult) {
-                            LockUtil.propagateLockSetFrom(callerThread);
-                        }
-                        try {
-                            V preResult = cacheUpdateComputer.computeCacheUpdate(key, joinedUpdateInterval);
-                            final NamedReentrantReadWriteLock lock = getOrCreateLockForKey(key);
-                            LockUtil.lockForWrite(lock);
-                            try {
-                                V result = cacheUpdateComputer.provideNewCacheValue(key, cache.get(key), preResult,
-                                        joinedUpdateInterval);
-                                cache(key, result);
-                                return result;
-                            } finally {
-                                LockUtil.unlockAfterWrite(lock);
-                                ongoingRecalculations.remove(key);
-                            }
-                        } finally {
-                            if (callerWaitsSynchronouslyForResult) {
-                                LockUtil.unpropagateLockSetFrom(callerThread);
-                            }
-                        }
-                    } catch (Exception e) {
-                        // cache won't be updated
-                        logger.log(Level.SEVERE, "triggerUpdate", e);
-                        throw new RuntimeException(e);
-                    }
-                }
-            }, joinedUpdateInterval);
+            final FutureTaskWithCancelBlocking future = new FutureTaskWithCancelBlocking(key,
+                    joinedUpdateInterval, callerWaitsSynchronouslyForResult, callerThread);
             ongoingRecalculations.put(key, future);
             recalculator.execute(future);
         }
@@ -353,13 +426,13 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
     public V get(K key, boolean waitForLatest) {
         V value = null;
         if (waitForLatest) {
-            FutureTaskWithCancelBlocking<V, U> future;
+            FutureTaskWithCancelBlocking future;
             synchronized (ongoingRecalculations) {
                 if (suspended && waitForLatest) {
                     final boolean wasTriggeredWhileSuspended = triggeredWhileSuspended.containsKey(key); // update interval may have deliberately been null
                     if (wasTriggeredWhileSuspended) {
-                        // If suspended and the caller wants to get the latest results, and during suspend recalculations were
-                        // triggered, and execute them now.
+                        // If suspended and the caller wants to get the latest results, and while suspended recalculations were
+                        // triggered, execute them now.
                         // This will enter the new future into ongoingRecalculations, and therefore this method
                         // will wait for its completion below.
                         // It is OK to assert that this method will synchronously wait for the results before

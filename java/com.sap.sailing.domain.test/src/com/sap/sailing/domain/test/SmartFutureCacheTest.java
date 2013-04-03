@@ -5,6 +5,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ConcurrentSkipListSet;
@@ -181,7 +182,7 @@ public class SmartFutureCacheTest {
                             throws Exception {
                         updateWasCalled.add(key);
                         computeCacheUpdateCount[0]++;
-                        Thread.sleep(100); // pretending a long calculation
+                        Thread.sleep(10); // pretending a long calculation
                         return updateInterval.getA() + updateInterval.getB();
                     }
                 }, "SmartFutureCacheTest.testJoiningOfUpdateIntervalsWhenBeingResumed") {
@@ -201,16 +202,25 @@ public class SmartFutureCacheTest {
         Random random = new Random();
         // Trigger very many updates shortly after each other, causing many re-calculations to be scheduled.
         final int numberOfUpdateTriggers = 1000000;
+        Set<Integer> updatesTriggeredFor = new HashSet<Integer>();
         for (int i=0; i<numberOfUpdateTriggers; i++) {
             final int nextInt = random.nextInt(strings.length);
             sfc.triggerUpdate(strings[nextInt], new FromAToBUpdateInterval(i, nextInt));
+            updatesTriggeredFor.add(nextInt);
         }
+        System.out.println(updatesTriggeredFor.size());
+        System.out.println(updatesTriggeredFor);
         System.out.println(updateWasCalled.size());
         System.out.println(updateWasCalled);
         System.out.println(computeCacheUpdateCount[0]);
-        Thread.sleep(3000);
+        Thread.sleep(100);
         System.out.println(updateWasCalled.size());
         System.out.println(updateWasCalled);
         System.out.println(computeCacheUpdateCount[0]);
+        Thread.sleep(100);
+        System.out.println(updateWasCalled.size());
+        System.out.println(updateWasCalled);
+        System.out.println(computeCacheUpdateCount[0]);
+        assertEquals(updatesTriggeredFor.size(), updateWasCalled.size());
     }
 }
