@@ -148,16 +148,19 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
             }
         };
 
+        TextColumn<SwissTimingRaceRecordDTO> raceDescriptionColumn = new TextColumn<SwissTimingRaceRecordDTO>() {
+            @Override
+            public String getValue(SwissTimingRaceRecordDTO object) {
+                return object.description;
+            }
+        };
+        
         TextColumn<SwissTimingRaceRecordDTO> boatClassColumn = new TextColumn<SwissTimingRaceRecordDTO>() {
             @Override
             public String getValue(SwissTimingRaceRecordDTO object) {
                 String result = object.boatClass != null ? object.boatClass : "";
                 if(object.discipline != null) {
-                    if(object.discipline.equalsIgnoreCase("M")) {
-                        result += " (Men)";
-                    } else if(object.discipline.equalsIgnoreCase("W")) {
-                        result += " (Woman)";
-                    }
+                    result += " (" + object.discipline + ")";
                 }
                 return result;
             }
@@ -230,6 +233,7 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
         AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
         raceTable = new CellTable<SwissTimingRaceRecordDTO>(/* pageSize */ 10000, tableRes);
         raceTable.addColumn(raceNameColumn, stringConstants.name());
+        raceTable.addColumn(raceDescriptionColumn, stringConstants.description());
         raceTable.addColumn(boatClassColumn, stringConstants.boatClass());
         raceTable.addColumn(raceStartTrackingColumn, stringConstants.raceStartTimeColumn());
         raceTable.setWidth("300px");
