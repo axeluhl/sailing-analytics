@@ -1,44 +1,43 @@
-package com.sap.sailing.racecommittee.app.domain.state.impl.analyzers;
+package com.sap.sailing.racecommittee.domain.state.impl.analyzers;
 
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogRaceStatusEvent;
-import com.sap.sailing.racecommittee.domain.state.impl.analyzers.RaceLogAnalyzer;
 
-public class FinishedTimeFinder extends RaceLogAnalyzer {
+public class FinishingTimeFinder extends RaceLogAnalyzer {
 
-    public FinishedTimeFinder(RaceLog raceLog) {
+    public FinishingTimeFinder(RaceLog raceLog) {
         super(raceLog);
     }
 
-    public TimePoint getFinishedTime() {
-        TimePoint finishedTime = null;
+    public TimePoint getFinishingTime() {
+        TimePoint finishingTime = null;
         
         this.raceLog.lockForRead();
         try {
-            finishedTime = searchForFinishedTime();
+            finishingTime = searchForFinishingTime();
         } finally {
             this.raceLog.unlockAfterRead();
         }
 
-        return finishedTime;
+        return finishingTime;
     }
     
-    private TimePoint searchForFinishedTime() {
-        TimePoint finishedTime = null;
+    private TimePoint searchForFinishingTime() {
+        TimePoint finishingTime = null;
         
         for (RaceLogEvent event : getPassEvents()) {
             if (event instanceof RaceLogRaceStatusEvent) {
                 RaceLogRaceStatusEvent statusEvent = (RaceLogRaceStatusEvent) event;
-                if (statusEvent.getNextStatus().equals(RaceLogRaceStatus.FINISHED)) {
-                    finishedTime = statusEvent.getTimePoint();
+                if (statusEvent.getNextStatus().equals(RaceLogRaceStatus.FINISHING)) {
+                    finishingTime = statusEvent.getTimePoint();
                 }
             }
         }
         
-        return finishedTime;
+        return finishingTime;
     }
 
 }
