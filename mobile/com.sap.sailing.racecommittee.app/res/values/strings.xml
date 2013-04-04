@@ -150,5 +150,6 @@
 	<string name="positionings">Positioning</string>
 	<string name="availableFinishingCompetitors">Competitors</string>
 	<string name="choose_blue_flag_finishing">Finish race</string>
+	<string name="drag_handle_description">Drag handle</string>
 	
 </resources>

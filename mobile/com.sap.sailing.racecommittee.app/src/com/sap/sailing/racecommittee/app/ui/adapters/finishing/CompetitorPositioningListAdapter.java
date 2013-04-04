@@ -24,14 +24,14 @@ public class CompetitorPositioningListAdapter extends ArrayAdapter<Competitor> {
         if (convertView == null) {
 
             LayoutInflater li = (LayoutInflater) (getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE));
-            view = li.inflate(R.layout.welter_one_row_two_columns, null);
+            view = li.inflate(R.layout.welter_positioning_item, null);
         }
 
         Competitor competitor = getItem(position);
 
-        TextView positionText = (TextView) view.findViewById(R.id.Welter_Cell_OneRowTwoColumns_columnOne_txtTitle);
+        TextView positionText = (TextView) view.findViewById(R.id.Welter_Cell_Positioning_columnOne_txtTitle);
 
-        TextView title = (TextView) view.findViewById(R.id.Welter_Cell_OneRowTwoColumns_columnTwo_txtTitle);
+        TextView title = (TextView) view.findViewById(R.id.Welter_Cell_Positioning_columnTwo_txtTitle);
 
         positionText.setText(String.valueOf(position + 1));
         title.setText(competitor.getName());

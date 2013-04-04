@@ -66,7 +66,7 @@ public class FinishingRaceFragment extends RaceFragment implements TickListener 
         positionedCompetitors = new ArrayList<Competitor>();
         competitorsAdapter = new CompetitorsAdapter(getActivity(), R.layout.welter_grid_competitor_cell, competitors);
         
-        positioningAdapter = new CompetitorPositioningListAdapter(getActivity(), R.layout.welter_one_row_two_columns, positionedCompetitors);
+        positioningAdapter = new CompetitorPositioningListAdapter(getActivity(), R.layout.welter_positioning_item, positionedCompetitors);
         
         positioningListView = (DragSortListView) getView().findViewById(R.id.listViewPositioningList);
         positioningListView.setAdapter(positioningAdapter);
@@ -79,6 +79,15 @@ public class FinishingRaceFragment extends RaceFragment implements TickListener 
                     positioningAdapter.remove(item);
                     positioningAdapter.insert(item, to);
                 }
+            }
+        });
+        
+        positioningListView.setRemoveListener(new DragSortListView.RemoveListener() {
+            
+            @Override
+            public void remove(int toBeRemoved) {
+                Competitor item = positioningAdapter.getItem(toBeRemoved);
+                onCompetitorRemovedFromPositioningList(item);
             }
         });
 
@@ -124,7 +133,7 @@ public class FinishingRaceFragment extends RaceFragment implements TickListener 
     }
 
     protected void onCompetitorClickedOnGrid(Competitor competitor) {
-        addNewCompetitorToList(competitor);
+        addNewCompetitorToPositioningList(competitor);
         removeCompetitorFromGrid(competitor);
     }
 
@@ -133,8 +142,23 @@ public class FinishingRaceFragment extends RaceFragment implements TickListener 
         competitorsAdapter.notifyDataSetChanged();
     }
 
-    private void addNewCompetitorToList(Competitor competitor) {
+    private void addNewCompetitorToPositioningList(Competitor competitor) {
         positionedCompetitors.add(competitor);
+        positioningAdapter.notifyDataSetChanged();
+    }
+    
+    protected void onCompetitorRemovedFromPositioningList(Competitor competitor) {
+        addNewCompetitorToCompetitorList(competitor);
+        removeCompetitorFromPositionings(competitor);
+    }
+    
+    private void addNewCompetitorToCompetitorList(Competitor competitor) {
+        competitors.add(competitor);
+        competitorsAdapter.notifyDataSetChanged();
+    }
+    
+    protected void removeCompetitorFromPositionings(Competitor competitor) {
+        positionedCompetitors.remove(competitor);
         positioningAdapter.notifyDataSetChanged();
     }
 
