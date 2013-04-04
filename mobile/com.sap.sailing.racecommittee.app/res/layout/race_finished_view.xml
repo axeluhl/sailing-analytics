@@ -32,7 +32,7 @@
             android:id="@+id/textFinishedRaceStarted"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:text="@string/blank"
+            android:text="@string/empty"
             android:textSize="14pt"
             android:gravity="center_vertical|center_horizontal"
             android:ems="10" />
@@ -48,7 +48,7 @@
             android:id="@+id/textFirstBoatFinished"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:text="@string/blank"
+            android:text="@string/empty"
             android:textSize="14pt"
             android:gravity="center_vertical|center_horizontal"
             android:ems="10" />
@@ -64,7 +64,7 @@
             android:id="@+id/textFinishedRaceEnded"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:text="@string/blank"
+            android:text="@string/empty"
             android:textSize="14pt"
             android:gravity="center_vertical|center_horizontal"
             android:ems="10" />
@@ -80,7 +80,7 @@
             android:id="@+id/textTimeLimit"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:text="@string/blank"
+            android:text="@string/empty"
             android:textSize="14pt"
             android:gravity="center_vertical|center_horizontal"
             android:ems="10" />
@@ -96,7 +96,7 @@
             android:id="@+id/textProtestStartTime"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:text="@string/blank"
+            android:text="@string/empty"
             android:textSize="14pt"
             android:gravity="center_vertical|center_horizontal"
             android:ems="10"

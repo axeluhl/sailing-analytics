@@ -72,10 +72,15 @@ public class OfflineDataManager extends DataManager {
 
         RaceLogEventFactory factory = new RaceLogEventFactoryImpl();
         PassAwareRaceLog log = new PassAwareRaceLogImpl();
+        log.add(factory.createStartTimeEvent(
+                new MillisecondsTimePoint(new Date().getTime() - 2000), 
+                1,
+                new MillisecondsTimePoint(new Date().getTime() - 1000)));
+
         log.add(factory.createRaceStatusEvent(
-                new MillisecondsTimePoint(new Date().getTime() + 1), 
-                2,
-                RaceLogRaceStatus.SCHEDULED));
+                new MillisecondsTimePoint(new Date().getTime()), 
+                1,
+                RaceLogRaceStatus.FINISHING));
 
         ManagedRace q1 = new ManagedRaceImpl(
                 new ManagedRaceIdentifierImpl(

@@ -37,7 +37,7 @@ public class FinishingRaceFragment extends RaceFragment implements TickListener 
     //private DragSortListView positioningListView;
     private ListView competitorListView;
     
-    private CompetitorsAdapter gridAdapter;
+    private CompetitorsAdapter competitorsAdapter;
     //private CompetitorPositioningListAdapter positioningAdapter;
     
     protected List<Competitor> competitors;
@@ -62,7 +62,7 @@ public class FinishingRaceFragment extends RaceFragment implements TickListener 
         Util.addAll(getRace().getCompetitors(), competitors);
         
         //positionedCompetitors = new ArrayList<Competitor>();
-        gridAdapter = new CompetitorsAdapter(getActivity(), R.layout.welter_grid_competitor_cell, competitors);
+        competitorsAdapter = new CompetitorsAdapter(getActivity(), R.layout.welter_grid_competitor_cell, competitors);
         
         //positioningAdapter = new CompetitorPositioningListAdapter(getActivity(), R.layout.welter_one_row_two_columns, positionedCompetitors);
         
@@ -81,7 +81,7 @@ public class FinishingRaceFragment extends RaceFragment implements TickListener 
 //        });
         
         competitorListView = (ListView) getView().findViewById(R.id.gridViewCompetitors);
-        competitorListView.setAdapter(gridAdapter);
+        competitorListView.setAdapter(competitorsAdapter);
 
         blueFlagButton.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
@@ -100,7 +100,7 @@ public class FinishingRaceFragment extends RaceFragment implements TickListener 
         competitorListView.setOnItemClickListener(new OnItemClickListener() {
 
             public void onItemClick(AdapterView<?> arg0, View view, int position, long arg3) {
-                Competitor competitor = (Competitor) gridAdapter.getItem(position);
+                Competitor competitor = (Competitor) competitorsAdapter.getItem(position);
                 ExLog.i("RaceFinishingFragment", "Grid is clicked at position " + position + " for competitor " + competitor.getName());
                 onCompetitorClickedOnGrid(competitor);
             }
@@ -129,7 +129,7 @@ public class FinishingRaceFragment extends RaceFragment implements TickListener 
 
     protected void removeCompetitorFromGrid(Competitor competitor) {
         competitors.remove(competitor);
-        gridAdapter.notifyDataSetChanged();
+        competitorsAdapter.notifyDataSetChanged();
     }
 
     private void addNewCompetitorToList(Competitor competitor) {
