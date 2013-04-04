@@ -135,7 +135,7 @@ public class PathPolyline {
                         newTurnPoints.add(polyline.getVertex(index));
                     }
                     turnPoints = newTurnPoints.toArray(new LatLng[0]);
-
+                    getTotalTime();
                 } else {
 
                     final int indexOfMovedPoint = getIndexOfMovedPoint();
