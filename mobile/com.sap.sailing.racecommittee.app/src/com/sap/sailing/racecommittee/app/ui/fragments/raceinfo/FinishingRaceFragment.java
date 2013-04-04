@@ -17,11 +17,13 @@ import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.mobeta.android.dslv.DragSortListView;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
+import com.sap.sailing.racecommittee.app.ui.adapters.finishing.CompetitorPositioningListAdapter;
 import com.sap.sailing.racecommittee.app.ui.adapters.finishing.CompetitorsAdapter;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sailing.racecommittee.app.utils.TickListener;
@@ -34,14 +36,14 @@ public class FinishingRaceFragment extends RaceFragment implements TickListener 
     private ImageButton novemberFlagButton;
     private ImageButton blueFlagButton;
     
-    //private DragSortListView positioningListView;
+    private DragSortListView positioningListView;
     private ListView competitorListView;
     
     private CompetitorsAdapter competitorsAdapter;
-    //private CompetitorPositioningListAdapter positioningAdapter;
+    private CompetitorPositioningListAdapter positioningAdapter;
     
     protected List<Competitor> competitors;
-    //protected List<Competitor> positionedCompetitors;
+    protected List<Competitor> positionedCompetitors;
     
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -61,25 +63,25 @@ public class FinishingRaceFragment extends RaceFragment implements TickListener 
         competitors = new ArrayList<Competitor>();
         Util.addAll(getRace().getCompetitors(), competitors);
         
-        //positionedCompetitors = new ArrayList<Competitor>();
+        positionedCompetitors = new ArrayList<Competitor>();
         competitorsAdapter = new CompetitorsAdapter(getActivity(), R.layout.welter_grid_competitor_cell, competitors);
         
-        //positioningAdapter = new CompetitorPositioningListAdapter(getActivity(), R.layout.welter_one_row_two_columns, positionedCompetitors);
+        positioningAdapter = new CompetitorPositioningListAdapter(getActivity(), R.layout.welter_one_row_two_columns, positionedCompetitors);
         
-        //positioningListView = (DragSortListView) getView().findViewById(R.id.listViewPositioningList);
-        //positioningListView.setAdapter(positioningAdapter);
-        //positioningListView.setDropListener(new DragSortListView.DropListener() {
-                
-//                @Override
-//                public void drop(int from, int to) {
-//                        if (from != to) {
-//                                Competitor item = positioningAdapter.getItem(from);
-//                                positioningAdapter.remove(item);
-//                                positioningAdapter.insert(item, to);
-//                        }
-//                }
-//        });
-        
+        positioningListView = (DragSortListView) getView().findViewById(R.id.listViewPositioningList);
+        positioningListView.setAdapter(positioningAdapter);
+        positioningListView.setDropListener(new DragSortListView.DropListener() {
+
+            @Override
+            public void drop(int from, int to) {
+                if (from != to) {
+                    Competitor item = positioningAdapter.getItem(from);
+                    positioningAdapter.remove(item);
+                    positioningAdapter.insert(item, to);
+                }
+            }
+        });
+
         competitorListView = (ListView) getView().findViewById(R.id.gridViewCompetitors);
         competitorListView.setAdapter(competitorsAdapter);
 
@@ -104,7 +106,6 @@ public class FinishingRaceFragment extends RaceFragment implements TickListener 
                 ExLog.i("RaceFinishingFragment", "Grid is clicked at position " + position + " for competitor " + competitor.getName());
                 onCompetitorClickedOnGrid(competitor);
             }
-
         });
         
     }
@@ -133,8 +134,8 @@ public class FinishingRaceFragment extends RaceFragment implements TickListener 
     }
 
     private void addNewCompetitorToList(Competitor competitor) {
-        //positionedCompetitors.add(competitor);
-        //positioningAdapter.notifyDataSetChanged();
+        positionedCompetitors.add(competitor);
+        positioningAdapter.notifyDataSetChanged();
     }
 
     protected void setCountdownLabels(long millisecondsSinceStart) {
