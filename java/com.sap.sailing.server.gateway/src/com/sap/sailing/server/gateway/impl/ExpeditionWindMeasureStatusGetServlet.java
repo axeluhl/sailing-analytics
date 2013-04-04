@@ -3,12 +3,12 @@ package com.sap.sailing.server.gateway.impl;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.SocketException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -26,8 +26,6 @@ public class ExpeditionWindMeasureStatusGetServlet extends SailingServerHttpServ
     
     private static long MIN_TIME_SINCE_LAST_MESSAGE = 5 * 1000; // 5s; 
     private static long MAX_TIME_SINCE_LAST_MESSAGE = 24 * 60 * 60 * 1000; // 1 day 
-
-    private SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss");
 
     public ExpeditionWindMeasureStatusGetServlet() {
         super();
@@ -62,8 +60,10 @@ public class ExpeditionWindMeasureStatusGetServlet extends SailingServerHttpServ
                 if(timeSinceLastMessageInMs > MAX_TIME_SINCE_LAST_MESSAGE) {
                     messagesToDrop.add(info.boatID);
                 } else if(timeSinceLastMessageInMs > MIN_TIME_SINCE_LAST_MESSAGE) {
-                    Date diff = new Date(timeSinceLastMessageInMs);
-                    out.println("Time since last message:" + "&nbsp;" + timeFormat.format(diff));
+                    long hours = TimeUnit.MILLISECONDS.toHours(timeSinceLastMessageInMs);
+                    long minutes = TimeUnit.MILLISECONDS.toMinutes(timeSinceLastMessageInMs) - TimeUnit.HOURS.toMinutes(hours);
+                    long seconds = TimeUnit.MILLISECONDS.toSeconds(timeSinceLastMessageInMs) - (TimeUnit.MINUTES.toSeconds(minutes) + TimeUnit.HOURS.toSeconds(hours));
+                    out.println("Time since last message:" + "&nbsp;" + String.format("%02d:%02d:%02d", hours, minutes, seconds));
                     out.println("<br/>");
                 }
                 out.println("Last message received:" + "&nbsp;" + info.messageReceivedAt.toString());
