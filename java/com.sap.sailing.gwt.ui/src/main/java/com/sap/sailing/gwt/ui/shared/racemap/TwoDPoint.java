@@ -90,51 +90,6 @@ public class TwoDPoint {
         return new TwoDPoint(x, y);
     }
 
-    // private static boolean isOnTheInside(TwoDPoint beforeOriginPoint, TwoDPoint originPoint, TwoDPoint
-    // afterOriginPoint, TwoDPoint newOriginPoint) {
-    //
-    // double xA = beforeOriginPoint.getX();
-    // double yA = beforeOriginPoint.getY();
-    // double xB = originPoint.getX();
-    // double yB = originPoint.getY();
-    // double xC = afterOriginPoint.getX();
-    // double yC = afterOriginPoint.getY();
-    // double xD = newOriginPoint.getX();
-    // double yD = newOriginPoint.getY();
-    //
-    // boolean firstCondition = (yD - yA) >= ((yB - yA) * (xD - xA) / (xB - xA));
-    // boolean secondCondition = (yD - yB) <= ((yC - yB) * (xD - xB) / (xC - xB));
-    //
-    // return firstCondition && secondCondition;
-    //
-    // }
-
-    // A //B //C //Bfirst
-    // private static TwoDSegment getBeforeNew(TwoDPoint beforePoint, TwoDPoint origin, TwoDPoint afterPoint, TwoDPoint
-    // newOrigin) {
-    // TwoDSegment AB = new TwoDSegment(beforePoint, origin);
-    // double slopeAB = AB.getLineSlope();
-    // double interceptAB = AB.getLineIntercept();
-    //
-    // TwoDSegment BC = new TwoDSegment(origin, afterPoint);
-    // double slopeBC = BC.getLineSlope();
-    // double interceptBC = BC.getLineIntercept();
-    //
-    // double temp1 = origin.x + newOrigin.x;
-    // double temp2 = origin.y + newOrigin.y - interceptAB - interceptBC;
-    //
-    // double beforeFx = (temp1 - temp2 / slopeBC) / (1 - slopeAB / slopeBC);
-    // double beforeFy = slopeAB * beforeFx + interceptAB;
-    //
-    // double afterFx = (temp1 - temp2 / slopeAB) / (1 - slopeBC / slopeAB);
-    // double afterFy = slopeBC * afterFx + interceptBC;
-    //
-    // TwoDPoint beforeF = new TwoDPoint(beforeFx, beforeFy);
-    // TwoDPoint afterF = new TwoDPoint(afterFx, afterFy);
-    //
-    // return new TwoDSegment(beforeF, afterF);
-    // }
-
     private static boolean areInClockwiseOrder(TwoDPoint A, TwoDPoint B, TwoDPoint C) {
         return (C.y - A.y) * (B.x - A.x) > (B.y - A.y) * (C.x - A.x);
     }
