@@ -43,6 +43,13 @@ public interface RaceState {
     TimePoint getFinishedTime();
     
     /**
+     * Returns the time of the first finisher for the current race or when the blue flag is displayed.
+     * 
+     * @return the first finisher time or <code>null</code>.
+     */
+    TimePoint getFinishingStartTime();
+    
+    /**
      * Sets the current race's course design
      * 
      * @return the course data or <code>null</code>.

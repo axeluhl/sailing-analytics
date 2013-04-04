@@ -1,14 +1,19 @@
 package com.sap.sailing.racecommittee.app.data;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
+import java.util.UUID;
 
+import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
+import com.sap.sailing.domain.base.impl.CompetitorImpl;
 import com.sap.sailing.domain.base.impl.CourseAreaImpl;
 import com.sap.sailing.domain.base.impl.EventBaseImpl;
 import com.sap.sailing.domain.base.impl.FleetImpl;
@@ -57,6 +62,13 @@ public class OfflineDataManager extends DataManager {
                 new BoatClassImpl("X40", false), 
                 null,
                 Arrays.asList(qualifying, medal));
+        
+        List<Competitor> competitors = new ArrayList<Competitor>();
+        competitors.add(new CompetitorImpl(UUID.randomUUID(), "SAP Extreme Sailing Team", null, null));
+        competitors.add(new CompetitorImpl(UUID.randomUUID(), "The Wave Muscat", null, null));
+        competitors.add(new CompetitorImpl(UUID.randomUUID(), "Red Bull Extreme Sailing Team", null, null));
+        competitors.add(new CompetitorImpl(UUID.randomUUID(), "Team Korea", null, null));
+        competitors.add(new CompetitorImpl(UUID.randomUUID(), "Realteam", null, null));
 
         RaceLogEventFactory factory = new RaceLogEventFactoryImpl();
         PassAwareRaceLog log = new PassAwareRaceLogImpl();
@@ -71,7 +83,7 @@ public class OfflineDataManager extends DataManager {
                         new FleetImpl("Default"), 
                         qualifying, 
                         raceGroup), 
-                        log);
+                        log, competitors);
 
         log = new PassAwareRaceLogImpl();
         /*log.add(factory.createStartTimeEvent(
@@ -87,7 +99,7 @@ public class OfflineDataManager extends DataManager {
                         new FleetImpl("Default"), 
                         qualifying, 
                         raceGroup), 
-                        log);
+                        log, competitors);
 
         log = new PassAwareRaceLogImpl();
         /*log.add(factory.createRaceStatusEvent(
@@ -100,7 +112,7 @@ public class OfflineDataManager extends DataManager {
                         new FleetImpl("Default"), 
                         qualifying, 
                         raceGroup), 
-                        log);
+                        log, competitors);
         /*ManagedRace m1 = new ManagedRaceImpl(
 				new ManagedRaceIdentifierImpl(
 						"M1", 

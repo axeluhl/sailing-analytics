@@ -2,6 +2,7 @@ package com.sap.sailing.racecommittee.app.domain.impl;
 
 import java.io.Serializable;
 
+import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.SeriesBase;
@@ -21,16 +22,18 @@ public class ManagedRaceImpl implements ManagedRace {
 
     private ManagedRaceIdentifier identifier;	
     private RaceState state;
+    private Iterable<Competitor> competitors;
 
-    public ManagedRaceImpl(ManagedRaceIdentifier identifier, PassAwareRaceLog raceLog) {
-        this(identifier, new RaceStateImpl(raceLog, null));
+    public ManagedRaceImpl(ManagedRaceIdentifier identifier, PassAwareRaceLog raceLog, Iterable<Competitor> competitors) {
+        this(identifier, new RaceStateImpl(raceLog, null), competitors);
     }
 
     public ManagedRaceImpl(
             ManagedRaceIdentifier identifier,
-            RaceState state) {
+            RaceState state, Iterable<Competitor> competitors) {
         this.identifier = identifier;
         this.state = state;
+        this.competitors = competitors;
     }
 
     public Serializable getId() {
@@ -76,6 +79,11 @@ public class ManagedRaceImpl implements ManagedRace {
     @Override
     public CourseBase getCourseDesign() {
         return state.getCourseDesign();
+    }
+    
+    @Override
+    public Iterable<Competitor> getCompetitors() {
+        return competitors;
     }
 
 }

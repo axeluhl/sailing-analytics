@@ -79,10 +79,14 @@
 	<string name="postpone_race">Postpone race</string>
 	<string name="fixedLine">Fixed line start</string>
 	<string name="gateStart_mode">Gate start</string>
+	<string name="confirmation_blue_flag_remove">Are you sure to remove the blue flag?</string>
+	<string name="finishing_limit_template">Race finishing limit is at %s</string>
+	<string name="race_running_since_template" formatted="false">%s since %s started</string>
 	
 	<string name="race_reset_confirmation_header">You are about to reset the race</string>
 	<string name="race_reset_confirmation_warning">Resetting the race removes all its saved data permanently. On the server the data is removed immediately. There is no way to recover the recorded flags and events. We strongly recommend to not reset the race.</string>
-	<string name="race_reset_confirmation_title">Reset race</string><string name="race_settime_overlap">The given time overlaps with a previous aborted race. Please select a later time.</string>
+	<string name="race_reset_confirmation_title">Reset race</string>
+	<string name="race_settime_overlap">The given time overlaps with a previous aborted race. Please select a later time.</string>
 	<string name="race_finished_start_time">Race started at:</string>
 	<string name="race_finished_end_time">Race finished at:</string>
 	<string name="settings_category_advanced">Advanced Settings</string>
@@ -144,5 +148,8 @@
 	<string name="yes">Yes</string>
 	<string name="no">No</string>
 	<string name="blank"></string>
+	<string name="positionings">Positioning</string>
+	<string name="availableFinishingCompetitors">Competitors</string>
+	<string name="choose_blue_flag_finishing">Finish race</string>
 	
 </resources>

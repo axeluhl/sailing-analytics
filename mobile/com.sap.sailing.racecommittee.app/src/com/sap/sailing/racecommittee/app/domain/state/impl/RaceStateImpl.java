@@ -20,6 +20,7 @@ import com.sap.sailing.racecommittee.app.domain.state.RaceState;
 import com.sap.sailing.racecommittee.app.domain.state.RaceStateChangedListener;
 import com.sap.sailing.racecommittee.app.domain.state.StartProcedure;
 import com.sap.sailing.racecommittee.app.domain.state.impl.analyzers.FinishedTimeFinder;
+import com.sap.sailing.racecommittee.app.domain.state.impl.analyzers.FinishingTimeFinder;
 import com.sap.sailing.racecommittee.domain.state.impl.analyzers.LastPublishedCourseDesignFinder;
 import com.sap.sailing.racecommittee.domain.state.impl.analyzers.RaceStatusAnalyzer;
 import com.sap.sailing.racecommittee.domain.state.impl.analyzers.StartTimeFinder;
@@ -37,6 +38,7 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
     private RaceStatusAnalyzer statusAnalyzer;
     private StartTimeFinder startTimeFinder;
     private FinishedTimeFinder finishedTimeFinder;
+    private FinishingTimeFinder finishingTimeFinder;
     private LastPublishedCourseDesignFinder lastCourseDesignFinder;
 
     public RaceStateImpl(PassAwareRaceLog raceLog, StartProcedure procedure) {
@@ -50,6 +52,7 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
         this.raceLog.addListener(raceLogListener);
 
         this.startTimeFinder = new StartTimeFinder(raceLog);
+        this.finishingTimeFinder = new FinishingTimeFinder(raceLog);
         this.finishedTimeFinder = new FinishedTimeFinder(raceLog);
         this.statusAnalyzer = new RaceStatusAnalyzer(raceLog);
         this.lastCourseDesignFinder = new LastPublishedCourseDesignFinder(raceLog);
@@ -151,6 +154,11 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
 
     public void eventAdded(RaceLogEvent event) {
         updateStatus();
+    }
+
+    @Override
+    public TimePoint getFinishingStartTime() {
+        return finishingTimeFinder.getFinishingTime();
     }
 
 }
