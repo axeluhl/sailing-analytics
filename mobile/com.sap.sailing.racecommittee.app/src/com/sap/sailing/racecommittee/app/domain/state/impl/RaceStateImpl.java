@@ -14,16 +14,16 @@ import com.sap.sailing.domain.racelog.PassAwareRaceLog;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogEventFactory;
+import com.sap.sailing.domain.racelog.analyzing.impl.FinishedTimeFinder;
+import com.sap.sailing.domain.racelog.analyzing.impl.FinishingTimeFinder;
+import com.sap.sailing.domain.racelog.analyzing.impl.LastPublishedCourseDesignFinder;
+import com.sap.sailing.domain.racelog.analyzing.impl.RaceStatusAnalyzer;
+import com.sap.sailing.domain.racelog.analyzing.impl.StartTimeFinder;
 import com.sap.sailing.racecommittee.app.domain.racelog.RaceLogChangedListener;
 import com.sap.sailing.racecommittee.app.domain.racelog.impl.RaceLogChangedVisitor;
 import com.sap.sailing.racecommittee.app.domain.state.RaceState;
 import com.sap.sailing.racecommittee.app.domain.state.RaceStateChangedListener;
 import com.sap.sailing.racecommittee.app.domain.state.StartProcedure;
-import com.sap.sailing.racecommittee.domain.state.impl.analyzers.FinishedTimeFinder;
-import com.sap.sailing.racecommittee.domain.state.impl.analyzers.FinishingTimeFinder;
-import com.sap.sailing.racecommittee.domain.state.impl.analyzers.LastPublishedCourseDesignFinder;
-import com.sap.sailing.racecommittee.domain.state.impl.analyzers.RaceStatusAnalyzer;
-import com.sap.sailing.racecommittee.domain.state.impl.analyzers.StartTimeFinder;
 
 public class RaceStateImpl implements RaceState, RaceLogChangedListener {
     // private static final String TAG = RaceStateImpl.class.getName();

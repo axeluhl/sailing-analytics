@@ -1,4 +1,4 @@
-package com.sap.sailing.racecommittee.domain.state.impl.analyzers;
+package com.sap.sailing.domain.racelog.analyzing.impl;
 
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
@@ -6,38 +6,38 @@ import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogRaceStatusEvent;
 
-public class FinishingTimeFinder extends RaceLogAnalyzer {
+public class FinishedTimeFinder extends RaceLogAnalyzer {
 
-    public FinishingTimeFinder(RaceLog raceLog) {
+    public FinishedTimeFinder(RaceLog raceLog) {
         super(raceLog);
     }
 
-    public TimePoint getFinishingTime() {
-        TimePoint finishingTime = null;
+    public TimePoint getFinishedTime() {
+        TimePoint finishedTime = null;
         
         this.raceLog.lockForRead();
         try {
-            finishingTime = searchForFinishingTime();
+            finishedTime = searchForFinishedTime();
         } finally {
             this.raceLog.unlockAfterRead();
         }
 
-        return finishingTime;
+        return finishedTime;
     }
     
-    private TimePoint searchForFinishingTime() {
-        TimePoint finishingTime = null;
+    private TimePoint searchForFinishedTime() {
+        TimePoint finishedTime = null;
         
         for (RaceLogEvent event : getPassEvents()) {
             if (event instanceof RaceLogRaceStatusEvent) {
                 RaceLogRaceStatusEvent statusEvent = (RaceLogRaceStatusEvent) event;
-                if (statusEvent.getNextStatus().equals(RaceLogRaceStatus.FINISHING)) {
-                    finishingTime = statusEvent.getTimePoint();
+                if (statusEvent.getNextStatus().equals(RaceLogRaceStatus.FINISHED)) {
+                    finishedTime = statusEvent.getTimePoint();
                 }
             }
         }
         
-        return finishingTime;
+        return finishedTime;
     }
 
 }
