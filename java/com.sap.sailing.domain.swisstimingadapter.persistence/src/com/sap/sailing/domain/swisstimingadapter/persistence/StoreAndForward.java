@@ -7,6 +7,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -95,7 +96,7 @@ public class StoreAndForward implements Runnable {
         this.portForClients = portForClients;
         this.sailMasterHostname = sailMasterHostname;
         this.sailMasterPort = sailMasterPort;
-        this.streamsToForwardTo = new ArrayList<OutputStream>();
+        this.streamsToForwardTo = Collections.synchronizedList(new ArrayList<OutputStream>());
         this.socketsToForwardTo = new ArrayList<Socket>();
         this.swissTimingAdapterPersistence = swissTimingAdapterPersistence;
         this.swissTimingFactory = swissTimingFactory; 
@@ -134,7 +135,7 @@ public class StoreAndForward implements Runnable {
         this.listenPort = listenPort;
         this.transceiver = swissTimingFactory.createSailMasterTransceiver();
         this.portForClients = portForClients;
-        this.streamsToForwardTo = new ArrayList<OutputStream>();
+        this.streamsToForwardTo = Collections.synchronizedList(new ArrayList<OutputStream>());
         this.socketsToForwardTo = new ArrayList<Socket>();
         this.swissTimingAdapterPersistence = swissTimingAdapterPersistence;
         this.swissTimingFactory = swissTimingFactory; 
@@ -266,66 +267,79 @@ public class StoreAndForward implements Runnable {
                 try {
                     InputStream is = socket.getInputStream();
                     Pair<String, Long> messageAndOptionalSequenceNumber = transceiver.receiveMessage(is);
-                    // ignore any sequence number contained in the message; we'll create our own
-                    DBObject emptyQuery = new BasicDBObject();
-                    DBObject incrementLastMessageCountQuery = new BasicDBObject().
-                            append("$inc", new BasicDBObject().append(FieldNames.LAST_MESSAGE_COUNT.name(), 1));
-                    while (!stopped && messageAndOptionalSequenceNumber != null) {
-                        logger.fine("Thread "+this+" received message: "+messageAndOptionalSequenceNumber.getA());
-                        DBObject newCountRecord = lastMessageCountCollection.findAndModify(emptyQuery, incrementLastMessageCountQuery);
-                        lastMessageCount = ((newCountRecord == null) ? 0l :
-                            ((Number) newCountRecord.get(FieldNames.LAST_MESSAGE_COUNT.name())).longValue());
-                        SailMasterMessage message = swissTimingFactory.createMessage(messageAndOptionalSequenceNumber.getA(), lastMessageCount);
-                        swissTimingAdapterPersistence.storeSailMasterMessage(message);
-                        synchronized (this) {
-                            for (OutputStream os : new ArrayList<OutputStream>(streamsToForwardTo)) {
-                                // write the sequence number of the message into the stream before actually writing the
-                                // SwissTiming message
-                                try {
-                                // TODO if forwarding to os doesn't work, e.g., because the socket was closed or the client died, remove os from streamsToForwardTo and the socket from socketsToForwardTo
-                                    transceiver.sendMessage(message, os);
-                                } catch (Exception e) {
-                                    int i=streamsToForwardTo.indexOf(os);
+                    if (messageAndOptionalSequenceNumber == null) {
+                        // found EOF; stopping
+                        stopped = true;
+                    } else {
+                        // ignore any sequence number contained in the message; we'll create our own
+                        DBObject emptyQuery = new BasicDBObject();
+                        DBObject incrementLastMessageCountQuery = new BasicDBObject().append("$inc",
+                                new BasicDBObject().append(FieldNames.LAST_MESSAGE_COUNT.name(), 1));
+                        while (!stopped && messageAndOptionalSequenceNumber != null) {
+                            logger.fine("Thread " + this + " received message: "
+                                    + messageAndOptionalSequenceNumber.getA());
+                            DBObject newCountRecord = lastMessageCountCollection.findAndModify(emptyQuery,
+                                    incrementLastMessageCountQuery);
+                            lastMessageCount = ((newCountRecord == null) ? 0l : ((Number) newCountRecord
+                                    .get(FieldNames.LAST_MESSAGE_COUNT.name())).longValue());
+                            SailMasterMessage message = swissTimingFactory.createMessage(
+                                    messageAndOptionalSequenceNumber.getA(), lastMessageCount);
+                            swissTimingAdapterPersistence.storeSailMasterMessage(message);
+                            synchronized (StoreAndForward.this) {
+                                for (OutputStream os : new ArrayList<OutputStream>(streamsToForwardTo)) {
+                                    // write the sequence number of the message into the stream before actually writing
+                                    // the
+                                    // SwissTiming message
                                     try {
-                                        os.close();
-                                    } catch (Exception exc) {
-                                        logger.throwing(StoreAndForward.class.getName(), "run", exc);
-                                    }
-                                    streamsToForwardTo.remove(os);
-                                    Socket s = socketsToForwardTo.remove(i);
-                                    try {
-                                        s.close();
-                                    } catch (Exception exc) {
-                                        logger.throwing(StoreAndForward.class.getName(), "run", exc);
+                                        transceiver.sendMessage(message, os);
+                                    } catch (Exception e) {
+                                        logger.log(Level.SEVERE, "Error sending message to " + os, e);
+                                        int i = streamsToForwardTo.indexOf(os);
+                                        try {
+                                            os.close();
+                                        } catch (Exception exc) {
+                                            logger.log(Level.SEVERE, "Exception closing socket output stream " + os
+                                                    + " after being unable to forward message " + message, exc);
+                                        }
+                                        streamsToForwardTo.remove(os);
+                                        Socket s = socketsToForwardTo.remove(i);
+                                        logger.info("Unable to send to socket " + s
+                                                + ". Trying to close. Removing from sockets to forward to.");
+                                        try {
+                                            s.close();
+                                        } catch (Exception exc) {
+                                            logger.log(Level.WARNING, "Exception trying to close socket " + s
+                                                    + " after being unable to forward message " + message, exc);
+                                        }
                                     }
                                 }
                             }
+                            if (!stopped) {
+                                messageAndOptionalSequenceNumber = transceiver.receiveMessage(is);
+                                if (messageAndOptionalSequenceNumber == null) {
+                                    // received EOF; stopping received
+                                    stopped = true;
+                                }
+                            }
                         }
-                        if (!stopped) {
-                            messageAndOptionalSequenceNumber = transceiver.receiveMessage(is);
-                        }
                     }
-                    for (OutputStream os : streamsToForwardTo) {
-                        os.close();
-                    }
-                    for (Socket socketToForwardTo : socketsToForwardTo) {
-                        socketToForwardTo.close();
-                    }
+                    // note that we're not changing anything with the sockets to which we forward messages; that will only happen
+                    // if forwarding to any of those sockets fails
                 } catch (Exception e) {
                     e.printStackTrace();
                     if (!stopped) {
-                        logger.throwing(StoreAndForward.class.getName(), "Error during forwarding message. Continuing...", e);
+                        logger.log(Level.INFO, "Error during forwarding message. Continuing...", e);
                         try {
                             Thread.sleep(1000l); // wait a little bit before trying to re-establish a connection
                         } catch (InterruptedException e1) {
-                            logger.throwing(StoreAndForward.class.getName(), "Can't find any sleep...", e1);
+                            logger.log(Level.INFO, "Can't find any sleep...", e1);
                         } 
                     } else {
                         logger.info("StoreAndForward socket was closed.");
                     }
                 }
             }
-            logger.exiting(getClass().getName(), "run");
+            logger.info("Terminating StoreAndForward ReceivingThread for socket "+socket);
             receivingThreads.remove(this);
         }
         
