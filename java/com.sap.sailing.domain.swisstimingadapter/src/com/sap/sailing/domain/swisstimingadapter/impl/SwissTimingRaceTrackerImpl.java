@@ -271,8 +271,19 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
             for (Triple<Integer, Integer, Long> markIndexRankAndTimeSinceStartInMilliseconds : markIndicesRanksAndTimesSinceStartInMilliseconds) {
                 Waypoint waypoint = Util.get(trackedRace.getRace().getCourse().getWaypoints(),
                         markIndexRankAndTimeSinceStartInMilliseconds.getA());
-                MillisecondsTimePoint timePoint = trackedRace.getStartOfRace() == null ? null : new MillisecondsTimePoint(
-                        trackedRace.getStartOfRace().asMillis() + markIndexRankAndTimeSinceStartInMilliseconds.getC());
+                final TimePoint startTime;
+                if (trackedRace.getStartOfRace() != null) {
+                    startTime = trackedRace.getStartOfRace();
+                } else {
+                    // estimate the start time assuming the event was received with the delay compared to real-time,
+                    // making the mark passing's time point now-delay
+                    startTime = MillisecondsTimePoint.now().minus(trackedRace.getDelayToLiveInMillis())
+                            .minus(markIndexRankAndTimeSinceStartInMilliseconds.getC());
+                    logger.warning("Received mark passing with time relative to start of race "+trackedRace.getRace().getName()+
+                            " before having received a race start time. Guessing from current wall time: "+startTime);
+                }
+                MillisecondsTimePoint timePoint = new MillisecondsTimePoint(
+                        startTime.asMillis() + markIndexRankAndTimeSinceStartInMilliseconds.getC());
                 MarkPassing markPassing = domainFactory.createMarkPassing(timePoint, waypoint,
                         domainFactory.getCompetitorByBoatIDAndBoatClass(boatID, boatClass));
                 markPassingsByMarkIndex.put(markIndexRankAndTimeSinceStartInMilliseconds.getA(), markPassing);
