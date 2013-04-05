@@ -32,6 +32,7 @@ import com.sap.sailing.server.gateway.deserialization.coursedata.impl.CourseData
 import com.sap.sailing.server.gateway.deserialization.coursedata.impl.GateDeserializer;
 import com.sap.sailing.server.gateway.deserialization.coursedata.impl.MarkDeserializer;
 import com.sap.sailing.server.gateway.deserialization.coursedata.impl.WaypointDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.CompetitorDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.RaceLogCourseDesignChangedEventDeserializer;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.ControlPointJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.CourseBaseJsonSerializer;
@@ -57,7 +58,7 @@ public class RaceLogCourseDesignChangedEventSerializerTest {
                                 new MarkJsonSerializer(), 
                                 new GateJsonSerializer(
                                         new MarkJsonSerializer())))));
-        deserializer = new RaceLogCourseDesignChangedEventDeserializer(new CourseDataDeserializer(
+        deserializer = new RaceLogCourseDesignChangedEventDeserializer(new CompetitorDeserializer(factory), new CourseDataDeserializer(
                 new WaypointDeserializer(
                         new ControlPointDeserializer(
                                 new MarkDeserializer(factory), 

@@ -2,6 +2,7 @@ package com.sap.sailing.server.gateway.deserialization.impl;
 
 import org.json.simple.JSONObject;
 
+import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
@@ -21,12 +22,14 @@ import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogStartTim
 public class RaceLogEventDeserializer implements JsonDeserializer<RaceLogEvent> {
     
     public static RaceLogEventDeserializer create(SharedDomainFactory domainFactory) {
+        JsonDeserializer<Competitor> competitorDeserializer = new CompetitorDeserializer(domainFactory);
+        
         return new RaceLogEventDeserializer(
-                new RaceLogFlagEventDeserializer(),
-                new RaceLogStartTimeEventDeserializer(), 
-                new RaceLogRaceStatusEventDeserializer(),
-                new RaceLogCourseAreaChangedEventDeserializer(),
-                new RaceLogCourseDesignChangedEventDeserializer(
+                new RaceLogFlagEventDeserializer(competitorDeserializer),
+                new RaceLogStartTimeEventDeserializer(competitorDeserializer), 
+                new RaceLogRaceStatusEventDeserializer(competitorDeserializer),
+                new RaceLogCourseAreaChangedEventDeserializer(competitorDeserializer),
+                new RaceLogCourseDesignChangedEventDeserializer(competitorDeserializer,
                         new CourseDataDeserializer(
                                 new WaypointDeserializer(
                                         new ControlPointDeserializer(
