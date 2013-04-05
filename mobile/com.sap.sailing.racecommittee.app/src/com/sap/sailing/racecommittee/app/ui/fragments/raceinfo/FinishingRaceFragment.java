@@ -86,6 +86,7 @@ public class FinishingRaceFragment extends RaceFragment implements TickListener 
                     Competitor item = positioningAdapter.getItem(from);
                     positioningAdapter.remove(item);
                     positioningAdapter.insert(item, to);
+                    getRace().getState().setFinishPositioningListChanged(positionedCompetitors);
                 }
             }
         });
@@ -163,6 +164,7 @@ public class FinishingRaceFragment extends RaceFragment implements TickListener 
     protected void onCompetitorClickedOnGrid(Competitor competitor) {
         addNewCompetitorToPositioningList(competitor);
         removeCompetitorFromGrid(competitor);
+        getRace().getState().setFinishPositioningListChanged(positionedCompetitors);
     }
 
     protected void removeCompetitorFromGrid(Competitor competitor) {
@@ -178,6 +180,7 @@ public class FinishingRaceFragment extends RaceFragment implements TickListener 
     protected void onCompetitorRemovedFromPositioningList(Competitor competitor) {
         addNewCompetitorToCompetitorList(competitor);
         removeCompetitorFromPositionings(competitor);
+        getRace().getState().setFinishPositioningListChanged(positionedCompetitors);
     }
     
     private void addNewCompetitorToCompetitorList(Competitor competitor) {
