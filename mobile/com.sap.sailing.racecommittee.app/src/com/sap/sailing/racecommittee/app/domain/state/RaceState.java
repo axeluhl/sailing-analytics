@@ -88,6 +88,11 @@ public interface RaceState {
      * @param competitors the current finishing list
      */
     void setFinishPositioningListChanged(List<Competitor> competitors);
+    
+    /**
+     * Sets a confirmation event for the finish positionings
+     */
+    void setFinishPositioningConfirmed();
 
     /**
      * Updates the race's status.

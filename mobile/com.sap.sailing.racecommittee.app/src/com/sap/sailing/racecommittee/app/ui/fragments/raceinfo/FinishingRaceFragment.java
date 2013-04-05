@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -98,6 +99,15 @@ public class FinishingRaceFragment extends RaceFragment implements TickListener 
                 Competitor item = positioningAdapter.getItem(toBeRemoved);
                 onCompetitorRemovedFromPositioningList(item);
             }
+        });
+        
+        positioningListView.setOnLongClickListener(new OnLongClickListener() {
+
+            @Override
+            public boolean onLongClick(View arg0) {
+                return false;
+            }
+            
         });
         
         dragSortController = buildDragSortController(positioningListView);
@@ -249,6 +259,7 @@ public class FinishingRaceFragment extends RaceFragment implements TickListener 
             public void onClick(DialogInterface dialog, int id) {
                 ExLog.i(ExLog.FLAG_BLUE_REMOVE, getRace().getId().toString(), getActivity());
                 getRace().getState().onRaceFinished(MillisecondsTimePoint.now());
+                getRace().getState().setFinishPositioningConfirmed();
             }
         })
         .setNegativeButton(getActivity().getResources().getString(R.string.no), new DialogInterface.OnClickListener() {

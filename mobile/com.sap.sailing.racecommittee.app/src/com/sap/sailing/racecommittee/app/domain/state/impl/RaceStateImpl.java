@@ -177,5 +177,13 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
     public List<Competitor> getFinishPositioningList() {
         return finishPositioningListFinder.getFinishPositioningList();
     }
+    
+    @Override
+    public void setFinishPositioningConfirmed() {
+        TimePoint eventTime = MillisecondsTimePoint.now();
+        
+        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFinishPositioningConfirmedEvent(eventTime, raceLog.getCurrentPassId());
+        this.raceLog.add(event);        
+    }
 
 }
