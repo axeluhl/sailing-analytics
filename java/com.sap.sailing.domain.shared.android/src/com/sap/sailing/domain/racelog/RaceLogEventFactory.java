@@ -9,6 +9,7 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.racelog.impl.RaceLogEventFactoryImpl;
+import com.sap.sailing.domain.racelog.impl.RaceLogFinishPositioningListChangedEventImpl;
 
 public interface RaceLogEventFactory {
     RaceLogEventFactory INSTANCE = new RaceLogEventFactoryImpl();
@@ -30,4 +31,7 @@ public interface RaceLogEventFactory {
     
     RaceLogCourseDesignChangedEvent createCourseDesignChangedEvent(TimePoint timePoint, Serializable id, List<Competitor> competitors, int passId, CourseBase courseData);
     RaceLogCourseDesignChangedEvent createCourseDesignChangedEvent(TimePoint timePoint, int passId, CourseBase courseData);
+    
+    RaceLogFinishPositioningListChangedEventImpl createFinishPositioningListChangedEvent(TimePoint timePoint, Serializable id, List<Competitor> competitors, int passId);
+    RaceLogFinishPositioningListChangedEventImpl createFinishPositioningListChangedEvent(TimePoint timePoint, List<Competitor> competitors, int passId);
 }

@@ -4,6 +4,7 @@ import com.sap.sailing.domain.racelog.RaceLogCourseAreaChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogCourseDesignChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogEventVisitor;
+import com.sap.sailing.domain.racelog.RaceLogFinishPositioningListChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
 import com.sap.sailing.domain.racelog.RaceLogPassChangeEvent;
 import com.sap.sailing.domain.racelog.RaceLogRaceStatusEvent;
@@ -19,6 +20,7 @@ public class RaceLogEventSerializerChooserImpl implements RaceLogEventSerializer
     private final JsonSerializer<RaceLogEvent> courseAreaChangedEventSerializer;
     private final JsonSerializer<RaceLogEvent> passChangedEventSerializer;
     private final JsonSerializer<RaceLogEvent> courseDesignChangedEventSerializer;
+    private final JsonSerializer<RaceLogEvent> finishPositioningListChangedEventSerializer;
 
     private JsonSerializer<RaceLogEvent> chosenSerializer;
 
@@ -28,13 +30,15 @@ public class RaceLogEventSerializerChooserImpl implements RaceLogEventSerializer
             JsonSerializer<RaceLogEvent> raceStatusSerializer,
             JsonSerializer<RaceLogEvent> courseAreaChangedEventSerializer,
             JsonSerializer<RaceLogEvent> passChangedEventSerializer,
-            JsonSerializer<RaceLogEvent> courseDesignChangedEventSerializer) {
+            JsonSerializer<RaceLogEvent> courseDesignChangedEventSerializer, 
+            JsonSerializer<RaceLogEvent> finishPositioningListChangedEventSerializer) {
         this.flagEventSerializer = flagEventSerializer;
         this.startTimeSerializer = startTimeSerializer;
         this.raceStatusSerializer = raceStatusSerializer;
         this.courseAreaChangedEventSerializer = courseAreaChangedEventSerializer;
         this.passChangedEventSerializer = passChangedEventSerializer;
         this.courseDesignChangedEventSerializer = courseDesignChangedEventSerializer;
+        this.finishPositioningListChangedEventSerializer = finishPositioningListChangedEventSerializer;
 
         this.chosenSerializer = null;
     }
@@ -79,6 +83,11 @@ public class RaceLogEventSerializerChooserImpl implements RaceLogEventSerializer
     @Override
     public void visit(RaceLogCourseDesignChangedEvent event) {
         chosenSerializer = courseDesignChangedEventSerializer;
+    }
+
+    @Override
+    public void visit(RaceLogFinishPositioningListChangedEvent event) {
+        chosenSerializer = finishPositioningListChangedEventSerializer;
     }
 
 }

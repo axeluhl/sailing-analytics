@@ -3,6 +3,7 @@ package com.sap.sailing.domain.tracking.impl;
 import com.sap.sailing.domain.racelog.RaceLogCourseAreaChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogCourseDesignChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogEventVisitor;
+import com.sap.sailing.domain.racelog.RaceLogFinishPositioningListChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
 import com.sap.sailing.domain.racelog.RaceLogPassChangeEvent;
 import com.sap.sailing.domain.racelog.RaceLogRaceStatusEvent;
@@ -47,6 +48,11 @@ public class TrackedRaceLogListener implements RaceLogEventVisitor {
     @Override
     public void visit(RaceLogCourseDesignChangedEvent event) {
         trackedRace.onCourseDesignChangedByRaceCommittee(event.getCourseDesign());
+    }
+
+    @Override
+    public void visit(RaceLogFinishPositioningListChangedEvent event) {
+        // TODO implement score correction !!!!!!!!!!!!!!!!
     }
 
 }

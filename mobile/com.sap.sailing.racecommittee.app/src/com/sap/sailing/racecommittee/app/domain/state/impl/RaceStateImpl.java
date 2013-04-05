@@ -2,6 +2,7 @@ package com.sap.sailing.racecommittee.app.domain.state.impl;
 
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -14,6 +15,7 @@ import com.sap.sailing.domain.racelog.PassAwareRaceLog;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogEventFactory;
+import com.sap.sailing.domain.racelog.analyzing.impl.FinishPositioningListFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.FinishedTimeFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.FinishingTimeFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.LastPublishedCourseDesignFinder;
@@ -40,6 +42,7 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
     private FinishedTimeFinder finishedTimeFinder;
     private FinishingTimeFinder finishingTimeFinder;
     private LastPublishedCourseDesignFinder lastCourseDesignFinder;
+    private FinishPositioningListFinder finishPositioningListFinder;
 
     public RaceStateImpl(PassAwareRaceLog raceLog, StartProcedure procedure) {
         this.raceLog = raceLog;
@@ -56,6 +59,7 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
         this.finishedTimeFinder = new FinishedTimeFinder(raceLog);
         this.statusAnalyzer = new RaceStatusAnalyzer(raceLog);
         this.lastCourseDesignFinder = new LastPublishedCourseDesignFinder(raceLog);
+        this.finishPositioningListFinder = new FinishPositioningListFinder(raceLog);
         updateStatus();
     }
 
@@ -159,6 +163,19 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
     @Override
     public TimePoint getFinishingStartTime() {
         return finishingTimeFinder.getFinishingTime();
+    }
+
+    @Override
+    public void setFinishPositioningListChanged(List<Competitor> competitors) {
+        TimePoint eventTime = MillisecondsTimePoint.now();
+        
+        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFinishPositioningListChangedEvent(eventTime, competitors, raceLog.getCurrentPassId());
+        this.raceLog.add(event);        
+    }
+    
+    @Override
+    public List<Competitor> getFinishPositioningList() {
+        return finishPositioningListFinder.getFinishPositioningList();
     }
 
 }

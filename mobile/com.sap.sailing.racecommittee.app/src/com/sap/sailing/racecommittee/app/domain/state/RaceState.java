@@ -1,5 +1,8 @@
 package com.sap.sailing.racecommittee.app.domain.state;
 
+import java.util.List;
+
+import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
@@ -50,11 +53,18 @@ public interface RaceState {
     TimePoint getFinishingStartTime();
     
     /**
-     * Sets the current race's course design
+     * Returns the current race's course design
      * 
      * @return the course data or <code>null</code>.
      */
     CourseBase getCourseDesign();
+    
+    /**
+     * Returns the current race's finish positioning list
+     * 
+     * @return the positioning list for the finish or <code>null</code>.
+     */
+    List<Competitor> getFinishPositioningList();
 
     /**
      * Sets the current race's start time
@@ -71,6 +81,13 @@ public interface RaceState {
      *            to be set.
      */
     void setCourseDesign(CourseBase newCourseData);
+    
+    /**
+     * Sets the current finish positioning list for the race
+     * 
+     * @param competitors the current finishing list
+     */
+    void setFinishPositioningListChanged(List<Competitor> competitors);
 
     /**
      * Updates the race's status.

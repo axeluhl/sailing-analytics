@@ -23,6 +23,7 @@ public class RaceLogEventSerializerChooserTest {
     private JsonSerializer<RaceLogEvent> courseAreaChangedEventSerializer;
     private JsonSerializer<RaceLogEvent> passChangedSerializer;
     private JsonSerializer<RaceLogEvent> courseDesignChangedEventSerializer;
+    private JsonSerializer<RaceLogEvent> finishPositioningListChangedEventSerializer;
     
     private RaceLogEventFactory factory;
     
@@ -35,6 +36,7 @@ public class RaceLogEventSerializerChooserTest {
         courseAreaChangedEventSerializer = mock(JsonSerializer.class);
         passChangedSerializer = mock(JsonSerializer.class);
         courseDesignChangedEventSerializer = mock(JsonSerializer.class);
+        finishPositioningListChangedEventSerializer = mock(JsonSerializer.class);
         
         chooser = new RaceLogEventSerializerChooserImpl(
                 flagEventSerializer, 
@@ -42,7 +44,8 @@ public class RaceLogEventSerializerChooserTest {
                 raceStatusSerializer, 
                 courseAreaChangedEventSerializer,
                 passChangedSerializer,
-                courseDesignChangedEventSerializer);
+                courseDesignChangedEventSerializer,
+                finishPositioningListChangedEventSerializer);
         
         factory = RaceLogEventFactory.INSTANCE;
     }
@@ -86,6 +89,13 @@ public class RaceLogEventSerializerChooserTest {
     public void testChoosesCourseDesignChangedSerializer() {
         // we use the real event type here because we do not want to re-implement the dispatching.
         RaceLogEvent event = factory.createCourseDesignChangedEvent(null, 0, null);
+        assertEquals(courseDesignChangedEventSerializer, chooser.getSerializer(event));
+    }
+    
+    @Test
+    public void testChoosesFinishPositioningListChangedSerializer() {
+        // we use the real event type here because we do not want to re-implement the dispatching.
+        RaceLogEvent event = factory.createFinishPositioningListChangedEvent(null, null, 0);
         assertEquals(courseDesignChangedEventSerializer, chooser.getSerializer(event));
     }
 

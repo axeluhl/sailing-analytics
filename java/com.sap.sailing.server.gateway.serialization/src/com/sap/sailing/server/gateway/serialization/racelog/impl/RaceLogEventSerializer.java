@@ -26,7 +26,8 @@ public class RaceLogEventSerializer implements JsonSerializer<RaceLogEvent> {
                                 new WaypointJsonSerializer(
                                         new ControlPointJsonSerializer(
                                                 new MarkJsonSerializer(),
-                                                new GateJsonSerializer(new MarkJsonSerializer())))))));
+                                                new GateJsonSerializer(new MarkJsonSerializer()))))),
+                new RaceLogFinishPositioningListChangedEventSerializer(competitorSerializer)));
     }
 
     private RaceLogEventSerializerChooser serializerChooser;

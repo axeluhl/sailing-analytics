@@ -90,4 +90,16 @@ public class RaceLogEventFactoryImpl implements RaceLogEventFactory {
         return createCourseDesignChangedEvent(timePoint, UUID.randomUUID(), new ArrayList<Competitor>(), passId, courseData);
     }
 
+    @Override
+    public RaceLogFinishPositioningListChangedEventImpl createFinishPositioningListChangedEvent(
+            TimePoint timePoint, Serializable id, List<Competitor> competitors, int passId) {
+        return new RaceLogFinishPositioningListChangedEventImpl(MillisecondsTimePoint.now(), timePoint, id, competitors, passId);
+    }
+
+    @Override
+    public RaceLogFinishPositioningListChangedEventImpl createFinishPositioningListChangedEvent(
+            TimePoint timePoint, List<Competitor> competitors, int passId) {
+        return createFinishPositioningListChangedEvent(timePoint, UUID.randomUUID(), competitors, passId);
+    }
+
 }
