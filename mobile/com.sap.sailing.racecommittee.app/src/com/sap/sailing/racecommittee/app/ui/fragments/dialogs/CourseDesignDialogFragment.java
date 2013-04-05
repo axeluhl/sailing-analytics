@@ -61,11 +61,11 @@ public class CourseDesignDialogFragment extends RaceDialogFragment {
     private Button unpublishButton;
     private Button takePreviousButton;
     
-    public int dragStartMode = DragSortController.ON_DRAG;
-    public boolean removeEnabled = true;
-    public int removeMode = DragSortController.FLING_REMOVE;
-    public boolean sortEnabled = true;
-    public boolean dragEnabled = true;
+    private int dragStartMode = DragSortController.ON_DRAG;
+    private boolean removeEnabled = true;
+    private int removeMode = DragSortController.FLING_REMOVE;
+    private boolean sortEnabled = true;
+    private boolean dragEnabled = true;
 
     @Override
     public void onAttach(android.app.Activity activity) {

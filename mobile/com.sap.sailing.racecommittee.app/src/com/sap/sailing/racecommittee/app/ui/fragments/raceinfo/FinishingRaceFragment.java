@@ -47,11 +47,11 @@ public class FinishingRaceFragment extends RaceFragment implements TickListener 
     protected List<Competitor> competitors;
     protected List<Competitor> positionedCompetitors;
     
-    public int dragStartMode = DragSortController.ON_DRAG;
-    public boolean removeEnabled = true;
-    public int removeMode = DragSortController.FLING_REMOVE;
-    public boolean sortEnabled = true;
-    public boolean dragEnabled = true;
+    private int dragStartMode = DragSortController.ON_DRAG;
+    private boolean removeEnabled = true;
+    private int removeMode = DragSortController.FLING_REMOVE;
+    private boolean sortEnabled = true;
+    private boolean dragEnabled = true;
     
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
