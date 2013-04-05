@@ -91,6 +91,7 @@ import com.sap.sailing.domain.racelog.RaceLogCourseAreaChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogCourseDesignChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogEventRestoreFactory;
+import com.sap.sailing.domain.racelog.RaceLogFinishPositioningListChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.racelog.RaceLogPassChangeEvent;
@@ -1005,9 +1006,16 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             return loadRaceLogCourseAreaChangedEvent(createdAt, timePoint, id, passId, competitors, dbObject);
         } else if (eventClass.equals(RaceLogCourseDesignChangedEvent.class.getSimpleName())) {
             return loadRaceLogCourseDesignChangedEvent(createdAt, timePoint, id, passId, competitors, dbObject);
+        } else if (eventClass.equals(RaceLogFinishPositioningListChangedEvent.class.getSimpleName())) {
+            return loadRaceLogFinishPositioningListChangedEvent(createdAt, timePoint, id, passId, competitors, dbObject);
         }
 
         throw new IllegalStateException(String.format("Unknown RaceLogEvent type %s", eventClass));
+    }
+
+    private RaceLogEvent loadRaceLogFinishPositioningListChangedEvent(TimePoint createdAt, TimePoint timePoint,
+            Serializable id, Integer passId, List<Competitor> competitors, DBObject dbObject) {
+        return raceLogEventFactory.createFinishPositioningListChangedEvent(createdAt, timePoint, id, competitors, passId);
     }
 
     private RaceLogEvent loadRaceLogPassChangeEvent(TimePoint createdAt, TimePoint timePoint, Serializable id,

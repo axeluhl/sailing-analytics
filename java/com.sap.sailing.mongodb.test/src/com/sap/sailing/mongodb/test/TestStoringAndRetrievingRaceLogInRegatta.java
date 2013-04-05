@@ -13,6 +13,7 @@ import org.junit.Test;
 
 import com.mongodb.MongoException;
 import com.sap.sailing.domain.base.BoatClass;
+import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.DomainFactory;
@@ -38,6 +39,7 @@ import com.sap.sailing.domain.racelog.RaceLogCourseAreaChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogCourseDesignChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogEventFactory;
+import com.sap.sailing.domain.racelog.RaceLogFinishPositioningListChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
 import com.sap.sailing.domain.racelog.RaceLogPassChangeEvent;
 import com.sap.sailing.domain.racelog.RaceLogRaceStatusEvent;
@@ -125,6 +127,34 @@ public class TestStoringAndRetrievingRaceLogInRegatta extends RaceLogMongoDBTest
             assertEquals(event.getTimePoint(), passEvent.getTimePoint());
             assertEquals(event.getPassId(), passEvent.getPassId());
             assertEquals(event.getId(), passEvent.getId());
+            assertEquals(1, Util.size(loadedRaceLog.getFixes()));
+        } finally {
+            loadedRaceLog.unlockAfterRead();
+        }
+    }
+    
+    @Test
+    public void testStoreAndRetrieveSimpleLeaderboardWithRaceLogFinishPositioningListChangeEvent() {
+        Competitor storedCompetitor = DomainFactory.INSTANCE.createCompetitor(UUID.randomUUID(), "SAP Extreme Sailing Team", null, null);
+        List<Competitor> storedPositioningList = new ArrayList<Competitor>();
+        storedPositioningList.add(storedCompetitor);
+        
+        RaceLogFinishPositioningListChangedEvent event = RaceLogEventFactory.INSTANCE.createFinishPositioningListChangedEvent(now, storedPositioningList, 0);
+
+        addAndStoreRaceLogEvent(regatta, raceColumnName, event);
+
+        RaceLog loadedRaceLog = retrieveRaceLog();
+
+        loadedRaceLog.lockForRead();
+        try {
+            RaceLogEvent loadedEvent = loadedRaceLog.getFirstRawFix();
+            RaceLogFinishPositioningListChangedEvent loadedPositioningEvent = (RaceLogFinishPositioningListChangedEvent) loadedEvent;
+            assertEquals(event.getTimePoint(), loadedPositioningEvent.getTimePoint());
+            assertEquals(event.getPassId(), loadedPositioningEvent.getPassId());
+            assertEquals(event.getId(), loadedPositioningEvent.getId());
+            assertEquals(event.getInvolvedBoats().size(), loadedPositioningEvent.getInvolvedBoats().size());
+            assertEquals(event.getInvolvedBoats().get(0).getId(), loadedPositioningEvent.getInvolvedBoats().get(0).getId());
+            assertEquals(event.getInvolvedBoats().get(0).getName(), loadedPositioningEvent.getInvolvedBoats().get(0).getName());
             assertEquals(1, Util.size(loadedRaceLog.getFixes()));
         } finally {
             loadedRaceLog.unlockAfterRead();

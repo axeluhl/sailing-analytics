@@ -30,4 +30,7 @@ public interface RaceLogEventRestoreFactory extends RaceLogEventFactory {
 
     RaceLogCourseDesignChangedEvent createCourseDesignChangedEvent(TimePoint createdAt, TimePoint logicalTimePoint,
             Serializable id, List<Competitor> competitors, int passId, CourseBase courseData);
+    
+    RaceLogFinishPositioningListChangedEvent createFinishPositioningListChangedEvent(TimePoint createdAt, TimePoint logicalTimePoint,
+            Serializable id, List<Competitor> competitors, int passId);
 }
