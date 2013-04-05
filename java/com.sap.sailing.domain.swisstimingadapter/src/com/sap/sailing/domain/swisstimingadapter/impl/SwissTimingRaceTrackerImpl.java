@@ -280,24 +280,23 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
             for (Triple<Integer, Integer, Long> markIndexRankAndTimeSinceStartInMilliseconds : markIndicesRanksAndTimesSinceStartInMilliseconds) {
                 Waypoint waypoint = Util.get(trackedRace.getRace().getCourse().getWaypoints(),
                         markIndexRankAndTimeSinceStartInMilliseconds.getA());
-                final TimePoint startTime;
+                // update mark passing only if we have a start time; guessed start times don't make sense and
+                // for the start line would lead subsequent calls to getStartOfRace() return that guessed start time
+                // which then cannot be identified as "guessed" anymore...
                 if (trackedRace.getStartOfRace() != null) {
-                    startTime = trackedRace.getStartOfRace();
+                    final TimePoint startTime = trackedRace.getStartOfRace();
+                    MillisecondsTimePoint timePoint = new MillisecondsTimePoint(
+                            startTime.asMillis() + markIndexRankAndTimeSinceStartInMilliseconds.getC());
+                    MarkPassing markPassing = domainFactory.createMarkPassing(timePoint, waypoint,
+                            domainFactory.getCompetitorByBoatIDAndBoatClass(boatID, boatClass));
+                    markPassingsByMarkIndex.put(markIndexRankAndTimeSinceStartInMilliseconds.getA(), markPassing);
                 } else {
-                    // estimate the start time assuming the event was received with the delay compared to real-time,
-                    // making the mark passing's time point now-delay
-                    startTime = MillisecondsTimePoint.now().minus(trackedRace.getDelayToLiveInMillis())
-                            .minus(markIndexRankAndTimeSinceStartInMilliseconds.getC());
+                    // 
                     logger.warning("Received mark passing with time relative to start of race "+trackedRace.getRace().getName()+
-                            " before having received a race start time. Guessing from current wall time: "+startTime+
-                            ". Queueing message for re-application when a start time has been received.");
+                            " before having received a race start time."
+                            + " Queueing message for re-application when a start time has been received.");
                     tmdMessageQueue.enqueue(raceID, boatID, markIndicesRanksAndTimesSinceStartInMilliseconds);
                 }
-                MillisecondsTimePoint timePoint = new MillisecondsTimePoint(
-                        startTime.asMillis() + markIndexRankAndTimeSinceStartInMilliseconds.getC());
-                MarkPassing markPassing = domainFactory.createMarkPassing(timePoint, waypoint,
-                        domainFactory.getCompetitorByBoatIDAndBoatClass(boatID, boatClass));
-                markPassingsByMarkIndex.put(markIndexRankAndTimeSinceStartInMilliseconds.getA(), markPassing);
             }
             trackedRace.updateMarkPassings(competitor, markPassingsByMarkIndex.values());
         } else {
