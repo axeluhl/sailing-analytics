@@ -9,9 +9,12 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.NavigableSet;
 import java.util.Set;
 import java.util.logging.Logger;
 
@@ -43,6 +46,7 @@ import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
+import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RacesHandle;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
@@ -299,6 +303,33 @@ public class EndToEndListeningStoreAndFowardTest {
             waypoints.add(waypoint);
         }
         assertEquals(7, Util.size(waypoints));
+    }
+    
+    @Test
+    public void testTMDMessageBeforeReceivingStartTime() throws Exception {
+        final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
+        String[] racesToTrack = new String[] { "SAM005923" };
+        setUpUsingScript(racesToTrack, "/TMDBeforeStartTimeExample.txt");
+        Set<TrackedRace> allTrackedRaces = new HashSet<TrackedRace>();
+        Iterable<Regatta> allEvents = racingEventService.getAllRegattas();
+        for (Regatta event : allEvents) {
+            DynamicTrackedRegatta trackedRegatta = racingEventService.getTrackedRegatta(event);
+            Iterable<TrackedRace> trackedRaces = trackedRegatta.getTrackedRaces();
+            for (TrackedRace trackedRace : trackedRaces) {
+                allTrackedRaces.add(trackedRace);
+            }
+        }
+        assertEquals(1, allTrackedRaces.size());
+        TrackedRace trackedRace = allTrackedRaces.iterator().next();
+        assertEquals("SAM005923", trackedRace.getRace().getName());
+        assertEquals(dateFormat.parse("2013-04-04T13:45:00+0200"), trackedRace.getStartOfRace().asDate());
+        for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
+            if (competitor.getBoat().getSailID().equals("GBR-828")) {
+                NavigableSet<MarkPassing> markPassings = trackedRace.getMarkPassings(competitor);
+                assertEquals(1, markPassings.size());
+                assertNotNull(markPassings.iterator().next().getTimePoint());
+            }
+        }
     }
     
     @Test
