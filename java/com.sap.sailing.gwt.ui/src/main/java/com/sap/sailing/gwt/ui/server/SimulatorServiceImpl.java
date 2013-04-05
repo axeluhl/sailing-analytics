@@ -411,11 +411,12 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
                 .getPathPoints().get(0).getTimePoint().asMillis()) / 1000;
 
 
-        while (totalTimeSeconds > totalTimeGPSTrackSeconds) {
-            totalTimeSeconds *= TOTAL_TIME_SCALE_FACTOR;
-        }
+        //while (totalTimeSeconds > totalTimeGPSTrackSeconds) {
+        //    totalTimeSeconds *= TOTAL_TIME_SCALE_FACTOR;
+        //}
+        System.out.println("TotalTimeGPS: "+totalTimeGPSTrackSeconds+"  TotalTimePoly: "+totalTimeSeconds);
 
-        return new ResponseTotalTimeDTO((long) totalTimeSeconds, notificationMessage);
+        return new ResponseTotalTimeDTO((long) totalTimeSeconds, (double)totalTimeSeconds/(double)totalTimeGPSTrackSeconds, notificationMessage);
     }
 
     @Override

@@ -64,6 +64,8 @@ public class PathPolyline {
     private boolean warningAlreadyShown = false;
     private SimulatorMap simulatorMap = null;
     private SimulatorMainPanel simulatorMainPanel = null;
+    private boolean getTotalTimeFactor = false;
+    private double totalTimeFactor = 0.0;
 
     public static PathPolyline createPathPolyline(List<SimulatorWindDTO> pathPoints, String color, int weight, double opacity, ErrorReporter errorReporter,
             SimulatorServiceAsync simulatorService,
@@ -118,6 +120,14 @@ public class PathPolyline {
     }
 
     private void drawPolylineOnMap() {
+
+        // first call with given sailing setup
+        if (this.polyline == null) {
+            this.getTotalTimeFactor = true;
+        } else {
+            this.getTotalTimeFactor = false;
+            System.out.println("totalTimeFactor: "+totalTimeFactor);
+        }
         if (this.polyline != null) {
             this.map.removeOverlay(this.polyline);
         }
@@ -596,15 +606,14 @@ public class PathPolyline {
             TwoDPoint secondAfter = this.toTwoDPoint(turnPoints[indexOfMovedPoint + 2]);
             TwoDSegment firstBeforeEdge = new TwoDSegment(newFirstBefore, neww);
 
-            if (indexOfMovedPoint == turnPoints.length - 3) {
+            if (indexOfMovedPoint == turnPoints.length - 3) {  // if only one point between moved and end
 
-                // check if the next 2 points must be eliminated
+                // check if only the next point must be eliminated
                 result = this.checkIfNextMustGo(turnPoints, indexOfMovedPoint, newFirstBefore, neww, newFirstAfter, secondAfter, firstBeforeEdge);
 
             } else {
 
-                // check if only the next point must be eliminated
-
+                // check if the next 2 points must be eliminated
                 result = this.checkIfNextTwoMustGo(turnPoints, indexOfMovedPoint, newFirstBefore, old, neww, oldFirstAfter, newFirstAfter, secondAfter,
                         firstBeforeEdge);
             }
@@ -616,16 +625,14 @@ public class PathPolyline {
             TwoDPoint secondBefore = toTwoDPoint(turnPoints[indexOfMovedPoint - 2]);
             TwoDSegment firstAfterEdge = new TwoDSegment(neww, newFirstAfter);
 
-            if (indexOfMovedPoint == 2) {
+            if (indexOfMovedPoint == 2) { // if only one point between moved and start
 
-                // check if the previous 2 points must be eliminated
-
+                // check if only the previous point must be eliminated
                 result = this.checkIfPreviousMustGo(turnPoints, indexOfMovedPoint, secondBefore, newFirstBefore, neww, newFirstAfter, firstAfterEdge);
 
             } else {
 
-                // check if only the previous point must be eliminated
-
+                // check if the previous 2 points must be eliminated
                 result = this.checkIfPreviousTwoMustGo(turnPoints, indexOfMovedPoint, secondBefore, oldFirstBefore, newFirstBefore, old, neww, newFirstAfter,
                         firstAfterEdge);
             }
@@ -951,7 +958,10 @@ public class PathPolyline {
                     warningAlreadyShown = true;
                 }
 
-                long totalTime = receiveData.totalTimeSeconds;
+                if (getTotalTimeFactor) {
+                    totalTimeFactor = receiveData.factorSim2GPS;
+                }
+                long totalTime = Math.round(receiveData.totalTimeSeconds / totalTimeFactor);
 
                 simulatorMap.addLegendOverlayForPathPolyline(totalTime * 1000);
                 simulatorMap.redrawLegendCanvasOverlay();
