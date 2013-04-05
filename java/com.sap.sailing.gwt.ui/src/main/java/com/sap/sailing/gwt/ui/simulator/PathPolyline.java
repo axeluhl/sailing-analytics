@@ -44,7 +44,7 @@ public class PathPolyline {
     private final static int DEFAULT_WEIGHT = 3;
     private final static double DEFAULT_OPACITY = 1.0;
     private final static double SMOOTHNESS_MAX_DEG = 20.0;
-    private final static double DELTA = 0.0001;
+    private final static double EPSILON = 0.0;
     private final static int STEP_DURATION_MILLISECONDS = 2000;
     private final static boolean USE_REAL_AVERAGE_WIND = true;
 
@@ -179,7 +179,7 @@ public class PathPolyline {
                         } else {
 
                             LatLng possibleNewPositionOfPointBeforeMoved = getNewPositionOfPointBeforeMoved(indexOfMovedPoint, newPositionOfMovedPoint);
-                            if (PathPolyline.equals(possibleNewPositionOfPointBeforeMoved, turnPoints[indexOfMovedPoint - 1]) == false) {
+                            if (PathPolyline.equals(possibleNewPositionOfPointBeforeMoved, turnPoints[indexOfMovedPoint - 1], EPSILON) == false) {
 
                                 secondPart = false;
                                 turnPoints[indexOfMovedPoint - 1] = possibleNewPositionOfPointBeforeMoved;
@@ -187,7 +187,7 @@ public class PathPolyline {
                             }
 
                             LatLng possibleNewPositionOfPointAfterMoved = getNewPositionOfPointAfterMoved(indexOfMovedPoint, newPositionOfMovedPoint);
-                            if (PathPolyline.equals(possibleNewPositionOfPointAfterMoved, turnPoints[indexOfMovedPoint + 1]) == false) {
+                            if (PathPolyline.equals(possibleNewPositionOfPointAfterMoved, turnPoints[indexOfMovedPoint + 1], EPSILON) == false) {
 
                                 secondPart = true;
                                 turnPoints[indexOfMovedPoint + 1] = possibleNewPositionOfPointAfterMoved;
@@ -869,7 +869,7 @@ public class PathPolyline {
 
         for (; index < this.turnPoints.length; index++) {
 
-            if (equals(this.turnPoints[index], this.polyline.getVertex(index)) == false) {
+            if (PathPolyline.equals(this.turnPoints[index], this.polyline.getVertex(index), EPSILON) == false) {
                 break;
             }
         }
@@ -924,12 +924,12 @@ public class PathPolyline {
      *            - the second LatLng object
      * @returns a boolean, true for equality, false otherwise.
      */
-    private static boolean equals(LatLng first, LatLng second) {
+    private static boolean equals(LatLng first, LatLng second, double epsilon) {
 
         double latDiff = Math.abs(first.getLatitude() - second.getLatitude());
         double lngDiff = Math.abs(first.getLongitude() - second.getLongitude());
 
-        return latDiff <= DELTA && lngDiff <= DELTA;
+        return latDiff <= epsilon && lngDiff <= epsilon;
     }
 
     private void getTotalTime() {
