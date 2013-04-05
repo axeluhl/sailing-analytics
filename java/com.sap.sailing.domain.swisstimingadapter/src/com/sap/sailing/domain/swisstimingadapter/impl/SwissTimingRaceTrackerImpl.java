@@ -80,6 +80,13 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
     private boolean loggedIgnore;
     private final long delayToLiveInMillis;
     
+    /**
+     * For TMD messages received when there was no start time set, this message queue stores those TMD messages. When a start
+     * time is received, it will be sent to the queue which in turn will re-apply all not yet applied TMD messages again to this
+     * tracker by calling {@link #receivedTimingData(String, String, List)}.
+     */
+    private final TMDMessageQueue tmdMessageQueue;
+    
     protected SwissTimingRaceTrackerImpl(String raceID, String hostname, int port, RaceLogStore raceLogStore, WindStore windStore,
             DomainFactory domainFactory, SwissTimingFactory factory, RaceSpecificMessageLoader messageLoader,
             TrackedRegattaRegistry trackedRegattaRegistry, boolean canSendRequests, long delayToLiveInMillis) throws InterruptedException,
@@ -93,6 +100,7 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
             TrackedRegattaRegistry trackedRegattaRegistry, boolean canSendRequests, long delayToLiveInMillis) throws InterruptedException,
             UnknownHostException, IOException, ParseException {
         super();
+        this.tmdMessageQueue = new TMDMessageQueue(this);
         this.regatta = regatta;
         this.connector = factory.getOrCreateSailMasterConnector(hostname, port, messageLoader, canSendRequests);
         this.domainFactory = domainFactory;
@@ -209,6 +217,7 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
             if (this.raceID.equals(raceID)) {
                 if (startTime != null) {
                     trackedRace.setStartTimeReceived(startTime);
+                    tmdMessageQueue.validStartTimeReceived();
                 }
                 for (Fix fix : fixes) {
                     GPSFixMoving gpsFix = domainFactory.createGPSFix(timePoint, fix);
@@ -271,11 +280,23 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
             for (Triple<Integer, Integer, Long> markIndexRankAndTimeSinceStartInMilliseconds : markIndicesRanksAndTimesSinceStartInMilliseconds) {
                 Waypoint waypoint = Util.get(trackedRace.getRace().getCourse().getWaypoints(),
                         markIndexRankAndTimeSinceStartInMilliseconds.getA());
-                MillisecondsTimePoint timePoint = trackedRace.getStartOfRace() == null ? null : new MillisecondsTimePoint(
-                        trackedRace.getStartOfRace().asMillis() + markIndexRankAndTimeSinceStartInMilliseconds.getC());
-                MarkPassing markPassing = domainFactory.createMarkPassing(timePoint, waypoint,
-                        domainFactory.getCompetitorByBoatIDAndBoatClass(boatID, boatClass));
-                markPassingsByMarkIndex.put(markIndexRankAndTimeSinceStartInMilliseconds.getA(), markPassing);
+                // update mark passing only if we have a start time; guessed start times don't make sense and
+                // for the start line would lead subsequent calls to getStartOfRace() return that guessed start time
+                // which then cannot be identified as "guessed" anymore...
+                if (trackedRace.getStartOfRace() != null) {
+                    final TimePoint startTime = trackedRace.getStartOfRace();
+                    MillisecondsTimePoint timePoint = new MillisecondsTimePoint(
+                            startTime.asMillis() + markIndexRankAndTimeSinceStartInMilliseconds.getC());
+                    MarkPassing markPassing = domainFactory.createMarkPassing(timePoint, waypoint,
+                            domainFactory.getCompetitorByBoatIDAndBoatClass(boatID, boatClass));
+                    markPassingsByMarkIndex.put(markIndexRankAndTimeSinceStartInMilliseconds.getA(), markPassing);
+                } else {
+                    // 
+                    logger.warning("Received mark passing with time relative to start of race "+trackedRace.getRace().getName()+
+                            " before having received a race start time."
+                            + " Queueing message for re-application when a start time has been received.");
+                    tmdMessageQueue.enqueue(raceID, boatID, markIndicesRanksAndTimesSinceStartInMilliseconds);
+                }
             }
             trackedRace.updateMarkPassings(competitor, markPassingsByMarkIndex.values());
         } else {
@@ -383,5 +404,13 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
     @Override
     public void receivedAvailableRaces(Iterable<Race> races) {
         // don't care
+    }
+    
+    protected DynamicTrackedRace getTrackedRace() {
+        return trackedRace;
+    }
+
+    public DomainFactory getDomainFactory() {
+        return domainFactory;
     }
 }
