@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
@@ -24,6 +25,8 @@ import com.sap.sailing.domain.tracking.TrackedRace;
  * 
  */
 public class TMDMessageQueue {
+    private static final Logger logger = Logger.getLogger(TMDMessageQueue.class.getName());
+    
     private static class TMDMessageContents {
         private final String raceID;
         private final String boatID;
@@ -47,6 +50,24 @@ public class TMDMessageQueue {
 
         public List<Triple<Integer, Integer, Long>> getMarkIndicesRanksAndTimesSinceStartInMilliseconds() {
             return markIndicesRanksAndTimesSinceStartInMilliseconds;
+        }
+        
+        @Override
+        public String toString() {
+            StringBuilder result = new StringBuilder("TMD|"+getRaceID()+"|"+getBoatID()+"|");
+            result.append(getMarkIndicesRanksAndTimesSinceStartInMilliseconds().size());
+            result.append('|');
+            for (Triple<Integer, Integer, Long> markIndexRankAndTimeSinceStartInMilliseconds : getMarkIndicesRanksAndTimesSinceStartInMilliseconds()) {
+                result.append(markIndexRankAndTimeSinceStartInMilliseconds.getA());
+                result.append(';');
+                if (markIndexRankAndTimeSinceStartInMilliseconds.getB() != null) {
+                    result.append(markIndexRankAndTimeSinceStartInMilliseconds.getB());
+                }
+                result.append(";<");
+                result.append(markIndexRankAndTimeSinceStartInMilliseconds.getC());
+                result.append("ms>");
+            }
+            return result.toString();
         }
     }
 
@@ -97,9 +118,14 @@ public class TMDMessageQueue {
             // This will avoid that the start time inference
             // rules consider them and let them take precedence over the start time received
             for (Triple<Integer, Integer, Long> markIndexRankAndTimeSinceStartInMilliseconds : messageContents.getMarkIndicesRanksAndTimesSinceStartInMilliseconds()) {
+                logger.info("Removing mark passing for mark #"+markIndexRankAndTimeSinceStartInMilliseconds.getA()+
+                        " for competitor "+competitor.getName()+" because its time point "+
+                        cleansedMarkPassings.get(markIndexRankAndTimeSinceStartInMilliseconds.getA()).getTimePoint()+
+                        " was guessed; will replace momentarily...");
                 cleansedMarkPassings.remove(markIndexRankAndTimeSinceStartInMilliseconds.getA());
             }
             trackedRace.updateMarkPassings(competitor, cleansedMarkPassings.values());
+            logger.info("Re-Playing TMD message "+messageContents+" with new race start time "+trackedRace.getStartOfRace());
             raceTracker.receivedTimingData(messageContents.getRaceID(), messageContents.getBoatID(),
                     messageContents.getMarkIndicesRanksAndTimesSinceStartInMilliseconds());
             i.remove();
