@@ -47,6 +47,7 @@ import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.racelog.RaceLogCourseAreaChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogCourseDesignChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
+import com.sap.sailing.domain.racelog.RaceLogFinishPositioningConfirmedEvent;
 import com.sap.sailing.domain.racelog.RaceLogFinishPositioningListChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
@@ -567,6 +568,13 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         result.put(FieldNames.RACE_LOG_EVENT.name(), storeRaceLogFinishPositioningListChangedEvent(finishPositioningListChangedEvent));
         return result;
     }
+    
+    public DBObject storeRaceLogEntry(RaceLogIdentifier raceLogIdentifier, RaceLogFinishPositioningConfirmedEvent finishPositioningConfirmedEvent) {
+        BasicDBObject result = new BasicDBObject();
+        result.put(FieldNames.RACE_LOG_IDENTIFIER.name(), MongoUtils.escapeDollarAndDot(raceLogIdentifier.getIdentifier().toString()));       
+        result.put(FieldNames.RACE_LOG_EVENT.name(), storeRaceLogFinishPositioningListChangedEvent(finishPositioningConfirmedEvent));
+        return result;
+    }
 
     private DBObject storeRaceLogStartTimeEvent(RaceLogStartTimeEvent startTimeEvent) {
         DBObject result = new BasicDBObject();
@@ -651,6 +659,15 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         storeRaceLogEventProperties(finishPositioningListChangedEvent, result);
 
         result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogFinishPositioningListChangedEvent.class.getSimpleName());
+
+        return result;
+    }
+    
+    private Object storeRaceLogFinishPositioningListChangedEvent(RaceLogFinishPositioningConfirmedEvent finishPositioningConfirmedEvent) {
+        DBObject result = new BasicDBObject();
+        storeRaceLogEventProperties(finishPositioningConfirmedEvent, result);
+
+        result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogFinishPositioningConfirmedEvent.class.getSimpleName());
 
         return result;
     }

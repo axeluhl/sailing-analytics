@@ -3,6 +3,7 @@ package com.sap.sailing.domain.tracking.impl;
 import com.sap.sailing.domain.racelog.RaceLogCourseAreaChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogCourseDesignChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogEventVisitor;
+import com.sap.sailing.domain.racelog.RaceLogFinishPositioningConfirmedEvent;
 import com.sap.sailing.domain.racelog.RaceLogFinishPositioningListChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
 import com.sap.sailing.domain.racelog.RaceLogPassChangeEvent;
@@ -13,7 +14,7 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 public class TrackedRaceLogListener implements RaceLogEventVisitor {
 
     private TrackedRace trackedRace;
-    
+
     public TrackedRaceLogListener(TrackedRace trackedRace) {
         this.trackedRace = trackedRace;
     }
@@ -42,7 +43,7 @@ public class TrackedRaceLogListener implements RaceLogEventVisitor {
 
     @Override
     public void visit(RaceLogCourseAreaChangedEvent event) {
-      //do nothing
+        //do nothing
     }
 
     @Override
@@ -52,6 +53,11 @@ public class TrackedRaceLogListener implements RaceLogEventVisitor {
 
     @Override
     public void visit(RaceLogFinishPositioningListChangedEvent event) {
+        // do nothing (wait for RaceLogFinishPositioningConfirmedEvent to perform score corrections)
+    }
+
+    @Override
+    public void visit(RaceLogFinishPositioningConfirmedEvent event) {
         // TODO implement score correction !!!!!!!!!!!!!!!!
     }
 

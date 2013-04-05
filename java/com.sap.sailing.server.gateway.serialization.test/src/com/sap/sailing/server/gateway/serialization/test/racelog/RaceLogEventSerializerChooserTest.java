@@ -24,6 +24,7 @@ public class RaceLogEventSerializerChooserTest {
     private JsonSerializer<RaceLogEvent> passChangedSerializer;
     private JsonSerializer<RaceLogEvent> courseDesignChangedEventSerializer;
     private JsonSerializer<RaceLogEvent> finishPositioningListChangedEventSerializer;
+    private JsonSerializer<RaceLogEvent> finishPositioningConfirmedEventSerializer;
     
     private RaceLogEventFactory factory;
     
@@ -37,6 +38,7 @@ public class RaceLogEventSerializerChooserTest {
         passChangedSerializer = mock(JsonSerializer.class);
         courseDesignChangedEventSerializer = mock(JsonSerializer.class);
         finishPositioningListChangedEventSerializer = mock(JsonSerializer.class);
+        finishPositioningConfirmedEventSerializer = mock(JsonSerializer.class);
         
         chooser = new RaceLogEventSerializerChooserImpl(
                 flagEventSerializer, 
@@ -45,7 +47,8 @@ public class RaceLogEventSerializerChooserTest {
                 courseAreaChangedEventSerializer,
                 passChangedSerializer,
                 courseDesignChangedEventSerializer,
-                finishPositioningListChangedEventSerializer);
+                finishPositioningListChangedEventSerializer,
+                finishPositioningConfirmedEventSerializer);
         
         factory = RaceLogEventFactory.INSTANCE;
     }
@@ -96,7 +99,14 @@ public class RaceLogEventSerializerChooserTest {
     public void testChoosesFinishPositioningListChangedSerializer() {
         // we use the real event type here because we do not want to re-implement the dispatching.
         RaceLogEvent event = factory.createFinishPositioningListChangedEvent(null, null, 0);
-        assertEquals(courseDesignChangedEventSerializer, chooser.getSerializer(event));
+        assertEquals(finishPositioningListChangedEventSerializer, chooser.getSerializer(event));
+    }
+    
+    @Test
+    public void testChoosesFinishPositioningConfirmedSerializer() {
+        // we use the real event type here because we do not want to re-implement the dispatching.
+        RaceLogEvent event = factory.createFinishPositioningConfirmedEvent(null, 0);
+        assertEquals(finishPositioningConfirmedEventSerializer, chooser.getSerializer(event));
     }
 
 }

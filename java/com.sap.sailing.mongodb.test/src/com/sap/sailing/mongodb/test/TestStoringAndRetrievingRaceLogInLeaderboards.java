@@ -33,6 +33,7 @@ import com.sap.sailing.domain.racelog.RaceLogCourseAreaChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogCourseDesignChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogEventFactory;
+import com.sap.sailing.domain.racelog.RaceLogFinishPositioningConfirmedEvent;
 import com.sap.sailing.domain.racelog.RaceLogFinishPositioningListChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
 import com.sap.sailing.domain.racelog.RaceLogPassChangeEvent;
@@ -96,6 +97,27 @@ public class TestStoringAndRetrievingRaceLogInLeaderboards extends RaceLogMongoD
             assertEquals(event.getTimePoint(), passEvent.getTimePoint());
             assertEquals(event.getPassId(), passEvent.getPassId());
             assertEquals(event.getId(), passEvent.getId());
+            assertEquals(1, Util.size(loadedRaceLog.getFixes()));
+        } finally {
+            loadedRaceLog.unlockAfterRead();
+        }
+    }
+    
+    @Test
+    public void testStoreAndRetrieveSimpleLeaderboardWithRaceLogFinishPositioningConfirmedEvent() {        
+        RaceLogFinishPositioningConfirmedEvent event = RaceLogEventFactory.INSTANCE.createFinishPositioningConfirmedEvent(now, 0);
+
+        addAndStoreRaceLogEvent(leaderboard, raceColumnName, event);
+
+        RaceLog loadedRaceLog = retrieveRaceLog();
+
+        loadedRaceLog.lockForRead();
+        try {
+            RaceLogEvent loadedEvent = loadedRaceLog.getFirstRawFix();
+            RaceLogFinishPositioningConfirmedEvent loadedConfirmedEvent = (RaceLogFinishPositioningConfirmedEvent) loadedEvent;
+            assertEquals(event.getTimePoint(), loadedConfirmedEvent.getTimePoint());
+            assertEquals(event.getPassId(), loadedConfirmedEvent.getPassId());
+            assertEquals(event.getId(), loadedConfirmedEvent.getId());
             assertEquals(1, Util.size(loadedRaceLog.getFixes()));
         } finally {
             loadedRaceLog.unlockAfterRead();

@@ -3,6 +3,7 @@ package com.sap.sailing.racecommittee.app.domain.racelog.impl;
 import com.sap.sailing.domain.racelog.RaceLogCourseAreaChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogCourseDesignChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogEventVisitor;
+import com.sap.sailing.domain.racelog.RaceLogFinishPositioningConfirmedEvent;
 import com.sap.sailing.domain.racelog.RaceLogFinishPositioningListChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
 import com.sap.sailing.domain.racelog.RaceLogPassChangeEvent;
@@ -45,6 +46,11 @@ public class RaceLogChangedVisitor implements RaceLogEventVisitor {
     @Override
     public void visit(RaceLogFinishPositioningListChangedEvent event) {
         listener.eventAdded(event);
+    }
+
+    @Override
+    public void visit(RaceLogFinishPositioningConfirmedEvent event) {
+        listener.eventAdded(event);        
     }
 
 }

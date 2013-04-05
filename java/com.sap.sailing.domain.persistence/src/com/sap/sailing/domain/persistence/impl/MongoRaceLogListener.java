@@ -7,6 +7,7 @@ import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.racelog.RaceLogCourseAreaChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogCourseDesignChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogEventVisitor;
+import com.sap.sailing.domain.racelog.RaceLogFinishPositioningConfirmedEvent;
 import com.sap.sailing.domain.racelog.RaceLogFinishPositioningListChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
@@ -67,6 +68,12 @@ public class MongoRaceLogListener implements RaceLogEventVisitor {
     public void visit(RaceLogFinishPositioningListChangedEvent event) {
         DBObject finishPositioningListChangedEventTrackEntry = mongoObjectFactory.storeRaceLogEntry(raceLogIdentifier, event);
         raceLogsCollection.insert(finishPositioningListChangedEventTrackEntry);
+    }
+
+    @Override
+    public void visit(RaceLogFinishPositioningConfirmedEvent event) {
+        DBObject finishPositioningConfirmedEventTrackEntry = mongoObjectFactory.storeRaceLogEntry(raceLogIdentifier, event);
+        raceLogsCollection.insert(finishPositioningConfirmedEventTrackEntry);
     }
 
 }

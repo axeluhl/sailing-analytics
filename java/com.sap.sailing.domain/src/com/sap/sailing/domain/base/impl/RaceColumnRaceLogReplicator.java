@@ -7,6 +7,7 @@ import com.sap.sailing.domain.racelog.RaceLogCourseAreaChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogCourseDesignChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogEventVisitor;
+import com.sap.sailing.domain.racelog.RaceLogFinishPositioningConfirmedEvent;
 import com.sap.sailing.domain.racelog.RaceLogFinishPositioningListChangedEvent;
 import com.sap.sailing.domain.racelog.RaceLogFlagEvent;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
@@ -64,6 +65,11 @@ public class RaceColumnRaceLogReplicator implements RaceLogEventVisitor, Seriali
 
     @Override
     public void visit(RaceLogFinishPositioningListChangedEvent event) {
+        notifyOnAdd(event);
+    }
+
+    @Override
+    public void visit(RaceLogFinishPositioningConfirmedEvent event) {
         notifyOnAdd(event);
     }
 }
