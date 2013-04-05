@@ -17,6 +17,7 @@ import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.mobeta.android.dslv.DragSortController;
 import com.mobeta.android.dslv.DragSortListView;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
@@ -38,12 +39,19 @@ public class FinishingRaceFragment extends RaceFragment implements TickListener 
     
     private DragSortListView positioningListView;
     private ListView competitorListView;
+    private DragSortController dragSortController;
     
     private CompetitorsAdapter competitorsAdapter;
     private CompetitorPositioningListAdapter positioningAdapter;
     
     protected List<Competitor> competitors;
     protected List<Competitor> positionedCompetitors;
+    
+    public int dragStartMode = DragSortController.ON_DRAG;
+    public boolean removeEnabled = true;
+    public int removeMode = DragSortController.FLING_REMOVE;
+    public boolean sortEnabled = true;
+    public boolean dragEnabled = true;
     
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -90,6 +98,11 @@ public class FinishingRaceFragment extends RaceFragment implements TickListener 
                 onCompetitorRemovedFromPositioningList(item);
             }
         });
+        
+        dragSortController = buildDragSortController(positioningListView);
+        positioningListView.setFloatViewManager(dragSortController);
+        positioningListView.setOnTouchListener(dragSortController);
+        positioningListView.setDragEnabled(dragEnabled);
 
         competitorListView = (ListView) getView().findViewById(R.id.gridViewCompetitors);
         competitorListView.setAdapter(competitorsAdapter);
@@ -130,6 +143,21 @@ public class FinishingRaceFragment extends RaceFragment implements TickListener 
     public void onStop() {
         super.onStop();
         TickSingleton.INSTANCE.unregisterListener(this);
+    }
+    
+    /**
+     * Called in onCreateView.
+     */
+    public DragSortController buildDragSortController(DragSortListView dragSortListView) {
+        DragSortController controller = new DragSortController(dragSortListView);
+        controller.setDragHandleId(R.id.drag_handle);
+        controller.setFlingHandleId(R.id.drag_handle);
+        controller.setRemoveEnabled(removeEnabled);
+        controller.setSortEnabled(sortEnabled);
+        controller.setDragInitMode(dragStartMode);
+        controller.setRemoveMode(removeMode);
+        controller.setBackgroundColor(getActivity().getResources().getColor(R.color.welter_medium_blue));
+        return controller;
     }
 
     protected void onCompetitorClickedOnGrid(Competitor competitor) {

@@ -2,7 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/Welter.Cell.Positioning"
     android:layout_width="fill_parent"
-    android:layout_height="50dp"
+    android:layout_height="60dp"
     android:background="@drawable/list_selector"
     android:gravity="center_vertical"
     android:orientation="horizontal"
@@ -10,8 +10,8 @@
 
     <ImageView
         android:id="@id/drag_handle"
-        android:layout_width="40dp"
-        android:layout_height="50dp"
+        android:layout_width="50dp"
+        android:layout_height="match_parent"
         android:layout_weight="0"
         android:background="@drawable/drag_symbol"
         android:contentDescription="@string/drag_handle_description" />
@@ -20,7 +20,7 @@
         android:id="@+id/Welter.Cell.Positioning.columnOne.txtTitle"
         android:layout_marginLeft="10dp"
         android:layout_width="20dp"
-        android:layout_height="50dp"
+        android:layout_height="match_parent"
         android:gravity="center_horizontal|center_vertical"
         android:padding="5dp"
         android:textColor="@drawable/text_selector"
@@ -29,8 +29,8 @@
 
     <TextView
         android:id="@+id/Welter.Cell.Positioning.columnTwo.txtTitle"
-        android:layout_width="130dp"
-        android:layout_height="50dp"
+        android:layout_width="220dp"
+        android:layout_height="match_parent"
         android:gravity="center_horizontal|center_vertical"
         android:padding="5dp"
         android:textColor="@drawable/text_selector"
