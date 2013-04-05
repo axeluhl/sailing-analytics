@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.Competitor;
@@ -82,7 +83,9 @@ public class TMDMessageQueue {
     }
     
     public synchronized void enqueue(String raceID, String boatID, List<Triple<Integer, Integer, Long>> markIndicesRanksAndTimesSinceStartInMilliseconds) {
-        queuedMessages.add(new TMDMessageContents(raceID, boatID, markIndicesRanksAndTimesSinceStartInMilliseconds));
+        final TMDMessageContents message = new TMDMessageContents(raceID, boatID, markIndicesRanksAndTimesSinceStartInMilliseconds);
+        queuedMessages.add(message);
+        logger.info("Queued TMD message "+message+" for replay when start time has been received");
     }
     
     /**
@@ -91,40 +94,55 @@ public class TMDMessageQueue {
      * time was set on the {@link TrackedRace} managed by the {@link SwissTimingRaceTrackerImpl}.
      */
     public synchronized void validStartTimeReceived() {
+        DynamicTrackedRace trackedRace = raceTracker.getTrackedRace();
         Iterator<TMDMessageContents> i = queuedMessages.iterator();
+        Map<Competitor, TreeMap<Integer, MarkPassing>> cleansedMarkPassings = new HashMap<>();
+        // first remove all mark passings that will then be updated to make sure no "guessed time" remains;
+        // otherwise, this could lead to the "guessed time" to 
         while (i.hasNext()) {
             TMDMessageContents messageContents = i.next();
-            DynamicTrackedRace trackedRace = raceTracker.getTrackedRace();
             Competitor competitor = raceTracker.getDomainFactory().getCompetitorByBoatIDAndBoatClass(messageContents.getBoatID(),
                     trackedRace.getRace().getBoatClass());
             NavigableSet<MarkPassing> oldMarkPassings = trackedRace.getMarkPassings(competitor);
-            Map<Integer, MarkPassing> cleansedMarkPassings = new HashMap<>();
-            Course course = trackedRace.getRace().getCourse();
-            course.lockForRead();
-            try {
-                trackedRace.lockForRead(oldMarkPassings);
+            TreeMap<Integer, MarkPassing> cleansedMarkPassingsForCompetitor = cleansedMarkPassings.get(competitor);
+            if (cleansedMarkPassingsForCompetitor == null) {
+                cleansedMarkPassingsForCompetitor = new TreeMap<>();
+                cleansedMarkPassings.put(competitor, cleansedMarkPassingsForCompetitor);
+                Course course = trackedRace.getRace().getCourse();
+                course.lockForRead();
                 try {
-                    for (MarkPassing oldMarkPassing : oldMarkPassings) {
-                        int waypointIndex = course.getIndexOfWaypoint(oldMarkPassing.getWaypoint());
-                        cleansedMarkPassings.put(waypointIndex, oldMarkPassing);
+                    trackedRace.lockForRead(oldMarkPassings);
+                    try {
+                        for (MarkPassing oldMarkPassing : oldMarkPassings) {
+                            int waypointIndex = course.getIndexOfWaypoint(oldMarkPassing.getWaypoint());
+                            cleansedMarkPassingsForCompetitor.put(waypointIndex, oldMarkPassing);
+                        }
+                    } finally {
+                        trackedRace.unlockAfterRead(oldMarkPassings);
                     }
                 } finally {
-                    trackedRace.unlockAfterRead(oldMarkPassings);
+                    course.unlockAfterRead();
                 }
-            } finally {
-                course.unlockAfterRead();
             }
-            // remove those mark passings for which the TMD message has mark passing times; their time points were just guessed.
+            // remove those mark passings for which the TMD message has mark passing times; their time points would just have been guessed.
             // This will avoid that the start time inference
             // rules consider them and let them take precedence over the start time received
             for (Triple<Integer, Integer, Long> markIndexRankAndTimeSinceStartInMilliseconds : messageContents.getMarkIndicesRanksAndTimesSinceStartInMilliseconds()) {
-                logger.info("Removing mark passing for mark #"+markIndexRankAndTimeSinceStartInMilliseconds.getA()+
-                        " for competitor "+competitor.getName()+" because its time point "+
-                        cleansedMarkPassings.get(markIndexRankAndTimeSinceStartInMilliseconds.getA()).getTimePoint()+
-                        " was guessed; will replace momentarily...");
-                cleansedMarkPassings.remove(markIndexRankAndTimeSinceStartInMilliseconds.getA());
+                if (cleansedMarkPassingsForCompetitor.containsKey(markIndexRankAndTimeSinceStartInMilliseconds.getA())) {
+                    logger.info("Removing mark passing for mark #"+markIndexRankAndTimeSinceStartInMilliseconds.getA()+
+                            " for competitor "+competitor.getName()+" because its time point "+
+                            cleansedMarkPassingsForCompetitor.get(markIndexRankAndTimeSinceStartInMilliseconds.getA()).getTimePoint()+
+                            " was guessed; will replace momentarily...");
+                    cleansedMarkPassingsForCompetitor.remove(markIndexRankAndTimeSinceStartInMilliseconds.getA());
+                }
             }
-            trackedRace.updateMarkPassings(competitor, cleansedMarkPassings.values());
+        }
+        for (Map.Entry<Competitor, TreeMap<Integer, MarkPassing>> e : cleansedMarkPassings.entrySet()) {
+            trackedRace.updateMarkPassings(e.getKey(), e.getValue().values());
+        }
+        i = queuedMessages.iterator();
+        while (i.hasNext()) {
+            TMDMessageContents messageContents = i.next();
             logger.info("Re-Playing TMD message "+messageContents+" with new race start time "+trackedRace.getStartOfRace());
             raceTracker.receivedTimingData(messageContents.getRaceID(), messageContents.getBoatID(),
                     messageContents.getMarkIndicesRanksAndTimesSinceStartInMilliseconds());

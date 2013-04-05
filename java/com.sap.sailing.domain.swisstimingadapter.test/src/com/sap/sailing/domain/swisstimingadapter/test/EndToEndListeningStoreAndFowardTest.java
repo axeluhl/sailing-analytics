@@ -333,6 +333,34 @@ public class EndToEndListeningStoreAndFowardTest {
     }
     
     @Test
+    public void testTMDMessageBeforeReceivingStartTimeWithManyTMDs() throws Exception {
+        final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
+        String[] racesToTrack = new String[] { "SAM005923" };
+        setUpUsingScript(racesToTrack, "/TMDBeforeStartTimeExample_ManyTMDs.txt");
+        Set<TrackedRace> allTrackedRaces = new HashSet<TrackedRace>();
+        Iterable<Regatta> allEvents = racingEventService.getAllRegattas();
+        for (Regatta event : allEvents) {
+            DynamicTrackedRegatta trackedRegatta = racingEventService.getTrackedRegatta(event);
+            Iterable<TrackedRace> trackedRaces = trackedRegatta.getTrackedRaces();
+            for (TrackedRace trackedRace : trackedRaces) {
+                allTrackedRaces.add(trackedRace);
+            }
+        }
+        assertEquals(1, allTrackedRaces.size());
+        TrackedRace trackedRace = allTrackedRaces.iterator().next();
+        assertEquals("SAM005923", trackedRace.getRace().getName());
+        assertEquals(dateFormat.parse("2013-04-04T13:45:00+0200"), trackedRace.getStartOfRace().asDate());
+        for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
+            NavigableSet<MarkPassing> markPassings = trackedRace.getMarkPassings(competitor);
+            if (competitor.getBoat().getSailID().equals("GBR-828")) {
+                assertEquals(7, markPassings.size());
+            }
+            assertNotNull(markPassings.iterator().next().getTimePoint());
+            assertEquals(trackedRace.getStartOfRace(), markPassings.iterator().next().getTimePoint());
+        }
+    }
+    
+    @Test
     public void testRongRaceLogRACZero() throws Exception{
         String[] racesToTrack = new String[] { "W4702" };
         String scriptName2 = "/SailMasterDataInterfaceRACZero.txt";
