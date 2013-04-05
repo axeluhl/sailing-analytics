@@ -82,7 +82,9 @@ public class TMDMessageQueue {
     }
     
     public synchronized void enqueue(String raceID, String boatID, List<Triple<Integer, Integer, Long>> markIndicesRanksAndTimesSinceStartInMilliseconds) {
-        queuedMessages.add(new TMDMessageContents(raceID, boatID, markIndicesRanksAndTimesSinceStartInMilliseconds));
+        final TMDMessageContents message = new TMDMessageContents(raceID, boatID, markIndicesRanksAndTimesSinceStartInMilliseconds);
+        queuedMessages.add(message);
+        logger.info("Queued TMD message "+message+" for replay when start time has been received");
     }
     
     /**
@@ -91,10 +93,12 @@ public class TMDMessageQueue {
      * time was set on the {@link TrackedRace} managed by the {@link SwissTimingRaceTrackerImpl}.
      */
     public synchronized void validStartTimeReceived() {
+        DynamicTrackedRace trackedRace = raceTracker.getTrackedRace();
         Iterator<TMDMessageContents> i = queuedMessages.iterator();
+        // first remove all mark passings that will then be updated to make sure no "guessed time" remains;
+        // otherwise, this could lead to the "guessed time" to 
         while (i.hasNext()) {
             TMDMessageContents messageContents = i.next();
-            DynamicTrackedRace trackedRace = raceTracker.getTrackedRace();
             Competitor competitor = raceTracker.getDomainFactory().getCompetitorByBoatIDAndBoatClass(messageContents.getBoatID(),
                     trackedRace.getRace().getBoatClass());
             NavigableSet<MarkPassing> oldMarkPassings = trackedRace.getMarkPassings(competitor);
@@ -125,6 +129,10 @@ public class TMDMessageQueue {
                 cleansedMarkPassings.remove(markIndexRankAndTimeSinceStartInMilliseconds.getA());
             }
             trackedRace.updateMarkPassings(competitor, cleansedMarkPassings.values());
+        }
+        i = queuedMessages.iterator();
+        while (i.hasNext()) {
+            TMDMessageContents messageContents = i.next();
             logger.info("Re-Playing TMD message "+messageContents+" with new race start time "+trackedRace.getStartOfRace());
             raceTracker.receivedTimingData(messageContents.getRaceID(), messageContents.getBoatID(),
                     messageContents.getMarkIndicesRanksAndTimesSinceStartInMilliseconds());
