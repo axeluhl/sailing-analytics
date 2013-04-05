@@ -146,7 +146,7 @@ public class FinishingRaceFragment extends RaceFragment implements TickListener 
     }
     
     /**
-     * Called in onCreateView.
+     * Creates a DragSortController and thereby defines the behaviour of the drag sort list
      */
     public DragSortController buildDragSortController(DragSortListView dragSortListView) {
         DragSortController controller = new DragSortController(dragSortListView);

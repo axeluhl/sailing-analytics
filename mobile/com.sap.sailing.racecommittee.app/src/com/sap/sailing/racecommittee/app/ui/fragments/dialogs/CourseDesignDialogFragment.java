@@ -15,12 +15,13 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.Button;
 import android.widget.GridView;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.mobeta.android.dslv.DragSortController;
+import com.mobeta.android.dslv.DragSortListView;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.Gate;
@@ -51,12 +52,20 @@ public class CourseDesignDialogFragment extends RaceDialogFragment {
     private List<CourseListDataElement> previousCourseElements;
     private CourseElementListAdapter courseElementAdapter;
     private CourseElementListAdapter previousCourseElementAdapter;
-    private ListView newCourseListView;
+    private DragSortListView newCourseListView;
     private ListView previousCourseListView;
+    
+    private DragSortController dragSortController;
     
     private Button publishButton;
     private Button unpublishButton;
     private Button takePreviousButton;
+    
+    public int dragStartMode = DragSortController.ON_DRAG;
+    public boolean removeEnabled = true;
+    public int removeMode = DragSortController.FLING_REMOVE;
+    public boolean sortEnabled = true;
+    public boolean dragEnabled = true;
 
     @Override
     public void onAttach(android.app.Activity activity) {
@@ -97,7 +106,7 @@ public class CourseDesignDialogFragment extends RaceDialogFragment {
         previousCourseElements = new ArrayList<CourseListDataElement>();
 
         gridAdapter = new MarkGridAdapter(getActivity(), R.layout.welter_one_row_no_image, aMarkList);
-        courseElementAdapter = new CourseElementListAdapter(getActivity(), R.layout.welter_one_row_three_columns, courseElements);
+        courseElementAdapter = new CourseElementListAdapter(getActivity(), R.layout.welter_draggable_waypoint_item, courseElements);
         previousCourseElementAdapter = new CourseElementListAdapter(getActivity(), R.layout.welter_one_row_three_columns, previousCourseElements);
         
         loadMarks();
@@ -114,17 +123,34 @@ public class CourseDesignDialogFragment extends RaceDialogFragment {
             }
 
         });
-
-        newCourseListView = (ListView) getView().findViewById(R.id.listViewNewCourse);
+        
+        newCourseListView = (DragSortListView) getView().findViewById(R.id.listViewNewCourse);
         newCourseListView.setAdapter(courseElementAdapter);
-        newCourseListView.setOnItemLongClickListener(new OnItemLongClickListener() {
+        newCourseListView.setDropListener(new DragSortListView.DropListener() {
 
             @Override
-            public boolean onItemLongClick(AdapterView<?> arg0, View arg1, int position, long arg3) {
-                createCourseElementModificationDialog(courseElements.get(position));
-                return true;
+            public void drop(int from, int to) {
+                if (from != to) {
+                    CourseListDataElement item = courseElementAdapter.getItem(from);
+                    courseElementAdapter.remove(item);
+                    courseElementAdapter.insert(item, to);
+                }
             }
         });
+        
+        newCourseListView.setRemoveListener(new DragSortListView.RemoveListener() {
+            
+            @Override
+            public void remove(int toBeRemoved) {
+                CourseListDataElement item = courseElementAdapter.getItem(toBeRemoved);
+                courseElementAdapter.remove(item);
+            }
+        });
+        
+        dragSortController = buildDragSortController(newCourseListView);
+        newCourseListView.setFloatViewManager(dragSortController);
+        newCourseListView.setOnTouchListener(dragSortController);
+        newCourseListView.setDragEnabled(dragEnabled);
 
         if (getRace().getCourseDesign() != null) {
             fillCourseElementsInList();
@@ -181,6 +207,21 @@ public class CourseDesignDialogFragment extends RaceDialogFragment {
 
         });
 
+    }
+    
+    /**
+     * Creates a DragSortController and thereby defines the behaviour of the drag sort list
+     */
+    public DragSortController buildDragSortController(DragSortListView dragSortListView) {
+        DragSortController controller = new DragSortController(dragSortListView);
+        controller.setDragHandleId(R.id.drag_handle);
+        controller.setFlingHandleId(R.id.drag_handle);
+        controller.setRemoveEnabled(removeEnabled);
+        controller.setSortEnabled(sortEnabled);
+        controller.setDragInitMode(dragStartMode);
+        controller.setRemoveMode(removeMode);
+        controller.setBackgroundColor(getActivity().getResources().getColor(R.color.welter_medium_blue));
+        return controller;
     }
     
     @Override
@@ -391,45 +432,6 @@ public class CourseDesignDialogFragment extends RaceDialogFragment {
         courseElement.setRoundingDirection(pickedDirection);
         courseElements.add(courseElement);
         courseElementAdapter.notifyDataSetChanged();
-    }
-    
-    private void createCourseElementModificationDialog(final CourseListDataElement courseElement) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setTitle(R.string.change_course_element)
-        .setItems(R.array.course_element_changers, new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int position) {
-                if (position == 0) {
-                    moveUpCourseElement(courseElement);
-                } else if (position == 1) {
-                    moveDownCourseElement(courseElement);
-                } else if (position == 2) {
-                    deleteCourseElement(courseElement);
-                }
-            }
-        });
-        builder.create();
-        builder.show();
-    }
-
-    protected void deleteCourseElement(CourseListDataElement courseElement) {
-        courseElements.remove(courseElement);
-        courseElementAdapter.notifyDataSetChanged();
-    }
-
-    protected void moveUpCourseElement(CourseListDataElement courseElement) {
-        int index = courseElements.indexOf(courseElement);
-        if (index != 0) {
-            Collections.swap(courseElements, index, index - 1);
-            courseElementAdapter.notifyDataSetChanged();
-        }
-    }
-
-    protected void moveDownCourseElement(CourseListDataElement courseElement) {
-        int index = courseElements.indexOf(courseElement);
-        if (index != courseElements.size() - 1) {
-            Collections.swap(courseElements, index, index + 1);
-            courseElementAdapter.notifyDataSetChanged();
-        }
     }
 
     protected void onPublish() {
