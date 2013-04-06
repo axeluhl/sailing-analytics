@@ -58,7 +58,7 @@ public class TrackedRaceLogListener implements RaceLogEventVisitor {
 
     @Override
     public void visit(RaceLogFinishPositioningConfirmedEvent event) {
-        // TODO implement score correction !!!!!!!!!!!!!!!!
+     // do nothing score correction is handled by the leaderboard
     }
 
 }

@@ -29,8 +29,11 @@ import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.ScoreCorrection.Result;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
+import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
+import com.sap.sailing.domain.racelog.RaceLogFinishPositioningConfirmedEvent;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
+import com.sap.sailing.domain.racelog.analyzing.impl.FinishPositioningListFinder;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
@@ -734,5 +737,51 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     @Override
     public void raceLogEventAdded(RaceColumn raceColumn, RaceLogIdentifier raceLogIdentifier, RaceLogEvent event) {
         getRaceColumnListeners().notifyListenersAboutRaceLogEventAdded(raceColumn, raceLogIdentifier, event);
+        if (event instanceof RaceLogFinishPositioningConfirmedEvent) {
+            compareScoresWithResultsOfRaceCommittee(raceColumn, raceLogIdentifier.getFleetName(), event.getTimePoint());
+        }
+    }
+    
+    /**
+     * Retrieves the last RaceLogFinishPositioningListChangedEvent from the racelog and compares the ranks and disqualifications 
+     * entered by the race committee with the tracked ranks. When a tracked rank for a competitor is not the same as the rank of the race committee,
+     * a score correction is issued.
+     * @param timePoint the TimePoint at which the race committee confirmed their last rank list entered in the app.
+     */
+    private void compareScoresWithResultsOfRaceCommittee(RaceColumn raceColumn, String fleetName, TimePoint timePoint) {
+        Fleet fleet = raceColumn.getFleetByName(fleetName);
+        RaceLog raceLog = raceColumn.getRaceLog(fleet);
+        
+        int numberOfCompetitorsInLeaderboard = Util.size(getCompetitors());
+        int numberOfCompetitorsInRace;
+        
+        if (raceColumn.getRaceDefinition(fleet) != null) {
+            numberOfCompetitorsInRace = Util.size(raceColumn.getRaceDefinition(fleet).getCompetitors());
+        } else {
+            numberOfCompetitorsInRace = numberOfCompetitorsInLeaderboard;
+        }
+        
+        FinishPositioningListFinder positioningListFinder = new FinishPositioningListFinder(raceLog);
+        List<Pair<Competitor, MaxPointsReason>> positioningList = positioningListFinder.getFinishPositioningList();
+        for (Pair<Competitor, MaxPointsReason> positionedCompetitor : positioningList) {
+            if (positionedCompetitor.getB().equals(MaxPointsReason.NONE)) {
+                try {
+                    int rank = positioningList.indexOf(positionedCompetitor) + 1;
+                    Double rankByRaceCommittee = getScoringScheme().getScoreForRank(raceColumn, positionedCompetitor.getA(), rank, numberOfCompetitorsInRace);
+                    Double currentRank = getNetPoints(positionedCompetitor.getA(), raceColumn, timePoint);
+                    if (!currentRank.equals(rankByRaceCommittee)) {
+                        //call RaceColumnListener
+                        //getScoreCorrection().correctScore(positionedCompetitor.getA(), raceColumn, rankByRaceCommittee);
+                    }
+                } catch (NoWindException ex) {
+                    ex.printStackTrace();
+                }
+            } else {
+                if (!positionedCompetitor.getB().equals(getMaxPointsReason(positionedCompetitor.getA(), raceColumn, timePoint))) {
+                    //call RaceColumnListener
+                    //getScoreCorrection().setMaxPointsReason(positionedCompetitor.getA(), raceColumn, positionedCompetitor.getB());
+                }
+            }
+        }
     }
 }

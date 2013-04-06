@@ -497,5 +497,6 @@ public interface TrackedRace extends Serializable {
      * a setter for the listener on course design changes. The listener is mostly part of the tracking provider adapter.
      * @param listener the listener to operate with.
      */
-    void setCourseDesignChangedListener(CourseDesignChangedListener listener); 
+    void setCourseDesignChangedListener(CourseDesignChangedListener listener);
+
 }

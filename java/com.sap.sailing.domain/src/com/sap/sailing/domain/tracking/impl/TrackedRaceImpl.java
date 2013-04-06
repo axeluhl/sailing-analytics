@@ -2294,7 +2294,6 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
 
     @Override
     public void detachRaceLog() {
-        // Currently doing not much, be may notify some listeners in the future.
         this.attachedRaceLog.removeListener(raceLogListener);
         this.attachedRaceLog = null;
     }
@@ -2308,4 +2307,5 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     public void setCourseDesignChangedListener(CourseDesignChangedListener listener) {
         this.courseDesignChangedListener = listener;
     }
+    
 }
