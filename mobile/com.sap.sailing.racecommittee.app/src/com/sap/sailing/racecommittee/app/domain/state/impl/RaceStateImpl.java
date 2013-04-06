@@ -25,9 +25,9 @@ import com.sap.sailing.domain.racelog.analyzing.impl.RaceStatusAnalyzer;
 import com.sap.sailing.domain.racelog.analyzing.impl.StartTimeFinder;
 import com.sap.sailing.racecommittee.app.domain.racelog.RaceLogChangedListener;
 import com.sap.sailing.racecommittee.app.domain.racelog.impl.RaceLogChangedVisitor;
+import com.sap.sailing.racecommittee.app.domain.startprocedure.StartProcedure;
 import com.sap.sailing.racecommittee.app.domain.state.RaceState;
 import com.sap.sailing.racecommittee.app.domain.state.RaceStateChangedListener;
-import com.sap.sailing.racecommittee.app.domain.state.StartProcedure;
 
 public class RaceStateImpl implements RaceState, RaceLogChangedListener {
     // private static final String TAG = RaceStateImpl.class.getName();
