@@ -49,6 +49,7 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
     public RaceStateImpl(PassAwareRaceLog raceLog, StartProcedure procedure) {
         this.raceLog = raceLog;
         this.startProcedure = procedure;
+        this.startProcedure.setRaceStateChangedListener(this);
         
         this.status = RaceLogRaceStatus.UNKNOWN;
         this.stateChangedListeners = new HashSet<RaceStateChangedListener>();
@@ -130,6 +131,7 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
         this.raceLog.add(event);
     }
 
+    @Override
     public void onRaceAborted(TimePoint eventTime) {
         RaceLogEvent abortEvent = RaceLogEventFactory.INSTANCE.createRaceStatusEvent(eventTime, raceLog.getCurrentPassId(), RaceLogRaceStatus.UNSCHEDULED);
         this.raceLog.add(abortEvent);
@@ -137,17 +139,26 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
         RaceLogEvent passChangeEvent = RaceLogEventFactory.INSTANCE.createPassChangeEvent(eventTime, raceLog.getCurrentPassId() + 1);
         this.raceLog.add(passChangeEvent);
     }
+    
+    @Override
+    public void onRaceStartphaseEntered(TimePoint eventTime) {
+        RaceLogEvent statusEvent = RaceLogEventFactory.INSTANCE.createRaceStatusEvent(eventTime, raceLog.getCurrentPassId(), RaceLogRaceStatus.STARTPHASE);
+        this.raceLog.add(statusEvent);
+    }
 
+    @Override
     public void onRaceStarted(TimePoint eventTime) {
         RaceLogEvent statusEvent = RaceLogEventFactory.INSTANCE.createRaceStatusEvent(eventTime, raceLog.getCurrentPassId(), RaceLogRaceStatus.RUNNING);
         this.raceLog.add(statusEvent);
     }
 
+    @Override
     public void onRaceFinishing(TimePoint eventTime) {
         RaceLogEvent statusEvent = RaceLogEventFactory.INSTANCE.createRaceStatusEvent(eventTime, raceLog.getCurrentPassId(), RaceLogRaceStatus.FINISHING);
         this.raceLog.add(statusEvent);
     }
 
+    @Override
     public void onRaceFinished(TimePoint eventTime) {
         RaceLogEvent statusEvent = RaceLogEventFactory.INSTANCE.createRaceStatusEvent(eventTime, raceLog.getCurrentPassId(), RaceLogRaceStatus.FINISHED);
         this.raceLog.add(statusEvent);

@@ -9,8 +9,9 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.racelog.RaceLog;
+import com.sap.sailing.racecommittee.app.domain.startprocedure.StartProcedureRaceStateChangedListener;
 
-public interface RaceState {
+public interface RaceState extends StartProcedureRaceStateChangedListener {
 
     /**
      * Register a new listener on state changes.
@@ -107,25 +108,5 @@ public interface RaceState {
      * @return the status of the race.
      */
     RaceLogRaceStatus getStatus();
-    
-    /**
-     * TODO: remove when start procedures are ready
-     */
-    void onRaceAborted(TimePoint eventTime);
-
-    /**
-     * TODO: remove when start procedures are ready
-     */
-    void onRaceStarted(TimePoint eventTime);
-
-    /**
-     * TODO: remove when start procedures are ready
-     */
-    void onRaceFinishing(TimePoint now);
-    
-    /**
-     * TODO: remove when start procedures are ready
-     */
-    void onRaceFinished(TimePoint now);
 
 }
