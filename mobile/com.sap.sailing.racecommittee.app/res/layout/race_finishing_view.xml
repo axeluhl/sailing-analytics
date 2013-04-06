@@ -57,18 +57,19 @@
 
                 <TextView
                     android:id="@+id/textPositioning"
-                    android:layout_width="300dp"
+                    android:layout_width="350dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:gravity="center_vertical|center_horizontal"
                     android:text="@string/positionings"
                     android:textSize="12pt"
                     android:textStyle="bold"
-                    android:layout_marginRight="30dp" />
+                    android:layout_marginRight="30dp"
+                    android:layout_marginLeft="10dp" />
 
                 <TextView
                     android:id="@+id/textCompetitors"
-                    android:layout_width="300dp"
+                    android:layout_width="250dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:gravity="center_vertical|center_horizontal"
@@ -85,11 +86,12 @@
 
                 <com.mobeta.android.dslv.DragSortListView
                     android:id="@+id/listViewPositioningList"
-                    android:layout_width="300dp"
+                    android:layout_width="350dp"
                     android:layout_height="match_parent"
                     android:layout_gravity="left"
                     android:verticalSpacing="5dp"
                     android:layout_marginRight="30dp" 
+                    android:layout_marginLeft="10dp"
                     dslv:drag_enabled="true"
                     dslv:collapsed_height="2dp"    
                     dslv:drag_scroll_start="0.33"    
@@ -101,7 +103,7 @@
 
                 <ListView
                     android:id="@+id/gridViewCompetitors"
-                    android:layout_width="200dp"
+                    android:layout_width="250dp"
                     android:layout_height="match_parent"
                     android:verticalSpacing="5dp"
                     android:layout_gravity="left"
@@ -121,7 +123,7 @@
         <!-- SELECTION SECTION -->
 
         <LinearLayout
-            android:layout_width="275dp"
+            android:layout_width="225dp"
             android:layout_height="match_parent"
             android:gravity="center_horizontal"
             android:orientation="vertical" >

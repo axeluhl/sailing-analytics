@@ -216,12 +216,19 @@ public class FinishingRaceFragment extends RaceFragment implements TickListener 
 
     protected void setMaxPointsReasonForItem(Pair<Competitor, MaxPointsReason> item, CharSequence maxPointsReasonName) {
         MaxPointsReason maxPointsReason = MaxPointsReason.valueOf(maxPointsReasonName.toString());
-        item = new Pair<Competitor, MaxPointsReason>(item.getA(), maxPointsReason);
+        Pair<Competitor, MaxPointsReason> newItem = new Pair<Competitor, MaxPointsReason>(item.getA(), maxPointsReason);
+        int currentIndexOfItem = positionedCompetitors.indexOf(item);
+        replaceItemInPositioningList(currentIndexOfItem, item, newItem);
         
         if (!maxPointsReason.equals(MaxPointsReason.NONE)) {
-            setCompetitorToBottomOfPositioningList(item);
+            setCompetitorToBottomOfPositioningList(newItem);
         }
         getRace().getState().setFinishPositioningListChanged(positionedCompetitors);
+    }
+
+    private void replaceItemInPositioningList(int currentIndexOfItem, Pair<Competitor, MaxPointsReason> item, Pair<Competitor, MaxPointsReason> newItem) {
+        positioningAdapter.remove(item);
+        positioningAdapter.insert(newItem, currentIndexOfItem);
     }
 
     private void setCompetitorToBottomOfPositioningList(Pair<Competitor, MaxPointsReason> item) {
