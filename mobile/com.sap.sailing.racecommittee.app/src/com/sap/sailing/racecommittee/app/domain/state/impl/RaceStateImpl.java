@@ -176,7 +176,7 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
     }
     
     @Override
-    public List<Competitor> getFinishPositioningList() {
+    public List<Pair<Competitor, MaxPointsReason>> getFinishPositioningList() {
         return finishPositioningListFinder.getFinishPositioningList();
     }
     

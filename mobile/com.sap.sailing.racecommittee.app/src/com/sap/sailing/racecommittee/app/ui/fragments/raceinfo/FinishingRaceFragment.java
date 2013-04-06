@@ -10,10 +10,10 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -75,7 +75,8 @@ public class FinishingRaceFragment extends RaceFragment implements TickListener 
         Util.addAll(getRace().getCompetitors(), competitors);
         competitorsAdapter = new CompetitorsAdapter(getActivity(), R.layout.welter_grid_competitor_cell, competitors);
         
-        positionedCompetitors = new ArrayList<Pair<Competitor, MaxPointsReason>>();
+        positionedCompetitors = initializeFinishPositioningList();
+        deletePositionedCompetitorsFromUnpositionedList();
         positioningAdapter = new CompetitorPositioningListAdapter(getActivity(), R.layout.welter_positioning_item, positionedCompetitors);
         
         positioningListView = (DragSortListView) getView().findViewById(R.id.listViewPositioningList);
@@ -86,8 +87,7 @@ public class FinishingRaceFragment extends RaceFragment implements TickListener 
             public void drop(int from, int to) {
                 if (from != to) {
                     Pair<Competitor, MaxPointsReason> item = positioningAdapter.getItem(from);
-                    positioningAdapter.remove(item);
-                    positioningAdapter.insert(item, to);
+                    setItemToNewPositioning(from, to, item);
                     getRace().getState().setFinishPositioningListChanged(positionedCompetitors);
                 }
             }
@@ -101,14 +101,14 @@ public class FinishingRaceFragment extends RaceFragment implements TickListener 
                 onCompetitorRemovedFromPositioningList(item);
             }
         });
-        
-        positioningListView.setOnLongClickListener(new OnLongClickListener() {
+
+        positioningListView.setOnItemLongClickListener(new OnItemLongClickListener() {
 
             @Override
-            public boolean onLongClick(View arg0) {
-                return false;
-            }
-            
+            public boolean onItemLongClick(AdapterView<?> arg0, View arg1, int position, long arg3) {
+                createMaxPointsReasonSelectionDialog(positionedCompetitors.get(position));
+                return true;
+            } 
         });
         
         dragSortController = buildDragSortController(positioningListView);
@@ -143,7 +143,7 @@ public class FinishingRaceFragment extends RaceFragment implements TickListener 
         });
         
     }
-    
+
     @Override
     public void onStart() {
         super.onStart();
@@ -170,6 +170,64 @@ public class FinishingRaceFragment extends RaceFragment implements TickListener 
         controller.setRemoveMode(removeMode);
         controller.setBackgroundColor(getActivity().getResources().getColor(R.color.welter_medium_blue));
         return controller;
+    }
+    
+    private void deletePositionedCompetitorsFromUnpositionedList() {
+        for (Pair<Competitor, MaxPointsReason> positionedItem : positionedCompetitors) {
+            competitors.remove(positionedItem.getA());
+        }
+    }
+    
+    private List<Pair<Competitor, MaxPointsReason>> initializeFinishPositioningList() {
+        List<Pair<Competitor, MaxPointsReason>> positionings;
+        if (getRace().getState().getFinishPositioningList() != null) {
+            positionings = getRace().getState().getFinishPositioningList();
+        } else {
+            positionings = new ArrayList<Util.Pair<Competitor,MaxPointsReason>>();
+        }
+        return positionings;
+    }
+    
+    private void setItemToNewPositioning(int from, int to, Pair<Competitor, MaxPointsReason> item) {
+        positioningAdapter.remove(item);
+        positioningAdapter.insert(item, to);
+    }
+
+    private void createMaxPointsReasonSelectionDialog(final Pair<Competitor, MaxPointsReason> item) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        final CharSequence[] maxPointsReasons = getAllMaxPointsReasons();
+        builder.setTitle(R.string.change_course_element)
+        .setItems(maxPointsReasons, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int position) {
+                setMaxPointsReasonForItem(item, maxPointsReasons[position]);
+            }
+        });
+        builder.create();
+        builder.show();
+    }
+    
+    private CharSequence[] getAllMaxPointsReasons() {
+        List<CharSequence> result = new ArrayList<CharSequence>();
+        for (MaxPointsReason reason : MaxPointsReason.values()) {
+            result.add(reason.name());
+        }
+        return result.toArray(new CharSequence[result.size()]);
+    }
+
+    protected void setMaxPointsReasonForItem(Pair<Competitor, MaxPointsReason> item, CharSequence maxPointsReasonName) {
+        MaxPointsReason maxPointsReason = MaxPointsReason.valueOf(maxPointsReasonName.toString());
+        item = new Pair<Competitor, MaxPointsReason>(item.getA(), maxPointsReason);
+        
+        if (!maxPointsReason.equals(MaxPointsReason.NONE)) {
+            setCompetitorToBottomOfPositioningList(item);
+        }
+        getRace().getState().setFinishPositioningListChanged(positionedCompetitors);
+    }
+
+    private void setCompetitorToBottomOfPositioningList(Pair<Competitor, MaxPointsReason> item) {
+        int currentIndex = positionedCompetitors.indexOf(item);
+        int lastIndex = positionedCompetitors.size() - 1;
+        setItemToNewPositioning(currentIndex, lastIndex, item);
     }
 
     protected void onCompetitorClickedOnGrid(Competitor competitor) {

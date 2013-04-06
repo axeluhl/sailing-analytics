@@ -66,7 +66,7 @@ public interface RaceState {
      * 
      * @return the positioning list for the finish or <code>null</code>.
      */
-    List<Competitor> getFinishPositioningList();
+    List<Pair<Competitor, MaxPointsReason>> getFinishPositioningList();
 
     /**
      * Sets the current race's start time
