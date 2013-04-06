@@ -22,7 +22,9 @@ import com.mobeta.android.dslv.DragSortController;
 import com.mobeta.android.dslv.DragSortListView;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.impl.Util;
+import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.ui.adapters.finishing.CompetitorPositioningListAdapter;
@@ -46,7 +48,7 @@ public class FinishingRaceFragment extends RaceFragment implements TickListener 
     private CompetitorPositioningListAdapter positioningAdapter;
     
     protected List<Competitor> competitors;
-    protected List<Competitor> positionedCompetitors;
+    protected List<Pair<Competitor, MaxPointsReason>> positionedCompetitors;
     
     private int dragStartMode = DragSortController.ON_DRAG;
     private boolean removeEnabled = true;
@@ -71,10 +73,9 @@ public class FinishingRaceFragment extends RaceFragment implements TickListener 
         
         competitors = new ArrayList<Competitor>();
         Util.addAll(getRace().getCompetitors(), competitors);
-        
-        positionedCompetitors = new ArrayList<Competitor>();
         competitorsAdapter = new CompetitorsAdapter(getActivity(), R.layout.welter_grid_competitor_cell, competitors);
         
+        positionedCompetitors = new ArrayList<Pair<Competitor, MaxPointsReason>>();
         positioningAdapter = new CompetitorPositioningListAdapter(getActivity(), R.layout.welter_positioning_item, positionedCompetitors);
         
         positioningListView = (DragSortListView) getView().findViewById(R.id.listViewPositioningList);
@@ -84,7 +85,7 @@ public class FinishingRaceFragment extends RaceFragment implements TickListener 
             @Override
             public void drop(int from, int to) {
                 if (from != to) {
-                    Competitor item = positioningAdapter.getItem(from);
+                    Pair<Competitor, MaxPointsReason> item = positioningAdapter.getItem(from);
                     positioningAdapter.remove(item);
                     positioningAdapter.insert(item, to);
                     getRace().getState().setFinishPositioningListChanged(positionedCompetitors);
@@ -96,7 +97,7 @@ public class FinishingRaceFragment extends RaceFragment implements TickListener 
             
             @Override
             public void remove(int toBeRemoved) {
-                Competitor item = positioningAdapter.getItem(toBeRemoved);
+                Pair<Competitor, MaxPointsReason> item = positioningAdapter.getItem(toBeRemoved);
                 onCompetitorRemovedFromPositioningList(item);
             }
         });
@@ -183,13 +184,14 @@ public class FinishingRaceFragment extends RaceFragment implements TickListener 
     }
 
     private void addNewCompetitorToPositioningList(Competitor competitor) {
-        positionedCompetitors.add(competitor);
+        
+        positionedCompetitors.add(new Pair<Competitor, MaxPointsReason>(competitor, MaxPointsReason.NONE));
         positioningAdapter.notifyDataSetChanged();
     }
     
-    protected void onCompetitorRemovedFromPositioningList(Competitor competitor) {
-        addNewCompetitorToCompetitorList(competitor);
-        removeCompetitorFromPositionings(competitor);
+    protected void onCompetitorRemovedFromPositioningList(Pair<Competitor, MaxPointsReason> item) {
+        addNewCompetitorToCompetitorList(item.getA());
+        removeCompetitorFromPositionings(item);
         getRace().getState().setFinishPositioningListChanged(positionedCompetitors);
     }
     
@@ -198,8 +200,8 @@ public class FinishingRaceFragment extends RaceFragment implements TickListener 
         competitorsAdapter.notifyDataSetChanged();
     }
     
-    protected void removeCompetitorFromPositionings(Competitor competitor) {
-        positionedCompetitors.remove(competitor);
+    protected void removeCompetitorFromPositionings(Pair<Competitor, MaxPointsReason> item) {
+        positionedCompetitors.remove(item);
         positioningAdapter.notifyDataSetChanged();
     }
 

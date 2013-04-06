@@ -9,7 +9,9 @@ import java.util.UUID;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.racelog.PassAwareRaceLog;
 import com.sap.sailing.domain.racelog.RaceLog;
@@ -166,10 +168,10 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
     }
 
     @Override
-    public void setFinishPositioningListChanged(List<Competitor> competitors) {
+    public void setFinishPositioningListChanged(List<Pair<Competitor,MaxPointsReason>> positionedCompetitors) {
         TimePoint eventTime = MillisecondsTimePoint.now();
         
-        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFinishPositioningListChangedEvent(eventTime, competitors, raceLog.getCurrentPassId());
+        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFinishPositioningListChangedEvent(eventTime, raceLog.getCurrentPassId(), positionedCompetitors);
         this.raceLog.add(event);        
     }
     

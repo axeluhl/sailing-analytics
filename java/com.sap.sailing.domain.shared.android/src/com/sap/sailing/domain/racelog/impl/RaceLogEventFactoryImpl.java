@@ -8,7 +8,9 @@ import java.util.UUID;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.racelog.RaceLogCourseAreaChangedEvent;
@@ -93,14 +95,14 @@ public class RaceLogEventFactoryImpl implements RaceLogEventFactory {
 
     @Override
     public RaceLogFinishPositioningListChangedEventImpl createFinishPositioningListChangedEvent(
-            TimePoint timePoint, Serializable id, List<Competitor> competitors, int passId) {
-        return new RaceLogFinishPositioningListChangedEventImpl(MillisecondsTimePoint.now(), timePoint, id, competitors, passId);
+            TimePoint timePoint, Serializable id, List<Competitor> competitors, int passId, List<Pair<Competitor,MaxPointsReason>> positionedCompetitors) {
+        return new RaceLogFinishPositioningListChangedEventImpl(MillisecondsTimePoint.now(), timePoint, id, competitors, passId, positionedCompetitors);
     }
 
     @Override
     public RaceLogFinishPositioningListChangedEventImpl createFinishPositioningListChangedEvent(
-            TimePoint timePoint, List<Competitor> competitors, int passId) {
-        return createFinishPositioningListChangedEvent(timePoint, UUID.randomUUID(), competitors, passId);
+            TimePoint timePoint, int passId, List<Pair<Competitor,MaxPointsReason>> positionedCompetitors) {
+        return createFinishPositioningListChangedEvent(timePoint, UUID.randomUUID(), new ArrayList<Competitor>(), passId, positionedCompetitors);
     }
 
     @Override

@@ -4,7 +4,9 @@ import java.util.List;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseBase;
+import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.racelog.RaceLog;
 
@@ -85,9 +87,9 @@ public interface RaceState {
     /**
      * Sets the current finish positioning list for the race
      * 
-     * @param competitors the current finishing list
+     * @param positionedCompetitors the current finishing list
      */
-    void setFinishPositioningListChanged(List<Competitor> competitors);
+    void setFinishPositioningListChanged(List<Pair<Competitor,MaxPointsReason>> positionedCompetitors);
     
     /**
      * Sets a confirmation event for the finish positionings

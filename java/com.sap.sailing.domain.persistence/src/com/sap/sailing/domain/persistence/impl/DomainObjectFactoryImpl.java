@@ -1023,7 +1023,10 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
 
     private RaceLogEvent loadRaceLogFinishPositioningListChangedEvent(TimePoint createdAt, TimePoint timePoint,
             Serializable id, Integer passId, List<Competitor> competitors, DBObject dbObject) {
-        return raceLogEventFactory.createFinishPositioningListChangedEvent(createdAt, timePoint, id, competitors, passId);
+        BasicDBList dbPositionedCompetitorList = (BasicDBList) dbObject.get(FieldNames.RACE_LOG_POSITIONED_COMPETITORS.name());
+        List<Pair<Competitor,MaxPointsReason>> positionedCompetitors = loadPositionedCompetitors(dbPositionedCompetitorList);
+        
+        return raceLogEventFactory.createFinishPositioningListChangedEvent(createdAt, timePoint, id, competitors, passId, positionedCompetitors);
     }
 
     private RaceLogEvent loadRaceLogPassChangeEvent(TimePoint createdAt, TimePoint timePoint, Serializable id,
@@ -1039,6 +1042,22 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     private RaceLogCourseAreaChangedEvent loadRaceLogCourseAreaChangedEvent(TimePoint createdAt, TimePoint timePoint, Serializable id, Integer passId, List<Competitor> competitors, DBObject dbObject) {
         Serializable courseAreaId = (Serializable) dbObject.get(FieldNames.COURSE_AREA_ID.name());
         return raceLogEventFactory.createCourseAreaChangedEvent(createdAt, timePoint, id, competitors, passId, courseAreaId);
+    }
+    
+    private List<Pair<Competitor, MaxPointsReason>> loadPositionedCompetitors(BasicDBList dbPositionedCompetitorList) {
+        List<Pair<Competitor, MaxPointsReason>> positionedCompetitors = new ArrayList<Pair<Competitor, MaxPointsReason>>();
+        for (Object object : dbPositionedCompetitorList) {
+            DBObject dbObject = (DBObject) object;
+
+            Serializable competitorId = (Serializable) dbObject.get(FieldNames.COMPETITOR_ID.name());
+            Competitor competitor = DomainFactory.INSTANCE.getExistingCompetitorById(competitorId);
+            
+            MaxPointsReason maxPointsReason = MaxPointsReason.valueOf((String) dbObject.get(FieldNames.LEADERBOARD_SCORE_CORRECTION_MAX_POINTS_REASON.name()));
+            
+            Pair<Competitor,MaxPointsReason> positionedCompetitor = new Pair<Competitor, MaxPointsReason>(competitor, maxPointsReason);
+            positionedCompetitors.add(positionedCompetitor);
+        }
+        return positionedCompetitors;
     }
 
     private List<Competitor> loadCompetitorsForRaceLogEvent(BasicDBList dbCompetitorList) {

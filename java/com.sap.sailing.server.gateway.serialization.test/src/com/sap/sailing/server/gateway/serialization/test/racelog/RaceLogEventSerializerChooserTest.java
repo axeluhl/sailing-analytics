@@ -98,7 +98,7 @@ public class RaceLogEventSerializerChooserTest {
     @Test
     public void testChoosesFinishPositioningListChangedSerializer() {
         // we use the real event type here because we do not want to re-implement the dispatching.
-        RaceLogEvent event = factory.createFinishPositioningListChangedEvent(null, null, 0);
+        RaceLogEvent event = factory.createFinishPositioningListChangedEvent(null, 0, null);
         assertEquals(finishPositioningListChangedEventSerializer, chooser.getSerializer(event));
     }
     

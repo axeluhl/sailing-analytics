@@ -36,6 +36,7 @@ import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
+import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
@@ -659,10 +660,12 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         storeRaceLogEventProperties(finishPositioningListChangedEvent, result);
 
         result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogFinishPositioningListChangedEvent.class.getSimpleName());
+        
+        result.put(FieldNames.RACE_LOG_POSITIONED_COMPETITORS.name(), storePositionedCompetitors(finishPositioningListChangedEvent.getPositionedCompetitors()));
 
         return result;
     }
-    
+
     private Object storeRaceLogFinishPositioningListChangedEvent(RaceLogFinishPositioningConfirmedEvent finishPositioningConfirmedEvent) {
         DBObject result = new BasicDBObject();
         storeRaceLogEventProperties(finishPositioningConfirmedEvent, result);
@@ -672,6 +675,25 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         return result;
     }
     
+    private BasicDBList storePositionedCompetitors(List<Pair<Competitor, MaxPointsReason>> positionedCompetitors) {
+        BasicDBList dbList = new BasicDBList();
+        
+        for (Pair<Competitor, MaxPointsReason> competitorPair : positionedCompetitors) {
+            dbList.add(storePositionedCompetitor(competitorPair));
+        }
+        
+        return dbList;
+    }
+    
+    private DBObject storePositionedCompetitor(Pair<Competitor, MaxPointsReason> competitorPair) {
+        DBObject result = new BasicDBObject();
+        
+        result.put(FieldNames.COMPETITOR_ID.name(), competitorPair.getA().getId());
+        result.put(FieldNames.LEADERBOARD_SCORE_CORRECTION_MAX_POINTS_REASON.name(), competitorPair.getB().name());
+        
+        return result;
+    }
+
     private BasicDBList storeCourseBase(CourseBase courseData) {
         BasicDBList dbList = new BasicDBList();
         
