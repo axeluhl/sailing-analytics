@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.state.RaceState;
@@ -65,20 +66,11 @@ public class RaceInfoFragment extends RaceFragment implements RaceStateChangedLi
             }
         });
 
-        /// TODO: implement reset button
         Button resetButton = ((Button) getView().findViewById(R.id.btnResetRace));
-        resetButton.setText("No yet");
         resetButton.setOnClickListener(new OnClickListener() {
             public void onClick(View arg0) {
-                /*getRace().getRaceLog().add(
-						new RaceLogRaceStatusEventImpl(
-								new MillisecondsTimePoint(new Date()), 
-								UUID.randomUUID(), 
-								null,
-								42,
-								RaceLogRaceStatus.UNSCHEDULED));
-				TimePoint time = new MillisecondsTimePoint(new Date());
-				getRace().getState().setStartTime(time.plus(360000));*/
+                ExLog.i(TAG, "Reset race button pressed");
+                getRace().getState().onRaceAborted(MillisecondsTimePoint.now());
             }
         });
 

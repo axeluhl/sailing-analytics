@@ -98,6 +98,12 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
             listener.onStartTimeChanged(newStartTime);
         }
     }
+    
+    private void notifyListenersAboutRaceAbortion() {
+        for (RaceStateChangedListener listener : stateChangedListeners) {
+            listener.onRaceAborted();
+        }
+    }
 
     public void registerListener(RaceStateChangedListener listener) {
         stateChangedListeners.add(listener);
@@ -122,6 +128,7 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
         RaceLogEvent event = RaceLogEventFactory.INSTANCE.createStartTimeEvent(eventTime, UUID.randomUUID(), 
                 Collections.<Competitor> emptyList(), raceLog.getCurrentPassId(), newStartTime);
         this.raceLog.add(event);
+        
         notifyListenersAboutStartTimeChange(newStartTime);
     }
 
@@ -150,6 +157,8 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
 
         RaceLogEvent passChangeEvent = RaceLogEventFactory.INSTANCE.createPassChangeEvent(eventTime, raceLog.getCurrentPassId() + 1);
         this.raceLog.add(passChangeEvent);
+        
+        notifyListenersAboutRaceAbortion();
     }
     
     @Override

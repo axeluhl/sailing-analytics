@@ -44,6 +44,9 @@ public class RaceLogFinishPositioningListChangedEventSerializer extends BaseRace
         
         for (Pair<Competitor, MaxPointsReason> positionedCompetitor : positionedCompetitors) {
             JSONObject jsonPositionedCompetitor = new JSONObject();
+            if (positionedCompetitor == null || positionedCompetitor.getA() == null) {
+                continue;
+            }
             jsonPositionedCompetitor.put(FIELD_COMPETITOR, competitorSerializer.serialize(positionedCompetitor.getA()));
             jsonPositionedCompetitor.put(FIELD_SCORE_CORRECTIONS_MAX_POINTS_REASON, positionedCompetitor.getB().name());
             jsonPositionedCompetitors.add(jsonPositionedCompetitor);

@@ -82,7 +82,7 @@ public class EventPersistenceManager {
      */
     private void removeEntryInFileContent(String eventLine) {
         if (fileContent.contains(eventLine)) {
-            fileContent = fileContent.replace(eventLine + "\n", "");
+            fileContent = fileContent.replace(eventLine, "");
             writeFileContentToFile();
             ExLog.i(TAG, "Entry " + eventLine + " is removed from fileContent");
         }

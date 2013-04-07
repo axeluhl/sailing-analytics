@@ -18,6 +18,7 @@ import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogCourseDe
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogFinishPositioningConfirmedEventSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogFinishPositioningListChangedEventSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogFlagEventSerializer;
+import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogPassChangeEventSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogRaceStatusEventSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogStartTimeEventSerializer;
 
@@ -37,7 +38,8 @@ public class RaceLogEventDeserializer implements JsonDeserializer<RaceLogEvent> 
                                         new ControlPointDeserializer(
                                                 new MarkDeserializer(domainFactory), new GateDeserializer(domainFactory, new MarkDeserializer(domainFactory)))))),
                 new RaceLogFinishPositioningListChangedEventDeserializer(competitorDeserializer),
-                new RaceLogFinishPositioningConfirmedEventDeserializer(competitorDeserializer));
+                new RaceLogFinishPositioningConfirmedEventDeserializer(competitorDeserializer),
+                new RaceLogPassChangeEventDeserializer(competitorDeserializer));
     }
 
     protected JsonDeserializer<RaceLogEvent> flagEventDeserializer;
@@ -47,6 +49,7 @@ public class RaceLogEventDeserializer implements JsonDeserializer<RaceLogEvent> 
     protected JsonDeserializer<RaceLogEvent> courseDesignChangedEventDeserializer;
     protected JsonDeserializer<RaceLogEvent> finishPositioningListChangedEventDeserializer;
     protected JsonDeserializer<RaceLogEvent> finishPositioningConfirmedEventDeserializer;
+    protected JsonDeserializer<RaceLogEvent> passChangeEventDeserializer;
 
     public RaceLogEventDeserializer(JsonDeserializer<RaceLogEvent> flagEventDeserializer,
             JsonDeserializer<RaceLogEvent> startTimeEventDeserializer,
@@ -54,7 +57,8 @@ public class RaceLogEventDeserializer implements JsonDeserializer<RaceLogEvent> 
             JsonDeserializer<RaceLogEvent> courseAreaChangedEventDeserializer,
             JsonDeserializer<RaceLogEvent> courseDesignChangedEventDeserializer,
             JsonDeserializer<RaceLogEvent> finishPositioningListChangedEventDeserializer,
-            JsonDeserializer<RaceLogEvent> finishPositioningConfirmedEventDeserializer) {
+            JsonDeserializer<RaceLogEvent> finishPositioningConfirmedEventDeserializer,
+            JsonDeserializer<RaceLogEvent> passChangeEventDeserializer) {
         this.flagEventDeserializer = flagEventDeserializer;
         this.startTimeEventDeserializer = startTimeEventDeserializer;
         this.raceStatusEventDeserializer = raceStatusEventDeserializer;
@@ -62,6 +66,7 @@ public class RaceLogEventDeserializer implements JsonDeserializer<RaceLogEvent> 
         this.courseDesignChangedEventDeserializer = courseDesignChangedEventDeserializer;
         this.finishPositioningListChangedEventDeserializer = finishPositioningListChangedEventDeserializer;
         this.finishPositioningConfirmedEventDeserializer = finishPositioningConfirmedEventDeserializer;
+        this.passChangeEventDeserializer = passChangeEventDeserializer;
     }
 
     protected JsonDeserializer<RaceLogEvent> getDeserializer(JSONObject object) throws JsonDeserializationException {
@@ -81,6 +86,8 @@ public class RaceLogEventDeserializer implements JsonDeserializer<RaceLogEvent> 
             return finishPositioningListChangedEventDeserializer;
         } else if (type.equals(RaceLogFinishPositioningConfirmedEventSerializer.VALUE_CLASS)) {
             return finishPositioningConfirmedEventDeserializer;
+        } else if (type.equals(RaceLogPassChangeEventSerializer.VALUE_CLASS)) {
+            return passChangeEventDeserializer;
         }
 
         throw new JsonDeserializationException(String.format("There is no deserializer defined for event type %s.",

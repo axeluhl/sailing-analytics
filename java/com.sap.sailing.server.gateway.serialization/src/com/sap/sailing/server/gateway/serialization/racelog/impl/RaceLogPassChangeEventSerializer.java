@@ -9,7 +9,7 @@ import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 
 public class RaceLogPassChangeEventSerializer extends BaseRaceLogEventSerializer {
 
-    public static final String VALUE_CLASS = RaceLogPassChangeEventSerializer.class.getSimpleName();
+    public static final String VALUE_CLASS = RaceLogPassChangeEvent.class.getSimpleName();
     
     public RaceLogPassChangeEventSerializer(JsonSerializer<Competitor> competitorSerializer) {
         super(competitorSerializer);
