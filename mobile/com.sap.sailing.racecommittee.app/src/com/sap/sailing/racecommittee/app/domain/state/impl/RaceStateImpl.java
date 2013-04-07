@@ -73,6 +73,11 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
     public RaceLogRaceStatus getStatus() {
         return status;
     }
+    
+    @Override
+    public StartProcedure getStartProcedure() {
+        return startProcedure;
+    }
 
     private void setStatus(RaceLogRaceStatus newStatus) {
         RaceLogRaceStatus oldStatus = this.status;
@@ -101,14 +106,7 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
     }
 
     public void setStartTime(TimePoint newStartTime) {
-        TimePoint now = MillisecondsTimePoint.now();
-        TimePoint startPhaseStartTime = startProcedure.getStartPhaseStartTime(newStartTime);
-        TimePoint eventTime;
-        if (now.after(startPhaseStartTime)) {
-            eventTime = startPhaseStartTime.minus(1);
-        } else {
-            eventTime = now;
-        }
+        TimePoint eventTime = startProcedure.getLogicalStartTimeEventTime(newStartTime);
             
         RaceLogRaceStatus status = getStatus();
         if (status != RaceLogRaceStatus.UNSCHEDULED) {

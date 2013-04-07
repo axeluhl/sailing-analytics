@@ -163,9 +163,8 @@ public class RaceStateService extends Service {
         TimePoint eventTime = (TimePoint) intent.getSerializableExtra(AppConstants.RACING_EVENT_TIME);
         
         if (getString(R.string.intentActionAlarmAction).equals(action)) {
-            // TODO: replace with generic action according to startprocedure
+            race.getState().getStartProcedure().dispatchFiredEventTimePoint(race.getState().getStartTime(), eventTime);
             managedIntents.get(race).remove(intent);
-            race.getState().onRaceStarted(eventTime);
             return;
         }
     }
@@ -218,24 +217,46 @@ public class RaceStateService extends Service {
         }
         
         switch (state.getStatus()) {
+        case UNSCHEDULED:
+            handleNewStartTime(race);
         case SCHEDULED:
-            TimePoint startTime = state.getStartTime().plus(1);
-            Intent intent = new Intent(getString(R.string.intentActionAlarmAction));
-            intent.putExtra(EXTRAS_SERVICE_ID, serviceId);
-            intent.putExtra(AppConstants.RACE_ID_KEY, race.getId());
-            intent.putExtra(AppConstants.RACING_EVENT_TIME, startTime);
-            PendingIntent pendingIntent = PendingIntent.getService(
-                    this, 
-                    alarmManagerRequestCode++, 
-                    intent,
-                    PendingIntent.FLAG_UPDATE_CURRENT);
-            managedIntents.get(race).add(pendingIntent);
-            ExLog.i(TAG, "The start race alarm will be fired at " + startTime);
-            alarmManager.set(AlarmManager.RTC_WAKEUP, startTime.asMillis(), pendingIntent);
+            //handleNewStartTime(race, state);
             break;
         default:
             break;
         }
+    }
+
+    private void handleNewStartTime(ManagedRace race) {
+        //formerly state.getStartTime().plus(1) don't know why
+        TimePoint startTime = race.getState().getStartTime();
+        
+        List<TimePoint> fireTimePoints = race.getState().getStartProcedure().getAutomaticEventFireTimePoints(startTime);
+        for (TimePoint eventFireTimePoint : fireTimePoints) {
+            scheduleEventTime(race, eventFireTimePoint);
+        }
+    }
+
+    private void scheduleEventTime(ManagedRace race, TimePoint eventFireTimePoint) {
+        String action = getString(R.string.intentActionAlarmAction);
+
+        addIntentToAlarmManager(action, race, eventFireTimePoint);
+    }
+
+    private void addIntentToAlarmManager(String action, ManagedRace managedRace, TimePoint eventFireTimePoint) {
+        PendingIntent pendingIntent = createPendingIntent(action, managedRace, eventFireTimePoint);
+        managedIntents.get(managedRace.getId()).add(pendingIntent);
+        alarmManager.set(AlarmManager.RTC_WAKEUP, eventFireTimePoint.asMillis(), pendingIntent);
+        ExLog.i(TAG, "The alarm " + action + " will be fired at " + eventFireTimePoint);
+    }
+
+    private PendingIntent createPendingIntent(String action, ManagedRace managedRace, TimePoint eventFireTimePoint) {
+        Intent intent = new Intent(action);
+        intent.putExtra(EXTRAS_SERVICE_ID, serviceId);
+        intent.putExtra(AppConstants.RACE_ID_KEY, managedRace.getId());
+        intent.putExtra(AppConstants.RACING_EVENT_TIME, eventFireTimePoint.asMillis());
+        PendingIntent pendingIntent = PendingIntent.getService(this, alarmManagerRequestCode++, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        return pendingIntent;
     }
 
 }

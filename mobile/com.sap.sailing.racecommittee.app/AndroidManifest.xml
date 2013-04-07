@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.sap.sailing.racecommittee.app"
     android:versionCode="1"
@@ -45,7 +46,8 @@
             android:name=".ui.activities.RacingActivity">
         </activity>
         
-        <activity android:name=".ui.activities.SettingsActivity"></activity><service
+        <activity android:name=".ui.activities.SettingsActivity"></activity>
+        <service
             android:name="com.sap.sailing.racecommittee.app.services.RaceStateService"
             android:enabled="true"
             android:exported="false" >

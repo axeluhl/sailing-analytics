@@ -17,9 +17,9 @@ public interface StartProcedure {
      */
     TimePoint getLogicalStartTimeEventTime(TimePoint newEnteredStartTime);
     
-    List<TimePoint> getTriggerEventTimePoints(TimePoint startTime);
+    List<TimePoint> getAutomaticEventFireTimePoints(TimePoint startTime);
     
-    void dispatchTriggeredEventTimePoint(TimePoint startTime, TimePoint eventTime);
+    void dispatchFiredEventTimePoint(TimePoint startTime, TimePoint eventTime);
     
     void setRaceStateChangedListener(StartProcedureRaceStateChangedListener raceStateChangedListener);
 

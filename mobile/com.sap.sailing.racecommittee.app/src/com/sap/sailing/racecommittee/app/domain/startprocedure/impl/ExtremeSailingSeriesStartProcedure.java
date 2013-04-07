@@ -45,7 +45,7 @@ public class ExtremeSailingSeriesStartProcedure implements StartProcedure {
     }
 
     @Override
-    public List<TimePoint> getTriggerEventTimePoints(TimePoint startTime) {
+    public List<TimePoint> getAutomaticEventFireTimePoints(TimePoint startTime) {
         List<TimePoint> triggerTimePoints = new ArrayList<TimePoint>();
         
         for (Long interval : startProcedureEventIntervals) {
@@ -55,7 +55,7 @@ public class ExtremeSailingSeriesStartProcedure implements StartProcedure {
     }
 
     @Override
-    public void dispatchTriggeredEventTimePoint(TimePoint startTime, TimePoint eventTime) {
+    public void dispatchFiredEventTimePoint(TimePoint startTime, TimePoint eventTime) {
         long interval = startTime.asMillis() - eventTime.asMillis();
         
         if (interval == startPhaseAPDownInterval) {
