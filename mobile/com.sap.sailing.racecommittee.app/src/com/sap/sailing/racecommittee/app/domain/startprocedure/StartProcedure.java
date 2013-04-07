@@ -6,7 +6,7 @@ import com.sap.sailing.domain.common.TimePoint;
 
 public interface StartProcedure {
     
-    TimePoint getStartTimeEventTime();
+    TimePoint getStartPhaseStartTime(TimePoint startTime);
     
     List<TimePoint> getTriggerEventTimePoints(TimePoint startTime);
     

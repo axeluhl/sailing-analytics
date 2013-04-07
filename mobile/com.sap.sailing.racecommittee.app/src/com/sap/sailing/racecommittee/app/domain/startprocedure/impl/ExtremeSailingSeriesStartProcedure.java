@@ -39,9 +39,8 @@ public class ExtremeSailingSeriesStartProcedure implements StartProcedure {
     }
 
     @Override
-    public TimePoint getStartTimeEventTime() {
-        // TODO Auto-generated method stub
-        return null;
+    public TimePoint getStartPhaseStartTime(TimePoint startTime) {
+        return startTime.minus(startPhaseAPDownInterval);
     }
 
     @Override
