@@ -81,6 +81,7 @@
 	<string name="fixedLine">Fixed line start</string>
 	<string name="gateStart_mode">Gate start</string>
 	<string name="confirmation_blue_flag_remove">Are you sure to remove the blue flag?</string>
+	<string name="confirmation_blue_flag_display">Are you sure to display the blue flag?</string>
 	<string name="finishing_limit_template">Race finishing limit is at %s</string>
 	<string name="race_running_since_template" formatted="false">%s since %s started</string>
 	

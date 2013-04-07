@@ -22,5 +22,9 @@ public interface StartProcedure {
     void dispatchFiredEventTimePoint(TimePoint startTime, TimePoint eventTime);
     
     void setRaceStateChangedListener(StartProcedureRaceStateChangedListener raceStateChangedListener);
+    
+    void setFinishing(TimePoint eventTime);
+    
+    void setFinished(TimePoint eventTime);
 
 }

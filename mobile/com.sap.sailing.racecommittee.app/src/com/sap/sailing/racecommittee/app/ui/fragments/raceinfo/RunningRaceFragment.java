@@ -1,5 +1,7 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,9 +12,14 @@ import android.widget.TextView;
 
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
+import com.sap.sailing.racecommittee.app.utils.TickListener;
+import com.sap.sailing.racecommittee.app.utils.TickSingleton;
 
-public class RunningRaceFragment extends RaceFragment {
+public class RunningRaceFragment extends RaceFragment implements TickListener {
+    
+    private TextView countUpTextView;
     
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -23,15 +30,72 @@ public class RunningRaceFragment extends RaceFragment {
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         
-        TextView countUp = (TextView) getView().findViewById(R.id.raceCountUp);
-        countUp.setText("Running");
+        countUpTextView = (TextView) getView().findViewById(R.id.raceCountUp);
         
         ImageButton blueFlagButton = (ImageButton) getView().findViewById(R.id.blueFlagButton);
         blueFlagButton.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
-                getRace().getState().onRaceFinishing(MillisecondsTimePoint.now());
+                showDisplayBlueFlagDialog();
             }
         });
+    }
+    
+    @Override
+    public void onStart() {
+        super.onStart();
+        TickSingleton.INSTANCE.registerListener(this);
+        notifyTick();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        TickSingleton.INSTANCE.unregisterListener(this);
+    }
+    
+    private void showDisplayBlueFlagDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setMessage(getActivity().getResources().getString(R.string.confirmation_blue_flag_display))
+        .setCancelable(true)
+        .setPositiveButton(getActivity().getResources().getString(R.string.yes), new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                ExLog.i(ExLog.FLAG_BLUE_SET, getRace().getId().toString(), getActivity());
+                getRace().getState().getStartProcedure().setFinishing(MillisecondsTimePoint.now());
+            }
+        })
+        .setNegativeButton(getActivity().getResources().getString(R.string.no), new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                ExLog.i(ExLog.FLAG_BLUE_SET_NO, getRace().getId().toString(), getActivity());
+                dialog.cancel();
+            }
+        });
+        AlertDialog alert = builder.create();
+        alert.show();
+    }
+    
+    public void notifyTick() {
+        if (getRace().getState().getStartTime() == null)
+            return;
+
+        long millisSinceStart = System.currentTimeMillis() - getRace().getState().getStartTime().asMillis();
+        setStarttimeCountupLabel(millisSinceStart);
+    }
+
+
+    private void setStarttimeCountupLabel(long millisecondsSinceStart) {
+        countUpTextView.setText(String.format(getString(R.string.race_running_since_template), prettyTimeString(millisecondsSinceStart), getRace().getName()));
+    }
+
+    protected CharSequence prettyTimeString(long time) {
+        int secondsStart = (int) (time / 1000);
+        int hours = secondsStart / 3600;
+        int minutes = (secondsStart % 3600) / 60;
+        int seconds = (secondsStart % 60);
+        String timePattern = "%s:%s:%s";
+        String secondsString = seconds < 10 ? "0" + seconds : "" + seconds;
+        String minutesString = minutes < 10 ? "0" + minutes : "" + minutes;
+        String hoursString = hours < 10 ? "0" + hours : "" + hours;
+        return String.format(timePattern, hoursString, minutesString, secondsString);
     }
 
 }

@@ -325,7 +325,7 @@ public class FinishingRaceFragment extends RaceFragment implements TickListener 
         .setPositiveButton(getActivity().getResources().getString(R.string.yes), new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
                 ExLog.i(ExLog.FLAG_BLUE_REMOVE, getRace().getId().toString(), getActivity());
-                getRace().getState().onRaceFinished(MillisecondsTimePoint.now());
+                getRace().getState().getStartProcedure().setFinished(MillisecondsTimePoint.now());
                 getRace().getState().setFinishPositioningConfirmed();
             }
         })

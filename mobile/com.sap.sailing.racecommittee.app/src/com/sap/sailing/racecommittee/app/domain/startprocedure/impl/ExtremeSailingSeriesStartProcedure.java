@@ -143,4 +143,30 @@ public class ExtremeSailingSeriesStartProcedure implements StartProcedure {
         return resultTime;
     }
 
+    @Override
+    public void setFinishing(TimePoint eventTime) {
+        TimePoint blueFlagDisplayEventTime = eventTime.minus(1);
+        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(blueFlagDisplayEventTime, UUID.randomUUID(), Collections.<Competitor>emptyList(), 
+                raceLog.getCurrentPassId(), Flags.BLUE, Flags.NONE, /*isDisplayed*/true);
+        raceLog.add(event);
+        
+        //TODO compute and set ESS time limit
+        
+        if (raceStateChangedListener != null) {
+            raceStateChangedListener.onRaceFinishing(eventTime);
+        }
+    }
+
+    @Override
+    public void setFinished(TimePoint eventTime) {
+        TimePoint blueFlagRemoveEventTime = eventTime.minus(1);
+        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(blueFlagRemoveEventTime, UUID.randomUUID(), Collections.<Competitor>emptyList(), 
+                raceLog.getCurrentPassId(), Flags.BLUE, Flags.NONE, /*isDisplayed*/false);
+        raceLog.add(event);
+        
+        if (raceStateChangedListener != null) {
+            raceStateChangedListener.onRaceFinished(eventTime);
+        }
+    }
+
 }
