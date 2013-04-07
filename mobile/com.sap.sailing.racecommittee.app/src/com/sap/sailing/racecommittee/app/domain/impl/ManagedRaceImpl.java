@@ -12,6 +12,7 @@ import com.sap.sailing.domain.racelog.PassAwareRaceLog;
 import com.sap.sailing.domain.racelog.RaceLog;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.ManagedRaceIdentifier;
+import com.sap.sailing.racecommittee.app.domain.startprocedure.impl.ExtremeSailingSeriesStartProcedure;
 import com.sap.sailing.racecommittee.app.domain.state.RaceState;
 import com.sap.sailing.racecommittee.app.domain.state.impl.RaceStateImpl;
 
@@ -25,7 +26,8 @@ public class ManagedRaceImpl implements ManagedRace {
     private Iterable<Competitor> competitors;
 
     public ManagedRaceImpl(ManagedRaceIdentifier identifier, PassAwareRaceLog raceLog, Iterable<Competitor> competitors) {
-        this(identifier, new RaceStateImpl(raceLog, null), competitors);
+        //TODO To be changed when the start procedure for a regatta/leaderboard can be selected in the GWT Admin Console on backend side
+        this(identifier, new RaceStateImpl(raceLog, new ExtremeSailingSeriesStartProcedure(raceLog)), competitors);
     }
 
     public ManagedRaceImpl(

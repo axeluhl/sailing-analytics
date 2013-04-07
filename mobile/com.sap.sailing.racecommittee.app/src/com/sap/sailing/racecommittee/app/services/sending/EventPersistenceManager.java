@@ -82,7 +82,7 @@ public class EventPersistenceManager {
      */
     private void removeEntryInFileContent(String eventLine) {
         if (fileContent.contains(eventLine)) {
-            fileContent = fileContent.replace(eventLine, "");
+            fileContent = fileContent.replace(eventLine + "\n", "");
             writeFileContentToFile();
             ExLog.i(TAG, "Entry " + eventLine + " is removed from fileContent");
         }
@@ -97,15 +97,26 @@ public class EventPersistenceManager {
 
     public List<Intent> restoreEvents() {
         List<Intent> delayedIntents = new ArrayList<Intent>();
+        List<String> fileEntriesToBeRemoved = new ArrayList<String>(); //These file entries may be too old. No appropriate race id has been found for this event.
 
         if (!fileContent.isEmpty()) {
             String[] eventLines = fileContent.split("\n");
             for (String line : eventLines) {
-                String[] lineParts = line.split(";");
+                if (!line.isEmpty()) {
+                    String[] lineParts = line.split(";");
 
-                Intent eventIntent = EventSendingService.createEventIntent(context, lineParts[0], lineParts[1]);
-                delayedIntents.add(eventIntent);
+                    Intent eventIntent = EventSendingService.createEventIntent(context, lineParts[0], lineParts[1]);
+                    if (eventIntent != null) {
+                        delayedIntents.add(eventIntent);
+                    } else {
+                        fileEntriesToBeRemoved.add(line);
+                    }
+                }
             }
+        }
+        
+        for (String lineToBeRemoved : fileEntriesToBeRemoved) {
+            removeEntryInFileContent(lineToBeRemoved);
         }
 
         ExLog.i(TAG, "Restored " + delayedIntents.size() + " events");

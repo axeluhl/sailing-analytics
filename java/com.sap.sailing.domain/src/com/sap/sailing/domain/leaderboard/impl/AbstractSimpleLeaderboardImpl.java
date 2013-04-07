@@ -769,7 +769,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                     int rank = positioningList.indexOf(positionedCompetitor) + 1;
                     Double rankByRaceCommittee = getScoringScheme().getScoreForRank(raceColumn, positionedCompetitor.getA(), rank, numberOfCompetitorsInRace);
                     Double currentRank = getNetPoints(positionedCompetitor.getA(), raceColumn, timePoint);
-                    if (!currentRank.equals(rankByRaceCommittee)) {
+                    if (currentRank == null || !currentRank.equals(rankByRaceCommittee)) {
                         //call RaceColumnListener
                         //getScoreCorrection().correctScore(positionedCompetitor.getA(), raceColumn, rankByRaceCommittee);
                     }

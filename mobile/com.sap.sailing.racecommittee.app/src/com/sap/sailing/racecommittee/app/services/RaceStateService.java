@@ -17,6 +17,7 @@ import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
 
+import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogEventVisitor;
@@ -160,7 +161,7 @@ public class RaceStateService extends Service {
             return;
         }
         
-        TimePoint eventTime = (TimePoint) intent.getSerializableExtra(AppConstants.RACING_EVENT_TIME);
+        TimePoint eventTime = new MillisecondsTimePoint(intent.getExtras().getLong(AppConstants.RACING_EVENT_TIME));
         
         if (getString(R.string.intentActionAlarmAction).equals(action)) {
             race.getState().getStartProcedure().dispatchFiredEventTimePoint(race.getState().getStartTime(), eventTime);
@@ -208,8 +209,6 @@ public class RaceStateService extends Service {
 
             this.registeredLogListeners.put(race, logListener);
             this.registeredStateListeners.put(race, stateListener);
-
-            ExLog.i(TAG, "Race " + race.getId() + " is scheduled now.");
         } else {
             ExLog.i(TAG, "Race " + race.getId() + " was already registered. Ignoring.");
         }
@@ -235,6 +234,7 @@ public class RaceStateService extends Service {
         for (TimePoint eventFireTimePoint : fireTimePoints) {
             scheduleEventTime(race, eventFireTimePoint);
         }
+        ExLog.i(TAG, "Race " + race.getId() + " is scheduled now.");
     }
 
     private void scheduleEventTime(ManagedRace race, TimePoint eventFireTimePoint) {

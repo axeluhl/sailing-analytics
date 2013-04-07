@@ -31,13 +31,13 @@ public class RaceLogEventDeserializer implements JsonDeserializer<RaceLogEvent> 
                 new RaceLogStartTimeEventDeserializer(competitorDeserializer), 
                 new RaceLogRaceStatusEventDeserializer(competitorDeserializer),
                 new RaceLogCourseAreaChangedEventDeserializer(competitorDeserializer),
-                new RaceLogFinishPositioningListChangedEventDeserializer(competitorDeserializer),
-                new RaceLogFinishPositioningConfirmedEventDeserializer(competitorDeserializer),
                 new RaceLogCourseDesignChangedEventDeserializer(competitorDeserializer,
                         new CourseDataDeserializer(
                                 new WaypointDeserializer(
                                         new ControlPointDeserializer(
-                                                new MarkDeserializer(domainFactory), new GateDeserializer(domainFactory, new MarkDeserializer(domainFactory)))))));
+                                                new MarkDeserializer(domainFactory), new GateDeserializer(domainFactory, new MarkDeserializer(domainFactory)))))),
+                new RaceLogFinishPositioningListChangedEventDeserializer(competitorDeserializer),
+                new RaceLogFinishPositioningConfirmedEventDeserializer(competitorDeserializer));
     }
 
     protected JsonDeserializer<RaceLogEvent> flagEventDeserializer;
