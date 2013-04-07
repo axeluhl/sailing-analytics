@@ -152,7 +152,7 @@ public class RegattaOverviewPanel extends SimplePanel implements RegattaOverview
             selectedRegattaOverviewEntry = selectedRegattaOverviewEntries.iterator().next();
         if (selectedRegattaOverviewEntry != null && regattaOverviewTableComposite.getAllRaces() != null) {
             for(RegattaOverviewEntryDTO regattaOverviewEntryDTO: regattaOverviewTableComposite.getAllRaces()) {
-                if(regattaOverviewEntryDTO.equals(selectedRegattaOverviewEntry)) {//TOTOTOTOTO!!!!!!!!!!!!
+                if(regattaOverviewEntryDTO.equals(selectedRegattaOverviewEntry)) {
                     raceCourseDesignDetailsComposite.setRace(regattaOverviewEntryDTO);
                     break;
                 }

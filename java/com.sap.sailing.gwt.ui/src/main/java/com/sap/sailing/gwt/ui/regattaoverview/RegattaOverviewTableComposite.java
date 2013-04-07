@@ -15,16 +15,20 @@ import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionModel;
 import com.google.gwt.view.client.SingleSelectionModel;
+import com.sap.sailing.domain.common.racelog.Flags;
+import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.MarkedAsyncCallback;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.shared.RaceInfoDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaOverviewEntryDTO;
 
 public class RegattaOverviewTableComposite extends Composite {
@@ -41,7 +45,7 @@ public class RegattaOverviewTableComposite extends Composite {
     private final String eventIdAsString;
     private final RegattaOverviewRaceSelectionProvider raceSelectionProvider;
 
-    private static RegattaOverviewResources resources = GWT.create(RegattaOverviewResources.class);
+    private final FlagImageResolver flagImageResolver;
 
     private static RegattaOverviewTableResources tableRes = GWT.create(RegattaOverviewTableResources.class);
 
@@ -51,6 +55,7 @@ public class RegattaOverviewTableComposite extends Composite {
         this.stringMessages = stringMessages;
         this.eventIdAsString = eventIdAsString;
         this.raceSelectionProvider = raceSelectionProvider;
+        this.flagImageResolver = new FlagImageResolver();
 
         mainPanel = new SimplePanel();
         panel = new VerticalPanel();
@@ -187,13 +192,14 @@ public class RegattaOverviewTableComposite extends Composite {
         TextColumn<RegattaOverviewEntryDTO> raceStartTimeColumn = new TextColumn<RegattaOverviewEntryDTO>() {
             @Override
             public String getValue(RegattaOverviewEntryDTO entryDTO) {
-                String result = stringMessages.noStarttimeAnnouncedYet();
+                String result = "-";
                 if (entryDTO.raceInfo.startTime != null) {
                     result = timeFormatter.format(entryDTO.raceInfo.startTime);
                 }
                 return result;
             }
         };
+        raceStartTimeColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
         raceStartTimeColumn.setSortable(true);
         regattaOverviewListHandler.setComparator(raceStartTimeColumn, new Comparator<RegattaOverviewEntryDTO>() {
 
@@ -219,10 +225,7 @@ public class RegattaOverviewTableComposite extends Composite {
         TextColumn<RegattaOverviewEntryDTO> raceStatusColumn = new TextColumn<RegattaOverviewEntryDTO>() {
             @Override
             public String getValue(RegattaOverviewEntryDTO entryDTO) {
-                String result = "";
-                if(entryDTO.raceInfo.lastStatus != null)
-                    result = entryDTO.raceInfo.lastStatus.toString();
-                return result;
+                return getStatusText(entryDTO.raceInfo);
             }
         };
         raceStatusColumn.setSortable(true);
@@ -238,14 +241,14 @@ public class RegattaOverviewTableComposite extends Composite {
         Column<RegattaOverviewEntryDTO, ImageResource> lastFlagColumn = new Column<RegattaOverviewEntryDTO, ImageResource>(new ImageResourceCell()) {
             @Override
             public ImageResource getValue(RegattaOverviewEntryDTO entryDTO) {
-                return resources.flagAP();
+                return flagImageResolver.resolveFlagToImage(entryDTO.raceInfo.lastFlag);
             }
         };
         
         Column<RegattaOverviewEntryDTO, ImageResource> lastFlagDirectionColumn = new Column<RegattaOverviewEntryDTO, ImageResource>(new ImageResourceCell()) {
             @Override
             public ImageResource getValue(RegattaOverviewEntryDTO entryDTO) {
-                return resources.arrowUp();
+                return flagImageResolver.resolveFlagDirectionToImage(entryDTO.raceInfo.displayed);
             }
         };
 
@@ -269,5 +272,35 @@ public class RegattaOverviewTableComposite extends Composite {
     private void showSelectedRaces() {
         List<RegattaOverviewEntryDTO> selectedRaces = getSelectedRaces();
         RegattaOverviewTableComposite.this.raceSelectionProvider.setSelection(selectedRaces);
+    }
+    
+    private String getStatusText(RaceInfoDTO raceInfo) {
+        String statusText = "";
+        if (raceInfo.lastStatus.equals(RaceLogRaceStatus.RUNNING) && raceInfo.lastFlag.equals(Flags.XRAY) && raceInfo.displayed) {
+            statusText = "Race is running (had early starters)";
+        } else if (raceInfo.lastStatus.equals(RaceLogRaceStatus.RUNNING) && raceInfo.lastFlag.equals(Flags.XRAY) && !raceInfo.displayed) {
+            statusText = "Race is running";
+        } else if (raceInfo.lastStatus.equals(RaceLogRaceStatus.RUNNING)) {
+            statusText = "Race is running";
+        } else if (raceInfo.lastStatus.equals(RaceLogRaceStatus.FINISHING)) {
+            statusText = "Race is finishing";
+        } else if (raceInfo.lastStatus.equals(RaceLogRaceStatus.FINISHED)) {
+            statusText = "Race is finished";
+        } else if (raceInfo.lastStatus.equals(RaceLogRaceStatus.SCHEDULED)) {
+            statusText = "Race is scheduled";
+        } else if (raceInfo.lastStatus.equals(RaceLogRaceStatus.STARTPHASE)) {
+            statusText = "Race in start phase";
+        } else if (raceInfo.lastStatus.equals(RaceLogRaceStatus.UNSCHEDULED)) {
+            statusText = stringMessages.noStarttimeAnnouncedYet();
+        } else if (raceInfo.lastFlag == null) {
+            statusText = "";
+        } else if (raceInfo.lastFlag.equals(Flags.FIRSTSUBSTITUTE)) {
+            statusText = "General recall";
+        } else if (raceInfo.lastFlag.equals(Flags.AP) && raceInfo.displayed) {
+            statusText = "Start postponed";
+        } else if (raceInfo.lastFlag.equals(Flags.NOVEMBER) && raceInfo.displayed) {
+            statusText = "Start abandoned";
+        }
+        return statusText;
     }
 }
