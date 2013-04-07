@@ -164,7 +164,7 @@ public class RaceStateService extends Service {
         
         if (getString(R.string.intentActionAlarmAction).equals(action)) {
             race.getState().getStartProcedure().dispatchFiredEventTimePoint(race.getState().getStartTime(), eventTime);
-            managedIntents.get(race).remove(intent);
+            managedIntents.get(race.getId()).remove(intent);
             return;
         }
     }
@@ -189,47 +189,47 @@ public class RaceStateService extends Service {
     }
 
     private void registerRace(ManagedRace race) {
-        RaceState state = race.getState();
-        managedIntents.put(race, new ArrayList<PendingIntent>());
-        registerAlarms(race, state);
+        ExLog.i(TAG, "Trying to register race " + race.getId());
         
-        // Register on event additions...
-        JsonSerializer<RaceLogEvent> eventSerializer = RaceLogEventSerializer.create(new CompetitorJsonSerializer());
-        RaceEventSender sender = new RaceEventSender(this, eventSerializer, race);
-        RaceLogChangedVisitor logListener = new RaceLogChangedVisitor(sender);
-        state.getRaceLog().addListener(logListener);
-        
-        // ... register on state changes!
-        RaceStateChangedListener stateListener = new RaceStateListener(this, race);
-        state.registerListener(stateListener);
-        
-        this.registeredLogListeners.put(race, logListener);
-        this.registeredStateListeners.put(race, stateListener);
+        if (!managedIntents.containsKey(race.getId())) {
+            RaceState state = race.getState();
+            managedIntents.put(race.getId(), new ArrayList<PendingIntent>());
+            registerAlarms(race, state);
+
+            // Register on event additions...
+            JsonSerializer<RaceLogEvent> eventSerializer = RaceLogEventSerializer.create(new CompetitorJsonSerializer());
+            RaceEventSender sender = new RaceEventSender(this, eventSerializer, race);
+            RaceLogChangedVisitor logListener = new RaceLogChangedVisitor(sender);
+            state.getRaceLog().addListener(logListener);
+
+            // ... register on state changes!
+            RaceStateChangedListener stateListener = new RaceStateListener(this, race);
+            state.registerListener(stateListener);
+
+            this.registeredLogListeners.put(race, logListener);
+            this.registeredStateListeners.put(race, stateListener);
+
+            ExLog.i(TAG, "Race " + race.getId() + " is scheduled now.");
+        } else {
+            ExLog.i(TAG, "Race " + race.getId() + " was already registered. Ignoring.");
+        }
     }
 
     public void registerAlarms(ManagedRace race, RaceState state) {
-        // TODO: this method must be replaced by dynamic actions
-        // according to the startprocedure!!
-        
-        List<PendingIntent> intents = managedIntents.get(race);
-        for (PendingIntent intent : intents) {
-            alarmManager.cancel(intent);
-        }
-        
         switch (state.getStatus()) {
-        case UNSCHEDULED:
-            handleNewStartTime(race);
         case SCHEDULED:
-            //handleNewStartTime(race, state);
+        case STARTPHASE:
+            handleNewStartTime(race, state.getStartTime());
             break;
         default:
             break;
         }
     }
 
-    private void handleNewStartTime(ManagedRace race) {
+    public void handleNewStartTime(ManagedRace race, TimePoint startTime) {
+        clearAlarms(race.getId());
+        
         //formerly state.getStartTime().plus(1) don't know why
-        TimePoint startTime = race.getState().getStartTime();
         
         List<TimePoint> fireTimePoints = race.getState().getStartProcedure().getAutomaticEventFireTimePoints(startTime);
         for (TimePoint eventFireTimePoint : fireTimePoints) {
@@ -257,6 +257,35 @@ public class RaceStateService extends Service {
         intent.putExtra(AppConstants.RACING_EVENT_TIME, eventFireTimePoint.asMillis());
         PendingIntent pendingIntent = PendingIntent.getService(this, alarmManagerRequestCode++, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         return pendingIntent;
+    }
+    
+    /**
+     * removes already set alarm times for a given managed race
+     * 
+     * @param managedRace
+     *            the race whose alarms shall be removed from alarmManager
+     */
+    public void clearAlarms(Serializable raceId) {
+        List<PendingIntent> intents = managedIntents.get(raceId);
+        
+        if (intents == null) {
+            ExLog.w(TAG, "There are no intents for race " + raceId);
+            return;
+        }
+        
+        for (PendingIntent pendingIntent : intents) {
+            alarmManager.cancel(pendingIntent);
+        }
+        
+        intents.clear();
+    }
+
+    public void handleRaceAborted(ManagedRace race) {
+        clearAlarms(race.getId());
+    }
+
+    public void handleIndividualRecall(ManagedRace race, TimePoint eventTime) {
+        //TODO handle X Flag: Trigger X Flag removal according to start procedure
     }
 
 }

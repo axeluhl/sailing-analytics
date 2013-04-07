@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.state.RaceState;
 import com.sap.sailing.racecommittee.app.domain.state.RaceStateChangedListener;
@@ -147,6 +148,21 @@ public class RaceInfoFragment extends RaceFragment implements RaceStateChangedLi
     @Override
     public void onChangeCourseDesign() {
         courseInfoHeader.setText("Course design is transmitted");
+    }
+
+    @Override
+    public void onStartTimeChanged(TimePoint startTime) {
+        //do nothing (onRaceStateChanged(RaceState) handles state change and fragment switch already
+    }
+
+    @Override
+    public void onRaceAborted() {
+        //do nothing (onRaceStateChanged(RaceState) handles state change and fragment switch already
+    }
+
+    @Override
+    public void onIndividualRecall(TimePoint eventTime) {
+        //do nothing (onRaceStateChanged(RaceState) handles state change and fragment switch already
     }
 
 }

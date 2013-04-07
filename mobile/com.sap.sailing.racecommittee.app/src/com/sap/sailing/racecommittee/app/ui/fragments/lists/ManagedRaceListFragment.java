@@ -17,6 +17,7 @@ import android.widget.ListView;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
+import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
@@ -100,6 +101,7 @@ public class ManagedRaceListFragment extends ListFragment implements JuryFlagCli
         }
     }
 
+    @Override
     public void onRaceStateChanged(RaceState state) {
         notifyDataChanged();
     }
@@ -211,6 +213,21 @@ public class ManagedRaceListFragment extends ListFragment implements JuryFlagCli
 
     public void onJuryFlagClicked(BoatClassSeriesDataFleet clicked) {
         // / TODO: implement.
+    }
+
+    @Override
+    public void onStartTimeChanged(TimePoint startTime) {
+        notifyDataChanged();
+    }
+
+    @Override
+    public void onRaceAborted() {
+        notifyDataChanged();
+    }
+
+    @Override
+    public void onIndividualRecall(TimePoint eventTime) {
+        notifyDataChanged();
     }
 
     /*
