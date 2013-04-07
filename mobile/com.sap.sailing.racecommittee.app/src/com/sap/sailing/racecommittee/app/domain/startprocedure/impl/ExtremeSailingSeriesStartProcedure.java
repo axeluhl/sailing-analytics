@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.UUID;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.racelog.PassAwareRaceLog;
@@ -126,6 +127,20 @@ public class ExtremeSailingSeriesStartProcedure implements StartProcedure {
     @Override
     public void setRaceStateChangedListener(StartProcedureRaceStateChangedListener raceStateChangedListener) {
         this.raceStateChangedListener = raceStateChangedListener;
+    }
+
+    @Override
+    public TimePoint getLogicalStartTimeEventTime(TimePoint newEnteredStartTime) {
+        TimePoint now = MillisecondsTimePoint.now();
+        TimePoint startPhaseStartTime = getStartPhaseStartTime(newEnteredStartTime);
+        TimePoint resultTime;
+        if (now.after(startPhaseStartTime)) {
+            resultTime = startPhaseStartTime.minus(1);
+        } else {
+            resultTime = now;
+        }
+        
+        return resultTime;
     }
 
 }
