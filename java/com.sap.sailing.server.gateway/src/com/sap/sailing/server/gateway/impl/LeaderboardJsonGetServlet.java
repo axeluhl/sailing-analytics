@@ -194,8 +194,8 @@ public class LeaderboardJsonGetServlet extends AbstractJsonHttpServlet implement
                         }
                     } else {
                         jsonLeaderboard = createEmptyLeaderboardJson(leaderboard, resultState, requestTimePoint);
-                        jsonLeaderboard.put("requestTimepoint", requestTimePoint.toString());
                     }
+                    jsonLeaderboard.put("requestTimepoint", requestTimePoint.toString());
                     
                     setJsonResponseHeader(resp);
                     jsonLeaderboard.writeJSONString(resp.getWriter());
@@ -217,7 +217,6 @@ public class LeaderboardJsonGetServlet extends AbstractJsonHttpServlet implement
             // now wait for this entry to be computed
             cacheEntry = cache.get(leaderboard, /* waitForLatest */ true);
             JSONObject jsonObject = cacheEntry.get(timePointAndResultState);
-            jsonObject.put("requestTimepoint", requestTimePoint.toString());
             return jsonObject;
         } else {
             cacheHits++;
