@@ -1,0 +1,102 @@
+package com.sap.sailing.racecommittee.app.ui.fragments.dialogs;
+
+import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.ViewGroup;
+import android.widget.ImageButton;
+
+import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.common.racelog.Flags;
+import com.sap.sailing.racecommittee.app.AppConstants;
+import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.logging.ExLog;
+
+public class AbortModeSelectionDialog extends RaceDialogFragment {
+    Flags abortFlag;
+
+    ImageButton abortFlagOnly;
+    ImageButton abortFlagOverHotel;
+    ImageButton abortFlagOverAlpha;
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        // Inflate the layout for this fragment
+        View view = inflater.inflate(R.layout.race_choose_abort_mode_view, container);
+
+        return view;
+    }
+
+    private void initializeAPDialog() {
+        getDialog().setTitle(getText(R.string.flag_ap));
+        abortFlagOnly.setImageResource(R.drawable.ap_flag);
+        abortFlagOverHotel.setImageResource(R.drawable.ap_over_hotel);
+        abortFlagOverAlpha.setImageResource(R.drawable.ap_over_alpha);
+
+    }
+
+    private void initializeNovemberDialog() {
+        getDialog().setTitle(getText(R.string.flag_november));
+    }
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+
+        Flags anAbortFlag = Flags.valueOf(getArguments().getString(AppConstants.FLAG_KEY));
+
+        if (!(anAbortFlag == Flags.AP || anAbortFlag == Flags.NOVEMBER)) {
+            throw new IllegalArgumentException(
+                    "An abort dialog can only be instantiated with flags NOVEMBER or AP, but was " + anAbortFlag);
+        }
+        abortFlag = anAbortFlag;
+
+        abortFlagOnly = (ImageButton) getView().findViewById(R.id.abortFlagOnly);
+        abortFlagOverHotel = (ImageButton) getView().findViewById(R.id.abortFlagOverHotel);
+        abortFlagOverAlpha = (ImageButton) getView().findViewById(R.id.abortFlagOverAlpha);
+
+        abortFlagOverAlpha.setOnClickListener(new OnClickListener() {
+
+            public void onClick(View arg0) {
+                ExLog.i(ExLog.RACE_CHOOSE_ABORT_ALPHA, getRace().getId().toString(), getActivity());
+                signalAbort(Flags.ALPHA);
+            }
+
+        });
+
+        abortFlagOverHotel.setOnClickListener(new OnClickListener() {
+
+            public void onClick(View arg0) {
+                ExLog.i(ExLog.RACE_CHOOSE_ABORT_HOTEL, getRace().getId().toString(), getActivity());
+                signalAbort(Flags.HOTEL);
+            }
+
+        });
+
+        abortFlagOnly.setOnClickListener(new OnClickListener() {
+
+            public void onClick(View arg0) {
+                ExLog.i(ExLog.RACE_CHOOSE_ABORT_NONE, getRace().getId().toString(), getActivity());
+                signalAbort(Flags.NONE);
+            }
+
+        });
+
+        if (this.abortFlag == Flags.NOVEMBER) {
+            initializeNovemberDialog();
+        } else {
+            initializeAPDialog();
+        }
+
+    }
+
+    private void signalAbort(Flags additionalFlag) {
+        if (this.abortFlag.equals(Flags.AP)) {
+            getRace().getState().getStartProcedure().setPostponed(MillisecondsTimePoint.now(), additionalFlag);
+        } else if (this.abortFlag.equals(Flags.NOVEMBER)) {
+            getRace().getState().getStartProcedure().setAbandoned(MillisecondsTimePoint.now(), additionalFlag);
+        }
+        this.dismiss();
+    }
+}

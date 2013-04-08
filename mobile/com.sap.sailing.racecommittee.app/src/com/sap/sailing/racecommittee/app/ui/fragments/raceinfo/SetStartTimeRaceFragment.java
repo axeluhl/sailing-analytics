@@ -3,6 +3,7 @@ package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 import java.util.Calendar;
 import java.util.Date;
 
+import android.app.FragmentManager;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,11 +15,14 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.AbortModeSelectionDialog;
+import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceDialogFragment;
 
 public class SetStartTimeRaceFragment extends RaceFragment {
 
@@ -64,6 +68,16 @@ public class SetStartTimeRaceFragment extends RaceFragment {
             public void onClick(View view) {
                 setStartTime();
             }
+        });
+        
+        abortRaceButton.setOnClickListener(new OnClickListener() {
+
+            @Override
+            public void onClick(View arg0) {
+                ExLog.i(ExLog.RACE_SET_TIME_BUTTON_AP, getRace().getId().toString(), getActivity());
+                showAPModeDialog();
+            }
+            
         });
 
         // / TODO: click-listener for abort button
@@ -145,6 +159,18 @@ public class SetStartTimeRaceFragment extends RaceFragment {
 
     private void setStartTime(Date newStartTime) {
         getRace().getState().setStartTime(new MillisecondsTimePoint(newStartTime));
+    }
+
+    protected void showAPModeDialog() {
+        FragmentManager fragmentManager = getFragmentManager();
+
+        RaceDialogFragment fragment = new AbortModeSelectionDialog();
+
+        Bundle args = getParameterBundle();
+        args.putString(AppConstants.FLAG_KEY, Flags.AP.name());
+        fragment.setArguments(args);
+
+        fragment.show(fragmentManager, "dialogAPMode");
     }
 
 }
