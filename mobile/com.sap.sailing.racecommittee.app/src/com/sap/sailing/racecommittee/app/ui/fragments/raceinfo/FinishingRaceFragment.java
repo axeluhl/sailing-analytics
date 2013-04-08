@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.List;
 
 import android.app.AlertDialog;
+import android.app.FragmentManager;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -25,17 +26,21 @@ import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.domain.common.racelog.Flags;
+import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.ui.adapters.finishing.CompetitorPositioningListAdapter;
 import com.sap.sailing.racecommittee.app.ui.adapters.finishing.CompetitorsAdapter;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.AbortModeSelectionDialog;
+import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceDialogFragment;
 
 public class FinishingRaceFragment extends RaceFragment {
     
     private TextView countUpTextView;
     protected TextView nextFlagCountdown;
-    private ImageButton novemberFlagButton;
+    private ImageButton abortingFlagButton;
     private ImageButton blueFlagButton;
     
     private DragSortListView positioningListView;
@@ -67,7 +72,7 @@ public class FinishingRaceFragment extends RaceFragment {
         nextFlagCountdown = (TextView) getView().findViewById(R.id.nextFlagCountdown);
         
         blueFlagButton = (ImageButton) getView().findViewById(R.id.blueFlagButton);
-        novemberFlagButton = (ImageButton) getView().findViewById(R.id.novemberButton);
+        abortingFlagButton = (ImageButton) getView().findViewById(R.id.abortingFlagButton);
         
         competitors = new ArrayList<Competitor>();
         Util.addAll(getRace().getCompetitors(), competitors);
@@ -123,10 +128,10 @@ public class FinishingRaceFragment extends RaceFragment {
             }
         });
 
-        novemberFlagButton.setOnClickListener(new OnClickListener() {
+        abortingFlagButton.setOnClickListener(new OnClickListener() {
 
             public void onClick(View v) {
-                showChooseAPNovemberDialog();
+                showNovemberModeDialog();
                 ExLog.i(ExLog.FLAG_NOVEMBER, getRace().getId().toString(), getActivity());
             }
         });
@@ -291,16 +296,17 @@ public class FinishingRaceFragment extends RaceFragment {
     private String getFormattedTimePart(int timePart) {
         return (timePart < 10) ? "0" + timePart : String.valueOf(timePart);
     }
+    
+    protected void showNovemberModeDialog() {
+        FragmentManager fragmentManager = getFragmentManager();
 
-    private void showChooseAPNovemberDialog() {
-//        FragmentManager fragmentManager = getFragmentManager();
-//
-//        RaceChooseAPNovemberDialog fragment = new RaceChooseAPNovemberDialog();
-//
-//        Bundle args = getParameterBundle();
-//        fragment.setArguments(args);
-//
-//        fragment.show(fragmentManager, "dialogAPNovemberMode");
+        RaceDialogFragment fragment = new AbortModeSelectionDialog();
+
+        Bundle args = getParameterBundle();
+        args.putString(AppConstants.FLAG_KEY, Flags.NOVEMBER.name());
+        fragment.setArguments(args);
+
+        fragment.show(fragmentManager, "dialogNovemberMode");
     }
 
     private void showRemoveBlueFlagDialog() {

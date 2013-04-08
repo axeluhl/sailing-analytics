@@ -1,6 +1,7 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
 import android.app.AlertDialog;
+import android.app.FragmentManager;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -14,6 +15,8 @@ import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.AbortTypeSelectionDialog;
+import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceDialogFragment;
 
 public class RunningRaceFragment extends RaceFragment {
     
@@ -34,6 +37,13 @@ public class RunningRaceFragment extends RaceFragment {
         blueFlagButton.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
                 showDisplayBlueFlagDialog();
+            }
+        });
+        
+        ImageButton abortingFlagButton = (ImageButton) getView().findViewById(R.id.abortingFlagButton);
+        abortingFlagButton.setOnClickListener(new OnClickListener() {
+            public void onClick(View v) {
+                showChooseAPNovemberDialog();
             }
         });
     }
@@ -81,6 +91,17 @@ public class RunningRaceFragment extends RaceFragment {
         String minutesString = minutes < 10 ? "0" + minutes : "" + minutes;
         String hoursString = hours < 10 ? "0" + hours : "" + hours;
         return String.format(timePattern, hoursString, minutesString, secondsString);
+    }
+
+    private void showChooseAPNovemberDialog() {
+        FragmentManager fragmentManager = getFragmentManager();
+
+        RaceDialogFragment fragment = new AbortTypeSelectionDialog();
+
+        Bundle args = getParameterBundle();
+        fragment.setArguments(args);
+
+        fragment.show(fragmentManager, "dialogAPNovemberMode");
     }
 
 }

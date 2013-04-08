@@ -192,8 +192,8 @@
                         android:text="@string/choose_blue_flag"
                         android:textAppearance="@style/TextAppearance.Welter.TitleLabel" />
 
-                    <!-- <ImageButton
-                        android:id="@+id/novemberButton"
+                    <ImageButton
+                        android:id="@+id/abortingFlagButton"
                         android:layout_width="140dp"
                 		android:layout_height="80dp"
                         android:contentDescription="@string/abort_running_race"
@@ -201,13 +201,13 @@
                         android:src="@drawable/ap_november_flag" />
 
                     <TextView
-                        android:id="@+id/novemberButtonLabel"
+                        android:id="@+id/abortingFlagButtonLabel"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="5dp"
                         android:layout_marginTop="2dp"
                         android:text="@string/abort_running_race"
-                        android:textAppearance="@style/TextAppearance.Welter.TitleLabel" /> -->
+                        android:textAppearance="@style/TextAppearance.Welter.TitleLabel" />
         </LinearLayout>
         
         <!-- END SELECTION SECTION -->
