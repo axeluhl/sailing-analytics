@@ -169,4 +169,52 @@ public class ExtremeSailingSeriesStartProcedure implements StartProcedure {
         }
     }
 
+    @Override
+    public void setPostponed(TimePoint eventTime, Flags lowerFlag) {
+        switch (lowerFlag) {
+        case NONE:
+        case ALPHA:
+        case HOTEL:
+            handleAPUp(eventTime, lowerFlag);
+            break;
+        default:
+            break;
+        }
+    }
+
+    private void handleAPUp(TimePoint eventTime, Flags lowerFlag) {
+        TimePoint apFlagDisplayEventTime = eventTime.minus(1);
+        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(apFlagDisplayEventTime, UUID.randomUUID(), Collections.<Competitor>emptyList(), 
+                raceLog.getCurrentPassId(), Flags.AP, lowerFlag, /*isDisplayed*/true);
+        raceLog.add(event);
+        
+        if (raceStateChangedListener != null) {
+            raceStateChangedListener.onRaceAborted(eventTime);
+        }
+    }
+
+    @Override
+    public void setAbandoned(TimePoint eventTime, Flags lowerFlag) {
+        switch (lowerFlag) {
+        case NONE:
+        case ALPHA:
+        case HOTEL:
+            handleNovemberUp(eventTime, lowerFlag);
+            break;
+        default:
+            break;
+        }
+    }
+
+    private void handleNovemberUp(TimePoint eventTime, Flags lowerFlag) {
+        TimePoint novemberFlagDisplayEventTime = eventTime.minus(1);
+        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(novemberFlagDisplayEventTime, UUID.randomUUID(), Collections.<Competitor>emptyList(), 
+                raceLog.getCurrentPassId(), Flags.NOVEMBER, lowerFlag, /*isDisplayed*/true);
+        raceLog.add(event);
+        
+        if (raceStateChangedListener != null) {
+            raceStateChangedListener.onRaceAborted(eventTime);
+        }
+    }
+
 }

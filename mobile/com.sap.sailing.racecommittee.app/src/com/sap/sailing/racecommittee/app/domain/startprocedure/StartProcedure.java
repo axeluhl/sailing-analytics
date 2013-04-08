@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.racelog.Flags;
 
 public interface StartProcedure {
     
@@ -26,5 +27,9 @@ public interface StartProcedure {
     void setFinishing(TimePoint eventTime);
     
     void setFinished(TimePoint eventTime);
+    
+    void setPostponed(TimePoint eventTime, Flags lowerFlag);
+    
+    void setAbandoned(TimePoint eventTime, Flags lowerFlag);
 
 }
