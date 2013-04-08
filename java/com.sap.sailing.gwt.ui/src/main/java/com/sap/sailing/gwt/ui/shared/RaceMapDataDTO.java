@@ -7,6 +7,7 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 
 public class RaceMapDataDTO implements IsSerializable {
     public Map<CompetitorDTO, List<GPSFixDTO>> boatPositions;
-    public CourseDTO coursePositions;
+    public CoursePositionsDTO coursePositions;
     public List<QuickRankDTO> quickRanks;
+    public BoatClassDTO boatClass;
 }

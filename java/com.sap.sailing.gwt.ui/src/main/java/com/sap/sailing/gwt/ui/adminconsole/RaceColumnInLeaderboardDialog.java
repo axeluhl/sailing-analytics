@@ -1,107 +1,146 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
-import java.util.Collection;
-
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.CheckBox;
+import com.google.gwt.user.client.ui.DoubleBox;
+import com.google.gwt.user.client.ui.HasVerticalAlignment;
+import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.FleetDTO;
 import com.sap.sailing.gwt.ui.shared.RaceColumnDTO;
 
 /**
- * Fills a {@link RaceColumnDTO} object by setting its {@link RaceColumnDTO#setMedalRace(boolean) medal race} property and its name.
- * As {@link RaceColumnDTO#getFleets()} fleet, a single default fleet is added.
+ * Fills a {@link RaceColumnDTO} object by setting its {@link RaceColumnDTO#setMedalRace(boolean) medal race} property,
+ * the column factor and its name.
  * 
  * @author Axel Uhl (D043530)
- *
+ * 
  */
-public class RaceColumnInLeaderboardDialog extends DataEntryDialog<Pair<RaceColumnDTO, FleetDTO>> {
-    private final static String DEFAULT_FLEET_NAME = "Default";
-    
+public class RaceColumnInLeaderboardDialog extends DataEntryDialog<RaceColumnInLeaderboardDialog.RaceColumnDescriptor> {
     private final TextBox raceNameBox;
+    private final DoubleBox explicitFactorBox;
     private final CheckBox isMedalRace;
+    private final StringMessages stringMessages;
+    private final boolean isRegattaLeaderboard;
 
-    private RaceColumnDTO raceInLeaderboard;
+    public static class RaceColumnDescriptor {
+        private String name;
+        private boolean isMedalRace;
+        private Double explicitFactor;
+        public RaceColumnDescriptor(String name, boolean isMedalRace, Double explicitFactor) {
+            super();
+            this.name = name;
+            this.isMedalRace = isMedalRace;
+            this.explicitFactor = explicitFactor;
+        }
+        public String getName() {
+            return name;
+        }
+        public void setName(String name) {
+            this.name = name;
+        }
+        public boolean isMedalRace() {
+            return isMedalRace;
+        }
+        public void setMedalRace(boolean isMedalRace) {
+            this.isMedalRace = isMedalRace;
+        }
+        public Double getExplicitFactor() {
+            return explicitFactor;
+        }
+        public void setExplicitFactor(Double explicitFactor) {
+            this.explicitFactor = explicitFactor;
+        }
+    }
 
-    private static class RaceDialogValidator implements Validator<Pair<RaceColumnDTO, FleetDTO>> {
+    private static class RaceDialogValidator implements Validator<RaceColumnDescriptor> {
+        private final StringMessages stringMessages;
+        private final Iterable<RaceColumnDTO> existingRaces;
 
-        private StringMessages stringConstants;
-        private Collection<Pair<RaceColumnDTO, FleetDTO>> existingRaces;
-
-        public RaceDialogValidator(StringMessages stringConstants, Collection<Pair<RaceColumnDTO, FleetDTO>> existingRaceColumnsAndFleetNames) {
-            this.stringConstants = stringConstants;
+        public RaceDialogValidator(StringMessages stringConstants, Iterable<RaceColumnDTO> existingRaceColumnsAndFleetNames) {
+            this.stringMessages = stringConstants;
             this.existingRaces = existingRaceColumnsAndFleetNames;
         }
 
         @Override
-        public String getErrorMessage(Pair<RaceColumnDTO, FleetDTO> valueToValidate) {
+        public String getErrorMessage(RaceColumnDescriptor valueToValidate) {
             String errorMessage;
-            String racename = valueToValidate.getA().getRaceColumnName();
-            Boolean isMedalRace = valueToValidate.getA().isMedalRace();
-            boolean isNameNotEmpty = racename != null & racename != "";
+            String racename = valueToValidate.getName();
+            Boolean isMedalRace = valueToValidate.isMedalRace();
+            boolean isNameNotEmpty = racename != null & !racename.isEmpty();
             boolean medalRaceNotNull = isMedalRace != null;
 
             boolean unique = true;
-            for (Pair<RaceColumnDTO, FleetDTO> raceColumnAndFleetName : existingRaces) {
-                if (raceColumnAndFleetName.getA().getRaceColumnName().equals(valueToValidate.getA().getRaceColumnName())) {
+            for (RaceColumnDTO raceColumn : existingRaces) {
+                if (raceColumn.getRaceColumnName().equals(valueToValidate.getName())) {
                     unique = false;
                 }
             }
 
             if (!isNameNotEmpty) {
-                errorMessage = stringConstants.raceNameEmpty();
+                errorMessage = stringMessages.pleaseEnterAName();
             } else if (!medalRaceNotNull) {
-                errorMessage = stringConstants.medalRaceIsNull();
+                errorMessage = stringMessages.medalRaceIsNull();
             } else if (!unique) {
-                errorMessage = stringConstants.raceWithThisNameAlreadyExists();
+                errorMessage = stringMessages.raceWithThisNameAlreadyExists();
             } else {
                 return errorMessage = null;
             }
             return errorMessage;
         }
-
     }
 
-    public RaceColumnInLeaderboardDialog(Collection<Pair<RaceColumnDTO, FleetDTO>> existingRaces,
-            RaceColumnDTO raceInLeaderboard, StringMessages stringConstants,
-            AsyncCallback<Pair<RaceColumnDTO, FleetDTO>> callback) {
-        super(stringConstants.name(), null, stringConstants.ok(), stringConstants.cancel(),
-                new RaceDialogValidator(stringConstants, existingRaces), callback);
-        this.raceInLeaderboard = raceInLeaderboard;
-        raceNameBox = createTextBox(raceInLeaderboard.getRaceColumnName());
-        isMedalRace = createCheckbox(stringConstants.medalRace());
-        isMedalRace.setValue(raceInLeaderboard.isMedalRace());
+    public RaceColumnInLeaderboardDialog(Iterable<RaceColumnDTO> existingRaces, RaceColumnDTO raceColumnToEdit, 
+            boolean isRegattaLeaderboard, StringMessages stringMessages, DialogCallback<RaceColumnDescriptor> callback) {
+        super(stringMessages.actionRaceEdit(), null, stringMessages.ok(), stringMessages.cancel(),
+                new RaceDialogValidator(stringMessages, existingRaces), callback);
+        this.isRegattaLeaderboard = isRegattaLeaderboard;
+        this.stringMessages = stringMessages;
+        raceNameBox = createTextBox(raceColumnToEdit.getRaceColumnName());
+        raceNameBox.setEnabled(!isRegattaLeaderboard);
+        explicitFactorBox = raceColumnToEdit.getExplicitFactor() == null ?
+                createDoubleBox(/* visibleLength */ 4) : createDoubleBox(raceColumnToEdit.getExplicitFactor(), /* visibleLength */ 4);
+        isMedalRace = createCheckbox(stringMessages.medalRace());
+        isMedalRace.setValue(raceColumnToEdit.isMedalRace());
+        isMedalRace.setEnabled(!isRegattaLeaderboard);
     }
 
     @Override
-    protected Pair<RaceColumnDTO, FleetDTO> getResult() {
-        raceInLeaderboard.name = raceNameBox.getValue();
-        raceInLeaderboard.setMedalRace(isMedalRace.getValue());
-        raceInLeaderboard.addFleet(new FleetDTO(DEFAULT_FLEET_NAME, /* ordering */ 0, /* color */ null));
-        return new Pair<RaceColumnDTO, FleetDTO>(raceInLeaderboard, raceInLeaderboard.getFleets().iterator().next());
+    protected RaceColumnDescriptor getResult() {
+        return new RaceColumnDescriptor(raceNameBox.getValue(), isMedalRace.getValue(),
+                explicitFactorBox.getText().trim().length() == 0 ? null : explicitFactorBox.getValue());
     }
 
     @Override
     protected Widget getAdditionalWidget() {
-        VerticalPanel panel = new VerticalPanel();
-        Widget additionalWidget = super.getAdditionalWidget();
-        if (additionalWidget != null) {
-            panel.add(additionalWidget);
-        }
-        panel.add(raceNameBox);
-        panel.add(isMedalRace);
-        return panel;
+        VerticalPanel mainPanel = new VerticalPanel();
+        
+        HorizontalPanel raceNamePanel = new HorizontalPanel();
+        raceNamePanel.setSpacing(3);
+        mainPanel.add(raceNamePanel);
+        raceNamePanel.add(new Label(stringMessages.name() + ":"));
+        raceNamePanel.add(raceNameBox);
+        HorizontalPanel factorPanel = new HorizontalPanel();
+        factorPanel.setSpacing(3);
+        mainPanel.add(factorPanel);
+        factorPanel.add(new Label(stringMessages.factor() + ":"));
+        factorPanel.add(explicitFactorBox);
+        alignAllPanelWidgetsVertically(raceNamePanel, HasVerticalAlignment.ALIGN_MIDDLE);
+        mainPanel.add(isMedalRace);
+        return mainPanel;
     }
 
     @Override
     public void show() {
         super.show();
-        raceNameBox.setFocus(true);
+        if (isRegattaLeaderboard) {
+            explicitFactorBox.setFocus(true);
+            explicitFactorBox.selectAll();
+        } else {
+            raceNameBox.setFocus(true);
+        }
     }
-
 }

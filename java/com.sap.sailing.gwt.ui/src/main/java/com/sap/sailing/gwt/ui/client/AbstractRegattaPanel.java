@@ -14,40 +14,44 @@ public abstract class AbstractRegattaPanel extends FormPanel implements RegattaD
     protected DateTimeFormatRenderer timeFormatter = new DateTimeFormatRenderer(DateTimeFormat.getFormat(PredefinedFormat.TIME_LONG));
     protected final RegattaRefresher regattaRefresher;
     protected ErrorReporter errorReporter;
-    protected StringMessages stringConstants;
+    protected StringMessages stringMessages;
     
     public AbstractRegattaPanel(SailingServiceAsync sailingService,
-            RegattaRefresher regattaRefresher, ErrorReporter errorReporter, StringMessages stringConstants) {
+            RegattaRefresher regattaRefresher, ErrorReporter errorReporter, StringMessages stringMessages) {
         super();
         this.sailingService = sailingService;
         this.regattaRefresher = regattaRefresher;
         this.errorReporter  = errorReporter;
-        this.stringConstants = stringConstants;
+        this.stringMessages = stringMessages;
     }
 
     @Override
     public abstract void fillRegattas(List<RegattaDTO> result);
     
     /**
-     * Returns <code>false</code> if <code>wordsToFilter</code> contain a value of the <code>valuesToCheck</code>  
-     * @param wordsToFilter the words to filter on
-     * @param valuesToCheck the values to check for. These values contain the values of the current rows.
-     * @return <code>false</code> if the <code>valuesToCheck</code> contains all <code>wordsToFilter</code>, <code>true</code> if not
+     * Returns <code>true</code> if <code>wordsToFilter</code> contain a value of the <code>valuesToCheck</code>
+     * 
+     * @param wordsToFilter
+     *            the words to filter on
+     * @param valuesToCheck
+     *            the values to check for. These values contain the values of the current rows.
+     * @return <code>true</code> if the <code>valuesToCheck</code> contains all <code>wordsToFilter</code>,
+     *         <code>false</code> if not
      */
-    protected boolean textContainingStringsToCheck(List<String> wordsToFilter, String... valuesToCheck){
-        boolean failed = false;
+    protected boolean textContainsStringsToCheck(List<String> wordsToFilter, String... valuesToCheck) {
+        boolean found = true;
         for (String word : wordsToFilter) {
             String textAsUppercase = word.toUpperCase().trim();
             boolean notContainedinEveryValue = true;
             for (int i = 0; notContainedinEveryValue && i < valuesToCheck.length; i++) {
                 String string = valuesToCheck[i];
-                notContainedinEveryValue = !string.toUpperCase().contains(textAsUppercase);
+                notContainedinEveryValue = string==null || !string.toUpperCase().contains(textAsUppercase);
             }
-            if(notContainedinEveryValue){
-                failed = true;
+            if (notContainedinEveryValue) {
+                found = false;
                 break;
             }
         }
-        return failed;
+        return found;
     }
 }

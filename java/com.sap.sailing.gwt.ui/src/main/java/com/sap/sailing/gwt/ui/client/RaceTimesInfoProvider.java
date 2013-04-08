@@ -11,50 +11,52 @@ import java.util.Set;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.RepeatingCommand;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RaceIdentifier;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.gwt.ui.shared.FleetDTO;
+import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
+import com.sap.sailing.gwt.ui.shared.RaceColumnDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 
 public class RaceTimesInfoProvider {
     
-    private SailingServiceAsync sailingService;
-    private ErrorReporter errorReporter;
+    private final SailingServiceAsync sailingService;
+    private final ErrorReporter errorReporter;
     
-    private Set<RaceIdentifier> raceIdentifiers;
-    private long requestInterval;
+    private final Set<RegattaAndRaceIdentifier> raceIdentifiers;
+    private long requestIntervalInMillis;
     
-    private HashMap<RaceIdentifier, RaceTimesInfoDTO> raceTimesInfos;
+    private final HashMap<RegattaAndRaceIdentifier, RaceTimesInfoDTO> raceTimesInfos;
     
-    private Set<RaceTimesInfoProviderListener> listeners;
-
+    private final Set<RaceTimesInfoProviderListener> listeners;
+    
     /**
-     * The <code>raceIdentifiers</code> has to be <code>not-null</code>, but can be empty.
+     * The <code>raceIdentifiers</code> has to be non-<code>null</code>, but can be empty.
      */
-    public RaceTimesInfoProvider(SailingServiceAsync sailingService, ErrorReporter errorReporter, Collection<RegattaAndRaceIdentifier> raceIdentifiers, long requestInterval) {
+    public RaceTimesInfoProvider(SailingServiceAsync sailingService, ErrorReporter errorReporter,
+            Collection<RegattaAndRaceIdentifier> raceIdentifiers, long requestIntervalInMillis) {
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
-        this.raceIdentifiers = new HashSet<RaceIdentifier>(raceIdentifiers);
-        this.requestInterval = requestInterval;
-        raceTimesInfos = new HashMap<RaceIdentifier, RaceTimesInfoDTO>();
+        this.raceIdentifiers = new HashSet<RegattaAndRaceIdentifier>(raceIdentifiers);
+        this.requestIntervalInMillis = requestIntervalInMillis;
+        raceTimesInfos = new HashMap<RegattaAndRaceIdentifier, RaceTimesInfoDTO>();
         listeners = new HashSet<RaceTimesInfoProviderListener>();
-        
         RepeatingCommand command = new RepeatingCommand() {
             @Override
             public boolean execute() {
                 readTimesInfos();
-                Scheduler.get().scheduleFixedPeriod(this, (int) RaceTimesInfoProvider.this.requestInterval);
+                Scheduler.get().scheduleFixedPeriod(this, (int) RaceTimesInfoProvider.this.requestIntervalInMillis);
+                // don't execute *this* particular scheduled repeating command again; the line above re-scheduled already
                 return false;
             }
         };
-        Scheduler.get().scheduleFixedPeriod(command, (int) this.requestInterval);
-        
-        forceTimesInfosUpdate();
+        command.execute();
     }
     
     /**
-     * @return An unmodifiable list of the RaceIdentifiers contained 
+     * @return An unmodifiable list of the RegattaAndRaceIdentifiers contained 
      */
-    public Set<RaceIdentifier> getRaceIdentifiers() {
+    public Set<RegattaAndRaceIdentifier> getRaceIdentifiers() {
         return Collections.unmodifiableSet(raceIdentifiers);
     }
     
@@ -68,7 +70,7 @@ public class RaceTimesInfoProvider {
      * @param forceTimesInfoRequest
      *            If <code>true</code> the race time info for the given race is fetched from the server
      */
-    public void addRaceIdentifier(final RaceIdentifier raceIdentifier, boolean forceTimesInfoRequest) {
+    public void addRaceIdentifier(final RegattaAndRaceIdentifier raceIdentifier, boolean forceTimesInfoRequest) {
         raceIdentifiers.add(raceIdentifier);
         if (forceTimesInfoRequest) {
             sailingService.getRaceTimesInfo(raceIdentifier, new AsyncCallback<RaceTimesInfoDTO>() {
@@ -113,7 +115,7 @@ public class RaceTimesInfoProvider {
     }
     
     public long getRequestInterval() {
-        return requestInterval;
+        return requestIntervalInMillis;
     }
     
     /**
@@ -121,18 +123,18 @@ public class RaceTimesInfoProvider {
      * @param requestInterval The new request interval
      */
     public void setRequestInterval(long requestInterval){
-        this.requestInterval = requestInterval;
+        this.requestIntervalInMillis = requestInterval;
     }
     
     /**
      * @return An unmodifiable map of the {@link RaceTimesInfoDTO times infos} for the current {@link #raceIdentifiers},
      *         or an empty map if no time infos are available
      */
-    public Map<RaceIdentifier, RaceTimesInfoDTO> getRaceTimesInfos(){
+    public Map<RegattaAndRaceIdentifier, RaceTimesInfoDTO> getRaceTimesInfos(){
         return Collections.unmodifiableMap(raceTimesInfos);
     }
     
-    public RaceTimesInfoDTO getRaceTimesInfo(RaceIdentifier raceIdentifier) {
+    public RaceTimesInfoDTO getRaceTimesInfo(RegattaAndRaceIdentifier raceIdentifier) {
         return raceTimesInfos.get(raceIdentifier);
     }
     
@@ -175,6 +177,24 @@ public class RaceTimesInfoProvider {
                 }
             });
         }
+    }
+
+    public RegattaAndRaceIdentifier getFirstStartedAndUnfinishedRace(LeaderboardDTO leaderboard) {
+        RegattaAndRaceIdentifier firstStartedAndUnfinishedRace = null;
+        Map<RegattaAndRaceIdentifier, RaceTimesInfoDTO> raceTimesInfos = getRaceTimesInfos();
+        for (RaceColumnDTO race : leaderboard.getRaceList()) {
+            for (FleetDTO fleet : race.getFleets()) {
+                RegattaAndRaceIdentifier raceIdentifier = race.getRaceIdentifier(fleet);
+                if (raceIdentifier != null) {
+                    RaceTimesInfoDTO raceTimes = raceTimesInfos.get(raceIdentifier);
+                    if (raceTimes != null && raceTimes.startOfTracking != null && raceTimes.endOfRace == null) {
+                        firstStartedAndUnfinishedRace = raceIdentifier;
+                        break;
+                    }
+                }
+            }
+        }
+        return firstStartedAndUnfinishedRace;
     }
     
 }

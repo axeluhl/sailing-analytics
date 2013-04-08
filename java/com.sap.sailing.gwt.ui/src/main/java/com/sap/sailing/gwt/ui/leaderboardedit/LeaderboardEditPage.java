@@ -12,17 +12,17 @@ import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
 
 public class LeaderboardEditPage extends AbstractEntryPoint {
     @Override
-    public void onModuleLoad() {
-        super.onModuleLoad();
+    protected void doOnModuleLoad() {
+        super.doOnModuleLoad();
         sailingService.getLeaderboardNames(new AsyncCallback<List<String>>() {
             @Override
             public void onSuccess(List<String> leaderboardNames) {
                 String leaderboardName = Window.Location.getParameter("name");
                 if (leaderboardNames.contains(leaderboardName)) {
-                    LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(stringMessages.editScores(), stringMessages);
+                    LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(stringMessages.editScores(), stringMessages, LeaderboardEditPage.this);
                     logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
                     EditableLeaderboardPanel leaderboardPanel = new EditableLeaderboardPanel(sailingService, new AsyncActionsExecutor(), leaderboardName, null,
-                            LeaderboardEditPage.this, stringMessages, userAgentType);
+                            LeaderboardEditPage.this, stringMessages, userAgent);
                     RootPanel.get().add(logoAndTitlePanel);
                     RootPanel.get().add(leaderboardPanel);
                 } else {

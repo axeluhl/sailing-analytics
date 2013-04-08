@@ -6,6 +6,9 @@ import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.TimePoint;
 
 public interface SettableScoreCorrection extends ScoreCorrection {
+    void addScoreCorrectionListener(ScoreCorrectionListener listener);
+    
+    void removeScoreCorrectionListener(ScoreCorrectionListener listener);
 
     /**
      * @param reason
@@ -16,6 +19,9 @@ public interface SettableScoreCorrection extends ScoreCorrection {
      */
     void setMaxPointsReason(Competitor competitor, RaceColumn raceColumn, MaxPointsReason reason);
     
+    /**
+     * @return a non-<code>null</code> result
+     */
     MaxPointsReason getMaxPointsReason(Competitor competitor, RaceColumn raceColumn);
 
     void correctScore(Competitor competitor, RaceColumn raceColumn, double points);
@@ -37,4 +43,8 @@ public interface SettableScoreCorrection extends ScoreCorrection {
     void setTimePointOfLastCorrectionsValidity(TimePoint timePointOfLastCorrectionsValidity);
     
     void setComment(String scoreCorrectionComment);
+    
+    void notifyListenersAboutCarriedPointsChange(Competitor competitor, Double oldCarriedPoints, Double newCarriedPoints);
+
+    void notifyListenersAboutIsSuppressedChange(Competitor competitor, boolean suppressed);
 }

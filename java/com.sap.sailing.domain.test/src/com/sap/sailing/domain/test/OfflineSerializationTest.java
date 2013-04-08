@@ -14,7 +14,7 @@ import java.util.Set;
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.BoatClass;
-import com.sap.sailing.domain.base.Buoy;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Nationality;
@@ -88,21 +88,21 @@ public class OfflineSerializationTest extends AbstractSerializationTest {
     }
     
     @Test
-    public void testIdentityStabilityOfBuoySerialization() throws ClassNotFoundException, IOException {
+    public void testIdentityStabilityOfMarkSerialization() throws ClassNotFoundException, IOException {
         DomainFactory senderDomainFactory = new DomainFactoryImpl();
         DomainFactory receiverDomainFactory = new DomainFactoryImpl();
-        Buoy sendersBuoy1 = senderDomainFactory.getOrCreateBuoy("TestBuoy1");
-        Buoy receiversBuoy1 = cloneBySerialization(sendersBuoy1, receiverDomainFactory);
-        Buoy receiversSecondCopyOfBuoy1 = cloneBySerialization(sendersBuoy1, receiverDomainFactory);
-        assertSame(receiversBuoy1, receiversSecondCopyOfBuoy1);
+        Mark sendersMark1 = senderDomainFactory.getOrCreateMark("TestBuoy1");
+        Mark receiversMark1 = cloneBySerialization(sendersMark1, receiverDomainFactory);
+        Mark receiversSecondCopyOfMark1 = cloneBySerialization(sendersMark1, receiverDomainFactory);
+        assertSame(receiversMark1, receiversSecondCopyOfMark1);
     }
 
     @Test
     public void testIdentityStabilityOfWaypointSerialization() throws ClassNotFoundException, IOException {
         DomainFactory senderDomainFactory = new DomainFactoryImpl();
         DomainFactory receiverDomainFactory = new DomainFactoryImpl();
-        Buoy sendersBuoy1 = senderDomainFactory.getOrCreateBuoy("TestBuoy1");
-        Waypoint sendersWaypoint1 = senderDomainFactory.createWaypoint(sendersBuoy1);
+        Mark sendersMark1 = senderDomainFactory.getOrCreateMark("TestBuoy1");
+        Waypoint sendersWaypoint1 = senderDomainFactory.createWaypoint(sendersMark1, /*passingSide*/null);
         Waypoint receiversWaypoint1 = cloneBySerialization(sendersWaypoint1, receiverDomainFactory);
         Waypoint receiversSecondCopyOfWaypoint1 = cloneBySerialization(sendersWaypoint1, receiverDomainFactory);
         assertSame(receiversWaypoint1, receiversSecondCopyOfWaypoint1);

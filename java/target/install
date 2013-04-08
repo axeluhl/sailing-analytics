@@ -8,7 +8,7 @@ echo Active branch is: $active_branch
 cd $exec_dir
 server_instance=`basename \`pwd\``
 echo Active server is: $server_instance
-if [ $active_branch == $server_instance ]
+if [ "$1" = "-f" -o $active_branch == $server_instance ]
 then
 p2PluginRepository=$GIT_DIR/java/com.sap.sailing.feature.p2build/bin/products/raceanalysis.product.id/linux/gtk/x86_64
 echo p2 repository for branch $active_branch: $p2PluginRepository
@@ -20,11 +20,13 @@ echo Install p2 content
 cp -v $p2PluginRepository/configuration/config.ini configuration
 cp -v $GIT_DIR/java/target/configuration/jetty/etc/jetty.xml configuration/jetty/etc
 cp -v $GIT_DIR/java/target/configuration/jetty/etc/realm.properties configuration/jetty/etc
+cp -v $GIT_DIR/java/target/configuration/monitoring.properties configuration/
 cp -r -v $p2PluginRepository/configuration/org.eclipse.equinox.simpleconfigurator configuration
 cp -v $p2PluginRepository/plugins/*.jar plugins
 echo Done.
 else
    echo "********** CANCEL INSTALLATION **************************"
    echo "ACTIVE BRANCH DOES NOT FIT THE CURRENT SERVER INSTANCE!!!"
+   echo "Use option -f to force install"
 fi
 

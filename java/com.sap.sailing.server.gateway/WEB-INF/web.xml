@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="utf-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns="http://java.sun.com/xml/ns/javaee"
+	xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee
+	http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" version="2.5">
+
+	<servlet>
+		<servlet-name>AdminApp</servlet-name>
+		<servlet-class>com.sap.sailing.server.gateway.impl.AdminApp</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>AdminApp</servlet-name>
+		<url-pattern>/admin</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>RaceGroups</servlet-name>
+		<servlet-class>com.sap.sailing.server.gateway.impl.rc.RaceGroupJsonExportServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>RaceGroups</servlet-name>
+		<url-pattern>/rc/racegroups</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>RCAddToRaceLog</servlet-name>
+		<servlet-class>com.sap.sailing.server.gateway.impl.rc.AddEntryToRaceLogJsonPostServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>RCAddToRaceLog</servlet-name>
+		<url-pattern>/rc/racelog</url-pattern>
+	</servlet-mapping>
+	
+	<!-- RACE COMMITTEE END -->
+
+	<servlet>
+		<servlet-name>RegattaAndRaceDataJsonGetServlet</servlet-name>
+		<servlet-class>com.sap.sailing.server.gateway.impl.RegattaAndRaceDataJsonGetServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>RegattaAndRaceDataJsonGetServlet</servlet-name>
+		<url-pattern>/moderator</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>ExpeditionThroughHttpPostServlet</servlet-name>
+		<servlet-class>com.sap.sailing.server.gateway.impl.ExpeditionThroughHttpPostServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>ExpeditionThroughHttpPostServlet</servlet-name>
+		<url-pattern>/expedition</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>EventsJsonGetServlet</servlet-name>
+		<servlet-class>com.sap.sailing.server.gateway.impl.EventsJsonGetServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>EventsJsonGetServlet</servlet-name>
+		<url-pattern>/events</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>RegattasJsonGetServlet</servlet-name>
+		<servlet-class>com.sap.sailing.server.gateway.impl.RegattasJsonGetServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>RegattasJsonGetServlet</servlet-name>
+		<url-pattern>/regattas</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>LeaderboardsJsonGetServlet</servlet-name>
+		<servlet-class>com.sap.sailing.server.gateway.impl.LeaderboardsJsonGetServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>LeaderboardsJsonGetServlet</servlet-name>
+		<url-pattern>/leaderboards</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>LeaderboardJsonGetServlet</servlet-name>
+		<servlet-class> com.sap.sailing.server.gateway.impl.LeaderboardJsonGetServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>LeaderboardJsonGetServlet</servlet-name>
+		<url-pattern>/leaderboard</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>LeaderboardGroupJsonGetServlet</servlet-name>
+		<servlet-class>com.sap.sailing.server.gateway.impl.LeaderboardGroupJsonGetServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>LeaderboardGroupJsonGetServlet</servlet-name>
+		<url-pattern>/leaderboardgroup</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>LeaderboardGroupsJsonGetServlet</servlet-name>
+		<servlet-class>com.sap.sailing.server.gateway.impl.LeaderboardGroupsJsonGetServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>LeaderboardGroupsJsonGetServlet</servlet-name>
+		<url-pattern>/leaderboardgroups</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>WindJsonGetServlet</servlet-name>
+		<servlet-class>com.sap.sailing.server.gateway.impl.WindJsonGetServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>WindJsonGetServlet</servlet-name>
+		<url-pattern>/wind</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>ExpeditionWindMeasureStatusGetServlet</servlet-name>
+		<servlet-class>com.sap.sailing.server.gateway.impl.ExpeditionWindMeasureStatusGetServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>ExpeditionWindMeasureStatusGetServlet</servlet-name>
+		<url-pattern>/expeditionWindStatus</url-pattern>
+	</servlet-mapping>
+		
+	<servlet>
+		<servlet-name>LiveRaceRankingRssGetServlet</servlet-name>
+		<servlet-class>com.sap.sailing.server.gateway.impl.LiveRaceRankingRssGetServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>LiveRaceRankingRssGetServlet</servlet-name>
+		<url-pattern>/rss/liveRaceRanking</url-pattern>
+	</servlet-mapping>
+ 
+	<servlet id="jsp">
+     <servlet-name>jspServet</servlet-name>
+     <servlet-class>org.apache.jasper.servlet.JspServlet</servlet-class>
+     <init-param>
+         <param-name>logVerbosityLevel</param-name>
+         <param-value>DEBUG</param-value>
+     </init-param>
+     <init-param>
+         <param-name>fork</param-name>
+         <param-value>false</param-value>
+     </init-param>
+     <init-param>
+         <param-name>keepgenerated</param-name>
+         <param-value>true</param-value>
+     </init-param>
+ 
+     <load-on-startup>0</load-on-startup>
+   </servlet>
+<!-- 
+   <servlet-mapping>
+     <servlet-name>jspServet</servlet-name>
+     <url-pattern>*.jsp</url-pattern>
+   </servlet-mapping>
+ --> 
+ </web-app>

@@ -7,9 +7,11 @@ import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.text.SimpleDateFormat;
 import java.util.List;
+import java.util.TimeZone;
 
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.ManeuverType;
+import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.tracking.Maneuver;
 
 public abstract class AbstractManeuverDetectionTestCase extends OnlineTracTracBasedTest {
@@ -23,6 +25,7 @@ public abstract class AbstractManeuverDetectionTestCase extends OnlineTracTracBa
     public AbstractManeuverDetectionTestCase() throws MalformedURLException, URISyntaxException {
         super();
         dateFormat = new SimpleDateFormat("MM/dd/yyyy-HH:mm:ss");
+        dateFormat.setTimeZone(TimeZone.getTimeZone("GMT+2")); // will result in CEST
     }
 
     /**
@@ -39,7 +42,7 @@ public abstract class AbstractManeuverDetectionTestCase extends OnlineTracTracBa
      *            The tolerance of time, the maneuver should have happened in milliseconds.
      */
     protected void assertManeuver(List<Maneuver> maneuverList, ManeuverType maneuverType,
-            MillisecondsTimePoint maneuverTimePoint, int tolerance) {
+            TimePoint maneuverTimePoint, int tolerance) {
         for (Maneuver maneuver : maneuverList) {
             assertNotNull(maneuver.getTimePoint());
             if (maneuver.getType() == maneuverType

@@ -15,6 +15,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog;
+import com.sap.sailing.gwt.ui.client.DataEntryDialog.DialogCallback;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -62,9 +63,9 @@ public class ReplicationPanel extends FlowPanel {
     
     private void addReplication() {
         AddReplicationDialog dialog = new AddReplicationDialog(null,
-                new AsyncCallback<Triple<Pair<String, String>, Integer, Integer>>() {
+                new DialogCallback<Triple<Pair<String, String>, Integer, Integer>>() {
                     @Override
-                    public void onSuccess(final Triple<Pair<String, String>, Integer, Integer> masterNameAndExchangeNameAndMessagingPortNumberAndServletPortNumber) {
+                    public void ok(final Triple<Pair<String, String>, Integer, Integer> masterNameAndExchangeNameAndMessagingPortNumberAndServletPortNumber) {
                         sailingService.startReplicatingFromMaster(masterNameAndExchangeNameAndMessagingPortNumberAndServletPortNumber.getA().getA(),
                                 masterNameAndExchangeNameAndMessagingPortNumberAndServletPortNumber.getA().getB(),
                                 masterNameAndExchangeNameAndMessagingPortNumberAndServletPortNumber.getC(),
@@ -84,7 +85,7 @@ public class ReplicationPanel extends FlowPanel {
                     }
                     
                     @Override
-                    public void onFailure(Throwable arg0) {
+                    public void cancel() {
                         // simply don't add replication
                     }
                 });
@@ -141,7 +142,7 @@ public class ReplicationPanel extends FlowPanel {
         private final IntegerBox servletPortField;
         
         public AddReplicationDialog(final Validator<Triple<Pair<String, String>, Integer, Integer>> validator,
-                final AsyncCallback<Triple<Pair<String, String>, Integer, Integer>> callback) {
+                final DialogCallback<Triple<Pair<String, String>, Integer, Integer>> callback) {
             super(stringMessages.add(), stringMessages.enterMaster(),
                     stringMessages.ok(), stringMessages.cancel(), validator, callback);
             hostnameEntryField = createTextBox("localhost");

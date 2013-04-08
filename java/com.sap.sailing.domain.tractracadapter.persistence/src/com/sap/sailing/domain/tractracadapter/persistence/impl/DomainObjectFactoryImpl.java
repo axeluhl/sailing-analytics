@@ -33,10 +33,10 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 result.add(ttConfig);
             }
             Collections.reverse(result);
-        } catch (Throwable t) {
+        } catch (Exception e) {
              // something went wrong during DB access; report, then use empty new wind track
             logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load recorded TracTrac configurations. Check MongoDB settings.");
-            logger.throwing(DomainObjectFactoryImpl.class.getName(), "getTracTracConfigurations", t);
+            logger.log(Level.SEVERE, "getTracTracConfigurations", e);
         }
         return result;
     }

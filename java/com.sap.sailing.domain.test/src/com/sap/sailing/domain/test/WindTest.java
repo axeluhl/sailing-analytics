@@ -1,24 +1,50 @@
 package com.sap.sailing.domain.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
 import org.junit.Test;
 
+import com.sap.sailing.domain.base.BoatClass;
+import com.sap.sailing.domain.base.Mark;
+import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.ControlPoint;
+import com.sap.sailing.domain.base.DomainFactory;
+import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.base.impl.BoatClassImpl;
+import com.sap.sailing.domain.base.impl.BoatImpl;
+import com.sap.sailing.domain.base.impl.CompetitorImpl;
+import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.base.impl.NationalityImpl;
+import com.sap.sailing.domain.base.impl.PersonImpl;
+import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
+import com.sap.sailing.domain.base.impl.RegattaImpl;
+import com.sap.sailing.domain.base.impl.TeamImpl;
+import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.Util;
+import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
+import com.sap.sailing.domain.tracking.DynamicTrackedRace;
+import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindTrack;
+import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
+import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
+import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
+import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.domain.tracking.impl.WindTrackImpl;
 
@@ -30,7 +56,7 @@ public class WindTest {
      */
     @Test
     public void testAveragingWind() throws InterruptedException {
-        WindTrack track = new WindTrackImpl(AVERAGING_INTERVAL_MILLIS, /* useSpeed */ true);
+        WindTrack track = new WindTrackImpl(AVERAGING_INTERVAL_MILLIS, /* useSpeed */ true, "TestWindTrack");
         TimePoint t1 = MillisecondsTimePoint.now();
         TimePoint t2 = new MillisecondsTimePoint(t1.asMillis()+10);
         TimePoint middle = new MillisecondsTimePoint((t1.asMillis()+t2.asMillis())/2);
@@ -45,7 +71,7 @@ public class WindTest {
     
     @Test
     public void testMultipleWindFixesWithSameTimestampInSameWindTrack() {
-        WindTrack track = new WindTrackImpl(AVERAGING_INTERVAL_MILLIS, /* useSpeed */ true);
+        WindTrack track = new WindTrackImpl(AVERAGING_INTERVAL_MILLIS, /* useSpeed */ true, "TestWindTrack");
         TimePoint now = MillisecondsTimePoint.now();
         DegreePosition pos1 = new DegreePosition(0, 0);
         DegreePosition pos2 = new DegreePosition(1, 1);
@@ -71,7 +97,7 @@ public class WindTest {
     
     @Test
     public void testEmptyTrackYieldsNullAsWindEstimate() {
-        WindTrack track = new WindTrackImpl(AVERAGING_INTERVAL_MILLIS, /* useSpeed */ true);
+        WindTrack track = new WindTrackImpl(AVERAGING_INTERVAL_MILLIS, /* useSpeed */ true, "TestWindTrack");
         assertNull(track.getAveragedWind(new DegreePosition(0, 0), MillisecondsTimePoint.now()));
     }
 
@@ -82,7 +108,7 @@ public class WindTest {
      */
     @Test
     public void testAveragingOfSparseWindTrack() {
-        WindTrack track = new WindTrackImpl(AVERAGING_INTERVAL_MILLIS, /* useSpeed */ true);
+        WindTrack track = new WindTrackImpl(AVERAGING_INTERVAL_MILLIS, /* useSpeed */ true, "TestWindTrack");
         DegreePosition pos = new DegreePosition(0, 0);
         Wind wind1 = new WindImpl(pos, new MillisecondsTimePoint(0), new KnotSpeedWithBearingImpl(20, new DegreeBearingImpl(0)));
         Wind wind2 = new WindImpl(pos, new MillisecondsTimePoint(1000), new KnotSpeedWithBearingImpl(20, new DegreeBearingImpl(0)));
@@ -115,7 +141,7 @@ public class WindTest {
     
     @Test
     public void testSingleElementWindTrack() {
-        WindTrack track = new WindTrackImpl(AVERAGING_INTERVAL_MILLIS, /* useSpeed */ true);
+        WindTrack track = new WindTrackImpl(AVERAGING_INTERVAL_MILLIS, /* useSpeed */ true, "TestWindTrack");
         DegreePosition pos = new DegreePosition(0, 0);
         Wind wind = new WindImpl(pos, new MillisecondsTimePoint(0), new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(123)));
         track.add(wind);
@@ -126,7 +152,7 @@ public class WindTest {
 
     @Test
     public void testSingleElementExtrapolation() {
-        WindTrack track = new WindTrackImpl(30000 /* 30s averaging interval */, /* useSpeed */ true);
+        WindTrack track = new WindTrackImpl(30000 /* 30s averaging interval */, /* useSpeed */ true, "TestWindTrack");
         DegreePosition pos = new DegreePosition(0, 0);
         Wind wind = new WindImpl(pos, new MillisecondsTimePoint(0), new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(123)));
         track.add(wind);
@@ -138,7 +164,7 @@ public class WindTest {
 
     @Test
     public void testSingleElementExtrapolationBeyondThreshold() {
-        WindTrack track = new WindTrackImpl(30000 /* 30s averaging interval */, /* useSpeed */ true);
+        WindTrack track = new WindTrackImpl(30000 /* 30s averaging interval */, /* useSpeed */ true, "TestWindTrack");
         DegreePosition pos = new DegreePosition(0, 0);
         Wind wind = new WindImpl(pos, new MillisecondsTimePoint(0), new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(123)));
         track.add(wind);
@@ -151,7 +177,7 @@ public class WindTest {
 
     @Test
     public void testTwoElementWindTrackSameBearing() {
-        WindTrack track = new WindTrackImpl(30000 /* 30s averaging interval */, /* useSpeed */ true);
+        WindTrack track = new WindTrackImpl(30000 /* 30s averaging interval */, /* useSpeed */ true, "TestWindTrack");
         DegreePosition pos = new DegreePosition(0, 0);
         Wind wind1 = new WindImpl(pos, new MillisecondsTimePoint(0), new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(100)));
         track.add(wind1);
@@ -164,7 +190,7 @@ public class WindTest {
 
     @Test
     public void testTwoElementWindTrackDifferentBearing() {
-        WindTrack track = new WindTrackImpl(30000 /* 30s averaging interval */, /* useSpeed */ true);
+        WindTrack track = new WindTrackImpl(30000 /* 30s averaging interval */, /* useSpeed */ true, "TestWindTrack");
         DegreePosition pos = new DegreePosition(0, 0);
         Wind wind1 = new WindImpl(pos, new MillisecondsTimePoint(0), new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(110)));
         track.add(wind1);
@@ -196,7 +222,7 @@ public class WindTest {
                 new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(85)));
         Wind wind3 = new WindImpl(null, new MillisecondsTimePoint(df.parse("2009-07-11T17:31:40").getTime()),
                 new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(80)));
-        WindTrack track = new WindTrackImpl(/* millisecondsOverWhichToAverage */ 30000, /* useSpeed */ true);
+        WindTrack track = new WindTrackImpl(/* millisecondsOverWhichToAverage */ 30000, /* useSpeed */ true, "TestWindTrack");
         track.add(wind1);
         track.add(wind2);
         track.add(wind3);
@@ -212,5 +238,47 @@ public class WindTest {
         // TODO construct a tiny course with one upwind, one reaching and one downwind leg, a race with two competitors;
         // TODO create a tracked race with corresponding WEB wind source; put leader in downwind, trailer in upwind and
         // TODO test that windward distance includes the full reaching leg's length
+    }
+    
+    /**
+     * See bug 943. Wind estimation should return <code>null</code> instead of causing exceptions in case there
+     * is no wind data to bootstrap the estimator with.
+     */
+    @Test
+    public void testWindEstimationReturnsNullIfNoUpwindStartAndNoOtherWindDataAvailable() {
+        DomainFactory domainFactory = DomainFactory.INSTANCE;
+        Mark startFinishLeft = domainFactory.getOrCreateMark("Start/Finish left");
+        Mark startFinishRight = domainFactory.getOrCreateMark("Start/Finish right");
+        ControlPoint startFinish = domainFactory.createGate(startFinishLeft, startFinishRight, "Start/Finish");
+        ControlPoint top = domainFactory.getOrCreateMark("Top");
+        Waypoint w1 = domainFactory.createWaypoint(startFinish, /*passingSide*/ null);
+        Waypoint w2 = domainFactory.createWaypoint(top, /*passingSide*/ null);
+        Waypoint w3 = domainFactory.createWaypoint(startFinish, /*passingSide*/ null);
+        Competitor competitor = new CompetitorImpl(123, "Test Competitor", new TeamImpl("STG", Collections.singleton(
+                new PersonImpl("Test Competitor", new NationalityImpl("GER"),
+                /* dateOfBirth */null, "This is famous " + "Test Competitor")), new PersonImpl("Rigo van Maas",
+                new NationalityImpl("NED"),
+                /* dateOfBirth */null, "This is Rigo, the coach")), new BoatImpl("Test Competitor" + "'s boat",
+                new BoatClassImpl("505", /* typicallyStartsUpwind */true), null));
+        final BoatClass boatClass = domainFactory.getOrCreateBoatClass("ESS40");
+        DynamicTrackedRace trackedRace = new DynamicTrackedRaceImpl(new DynamicTrackedRegattaImpl(
+                new RegattaImpl(EmptyRaceLogStore.INSTANCE, "Test Regatta", boatClass,
+                /* trackedRegattaRegistry */ null, domainFactory.createScoringScheme(ScoringSchemeType.LOW_POINT), "123", null)),
+                new RaceDefinitionImpl("Test Race",
+                        new CourseImpl("Test Course", Arrays.asList(new Waypoint[] { w1, w2, w3 })),
+                        boatClass, Collections.singleton(competitor)),
+                        EmptyWindStore.INSTANCE, /* delayToLiveInMillis */ 1000,
+                        /* millisecondsOverWhichToAverageWind */ 30000,
+                        /* millisecondsOverWhichToAverageSpeed */ 30000);
+        TimePoint start = MillisecondsTimePoint.now();
+        TimePoint topMarkRounding = start.plus(30000);
+        TimePoint finish = topMarkRounding.plus(30000);
+        trackedRace.updateMarkPassings(competitor, Arrays.asList(new MarkPassing[] {
+            new MarkPassingImpl(start, w1, competitor),    
+            new MarkPassingImpl(topMarkRounding, w2, competitor),    
+            new MarkPassingImpl(finish, w3, competitor)    
+        }));
+        assertFalse(boatClass.typicallyStartsUpwind());
+        assertNull(trackedRace.getEstimatedWindDirection(new DegreePosition(0, 0), MillisecondsTimePoint.now()));
     }
 }

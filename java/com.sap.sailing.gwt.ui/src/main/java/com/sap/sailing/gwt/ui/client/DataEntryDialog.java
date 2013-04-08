@@ -1,5 +1,8 @@
 package com.sap.sailing.gwt.ui.client;
 
+import java.util.Date;
+
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.dom.client.Style.FontWeight;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ChangeEvent;
@@ -14,13 +17,17 @@ import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.DoubleBox;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.HasVerticalAlignment;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.IntegerBox;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.LongBox;
+import com.google.gwt.user.client.ui.RadioButton;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.datepicker.client.DateBox;
 
 /**
  * An abstract data entry dialog class, capturing data of type <code>T</code>, with generic OK/Cancel buttons, title and
@@ -45,6 +52,11 @@ public abstract class DataEntryDialog<T> {
         String getErrorMessage(T valueToValidate);
     }
     
+    public static interface DialogCallback<T> {
+        void ok(T editedObject);
+        void cancel();
+    }
+
     /**
      * @param validator
      *            an optional validator; if <code>null</code>, no validation of data entered is performed; otherwise,
@@ -55,14 +67,32 @@ public abstract class DataEntryDialog<T> {
      *            {@link AsyncCallback#onSuccess(Object) confirmed}
      */
     public DataEntryDialog(String title, String message, String okButtonName, String cancelButtonName,
-            Validator<T> validator, final AsyncCallback<T> callback) {
+            Validator<T> validator, final DialogCallback<T> callback) {
+        this(title, message, okButtonName, cancelButtonName, validator, /* animationEnabled */ true, callback);
+    }
+    
+    /**
+     * @param validator
+     *            an optional validator; if <code>null</code>, no validation of data entered is performed; otherwise,
+     *            data validation is triggered upon any noticeable change in any of the elements constructed by
+     *            {@link #createCheckbox(String)}, {@link #createTextBox(String)}, etc.
+     * @param callback
+     *            will be called when the dialog if {@link AsyncCallback#onFailure(Throwable) cancelled} or
+     *            {@link AsyncCallback#onSuccess(Object) confirmed}
+     */
+    public DataEntryDialog(String title, String message, String okButtonName, String cancelButtonName,
+            Validator<T> validator, boolean animationEnabled, final DialogCallback<T> callback) {
         dateEntryDialog = new DialogBox();
         dateEntryDialog.setText(title);
-        dateEntryDialog.setAnimationEnabled(true);
+        dateEntryDialog.setAnimationEnabled(animationEnabled);
         this.validator = validator;
         okButton = new Button(okButtonName);
+        okButton.getElement().getStyle().setMargin(3, Unit.PX);
+        okButton.ensureDebugId("OkButton");
         FlowPanel dialogFPanel = new FlowPanel();
+        dialogFPanel.setWidth("100%");
         statusLabel = new Label();
+        statusLabel.ensureDebugId("StatusLabel");
         dialogFPanel.add(statusLabel);
         if (message != null) {
             Label messageLabel = new Label(message);
@@ -71,25 +101,28 @@ public abstract class DataEntryDialog<T> {
         }
         
         panelForAdditionalWidget = new FlowPanel();
+        panelForAdditionalWidget.setWidth("100%");
         dialogFPanel.add(panelForAdditionalWidget);
         FlowPanel buttonPanel = new FlowPanel();
         dialogFPanel.add(buttonPanel);
         buttonPanel.setStyleName("additionalWidgets");
         buttonPanel.add(okButton);
         cancelButton = new Button(cancelButtonName);
+        cancelButton.getElement().getStyle().setMargin(3, Unit.PX);
+        cancelButton.ensureDebugId("CancelButton");
         buttonPanel.add(cancelButton);
         cancelButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 dateEntryDialog.hide();
-                callback.onFailure(null);
+                callback.cancel();
             }
         });
         dateEntryDialog.setWidget(dialogFPanel);
         okButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
                 dateEntryDialog.hide();
-                callback.onSuccess(getResult());
+                callback.ok(getResult());
             }
         });
     }
@@ -111,7 +144,7 @@ public abstract class DataEntryDialog<T> {
     }
     
     protected abstract T getResult();
-    
+
     /**
      * Creates a text box with a key-up listener attached which ensures the value is updated after each
      * key-up event and the entire dialog is {@link #validate() validated} in this case.
@@ -176,6 +209,14 @@ public abstract class DataEntryDialog<T> {
     }
 
     public DoubleBox createDoubleBox(double initialValue, int visibleLength) {
+        return createDoubleBoxInternal(initialValue, visibleLength);
+    }
+
+    public DoubleBox createDoubleBox(int visibleLength) {
+        return createDoubleBoxInternal(null, visibleLength);
+    }
+    
+    private DoubleBox createDoubleBoxInternal(Double initialValue, int visibleLength) {
         DoubleBox doubleBox = new DoubleBox();
         doubleBox.setVisibleLength(visibleLength);
         doubleBox.setValue(initialValue);
@@ -189,6 +230,31 @@ public abstract class DataEntryDialog<T> {
         AbstractEntryPoint.linkEnterToButton(getOkButton(), doubleBox);
         AbstractEntryPoint.linkEscapeToButton(getCancelButton(), doubleBox);
         return doubleBox;
+    }
+
+    public DateBox createDateBox(long initialTimeInMs, int visibleLength) {
+        return createDateBoxInternal(new Date(initialTimeInMs), visibleLength);
+    }
+
+    public DateBox createDateBox(int visibleLength) {
+        return createDateBoxInternal(null, visibleLength);
+    }
+    
+    private DateBox createDateBoxInternal(Date initialDate, int visibleLength) {
+        DateBox dateBox = new DateBox();
+        dateBox.getTextBox().setVisibleLength(visibleLength);
+        dateBox.setFireNullValues(true);
+        dateBox.setValue(initialDate);
+        AbstractEntryPoint.addFocusUponKeyUpToggler(dateBox.getTextBox());
+        dateBox.addValueChangeHandler(new ValueChangeHandler<Date>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<Date> event) {
+                validate();
+            }
+        });
+        AbstractEntryPoint.linkEnterToButton(getOkButton(), dateBox.getTextBox());
+        AbstractEntryPoint.linkEscapeToButton(getCancelButton(), dateBox.getTextBox());
+        return dateBox;
     }
 
     /**
@@ -235,9 +301,22 @@ public abstract class DataEntryDialog<T> {
         headlineLabel.getElement().getStyle().setPaddingTop(1, Unit.EM);
         return headlineLabel;
     }
+    
+    public FlowPanel createHeadline(String headlineText, boolean regularHeadline) {
+    	FlowPanel headlinePanel = new FlowPanel();
+        Label headlineLabel = new Label(headlineText);
+        if (regularHeadline) {
+            headlinePanel.addStyleName("dialogInnerHeadline");
+        } else {
+            headlinePanel.addStyleName("dialogInnerHeadlineOther");
+        }
+        headlinePanel.add(headlineLabel);
+        return headlinePanel;
+    }
 
     public CheckBox createCheckbox(String checkboxLabel) {
         CheckBox result = new CheckBox(checkboxLabel);
+        result.setWordWrap(false);
         result.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
             @Override
             public void onValueChange(ValueChangeEvent<Boolean> event) {
@@ -249,6 +328,32 @@ public abstract class DataEntryDialog<T> {
         return result;
     }
 
+    public RadioButton createRadioButton(String radioButtonGroupName, String radioButtonLabel) {
+        RadioButton result = new RadioButton(radioButtonGroupName, radioButtonLabel);
+        result.setWordWrap(false);
+        result.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<Boolean> event) {
+                validate();
+            }
+        });
+        AbstractEntryPoint.linkEnterToButton(getOkButton(), result);
+        AbstractEntryPoint.linkEscapeToButton(getCancelButton(), result);
+        return result;
+    }
+
+    /**
+     * Creates a standard label for input fields.
+     * The label has some default formatting like "no wrap" and a colon right after the label text 
+     * @param name
+     * @return
+     */
+    public Label createLabel(String name) {
+        Label result = new Label(name + ":");
+        result.setWordWrap(false);
+        return result;
+    }
+    
     public ListBox createListBox(boolean isMultipleSelect) {
         ListBox result = new ListBox(isMultipleSelect);
         result.addChangeHandler(new ChangeHandler() {
@@ -262,6 +367,12 @@ public abstract class DataEntryDialog<T> {
         return result;
     }
 
+    public void alignAllPanelWidgetsVertically(HorizontalPanel panel, HasVerticalAlignment.VerticalAlignmentConstant alignment) {
+        for(int i = 0; i < panel.getWidgetCount(); i++) {
+            panel.setCellVerticalAlignment(panel.getWidget(i), alignment);
+        }
+    }
+    
     /**
      * Can contribute an additional widget to be displayed underneath the text entry field. If <code>null</code> is
      * returned, no additional widget will be displayed. This is the default behavior of this default implementation.
@@ -285,6 +396,10 @@ public abstract class DataEntryDialog<T> {
         return statusLabel;
     }
 
+    protected void setCursor(Style.Cursor cursor) {
+        dateEntryDialog.getElement().getStyle().setCursor(cursor);
+    }
+
     public void show() {
         Widget additionalWidget = getAdditionalWidget();
         if (additionalWidget != null) {
@@ -294,4 +409,7 @@ public abstract class DataEntryDialog<T> {
         dateEntryDialog.center();
     }
 
+    public void ensureDebugId(String debugId) {
+        dateEntryDialog.ensureDebugId(debugId);
+    }
 }

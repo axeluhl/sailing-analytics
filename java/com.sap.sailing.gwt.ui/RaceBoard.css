@@ -62,6 +62,14 @@ table {
 	border-collapse: separate;
 }
 
+.CombinedWindPanel {
+	-moz-border-radius: 4px;
+	-webkit-border-radius: 4px;
+	border-radius: 4px;
+	background-color: rgba(255, 255, 255, 0.75);
+	border: 1px solid #C9CACA;
+}
+
 .RaceBoardHeaderPanel {
 	margin: 0 12px 14px 12px;
 }
@@ -108,38 +116,6 @@ img.openColumn {
 
 .mainPanel {
 	width: 100%;
-}
-
-.globalNavigation {
-    position:absolute;
-    top:0;
-    right:0;
-}
-
-.globalNavigation-leaderBoardGroup a, .globalNavigation-home a {
-    background: url(images/globalNavigation-home_bg.png) 11px 8px no-repeat;
-}
-
-.globalNavigation-leaderBoard a {
-	background: url(images/globalNavigation-leaderBoard_bg.png) 11px 8px no-repeat;
-}
-
-.globalNavigation-leaderBoardGroup, .globalNavigation-leaderBoard, .globalNavigation-home {
-    margin: -4px 10px 0 0;
-    padding: 0px 0px 4px;
-    float: left;
-    background: #7c7b7c url(images/alert-overlay.png) repeat-x;
-}
-
-.globalNavigation-leaderBoard {
-	margin-right: 5px;
-}
-
-.globalNavigation-leaderBoardGroup a, .globalNavigation-leaderBoard a, .globalNavigation-home a {
-	color: #fff;
-	text-decoration: none;
-    display: block;
-    padding: 8px 13px 6px 36px;
 }
 
 .raceBoardNavigation {
@@ -251,14 +227,51 @@ img.openColumn {
 	cursor: pointer;
 }
 
+.raceBoardNavigation-standaloneElement {
+    background: url("images/btn-cta-orangeleft.png") repeat-x scroll center 0 transparent;
+	color: #FFFFFF;
+    cursor: pointer;
+    font-family: UbuntuBold,Verdana,Arial,sans-serif;
+    font-size: 14px;
+    margin: 0 0 0 0;
+    padding: 2px 7px 2px 3px;
+    height: 23px; 
+    display: inline-block;
+    text-decoration: none;
+    -moz-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    -webkit-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    text-shadow: 0 -1px 1px rgba(0, 0, 0, 0.25);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.25);
+	border-radius: 5px 5px 5px 5px; 
+    -moz-border-radius: 5px 0 0 5px;
+    -webkit-border-radius: 5px 5px 5px 5px;
+}
+
+.raceBoardNavigation-standaloneElement:active {
+	top: 1px;
+	position: relative;
+}
+
+.raceBoardNavigation-standaloneElement:hover {
+    background: url("images/btn-cta-orangeleft.png") repeat-x scroll center -30px transparent;
+    cursor: pointer;
+}
+
+.raceBoardNavigation-standaloneElement label {
+	cursor: pointer;
+}
+
 .timePanelButton {
 	float: left;
+	margin: 0 0 0 5px;
 }
 
 .playPauseButton {
 	padding: 0;
+	float: left;
 	width: 28px;
-	height: 24px;
+	height: 25px;
 	background: url(images/timeslider-play-active-icon.png) 0 0 no-repeat;
     cursor: pointer;
 }
@@ -277,13 +290,21 @@ img.openColumn {
   cursor: pointer;
 }
 
-
 .backToLivePlayButton {
-    float: left;
-    padding: 3px 10px 4px;
+	background: url(images/btn-cta-greenleft.png) center top repeat-x;
+    margin: 0 0 0 5px;
+}
+
+.backToLivePlayButton:hover {
+    background: url(images/btn-cta-greenleft.png) center -30px repeat-x;
+    margin: 0 0 0 5px;
 }
 
 .dockLayoutPanel div[style="position: absolute; overflow: hidden; left: 0px; right: 0px; bottom: 0px; height: 90px;"] {
 	box-shadow: 0 0 8px #424242;
 	z-index: 10;
+}
+
+.browserOptimizedMessage {
+	padding: 15px 0px;
 }

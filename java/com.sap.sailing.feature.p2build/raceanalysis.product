@@ -39,10 +39,15 @@
       <plugin id="com.sap.sailing.winregatta.resultimport" autoStart="true" startLevel="3" />
       <plugin id="com.sap.sailing.gwt.ui" autoStart="true" startLevel="4" />
       <plugin id="com.sap.sailing.kiworesultimport" autoStart="true" startLevel="3" />
+      <plugin id="com.sap.sailing.monitoring" autoStart="true" startLevel="5" />
       <plugin id="com.sap.sailing.server" autoStart="true" startLevel="4" />
+      <plugin id="com.sap.sailing.server.gateway" autoStart="true" startLevel="4" />
+      <plugin id="com.sap.sailing.server.gateway.ess40" autoStart="true" startLevel="4" />
       <plugin id="com.sap.sailing.server.replication" autoStart="true" startLevel="4" />
       <plugin id="com.sap.sailing.www" autoStart="true" startLevel="4" />
+      <plugin id="com.sap.sailing.www.events" autoStart="true" startLevel="4" />
       <plugin id="com.sap.sailing.xcelsiusadapter" autoStart="true" startLevel="4" />
+      <plugin id="com.sap.sailing.xrr.resultimport" autoStart="true" startLevel="3" />
       <plugin id="org.eclipse.equinox.common" autoStart="true" startLevel="2" />
       <plugin id="org.eclipse.equinox.simpleconfigurator" autoStart="true" startLevel="2" />
       <plugin id="org.eclipse.jetty.continuation" autoStart="true" startLevel="4" />
@@ -63,7 +68,7 @@
       <property name="expedition.udp.port" value="2010" />
       <property name="mongo.port" value="10200" />
       <property name="osgi.noShutdown" value="true" />
-      <property name="replication.exchangeName" value="sapsailinganalytics-master" />
+      <property name="replication.exchangeName" value="sapsailinganalytics-dev" />
    </configurations>
 
 </product>

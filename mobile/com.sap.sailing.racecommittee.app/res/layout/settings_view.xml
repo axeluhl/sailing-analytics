@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <PreferenceCategory android:title="@string/settings_category_general" >
+
+        <EditTextPreference
+            android:name="@string/settings_general_manageareas_header"
+            android:defaultValue="@string/settings_general_manageareas_default"
+            android:key="courseAreasPref"
+            android:summary="@string/settings_general_manageareas_description"
+            android:title="@string/settings_general_manageareas_header" />
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="@string/settings_category_race" >
+<!-- 
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="checkboxPrefGolf"
+            android:summary="Check the box if the Golf flag should be automatically removed in a gate start race"
+            android:title="Remove Golf Automatically" />
+-->
+        <EditTextPreference
+            android:defaultValue="30"
+            android:inputType="numberDecimal"
+            android:key="edittextRaceTimeFrameAfterFinish"
+            android:summary="@string/settings_time_frame_description"
+            android:title="@string/settings_time_frame_header" />
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="@string/settings_category_advanced" >
+
+        <EditTextPreference
+            android:name="@string/settings_advanced_service_header"
+            android:defaultValue="@string/settings_advanced_service_default"
+            android:key="webserviceUrlPref"
+            android:summary="@string/settings_advanced_service_description"
+            android:title="@string/settings_advanced_service_header" />
+    </PreferenceCategory>
+
+</PreferenceScreen>

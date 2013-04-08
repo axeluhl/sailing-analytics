@@ -8,8 +8,9 @@ import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
-import com.sap.sailing.domain.common.DefaultLeaderboardName;
+import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
 import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
@@ -19,6 +20,7 @@ import com.sap.sailing.gwt.ui.client.RaceSelectionModel;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
+import com.sap.sailing.gwt.ui.client.UserAgentChecker;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RaceDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
@@ -34,9 +36,11 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
     private String leaderboardGroupName;
     private RaceBoardViewModes viewMode;
 
+    private GlobalNavigationPanel globalNavigationPanel;
+
     @Override
-    public void onModuleLoad() {     
-        super.onModuleLoad();
+    protected void doOnModuleLoad() {    
+        super.doOnModuleLoad();
         regattaName = Window.Location.getParameter("regattaName");
         raceName = Window.Location.getParameter("raceName");
         String leaderboardNameParamValue = Window.Location.getParameter("leaderboardName");
@@ -53,7 +57,7 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
             viewMode = RaceBoardViewModes.ONESCREEN;
         }
         if (leaderboardNameParamValue == null || leaderboardNameParamValue.isEmpty()) {
-            leaderboardName = DefaultLeaderboardName.DEFAULT_LEADERBOARD_NAME;
+            leaderboardName = LeaderboardNameConstants.DEFAULT_LEADERBOARD_NAME;
         } else {
             leaderboardName = leaderboardNameParamValue;
         }
@@ -113,7 +117,7 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
                     break;
                 }
             }
-            if(!foundLeaderboard) {
+            if (!foundLeaderboard) {
                 createErrorPage("the leaderboard is not contained in this leaderboard group.");
                 return;
             }
@@ -129,8 +133,8 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         raceSelectionModel.setSelection(singletonList);
         Timer timer = new Timer(PlayModes.Replay, 1000l);
         RaceTimesInfoProvider raceTimesInfoProvider = new RaceTimesInfoProvider(sailingService, this, singletonList, 5000l /* requestInterval*/);
-        RaceBoardPanel raceBoardPanel = new RaceBoardPanel(sailingService, user, timer, raceSelectionModel, leaderboardName, leaderboardGroupName,
-                RaceBoardEntryPoint.this, stringMessages, userAgentType, viewMode, raceTimesInfoProvider);
+        RaceBoardPanel raceBoardPanel = new RaceBoardPanel(sailingService, mediaService, user, timer, raceSelectionModel, leaderboardName, leaderboardGroupName,
+                RaceBoardEntryPoint.this, stringMessages, userAgent, viewMode, raceTimesInfoProvider);
         raceBoardPanel.fillRegattas(regattas);
 
         switch (viewMode) {
@@ -170,26 +174,37 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
     }
 
     private FlowPanel createLogoAndTitlePanel(RaceBoardPanel raceBoardPanel) {
-        LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(regattaName, selectedRace.name, stringMessages);
+        globalNavigationPanel = new GlobalNavigationPanel(stringMessages, true, leaderboardName, leaderboardGroupName);
+        LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(regattaName, selectedRace.name, stringMessages, this) {
+            @Override
+            public void onResize() {
+                super.onResize();
+                if (isSmallWidth()) {
+                    remove(globalNavigationPanel);
+                } else {
+                    add(globalNavigationPanel);
+                }
+            }
+        };
         logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
-
-        FlowPanel globalNavigationPanel = new GlobalNavigationPanel(stringMessages, true, leaderboardName, leaderboardGroupName);
-        logoAndTitlePanel.add(globalNavigationPanel);
-        
+        if (!isSmallWidth()) {
+            logoAndTitlePanel.add(globalNavigationPanel);
+        }
         return logoAndTitlePanel;
     }
     
     private void createRaceBoardInOneScreenMode(RaceBoardPanel raceBoardPanel) {
         DockLayoutPanel p = new DockLayoutPanel(Unit.PX);
         RootLayoutPanel.get().add(p);
-        
         FlowPanel toolbarPanel = new FlowPanel();
-        
         toolbarPanel.add(raceBoardPanel.getNavigationWidget());
-
+        if (!UserAgentChecker.INSTANCE.isUserAgentSupported(userAgent)) {
+            HTML lbl = new HTML(stringMessages.warningBrowserUnsupported());
+            lbl.setStyleName("browserOptimizedMessage");
+            toolbarPanel.add(lbl);
+        }
         FlowPanel logoAndTitlePanel = createLogoAndTitlePanel(raceBoardPanel);
         FlowPanel timePanel = createTimePanel(raceBoardPanel);
-        
         p.addNorth(logoAndTitlePanel, 68);        
         p.addNorth(toolbarPanel, 40);
         p.addSouth(timePanel, 90);                     

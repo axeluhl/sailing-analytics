@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <project
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
 	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
@@ -15,6 +15,7 @@
 
 	<modules>
 		<module>com.sap.sailing.domain.common</module>
+		<module>com.sap.sailing.domain.shared.android</module>
 		<module>com.sap.sailing.domain</module>
 		<module>com.sap.sailing.operationaltransformation</module>
 		<module>com.sap.sailing.operationaltransformation.test</module>
@@ -23,23 +24,31 @@
 		<module>com.sap.sailing.domain.persistence</module>
 		<module>com.sap.sailing.domain.test</module>
 		<module>com.sap.sailing.domain.tractracadapter</module>
+		<module>com.sap.sailing.domain.tractracadapter.test</module>
 		<module>com.sap.sailing.domain.tractracadapter.persistence</module>
 		<module>com.sap.sailing.domain.swisstimingadapter</module>
 		<module>com.sap.sailing.domain.swisstimingadapter.persistence</module>
 		<module>com.sap.sailing.domain.swisstimingadapter.test</module>
+		<module>com.sap.sailing.domain.swisstimingreplayadapter</module>
+		<module>com.sap.sailing.domain.swisstimingreplayadapter.test</module>
 		<module>com.sap.sailing.declination</module>
 		<module>com.sap.sailing.declination.test</module>
 		<module>com.sap.sailing.udpconnector</module>
 		<module>com.sap.sailing.expeditionconnector</module>
 		<module>com.sap.sailing.expeditionconnector.test</module>
 		<module>com.sap.sailing.server</module>
+		<module>com.sap.sailing.server.gateway</module>
+		<module>com.sap.sailing.server.gateway.test</module>
+		<module>com.sap.sailing.server.gateway.ess40</module>
+		<module>com.sap.sailing.server.gateway.serialization</module>
+		<module>com.sap.sailing.server.gateway.serialization.test</module>
 		<module>com.sap.sailing.server.replication</module>
 		<module>com.sap.sailing.server.replication.test</module>
 		<module>com.sap.sailing.www</module>
 		<module>com.sap.sailing.www.events</module>
 		<module>com.sap.sailing.xcelsiusadapter</module>
-		<module>com.sap.sailing.gwt.ui</module>
-		<module>com.sap.sailing.gwt.ui.test</module>
+	    <module>com.sap.sailing.gwt.ui</module>
+       	<module>com.sap.sailing.gwt.ui.test</module>
 		<module>com.google.gwt.osgi</module>
 		<module>com.sap.sailing.server.test</module>
 		<module>com.sap.sailing.mongodb</module>
@@ -58,17 +67,95 @@
 		<module>com.sap.sailing.kiworesultimport.test</module>
 		<module>com.sap.sailing.ess40.resultimport</module>
 		<module>com.sap.sailing.ess40.resultimport.test</module>
+		<module>com.sap.sailing.odf.resultimport</module>
+		<module>com.sap.sailing.odf.resultimport.test</module>
+		<module>com.sap.sailing.xrr.resultimport</module>
+		<module>com.sap.sailing.xrr.resultimport.test</module>
 		<module>com.sap.sailing.freg.resultimport</module>
 		<module>com.sap.sailing.freg.resultimport.test</module>
 		<module>com.sap.sailing.winregatta.resultimport</module>
 		<module>com.sap.sailing.winregatta.resultimport.test</module>
+		<module>com.sap.sailing.selenium.test</module>
+		<module>org.openqa.selenium.osgi</module>
+		<module>com.sap.sailing.monitoring</module>
+		<module>com.sap.sailing.nmeaconnector</module>
+		<module>com.sap.sailing.nmeaconnector.test</module>
+		<module>net.sf.marineapi</module>
+		<module>net.sf.marineapi.test</module>
 	</modules>
 	
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<tycho-version>0.13.0</tycho-version>
+        
+		<!--
+          QUESTION: Which properties or settings are system dependent and differ across
+                    different machines/environments?
+          QUESTION: Can we move the system property -Dmongo.dbName to "parameters.mongodb"?
+                    If so the IP of the host would be the same for all profiles.
+		-->
+        <parameters.common>
+		  -Dfile.encoding=cp1252 -Dreplication.brokerURL=tcp://localhost:61615 -Dmongo.dbName=winddbTest
+        </parameters.common>
+		<parameters.vm-settings>
+          -Xmx1024m -XX:PermSize=256m -XX:-UseGCOverheadLimit -XX:+UseParallelGC
+		</parameters.vm-settings>
+		<parameters.tractrac>
+          -Dtractrac.tunnel=true -Dtractrac.tunnel.host=10.18.22.156
+		</parameters.tractrac>
+		<parameters.mongodb>
+          -Dmongo.host=10.18.22.156
+		</parameters.mongodb>
+        <parameters.debug>
+          -Xdebug
+          -Xrunjdwp:transport=dt_socket,address=8000,server=y,suspend=y 
+        </parameters.debug>
+        <!--
+          "Forward declaration" for better readability. The actual value should be defined in the local settings.xml,
+          because of the differences between the CI-Build and the local setup.
+        -->
+        <parameters.proxy>
+        </parameters.proxy>
 	</properties>
+
+    <profiles>
+        <profile>
+            <id>no-debug.with-proxy</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                <tycho.build.argLine>
+		  ${parameters.common} ${parameters.vm-settings} ${parameters.proxy} ${parameters.tractrac} ${parameters.mongodb}
+		</tycho.build.argLine>
+            </properties>
+        </profile>
+        <profile>
+            <id>no-debug.without-proxy</id>
+            <properties>
+                <tycho.build.argLine>
+				  ${parameters.common} ${parameters.vm-settings}
+				</tycho.build.argLine>
+            </properties>
+        </profile>
+        <profile>
+            <id>debug.with-proxy</id>
+            <properties>
+                <tycho.build.argLine>
+			      ${parameters.common} ${parameters.vm-settings} ${parameters.proxy} ${parameters.debug}
+				</tycho.build.argLine>
+            </properties>
+        </profile>
+        <profile>
+            <id>debug.without-proxy</id>
+            <properties>
+                <tycho.build.argLine>
+                  ${parameters.common} ${parameters.vm-settings} ${parameters.debug}
+				</tycho.build.argLine>
+            </properties>
+        </profile>
+    </profiles>
 
 	<build>
 		<directory>bin</directory>
@@ -146,6 +233,7 @@
 				<artifactId>tycho-surefire-plugin</artifactId>
 				<version>${tycho-version}</version>
 				<configuration>
+<<<<<<< HEAD
 <!-- non-debug -->
 <!-- proxy
 					<argLine>-Dfile.encoding=cp1252 -Dhttp.proxyHost=proxy -Dhttp.proxyPort=8080 -Dtractrac.tunnel=true -Dtractrac.tunnel.host=10.18.206.73 -Dmongo.host=10.18.206.73 -Dmongo.dbName=winddbTest -Dreplication.brokerURL=tcp://localhost:61615 -Xmx1024m -XX:PermSize=256m -XX:-UseGCOverheadLimit -XX:+UseParallelGC</argLine>
@@ -162,15 +250,19 @@
 					<argLine>-Dfile.encoding=cp1252 -Xdebug -Xrunjdwp:transport=dt_socket,address=8000,server=y,suspend=y -Dmongo.dbName=winddbTest -Dreplication.brokerURL=tcp://localhost:61615 -Xmx1024m -XX:PermSize=256m -XX:-UseGCOverheadLimit -XX:+UseParallelGC</argLine>
 -->
 
+=======
+				    <argLine>${tycho.build.argLine}</argLine>
+>>>>>>> origin/master
 					<excludes>
-						<exclude>**/*$*</exclude> <!-- Exclude inner classes -->
+						<!-- Exclude inner classes -->
+						<exclude>**/*$*</exclude>
 					</excludes>
 				</configuration>
 			</plugin>
 			<plugin>
-				<groupId>org.eclipse.tycho</groupId>
+				<groupId>org.sonatype.tycho</groupId>
 				<artifactId>maven-osgi-compiler-plugin</artifactId>
-				<version>${tycho-version}</version>
+                <version>${tycho-version}</version>
 				<configuration>
 					<source>1.7</source>
 					<target>1.7</target>

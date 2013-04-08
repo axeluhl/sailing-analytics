@@ -78,6 +78,13 @@ public class Timer {
      * Set to <code>true</code> to enable the timer to advance the max time automatically if the current time gets greater than the max time 
      */
     private boolean autoAdvance;
+
+    /**
+     * If {@link #setLivePlayDelayInMillisExplicitly(long)} was called, this flag is set to <code>true</code> which will
+     * cause calls to {@link #setLivePlayDelayInMillis(long)} to be ignored. Then, the only way to update the live delay is
+     * to call {@link #setLivePlayDelayInMillisExplicitly(long)}.
+     */
+    private boolean delaySetExplicity;
     
     /**
      * The timer can run in two different modes: Live and Replay
@@ -105,14 +112,14 @@ public class Timer {
      */
     public Timer(PlayModes playMode, long refreshInterval) {
         this.refreshInterval = refreshInterval;
-        this.playMode = playMode;
         time = new Date();
         timeListeners = new HashSet<TimeListener>();
         playStateListeners = new HashSet<PlayStateListener>();
         playState = PlayStates.Stopped;
-        playSpeedFactor = 1.0;
+        setPlaySpeedFactor(1.0);
         livePlayDelayInMillis = 0l;
         autoAdvance = true;
+        setPlayMode(playMode);
     }
     
     public void addTimeListener(TimeListener listener) {
@@ -143,6 +150,9 @@ public class Timer {
     
     public void setPlaySpeedFactor(double playSpeedFactor) {
         this.playSpeedFactor = playSpeedFactor;
+        for (PlayStateListener playStateListener : playStateListeners) {
+            playStateListener.playSpeedFactorChanged(this.playSpeedFactor);
+        }
     }
     
     public void setRefreshInterval(long refreshInterval) {
@@ -209,7 +219,7 @@ public class Timer {
             if (playMode == PlayModes.Live) {
                 setTime(System.currentTimeMillis()-livePlayDelayInMillis);
             }
-            if(autoAdvance) {
+            if (autoAdvance) {
                 startAutoAdvance();
             }
             for (PlayStateListener playStateListener : playStateListeners) {
@@ -258,6 +268,21 @@ public class Timer {
     }
     
     public void setLivePlayDelayInMillis(long delayInMilliseconds) {
+        if (!delaySetExplicity) {
+            basicSetLivePlayDelayInMillis(delayInMilliseconds);
+        }
+    }
+    
+    /**
+     * Always updates the delay if it is different from the current delay setting. The fact that an explicit delay update was
+     * performed is recorded which will block further automatic delay updates from this point onwards.
+     */
+    public void setLivePlayDelayInMillisExplicitly(long delayInMilliseconds) {
+        basicSetLivePlayDelayInMillis(delayInMilliseconds);
+        delaySetExplicity = true;
+    }
+
+    private void basicSetLivePlayDelayInMillis(long delayInMilliseconds) {
         if (this.livePlayDelayInMillis != delayInMilliseconds) {
             this.livePlayDelayInMillis = delayInMilliseconds;
             if (getPlayMode() == PlayModes.Live) {

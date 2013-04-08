@@ -54,7 +54,7 @@ public class MongoWindStoreImpl extends EmptyWindStore implements MongoWindStore
         if (windSource.canBeStored()) {
             result = domainObjectFactory.loadWindTrack(trackedRegatta.getRegatta(), trackedRace.getRace(), windSource,
                     millisecondsOverWhichToAverage);
-            result.addListener(new MongoWindListener(trackedRegatta, trackedRace, windSource, mongoObjectFactory, db));
+            result.addListener(new MongoWindListener(trackedRace, trackedRegatta.getRegatta().getName(), windSource, mongoObjectFactory, db));
         } else {
             result = super.getWindTrack(trackedRegatta, trackedRace, windSource, millisecondsOverWhichToAverage, delayForWindEstimationCacheInvalidation);
         }
@@ -67,7 +67,7 @@ public class MongoWindStoreImpl extends EmptyWindStore implements MongoWindStore
         Map<? extends WindSource, ? extends WindTrack> result = domainObjectFactory.loadWindTracks(
                 trackedRegatta.getRegatta(), trackedRace.getRace(), millisecondsOverWhichToAverageWind);
         for (Entry<? extends WindSource, ? extends WindTrack> e : result.entrySet()) {
-            e.getValue().addListener(new MongoWindListener(trackedRegatta, trackedRace, e.getKey(), mongoObjectFactory, db));
+            e.getValue().addListener(new MongoWindListener(trackedRace, trackedRegatta.getRegatta().getName(), e.getKey(), mongoObjectFactory, db));
         }
         return result;
     }

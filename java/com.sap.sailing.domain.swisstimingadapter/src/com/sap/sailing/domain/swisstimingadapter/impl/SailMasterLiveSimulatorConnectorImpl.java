@@ -15,9 +15,7 @@ public class SailMasterLiveSimulatorConnectorImpl extends SailMasterConnectorImp
     
     public SailMasterLiveSimulatorConnectorImpl(String host, int port, RaceSpecificMessageLoader messageLoader, boolean canSendRequests) throws InterruptedException {
         super(host, port, messageLoader, canSendRequests);
-        
         bufferedMessageList = Collections.synchronizedList(new ArrayList<SailMasterMessage>());
-        
         Thread messageDeliveryThread = new Thread("SailMasterLiveSimulatorConnector") {
             public void run() {
                 while(true) {
@@ -44,7 +42,7 @@ public class SailMasterLiveSimulatorConnectorImpl extends SailMasterConnectorImp
     }
 
     @Override
-    protected void notifyListeners(SailMasterMessage message) throws ParseException {
+    protected void notifyListeners(SailMasterMessage message) {
         // we cache all messages here and deliver them with a different speed
         bufferedMessageList.add(message);
     }

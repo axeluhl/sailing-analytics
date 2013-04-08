@@ -15,6 +15,7 @@ import org.junit.Test;
 import com.maptrack.client.io.TypeController;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
@@ -23,6 +24,7 @@ import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.Receiver;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
+import com.sap.sailing.domain.tractracadapter.impl.ControlPointAdapter;
 import com.tractrac.clientmodule.Race;
 import com.tractrac.clientmodule.RaceCompetitor;
 import com.tractrac.clientmodule.data.ICallbackData;
@@ -93,11 +95,11 @@ public class ReceiveMarkPassingDataTest extends AbstractTracTracLiveTest {
         List<Receiver> receivers = new ArrayList<Receiver>();
         receivers.add(receiver);
         for (Receiver r : DomainFactory.INSTANCE.getUpdateReceivers(
-                new DynamicTrackedRegattaImpl(DomainFactory.INSTANCE.getOrCreateDefaultRegatta(getTracTracEvent(), /* trackedRegattaRegistry */ null)),
+                new DynamicTrackedRegattaImpl(DomainFactory.INSTANCE.getOrCreateDefaultRegatta(EmptyRaceLogStore.INSTANCE, getTracTracEvent(), /* trackedRegattaRegistry */ null)),
                 getTracTracEvent(), EmptyWindStore.INSTANCE, /* startOfTracking */ null, /* endOfTracking */ null, /* delayToLiveInMillis */ 0l,
                 /* simulator */ null, new DynamicRaceDefinitionSet() {
                     @Override
-                    public void addRaceDefinition(RaceDefinition race) {}
+                    public void addRaceDefinition(RaceDefinition race, DynamicTrackedRace trackedRace) {}
                 },
                 /* trackedRegattaRegistry */ null, ReceiverType.RACECOURSE, ReceiverType.MARKPOSITIONS, ReceiverType.RACESTARTFINISH, ReceiverType.RAWPOSITIONS)) {
             receivers.add(r);
@@ -137,7 +139,7 @@ public class ReceiveMarkPassingDataTest extends AbstractTracTracLiveTest {
         // the first waypoint is used
         boolean found = false;
         for (Waypoint waypoint : raceDefinition.getCourse().getWaypoints()) {
-            if (waypoint.getControlPoint() == DomainFactory.INSTANCE.getOrCreateControlPoint(entry.getControlPoint())) {
+            if (waypoint.getControlPoint() == DomainFactory.INSTANCE.getOrCreateControlPoint(new ControlPointAdapter(entry.getControlPoint()))) {
                 found = true;
             }
         }

@@ -1,22 +1,29 @@
 package com.sap.sailing.gwt.ui.shared;
 
-public class MarkDTO extends NamedDTO {
+import java.util.Collections;
+
+import com.sap.sailing.domain.common.MarkType;
+
+public class MarkDTO extends ControlPointDTO {
     public PositionDTO position;
+    public String color;
+    public String shape;
+    public String pattern;
+    public MarkType type;
+
+    MarkDTO() {}
     
-    public MarkDTO() {}
-    
-    public MarkDTO(String name, double latDeg, double lngDeg) {
-        super(name);
-        position = new PositionDTO(latDeg, lngDeg);
+    public MarkDTO(String idAsString, String name, double latDeg, double lngDeg) {
+        super(idAsString, name);
+        this.position = new PositionDTO(latDeg, lngDeg);
+    }
+
+    public MarkDTO(String idAsString, String name) {
+        super(idAsString, name);
     }
     
     @Override
-    public int hashCode() {
-        return 98174 ^ name.hashCode();
-    }
-    
-    @Override
-    public boolean equals(Object o) {
-        return name.equals(((MarkDTO) o).name);
+    public Iterable<MarkDTO> getMarks() {
+        return Collections.singleton(this);
     }
 }

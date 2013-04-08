@@ -14,6 +14,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.TracTracConnectionConstants;
@@ -53,7 +54,7 @@ public class UnicodeCharactersInCompetitorNamesTest {
                                 : new URI("tcp://" + TracTracConnectionConstants.HOST_NAME + ":"
                                         + TracTracConnectionConstants.PORT_STORED),
                         /* startOfTracking */null, /* endOfTracking */null, /* delayToLiveInMillis */0l,
-                        /* simulateWithStartTimeNow */ false, EmptyWindStore.INSTANCE,
+                        /* simulateWithStartTimeNow */ false, EmptyRaceLogStore.INSTANCE, EmptyWindStore.INSTANCE,
                         new DummyTrackedRegattaRegistry());
 
         Iterable<Competitor> competitors = fourtyninerYellow_2.getRacesHandle().getRaces().iterator().next()

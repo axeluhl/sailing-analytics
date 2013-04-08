@@ -1,0 +1,13 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Gateway tests
+Bundle-SymbolicName: com.sap.sailing.server.gateway.test
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: SAP
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Fragment-Host: com.sap.sailing.server.gateway
+Require-Bundle: org.mockito.mockito-core;bundle-version="1.9.5",
+ com.sap.sailing.domain.test,
+ org.hamcrest;bundle-version="1.1.0"
+Import-Package: com.sap.sailing.server.impl,
+ org.junit;version="4.8.2"

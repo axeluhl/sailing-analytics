@@ -19,11 +19,15 @@ public class FixImpl implements Fix {
     private final Speed velocityMadeGood;
     private final Distance distanceToLeader;
     private final Distance distanceToNextMark;
-
+    
+    /**
+     * A disqualification reason, such as "DNC" or "DNS". May be <code>null</code>.
+     */
+    private final String boatIRM;
     
     public FixImpl(String boatID, TrackerType trackerType, Long ageOfDataInMilliseconds, Position position,
             SpeedWithBearing speed, Integer nextMarkIndex, Integer rank, Speed averageSpeedOverGroundPerLeg,
-            Speed velocityMadeGood, Distance distanceToLeader, Distance distanceToNextMark) {
+            Speed velocityMadeGood, Distance distanceToLeader, Distance distanceToNextMark, String boatIRM) {
         super();
         this.boatID = boatID;
         this.trackerType = trackerType;
@@ -36,6 +40,12 @@ public class FixImpl implements Fix {
         this.velocityMadeGood = velocityMadeGood;
         this.distanceToLeader = distanceToLeader;
         this.distanceToNextMark = distanceToNextMark;
+        this.boatIRM = boatIRM;
+    }
+
+    @Override
+    public String getBoatIRM() {
+        return boatIRM;
     }
 
     @Override

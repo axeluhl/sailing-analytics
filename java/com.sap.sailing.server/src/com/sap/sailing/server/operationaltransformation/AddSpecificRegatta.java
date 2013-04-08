@@ -1,5 +1,6 @@
 package com.sap.sailing.server.operationaltransformation;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -13,6 +14,7 @@ import com.sap.sailing.domain.base.impl.SeriesImpl;
 import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
+import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
@@ -21,23 +23,31 @@ public class AddSpecificRegatta extends AbstractAddRegattaOperation {
     private static final long serialVersionUID = -8018855620167669352L;
     private final Map<String, Pair<List<Triple<String, Integer, Color>>, Boolean>> seriesNamesWithFleetNamesAndFleetOrderingAndMedal;
     private final boolean persistent;
+    private final ScoringScheme scoringScheme;
+    private final Serializable defaultCourseAreaId;
     
-    public AddSpecificRegatta(String regattaName, String boatClassName, Map<String, Pair<List<Triple<String, Integer, Color>>, Boolean>> seriesNamesWithFleetNamesAndFleetOrdering, boolean persistent) {
-        super(regattaName, boatClassName);
+    public AddSpecificRegatta(String regattaName, String boatClassName, Serializable id,
+            Map<String, Pair<List<Triple<String, Integer, Color>>, Boolean>> seriesNamesWithFleetNamesAndFleetOrdering,
+            boolean persistent, ScoringScheme scoringScheme, Serializable defaultCourseAreaId) {
+        super(regattaName, boatClassName, id);
         this.seriesNamesWithFleetNamesAndFleetOrderingAndMedal = seriesNamesWithFleetNamesAndFleetOrdering;
         this.persistent = persistent;
+        this.scoringScheme = scoringScheme;
+        this.defaultCourseAreaId = defaultCourseAreaId;
     }
 
     @Override
     public Regatta internalApplyTo(RacingEventService toState) throws Exception {
-        return toState.createRegatta(getBaseEventName(), getBoatClassName(), createSeries(toState), persistent);
+        return toState.createRegatta(getBaseRegattaName(), getBoatClassName(), getId(), createSeries(toState),
+                persistent, scoringScheme, defaultCourseAreaId);
     }
 
     private Iterable<? extends Series> createSeries(TrackedRegattaRegistry trackedRegattaRegistry) {
         List<Series> result = new ArrayList<Series>();
         for (Map.Entry<String, Pair<List<Triple<String, Integer, Color>>, Boolean>> e : seriesNamesWithFleetNamesAndFleetOrderingAndMedal.entrySet()) {
             final List<String> emptyRaceColumnNamesList = Collections.emptyList();
-            Series s = new SeriesImpl(e.getKey(), /* isMedal */ e.getValue().getB(), createFleets(e.getValue().getA()), emptyRaceColumnNamesList, trackedRegattaRegistry);
+            Series s = new SeriesImpl(e.getKey(), /* isMedal */e.getValue().getB(), createFleets(e.getValue().getA()),
+                    emptyRaceColumnNamesList, trackedRegattaRegistry);
             result.add(s);
         }
         return result;

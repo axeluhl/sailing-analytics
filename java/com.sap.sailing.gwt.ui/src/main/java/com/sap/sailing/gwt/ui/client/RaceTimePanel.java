@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Map;
 
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.client.Timer.PlayStates;
@@ -14,13 +13,13 @@ import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.components.SettingsDialogComponent;
 
 public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements RaceSelectionChangeListener, RaceTimesInfoProviderListener {
-    private RaceTimesInfoProvider raceTimesInfoProvider;
-    private RaceIdentifier selectedRace;
+    private final RaceTimesInfoProvider raceTimesInfoProvider;
+    private RegattaAndRaceIdentifier selectedRace;
     private boolean autoAdjustPlayMode;
     private RaceTimesInfoDTO lastRaceTimesInfo;
     
-    public RaceTimePanel(Timer timer, StringMessages stringMessages, RaceTimesInfoProvider raceTimesInfoProvider) {
-        super(timer, stringMessages);
+    public RaceTimePanel(Timer timer, TimeRangeWithZoomProvider timeRangeProvider, StringMessages stringMessages, RaceTimesInfoProvider raceTimesInfoProvider) {
+        super(timer, timeRangeProvider, stringMessages);
         this.raceTimesInfoProvider = raceTimesInfoProvider;
         selectedRace = null;
         autoAdjustPlayMode = true;
@@ -51,11 +50,8 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
             // in case the race is not tracked anymore we reset the time slider
             resetTimeSlider();
         } else {
-            // check if the live delay is already been set
-            if (!isUserExplicitlyChangedLivePlayDelay() && timer.getLivePlayDelayInMillis() != raceTimesInfo.delayToLiveInMs) {
-                timer.setLivePlayDelayInMillis(raceTimesInfo.delayToLiveInMs);
-            }
-            
+            // timer will only accept this update if the delay hasn't been updated explicitly
+            timer.setLivePlayDelayInMillis(raceTimesInfo.delayToLiveInMs);
             if ((raceTimesInfo.startOfTracking != null || raceTimesInfo.startOfRace != null) && 
                     (raceTimesInfo.newestTrackingEvent != null || raceTimesInfo.endOfRace != null)) {
                 // we set here the min and max of the time slider, the start and end of the race as well as the known
@@ -67,8 +63,8 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
                     timer.setPlayMode(PlayModes.Live);
                 }
                 
-                boolean timerAlreadyInitialized = getMin() != null && getMax() != null && timeSlider.getCurrentValue() != null;
-                if (!isTimeZoomed) {
+                boolean timerAlreadyInitialized = getFromTime() != null && getToTime() != null && timeSlider.getCurrentValue() != null;
+                if (!timeRangeProvider.isZoomed()) {
                     updateMinMax(raceTimesInfo);
                     if (!timerAlreadyInitialized) {
                         initTimerPosition(raceTimesInfo);
@@ -84,10 +80,9 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
     } 
     
     @Override
-    public void onTimeZoom(Date zoomStartTimepoint, Date zoomEndTimepoint) {
-        isTimeZoomed = true;
+    public void onTimeZoomChanged(Date zoomStartTimepoint, Date zoomEndTimepoint) {
+        super.onTimeZoomChanged(zoomStartTimepoint, zoomEndTimepoint);
         timeSlider.setZoomed(true);
-        timer.setAutoAdvance(false);
         setMinMax(zoomStartTimepoint, zoomEndTimepoint, false);
         timeSlider.clearMarkersAndLabelsAndTicks();
         redrawAllMarkers(lastRaceTimesInfo);
@@ -95,10 +90,14 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
 
     @Override
     public void onTimeZoomReset() {
-        isTimeZoomed = false;
+        super.onTimeZoomReset();
         timeSlider.setZoomed(false);
-        timer.setAutoAdvance(true);
-        updateMinMax(this.lastRaceTimesInfo);
+        
+        timeSlider.setMinValue(new Double(timeRangeProvider.getFromTime().getTime()), false);
+        timeSlider.setMaxValue(new Double(timeRangeProvider.getToTime().getTime()), false);
+        timeSlider.setCurrentValue(new Double(timer.getTime().getTime()), true);
+        
+//        updateMinMax(this.lastRaceTimesInfo);
         timeSlider.clearMarkersAndLabelsAndTicks();
         redrawAllMarkers(lastRaceTimesInfo);
     }
@@ -106,14 +105,15 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
     @Override
     protected boolean isLiveModeToBeMadePossible() {
         long livePlayDelayInMillis = timer.getLivePlayDelayInMillis();
-        long eventTimeoutTolerance = 60 * 1000; // 60s 
+        long eventTimeoutTolerance = 60 * 1000; // 60s
+        long timeBeforeRaceStartTolerance = 3 * 60 * 1000; // 3min
         long liveTimePointInMillis = System.currentTimeMillis() - livePlayDelayInMillis;
         RaceTimesInfoDTO lastRaceTimesInfo = raceTimesInfoProvider != null ? raceTimesInfoProvider.getRaceTimesInfo(selectedRace) : null;
         return lastRaceTimesInfo != null &&
                 lastRaceTimesInfo.newestTrackingEvent != null &&
                 liveTimePointInMillis < lastRaceTimesInfo.newestTrackingEvent.getTime() + eventTimeoutTolerance &&
-                lastRaceTimesInfo.startOfTracking != null &&
-                liveTimePointInMillis > lastRaceTimesInfo.startOfTracking.getTime();
+                ((lastRaceTimesInfo.startOfTracking != null && liveTimePointInMillis > lastRaceTimesInfo.startOfTracking.getTime())||
+                 (lastRaceTimesInfo.startOfRace != null && liveTimePointInMillis > lastRaceTimesInfo.startOfRace.getTime() - timeBeforeRaceStartTolerance));
     }
     
     @Override
@@ -152,7 +152,7 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
         Date max = raceMinMax.getB();
         
         // never reduce max if it was already set
-        if (min != null && max != null && (getMax() == null || getMax().before(max))) {
+        if (min != null && max != null && (getToTime() == null || getToTime().before(max))) {
             setMinMax(min, max, /* fireEvent */ false); // no event because we guarantee time to be between min and max
         }
     }
@@ -233,7 +233,7 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
     }
     
     @Override
-    public void raceTimesInfosReceived(Map<RaceIdentifier, RaceTimesInfoDTO> raceTimesInfos) {
+    public void raceTimesInfosReceived(Map<RegattaAndRaceIdentifier, RaceTimesInfoDTO> raceTimesInfos) {
         updateTimeInfo(raceTimesInfos.get(selectedRace));
     }
 }

@@ -16,21 +16,21 @@ Require-Bundle: com.sap.sailing.domain,
  com.sap.sailing.expeditionconnector,
  com.sap.sailing.declination,
  com.sap.sailing.mongodb,
- javax.servlet;bundle-version="2.5.0",
- com.mongodb.driver;bundle-version="2.6.2",
  com.sap.sailing.domain.swisstimingadapter,
  com.sap.sailing.domain.persistence,
  com.sap.sailing.domain.swisstimingadapter.persistence,
  com.sap.sailing.domain.common,
  com.sap.sailing.udpconnector,
- com.sap.sailing.operationaltransformation
+ com.sap.sailing.operationaltransformation,
+ com.sap.sailing.domain.shared.android;bundle-version="1.0.0"
 Bundle-ClassPath: .
 Export-Package: com.sap.sailing.server,
  com.sap.sailing.server.impl;
   x-friends:="com.sap.sailing.mongodb.test,
    com.sap.sailing.server.test,
+   com.sap.sailing.server.gateway.test,
    com.sap.sailing.domain.swisstimingadapter.test,
    com.sap.sailing.gwt.ui.test,
    com.sap.sailing.server.replication.test",
  com.sap.sailing.server.operationaltransformation
-Web-ContextPath: /sailingserver
+

@@ -2,45 +2,22 @@ package com.sap.sailing.gwt.ui.shared;
 
 import java.util.List;
 
+import com.sap.sailing.domain.common.NauticalSide;
+
 public class WaypointDTO extends NamedDTO {
-    public List<MarkDTO> buoys;
+    public List<MarkDTO> marks;
     
-    public int courseIndex;
-
-    public int markPassingsCount;
+    public ControlPointDTO controlPoint;
     
-    public WaypointDTO() {}
+    public NauticalSide passingSide;
     
-    public WaypointDTO(String name, int courseIndex) {
+    WaypointDTO() {}
+    
+    public WaypointDTO(String name, ControlPointDTO controlPoint, List<MarkDTO> marks, NauticalSide passingSide) {
         super(name);
-        this.courseIndex = courseIndex;
-    }
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = super.hashCode();
-        result = prime * result + courseIndex;
-        result = prime * result + ((name == null) ? 0 : name.hashCode());
-        return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (!super.equals(obj))
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        WaypointDTO other = (WaypointDTO) obj;
-        if (courseIndex != other.courseIndex)
-            return false;
-        if (name == null) {
-            if (other.name != null)
-                return false;
-        } else if (!name.equals(other.name))
-            return false;
-        return true;
+        this.name = name;
+        this.marks = marks;
+        this.controlPoint = controlPoint;
+        this.passingSide = passingSide;
     }
 }

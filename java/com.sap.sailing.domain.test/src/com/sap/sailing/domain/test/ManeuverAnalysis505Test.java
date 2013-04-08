@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -44,7 +43,6 @@ public class ManeuverAnalysis505Test extends AbstractManeuverDetectionTestCase {
         getTrackedRace().recordWind(
                 new WindImpl(/* position */null, MillisecondsTimePoint.now(), new KnotSpeedWithBearingImpl(12,
                         new DegreeBearingImpl(65))), new WindSourceImpl(WindSourceType.WEB));
-        dateFormat = new SimpleDateFormat("MM/dd/yyyy-HH:mm:ss");
     }
     
     /**
@@ -126,7 +124,7 @@ public class ManeuverAnalysis505Test extends AbstractManeuverDetectionTestCase {
         assertManeuver(maneuvers, ManeuverType.JIBE,
                 new MillisecondsTimePoint(dateFormat.parse("06/23/2011-16:13:28")), JIBE_TOLERANCE);
         assertManeuver(maneuvers, ManeuverType.JIBE,
-                new MillisecondsTimePoint(dateFormat.parse("06/23/2011-16:18:37")), JIBE_TOLERANCE);
+                new MillisecondsTimePoint(dateFormat.parse("06/23/2011-16:18:27")), JIBE_TOLERANCE);
         assertManeuver(maneuvers, ManeuverType.JIBE,
                 new MillisecondsTimePoint(dateFormat.parse("06/23/2011-16:21:28")), JIBE_TOLERANCE);
 

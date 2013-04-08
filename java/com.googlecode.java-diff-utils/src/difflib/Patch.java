@@ -43,6 +43,10 @@ public class Patch<T> {
         return result;
     }
     
+    public boolean isEmpty() {
+        return deltas.isEmpty();
+    }
+    
     /**
      * Apply this patch to the given target in-place, updating the <code>target</code> list
      * @return the patched text

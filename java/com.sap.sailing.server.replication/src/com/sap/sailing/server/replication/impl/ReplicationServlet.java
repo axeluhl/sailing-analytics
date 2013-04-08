@@ -5,6 +5,7 @@ import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Arrays;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
@@ -15,7 +16,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
 import com.sap.sailing.server.RacingEventService;
-import com.sap.sailing.server.SailingServerHttpServlet;
+import com.sap.sailing.server.gateway.SailingServerHttpServlet;
 import com.sap.sailing.server.replication.ReplicaDescriptor;
 import com.sap.sailing.server.replication.ReplicationService;
 
@@ -67,7 +68,7 @@ public class ReplicationServlet extends SailingServerHttpServlet {
                 getService().serializeForInitialReplication(oos);
             } catch (Exception e) {
                 logger.info("Error trying to serialize initial load for replication: "+e.getMessage());
-                logger.throwing(ReplicationServlet.class.getName(), "doGet", e);
+                logger.log(Level.SEVERE, "doGet", e);
                 resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                 e.printStackTrace(resp.getWriter());
             }

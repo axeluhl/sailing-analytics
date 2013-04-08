@@ -9,7 +9,6 @@ import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Grid;
@@ -61,7 +60,7 @@ public class SeriesWithFleetsCreateDialog extends DataEntryDialog<SeriesDTO> {
                 }
             }
             if (!nameNotEmpty) {
-                errorMessage = stringConstants.pleaseEnterNonEmptyName();
+                errorMessage = stringConstants.pleaseEnterAName();
             } else if (!unique) {
                 errorMessage = stringConstants.seriesWithThisNameAlreadyExists();
             }
@@ -87,7 +86,7 @@ public class SeriesWithFleetsCreateDialog extends DataEntryDialog<SeriesDTO> {
                     index2++;
                 }
                 if (!fleetNameNotEmpty) {
-                    errorMessage = stringConstants.fleet() + " " + (index + 1) + ": " + stringConstants.pleaseEnterNonEmptyName();
+                    errorMessage = stringConstants.fleet() + " " + (index + 1) + ": " + stringConstants.pleaseEnterAName();
                 } else if (!fleetUnique) {
                     errorMessage = stringConstants.fleet() + " " + (index2 + 1) + ": " + stringConstants.fleetWithThisNameAlreadyExists();
                 }
@@ -97,7 +96,7 @@ public class SeriesWithFleetsCreateDialog extends DataEntryDialog<SeriesDTO> {
     }
 
     public SeriesWithFleetsCreateDialog(Collection<SeriesDTO> existingSeries, StringMessages stringConstants,
-            AsyncCallback<SeriesDTO> callback) {
+            DialogCallback<SeriesDTO> callback) {
         super(stringConstants.series(), null, stringConstants.ok(), stringConstants.cancel(),  
                 new SeriesParameterValidator(stringConstants, existingSeries), callback);
         this.stringConstants = stringConstants;

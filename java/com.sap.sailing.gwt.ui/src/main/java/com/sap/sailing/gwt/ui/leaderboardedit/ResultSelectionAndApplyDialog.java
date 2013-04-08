@@ -43,7 +43,7 @@ public class ResultSelectionAndApplyDialog extends DataEntryDialog<Triple<String
         }
     }
     
-    private static class Callback implements AsyncCallback<Triple<String, String, Pair<String, Date>>> {
+    private static class Callback implements DialogCallback<Triple<String, String, Pair<String, Date>>> {
         private final EditableLeaderboardPanel leaderboardPanel;
         private final SailingServiceAsync sailingService;
         private final StringMessages stringMessages;
@@ -58,12 +58,12 @@ public class ResultSelectionAndApplyDialog extends DataEntryDialog<Triple<String
         }
 
         @Override
-        public void onFailure(Throwable caught) {
+        public void cancel() {
             // don't do anything; dialog was canceled
         }
 
         @Override
-        public void onSuccess(Triple<String, String, Pair<String, Date>> result) {
+        public void ok(Triple<String, String, Pair<String, Date>> result) {
             final String scoreCorrectionProviderName = result.getA();
             final String eventName = result.getB();
             final String boatClassName = result.getC().getA();

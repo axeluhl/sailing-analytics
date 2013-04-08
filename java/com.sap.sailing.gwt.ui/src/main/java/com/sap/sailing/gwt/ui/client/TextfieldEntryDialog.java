@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.ui.client;
 
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -15,7 +14,7 @@ public class TextfieldEntryDialog extends DataEntryDialog<String> {
     private final TextBox entryField;
     
     public TextfieldEntryDialog(String title, String message, String okButtonName, String cancelButtonName,
-            String initialValue, final Validator<String> validator, final AsyncCallback<String> callback) {
+            String initialValue, final Validator<String> validator, final DialogCallback<String> callback) {
         super(title, message, okButtonName, cancelButtonName, validator, callback);
         entryField = createTextBox(initialValue);
     }

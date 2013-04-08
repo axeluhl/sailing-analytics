@@ -29,11 +29,13 @@ public class UpdateIsMedalRace extends AbstractLeaderboardColumnOperation<Void> 
     @Override
     public Void internalApplyTo(RacingEventService toState) {
         Leaderboard leaderboard = toState.getLeaderboardByName(getLeaderboardName());
-        if (leaderboard != null && leaderboard instanceof FlexibleLeaderboard) {
+        if (leaderboard == null) {
+            throw new IllegalArgumentException("Leaderboard named " + getLeaderboardName() + " not found");
+        } else  if (!(leaderboard instanceof FlexibleLeaderboard)) {
+            throw new IllegalArgumentException("Medal race settings cannot be changed in leaderboard named " + getLeaderboardName());
+        } else {
             ((FlexibleLeaderboard) leaderboard).updateIsMedalRace(getColumnName(), isMedalRace);
             updateStoredLeaderboard(toState, leaderboard);
-        } else {
-            throw new IllegalArgumentException("Leaderboard named " + getLeaderboardName() + " not found");
         }
         return null;
     }

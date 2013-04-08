@@ -16,8 +16,8 @@ import java.util.TimeZone;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sap.sailing.domain.base.Buoy;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
@@ -53,15 +53,15 @@ public class ManeuverDetectionOnMdM2011SemifinalTest extends OnlineTracTracBased
                 /* raceId */ "01ea3604-02ef-11e1-9efc-406186cbf87c", new ReceiverType[] { ReceiverType.MARKPASSINGS, ReceiverType.RACECOURSE, ReceiverType.RAWPOSITIONS });
         TimePoint epoch = new MillisecondsTimePoint(0l);
         TimePoint now = MillisecondsTimePoint.now();
-        Map<String, Position> buoyPositions = new HashMap<String, Position>();
-        buoyPositions.put("CR Start (left)", new DegreePosition(53.562944999999985, 10.010104000000046));
-        buoyPositions.put("CR Start (right)", new DegreePosition(53.562944999999985, 10.010104000000046));
-        buoyPositions.put("Leeward mark", new DegreePosition(53.562145000000015, 10.009252));
-        buoyPositions.put("Luvtonne", new DegreePosition(53.560581899999995, 10.005657));
+        Map<String, Position> markPositions = new HashMap<String, Position>();
+        markPositions.put("CR Start (1)", new DegreePosition(53.562944999999985, 10.010104000000046));
+        markPositions.put("CR Start (2)", new DegreePosition(53.562944999999985, 10.010104000000046));
+        markPositions.put("Leeward mark", new DegreePosition(53.562145000000015, 10.009252));
+        markPositions.put("Luvtonne", new DegreePosition(53.560581899999995, 10.005657));
         for (Waypoint w : getTrackedRace().getRace().getCourse().getWaypoints()) {
-            for (Buoy buoy : w.getBuoys()) {
-                getTrackedRace().getOrCreateTrack(buoy).addGPSFix(new GPSFixImpl(buoyPositions.get(buoy.getName()), epoch));
-                getTrackedRace().getOrCreateTrack(buoy).addGPSFix(new GPSFixImpl(buoyPositions.get(buoy.getName()), now));
+            for (Mark mark : w.getMarks()) {
+                getTrackedRace().getOrCreateTrack(mark).addGPSFix(new GPSFixImpl(markPositions.get(mark.getName()), epoch));
+                getTrackedRace().getOrCreateTrack(mark).addGPSFix(new GPSFixImpl(markPositions.get(mark.getName()), now));
             }
         }
         getTrackedRace().recordWind(new WindImpl(/* position */ null, MillisecondsTimePoint.now(),

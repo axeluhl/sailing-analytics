@@ -52,19 +52,12 @@ public abstract class AbstractRaceManagementPanel extends AbstractEventManagemen
     abstract void refreshSelectedRaceData();
 
     @Override
-    public void fillRegattas(List<RegattaDTO> result) {
-        trackedRacesListComposite.fillRegattas(result);
-        savedEvents = result;
-    }
-    
-    @Override
     public void onRaceSelectionChange(List<RegattaAndRaceIdentifier> selectedRaces) {
         if (selectedRaces.size() == 1) {
             singleSelectedRace = selectedRaces.get(0);
             selectedCaptionRacePanel.setCaptionText(singleSelectedRace.getRaceName());
             selectedCaptionRacePanel.setVisible(true);
-            
-            for (RegattaDTO regatta : savedEvents) {
+            for (RegattaDTO regatta : getAvailableRegattas()) {
                 for (RaceDTO race : regatta.races) {
                     if (race != null && race.getRaceIdentifier().equals(singleSelectedRace)) {
                         this.selectedRaceDTO = race;

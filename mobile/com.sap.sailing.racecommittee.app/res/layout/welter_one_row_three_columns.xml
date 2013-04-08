@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/Welter.Cell.OneRowThreeColumns"
+    android:layout_width="fill_parent"
+    android:layout_height="80dp"
+    android:background="@drawable/list_selector"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:paddingLeft="6dip" >
+
+    <LinearLayout
+        android:id="@+id/Welter.Cell.OneRowThreeColumns.columnOne"
+        android:layout_width="100dp" 
+        android:layout_height="80dp"
+        android:gravity="center_horizontal|center_vertical"
+        android:orientation="vertical">
+        <ImageView android:id="@+id/Welter.Cell.OneRowThreeColumns.columnOne.imgImage"
+		    android:layout_width="32dp"
+		    android:layout_height="32dp" 
+		    android:gravity="center_horizontal|center_vertical"
+		    android:contentDescription="@string/buoyImage"/>
+        <TextView
+            android:id="@+id/Welter.Cell.OneRowThreeColumns.columnOne.txtLeftBuoy"
+            android:layout_width="100dp"
+            android:layout_height="match_parent"
+            android:padding="5dp"
+            android:textColor="@drawable/text_selector"
+            android:gravity="center_horizontal|center_vertical"
+            android:textSize="9pt" />
+    </LinearLayout>
+
+        <TextView
+        android:id="@+id/Welter.Cell.OneRowThreeColumns.txtRoundingDirection"
+        android:layout_width="100dp"
+        android:layout_height="match_parent"
+        android:padding="5dp"
+        android:textColor="@drawable/text_selector"
+        android:textSize="9pt" />
+    
+    <LinearLayout
+        android:id="@+id/Welter.Cell.OneRowThreeColumns.columnThree"
+        android:layout_width="100dp"
+        android:layout_height="80dp"
+        android:gravity="center_horizontal|center_vertical"
+        android:orientation="vertical">
+        <ImageView android:id="@+id/Welter.Cell.OneRowThreeColumns.columnThree.imgImage"
+		    android:layout_width="32dp"
+		    android:layout_height="32dp"
+		    android:gravity="center_horizontal|center_vertical" 
+		    android:contentDescription="@string/buoyImage"/>
+        <TextView
+        android:id="@+id/Welter.Cell.OneRowThreeColumns.columnThree.txtRightBuoy"
+        android:layout_width="100dp"
+        android:layout_height="match_parent"
+        android:padding="5dp"
+        android:gravity="center_horizontal|center_vertical"
+        android:textColor="@drawable/text_selector"
+        android:textSize="9pt" />
+    </LinearLayout>
+
+</LinearLayout>

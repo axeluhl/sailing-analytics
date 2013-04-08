@@ -13,7 +13,7 @@ import java.net.InetAddress;
  * @author Axel Uhl (d043530)
  *
  */
-public class UDPMirror implements Runnable {
+public class UDPMirror {
 
     /**
      * @param args 0: the port to listen to; 2*i-1, 2*i for i>0: host/port to which to forward
@@ -30,6 +30,7 @@ public class UDPMirror implements Runnable {
             }
             int listeningOnPort = Integer.valueOf(args[c++]);
             byte[] buf = new byte[65536];
+            @SuppressWarnings("resource") // Can't close resource due to the infinite loop. Will be closed, when  the thread is terminated.
             DatagramSocket udpSocket = new DatagramSocket(listeningOnPort);
             DatagramPacket received = new DatagramPacket(buf, buf.length);
             DatagramSocket[] sendingSockets = new DatagramSocket[(args.length - 1) / 2];
@@ -54,13 +55,6 @@ public class UDPMirror implements Runnable {
         }
     }
     
-    /**
-     * Listens for an inbound TCP connection
-     */
-    public void run() {
-        
-    }
-
     private static void usage() {
         System.out.println("Usage: java "+UDPMirror.class.getName()+" [-v] <listeningport> hostname1 port1 [hostname2 port2]*");
         System.out.println("  -v\tPrint packets received to stdout");

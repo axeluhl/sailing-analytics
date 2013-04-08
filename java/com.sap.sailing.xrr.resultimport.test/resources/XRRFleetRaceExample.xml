@@ -1,0 +1,3019 @@
+<?xml version="1.0" encoding="utf-8"?>
+<SailingXRR xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.sailing.org/uploads/xml/sailingXRR_v1.3.xsd" Version="1.3" Type="SailingXRR" Date="2012-11-08" Time="12:30:00">
+
+	<Person PersonID="53693" NOC="AUS" IFPersonID="AUSCD13" FamilyName="Davies" GivenName="Caitlin" />
+	<Person PersonID="656187" NOC="AHO" IFPersonID="AHOPV1" FamilyName="van Aanholt" GivenName="Philipine" />
+	<Person PersonID="656885" NOC="MAS" IFPersonID="MASKM1" FamilyName="Mohd Afendy" GivenName="Khairunneeta" />
+	<Person PersonID="656985" NOC="FIN" IFPersonID="FINHT2" FamilyName="Tenkanen" GivenName="Heidi " />
+	<Person PersonID="528315" NOC="AUS" IFPersonID="XXXXX" FamilyName="Elks" GivenName="Caitlin" />
+	<Person PersonID="39353" NOC="AUS" IFPersonID="AUSAS21" FamilyName="Stoddart" GivenName="Ashley" />
+	<Person PersonID="657613" NOC="LCA" IFPersonID="LCABL1" FamilyName="Lygoe" GivenName="Beth" />
+	<Person PersonID="641976" NOC="GBR" IFPersonID="GBRAY5" FamilyName="Young" GivenName="Alison" />
+	<Person PersonID="584221" NOC="IND" IFPersonID="INDRR6" FamilyName="Rau" GivenName="Rohini" />
+	<Person PersonID="586271" NOC="GBR" IFPersonID="GBRAB29" FamilyName="Brewster" GivenName="Andrea" />
+	<Person PersonID="624949" NOC="IRL" IFPersonID="IRLAM24" FamilyName="Murphy" GivenName="Annalise" />
+	<Person PersonID="637975" NOC="FIN" IFPersonID="FINTT1" FamilyName="Tenkanen" GivenName="Tuula" />
+	<Person PersonID="592788" NOC="NED" IFPersonID="NEDMB7" FamilyName="Bouwmeester" GivenName="Marit" />
+	<Person PersonID="563901" NOC="NZL" IFPersonID="NZLSW1" FamilyName="Winther" GivenName="Sara" />
+	<Person PersonID="657281" NOC="CHN" IFPersonID="CHNLX2" FamilyName="Xu" GivenName="Lijia" />
+	<Person PersonID="658695" NOC="CHN" IFPersonID="CHNDZ1" FamilyName="Zhang" GivenName="Dongshuang" />
+	<Person PersonID="658699" NOC="ISV" IFPersonID="ISVMR1" FamilyName="Roller" GivenName="Mayumi" />
+	<Person PersonID="642808" NOC="TUR" IFPersonID="TURCD5" FamilyName="Donertas" GivenName="Nazli Cagla" />
+	<Person PersonID="591274" NOC="NZL" IFPersonID="NZLMP1" FamilyName="Powrie" GivenName="Miranda" />
+	<Person PersonID="623624" NOC="BLR" IFPersonID="BLRTD1" FamilyName="Drozdovskaya" GivenName="Tatiana" />
+	<Person PersonID="43896" NOC="AUS" IFPersonID="XXXXX" FamilyName="King" GivenName="Gabrielle" />
+	<Person PersonID="663111" NOC="GBR" IFPersonID="GBRCM36" FamilyName="Martin" GivenName="Chloe" />
+	<Person PersonID="663683" NOC="IND" IFPersonID="INDMS4" FamilyName="Santhanam" GivenName="Mrinalini" />
+	<Person PersonID="575884" NOC="SIN" IFPersonID="XXXXX" FamilyName="Yin" GivenName="Elizabeth" />
+	<Person PersonID="664332" NOC="AUS" IFPersonID="XXXXX" FamilyName="Bursa" GivenName="Michelle" />
+	<Person PersonID="586217" NOC="AUS" IFPersonID="AUSJC49" FamilyName="Condie" GivenName="John" />
+	<Person PersonID="44329" NOC="AUS" IFPersonID="AUSRM24" FamilyName="McMillan" GivenName="Rob" />
+	<Person PersonID="572683" NOC="AUS" IFPersonID="AUSOT1" FamilyName="Tweddell" GivenName="Oliver" />
+	<Person PersonID="658242" NOC="NZL" IFPersonID="NZLRC12" FamilyName="Coutts" GivenName="Rob" />
+	<Person PersonID="646327" NOC="USA" IFPersonID="USABL24" FamilyName="Leibowitz" GivenName="Ben" />
+	<Person PersonID="581047" NOC="AUS" IFPersonID="AUSMV5" FamilyName="Visser" GivenName="Matt" />
+	<Person PersonID="661008" NOC="UKR" IFPersonID="UKROB1" FamilyName="Borysov" GivenName="Oleksiy" />
+	<Person PersonID="662370" NOC="NZL" IFPersonID="NZLBD6" FamilyName="Douglas" GivenName="Bradley" />
+	<Person PersonID="662667" NOC="AUS" IFPersonID="XXXXX" FamilyName="Gavenlock" GivenName="Andrew" />
+	<Person PersonID="662830" NOC="AUS" IFPersonID="AUDIM1" FamilyName="McKillop" GivenName="Ian " />
+	<Person PersonID="592493" NOC="AUS" IFPersonID="AUSWR2" FamilyName="Ryan" GivenName="Will" />
+	<Person PersonID="623755" NOC="AUS" IFPersonID="AUSSK7" FamilyName="Kivell" GivenName="Sam" />
+	<Person PersonID="505353" NOC="AUS" IFPersonID="AUSSC31" FamilyName="Cotton" GivenName="Scott" />
+	<Person PersonID="505644" NOC="AUS" IFPersonID="AUSRS28" FamilyName="Size" GivenName="Robert" />
+	<Person PersonID="10121" NOC="AUS" IFPersonID="AUSMP3" FamilyName="Page" GivenName="Malcolm" />
+	<Person PersonID="10385" NOC="AUS" IFPersonID="AUSMB11" FamilyName="Belcher" GivenName="Mathew" />
+	<Person PersonID="641291" NOC="CAN" IFPersonID="RSAML3" FamilyName="Leigh" GivenName="Mike " />
+	<Person PersonID="656592" NOC="CAN" IFPersonID="CANLR2" FamilyName="Ramsay" GivenName="Luke" />
+	<Person PersonID="57507" NOC="AUS" IFPersonID="XXXXX" FamilyName="Galloway" GivenName="Angus" />
+	<Person PersonID="595108" NOC="AUS" IFPersonID="AUSAG22" FamilyName="Gough" GivenName="Alexander" />
+	<Person PersonID="68607" NOC="AUS" IFPersonID="AUSKB5" FamilyName="Bromfield" GivenName="Karl" />
+	<Person PersonID="68608" NOC="AUS" IFPersonID="AUSNB5" FamilyName="Bromfield" GivenName="Neal" />
+	<Person PersonID="658383" NOC="NZL" IFPersonID="NZLPS3" FamilyName="Snow-Hansen" GivenName="Paul" />
+	<Person PersonID="658384" NOC="NZL" IFPersonID="NZLJS2" FamilyName="Snow-Hansen" GivenName="Jason Saunders" />
+	<Person PersonID="589317" NOC="USA" IFPersonID="USAGB6" FamilyName="Biehl" GivenName="Graham" />
+	<Person PersonID="608516" NOC="USA" IFPersonID="USASM24" FamilyName="McNay" GivenName="Stuart" />
+	<Person PersonID="56563" NOC="AUS" IFPersonID="AUSRC30" FamilyName="Crawford" GivenName="Robert" />
+	<Person PersonID="521596" NOC="AUS" IFPersonID="AUSMC24" FamilyName="Crawford" GivenName="Matthew" />
+	<Person PersonID="28144" NOC="AUS" IFPersonID="AUSMT7" FamilyName="Taylor" GivenName="Matthew" />
+	<Person PersonID="28148" NOC="AUS" IFPersonID="AUSBT6" FamilyName="Taylor" GivenName="Benjamin" />
+	<Person PersonID="658714" NOC="JPN" IFPersonID="JPNRH1" FamilyName="Harada" GivenName="Ryunosuke" />
+	<Person PersonID="658715" NOC="JPN" IFPersonID="JPNYY3" FamilyName="Yoshida" GivenName="Yugo" />
+	<Person PersonID="59251" NOC="AUS" IFPersonID="USANM23" FamilyName="Martin" GivenName="Nick" />
+	<Person PersonID="638686" NOC="USA" IFPersonID="USAAR17" FamilyName="Roberts" GivenName="Adam" />
+	<Person PersonID="38340" NOC="AUS" IFPersonID="AUSAC30" FamilyName="Conway" GivenName="Alexander" />
+	<Person PersonID="38342" NOC="AUS" IFPersonID="AUSPC23" FamilyName="Conway" GivenName="Patrick" />
+	<Person PersonID="664314" NOC="RSA" IFPersonID="XXXXX" FamilyName="Asenathi" GivenName="Jim" />
+	<Person PersonID="47287" NOC="USA" IFPersonID="USAAC3" FamilyName="Clark" GivenName="Amanda" />
+	<Person PersonID="642078" NOC="USA" IFPersonID="USASL15" FamilyName="Lihan" GivenName="Sarah" />
+	<Person PersonID="517977" NOC="USA" IFPersonID="USAEM1" FamilyName="Maxwell" GivenName="Erin" />
+	<Person PersonID="658246" NOC="USA" IFPersonID="USAIK1" FamilyName="Farrar" GivenName="Isabelle" />
+	<Person PersonID="28327" NOC="AUS" IFPersonID="AUSSR16" FamilyName="Ryan" GivenName="Sasha" />
+	<Person PersonID="51124" NOC="AUS" IFPersonID="AUSCH12" FamilyName="Hall" GivenName="Chelsea" />
+	<Person PersonID="636505" IFPersonID="XXXXX" FamilyName="Belcher" GivenName="Friederike" />
+	<Person PersonID="638212" NOC="GER" IFPersonID="GERKK1" FamilyName="Kadelbach" GivenName="Kathrin" />
+	<Person PersonID="563307" NOC="JPN" IFPersonID="JPNAK3" FamilyName="Kondo" GivenName="Ai" />
+	<Person PersonID="658713" NOC="JPN" IFPersonID="JPWT1" FamilyName="Tabata" GivenName="Wakako" />
+	<Person PersonID="661005" NOC="UKR" IFPersonID="UKRAK14" FamilyName="Kolomiiets" GivenName="Anastasiia" />
+	<Person PersonID="661006" NOC="UKR" IFPersonID="UKROC3" FamilyName="Chycherova" GivenName="Oleksandra " />
+	<Person PersonID="10115" NOC="AUS" IFPersonID="XXXXX" FamilyName="Stowell" GivenName="Belinda" />
+	<Person PersonID="35546" NOC="AUS" IFPersonID="XXXXX" FamilyName="Rechichi" GivenName="Elise" />
+	<Person PersonID="658289" NOC="NED" IFPersonID="NEDDV4" FamilyName="van Rijsselberge" GivenName="Dorian" />
+	<Person PersonID="638089" NOC="NOR" IFPersonID="NORSW1" FamilyName="Wang-Hansen" GivenName="Sebastian" />
+	<Person PersonID="10417" NOC="AUS" IFPersonID="AUSJL15" FamilyName="Lord" GivenName="Justin" />
+	<Person PersonID="563825" NOC="CAN" IFPersonID="CANZP1" FamilyName="Plavsic" GivenName="Zachary" />
+	<Person PersonID="662333" NOC="ITA" IFPersonID="ITAMB6" FamilyName="Marcantonio" GivenName="Baglione" />
+	<Person PersonID="541998" NOC="AUS" IFPersonID="AUSER5" FamilyName="Robertshaw" GivenName="Eamon" />
+	<Person PersonID="41726" NOC="AUS" IFPersonID="AUSJL4" FamilyName="Levy" GivenName="James" />
+	<Person PersonID="637419" NOC="AUS" IFPersonID="XXXXX" FamilyName="Willis" GivenName="Robert" />
+	<Person PersonID="618737" NOC="NZL" IFPersonID="NZLJT1" FamilyName="Tobin" GivenName="JP" />
+	<Person PersonID="607985" NOC="TPE" IFPersonID="TPE HC1" FamilyName="Chang" GivenName="Hao" />
+	<Person PersonID="664337" NOC="AUS" IFPersonID="XXXXX" FamilyName="Baille" GivenName="Luke" />
+	<Person PersonID="589990" NOC="NZL" IFPersonID="NZLPB2" FamilyName="Burling" GivenName="Peter" />
+	<Person PersonID="591381" NOC="NZL" IFPersonID="NZLBT6" FamilyName="Tuke" GivenName="Blair" />
+	<Person PersonID="46645" NOC="AUS" IFPersonID="XXXXX" FamilyName="Phillips" GivenName="William" />
+	<Person PersonID="46646" NOC="AUS" IFPersonID="XXXXX" FamilyName="Phillips" GivenName="Samuel" />
+	<Person PersonID="620000" NOC="NZL" IFPersonID="NZLJP6" FamilyName="Porebski" GivenName="Josh" />
+	<Person PersonID="636345" NOC="NZL" IFPersonID="NZLMH9" FamilyName="Hansen" GivenName="Marcus" />
+	<Person PersonID="41443" NOC="AUS" IFPersonID="AUSST5" FamilyName="Thomas" GivenName="Steven" />
+	<Person PersonID="581580" NOC="AUS" IFPersonID="AUSJW20" FamilyName="Warren" GivenName="Jasper" />
+	<Person PersonID="589699" NOC="IRL" IFPersonID="IRLMM21" FamilyName="Mcgovern" GivenName="Matthew" />
+	<Person PersonID="619815" NOC="IRL" IFPersonID="IRLRS8" FamilyName="Seaton" GivenName="Ryan " />
+	<Person PersonID="658251" NOC="CHI" IFPersonID="CHIPH1" FamilyName="Herman" GivenName="Pablo" />
+	<Person PersonID="659319" NOC="CHI" IFPersonID="CHILH1" FamilyName="Herman" GivenName="Luis Felipe" />
+	<Person PersonID="25946" NOC="AUS" IFPersonID="AUSNO3" FamilyName="Outteridge" GivenName="Nathan" />
+	<Person PersonID="624543" NOC="AUS" IFPersonID="AUSIJ1" FamilyName="Jensen" GivenName="Iain" />
+	<Person PersonID="65375" NOC="AUS" IFPersonID="AUSJC9" FamilyName="Crisp" GivenName="Jessica" />
+	<Person PersonID="613972" NOC="AUS" IFPersonID="AUSAS3" FamilyName="Shreeve" GivenName="Allison" />
+	<Person PersonID="638291" NOC="ITA" IFPersonID="ITAFT1" FamilyName="Tartaglini" GivenName="Flavia" />
+	<Person PersonID="608252" NOC="AUS" IFPersonID="AUSJS43" FamilyName="Sterling" GivenName="Joanna" />
+	<Person PersonID="658484" NOC="GBR" IFPersonID="GBRIH12" FamilyName="Hamilton" GivenName="Izzy" />
+	<Person PersonID="610308" NOC="NZL" IFPersonID="NZLJS6" FamilyName="Sellers" GivenName="Justina" />
+	<Person PersonID="660807" NOC="GBR" IFPersonID="GBRBS1" FamilyName="Shaw" GivenName="Bryony" />
+	<Person PersonID="659092" NOC="GBR" IFPersonID="GBRCC64" FamilyName="Carney" GivenName="Claudia " />
+	<Person PersonID="590237" NOC="NOR" IFPersonID="NORJS3" FamilyName="Stalstrom" GivenName="Jannicke" />
+	<Person PersonID="618901" NOC="AUS" IFPersonID="XXXXX" FamilyName="Dunstone" GivenName="Simon" />
+	<Person PersonID="365420" NOC="AUS" IFPersonID="XXXXX" FamilyName="Brown" GivenName="Colin" />
+	<Person PersonID="660850" NOC="AUS" IFPersonID="AUSMB33" FamilyName="Bugg" GivenName="Matt" />
+	<Person PersonID="645162" IFPersonID="AUSBW20" FamilyName="Willcock" GivenName="Brett" />
+	<Person PersonID="350202" NOC="AUS" IFPersonID="XXXXX" FamilyName="Leydon" GivenName="Michael" />
+	<Person PersonID="664316" NOC="NZL" IFPersonID="NZLPF2" FamilyName="Francis" GivenName="Paul" />
+	<Person PersonID="32090" NOC="AUS" IFPersonID="XXXXX" FamilyName="Hyde" GivenName="Greg" />
+	<Person PersonID="642403" NOC="GBR" IFPersonID="GBRAR50" FamilyName="Rickham" GivenName="ALexandra" />
+	<Person PersonID="646363" IFPersonID="GBRNB40" FamilyName="Birrell" GivenName="Niki" />
+	<Person PersonID="62579" NOC="NZL" IFPersonID="NZLAM3" FamilyName="May" GivenName="Andrew" />
+	<Person PersonID="641136" IFPersonID="AUSRP10" FamilyName="Phillips" GivenName="Russell" />
+	<Person PersonID="625449" NOC="NZL" IFPersonID="NZLTD3" FamilyName="Dempsey" GivenName="Tim" />
+	<Person PersonID="643053" NOC="NZL" IFPersonID="NZLJA5" FamilyName="Apel" GivenName="Jan" />
+	<Person PersonID="561819" NOC="AUS" IFPersonID="AUSMC29" FamilyName="Cameron" GivenName="Malcolm" />
+	<Person PersonID="586380" NOC="AUS" IFPersonID="AUSSL21" FamilyName="Lay" GivenName="Samuel" />
+	<Person PersonID="364735" NOC="AUS" IFPersonID="AUSLM2" FamilyName="Mason" GivenName="Lindsay" />
+	<Person PersonID="661683" NOC="AUS" IFPersonID="AUSAB6" FamilyName="Barnbrook" GivenName="Amethyst" />
+	<Person PersonID="15060" NOC="AUS" IFPersonID="AUSJD9" FamilyName="Dunross" GivenName="Jamie" />
+	<Person PersonID="540256" NOC="AUS" IFPersonID="XXXXX" FamilyName="Cox" GivenName="Rachael" />
+	<Person PersonID="363059" NOC="AUS" IFPersonID="AUSDF2" FamilyName="Fitzgibbon" GivenName="Daniel" />
+	<Person PersonID="661991" NOC="AUS" IFPersonID="AUSLT7" FamilyName="Tesch" GivenName="Liesl" />
+	<Person PersonID="507702" NOC="AUS" IFPersonID="AUSMW34" FamilyName="Wearn" GivenName="Matthew" />
+	<Person PersonID="25916" NOC="AUS" IFPersonID="AUSTB17" FamilyName="Burton" GivenName="Tom" />
+	<Person PersonID="62411" NOC="AUS" IFPersonID="AUSTB13" FamilyName="Brown" GivenName="Tristan" />
+	<Person PersonID="563071" NOC="NZL" IFPersonID="NZLJJ1" FamilyName="Junior" GivenName="Josh" />
+	<Person PersonID="656221" NOC="ISV" IFPersonID="ISVCT1" FamilyName="Thompson" GivenName="Cy" />
+	<Person PersonID="656188" NOC="AHO" IFPersonID="AHOAV1" FamilyName="van Aanholt" GivenName="Ard" />
+	<Person PersonID="656526" NOC="SUI" IFPersonID="suigg4" FamilyName="Girod" GivenName="Guillaume" />
+	<Person PersonID="63698" NOC="AUS" IFPersonID="XXXXX" FamilyName="Bolton" GivenName="Chris" />
+	<Person PersonID="656363" NOC="MAS" IFPersonID="MASKN1" FamilyName="Mohd Afendy" GivenName="Khairulnizam" />
+	<Person PersonID="656929" NOC="UKR" IFPersonID="UKRVK5" FamilyName="Kudryashov" GivenName="Valeriy" />
+	<Person PersonID="594666" NOC="AUS" IFPersonID="AUSJL12" FamilyName="Lilley" GivenName="Jake" />
+	<Person PersonID="501060" NOC="AUS" IFPersonID="AUSTS2" FamilyName="Slingsby" GivenName="Thomas" />
+	<Person PersonID="607595" NOC="JPN" IFPersonID="JPNIH1" FamilyName="Hall" GivenName="Ian" />
+	<Person PersonID="541526" NOC="TRI" IFPersonID="TRIAL1" FamilyName="Lewis" GivenName="Andrew" />
+	<Person PersonID="44806" NOC="AUS" IFPersonID="AUSAB10" FamilyName="Brunning" GivenName="Ashley" />
+	<Person PersonID="656941" NOC="GBR" IFPersonID="GBRBC35" FamilyName="Cornish" GivenName="Ben" />
+	<Person PersonID="657082" NOC="JPN" IFPersonID="JPNKJ1" FamilyName="Jo" GivenName="Kota" />
+	<Person PersonID="644449" NOC="KOR" IFPersonID="KORJH2" FamilyName="Ha" GivenName="Jeemin" />
+	<Person PersonID="575743" NOC="NOR" IFPersonID="XXXXX" FamilyName="Ruth" GivenName="Kristian" />
+	<Person PersonID="657910" NOC="GBR" IFPersonID="GBRNT3" FamilyName="Thompson" GivenName="Nick" />
+	<Person PersonID="588680" NOC="AUS" IFPersonID="AUSJW2" FamilyName="West" GivenName="Jared" />
+	<Person PersonID="607798" NOC="NZL" IFPersonID="NZLAM8" FamilyName="Maloney" GivenName="Andy" />
+	<Person PersonID="658286" NOC="NED" IFPersonID="NEDRV7" FamilyName="van Schaardenburg" GivenName="Rutger" />
+	<Person PersonID="641278" NOC="NED" IFPersonID="NEDRB5" FamilyName="Bouwmeester" GivenName="Roelof" />
+	<Person PersonID="658291" NOC="USA" IFPersonID="USACB64" FamilyName="Buckingham" GivenName="Charlie" />
+	<Person PersonID="641909" NOC="BEL" IFPersonID="BELWV2" FamilyName="van Laer" GivenName="Wannes" />
+	<Person PersonID="658385" NOC="BEL" IFPersonID="BELLB3" FamilyName="Balcaen" GivenName="Lander" />
+	<Person PersonID="50464" NOC="AUS" IFPersonID="AUSBU2" FamilyName="Utting" GivenName="Bradley" />
+	<Person PersonID="32907" NOC="NZL" IFPersonID="NZLAM4" FamilyName="Murdoch" GivenName="Andrew" />
+	<Person PersonID="605963" NOC="FIN" IFPersonID="FINFW1" FamilyName="Westman" GivenName="Fredrik" />
+	<Person PersonID="514209" NOC="AUS" IFPersonID="AUSKS10" FamilyName="Sulkowski" GivenName="Ki-Raphael" />
+	<Person PersonID="658696" NOC="CHN" IFPersonID="CHNQC1" FamilyName="Chi" GivenName="Qiang" />
+	<Person PersonID="658697" NOC="CHN" IFPersonID="CHNJQ1" FamilyName="Qiao" GivenName="Jian" />
+	<Person PersonID="658698" NOC="CHN" IFPersonID="CHNJS1" FamilyName="Shi" GivenName="Jian" />
+	<Person PersonID="641824" NOC="POL" IFPersonID="POLJS1" FamilyName="Stelmaszyk" GivenName="Jonasz" />
+	<Person PersonID="659079" NOC="TUR" IFPersonID="TURMC1" FamilyName="Cakir" GivenName="Mustafa" />
+	<Person PersonID="646338" NOC="TUR" IFPersonID="TUROB1" FamilyName="Bilgen" GivenName="Onur" />
+	<Person PersonID="603443" NOC="NZL" IFPersonID="NZLSM12" FamilyName="Meech" GivenName="Sam" />
+	<Person PersonID="658502" NOC="JPN" IFPersonID="JPNHN1" FamilyName="Nagai" GivenName="Hisaki" />
+	<Person PersonID="574077" NOC="IND" IFPersonID="INDAR1" FamilyName="Rau" GivenName="Ajay" />
+	<Person PersonID="612226" NOC="AUS" IFPersonID="AUSSB21" FamilyName="Bly" GivenName="Sean" />
+	<Person PersonID="660836" NOC="UKR" IFPersonID="UKROI1" FamilyName="Oleksandr" GivenName="Isakov" />
+	<Person PersonID="661003" NOC="IRL" IFPersonID="je4irl" FamilyName="Espey" GivenName="James" />
+	<Person PersonID="564759" NOC="AUS" IFPersonID="AUSBF3" FamilyName="Franklin" GivenName="Benjamin" />
+	<Person PersonID="637310" NOC="SWE" IFPersonID="SWERM2" FamilyName="Myrgren" GivenName="Rasmus" />
+	<Person PersonID="524017" NOC="AUS" IFPersonID="XXXXX" FamilyName="Kennedy" GivenName="Mitchell" />
+	<Person PersonID="66107" NOC="AUS" IFPersonID="AUSKH6" FamilyName="Hauschildt" GivenName="Klade" />
+	<Person PersonID="662451" NOC="NED" IFPersonID="nednh1" FamilyName="Heiner" GivenName="Nicholas" />
+	<Person PersonID="640734" NOC="CAN" IFPersonID="CANLP2" FamilyName="Parkhill" GivenName="Lee" />
+	<Person PersonID="662458" NOC="CAN" IFPersonID="CANTR3" FamilyName="Ramshaw" GivenName="Tom" />
+	<Person PersonID="43143" NOC="AUS" IFPersonID="AUSRP5" FamilyName="Palk" GivenName="Ryan" />
+	<Person PersonID="644872" NOC="SIN" IFPersonID="SINCC1" FamilyName="Cheng" GivenName="Colin " />
+	<Person PersonID="644063" NOC="AUS" IFPersonID="XXXXX" FamilyName="Faris" GivenName="Jonathan" />
+	<Person PersonID="605320" NOC="AUS" IFPersonID="AUSJB25" FamilyName="Burman" GivenName="James" />
+	<Person PersonID="609756" NOC="ISR" IFPersonID="ISRYB2" FamilyName="Botzer" GivenName="Yuval" />
+	<Person PersonID="54849" NOC="AUS" IFPersonID="AUSMB57" FamilyName="Buckingham" GivenName="Mitchell" />
+	<Person PersonID="656314" NOC="JPN" IFPersonID="JNSM2" FamilyName="Muromasu" GivenName="Satoshi" />
+	<Person PersonID="664310" NOC="IND" IFPersonID="INDNK2" FamilyName="Kumar" GivenName="M. Naveen" />
+	<Person PersonID="664311" NOC="IND" IFPersonID="XXXXX" FamilyName="Randhawa" GivenName="Gaurav" />
+	<Person PersonID="664312" NOC="IND" IFPersonID="XXXXX" FamilyName="Singh" GivenName="Gajender" />
+	<Person PersonID="661949" NOC="AUS" IFPersonID="XXXXX" FamilyName="Singh" GivenName="Jasvir" />
+	<Person PersonID="664313" NOC="JPN" IFPersonID="JPNSY5" FamilyName="Yasuda" GivenName="Shinnosuke" />
+	<Person PersonID="664333" NOC="SUI" IFPersonID="SUICB3" FamilyName="Bottoni" GivenName="Christoph" />
+
+	<Boat BoatID="42299" SailNumber="177098" />
+	<Boat BoatID="42543" SailNumber="195717" />
+	<Boat BoatID="42747" SailNumber="194099" BoatName="Laser" />
+	<Boat BoatID="42807" SailNumber="202669" BoatName="-" />
+	<Boat BoatID="43092" SailNumber="196889" BoatName="Larikin" />
+	<Boat BoatID="43156" SailNumber="199110" BoatName="TBA" />
+	<Boat BoatID="43233" SailNumber="193225" BoatName="laser radial" />
+	<Boat BoatID="43346" SailNumber="197658" />
+	<Boat BoatID="43378" SailNumber="185820" />
+	<Boat BoatID="43401" SailNumber="199867" />
+	<Boat BoatID="43402" SailNumber="199417" />
+	<Boat BoatID="43429" SailNumber="202670" BoatName="-" />
+	<Boat BoatID="43437" SailNumber="201862" BoatName="Laser Radial" />
+	<Boat BoatID="43493" SailNumber="199211" BoatName="CANAM" />
+	<Boat BoatID="43582" SailNumber="177117" />
+	<Boat BoatID="43583" SailNumber="191213" />
+	<Boat BoatID="43588" SailNumber="184542" />
+	<Boat BoatID="43730" SailNumber="202658" BoatName="-" />
+	<Boat BoatID="43777" SailNumber="195548" />
+	<Boat BoatID="43821" SailNumber="199269" />
+	<Boat BoatID="43844" SailNumber="196451" BoatName="-" />
+	<Boat BoatID="44610" SailNumber="199496" />
+	<Boat BoatID="44611" SailNumber="194164" />
+	<Boat BoatID="44612" SailNumber="186755" />
+	<Boat BoatID="44633" SailNumber="202648" />
+	<Boat BoatID="42276" SailNumber="262" BoatName="caroline" />
+	<Boat BoatID="43240" SailNumber="2" BoatName="nb sailsports" />
+	<Boat BoatID="43246" SailNumber="261" BoatName="Bear Grillz" />
+	<Boat BoatID="43400" SailNumber="9" />
+	<Boat BoatID="43591" SailNumber="53" />
+	<Boat BoatID="43873" SailNumber="5" BoatName="ANIKA" />
+	<Boat BoatID="43936" SailNumber="1" />
+	<Boat BoatID="44022" SailNumber="7" />
+	<Boat BoatID="44225" SailNumber="272" BoatName="AUS 272" />
+	<Boat BoatID="44272" SailNumber="26" BoatName="Ken " />
+	<Boat BoatID="42277" SailNumber="13" BoatName="-" />
+	<Boat BoatID="42492" SailNumber="3" BoatName="Running Girl" />
+	<Boat BoatID="42527" SailNumber="11" BoatName="My Life" />
+	<Boat BoatID="42656" SailNumber="618" />
+	<Boat BoatID="43363" SailNumber="17" />
+	<Boat BoatID="43457" SailNumber="2" />
+	<Boat BoatID="43475" SailNumber="212" BoatName="Monster" />
+	<Boat BoatID="43549" SailNumber="1713" BoatName="US Sailing Team Alphagraphics" />
+	<Boat BoatID="43572" SailNumber="5" />
+	<Boat BoatID="43602" SailNumber="373" />
+	<Boat BoatID="43607" SailNumber="4" />
+	<Boat BoatID="43775" SailNumber="81" BoatName="HBI" />
+	<Boat BoatID="43989" SailNumber="6" BoatName="Lexa" />
+	<Boat BoatID="44609" SailNumber="10" />
+	<Boat BoatID="42634" SailNumber="1736" BoatName="US Sailing Team AlphaGraphics" />
+	<Boat BoatID="43416" SailNumber="1757" BoatName="Unfinshed Business" />
+	<Boat BoatID="43510" SailNumber="12" />
+	<Boat BoatID="43535" SailNumber="21" BoatName="BMW - EWE" />
+	<Boat BoatID="43606" SailNumber="4151" />
+	<Boat BoatID="43932" SailNumber="7" BoatName="-" />
+	<Boat BoatID="44331" SailNumber="1" BoatName="TBA" />
+	<Boat BoatID="43438" SailNumber="NED8" BoatName="RSX" />
+	<Boat BoatID="43468" SailNumber="NOR7" />
+	<Boat BoatID="43557" SailNumber="AUS38" BoatName="-" />
+	<Boat BoatID="43826" SailNumber="CAN33" />
+	<Boat BoatID="43999" SailNumber="ITA2" BoatName="RSX MEN" />
+	<Boat BoatID="44062" SailNumber="AUS693" />
+	<Boat BoatID="44072" SailNumber="AUS7" BoatName="Minchia" />
+	<Boat BoatID="44094" SailNumber="USA7" />
+	<Boat BoatID="44103" SailNumber="NZL151" />
+	<Boat BoatID="44351" SailNumber="TPE8" BoatName="RS:X" />
+	<Boat BoatID="44638" SailNumber="AUS833" />
+	<Boat BoatID="42838" SailNumber="111" BoatName="Brutus" />
+	<Boat BoatID="43553" SailNumber="1134" BoatName="49er" />
+	<Boat BoatID="43574" SailNumber="1100" />
+	<Boat BoatID="43798" SailNumber="1140" BoatName="The Stig" />
+	<Boat BoatID="43825" SailNumber="300" BoatName="Real Classy" />
+	<Boat BoatID="44280" SailNumber="1216" />
+	<Boat BoatID="44362" SailNumber="2" BoatName="Trap for Young Players" />
+	<Boat BoatID="42439" SailNumber="15" />
+	<Boat BoatID="42836" SailNumber="911" BoatName="ALLISON SHREEVE" />
+	<Boat BoatID="43173" SailNumber="46" />
+	<Boat BoatID="43596" SailNumber="254" BoatName="REXY" />
+	<Boat BoatID="43639" SailNumber="30" />
+	<Boat BoatID="43753" SailNumber="5" />
+	<Boat BoatID="43868" SailNumber="94" BoatName="SKANDIA" />
+	<Boat BoatID="43886" SailNumber="71" />
+	<Boat BoatID="44100" SailNumber="3" BoatName="Hektor Dolphin" />
+	<Boat BoatID="43162" SailNumber="29" BoatName="Tumbleweed" />
+	<Boat BoatID="43319" SailNumber="10" BoatName="Lilla Babs" />
+	<Boat BoatID="43890" SailNumber="1" BoatName="Supermodel" />
+	<Boat BoatID="44230" SailNumber="92" />
+	<Boat BoatID="44350" SailNumber="27" BoatName="Octopod 2" />
+	<Boat BoatID="44616" SailNumber="17" />
+	<Boat BoatID="44639" SailNumber="32" />
+	<Boat BoatID="43120" SailNumber="059" />
+	<Boat BoatID="43372" SailNumber="030" />
+	<Boat BoatID="43502" SailNumber="036" BoatName="Equalizer" />
+	<Boat BoatID="43539" SailNumber="026" BoatName="Callala" />
+	<Boat BoatID="44036" SailNumber="060" />
+	<Boat BoatID="44045" SailNumber="052" BoatName="Cape Bouvard 2" />
+	<Boat BoatID="44182" SailNumber="025" BoatName="Gina" />
+	<Boat BoatID="42167" SailNumber="199015" BoatName="The Kennel" />
+	<Boat BoatID="42281" SailNumber="199012" BoatName="NB Laser" />
+	<Boat BoatID="42317" SailNumber="196432" BoatName="Boating Hardware" />
+	<Boat BoatID="42401" SailNumber="197247" BoatName="speedmister2000" />
+	<Boat BoatID="42451" SailNumber="199555" />
+	<Boat BoatID="42545" SailNumber="198760" />
+	<Boat BoatID="42607" SailNumber="202656" />
+	<Boat BoatID="42668" SailNumber="190355" BoatName="The boat previously known as..." />
+	<Boat BoatID="42746" SailNumber="182999" BoatName="Laser" />
+	<Boat BoatID="42770" SailNumber="202672" BoatName="laser" />
+	<Boat BoatID="42777" SailNumber="202646" BoatName="Ybsgnils" />
+	<Boat BoatID="42787" SailNumber="197541" BoatName="Johnny Drama" />
+	<Boat BoatID="42823" SailNumber="199053" BoatName="Layla" />
+	<Boat BoatID="43015" SailNumber="184116" BoatName="Laser" />
+	<Boat BoatID="43153" SailNumber="199014" BoatName="Australian Sailing Squad" />
+	<Boat BoatID="43224" SailNumber="202653" />
+	<Boat BoatID="43280" SailNumber="202609" />
+	<Boat BoatID="43308" SailNumber="196647" />
+	<Boat BoatID="43315" SailNumber="199076" BoatName="Eldorado and 4Subsea" />
+	<Boat BoatID="43344" SailNumber="198211" BoatName="Skandia Team GBR" />
+	<Boat BoatID="43373" SailNumber="201416" BoatName="www.kroten.com.au" />
+	<Boat BoatID="43389" SailNumber="198109" />
+	<Boat BoatID="43432" SailNumber="192625" BoatName="Laser" />
+	<Boat BoatID="43439" SailNumber="197520" BoatName="Laser" />
+	<Boat BoatID="43442" SailNumber="202655" />
+	<Boat BoatID="43444" SailNumber="192012" />
+	<Boat BoatID="43477" SailNumber="191112" />
+	<Boat BoatID="43544" SailNumber="190340" BoatName="Scud" />
+	<Boat BoatID="43569" SailNumber="199218" BoatName="Hyundai NZ" />
+	<Boat BoatID="43573" SailNumber="199079" />
+	<Boat BoatID="43578" SailNumber="199097" BoatName="UNLEASHED" />
+	<Boat BoatID="43584" SailNumber="186440" />
+	<Boat BoatID="43585" SailNumber="193910" />
+	<Boat BoatID="43586" SailNumber="196007" />
+	<Boat BoatID="43610" SailNumber="202671" BoatName="Kredyt Bank" />
+	<Boat BoatID="43728" SailNumber="202657" BoatName="-" />
+	<Boat BoatID="43729" SailNumber="202654" />
+	<Boat BoatID="43774" SailNumber="196871" />
+	<Boat BoatID="43799" SailNumber="199065" BoatName="Toyoda Gosei" />
+	<Boat BoatID="43823" SailNumber="198119" BoatName="Mr Boombastic" />
+	<Boat BoatID="43861" SailNumber="201507" BoatName="Duck n Weave" />
+	<Boat BoatID="43879" SailNumber="187921" BoatName="laser" />
+	<Boat BoatID="43930" SailNumber="197697" />
+	<Boat BoatID="44014" SailNumber="192623" BoatName="Dark n Stormy" />
+	<Boat BoatID="44031" SailNumber="199171" BoatName="Veidekke/Ramirent" />
+	<Boat BoatID="44048" SailNumber="192624" />
+	<Boat BoatID="44059" SailNumber="199057" BoatName="McLovin" />
+	<Boat BoatID="44075" SailNumber="194869" />
+	<Boat BoatID="44078" SailNumber="9191" />
+	<Boat BoatID="44089" SailNumber="197561" BoatName="Car Ramrod" />
+	<Boat BoatID="44116" SailNumber="201072" BoatName="Obsession" />
+	<Boat BoatID="44136" SailNumber="197538" BoatName="Shiok La" />
+	<Boat BoatID="44147" SailNumber="188615" BoatName="Soledadito" />
+	<Boat BoatID="44353" SailNumber="202600" BoatName="ASS" />
+	<Boat BoatID="44598" SailNumber="197293" />
+	<Boat BoatID="44599" SailNumber="202584" />
+	<Boat BoatID="44601" SailNumber="184061" />
+	<Boat BoatID="44602" SailNumber="194120" />
+	<Boat BoatID="44604" SailNumber="199244" />
+	<Boat BoatID="44605" SailNumber="190899" />
+	<Boat BoatID="44606" SailNumber="190896" />
+	<Boat BoatID="44607" SailNumber="187427" />
+	<Boat BoatID="44634" SailNumber="199240" />
+
+	<Team NOC="AUS" BoatID="42299" TeamID="42299">
+		<Crew PersonID="53693" Position="S" />
+	</Team>
+	<Team NOC="AHO" BoatID="42543" TeamID="42543">
+		<Crew PersonID="656187" Position="S" />
+	</Team>
+	<Team NOC="MAS" BoatID="42747" TeamID="42747" TeamName="Laser">
+		<Crew PersonID="656885" Position="S" />
+	</Team>
+	<Team NOC="FIN" BoatID="42807" TeamID="42807" TeamName="-">
+		<Crew PersonID="656985" Position="S" />
+	</Team>
+	<Team NOC="AUS" BoatID="43092" TeamID="43092" TeamName="Larikin">
+		<Crew PersonID="528315" Position="S" />
+	</Team>
+	<Team NOC="AUS" BoatID="43156" TeamID="43156" TeamName="TBA">
+		<Crew PersonID="39353" Position="S" />
+	</Team>
+	<Team NOC="LCA" BoatID="43233" TeamID="43233" TeamName="laser radial">
+		<Crew PersonID="657613" Position="S" />
+	</Team>
+	<Team NOC="GBR" BoatID="43346" TeamID="43346">
+		<Crew PersonID="641976" Position="S" />
+	</Team>
+	<Team NOC="IND" BoatID="43378" TeamID="43378">
+		<Crew PersonID="584221" Position="S" />
+	</Team>
+	<Team NOC="GBR" BoatID="43401" TeamID="43401">
+		<Crew PersonID="586271" Position="S" />
+	</Team>
+	<Team NOC="IRL" BoatID="43402" TeamID="43402">
+		<Crew PersonID="624949" Position="S" />
+	</Team>
+	<Team NOC="FIN" BoatID="43429" TeamID="43429" TeamName="-">
+		<Crew PersonID="637975" Position="S" />
+	</Team>
+	<Team NOC="NED" BoatID="43437" TeamID="43437" TeamName="Laser Radial">
+		<Crew PersonID="592788" Position="S" />
+	</Team>
+	<Team NOC="NZL" BoatID="43493" TeamID="43493" TeamName="CANAM">
+		<Crew PersonID="563901" Position="S" />
+	</Team>
+	<Team NOC="CHN" BoatID="43582" TeamID="43582">
+		<Crew PersonID="657281" Position="S" />
+	</Team>
+	<Team NOC="CHN" BoatID="43583" TeamID="43583">
+		<Crew PersonID="658695" Position="S" />
+	</Team>
+	<Team NOC="ISV" BoatID="43588" TeamID="43588">
+		<Crew PersonID="658699" Position="S" />
+	</Team>
+	<Team NOC="TUR" BoatID="43730" TeamID="43730" TeamName="-">
+		<Crew PersonID="642808" Position="S" />
+	</Team>
+	<Team NOC="NZL" BoatID="43777" TeamID="43777">
+		<Crew PersonID="591274" Position="S" />
+	</Team>
+	<Team NOC="BLR" BoatID="43821" TeamID="43821">
+		<Crew PersonID="623624" Position="S" />
+	</Team>
+	<Team NOC="AUS" BoatID="43844" TeamID="43844" TeamName="-">
+		<Crew PersonID="43896" Position="S" />
+	</Team>
+	<Team NOC="GBR" BoatID="44610" TeamID="44610">
+		<Crew PersonID="663111" Position="S" />
+	</Team>
+	<Team NOC="IND" BoatID="44611" TeamID="44611">
+		<Crew PersonID="663683" Position="S" />
+	</Team>
+	<Team NOC="SIN" BoatID="44612" TeamID="44612">
+		<Crew PersonID="575884" Position="S" />
+	</Team>
+	<Team NOC="AUS" BoatID="44633" TeamID="44633">
+		<Crew PersonID="664332" Position="S" />
+	</Team>
+	<Team NOC="AUS" BoatID="42276" TeamID="42276" TeamName="caroline">
+		<Crew PersonID="586217" Position="S" />
+	</Team>
+	<Team NOC="AUS" BoatID="43240" TeamID="43240" TeamName="nb sailsports">
+		<Crew PersonID="44329" Position="S" />
+	</Team>
+	<Team NOC="AUS" BoatID="43246" TeamID="43246" TeamName="Bear Grillz">
+		<Crew PersonID="572683" Position="S" />
+	</Team>
+	<Team NOC="NZL" BoatID="43400" TeamID="43400">
+		<Crew PersonID="658242" Position="S" />
+	</Team>
+	<Team NOC="USA" BoatID="43591" TeamID="43591">
+		<Crew PersonID="646327" Position="S" />
+	</Team>
+	<Team NOC="AUS" BoatID="43873" TeamID="43873" TeamName="ANIKA">
+		<Crew PersonID="581047" Position="S" />
+	</Team>
+	<Team NOC="UKR" BoatID="43936" TeamID="43936">
+		<Crew PersonID="661008" Position="S" />
+	</Team>
+	<Team NOC="NZL" BoatID="44022" TeamID="44022">
+		<Crew PersonID="662370" Position="S" />
+	</Team>
+	<Team NOC="AUS" BoatID="44225" TeamID="44225" TeamName="AUS 272">
+		<Crew PersonID="662667" Position="S" />
+	</Team>
+	<Team NOC="AUS" BoatID="44272" TeamID="44272" TeamName="Ken ">
+		<Crew PersonID="662830" Position="S" />
+	</Team>
+	<Team NOC="AUS" BoatID="42277" TeamID="42277" TeamName="-">
+		<Crew PersonID="592493" Position="C" />
+		<Crew PersonID="623755" Position="S" />
+	</Team>
+	<Team NOC="AUS" BoatID="42492" TeamID="42492" TeamName="Running Girl">
+		<Crew PersonID="505353" Position="S" />
+		<Crew PersonID="505644" Position="C" />
+	</Team>
+	<Team NOC="AUS" BoatID="42527" TeamID="42527" TeamName="My Life">
+		<Crew PersonID="10121" Position="C" />
+		<Crew PersonID="10385" Position="S" />
+	</Team>
+	<Team NOC="CAN" BoatID="42656" TeamID="42656">
+		<Crew PersonID="641291" Position="C" />
+		<Crew PersonID="656592" Position="S" />
+	</Team>
+	<Team NOC="AUS" BoatID="43363" TeamID="43363">
+		<Crew PersonID="57507" Position="S" />
+		<Crew PersonID="595108" Position="C" />
+	</Team>
+	<Team NOC="AUS" BoatID="43457" TeamID="43457">
+		<Crew PersonID="68607" Position="S" />
+		<Crew PersonID="68608" Position="C" />
+	</Team>
+	<Team NOC="NZL" BoatID="43475" TeamID="43475" TeamName="Monster">
+		<Crew PersonID="658383" Position="S" />
+		<Crew PersonID="658384" Position="C" />
+	</Team>
+	<Team NOC="USA" BoatID="43549" TeamID="43549" TeamName="US Sailing Team Alphagraphics">
+		<Crew PersonID="589317" Position="C" />
+		<Crew PersonID="608516" Position="S" />
+	</Team>
+	<Team NOC="AUS" BoatID="43572" TeamID="43572">
+		<Crew PersonID="56563" Position="C" />
+		<Crew PersonID="521596" Position="S" />
+	</Team>
+	<Team NOC="AUS" BoatID="43602" TeamID="43602">
+		<Crew PersonID="28144" Position="S" />
+		<Crew PersonID="28148" Position="C" />
+	</Team>
+	<Team NOC="JPN" BoatID="43607" TeamID="43607">
+		<Crew PersonID="658714" Position="S" />
+		<Crew PersonID="658715" Position="C" />
+	</Team>
+	<Team NOC="USA" BoatID="43775" TeamID="43775" TeamName="HBI">
+		<Crew PersonID="59251" Position="C" />
+		<Crew PersonID="638686" Position="S" />
+	</Team>
+	<Team NOC="AUS" BoatID="43989" TeamID="43989" TeamName="Lexa">
+		<Crew PersonID="38340" Position="S" />
+		<Crew PersonID="38342" Position="C" />
+	</Team>
+	<Team NOC="RSA" BoatID="44609" TeamID="44609">
+		<Crew PersonID="664314" Position="S" />
+	</Team>
+	<Team NOC="USA" BoatID="42634" TeamID="42634" TeamName="US Sailing Team AlphaGraphics">
+		<Crew PersonID="47287" Position="S" />
+		<Crew PersonID="642078" Position="C" />
+	</Team>
+	<Team NOC="USA" BoatID="43416" TeamID="43416" TeamName="Unfinshed Business">
+		<Crew PersonID="517977" Position="S" />
+		<Crew PersonID="658246" Position="C" />
+	</Team>
+	<Team NOC="AUS" BoatID="43510" TeamID="43510">
+		<Crew PersonID="28327" Position="S" />
+		<Crew PersonID="51124" Position="C" />
+	</Team>
+	<Team NOC="GER" BoatID="43535" TeamID="43535" TeamName="BMW - EWE">
+		<Crew PersonID="636505" Position="C" />
+		<Crew PersonID="638212" Position="S" />
+	</Team>
+	<Team NOC="JPN" BoatID="43606" TeamID="43606">
+		<Crew PersonID="563307" Position="S" />
+		<Crew PersonID="658713" Position="C" />
+	</Team>
+	<Team NOC="UKR" BoatID="43932" TeamID="43932" TeamName="-">
+		<Crew PersonID="661005" Position="S" />
+		<Crew PersonID="661006" Position="C" />
+	</Team>
+	<Team NOC="AUS" BoatID="44331" TeamID="44331" TeamName="TBA">
+		<Crew PersonID="10115" Position="C" />
+		<Crew PersonID="35546" Position="S" />
+	</Team>
+	<Team NOC="NED" BoatID="43438" TeamID="43438" TeamName="RSX">
+		<Crew PersonID="658289" Position="S" />
+	</Team>
+	<Team NOC="NOR" BoatID="43468" TeamID="43468">
+		<Crew PersonID="638089" Position="S" />
+	</Team>
+	<Team NOC="AUS" BoatID="43557" TeamID="43557" TeamName="-">
+		<Crew PersonID="10417" Position="S" />
+	</Team>
+	<Team NOC="CAN" BoatID="43826" TeamID="43826">
+		<Crew PersonID="563825" Position="S" />
+	</Team>
+	<Team NOC="ITA" BoatID="43999" TeamID="43999" TeamName="RSX MEN">
+		<Crew PersonID="662333" Position="S" />
+	</Team>
+	<Team NOC="AUS" BoatID="44062" TeamID="44062">
+		<Crew PersonID="541998" Position="S" />
+	</Team>
+	<Team NOC="AUS" BoatID="44072" TeamID="44072" TeamName="Minchia">
+		<Crew PersonID="41726" Position="S" />
+	</Team>
+	<Team NOC="AUS" BoatID="44094" TeamID="44094">
+		<Crew PersonID="637419" Position="S" />
+	</Team>
+	<Team NOC="NZL" BoatID="44103" TeamID="44103">
+		<Crew PersonID="618737" Position="S" />
+	</Team>
+	<Team NOC="TPE" BoatID="44351" TeamID="44351" TeamName="RS:X">
+		<Crew PersonID="607985" Position="S" />
+	</Team>
+	<Team NOC="AUS" BoatID="44638" TeamID="44638">
+		<Crew PersonID="664337" Position="S" />
+	</Team>
+	<Team NOC="NZL" BoatID="42838" TeamID="42838" TeamName="Brutus">
+		<Crew PersonID="589990" Position="S" />
+		<Crew PersonID="591381" Position="C" />
+	</Team>
+	<Team NOC="AUS" BoatID="43553" TeamID="43553" TeamName="49er">
+		<Crew PersonID="46645" Position="C" />
+		<Crew PersonID="46646" Position="S" />
+	</Team>
+	<Team NOC="NZL" BoatID="43574" TeamID="43574">
+		<Crew PersonID="620000" Position="C" />
+		<Crew PersonID="636345" Position="S" />
+	</Team>
+	<Team NOC="AUS" BoatID="43798" TeamID="43798" TeamName="The Stig">
+		<Crew PersonID="41443" Position="S" />
+		<Crew PersonID="581580" Position="C" />
+	</Team>
+	<Team NOC="IRL" BoatID="43825" TeamID="43825" TeamName="Real Classy">
+		<Crew PersonID="589699" Position="C" />
+		<Crew PersonID="619815" Position="S" />
+	</Team>
+	<Team NOC="CHI" BoatID="44280" TeamID="44280">
+		<Crew PersonID="658251" Position="S" />
+		<Crew PersonID="659319" Position="C" />
+	</Team>
+	<Team NOC="AUS" BoatID="44362" TeamID="44362" TeamName="Trap for Young Players">
+		<Crew PersonID="25946" Position="S" />
+		<Crew PersonID="624543" Position="C" />
+	</Team>
+	<Team NOC="AUS" BoatID="42439" TeamID="42439">
+		<Crew PersonID="65375" Position="S" />
+	</Team>
+	<Team NOC="AUS" BoatID="42836" TeamID="42836" TeamName="ALLISON SHREEVE">
+		<Crew PersonID="613972" Position="S" />
+	</Team>
+	<Team NOC="ITA" BoatID="43173" TeamID="43173">
+		<Crew PersonID="638291" Position="S" />
+	</Team>
+	<Team NOC="AUS" BoatID="43596" TeamID="43596" TeamName="REXY">
+		<Crew PersonID="608252" Position="S" />
+	</Team>
+	<Team NOC="GBR" BoatID="43639" TeamID="43639">
+		<Crew PersonID="658484" Position="S" />
+	</Team>
+	<Team NOC="NZL" BoatID="43753" TeamID="43753">
+		<Crew PersonID="610308" Position="S" />
+	</Team>
+	<Team NOC="GBR" BoatID="43868" TeamID="43868" TeamName="SKANDIA">
+		<Crew PersonID="660807" Position="S" />
+	</Team>
+	<Team NOC="GBR" BoatID="43886" TeamID="43886">
+		<Crew PersonID="659092" Position="S" />
+	</Team>
+	<Team NOC="NOR" BoatID="44100" TeamID="44100" TeamName="Hektor Dolphin">
+		<Crew PersonID="590237" Position="S" />
+	</Team>
+	<Team NOC="AUS" BoatID="43162" TeamID="43162" TeamName="Tumbleweed">
+		<Crew PersonID="618901" Position="S" />
+	</Team>
+	<Team NOC="AUS" BoatID="43319" TeamID="43319" TeamName="Lilla Babs">
+		<Crew PersonID="365420" Position="S" />
+	</Team>
+	<Team NOC="AUS" BoatID="43890" TeamID="43890" TeamName="Supermodel">
+		<Crew PersonID="660850" Position="S" />
+	</Team>
+	<Team NOC="NZL" BoatID="44230" TeamID="44230">
+		<Crew PersonID="645162" Position="S" />
+	</Team>
+	<Team NOC="AUS" BoatID="44350" TeamID="44350" TeamName="Octopod 2">
+		<Crew PersonID="350202" Position="S" />
+	</Team>
+	<Team NOC="NZL" BoatID="44616" TeamID="44616">
+		<Crew PersonID="664316" Position="S" />
+	</Team>
+	<Team NOC="AUS" BoatID="44639" TeamID="44639">
+		<Crew PersonID="32090" Position="S" />
+	</Team>
+	<Team NOC="GBR" BoatID="43120" TeamID="43120">
+		<Crew PersonID="642403" Position="S" />
+		<Crew PersonID="646363" Position="C" />
+	</Team>
+	<Team NOC="AUS" BoatID="43372" TeamID="43372">
+		<Crew PersonID="62579" Position="C" />
+		<Crew PersonID="641136" Position="S" />
+	</Team>
+	<Team NOC="NZL" BoatID="43502" TeamID="43502" TeamName="Equalizer">
+		<Crew PersonID="625449" Position="S" />
+		<Crew PersonID="643053" Position="C" />
+	</Team>
+	<Team NOC="AUS" BoatID="43539" TeamID="43539" TeamName="Callala">
+		<Crew PersonID="561819" Position="S" />
+		<Crew PersonID="586380" Position="C" />
+	</Team>
+	<Team NOC="AUS" BoatID="44036" TeamID="44036">
+		<Crew PersonID="364735" Position="C" />
+		<Crew PersonID="661683" Position="S" />
+	</Team>
+	<Team NOC="AUS" BoatID="44045" TeamID="44045" TeamName="Cape Bouvard 2">
+		<Crew PersonID="15060" Position="S" />
+		<Crew PersonID="540256" Position="C" />
+	</Team>
+	<Team NOC="AUS" BoatID="44182" TeamID="44182" TeamName="Gina">
+		<Crew PersonID="363059" Position="S" />
+		<Crew PersonID="661991" Position="C" />
+	</Team>
+	<Team NOC="AUS" BoatID="42167" TeamID="42167" TeamName="The Kennel">
+		<Crew PersonID="507702" Position="S" />
+	</Team>
+	<Team NOC="AUS" BoatID="42281" TeamID="42281" TeamName="NB Laser">
+		<Crew PersonID="25916" Position="S" />
+	</Team>
+	<Team NOC="AUS" BoatID="42317" TeamID="42317" TeamName="Boating Hardware">
+		<Crew PersonID="62411" Position="S" />
+	</Team>
+	<Team NOC="NZL" BoatID="42401" TeamID="42401" TeamName="speedmister2000">
+		<Crew PersonID="563071" Position="S" />
+	</Team>
+	<Team NOC="ISV" BoatID="42451" TeamID="42451">
+		<Crew PersonID="656221" Position="S" />
+	</Team>
+	<Team NOC="AHO" BoatID="42545" TeamID="42545">
+		<Crew PersonID="656188" Position="S" />
+	</Team>
+	<Team NOC="SUI" BoatID="42607" TeamID="42607">
+		<Crew PersonID="656526" Position="S" />
+	</Team>
+	<Team NOC="AUS" BoatID="42668" TeamID="42668" TeamName="The boat previously known as...">
+		<Crew PersonID="63698" Position="S" />
+	</Team>
+	<Team NOC="MAS" BoatID="42746" TeamID="42746" TeamName="Laser">
+		<Crew PersonID="656363" Position="S" />
+	</Team>
+	<Team NOC="UKR" BoatID="42770" TeamID="42770" TeamName="laser">
+		<Crew PersonID="656929" Position="S" />
+	</Team>
+	<Team NOC="AUS" BoatID="42777" TeamID="42777" TeamName="Ybsgnils">
+		<Crew PersonID="594666" Position="S" />
+	</Team>
+	<Team NOC="AUS" BoatID="42787" TeamID="42787" TeamName="Johnny Drama">
+		<Crew PersonID="501060" Position="S" />
+	</Team>
+	<Team NOC="JPN" BoatID="42823" TeamID="42823" TeamName="Layla">
+		<Crew PersonID="607595" Position="S" />
+	</Team>
+	<Team NOC="TRI" BoatID="43015" TeamID="43015" TeamName="Laser">
+		<Crew PersonID="541526" Position="S" />
+	</Team>
+	<Team NOC="AUS" BoatID="43153" TeamID="43153" TeamName="Australian Sailing Squad">
+		<Crew PersonID="44806" Position="S" />
+	</Team>
+	<Team NOC="GBR" BoatID="43224" TeamID="43224">
+		<Crew PersonID="656941" Position="S" />
+	</Team>
+	<Team NOC="JPN" BoatID="43280" TeamID="43280">
+		<Crew PersonID="657082" Position="S" />
+	</Team>
+	<Team NOC="KOR" BoatID="43308" TeamID="43308">
+		<Crew PersonID="644449" Position="S" />
+	</Team>
+	<Team NOC="NOR" BoatID="43315" TeamID="43315" TeamName="Eldorado and 4Subsea">
+		<Crew PersonID="575743" Position="S" />
+	</Team>
+	<Team NOC="GBR" BoatID="43344" TeamID="43344" TeamName="Skandia Team GBR">
+		<Crew PersonID="657910" Position="S" />
+	</Team>
+	<Team NOC="AUS" BoatID="43373" TeamID="43373" TeamName="www.kroten.com.au">
+		<Crew PersonID="588680" Position="S" />
+	</Team>
+	<Team NOC="NZL" BoatID="43389" TeamID="43389">
+		<Crew PersonID="607798" Position="S" />
+	</Team>
+	<Team NOC="NED" BoatID="43432" TeamID="43432" TeamName="Laser">
+		<Crew PersonID="658286" Position="S" />
+	</Team>
+	<Team NOC="NED" BoatID="43439" TeamID="43439" TeamName="Laser">
+		<Crew PersonID="641278" Position="S" />
+	</Team>
+	<Team NOC="USA" BoatID="43442" TeamID="43442">
+		<Crew PersonID="658291" Position="S" />
+	</Team>
+	<Team NOC="BEL" BoatID="43444" TeamID="43444">
+		<Crew PersonID="641909" Position="S" />
+	</Team>
+	<Team NOC="BEL" BoatID="43477" TeamID="43477">
+		<Crew PersonID="658385" Position="S" />
+	</Team>
+	<Team NOC="AUS" BoatID="43544" TeamID="43544" TeamName="Scud">
+		<Crew PersonID="50464" Position="S" />
+	</Team>
+	<Team NOC="NZL" BoatID="43569" TeamID="43569" TeamName="Hyundai NZ">
+		<Crew PersonID="32907" Position="S" />
+	</Team>
+	<Team NOC="FIN" BoatID="43573" TeamID="43573">
+		<Crew PersonID="605963" Position="S" />
+	</Team>
+	<Team NOC="AUS" BoatID="43578" TeamID="43578" TeamName="UNLEASHED">
+		<Crew PersonID="514209" Position="S" />
+	</Team>
+	<Team NOC="CHN" BoatID="43584" TeamID="43584">
+		<Crew PersonID="658696" Position="S" />
+	</Team>
+	<Team NOC="CHN" BoatID="43585" TeamID="43585">
+		<Crew PersonID="658697" Position="S" />
+	</Team>
+	<Team NOC="CHN" BoatID="43586" TeamID="43586">
+		<Crew PersonID="658698" Position="S" />
+	</Team>
+	<Team NOC="POL" BoatID="43610" TeamID="43610" TeamName="Kredyt Bank">
+		<Crew PersonID="641824" Position="S" />
+	</Team>
+	<Team NOC="TUR" BoatID="43728" TeamID="43728" TeamName="-">
+		<Crew PersonID="659079" Position="S" />
+	</Team>
+	<Team NOC="TUR" BoatID="43729" TeamID="43729">
+		<Crew PersonID="646338" Position="S" />
+	</Team>
+	<Team NOC="NZL" BoatID="43774" TeamID="43774">
+		<Crew PersonID="603443" Position="S" />
+	</Team>
+	<Team NOC="JPN" BoatID="43799" TeamID="43799" TeamName="Toyoda Gosei">
+		<Crew PersonID="658502" Position="S" />
+	</Team>
+	<Team NOC="IND" BoatID="43823" TeamID="43823" TeamName="Mr Boombastic">
+		<Crew PersonID="574077" Position="S" />
+	</Team>
+	<Team NOC="AUS" BoatID="43861" TeamID="43861" TeamName="Duck n Weave">
+		<Crew PersonID="612226" Position="S" />
+	</Team>
+	<Team NOC="UKR" BoatID="43879" TeamID="43879" TeamName="laser">
+		<Crew PersonID="660836" Position="S" />
+	</Team>
+	<Team NOC="IRL" BoatID="43930" TeamID="43930">
+		<Crew PersonID="661003" Position="S" />
+	</Team>
+	<Team NOC="AUS" BoatID="44014" TeamID="44014" TeamName="Dark n Stormy">
+		<Crew PersonID="564759" Position="S" />
+	</Team>
+	<Team NOC="SWE" BoatID="44031" TeamID="44031" TeamName="Veidekke/Ramirent">
+		<Crew PersonID="637310" Position="S" />
+	</Team>
+	<Team NOC="AUS" BoatID="44048" TeamID="44048">
+		<Crew PersonID="524017" Position="S" />
+	</Team>
+	<Team NOC="AUS" BoatID="44059" TeamID="44059" TeamName="McLovin">
+		<Crew PersonID="66107" Position="S" />
+	</Team>
+	<Team NOC="NED" BoatID="44075" TeamID="44075">
+		<Crew PersonID="662451" Position="S" />
+	</Team>
+	<Team NOC="CAN" BoatID="44078" TeamID="44078">
+		<Crew PersonID="640734" Position="S" />
+	</Team>
+	<Team NOC="CAN" BoatID="44089" TeamID="44089" TeamName="Car Ramrod">
+		<Crew PersonID="662458" Position="S" />
+	</Team>
+	<Team NOC="AUS" BoatID="44116" TeamID="44116" TeamName="Obsession">
+		<Crew PersonID="43143" Position="S" />
+	</Team>
+	<Team NOC="SIN" BoatID="44136" TeamID="44136" TeamName="Shiok La">
+		<Crew PersonID="644872" Position="S" />
+	</Team>
+	<Team NOC="AUS" BoatID="44147" TeamID="44147" TeamName="Soledadito">
+		<Crew PersonID="644063" Position="S" />
+	</Team>
+	<Team NOC="AUS" BoatID="44353" TeamID="44353" TeamName="ASS">
+		<Crew PersonID="605320" Position="S" />
+	</Team>
+	<Team NOC="ISR" BoatID="44598" TeamID="44598">
+		<Crew PersonID="609756" Position="S" />
+	</Team>
+	<Team NOC="AUS" BoatID="44599" TeamID="44599">
+		<Crew PersonID="54849" Position="S" />
+	</Team>
+	<Team NOC="JPN" BoatID="44601" TeamID="44601">
+		<Crew PersonID="656314" Position="S" />
+	</Team>
+	<Team NOC="IND" BoatID="44602" TeamID="44602">
+		<Crew PersonID="664310" Position="S" />
+	</Team>
+	<Team NOC="IND" BoatID="44604" TeamID="44604">
+		<Crew PersonID="664311" Position="S" />
+	</Team>
+	<Team NOC="IND" BoatID="44605" TeamID="44605">
+		<Crew PersonID="664312" Position="S" />
+	</Team>
+	<Team NOC="IND" BoatID="44606" TeamID="44606">
+		<Crew PersonID="661949" Position="S" />
+	</Team>
+	<Team NOC="JPN" BoatID="44607" TeamID="44607">
+		<Crew PersonID="664313" Position="S" />
+	</Team>
+	<Team NOC="SUI" BoatID="44634" TeamID="44634">
+		<Crew PersonID="664333" Position="S" />
+	</Team>
+
+	<Event EventID="37486" IFEventID="IFRGT-15505" Title="ISAF Sailing World Cup - Sail Melbourne">
+		<Race RaceStartTime="15:10:00" RaceStartDate="2011-11-07" RaceName="1" RaceNumber="1" RaceID="2-1-1-0" RaceStatus="final" />
+		<Race RaceStartTime="16:45:00" RaceStartDate="2011-11-07" RaceName="2" RaceNumber="2" RaceID="2-1-2-0" RaceStatus="final" />
+		<Race RaceStartTime="12:05:00" RaceStartDate="2011-11-08" RaceName="3" RaceNumber="3" RaceID="2-1-3-0" RaceStatus="final" />
+		<Race RaceStartTime="17:45:00" RaceStartDate="2011-11-08" RaceName="4" RaceNumber="4" RaceID="2-1-4-0" RaceStatus="final" />
+		<Race RaceStartTime="10:45:00" RaceStartDate="2011-11-10" RaceName="5" RaceNumber="5" RaceID="2-1-5-0" RaceStatus="final" />
+		<Race RaceStartTime="11:50:00" RaceStartDate="2011-11-10" RaceName="6" RaceNumber="6" RaceID="2-1-6-0" RaceStatus="final" />
+		<Race RaceStartTime="12:55:00" RaceStartDate="2011-11-10" RaceName="7" RaceNumber="7" RaceID="2-1-7-0" RaceStatus="final" />
+		<Race RaceStartTime="14:52:00" RaceStartDate="2011-11-11" RaceName="8" RaceNumber="8" RaceID="2-1-8-0" RaceStatus="final" />
+		<Race RaceStartTime="15:45:00" RaceStartDate="2011-11-11" RaceName="9" RaceNumber="9" RaceID="2-1-9-0" RaceStatus="final" />
+		<Race RaceStartTime="17:15:00" RaceStartDate="2011-11-11" RaceName="10" RaceNumber="10" RaceID="2-1-10-0" RaceStatus="final" />
+		<Race RaceStartTime="13:25:00" RaceStartDate="2011-11-12" RaceName="1" RaceNumber="1" RaceID="2-2-1-0" RaceStatus="final" />
+		<Race RaceStartTime="13:15:00" RaceStartDate="2011-11-07" RaceName="1" RaceNumber="1" RaceID="3-1-1-0" RaceStatus="final" />
+		<Race RaceStartTime="14:20:00" RaceStartDate="2011-11-07" RaceName="2" RaceNumber="2" RaceID="3-1-2-0" RaceStatus="final" />
+		<Race RaceStartTime="15:50:00" RaceStartDate="2011-11-08" RaceName="3" RaceNumber="3" RaceID="3-1-3-0" RaceStatus="final" />
+		<Race RaceStartTime="17:45:00" RaceStartDate="2011-11-08" RaceName="4" RaceNumber="4" RaceID="3-1-4-0" RaceStatus="final" />
+		<Race RaceStartTime="12:35:00" RaceStartDate="2011-11-09" RaceName="5" RaceNumber="5" RaceID="3-1-5-0" RaceStatus="final" />
+		<Race RaceStartTime="14:05:00" RaceStartDate="2011-11-10" RaceName="6" RaceNumber="6" RaceID="3-1-6-0" RaceStatus="final" />
+		<Race RaceStartTime="15:16:00" RaceStartDate="2011-11-10" RaceName="7" RaceNumber="7" RaceID="3-1-7-0" RaceStatus="final" />
+		<Race RaceStartTime="16:40:00" RaceStartDate="2011-11-10" RaceName="8" RaceNumber="8" RaceID="3-1-8-0" RaceStatus="final" />
+		<Race RaceStartTime="11:05:00" RaceStartDate="2011-11-11" RaceName="9" RaceNumber="9" RaceID="3-1-9-0" RaceStatus="final" />
+		<Race RaceStartTime="00:00:00" RaceStartDate="2011-11-11" RaceName="10" RaceNumber="10" RaceID="3-1-10-0" RaceStatus="final" />
+		<Race RaceStartTime="14:51:00" RaceStartDate="2011-11-12" RaceName="1" RaceNumber="1" RaceID="3-2-1-0" RaceStatus="final" />
+		<Race RaceStartTime="13:05:00" RaceStartDate="2011-11-07" RaceName="1" RaceNumber="1" RaceID="4-1-1-0" RaceStatus="final" />
+		<Race RaceStartTime="14:05:00" RaceStartDate="2011-11-07" RaceName="2" RaceNumber="2" RaceID="4-1-2-0" RaceStatus="final" />
+		<Race RaceStartTime="15:40:00" RaceStartDate="2011-11-08" RaceName="3" RaceNumber="3" RaceID="4-1-3-0" RaceStatus="final" />
+		<Race RaceStartTime="17:00:00" RaceStartDate="2011-11-08" RaceName="4" RaceNumber="4" RaceID="4-1-4-0" RaceStatus="final" />
+		<Race RaceStartTime="12:25:00" RaceStartDate="2011-11-09" RaceName="5" RaceNumber="5" RaceID="4-1-5-0" RaceStatus="final" />
+		<Race RaceStartTime="14:25:00" RaceStartDate="2011-11-10" RaceName="6" RaceNumber="6" RaceID="4-1-6-0" RaceStatus="final" />
+		<Race RaceStartTime="16:00:00" RaceStartDate="2011-11-10" RaceName="7" RaceNumber="7" RaceID="4-1-7-0" RaceStatus="final" />
+		<Race RaceStartTime="12:30:00" RaceStartDate="2011-11-10" RaceName="8" RaceNumber="8" RaceID="4-1-8-0" RaceStatus="final" />
+		<Race RaceStartTime="11:32:00" RaceStartDate="2011-11-11" RaceName="9" RaceNumber="9" RaceID="4-1-9-0" RaceStatus="final" />
+		<Race RaceStartTime="13:12:00" RaceStartDate="2011-11-11" RaceName="10" RaceNumber="10" RaceID="4-1-10-0" RaceStatus="final" />
+		<Race RaceStartTime="12:27:00" RaceStartDate="2011-11-12" RaceName="1" RaceNumber="1" RaceID="4-2-1-0" RaceStatus="final" />
+		<Race RaceStartTime="13:05:00" RaceStartDate="2011-11-07" RaceName="1" RaceNumber="1" RaceID="5-1-1-0" RaceStatus="final" />
+		<Race RaceStartTime="14:05:00" RaceStartDate="2011-11-07" RaceName="2" RaceNumber="2" RaceID="5-1-2-0" RaceStatus="final" />
+		<Race RaceStartTime="15:40:00" RaceStartDate="2011-11-08" RaceName="3" RaceNumber="3" RaceID="5-1-3-0" RaceStatus="final" />
+		<Race RaceStartTime="17:00:00" RaceStartDate="2011-11-08" RaceName="4" RaceNumber="4" RaceID="5-1-4-0" RaceStatus="final" />
+		<Race RaceStartTime="12:25:00" RaceStartDate="2011-11-09" RaceName="5" RaceNumber="5" RaceID="5-1-5-0" RaceStatus="final" />
+		<Race RaceStartTime="14:25:00" RaceStartDate="2011-11-10" RaceName="6" RaceNumber="6" RaceID="5-1-6-0" RaceStatus="final" />
+		<Race RaceStartTime="16:00:00" RaceStartDate="2011-11-10" RaceName="7" RaceNumber="7" RaceID="5-1-7-0" RaceStatus="final" />
+		<Race RaceStartTime="11:00:00" RaceStartDate="2011-11-10" RaceName="8" RaceNumber="8" RaceID="5-1-8-0" RaceStatus="final" />
+		<Race RaceStartTime="11:32:00" RaceStartDate="2011-11-11" RaceName="9" RaceNumber="9" RaceID="5-1-9-0" RaceStatus="final" />
+		<Race RaceStartTime="13:13:00" RaceStartDate="2011-11-11" RaceName="10" RaceNumber="10" RaceID="5-1-10-0" RaceStatus="final" />
+		<Race RaceStartTime="13:25:00" RaceStartDate="2011-11-12" RaceName="1" RaceNumber="1" RaceID="5-2-1-0" RaceStatus="final" />
+		<Race RaceStartTime="15:14:00" RaceStartDate="2011-11-07" RaceName="1" RaceNumber="1" RaceID="7-1-1-0" RaceStatus="final" />
+		<Race RaceStartTime="16:41:00" RaceStartDate="2011-11-07" RaceName="2" RaceNumber="2" RaceID="7-1-2-0" RaceStatus="final" />
+		<Race RaceStartTime="12:12:00" RaceStartDate="2011-11-09" RaceName="3" RaceNumber="3" RaceID="7-1-3-0" RaceStatus="final" />
+		<Race RaceStartTime="13:36:00" RaceStartDate="2011-11-09" RaceName="4" RaceNumber="4" RaceID="7-1-4-0" RaceStatus="final" />
+		<Race RaceStartTime="10:42:00" RaceStartDate="2011-11-10" RaceName="5" RaceNumber="5" RaceID="7-1-5-0" RaceStatus="final" />
+		<Race RaceStartTime="11:43:00" RaceStartDate="2011-11-10" RaceName="6" RaceNumber="6" RaceID="7-1-6-0" RaceStatus="final" />
+		<Race RaceStartTime="12:49:00" RaceStartDate="2011-11-10" RaceName="7" RaceNumber="7" RaceID="7-1-7-0" RaceStatus="final" />
+		<Race RaceStartTime="11:52:00" RaceStartDate="2011-11-11" RaceName="8" RaceNumber="8" RaceID="7-1-8-0" RaceStatus="final" />
+		<Race RaceStartTime="00:00:00" RaceStartDate="2011-11-11" RaceName="9" RaceNumber="9" RaceID="7-1-9-0" RaceStatus="final" />
+		<Race RaceStartTime="14:04:00" RaceStartDate="2011-11-12" RaceName="1" RaceNumber="1" RaceID="7-2-1-0" RaceStatus="final" />
+		<Race RaceStartTime="13:05:00" RaceStartDate="2011-11-07" RaceName="1" RaceNumber="1" RaceID="8-1-1-0" RaceStatus="final" />
+		<Race RaceStartTime="13:50:00" RaceStartDate="2011-11-07" RaceName="2" RaceNumber="2" RaceID="8-1-2-0" RaceStatus="final" />
+		<Race RaceStartTime="14:26:00" RaceStartDate="2011-11-07" RaceName="3" RaceNumber="3" RaceID="8-1-3-0" RaceStatus="final" />
+		<Race RaceStartTime="15:52:00" RaceStartDate="2011-11-08" RaceName="4" RaceNumber="4" RaceID="8-1-4-0" RaceStatus="final" />
+		<Race RaceStartTime="14:42:00" RaceStartDate="2011-11-08" RaceName="5" RaceNumber="5" RaceID="8-1-5-0" RaceStatus="final" />
+		<Race RaceStartTime="17:30:00" RaceStartDate="2011-11-08" RaceName="6" RaceNumber="6" RaceID="8-1-6-0" RaceStatus="final" />
+		<Race RaceStartTime="13:50:00" RaceStartDate="2011-11-10" RaceName="7" RaceNumber="7" RaceID="8-1-7-0" RaceStatus="final" />
+		<Race RaceStartTime="14:28:00" RaceStartDate="2011-11-10" RaceName="8" RaceNumber="8" RaceID="8-1-8-0" RaceStatus="final" />
+		<Race RaceStartTime="15:22:00" RaceStartDate="2011-11-10" RaceName="9" RaceNumber="9" RaceID="8-1-9-0" RaceStatus="final" />
+		<Race RaceStartTime="16:05:00" RaceStartDate="2011-11-10" RaceName="10" RaceNumber="10" RaceID="8-1-10-0" RaceStatus="final" />
+		<Race RaceStartTime="14:22:00" RaceStartDate="2011-11-11" RaceName="11" RaceNumber="11" RaceID="8-1-11-0" RaceStatus="final" />
+		<Race RaceStartTime="15:01:00" RaceStartDate="2011-11-11" RaceName="12" RaceNumber="12" RaceID="8-1-12-0" RaceStatus="final" />
+		<Race RaceStartTime="15:40:00" RaceStartDate="2011-11-11" RaceName="13" RaceNumber="13" RaceID="8-1-13-0" RaceStatus="final" />
+		<Race RaceStartTime="16:26:00" RaceStartDate="2011-11-11" RaceName="14" RaceNumber="14" RaceID="8-1-14-0" RaceStatus="final" />
+		<Race RaceStartTime="12:20:00" RaceStartDate="2011-11-12" RaceName="1" RaceNumber="1" RaceID="8-2-1-0" RaceStatus="final" />
+		<Race RaceStartTime="15:29:00" RaceStartDate="2011-11-07" RaceName="1" RaceNumber="1" RaceID="9-1-1-0" RaceStatus="final" />
+		<Race RaceStartTime="16:48:00" RaceStartDate="2011-11-07" RaceName="2" RaceNumber="2" RaceID="9-1-2-0" RaceStatus="final" />
+		<Race RaceStartTime="12:05:00" RaceStartDate="2011-11-09" RaceName="3" RaceNumber="3" RaceID="9-1-3-0" RaceStatus="final" />
+		<Race RaceStartTime="13:20:00" RaceStartDate="2011-11-09" RaceName="4" RaceNumber="4" RaceID="9-1-4-0" RaceStatus="final" />
+		<Race RaceStartTime="10:35:00" RaceStartDate="2011-11-10" RaceName="5" RaceNumber="5" RaceID="9-1-5-0" RaceStatus="final" />
+		<Race RaceStartTime="11:36:00" RaceStartDate="2011-11-10" RaceName="6" RaceNumber="6" RaceID="9-1-6-0" RaceStatus="final" />
+		<Race RaceStartTime="12:38:00" RaceStartDate="2011-11-10" RaceName="7" RaceNumber="7" RaceID="9-1-7-0" RaceStatus="final" />
+		<Race RaceStartTime="11:46:00" RaceStartDate="2011-11-11" RaceName="8" RaceNumber="8" RaceID="9-1-8-0" RaceStatus="final" />
+		<Race RaceStartTime="13:09:00" RaceStartDate="2011-11-11" RaceName="9" RaceNumber="9" RaceID="9-1-9-0" RaceStatus="final" />
+		<Race RaceStartTime="14:46:00" RaceStartDate="2011-11-12" RaceName="1" RaceNumber="1" RaceID="9-2-1-0" RaceStatus="final" />
+		<Race RaceStartTime="13:06:00" RaceStartDate="2011-11-07" RaceName="1" RaceNumber="1" RaceID="10-1-1-0" RaceStatus="final" />
+		<Race RaceStartTime="14:39:00" RaceStartDate="2011-11-07" RaceName="2" RaceNumber="2" RaceID="10-1-2-0" RaceStatus="final" />
+		<Race RaceStartTime="12:26:00" RaceStartDate="2011-11-09" RaceName="3" RaceNumber="3" RaceID="10-1-3-0" RaceStatus="final" />
+		<Race RaceStartTime="10:35:00" RaceStartDate="2011-11-10" RaceName="4" RaceNumber="4" RaceID="10-1-4-0" RaceStatus="final" />
+		<Race RaceStartTime="11:29:00" RaceStartDate="2011-11-10" RaceName="5" RaceNumber="5" RaceID="10-1-5-0" RaceStatus="final" />
+		<Race RaceStartTime="12:27:00" RaceStartDate="2011-11-10" RaceName="6" RaceNumber="6" RaceID="10-1-6-0" RaceStatus="final" />
+		<Race RaceStartTime="00:00:00" RaceStartDate="2011-11-11" RaceName="7" RaceNumber="7" RaceID="10-1-7-0" RaceStatus="final" />
+		<Race RaceStartTime="12:27:00" RaceStartDate="2011-11-11" RaceName="8" RaceNumber="8" RaceID="10-1-8-0" RaceStatus="final" />
+		<Race RaceStartTime="13:41:00" RaceStartDate="2011-11-11" RaceName="9" RaceNumber="9" RaceID="10-1-9-0" RaceStatus="final" />
+		<Race RaceStartTime="10:15:00" RaceStartDate="2011-11-12" RaceName="10" RaceNumber="10" RaceID="10-1-10-0" RaceStatus="final" />
+		<Race RaceStartTime="13:00:00" RaceStartDate="2011-11-07" RaceName="1" RaceNumber="1" RaceID="11-1-1-0" RaceStatus="final" />
+		<Race RaceStartTime="14:33:00" RaceStartDate="2011-11-07" RaceName="2" RaceNumber="2" RaceID="11-1-2-0" RaceStatus="final" />
+		<Race RaceStartTime="12:19:00" RaceStartDate="2011-11-09" RaceName="3" RaceNumber="3" RaceID="11-1-3-0" RaceStatus="final" />
+		<Race RaceStartTime="10:42:00" RaceStartDate="2011-11-10" RaceName="4" RaceNumber="4" RaceID="11-1-4-0" RaceStatus="final" />
+		<Race RaceStartTime="11:38:00" RaceStartDate="2011-11-10" RaceName="5" RaceNumber="5" RaceID="11-1-5-0" RaceStatus="final" />
+		<Race RaceStartTime="12:39:00" RaceStartDate="2011-11-10" RaceName="6" RaceNumber="6" RaceID="11-1-6-0" RaceStatus="final" />
+		<Race RaceStartTime="10:58:00" RaceStartDate="2011-11-11" RaceName="7" RaceNumber="7" RaceID="11-1-7-0" RaceStatus="final" />
+		<Race RaceStartTime="12:21:00" RaceStartDate="2011-11-11" RaceName="8" RaceNumber="8" RaceID="11-1-8-0" RaceStatus="final" />
+		<Race RaceStartTime="13:34:00" RaceStartDate="2011-11-11" RaceName="9" RaceNumber="9" RaceID="11-1-9-0" RaceStatus="final" />
+		<Race RaceStartTime="10:10:00" RaceStartDate="2011-11-12" RaceName="10" RaceNumber="10" RaceID="11-1-10-0" RaceStatus="final" />
+		<Race RaceStartTime="15:25:00" RaceStartDate="2011-11-07" RaceName="1" RaceNumber="1" RaceID="20-2-1-0" RaceStatus="final" />
+		<Race RaceStartTime="16:38:00" RaceStartDate="2011-11-07" RaceName="2" RaceNumber="2" RaceID="20-2-2-0" RaceStatus="final" />
+		<Race RaceStartTime="16:24:00" RaceStartDate="2011-11-08" RaceName="3" RaceNumber="3" RaceID="20-2-3-0" RaceStatus="final" />
+		<Race RaceStartTime="17:51:00" RaceStartDate="2011-11-08" RaceName="4" RaceNumber="4" RaceID="20-2-4-0" RaceStatus="final" />
+		<Race RaceStartTime="14:21:00" RaceStartDate="2011-11-10" RaceName="5" RaceNumber="5" RaceID="20-2-5-0" RaceStatus="final" />
+		<Race RaceStartTime="15:54:00" RaceStartDate="2011-11-10" RaceName="6" RaceNumber="6" RaceID="20-2-6-0" RaceStatus="final" />
+		<Race RaceStartTime="17:08:00" RaceStartDate="2011-11-10" RaceName="7" RaceNumber="7" RaceID="20-2-7-0" RaceStatus="final" />
+		<Race RaceStartTime="14:26:00" RaceStartDate="2011-11-11" RaceName="8" RaceNumber="8" RaceID="20-2-8-0" RaceStatus="final" />
+		<Race RaceStartTime="15:47:00" RaceStartDate="2011-11-11" RaceName="9" RaceNumber="9" RaceID="20-2-9-0" RaceStatus="final" />
+		<Race RaceStartTime="17:00:00" RaceStartDate="2011-11-11" RaceName="10" RaceNumber="10" RaceID="20-2-10-0" RaceStatus="final" />
+		<Race RaceStartTime="15:25:00" RaceStartDate="2011-11-07" RaceName="1" RaceNumber="1" RaceID="20-3-1-0" RaceStatus="final" />
+		<Race RaceStartTime="16:38:00" RaceStartDate="2011-11-07" RaceName="2" RaceNumber="2" RaceID="20-3-2-0" RaceStatus="final" />
+		<Race RaceStartTime="16:24:00" RaceStartDate="2011-11-08" RaceName="3" RaceNumber="3" RaceID="20-3-3-0" RaceStatus="final" />
+		<Race RaceStartTime="17:51:00" RaceStartDate="2011-11-08" RaceName="4" RaceNumber="4" RaceID="20-3-4-0" RaceStatus="final" />
+		<Race RaceStartTime="14:13:00" RaceStartDate="2011-11-10" RaceName="5" RaceNumber="5" RaceID="20-3-5-0" RaceStatus="final" />
+		<Race RaceStartTime="15:33:00" RaceStartDate="2011-11-10" RaceName="6" RaceNumber="6" RaceID="20-3-6-0" RaceStatus="final" />
+		<Race RaceStartTime="16:58:00" RaceStartDate="2011-11-10" RaceName="7" RaceNumber="7" RaceID="20-3-7-0" RaceStatus="final" />
+		<Race RaceStartTime="14:45:00" RaceStartDate="2011-11-11" RaceName="8" RaceNumber="8" RaceID="20-3-8-0" RaceStatus="final" />
+		<Race RaceStartTime="15:55:00" RaceStartDate="2011-11-11" RaceName="9" RaceNumber="9" RaceID="20-3-9-0" RaceStatus="final" />
+		<Race RaceStartTime="17:09:00" RaceStartDate="2011-11-11" RaceName="10" RaceNumber="10" RaceID="20-3-10-0" RaceStatus="final" />
+		<Race RaceStartTime="14:06:00" RaceStartDate="2011-11-12" RaceName="1" RaceNumber="1" RaceID="20-4-1-0" RaceStatus="final" />
+		<Division DivisionID="20" Title="Laser" IFClassID="LSR" Gender="Men" >
+			<RaceResult TeamID="42787" RaceID="20-3-1-0" RacePoints="1"/>
+			<RaceResult TeamID="42787" RaceID="20-3-2-0" RacePoints="2"/>
+			<RaceResult TeamID="42787" RaceID="20-3-3-0" RacePoints="1"/>
+			<RaceResult TeamID="42787" RaceID="20-3-4-0" RacePoints="1"/>
+			<RaceResult TeamID="42787" RaceID="20-3-5-0" RacePoints="2"/>
+			<RaceResult TeamID="42787" RaceID="20-3-6-0" RacePoints="3"/>
+			<RaceResult TeamID="42787" RaceID="20-3-7-0" RacePoints="1"/>
+			<RaceResult TeamID="42787" RaceID="20-3-8-0" RacePoints="2"/>
+			<RaceResult TeamID="42787" RaceID="20-3-9-0" RacePoints="1"/>
+			<RaceResult TeamID="42787" RaceID="20-3-10-0" RacePoints="17" Discard="true"/>
+			<RaceResult TeamID="42787" RaceID="20-4-1-0" RacePoints="2"/>
+			<SeriesResult TeamID="42787"  NetPoints="16" Rank="1" TotalPoints="33" />
+
+			<RaceResult TeamID="43344" RaceID="20-3-1-0" RacePoints="3"/>
+			<RaceResult TeamID="43344" RaceID="20-3-2-0" RacePoints="1"/>
+			<RaceResult TeamID="43344" RaceID="20-3-3-0" RacePoints="3"/>
+			<RaceResult TeamID="43344" RaceID="20-3-4-0" RacePoints="5"/>
+			<RaceResult TeamID="43344" RaceID="20-3-5-0" RacePoints="4"/>
+			<RaceResult TeamID="43344" RaceID="20-3-6-0" RacePoints="7" Discard="true"/>
+			<RaceResult TeamID="43344" RaceID="20-3-7-0" RacePoints="3"/>
+			<RaceResult TeamID="43344" RaceID="20-3-8-0" RacePoints="7"/>
+			<RaceResult TeamID="43344" RaceID="20-3-9-0" RacePoints="3"/>
+			<RaceResult TeamID="43344" RaceID="20-3-10-0" RacePoints="4"/>
+			<RaceResult TeamID="43344" RaceID="20-4-1-0" RacePoints="10"/>
+			<SeriesResult TeamID="43344"  NetPoints="43" Rank="2" TotalPoints="50" />
+
+			<RaceResult TeamID="42281" RaceID="20-3-1-0" RacePoints="1"/>
+			<RaceResult TeamID="42281" RaceID="20-3-2-0" RacePoints="5"/>
+			<RaceResult TeamID="42281" RaceID="20-3-3-0" RacePoints="11"/>
+			<RaceResult TeamID="42281" RaceID="20-3-4-0" RacePoints="4"/>
+			<RaceResult TeamID="42281" RaceID="20-3-5-0" RacePoints="12"/>
+			<RaceResult TeamID="42281" RaceID="20-3-6-0" RacePoints="33" Discard="true" ScoreCode="DNF"/>
+			<RaceResult TeamID="42281" RaceID="20-3-7-0" RacePoints="2"/>
+			<RaceResult TeamID="42281" RaceID="20-3-8-0" RacePoints="1"/>
+			<RaceResult TeamID="42281" RaceID="20-3-9-0" RacePoints="5"/>
+			<RaceResult TeamID="42281" RaceID="20-3-10-0" RacePoints="16"/>
+			<RaceResult TeamID="42281" RaceID="20-4-1-0" RacePoints="6"/>
+			<SeriesResult TeamID="42281"  NetPoints="63" Rank="3" TotalPoints="96" />
+
+			<RaceResult TeamID="43153" RaceID="20-3-1-0" RacePoints="2"/>
+			<RaceResult TeamID="43153" RaceID="20-3-2-0" RacePoints="3"/>
+			<RaceResult TeamID="43153" RaceID="20-3-3-0" RacePoints="10"/>
+			<RaceResult TeamID="43153" RaceID="20-3-4-0" RacePoints="8"/>
+			<RaceResult TeamID="43153" RaceID="20-3-5-0" RacePoints="1"/>
+			<RaceResult TeamID="43153" RaceID="20-3-6-0" RacePoints="1"/>
+			<RaceResult TeamID="43153" RaceID="20-3-7-0" RacePoints="9"/>
+			<RaceResult TeamID="43153" RaceID="20-3-8-0" RacePoints="9"/>
+			<RaceResult TeamID="43153" RaceID="20-3-9-0" RacePoints="8"/>
+			<RaceResult TeamID="43153" RaceID="20-3-10-0" RacePoints="33" Discard="true" ScoreCode="DNF"/>
+			<RaceResult TeamID="43153" RaceID="20-4-1-0" RacePoints="16"/>
+			<SeriesResult TeamID="43153"  NetPoints="67" Rank="4" TotalPoints="100" />
+
+			<RaceResult TeamID="44078" RaceID="20-3-1-0" RacePoints="6"/>
+			<RaceResult TeamID="44078" RaceID="20-3-2-0" RacePoints="1"/>
+			<RaceResult TeamID="44078" RaceID="20-3-3-0" RacePoints="2"/>
+			<RaceResult TeamID="44078" RaceID="20-3-4-0" RacePoints="10"/>
+			<RaceResult TeamID="44078" RaceID="20-3-5-0" RacePoints="8"/>
+			<RaceResult TeamID="44078" RaceID="20-3-6-0" RacePoints="20" Discard="true"/>
+			<RaceResult TeamID="44078" RaceID="20-3-7-0" RacePoints="5"/>
+			<RaceResult TeamID="44078" RaceID="20-3-8-0" RacePoints="5"/>
+			<RaceResult TeamID="44078" RaceID="20-3-9-0" RacePoints="10"/>
+			<RaceResult TeamID="44078" RaceID="20-3-10-0" RacePoints="5"/>
+			<RaceResult TeamID="44078" RaceID="20-4-1-0" RacePoints="22" ScoreCode="BFD"/>
+			<SeriesResult TeamID="44078"  NetPoints="74" Rank="5" TotalPoints="94" />
+
+			<RaceResult TeamID="43389" RaceID="20-3-1-0" RacePoints="12"/>
+			<RaceResult TeamID="43389" RaceID="20-3-2-0" RacePoints="3"/>
+			<RaceResult TeamID="43389" RaceID="20-3-3-0" RacePoints="7"/>
+			<RaceResult TeamID="43389" RaceID="20-3-4-0" RacePoints="3"/>
+			<RaceResult TeamID="43389" RaceID="20-3-5-0" RacePoints="14"/>
+			<RaceResult TeamID="43389" RaceID="20-3-6-0" RacePoints="2"/>
+			<RaceResult TeamID="43389" RaceID="20-3-7-0" RacePoints="17"/>
+			<RaceResult TeamID="43389" RaceID="20-3-8-0" RacePoints="21" Discard="true"/>
+			<RaceResult TeamID="43389" RaceID="20-3-9-0" RacePoints="7"/>
+			<RaceResult TeamID="43389" RaceID="20-3-10-0" RacePoints="11"/>
+			<RaceResult TeamID="43389" RaceID="20-4-1-0" RacePoints="4"/>
+			<SeriesResult TeamID="43389"  NetPoints="80" Rank="6" TotalPoints="101" />
+
+			<RaceResult TeamID="44075" RaceID="20-3-1-0" RacePoints="2"/>
+			<RaceResult TeamID="44075" RaceID="20-3-2-0" RacePoints="9"/>
+			<RaceResult TeamID="44075" RaceID="20-3-3-0" RacePoints="4"/>
+			<RaceResult TeamID="44075" RaceID="20-3-4-0" RacePoints="4"/>
+			<RaceResult TeamID="44075" RaceID="20-3-5-0" RacePoints="13"/>
+			<RaceResult TeamID="44075" RaceID="20-3-6-0" RacePoints="12"/>
+			<RaceResult TeamID="44075" RaceID="20-3-7-0" RacePoints="4"/>
+			<RaceResult TeamID="44075" RaceID="20-3-8-0" RacePoints="16" Discard="true"/>
+			<RaceResult TeamID="44075" RaceID="20-3-9-0" RacePoints="14"/>
+			<RaceResult TeamID="44075" RaceID="20-3-10-0" RacePoints="10"/>
+			<RaceResult TeamID="44075" RaceID="20-4-1-0" RacePoints="12"/>
+			<SeriesResult TeamID="44075"  NetPoints="84" Rank="7" TotalPoints="100" />
+
+			<RaceResult TeamID="44116" RaceID="20-3-1-0" RacePoints="14"/>
+			<RaceResult TeamID="44116" RaceID="20-3-2-0" RacePoints="4"/>
+			<RaceResult TeamID="44116" RaceID="20-3-3-0" RacePoints="5"/>
+			<RaceResult TeamID="44116" RaceID="20-3-4-0" RacePoints="10"/>
+			<RaceResult TeamID="44116" RaceID="20-3-5-0" RacePoints="11"/>
+			<RaceResult TeamID="44116" RaceID="20-3-6-0" RacePoints="10"/>
+			<RaceResult TeamID="44116" RaceID="20-3-7-0" RacePoints="8"/>
+			<RaceResult TeamID="44116" RaceID="20-3-8-0" RacePoints="4"/>
+			<RaceResult TeamID="44116" RaceID="20-3-9-0" RacePoints="17"/>
+			<RaceResult TeamID="44116" RaceID="20-3-10-0" RacePoints="28" Discard="true"/>
+			<RaceResult TeamID="44116" RaceID="20-4-1-0" RacePoints="8"/>
+			<SeriesResult TeamID="44116"  NetPoints="91" Rank="8" TotalPoints="119" />
+
+			<RaceResult TeamID="42401" RaceID="20-3-1-0" RacePoints="15"/>
+			<RaceResult TeamID="42401" RaceID="20-3-2-0" RacePoints="7"/>
+			<RaceResult TeamID="42401" RaceID="20-3-3-0" RacePoints="11"/>
+			<RaceResult TeamID="42401" RaceID="20-3-4-0" RacePoints="1"/>
+			<RaceResult TeamID="42401" RaceID="20-3-5-0" RacePoints="9"/>
+			<RaceResult TeamID="42401" RaceID="20-3-6-0" RacePoints="18"/>
+			<RaceResult TeamID="42401" RaceID="20-3-7-0" RacePoints="19" Discard="true"/>
+			<RaceResult TeamID="42401" RaceID="20-3-8-0" RacePoints="3"/>
+			<RaceResult TeamID="42401" RaceID="20-3-9-0" RacePoints="2"/>
+			<RaceResult TeamID="42401" RaceID="20-3-10-0" RacePoints="18"/>
+			<RaceResult TeamID="42401" RaceID="20-4-1-0" RacePoints="14"/>
+			<SeriesResult TeamID="42401"  NetPoints="98" Rank="9" TotalPoints="117" />
+
+			<RaceResult TeamID="43439" RaceID="20-3-1-0" RacePoints="12"/>
+			<RaceResult TeamID="43439" RaceID="20-3-2-0" RacePoints="10"/>
+			<RaceResult TeamID="43439" RaceID="20-3-3-0" RacePoints="1"/>
+			<RaceResult TeamID="43439" RaceID="20-3-4-0" RacePoints="3"/>
+			<RaceResult TeamID="43439" RaceID="20-3-5-0" RacePoints="10"/>
+			<RaceResult TeamID="43439" RaceID="20-3-6-0" RacePoints="33" Discard="true" ScoreCode="DNF"/>
+			<RaceResult TeamID="43439" RaceID="20-3-7-0" RacePoints="13"/>
+			<RaceResult TeamID="43439" RaceID="20-3-8-0" RacePoints="15"/>
+			<RaceResult TeamID="43439" RaceID="20-3-9-0" RacePoints="15"/>
+			<RaceResult TeamID="43439" RaceID="20-3-10-0" RacePoints="1"/>
+			<RaceResult TeamID="43439" RaceID="20-4-1-0" RacePoints="22" ScoreCode="DNF"/>
+			<SeriesResult TeamID="43439"  NetPoints="102" Rank="10" TotalPoints="135" />
+
+			<RaceResult TeamID="43442" RaceID="20-3-1-0" RacePoints="7"/>
+			<RaceResult TeamID="43442" RaceID="20-3-2-0" RacePoints="6"/>
+			<RaceResult TeamID="43442" RaceID="20-3-3-0" RacePoints="22"/>
+			<RaceResult TeamID="43442" RaceID="20-3-4-0" RacePoints="8"/>
+			<RaceResult TeamID="43442" RaceID="20-3-5-0" RacePoints="7"/>
+			<RaceResult TeamID="43442" RaceID="20-3-6-0" RacePoints="15"/>
+			<RaceResult TeamID="43442" RaceID="20-3-7-0" RacePoints="6"/>
+			<RaceResult TeamID="43442" RaceID="20-3-8-0" RacePoints="24" Discard="true"/>
+			<RaceResult TeamID="43442" RaceID="20-3-9-0" RacePoints="11"/>
+			<RaceResult TeamID="43442" RaceID="20-3-10-0" RacePoints="8"/>
+			<SeriesResult TeamID="43442"  NetPoints="90" Rank="11" TotalPoints="114" />
+
+			<RaceResult TeamID="43569" RaceID="20-3-1-0" RacePoints="16"/>
+			<RaceResult TeamID="43569" RaceID="20-3-2-0" RacePoints="10"/>
+			<RaceResult TeamID="43569" RaceID="20-3-3-0" RacePoints="12"/>
+			<RaceResult TeamID="43569" RaceID="20-3-4-0" RacePoints="5"/>
+			<RaceResult TeamID="43569" RaceID="20-3-5-0" RacePoints="3"/>
+			<RaceResult TeamID="43569" RaceID="20-3-6-0" RacePoints="8"/>
+			<RaceResult TeamID="43569" RaceID="20-3-7-0" RacePoints="7"/>
+			<RaceResult TeamID="43569" RaceID="20-3-8-0" RacePoints="20"/>
+			<RaceResult TeamID="43569" RaceID="20-3-9-0" RacePoints="24" Discard="true"/>
+			<RaceResult TeamID="43569" RaceID="20-3-10-0" RacePoints="12"/>
+			<SeriesResult TeamID="43569"  NetPoints="93" Rank="12" TotalPoints="117" />
+
+			<RaceResult TeamID="43315" RaceID="20-3-1-0" RacePoints="14"/>
+			<RaceResult TeamID="43315" RaceID="20-3-2-0" RacePoints="13"/>
+			<RaceResult TeamID="43315" RaceID="20-3-3-0" RacePoints="9"/>
+			<RaceResult TeamID="43315" RaceID="20-3-4-0" RacePoints="9"/>
+			<RaceResult TeamID="43315" RaceID="20-3-5-0" RacePoints="5"/>
+			<RaceResult TeamID="43315" RaceID="20-3-6-0" RacePoints="11"/>
+			<RaceResult TeamID="43315" RaceID="20-3-7-0" RacePoints="23" Discard="true"/>
+			<RaceResult TeamID="43315" RaceID="20-3-8-0" RacePoints="14"/>
+			<RaceResult TeamID="43315" RaceID="20-3-9-0" RacePoints="9"/>
+			<RaceResult TeamID="43315" RaceID="20-3-10-0" RacePoints="13"/>
+			<SeriesResult TeamID="43315"  NetPoints="97" Rank="13" TotalPoints="120" />
+
+			<RaceResult TeamID="44353" RaceID="20-3-1-0" RacePoints="5"/>
+			<RaceResult TeamID="44353" RaceID="20-3-2-0" RacePoints="12"/>
+			<RaceResult TeamID="44353" RaceID="20-3-3-0" RacePoints="3"/>
+			<RaceResult TeamID="44353" RaceID="20-3-4-0" RacePoints="13"/>
+			<RaceResult TeamID="44353" RaceID="20-3-5-0" RacePoints="18"/>
+			<RaceResult TeamID="44353" RaceID="20-3-6-0" RacePoints="6"/>
+			<RaceResult TeamID="44353" RaceID="20-3-7-0" RacePoints="11"/>
+			<RaceResult TeamID="44353" RaceID="20-3-8-0" RacePoints="28"/>
+			<RaceResult TeamID="44353" RaceID="20-3-9-0" RacePoints="31" Discard="true"/>
+			<RaceResult TeamID="44353" RaceID="20-3-10-0" RacePoints="7"/>
+			<SeriesResult TeamID="44353"  NetPoints="103" Rank="14" TotalPoints="134" />
+
+			<RaceResult TeamID="43015" RaceID="20-3-1-0" RacePoints="6"/>
+			<RaceResult TeamID="43015" RaceID="20-3-2-0" RacePoints="6"/>
+			<RaceResult TeamID="43015" RaceID="20-3-3-0" RacePoints="18"/>
+			<RaceResult TeamID="43015" RaceID="20-3-4-0" RacePoints="7"/>
+			<RaceResult TeamID="43015" RaceID="20-3-5-0" RacePoints="31" Discard="true"/>
+			<RaceResult TeamID="43015" RaceID="20-3-6-0" RacePoints="21"/>
+			<RaceResult TeamID="43015" RaceID="20-3-7-0" RacePoints="14"/>
+			<RaceResult TeamID="43015" RaceID="20-3-8-0" RacePoints="13"/>
+			<RaceResult TeamID="43015" RaceID="20-3-9-0" RacePoints="4"/>
+			<RaceResult TeamID="43015" RaceID="20-3-10-0" RacePoints="14"/>
+			<SeriesResult TeamID="43015"  NetPoints="103" Rank="15" TotalPoints="134" />
+
+			<RaceResult TeamID="44031" RaceID="20-3-1-0" RacePoints="8"/>
+			<RaceResult TeamID="44031" RaceID="20-3-2-0" RacePoints="4"/>
+			<RaceResult TeamID="44031" RaceID="20-3-3-0" RacePoints="8"/>
+			<RaceResult TeamID="44031" RaceID="20-3-4-0" RacePoints="21"/>
+			<RaceResult TeamID="44031" RaceID="20-3-5-0" RacePoints="6"/>
+			<RaceResult TeamID="44031" RaceID="20-3-6-0" RacePoints="23"/>
+			<RaceResult TeamID="44031" RaceID="20-3-7-0" RacePoints="15"/>
+			<RaceResult TeamID="44031" RaceID="20-3-8-0" RacePoints="12"/>
+			<RaceResult TeamID="44031" RaceID="20-3-9-0" RacePoints="6"/>
+			<RaceResult TeamID="44031" RaceID="20-3-10-0" RacePoints="26" Discard="true"/>
+			<SeriesResult TeamID="44031"  NetPoints="103" Rank="16" TotalPoints="129" />
+
+			<RaceResult TeamID="43308" RaceID="20-3-1-0" RacePoints="8"/>
+			<RaceResult TeamID="43308" RaceID="20-3-2-0" RacePoints="2"/>
+			<RaceResult TeamID="43308" RaceID="20-3-3-0" RacePoints="2"/>
+			<RaceResult TeamID="43308" RaceID="20-3-4-0" RacePoints="2"/>
+			<RaceResult TeamID="43308" RaceID="20-3-5-0" RacePoints="17"/>
+			<RaceResult TeamID="43308" RaceID="20-3-6-0" RacePoints="13"/>
+			<RaceResult TeamID="43308" RaceID="20-3-7-0" RacePoints="20"/>
+			<RaceResult TeamID="43308" RaceID="20-3-8-0" RacePoints="33" Discard="true" ScoreCode="DNC"/>
+			<RaceResult TeamID="43308" RaceID="20-3-9-0" RacePoints="12"/>
+			<RaceResult TeamID="43308" RaceID="20-3-10-0" RacePoints="31"/>
+			<SeriesResult TeamID="43308"  NetPoints="107" Rank="17" TotalPoints="140" />
+
+			<RaceResult TeamID="43432" RaceID="20-3-1-0" RacePoints="3"/>
+			<RaceResult TeamID="43432" RaceID="20-3-2-0" RacePoints="5"/>
+			<RaceResult TeamID="43432" RaceID="20-3-3-0" RacePoints="13"/>
+			<RaceResult TeamID="43432" RaceID="20-3-4-0" RacePoints="2"/>
+			<RaceResult TeamID="43432" RaceID="20-3-5-0" RacePoints="20"/>
+			<RaceResult TeamID="43432" RaceID="20-3-6-0" RacePoints="14"/>
+			<RaceResult TeamID="43432" RaceID="20-3-7-0" RacePoints="28" Discard="true"/>
+			<RaceResult TeamID="43432" RaceID="20-3-8-0" RacePoints="18"/>
+			<RaceResult TeamID="43432" RaceID="20-3-9-0" RacePoints="13"/>
+			<RaceResult TeamID="43432" RaceID="20-3-10-0" RacePoints="25"/>
+			<SeriesResult TeamID="43432"  NetPoints="113" Rank="18" TotalPoints="141" />
+
+			<RaceResult TeamID="43728" RaceID="20-3-1-0" RacePoints="5"/>
+			<RaceResult TeamID="43728" RaceID="20-3-2-0" RacePoints="18"/>
+			<RaceResult TeamID="43728" RaceID="20-3-3-0" RacePoints="19"/>
+			<RaceResult TeamID="43728" RaceID="20-3-4-0" RacePoints="18"/>
+			<RaceResult TeamID="43728" RaceID="20-3-5-0" RacePoints="16"/>
+			<RaceResult TeamID="43728" RaceID="20-3-6-0" RacePoints="5"/>
+			<RaceResult TeamID="43728" RaceID="20-3-7-0" RacePoints="22"/>
+			<RaceResult TeamID="43728" RaceID="20-3-8-0" RacePoints="8"/>
+			<RaceResult TeamID="43728" RaceID="20-3-9-0" RacePoints="27" Discard="true"/>
+			<RaceResult TeamID="43728" RaceID="20-3-10-0" RacePoints="2"/>
+			<SeriesResult TeamID="43728"  NetPoints="113" Rank="19" TotalPoints="140" />
+
+			<RaceResult TeamID="43774" RaceID="20-3-1-0" RacePoints="11"/>
+			<RaceResult TeamID="43774" RaceID="20-3-2-0" RacePoints="11"/>
+			<RaceResult TeamID="43774" RaceID="20-3-3-0" RacePoints="4"/>
+			<RaceResult TeamID="43774" RaceID="20-3-4-0" RacePoints="6"/>
+			<RaceResult TeamID="43774" RaceID="20-3-5-0" RacePoints="27"/>
+			<RaceResult TeamID="43774" RaceID="20-3-6-0" RacePoints="4"/>
+			<RaceResult TeamID="43774" RaceID="20-3-7-0" RacePoints="10"/>
+			<RaceResult TeamID="43774" RaceID="20-3-8-0" RacePoints="31" Discard="true"/>
+			<RaceResult TeamID="43774" RaceID="20-3-9-0" RacePoints="25"/>
+			<RaceResult TeamID="43774" RaceID="20-3-10-0" RacePoints="19"/>
+			<SeriesResult TeamID="43774"  NetPoints="117" Rank="20" TotalPoints="148" />
+
+			<RaceResult TeamID="43444" RaceID="20-3-1-0" RacePoints="10"/>
+			<RaceResult TeamID="43444" RaceID="20-3-2-0" RacePoints="9"/>
+			<RaceResult TeamID="43444" RaceID="20-3-3-0" RacePoints="6"/>
+			<RaceResult TeamID="43444" RaceID="20-3-4-0" RacePoints="11"/>
+			<RaceResult TeamID="43444" RaceID="20-3-5-0" RacePoints="15"/>
+			<RaceResult TeamID="43444" RaceID="20-3-6-0" RacePoints="9"/>
+			<RaceResult TeamID="43444" RaceID="20-3-7-0" RacePoints="18"/>
+			<RaceResult TeamID="43444" RaceID="20-3-8-0" RacePoints="23" Discard="true"/>
+			<RaceResult TeamID="43444" RaceID="20-3-9-0" RacePoints="21"/>
+			<RaceResult TeamID="43444" RaceID="20-3-10-0" RacePoints="23"/>
+			<SeriesResult TeamID="43444"  NetPoints="122" Rank="21" TotalPoints="145" />
+
+			<RaceResult TeamID="44634" RaceID="20-3-1-0" RacePoints="4"/>
+			<RaceResult TeamID="44634" RaceID="20-3-2-0" RacePoints="18"/>
+			<RaceResult TeamID="44634" RaceID="20-3-3-0" RacePoints="10"/>
+			<RaceResult TeamID="44634" RaceID="20-3-4-0" RacePoints="7"/>
+			<RaceResult TeamID="44634" RaceID="20-3-5-0" RacePoints="24"/>
+			<RaceResult TeamID="44634" RaceID="20-3-6-0" RacePoints="16"/>
+			<RaceResult TeamID="44634" RaceID="20-3-7-0" RacePoints="26"/>
+			<RaceResult TeamID="44634" RaceID="20-3-8-0" RacePoints="17"/>
+			<RaceResult TeamID="44634" RaceID="20-3-9-0" RacePoints="33" Discard="true" ScoreCode="DNF"/>
+			<RaceResult TeamID="44634" RaceID="20-3-10-0" RacePoints="3"/>
+			<SeriesResult TeamID="44634"  NetPoints="125" Rank="22" TotalPoints="158" />
+
+			<RaceResult TeamID="43879" RaceID="20-3-1-0" RacePoints="17"/>
+			<RaceResult TeamID="43879" RaceID="20-3-2-0" RacePoints="13"/>
+			<RaceResult TeamID="43879" RaceID="20-3-3-0" RacePoints="5"/>
+			<RaceResult TeamID="43879" RaceID="20-3-4-0" RacePoints="15"/>
+			<RaceResult TeamID="43879" RaceID="20-3-5-0" RacePoints="30" Discard="true"/>
+			<RaceResult TeamID="43879" RaceID="20-3-6-0" RacePoints="24"/>
+			<RaceResult TeamID="43879" RaceID="20-3-7-0" RacePoints="12"/>
+			<RaceResult TeamID="43879" RaceID="20-3-8-0" RacePoints="11"/>
+			<RaceResult TeamID="43879" RaceID="20-3-9-0" RacePoints="22"/>
+			<RaceResult TeamID="43879" RaceID="20-3-10-0" RacePoints="21"/>
+			<SeriesResult TeamID="43879"  NetPoints="140" Rank="23" TotalPoints="170" />
+
+			<RaceResult TeamID="44136" RaceID="20-3-1-0" RacePoints="13"/>
+			<RaceResult TeamID="44136" RaceID="20-3-2-0" RacePoints="20"/>
+			<RaceResult TeamID="44136" RaceID="20-3-3-0" RacePoints="13"/>
+			<RaceResult TeamID="44136" RaceID="20-3-4-0" RacePoints="13"/>
+			<RaceResult TeamID="44136" RaceID="20-3-5-0" RacePoints="22"/>
+			<RaceResult TeamID="44136" RaceID="20-3-6-0" RacePoints="22"/>
+			<RaceResult TeamID="44136" RaceID="20-3-7-0" RacePoints="33" Discard="true" ScoreCode="BFD"/>
+			<RaceResult TeamID="44136" RaceID="20-3-8-0" RacePoints="6"/>
+			<RaceResult TeamID="44136" RaceID="20-3-9-0" RacePoints="16"/>
+			<RaceResult TeamID="44136" RaceID="20-3-10-0" RacePoints="20"/>
+			<SeriesResult TeamID="44136"  NetPoints="145" Rank="24" TotalPoints="178" />
+
+			<RaceResult TeamID="43586" RaceID="20-3-1-0" RacePoints="7"/>
+			<RaceResult TeamID="43586" RaceID="20-3-2-0" RacePoints="7"/>
+			<RaceResult TeamID="43586" RaceID="20-3-3-0" RacePoints="33" Discard="true" ScoreCode="DNF"/>
+			<RaceResult TeamID="43586" RaceID="20-3-4-0" RacePoints="9"/>
+			<RaceResult TeamID="43586" RaceID="20-3-5-0" RacePoints="19"/>
+			<RaceResult TeamID="43586" RaceID="20-3-6-0" RacePoints="17"/>
+			<RaceResult TeamID="43586" RaceID="20-3-7-0" RacePoints="21"/>
+			<RaceResult TeamID="43586" RaceID="20-3-8-0" RacePoints="26"/>
+			<RaceResult TeamID="43586" RaceID="20-3-9-0" RacePoints="19"/>
+			<RaceResult TeamID="43586" RaceID="20-3-10-0" RacePoints="29"/>
+			<SeriesResult TeamID="43586"  NetPoints="154" Rank="25" TotalPoints="187" />
+
+			<RaceResult TeamID="43610" RaceID="20-3-1-0" RacePoints="20"/>
+			<RaceResult TeamID="43610" RaceID="20-3-2-0" RacePoints="12"/>
+			<RaceResult TeamID="43610" RaceID="20-3-3-0" RacePoints="17"/>
+			<RaceResult TeamID="43610" RaceID="20-3-4-0" RacePoints="12"/>
+			<RaceResult TeamID="43610" RaceID="20-3-5-0" RacePoints="23"/>
+			<RaceResult TeamID="43610" RaceID="20-3-6-0" RacePoints="19"/>
+			<RaceResult TeamID="43610" RaceID="20-3-7-0" RacePoints="25"/>
+			<RaceResult TeamID="43610" RaceID="20-3-8-0" RacePoints="10"/>
+			<RaceResult TeamID="43610" RaceID="20-3-9-0" RacePoints="29" Discard="true"/>
+			<RaceResult TeamID="43610" RaceID="20-3-10-0" RacePoints="22"/>
+			<SeriesResult TeamID="43610"  NetPoints="160" Rank="26" TotalPoints="189" />
+
+			<RaceResult TeamID="43930" RaceID="20-3-1-0" RacePoints="13"/>
+			<RaceResult TeamID="43930" RaceID="20-3-2-0" RacePoints="17"/>
+			<RaceResult TeamID="43930" RaceID="20-3-3-0" RacePoints="9"/>
+			<RaceResult TeamID="43930" RaceID="20-3-4-0" RacePoints="17"/>
+			<RaceResult TeamID="43930" RaceID="20-3-5-0" RacePoints="29"/>
+			<RaceResult TeamID="43930" RaceID="20-3-6-0" RacePoints="30" Discard="true"/>
+			<RaceResult TeamID="43930" RaceID="20-3-7-0" RacePoints="30"/>
+			<RaceResult TeamID="43930" RaceID="20-3-8-0" RacePoints="19"/>
+			<RaceResult TeamID="43930" RaceID="20-3-9-0" RacePoints="18"/>
+			<RaceResult TeamID="43930" RaceID="20-3-10-0" RacePoints="15"/>
+			<SeriesResult TeamID="43930"  NetPoints="167" Rank="27" TotalPoints="197" />
+
+			<RaceResult TeamID="43585" RaceID="20-3-1-0" RacePoints="19"/>
+			<RaceResult TeamID="43585" RaceID="20-3-2-0" RacePoints="8"/>
+			<RaceResult TeamID="43585" RaceID="20-3-3-0" RacePoints="8"/>
+			<RaceResult TeamID="43585" RaceID="20-3-4-0" RacePoints="21"/>
+			<RaceResult TeamID="43585" RaceID="20-3-5-0" RacePoints="26"/>
+			<RaceResult TeamID="43585" RaceID="20-3-6-0" RacePoints="29" Discard="true"/>
+			<RaceResult TeamID="43585" RaceID="20-3-7-0" RacePoints="16"/>
+			<RaceResult TeamID="43585" RaceID="20-3-8-0" RacePoints="22"/>
+			<RaceResult TeamID="43585" RaceID="20-3-9-0" RacePoints="23"/>
+			<RaceResult TeamID="43585" RaceID="20-3-10-0" RacePoints="27"/>
+			<SeriesResult TeamID="43585"  NetPoints="170" Rank="28" TotalPoints="199" />
+
+			<RaceResult TeamID="42607" RaceID="20-3-1-0" RacePoints="11"/>
+			<RaceResult TeamID="42607" RaceID="20-3-2-0" RacePoints="8"/>
+			<RaceResult TeamID="42607" RaceID="20-3-3-0" RacePoints="16"/>
+			<RaceResult TeamID="42607" RaceID="20-3-4-0" RacePoints="14"/>
+			<RaceResult TeamID="42607" RaceID="20-3-5-0" RacePoints="25"/>
+			<RaceResult TeamID="42607" RaceID="20-3-6-0" RacePoints="25"/>
+			<RaceResult TeamID="42607" RaceID="20-3-7-0" RacePoints="24"/>
+			<RaceResult TeamID="42607" RaceID="20-3-8-0" RacePoints="27"/>
+			<RaceResult TeamID="42607" RaceID="20-3-9-0" RacePoints="20"/>
+			<RaceResult TeamID="42607" RaceID="20-3-10-0" RacePoints="30" Discard="true"/>
+			<SeriesResult TeamID="42607"  NetPoints="170" Rank="29" TotalPoints="200" />
+
+			<RaceResult TeamID="43477" RaceID="20-3-1-0" RacePoints="27"/>
+			<RaceResult TeamID="43477" RaceID="20-3-2-0" RacePoints="15"/>
+			<RaceResult TeamID="43477" RaceID="20-3-3-0" RacePoints="12"/>
+			<RaceResult TeamID="43477" RaceID="20-3-4-0" RacePoints="12"/>
+			<RaceResult TeamID="43477" RaceID="20-3-5-0" RacePoints="21"/>
+			<RaceResult TeamID="43477" RaceID="20-3-6-0" RacePoints="27"/>
+			<RaceResult TeamID="43477" RaceID="20-3-7-0" RacePoints="31" Discard="true"/>
+			<RaceResult TeamID="43477" RaceID="20-3-8-0" RacePoints="29"/>
+			<RaceResult TeamID="43477" RaceID="20-3-9-0" RacePoints="28"/>
+			<RaceResult TeamID="43477" RaceID="20-3-10-0" RacePoints="6"/>
+			<SeriesResult TeamID="43477"  NetPoints="177" Rank="30" TotalPoints="208" />
+
+			<RaceResult TeamID="42746" RaceID="20-3-1-0" RacePoints="18"/>
+			<RaceResult TeamID="42746" RaceID="20-3-2-0" RacePoints="17"/>
+			<RaceResult TeamID="42746" RaceID="20-3-3-0" RacePoints="7"/>
+			<RaceResult TeamID="42746" RaceID="20-3-4-0" RacePoints="14"/>
+			<RaceResult TeamID="42746" RaceID="20-3-5-0" RacePoints="32" Discard="true"/>
+			<RaceResult TeamID="42746" RaceID="20-3-6-0" RacePoints="26"/>
+			<RaceResult TeamID="42746" RaceID="20-3-7-0" RacePoints="29"/>
+			<RaceResult TeamID="42746" RaceID="20-3-8-0" RacePoints="30"/>
+			<RaceResult TeamID="42746" RaceID="20-3-9-0" RacePoints="30"/>
+			<RaceResult TeamID="42746" RaceID="20-3-10-0" RacePoints="9"/>
+			<SeriesResult TeamID="42746"  NetPoints="180" Rank="31" TotalPoints="212" />
+
+			<RaceResult TeamID="42317" RaceID="20-3-1-0" RacePoints="19"/>
+			<RaceResult TeamID="42317" RaceID="20-3-2-0" RacePoints="14"/>
+			<RaceResult TeamID="42317" RaceID="20-3-3-0" RacePoints="14"/>
+			<RaceResult TeamID="42317" RaceID="20-3-4-0" RacePoints="6"/>
+			<RaceResult TeamID="42317" RaceID="20-3-5-0" RacePoints="28" Discard="true"/>
+			<RaceResult TeamID="42317" RaceID="20-3-6-0" RacePoints="28"/>
+			<RaceResult TeamID="42317" RaceID="20-3-7-0" RacePoints="27"/>
+			<RaceResult TeamID="42317" RaceID="20-3-8-0" RacePoints="25"/>
+			<RaceResult TeamID="42317" RaceID="20-3-9-0" RacePoints="26"/>
+			<RaceResult TeamID="42317" RaceID="20-3-10-0" RacePoints="24"/>
+			<SeriesResult TeamID="42317"  NetPoints="183" Rank="32" TotalPoints="211" />
+
+			<RaceResult TeamID="43373" RaceID="20-2-1-0" RacePoints="9"/>
+			<RaceResult TeamID="43373" RaceID="20-2-2-0" RacePoints="26" Discard="true"/>
+			<RaceResult TeamID="43373" RaceID="20-2-3-0" RacePoints="14"/>
+			<RaceResult TeamID="43373" RaceID="20-2-4-0" RacePoints="24"/>
+			<RaceResult TeamID="43373" RaceID="20-2-5-0" RacePoints="3"/>
+			<RaceResult TeamID="43373" RaceID="20-2-6-0" RacePoints="7"/>
+			<RaceResult TeamID="43373" RaceID="20-2-7-0" RacePoints="5"/>
+			<RaceResult TeamID="43373" RaceID="20-2-8-0" RacePoints="4"/>
+			<RaceResult TeamID="43373" RaceID="20-2-9-0" RacePoints="1"/>
+			<RaceResult TeamID="43373" RaceID="20-2-10-0" RacePoints="1"/>
+			<SeriesResult TeamID="43373"  NetPoints="68" Rank="1" TotalPoints="94" />
+
+			<RaceResult TeamID="43729" RaceID="20-2-1-0" RacePoints="23"/>
+			<RaceResult TeamID="43729" RaceID="20-2-2-0" RacePoints="27" Discard="true"/>
+			<RaceResult TeamID="43729" RaceID="20-2-3-0" RacePoints="6"/>
+			<RaceResult TeamID="43729" RaceID="20-2-4-0" RacePoints="23"/>
+			<RaceResult TeamID="43729" RaceID="20-2-5-0" RacePoints="8"/>
+			<RaceResult TeamID="43729" RaceID="20-2-6-0" RacePoints="1"/>
+			<RaceResult TeamID="43729" RaceID="20-2-7-0" RacePoints="2"/>
+			<RaceResult TeamID="43729" RaceID="20-2-8-0" RacePoints="1"/>
+			<RaceResult TeamID="43729" RaceID="20-2-9-0" RacePoints="12"/>
+			<RaceResult TeamID="43729" RaceID="20-2-10-0" RacePoints="10"/>
+			<SeriesResult TeamID="43729"  NetPoints="86" Rank="2" TotalPoints="113" />
+
+			<RaceResult TeamID="42167" RaceID="20-2-1-0" RacePoints="9"/>
+			<RaceResult TeamID="42167" RaceID="20-2-2-0" RacePoints="16"/>
+			<RaceResult TeamID="42167" RaceID="20-2-3-0" RacePoints="25" Discard="true"/>
+			<RaceResult TeamID="42167" RaceID="20-2-4-0" RacePoints="20"/>
+			<RaceResult TeamID="42167" RaceID="20-2-5-0" RacePoints="4"/>
+			<RaceResult TeamID="42167" RaceID="20-2-6-0" RacePoints="9"/>
+			<RaceResult TeamID="42167" RaceID="20-2-7-0" RacePoints="4"/>
+			<RaceResult TeamID="42167" RaceID="20-2-8-0" RacePoints="5"/>
+			<RaceResult TeamID="42167" RaceID="20-2-9-0" RacePoints="18"/>
+			<RaceResult TeamID="42167" RaceID="20-2-10-0" RacePoints="9"/>
+			<SeriesResult TeamID="42167"  NetPoints="94" Rank="3" TotalPoints="119" />
+
+			<RaceResult TeamID="44059" RaceID="20-2-1-0" RacePoints="4"/>
+			<RaceResult TeamID="44059" RaceID="20-2-2-0" RacePoints="24" Discard="true"/>
+			<RaceResult TeamID="44059" RaceID="20-2-3-0" RacePoints="21"/>
+			<RaceResult TeamID="44059" RaceID="20-2-4-0" RacePoints="18"/>
+			<RaceResult TeamID="44059" RaceID="20-2-5-0" RacePoints="16"/>
+			<RaceResult TeamID="44059" RaceID="20-2-6-0" RacePoints="13"/>
+			<RaceResult TeamID="44059" RaceID="20-2-7-0" RacePoints="10"/>
+			<RaceResult TeamID="44059" RaceID="20-2-8-0" RacePoints="6"/>
+			<RaceResult TeamID="44059" RaceID="20-2-9-0" RacePoints="5"/>
+			<RaceResult TeamID="44059" RaceID="20-2-10-0" RacePoints="5"/>
+			<SeriesResult TeamID="44059"  NetPoints="98" Rank="4" TotalPoints="122" />
+
+			<RaceResult TeamID="43573" RaceID="20-2-1-0" RacePoints="22"/>
+			<RaceResult TeamID="43573" RaceID="20-2-2-0" RacePoints="14"/>
+			<RaceResult TeamID="43573" RaceID="20-2-3-0" RacePoints="26" Discard="true"/>
+			<RaceResult TeamID="43573" RaceID="20-2-4-0" RacePoints="26"/>
+			<RaceResult TeamID="43573" RaceID="20-2-5-0" RacePoints="2"/>
+			<RaceResult TeamID="43573" RaceID="20-2-6-0" RacePoints="3"/>
+			<RaceResult TeamID="43573" RaceID="20-2-7-0" RacePoints="1"/>
+			<RaceResult TeamID="43573" RaceID="20-2-8-0" RacePoints="17"/>
+			<RaceResult TeamID="43573" RaceID="20-2-9-0" RacePoints="16"/>
+			<RaceResult TeamID="43573" RaceID="20-2-10-0" RacePoints="4"/>
+			<SeriesResult TeamID="43573"  NetPoints="105" Rank="5" TotalPoints="131" />
+
+			<RaceResult TeamID="42451" RaceID="20-2-1-0" RacePoints="10"/>
+			<RaceResult TeamID="42451" RaceID="20-2-2-0" RacePoints="19"/>
+			<RaceResult TeamID="42451" RaceID="20-2-3-0" RacePoints="20"/>
+			<RaceResult TeamID="42451" RaceID="20-2-4-0" RacePoints="23"/>
+			<RaceResult TeamID="42451" RaceID="20-2-5-0" RacePoints="10"/>
+			<RaceResult TeamID="42451" RaceID="20-2-6-0" RacePoints="12"/>
+			<RaceResult TeamID="42451" RaceID="20-2-7-0" RacePoints="24" Discard="true"/>
+			<RaceResult TeamID="42451" RaceID="20-2-8-0" RacePoints="2"/>
+			<RaceResult TeamID="42451" RaceID="20-2-9-0" RacePoints="4"/>
+			<RaceResult TeamID="42451" RaceID="20-2-10-0" RacePoints="7"/>
+			<SeriesResult TeamID="42451"  NetPoints="107" Rank="6" TotalPoints="131" />
+
+			<RaceResult TeamID="43584" RaceID="20-2-1-0" RacePoints="15"/>
+			<RaceResult TeamID="43584" RaceID="20-2-2-0" RacePoints="22"/>
+			<RaceResult TeamID="43584" RaceID="20-2-3-0" RacePoints="20"/>
+			<RaceResult TeamID="43584" RaceID="20-2-4-0" RacePoints="30" Discard="true"/>
+			<RaceResult TeamID="43584" RaceID="20-2-5-0" RacePoints="14"/>
+			<RaceResult TeamID="43584" RaceID="20-2-6-0" RacePoints="5"/>
+			<RaceResult TeamID="43584" RaceID="20-2-7-0" RacePoints="6"/>
+			<RaceResult TeamID="43584" RaceID="20-2-8-0" RacePoints="19"/>
+			<RaceResult TeamID="43584" RaceID="20-2-9-0" RacePoints="3"/>
+			<RaceResult TeamID="43584" RaceID="20-2-10-0" RacePoints="3"/>
+			<SeriesResult TeamID="43584"  NetPoints="107" Rank="7" TotalPoints="137" />
+
+			<RaceResult TeamID="44598" RaceID="20-2-1-0" RacePoints="16"/>
+			<RaceResult TeamID="44598" RaceID="20-2-2-0" RacePoints="15"/>
+			<RaceResult TeamID="44598" RaceID="20-2-3-0" RacePoints="21"/>
+			<RaceResult TeamID="44598" RaceID="20-2-4-0" RacePoints="19"/>
+			<RaceResult TeamID="44598" RaceID="20-2-5-0" RacePoints="1"/>
+			<RaceResult TeamID="44598" RaceID="20-2-6-0" RacePoints="2"/>
+			<RaceResult TeamID="44598" RaceID="20-2-7-0" RacePoints="3"/>
+			<RaceResult TeamID="44598" RaceID="20-2-8-0" RacePoints="32" Discard="true" ScoreCode="RAF"/>
+			<RaceResult TeamID="44598" RaceID="20-2-9-0" RacePoints="23"/>
+			<RaceResult TeamID="44598" RaceID="20-2-10-0" RacePoints="8"/>
+			<SeriesResult TeamID="44598"  NetPoints="108" Rank="8" TotalPoints="140" />
+
+			<RaceResult TeamID="43799" RaceID="20-2-1-0" RacePoints="25" Discard="true"/>
+			<RaceResult TeamID="43799" RaceID="20-2-2-0" RacePoints="11"/>
+			<RaceResult TeamID="43799" RaceID="20-2-3-0" RacePoints="16"/>
+			<RaceResult TeamID="43799" RaceID="20-2-4-0" RacePoints="16"/>
+			<RaceResult TeamID="43799" RaceID="20-2-5-0" RacePoints="12"/>
+			<RaceResult TeamID="43799" RaceID="20-2-6-0" RacePoints="11"/>
+			<RaceResult TeamID="43799" RaceID="20-2-7-0" RacePoints="12"/>
+			<RaceResult TeamID="43799" RaceID="20-2-8-0" RacePoints="16"/>
+			<RaceResult TeamID="43799" RaceID="20-2-9-0" RacePoints="7"/>
+			<RaceResult TeamID="43799" RaceID="20-2-10-0" RacePoints="13"/>
+			<SeriesResult TeamID="43799"  NetPoints="114" Rank="9" TotalPoints="139" />
+
+			<RaceResult TeamID="42823" RaceID="20-2-1-0" RacePoints="21"/>
+			<RaceResult TeamID="42823" RaceID="20-2-2-0" RacePoints="23" Discard="true"/>
+			<RaceResult TeamID="42823" RaceID="20-2-3-0" RacePoints="23"/>
+			<RaceResult TeamID="42823" RaceID="20-2-4-0" RacePoints="19"/>
+			<RaceResult TeamID="42823" RaceID="20-2-5-0" RacePoints="7"/>
+			<RaceResult TeamID="42823" RaceID="20-2-6-0" RacePoints="4"/>
+			<RaceResult TeamID="42823" RaceID="20-2-7-0" RacePoints="13"/>
+			<RaceResult TeamID="42823" RaceID="20-2-8-0" RacePoints="12"/>
+			<RaceResult TeamID="42823" RaceID="20-2-9-0" RacePoints="6"/>
+			<RaceResult TeamID="42823" RaceID="20-2-10-0" RacePoints="19"/>
+			<SeriesResult TeamID="42823"  NetPoints="124" Rank="10" TotalPoints="147" />
+
+			<RaceResult TeamID="43578" RaceID="20-2-1-0" RacePoints="24"/>
+			<RaceResult TeamID="43578" RaceID="20-2-2-0" RacePoints="26"/>
+			<RaceResult TeamID="43578" RaceID="20-2-3-0" RacePoints="27"/>
+			<RaceResult TeamID="43578" RaceID="20-2-4-0" RacePoints="29" Discard="true"/>
+			<RaceResult TeamID="43578" RaceID="20-2-5-0" RacePoints="5"/>
+			<RaceResult TeamID="43578" RaceID="20-2-6-0" RacePoints="8"/>
+			<RaceResult TeamID="43578" RaceID="20-2-7-0" RacePoints="14"/>
+			<RaceResult TeamID="43578" RaceID="20-2-8-0" RacePoints="9"/>
+			<RaceResult TeamID="43578" RaceID="20-2-9-0" RacePoints="2"/>
+			<RaceResult TeamID="43578" RaceID="20-2-10-0" RacePoints="12"/>
+			<SeriesResult TeamID="43578"  NetPoints="127" Rank="11" TotalPoints="156" />
+
+			<RaceResult TeamID="44607" RaceID="20-2-1-0" RacePoints="20"/>
+			<RaceResult TeamID="44607" RaceID="20-2-2-0" RacePoints="16"/>
+			<RaceResult TeamID="44607" RaceID="20-2-3-0" RacePoints="29" Discard="true"/>
+			<RaceResult TeamID="44607" RaceID="20-2-4-0" RacePoints="20"/>
+			<RaceResult TeamID="44607" RaceID="20-2-5-0" RacePoints="15"/>
+			<RaceResult TeamID="44607" RaceID="20-2-6-0" RacePoints="17"/>
+			<RaceResult TeamID="44607" RaceID="20-2-7-0" RacePoints="9"/>
+			<RaceResult TeamID="44607" RaceID="20-2-8-0" RacePoints="20"/>
+			<RaceResult TeamID="44607" RaceID="20-2-9-0" RacePoints="9"/>
+			<RaceResult TeamID="44607" RaceID="20-2-10-0" RacePoints="2"/>
+			<SeriesResult TeamID="44607"  NetPoints="128" Rank="12" TotalPoints="157" />
+
+			<RaceResult TeamID="42770" RaceID="20-2-1-0" RacePoints="17"/>
+			<RaceResult TeamID="42770" RaceID="20-2-2-0" RacePoints="19"/>
+			<RaceResult TeamID="42770" RaceID="20-2-3-0" RacePoints="15"/>
+			<RaceResult TeamID="42770" RaceID="20-2-4-0" RacePoints="15"/>
+			<RaceResult TeamID="42770" RaceID="20-2-5-0" RacePoints="22" Discard="true"/>
+			<RaceResult TeamID="42770" RaceID="20-2-6-0" RacePoints="18"/>
+			<RaceResult TeamID="42770" RaceID="20-2-7-0" RacePoints="15"/>
+			<RaceResult TeamID="42770" RaceID="20-2-8-0" RacePoints="10"/>
+			<RaceResult TeamID="42770" RaceID="20-2-9-0" RacePoints="13"/>
+			<RaceResult TeamID="42770" RaceID="20-2-10-0" RacePoints="6"/>
+			<SeriesResult TeamID="42770"  NetPoints="128" Rank="13" TotalPoints="150" />
+
+			<RaceResult TeamID="44089" RaceID="20-2-1-0" RacePoints="22"/>
+			<RaceResult TeamID="44089" RaceID="20-2-2-0" RacePoints="25" Discard="true"/>
+			<RaceResult TeamID="44089" RaceID="20-2-3-0" RacePoints="23"/>
+			<RaceResult TeamID="44089" RaceID="20-2-4-0" RacePoints="17"/>
+			<RaceResult TeamID="44089" RaceID="20-2-5-0" RacePoints="6"/>
+			<RaceResult TeamID="44089" RaceID="20-2-6-0" RacePoints="6"/>
+			<RaceResult TeamID="44089" RaceID="20-2-7-0" RacePoints="11"/>
+			<RaceResult TeamID="44089" RaceID="20-2-8-0" RacePoints="8"/>
+			<RaceResult TeamID="44089" RaceID="20-2-9-0" RacePoints="21"/>
+			<RaceResult TeamID="44089" RaceID="20-2-10-0" RacePoints="16"/>
+			<SeriesResult TeamID="44089"  NetPoints="130" Rank="14" TotalPoints="155" />
+
+			<RaceResult TeamID="44048" RaceID="20-2-1-0" RacePoints="21" Discard="true"/>
+			<RaceResult TeamID="44048" RaceID="20-2-2-0" RacePoints="20"/>
+			<RaceResult TeamID="44048" RaceID="20-2-3-0" RacePoints="18"/>
+			<RaceResult TeamID="44048" RaceID="20-2-4-0" RacePoints="11"/>
+			<RaceResult TeamID="44048" RaceID="20-2-5-0" RacePoints="11"/>
+			<RaceResult TeamID="44048" RaceID="20-2-6-0" RacePoints="15"/>
+			<RaceResult TeamID="44048" RaceID="20-2-7-0" RacePoints="16"/>
+			<RaceResult TeamID="44048" RaceID="20-2-8-0" RacePoints="13"/>
+			<RaceResult TeamID="44048" RaceID="20-2-9-0" RacePoints="19"/>
+			<RaceResult TeamID="44048" RaceID="20-2-10-0" RacePoints="14"/>
+			<SeriesResult TeamID="44048"  NetPoints="137" Rank="15" TotalPoints="158" />
+
+			<RaceResult TeamID="42777" RaceID="20-2-1-0" RacePoints="25"/>
+			<RaceResult TeamID="42777" RaceID="20-2-2-0" RacePoints="22"/>
+			<RaceResult TeamID="42777" RaceID="20-2-3-0" RacePoints="17"/>
+			<RaceResult TeamID="42777" RaceID="20-2-4-0" RacePoints="28" Discard="true"/>
+			<RaceResult TeamID="42777" RaceID="20-2-5-0" RacePoints="18"/>
+			<RaceResult TeamID="42777" RaceID="20-2-6-0" RacePoints="10"/>
+			<RaceResult TeamID="42777" RaceID="20-2-7-0" RacePoints="7"/>
+			<RaceResult TeamID="42777" RaceID="20-2-8-0" RacePoints="15"/>
+			<RaceResult TeamID="42777" RaceID="20-2-9-0" RacePoints="14"/>
+			<RaceResult TeamID="42777" RaceID="20-2-10-0" RacePoints="15"/>
+			<SeriesResult TeamID="42777"  NetPoints="143" Rank="16" TotalPoints="171" />
+
+			<RaceResult TeamID="43280" RaceID="20-2-1-0" RacePoints="18"/>
+			<RaceResult TeamID="43280" RaceID="20-2-2-0" RacePoints="28" Discard="true"/>
+			<RaceResult TeamID="43280" RaceID="20-2-3-0" RacePoints="22"/>
+			<RaceResult TeamID="43280" RaceID="20-2-4-0" RacePoints="22"/>
+			<RaceResult TeamID="43280" RaceID="20-2-5-0" RacePoints="19"/>
+			<RaceResult TeamID="43280" RaceID="20-2-6-0" RacePoints="14"/>
+			<RaceResult TeamID="43280" RaceID="20-2-7-0" RacePoints="20"/>
+			<RaceResult TeamID="43280" RaceID="20-2-8-0" RacePoints="3"/>
+			<RaceResult TeamID="43280" RaceID="20-2-9-0" RacePoints="10"/>
+			<RaceResult TeamID="43280" RaceID="20-2-10-0" RacePoints="22"/>
+			<SeriesResult TeamID="43280"  NetPoints="150" Rank="17" TotalPoints="178" />
+
+			<RaceResult TeamID="43224" RaceID="20-2-1-0" RacePoints="23"/>
+			<RaceResult TeamID="43224" RaceID="20-2-2-0" RacePoints="21"/>
+			<RaceResult TeamID="43224" RaceID="20-2-3-0" RacePoints="24"/>
+			<RaceResult TeamID="43224" RaceID="20-2-4-0" RacePoints="27" Discard="true"/>
+			<RaceResult TeamID="43224" RaceID="20-2-5-0" RacePoints="9"/>
+			<RaceResult TeamID="43224" RaceID="20-2-6-0" RacePoints="20"/>
+			<RaceResult TeamID="43224" RaceID="20-2-7-0" RacePoints="8"/>
+			<RaceResult TeamID="43224" RaceID="20-2-8-0" RacePoints="24"/>
+			<RaceResult TeamID="43224" RaceID="20-2-9-0" RacePoints="15"/>
+			<RaceResult TeamID="43224" RaceID="20-2-10-0" RacePoints="11"/>
+			<SeriesResult TeamID="43224"  NetPoints="155" Rank="18" TotalPoints="182" />
+
+			<RaceResult TeamID="44014" RaceID="20-2-1-0" RacePoints="24"/>
+			<RaceResult TeamID="44014" RaceID="20-2-2-0" RacePoints="21"/>
+			<RaceResult TeamID="44014" RaceID="20-2-3-0" RacePoints="31" Discard="true"/>
+			<RaceResult TeamID="44014" RaceID="20-2-4-0" RacePoints="22"/>
+			<RaceResult TeamID="44014" RaceID="20-2-5-0" RacePoints="13"/>
+			<RaceResult TeamID="44014" RaceID="20-2-6-0" RacePoints="21"/>
+			<RaceResult TeamID="44014" RaceID="20-2-7-0" RacePoints="17"/>
+			<RaceResult TeamID="44014" RaceID="20-2-8-0" RacePoints="11"/>
+			<RaceResult TeamID="44014" RaceID="20-2-9-0" RacePoints="11"/>
+			<RaceResult TeamID="44014" RaceID="20-2-10-0" RacePoints="18"/>
+			<SeriesResult TeamID="44014"  NetPoints="158" Rank="19" TotalPoints="189" />
+
+			<RaceResult TeamID="43861" RaceID="20-2-1-0" RacePoints="26" Discard="true"/>
+			<RaceResult TeamID="43861" RaceID="20-2-2-0" RacePoints="23"/>
+			<RaceResult TeamID="43861" RaceID="20-2-3-0" RacePoints="26"/>
+			<RaceResult TeamID="43861" RaceID="20-2-4-0" RacePoints="26"/>
+			<RaceResult TeamID="43861" RaceID="20-2-5-0" RacePoints="20"/>
+			<RaceResult TeamID="43861" RaceID="20-2-6-0" RacePoints="16"/>
+			<RaceResult TeamID="43861" RaceID="20-2-7-0" RacePoints="21"/>
+			<RaceResult TeamID="43861" RaceID="20-2-8-0" RacePoints="7"/>
+			<RaceResult TeamID="43861" RaceID="20-2-9-0" RacePoints="8"/>
+			<RaceResult TeamID="43861" RaceID="20-2-10-0" RacePoints="24"/>
+			<SeriesResult TeamID="43861"  NetPoints="171" Rank="20" TotalPoints="197" />
+
+			<RaceResult TeamID="42545" RaceID="20-2-1-0" RacePoints="30" Discard="true"/>
+			<RaceResult TeamID="42545" RaceID="20-2-2-0" RacePoints="28"/>
+			<RaceResult TeamID="42545" RaceID="20-2-3-0" RacePoints="19"/>
+			<RaceResult TeamID="42545" RaceID="20-2-4-0" RacePoints="29"/>
+			<RaceResult TeamID="42545" RaceID="20-2-5-0" RacePoints="17"/>
+			<RaceResult TeamID="42545" RaceID="20-2-6-0" RacePoints="19"/>
+			<RaceResult TeamID="42545" RaceID="20-2-7-0" RacePoints="18"/>
+			<RaceResult TeamID="42545" RaceID="20-2-8-0" RacePoints="14"/>
+			<RaceResult TeamID="42545" RaceID="20-2-9-0" RacePoints="22"/>
+			<RaceResult TeamID="42545" RaceID="20-2-10-0" RacePoints="20"/>
+			<SeriesResult TeamID="42545"  NetPoints="186" Rank="21" TotalPoints="216" />
+
+			<RaceResult TeamID="44605" RaceID="20-2-1-0" RacePoints="29" Discard="true"/>
+			<RaceResult TeamID="44605" RaceID="20-2-2-0" RacePoints="27"/>
+			<RaceResult TeamID="44605" RaceID="20-2-3-0" RacePoints="15"/>
+			<RaceResult TeamID="44605" RaceID="20-2-4-0" RacePoints="16"/>
+			<RaceResult TeamID="44605" RaceID="20-2-5-0" RacePoints="23"/>
+			<RaceResult TeamID="44605" RaceID="20-2-6-0" RacePoints="22"/>
+			<RaceResult TeamID="44605" RaceID="20-2-7-0" RacePoints="28"/>
+			<RaceResult TeamID="44605" RaceID="20-2-8-0" RacePoints="22"/>
+			<RaceResult TeamID="44605" RaceID="20-2-9-0" RacePoints="20"/>
+			<RaceResult TeamID="44605" RaceID="20-2-10-0" RacePoints="17"/>
+			<SeriesResult TeamID="44605"  NetPoints="190" Rank="22" TotalPoints="219" />
+
+			<RaceResult TeamID="43544" RaceID="20-2-1-0" RacePoints="27"/>
+			<RaceResult TeamID="43544" RaceID="20-2-2-0" RacePoints="24"/>
+			<RaceResult TeamID="43544" RaceID="20-2-3-0" RacePoints="28" Discard="true"/>
+			<RaceResult TeamID="43544" RaceID="20-2-4-0" RacePoints="24"/>
+			<RaceResult TeamID="43544" RaceID="20-2-5-0" RacePoints="21"/>
+			<RaceResult TeamID="43544" RaceID="20-2-6-0" RacePoints="26"/>
+			<RaceResult TeamID="43544" RaceID="20-2-7-0" RacePoints="22"/>
+			<RaceResult TeamID="43544" RaceID="20-2-8-0" RacePoints="18"/>
+			<RaceResult TeamID="43544" RaceID="20-2-9-0" RacePoints="24"/>
+			<RaceResult TeamID="43544" RaceID="20-2-10-0" RacePoints="25"/>
+			<SeriesResult TeamID="43544"  NetPoints="211" Rank="23" TotalPoints="239" />
+
+			<RaceResult TeamID="44604" RaceID="20-2-1-0" RacePoints="33" Discard="true" ScoreCode="DNF"/>
+			<RaceResult TeamID="44604" RaceID="20-2-2-0" RacePoints="29"/>
+			<RaceResult TeamID="44604" RaceID="20-2-3-0" RacePoints="28"/>
+			<RaceResult TeamID="44604" RaceID="20-2-4-0" RacePoints="31"/>
+			<RaceResult TeamID="44604" RaceID="20-2-5-0" RacePoints="27"/>
+			<RaceResult TeamID="44604" RaceID="20-2-6-0" RacePoints="24"/>
+			<RaceResult TeamID="44604" RaceID="20-2-7-0" RacePoints="26"/>
+			<RaceResult TeamID="44604" RaceID="20-2-8-0" RacePoints="21"/>
+			<RaceResult TeamID="44604" RaceID="20-2-9-0" RacePoints="17"/>
+			<RaceResult TeamID="44604" RaceID="20-2-10-0" RacePoints="23"/>
+			<SeriesResult TeamID="44604"  NetPoints="226" Rank="24" TotalPoints="259" />
+
+			<RaceResult TeamID="44602" RaceID="20-2-1-0" RacePoints="29"/>
+			<RaceResult TeamID="44602" RaceID="20-2-2-0" RacePoints="25"/>
+			<RaceResult TeamID="44602" RaceID="20-2-3-0" RacePoints="30" Discard="true"/>
+			<RaceResult TeamID="44602" RaceID="20-2-4-0" RacePoints="28"/>
+			<RaceResult TeamID="44602" RaceID="20-2-5-0" RacePoints="26"/>
+			<RaceResult TeamID="44602" RaceID="20-2-6-0" RacePoints="23"/>
+			<RaceResult TeamID="44602" RaceID="20-2-7-0" RacePoints="25"/>
+			<RaceResult TeamID="44602" RaceID="20-2-8-0" RacePoints="25"/>
+			<RaceResult TeamID="44602" RaceID="20-2-9-0" RacePoints="25"/>
+			<RaceResult TeamID="44602" RaceID="20-2-10-0" RacePoints="21"/>
+			<SeriesResult TeamID="44602"  NetPoints="227" Rank="25" TotalPoints="257" />
+
+			<RaceResult TeamID="42668" RaceID="20-2-1-0" RacePoints="26"/>
+			<RaceResult TeamID="42668" RaceID="20-2-2-0" RacePoints="29" Discard="true"/>
+			<RaceResult TeamID="42668" RaceID="20-2-3-0" RacePoints="29"/>
+			<RaceResult TeamID="42668" RaceID="20-2-4-0" RacePoints="27"/>
+			<RaceResult TeamID="42668" RaceID="20-2-5-0" RacePoints="25"/>
+			<RaceResult TeamID="42668" RaceID="20-2-6-0" RacePoints="25"/>
+			<RaceResult TeamID="42668" RaceID="20-2-7-0" RacePoints="23"/>
+			<RaceResult TeamID="42668" RaceID="20-2-8-0" RacePoints="23"/>
+			<RaceResult TeamID="42668" RaceID="20-2-9-0" RacePoints="27"/>
+			<RaceResult TeamID="42668" RaceID="20-2-10-0" RacePoints="27"/>
+			<SeriesResult TeamID="42668"  NetPoints="232" Rank="26" TotalPoints="261" />
+
+			<RaceResult TeamID="44606" RaceID="20-2-1-0" RacePoints="28"/>
+			<RaceResult TeamID="44606" RaceID="20-2-2-0" RacePoints="31"/>
+			<RaceResult TeamID="44606" RaceID="20-2-3-0" RacePoints="25"/>
+			<RaceResult TeamID="44606" RaceID="20-2-4-0" RacePoints="25"/>
+			<RaceResult TeamID="44606" RaceID="20-2-5-0" RacePoints="24"/>
+			<RaceResult TeamID="44606" RaceID="20-2-6-0" RacePoints="28"/>
+			<RaceResult TeamID="44606" RaceID="20-2-7-0" RacePoints="19"/>
+			<RaceResult TeamID="44606" RaceID="20-2-8-0" RacePoints="27"/>
+			<RaceResult TeamID="44606" RaceID="20-2-9-0" RacePoints="29"/>
+			<RaceResult TeamID="44606" RaceID="20-2-10-0" RacePoints="32" Discard="true" ScoreCode="DNF"/>
+			<SeriesResult TeamID="44606"  NetPoints="236" Rank="27" TotalPoints="268" />
+
+			<RaceResult TeamID="44599" RaceID="20-2-1-0" RacePoints="28"/>
+			<RaceResult TeamID="44599" RaceID="20-2-2-0" RacePoints="30"/>
+			<RaceResult TeamID="44599" RaceID="20-2-3-0" RacePoints="24"/>
+			<RaceResult TeamID="44599" RaceID="20-2-4-0" RacePoints="31"/>
+			<RaceResult TeamID="44599" RaceID="20-2-5-0" RacePoints="30"/>
+			<RaceResult TeamID="44599" RaceID="20-2-6-0" RacePoints="27"/>
+			<RaceResult TeamID="44599" RaceID="20-2-7-0" RacePoints="27"/>
+			<RaceResult TeamID="44599" RaceID="20-2-8-0" RacePoints="26"/>
+			<RaceResult TeamID="44599" RaceID="20-2-9-0" RacePoints="26"/>
+			<RaceResult TeamID="44599" RaceID="20-2-10-0" RacePoints="32" Discard="true" ScoreCode="DNF"/>
+			<SeriesResult TeamID="44599"  NetPoints="249" Rank="28" TotalPoints="281" />
+
+			<RaceResult TeamID="44601" RaceID="20-2-1-0" RacePoints="32" Discard="true"/>
+			<RaceResult TeamID="44601" RaceID="20-2-2-0" RacePoints="32"/>
+			<RaceResult TeamID="44601" RaceID="20-2-3-0" RacePoints="27"/>
+			<RaceResult TeamID="44601" RaceID="20-2-4-0" RacePoints="25"/>
+			<RaceResult TeamID="44601" RaceID="20-2-5-0" RacePoints="29"/>
+			<RaceResult TeamID="44601" RaceID="20-2-6-0" RacePoints="29"/>
+			<RaceResult TeamID="44601" RaceID="20-2-7-0" RacePoints="29"/>
+			<RaceResult TeamID="44601" RaceID="20-2-8-0" RacePoints="29"/>
+			<RaceResult TeamID="44601" RaceID="20-2-9-0" RacePoints="28"/>
+			<RaceResult TeamID="44601" RaceID="20-2-10-0" RacePoints="26"/>
+			<SeriesResult TeamID="44601"  NetPoints="254" Rank="29" TotalPoints="286" />
+
+			<RaceResult TeamID="44147" RaceID="20-2-1-0" RacePoints="30"/>
+			<RaceResult TeamID="44147" RaceID="20-2-2-0" RacePoints="31"/>
+			<RaceResult TeamID="44147" RaceID="20-2-3-0" RacePoints="33" Discard="true" ScoreCode="DNC"/>
+			<RaceResult TeamID="44147" RaceID="20-2-4-0" RacePoints="33" ScoreCode="DNF"/>
+			<RaceResult TeamID="44147" RaceID="20-2-5-0" RacePoints="28"/>
+			<RaceResult TeamID="44147" RaceID="20-2-6-0" RacePoints="30"/>
+			<RaceResult TeamID="44147" RaceID="20-2-7-0" RacePoints="30"/>
+			<RaceResult TeamID="44147" RaceID="20-2-8-0" RacePoints="28"/>
+			<RaceResult TeamID="44147" RaceID="20-2-9-0" RacePoints="30"/>
+			<RaceResult TeamID="44147" RaceID="20-2-10-0" RacePoints="32" ScoreCode="DNF"/>
+			<SeriesResult TeamID="44147"  NetPoints="272" Rank="30" TotalPoints="305" />
+
+			<RaceResult TeamID="43823" RaceID="20-2-1-0" RacePoints="31"/>
+			<RaceResult TeamID="43823" RaceID="20-2-2-0" RacePoints="30"/>
+			<RaceResult TeamID="43823" RaceID="20-2-3-0" RacePoints="30"/>
+			<RaceResult TeamID="43823" RaceID="20-2-4-0" RacePoints="30"/>
+			<RaceResult TeamID="43823" RaceID="20-2-5-0" RacePoints="32" Discard="true" ScoreCode="DNC"/>
+			<RaceResult TeamID="43823" RaceID="20-2-6-0" RacePoints="32" ScoreCode="DNC"/>
+			<RaceResult TeamID="43823" RaceID="20-2-7-0" RacePoints="32" ScoreCode="DNC"/>
+			<RaceResult TeamID="43823" RaceID="20-2-8-0" RacePoints="32" ScoreCode="DNC"/>
+			<RaceResult TeamID="43823" RaceID="20-2-9-0" RacePoints="32" ScoreCode="DNC"/>
+			<RaceResult TeamID="43823" RaceID="20-2-10-0" RacePoints="32" ScoreCode="DNC"/>
+			<SeriesResult TeamID="43823"  NetPoints="281" Rank="31" TotalPoints="313" />
+		</Division>
+
+		<Division DivisionID="2" Title="Laser Radial Women" IFClassID="LAR" Gender="Women" >
+			<RaceResult TeamID="43582" RaceID="2-1-1-0" RacePoints="1"/>
+			<RaceResult TeamID="43582" RaceID="2-1-2-0" RacePoints="2"/>
+			<RaceResult TeamID="43582" RaceID="2-1-3-0" RacePoints="4"/>
+			<RaceResult TeamID="43582" RaceID="2-1-4-0" RacePoints="2"/>
+			<RaceResult TeamID="43582" RaceID="2-1-5-0" RacePoints="2"/>
+			<RaceResult TeamID="43582" RaceID="2-1-6-0" RacePoints="3"/>
+			<RaceResult TeamID="43582" RaceID="2-1-7-0" RacePoints="1"/>
+			<RaceResult TeamID="43582" RaceID="2-1-8-0" RacePoints="4"/>
+			<RaceResult TeamID="43582" RaceID="2-1-9-0" RacePoints="1"/>
+			<RaceResult TeamID="43582" RaceID="2-1-10-0" RacePoints="8" Discard="true"/>
+			<RaceResult TeamID="43582" RaceID="2-2-1-0" RacePoints="16"/>
+			<SeriesResult TeamID="43582"  NetPoints="36" Rank="1" TotalPoints="44" />
+
+			<RaceResult TeamID="43429" RaceID="2-1-1-0" RacePoints="2"/>
+			<RaceResult TeamID="43429" RaceID="2-1-2-0" RacePoints="3"/>
+			<RaceResult TeamID="43429" RaceID="2-1-3-0" RacePoints="2"/>
+			<RaceResult TeamID="43429" RaceID="2-1-4-0" RacePoints="9" Discard="true"/>
+			<RaceResult TeamID="43429" RaceID="2-1-5-0" RacePoints="3"/>
+			<RaceResult TeamID="43429" RaceID="2-1-6-0" RacePoints="6"/>
+			<RaceResult TeamID="43429" RaceID="2-1-7-0" RacePoints="3"/>
+			<RaceResult TeamID="43429" RaceID="2-1-8-0" RacePoints="1"/>
+			<RaceResult TeamID="43429" RaceID="2-1-9-0" RacePoints="6"/>
+			<RaceResult TeamID="43429" RaceID="2-1-10-0" RacePoints="6"/>
+			<RaceResult TeamID="43429" RaceID="2-2-1-0" RacePoints="20"/>
+			<SeriesResult TeamID="43429"  NetPoints="52" Rank="2" TotalPoints="61" />
+
+			<RaceResult TeamID="44633" RaceID="2-1-1-0" RacePoints="7"/>
+			<RaceResult TeamID="44633" RaceID="2-1-2-0" RacePoints="7"/>
+			<RaceResult TeamID="44633" RaceID="2-1-3-0" RacePoints="22" Discard="true"/>
+			<RaceResult TeamID="44633" RaceID="2-1-4-0" RacePoints="3"/>
+			<RaceResult TeamID="44633" RaceID="2-1-5-0" RacePoints="5"/>
+			<RaceResult TeamID="44633" RaceID="2-1-6-0" RacePoints="4"/>
+			<RaceResult TeamID="44633" RaceID="2-1-7-0" RacePoints="5"/>
+			<RaceResult TeamID="44633" RaceID="2-1-8-0" RacePoints="7"/>
+			<RaceResult TeamID="44633" RaceID="2-1-9-0" RacePoints="11"/>
+			<RaceResult TeamID="44633" RaceID="2-1-10-0" RacePoints="4"/>
+			<RaceResult TeamID="44633" RaceID="2-2-1-0" RacePoints="6"/>
+			<SeriesResult TeamID="44633"  NetPoints="59" Rank="3" TotalPoints="81" />
+
+			<RaceResult TeamID="43346" RaceID="2-1-1-0" RacePoints="3"/>
+			<RaceResult TeamID="43346" RaceID="2-1-2-0" RacePoints="12"/>
+			<RaceResult TeamID="43346" RaceID="2-1-3-0" RacePoints="14" Discard="true"/>
+			<RaceResult TeamID="43346" RaceID="2-1-4-0" RacePoints="4"/>
+			<RaceResult TeamID="43346" RaceID="2-1-5-0" RacePoints="1"/>
+			<RaceResult TeamID="43346" RaceID="2-1-6-0" RacePoints="5"/>
+			<RaceResult TeamID="43346" RaceID="2-1-7-0" RacePoints="4"/>
+			<RaceResult TeamID="43346" RaceID="2-1-8-0" RacePoints="8"/>
+			<RaceResult TeamID="43346" RaceID="2-1-9-0" RacePoints="7"/>
+			<RaceResult TeamID="43346" RaceID="2-1-10-0" RacePoints="12"/>
+			<RaceResult TeamID="43346" RaceID="2-2-1-0" RacePoints="4"/>
+			<SeriesResult TeamID="43346"  NetPoints="60" Rank="4" TotalPoints="74" />
+
+			<RaceResult TeamID="43493" RaceID="2-1-1-0" RacePoints="9"/>
+			<RaceResult TeamID="43493" RaceID="2-1-2-0" RacePoints="4"/>
+			<RaceResult TeamID="43493" RaceID="2-1-3-0" RacePoints="13"/>
+			<RaceResult TeamID="43493" RaceID="2-1-4-0" RacePoints="15" Discard="true"/>
+			<RaceResult TeamID="43493" RaceID="2-1-5-0" RacePoints="7"/>
+			<RaceResult TeamID="43493" RaceID="2-1-6-0" RacePoints="1"/>
+			<RaceResult TeamID="43493" RaceID="2-1-7-0" RacePoints="2"/>
+			<RaceResult TeamID="43493" RaceID="2-1-8-0" RacePoints="3"/>
+			<RaceResult TeamID="43493" RaceID="2-1-9-0" RacePoints="3"/>
+			<RaceResult TeamID="43493" RaceID="2-1-10-0" RacePoints="14"/>
+			<RaceResult TeamID="43493" RaceID="2-2-1-0" RacePoints="8"/>
+			<SeriesResult TeamID="43493"  NetPoints="64" Rank="5" TotalPoints="79" />
+
+			<RaceResult TeamID="43821" RaceID="2-1-1-0" RacePoints="5"/>
+			<RaceResult TeamID="43821" RaceID="2-1-2-0" RacePoints="9"/>
+			<RaceResult TeamID="43821" RaceID="2-1-3-0" RacePoints="10"/>
+			<RaceResult TeamID="43821" RaceID="2-1-4-0" RacePoints="16" Discard="true"/>
+			<RaceResult TeamID="43821" RaceID="2-1-5-0" RacePoints="9"/>
+			<RaceResult TeamID="43821" RaceID="2-1-6-0" RacePoints="8"/>
+			<RaceResult TeamID="43821" RaceID="2-1-7-0" RacePoints="11"/>
+			<RaceResult TeamID="43821" RaceID="2-1-8-0" RacePoints="5"/>
+			<RaceResult TeamID="43821" RaceID="2-1-9-0" RacePoints="15"/>
+			<RaceResult TeamID="43821" RaceID="2-1-10-0" RacePoints="5"/>
+			<RaceResult TeamID="43821" RaceID="2-2-1-0" RacePoints="2"/>
+			<SeriesResult TeamID="43821"  NetPoints="79" Rank="6" TotalPoints="95" />
+
+			<RaceResult TeamID="43583" RaceID="2-1-1-0" RacePoints="15"/>
+			<RaceResult TeamID="43583" RaceID="2-1-2-0" RacePoints="1"/>
+			<RaceResult TeamID="43583" RaceID="2-1-3-0" RacePoints="1"/>
+			<RaceResult TeamID="43583" RaceID="2-1-4-0" RacePoints="13"/>
+			<RaceResult TeamID="43583" RaceID="2-1-5-0" RacePoints="16"/>
+			<RaceResult TeamID="43583" RaceID="2-1-6-0" RacePoints="17" Discard="true"/>
+			<RaceResult TeamID="43583" RaceID="2-1-7-0" RacePoints="8"/>
+			<RaceResult TeamID="43583" RaceID="2-1-8-0" RacePoints="15"/>
+			<RaceResult TeamID="43583" RaceID="2-1-9-0" RacePoints="5"/>
+			<RaceResult TeamID="43583" RaceID="2-1-10-0" RacePoints="1"/>
+			<RaceResult TeamID="43583" RaceID="2-2-1-0" RacePoints="14"/>
+			<SeriesResult TeamID="43583"  NetPoints="89" Rank="7" TotalPoints="106" />
+
+			<RaceResult TeamID="43402" RaceID="2-1-1-0" RacePoints="6"/>
+			<RaceResult TeamID="43402" RaceID="2-1-2-0" RacePoints="23" Discard="true"/>
+			<RaceResult TeamID="43402" RaceID="2-1-3-0" RacePoints="20"/>
+			<RaceResult TeamID="43402" RaceID="2-1-4-0" RacePoints="19"/>
+			<RaceResult TeamID="43402" RaceID="2-1-5-0" RacePoints="4"/>
+			<RaceResult TeamID="43402" RaceID="2-1-6-0" RacePoints="2"/>
+			<RaceResult TeamID="43402" RaceID="2-1-7-0" RacePoints="10"/>
+			<RaceResult TeamID="43402" RaceID="2-1-8-0" RacePoints="2"/>
+			<RaceResult TeamID="43402" RaceID="2-1-9-0" RacePoints="4"/>
+			<RaceResult TeamID="43402" RaceID="2-1-10-0" RacePoints="15"/>
+			<RaceResult TeamID="43402" RaceID="2-2-1-0" RacePoints="10"/>
+			<SeriesResult TeamID="43402"  NetPoints="92" Rank="8" TotalPoints="115" />
+
+			<RaceResult TeamID="43730" RaceID="2-1-1-0" RacePoints="10"/>
+			<RaceResult TeamID="43730" RaceID="2-1-2-0" RacePoints="6"/>
+			<RaceResult TeamID="43730" RaceID="2-1-3-0" RacePoints="5"/>
+			<RaceResult TeamID="43730" RaceID="2-1-4-0" RacePoints="5"/>
+			<RaceResult TeamID="43730" RaceID="2-1-5-0" RacePoints="14"/>
+			<RaceResult TeamID="43730" RaceID="2-1-6-0" RacePoints="9"/>
+			<RaceResult TeamID="43730" RaceID="2-1-7-0" RacePoints="12"/>
+			<RaceResult TeamID="43730" RaceID="2-1-8-0" RacePoints="12"/>
+			<RaceResult TeamID="43730" RaceID="2-1-9-0" RacePoints="9"/>
+			<RaceResult TeamID="43730" RaceID="2-1-10-0" RacePoints="17" Discard="true"/>
+			<RaceResult TeamID="43730" RaceID="2-2-1-0" RacePoints="12"/>
+			<SeriesResult TeamID="43730"  NetPoints="94" Rank="9" TotalPoints="111" />
+
+			<RaceResult TeamID="43777" RaceID="2-1-1-0" RacePoints="13"/>
+			<RaceResult TeamID="43777" RaceID="2-1-2-0" RacePoints="8"/>
+			<RaceResult TeamID="43777" RaceID="2-1-3-0" RacePoints="6"/>
+			<RaceResult TeamID="43777" RaceID="2-1-4-0" RacePoints="6"/>
+			<RaceResult TeamID="43777" RaceID="2-1-5-0" RacePoints="6"/>
+			<RaceResult TeamID="43777" RaceID="2-1-6-0" RacePoints="7"/>
+			<RaceResult TeamID="43777" RaceID="2-1-7-0" RacePoints="7"/>
+			<RaceResult TeamID="43777" RaceID="2-1-8-0" RacePoints="18"/>
+			<RaceResult TeamID="43777" RaceID="2-1-9-0" RacePoints="10"/>
+			<RaceResult TeamID="43777" RaceID="2-1-10-0" RacePoints="19" Discard="true"/>
+			<RaceResult TeamID="43777" RaceID="2-2-1-0" RacePoints="18"/>
+			<SeriesResult TeamID="43777"  NetPoints="99" Rank="10" TotalPoints="118" />
+
+			<RaceResult TeamID="43401" RaceID="2-1-1-0" RacePoints="8"/>
+			<RaceResult TeamID="43401" RaceID="2-1-2-0" RacePoints="13"/>
+			<RaceResult TeamID="43401" RaceID="2-1-3-0" RacePoints="9"/>
+			<RaceResult TeamID="43401" RaceID="2-1-4-0" RacePoints="7"/>
+			<RaceResult TeamID="43401" RaceID="2-1-5-0" RacePoints="12"/>
+			<RaceResult TeamID="43401" RaceID="2-1-6-0" RacePoints="13"/>
+			<RaceResult TeamID="43401" RaceID="2-1-7-0" RacePoints="14"/>
+			<RaceResult TeamID="43401" RaceID="2-1-8-0" RacePoints="9"/>
+			<RaceResult TeamID="43401" RaceID="2-1-9-0" RacePoints="18" Discard="true"/>
+			<RaceResult TeamID="43401" RaceID="2-1-10-0" RacePoints="2"/>
+			<SeriesResult TeamID="43401"  NetPoints="87" Rank="11" TotalPoints="105" />
+
+			<RaceResult TeamID="44610" RaceID="2-1-1-0" RacePoints="11"/>
+			<RaceResult TeamID="44610" RaceID="2-1-2-0" RacePoints="14"/>
+			<RaceResult TeamID="44610" RaceID="2-1-3-0" RacePoints="16" Discard="true"/>
+			<RaceResult TeamID="44610" RaceID="2-1-4-0" RacePoints="10"/>
+			<RaceResult TeamID="44610" RaceID="2-1-5-0" RacePoints="10"/>
+			<RaceResult TeamID="44610" RaceID="2-1-6-0" RacePoints="10"/>
+			<RaceResult TeamID="44610" RaceID="2-1-7-0" RacePoints="13"/>
+			<RaceResult TeamID="44610" RaceID="2-1-8-0" RacePoints="14"/>
+			<RaceResult TeamID="44610" RaceID="2-1-9-0" RacePoints="8"/>
+			<RaceResult TeamID="44610" RaceID="2-1-10-0" RacePoints="16"/>
+			<SeriesResult TeamID="44610"  NetPoints="106" Rank="12" TotalPoints="122" />
+
+			<RaceResult TeamID="44612" RaceID="2-1-1-0" RacePoints="14"/>
+			<RaceResult TeamID="44612" RaceID="2-1-2-0" RacePoints="10"/>
+			<RaceResult TeamID="44612" RaceID="2-1-3-0" RacePoints="21" Discard="true"/>
+			<RaceResult TeamID="44612" RaceID="2-1-4-0" RacePoints="20"/>
+			<RaceResult TeamID="44612" RaceID="2-1-5-0" RacePoints="15"/>
+			<RaceResult TeamID="44612" RaceID="2-1-6-0" RacePoints="19"/>
+			<RaceResult TeamID="44612" RaceID="2-1-7-0" RacePoints="16"/>
+			<RaceResult TeamID="44612" RaceID="2-1-8-0" RacePoints="13"/>
+			<RaceResult TeamID="44612" RaceID="2-1-9-0" RacePoints="2"/>
+			<RaceResult TeamID="44612" RaceID="2-1-10-0" RacePoints="3"/>
+			<SeriesResult TeamID="44612"  NetPoints="112" Rank="13" TotalPoints="133" />
+
+			<RaceResult TeamID="43844" RaceID="2-1-1-0" RacePoints="12"/>
+			<RaceResult TeamID="43844" RaceID="2-1-2-0" RacePoints="15"/>
+			<RaceResult TeamID="43844" RaceID="2-1-3-0" RacePoints="17"/>
+			<RaceResult TeamID="43844" RaceID="2-1-4-0" RacePoints="11"/>
+			<RaceResult TeamID="43844" RaceID="2-1-5-0" RacePoints="13"/>
+			<RaceResult TeamID="43844" RaceID="2-1-6-0" RacePoints="18" Discard="true"/>
+			<RaceResult TeamID="43844" RaceID="2-1-7-0" RacePoints="15"/>
+			<RaceResult TeamID="43844" RaceID="2-1-8-0" RacePoints="11"/>
+			<RaceResult TeamID="43844" RaceID="2-1-9-0" RacePoints="13"/>
+			<RaceResult TeamID="43844" RaceID="2-1-10-0" RacePoints="9"/>
+			<SeriesResult TeamID="43844"  NetPoints="116" Rank="14" TotalPoints="134" />
+
+			<RaceResult TeamID="43437" RaceID="2-1-1-0" RacePoints="4"/>
+			<RaceResult TeamID="43437" RaceID="2-1-2-0" RacePoints="5"/>
+			<RaceResult TeamID="43437" RaceID="2-1-3-0" RacePoints="7"/>
+			<RaceResult TeamID="43437" RaceID="2-1-4-0" RacePoints="1"/>
+			<RaceResult TeamID="43437" RaceID="2-1-5-0" RacePoints="8"/>
+			<RaceResult TeamID="43437" RaceID="2-1-6-0" RacePoints="14"/>
+			<RaceResult TeamID="43437" RaceID="2-1-7-0" RacePoints="26" Discard="true" ScoreCode="DNC"/>
+			<RaceResult TeamID="43437" RaceID="2-1-8-0" RacePoints="26" ScoreCode="DNC"/>
+			<RaceResult TeamID="43437" RaceID="2-1-9-0" RacePoints="26" ScoreCode="DNC"/>
+			<RaceResult TeamID="43437" RaceID="2-1-10-0" RacePoints="26" ScoreCode="DNC"/>
+			<SeriesResult TeamID="43437"  NetPoints="117" Rank="15" TotalPoints="143" />
+
+			<RaceResult TeamID="42543" RaceID="2-1-1-0" RacePoints="17"/>
+			<RaceResult TeamID="42543" RaceID="2-1-2-0" RacePoints="11"/>
+			<RaceResult TeamID="42543" RaceID="2-1-3-0" RacePoints="15"/>
+			<RaceResult TeamID="42543" RaceID="2-1-4-0" RacePoints="12"/>
+			<RaceResult TeamID="42543" RaceID="2-1-5-0" RacePoints="17"/>
+			<RaceResult TeamID="42543" RaceID="2-1-6-0" RacePoints="12"/>
+			<RaceResult TeamID="42543" RaceID="2-1-7-0" RacePoints="18"/>
+			<RaceResult TeamID="42543" RaceID="2-1-8-0" RacePoints="10"/>
+			<RaceResult TeamID="42543" RaceID="2-1-9-0" RacePoints="12"/>
+			<RaceResult TeamID="42543" RaceID="2-1-10-0" RacePoints="26" Discard="true" ScoreCode="DNF"/>
+			<SeriesResult TeamID="42543"  NetPoints="124" Rank="16" TotalPoints="150" />
+
+			<RaceResult TeamID="42807" RaceID="2-1-1-0" RacePoints="16"/>
+			<RaceResult TeamID="42807" RaceID="2-1-2-0" RacePoints="18"/>
+			<RaceResult TeamID="42807" RaceID="2-1-3-0" RacePoints="8"/>
+			<RaceResult TeamID="42807" RaceID="2-1-4-0" RacePoints="22"/>
+			<RaceResult TeamID="42807" RaceID="2-1-5-0" RacePoints="26" Discard="true" ScoreCode="BFD"/>
+			<RaceResult TeamID="42807" RaceID="2-1-6-0" RacePoints="16"/>
+			<RaceResult TeamID="42807" RaceID="2-1-7-0" RacePoints="9"/>
+			<RaceResult TeamID="42807" RaceID="2-1-8-0" RacePoints="16"/>
+			<RaceResult TeamID="42807" RaceID="2-1-9-0" RacePoints="22"/>
+			<RaceResult TeamID="42807" RaceID="2-1-10-0" RacePoints="10"/>
+			<SeriesResult TeamID="42807"  NetPoints="137" Rank="17" TotalPoints="163" />
+
+			<RaceResult TeamID="43156" RaceID="2-1-1-0" RacePoints="21"/>
+			<RaceResult TeamID="43156" RaceID="2-1-2-0" RacePoints="17"/>
+			<RaceResult TeamID="43156" RaceID="2-1-3-0" RacePoints="18"/>
+			<RaceResult TeamID="43156" RaceID="2-1-4-0" RacePoints="25" Discard="true"/>
+			<RaceResult TeamID="43156" RaceID="2-1-5-0" RacePoints="11"/>
+			<RaceResult TeamID="43156" RaceID="2-1-6-0" RacePoints="21"/>
+			<RaceResult TeamID="43156" RaceID="2-1-7-0" RacePoints="6"/>
+			<RaceResult TeamID="43156" RaceID="2-1-8-0" RacePoints="6"/>
+			<RaceResult TeamID="43156" RaceID="2-1-9-0" RacePoints="19"/>
+			<RaceResult TeamID="43156" RaceID="2-1-10-0" RacePoints="20"/>
+			<SeriesResult TeamID="43156"  NetPoints="139" Rank="18" TotalPoints="164" />
+
+			<RaceResult TeamID="43378" RaceID="2-1-1-0" RacePoints="20"/>
+			<RaceResult TeamID="43378" RaceID="2-1-2-0" RacePoints="21"/>
+			<RaceResult TeamID="43378" RaceID="2-1-3-0" RacePoints="3"/>
+			<RaceResult TeamID="43378" RaceID="2-1-4-0" RacePoints="8"/>
+			<RaceResult TeamID="43378" RaceID="2-1-5-0" RacePoints="19"/>
+			<RaceResult TeamID="43378" RaceID="2-1-6-0" RacePoints="22" Discard="true"/>
+			<RaceResult TeamID="43378" RaceID="2-1-7-0" RacePoints="19"/>
+			<RaceResult TeamID="43378" RaceID="2-1-8-0" RacePoints="20"/>
+			<RaceResult TeamID="43378" RaceID="2-1-9-0" RacePoints="17"/>
+			<RaceResult TeamID="43378" RaceID="2-1-10-0" RacePoints="13"/>
+			<SeriesResult TeamID="43378"  NetPoints="140" Rank="19" TotalPoints="162" />
+
+			<RaceResult TeamID="43588" RaceID="2-1-1-0" RacePoints="19"/>
+			<RaceResult TeamID="43588" RaceID="2-1-2-0" RacePoints="16"/>
+			<RaceResult TeamID="43588" RaceID="2-1-3-0" RacePoints="24" Discard="true"/>
+			<RaceResult TeamID="43588" RaceID="2-1-4-0" RacePoints="17"/>
+			<RaceResult TeamID="43588" RaceID="2-1-5-0" RacePoints="20"/>
+			<RaceResult TeamID="43588" RaceID="2-1-6-0" RacePoints="20"/>
+			<RaceResult TeamID="43588" RaceID="2-1-7-0" RacePoints="21"/>
+			<RaceResult TeamID="43588" RaceID="2-1-8-0" RacePoints="17"/>
+			<RaceResult TeamID="43588" RaceID="2-1-9-0" RacePoints="14"/>
+			<RaceResult TeamID="43588" RaceID="2-1-10-0" RacePoints="7"/>
+			<SeriesResult TeamID="43588"  NetPoints="151" Rank="20" TotalPoints="175" />
+
+			<RaceResult TeamID="43092" RaceID="2-1-1-0" RacePoints="18"/>
+			<RaceResult TeamID="43092" RaceID="2-1-2-0" RacePoints="20"/>
+			<RaceResult TeamID="43092" RaceID="2-1-3-0" RacePoints="11"/>
+			<RaceResult TeamID="43092" RaceID="2-1-4-0" RacePoints="18"/>
+			<RaceResult TeamID="43092" RaceID="2-1-5-0" RacePoints="18"/>
+			<RaceResult TeamID="43092" RaceID="2-1-6-0" RacePoints="15"/>
+			<RaceResult TeamID="43092" RaceID="2-1-7-0" RacePoints="20"/>
+			<RaceResult TeamID="43092" RaceID="2-1-8-0" RacePoints="21" Discard="true"/>
+			<RaceResult TeamID="43092" RaceID="2-1-9-0" RacePoints="20"/>
+			<RaceResult TeamID="43092" RaceID="2-1-10-0" RacePoints="18"/>
+			<SeriesResult TeamID="43092"  NetPoints="158" Rank="21" TotalPoints="179" />
+
+			<RaceResult TeamID="43233" RaceID="2-1-1-0" RacePoints="22"/>
+			<RaceResult TeamID="43233" RaceID="2-1-2-0" RacePoints="24" Discard="true"/>
+			<RaceResult TeamID="43233" RaceID="2-1-3-0" RacePoints="23"/>
+			<RaceResult TeamID="43233" RaceID="2-1-4-0" RacePoints="23"/>
+			<RaceResult TeamID="43233" RaceID="2-1-5-0" RacePoints="21"/>
+			<RaceResult TeamID="43233" RaceID="2-1-6-0" RacePoints="11"/>
+			<RaceResult TeamID="43233" RaceID="2-1-7-0" RacePoints="17"/>
+			<RaceResult TeamID="43233" RaceID="2-1-8-0" RacePoints="23"/>
+			<RaceResult TeamID="43233" RaceID="2-1-9-0" RacePoints="23"/>
+			<RaceResult TeamID="43233" RaceID="2-1-10-0" RacePoints="11"/>
+			<SeriesResult TeamID="43233"  NetPoints="174" Rank="22" TotalPoints="198" />
+
+			<RaceResult TeamID="42747" RaceID="2-1-1-0" RacePoints="23"/>
+			<RaceResult TeamID="42747" RaceID="2-1-2-0" RacePoints="19"/>
+			<RaceResult TeamID="42747" RaceID="2-1-3-0" RacePoints="19"/>
+			<RaceResult TeamID="42747" RaceID="2-1-4-0" RacePoints="14"/>
+			<RaceResult TeamID="42747" RaceID="2-1-5-0" RacePoints="22"/>
+			<RaceResult TeamID="42747" RaceID="2-1-6-0" RacePoints="23"/>
+			<RaceResult TeamID="42747" RaceID="2-1-7-0" RacePoints="24" Discard="true"/>
+			<RaceResult TeamID="42747" RaceID="2-1-8-0" RacePoints="19"/>
+			<RaceResult TeamID="42747" RaceID="2-1-9-0" RacePoints="16"/>
+			<RaceResult TeamID="42747" RaceID="2-1-10-0" RacePoints="21"/>
+			<SeriesResult TeamID="42747"  NetPoints="176" Rank="23" TotalPoints="200" />
+
+			<RaceResult TeamID="42299" RaceID="2-1-1-0" RacePoints="24" Discard="true"/>
+			<RaceResult TeamID="42299" RaceID="2-1-2-0" RacePoints="22"/>
+			<RaceResult TeamID="42299" RaceID="2-1-3-0" RacePoints="12"/>
+			<RaceResult TeamID="42299" RaceID="2-1-4-0" RacePoints="21"/>
+			<RaceResult TeamID="42299" RaceID="2-1-5-0" RacePoints="24"/>
+			<RaceResult TeamID="42299" RaceID="2-1-6-0" RacePoints="24"/>
+			<RaceResult TeamID="42299" RaceID="2-1-7-0" RacePoints="23"/>
+			<RaceResult TeamID="42299" RaceID="2-1-8-0" RacePoints="24"/>
+			<RaceResult TeamID="42299" RaceID="2-1-9-0" RacePoints="21"/>
+			<RaceResult TeamID="42299" RaceID="2-1-10-0" RacePoints="22"/>
+			<SeriesResult TeamID="42299"  NetPoints="193" Rank="24" TotalPoints="217" />
+
+			<RaceResult TeamID="44611" RaceID="2-1-1-0" RacePoints="25"/>
+			<RaceResult TeamID="44611" RaceID="2-1-2-0" RacePoints="25"/>
+			<RaceResult TeamID="44611" RaceID="2-1-3-0" RacePoints="25"/>
+			<RaceResult TeamID="44611" RaceID="2-1-4-0" RacePoints="24"/>
+			<RaceResult TeamID="44611" RaceID="2-1-5-0" RacePoints="23"/>
+			<RaceResult TeamID="44611" RaceID="2-1-6-0" RacePoints="26" Discard="true" ScoreCode="OCS"/>
+			<RaceResult TeamID="44611" RaceID="2-1-7-0" RacePoints="22"/>
+			<RaceResult TeamID="44611" RaceID="2-1-8-0" RacePoints="22"/>
+			<RaceResult TeamID="44611" RaceID="2-1-9-0" RacePoints="24"/>
+			<RaceResult TeamID="44611" RaceID="2-1-10-0" RacePoints="23"/>
+			<SeriesResult TeamID="44611"  NetPoints="213" Rank="25" TotalPoints="239" />
+		</Division>
+
+		<Division DivisionID="3" Title="Finn" IFClassID="FINN" Gender="Men" >
+			<RaceResult TeamID="43936" RaceID="3-1-1-0" RacePoints="2"/>
+			<RaceResult TeamID="43936" RaceID="3-1-2-0" RacePoints="1"/>
+			<RaceResult TeamID="43936" RaceID="3-1-3-0" RacePoints="1"/>
+			<RaceResult TeamID="43936" RaceID="3-1-4-0" RacePoints="2"/>
+			<RaceResult TeamID="43936" RaceID="3-1-5-0" RacePoints="2"/>
+			<RaceResult TeamID="43936" RaceID="3-1-6-0" RacePoints="1"/>
+			<RaceResult TeamID="43936" RaceID="3-1-7-0" RacePoints="2"/>
+			<RaceResult TeamID="43936" RaceID="3-1-8-0" RacePoints="3" Discard="true"/>
+			<RaceResult TeamID="43936" RaceID="3-1-9-0" RacePoints="1"/>
+			<RaceResult TeamID="43936" RaceID="3-1-10-0" RacePoints="2"/>
+			<RaceResult TeamID="43936" RaceID="3-2-1-0" RacePoints="4"/>
+			<SeriesResult TeamID="43936"  NetPoints="18" Rank="1" TotalPoints="21" />
+
+			<RaceResult TeamID="43246" RaceID="3-1-1-0" RacePoints="1"/>
+			<RaceResult TeamID="43246" RaceID="3-1-2-0" RacePoints="3"/>
+			<RaceResult TeamID="43246" RaceID="3-1-3-0" RacePoints="3"/>
+			<RaceResult TeamID="43246" RaceID="3-1-4-0" RacePoints="4"/>
+			<RaceResult TeamID="43246" RaceID="3-1-5-0" RacePoints="1"/>
+			<RaceResult TeamID="43246" RaceID="3-1-6-0" RacePoints="2"/>
+			<RaceResult TeamID="43246" RaceID="3-1-7-0" RacePoints="1"/>
+			<RaceResult TeamID="43246" RaceID="3-1-8-0" RacePoints="1"/>
+			<RaceResult TeamID="43246" RaceID="3-1-9-0" RacePoints="8" Discard="true"/>
+			<RaceResult TeamID="43246" RaceID="3-1-10-0" RacePoints="8"/>
+			<RaceResult TeamID="43246" RaceID="3-2-1-0" RacePoints="2"/>
+			<SeriesResult TeamID="43246"  NetPoints="26" Rank="2" TotalPoints="34" />
+
+			<RaceResult TeamID="43240" RaceID="3-1-1-0" RacePoints="3"/>
+			<RaceResult TeamID="43240" RaceID="3-1-2-0" RacePoints="2"/>
+			<RaceResult TeamID="43240" RaceID="3-1-3-0" RacePoints="6"/>
+			<RaceResult TeamID="43240" RaceID="3-1-4-0" RacePoints="1"/>
+			<RaceResult TeamID="43240" RaceID="3-1-5-0" RacePoints="4"/>
+			<RaceResult TeamID="43240" RaceID="3-1-6-0" RacePoints="3"/>
+			<RaceResult TeamID="43240" RaceID="3-1-7-0" RacePoints="4"/>
+			<RaceResult TeamID="43240" RaceID="3-1-8-0" RacePoints="2"/>
+			<RaceResult TeamID="43240" RaceID="3-1-9-0" RacePoints="9" Discard="true"/>
+			<RaceResult TeamID="43240" RaceID="3-1-10-0" RacePoints="5"/>
+			<RaceResult TeamID="43240" RaceID="3-2-1-0" RacePoints="8"/>
+			<SeriesResult TeamID="43240"  NetPoints="38" Rank="3" TotalPoints="47" />
+
+			<RaceResult TeamID="44022" RaceID="3-1-1-0" RacePoints="4"/>
+			<RaceResult TeamID="44022" RaceID="3-1-2-0" RacePoints="6"/>
+			<RaceResult TeamID="44022" RaceID="3-1-3-0" RacePoints="4"/>
+			<RaceResult TeamID="44022" RaceID="3-1-4-0" RacePoints="10" Discard="true"/>
+			<RaceResult TeamID="44022" RaceID="3-1-5-0" RacePoints="3"/>
+			<RaceResult TeamID="44022" RaceID="3-1-6-0" RacePoints="4"/>
+			<RaceResult TeamID="44022" RaceID="3-1-7-0" RacePoints="3"/>
+			<RaceResult TeamID="44022" RaceID="3-1-8-0" RacePoints="4"/>
+			<RaceResult TeamID="44022" RaceID="3-1-9-0" RacePoints="6"/>
+			<RaceResult TeamID="44022" RaceID="3-1-10-0" RacePoints="3"/>
+			<RaceResult TeamID="44022" RaceID="3-2-1-0" RacePoints="10"/>
+			<SeriesResult TeamID="44022"  NetPoints="47" Rank="4" TotalPoints="57" />
+
+			<RaceResult TeamID="43873" RaceID="3-1-1-0" RacePoints="8"/>
+			<RaceResult TeamID="43873" RaceID="3-1-2-0" RacePoints="4"/>
+			<RaceResult TeamID="43873" RaceID="3-1-3-0" RacePoints="11" Discard="true" ScoreCode="OCS"/>
+			<RaceResult TeamID="43873" RaceID="3-1-4-0" RacePoints="9"/>
+			<RaceResult TeamID="43873" RaceID="3-1-5-0" RacePoints="9"/>
+			<RaceResult TeamID="43873" RaceID="3-1-6-0" RacePoints="6"/>
+			<RaceResult TeamID="43873" RaceID="3-1-7-0" RacePoints="5"/>
+			<RaceResult TeamID="43873" RaceID="3-1-8-0" RacePoints="9"/>
+			<RaceResult TeamID="43873" RaceID="3-1-9-0" RacePoints="7"/>
+			<RaceResult TeamID="43873" RaceID="3-1-10-0" RacePoints="1"/>
+			<RaceResult TeamID="43873" RaceID="3-2-1-0" RacePoints="6"/>
+			<SeriesResult TeamID="43873"  NetPoints="64" Rank="5" TotalPoints="75" />
+
+			<RaceResult TeamID="43400" RaceID="3-1-1-0" RacePoints="7"/>
+			<RaceResult TeamID="43400" RaceID="3-1-2-0" RacePoints="5"/>
+			<RaceResult TeamID="43400" RaceID="3-1-3-0" RacePoints="2"/>
+			<RaceResult TeamID="43400" RaceID="3-1-4-0" RacePoints="7"/>
+			<RaceResult TeamID="43400" RaceID="3-1-5-0" RacePoints="5"/>
+			<RaceResult TeamID="43400" RaceID="3-1-6-0" RacePoints="5"/>
+			<RaceResult TeamID="43400" RaceID="3-1-7-0" RacePoints="10" Discard="true"/>
+			<RaceResult TeamID="43400" RaceID="3-1-8-0" RacePoints="6"/>
+			<RaceResult TeamID="43400" RaceID="3-1-9-0" RacePoints="3"/>
+			<RaceResult TeamID="43400" RaceID="3-1-10-0" RacePoints="4"/>
+			<RaceResult TeamID="43400" RaceID="3-2-1-0" RacePoints="20"/>
+			<SeriesResult TeamID="43400"  NetPoints="64" Rank="6" TotalPoints="74" />
+
+			<RaceResult TeamID="44272" RaceID="3-1-1-0" RacePoints="6"/>
+			<RaceResult TeamID="44272" RaceID="3-1-2-0" RacePoints="8"/>
+			<RaceResult TeamID="44272" RaceID="3-1-3-0" RacePoints="5"/>
+			<RaceResult TeamID="44272" RaceID="3-1-4-0" RacePoints="6"/>
+			<RaceResult TeamID="44272" RaceID="3-1-5-0" RacePoints="8"/>
+			<RaceResult TeamID="44272" RaceID="3-1-6-0" RacePoints="7"/>
+			<RaceResult TeamID="44272" RaceID="3-1-7-0" RacePoints="9"/>
+			<RaceResult TeamID="44272" RaceID="3-1-8-0" RacePoints="5"/>
+			<RaceResult TeamID="44272" RaceID="3-1-9-0" RacePoints="2"/>
+			<RaceResult TeamID="44272" RaceID="3-1-10-0" RacePoints="10" Discard="true"/>
+			<RaceResult TeamID="44272" RaceID="3-2-1-0" RacePoints="12"/>
+			<SeriesResult TeamID="44272"  NetPoints="68" Rank="7" TotalPoints="78" />
+
+			<RaceResult TeamID="44225" RaceID="3-1-1-0" RacePoints="5"/>
+			<RaceResult TeamID="44225" RaceID="3-1-2-0" RacePoints="7"/>
+			<RaceResult TeamID="44225" RaceID="3-1-3-0" RacePoints="7"/>
+			<RaceResult TeamID="44225" RaceID="3-1-4-0" RacePoints="3"/>
+			<RaceResult TeamID="44225" RaceID="3-1-5-0" RacePoints="11" Discard="true" ScoreCode="DNF"/>
+			<RaceResult TeamID="44225" RaceID="3-1-6-0" RacePoints="8"/>
+			<RaceResult TeamID="44225" RaceID="3-1-7-0" RacePoints="7"/>
+			<RaceResult TeamID="44225" RaceID="3-1-8-0" RacePoints="10"/>
+			<RaceResult TeamID="44225" RaceID="3-1-9-0" RacePoints="5"/>
+			<RaceResult TeamID="44225" RaceID="3-1-10-0" RacePoints="9"/>
+			<RaceResult TeamID="44225" RaceID="3-2-1-0" RacePoints="18"/>
+			<SeriesResult TeamID="44225"  NetPoints="79" Rank="8" TotalPoints="90" />
+
+			<RaceResult TeamID="43591" RaceID="3-1-1-0" RacePoints="10" Discard="true"/>
+			<RaceResult TeamID="43591" RaceID="3-1-2-0" RacePoints="10"/>
+			<RaceResult TeamID="43591" RaceID="3-1-3-0" RacePoints="8"/>
+			<RaceResult TeamID="43591" RaceID="3-1-4-0" RacePoints="5"/>
+			<RaceResult TeamID="43591" RaceID="3-1-5-0" RacePoints="7"/>
+			<RaceResult TeamID="43591" RaceID="3-1-6-0" RacePoints="9"/>
+			<RaceResult TeamID="43591" RaceID="3-1-7-0" RacePoints="8"/>
+			<RaceResult TeamID="43591" RaceID="3-1-8-0" RacePoints="7"/>
+			<RaceResult TeamID="43591" RaceID="3-1-9-0" RacePoints="4"/>
+			<RaceResult TeamID="43591" RaceID="3-1-10-0" RacePoints="7"/>
+			<RaceResult TeamID="43591" RaceID="3-2-1-0" RacePoints="16"/>
+			<SeriesResult TeamID="43591"  NetPoints="81" Rank="9" TotalPoints="91" />
+
+			<RaceResult TeamID="42276" RaceID="3-1-1-0" RacePoints="9"/>
+			<RaceResult TeamID="42276" RaceID="3-1-2-0" RacePoints="9"/>
+			<RaceResult TeamID="42276" RaceID="3-1-3-0" RacePoints="9"/>
+			<RaceResult TeamID="42276" RaceID="3-1-4-0" RacePoints="8"/>
+			<RaceResult TeamID="42276" RaceID="3-1-5-0" RacePoints="6"/>
+			<RaceResult TeamID="42276" RaceID="3-1-6-0" RacePoints="10" Discard="true"/>
+			<RaceResult TeamID="42276" RaceID="3-1-7-0" RacePoints="6"/>
+			<RaceResult TeamID="42276" RaceID="3-1-8-0" RacePoints="8"/>
+			<RaceResult TeamID="42276" RaceID="3-1-9-0" RacePoints="10"/>
+			<RaceResult TeamID="42276" RaceID="3-1-10-0" RacePoints="6"/>
+			<RaceResult TeamID="42276" RaceID="3-2-1-0" RacePoints="14"/>
+			<SeriesResult TeamID="42276"  NetPoints="85" Rank="10" TotalPoints="95" />
+		</Division>
+
+		<Division DivisionID="4" Title="470 Men" IFClassID="470" Gender="Men" >
+			<RaceResult TeamID="43549" RaceID="4-1-1-0" RacePoints="1"/>
+			<RaceResult TeamID="43549" RaceID="4-1-2-0" RacePoints="2"/>
+			<RaceResult TeamID="43549" RaceID="4-1-3-0" RacePoints="4"/>
+			<RaceResult TeamID="43549" RaceID="4-1-4-0" RacePoints="4"/>
+			<RaceResult TeamID="43549" RaceID="4-1-5-0" RacePoints="3"/>
+			<RaceResult TeamID="43549" RaceID="4-1-6-0" RacePoints="8" Discard="true"/>
+			<RaceResult TeamID="43549" RaceID="4-1-7-0" RacePoints="1"/>
+			<RaceResult TeamID="43549" RaceID="4-1-8-0" RacePoints="1"/>
+			<RaceResult TeamID="43549" RaceID="4-1-9-0" RacePoints="2"/>
+			<RaceResult TeamID="43549" RaceID="4-1-10-0" RacePoints="3"/>
+			<RaceResult TeamID="43549" RaceID="4-2-1-0" RacePoints="4"/>
+			<SeriesResult TeamID="43549"  NetPoints="25" Rank="1" TotalPoints="33" />
+
+			<RaceResult TeamID="42527" RaceID="4-1-1-0" RacePoints="6"/>
+			<RaceResult TeamID="42527" RaceID="4-1-2-0" RacePoints="1"/>
+			<RaceResult TeamID="42527" RaceID="4-1-3-0" RacePoints="2"/>
+			<RaceResult TeamID="42527" RaceID="4-1-4-0" RacePoints="2"/>
+			<RaceResult TeamID="42527" RaceID="4-1-5-0" RacePoints="15" Discard="true" ScoreCode="OCS"/>
+			<RaceResult TeamID="42527" RaceID="4-1-6-0" RacePoints="1"/>
+			<RaceResult TeamID="42527" RaceID="4-1-7-0" RacePoints="2"/>
+			<RaceResult TeamID="42527" RaceID="4-1-8-0" RacePoints="3"/>
+			<RaceResult TeamID="42527" RaceID="4-1-9-0" RacePoints="6"/>
+			<RaceResult TeamID="42527" RaceID="4-1-10-0" RacePoints="5"/>
+			<RaceResult TeamID="42527" RaceID="4-2-1-0" RacePoints="2"/>
+			<SeriesResult TeamID="42527"  NetPoints="30" Rank="2" TotalPoints="45" />
+
+			<RaceResult TeamID="42277" RaceID="4-1-1-0" RacePoints="2"/>
+			<RaceResult TeamID="42277" RaceID="4-1-2-0" RacePoints="3"/>
+			<RaceResult TeamID="42277" RaceID="4-1-3-0" RacePoints="1"/>
+			<RaceResult TeamID="42277" RaceID="4-1-4-0" RacePoints="1"/>
+			<RaceResult TeamID="42277" RaceID="4-1-5-0" RacePoints="5"/>
+			<RaceResult TeamID="42277" RaceID="4-1-6-0" RacePoints="5"/>
+			<RaceResult TeamID="42277" RaceID="4-1-7-0" RacePoints="4"/>
+			<RaceResult TeamID="42277" RaceID="4-1-8-0" RacePoints="2"/>
+			<RaceResult TeamID="42277" RaceID="4-1-9-0" RacePoints="1"/>
+			<RaceResult TeamID="42277" RaceID="4-1-10-0" RacePoints="8" Discard="true"/>
+			<RaceResult TeamID="42277" RaceID="4-2-1-0" RacePoints="14"/>
+			<SeriesResult TeamID="42277"  NetPoints="38" Rank="3" TotalPoints="46" />
+
+			<RaceResult TeamID="43775" RaceID="4-1-1-0" RacePoints="8"/>
+			<RaceResult TeamID="43775" RaceID="4-1-2-0" RacePoints="12" Discard="true"/>
+			<RaceResult TeamID="43775" RaceID="4-1-3-0" RacePoints="3"/>
+			<RaceResult TeamID="43775" RaceID="4-1-4-0" RacePoints="5"/>
+			<RaceResult TeamID="43775" RaceID="4-1-5-0" RacePoints="1"/>
+			<RaceResult TeamID="43775" RaceID="4-1-6-0" RacePoints="9"/>
+			<RaceResult TeamID="43775" RaceID="4-1-7-0" RacePoints="3"/>
+			<RaceResult TeamID="43775" RaceID="4-1-8-0" RacePoints="4"/>
+			<RaceResult TeamID="43775" RaceID="4-1-9-0" RacePoints="3"/>
+			<RaceResult TeamID="43775" RaceID="4-1-10-0" RacePoints="9"/>
+			<RaceResult TeamID="43775" RaceID="4-2-1-0" RacePoints="6"/>
+			<SeriesResult TeamID="43775"  NetPoints="51" Rank="4" TotalPoints="63" />
+
+			<RaceResult TeamID="43607" RaceID="4-1-1-0" RacePoints="5"/>
+			<RaceResult TeamID="43607" RaceID="4-1-2-0" RacePoints="5"/>
+			<RaceResult TeamID="43607" RaceID="4-1-3-0" RacePoints="8"/>
+			<RaceResult TeamID="43607" RaceID="4-1-4-0" RacePoints="10"/>
+			<RaceResult TeamID="43607" RaceID="4-1-5-0" RacePoints="2"/>
+			<RaceResult TeamID="43607" RaceID="4-1-6-0" RacePoints="6"/>
+			<RaceResult TeamID="43607" RaceID="4-1-7-0" RacePoints="15" Discard="true" ScoreCode="OCS"/>
+			<RaceResult TeamID="43607" RaceID="4-1-8-0" RacePoints="6"/>
+			<RaceResult TeamID="43607" RaceID="4-1-9-0" RacePoints="5"/>
+			<RaceResult TeamID="43607" RaceID="4-1-10-0" RacePoints="1"/>
+			<RaceResult TeamID="43607" RaceID="4-2-1-0" RacePoints="8"/>
+			<SeriesResult TeamID="43607"  NetPoints="56" Rank="5" TotalPoints="71" />
+
+			<RaceResult TeamID="43475" RaceID="4-1-1-0" RacePoints="4"/>
+			<RaceResult TeamID="43475" RaceID="4-1-2-0" RacePoints="4"/>
+			<RaceResult TeamID="43475" RaceID="4-1-3-0" RacePoints="5"/>
+			<RaceResult TeamID="43475" RaceID="4-1-4-0" RacePoints="11" Discard="true"/>
+			<RaceResult TeamID="43475" RaceID="4-1-5-0" RacePoints="8"/>
+			<RaceResult TeamID="43475" RaceID="4-1-6-0" RacePoints="4"/>
+			<RaceResult TeamID="43475" RaceID="4-1-7-0" RacePoints="7"/>
+			<RaceResult TeamID="43475" RaceID="4-1-8-0" RacePoints="5"/>
+			<RaceResult TeamID="43475" RaceID="4-1-9-0" RacePoints="4"/>
+			<RaceResult TeamID="43475" RaceID="4-1-10-0" RacePoints="7"/>
+			<RaceResult TeamID="43475" RaceID="4-2-1-0" RacePoints="10"/>
+			<SeriesResult TeamID="43475"  NetPoints="58" Rank="6" TotalPoints="69" />
+
+			<RaceResult TeamID="42656" RaceID="4-1-1-0" RacePoints="3"/>
+			<RaceResult TeamID="42656" RaceID="4-1-2-0" RacePoints="6"/>
+			<RaceResult TeamID="42656" RaceID="4-1-3-0" RacePoints="12" Discard="true"/>
+			<RaceResult TeamID="42656" RaceID="4-1-4-0" RacePoints="3"/>
+			<RaceResult TeamID="42656" RaceID="4-1-5-0" RacePoints="4"/>
+			<RaceResult TeamID="42656" RaceID="4-1-6-0" RacePoints="2"/>
+			<RaceResult TeamID="42656" RaceID="4-1-7-0" RacePoints="12"/>
+			<RaceResult TeamID="42656" RaceID="4-1-8-0" RacePoints="12"/>
+			<RaceResult TeamID="42656" RaceID="4-1-9-0" RacePoints="10"/>
+			<RaceResult TeamID="42656" RaceID="4-1-10-0" RacePoints="4"/>
+			<RaceResult TeamID="42656" RaceID="4-2-1-0" RacePoints="18"/>
+			<SeriesResult TeamID="42656"  NetPoints="74" Rank="7" TotalPoints="86" />
+
+			<RaceResult TeamID="42492" RaceID="4-1-1-0" RacePoints="10"/>
+			<RaceResult TeamID="42492" RaceID="4-1-2-0" RacePoints="11"/>
+			<RaceResult TeamID="42492" RaceID="4-1-3-0" RacePoints="13" Discard="true"/>
+			<RaceResult TeamID="42492" RaceID="4-1-4-0" RacePoints="6"/>
+			<RaceResult TeamID="42492" RaceID="4-1-5-0" RacePoints="7"/>
+			<RaceResult TeamID="42492" RaceID="4-1-6-0" RacePoints="7"/>
+			<RaceResult TeamID="42492" RaceID="4-1-7-0" RacePoints="5"/>
+			<RaceResult TeamID="42492" RaceID="4-1-8-0" RacePoints="9"/>
+			<RaceResult TeamID="42492" RaceID="4-1-9-0" RacePoints="8"/>
+			<RaceResult TeamID="42492" RaceID="4-1-10-0" RacePoints="2"/>
+			<RaceResult TeamID="42492" RaceID="4-2-1-0" RacePoints="12"/>
+			<SeriesResult TeamID="42492"  NetPoints="77" Rank="8" TotalPoints="90" />
+
+			<RaceResult TeamID="43572" RaceID="4-1-1-0" RacePoints="7"/>
+			<RaceResult TeamID="43572" RaceID="4-1-2-0" RacePoints="7"/>
+			<RaceResult TeamID="43572" RaceID="4-1-3-0" RacePoints="7"/>
+			<RaceResult TeamID="43572" RaceID="4-1-4-0" RacePoints="7"/>
+			<RaceResult TeamID="43572" RaceID="4-1-5-0" RacePoints="9"/>
+			<RaceResult TeamID="43572" RaceID="4-1-6-0" RacePoints="3"/>
+			<RaceResult TeamID="43572" RaceID="4-1-7-0" RacePoints="6"/>
+			<RaceResult TeamID="43572" RaceID="4-1-8-0" RacePoints="7"/>
+			<RaceResult TeamID="43572" RaceID="4-1-9-0" RacePoints="11"/>
+			<RaceResult TeamID="43572" RaceID="4-1-10-0" RacePoints="12" Discard="true"/>
+			<RaceResult TeamID="43572" RaceID="4-2-1-0" RacePoints="20"/>
+			<SeriesResult TeamID="43572"  NetPoints="84" Rank="9" TotalPoints="96" />
+
+			<RaceResult TeamID="43989" RaceID="4-1-1-0" RacePoints="9"/>
+			<RaceResult TeamID="43989" RaceID="4-1-2-0" RacePoints="9"/>
+			<RaceResult TeamID="43989" RaceID="4-1-3-0" RacePoints="10"/>
+			<RaceResult TeamID="43989" RaceID="4-1-4-0" RacePoints="9"/>
+			<RaceResult TeamID="43989" RaceID="4-1-5-0" RacePoints="6"/>
+			<RaceResult TeamID="43989" RaceID="4-1-6-0" RacePoints="12"/>
+			<RaceResult TeamID="43989" RaceID="4-1-7-0" RacePoints="9"/>
+			<RaceResult TeamID="43989" RaceID="4-1-8-0" RacePoints="8"/>
+			<RaceResult TeamID="43989" RaceID="4-1-9-0" RacePoints="14" Discard="true"/>
+			<RaceResult TeamID="43989" RaceID="4-1-10-0" RacePoints="6"/>
+			<RaceResult TeamID="43989" RaceID="4-2-1-0" RacePoints="16"/>
+			<SeriesResult TeamID="43989"  NetPoints="94" Rank="10" TotalPoints="108" />
+
+			<RaceResult TeamID="43602" RaceID="4-1-1-0" RacePoints="13"/>
+			<RaceResult TeamID="43602" RaceID="4-1-2-0" RacePoints="10"/>
+			<RaceResult TeamID="43602" RaceID="4-1-3-0" RacePoints="6"/>
+			<RaceResult TeamID="43602" RaceID="4-1-4-0" RacePoints="8"/>
+			<RaceResult TeamID="43602" RaceID="4-1-5-0" RacePoints="11"/>
+			<RaceResult TeamID="43602" RaceID="4-1-6-0" RacePoints="11"/>
+			<RaceResult TeamID="43602" RaceID="4-1-7-0" RacePoints="8"/>
+			<RaceResult TeamID="43602" RaceID="4-1-8-0" RacePoints="13"/>
+			<RaceResult TeamID="43602" RaceID="4-1-9-0" RacePoints="7"/>
+			<RaceResult TeamID="43602" RaceID="4-1-10-0" RacePoints="14" Discard="true"/>
+			<SeriesResult TeamID="43602"  NetPoints="87" Rank="11" TotalPoints="101" />
+
+			<RaceResult TeamID="44609" RaceID="4-1-1-0" RacePoints="12"/>
+			<RaceResult TeamID="44609" RaceID="4-1-2-0" RacePoints="8"/>
+			<RaceResult TeamID="44609" RaceID="4-1-3-0" RacePoints="11"/>
+			<RaceResult TeamID="44609" RaceID="4-1-4-0" RacePoints="12"/>
+			<RaceResult TeamID="44609" RaceID="4-1-5-0" RacePoints="15" Discard="true" ScoreCode="OCS"/>
+			<RaceResult TeamID="44609" RaceID="4-1-6-0" RacePoints="10"/>
+			<RaceResult TeamID="44609" RaceID="4-1-7-0" RacePoints="11"/>
+			<RaceResult TeamID="44609" RaceID="4-1-8-0" RacePoints="10"/>
+			<RaceResult TeamID="44609" RaceID="4-1-9-0" RacePoints="9"/>
+			<RaceResult TeamID="44609" RaceID="4-1-10-0" RacePoints="13"/>
+			<SeriesResult TeamID="44609"  NetPoints="96" Rank="12" TotalPoints="111" />
+
+			<RaceResult TeamID="43363" RaceID="4-1-1-0" RacePoints="11"/>
+			<RaceResult TeamID="43363" RaceID="4-1-2-0" RacePoints="13"/>
+			<RaceResult TeamID="43363" RaceID="4-1-3-0" RacePoints="14" Discard="true"/>
+			<RaceResult TeamID="43363" RaceID="4-1-4-0" RacePoints="14"/>
+			<RaceResult TeamID="43363" RaceID="4-1-5-0" RacePoints="10"/>
+			<RaceResult TeamID="43363" RaceID="4-1-6-0" RacePoints="13"/>
+			<RaceResult TeamID="43363" RaceID="4-1-7-0" RacePoints="10"/>
+			<RaceResult TeamID="43363" RaceID="4-1-8-0" RacePoints="11"/>
+			<RaceResult TeamID="43363" RaceID="4-1-9-0" RacePoints="12"/>
+			<RaceResult TeamID="43363" RaceID="4-1-10-0" RacePoints="11"/>
+			<SeriesResult TeamID="43363"  NetPoints="105" Rank="13" TotalPoints="119" />
+
+			<RaceResult TeamID="43457" RaceID="4-1-1-0" RacePoints="14"/>
+			<RaceResult TeamID="43457" RaceID="4-1-2-0" RacePoints="14"/>
+			<RaceResult TeamID="43457" RaceID="4-1-3-0" RacePoints="9"/>
+			<RaceResult TeamID="43457" RaceID="4-1-4-0" RacePoints="13"/>
+			<RaceResult TeamID="43457" RaceID="4-1-5-0" RacePoints="12"/>
+			<RaceResult TeamID="43457" RaceID="4-1-6-0" RacePoints="14"/>
+			<RaceResult TeamID="43457" RaceID="4-1-7-0" RacePoints="15" Discard="true" ScoreCode="DNF"/>
+			<RaceResult TeamID="43457" RaceID="4-1-8-0" RacePoints="15" ScoreCode="DNC"/>
+			<RaceResult TeamID="43457" RaceID="4-1-9-0" RacePoints="13"/>
+			<RaceResult TeamID="43457" RaceID="4-1-10-0" RacePoints="10"/>
+			<SeriesResult TeamID="43457"  NetPoints="114" Rank="14" TotalPoints="129" />
+		</Division>
+
+		<Division DivisionID="5" Title="470 Women" IFClassID="470" Gender="Women" >
+			<RaceResult TeamID="44331" RaceID="5-1-1-0" RacePoints="1"/>
+			<RaceResult TeamID="44331" RaceID="5-1-2-0" RacePoints="1"/>
+			<RaceResult TeamID="44331" RaceID="5-1-3-0" RacePoints="4"/>
+			<RaceResult TeamID="44331" RaceID="5-1-4-0" RacePoints="2"/>
+			<RaceResult TeamID="44331" RaceID="5-1-5-0" RacePoints="6" Discard="true"/>
+			<RaceResult TeamID="44331" RaceID="5-1-6-0" RacePoints="1"/>
+			<RaceResult TeamID="44331" RaceID="5-1-7-0" RacePoints="4"/>
+			<RaceResult TeamID="44331" RaceID="5-1-8-0" RacePoints="1"/>
+			<RaceResult TeamID="44331" RaceID="5-1-9-0" RacePoints="1"/>
+			<RaceResult TeamID="44331" RaceID="5-1-10-0" RacePoints="1"/>
+			<RaceResult TeamID="44331" RaceID="5-2-1-0" RacePoints="2"/>
+			<SeriesResult TeamID="44331"  NetPoints="18" Rank="1" TotalPoints="24" />
+
+			<RaceResult TeamID="43606" RaceID="5-1-1-0" RacePoints="2"/>
+			<RaceResult TeamID="43606" RaceID="5-1-2-0" RacePoints="4" Discard="true"/>
+			<RaceResult TeamID="43606" RaceID="5-1-3-0" RacePoints="3"/>
+			<RaceResult TeamID="43606" RaceID="5-1-4-0" RacePoints="1"/>
+			<RaceResult TeamID="43606" RaceID="5-1-5-0" RacePoints="3"/>
+			<RaceResult TeamID="43606" RaceID="5-1-6-0" RacePoints="2"/>
+			<RaceResult TeamID="43606" RaceID="5-1-7-0" RacePoints="2"/>
+			<RaceResult TeamID="43606" RaceID="5-1-8-0" RacePoints="4"/>
+			<RaceResult TeamID="43606" RaceID="5-1-9-0" RacePoints="4"/>
+			<RaceResult TeamID="43606" RaceID="5-1-10-0" RacePoints="2"/>
+			<RaceResult TeamID="43606" RaceID="5-2-1-0" RacePoints="8"/>
+			<SeriesResult TeamID="43606"  NetPoints="31" Rank="2" TotalPoints="35" />
+
+			<RaceResult TeamID="42634" RaceID="5-1-1-0" RacePoints="5"/>
+			<RaceResult TeamID="42634" RaceID="5-1-2-0" RacePoints="2"/>
+			<RaceResult TeamID="42634" RaceID="5-1-3-0" RacePoints="7" Discard="true"/>
+			<RaceResult TeamID="42634" RaceID="5-1-4-0" RacePoints="5"/>
+			<RaceResult TeamID="42634" RaceID="5-1-5-0" RacePoints="1"/>
+			<RaceResult TeamID="42634" RaceID="5-1-6-0" RacePoints="3"/>
+			<RaceResult TeamID="42634" RaceID="5-1-7-0" RacePoints="1"/>
+			<RaceResult TeamID="42634" RaceID="5-1-8-0" RacePoints="7"/>
+			<RaceResult TeamID="42634" RaceID="5-1-9-0" RacePoints="3"/>
+			<RaceResult TeamID="42634" RaceID="5-1-10-0" RacePoints="5"/>
+			<RaceResult TeamID="42634" RaceID="5-2-1-0" RacePoints="6"/>
+			<SeriesResult TeamID="42634"  NetPoints="38" Rank="3" TotalPoints="45" />
+
+			<RaceResult TeamID="43416" RaceID="5-1-1-0" RacePoints="4"/>
+			<RaceResult TeamID="43416" RaceID="5-1-2-0" RacePoints="3"/>
+			<RaceResult TeamID="43416" RaceID="5-1-3-0" RacePoints="2"/>
+			<RaceResult TeamID="43416" RaceID="5-1-4-0" RacePoints="6"/>
+			<RaceResult TeamID="43416" RaceID="5-1-5-0" RacePoints="4"/>
+			<RaceResult TeamID="43416" RaceID="5-1-6-0" RacePoints="7" Discard="true"/>
+			<RaceResult TeamID="43416" RaceID="5-1-7-0" RacePoints="7"/>
+			<RaceResult TeamID="43416" RaceID="5-1-8-0" RacePoints="5"/>
+			<RaceResult TeamID="43416" RaceID="5-1-9-0" RacePoints="6"/>
+			<RaceResult TeamID="43416" RaceID="5-1-10-0" RacePoints="3"/>
+			<RaceResult TeamID="43416" RaceID="5-2-1-0" RacePoints="4"/>
+			<SeriesResult TeamID="43416"  NetPoints="44" Rank="4" TotalPoints="51" />
+
+			<RaceResult TeamID="43535" RaceID="5-1-1-0" RacePoints="3"/>
+			<RaceResult TeamID="43535" RaceID="5-1-2-0" RacePoints="5"/>
+			<RaceResult TeamID="43535" RaceID="5-1-3-0" RacePoints="6" Discard="true"/>
+			<RaceResult TeamID="43535" RaceID="5-1-4-0" RacePoints="3"/>
+			<RaceResult TeamID="43535" RaceID="5-1-5-0" RacePoints="2"/>
+			<RaceResult TeamID="43535" RaceID="5-1-6-0" RacePoints="4"/>
+			<RaceResult TeamID="43535" RaceID="5-1-7-0" RacePoints="5"/>
+			<RaceResult TeamID="43535" RaceID="5-1-8-0" RacePoints="6"/>
+			<RaceResult TeamID="43535" RaceID="5-1-9-0" RacePoints="2"/>
+			<RaceResult TeamID="43535" RaceID="5-1-10-0" RacePoints="4"/>
+			<RaceResult TeamID="43535" RaceID="5-2-1-0" RacePoints="12"/>
+			<SeriesResult TeamID="43535"  NetPoints="46" Rank="5" TotalPoints="52" />
+
+			<RaceResult TeamID="43510" RaceID="5-1-1-0" RacePoints="6"/>
+			<RaceResult TeamID="43510" RaceID="5-1-2-0" RacePoints="6"/>
+			<RaceResult TeamID="43510" RaceID="5-1-3-0" RacePoints="1"/>
+			<RaceResult TeamID="43510" RaceID="5-1-4-0" RacePoints="4"/>
+			<RaceResult TeamID="43510" RaceID="5-1-5-0" RacePoints="7" Discard="true"/>
+			<RaceResult TeamID="43510" RaceID="5-1-6-0" RacePoints="5"/>
+			<RaceResult TeamID="43510" RaceID="5-1-7-0" RacePoints="6"/>
+			<RaceResult TeamID="43510" RaceID="5-1-8-0" RacePoints="3"/>
+			<RaceResult TeamID="43510" RaceID="5-1-9-0" RacePoints="5"/>
+			<RaceResult TeamID="43510" RaceID="5-1-10-0" RacePoints="6"/>
+			<RaceResult TeamID="43510" RaceID="5-2-1-0" RacePoints="14"/>
+			<SeriesResult TeamID="43510"  NetPoints="56" Rank="6" TotalPoints="63" />
+
+			<RaceResult TeamID="43932" RaceID="5-1-1-0" RacePoints="7" Discard="true"/>
+			<RaceResult TeamID="43932" RaceID="5-1-2-0" RacePoints="7"/>
+			<RaceResult TeamID="43932" RaceID="5-1-3-0" RacePoints="5"/>
+			<RaceResult TeamID="43932" RaceID="5-1-4-0" RacePoints="7"/>
+			<RaceResult TeamID="43932" RaceID="5-1-5-0" RacePoints="5"/>
+			<RaceResult TeamID="43932" RaceID="5-1-6-0" RacePoints="6"/>
+			<RaceResult TeamID="43932" RaceID="5-1-7-0" RacePoints="3"/>
+			<RaceResult TeamID="43932" RaceID="5-1-8-0" RacePoints="2"/>
+			<RaceResult TeamID="43932" RaceID="5-1-9-0" RacePoints="7"/>
+			<RaceResult TeamID="43932" RaceID="5-1-10-0" RacePoints="7"/>
+			<RaceResult TeamID="43932" RaceID="5-2-1-0" RacePoints="10"/>
+			<SeriesResult TeamID="43932"  NetPoints="59" Rank="7" TotalPoints="66" />
+		</Division>
+
+		<Division DivisionID="8" Title="49er" IFClassID="49ER" Gender="Men" >
+			<RaceResult TeamID="44362" RaceID="8-1-1-0" RacePoints="2"/>
+			<RaceResult TeamID="44362" RaceID="8-1-2-0" RacePoints="2"/>
+			<RaceResult TeamID="44362" RaceID="8-1-3-0" RacePoints="3"/>
+			<RaceResult TeamID="44362" RaceID="8-1-4-0" RacePoints="2"/>
+			<RaceResult TeamID="44362" RaceID="8-1-5-0" RacePoints="3"/>
+			<RaceResult TeamID="44362" RaceID="8-1-6-0" RacePoints="2"/>
+			<RaceResult TeamID="44362" RaceID="8-1-7-0" RacePoints="4" Discard="true"/>
+			<RaceResult TeamID="44362" RaceID="8-1-8-0" RacePoints="1"/>
+			<RaceResult TeamID="44362" RaceID="8-1-9-0" RacePoints="2"/>
+			<RaceResult TeamID="44362" RaceID="8-1-10-0" RacePoints="1"/>
+			<RaceResult TeamID="44362" RaceID="8-1-11-0" RacePoints="2"/>
+			<RaceResult TeamID="44362" RaceID="8-1-12-0" RacePoints="1"/>
+			<RaceResult TeamID="44362" RaceID="8-1-13-0" RacePoints="2"/>
+			<RaceResult TeamID="44362" RaceID="8-1-14-0" RacePoints="2"/>
+			<RaceResult TeamID="44362" RaceID="8-2-1-0" RacePoints="4"/>
+			<SeriesResult TeamID="44362"  NetPoints="29" Rank="1" TotalPoints="33" />
+
+			<RaceResult TeamID="43553" RaceID="8-1-1-0" RacePoints="4"/>
+			<RaceResult TeamID="43553" RaceID="8-1-2-0" RacePoints="1"/>
+			<RaceResult TeamID="43553" RaceID="8-1-3-0" RacePoints="2"/>
+			<RaceResult TeamID="43553" RaceID="8-1-4-0" RacePoints="7" Discard="true"/>
+			<RaceResult TeamID="43553" RaceID="8-1-5-0" RacePoints="2"/>
+			<RaceResult TeamID="43553" RaceID="8-1-6-0" RacePoints="4"/>
+			<RaceResult TeamID="43553" RaceID="8-1-7-0" RacePoints="2"/>
+			<RaceResult TeamID="43553" RaceID="8-1-8-0" RacePoints="3"/>
+			<RaceResult TeamID="43553" RaceID="8-1-9-0" RacePoints="1"/>
+			<RaceResult TeamID="43553" RaceID="8-1-10-0" RacePoints="2"/>
+			<RaceResult TeamID="43553" RaceID="8-1-11-0" RacePoints="1"/>
+			<RaceResult TeamID="43553" RaceID="8-1-12-0" RacePoints="2"/>
+			<RaceResult TeamID="43553" RaceID="8-1-13-0" RacePoints="4"/>
+			<RaceResult TeamID="43553" RaceID="8-1-14-0" RacePoints="1"/>
+			<RaceResult TeamID="43553" RaceID="8-2-1-0" RacePoints="10"/>
+			<SeriesResult TeamID="43553"  NetPoints="39" Rank="2" TotalPoints="46" />
+
+			<RaceResult TeamID="42838" RaceID="8-1-1-0" RacePoints="1"/>
+			<RaceResult TeamID="42838" RaceID="8-1-2-0" RacePoints="4" Discard="true"/>
+			<RaceResult TeamID="42838" RaceID="8-1-3-0" RacePoints="1"/>
+			<RaceResult TeamID="42838" RaceID="8-1-4-0" RacePoints="4"/>
+			<RaceResult TeamID="42838" RaceID="8-1-5-0" RacePoints="1"/>
+			<RaceResult TeamID="42838" RaceID="8-1-6-0" RacePoints="3"/>
+			<RaceResult TeamID="42838" RaceID="8-1-7-0" RacePoints="1"/>
+			<RaceResult TeamID="42838" RaceID="8-1-8-0" RacePoints="2"/>
+			<RaceResult TeamID="42838" RaceID="8-1-9-0" RacePoints="4"/>
+			<RaceResult TeamID="42838" RaceID="8-1-10-0" RacePoints="3"/>
+			<RaceResult TeamID="42838" RaceID="8-1-11-0" RacePoints="4"/>
+			<RaceResult TeamID="42838" RaceID="8-1-12-0" RacePoints="3"/>
+			<RaceResult TeamID="42838" RaceID="8-1-13-0" RacePoints="1"/>
+			<RaceResult TeamID="42838" RaceID="8-1-14-0" RacePoints="4"/>
+			<RaceResult TeamID="42838" RaceID="8-2-1-0" RacePoints="8"/>
+			<SeriesResult TeamID="42838"  NetPoints="40" Rank="3" TotalPoints="44" />
+
+			<RaceResult TeamID="43825" RaceID="8-1-1-0" RacePoints="5"/>
+			<RaceResult TeamID="43825" RaceID="8-1-2-0" RacePoints="3"/>
+			<RaceResult TeamID="43825" RaceID="8-1-3-0" RacePoints="4"/>
+			<RaceResult TeamID="43825" RaceID="8-1-4-0" RacePoints="3"/>
+			<RaceResult TeamID="43825" RaceID="8-1-5-0" RacePoints="5"/>
+			<RaceResult TeamID="43825" RaceID="8-1-6-0" RacePoints="6" Discard="true"/>
+			<RaceResult TeamID="43825" RaceID="8-1-7-0" RacePoints="3"/>
+			<RaceResult TeamID="43825" RaceID="8-1-8-0" RacePoints="4"/>
+			<RaceResult TeamID="43825" RaceID="8-1-9-0" RacePoints="3"/>
+			<RaceResult TeamID="43825" RaceID="8-1-10-0" RacePoints="4"/>
+			<RaceResult TeamID="43825" RaceID="8-1-11-0" RacePoints="3"/>
+			<RaceResult TeamID="43825" RaceID="8-1-12-0" RacePoints="4"/>
+			<RaceResult TeamID="43825" RaceID="8-1-13-0" RacePoints="3"/>
+			<RaceResult TeamID="43825" RaceID="8-1-14-0" RacePoints="3"/>
+			<RaceResult TeamID="43825" RaceID="8-2-1-0" RacePoints="6"/>
+			<SeriesResult TeamID="43825"  NetPoints="53" Rank="4" TotalPoints="59" />
+
+			<RaceResult TeamID="43798" RaceID="8-1-1-0" RacePoints="6"/>
+			<RaceResult TeamID="43798" RaceID="8-1-2-0" RacePoints="6"/>
+			<RaceResult TeamID="43798" RaceID="8-1-3-0" RacePoints="5"/>
+			<RaceResult TeamID="43798" RaceID="8-1-4-0" RacePoints="1"/>
+			<RaceResult TeamID="43798" RaceID="8-1-5-0" RacePoints="8" Discard="true" ScoreCode="OCS"/>
+			<RaceResult TeamID="43798" RaceID="8-1-6-0" RacePoints="1"/>
+			<RaceResult TeamID="43798" RaceID="8-1-7-0" RacePoints="6"/>
+			<RaceResult TeamID="43798" RaceID="8-1-8-0" RacePoints="5"/>
+			<RaceResult TeamID="43798" RaceID="8-1-9-0" RacePoints="5"/>
+			<RaceResult TeamID="43798" RaceID="8-1-10-0" RacePoints="6"/>
+			<RaceResult TeamID="43798" RaceID="8-1-11-0" RacePoints="5"/>
+			<RaceResult TeamID="43798" RaceID="8-1-12-0" RacePoints="5"/>
+			<RaceResult TeamID="43798" RaceID="8-1-13-0" RacePoints="6"/>
+			<RaceResult TeamID="43798" RaceID="8-1-14-0" RacePoints="5"/>
+			<RaceResult TeamID="43798" RaceID="8-2-1-0" RacePoints="2"/>
+			<SeriesResult TeamID="43798"  NetPoints="64" Rank="5" TotalPoints="72" />
+
+			<RaceResult TeamID="43574" RaceID="8-1-1-0" RacePoints="3"/>
+			<RaceResult TeamID="43574" RaceID="8-1-2-0" RacePoints="7"/>
+			<RaceResult TeamID="43574" RaceID="8-1-3-0" RacePoints="7"/>
+			<RaceResult TeamID="43574" RaceID="8-1-4-0" RacePoints="5"/>
+			<RaceResult TeamID="43574" RaceID="8-1-5-0" RacePoints="4"/>
+			<RaceResult TeamID="43574" RaceID="8-1-6-0" RacePoints="7"/>
+			<RaceResult TeamID="43574" RaceID="8-1-7-0" RacePoints="5"/>
+			<RaceResult TeamID="43574" RaceID="8-1-8-0" RacePoints="6"/>
+			<RaceResult TeamID="43574" RaceID="8-1-9-0" RacePoints="6"/>
+			<RaceResult TeamID="43574" RaceID="8-1-10-0" RacePoints="5"/>
+			<RaceResult TeamID="43574" RaceID="8-1-11-0" RacePoints="8" Discard="true" ScoreCode="DNF"/>
+			<RaceResult TeamID="43574" RaceID="8-1-12-0" RacePoints="8" ScoreCode="DNC"/>
+			<RaceResult TeamID="43574" RaceID="8-1-13-0" RacePoints="5"/>
+			<RaceResult TeamID="43574" RaceID="8-1-14-0" RacePoints="6"/>
+			<RaceResult TeamID="43574" RaceID="8-2-1-0" RacePoints="12"/>
+			<SeriesResult TeamID="43574"  NetPoints="86" Rank="6" TotalPoints="94" />
+
+			<RaceResult TeamID="44280" RaceID="8-1-1-0" RacePoints="7"/>
+			<RaceResult TeamID="44280" RaceID="8-1-2-0" RacePoints="5"/>
+			<RaceResult TeamID="44280" RaceID="8-1-3-0" RacePoints="6"/>
+			<RaceResult TeamID="44280" RaceID="8-1-4-0" RacePoints="6"/>
+			<RaceResult TeamID="44280" RaceID="8-1-5-0" RacePoints="8" Discard="true" ScoreCode="OCS"/>
+			<RaceResult TeamID="44280" RaceID="8-1-6-0" RacePoints="5"/>
+			<RaceResult TeamID="44280" RaceID="8-1-7-0" RacePoints="8" ScoreCode="DNC"/>
+			<RaceResult TeamID="44280" RaceID="8-1-8-0" RacePoints="8" ScoreCode="DNC"/>
+			<RaceResult TeamID="44280" RaceID="8-1-9-0" RacePoints="8" ScoreCode="DNC"/>
+			<RaceResult TeamID="44280" RaceID="8-1-10-0" RacePoints="8" ScoreCode="DNC"/>
+			<RaceResult TeamID="44280" RaceID="8-1-11-0" RacePoints="8" ScoreCode="DNC"/>
+			<RaceResult TeamID="44280" RaceID="8-1-12-0" RacePoints="8" ScoreCode="DNC"/>
+			<RaceResult TeamID="44280" RaceID="8-1-13-0" RacePoints="8" ScoreCode="DNC"/>
+			<RaceResult TeamID="44280" RaceID="8-1-14-0" RacePoints="8" ScoreCode="DNC"/>
+			<RaceResult TeamID="44280" RaceID="8-2-1-0" RacePoints="16" ScoreCode="DNC"/>
+			<SeriesResult TeamID="44280"  NetPoints="109" Rank="7" TotalPoints="117" />
+		</Division>
+
+		<Division DivisionID="7" Title="RSX Men" IFClassID="RSX" Gender="Men" >
+			<RaceResult TeamID="44103" RaceID="7-1-1-0" RacePoints="2"/>
+			<RaceResult TeamID="44103" RaceID="7-1-2-0" RacePoints="2"/>
+			<RaceResult TeamID="44103" RaceID="7-1-3-0" RacePoints="3" Discard="true"/>
+			<RaceResult TeamID="44103" RaceID="7-1-4-0" RacePoints="2"/>
+			<RaceResult TeamID="44103" RaceID="7-1-5-0" RacePoints="2"/>
+			<RaceResult TeamID="44103" RaceID="7-1-6-0" RacePoints="1"/>
+			<RaceResult TeamID="44103" RaceID="7-1-7-0" RacePoints="2"/>
+			<RaceResult TeamID="44103" RaceID="7-1-8-0" RacePoints="1"/>
+			<RaceResult TeamID="44103" RaceID="7-1-9-0" RacePoints="1"/>
+			<RaceResult TeamID="44103" RaceID="7-2-1-0" RacePoints="4"/>
+			<SeriesResult TeamID="44103"  NetPoints="17" Rank="1" TotalPoints="20" />
+
+			<RaceResult TeamID="43438" RaceID="7-1-1-0" RacePoints="3"/>
+			<RaceResult TeamID="43438" RaceID="7-1-2-0" RacePoints="1"/>
+			<RaceResult TeamID="43438" RaceID="7-1-3-0" RacePoints="1"/>
+			<RaceResult TeamID="43438" RaceID="7-1-4-0" RacePoints="4" Discard="true"/>
+			<RaceResult TeamID="43438" RaceID="7-1-5-0" RacePoints="1"/>
+			<RaceResult TeamID="43438" RaceID="7-1-6-0" RacePoints="2"/>
+			<RaceResult TeamID="43438" RaceID="7-1-7-0" RacePoints="4"/>
+			<RaceResult TeamID="43438" RaceID="7-1-8-0" RacePoints="2"/>
+			<RaceResult TeamID="43438" RaceID="7-1-9-0" RacePoints="2"/>
+			<RaceResult TeamID="43438" RaceID="7-2-1-0" RacePoints="2"/>
+			<SeriesResult TeamID="43438"  NetPoints="18" Rank="2" TotalPoints="22" />
+
+			<RaceResult TeamID="43826" RaceID="7-1-1-0" RacePoints="1"/>
+			<RaceResult TeamID="43826" RaceID="7-1-2-0" RacePoints="4" Discard="true"/>
+			<RaceResult TeamID="43826" RaceID="7-1-3-0" RacePoints="2"/>
+			<RaceResult TeamID="43826" RaceID="7-1-4-0" RacePoints="1"/>
+			<RaceResult TeamID="43826" RaceID="7-1-5-0" RacePoints="3"/>
+			<RaceResult TeamID="43826" RaceID="7-1-6-0" RacePoints="3"/>
+			<RaceResult TeamID="43826" RaceID="7-1-7-0" RacePoints="1"/>
+			<RaceResult TeamID="43826" RaceID="7-1-8-0" RacePoints="3"/>
+			<RaceResult TeamID="43826" RaceID="7-1-9-0" RacePoints="3"/>
+			<RaceResult TeamID="43826" RaceID="7-2-1-0" RacePoints="8"/>
+			<SeriesResult TeamID="43826"  NetPoints="25" Rank="3" TotalPoints="29" />
+
+			<RaceResult TeamID="43468" RaceID="7-1-1-0" RacePoints="6"/>
+			<RaceResult TeamID="43468" RaceID="7-1-2-0" RacePoints="3"/>
+			<RaceResult TeamID="43468" RaceID="7-1-3-0" RacePoints="6"/>
+			<RaceResult TeamID="43468" RaceID="7-1-4-0" RacePoints="3"/>
+			<RaceResult TeamID="43468" RaceID="7-1-5-0" RacePoints="5"/>
+			<RaceResult TeamID="43468" RaceID="7-1-6-0" RacePoints="4"/>
+			<RaceResult TeamID="43468" RaceID="7-1-7-0" RacePoints="6"/>
+			<RaceResult TeamID="43468" RaceID="7-1-8-0" RacePoints="5"/>
+			<RaceResult TeamID="43468" RaceID="7-1-9-0" RacePoints="9" Discard="true"/>
+			<RaceResult TeamID="43468" RaceID="7-2-1-0" RacePoints="10"/>
+			<SeriesResult TeamID="43468"  NetPoints="48" Rank="4" TotalPoints="57" />
+
+			<RaceResult TeamID="44072" RaceID="7-1-1-0" RacePoints="7"/>
+			<RaceResult TeamID="44072" RaceID="7-1-2-0" RacePoints="9"/>
+			<RaceResult TeamID="44072" RaceID="7-1-3-0" RacePoints="9"/>
+			<RaceResult TeamID="44072" RaceID="7-1-4-0" RacePoints="10" Discard="true"/>
+			<RaceResult TeamID="44072" RaceID="7-1-5-0" RacePoints="9"/>
+			<RaceResult TeamID="44072" RaceID="7-1-6-0" RacePoints="9"/>
+			<RaceResult TeamID="44072" RaceID="7-1-7-0" RacePoints="7"/>
+			<RaceResult TeamID="44072" RaceID="7-1-8-0" RacePoints="4"/>
+			<RaceResult TeamID="44072" RaceID="7-1-9-0" RacePoints="4"/>
+			<RaceResult TeamID="44072" RaceID="7-2-1-0" RacePoints="6"/>
+			<SeriesResult TeamID="44072"  NetPoints="64" Rank="5" TotalPoints="74" />
+
+			<RaceResult TeamID="44638" RaceID="7-1-1-0" RacePoints="4"/>
+			<RaceResult TeamID="44638" RaceID="7-1-2-0" RacePoints="5"/>
+			<RaceResult TeamID="44638" RaceID="7-1-3-0" RacePoints="4"/>
+			<RaceResult TeamID="44638" RaceID="7-1-4-0" RacePoints="8"/>
+			<RaceResult TeamID="44638" RaceID="7-1-5-0" RacePoints="6"/>
+			<RaceResult TeamID="44638" RaceID="7-1-6-0" RacePoints="5"/>
+			<RaceResult TeamID="44638" RaceID="7-1-7-0" RacePoints="3"/>
+			<RaceResult TeamID="44638" RaceID="7-1-8-0" RacePoints="10" Discard="true"/>
+			<RaceResult TeamID="44638" RaceID="7-1-9-0" RacePoints="10"/>
+			<RaceResult TeamID="44638" RaceID="7-2-1-0" RacePoints="20"/>
+			<SeriesResult TeamID="44638"  NetPoints="65" Rank="6" TotalPoints="75" />
+
+			<RaceResult TeamID="43999" RaceID="7-1-1-0" RacePoints="5"/>
+			<RaceResult TeamID="43999" RaceID="7-1-2-0" RacePoints="7"/>
+			<RaceResult TeamID="43999" RaceID="7-1-3-0" RacePoints="7"/>
+			<RaceResult TeamID="43999" RaceID="7-1-4-0" RacePoints="7"/>
+			<RaceResult TeamID="43999" RaceID="7-1-5-0" RacePoints="7"/>
+			<RaceResult TeamID="43999" RaceID="7-1-6-0" RacePoints="7"/>
+			<RaceResult TeamID="43999" RaceID="7-1-7-0" RacePoints="5"/>
+			<RaceResult TeamID="43999" RaceID="7-1-8-0" RacePoints="8" Discard="true"/>
+			<RaceResult TeamID="43999" RaceID="7-1-9-0" RacePoints="7"/>
+			<RaceResult TeamID="43999" RaceID="7-2-1-0" RacePoints="14"/>
+			<SeriesResult TeamID="43999"  NetPoints="66" Rank="7" TotalPoints="74" />
+
+			<RaceResult TeamID="44094" RaceID="7-1-1-0" RacePoints="12" Discard="true" ScoreCode="OCS"/>
+			<RaceResult TeamID="44094" RaceID="7-1-2-0" RacePoints="6"/>
+			<RaceResult TeamID="44094" RaceID="7-1-3-0" RacePoints="5"/>
+			<RaceResult TeamID="44094" RaceID="7-1-4-0" RacePoints="6"/>
+			<RaceResult TeamID="44094" RaceID="7-1-5-0" RacePoints="4"/>
+			<RaceResult TeamID="44094" RaceID="7-1-6-0" RacePoints="6"/>
+			<RaceResult TeamID="44094" RaceID="7-1-7-0" RacePoints="10"/>
+			<RaceResult TeamID="44094" RaceID="7-1-8-0" RacePoints="7"/>
+			<RaceResult TeamID="44094" RaceID="7-1-9-0" RacePoints="8"/>
+			<RaceResult TeamID="44094" RaceID="7-2-1-0" RacePoints="18"/>
+			<SeriesResult TeamID="44094"  NetPoints="70" Rank="8" TotalPoints="82" />
+
+			<RaceResult TeamID="44351" RaceID="7-1-1-0" RacePoints="8"/>
+			<RaceResult TeamID="44351" RaceID="7-1-2-0" RacePoints="8"/>
+			<RaceResult TeamID="44351" RaceID="7-1-3-0" RacePoints="8"/>
+			<RaceResult TeamID="44351" RaceID="7-1-4-0" RacePoints="5"/>
+			<RaceResult TeamID="44351" RaceID="7-1-5-0" RacePoints="8"/>
+			<RaceResult TeamID="44351" RaceID="7-1-6-0" RacePoints="8"/>
+			<RaceResult TeamID="44351" RaceID="7-1-7-0" RacePoints="9" Discard="true"/>
+			<RaceResult TeamID="44351" RaceID="7-1-8-0" RacePoints="9"/>
+			<RaceResult TeamID="44351" RaceID="7-1-9-0" RacePoints="6"/>
+			<RaceResult TeamID="44351" RaceID="7-2-1-0" RacePoints="16"/>
+			<SeriesResult TeamID="44351"  NetPoints="76" Rank="9" TotalPoints="85" />
+
+			<RaceResult TeamID="44062" RaceID="7-1-1-0" RacePoints="12" Discard="true" ScoreCode="OCS"/>
+			<RaceResult TeamID="44062" RaceID="7-1-2-0" RacePoints="12" ScoreCode="OCS"/>
+			<RaceResult TeamID="44062" RaceID="7-1-3-0" RacePoints="11"/>
+			<RaceResult TeamID="44062" RaceID="7-1-4-0" RacePoints="12" ScoreCode="DNF"/>
+			<RaceResult TeamID="44062" RaceID="7-1-5-0" RacePoints="10"/>
+			<RaceResult TeamID="44062" RaceID="7-1-6-0" RacePoints="10"/>
+			<RaceResult TeamID="44062" RaceID="7-1-7-0" RacePoints="8"/>
+			<RaceResult TeamID="44062" RaceID="7-1-8-0" RacePoints="6"/>
+			<RaceResult TeamID="44062" RaceID="7-1-9-0" RacePoints="5"/>
+			<RaceResult TeamID="44062" RaceID="7-2-1-0" RacePoints="12"/>
+			<SeriesResult TeamID="44062"  NetPoints="86" Rank="10" TotalPoints="98" />
+
+			<RaceResult TeamID="43557" RaceID="7-1-1-0" RacePoints="9"/>
+			<RaceResult TeamID="43557" RaceID="7-1-2-0" RacePoints="10"/>
+			<RaceResult TeamID="43557" RaceID="7-1-3-0" RacePoints="10"/>
+			<RaceResult TeamID="43557" RaceID="7-1-4-0" RacePoints="9"/>
+			<RaceResult TeamID="43557" RaceID="7-1-5-0" RacePoints="12" Discard="true" ScoreCode="DNF"/>
+			<RaceResult TeamID="43557" RaceID="7-1-6-0" RacePoints="12" ScoreCode="DNF"/>
+			<RaceResult TeamID="43557" RaceID="7-1-7-0" RacePoints="11"/>
+			<RaceResult TeamID="43557" RaceID="7-1-8-0" RacePoints="11"/>
+			<RaceResult TeamID="43557" RaceID="7-1-9-0" RacePoints="11"/>
+			<SeriesResult TeamID="43557"  NetPoints="83" Rank="11" TotalPoints="95" />
+		</Division>
+
+		<Division DivisionID="9" Title="RSX Women" IFClassID="RSX" Gender="Women" >
+			<RaceResult TeamID="42439" RaceID="9-1-1-0" RacePoints="2"/>
+			<RaceResult TeamID="42439" RaceID="9-1-2-0" RacePoints="1"/>
+			<RaceResult TeamID="42439" RaceID="9-1-3-0" RacePoints="4" Discard="true"/>
+			<RaceResult TeamID="42439" RaceID="9-1-4-0" RacePoints="4"/>
+			<RaceResult TeamID="42439" RaceID="9-1-5-0" RacePoints="2"/>
+			<RaceResult TeamID="42439" RaceID="9-1-6-0" RacePoints="3"/>
+			<RaceResult TeamID="42439" RaceID="9-1-7-0" RacePoints="4"/>
+			<RaceResult TeamID="42439" RaceID="9-1-8-0" RacePoints="1"/>
+			<RaceResult TeamID="42439" RaceID="9-1-9-0" RacePoints="2"/>
+			<RaceResult TeamID="42439" RaceID="9-2-1-0" RacePoints="2"/>
+			<SeriesResult TeamID="42439"  NetPoints="21" Rank="1" TotalPoints="25" />
+
+			<RaceResult TeamID="43868" RaceID="9-1-1-0" RacePoints="5"/>
+			<RaceResult TeamID="43868" RaceID="9-1-2-0" RacePoints="2"/>
+			<RaceResult TeamID="43868" RaceID="9-1-3-0" RacePoints="1"/>
+			<RaceResult TeamID="43868" RaceID="9-1-4-0" RacePoints="1"/>
+			<RaceResult TeamID="43868" RaceID="9-1-5-0" RacePoints="10" Discard="true" ScoreCode="OCS"/>
+			<RaceResult TeamID="43868" RaceID="9-1-6-0" RacePoints="1"/>
+			<RaceResult TeamID="43868" RaceID="9-1-7-0" RacePoints="3"/>
+			<RaceResult TeamID="43868" RaceID="9-1-8-0" RacePoints="3"/>
+			<RaceResult TeamID="43868" RaceID="9-1-9-0" RacePoints="1"/>
+			<RaceResult TeamID="43868" RaceID="9-2-1-0" RacePoints="4"/>
+			<SeriesResult TeamID="43868"  NetPoints="21" Rank="2" TotalPoints="31" />
+
+			<RaceResult TeamID="43173" RaceID="9-1-1-0" RacePoints="1"/>
+			<RaceResult TeamID="43173" RaceID="9-1-2-0" RacePoints="10" Discard="true" ScoreCode="OCS"/>
+			<RaceResult TeamID="43173" RaceID="9-1-3-0" RacePoints="3"/>
+			<RaceResult TeamID="43173" RaceID="9-1-4-0" RacePoints="5"/>
+			<RaceResult TeamID="43173" RaceID="9-1-5-0" RacePoints="1"/>
+			<RaceResult TeamID="43173" RaceID="9-1-6-0" RacePoints="2"/>
+			<RaceResult TeamID="43173" RaceID="9-1-7-0" RacePoints="2"/>
+			<RaceResult TeamID="43173" RaceID="9-1-8-0" RacePoints="4"/>
+			<RaceResult TeamID="43173" RaceID="9-1-9-0" RacePoints="4"/>
+			<RaceResult TeamID="43173" RaceID="9-2-1-0" RacePoints="6"/>
+			<SeriesResult TeamID="43173"  NetPoints="28" Rank="3" TotalPoints="38" />
+
+			<RaceResult TeamID="44100" RaceID="9-1-1-0" RacePoints="6" Discard="true"/>
+			<RaceResult TeamID="44100" RaceID="9-1-2-0" RacePoints="4"/>
+			<RaceResult TeamID="44100" RaceID="9-1-3-0" RacePoints="2"/>
+			<RaceResult TeamID="44100" RaceID="9-1-4-0" RacePoints="3"/>
+			<RaceResult TeamID="44100" RaceID="9-1-5-0" RacePoints="3"/>
+			<RaceResult TeamID="44100" RaceID="9-1-6-0" RacePoints="6"/>
+			<RaceResult TeamID="44100" RaceID="9-1-7-0" RacePoints="5"/>
+			<RaceResult TeamID="44100" RaceID="9-1-8-0" RacePoints="2"/>
+			<RaceResult TeamID="44100" RaceID="9-1-9-0" RacePoints="3"/>
+			<RaceResult TeamID="44100" RaceID="9-2-1-0" RacePoints="12"/>
+			<SeriesResult TeamID="44100"  NetPoints="40" Rank="4" TotalPoints="46" />
+
+			<RaceResult TeamID="43639" RaceID="9-1-1-0" RacePoints="3"/>
+			<RaceResult TeamID="43639" RaceID="9-1-2-0" RacePoints="7" Discard="true"/>
+			<RaceResult TeamID="43639" RaceID="9-1-3-0" RacePoints="6"/>
+			<RaceResult TeamID="43639" RaceID="9-1-4-0" RacePoints="6"/>
+			<RaceResult TeamID="43639" RaceID="9-1-5-0" RacePoints="4"/>
+			<RaceResult TeamID="43639" RaceID="9-1-6-0" RacePoints="4"/>
+			<RaceResult TeamID="43639" RaceID="9-1-7-0" RacePoints="1"/>
+			<RaceResult TeamID="43639" RaceID="9-1-8-0" RacePoints="6"/>
+			<RaceResult TeamID="43639" RaceID="9-1-9-0" RacePoints="5"/>
+			<RaceResult TeamID="43639" RaceID="9-2-1-0" RacePoints="8"/>
+			<SeriesResult TeamID="43639"  NetPoints="43" Rank="5" TotalPoints="50" />
+
+			<RaceResult TeamID="43753" RaceID="9-1-1-0" RacePoints="4"/>
+			<RaceResult TeamID="43753" RaceID="9-1-2-0" RacePoints="3"/>
+			<RaceResult TeamID="43753" RaceID="9-1-3-0" RacePoints="5"/>
+			<RaceResult TeamID="43753" RaceID="9-1-4-0" RacePoints="7"/>
+			<RaceResult TeamID="43753" RaceID="9-1-5-0" RacePoints="10" Discard="true" ScoreCode="OCS"/>
+			<RaceResult TeamID="43753" RaceID="9-1-6-0" RacePoints="7"/>
+			<RaceResult TeamID="43753" RaceID="9-1-7-0" RacePoints="6"/>
+			<RaceResult TeamID="43753" RaceID="9-1-8-0" RacePoints="5"/>
+			<RaceResult TeamID="43753" RaceID="9-1-9-0" RacePoints="6"/>
+			<RaceResult TeamID="43753" RaceID="9-2-1-0" RacePoints="14"/>
+			<SeriesResult TeamID="43753"  NetPoints="57" Rank="6" TotalPoints="67" />
+
+			<RaceResult TeamID="42836" RaceID="9-1-1-0" RacePoints="7"/>
+			<RaceResult TeamID="42836" RaceID="9-1-2-0" RacePoints="5"/>
+			<RaceResult TeamID="42836" RaceID="9-1-3-0" RacePoints="8"/>
+			<RaceResult TeamID="42836" RaceID="9-1-4-0" RacePoints="2"/>
+			<RaceResult TeamID="42836" RaceID="9-1-5-0" RacePoints="5"/>
+			<RaceResult TeamID="42836" RaceID="9-1-6-0" RacePoints="5"/>
+			<RaceResult TeamID="42836" RaceID="9-1-7-0" RacePoints="9" Discard="true"/>
+			<RaceResult TeamID="42836" RaceID="9-1-8-0" RacePoints="7"/>
+			<RaceResult TeamID="42836" RaceID="9-1-9-0" RacePoints="9"/>
+			<RaceResult TeamID="42836" RaceID="9-2-1-0" RacePoints="18"/>
+			<SeriesResult TeamID="42836"  NetPoints="66" Rank="7" TotalPoints="75" />
+
+			<RaceResult TeamID="43886" RaceID="9-1-1-0" RacePoints="8"/>
+			<RaceResult TeamID="43886" RaceID="9-1-2-0" RacePoints="10" Discard="true" ScoreCode="OCS"/>
+			<RaceResult TeamID="43886" RaceID="9-1-3-0" RacePoints="7"/>
+			<RaceResult TeamID="43886" RaceID="9-1-4-0" RacePoints="8"/>
+			<RaceResult TeamID="43886" RaceID="9-1-5-0" RacePoints="6"/>
+			<RaceResult TeamID="43886" RaceID="9-1-6-0" RacePoints="9"/>
+			<RaceResult TeamID="43886" RaceID="9-1-7-0" RacePoints="7"/>
+			<RaceResult TeamID="43886" RaceID="9-1-8-0" RacePoints="9"/>
+			<RaceResult TeamID="43886" RaceID="9-1-9-0" RacePoints="7"/>
+			<RaceResult TeamID="43886" RaceID="9-2-1-0" RacePoints="10"/>
+			<SeriesResult TeamID="43886"  NetPoints="71" Rank="8" TotalPoints="81" />
+
+			<RaceResult TeamID="43596" RaceID="9-1-1-0" RacePoints="9" Discard="true"/>
+			<RaceResult TeamID="43596" RaceID="9-1-2-0" RacePoints="6"/>
+			<RaceResult TeamID="43596" RaceID="9-1-3-0" RacePoints="9"/>
+			<RaceResult TeamID="43596" RaceID="9-1-4-0" RacePoints="9"/>
+			<RaceResult TeamID="43596" RaceID="9-1-5-0" RacePoints="7"/>
+			<RaceResult TeamID="43596" RaceID="9-1-6-0" RacePoints="8"/>
+			<RaceResult TeamID="43596" RaceID="9-1-7-0" RacePoints="8"/>
+			<RaceResult TeamID="43596" RaceID="9-1-8-0" RacePoints="8"/>
+			<RaceResult TeamID="43596" RaceID="9-1-9-0" RacePoints="8"/>
+			<RaceResult TeamID="43596" RaceID="9-2-1-0" RacePoints="16"/>
+			<SeriesResult TeamID="43596"  NetPoints="79" Rank="9" TotalPoints="88" />
+		</Division>
+
+		<Division DivisionID="10" Title="2.4mR" IFClassID="2.4mR" Gender="Open" >
+			<RaceResult TeamID="43890" RaceID="10-1-1-0" RacePoints="1"/>
+			<RaceResult TeamID="43890" RaceID="10-1-2-0" RacePoints="1"/>
+			<RaceResult TeamID="43890" RaceID="10-1-3-0" RacePoints="2" Discard="true"/>
+			<RaceResult TeamID="43890" RaceID="10-1-4-0" RacePoints="1"/>
+			<RaceResult TeamID="43890" RaceID="10-1-5-0" RacePoints="1"/>
+			<RaceResult TeamID="43890" RaceID="10-1-6-0" RacePoints="1"/>
+			<RaceResult TeamID="43890" RaceID="10-1-7-0" RacePoints="1"/>
+			<RaceResult TeamID="43890" RaceID="10-1-8-0" RacePoints="1"/>
+			<RaceResult TeamID="43890" RaceID="10-1-9-0" RacePoints="1"/>
+			<RaceResult TeamID="43890" RaceID="10-1-10-0" RacePoints="1"/>
+			<SeriesResult TeamID="43890"  NetPoints="9" Rank="1" TotalPoints="11" />
+
+			<RaceResult TeamID="44639" RaceID="10-1-1-0" RacePoints="2"/>
+			<RaceResult TeamID="44639" RaceID="10-1-2-0" RacePoints="5"/>
+			<RaceResult TeamID="44639" RaceID="10-1-3-0" RacePoints="1"/>
+			<RaceResult TeamID="44639" RaceID="10-1-4-0" RacePoints="5"/>
+			<RaceResult TeamID="44639" RaceID="10-1-5-0" RacePoints="3"/>
+			<RaceResult TeamID="44639" RaceID="10-1-6-0" RacePoints="6" Discard="true"/>
+			<RaceResult TeamID="44639" RaceID="10-1-7-0" RacePoints="2"/>
+			<RaceResult TeamID="44639" RaceID="10-1-8-0" RacePoints="5"/>
+			<RaceResult TeamID="44639" RaceID="10-1-9-0" RacePoints="2"/>
+			<RaceResult TeamID="44639" RaceID="10-1-10-0" RacePoints="5"/>
+			<SeriesResult TeamID="44639"  NetPoints="30" Rank="2" TotalPoints="36" />
+
+			<RaceResult TeamID="44350" RaceID="10-1-1-0" RacePoints="5"/>
+			<RaceResult TeamID="44350" RaceID="10-1-2-0" RacePoints="2"/>
+			<RaceResult TeamID="44350" RaceID="10-1-3-0" RacePoints="6"/>
+			<RaceResult TeamID="44350" RaceID="10-1-4-0" RacePoints="8" Discard="true" ScoreCode="DNF"/>
+			<RaceResult TeamID="44350" RaceID="10-1-5-0" RacePoints="2"/>
+			<RaceResult TeamID="44350" RaceID="10-1-6-0" RacePoints="4"/>
+			<RaceResult TeamID="44350" RaceID="10-1-7-0" RacePoints="3"/>
+			<RaceResult TeamID="44350" RaceID="10-1-8-0" RacePoints="3"/>
+			<RaceResult TeamID="44350" RaceID="10-1-9-0" RacePoints="3"/>
+			<RaceResult TeamID="44350" RaceID="10-1-10-0" RacePoints="2"/>
+			<SeriesResult TeamID="44350"  NetPoints="30" Rank="3" TotalPoints="38" />
+
+			<RaceResult TeamID="44230" RaceID="10-1-1-0" RacePoints="4"/>
+			<RaceResult TeamID="44230" RaceID="10-1-2-0" RacePoints="3"/>
+			<RaceResult TeamID="44230" RaceID="10-1-3-0" RacePoints="3"/>
+			<RaceResult TeamID="44230" RaceID="10-1-4-0" RacePoints="2"/>
+			<RaceResult TeamID="44230" RaceID="10-1-5-0" RacePoints="4"/>
+			<RaceResult TeamID="44230" RaceID="10-1-6-0" RacePoints="2"/>
+			<RaceResult TeamID="44230" RaceID="10-1-7-0" RacePoints="4"/>
+			<RaceResult TeamID="44230" RaceID="10-1-8-0" RacePoints="4"/>
+			<RaceResult TeamID="44230" RaceID="10-1-9-0" RacePoints="6" Discard="true"/>
+			<RaceResult TeamID="44230" RaceID="10-1-10-0" RacePoints="4"/>
+			<SeriesResult TeamID="44230"  NetPoints="30" Rank="4" TotalPoints="36" />
+
+			<RaceResult TeamID="44616" RaceID="10-1-1-0" RacePoints="3"/>
+			<RaceResult TeamID="44616" RaceID="10-1-2-0" RacePoints="4"/>
+			<RaceResult TeamID="44616" RaceID="10-1-3-0" RacePoints="7" Discard="true"/>
+			<RaceResult TeamID="44616" RaceID="10-1-4-0" RacePoints="6"/>
+			<RaceResult TeamID="44616" RaceID="10-1-5-0" RacePoints="5"/>
+			<RaceResult TeamID="44616" RaceID="10-1-6-0" RacePoints="3"/>
+			<RaceResult TeamID="44616" RaceID="10-1-7-0" RacePoints="5"/>
+			<RaceResult TeamID="44616" RaceID="10-1-8-0" RacePoints="2"/>
+			<RaceResult TeamID="44616" RaceID="10-1-9-0" RacePoints="5"/>
+			<RaceResult TeamID="44616" RaceID="10-1-10-0" RacePoints="3"/>
+			<SeriesResult TeamID="44616"  NetPoints="36" Rank="5" TotalPoints="43" />
+
+			<RaceResult TeamID="43319" RaceID="10-1-1-0" RacePoints="6"/>
+			<RaceResult TeamID="43319" RaceID="10-1-2-0" RacePoints="7" Discard="true"/>
+			<RaceResult TeamID="43319" RaceID="10-1-3-0" RacePoints="5"/>
+			<RaceResult TeamID="43319" RaceID="10-1-4-0" RacePoints="4"/>
+			<RaceResult TeamID="43319" RaceID="10-1-5-0" RacePoints="6"/>
+			<RaceResult TeamID="43319" RaceID="10-1-6-0" RacePoints="7"/>
+			<RaceResult TeamID="43319" RaceID="10-1-7-0" RacePoints="6"/>
+			<RaceResult TeamID="43319" RaceID="10-1-8-0" RacePoints="6"/>
+			<RaceResult TeamID="43319" RaceID="10-1-9-0" RacePoints="4"/>
+			<RaceResult TeamID="43319" RaceID="10-1-10-0" RacePoints="7"/>
+			<SeriesResult TeamID="43319"  NetPoints="51" Rank="6" TotalPoints="58" />
+
+			<RaceResult TeamID="43162" RaceID="10-1-1-0" RacePoints="7" Discard="true"/>
+			<RaceResult TeamID="43162" RaceID="10-1-2-0" RacePoints="6"/>
+			<RaceResult TeamID="43162" RaceID="10-1-3-0" RacePoints="4"/>
+			<RaceResult TeamID="43162" RaceID="10-1-4-0" RacePoints="3"/>
+			<RaceResult TeamID="43162" RaceID="10-1-5-0" RacePoints="7"/>
+			<RaceResult TeamID="43162" RaceID="10-1-6-0" RacePoints="5"/>
+			<RaceResult TeamID="43162" RaceID="10-1-7-0" RacePoints="7"/>
+			<RaceResult TeamID="43162" RaceID="10-1-8-0" RacePoints="7"/>
+			<RaceResult TeamID="43162" RaceID="10-1-9-0" RacePoints="7"/>
+			<RaceResult TeamID="43162" RaceID="10-1-10-0" RacePoints="6"/>
+			<SeriesResult TeamID="43162"  NetPoints="52" Rank="7" TotalPoints="59" />
+		</Division>
+
+		<Division DivisionID="11" Title="Skud" IFClassID="SKUD18" Gender="Open" >
+			<RaceResult TeamID="43120" RaceID="11-1-1-0" RacePoints="1"/>
+			<RaceResult TeamID="43120" RaceID="11-1-2-0" RacePoints="1"/>
+			<RaceResult TeamID="43120" RaceID="11-1-3-0" RacePoints="1"/>
+			<RaceResult TeamID="43120" RaceID="11-1-4-0" RacePoints="2"/>
+			<RaceResult TeamID="43120" RaceID="11-1-5-0" RacePoints="1"/>
+			<RaceResult TeamID="43120" RaceID="11-1-6-0" RacePoints="2"/>
+			<RaceResult TeamID="43120" RaceID="11-1-7-0" RacePoints="4" Discard="true"/>
+			<RaceResult TeamID="43120" RaceID="11-1-8-0" RacePoints="2"/>
+			<RaceResult TeamID="43120" RaceID="11-1-9-0" RacePoints="1"/>
+			<RaceResult TeamID="43120" RaceID="11-1-10-0" RacePoints="2"/>
+			<SeriesResult TeamID="43120"  NetPoints="13" Rank="1" TotalPoints="17" />
+
+			<RaceResult TeamID="44182" RaceID="11-1-1-0" RacePoints="3"/>
+			<RaceResult TeamID="44182" RaceID="11-1-2-0" RacePoints="3"/>
+			<RaceResult TeamID="44182" RaceID="11-1-3-0" RacePoints="4" Discard="true"/>
+			<RaceResult TeamID="44182" RaceID="11-1-4-0" RacePoints="1"/>
+			<RaceResult TeamID="44182" RaceID="11-1-5-0" RacePoints="3"/>
+			<RaceResult TeamID="44182" RaceID="11-1-6-0" RacePoints="1"/>
+			<RaceResult TeamID="44182" RaceID="11-1-7-0" RacePoints="2"/>
+			<RaceResult TeamID="44182" RaceID="11-1-8-0" RacePoints="1"/>
+			<RaceResult TeamID="44182" RaceID="11-1-9-0" RacePoints="2"/>
+			<RaceResult TeamID="44182" RaceID="11-1-10-0" RacePoints="1"/>
+			<SeriesResult TeamID="44182"  NetPoints="17" Rank="2" TotalPoints="21" />
+
+			<RaceResult TeamID="44045" RaceID="11-1-1-0" RacePoints="2"/>
+			<RaceResult TeamID="44045" RaceID="11-1-2-0" RacePoints="4" Discard="true"/>
+			<RaceResult TeamID="44045" RaceID="11-1-3-0" RacePoints="3"/>
+			<RaceResult TeamID="44045" RaceID="11-1-4-0" RacePoints="4"/>
+			<RaceResult TeamID="44045" RaceID="11-1-5-0" RacePoints="2"/>
+			<RaceResult TeamID="44045" RaceID="11-1-6-0" RacePoints="3"/>
+			<RaceResult TeamID="44045" RaceID="11-1-7-0" RacePoints="1"/>
+			<RaceResult TeamID="44045" RaceID="11-1-8-0" RacePoints="4"/>
+			<RaceResult TeamID="44045" RaceID="11-1-9-0" RacePoints="4"/>
+			<RaceResult TeamID="44045" RaceID="11-1-10-0" RacePoints="4"/>
+			<SeriesResult TeamID="44045"  NetPoints="27" Rank="3" TotalPoints="31" />
+
+			<RaceResult TeamID="44036" RaceID="11-1-1-0" RacePoints="4"/>
+			<RaceResult TeamID="44036" RaceID="11-1-2-0" RacePoints="2"/>
+			<RaceResult TeamID="44036" RaceID="11-1-3-0" RacePoints="2"/>
+			<RaceResult TeamID="44036" RaceID="11-1-4-0" RacePoints="3"/>
+			<RaceResult TeamID="44036" RaceID="11-1-5-0" RacePoints="4"/>
+			<RaceResult TeamID="44036" RaceID="11-1-6-0" RacePoints="4"/>
+			<RaceResult TeamID="44036" RaceID="11-1-7-0" RacePoints="3"/>
+			<RaceResult TeamID="44036" RaceID="11-1-8-0" RacePoints="3"/>
+			<RaceResult TeamID="44036" RaceID="11-1-9-0" RacePoints="5" Discard="true"/>
+			<RaceResult TeamID="44036" RaceID="11-1-10-0" RacePoints="5"/>
+			<SeriesResult TeamID="44036"  NetPoints="30" Rank="4" TotalPoints="35" />
+
+			<RaceResult TeamID="43539" RaceID="11-1-1-0" RacePoints="7" Discard="true"/>
+			<RaceResult TeamID="43539" RaceID="11-1-2-0" RacePoints="5"/>
+			<RaceResult TeamID="43539" RaceID="11-1-3-0" RacePoints="7"/>
+			<RaceResult TeamID="43539" RaceID="11-1-4-0" RacePoints="6"/>
+			<RaceResult TeamID="43539" RaceID="11-1-5-0" RacePoints="5"/>
+			<RaceResult TeamID="43539" RaceID="11-1-6-0" RacePoints="5"/>
+			<RaceResult TeamID="43539" RaceID="11-1-7-0" RacePoints="6"/>
+			<RaceResult TeamID="43539" RaceID="11-1-8-0" RacePoints="7"/>
+			<RaceResult TeamID="43539" RaceID="11-1-9-0" RacePoints="3"/>
+			<RaceResult TeamID="43539" RaceID="11-1-10-0" RacePoints="7"/>
+			<SeriesResult TeamID="43539"  NetPoints="51" Rank="5" TotalPoints="58" />
+
+			<RaceResult TeamID="43372" RaceID="11-1-1-0" RacePoints="5"/>
+			<RaceResult TeamID="43372" RaceID="11-1-2-0" RacePoints="7"/>
+			<RaceResult TeamID="43372" RaceID="11-1-3-0" RacePoints="6"/>
+			<RaceResult TeamID="43372" RaceID="11-1-4-0" RacePoints="7"/>
+			<RaceResult TeamID="43372" RaceID="11-1-5-0" RacePoints="7"/>
+			<RaceResult TeamID="43372" RaceID="11-1-6-0" RacePoints="6"/>
+			<RaceResult TeamID="43372" RaceID="11-1-7-0" RacePoints="8" Discard="true" ScoreCode="OCS"/>
+			<RaceResult TeamID="43372" RaceID="11-1-8-0" RacePoints="5"/>
+			<RaceResult TeamID="43372" RaceID="11-1-9-0" RacePoints="6"/>
+			<RaceResult TeamID="43372" RaceID="11-1-10-0" RacePoints="3"/>
+			<SeriesResult TeamID="43372"  NetPoints="52" Rank="6" TotalPoints="60" />
+
+			<RaceResult TeamID="43502" RaceID="11-1-1-0" RacePoints="6"/>
+			<RaceResult TeamID="43502" RaceID="11-1-2-0" RacePoints="6"/>
+			<RaceResult TeamID="43502" RaceID="11-1-3-0" RacePoints="5"/>
+			<RaceResult TeamID="43502" RaceID="11-1-4-0" RacePoints="5"/>
+			<RaceResult TeamID="43502" RaceID="11-1-5-0" RacePoints="6"/>
+			<RaceResult TeamID="43502" RaceID="11-1-6-0" RacePoints="8" Discard="true" ScoreCode="OCS"/>
+			<RaceResult TeamID="43502" RaceID="11-1-7-0" RacePoints="5"/>
+			<RaceResult TeamID="43502" RaceID="11-1-8-0" RacePoints="6"/>
+			<RaceResult TeamID="43502" RaceID="11-1-9-0" RacePoints="7"/>
+			<RaceResult TeamID="43502" RaceID="11-1-10-0" RacePoints="6"/>
+			<SeriesResult TeamID="43502"  NetPoints="52" Rank="7" TotalPoints="60" />
+		</Division>
+
+
+	</Event>
+</SailingXRR>

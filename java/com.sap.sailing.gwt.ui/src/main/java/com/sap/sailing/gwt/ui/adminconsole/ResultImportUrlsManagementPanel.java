@@ -15,6 +15,7 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.RadioButton;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog;
+import com.sap.sailing.gwt.ui.client.DataEntryDialog.DialogCallback;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -143,14 +144,14 @@ public class ResultImportUrlsManagementPanel extends FlowPanel {
                         }
                         return result;
                     }
-        }, new AsyncCallback<String>() {
+        }, new DialogCallback<String>() {
             @Override
-            public void onFailure(Throwable caught) {
+            public void cancel() {
                 // user cancelled; just don't add
             }
 
             @Override
-            public void onSuccess(String url) {
+            public void ok(String url) {
                 urlListBox.addItem(url);
                 sailingService.addResultImportUrl(selectedProviderName, url, new AsyncCallback<Void>() {
                     @Override

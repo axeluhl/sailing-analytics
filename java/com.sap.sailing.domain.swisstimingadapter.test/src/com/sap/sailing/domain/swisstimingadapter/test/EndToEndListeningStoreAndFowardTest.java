@@ -9,9 +9,12 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.NavigableSet;
 import java.util.Set;
 import java.util.logging.Logger;
 
@@ -19,15 +22,17 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
-import com.sap.sailing.domain.base.Buoy;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.impl.Util;
+import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.swisstimingadapter.MessageType;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterConnector;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterTransceiver;
@@ -41,6 +46,7 @@ import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
+import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RacesHandle;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
@@ -64,6 +70,7 @@ public class EndToEndListeningStoreAndFowardTest {
     private SwissTimingFactory swissTimingFactory;
 
     private EmptyWindStore emptyWindStore;
+    private EmptyRaceLogStore emptyRaceLogStore;
     private RacingEventService racingEventService;
 
     private List<RacesHandle> raceHandles;
@@ -83,15 +90,17 @@ public class EndToEndListeningStoreAndFowardTest {
         sendingStream = sendingSocket.getOutputStream();
         swissTimingFactory = SwissTimingFactory.INSTANCE;
         emptyWindStore = EmptyWindStore.INSTANCE;
+        emptyRaceLogStore = EmptyRaceLogStore.INSTANCE;
         transceiver = swissTimingFactory.createSailMasterTransceiver();
         DBCollection lastMessageCountCollection = db.getCollection(CollectionNames.LAST_MESSAGE_COUNT.name());
         lastMessageCountCollection.update(new BasicDBObject(),
                 new BasicDBObject().append(FieldNames.LAST_MESSAGE_COUNT.name(), 0l),
                 /* upsert */true, /* multi */false);
         // important: construct a new domain factory each time to make sure the competitor cache starts out empty
+        final com.sap.sailing.domain.base.impl.DomainFactoryImpl baseDomainFactory = new com.sap.sailing.domain.base.impl.DomainFactoryImpl();
         racingEventService = new RacingEventServiceImpl(mongoDBService, SwissTimingFactory.INSTANCE,
-                new DomainFactoryImpl(new com.sap.sailing.domain.base.impl.DomainFactoryImpl()),
-                com.sap.sailing.domain.tractracadapter.DomainFactory.INSTANCE);
+                new DomainFactoryImpl(baseDomainFactory),
+                new com.sap.sailing.domain.tractracadapter.impl.DomainFactoryImpl(baseDomainFactory));
         raceHandles = new ArrayList<RacesHandle>();
     }
 
@@ -140,7 +149,19 @@ public class EndToEndListeningStoreAndFowardTest {
         String scriptName1 = "/SailMasterDataInterfaceRACandSTL.txt";
         String scriptName2 = "/SailMasterDataInterface-ExampleAsText.txt";
         setUpUsingScript(racesToTrack, scriptName1, scriptName2);
+        coreOfTestLongRaceLog();
+    }
 
+    @Test
+    public void testLongRaceLogNewVersion() throws Exception {
+        String[] racesToTrack = new String[] { "W4702" };
+        String scriptName1 = "/W4702RACandSTLandCCG.txt";
+        String scriptName2 = "/W4702AsText.txt";
+        setUpUsingScript(racesToTrack, scriptName1, scriptName2);
+        coreOfTestLongRaceLog();
+    }
+
+    private void coreOfTestLongRaceLog() {
         Set<TrackedRace> allTrackedRaces = new HashSet<TrackedRace>();
         Iterable<Regatta> allRegattas = racingEventService.getAllRegattas();
         for (Regatta regatta : allRegattas) {
@@ -163,7 +184,8 @@ public class EndToEndListeningStoreAndFowardTest {
             assertEquals(7, Util.size(race.getCourse().getWaypoints()));
             assertEquals(6, Util.size(race.getCourse().getLegs()));
             for (Competitor competitor : race.getCompetitors()) {
-                if (!competitor.getName().equals("Competitor 35") && !competitor.getName().equals("Competitor 20")) {
+                if (!competitor.getName().equals("Competitor 35") && !competitor.getName().equals("Competitor 20")
+                        && !competitor.getName().equals("GBR 831") && !competitor.getName().equals("NED 24")) {
                     final GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(competitor);
                     track.lockForRead();
                     try {
@@ -173,17 +195,17 @@ public class EndToEndListeningStoreAndFowardTest {
                     }
                 }
             }
-            Set<Buoy> buoys = new HashSet<Buoy>();
+            Set<Mark> marks = new HashSet<Mark>();
             for (Waypoint waypoint : race.getCourse().getWaypoints()) {
-                for (Buoy buoy : waypoint.getBuoys()) {
-                    buoys.add(buoy);
+                for (Mark mark : waypoint.getMarks()) {
+                    marks.add(mark);
                 }
             }
-            for (Buoy buoy : buoys) {
-                final GPSFixTrack<Buoy, GPSFix> track = trackedRace.getOrCreateTrack(buoy);
+            for (Mark mark : marks) {
+                final GPSFixTrack<Mark, GPSFix> track = trackedRace.getOrCreateTrack(mark);
                 track.lockForRead();
                 try {
-                    assertTrue("Track of buoy " + buoy + " empty",
+                    assertTrue("Track of mark " + mark + " empty",
                             !Util.isEmpty(track.getRawFixes()));
                 } finally {
                     track.unlockAfterRead();
@@ -227,7 +249,7 @@ public class EndToEndListeningStoreAndFowardTest {
             assertEquals(2, Util.size(race.getCourse().getLegs()));
             for (Competitor competitor : race.getCompetitors()) {
                 if (!competitor.getName().equals("NED 24") && !competitor.getName().equals("Competitor 35")
-                        && !competitor.getName().equals("Competitor 20")) {
+                        && !competitor.getName().equals("Competitor 20") && !competitor.getName().equals("GBR 831")) {
                     final GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(competitor);
                     track.lockForRead();
                     try {
@@ -237,17 +259,17 @@ public class EndToEndListeningStoreAndFowardTest {
                     }
                 }
             }
-            Set<Buoy> buoys = new HashSet<Buoy>();
+            Set<Mark> marks = new HashSet<Mark>();
             for (Waypoint waypoint : race.getCourse().getWaypoints()) {
-                for (Buoy buoy : waypoint.getBuoys()) {
-                    buoys.add(buoy);
+                for (Mark mark : waypoint.getMarks()) {
+                    marks.add(mark);
                 }
             }
-            for (Buoy buoy : buoys) {
-                final GPSFixTrack<Buoy, GPSFix> track = trackedRace.getOrCreateTrack(buoy);
+            for (Mark mark : marks) {
+                final GPSFixTrack<Mark, GPSFix> track = trackedRace.getOrCreateTrack(mark);
                 track.lockForRead();
                 try {
-                    assertTrue("Track of buoy " + buoy + " empty", !Util.isEmpty(track.getRawFixes()));
+                    assertTrue("Track of mark " + mark + " empty", !Util.isEmpty(track.getRawFixes()));
                 } finally {
                     track.unlockAfterRead();
                 }
@@ -281,6 +303,61 @@ public class EndToEndListeningStoreAndFowardTest {
             waypoints.add(waypoint);
         }
         assertEquals(7, Util.size(waypoints));
+    }
+    
+    @Test
+    public void testTMDMessageBeforeReceivingStartTime() throws Exception {
+        final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
+        String[] racesToTrack = new String[] { "SAM005923" };
+        setUpUsingScript(racesToTrack, "/TMDBeforeStartTimeExample.txt");
+        Set<TrackedRace> allTrackedRaces = new HashSet<TrackedRace>();
+        Iterable<Regatta> allEvents = racingEventService.getAllRegattas();
+        for (Regatta event : allEvents) {
+            DynamicTrackedRegatta trackedRegatta = racingEventService.getTrackedRegatta(event);
+            Iterable<TrackedRace> trackedRaces = trackedRegatta.getTrackedRaces();
+            for (TrackedRace trackedRace : trackedRaces) {
+                allTrackedRaces.add(trackedRace);
+            }
+        }
+        assertEquals(1, allTrackedRaces.size());
+        TrackedRace trackedRace = allTrackedRaces.iterator().next();
+        assertEquals("SAM005923", trackedRace.getRace().getName());
+        assertEquals(dateFormat.parse("2013-04-04T13:45:00+0200"), trackedRace.getStartOfRace().asDate());
+        for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
+            if (competitor.getBoat().getSailID().equals("GBR-828")) {
+                NavigableSet<MarkPassing> markPassings = trackedRace.getMarkPassings(competitor);
+                assertEquals(1, markPassings.size());
+                assertNotNull(markPassings.iterator().next().getTimePoint());
+            }
+        }
+    }
+    
+    @Test
+    public void testTMDMessageBeforeReceivingStartTimeWithManyTMDs() throws Exception {
+        final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
+        String[] racesToTrack = new String[] { "SAM005923" };
+        setUpUsingScript(racesToTrack, "/TMDBeforeStartTimeExample_ManyTMDs.txt");
+        Set<TrackedRace> allTrackedRaces = new HashSet<TrackedRace>();
+        Iterable<Regatta> allEvents = racingEventService.getAllRegattas();
+        for (Regatta event : allEvents) {
+            DynamicTrackedRegatta trackedRegatta = racingEventService.getTrackedRegatta(event);
+            Iterable<TrackedRace> trackedRaces = trackedRegatta.getTrackedRaces();
+            for (TrackedRace trackedRace : trackedRaces) {
+                allTrackedRaces.add(trackedRace);
+            }
+        }
+        assertEquals(1, allTrackedRaces.size());
+        TrackedRace trackedRace = allTrackedRaces.iterator().next();
+        assertEquals("SAM005923", trackedRace.getRace().getName());
+        assertEquals(dateFormat.parse("2013-04-04T13:45:00+0200"), trackedRace.getStartOfRace().asDate());
+        for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
+            NavigableSet<MarkPassing> markPassings = trackedRace.getMarkPassings(competitor);
+            if (competitor.getBoat().getSailID().equals("GBR-828")) {
+                assertEquals(7, markPassings.size());
+            }
+            assertNotNull(markPassings.iterator().next().getTimePoint());
+            assertEquals(trackedRace.getStartOfRace(), markPassings.iterator().next().getTimePoint());
+        }
     }
     
     @Test
@@ -322,7 +399,7 @@ public class EndToEndListeningStoreAndFowardTest {
         for (String raceToTrack : racesToTrack) {
             RacesHandle raceHandle = racingEventService.addSwissTimingRace(/* regattaToAddTo */ null /* use a default regatta */,
                     raceToTrack, "localhost", /* canSendRequests */
-                    CLIENT_PORT, false, emptyWindStore, -1);
+                    CLIENT_PORT, false, emptyWindStore, emptyRaceLogStore, -1);
             raceHandles.add(raceHandle);
             if (connector == null) {
                 connector = racingEventService.getSwissTimingFactory().getOrCreateSailMasterConnector("localhost",

@@ -8,7 +8,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.logging.Logger;
 
-import com.sap.sailing.domain.base.Buoy;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
@@ -200,8 +200,8 @@ public class Simulator {
                     public void run() {
                         try {
                             delayMarkPassings(competitor, deliverLater);
-                        } catch (Throwable t) {
-                            logger.throwing(Simulator.class.getName(), "scheduleMarkPosition", t);
+                        } catch (Exception e) {
+                            logger.throwing(Simulator.class.getName(), "scheduleMarkPosition", e);
                         }
                     }
                 }, transformedTimepoint.asDate());
@@ -213,20 +213,20 @@ public class Simulator {
         
     }
 
-    public void scheduleMarkPosition(final Buoy buoy, GPSFixMoving markFix) {
+    public void scheduleMarkPosition(final Mark mark, GPSFixMoving markFix) {
         final TimePoint transformedTimepoint = advance(markFix.getTimePoint());
         final GPSFixMoving transformedMarkFix = new GPSFixMovingImpl(markFix.getPosition(), transformedTimepoint, markFix.getSpeed());
         long waitTime = getWaitTimeInMillisUntil(transformedMarkFix.getTimePoint());
         if (waitTime <= 0) {
-            trackedRace.recordFix(buoy, transformedMarkFix);
+            trackedRace.recordFix(mark, transformedMarkFix);
         } else {
             timer.schedule(new TimerTask() {
                 @Override
                 public void run() {
                     try {
-                        trackedRace.recordFix(buoy, transformedMarkFix);
-                    } catch (Throwable t) {
-                        logger.throwing(Simulator.class.getName(), "scheduleMarkPosition", t);
+                        trackedRace.recordFix(mark, transformedMarkFix);
+                    } catch (Exception e) {
+                        logger.throwing(Simulator.class.getName(), "scheduleMarkPosition", e);
                     }
                 }
             }, transformedTimepoint.asDate());
