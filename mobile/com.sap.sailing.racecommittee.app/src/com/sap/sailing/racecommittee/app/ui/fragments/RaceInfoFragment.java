@@ -1,7 +1,10 @@
 package com.sap.sailing.racecommittee.app.ui.fragments;
 
+import android.app.AlertDialog;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,9 +13,12 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.state.RaceState;
 import com.sap.sailing.racecommittee.app.domain.state.RaceStateChangedListener;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
@@ -32,6 +38,8 @@ public class RaceInfoFragment extends RaceFragment implements RaceStateChangedLi
     private TextView fleetInfoHeader;
     private TextView raceInfoHeader;
     private TextView courseInfoHeader;
+    
+    private View resetRaceDialogView;
 
     public RaceInfoFragment() {
         this.infoFragmentChooser = new RaceInfoFragmentChooser();
@@ -57,7 +65,6 @@ public class RaceInfoFragment extends RaceFragment implements RaceStateChangedLi
                 getRace().getFleet().getName()));
         raceInfoHeader.setText(String.format("%s", getRace().getName()));
 
-        /// TODO: implement course selection
         courseInfoHeader.setOnClickListener(new OnClickListener() {
 
             @Override
@@ -70,12 +77,14 @@ public class RaceInfoFragment extends RaceFragment implements RaceStateChangedLi
         resetButton.setOnClickListener(new OnClickListener() {
             public void onClick(View arg0) {
                 ExLog.i(TAG, "Reset race button pressed");
-                getRace().getState().onRaceAborted(MillisecondsTimePoint.now());
+                showRaceResetConfirmationDialog();
             }
         });
 
         // Initial fragment selection...
         switchToInfoFragment();
+        
+        updateCourseDesignLabel();
     }
 
     @Override
@@ -109,16 +118,15 @@ public class RaceInfoFragment extends RaceFragment implements RaceStateChangedLi
     }
 
     private void displayInfoFragment() {
-        FragmentTransaction transaction = getFragmentManager()
-                .beginTransaction();
-        transaction.setCustomAnimations(R.animator.slide_in,
-                R.animator.slide_out);
+        FragmentTransaction transaction = getFragmentManager().beginTransaction();
+        transaction.setCustomAnimations(R.animator.slide_in, R.animator.slide_out);
         transaction.replace(R.id.infoContainer, infoFragment);
         transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
         transaction.commit();
     }
 
     public void onRaceStateChanged(RaceState state) {
+        updateCourseDesignLabel();
         switchToInfoFragment();
     }
 
@@ -139,7 +147,7 @@ public class RaceInfoFragment extends RaceFragment implements RaceStateChangedLi
 
     @Override
     public void onChangeCourseDesign() {
-        courseInfoHeader.setText("Course design is transmitted");
+        updateCourseDesignLabel();
     }
 
     @Override
@@ -155,6 +163,59 @@ public class RaceInfoFragment extends RaceFragment implements RaceStateChangedLi
     @Override
     public void onIndividualRecall(TimePoint eventTime) {
         //do nothing (onRaceStateChanged(RaceState) handles state change and fragment switch already
+    }
+
+    private void showRaceResetConfirmationDialog() {
+        prepareResetRaceView();
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setView(resetRaceDialogView)
+        .setTitle(R.string.race_reset_confirmation_title)
+        .setIcon(R.drawable.ic_dialog_alert_holo_light)
+        .setCancelable(true)
+        .setPositiveButton("Reset anyway",
+                new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                ExLog.i(ExLog.RACE_RESET_YES, getRace().getId().toString(), getActivity());
+                ExLog.w(TAG, String.format("Race %s is selected for reset.", getRace().getId()));
+
+                getRace().getState().onRaceAborted(MillisecondsTimePoint.now());
+            }
+        })
+        .setNegativeButton("CANCEL",
+                new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                ExLog.i(ExLog.RACE_RESET_NO, getRace().getId().toString(), getActivity());
+                dialog.cancel();
+            }
+        });
+        AlertDialog alert = builder.create();
+        ExLog.i(ExLog.RACE_RESET_DIALOG_BUTTON, getRace().getId().toString(), getActivity());
+        alert.show();
+    }
+
+    private void prepareResetRaceView() {
+        LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        resetRaceDialogView = inflater.inflate(R.layout.race_reset_confirmation, null);
+        TextView raceInfoView = (TextView) resetRaceDialogView.findViewById(R.id.textRaceResetRaceInfo);
+
+        ManagedRace race = getRace();
+        raceInfoView.setText(String.format("%s - %s - %s", race.getRaceGroup().getName(), race.getFleet().getName(), race.getRaceName()));
+    }
+
+    public void updateCourseDesignLabel() {
+        if (getRace().getState().getCourseDesign() != null) {
+
+            CourseBase courseDesign = getRace().getState().getCourseDesign();
+            if (Util.isEmpty(courseDesign.getWaypoints())) {
+                courseInfoHeader.setText(getString(R.string.running_on_unknown));
+            } else {
+                courseInfoHeader.setText(String.format(
+                        getString(R.string.course_design_number_waypoints),
+                        Util.size(courseDesign.getWaypoints())));
+            }
+        } else {
+            courseInfoHeader.setText(getString(R.string.running_on_unknown));
+        }
     }
 
 }
