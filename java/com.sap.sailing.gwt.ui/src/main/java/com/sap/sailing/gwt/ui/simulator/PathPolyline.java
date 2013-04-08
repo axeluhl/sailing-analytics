@@ -150,7 +150,7 @@ public class PathPolyline {
                     }
                     turnPoints = newTurnPoints.toArray(new LatLng[0]);
                     drawPolylineOnMap();
-                    
+
                 } else {
 
                     final int indexOfMovedPoint = getIndexOfMovedPoint();
@@ -163,7 +163,9 @@ public class PathPolyline {
                         // nor a 3-turns line.
                     } else {
 
-                        LatLng newPositionOfMovedPoint = getNewPositionOfMovedPointCurved(indexOfMovedPoint);
+                        Pair newPositionOfMovedPointAndFlag = getNewPositionOfMovedPointCurved(indexOfMovedPoint);
+                        LatLng newPositionOfMovedPoint = newPositionOfMovedPointAndFlag.point;
+                        Boolean projectionOfAfterEdge = newPositionOfMovedPointAndFlag.flag;
 
                         LatLng oldPositionOfFirstBeforeMovedPoint = turnPoints[indexOfMovedPoint - 1];
                         LatLng oldPositionOfMovedPoint = turnPoints[indexOfMovedPoint];
@@ -184,10 +186,11 @@ public class PathPolyline {
                         } else {
 
                             LatLng possibleNewPositionOfPointBeforeMoved = getNewPositionOfPointBeforeMovedCurved(indexOfMovedPoint, newPositionOfMovedPoint);
-                            if (PathPolyline.equals(possibleNewPositionOfPointBeforeMoved, turnPoints[indexOfMovedPoint - 1], EPSILON) == false) {
+                            if (projectionOfAfterEdge
+                                    && PathPolyline.equals(possibleNewPositionOfPointBeforeMoved, turnPoints[indexOfMovedPoint - 1], EPSILON) == false) {
 
                                 secondPart = false;
-                                
+
                                 //System.out.println("old Point: "+turnPoints[indexOfMovedPoint-1].getLatitude()+", "+turnPoints[indexOfMovedPoint-1].getLongitude());
                                 //System.out.println("new Point: "+possibleNewPositionOfPointBeforeMoved.getLatitude()+", "+possibleNewPositionOfPointBeforeMoved.getLongitude());
                                 turnPoints[indexOfMovedPoint - 1] = possibleNewPositionOfPointBeforeMoved;
@@ -195,7 +198,8 @@ public class PathPolyline {
                             }
 
                             LatLng possibleNewPositionOfPointAfterMoved = getNewPositionOfPointAfterMovedCurved(indexOfMovedPoint, newPositionOfMovedPoint);
-                            if (PathPolyline.equals(possibleNewPositionOfPointAfterMoved, turnPoints[indexOfMovedPoint + 1], EPSILON) == false) {
+                            if (!projectionOfAfterEdge
+                                    && PathPolyline.equals(possibleNewPositionOfPointAfterMoved, turnPoints[indexOfMovedPoint + 1], EPSILON) == false) {
 
                                 secondPart = true;
                                 turnPoints[indexOfMovedPoint + 1] = possibleNewPositionOfPointAfterMoved;
@@ -780,23 +784,23 @@ public class PathPolyline {
         return turnPoints;
     }
 
-    
+
     private Position intersectCurved(Position pos1, Bearing bear1, Position pos2, Bearing bear2) {
-        
+
         double lat1 = pos1.getLatRad();
         double lon1 = pos1.getLngRad();
-        
+
         double lat2 = pos2.getLatRad();
         double lon2 = pos2.getLngRad();
-        
+
         //System.out.println("p1: "+(lat1*180/Math.PI)+", "+(lon1*180/Math.PI));
         //System.out.println("p2: "+(lat2*180/Math.PI)+", "+(lon2*180/Math.PI));
-        
+
         Double lat3, lon3, ang3;
-        
+
         double crs13 = bear1.getRadians();
         double crs23 = bear2.getRadians();
-        
+
         double dst12=2.0*Math.asin(Math.sqrt(Math.pow(Math.sin((lat1-lat2)/2.0), 2.0)+Math.cos(lat1)*Math.cos(lat2)*Math.pow(Math.sin((lon1-lon2)/2.0), 2.0)));
 
         double crs12, crs21;
@@ -810,13 +814,13 @@ public class PathPolyline {
 
         double ang1 = ((crs13-crs12+Math.PI)%(2.0*Math.PI))-Math.PI;
         double ang2 = ((crs21-crs23+Math.PI)%(2.0*Math.PI))-Math.PI;
-        
+
         if ((Math.sin(ang1) == 0.0)&&(Math.sin(ang2) == 0.0)) {
             //"infinity of intersections"
             lat3 = null;
             lon3 = null;
         } else {
-            ang3=Math.acos(-Math.cos(ang1)*Math.cos(ang2)+Math.sin(ang1)*Math.sin(ang2)*Math.cos(dst12)); 
+            ang3=Math.acos(-Math.cos(ang1)*Math.cos(ang2)+Math.sin(ang1)*Math.sin(ang2)*Math.cos(dst12));
             double dst13 = Math.atan2(Math.sin(dst12)*Math.sin(ang1)*Math.sin(ang2),Math.cos(ang2)+Math.cos(ang1)*Math.cos(ang3));
             lat3=Math.asin(Math.sin(lat1)*Math.cos(dst13)+Math.cos(lat1)*Math.sin(dst13)*Math.cos(crs13));
             double dlon=Math.atan2(Math.sin(crs13)*Math.sin(dst13)*Math.cos(lat1),Math.cos(dst13)-Math.sin(lat1)*Math.sin(lat3));
@@ -829,18 +833,18 @@ public class PathPolyline {
             lat3 = -lat3;
             lon3 = Math.PI + lon3;
         }
-        
+
         //System.out.println("p4: "+(lat3*180/Math.PI)+", "+(lon3*180/Math.PI)+"\n");
-        
+
         Position intersectPoint = new RadianPosition(lat3, lon3);
-        
+
         return intersectPoint;
     }
-    
-    
 
-    
-    
+
+
+
+
     /**
      * This member computes the correct new position of the moved point. In order to do so, it will take into
      * consideration the "before edge" - the edge defined by the old position of the moved point and the previous point,
@@ -852,6 +856,7 @@ public class PathPolyline {
      *            - the index of the moved turn point.
      * @returns a LatLng object - the correct new position of the moved point.
      */
+    @SuppressWarnings("unused")
     private LatLng getNewPositionOfMovedPoint(int indexOfMovedPoint) {
 
         TwoDPoint firstBefore = this.toTwoDPoint(this.turnPoints[indexOfMovedPoint - 1]);
@@ -878,7 +883,7 @@ public class PathPolyline {
         }
     }
 
-    private LatLng getNewPositionOfMovedPointCurved(int indexOfMovedPoint) {
+    private Pair getNewPositionOfMovedPointCurved(int indexOfMovedPoint) {
 
         Position firstBefore = this.toPosition(this.turnPoints[indexOfMovedPoint - 1]);
         Position oldPositionMovedPoint = this.toPosition(this.turnPoints[indexOfMovedPoint]);
@@ -889,27 +894,27 @@ public class PathPolyline {
         // bearings of edges before and after
         Bearing bearBefore = firstBefore.getBearingGreatCircle(oldPositionMovedPoint);
         Bearing bearAfter = firstAfter.getBearingGreatCircle(oldPositionMovedPoint);
-        
+
         System.out.println("bearBefore: "+bearBefore.getDegrees());
         System.out.println("bearAfter : "+bearAfter.getDegrees());
-   
+
         // projection positions on edges before and after
         Position projectionOnBeforeEdge = newPositionMovedPointBeforeFix.projectToLineThrough(firstBefore, bearBefore);
         Position projectionOnAfterEdge = newPositionMovedPointBeforeFix.projectToLineThrough(firstAfter, bearAfter);
-        
+
         // distances between new position and edges, i.e. projection positions
         double distanceToBeforeEdge = newPositionMovedPointBeforeFix.getDistance(projectionOnBeforeEdge).getMeters();
         double distanceToAfterEdge = newPositionMovedPointBeforeFix.getDistance(projectionOnAfterEdge).getMeters();
-        
+
         LatLng projLatLngOnBeforeEdge = LatLng.newInstance(projectionOnBeforeEdge.getLatDeg(), projectionOnBeforeEdge.getLngDeg());
         LatLng projLatLngOnAfterEdge = LatLng.newInstance(projectionOnAfterEdge.getLatDeg(), projectionOnAfterEdge.getLngDeg());
-        
+
         if (indexOfMovedPoint == 1) {
-            return projLatLngOnBeforeEdge;
+            return new Pair(projLatLngOnBeforeEdge, false);
         } else if (indexOfMovedPoint == this.turnPoints.length - 2) {
-            return projLatLngOnAfterEdge;
+            return new Pair(projLatLngOnAfterEdge, true);
         } else {
-            return (distanceToBeforeEdge < distanceToAfterEdge) ? projLatLngOnBeforeEdge : projLatLngOnAfterEdge;
+            return (distanceToBeforeEdge < distanceToAfterEdge) ? new Pair(projLatLngOnBeforeEdge, false) : new Pair(projLatLngOnAfterEdge, true);
         }
     }
 
@@ -925,6 +930,7 @@ public class PathPolyline {
      *            - the new position of the moved point
      * @returns a LatLng object - the correct new position of the point after the moved one.
      */
+    @SuppressWarnings("unused")
     private LatLng getNewPositionOfPointAfterMoved(int indexOfMovedPoint, LatLng newPositionOfMovedPoint) {
 
         TwoDPoint oldPositionOfMovedPoint = toTwoDPoint(this.turnPoints[indexOfMovedPoint]);
@@ -940,7 +946,7 @@ public class PathPolyline {
     private LatLng getNewPositionOfPointAfterMovedCurved(int indexOfMovedPoint, LatLng newLatLngOfMovedPoint) {
 
         Position newPositionOfMovedPoint = toPosition(newLatLngOfMovedPoint);
-        
+
         Position oldPositionOfMovedPoint = toPosition(this.turnPoints[indexOfMovedPoint]);
         Position firstAfter = toPosition(this.turnPoints[indexOfMovedPoint + 1]);
         Position secondAfter = toPosition(this.turnPoints[indexOfMovedPoint + 2]);
@@ -948,14 +954,14 @@ public class PathPolyline {
         // bearings of fist and second after edges
         Bearing bearFirstAfter = oldPositionOfMovedPoint.getBearingGreatCircle(firstAfter);
         Bearing bearSecondAfter = secondAfter.getBearingGreatCircle(firstAfter);
-   
+
         // intersection point
         Position intersectPoint = this.intersectCurved(newPositionOfMovedPoint, bearFirstAfter, secondAfter, bearSecondAfter);
 
         return LatLng.newInstance(intersectPoint.getLatDeg(), intersectPoint.getLngDeg());
     }
 
-    
+
     /**
      * This member computes the correct new position of the point before the moved one. In order to do so, it will
      * compute the projection by vector of the new position of the moved point on the line defined by the first before
@@ -968,6 +974,7 @@ public class PathPolyline {
      *            - the new position of the moved point
      * @returns a LatLng object - the correct new position of the point before the moved one.
      */
+    @SuppressWarnings("unused")
     private LatLng getNewPositionOfPointBeforeMoved(int indexOfMovedPoint, LatLng newPositionOfMovedPoint) {
 
         TwoDPoint firstBefore = toTwoDPoint(this.turnPoints[indexOfMovedPoint - 1]);
@@ -991,10 +998,10 @@ public class PathPolyline {
         // bearings of fist and second after edges
         Bearing bearSecondBefore = secondBefore.getBearingGreatCircle(firstBefore);
         Bearing bearFirstBefore = oldPositionOfMovedPoint.getBearingGreatCircle(firstBefore);
- 
+
         System.out.println("bear2Before: "+bearSecondBefore.getDegrees());
         System.out.println("bear1Before: "+bearFirstBefore.getDegrees());
-       
+
         // intersection point
         Position intersectPoint = this.intersectCurved(newPositionOfMovedPoint, bearFirstBefore, secondBefore, bearSecondBefore);
         System.out.println("interSect: "+intersectPoint.getLatDeg()+", "+intersectPoint.getLngDeg());
@@ -1040,7 +1047,7 @@ public class PathPolyline {
         Position pos = new DegreePosition(latLng.getLatitude(), latLng.getLongitude());
         return pos;
     }
-    
+
     /**
      * Converts a TwoDPoint object to a LatLng object. Considering that a TwoDPoint represent a point on a plane and
      * that a LatLng object represents one on a sphere, it will use the MapWidget aproximation to a container pixel in
@@ -1133,5 +1140,15 @@ public class PathPolyline {
      */
     public static double knotsToMetersPerSecond(double knots) {
         return knots * FACTOR_KN2MPS;
+    }
+
+    private class Pair {
+        public LatLng point;
+        public Boolean flag;
+
+        public Pair(LatLng point, boolean flag) {
+            this.flag = flag;
+            this.point = point;
+        }
     }
 }
