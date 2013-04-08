@@ -30,10 +30,8 @@ import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.ui.adapters.finishing.CompetitorPositioningListAdapter;
 import com.sap.sailing.racecommittee.app.ui.adapters.finishing.CompetitorsAdapter;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
-import com.sap.sailing.racecommittee.app.utils.TickListener;
-import com.sap.sailing.racecommittee.app.utils.TickSingleton;
 
-public class FinishingRaceFragment extends RaceFragment implements TickListener {
+public class FinishingRaceFragment extends RaceFragment {
     
     private TextView countUpTextView;
     protected TextView nextFlagCountdown;
@@ -142,19 +140,6 @@ public class FinishingRaceFragment extends RaceFragment implements TickListener 
             }
         });
         
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        TickSingleton.INSTANCE.registerListener(this);
-        notifyTick();
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        TickSingleton.INSTANCE.unregisterListener(this);
     }
     
     /**

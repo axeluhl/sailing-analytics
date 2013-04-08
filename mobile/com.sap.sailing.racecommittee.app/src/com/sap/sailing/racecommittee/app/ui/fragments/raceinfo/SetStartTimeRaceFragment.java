@@ -19,10 +19,8 @@ import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
-import com.sap.sailing.racecommittee.app.utils.TickListener;
-import com.sap.sailing.racecommittee.app.utils.TickSingleton;
 
-public class SetStartTimeRaceFragment extends RaceFragment implements TickListener {
+public class SetStartTimeRaceFragment extends RaceFragment {
 
     public static SetStartTimeRaceFragment create(ManagedRace race) {
         SetStartTimeRaceFragment fragment = new SetStartTimeRaceFragment();
@@ -71,18 +69,6 @@ public class SetStartTimeRaceFragment extends RaceFragment implements TickListen
         // / TODO: click-listener for abort button
 
         refreshTimePickerTime();
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        TickSingleton.INSTANCE.registerListener(this);
-    }
-
-    @Override
-    public void onStop() {
-        TickSingleton.INSTANCE.unregisterListener(this);
-        super.onStop();
     }
 
     public void notifyTick() {

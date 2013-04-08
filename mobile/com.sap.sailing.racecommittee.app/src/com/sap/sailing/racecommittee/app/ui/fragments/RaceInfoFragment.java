@@ -218,4 +218,9 @@ public class RaceInfoFragment extends RaceFragment implements RaceStateChangedLi
         }
     }
 
+    @Override
+    public void notifyTick() {
+        //do nothing
+    }
+
 }

@@ -14,4 +14,10 @@ public class ErrorRaceFragment extends RaceFragment {
         ExLog.e(TAG, "Somehow the error race fragment got selected...");
     }
 
+    @Override
+    public void notifyTick() {
+        // TODO Auto-generated method stub
+        
+    }
+
 }

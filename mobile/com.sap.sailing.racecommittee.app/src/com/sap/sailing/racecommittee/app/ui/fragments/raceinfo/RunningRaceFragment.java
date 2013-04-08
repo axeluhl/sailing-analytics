@@ -14,10 +14,8 @@ import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
-import com.sap.sailing.racecommittee.app.utils.TickListener;
-import com.sap.sailing.racecommittee.app.utils.TickSingleton;
 
-public class RunningRaceFragment extends RaceFragment implements TickListener {
+public class RunningRaceFragment extends RaceFragment {
     
     private TextView countUpTextView;
     
@@ -38,19 +36,6 @@ public class RunningRaceFragment extends RaceFragment implements TickListener {
                 showDisplayBlueFlagDialog();
             }
         });
-    }
-    
-    @Override
-    public void onStart() {
-        super.onStart();
-        TickSingleton.INSTANCE.registerListener(this);
-        notifyTick();
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        TickSingleton.INSTANCE.unregisterListener(this);
     }
     
     private void showDisplayBlueFlagDialog() {

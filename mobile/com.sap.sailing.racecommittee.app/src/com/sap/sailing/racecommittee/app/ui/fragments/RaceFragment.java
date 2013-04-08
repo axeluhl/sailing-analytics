@@ -5,11 +5,13 @@ import java.io.Serializable;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.data.OnlineDataManager;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
+import com.sap.sailing.racecommittee.app.utils.TickListener;
+import com.sap.sailing.racecommittee.app.utils.TickSingleton;
 
 import android.app.Fragment;
 import android.os.Bundle;
 
-public class RaceFragment extends Fragment {
+public abstract class RaceFragment extends Fragment implements TickListener {
 
     public static Bundle createArguments(ManagedRace race) {
         Bundle arguments = new Bundle();
@@ -30,6 +32,19 @@ public class RaceFragment extends Fragment {
                     String.format("Unable to obtain ManagedRace from datastore on start of race fragment."));
         }
     }
+    
+    @Override
+    public void onStart() {
+        super.onStart();
+        TickSingleton.INSTANCE.registerListener(this);
+        notifyTick();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        TickSingleton.INSTANCE.unregisterListener(this);
+    }
 
     public ManagedRace getRace() {
         return managedRace;
@@ -45,5 +60,7 @@ public class RaceFragment extends Fragment {
         args.putSerializable(AppConstants.RACE_ID_KEY, managedRace.getId());
         return args;
     }
+
+    public abstract void notifyTick();
 
 }

@@ -14,10 +14,6 @@ import android.widget.TextView;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 
-/**
- * @author Klaus Trophie
- * 
- */
 public class FinishedRaceFragment extends RaceFragment {
 
     TextView headerView;
@@ -82,6 +78,12 @@ public class FinishedRaceFragment extends RaceFragment {
 
     private String getFormattedTimePart(int timePart) {
         return (timePart < 10) ? "0" + timePart : String.valueOf(timePart);
+    }
+
+    @Override
+    public void notifyTick() {
+        // TODO Auto-generated method stub
+        
     }
 
 }
