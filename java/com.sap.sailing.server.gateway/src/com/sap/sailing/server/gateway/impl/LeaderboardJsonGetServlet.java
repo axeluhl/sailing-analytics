@@ -46,6 +46,7 @@ public class LeaderboardJsonGetServlet extends AbstractJsonHttpServlet implement
     private static final Logger logger = Logger.getLogger(LeaderboardJsonGetServlet.class.getName());
     private static final String PARAM_NAME_LEADERBOARDNAME = "leaderboardName";
     private static final String PARAM_NAME_RESULTSTATE = "resultState";
+    private static final String PARAM_NAME_USE_CACHE = "useCache";
     
     public static enum ResultStates { Live, Preliminary, Final };
     
@@ -167,6 +168,11 @@ public class LeaderboardJsonGetServlet extends AbstractJsonHttpServlet implement
     public void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         TimePoint requestTimePoint = MillisecondsTimePoint.now();
         String leaderboardName = req.getParameter(PARAM_NAME_LEADERBOARDNAME);
+        String useCacheParam = req.getParameter(PARAM_NAME_USE_CACHE);
+        boolean useCache = true; // default
+        if(useCacheParam != null && "false".equalsIgnoreCase(useCacheParam)) {
+            useCache = false;
+        }
         if (leaderboardName == null) {
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Need to specify a leaderboard name using the "+
                     PARAM_NAME_LEADERBOARDNAME+" parameter");
@@ -181,7 +187,11 @@ public class LeaderboardJsonGetServlet extends AbstractJsonHttpServlet implement
                     JSONObject jsonLeaderboard;
                     if(resultTimePoint != null) {
                         Pair<TimePoint, ResultStates> resultStateAndTimePoint = new Pair<>(resultTimePoint, resultState);
-                        jsonLeaderboard = getLeaderboardJsonFromCacheOrCompute(leaderboard, resultStateAndTimePoint, requestTimePoint);
+                        if(useCache) {
+                            jsonLeaderboard = getLeaderboardJsonFromCacheOrCompute(leaderboard, resultStateAndTimePoint, requestTimePoint);
+                        } else {
+                            jsonLeaderboard = computeLeaderboardJson(leaderboard, resultStateAndTimePoint);
+                        }
                     } else {
                         jsonLeaderboard = createEmptyLeaderboardJson(leaderboard, resultState, requestTimePoint);
                         jsonLeaderboard.put("requestTimepoint", requestTimePoint.toString());
