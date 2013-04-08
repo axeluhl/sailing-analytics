@@ -84,7 +84,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
     private static final WindPatternDisplayManager wpDisplayManager = WindPatternDisplayManager.INSTANCE;
     private static final String POLYLINE_PATH_NAME = "Polyline";
 
-    private static final double TOTAL_TIME_SCALE_FACTOR = 0.9;
+    // private static final double TOTAL_TIME_SCALE_FACTOR = 0.9;
     private static final int DEFAULT_STEP_MAX = 800;
     private static final long DEFAULT_TIMESTEP = 6666;
 
@@ -359,8 +359,9 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
 
         this.stepSizeMeters = SimulatorServiceUtils.knotsToMetersPerSecond(this.averageWind.getKnots()) * (requestData.stepDurationMilliseconds / 1000.);
 
-        List<Position> points = SimulatorServiceUtils.getIntermediatePoints2(requestData.turnPoints, this.stepSizeMeters);
-        int noOfPointsMinus1 = points.size() - 1;
+        // List<Position> points = SimulatorServiceUtils.getIntermediatePoints2(requestData.turnPoints,
+        // this.stepSizeMeters);
+        // int noOfPointsMinus1 = points.size() - 1;
 
         Pair<PolarDiagram, String> polarDiagramAndNotificationMessage = this.getPolarDiagram(requestData.selection.boatClassIndex);
         PolarDiagram polarDiagram = polarDiagramAndNotificationMessage.getA();
@@ -369,44 +370,46 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         SailingSimulator simulator = new SailingSimulatorImpl(new SimulationParametersImpl(null, polarDiagram, null, SailingSimulatorUtil.measured));
         Path gpsTrack = simulator.getLegGPSTrack(SimulatorServiceUtils.toSimulatorUISelection(requestData.selection));
 
-        Position startPoint = null;
-        Position endPoint = null;
-        double boatBearingDeg = 0.;
-        double boatSpeedMetersPerSecond = 0.;
-        double distanceMeters = 0.;
-
-        SimulatorWindDTO courseStartPoint = requestData.allPoints.get(0);
-        long timepointAsMillis = courseStartPoint.timepoint;
-        SpeedWithBearing windAtTimePoint = null;
-
-        long stepTimeMilliseconds = 0L;
-
-        for (int index = 0; index < noOfPointsMinus1; index++) {
-
-            startPoint = points.get(index);
-            endPoint = points.get(index + 1);
-            distanceMeters = SimulatorServiceUtils.getDistanceBetween(startPoint, endPoint);
-
-            windAtTimePoint = requestData.useRealAverageWindSpeed ? SimulatorServiceUtils.getWindAtTimepoint(timepointAsMillis, gpsTrack)
-                    : SimulatorServiceUtils.DEFAULT_AVERAGE_WIND;
-
-            boatBearingDeg = SimulatorServiceUtils.getInitialBearing(startPoint, endPoint);
-            polarDiagram.setWind(windAtTimePoint);
-            boatSpeedMetersPerSecond = polarDiagram.getSpeedAtBearing(new DegreeBearingImpl(boatBearingDeg)).getMetersPerSecond();
-            stepTimeMilliseconds = (long) ((distanceMeters / boatSpeedMetersPerSecond) * 1000);
-            //problem right here
-            //boatSpeed might be 0 for very small distances
-            //this is a rough fix
-            if(boatSpeedMetersPerSecond == 0.0) {
-                stepTimeMilliseconds = 1000;
-            }
-
-            timepointAsMillis += stepTimeMilliseconds;
-
-        }
-
-        double totalTimeSeconds = (timepointAsMillis - requestData.allPoints.get(0).timepoint) / 1000;
-
+        // Position startPoint = null;
+        // Position endPoint = null;
+        // double boatBearingDeg = 0.;
+        // double boatSpeedMetersPerSecond = 0.;
+        // double distanceMeters = 0.;
+        //
+        // SimulatorWindDTO courseStartPoint = requestData.allPoints.get(0);
+        // long timepointAsMillis = courseStartPoint.timepoint;
+        // SpeedWithBearing windAtTimePoint = null;
+        //
+        // long stepTimeMilliseconds = 0L;
+        //
+        // for (int index = 0; index < noOfPointsMinus1; index++) {
+        //
+        // startPoint = points.get(index);
+        // endPoint = points.get(index + 1);
+        // distanceMeters = startPoint.getDistance(endPoint).getMeters();
+        //
+        // windAtTimePoint = requestData.useRealAverageWindSpeed ?
+        // SimulatorServiceUtils.getWindAtTimepoint(timepointAsMillis, gpsTrack)
+        // : SimulatorServiceUtils.DEFAULT_AVERAGE_WIND;
+        //
+        // boatBearingDeg = SimulatorServiceUtils.getInitialBearing(startPoint, endPoint);
+        // polarDiagram.setWind(windAtTimePoint);
+        // boatSpeedMetersPerSecond = polarDiagram.getSpeedAtBearing(new
+        // DegreeBearingImpl(boatBearingDeg)).getMetersPerSecond();
+        // stepTimeMilliseconds = (long) ((distanceMeters / boatSpeedMetersPerSecond) * 1000);
+        //
+        // // problem right here: boatSpeed might be 0 for very small distances
+        // // this is a rough fix
+        // if(boatSpeedMetersPerSecond == 0.0) {
+        // stepTimeMilliseconds = 1000;
+        // }
+        //
+        // timepointAsMillis += stepTimeMilliseconds;
+        //
+        // }
+        //
+        // double totalTimeSeconds = (timepointAsMillis - courseStartPoint.timepoint) / 1000;
+        //
         double totalTimeGPSTrackSeconds = (gpsTrack.getPathPoints().get(gpsTrack.getPathPoints().size() - 1).getTimePoint().asMillis() - gpsTrack
                 .getPathPoints().get(0).getTimePoint().asMillis()) / 1000;
 
@@ -414,9 +417,32 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         //while (totalTimeSeconds > totalTimeGPSTrackSeconds) {
         //    totalTimeSeconds *= TOTAL_TIME_SCALE_FACTOR;
         //}
-        System.out.println("TotalTimeGPS: "+totalTimeGPSTrackSeconds+"  TotalTimePoly: "+totalTimeSeconds);
 
-        return new ResponseTotalTimeDTO((long) totalTimeSeconds, (double)totalTimeSeconds/(double)totalTimeGPSTrackSeconds, notificationMessage);
+
+        long startTimePoint = requestData.allPoints.get(0).timepoint;
+        long segmentTime = 0;
+        int segmentIndex = 0;
+        long totalTime = 0;
+
+        for (int index = 0; index < requestData.turnPoints.size() - 1; index++) {
+
+            segmentIndex++;
+
+            totalTime += segmentTime;
+
+            segmentTime = getTimeMillisecondsBetween(requestData.turnPoints.get(index), requestData.turnPoints.get(index + 1), this.stepSizeMeters,
+                    requestData.useRealAverageWindSpeed, gpsTrack, polarDiagram, startTimePoint + totalTime);
+
+            System.out.println("Total time of segment " + segmentIndex + " = " + segmentTime + " milliseconds");
+        }
+
+        totalTime += segmentTime;
+
+        long totalTimeSeconds = totalTime / 1000;
+
+        System.out.println("TotalTimeGPS: " + totalTimeGPSTrackSeconds + "  TotalTimePoly: " + totalTimeSeconds);
+
+        return new ResponseTotalTimeDTO(totalTimeSeconds, totalTimeSeconds/totalTimeGPSTrackSeconds, notificationMessage);
     }
 
     @Override
@@ -908,6 +934,105 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
 
     public SpeedWithBearing getAverageWind() {
         return this.averageWind;
+    }
+
+    public List<Integer> GetIndexesOfTurnPointsInBigList(List<PositionDTO> turnPoints, List<SimulatorWindDTO> bigList) {
+
+        List<Integer> result = new ArrayList<Integer>();
+        result.add(0);
+
+        int noOfTurnPoints = turnPoints.size();
+        int noOfAllPoints = bigList.size();
+
+        PositionDTO turnPoint = null;
+        SimulatorWindDTO point = null;
+
+        int lastIndex = 0;
+
+        for (int index1 = 0; index1 < noOfTurnPoints; index1++) {
+
+            for (int index2 = lastIndex + 1; index2 < noOfAllPoints; index2++) {
+
+                turnPoint = turnPoints.get(index1);
+                point = bigList.get(index2);
+
+                if (point.position.latDeg == turnPoint.latDeg && point.position.lngDeg == turnPoint.lngDeg) {
+
+                    result.add(index2);
+                    lastIndex = index2;
+                }
+            }
+        }
+
+        return result;
+    }
+
+    public static List<Position> getIntermediatePoints(Position startPoint, Position endPoint, double stepSizeMeters) {
+        List<Position> result = new ArrayList<Position>();
+
+        double distance = startPoint.getDistance(endPoint).getMeters();
+
+        int noOfSteps = (int) (distance / stepSizeMeters) + 1;
+        double bearing = startPoint.getBearingGreatCircle(endPoint).getDegrees();
+
+        Position temp = null;
+
+        result.add(startPoint);
+        for (int stepIndex = 1; stepIndex < noOfSteps; stepIndex++) {
+
+            temp = SimulatorServiceUtils.getDestinationPoint(startPoint, bearing, stepSizeMeters * stepIndex);
+            result.add(temp);
+            bearing = startPoint.getBearingGreatCircle(temp).getDegrees();
+        }
+
+        return result;
+    }
+
+    public long getTimeMillisecondsBetween(PositionDTO turn1, PositionDTO turn2, double stepSizeMeters, boolean useRealAverageWindSpeed, Path gpsTrack,
+            PolarDiagram polarDiagram, long startTimePoint2) {
+
+        Position p1 = new DegreePosition(turn1.latDeg, turn1.lngDeg);
+        Position p2 = new DegreePosition(turn2.latDeg, turn2.lngDeg);
+
+        List<Position> points = getIntermediatePoints(p1, p2, stepSizeMeters);
+        int noOfPointsMinus1 = points.size() - 1;
+
+        Position startPoint = null;
+        Position endPoint = null;
+        double boatBearingDeg = 0.;
+        double boatSpeedMetersPerSecond = 0.;
+        double distanceMeters = 0.;
+
+        long timepointAsMillis = startTimePoint2;
+        SpeedWithBearing windAtTimePoint = null;
+
+        long stepTimeMilliseconds = 0L;
+
+        for (int index = 0; index < noOfPointsMinus1; index++) {
+
+            startPoint = points.get(index);
+            endPoint = points.get(index + 1);
+            distanceMeters = startPoint.getDistance(endPoint).getMeters();
+
+            windAtTimePoint = useRealAverageWindSpeed ? SimulatorServiceUtils.getWindAtTimepoint(timepointAsMillis, gpsTrack)
+                    : SimulatorServiceUtils.DEFAULT_AVERAGE_WIND;
+
+            boatBearingDeg = SimulatorServiceUtils.getInitialBearing(startPoint, endPoint);
+            polarDiagram.setWind(windAtTimePoint);
+            boatSpeedMetersPerSecond = polarDiagram.getSpeedAtBearing(new DegreeBearingImpl(boatBearingDeg)).getMetersPerSecond();
+            stepTimeMilliseconds = (long) ((distanceMeters / boatSpeedMetersPerSecond) * 1000);
+
+            // problem right here: boatSpeed might be 0 for very small distances
+            // this is a rough fix
+            if(boatSpeedMetersPerSecond == 0.0) {
+                stepTimeMilliseconds = 1000;
+            }
+
+            timepointAsMillis += stepTimeMilliseconds;
+        }
+
+        return (timepointAsMillis - startTimePoint2);
+
     }
 
 }

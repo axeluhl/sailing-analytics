@@ -22,46 +22,46 @@ import com.sap.sailing.simulator.impl.SimulatorUISelectionImpl;
 
 public class SimulatorServiceUtils {
 
-    public static final double EARTH_RADIUS_METERS = 6378137;
-    public static final double FACTOR_DEG2RAD = 0.0174532925;
-    public static final double FACTOR_RAD2DEG = 57.2957795;
-    public static final double FACTOR_KN2MPS = 0.514444;
-    public static final double FACTOR_MPS2KN = 1.94384;
-    public static final SpeedWithBearing DEFAULT_AVERAGE_WIND = new KnotSpeedWithBearingImpl(4.5, new DegreeBearingImpl(350));
+    public static double EARTH_RADIUS_METERS = 6378137;
+    public static double FACTOR_DEG2RAD = 0.0174532925;
+    public static double FACTOR_RAD2DEG = 57.2957795;
+    public static double FACTOR_KN2MPS = 0.514444;
+    public static double FACTOR_MPS2KN = 1.94384;
+    public static SpeedWithBearing DEFAULT_AVERAGE_WIND = new KnotSpeedWithBearingImpl(4.5, new DegreeBearingImpl(350));
 
     /**
      * Converts degress to radians
      */
-    public static double degreesToRadians(final double degrees) {
+    public static double degreesToRadians(double degrees) {
         return (degrees * FACTOR_DEG2RAD);
     }
 
     /**
      * Converts radians to degrees
      */
-    public static double radiansToDegrees(final double radians) {
+    public static double radiansToDegrees(double radians) {
         return (radians * FACTOR_RAD2DEG);
     }
 
     /**
      * Converts knots to meters per second
      */
-    public static double knotsToMetersPerSecond(final double knots) {
+    public static double knotsToMetersPerSecond(double knots) {
         return knots * FACTOR_KN2MPS;
     }
 
     /**
      * Converts meters per second to knots
      */
-    public static double metersPerSecondToKnots(final double metersPerSecond) {
+    public static double metersPerSecondToKnots(double metersPerSecond) {
         return metersPerSecond * FACTOR_MPS2KN;
     }
 
     /**
      * Computes the average value from the given list of SpeedWithBearing objects.
      */
-    public static SpeedWithBearing getAverage(final SimulatorWindDTO windDTO1, final SimulatorWindDTO windDTO2) {
-        final List<SimulatorWindDTO> windDTOs = new ArrayList<SimulatorWindDTO>();
+    public static SpeedWithBearing getAverage(SimulatorWindDTO windDTO1, SimulatorWindDTO windDTO2) {
+        List<SimulatorWindDTO> windDTOs = new ArrayList<SimulatorWindDTO>();
         windDTOs.add(windDTO1);
         windDTOs.add(windDTO2);
         return SimulatorServiceUtils.getAverage(windDTOs);
@@ -70,21 +70,21 @@ public class SimulatorServiceUtils {
     /**
      * Computes the average value from the given list of SpeedWithBearing objects.
      */
-    public static SpeedWithBearing getAverage(final List<SimulatorWindDTO> windDTOs) {
+    public static SpeedWithBearing getAverage(List<SimulatorWindDTO> windDTOs) {
 
         double sumOfProductOfSpeedAndCosBearing = 0.0;
         double sumOfProductOfSpeedAndSinBearing = 0.0;
         double windBearingRadians = 0.0;
 
-        for (final SimulatorWindDTO windDTO : windDTOs) {
+        for (SimulatorWindDTO windDTO : windDTOs) {
             windBearingRadians = degreesToRadians(windDTO.trueWindBearingDeg);
             sumOfProductOfSpeedAndSinBearing += (windDTO.trueWindSpeedInKnots * Math.sin(windBearingRadians));
             sumOfProductOfSpeedAndCosBearing += (windDTO.trueWindSpeedInKnots * Math.cos(windBearingRadians));
         }
-        final int count = windDTOs.size();
-        final double a = sumOfProductOfSpeedAndSinBearing / count;
-        final double b = sumOfProductOfSpeedAndCosBearing / count;
-        final double c = radiansToDegrees(Math.atan(a / b));
+        int count = windDTOs.size();
+        double a = sumOfProductOfSpeedAndSinBearing / count;
+        double b = sumOfProductOfSpeedAndCosBearing / count;
+        double c = radiansToDegrees(Math.atan(a / b));
 
         double averageBearingDegrees = 0.0;
 
@@ -98,7 +98,7 @@ public class SimulatorServiceUtils {
             averageBearingDegrees = 180 - c;
         }
 
-        final double averageSpeedKnots = Math.sqrt(a * a + b * b);
+        double averageSpeedKnots = Math.sqrt(a * a + b * b);
 
         return new KnotSpeedWithBearingImpl(averageSpeedKnots, new DegreeBearingImpl(averageBearingDegrees));
     }
@@ -106,11 +106,13 @@ public class SimulatorServiceUtils {
     /**
      * Gets an array of points from the start to the end with a certain step.
      */
-    public static List<Position> getIntermediatePoints(final Position startPoint, final Position endPoint, final double stepSizeMeters) {
-        final List<Position> result = new ArrayList<Position>();
+    public static List<Position> getIntermediatePoints(Position startPoint, Position endPoint, double stepSizeMeters) {
+        List<Position> result = new ArrayList<Position>();
 
-        final double distance = getDistanceBetween(startPoint, endPoint);
-        final int noOfSteps = (int) (distance / stepSizeMeters) + 1;
+        // double distance = getDistanceBetween(startPoint, endPoint);
+        double distance = startPoint.getDistance(endPoint).getMeters();
+
+        int noOfSteps = (int) (distance / stepSizeMeters) + 1;
         double bearing = getInitialBearing(startPoint, endPoint);
 
         Position temp = null;
@@ -125,10 +127,10 @@ public class SimulatorServiceUtils {
         return result;
     }
 
-    public static List<Position> getIntermediatePoints2(final List<PositionDTO> points, final double stepSizeMeters) {
-        final List<Position> newPoints = new ArrayList<Position>();
+    public static List<Position> getIntermediatePoints2(List<PositionDTO> points, double stepSizeMeters) {
+        List<Position> newPoints = new ArrayList<Position>();
 
-        for (final PositionDTO point : points) {
+        for (PositionDTO point : points) {
             newPoints.add(new DegreePosition(point.latDeg, point.lngDeg));
         }
 
@@ -139,30 +141,31 @@ public class SimulatorServiceUtils {
      * For every segment of two points in the given array, it computes the intermediate points given the certain step
      * size.
      */
-    public static List<Position> getIntermediatePoints(final List<Position> points, final double stepSizeMeters) {
+    public static List<Position> getIntermediatePoints(List<Position> points, double stepSizeMeters) {
 
-        final int noOfPoints = points.size();
-        final int noOfPointsMinus1 = noOfPoints - 1;
+        int noOfPoints = points.size();
+        int noOfPointsMinus1 = noOfPoints - 1;
         if (noOfPoints == 0) {
             return new ArrayList<Position>();
         } else if (noOfPoints == 1) {
             return points;
         } else if (noOfPoints == 2) {
 
-            final Position startPoint = points.get(0);
-            final Position endPoint = points.get(1);
+            Position startPoint = points.get(0);
+            Position endPoint = points.get(1);
 
-            final double distance = getDistanceBetween(startPoint, endPoint);
+            // double distance = getDistanceBetween(startPoint, endPoint);
+            double distance = startPoint.getDistance(endPoint).getMeters();
             if (distance <= stepSizeMeters) {
                 return points;
             } else {
-                final List<Position> newPoints = getIntermediatePoints(startPoint, endPoint, stepSizeMeters);
+                List<Position> newPoints = getIntermediatePoints(startPoint, endPoint, stepSizeMeters);
                 newPoints.add(endPoint);
                 return newPoints;
             }
         }
 
-        final List<Position> result = new ArrayList<Position>();
+        List<Position> result = new ArrayList<Position>();
 
         for (int index = 0; index < noOfPointsMinus1; index++) {
             result.addAll(getIntermediatePoints(points.get(index), points.get(index + 1), stepSizeMeters));
@@ -177,9 +180,10 @@ public class SimulatorServiceUtils {
     /**
      * Computes the time required to travel from the start point to the end point with the specified speed.
      */
-    public static double getTimeSeconds(final Position startPoint, final Position endPoint, final double endSpeedMetersPerSecond) {
+    public static double getTimeSeconds(Position startPoint, Position endPoint, double endSpeedMetersPerSecond) {
 
-        final double distance = getDistanceBetween(startPoint, endPoint);
+        // double distance = getDistanceBetween(startPoint, endPoint);
+        double distance = startPoint.getDistance(endPoint).getMeters();
 
         if (distance == 0.0) {
             return 0.0;
@@ -191,9 +195,9 @@ public class SimulatorServiceUtils {
     /**
      * Returns the total distance between the path composed of the given points
      */
-    public static double getTotalDistanceMeters(final Position[] points) {
+    public static double getTotalDistanceMeters(Position[] points) {
 
-        final int noOfPositions = points.length;
+        int noOfPositions = points.length;
 
         if (noOfPositions == 0 || noOfPositions == 1) {
             return 0.0;
@@ -207,64 +211,66 @@ public class SimulatorServiceUtils {
                 break;
             }
 
-            result += getDistanceBetween(points[index], points[index + 1]);
+            result += points[index].getDistance(points[index + 1]).getMeters();
+            // result += getDistanceBetween(points[index], points[index + 1]);
         }
 
         return result;
     }
 
-    /**
-     * Returns the distance from this point to the supplied point, in meters (using Haversine formula).
-     */
-    public static double getDistanceBetween(final Position startPoint, final Position endPoint) {
-
-        final double lat1 = startPoint.getLatRad();
-        final double lon1 = startPoint.getLngRad();
-
-        final double lat2 = endPoint.getLatRad();
-        final double lon2 = endPoint.getLngRad();
-
-        final double dLat = lat2 - lat1;
-        final double dLon = lon2 - lon1;
-
-        final double a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
-        final double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        final double d = EARTH_RADIUS_METERS * c;
-
-        return d;
-    }
+    // /**
+    // * Returns the distance from this point to the supplied point, in meters (using Haversine formula).
+    // */
+    // public static double getDistanceBetween(Position startPoint, Position endPoint) {
+    //
+    // double lat1 = startPoint.getLatRad();
+    // double lon1 = startPoint.getLngRad();
+    //
+    // double lat2 = endPoint.getLatRad();
+    // double lon2 = endPoint.getLngRad();
+    //
+    // double dLat = lat2 - lat1;
+    // double dLon = lon2 - lon1;
+    //
+    // double a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLon / 2) *
+    // Math.sin(dLon / 2);
+    // double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    // double d = EARTH_RADIUS_METERS * c;
+    //
+    // return d;
+    // }
 
     /**
      * Returns the initial bearing from the start point to the end point in degrees
      */
-    public static double getInitialBearing(final Position startPoint, final Position endPoint) {
+    public static double getInitialBearing(Position startPoint, Position endPoint) {
 
-        final double lat1 = startPoint.getLatRad();
-        final double lat2 = endPoint.getLatRad();
+        double lat1 = startPoint.getLatRad();
+        double lat2 = endPoint.getLatRad();
 
-        final double dLon = endPoint.getLngRad() - startPoint.getLngRad();
+        double dLon = endPoint.getLngRad() - startPoint.getLngRad();
 
-        final double y = Math.sin(dLon) * Math.cos(lat2);
-        final double x = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLon);
-        final double bearing = Math.atan2(y, x);
+        double y = Math.sin(dLon) * Math.cos(lat2);
+        double x = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLon);
+        double bearing = Math.atan2(y, x);
 
         return (radiansToDegrees(bearing) + 360) % 360;
     }
 
     /**
-     * Returns final bearing arriving at the end point from the start point; The final bearing will differ from the
-     * initial bearing by varying degrees according to distance and latitude
+     * Returns bearing arriving at the end point from the start point; The bearing will differ from the initial bearing
+     * by varying degrees according to distance and latitude
      */
-    public static double getFinalBearing(final Position startPoint, final Position endPoint) {
+    public static double getFinalBearing(Position startPoint, Position endPoint) {
 
-        final double lat1 = startPoint.getLatRad();
-        final double lat2 = endPoint.getLatRad();
+        double lat1 = startPoint.getLatRad();
+        double lat2 = endPoint.getLatRad();
 
-        final double dLon = endPoint.getLngRad() - startPoint.getLngRad();
+        double dLon = endPoint.getLngRad() - startPoint.getLngRad();
 
-        final double y = Math.sin(dLon) * Math.cos(lat2);
-        final double x = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLon);
-        final double bearing = Math.atan2(y, x);
+        double y = Math.sin(dLon) * Math.cos(lat2);
+        double x = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLon);
+        double bearing = Math.atan2(y, x);
 
         return (radiansToDegrees(bearing) + 180) % 360;
     }
@@ -272,18 +278,18 @@ public class SimulatorServiceUtils {
     /**
      * Returns the midpoint between this point and the supplied point.
      */
-    public static Position getMidpointBetween(final Position startPoint, final Position endPoint) {
+    public static Position getMidpointBetween(Position startPoint, Position endPoint) {
 
-        final double lat1 = startPoint.getLatRad();
-        final double lon1 = startPoint.getLngRad();
-        final double lat2 = endPoint.getLatRad();
+        double lat1 = startPoint.getLatRad();
+        double lon1 = startPoint.getLngRad();
+        double lat2 = endPoint.getLatRad();
 
-        final double dLon = endPoint.getLngRad() - lon1;
+        double dLon = endPoint.getLngRad() - lon1;
 
-        final double Bx = Math.cos(lat2) * Math.cos(dLon);
-        final double By = Math.cos(lat2) * Math.sin(dLon);
+        double Bx = Math.cos(lat2) * Math.cos(dLon);
+        double By = Math.cos(lat2) * Math.sin(dLon);
 
-        final double lat3 = Math.atan2(Math.sin(lat1) + Math.sin(lat2), Math.sqrt((Math.cos(lat1) + Bx) * (Math.cos(lat1) + Bx) + By * By));
+        double lat3 = Math.atan2(Math.sin(lat1) + Math.sin(lat2), Math.sqrt((Math.cos(lat1) + Bx) * (Math.cos(lat1) + Bx) + By * By));
         double lon3 = lon1 + Math.atan2(By, Math.cos(lat1) + Bx);
         lon3 = (lon3 + 3 * Math.PI) % (2 * Math.PI) - Math.PI;
 
@@ -294,14 +300,14 @@ public class SimulatorServiceUtils {
      * Returns the destination point from this point having travelled the given distance, in meters on the given initial
      * bearing (bearing may vary before destination is reached)
      */
-    public static Position getDestinationPoint(final Position startPoint, final double bearingDegrees, final double distanceMeters) {
+    public static Position getDestinationPoint(Position startPoint, double bearingDegrees, double distanceMeters) {
 
-        final double distance = distanceMeters / EARTH_RADIUS_METERS;
-        final double bearing = degreesToRadians(bearingDegrees);
-        final double lat1 = startPoint.getLatRad();
-        final double lon1 = startPoint.getLngRad();
+        double distance = distanceMeters / EARTH_RADIUS_METERS;
+        double bearing = degreesToRadians(bearingDegrees);
+        double lat1 = startPoint.getLatRad();
+        double lon1 = startPoint.getLngRad();
 
-        final double lat2 = Math.asin(Math.sin(lat1) * Math.cos(distance) + Math.cos(lat1) * Math.sin(distance) * Math.cos(bearing));
+        double lat2 = Math.asin(Math.sin(lat1) * Math.cos(distance) + Math.cos(lat1) * Math.sin(distance) * Math.cos(bearing));
         double lon2 = lon1 + Math.atan2(Math.sin(bearing) * Math.sin(distance) * Math.cos(lat1), Math.cos(distance) - Math.sin(lat1) * Math.sin(lat2));
         lon2 = (lon2 + 3 * Math.PI) % (2 * Math.PI) - Math.PI;
 
