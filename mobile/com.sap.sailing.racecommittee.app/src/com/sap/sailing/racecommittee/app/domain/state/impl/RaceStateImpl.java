@@ -20,6 +20,7 @@ import com.sap.sailing.domain.racelog.RaceLogEventFactory;
 import com.sap.sailing.domain.racelog.analyzing.impl.FinishPositioningListFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.FinishedTimeFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.FinishingTimeFinder;
+import com.sap.sailing.domain.racelog.analyzing.impl.IndividualRecallFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.LastPublishedCourseDesignFinder;
 import com.sap.sailing.domain.racelog.analyzing.impl.RaceStatusAnalyzer;
 import com.sap.sailing.domain.racelog.analyzing.impl.StartTimeFinder;
@@ -45,6 +46,7 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
     private FinishingTimeFinder finishingTimeFinder;
     private LastPublishedCourseDesignFinder lastCourseDesignFinder;
     private FinishPositioningListFinder finishPositioningListFinder;
+    private IndividualRecallFinder individualRecallFinder;
 
     public RaceStateImpl(PassAwareRaceLog raceLog, StartProcedure procedure) {
         this.raceLog = raceLog;
@@ -63,6 +65,7 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
         this.statusAnalyzer = new RaceStatusAnalyzer(raceLog);
         this.lastCourseDesignFinder = new LastPublishedCourseDesignFinder(raceLog);
         this.finishPositioningListFinder = new FinishPositioningListFinder(raceLog);
+        this.individualRecallFinder = new IndividualRecallFinder(raceLog);
         updateStatus();
     }
 
@@ -219,6 +222,33 @@ public class RaceStateImpl implements RaceState, RaceLogChangedListener {
         
         RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFinishPositioningConfirmedEvent(eventTime, raceLog.getCurrentPassId());
         this.raceLog.add(event);        
+    }
+
+    @Override
+    public void onIndividualRecall(TimePoint individualRecallRemovalFireTimePoint) {
+        notifyListenersAboutIndividualRecall(individualRecallRemovalFireTimePoint);
+    }
+
+    private void notifyListenersAboutIndividualRecall(TimePoint individualRecallRemovalFireTimePoint) {
+        for (RaceStateChangedListener listener : stateChangedListeners) {
+            listener.onIndividualRecallDisplayed(individualRecallRemovalFireTimePoint);
+        }
+    }
+
+    @Override
+    public TimePoint getIndividualRecallDisplayedTime() {
+        return individualRecallFinder.getIndividualRecallDisplayedTime();
+    }
+
+    @Override
+    public void onIndividualRecallRemoval() {
+        notifyListenersAboutIndividualRecallRemoval();
+    }
+
+    private void notifyListenersAboutIndividualRecallRemoval() {
+        for (RaceStateChangedListener listener : stateChangedListeners) {
+            listener.onIndividualRecallRemoval();
+        }
     }
 
 }

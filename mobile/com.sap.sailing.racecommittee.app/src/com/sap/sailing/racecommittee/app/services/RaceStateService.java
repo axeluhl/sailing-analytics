@@ -167,6 +167,8 @@ public class RaceStateService extends Service {
             race.getState().getStartProcedure().dispatchFiredEventTimePoint(race.getState().getStartTime(), eventTime);
             managedIntents.get(race.getId()).remove(intent);
             return;
+        } else if (getString(R.string.intentActionIndividualRecallRemoval).equals(action)) {
+            race.getState().getStartProcedure().dispatchFiredIndividualRecallRemovalEvent(race.getState().getIndividualRecallDisplayedTime(), eventTime);
         }
     }
 
@@ -220,6 +222,8 @@ public class RaceStateService extends Service {
         case STARTPHASE:
             handleNewStartTime(race, state.getStartTime());
             break;
+        case RUNNING:
+            //TODO check for individual recall removal event
         default:
             break;
         }
@@ -231,15 +235,14 @@ public class RaceStateService extends Service {
         //formerly state.getStartTime().plus(1) don't know why
         
         List<TimePoint> fireTimePoints = race.getState().getStartProcedure().getAutomaticEventFireTimePoints(startTime);
+        String action = getString(R.string.intentActionAlarmAction);
         for (TimePoint eventFireTimePoint : fireTimePoints) {
-            scheduleEventTime(race, eventFireTimePoint);
+            scheduleEventTime(action, race, eventFireTimePoint);
         }
         ExLog.i(TAG, "Race " + race.getId() + " is scheduled now.");
     }
 
-    private void scheduleEventTime(ManagedRace race, TimePoint eventFireTimePoint) {
-        String action = getString(R.string.intentActionAlarmAction);
-
+    private void scheduleEventTime(String action, ManagedRace race, TimePoint eventFireTimePoint) {
         addIntentToAlarmManager(action, race, eventFireTimePoint);
     }
 
@@ -284,8 +287,13 @@ public class RaceStateService extends Service {
         clearAlarms(race.getId());
     }
 
-    public void handleIndividualRecall(ManagedRace race, TimePoint eventTime) {
-        //TODO handle X Flag: Trigger X Flag removal according to start procedure
+    public void handleIndividualRecall(ManagedRace race, TimePoint individualRecallRemovalFireTimePoint) {
+        String action = getString(R.string.intentActionIndividualRecallRemoval);
+        scheduleEventTime(action, race, individualRecallRemovalFireTimePoint);
+    }
+
+    public void handleIndividualRecallRemoved(ManagedRace race) {
+        clearAlarms(race.getId());
     }
 
 }

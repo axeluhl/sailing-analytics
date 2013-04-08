@@ -32,7 +32,12 @@ public class RaceStateListener implements RaceStateChangedListener {
     }
 
     @Override
-    public void onIndividualRecall(TimePoint eventTime) {
-        service.handleIndividualRecall(race, eventTime);
+    public void onIndividualRecallDisplayed(TimePoint individualRecallRemovalFireTimePoint) {
+        service.handleIndividualRecall(race, individualRecallRemovalFireTimePoint);
+    }
+
+    @Override
+    public void onIndividualRecallRemoval() {
+        service.handleIndividualRecallRemoved(race);
     }
 }

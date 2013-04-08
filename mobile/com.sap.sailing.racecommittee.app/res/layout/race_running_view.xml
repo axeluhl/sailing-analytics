@@ -120,8 +120,8 @@
             android:gravity="center_horizontal"
             android:orientation="vertical" >
 
-                    <!-- <ImageButton
-                        android:id="@+id/xrayButton"
+                    <ImageButton
+                        android:id="@+id/individualRecallButton"
                         android:layout_width="140dp"
                 		android:layout_height="80dp"
                         android:contentDescription="@string/choose_xray_flag_up"
@@ -130,7 +130,7 @@
                         android:visibility="gone" />
 
                     <TextView
-                        android:id="@+id/ChooseXrayLabel"
+                        android:id="@+id/individualRecallLabel"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="5dp"
@@ -139,7 +139,7 @@
                         android:textAppearance="@style/TextAppearance.Welter.TitleLabel"
                         android:visibility="gone" />
                     
-                    <ImageButton
+                    <!-- <ImageButton
                         android:id="@+id/golfButton"
                         android:layout_width="140dp"
                 		android:layout_height="80dp"
@@ -156,7 +156,7 @@
                         android:layout_marginTop="2dp"
                         android:text="@string/choose_golf_flag_down"
                         android:textAppearance="@style/TextAppearance.Welter.TitleLabel"
-                        android:visibility="gone" />
+                        android:visibility="gone" />-->
 
                     <ImageButton
                         android:id="@+id/firstSubstituteButton"
@@ -173,7 +173,7 @@
                         android:layout_marginBottom="5dp"
                         android:layout_marginTop="2dp"
                         android:text="@string/choose_first_substitute_flag"
-                        android:textAppearance="@style/TextAppearance.Welter.TitleLabel" />  -->
+                        android:textAppearance="@style/TextAppearance.Welter.TitleLabel" />
 
                     <ImageButton
                         android:id="@+id/blueFlagButton"

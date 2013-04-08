@@ -12,13 +12,15 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.AbortTypeSelectionDialog;
+import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.IndividualRecallUiListener;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceDialogFragment;
 
-public class RunningRaceFragment extends RaceFragment {
+public class RunningRaceFragment extends RaceFragment implements IndividualRecallUiListener {
     
     private TextView countUpTextView;
     
@@ -46,8 +48,48 @@ public class RunningRaceFragment extends RaceFragment {
                 showChooseAPNovemberDialog();
             }
         });
+        
+        ImageButton generalRecallFlagButton = (ImageButton) getView().findViewById(R.id.firstSubstituteButton);
+        generalRecallFlagButton.setOnClickListener(new OnClickListener() {
+            public void onClick(View v) {
+                showDisplayGeneralRecallDialog();
+            }
+        });
+        
+        
+        ImageButton individualRecallButton = (ImageButton) getView().findViewById(R.id.individualRecallButton);
+        individualRecallButton.setOnClickListener(new OnClickListener() {
+            public void onClick(View v) {
+                TimePoint now = MillisecondsTimePoint.now();
+                if (getRace().getState().getIndividualRecallDisplayedTime() == null) {
+                    getRace().getState().getStartProcedure().setIndividualRecall(now);
+                } else {
+                    getRace().getState().getStartProcedure().setIndividualRecallRemoval(now);
+                }
+            }
+        });
     }
-    
+
+    private void showDisplayGeneralRecallDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setMessage(getActivity().getResources().getString(R.string.confirmation_first_substitute_display))
+        .setCancelable(true)
+        .setPositiveButton(getActivity().getResources().getString(R.string.yes), new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                ExLog.i(ExLog.RACE_RUNNING_GENERAL_RECALL_YES, getRace().getId().toString(), getActivity());
+                getRace().getState().getStartProcedure().setGeneralRecall(MillisecondsTimePoint.now());
+            }
+        })
+        .setNegativeButton(getActivity().getResources().getString(R.string.no), new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                ExLog.i(ExLog.RACE_RUNNING_GENERAL_RECALL_NO, getRace().getId().toString(), getActivity());
+                dialog.cancel();
+            }
+        });
+        AlertDialog alert = builder.create();
+        alert.show();
+    }
+
     private void showDisplayBlueFlagDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setMessage(getActivity().getResources().getString(R.string.confirmation_blue_flag_display))
@@ -102,6 +144,16 @@ public class RunningRaceFragment extends RaceFragment {
         fragment.setArguments(args);
 
         fragment.show(fragmentManager, "dialogAPNovemberMode");
+    }
+
+    @Override
+    public void removeIndividualRecallFlag() {
+        //TODO flag moving
+    }
+
+    @Override
+    public void displayIndividualRecallFlag() {
+        //TODO flag moving
     }
 
 }

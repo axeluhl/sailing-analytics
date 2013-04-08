@@ -115,4 +115,9 @@ public interface RaceState extends StartProcedureRaceStateChangedListener {
      */
     StartProcedure getStartProcedure();
 
+    /**
+     * @return the timepoint at which the individual recall was displayed or null when the individual recall is already removed
+     */
+    TimePoint getIndividualRecallDisplayedTime();
+
 }

@@ -31,5 +31,13 @@ public interface StartProcedure {
     void setPostponed(TimePoint eventTime, Flags lowerFlag);
     
     void setAbandoned(TimePoint eventTime, Flags lowerFlag);
+    
+    void setGeneralRecall(TimePoint eventTime);
+    
+    void setIndividualRecall(TimePoint eventTime);
+
+    void dispatchFiredIndividualRecallRemovalEvent(TimePoint individualRecallDisplayedTime, TimePoint eventTime);
+    
+    void setIndividualRecallRemoval(TimePoint eventTime);
 
 }

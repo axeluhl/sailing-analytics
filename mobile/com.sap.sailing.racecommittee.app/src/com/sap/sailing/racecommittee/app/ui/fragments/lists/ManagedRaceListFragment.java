@@ -226,7 +226,12 @@ public class ManagedRaceListFragment extends ListFragment implements JuryFlagCli
     }
 
     @Override
-    public void onIndividualRecall(TimePoint eventTime) {
+    public void onIndividualRecallDisplayed(TimePoint individualRecallRemovalFireTimePoint) {
+        notifyDataChanged();
+    }
+
+    @Override
+    public void onIndividualRecallRemoval() {
         notifyDataChanged();
     }
 

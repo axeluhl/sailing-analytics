@@ -9,5 +9,7 @@ public interface RaceStateChangedListener {
     
     void onRaceAborted();
     
-    void onIndividualRecall(TimePoint eventTime);
+    void onIndividualRecallDisplayed(TimePoint individualRecallRemovalFireTimePoint);
+
+    void onIndividualRecallRemoval();
 }

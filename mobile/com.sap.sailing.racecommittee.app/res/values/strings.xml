@@ -7,6 +7,7 @@
     <string name="intentActionSendSavedIntents">com.sap.sailing.racecommittee.app.action.sendSavedIntents</string>
     <string name="intentActionSendEvent">com.sap.sailing.racecommittee.app.action.sendEvent</string>
     <string name="intentActionAlarmAction">com.sap.sailing.racecommittee.app.action.alarmAction</string>
+    <string name="intentActionIndividualRecallRemoval">com.sap.sailing.racecommittee.app.action.individualrecallremovalaction</string>
     
     <string name="hello">Hello World, RaceCommitteeActivity!</string>
     <string name="running_on_course">(on course %s)</string>
@@ -82,6 +83,7 @@
 	<string name="gateStart_mode">Gate start</string>
 	<string name="confirmation_blue_flag_remove">Are you sure to remove the blue flag?</string>
 	<string name="confirmation_blue_flag_display">Are you sure to display the blue flag?</string>
+	<string name="confirmation_first_substitute_display">Are you sure to display general recall?</string>
 	<string name="finishing_limit_template">Race finishing limit is at %s</string>
 	<string name="race_running_since_template" formatted="false">%s since %s started</string>
 	

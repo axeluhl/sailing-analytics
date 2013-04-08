@@ -23,6 +23,8 @@ public class ExtremeSailingSeriesStartProcedure implements StartProcedure {
     private final static long startPhaseESSOneUpInterval = 1 * 60 * 1000; // minutes * seconds * milliseconds
     private final static long startPhaseESSOneDownInterval = 0;
     
+    private final static long individualRecallRemovalInterval = 4 * 60 * 1000; // minutes * seconds * milliseconds
+    
     private List<Long> startProcedureEventIntervals;
     private PassAwareRaceLog raceLog;
     private StartProcedureRaceStateChangedListener raceStateChangedListener;
@@ -214,6 +216,53 @@ public class ExtremeSailingSeriesStartProcedure implements StartProcedure {
         
         if (raceStateChangedListener != null) {
             raceStateChangedListener.onRaceAborted(eventTime);
+        }
+    }
+
+    @Override
+    public void setGeneralRecall(TimePoint eventTime) {
+        TimePoint recallDisplayEventTime = eventTime.minus(1);
+        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(recallDisplayEventTime, UUID.randomUUID(), Collections.<Competitor>emptyList(), 
+                raceLog.getCurrentPassId(), Flags.FIRSTSUBSTITUTE, Flags.NONE, /*isDisplayed*/true);
+        raceLog.add(event);
+        
+        if (raceStateChangedListener != null) {
+            raceStateChangedListener.onRaceAborted(eventTime);
+        }
+    }
+
+    @Override
+    public void setIndividualRecall(TimePoint eventTime) {
+        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(eventTime, UUID.randomUUID(), Collections.<Competitor>emptyList(), 
+                raceLog.getCurrentPassId(), Flags.XRAY, Flags.NONE, /*isDisplayed*/true);
+        raceLog.add(event);
+        
+        TimePoint individualRecallRemovalFireTimePoint = eventTime.plus(individualRecallRemovalInterval);
+        
+        if (raceStateChangedListener != null) {
+            raceStateChangedListener.onIndividualRecall(individualRecallRemovalFireTimePoint);
+        }
+    }
+
+    @Override
+    public void dispatchFiredIndividualRecallRemovalEvent(TimePoint individualRecallDisplayedTime, TimePoint eventTime) {
+        if (individualRecallDisplayedTime != null) {
+            long interval = eventTime.asMillis() - individualRecallDisplayedTime.asMillis();
+            
+            if (interval == individualRecallRemovalInterval) {
+                setIndividualRecallRemoval(eventTime);
+            }
+        }
+    }
+
+    @Override
+    public void setIndividualRecallRemoval(TimePoint eventTime) {
+        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(eventTime, UUID.randomUUID(), Collections.<Competitor>emptyList(), 
+                raceLog.getCurrentPassId(), Flags.XRAY, Flags.NONE, /*isDisplayed*/false);
+        raceLog.add(event);
+        
+        if (raceStateChangedListener != null) {
+            raceStateChangedListener.onIndividualRecallRemoval();
         }
     }
 

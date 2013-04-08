@@ -24,6 +24,7 @@ import com.sap.sailing.racecommittee.app.domain.state.RaceStateChangedListener;
 import com.sap.sailing.racecommittee.app.logging.ExLog;
 import com.sap.sailing.racecommittee.app.ui.fragments.chooser.RaceInfoFragmentChooser;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.CourseDesignDialogFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.IndividualRecallUiListener;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceDialogFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceInfoListener;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.SetStartTimeRaceFragment;
@@ -161,8 +162,10 @@ public class RaceInfoFragment extends RaceFragment implements RaceStateChangedLi
     }
 
     @Override
-    public void onIndividualRecall(TimePoint eventTime) {
-        //do nothing (onRaceStateChanged(RaceState) handles state change and fragment switch already
+    public void onIndividualRecallDisplayed(TimePoint individualRecallRemovalFireTimePoint) {
+        if (infoFragment instanceof IndividualRecallUiListener) {
+            ((IndividualRecallUiListener) infoFragment).displayIndividualRecallFlag();
+        }
     }
 
     private void showRaceResetConfirmationDialog() {
@@ -221,6 +224,13 @@ public class RaceInfoFragment extends RaceFragment implements RaceStateChangedLi
     @Override
     public void notifyTick() {
         //do nothing
+    }
+
+    @Override
+    public void onIndividualRecallRemoval() {
+        if (infoFragment instanceof IndividualRecallUiListener) {
+            ((IndividualRecallUiListener) infoFragment).removeIndividualRecallFlag();
+        }
     }
 
 }
