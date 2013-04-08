@@ -183,6 +183,7 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
                 if (message.getSequenceNumber() != null) {
                     maxSequenceNumber = message.getSequenceNumber();
                 }
+                i++;
                 notifyListenersStoredDataProgress(raceID, ((double) i)/(double) messages.size());
             }
             // now process the buffered messages one by one:
