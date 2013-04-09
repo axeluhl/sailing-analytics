@@ -9,6 +9,9 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.RelativeLayout;
+import android.widget.RelativeLayout.LayoutParams;
 import android.widget.TextView;
 
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
@@ -23,6 +26,9 @@ import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceDialogFragment
 public class RunningRaceFragment extends RaceFragment implements IndividualRecallUiListener {
     
     private TextView countUpTextView;
+    private ImageView individualRecallFlag;
+    private TextView individualRecallLabel;
+    ImageButton abortingFlagButton;
     
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -35,6 +41,9 @@ public class RunningRaceFragment extends RaceFragment implements IndividualRecal
         
         countUpTextView = (TextView) getView().findViewById(R.id.raceCountUp);
         
+        individualRecallFlag = (ImageView) getView().findViewById(R.id.xrayFlag);
+        individualRecallLabel = (TextView) getView().findViewById(R.id.individualRecallLabel);
+        
         ImageButton blueFlagButton = (ImageButton) getView().findViewById(R.id.blueFlagButton);
         blueFlagButton.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
@@ -42,7 +51,7 @@ public class RunningRaceFragment extends RaceFragment implements IndividualRecal
             }
         });
         
-        ImageButton abortingFlagButton = (ImageButton) getView().findViewById(R.id.abortingFlagButton);
+        abortingFlagButton = (ImageButton) getView().findViewById(R.id.abortingFlagButton);
         abortingFlagButton.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
                 showChooseAPNovemberDialog();
@@ -148,12 +157,39 @@ public class RunningRaceFragment extends RaceFragment implements IndividualRecal
 
     @Override
     public void removeIndividualRecallFlag() {
-        //TODO flag moving
+        setIndividualRecallRemovedInView();
     }
 
     @Override
     public void displayIndividualRecallFlag() {
-        //TODO flag moving
+        setIndividualRecallDisplayedInView();
     }
 
+    private void setIndividualRecallDisplayedInView() {
+        moveImageUp(individualRecallFlag);
+        String unsetXray = getActivity().getResources().getString(R.string.choose_xray_flag_down);
+        individualRecallLabel.setText(unsetXray);
+    }
+    
+    private void setIndividualRecallRemovedInView() {
+        moveImageDown(individualRecallFlag);
+        //setXrayCountdownLabel();
+        String setIndividualRecallUp = getActivity().getResources().getString(R.string.choose_xray_flag_up);
+        individualRecallLabel.setText(setIndividualRecallUp);
+    }
+
+    protected void moveImageUp(ImageView image) {
+        moveImage(image, 1, 0);
+    }
+
+    protected void moveImageDown(ImageView image) {
+        moveImage(image, 0, 1);
+    }
+
+    protected void moveImage(ImageView image, int parentTop, int parentBottom) {
+        LayoutParams params = (RelativeLayout.LayoutParams) image.getLayoutParams();
+        params.addRule(RelativeLayout.ALIGN_PARENT_TOP, parentTop);
+        params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, parentBottom);
+        image.setLayoutParams(params);
+    }
 }

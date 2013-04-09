@@ -163,7 +163,4 @@ public class EssStartPhaseFragment extends RaceFragment implements EssStartPhase
         
         nextToBeDisplayedFlag.setVisibility(View.INVISIBLE);
     }
-    
-    
-
 }
