@@ -125,6 +125,7 @@ public class RunningRaceFragment extends RaceFragment implements IndividualRecal
 
         long millisSinceStart = System.currentTimeMillis() - getRace().getState().getStartTime().asMillis();
         setStarttimeCountupLabel(millisSinceStart);
+        //TODO: implement count down label text when individual recall is displayed
     }
 
 
