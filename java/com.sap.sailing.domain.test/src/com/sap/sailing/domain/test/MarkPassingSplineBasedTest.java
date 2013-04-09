@@ -95,8 +95,8 @@ public class MarkPassingSplineBasedTest extends AbstractMarkPassingTest {
 		}
 		Vector2D point1 = new Vector2D(prevFix.getPosition());
 		Vector2D point2 = new Vector2D(fix.getPosition());
-		Vector2D tangent1 = new Vector2D(prevFix.getSpeed().getBearing(), prevFix.getSpeed().getMetersPerSecond() * TANGENT_SCALING_FACTOR);
-		Vector2D tangent2 = new Vector2D(fix.getSpeed().getBearing(), fix.getSpeed().getMetersPerSecond() * TANGENT_SCALING_FACTOR);
+		Vector2D tangent1 = new Vector2D(prevFix.getSpeed().getBearing(), prevFix.getSpeed().getKnots() * TANGENT_SCALING_FACTOR /* abhängig von Bootsklasse, zeitl. Abstand zw. Fixes */);
+		Vector2D tangent2 = new Vector2D(fix.getSpeed().getBearing(), fix.getSpeed().getKnots() * TANGENT_SCALING_FACTOR);
 		HermiteCurve interpolatedCourse = new HermiteCurve(point1, point2, tangent1, tangent2);
 
 		// find out which waypoints to check (last waypoint passed and the next)

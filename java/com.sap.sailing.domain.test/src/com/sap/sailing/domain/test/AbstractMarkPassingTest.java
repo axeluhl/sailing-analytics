@@ -56,7 +56,7 @@ public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
 	/**
 	 * How many milliseconds may the given and computed mark passings drift apart before being counted as a miss.
 	 */
-	private static final int TIMEDELTA_TOLERANCE = 10000000;
+	private static final int TIMEDELTA_TOLERANCE = 10000;
 	
 	/**
 	 * Reload the test data from the web?
