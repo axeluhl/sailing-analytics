@@ -1,4 +1,4 @@
-package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
+package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.startphase;
 
 import android.app.Activity;
 import android.app.FragmentManager;
@@ -18,6 +18,7 @@ import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.AbortModeSelectionDialog;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceDialogFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceInfoListener;
 import com.sap.sailing.racecommittee.app.utils.TimeUtils;
 
 public class StartphaseRaceFragment extends RaceFragment {

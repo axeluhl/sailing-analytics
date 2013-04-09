@@ -8,7 +8,6 @@ import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.FinishedRaceFragm
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.FinishingRaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RunningRaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.SetStartTimeRaceFragment;
-import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.StartphaseRaceFragment;
 
 public class RaceInfoFragmentChooser {
     private static final String TAG = RaceInfoFragmentChooser.class.getName();
@@ -19,7 +18,7 @@ public class RaceInfoFragmentChooser {
             return createInfoFragment(SetStartTimeRaceFragment.class, managedRace);
         case SCHEDULED:
         case STARTPHASE:
-            return createInfoFragment(StartphaseRaceFragment.class, managedRace);
+            return createInfoFragment(managedRace.getState().getStartProcedure().getStartphaseFragment(), managedRace);
         case RUNNING:
             return createInfoFragment(RunningRaceFragment.class, managedRace);
         case FINISHING:

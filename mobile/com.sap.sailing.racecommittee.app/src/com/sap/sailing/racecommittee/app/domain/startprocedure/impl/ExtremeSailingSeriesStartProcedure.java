@@ -5,15 +5,21 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
+import android.content.Context;
+
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.racelog.PassAwareRaceLog;
 import com.sap.sailing.domain.racelog.RaceLogEvent;
 import com.sap.sailing.domain.racelog.RaceLogEventFactory;
+import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.startprocedure.StartProcedure;
 import com.sap.sailing.racecommittee.app.domain.startprocedure.StartProcedureRaceStateChangedListener;
+import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.startphase.EssStartPhaseFragment;
 
 public class ExtremeSailingSeriesStartProcedure implements StartProcedure {
     
@@ -28,11 +34,13 @@ public class ExtremeSailingSeriesStartProcedure implements StartProcedure {
     private List<Long> startProcedureEventIntervals;
     private PassAwareRaceLog raceLog;
     private StartProcedureRaceStateChangedListener raceStateChangedListener;
+    private EssStartPhaseEventListener startPhaseEventListener;
     
     public ExtremeSailingSeriesStartProcedure(PassAwareRaceLog raceLog) {
         this.raceLog = raceLog;
         startProcedureEventIntervals = new ArrayList<Long>();
         raceStateChangedListener = null;
+        startPhaseEventListener = null;
         
         startProcedureEventIntervals.add(startPhaseAPDownInterval);
         startProcedureEventIntervals.add(startPhaseESSThreeUpInterval);
@@ -83,12 +91,20 @@ public class ExtremeSailingSeriesStartProcedure implements StartProcedure {
         RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(eventTime, UUID.randomUUID(), Collections.<Competitor>emptyList(), 
                 raceLog.getCurrentPassId(), Flags.AP, Flags.NONE, /*isDisplayed*/false);
         raceLog.add(event);
+        
+        if (startPhaseEventListener != null) {
+            startPhaseEventListener.onAPDown();
+        }
     }
 
     private void handleEssThreeUp(TimePoint eventTime) {
         RaceLogEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(eventTime, UUID.randomUUID(), Collections.<Competitor>emptyList(), 
                 raceLog.getCurrentPassId(), Flags.ESSTHREE, Flags.NONE, /*isDisplayed*/true);
         raceLog.add(event);
+        
+        if (startPhaseEventListener != null) {
+            startPhaseEventListener.onEssThreeUp();
+        }
     }
 
     private void handleEssTwoUpAndEssThreeDown(TimePoint eventTime) {
@@ -101,6 +117,10 @@ public class ExtremeSailingSeriesStartProcedure implements StartProcedure {
         RaceLogEvent essTwoUpEvent = RaceLogEventFactory.INSTANCE.createFlagEvent(eventTime, UUID.randomUUID(), Collections.<Competitor>emptyList(), 
                 raceLog.getCurrentPassId(), Flags.ESSTWO, Flags.NONE, /*isDisplayed*/true);
         raceLog.add(essTwoUpEvent);
+        
+        if (startPhaseEventListener != null) {
+            startPhaseEventListener.onEssTwoUp();
+        }
     }
 
     private void handleEssOneUpAndEssTwoDown(TimePoint eventTime) {
@@ -113,6 +133,10 @@ public class ExtremeSailingSeriesStartProcedure implements StartProcedure {
         RaceLogEvent essOneUpEvent = RaceLogEventFactory.INSTANCE.createFlagEvent(eventTime, UUID.randomUUID(), Collections.<Competitor>emptyList(), 
                 raceLog.getCurrentPassId(), Flags.ESSONE, Flags.NONE, /*isDisplayed*/true);
         raceLog.add(essOneUpEvent);
+        
+        if (startPhaseEventListener != null) {
+            startPhaseEventListener.onEssOneUp();
+        }
     }
 
     private void handleEssOneDown(TimePoint eventTime) {
@@ -264,6 +288,33 @@ public class ExtremeSailingSeriesStartProcedure implements StartProcedure {
         if (raceStateChangedListener != null) {
             raceStateChangedListener.onIndividualRecallRemoval();
         }
+    }
+
+    @Override
+    public Class<? extends RaceFragment> getStartphaseFragment() {
+        return EssStartPhaseFragment.class;
+    }
+
+    @Override
+    public void setEssStartPhaseEventListener(EssStartPhaseEventListener listener) {
+        startPhaseEventListener = listener;
+    }
+
+    @Override
+    public Pair<String, Long> getNextFlagCountdownUiLabel(Context context, long millisecondsTillStart) {
+        Pair<String, Long> result;
+        if (millisecondsTillStart < startPhaseESSOneUpInterval) {
+            result = new Pair<String, Long>(context.getResources().getString(R.string.race_startphase_ess_countdown_one_flag_remove), millisecondsTillStart);
+        } else if (millisecondsTillStart < startPhaseESSTwoUpInterval) {
+            result = new Pair<String, Long>(context.getResources().getString(R.string.race_startphase_ess_countdown_one_flag_display), millisecondsTillStart - startPhaseESSOneUpInterval);
+        } else if (millisecondsTillStart < startPhaseESSThreeUpInterval) {
+            result = new Pair<String, Long>(context.getResources().getString(R.string.race_startphase_ess_countdown_two_flag_display), millisecondsTillStart - startPhaseESSTwoUpInterval);
+        } else if (millisecondsTillStart < startPhaseAPDownInterval) {
+            result = new Pair<String, Long>(context.getResources().getString(R.string.race_startphase_ess_countdown_three_flag_display), millisecondsTillStart - startPhaseESSThreeUpInterval);
+        } else {
+            result = new Pair<String, Long>(context.getResources().getString(R.string.race_startphase_ess_countdown_ap_flag_removed), millisecondsTillStart - startPhaseAPDownInterval);
+        }
+        return result;
     }
 
 }
