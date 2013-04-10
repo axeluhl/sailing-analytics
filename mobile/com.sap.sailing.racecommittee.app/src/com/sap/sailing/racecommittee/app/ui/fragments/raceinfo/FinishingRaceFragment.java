@@ -13,6 +13,7 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
@@ -39,6 +40,7 @@ public class FinishingRaceFragment extends RaceFragment {
         
         countUpTextView = (TextView) getView().findViewById(R.id.raceCountUp);
         nextFlagCountdown = (TextView) getView().findViewById(R.id.nextFlagCountdown);
+        nextFlagCountdown.setText(getTimeLimitText());
         
         blueFlagButton = (ImageButton) getView().findViewById(R.id.blueFlagButton);
         abortingFlagButton = (ImageButton) getView().findViewById(R.id.abortingFlagButton);
@@ -84,12 +86,23 @@ public class FinishingRaceFragment extends RaceFragment {
         return String.format(timePattern, hoursString, minutesString,
                 secondsString);
     }
-    
-    protected void setRaceFinishCountDownLabel() {
-        Date raceFinishingTimeDate = getRace().getState().getFinishingStartTime().asDate();
 
-        nextFlagCountdown.setText(String.format(getActivity().getResources().getString(R.string.finishing_limit_template), 
-                getFormattedTime(raceFinishingTimeDate)));
+    private TimePoint getTimeLimit() {
+        TimePoint startTime = getRace().getState().getStartTime();
+        TimePoint firstBoatTime = getRace().getState().getFinishingStartTime();
+        if (startTime == null || firstBoatTime == null) {
+            return null;
+        }
+        return firstBoatTime.plus((long)((firstBoatTime.asMillis() - startTime.asMillis()) * 0.75));
+    }
+
+    private CharSequence getTimeLimitText() {
+        TimePoint timeLimit = getTimeLimit();
+        if (timeLimit != null) {
+            return String.format("%s %s", getString(R.string.race_time_limit),
+                    getFormattedTime(timeLimit.asDate()));
+        }
+        return getString(R.string.empty);
     }
 
     private String getFormattedTime(Date time) {
@@ -139,7 +152,5 @@ public class FinishingRaceFragment extends RaceFragment {
 
         long millisSinceStart = System.currentTimeMillis() - getRace().getState().getStartTime().asMillis();
         setCountdownLabels(millisSinceStart);
-
-        setRaceFinishCountDownLabel();
     }
 }
