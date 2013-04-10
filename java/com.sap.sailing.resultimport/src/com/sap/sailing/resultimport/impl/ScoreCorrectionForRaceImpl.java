@@ -1,4 +1,4 @@
-package com.sap.sailing.freg.resultimport.impl;
+package com.sap.sailing.resultimport.impl;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -19,7 +19,7 @@ public class ScoreCorrectionForRaceImpl implements ScoreCorrectionsForRace {
         this.raceNumberStartingWithOne = raceNumberStartingWithZero+1;
         this.scoreCorrectionsBySailID = new HashMap<String, ScoreCorrectionForCompetitorInRace>();
         for (CompetitorRow competitorRow : regattaResult.getCompetitorResults()) {
-            String teamName = competitorRow.getTeamName();
+            String competitorName = competitorRow.getCompetitorName();
             CompetitorEntry competitorEntry;
             if (raceNumberStartingWithZero < Util.size(competitorRow.getRankAndMaxPointsReasonAndPointsAndDiscarded())) {
                 competitorEntry = Util.get(competitorRow.getRankAndMaxPointsReasonAndPointsAndDiscarded(), raceNumberStartingWithZero);
@@ -27,7 +27,7 @@ public class ScoreCorrectionForRaceImpl implements ScoreCorrectionsForRace {
                 competitorEntry = null;
             }
             scoreCorrectionsBySailID.put(competitorRow.getSailID(),
-                    new ScoreCorrectionForCompetitorInRaceImpl(competitorRow.getSailID(), teamName, competitorEntry));
+                    new ScoreCorrectionForCompetitorInRaceImpl(competitorRow.getSailID(), competitorName, competitorEntry));
         }
     }
 

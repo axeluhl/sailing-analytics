@@ -285,7 +285,7 @@ public class CompetitorRowImpl implements CompetitorRow
 	}
 
 	@Override
-	public String getTeamName() {
+	public String getCompetitorName() {
 		return teamMember1Name;
 	}
 
@@ -293,10 +293,4 @@ public class CompetitorRowImpl implements CompetitorRow
 	public String getSailID() {		
 		return country.trim() + sailNumber.trim();
 	}
-
-	@Override
-	public String getClubName() {
-		return "";
-	}
-
 }

@@ -15,6 +15,8 @@ import java.util.regex.Pattern;
 import com.sap.sailing.resultimport.CompetitorEntry;
 import com.sap.sailing.resultimport.CompetitorRow;
 import com.sap.sailing.resultimport.RegattaResults;
+import com.sap.sailing.resultimport.impl.CompetitorRowImpl;
+import com.sap.sailing.resultimport.impl.DefaultCompetitorEntryImpl;
 
 public class FregHtmlParser {
     private static final Logger logger = Logger.getLogger(FregHtmlParser.class.getName());
@@ -150,10 +152,8 @@ public class FregHtmlParser {
                     getRankAndMaxPointsReasonAndPointsAndDiscardedForOnceRace(tdContent.get(i).trim());
             rankAndMaxPointsReasonAndPointsAndDiscarded.add(rankAndMaxPointsReasonAndPointsAndDiscardedForOnceRace);
         }
-        String[] clubNameAndCountry = getTagContents(tdContent.get(tdContent.size()-1).trim(), "p").get(0).trim().split("<(br|BR)>");
-        String clubName = clubNameAndCountry[0].replace("&nbsp;", " ").trim();
         return new CompetitorRowImpl(totalRank, sailID, names, scoreAfterDiscarding, totalPointsBeforeDiscarding,
-                rankAndMaxPointsReasonAndPointsAndDiscarded, clubName);
+                rankAndMaxPointsReasonAndPointsAndDiscarded);
     }
 
     private CompetitorEntry getRankAndMaxPointsReasonAndPointsAndDiscardedForOnceRace(
@@ -190,7 +190,7 @@ public class FregHtmlParser {
             }
         }
         Double points = lines.length < 2 ? null : Double.valueOf(getTagContents(lines[1], "i").get(0));
-        return new CompetitorEntryImpl(rank, maxPointsReason, points, isDiscarded);
+        return new DefaultCompetitorEntryImpl(rank, maxPointsReason, points, isDiscarded);
     }
 
     private Double getScore(String cell) {

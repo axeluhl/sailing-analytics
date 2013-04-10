@@ -10,11 +10,9 @@ public interface CompetitorRow {
 
     Iterable<String> getNames();
 
-    String getTeamName();
+    String getCompetitorName();
 
     String getSailID();
 
     Integer getTotalRank();
-    
-    String getClubName();
 }

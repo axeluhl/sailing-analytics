@@ -1,4 +1,4 @@
-package com.sap.sailing.freg.resultimport.impl;
+package com.sap.sailing.resultimport.impl;
 
 import java.util.logging.Logger;
 
@@ -9,15 +9,15 @@ import com.sap.sailing.resultimport.CompetitorEntry;
 public class ScoreCorrectionForCompetitorInRaceImpl implements ScoreCorrectionForCompetitorInRace {
     private static final Logger logger = Logger.getLogger(ScoreCorrectionForCompetitorInRaceImpl.class.getName());
     
-    private final String teamName;
+    private final String competitorName;
     private final String sailID;
     private final int points;
     private final MaxPointsReason maxPointsReason;
     private final boolean discarded;
     
-    public ScoreCorrectionForCompetitorInRaceImpl(String sailID, String teamName, CompetitorEntry competitorEntry) {
+    public ScoreCorrectionForCompetitorInRaceImpl(String sailID, String competitorName, CompetitorEntry competitorEntry) {
         this.sailID = sailID;
-        this.teamName = teamName;
+        this.competitorName = competitorName;
         if (competitorEntry == null) {
             points = 0;
             maxPointsReason = null;
@@ -46,7 +46,7 @@ public class ScoreCorrectionForCompetitorInRaceImpl implements ScoreCorrectionFo
 
     @Override
     public String getCompetitorName() {
-        return teamName;
+        return competitorName;
     }
 
     @Override

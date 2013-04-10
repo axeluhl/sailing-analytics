@@ -1,4 +1,4 @@
-package com.sap.sailing.freg.resultimport.impl;
+package com.sap.sailing.resultimport.impl;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,10 +10,10 @@ import com.sap.sailing.resultimport.CompetitorRow;
 import com.sap.sailing.resultimport.RegattaResults;
 
 public class RegattaScoreCorrectionsImpl implements RegattaScoreCorrections {
-    private final ScoreCorrectionProviderImpl provider;
+    private final ScoreCorrectionProvider provider;
     private final Iterable<ScoreCorrectionsForRace> scoreCorrectionsForRaces;
     
-    public RegattaScoreCorrectionsImpl(ScoreCorrectionProviderImpl scoreCorrectionProviderImpl,
+    public RegattaScoreCorrectionsImpl(ScoreCorrectionProvider scoreCorrectionProviderImpl,
             RegattaResults regattaResult) {
         this.provider = scoreCorrectionProviderImpl;
         List<ScoreCorrectionsForRace> scfr = new ArrayList<ScoreCorrectionsForRace>();

@@ -1,4 +1,4 @@
-package com.sap.sailing.freg.resultimport.impl;
+package com.sap.sailing.resultimport.impl;
 
 import com.sap.sailing.resultimport.CompetitorEntry;
 import com.sap.sailing.resultimport.CompetitorRow;
@@ -10,10 +10,9 @@ public class CompetitorRowImpl implements CompetitorRow {
     private final Double scoreAfterDiscarding;
     private final Double totalPointsBeforeDiscarding;
     private final Iterable<CompetitorEntry> rankAndMaxPointsReasonAndPointsAndDiscarded;
-    private final String clubName;
     
     public CompetitorRowImpl(Integer totalRank, String sailID, Iterable<String> names, Double scoreAfterDiscarding,
-            Double totalPointsBeforeDiscarding, Iterable<CompetitorEntry> rankAndMaxPointsReasonAndPointsAndDiscarded, String clubName) {
+            Double totalPointsBeforeDiscarding, Iterable<CompetitorEntry> rankAndMaxPointsReasonAndPointsAndDiscarded) {
         super();
         this.totalRank = totalRank;
         this.sailID = sailID;
@@ -21,7 +20,6 @@ public class CompetitorRowImpl implements CompetitorRow {
         this.scoreAfterDiscarding = scoreAfterDiscarding;
         this.totalPointsBeforeDiscarding = totalPointsBeforeDiscarding;
         this.rankAndMaxPointsReasonAndPointsAndDiscarded = rankAndMaxPointsReasonAndPointsAndDiscarded;
-        this.clubName = clubName;
     }
 
     @Override
@@ -55,12 +53,7 @@ public class CompetitorRowImpl implements CompetitorRow {
     }
 
     @Override
-    public String getClubName() {
-        return clubName;
-    }
-
-    @Override
-    public String getTeamName() {
+    public String getCompetitorName() {
         StringBuilder result = new StringBuilder();
         boolean first = true;
         for (String name : getNames()) {
