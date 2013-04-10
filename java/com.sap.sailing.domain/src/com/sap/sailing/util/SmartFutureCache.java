@@ -1,4 +1,4 @@
-package com.sap.sailing.util.impl;
+package com.sap.sailing.util;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -18,7 +18,9 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.sap.sailing.util.impl.SmartFutureCache.UpdateInterval;
+import com.sap.sailing.util.SmartFutureCache.UpdateInterval;
+import com.sap.sailing.util.impl.LockUtil;
+import com.sap.sailing.util.impl.NamedReentrantReadWriteLock;
 
 /**
  * A cache for which a background update can be triggered. Readers can decide whether they want to wait for any ongoing
@@ -430,7 +432,7 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
         if (waitForLatest) {
             FutureTaskWithCancelBlocking future;
             synchronized (ongoingRecalculations) {
-                if (suspended && waitForLatest) {
+                if (suspended) { // waitForLatest is true, see "if" above
                     final boolean wasTriggeredWhileSuspended = triggeredWhileSuspended.containsKey(key); // update interval may have deliberately been null
                     if (wasTriggeredWhileSuspended) {
                         // If suspended and the caller wants to get the latest results, and while suspended recalculations were
