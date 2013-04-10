@@ -194,8 +194,9 @@ public class ExtremeSailingSeriesStartProcedure implements StartProcedure {
     @Override
     public void dispatchAutomaticRaceEndEvent(TimePoint automaticRaceEnd) {
         RaceStatusAnalyzer analyzer = new RaceStatusAnalyzer(raceLog);
-        if(analyzer.getStatus().equals(RaceLogRaceStatus.FINISHING))
-            setFinished(automaticRaceEnd);
+        if(analyzer.getStatus().equals(RaceLogRaceStatus.FINISHING)) {
+            //setFinished(automaticRaceEnd);
+        }
     }
 
     @Override
